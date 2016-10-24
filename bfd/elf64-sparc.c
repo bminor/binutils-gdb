@@ -463,6 +463,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       if (p->name != NULL && strcmp (p->name, *namep))
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
             (_("Register %%g%d used incompatibly: %s in %B, previously %s in %B"),
              abfd, p->abfd, (int) sym->st_value,
              **namep ? *namep : "#scratch",
@@ -486,6 +487,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 		  if (type > STT_FUNC)
 		    type = 0;
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("Symbol `%s' has differing types: REGISTER in %B, previously %s in %B"),
 		     abfd, p->abfd, *namep, stt_types[type]);
 		  return FALSE;
@@ -531,6 +533,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	    if (type > STT_FUNC)
 	      type = 0;
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("Symbol `%s' has differing types: %s in %B, previously REGISTER in %B"),
 	       abfd, p->abfd, *namep, stt_types[type]);
 	    return FALSE;
@@ -636,8 +639,9 @@ elf64_sparc_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
    object file when linking.  */
 
 static bfd_boolean
-elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf64_sparc_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   bfd_boolean error;
   flagword new_flags, old_flags;
   int new_mm, old_mm;
@@ -703,6 +707,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
         {
           error = TRUE;
 	  _bfd_error_handler
+	    /* xgettext:c-format */
             (_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
              ibfd, (long) new_flags, (long) old_flags);
         }
@@ -715,7 +720,7 @@ elf64_sparc_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
           return FALSE;
         }
     }
-  return _bfd_sparc_elf_merge_private_bfd_data (ibfd, obfd);
+  return _bfd_sparc_elf_merge_private_bfd_data (ibfd, info);
 }
 
 /* MARCO: Set the correct entry size for the .stab section.  */

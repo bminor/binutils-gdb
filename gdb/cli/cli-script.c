@@ -380,8 +380,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
      not confused with Insight.  */
   in_user_command = 1;
 
-  make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   command_nest_depth++;
   while (cmdlines)
@@ -654,7 +653,6 @@ static void
 while_command (char *arg, int from_tty)
 {
   struct command_line *command = NULL;
-  struct cleanup *old_chain;
 
   control_level = 1;
   command = get_command_line (while_control, arg);
@@ -662,13 +660,10 @@ while_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  old_chain = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   execute_control_command_untraced (command);
   free_command_lines (&command);
-
-  do_cleanups (old_chain);
 }
 
 /* "if" command support.  Execute either the true or false arm depending
@@ -686,13 +681,10 @@ if_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  old_chain = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   execute_control_command_untraced (command);
   free_command_lines (&command);
-
-  do_cleanups (old_chain);
 }
 
 /* Cleanup */
@@ -1693,10 +1685,8 @@ script_from_file (FILE *stream, const char *file)
   source_line_number = 0;
   source_file_name = file;
 
-  make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
-
   {
+    scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
     TRY
       {

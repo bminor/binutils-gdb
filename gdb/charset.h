@@ -19,6 +19,8 @@
 #ifndef CHARSET_H
 #define CHARSET_H
 
+#include <vector>
+
 /* If the target program uses a different character set than the host,
    GDB has some support for translating between the two; GDB converts
    characters and strings to the host character set before displaying
@@ -81,54 +83,71 @@ enum wchar_iterate_result
     wchar_iterate_eof
   };
 
-/* Declaration of the opaque wchar iterator type.  */
-struct wchar_iterator;
+/* An iterator that returns host wchar_t's from a target string.  */
+class wchar_iterator
+{
+ public:
 
-/* Create a new character iterator which returns wchar_t's.  INPUT is
-   the input buffer.  BYTES is the number of bytes in the input
-   buffer.  CHARSET is the name of the character set in which INPUT is
-   encoded.  WIDTH is the number of bytes in a base character of
-   CHARSET.
+  /* Create a new character iterator which returns wchar_t's.  INPUT is
+     the input buffer.  BYTES is the number of bytes in the input
+     buffer.  CHARSET is the name of the character set in which INPUT is
+     encoded.  WIDTH is the number of bytes in a base character of
+     CHARSET.
    
-   This function either returns a new character set iterator, or calls
-   error.  The result can be freed using a cleanup; see
-   make_cleanup_wchar_iterator.  */
-struct wchar_iterator *make_wchar_iterator (const gdb_byte *input,
-					    size_t bytes,
-					    const char *charset,
-					    size_t width);
+     This function either returns a new character set iterator, or calls
+     error.  The result can be freed using a cleanup; see
+     make_cleanup_wchar_iterator.  */
+  wchar_iterator (const gdb_byte *input, size_t bytes, const char *charset,
+		  size_t width);
 
-/* Return a new cleanup suitable for destroying the wchar iterator
-   ITER.  */
-struct cleanup *make_cleanup_wchar_iterator (struct wchar_iterator *iter);
+  ~wchar_iterator ();
 
-/* Perform a single iteration of a wchar_t iterator.
+  /* Perform a single iteration of a wchar_t iterator.
    
-   Returns the number of characters converted.  A negative result
-   means that EOF has been reached.  A positive result indicates the
-   number of valid wchar_ts in the result; *OUT_CHARS is updated to
-   point to the first valid character.
+     Returns the number of characters converted.  A negative result
+     means that EOF has been reached.  A positive result indicates the
+     number of valid wchar_ts in the result; *OUT_CHARS is updated to
+     point to the first valid character.
 
-   In all cases aside from EOF, *PTR is set to point to the first
-   converted target byte.  *LEN is set to the number of bytes
-   converted.
+     In all cases aside from EOF, *PTR is set to point to the first
+     converted target byte.  *LEN is set to the number of bytes
+     converted.
 
-   A zero result means one of several unusual results.  *OUT_RESULT is
-   set to indicate the type of un-ordinary return.
+     A zero result means one of several unusual results.  *OUT_RESULT is
+     set to indicate the type of un-ordinary return.
 
-   wchar_iterate_invalid means that an invalid input character was
-   seen.  The iterator is advanced by WIDTH (the argument to
-   make_wchar_iterator) bytes.
+     wchar_iterate_invalid means that an invalid input character was
+     seen.  The iterator is advanced by WIDTH (the argument to
+     the wchar_iterator constructor) bytes.
 
-   wchar_iterate_incomplete means that an incomplete character was
-   seen at the end of the input sequence.
+     wchar_iterate_incomplete means that an incomplete character was
+     seen at the end of the input sequence.
    
-   wchar_iterate_eof means that all bytes were successfully
-   converted.  The other output arguments are not set.  */
-int wchar_iterate (struct wchar_iterator *iter,
-		   enum wchar_iterate_result *out_result,
-		   gdb_wchar_t **out_chars,
-		   const gdb_byte **ptr, size_t *len);
+     wchar_iterate_eof means that all bytes were successfully
+     converted.  The other output arguments are not set.  */
+  int iterate (enum wchar_iterate_result *out_result, gdb_wchar_t **out_chars,
+	       const gdb_byte **ptr, size_t *len);
+
+ private:
+
+  /* The underlying iconv descriptor.  */
+#ifdef PHONY_ICONV
+  int m_desc;
+#else
+  iconv_t m_desc;
+#endif
+
+  /* The input string.  This is updated as we convert characters.  */
+  const gdb_byte *m_input;
+  /* The number of bytes remaining in the input.  */
+  size_t m_bytes;
+
+  /* The width of an input character.  */
+  size_t m_width;
+
+  /* The output buffer.  */
+  std::vector<gdb_wchar_t> m_out;
+};
 
 
 

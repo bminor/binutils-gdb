@@ -126,6 +126,7 @@ sh_symbian_import_as (struct bfd_link_info *info, bfd * abfd,
 	  return TRUE;
 
 	bfd_set_error (bfd_error_invalid_operation);
+	/* xgettext:c-format */
 	_bfd_error_handler (_("%B: IMPORT AS directive for %s conceals previous IMPORT AS"),
 			    abfd, current_name);
 	return FALSE;
@@ -379,6 +380,7 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 		     (long) (directive - (char *) contents));
 
 	  bfd_set_error (bfd_error_invalid_operation);
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: Unrecognised .directive command: %s"),
 			      abfd, directive);
 	  break;
@@ -496,6 +498,7 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 
 	  if (new_hash == NULL)
 	    {
+	      /* xgettext:c-format */
 	      _bfd_error_handler (_("%B: Failed to add renamed symbol %s"),
 				  input_bfd, ptr->new_name);
 	      continue;

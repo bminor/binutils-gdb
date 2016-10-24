@@ -382,6 +382,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
 
     case XSTORMY16_OPERAND_REL8_4:
       fixP->fx_addnumber -= 2;
+      /* Fall through.  */
     case XSTORMY16_OPERAND_REL8_2:
       fixP->fx_addnumber -= 2;
       fixP->fx_pcrel = 1;
@@ -389,7 +390,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
 
     case XSTORMY16_OPERAND_REL12:
       fixP->fx_where += 2;
-      /* Fall through...  */
+      /* Fall through.  */
     case XSTORMY16_OPERAND_REL12A:
       fixP->fx_addnumber -= 2;
       fixP->fx_pcrel = 1;

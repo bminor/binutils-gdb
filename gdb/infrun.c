@@ -3857,9 +3857,7 @@ check_curr_ui_sync_execution_done (void)
 void
 all_uis_check_sync_execution_done (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       check_curr_ui_sync_execution_done ();
     }
@@ -3870,24 +3868,11 @@ all_uis_check_sync_execution_done (void)
 void
 all_uis_on_sync_execution_starting (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       if (current_ui->prompt_state == PROMPT_NEEDED)
 	async_disable_stdin ();
     }
-}
-
-/* A cleanup that restores the execution direction to the value saved
-   in *ARG.  */
-
-static void
-restore_execution_direction (void *arg)
-{
-  enum exec_direction_kind *save_exec_dir = (enum exec_direction_kind *) arg;
-
-  execution_direction = *save_exec_dir;
 }
 
 /* Asynchronous version of wait_for_inferior.  It is called by the
@@ -3906,7 +3891,6 @@ fetch_inferior_event (void *client_data)
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct cleanup *ts_old_chain;
-  enum exec_direction_kind save_exec_dir = execution_direction;
   int cmd_done = 0;
   ptid_t waiton_ptid = minus_one_ptid;
 
@@ -3915,8 +3899,7 @@ fetch_inferior_event (void *client_data)
   /* Events are always processed with the main UI as current UI.  This
      way, warnings, debug output, etc. are always consistently sent to
      the main console.  */
-  make_cleanup_restore_current_ui ();
-  current_ui = main_ui;
+  scoped_restore save_ui = make_scoped_restore (&current_ui, main_ui);
 
   /* End up with readline processing input, if necessary.  */
   make_cleanup (reinstall_readline_callback_handler_cleanup, NULL);
@@ -3945,8 +3928,8 @@ fetch_inferior_event (void *client_data)
      event.  */
   target_dcache_invalidate ();
 
-  make_cleanup (restore_execution_direction, &save_exec_dir);
-  execution_direction = target_execution_direction ();
+  scoped_restore save_exec_dir
+    = make_scoped_restore (&execution_direction, target_execution_direction ());
 
   ecs->ptid = do_target_wait (waiton_ptid, &ecs->ws,
 			      target_can_async_p () ? TARGET_WNOHANG : 0);
@@ -8101,22 +8084,20 @@ print_stop_location (struct target_waitstatus *ws)
 void
 print_stop_event (struct ui_out *uiout)
 {
-  struct cleanup *old_chain;
   struct target_waitstatus last;
   ptid_t last_ptid;
   struct thread_info *tp;
 
   get_last_target_status (&last_ptid, &last);
 
-  old_chain = make_cleanup_restore_current_uiout ();
-  current_uiout = uiout;
+  {
+    scoped_restore save_uiout = make_scoped_restore (&current_uiout, uiout);
 
-  print_stop_location (&last);
+    print_stop_location (&last);
 
-  /* Display the auto-display expressions.  */
-  do_displays ();
-
-  do_cleanups (old_chain);
+    /* Display the auto-display expressions.  */
+    do_displays ();
+  }
 
   tp = inferior_thread ();
   if (tp->thread_fsm != NULL
@@ -8230,7 +8211,6 @@ normal_stop (void)
   ptid_t last_ptid;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   ptid_t pid_ptid;
-  struct switch_thru_all_uis state;
 
   get_last_target_status (&last_ptid, &last);
 
@@ -8295,7 +8275,7 @@ normal_stop (void)
       && last.kind != TARGET_WAITKIND_EXITED
       && last.kind != TARGET_WAITKIND_NO_RESUMED)
     {
-      SWITCH_THRU_ALL_UIS (state)
+      SWITCH_THRU_ALL_UIS ()
 	{
 	  target_terminal_ours_for_output ();
 	  printf_filtered (_("[Switching to %s]\n"),
@@ -8307,7 +8287,7 @@ normal_stop (void)
 
   if (last.kind == TARGET_WAITKIND_NO_RESUMED)
     {
-      SWITCH_THRU_ALL_UIS (state)
+      SWITCH_THRU_ALL_UIS ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
 	  {
 	    target_terminal_ours_for_output ();
@@ -8324,7 +8304,7 @@ normal_stop (void)
   if (stopped_by_random_signal)
     disable_current_display ();
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       async_enable_stdin ();
     }

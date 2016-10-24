@@ -859,7 +859,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	infcmd.c inflow.c infrun.c \
 	inline-frame.c \
 	interps.c \
-	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c jv-varobj.c \
 	language.c linespec.c location.c minidebug.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
@@ -952,7 +951,7 @@ interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h location.h i387-tdep.h mn10300-tdep.h \
 sparc64-tdep.h ppcobsd-tdep.h \
 coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
-m68k-tdep.h spu-tdep.h jv-lang.h environ.h amd64-tdep.h \
+m68k-tdep.h spu-tdep.h environ.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
@@ -1066,7 +1065,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ui-out.o cli-out.o \
 	varobj.o vec.o \
 	go-lang.o go-valprint.o go-typeprint.o \
-	jv-lang.o jv-valprint.o jv-typeprint.o jv-varobj.o \
 	m2-lang.o opencl-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	selftest.o sentinel-frame.o \
 	complaints.o typeprint.o \
@@ -1114,12 +1112,10 @@ YYFILES = c-exp.c \
 	cp-name-parser.c \
 	ada-lex.c \
 	ada-exp.c \
-	jv-exp.c \
 	d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 YYOBJ = c-exp.o \
 	cp-name-parser.o \
 	ada-exp.o \
-	jv-exp.o \
 	d-exp.o f-exp.o go-exp.o m2-exp.o p-exp.o rust-exp.o
 
 # Things which need to be built when making a distribution.
@@ -1491,7 +1487,6 @@ local-maintainer-clean:
 	rm -f c-exp.c \
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
-		jv-exp.tab \
 		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)

@@ -42,4 +42,5 @@ cat <<EOF
 
   /* DWARF Extension.  */
   .debug_macro    0 : { *(.debug_macro) }
+  .debug_addr     0 : { *(.debug_addr) }
 EOF

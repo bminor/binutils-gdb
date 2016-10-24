@@ -425,6 +425,7 @@ elf_crx_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_CRX_MAX)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: unrecognised CRX reloc number: %d"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);

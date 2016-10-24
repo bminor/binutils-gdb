@@ -2132,6 +2132,7 @@ md_apply_fix (fixS *   fixP,
     case BFD_RELOC_MICROBLAZE_64_TLSGD:
     case BFD_RELOC_MICROBLAZE_64_TLSLD:
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Fall through.  */
 
     case BFD_RELOC_MICROBLAZE_64_GOTPC:
     case BFD_RELOC_MICROBLAZE_64_GOT:

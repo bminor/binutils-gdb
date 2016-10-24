@@ -19,6 +19,8 @@ set|show compile-gcc
   running on MS-Windows use to assign names to threads in the
   debugger.
 
+* Support for Java programs compiled with gcj has been removed.
+
 * New targets
 
 Synopsys ARC			arc*-*-elf32
@@ -155,6 +157,10 @@ signal-event EVENTID
   recording.  For example:
 
     =record-started,thread-group="i1",method="btrace",format="bts"
+
+* MI async record =thread-selected now includes the frame field.  For example:
+
+     =thread-selected,id="3",frame={level="0",addr="0x00000000004007c0"}
 
 * New targets
 

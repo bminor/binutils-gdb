@@ -222,7 +222,8 @@ static int found_ecoff_debugging_info;
 static int upgrade_type (int, struct type **, int, union aux_ext *,
 			 int, char *);
 
-static void parse_partial_symbols (struct objfile *);
+static void parse_partial_symbols (minimal_symbol_reader &,
+				   struct objfile *);
 
 static int has_opaque_xref (FDR *, SYMR *);
 
@@ -336,7 +337,8 @@ fdr_name (FDR *f)
    different sections are relocated via the SECTION_OFFSETS.  */
 
 void
-mdebug_build_psymtabs (struct objfile *objfile,
+mdebug_build_psymtabs (minimal_symbol_reader &reader,
+		       struct objfile *objfile,
 		       const struct ecoff_debug_swap *swap,
 		       struct ecoff_debug_info *info)
 {
@@ -367,7 +369,7 @@ mdebug_build_psymtabs (struct objfile *objfile,
 	(*swap->swap_fdr_in) (objfile->obfd, fdr_src, fdr_ptr);
     }
 
-  parse_partial_symbols (objfile);
+  parse_partial_symbols (reader, objfile);
 
 #if 0
   /* Check to make sure file was compiled with -g.  If not, warn the
@@ -2260,7 +2262,8 @@ function_outside_compilation_unit_complaint (const char *arg1)
    belongs to, and then records this new minimal symbol.  */
 
 static void
-record_minimal_symbol (const char *name, const CORE_ADDR address,
+record_minimal_symbol (minimal_symbol_reader &reader,
+		       const char *name, const CORE_ADDR address,
                        enum minimal_symbol_type ms_type, int storage_class,
                        struct objfile *objfile)
 {
@@ -2316,15 +2319,15 @@ record_minimal_symbol (const char *name, const CORE_ADDR address,
         section = -1;
     }
 
-  prim_record_minimal_symbol_and_info (name, address, ms_type,
-                                       section, objfile);
+  reader.record_with_info (name, address, ms_type, section);
 }
 
 /* Master parsing procedure for first-pass reading of file symbols
    into a partial_symtab.  */
 
 static void
-parse_partial_symbols (struct objfile *objfile)
+parse_partial_symbols (minimal_symbol_reader &reader,
+		       struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
@@ -2624,7 +2627,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  unknown_ext_complaint (name);
 	}
       if (!ECOFF_IN_ELF (cur_bfd))
-        record_minimal_symbol (name, svalue, ms_type, ext_in->asym.sc,
+        record_minimal_symbol (reader, name, svalue, ms_type, ext_in->asym.sc,
                                objfile);
     }
 
@@ -2741,7 +2744,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      if (sh.st == stStaticProc)
 			{
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-                          record_minimal_symbol (namestring, sh.value,
+                          record_minimal_symbol (reader, namestring, sh.value,
                                                  mst_file_text, sh.sc,
                                                  objfile);
 			}
@@ -2786,7 +2789,7 @@ parse_partial_symbols (struct objfile *objfile)
 			case scPData:
 			case scXData:
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-                          record_minimal_symbol (namestring, sh.value,
+                          record_minimal_symbol (reader, namestring, sh.value,
                                                  mst_file_data, sh.sc,
                                                  objfile);
 			  sh.value += ANOFFSET (objfile->section_offsets,
@@ -2797,7 +2800,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  /* FIXME!  Shouldn't this use cases for bss, 
 			     then have the default be abs?  */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-                          record_minimal_symbol (namestring, sh.value,
+                          record_minimal_symbol (reader, namestring, sh.value,
                                                  mst_file_bss, sh.sc,
                                                  objfile);
 			  sh.value += ANOFFSET (objfile->section_offsets,
@@ -3467,10 +3470,9 @@ parse_partial_symbols (struct objfile *objfile)
 		  int new_sdx;
 
 		case stStaticProc:
-		  prim_record_minimal_symbol_and_info (name, minsym_value,
-						       mst_file_text,
-						       SECT_OFF_TEXT (objfile),
-						       objfile);
+		  reader.record_with_info (name, minsym_value,
+					   mst_file_text,
+					   SECT_OFF_TEXT (objfile));
 
 		  /* FALLTHROUGH */
 
@@ -3553,15 +3555,13 @@ parse_partial_symbols (struct objfile *objfile)
 
 		case stStatic:	/* Variable */
 		  if (SC_IS_DATA (sh.sc))
-		    prim_record_minimal_symbol_and_info (name, minsym_value,
-							 mst_file_data,
-							 SECT_OFF_DATA (objfile),
-							 objfile);
+		    reader.record_with_info (name, minsym_value,
+					     mst_file_data,
+					     SECT_OFF_DATA (objfile));
 		  else
-		    prim_record_minimal_symbol_and_info (name, minsym_value,
-							 mst_file_bss,
-							 SECT_OFF_BSS (objfile),
-							 objfile);
+		    reader.record_with_info (name, minsym_value,
+					     mst_file_bss,
+					     SECT_OFF_BSS (objfile));
 		  theclass = LOC_STATIC;
 		  break;
 
@@ -4873,14 +4873,12 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 {
   bfd *abfd = objfile->obfd;
   struct ecoff_debug_info *info;
-  struct cleanup *back_to;
 
   /* FIXME: It's not clear whether we should be getting minimal symbol
      information from .mdebug in an ELF file, or whether we will.
      Re-initialize the minimal symbol reader in case we do.  */
 
-  init_minimal_symbol_collection ();
-  back_to = make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader (objfile);
 
   info = ((struct ecoff_debug_info *)
 	  obstack_alloc (&objfile->objfile_obstack,
@@ -4890,10 +4888,9 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
     error (_("Error reading ECOFF debugging information: %s"),
 	   bfd_errmsg (bfd_get_error ()));
 
-  mdebug_build_psymtabs (objfile, swap, info);
+  mdebug_build_psymtabs (reader, objfile, swap, info);
 
-  install_minimal_symbols (objfile);
-  do_cleanups (back_to);
+  reader.install ();
 }
 
 void

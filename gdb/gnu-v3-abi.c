@@ -302,10 +302,6 @@ gnuv3_rtti_type (struct value *value,
   if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT)
     return NULL;
 
-  /* Java doesn't have RTTI following the C++ ABI.  */
-  if (TYPE_CPLUS_REALLY_JAVA (values_type))
-    return NULL;
-
   /* Determine architecture.  */
   gdbarch = get_type_arch (values_type);
 
@@ -457,9 +453,8 @@ gnuv3_baseclass_offset (struct type *type, int index,
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   /* If it isn't a virtual base, this is easy.  The offset is in the
-     type definition.  Likewise for Java, which doesn't really have
-     virtual inheritance in the C++ sense.  */
-  if (!BASETYPE_VIA_VIRTUAL (type, index) || TYPE_CPLUS_REALLY_JAVA (type))
+     type definition.  */
+  if (!BASETYPE_VIA_VIRTUAL (type, index))
     return TYPE_BASECLASS_BITPOS (type, index) / 8;
 
   /* To access a virtual base, we need to use the vbase offset stored in

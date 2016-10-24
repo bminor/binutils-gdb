@@ -924,6 +924,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	      && read_value (abfd, buf - length, length, FALSE) == 0)
 	    {
 	      (*info->callbacks->minfo)
+		/* xgettext:c-format */
 		(_("discarding zero address range FDE in %B(%A).\n"),
 		 abfd, sec);
 	      this_inf->u.fde.cie_inf = NULL;
@@ -1028,6 +1029,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
  free_no_table:
   (*info->callbacks->einfo)
+    /* xgettext:c-format */
     (_("%P: error in %B(%A); no .eh_frame_hdr table will be created.\n"),
      abfd, sec);
   hdr_info->u.dwarf.table = FALSE;
@@ -1379,6 +1381,7 @@ _bfd_elf_discard_section_eh_frame
 		if (num_warnings_issued < 10)
 		  {
 		    (*info->callbacks->einfo)
+		      /* xgettext:c-format */
 		      (_("%P: FDE encoding in %B(%A) prevents .eh_frame_hdr"
 			 " table being created.\n"), abfd, sec);
 		    num_warnings_issued ++;
@@ -1673,6 +1676,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
       addr = bfd_get_signed_32 (abfd, contents + offset) + offset;
       if (addr <= last_addr)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: %s not in order"), sec->owner, sec->name);
 	  return FALSE;
 	}
@@ -1686,6 +1690,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
   addr -= (sec->output_section->vma + sec->output_offset + sec->rawsize);
   if (addr & 1)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: %s invalid input section size"),
 			  sec->owner, sec->name);
       bfd_set_error (bfd_error_bad_value);
@@ -1693,6 +1698,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
     }
   if (last_addr >= addr + sec->rawsize)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: %s points past end of text section"),
 			  sec->owner, sec->name);
       bfd_set_error (bfd_error_bad_value);

@@ -2490,6 +2490,7 @@ ppc64_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   type = ELF64_R_TYPE (dst->r_info);
   if (type >= ARRAY_SIZE (ppc64_elf_howto_table))
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid relocation type %d"),
 			  abfd, (int) type);
       type = R_PPC64_NONE;
@@ -4588,6 +4589,7 @@ ppc_add_stub (const char *stub_name,
 				     TRUE, FALSE);
   if (stub_entry == NULL)
     {
+      /* xgettext:c-format */
       info->callbacks->einfo (_("%P: %B: cannot create stub entry %s\n"),
 			      section->owner, stub_name);
       return NULL;
@@ -5125,6 +5127,7 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 	set_abiversion (ibfd, 1);
       else if (abiversion (ibfd) >= 2)
 	{
+	  /* xgettext:c-format */
 	  info->callbacks->einfo (_("%P: %B .opd not allowed in ABI"
 				    " version %d\n"),
 				  ibfd, abiversion (ibfd));
@@ -5471,7 +5474,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  tls_type = TLS_TLS | TLS_DTPREL;
 	dogottls:
 	  sec->has_tls_reloc = 1;
-	  /* Fall thru */
+	  /* Fall through */
 
 	case R_PPC64_GOT16:
 	case R_PPC64_GOT16_DS:
@@ -5559,6 +5562,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* It does not make sense to have a procedure linkage
 		 table entry for a non-ifunc local symbol.  */
 	      info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%P: %H: %s reloc against local symbol\n"),
 		 abfd, sec, rel->r_offset,
 		 ppc64_elf_howto_table[r_type]->name);
@@ -5606,6 +5610,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
 		ppc_howto_init ();
+	      /* xgettext:c-format */
 	      info->callbacks->einfo (_("%P: %H: %s reloc unsupported "
 					"in shared libraries and PIEs.\n"),
 				      abfd, sec, rel->r_offset,
@@ -5619,6 +5624,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TOC16_DS:
 	  htab->do_multi_toc = 1;
 	  ppc64_elf_tdata (abfd)->has_small_toc_reloc = 1;
+	  /* Fall through.  */
 	case R_PPC64_TOC16_LO:
 	case R_PPC64_TOC16_HI:
 	case R_PPC64_TOC16_HA:
@@ -5998,8 +6004,9 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
    object file when linking.  */
 
 static bfd_boolean
-ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+ppc64_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   unsigned long iflags, oflags;
 
   if ((ibfd->flags & BFD_LINKER_CREATED) != 0)
@@ -6008,7 +6015,7 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (!is_ppc64_elf (ibfd) || !is_ppc64_elf (obfd))
     return TRUE;
 
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   iflags = elf_elfheader (ibfd)->e_flags;
@@ -6017,6 +6024,7 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (iflags & ~EF_PPC64_ABI)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B uses unknown e_flags 0x%lx"), ibfd, iflags);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -6024,16 +6032,17 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   else if (iflags != oflags && iflags != 0)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: ABI version %ld is not compatible with ABI version %ld output"),
 	 ibfd, iflags, oflags);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
 
-  _bfd_elf_ppc_merge_fp_attributes (ibfd, obfd);
+  _bfd_elf_ppc_merge_fp_attributes (ibfd, info);
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }
@@ -6048,7 +6057,6 @@ ppc64_elf_print_private_bfd_data (bfd *abfd, void *ptr)
     {
       FILE *file = ptr;
 
-      /* xgettext:c-format */
       fprintf (file, _("private flags = 0x%lx:"),
 	       elf_elfheader (abfd)->e_flags);
 
@@ -7829,6 +7837,7 @@ dec_dynrel_count (bfd_vma r_info,
 	}
     }
 
+  /* xgettext:c-format */
   info->callbacks->einfo (_("%P: dynreloc miscount for %B, section %A\n"),
 			  sec->owner, sec);
   bfd_set_error (bfd_error_bad_value);
@@ -7927,6 +7936,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	      || (r_type = ELF64_R_TYPE ((rel + 1)->r_info)) != R_PPC64_TOC)
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: unexpected reloc type %u in .opd section"),
 		 ibfd, r_type);
 	      broken = TRUE;
@@ -7948,6 +7958,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 					     sym_sec);
 
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: undefined sym `%s' in .opd section"),
 		 ibfd, sym_name);
 	      broken = TRUE;
@@ -8524,7 +8535,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    case R_PPC64_GOT_TLSLD16_LO:
 		      expecting_tls_get_addr = 1;
 		      found_tls_get_addr_arg = 1;
-		      /* Fall thru */
+		      /* Fall through.  */
 
 		    case R_PPC64_GOT_TLSLD16_HI:
 		    case R_PPC64_GOT_TLSLD16_HA:
@@ -8544,7 +8555,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    case R_PPC64_GOT_TLSGD16_LO:
 		      expecting_tls_get_addr = 1;
 		      found_tls_get_addr_arg = 1;
-		      /* Fall thru */
+		      /* Fall through. */
 
 		    case R_PPC64_GOT_TLSGD16_HI:
 		    case R_PPC64_GOT_TLSGD16_HA:
@@ -8575,7 +8586,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    case R_PPC64_TLSGD:
 		    case R_PPC64_TLSLD:
 		      found_tls_get_addr_arg = 1;
-		      /* Fall thru */
+		      /* Fall through.  */
 
 		    case R_PPC64_TLS:
 		    case R_PPC64_TOC16:
@@ -8707,6 +8718,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			 could just mark this symbol to exclude it
 			 from tls optimization but it's safer to skip
 			 the entire optimization.  */
+		      /* xgettext:c-format */
 		      info->callbacks->minfo (_("%H arg lost __tls_get_addr, "
 						"TLS optimization disabled\n"),
 					      ibfd, sec, rel->r_offset);
@@ -9205,6 +9217,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			  ppc64_elf_tdata (ibfd)->unexpected_toc_insn = 1;
 			  sprintf (str, "%#08x", insn);
 			  info->callbacks->einfo
+			    /* xgettext:c-format */
 			    (_("%P: %H: toc optimization is not supported for"
 			       " %s instruction.\n"),
 			     ibfd, sec, rel->r_offset & ~3, str);
@@ -9268,7 +9281,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			    }
 			  if ((opc & (0x3f << 2)) == (58u << 2))
 			    break;
-			  /* Fall thru */
+			  /* Fall through.  */
 
 			default:
 			  /* Wrong sort of reloc, or not a ld.  We may
@@ -9433,6 +9446,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			  if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
 			    ppc_howto_init ();
 			  info->callbacks->einfo
+			    /* xgettext:c-format */
 			    (_("%P: %H: %s references "
 			       "optimized away TOC entry\n"),
 			     ibfd, sec, rel->r_offset,
@@ -11122,6 +11136,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
 	  info->callbacks->einfo
+	    /* xgettext:c-format */
 	    (_("%P: linkage table error against `%T'\n"),
 	     stub_entry->h != NULL
 	     ? stub_entry->h->elf.root.root.string
@@ -12104,6 +12119,7 @@ group_sections (struct bfd_link_info *info,
 
 	  big_sec = total > group_size;
 	  if (big_sec && !suppress_size_errors)
+	    /* xgettext:c-format */
 	    _bfd_error_handler (_("%B section %A exceeds stub group size"),
 				tail->owner, tail);
 	  curr_toc = htab->sec_info[tail->id].toc_off;
@@ -13558,7 +13574,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  else
 	    info->callbacks->einfo
 	      (!IS_PPC64_TLS_RELOC (r_type)
+	       /* xgettext:c-format */
 	       ? _("%P: %H: %s used with TLS symbol `%T'\n")
+	       /* xgettext:c-format */
 	       : _("%P: %H: %s used with non-TLS symbol `%T'\n"),
 	       input_bfd, input_section, rel->r_offset,
 	       ppc64_elf_howto_table[r_type]->name,
@@ -14073,18 +14091,18 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_ADDR14_BRTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
 	  insn = 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
-	  /* Fall thru.  */
+	  /* Fall through.  */
 
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRNTAKEN:
 	case R_PPC64_REL14_BRNTAKEN:
 	  insn |= bfd_get_32 (output_bfd,
 			      contents + rel->r_offset) & ~(0x01 << 21);
-	  /* Fall thru.  */
+	  /* Fall through.  */
 
 	case R_PPC64_REL14:
 	  max_br_offset = 1 << 15;
-	  /* Fall thru.  */
+	  /* Fall through.  */
 
 	case R_PPC64_REL24:
 	  /* Calls to functions with a different TOC, such as calls to
@@ -14188,11 +14206,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (stub_entry->stub_type == ppc_stub_plt_call
 		      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 		    info->callbacks->einfo
+		      /* xgettext:c-format */
 		      (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
 			 "recompile with -fPIC\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 		  else
 		    info->callbacks->einfo
+		      /* xgettext:c-format */
 		      (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
 			 "(-mcmodel=small toc adjust stub)\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
@@ -14320,6 +14340,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  info->callbacks->einfo
+	    /* xgettext:c-format */
 	    (_("%P: %B: unknown relocation type %d for `%T'\n"),
 	     input_bfd, (int) r_type, sym_name);
 
@@ -14730,7 +14751,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL64:
 	  if (htab->elf.tls_sec != NULL)
 	    addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	  /* Relocations that may need to be propagated if this is a
 	     dynamic object.  */
@@ -14862,6 +14883,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 			{
 			  info->callbacks->einfo
+			    /* xgettext:c-format */
 			    (_("%P: %H: %s for indirect "
 			       "function `%T' unsupported\n"),
 			     input_bfd, input_section, rel->r_offset,
@@ -14969,6 +14991,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  /* These ones haven't been implemented yet.  */
 
 	  info->callbacks->einfo
+	    /* xgettext:c-format */
 	    (_("%P: %B: %s is not supported for `%T'\n"),
 	     input_bfd,
 	     ppc64_elf_howto_table[r_type]->name, sym_name);
@@ -15073,7 +15096,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec == NULL)
 	    break;
-	  /* Fall thru */
+	  /* Fall through.  */
 
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_PLTGOT16_HA:
@@ -15123,6 +15146,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      relocation ^= relocation & mask;
 	      info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%P: %H: error: %s not a multiple of %u\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 howto->name,
@@ -15144,6 +15168,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  info->callbacks->einfo
+	    /* xgettext:c-format */
 	    (_("%P: %H: unresolvable %s against `%T'\n"),
 	     input_bfd, input_section, rel->r_offset,
 	     howto->name,
@@ -15240,6 +15265,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%P: %H: %s against `%T': error %d\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 reloc_name, sym_name, (int) r);

@@ -1441,6 +1441,7 @@ _bfd_vms_lib_get_imagelib_file (bfd *el)
 
   if (res == NULL)
     {
+      /* xgettext:c-format */
       _bfd_error_handler(_("could not open shared image '%s' from '%s'"),
 			 filename, archive->filename);
       bfd_release (archive, filename);

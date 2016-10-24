@@ -472,6 +472,7 @@ print_insn_arg (int d,
     case 'f':
       /* A "gen" operand but 5 bits from the end of instruction.  */
       ioffset -= 5;
+      /* Fall through.  */
     case 'Z':
     case 'F':
     case 'L':

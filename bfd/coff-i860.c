@@ -604,6 +604,7 @@ i860_reloc_processing (arelent *cache_ptr, struct internal_reloc *dst,
 	  if (dst->r_symndx < 0 || dst->r_symndx >= obj_conv_table_size (abfd))
 	    {
 	      _bfd_error_handler
+		/* xgettext: c-format */
 		(_("%B: warning: illegal symbol index %ld in relocs"),
 		 abfd, dst->r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;

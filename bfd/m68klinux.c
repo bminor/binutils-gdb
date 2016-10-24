@@ -424,6 +424,7 @@ linux_tally_symbols (struct linux_link_hash_entry *h,
 	  p = strrchr (alloc, '_');
 	  *p++ = '\0';
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("Output file requires shared library `%s.so.%s'\n"),
 	     alloc, p);
 	  free (alloc);

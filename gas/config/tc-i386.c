@@ -958,8 +958,6 @@ static const arch_entry cpu_arch[] =
     CPU_SE1_FLAGS, 0 },
   { STRING_COMMA_LEN (".clwb"), PROCESSOR_UNKNOWN,
     CPU_CLWB_FLAGS, 0 },
-  { STRING_COMMA_LEN (".pcommit"), PROCESSOR_UNKNOWN,
-    CPU_PCOMMIT_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512ifma"), PROCESSOR_UNKNOWN,
     CPU_AVX512IFMA_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512vbmi"), PROCESSOR_UNKNOWN,
@@ -1374,9 +1372,11 @@ operand_type_all_zero (const union i386_operand_type *x)
     case 3:
       if (x->array[2])
 	return 0;
+      /* Fall through.  */
     case 2:
       if (x->array[1])
 	return 0;
+      /* Fall through.  */
     case 1:
       return !x->array[0];
     default:
@@ -1391,10 +1391,13 @@ operand_type_set (union i386_operand_type *x, unsigned int v)
     {
     case 3:
       x->array[2] = v;
+      /* Fall through.  */
     case 2:
       x->array[1] = v;
+      /* Fall through.  */
     case 1:
       x->array[0] = v;
+      /* Fall through.  */
       break;
     default:
       abort ();
@@ -1410,9 +1413,11 @@ operand_type_equal (const union i386_operand_type *x,
     case 3:
       if (x->array[2] != y->array[2])
 	return 0;
+      /* Fall through.  */
     case 2:
       if (x->array[1] != y->array[1])
 	return 0;
+      /* Fall through.  */
     case 1:
       return x->array[0] == y->array[0];
       break;
@@ -1429,9 +1434,11 @@ cpu_flags_all_zero (const union i386_cpu_flags *x)
     case 3:
       if (x->array[2])
 	return 0;
+      /* Fall through.  */
     case 2:
       if (x->array[1])
 	return 0;
+      /* Fall through.  */
     case 1:
       return !x->array[0];
     default:
@@ -1448,9 +1455,11 @@ cpu_flags_equal (const union i386_cpu_flags *x,
     case 3:
       if (x->array[2] != y->array[2])
 	return 0;
+      /* Fall through.  */
     case 2:
       if (x->array[1] != y->array[1])
 	return 0;
+      /* Fall through.  */
     case 1:
       return x->array[0] == y->array[0];
       break;
@@ -1473,8 +1482,10 @@ cpu_flags_and (i386_cpu_flags x, i386_cpu_flags y)
     {
     case 3:
       x.array [2] &= y.array [2];
+      /* Fall through.  */
     case 2:
       x.array [1] &= y.array [1];
+      /* Fall through.  */
     case 1:
       x.array [0] &= y.array [0];
       break;
@@ -1491,8 +1502,10 @@ cpu_flags_or (i386_cpu_flags x, i386_cpu_flags y)
     {
     case 3:
       x.array [2] |= y.array [2];
+      /* Fall through.  */
     case 2:
       x.array [1] |= y.array [1];
+      /* Fall through.  */
     case 1:
       x.array [0] |= y.array [0];
       break;
@@ -1509,8 +1522,10 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
     {
     case 3:
       x.array [2] &= ~y.array [2];
+      /* Fall through.  */
     case 2:
       x.array [1] &= ~y.array [1];
+      /* Fall through.  */
     case 1:
       x.array [0] &= ~y.array [0];
       break;
@@ -1607,8 +1622,10 @@ operand_type_and (i386_operand_type x, i386_operand_type y)
     {
     case 3:
       x.array [2] &= y.array [2];
+      /* Fall through.  */
     case 2:
       x.array [1] &= y.array [1];
+      /* Fall through.  */
     case 1:
       x.array [0] &= y.array [0];
       break;
@@ -1625,8 +1642,10 @@ operand_type_or (i386_operand_type x, i386_operand_type y)
     {
     case 3:
       x.array [2] |= y.array [2];
+      /* Fall through.  */
     case 2:
       x.array [1] |= y.array [1];
+      /* Fall through.  */
     case 1:
       x.array [0] |= y.array [0];
       break;
@@ -1643,8 +1662,10 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
     {
     case 3:
       x.array [2] ^= y.array [2];
+      /* Fall through.  */
     case 2:
       x.array [1] ^= y.array [1];
+      /* Fall through.  */
     case 1:
       x.array [0] ^= y.array [0];
       break;
@@ -3928,6 +3949,7 @@ check_suffix:
 	  if (intel_syntax && (intel_float_operand (mnemonic) & 2))
 	    i.suffix = SHORT_MNEM_SUFFIX;
 	  else
+	    /* Fall through.  */
 	case BYTE_MNEM_SUFFIX:
 	case QWORD_MNEM_SUFFIX:
 	  i.suffix = mnem_p[-1];
@@ -4203,6 +4225,7 @@ swap_operands (void)
     case 5:
     case 4:
       swap_2_operands (1, i.operands - 2);
+      /* Fall through.  */
     case 3:
     case 2:
       swap_2_operands (0, i.operands - 1);
@@ -4942,11 +4965,13 @@ match_template (char mnem_suffix)
 	      else if (t->opcode_modifier.d)
 		goto check_reverse;
 	    }
+	  /* Fall through.  */
 
 	case 3:
 	  /* If we swap operand in encoding, we match the next one.  */
 	  if (i.swap_operand && t->opcode_modifier.s)
 	    continue;
+	  /* Fall through.  */
 	case 4:
 	case 5:
 	  overlap1 = operand_type_and (i.types[1], operand_types[1]);
@@ -4998,9 +5023,11 @@ check_reverse:
 		case 5:
 		  overlap4 = operand_type_and (i.types[4],
 					       operand_types[4]);
+		  /* Fall through.  */
 		case 4:
 		  overlap3 = operand_type_and (i.types[3],
 					       operand_types[3]);
+		  /* Fall through.  */
 		case 3:
 		  overlap2 = operand_type_and (i.types[2],
 					       operand_types[2]);
@@ -5018,6 +5045,7 @@ check_reverse:
 						       i.types[4],
 						       operand_types[4]))
 		    continue;
+		  /* Fall through.  */
 		case 4:
 		  if (!operand_type_match (overlap3, i.types[3])
 		      || (check_register
@@ -5028,6 +5056,7 @@ check_reverse:
 							   i.types[3],
 							   operand_types[3])))
 		    continue;
+		  /* Fall through.  */
 		case 3:
 		  /* Here we make use of the fact that there are no
 		     reverse match 3 operand instructions, and all 3
@@ -5370,6 +5399,7 @@ process_suffix (void)
 	      i.suffix = QWORD_MNEM_SUFFIX;
 	      break;
 	    }
+	  /* Fall through.  */
 	case CODE_32BIT:
 	  if (!i.tm.opcode_modifier.no_lsuf)
 	    i.suffix = LONG_MNEM_SUFFIX;
@@ -6953,6 +6983,7 @@ output_jump (void)
     {
     case 2:
       *p++ = i.tm.base_opcode >> 8;
+      /* Fall through.  */
     case 1:
       *p++ = i.tm.base_opcode;
       break;
@@ -10694,6 +10725,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  return NULL;
 	}
 #endif
+      /* Fall through.  */
 
     case BFD_RELOC_X86_64_PLT32:
     case BFD_RELOC_X86_64_GOT32:
@@ -10746,6 +10778,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  code = fixp->fx_r_type;
 	  break;
 	}
+      /* Fall through.  */
     default:
       if (fixp->fx_pcrel)
 	{

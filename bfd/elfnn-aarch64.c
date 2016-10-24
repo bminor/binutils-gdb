@@ -2833,6 +2833,7 @@ _bfd_aarch64_add_stub_entry_in_group (const char *stub_name,
 					 TRUE, FALSE);
   if (stub_entry == NULL)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%s: cannot create stub entry %s"),
 			  section->owner, stub_name);
       return NULL;
@@ -4970,6 +4971,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
 				     NULL);
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: relocation %s against STT_GNU_IFUNC "
 	       "symbol `%s' isn't handled by %s"), input_bfd,
 	     howto->name, name, __FUNCTION__);
@@ -4985,6 +4987,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		name = bfd_elf_sym_name (input_bfd, symtab_hdr,
 					 sym, NULL);
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' has non-zero addend: %d"),
 		 input_bfd, howto->name, name, rel->r_addend);
@@ -5305,6 +5308,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: relocation %s against external symbol `%s' can not be used"
 	       " when making a shared object; recompile with -fPIC"),
 	     input_bfd, elfNN_aarch64_howto_table[howto_index].name,
@@ -5312,6 +5316,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_AARCH64_16:
 #if ARCH_SIZE == 64
@@ -5371,6 +5376,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  {
 	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B: Local symbol descriptor table be NULL when applying "
 		 "relocation %s against local symbol"),
 	       input_bfd, elfNN_aarch64_howto_table[howto_index].name);
@@ -5439,6 +5445,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    {
 	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: Local symbol descriptor table be NULL when applying "
 		   "relocation %s against local symbol"),
 		 input_bfd, elfNN_aarch64_howto_table[howto_index].name);
@@ -6040,6 +6047,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
       if (howto == NULL)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
 	     input_bfd, input_section, r_type);
@@ -6123,7 +6131,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
+	      /* xgettext:c-format */
 	      ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+	      /* xgettext:c-format */
 	      : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
 	     input_section, (long) rel->r_offset, howto->name, name);
@@ -6393,8 +6403,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 				      +rel->r_offset) != (bfd_vma) - 1)
 	{
 	  _bfd_error_handler
-	    (_
-	     ("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    /* xgettext:c-format */
+	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd, input_section, (long) rel->r_offset, howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -6521,15 +6531,16 @@ elfNN_aarch64_set_private_flags (bfd *abfd, flagword flags)
    object file when linking.  */
 
 static bfd_boolean
-elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   bfd_boolean flags_compatible = TRUE;
   asection *sec;
 
   /* Check if we have the same endianess.  */
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (!is_aarch64_elf (ibfd) || !is_aarch64_elf (obfd))
@@ -7018,6 +7029,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: bad symbol index: %d"), abfd, r_symndx);
 	  return FALSE;
 	}
@@ -7316,6 +7328,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s against `%s' can not be used when making "
 		   "a shared object; recompile with -fPIC"),
 		 abfd, elfNN_aarch64_howto_table[howto_index].name,
@@ -7323,6 +7336,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
+	  /* Fall through.  */
 
 	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
 	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:

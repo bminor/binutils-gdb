@@ -1518,7 +1518,10 @@ valpy_long (PyObject *self)
     }
   END_CATCH
 
-  return gdb_py_long_from_longest (l);
+  if (TYPE_UNSIGNED (type))
+    return gdb_py_long_from_ulongest (l);
+  else
+    return gdb_py_long_from_longest (l);
 }
 
 /* Implements conversion to float.  */

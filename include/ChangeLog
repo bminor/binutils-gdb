@@ -1,3 +1,32 @@
+2016-10-17  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (DT_SYMTAB_SHNDX): Define.
+	(EM_CLOUDSHIELD, EM_COREA_1ST, EM_COREA_2ND, EM_OPEN8): Define.
+	(EM_VIDEOCORE5, EM_56800EX, EM_BA1, EM_BA2, EM_XCORE): Define.
+	(EM_MCHP_PIC, EM_KM32, EM_KMX32, EM_KMX16, EM_KMX8): Define.
+	(EM_KVARC, EM_CDP, EM_COGE, EM_COOL, EM_NORC): Define.
+	(EM_CSR_KALIMBA, EM_Z80, EM_AMDGPU, EM_RISCV): Define.
+	(ELFOSABI_OPENVOS): Define.
+	(GRP_MASKOS, GRP_MASKPROC): Define.
+
+2016-10-14  Pedro Alves  <palves@redhat.com>
+
+	* ansidecl.h [__cplusplus >= 201103 && GCC_VERSION < 4007] (FINAL,
+	OVERRIDE): Define as empty.
+	[__cplusplus < 201103 && GCC_VERSION < 4007] (FINAL): Define as
+	__final.
+	[__cplusplus < 201103 && GCC_VERSION >= 4007] (OVERRIDE): Define as
+	empty.
+
+2016-10-14  Pedro Alves  <palves@redhat.com>
+
+	* ansidecl.h (GCC_FINAL): Delete.
+	(OVERRIDE, FINAL): New, moved from gcc/coretypes.h.
+
+2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (ARC_OPCODE_ARCV2): New define.
+
 2016-09-29  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (PPC_OPERAND_OPTIONAL32): Define.

@@ -368,6 +368,7 @@ elf_s390_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
     default:
       if (r_type >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0]))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: invalid relocation type %d"),
 			      abfd, (int) r_type);
 	  r_type = R_390_NONE;
@@ -924,6 +925,7 @@ elf_s390_check_relocs (bfd *abfd,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: bad symbol index: %d"),
 			      abfd, r_symndx);
 	  return FALSE;
@@ -1052,6 +1054,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_GOTOFF64:
 	  if (h == NULL || !s390_is_ifunc_symbol_p (h) || !h->def_regular)
 	    break;
+	  /* Fall through.  */
 
 	case R_390_PLT12DBL:
 	case R_390_PLT16DBL:
@@ -1164,6 +1167,7 @@ elf_s390_check_relocs (bfd *abfd,
 	      if (old_tls_type == GOT_NORMAL || tls_type == GOT_NORMAL)
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: `%s' accessed both as normal and thread local symbol"),
 		     abfd, h->root.root.string);
 		  return FALSE;
@@ -2294,6 +2298,7 @@ invalid_tls_insn (bfd *input_bfd,
 
   howto = elf_howto_table + ELF64_R_TYPE (rel->r_info);
   _bfd_error_handler
+    /* xgettext:c-format */
     (_("%B(%A+0x%lx): invalid instruction for TLS relocation %s"),
      input_bfd,
      input_section,
@@ -2758,6 +2763,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 			    + h->plt.offset);
 	      goto do_relocation;
 	    }
+	  /* Fall through.  */
 
 	case R_390_8:
 	case R_390_16:
@@ -3307,6 +3313,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
@@ -3363,6 +3370,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
@@ -3971,15 +3979,12 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
    object file when linking.  */
 
 static bfd_boolean
-elf64_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf64_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  if (!is_s390_elf (ibfd) || !is_s390_elf (obfd))
+  if (!is_s390_elf (ibfd) || !is_s390_elf (info->output_bfd))
     return TRUE;
 
-  if (!elf_s390_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
-  return TRUE;
+  return elf_s390_merge_obj_attributes (ibfd, info);
 }
 
 /* Why was the hash table entry size definition changed from

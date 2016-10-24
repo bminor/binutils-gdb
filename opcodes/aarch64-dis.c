@@ -788,10 +788,15 @@ decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
   switch (simd_size)
     {
     case  2: imm = (imm <<  2) | imm;
+      /* Fall through.  */
     case  4: imm = (imm <<  4) | imm;
+      /* Fall through.  */
     case  8: imm = (imm <<  8) | imm;
+      /* Fall through.  */
     case 16: imm = (imm << 16) | imm;
+      /* Fall through.  */
     case 32: imm = (imm << 32) | imm;
+      /* Fall through.  */
     case 64: break;
     default: assert (0); return 0;
     }
@@ -1316,14 +1321,14 @@ aarch64_ext_sve_addr_rr_lsl (const aarch64_operand *self,
 			     aarch64_opnd_info *info, aarch64_insn code,
 			     const aarch64_inst *inst ATTRIBUTE_UNUSED)
 {
-  int index;
+  int index_regno;
 
-  index = extract_field (self->fields[1], code, 0);
-  if (index == 31 && (self->flags & OPD_F_NO_ZR) != 0)
+  index_regno = extract_field (self->fields[1], code, 0);
+  if (index_regno == 31 && (self->flags & OPD_F_NO_ZR) != 0)
     return 0;
 
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
-  info->addr.offset.regno = index;
+  info->addr.offset.regno = index_regno;
   info->addr.offset.is_reg = TRUE;
   info->addr.writeback = FALSE;
   info->addr.preind = TRUE;

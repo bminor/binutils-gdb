@@ -1411,6 +1411,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: bad symbol index: %d"), abfd, r_symndx);
 	  return FALSE;
 	}
@@ -1591,6 +1592,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		else
 		  {
 		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: `%s' accessed both as normal and thread local symbol"),
 		       abfd, h ? h->root.root.string : "<local>");
 		    return FALSE;
@@ -3147,6 +3149,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
 					 NULL);
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
 		 _bfd_sparc_elf_howto_table[r_type].name,
@@ -3906,6 +3909,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
@@ -4942,8 +4946,9 @@ _bfd_sparc_elf_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
    object file when linking.  */
 
 bfd_boolean
-_bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
 
@@ -4974,9 +4979,8 @@ _bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   out_attr->i |= in_attr->i;
   out_attr->type = 1;
 
-
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }

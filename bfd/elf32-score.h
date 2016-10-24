@@ -141,7 +141,7 @@ extern bfd_boolean
 s7_elf32_score_print_private_bfd_data (bfd *, void *);
 
 extern bfd_boolean
-s7_elf32_score_merge_private_bfd_data (bfd *, bfd *);
+s7_elf32_score_merge_private_bfd_data (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean
 s7_elf32_score_new_section_hook (bfd *, asection *);

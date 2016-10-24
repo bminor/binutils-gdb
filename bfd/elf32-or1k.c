@@ -740,6 +740,7 @@ or1k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_OR1K_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid OR1K reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -1643,6 +1644,7 @@ or1k_elf_check_relocs (bfd *abfd,
                                    name + 5) != 0)
                       {
 			_bfd_error_handler
+			  /* xgettext:c-format */
                           (_("%B: bad relocation section name `%s\'"),
                            abfd, name);
                       }
@@ -2765,8 +2767,9 @@ or1k_elf_set_private_flags (bfd *abfd, flagword flags)
    EF_OR1K_NODELAY flag setting.  */
 
 static bfd_boolean
-elf32_or1k_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
 

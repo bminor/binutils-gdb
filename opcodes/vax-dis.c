@@ -296,6 +296,7 @@ print_insn_mode (const char *d,
       break;
     case 0xB0: /* Displacement byte deferred:	*displ(Rn).  */
       (*info->fprintf_func) (info->stream, "*");
+      /* Fall through.  */
     case 0xA0: /* Displacement byte:		displ(Rn).  */
       if (reg == 0xF)
 	(*info->print_address_func) (addr + 2 + NEXTBYTE (p), info);
@@ -305,6 +306,7 @@ print_insn_mode (const char *d,
       break;
     case 0xD0: /* Displacement word deferred:	*displ(Rn).  */
       (*info->fprintf_func) (info->stream, "*");
+      /* Fall through.  */
     case 0xC0: /* Displacement word:		displ(Rn).  */
       if (reg == 0xF)
 	(*info->print_address_func) (addr + 3 + NEXTWORD (p), info);
@@ -314,6 +316,7 @@ print_insn_mode (const char *d,
       break;
     case 0xF0: /* Displacement long deferred:	*displ(Rn).  */
       (*info->fprintf_func) (info->stream, "*");
+      /* Fall through.  */
     case 0xE0: /* Displacement long:		displ(Rn).  */
       if (reg == 0xF)
 	(*info->print_address_func) (addr + 5 + NEXTLONG (p), info);

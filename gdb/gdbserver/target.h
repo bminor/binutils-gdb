@@ -535,10 +535,6 @@ int kill_inferior (int);
 #define target_async(enable) \
   (the_target->async ? (*the_target->async) (enable) : 0)
 
-#define target_supports_multi_process() \
-  (the_target->supports_multi_process ? \
-   (*the_target->supports_multi_process) () : 0)
-
 #define target_process_qsupported(features, count)	\
   do							\
     {							\

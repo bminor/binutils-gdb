@@ -655,7 +655,7 @@ static struct option options[] =
   {0,			no_argument, 0, 0}
 };
 
-static void
+ATTRIBUTE_NORETURN static void
 usage (FILE *stream, int exit_status)
 {
   fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),

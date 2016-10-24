@@ -453,11 +453,11 @@
 /* Define to 1 if your system has struct lwp. */
 #undef HAVE_STRUCT_LWP
 
-/* Define to 1 if `struct ptrace_lwpinfo' is a member of `pl_tdname'. */
-#undef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
-
 /* Define to 1 if `struct ptrace_lwpinfo' is a member of `pl_syscall_code'. */
 #undef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
+
+/* Define to 1 if `struct ptrace_lwpinfo' is a member of `pl_tdname'. */
+#undef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
 
 /* Define to 1 if your system has struct reg in <machine/reg.h>. */
 #undef HAVE_STRUCT_REG

@@ -3998,8 +3998,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	 - it's a Thumb->Arm call and blx is not available, or it's a
 	   Thumb->Arm branch (not bl). A stub is needed in this case,
 	   but only if this call is not through a PLT entry. Indeed,
-	   PLT stubs handle mode switching already.
-      */
+	   PLT stubs handle mode switching already.  */
       if ((!thumb2_bl
 	    && (branch_offset > THM_MAX_FWD_BRANCH_OFFSET
 		|| (branch_offset < THM_MAX_BWD_BRANCH_OFFSET)))
@@ -4021,10 +4020,11 @@ arm_type_of_stub (struct bfd_link_info *info,
 	     PLT, use one that branches directly to the ARM PLT
 	     stub. If we pretended we'd use the pre-PLT Thumb->ARM
 	     stub, undo this now.  */
-	  if ((branch_type == ST_BRANCH_TO_THUMB) && use_plt && !thumb_only) {
-	    branch_type = ST_BRANCH_TO_ARM;
-	    branch_offset += PLT_THUMB_STUB_SIZE;
-	  }
+	  if ((branch_type == ST_BRANCH_TO_THUMB) && use_plt && !thumb_only)
+	    {
+	      branch_type = ST_BRANCH_TO_ARM;
+	      branch_offset += PLT_THUMB_STUB_SIZE;
+	    }
 
 	  if (branch_type == ST_BRANCH_TO_THUMB)
 	    {
@@ -4032,13 +4032,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      if (!thumb_only)
 		{
 		  if (input_sec->flags & SEC_ELF_PURECODE)
-		    _bfd_error_handler (_("%B(%s): warning: long branch "
-					  " veneers used in section with "
-					  "SHF_ARM_PURECODE section "
-					  "attribute is only supported"
-					  " for M-profile targets that "
-					  "implement the movw "
-					  "instruction."));
+		    _bfd_error_handler (_("\
+%B(%A): warning: long branch  veneers used in section with SHF_ARM_PURECODE section \
+attribute is only supported for M-profile targets that implement the movw instruction."),
+					input_sec);
 
 		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		    /* PIC stubs.  */
@@ -4067,13 +4064,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  else
 		    {
 		      if (input_sec->flags & SEC_ELF_PURECODE)
-			_bfd_error_handler (_("%B(%s): warning: long branch "
-					      " veneers used in section with "
-					      "SHF_ARM_PURECODE section "
-					      "attribute is only supported"
-					      " for M-profile targets that "
-					      "implement the movw "
-					      "instruction."));
+			_bfd_error_handler (_("\
+%B(%A): warning: long branch  veneers used in section with SHF_ARM_PURECODE section \
+attribute is only supported for M-profile targets that implement the movw instruction."),
+					    input_sec);
 
 		      stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 			/* PIC stub.  */
@@ -8633,10 +8627,11 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 			  {
 			    _bfd_error_handler
 			      /* Note - overlong line used here to allow for translation.  */
+			      /* xgettext:c-format */
 			      (_("\
 %B(%A+0x%lx): error: multiple load detected in non-last IT block instruction : STM32L4XX veneer cannot be generated.\n"
 				 "Use gcc option -mrestrict-it to generate only one instruction per IT block.\n"),
-			       abfd, sec, (long)i);
+			       abfd, sec, (long) i);
 			  }
 			else
 			  {
@@ -9735,7 +9730,8 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	    insn = (insn << 16)
 	      | bfd_get_16 (input_bfd, contents + rel->r_offset + 2);
 	  _bfd_error_handler
-	    (_("%B(%A+0x%lx):unexpected Thumb instruction '0x%x' in TLS trampoline"),
+	    /* xgettext:c-format */
+	    (_("%B(%A+0x%lx): unexpected Thumb instruction '0x%x' in TLS trampoline"),
 	     input_bfd, input_sec, (unsigned long)rel->r_offset, insn);
 	  return bfd_reloc_notsupported;
 	}
@@ -9774,7 +9770,8 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
       else
 	{
 	  _bfd_error_handler
-	    (_("%B(%A+0x%lx):unexpected ARM instruction '0x%x' in TLS trampoline"),
+	    /* xgettext:c-format */
+	    (_("%B(%A+0x%lx): unexpected ARM instruction '0x%x' in TLS trampoline"),
 	     input_bfd, input_sec, (unsigned long)rel->r_offset, insn);
 	  return bfd_reloc_notsupported;
 	}
@@ -10041,6 +10038,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_ABS12:
       if (!globals->vxworks_p)
 	return elf32_arm_abs12_reloc (input_bfd, hit_data, value + addend);
+      /* Fall through.  */
 
     case R_ARM_PC24:
     case R_ARM_ABS32:
@@ -11529,7 +11527,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		else
 		  {
 		    _bfd_error_handler
-		      (_("%B(%A+0x%lx):unexpected Thumb instruction '0x%x' referenced by TLS_GOTDESC"),
+		      /* xgettext:c-format */
+		      (_("%B(%A+0x%lx): unexpected Thumb instruction '0x%x' referenced by TLS_GOTDESC"),
 		       input_bfd, input_section,
 		       (unsigned long)rel->r_offset, insn);
 		    return bfd_reloc_notsupported;
@@ -11552,7 +11551,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 		  default:
 		    _bfd_error_handler
-		      (_("%B(%A+0x%lx):unexpected ARM instruction '0x%x' referenced by TLS_GOTDESC"),
+		      /* xgettext:c-format */
+		      (_("%B(%A+0x%lx): unexpected ARM instruction '0x%x' referenced by TLS_GOTDESC"),
 		       input_bfd, input_section,
 		       (unsigned long)rel->r_offset, insn);
 		    return bfd_reloc_notsupported;
@@ -11581,6 +11581,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       if (bfd_link_dll (info))
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"),
 	     input_bfd, input_section,
 	     (long) rel->r_offset, howto->name);
@@ -11794,6 +11795,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    if (negative == 0)
 	      {
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("%B(%A+0x%lx): Only ADD or SUB instructions are allowed for ALU group relocations"),
 		  input_bfd, input_section,
 		  (long) rel->r_offset, howto->name);
@@ -11834,6 +11836,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	     || r_type == R_ARM_ALU_SB_G2) && residual != 0)
 	  {
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
 	      input_bfd, input_section,
 	       (long) rel->r_offset, signed_value < 0 ? - signed_value : signed_value,
@@ -11924,6 +11927,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (residual >= 0x1000)
 	  {
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
 	       input_bfd, input_section,
 	       (long) rel->r_offset, labs (signed_value), howto->name);
@@ -12009,6 +12013,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (residual >= 0x100)
 	  {
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
 	       input_bfd, input_section,
 	       (long) rel->r_offset, labs (signed_value), howto->name);
@@ -12096,6 +12101,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if ((residual & 0x3) != 0 || residual >= 0x400)
 	  {
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
 	      input_bfd, input_section,
 	      (long) rel->r_offset, labs (signed_value), howto->name);
@@ -12359,6 +12365,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 			  || (howto->src_mask & (howto->src_mask + 1)))
 			{
 			  _bfd_error_handler
+			    /* xgettext:c-format */
 			    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
 			     input_bfd, input_section,
 			     (long) rel->r_offset, howto->name);
@@ -12470,7 +12477,9 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	{
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
+	      /* xgettext:c-format */
 	      ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+	      /* xgettext:c-format */
 	      : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
 	     input_section,
@@ -12523,6 +12532,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
@@ -13491,8 +13501,9 @@ elf32_arm_attributes_forbid_div (const obj_attribute *attr)
    are conflicting attributes.  */
 
 static bfd_boolean
-elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
+elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   /* Some tags have 0 = don't care, 1 = strong requirement,
@@ -14047,7 +14058,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
+  if (!_bfd_elf_merge_object_attributes (ibfd, info))
     return FALSE;
 
   /* Check for any attributes not known on ARM.  */
@@ -14075,7 +14086,7 @@ elf32_arm_versions_compatible (unsigned iver, unsigned over)
    object file when linking.  */
 
 static bfd_boolean
-elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd);
+elf32_arm_merge_private_bfd_data (bfd *, struct bfd_link_info *);
 
 /* Display the flags field.  */
 
@@ -14094,7 +14105,6 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
   /* Ignore init flag - it may not be set, despite the flags field
      containing valid data.  */
 
-  /* xgettext:c-format */
   fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
   switch (EF_ARM_EABI_VERSION (flags))
@@ -14946,15 +14956,15 @@ elf32_arm_update_relocs (asection *o,
 		{
 		  arm_unwind_table_edit *edit_node, *edit_next;
 		  bfd_vma bias;
-		  bfd_vma index;
+		  bfd_vma reloc_index;
 
 		  (*swap_in) (abfd, erela, irela);
-		  index = (irela->r_offset - offset) / 8;
+		  reloc_index = (irela->r_offset - offset) / 8;
 
 		  bias = 0;
 		  edit_node = edit_list;
 		  for (edit_next = edit_list;
-		       edit_next && edit_next->index <= index;
+		       edit_next && edit_next->index <= reloc_index;
 		       edit_next = edit_node->next)
 		    {
 		      bias++;
@@ -14962,7 +14972,7 @@ elf32_arm_update_relocs (asection *o,
 		    }
 
 		  if (edit_node->type != DELETE_EXIDX_ENTRY
-		      || edit_node->index != index)
+		      || edit_node->index != reloc_index)
 		    {
 		      irela->r_offset -= bias * 8;
 		      irela++;
@@ -16014,7 +16024,6 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       if (!bfd_elf32_arm_process_before_allocation (ibfd, info)
 	  || !bfd_elf32_arm_vfp11_erratum_scan (ibfd, info)
 	  || !bfd_elf32_arm_stm32l4xx_erratum_scan (ibfd, info))
-	/* xgettext:c-format */
 	_bfd_error_handler (_("Errors encountered processing file %s"),
 			    ibfd->filename);
     }
@@ -19594,21 +19603,22 @@ elf32_arm_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
    object file when linking.  */
 
 static bfd_boolean
-elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
   bfd_boolean flags_compatible = TRUE;
   asection *sec;
 
   /* Check if we have the same endianness.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
     return TRUE;
 
-  if (!elf32_arm_merge_eabi_attributes (ibfd, obfd))
+  if (!elf32_arm_merge_eabi_attributes (ibfd, info))
     return FALSE;
 
   /* The input BFD must have had its flags initialised.  */

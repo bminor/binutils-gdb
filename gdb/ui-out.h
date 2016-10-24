@@ -247,8 +247,4 @@ extern void ui_out_destroy (struct ui_out *uiout);
 
 extern int ui_out_redirect (struct ui_out *uiout, struct ui_file *outstream);
 
-/* Make a cleanup that restores the previous current uiout.  */
-
-extern struct cleanup *make_cleanup_restore_current_uiout (void);
-
 #endif /* UI_OUT_H */

@@ -955,6 +955,7 @@ avr_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_AVR_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid AVR reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -2682,6 +2683,7 @@ elf32_avr_relax_section (bfd *abfd,
                   }
               }
           }
+	  /* Fall through.  */
 
         default:
           {
@@ -3256,6 +3258,7 @@ avr_add_stub (const char *stub_name,
 
   if (hsh == NULL)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: cannot create stub entry %s"),
 			  NULL, stub_name);
       return NULL;

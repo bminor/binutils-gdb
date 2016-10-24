@@ -5238,8 +5238,6 @@ watchpoint_check (void *p)
     }
   else
     {
-      struct switch_thru_all_uis state;
-
       /* This seems like the only logical thing to do because
          if we temporarily ignored the watchpoint, then when
          we reenter the block in which it is valid it contains
@@ -5254,7 +5252,7 @@ watchpoint_check (void *p)
 	 already.  So we have no choice but print the information
 	 here.  */
 
-      SWITCH_THRU_ALL_UIS (state)
+      SWITCH_THRU_ALL_UIS ()
         {
 	  struct ui_out *uiout = current_uiout;
 
@@ -5435,9 +5433,7 @@ bpstat_check_watchpoint (bpstat bs)
 	    case 0:
 	      /* Error from catch_errors.  */
 	      {
-		struct switch_thru_all_uis state;
-
-		SWITCH_THRU_ALL_UIS (state)
+		SWITCH_THRU_ALL_UIS ()
 	          {
 		    printf_filtered (_("Watchpoint %d deleted.\n"),
 				     b->base.number);
@@ -14775,21 +14771,18 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 {
   int num;
   struct breakpoint *b, *tmp;
-  int match;
-  struct get_number_or_range_state state;
 
   if (args == 0 || *args == '\0')
     error_no_arg (_("one or more breakpoint numbers"));
 
-  init_number_or_range (&state, args);
+  number_or_range_parser parser (args);
 
-  while (!state.finished)
+  while (!parser.finished ())
     {
-      const char *p = state.string;
+      const char *p = parser.cur_tok ();
+      bool match = false;
 
-      match = 0;
-
-      num = get_number_or_range (&state);
+      num = parser.get_number ();
       if (num == 0)
 	{
 	  warning (_("bad breakpoint number at or near '%s'"), p);
@@ -14799,11 +14792,11 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 	  ALL_BREAKPOINTS_SAFE (b, tmp)
 	    if (b->number == num)
 	      {
-		match = 1;
+		match = true;
 		function (b, data);
 		break;
 	      }
-	  if (match == 0)
+	  if (!match)
 	    printf_unfiltered (_("No breakpoint number %d.\n"), num);
 	}
     }
@@ -15584,12 +15577,10 @@ trace_pass_command (char *args, int from_tty)
     }
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  t1 = get_tracepoint_by_number (&args, &state);
+	  t1 = get_tracepoint_by_number (&args, &parser);
 	  if (t1)
 	    trace_pass_set_count (t1, count, from_tty);
 	}
@@ -15635,16 +15626,16 @@ get_tracepoint_by_number_on_target (int num)
 
 struct tracepoint *
 get_tracepoint_by_number (char **arg,
-			  struct get_number_or_range_state *state)
+			  number_or_range_parser *parser)
 {
   struct breakpoint *t;
   int tpnum;
   char *instring = arg == NULL ? NULL : *arg;
 
-  if (state)
+  if (parser != NULL)
     {
-      gdb_assert (!state->finished);
-      tpnum = get_number_or_range (state);
+      gdb_assert (!parser->finished ());
+      tpnum = parser->get_number ();
     }
   else if (arg == NULL || *arg == NULL || ! **arg)
     tpnum = tracepoint_count;

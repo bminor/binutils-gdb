@@ -4428,6 +4428,7 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
       psymval = &symval;
       always_apply_relocation = true;
       addend = 0;
+      // Fall through.
 
     // when under PIC mode, these relocations are deferred to rtld
     case elfcpp::R_TILEGX_IMM16_X0_HW0:
@@ -4618,6 +4619,7 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
                 got_type = GOT_TYPE_TLS_OFFSET;
                 have_got_offset = true;
               }
+	      // Fall through.
             do_update_value:
               if (have_got_offset) {
                 if (gsym != NULL) {
@@ -4647,10 +4649,8 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
               } // else if (opt_t == tls::TLSOPT_TO_LE)
                 //   both GD/IE are turned into LE, which
                 //   is absolute relocation.
-                //
-                //  |  go through
-                //  |
-                //  V
+                // Fall through.
+
             // LE
             //
             // tp

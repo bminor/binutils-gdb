@@ -447,56 +447,6 @@ struct ui *main_ui;
 struct ui *current_ui;
 struct ui *ui_list;
 
-/* A cleanup handler that restores the current UI.  */
-
-static void
-restore_ui_cleanup (void *data)
-{
-  current_ui = (struct ui *) data;
-}
-
-/* See top.h.  */
-
-struct cleanup *
-make_cleanup_restore_current_ui (void)
-{
-  return make_cleanup (restore_ui_cleanup, current_ui);
-}
-
-/* See top.h.  */
-
-void
-switch_thru_all_uis_init (struct switch_thru_all_uis *state)
-{
-  state->iter = ui_list;
-  state->old_chain = make_cleanup_restore_current_ui ();
-}
-
-/* See top.h.  */
-
-int
-switch_thru_all_uis_cond (struct switch_thru_all_uis *state)
-{
-  if (state->iter != NULL)
-    {
-      current_ui = state->iter;
-      return 1;
-    }
-  else
-    {
-      do_cleanups (state->old_chain);
-      return 0;
-    }
-}
-
-/* See top.h.  */
-
-void
-switch_thru_all_uis_next (struct switch_thru_all_uis *state)
-{
-  state->iter = state->iter->next;
-}
-
 /* Get a pointer to the current UI's line buffer.  This is used to
    construct a whole line of input from partial input.  */
 
@@ -612,13 +562,12 @@ void
 command_handler (char *command)
 {
   struct ui *ui = current_ui;
-  struct cleanup *stat_chain;
   char *c;
 
   if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
 
-  stat_chain = make_command_stats_cleanup (1);
+  scoped_command_stats stat_reporter (true);
 
   /* Do not execute commented lines.  */
   for (c = command; *c == ' ' || *c == '\t'; c++)
@@ -630,8 +579,6 @@ command_handler (char *command)
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
     }
-
-  do_cleanups (stat_chain);
 }
 
 /* Append RL, an input line returned by readline or one of its

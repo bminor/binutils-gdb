@@ -139,7 +139,7 @@ reg_xbc (int reg)
 
 %}
 
-%name-prefix="rl78_"
+%name-prefix "rl78_"
 
 %union {
   int regno;

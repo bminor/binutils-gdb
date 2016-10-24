@@ -590,6 +590,7 @@ lm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_LM32_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid LM32 reloc number: %d"), abfd, r_type);
       r_type = 0;
     }

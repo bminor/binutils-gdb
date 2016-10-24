@@ -296,6 +296,7 @@ process_esd (bfd *abfd, struct ext_esd *esd, int pass)
 	  break;
 	case ESD_XDEF_IN_ABS:
 	  sec = bfd_abs_section_ptr;
+	  /* Fall through.  */
 	case ESD_XDEF_IN_SEC:
 	  {
 	    int snum = VDATA (abfd)->def_idx++;

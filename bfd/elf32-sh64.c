@@ -44,7 +44,7 @@ static bfd_boolean sh64_elf_new_section_hook
 static bfd_boolean sh64_elf_copy_private_data
   (bfd *, bfd *);
 static bfd_boolean sh64_elf_merge_private_data
-  (bfd *, bfd *);
+  (bfd *, struct bfd_link_info *);
 static bfd_boolean sh64_elf_fake_sections
   (bfd *, Elf_Internal_Shdr *, asection *);
 static bfd_boolean sh64_elf_set_private_flags
@@ -203,11 +203,12 @@ sh64_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 }
 
 static bfd_boolean
-sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
+sh64_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, new_flags;
 
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -220,11 +221,14 @@ sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 
       if (bfd_get_arch_size (ibfd) == 32
 	  && bfd_get_arch_size (obfd) == 64)
+	/* xgettext:c-format */
 	msg = _("%s: compiled as 32-bit object and %s is 64-bit");
       else if (bfd_get_arch_size (ibfd) == 64
 	       && bfd_get_arch_size (obfd) == 32)
+	/* xgettext:c-format */
 	msg = _("%s: compiled as 64-bit object and %s is 32-bit");
       else
+	/* xgettext:c-format */
 	msg = _("%s: object size does not match that of target %s");
 
       _bfd_error_handler (msg, bfd_get_filename (ibfd),
@@ -593,6 +597,7 @@ shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
   if (dropped != 0)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: error: unaligned relocation type %d at %08x reloc %p\n"),
 	 input_section->owner, ELF32_R_TYPE (rel->r_info),
 	 (unsigned) rel->r_offset, relocation);

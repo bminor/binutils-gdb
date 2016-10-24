@@ -79,9 +79,10 @@ extern void dump_toc (void *);
 #define HASH_CHECK_DCL char eye_catcher[8];
 #define HASH_CHECK_INIT(ret)      strcpy(ret->eye_catcher, EYE)
 #define HASH_CHECK(addr) \
- if (strcmp(addr->eye_catcher, EYE) != 0) \
+ if (strcmp (addr->eye_catcher, EYE) != 0) \
   { \
     fprintf (stderr,\
+    /* xgettext: c-format */ \
     _("File %s, line %d, Hash check failure, bad eye %8s\n"), \
     __FILE__, __LINE__, addr->eye_catcher); \
     abort (); \
@@ -1038,6 +1039,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  _bfd_error_handler
+	    /* xgettext: c-format */
 	    (_("%B: unsupported relocation type 0x%02x"), input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -1128,6 +1130,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 		    if ((bfd_vma) our_toc_offset >= 65535)
 		      {
 			_bfd_error_handler
+			  /* xgettext: c-format */
 			  (_("%B: Relocation for %s of %lx exceeds "
 			     "Toc size limit"),
 			   input_bfd, name,
@@ -1182,6 +1185,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 		&& (bfd_vma) our_toc_offset > toc_section->size)
 	      {
 		_bfd_error_handler
+		  /* xgettext: c-format */
 		  (_("%B: Relocation exceeds allocated TOC (%lx)"),
 		   input_bfd, (unsigned long) toc_section->size);
 		bfd_set_error (bfd_error_bad_value);
@@ -1236,6 +1240,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	      my_name = h->root.root.root.string;
 
 	    _bfd_error_handler
+	      /* xgettext: c-format */
 	      (_("Warning: unsupported reloc %s <file %B, section %A>\n"
 		 "sym %ld (%s), r_vaddr %ld (%lx)"),
 	       input_bfd, input_section, howto->name,
@@ -1254,6 +1259,7 @@ coff_ppc_relocate_section (bfd *output_bfd,
 	    my_name = h->root.root.root.string;
 
 	    _bfd_error_handler
+	      /* xgettext: c-format */
 	      (_("%B: Out of order IMGLUE reloc for %s"), input_bfd, my_name);
 	    bfd_set_error (bfd_error_bad_value);
 	    return FALSE;
@@ -1484,6 +1490,7 @@ dump_toc (void * vfile)
 	  else
 	    {
 	      fprintf (file,
+		       /* xgettext: c-format */
 		      _("**** global_toc_size %ld(%lx), thunk_size %ld(%lx)\n"),
 		       global_toc_size, (unsigned long) global_toc_size,
 		       thunk_size, (unsigned long) thunk_size);
@@ -1761,6 +1768,7 @@ ppc_coff_rtype2howto (arelent *relent, struct internal_reloc *internal)
       break;
     default:
       _bfd_error_handler
+	/* xgettext: c-format */
 	(_("warning: unsupported reloc %s [%d] used -- it may not work"),
 	 ppc_coff_howto_table[r_type].name, r_type);
       howto = ppc_coff_howto_table + r_type;
@@ -1832,6 +1840,7 @@ coff_ppc_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     default:
       _bfd_error_handler
+	/* xgettext: c-format */
 	(_("warning: unsupported reloc %s [%d] used -- it may not work"),
 	 ppc_coff_howto_table[r_type].name, r_type);
       howto = ppc_coff_howto_table + r_type;

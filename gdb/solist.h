@@ -100,12 +100,6 @@ struct target_so_ops
     /* Target dependent code to run after child process fork.  */
     void (*solib_create_inferior_hook) (int from_tty);
 
-    /* Do additional symbol handling, lookup, etc. after symbols for a
-       shared object have been loaded in the usual way.  This is
-       called to do any system specific symbol handling that might be
-       needed.  */
-    void (*special_symbol_handling) (void);
-
     /* Construct a list of the currently loaded shared objects.  This
        list does not include an entry for the main executable file.
 

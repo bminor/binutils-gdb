@@ -91,8 +91,7 @@ compile_file_command (char *arg, int from_tty)
   char *buffer;
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   /* Check the user did not just <enter> after command.  */
   if (arg == NULL)
@@ -115,7 +114,7 @@ compile_file_command (char *arg, int from_tty)
 
   arg = skip_spaces (arg);
   arg = gdb_abspath (arg);
-  make_cleanup (xfree, arg);
+  cleanup = make_cleanup (xfree, arg);
   buffer = xstrprintf ("#include \"%s\"\n", arg);
   make_cleanup (xfree, buffer);
   eval_compile_command (NULL, buffer, scope, NULL);
@@ -130,11 +129,9 @@ compile_file_command (char *arg, int from_tty)
 static void
 compile_code_command (char *arg, int from_tty)
 {
-  struct cleanup *cleanup;
   enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
 
-  cleanup = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   if (arg != NULL && check_raw_argument (&arg))
     {
@@ -155,13 +152,12 @@ compile_code_command (char *arg, int from_tty)
   else
     {
       struct command_line *l = get_command_line (compile_control, "");
+      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
 
-      make_cleanup_free_command_lines (&l);
       l->control_u.compile.scope = scope;
       execute_control_command_untraced (l);
+      do_cleanups (cleanup);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Callback for compile_print_command.  */
@@ -183,12 +179,10 @@ static void
 compile_print_command (char *arg_param, int from_tty)
 {
   const char *arg = arg_param;
-  struct cleanup *cleanup;
   enum compile_i_scope_types scope = COMPILE_I_PRINT_ADDRESS_SCOPE;
   struct format_data fmt;
 
-  cleanup = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   /* Passing &FMT as SCOPE_DATA is safe as do_module_cleanup will not
      touch the stale pointer if compile_object_run has already quit.  */
@@ -199,14 +193,13 @@ compile_print_command (char *arg_param, int from_tty)
   else
     {
       struct command_line *l = get_command_line (compile_control, "");
+      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
 
-      make_cleanup_free_command_lines (&l);
       l->control_u.compile.scope = scope;
       l->control_u.compile.scope_data = &fmt;
       execute_control_command_untraced (l);
+      do_cleanups (cleanup);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* A cleanup function to remove a directory and all its contents.  */

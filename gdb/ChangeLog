@@ -1,3 +1,991 @@
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2expr.h (class dwarf_expr_context)
+	<get_frame_base, get_frame_cfa, get_tls_address, dwarf_call,
+	push_dwarf_block_entry_value, get_addr_index, get_object_address>:
+	Now pure virtual.
+	* dwarf2-frame.c (class dwarf_expr_executor)
+	<get_frame_base, get_frame_cfa, get_tls_address, dwarf_call,
+	push_dwarf_block_entry_value, get_addr_index, get_object_address>:
+	New methods.
+	<invalid>: New method.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* minsyms.h (minimal_symbol_reader::record_full): "copy_name" now
+	a bool.
+	(record, record_with_info): Update.
+	* minsyms.c (record): Fix indentation.
+	(record_full): Fix indentation.  Update for type change.
+	* elfread.c (record_minimal_symbol): "copy_name" now a bool.
+	(elf_symtab_read): "copy_names" now a bool.
+	(elf_rel_plt_read, elf_read_minimal_symbols): Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* main.c: Include <vector>.
+	(cmdarg_s): Remove typedef.  Don't define VEC.
+	(captured_main_1): Use vector, not VEC.  Remove cleanups.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (struct dwarf_expr_context_funcs): Don't declare.
+	(dwarf_expr_read_addr_from_reg, dwarf_expr_get_reg_value)
+	(dwarf_expr_read_mem, dwarf_expr_frame_base): Rename; turn into
+	methods.
+	(get_frame_pc_for_per_cu_dwarf_call): New function.
+	(dwarf_expr_frame_cfa, dwarf_expr_frame_pc)
+	(dwarf_expr_tls_address): Rename; turn into methods.
+	(per_cu_dwarf_call): Remove arguments.  Use
+	get_frame_pc_for_per_cu_dwarf_call.
+	(dwarf_evaluate_loc_desc): New class.
+	(dwarf_expr_dwarf_call, dwarf_expr_context)
+	(dwarf_expr_push_dwarf_reg_entry_value)
+	(dwarf_expr_get_addr_index, dwarf_expr_get_obj_addr): Rename; turn
+	into methods.
+	(dwarf_expr_ctx_funcs): Remove.
+	(dwarf2_evaluate_loc_desc_full): Update.
+	(dwarf2_locexpr_baton_eval): Update.
+	(symbol_needs_eval_context): New class.
+	(symbol_needs_read_addr_from_reg, symbol_needs_get_reg_value)
+	(symbol_needs_read_mem, symbol_needs_frame_base)
+	(symbol_needs_frame_cfa, symbol_needs_tls_address)
+	(symbol_needs_dwarf_call, needs_dwarf_reg_entry_value): Rename;
+	turn into methods.
+	(needs_get_addr_index, needs_get_obj_addr): Remove; turn into
+	methods.
+	(symbol_needs_ctx_funcs): Remove.
+	(dwarf2_loc_desc_get_symbol_read_needs): Update.
+	* dwarf2expr.h (struct dwarf_expr_context_funcs): Remove; turn
+	contents into methods.
+	(struct dwarf_expr_context) <baton, funcs>: Remove.
+	<read_addr_from_reg, get_reg_value, read_mem, get_frame_base,
+	get_frame_cfa, get_frame_pc, get_tls_address, dwarf_call,
+	impl_get_base_type, push_dwarf_block_entry_value, get_addr_index,
+	get_object_address>: Declare new methods.
+	(ctx_no_get_frame_base, ctx_no_get_frame_cfa)
+	(ctx_no_get_frame_pc, ctx_no_get_tls_address, ctx_no_dwarf_call)
+	(ctx_no_get_base_type, ctx_no_push_dwarf_reg_entry_value)
+	(ctx_no_get_addr_index): Don't declare.
+	* dwarf2expr.c (get_base_type): Use impl_get_base_type.
+	(execute_stack_op): Update.
+	(ctx_no_get_frame_base, ctx_no_get_frame_cfa)
+	(ctx_no_get_frame_pc, ctx_no_get_tls_address, ctx_no_dwarf_call)
+	(ctx_no_get_base_type, ctx_no_push_dwarf_reg_entry_value)
+	(ctx_no_get_addr_index): Remove; now methods on
+	dwarf_expr_context.
+	* dwarf2-frame.c (read_addr_from_reg): Take a frame_info, not a
+	baton.
+	(class dwarf_expr_executor): New class.
+	(get_reg_value, read_mem): Rename, turn into methods.
+	(execute_stack_op): Use dwarf_expr_executor.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (per_cu_dwarf_call)
+	(dwarf_expr_push_dwarf_reg_entry_value)
+	(dwarf2_evaluate_loc_desc_full, dwarf2_locexpr_baton_eval)
+	(needs_dwarf_reg_entry_value)
+	(dwarf2_loc_desc_get_symbol_read_needs): Update.
+	* dwarf2expr.h (dwarf_expr_context) <push_address, eval, fetch,
+	fetch_address, fetch_in_stack_memory, address_type, grow_stack,
+	push, stack_empty_p, add_piece, get_base_type, execute_stack_op,
+	pop>: New method declarations.
+	(dwarf_expr_push_address, dwarf_expr_eval, dwarf_expr_fetch)
+	(dwarf_expr_fetch_address, dwarf_expr_fetch_in_stack_memory):
+	Don't declare.
+	* dwarf2expr.c (address_type, grow_stack, push, push_address)
+	(pop, fetch, fetch_address, fetch_in_stack_memory)
+	(stack_empty_p, add_piece, eval, get_base_type)
+	(execute_stack_op): Rename.  Turn into methods.
+	* dwarf2-frame.c (execute_stack_op): Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Stack-allocate
+	dwarf_expr_context.  Remove cleanups.
+	(dwarf2_locexpr_baton_eval)
+	(dwarf2_loc_desc_get_symbol_read_needs):  Likewise.
+	* dwarf2expr.h (dwarf_expr_context, ~dwarf_expr_context): Add
+	constructors and destructors.
+	(new_dwarf_expr_context, free_dwarf_expr_context)
+	(make_cleanup_free_dwarf_expr_context): Don't declare.
+	* dwarf2-frame.c (execute_stack_op): Stack-allocate
+	dwarf_expr_context.  Remove cleanups.
+	(dwarf_expr_context): Rename from new_dwarf_expr_context.  Turn
+	into constructor.
+	(free_dwarf_expr_context, free_dwarf_expr_context_cleanup):
+	Remove.
+	(~dwarf_expr_context): Rename from
+	make_cleanup_free_dwarf_expr_context.  Turn into destructor.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c: Include <vector>.
+	(read_pieced_value, write_pieced_value)
+	(dwarf2_compile_expr_to_ax): Use std::vector.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (print_stack_frame_to_uiout): Use scoped_restore.
+	* ui-out.c (make_cleanup_restore_current_uiout)
+	(restore_current_uiout_cleanup): Remove.
+	* infrun.c (print_stop_event): Use scoped_restore.
+	* ui-out.h (make_cleanup_restore_current_uiout): Don't declare.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* elfread.c (elf_read_minimal_symbols): Use gdb::unique_ptr.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-dump.c (dump_memory_to_file): Use gdb::unique_ptr.
+	(restore_binary_file): Likewise.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* maint.h (scoped_command_stats): New class.
+	(make_command_stats_cleanup): Don't declare.
+	* maint.c (struct cmd_stats): Remove.
+	(~scoped_command_stats): Rename from report_command_stats.  Now a
+	destructor.
+	(scoped_command_stats): Rename from make_command_stats_cleanup.
+	Now a constructor.
+	* main.c (captured_main_1): New function.  Use
+	scoped_command_stats.
+	(captured_main): Call captured_main_1.
+	* event-top.c (command_handler): Use scoped_command_stats.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use gdb::unique_ptr.
+	Remove some cleanups.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-interp.c (tui_on_normal_stop, tui_on_signal_received)
+	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history, tui_on_user_selected_context_changed):
+	Update.
+	* top.h (switch_thru_all_uis): New class.
+	(SWITCH_THRU_ALL_UIS): Rewrite.
+	(make_cleanup_restore_current_ui, switch_thru_all_uis_init)
+	(switch_thru_all_uis_cond, switch_thru_all_uis_next): Don't
+	declare.
+	* mi/mi-interp.c (mi_new_thread, mi_thread_exit)
+	(mi_record_changed, mi_inferior_added, mi_inferior_appeared)
+	(mi_inferior_exit, mi_inferior_removed, mi_on_signal_received)
+	(mi_on_end_stepping_range, mi_on_signal_exited, mi_on_exited)
+	(mi_on_no_history, mi_on_normal_stop, mi_traceframe_changed)
+	(mi_tsv_created, mi_tsv_deleted, mi_tsv_modified)
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_output_running_pid, mi_on_resume)
+	(mi_solib_loaded, mi_solib_unloaded, mi_command_param_changed)
+	(mi_memory_changed, mi_user_selected_context_changed): Update.
+	* infrun.c (all_uis_check_sync_execution_done)
+	(all_uis_on_sync_execution_starting, normal_stop): Update.
+	* event-top.c (restore_ui_cleanup)
+	(make_cleanup_restore_current_ui, switch_thru_all_uis_init)
+	(switch_thru_all_uis_cond, switch_thru_all_uis_next): Remove.
+	* cli/cli-interp.c (cli_on_normal_stop, cli_on_signal_received)
+	(cli_on_end_stepping_range, cli_on_signal_exited, cli_on_exited)
+	(cli_on_no_history, cli_on_user_selected_context_changed):
+	Update.
+	* breakpoint.c (watchpoint_check): Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (record_minimal_symbol, scan_xcoff_symtab): Add
+	"reader" argument.  Update.
+	(xcoff_initial_scan): Update.
+	* symfile.h (mdebug_build_psymtabs): Add "reader" argument.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	(read_alphacoff_dynamic_symtab): Add "reader" argument.  Update.
+	* minsyms.h (minimal_symbol_reader) <record, record_full>:
+	Declare.
+	<m_msym_bunch, m_msym_bunch_index, m_msym_count>: New members.
+	<record_with_info>: New function, renamed from
+	prim_record_minimal_symbol_and_info.
+	* minsyms.c (msym_bunch, msym_bunch_index, msym_count): Remove
+	globals.
+	(minimal_symbol_reader): Initialize new members.
+	(minimal_symbol_reader::record): Renamed from
+	prim_record_minimal_symbol.
+	(minimal_symbol_reader::record_full): Renamed from
+	prim_record_minimal_symbol_full.
+	(prim_record_minimal_symbol_and_info): Move to minsyms.h; rename.
+	* mdebugread.c (mdebug_build_psymtabs, parse_partial_symbols)
+	(record_minimal_symbol): Add "reader" argument.  Update.
+	(elfmdebug_build_psymtabs): Update.
+	* machoread.c (macho_symtab_add_minsym, macho_symtab_read): Add
+	"reader" argument.  Update.
+	(macho_symfile_read): Update.
+	* elfread.c (record_minimal_symbol, elf_symtab_read)
+	(elf_rel_plt_read): Add "reader" argument.  Update.
+	(elf_read_minimal_symbols): Update.
+	* dbxread.c (record_minimal_symbol, read_dbx_dynamic_symtab)
+	(read_dbx_symtab): Add "reader" argument.  Update.
+	(dbx_symfile_read): Update.
+	* coffread.c (record_minimal_symbol, coff_symtab_read): Add
+	"reader" argument.  Update.
+	(coff_symfile_read): Update.
+	* coff-pe-read.h (read_pe_exported_syms): Add "reader" argument.
+	* coff-pe-read.c (add_pe_exported_sym, add_pe_forwarded_sym)
+	(read_pe_exported_syms): Add "reader" argument.  Update.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (xcoff_initial_scan): Update.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	* minsyms.c (minimal_symbol_reader): Add obj argument.
+	Initialize member.
+	(install): Remove objfile argument.  Update.
+	* mdebugread.c (elfmdebug_build_psymtabs): Update.
+	* machoread.c (macho_symfile_read): Update.
+	* elfread.c (elf_read_minimal_symbols): Update.
+	* dbxread.c (dbx_symfile_read): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* minsyms.h (minimal_symbol_reader): Add m_objfile member.
+	(constructor): Add objfile argument.
+	(minimal_symbol_reader::install): Remove objfile argument.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (xcoff_initial_scan): Use
+	minimal_symbol_reader.
+	* mipsread.c (mipscoff_symfile_read): Use
+	minimal_symbol_reader.
+	* minsyms.h (minimal_symbol_reader): New class.
+	(init_minimal_symbol_collection)
+	(make_cleanup_discard_minimal_symbols, install_minimal_symbols):
+	Don't declare.
+	* minsyms.c (minimal_symbol_reader): Renamed from
+	init_minimal_symbol_collection, turned into constructor.
+	(~minimal_symbol_reader): Renamed from
+	do_discard_minimal_symbols_cleanup, turned into destructor.
+	(make_cleanup_discard_minimal_symbols): Remove.
+	(minimal_symbol_reader::install): Rename form
+	install_minimal_symbols.
+	* mdebugread.c (elfmdebug_build_psymtabs): Use
+	minimal_symbol_reader.
+	* machoread.c (macho_symfile_read): Use
+	minimal_symbol_reader.
+	* elfread.c (elf_read_minimal_symbols): Use
+	minimal_symbol_reader.
+	* dbxread.c (dbx_symfile_read): Use minimal_symbol_reader.
+	* coffread.c (coff_symfile_read): Use
+	minimal_symbol_reader.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* top.c (new_ui_command, wait_sync_command_done)
+	(gdb_readline_wrapper): Use scoped_restore.
+	* infrun.c (fetch_inferior_event): Use scoped_restore.
+	* infcall.c (call_thread_fsm_should_stop): Use scoped_restore.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (make_cleanup_restore_ui_file, do_restore_ui_file)
+	(struct restore_ui_file_closure): Remove.
+	* utils.h (make_cleanup_restore_ui_file): Don't declare.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	scoped_restore.
+	* top.c (execute_command_to_string): Use scoped_restore.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* common/scoped_restore.h: New file.
+	* utils.h: Include scoped_restore.h.
+	* top.c (execute_command_to_string): Use scoped_restore.
+	* python/python.c (python_interactive_command): Use
+	scoped_restore.
+	(python_command, execute_gdb_command): Likewise.
+	* printcmd.c (do_one_display): Use scoped_restore.
+	* mi/mi-main.c (exec_continue): Use scoped_restore.
+	* mi/mi-cmd-var.c (mi_cmd_var_assign): Use scoped_restore.
+	* linux-fork.c (checkpoint_command): Use scoped_restore.
+	* infrun.c (restore_execution_direction): Remove.
+	(fetch_inferior_event): Use scoped_restore.
+	* compile/compile.c (compile_file_command): Use
+	scoped_restore.
+	(compile_code_command, compile_print_command): Likewise.
+	* cli/cli-script.c (execute_user_command): Use
+	scoped_restore.
+	(while_command, if_command, script_from_file): Likewise.
+	* arm-tdep.c (arm_insert_single_step_breakpoint): Use
+	scoped_restore.
+
+2016-10-21  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (read_xcoff_symtab): Make "filestring" const.
+
+2016-10-21  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* xcoffread.c (read_xcoff_symtab): Make name of current file as
+	pst->filename instead of _start_ in AIX.
+
+2016-10-21  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* solist.h (struct target_so_ops): Delete special_symbol_handling
+	hook.
+	* solib.c (solib_add, reload_shared_libraries): Adjust.
+	* solib-aix.c (solib_aix_special_symbol_handling): Delete
+	(_initialize_solib_aix): Adjust
+	* solib-darwin.c (darwin_special_symbol_handling): Delete
+	(_initialize_darwin_solib): Adjust
+	* solib-dsbt.c (dsbt_special_symbol_handling): Delete
+	(_initialize_dsbt_solib): Adjust
+	* solib-frv.c (frv_special_symbol_handling): Delete
+	(_initialize_frv_solib): Adjust
+	* solib-svr4.c (svr4_special_symbol_handling): Delete
+	(_initialize_svr4_solib): Adjust
+	* solib-target.c (solib_target_special_symbol_handling): Delete
+	(_initialize_solib_target): Adjust
+
+2016-10-20  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.tgt: Don't configure if target is *-*-vxworks*.
+
+2016-10-19  Pedro Alves  <palves@redhat.com>
+
+	* config.in: Regenerate.
+
+2016-10-18  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h (__STDC_CONSTANT_MACROS)
+	(__STDC_LIMIT_MACROS): Delete.
+
+2016-10-18  Pedro Alves  <palves@redhat.com>
+
+	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
+	2692e23a48e21f6daa029e8af9f1a143b7532f47.
+	* gnulib/configure, gnulib/config.in, gnulib/aclocal.m4:
+	Regenerate.
+	* gnulib/import/Makefile: Update.
+	* gnulib/import/alloca: Update.
+	* gnulib/import/basename-lgpl: Update.
+	* gnulib/import/canonicalize-lgpl: Update.
+	* gnulib/import/config: Update.
+	* gnulib/import/dirent: Update.
+	* gnulib/import/dirfd: Update.
+	* gnulib/import/dirname-lgpl: Update.
+	* gnulib/import/dirname.h: Update.
+	* gnulib/import/dosname.h: Update.
+	* gnulib/import/errno: Update.
+	* gnulib/import/extra/snippet/arg-nonnull.h: Update.
+	* gnulib/import/extra/snippet/c++defs.h: Update.
+	* gnulib/import/extra/snippet/warn-on-use.h: Update.
+	* gnulib/import/extra/update-copyright: Update.
+	* gnulib/import/flexmember.h: Update.
+	* gnulib/import/float+.h: Update.
+	* gnulib/import/float: Update.
+	* gnulib/import/float: Update.
+	* gnulib/import/fnmatch: Update.
+	* gnulib/import/fnmatch: Update.
+	* gnulib/import/fnmatch_loop: Update.
+	* gnulib/import/fpucw.h: Update.
+	* gnulib/import/frexp: Update.
+	* gnulib/import/frexpl: Update.
+	* gnulib/import/gettimeofday: Update.
+	* gnulib/import/hard-locale: Update.
+	* gnulib/import/hard-locale.h: Update.
+	* gnulib/import/inttypes: Update.
+	* gnulib/import/isnan: Update.
+	* gnulib/import/isnand-nolibm.h: Update.
+	* gnulib/import/isnand: Update.
+	* gnulib/import/isnanl-nolibm.h: Update.
+	* gnulib/import/isnanl: Update.
+	* gnulib/import/itold: Update.
+	* gnulib/import/limits: Update.
+	* gnulib/import/localcharset: Update.
+	* gnulib/import/localcharset.h: Update.
+	* gnulib/import/lstat: Update.
+	* gnulib/import/m4/00gnulib: Update.
+	* gnulib/import/m4/absolute-header: Update.
+	* gnulib/import/m4/alloca: Update.
+	* gnulib/import/m4/canonicalize: Update.
+	* gnulib/import/m4/codeset: Update.
+	* gnulib/import/m4/configmake: Update.
+	* gnulib/import/m4/dirent_h: Update.
+	* gnulib/import/m4/dirfd: Update.
+	* gnulib/import/m4/dirname: Update.
+	* gnulib/import/m4/double-slash-root: Update.
+	* gnulib/import/m4/eealloc: Update.
+	* gnulib/import/m4/errno_h: Update.
+	* gnulib/import/m4/exponentd: Update.
+	* gnulib/import/m4/exponentl: Update.
+	* gnulib/import/m4/extensions: Update.
+	* gnulib/import/m4/extern-inline: Update.
+	* gnulib/import/m4/fcntl-o: Update.
+	* gnulib/import/m4/flexmember: Update.
+	* gnulib/import/m4/float_h: Update.
+	* gnulib/import/m4/fnmatch: Update.
+	* gnulib/import/m4/fpieee: Update.
+	* gnulib/import/m4/frexp: Update.
+	* gnulib/import/m4/frexpl: Update.
+	* gnulib/import/m4/gettimeofday: Update.
+	* gnulib/import/m4/glibc21: Update.
+	* gnulib/import/m4/gnulib-cache: Update.
+	* gnulib/import/m4/gnulib-common: Update.
+	* gnulib/import/m4/gnulib-comp: Update.
+	* gnulib/import/m4/gnulib-tool: Update.
+	* gnulib/import/m4/hard-locale: Update.
+	* gnulib/import/m4/include_next: Update.
+	* gnulib/import/m4/inttypes-pri: Update.
+	* gnulib/import/m4/inttypes: Update.
+	* gnulib/import/m4/isnand: Update.
+	* gnulib/import/m4/isnanl: Update.
+	* gnulib/import/m4/largefile: Update.
+	* gnulib/import/m4/limits-h: Update.
+	* gnulib/import/m4/localcharset: Update.
+	* gnulib/import/m4/locale-fr: Update.
+	* gnulib/import/m4/locale-ja: Update.
+	* gnulib/import/m4/locale-zh: Update.
+	* gnulib/import/m4/longlong: Update.
+	* gnulib/import/m4/lstat: Update.
+	* gnulib/import/m4/malloc: Update.
+	* gnulib/import/m4/malloca: Update.
+	* gnulib/import/m4/math_h: Update.
+	* gnulib/import/m4/mbrtowc: Update.
+	* gnulib/import/m4/mbsinit: Update.
+	* gnulib/import/m4/mbsrtowcs: Update.
+	* gnulib/import/m4/mbstate_t: Update.
+	* gnulib/import/m4/memchr: Update.
+	* gnulib/import/m4/memmem: Update.
+	* gnulib/import/m4/mmap-anon: Update.
+	* gnulib/import/m4/multiarch: Update.
+	* gnulib/import/m4/nocrash: Update.
+	* gnulib/import/m4/off_t: Update.
+	* gnulib/import/m4/pathmax: Update.
+	* gnulib/import/m4/rawmemchr: Update.
+	* gnulib/import/m4/readlink: Update.
+	* gnulib/import/m4/rename: Update.
+	* gnulib/import/m4/rmdir: Update.
+	* gnulib/import/m4/signal_h: Update.
+	* gnulib/import/m4/ssize_t: Update.
+	* gnulib/import/m4/stat: Update.
+	* gnulib/import/m4/stdbool: Update.
+	* gnulib/import/m4/stddef_h: Update.
+	* gnulib/import/m4/stdint: Update.
+	* gnulib/import/m4/stdio_h: Update.
+	* gnulib/import/m4/stdlib_h: Update.
+	* gnulib/import/m4/strchrnul: Update.
+	* gnulib/import/m4/string_h: Update.
+	* gnulib/import/m4/strstr: Update.
+	* gnulib/import/m4/strtok_r: Update.
+	* gnulib/import/m4/sys_socket_h: Update.
+	* gnulib/import/m4/sys_stat_h: Update.
+	* gnulib/import/m4/sys_time_h: Update.
+	* gnulib/import/m4/sys_types_h: Update.
+	* gnulib/import/m4/time_h: Update.
+	* gnulib/import/m4/unistd_h: Update.
+	* gnulib/import/m4/warn-on-use: Update.
+	* gnulib/import/m4/wchar_h: Update.
+	* gnulib/import/m4/wchar_t: Update.
+	* gnulib/import/m4/wctype_h: Update.
+	* gnulib/import/m4/wint_t: Update.
+	* gnulib/import/malloc: Update.
+	* gnulib/import/malloca: Update.
+	* gnulib/import/malloca.h: Update.
+	* gnulib/import/math: Update.
+	* gnulib/import/math: Update.
+	* gnulib/import/mbrtowc: Update.
+	* gnulib/import/mbsinit: Update.
+	* gnulib/import/mbsrtowcs-impl.h: Update.
+	* gnulib/import/mbsrtowcs-state: Update.
+	* gnulib/import/mbsrtowcs: Update.
+	* gnulib/import/memchr: Update.
+	* gnulib/import/memmem: Update.
+	* gnulib/import/pathmax.h: Update.
+	* gnulib/import/rawmemchr: Update.
+	* gnulib/import/readlink: Update.
+	* gnulib/import/ref-add.sin: Update.
+	* gnulib/import/ref-del.sin: Update.
+	* gnulib/import/rename: Update.
+	* gnulib/import/rmdir: Update.
+	* gnulib/import/same-inode.h: Update.
+	* gnulib/import/signal: Update.
+	* gnulib/import/stat: Update.
+	* gnulib/import/stdbool: Update.
+	* gnulib/import/stddef: Update.
+	* gnulib/import/stdint: Update.
+	* gnulib/import/stdio: Update.
+	* gnulib/import/stdlib: Update.
+	* gnulib/import/str-two-way.h: Update.
+	* gnulib/import/strchrnul: Update.
+	* gnulib/import/streq.h: Update.
+	* gnulib/import/string: Update.
+	* gnulib/import/stripslash: Update.
+	* gnulib/import/strnlen1: Update.
+	* gnulib/import/strnlen1.h: Update.
+	* gnulib/import/strstr: Update.
+	* gnulib/import/strtok_r: Update.
+	* gnulib/import/sys_stat: Update.
+	* gnulib/import/sys_time: Update.
+	* gnulib/import/sys_types: Update.
+	* gnulib/import/time: Update.
+	* gnulib/import/unistd: Update.
+	* gnulib/import/unistd: Update.
+	* gnulib/import/verify.h: Update.
+	* gnulib/import/wchar: Update.
+	* gnulib/import/wctype: Update.
+	* gnulib/import/flexmember.h: New file.
+	* gnulib/import/hard-locale.c: New file.
+	* gnulib/import/hard-locale.h: New file.
+	* gnulib/import/limits.in.h: New file.
+	* gnulib/import/m4/flexmember.m4: New file.
+	* gnulib/import/m4/hard-locale.m4: New file.
+	* gnulib/import/m4/limits-h.m4: New file.
+
+2016-10-18  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h: Include "gdb_unique_ptr.h".
+	* common/gdb_unique_ptr.h: New.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* i386-tdep.c (i386_mpx_info_bounds): Make sure the architecture
+	is `bfd_arch_i386' before proceeding.
+	(i386_mpx_set_bounds): Likewise.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* tilegx-tdep.c (tilegx_analyze_prologue): Use the `long long'
+	type for `operands'.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-main.c (mi_cmd_trace_save): Check if argument is present
+	before using it.
+
+2016-10-17  Pedro Alves  <palves@redhat.com>
+
+	* charset.h (class wchar_iterator) [PHONY_ICONV] <m_desc>: Use
+	'int' as type.
+
+2016-10-14  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* solib-aix.c (solib_aix_bfd_open): Call solib_find so that sysroot
+	path is set properly if program has a dependency on .a archive and
+	sysroot is set via set sysroot command.
+
+2016-10-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.c: Remove leftover comment.
+
+2016-10-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* common/common-defs.h [HAVE_STRINGS_H]: Include strings.h if
+	available, to get prototypes of 'strcasecmp' and 'strncasecmp'.
+
+2016-10-13  Pedro Alves  <palves@redhat.com>
+
+	* contrib/ari/gdb_ari.sh (boolean): Suggest bool instead.
+	(false, true): Remove checks.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
+	* machoread.c (macho_symfile_read_all_oso): Use std::string.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (trace_dump_command): Remove unnecessary
+	null_cleanup.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_emit_char, count_next_character)
+	(generic_printstr): Update.
+	* charset.c (struct wchar_iterator): Move to charset.h.
+	(wchar_iterator::wchar_iterator): Rename from
+	make_wchar_iterator, turn into a constructor.
+	(wchar_iterator::~wchar_iterator): Rename from
+	do_cleanup_iterator, turn into a destructor.
+	(make_cleanup_wchar_iterator): Remove.
+	(wchar_iterator::iterate): Rename from wchar_iterate.  Remove
+	"iter" argument.  Update.
+	* charset.h: Include <vector>.
+	(class wchar_iterator): New class, from old struct
+	wchar_iterator.
+	(make_wchar_iterator, make_cleanup_wchar_iterator): Don't
+	declare.
+
+2016-10-12  Tom Tromey  <tom@tromey.com>
+
+	* selftest.c: Include <vector>, not "vec.h".
+	(self_test_function_ptr): Remove.
+	(tests): Now a std::vector.
+	(register_self_test, run_self_tests): Update.
+
+2016-10-13  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* tid-parse.h (tid_range_parser): New class.
+	(enum tid_range_state): Move into tid_range_parser's scope.
+	Remove TID_RANGE_ prefix from all values.
+	(tid_range_parser_get_tid, tid_range_parser_get_tid_range)
+	(tid_range_parser_star_range, tid_range_parser_finished)
+	(tid_range_parser_skip, tid_range_parser_qualified): Don't
+	declare.
+	(tid_is_in_list): Update comment.
+	* tid-parse.c (tid_range_parser::tid_range_parser): New.
+	(init, finished, get_string, skip, tid_is_qualified)
+	(get_tid_or_range, get_tid_range, get_tid, star_range): Rename;
+	turn into methods.
+	(tid_is_in_list): Adjust.
+	* cli/cli-utils.h (number_or_range_parser): New class.
+	(init_number_or_range, get_number_or_range)
+	(number_range_setup_range): Don't declare.
+	* cli/cli-utils.c
+	(number_or_range_parser::number_or_range_parser): New.
+	(init_number_or_range, get_number_or_range)
+	(number_range_setup_range): Rename; turn into methods.
+	(number_is_in_list): Adjust.
+	* breakpoint.c (map_breakpoint_numbers): Adjust.  Use bool.
+	(trace_pass_command, get_tracepoint_by_number): Adjust.
+	* breakpoint.h (get_tracepoint_by_number): Adjust.
+	* inferior.c (detach_inferior_command, kill_inferior_command)
+	(remove_inferior_command): Adjust.
+	* linespec.c (decode_line_2): Adjust.
+	* memattr.c (mem_enable_command, mem_disable_command)
+	(mem_delete_command): Adjust.
+	* printcmd.c (map_display_numbers): Adjust.
+	* reverse.c (delete_bookmark_command, bookmarks_info): Adjust.
+	* thread.c (thread_apply_command): Adjust.
+
+2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-newlib-tdep.c: New file.
+	* configure.tgt: Add newlib support for ARC.
+
+2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.h (struct gdbarch_tdep) <jb_pc>: New field.
+	* arc-tdep.c (arc_get_longjmp_target): New function.
+	(arc_gdbarch_init): Set get_longjmp_target if jb_pc is non-negative.
+	(arc_dump_tdep): Print jb_pc.
+
+2016-10-12  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.h (struct gdbarch_tdep): New.
+	* arc-tdep.c (arc_gdbarch_init): Allocate gdbarch_tdep.
+
+2016-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/20682
+	* aarch64-tdep.c: Replace 32 with AARCH64_D_REGISTER_COUNT.
+	(aarch64_analyze_prologue): Extend array 'regs' for D registers.
+	Assert that operand 0 and 1 can be X or D registers.  Update
+	register number for D registers.  Update registers in frame
+	cache.
+	* aarch64-tdep.h (AARCH64_D_REGISTER_COUNT): New macro.
+
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm.h (enum arm_breakpoint_kinds): New.
+	* arm-tdep.c (arm_remote_breakpoint_from_pc): Use
+	ARM_BP_KIND_THUMB2.
+
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
+	* m32c-tdep.c (m32c_gdbarch_init): Rename local 'arch' by
+	'gdbarch'.
+
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
+	* v850-tdep.c (v850_breakpoint_from_pc): Use the right
+	breakpoint instruction.
+	(v850_dbtrap_breakpoint_from_pc): Remove.
+	(v850_gdbarch_init): Update.
+
+2016-10-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (push_level): Remove "id" parameter.
+	(ui_out_begin): Update call.
+
+2016-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.12 released.
+
+2016-10-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* python/python.c (gdbpy_decode_line): Call
+	string_to_event_location_basic instead of new_linespec_location.
+
+2016-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* target.c (target_supports_multi_process): New function, moved
+	from...
+	* target.h (target_supports_multi_process): ... here.  Remove
+	macro.
+	* target/target.h (target_supports_multi_process): New prototype.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* cp-valprint.c (vtbl_ptr_name): Write "extern const" instead of
+	EXPORTED_CONST.
+	* stub-termcap.c: Remove __cplusplus checks.
+	* common/common-defs.h [!__cplusplus] (EXTERN_C, EXTERN_C_PUSH,
+	EXTERN_C_POP): Delete.
+	* common/common-exceptions.h (GDB_XCPT_SJMP): Update comments.
+	(GDB_XCPT) [!__cplusplus]: Delete.
+	(throw_exception, throw_exception_sjlj): Update comments.
+	* guile/guile-internal.h (as_a_scm_t_subr) [!__cplusplus]: Delete.
+	* guile/guile.c (extension_language_guile): Write "extern const"
+	instead of EXPORTED_CONST.
+	* features/feature_to_c.sh: Don't emit !__cplusplus code.  Write
+	"extern const" instead of EXPORTED_CONST.
+
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* python/py-value.c (valpy_long): Handle unsigned values.
+
+2016-10-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* frame.h: Forward-declare struct ui_out.
+
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS: Remove Java test maintainer.
+	* varobj.h (java_varobj_ops): Don't declare.
+	* valprint.h (struct value_print_options)
+	<pascal_static_field_print>: Update comment.
+	* utils.c (producer_is_gcc): Remove java reference.
+	* symtab.h (struct general_symbol_info): Remove java references.
+	(SYMBOL_SEARCH_NAME): Likewise.
+	* objfiles.c (allocate_objfile): Update comment.
+	* linespec.c (find_linespec_symbols): Remove java references.
+	* gnu-v3-abi.c (gnuv3_rtti_type, gnuv3_baseclass_offset): Remove
+	java references.
+	* gdbtypes.h (struct cplus_struct_type) <is_java>: Remove.
+	(TYPE_CPLUS_REALLY_JAVA): Remove.
+	* c-varobj.c (enum vsections): Update comment.
+	* symtab.c (symbol_set_language, symbol_set_names)
+	(symbol_natural_name, symbol_demangled_name)
+	(demangle_for_lookup, symbol_matches_domain)
+	(default_make_symbol_completion_list_break_on_1): Remove java
+	references.
+	(JAVA_PREFIX, JAVA_PREFIX_LEN): Remove.
+	* psymtab.c (match_partial_symbol, psymtab_search_name)
+	(lookup_partial_symbol): Remove java references.
+	* dwarf2read.c (find_slot_in_mapped_hash): Remove java references.
+	(add_partial_symbol, dwarf2_compute_name, dwarf2_physname)
+	(dwarf2_add_member_fn, is_vtable_name, read_structure_type)
+	(process_structure_scope, read_subroutine_type)
+	(read_subrange_type, load_partial_dies)
+	(new_symbol_full, determine_prefix, typename_concat)
+	(dwarf2_name): Remove java references.
+	(set_cu_language): Treat Java as C++.
+	* c-typeprint.c (c_type_print_args): Remove java reference.
+	* defs.h (enum language) <language_java>: Remove.
+	* Makefile.in (SFILES, HFILES_NO_SRCDIR, COMMON_OBS, YYFILES)
+	(YYOBJ, local-maintainer-clean): Don't mention java files.
+	* jv-exp.y, jv-lang.c, jv-lang.h, jv-typeprint.c, jv-valprint.c,
+	jv-varobj.c: Remove.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_pseudo_register_type): Make FCRs always
+	32-bit.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_pseudo_register_type): Rearrange comments
+	throughout.
+
+2016-10-06  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* stack.c (frame_info): Call val_print_not_saved instead of
+	val_print_unavailable if frame_id check fails.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* jit.c (free_objfile_data): Delete the JIT breakpoint and clear
+	the cached code address.
+
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* features/aarch64-core.xml (cpsr_flags): Elide "type" and specify
+	"end" in all fields.
+	* features/aarch64.c: Regenerate.
+	* features/i386/32bit-mpx.xml (_bndcfgu): Specify type of "preserved"
+	and "enabled" fields. Correct size of "enabled" field.
+	* features/i386/64bit-mpx.xml (_bndcfgu): Specify type of "preserved"
+	and "enabled" fields.
+	* features/i386/i386-avx-mpx-linux.c: Regenerate.
+	* features/i386/i386-avx-mpx.c: Regenerate.
+	* features/i386/i386-avx512-linux.c: Regenerate.
+	* features/i386/i386-avx512.c: Regenerate.
+	* features/i386/i386-mpx-linux.c: Regenerate.
+	* features/i386/i386-mpx.c: Regenerate.
+	* features/arc-arcompact.c: Regenerate.
+	* features/arc-v2.c: Regenerate.
+	* xml-tdesc.c (tdesc_start_field): Require "end" spec.  Single bit
+	fields default to "bool" type.
+
+	Revert 2016-03-15  Doug Evans  <dje@google.com>
+	* features/i386/32bit-core.xml (i386_eflags): Remove "end" spec.
+	* features/i386/32bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/64bit-core.xml (i386_eflags): Ditto.
+	* features/i386/64bit-sse.xml (i386_eflags): Ditto.
+	* features/i386/x32-core.xml (i386_eflags): Ditto.
+
+2016-10-05  Tom Tromey  <tom@tromey.com>
+
+	PR breakpoints/20653:
+	* location.c (string_to_explicit_location): Use NULL, not '\0'.
+
+2016-10-05  Tom Tromey  <tom@tromey.com>
+
+	PR symtab/20652:
+	* psymtab.c (psymbol_compare): Correctly compare "ginfo.value"
+	fields.
+
+2016-10-05  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2expr.c (dwarf_expr_require_composition): Allow
+	DW_OP_GNU_uninit.
+	(execute_stack_op): Use dwarf_expr_require_composition instead of
+	copying its logic.
+
+2016-10-05  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_frame_prev_register): Remove annoying log message.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (WHICH): Add
+	rs6000/powerpc-isa205-32l, rs6000/powerpc-isa205-64l,
+	rs6000/powerpc-isa205-altivec32l, rs6000/powerpc-isa205-altivec64l,
+	rs6000/powerpc-isa205-vsx32l and rs6000/powerpc-isa205-vsx64l.
+	* regformats/rs6000/powerpc-isa205-32l.dat: Regenerated.
+	* regformats/rs6000/powerpc-isa205-64l.dat: Likewise.
+	* regformats/rs6000/powerpc-isa205-altivec32l.dat: Likewise.
+	* regformats/rs6000/powerpc-isa205-altivec64l.dat: Likewise.
+	* regformats/rs6000/powerpc-isa205-vsx32l.dat: Likewise.
+	* regformats/rs6000/powerpc-isa205-vsx64l.dat: Likewise.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (XMLTOC): Add s390-tevx-linux64.xml,
+	s390-vx-linux64.xml, s390x-tevx-linux64.xml and
+	s390x-vx-linux64.xml.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile: Remove i386/*-expedite. Add i386-expedite,
+	amd64-expedite, and x32-expedite.
+
+2016-10-05  Terry Guo  <terry.guo@arm.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c: Adjust includes.
+	* features/Makefile (WHICH): Add "arm/" directory to arm
+	target descriptions.
+	(XMLTOC): Likewise.
+	(arm/arm-with-iwmmxt.dat): Adjust the path for
+	dependencies.
+	* features/arm-core.xml: Moved to ...
+	* features/arm/arm-core.xml: ... it.
+	* features/arm-fpa.xml: Moved to ...
+	* features/arm/arm-fpa.xml: ... it.
+	* features/arm-m-profile.xml: Moved to ...
+	* features/arm/arm-m-profile.xm: ... it.
+	* features/arm-vfpv2.xml: Moved to ...
+	* features/arm/arm-vfpv2.xm: ... it.
+	* features/arm-vfpv3.xml: Moved to ...
+	* features/arm/arm-vfpv3.xml: ... it.
+	* features/arm-with-iwmmxt.c: Moved to ...
+	* features/arm/arm-with-iwmmxt.c: ... it.
+	* features/arm-with-iwmmxt.xml: Moved to ...
+	* features/arm/arm-with-iwmmxt.xml: ... it.
+	* features/arm-with-m-fpa-layout.c: Moved to ...
+	* features/arm/arm-with-m-fpa-layout.c: ... it.
+	* features/arm-with-m-fpa-layout.xml: Moved to ...
+	* features/arm/arm-with-m-fpa-layout.xml: ... it.
+	* features/arm-with-m-vfp-d16.c: Moved to ...
+	* features/arm/arm-with-m-vfp-d16.c: ... it.
+	* features/arm-with-m-vfp-d16.xml: Moved to ...
+	* features/arm/arm-with-m-vfp-d16.xml: ... it.
+	* features/arm-with-m.c: Moved to ...
+	* features/arm/arm-with-m.c: ... it.
+	* features/arm-with-m.xml: Moved to ...
+	* features/arm/arm-with-m.xm: ... it.
+	* features/arm-with-neon.c: Moved to ...
+	* features/arm/arm-with-neon.c: ... it.
+	* features/arm-with-neon.xml: Moved to ...
+	* features/arm/arm-with-neon.xml: ... it.
+	* features/arm-with-vfpv2.c: Moved to ...
+	* features/arm/arm-with-vfpv2.c: ... it.
+	* features/arm-with-vfpv2.xml: Moved to ...
+	* features/arm/arm-with-vfpv2.xml: ... it.
+	* features/arm-with-vfpv3.c: Moved to ...
+	* features/arm/arm-with-vfpv3.c: ... it.
+	* features/arm-with-vfpv3.xml: Moved to ...
+	* features/arm/arm-with-vfpv3.xml: ... it.
+	* features/xscale-iwmmxt.xml: Moved to ...
+	* features/arm/xscale-iwmmxt.xml: ... it.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* NEWS: Mention new frame field of =thread-selected event.
+	* cli/cli-decode.c (add_cmd): Initialize c->suppress_notification.
+	(add_com_suppress_notification): New function definition.
+	(cmd_func): Set and restore the suppress_notification flag.
+	* cli/cli-deicode.h (struct cmd_list_element)
+	<suppress_notification>: New field.
+	* cli/cli-interp.c (cli_suppress_notification): New global variable.
+	(cli_on_user_selected_context_changed): New function.
+	(_initialize_cli_interp): Attach to user_selected_context_changed
+	observer.
+	* command.h (struct cli_suppress_notification): New structure.
+	(cli_suppress_notification): New global variable declaration.
+	(add_com_suppress_notification): New function declaration.
+	* defs.h (enum user_selected_what_flag): New enum.
+	(user_selected_what): New enum flag type.
+	* frame.h (print_stack_frame_to_uiout): New function declaration.
+	* gdbthread.h (print_selected_thread_frame): New function declaration.
+	* inferior.c (print_selected_inferior): New function definition.
+	(inferior_command): Remove printing of inferior/thread/frame switch
+	notifications, notify user_selected_context_changed observer.
+	* inferior.h (print_selected_inferior): New function declaration.
+	* mi/mi-cmds.c (struct mi_cmd): Add user_selected_context
+	suppression to stack-select-frame and thread-select commands.
+	* mi/mi-interp.c (struct mi_suppress_notification)
+	<user_selected_context>: Initialize.
+	(mi_user_selected_context_changed): New function definition.
+	(_initialize_mi_interp): Attach to user_selected_context_changed.
+	* mi/mi-main.c (mi_cmd_thread_select): Print thread selection reply.
+	(mi_execute_command): Handle notification suppression.  Notify
+	user_selected_context_changed observer on thread change instead of printing
+	event directly.  Don't send it if command already sends the notification.
+	(command_notifies_uscc_observer): New function.
+	(mi_cmd_execute): Don't handle notification suppression.
+	* mi/mi-main.h (struct mi_suppress_notification)
+	<user_selected_context>: New field.
+	* stack.c (print_stack_frame_to_uiout): New function definition.
+	(select_frame_command): Notify user_selected_context_changed
+	observer.
+	(frame_command): Call print_selected_thread_frame if there's no frame
+	change or notify user_selected_context_changed observer if there is.
+	(up_command): Notify user_selected_context_changed observer.
+	(down_command): Likewise.
+	(_initialize_stack): Suppress user_selected_context notification for
+	command select-frame.
+	* thread.c (thread_command): Notify
+	user_selected_context_changed if the thread has changed, print
+	thread info directly if it hasn't.
+	(do_captured_thread_select): Do not print thread switch event.
+	(print_selected_thread_frame): New function definition.
+	* tui/tui-interp.c (tui_on_user_selected_context_changed):
+	New function definition.
+	(_initialize_tui_interp): Attach to user_selected_context_changed
+	observer.
+
 2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression

@@ -771,7 +771,8 @@ sh_relax_section (bfd *abfd,
       laddr += ((irel->r_offset & 0xffffffff) ^ 0x80000000) - 0x80000000;
       if (laddr >= sec->size)
 	{
-	  _bfd_error_handler ("%B: 0x%lx: warning: bad R_SH_USES offset",
+	  /* xgettext: c-format */
+	  _bfd_error_handler (_("%B: 0x%lx: warning: bad R_SH_USES offset"),
 			      abfd, (unsigned long) irel->r_vaddr);
 	  continue;
 	}
@@ -781,7 +782,8 @@ sh_relax_section (bfd *abfd,
       if ((insn & 0xf000) != 0xd000)
 	{
 	  _bfd_error_handler
-	    ("%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x",
+	    /* xgettext: c-format */
+	    (_("%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
 	     abfd, (unsigned long) irel->r_vaddr, insn);
 	  continue;
 	}
@@ -798,7 +800,8 @@ sh_relax_section (bfd *abfd,
       if (paddr >= sec->size)
 	{
 	  _bfd_error_handler
-	    ("%B: 0x%lx: warning: bad R_SH_USES load offset",
+	    /* xgettext: c-format */
+	    (_("%B: 0x%lx: warning: bad R_SH_USES load offset"),
 	     abfd, (unsigned long) irel->r_vaddr);
 	  continue;
 	}
@@ -822,7 +825,8 @@ sh_relax_section (bfd *abfd,
       if (irelfn >= irelend)
 	{
 	  _bfd_error_handler
-	    ("%B: 0x%lx: warning: could not find expected reloc",
+	    /* xgettext: c-format */
+	    (_("%B: 0x%lx: warning: could not find expected reloc"),
 	     abfd, (unsigned long) paddr);
 	  continue;
 	}
@@ -838,7 +842,8 @@ sh_relax_section (bfd *abfd,
       if (sym.n_scnum != 0 && sym.n_scnum != sec->target_index)
 	{
 	  _bfd_error_handler
-	    ("%B: 0x%lx: warning: symbol in unexpected section",
+	    /* xgettext: c-format */
+	    (_("%B: 0x%lx: warning: symbol in unexpected section"),
 	     abfd, (unsigned long) paddr);
 	  continue;
 	}
@@ -963,7 +968,8 @@ sh_relax_section (bfd *abfd,
       if (irelcount >= irelend)
 	{
 	  _bfd_error_handler
-	    ("%B: 0x%lx: warning: could not find expected COUNT reloc",
+	    /* xgettext: c-format */
+	    (_("%B: 0x%lx: warning: could not find expected COUNT reloc"),
 	     abfd, (unsigned long) paddr);
 	  continue;
 	}
@@ -972,7 +978,8 @@ sh_relax_section (bfd *abfd,
          just deleted one.  */
       if (irelcount->r_offset == 0)
 	{
-	  _bfd_error_handler ("%B: 0x%lx: warning: bad count",
+	  /* xgettext: c-format */
+	  _bfd_error_handler (_("%B: 0x%lx: warning: bad count"),
 			      abfd, (unsigned long) paddr);
 	  continue;
 	}
@@ -1343,7 +1350,8 @@ sh_relax_delete_bytes (bfd *abfd,
 	  if (overflow)
 	    {
 	      _bfd_error_handler
-		("%B: 0x%lx: fatal: reloc overflow while relaxing",
+		/* xgettext: c-format */
+		(_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
 		 abfd, (unsigned long) irel->r_vaddr);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -1438,7 +1446,7 @@ sh_relax_delete_bytes (bfd *abfd,
       || obj_raw_syments (abfd) != NULL)
     {
       _bfd_error_handler
-	("%B: fatal: generic symbols retrieved before relaxing", abfd);
+	(_("%B: fatal: generic symbols retrieved before relaxing"), abfd);
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
@@ -2630,7 +2638,8 @@ sh_swap_insns (bfd *      abfd,
 	  if (overflow)
 	    {
 	      _bfd_error_handler
-		("%B: 0x%lx: fatal: reloc overflow while relaxing",
+		/* xgettext: c-format */
+		(_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
 		 abfd, (unsigned long) irel->r_vaddr);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -2767,7 +2776,8 @@ sh_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || (unsigned long) symndx >= obj_raw_syment_count (input_bfd))
 	    {
 	      _bfd_error_handler
-		("%B: illegal symbol index %ld in relocs",
+		/* xgettext: c-format */
+		(_("%B: illegal symbol index %ld in relocs"),
 		 input_bfd, symndx);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;

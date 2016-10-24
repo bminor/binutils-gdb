@@ -1186,6 +1186,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  && verhdr->sh_size / sizeof (Elf_External_Versym) != symcount)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: version count (%ld) does not match symbol count (%ld)"),
 	     abfd->filename,
 	     (long) (verhdr->sh_size / sizeof (Elf_External_Versym)),
@@ -1440,6 +1441,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
       else if (ELF_R_SYM (rela.r_info) > symcount)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s(%s): relocation %d has invalid symbol index %ld"),
 	     abfd->filename, asect->name, i, ELF_R_SYM (rela.r_info));
 	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;

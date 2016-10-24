@@ -77,8 +77,8 @@ struct value_print_options
   /* If nonzero, print static fields.  */
   int static_field_print;
 
-  /* If nonzero, print static fields for Pascal.  FIXME: C++ and Java
-     share one flag, why not Pascal too?  */
+  /* If nonzero, print static fields for Pascal.  FIXME: C++ has a
+     flag, why not share with Pascal too?  */
   int pascal_static_field_print;
 
   /* If non-zero don't do Python pretty-printing.  */

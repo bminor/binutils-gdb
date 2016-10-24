@@ -216,9 +216,6 @@ delete_all_bookmarks (void)
 static void
 delete_bookmark_command (char *args, int from_tty)
 {
-  int num;
-  struct get_number_or_range_state state;
-
   if (bookmark_chain == NULL)
     {
       warning (_("No bookmarks."));
@@ -233,10 +230,10 @@ delete_bookmark_command (char *args, int from_tty)
       return;
     }
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
       if (!delete_one_bookmark (num))
 	/* Not found.  */
 	warning (_("No bookmark #%d."), num);
@@ -323,20 +320,16 @@ bookmark_1 (int bnum)
 static void
 bookmarks_info (char *args, int from_tty)
 {
-  int bnum = -1;
-
   if (!bookmark_chain)
     printf_filtered (_("No bookmarks.\n"));
   else if (args == NULL || *args == '\0')
     bookmark_1 (-1);
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  bnum = get_number_or_range (&state);
+	  int bnum = parser.get_number ();
 	  bookmark_1 (bnum);
 	}
     }

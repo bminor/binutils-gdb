@@ -20,7 +20,7 @@ DYNAMIC SYMBOL TABLE:
 Disassembly of section .text:
 
 0+8000 \<_start\>:
-    8000:	9400000c 	bl	8030 \<foo\+0x24\>
+    8000:	9400000c 	bl	8030 \<.*>
 
 0+8004 \<hidfn\>:
     8004:	8a000000 	and	x0, x0, x0

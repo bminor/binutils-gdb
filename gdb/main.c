@@ -45,6 +45,7 @@
 #include "event-top.h"
 #include "infrun.h"
 #include "signals-state-save-restore.h"
+#include <vector>
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -429,24 +430,21 @@ enum cmdarg_kind
 };
 
 /* Arguments of --command option and its counterpart.  */
-typedef struct cmdarg {
+struct cmdarg {
   /* Type of this option.  */
   enum cmdarg_kind type;
 
   /* Value of this option - filename or the GDB command itself.  String memory
      is not owned by this structure despite it is 'const'.  */
   char *string;
-} cmdarg_s;
+};
 
-/* Define type VEC (cmdarg_s).  */
-DEF_VEC_O (cmdarg_s);
-
-static int
-captured_main (void *data)
+static void
+captured_main_1 (struct captured_main_args *context)
 {
-  struct captured_main_args *context = (struct captured_main_args *) data;
   int argc = context->argc;
   char **argv = context->argv;
+
   static int quiet = 0;
   static int set_args = 0;
   static int inhibit_home_gdbinit = 0;
@@ -467,15 +465,10 @@ captured_main (void *data)
   static int print_configuration;
 
   /* Pointers to all arguments of --command option.  */
-  VEC (cmdarg_s) *cmdarg_vec = NULL;
-  struct cmdarg *cmdarg_p;
+  std::vector<struct cmdarg> cmdarg_vec;
 
-  /* Indices of all arguments of --directory option.  */
-  char **dirarg;
-  /* Allocated size.  */
-  int dirsize;
-  /* Number of elements used.  */
-  int ndir;
+  /* All arguments of --directory option.  */
+  std::vector<char *> dirarg;
 
   /* gdb init files.  */
   const char *system_gdbinit;
@@ -486,14 +479,14 @@ captured_main (void *data)
   int save_auto_load;
   struct objfile *objfile;
 
-  struct cleanup *pre_stat_chain;
+  struct cleanup *chain;
 
 #ifdef HAVE_SBRK
-  /* Set this before calling make_command_stats_cleanup.  */
+  /* Set this before constructing scoped_command_stats.  */
   lim_at_start = (char *) sbrk (0);
 #endif
 
-  pre_stat_chain = make_command_stats_cleanup (0);
+  scoped_command_stats stat_reporter (false);
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -509,11 +502,6 @@ captured_main (void *data)
   bfd_init ();
   notice_open_fds ();
   save_original_signals_state ();
-
-  make_cleanup (VEC_cleanup (cmdarg_s), &cmdarg_vec);
-  dirsize = 1;
-  dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
-  ndir = 0;
 
   saved_command_line = (char *) xstrdup ("");
 
@@ -746,28 +734,28 @@ captured_main (void *data)
 	    {
 	      struct cmdarg cmdarg = { CMDARG_FILE, optarg };
 
-	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	      cmdarg_vec.push_back (cmdarg);
 	    }
 	    break;
 	  case 'X':
 	    {
 	      struct cmdarg cmdarg = { CMDARG_COMMAND, optarg };
 
-	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	      cmdarg_vec.push_back (cmdarg);
 	    }
 	    break;
 	  case OPT_IX:
 	    {
 	      struct cmdarg cmdarg = { CMDARG_INIT_FILE, optarg };
 
-	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	      cmdarg_vec.push_back (cmdarg);
 	    }
 	    break;
 	  case OPT_IEX:
 	    {
 	      struct cmdarg cmdarg = { CMDARG_INIT_COMMAND, optarg };
 
-	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	      cmdarg_vec.push_back (cmdarg);
 	    }
 	    break;
 	  case 'B':
@@ -809,13 +797,7 @@ captured_main (void *data)
 	    interpreter_p = xstrdup (optarg);
 	    break;
 	  case 'd':
-	    dirarg[ndir++] = optarg;
-	    if (ndir >= dirsize)
-	      {
-		dirsize *= 2;
-		dirarg = (char **) xrealloc ((char *) dirarg,
-					     dirsize * sizeof (*dirarg));
-	      }
+	    dirarg.push_back (optarg);
 	    break;
 	  case 't':
 	    ttyarg = optarg;
@@ -1006,17 +988,21 @@ captured_main (void *data)
     catch_command_errors_const (source_script, home_gdbinit, 0);
 
   /* Process '-ix' and '-iex' options early.  */
-  for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
-    switch (cmdarg_p->type)
+  for (i = 0; i < cmdarg_vec.size (); i++)
     {
-      case CMDARG_INIT_FILE:
-        catch_command_errors_const (source_script, cmdarg_p->string,
-				    !batch_flag);
-	break;
-      case CMDARG_INIT_COMMAND:
-        catch_command_errors (execute_command, cmdarg_p->string,
-			      !batch_flag);
-	break;
+      const struct cmdarg &cmdarg_p = cmdarg_vec[i];
+
+      switch (cmdarg_p.type)
+	{
+	case CMDARG_INIT_FILE:
+	  catch_command_errors_const (source_script, cmdarg_p.string,
+				      !batch_flag);
+	  break;
+	case CMDARG_INIT_COMMAND:
+	  catch_command_errors (execute_command, cmdarg_p.string,
+				!batch_flag);
+	  break;
+	}
     }
 
   /* Now perform all the actions indicated by the arguments.  */
@@ -1025,9 +1011,8 @@ captured_main (void *data)
       catch_command_errors (cd_command, cdarg, 0);
     }
 
-  for (i = 0; i < ndir; i++)
+  for (i = 0; i < dirarg.size (); i++)
     catch_command_errors (directory_switch, dirarg[i], 0);
-  xfree (dirarg);
 
   /* Skip auto-loading section-specified scripts until we've sourced
      local_gdbinit (which is often used to augment the source search
@@ -1116,17 +1101,21 @@ captured_main (void *data)
     load_auto_scripts_for_objfile (objfile);
 
   /* Process '-x' and '-ex' options.  */
-  for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
-    switch (cmdarg_p->type)
+  for (i = 0; i < cmdarg_vec.size (); i++)
     {
-      case CMDARG_FILE:
-        catch_command_errors_const (source_script, cmdarg_p->string,
-				    !batch_flag);
-	break;
-      case CMDARG_COMMAND:
-        catch_command_errors (execute_command, cmdarg_p->string,
-			      !batch_flag);
-	break;
+      const struct cmdarg &cmdarg_p = cmdarg_vec[i];
+
+      switch (cmdarg_p.type)
+	{
+	case CMDARG_FILE:
+	  catch_command_errors_const (source_script, cmdarg_p.string,
+				      !batch_flag);
+	  break;
+	case CMDARG_COMMAND:
+	  catch_command_errors (execute_command, cmdarg_p.string,
+				!batch_flag);
+	  break;
+	}
     }
 
   /* Read in the old history after all the command files have been
@@ -1138,9 +1127,14 @@ captured_main (void *data)
       /* We have hit the end of the batch file.  */
       quit_force (NULL, 0);
     }
+}
 
-  /* Show time and/or space usage.  */
-  do_cleanups (pre_stat_chain);
+static void
+captured_main (void *data)
+{
+  struct captured_main_args *context = (struct captured_main_args *) data;
+
+  captured_main_1 (context);
 
   /* NOTE: cagney/1999-11-07: There is probably no reason for not
      moving this loop and the code found in captured_command_loop()

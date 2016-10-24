@@ -542,8 +542,9 @@ arc_info_to_howto_rel (bfd * abfd ATTRIBUTE_UNUSED,
    object file when linking.  */
 
 static bfd_boolean
-arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   unsigned short mach_ibfd;
   static unsigned short mach_obfd = EM_NONE;
   flagword out_flags;
@@ -551,13 +552,8 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   asection *sec;
 
    /* Check if we have the same endianess.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    {
-      _bfd_error_handler (_("ERROR: Endian Match failed. Attempting to link "
-			    "%B with binary %s of opposite endian-ness"),
-			  ibfd, bfd_get_filename (obfd));
-      return FALSE;
-    }
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
+    return FALSE;
 
   /* Collect ELF flags.  */
   in_flags = elf_elfheader (ibfd)->e_flags & EF_ARC_MACH_MSK;
@@ -605,6 +601,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     {
       if (mach_ibfd != mach_obfd)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("ERROR: Attempting to link %B "
 				"with a binary %s of different architecture"),
 			      ibfd, bfd_get_filename (obfd));
@@ -614,6 +611,7 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  /* Warn if different flags.  */
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: uses different e_flags (0x%lx) fields than "
 	       "previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)in_flags, (long)out_flags);
@@ -808,6 +806,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	{
 	  if (reloc_data.reloc_addend == 0)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): CMEM relocation to `%s' is invalid, "
 		 "16 MSB should be 0x%04x (value is 0x%lx)"),
 	       reloc_data.input_section->owner,
@@ -818,6 +817,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	       (relocation));
 	  else
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%lx): CMEM relocation to `%s+0x%lx' is invalid, "
 		 "16 MSB should be 0x%04x (value is 0x%lx)"),
 	       reloc_data.input_section->owner,
@@ -1530,22 +1530,27 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	  break;
 
 	case bfd_reloc_other:
+	  /* xgettext:c-format */
 	  msg = _("%B(%A): warning: unaligned access to symbol '%s' in the small data area");
 	  break;
 
 	case bfd_reloc_outofrange:
+	  /* xgettext:c-format */
 	  msg = _("%B(%A): internal error: out of range error");
 	  break;
 
 	case bfd_reloc_notsupported:
+	  /* xgettext:c-format */
 	  msg = _("%B(%A): internal error: unsupported relocation error");
 	  break;
 
 	case bfd_reloc_dangerous:
+	  /* xgettext:c-format */
 	  msg = _("%B(%A): internal error: dangerous relocation");
 	  break;
 
 	default:
+	  /* xgettext:c-format */
 	  msg = _("%B(%A): internal error: unknown error");
 	  break;
 	}
@@ -1728,6 +1733,7 @@ elf_arc_check_relocs (bfd *			 abfd,
 		  /* bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);  */
 		  name = "UNKNOWN";
 		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("\
 %B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		    abfd,

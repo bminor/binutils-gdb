@@ -42,7 +42,8 @@
 #include "psymtab.h"
 
 static void
-read_alphacoff_dynamic_symtab (struct section_offsets *,
+read_alphacoff_dynamic_symtab (minimal_symbol_reader &,
+			       struct section_offsets *,
 			       struct objfile *objfile);
 
 /* Initialize anything that needs initializing when a completely new
@@ -69,10 +70,8 @@ static void
 mipscoff_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd = objfile->obfd;
-  struct cleanup *back_to;
 
-  init_minimal_symbol_collection ();
-  back_to = make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader (objfile);
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -81,18 +80,17 @@ mipscoff_symfile_read (struct objfile *objfile, int symfile_flags)
 	(abfd, (asection *) NULL, &ecoff_data (abfd)->debug_info)))
     error (_("Error reading symbol table: %s"), bfd_errmsg (bfd_get_error ()));
 
-  mdebug_build_psymtabs (objfile, &ecoff_backend (abfd)->debug_swap,
+  mdebug_build_psymtabs (reader, objfile, &ecoff_backend (abfd)->debug_swap,
 			 &ecoff_data (abfd)->debug_info);
 
   /* Add alpha coff dynamic symbols.  */
 
-  read_alphacoff_dynamic_symtab (objfile->section_offsets, objfile);
+  read_alphacoff_dynamic_symtab (reader, objfile->section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
 
-  install_minimal_symbols (objfile);
-  do_cleanups (back_to);
+  reader.install ();
 }
 
 /* Perform any local cleanups required when we are done with a
@@ -176,7 +174,8 @@ alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, void *sip)
    them to the minimal symbol table.  */
 
 static void
-read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
+read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
+			       struct section_offsets *section_offsets,
 			       struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
@@ -391,7 +390,7 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 	    }
 	}
 
-      prim_record_minimal_symbol (name, sym_value, ms_type, objfile);
+      reader.record (name, sym_value, ms_type);
     }
 
   do_cleanups (cleanups);

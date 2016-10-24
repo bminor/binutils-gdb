@@ -259,8 +259,9 @@ elf_s390_elf_sort_relocs_p (asection *sec)
 /* Merge object attributes from IBFD into OBFD.  Raise an error if
    there are conflicting attributes.  */
 static bfd_boolean
-elf_s390_merge_obj_attributes (bfd *ibfd, bfd *obfd)
+elf_s390_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
 
@@ -286,10 +287,12 @@ elf_s390_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 
   if (in_attr->i > 2)
     _bfd_error_handler
+      /* xgettext:c-format */
       (_("Warning: %B uses unknown vector ABI %d"), ibfd,
        in_attr->i);
   else if (out_attr->i > 2)
     _bfd_error_handler
+      /* xgettext:c-format */
       (_("Warning: %B uses unknown vector ABI %d"), obfd,
        out_attr->i);
   else if (in_attr->i != out_attr->i)
@@ -301,6 +304,7 @@ elf_s390_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	  const char abi_str[3][9] = { "none", "software", "hardware" };
 
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("Warning: %B uses vector %s ABI, %B uses %s ABI"),
 	     ibfd, obfd, abi_str[in_attr->i], abi_str[out_attr->i]);
 	}
@@ -309,7 +313,7 @@ elf_s390_merge_obj_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  _bfd_elf_merge_object_attributes (ibfd, info);
 
   return TRUE;
 }

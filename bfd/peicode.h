@@ -771,11 +771,13 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
     case IMPORT_CONST:
       /* XXX code yet to be written.  */
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: Unhandled import type; %x"),
 			  abfd, import_type);
       return FALSE;
 
     default:
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: Unrecognised import type; %x"),
 			  abfd, import_type);
       return FALSE;
@@ -790,6 +792,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       break;
 
     default:
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: Unrecognised import name type; %x"),
 			  abfd, import_name_type);
       return FALSE;
@@ -1210,6 +1213,7 @@ pe_ILF_object_p (bfd * abfd)
       /* We no longer support PowerPC.  */
     default:
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: Unrecognised machine type (0x%x)"
 	   " in Import Library Format archive"),
 	 abfd, machine);
@@ -1222,6 +1226,7 @@ pe_ILF_object_p (bfd * abfd)
   if (magic == 0)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: Recognised but unhandled machine type (0x%x)"
 	   " in Import Library Format archive"),
 	 abfd, machine);

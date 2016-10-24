@@ -6092,7 +6092,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	  ppc_object->set_opd_discard(reloc.get_r_offset());
 	  break;
 	}
-      // Fall thru
+      // Fall through.
     case elfcpp::R_PPC64_UADDR64:
     case elfcpp::R_POWERPC_ADDR32:
     case elfcpp::R_POWERPC_UADDR32:
@@ -6199,7 +6199,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 		      || gsym->is_preemptible())))
 	    target->make_plt_entry(symtab, layout, gsym);
 	}
-      // Fall thru
+      // Fall through.
 
     case elfcpp::R_PPC64_REL64:
     case elfcpp::R_POWERPC_REL32:
@@ -7589,6 +7589,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size != 64)
 	// R_PPC_TLSGD, R_PPC_TLSLD, R_PPC_EMB_RELST_LO, R_PPC_EMB_RELST_HI
 	break;
+      // Fall through.
     case elfcpp::R_POWERPC_TPREL16:
     case elfcpp::R_POWERPC_TPREL16_LO:
     case elfcpp::R_POWERPC_TPREL16_HI:
@@ -7612,6 +7613,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	// R_PPC_EMB_NADDR32, R_PPC_EMB_NADDR16, R_PPC_EMB_NADDR16_LO
 	// R_PPC_EMB_NADDR16_HI, R_PPC_EMB_NADDR16_HA, R_PPC_EMB_SDAI16
 	break;
+      // Fall through.
     case elfcpp::R_POWERPC_DTPREL16:
     case elfcpp::R_POWERPC_DTPREL16_LO:
     case elfcpp::R_POWERPC_DTPREL16_HI:
@@ -7640,6 +7642,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
       branch_bit = 1 << 21;
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
       {
@@ -8004,6 +8007,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  maybe_dq_reloc = true;
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16:
     case elfcpp::R_POWERPC_REL16:
     case elfcpp::R_PPC64_TOC16:
@@ -8038,6 +8042,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_MRKREF, R_PPC_EMB_RELST_LO, R_PPC_EMB_RELST_HA
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_PPC64_TOC16_HI:
@@ -8058,6 +8063,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_RELSEC16, R_PPC_EMB_RELST_HI, R_PPC_EMB_BIT_FLD
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_PPC64_TOC16_HA:
@@ -8080,6 +8086,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR16_LO
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHER:
     case elfcpp::R_PPC64_TPREL16_HIGHER:
       Reloc::addr16_hi2(view, value);
@@ -8089,6 +8096,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR16_HI
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHERA:
     case elfcpp::R_PPC64_TPREL16_HIGHERA:
       Reloc::addr16_ha2(view, value);
@@ -8098,6 +8106,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR16_HA
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHEST:
     case elfcpp::R_PPC64_TPREL16_HIGHEST:
       Reloc::addr16_hi3(view, value);
@@ -8107,6 +8116,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_SDAI16
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHESTA:
     case elfcpp::R_PPC64_TPREL16_HIGHESTA:
       Reloc::addr16_ha3(view, value);
@@ -8117,11 +8127,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR32, R_PPC_EMB_NADDR16
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_TPREL16_DS:
     case elfcpp::R_PPC64_TPREL16_LO_DS:
       if (size == 32)
 	// R_PPC_TLSGD, R_PPC_TLSLD
 	break;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_DS:
     case elfcpp::R_PPC64_ADDR16_LO_DS:
     case elfcpp::R_PPC64_TOC16_DS:

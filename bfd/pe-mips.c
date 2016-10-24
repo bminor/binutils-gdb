@@ -715,9 +715,11 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
 	   mem = pointer to memory we're fixing up
 	   val = VMA of what we need to refer to.  */
 
-#define UI(x) _bfd_error_handler (_("%B: unimplemented %s\n"), \
-				  input_bfd, x);	       \
-	      bfd_set_error (bfd_error_bad_value);
+#define UI(x)						       \
+      /* xgettext:c-format */				       \
+	_bfd_error_handler (_("%B: unimplemented %s\n"),       \
+			    input_bfd, x);		       \
+	bfd_set_error (bfd_error_bad_value);
 
       switch (rel->r_type)
 	{

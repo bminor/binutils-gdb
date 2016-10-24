@@ -39,7 +39,6 @@
 #include "varobj.h"
 #include "target.h"
 #include "parser-defs.h"
-#include "jv-lang.h"
 #include "demangle.h"
 #include "symfile.h"
 #include "cp-support.h"

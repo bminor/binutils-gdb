@@ -2708,7 +2708,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	      sec->orelocation = rpp;
 	      break;
 	    }
-	  /* else fall through */
+	  /* Fall through.  */
+
 	case IDATA4:
 	  /* An idata$4 or idata$5 is one word long, and has an
 	     rva to idata$6.  */

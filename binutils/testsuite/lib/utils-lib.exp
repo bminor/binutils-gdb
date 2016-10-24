@@ -464,7 +464,8 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	    set srcfile $newfile
 	}
-	file copy -force ${srcfile} $tempfile
+	# Make sure we copy the file if we are doing remote host testing.
+	remote_download host ${srcfile} $tempfile
     } else {
 	set exec_output [binutils_assemble_flags ${srcfile} $tempfile $opts(as)]
 	if [string match "" $exec_output] then {

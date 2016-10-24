@@ -193,6 +193,7 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
       // table.
       gold_error(_("invalid STB_LOCAL symbol in external symbols"));
       bits = global_flag;
+      break;
 
     default:
       // Any target which wants to handle STB_LOOS, etc., needs to

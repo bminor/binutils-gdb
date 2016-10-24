@@ -432,6 +432,7 @@ addr_mode (char *operand,
 		  addrmodeP->disp[0] = str + 2;
 		  return -1;
 		}
+	      /* Fall through.  */
 	    default:
 	      as_bad (_("Invalid syntax in PC-relative addressing mode"));
 	      return 0;
@@ -481,7 +482,7 @@ addr_mode (char *operand,
 	{
 	case 'f':
 	  addrmodeP->float_flag = 1;
-	  /* Drop through.  */
+	  /* Fall through.  */
 	case 'r':
 	  if (str[1] >= '0' && str[1] < '8')
 	    {
@@ -564,7 +565,7 @@ addr_mode (char *operand,
 		  str[strl - 4] = 0;
 		  return -1;		/* reg rel */
 		}
-	      /* Drop through.  */
+	      /* Fall through.  */
 
 	    default:
 	      if (!strncmp (&str[strl - 4], "(fp", 3))
@@ -925,6 +926,7 @@ encode_operand (int argc,
 	case 'f':		/* Operand of sfsr turns out to be a nasty
 				   specialcase.  */
 	  opcode_bit_ptr -= 5;
+	  /* Fall through.  */
 	case 'Z':		/* Float not immediate.  */
 	case 'F':		/* 32 bit float	general form.  */
 	case 'L':		/* 64 bit float.  */

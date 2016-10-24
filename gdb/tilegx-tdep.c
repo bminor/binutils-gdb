@@ -449,7 +449,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
       for (i = 0; i < num_insns; i++)
 	{
 	  struct tilegx_decoded_instruction *this_insn = &decoded[i];
-	  int64_t *operands = (int64_t *) this_insn->operand_values;
+	  long long *operands = this_insn->operand_values;
 	  const struct tilegx_opcode *opcode = this_insn->opcode;
 
 	  switch (opcode->mnemonic)

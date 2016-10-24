@@ -2737,6 +2737,7 @@ xcoff_reloc_type_fail (bfd *input_bfd,
                        bfd_byte *contents ATTRIBUTE_UNUSED)
 {
   _bfd_error_handler
+    /* xgettext: c-format */
     (_("%s: unsupported relocation type 0x%02x"),
      bfd_get_filename (input_bfd), (unsigned int) rel->r_type);
   bfd_set_error (bfd_error_bad_value);
@@ -2822,6 +2823,7 @@ xcoff_reloc_type_toc (bfd *input_bfd,
       if (h->toc_section == NULL)
 	{
 	  _bfd_error_handler
+	    /* xgettext: c-format */
 	    (_("%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"),
 	     bfd_get_filename (input_bfd), rel->r_vaddr,
 	     h->root.root.string);
@@ -3568,6 +3570,7 @@ xcoff_create_csect_from_smclas (bfd *abfd,
   else
     {
       _bfd_error_handler
+	/* xgettext: c-format */
 	(_("%B: symbol `%s' has unrecognized smclas %d"),
 	 abfd, symbol_name, aux->x_csect.x_smclas);
       bfd_set_error (bfd_error_bad_value);

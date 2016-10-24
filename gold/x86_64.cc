@@ -2361,7 +2361,7 @@ Target_x86_64<size>::Scan::check_non_pic(Relobj* object, unsigned int r_type,
 	      && !gsym->is_undefined()
 	      && !gsym->is_preemptible()))
 	return;
-      /* Fall through.  */
+      // Fall through.
     case elfcpp::R_X86_64_32:
       // R_X86_64_32 is OK for x32.
       if (size == 32 && r_type == elfcpp::R_X86_64_32)

@@ -1,3 +1,176 @@
+2016-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Remove .pcommit.
+	* doc/c-i386.texi: Likewise.
+	* testsuite/gas/i386/i386.exp: Remove pcommit tests.
+	* testsuite/gas/i386/pcommit-intel.d: Removed.
+	* testsuite/gas/i386/pcommit.d: Likewise.
+	* testsuite/gas/i386/pcommit.s: Likewise.
+	* testsuite/gas/i386/x86-64-pcommit-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-pcommit.d: Likewise.
+	* testsuite/gas/i386/x86-64-pcommit.s: Likewise.
+
+2016-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20705
+	* testsuite/gas/i386/i386.exp: Run x86-64-opcode-bad.
+	* testsuite/gas/i386/x86-64-opcode-bad.d: New file.
+	* testsuite/gas/i386/x86-64-opcode-bad.s: Likewise.
+
+2016-10-19  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-arm.c (encode_arm_shift): Generate unpredictable warning
+	for register-shifted register instructions.
+	* testsuite/gas/arm/shift-bad-pc.d: New.
+	* testsuite/gas/arm/shift-bad-pc.l: New.
+	* testsuite/gas/arm/shift-bad-pc.s: New.
+
+2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/arc/dis-inv.d: Fixed matching.
+
+2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/arc/dis-inv.s: Test to validate patch.
+	* testsuite/arc/dis-inv.d: Likewise.
+
+2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/shortlimm_a7.d: New file.
+	* testsuite/gas/arc/shortlimm_a7.s: Likewise.
+	* testsuite/gas/arc/shortlimm_hs.d: Likewise.
+	* testsuite/gas/arc/shortlimm_hs.s: Likewise.
+
+2016-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/tls.d: Adjust output to match change in objdump.
+
+2016-10-11  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20666
+	* testsuite/gas/aarch64/alias-2.d: Update expected results.
+
+2016-10-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/gas/cfi/cfi-common-1.d: Adjust regexps for mips64.
+	* testsuite/gas/cfi/cfi-common-2.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-3.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-4.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-5.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-7.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-8.d: Likewise.
+	* testsuite/gas/cfi/cfi-common-9.d: Likewise.
+	* testsuite/gas/cfi/cfi-mips-1.d: Likewise.
+
+2016-10-08  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (EXTRA_as_new_SOURCES): Add config/rl78-parse.y and
+	config/rx-parse.y.  Move config/bfin-parse.y.
+	(bfin-parse.@OBJEXT@, rl78-parse.@OBJEXT@, rx-parse.@OBJEXT@): Delete.
+	($(srcdir)/config/rl78-defs.h): New rule.
+	* Makefile.in: Regenerate.
+
+2016-10-07  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20667
+	* testsuite/gas/aarch64/sys-rt-reg.s: Test source for instructions using
+	SYS_Rt reg.
+	* testsuite/gas/aarch64/sys-rt-reg.d: New testcase.
+
+2016-10-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/leave_enter.d: New file.
+	* testsuite/gas/arc/leave_enter.s: Likewise.
+	* testsuite/gas/arc/regnames.d: Likewise.
+	* testsuite/gas/arc/regnames.s: Likewise.
+	* config/tc-arc.c (arc_parse_name): Don't match reg names against
+	confirmed symbol names.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* app.c (do_scrub_chars): Move fall through comment.
+	* expr.c (operand): Likewise.
+
+2016-10-06  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	PR gas/20648
+	* dw2gencfi.c (dot_cfi_sections): Refine the check for
+	inconsistent .cfi_sections to only consider compact vs non
+	compact forms.
+	* testsuite/gas/cfi/cfi-common-9.d: New file.
+	* testsuite/gas/cfi/cfi-common-9.s: New file.
+	* testsuite/gas/cfi/cfi.exp: Run new test.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* app.c: Add missing fall through comments.
+	* dw2gencfi.c: Likewise.
+	* expr.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-metag.c: Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-rx.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* depend.c: Spell fall through comments consistently.
+	* config/tc-arm.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-visium.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* as.h (as_assert): Add ATTRIBUTE_NORETURN.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-arc.c (find_opcode_match): Add missing break.
+	* config/tc-i960.c (get_cdisp): Likewise.
+	* config/tc-metag.c (parse_swap, md_apply_fix): Likewise.
+	* config/tc-mt.c (md_parse_option): Likewise.
+	* config/tc-nds32.c (nds32_apply_fix): Likewise.
+	* config/tc-hppa.c (pa_ip): Assert rather than testing last
+	condition of multiple if statements.
+	* config/tc-s390.c (s390_exp_compare): Return 0 on error.
+	* config/tc-tic4x.c (tic4x_operand_parse): Add as_bad and break
+	out of case rather than falling into next case.  Formatting.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* config/rl78-parse.y: Don't use deprecated %name-prefix.
+	* config/rx-parse.y: Likewise.
+
 2016-09-29  Jiong Wang  <jiong.wang@arm.com>
 
 	PR target/20553

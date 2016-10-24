@@ -949,8 +949,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
       if (md_need_index_operator())
 	goto de_fault;
 # endif
-      /* FALLTHROUGH */
 #endif
+      /* Fall through.  */
     case '(':
       /* Didn't begin with digit & not a name.  */
       segment = expr (0, expressionP, mode);
@@ -980,8 +980,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
       if (! flag_m68k_mri || *input_line_pointer != '\'')
 	goto de_fault;
       ++input_line_pointer;
-      /* Fall through.  */
 #endif
+      /* Fall through.  */
     case '\'':
       if (! flag_m68k_mri)
 	{
@@ -1002,12 +1002,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
       /* Double quote is the bitwise not operator in MRI mode.  */
       if (! flag_m68k_mri)
 	goto de_fault;
-      /* Fall through.  */
 #endif
+      /* Fall through.  */
     case '~':
       /* '~' is permitted to start a label on the Delta.  */
       if (is_name_beginner (c))
 	goto isname;
+      /* Fall through.  */
     case '!':
     case '-':
     case '+':

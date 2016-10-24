@@ -12820,7 +12820,7 @@ Target_arm<big_endian>::apply_cortex_a8_workaround(
       // branch to the stub.  We use the THUMB-2 encoding here.
       upper_insn = 0xf000U;
       lower_insn = 0xb800U;
-      // Fall through
+      // Fall through.
     case arm_stub_a8_veneer_b:
     case arm_stub_a8_veneer_bl:
     case arm_stub_a8_veneer_blx:

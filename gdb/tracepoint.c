@@ -3061,11 +3061,9 @@ trace_dump_command (char *args, int from_tty)
   printf_filtered ("Data collected at tracepoint %d, trace frame %d:\n",
 		   tracepoint_number, traceframe_number);
 
-  old_chain = make_cleanup (null_cleanup, NULL);
-
   /* This command only makes sense for the current frame, not the
      selected frame.  */
-  make_cleanup_restore_current_thread ();
+  old_chain = make_cleanup_restore_current_thread ();
   select_frame (get_current_frame ());
 
   actions = all_tracepoint_actions_and_cleanup (loc->owner);

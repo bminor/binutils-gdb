@@ -64,12 +64,7 @@ done
 
 echo >> $output
 
-echo "#ifdef __cplusplus"                    >> $output
-echo "#  define EXPORTED_CONST extern const" >> $output
-echo "#else"                                 >> $output
-echo "#  define EXPORTED_CONST const"        >> $output
-echo "#endif"                                >> $output
-echo "EXPORTED_CONST char *const xml_builtin[][2] = {" >> $output
+echo "extern const char *const xml_builtin[][2] = {" >> $output
 
 for input; do
   basename=`echo $input | sed 's,.*/,,'`

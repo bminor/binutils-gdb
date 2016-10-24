@@ -77,6 +77,15 @@ enum arc_regnum
 
 extern int arc_debug;
 
+/* Target-dependent information.  */
+
+struct gdbarch_tdep
+{
+  /* Offset to PC value in jump buffer.  If this is negative, longjmp
+     support will be disabled.  */
+  int jb_pc;
+};
+
 /* Utility functions used by other ARC-specific modules.  */
 
 static inline int

@@ -1,3 +1,93 @@
+2016-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_RM_0_0FAE_REG_7): Removed.
+	(prefix_table): Remove the PREFIX_RM_0_0FAE_REG_7 entry.
+	(rm_table): Update the RM_0FAE_REG_7 entry.
+	* i386-gen.c (cpu_flag_init): Remove CPU_PCOMMIT_FLAGS.
+	(cpu_flags): Remove CpuPCOMMIT.
+	* i386-opc.h (CpuPCOMMIT): Removed.
+	(i386_cpu_flags): Remove cpupcommit.
+	* i386-opc.tbl: Remove pcommit.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2016-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20705
+	* i386-dis.c (get_valid_dis386): Ignore the REX_B bit and
+	the highest bit in VEX.vvvv for the 3-byte VEX prefix in
+	32-bit mode.  Don't check vex.register_specifier in 32-bit
+	mode.
+	(OP_VEX): Check for invalid mask registers.
+
+2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20699
+	* i386-dis.c (OP_E_memory): Check addr32flag in stead of
+	sizeflag.
+
+2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20704
+	* i386-dis.c (three_byte_table): Remove the remaining SSE5 support.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* aarch64-dis.c (aarch64_ext_sve_addr_rr_lsl): Rename `index'
+	local variable to `index_regno'.
+
+2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-tbl.h: Removed any "inv.+" instructions from the table.
+
+2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (find_format_from_table): Discriminate LIMM indicator
+	usage on ISA basis.
+
+2016-10-11  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20666
+	* aarch64-asm.c (convert_bfc_to_bfm): Fix dest index.
+
+2016-10-07  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20667
+	* aarch64-opc.c (aarch64_print_operand): Always print operand if it's
+	available.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* sh-opc.h (sh_merge_bfd_arch): Delete prototype.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* aarch64-opc.c: Spell fall through comments consistently.
+	* i386-dis.c: Likewise.
+	* aarch64-dis.c: Add missing fall through comments.
+	* aarch64-opc.c: Likewise.
+	* arc-dis.c: Likewise.
+	* arm-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* mep-asm.c: Likewise.
+	* ns32k-dis.c: Likewise.
+	* sh-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* tic6x-dis.c: Likewise.
+	* vax-dis.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* arc-ext.c (create_map): Add missing break.
+	* msp430-decode.opc (encode_as): Likewise.
+	* msp430-decode.c: Regenerate.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* cr16-dis.c (print_insn_cr16): Don't use boolean OR in arithmetic.
+	* crx-dis.c (print_insn_crx): Likewise.
+
 2016-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/20657

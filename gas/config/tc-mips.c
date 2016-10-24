@@ -9848,6 +9848,7 @@ macro (struct mips_cl_insn *ip, char *str)
     {
     case M_DABS:
       dbl = 1;
+      /* Fall through.  */
     case M_ABS:
       /*    bgez    $a0,1f
 	    move    v0,$a0
@@ -9997,6 +9998,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BGEL:
       likely = 1;
+      /* Fall through.  */
     case M_BGE:
       if (op[1] == 0)
 	macro_build_branch_rs (likely ? M_BGEZL : M_BGEZ, &offset_expr, op[0]);
@@ -10022,6 +10024,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BGTL_I:
       likely = 1;
+      /* Fall through.  */
     case M_BGT_I:
       /* Check for > max integer.  */
       if (imm_expr.X_add_number >= GPR_SMAX)
@@ -10068,6 +10071,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BGEUL:
       likely = 1;
+      /* Fall through.  */
     case M_BGEU:
       if (op[1] == 0)
 	goto do_true;
@@ -10085,6 +10089,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BGTUL_I:
       likely = 1;
+      /* Fall through.  */
     case M_BGTU_I:
       if (op[0] == 0
 	  || (GPR_SIZE == 32
@@ -10112,6 +10117,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BGTL:
       likely = 1;
+      /* Fall through.  */
     case M_BGT:
       if (op[1] == 0)
 	macro_build_branch_rs (likely ? M_BGTZL : M_BGTZ, &offset_expr, op[0]);
@@ -10128,6 +10134,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BGTUL:
       likely = 1;
+      /* Fall through.  */
     case M_BGTU:
       if (op[1] == 0)
 	macro_build_branch_rsrt (likely ? M_BNEL : M_BNE,
@@ -10145,6 +10152,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BLEL:
       likely = 1;
+      /* Fall through.  */
     case M_BLE:
       if (op[1] == 0)
 	macro_build_branch_rs (likely ? M_BLEZL : M_BLEZ, &offset_expr, op[0]);
@@ -10161,6 +10169,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BLEL_I:
       likely = 1;
+      /* Fall through.  */
     case M_BLE_I:
       if (imm_expr.X_add_number >= GPR_SMAX)
 	goto do_true;
@@ -10185,6 +10194,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BLEUL:
       likely = 1;
+      /* Fall through.  */
     case M_BLEU:
       if (op[1] == 0)
 	macro_build_branch_rsrt (likely ? M_BEQL : M_BEQ,
@@ -10202,6 +10212,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BLEUL_I:
       likely = 1;
+      /* Fall through.  */
     case M_BLEU_I:
       if (op[0] == 0
 	  || (GPR_SIZE == 32
@@ -10229,6 +10240,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BLTL:
       likely = 1;
+      /* Fall through.  */
     case M_BLT:
       if (op[1] == 0)
 	macro_build_branch_rs (likely ? M_BLTZL : M_BLTZ, &offset_expr, op[0]);
@@ -10245,6 +10257,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_BLTUL:
       likely = 1;
+      /* Fall through.  */
     case M_BLTU:
       if (op[1] == 0)
 	goto do_false;
@@ -10262,11 +10275,13 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_DDIV_3:
       dbl = 1;
+      /* Fall through.  */
     case M_DIV_3:
       s = "mflo";
       goto do_div3;
     case M_DREM_3:
       dbl = 1;
+      /* Fall through.  */
     case M_REM_3:
       s = "mfhi";
     do_div3:
@@ -10458,11 +10473,13 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_DLCA_AB:
       dbl = 1;
+      /* Fall through.  */
     case M_LCA_AB:
       call = 1;
       goto do_la;
     case M_DLA_AB:
       dbl = 1;
+      /* Fall through.  */
     case M_LA_AB:
     do_la:
       /* Load the address of a symbol into a register.  If breg is not
@@ -12685,6 +12702,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_DMUL:
       dbl = 1;
+      /* Fall through.  */
     case M_MUL:
       if (mips_opts.arch == CPU_R5900)
 	macro_build (NULL, dbl ? "dmultu" : "multu", "d,s,t", op[0], op[1],
@@ -12698,6 +12716,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_DMUL_I:
       dbl = 1;
+      /* Fall through.  */
     case M_MUL_I:
       /* The MIPS assembler some times generates shifts and adds.  I'm
 	 not trying to be that fancy. GCC should do this for us
@@ -12710,12 +12729,14 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_DMULO_I:
       dbl = 1;
+      /* Fall through.  */
     case M_MULO_I:
       imm = 1;
       goto do_mulo;
 
     case M_DMULO:
       dbl = 1;
+      /* Fall through.  */
     case M_MULO:
     do_mulo:
       start_noreorder ();
@@ -12747,12 +12768,14 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_DMULOU_I:
       dbl = 1;
+      /* Fall through.  */
     case M_MULOU_I:
       imm = 1;
       goto do_mulou;
 
     case M_DMULOU:
       dbl = 1;
+      /* Fall through.  */
     case M_MULOU:
     do_mulou:
       start_noreorder ();
@@ -13456,11 +13479,13 @@ mips16_macro (struct mips_cl_insn *ip)
 
     case M_DDIV_3:
       dbl = 1;
+      /* Fall through.  */
     case M_DIV_3:
       s = "mflo";
       goto do_div3;
     case M_DREM_3:
       dbl = 1;
+      /* Fall through.  */
     case M_REM_3:
       s = "mfhi";
     do_div3:
@@ -13505,6 +13530,7 @@ mips16_macro (struct mips_cl_insn *ip)
 
     case M_DMUL:
       dbl = 1;
+      /* Fall through.  */
     case M_MUL:
       macro_build (NULL, dbl ? "dmultu" : "multu", "x,y", op[1], op[2]);
       macro_build (NULL, "mflo", "x", op[0]);

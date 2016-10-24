@@ -19,10 +19,10 @@ initialize_tdesc_aarch64 (void)
   feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.core");
   type = tdesc_create_flags (feature, "cpsr_flags", 4);
   tdesc_add_flag (type, 0, "SP");
-  tdesc_add_bitfield (type, "", 1, 1);
+  tdesc_add_flag (type, 1, "");
   tdesc_add_bitfield (type, "EL", 2, 3);
   tdesc_add_flag (type, 4, "nRW");
-  tdesc_add_bitfield (type, "", 5, 5);
+  tdesc_add_flag (type, 5, "");
   tdesc_add_flag (type, 6, "F");
   tdesc_add_flag (type, 7, "I");
   tdesc_add_flag (type, 8, "A");

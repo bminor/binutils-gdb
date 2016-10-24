@@ -1,3 +1,147 @@
+2016-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/morestack.exp: Try to build it using -fuse-ld=gold first.
+
+2016-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (get_compiler_info): Generalize gcc_compile regexp.
+
+2016-10-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+    	* gdb.base/killed-outside.exp: Remove $options from a call to
+    	`prepare_for_testing'.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
+	Change test message.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
+	Update comment.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp: New file.
+
+2016-10-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/code_elim.exp (get_var_address): Remove.
+	* gdb.base/relocate.exp: Likewise.
+	* gdb.base/shreloc.exp: Likewise.
+	* lib/gdb.exp (get_var_address): New.
+
+2016-10-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/structs.exp: Invoke gdb_skip_float_test, and do
+	floating point tests if $skip_float_test is false.
+
+2016-10-12  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.python/py-value.c (main): Check if argv is NULL before using it.
+	* gdb.python/py-value.exp (test_value_in_inferior): Don't use hardcoded
+	argc values.
+	Add 1 to argc so we guarantee distinct initial/modified argc values.
+
+2016-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/powerpc-prologue.c (optimized_1): New declaration.
+
+2016-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/powerpc-prologue.exp: Use standard_output_file
+	* gdb.arch/ppc64-symtab-cordic.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+
+2016-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.xml/tdesc-regs.exp: Set regdir to "arm/".
+
+2016-10-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.python/python.exp: Test decode_line("*0").
+
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-value.exp (test_value_creation): Add test for large
+	unsigned 64-bit value.
+
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* gdb.compile/compile.exp: Change java tests to rust.
+	* gdb.base/setshow.exp: Change java tests to rust.
+	* gdb.base/default.exp: Remove java from language list.
+	* README (Examples): Update language example.
+	* gdb.python/py-lookup-type.exp (test_lookup_type): Remove java
+	test.
+	* lib/gdb.exp (skip_java_tests): Remove.
+	* lib/java.exp: Remove.
+	* gdb.java: Remove.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdb.arch/mips-fcr.exp: New test.
+	* gdb.arch/mips-fcr.c: Source for the new test.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdb.base/solib-disc.exp: Use `standard_output_file'
+	throughout.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/jit-simple-dl.c: New file.
+	* gdb.base/jit-simple-jit.c: New file, factored out from ...
+	* gdb.base/jit-simple.c: ... this.
+	* gdb.base/jit-simple.exp (jit_run): Delete.
+	(build_jit): New proc.
+	(jit_test_reread): Recompile either the main program or the shared
+	library, depending on what is being tested.  Skip changing address
+	if caller wants to.  Compare before/after addresses.  If testing
+	standalone, explicitly load the binary.  Test "maint info
+	breakpoints".
+	(top level): Add "standalone vs shared lib" and "change address"
+	vs "same address" axes.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/jit-simple.exp (top level) Delete get_compiler_info
+	call.
+	(jit_run): Delete.
+	(jit_test_reread): Use with_test_prefix.  Reload the main binary
+	explicitly.  Compare the before/after addresses of the JIT
+	descriptor.
+
+2016-08-15  Doug Evans  <dje@google.com>
+
+	* gdb.xml/extra-regs.xml: Update, end field now required, default type
+	for single bitfields is bool.
+	* gdb.xml/tdesc-regs.exp: Ditto.
+
+2016-10-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-signal.exp (backtrace 10): Fix #2 typo.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (support_complex_tests): Return zero if
+	gdb_skip_float_test return true.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* gdb.mi/user-selected-context-sync.exp: New file.
+	* gdb.mi/user-selected-context-sync.c: New file.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Adapt
+	=thread-select-event check.
+
 2016-09-29  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gdb.arch/powerpc-power.exp <cmprb>: Update tests to account for

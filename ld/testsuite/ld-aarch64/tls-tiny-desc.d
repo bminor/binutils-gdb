@@ -6,8 +6,8 @@
 Disassembly of section .text:
 
 0000000000010000 \<test\>:
- +10000:	58080141 	ldr	x1, 20028 \<_GLOBAL_OFFSET_TABLE_\+0x28\>
- +10004:	10080120 	adr	x0, 20028 \<_GLOBAL_OFFSET_TABLE_\+0x28\>
+ +10000:	58080141 	ldr	x1, 20028 \<var>
+ +10004:	10080120 	adr	x0, 20028 \<var>
  +10008:	d63f0020 	blr	x1
 
 Disassembly of section .plt:

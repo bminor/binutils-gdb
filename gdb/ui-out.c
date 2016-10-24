@@ -117,8 +117,7 @@ current_level (struct ui_out *uiout)
 /* Create a new level, of TYPE.  Return the new level's index.  */
 static int
 push_level (struct ui_out *uiout,
-	    enum ui_out_type type,
-	    const char *id)
+	    enum ui_out_type type)
 {
   struct ui_out_level *current;
 
@@ -315,7 +314,7 @@ specified after table_body."));
     verify_field (uiout, &fldno, &width, &align);
   }
 
-  new_level = push_level (uiout, type, id);
+  new_level = push_level (uiout, type);
 
   /* If the push puts us at the same level as a table row entry, we've
      got a new table row.  Put the header pointer back to the start.  */
@@ -951,24 +950,6 @@ ui_out_destroy (struct ui_out *uiout)
   uo_data_destroy (uiout);
   clear_table (uiout);
   xfree (uiout);
-}
-
-/* Cleanup that restores a previous current uiout.  */
-
-static void
-restore_current_uiout_cleanup (void *arg)
-{
-  struct ui_out *saved_uiout = (struct ui_out *) arg;
-
-  current_uiout = saved_uiout;
-}
-
-/* See ui-out.h.  */
-
-struct cleanup *
-make_cleanup_restore_current_uiout (void)
-{
-  return make_cleanup (restore_current_uiout_cleanup, current_uiout);
 }
 
 /* Standard gdb initialization hook.  */

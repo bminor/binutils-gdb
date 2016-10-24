@@ -556,7 +556,7 @@ const struct lang_varobj_ops c_varobj_ops =
    c_is_path_expr_parent  /* is_path_expr_parent */
 };
 
-/* A little convenience enum for dealing with C++/Java.  */
+/* A little convenience enum for dealing with C++.  */
 enum vsections
 {
   v_public = 0, v_private, v_protected

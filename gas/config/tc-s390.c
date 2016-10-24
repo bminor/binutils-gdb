@@ -929,6 +929,7 @@ s390_exp_compare (expressionS *exp1, expressionS *exp2)
 
     case O_big:
       as_bad (_("Can't handle O_big in s390_exp_compare"));
+      return 0;
 
     case O_symbol:     /* X_add_symbol & X_add_number must be equal.  */
     case O_symbol_rva:

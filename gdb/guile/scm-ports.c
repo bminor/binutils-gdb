@@ -524,15 +524,13 @@ ioscm_with_output_to_port_worker (SCM port, SCM thunk, enum oport oport,
 
   make_cleanup_ui_file_delete (port_file);
 
+  scoped_restore save_file = make_scoped_restore (oport == GDB_STDERR
+						  ? &gdb_stderr : &gdb_stdout);
+
   if (oport == GDB_STDERR)
-    {
-      make_cleanup_restore_ui_file (&gdb_stderr);
-      gdb_stderr = port_file;
-    }
+    gdb_stderr = port_file;
   else
     {
-      make_cleanup_restore_ui_file (&gdb_stdout);
-
       if (ui_out_redirect (current_uiout, port_file) < 0)
 	warning (_("Current output protocol does not support redirection"));
       else

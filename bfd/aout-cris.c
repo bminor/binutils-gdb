@@ -196,6 +196,7 @@ MY (swap_ext_reloc_out) (bfd *abfd,
      We may change this later, but assert this for the moment.  */
   if (r_type > 2)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%s: Invalid relocation type exported: %d"),
 			  bfd_get_filename (abfd), r_type);
 
@@ -239,6 +240,7 @@ MY (swap_ext_reloc_in) (bfd *abfd,
 
   if (r_type > 2)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: Invalid relocation type imported: %d"),
 			  abfd, r_type);
 
@@ -250,6 +252,7 @@ MY (swap_ext_reloc_in) (bfd *abfd,
   if (r_extern && r_index > symcount)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
         (_("%B: Bad relocation record imported: %d"), abfd, r_index);
 
       bfd_set_error (bfd_error_wrong_format);

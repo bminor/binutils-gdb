@@ -2078,6 +2078,7 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
       if ((value & 7) || value + max_offset >= 2*max_offset - 8)
 	{
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("stub entry for %s cannot load .plt, dp offset = %ld"),
 	     hh->eh.root.root.string, (long) value);
 	  return FALSE;
@@ -3282,6 +3283,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	    && value + addend + max_branch_offset >= 2*max_branch_offset)
 	  {
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B(%A+0x%" BFD_VMA_FMT "x): cannot reach %s"),
 	      input_bfd,
 	      input_section,

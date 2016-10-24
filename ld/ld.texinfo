@@ -6032,7 +6032,9 @@ The result of comparisons, @samp{&&} and @samp{||} is also a number.
 @item
 The result of other binary arithmetic and logical operations on two
 relative addresses in the same section or two absolute addresses
-(after above conversions) is also a number.
+(after above conversions) is also a number when
+@code{LD_FEATURE ("SANE_EXPR")} or inside an output section definition
+but an absolute address otherwise.
 @item
 The result of other operations on relative addresses or one
 relative address and a number, is a relative address in the same

@@ -2092,7 +2092,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           /* 214 Store-conditional NOP, BSR or HINT at psect + offset
              arg: none.  */
         case ETIR__C_STC_NBH_PS:
-	  _bfd_error_handler ("%s: not supported",
+	  _bfd_error_handler (_("%s: not supported"),
 			      _bfd_vms_etir_name (cmd));
           return FALSE;
           break;
@@ -4846,6 +4846,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
               if (prev_cmd != ETIR__C_STA_PQ)
                 {
 		  _bfd_error_handler
+		    /* xgettext:c-format */
                     (_("Unknown reloc %s + %s"), _bfd_vms_etir_name (prev_cmd),
                      _bfd_vms_etir_name (cmd));
                   return FALSE;
@@ -4863,6 +4864,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
                   if (prev_cmd != ETIR__C_STA_GBL)
                     {
 		      _bfd_error_handler
+			/* xgettext:c-format */
                         (_("Unknown reloc %s + %s"), _bfd_vms_etir_name (cmd),
                          _bfd_vms_etir_name (ETIR__C_STA_LW));
                       return FALSE;
@@ -4877,6 +4879,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
               if (prev_cmd != -1 && prev_cmd != ETIR__C_STA_GBL)
                 {
 		  _bfd_error_handler
+		    /* xgettext:c-format */
                     (_("Unknown reloc %s + %s"), _bfd_vms_etir_name (cmd),
                      _bfd_vms_etir_name (ETIR__C_STA_QW));
                   return FALSE;
@@ -4892,6 +4895,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
                   && prev_cmd != ETIR__C_STA_LW
                   && prev_cmd != ETIR__C_STA_PQ)
                 {
+		  /* xgettext:c-format */
 		  _bfd_error_handler (_("Unknown reloc %s + %s"),
 				      _bfd_vms_etir_name (prev_cmd),
 				      _bfd_vms_etir_name (ETIR__C_STO_LW));
@@ -4904,6 +4908,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
 			         /* ALPHA_R_REFQUAD abs_section, step 2 */
               if (prev_cmd != ETIR__C_OPR_ADD && prev_cmd != ETIR__C_STA_QW)
                 {
+		  /* xgettext:c-format */
 		  _bfd_error_handler (_("Unknown reloc %s + %s"),
 				      _bfd_vms_etir_name (prev_cmd),
 				      _bfd_vms_etir_name (ETIR__C_STO_QW));
@@ -4915,6 +4920,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
             case ETIR__C_STO_OFF: /* ALPHA_R_REFQUAD others, step 2 */
               if (prev_cmd != ETIR__C_STA_PQ)
                 {
+		  /* xgettext:c-format */
 		  _bfd_error_handler (_("Unknown reloc %s + %s"),
 				      _bfd_vms_etir_name (prev_cmd),
 				      _bfd_vms_etir_name (ETIR__C_STO_OFF));
@@ -4927,6 +4933,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
                                   /* ALPHA_R_REFQUAD und_section, step 3 */
               if (prev_cmd != ETIR__C_STA_LW && prev_cmd != ETIR__C_STA_QW)
                 {
+		  /* xgettext:c-format */
 		  _bfd_error_handler (_("Unknown reloc %s + %s"),
 				      _bfd_vms_etir_name (prev_cmd),
 				      _bfd_vms_etir_name (ETIR__C_OPR_ADD));
@@ -5450,7 +5457,7 @@ alpha_vms_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
       case BFD_RELOC_ALPHA_LDA:		alpha_type = ALPHA_R_LDA;	break;
       case BFD_RELOC_ALPHA_BOH:		alpha_type = ALPHA_R_BOH;	break;
       default:
-	_bfd_error_handler ("reloc (%d) is *UNKNOWN*", code);
+	_bfd_error_handler (_("reloc (%d) is *UNKNOWN*"), code);
 	return NULL;
     }
   vms_debug2 ((2, "reloc is %s\n", alpha_howto_table[alpha_type].name));
@@ -5564,6 +5571,7 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
 
   subtype = (unsigned)bfd_getl16 (emh->subtyp);
 
+  /* xgettext:c-format */
   fprintf (file, _("  EMH %u (len=%u): "), subtype, rec_len);
 
   switch (subtype)
@@ -5713,6 +5721,7 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
       type = (unsigned)bfd_getl16 (e->gsdtyp);
       len = (unsigned)bfd_getl16 (e->gsdsiz);
 
+      /* xgettext:c-format */
       fprintf (file, _("  EGSD entry %2u (type: %u, len: %u): "),
                n, type, len);
       n++;
@@ -5915,18 +5924,22 @@ evax_bfd_print_hex (FILE *file, const char *pfx,
 static void
 evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf, int is_ps)
 {
+  /* xgettext:c-format */
   fprintf (file, _("    linkage index: %u, replacement insn: 0x%08x\n"),
            (unsigned)bfd_getl32 (buf),
            (unsigned)bfd_getl32 (buf + 16));
+  /* xgettext:c-format */
   fprintf (file, _("    psect idx 1: %u, offset 1: 0x%08x %08x\n"),
            (unsigned)bfd_getl32 (buf + 4),
            (unsigned)bfd_getl32 (buf + 12),
            (unsigned)bfd_getl32 (buf + 8));
+  /* xgettext:c-format */
   fprintf (file, _("    psect idx 2: %u, offset 2: 0x%08x %08x\n"),
            (unsigned)bfd_getl32 (buf + 20),
            (unsigned)bfd_getl32 (buf + 28),
            (unsigned)bfd_getl32 (buf + 24));
   if (is_ps)
+    /* xgettext:c-format */
     fprintf (file, _("    psect idx 3: %u, offset 3: 0x%08x %08x\n"),
              (unsigned)bfd_getl32 (buf + 32),
              (unsigned)bfd_getl32 (buf + 40),
@@ -5942,6 +5955,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
   unsigned int off = sizeof (struct vms_egsd);
   unsigned int sec_len = 0;
 
+  /* xgettext:c-format */
   fprintf (file, _("  %s (len=%u+%u):\n"), name,
            (unsigned)(rec_len - sizeof (struct vms_eobjrec)),
            (unsigned)sizeof (struct vms_eobjrec));
@@ -5957,6 +5971,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
       size = bfd_getl16 (etir->size);
       buf = rec + off + sizeof (struct vms_etir);
 
+      /* xgettext:c-format */
       fprintf (file, _("   (type: %3u, size: 4+%3u): "), type, size - 4);
       switch (type)
         {
@@ -5975,6 +5990,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
           break;
         case ETIR__C_STA_PQ:
           fprintf (file, _("STA_PQ (stack psect base + offset)\n"));
+	  /* xgettext:c-format */
           fprintf (file, _("    psect: %u, offset: 0x%08x %08x\n"),
                    (unsigned)bfd_getl32 (buf + 0),
                    (unsigned)bfd_getl32 (buf + 8),
@@ -6111,6 +6127,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
         case ETIR__C_STC_LP_PSB:
           fprintf (file,
                    _("STC_LP_PSB (store cond linkage pair + signature)\n"));
+	  /* xgettext:c-format */
           fprintf (file, _("   linkage index: %u, procedure: %.*s\n"),
                    (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
           buf += 4 + 1 + buf[4];
@@ -6118,17 +6135,20 @@ evax_bfd_print_etir (FILE *file, const char *name,
           break;
         case ETIR__C_STC_GBL:
           fprintf (file, _("STC_GBL (store cond global)\n"));
+	  /* xgettext:c-format */
           fprintf (file, _("   linkage index: %u, global: %.*s\n"),
                    (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
           break;
         case ETIR__C_STC_GCA:
           fprintf (file, _("STC_GCA (store cond code address)\n"));
+	  /* xgettext:c-format */
           fprintf (file, _("   linkage index: %u, procedure name: %.*s\n"),
                    (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
           break;
         case ETIR__C_STC_PS:
           fprintf (file, _("STC_PS (store cond psect + offset)\n"));
           fprintf (file,
+		   /* xgettext:c-format */
                    _("   linkage index: %u, psect: %u, offset: 0x%08x %08x\n"),
                    (unsigned)bfd_getl32 (buf),
                    (unsigned)bfd_getl32 (buf + 4),
@@ -6346,6 +6366,7 @@ evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
         break;
       base = bfd_getl32 (rel + 4);
 
+      /* xgettext:c-format */
       fprintf (file, _("  bitcount: %u, base addr: 0x%08x\n"),
                count, base);
 
@@ -6359,6 +6380,7 @@ evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
           val = bfd_getl32 (rel);
           rel += 4;
 
+	  /* xgettext:c-format */
           fprintf (file, _("   bitmap: 0x%08x (count: %u):\n"), val, count);
 
           for (k = 0; k < 32; k++)
@@ -6391,11 +6413,13 @@ evax_bfd_print_address_fixups (FILE *file, const unsigned char *rel)
       count = bfd_getl32 (rel + 0);
       if (count == 0)
         return;
+      /* xgettext:c-format */
       fprintf (file, _("  image %u (%u entries)\n"),
                (unsigned)bfd_getl32 (rel + 4), count);
       rel += 8;
       for (j = 0; j < count; j++)
         {
+	  /* xgettext:c-format */
           fprintf (file, _("   offset: 0x%08x, val: 0x%08x\n"),
                    (unsigned)bfd_getl32 (rel + 0),
                    (unsigned)bfd_getl32 (rel + 4));
@@ -6417,6 +6441,7 @@ evax_bfd_print_reference_fixups (FILE *file, const unsigned char *rel)
       count = bfd_getl32 (rel + 0);
       if (count == 0)
         break;
+      /* xgettext:c-format */
       fprintf (file, _("  image %u (%u entries), offsets:\n"),
                (unsigned)bfd_getl32 (rel + 4), count);
       rel += 8;
@@ -6550,6 +6575,7 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
     }
   else
     {
+      /* xgettext:c-format */
       fprintf (file, _("class: %u, dtype: %u, length: %u, pointer: 0x%08x\n"),
                bclass, dtype, len, pointer);
       switch (bclass)
@@ -6565,10 +6591,12 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
                      evax_bfd_get_dsc_name (dsc->dtype));
             evax_bfd_print_indent (indent + 1, file);
             fprintf (file,
+		     /* xgettext:c-format */
                      _("dimct: %u, aflags: 0x%02x, digits: %u, scale: %u\n"),
                      dsc->dimct, dsc->aflags, dsc->digits, dsc->scale);
             evax_bfd_print_indent (indent + 1, file);
             fprintf (file,
+		     /* xgettext:c-format */
                      _("arsize: %u, a0: 0x%08x\n"),
                      (unsigned)bfd_getl32 (dsc->arsize),
                      (unsigned)bfd_getl32 (dsc->a0));
@@ -6578,7 +6606,7 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
             for (i = 0; i < dsc->dimct; i++)
               {
                 evax_bfd_print_indent (indent + 2, file);
-                fprintf (file, _("[%u]: %u\n"), i + 1,
+                fprintf (file, "[%u]: %u\n", i + 1,
                          (unsigned)bfd_getl32 (b));
                 b += 4;
               }
@@ -6588,6 +6616,7 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
             for (i = 0; i < dsc->dimct; i++)
               {
                 evax_bfd_print_indent (indent + 2, file);
+		/* xgettext:c-format */
                 fprintf (file, _("[%u]: Lower: %u, upper: %u\n"), i + 1,
                          (unsigned)bfd_getl32 (b + 0),
                          (unsigned)bfd_getl32 (b + 4));
@@ -6604,6 +6633,7 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
                      evax_bfd_get_dsc_name (ubs->dtype));
             evax_bfd_print_indent (indent + 1, file);
             fprintf (file,
+		     /* xgettext:c-format */
                      _("base: %u, pos: %u\n"),
                      (unsigned)bfd_getl32 (ubs->base),
                      (unsigned)bfd_getl32 (ubs->pos));
@@ -6624,6 +6654,7 @@ evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
   unsigned int len = 5;
 
   evax_bfd_print_indent (indent, file);
+  /* xgettext:c-format */
   fprintf (file, _("vflags: 0x%02x, value: 0x%08x "), vflags, value);
   buf += 5;
 
@@ -6652,6 +6683,7 @@ evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
       fprintf (file, _("(at bit offset %u)\n"), value);
       break;
     default:
+      /* xgettext:c-format */
       fprintf (file, _("(reg: %u, disp: %u, indir: %u, kind: "),
                (vflags & DST__K_REGNUM_MASK) >> DST__K_REGNUM_SHIFT,
                vflags & DST__K_DISP ? 1 : 0,
@@ -6684,24 +6716,26 @@ evax_bfd_print_typspec (const unsigned char *buf, int indent, FILE *file)
   unsigned int len = (unsigned)bfd_getl16 (buf);
 
   evax_bfd_print_indent (indent, file);
-  fprintf (file, ("len: %2u, kind: %2u "), len, kind);
+  /* xgettext:c-format */
+  fprintf (file, _("len: %2u, kind: %2u "), len, kind);
   buf += 3;
   switch (kind)
     {
     case DST__K_TS_ATOM:
-      fprintf (file, ("atomic, type=0x%02x %s\n"),
+    /* xgettext:c-format */
+      fprintf (file, _("atomic, type=0x%02x %s\n"),
                buf[0], evax_bfd_get_dsc_name (buf[0]));
       break;
     case DST__K_TS_IND:
-      fprintf (file, ("indirect, defined at 0x%08x\n"),
+      fprintf (file, _("indirect, defined at 0x%08x\n"),
                (unsigned)bfd_getl32 (buf));
       break;
     case DST__K_TS_TPTR:
-      fprintf (file, ("typed pointer\n"));
+      fprintf (file, _("typed pointer\n"));
       evax_bfd_print_typspec (buf, indent + 1, file);
       break;
     case DST__K_TS_PTR:
-      fprintf (file, ("pointer\n"));
+      fprintf (file, _("pointer\n"));
       break;
     case DST__K_TS_ARRAY:
       {
@@ -6709,30 +6743,30 @@ evax_bfd_print_typspec (const unsigned char *buf, int indent, FILE *file)
         unsigned int vec_len;
         unsigned int i;
 
-        fprintf (file, ("array, dim: %u, bitmap: "), buf[0]);
+        fprintf (file, _("array, dim: %u, bitmap: "), buf[0]);
         vec_len = (buf[0] + 1 + 7) / 8;
         for (i = 0; i < vec_len; i++)
           fprintf (file, " %02x", buf[i + 1]);
         fputc ('\n', file);
         vs = buf + 1 + vec_len;
         evax_bfd_print_indent (indent, file);
-        fprintf (file, ("array descriptor:\n"));
+        fprintf (file, _("array descriptor:\n"));
         vs += evax_bfd_print_valspec (vs, indent + 1, file);
         for (i = 0; i < buf[0] + 1U; i++)
           if (buf[1 + i / 8] & (1 << (i % 8)))
             {
               evax_bfd_print_indent (indent, file);
               if (i == 0)
-                fprintf (file, ("type spec for element:\n"));
+                fprintf (file, _("type spec for element:\n"));
               else
-                fprintf (file, ("type spec for subscript %u:\n"), i);
+                fprintf (file, _("type spec for subscript %u:\n"), i);
               evax_bfd_print_typspec (vs, indent + 1, file);
               vs += bfd_getl16 (vs);
             }
       }
       break;
     default:
-      fprintf (file, ("*unhandled*\n"));
+      fprintf (file, _("*unhandled*\n"));
     }
 }
 
@@ -6759,6 +6793,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
         }
       len = bfd_getl16 (dsth.length);
       type = bfd_getl16 (dsth.type);
+      /* xgettext:c-format */
       fprintf (file, _(" type: %3u, len: %3u (at 0x%08x): "),
                type, len, off);
       if (len == 0)
@@ -6827,6 +6862,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
             const char *name = (const char *)buf + sizeof (*dst);
 
             fprintf (file, _("modbeg\n"));
+	    /* xgettext:c-format */
             fprintf (file, _("   flags: %d, language: %u, "
                              "major: %u, minor: %u\n"),
                      dst->flags,
@@ -6849,6 +6885,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
             const char *name = (const char *)buf + sizeof (*dst);
 
             fputs (_("rtnbeg\n"), file);
+	    /* xgettext:c-format */
             fprintf (file, _("    flags: %u, address: 0x%08x, "
                              "pd-address: 0x%08x\n"),
                      dst->flags,
@@ -6878,6 +6915,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
           {
             struct vms_dst_epilog *dst = (void *)buf;
 
+	    /* xgettext:c-format */
             fprintf (file, _("epilog: flags: %u, count: %u\n"),
                      dst->flags, (unsigned)bfd_getl32 (dst->count));
           }
@@ -6887,6 +6925,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
             struct vms_dst_blkbeg *dst = (void *)buf;
             const char *name = (const char *)buf + sizeof (*dst);
 
+	    /* xgettext:c-format */
             fprintf (file, _("blkbeg: address: 0x%08x, name: %.*s\n"),
                      (unsigned)bfd_getl32 (dst->address),
                      name[0], name + 1);
@@ -6920,7 +6959,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
             fprintf (file, _("recbeg: name: %.*s\n"), name[0], name + 1);
             evax_bfd_print_valspec (buf, 4, file);
-            fprintf (file, ("    len: %u bits\n"),
+            fprintf (file, _("    len: %u bits\n"),
                      (unsigned)bfd_getl32 (name + 1 + name[0]));
           }
           break;
@@ -6928,6 +6967,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
           fprintf (file, _("recend\n"));
           break;
         case DST__K_ENUMBEG:
+	  /* xgettext:c-format */
           fprintf (file, _("enumbeg, len: %u, name: %.*s\n"),
                    buf[0], buf[1], buf + 2);
           break;
@@ -6941,9 +6981,9 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
         case DST__K_LABEL:
           {
             struct vms_dst_label *lab = (void *)buf;
-            fprintf (file, ("label, name: %.*s\n"),
+            fprintf (file, _("label, name: %.*s\n"),
                      lab->name[0], lab->name + 1);
-            fprintf (file, ("    address: 0x%08x\n"),
+            fprintf (file, _("    address: 0x%08x\n"),
                      (unsigned)bfd_getl32 (lab->value));
           }
           break;
@@ -6955,6 +6995,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
             fprintf (file, _("discontiguous range (nbr: %u)\n"), cnt);
             for (i = 0; i < cnt; i++, rng += 8)
+	      /* xgettext:c-format */
               fprintf (file, _("    address: 0x%08x, size: %u\n"),
                        (unsigned)bfd_getl32 (rng),
                        (unsigned)bfd_getl32 (rng + 4));
@@ -7049,6 +7090,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
                         fprintf (file, _("delta pc +%-4d"), -cmd);
                         line++;  /* FIXME: curr increment.  */
                         pc += -cmd;
+			/* xgettext:c-format */
                         fprintf (file, _("    pc: 0x%08x line: %5u\n"),
                                  pc, line);
                         cmdlen = 1;
@@ -7083,10 +7125,12 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
                       struct vms_dst_src_decl_src *src = (void *)(buf + 1);
                       const char *name;
 
+		      /* xgettext:c-format */
                       fprintf (file, _("   declfile: len: %u, flags: %u, "
                                        "fileid: %u\n"),
                                src->length, src->flags,
                                (unsigned)bfd_getl16 (src->fileid));
+		      /* xgettext:c-format */
                       fprintf (file, _("   rms: cdt: 0x%08x %08x, "
                                        "ebk: 0x%08x, ffb: 0x%04x, "
                                        "rfo: %u\n"),
@@ -7190,9 +7234,11 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       fprintf (file, _("cannot read EIHD\n"));
       return;
     }
+  /* xgettext:c-format */
   fprintf (file, _("EIHD: (size: %u, nbr blocks: %u)\n"),
            (unsigned)bfd_getl32 (eihd.size),
            (unsigned)bfd_getl32 (eihd.hdrblkcnt));
+  /* xgettext:c-format */
   fprintf (file, _(" majorid: %u, minorid: %u\n"),
            (unsigned)bfd_getl32 (eihd.majorid),
            (unsigned)bfd_getl32 (eihd.minorid));
@@ -7210,6 +7256,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       name = _("unknown");
       break;
     }
+  /* xgettext:c-format */
   fprintf (file, _(" image type: %u (%s)"), val, name);
 
   val = (unsigned)bfd_getl32 (eihd.subtype);
@@ -7225,12 +7272,14 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       name = _("unknown");
       break;
     }
+  /* xgettext:c-format */
   fprintf (file, _(", subtype: %u (%s)\n"), val, name);
 
   eisd_off = bfd_getl32 (eihd.isdoff);
   eiha_off = bfd_getl32 (eihd.activoff);
   eihi_off = bfd_getl32 (eihd.imgidoff);
   eihs_off = bfd_getl32 (eihd.symdbgoff);
+  /* xgettext:c-format */
   fprintf (file, _(" offsets: isd: %u, activ: %u, symdbg: %u, "
                    "imgid: %u, patch: %u\n"),
            eisd_off, eiha_off, eihs_off, eihi_off,
@@ -7244,6 +7293,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
                    " version array off: %u\n"),
            eihvn_off);
   fprintf (file,
+	   /* xgettext:c-format */
            _(" img I/O count: %u, nbr channels: %u, req pri: %08x%08x\n"),
            (unsigned)bfd_getl32 (eihd.imgiocnt),
            (unsigned)bfd_getl32 (eihd.iochancnt),
@@ -7280,6 +7330,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
   if (val & EIHD__M_EXT_BIND_SECT)
     fprintf (file, " EXT_BIND_SECT");
   fprintf (file, "\n");
+  /* xgettext:c-format */
   fprintf (file, _(" ident: 0x%08x, sysver: 0x%08x, "
                    "match ctrl: %u, symvect_size: %u\n"),
            (unsigned)bfd_getl32 (eihd.ident),
@@ -7292,6 +7343,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
     {
       eihef_off = bfd_getl32 (eihd.ext_fixup_off);
       eihnp_off = bfd_getl32 (eihd.noopt_psect_off);
+      /* xgettext:c-format */
       fprintf (file, _(", ext fixup offset: %u, no_opt psect off: %u"),
                eihef_off, eihnp_off);
     }
@@ -7387,7 +7439,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
                 fputs (_("*unknown*        "), file);
                 break;
               }
-            fprintf (file, _(": %u.%u\n"),
+            fprintf (file, ": %u.%u\n",
                      (unsigned)bfd_getl16 (ver.major),
                      (unsigned)bfd_getl16 (ver.minor));
           }
@@ -7405,18 +7457,23 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
         }
       fprintf (file, _("Image activation:  (size=%u)\n"),
                (unsigned)bfd_getl32 (eiha.size));
+      /* xgettext:c-format */
       fprintf (file, _(" First address : 0x%08x 0x%08x\n"),
                (unsigned)bfd_getl32 (eiha.tfradr1_h),
                (unsigned)bfd_getl32 (eiha.tfradr1));
+      /* xgettext:c-format */
       fprintf (file, _(" Second address: 0x%08x 0x%08x\n"),
                (unsigned)bfd_getl32 (eiha.tfradr2_h),
                (unsigned)bfd_getl32 (eiha.tfradr2));
+      /* xgettext:c-format */
       fprintf (file, _(" Third address : 0x%08x 0x%08x\n"),
                (unsigned)bfd_getl32 (eiha.tfradr3_h),
                (unsigned)bfd_getl32 (eiha.tfradr3));
+      /* xgettext:c-format */
       fprintf (file, _(" Fourth address: 0x%08x 0x%08x\n"),
                (unsigned)bfd_getl32 (eiha.tfradr4_h),
                (unsigned)bfd_getl32 (eiha.tfradr4));
+      /* xgettext:c-format */
       fprintf (file, _(" Shared image  : 0x%08x 0x%08x\n"),
                (unsigned)bfd_getl32 (eiha.inishr_h),
                (unsigned)bfd_getl32 (eiha.inishr));
@@ -7431,6 +7488,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
           fprintf (file, _("cannot read EIHI\n"));
           return;
         }
+      /* xgettext:c-format */
       fprintf (file, _("Image identification: (major: %u, minor: %u)\n"),
                (unsigned)bfd_getl32 (eihi.majorid),
                (unsigned)bfd_getl32 (eihi.minorid));
@@ -7455,19 +7513,23 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
           fprintf (file, _("cannot read EIHS\n"));
           return;
         }
+      /* xgettext:c-format */
       fprintf (file, _("Image symbol & debug table: (major: %u, minor: %u)\n"),
                (unsigned)bfd_getl32 (eihs.majorid),
                (unsigned)bfd_getl32 (eihs.minorid));
       dst_vbn = bfd_getl32 (eihs.dstvbn);
       dst_size = bfd_getl32 (eihs.dstsize);
+      /* xgettext:c-format */
       fprintf (file, _(" debug symbol table : vbn: %u, size: %u (0x%x)\n"),
                dst_vbn, dst_size, dst_size);
       gst_vbn = bfd_getl32 (eihs.gstvbn);
       gst_size = bfd_getl32 (eihs.gstsize);
+      /* xgettext:c-format */
       fprintf (file, _(" global symbol table: vbn: %u, records: %u\n"),
                gst_vbn, gst_size);
       dmt_vbn = bfd_getl32 (eihs.dmtvbn);
       dmt_size = bfd_getl32 (eihs.dmtsize);
+      /* xgettext:c-format */
       fprintf (file, _(" debug module table : vbn: %u, size: %u\n"),
                dmt_vbn, dmt_size);
     }
@@ -7491,6 +7553,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
           /* Next block.  */
           eisd_off = (eisd_off + VMS_BLOCK_SIZE) & ~(VMS_BLOCK_SIZE - 1);
         }
+      /* xgettext:c-format */
       fprintf (file, _("Image section descriptor: (major: %u, minor: %u, "
                        "size: %u, offset: %u)\n"),
                (unsigned)bfd_getl32 (eisd.majorid),
@@ -7498,6 +7561,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
                len, eisd_off);
       if (len == 0)
         break;
+      /* xgettext:c-format */
       fprintf (file, _(" section: base: 0x%08x%08x size: 0x%08x\n"),
                (unsigned)bfd_getl32 (eisd.virt_addr + 4),
                (unsigned)bfd_getl32 (eisd.virt_addr + 0),
@@ -7540,6 +7604,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
           eiaf_vbn = bfd_getl32 (eisd.vbn);
           eiaf_size = bfd_getl32 (eisd.secsize);
         }
+      /* xgettext:c-format */
       fprintf (file, _(" vbn: %u, pfc: %u, matchctl: %u type: %u ("),
                (unsigned)bfd_getl32 (eisd.vbn),
                eisd.pfc, eisd.matchctl, eisd.type);
@@ -7569,6 +7634,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
         }
       fputs (_(")\n"), file);
       if (val & EISD__M_GBL)
+	/* xgettext:c-format */
         fprintf (file, _(" ident: 0x%08x, name: %.*s\n"),
                  (unsigned)bfd_getl32 (eisd.ident),
                  eisd.gblnam[0], eisd.gblnam + 1);
@@ -7597,6 +7663,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
             }
           count = bfd_getl16 (dmth.psect_count);
           fprintf (file,
+		   /* xgettext:c-format */
                    _(" module offset: 0x%08x, size: 0x%08x, (%u psects)\n"),
                    (unsigned)bfd_getl32 (dmth.modbeg),
                    (unsigned)bfd_getl32 (dmth.size), count);
@@ -7610,6 +7677,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
                   fprintf (file, _("cannot read DMT psect\n"));
                   return;
                 }
+	      /* xgettext:c-format */
               fprintf (file, _("  psect start: 0x%08x, length: %u\n"),
                        (unsigned)bfd_getl32 (dmtp.start),
                        (unsigned)bfd_getl32 (dmtp.length));
@@ -7665,12 +7733,15 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
         }
       eiaf = (struct vms_eiaf *)buf;
       fprintf (file,
+	       /* xgettext:c-format */
                _("Image activator fixup: (major: %u, minor: %u)\n"),
                (unsigned)bfd_getl32 (eiaf->majorid),
                (unsigned)bfd_getl32 (eiaf->minorid));
+      /* xgettext:c-format */
       fprintf (file, _("  iaflink : 0x%08x %08x\n"),
                (unsigned)bfd_getl32 (eiaf->iaflink + 0),
                (unsigned)bfd_getl32 (eiaf->iaflink + 4));
+      /* xgettext:c-format */
       fprintf (file, _("  fixuplnk: 0x%08x %08x\n"),
                (unsigned)bfd_getl32 (eiaf->fixuplnk + 0),
                (unsigned)bfd_getl32 (eiaf->fixuplnk + 4));
@@ -7680,22 +7751,27 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
                (unsigned)bfd_getl32 (eiaf->flags));
       qrelfixoff = bfd_getl32 (eiaf->qrelfixoff);
       lrelfixoff = bfd_getl32 (eiaf->lrelfixoff);
+      /* xgettext:c-format */
       fprintf (file, _("  qrelfixoff: %5u, lrelfixoff: %5u\n"),
                qrelfixoff, lrelfixoff);
       qdotadroff = bfd_getl32 (eiaf->qdotadroff);
       ldotadroff = bfd_getl32 (eiaf->ldotadroff);
+      /* xgettext:c-format */
       fprintf (file, _("  qdotadroff: %5u, ldotadroff: %5u\n"),
                qdotadroff, ldotadroff);
       codeadroff = bfd_getl32 (eiaf->codeadroff);
       lpfixoff = bfd_getl32 (eiaf->lpfixoff);
+      /* xgettext:c-format */
       fprintf (file, _("  codeadroff: %5u, lpfixoff  : %5u\n"),
                codeadroff, lpfixoff);
       chgprtoff = bfd_getl32 (eiaf->chgprtoff);
       fprintf (file, _("  chgprtoff : %5u\n"), chgprtoff);
       shrimgcnt = bfd_getl32 (eiaf->shrimgcnt);
       shlstoff = bfd_getl32 (eiaf->shlstoff);
+      /* xgettext:c-format */
       fprintf (file, _("  shlstoff  : %5u, shrimgcnt : %5u\n"),
                shlstoff, shrimgcnt);
+      /* xgettext:c-format */
       fprintf (file, _("  shlextra  : %5u, permctx   : %5u\n"),
                (unsigned)bfd_getl32 (eiaf->shlextra),
                (unsigned)bfd_getl32 (eiaf->permctx));
@@ -7713,6 +7789,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
           for (j = 0; j < shrimgcnt; j++, shl++)
             {
               fprintf (file,
+		       /* xgettext:c-format */
                        _("  %u: size: %u, flags: 0x%02x, name: %.*s\n"),
                        j, shl->size, shl->flags,
                        shl->imgnam[0], shl->imgnam + 1);
@@ -7759,6 +7836,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
             {
               unsigned int prot = bfd_getl32 (eicp->newprt);
               fprintf (file,
+		       /* xgettext:c-format */
                        _("  base: 0x%08x %08x, size: 0x%08x, prot: 0x%08x "),
                        (unsigned)bfd_getl32 (eicp->baseva + 4),
                        (unsigned)bfd_getl32 (eicp->baseva + 0),
@@ -8669,6 +8747,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
               && !(PRIV2 (sub, eom_data).eom_b_tfrflg & EEOM__M_WKTFR))
             {
               (*info->callbacks->einfo)
+		/* xgettext:c-format */
                 (_("%P: multiple entry points: in modules %B and %B\n"),
                  startbfd, sub);
               continue;

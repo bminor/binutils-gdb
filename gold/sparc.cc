@@ -2305,7 +2305,7 @@ Target_sparc<size, big_endian>::Scan::local(
 				       reloc.get_r_addend(), is_ifunc);
 	  break;
 	}
-      /* Fall through.  */
+      // Fall through.
 
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
@@ -2815,6 +2815,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	  // and code transform the GOT load into an addition.
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -3354,6 +3355,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  gdop_valid = true;
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -3475,7 +3477,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  Reloc::gdop_lox10(view, got_offset);
 	  break;
 	}
-      /* Fall through.  */
+      // Fall through.
     case elfcpp::R_SPARC_GOT10:
       Reloc::lo10(view, got_offset, addend);
       break;
@@ -3504,7 +3506,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  Reloc::gdop_hix22(view, got_offset);
 	  break;
 	}
-      /* Fall through.  */
+      // Fall through.
     case elfcpp::R_SPARC_GOT22:
       Reloc::hi22(view, got_offset, addend);
       break;

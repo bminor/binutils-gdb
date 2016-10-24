@@ -270,6 +270,7 @@ binary_set_section_contents (bfd *abfd,
 
 	  if (s->filepos < 0)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("Warning: Writing section `%s' at huge (ie negative) "
 		 "file offset 0x%lx."),
 	       bfd_get_section_name (abfd, s),

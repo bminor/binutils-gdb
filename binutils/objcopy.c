@@ -512,7 +512,7 @@ static bfd_boolean write_debugging_info (bfd *, void *, long *, asymbol ***);
 static const char *lookup_sym_redefinition (const char *);
 static const char *find_section_rename (const char *, flagword *);
 
-static void
+ATTRIBUTE_NORETURN static void
 copy_usage (FILE *stream, int exit_status)
 {
   fprintf (stream, _("Usage: %s [option(s)] in-file [out-file]\n"), program_name);
@@ -646,7 +646,7 @@ copy_usage (FILE *stream, int exit_status)
   exit (exit_status);
 }
 
-static void
+ATTRIBUTE_NORETURN static void
 strip_usage (FILE *stream, int exit_status)
 {
   fprintf (stream, _("Usage: %s <option(s)> in-file(s)\n"), program_name);
@@ -4302,7 +4302,7 @@ copy_main (int argc, char *argv[])
 	      {
 	      case OPTION_CHANGE_SECTION_ADDRESS:
 		p->vma_val = val;
-		/* Drop through.  */
+		/* Fall through.  */
 
 	      case OPTION_CHANGE_SECTION_LMA:
 		p->lma_val = val;

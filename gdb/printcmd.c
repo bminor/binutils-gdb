@@ -1876,19 +1876,18 @@ map_display_numbers (char *args,
 				       void *),
 		     void *data)
 {
-  struct get_number_or_range_state state;
   int num;
 
   if (args == NULL)
     error_no_arg (_("one or more display numbers"));
 
-  init_number_or_range (&state, args);
+  number_or_range_parser parser (args);
 
-  while (!state.finished)
+  while (!parser.finished ())
     {
-      const char *p = state.string;
+      const char *p = parser.cur_tok ();
 
-      num = get_number_or_range (&state);
+      num = parser.get_number ();
       if (num == 0)
 	warning (_("bad display number at or near '%s'"), p);
       else
@@ -1938,7 +1937,6 @@ undisplay_command (char *args, int from_tty)
 static void
 do_one_display (struct display *d)
 {
-  struct cleanup *old_chain;
   int within_current_scope;
 
   if (d->enabled_p == 0)
@@ -1990,8 +1988,8 @@ do_one_display (struct display *d)
   if (!within_current_scope)
     return;
 
-  old_chain = make_cleanup_restore_integer (&current_display_number);
-  current_display_number = d->number;
+  scoped_restore save_display_number
+    = make_scoped_restore (&current_display_number, d->number);
 
   annotate_display_begin ();
   printf_filtered ("%d", d->number);
@@ -2079,7 +2077,6 @@ do_one_display (struct display *d)
   annotate_display_end ();
 
   gdb_flush (gdb_stdout);
-  do_cleanups (old_chain);
 }
 
 /* Display all of the values on the auto-display chain which can be

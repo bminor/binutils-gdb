@@ -2738,6 +2738,7 @@ slot_index (unsigned long slot_addr,
 		as_fatal (_("Only constant offsets are supported"));
 		break;
 	      }
+	    /* Fall through.  */
 	  case rs_fill:
 	    s_index += 3 * (first_frag->fr_offset >> 4);
 	    break;
@@ -5635,6 +5636,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
       /* SOR must be an integer multiple of 8 */
       if (e->X_op == O_constant && e->X_add_number & 0x7)
 	return OPERAND_OUT_OF_RANGE;
+      /* Fall through.  */
     case IA64_OPND_SOF:
     case IA64_OPND_SOL:
       if (e->X_op == O_constant)
@@ -5790,6 +5792,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
     case IA64_OPND_IMM14:
     case IA64_OPND_IMM22:
       relocatable = 1;
+      /* Fall through.  */
     case IA64_OPND_IMM1:
     case IA64_OPND_IMM8:
     case IA64_OPND_IMM8U4:
@@ -5929,6 +5932,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	  ++CURR_SLOT.num_fixups;
 	  return OPERAND_MATCH;
 	}
+      /* Fall through.  */
     case IA64_OPND_TAG13:
     case IA64_OPND_TAG13b:
       switch (e->X_op)
@@ -9281,6 +9285,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		    {
 		      specs[count++] = tmpl;
 		    }
+		  /* Fall through.  */
 		case AR_RSC:
 		  if (!rsrc_write &&
 		      (regno == AR_BSPSTORE
@@ -10263,7 +10268,7 @@ remove_marked_resource (struct rsrc *rs)
     case IA64_DVS_SPECIFIC:
       if (md.debug_dv)
 	fprintf (stderr, "Implementation-specific, assume worst case...\n");
-      /* ...fall through...  */
+      /* Fall through.  */
     case IA64_DVS_INSTR:
       if (md.debug_dv)
 	fprintf (stderr, "Inserting instr serialization\n");

@@ -557,6 +557,28 @@ arc_store_return_value (struct gdbarch *gdbarch, struct type *type,
     error (_("arc_store_return_value: type length too large."));
 }
 
+/* Implement the "get_longjmp_target" gdbarch method.  */
+
+static int
+arc_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+{
+  if (arc_debug)
+    debug_printf ("arc: get_longjmp_target\n");
+
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int pc_offset = tdep->jb_pc * ARC_REGISTER_SIZE;
+  gdb_byte buf[ARC_REGISTER_SIZE];
+  CORE_ADDR jb_addr = get_frame_register_unsigned (frame, ARC_FIRST_ARG_REGNUM);
+
+  if (target_read_memory (jb_addr + pc_offset, buf, ARC_REGISTER_SIZE))
+    return 0; /* Failed to read from memory.  */
+
+  *pc = extract_unsigned_integer (buf, ARC_REGISTER_SIZE,
+				  gdbarch_byte_order (gdbarch));
+  return 1;
+}
+
 /* Implement the "return_value" gdbarch method.  */
 
 static enum return_value_convention
@@ -876,9 +898,6 @@ static struct value *
 arc_frame_prev_register (struct frame_info *this_frame,
 			 void **this_cache, int regnum)
 {
-  if (arc_debug)
-    debug_printf ("arc: frame_prev_register (regnum = %d)\n", regnum);
-
   if (*this_cache == NULL)
     *this_cache = arc_make_frame_cache (this_frame);
   struct arc_frame_cache *cache = (struct arc_frame_cache *) (*this_cache);
@@ -1162,7 +1181,11 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (!arc_tdesc_init (info, &tdesc, &tdesc_data))
     return NULL;
 
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, NULL);
+  /* Allocate the ARC-private target-dependent information structure, and the
+     GDB target-independent information structure.  */
+  struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
+  tdep->jb_pc = -1; /* No longjmp support by default.  */
+  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Data types.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -1246,6 +1269,9 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      It can override functions set earlier.  */
   gdbarch_init_osabi (info, gdbarch);
 
+  if (tdep->jb_pc >= 0)
+    set_gdbarch_get_longjmp_target (gdbarch, arc_get_longjmp_target);
+
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 
   return gdbarch;
@@ -1256,7 +1282,9 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  /* Empty for now.  */
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  fprintf_unfiltered (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 }
 
 /* Suppress warning from -Wmissing-prototypes.  */

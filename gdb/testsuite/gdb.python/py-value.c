@@ -82,7 +82,7 @@ char **save_argv;
 int
 main (int argc, char *argv[])
 {
-  char *cp = argv[0]; /* Prevent gcc from optimizing argv[] out.  */
+  char *cp;
   struct s s;
   union u u;
   PTR x = &s;
@@ -98,6 +98,14 @@ main (int argc, char *argv[])
   int *ptr_i = &i;
   const char *sn = 0;
   struct str *xstr;
+
+  /* Prevent gcc from optimizing argv[] out.  */
+
+  /* We also check for a NULL argv in case we are dealing with a target
+     executing in a freestanding environment, therefore there are no
+     guarantees about argc or argv.  */
+  if (argv != NULL)
+    cp = argv[0];
 
   s.a = 3;
   s.b = 5;

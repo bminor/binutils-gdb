@@ -801,14 +801,14 @@ aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
-arm-with-iwmmxt.c : $(srcdir)/../regformats/arm-with-iwmmxt.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-iwmmxt.dat arm-with-iwmmxt.c
-arm-with-vfpv2.c : $(srcdir)/../regformats/arm-with-vfpv2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-vfpv2.dat arm-with-vfpv2.c
-arm-with-vfpv3.c : $(srcdir)/../regformats/arm-with-vfpv3.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-vfpv3.dat arm-with-vfpv3.c
-arm-with-neon.c : $(srcdir)/../regformats/arm-with-neon.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-neon.dat arm-with-neon.c
+arm-with-iwmmxt.c : $(srcdir)/../regformats/arm/arm-with-iwmmxt.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-iwmmxt.dat arm-with-iwmmxt.c
+arm-with-vfpv2.c : $(srcdir)/../regformats/arm/arm-with-vfpv2.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-vfpv2.dat arm-with-vfpv2.c
+arm-with-vfpv3.c : $(srcdir)/../regformats/arm/arm-with-vfpv3.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-vfpv3.dat arm-with-vfpv3.c
+arm-with-neon.c : $(srcdir)/../regformats/arm/arm-with-neon.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-neon.dat arm-with-neon.c
 reg-bfin.c : $(srcdir)/../regformats/reg-bfin.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-bfin.dat reg-bfin.c
 reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)

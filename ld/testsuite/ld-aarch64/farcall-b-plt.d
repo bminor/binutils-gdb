@@ -7,7 +7,7 @@
 
 Disassembly of section .plt:
 
-.* <foo@plt.*>:
+.* <.plt>:
 .*:	a9bf7bf0 	stp	x16, x30, \[sp, #-16\]!
 .*:	.* 	adrp	x16, .* <__foo_veneer\+.*>
 .*:	.* 	ldr	x17, \[x16, #.*\]
@@ -32,7 +32,7 @@ Disassembly of section .text:
 .*:	.* 	b	.* <__foo_veneer\+.*>
 
 .* <__foo_veneer>:
-.*:	.* 	adrp	x16, 0 <foo@plt.*>
+.*:	.* 	adrp	x16, 0 <.*>
 .*:	.* 	add	x16, x16, #.*
 .*:	d61f0200 	br	x16
 	...

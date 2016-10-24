@@ -1,3 +1,40 @@
+2016-10-24  Yao Qi  <yao.qi@linaro.org>
+
+	PR server/20733
+	* linux-aarch64-low.c (append_insns): Cast the return value to
+	'uint32_t *'.
+
+2016-10-10  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c (enum arm_breakpoint_kinds): Remove.
+
+2016-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* target.c (target_supports_multi_process): New function, moved
+	from...
+	* target.h (target_supports_multi_process): ... here.  Remove
+	macro.
+
+2016-10-05  Tom Tromey  <tom@tromey.com>
+
+	PR remote/20655:
+	* tracepoint.c (handle_tracepoint_bkpts): Check
+	ipa_error_tracepoint, not ipa_stopping_tracepoint.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Update the path of arm-*.xml files.
+
+2016-10-05  Terry Guo  <terry.guo@arm.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in: Adjust the path of rules.
+	* configure.srv: Update the path of xml files.
+	* regformats/arm-with-iwmmxt.dat: Regenerated.
+	* regformats/arm-with-neon.dat: Likewise.
+	* regformats/arm-with-vfpv2.dat: Likewise.
+	* regformats/arm-with-vfpv3.dat Likewise.
+
 2016-09-30  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdbserver/20627

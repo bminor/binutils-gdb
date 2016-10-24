@@ -1165,6 +1165,7 @@ set_operand (char *operand, ins * cr16_ins)
     {
     case arg_ic:    /* Case $0x18.  */
       operandS++;
+      /* Fall through.  */
     case arg_c:     /* Case 0x18.  */
       /* Set constant.  */
       process_label_constant (operandS, cr16_ins);
@@ -1182,6 +1183,7 @@ set_operand (char *operand, ins * cr16_ins)
       *operandE = '\0';
       process_label_constant (operandS, cr16_ins);
       operandS = operandE;
+      /* Fall through.  */
     case arg_rbase: /* Case (r1) or (r1,r0).  */
       operandS++;
       /* Set register base.  */
@@ -1789,7 +1791,9 @@ print_constant (int nbits, int shift, argument *arg)
       break;
 
     case 21:
-      if ((nbits == 21) && (IS_INSN_TYPE (LD_STOR_INS))) nbits = 20;
+      if ((nbits == 21) && (IS_INSN_TYPE (LD_STOR_INS)))
+	nbits = 20;
+      /* Fall through.  */
     case 24:
     case 22:
     case 20:

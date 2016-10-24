@@ -37,6 +37,12 @@ struct cli_interp
   struct ui_out *cli_uiout;
 };
 
+/* Suppress notification struct.  */
+struct cli_suppress_notification cli_suppress_notification =
+  {
+    0   /* user_selected_context_changed */
+  };
+
 /* Returns the INTERP's data cast as cli_interp if INTERP is a CLI,
    and returns NULL otherwise.  */
 
@@ -93,12 +99,10 @@ should_print_stop_to_console (struct interp *console_interp,
 static void
 cli_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  struct switch_thru_all_uis state;
-
   if (!print_frame)
     return;
 
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct interp *interp = top_level_interpreter ();
       struct cli_interp *cli = as_cli_interp (interp);
@@ -118,9 +122,7 @@ cli_on_normal_stop (struct bpstats *bs, int print_frame)
 static void
 cli_on_signal_received (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -136,9 +138,7 @@ cli_on_signal_received (enum gdb_signal siggnal)
 static void
 cli_on_end_stepping_range (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -154,9 +154,7 @@ cli_on_end_stepping_range (void)
 static void
 cli_on_signal_exited (enum gdb_signal siggnal)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -172,9 +170,7 @@ cli_on_signal_exited (enum gdb_signal siggnal)
 static void
 cli_on_exited (int exitstatus)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -190,9 +186,7 @@ cli_on_exited (int exitstatus)
 static void
 cli_on_no_history (void)
 {
-  struct switch_thru_all_uis state;
-
-  SWITCH_THRU_ALL_UIS (state)
+  SWITCH_THRU_ALL_UIS ()
     {
       struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
 
@@ -227,6 +221,35 @@ cli_on_command_error (void)
     return;
 
   display_gdb_prompt (NULL);
+}
+
+/* Observer for the user_selected_context_changed notification.  */
+
+static void
+cli_on_user_selected_context_changed (user_selected_what selection)
+{
+  struct thread_info *tp;
+
+  /* This event is suppressed.  */
+  if (cli_suppress_notification.user_selected_context)
+    return;
+
+  tp = find_thread_ptid (inferior_ptid);
+
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      if (selection & USER_SELECTED_INFERIOR)
+	print_selected_inferior (cli->cli_uiout);
+
+      if (tp != NULL
+	  && ((selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME))))
+	print_selected_thread_frame (cli->cli_uiout, selection);
+    }
 }
 
 /* pre_command_loop implementation.  */
@@ -393,4 +416,6 @@ _initialize_cli_interp (void)
   observer_attach_no_history (cli_on_no_history);
   observer_attach_sync_execution_done (cli_on_sync_execution_done);
   observer_attach_command_error (cli_on_command_error);
+  observer_attach_user_selected_context_changed
+    (cli_on_user_selected_context_changed);
 }

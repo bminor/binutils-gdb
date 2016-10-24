@@ -90,4 +90,9 @@ extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
 
 extern void target_mourn_inferior (ptid_t ptid);
 
+/* Return 1 if this target can debug multiple processes
+   simultaneously, zero otherwise.  */
+
+extern int target_supports_multi_process (void);
+
 #endif /* TARGET_COMMON_H */

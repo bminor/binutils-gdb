@@ -216,7 +216,7 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h elf-hints.h limits.h local
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h)
 ACX_HEADER_STRING
 AC_CHECK_FUNCS(glob mkstemp realpath sbrk setlocale waitpid)
-AC_CHECK_FUNCS(open lseek close)
+AC_CHECK_FUNCS(getauxval open lseek close)
 AC_HEADER_DIRENT
 
 dnl AC_CHECK_HEADERS(sys/mman.h)

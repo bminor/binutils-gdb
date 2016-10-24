@@ -1794,9 +1794,9 @@ extern asection _bfd_std_section[4];
 #define bfd_section_removed_from_list(ABFD, S) \
   ((S)->next == NULL ? (ABFD)->section_last != (S) : (S)->next->prev != (S))
 
-#define BFD_FAKE_SECTION(SEC, FLAGS, SYM, NAME, IDX)                   \
+#define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)                   \
   /* name, id,  index, next, prev, flags, user_set_vma,            */  \
-  { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,                           \
+  {  NAME, IDX, 0,     NULL, NULL, FLAGS, 0,                           \
                                                                        \
   /* linker_mark, linker_has_input, gc_mark, decompress_status,    */  \
      0,           0,                1,       0,                        \
@@ -6975,11 +6975,6 @@ bfd_boolean bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd);
 #define bfd_copy_private_bfd_data(ibfd, obfd) \
      BFD_SEND (obfd, _bfd_copy_private_bfd_data, \
                (ibfd, obfd))
-bfd_boolean bfd_merge_private_bfd_data (bfd *ibfd, bfd *obfd);
-
-#define bfd_merge_private_bfd_data(ibfd, obfd) \
-     BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
-               (ibfd, obfd))
 bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 
 #define bfd_set_private_flags(abfd, flags) \
@@ -7296,7 +7291,7 @@ typedef struct bfd_target
   bfd_boolean (*_bfd_copy_private_bfd_data) (bfd *, bfd *);
   /* Called to merge BFD general private data from one object file
      to a common output file when linking.  */
-  bfd_boolean (*_bfd_merge_private_bfd_data) (bfd *, bfd *);
+  bfd_boolean (*_bfd_merge_private_bfd_data) (bfd *, struct bfd_link_info *);
   /* Called to initialize BFD private section data from one object file
      to another.  */
 #define bfd_init_private_section_data(ibfd, isec, obfd, osec, link_info) \
@@ -7620,6 +7615,12 @@ bfd_boolean bfd_link_check_relocs
 bfd_boolean _bfd_generic_link_check_relocs
    (bfd *abfd, struct bfd_link_info *info);
 
+bfd_boolean bfd_merge_private_bfd_data
+   (bfd *ibfd, struct bfd_link_info *info);
+
+#define bfd_merge_private_bfd_data(ibfd, info) \
+     BFD_SEND ((info)->output_bfd, _bfd_merge_private_bfd_data, \
+               (ibfd, info))
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);

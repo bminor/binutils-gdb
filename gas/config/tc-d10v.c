@@ -1548,7 +1548,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  if ( segf && segf->sym != fixP->fx_addsy)
 	    value = 0;
         }
-      /* Drop through.  */
+      /* Fall through.  */
     case BFD_RELOC_D10V_18:
       /* Instruction addresses are always right-shifted by 2.  */
       value >>= AT_WORD_RIGHT_SHIFT;

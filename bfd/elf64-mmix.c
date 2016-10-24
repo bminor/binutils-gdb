@@ -1191,6 +1191,7 @@ mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
 	if (value != gregdata->reloc_request[bpo_index].value)
 	  {
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: Internal inconsistency error for value for\n\
  linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"),
 	       bfd_get_filename (isec->owner),
@@ -1261,6 +1262,7 @@ mmix_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
   r_type = ELF64_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_MMIX_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid MMIX reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -1612,11 +1614,13 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	     to ease the translation into other languages.  */
 	  if (symname == NULL || *symname == 0)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: base-plus-offset relocation against register symbol: (unknown) in %s"),
 	       bfd_get_filename (input_section->owner),
 	       bfd_get_section_name (symsec->owner, symsec));
 	  else
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: base-plus-offset relocation against register symbol: %s in %s"),
 	       bfd_get_filename (input_section->owner), symname,
 	       bfd_get_section_name (symsec->owner, symsec));
@@ -1661,11 +1665,13 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	     to ease the translation into other languages.  */
 	  if (symname == NULL || *symname == 0)
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: register relocation against non-register symbol: (unknown) in %s"),
 	       bfd_get_filename (input_section->owner),
 	       bfd_get_section_name (symsec->owner, symsec));
 	  else
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: register relocation against non-register symbol: %s in %s"),
 	       bfd_get_filename (input_section->owner), symname,
 	       bfd_get_section_name (symsec->owner, symsec));
@@ -1733,6 +1739,7 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	  {
 	    /* FIXME: Better error message.  */
 	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%s: LOCAL directive: Register $%ld is not a local register.  First global register is $%ld."),
 	       bfd_get_filename (input_section->owner), (long) srel, (long) first_global);
 
@@ -2190,6 +2197,7 @@ mmix_elf_add_symbol_hook (bfd *abfd,
 	  /* How do we get the asymbol (or really: the filename) from h?
 	     h->u.def.section->owner is NULL.  */
 	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: Error: multiple definition of `%s'; start of %s "
 	       "is set in a earlier linked file\n"),
 	     bfd_get_filename (abfd), *namep,
@@ -2434,6 +2442,7 @@ _bfd_mmix_after_linker_allocation (bfd *abfd ATTRIBUTE_UNUSED,
       != gregdata->n_bpo_relocs)
     {
       _bfd_error_handler
+	/* xgettext:c-format */
 	(_("Internal inconsistency: remaining %u != max %u.\n\
   Please report this bug."),
 	 gregdata->n_remaining_bpo_relocs_this_relaxation_round,

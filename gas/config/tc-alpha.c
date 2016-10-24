@@ -1005,6 +1005,7 @@ tokenize_arguments (char *str,
 	    /* ... then fall through to plain expression.  */
 	    input_line_pointer = hold;
 	  }
+	  /* Fall through.  */
 
 	default:
 	  if (saw_arg && !saw_comma)
@@ -5583,6 +5584,7 @@ md_atof (int type, char *litP, int *sizeP)
     case 'G':
       /* vax_md_atof() doesn't like "G" for some reason.  */
       type = 'g';
+      /* Fall through.  */
     case 'F':
     case 'D':
       return vax_md_atof (type, litP, sizeP);

@@ -548,14 +548,6 @@ solib_aix_solib_create_inferior_hook (int from_tty)
     }
 }
 
-/* Implement the "special_symbol_handling" target_so_ops method.  */
-
-static void
-solib_aix_special_symbol_handling (void)
-{
-  /* Nothing needed.  */
-}
-
 /* Implement the "current_sos" target_so_ops method.  */
 
 static struct so_list *
@@ -648,6 +640,8 @@ solib_aix_bfd_open (char *pathname)
   char *member_name;
   bfd *archive_bfd, *object_bfd;
   struct cleanup *cleanup;
+  int found_file;
+  char *found_pathname;
 
   if (pathname[path_len - 1] != ')')
     return solib_bfd_open (pathname);
@@ -669,7 +663,13 @@ solib_aix_bfd_open (char *pathname)
   member_name = xstrprintf ("%.*s", path_len - filename_len - 2, sep + 1);
   make_cleanup (xfree, member_name);
 
-  archive_bfd = gdb_bfd_open (filename, gnutarget, -1);
+  /* Calling solib_find makes certain that sysroot path is set properly
+     if program has a dependency on .a archive and sysroot is set via
+     set sysroot command.  */
+  found_pathname = solib_find (filename, &found_file);
+  if (found_pathname == NULL)
+      perror_with_name (pathname);
+  archive_bfd = solib_bfd_fopen (found_pathname, found_file);
   if (archive_bfd == NULL)
     {
       warning (_("Could not open `%s' as an executable file: %s"),
@@ -724,12 +724,13 @@ solib_aix_bfd_open (char *pathname)
       return NULL;
     }
 
-  /* Override the returned bfd's name with our synthetic name in order
-     to allow commands listing all shared libraries to display that
-     synthetic name.  Otherwise, we would only be displaying the name
-     of the archive member object.  */
+  /* Override the returned bfd's name with the name returned from solib_find
+     along with appended parenthesized member name in order to allow commands
+     listing all shared libraries to display.  Otherwise, we would only be
+     displaying the name of the archive member object.  */
   xfree (bfd_get_filename (object_bfd));
-  object_bfd->filename = xstrdup (pathname);
+  object_bfd->filename = xstrprintf ("%s%s",
+                                     bfd_get_filename (archive_bfd), sep);
 
   gdb_bfd_unref (archive_bfd);
   do_cleanups (cleanup);
@@ -823,8 +824,6 @@ _initialize_solib_aix (void)
   solib_aix_so_ops.clear_solib = solib_aix_clear_solib;
   solib_aix_so_ops.solib_create_inferior_hook
     = solib_aix_solib_create_inferior_hook;
-  solib_aix_so_ops.special_symbol_handling
-    = solib_aix_special_symbol_handling;
   solib_aix_so_ops.current_sos = solib_aix_current_sos;
   solib_aix_so_ops.open_symbol_file_object
     = solib_aix_open_symbol_file_object;

@@ -319,35 +319,6 @@ make_cleanup_htab_delete (htab_t htab)
   return make_cleanup (do_htab_delete_cleanup, htab);
 }
 
-struct restore_ui_file_closure
-{
-  struct ui_file **variable;
-  struct ui_file *value;
-};
-
-static void
-do_restore_ui_file (void *p)
-{
-  struct restore_ui_file_closure *closure
-    = (struct restore_ui_file_closure *) p;
-
-  *(closure->variable) = closure->value;
-}
-
-/* Remember the current value of *VARIABLE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_ui_file (struct ui_file **variable)
-{
-  struct restore_ui_file_closure *c = XNEW (struct restore_ui_file_closure);
-
-  c->variable = variable;
-  c->value = *variable;
-
-  return make_cleanup_dtor (do_restore_ui_file, (void *) c, xfree);
-}
-
 /* Helper for make_cleanup_value_free_to_mark.  */
 
 static void
@@ -3199,7 +3170,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       if (minor == NULL)
 	minor = &min;
 
-      /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
+      /* Skip any identifier after "GNU " - such as "C11" or "C++".
 	 A full producer string might look like:
 	 "GNU C 4.7.2"
 	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."

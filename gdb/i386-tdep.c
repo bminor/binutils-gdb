@@ -8857,7 +8857,8 @@ i386_mpx_info_bounds (char *args, int from_tty)
   struct gdbarch *gdbarch = get_current_arch ();
   struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
-  if (!i386_mpx_enabled ())
+  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_i386
+      || !i386_mpx_enabled ())
     {
       printf_unfiltered (_("Intel Memory Protection Extensions not "
 			   "supported on this target.\n"));
@@ -8900,7 +8901,8 @@ i386_mpx_set_bounds (char *args, int from_tty)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
-  if (!i386_mpx_enabled ())
+  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_i386
+      || !i386_mpx_enabled ())
     error (_("Intel Memory Protection Extensions not supported\
  on this target."));
 

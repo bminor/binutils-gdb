@@ -302,6 +302,15 @@ target_continue (ptid_t ptid, enum gdb_signal signal)
   (*the_target->resume) (&resume_info, 1);
 }
 
+/* See target/target.h.  */
+
+int
+target_supports_multi_process (void)
+{
+  return (the_target->supports_multi_process != NULL ?
+	  (*the_target->supports_multi_process) () : 0);
+}
+
 int
 start_non_stop (int nonstop)
 {

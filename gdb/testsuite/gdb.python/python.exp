@@ -251,6 +251,13 @@ gdb_py_test_silent_cmd {python symtab = gdb.decode_line ("func1,func2")} \
     "test decode_line func1,func2" 1
 gdb_test {python print (symtab[0])} ",func2" "stop at comma in linespec"
 
+gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"*0\")" "Test decode_line *0" 1
+gdb_test "python print (len(symtab))" "2" "Test decode_line *0 result length"
+gdb_test "python print (symtab\[0\])" "None" "Test decode_line *0 unparsed"
+gdb_test "python print (len(symtab\[1\]))" "1" "Test decode_line *0 locations length"
+gdb_test "python print (symtab\[1\]\[0\].symtab)" "None" "Test decode_line *0 filename"
+gdb_test "python print (symtab\[1\]\[0\].pc)" "0" "Test decode_line *0 pc"
+
 # gdb.write
 gdb_test "python print (sys.stderr)" ".*gdb.GdbOutputErrorFile (instance|object) at.*" "Test stderr location"
 gdb_test "python print (sys.stdout)" ".*gdb.GdbOutputFile (instance|object) at.*" "Test stdout location"

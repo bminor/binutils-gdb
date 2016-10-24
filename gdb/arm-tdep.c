@@ -60,13 +60,13 @@
 #include "record-full.h"
 #include <algorithm>
 
-#include "features/arm-with-m.c"
-#include "features/arm-with-m-fpa-layout.c"
-#include "features/arm-with-m-vfp-d16.c"
-#include "features/arm-with-iwmmxt.c"
-#include "features/arm-with-vfpv2.c"
-#include "features/arm-with-vfpv3.c"
-#include "features/arm-with-neon.c"
+#include "features/arm/arm-with-m.c"
+#include "features/arm/arm-with-m-fpa-layout.c"
+#include "features/arm/arm-with-m-vfp-d16.c"
+#include "features/arm/arm-with-iwmmxt.c"
+#include "features/arm/arm-with-vfpv2.c"
+#include "features/arm/arm-with-vfpv3.c"
+#include "features/arm/arm-with-neon.c"
 
 static int arm_debug;
 
@@ -4255,15 +4255,12 @@ arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
 				   struct address_space *aspace,
 				   CORE_ADDR pc)
 {
-  struct cleanup *old_chain
-    = make_cleanup_restore_integer (&arm_override_mode);
-
-  arm_override_mode = IS_THUMB_ADDR (pc);
+  scoped_restore save_override_mode
+    = make_scoped_restore (&arm_override_mode,
+			   (int) IS_THUMB_ADDR (pc));
   pc = gdbarch_addr_bits_remove (gdbarch, pc);
 
   insert_single_step_breakpoint (gdbarch, aspace, pc);
-
-  do_cleanups (old_chain);
 }
 
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
@@ -7900,7 +7897,7 @@ arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
   if (arm_pc_is_thumb (gdbarch, *pcptr) && *kindptr == 4)
     /* The documented magic value for a 32-bit Thumb-2 breakpoint, so
        that this is not confused with a 32-bit ARM breakpoint.  */
-    *kindptr = 3;
+    *kindptr = ARM_BP_KIND_THUMB2;
 }
 
 /* Extract from an array REGBUF containing the (raw) register state a

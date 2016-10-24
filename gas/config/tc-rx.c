@@ -2401,8 +2401,10 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
 
     case BFD_RELOC_RX_GPRELL:
       val >>= 1;
+      /* Fall through.  */
     case BFD_RELOC_RX_GPRELW:
       val >>= 1;
+      /* Fall through.  */
     case BFD_RELOC_RX_GPRELB:
 #if RX_OPCODE_BIG_ENDIAN
       op[1] = val & 0xff;

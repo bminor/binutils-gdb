@@ -1276,6 +1276,7 @@ arm_reg_alt_syntax (char **ccp, char *start, struct reg_entry *reg,
 	if (*ccp != start && processor <= 15)
 	  return processor;
       }
+      /* Fall through.  */
 
     case REG_TYPE_MMXWC:
       /* WC includes WCG.  ??? I'm not sure this is true for all
@@ -7426,6 +7427,21 @@ encode_arm_vfp_reg (int reg, enum vfp_reg_pos pos)
 static void
 encode_arm_shift (int i)
 {
+  /* register-shifted register.  */
+  if (inst.operands[i].immisreg)
+    {
+      int index;
+      for (index = 0; index <= i; ++index)
+	{
+	  gas_assert (inst.operands[index].present);
+	  if (inst.operands[index].isreg && inst.operands[index].reg == REG_PC)
+	    as_warn (UNPRED_REG ("r15"));
+	}
+
+      if (inst.operands[i].imm == REG_PC)
+	as_warn (UNPRED_REG ("r15"));
+    }
+
   if (inst.operands[i].shift_kind == SHIFT_RRX)
     inst.instruction |= SHIFT_ROR << 5;
   else
@@ -17773,7 +17789,7 @@ opcode_lookup (char **str)
 	case OT_odd_infix_unc:
 	  if (!unified_syntax)
 	    return 0;
-	  /* else fall through */
+	  /* Fall through.  */
 
 	case OT_csuffix:
 	case OT_csuffixF:
@@ -22842,6 +22858,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_OFFSET_IMM:
       if (!fixP->fx_done && seg->use_rela_p)
 	value = 0;
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_LITERAL:
       sign = value > 0;
@@ -23200,6 +23217,7 @@ md_apply_fix (fixS *	fixP,
 	  newval = md_chars_to_number (buf, INSN_SIZE);
 	  fixP->fx_done = 0;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_PLT32:
 #endif
@@ -24092,6 +24110,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_8_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_16:
       if (fixp->fx_pcrel)
@@ -24099,6 +24118,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_16_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_32:
       if (fixp->fx_pcrel)
@@ -24106,6 +24126,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_32_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_MOVW:
       if (fixp->fx_pcrel)
@@ -24113,6 +24134,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_MOVW_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_MOVT:
       if (fixp->fx_pcrel)
@@ -24120,6 +24142,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_MOVT_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_THUMB_MOVW:
       if (fixp->fx_pcrel)
@@ -24127,6 +24150,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_THUMB_MOVW_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_THUMB_MOVT:
       if (fixp->fx_pcrel)
@@ -24134,6 +24158,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_THUMB_MOVT_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_NONE:
     case BFD_RELOC_ARM_PCREL_BRANCH:

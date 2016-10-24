@@ -1,3 +1,318 @@
+2016-10-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/gas.pot: Regenerate.
+
+2016-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* aout-adobe.c: Add missing c-format tags for translatable strings.
+	* aout-cris.c: Likewise.
+	* aoutx.h: Likewise.
+	* bfd.c: Likewise.
+	* binary.c: Likewise.
+	* cache.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-i860.c: Likewise.
+	* coff-mcore.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-tic4x.c: Likewise.
+	* coff-tic54x.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffgen.c: Likewise.
+	* cofflink.c: Likewise.
+	* coffswap.h: Likewise.
+	* cpu-arm.c: Likewise.
+	* dwarf2.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf-attrs.c: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf-ifunc.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf-s390-common.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arc.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cr16c.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-crx.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-d30v.c: Likewise.
+	* elf32-epiphany.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-gen.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-i960.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc12.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-mep.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-moxie.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-or1k.c: Likewise.
+	* elf32-pj.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-rx.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh-symbian.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-spu.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-visium.c: Likewise.
+	* elf32-xgate.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-gen.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: Likewise.
+	* libbfd.c: Likewise.
+	* linker.c: Likewise.
+	* m68klinux.c: Likewise.
+	* mach-o.c: Likewise.
+	* merge.c: Likewise.
+	* mmo.c: Likewise.
+	* oasys.c: Likewise.
+	* pdp11.c: Likewise.
+	* pe-mips.c: Likewise.
+	* peXXigen.c: Likewise.
+	* pei-x86_64.c: Likewise.
+	* peicode.h: Likewise.
+	* ppcboot.c: Likewise.
+	* reloc.c: Likewise.
+	* sparclinux.c: Likewise.
+	* srec.c: Likewise.
+	* stabs.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* vms-lib.c: Likewise.
+	* xcofflink.c: Likewise.
+
+2016-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-nds32.c (nds32_elf_check_relocs): Avoid aliasing warning
+	from GCC.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-arm.c (elf32_arm_update_relocs): Rename `index' local
+	variable to `reloc_index'.
+
+2016-10-12  Alan Modra  <amodra@gmail.com>
+
+	* section.c (BFD_FAKE_SECTION): Reorder parameters.  Formatting.
+	(STD_SECTION): Adjust to suit.
+	* elf.c (_bfd_elf_large_com_section): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2016-10-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Handle symbols
+	defined temporarily with bfd_und_section.
+	* elflink.c (_bfd_elf_gc_keep): Don't set SEC_KEEP for bfd_und_section.
+	* elfxx-mips.c (mips_elf_local_pic_function_p): Exclude defined
+	symbols with bfd_und_section.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* targets.c (bfd_target <_bfd_merge_private_bfd_data>): Replace
+	obfd param with struct bfd_link_info param.  Update all callers.
+	* linker.c (bfd_merge_private_bfd_data): Likewise.
+	(_bfd_generic_verify_endian_match): Likewise.
+	* aoutf1.h (sunos_merge_private_bfd_data): Likewise.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Likewise.
+	* elf-attrs.c (_bfd_elf_merge_object_attributes): Likewise.
+	* elf-bfd.h (_bfd_elf_ppc_merge_fp_attributes): Likewise.
+	(_bfd_elf_merge_object_attributes): Likewise.
+	* elf-m10300.c (_bfd_mn10300_elf_merge_private_bfd_data): Likewise.
+	* elf-s390-common.c (elf_s390_merge_obj_attributes): Likewise.
+	* elf32-arc.c (arc_elf_merge_private_bfd_data): Likewise.
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Likewise.
+	(elf32_arm_merge_private_bfd_data): Likewise.
+	* elf32-bfin.c (elf32_bfin_merge_private_bfd_data): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_merge_private_bfd_data): Likewise.
+	* elf32-cris.c (cris_elf_merge_private_bfd_data): Likewise.
+	* elf32-frv.c (frv_elf_merge_private_bfd_data): Likewise.
+	* elf32-h8300.c (elf32_h8_merge_private_bfd_data): Likewise.
+	* elf32-i370.c (i370_elf_merge_private_bfd_data): Likewise.
+	* elf32-iq2000.c (iq2000_elf_merge_private_bfd_data): Likewise.
+	* elf32-m32c.c (m32c_elf_merge_private_bfd_data): Likewise.
+	* elf32-m32r.c (m32r_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68hc1x.c (_bfd_m68hc11_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68hc1x.h (_bfd_m68hc11_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68k.c (elf32_m68k_merge_private_bfd_data): Likewise.
+	* elf32-mcore.c (mcore_elf_merge_private_bfd_data): Likewise.
+	* elf32-mep.c (mep_elf_merge_private_bfd_data): Likewise.
+	* elf32-msp430.c (elf32_msp430_merge_mspabi_attributes): Likewise.
+	(elf32_msp430_merge_private_bfd_data): Likewise.
+	* elf32-mt.c (mt_elf_merge_private_bfd_data): Likewise.
+	* elf32-nds32.c (nds32_elf_merge_private_bfd_data): Likewise.
+	* elf32-nios2.c (nios2_elf32_merge_private_bfd_data): Likewise.
+	* elf32-or1k.c (elf32_or1k_merge_private_bfd_data): Likewise.
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Likewise.
+	(ppc_elf_merge_obj_attributes): Likewise.
+	(ppc_elf_merge_private_bfd_data): Likewise.
+	* elf32-rl78.c (rl78_elf_merge_private_bfd_data): Likewise.
+	* elf32-rx.c (rx_elf_merge_private_bfd_data): Likewise.
+	* elf32-s390.c (elf32_s390_merge_private_bfd_data): Likewise.
+	* elf32-score.c (s3_elf32_score_merge_private_bfd_data): Likewise.
+	(elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-score.h (s7_elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-score7.c (s7_elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-sh.c (sh_merge_bfd_arch, sh_elf_merge_private_data): Likewise.
+	* elf32-sh64.c (sh64_elf_merge_private_data): Likewise.
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_merge_attributes): Likewise.
+	(elf32_tic6x_merge_private_bfd_data): Likewise.
+	* elf32-v850.c (v850_elf_merge_private_bfd_data): Likewise.
+	* elf32-vax.c (elf32_vax_merge_private_bfd_data): Likewise.
+	* elf32-visium.c (visium_elf_merge_private_bfd_data): Likewise.
+	* elf32-xtensa.c (elf_xtensa_merge_private_bfd_data): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_merge_private_bfd_data): Likewise.
+	* elf64-ppc.c (ppc64_elf_merge_private_bfd_data): Likewise.
+	* elf64-s390.c (elf64_s390_merge_private_bfd_data): Likewise.
+	* elf64-sh64.c (sh_elf64_merge_private_data): Likewise.
+	* elf64-sparc.c (elf64_sparc_merge_private_bfd_data): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_merge_private_bfd_data): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_merge_private_bfd_data): Likewise.
+	* elfxx-mips.c (mips_elf_merge_obj_e_flags): Likewise.
+	(mips_elf_merge_obj_attributes): Likewise.
+	(_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_merge_private_bfd_data): Likewise.
+	* elfxx-sparc.h (_bfd_sparc_elf_merge_private_bfd_data): Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_merge_private_bfd_data): Likewise.
+	* elfxx-tilegx.c (_bfd_tilegx_elf_merge_private_bfd_data): Likewise.
+	* elfxx-tilegx.h (_bfd_tilegx_elf_merge_private_bfd_data): Likewise.
+	* libbfd-in.h (_bfd_generic_bfd_merge_private_bfd_data): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (LIBBFD_H_FILES): Update.
+	* doc/Makefile.am (LIBBFD_H_DEP): Likewise.
+	* cpu-sh.c (sh_merge_bfd_arch): Move to..
+	* elf32-sh.c: ..here, and make static.
+	* elf32-arc.c (arc_elf_merge_private_bfd_data): Delete extraneous
+	error.
+	* elf32-cris.c (cris_elf_merge_private_bfd_data): Don't call
+	_bfd_generic_verify_endian_match.
+	* elf32-microblaze.c (microblaze_elf_merge_private_bfd_data): Delete.
+	(bfd_elf32_bfd_merge_private_bfd_data): Define as
+	_bfd_generic_verify_endian_match.
+	* elf32-mt.c (mt_elf_merge_private_bfd_data): Don't test
+	boolean == FALSE.
+	* elf32-xgate.c (_bfd_xgate_elf_merge_private_bfd_data): Delete.
+	(bfd_elf32_bfd_merge_private_bfd_data): Don't define.
+	* elf32-xgate.h (_bfd_xgate_elf_merge_private_bfd_data): Delete.
+	* libbfd-in.h (_bfd_generic_verify_endian_match): Delete.
+	* libbfd.c (_bfd_generic_verify_endian_match): Move to..
+	* linker.c: ..here, and make internal.
+	* bfd.c (bfd_merge_private_bfd_data): Move to..
+	* linker.c: ..here.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* coff-h8300.c: Spell fall through comments consistently.
+	* coffgen.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elfxx-aarch64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* cpu-ns32k.c: Add missing fall through comments.
+	* elf-m10300.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-rx.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* ieee.c: Likewise.
+	* oasys.c: Likewise.
+	* pdp11.c: Likewise.
+	* srec.c: Likewise.
+	* versados.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Revert accidental commit
+	made 2015-01-08.
+	* elf32-nds32.c (nds32_elf_grok_psinfo): Add missing break.
+	* reloc.c (bfd_default_reloc_type_lookup): Add missing breaks.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* elf32-epiphany.c (epiphany_final_link_relocate): Use bitwise
+	OR in arithmetic expression, not boolean OR.
+
 2016-09-30  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (BFD_H_FILES): Add linker.c and simple.c.  Sort
@@ -2139,6 +2454,7 @@
 
 2016-04-05  Maciej W. Rozycki  <macro@imgtec.com>
 
+	PR ld/19908
 	* elflink.c (elf_link_add_object_symbols): Always turn hidden
 	and internal symbols which have a dynamic index into local
 	ones.
