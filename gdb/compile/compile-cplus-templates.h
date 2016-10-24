@@ -24,27 +24,27 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <tr1/unordered_map>
 
 struct symbol;
 struct gcc_cp_template_args;
 struct template_symbol;
-struct compile_cplus_instance;
 
-namespace compile::cplus::templates
+namespace compile
 {
   class function_template_defn;
   class class_template_defn;
+  class compile_cplus_instance;
 
   // Types used for tracking template definitions.
   typedef std::pair<std::string, function_template_defn *>
-    function_template_map_item;
-  typedef std::unordered_map<std::string, function_template_defn *>
-    function_template_defn_map;
+    function_template_map_item_t;
+  typedef std::tr1::unordered_map<std::string, function_template_defn *>
+    function_template_defn_map_t;
   typedef std::pair<std::string, class_template_defn *>
-    class_template_map_item;
-  typedef std::unordered_map<std::string, class_template_defn *>
-    class_template_defn_map;
+    class_template_map_item_t;
+  typedef std::tr1::unordered_map<std::string, class_template_defn *>
+    class_template_defn_map_t;
 
   // A base class holding data common to all template definitions.
 
@@ -183,7 +183,7 @@ namespace compile::cplus::templates
 
     // A unary function to delete map items.
 
-    static void destroy (function_template_map_item p);
+    static void destroy (function_template_map_item_t p);
 
     // Construct a new function template definition with the generic
     // string representation GENERIC and demangle INFO, based on the
@@ -278,7 +278,7 @@ namespace compile::cplus::templates
 
     // A unary function to delete map items.
 
-    static void destroy (class_template_map_item p);
+    static void destroy (class_template_map_item_t p);
 
     // Construct a new class template definition with the generic
     // string representation GENERIC based on the concrete instance
@@ -310,51 +310,15 @@ namespace compile::cplus::templates
   // Loop over SYMBOLS, defining any generic template definitions for
   // any template symbols in the list.
 
-  void define_templates (struct compile_cplus_instance *instance,
+  void define_templates (compile_cplus_instance *instance,
 			 VEC (block_symbol_d) *symbols);
 
-  // Enumerate the template arguments fo template DEFN into DEST.
-
-  void enumerate_template_arguments (struct compile_cplus_instance *instance,
-				     struct gcc_cp_template_args *dest,
-				     const template_defn *defn,
-				     const struct template_argument_info *arg_info);
-
-  // Emit any new function template definitions to the compiler plug-in
-  // INSTANCE.
-
-  void emit_function_template_decls (struct compile_cplus_instance *instance);
 
   // Scan TYPE for any new function templates.
   // Does not actually emit definitions for any new templates until
   // emit_function_template_decls is called.
 
-  void scan_type_for_function_templates (struct compile_cplus_instance *instance,
+  void scan_type_for_function_templates (compile_cplus_instance *instance,
 					 struct type *type);
-
-  // If TYPE (with declaration name NAME) represents a concrete instance
-  // of a new template, note the new template definition in INSTANCE
-
-  void maybe_define_new_class_template (struct compile_cplus_instance *instance,
-					struct type *type, const char *name);
-
-  // Emit any new class template definitions to the compiler plug-in
-  // INSTANCE.
-
-  void emit_class_template_decls (struct compile_cplus_instance *instance);
-
-  // Search for an existing class template definition based on TYPE.
-  // Returns NULL if no template based on TYPE is known.
-
-  class_template_defn *
-  find_class_template_defn (struct compile_cplus_instance *instance,
-			    struct type *type);
-
-  // Find the generic template definition for TSYM or NULL if none was
-  // found.
-
-  function_template_defn *
-  find_function_template_defn (struct compile_cplus_instance *instance,
-			       struct template_symbol *tsym);
 };
 #endif // COMPILE_CPLUS_TEMPLATES_H

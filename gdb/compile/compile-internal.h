@@ -17,12 +17,12 @@
 #ifndef GDB_COMPILE_INTERNAL_H
 #define GDB_COMPILE_INTERNAL_H
 
-#include "hashtab.h"
+#include "defs.h"
 #include "gcc-c-interface.h"
-#include "common/enum-flags.h"
+#include "compile-internal.h"
 
-/* enum-flags wrapper.  */
-DEF_ENUM_FLAGS_TYPE (enum gcc_qualifiers, gcc_qualifiers_flags);
+#include <string>
+#include <tr1/unordered_map>
 
 /* Debugging flag for the "compile" family of commands.  */
 
@@ -37,53 +37,146 @@ struct block;
 /* An object of this type holds state associated with a given
    compilation job.  */
 
-struct compile_instance
+class compile_instance
 {
-  /* The GCC front end.  */
+public:
 
-  struct gcc_base_context *fe;
+  compile_instance (struct gcc_base_context *gcc_fe, const char *options)
+    : m_gcc_fe (gcc_fe), m_gcc_target_options (options)
+  {
+  }
+
+  virtual ~compile_instance ()
+  {
+  }
+
+  // Returns the GCC options to be passed during compilation.
+
+  const std::string &
+  gcc_target_options () const
+  {
+    return m_gcc_target_options;
+  }
+
+  /* Insert GCC_TYPE into the type cache for TYPE.
+
+     It is ok for a given type to be inserted more than once, provided that
+     the exact same association is made each time.  */
+
+  void insert_type (struct type *type, gcc_type gcc_type);
+
+  // Associate SYMBOL with some error text.
+
+  void insert_symbol_error (const struct symbol *sym, std::string text);
+
+  /* Emit the error message corresponding to SYM, if one exists, and
+     arrange for it not to be emitted again.  */
+
+  void error_symbol_once (const struct symbol *sym);
+
+  /* These currently just forward to the underlying ops
+     vtable.  */
+
+  // Set the plug-in print callback.
+
+  void set_print_callback (void (*print_function) (void *, const char *),
+			   void *datum);
+
+  // Return the plug-in's front-end version.
+
+  unsigned int version () const;
+
+
+  // Set the plug-in's verbosity level.
+
+  void set_verbose (int level);
+
+  // Set the plug-in driver program.
+
+  void set_driver_filename (const char *filename);
+
+  // Set the regular expression used to match the configury triplet
+  // prefix to the compiler.
+
+  void set_triplet_regexp (const char *regexp);
+
+  // Set compilation arguments.
+
+  char *set_arguments (int argc, char **argv);
+
+  // !!keiths: YUCK!
+
+  char *set_arguments (const char *regexp, int argc, char **argv);
+
+  // Set the filename of the program to compile.
+
+  void set_source_file (const char *filename);
+
+  // Compile the previously specified source file to FILENAME.
+
+  bool compile (const char *filename);
+
+  // Same as above, but for earlier protocol versions.
+
+  bool compile (const char *filename, int verbose_level);
+
+  // Set the scope type for this compile.
+
+  void set_scope (enum compile_i_scope_types scope)
+  {
+    m_scope = scope;
+  }
+
+  // Return the scope type.
+
+  enum compile_i_scope_types scope () const
+  {
+    return m_scope;
+  }
+
+  // Set the block to be used for symbol searches.
+
+  void set_block (const struct block *block)
+  {
+    m_block = block;
+  }
+
+  // Return the search block.
+
+  const struct block *block () const
+  {
+    return m_block;
+  }
+
+protected:
+
+  /* Map types used by the compile instance for caching type conversions.
+     and error tracking.  */
+
+  typedef std::pair<struct type *, gcc_type> type_map_item_t;
+  typedef std::tr1::unordered_map<struct type *, gcc_type> type_map_t;
+  typedef std::pair<const struct symbol *, std::string> symbol_err_map_item_t;
+  typedef std::tr1::unordered_map<const struct symbol *, std::string> symbol_err_map_t;
+
+  /* The GCC front end.  */
+  struct gcc_base_context *m_gcc_fe;
 
   /* The "scope" of this compilation.  */
-
-  enum compile_i_scope_types scope;
+  enum compile_i_scope_types m_scope;
 
   /* The block in which an expression is being parsed.  */
-
-  const struct block *block;
+  const struct block *m_block;
 
   /* Specify "-std=gnu11", "-std=gnu++11" or similar.  These options are put
      after CU's DW_AT_producer compilation options to override them.  */
+  std::string m_gcc_target_options;
 
-  const char *gcc_target_options;
+  // Map from gdb types to gcc types.
+  type_map_t m_type_map;
 
-  /* How to destroy this object.  */
-
-  void (*destroy) (struct compile_instance *);
+  // Map from gdb symbols to gcc error messages to emit.
+  symbol_err_map_t m_symbol_err_map;
 };
-
-/* A subclass of compile_instance that is specific to the C front
-   end.  */
-struct compile_c_instance
-{
-  /* Base class.  Note that the base class vtable actually points to a
-     gcc_c_fe_vtable.  */
-
-  struct compile_instance base;
-
-  /* Map from gdb types to gcc types.  */
-
-  htab_t type_map;
-
-  /* Map from gdb symbols to gcc error messages to emit.  */
-
-  htab_t symbol_err_map;
-};
-
-/* A helper macro that takes a compile_c_instance and returns its
-   corresponding gcc_c_context.  */
-
- #define C_CTX(I) ((struct gcc_c_context *) ((I)->base.fe))
- #define CP_CTX(I) ((struct gcc_cp_context *) ((I)->base.fe))
 
 /* Define header and footers for different scopes.  */
 
@@ -115,53 +208,5 @@ extern char *compile_register_name_mangled (struct gdbarch *gdbarch,
 
 extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 					   const char *reg_name);
-
-/* Convert a gdb type, TYPE, to a GCC type.  INSTANCE is used to do the
-   actual conversion.  If this type was defined in another type,
-   NESTED_ACCESS should indicate the accessibility of this type
-   (or GCC_CP_ACCESS_NONE if not a nested type).
-
-   The new GCC type is returned.  */
-
-struct type;
-extern gcc_type convert_type (struct compile_c_instance *instance,
-			      struct type *type);
-
-/* A callback suitable for use as the GCC C symbol oracle.  */
-
-extern gcc_c_oracle_function gcc_convert_symbol;
-
-/* A callback suitable for use as the GCC C address oracle.  */
-
-extern gcc_c_symbol_address_function gcc_symbol_address;
-
-/* Instantiate a GDB object holding state for the GCC context FE.  The
-   new object is returned.  */
-
-extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
-
-/* Emit code to compute the address for all the local variables in
-   scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
-   register number, where each element indicates if the corresponding
-   register is needed to compute a local variable.  */
-
-extern unsigned char *generate_c_for_variable_locations
-     (struct compile_c_instance *compiler,
-      struct ui_file *stream,
-      struct gdbarch *gdbarch,
-      const struct block *block,
-      CORE_ADDR pc);
-
-/* Get the GCC mode attribute value for a given type size.  */
-
-extern const char *c_get_mode_for_size (int size);
-
-/* Given a dynamic property, return an xmallocd name that is used to
-   represent its size.  The result must be freed by the caller.  The
-   contents of the resulting string will be the same each time for
-   each call with the same argument.  */
-
-struct dynamic_prop;
-extern char *c_get_range_decl_name (const struct dynamic_prop *prop);
 
 #endif /* GDB_COMPILE_INTERNAL_H */

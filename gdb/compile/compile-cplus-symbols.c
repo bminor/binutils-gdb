@@ -33,111 +33,15 @@
 #include "dwarf2loc.h"
 #include "cp-support.h"
 #include "gdbcmd.h"
+#include "compile-c.h" // !!keiths FIXME for c_get_range_decl_name
+
 
 
-/* Object of this type are stored in the compiler's symbol_err_map.  */
+using namespace compile;
 
-struct symbol_error
-{
-  /* The symbol.  */
-
-  const struct symbol *sym;
-
-  /* The error message to emit.  This is malloc'd and owned by the
-     hash table.  */
-
-  char *message;
-};
+// See description in compile-internal.h.
 
 int debug_compile_oracle = 0;
-
-/* Hash function for struct symbol_error.  */
-
-static hashval_t
-hash_symbol_error (const void *a)
-{
-  const struct symbol_error *se = (struct symbol_error *) a;
-
-  return htab_hash_pointer (se->sym);
-}
-
-/* Equality function for struct symbol_error.  */
-
-static int
-eq_symbol_error (const void *a, const void *b)
-{
-  const struct symbol_error *sea = (struct symbol_error *) a;
-  const struct symbol_error *seb = (struct symbol_error *) b;
-
-  return sea->sym == seb->sym;
-}
-
-/* Deletion function for struct symbol_error.  */
-
-static void
-del_symbol_error (void *a)
-{
-  struct symbol_error *se = (struct symbol_error *) a;
-
-  xfree (se->message);
-  xfree (se);
-}
-
-/* Associate SYMBOL with some error text.  */
-
-static void
-insert_symbol_error (htab_t hash, const struct symbol *sym, const char *text)
-{
-  struct symbol_error e;
-  void **slot;
-
-  e.sym = sym;
-  slot = htab_find_slot (hash, &e, INSERT);
-  if (*slot == NULL)
-    {
-      struct symbol_error *e = XNEW (struct symbol_error);
-
-      e->sym = sym;
-      e->message = xstrdup (text);
-      *slot = e;
-    }
-}
-
-/* Emit the error message corresponding to SYM, if one exists, and
-   arrange for it not to be emitted again.  */
-
-static void
-error_symbol_once (struct compile_cplus_instance *instance,
-		   const struct symbol *sym)
-{
-  struct symbol_error search;
-  struct symbol_error *err;
-  char *message;
-
-  if (instance->symbol_err_map == NULL)
-    return;
-
-  search.sym = sym;
-  err = (struct symbol_error *) htab_find (instance->symbol_err_map, &search);
-  if (err == NULL || err->message == NULL)
-    return;
-
-  message = err->message;
-  err->message = NULL;
-  make_cleanup (xfree, message);
-  error (_("%s"), message);
-}
-
-
-
-/* Compute the name of the pointer representing a local symbol's
-   address.  */
-
-static char *
-symbol_substitution_name (struct symbol *sym)
-{
-  return concat ("__", SYMBOL_NATURAL_NAME (sym), "_ptr", (char *) NULL);
-}
 
 /* Convert a given symbol, SYM, to the compiler's representation.
    CONTEXT is the compiler instance.  IS_GLOBAL is true if the
@@ -147,22 +51,20 @@ symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (struct compile_cplus_instance *instance,
-		    struct block_symbol sym,
-		    int is_global,
-		    int is_local)
+convert_one_symbol (compile_cplus_instance *instance,
+		    struct block_symbol sym, bool is_global, bool is_local)
 {
   gcc_type sym_type;
   const char *filename = symbol_symtab (sym.symbol)->filename;
   unsigned short line = SYMBOL_LINE (sym.symbol);
 
-  error_symbol_once (instance, sym.symbol);
+  instance->error_symbol_once (sym.symbol);
 
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else if (!SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
-    sym_type = convert_cplus_type (instance, SYMBOL_TYPE (sym.symbol),
-				   GCC_CP_ACCESS_NONE);
+    sym_type = instance->convert_type (SYMBOL_TYPE (sym.symbol),
+				       GCC_CP_ACCESS_NONE);
 
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
@@ -170,17 +72,15 @@ convert_one_symbol (struct compile_cplus_instance *instance,
     }
   else
     {
-      compile::cplus::templates::function_template_defn *template_decl = NULL;
       /* Squash compiler warning.  */
       gcc_cp_symbol_kind_flags kind = GCC_CP_FLAG_BASE;
       CORE_ADDR addr = 0;
-      char *symbol_name = NULL, *name = NULL;
-      struct gcc_cp_template_args targs;
-      struct cleanup *back_to;
+      std::string name;
+      char *symbol_name = NULL;
 
-      /* Arrange to free `name' and 'symbol_name'.  */
-      back_to = make_cleanup (free_current_contents, &name);
-      make_cleanup (free_current_contents, &symbol_name);
+      // Add a null cleanup for templates.  !!keiths: remove!
+      struct cleanup *back_to
+	= make_cleanup (free_current_contents, &symbol_name);
 
       switch (SYMBOL_CLASS (sym.symbol))
 	{
@@ -219,47 +119,17 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	      {
 		kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
 		name = special_name;
+		xfree (special_name);
 	      }
 	    else if (func_name != SYMBOL_NATURAL_NAME (sym.symbol))
 	      {
 		kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
-		name = xstrdup (func_name);
+		name = func_name;
 	      }
 	    else if (ignore)
 	      {
 		/* !!keiths: I don't think we can get here, can we?  */
 		gdb_assert_not_reached ("told to ignore method!");
-	      }
-
-	    if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
-	      {
-		int i;
-		struct template_symbol *tsym
-		  = (struct template_symbol *) sym.symbol;
-
-		/* Find the template definition, defining the template,
-		   if needed.  */
-		template_decl = compile::cplus::templates::find_function_template_defn (instance, tsym);
-		if (template_decl == NULL)
-		  {
-		    /* We didn't find one, but we've been told that this
-		       symbol is a function template.  There's not much
-		       we can do here...  */
-		    break;
-		  }
-
-		/* Construct the template specialization.  This will
-		   be used later.  */
-		targs.n_elements = tsym->template_arguments->n_arguments;
-		targs.kinds = XNEWVEC (char ,targs.n_elements);
-		make_cleanup (xfree, targs.kinds);
-		targs.elements
-		  = XNEWVEC (gcc_cp_template_arg, targs.n_elements);
-		make_cleanup (xfree, targs.elements);
-		compile::cplus::templates::enumerate_template_arguments (instance,
-									&targs,
-									template_decl,
-									tsym->template_arguments);
 	      }
 	  }
 	  break;
@@ -271,15 +141,8 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	      do_cleanups (back_to);
 	      return;
 	    }
-	  if (debug_compile_cplus_types)
-	    {
-	      printf_unfiltered ("build_constant %s\n",
-				 SYMBOL_NATURAL_NAME (sym.symbol));
-	    }
-	  CPCALL (build_constant, instance,
-		  sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
-		  SYMBOL_VALUE (sym.symbol),
-		  filename, line);
+	  instance->build_constant (sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
+				    SYMBOL_VALUE (sym.symbol), filename, line);
 	  do_cleanups (back_to);
 	  return;
 
@@ -347,7 +210,7 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	case LOC_LOCAL:
 	substitution:
 	  kind = GCC_CP_SYMBOL_VARIABLE;
-	  symbol_name = symbol_substitution_name (sym.symbol);
+	  symbol_name = c_symbol_substitution_name (sym.symbol);
 	  break;
 
 	case LOC_STATIC:
@@ -362,10 +225,10 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	}
 
       /* Don't emit local variable decls for a raw expression.  */
-      if (instance->base.scope != COMPILE_I_RAW_SCOPE
+      if (instance->scope () != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  int need_new_context = 0;
+	  bool need_new_context = false;
 	  struct compile_cplus_context *pctx = NULL;
 
 	  /* For non-local symbols, create/push a new processing context
@@ -374,67 +237,53 @@ convert_one_symbol (struct compile_cplus_instance *instance,
 	    {
 	      gcc_type dummy;
 
-	      pctx = new_processing_context (instance,
-					     SYMBOL_NATURAL_NAME (sym.symbol),
-					     SYMBOL_TYPE (sym.symbol),
-					     &dummy);
+	      pctx
+		= instance->new_context (SYMBOL_NATURAL_NAME (sym.symbol),
+					 SYMBOL_TYPE (sym.symbol), &dummy);
 	      if (dummy != GCC_TYPE_NONE)
 		{
 		  /* We found a symbol for this type that was defined inside
 		     some other symbol, e.g., a class tyepdef defined.
 		     Don't return anything in that case because that really
 		     confuses users.  */
-		  xfree (symbol_name);
-		  xfree (name);
-		  delete_processing_context (pctx);
+		  instance->delete_context (pctx);
 		  do_cleanups (back_to);
 		  return;
 		}
 
-	      need_new_context = ccp_need_new_context (pctx);
+	      need_new_context = instance->need_new_context (pctx);
 	      if (need_new_context)
-		ccp_push_processing_context (instance, pctx);
+		instance->push_context (pctx);
 	    }
 
 	  /* Get the `raw' name of the symbol.  */
-	  if (name == NULL && SYMBOL_NATURAL_NAME (sym.symbol) != NULL)
+	  if (name.empty () && SYMBOL_NATURAL_NAME (sym.symbol) != NULL)
 	    {
-	      name
-		= cp_func_name (SYMBOL_NATURAL_NAME (sym.symbol));
+	      char *str = cp_func_name (SYMBOL_NATURAL_NAME (sym.symbol));
+
+	      name = str;
+	      xfree (str);
 	    }
 
 	  /* Define the decl.  */
 	  if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
 	    {
-	      if (debug_compile_cplus_types)
-		{
-		  printf_unfiltered ("specialize_function_template %s\n",
-				     SYMBOL_NATURAL_NAME (sym.symbol));
-		}
-	      CPCALL (specialize_function_template, instance,
-		      template_decl->decl (),
-		      &targs,
-		      addr,
-		      filename,
-		      line);
+	      struct template_symbol *tsymbol
+		= (struct template_symbol *) sym.symbol;
+
+	      instance->specialize_function_template (tsymbol, addr,
+						      filename, line);
 	    }
 	  else
 	    {
-	      if (debug_compile_cplus_types)
-		{
-		  printf_unfiltered ("new_decl %s %d %s\n", name, (int) kind,
-				     symbol_name);
-		}
-	      CPCALL (new_decl, instance,
-		      name, kind, sym_type, symbol_name, addr,
-		      filename, line);
+	      instance->new_decl ("variable", name.c_str (), kind, sym_type,
+				  symbol_name, addr, filename, line);
 	    }
 
 	  /* Pop any processing context.  */
 	  if (need_new_context)
-	    ccp_pop_processing_context (instance, pctx);
-
-	  delete_processing_context (pctx);
+	    instance->pop_context (pctx);
+	  instance->delete_context (pctx);
 	}
 
       /* Free any allocated memory.  */
@@ -447,13 +296,10 @@ convert_one_symbol (struct compile_cplus_instance *instance,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_cplus_instance *instance,
+convert_symbol_sym (compile_cplus_instance *instance,
 		    const char *identifier, struct block_symbol sym,
 		    domain_enum domain)
 {
-  const struct block *static_block;
-  int is_local_symbol;
-
   /* If we found a symbol and it is not in the  static or global
      scope, then we should first convert any static or global scope
      symbol of the same name.  This lets this unusual case work:
@@ -466,9 +312,9 @@ convert_symbol_sym (struct compile_cplus_instance *instance,
      }
   */
 
-  static_block = block_static_block (sym.block);
+  const struct block *static_block = block_static_block (sym.block);
   /* STATIC_BLOCK is NULL if FOUND_BLOCK is the global block.  */
-  is_local_symbol = (sym.block != static_block && static_block != NULL);
+  bool is_local_symbol = (sym.block != static_block && static_block != NULL);
   if (is_local_symbol)
     {
       struct block_symbol global_sym;
@@ -483,7 +329,7 @@ convert_symbol_sym (struct compile_cplus_instance *instance,
 	    fprintf_unfiltered (gdb_stdout,
 				"gcc_convert_symbol \"%s\": global symbol\n",
 				identifier);
-	  convert_one_symbol (instance, global_sym, 1, 0);
+	  convert_one_symbol (instance, global_sym, true, false);
 	}
     }
 
@@ -491,14 +337,14 @@ convert_symbol_sym (struct compile_cplus_instance *instance,
     fprintf_unfiltered (gdb_stdout,
 			"gcc_convert_symbol \"%s\": local symbol\n",
 			identifier);
-  convert_one_symbol (instance, sym, 0, is_local_symbol);
+  convert_one_symbol (instance, sym, false, is_local_symbol);
 }
 
 /* Convert a minimal symbol to its gcc form.  CONTEXT is the compiler
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (struct compile_cplus_instance *instance,
+convert_symbol_bmsym (compile_cplus_instance *instance,
 		      struct bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
@@ -547,10 +393,8 @@ convert_symbol_bmsym (struct compile_cplus_instance *instance,
       break;
     }
 
-  sym_type = convert_cplus_type (instance, type, GCC_CP_ACCESS_NONE);
-  if (debug_compile_cplus_types)
-    printf_unfiltered ("push_namespace \"\"\n");
-  CPCALL (push_namespace, instance, "");
+  sym_type = instance->convert_type (type, GCC_CP_ACCESS_NONE);
+  instance->push_namespace ("");
   // FIXME: push (and, after the call, pop) any other namespaces, if
   // any, and drop the above when defining a class member.  drop any
   // namespace and class names from before the symbol name, and any
@@ -559,24 +403,16 @@ convert_symbol_bmsym (struct compile_cplus_instance *instance,
      information for the symbol.  While we have access to the demangled
      name, we still don't know what A::B::C::D::E::F means without debug
      info, no?  */
-  if (debug_compile_cplus_types)
-    {
-      printf_unfiltered ("new_decl minsym %s %d\n",
-			 MSYMBOL_NATURAL_NAME (msym), (int) kind);
-    }
-  CPCALL (new_decl, instance,
-	  MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
-	  NULL, addr, NULL, 0);
-  if (debug_compile_cplus_types)
-    printf_unfiltered ("pop_namespace \"\"\n");
-  CPCALL (pop_namespace, instance);
+  instance->new_decl ("minsym", MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
+		      NULL, addr, NULL, 0);
+  instance->pop_namespace ("");
 }
 
 /* Do a regular expression search of the symbol table for any symbol
    named NAME in the given DOMAIN.  Warning: This is INCREDIBLY slow.  */
 
 static int
-regexp_search_symbols (struct compile_cplus_instance *instance,
+regexp_search_symbols (compile_cplus_instance *instance,
 		      const char *name, domain_enum domain)
 {
   char *regexp;
@@ -639,8 +475,8 @@ gcc_cplus_convert_symbol (void *datum,
 			  enum gcc_cp_oracle_request request,
 			  const char *identifier)
 {
-  struct compile_cplus_instance *instance
-    = (struct compile_cplus_instance *) datum;
+  compile_cplus_instance *instance
+    = (compile_cplus_instance *) datum;
   domain_enum domain;
   int found = 0;
   struct search_multiple_result search_result;
@@ -666,7 +502,7 @@ gcc_cplus_convert_symbol (void *datum,
      is to simply emit a gcc error.  */
   if (debug_compile_oracle)
     {
-      printf ("got oracle request for %s in domain %s\n", identifier,
+      printf ("got oracle request for \"%s\" in domain %s\n", identifier,
 	      domain_name (domain));
     }
 
@@ -702,7 +538,7 @@ gcc_cplus_convert_symbol (void *datum,
 	      struct block_symbol *elt;
 
 	      /* Define any template generics from the found symbols.  */
-	      compile::cplus::templates::define_templates (instance, search_result.symbols);
+	      define_templates (instance, search_result.symbols);
 
 	      /* Convert each found symbol.  */
 	      for (ix = 0;
@@ -719,7 +555,7 @@ gcc_cplus_convert_symbol (void *datum,
 	{
 	  struct block_symbol sym;
 
-	  sym = lookup_symbol (identifier, instance->base.block, domain, NULL);
+	  sym = lookup_symbol (identifier, instance->block (), domain, NULL);
 	  if (sym.symbol != NULL)
 	    {
 	      convert_symbol_sym (instance, identifier, sym, domain);
@@ -751,9 +587,7 @@ gcc_cplus_convert_symbol (void *datum,
     }
   CATCH (e, RETURN_MASK_ALL)
     {
-      if (debug_compile_cplus_types)
-	printf_unfiltered ("error: %s\n", e.message);
-      CPCALL (error, instance, e.message);
+      instance->error (e.message);
     }
   END_CATCH
 
@@ -780,8 +614,8 @@ gcc_address
 gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			  const char *identifier)
 {
-  struct compile_cplus_instance *instance
-    = (struct compile_cplus_instance *) datum;
+  compile_cplus_instance *instance
+    = (compile_cplus_instance *) datum;
   gcc_address result = 0;
   int found = 0;
 
@@ -831,9 +665,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      if (debug_compile_cplus_types)
-	printf_unfiltered ("error: %s\n", e.message);
-      CPCALL (error, instance, e.message);
+      instance->error (e.message);
     }
   END_CATCH
 
@@ -854,235 +686,6 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 }
 
 
-
-/* A hash function for symbol names.  */
-
-static hashval_t
-hash_symname (const void *a)
-{
-  const struct symbol *sym = (struct symbol *) a;
-
-  return htab_hash_string (SYMBOL_NATURAL_NAME (sym));
-}
-
-/* A comparison function for hash tables that just looks at symbol
-   names.  */
-
-static int
-eq_symname (const void *a, const void *b)
-{
-  const struct symbol *syma = (struct symbol *) a;
-  const struct symbol *symb = (struct symbol *) b;
-
-  return strcmp (SYMBOL_NATURAL_NAME (syma), SYMBOL_NATURAL_NAME (symb)) == 0;
-}
-
-/* If a symbol with the same name as SYM is already in HASHTAB, return
-   1.  Otherwise, add SYM to HASHTAB and return 0.  */
-
-static int
-symbol_seen (htab_t hashtab, struct symbol *sym)
-{
-  void **slot;
-
-  slot = htab_find_slot (hashtab, sym, INSERT);
-  if (*slot != NULL)
-    return 1;
-
-  *slot = sym;
-  return 0;
-}
-
-/* Generate C code to compute the length of a VLA.  */
-
-static void
-generate_vla_size (struct compile_cplus_instance *compiler,
-		   struct ui_file *stream,
-		   struct gdbarch *gdbarch,
-		   unsigned char *registers_used,
-		   CORE_ADDR pc,
-		   struct type *type,
-		   struct symbol *sym)
-{
-  type = check_typedef (type);
-
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_RANGE:
-      {
-	if (TYPE_HIGH_BOUND_KIND (type) == PROP_LOCEXPR
-	    || TYPE_HIGH_BOUND_KIND (type) == PROP_LOCLIST)
-	  {
-	    const struct dynamic_prop *prop = &TYPE_RANGE_DATA (type)->high;
-	    char *name = c_get_range_decl_name (prop);
-	    struct cleanup *cleanup = make_cleanup (xfree, name);
-
-	    dwarf2_compile_property_to_c (stream, name,
-					  gdbarch, registers_used,
-					  prop, pc, sym);
-	    do_cleanups (cleanup);
-	  }
-      }
-      break;
-
-    case TYPE_CODE_ARRAY:
-      generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			 TYPE_INDEX_TYPE (type), sym);
-      generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			 TYPE_TARGET_TYPE (type), sym);
-      break;
-
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_STRUCT:
-      {
-	int i;
-
-	for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	  if (!field_is_static (&TYPE_FIELD (type, i)))
-	    generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			       TYPE_FIELD_TYPE (type, i), sym);
-      }
-      break;
-    }
-}
-
-/* Generate C code to compute the address of SYM.  */
-
-static void
-generate_cplus_for_for_one_variable (struct compile_cplus_instance *compiler,
-				 struct ui_file *stream,
-				 struct gdbarch *gdbarch,
-				 unsigned char *registers_used,
-				 CORE_ADDR pc,
-				 struct symbol *sym)
-{
-
-  TRY
-    {
-      if (is_dynamic_type (SYMBOL_TYPE (sym)))
-	{
-	  struct ui_file *size_file = mem_fileopen ();
-	  struct cleanup *cleanup = make_cleanup_ui_file_delete (size_file);
-
-	  generate_vla_size (compiler, size_file, gdbarch, registers_used, pc,
-			     SYMBOL_TYPE (sym), sym);
-	  ui_file_put (size_file, ui_file_write_for_put, stream);
-
-	  do_cleanups (cleanup);
-	}
-
-      if (SYMBOL_COMPUTED_OPS (sym) != NULL)
-	{
-	  char *generated_name = symbol_substitution_name (sym);
-	  struct cleanup *cleanup = make_cleanup (xfree, generated_name);
-	  /* We need to emit to a temporary buffer in case an error
-	     occurs in the middle.  */
-	  struct ui_file *local_file = mem_fileopen ();
-
-	  make_cleanup_ui_file_delete (local_file);
-	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (sym, local_file,
-							  gdbarch,
-							  registers_used,
-							  pc, generated_name);
-	  ui_file_put (local_file, ui_file_write_for_put, stream);
-
-	  do_cleanups (cleanup);
-	}
-      else
-	{
-	  switch (SYMBOL_CLASS (sym))
-	    {
-	    case LOC_REGISTER:
-	    case LOC_ARG:
-	    case LOC_REF_ARG:
-	    case LOC_REGPARM_ADDR:
-	    case LOC_LOCAL:
-	      error (_("Local symbol unhandled when generating C code."));
-
-	    case LOC_COMPUTED:
-	      gdb_assert_not_reached (_("LOC_COMPUTED variable "
-					"missing a method."));
-
-	    default:
-	      /* Nothing to do for all other cases, as they don't represent
-		 local variables.  */
-	      break;
-	    }
-	}
-    }
-
-  CATCH (e, RETURN_MASK_ERROR)
-    {
-      if (compiler->symbol_err_map == NULL)
-	compiler->symbol_err_map = htab_create_alloc (10,
-						      hash_symbol_error,
-						      eq_symbol_error,
-						      del_symbol_error,
-						      xcalloc,
-						      xfree);
-      insert_symbol_error (compiler->symbol_err_map, sym, e.message);
-    }
-  END_CATCH
-}
-
-/* See compile-cplus.h.  */
-
-unsigned char *
-generate_cplus_for_variable_locations (struct compile_cplus_instance *compiler,
-				       struct ui_file *stream,
-				       struct gdbarch *gdbarch,
-				       const struct block *block,
-				       CORE_ADDR pc)
-{
-  struct cleanup *cleanup, *outer;
-  htab_t symhash;
-  const struct block *static_block = block_static_block (block);
-  unsigned char *registers_used;
-
-  /* If we're already in the static or global block, there is nothing
-     to write.  */
-  if (static_block == NULL || block == static_block)
-    return NULL;
-
-  registers_used = XCNEWVEC (unsigned char, gdbarch_num_regs (gdbarch));
-  outer = make_cleanup (xfree, registers_used);
-
-  /* Ensure that a given name is only entered once.  This reflects the
-     reality of shadowing.  */
-  symhash = htab_create_alloc (1, hash_symname, eq_symname, NULL,
-			       xcalloc, xfree);
-  cleanup = make_cleanup_htab_delete (symhash);
-
-  while (1)
-    {
-      struct symbol *sym;
-      struct block_iterator iter;
-
-      /* Iterate over symbols in this block, generating code to
-	 compute the location of each local variable.  */
-      for (sym = block_iterator_first (block, &iter);
-	   sym != NULL;
-	   sym = block_iterator_next (&iter))
-	{
-	  if (!symbol_seen (symhash, sym))
-	    generate_cplus_for_for_one_variable (compiler, stream, gdbarch,
-						 registers_used, pc, sym);
-	}
-
-      /* If we just finished the outermost block of a function, we're
-	 done.  */
-      if (BLOCK_FUNCTION (block) != NULL)
-	break;
-      block = BLOCK_SUPERBLOCK (block);
-    }
-
-  do_cleanups (cleanup);
-  discard_cleanups (outer);
-  return registers_used;
-}
 
 void _initialize_compile_cplus_symbols (void);
 

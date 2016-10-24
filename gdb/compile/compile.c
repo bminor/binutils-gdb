@@ -440,7 +440,7 @@ get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
       freeargv (argv_producer);
     }
 
-  build_argc_argv (compiler->gcc_target_options,
+  build_argc_argv (compiler->gcc_target_options ().c_str (),
 		   &argc_compiler, &argv_compiler);
   append_args (argcp, argvp, argc_compiler, argv_compiler);
   freeargv (argv_compiler);
@@ -448,14 +448,14 @@ get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
   append_args (argcp, argvp, compile_args_argc, compile_args_argv);
 }
 
-/* A cleanup function to destroy a gdb_gcc_instance.  */
+/* A cleanup function to destroy a compile_instance.  */
 
 static void
 cleanup_compile_instance (void *arg)
 {
   struct compile_instance *inst = (struct compile_instance *) arg;
 
-  inst->destroy (inst);
+  delete inst;
 }
 
 /* A cleanup function to unlink a file.  */
@@ -496,7 +496,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   CORE_ADDR trash_pc, expr_pc;
   int argc;
   char **argv;
-  int ok;
+  bool ok;
   FILE *src;
   struct gdbarch *gdbarch = get_current_arch ();
   char *triplet_rx = NULL;
@@ -516,10 +516,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   compiler = current_language->la_get_compile_instance ();
   cleanup = make_cleanup (cleanup_compile_instance, compiler);
 
-  compiler->fe->ops->set_print_callback (compiler->fe, print_callback, NULL);
-
-  compiler->scope = scope;
-  compiler->block = expr_block;
+  compiler->set_print_callback (print_callback, NULL);
+  compiler->set_scope (scope);
+  compiler->set_block (expr_block);
 
   /* From the provided expression, build a scope to pass to the
      compiler.  */
@@ -551,16 +550,16 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "debug output:\n\n%s", code);
 
-  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
-    compiler->fe->ops->set_verbose (compiler->fe, compile_debug);
+  if (compiler->version () >= GCC_FE_VERSION_1)
+    compiler->set_verbose (compile_debug);
 
   if (compile_gcc[0] != 0)
     {
-      if (compiler->fe->ops->version < GCC_FE_VERSION_1)
+      if (compiler->version () < GCC_FE_VERSION_1)
 	error (_("Command 'set compile-gcc' requires GCC version 6 or higher "
 		 "(libcc1 interface version 1 or higher)"));
 
-      compiler->fe->ops->set_driver_filename (compiler->fe, compile_gcc);
+      compiler->set_driver_filename (compile_gcc);
     }
   else
     {
@@ -571,19 +570,19 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
       triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
       make_cleanup (xfree, triplet_rx);
 
-      if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
-	compiler->fe->ops->set_triplet_regexp (compiler->fe, triplet_rx);
+      if (compiler->version () >= GCC_FE_VERSION_1)
+	compiler->set_triplet_regexp (triplet_rx);
     }
 
   /* Set compiler command-line arguments.  */
   get_args (compiler, gdbarch, &argc, &argv);
   make_cleanup_freeargv (argv);
 
-  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
-    error_message = compiler->fe->ops->set_arguments (compiler->fe, argc, argv);
+  // !!keiths: This should be hidden at this level!
+  if (compiler->version ()>= GCC_FE_VERSION_1)
+    error_message = compiler->set_arguments (argc, argv);
   else
-    error_message = compiler->fe->ops->set_arguments_v0 (compiler->fe, triplet_rx,
-							 argc, argv);
+    error_message = compiler->set_arguments (triplet_rx, argc, argv);
   if (error_message != NULL)
     {
       make_cleanup (xfree, error_message);
@@ -617,13 +616,12 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 			source_file);
 
   /* Call the compiler and start the compilation process.  */
-  compiler->fe->ops->set_source_file (compiler->fe, source_file);
+  compiler->set_source_file (source_file);
 
-  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
-    ok = compiler->fe->ops->compile (compiler->fe, object_file);
+  if (compiler->version () >= GCC_FE_VERSION_1)
+    ok = compiler->compile (object_file);
   else
-    ok = compiler->fe->ops->compile_v0 (compiler->fe, object_file,
-					compile_debug);
+    ok = compiler->compile (object_file, compile_debug);
   if (!ok)
     error (_("Compilation failed."));
 
@@ -709,6 +707,141 @@ compile_register_name_demangle (struct gdbarch *gdbarch,
 
   error (_("Cannot find gdbarch register \"%s\"."), regname);
 }
+
+// See description in compile-internal.h.
+
+void
+compile_instance::insert_type (struct type *type, gcc_type gcc_type)
+{
+  type_map_t::iterator pos = m_type_map.find (type);
+
+  if (pos != m_type_map.end ())
+    {
+      /* The type might have already been inserted in order to handle
+	 recursive types.  */
+      if (pos->second != gcc_type)
+	error (_("Unexpected type id from GCC, check you use recent "
+		 "enough GCC."));
+    }
+  else
+    m_type_map.insert (std::make_pair (type, gcc_type));
+}
+
+// See description in compile-internal.h.
+
+void
+compile_instance::insert_symbol_error (const struct symbol *sym,
+				       std::string text)
+{
+  symbol_err_map_t::iterator pos = m_symbol_err_map.find (sym);
+
+  if (pos == m_symbol_err_map.end ())
+    m_symbol_err_map.insert (std::make_pair (sym, text));
+}
+
+// See description in compile-internal.h.
+
+void
+compile_instance::error_symbol_once (const struct symbol *sym)
+{
+  symbol_err_map_t::iterator pos = m_symbol_err_map.find (sym);
+  if (pos == m_symbol_err_map.end () || pos->second.length () == 0)
+    return;
+
+  std::string message (pos->second);
+  pos->second.clear ();
+  ::error (_("%s"), message.c_str ());
+}
+
+// Forwards to the plug-in.
+
+#define FORWARD(OP,...) (m_gcc_fe->ops->OP (m_gcc_fe, ##__VA_ARGS__))
+
+// Set the plug-in print callback.
+
+void
+compile_instance::set_print_callback
+  (void (*print_function) (void *, const char *), void *datum)
+{
+  FORWARD (set_print_callback, print_function, datum);
+}
+
+// Return the plug-in's front-end version.
+
+unsigned int
+compile_instance::version () const
+{
+  return m_gcc_fe->ops->version;
+}
+
+// Set the plug-in's verbosity level.
+
+void
+compile_instance::set_verbose (int level)
+{
+  FORWARD (set_verbose, level);
+}
+
+// Set the plug-in driver program.
+
+void
+compile_instance::set_driver_filename (const char *filename)
+{
+  // !!keiths: Possible leak???
+  FORWARD (set_driver_filename, filename);
+}
+
+// Set the regular expression used to match the configury triplet
+// prefix to the compiler.
+
+void
+compile_instance::set_triplet_regexp (const char *regexp)
+{
+  // !!keiths: Leak?
+  FORWARD (set_triplet_regexp, regexp);
+}
+
+// Set compilation arguments.
+
+char *
+compile_instance::set_arguments (int argc, char **argv)
+{
+  return FORWARD (set_arguments, argc, argv);
+}
+
+// !!keiths: YUCK!
+
+char *
+compile_instance::set_arguments (const char *regexp, int argc, char **argv)
+{
+  return FORWARD (set_arguments_v0, regexp, argc, argv);
+}
+
+// Set the filename of the program to compile.
+
+void
+compile_instance::set_source_file (const char *filename)
+{
+  FORWARD (set_source_file, filename);
+}
+
+// Compile the previously specified source file to FILENAME.
+
+bool
+compile_instance::compile (const char *filename)
+{
+  return FORWARD (compile, filename);
+}
+
+// Like above, but for an earlier compile protocol.
+
+bool
+compile_instance::compile (const char *filename, int verbose_level)
+{
+  return FORWARD (compile_v0, filename, verbose_level);
+}
+
+#undef FORWARD
 
 extern initialize_file_ftype _initialize_compile;
 

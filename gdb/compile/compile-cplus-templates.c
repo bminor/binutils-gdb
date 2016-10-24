@@ -28,6 +28,8 @@
 
 #include <algorithm>
 
+using namespace compile;
+
 /* Modifiers for abstract template parameters when used in template function
    declarations, including CV and ref qualifiers and pointer and reference
    type modifiers, e.g., const T*.  */
@@ -77,21 +79,20 @@ static void print_function_template_arglist
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::function_template_defn::
-destroy (compile::cplus::templates::function_template_map_item p)
+function_template_defn::
+destroy (function_template_map_item_t p)
 {
   delete p.second;
 }
 
 // See description in compile-cplus-templates.h.
 
-compile::cplus::templates::
 function_template_defn::
 function_template_defn (std::string generic, parsed_demangle_info info,
 			const struct template_symbol *tsymbol,
 			struct type *parent_type, int fidx, int midx)
-  : template_defn (compile::cplus::decl_name (tsymbol->search_name),
-		   generic, tsymbol->template_arguments->n_arguments),
+: template_defn (compile::decl_name (tsymbol->search_name), generic,
+		   tsymbol->template_arguments->n_arguments),
     m_tsymbol (tsymbol), m_parent_type (parent_type),
     m_fidx (fidx), m_midx (midx),
     m_demangle_info (info)
@@ -101,8 +102,7 @@ function_template_defn (std::string generic, parsed_demangle_info info,
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::class_template_defn::
-destroy (compile::cplus::templates::class_template_map_item p)
+class_template_defn::destroy (class_template_map_item_t p)
 {
   delete p.second;
 }
@@ -207,13 +207,11 @@ compute_function_template_generic (struct template_symbol *tsymbol,
   return generic;
 }
 
-/* If SYM is a template symbol whose generic we have not yet declared,
-   add it to INSTANCE's list of template definitions and scan for default
-   values.  */
+// See description in compile-cplus.h.
 
-static void
-maybe_define_new_function_template (struct compile_cplus_instance *instance,
-				    const struct symbol *sym,
+void
+compile_cplus_instance::
+maybe_define_new_function_template (const struct symbol *sym,
 				    struct type *parent_type,
 				    int f_idx, int m_idx)
 {
@@ -221,24 +219,23 @@ maybe_define_new_function_template (struct compile_cplus_instance *instance,
     {
       struct template_symbol *tsym = (struct template_symbol *) sym;
 
+      if (tsym->linkage_name == NULL)
+	return;
+
       parsed_demangle_info info (tsym->linkage_name, DMGL_ANSI | DMGL_PARAMS);
       std::string generic (compute_function_template_generic (tsym, info));
-      compile::cplus::templates::function_template_defn_map::iterator pos
-	= instance->function_template_defns->find (generic);
-      compile::cplus::templates::function_template_defn *defn;     
-      if (pos == instance->function_template_defns->end ())
+      function_template_defn_map_t::iterator pos
+	= m_function_template_defns->find (generic);
+      function_template_defn *defn;
+      if (pos == m_function_template_defns->end ())
 	{
 	  // New template definition -- insert it into the cache.
 	  // !!keiths: This invokes the copy ctor for parsed_demangle_info
 	  // Is there a way to not do that and still maintain RAII??
 	  defn
-	    = new compile::cplus::templates::function_template_defn (generic,
-								    info, tsym,
-								    parent_type,
-								    f_idx,
-								    m_idx);
-	  instance->function_template_defns->insert (std::make_pair (generic,
-								     defn));
+	    = new function_template_defn (generic, info, tsym, parent_type,
+					  f_idx, m_idx);
+	  m_function_template_defns->insert (std::make_pair (generic, defn));
 	}
       else
 	{
@@ -268,9 +265,8 @@ maybe_define_new_function_template (struct compile_cplus_instance *instance,
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::
-define_templates (struct compile_cplus_instance *instance,
-		  VEC (block_symbol_d) *symbols)
+compile::define_templates (compile_cplus_instance *instance,
+			   VEC (block_symbol_d) *symbols)
 {
   int i;
   struct block_symbol *elt;
@@ -284,22 +280,21 @@ define_templates (struct compile_cplus_instance *instance,
      compiler plug-in.  */
 
   for (i = 0; VEC_iterate (block_symbol_d, symbols, i, elt); ++i)
-    maybe_define_new_function_template (instance, elt->symbol, NULL, -1, -1);
+    instance->maybe_define_new_function_template (elt->symbol, NULL, -1, -1);
 
   /* !!keiths: From here on out, we MUST have all types declared or defined,
      otherwise GCC will give us "definition of TYPE in template parameter
      list."  */
   /* Create any new template definitions we encountered.  */
-  compile::cplus::templates::emit_function_template_decls (instance);
-  compile::cplus::templates::emit_class_template_decls (instance);
+  instance->emit_function_template_decls ();
+  instance->emit_class_template_decls ();
 }
 
 // See description in compile-cplus-templates.h.
 
-compile::cplus::templates::function_template_defn *
-compile::cplus::templates::
-find_function_template_defn (struct compile_cplus_instance *instance,
-			     struct template_symbol *tsym)
+function_template_defn *
+compile_cplus_instance::
+find_function_template_defn (struct template_symbol *tsym)
 {
   /* Some times the template has no no linkage name from the compiler.
      There's not much we can do in this case.  */
@@ -308,9 +303,9 @@ find_function_template_defn (struct compile_cplus_instance *instance,
 
   parsed_demangle_info info (tsym->linkage_name, DMGL_ANSI | DMGL_PARAMS);
   std::string generic (compute_function_template_generic (tsym, info));
-  compile::cplus::templates::function_template_defn_map::iterator pos
-    = instance->function_template_defns->find (generic);
-  if (pos != instance->function_template_defns->end ())
+  function_template_defn_map_t::iterator pos
+    = m_function_template_defns->find (generic);
+  if (pos != m_function_template_defns->end ())
     {
       /* A template generic for this was already defined.  */
       return pos->second;
@@ -361,23 +356,21 @@ compute_class_template_generic (std::string name, struct type *type)
 
 // See description in compile-cplus-templates.h.
 
-compile::cplus::templates::class_template_defn *
-compile::cplus::templates::
-find_class_template_defn (struct compile_cplus_instance *instance,
-			  struct type *type)
+class_template_defn *
+compile_cplus_instance::find_class_template_defn (struct type *type)
 {
   /* There are no template definitions associated with anonymous types or
      types without template arguments.  */
   if (TYPE_NAME (type) == NULL || TYPE_TEMPLATE_ARGUMENT_INFO (type) == NULL)
     return NULL;
 
-  char *name = compile::cplus::decl_name (TYPE_NAME (type));
+  char *name = decl_name (TYPE_NAME (type));
   struct cleanup *back_to = make_cleanup (xfree, name);
 
   std::string generic (compute_class_template_generic (name, type));
-  compile::cplus::templates::class_template_defn_map::iterator pos
-    = instance->class_template_defns->find (generic);
-  if (pos != instance->class_template_defns->end ())
+  class_template_defn_map_t::iterator pos
+    = m_class_template_defns->find (generic);
+  if (pos != m_class_template_defns->end ())
     {
       /* A template generic for this was already defined.  */
       do_cleanups (back_to);
@@ -659,25 +652,23 @@ print_conversion_node (const struct demangle_component *comp,
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::
-maybe_define_new_class_template (struct compile_cplus_instance *instance,
-				 struct type *type, const char *decl_name)
+compile_cplus_instance::
+maybe_define_new_class_template (struct type *type, const char *decl_name)
 {
   if (TYPE_N_TEMPLATE_ARGUMENTS (type) == 0)
     return;
 
   std::string generic (compute_class_template_generic (decl_name, type));
-  compile::cplus::templates::class_template_defn_map::iterator pos
-    = instance->class_template_defns->find (generic);
+  class_template_defn_map_t::iterator pos
+    = m_class_template_defns->find (generic);
 
-  compile::cplus::templates::class_template_defn *defn = NULL;
-  if (pos == instance->class_template_defns->end ())
+  class_template_defn *defn = NULL;
+  if (pos == m_class_template_defns->end ())
     {
       // New template definition -- insert it into the cache.
       defn
-	= new compile::cplus::templates::class_template_defn (decl_name,
-							     generic, type);
-      instance->class_template_defns->insert (std::make_pair (generic, defn));
+	= new class_template_defn (decl_name, generic, type);
+      m_class_template_defns->insert (std::make_pair (generic, defn));
     }
   else
     {
@@ -705,9 +696,8 @@ maybe_define_new_class_template (struct compile_cplus_instance *instance,
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::
-scan_type_for_function_templates (struct compile_cplus_instance *instance,
-				  struct type *type)
+compile::scan_type_for_function_templates (compile_cplus_instance *instance,
+					   struct type *type)
 {
   int i;
 
@@ -718,14 +708,11 @@ scan_type_for_function_templates (struct compile_cplus_instance *instance,
 
       for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (type, i); ++j)
 	{
-	  const struct block *block
-	    = compile::cplus::get_current_search_block ();
 	  struct block_symbol sym
 	    = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
-			     block, VAR_DOMAIN, NULL);
+			     instance->block (), VAR_DOMAIN, NULL);
 
-	  maybe_define_new_function_template (instance, sym.symbol,
-					      type, i, j);
+	  instance->maybe_define_new_function_template (sym.symbol, type, i, j);
 	}
     }
 }
@@ -734,7 +721,7 @@ scan_type_for_function_templates (struct compile_cplus_instance *instance,
    parameter ARG in compile INSTANCE.  */
 
 static gcc_expr
-get_template_argument_value (struct compile_cplus_instance *instance,
+get_template_argument_value (compile_cplus_instance *instance,
 			     gcc_type type, struct symbol *arg)
 {
   gcc_expr value = 0;
@@ -743,12 +730,7 @@ get_template_argument_value (struct compile_cplus_instance *instance,
     {
       /* !!keiths: More (incomplete) fun.  */
     case LOC_CONST:
-      if (debug_compile_cplus_types)
-	{
-	  printf_unfiltered ("literal_expr %lld %ld\n",
-			     type, SYMBOL_VALUE (arg));
-	}
-	value = CPCALL (literal_expr, instance, type, SYMBOL_VALUE (arg));
+      value = instance->literal_expr (type, SYMBOL_VALUE (arg));
       break;
 
     case LOC_COMPUTED:
@@ -763,12 +745,12 @@ get_template_argument_value (struct compile_cplus_instance *instance,
 	    frame = get_selected_frame (NULL);
 	    gdb_assert (frame != NULL);
 	  }
-	val = read_var_value (arg, instance->base.block, frame);
+	val = read_var_value (arg, instance->block (), frame);
 
 	/* !!keiths: This is a hack, but I don't want to write
 	   yet another linkage name translation function.  At least
 	   not just yet.  */
-	value = CPCALL (literal_expr, instance, type, value_address (val));
+	value = instance->literal_expr (type, value_address (val));
       }
       break;
 
@@ -785,10 +767,8 @@ get_template_argument_value (struct compile_cplus_instance *instance,
 
 static void
 define_template_parameters_generic
-(struct compile_cplus_instance *instance,
- compile::cplus::templates::template_defn *defn,
-   const struct template_argument_info *arg_info,
-   const char *filename, int line)
+(compile_cplus_instance *instance, template_defn *defn,
+ const struct template_argument_info *arg_info, const char *filename, int line)
 {
   int i;
 
@@ -811,15 +791,8 @@ define_template_parameters_generic
 		/* This type must previously have been converted,
 		   or GCC will error with "definition of TYPE inside
 		   template parameter list."  */
-		default_type = convert_cplus_type (instance, type,
-						   GCC_CP_ACCESS_NONE);
-	      }
-
-	    if (debug_compile_cplus_types)
-	      {
-		printf_unfiltered
-		  ("new_template_typename_parm %s %d %lld %s %d\n",
-		   id, is_pack, default_type, filename, line);
+		default_type = instance->convert_type (type,
+						       GCC_CP_ACCESS_NONE);
 	      }
 
 	    /* !!keiths: This would be the base generic parameter...
@@ -827,7 +800,7 @@ define_template_parameters_generic
 	       actually figure out those qualifiers, e.g,
 	    const T& foo<A> () vs T foo<const A&> ().  */
 	    gcc_type abstract_type
-	      = CPCALL (new_template_typename_parm, instance, id, is_pack,
+	      = instance->new_template_typename_parm (id, is_pack,
 			default_type, filename, line);
 	    defn->set_parameter_abstract_type (i, abstract_type);
 	  }
@@ -841,7 +814,7 @@ define_template_parameters_generic
 	    /* Get the argument's type.  This type must also have been
 	     previously defined (or declared) to prevent errors.  */
 	    gcc_type abstract_type
-	      = convert_cplus_type (instance, ptype, GCC_CP_ACCESS_NONE);
+	      = instance->convert_type (ptype, GCC_CP_ACCESS_NONE);
 	    defn->set_parameter_abstract_type (i, abstract_type);
 
 	    if (defn->default_argument (i) != NULL)
@@ -851,15 +824,8 @@ define_template_parameters_generic
 						 defn->default_argument (i));
 	      }
 
-	    if (debug_compile_cplus_types)
-	      {
-		printf_unfiltered
-		  ("new_template_value_parm %lld %s %lld %s %d\n",
-		   abstract_type, id, default_value, filename, line);
-	      }
-
-	    CPCALL (new_template_value_parm, instance, abstract_type, id,
-			default_value, filename, line);
+	    instance->new_template_value_parm (abstract_type, id,
+					       default_value, filename, line);
 	  }
 	  break;
 
@@ -880,7 +846,7 @@ define_template_parameters_generic
 /* Fill in the `kinds'  member of DEST from ARG_INFO.  */
 
 static void
-enumerate_template_parameter_kinds (struct compile_cplus_instance *instance,
+enumerate_template_parameter_kinds (compile_cplus_instance *instance,
 				    struct gcc_cp_template_args *dest,
 				    const struct template_argument_info *arg_info)
 {
@@ -911,16 +877,15 @@ enumerate_template_parameter_kinds (struct compile_cplus_instance *instance,
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::
-enumerate_template_arguments (struct compile_cplus_instance *instance,
-			      struct gcc_cp_template_args *dest,
-			      const compile::cplus::templates::template_defn *defn,
+compile_cplus_instance::
+enumerate_template_arguments (struct gcc_cp_template_args *dest,
+			      const template_defn *defn,
 			      const struct template_argument_info *arg_info)
 {
   int i;
 
   /* Fill in the parameter kinds.  */
-  enumerate_template_parameter_kinds (instance, dest, arg_info);
+  enumerate_template_parameter_kinds (this, dest, arg_info);
 
   /* Loop over the arguments, converting parameter types, values, etc
      into DEST.  */
@@ -931,9 +896,8 @@ enumerate_template_arguments (struct compile_cplus_instance *instance,
 	case type_parameter:
 	  {
 	    gcc_type type
-	      = convert_cplus_type (instance,
-				    SYMBOL_TYPE (arg_info->arguments[i]),
-				    GCC_CP_ACCESS_NONE);
+	      = convert_type (SYMBOL_TYPE (arg_info->arguments[i]),
+			      GCC_CP_ACCESS_NONE);
 
 	    dest->elements[i].type = type;
 	  }
@@ -944,7 +908,7 @@ enumerate_template_arguments (struct compile_cplus_instance *instance,
 	    gcc_type type = defn->parameter_abstract_type (i);
 
 	    dest->elements[i].value
-	      = get_template_argument_value (instance, type,
+	      = get_template_argument_value (this, type,
 					     arg_info->arguments[i]);
 	  }
 	  break;
@@ -966,8 +930,7 @@ enumerate_template_arguments (struct compile_cplus_instance *instance,
 
 static void
 define_default_template_parameter_types
-  (struct compile_cplus_instance *instance,
-   compile::cplus::templates::template_defn *defn,
+  (compile_cplus_instance *instance, template_defn *defn,
    const struct template_argument_info *arg_info)
 {
   int i;
@@ -980,9 +943,8 @@ define_default_template_parameter_types
 	    {
 	    case type_parameter:
 	    case value_parameter:
-	      convert_cplus_type (instance,
-				  SYMBOL_TYPE (defn->default_argument (i)),
-				  GCC_CP_ACCESS_NONE);
+	      instance->convert_type (SYMBOL_TYPE (defn->default_argument (i)),
+				      GCC_CP_ACCESS_NONE);
 	      break;
 
 	    case template_parameter:
@@ -1000,7 +962,7 @@ class template_parameter_type_modifier_adder
 {
 public:
   template_parameter_type_modifier_adder
-    (struct compile_cplus_instance *instance, gcc_type the_type)
+    (compile_cplus_instance *instance, gcc_type the_type)
       : m_instance (instance), m_flags (0), m_type (the_type)
   {
   }
@@ -1025,23 +987,20 @@ public:
 	break;
 
       case PARAMETER_POINTER:
-	m_type = compile::cplus::convert_qualified_base (m_instance,
-							 m_type, m_flags);
-	m_type = compile::cplus::convert_pointer_base (m_instance, m_type);
+	m_type = convert_qualified_base (m_instance, m_type, m_flags);
+	m_type = convert_pointer_base (m_instance, m_type);
 	m_flags = (enum gcc_cp_qualifiers) 0;
 	break;
 
       case PARAMETER_LVALUE_REFERENCE:
-	m_type = compile::cplus::convert_qualified_base (m_instance,
-							 m_type, m_flags);
-	m_type = compile::cplus::convert_pointer_base (m_instance, m_type);
+	m_type = convert_qualified_base (m_instance, m_type, m_flags);
+	m_type = convert_pointer_base (m_instance, m_type);
 	m_flags = (enum gcc_cp_qualifiers) 0;
 	break;
 
       case PARAMETER_RVALUE_REFERENCE:
-	m_type = compile::cplus::convert_qualified_base (m_instance,
-							 m_type, m_flags);
-	m_type = compile::cplus::convert_reference_base (m_instance, m_type);
+	m_type = convert_qualified_base (m_instance, m_type, m_flags);
+	m_type = convert_reference_base (m_instance, m_type);
 	m_flags = (enum gcc_cp_qualifiers) 0;
 	break;
 
@@ -1060,7 +1019,7 @@ public:
 
 private:
   // The compiler instance into which to elide the new type(s).
-  struct compile_cplus_instance *m_instance;
+  compile_cplus_instance *m_instance;
 
   // The qualifier flags.
   gcc_cp_qualifiers_flags m_flags;
@@ -1073,7 +1032,7 @@ private:
 
 static gcc_type
 add_template_type_modifiers
-  (struct compile_cplus_instance *instance, gcc_type type,
+  (compile_cplus_instance *instance, gcc_type type,
    const std::vector<template_parameter_modifier> &modifiers)
 {
   template_parameter_type_modifier_adder adder (instance, type);
@@ -1085,7 +1044,7 @@ add_template_type_modifiers
 /* Add the type modifiers described in COMP to BASE_TYPE.  */
 
 static gcc_type
-add_type_modifiers (struct compile_cplus_instance *instance,
+add_type_modifiers (compile_cplus_instance *instance,
 		    gcc_type base_type,
 		    const struct demangle_component *comp)
 {
@@ -1097,408 +1056,396 @@ add_type_modifiers (struct compile_cplus_instance *instance,
   return result;
 }
 
-/* A hashtable callback to define (to the plug-in) and fill-in the
+/* A struct to define (to the plug-in) and fill-in the
    function template definition based on the template instance in SLOT.
    CALL_DATA should be the compiler instance to use.  */
 
 /* !!keiths: This is heinously long!  */
 
-static void
-define_function_template (struct compile_cplus_instance *instance,
-			  compile::cplus::templates::function_template_defn *defn)
+class function_template_definer
 {
-  if (defn->defined ())
-    {
-      /* This template has already been defined.  Keep looking for more
-	 undefined templates.  */
-      return;
-    }
+ public:
 
-  // Make sure we only do this once.
-  defn->set_defined (true);
+  function_template_definer (compile_cplus_instance *instance)
+  : m_instance (instance)
+  {
+  }
 
-  struct fn_field *method_field;
-  struct type *method_type;
-  const struct template_symbol *tsym = defn->template_symbol ();
-  if (defn->parent_type () != NULL
-      && defn->fidx () != -1 && defn->midx () != -1)
-    {
-      struct fn_field *methods
-	= TYPE_FN_FIELDLIST1 (defn->parent_type (), defn->fidx ());
+  void operator() (function_template_map_item_t item)
+  {
+    function_template_defn *defn = item.second;
 
-      method_field = &methods[defn->midx ()];
-      method_type = method_field->type;
-    }
-  else
-    {
-      method_field = NULL;
-      method_type = SYMBOL_TYPE (&tsym->base);
-    }
+    if (defn->defined ())
+      {
+	/* This template has already been defined.  Keep looking for more
+	   undefined templates.  */
+	return;
+      }
 
-  bool ignore;
-  char *special_name = NULL;
-  const char *id = defn->decl_name ();
-  gdb_assert (!strchr (id, ':'));
-  const char *name = maybe_canonicalize_special_function (id,
-							  method_field,
-							  method_type,
-							  &special_name,
-							  &ignore);
+    // Make sure we only do this once.
+    defn->set_defined (true);
 
-  /* Ignore any "ignore" -- we need the template defined even if
-     this specific instance shouldn't emit a template.  */
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
-  if (special_name != NULL)
-    {
-      make_cleanup (xfree, special_name);
-      name = special_name;
-    }
+    struct fn_field *method_field;
+    struct type *method_type;
+    const struct template_symbol *tsym = defn->template_symbol ();
+    if (defn->parent_type () != NULL
+	&& defn->fidx () != -1 && defn->midx () != -1)
+      {
+	struct fn_field *methods
+	  = TYPE_FN_FIELDLIST1 (defn->parent_type (), defn->fidx ());
 
-  gcc_cp_symbol_kind_flags sym_kind = GCC_CP_SYMBOL_FUNCTION;
-  if (name != id)
-    sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
+	method_field = &methods[defn->midx ()];
+	method_type = method_field->type;
+      }
+    else
+      {
+	method_field = NULL;
+	method_type = SYMBOL_TYPE (&tsym->base);
+      }
 
-  // Define any default value types.
-  define_default_template_parameter_types (instance, defn,
-					   tsym->template_arguments);
+    bool ignore;
+    char *special_name = NULL;
+    const char *id = defn->decl_name ();
+    gdb_assert (!strchr (id, ':'));
+    const char *name = maybe_canonicalize_special_function (id,
+							    method_field,
+							    method_type,
+							    &special_name,
+							    &ignore);
 
-  // Assess the processing context.
-  gcc_type result;
-  struct compile_cplus_context *pctx
-    = new_processing_context (instance, SYMBOL_NATURAL_NAME (&tsym->base),
-			      SYMBOL_TYPE (&tsym->base), &result);
-  if (result != GCC_TYPE_NONE)
-    {
-      gdb_assert (pctx == NULL);
-      do_cleanups (back_to);
-      /* new_processing_context returned the type of the actual template
-	 instance from which we're constructing the template definition.
-	 It is already defined.  */
-      return;
-    }
+    /* Ignore any "ignore" -- we need the template defined even if
+       this specific instance shouldn't emit a template.  */
+    struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+    if (special_name != NULL)
+      {
+	make_cleanup (xfree, special_name);
+	name = special_name;
+      }
 
-  /* If we need a new context, push it.  */
-  int need_new_context = ccp_need_new_context (pctx);
-  if (need_new_context)
-    ccp_push_processing_context (instance, pctx);
+    gcc_cp_symbol_kind_flags sym_kind = GCC_CP_SYMBOL_FUNCTION;
+    if (name != id)
+      sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
 
-  if (debug_compile_cplus_types)
-    {
-      printf_unfiltered ("start_new_template_decl for function generic %s\n",
-			 defn->generic ().c_str ());
-    }
-  CPCALL (start_new_template_decl, instance);
+    // Define any default value types.
+    define_default_template_parameter_types (m_instance, defn,
+					     tsym->template_arguments);
 
-  // Get the parameters' generic kinds and types.
-  define_template_parameters_generic (instance, defn,
-				      tsym->template_arguments,
-				      symbol_symtab (&tsym->base)->filename,
-				      SYMBOL_LINE (&tsym->base));
+    // Assess the processing context.
+    gcc_type result;
+    struct compile_cplus_context *pctx
+      = m_instance->new_context (SYMBOL_NATURAL_NAME (&tsym->base),
+				 SYMBOL_TYPE (&tsym->base), &result);
+    if (result != GCC_TYPE_NONE)
+      {
+	gdb_assert (pctx == NULL);
+	do_cleanups (back_to);
+	/* new_processing_context returned the type of the actual template
+	   instance from which we're constructing the template definition.
+	   It is already defined.  */
+	return;
+      }
 
-  /* Find the function node describing this template function.  */
-  gdb_assert (defn->demangle_info ()->tree ()->type
-	      == DEMANGLE_COMPONENT_TYPED_NAME);
-  struct demangle_component *comp = d_right (defn->demangle_info ()->tree ());
-  gdb_assert (comp->type == DEMANGLE_COMPONENT_FUNCTION_TYPE);
+    /* If we need a new context, push it.  */
+    bool need_new_context = m_instance->need_new_context (pctx);
+    if (need_new_context)
+      m_instance->push_context (pctx);
 
-  /* The return type is either a concrete type (TYPE_TARGET_TYPE)
-     or a template parameter.  */
-  gcc_type return_type;
-  if (tsym->template_return_index != -1)
-    {
-      gcc_type param_type
-	= defn->parameter_abstract_type (tsym->template_return_index);
+    m_instance->start_new_template_decl (defn->generic ().c_str ());
 
-      return_type
-	= add_type_modifiers (instance, param_type, d_left (comp));
-    }
-  else if (tsym->conversion_operator_index != -1)
-    {
-      bool done = false;
-      gcc_type param_type
-	= defn->parameter_abstract_type (tsym->conversion_operator_index);
+    // Get the parameters' generic kinds and types.
+    define_template_parameters_generic (m_instance, defn,
+					tsym->template_arguments,
+					symbol_symtab (&tsym->base)->filename,
+					SYMBOL_LINE (&tsym->base));
 
-      /* Conversion operators do not have a return type or arguments,
-	 so we need to use the CONVERSION node in the left/name sub-tree
-	 of the demangle tree.  */
+    /* Find the function node describing this template function.  */
+    gdb_assert (defn->demangle_info ()->tree ()->type
+		== DEMANGLE_COMPONENT_TYPED_NAME);
+    struct demangle_component *comp = d_right (defn->demangle_info ()->tree ());
+    gdb_assert (comp->type == DEMANGLE_COMPONENT_FUNCTION_TYPE);
 
-      comp = d_left (defn->demangle_info ()->tree ());
-      while (!done)
-	{
-	  switch (comp->type)
-	    {
-	    case DEMANGLE_COMPONENT_TEMPLATE:
-	      comp = d_left (comp);
-	      break;
+    /* The return type is either a concrete type (TYPE_TARGET_TYPE)
+       or a template parameter.  */
+    gcc_type return_type;
+    if (tsym->template_return_index != -1)
+      {
+	gcc_type param_type
+	  = defn->parameter_abstract_type (tsym->template_return_index);
 
-	    case DEMANGLE_COMPONENT_QUAL_NAME:
-	      comp = d_right (comp);
-	      break;
+	return_type
+	  = add_type_modifiers (m_instance, param_type, d_left (comp));
+      }
+    else if (tsym->conversion_operator_index != -1)
+      {
+	bool done = false;
+	gcc_type param_type
+	  = defn->parameter_abstract_type (tsym->conversion_operator_index);
 
-	    case DEMANGLE_COMPONENT_CONVERSION:
-	    default:
-	      done = true;
-	      break;
-	    }
-	}
+	/* Conversion operators do not have a return type or arguments,
+	   so we need to use the CONVERSION node in the left/name sub-tree
+	   of the demangle tree.  */
 
-      /* We had better have found a CONVERSION node if
-	 tsym->conversion_operator_index was set!  */
-      gdb_assert (comp->type == DEMANGLE_COMPONENT_CONVERSION);
-      return_type = add_type_modifiers (instance, param_type, d_left (comp));
-    }
-  else
-    {
-      return_type
-	= convert_cplus_type (instance,
-			      TYPE_TARGET_TYPE (SYMBOL_TYPE (&tsym->base)),
-			      GCC_CP_ACCESS_NONE);
-    }
+	comp = d_left (defn->demangle_info ()->tree ());
+	while (!done)
+	  {
+	    switch (comp->type)
+	      {
+	      case DEMANGLE_COMPONENT_TEMPLATE:
+		comp = d_left (comp);
+		break;
 
-  /* Get the parameters' definitions, and put them into ARRAY.  */
-  struct type *templ_type = SYMBOL_TYPE (&tsym->base);
-  int is_varargs = compile::cplus::is_varargs_p (templ_type);
-  struct gcc_type_array array;
-  array.n_elements = TYPE_NFIELDS (templ_type);
-  array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (templ_type));
-  make_cleanup (xfree, array.elements);
-  int artificials = 0;
+	      case DEMANGLE_COMPONENT_QUAL_NAME:
+		comp = d_right (comp);
+		break;
 
-  /* d_right (info->tree) is FUNCTION_TYPE (assert above).  */
-  comp = d_right (d_right (defn->demangle_info ()->tree ()));
-  gdb_assert (comp != NULL && comp->type == DEMANGLE_COMPONENT_ARGLIST);
+	      case DEMANGLE_COMPONENT_CONVERSION:
+	      default:
+		done = true;
+		break;
+	      }
+	  }
 
-  for (int i = 0; i < TYPE_NFIELDS (templ_type); ++i)
-    {
-      if (TYPE_FIELD_ARTIFICIAL (templ_type, i))
-	{
-	  --array.n_elements;
-	  ++artificials;
-	}
-      else
-	{
-	  int tidx = tsym->template_argument_indices[i - artificials];
-	  struct type *arg_type = TYPE_FIELD_TYPE (templ_type, i);
+	/* We had better have found a CONVERSION node if
+	   tsym->conversion_operator_index was set!  */
+	gdb_assert (comp->type == DEMANGLE_COMPONENT_CONVERSION);
+	return_type = add_type_modifiers (m_instance, param_type,
+					  d_left (comp));
+      }
+    else
+      {
+	return_type
+	  = m_instance->convert_type (TYPE_TARGET_TYPE (SYMBOL_TYPE (&tsym->base)),
+				    GCC_CP_ACCESS_NONE);
+      }
 
-	  if (tidx == -1)
-	    {
-	      // The parameter's type is a concrete type.
-	      array.elements[i - artificials]
-		= convert_cplus_type (instance, arg_type, GCC_CP_ACCESS_NONE);
-	    }
-	  else
-	    {
-	      // The parameter's type is a template parameter.
-	      result = defn->parameter_abstract_type (tidx);
+    /* Get the parameters' definitions, and put them into ARRAY.  */
+    struct type *templ_type = SYMBOL_TYPE (&tsym->base);
+    int is_varargs = is_varargs_p (templ_type);
+    struct gcc_type_array array;
+    array.n_elements = TYPE_NFIELDS (templ_type);
+    array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (templ_type));
+    make_cleanup (xfree, array.elements);
+    int artificials = 0;
 
-	      array.elements[i - artificials]
-		= add_type_modifiers (instance, result, d_left (comp));
-	    }
+    /* d_right (info->tree) is FUNCTION_TYPE (assert above).  */
+    comp = d_right (d_right (defn->demangle_info ()->tree ()));
+    gdb_assert (comp != NULL && comp->type == DEMANGLE_COMPONENT_ARGLIST);
 
-	  /* Move to the next ARGLIST node.  */
-	  comp = d_right (comp);
-	}
-    }
+    for (int i = 0; i < TYPE_NFIELDS (templ_type); ++i)
+      {
+	if (TYPE_FIELD_ARTIFICIAL (templ_type, i))
+	  {
+	    --array.n_elements;
+	    ++artificials;
+	  }
+	else
+	  {
+	    int tidx = tsym->template_argument_indices[i - artificials];
+	    struct type *arg_type = TYPE_FIELD_TYPE (templ_type, i);
 
-  if (debug_compile_cplus_types)
-    {
-      printf_unfiltered ("build_function_type for template %s %lld %d\n",
-			 defn->generic ().c_str (), return_type, is_varargs);
-    }
-  gcc_type func_type = CPCALL (build_function_type, instance, return_type,
-			       &array, is_varargs);
+	    if (tidx == -1)
+	      {
+		// The parameter's type is a concrete type.
+		array.elements[i - artificials]
+		  = m_instance->convert_type (arg_type, GCC_CP_ACCESS_NONE);
+	      }
+	    else
+	      {
+		// The parameter's type is a template parameter.
+		gcc_type result = defn->parameter_abstract_type (tidx);
 
-  /* If we have a method, create its type and set additional symbol flags
-     for the compiler.  */
-  if (defn->parent_type () != NULL
-      && defn->fidx () != -1 && defn->midx () != -1)
-    {
-      gcc_type class_type;
-      struct fn_field *methods
-	= TYPE_FN_FIELDLIST1 (defn->parent_type (), defn->fidx ());
+		array.elements[i - artificials]
+		  = add_type_modifiers (m_instance, result, d_left (comp));
+	      }
 
-      /* Get the defining class's type.  This should already be in the
-	 cache.  */
-      class_type = convert_cplus_type (instance, defn->parent_type (),
-				       GCC_CP_ACCESS_NONE);
+	    /* Move to the next ARGLIST node.  */
+	    comp = d_right (comp);
+	  }
+      }
 
-      /* Add any virtuality flags.  */
-      if (TYPE_FN_FIELD_VIRTUAL_P (methods, defn->midx ()))
-	{
-	  sym_kind |= GCC_CP_FLAG_VIRTUAL_FUNCTION;
+    gcc_type func_type = m_instance->build_function_type (return_type, &array,
+							  is_varargs);
 
-	  /* Unfortunate to have to do a symbol lookup, but this is the only
-	     way to know if we have a pure virtual method.  */
-	  const struct block *block
-	    = compile::cplus::get_current_search_block ();
-	  struct block_symbol sym
-	    = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, defn->midx ()),
-			     block, VAR_DOMAIN, NULL);
-	  if (sym.symbol == NULL)
-	    {
-	      /* !!keiths: The pure virtual hack.  See
-		 ccp_convert_struct_or_union_methods for more.  */
-	      sym_kind |= GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION;
-	    }
-	}
+    /* If we have a method, create its type and set additional symbol flags
+       for the compiler.  */
+    if (defn->parent_type () != NULL
+	&& defn->fidx () != -1 && defn->midx () != -1)
+      {
+	gcc_type class_type;
+	struct fn_field *methods
+	  = TYPE_FN_FIELDLIST1 (defn->parent_type (), defn->fidx ());
 
-      /* Add access flags.  */
-      sym_kind |= compile::cplus::get_method_access_flag (defn->parent_type (),
-							 defn->fidx (),
-							 defn->midx ());
+	/* Get the defining class's type.  This should already be in the
+	   cache.  */
+	class_type = m_instance->convert_type (defn->parent_type (),
+					       GCC_CP_ACCESS_NONE);
 
-      /* Create the method type.  */
-      if (!TYPE_FN_FIELD_STATIC_P (methods, defn->midx ()))
-	{
-	  gcc_cp_qualifiers_flags quals;
-	  gcc_cp_ref_qualifiers_flags rquals;
+	/* Add any virtuality flags.  */
+	if (TYPE_FN_FIELD_VIRTUAL_P (methods, defn->midx ()))
+	  {
+	    sym_kind |= GCC_CP_FLAG_VIRTUAL_FUNCTION;
 
-	  quals = (enum gcc_cp_qualifiers) 0; // !!keiths FIXME
-	  rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
-	  if (debug_compile_cplus_types)
-	    {
-	      printf_unfiltered ("build_method_type for template %s\n",
-				 defn->generic ().c_str ());
-	    }
-	  func_type = CPCALL (build_method_type, instance, class_type,
-			      func_type, quals, rquals);
-	}
-    }
+	    /* Unfortunate to have to do a symbol lookup, but this is the only
+	       way to know if we have a pure virtual method.  */
+	    struct block_symbol sym
+	      = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, defn->midx ()),
+			       m_instance->block (), VAR_DOMAIN, NULL);
+	    if (sym.symbol == NULL)
+	      {
+		/* !!keiths: The pure virtual hack.  See
+		   ccp_convert_struct_or_union_methods for more.  */
+		sym_kind |= GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION;
+	      }
+	  }
 
-  /* Finally, define the new generic template declaration.  */
-  if (debug_compile_cplus_types)
-    printf_unfiltered ("new_decl function template defn %s\n", name);
-  defn->set_decl (CPCALL (new_decl, instance,
-			  name,
-			  sym_kind,
-			  func_type,
-			  0,
-			  0,
-			  symbol_symtab (&(tsym->base))->filename,
-			  SYMBOL_LINE (&(tsym->base))));
+	/* Add access flags.  */
+	sym_kind |= get_method_access_flag (defn->parent_type (),
+					    defn->fidx (), defn->midx ());
 
-  /* Pop the processing context, if we pushed one, and then delete it.  */
-  if (need_new_context)
-    ccp_pop_processing_context (instance, pctx);
-  delete_processing_context (pctx);
-  do_cleanups (back_to);
-}
+	/* Create the method type.  */
+	if (!TYPE_FN_FIELD_STATIC_P (methods, defn->midx ()))
+	  {
+	    gcc_cp_qualifiers_flags quals;
+	    gcc_cp_ref_qualifiers_flags rquals;
+
+	    quals = (enum gcc_cp_qualifiers) 0; // !!keiths FIXME
+	    rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
+	    func_type
+	      = m_instance->build_method_type (class_type, func_type, quals,
+					       rquals);
+	  }
+      }
+
+    /* Finally, define the new generic template declaration.  */
+    gcc_decl decl
+      = m_instance->new_decl ("function template", name, sym_kind,
+			      func_type, 0, 0,
+			      symbol_symtab (&(tsym->base))->filename,
+			      SYMBOL_LINE (&(tsym->base)));
+    defn->set_decl (decl);
+
+    /* Pop the processing context, if we pushed one, and then delete it.  */
+    if (need_new_context)
+      m_instance->pop_context (pctx);
+    m_instance->delete_context (pctx);
+    do_cleanups (back_to);
+  }
+
+ private:
+
+  // The compiler instance to use.
+  compile_cplus_instance *m_instance;
+};
 
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::
-emit_function_template_decls (struct compile_cplus_instance *instance)
+compile_cplus_instance::emit_function_template_decls ()
 {
-  compile::cplus::templates::function_template_defn_map::iterator pos;
+  function_template_definer definer (this);
 
-  for (pos = instance->function_template_defns->begin ();
-       pos != instance->function_template_defns->end (); ++pos)
-    define_function_template (instance, pos->second);
+  std::for_each (m_function_template_defns->begin (),
+		 m_function_template_defns->end (), definer);
 }
 
-/* Define and fill-in the class template definition based on the
-   template DEFN.  */
+// A class to define and fill-in the class template definition.
 
-static void
-define_class_template (struct compile_cplus_instance *instance,
-		       compile::cplus::templates::class_template_defn *defn)
+class class_template_definer
 {
-  if (defn->defined ())
-    {
-      /* This template has already been defined.  Keep looking for more
-	 undefined templates.  */
-      return;
-    }
+ public:
 
-  // Make sure this is only done once!
-  defn->set_defined (true);
+  class_template_definer (compile_cplus_instance *instance)
+    : m_instance (instance)
+  {
+  }
 
-  // Define any default value types.
-  const struct template_argument_info *arg_info
-    = TYPE_TEMPLATE_ARGUMENT_INFO (defn->type ());
-  define_default_template_parameter_types (instance, defn, arg_info);
+  void operator() (class_template_map_item_t item)
+  {
+    class_template_defn *defn = item.second;
 
-  // Asses the processing context.
-  gcc_type result;
-  struct compile_cplus_context *pctx
-    = new_processing_context (instance, defn->decl_name (), defn->type (),
-			      &result);
-  if (result != GCC_TYPE_NONE)
-    {
-      gdb_assert (pctx == NULL);
-      /* new_processing_context returned the type of the actual template
-	 instance from which we're constructing the template definition.
-	 It is already defined.  */
-      return;
-    }
+    if (defn->defined ())
+      {
+	/* This template has already been defined.  Keep looking for more
+	   undefined templates.  */
+	return;
+      }
 
-  // If we need a new context, push it.
-  int need_new_context = ccp_need_new_context (pctx);
-  if (need_new_context)
-    ccp_push_processing_context (instance, pctx);
+    // Make sure this is only done once!
+    defn->set_defined (true);
 
-  // Now start a new template list for this template.
-  if (debug_compile_cplus_types)
-    {
-      printf_unfiltered ("start_new_template_decl for class generic %s\n",
-			 defn->generic ().c_str ());
-    }
-  CPCALL (start_new_template_decl, instance);
+    // Define any default value types.
+    const struct template_argument_info *arg_info
+      = TYPE_TEMPLATE_ARGUMENT_INFO (defn->type ());
+    define_default_template_parameter_types (m_instance, defn, arg_info);
 
-  // Get the parameters' generic kinds and types.
-  define_template_parameters_generic (instance, defn, arg_info,
-				      /* filename */ NULL, // !!keiths FIXME
-				      /* line */ 0); // !!keiths FIXME
+    // Asses the processing context.
+    gcc_type result;
+    struct compile_cplus_context *pctx
+      = m_instance->new_context (defn->decl_name (), defn->type (), &result);
+    if (result != GCC_TYPE_NONE)
+      {
+	gdb_assert (pctx == NULL);
+	/* new_processing_context returned the type of the actual template
+	   instance from which we're constructing the template definition.
+	   It is already defined.  */
+	return;
+      }
 
-  /* Define the new generic template declaration.  */
-  if (TYPE_CODE (defn->type ()) == TYPE_CODE_STRUCT)
-    {
-      if (debug_compile_cplus_types)
-	{
-	  printf_unfiltered ("new_decl for class template defn %s\n",
-			     defn->decl_name ());
-	}
-      defn->set_decl (CPCALL (new_decl, instance,
-			      defn->decl_name (),
-			      GCC_CP_SYMBOL_CLASS /* | nested_access? */
-			      | (TYPE_DECLARED_CLASS (defn->type ())
-				 ? GCC_CP_FLAG_CLASS_NOFLAG
-				 : GCC_CP_FLAG_CLASS_IS_STRUCT),
-			      0, NULL, 0, /*filename*/ NULL, /*line*/ 0));
-    }
-  else
-    {
-      gdb_assert (TYPE_CODE (defn->type ()) == TYPE_CODE_UNION);
-      if (debug_compile_cplus_types)
-	{
-	  printf_unfiltered ("new_decl for union template defn %s\n",
-			     defn->decl_name ());
-	}
-      defn->set_decl (CPCALL (new_decl, instance,
-			      defn->decl_name (),
-			      GCC_CP_SYMBOL_UNION /* | nested_access? */,
-			      0, NULL, 0, /*fileanme*/NULL, /*line*/0));
-    }
-  if (debug_compile_cplus_types)
-    printf_unfiltered ("\tgcc_decl = %lld\n", defn->decl ());
+    // If we need a new context, push it.
+    bool need_new_context = m_instance->need_new_context (pctx);
+    if (need_new_context)
+      m_instance->push_context (pctx);
 
-  if (need_new_context)
-    ccp_pop_processing_context (instance, pctx);
-  delete_processing_context (pctx);
-}
+    // Now start a new template list for this template.
+    m_instance->start_new_template_decl (defn->generic ().c_str ());
+
+    // Get the parameters' generic kinds and types.
+    define_template_parameters_generic (m_instance, defn, arg_info,
+					/* filename */ NULL, // !!keiths FIXME
+					/* line */ 0); // !!keiths FIXME
+
+    /* Define the new generic template declaration.  */
+    if (TYPE_CODE (defn->type ()) == TYPE_CODE_STRUCT)
+      {
+	gcc_decl decl
+	  = m_instance->new_decl ("class template", defn->decl_name (),
+				  GCC_CP_SYMBOL_CLASS /* | nested_access? */
+				  | (TYPE_DECLARED_CLASS (defn->type ())
+				     ? GCC_CP_FLAG_CLASS_NOFLAG
+				     : GCC_CP_FLAG_CLASS_IS_STRUCT),
+				  0, NULL, 0, /*filename*/ NULL, /*line*/ 0);
+	defn->set_decl (decl);
+      }
+    else
+      {
+	gdb_assert (TYPE_CODE (defn->type ()) == TYPE_CODE_UNION);
+	gcc_decl decl
+	  = m_instance->new_decl ("union template", defn->decl_name (),
+				  GCC_CP_SYMBOL_UNION /* | nested_access? */,
+				  0, NULL, 0, /*fileanme*/NULL, /*line*/0);
+	defn->set_decl (decl);
+      }
+
+    if (need_new_context)
+      m_instance->pop_context (pctx);
+    m_instance->delete_context (pctx);
+  }
+
+ private:
+
+  // The compiler instance to use.
+  compile_cplus_instance *m_instance;
+};
 
 // See description in compile-cplus-templates.h.
 
 void
-compile::cplus::templates::
-emit_class_template_decls (struct compile_cplus_instance *instance)
+compile_cplus_instance::emit_class_template_decls ()
 {
-  compile::cplus::templates::class_template_defn_map::iterator pos;
+  class_template_definer definer (this);
 
-  for (pos = instance->class_template_defns->begin ();
-       pos != instance->class_template_defns->end (); ++pos)
-    define_class_template (instance, pos->second);
+  std::for_each (m_class_template_defns->begin (),
+		 m_class_template_defns->end (), definer);
 }
 
 /* A command to test function_template_decl.  */
