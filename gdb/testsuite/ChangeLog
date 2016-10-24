@@ -1,3 +1,7 @@
+2016-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/morestack.exp: Try to build it using -fuse-ld=gold first.
+
 2016-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdb.exp (get_compiler_info): Generalize gcc_compile regexp.
