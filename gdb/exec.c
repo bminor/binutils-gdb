@@ -227,7 +227,8 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
       prev_err = err;
 
       /* Save message so it doesn't get trashed by the catch below.  */
-      prev_err.message = xstrdup (err.message);
+      if (err.message != NULL)
+	prev_err.message = xstrdup (err.message);
     }
   END_CATCH
 

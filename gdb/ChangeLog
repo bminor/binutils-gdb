@@ -1,5 +1,10 @@
 2016-10-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* exec.c (exec_file_locate_attach): Prevent NULL pointer dereference
+	when duplicating a string.
+
+2016-10-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* exec.c (exception_print_same): Fix string comparison to use
 	statically-allocated ones.
 
