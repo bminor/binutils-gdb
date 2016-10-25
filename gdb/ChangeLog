@@ -1,5 +1,9 @@
 2016-10-25  Pedro Alves  <palves@redhat.com>
 
+	* common/new-op.c: Add comment about -fsanitize=address.
+
+2016-10-25  Pedro Alves  <palves@redhat.com>
+
        * common/common-defs.h (__STDC_CONSTANT_MACROS)
        (__STDC_LIMIT_MACROS): Define.
 

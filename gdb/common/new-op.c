@@ -33,6 +33,12 @@
    new-handler function instead (std::set_new_handler) because we want
    to catch allocation errors from within global constructors too.
 
+   Skip overriding if building with -fsanitize=address though.
+   Address sanitizer wants to override operator new/delete too in
+   order to detect malloc+delete and new+free mismatches.  Our
+   versions would mask out ASan's, with the result of losing that
+   useful mismatch detection.
+
    Note that C++ implementations could either have their throw
    versions call the nothrow versions (libstdc++), or the other way
    around (clang/libc++).  For that reason, we replace both throw and
