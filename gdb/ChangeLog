@@ -1,3 +1,38 @@
+2016-10-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/20712
+	* defs.h: Remove obsolete comment
+	(atof): Wrap in !__cplusplus.
+	* procfs.c (do_destroy_procinfo_cleanup): Add cast.
+	(sysset_t_alloc): Likewise.
+	(proc_set_traced_sysentry): Likewise.
+	(proc_set_traced_sysexit): Likewise.
+	[!PIOCLSTATUS && NEW_PROC_API] (do_closedir_cleanup): Likewise.
+	(proc_get_LDT_entry): Initiate cleanups before returns.
+	(procfs_wait): Use GDB_SIGNAL_0.
+	(procfs_corefile_thread_callback): Add cast.
+	* sol-thread.c (td_log_ftype, td_ta_new_ftype, td_ta_delete_ftype)
+	(td_init_ftype, td_ta_get_ph_ftype, td_ta_get_nthreads_ftype)
+	(td_ta_tsd_iter_ftype, td_ta_thr_iter_ftype)
+	(td_thr_validate_ftype, td_thr_tsd_ftype, td_thr_get_info_ftype)
+	(td_thr_getfpregs_ftype, td_thr_getxregsize_ftype)
+	(td_thr_getxregs_ftype, td_thr_sigsetmask_ftype)
+	(td_thr_setprio_ftype, td_thr_setsigpending_ftype)
+	(td_thr_setfpregs_ftype, td_thr_setxregs_ftype)
+	(td_ta_map_id2thr_ftype, td_ta_map_lwp2thr_ftype)
+	(td_thr_getgregs_ftype, td_thr_setgregs_ftype): New typedefs.
+	(p_td_log, p_td_ta_new, p_td_ta_delete, p_td_init, p_td_ta_get_ph)
+	(p_td_ta_get_nthreads, p_td_ta_tsd_iter, p_td_ta_thr_iter)
+	(p_td_thr_validate, p_td_thr_tsd, p_td_thr_get_info)
+	(p_td_thr_getfpregs, p_td_thr_getxregsize, p_td_thr_getxregs)
+	(p_td_thr_sigsetmask, p_td_thr_setprio, p_td_thr_setsigpending)
+	(p_td_thr_setfpregs, p_td_thr_setxregs, p_td_ta_map_id2thr)
+	(p_td_ta_map_lwp2thr, p_td_thr_getgregs, p_td_thr_setgregs): Use them.
+	(ps_pdread): Add cast.
+	(ps_ptread): Likewise.
+	(resolve): Likewise.
+	* top.c (gdb_safe_append_history): Print pid_t as long.
+
 2016-10-24  Tom Tromey  <tom@tromey.com>
 
 	PR breakpoints/20653:
