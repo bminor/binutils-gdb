@@ -27,6 +27,19 @@
 #include "build-gnulib/config.h"
 #endif
 
+/* From:
+    https://www.gnu.org/software/gnulib/manual/html_node/stdint_002eh.html
+
+   "On some hosts that predate C++11, when using C++ one must define
+   __STDC_CONSTANT_MACROS to make visible the definitions of constant
+   macros such as INTMAX_C, and one must define __STDC_LIMIT_MACROS to
+   make visible the definitions of limit macros such as INTMAX_MAX.".
+
+   Must do this before including any system header, since system
+   headers may include stdint.h.  */
+#define __STDC_CONSTANT_MACROS 1
+#define __STDC_LIMIT_MACROS 1
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
