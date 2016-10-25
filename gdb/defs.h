@@ -620,13 +620,7 @@ enum gdb_osabi
   GDB_OSABI_INVALID		/* keep this last */
 };
 
-/* Global functions from other, non-gdb GNU thingies.
-   Libiberty thingies are no longer declared here.  We include libiberty.h
-   above, instead.  */
-
-/* From other system libraries */
-
-#ifndef atof
+#if !defined atof && !defined __cplusplus
 extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 #endif
 
