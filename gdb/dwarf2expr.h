@@ -68,7 +68,7 @@ struct dwarf_stack_value
 struct dwarf_expr_context
 {
   dwarf_expr_context ();
-  ~dwarf_expr_context ();
+  virtual ~dwarf_expr_context ();
 
   void push_address (CORE_ADDR value, int in_stack_memory);
   void eval (const gdb_byte *addr, size_t len);

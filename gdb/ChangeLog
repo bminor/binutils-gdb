@@ -1,3 +1,8 @@
+2016-10-25  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context) <~dwarf_expr_context>:
+	Make virtual.
+
 2016-10-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR build/20712
