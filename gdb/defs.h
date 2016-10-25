@@ -612,16 +612,6 @@ enum gdb_osabi
   GDB_OSABI_INVALID		/* keep this last */
 };
 
-/* Global functions from other, non-gdb GNU thingies.
-   Libiberty thingies are no longer declared here.  We include libiberty.h
-   above, instead.  */
-
-/* From other system libraries */
-
-#ifndef atof
-extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
-#endif
-
 /* Enumerate the requirements a symbol has in order to be evaluated.
    These are listed in order of "strength" -- a later entry subsumes
    earlier ones.  This fine-grained distinction is important because

@@ -1166,7 +1166,7 @@ gdb_safe_append_history (void)
   struct cleanup *old_chain;
 
   local_history_filename
-    = xstrprintf ("%s-gdb%d~", history_filename, getpid ());
+    = xstrprintf ("%s-gdb%ld~", history_filename, (long) getpid ());
   old_chain = make_cleanup (xfree, local_history_filename);
 
   ret = rename (history_filename, local_history_filename);
