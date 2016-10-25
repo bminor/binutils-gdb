@@ -1,3 +1,7 @@
+2016-10-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (STUB_JALR): Correct description.
+
 2016-10-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/gas.pot: Regenerate.

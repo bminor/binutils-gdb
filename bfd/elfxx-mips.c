@@ -913,7 +913,7 @@ static bfd *reldyn_sorting_bfd;
     : 0x8f998010))              		/* lw t9,0x8010(gp) */
 #define STUB_MOVE 0x03e07825			/* or t7,ra,zero */
 #define STUB_LUI(VAL) (0x3c180000 + (VAL))	/* lui t8,VAL */
-#define STUB_JALR 0x0320f809			/* jalr t9,ra */
+#define STUB_JALR 0x0320f809			/* jalr ra,t9 */
 #define STUB_ORI(VAL) (0x37180000 + (VAL))	/* ori t8,t8,VAL */
 #define STUB_LI16U(VAL) (0x34180000 + (VAL))	/* ori t8,zero,VAL unsigned */
 #define STUB_LI16S(abfd, VAL)						\
