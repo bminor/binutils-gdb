@@ -35,10 +35,18 @@
    macros such as INTMAX_C, and one must define __STDC_LIMIT_MACROS to
    make visible the definitions of limit macros such as INTMAX_MAX.".
 
-   Must do this before including any system header, since system
-   headers may include stdint.h.  */
+   And:
+    https://www.gnu.org/software/gnulib/manual/html_node/inttypes_002eh.html
+
+   "On some hosts that predate C++11, when using C++ one must define
+   __STDC_FORMAT_MACROS to make visible the declarations of format
+   macros such as PRIdMAX."
+
+   Must do this before including any system header, since other system
+   headers may include stdint.h/inttypes.h.  */
 #define __STDC_CONSTANT_MACROS 1
 #define __STDC_LIMIT_MACROS 1
+#define __STDC_FORMAT_MACROS 1
 
 #include <stdarg.h>
 #include <stdio.h>
