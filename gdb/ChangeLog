@@ -1,3 +1,9 @@
+2016-10-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/20716
+	* common/new-op.c (__has_feature): New macro.
+	Don't override operator new if asan is used.
+
 2016-10-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* exec.c (exec_file_locate_attach): Prevent NULL pointer dereference

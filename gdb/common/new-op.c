@@ -17,6 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* GCC does not understand __has_feature.  */
+#if !defined(__has_feature)
+# define __has_feature(x) 0
+#endif
+
+#if !__has_feature(address_sanitizer) && !defined(__SANITIZE_ADDRESS__)
 #include "common-defs.h"
 #include "host-defs.h"
 #include <new>
@@ -83,3 +89,4 @@ operator new[] (std::size_t sz, const std::nothrow_t&)
 {
   return ::operator new (sz, std::nothrow);
 }
+#endif
