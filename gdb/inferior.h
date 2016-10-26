@@ -43,6 +43,8 @@ struct target_desc_info;
 #include "progspace.h"
 #include "registry.h"
 
+#include "symfile-add-flags.h"
+
 struct infcall_suspend_state;
 struct infcall_control_state;
 
@@ -388,9 +390,8 @@ struct inferior
   LONGEST exit_code;
 
   /* Default flags to pass to the symbol reading functions.  These are
-     used whenever a new objfile is created.  The valid values come
-     from enum symfile_add_flags.  */
-  int symfile_flags;
+     used whenever a new objfile is created.  */
+  symfile_add_flags symfile_flags;
 
   /* Info about an inferior's target description (if it's fetched; the
      user supplied description's filename, if any; etc.).  */

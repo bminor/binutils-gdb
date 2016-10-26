@@ -430,7 +430,8 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
 
 static void
 macho_add_oso_symfile (oso_el *oso, bfd *abfd, const char *name,
-                       struct objfile *main_objfile, int symfile_flags)
+                       struct objfile *main_objfile,
+		       symfile_add_flags symfile_flags)
 {
   int storage;
   int i;
@@ -632,7 +633,7 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd, const char *name,
 static void
 macho_symfile_read_all_oso (VEC (oso_el) **oso_vector_ptr,
 			    struct objfile *main_objfile,
-			    int symfile_flags)
+			    symfile_add_flags symfile_flags)
 {
   int ix;
   VEC (oso_el) *vec = *oso_vector_ptr;
@@ -826,7 +827,7 @@ macho_check_dsym (struct objfile *objfile, char **filenamep)
 }
 
 static void
-macho_symfile_read (struct objfile *objfile, int symfile_flags)
+macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd = objfile->obfd;
   long storage_needed;

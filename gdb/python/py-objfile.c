@@ -437,7 +437,6 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
   static char *keywords[] = { "file_name", NULL };
   objfile_object *obj = (objfile_object *) self;
   const char *file_name;
-  int symfile_flags = 0;
 
   OBJFPY_REQUIRE_VALID (obj);
 
@@ -448,7 +447,7 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
     {
       bfd *abfd = symfile_bfd_open (file_name);
 
-      symbol_file_add_separate (abfd, file_name, symfile_flags, obj->objfile);
+      symbol_file_add_separate (abfd, file_name, 0, obj->objfile);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

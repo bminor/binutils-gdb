@@ -283,7 +283,7 @@ static void dbx_symfile_init (struct objfile *);
 
 static void dbx_new_init (struct objfile *);
 
-static void dbx_symfile_read (struct objfile *, int);
+static void dbx_symfile_read (struct objfile *, symfile_add_flags);
 
 static void dbx_symfile_finish (struct objfile *);
 
@@ -520,7 +520,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
    hung off the objfile structure.  */
 
 static void
-dbx_symfile_read (struct objfile *objfile, int symfile_flags)
+dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *sym_bfd;
   int val;

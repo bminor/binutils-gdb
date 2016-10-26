@@ -1,5 +1,55 @@
 2016-10-26  Pedro Alves  <palves@redhat.com>
 
+	* coffread.c (coff_symfile_read): Use symfile_add_flags.
+	* dbxread.c (dbx_symfile_read): Ditto.
+	* elfread.c (elf_symfile_read): Ditto.
+	* inferior.h: Include symfile-add-flags.h.
+	(struct inferior) <symfile_flags>: Now symfile_add_flags.
+	* machoread.c (macho_add_oso_symfile, macho_symfile_read_all_oso)
+	(macho_symfile_read, mipscoff_symfile_read): Use
+	symfile_add_flags.
+	* objfile-flags.h: New file.
+	* objfiles.c (allocate_objfile): Use objfile_flags.
+	* objfiles.h: Include objfile-flags.h.
+	(struct objfile) <flags>: Now an objfile_flags.
+	(OBJF_REORDERED, OBJF_SHARED, OBJF_READNOW, OBJF_USERLOADED)
+	(OBJF_PSYMTABS_READ, OBJF_MAINLINE, OBJF_NOT_FILENAME): Delete.
+	Converted to an enum-flags in objfile-flags.h.
+	(allocate_objfile): Use objfile_flags.
+	* python/py-objfile.c (objfpy_add_separate_debug_file): Remove
+	unnecessary local.
+	* solib.c (solib_read_symbols, solib_add)
+	(reload_shared_libraries_1): Use symfile_add_flags.
+	* solib.h: Include "symfile-add-flags.h".
+	(solib_read_symbols): Use symfile_add_flags.
+	* symfile-add-flags.h: New file.
+	* symfile-debug.c (debug_sym_read): Use symfile_add_flags.
+	* symfile-mem.c (symbol_file_add_from_memory): Use
+	symfile_add_flags.
+	* symfile.c (read_symbols, syms_from_objfile_1)
+	(syms_from_objfile, finish_new_objfile): Use symfile_add_flags.
+	(symbol_file_add_with_addrs): Use symfile_add_flags and
+	objfile_flags.
+	(symbol_file_add_separate): Use symfile_add_flags.
+	(symbol_file_add_from_bfd, symbol_file_add): Use symfile_add_flags
+	and objfile_flags.
+	(symbol_file_add_main_1): : Use objfile_flags.  Fix add_flags vs
+	flags confusion.
+	(symbol_file_command): Use objfile_flags.
+	(add_symbol_file_command): Use symfile_add_flags and
+	objfile_flags.
+	(clear_symtab_users): Use symfile_add_flags.
+	* symfile.h: Include "symfile-add-flags.h" and "objfile-flags.h".
+	(struct sym_fns) <sym_read>: Use symfile_add_flags.
+	(clear_symtab_users): Use symfile_add_flags.
+	(enum symfile_add_flags): Delete, moved to symfile-add-flags.h and
+	converted to enum-flags.
+	(symbol_file_add, symbol_file_add_from_bfd)
+	(symbol_file_add_separate): Use symfile_add_flags.
+	* xcoffread.c (xcoff_initial_scan): Use symfile_add_flags.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
 	* inferior.h (ALL_NON_EXITED_INFERIORS): New macro.
 	* infrun.c (do_target_resume): Call target_commit_resume.
 	(proceed): Defer target_commit_resume while looping over threads,

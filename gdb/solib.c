@@ -669,7 +669,7 @@ master_so_list (void)
    loaded.  */
 
 int
-solib_read_symbols (struct so_list *so, int flags)
+solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 {
   if (so->symbols_loaded)
     {
@@ -999,8 +999,10 @@ solib_add (const char *pattern, int from_tty,
   {
     int any_matches = 0;
     int loaded_any_symbols = 0;
-    const int flags =
-        SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
+    symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
+
+    if (from_tty)
+        add_flags |= SYMFILE_VERBOSE;
 
     for (gdb = so_list_head; gdb; gdb = gdb->next)
       if (! pattern || re_exec (gdb->so_name))
@@ -1024,7 +1026,7 @@ solib_add (const char *pattern, int from_tty,
 		    printf_unfiltered (_("Symbols already loaded for %s\n"),
 				       gdb->so_name);
 		}
-	      else if (solib_read_symbols (gdb, flags))
+	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = 1;
 	    }
 	}
@@ -1357,8 +1359,10 @@ reload_shared_libraries_1 (int from_tty)
       char *filename, *found_pathname = NULL;
       bfd *abfd;
       int was_loaded = so->symbols_loaded;
-      const int flags =
-	SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
+      symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
+
+      if (from_tty)
+	add_flags |= SYMFILE_VERBOSE;
 
       filename = tilde_expand (so->so_original_name);
       make_cleanup (xfree, filename);
@@ -1407,7 +1411,7 @@ reload_shared_libraries_1 (int from_tty)
 
 	    if (!got_error
 		&& (auto_solib_add || was_loaded || libpthread_solib_p (so)))
-	      solib_read_symbols (so, flags);
+	      solib_read_symbols (so, add_flags);
 	}
     }
 

@@ -195,7 +195,7 @@ eb_complaint (int arg1)
 	     _("Mismatched .eb symbol ignored starting at symnum %d"), arg1);
 }
 
-static void xcoff_initial_scan (struct objfile *, int);
+static void xcoff_initial_scan (struct objfile *, symfile_add_flags);
 
 static void scan_xcoff_symtab (minimal_symbol_reader &,
 			       struct objfile *);
@@ -2925,7 +2925,7 @@ xcoff_get_toc_offset (struct objfile *objfile)
    loaded).  */
 
 static void
-xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
+xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd;
   int val;
