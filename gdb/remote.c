@@ -5556,6 +5556,58 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
   return p;
 }
 
+/* Set the target running, using the packets that use Hc
+   (c/s/C/S).  */
+
+static void
+remote_resume_with_hc (struct target_ops *ops,
+		       ptid_t ptid, int step, enum gdb_signal siggnal)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct thread_info *thread;
+  char *buf;
+
+  rs->last_sent_signal = siggnal;
+  rs->last_sent_step = step;
+
+  /* The c/s/C/S resume packets use Hc, so set the continue
+     thread.  */
+  if (ptid_equal (ptid, minus_one_ptid))
+    set_continue_thread (any_thread_ptid);
+  else
+    set_continue_thread (ptid);
+
+  ALL_NON_EXITED_THREADS (thread)
+    resume_clear_thread_private_info (thread);
+
+  buf = rs->buf;
+  if (execution_direction == EXEC_REVERSE)
+    {
+      /* We don't pass signals to the target in reverse exec mode.  */
+      if (info_verbose && siggnal != GDB_SIGNAL_0)
+	warning (_(" - Can't pass signal %d to target in reverse: ignored."),
+		 siggnal);
+
+      if (step && packet_support (PACKET_bs) == PACKET_DISABLE)
+	error (_("Remote reverse-step not supported."));
+      if (!step && packet_support (PACKET_bc) == PACKET_DISABLE)
+	error (_("Remote reverse-continue not supported."));
+
+      strcpy (buf, step ? "bs" : "bc");
+    }
+  else if (siggnal != GDB_SIGNAL_0)
+    {
+      buf[0] = step ? 'S' : 'C';
+      buf[1] = tohex (((int) siggnal >> 4) & 0xf);
+      buf[2] = tohex (((int) siggnal) & 0xf);
+      buf[3] = '\0';
+    }
+  else
+    strcpy (buf, step ? "s" : "c");
+
+  putpkt (buf);
+}
+
 /* Resume the remote inferior by using a "vCont" packet.  The thread
    to be resumed is PTID; STEP and SIGGNAL indicate whether the
    resumed thread should be single-stepped and/or signalled.  If PTID
@@ -5563,15 +5615,19 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
    be stepped and/or signalled is given in the global INFERIOR_PTID.
    This function returns non-zero iff it resumes the inferior.
 
-   This function issues a strict subset of all possible vCont commands at the
-   moment.  */
+   This function issues a strict subset of all possible vCont commands
+   at the moment.  */
 
 static int
-remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
+remote_resume_with_vcont (ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
   char *endp;
+
+  /* No reverse execution actions defined for vCont.  */
+  if (execution_direction == EXEC_REVERSE)
+    return 0;
 
   if (packet_support (PACKET_vCont) == PACKET_SUPPORT_UNKNOWN)
     remote_vcont_probe (rs);
@@ -5644,8 +5700,6 @@ remote_resume (struct target_ops *ops,
 	       ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
-  char *buf;
-  struct thread_info *thread;
 
   /* In all-stop, we can't mark REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN
      (explained in remote-notif.c:handle_notification) so
@@ -5656,55 +5710,12 @@ remote_resume (struct target_ops *ops,
   if (!target_is_non_stop_p ())
     remote_notif_process (rs->notif_state, &notif_client_stop);
 
-  rs->last_sent_signal = siggnal;
-  rs->last_sent_step = step;
-
   rs->last_resume_exec_dir = execution_direction;
 
-  /* The vCont packet doesn't need to specify threads via Hc.  */
-  /* No reverse support (yet) for vCont.  */
-  if (execution_direction != EXEC_REVERSE)
-    if (remote_vcont_resume (ptid, step, siggnal))
-      goto done;
+  /* Prefer vCont, and fallback to s/c/S/C, which use Hc.  */
+  if (!remote_resume_with_vcont (ptid, step, siggnal))
+    remote_resume_with_hc (ops, ptid, step, siggnal);
 
-  /* All other supported resume packets do use Hc, so set the continue
-     thread.  */
-  if (ptid_equal (ptid, minus_one_ptid))
-    set_continue_thread (any_thread_ptid);
-  else
-    set_continue_thread (ptid);
-
-  ALL_NON_EXITED_THREADS (thread)
-    resume_clear_thread_private_info (thread);
-
-  buf = rs->buf;
-  if (execution_direction == EXEC_REVERSE)
-    {
-      /* We don't pass signals to the target in reverse exec mode.  */
-      if (info_verbose && siggnal != GDB_SIGNAL_0)
-	warning (_(" - Can't pass signal %d to target in reverse: ignored."),
-		 siggnal);
-
-      if (step && packet_support (PACKET_bs) == PACKET_DISABLE)
-	error (_("Remote reverse-step not supported."));
-      if (!step && packet_support (PACKET_bc) == PACKET_DISABLE)
-	error (_("Remote reverse-continue not supported."));
-
-      strcpy (buf, step ? "bs" : "bc");
-    }
-  else if (siggnal != GDB_SIGNAL_0)
-    {
-      buf[0] = step ? 'S' : 'C';
-      buf[1] = tohex (((int) siggnal >> 4) & 0xf);
-      buf[2] = tohex (((int) siggnal) & 0xf);
-      buf[3] = '\0';
-    }
-  else
-    strcpy (buf, step ? "s" : "c");
-
-  putpkt (buf);
-
- done:
   /* We are about to start executing the inferior, let's register it
      with the event loop.  NOTE: this is the one place where all the
      execution commands end up.  We could alternatively do this in each

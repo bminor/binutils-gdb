@@ -1,3 +1,12 @@
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_resume_with_hc): New function, factored out
+	from ...
+	(remote_resume): ... this.  Always try vCont first.
+	(remote_vcont_resume): Rename to ...
+	(remote_resume_with_vcont): ... this.  Bail out if execution
+	direction is reverse.
+
 2016-10-25  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context) <~dwarf_expr_context>:
