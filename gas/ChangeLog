@@ -1,5 +1,11 @@
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
+	* testsuite/gas/arc/nps400-6.s: Change ldbit tests so that limm
+	operands are out of the range of an s9, in order to fix the test.
+	* testsuite/gas/arc/nps400-6.d: Updated to match new expected output.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
 	* testsuite/gas/arc/nps-400-9.d: Added.
 	* testsuite/gas/arc/nps-400-9.s: Added.
 
