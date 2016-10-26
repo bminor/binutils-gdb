@@ -589,6 +589,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  event_lwp->status_pending_p = 1;
 	  event_lwp->status_pending = wstat;
 
+	  /* Link the threads until the parent event is passed on to
+	     higher layers.  */
+	  event_lwp->fork_relative = child_lwp;
+	  child_lwp->fork_relative = event_lwp;
+
 	  /* If the parent thread is doing step-over with single-step
 	     breakpoints, the list of single-step breakpoints are cloned
 	     from the parent's.  Remove them from the child process.
@@ -3853,6 +3858,15 @@ linux_wait_1 (ptid_t ptid,
     {
       /* If the reported event is an exit, fork, vfork or exec, let
 	 GDB know.  */
+
+      /* Break the unreported fork relationship chain.  */
+      if (event_child->waitstatus.kind == TARGET_WAITKIND_FORKED
+	  || event_child->waitstatus.kind == TARGET_WAITKIND_VFORKED)
+	{
+	  event_child->fork_relative->fork_relative = NULL;
+	  event_child->fork_relative = NULL;
+	}
+
       *ourstatus = event_child->waitstatus;
       /* Clear the event lwp's waitstatus since we handled it already.  */
       event_child->waitstatus.kind = TARGET_WAITKIND_IGNORE;
@@ -4651,6 +4665,51 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 			      : "stopping",
 			      lwpid_of (thread));
 
+	      continue;
+	    }
+
+	  /* Ignore (wildcard) resume requests for already-resumed
+	     threads.  */
+	  if (r->resume[ndx].kind != resume_stop
+	      && thread->last_resume_kind != resume_stop)
+	    {
+	      if (debug_threads)
+		debug_printf ("already %s LWP %ld at GDB's request\n",
+			      (thread->last_resume_kind
+			       == resume_step)
+			      ? "stepping"
+			      : "continuing",
+			      lwpid_of (thread));
+	      continue;
+	    }
+
+	  /* Don't let wildcard resumes resume fork children that GDB
+	     does not yet know are new fork children.  */
+	  if (lwp->fork_relative != NULL)
+	    {
+	      struct inferior_list_entry *inf, *tmp;
+	      struct lwp_info *rel = lwp->fork_relative;
+
+	      if (rel->status_pending_p
+		  && (rel->waitstatus.kind == TARGET_WAITKIND_FORKED
+		      || rel->waitstatus.kind == TARGET_WAITKIND_VFORKED))
+		{
+		  if (debug_threads)
+		    debug_printf ("not resuming LWP %ld: has queued stop reply\n",
+				  lwpid_of (thread));
+		  continue;
+		}
+	    }
+
+	  /* If the thread has a pending event that has already been
+	     reported to GDBserver core, but GDB has not pulled the
+	     event out of the vStopped queue yet, likewise, ignore the
+	     (wildcard) resume request.  */
+	  if (in_queued_stop_replies (entry->id))
+	    {
+	      if (debug_threads)
+		debug_printf ("not resuming LWP %ld: has queued stop reply\n",
+			      lwpid_of (thread));
 	      continue;
 	    }
 
