@@ -2150,6 +2150,16 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
     }
 }
 
+/* The to_commit_resume method of target record-btrace.  */
+
+static void
+record_btrace_commit_resume (struct target_ops *ops)
+{
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
+    ops->beneath->to_commit_resume (ops->beneath);
+}
+
 /* Cancel resuming TP.  */
 
 static void
@@ -2875,6 +2885,7 @@ init_record_btrace_ops (void)
   ops->to_get_unwinder = &record_btrace_to_get_unwinder;
   ops->to_get_tailcall_unwinder = &record_btrace_to_get_tailcall_unwinder;
   ops->to_resume = record_btrace_resume;
+  ops->to_commit_resume = record_btrace_commit_resume;
   ops->to_wait = record_btrace_wait;
   ops->to_stop = record_btrace_stop;
   ops->to_update_thread_list = record_btrace_update_thread_list;

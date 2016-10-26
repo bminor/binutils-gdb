@@ -2366,6 +2366,8 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
     target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
 
   target_resume (resume_ptid, step, sig);
+
+  target_commit_resume ();
 }
 
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
@@ -2984,6 +2986,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain;
+  struct cleanup *defer_resume_cleanup;
   int started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
@@ -3125,6 +3128,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      until the target stops again.  */
   tp->prev_pc = regcache_read_pc (regcache);
 
+  defer_resume_cleanup = make_cleanup_defer_target_commit_resume ();
+
   started = start_step_over ();
 
   if (step_over_info_valid_p ())
@@ -3188,6 +3193,9 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
       if (!ecs->wait_some_more)
 	error (_("Command aborted."));
     }
+
+  do_cleanups (defer_resume_cleanup);
+  target_commit_resume ();
 
   discard_cleanups (old_chain);
 

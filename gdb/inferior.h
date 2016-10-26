@@ -513,6 +513,12 @@ extern struct cleanup *save_current_inferior (void);
 #define ALL_INFERIORS(I) \
   for ((I) = inferior_list; (I); (I) = (I)->next)
 
+/* Traverse all non-exited inferiors.  */
+
+#define ALL_NON_EXITED_INFERIORS(I) \
+  ALL_INFERIORS (I)		    \
+    if ((I)->pid != 0)
+
 extern struct inferior *inferior_list;
 
 /* Prune away automatically added inferiors that aren't required

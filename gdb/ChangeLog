@@ -1,5 +1,49 @@
 2016-10-26  Pedro Alves  <palves@redhat.com>
 
+	* inferior.h (ALL_NON_EXITED_INFERIORS): New macro.
+	* infrun.c (do_target_resume): Call target_commit_resume.
+	(proceed): Defer target_commit_resume while looping over threads,
+	resuming them.  Call target_commit_resume at the end.
+	* record-btrace.c (record_btrace_commit_resume): New function.
+	(init_record_btrace_ops): Install it as to_commit_resume method.
+	* record-full.c (record_full_commit_resume): New function.
+	(record_full_wait_1): Call the beneath target's to_commit_resume
+	method.
+	(init_record_full_ops): Install record_full_commit_resume as
+	to_commit_resume method.
+	* remote.c (struct private_thread_info) <last_resume_step,
+	last_resume_sig, vcont_resumed>: New fields.
+	(remote_add_thread): Set the new thread's vcont_resumed flag.
+	(demand_private_info): Delete.
+	(get_private_info_thread, get_private_info_ptid): New functions.
+	(remote_update_thread_list): Adjust.
+	(process_initial_stop_replies): Clear the thread's vcont_resumed
+	flag.
+	(remote_resume): If connected in non-stop mode, record the resume
+	request and return early.
+	(struct private_inferior): New.
+	(struct vcont_builder): New.
+	(vcont_builder_restart, vcont_builder_flush)
+	(vcont_builder_push_action): New functions.
+	(MAX_ACTION_SIZE): New macro.
+	(remote_commit_resume): New function.
+	(thread_pending_fork_status, is_pending_fork_parent_thread): New
+	functions.
+	(check_pending_event_prevents_wildcard_vcont_callback)
+	(check_pending_events_prevent_wildcard_vcont): New functions.
+	(process_stop_reply): Adjust.  Clear the thread's vcont_resumed
+	flag.
+	(init_remote_ops): Install remote_commit_resume.
+	* target-delegates.c: Regenerate.
+	* target.c (defer_target_commit_resume): New global.
+	(target_commit_resume, make_cleanup_defer_target_commit_resume):
+	New functions.
+	* target.h (struct target_ops) <to_commit_resume>: New field.
+	(target_resume): Update comments.
+	(target_commit_resume): New declaration.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
 	* inferior.c (exit_inferior_1): Free 'priv'.
 
 2016-10-26  Pedro Alves  <palves@redhat.com>
