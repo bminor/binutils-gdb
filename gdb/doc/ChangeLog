@@ -1,3 +1,9 @@
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Packets): Clarify vCont packets with multiple
+	actions that match a thread, and what happens when an action
+	matches a thread that is already running.
+
 2016-10-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Using Trace Files): Fix typo.

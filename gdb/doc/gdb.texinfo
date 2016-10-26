@@ -35530,13 +35530,17 @@ for success in non-stop mode (@pxref{Remote Non-Stop})
 @cindex @samp{vCont} packet
 @anchor{vCont packet}
 Resume the inferior, specifying different actions for each thread.
-If an action is specified with no @var{thread-id}, then it is applied to any
-threads that don't have a specific action specified; if no default action is
-specified then other threads should remain stopped in all-stop mode and
-in their current state in non-stop mode.
-Specifying multiple
-default actions is an error; specifying no actions is also an error.
-Thread IDs are specified using the syntax described in @ref{thread-id syntax}.
+
+For each inferior thread, the leftmost action with a matching
+@var{thread-id} is applied.  Threads that don't match any action
+remain in their current state.  Thread IDs are specified using the
+syntax described in @ref{thread-id syntax}.  If multiprocess
+extensions (@pxref{multiprocess extensions}) are supported, actions
+can be specified to match all threads in a process by using the
+@samp{p@var{pid}.-1} form of the @var{thread-id}.  An action with no
+@var{thread-id} is called the default action and matches all threads.
+Specifying multiple default actions is an error; specifying no actions
+is also an error.
 
 Currently supported actions are:
 
@@ -35581,11 +35585,17 @@ the corresponding stop reply should indicate that the thread has stopped with
 signal @samp{0}, regardless of whether the target uses some other signal
 as an implementation detail.
 
+The server must ignore @samp{c}, @samp{C}, @samp{s}, @samp{S}, and
+@samp{r} actions for threads that are already running.  Conversely,
+the server must ignore @samp{t} actions for threads that are already
+stopped.
+
+@emph{Note:} In non-stop mode, a thread is considered running until
+@value{GDBN} acknowleges an asynchronous stop notification for it with
+the @samp{vStopped} packet (@pxref{Remote Non-Stop}).
+
 The stub must support @samp{vCont} if it reports support for
-multiprocess extensions (@pxref{multiprocess extensions}).  Note that in
-this case @samp{vCont} actions can be specified to apply to all threads
-in a process by using the @samp{p@var{pid}.-1} form of the
-@var{thread-id}.
+multiprocess extensions (@pxref{multiprocess extensions}).
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
