@@ -380,21 +380,22 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
 /* Return the full pathname of the main executable, or NULL if not
    found.  The returned pathname is malloc'ed and must be freed by
    the caller.  If FD is non-NULL, *FD is set to either -1 or an open
-   file handle for the main executable.
-
-   The search algorithm used is described in solib_find_1's comment
-   above.  */
+   file handle for the main executable.  */
 
 char *
 exec_file_find (char *in_pathname, int *fd)
 {
-  char *result = solib_find_1 (in_pathname, fd, 0);
+  char *result;
+  const char *fskind = effective_target_file_system_kind ();
 
-  if (result == NULL)
+  if (in_pathname == NULL)
+    return NULL;
+
+  if (*gdb_sysroot != '\0' && IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname))
     {
-      const char *fskind = effective_target_file_system_kind ();
+      result = solib_find_1 (in_pathname, fd, 0);
 
-      if (fskind == file_system_kind_dos_based)
+      if (result == NULL && fskind == file_system_kind_dos_based)
 	{
 	  char *new_pathname;
 
@@ -404,6 +405,21 @@ exec_file_find (char *in_pathname, int *fd)
 
 	  result = solib_find_1 (new_pathname, fd, 0);
 	}
+    }
+  else
+    {
+      /* It's possible we don't have a full path, but rather just a
+	 filename.  Some targets, such as HP-UX, don't provide the
+	 full path, sigh.
+
+	 Attempt to qualify the filename against the source path.
+	 (If that fails, we'll just fall back on the original
+	 filename.  Not much more we can do...)  */
+
+      if (!source_full_path_of (in_pathname, &result))
+	result = xstrdup (in_pathname);
+      if (fd != NULL)
+	*fd = -1;
     }
 
   return result;

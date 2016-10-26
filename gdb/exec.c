@@ -136,73 +136,16 @@ exec_file_clear (int from_tty)
     printf_unfiltered (_("No executable file now.\n"));
 }
 
-/* Returns non-zero if exceptions E1 and E2 are equal.  Returns zero
-   otherwise.  */
-
-static int
-exception_print_same (struct gdb_exception e1, struct gdb_exception e2)
-{
-  const char *msg1 = e1.message;
-  const char *msg2 = e2.message;
-
-  if (msg1 == NULL)
-    msg1 = "";
-  if (msg2 == NULL)
-    msg2 = "";
-
-  return (e1.reason == e2.reason
-	  && e1.error == e2.error
-	  && strcmp (msg1, msg2) == 0);
-}
-
-/* See gdbcore.h.  */
+/* See exec.h.  */
 
 void
-exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
+try_open_exec_file (const char *exec_file_host, struct inferior *inf,
+		    symfile_add_flags add_flags)
 {
-  char *exec_file, *full_exec_path = NULL;
   struct cleanup *old_chain;
   struct gdb_exception prev_err = exception_none;
 
-  /* Do nothing if we already have an executable filename.  */
-  exec_file = (char *) get_exec_file (0);
-  if (exec_file != NULL)
-    return;
-
-  /* Try to determine a filename from the process itself.  */
-  exec_file = target_pid_to_exec_file (pid);
-  if (exec_file == NULL)
-    {
-      warning (_("No executable has been specified and target does not "
-		 "support\n"
-		 "determining executable automatically.  "
-		 "Try using the \"file\" command."));
-      return;
-    }
-
-  /* If gdb_sysroot is not empty and the discovered filename
-     is absolute then prefix the filename with gdb_sysroot.  */
-  if (*gdb_sysroot != '\0' && IS_ABSOLUTE_PATH (exec_file))
-    {
-      full_exec_path = exec_file_find (exec_file, NULL);
-      if (full_exec_path == NULL)
-	return;
-    }
-  else
-    {
-      /* It's possible we don't have a full path, but rather just a
-	 filename.  Some targets, such as HP-UX, don't provide the
-	 full path, sigh.
-
-	 Attempt to qualify the filename against the source path.
-	 (If that fails, we'll just fall back on the original
-	 filename.  Not much more we can do...)  */
-      if (!source_full_path_of (exec_file, &full_exec_path))
-	full_exec_path = xstrdup (exec_file);
-    }
-
-  old_chain = make_cleanup (xfree, full_exec_path);
-  make_cleanup (free_current_contents, &prev_err.message);
+  old_chain = make_cleanup (free_current_contents, &prev_err.message);
 
   /* exec_file_attach and symbol_file_add_main may throw an error if the file
      cannot be opened either locally or remotely.
@@ -217,7 +160,9 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
      errors/exceptions in the following code.  */
   TRY
     {
-      exec_file_attach (full_exec_path, from_tty);
+      /* We must do this step even if exec_file_host is NULL, so that
+	 exec_file_attach will clear state.  */
+      exec_file_attach (exec_file_host, add_flags & SYMFILE_VERBOSE);
     }
   CATCH (err, RETURN_MASK_ERROR)
     {
@@ -232,20 +177,58 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
     }
   END_CATCH
 
-  TRY
+  if (exec_file_host != NULL)
     {
-      if (defer_bp_reset)
-	current_inferior ()->symfile_flags |= SYMFILE_DEFER_BP_RESET;
-      symbol_file_add_main (full_exec_path, from_tty);
+      TRY
+	{
+	  symbol_file_add_main (exec_file_host, add_flags);
+	}
+      CATCH (err, RETURN_MASK_ERROR)
+	{
+	  if (!exception_print_same (prev_err, err))
+	    warning ("%s", err.message);
+	}
+      END_CATCH
     }
-  CATCH (err, RETURN_MASK_ERROR)
-    {
-      if (!exception_print_same (prev_err, err))
-	warning ("%s", err.message);
-    }
-  END_CATCH
-  current_inferior ()->symfile_flags &= ~SYMFILE_DEFER_BP_RESET;
 
+  do_cleanups (old_chain);
+}
+
+/* See gdbcore.h.  */
+
+void
+exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
+{
+  char *exec_file_target, *exec_file_host;
+  struct cleanup *old_chain;
+  symfile_add_flags add_flags = 0;
+
+  /* Do nothing if we already have an executable filename.  */
+  if (get_exec_file (0) != NULL)
+    return;
+
+  /* Try to determine a filename from the process itself.  */
+  exec_file_target = target_pid_to_exec_file (pid);
+  if (exec_file_target == NULL)
+    {
+      warning (_("No executable has been specified and target does not "
+		 "support\n"
+		 "determining executable automatically.  "
+		 "Try using the \"file\" command."));
+      return;
+    }
+
+  exec_file_host = exec_file_find (exec_file_target, NULL);
+  old_chain = make_cleanup (xfree, exec_file_host);
+
+  if (defer_bp_reset)
+    add_flags |= SYMFILE_DEFER_BP_RESET;
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
+
+  /* Attempt to open the exec file.  */
+  try_open_exec_file (exec_file_host, current_inferior (), add_flags);
   do_cleanups (old_chain);
 }
 

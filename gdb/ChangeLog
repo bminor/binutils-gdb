@@ -1,3 +1,35 @@
+2016-10-25  Sandra Loosemore  <sandra@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20569
+	* exceptions.c (exception_print_same): Moved here from exec.c.
+	* exceptions.h (exception_print_same): Declare.
+	* exec.h: Include "symfile-add-flags.h".
+	(try_open_exec_file): New declaration.
+	* exec.c (exception_print_same): Moved to exceptions.c.
+	(try_open_exec_file): New function.
+	(exec_file_locate_attach): Rename exec_file and full_exec_path
+	variables to avoid confusion between target and host pathnames.
+	Move pathname processing logic to exec_file_find.  Do not return
+	early if pathname lookup fails; Call try_open_exec_file.
+	* infrun.c (follow_exec): Split and rename execd_pathname variable
+	to avoid confusion between target and host pathnames.  Warn if
+	pathname lookup fails.  Pass target pathname to
+	target_follow_exec, not hostpathname.  Call try_open_exec_file.
+	* main.c (symbol_file_add_main_adapter): New function.
+	(captured_main_1): Use it.
+	* solib-svr4.c (open_symbol_file_object): Adjust to pass
+	symfile_add_flags to symbol_file_add_main.
+	* solib.c (exec_file_find): Incorporate fallback logic for relative
+	pathnames formerly in exec_file_locate_attach.
+	* symfile.c (symbol_file_add_main, symbol_file_add_main_1):
+	Replace 'from_tty' parameter with a symfile_add_file.
+	(symbol_file_command): Adjust to pass symfile_add_flags to
+	symbol_file_add_main.
+	* symfile.h (symbol_file_add_main): Replace 'from_tty' parameter
+	with a symfile_add_file.
+
 2016-10-26  Pedro Alves  <palves@redhat.com>
 
 	* coffread.c (coff_symfile_read): Use symfile_add_flags.

@@ -543,7 +543,8 @@ extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, struct obj_section *);
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Load symbols from a file.  */
-extern void symbol_file_add_main (const char *args, int from_tty);
+extern void symbol_file_add_main (const char *args,
+				  symfile_add_flags add_flags);
 
 /* Clear GDB symbol tables.  */
 extern void symbol_file_clear (int from_tty);

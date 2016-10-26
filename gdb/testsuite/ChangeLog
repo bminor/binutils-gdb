@@ -1,3 +1,7 @@
+2016-10-25  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/exec-invalid-sysroot.exp: New file.
+
 2016-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/morestack.exp: Try to build it using -fuse-ld=gold first.

@@ -85,7 +85,7 @@ int readnow_symbol_files;	/* Read full symbols immediately.  */
 
 static void load_command (char *, int);
 
-static void symbol_file_add_main_1 (const char *args, int from_tty,
+static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
 				    objfile_flags flags);
 
 static void add_symbol_file_command (char *, int);
@@ -1306,19 +1306,16 @@ symbol_file_add (const char *name, symfile_add_flags add_flags,
    command itself.  */
 
 void
-symbol_file_add_main (const char *args, int from_tty)
+symbol_file_add_main (const char *args, symfile_add_flags add_flags)
 {
-  symbol_file_add_main_1 (args, from_tty, 0);
+  symbol_file_add_main_1 (args, add_flags, 0);
 }
 
 static void
-symbol_file_add_main_1 (const char *args, int from_tty, objfile_flags flags)
+symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
+			objfile_flags flags)
 {
-  symfile_add_flags add_flags = (current_inferior ()->symfile_flags
-				 | SYMFILE_MAINLINE);
-
-  if (from_tty)
-    add_flags |= SYMFILE_VERBOSE;
+  add_flags |= current_inferior ()->symfile_flags | SYMFILE_MAINLINE;
 
   symbol_file_add (args, add_flags, NULL, flags);
 
@@ -1655,8 +1652,12 @@ symbol_file_command (char *args, int from_tty)
     {
       char **argv = gdb_buildargv (args);
       objfile_flags flags = OBJF_USERLOADED;
+      symfile_add_flags add_flags = 0;
       struct cleanup *cleanups;
       char *name = NULL;
+
+      if (from_tty)
+	add_flags |= SYMFILE_VERBOSE;
 
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
@@ -1667,7 +1668,7 @@ symbol_file_command (char *args, int from_tty)
 	    error (_("unknown option `%s'"), *argv);
 	  else
 	    {
-	      symbol_file_add_main_1 (*argv, from_tty, flags);
+	      symbol_file_add_main_1 (*argv, add_flags, flags);
 	      name = *argv;
 	    }
 
