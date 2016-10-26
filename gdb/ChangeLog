@@ -1,5 +1,9 @@
 2016-10-26  Pedro Alves  <palves@redhat.com>
 
+	* inferior.c (exit_inferior_1): Free 'priv'.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_resume_with_hc): New function, factored out
 	from ...
 	(remote_resume): ... this.  Always try vCont first.
