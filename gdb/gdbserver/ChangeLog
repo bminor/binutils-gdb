@@ -1,5 +1,12 @@
 2016-10-27  Yao Qi  <yao.qi@linaro.org>
 
+	* inferiors.c (find_inferior_in_random): New function.
+	* inferiors.h (find_inferior_in_random): Declare.
+	* linux-low.c (linux_wait_for_event_filtered): Call
+	find_inferior_in_random instead of find_inferior.
+
+2016-10-27  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_wait_1): If single-step breakpoints are
 	inserted, remove them.
 

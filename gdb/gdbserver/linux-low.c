@@ -2700,7 +2700,8 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
   if (ptid_equal (filter_ptid, minus_one_ptid) || ptid_is_pid (filter_ptid))
     {
       event_thread = (struct thread_info *)
-	find_inferior (&all_threads, status_pending_p_callback, &filter_ptid);
+	find_inferior_in_random (&all_threads, status_pending_p_callback,
+				 &filter_ptid);
       if (event_thread != NULL)
 	event_child = get_thread_lwp (event_thread);
       if (debug_threads && event_thread)
@@ -2811,7 +2812,8 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
       /* ... and find an LWP with a status to report to the core, if
 	 any.  */
       event_thread = (struct thread_info *)
-	find_inferior (&all_threads, status_pending_p_callback, &filter_ptid);
+	find_inferior_in_random (&all_threads, status_pending_p_callback,
+				 &filter_ptid);
       if (event_thread != NULL)
 	{
 	  event_child = get_thread_lwp (event_thread);
