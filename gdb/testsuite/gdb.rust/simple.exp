@@ -103,6 +103,11 @@ gdb_test_sequence "ptype z" "" {
 }
 gdb_test "print z.1" " = 8"
 
+gdb_test "print univariant" " = simple::Univariant::Foo{a: 1}"
+gdb_test "print univariant.a" " = 1"
+gdb_test "print univariant_anon" " = simple::UnivariantAnon::Foo\\(1\\)"
+gdb_test "print univariant_anon.0" " = 1"
+
 gdb_test_sequence "ptype simple::ByeBob" "" {
     " = struct simple::ByeBob \\("
     "  i32,"
@@ -220,3 +225,10 @@ gdb_test "print (1,)" "Tuple expressions not supported yet"
 gdb_test "print (1)" " = 1"
 
 gdb_test "print 23..97.0" "Range expression with different types"
+
+gdb_test "print (*parametrized.next.val)" \
+    " = simple::ParametrizedStruct<i32> {next: simple::ParametrizedEnum<Box<simple::ParametrizedStruct<i32>>>::Empty, value: 1}"
+gdb_test "print parametrized.next.val" \
+    " = \\(simple::ParametrizedStruct<i32> \\*\\) $hex"
+gdb_test "print parametrized" \
+    " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"

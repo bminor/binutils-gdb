@@ -1,3 +1,8 @@
+2016-10-27  Manish Goregaokar  <manish@mozilla.com>
+
+    * gdb.rust/simple.rs: Add test for univariant enums without discriminants
+    and for encoded struct-like enums
+
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/maint.exp <maint info line-table w/o a file name>: Use

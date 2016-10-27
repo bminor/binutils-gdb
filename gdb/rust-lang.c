@@ -194,6 +194,18 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
 	 has changed its debuginfo format.  */
       error (_("Could not find enum discriminant field"));
     }
+  else if (TYPE_NFIELDS (type) == 1)
+    {
+      /* Sometimes univariant enums are encoded without a
+         discriminant.  In that case, treating it as an encoded enum
+         with the first field being the actual type works.  */
+      const char *field_name = TYPE_NAME (TYPE_FIELD_TYPE (type, 0));
+      const char *last = rust_last_path_segment (field_name);
+      ret.name = concat (TYPE_NAME (type), "::", last, (char *) NULL);
+      ret.field_no = RUST_ENCODED_ENUM_REAL;
+      ret.is_encoded = 1;
+      return ret;
+    }
 
   if (strcmp (TYPE_FIELD_NAME (disr_type, 0), "RUST$ENUM$DISR") != 0)
     error (_("Rust debug format has changed"));
@@ -1725,7 +1737,9 @@ tuple structs, and tuple-like enum variants"));
 	    variant_type = TYPE_FIELD_TYPE (type, disr.field_no);
 
 	    if (variant_type == NULL
-		|| rust_tuple_variant_type_p (variant_type))
+	        || (disr.is_encoded
+	            ? rust_tuple_struct_type_p (variant_type)
+	            : rust_tuple_variant_type_p (variant_type)))
 	      error(_("Attempting to access named field %s of tuple variant %s, \
 which has only anonymous fields"),
 		    field_name, disr.name);
