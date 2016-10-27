@@ -1,5 +1,10 @@
 2016-10-27  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_supports_range_stepping): Return true if
+	can_software_single_step return true.
+
+2016-10-27  Yao Qi  <yao.qi@linaro.org>
+
 	* inferiors.c (find_inferior_in_random): New function.
 	* inferiors.h (find_inferior_in_random): Declare.
 	* linux-low.c (linux_wait_for_event_filtered): Call

@@ -6519,6 +6519,8 @@ linux_supports_agent (void)
 static int
 linux_supports_range_stepping (void)
 {
+  if (can_software_single_step ())
+    return 1;
   if (*the_low_target.supports_range_stepping == NULL)
     return 0;
 
