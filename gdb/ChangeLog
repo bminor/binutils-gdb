@@ -1,5 +1,9 @@
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
+	* ax_cxx_compile_stdcxx.m4: New file.
+
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
 	* maint.c (scoped_command_stats::scoped_command_stats): Clear
 	m_space_enabled, m_time_enabled and m_symtab_enabled.
 
