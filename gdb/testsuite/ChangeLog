@@ -1,3 +1,8 @@
+2016-10-28  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/foll-exec.exp (do_exec_tests): Make test pattern more
+	general.
+
 2016-10-25  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/exec-invalid-sysroot.exp: New file.
