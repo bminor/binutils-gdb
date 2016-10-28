@@ -887,6 +887,8 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
       m_space_enabled = 1;
 #endif
     }
+  else
+    m_space_enabled = 0;
 
   if (msg_type == 0 || per_command_time)
     {
@@ -894,6 +896,8 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
       gettimeofday (&m_start_wall_time, NULL);
       m_time_enabled = 1;
     }
+  else
+    m_time_enabled = 0;
 
   if (msg_type == 0 || per_command_symtab)
     {
@@ -905,6 +909,8 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
       m_start_nr_blocks = nr_blocks;
       m_symtab_enabled = 1;
     }
+  else
+    m_symtab_enabled = 0;
 
   /* Initalize timer to keep track of how long we waited for the user.  */
   reset_prompt_for_continue_wait_time ();
