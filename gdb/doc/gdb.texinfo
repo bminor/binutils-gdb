@@ -35538,9 +35538,8 @@ syntax described in @ref{thread-id syntax}.  If multiprocess
 extensions (@pxref{multiprocess extensions}) are supported, actions
 can be specified to match all threads in a process by using the
 @samp{p@var{pid}.-1} form of the @var{thread-id}.  An action with no
-@var{thread-id} is called the default action and matches all threads.
-Specifying multiple default actions is an error; specifying no actions
-is also an error.
+@var{thread-id} matches all threads.  Specifying no actions is an
+error.
 
 Currently supported actions are:
 

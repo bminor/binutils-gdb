@@ -1,3 +1,8 @@
+2016-10-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Packets) <vCont>: Remove mention of default
+	actions.
+
 2016-10-26  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Packets): Clarify vCont packets with multiple
