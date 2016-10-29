@@ -1,5 +1,9 @@
 2016-10-29  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Clarify C++ requirement.
+
+2016-10-29  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Adjust to mention C++11 requirement.
 
 2016-10-29  Eli Zaretskii  <eliz@gnu.org>

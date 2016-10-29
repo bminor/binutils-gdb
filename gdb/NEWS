@@ -3,7 +3,7 @@
 
 *** Changes since GDB 7.12
 
-* GDB and GDBserver now require building with a C++11 compiler.
+* Building GDB and GDBserver now requires a C++11 compiler.
 
   For example, GCC 4.8 or later.
 
