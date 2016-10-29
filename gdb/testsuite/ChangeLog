@@ -1,3 +1,7 @@
+2016-10-29  Manish Goregaokar  <manish@mozilla.com>
+
+    * gdb.rust/simple.exp: Add tests for `sizeof(expr)`
+
 2016-10-27  Manish Goregaokar  <manish@mozilla.com>
 
     * gdb.rust/simple.rs: Add test for univariant enums without discriminants

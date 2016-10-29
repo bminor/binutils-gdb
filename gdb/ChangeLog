@@ -1,3 +1,7 @@
+2016-10-29  Manish Goregaokar  <manish@mozilla.com>
+
+    * rust-exp.y: Parse `sizeof(exp)` as `UNOP_SIZEOF`
+
 2016-10-28  Manish Goregaokar  <manish@mozilla.com>
 
     * rust-lang.c (rust_union_is_untagged): Add function to

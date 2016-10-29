@@ -276,6 +276,7 @@ struct rust_op
 %token <voidval> KW_EXTERN
 %token <voidval> KW_CONST
 %token <voidval> KW_FN
+%token <voidval> KW_SIZEOF
 
 /* Operator tokens.  */
 %token <voidval> DOTDOT
@@ -371,7 +372,7 @@ expr:
 |	array_expr
 |	idx_expr
 |	range_expr
-|	unop_expr
+|	unop_expr /* Must precede call_expr because of ambiguity with sizeof.  */
 |	binop_expr
 |	paren_expr
 |	call_expr
@@ -577,7 +578,8 @@ unop_expr:
 
 |	'&' KW_MUT expr	%prec UNARY
 		{ $$ = ast_unary (UNOP_ADDR, $3); }
-
+|   KW_SIZEOF '(' expr ')' %prec UNARY
+        { $$ = ast_unary (UNOP_SIZEOF, $3); }
 ;
 
 binop_expr:
@@ -872,6 +874,7 @@ static const struct token_info identifier_tokens[] =
   { "true", KW_TRUE, OP_NULL },
   { "extern", KW_EXTERN, OP_NULL },
   { "fn", KW_FN, OP_NULL },
+  { "sizeof", KW_SIZEOF, OP_NULL },
 };
 
 /* Operator tokens, sorted longest first.  */
@@ -2194,6 +2197,7 @@ convert_ast_to_expression (struct parser_state *state,
     case UNOP_COMPLEMENT:
     case UNOP_IND:
     case UNOP_ADDR:
+    case UNOP_SIZEOF:
       convert_ast_to_expression (state, operation->left.op, top);
       write_exp_elt_opcode (state, operation->opcode);
       break;

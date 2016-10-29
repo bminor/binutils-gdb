@@ -33,6 +33,7 @@ if {![runto ${srcfile}:$line]} {
 
 gdb_test "print a" " = \\(\\)"
 gdb_test "ptype a" " = \\(\\)"
+gdb_test "print sizeof(a)" " = 0"
 
 gdb_test "print b" " = \\\[\\\]"
 gdb_test "ptype b" " = \\\[i32; 0\\\]"
@@ -41,6 +42,7 @@ gdb_test "print *(&b as *const \[i32; 0_0\])" " = \\\[\\\]"
 
 gdb_test "print c" " = 99"
 gdb_test "ptype c" " = i32"
+gdb_test "print sizeof(c)" " = 4"
 
 gdb_test "print c = 87" " = \\(\\)"
 gdb_test "print c" " = 87"
@@ -127,7 +129,7 @@ gdb_test "print nosuchsymbol" \
 gdb_test "print e" " = simple::MoreComplicated::Two\\(73\\)"
 gdb_test "print e2" \
     " = simple::MoreComplicated::Four\\{this: true, is: 8, a: 109 'm', struct_: 100, variant: 10\\}"
-
+gdb_test "print sizeof(e)" " = 24"
 gdb_test_sequence "ptype e" "" {
     " = enum simple::MoreComplicated \\{"
     "  One,"
