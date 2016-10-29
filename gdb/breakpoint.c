@@ -9653,7 +9653,7 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
       old_chain = make_cleanup (xfree, msg);
 
       if (!rslt)
-	error (_("May not have a fast tracepoint at 0x%s%s"),
+	error (_("May not have a fast tracepoint at %s%s"),
 	       paddress (sarch, sal->pc), (msg ? msg : ""));
 
       do_cleanups (old_chain);

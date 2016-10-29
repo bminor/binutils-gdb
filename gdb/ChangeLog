@@ -1,3 +1,9 @@
+2016-11-08  Cordian A. Daniluk  <th3c0r1uk@gmail.com>
+
+	PR breakpoints/20739
+	* breakpoint.c (check_fast_tracepoint_sals): Don't print duplicate
+	0x prefix.
+
 2016-11-08  Yao Qi  <yao.qi@linaro.org>
 
 	* rust-lang.c (val_print_struct): Fix indentation.
