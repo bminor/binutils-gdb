@@ -1,3 +1,11 @@
+2016-10-28  Manish Goregaokar  <manish@mozilla.com>
+
+    * rust-lang.c (rust_union_is_untagged): Add function to
+    check if a union is an untagged unioni
+    (rust_val_print): Handle printing of untagged union values
+    (rust_print_type): Handle printing of untagged union types
+    (rust_evaluate_subexp): Handle evaluating field
+    access on untagged unions
 
 2016-10-27  Manish Goregaokar  <manish@mozilla.com>
 

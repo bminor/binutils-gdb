@@ -93,6 +93,28 @@ struct disr_info
 
 #define RUST_ENCODED_ENUM_HIDDEN 1
 
+/* Whether or not a TYPE_CODE_UNION value is an untagged union
+   as opposed to being a regular Rust enum.  */
+static bool
+rust_union_is_untagged (struct type *type)
+{
+  /* Unions must have at least one field.  */
+  if (TYPE_NFIELDS (type) == 0)
+    return false;
+  /* If the first field is named, but the name has the rust enum prefix,
+      it is an enum.  */
+  if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
+	       strlen (RUST_ENUM_PREFIX)) == 0)
+    return false;
+  /* Unions only have named fields.  */
+  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (strlen (TYPE_FIELD_NAME (type, i)) == 0)
+        return false;
+    }
+  return true;
+}
+
 /* Utility function to get discriminant info for a given value.  */
 
 static struct disr_info
@@ -456,6 +478,85 @@ rust_printstr (struct ui_file *stream, struct type *type,
 
 
 
+/* rust_print_type branch for structs and untagged unions.  */
+
+static void
+val_print_struct (struct type *type, const gdb_byte *valaddr,
+		              int embedded_offset, CORE_ADDR address, struct ui_file *stream,
+		              int recurse, const struct value *val,
+		              const struct value_print_options *options)
+{
+  int i;
+  int first_field;
+  int is_tuple = rust_tuple_type_p (type);
+  int is_tuple_struct = !is_tuple && rust_tuple_struct_type_p (type);
+  struct value_print_options opts;
+
+  if (!is_tuple)
+    {
+      if (TYPE_TAG_NAME (type) != NULL)
+        fprintf_filtered (stream, "%s", TYPE_TAG_NAME (type));
+
+      if (TYPE_NFIELDS (type) == 0)
+        return;
+
+      if (TYPE_TAG_NAME (type) != NULL)
+        fputs_filtered (" ", stream);
+    }
+
+  if (is_tuple || is_tuple_struct)
+    fputs_filtered ("(", stream);
+  else
+    fputs_filtered ("{", stream);
+
+  opts = *options;
+  opts.deref_ref = 0;
+
+  first_field = 1;
+  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (field_is_static (&TYPE_FIELD (type, i)))
+        continue;
+
+      if (!first_field)
+        fputs_filtered (",", stream);
+
+      if (options->prettyformat)
+        {
+    fputs_filtered ("\n", stream);
+    print_spaces_filtered (2 + 2 * recurse, stream);
+        }
+      else if (!first_field)
+        fputs_filtered (" ", stream);
+
+      first_field = 0;
+
+      if (!is_tuple && !is_tuple_struct)
+        {
+    fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+    fputs_filtered (": ", stream);
+        }
+
+      val_print (TYPE_FIELD_TYPE (type, i),
+           valaddr,
+           embedded_offset + TYPE_FIELD_BITPOS (type, i) / 8,
+           address,
+           stream, recurse + 1, val, &opts,
+           current_language);
+    }
+
+  if (options->prettyformat)
+    {
+      fputs_filtered ("\n", stream);
+      print_spaces_filtered (2 * recurse, stream);
+    }
+
+  if (is_tuple || is_tuple_struct)
+    fputs_filtered (")", stream);
+  else
+    fputs_filtered ("}", stream);
+}
+
 static const struct generic_val_print_decorations rust_decorations =
 {
   /* Complex isn't used in Rust, but we provide C-ish values just in
@@ -567,6 +668,18 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	struct value_print_options opts;
 	struct cleanup *cleanup;
 
+  /* Untagged unions are printed as if they are structs.
+     Since the field bit positions overlap in the debuginfo,
+     the code for printing a union is same as that for a struct,
+     the only difference is that the input type will have overlapping
+     fields.  */
+  if (rust_union_is_untagged (type))
+    {
+      val_print_struct (type, valaddr, embedded_offset, address, stream,
+			  recurse, val, options);
+      break;
+    }
+
 	opts = *options;
 	opts.deref_ref = 0;
 
@@ -639,77 +752,8 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_STRUCT:
-      {
-	int i;
-	int first_field;
-	int is_tuple = rust_tuple_type_p (type);
-	int is_tuple_struct = !is_tuple && rust_tuple_struct_type_p (type);
-	struct value_print_options opts;
-
-	if (!is_tuple)
-	  {
-	    if (TYPE_TAG_NAME (type) != NULL)
-	      fprintf_filtered (stream, "%s", TYPE_TAG_NAME (type));
-
-	    if (TYPE_NFIELDS (type) == 0)
-	      break;
-
-	    if (TYPE_TAG_NAME (type) != NULL)
-	      fputs_filtered (" ", stream);
-	  }
-
-	if (is_tuple || is_tuple_struct)
-	  fputs_filtered ("(", stream);
-	else
-	  fputs_filtered ("{", stream);
-
-	opts = *options;
-	opts.deref_ref = 0;
-
-	first_field = 1;
-	for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	  {
-	    if (field_is_static (&TYPE_FIELD (type, i)))
-	      continue;
-
-	    if (!first_field)
-	      fputs_filtered (",", stream);
-
-	    if (options->prettyformat)
-	      {
-		fputs_filtered ("\n", stream);
-		print_spaces_filtered (2 + 2 * recurse, stream);
-	      }
-	    else if (!first_field)
-	      fputs_filtered (" ", stream);
-
-	    first_field = 0;
-
-	    if (!is_tuple && !is_tuple_struct)
-	      {
-		fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-		fputs_filtered (": ", stream);
-	      }
-
-	    val_print (TYPE_FIELD_TYPE (type, i),
-		       valaddr,
-		       embedded_offset + TYPE_FIELD_BITPOS (type, i) / 8,
-		       address,
-		       stream, recurse + 1, val, &opts,
-		       current_language);
-	  }
-
-	if (options->prettyformat)
-	  {
-	    fputs_filtered ("\n", stream);
-	    print_spaces_filtered (2 * recurse, stream);
-	  }
-
-	if (is_tuple || is_tuple_struct)
-	  fputs_filtered (")", stream);
-	else
-	  fputs_filtered ("}", stream);
-      }
+      val_print_struct (type, valaddr, embedded_offset, address, stream,
+       recurse, val, options);
       break;
 
     default:
@@ -721,6 +765,72 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 }
 
 
+
+static void
+rust_print_type (struct type *type, const char *varstring,
+		 struct ui_file *stream, int show, int level,
+		 const struct type_print_options *flags);
+
+/* Print a struct or union typedef.  */
+static void
+rust_print_struct_def (struct type *type, const char *varstring,
+		                   struct ui_file *stream, int show, int level,
+		                   const struct type_print_options *flags)
+{
+	int is_tuple_struct, i;
+
+	/* Print a tuple type simply.  */
+	if (rust_tuple_type_p (type))
+	  {
+	    fputs_filtered (TYPE_TAG_NAME (type), stream);
+	    return;
+	  }
+
+	/* If we see a base class, delegate to C.  */
+	if (TYPE_N_BASECLASSES (type) > 0)
+	  c_print_type (type, varstring, stream, show, level, flags);
+
+  /* This code path is also used by unions.  */
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	  fputs_filtered ("struct ", stream);
+  else
+	  fputs_filtered ("union ", stream);
+
+	if (TYPE_TAG_NAME (type) != NULL)
+	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+
+	is_tuple_struct = rust_tuple_struct_type_p (type);
+
+	if (TYPE_NFIELDS (type) == 0 && !rust_tuple_type_p (type))
+	  return;
+	fputs_filtered (is_tuple_struct ? " (\n" : " {\n", stream);
+
+	for (i = 0; i < TYPE_NFIELDS (type); ++i)
+	  {
+	    const char *name;
+
+	    QUIT;
+	    if (field_is_static (&TYPE_FIELD (type, i)))
+	      continue;
+
+	    /* We'd like to print "pub" here as needed, but rustc
+	       doesn't emit the debuginfo, and our types don't have
+	       cplus_struct_type attached.  */
+
+	    /* For a tuple struct we print the type but nothing
+	       else.  */
+	    print_spaces_filtered (level + 2, stream);
+	    if (!is_tuple_struct)
+	      fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
+
+	    rust_print_type (TYPE_FIELD_TYPE (type, i), NULL,
+			     stream, show - 1, level + 2,
+			     flags);
+	    fputs_filtered (",\n", stream);
+	  }
+
+	fprintfi_filtered (level, stream, is_tuple_struct ? ")" : "}");
+}
 
 /* la_print_typedef implementation for Rust.  */
 
@@ -810,56 +920,7 @@ rust_print_type (struct type *type, const char *varstring,
       break;
 
     case TYPE_CODE_STRUCT:
-      {
-	int is_tuple_struct;
-
-	/* Print a tuple type simply.  */
-	if (rust_tuple_type_p (type))
-	  {
-	    fputs_filtered (TYPE_TAG_NAME (type), stream);
-	    break;
-	  }
-
-	/* If we see a base class, delegate to C.  */
-	if (TYPE_N_BASECLASSES (type) > 0)
-	  goto c_printer;
-
-	fputs_filtered ("struct ", stream);
-	if (TYPE_TAG_NAME (type) != NULL)
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
-
-	is_tuple_struct = rust_tuple_struct_type_p (type);
-
-	if (TYPE_NFIELDS (type) == 0 && !rust_tuple_type_p (type))
-	  break;
-	fputs_filtered (is_tuple_struct ? " (\n" : " {\n", stream);
-
-	for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	  {
-	    const char *name;
-
-	    QUIT;
-	    if (field_is_static (&TYPE_FIELD (type, i)))
-	      continue;
-
-	    /* We'd like to print "pub" here as needed, but rustc
-	       doesn't emit the debuginfo, and our types don't have
-	       cplus_struct_type attached.  */
-
-	    /* For a tuple struct we print the type but nothing
-	       else.  */
-	    print_spaces_filtered (level + 2, stream);
-	    if (!is_tuple_struct)
-	      fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
-
-	    rust_print_type (TYPE_FIELD_TYPE (type, i), NULL,
-			     stream, show - 1, level + 2,
-			     flags);
-	    fputs_filtered (",\n", stream);
-	  }
-
-	fprintfi_filtered (level, stream, is_tuple_struct ? ")" : "}");
-      }
+    	rust_print_struct_def (type, varstring, stream, show, level, flags);
       break;
 
     case TYPE_CODE_ENUM:
@@ -899,6 +960,16 @@ rust_print_type (struct type *type, const char *varstring,
 	int i, len = 0;
 	/* Skip the discriminant field.  */
 	int skip_to = 1;
+
+  /* Unions and structs have the same syntax in Rust,
+     the only difference is that structs are declared with `struct`
+     and union with `union`. This difference is handled in the struct
+     printer.  */
+  if (rust_union_is_untagged (type))
+    {
+      rust_print_struct_def (type, varstring, stream, show, level, flags);
+      break;
+    }
 
 	fputs_filtered ("enum ", stream);
 	if (TYPE_TAG_NAME (type) != NULL)
@@ -1638,7 +1709,10 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
         lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
         type = value_type (lhs);
-        if (TYPE_CODE (type) == TYPE_CODE_UNION)
+        /* Untagged unions can't have anonymous field access since
+           they can only have named fields.  */
+        if (TYPE_CODE (type) == TYPE_CODE_UNION
+            && !rust_union_is_untagged (type))
 	  {
 	    struct cleanup *cleanup;
 
@@ -1713,8 +1787,8 @@ tuple structs, and tuple-like enum variants"));
         lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
         type = value_type (lhs);
-
-        if (TYPE_CODE (type) == TYPE_CODE_UNION)
+        if (TYPE_CODE (type) == TYPE_CODE_UNION
+            && !rust_union_is_untagged (type))
 	  {
 	    int i, start;
 	    struct disr_info disr;
@@ -1763,6 +1837,7 @@ which has only anonymous fields"),
 	  }
 	else
 	  {
+	    /* Field access in structs and untagged unions works like C.  */
 	    *pos = pc;
 	    result = evaluate_subexp_standard (expect_type, exp, pos, noside);
 	  }
