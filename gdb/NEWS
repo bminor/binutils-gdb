@@ -3,7 +3,9 @@
 
 *** Changes since GDB 7.12
 
-* GDB and GDBserver now require building with a C++ compiler.
+* GDB and GDBserver now require building with a C++11 compiler.
+
+  For example, GCC 4.8 or later.
 
   It is no longer possible to build GDB or GDBserver with a C
   compiler.  The --disable-build-with-cxx configure option has been
