@@ -1,3 +1,13 @@
+2016-10-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Mention support for redirection on MS-Windows.
+
+	* windows-nat.c (redir_open, redir_set_redirection)
+	(redirect_inferior_handles) [!__CYGWIN__]: New functions.
+	(windows_create_inferior) [!__CYGWIN__]: Use
+	'redirect_inferior_handles' to redirect standard handles of the
+	debuggee if the command line requests that.
+
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (CXX_DIALECT): Get from configure.

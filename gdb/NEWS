@@ -9,6 +9,14 @@
   compiler.  The --disable-build-with-cxx configure option has been
   removed.
 
+* Native debugging on MS-Windows supports command-line redirection
+
+  Command-line arguments used for starting programs on MS-Windows can
+  now include redirection symbols supported by native Windows shells,
+  such as '<', '>', '>>', '2>&1', etc.  This affects GDB commands such
+  as "run", "start", and "set args", as well as the corresponding MI
+  features.
+
 * Support for thread names on MS-Windows.
 
   GDB now catches and handles the special exception that programs
