@@ -1,5 +1,10 @@
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Add
+	xc16x-*-elf to the list of targets that don't support -shared.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ldgram.y: Rename file_NAME_list to section_NAME_list
 	throughout.
 

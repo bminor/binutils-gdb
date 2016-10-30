@@ -1764,6 +1764,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget spu-*-*]
 	 && ![istarget v850*-*-*]
 	 && ![istarget visium-*-*]
+	 && ![istarget xc16x-*-elf]
 	 && ![istarget xgate-*-*]
 	 && ![istarget xstormy16-*-*]
 	 && ![istarget *-*-irix*]
