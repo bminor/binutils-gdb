@@ -3400,13 +3400,13 @@ microblaze_elf_finish_dynamic_sections (bfd *output_bfd,
             {
               asection *s;
 
-              s = bfd_get_linker_section (dynobj, name);
+              s = bfd_get_section_by_name (output_bfd, name);
               if (s == NULL)
                 dyn.d_un.d_val = 0;
               else
                 {
                   if (! size)
-                    dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
+                    dyn.d_un.d_ptr = s->vma;
                   else
                     dyn.d_un.d_val = s->size;
                 }
