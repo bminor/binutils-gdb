@@ -92,6 +92,12 @@ class ElidingFrameDecorator(FrameDecorator):
     def elided(self):
         return iter(self.elided_frames)
 
+    def address (self):
+        # Regression test for an overflow in the python layer.
+        bitsize = 8 * gdb.lookup_type('void').pointer().sizeof
+        mask = (1 << bitsize) - 1
+        return 0xffffffffffffffff & mask
+
 class ElidingIterator:
     def __init__(self, ii):
         self.input_iterator = ii

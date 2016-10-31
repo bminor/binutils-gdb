@@ -1116,7 +1116,13 @@ py_print_frame (PyObject *filter, int flags,
 
 	  if (paddr != Py_None)
 	    {
-	      address = PyLong_AsLong (paddr);
+	      if (get_addr_from_python (paddr, &address) < 0)
+		{
+		  Py_DECREF (paddr);
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+
 	      has_addr = 1;
 	    }
 	  Py_DECREF (paddr);
@@ -1213,10 +1219,10 @@ py_print_frame (PyObject *filter, int flags,
 	    }
 	  else if (PyLong_Check (py_func))
 	    {
-	      CORE_ADDR addr = PyLong_AsUnsignedLongLong (py_func);
+	      CORE_ADDR addr;
 	      struct bound_minimal_symbol msymbol;
 
-	      if (PyErr_Occurred ())
+	      if (get_addr_from_python (py_func, &addr) < 0)
 		{
 		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
@@ -1340,6 +1346,12 @@ py_print_frame (PyObject *filter, int flags,
 	  if (py_line != Py_None)
 	    {
 	      line = PyLong_AsLong (py_line);
+	      if (PyErr_Occurred ())
+		{
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+
 	      TRY
 		{
 		  ui_out_text (out, ":");
