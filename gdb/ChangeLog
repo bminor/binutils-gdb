@@ -1,3 +1,8 @@
+2016-11-08  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (py_print_frame): Use
+	get_addr_from_python.  Check for errors when getting line number.
+
 2016-11-08  Yao Qi  <yao.qi@linaro.org>
 
 	* ada-lang.h (ada_val_print): Remove second parameter.  Remove
