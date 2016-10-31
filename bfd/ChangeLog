@@ -1,3 +1,8 @@
+2016-11-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* reloc.c (bfd_default_reloc_type_lookup) <BFD_RELOC_CTOR>: Do
+	not fall through to the default case.
+
 2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
 	    Andrew Waterman <andrew@sifive.com>
 
