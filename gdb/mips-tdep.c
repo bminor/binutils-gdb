@@ -560,19 +560,6 @@ static const char *mips_generic_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "fsr", "fir",
 };
 
-/* Names of IDT R3041 registers.  */
-
-static const char *mips_r3041_reg_names[] = {
-  "sr", "lo", "hi", "bad", "cause", "pc",
-  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
-  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-  "fsr", "fir", "", /*"fp" */ "",
-  "", "", "bus", "ccfg", "", "", "", "",
-  "", "", "port", "cmp", "", "", "epc", "prid",
-};
-
 /* Names of tx39 registers.  */
 
 static const char *mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
@@ -7070,23 +7057,10 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  /* The IDT board uses an unusual breakpoint value, and
-	     sometimes gets confused when it sees the usual MIPS
-	     breakpoint instruction.  */
 	  static gdb_byte big_breakpoint[] = { 0, 0x5, 0, 0xd };
-	  static gdb_byte pmon_big_breakpoint[] = { 0, 0, 0, 0xd };
-	  static gdb_byte idt_big_breakpoint[] = { 0, 0, 0x0a, 0xd };
 
 	  *lenptr = sizeof (big_breakpoint);
-
-	  if (strcmp (target_shortname, "mips") == 0)
-	    return idt_big_breakpoint;
-	  else if (strcmp (target_shortname, "ddb") == 0
-		   || strcmp (target_shortname, "pmon") == 0
-		   || strcmp (target_shortname, "lsi") == 0)
-	    return pmon_big_breakpoint;
-	  else
-	    return big_breakpoint;
+	  return big_breakpoint;
 	}
     }
   else
@@ -7116,19 +7090,9 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
       else
 	{
 	  static gdb_byte little_breakpoint[] = { 0xd, 0, 0x5, 0 };
-	  static gdb_byte pmon_little_breakpoint[] = { 0xd, 0, 0, 0 };
-	  static gdb_byte idt_little_breakpoint[] = { 0xd, 0x0a, 0, 0 };
 
 	  *lenptr = sizeof (little_breakpoint);
-
-	  if (strcmp (target_shortname, "mips") == 0)
-	    return idt_little_breakpoint;
-	  else if (strcmp (target_shortname, "ddb") == 0
-		   || strcmp (target_shortname, "pmon") == 0
-		   || strcmp (target_shortname, "lsi") == 0)
-	    return pmon_little_breakpoint;
-	  else
-	    return little_breakpoint;
+	  return little_breakpoint;
 	}
     }
 }

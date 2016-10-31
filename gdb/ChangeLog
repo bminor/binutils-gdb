@@ -1,5 +1,11 @@
 2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-tdep.c (mips_r3041_reg_names): Remove.
+	(mips_breakpoint_from_pc): Remove IDT and PMON breakpoint
+	encodings.
+
+2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* defs.h (gdb_osabi): Remove GDB_OSABI_IRIX enum value.
 	* osabi.c (gdb_osabi_names): Remove "Irix" entry.
 	* mips-tdep.c (mips_irix_reg_names): Remove.
