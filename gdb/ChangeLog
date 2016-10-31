@@ -1,3 +1,13 @@
+2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* defs.h (gdb_osabi): Remove GDB_OSABI_IRIX enum value.
+	* osabi.c (gdb_osabi_names): Remove "Irix" entry.
+	* mips-tdep.c (mips_irix_reg_names): Remove.
+	(mips_register_type): Remove GDB_OSABI_IRIX code.
+	(mips_pseudo_register_type): Likewise.
+	(mips_breakpoint_from_pc): Likewise.
+	(mips_gdbarch_init): Likewise.
+
 2016-10-29  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Clarify C++ requirement.
