@@ -515,10 +515,14 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
     per_cu_dwarf_call (this, die_offset, per_cu);
   }
 
-  /* Callback function for dwarf2_evaluate_loc_desc.  */
-  struct type *impl_get_base_type (cu_offset die_offset) OVERRIDE
+  struct type *get_base_type (cu_offset die_offset, int size) OVERRIDE
   {
-    return dwarf2_get_die_type (die_offset, per_cu);
+    struct type *result = dwarf2_get_die_type (die_offset, per_cu);
+    if (result == NULL)
+      error (_("Could not find type for DW_OP_GNU_const_type"));
+    if (size != 0 && TYPE_LENGTH (result) != size)
+      error (_("DW_OP_GNU_const_type has different sizes for type and data"));
+    return result;
   }
 
   /* Callback function for dwarf2_evaluate_loc_desc.
@@ -553,7 +557,6 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
   {
     struct frame_info *caller_frame;
     struct dwarf2_per_cu_data *caller_per_cu;
-    struct dwarf_expr_baton baton_local;
     struct call_site_parameter *parameter;
     const gdb_byte *data_src;
     size_t size;
@@ -570,17 +573,20 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
       throw_error (NO_ENTRY_VALUE_ERROR,
 		   _("Cannot resolve DW_AT_GNU_call_site_data_value"));
 
-    baton_local.frame = caller_frame;
-    baton_local.per_cu = caller_per_cu;
-    baton_local.obj_address = 0;
+    scoped_restore save_frame = make_scoped_restore (&this->frame,
+						     caller_frame);
+    scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
+						      caller_per_cu);
+    scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
+							(CORE_ADDR) 0);
 
     scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
     this->gdbarch
-      = get_objfile_arch (dwarf2_per_cu_objfile (baton_local.per_cu));
+      = get_objfile_arch (dwarf2_per_cu_objfile (per_cu));
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
-    this->addr_size = dwarf2_per_cu_addr_size (baton_local.per_cu);
+    this->addr_size = dwarf2_per_cu_addr_size (per_cu);
     scoped_restore save_offset = make_scoped_restore (&this->offset);
-    this->offset = dwarf2_per_cu_text_offset (baton_local.per_cu);
+    this->offset = dwarf2_per_cu_text_offset (per_cu);
 
     this->eval (data_src, size);
   }
@@ -2702,6 +2708,12 @@ class symbol_needs_eval_context : public dwarf_expr_context
 
   /* CFA accesses require a frame.  */
   CORE_ADDR get_frame_cfa () OVERRIDE
+  {
+    needs = SYMBOL_NEEDS_FRAME;
+    return 1;
+  }
+
+  CORE_ADDR get_frame_pc () OVERRIDE
   {
     needs = SYMBOL_NEEDS_FRAME;
     return 1;

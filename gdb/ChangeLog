@@ -1,3 +1,16 @@
+2016-11-02  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (dwarf_evaluate_loc_desc::get_base_type): Rename
+	from impl_get_base_type.  Rewrite.
+	(struct dwarf_expr_baton): Remove.
+	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value): Save and
+	restore more fields.
+	(symbol_needs_eval_context::get_frame_pc): New method.
+	* dwarf2expr.h (dwarf_expr_context::get_base_type): Now public,
+	virtual.
+	(dwarf_expr_context::impl_get_base_type): Remove.
+	* dwarf2expr.c (dwarf_expr_context::get_base_type): Remove.
+
 2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* configure.ac <mips-sgi-irix5*>: Remove <sys/proc.h> _KMEMUSER

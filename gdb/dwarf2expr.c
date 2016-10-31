@@ -406,22 +406,6 @@ base_types_equal_p (struct type *t1, struct type *t2)
   return TYPE_LENGTH (t1) == TYPE_LENGTH (t2);
 }
 
-/* A convenience function to call get_base_type and return the result.
-   DIE is the DIE whose type we need.  SIZE is non-zero if this
-   function should verify that the resulting type has the correct
-   size.  */
-
-struct type *
-dwarf_expr_context::get_base_type (cu_offset die, int size)
-{
-  struct type *result = this->impl_get_base_type (die);
-  if (result == NULL)
-    error (_("Could not find type for DW_OP_GNU_const_type"));
-  if (size != 0 && TYPE_LENGTH (result) != size)
-    error (_("DW_OP_GNU_const_type has different sizes for type and data"));
-  return result;
-}
-
 /* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_reg* return the
    DWARF register number.  Otherwise return -1.  */
 
