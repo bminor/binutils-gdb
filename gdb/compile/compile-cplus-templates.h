@@ -24,7 +24,8 @@
 
 #include <string>
 #include <vector>
-#include <tr1/unordered_map>
+#include <unordered_map>
+#include <memory>
 
 struct symbol;
 struct gcc_cp_template_args;
@@ -37,13 +38,15 @@ namespace compile
   class compile_cplus_instance;
 
   // Types used for tracking template definitions.
-  typedef std::pair<std::string, function_template_defn *>
+  typedef std::unique_ptr<function_template_defn> function_template_defn_up;
+  typedef std::unique_ptr<class_template_defn> class_template_defn_up;
+  typedef std::pair<std::string, function_template_defn_up>
     function_template_map_item_t;
-  typedef std::tr1::unordered_map<std::string, function_template_defn *>
+  typedef std::unordered_map<std::string, function_template_defn_up>
     function_template_defn_map_t;
-  typedef std::pair<std::string, class_template_defn *>
+  typedef std::pair<std::string, class_template_defn_up>
     class_template_map_item_t;
-  typedef std::tr1::unordered_map<std::string, class_template_defn *>
+  typedef std::unordered_map<std::string, class_template_defn_up>
     class_template_defn_map_t;
 
   // A base class holding data common to all template definitions.
@@ -84,8 +87,8 @@ namespace compile
       return m_generic;
     }
 
-    // Return the compiler plug-in's abstract type for the IDX'th
-    // template parameter.
+    /* Return the compiler plug-in's abstract type for the IDX'th
+       template parameter.  */
 
     gcc_type
     parameter_abstract_type (unsigned int idx) const
@@ -101,7 +104,7 @@ namespace compile
       m_abstract_types[idx] = type;
     }
 
-    // Has this template already been elided to the compiler plug-in?
+    // Has this template already been defined in the compiler plug-in?
 
     bool
     defined (void) const
@@ -117,8 +120,8 @@ namespace compile
       m_defined = val;
     }
 
-    // Return the ARG_NUM'th template parameter's default value
-    // or NULL if none was set (or known).
+    /* Return the ARG_NUM'th template parameter's default value
+       or NULL if none was set (or known).  */
 
     struct symbol *
     default_argument (unsigned int arg_num) const
@@ -136,13 +139,13 @@ namespace compile
 
   protected:
 
-    // Protected constructor so that no one instantiates this
-    // type directly.
-    //
-    // DECL_NAME is the declaration name of this template, i.e., it's
-    // name with no template parameters.  GENERIC is the computed generic
-    // template definition.  N_PARAMETERS specifies how many template
-    // parameters this template has.
+    /* Protected constructor so that no one instantiates this
+       type directly.
+
+       DECL_NAME is the declaration name of this template, i.e., it's
+       name with no template parameters.  GENERIC is the computed generic
+       template definition.  N_PARAMETERS specifies how many template
+       parameters this template has.  */
 
     template_defn (std::string decl_name, std::string generic,
 		   unsigned int n_parameters)
@@ -181,20 +184,16 @@ namespace compile
   {
   public:
 
-    // A unary function to delete map items.
+    /* Construct a new function template definition with the generic
+       string representation GENERIC and demangle INFO, based on the
+       concrete instance given by template symbol TSYMBOL.
 
-    static void destroy (function_template_map_item_t p);
+       If this definition is a method template, PARENT_TYPE is the type
+       of the closing class and FIDX and MIDX are the fieldlist and
+       method indices, respectively, which describe this method.
 
-    // Construct a new function template definition with the generic
-    // string representation GENERIC and demangle INFO, based on the
-    // concrete instance given by template symbol TSYMBOL.
-    //
-    // If this definition is a method template, PARENT_TYPE is the type
-    // of the closing class and FIDX and MIDX are the fieldlist and
-    // method indices, respectively, which describe this method.
-    //
-    // If this definition is not a method template, PARENT_TYPE is NULL
-    // and FIDX/MIDX are both -1.
+       If this definition is not a method template, PARENT_TYPE is NULL
+       and FIDX/MIDX are both -1.  */
 
     function_template_defn (std::string generic, parsed_demangle_info info,
 			    const struct template_symbol *tsymbol,
@@ -202,54 +201,50 @@ namespace compile
 
     // Return the demangle information for this template.
 
-    const parsed_demangle_info *
-    demangle_info (void) const
+    const parsed_demangle_info *demangle_info (void) const
     {
       return &m_demangle_info;
     }
 
     // Return the concrete instance used to define this template.
 
-    const struct template_symbol *
-    template_symbol (void) const
+    const struct template_symbol *template_symbol (void) const
     {
       return m_tsymbol;
     }
 
-    // For method templates, return the type of the enclosing parent type,
-    // or NULL for non-method templates.
+    /* For method templates, return the type of the enclosing parent type,
+       or NULL for non-method templates.  */
 
-    struct type *
-    parent_type (void) const
+    struct type *parent_type (void) const
     {
       return m_parent_type;
     }
 
-    // For method templates, return the field list index in PARENT_TYPE
-    // which describes this method.  Return -1 otherwise.
-    int
-    fidx (void) const
+    /* For method templates, return the field list index in PARENT_TYPE
+       which describes this method.  Return -1 otherwise.  */
+
+    int fidx (void) const
     {
       return m_fidx;
     }
 
-    // For method templates, return the index of this method into the
-    // field list (given by fidx()).  Return -1 otherwise.
+    /* For method templates, return the index of this method into the
+       field list (given by fidx()).  Return -1 otherwise.  */
 
-    int
-    midx (void) const
+    int midx (void) const
     {
       return m_midx;
     }
 
   private:
 
-    // The template symbol used to create this template definition.
-    // NOTE: Any given template_defn could be associated with any number
-    // of template instances in the program.
-    //
-    // This field is not const since we will be lazily computing template
-    // parameter indices for the function's argument and return types.
+    /* The template symbol used to create this template definition.
+       NOTE: Any given template_defn could be associated with any number
+       of template instances in the program.
+
+       This field is not const since we will be lazily computing template
+       parameter indices for the function's argument and return types.  */
 
     const struct template_symbol *m_tsymbol;
 
@@ -257,15 +252,13 @@ namespace compile
 
     struct type *m_parent_type;
 
-    // The fieldlist and method indices for the method or -1 if this template
-    // definition does not represent a method.
+    /* The fieldlist and method indices for the method or -1 if this template
+       definition does not represent a method.  */
 
     int m_fidx;
     int m_midx;
 
     // Demangle tree for the template defining this generic.
-    //  Must be freed with cp_demangled_name_parse_free.
-
     parsed_demangle_info m_demangle_info;
   };
 
@@ -280,9 +273,9 @@ namespace compile
 
     static void destroy (class_template_map_item_t p);
 
-    // Construct a new class template definition with the generic
-    // string representation GENERIC based on the concrete instance
-    // TYPE.
+    /* Construct a new class template definition with the generic
+       string representation GENERIC based on the concrete instance
+       TYPE.  */
 
     class_template_defn (std::string decl_name, std::string generic,
 			 struct type *type)
@@ -293,30 +286,29 @@ namespace compile
 
     // Return concrete instance that this template definition was based on.
 
-    struct type *
-    type (void) const
+    struct type *type (void) const
     {
       return m_type;
     }
 
   private:
 
-    // The type used to create this template definition.
-    // NOTE: Any given template_defn could be associated with any number
-    // of template instances in the program.
+    /* The type used to create this template definition.
+       NOTE: Any given template_defn could be associated with any number
+       of template instances in the program.  */
     struct type *m_type;
   };
 
-  // Loop over SYMBOLS, defining any generic template definitions for
-  // any template symbols in the list.
+  /* Loop over SYMBOLS, defining any generic template definitions for
+     any template symbols in the list.  */
 
   void define_templates (compile_cplus_instance *instance,
 			 VEC (block_symbol_d) *symbols);
 
 
-  // Scan TYPE for any new function templates.
-  // Does not actually emit definitions for any new templates until
-  // emit_function_template_decls is called.
+  /* Scan TYPE for any new function templates.
+     Does not actually emit definitions for any new templates until
+     emit_function_template_decls is called.  */
 
   void scan_type_for_function_templates (compile_cplus_instance *instance,
 					 struct type *type);

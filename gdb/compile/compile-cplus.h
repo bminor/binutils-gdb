@@ -21,9 +21,11 @@
 #include "common/enum-flags.h"
 #include "compile-cplus-templates.h"
 
+#include <string>
+#include <memory>
+
 struct type;
 struct block;
-struct compile_cplus_context;
 
 // enum-flags wrapper
 DEF_ENUM_FLAGS_TYPE (enum gcc_cp_qualifiers, gcc_cp_qualifiers_flags);
@@ -32,8 +34,80 @@ DEF_ENUM_FLAGS_TYPE (enum gcc_cp_symbol_kind, gcc_cp_symbol_kind_flags);
 
 namespace compile
 {
-  /* A subclass of compile_instance that is specific to the C++ front
-     end.  */
+  class compile_cplus_instance;
+
+  /* A single component of a type's scope.  Type names are broken into
+     "components," a series of unqualified names comprising the type name,
+     e.g., "namespace1", "namespace2", "myclass".  */
+
+  struct scope_component
+  {
+    // The unqualified name of this scope.
+    std::string name;
+
+    // The block symbol for this type/scope.
+    struct block_symbol bsymbol;
+  };
+
+  // Comparison operators for scope_components.
+
+  bool operator== (const scope_component &lhs, const scope_component &rhs);
+  bool operator!= (const scope_component &lhs, const scope_component &rhs);
+
+
+  /* A single compiler scope used to define a type.
+
+     A compile_scope is a list of scope_components, where all leading
+     scope_components are namespaces, followed by a single non-namespace
+     type component (the actual type we are converting).  */
+
+  class compile_scope : private std::vector<scope_component>
+  {
+  public:
+
+    using std::vector<scope_component>::push_back;
+    using std::vector<scope_component>::pop_back;
+    using std::vector<scope_component>::back;
+    using std::vector<scope_component>::empty;
+    using std::vector<scope_component>::size;
+    using std::vector<scope_component>::begin;
+    using std::vector<scope_component>::end;
+    using std::vector<scope_component>::operator[];
+
+    compile_scope ()
+      : m_nested_type (GCC_TYPE_NONE), m_pushed (false)
+    {
+    }
+
+    /* Return the gcc_type of the type if it is a nested definition.
+       Returns GCC_TYPE_NONE if this type was not nested.  */
+
+    gcc_type nested_type ()
+    {
+      return m_nested_type;
+    }
+
+  private:
+    /* compile_cplus_instance is a friend class so that it can set the
+       following private members when compile_scopes are created.  */
+
+    friend compile_cplus_instance;
+
+    /* If the type was actually a nested type, this will hold that nested
+       type after the scope is pushed.  */
+    gcc_type m_nested_type;
+
+    /* If true, this scope was pushed to the compiler and all namespaces
+       must be popped when leaving the scope.  */
+    bool m_pushed;
+  };
+
+  // Comparison operators for compile_scopes.
+
+  bool operator== (const compile_scope &lhs, const compile_scope &rhs);
+  bool operator!= (const compile_scope &lhs, const compile_scope &rhs);
+
+  // A subclass of compile_instance that is specific to the C++ front end.
 
   class compile_cplus_instance
     : public compile_instance
@@ -41,7 +115,6 @@ namespace compile
   public:
 
     explicit compile_cplus_instance (struct gcc_cp_context *gcc_fe);
-    ~compile_cplus_instance ();
 
     /* If SYM is a template symbol whose generic we have not yet declared,
        add it to INSTANCE's list of template definitions and scan for default
@@ -61,14 +134,13 @@ namespace compile
     /* Find the generic template definition for TSYM or NULL if none was
        found.  */
 
-    compile::function_template_defn *
-      find_function_template_defn (struct template_symbol *tsym);
+    function_template_defn *
+    find_function_template_defn (struct template_symbol *tsym);
 
     /* Search for an existing class template definition based on TYPE.
        Returns NULL if no template based on TYPE is known.  */
 
-    compile::class_template_defn *
-      find_class_template_defn (struct type *type);
+    class_template_defn *find_class_template_defn (struct type *type);
 
     // Emit any new function template definitions to the compiler plug-in.
 
@@ -89,13 +161,29 @@ namespace compile
     gcc_type convert_type (struct type *type,
 			   enum gcc_cp_symbol_kind nested_access);
 
-    struct compile_cplus_context *
-    new_context (const char *type_name, struct type *type,
-		 gcc_type *nested_type);
-    void push_context (struct compile_cplus_context *);
-    bool need_new_context (const struct compile_cplus_context *);
-    void pop_context (struct compile_cplus_context *);
-    void delete_context (struct compile_cplus_context *);
+    /* Factory method to create a new scope based on TYPE with name TYPE_NAME.
+       [TYPE_NAME could be TYPE_NAME or SYMBOL_NATURAL_NAME.]
+
+       If TYPE is a nested or local definition, nested_type () will return
+       the gcc_type of the conversion.
+
+       Otherwise, nested_type () is GCC_TYPE_NONE.  */
+
+    compile_scope new_scope (const char *type_name, struct type *type);
+
+    /* Enter the given NEW_SCOPE.
+
+       Scopes are always pushed onto the internal stack of scopes, but they
+       are only pushed to the plug-in when necessary.  */
+
+    void enter_scope (compile_scope &scope);
+
+    /* Leave the current scope.
+
+       Scopes are always removed from the internal stack of scopes, but they
+       are only popped from the plug-in when necessary.  */
+
+    void leave_scope ();
 
     // !!keiths: YUCK!
     // Plug-in forwards
@@ -158,9 +246,11 @@ namespace compile
     gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes,
 		       const char *builtin_name);
 
-    gcc_type start_new_enum_type (const char *name, gcc_type underlying_int_type,
+    gcc_type start_new_enum_type (const char *name,
+				  gcc_type underlying_int_type,
 				  enum gcc_cp_symbol_kind flags,
-				  const char *filename, unsigned int line_number);
+				  const char *filename,
+				  unsigned int line_number);
 
     gcc_decl build_add_enum_constant (gcc_type enum_type, const char *name,
 				      unsigned long value);
@@ -201,24 +291,23 @@ namespace compile
 
   private:
 
-    // Enumerate the template arguments fo template DEFN into DEST.
+    // Enumerate the template arguments of template DEFN into DEST.
 
-    void
-      enumerate_template_arguments
-      (struct gcc_cp_template_args *dest,
-       const compile::template_defn *defn,
+    void enumerate_template_arguments
+      (struct gcc_cp_template_args *dest, const template_defn *defn,
        const struct template_argument_info *arg_info);
 
     // The C++ compile plug-in context.
     struct gcc_cp_context *m_context;
 
     // A cache of function template definitions.
-    compile::function_template_defn_map_t *
-      m_function_template_defns;
+    std::unique_ptr<function_template_defn_map_t> m_function_template_defns;
 
     // A cache of class template definitions.
-    compile::class_template_defn_map_t *
-      m_class_template_defns;
+    std::unique_ptr<class_template_defn_map_t> m_class_template_defns;
+
+    // A list of scopes we are processing.
+    std::vector<compile_scope> m_scopes;
   };
 
   /* Return the declaration name of the natural name NATURAL.
@@ -240,9 +329,8 @@ namespace compile
 
   // Convert BASE into a reference type in the given compile INSTANCE.
 
-  gcc_type
-  convert_reference_base (compile_cplus_instance *instance,
-			  gcc_type base);
+  gcc_type convert_reference_base (compile_cplus_instance *instance,
+				   gcc_type base);
 
   /* Returns non-zero if the given TYPE represents a varargs function,
      zero otherwise.  */
@@ -252,8 +340,8 @@ namespace compile
   /* Get the access flag for the NUM'th method of TYPE's FNI'th
      fieldlist.  */
 
-  enum gcc_cp_symbol_kind
-  get_method_access_flag (const struct type *type, int fni, int num);
+  enum gcc_cp_symbol_kind get_method_access_flag (const struct type *type,
+						  int fni, int num);
 
 /* Maybe canonicalize FIELD_NAME with function field METHOD_FIELD (may
    be NULL for non-constructors) and METHOD_TYPE (may not be NULL).

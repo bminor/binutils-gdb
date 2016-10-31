@@ -224,36 +224,31 @@ convert_one_symbol (compile_cplus_instance *instance,
 
 	}
 
+
       /* Don't emit local variable decls for a raw expression.  */
       if (instance->scope () != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  bool need_new_context = false;
-	  struct compile_cplus_context *pctx = NULL;
+	  compile_scope scope;
 
-	  /* For non-local symbols, create/push a new processing context
-	     so that the symbol is properly scoped to the plug-in.  */
+	  /* For non-local symbols, create/push a new scope so that the
+	     symbol is properly scoped to the plug-in.  */
 	  if (!is_local)
 	    {
-	      gcc_type dummy;
-
-	      pctx
-		= instance->new_context (SYMBOL_NATURAL_NAME (sym.symbol),
-					 SYMBOL_TYPE (sym.symbol), &dummy);
-	      if (dummy != GCC_TYPE_NONE)
+	      scope
+		= instance->new_scope (SYMBOL_NATURAL_NAME (sym.symbol),
+				       SYMBOL_TYPE (sym.symbol));
+	      if (scope.nested_type () != GCC_TYPE_NONE)
 		{
 		  /* We found a symbol for this type that was defined inside
 		     some other symbol, e.g., a class tyepdef defined.
 		     Don't return anything in that case because that really
 		     confuses users.  */
-		  instance->delete_context (pctx);
 		  do_cleanups (back_to);
 		  return;
 		}
 
-	      need_new_context = instance->need_new_context (pctx);
-	      if (need_new_context)
-		instance->push_context (pctx);
+	      instance->enter_scope (scope);
 	    }
 
 	  /* Get the `raw' name of the symbol.  */
@@ -280,10 +275,9 @@ convert_one_symbol (compile_cplus_instance *instance,
 				  symbol_name, addr, filename, line);
 	    }
 
-	  /* Pop any processing context.  */
-	  if (need_new_context)
-	    instance->pop_context (pctx);
-	  instance->delete_context (pctx);
+	  // Pop scope for non-local symbols.
+	  if (!is_local)
+	    instance->leave_scope ();
 	}
 
       /* Free any allocated memory.  */

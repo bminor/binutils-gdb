@@ -49,60 +49,18 @@ using namespace compile;
 
 #define DONT_CACHE_TYPE ((gcc_type) 0)
 
-/* A scope of a type.  Type names are broken into "scopes" or
-   "components," a series of unqualified names comprising the
-   type name, e.g., "namespace1", "namespace2", "myclass", "method".  */
-
-struct compile_cplus_scope
-{
-  /* The unqualified name of this scope.  */
-  struct stoken name;
-
-  /* The block symbol for this type/scope.  */
-  struct block_symbol bsymbol;
-};
-typedef struct compile_cplus_scope compile_cplus_scope_def;
-DEF_VEC_O (compile_cplus_scope_def);
-
-/* A processing context.  */
-
-struct compile_cplus_context
-{
-  VEC (compile_cplus_scope_def) *scopes;
-};
-#define CONTEXT_SCOPES(PCTX) ((PCTX)->scopes)
-typedef struct compile_cplus_context *compile_cplus_context_def;
-DEF_VEC_P (compile_cplus_context_def);
-
-/* A list of contexts we are processing.  A processing context
-   is simply a non-namespace scope.  */
-
-static VEC (compile_cplus_context_def) *cplus_processing_contexts = NULL;
-
 /* Flag to enable internal debugging.  */
 
 static int debug_compile_cplus_types = 0;
 
-/* Flag to enable internal context switching debugging.  */
+/* Flag to enable internal scope switching debugging.  */
 
-static int debug_compile_cplus_contexts = 0;
+static int debug_compile_cplus_scopes = 0;
 
 /* Forward declarations.  */
 
 static gcc_type ccp_convert_func (compile_cplus_instance *instance,
 				  struct type *type, int strip_artificial);
-
-/* Allocate a new C string from the given TOKEN.  */
-
-static char *
-copy_stoken (const struct stoken *token)
-{
-  char *string = (char *) xmalloc (token->length + 1);
-
-  strncpy (string, token->ptr, token->length);
-  string[token->length] = '\0';
-  return string;
-}
 
 // See description in compile-cplus.h.
 
@@ -191,29 +149,22 @@ compile::get_method_access_flag (const struct type *type, int fni, int num)
   gdb_assert_not_reached ("unhandled method access specifier");
 }
 
-/* A useful debugging function to output the processing context PCTX
+/* A useful debugging function to output the scope SCOPE
    to stdout.  */
 
 static void __attribute__ ((used))
-debug_print_context (const struct compile_cplus_context *pctx)
+debug_print_scope (const compile_scope &scope)
 {
   int i;
-  struct compile_cplus_scope *scope;
 
-  if (pctx != NULL)
+  for (const auto &comp: scope)
     {
-      for (i = 0;
-	   VEC_iterate (compile_cplus_scope_def, CONTEXT_SCOPES (pctx),
-			i, scope); ++i)
-	{
-	  char *name = copy_stoken (&scope->name);
-	  const char *symbol;
+      std::string symbol = (comp.bsymbol.symbol != NULL
+			    ? SYMBOL_NATURAL_NAME (comp.bsymbol.symbol)
+			    : "<none>");
 
-	  symbol = (scope->bsymbol.symbol != NULL
-		    ? SYMBOL_NATURAL_NAME (scope->bsymbol.symbol) : "<none>");
-	  printf ("\tname = %s, symbol = %s\n", name, symbol);
-	  xfree (name);
-	}
+      printf ("\tname = %s, symbol = %s\n", comp.name.c_str (),
+	      symbol.c_str ());
     }
 }
 
@@ -234,84 +185,53 @@ type_code_to_string (enum type_code code)
   return s[code + 1];
 }
 
-/* Get the current processing context.  */
-
-static struct compile_cplus_context *
-get_current_processing_context (void)
-{
-  if (VEC_empty (compile_cplus_context_def, cplus_processing_contexts))
-    return NULL;
-
-  return VEC_last (compile_cplus_context_def, cplus_processing_contexts);
-}
-
-/* Get the main scope to process in the processing context PCTX.  */
-
-static struct compile_cplus_scope *
-get_processing_context_scope (struct compile_cplus_context *pctx)
-{
-  return VEC_last (compile_cplus_scope_def, CONTEXT_SCOPES (pctx));
-}
-
 /* Convert TYPENAME into a vector of namespace and top-most/super
    composite scopes.
 
    For example, for the input "Namespace::classB::classInner", the
-   resultant vector will contain the tokens {"Namespace", 9} and
-   {"classB", 6}.
+   resultant vector will contain the tokens "Namespace" and
+   "classB".  */
 
-   The resulting VEC must be freed, but the individual components should not.
-   This function may return NULL if TYPE represents an anonymous type.  */
-
-static VEC (compile_cplus_scope_def) *
-ccp_type_name_to_scopes (const char *type_name, const struct block *block)
+static compile_scope
+ccp_type_name_to_scope (const char *type_name, const struct block *block)
 {
-  const char *p;
-  char *lookup_name;
-  int running_length = 0;
-  struct cleanup *back_to;
-  VEC (compile_cplus_scope_def) *result = NULL;
+  compile_scope scope;
 
   if (type_name == NULL)
     {
       /* An anonymous type.  We cannot really do much here.  We simply cannot
 	 look up anonymous types easily/at all.  */
-      return NULL;
+      return scope;
     }
 
-  back_to = make_cleanup (free_current_contents, &lookup_name);
-  p = type_name;
+  const char *p = type_name;
+  std::string lookup_name;
+
   while (1)
     {
-      struct stoken s;
-      struct block_symbol bsymbol;
+      // Create a string token of the first component of TYPE_NAME.
+      int len = cp_find_first_component (p);
+      std::string s (p, len);
 
-      s.ptr = p;
-      s.length = cp_find_first_component (p);
-      p += s.length;
+      // Advance past the last token.
+      p += len;
 
-      /* Look up the symbol and decide when to stop.  */
-      if (running_length == 0)
-	{
-	  lookup_name = copy_stoken (&s);
-	  running_length = s.length + 1;
-	}
-      else
-	{
-	  running_length += 2 + s.length;
-	  lookup_name = (char *) xrealloc (lookup_name, running_length);
-	  strcat (lookup_name, "::");
-	  strncat (lookup_name, s.ptr, s.length);
-	}
-      bsymbol = lookup_symbol (lookup_name, block, VAR_DOMAIN, NULL);
+      // Look up the symbol and decide when to stop.
+      if (!lookup_name.empty ())
+	lookup_name += "::";
+      lookup_name += s;
+
+      // Lookup the resulting name.
+      struct block_symbol bsymbol
+	= lookup_symbol (lookup_name.c_str (), block, VAR_DOMAIN, NULL);
+
       if (bsymbol.symbol != NULL)
 	{
-	  struct compile_cplus_scope c = { s, bsymbol };
+	  scope_component comp = {s, bsymbol};
 
-	  VEC_safe_push (compile_cplus_scope_def, result, &c);
+	  scope.push_back (comp);
 
-	  if (TYPE_CODE (SYMBOL_TYPE (bsymbol.symbol))
-	      != TYPE_CODE_NAMESPACE)
+	  if (TYPE_CODE (SYMBOL_TYPE (bsymbol.symbol)) != TYPE_CODE_NAMESPACE)
 	    {
 	      /* We're done.  */
 	      break;
@@ -336,303 +256,212 @@ ccp_type_name_to_scopes (const char *type_name, const struct block *block)
 	break;
     }
 
-  do_cleanups (back_to);
-  return result;
+  return scope;
 }
 
-/* Does PCTX require a new processing context? Returns 1 if a new context
-   should be pushed (by the caller), zero otherwise.  */
+/* Compare two scope_components for equality.  These are equal if the names
+   of the two components' are the same.  */
 
 bool
-compile_cplus_instance::need_new_context
-  (const struct compile_cplus_context *pctx)
+compile::operator== (const scope_component &lhs, const scope_component &rhs)
 {
-  int i, cur_len, new_len;
-  struct compile_cplus_scope *cur_scope, *new_scope;
-  struct compile_cplus_context *current
-    = get_current_processing_context ();
+  return lhs.name == rhs.name;
+}
 
-  if (debug_compile_cplus_contexts)
+/* Compare two scope_components for inequality.  These are not equal if
+   the two components' names are not equal.  */
+
+bool
+compile::operator!= (const scope_component &lhs, const scope_component &rhs)
+{
+  return lhs.name != rhs.name;
+}
+
+/* Compare two compile_scopes for equality.  These are equal if they are both
+   contain the same number of components and each component is equal.  */
+
+bool
+compile::operator== (const compile_scope &lhs, const compile_scope &rhs)
+{
+  if (lhs.size () != rhs.size ())
+    return false;
+
+  for (int i = 0; i < lhs.size (); ++i)
     {
-      printf_unfiltered ("scopes for current context, %p:\n", current);
-      debug_print_context (current);
-      printf_unfiltered ("comparing to scopes of %p:\n", pctx);
-      debug_print_context (pctx);
+      if (lhs[i] != rhs[i])
+	return false;
     }
 
-  /* PCTX is "the same" as the current scope iff
-     1. current is not NULL
-     2. CONTEXT_SCOPES of current and PCX are the same length.
-     3. scope names are the same.  */
-  if (current == NULL)
+  return true;
+}
+
+/* Compare two compile_scopes for inequality.  These are inequal if they
+   contain unequal number of elements or if any of the components are not
+   the same.  */
+
+bool
+compile::operator!= (const compile_scope &lhs, const compile_scope &rhs)
+{
+  if (lhs.size () != rhs.size ())
+    return true;
+
+  for (int i = 0; i < lhs.size (); ++i)
     {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("no current context -- need new context\n");
-      return 1;
+      if (lhs[i] != rhs[i])
+	return true;
     }
 
-  cur_len = VEC_length (compile_cplus_scope_def, CONTEXT_SCOPES (current));
-  new_len = VEC_length (compile_cplus_scope_def, CONTEXT_SCOPES (pctx));
-  if (cur_len != new_len)
+  return false;
+}
+
+// See description in compile-cplus.h.
+
+void
+compile_cplus_instance::enter_scope (compile_scope &new_scope)
+{
+  bool must_push = m_scopes.empty () || m_scopes.back () != new_scope;
+
+  new_scope.m_pushed = must_push;
+
+  // Save the new scope.
+  m_scopes.push_back (new_scope);
+
+  if (must_push)
     {
-      if (debug_compile_cplus_contexts)
+      if (debug_compile_cplus_scopes)
+	printf_unfiltered ("entering new scope %p\n", new_scope);
+
+      // Push the global namespace.
+      push_namespace ("");
+
+      /* Push all other namespaces.  Note that we do not push the last
+	 scope_component -- that's the actual type we are converting.  */
+      std::for_each
+	(new_scope.begin (), new_scope.end () - 1, [this] (const auto &comp)
+	 {
+	  gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))
+		      == TYPE_CODE_NAMESPACE);
+
+	  const char *ns = (comp.name == CP_ANONYMOUS_NAMESPACE_STR ? NULL
+			    : comp.name.c_str ());
+
+	  this->push_namespace (ns);
+	 });
+    }
+  else
+    {
+      if (debug_compile_cplus_scopes)
 	{
 	  printf_unfiltered
-	    ("length mismatch: current %d, new %d -- need new context\n",
-	     cur_len, new_len);
-	}
-      return 1;
-    }
-
-  for (i = 0;
-       (VEC_iterate (compile_cplus_scope_def,
-		     CONTEXT_SCOPES (current), i, cur_scope)
-	&& VEC_iterate (compile_cplus_scope_def,
-			CONTEXT_SCOPES (pctx), i, new_scope)); ++i)
-    {
-      if (cur_scope->name.length != new_scope->name.length)
-	{
-	  if (debug_compile_cplus_contexts)
-	    {
-	      printf_unfiltered
-		("current scope namelen != newscope namelen -- need new context.\n");
-	    }
-	  return 1;
-	}
-      else
-	{
-	  const char *cur_name = cur_scope->name.ptr;
-	  const char *new_name = new_scope->name.ptr;
-
-	  if (strncmp (cur_name, new_name, cur_scope->name.length) != 0)
-	    {
-	      if (debug_compile_cplus_contexts)
-		{
-		  char *a = (char *) alloca (cur_scope->name.length + 1);
-		  char *b = (char *) alloca (cur_scope->name.length + 1);
-
-		  strncpy (a, cur_scope->name.ptr, cur_scope->name.length);
-		  strncpy (b, new_scope->name.ptr, new_scope->name.length);
-		  printf_unfiltered ("%s != %s -- need new context\n",
-				     cur_name, new_name);
-		}
-	      return 1;
-	    }
+	    ("staying in current scope -- scopes are identical\n");
 	}
     }
-
-  if (debug_compile_cplus_contexts)
-    printf_unfiltered ("all scopes identical -- do NOT need new context\n");
-  return 0;
 }
 
-/* Push the processing context PCTX into the given compiler CONTEXT.
-
-   The main purpose of this function is to push namespaces, including the
-   global namespace, into CONTEXT for type conversions.  */
+// See description in compile-cplus.h.
 
 void
-compile_cplus_instance::push_context (struct compile_cplus_context *pctx)
+compile_cplus_instance::leave_scope ()
 {
-  /* Push the scope we are processing.  */
-  VEC_safe_push (compile_cplus_context_def, cplus_processing_contexts, pctx);
+  // Get the current scope and remove it from the internal list of scopes.
+  compile_scope &current = m_scopes.back ();
+  m_scopes.pop_back ();
 
-  /* Push the global namespace.  */
-  push_namespace ("");
-
-  if (CONTEXT_SCOPES (pctx) != NULL)
+  if (current.m_pushed)
     {
-      int ix;
-      struct compile_cplus_scope *scope, *last;
+      if (debug_compile_cplus_scopes)
+	printf_unfiltered ("leaving scope %p\n", current);
 
-      /* Get the scope we are/will be processing.  */
-      last = get_processing_context_scope (pctx);
+      /* Pop namespaces.  Do not push the last scope_component -- that's
+	 the type we are converting, not a namespace.  */
+      std::for_each
+	(current.begin (),current.end () - 1, [this] (const auto &comp) {
+	  gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))
+		      == TYPE_CODE_NAMESPACE);
+	  this->pop_namespace (comp.name.c_str ());
+	});
 
-      /* Push all other namespaces.  */
-      for (ix = 0;
-	   (VEC_iterate (compile_cplus_scope_def, CONTEXT_SCOPES (pctx),
-			 ix, scope)
-	    && scope != last);
-	   ++ix)
-	{
-	  char *ns;
-
-	  if (scope->name.length == CP_ANONYMOUS_NAMESPACE_LEN
-	      && strncmp (scope->name.ptr, CP_ANONYMOUS_NAMESPACE_STR,
-			  CP_ANONYMOUS_NAMESPACE_LEN) == 0)
-	    ns = NULL;
-	  else
-	    ns = copy_stoken (&scope->name);
-	  push_namespace (ns);
-	  xfree (ns);
-	}
+      // Pop global namespace.
+      pop_namespace ("");
+    }
+  else
+    {
+      if (debug_compile_cplus_scopes)
+	printf_unfiltered ("identical scopes -- not leaving scope\n");
     }
 }
 
-/* Pop the processing context PCTX from CONTEXT.
+// See description in compile-cplus.h.
 
-   This is largely used to pop any namespaces that were required to
-   define a type from CONTEXT.  */
-
-void
-compile_cplus_instance::pop_context (struct compile_cplus_context *pctx)
+compile_scope
+compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 {
-  int ix;
-  struct compile_cplus_scope *scope;
-  struct compile_cplus_context *ctx;
-
-  /* Pop the context.  */
-  ctx = VEC_pop (compile_cplus_context_def, cplus_processing_contexts);
-  gdb_assert (ctx == pctx);
-
-  if (CONTEXT_SCOPES (pctx) != NULL)
-    {
-      struct compile_cplus_scope *last
-	= VEC_last (compile_cplus_scope_def, CONTEXT_SCOPES (pctx));
-
-      /* Pop namespaces.  */
-      for (ix = 0;
-	   (VEC_iterate (compile_cplus_scope_def, CONTEXT_SCOPES (pctx),
-			 ix, scope)
-	    && scope != last);
-	   ++ix)
-	{
-	  char *ns = copy_stoken (&scope->name);
-
-	  pop_namespace (ns);
-	  xfree (ns);
-	}
-    }
-
-  /* Pop global namespace.  */
-  pop_namespace ("");
-}
-
-/* Create a new processing context for TYPE with name TYPE_NAME.
-   [TYPE_NAME could be TYPE_NAME or SYMBOL_NATURAL_NAME.]
-
-   If TYPE is a nested or local definition, *NESTED_TYPE is set to the
-   result and this function returns NULL.
-
-   Otherwise, *NESTED_TYPE is set to GCC_TYPE_NONE and a new processing
-   context is returned. [See description of get_type_scopes for more.]
-   The result should be freed with delete_context.  */
-
-struct compile_cplus_context *
-compile_cplus_instance::new_context (const char *type_name,
-				     struct type *type, gcc_type *nested_type)
-{
-  char *name;
-  struct cleanup *cleanups;
-  struct compile_cplus_context *pctx;
-
-  *nested_type = GCC_TYPE_NONE;
-  pctx = XCNEW (struct compile_cplus_context);
-  cleanups = make_cleanup (xfree, pctx);
-
   /* Break the type name into components.  If TYPE was defined in some
      superclass, we do not process TYPE but process the enclosing type
      instead.  */
-  CONTEXT_SCOPES (pctx) = ccp_type_name_to_scopes (type_name, block ());
-  make_cleanup (VEC_cleanup (compile_cplus_scope_def),
-		&CONTEXT_SCOPES (pctx));
+  compile_scope scope = ccp_type_name_to_scope (type_name, block ());
 
-  if (CONTEXT_SCOPES (pctx) != NULL)
+  if (!scope.empty ())
     {
-      struct compile_cplus_scope *scope, *cur_scope = NULL;
-      struct compile_cplus_context *cur_context;
-
-      cur_context = get_current_processing_context ();
-      if (cur_context != NULL)
-	cur_scope = get_processing_context_scope (cur_context);
-
       /* Get the name of the last component, which should be the
 	 unqualified name of the type to process.  */
-      scope = get_processing_context_scope (pctx);
+      scope_component &comp = scope.back ();
 
-      if (!types_equal (type, SYMBOL_TYPE (scope->bsymbol.symbol))
-	  && (cur_scope == NULL
-	      || cur_scope->bsymbol.symbol != scope->bsymbol.symbol))
+      if (!types_equal (type, SYMBOL_TYPE (comp.bsymbol.symbol))
+	  && (m_scopes.empty ()
+	      || (m_scopes.back ().back ().bsymbol.symbol
+		  != comp.bsymbol.symbol)))
 	{
-	  /* !!keiths: I don't like this.  This seems like it would
-	     get us into hot water.  I think it better to return the
-	     struct type of the nested type and have the caller do that
-	     instead.  I don't think this function should cause scopes
-	     to be pushed.  That should be explicitly done by callers.  */
-	  /* The type the oracle asked about is defined inside another
-	     class(es).  Convert that type instead of defining this type.  */
-	  convert_type (SYMBOL_TYPE (scope->bsymbol.symbol),
-			GCC_CP_ACCESS_NONE);
+	  /* The type is defined inside another class(es).  Convert that
+	     type instead of defining this type.  */
+	  convert_type (SYMBOL_TYPE (comp.bsymbol.symbol), GCC_CP_ACCESS_NONE);
 
 	  /* If the original type (passed in to us) is defined in a nested
 	     class, the previous call will give us that type's gcc_type.
 	     Upper layers are expecting to get the original type's
 	     gcc_type!  */
 	  type_map_t::iterator pos = m_type_map.find (type);
+
 	  gdb_assert (pos != m_type_map.end ());
-	  *nested_type = pos->second;
-	  do_cleanups (cleanups);
-	  return NULL;
+	  scope.m_nested_type = pos->second;
+	  return scope;
 	}
     }
   else
     {
-      struct compile_cplus_scope scope;
-
       if (TYPE_NAME (type) == NULL)
 	{
-	  struct compile_cplus_context *current;
+	  // Anonymous type
 
-	  /* Anonymous type  */
-	  name = NULL;
 	  /* We don't have a qualified name for this to look up, but
 	     we need a scope.  We have to assume, then, that it is the same
 	     as the current scope, if any.  */
-	  /* !!keiths: FIXME: This isn't quite right.  */
-	  current = get_current_processing_context ();
-	  if (current != NULL)
+	  if (!m_scopes.empty ())
 	    {
-	      CONTEXT_SCOPES (pctx) = VEC_copy (compile_cplus_scope_def,
-						CONTEXT_SCOPES (current));
+	      scope = m_scopes.back ();
+	      scope.m_pushed = false;
 	    }
 	  else
-	    {
-	      scope.bsymbol.block = NULL;
-	      scope.bsymbol.symbol = NULL;
-	      scope.name.ptr = NULL;
-	      scope.name.length = 0;
-	      VEC_safe_push (compile_cplus_scope_def, CONTEXT_SCOPES (pctx),
-			     &scope);
-	    }
+	    scope.push_back (scope_component ());
 	}
       else
 	{
-	  scope.bsymbol
-	    = lookup_symbol (TYPE_NAME (type), block (), VAR_DOMAIN, NULL);
-	  name = cp_func_name (TYPE_NAME (type));
-	  make_cleanup (xfree, name);
-	  scope.name.ptr = name;
-	  scope.name.length = strlen (name);
+	  scope_component comp;
 
-	  VEC_safe_push (compile_cplus_scope_def, CONTEXT_SCOPES (pctx),
-			 &scope);
+	  comp.bsymbol
+	    = lookup_symbol (TYPE_NAME (type), block (), VAR_DOMAIN, NULL);
+
+	  char *name = cp_func_name (TYPE_NAME (type));
+
+	  comp.name = name;
+	  xfree (name);
+	  scope.push_back (comp);
 	}
     }
 
-  discard_cleanups (cleanups);
-  return pctx;
-}
-
-/* Delete the processing context PCTX. */
-
-void
-compile_cplus_instance::delete_context (struct compile_cplus_context *pctx)
-{
-  if (pctx != NULL)
-    {
-      VEC_free (compile_cplus_scope_def, CONTEXT_SCOPES (pctx));
-      xfree (pctx);
-    }
+  // There had better be at least one component in the scope!
+  gdb_assert (scope.size () > 0);
+  return scope;
 }
 
 // !!keiths: not RVALUE REFERENCES!
@@ -751,52 +580,35 @@ static gcc_type
 ccp_convert_typedef (compile_cplus_instance *instance,
 		     struct type *type, enum gcc_cp_symbol_kind nested_access)
 {
-  gcc_type typedef_type, result;
-  char *name;
-  struct compile_cplus_context *pctx;
-  struct cleanup *cleanups;
+  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
 
-  cleanups = make_cleanup (null_cleanup, NULL);
-  pctx = instance->new_context (TYPE_NAME (type), type, &result);
-  if (result != GCC_TYPE_NONE)
-    {
-      gdb_assert (pctx == NULL);
-      do_cleanups (cleanups);
-      return result;
-    }
+  if (scope.nested_type () != GCC_TYPE_NONE)
+    return scope.nested_type ();
+
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  char *name = NULL;
 
   if (TYPE_NAME (type) != NULL)
     {
       name = cp_func_name (TYPE_NAME (type));
       make_cleanup (xfree, name);
     }
-  else
-    name = NULL;
 
-  bool need_new_context = instance->need_new_context (pctx);
-  if (need_new_context)
-    instance->push_context (pctx);
+  // Make sure the scope for this type has been pushed.
+  instance->enter_scope (scope);
 
-  /* FIXME: I moved this call before the context switching so that
-     need_new_context would work as a heuristics for namespace-scoped
-     types, but it ends up defining anonymous enum types and constants
-     in the wrong context, so it can't stay here.  */
-  /* !!keiths: And I'm moving it back.  I think checking accessibility
-     should now give you what you're after.  It is not GCC_CP_ACCESS_NONE
-     if we're looking at a nested type.  */
-  typedef_type = instance->convert_type (check_typedef (type),
-					 GCC_CP_ACCESS_NONE);
+  // Convert the typedef's real type.
+  gcc_type typedef_type = instance->convert_type (check_typedef (type),
+						  GCC_CP_ACCESS_NONE);
 
   instance->new_decl ("typedef", name,
 		      GCC_CP_SYMBOL_TYPEDEF | nested_access,
 		      typedef_type,
-		      0, 0,
-		      /* !!keiths: Wow. More of this!  */
+		      0, 0, // !!keiths: Wow. More of this!
 		      NULL, 0);
 
-  if (need_new_context)
-    instance->pop_context (pctx);
-  instance->delete_context (pctx);
+  // Done with this scope.
+  instance->leave_scope ();
   do_cleanups (cleanups);
   return typedef_type;
 }
@@ -804,8 +616,7 @@ ccp_convert_typedef (compile_cplus_instance *instance,
 /* Convert types defined in TYPE.  */
 
 static void
-ccp_convert_type_defns (compile_cplus_instance *instance,
-			struct type *type)
+ccp_convert_type_defns (compile_cplus_instance *instance, struct type *type)
 {
   int i;
   enum gcc_cp_symbol_kind accessibility;
@@ -916,7 +727,6 @@ ccp_convert_struct_or_union_members (compile_cplus_instance *instance,
 	}
       else
 	{
-	  /* !!keiths: I am guessing this is insufficient... */
 	  unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
 	  enum gcc_cp_symbol_kind field_flags = GCC_CP_SYMBOL_FIELD
 	    | get_field_access_flag (type, i)
@@ -1033,7 +843,6 @@ compile::maybe_canonicalize_special_function
   *ignore = false;
 
   /* We only consider ctors and dtors if METHOD_FIELD is non-NULL.  */
-  /* !!keiths: Ick.  Maybe we can look it up here instead if it is NULL?  */
   if (method_field != NULL)
     {
       if (method_field->is_constructor)
@@ -1326,25 +1135,6 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	 representation of the class.  */
       for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (type, i); ++j)
 	{
-#if 0
-	  int qual_flags = 0;
-	  /* pmuldoon: Need to detect LVALUE/RVALUE Qualifiers here. */
-	  int ref_qual_flags = GCC_CP_REF_QUAL_NONE;
-	  gcc_type prototype;
-
-	  /* Skip artificial methods (for now?) */
-	  if (! TYPE_FN_FIELD_ARTIFICIAL (methods, j))
-	    {
-	      struct type *temp_type = TYPE_FN_FIELD_TYPE (methods, j);
-
-	      /* Convert to a function, first. */
-	      prototype = instance->convert_type (temp_type);
-
-
-	      instance->build_method_type (class_type, prototype, qual_flags,
-					   ref_qual_flags);
-	    }
-#else
 	  CORE_ADDR address;
 	  gcc_type method_type;
 	  struct block_symbol sym;
@@ -1390,8 +1180,8 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	    {
 	      if (TYPE_FN_FIELD_VIRTUAL_P (methods, j))
 		{
-		  /* !!keiths: This is beyond hacky, and is really only a
-		     lame workaround for detecting pure virtual methods.  */
+		  /* This is beyond hacky, and is really only a workaround for
+		     detecting pure virtual methods.  */
 		  method_type
 		    = ccp_convert_method (instance, type,
 					  TYPE_FN_FIELD_TYPE (methods, j));
@@ -1425,7 +1215,6 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 
 	  filename = symbol_symtab (sym.symbol)->filename;
 	  line = SYMBOL_LINE (sym.symbol);
-	  /* !!keiths: Is this sufficient?  */
 	  address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
 
 	  /* Short-circuit for method templates.  */
@@ -1484,7 +1273,6 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 			      sym_kind | get_method_access_flag (type, i, j),
 			      method_type, NULL, address, filename, line);
 	  do_cleanups (back_to);
-#endif
 	}
 
       do_cleanups (outer);
@@ -1500,31 +1288,25 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 			     struct type *type,
 			     enum gcc_cp_symbol_kind nested_access)
 {
-  int i;
-  gcc_type result;
-  gcc_decl resuld; /* FIXME: yeah, it's a terrible pun.  Please make
-		      it go once we separate declaration from
-		      definition (see below).  -lxo */
-  struct compile_cplus_context *pctx;
-  char *name = NULL;
   const char *filename = NULL;  /* !!keiths: FIXME  */
   unsigned short line = 0;
-  struct cleanup *cleanups;
 
-  /* Create an empty cleanup chain.  */
-  cleanups = make_cleanup (null_cleanup, NULL);
-
-  /* Get the decl name of this type.  */
+  // Get the decl name of this type.
+  std::string name;
   if (TYPE_NAME (type) != NULL)
     {
-      name = decl_name (TYPE_NAME (type));
-      make_cleanup (xfree, name);
+      char *str = decl_name (TYPE_NAME (type));
+
+      name = str;
+      xfree (str);
     }
   else
     {
-      // !!keiths: Wow.
       if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-	name = "anonymous struct";
+	{
+	  name = (TYPE_DECLARED_CLASS (type) ? "anonymous class"
+		  : "anonymous struct");
+	}
       else
 	name = "anonymous union";
     }
@@ -1536,49 +1318,35 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 
   /* If this is a new template class, make sure the generic has been seen
      and defined.  */
-  instance->maybe_define_new_class_template (type, name);
+  instance->maybe_define_new_class_template (type, name.c_str ());
   instance->emit_class_template_decls ();
 
-  /* Create a new processing context for TYPE.  */
-  pctx = instance->new_context (TYPE_NAME (type), type, &result);
-  if (result != GCC_TYPE_NONE)
+  // Create a new scope for TYPE.
+  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
+
+  if (scope.nested_type () != GCC_TYPE_NONE)
     {
       /* The type requested was actually defined inside another type,
 	 such as a nested class definition.  Return that type.  */
-      gdb_assert (pctx == NULL);
-      do_cleanups (cleanups);
-      return result;
+      return scope.nested_type ();
     }
 
-  /* Push all scopes.  */
-  bool need_new_context = instance->need_new_context (pctx);
-  if (need_new_context)
-    {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("entering new processing scope %p\n", pctx);
-      instance->push_context (pctx);
-    }
-  else
-    {
-      if (debug_compile_cplus_contexts)
-	{
-	  printf_unfiltered
-	    ("staying in current scope -- scopes are identical\n");
-	}
-    }
+  // Push all scopes.
+  instance->enter_scope (scope);
 
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
 
+  gcc_decl resuld; /* FIXME: yeah, it's a terrible pun.  Please make
+		      it go once we separate declaration from
+		      definition (see below).  -lxo */
   if (TYPE_N_TEMPLATE_ARGUMENTS (type))
-    {
-      resuld = instance->specialize_class_template (type, filename, line);
-    }
+    resuld = instance->specialize_class_template (type, filename, line);
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       const char *what = TYPE_DECLARED_CLASS (type) ? "struct" : "class";
 
-      resuld = instance->new_decl (what, name,
+      resuld = instance->new_decl (what, name.c_str (),
 				   GCC_CP_SYMBOL_CLASS | nested_access
 				   | (TYPE_DECLARED_CLASS (type)
 				      ? GCC_CP_FLAG_CLASS_NOFLAG
@@ -1588,17 +1356,18 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-      resuld = instance->new_decl ("union", name,
+      resuld = instance->new_decl ("union", name.c_str (),
 				   GCC_CP_SYMBOL_UNION | nested_access,
 				   0, NULL, 0, filename, line);
     }
 
-  /* FIXME: we should be able to pop the context at this point, rather
+  /* FIXME: we should be able to pop the scope at this point, rather
      than at the end, and we ought to delay the rest of this function
      to the point in which we need the class or union to be a complete
      type, otherwise some well-formed C++ types cannot be represented.
      -lxo */
 
+  gcc_type result;
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       struct gcc_vbase_array bases;
@@ -1611,7 +1380,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 	  bases.elements = XNEWVEC (gcc_type, num_baseclasses);
 	  bases.flags = XNEWVEC (enum gcc_cp_symbol_kind, num_baseclasses);
 	  bases.n_elements = num_baseclasses;
-	  for (i = 0; i < num_baseclasses; ++i)
+	  for (int i = 0; i < num_baseclasses; ++i)
 	    {
 	      struct type *base_type = TYPE_BASECLASS (type, i);
 
@@ -1625,7 +1394,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 	    }
 	}
 
-      result = instance->start_class_definition (name, resuld, &bases,
+      result = instance->start_class_definition (name.c_str (), resuld, &bases,
 						 filename, line);
       xfree (bases.flags);
       xfree (bases.elements);
@@ -1634,7 +1403,8 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
       result
-	= instance->start_class_definition (name, resuld, NULL, filename, line);
+	= instance->start_class_definition (name.c_str (), resuld, NULL,
+					    filename, line);
     }
 
   instance->insert_type (type, result);
@@ -1651,23 +1421,10 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   /* FIXME: add friend declarations.  -lxo  */
 
   /* All finished.  */
-  instance->finish_record_or_union (name, TYPE_LENGTH (type));
+  instance->finish_record_or_union (name.c_str (), TYPE_LENGTH (type));
 
-  /* Pop all scopes.  */
-  if (need_new_context)
-    {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("leaving processing scope %p\n", pctx);
-      instance->pop_context (pctx);
-    }
-  else
-    {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("identical contexts -- not leaving context\n");
-    }
-  instance->delete_context (pctx);
-
-  do_cleanups (cleanups);
+  // Pop all scopes.
+  instance->leave_scope ();
   return result;
 }
 
@@ -1680,8 +1437,7 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
 		  enum gcc_cp_symbol_kind nested_access)
 {
   int i;
-  gcc_type int_type, result;
-  struct compile_cplus_context *pctx;
+  gcc_type int_type;
   char *name = NULL;
   const char *filename = NULL;
   unsigned short line = 0;
@@ -1690,19 +1446,18 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
      being unable to convert enum values from '(MyEnum)0' to 'int'.  */
   int scoped_enum_p = /*TYPE_DECLARED_CLASS (type) ? TRUE :*/ FALSE;
 
-  /* Create an empty cleanup chain.  */
-  cleanups = make_cleanup (null_cleanup, NULL);
+  // Create a new scope for this type.
+  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
 
-  /* Create a new processing context for TYPE.  */
-  pctx = instance->new_context (TYPE_NAME (type), type, &result);
-  if (result != GCC_TYPE_NONE)
+  if (scope.nested_type () != GCC_TYPE_NONE)
     {
       /* The type requested was actually defined inside another type,
 	 such as a nested class definition.  Return that type.  */
-      gdb_assert (pctx == NULL);
-      do_cleanups (cleanups);
-      return result;
+      return scope.nested_type ();
     }
+
+  // Create an empty cleanup chain.
+  cleanups = make_cleanup (null_cleanup, NULL);
 
   if (TYPE_NAME (type) != NULL)
     {
@@ -1710,47 +1465,30 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
       make_cleanup (xfree, name);
     }
   else
-    {
-      /* !!keiths: Wow.  */
-      name = "anonymous enum";
-    }
+    name = "anonymous enum";
 
-  /* Push all scopes.  */
-  bool need_new_context = instance->need_new_context (pctx);
-  if (need_new_context)
-    {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("entering new processing scope %p\n", pctx);
-      instance->push_context (pctx);
-    }
-  else
-    {
-      if (debug_compile_cplus_contexts)
-	{
-	  printf_unfiltered
-	    ("staying in current scope -- scopes are identical\n");
-	}
-    }
-
-  // FIXME: drop any namespaces and enclosing class names, if any. -lxo
-  /* !!keiths: Why?  Drop or push, just like convert_struct_or_union?  */
-  // Drop them from "name", if they're there at all.
+  // Push all scopes.
+  instance->enter_scope (scope);
 
   int_type = instance->int_type (TYPE_UNSIGNED (type),
 				 TYPE_LENGTH (type), NULL);
-  result = instance->start_new_enum_type (name, int_type,
-					  GCC_CP_SYMBOL_ENUM | nested_access
-					  | (scoped_enum_p
-					     ? GCC_CP_FLAG_ENUM_SCOPED
-					     : GCC_CP_FLAG_ENUM_NOFLAG),
-					  filename, line);
+  gcc_type result
+    = instance->start_new_enum_type (name, int_type,
+				     GCC_CP_SYMBOL_ENUM | nested_access
+				     | (scoped_enum_p
+					? GCC_CP_FLAG_ENUM_SCOPED
+					: GCC_CP_FLAG_ENUM_NOFLAG),
+				     filename, line);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
       char *fname = cp_func_name (TYPE_FIELD_NAME (type, i));
 
       if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
 	  || fname == NULL)
-	continue;
+	{
+	  xfree (fname);
+	  continue;
+	}
 
       instance->build_add_enum_constant (result, fname,
 					 TYPE_FIELD_ENUMVAL (type, i));
@@ -1759,22 +1497,8 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
 
   instance->finish_enum_type (result);
 
-  /* Pop all scopes.  */
-  if (need_new_context)
-    {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("leaving processing scope %p\n", pctx);
-      instance->pop_context (pctx);
-    }
-  else
-    {
-      if (debug_compile_cplus_contexts)
-	printf_unfiltered ("identical contexts -- not leaving context\n");
-    }
-
-  /* Delete the processing context.  */
-  instance->delete_context (pctx);
-
+  // Pop all scopes.
+  instance->leave_scope ();
   do_cleanups (cleanups);
   return result;
 }
@@ -1920,18 +1644,11 @@ static gcc_type
 ccp_convert_namespace (compile_cplus_instance *instance,
 		       struct type *type)
 {
-  gcc_type dummy;
+  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
+
+
   char *name = NULL;
-  struct compile_cplus_context *pctx;
-  struct cleanup *cleanups;
-
-  /* !!keiths: I don't think we can define namespaces inside other types,
-     so the only way to get here is to be defining either a global namespace
-     or something defined via namespaces all in the global namespace.  */
-
-  cleanups = make_cleanup (null_cleanup, NULL);
-  pctx = instance->new_context (TYPE_NAME (type), type, &dummy);
-
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   if (TYPE_NAME (type) != NULL)
     {
       name = cp_func_name (TYPE_NAME (type));
@@ -1940,18 +1657,18 @@ ccp_convert_namespace (compile_cplus_instance *instance,
   else
     name = "";
 
-  bool need_new_context = instance->need_new_context (pctx);
-  if (need_new_context)
-    instance->push_context (pctx);
+  // Push scope.
+  instance->enter_scope (scope);
 
+  // Convert this namespace.
   instance->push_namespace (name);
   instance->pop_namespace (name);
 
-  if (need_new_context)
-    instance->pop_context (pctx);
-  instance->delete_context (pctx);
-
+  // Pop scope.
+  instance->leave_scope ();
   do_cleanups (cleanups);
+
+  // Namespaces are non-cacheable "types."
   return DONT_CACHE_TYPE;
 }
 
@@ -2091,25 +1808,9 @@ compile_cplus_instance::compile_cplus_instance (struct gcc_cp_context *gcc_fe)
 				 this);
 }
 
-compile_cplus_instance::~compile_cplus_instance ()
-{
-  /* Until we have a real unique_ptr, we must manually delete all the
-     template definition vector contents.  */
-  std::for_each (m_function_template_defns->begin (),
-		 m_function_template_defns->end (),
-		 function_template_defn::destroy);
-  delete m_function_template_defns;
-
-  std::for_each (m_class_template_defns->begin (),
-		 m_class_template_defns->end (),
-		 class_template_defn::destroy);
-  delete m_class_template_defns;
-}
-
-// !!keiths: YUCK!
 // Plug-in forwards
 
-// This is really a bool printer.
+// A result printer for plug-in calls that return a boolean result.
 
 static void
 ccp_output_result (int result)
@@ -2117,7 +1818,7 @@ ccp_output_result (int result)
   printf_unfiltered ("%s\n", result ? "true" : "false");
 }
 
-// gcc_type and gcc_decl are the same underlying type. :-(
+// A result printer for plug-in calls that return a gcc_type or gcc_decl.
 
 static void
 ccp_output_result (gcc_type result)
@@ -2154,6 +1855,8 @@ ccp_output_result (gcc_type result)
     return result;							\
   };
 
+// See description in gcc-cp-fe.def.
+
 bool
 compile_cplus_instance::build_constant (gcc_type type, const char *name,
 					unsigned long value,
@@ -2162,14 +1865,15 @@ compile_cplus_instance::build_constant (gcc_type type, const char *name,
 {
   DECLARE_FORWARD (build_constant, type, name, value, filename, line_number);
 
-  return forward ("%s", name);
+  return forward ("\"%s\"", name);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_decl
-compile_cplus_instance::
-specialize_function_template (struct template_symbol *concrete,
-			      gcc_address address,
-			      const char *filename, unsigned int line_number)
+compile_cplus_instance::specialize_function_template
+  (struct template_symbol *concrete, gcc_address address,
+   const char *filename, unsigned int line_number)
 {
   function_template_defn *defn
     = find_function_template_defn (concrete);
@@ -2196,10 +1900,12 @@ specialize_function_template (struct template_symbol *concrete,
   return result;
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_decl
-compile_cplus_instance::
-specialize_class_template (struct type *concrete, const char *filename,
-			   unsigned int line_number)
+compile_cplus_instance::specialize_class_template (struct type *concrete,
+						   const char *filename,
+						   unsigned int line_number)
 {
   class_template_defn *defn
     = find_class_template_defn (concrete);
@@ -2229,6 +1935,8 @@ specialize_class_template (struct type *concrete, const char *filename,
   return result;
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_decl
 compile_cplus_instance::new_decl (const char *decl_type,
 				  const char *name,
@@ -2245,6 +1953,8 @@ compile_cplus_instance::new_decl (const char *decl_type,
 		  substitution_name);
 }
 
+// See description in gcc-cp-fe.def.
+
 bool
 compile_cplus_instance::push_namespace (const char *name)
 {
@@ -2252,6 +1962,8 @@ compile_cplus_instance::push_namespace (const char *name)
 
   return forward ("%s", name);
 }
+
+// See description in gcc-cp-fe.def.
 
 bool
 compile_cplus_instance::pop_namespace (const char *opt_name)
@@ -2261,6 +1973,8 @@ compile_cplus_instance::pop_namespace (const char *opt_name)
   return forward ("%s", opt_name);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::error (const char *message)
 {
@@ -2268,6 +1982,8 @@ compile_cplus_instance::error (const char *message)
 
   return forward ("%s", message);
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::build_reference_type (gcc_type base_type,
@@ -2278,6 +1994,8 @@ compile_cplus_instance::build_reference_type (gcc_type base_type,
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::build_pointer_type (gcc_type base_type)
 {
@@ -2285,6 +2003,8 @@ compile_cplus_instance::build_pointer_type (gcc_type base_type)
 
   return forward ("");
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::build_vla_array_type (gcc_type element_type,
@@ -2295,6 +2015,8 @@ compile_cplus_instance::build_vla_array_type (gcc_type element_type,
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::build_vector_type (gcc_type element_type,
 					   int num_elements)
@@ -2304,6 +2026,8 @@ compile_cplus_instance::build_vector_type (gcc_type element_type,
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::build_array_type (gcc_type element_type,
 					  int num_elements)
@@ -2312,6 +2036,8 @@ compile_cplus_instance::build_array_type (gcc_type element_type,
 
   return forward ("");
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_decl
 compile_cplus_instance::new_field (const char *field_name, gcc_type field_type,
@@ -2324,6 +2050,8 @@ compile_cplus_instance::new_field (const char *field_name, gcc_type field_type,
   return forward ("%s %lld", field_name, field_type);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::build_method_type (gcc_type class_type,
 					   gcc_type func_type,
@@ -2335,11 +2063,13 @@ compile_cplus_instance::build_method_type (gcc_type class_type,
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
-compile_cplus_instance::
-start_class_definition (const char *name, gcc_decl typedecl,
-			const struct gcc_vbase_array *base_classes,
-			const char *filename, unsigned int line_number)
+compile_cplus_instance::start_class_definition
+  (const char *name, gcc_decl typedecl,
+   const struct gcc_vbase_array *base_classes,
+   const char *filename, unsigned int line_number)
 {
   DECLARE_FORWARD (start_class_definition, typedecl, base_classes,
 		   filename, line_number);
@@ -2347,14 +2077,18 @@ start_class_definition (const char *name, gcc_decl typedecl,
   return forward ("%s", name);
 }
 
+// See description in gcc-cp-fe.def.
+
 bool
-compile_cplus_instance::
-finish_record_or_union (const char *name, unsigned long size_in_bytes)
+compile_cplus_instance::finish_record_or_union (const char *name,
+						unsigned long size_in_bytes)
 {
   DECLARE_FORWARD (finish_record_or_union, size_in_bytes);
 
   return forward ("%s (%ld)", name, size_in_bytes);
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::int_type (bool is_unsigned, unsigned long size_in_bytes,
@@ -2364,6 +2098,8 @@ compile_cplus_instance::int_type (bool is_unsigned, unsigned long size_in_bytes,
 
   return forward ("%d %ld %s", is_unsigned, size_in_bytes, builtin_name);
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::start_new_enum_type (const char *name,
@@ -2378,6 +2114,8 @@ compile_cplus_instance::start_new_enum_type (const char *name,
   return forward ("%s", name);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_decl
 compile_cplus_instance::build_add_enum_constant (gcc_type enum_type,
 						 const char *name,
@@ -2388,6 +2126,8 @@ compile_cplus_instance::build_add_enum_constant (gcc_type enum_type,
   return forward ("%s = %ld", name, value);
 }
 
+// See description in gcc-cp-fe.def.
+
 bool
 compile_cplus_instance::finish_enum_type (gcc_type enum_type)
 {
@@ -2396,17 +2136,20 @@ compile_cplus_instance::finish_enum_type (gcc_type enum_type)
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
-compile_cplus_instance::
-build_function_type (gcc_type return_type,
-		     const struct gcc_type_array *argument_types,
-		     bool is_varargs)
+compile_cplus_instance::build_function_type
+  (gcc_type return_type, const struct gcc_type_array *argument_types,
+   bool is_varargs)
 {
   DECLARE_FORWARD (build_function_type, return_type, argument_types,
 		   is_varargs);
 
   return forward ("%lld %d", return_type, is_varargs);
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::char_type ()
@@ -2415,6 +2158,8 @@ compile_cplus_instance::char_type ()
 
   return forward ("");
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::float_type (unsigned long size_in_bytes,
@@ -2425,6 +2170,8 @@ compile_cplus_instance::float_type (unsigned long size_in_bytes,
   return forward  ("%ld %s", size_in_bytes, builtin_name);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::void_type ()
 {
@@ -2433,6 +2180,8 @@ compile_cplus_instance::void_type ()
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::bool_type ()
 {
@@ -2440,6 +2189,8 @@ compile_cplus_instance::bool_type ()
 
   return forward ("");
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::build_qualified_type (gcc_type unqualified_type,
@@ -2450,6 +2201,8 @@ compile_cplus_instance::build_qualified_type (gcc_type unqualified_type,
   return forward ("");
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_type
 compile_cplus_instance::build_complex_type (gcc_type element_type)
 {
@@ -2458,6 +2211,8 @@ compile_cplus_instance::build_complex_type (gcc_type element_type)
   return forward ("%lld", element_type);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_expr
 compile_cplus_instance::literal_expr (gcc_type type, unsigned long value)
 {
@@ -2465,6 +2220,8 @@ compile_cplus_instance::literal_expr (gcc_type type, unsigned long value)
 
   return forward ("%lld %ld", type, value);
 }
+
+// See description in gcc-cp-fe.def.
 
 gcc_type
 compile_cplus_instance::new_template_typename_parm (const char *id, bool pack_p,
@@ -2479,6 +2236,8 @@ compile_cplus_instance::new_template_typename_parm (const char *id, bool pack_p,
 		  filename, line_number);
 }
 
+// See description in gcc-cp-fe.def.
+
 gcc_decl
 compile_cplus_instance::new_template_value_parm (gcc_type type, const char *id,
 						 gcc_expr default_value,
@@ -2491,6 +2250,8 @@ compile_cplus_instance::new_template_value_parm (gcc_type type, const char *id,
   return forward ("%lld %s %lld %s %d", type, id, default_value,
 		  filename, line_number);
 }
+
+// See description in gcc-cp-fe.def.
 
 bool
 compile_cplus_instance::start_new_template_decl (const char *generic)
@@ -2518,11 +2279,11 @@ the compile commands."),
 			     &setdebuglist,
 			     &showdebuglist);
 
-  add_setshow_boolean_cmd ("compile-cplus-contexts", no_class,
-			     &debug_compile_cplus_contexts, _("\
-Set debugging of C++ compile contexts."), _("\
-Show debugging of C++ compile contexts."), _("\
-When enabled debugging messages are printed about definition contexts during\n\
+  add_setshow_boolean_cmd ("compile-cplus-scopes", no_class,
+			     &debug_compile_cplus_scopes, _("\
+Set debugging of C++ compile scopes."), _("\
+Show debugging of C++ compile scopes."), _("\
+When enabled debugging messages are printed about definition scopes during\n\
 C++ type conversion for the compile commands."),
 			     NULL,
 			     NULL,
