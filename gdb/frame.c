@@ -2220,6 +2220,17 @@ get_prev_frame (struct frame_info *this_frame)
      something should be calling get_selected_frame() or
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
+  
+  /* If this_frame is the current frame, then compute and stash
+     its frame id prior to fetching and computing the frame id of the
+     previous frame.  Otherwise, the cycle detection code in
+     get_prev_frame_if_no_cycle() will not work correctly.  When
+     get_frame_id() is called later on, an assertion error will
+     be triggered in the event of a cycle between the current
+     frame and its previous frame.  */
+  if (this_frame->level == 0)
+    get_frame_id (this_frame);
+
   frame_pc_p = get_frame_pc_if_available (this_frame, &frame_pc);
 
   /* tausq/2004-12-07: Dummy frames are skipped because it doesn't make much

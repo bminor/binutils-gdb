@@ -1,5 +1,10 @@
 2016-11-16  Kevin Buettner  <kevinb@redhat.com>
 
+	* frame.c (get_prev_frame): Stash frame id for current frame
+	prior to computing frame id for previous frame.
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
 	* python/py-unwind.c (pending_framepy_read_register): Use
 	value_of_register() instead of get_frame_register_value().
 
