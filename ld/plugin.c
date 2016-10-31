@@ -1195,6 +1195,7 @@ plugin_object_p (bfd *ibfd)
 void
 plugin_maybe_claim (lang_input_statement_type *entry)
 {
+  ASSERT (entry->header.type == lang_input_statement_enum);
   if (plugin_object_p (entry->the_bfd))
     {
       bfd *abfd = entry->the_bfd->plugin_dummy_bfd;

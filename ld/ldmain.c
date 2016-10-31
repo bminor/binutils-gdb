@@ -800,6 +800,7 @@ add_archive_element (struct bfd_link_info *info,
 
   input = (lang_input_statement_type *)
       xcalloc (1, sizeof (lang_input_statement_type));
+  input->header.type = lang_input_statement_enum;
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
