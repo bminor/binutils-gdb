@@ -13907,12 +13907,6 @@ $as_echo "#define NEW_PROC_API 1" >>confdefs.h
 $as_echo "#define NEW_PROC_API 1" >>confdefs.h
 
       ;;
-  mips-sgi-irix5*)
-      # Work around <sys/proc.h> needing _KMEMUSER problem on IRIX 5.
-
-$as_echo "#define _KMEMUSER 1" >>confdefs.h
-
-      ;;
   esac
 fi
 

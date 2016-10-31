@@ -1,5 +1,12 @@
 2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* configure.ac <mips-sgi-irix5*>: Remove <sys/proc.h> _KMEMUSER
+	workaround.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-tdep.c (mips_r3041_reg_names): Remove.
 	(mips_breakpoint_from_pc): Remove IDT and PMON breakpoint
 	encodings.
