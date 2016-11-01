@@ -17,6 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* GCC does not understand __has_feature.  */
+#if !defined(__has_feature)
+# define __has_feature(x) 0
+#endif
+
+#if !__has_feature(address_sanitizer) && !defined(__SANITIZE_ADDRESS__)
 #include "common-defs.h"
 #include "host-defs.h"
 #include <new>
@@ -26,6 +32,12 @@
    dump/continue, just like xmalloc does.  We don't do this from a
    new-handler function instead (std::set_new_handler) because we want
    to catch allocation errors from within global constructors too.
+
+   Skip overriding if building with -fsanitize=address though.
+   Address sanitizer wants to override operator new/delete too in
+   order to detect malloc+delete and new+free mismatches.  Our
+   versions would mask out ASan's, with the result of losing that
+   useful mismatch detection.
 
    Note that C++ implementations could either have their throw
    versions call the nothrow versions (libstdc++), or the other way
@@ -83,3 +95,4 @@ operator new[] (std::size_t sz, const std::nothrow_t&)
 {
   return ::operator new (sz, std::nothrow);
 }
+#endif

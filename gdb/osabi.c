@@ -71,7 +71,6 @@ static const struct osabi_names gdb_osabi_names[] =
   { "OpenBSD/ELF", NULL },
   { "WindowsCE", NULL },
   { "DJGPP", NULL },
-  { "Irix", NULL },
   { "HP-UX/ELF", NULL },
   { "HP-UX/SOM", NULL },
   { "QNX-Neutrino", NULL },

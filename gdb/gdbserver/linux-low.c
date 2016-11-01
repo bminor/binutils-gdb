@@ -589,6 +589,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  event_lwp->status_pending_p = 1;
 	  event_lwp->status_pending = wstat;
 
+	  /* Link the threads until the parent event is passed on to
+	     higher layers.  */
+	  event_lwp->fork_relative = child_lwp;
+	  child_lwp->fork_relative = event_lwp;
+
 	  /* If the parent thread is doing step-over with single-step
 	     breakpoints, the list of single-step breakpoints are cloned
 	     from the parent's.  Remove them from the child process.
@@ -2695,7 +2700,8 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
   if (ptid_equal (filter_ptid, minus_one_ptid) || ptid_is_pid (filter_ptid))
     {
       event_thread = (struct thread_info *)
-	find_inferior (&all_threads, status_pending_p_callback, &filter_ptid);
+	find_inferior_in_random (&all_threads, status_pending_p_callback,
+				 &filter_ptid);
       if (event_thread != NULL)
 	event_child = get_thread_lwp (event_thread);
       if (debug_threads && event_thread)
@@ -2806,7 +2812,8 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
       /* ... and find an LWP with a status to report to the core, if
 	 any.  */
       event_thread = (struct thread_info *)
-	find_inferior (&all_threads, status_pending_p_callback, &filter_ptid);
+	find_inferior_in_random (&all_threads, status_pending_p_callback,
+				 &filter_ptid);
       if (event_thread != NULL)
 	{
 	  event_child = get_thread_lwp (event_thread);
@@ -3679,17 +3686,31 @@ linux_wait_1 (ptid_t ptid,
 	  (*the_low_target.set_pc) (regcache, event_child->stop_pc);
 	}
 
-      /* We may have finished stepping over a breakpoint.  If so,
-	 we've stopped and suspended all LWPs momentarily except the
-	 stepping one.  This is where we resume them all again.  We're
-	 going to keep waiting, so use proceed, which handles stepping
-	 over the next breakpoint.  */
+      if (step_over_finished)
+	{
+	  /* If we have finished stepping over a breakpoint, we've
+	     stopped and suspended all LWPs momentarily except the
+	     stepping one.  This is where we resume them all again.
+	     We're going to keep waiting, so use proceed, which
+	     handles stepping over the next breakpoint.  */
+	  unsuspend_all_lwps (event_child);
+	}
+      else
+	{
+	  /* Remove the single-step breakpoints if any.  Note that
+	     there isn't single-step breakpoint if we finished stepping
+	     over.  */
+	  if (can_software_single_step ()
+	      && has_single_step_breakpoints (current_thread))
+	    {
+	      stop_all_lwps (0, event_child);
+	      delete_single_step_breakpoints (current_thread);
+	      unstop_all_lwps (0, event_child);
+	    }
+	}
+
       if (debug_threads)
 	debug_printf ("proceeding all threads.\n");
-
-      if (step_over_finished)
-	unsuspend_all_lwps (event_child);
-
       proceed_all_lwps ();
 
       if (debug_threads)
@@ -3853,6 +3874,15 @@ linux_wait_1 (ptid_t ptid,
     {
       /* If the reported event is an exit, fork, vfork or exec, let
 	 GDB know.  */
+
+      /* Break the unreported fork relationship chain.  */
+      if (event_child->waitstatus.kind == TARGET_WAITKIND_FORKED
+	  || event_child->waitstatus.kind == TARGET_WAITKIND_VFORKED)
+	{
+	  event_child->fork_relative->fork_relative = NULL;
+	  event_child->fork_relative = NULL;
+	}
+
       *ourstatus = event_child->waitstatus;
       /* Clear the event lwp's waitstatus since we handled it already.  */
       event_child->waitstatus.kind = TARGET_WAITKIND_IGNORE;
@@ -4651,6 +4681,51 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 			      : "stopping",
 			      lwpid_of (thread));
 
+	      continue;
+	    }
+
+	  /* Ignore (wildcard) resume requests for already-resumed
+	     threads.  */
+	  if (r->resume[ndx].kind != resume_stop
+	      && thread->last_resume_kind != resume_stop)
+	    {
+	      if (debug_threads)
+		debug_printf ("already %s LWP %ld at GDB's request\n",
+			      (thread->last_resume_kind
+			       == resume_step)
+			      ? "stepping"
+			      : "continuing",
+			      lwpid_of (thread));
+	      continue;
+	    }
+
+	  /* Don't let wildcard resumes resume fork children that GDB
+	     does not yet know are new fork children.  */
+	  if (lwp->fork_relative != NULL)
+	    {
+	      struct inferior_list_entry *inf, *tmp;
+	      struct lwp_info *rel = lwp->fork_relative;
+
+	      if (rel->status_pending_p
+		  && (rel->waitstatus.kind == TARGET_WAITKIND_FORKED
+		      || rel->waitstatus.kind == TARGET_WAITKIND_VFORKED))
+		{
+		  if (debug_threads)
+		    debug_printf ("not resuming LWP %ld: has queued stop reply\n",
+				  lwpid_of (thread));
+		  continue;
+		}
+	    }
+
+	  /* If the thread has a pending event that has already been
+	     reported to GDBserver core, but GDB has not pulled the
+	     event out of the vStopped queue yet, likewise, ignore the
+	     (wildcard) resume request.  */
+	  if (in_queued_stop_replies (entry->id))
+	    {
+	      if (debug_threads)
+		debug_printf ("not resuming LWP %ld: has queued stop reply\n",
+			      lwpid_of (thread));
 	      continue;
 	    }
 
@@ -6444,6 +6519,8 @@ linux_supports_agent (void)
 static int
 linux_supports_range_stepping (void)
 {
+  if (can_software_single_step ())
+    return 1;
   if (*the_low_target.supports_range_stepping == NULL)
     return 0;
 

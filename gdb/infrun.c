@@ -1077,15 +1077,17 @@ show_follow_exec_mode_string (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Follow exec mode is \"%s\".\n"),  value);
 }
 
-/* EXECD_PATHNAME is assumed to be non-NULL.  */
+/* EXEC_FILE_TARGET is assumed to be non-NULL.  */
 
 static void
-follow_exec (ptid_t ptid, char *execd_pathname)
+follow_exec (ptid_t ptid, char *exec_file_target)
 {
   struct thread_info *th, *tmp;
   struct inferior *inf = current_inferior ();
   int pid = ptid_get_pid (ptid);
   ptid_t process_ptid;
+  char *exec_file_host;
+  struct cleanup *old_chain;
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1155,7 +1157,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
   process_ptid = pid_to_ptid (pid);
   printf_unfiltered (_("%s is executing new program: %s\n"),
 		     target_pid_to_str (process_ptid),
-		     execd_pathname);
+		     exec_file_target);
 
   /* We've followed the inferior through an exec.  Therefore, the
      inferior has essentially been killed & reborn.  */
@@ -1164,14 +1166,17 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   breakpoint_init_inferior (inf_execd);
 
-  if (*gdb_sysroot != '\0')
-    {
-      char *name = exec_file_find (execd_pathname, NULL);
+  exec_file_host = exec_file_find (exec_file_target, NULL);
+  old_chain = make_cleanup (xfree, exec_file_host);
 
-      execd_pathname = (char *) alloca (strlen (name) + 1);
-      strcpy (execd_pathname, name);
-      xfree (name);
-    }
+  /* If we were unable to map the executable target pathname onto a host
+     pathname, tell the user that.  Otherwise GDB's subsequent behavior
+     is confusing.  Maybe it would even be better to stop at this point
+     so that the user can specify a file manually before continuing.  */
+  if (exec_file_host == NULL)
+    warning (_("Could not load symbols for executable %s.\n"
+	       "Do you need \"set sysroot\"?"),
+	     exec_file_target);
 
   /* Reset the shared library package.  This ensures that we get a
      shlib event when the child reaches "_start", at which point the
@@ -1193,7 +1198,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
       inf = add_inferior_with_spaces ();
       inf->pid = pid;
-      target_follow_exec (inf, execd_pathname);
+      target_follow_exec (inf, exec_file_target);
 
       set_current_inferior (inf);
       set_current_program_space (inf->pspace);
@@ -1212,21 +1217,14 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   gdb_assert (current_program_space == inf->pspace);
 
-  /* That a.out is now the one to use.  */
-  exec_file_attach (execd_pathname, 0);
+  /* Attempt to open the exec file.  SYMFILE_DEFER_BP_RESET is used
+     because the proper displacement for a PIE (Position Independent
+     Executable) main symbol file will only be computed by
+     solib_create_inferior_hook below.  breakpoint_re_set would fail
+     to insert the breakpoints with the zero displacement.  */
+  try_open_exec_file (exec_file_host, inf, SYMFILE_DEFER_BP_RESET);
 
-  /* SYMFILE_DEFER_BP_RESET is used as the proper displacement for PIE
-     (Position Independent Executable) main symbol file will get applied by
-     solib_create_inferior_hook below.  breakpoint_re_set would fail to insert
-     the breakpoints with the zero displacement.  */
-
-  symbol_file_add (execd_pathname,
-		   (inf->symfile_flags
-		    | SYMFILE_MAINLINE | SYMFILE_DEFER_BP_RESET),
-		   NULL, 0);
-
-  if ((inf->symfile_flags & SYMFILE_NO_READ) == 0)
-    set_initial_language ();
+  do_cleanups (old_chain);
 
   /* If the target can specify a description, read it.  Must do this
      after flipping to the new executable (because the target supplied
@@ -2366,6 +2364,8 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
     target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
 
   target_resume (resume_ptid, step, sig);
+
+  target_commit_resume ();
 }
 
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
@@ -2984,6 +2984,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain;
+  struct cleanup *defer_resume_cleanup;
   int started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
@@ -3125,6 +3126,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      until the target stops again.  */
   tp->prev_pc = regcache_read_pc (regcache);
 
+  defer_resume_cleanup = make_cleanup_defer_target_commit_resume ();
+
   started = start_step_over ();
 
   if (step_over_info_valid_p ())
@@ -3188,6 +3191,9 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
       if (!ecs->wait_some_more)
 	error (_("Command aborted."));
     }
+
+  do_cleanups (defer_resume_cleanup);
+  target_commit_resume ();
 
   discard_cleanups (old_chain);
 

@@ -413,6 +413,20 @@ catch_command_errors_const (catch_command_errors_const_ftype *command,
   return 1;
 }
 
+/* Adapter for symbol_file_add_main that translates 'from_tty' to a
+   symfile_add_flags.  */
+
+static void
+symbol_file_add_main_adapter (const char *arg, int from_tty)
+{
+  symfile_add_flags add_flags = 0;
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
+
+  symbol_file_add_main (arg, add_flags);
+}
+
 /* Type of this option.  */
 enum cmdarg_kind
 {
@@ -1029,7 +1043,7 @@ captured_main_1 (struct captured_main_args *context)
          catch_command_errors returns non-zero on success!  */
       if (catch_command_errors_const (exec_file_attach, execarg,
 				      !batch_flag))
-	catch_command_errors_const (symbol_file_add_main, symarg,
+	catch_command_errors_const (symbol_file_add_main_adapter, symarg,
 				    !batch_flag);
     }
   else
@@ -1038,7 +1052,7 @@ captured_main_1 (struct captured_main_args *context)
 	catch_command_errors_const (exec_file_attach, execarg,
 				    !batch_flag);
       if (symarg != NULL)
-	catch_command_errors_const (symbol_file_add_main, symarg,
+	catch_command_errors_const (symbol_file_add_main_adapter, symarg,
 				    !batch_flag);
     }
 

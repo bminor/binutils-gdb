@@ -67,7 +67,7 @@ mipscoff_symfile_init (struct objfile *objfile)
 /* Read a symbol file from a file.  */
 
 static void
-mipscoff_symfile_read (struct objfile *objfile, int symfile_flags)
+mipscoff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd = objfile->obfd;
 

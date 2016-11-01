@@ -85,7 +85,8 @@ int readnow_symbol_files;	/* Read full symbols immediately.  */
 
 static void load_command (char *, int);
 
-static void symbol_file_add_main_1 (const char *args, int from_tty, int flags);
+static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
+				    objfile_flags flags);
 
 static void add_symbol_file_command (char *, int);
 
@@ -865,7 +866,7 @@ default_symfile_segments (bfd *abfd)
    possibly force the partial symbols to be read.  */
 
 static void
-read_symbols (struct objfile *objfile, int add_flags)
+read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 {
   (*objfile->sf->sym_read) (objfile, add_flags);
   objfile->per_bfd->minsyms_read = 1;
@@ -994,7 +995,7 @@ init_entry_point_info (struct objfile *objfile)
 static void
 syms_from_objfile_1 (struct objfile *objfile,
 		     struct section_addr_info *addrs,
-		     int add_flags)
+		     symfile_add_flags add_flags)
 {
   struct section_addr_info *local_addr = NULL;
   struct cleanup *old_chain;
@@ -1085,7 +1086,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 static void
 syms_from_objfile (struct objfile *objfile,
 		   struct section_addr_info *addrs,
-		   int add_flags)
+		   symfile_add_flags add_flags)
 {
   syms_from_objfile_1 (objfile, addrs, add_flags);
   init_entry_point_info (objfile);
@@ -1096,7 +1097,7 @@ syms_from_objfile (struct objfile *objfile,
    objfile.  ADD_FLAGS is a bitmask of enum symfile_add_flags.  */
 
 static void
-finish_new_objfile (struct objfile *objfile, int add_flags)
+finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
 {
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file.  Otherwise it is sufficient to fixup all the
@@ -1138,9 +1139,10 @@ finish_new_objfile (struct objfile *objfile, int add_flags)
    Upon failure, jumps back to command level (never returns).  */
 
 static struct objfile *
-symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
+symbol_file_add_with_addrs (bfd *abfd, const char *name,
+			    symfile_add_flags add_flags,
 			    struct section_addr_info *addrs,
-			    int flags, struct objfile *parent)
+			    objfile_flags flags, struct objfile *parent)
 {
   struct objfile *objfile;
   const int from_tty = add_flags & SYMFILE_VERBOSE;
@@ -1164,8 +1166,9 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 
-  objfile = allocate_objfile (abfd, name,
-			      flags | (mainline ? OBJF_MAINLINE : 0));
+  if (mainline)
+    flags |= OBJF_MAINLINE;
+  objfile = allocate_objfile (abfd, name, flags);
 
   if (parent)
     add_separate_debug_objfile (objfile, parent);
@@ -1242,7 +1245,8 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
    see allocate_objfile's definition.  */
 
 void
-symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
+symbol_file_add_separate (bfd *bfd, const char *name,
+			  symfile_add_flags symfile_flags,
 			  struct objfile *objfile)
 {
   struct section_addr_info *sap;
@@ -1268,9 +1272,10 @@ symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
    See symbol_file_add_with_addrs's comments for details.  */
 
 struct objfile *
-symbol_file_add_from_bfd (bfd *abfd, const char *name, int add_flags,
+symbol_file_add_from_bfd (bfd *abfd, const char *name,
+			  symfile_add_flags add_flags,
                           struct section_addr_info *addrs,
-                          int flags, struct objfile *parent)
+                          objfile_flags flags, struct objfile *parent)
 {
   return symbol_file_add_with_addrs (abfd, name, add_flags, addrs, flags,
 				     parent);
@@ -1280,8 +1285,8 @@ symbol_file_add_from_bfd (bfd *abfd, const char *name, int add_flags,
    loaded file.  See symbol_file_add_with_addrs's comments for details.  */
 
 struct objfile *
-symbol_file_add (const char *name, int add_flags,
-		 struct section_addr_info *addrs, int flags)
+symbol_file_add (const char *name, symfile_add_flags add_flags,
+		 struct section_addr_info *addrs, objfile_flags flags)
 {
   bfd *bfd = symfile_bfd_open (name);
   struct cleanup *cleanup = make_cleanup_bfd_unref (bfd);
@@ -1301,16 +1306,16 @@ symbol_file_add (const char *name, int add_flags,
    command itself.  */
 
 void
-symbol_file_add_main (const char *args, int from_tty)
+symbol_file_add_main (const char *args, symfile_add_flags add_flags)
 {
-  symbol_file_add_main_1 (args, from_tty, 0);
+  symbol_file_add_main_1 (args, add_flags, 0);
 }
 
 static void
-symbol_file_add_main_1 (const char *args, int from_tty, int flags)
+symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
+			objfile_flags flags)
 {
-  const int add_flags = (current_inferior ()->symfile_flags
-			 | SYMFILE_MAINLINE | (from_tty ? SYMFILE_VERBOSE : 0));
+  add_flags |= current_inferior ()->symfile_flags | SYMFILE_MAINLINE;
 
   symbol_file_add (args, add_flags, NULL, flags);
 
@@ -1318,7 +1323,7 @@ symbol_file_add_main_1 (const char *args, int from_tty, int flags)
      what is frameless.  */
   reinit_frame_cache ();
 
-  if ((flags & SYMFILE_NO_READ) == 0)
+  if ((add_flags & SYMFILE_NO_READ) == 0)
     set_initial_language ();
 }
 
@@ -1646,9 +1651,13 @@ symbol_file_command (char *args, int from_tty)
   else
     {
       char **argv = gdb_buildargv (args);
-      int flags = OBJF_USERLOADED;
+      objfile_flags flags = OBJF_USERLOADED;
+      symfile_add_flags add_flags = 0;
       struct cleanup *cleanups;
       char *name = NULL;
+
+      if (from_tty)
+	add_flags |= SYMFILE_VERBOSE;
 
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
@@ -1659,7 +1668,7 @@ symbol_file_command (char *args, int from_tty)
 	    error (_("unknown option `%s'"), *argv);
 	  else
 	    {
-	      symbol_file_add_main_1 (*argv, from_tty, flags);
+	      symbol_file_add_main_1 (*argv, add_flags, flags);
 	      name = *argv;
 	    }
 
@@ -2222,7 +2231,6 @@ add_symbol_file_command (char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   char *filename = NULL;
-  int flags = OBJF_USERLOADED | OBJF_SHARED;
   char *arg;
   int section_index = 0;
   int argcnt = 0;
@@ -2232,6 +2240,11 @@ add_symbol_file_command (char *args, int from_tty)
   int expecting_sec_addr = 0;
   char **argv;
   struct objfile *objf;
+  objfile_flags flags = OBJF_USERLOADED | OBJF_SHARED;
+  symfile_add_flags add_flags = 0;
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
 
   struct sect_opt
   {
@@ -2357,8 +2370,7 @@ add_symbol_file_command (char *args, int from_tty)
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
 
-  objf = symbol_file_add (filename, from_tty ? SYMFILE_VERBOSE : 0,
-			  section_addrs, flags);
+  objf = symbol_file_add (filename, add_flags, section_addrs, flags);
 
   add_target_sections_of_objfile (objf);
 
@@ -2937,11 +2949,11 @@ add_compunit_symtab_to_objfile (struct compunit_symtab *cu)
 }
 
 
-/* Reset all data structures in gdb which may contain references to symbol
-   table data.  ADD_FLAGS is a bitmask of enum symfile_add_flags.  */
+/* Reset all data structures in gdb which may contain references to
+   symbol table data.  */
 
 void
-clear_symtab_users (int add_flags)
+clear_symtab_users (symfile_add_flags add_flags)
 {
   /* Someday, we should do better than this, by only blowing away
      the things that really need to be blown.  */

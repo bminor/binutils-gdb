@@ -561,7 +561,7 @@ static bfd *symfile_bfd;
 /* Read a symbol file, after initialization by coff_symfile_init.  */
 
 static void
-coff_symfile_read (struct objfile *objfile, int symfile_flags)
+coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   struct coff_symfile_info *info;
   bfd *abfd = objfile->obfd;

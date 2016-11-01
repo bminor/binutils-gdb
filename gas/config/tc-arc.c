@@ -401,16 +401,19 @@ static void assemble_insn
   (const struct arc_opcode *, const expressionS *, int,
    const struct arc_flags *, int, struct arc_insn *);
 
-/* The cpu for which we are generating code.  */
-static unsigned arc_target;
-static const char *arc_target_name;
-static unsigned arc_features;
+/* The selection of the machine type can come from different sources.  This
+   enum is used to track how the selection was made in order to perform
+   error checks.  */
+enum mach_selection_type
+  {
+    MACH_SELECTION_NONE,
+    MACH_SELECTION_FROM_DEFAULT,
+    MACH_SELECTION_FROM_CPU_DIRECTIVE,
+    MACH_SELECTION_FROM_COMMAND_LINE
+  };
 
-/* The default architecture.  */
-static int arc_mach_type;
-
-/* TRUE if the cpu type has been explicitly specified.  */
-static bfd_boolean mach_type_specified_p = FALSE;
+/* How the current machine type was selected.  */
+static enum mach_selection_type mach_selection_mode = MACH_SELECTION_NONE;
 
 /* The hash table of instruction opcodes.  */
 static struct hash_control *arc_opcode_hash;
@@ -447,6 +450,9 @@ static const struct cpu_type
     EF_ARC_CPU_ARCV2HS, ARC_CD},
   { 0, 0, 0, 0, 0 }
 };
+
+/* Information about the cpu/variant we're assembling for.  */
+static struct cpu_type selected_cpu;
 
 /* Used by the arc_reloc_op table.  Order is important.  */
 #define O_gotoff  O_md1     /* @gotoff relocation.  */
@@ -644,7 +650,7 @@ const struct arc_relaxable_ins arc_relaxable_insns[] =
 const unsigned arc_num_relaxable_ins = ARRAY_SIZE (arc_relaxable_insns);
 
 /* Flags to set in the elf header.  */
-static flagword arc_eflag = 0x00;
+static const flagword arc_initial_eflag = 0x00;
 
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 symbolS * GOT_symbol = 0;
@@ -760,22 +766,46 @@ md_number_to_chars_midend (char *buf, valueT val, int n)
 }
 
 /* Select an appropriate entry from CPU_TYPES based on ARG and initialise
-   the relevant static global variables.  */
+   the relevant static global variables.  Parameter SEL describes where
+   this selection originated from.  */
 
 static void
-arc_select_cpu (const char *arg)
+arc_select_cpu (const char *arg, enum mach_selection_type sel)
 {
   int cpu_flags = 0;
   int i;
 
+  /* We should only set a default if we've not made a selection from some
+     other source.  */
+  gas_assert (sel != MACH_SELECTION_FROM_DEFAULT
+              || mach_selection_mode == MACH_SELECTION_NONE);
+
+  /* Look for a matching entry in CPU_TYPES array.  */
   for (i = 0; cpu_types[i].name; ++i)
     {
       if (!strcasecmp (cpu_types[i].name, arg))
         {
-          arc_target = cpu_types[i].flags;
-          arc_target_name = cpu_types[i].name;
-          arc_features = cpu_types[i].features;
-          arc_mach_type = cpu_types[i].mach;
+          /* If a previous selection was made on the command line, then we
+             allow later selections on the command line to override earlier
+             ones.  However, a selection from a '.cpu NAME' directive must
+             match the command line selection, or we give a warning.  */
+          if (mach_selection_mode == MACH_SELECTION_FROM_COMMAND_LINE)
+            {
+              gas_assert (sel == MACH_SELECTION_FROM_COMMAND_LINE
+                          || sel == MACH_SELECTION_FROM_CPU_DIRECTIVE);
+              if (sel == MACH_SELECTION_FROM_CPU_DIRECTIVE
+                  && selected_cpu.mach != cpu_types[i].mach)
+                {
+                  as_warn (_("Command-line value overrides \".cpu\" directive"));
+                  return;
+                }
+            }
+
+          /* Initialise static global data about selected machine type.  */
+          selected_cpu.flags = cpu_types[i].flags;
+          selected_cpu.name = cpu_types[i].name;
+          selected_cpu.features = cpu_types[i].features;
+          selected_cpu.mach = cpu_types[i].mach;
           cpu_flags = cpu_types[i].eflags;
           break;
         }
@@ -784,7 +814,8 @@ arc_select_cpu (const char *arg)
   if (!cpu_types[i].name)
     as_fatal (_("unknown architecture: %s\n"), arg);
   gas_assert (cpu_flags != 0);
-  arc_eflag = (arc_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
+  selected_cpu.eflags = (arc_initial_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
+  mach_selection_mode = sel;
 }
 
 /* Here ends all the ARCompact extension instruction assembling
@@ -887,62 +918,41 @@ arc_lcomm (int ignore)
 static void
 arc_option (int ignore ATTRIBUTE_UNUSED)
 {
-  int mach = -1;
   char c;
   char *cpu;
+  const char *cpu_name;
 
   c = get_symbol_name (&cpu);
-  mach = arc_get_mach (cpu);
 
-  if (mach == -1)
-    goto bad_cpu;
-
-  if (!mach_type_specified_p)
-    {
-      if ((!strcmp ("ARC600", cpu))
-	  || (!strcmp ("ARC601", cpu))
-	  || (!strcmp ("A6", cpu)))
-	{
-	  md_parse_option (OPTION_MCPU, "arc600");
-	}
-      else if ((!strcmp ("ARC700", cpu))
-	       || (!strcmp ("A7", cpu)))
-	{
-	  md_parse_option (OPTION_MCPU, "arc700");
-	}
-      else if (!strcmp ("EM", cpu))
-	{
-	  md_parse_option (OPTION_MCPU, "arcem");
-	}
-      else if (!strcmp ("HS", cpu))
-	{
-	  md_parse_option (OPTION_MCPU, "archs");
-	}
-      else if (!strcmp ("NPS400", cpu))
-	{
-	  md_parse_option (OPTION_MCPU, "nps400");
-	}
-      else
-	as_fatal (_("could not find the architecture"));
-
-      if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
-	as_fatal (_("could not set architecture and machine"));
-
-      /* Set elf header flags.  */
-      bfd_set_private_flags (stdoutput, arc_eflag);
-    }
+  if ((!strcmp ("ARC600", cpu))
+      || (!strcmp ("ARC601", cpu))
+      || (!strcmp ("A6", cpu)))
+    cpu_name = "arc600";
+  else if ((!strcmp ("ARC700", cpu))
+           || (!strcmp ("A7", cpu)))
+    cpu_name = "arc700";
+  else if (!strcmp ("EM", cpu))
+    cpu_name = "arcem";
+  else if (!strcmp ("HS", cpu))
+    cpu_name = "archs";
+  else if (!strcmp ("NPS400", cpu))
+    cpu_name = "nps400";
   else
-    if (arc_mach_type != mach)
-      as_warn (_("Command-line value overrides \".cpu\" directive"));
+    cpu_name = NULL;
+
+  if (cpu_name != NULL)
+    arc_select_cpu (cpu_name, MACH_SELECTION_FROM_CPU_DIRECTIVE);
+  else
+    as_fatal (_("invalid architecture `%s' in .cpu directive"), cpu);
+
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, selected_cpu.mach))
+    as_fatal (_("could not set architecture and machine"));
+
+  /* Set elf header flags.  */
+  bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   restore_line_pointer (c);
   demand_empty_rest_of_line ();
-  return;
-
- bad_cpu:
-  restore_line_pointer (c);
-  as_bad (_("invalid identifier for \".cpu\""));
-  ignore_rest_of_line ();
 }
 
 /* Smartly print an expression.  */
@@ -1561,19 +1571,19 @@ allocate_tok (expressionS *tok, int ntok, int cidx)
 static bfd_boolean
 check_cpu_feature (insn_subclass_t sc)
 {
-  if (is_code_density_p (sc) && !(arc_features & ARC_CD))
+  if (is_code_density_p (sc) && !(selected_cpu.features & ARC_CD))
     return FALSE;
 
-  if (is_spfp_p (sc) && !(arc_features & ARC_SPFP))
+  if (is_spfp_p (sc) && !(selected_cpu.features & ARC_SPFP))
     return FALSE;
 
-  if (is_dpfp_p (sc) && !(arc_features & ARC_DPFP))
+  if (is_dpfp_p (sc) && !(selected_cpu.features & ARC_DPFP))
     return FALSE;
 
-  if (is_fpuda_p (sc) && !(arc_features & ARC_FPUDA))
+  if (is_fpuda_p (sc) && !(selected_cpu.features & ARC_FPUDA))
     return FALSE;
 
-  if (is_nps400_p (sc) && !(arc_features & ARC_NPS400))
+  if (is_nps400_p (sc) && !(selected_cpu.features & ARC_NPS400))
     return FALSE;
 
   return TRUE;
@@ -1700,7 +1710,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 
       /* Don't match opcodes that don't exist on this
 	 architecture.  */
-      if (!(opcode->cpu & arc_target))
+      if (!(opcode->cpu & selected_cpu.flags))
 	goto match_failed;
 
       if (!check_cpu_feature (opcode->subclass))
@@ -2294,7 +2304,7 @@ find_special_case_long_opcode (const char *opname,
 
       opcode = &arc_long_opcodes[i].base_opcode;
 
-      if (!(opcode->cpu & arc_target))
+      if (!(opcode->cpu & selected_cpu.flags))
         continue;
 
       if (!check_cpu_feature (opcode->subclass))
@@ -2413,7 +2423,7 @@ assemble_tokens (const char *opname,
 	as_bad (_("inappropriate arguments for opcode '%s'"), opname);
       else
 	as_bad (_("opcode '%s' not supported for target %s"), opname,
-		arc_target_name);
+		selected_cpu.name);
     }
   else
     as_bad (_("unknown opcode '%s'"), opname);
@@ -2522,17 +2532,17 @@ md_begin (void)
 {
   const struct arc_opcode *opcode = arc_opcodes;
 
-  if (!mach_type_specified_p)
-    arc_select_cpu (TARGET_WITH_CPU);
+  if (mach_selection_mode == MACH_SELECTION_NONE)
+    arc_select_cpu (TARGET_WITH_CPU, MACH_SELECTION_FROM_DEFAULT);
 
   /* The endianness can be chosen "at the factory".  */
   target_big_endian = byte_order == BIG_ENDIAN;
 
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, arc_mach_type))
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, selected_cpu.mach))
     as_warn (_("could not set architecture and machine"));
 
   /* Set elf header flags.  */
-  bfd_set_private_flags (stdoutput, arc_eflag);
+  bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   /* Set up a hash table for the instructions.  */
   arc_opcode_hash = hash_new ();
@@ -2616,7 +2626,7 @@ md_begin (void)
     {
       const char *retval;
 
-      if (!(auxr->cpu & arc_target))
+      if (!(auxr->cpu & selected_cpu.flags))
 	continue;
 
       if ((auxr->subclass != NONE)
@@ -3387,8 +3397,7 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_MCPU:
       {
-        arc_select_cpu (arg);
-        mach_type_specified_p = TRUE;
+        arc_select_cpu (arg, MACH_SELECTION_FROM_COMMAND_LINE);
 	break;
       }
 
@@ -3404,8 +3413,8 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_CD:
       /* This option has an effect only on ARC EM.  */
-      if (arc_target & ARC_OPCODE_ARCv2EM)
-	arc_features |= ARC_CD;
+      if (selected_cpu.flags & ARC_OPCODE_ARCv2EM)
+	selected_cpu.features |= ARC_CD;
       else
 	as_warn (_("Code density option invalid for selected CPU"));
       break;
@@ -3415,21 +3424,21 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_NPS400:
-      arc_features |= ARC_NPS400;
+      selected_cpu.features |= ARC_NPS400;
       break;
 
     case OPTION_SPFP:
-      arc_features |= ARC_SPFP;
+      selected_cpu.features |= ARC_SPFP;
       break;
 
     case OPTION_DPFP:
-      arc_features |= ARC_DPFP;
+      selected_cpu.features |= ARC_DPFP;
       break;
 
     case OPTION_FPUDA:
       /* This option has an effect only on ARC EM.  */
-      if (arc_target & ARC_OPCODE_ARCv2EM)
-	arc_features |= ARC_FPUDA;
+      if (selected_cpu.flags & ARC_OPCODE_ARCv2EM)
+	selected_cpu.features |= ARC_FPUDA;
       else
 	as_warn (_("FPUDA invalid for selected CPU"));
       break;
@@ -4163,10 +4172,10 @@ arc_cons_fix_new (fragS *frag,
 static void
 check_zol (symbolS *s)
 {
-  switch (arc_mach_type)
+  switch (selected_cpu.mach)
     {
     case bfd_mach_arc_arcv2:
-      if (arc_target & ARC_OPCODE_ARCv2EM)
+      if (selected_cpu.flags & ARC_OPCODE_ARCv2EM)
 	return;
 
       if (is_br_jmp_insn_p (arc_last_insns[0].opcode)
@@ -4491,8 +4500,8 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
 
   /* Check the opcode ranges.  */
   moplow = 0x05;
-  mophigh = (arc_target & (ARC_OPCODE_ARCv2EM
-			   | ARC_OPCODE_ARCv2HS)) ? 0x07 : 0x0a;
+  mophigh = (selected_cpu.flags & (ARC_OPCODE_ARCv2EM
+                                   | ARC_OPCODE_ARCv2HS)) ? 0x07 : 0x0a;
 
   if ((einsn.major > mophigh) || (einsn.major < moplow))
     as_fatal (_("major opcode not in range [0x%02x - 0x%02x]"), moplow, mophigh);
@@ -4517,7 +4526,7 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
       break;
     }
 
-  arc_ext_opcodes = arcExtMap_genOpcode (&einsn, arc_target, &errmsg);
+  arc_ext_opcodes = arcExtMap_genOpcode (&einsn, selected_cpu.flags, &errmsg);
   if (arc_ext_opcodes == NULL)
     {
       if (errmsg)
@@ -4741,7 +4750,7 @@ arc_extcorereg (int opertype)
       /* Auxiliary register.  */
       auxr = XNEW (struct arc_aux_reg);
       auxr->name = ereg.name;
-      auxr->cpu = arc_target;
+      auxr->cpu = selected_cpu.flags;
       auxr->subclass = NONE;
       auxr->address = ereg.number;
       retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);

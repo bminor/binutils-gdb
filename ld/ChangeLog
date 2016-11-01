@@ -1,3 +1,9 @@
+2016-10-31  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ldmain.c (add_archive_element): Initialize input->header.type.
+	* plugin.c (plugin_maybe_claim): Assert the statement is an input
+	statement.
+
 2016-10-15  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/spu_ovl.o_c: Regenerate.

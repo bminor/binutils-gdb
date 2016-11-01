@@ -26,6 +26,8 @@ struct target_ops;
 struct target_so_ops;
 struct program_space;
 
+#include "symfile-add-flags.h"
+
 /* Called when we free all symtabs, to free the shared library information
    as well.  */
 
@@ -34,7 +36,7 @@ extern void clear_solib (void);
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 
 extern void solib_add (const char *, int, struct target_ops *, int);
-extern int solib_read_symbols (struct so_list *, int);
+extern int solib_read_symbols (struct so_list *, symfile_add_flags);
 
 /* Function to be called when the inferior starts up, to discover the
    names of shared libraries that are dynamically linked, the base

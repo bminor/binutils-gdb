@@ -38,6 +38,10 @@ AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
+# We require a C++11 compiler.  Check if one is available, and if
+# necessary, set CXX_DIALECT to some -std=xxx switch.
+AX_CXX_COMPILE_STDCXX(11, , mandatory)
+
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
@@ -1540,12 +1544,6 @@ if test "${target}" = "${host}"; then
   *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]]*)
       AC_DEFINE(NEW_PROC_API, 1,
       [Define if you want to use new multi-fd /proc interface.])
-      ;;
-  mips-sgi-irix5*)
-      # Work around <sys/proc.h> needing _KMEMUSER problem on IRIX 5.
-      AC_DEFINE([_KMEMUSER], 1,
-      [Define to 1 so <sys/proc.h> gets a definition of anon_hdl.  Works
-       around a <sys/proc.h> problem on IRIX 5.])
       ;;
   esac
 fi

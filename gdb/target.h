@@ -461,6 +461,8 @@ struct target_ops
 		       int TARGET_DEBUG_PRINTER (target_debug_print_step),
 		       enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
+    void (*to_commit_resume) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     ptid_t (*to_wait) (struct target_ops *,
 		       ptid_t, struct target_waitstatus *,
 		       int TARGET_DEBUG_PRINTER (target_debug_print_options))
@@ -1328,18 +1330,41 @@ extern void target_detach (const char *, int);
 
 extern void target_disconnect (const char *, int);
 
-/* Resume execution of the target process PTID (or a group of
-   threads).  STEP says whether to hardware single-step or to run free;
-   SIGGNAL is the signal to be given to the target, or GDB_SIGNAL_0 for no
-   signal.  The caller may not pass GDB_SIGNAL_DEFAULT.  A specific
-   PTID means `step/resume only this process id'.  A wildcard PTID
-   (all threads, or all threads of process) means `step/resume
-   INFERIOR_PTID, and let other threads (for which the wildcard PTID
-   matches) resume with their 'thread->suspend.stop_signal' signal
-   (usually GDB_SIGNAL_0) if it is in "pass" state, or with no signal
-   if in "no pass" state.  */
+/* Resume execution (or prepare for execution) of a target thread,
+   process or all processes.  STEP says whether to hardware
+   single-step or to run free; SIGGNAL is the signal to be given to
+   the target, or GDB_SIGNAL_0 for no signal.  The caller may not pass
+   GDB_SIGNAL_DEFAULT.  A specific PTID means `step/resume only this
+   process id'.  A wildcard PTID (all threads, or all threads of
+   process) means `step/resume INFERIOR_PTID, and let other threads
+   (for which the wildcard PTID matches) resume with their
+   'thread->suspend.stop_signal' signal (usually GDB_SIGNAL_0) if it
+   is in "pass" state, or with no signal if in "no pass" state.
 
+   In order to efficiently handle batches of resumption requests,
+   targets may implement this method such that it records the
+   resumption request, but defers the actual resumption to the
+   target_commit_resume method implementation.  See
+   target_commit_resume below.  */
 extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
+
+/* Commit a series of resumption requests previously prepared with
+   target_resume calls.
+
+   GDB always calls target_commit_resume after calling target_resume
+   one or more times.  A target may thus use this method in
+   coordination with the target_resume method to batch target-side
+   resumption requests.  In that case, the target doesn't actually
+   resume in its target_resume implementation.  Instead, it prepares
+   the resumption in target_resume, and defers the actual resumption
+   to target_commit_resume.  E.g., the remote target uses this to
+   coalesce multiple resumption requests in a single vCont packet.  */
+extern void target_commit_resume ();
+
+/* Setup to defer target_commit_resume calls, and return a cleanup
+   that reactivates target_commit_resume, if it was previously
+   active.  */
+struct cleanup *make_cleanup_defer_target_commit_resume ();
 
 /* For target_read_memory see target/target.h.  */
 

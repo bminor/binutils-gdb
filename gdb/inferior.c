@@ -253,6 +253,9 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 
   inf->pid = 0;
   inf->fake_pid_p = 0;
+  xfree (inf->priv);
+  inf->priv = NULL;
+
   if (inf->vfork_parent != NULL)
     {
       inf->vfork_parent->vfork_child = NULL;
@@ -851,7 +854,11 @@ add_inferior_command (char *args, int from_tty)
   int i, copies = 1;
   char *exec = NULL;
   char **argv;
+  symfile_add_flags add_flags = 0;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
 
   if (args)
     {
@@ -900,7 +907,7 @@ add_inferior_command (char *args, int from_tty)
 	  switch_to_thread (null_ptid);
 
 	  exec_file_attach (exec, from_tty);
-	  symbol_file_add_main (exec, from_tty);
+	  symbol_file_add_main (exec, add_flags);
 	}
     }
 

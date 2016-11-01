@@ -123,6 +123,10 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 /* Get rid of the currently pending stop replies that match PTID.  */
 extern void discard_queued_stop_replies (ptid_t ptid);
 
+/* Returns true if there's a pending stop reply that matches PTID in
+   the vStopped notifications queue.  */
+extern int in_queued_stop_replies (ptid_t ptid);
+
 #include "remote-utils.h"
 
 #include "utils.h"

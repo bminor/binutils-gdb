@@ -1,3 +1,312 @@
+2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* configure.ac <mips-sgi-irix5*>: Remove <sys/proc.h> _KMEMUSER
+	workaround.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_r3041_reg_names): Remove.
+	(mips_breakpoint_from_pc): Remove IDT and PMON breakpoint
+	encodings.
+
+2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* defs.h (gdb_osabi): Remove GDB_OSABI_IRIX enum value.
+	* osabi.c (gdb_osabi_names): Remove "Irix" entry.
+	* mips-tdep.c (mips_irix_reg_names): Remove.
+	(mips_register_type): Remove GDB_OSABI_IRIX code.
+	(mips_pseudo_register_type): Likewise.
+	(mips_breakpoint_from_pc): Likewise.
+	(mips_gdbarch_init): Likewise.
+
+2016-10-29  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Clarify C++ requirement.
+
+2016-10-29  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Adjust to mention C++11 requirement.
+
+2016-10-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Mention support for redirection on MS-Windows.
+
+	* windows-nat.c (redir_open, redir_set_redirection)
+	(redirect_inferior_handles) [!__CYGWIN__]: New functions.
+	(windows_create_inferior) [!__CYGWIN__]: Use
+	'redirect_inferior_handles' to redirect standard handles of the
+	debuggee if the command line requests that.
+
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (CXX_DIALECT): Get from configure.
+	(COMPILE.pre, CC_LD): Append $(CXX_DIALECT).
+	(FLAGS_TO_PASS): Pass CXX_DIALECT.
+	* acinclude.m4: Include ax_cxx_compile_stdcxx.m4.
+	* ax_cxx_compile_stdcxx.m4: Add FSF copyright header.  Set and
+	AC_SUBST CXX_DIALECT instead of changing CXX/CXXCPP.
+	* configure.ac: Call AX_CXX_COMPILE_STDCXX.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* ax_cxx_compile_stdcxx.m4: New file.
+
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* maint.c (scoped_command_stats::scoped_command_stats): Clear
+	m_space_enabled, m_time_enabled and m_symtab_enabled.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (bfun_s): New typedef.
+	(ftrace_update_caller): Print caller in debug dump.
+	(ftrace_get_caller, ftrace_match_backtrace, ftrace_fixup_level)
+	(ftrace_compute_global_level_offset, ftrace_connect_bfun)
+	(ftrace_connect_backtrace, ftrace_bridge_gap, btrace_bridge_gaps): New.
+	(btrace_compute_ftrace_bts): Pass vector of gaps.  Collect gaps.
+	(btrace_compute_ftrace_pt): Likewise.
+	(btrace_compute_ftrace): Split into this, ...
+	(btrace_compute_ftrace_1): ... this, and ...
+	(btrace_finalize_ftrace): ... this.  Call btrace_bridge_gaps.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_new_return): Start from the previous function's
+	level if we can't find a matching call for a return.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_update_function): Update tail call heuristic.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_compute_ftrace_bts, ftrace_add_pt): Allow
+	leading gaps.
+	* record-btrace.c (record_btrace_single_step_forward)
+	(record_btrace_single_step_backward): Jump back to last
+	instruction if step ends at a gap.
+	(record_btrace_goto_begin): Skip gaps.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_add_pt): Fix gap indication.  Add warning for non-
+	contiguous trace and overflow.  Rephrase trace decode warning and print
+	instruction number.  Remove dead gaps warning.
+	(btrace_compute_ftrace_bts): Rephrase warnings and print instruction
+	number.
+
+2016-10-25  Sandra Loosemore  <sandra@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20569
+	* exceptions.c (exception_print_same): Moved here from exec.c.
+	* exceptions.h (exception_print_same): Declare.
+	* exec.h: Include "symfile-add-flags.h".
+	(try_open_exec_file): New declaration.
+	* exec.c (exception_print_same): Moved to exceptions.c.
+	(try_open_exec_file): New function.
+	(exec_file_locate_attach): Rename exec_file and full_exec_path
+	variables to avoid confusion between target and host pathnames.
+	Move pathname processing logic to exec_file_find.  Do not return
+	early if pathname lookup fails; Call try_open_exec_file.
+	* infrun.c (follow_exec): Split and rename execd_pathname variable
+	to avoid confusion between target and host pathnames.  Warn if
+	pathname lookup fails.  Pass target pathname to
+	target_follow_exec, not hostpathname.  Call try_open_exec_file.
+	* main.c (symbol_file_add_main_adapter): New function.
+	(captured_main_1): Use it.
+	* solib-svr4.c (open_symbol_file_object): Adjust to pass
+	symfile_add_flags to symbol_file_add_main.
+	* solib.c (exec_file_find): Incorporate fallback logic for relative
+	pathnames formerly in exec_file_locate_attach.
+	* symfile.c (symbol_file_add_main, symbol_file_add_main_1):
+	Replace 'from_tty' parameter with a symfile_add_file.
+	(symbol_file_command): Adjust to pass symfile_add_flags to
+	symbol_file_add_main.
+	* symfile.h (symbol_file_add_main): Replace 'from_tty' parameter
+	with a symfile_add_file.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* coffread.c (coff_symfile_read): Use symfile_add_flags.
+	* dbxread.c (dbx_symfile_read): Ditto.
+	* elfread.c (elf_symfile_read): Ditto.
+	* inferior.h: Include symfile-add-flags.h.
+	(struct inferior) <symfile_flags>: Now symfile_add_flags.
+	* machoread.c (macho_add_oso_symfile, macho_symfile_read_all_oso)
+	(macho_symfile_read, mipscoff_symfile_read): Use
+	symfile_add_flags.
+	* objfile-flags.h: New file.
+	* objfiles.c (allocate_objfile): Use objfile_flags.
+	* objfiles.h: Include objfile-flags.h.
+	(struct objfile) <flags>: Now an objfile_flags.
+	(OBJF_REORDERED, OBJF_SHARED, OBJF_READNOW, OBJF_USERLOADED)
+	(OBJF_PSYMTABS_READ, OBJF_MAINLINE, OBJF_NOT_FILENAME): Delete.
+	Converted to an enum-flags in objfile-flags.h.
+	(allocate_objfile): Use objfile_flags.
+	* python/py-objfile.c (objfpy_add_separate_debug_file): Remove
+	unnecessary local.
+	* solib.c (solib_read_symbols, solib_add)
+	(reload_shared_libraries_1): Use symfile_add_flags.
+	* solib.h: Include "symfile-add-flags.h".
+	(solib_read_symbols): Use symfile_add_flags.
+	* symfile-add-flags.h: New file.
+	* symfile-debug.c (debug_sym_read): Use symfile_add_flags.
+	* symfile-mem.c (symbol_file_add_from_memory): Use
+	symfile_add_flags.
+	* symfile.c (read_symbols, syms_from_objfile_1)
+	(syms_from_objfile, finish_new_objfile): Use symfile_add_flags.
+	(symbol_file_add_with_addrs): Use symfile_add_flags and
+	objfile_flags.
+	(symbol_file_add_separate): Use symfile_add_flags.
+	(symbol_file_add_from_bfd, symbol_file_add): Use symfile_add_flags
+	and objfile_flags.
+	(symbol_file_add_main_1): : Use objfile_flags.  Fix add_flags vs
+	flags confusion.
+	(symbol_file_command): Use objfile_flags.
+	(add_symbol_file_command): Use symfile_add_flags and
+	objfile_flags.
+	(clear_symtab_users): Use symfile_add_flags.
+	* symfile.h: Include "symfile-add-flags.h" and "objfile-flags.h".
+	(struct sym_fns) <sym_read>: Use symfile_add_flags.
+	(clear_symtab_users): Use symfile_add_flags.
+	(enum symfile_add_flags): Delete, moved to symfile-add-flags.h and
+	converted to enum-flags.
+	(symbol_file_add, symbol_file_add_from_bfd)
+	(symbol_file_add_separate): Use symfile_add_flags.
+	* xcoffread.c (xcoff_initial_scan): Use symfile_add_flags.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* inferior.h (ALL_NON_EXITED_INFERIORS): New macro.
+	* infrun.c (do_target_resume): Call target_commit_resume.
+	(proceed): Defer target_commit_resume while looping over threads,
+	resuming them.  Call target_commit_resume at the end.
+	* record-btrace.c (record_btrace_commit_resume): New function.
+	(init_record_btrace_ops): Install it as to_commit_resume method.
+	* record-full.c (record_full_commit_resume): New function.
+	(record_full_wait_1): Call the beneath target's to_commit_resume
+	method.
+	(init_record_full_ops): Install record_full_commit_resume as
+	to_commit_resume method.
+	* remote.c (struct private_thread_info) <last_resume_step,
+	last_resume_sig, vcont_resumed>: New fields.
+	(remote_add_thread): Set the new thread's vcont_resumed flag.
+	(demand_private_info): Delete.
+	(get_private_info_thread, get_private_info_ptid): New functions.
+	(remote_update_thread_list): Adjust.
+	(process_initial_stop_replies): Clear the thread's vcont_resumed
+	flag.
+	(remote_resume): If connected in non-stop mode, record the resume
+	request and return early.
+	(struct private_inferior): New.
+	(struct vcont_builder): New.
+	(vcont_builder_restart, vcont_builder_flush)
+	(vcont_builder_push_action): New functions.
+	(MAX_ACTION_SIZE): New macro.
+	(remote_commit_resume): New function.
+	(thread_pending_fork_status, is_pending_fork_parent_thread): New
+	functions.
+	(check_pending_event_prevents_wildcard_vcont_callback)
+	(check_pending_events_prevent_wildcard_vcont): New functions.
+	(process_stop_reply): Adjust.  Clear the thread's vcont_resumed
+	flag.
+	(init_remote_ops): Install remote_commit_resume.
+	* target-delegates.c: Regenerate.
+	* target.c (defer_target_commit_resume): New global.
+	(target_commit_resume, make_cleanup_defer_target_commit_resume):
+	New functions.
+	* target.h (struct target_ops) <to_commit_resume>: New field.
+	(target_resume): Update comments.
+	(target_commit_resume): New declaration.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (exit_inferior_1): Free 'priv'.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_resume_with_hc): New function, factored out
+	from ...
+	(remote_resume): ... this.  Always try vCont first.
+	(remote_vcont_resume): Rename to ...
+	(remote_resume_with_vcont): ... this.  Bail out if execution
+	direction is reverse.
+
+2016-10-25  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context) <~dwarf_expr_context>:
+	Make virtual.
+
+2016-10-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/20712
+	* defs.h: Remove obsolete comment
+	(atof): Remove.
+	* procfs.c (do_destroy_procinfo_cleanup): Add cast.
+	(sysset_t_alloc): Likewise.
+	(proc_set_traced_sysentry): Likewise.
+	(proc_set_traced_sysexit): Likewise.
+	[!PIOCLSTATUS && NEW_PROC_API] (do_closedir_cleanup): Likewise.
+	(proc_get_LDT_entry): Initiate cleanups before returns.
+	(procfs_wait): Use GDB_SIGNAL_0.
+	(procfs_corefile_thread_callback): Add cast.
+	* sol-thread.c (td_log_ftype, td_ta_new_ftype, td_ta_delete_ftype)
+	(td_init_ftype, td_ta_get_ph_ftype, td_ta_get_nthreads_ftype)
+	(td_ta_tsd_iter_ftype, td_ta_thr_iter_ftype)
+	(td_thr_validate_ftype, td_thr_tsd_ftype, td_thr_get_info_ftype)
+	(td_thr_getfpregs_ftype, td_thr_getxregsize_ftype)
+	(td_thr_getxregs_ftype, td_thr_sigsetmask_ftype)
+	(td_thr_setprio_ftype, td_thr_setsigpending_ftype)
+	(td_thr_setfpregs_ftype, td_thr_setxregs_ftype)
+	(td_ta_map_id2thr_ftype, td_ta_map_lwp2thr_ftype)
+	(td_thr_getgregs_ftype, td_thr_setgregs_ftype): New typedefs.
+	(p_td_log, p_td_ta_new, p_td_ta_delete, p_td_init, p_td_ta_get_ph)
+	(p_td_ta_get_nthreads, p_td_ta_tsd_iter, p_td_ta_thr_iter)
+	(p_td_thr_validate, p_td_thr_tsd, p_td_thr_get_info)
+	(p_td_thr_getfpregs, p_td_thr_getxregsize, p_td_thr_getxregs)
+	(p_td_thr_sigsetmask, p_td_thr_setprio, p_td_thr_setsigpending)
+	(p_td_thr_setfpregs, p_td_thr_setxregs, p_td_ta_map_id2thr)
+	(p_td_ta_map_lwp2thr, p_td_thr_getgregs, p_td_thr_setgregs): Use them.
+	(ps_pdread): Add cast.
+	(ps_ptread): Likewise.
+	(resolve): Likewise.
+	* top.c (gdb_safe_append_history): Print pid_t as long.
+
+2016-10-25  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h (__STDC_FORMAT_MACROS): Define.
+
+2016-10-25  Pedro Alves  <palves@redhat.com>
+
+	* common/new-op.c: Add comment about -fsanitize=address.
+
+2016-10-25  Pedro Alves  <palves@redhat.com>
+
+       * common/common-defs.h (__STDC_CONSTANT_MACROS)
+       (__STDC_LIMIT_MACROS): Define.
+
+2016-10-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/20716
+	* common/new-op.c (__has_feature): New macro.
+	Don't override operator new if asan is used.
+
+2016-10-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* exec.c (exec_file_locate_attach): Prevent NULL pointer dereference
+	when duplicating a string.
+
+2016-10-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* exec.c (exception_print_same): Fix string comparison to use
+	statically-allocated ones.
+
 2016-10-21  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2expr.h (class dwarf_expr_context)

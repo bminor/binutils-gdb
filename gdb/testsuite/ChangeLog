@@ -1,3 +1,18 @@
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/maint.exp <maint info line-table w/o a file name>: Use
+	gdb_test_multiple, tighten regexps and match symtabs and line
+	tables incrementally.
+
+2016-10-28  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/foll-exec.exp (do_exec_tests): Make test pattern more
+	general.
+
+2016-10-25  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/exec-invalid-sysroot.exp: New file.
+
 2016-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/morestack.exp: Try to build it using -fuse-ld=gold first.

@@ -1181,7 +1181,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
    capability even for files compiled without -g.  */
 
 static void
-elf_symfile_read (struct objfile *objfile, int symfile_flags)
+elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;

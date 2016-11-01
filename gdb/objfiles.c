@@ -366,7 +366,7 @@ build_objfile_section_table (struct objfile *objfile)
    simply copied through to the new objfile flags member.  */
 
 struct objfile *
-allocate_objfile (bfd *abfd, const char *name, int flags)
+allocate_objfile (bfd *abfd, const char *name, objfile_flags flags)
 {
   struct objfile *objfile;
   char *expanded_name;

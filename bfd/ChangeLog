@@ -1,3 +1,17 @@
+2016-10-31  Alan Modra  <amodra@gmail.com>
+
+	PR 20748
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Revert
+	2016-05-13 change.
+
+2016-10-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cpu-arc.c (arc_get_mach): Delete.
+
+2016-10-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (STUB_JALR): Correct description.
+
 2016-10-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/gas.pot: Regenerate.

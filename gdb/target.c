@@ -2329,6 +2329,34 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
   clear_inline_frame_state (ptid);
 }
 
+/* If true, target_commit_resume is a nop.  */
+static int defer_target_commit_resume;
+
+/* See target.h.  */
+
+void
+target_commit_resume (void)
+{
+  struct target_ops *t;
+
+  if (defer_target_commit_resume)
+    return;
+
+  current_target.to_commit_resume (&current_target);
+}
+
+/* See target.h.  */
+
+struct cleanup *
+make_cleanup_defer_target_commit_resume (void)
+{
+  struct cleanup *old_chain;
+
+  old_chain = make_cleanup_restore_integer (&defer_target_commit_resume);
+  defer_target_commit_resume = 1;
+  return old_chain;
+}
+
 void
 target_pass_signals (int numsigs, unsigned char *pass_signals)
 {

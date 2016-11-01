@@ -51,6 +51,7 @@ RANLIB = @RANLIB@
 
 CC = @CC@
 CXX = @CXX@
+CXX_DIALECT= @CXX_DIALECT@
 AR = @AR@
 AR_FLAGS = rc
 
@@ -61,7 +62,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX)
+COMPILE.pre = $(CXX) $(CXX_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -80,7 +81,7 @@ VPATH = @srcdir@
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
 #CC_LD=g++ -static
-CC_LD=$(CXX)
+CC_LD=$(CXX) $(CXX_DIALECT)
 
 # Where is the "include" directory?  Traditionally ../include or ./include
 INCLUDE_DIR =  ${srcdir}/../../include

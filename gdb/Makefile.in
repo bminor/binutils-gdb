@@ -86,6 +86,7 @@ CATALOGS = @CATALOGS@
 # distribution will fix your include files up.
 CC=@CC@
 CXX=@CXX@
+CXX_DIALECT= @CXX_DIALECT@
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
@@ -94,7 +95,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX)
+COMPILE.pre = $(CXX) $(CXX_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -125,7 +126,7 @@ MAKEHTMLFLAGS =
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
 #CC_LD=g++ -static
-CC_LD=$(CXX)
+CC_LD=$(CXX) $(CXX_DIALECT)
 
 # Where is our "include" directory?  Typically $(srcdir)/../include.
 # This is essentially the header file directory for the library
@@ -749,6 +750,7 @@ FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"CXX=$(CXX)" \
+	"CXX_DIALECT=$(CXX_DIALECT)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"DLLTOOL=$(DLLTOOL)" \
 	"LDFLAGS=$(LDFLAGS)" \

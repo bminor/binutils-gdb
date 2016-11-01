@@ -560,19 +560,6 @@ static const char *mips_generic_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "fsr", "fir",
 };
 
-/* Names of IDT R3041 registers.  */
-
-static const char *mips_r3041_reg_names[] = {
-  "sr", "lo", "hi", "bad", "cause", "pc",
-  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
-  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-  "fsr", "fir", "", /*"fp" */ "",
-  "", "", "bus", "ccfg", "", "", "", "",
-  "", "", "port", "cmp", "", "", "epc", "prid",
-};
-
 /* Names of tx39 registers.  */
 
 static const char *mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
@@ -584,15 +571,6 @@ static const char *mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "", "", "", "",
   "", "", "", "", "", "", "", "",
   "", "", "config", "cache", "debug", "depc", "epc",
-};
-
-/* Names of IRIX registers.  */
-static const char *mips_irix_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
-  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
-  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-  "pc", "cause", "bad", "hi", "lo", "fsr", "fir"
 };
 
 /* Names of registers with Linux kernels.  */
@@ -1033,8 +1011,7 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
       if (rawnum == mips_regnum (gdbarch)->fp_control_status
 	  || rawnum == mips_regnum (gdbarch)->fp_implementation_revision)
 	return builtin_type (gdbarch)->builtin_int32;
-      else if (gdbarch_osabi (gdbarch) != GDB_OSABI_IRIX
-	       && gdbarch_osabi (gdbarch) != GDB_OSABI_LINUX
+      else if (gdbarch_osabi (gdbarch) != GDB_OSABI_LINUX
 	       && rawnum >= MIPS_FIRST_EMBED_REGNUM
 	       && rawnum <= MIPS_LAST_EMBED_REGNUM)
 	/* The pseudo/cooked view of the embedded registers is always
@@ -1116,8 +1093,7 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
      the necessary 32 bits, but older versions of GDB expected 64,
      so allow the target to provide 64 bits without interfering
      with the displayed type.  */
-  if (gdbarch_osabi (gdbarch) != GDB_OSABI_IRIX
-      && gdbarch_osabi (gdbarch) != GDB_OSABI_LINUX
+  if (gdbarch_osabi (gdbarch) != GDB_OSABI_LINUX
       && rawnum >= MIPS_FIRST_EMBED_REGNUM
       && rawnum <= MIPS_LAST_EMBED_REGNUM)
     return builtin_type (gdbarch)->builtin_int32;
@@ -7081,28 +7057,10 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  /* The IDT board uses an unusual breakpoint value, and
-	     sometimes gets confused when it sees the usual MIPS
-	     breakpoint instruction.  */
 	  static gdb_byte big_breakpoint[] = { 0, 0x5, 0, 0xd };
-	  static gdb_byte pmon_big_breakpoint[] = { 0, 0, 0, 0xd };
-	  static gdb_byte idt_big_breakpoint[] = { 0, 0, 0x0a, 0xd };
-	  /* Likewise, IRIX appears to expect a different breakpoint,
-	     although this is not apparent until you try to use pthreads.  */
-	  static gdb_byte irix_big_breakpoint[] = { 0, 0, 0, 0xd };
 
 	  *lenptr = sizeof (big_breakpoint);
-
-	  if (strcmp (target_shortname, "mips") == 0)
-	    return idt_big_breakpoint;
-	  else if (strcmp (target_shortname, "ddb") == 0
-		   || strcmp (target_shortname, "pmon") == 0
-		   || strcmp (target_shortname, "lsi") == 0)
-	    return pmon_big_breakpoint;
-	  else if (gdbarch_osabi (gdbarch) == GDB_OSABI_IRIX)
-	    return irix_big_breakpoint;
-	  else
-	    return big_breakpoint;
+	  return big_breakpoint;
 	}
     }
   else
@@ -7132,19 +7090,9 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
       else
 	{
 	  static gdb_byte little_breakpoint[] = { 0xd, 0, 0x5, 0 };
-	  static gdb_byte pmon_little_breakpoint[] = { 0xd, 0, 0, 0 };
-	  static gdb_byte idt_little_breakpoint[] = { 0xd, 0x0a, 0, 0 };
 
 	  *lenptr = sizeof (little_breakpoint);
-
-	  if (strcmp (target_shortname, "mips") == 0)
-	    return idt_little_breakpoint;
-	  else if (strcmp (target_shortname, "ddb") == 0
-		   || strcmp (target_shortname, "pmon") == 0
-		   || strcmp (target_shortname, "lsi") == 0)
-	    return pmon_little_breakpoint;
-	  else
-	    return little_breakpoint;
+	  return little_breakpoint;
 	}
     }
 }
@@ -8158,22 +8106,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int dspctl;
 
   /* Fill in the OS dependent register numbers and names.  */
-  if (info.osabi == GDB_OSABI_IRIX)
-    {
-      mips_regnum.fp0 = 32;
-      mips_regnum.pc = 64;
-      mips_regnum.cause = 65;
-      mips_regnum.badvaddr = 66;
-      mips_regnum.hi = 67;
-      mips_regnum.lo = 68;
-      mips_regnum.fp_control_status = 69;
-      mips_regnum.fp_implementation_revision = 70;
-      mips_regnum.dspacc = dspacc = -1;
-      mips_regnum.dspctl = dspctl = -1;
-      num_regs = 71;
-      reg_names = mips_irix_reg_names;
-    }
-  else if (info.osabi == GDB_OSABI_LINUX)
+  if (info.osabi == GDB_OSABI_LINUX)
     {
       mips_regnum.fp0 = 38;
       mips_regnum.pc = 37;

@@ -1,3 +1,42 @@
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (CXX_DIALECT): Get from configure.
+	(COMPILE.pre, CC_LD): Append $(CXX_DIALECT).
+	* acinclude.m4: Include ../ax_cxx_compile_stdcxx.m4.
+	* configure.ac: Call AX_CXX_COMPILE_STDCXX.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2016-10-27  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_supports_range_stepping): Return true if
+	can_software_single_step return true.
+
+2016-10-27  Yao Qi  <yao.qi@linaro.org>
+
+	* inferiors.c (find_inferior_in_random): New function.
+	* inferiors.h (find_inferior_in_random): Declare.
+	* linux-low.c (linux_wait_for_event_filtered): Call
+	find_inferior_in_random instead of find_inferior.
+
+2016-10-27  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_wait_1): If single-step breakpoints are
+	inserted, remove them.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Link parent/child fork
+	threads.
+	(linux_wait_1): Unlink them.
+	(linux_set_resume_request): Ignore resume requests for
+	already-resumed and unhandled fork child threads.
+	* linux-low.h (struct lwp_info) <fork_relative>: New field.
+	* server.c (in_queued_stop_replies_ptid, in_queued_stop_replies):
+	New functions.
+	(handle_v_requests) <vCont>: Don't call require_running.
+	* server.h (in_queued_stop_replies): New declaration.
+
 2016-10-24  Yao Qi  <yao.qi@linaro.org>
 
 	PR server/20733
