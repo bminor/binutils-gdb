@@ -430,6 +430,8 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
 	default:
 	  einfo (_("%P%F: unknown ELF symbol visibility: %d!\n"),
 		 ldsym->visibility);
+	  return LDPS_ERR;
+
 	case LDPV_DEFAULT:
 	  visibility = STV_DEFAULT;
 	  break;
@@ -1193,6 +1195,7 @@ plugin_object_p (bfd *ibfd)
 void
 plugin_maybe_claim (lang_input_statement_type *entry)
 {
+  ASSERT (entry->header.type == lang_input_statement_enum);
   if (plugin_object_p (entry->the_bfd))
     {
       bfd *abfd = entry->the_bfd->plugin_dummy_bfd;

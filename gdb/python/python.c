@@ -319,11 +319,9 @@ static void
 python_interactive_command (char *arg, int from_tty)
 {
   struct ui *ui = current_ui;
-  struct cleanup *cleanup;
   int err;
 
-  cleanup = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   arg = skip_spaces (arg);
 
@@ -351,8 +349,6 @@ python_interactive_command (char *arg, int from_tty)
       gdbpy_print_stack ();
       error (_("Error while executing Python code."));
     }
-
-  do_cleanups (cleanup);
 }
 
 /* A wrapper around PyRun_SimpleFile.  FILE is the Python script to run
@@ -467,8 +463,7 @@ python_command (char *arg, int from_tty)
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
-  make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   arg = skip_spaces (arg);
   if (arg && *arg)
@@ -651,10 +646,10 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       struct cleanup *cleanup = make_cleanup (xfree, copy);
       struct interp *interp;
 
-      make_cleanup_restore_integer (&current_ui->async);
-      current_ui->async = 0;
+      scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-      make_cleanup_restore_ui_out (&current_uiout);
+      scoped_restore save_uiout = make_scoped_restore (&current_uiout);
+
       /* Use the console interpreter uiout to have the same print format
 	for console or MI.  */
       interp = interp_lookup (current_ui, "console");
@@ -739,7 +734,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   if (arg != NULL)
     {
-      location = new_linespec_location (&arg);
+      location = string_to_event_location_basic (&arg, python_language);
       make_cleanup_delete_event_location (location);
     }
 

@@ -154,9 +154,10 @@ extern void exec_file_attach (const char *filename, int from_tty);
 /* If the filename of the main executable is unknown, attempt to
    determine it.  If a filename is determined, proceed as though
    it was just specified with the "file" command.  Do nothing if
-   the filename of the main executable is already known.  */
+   the filename of the main executable is already known.
+   DEFER_BP_RESET uses SYMFILE_DEFER_BP_RESET for the main symbol file.  */
 
-extern void exec_file_locate_attach (int pid, int from_tty);
+extern void exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 

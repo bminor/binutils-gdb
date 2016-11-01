@@ -28,6 +28,7 @@
 #include "hist.h"
 #include "corefile.h"
 #include "safe-ctype.h"
+#include <limits.h>    /* For UINT_MAX.  */
 
 bfd *core_bfd;
 static int core_num_syms;
@@ -490,17 +491,21 @@ static char name[BUFSIZE];
 
 /* Return number of symbols in a symbol-table file.  */
 
-static int
+static unsigned int
 num_of_syms_in (FILE * f)
 {
   char   type;
-  int num = 0;
+  unsigned int num = 0;
 
   while (!feof (f) && fgets (buf, BUFSIZE - 1, f))
     {
       if (sscanf (buf, "%" STR_BUFSIZE "s %c %" STR_BUFSIZE "s", address, &type, name) == 3)
         if (type == 't' || type == 'T')
-          ++num;
+	  {
+	    /* PR 20499 - prevent integer overflow computing argument to xmalloc.  */	  
+	    if (++num >= UINT_MAX / sizeof (Sym))
+	      return -1U;
+	  }
     }
 
   return num;
@@ -529,6 +534,12 @@ core_create_syms_from (const char * sym_table_file)
   if (symtab.len == 0)
     {
       fprintf (stderr, _("%s: file `%s' has no symbols\n"), whoami, sym_table_file);
+      done (1);
+    }
+  else if (symtab.len == -1U)
+    {
+      fprintf (stderr, _("%s: file `%s' has too many symbols\n"),
+	       whoami, sym_table_file);
       done (1);
     }
 

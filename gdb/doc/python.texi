@@ -949,7 +949,7 @@ Each field is a @code{gdb.Field} object, with some pre-defined attributes:
 @table @code
 @item bitpos
 This attribute is not available for @code{enum} or @code{static}
-(as in C@t{++} or Java) fields.  The value is the position, counting
+(as in C@t{++}) fields.  The value is the position, counting
 in bits, from the start of the containing type.
 
 @item enumval
@@ -1147,7 +1147,7 @@ An unknown or erroneous type.
 
 @vindex TYPE_CODE_METHOD
 @item gdb.TYPE_CODE_METHOD
-A method type, as found in C@t{++} or Java.
+A method type, as found in C@t{++}.
 
 @vindex TYPE_CODE_METHODPTR
 @item gdb.TYPE_CODE_METHODPTR

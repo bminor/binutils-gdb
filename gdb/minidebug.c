@@ -22,6 +22,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcore.h"
+#include <algorithm>
 
 #ifdef HAVE_LIBLZMA
 
@@ -201,7 +202,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 			       + iter.block.uncompressed_size);
 	}
 
-      chunk_size = min (nbytes, lstream->data_end - offset);
+      chunk_size = std::min (nbytes, (file_ptr) lstream->data_end - offset);
       memcpy (buf, lstream->data + offset - lstream->data_start, chunk_size);
       buf = (gdb_byte *) buf + chunk_size;
       offset += chunk_size;

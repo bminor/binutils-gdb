@@ -5779,7 +5779,7 @@ static int
 som_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 		    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  (*_bfd_error_handler) (_("som_sizeof_headers unimplemented"));
+  _bfd_error_handler (_("som_sizeof_headers unimplemented"));
   abort ();
   return 0;
 }

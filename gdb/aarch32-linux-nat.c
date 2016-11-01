@@ -67,8 +67,15 @@ aarch32_gp_regcache_collect (const struct regcache *regcache, uint32_t *regs,
 
   if (arm_apcs_32
       && REG_VALID == regcache_register_status (regcache, ARM_PS_REGNUM))
-    regcache_raw_collect (regcache, ARM_PS_REGNUM,
-			  &regs[ARM_CPSR_GREGNUM]);
+    {
+      uint32_t cpsr = regs[ARM_CPSR_GREGNUM];
+
+      regcache_raw_collect (regcache, ARM_PS_REGNUM,
+			    &regs[ARM_CPSR_GREGNUM]);
+      /* Keep reserved bits bit 20 to bit 23.  */
+      regs[ARM_CPSR_GREGNUM] = ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff)
+				| (cpsr & 0x00f00000));
+    }
 }
 
 /* Supply VFP registers contents, stored in REGS, to REGCACHE.

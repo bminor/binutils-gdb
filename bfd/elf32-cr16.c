@@ -647,7 +647,7 @@ elf_cr16_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     if (code == cr16_reloc_map[i].bfd_reloc_enum)
       return &cr16_elf_howto_table[cr16_reloc_map[i].cr16_reloc_type];
 
-  _bfd_error_handler ("Unsupported CR16 relocation type: 0x%x\n", code);
+  _bfd_error_handler (_("Unsupported CR16 relocation type: 0x%x\n"), code);
   return NULL;
 }
 
@@ -675,8 +675,9 @@ elf_cr16_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 
   if (r_type >= R_CR16_MAX)
     {
-      (*_bfd_error_handler) (_("%B: unrecognised CR16 reloc number: %d"),
-			     abfd, r_type);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%B: unrecognised CR16 reloc number: %d"),
+			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       r_type = R_CR16_NONE;
     }
@@ -1725,8 +1726,10 @@ _bfd_cr16_elf_object_p (bfd *abfd)
    object file when linking.  */
 
 static bfd_boolean
-_bfd_cr16_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_cr16_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
+
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;

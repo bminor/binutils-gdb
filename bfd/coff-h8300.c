@@ -579,9 +579,7 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
 	  /* Done with this reloc.  */
 	  break;
 	}
-
-      /* FALLTHROUGH and try to turn the 24-/32-bit reloc into a 16-bit
-	 reloc.  */
+      /* Fall through.  */
 
     /* This is a 24-/32-bit absolute address in a mov insn, which can
        become an 16-bit absolute address if it's in the right range.  */
@@ -1066,7 +1064,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 
 	if (link_info->output_bfd->xvec != abfd->xvec)
 	  {
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
 	      (_("cannot handle R_MEM_INDIRECT reloc when using %s output"),
 	       link_info->output_bfd->xvec->name);
 

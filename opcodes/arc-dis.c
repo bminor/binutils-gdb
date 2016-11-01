@@ -296,7 +296,7 @@ find_format_from_table (struct disassemble_info *info,
       /* Possible candidate, check the operands.  */
       for (opidx = opcode->operands; *opidx; opidx++)
 	{
-	  int value;
+	  int value, limmind;
 	  const struct arc_operand *operand = &arc_operands[*opidx];
 
 	  if (operand->flags & ARC_OPERAND_FAKE)
@@ -309,11 +309,12 @@ find_format_from_table (struct disassemble_info *info,
 
 	  /* Check for LIMM indicator.  If it is there, then make sure
 	     we pick the right format.  */
+	  limmind = (isa_mask & ARC_OPCODE_ARCV2) ? 0x1E : 0x3E;
 	  if (operand->flags & ARC_OPERAND_IR
 	      && !(operand->flags & ARC_OPERAND_LIMM))
 	    {
 	      if ((value == 0x3E && insn_len == 4)
-		  || (value == 0x1E && insn_len == 2))
+		  || (value == limmind && insn_len == 2))
 		{
 		  invalid = TRUE;
 		  break;
@@ -477,15 +478,15 @@ find_format (bfd_vma                       memaddr,
 {
   const struct arc_opcode *opcode = NULL;
   bfd_boolean needs_limm;
-  const extInstruction_t *einsn;
+  const extInstruction_t *einsn, *i;
 
   /* First, try the extension instructions.  */
   einsn = arcExtMap_insn (OPCODE (insn[0]), insn[0]);
-  if (einsn != NULL)
+  for (i = einsn; (i != NULL) && (opcode == NULL); i = i->next)
     {
       const char *errmsg = NULL;
 
-      opcode = arcExtMap_genOpcode (einsn, isa_mask, &errmsg);
+      opcode = arcExtMap_genOpcode (i, isa_mask, &errmsg);
       if (opcode == NULL)
 	{
 	  (*info->fprintf_func) (info->stream, "\
@@ -703,6 +704,7 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
           if (minor_opcode < 4)
             return 2;
         }
+      /* Fall through.  */
     case bfd_mach_arc_arc600:
       return (major_opcode > 0xb) ? 2 : 4;
       break;
@@ -938,7 +940,10 @@ print_insn_arc (bfd_vma memaddr,
     case bfd_mach_arc_arcv2:
     default:
       isa_mask = ARC_OPCODE_ARCv2EM;
-      if ((header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+      /* TODO: Perhaps remove defitinion of header since it is only used at
+         this location.  */
+      if (header != NULL
+	  && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
 	{
 	  isa_mask = ARC_OPCODE_ARCv2HS;
 	  /* FPU instructions are not extensions for HS.  */
@@ -1235,11 +1240,16 @@ print_insn_arc (bfd_vma memaddr,
 disassembler_ftype
 arc_get_disassembler (bfd *abfd)
 {
-  /* Read the extenssion insns and registers, if any.  */
-  build_ARC_extmap (abfd);
+  /* BFD my be absent, if opcodes is invoked from the debugger that
+     has connected to remote target and doesn't have an ELF file.  */
+  if (abfd != NULL)
+    {
+      /* Read the extension insns and registers, if any.  */
+      build_ARC_extmap (abfd);
 #ifdef DEBUG
-  dump_ARC_extmap ();
+      dump_ARC_extmap ();
 #endif
+    }
 
   return print_insn_arc;
 }

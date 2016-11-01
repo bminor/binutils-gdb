@@ -223,7 +223,7 @@
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \
-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_set_private_flags
 #define bfd_elfNN_bfd_set_private_flags \
@@ -548,6 +548,9 @@
 #ifndef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			_bfd_elf_link_output_relocs
 #endif
+#ifndef elf_backend_update_relocs
+#define elf_backend_update_relocs		NULL
+#endif
 #ifndef elf_backend_count_relocs
 #define elf_backend_count_relocs		NULL
 #endif
@@ -657,7 +660,7 @@
 #endif
 
 #ifndef elf_backend_link_order_error_handler
-#define elf_backend_link_order_error_handler _bfd_default_error_handler
+#define elf_backend_link_order_error_handler _bfd_error_handler
 #endif
 
 #ifndef elf_backend_common_definition
@@ -775,6 +778,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_get_target_dtag,
   elf_backend_ignore_undef_symbol,
   elf_backend_emit_relocs,
+  elf_backend_update_relocs,
   elf_backend_count_relocs,
   elf_backend_count_additional_relocs,
   elf_backend_sort_relocs_p,

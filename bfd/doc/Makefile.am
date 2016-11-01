@@ -252,14 +252,13 @@ linker.stamp: $(srcdir)/../linker.c $(srcdir)/doc.str $(MKDOC)
 
 LIBBFD_H_DEP = \
 	$(srcdir)/../libbfd-in.h	\
-	$(srcdir)/../init.c		\
 	$(srcdir)/../libbfd.c		\
 	$(srcdir)/../bfdio.c		\
 	$(srcdir)/../bfdwin.c		\
 	$(srcdir)/../cache.c		\
 	$(srcdir)/../reloc.c		\
 	$(srcdir)/../archures.c		\
-	$(srcdir)/../elf.c		\
+	$(srcdir)/../linker.c		\
 	$(srcdir)/header.sed		\
 	$(srcdir)/proto.str		\
 	$(MKDOC)

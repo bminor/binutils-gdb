@@ -187,6 +187,14 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 extern const struct floatformat ** gdbarch_long_double_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat ** long_double_format);
 
+/* Returns the floating-point format to be used for values of length LENGTH.
+   NAME, if non-NULL, is the type name, which may be used to distinguish
+   different target formats of the same length. */
+
+typedef const struct floatformat ** (gdbarch_floatformat_for_type_ftype) (struct gdbarch *gdbarch, const char *name, int length);
+extern const struct floatformat ** gdbarch_floatformat_for_type (struct gdbarch *gdbarch, const char *name, int length);
+extern void set_gdbarch_floatformat_for_type (struct gdbarch *gdbarch, gdbarch_floatformat_for_type_ftype *floatformat_for_type);
+
 /* For most targets, a pointer on the target and its representation as an
    address in GDB have the same size and "look the same".  For such a
    target, you need only set gdbarch_ptr_bit and gdbarch_addr_bit

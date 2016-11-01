@@ -255,7 +255,8 @@ srec_bad_byte (bfd *abfd,
 	  buf[0] = c;
 	  buf[1] = '\0';
 	}
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B:%d: Unexpected character `%s' in S-record file\n"),
 	 abfd, lineno, buf);
       bfd_set_error (bfd_error_bad_value);
@@ -483,8 +484,9 @@ srec_scan (bfd *abfd)
 	      min_bytes = 5;
 	    if (bytes < min_bytes)
 	      {
-		(*_bfd_error_handler) (_("%B:%d: byte count %d too small\n"),
-				       abfd, lineno, bytes);
+		/* xgettext:c-format */
+		_bfd_error_handler (_("%B:%d: byte count %d too small\n"),
+				    abfd, lineno, bytes);
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
@@ -574,7 +576,8 @@ srec_scan (bfd *abfd)
 		check_sum = 255 - (check_sum & 0xff);
 		if (check_sum != HEX (data))
 		  {
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B:%d: Bad checksum in S-record file\n"),
 		       abfd, lineno);
 		    bfd_set_error (bfd_error_bad_value);
@@ -607,7 +610,8 @@ srec_scan (bfd *abfd)
 		check_sum = 255 - (check_sum & 0xff);
 		if (check_sum != HEX (data))
 		  {
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B:%d: Bad checksum in S-record file\n"),
 		       abfd, lineno);
 		    bfd_set_error (bfd_error_bad_value);
@@ -972,10 +976,12 @@ srec_write_record (bfd *abfd,
     case 7:
       TOHEX (dst, (address >> 24), check_sum);
       dst += 2;
+      /* Fall through.  */
     case 8:
     case 2:
       TOHEX (dst, (address >> 16), check_sum);
       dst += 2;
+      /* Fall through.  */
     case 9:
     case 1:
     case 0:

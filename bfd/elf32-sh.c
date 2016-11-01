@@ -487,8 +487,9 @@ sh_elf_info_to_howto (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
       || (r >= R_SH_FIRST_INVALID_RELOC_5 && r <= R_SH_LAST_INVALID_RELOC_5)
       || (r >= R_SH_FIRST_INVALID_RELOC_6 && r <= R_SH_LAST_INVALID_RELOC_6))
     {
-      (*_bfd_error_handler) (_("%B: unrecognised SH reloc number: %d"),
-			     abfd, r);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%B: unrecognised SH reloc number: %d"),
+			  abfd, r);
       bfd_set_error (bfd_error_bad_value);
       r = R_SH_NONE;
     }
@@ -575,9 +576,9 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       laddr = irel->r_offset + 4 + irel->r_addend;
       if (laddr >= sec->size)
 	{
-	  (*_bfd_error_handler) (_("%B: 0x%lx: warning: bad R_SH_USES offset"),
-				 abfd,
-				 (unsigned long) irel->r_offset);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%B: 0x%lx: warning: bad R_SH_USES offset"),
+			      abfd, (unsigned long) irel->r_offset);
 	  continue;
 	}
       insn = bfd_get_16 (abfd, contents + laddr);
@@ -586,9 +587,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	 do.  */
       if ((insn & 0xf000) != 0xd000)
 	{
-	  ((*_bfd_error_handler)
-	   (_("%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
-	    abfd, (unsigned long) irel->r_offset, insn));
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
+	     abfd, (unsigned long) irel->r_offset, insn);
 	  continue;
 	}
 
@@ -603,9 +605,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       paddr += (laddr + 4) &~ (bfd_vma) 3;
       if (paddr >= sec->size)
 	{
-	  ((*_bfd_error_handler)
-	   (_("%B: 0x%lx: warning: bad R_SH_USES load offset"),
-	    abfd, (unsigned long) irel->r_offset));
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B: 0x%lx: warning: bad R_SH_USES load offset"),
+	     abfd, (unsigned long) irel->r_offset);
 	  continue;
 	}
 
@@ -618,9 +621,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	  break;
       if (irelfn >= irelend)
 	{
-	  ((*_bfd_error_handler)
-	   (_("%B: 0x%lx: warning: could not find expected reloc"),
-	    abfd, (unsigned long) paddr));
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B: 0x%lx: warning: could not find expected reloc"),
+	     abfd, (unsigned long) paddr);
 	  continue;
 	}
 
@@ -646,9 +650,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	  if (isym->st_shndx
 	      != (unsigned int) _bfd_elf_section_from_bfd_section (abfd, sec))
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: warning: symbol in unexpected section"),
-		abfd, (unsigned long) paddr));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: warning: symbol in unexpected section"),
+		 abfd, (unsigned long) paddr);
 	      continue;
 	    }
 
@@ -775,9 +780,10 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       /* Now check whether we got a COUNT reloc.  */
       if (irelcount >= irelend)
 	{
-	  ((*_bfd_error_handler)
-	   (_("%B: 0x%lx: warning: could not find expected COUNT reloc"),
-	    abfd, (unsigned long) paddr));
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B: 0x%lx: warning: could not find expected COUNT reloc"),
+	     abfd, (unsigned long) paddr);
 	  continue;
 	}
 
@@ -785,9 +791,9 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	 just deleted one.  */
       if (irelcount->r_addend == 0)
 	{
-	  ((*_bfd_error_handler) (_("%B: 0x%lx: warning: bad count"),
-				  abfd,
-				  (unsigned long) paddr));
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%B: 0x%lx: warning: bad count"),
+			      abfd, (unsigned long) paddr);
 	  continue;
 	}
 
@@ -1188,9 +1194,10 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 
 	  if (overflow)
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
-		abfd, (unsigned long) irel->r_offset));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
+		 abfd, (unsigned long) irel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1558,9 +1565,10 @@ sh_elf_swap_insns (bfd *abfd, asection *sec, void *relocs,
 
 	  if (overflow)
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
-		abfd, (unsigned long) irel->r_offset));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
+		 abfd, (unsigned long) irel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4008,7 +4016,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	      if (howto->rightshift || howto->src_mask != 0xffffffff)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
 		     (long) rel->r_offset, howto->name);
@@ -4125,7 +4134,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 						    rel->r_offset)
 			   != (bfd_vma) -1))
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -4203,10 +4213,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		}
 	      if (disp & mask)
 		{
-		  ((*_bfd_error_handler)
-		   (_("%B: 0x%lx: fatal: unaligned branch target for relax-support relocation"),
-		    input_section->owner,
-		    (unsigned long) rel->r_offset));
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%B: 0x%lx: fatal: unaligned branch target for relax-support relocation"),
+		     input_section->owner,
+		     (unsigned long) rel->r_offset);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -4236,11 +4247,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_SH_DIR4UL:
 	  if (relocation & 3)
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
-		input_section->owner,
-		(unsigned long) rel->r_offset, howto->name,
-		(unsigned long) relocation));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		 input_section->owner,
+		 (unsigned long) rel->r_offset, howto->name,
+		 (unsigned long) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4251,11 +4263,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_SH_DIR4UW:
 	  if (relocation & 1)
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
-		input_section->owner,
-		(unsigned long) rel->r_offset, howto->name,
-		(unsigned long) relocation));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		 input_section->owner,
+		 (unsigned long) rel->r_offset, howto->name,
+		 (unsigned long) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4265,11 +4278,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if ((signed int)relocation < -32
 	      || (signed int)relocation > 32)
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"),
-		input_section->owner,
-		(unsigned long) rel->r_offset,
-		(unsigned long) relocation));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"),
+		 input_section->owner,
+		 (unsigned long) rel->r_offset,
+		 (unsigned long) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4279,11 +4293,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if ((signed int)relocation < -16
 	      || (signed int)relocation > 16)
 	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"),
-		input_section->owner,
-		(unsigned long) rel->r_offset,
-		(unsigned long) relocation));
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"),
+		 input_section->owner,
+		 (unsigned long) rel->r_offset,
+		 (unsigned long) relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4423,7 +4438,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		if (sh_elf_osec_readonly_p (output_bfd,
 					    input_section->output_section))
 		  {
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B(%A+0x%lx): cannot emit fixup to `%s' in read-only section"),
 		       input_bfd,
 		       input_section,
@@ -4901,7 +4917,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		if (sh_elf_osec_readonly_p (output_bfd,
 					    reloc_section->output_section))
 		  {
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B(%A+0x%lx): cannot emit fixup to `%s' in read-only section"),
 		       input_bfd,
 		       input_section,
@@ -5009,6 +5026,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    || !SYMBOL_FUNCDESC_LOCAL (info, h)))
 	    {
 	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B(%A+0x%lx): %s relocation against external symbol \"%s\""),
 		 input_bfd, input_section, (long) rel->r_offset, howto->name,
 		 h->root.root.string);
@@ -5482,12 +5500,14 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (bfd_link_pic (info))
 		{
 		  info->callbacks->einfo
+		    /* xgettext:c-format */
 		    (_("%X%C: relocation to \"%s\" references a different segment\n"),
 		     input_bfd, input_section, rel->r_offset, symname);
 		  return FALSE;
 		}
 	      else
 		info->callbacks->einfo
+		  /* xgettext:c-format */
 		  (_("%C: warning: relocation to \"%s\" references a different segment\n"),
 		   input_bfd, input_section, rel->r_offset, symname);
 	    }
@@ -5883,6 +5903,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      /* This may require an rofixup.  */
 	      if (!htab->fdpic_p)
 		break;
+	      /* Fall through.  */
 	    case R_SH_GOTPLT32:
 	    case R_SH_GOT32:
 	    case R_SH_GOT20:
@@ -6053,18 +6074,21 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		{
 		  if ((old_got_type == GOT_FUNCDESC || got_type == GOT_FUNCDESC)
 		      && (old_got_type == GOT_NORMAL || got_type == GOT_NORMAL))
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: `%s' accessed both as normal and FDPIC symbol"),
 		       abfd, h->root.root.string);
 		  else if (old_got_type == GOT_FUNCDESC
 			   || got_type == GOT_FUNCDESC)
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: `%s' accessed both as FDPIC and thread local symbol"),
 		       abfd, h->root.root.string);
 		  else
-		    (*_bfd_error_handler)
-		    (_("%B: `%s' accessed both as normal and thread local symbol"),
-		     abfd, h->root.root.string);
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%B: `%s' accessed both as normal and thread local symbol"),
+		       abfd, h->root.root.string);
 		  return FALSE;
 		}
 	    }
@@ -6088,7 +6112,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	case R_SH_GOTOFFFUNCDESC20:
 	  if (rel->r_addend)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: Function descriptor relocation with non-zero addend"),
 		 abfd);
 	      return FALSE;
@@ -6136,11 +6160,13 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      if (old_got_type != GOT_FUNCDESC && old_got_type != GOT_UNKNOWN)
 		{
 		  if (old_got_type == GOT_NORMAL)
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: `%s' accessed both as normal and FDPIC symbol"),
 		       abfd, h->root.root.string);
 		  else
-		    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
 		      (_("%B: `%s' accessed both as FDPIC and thread local symbol"),
 		       abfd, h->root.root.string);
 		}
@@ -6324,7 +6350,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	case R_SH_TLS_LE_32:
 	  if (bfd_link_dll (info))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_("%B: TLS local exec code cannot be linked into shared objects"),
 		 abfd);
 	      return FALSE;
@@ -6415,13 +6441,64 @@ sh_find_elf_flags (unsigned int arch_set)
   return sh_elf_get_flags_from_mach (bfd_mach);
 }
 
+/* Merge the architecture type of two BFD files, such that the
+   resultant architecture supports all the features required
+   by the two input BFDs.
+   If the input BFDs are multually incompatible - i.e. one uses
+   DSP while the other uses FPU - or there is no known architecture
+   that fits the requirements then an error is emitted.  */
+
+static bfd_boolean
+sh_merge_bfd_arch (bfd *ibfd, struct bfd_link_info *info)
+{
+  bfd *obfd = info->output_bfd;
+  unsigned int old_arch, new_arch, merged_arch;
+
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
+    return FALSE;
+
+  old_arch = sh_get_arch_up_from_bfd_mach (bfd_get_mach (obfd));
+  new_arch = sh_get_arch_up_from_bfd_mach (bfd_get_mach (ibfd));
+
+  merged_arch = SH_MERGE_ARCH_SET (old_arch, new_arch);
+
+  if (!SH_VALID_CO_ARCH_SET (merged_arch))
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%B: uses %s instructions while previous modules "
+	   "use %s instructions"),
+	 ibfd,
+	 SH_ARCH_SET_HAS_DSP (new_arch) ? "dsp" : "floating point",
+	 SH_ARCH_SET_HAS_DSP (new_arch) ? "floating point" : "dsp");
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  else if (!SH_VALID_ARCH_SET (merged_arch))
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("internal error: merge of architecture '%s' with "
+	   "architecture '%s' produced unknown architecture"),
+	 bfd_printable_name (obfd),
+	 bfd_printable_name (ibfd));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  bfd_default_set_arch_mach (obfd, bfd_arch_sh,
+			     sh_get_bfd_mach_from_arch_set (merged_arch));
+
+  return TRUE;
+}
+
 /* This routine initialises the elf flags when required and
    calls sh_merge_bfd_arch() to check dsp/fpu compatibility.  */
 
 static bfd_boolean
-sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
+sh_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  extern bfd_boolean sh_merge_bfd_arch (bfd *, bfd *);
+  bfd *obfd = info->output_bfd;
 
   if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
     return TRUE;
@@ -6436,10 +6513,10 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 	elf_elfheader (obfd)->e_flags &= ~EF_SH_PIC;
     }
 
-  if (! sh_merge_bfd_arch (ibfd, obfd))
+  if (! sh_merge_bfd_arch (ibfd, info))
     {
-      _bfd_error_handler ("%B: uses instructions which are incompatible "
-			  "with instructions used in previous modules",
+      _bfd_error_handler (_("%B: uses instructions which are incompatible "
+			    "with instructions used in previous modules"),
 			  ibfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -6451,7 +6528,7 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 
   if (fdpic_object_p (ibfd) != fdpic_object_p (obfd))
     {
-      _bfd_error_handler ("%B: attempt to mix FDPIC and non-FDPIC objects",
+      _bfd_error_handler (_("%B: attempt to mix FDPIC and non-FDPIC objects"),
 			  ibfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;

@@ -22,9 +22,7 @@
 
 #include "defs.h"
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 /* -Wmissing-prototypes */
 extern int tgetent (char *buffer, char *termtype);
@@ -34,9 +32,7 @@ extern char* tgetstr (char *name, char **area);
 extern int tputs (char *string, int nlines, int (*outfun) (int));
 extern char *tgoto (const char *cap, int col, int row);
 
-#ifdef __cplusplus
 }
-#endif
 
 /* These globals below are global termcap variables that readline
    references.

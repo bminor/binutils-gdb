@@ -37,6 +37,7 @@
 
 #include <inttypes.h>
 #include <ctype.h>
+#include <algorithm>
 
 /* Command lists for btrace maintenance commands.  */
 static struct cmd_list_element *maint_btrace_cmdlist;
@@ -47,6 +48,10 @@ static struct cmd_list_element *maint_btrace_pt_show_cmdlist;
 
 /* Control whether to skip PAD packets when computing the packet history.  */
 static int maint_btrace_pt_skip_pad = 1;
+
+/* A vector of function segments.  */
+typedef struct btrace_function * bfun_s;
+DEF_VEC_P (bfun_s);
 
 static void btrace_add_pc (struct thread_info *tp);
 
@@ -233,6 +238,7 @@ ftrace_update_caller (struct btrace_function *bfun,
   bfun->flags = flags;
 
   ftrace_debug (bfun, "set caller");
+  ftrace_debug (caller, "..to");
 }
 
 /* Fix up the caller for all segments of a function.  */
@@ -293,6 +299,18 @@ ftrace_new_tailcall (struct btrace_function *caller,
   ftrace_debug (bfun, "new tail call");
 
   return bfun;
+}
+
+/* Return the caller of BFUN or NULL if there is none.  This function skips
+   tail calls in the call chain.  */
+static struct btrace_function *
+ftrace_get_caller (struct btrace_function *bfun)
+{
+  for (; bfun != NULL; bfun = bfun->up)
+    if ((bfun->flags & BFUN_UP_LINKS_TO_TAILCALL) == 0)
+      return bfun->up;
+
+  return NULL;
 }
 
 /* Find the innermost caller in the back trace of BFUN with MFUN/FUN
@@ -386,16 +404,12 @@ ftrace_new_return (struct btrace_function *prev,
 	  /* There is no call in PREV's back trace.  We assume that the
 	     branch trace did not include it.  */
 
-	  /* Let's find the topmost call function - this skips tail calls.  */
+	  /* Let's find the topmost function and add a new caller for it.
+	     This should handle a series of initial tail calls.  */
 	  while (prev->up != NULL)
 	    prev = prev->up;
 
-	  /* We maintain levels for a series of returns for which we have
-	     not seen the calls.
-	     We start at the preceding function's level in case this has
-	     already been a return for which we have not seen the call.
-	     We start at level 0 otherwise, to handle tail calls correctly.  */
-	  bfun->level = min (0, prev->level) - 1;
+	  bfun->level = prev->level - 1;
 
 	  /* Fix up the call stack for PREV.  */
 	  ftrace_fixup_caller (prev, bfun, BFUN_UP_LINKS_TO_RET);
@@ -405,8 +419,16 @@ ftrace_new_return (struct btrace_function *prev,
       else
 	{
 	  /* There is a call in PREV's back trace to which we should have
-	     returned.  Let's remain at this level.  */
-	  bfun->level = prev->level;
+	     returned but didn't.  Let's start a new, separate back trace
+	     from PREV's level.  */
+	  bfun->level = prev->level - 1;
+
+	  /* We fix up the back trace for PREV but leave other function segments
+	     on the same level as they are.
+	     This should handle things like schedule () correctly where we're
+	     switching contexts.  */
+	  prev->up = bfun;
+	  prev->flags = BFUN_UP_LINKS_TO_RET;
 
 	  ftrace_debug (bfun, "new return - unknown caller");
 	}
@@ -528,10 +550,17 @@ ftrace_update_function (struct btrace_function *bfun, CORE_ADDR pc)
 
 	    start = get_pc_function_start (pc);
 
-	    /* If we can't determine the function for PC, we treat a jump at
-	       the end of the block as tail call.  */
-	    if (start == 0 || start == pc)
+	    /* A jump to the start of a function is (typically) a tail call.  */
+	    if (start == pc)
 	      return ftrace_new_tailcall (bfun, mfun, fun);
+
+	    /* If we can't determine the function for PC, we treat a jump at
+	       the end of the block as tail call if we're switching functions
+	       and as an intra-function branch if we don't.  */
+	    if (start == 0 && ftrace_function_switched (bfun, mfun, fun))
+	      return ftrace_new_tailcall (bfun, mfun, fun);
+
+	    break;
 	  }
 	}
     }
@@ -587,23 +616,359 @@ ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
   return iclass;
 }
 
+/* Try to match the back trace at LHS to the back trace at RHS.  Returns the
+   number of matching function segments or zero if the back traces do not
+   match.  */
+
+static int
+ftrace_match_backtrace (struct btrace_function *lhs,
+			struct btrace_function *rhs)
+{
+  int matches;
+
+  for (matches = 0; lhs != NULL && rhs != NULL; ++matches)
+    {
+      if (ftrace_function_switched (lhs, rhs->msym, rhs->sym))
+	return 0;
+
+      lhs = ftrace_get_caller (lhs);
+      rhs = ftrace_get_caller (rhs);
+    }
+
+  return matches;
+}
+
+/* Add ADJUSTMENT to the level of BFUN and succeeding function segments.  */
+
+static void
+ftrace_fixup_level (struct btrace_function *bfun, int adjustment)
+{
+  if (adjustment == 0)
+    return;
+
+  DEBUG_FTRACE ("fixup level (%+d)", adjustment);
+  ftrace_debug (bfun, "..bfun");
+
+  for (; bfun != NULL; bfun = bfun->flow.next)
+    bfun->level += adjustment;
+}
+
+/* Recompute the global level offset.  Traverse the function trace and compute
+   the global level offset as the negative of the minimal function level.  */
+
+static void
+ftrace_compute_global_level_offset (struct btrace_thread_info *btinfo)
+{
+  struct btrace_function *bfun, *end;
+  int level;
+
+  if (btinfo == NULL)
+    return;
+
+  bfun = btinfo->begin;
+  if (bfun == NULL)
+    return;
+
+  /* The last function segment contains the current instruction, which is not
+     really part of the trace.  If it contains just this one instruction, we
+     stop when we reach it; otherwise, we let the below loop run to the end.  */
+  end = btinfo->end;
+  if (VEC_length (btrace_insn_s, end->insn) > 1)
+    end = NULL;
+
+  level = INT_MAX;
+  for (; bfun != end; bfun = bfun->flow.next)
+    level = std::min (level, bfun->level);
+
+  DEBUG_FTRACE ("setting global level offset: %d", -level);
+  btinfo->level = -level;
+}
+
+/* Connect the function segments PREV and NEXT in a bottom-to-top walk as in
+   ftrace_connect_backtrace.  */
+
+static void
+ftrace_connect_bfun (struct btrace_function *prev,
+		     struct btrace_function *next)
+{
+  DEBUG_FTRACE ("connecting...");
+  ftrace_debug (prev, "..prev");
+  ftrace_debug (next, "..next");
+
+  /* The function segments are not yet connected.  */
+  gdb_assert (prev->segment.next == NULL);
+  gdb_assert (next->segment.prev == NULL);
+
+  prev->segment.next = next;
+  next->segment.prev = prev;
+
+  /* We may have moved NEXT to a different function level.  */
+  ftrace_fixup_level (next, prev->level - next->level);
+
+  /* If we run out of back trace for one, let's use the other's.  */
+  if (prev->up == NULL)
+    {
+      if (next->up != NULL)
+	{
+	  DEBUG_FTRACE ("using next's callers");
+	  ftrace_fixup_caller (prev, next->up, next->flags);
+	}
+    }
+  else if (next->up == NULL)
+    {
+      if (prev->up != NULL)
+	{
+	  DEBUG_FTRACE ("using prev's callers");
+	  ftrace_fixup_caller (next, prev->up, prev->flags);
+	}
+    }
+  else
+    {
+      /* PREV may have a tailcall caller, NEXT can't.  If it does, fixup the up
+	 link to add the tail callers to NEXT's back trace.
+
+	 This removes NEXT->UP from NEXT's back trace.  It will be added back
+	 when connecting NEXT and PREV's callers - provided they exist.
+
+	 If PREV's back trace consists of a series of tail calls without an
+	 actual call, there will be no further connection and NEXT's caller will
+	 be removed for good.  To catch this case, we handle it here and connect
+	 the top of PREV's back trace to NEXT's caller.  */
+      if ((prev->flags & BFUN_UP_LINKS_TO_TAILCALL) != 0)
+	{
+	  struct btrace_function *caller;
+	  btrace_function_flags flags;
+
+	  /* We checked NEXT->UP above so CALLER can't be NULL.  */
+	  caller = next->up;
+	  flags = next->flags;
+
+	  DEBUG_FTRACE ("adding prev's tail calls to next");
+
+	  ftrace_fixup_caller (next, prev->up, prev->flags);
+
+	  for (prev = prev->up; prev != NULL; prev = prev->up)
+	    {
+	      /* At the end of PREV's back trace, continue with CALLER.  */
+	      if (prev->up == NULL)
+		{
+		  DEBUG_FTRACE ("fixing up link for tailcall chain");
+		  ftrace_debug (prev, "..top");
+		  ftrace_debug (caller, "..up");
+
+		  ftrace_fixup_caller (prev, caller, flags);
+
+		  /* If we skipped any tail calls, this may move CALLER to a
+		     different function level.
+
+		     Note that changing CALLER's level is only OK because we
+		     know that this is the last iteration of the bottom-to-top
+		     walk in ftrace_connect_backtrace.
+
+		     Otherwise we will fix up CALLER's level when we connect it
+		     to PREV's caller in the next iteration.  */
+		  ftrace_fixup_level (caller, prev->level - caller->level - 1);
+		  break;
+		}
+
+	      /* There's nothing to do if we find a real call.  */
+	      if ((prev->flags & BFUN_UP_LINKS_TO_TAILCALL) == 0)
+		{
+		  DEBUG_FTRACE ("will fix up link in next iteration");
+		  break;
+		}
+	    }
+	}
+    }
+}
+
+/* Connect function segments on the same level in the back trace at LHS and RHS.
+   The back traces at LHS and RHS are expected to match according to
+   ftrace_match_backtrace.  */
+
+static void
+ftrace_connect_backtrace (struct btrace_function *lhs,
+			  struct btrace_function *rhs)
+{
+  while (lhs != NULL && rhs != NULL)
+    {
+      struct btrace_function *prev, *next;
+
+      gdb_assert (!ftrace_function_switched (lhs, rhs->msym, rhs->sym));
+
+      /* Connecting LHS and RHS may change the up link.  */
+      prev = lhs;
+      next = rhs;
+
+      lhs = ftrace_get_caller (lhs);
+      rhs = ftrace_get_caller (rhs);
+
+      ftrace_connect_bfun (prev, next);
+    }
+}
+
+/* Bridge the gap between two function segments left and right of a gap if their
+   respective back traces match in at least MIN_MATCHES functions.
+
+   Returns non-zero if the gap could be bridged, zero otherwise.  */
+
+static int
+ftrace_bridge_gap (struct btrace_function *lhs, struct btrace_function *rhs,
+		   int min_matches)
+{
+  struct btrace_function *best_l, *best_r, *cand_l, *cand_r;
+  int best_matches;
+
+  DEBUG_FTRACE ("checking gap at insn %u (req matches: %d)",
+		rhs->insn_offset - 1, min_matches);
+
+  best_matches = 0;
+  best_l = NULL;
+  best_r = NULL;
+
+  /* We search the back traces of LHS and RHS for valid connections and connect
+     the two functon segments that give the longest combined back trace.  */
+
+  for (cand_l = lhs; cand_l != NULL; cand_l = ftrace_get_caller (cand_l))
+    for (cand_r = rhs; cand_r != NULL; cand_r = ftrace_get_caller (cand_r))
+      {
+	int matches;
+
+	matches = ftrace_match_backtrace (cand_l, cand_r);
+	if (best_matches < matches)
+	  {
+	    best_matches = matches;
+	    best_l = cand_l;
+	    best_r = cand_r;
+	  }
+      }
+
+  /* We need at least MIN_MATCHES matches.  */
+  gdb_assert (min_matches > 0);
+  if (best_matches < min_matches)
+    return 0;
+
+  DEBUG_FTRACE ("..matches: %d", best_matches);
+
+  /* We will fix up the level of BEST_R and succeeding function segments such
+     that BEST_R's level matches BEST_L's when we connect BEST_L to BEST_R.
+
+     This will ignore the level of RHS and following if BEST_R != RHS.  I.e. if
+     BEST_R is a successor of RHS in the back trace of RHS (phases 1 and 3).
+
+     To catch this, we already fix up the level here where we can start at RHS
+     instead of at BEST_R.  We will ignore the level fixup when connecting
+     BEST_L to BEST_R as they will already be on the same level.  */
+  ftrace_fixup_level (rhs, best_l->level - best_r->level);
+
+  ftrace_connect_backtrace (best_l, best_r);
+
+  return best_matches;
+}
+
+/* Try to bridge gaps due to overflow or decode errors by connecting the
+   function segments that are separated by the gap.  */
+
+static void
+btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
+{
+  VEC (bfun_s) *remaining;
+  struct cleanup *old_chain;
+  int min_matches;
+
+  DEBUG ("bridge gaps");
+
+  remaining = NULL;
+  old_chain = make_cleanup (VEC_cleanup (bfun_s), &remaining);
+
+  /* We require a minimum amount of matches for bridging a gap.  The number of
+     required matches will be lowered with each iteration.
+
+     The more matches the higher our confidence that the bridging is correct.
+     For big gaps or small traces, however, it may not be feasible to require a
+     high number of matches.  */
+  for (min_matches = 5; min_matches > 0; --min_matches)
+    {
+      /* Let's try to bridge as many gaps as we can.  In some cases, we need to
+	 skip a gap and revisit it again after we closed later gaps.  */
+      while (!VEC_empty (bfun_s, *gaps))
+	{
+	  struct btrace_function *gap;
+	  unsigned int idx;
+
+	  for (idx = 0; VEC_iterate (bfun_s, *gaps, idx, gap); ++idx)
+	    {
+	      struct btrace_function *lhs, *rhs;
+	      int bridged;
+
+	      /* We may have a sequence of gaps if we run from one error into
+		 the next as we try to re-sync onto the trace stream.  Ignore
+		 all but the leftmost gap in such a sequence.
+
+		 Also ignore gaps at the beginning of the trace.  */
+	      lhs = gap->flow.prev;
+	      if (lhs == NULL || lhs->errcode != 0)
+		continue;
+
+	      /* Skip gaps to the right.  */
+	      for (rhs = gap->flow.next; rhs != NULL; rhs = rhs->flow.next)
+		if (rhs->errcode == 0)
+		  break;
+
+	      /* Ignore gaps at the end of the trace.  */
+	      if (rhs == NULL)
+		continue;
+
+	      bridged = ftrace_bridge_gap (lhs, rhs, min_matches);
+
+	      /* Keep track of gaps we were not able to bridge and try again.
+		 If we just pushed them to the end of GAPS we would risk an
+		 infinite loop in case we simply cannot bridge a gap.  */
+	      if (bridged == 0)
+		VEC_safe_push (bfun_s, remaining, gap);
+	    }
+
+	  /* Let's see if we made any progress.  */
+	  if (VEC_length (bfun_s, remaining) == VEC_length (bfun_s, *gaps))
+	    break;
+
+	  VEC_free (bfun_s, *gaps);
+
+	  *gaps = remaining;
+	  remaining = NULL;
+	}
+
+      /* We get here if either GAPS is empty or if GAPS equals REMAINING.  */
+      if (VEC_empty (bfun_s, *gaps))
+	break;
+
+      VEC_free (bfun_s, remaining);
+    }
+
+  do_cleanups (old_chain);
+
+  /* We may omit this in some cases.  Not sure it is worth the extra
+     complication, though.  */
+  ftrace_compute_global_level_offset (&tp->btrace);
+}
+
 /* Compute the function branch trace from BTS trace.  */
 
 static void
 btrace_compute_ftrace_bts (struct thread_info *tp,
-			   const struct btrace_data_bts *btrace)
+			   const struct btrace_data_bts *btrace,
+			   VEC (bfun_s) **gaps)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_function *begin, *end;
   struct gdbarch *gdbarch;
-  unsigned int blk, ngaps;
+  unsigned int blk;
   int level;
 
   gdbarch = target_gdbarch ();
   btinfo = &tp->btrace;
   begin = btinfo->begin;
   end = btinfo->end;
-  ngaps = btinfo->ngaps;
   level = begin != NULL ? -btinfo->level : INT_MAX;
   blk = VEC_length (btrace_block_s, btrace->blocks);
 
@@ -625,16 +990,17 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* We should hit the end of the block.  Warn if we went too far.  */
 	  if (block->end < pc)
 	    {
-	      /* Indicate the gap in the trace - unless we're at the
-		 beginning.  */
-	      if (begin != NULL)
-		{
-		  warning (_("Recorded trace may be corrupted around %s."),
-			   core_addr_to_string_nz (pc));
+	      /* Indicate the gap in the trace.  */
+	      end = ftrace_new_gap (end, BDE_BTS_OVERFLOW);
+	      if (begin == NULL)
+		begin = end;
 
-		  end = ftrace_new_gap (end, BDE_BTS_OVERFLOW);
-		  ngaps += 1;
-		}
+	      VEC_safe_push (bfun_s, *gaps, end);
+
+	      warning (_("Recorded trace may be corrupted at instruction "
+			 "%u (pc = %s)."), end->insn_offset - 1,
+		       core_addr_to_string_nz (pc));
+
 	      break;
 	    }
 
@@ -645,7 +1011,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* Maintain the function level offset.
 	     For all but the last block, we do it here.  */
 	  if (blk != 0)
-	    level = min (level, end->level);
+	    level = std::min (level, end->level);
 
 	  size = 0;
 	  TRY
@@ -671,13 +1037,15 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* We can't continue if we fail to compute the size.  */
 	  if (size <= 0)
 	    {
-	      warning (_("Recorded trace may be incomplete around %s."),
-		       core_addr_to_string_nz (pc));
-
 	      /* Indicate the gap in the trace.  We just added INSN so we're
 		 not at the beginning.  */
 	      end = ftrace_new_gap (end, BDE_BTS_INSN_SIZE);
-	      ngaps += 1;
+
+	      VEC_safe_push (bfun_s, *gaps, end);
+
+	      warning (_("Recorded trace may be incomplete at instruction %u "
+			 "(pc = %s)."), end->insn_offset - 1,
+		       core_addr_to_string_nz (pc));
 
 	      break;
 	    }
@@ -691,13 +1059,12 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	     and is not really part of the execution history, it shouldn't
 	     affect the level.  */
 	  if (blk == 0)
-	    level = min (level, end->level);
+	    level = std::min (level, end->level);
 	}
     }
 
   btinfo->begin = begin;
   btinfo->end = end;
-  btinfo->ngaps = ngaps;
 
   /* LEVEL is the minimal function level of all btrace function segments.
      Define the global level offset to -LEVEL so all function levels are
@@ -745,15 +1112,14 @@ static void
 ftrace_add_pt (struct pt_insn_decoder *decoder,
 	       struct btrace_function **pbegin,
 	       struct btrace_function **pend, int *plevel,
-	       unsigned int *ngaps)
+	       VEC (bfun_s) **gaps)
 {
   struct btrace_function *begin, *end, *upd;
   uint64_t offset;
-  int errcode, nerrors;
+  int errcode;
 
   begin = *pbegin;
   end = *pend;
-  nerrors = 0;
   for (;;)
     {
       struct btrace_insn btinsn;
@@ -784,11 +1150,33 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 		 flag.  The ENABLED instruction flag means that we continued
 		 from some other instruction.  Indicate this as a trace gap.  */
 	      if (insn.enabled)
-		*pend = end = ftrace_new_gap (end, BDE_PT_DISABLED);
+		{
+		  *pend = end = ftrace_new_gap (end, BDE_PT_DISABLED);
 
-	      /* Indicate trace overflows.  */
-	      if (insn.resynced)
-		*pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
+		  VEC_safe_push (bfun_s, *gaps, end);
+
+		  pt_insn_get_offset (decoder, &offset);
+
+		  warning (_("Non-contiguous trace at instruction %u (offset "
+			     "= 0x%" PRIx64 ", pc = 0x%" PRIx64 ")."),
+			   end->insn_offset - 1, offset, insn.ip);
+		}
+	    }
+
+	  /* Indicate trace overflows.  */
+	  if (insn.resynced)
+	    {
+	      *pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
+	      if (begin == NULL)
+		*pbegin = begin = end;
+
+	      VEC_safe_push (bfun_s, *gaps, end);
+
+	      pt_insn_get_offset (decoder, &offset);
+
+	      warning (_("Overflow at instruction %u (offset = 0x%" PRIx64
+			 ", pc = 0x%" PRIx64 ")."), end->insn_offset - 1,
+		       offset, insn.ip);
 	    }
 
 	  upd = ftrace_update_function (end, insn.ip);
@@ -801,7 +1189,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	    }
 
 	  /* Maintain the function level offset.  */
-	  *plevel = min (*plevel, end->level);
+	  *plevel = std::min (*plevel, end->level);
 
 	  btinsn.pc = (CORE_ADDR) insn.ip;
 	  btinsn.size = (gdb_byte) insn.size;
@@ -814,24 +1202,19 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
       if (errcode == -pte_eos)
 	break;
 
-      /* If the gap is at the very beginning, we ignore it - we will have
-	 less trace, but we won't have any holes in the trace.  */
+      /* Indicate the gap in the trace.  */
+      *pend = end = ftrace_new_gap (end, errcode);
       if (begin == NULL)
-	continue;
+	*pbegin = begin = end;
+
+      VEC_safe_push (bfun_s, *gaps, end);
 
       pt_insn_get_offset (decoder, &offset);
 
-      warning (_("Failed to decode Intel Processor Trace near trace "
-		 "offset 0x%" PRIx64 " near recorded PC 0x%" PRIx64 ": %s."),
+      warning (_("Decode error (%d) at instruction %u (offset = 0x%" PRIx64
+		 ", pc = 0x%" PRIx64 "): %s."), errcode, end->insn_offset - 1,
 	       offset, insn.ip, pt_errstr (pt_errcode (errcode)));
-
-      /* Indicate the gap in the trace.  */
-      *pend = end = ftrace_new_gap (end, errcode);
-      *ngaps += 1;
     }
-
-  if (nerrors > 0)
-    warning (_("The recorded execution trace may have gaps."));
 }
 
 /* A callback function to allow the trace decoder to read the inferior's
@@ -899,7 +1282,8 @@ static void btrace_finalize_ftrace_pt (struct pt_insn_decoder *decoder,
 
 static void
 btrace_compute_ftrace_pt (struct thread_info *tp,
-			  const struct btrace_data_pt *btrace)
+			  const struct btrace_data_pt *btrace,
+			  VEC (bfun_s) **gaps)
 {
   struct btrace_thread_info *btinfo;
   struct pt_insn_decoder *decoder;
@@ -943,8 +1327,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 	error (_("Failed to configure the Intel Processor Trace decoder: "
 		 "%s."), pt_errstr (pt_errcode (errcode)));
 
-      ftrace_add_pt (decoder, &btinfo->begin, &btinfo->end, &level,
-		     &btinfo->ngaps);
+      ftrace_add_pt (decoder, &btinfo->begin, &btinfo->end, &level, gaps);
     }
   CATCH (error, RETURN_MASK_ALL)
     {
@@ -952,7 +1335,8 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
       if (error.reason == RETURN_QUIT && btinfo->end != NULL)
 	{
 	  btinfo->end = ftrace_new_gap (btinfo->end, BDE_PT_USER_QUIT);
-	  btinfo->ngaps++;
+
+	  VEC_safe_push (bfun_s, *gaps, btinfo->end);
 	}
 
       btrace_finalize_ftrace_pt (decoder, tp, level);
@@ -968,7 +1352,8 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
 static void
 btrace_compute_ftrace_pt (struct thread_info *tp,
-			  const struct btrace_data_pt *btrace)
+			  const struct btrace_data_pt *btrace,
+			  VEC (bfun_s) **gaps)
 {
   internal_error (__FILE__, __LINE__, _("Unexpected branch trace format."));
 }
@@ -979,7 +1364,8 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
    a thread given by BTINFO.  */
 
 static void
-btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
+btrace_compute_ftrace_1 (struct thread_info *tp, struct btrace_data *btrace,
+			 VEC (bfun_s) **gaps)
 {
   DEBUG ("compute ftrace");
 
@@ -989,15 +1375,51 @@ btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
       return;
 
     case BTRACE_FORMAT_BTS:
-      btrace_compute_ftrace_bts (tp, &btrace->variant.bts);
+      btrace_compute_ftrace_bts (tp, &btrace->variant.bts, gaps);
       return;
 
     case BTRACE_FORMAT_PT:
-      btrace_compute_ftrace_pt (tp, &btrace->variant.pt);
+      btrace_compute_ftrace_pt (tp, &btrace->variant.pt, gaps);
       return;
     }
 
   internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+}
+
+static void
+btrace_finalize_ftrace (struct thread_info *tp, VEC (bfun_s) **gaps)
+{
+  if (!VEC_empty (bfun_s, *gaps))
+    {
+      tp->btrace.ngaps += VEC_length (bfun_s, *gaps);
+      btrace_bridge_gaps (tp, gaps);
+    }
+}
+
+static void
+btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
+{
+  VEC (bfun_s) *gaps;
+  struct cleanup *old_chain;
+
+  gaps = NULL;
+  old_chain = make_cleanup (VEC_cleanup (bfun_s), &gaps);
+
+  TRY
+    {
+      btrace_compute_ftrace_1 (tp, btrace, &gaps);
+    }
+  CATCH (error, RETURN_MASK_ALL)
+    {
+      btrace_finalize_ftrace (tp, &gaps);
+
+      throw_exception (error);
+    }
+  END_CATCH
+
+  btrace_finalize_ftrace (tp, &gaps);
+
+  do_cleanups (old_chain);
 }
 
 /* Add an entry for the current PC.  */
@@ -1827,7 +2249,7 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
       space = end - index;
 
       /* Advance the iterator as far as possible within this segment.  */
-      adv = min (space, stride);
+      adv = std::min (space, stride);
       stride -= adv;
       index += adv;
       steps += adv;
@@ -1906,7 +2328,7 @@ btrace_insn_prev (struct btrace_insn_iterator *it, unsigned int stride)
 	}
 
       /* Advance the iterator as far as possible within this segment.  */
-      adv = min (index, stride);
+      adv = std::min (index, stride);
 
       stride -= adv;
       index -= adv;

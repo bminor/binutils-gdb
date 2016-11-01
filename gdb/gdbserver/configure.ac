@@ -38,10 +38,11 @@ AC_PROG_RANLIB
 
 AC_ARG_PROGRAM
 
-AC_HEADER_STDC
+# We require a C++11 compiler.  Check if one is available, and if
+# necessary, set CXX_DIALECT to some -std=xxx switch.
+AX_CXX_COMPILE_STDCXX(11, , mandatory)
 
-# See if we are building with C++, and substitute COMPILER.
-GDB_AC_BUILD_WITH_CXX
+AC_HEADER_STDC
 
 # Set the 'development' global.
 . $srcdir/../../bfd/development.sh

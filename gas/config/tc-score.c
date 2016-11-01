@@ -7453,6 +7453,7 @@ s3_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
           code = BFD_RELOC_32_PCREL;
           break;
         }
+      /* Fall through.  */
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_LO16:
     case BFD_RELOC_SCORE_JMP:

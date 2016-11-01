@@ -1075,6 +1075,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		case tic6x_coding_mem_offset_minus_one_noscale:
 		case tic6x_coding_mem_offset_minus_one:
 		  fld_val += 1;
+		  /* Fall through.  */
 		case tic6x_coding_mem_offset_noscale:
 		case tic6x_coding_mem_offset:
 		  mem_offset = fld_val;

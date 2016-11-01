@@ -44,6 +44,8 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
+set skip_float_test [gdb_skip_float_test]
+
 # Start with a fresh gdb.
 
 clean_restart ${binfile}
@@ -128,14 +130,14 @@ if ![gdb_skip_stdio_test "print print_one_large_struct(...)"] {
 	".\[0-9\]+ = \\{next_index = \\{1, 2, 3, 4, 5, 6, 7, 8, 9, 10\\}, values = \\{4, 6, 8, 10, 12, 14, 16, 18, 20, 22\\}, head = 0\\}"
 }
 
-if {![gdb_skip_float_test "print print_one_double(*d1)"] && \
+if {!$skip_float_test && \
         ![gdb_skip_stdio_test "print print_one_double(*d1)"] } {
     print_struct_call "print_one_double(*d1)" \
 	".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+" \
 	".\[0-9\]+ = \\{double1 = 1\\.111\[0-9\]*\\}"
 }
 
-if {![gdb_skip_float_test "print print_two_floats(*f3)"] && \
+if {!$skip_float_test && \
         ![gdb_skip_stdio_test "print print_two_floats(*f3)"] } {
     print_struct_call "print_two_floats(*f3)" \
 	".*Contents of two_floats_t:\[ \r\n\]+-2\\.345000\[ \t]+1\\.000000\[ \r\n\]+" \

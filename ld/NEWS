@@ -2,6 +2,9 @@
 
 Changes in 2.28:
 
+* The command line option --no-eh-frame-hdr can now be used in ELF based
+  linkers to disable the automatic generation of .eh_frame_hdr sections.
+
 * Add --in-implib=<infile> to the ARM linker to enable specifying a set of
   Secure Gateway veneers that must exist in the output import library specified
   by --out-implib=<outfile> and the address they must have.  As such,

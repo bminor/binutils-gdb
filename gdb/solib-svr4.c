@@ -1022,6 +1022,10 @@ open_symbol_file_object (void *from_ttyp)
   gdb_byte *l_name_buf = (gdb_byte *) xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
   struct svr4_info *info = get_svr4_info ();
+  symfile_add_flags add_flags = 0;
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
@@ -1071,7 +1075,7 @@ open_symbol_file_object (void *from_ttyp)
     }
 
   /* Have a pathname: read the symbol file.  */
-  symbol_file_add_main (filename, from_tty);
+  symbol_file_add_main (filename, add_flags);
 
   do_cleanups (cleanups);
   return 1;
@@ -2552,14 +2556,6 @@ enable_break (struct svr4_info *info, int from_tty)
   return 0;
 }
 
-/* Implement the "special_symbol_handling" target_so_ops method.  */
-
-static void
-svr4_special_symbol_handling (void)
-{
-  /* Nothing to do.  */
-}
-
 /* Read the ELF program headers from ABFD.  Return the contents and
    set *PHDRS_SIZE to the size of the program headers.  */
 
@@ -3327,7 +3323,6 @@ _initialize_svr4_solib (void)
   svr4_so_ops.clear_so = svr4_clear_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;
   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
-  svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;
   svr4_so_ops.current_sos = svr4_current_sos;
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;

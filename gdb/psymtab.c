@@ -591,9 +591,6 @@ match_partial_symbol (struct objfile *objfile,
 	{
 	  center = bottom + (top - bottom) / 2;
 	  gdb_assert (center < top);
-	  if (!do_linear_search
-	      && (SYMBOL_LANGUAGE (*center) == language_java))
-	    do_linear_search = 1;
 	  if (ordered_compare (SYMBOL_SEARCH_NAME (*center), name) >= 0)
 	    top = center;
 	  else
@@ -642,7 +639,6 @@ psymtab_search_name (const char *name)
   switch (current_language->la_language)
     {
     case language_cplus:
-    case language_java:
       {
 	if (strchr (name, '('))
 	  {
@@ -704,11 +700,6 @@ lookup_partial_symbol (struct objfile *objfile,
 	  if (!(center < top))
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
-	  if (!do_linear_search
-	      && SYMBOL_LANGUAGE (*center) == language_java)
-	    {
-	      do_linear_search = 1;
-	    }
 	  if (strcmp_iw_ordered (SYMBOL_SEARCH_NAME (*center),
 				 search_name) >= 0)
 	    {
@@ -1577,7 +1568,7 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
 
-  return (memcmp (&sym1->ginfo.value, &sym1->ginfo.value,
+  return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
                   sizeof (sym1->ginfo.value)) == 0
 	  && sym1->ginfo.language == sym2->ginfo.language
           && PSYMBOL_DOMAIN (sym1) == PSYMBOL_DOMAIN (sym2)

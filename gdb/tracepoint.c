@@ -56,6 +56,7 @@
 #include "rsp-low.h"
 #include "tracefile.h"
 #include "location.h"
+#include <algorithm>
 
 /* readline include files */
 #include "readline/readline.h"
@@ -3060,11 +3061,9 @@ trace_dump_command (char *args, int from_tty)
   printf_filtered ("Data collected at tracepoint %d, trace frame %d:\n",
 		   tracepoint_number, traceframe_number);
 
-  old_chain = make_cleanup (null_cleanup, NULL);
-
   /* This command only makes sense for the current frame, not the
      selected frame.  */
-  make_cleanup_restore_current_thread ();
+  old_chain = make_cleanup_restore_current_thread ();
   select_frame (get_current_frame ());
 
   actions = all_tracepoint_actions_and_cleanup (loc->owner);
@@ -4324,8 +4323,8 @@ traceframe_available_memory (VEC(mem_range_s) **result,
 
 	    nr = VEC_safe_push (mem_range_s, *result, NULL);
 
-	    nr->start = max (lo1, lo2);
-	    nr->length = min (hi1, hi2) - nr->start;
+	    nr->start = std::max (lo1, lo2);
+	    nr->length = std::min (hi1, hi2) - nr->start;
 	  }
 
       normalize_mem_ranges (*result);

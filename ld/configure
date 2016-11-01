@@ -646,6 +646,7 @@ LIBINTL
 USE_NLS
 WARN_WRITE_STRINGS
 NO_WERROR
+WARN_CFLAGS_FOR_BUILD
 WARN_CFLAGS
 installed_linker
 install_as_default
@@ -11723,7 +11724,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11726 "configure"
+#line 11727 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11829,7 +11830,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11832 "configure"
+#line 11833 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15558,8 +15559,12 @@ fi
 # Set the 'development' global.
 . $srcdir/../bfd/development.sh
 
+# Set acp_cpp_for_build variable
+ac_cpp_for_build="$CC_FOR_BUILD -E $CPPFLAGS_FOR_BUILD"
+
 # Default set of GCC warnings to enable.
 GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
+GCC_WARN_CFLAGS_FOR_BUILD="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
 # Add -Wshadow if the compiler is a sufficiently recent version of GCC.
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -15604,6 +15609,36 @@ fi
 rm -f conftest*
 
 
+# Verify CC_FOR_BUILD to be compatible with waring flags
+
+# Add -Wshadow if the compiler is a sufficiently recent version of GCC.
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+__GNUC__
+_ACEOF
+if (eval "$ac_cpp_for_build conftest.$ac_ext") 2>&5 |
+  $EGREP "^[0-3]$" >/dev/null 2>&1; then :
+
+else
+  GCC_WARN_CFLAGS_FOR_BUILD="$GCC_WARN_CFLAGS_FOR_BUILD -Wshadow"
+fi
+rm -f conftest*
+
+
+# Add -Wstack-usage if the compiler is a sufficiently recent version of GCC.
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+__GNUC__
+_ACEOF
+if (eval "$ac_cpp_for_build conftest.$ac_ext") 2>&5 |
+  $EGREP "^[0-4]$" >/dev/null 2>&1; then :
+
+else
+  GCC_WARN_CFLAGS_FOR_BUILD="$GCC_WARN_CFLAGS_FOR_BUILD -Wstack-usage=262144"
+fi
+rm -f conftest*
+
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -15619,6 +15654,7 @@ case "${host}" in
   *-*-mingw32*)
     if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
       GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Wno-format"
+      GCC_WARN_CFLAGS_FOR_BUILD="$GCC_WARN_CFLAGS_FOR_BUILD -Wno-format"
     fi
     ;;
   *) ;;
@@ -15632,25 +15668,32 @@ fi
 NO_WERROR=
 if test "${ERROR_ON_WARNING}" = yes ; then
     GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Werror"
+    GCC_WARN_CFLAGS_FOR_BUILD="$GCC_WARN_CFLAGS_FOR_BUILD -Werror"
     NO_WERROR="-Wno-error"
 fi
 
 if test "${GCC}" = yes ; then
   WARN_CFLAGS="${GCC_WARN_CFLAGS}"
+  WARN_CFLAGS_FOR_BUILD="${GCC_WARN_CFLAGS_FOR_BUILD}"
 fi
 
 # Check whether --enable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then :
   enableval=$enable_build_warnings; case "${enableval}" in
-  yes)	WARN_CFLAGS="${GCC_WARN_CFLAGS}";;
+  yes)	WARN_CFLAGS="${GCC_WARN_CFLAGS}"
+        WARN_CFLAGS_FOR_BUILD="${GCC_WARN_CFLAGS_FOR_BUILD}";;
   no)	if test "${GCC}" = yes ; then
 	  WARN_CFLAGS="-w"
+      WARN_CFLAGS_FOR_BUILD="-w"
 	fi;;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        WARN_CFLAGS="${GCC_WARN_CFLAGS} ${t}";;
+        WARN_CFLAGS="${GCC_WARN_CFLAGS} ${t}"
+        WARN_CFLAGS_FOR_BUILD="${GCC_WARN_CFLAGS_FOR_BUILD} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        WARN_CFLAGS="${t} ${GCC_WARN_CFLAGS}";;
-  *)    WARN_CFLAGS=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+        WARN_CFLAGS="${t} ${GCC_WARN_CFLAGS}"
+        WARN_CFLAGS_FOR_BUILD="${t} ${GCC_WARN_CFLAGS_FOR_BUILD}";;
+  *)    WARN_CFLAGS=`echo "${enableval}" | sed -e "s/,/ /g"`
+        WARN_CFLAGS_FOR_BUILD=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 fi
 
@@ -15658,6 +15701,7 @@ fi
 if test x"$silent" != x"yes" && test x"$WARN_CFLAGS" != x""; then
   echo "Setting warning flags = $WARN_CFLAGS" 6>&1
 fi
+
 
 
 
@@ -16444,7 +16488,7 @@ _ACEOF
 fi
 done
 
-for ac_func in open lseek close
+for ac_func in getauxval open lseek close
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

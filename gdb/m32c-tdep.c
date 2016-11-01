@@ -192,27 +192,18 @@ make_types (struct gdbarch *arch)
      this is called, so we avoid using them.  */
   tdep->voyd = arch_type (arch, TYPE_CODE_VOID, 1, "void");
   tdep->ptr_voyd
-    = arch_type (arch, TYPE_CODE_PTR, gdbarch_ptr_bit (arch) / TARGET_CHAR_BIT,
-                 NULL);
-  TYPE_TARGET_TYPE (tdep->ptr_voyd) = tdep->voyd;
-  TYPE_UNSIGNED (tdep->ptr_voyd) = 1;
+    = arch_pointer_type (arch, gdbarch_ptr_bit (arch), NULL, tdep->voyd);
   tdep->func_voyd = lookup_function_type (tdep->voyd);
 
   xsnprintf (type_name, sizeof (type_name), "%s_data_addr_t",
 	     gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->data_addr_reg_type
-    = arch_type (arch, TYPE_CODE_PTR, data_addr_reg_bits / TARGET_CHAR_BIT,
-                 xstrdup (type_name));
-  TYPE_TARGET_TYPE (tdep->data_addr_reg_type) = tdep->voyd;
-  TYPE_UNSIGNED (tdep->data_addr_reg_type) = 1;
+    = arch_pointer_type (arch, data_addr_reg_bits, type_name, tdep->voyd);
 
   xsnprintf (type_name, sizeof (type_name), "%s_code_addr_t",
 	     gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->code_addr_reg_type
-    = arch_type (arch, TYPE_CODE_PTR, code_addr_reg_bits / TARGET_CHAR_BIT,
-                 xstrdup (type_name));
-  TYPE_TARGET_TYPE (tdep->code_addr_reg_type) = tdep->func_voyd;
-  TYPE_UNSIGNED (tdep->code_addr_reg_type) = 1;
+    = arch_pointer_type (arch, code_addr_reg_bits, type_name, tdep->func_voyd);
 
   tdep->uint8  = arch_integer_type (arch,  8, 1, "uint8_t");
   tdep->uint16 = arch_integer_type (arch, 16, 1, "uint16_t");
@@ -2630,7 +2621,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 static struct gdbarch *
 m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *arch;
+  struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   unsigned long mach = info.bfd_arch_info->mach;
 
@@ -2642,51 +2633,51 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   tdep = XCNEW (struct gdbarch_tdep);
-  arch = gdbarch_alloc (&info, tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Essential types.  */
-  make_types (arch);
+  make_types (gdbarch);
 
   /* Address/pointer conversions.  */
   if (mach == bfd_mach_m16c)
     {
-      set_gdbarch_address_to_pointer (arch, m32c_m16c_address_to_pointer);
-      set_gdbarch_pointer_to_address (arch, m32c_m16c_pointer_to_address);
+      set_gdbarch_address_to_pointer (gdbarch, m32c_m16c_address_to_pointer);
+      set_gdbarch_pointer_to_address (gdbarch, m32c_m16c_pointer_to_address);
     }
 
   /* Register set.  */
-  make_regs (arch);
+  make_regs (gdbarch);
 
   /* Disassembly.  */
-  set_gdbarch_print_insn (arch, print_insn_m32c);
+  set_gdbarch_print_insn (gdbarch, print_insn_m32c);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (arch, m32c_breakpoint_from_pc);
+  set_gdbarch_breakpoint_from_pc (gdbarch, m32c_breakpoint_from_pc);
 
   /* Prologue analysis and unwinding.  */
-  set_gdbarch_inner_than (arch, core_addr_lessthan);
-  set_gdbarch_skip_prologue (arch, m32c_skip_prologue);
-  set_gdbarch_unwind_pc (arch, m32c_unwind_pc);
-  set_gdbarch_unwind_sp (arch, m32c_unwind_sp);
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_skip_prologue (gdbarch, m32c_skip_prologue);
+  set_gdbarch_unwind_pc (gdbarch, m32c_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, m32c_unwind_sp);
 #if 0
   /* I'm dropping the dwarf2 sniffer because it has a few problems.
      They may be in the dwarf2 cfi code in GDB, or they may be in
      the debug info emitted by the upstream toolchain.  I don't 
      know which, but I do know that the prologue analyzer works better.
      MVS 04/13/06  */
-  dwarf2_append_sniffers (arch);
+  dwarf2_append_sniffers (gdbarch);
 #endif
-  frame_unwind_append_unwinder (arch, &m32c_unwind);
+  frame_unwind_append_unwinder (gdbarch, &m32c_unwind);
 
   /* Inferior calls.  */
-  set_gdbarch_push_dummy_call (arch, m32c_push_dummy_call);
-  set_gdbarch_return_value (arch, m32c_return_value);
-  set_gdbarch_dummy_id (arch, m32c_dummy_id);
+  set_gdbarch_push_dummy_call (gdbarch, m32c_push_dummy_call);
+  set_gdbarch_return_value (gdbarch, m32c_return_value);
+  set_gdbarch_dummy_id (gdbarch, m32c_dummy_id);
 
   /* Trampolines.  */
-  set_gdbarch_skip_trampoline_code (arch, m32c_skip_trampoline_code);
+  set_gdbarch_skip_trampoline_code (gdbarch, m32c_skip_trampoline_code);
 
-  set_gdbarch_virtual_frame_pointer (arch, m32c_virtual_frame_pointer);
+  set_gdbarch_virtual_frame_pointer (gdbarch, m32c_virtual_frame_pointer);
 
   /* m32c function boundary addresses are not necessarily even.
      Therefore, the `vbit', which indicates a pointer to a virtual
@@ -2696,9 +2687,9 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      In order to verify this, see the definition of
      TARGET_PTRMEMFUNC_VBIT_LOCATION in gcc/defaults.h along with the
      definition of FUNCTION_BOUNDARY in gcc/config/m32c/m32c.h.  */
-  set_gdbarch_vbit_in_delta (arch, 1);
+  set_gdbarch_vbit_in_delta (gdbarch, 1);
 
-  return arch;
+  return gdbarch;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

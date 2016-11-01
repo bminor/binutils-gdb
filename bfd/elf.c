@@ -338,6 +338,7 @@ bfd_elf_string_from_elf_section (bfd *abfd,
       if (hdr->sh_type != SHT_STRTAB && hdr->sh_type < SHT_LOOS)
 	{
 	  /* PR 17512: file: f057ec89.  */
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: attempt to load strings from a non-string section (number %d)"),
 			      abfd, shindex);
 	  return NULL;
@@ -350,7 +351,8 @@ bfd_elf_string_from_elf_section (bfd *abfd,
   if (strindex >= hdr->sh_size)
     {
       unsigned int shstrndx = elf_elfheader(abfd)->e_shstrndx;
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: invalid string offset %u >= %lu for section `%s'"),
 	 abfd, strindex, (unsigned long) hdr->sh_size,
 	 (shindex == shstrndx && strindex == hdr->sh_name
@@ -489,9 +491,10 @@ bfd_elf_get_elf_syms (bfd *ibfd,
     if (!(*bed->s->swap_symbol_in) (ibfd, esym, shndx, isym))
       {
 	symoffset += (esym - (bfd_byte *) extsym_buf) / extsym_size;
-	(*_bfd_error_handler) (_("%B symbol number %lu references "
-				 "nonexistent SHT_SYMTAB_SHNDX section"),
-			       ibfd, (unsigned long) symoffset);
+	/* xgettext:c-format */
+	_bfd_error_handler (_("%B symbol number %lu references "
+			      "nonexistent SHT_SYMTAB_SHNDX section"),
+			    ibfd, (unsigned long) symoffset);
 	if (alloc_intsym != NULL)
 	  free (alloc_intsym);
 	intsym_buf = NULL;
@@ -645,6 +648,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  if (shdr->contents == NULL)
 		    {
 		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%B: corrupt size field in group section header: 0x%lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
@@ -658,6 +662,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 			  != shdr->sh_size))
 		    {
 		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%B: invalid size field in group section header: 0x%lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
@@ -691,8 +696,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 			}
 		      if (idx >= shnum)
 			{
-			  ((*_bfd_error_handler)
-			   (_("%B: invalid SHT_GROUP entry"), abfd));
+			  _bfd_error_handler
+			    (_("%B: invalid SHT_GROUP entry"), abfd);
 			  idx = 0;
 			}
 		      dest->shdr = elf_elfsections (abfd)[idx];
@@ -710,7 +715,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		{
 		  elf_tdata (abfd)->group_sect_ptr = NULL;
 		  elf_tdata (abfd)->num_group = num_group = -1;
-		  (*_bfd_error_handler) (_("%B: no valid group sections found"), abfd);
+		  _bfd_error_handler
+		    (_("%B: no valid group sections found"), abfd);
 		  bfd_set_error (bfd_error_bad_value);
 		}
 	    }
@@ -777,8 +783,9 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 
   if (elf_group_name (newsect) == NULL)
     {
-      (*_bfd_error_handler) (_("%B: no group info for section %A"),
-			     abfd, newsect);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%B: no group info for section %A"),
+			  abfd, newsect);
       return FALSE;
     }
   return TRUE;
@@ -807,6 +814,7 @@ _bfd_elf_setup_sections (bfd *abfd)
 	      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 	      if (bed->link_order_error_handler)
 		bed->link_order_error_handler
+		  /* xgettext:c-format */
 		  (_("%B: warning: sh_link not set for section `%A'"),
 		   abfd, s);
 	    }
@@ -825,7 +833,8 @@ _bfd_elf_setup_sections (bfd *abfd)
 		 sh_link.  We don't want to proceed.  */
 	      if (linksec == NULL)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: sh_link [%d] in section `%A' is incorrect"),
 		     s->owner, s, elfsec);
 		  result = FALSE;
@@ -837,7 +846,8 @@ _bfd_elf_setup_sections (bfd *abfd)
       else if (this_hdr->sh_type == SHT_GROUP
 	       && elf_next_in_group (s) == NULL)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: SHT_GROUP section [index %d] has no SHF_GROUP sections"),
 	     abfd, elf_section_data (s)->this_idx);
 	  result = FALSE;
@@ -857,7 +867,8 @@ _bfd_elf_setup_sections (bfd *abfd)
       /* PR binutils/18758: Beware of corrupt binaries with invalid group data.  */
       if (shdr == NULL || shdr->bfd_section == NULL || shdr->contents == NULL)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: section group entry number %u is corrupt"),
 	     abfd, i);
 	  result = FALSE;
@@ -881,7 +892,8 @@ _bfd_elf_setup_sections (bfd *abfd)
 	else
 	  {
 	    /* There are some unknown sections in the group.  */
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B: unknown [%d] section `%s' in group [%s]"),
 	       abfd,
 	       (unsigned int) idx->shdr->sh_type,
@@ -1147,7 +1159,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	{
 	  if (!bfd_init_section_compress_status (abfd, newsect))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: unable to initialize compress status for section %s"),
 		 abfd, name);
 	      return FALSE;
@@ -1157,7 +1170,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	{
 	  if (!bfd_init_section_decompress_status (abfd, newsect))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: unable to initialize decompress status for section %s"),
 		 abfd, name);
 	      return FALSE;
@@ -1336,6 +1350,7 @@ copy_special_section_fields (const bfd *ibfd,
 	/* FIXME: Should we install iheader->sh_link
 	   if we could not find a match ?  */
 	(* _bfd_error_handler)
+	  /* xgettext:c-format */
 	  (_("%B: Failed to find link section for section %d"), obfd, secnum);
     }
 
@@ -1362,6 +1377,7 @@ copy_special_section_fields (const bfd *ibfd,
 	}
       else
 	(* _bfd_error_handler)
+	  /* xgettext:c-format */
 	  (_("%B: Failed to find info section for section %d"), obfd, secnum);
     }
 
@@ -1944,7 +1960,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	}
       if (sections_being_created [shindex])
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: warning: loop in section dependencies detected"), abfd);
 	  return FALSE;
 	}
@@ -2051,7 +2067,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	 Unusual, but possible.  Warn, but continue.  */
       if (elf_onesymtab (abfd) != 0)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: warning: multiple symbol tables detected - ignoring the table in section %u"),
 	     abfd, shindex);
 	  goto success;
@@ -2133,7 +2150,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	 Unusual, but possible.  Warn, but continue.  */
       if (elf_dynsymtab (abfd) != 0)
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: warning: multiple dynamic symbol tables detected - ignoring the table in section %u"),
 	     abfd, shindex);
 	  goto success;
@@ -2244,9 +2262,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	/* Check for a bogus link to avoid crashing.  */
 	if (hdr->sh_link >= num_sec)
 	  {
-	    ((*_bfd_error_handler)
-	     (_("%B: invalid link %lu for reloc section %s (index %u)"),
-	      abfd, hdr->sh_link, name, shindex));
+	    _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%B: invalid link %lu for reloc section %s (index %u)"),
+	       abfd, hdr->sh_link, name, shindex);
 	    ret = _bfd_elf_make_section_from_shdr (abfd, hdr, name,
 						   shindex);
 	    goto success;
@@ -2429,7 +2448,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	    /* FIXME: How to properly handle allocated section reserved
 	       for applications?  */
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B: don't know how to handle allocated, application "
 		 "specific section `%s' [0x%8x]"),
 	       abfd, name, hdr->sh_type);
@@ -2444,7 +2464,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       else if (hdr->sh_type >= SHT_LOPROC
 	       && hdr->sh_type <= SHT_HIPROC)
 	/* FIXME: We should handle this section.  */
-	(*_bfd_error_handler)
+	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B: don't know how to handle processor specific section "
 	     "`%s' [0x%8x]"),
 	   abfd, name, hdr->sh_type);
@@ -2455,7 +2476,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    /* SHF_OS_NONCONFORMING indicates that special knowledge is
 	       required to correctly process the section and the file should
 	       be rejected with an error message.  */
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B: don't know how to handle OS specific section "
 		 "`%s' [0x%8x]"),
 	       abfd, name, hdr->sh_type);
@@ -2468,7 +2490,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	}
       else
 	/* FIXME: We should handle this section.  */
-	(*_bfd_error_handler)
+	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B: don't know how to handle section `%s' [0x%8x]"),
 	   abfd, name, hdr->sh_type);
 
@@ -3171,7 +3194,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
   /* PR 17512: file: 0eb809fe, 8b0535ee.  */
   if (asect->alignment_power >= (sizeof (bfd_vma) * 8) - 1)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: error: Alignment power %d of section `%A' is too big"),
 	 abfd, asect, asect->alignment_power);
       arg->failed = TRUE;
@@ -3201,7 +3225,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	 allow the link to proceed.  This can happen when users link
 	 non-bss input sections to bss output sections, or emit data
 	 to a bss output section via a linker script.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("warning: section `%A' type changed to PROGBITS"), asect);
       this_hdr->sh_type = sh_type;
     }
@@ -3643,6 +3667,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 
   if (section_number >= SHN_LORESERVE)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: too many sections: %u"),
 			  abfd, section_number);
       return FALSE;
@@ -3726,7 +3751,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		  if (discarded_section (s))
 		    {
 		      asection *kept;
-		      (*_bfd_error_handler)
+		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%B: sh_link of section `%A' points to discarded section `%A' of `%B'"),
 			 abfd, d->this_hdr.bfd_section,
 			 s, s->owner);
@@ -3749,7 +3775,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		  /* Handle objcopy. */
 		  if (s->output_section == NULL)
 		    {
-		      (*_bfd_error_handler)
+		      _bfd_error_handler
+			/* xgettext:c-format */
 			(_("%B: sh_link of section `%A' points to removed section `%A' of `%B'"),
 			 abfd, d->this_hdr.bfd_section, s, s->owner);
 		      bfd_set_error (bfd_error_bad_value);
@@ -3770,6 +3797,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		= get_elf_backend_data (abfd);
 	      if (bed->link_order_error_handler)
 		bed->link_order_error_handler
+		  /* xgettext:c-format */
 		  (_("%B: warning: sh_link not set for section `%A'"),
 		   abfd, sec);
 	    }
@@ -5291,7 +5319,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  || (!m->p_paddr_valid
 		      && p->p_paddr < (bfd_vma) off))
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: Not enough room for program headers, try linking with -N"),
 		     abfd);
 		  bfd_set_error (bfd_error_bad_value);
@@ -5377,7 +5405,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  && (s_start < p_end
 		      || p_end < p_start))
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: section %A lma %#lx adjusted to %#lx"), abfd, sec,
 		     (unsigned long) s_start, (unsigned long) p_end);
 		  adjust = 0;
@@ -5513,7 +5542,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      if (!ELF_SECTION_IN_SEGMENT_1 (this_hdr, p, check_vma, 0)
 		  && !ELF_TBSS_SPECIAL (this_hdr, p))
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B: section `%A' can't be allocated in segment %d"),
 		     abfd, sec, j);
 		  print_segment_map (m);
@@ -5560,7 +5590,8 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
       else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	{
 	  if (hdr->sh_size != 0)
-	    (*_bfd_error_handler)
+	    _bfd_error_handler
+	      /* xgettext:c-format */
 	      (_("%B: warning: allocated section `%s' not in segment"),
 	       abfd,
 	       (hdr->bfd_section == NULL
@@ -5749,7 +5780,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      if (m->includes_filehdr || m->includes_phdrs)
 		{
 		  /* PR 17512: file: 2195325e.  */
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%B: warning: non-load segment includes file header and/or program header"),
 		     abfd);
 		  return FALSE;
@@ -6235,7 +6266,8 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
     {
       /* This case can occur when using --strip-symbol on a symbol
 	 which is used in a relocation entry.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: symbol `%s' required but not present"),
 	 abfd, bfd_asymbol_name (asym_ptr));
       bfd_set_error (bfd_error_no_symbols);
@@ -6574,9 +6606,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	     something.  They are allowed by the ELF spec however, so only
 	     a warning is produced.  */
 	  if (segment->p_type == PT_LOAD)
-	    (*_bfd_error_handler) (_("\
+	    _bfd_error_handler (_("\
 %B: warning: Empty loadable segment detected, is this intentional ?"),
-				   ibfd);
+				ibfd);
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -7187,9 +7219,10 @@ rewrite:
 	  {
 	    /* PR 17512: file: f17299af.  */
 	    if (segment->p_align > (bfd_vma) 1 << ((sizeof (bfd_vma) * 8) - 2))
-	      (*_bfd_error_handler) (_("\
+	      /* xgettext:c-format */
+	      _bfd_error_handler (_("\
 %B: warning: segment alignment of 0x%llx is too large"),
-				     ibfd, (long long) segment->p_align);
+				  ibfd, (long long) segment->p_align);
 	    else
 	      maxpagesize = segment->p_align;
 	  }
@@ -7663,6 +7696,7 @@ error_return:
 		    shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
 		  if (shndx == SHN_BAD)
 		    {
+		      /* xgettext:c-format */
 		      _bfd_error_handler (_("\
 Unable to find equivalent output section for symbol '%s' from section '%s'"),
 					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
@@ -7994,7 +8028,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
       if (hdr->sh_info == 0 || hdr->sh_size < sizeof (Elf_External_Verneed))
 	{
 error_return_bad_verref:
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: .gnu.version_r invalid entry"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
 error_return_verref:
@@ -8121,7 +8155,7 @@ error_return_verref:
       if (hdr->sh_info == 0 || hdr->sh_size < sizeof (Elf_External_Verdef))
 	{
 	error_return_bad_verdef:
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("%B: .gnu.version_d invalid entry"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
 	error_return_verdef:
@@ -8672,7 +8706,8 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
   return TRUE;
 
  fail:
-  (*_bfd_error_handler)
+  _bfd_error_handler
+    /* xgettext:c-format */
     (_("%B: unsupported relocation type %s"),
      abfd, areloc->howto->name);
   bfd_set_error (bfd_error_bad_value);
@@ -11033,10 +11068,12 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
-/* It is only used by x86-64 so far.  */
+/* It is only used by x86-64 so far.
+   ??? This repeats *COM* id of zero.  sec->id is supposed to be unique,
+   but current usage would allow all of _bfd_std_section to be zero.  t*/
 asection _bfd_elf_large_com_section
-  = BFD_FAKE_SECTION (_bfd_elf_large_com_section,
-		      SEC_IS_COMMON, NULL, "LARGE_COMMON", 0);
+  = BFD_FAKE_SECTION (_bfd_elf_large_com_section, NULL,
+		      "LARGE_COMMON", 0, SEC_IS_COMMON);
 
 void
 _bfd_elf_post_process_headers (bfd * abfd,

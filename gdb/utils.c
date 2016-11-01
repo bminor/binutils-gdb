@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dyn-string.h"
 #include <ctype.h>
 #include "gdb_wait.h"
 #include "event-top.h"
@@ -152,18 +151,6 @@ struct cleanup *
 make_cleanup_freeargv (char **arg)
 {
   return make_cleanup (do_freeargv, arg);
-}
-
-static void
-do_dyn_string_delete (void *arg)
-{
-  dyn_string_delete ((dyn_string_t) arg);
-}
-
-struct cleanup *
-make_cleanup_dyn_string_delete (dyn_string_t arg)
-{
-  return make_cleanup (do_dyn_string_delete, arg);
 }
 
 static void
@@ -330,64 +317,6 @@ struct cleanup *
 make_cleanup_htab_delete (htab_t htab)
 {
   return make_cleanup (do_htab_delete_cleanup, htab);
-}
-
-struct restore_ui_out_closure
-{
-  struct ui_out **variable;
-  struct ui_out *value;
-};
-
-static void
-do_restore_ui_out (void *p)
-{
-  struct restore_ui_out_closure *closure
-    = (struct restore_ui_out_closure *) p;
-
-  *(closure->variable) = closure->value;
-}
-
-/* Remember the current value of *VARIABLE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_ui_out (struct ui_out **variable)
-{
-  struct restore_ui_out_closure *c = XNEW (struct restore_ui_out_closure);
-
-  c->variable = variable;
-  c->value = *variable;
-
-  return make_cleanup_dtor (do_restore_ui_out, (void *) c, xfree);
-}
-
-struct restore_ui_file_closure
-{
-  struct ui_file **variable;
-  struct ui_file *value;
-};
-
-static void
-do_restore_ui_file (void *p)
-{
-  struct restore_ui_file_closure *closure
-    = (struct restore_ui_file_closure *) p;
-
-  *(closure->variable) = closure->value;
-}
-
-/* Remember the current value of *VARIABLE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_ui_file (struct ui_file **variable)
-{
-  struct restore_ui_file_closure *c = XNEW (struct restore_ui_file_closure);
-
-  c->variable = variable;
-  c->value = *variable;
-
-  return make_cleanup_dtor (do_restore_ui_file, (void *) c, xfree);
 }
 
 /* Helper for make_cleanup_value_free_to_mark.  */
@@ -3241,7 +3170,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       if (minor == NULL)
 	minor = &min;
 
-      /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
+      /* Skip any identifier after "GNU " - such as "C11" or "C++".
 	 A full producer string might look like:
 	 "GNU C 4.7.2"
 	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."

@@ -459,7 +459,7 @@ PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
 
-void   as_assert (const char *, int, const char *);
+void   as_assert (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   sprint_value (char *, addressT);
 int    had_errors (void);

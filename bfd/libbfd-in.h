@@ -109,9 +109,7 @@ extern void *bfd_realloc2
 extern void *bfd_zmalloc2
   (bfd_size_type, bfd_size_type);
 
-extern void _bfd_default_error_handler (const char *s, ...);
-extern bfd_error_handler_type _bfd_error_handler;
-extern bfd_assert_handler_type _bfd_assert_handler;
+extern void _bfd_error_handler (const char *s, ...);
 
 /* These routines allocate and free things on the BFD's objalloc.  */
 
@@ -264,7 +262,7 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
 #define _bfd_generic_bfd_copy_private_bfd_data \
   ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
 #define _bfd_generic_bfd_merge_private_bfd_data \
-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_true)
 #define _bfd_generic_bfd_set_private_flags \
   ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
 #define _bfd_generic_bfd_copy_private_section_data \
@@ -751,10 +749,6 @@ extern bfd_size_type _bfd_stringtab_add
 /* Write out a string table.  */
 extern bfd_boolean _bfd_stringtab_emit
   (bfd *, struct bfd_strtab_hash *);
-
-/* Check that endianness of input and output file match.  */
-extern bfd_boolean _bfd_generic_verify_endian_match
-  (bfd *, bfd *);
 
 /* Macros to tell if bfds are read or write enabled.
 

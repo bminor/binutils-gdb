@@ -1,3 +1,7 @@
+2016-09-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* .gitignore: Add archives and make stamps.
+
 2016-07-20  Yan-Ting Lin  <currygt52@gmail.com>
 
 	* configure.ac (nds32*-*-*): Remove entry to enable gdb.

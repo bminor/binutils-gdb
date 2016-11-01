@@ -36,6 +36,7 @@
 #include "charset.h"
 #include "typeprint.h"
 #include <ctype.h>
+#include <algorithm>
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -999,10 +1000,9 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_UNDEF:
-      /* This happens (without TYPE_FLAG_STUB set) on systems which
-         don't use dbx xrefs (NO_DBX_XREFS in gcc) if a file has a
-         "struct foo *bar" and no complete type for struct foo in that
-         file.  */
+      /* This happens (without TYPE_STUB set) on systems which don't use
+         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
+         and no complete type for struct foo in that file.  */
       fprintf_filtered (stream, _("<incomplete type>"));
       break;
 
@@ -2179,7 +2179,7 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
     {
       /* We want fetchlimit chars, so we might as well read them all in
 	 one operation.  */
-      unsigned int fetchlen = min (len, fetchlimit);
+      unsigned int fetchlen = std::min ((unsigned) len, fetchlimit);
 
       *buffer = (gdb_byte *) xmalloc (fetchlen * width);
       bufptr = *buffer;
@@ -2203,12 +2203,12 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 	 So we choose the minimum of 8 and fetchlimit.  We used to use 200
 	 instead of 8 but 200 is way too big for remote debugging over a
 	  serial line.  */
-      chunksize = min (8, fetchlimit);
+      chunksize = std::min (8u, fetchlimit);
 
       do
 	{
 	  QUIT;
-	  nfetch = min (chunksize, fetchlimit - bufsize);
+	  nfetch = std::min ((unsigned long) chunksize, fetchlimit - bufsize);
 
 	  if (*buffer == NULL)
 	    *buffer = (gdb_byte *) xmalloc (nfetch * width);
@@ -2404,19 +2404,16 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   struct obstack wchar_buf, output;
   struct cleanup *cleanups;
   gdb_byte *buf;
-  struct wchar_iterator *iter;
   int need_escape = 0;
 
   buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
   pack_long (buf, type, c);
 
-  iter = make_wchar_iterator (buf, TYPE_LENGTH (type),
-			      encoding, TYPE_LENGTH (type));
-  cleanups = make_cleanup_wchar_iterator (iter);
+  wchar_iterator iter (buf, TYPE_LENGTH (type), encoding, TYPE_LENGTH (type));
 
   /* This holds the printable form of the wchar_t data.  */
   obstack_init (&wchar_buf);
-  make_cleanup_obstack_free (&wchar_buf);
+  cleanups = make_cleanup_obstack_free (&wchar_buf);
 
   while (1)
     {
@@ -2427,7 +2424,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
       int print_escape = 1;
       enum wchar_iterate_result result;
 
-      num_chars = wchar_iterate (iter, &result, &chars, &buf, &buflen);
+      num_chars = iter.iterate (&result, &chars, &buf, &buflen);
       if (num_chars < 0)
 	break;
       if (num_chars > 0)
@@ -2481,7 +2478,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
    storing the result in VEC.  */
 
 static int
-count_next_character (struct wchar_iterator *iter,
+count_next_character (wchar_iterator *iter,
 		      VEC (converted_character_d) **vec)
 {
   struct converted_character *current;
@@ -2492,7 +2489,7 @@ count_next_character (struct wchar_iterator *iter,
       gdb_wchar_t *chars;
 
       tmp.num_chars
-	= wchar_iterate (iter, &tmp.result, &chars, &tmp.buf, &tmp.buflen);
+	= iter->iterate (&tmp.result, &chars, &tmp.buf, &tmp.buflen);
       if (tmp.num_chars > 0)
 	{
 	  gdb_assert (tmp.num_chars < MAX_WCHARS);
@@ -2521,8 +2518,7 @@ count_next_character (struct wchar_iterator *iter,
       while (1)
 	{
 	  /* Get the next character.  */
-	  d.num_chars
-	    = wchar_iterate (iter, &d.result, &chars, &d.buf, &d.buflen);
+	  d.num_chars = iter->iterate (&d.result, &chars, &d.buf, &d.buflen);
 
 	  /* If a character was successfully converted, save the character
 	     into the converted character.  */
@@ -2736,7 +2732,6 @@ generic_printstr (struct ui_file *stream, struct type *type,
   int width = TYPE_LENGTH (type);
   struct obstack wchar_buf, output;
   struct cleanup *cleanup;
-  struct wchar_iterator *iter;
   int finished = 0;
   struct converted_character *last;
   VEC (converted_character_d) *converted_chars;
@@ -2771,10 +2766,10 @@ generic_printstr (struct ui_file *stream, struct type *type,
     }
 
   /* Arrange to iterate over the characters, in wchar_t form.  */
-  iter = make_wchar_iterator (string, length * width, encoding, width);
-  cleanup = make_cleanup_wchar_iterator (iter);
+  wchar_iterator iter (string, length * width, encoding, width);
   converted_chars = NULL;
-  make_cleanup (VEC_cleanup (converted_character_d), &converted_chars);
+  cleanup = make_cleanup (VEC_cleanup (converted_character_d),
+			  &converted_chars);
 
   /* Convert characters until the string is over or the maximum
      number of printed characters has been reached.  */
@@ -2786,7 +2781,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
       QUIT;
 
       /* Grab the next character and repeat count.  */
-      r = count_next_character (iter, &converted_chars);
+      r = count_next_character (&iter, &converted_chars);
 
       /* If less than zero, the end of the input string was reached.  */
       if (r < 0)
@@ -2865,8 +2860,8 @@ val_print_string (struct type *elttype, const char *encoding,
      because finding the null byte (or available memory) is what actually
      limits the fetch.  */
 
-  fetchlimit = (len == -1 ? options->print_max : min (len,
-						      options->print_max));
+  fetchlimit = (len == -1 ? options->print_max : std::min ((unsigned) len,
+							   options->print_max));
 
   err = read_string (addr, len, width, fetchlimit, byte_order,
 		     &buffer, &bytes_read);

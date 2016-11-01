@@ -1258,7 +1258,7 @@ A string of bits.  It is deprecated.
 An unknown or erroneous type.
 
 @item TYPE_CODE_METHOD
-A method type, as found in C@t{++} or Java.
+A method type, as found in C@t{++}.
 
 @item TYPE_CODE_METHODPTR
 A pointer-to-member-function.
@@ -1322,7 +1322,7 @@ Return the enum value represented by @code{<gdb:field>} @var{field}.
 @deffn {Scheme Procedure} field-bitpos field
 Return the bit position of @code{<gdb:field>} @var{field}.
 This attribute is not available for @code{static} fields (as in
-C@t{++} or Java).
+C@t{++}).
 @end deffn
 
 @deffn {Scheme Procedure} field-bitsize field

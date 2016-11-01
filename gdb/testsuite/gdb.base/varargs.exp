@@ -37,6 +37,8 @@ if [get_compiler_info] {
     return -1
 }
 
+set skip_float_test [gdb_skip_float_test]
+
 set additional_flags {debug}
 if [support_complex_tests] {
     lappend additional_flags "additional_flags=-DTEST_COMPLEX"
@@ -87,7 +89,7 @@ gdb_test_stdio "print find_max2(3,1,2,3)" \
     ".\[0-9\]+ = 3" \
     "print find_max2(3,1,2,3)"
 
-if {![target_info exists gdb,skip_float_tests]} {
+if {!$skip_float_test} {
     gdb_test_stdio "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)" \
 	"find_max\\(.*\\) returns 17\\.000000\[ \r\n\]+" \
 	".\[0-9\]+ = 17" \

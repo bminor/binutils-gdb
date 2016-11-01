@@ -740,6 +740,7 @@ or1k_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_OR1K_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid OR1K reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -989,7 +990,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
           /* Addend should be zero.  */
           if (rel->r_addend != 0)
-            (*_bfd_error_handler)
+	    _bfd_error_handler
               (_("internal error: addend should be zero for R_OR1K_GOT16"));
 
           break;
@@ -1076,7 +1077,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
                     else
                       {
                         BFD_FAIL ();
-                        (*_bfd_error_handler)
+			_bfd_error_handler
                           (_("%B: probably compiled without -fPIC?"),
                            input_bfd);
                         bfd_set_error (bfd_error_bad_value);
@@ -1098,7 +1099,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
         case R_OR1K_TLS_LDO_LO16:
           /* TODO: implement support for local dynamic.  */
           BFD_FAIL ();
-          (*_bfd_error_handler)
+	  _bfd_error_handler
             (_("%B: support for local dynamic not implemented"),
              input_bfd);
           bfd_set_error (bfd_error_bad_value);
@@ -1233,7 +1234,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
           /* These are resolved dynamically on load and shouldn't
              be used as linker input.  */
           BFD_FAIL ();
-          (*_bfd_error_handler)
+	  _bfd_error_handler
             (_("%B: will not resolve runtime TLS relocation"),
              input_bfd);
           bfd_set_error (bfd_error_bad_value);
@@ -1642,7 +1643,8 @@ or1k_elf_check_relocs (bfd *abfd,
                         || strcmp (bfd_get_section_name (abfd, sec),
                                    name + 5) != 0)
                       {
-                        (*_bfd_error_handler)
+			_bfd_error_handler
+			  /* xgettext:c-format */
                           (_("%B: bad relocation section name `%s\'"),
                            abfd, name);
                       }
@@ -2765,8 +2767,9 @@ or1k_elf_set_private_flags (bfd *abfd, flagword flags)
    EF_OR1K_NODELAY flag setting.  */
 
 static bfd_boolean
-elf32_or1k_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
 
@@ -2790,7 +2793,7 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   if ((in_flags & EF_OR1K_NODELAY) != (out_flags & EF_OR1K_NODELAY))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(_("%B: EF_OR1K_NODELAY flag mismatch with previous modules"), ibfd);
 
       bfd_set_error (bfd_error_bad_value);

@@ -1,3 +1,99 @@
+2016-10-21  Gergely Nagy  <ngg@tresorit.com>
+
+	PR gold/17704
+	* icf.cc (match_sections): Add new parameter section_addraligns.
+	Check section alignment and keep the section with the strictest
+	alignment.
+	(find_identical_sections): New local variable section_addraligns.
+	Store each section's alignment.
+	* testsuite/pr17704a_test.s: New file.
+	* testsuite/Makefile.am (pr17704a_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Add fall
+	through comment.
+	* tilegx.cc (Target_tilegx::Relocate::relocate): Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.cc: Spell fall through comments as "// Fall through.".
+	* arm.cc: Likewise.
+	* mips.cc: Likewise.
+	* powerpc.cc: Likewise.
+	* s390.cc: Likewise.
+	* sparc.cc: Likewise.
+	* x86_64.cc: Likewise.
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Add missing
+	fall through comments.
+	* sparc.cc: (Target_sparc::Scan::global): Likewise.
+	(Target_sparc::Relocate::relocate): Likewise.
+	* tilegx.cc (Target_tilegx::Relocate::relocate): Likewise.
+	* resolve.cc (symbol_to_bits): Add missing break.
+
+2016-09-26  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20238
+	* symtab.cc (Symbol_table::define_default_version): Check that
+	unversioned symbol is defined.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+	* testsuite/Makefile.in: Likewise.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.cc (Target_aarch64::is_erratum_835769_sequence): Avoid
+	compiler warning.
+	* output.cc (Output_segment::set_section_addresses): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
+2016-09-02  Doug Kwan  <dougkwan@google.com>
+
+        * arm.cc (Target_arm::Target_arm): Move method definition outside of
+        class definition.  Add code to handle --target1-rel, --target1-abs
+        and --target2= options.
+        (Target_arm::get_reloc_reloc_type): Change method to be non-static
+        and const.
+        (Target_arm::target1_is_rel_, Target_arm::target2_reloc_): New data
+        member declaration.
+        (Target_arm::Scan::local, Target_arm::Scan::global,
+        Target_arm::Relocate::relocate,
+        Target_arm::Relocatable_size_for_reloc::get_size_for_reloc): Adjust
+        call to Target_arm::get_real_reloc_type.
+        (Target_arm::get_real_reloc_type): Use command line options to
+        determine real types of R_ARM_TARGET1 and R_ARM_TARGET2.
+        * options.h (--target1-rel, --target1-abs, --target2): New ARM-only
+        options.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (class Stub_control): Delete stub14_group_size_
+	and has14_.  Add group_size_.
+	(Stub_control::can_add_to_stub_group): Adjust to suit.  Print
+	debug info when switching to adding sections before stubs.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* debug.h (DEBUG_TARGET): New.
+	(DEBUG_ALL): Add DEBUG_TARGET.
+	(gold_debug): Delete FORMAT param.
+	* powerpc.cc (Stub_control::can_add_to_stub_group): Print debug ourput.
+
+2016-08-30  Alan Modra  <amodra@gmail.com>
+
+	PR 20523
+	* powerpc.cc (class Stub_control): Add has14_.  Comment owner_.
+	(Stub_control::can_add_to_stub_group): Correct grouping of
+	sections containing 14-bit external branches.  When returning
+	false, set state_ to reflect the fact that we have one section
+	for the next group.  Rewrite most of function for clarity.
+	Add and expand comments.
+	(Target_powerpc::do_relax): Print stub group size retry in hex.
+
 2016-08-26  Han Shen  <shenhan@google.com>
 
 	PR gold/20529 - relaxing loop never ends.

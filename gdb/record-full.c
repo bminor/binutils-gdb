@@ -1002,6 +1002,15 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
     target_async (1);
 }
 
+/* "to_commit_resume" method for process record target.  */
+
+static void
+record_full_commit_resume (struct target_ops *ops)
+{
+  if (!RECORD_FULL_IS_REPLAY)
+    ops->beneath->to_commit_resume (ops->beneath);
+}
+
 static int record_full_get_sig = 0;
 
 /* SIGINT signal handler, registered by "to_wait" method.  */
@@ -1172,6 +1181,7 @@ record_full_wait_1 (struct target_ops *ops,
 					    "target beneath\n");
 		      ops->beneath->to_resume (ops->beneath, ptid, step,
 					       GDB_SIGNAL_0);
+		      ops->beneath->to_commit_resume (ops->beneath);
 		      continue;
 		    }
 		}
@@ -1650,7 +1660,7 @@ record_full_insert_breakpoint (struct target_ops *ops,
 	 really need to install regular breakpoints in the inferior.
 	 However, we do have to insert software single-step
 	 breakpoints, in case the target can't hardware step.  To keep
-	 things single, we always insert.  */
+	 things simple, we always insert.  */
       struct cleanup *old_cleanups;
       int ret;
 
@@ -1975,6 +1985,7 @@ init_record_full_ops (void)
   record_full_ops.to_close = record_full_close;
   record_full_ops.to_async = record_full_async;
   record_full_ops.to_resume = record_full_resume;
+  record_full_ops.to_commit_resume = record_full_commit_resume;
   record_full_ops.to_wait = record_full_wait;
   record_full_ops.to_disconnect = record_disconnect;
   record_full_ops.to_detach = record_detach;

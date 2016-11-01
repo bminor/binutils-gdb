@@ -53,8 +53,13 @@ struct funcs
 static void
 m1 (void)
 {
+  /* m1 and m2 are equivalent, but because of some compiler
+     optimizations we have to make each of them unique.  This is why
+     we have this dummy variable here.  */
+  volatile int dummy = 0;
+
   if (TEST2)
-    STAP_PROBE (test, two);
+    STAP_PROBE1 (test, two, dummy);
 }
 
 static void

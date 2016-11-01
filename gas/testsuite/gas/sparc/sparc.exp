@@ -70,6 +70,7 @@ if [istarget sparc*-*-*] {
         run_dump_test "xcrypto"
         run_dump_test "v9branch1"
         run_dump_test "imm-plus-rreg"
+        run_dump_test "dcti-couples-v9"
     }
 
     if [gas_64_check] {
@@ -98,6 +99,8 @@ if [istarget sparc*-*-*] {
     run_dump_test "v9branch5"
     run_dump_test "pr19910-1"
     run_list_test "pr19910-2"
+    run_dump_test "dcti-couples-v8"
+    run_dump_test "dcti-couples-v9c"
 }
 
 if [istarget sparc-*-vxworks*] {

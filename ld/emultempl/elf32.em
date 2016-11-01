@@ -337,7 +337,11 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
 
   abfd = bfd_openr (name, bfd_get_target (link_info.output_bfd));
   if (abfd == NULL)
-    return FALSE;
+    {
+      if (verbose)
+	info_msg (_("attempt to open %s failed\n"), name);
+      return FALSE;
+    }
 
   /* Linker needs to decompress sections.  */
   abfd->flags |= BFD_DECOMPRESS;
@@ -468,6 +472,15 @@ fragment <<EOF
   return TRUE;
 }
 
+EOF
+if [ "x${NATIVE}" = xyes ] ; then
+fragment <<EOF
+#ifdef HAVE_GETAUXVAL
+#include <sys/auxv.h>
+#endif
+EOF
+fi
+fragment <<EOF
 
 /* Search for a needed file in a path.  */
 
@@ -492,6 +505,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
   len = strlen (name);
   while (1)
     {
+      char * var;
       char *filename, *sset;
 
       s = strchr (path, config.rpath_separator);
@@ -519,6 +533,147 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	  sset = filename + (s - path) + 1;
 	}
       strcpy (sset, name);
+
+      /* PR 20535: Support the same pseudo-environment variables that
+	 are supported by ld.so.  Namely, $ORIGIN, $LIB and $PLATFORM.
+         Since there can be more than one occurrence of these tokens in
+	 the path we loop until no more are found.  */
+      while ((var = strchr (filename, '$')) != NULL)
+	{
+	  /* The ld.so manual page does not say, but I am going to assume that
+	     these tokens are terminated by a directory seperator character
+	     (/) or the end of the string.  There is also an implication that
+	     $ORIGIN should only be used at the start of a path, but that is
+	     not enforced here.
+
+	     FIXME: The ld.so manual page also states that it allows ${ORIGIN}
+	     ${LIB} and ${PLATFORM}.  We should support these variants too.
+
+	     FIXME: The code could be a lot cleverer about allocating space
+	     for the processed string.  */
+	  char *    end = strchr (var, '/');
+	  char *    replacement = NULL;
+	  char *    freeme = NULL;
+	  unsigned  flen = strlen (filename);
+
+	  if (end != NULL)
+	    /* Temporarily terminate the filename at the end of the token.  */
+	    * end = 0;
+
+	  switch (var[1])
+	    {
+	    case 'O':
+	      if (strcmp (var + 2, "RIGIN") == 0)
+		{
+		  /* ORIGIN - replace with the full path to the directory
+		     containing the program or shared object.  */
+		  if (needed.by == NULL)
+		    break;
+		  replacement = bfd_get_filename (needed.by);
+		  if (replacement)
+		    {
+		      char * slash;
+
+		      if (replacement[0] == '/')
+			freeme = xstrdup (replacement);
+		      else
+			{
+			  char * current_dir = getpwd ();
+
+			  freeme = xmalloc (strlen (replacement) + strlen (current_dir));
+			  sprintf (freeme, "%s/%s", current_dir, replacement);
+			}
+
+		      replacement = freeme;
+		      if ((slash = strrchr (replacement, '/')) != NULL)
+			* slash = 0;
+		    }
+		}
+	      break;
+
+	    case 'L':
+	      if (strcmp (var + 2, "IB") == 0)
+		{
+		  /* LIB - replace with "lib" in 32-bit environments
+		     and "lib64" in 64-bit environments.  */
+
+		  /* Note - we could replace this switch statement by
+		     conditional fragments of shell script, but that is messy.
+		     Any compiler worth its salt is going to optimize away
+		     all but one of these case statements anyway.  */
+		  switch ($ELFSIZE)
+		    {
+		    case 32: replacement = "lib"; break;
+		    case 64: replacement = "lib64"; break;
+		    default:
+		      /* $ELFSIZE is not 32 or 64 ...  */
+		      abort ();
+		    }
+		}
+	      break;
+
+	    case 'P':
+	      if (strcmp (var + 2, "LATFORM") == 0)
+		{
+		  /* PLATFORM - replace with a string corresponding
+		     to the processor type of the host system.
+
+		     FIXME: Supporting this token might be a bad idea,
+		     especially for non-native linkers.  It has the potential
+		     to find incorrect results.  Maybe issuing a warning
+		     message would be safer.  Current policy: wait and see if
+		     somebody complains.  */
+		  replacement = "$OUTPUT_ARCH";
+EOF
+# We use getauxval() if it is available, but only for natives.
+if [ "x${NATIVE}" = xyes ] ; then
+fragment <<EOF
+#ifdef HAVE_GETAUXVAL
+		  replacement = (char *) getauxval (AT_PLATFORM);
+#endif
+EOF
+fi
+fragment <<EOF
+		}
+	      break;
+
+	    default:
+	      break;
+	    }
+
+	  if (replacement)
+	    {
+	      char * filename2 = xmalloc (flen + strlen (replacement));
+
+	      if (end)
+		sprintf (filename2, "%.*s%s/%s",
+			 (int)(var - filename), filename,
+			 replacement, end + 1);
+	      else
+		sprintf (filename2, "%.*s%s",
+			 (int)(var - filename), filename,
+			 replacement);
+		
+	      free (filename);
+	      filename = filename2;
+	      /* There is no need to restore the path separator (when
+		 end != NULL) as we have replaced the entire string.  */
+	    }
+	  else
+	    {
+	      if (verbose)
+		/* We only issue an "unrecognised" message in verbose mode
+		   as the $<foo> token might be a legitimate component of
+		   a path name in the target's file system.  */
+		info_msg (_("unrecognised token '%s' in search path\n"), var);
+
+	      if (end)
+		/* Restore the path separator.  */
+		* end = '/';
+	    }
+
+	  free (freeme);
+	}
 
       needed.name = filename;
       if (gld${EMULATION_NAME}_try_needed (&needed, force))
@@ -1903,9 +2058,16 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	   lang_insert_orphan to create a new output section.  */
 	constraint = SPECIAL;
 
+	/* SEC_EXCLUDE is cleared when doing a relocatable link.  But
+	   we can't merge 2 input sections with the same name when only
+	   one of them has SHF_EXCLUDE.  */
 	if (os->bfd_section != NULL
 	    && (os->bfd_section->flags == 0
-		|| (((s->flags ^ os->bfd_section->flags)
+		|| ((!bfd_link_relocatable (&link_info)
+		     || (((elf_section_flags (s)
+			  ^ elf_section_flags (os->bfd_section))
+			 & SHF_EXCLUDE) == 0))
+		    && ((s->flags ^ os->bfd_section->flags)
 		     & (SEC_LOAD | SEC_ALLOC)) == 0
 		    && _bfd_elf_match_sections_by_type (link_info.output_bfd,
 							os->bfd_section,
@@ -2199,15 +2361,19 @@ fi
 
 fragment <<EOF
 
-#define OPTION_DISABLE_NEW_DTAGS	(400)
-#define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
-#define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
-#define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
-#define OPTION_EXCLUDE_LIBS		(OPTION_EH_FRAME_HDR + 1)
-#define OPTION_HASH_STYLE		(OPTION_EXCLUDE_LIBS + 1)
-#define OPTION_BUILD_ID			(OPTION_HASH_STYLE + 1)
-#define OPTION_AUDIT			(OPTION_BUILD_ID + 1)
-#define OPTION_COMPRESS_DEBUG		(OPTION_AUDIT + 1)
+enum elf_options
+{
+  OPTION_DISABLE_NEW_DTAGS = 400,
+  OPTION_ENABLE_NEW_DTAGS,
+  OPTION_GROUP,
+  OPTION_EH_FRAME_HDR,
+  OPTION_NO_EH_FRAME_HDR,
+  OPTION_EXCLUDE_LIBS,
+  OPTION_HASH_STYLE,
+  OPTION_BUILD_ID,
+  OPTION_AUDIT,
+  OPTION_COMPRESS_DEBUG
+};
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -2243,6 +2409,7 @@ fragment <<EOF
     {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
     {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
     {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
+    {"no-eh-frame-hdr", no_argument, NULL, OPTION_NO_EH_FRAME_HDR},
     {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
     {"hash-style", required_argument, NULL, OPTION_HASH_STYLE},
 EOF
@@ -2320,6 +2487,10 @@ fragment <<EOF
 
     case OPTION_EH_FRAME_HDR:
       link_info.eh_frame_hdr_type = DWARF2_EH_HDR;
+      break;
+
+    case OPTION_NO_EH_FRAME_HDR:
+      link_info.eh_frame_hdr_type = 0;
       break;
 
     case OPTION_GROUP:

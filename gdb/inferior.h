@@ -43,6 +43,8 @@ struct target_desc_info;
 #include "progspace.h"
 #include "registry.h"
 
+#include "symfile-add-flags.h"
+
 struct infcall_suspend_state;
 struct infcall_control_state;
 
@@ -388,9 +390,8 @@ struct inferior
   LONGEST exit_code;
 
   /* Default flags to pass to the symbol reading functions.  These are
-     used whenever a new objfile is created.  The valid values come
-     from enum symfile_add_flags.  */
-  int symfile_flags;
+     used whenever a new objfile is created.  */
+  symfile_add_flags symfile_flags;
 
   /* Info about an inferior's target description (if it's fetched; the
      user supplied description's filename, if any; etc.).  */
@@ -513,6 +514,12 @@ extern struct cleanup *save_current_inferior (void);
 #define ALL_INFERIORS(I) \
   for ((I) = inferior_list; (I); (I) = (I)->next)
 
+/* Traverse all non-exited inferiors.  */
+
+#define ALL_NON_EXITED_INFERIORS(I) \
+  ALL_INFERIORS (I)		    \
+    if ((I)->pid != 0)
+
 extern struct inferior *inferior_list;
 
 /* Prune away automatically added inferiors that aren't required
@@ -522,5 +529,8 @@ extern void prune_inferiors (void);
 extern int number_of_inferiors (void);
 
 extern struct inferior *add_inferior_with_spaces (void);
+
+/* Print the current selected inferior.  */
+extern void print_selected_inferior (struct ui_out *uiout);
 
 #endif /* !defined (INFERIOR_H) */

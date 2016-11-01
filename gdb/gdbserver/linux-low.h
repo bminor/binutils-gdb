@@ -301,6 +301,12 @@ struct lwp_info
      information or exit status until it can be reported to GDB.  */
   struct target_waitstatus waitstatus;
 
+  /* A pointer to the fork child/parent relative.  Valid only while
+     the parent fork event is not reported to higher layers.  Used to
+     avoid wildcard vCont actions resuming a fork child before GDB is
+     notified about the parent's fork event.  */
+  struct lwp_info *fork_relative;
+
   /* When stopped is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is
      running, this is the address at which the lwp was resumed.  */

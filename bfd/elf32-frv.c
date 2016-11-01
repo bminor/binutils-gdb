@@ -2561,6 +2561,7 @@ frv_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
     default:
       if (r_type >= (unsigned int) R_FRV_max)
 	{
+	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%B: invalid FRV reloc number: %d"), abfd, r_type);
 	  r_type = 0;
 	}
@@ -2775,6 +2776,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_FRV_32:
 	  if (! IS_FDPIC (output_bfd))
 	    goto non_fdpic;
+	  /* Fall through.  */
 
 	case R_FRV_GOT12:
 	case R_FRV_GOTHI:
@@ -2825,6 +2827,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 						      rel->r_addend))
 	    {
 	      info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%H: relocation to `%s+%v'"
 		   " may have caused the error above\n"),
 		 input_bfd, input_section, rel->r_offset, name, rel->r_addend);
@@ -3911,6 +3914,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   && picrel->d.h->root.type == bfd_link_hash_undefined))
 	    {
 	      info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%H: reloc against `%s' references a different segment\n"),
 		 input_bfd, input_section, rel->r_offset, name);
 	    }
@@ -4061,6 +4065,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (msg)
 	    {
 	      info->callbacks->einfo
+		/* xgettext:c-format */
 		(_("%H: reloc against `%s': %s\n"),
 		 input_bfd, input_section, rel->r_offset, name, msg);
 	      return FALSE;
@@ -6266,6 +6271,7 @@ elf32_frv_check_relocs (bfd *abfd,
 	default:
 	bad_reloc:
 	  info->callbacks->einfo
+	    /* xgettext:c-format */
 	    (_("%B: unsupported relocation type %i\n"),
 	     abfd, ELF32_R_TYPE (rel->r_info));
 	  return FALSE;
@@ -6348,8 +6354,9 @@ frv_elf_arch_extension_p (flagword base, flagword extension)
    object file when linking.  */
 
 static bfd_boolean
-frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, old_partial;
   flagword new_flags, new_partial;
   bfd_boolean error = FALSE;
@@ -6364,9 +6371,10 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     new_flags &= ~EF_FRV_PIC;
 
 #ifdef DEBUG
-  (*_bfd_error_handler) ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
-			 old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
-			 bfd_get_filename (ibfd));
+  _bfd_error_handler
+    ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
+     old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
+     bfd_get_filename (ibfd));
 #endif
 
   if (!elf_flags_init (obfd))			/* First call, no flags set.  */
@@ -6514,7 +6522,8 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	      old_flags &= ~ EF_FRV_PIC_FLAGS;
 #ifndef FRV_NO_PIC_ERROR
 	      error = TRUE;
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%s: compiled with %s and linked with modules that use non-pic relocations"),
 		 bfd_get_filename (ibfd),
 		 (new_flags & EF_FRV_BIGPIC) ? "-fPIC" : "-fpic");
@@ -6567,7 +6576,8 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (new_opt[0])
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: compiled with %s and linked with modules compiled with %s"),
 	     bfd_get_filename (ibfd), new_opt, old_opt);
 	}
@@ -6579,7 +6589,8 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  old_flags |= new_partial;
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: uses different unknown e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)new_partial, (long)old_partial);
 	}
@@ -6600,11 +6611,11 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     {
       error = TRUE;
       if (IS_FDPIC (obfd))
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%s: cannot link non-fdpic object file into fdpic executable"),
 	   bfd_get_filename (ibfd));
       else
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%s: cannot link fdpic object file into non-fdpic executable"),
 	   bfd_get_filename (ibfd));
     }

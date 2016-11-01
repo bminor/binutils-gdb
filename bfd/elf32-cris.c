@@ -463,6 +463,7 @@ cris_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= R_CRIS_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid CRIS reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -1110,6 +1111,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   != (bfd_vma) -1))
 		{
 		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A: unresolvable relocation %s against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -1170,10 +1172,12 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   || (!h->def_dynamic
 			       && h->root.type == bfd_link_hash_undefweak)))))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		((h->got.offset == (bfd_vma) -1)
+		 /* xgettext:c-format */
 		 ? _("%B, section %A: No PLT nor GOT for relocation %s"
 		     " against symbol `%s'")
+		 /* xgettext:c-format */
 		 : _("%B, section %A: No PLT for relocation %s"
 		     " against symbol `%s'"),
 		 input_bfd,
@@ -1298,7 +1302,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   symbols.  Make this an error; the compiler isn't
 		   allowed to pass us these kinds of things.  */
 		if (h == NULL)
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A: relocation %s with non-zero addend %d"
 		       " against local symbol"),
 		     input_bfd,
@@ -1306,7 +1311,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		     cris_elf_howto_table[r_type].name,
 		     rel->r_addend);
 		else
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A: relocation %s with non-zero addend %d"
 		       " against symbol `%s'"),
 		     input_bfd,
@@ -1332,7 +1338,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		       || (!h->def_dynamic
 			   && h->root.type == bfd_link_hash_undefweak))))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s is"
 		   " not allowed for global symbol: `%s'"),
 		 input_bfd,
@@ -1348,7 +1355,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     it's noticed if it happens elsewhere.  */
 	  if (sgot == NULL)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s with no GOT created"),
 		 input_bfd,
 		 input_section,
@@ -1561,12 +1569,14 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  || (!h->def_regular
 		      && h->root.type != bfd_link_hash_undefined)))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		((h->root.type == bfd_link_hash_undefined)
 		 /* We shouldn't get here for GCC-emitted code.  */
+		 /* xgettext:c-format */
 		 ? _("%B, section %A: relocation %s has an undefined"
 		     " reference to `%s', perhaps a declaration mixup?")
-		 : ("%B, section %A: relocation %s is"
+		 /* xgettext:c-format */
+		 : _("%B, section %A: relocation %s is"
 		     " not allowed for `%s', a global symbol with default"
 		     " visibility, perhaps a declaration mixup?"),
 		 input_bfd,
@@ -1649,7 +1659,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 symbol *plus offset*.  The GOT holds relocations for
 		 symbols.  Make this an error; the compiler isn't allowed
 		 to pass us these kinds of things.  */
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s with non-zero addend %d"
 		   " against symbol `%s'"),
 		 input_bfd,
@@ -1802,7 +1813,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 relocations for symbols.  Make this an error; the
 		 compiler isn't allowed to pass us these kinds of
 		 things.  */
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s with non-zero addend %d"
 		   " against symbol `%s'"),
 		 input_bfd,
@@ -1936,7 +1948,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 been emitted.  */
 	      && h->root.type != bfd_link_hash_undefined)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A: relocation %s is"
 		   " not allowed for symbol: `%s'"
 		   " which is defined outside the program,"
@@ -1989,14 +2002,14 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			 only.  */
 		    case R_CRIS_16_GOT_TPREL:
 		    case R_CRIS_16_GOT_GD:
-		      (*_bfd_error_handler)
+		      _bfd_error_handler
 			(_("(too many global variables for -fpic:"
 			   " recompile with -fPIC)"));
 		      break;
 
 		    case R_CRIS_16_TPREL:
 		    case R_CRIS_16_DTPREL:
-		      (*_bfd_error_handler)
+		      _bfd_error_handler
 			(_("(thread-local data too big for -fpic or"
 			   " -msmall-tls: recompile with -fPIC or"
 			   " -mno-small-tls)"));
@@ -3228,7 +3241,8 @@ cris_elf_check_relocs (bfd *abfd,
 		 that, we must insist on dynobj being a specific mach.  */
 	      if (bfd_get_mach (dynobj) == bfd_mach_cris_v10_v32)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
+		    /* xgettext:c-format */
 		    (_("%B, section %A:\n  v10/v32 compatible object %s"
 		       " must not contain a PIC relocation"),
 		     abfd, sec);
@@ -3336,7 +3350,8 @@ cris_elf_check_relocs (bfd *abfd,
 	case R_CRIS_32_GD:
 	  if (bfd_link_pic (info))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A:\n  relocation %s not valid"
 		   " in a shared object;"
 		   " typically an option mixup, recompile with -fPIC"),
@@ -3550,7 +3565,8 @@ cris_elf_check_relocs (bfd *abfd,
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
 	      /* FIXME: How do we make this optionally a warning only?  */
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B, section %A:\n  relocation %s should not"
 		   " be used in a shared object; recompile with -fPIC"),
 		 abfd,
@@ -3972,7 +3988,8 @@ elf_cris_discard_excess_dso_dynamics (struct elf_cris_link_hash_entry *h,
     if ((s->section->flags & SEC_READONLY) != 0)
       {
 	/* FIXME: How do we make this optionally a warning only?  */
-	(*_bfd_error_handler)
+	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B, section `%A', to symbol `%s':\n"
 	     "  relocation %s should not be used"
 	     " in a shared object; recompile with -fPIC"),
@@ -4154,11 +4171,12 @@ cris_elf_print_private_bfd_data (bfd *abfd, void * ptr)
 /* Don't mix files with and without a leading underscore.  */
 
 static bfd_boolean
-cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+cris_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   int imach, omach;
 
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+  if (! _bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -4186,7 +4204,7 @@ cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (bfd_get_symbol_leading_char (ibfd)
       != bfd_get_symbol_leading_char (obfd))
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
 	(bfd_get_symbol_leading_char (ibfd) == '_'
 	 ? _("%B: uses _-prefixed symbols, but writing file with non-prefixed symbols")
 	 : _("%B: uses non-prefixed symbols, but writing file with _-prefixed symbols"),
@@ -4206,7 +4224,7 @@ cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  || (omach == bfd_mach_cris_v32
 	      && imach != bfd_mach_cris_v10_v32))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    ((imach == bfd_mach_cris_v32)
 	     ? _("%B contains CRIS v32 code, incompatible"
 		 " with previous objects")
@@ -4233,17 +4251,13 @@ cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 static bfd_boolean
 cris_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  /* Call the base function.  */
-  if (!_bfd_elf_copy_private_bfd_data (ibfd, obfd))
-    return FALSE;
-
-  /* If output is big-endian for some obscure reason, stop here.  */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
-    return FALSE;
-
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
+
+  /* Call the base function.  */
+  if (!_bfd_elf_copy_private_bfd_data (ibfd, obfd))
+    return FALSE;
 
   /* Do what we really came here for.  */
   return bfd_set_arch_mach (obfd, bfd_arch_cris, bfd_get_mach (ibfd));

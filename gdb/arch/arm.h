@@ -58,6 +58,14 @@ enum gdb_regnum {
   ARM_LAST_FP_ARG_REGNUM = ARM_F3_REGNUM
 };
 
+/* Enum describing the different kinds of breakpoints.  */
+enum arm_breakpoint_kinds
+{
+   ARM_BP_KIND_THUMB = 2,
+   ARM_BP_KIND_THUMB2 = 3,
+   ARM_BP_KIND_ARM = 4,
+};
+
 /* Instruction condition field values.  */
 #define INST_EQ		0x0
 #define INST_NE		0x1

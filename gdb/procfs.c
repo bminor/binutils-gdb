@@ -791,7 +791,7 @@ destroy_procinfo (procinfo *pi)
 static void
 do_destroy_procinfo_cleanup (void *pi)
 {
-  destroy_procinfo (pi);
+  destroy_procinfo ((procinfo *) pi);
 }
 
 enum { NOKILL, KILL };
@@ -845,7 +845,7 @@ sysset_t_alloc (procinfo * pi)
   sysset_t *ret;
   int size = sysset_t_size (pi);
 
-  ret = xmalloc (size);
+  ret = (sysset_t *) xmalloc (size);
 #ifdef DYNAMIC_SYSCALLS
   ret->pr_size = ((pi->num_syscalls + (8 * sizeof (uint64_t) - 1))
 		  / (8 * sizeof (uint64_t)));
@@ -1675,7 +1675,7 @@ proc_set_traced_sysentry (procinfo *pi, sysset_t *sysset)
 		  - sizeof (sysset_t)
 		  + sysset_t_size (pi);
 
-    argp = xmalloc (argp_size);
+    argp = (struct gdb_proc_ctl_pcsentry *) xmalloc (argp_size);
 
     argp->cmd = PCSENTRY;
     memcpy (&argp->sysset, sysset, sysset_t_size (pi));
@@ -1720,7 +1720,7 @@ proc_set_traced_sysexit (procinfo *pi, sysset_t *sysset)
 		  - sizeof (sysset_t)
 		  + sysset_t_size (pi);
 
-    argp = xmalloc (argp_size);
+    argp = (struct gdb_proc_ctl_pcsexit *) xmalloc (argp_size);
 
     argp->cmd = PCSEXIT;
     memcpy (&argp->sysset, sysset, sysset_t_size (pi));
@@ -2512,9 +2512,13 @@ proc_get_LDT_entry (procinfo *pi, int key)
 	break;	/* end of table */
       /* If key matches, return this entry.  */
       if (ldt_entry->sel == key)
-	return ldt_entry;
+	{
+	  do_cleanups (old_chain);
+	  return ldt_entry;
+	}
     }
   /* Loop ended, match not found.  */
+  do_cleanups (old_chain);
   return NULL;
 #else
   int nldt, i;
@@ -2756,7 +2760,7 @@ proc_update_threads (procinfo *pi)
 static void
 do_closedir_cleanup (void *dir)
 {
-  closedir (dir);
+  closedir ((DIR *) dir);
 }
 
 static int
@@ -3716,7 +3720,7 @@ wait_again:
 		    else
 		      {
 			/* How to keep going without returning to wfi: */
-			target_resume (ptid, 0, GDB_SIGNAL_0);
+			target_continue_no_signal (ptid);
 			goto wait_again;
 		      }
 		  }
@@ -3742,7 +3746,7 @@ wait_again:
 		    /* This is an internal event and should be transparent
 		       to wfi, so resume the execution and wait again.	See
 		       comment in procfs_init_inferior() for more details.  */
-		    target_resume (ptid, 0, GDB_SIGNAL_0);
+		    target_continue_no_signal (ptid);
 		    goto wait_again;
 		  }
 #endif
@@ -3836,7 +3840,7 @@ wait_again:
 		      add_thread (temp_ptid);
 
 		    status->kind = TARGET_WAITKIND_STOPPED;
-		    status->value.sig = 0;
+		    status->value.sig = GDB_SIGNAL_0;
 		    return retval;
 		  }
 #endif
@@ -4273,7 +4277,7 @@ procfs_kill_inferior (struct target_ops *ops)
 
       if (pi)
 	unconditionally_kill_inferior (pi);
-      target_mourn_inferior ();
+      target_mourn_inferior (inferior_ptid);
     }
 }
 
@@ -4567,7 +4571,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
       if (path == NULL)
 	path = "/bin:/usr/bin";
 
-      tryname = alloca (strlen (path) + strlen (shell_file) + 2);
+      tryname = (char *) alloca (strlen (path) + strlen (shell_file) + 2);
       for (p = path; p != NULL; p = p1 ? p1 + 1: NULL)
 	{
 	  p1 = strchr (p, ':');
@@ -5367,7 +5371,8 @@ struct procfs_corefile_thread_data {
 static int
 procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
 {
-  struct procfs_corefile_thread_data *args = data;
+  struct procfs_corefile_thread_data *args
+    = (struct procfs_corefile_thread_data *) data;
 
   if (pi != NULL)
     {

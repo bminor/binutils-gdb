@@ -53,6 +53,7 @@
 #include "ui-file.h"
 
 #include "host-defs.h"
+#include "common/enum-flags.h"
 
 /* Scope types enumerator.  List the types of scopes the compiler will
    accept.  */
@@ -101,13 +102,6 @@ enum compile_i_scope_types
 #endif
 
 #include "hashtab.h"
-
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
 
 /* * Enable dbx commands if set.  */
 extern int dbx_commands;
@@ -202,9 +196,9 @@ extern void quit_serial_event_clear (void);
    Note that there's ambiguity between the mangling schemes of some of
    these languages, so some symbols could be successfully demangled by
    several languages.  For that reason, the constants here are sorted
-   in the order we'll attempt demangling them.  For example: Java and
-   Rust use C++ mangling, so must come after C++; Ada must come last
-   (see ada_sniff_from_mangled_name).  */
+   in the order we'll attempt demangling them.  For example: Rust uses
+   C++ mangling, so must come after C++; Ada must come last (see
+   ada_sniff_from_mangled_name).  */
 
 enum language
   {
@@ -213,7 +207,6 @@ enum language
     language_c,			/* C */
     language_objc,		/* Objective-C */
     language_cplus,		/* C++ */
-    language_java,		/* Java */
     language_d,			/* D */
     language_go,		/* Go */
     language_fortran,		/* Fortran */
@@ -602,7 +595,6 @@ enum gdb_osabi
   GDB_OSABI_OPENBSD_ELF,
   GDB_OSABI_WINCE,
   GDB_OSABI_GO32,
-  GDB_OSABI_IRIX,
   GDB_OSABI_HPUX_ELF,
   GDB_OSABI_HPUX_SOM,
   GDB_OSABI_QNXNTO,
@@ -618,16 +610,6 @@ enum gdb_osabi
 
   GDB_OSABI_INVALID		/* keep this last */
 };
-
-/* Global functions from other, non-gdb GNU thingies.
-   Libiberty thingies are no longer declared here.  We include libiberty.h
-   above, instead.  */
-
-/* From other system libraries */
-
-#ifndef atof
-extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
-#endif
 
 /* Enumerate the requirements a symbol has in order to be evaluated.
    These are listed in order of "strength" -- a later entry subsumes
@@ -749,6 +731,21 @@ enum block_enum
   STATIC_BLOCK = 1,
   FIRST_LOCAL_BLOCK = 2
 };
+
+/* User selection used in observer.h and multiple print functions.  */
+
+enum user_selected_what_flag
+  {
+    /* Inferior selected.  */
+    USER_SELECTED_INFERIOR = 1 << 1,
+
+    /* Thread selected.  */
+    USER_SELECTED_THREAD = 1 << 2,
+
+    /* Frame selected.  */
+    USER_SELECTED_FRAME = 1 << 3
+  };
+DEF_ENUM_FLAGS_TYPE (enum user_selected_what_flag, user_selected_what);
 
 #include "utils.h"
 

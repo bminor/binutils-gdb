@@ -53,6 +53,7 @@
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "block.h"
 #include <ctype.h>
+#include <algorithm>
 
 #define parse_type(ps) builtin_type (parse_gdbarch (ps))
 #define parse_f_type(ps) builtin_f_type (parse_gdbarch (ps))
@@ -866,7 +867,7 @@ growbuf_by_size (int count)
 {
   int growby;
 
-  growby = max (count, GROWBY_MIN_SIZE);
+  growby = std::max (count, GROWBY_MIN_SIZE);
   tempbufsize += growby;
   if (tempbuf == NULL)
     tempbuf = (char *) malloc (tempbufsize);

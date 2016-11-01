@@ -2270,9 +2270,12 @@ file as @code{__wrap_malloc}; if you do, the assembler may resolve the
 call before the linker has a chance to wrap it to @code{malloc}.
 
 @kindex --eh-frame-hdr
+@kindex --no-eh-frame-hdr
 @item --eh-frame-hdr
-Request creation of @code{.eh_frame_hdr} section and ELF
-@code{PT_GNU_EH_FRAME} segment header.
+@itemx --no-eh-frame-hdr
+Request (@option{--eh-frame-hdr}) or suppress
+(@option{--no-eh-frame-hdr}) the creation of @code{.eh_frame_hdr}
+section and ELF @code{PT_GNU_EH_FRAME} segment header.
 
 @kindex --ld-generated-unwind-info
 @item --no-ld-generated-unwind-info
@@ -4211,6 +4214,21 @@ they are found in the linker input.  In the second example, all
 @samp{.text} input sections will appear first, followed by all
 @samp{.rdata} input sections.
 
+When using EXCLUDE_FILE with more than one section, the exclusion only
+applies to the section immediately following, for example:
+@smallexample
+*(EXCLUDE_FILE (*somefile.o) .text .rdata)
+@end smallexample
+@noindent
+will cause all @samp{.text} sections from all files except
+@file{somefile.o} to be included, while all @samp{.rdata} sections
+from all files, including @file{somefile.o}, will be included.  To
+exclude the @samp{.rdata} sections from @file{somefile.o} the example
+should be modified to:
+@smallexample
+*(EXCLUDE_FILE (*somefile.o) .text EXCLUDE_FILE (*somefile.o) .rdata)
+@end smallexample
+
 You can specify a file name to include sections from a particular file.
 You would do this if one or more of your files contain special data that
 needs to be at a particular location in memory.  For example:
@@ -6014,7 +6032,9 @@ The result of comparisons, @samp{&&} and @samp{||} is also a number.
 @item
 The result of other binary arithmetic and logical operations on two
 relative addresses in the same section or two absolute addresses
-(after above conversions) is also a number.
+(after above conversions) is also a number when
+@code{LD_FEATURE ("SANE_EXPR")} or inside an output section definition
+but an absolute address otherwise.
 @item
 The result of other operations on relative addresses or one
 relative address and a number, is a relative address in the same

@@ -1725,8 +1725,9 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"),
-				 abfd, r_symndx);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%B: bad symbol index: %d"),
+			      abfd, r_symndx);
 	  return FALSE;
 	}
 
@@ -1832,7 +1833,8 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
                   tls_type = old_tls_type;
                 else
                   {
-                    (*_bfd_error_handler)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
                       (_("%B: `%s' accessed both as normal and thread local symbol"),
                        abfd, h ? h->root.root.string : "<local>");
                     return FALSE;
@@ -3170,7 +3172,8 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       if ((unsigned int)r_type >= ARRAY_SIZE (tilegx_elf_howto_table))
 	{
           /* Not clear if we need to check here, but just be paranoid. */
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
 	     input_bfd, r_type, input_section);
 	  bfd_set_error (bfd_error_bad_value);
@@ -3729,7 +3732,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			  if (indx == 0)
 			    {
 			      BFD_FAIL ();
-			      (*_bfd_error_handler)
+			      _bfd_error_handler
 				(_("%B: probably compiled without -fPIC?"),
 				 input_bfd);
 			      bfd_set_error (bfd_error_bad_value);
@@ -3978,7 +3981,8 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	       && h->def_dynamic)
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
-	(*_bfd_error_handler)
+	_bfd_error_handler
+	  /* xgettext:c-format */
 	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
@@ -4326,7 +4330,7 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
     {
       if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
 	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
 	  return FALSE;
 	}
@@ -4426,14 +4430,16 @@ tilegx_additional_program_headers (bfd *abfd,
 
 
 bfd_boolean
-_bfd_tilegx_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+_bfd_tilegx_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   const char *targ1 = bfd_get_target (ibfd);
   const char *targ2 = bfd_get_target (obfd);
 
   if (strcmp (targ1, targ2) != 0)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B: Cannot link together %s and %s objects."),
 	 ibfd, targ1, targ2);
       bfd_set_error (bfd_error_bad_value);

@@ -49,6 +49,7 @@
 #include "source.h"
 #include "objfiles.h"
 #include "user-regs.h"
+#include <algorithm>
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */
@@ -1925,7 +1926,7 @@ increase_expout_size (struct parser_state *ps, size_t lenelt)
 {
   if ((ps->expout_ptr + lenelt) >= ps->expout_size)
     {
-      ps->expout_size = max (ps->expout_size * 2,
+      ps->expout_size = std::max (ps->expout_size * 2,
 			     ps->expout_ptr + lenelt + 10);
       ps->expout = (struct expression *)
 	xrealloc (ps->expout, (sizeof (struct expression)

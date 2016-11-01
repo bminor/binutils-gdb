@@ -1280,7 +1280,7 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_TASK_LINK:
 	  link_info.task_link = TRUE;
-	  /* Fall through - do an implied -r option.  */
+	  /* Fall through.  */
 	case OPTION_UR:
 	  if (bfd_link_pic (&link_info))
 	    einfo (_("%P%F: -r and %s may not be used together\n"),
@@ -1619,6 +1619,7 @@ parse_args (unsigned argc, char **argv)
       break;
     case dynamic_list_data:
       link_info.dynamic_data = TRUE;
+      /* Fall through.  */
     case dynamic_list:
       link_info.dynamic = TRUE;
       break;
@@ -1723,6 +1724,8 @@ elf_shlib_list_options (FILE *file)
   --enable-new-dtags          Enable new dynamic tags\n"));
   fprintf (file, _("\
   --eh-frame-hdr              Create .eh_frame_hdr section\n"));
+  fprintf (file, _("\
+  --no-eh-frame-hdr           Do not create .eh_frame_hdr section\n"));
   fprintf (file, _("\
   --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
   fprintf (file, _("\

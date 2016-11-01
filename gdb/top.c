@@ -386,33 +386,35 @@ new_ui_command (char *args, int from_tty)
   interpreter_name = argv[0];
   tty_name = argv[1];
 
-  make_cleanup (restore_ui_cleanup, current_ui);
+  {
+    scoped_restore save_ui = make_scoped_restore (&current_ui);
 
-  failure_chain = make_cleanup (null_cleanup, NULL);
+    failure_chain = make_cleanup (null_cleanup, NULL);
 
-  /* Open specified terminal, once for each of
-     stdin/stdout/stderr.  */
-  for (i = 0; i < 3; i++)
-    {
-      stream[i] = open_terminal_stream (tty_name);
-      make_cleanup_fclose (stream[i]);
-    }
+    /* Open specified terminal, once for each of
+       stdin/stdout/stderr.  */
+    for (i = 0; i < 3; i++)
+      {
+	stream[i] = open_terminal_stream (tty_name);
+	make_cleanup_fclose (stream[i]);
+      }
 
-  ui = new_ui (stream[0], stream[1], stream[2]);
-  make_cleanup (delete_ui_cleanup, ui);
+    ui = new_ui (stream[0], stream[1], stream[2]);
+    make_cleanup (delete_ui_cleanup, ui);
 
-  ui->async = 1;
+    ui->async = 1;
 
-  current_ui = ui;
+    current_ui = ui;
 
-  set_top_level_interpreter (interpreter_name);
+    set_top_level_interpreter (interpreter_name);
 
-  interp_pre_command_loop (top_level_interpreter ());
+    interp_pre_command_loop (top_level_interpreter ());
 
-  discard_cleanups (failure_chain);
+    discard_cleanups (failure_chain);
 
-  /* This restores the previous UI and frees argv.  */
-  do_cleanups (success_chain);
+    /* This restores the previous UI and frees argv.  */
+    do_cleanups (success_chain);
+  }
 
   printf_unfiltered ("New UI allocated\n");
 }
@@ -561,8 +563,12 @@ check_frame_language_change (void)
 void
 wait_sync_command_done (void)
 {
+  /* Processing events may change the current UI.  */
+  scoped_restore save_ui = make_scoped_restore (&current_ui);
+  struct ui *ui = current_ui;
+
   while (gdb_do_one_event () >= 0)
-    if (current_ui->prompt_state != PROMPT_BLOCKED)
+    if (ui->prompt_state != PROMPT_BLOCKED)
       break;
 }
 
@@ -695,28 +701,27 @@ execute_command_to_string (char *p, int from_tty)
      restoration callbacks.  */
   cleanup = set_batch_flag_and_make_cleanup_restore_page_info ();
 
-  make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   str_file = mem_fileopen ();
 
   make_cleanup_ui_file_delete (str_file);
-  make_cleanup_restore_ui_file (&gdb_stdout);
-  make_cleanup_restore_ui_file (&gdb_stderr);
-  make_cleanup_restore_ui_file (&gdb_stdlog);
-  make_cleanup_restore_ui_file (&gdb_stdtarg);
-  make_cleanup_restore_ui_file (&gdb_stdtargerr);
 
   if (ui_out_redirect (current_uiout, str_file) < 0)
     warning (_("Current output protocol does not support redirection"));
   else
     make_cleanup_ui_out_redirect_pop (current_uiout);
 
-  gdb_stdout = str_file;
-  gdb_stderr = str_file;
-  gdb_stdlog = str_file;
-  gdb_stdtarg = str_file;
-  gdb_stdtargerr = str_file;
+  scoped_restore save_stdout
+    = make_scoped_restore (&gdb_stdout, str_file);
+  scoped_restore save_stderr
+    = make_scoped_restore (&gdb_stderr, str_file);
+  scoped_restore save_stdlog
+    = make_scoped_restore (&gdb_stdlog, str_file);
+  scoped_restore save_stdtarg
+    = make_scoped_restore (&gdb_stdtarg, str_file);
+  scoped_restore save_stdtargerr
+    = make_scoped_restore (&gdb_stdtargerr, str_file);
 
   execute_command (p, from_tty);
 
@@ -1030,6 +1035,9 @@ gdb_readline_wrapper (const char *prompt)
   ui->secondary_prompt_depth++;
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
 
+  /* Processing events may change the current UI.  */
+  scoped_restore save_ui = make_scoped_restore (&current_ui);
+
   if (cleanup->target_is_async_orig)
     target_async (0);
 
@@ -1158,7 +1166,7 @@ gdb_safe_append_history (void)
   struct cleanup *old_chain;
 
   local_history_filename
-    = xstrprintf ("%s-gdb%d~", history_filename, getpid ());
+    = xstrprintf ("%s-gdb%ld~", history_filename, (long) getpid ());
   old_chain = make_cleanup (xfree, local_history_filename);
 
   ret = rename (history_filename, local_history_filename);
@@ -1616,7 +1624,7 @@ undo_terminal_modifications_before_exit (void)
 /* Quit without asking for confirmation.  */
 
 void
-quit_force (char *args, int from_tty)
+quit_force (int *exit_arg, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
@@ -1625,16 +1633,12 @@ quit_force (char *args, int from_tty)
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression.  */
-  if (args)
-    {
-      struct value *val = parse_and_eval (args);
-
-      exit_code = (int) value_as_long (val);
-    }
+  if (exit_arg)
+    exit_code = *exit_arg;
   else if (return_child_result)
     exit_code = return_child_result_value;
 
-  qt.args = args;
+  qt.args = NULL;
   qt.from_tty = from_tty;
 
   /* We want to handle any quit errors and exit regardless.  */

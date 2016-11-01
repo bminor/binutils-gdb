@@ -806,7 +806,8 @@ coff_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 
       memcpy (buf, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
       buf[sizeof (scnhdr_int->s_name)] = '\0';
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%s: warning: %s: line number overflow: 0x%lx > 0xffff"),
 	 bfd_get_filename (abfd),
 	 buf, scnhdr_int->s_nlnno);
@@ -821,9 +822,10 @@ coff_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 
       memcpy (buf, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
       buf[sizeof (scnhdr_int->s_name)] = '\0';
-      (*_bfd_error_handler) (_("%s: %s: reloc overflow: 0x%lx > 0xffff"),
-			     bfd_get_filename (abfd),
-			     buf, scnhdr_int->s_nreloc);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%s: %s: reloc overflow: 0x%lx > 0xffff"),
+			  bfd_get_filename (abfd),
+			  buf, scnhdr_int->s_nreloc);
       bfd_set_error (bfd_error_file_truncated);
       PUT_SCNHDR_NRELOC (abfd, 0xffff, scnhdr_ext->s_nreloc);
       ret = 0;

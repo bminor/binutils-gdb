@@ -124,8 +124,8 @@ osf_core_core_file_p (bfd *abfd)
 	  flags = SEC_HAS_CONTENTS;
 	  break;
 	default:
-	  (*_bfd_error_handler) (_("Unhandled OSF/1 core file section type %d\n"),
-				 core_scnhdr.scntype);
+	  _bfd_error_handler (_("Unhandled OSF/1 core file section type %d\n"),
+			      core_scnhdr.scntype);
 	  continue;
 	}
 

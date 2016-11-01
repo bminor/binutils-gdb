@@ -33,7 +33,8 @@
 #define BFD_M68HC11_BANK_VIRTUAL_NAME "__bank_virtual"
 
 /* Set and control ELF flags in ELF header.  */
-extern bfd_boolean _bfd_m68hc11_elf_merge_private_bfd_data (bfd*,bfd*);
+extern bfd_boolean _bfd_m68hc11_elf_merge_private_bfd_data
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_m68hc11_elf_set_private_flags (bfd*,flagword);
 extern bfd_boolean _bfd_m68hc11_elf_print_private_bfd_data (bfd*, void*);
 

@@ -730,6 +730,7 @@ set_operand (char *operand, ins * crx_ins)
     case arg_sc:    /* Case *+0x18.  */
     case arg_ic:    /* Case $0x18.  */
       operandS++;
+      /* Fall through.  */
     case arg_c:	    /* Case 0x18.  */
       /* Set constant.  */
       process_label_constant (operandS, crx_ins);
@@ -747,6 +748,7 @@ set_operand (char *operand, ins * crx_ins)
       *operandE = '\0';
       process_label_constant (operandS, crx_ins);
       operandS = operandE;
+      /* Fall through.  */
     case arg_rbase: /* Case (r1).  */
       operandS++;
       /* Set register base.  */
@@ -1279,6 +1281,7 @@ print_operand (int nbits, int shift, argument *arg)
       CRX_PRINT (0, getreg_image (arg->r), 12);
       CRX_PRINT (0, getreg_image (arg->i_r), 8);
       CRX_PRINT (0, arg->scale, 6);
+      /* Fall through.  */
     case arg_ic:
     case arg_c:
       print_constant (nbits, shift, arg);

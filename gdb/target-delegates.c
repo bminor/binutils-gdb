@@ -109,6 +109,28 @@ debug_resume (struct target_ops *self, ptid_t arg1, int arg2, enum gdb_signal ar
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
+static void
+delegate_commit_resume (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_commit_resume (self);
+}
+
+static void
+tdefault_commit_resume (struct target_ops *self)
+{
+}
+
+static void
+debug_commit_resume (struct target_ops *self)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_commit_resume (...)\n", debug_target.to_shortname);
+  debug_target.to_commit_resume (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_commit_resume (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
 static ptid_t
 delegate_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
 {
@@ -4108,6 +4130,8 @@ install_delegators (struct target_ops *ops)
     ops->to_disconnect = delegate_disconnect;
   if (ops->to_resume == NULL)
     ops->to_resume = delegate_resume;
+  if (ops->to_commit_resume == NULL)
+    ops->to_commit_resume = delegate_commit_resume;
   if (ops->to_wait == NULL)
     ops->to_wait = delegate_wait;
   if (ops->to_fetch_registers == NULL)
@@ -4413,6 +4437,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_detach = tdefault_detach;
   ops->to_disconnect = tdefault_disconnect;
   ops->to_resume = tdefault_resume;
+  ops->to_commit_resume = tdefault_commit_resume;
   ops->to_wait = default_target_wait;
   ops->to_fetch_registers = tdefault_fetch_registers;
   ops->to_store_registers = tdefault_store_registers;
@@ -4570,6 +4595,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_detach = debug_detach;
   ops->to_disconnect = debug_disconnect;
   ops->to_resume = debug_resume;
+  ops->to_commit_resume = debug_commit_resume;
   ops->to_wait = debug_wait;
   ops->to_fetch_registers = debug_fetch_registers;
   ops->to_store_registers = debug_store_registers;

@@ -1136,32 +1136,12 @@ Do not use strnicmp(), instead use strncasecmp()"
 # Boolean expressions and conditionals
 
 BEGIN { doc["boolean"] = "\
-Do not use `boolean'\'',  use `int'\'' instead"
+Do not use `boolean'\'',  use `bool'\'' instead"
     category["boolean"] = ari_regression
 }
 /(^|[^_[:alnum:]])boolean([^_[:alnum:]]|$)/ {
     if (is_yacc_or_lex == 0) {
        fail("boolean")
-    }
-}
-
-BEGIN { doc["false"] = "\
-Definitely do not use `false'\'' in boolean expressions"
-    category["false"] = ari_regression
-}
-/(^|[^_[:alnum:]])false([^_[:alnum:]]|$)/ {
-    if (is_yacc_or_lex == 0) {
-       fail("false")
-    }
-}
-
-BEGIN { doc["true"] = "\
-Do not try to use `true'\'' in boolean expressions"
-    category["true"] = ari_regression
-}
-/(^|[^_[:alnum:]])true([^_[:alnum:]]|$)/ {
-    if (is_yacc_or_lex == 0) {
-       fail("true")
     }
 }
 

@@ -29,7 +29,6 @@
 #include "elf/xgate.h"
 
 /* Set and control ELF flags in ELF header.  */
-extern bfd_boolean _bfd_xgate_elf_merge_private_bfd_data (bfd*,bfd*);
 extern bfd_boolean _bfd_xgate_elf_set_private_flags (bfd*,flagword);
 extern bfd_boolean _bfd_xgate_elf_print_private_bfd_data (bfd*, void*);
 

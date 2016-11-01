@@ -1,3 +1,26 @@
+2016-10-06  Tom Tromey  <tromey@sourceware.org>
+
+	PR gprof/20656
+	* source.c (annotate_source): Delete redundant assignment to
+	new_line.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* gprof.c: Add missing fall through comments.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
+2016-08-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gprof/20499
+	* corefile.c (num_of_syms_in): Return an unsigned int.
+	Fail if the count exceeds the maximum possible allocatable size.
+	(core_create_syms_from): Exit early if num_of_syms_in returns a
+	failure code.
+
 2016-08-23  Nick Clifton  <nickc@redhat.com>
 
 	PR gprof/20499

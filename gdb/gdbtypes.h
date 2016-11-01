@@ -184,35 +184,8 @@ enum type_code
     TYPE_CODE_XMETHOD
   };
 
-/* * Some constants representing each bit field in the main_type.  See
-   the bit-field-specific macros, below, for documentation of each
-   constant in this enum.  These enum values are only used with
-   init_type.  Note that the values are chosen not to conflict with
-   type_instance_flag_value; this lets init_type error-check its
-   input.  */
-
-enum type_flag_value
-{
-  TYPE_FLAG_UNSIGNED = (1 << 9),
-  TYPE_FLAG_NOSIGN = (1 << 10),
-  TYPE_FLAG_STUB = (1 << 11),
-  TYPE_FLAG_TARGET_STUB = (1 << 12),
-  TYPE_FLAG_STATIC = (1 << 13),
-  TYPE_FLAG_PROTOTYPED = (1 << 14),
-  TYPE_FLAG_INCOMPLETE = (1 << 15),
-  TYPE_FLAG_VARARGS = (1 << 16),
-  TYPE_FLAG_VECTOR = (1 << 17),
-  TYPE_FLAG_FIXED_INSTANCE = (1 << 18),
-  TYPE_FLAG_STUB_SUPPORTED = (1 << 19),
-  TYPE_FLAG_GNU_IFUNC = (1 << 20),
-
-  /* * Used for error-checking.  */
-  TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
-};
-
 /* * Some bits for the type's instance_flags word.  See the macros
-   below for documentation on each bit.  Note that if you add a value
-   here, you must update the enum type_flag_value as well.  */
+   below for documentation on each bit.  */
 
 enum type_instance_flag_value
 {
@@ -228,7 +201,7 @@ enum type_instance_flag_value
 };
 
 /* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
-   the type is signed (unless TYPE_FLAG_NOSIGN (below) is set).  */
+   the type is signed (unless TYPE_NOSIGN (below) is set).  */
 
 #define TYPE_UNSIGNED(t)	(TYPE_MAIN_TYPE (t)->flag_unsigned)
 
@@ -370,11 +343,11 @@ enum type_instance_flag_value
    architecture's two (or more) address spaces, but this is an extension
    of the architecture's model.
 
-   If TYPE_FLAG_INST is set, an object of the corresponding type
+   If TYPE_INSTANCE_FLAG_CODE_SPACE is set, an object of the corresponding type
    resides in instruction memory, even if its address (in the extended
    flat address space) does not reflect this.
 
-   Similarly, if TYPE_FLAG_DATA is set, then an object of the 
+   Similarly, if TYPE_INSTANCE_FLAG_DATA_SPACE is set, then an object of the
    corresponding type resides in the data memory space, even if
    this is not indicated by its (flat address space) address.
 
@@ -390,7 +363,7 @@ enum type_instance_flag_value
 /* * Address class flags.  Some environments provide for pointers
    whose size is different from that of a normal pointer or address
    types where the bits are interpreted differently than normal
-   addresses.  The TYPE_FLAG_ADDRESS_CLASS_n flags may be used in
+   addresses.  The TYPE_INSTANCE_FLAG_ADDRESS_CLASS_n flags may be used in
    target specific ways to represent these different types of address
    classes.  */
 
@@ -685,7 +658,7 @@ struct main_type
 
      This is used for printing only, except by poorly designed C++ code.
      For looking up a name, look for a symbol in the STRUCT_DOMAIN.
-     One more legitimate use is that if TYPE_FLAG_STUB is set, this is
+     One more legitimate use is that if TYPE_STUB is set, this is
      the name to use to look for definitions in other files.  */
 
   const char *tag_name;
@@ -952,10 +925,6 @@ struct cplus_struct_type
        dynamic.  Zero if not yet computed.  */
 
     int is_dynamic : 2;
-
-    /* * Non-zero if this type came from a Java CU.  */
-
-    unsigned int is_java : 1;
 
     /* * The base class which defined the virtual function table pointer.  */
 
@@ -1336,7 +1305,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
 #define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
-#define TYPE_CPLUS_REALLY_JAVA(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_java
 
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
@@ -1672,8 +1640,21 @@ extern unsigned int type_length_units (struct type *type);
 
 /* * Helper function to construct objfile-owned types.  */
 
-extern struct type *init_type (enum type_code, int, int, const char *,
-			       struct objfile *);
+extern struct type *init_type (struct objfile *, enum type_code, int,
+			       const char *);
+extern struct type *init_integer_type (struct objfile *, int, int,
+				       const char *);
+extern struct type *init_character_type (struct objfile *, int, int,
+					 const char *);
+extern struct type *init_boolean_type (struct objfile *, int, int,
+				       const char *);
+extern struct type *init_float_type (struct objfile *, int, const char *,
+				     const struct floatformat **);
+extern struct type *init_decfloat_type (struct objfile *, int, const char *);
+extern struct type *init_complex_type (struct objfile *, const char *,
+				       struct type *);
+extern struct type *init_pointer_type (struct objfile *, int, const char *,
+				       struct type *);
 
 /* Helper functions to construct architecture-owned types.  */
 extern struct type *arch_type (struct gdbarch *, enum type_code, int,
@@ -1686,7 +1667,10 @@ extern struct type *arch_boolean_type (struct gdbarch *, int, int,
 				       const char *);
 extern struct type *arch_float_type (struct gdbarch *, int, const char *,
 				     const struct floatformat **);
+extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
 extern struct type *arch_complex_type (struct gdbarch *, const char *,
+				       struct type *);
+extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
 				       struct type *);
 
 /* Helper functions to construct a struct or record type.  An

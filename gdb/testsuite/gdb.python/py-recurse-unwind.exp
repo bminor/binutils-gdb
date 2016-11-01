@@ -61,7 +61,6 @@ gdb_test_no_output "python TestUnwinder.reset_count()"
 # get hung up in potentially infinite recursion when invoking the
 # Python-based unwinder.
 
-setup_kfail "gdb/19927" "*-*-*"
 gdb_test_sequence "bt"  "backtrace" {
     "\\r\\n#0 .* ccc \\(arg=789\\) at "
     "\\r\\n#1 .* bbb \\(arg=456\\) at "
@@ -71,5 +70,4 @@ gdb_test_sequence "bt"  "backtrace" {
 
 # Test that the python-based unwinder / sniffer was actually called
 # during generation of the backtrace.
-setup_kfail "gdb/19927" "*-*-*"
 gdb_test "python print(TestUnwinder.count > 0)" "True"

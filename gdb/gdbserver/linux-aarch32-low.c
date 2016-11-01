@@ -62,11 +62,15 @@ arm_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
   uint32_t *regs = (uint32_t *) buf;
+  uint32_t cpsr = regs[ARM_CPSR_GREGNUM];
 
   for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
     collect_register (regcache, i, &regs[i]);
 
   collect_register (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
+  /* Keep reserved bits bit 20 to bit 23.  */
+  regs[ARM_CPSR_GREGNUM] = ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff)
+			    | (cpsr & 0x00f00000));
 }
 
 /* Supply GP registers contents, stored in BUF, to REGCACHE.  */
@@ -214,14 +218,6 @@ arm_breakpoint_at (CORE_ADDR where)
 
   return 0;
 }
-
-/* Enum describing the different kinds of breakpoints.  */
-enum arm_breakpoint_kinds
-{
-   ARM_BP_KIND_THUMB = 2,
-   ARM_BP_KIND_THUMB2 = 3,
-   ARM_BP_KIND_ARM = 4,
-};
 
 /* Implementation of linux_target_ops method "breakpoint_kind_from_pc".
 

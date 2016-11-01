@@ -36,8 +36,8 @@
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "objfiles.h"
-
 #include "m32r-tdep.h"
+#include <algorithm>
 
 /* Local functions */
 
@@ -484,7 +484,7 @@ m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	   the end of the function.  In this case, there probably isn't a
 	   prologue.  */
 	{
-	  func_end = min (func_end, func_addr + DEFAULT_SEARCH_LIMIT);
+	  func_end = std::min (func_end, func_addr + DEFAULT_SEARCH_LIMIT);
 	}
     }
   else

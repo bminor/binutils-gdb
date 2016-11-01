@@ -1,3 +1,519 @@
+2016-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_RM_0_0FAE_REG_7): Removed.
+	(prefix_table): Remove the PREFIX_RM_0_0FAE_REG_7 entry.
+	(rm_table): Update the RM_0FAE_REG_7 entry.
+	* i386-gen.c (cpu_flag_init): Remove CPU_PCOMMIT_FLAGS.
+	(cpu_flags): Remove CpuPCOMMIT.
+	* i386-opc.h (CpuPCOMMIT): Removed.
+	(i386_cpu_flags): Remove cpupcommit.
+	* i386-opc.tbl: Remove pcommit.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2016-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20705
+	* i386-dis.c (get_valid_dis386): Ignore the REX_B bit and
+	the highest bit in VEX.vvvv for the 3-byte VEX prefix in
+	32-bit mode.  Don't check vex.register_specifier in 32-bit
+	mode.
+	(OP_VEX): Check for invalid mask registers.
+
+2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20699
+	* i386-dis.c (OP_E_memory): Check addr32flag in stead of
+	sizeflag.
+
+2016-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/20704
+	* i386-dis.c (three_byte_table): Remove the remaining SSE5 support.
+
+2016-10-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* aarch64-dis.c (aarch64_ext_sve_addr_rr_lsl): Rename `index'
+	local variable to `index_regno'.
+
+2016-10-17  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-tbl.h: Removed any "inv.+" instructions from the table.
+
+2016-10-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (find_format_from_table): Discriminate LIMM indicator
+	usage on ISA basis.
+
+2016-10-11  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20666
+	* aarch64-asm.c (convert_bfc_to_bfm): Fix dest index.
+
+2016-10-07  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20667
+	* aarch64-opc.c (aarch64_print_operand): Always print operand if it's
+	available.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* sh-opc.h (sh_merge_bfd_arch): Delete prototype.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* aarch64-opc.c: Spell fall through comments consistently.
+	* i386-dis.c: Likewise.
+	* aarch64-dis.c: Add missing fall through comments.
+	* aarch64-opc.c: Likewise.
+	* arc-dis.c: Likewise.
+	* arm-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* mep-asm.c: Likewise.
+	* ns32k-dis.c: Likewise.
+	* sh-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* tic6x-dis.c: Likewise.
+	* vax-dis.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* arc-ext.c (create_map): Add missing break.
+	* msp430-decode.opc (encode_as): Likewise.
+	* msp430-decode.c: Regenerate.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* cr16-dis.c (print_insn_cr16): Don't use boolean OR in arithmetic.
+	* crx-dis.c (print_insn_crx): Likewise.
+
+2016-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20657
+	* i386-dis.c (putop): Don't assign alt twice.
+
+2016-09-29  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20553
+	* aarch64-tbl.h (fmla, fmls, fmul, fmulx): Fix opcode mask field.
+
+2016-09-29  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (L): Make compulsory.
+	(LOPT): New, optional form of L.
+	(HTM_R): Define as LOPT.
+	(L0, L1): Delete.
+	(L32OPT): New, optional for 32-bit L.
+	(L2OPT): New, 2-bit L for dcbf.
+	(SVC_LEC): Update.
+	(L2): Define.
+	(insert_l0, extract_l0, insert_l1, extract_l2): Delete.
+	(powerpc_opcodes <cmpli, cmpi, cmpl, cmp>): Use L32OPT.
+	<dcbf>: Use L2OPT.
+	<tlbiel, tlbie>: Use LOPT.
+	<wclr, wclrall>: Use L2.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
+2016-09-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-ext-tbl.h (EXTINSN2OPF): Define.
+	(EXTINSN2OP): Use EXTINSN2OPF.
+	(bspeekm, bspop, modapp): New extension instructions.
+	* arc-opc.c (F_DNZ_ND): Define.
+	(F_DNZ_D): Likewise.
+	(F_SIZEB1): Changed.
+	(C_DNZ_D): Define.
+	(C_HARD): Changed.
+	* arc-tbl.h (dbnz): New instruction.
+	(prealloc): Allow it for ARC EM.
+	(xbfu): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (print_immediate_offset_address): Print spaces
+	after commas in addresses.
+	(aarch64_print_operand): Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Use "must be"
+	rather than "should be" or "expected to be" in error messages.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-dis.c (remove_dot_suffix): New function, split out from...
+	(print_mnemonic_name): ...here.
+	(print_comment): New function.
+	(print_aarch64_insn): Call it.
+	* aarch64-opc.c (aarch64_conds): Add SVE names.
+	(aarch64_print_operand): Print alternative condition names in
+	a comment.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (OP_SVE_B, OP_SVE_BB, OP_SVE_BBBU, OP_SVE_BMB)
+	(OP_SVE_BPB, OP_SVE_BUB, OP_SVE_BUBB, OP_SVE_BUU, OP_SVE_BZ)
+	(OP_SVE_BZB, OP_SVE_BZBB, OP_SVE_BZU, OP_SVE_DD, OP_SVE_DDD)
+	(OP_SVE_DMD, OP_SVE_DMH, OP_SVE_DMS, OP_SVE_DU, OP_SVE_DUD, OP_SVE_DUU)
+	(OP_SVE_DUV_BHS, OP_SVE_DUV_BHSD, OP_SVE_DZD, OP_SVE_DZU, OP_SVE_HB)
+	(OP_SVE_HMD, OP_SVE_HMS, OP_SVE_HU, OP_SVE_HUU, OP_SVE_HZU, OP_SVE_RR)
+	(OP_SVE_RURV_BHSD, OP_SVE_RUV_BHSD, OP_SVE_SMD, OP_SVE_SMH, OP_SVE_SMS)
+	(OP_SVE_SU, OP_SVE_SUS, OP_SVE_SUU, OP_SVE_SZS, OP_SVE_SZU, OP_SVE_UB)
+	(OP_SVE_UUD, OP_SVE_UUS, OP_SVE_VMR_BHSD, OP_SVE_VMU_SD)
+	(OP_SVE_VMVD_BHS, OP_SVE_VMVU_BHSD, OP_SVE_VMVU_SD, OP_SVE_VMVV_BHSD)
+	(OP_SVE_VMVV_SD, OP_SVE_VMV_BHSD, OP_SVE_VMV_HSD, OP_SVE_VMV_SD)
+	(OP_SVE_VM_SD, OP_SVE_VPU_BHSD, OP_SVE_VPV_BHSD, OP_SVE_VRR_BHSD)
+	(OP_SVE_VRU_BHSD, OP_SVE_VR_BHSD, OP_SVE_VUR_BHSD, OP_SVE_VUU_BHSD)
+	(OP_SVE_VUVV_BHSD, OP_SVE_VUVV_SD, OP_SVE_VUV_BHSD, OP_SVE_VUV_SD)
+	(OP_SVE_VU_BHSD, OP_SVE_VU_HSD, OP_SVE_VU_SD, OP_SVE_VVD_BHS)
+	(OP_SVE_VVU_BHSD, OP_SVE_VVVU_SD, OP_SVE_VVV_BHSD, OP_SVE_VVV_SD)
+	(OP_SVE_VV_BHSD, OP_SVE_VV_HSD_BHS, OP_SVE_VV_SD, OP_SVE_VWW_BHSD)
+	(OP_SVE_VXX_BHSD, OP_SVE_VZVD_BHS, OP_SVE_VZVU_BHSD, OP_SVE_VZVV_BHSD)
+	(OP_SVE_VZVV_SD, OP_SVE_VZV_SD, OP_SVE_V_SD, OP_SVE_WU, OP_SVE_WV_BHSD)
+	(OP_SVE_XU, OP_SVE_XUV_BHSD, OP_SVE_XVW_BHSD, OP_SVE_XV_BHSD)
+	(OP_SVE_XWU, OP_SVE_XXU): New macros.
+	(aarch64_feature_sve): New variable.
+	(SVE): New macro.
+	(_SVE_INSN): Likewise.
+	(aarch64_opcode_table): Add SVE instructions.
+	* aarch64-opc.h (extract_fields): Declare.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.c (do_misc_encoding): Handle the new SVE aarch64_ops.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.c (extract_fields): Make global.
+	(do_misc_decoding): Handle the new SVE aarch64_ops.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.h (FLD_SVE_M_4, FLD_SVE_M_14, FLD_SVE_M_16)
+	(FLD_SVE_sz, FLD_SVE_tsz, FLD_SVE_tszl_8, FLD_SVE_tszl_19): New
+	aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries.
+	* aarch64-asm.c (aarch64_get_variant): New function.
+	(aarch64_encode_variant_using_iclass): Likewise.
+	(aarch64_opcode_encode): Call it.
+	* aarch64-dis.c (aarch64_decode_variant_using_iclass): New function.
+	(aarch64_opcode_decode): Call it.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE core
+	and FP register operands.
+	* aarch64-opc.h (FLD_SVE_Rm, FLD_SVE_Rn, FLD_SVE_Vd, FLD_SVE_Vm)
+	(FLD_SVE_Vn): New aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries.
+	(aarch64_print_operand): Handle the new SVE core and FP register
+	operands.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm-2.c: Likewise.
+	* aarch64-dis-2.c: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE FP
+	immediate operands.
+	* aarch64-opc.h (FLD_SVE_i1): New aarch64_field_kind.
+	* aarch64-opc.c (fields): Add corresponding entry.
+	(operand_general_constraint_met_p): Handle the new SVE FP immediate
+	operands.
+	(aarch64_print_operand): Likewise.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_float_half_one, ins_sve_float_half_two)
+	(ins_sve_float_zero_one): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_float_half_one): New function.
+	(aarch64_ins_sve_float_half_two): Likewise.
+	(aarch64_ins_sve_float_zero_one): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_float_half_one, ext_sve_float_half_two)
+	(ext_sve_float_zero_one): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_float_half_one): New function.
+	(aarch64_ext_sve_float_half_two): Likewise.
+	(aarch64_ext_sve_float_zero_one): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE
+	integer immediate operands.
+	* aarch64-opc.h (FLD_SVE_immN, FLD_SVE_imm3, FLD_SVE_imm5)
+	(FLD_SVE_imm5b, FLD_SVE_imm7, FLD_SVE_imm8, FLD_SVE_imm9)
+	(FLD_SVE_immr, FLD_SVE_imms, FLD_SVE_tszh): New aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries.
+	(operand_general_constraint_met_p): Handle the new SVE integer
+	immediate operands.
+	(aarch64_print_operand): Likewise.
+	(aarch64_sve_dupm_mov_immediate_p): New function.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_inv_limm, ins_sve_aimm, ins_sve_asimm)
+	(ins_sve_limm_mov, ins_sve_shlimm, ins_sve_shrimm): New inserters.
+	* aarch64-asm.c (aarch64_ins_limm_1): New function, split out from...
+	(aarch64_ins_limm): ...here.
+	(aarch64_ins_inv_limm): New function.
+	(aarch64_ins_sve_aimm): Likewise.
+	(aarch64_ins_sve_asimm): Likewise.
+	(aarch64_ins_sve_limm_mov): Likewise.
+	(aarch64_ins_sve_shlimm): Likewise.
+	(aarch64_ins_sve_shrimm): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_inv_limm, ext_sve_aimm, ext_sve_asimm)
+	(ext_sve_limm_mov, ext_sve_shlimm, ext_sve_shrimm): New extractors.
+	* aarch64-dis.c (decode_limm): New function, split out from...
+	(aarch64_ext_limm): ...here.
+	(aarch64_ext_inv_limm): New function.
+	(decode_sve_aimm): Likewise.
+	(aarch64_ext_sve_aimm): Likewise.
+	(aarch64_ext_sve_asimm): Likewise.
+	(aarch64_ext_sve_limm_mov): Likewise.
+	(aarch64_top_bit): Likewise.
+	(aarch64_ext_sve_shlimm): Likewise.
+	(aarch64_ext_sve_shrimm): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for new MUL VL
+	operands.
+	* aarch64-opc.c (aarch64_operand_modifiers): Initialize
+	the AARCH64_MOD_MUL_VL entry.
+	(value_aligned_p): Cope with non-power-of-two alignments.
+	(operand_general_constraint_met_p): Handle the new MUL VL addresses.
+	(print_immediate_offset_address): Likewise.
+	(aarch64_print_operand): Likewise.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_addr_ri_s4xvl, ins_sve_addr_ri_s6xvl)
+	(ins_sve_addr_ri_s9xvl): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_addr_ri_s4xvl): New function.
+	(aarch64_ins_sve_addr_ri_s6xvl): Likewise.
+	(aarch64_ins_sve_addr_ri_s9xvl): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_addr_ri_s4xvl, ext_sve_addr_ri_s6xvl)
+	(ext_sve_addr_ri_s9xvl): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_addr_reg_mul_vl): New function.
+	(aarch64_ext_sve_addr_ri_s4xvl): Likewise.
+	(aarch64_ext_sve_addr_ri_s6xvl): Likewise.
+	(aarch64_ext_sve_addr_ri_s9xvl): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for the new SVE
+	address operands.
+	* aarch64-opc.h (FLD_SVE_imm6, FLD_SVE_msz, FLD_SVE_xs_14)
+	(FLD_SVE_xs_22): New aarch64_field_kinds.
+	(OPD_F_OD_MASK, OPD_F_OD_LSB, OPD_F_NO_ZR): New flags.
+	(get_operand_specific_data): New function.
+	* aarch64-opc.c (fields): Add entries for FLD_SVE_imm6, FLD_SVE_msz,
+	FLD_SVE_xs_14 and FLD_SVE_xs_22.
+	(operand_general_constraint_met_p): Handle the new SVE address
+	operands.
+	(sve_reg): New array.
+	(get_addr_sve_reg_name): New function.
+	(aarch64_print_operand): Handle the new SVE address operands.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_addr_ri_u6, ins_sve_addr_rr_lsl)
+	(ins_sve_addr_rz_xtw, ins_sve_addr_zi_u5, ins_sve_addr_zz_lsl)
+	(ins_sve_addr_zz_sxtw, ins_sve_addr_zz_uxtw): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_addr_ri_u6): New function.
+	(aarch64_ins_sve_addr_rr_lsl): Likewise.
+	(aarch64_ins_sve_addr_rz_xtw): Likewise.
+	(aarch64_ins_sve_addr_zi_u5): Likewise.
+	(aarch64_ins_sve_addr_zz): Likewise.
+	(aarch64_ins_sve_addr_zz_lsl): Likewise.
+	(aarch64_ins_sve_addr_zz_sxtw): Likewise.
+	(aarch64_ins_sve_addr_zz_uxtw): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_addr_ri_u6, ext_sve_addr_rr_lsl)
+	(ext_sve_addr_rz_xtw, ext_sve_addr_zi_u5, ext_sve_addr_zz_lsl)
+	(ext_sve_addr_zz_sxtw, ext_sve_addr_zz_uxtw): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_add_reg_imm): New function.
+	(aarch64_ext_sve_addr_ri_u6): Likewise.
+	(aarch64_ext_sve_addr_rr_lsl): Likewise.
+	(aarch64_ext_sve_addr_rz_xtw): Likewise.
+	(aarch64_ext_sve_addr_zi_u5): Likewise.
+	(aarch64_ext_sve_addr_zz): Likewise.
+	(aarch64_ext_sve_addr_zz_lsl): Likewise.
+	(aarch64_ext_sve_addr_zz_sxtw): Likewise.
+	(aarch64_ext_sve_addr_zz_uxtw): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add an entry for
+	AARCH64_OPND_SVE_PATTERN_SCALED.
+	* aarch64-opc.h (FLD_SVE_imm4): New aarch64_field_kind.
+	* aarch64-opc.c (fields): Add a corresponding entry.
+	(set_multiplier_out_of_range_error): New function.
+	(aarch64_operand_modifiers): Add entry for AARCH64_MOD_MUL.
+	(operand_general_constraint_met_p): Handle
+	AARCH64_OPND_SVE_PATTERN_SCALED.
+	(print_register_offset_address): Use PRIi64 to print the
+	shift amount.
+	(aarch64_print_operand): Likewise.  Handle
+	AARCH64_OPND_SVE_PATTERN_SCALED.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_scale): New inserter.
+	* aarch64-asm.c (aarch64_ins_sve_scale): New function.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_scale): New inserter.
+	* aarch64-dis.c (aarch64_ext_sve_scale): New function.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for
+	AARCH64_OPND_SVE_PATTERN and AARCH64_OPND_SVE_PRFOP.
+	* aarch64-opc.h (FLD_SVE_pattern): New aarch64_field_kind.
+	(FLD_SVE_prfop): Likewise.
+	* aarch64-opc.c: Include libiberty.h.
+	(aarch64_sve_pattern_array): New variable.
+	(aarch64_sve_prfop_array): Likewise.
+	(fields): Add entries for FLD_SVE_pattern and FLD_SVE_prfop.
+	(aarch64_print_operand): Handle AARCH64_OPND_SVE_PATTERN and
+	AARCH64_OPND_SVE_PRFOP.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (aarch64_opnd_qualifiers): Add entries for
+	AARCH64_OPND_QLF_P_[ZM].
+	(aarch64_print_operand): Print /z and /m where appropriate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERANDS): Add entries for new SVE operands.
+	* aarch64-opc.h (FLD_SVE_Pd, FLD_SVE_Pg3, FLD_SVE_Pg4_5)
+	(FLD_SVE_Pg4_10, FLD_SVE_Pg4_16, FLD_SVE_Pm, FLD_SVE_Pn, FLD_SVE_Pt)
+	(FLD_SVE_Za_5, FLD_SVE_Za_16, FLD_SVE_Zd, FLD_SVE_Zm_5, FLD_SVE_Zm_16)
+	(FLD_SVE_Zn, FLD_SVE_Zt, FLD_SVE_tzsh): New aarch64_field_kinds.
+	* aarch64-opc.c (fields): Add corresponding entries here.
+	(operand_general_constraint_met_p): Check that SVE register lists
+	have the correct length.  Check the ranges of SVE index registers.
+	Check for cases where p8-p15 are used in 3-bit predicate fields.
+	(aarch64_print_operand): Handle the new SVE operands.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-asm.h (ins_sve_index, ins_sve_reglist): New inserters.
+	* aarch64-asm.c (aarch64_ins_sve_index): New function.
+	(aarch64_ins_sve_reglist): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_index, ext_sve_reglist): New extractors.
+	* aarch64-dis.c (aarch64_ext_sve_index): New function.
+	(aarch64_ext_sve_reglist): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (CORE_INSN, __FP_INSN, SIMD_INSN, CRYP_INSN)
+	(_CRC_INSN, _LSE_INSN, _LOR_INSN, RDMA_INSN, FP16_INSN, SF16_INSN)
+	(V8_2_INSN, aarch64_opcode_table): Initialize tied_operand field.
+	* aarch64-opc.c (aarch64_match_operands_constraint): Check for
+	tied operands.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (get_offset_int_reg_name): New function.
+	(print_immediate_offset_address): Likewise.
+	(print_register_offset_address): Take the base and offset
+	registers as parameters.
+	(aarch64_print_operand): Update caller accordingly.  Use
+	print_immediate_offset_address.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (BANK): New macro.
+	(R32, R64): Take a register number as argument
+	(int_reg): Use BANK.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (print_register_list): Add a prefix parameter.
+	(aarch64_print_operand): Update accordingly.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (AARCH64_OPERNADS): Use fpimm rather than imm
+	for FPIMM.
+	* aarch64-asm.h (ins_fpimm): New inserter.
+	* aarch64-asm.c (aarch64_ins_fpimm): New function.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_fpimm): New extractor.
+	* aarch64-dis.c (aarch64_ext_imm): Remove fpimm test.
+	(aarch64_ext_fpimm): New function.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-asm.c: Include libiberty.h.
+	(insert_fields): New function.
+	(aarch64_ins_imm): Use it.
+	* aarch64-dis.c (extract_fields): New function.
+	(aarch64_ext_imm): Use it.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (aarch64_logical_immediate_p): Replace is32
+	with an esize parameter.
+	(operand_general_constraint_met_p): Update accordingly.
+	Fix misindented code.
+	* aarch64-asm.c (aarch64_ins_limm): Update call to
+	aarch64_logical_immediate_p.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-opc.c (match_operands_qualifier): Handle F_STRICT.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-gen.c (indented_print): Avoid hard-coded indentation limit.
+
+2016-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (find_format): Walk the linked list pointed by einsn.
+
+2016-09-14  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <slbiag>: New mnemonic.
+	<addex., brd, brh, brw, lwzmx, nandxor, rldixor, setbool,
+	xor3>: Delete mnemonics.
+	<cp_abort>: Rename mnemonic from ...
+	<cpabort>: ...to this.
+	<setb>: Change to a X form instruction.
+	<sync>: Change to 1 operand form.
+	<copy>: Delete mnemonic.
+	<copy_first>: Rename mnemonic from ...
+	<copy>: ...to this.
+	<paste, paste.>: Delete mnemonics.
+	<paste_last>: Rename mnemonic from ...
+	<paste.>: ...to this.
+
+2016-09-14  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (arc_get_disassembler): Accept a null bfd gracefully.
+
+2016-09-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Support alternate arch strings.
+
+2016-09-12  Patrick Steuer  <steuer@linux.vnet.ibm.com>
+
+	* s390-opc.txt: Fix kmctr instruction type.
+
+2016-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Remove CPU_IAMCU_COMPAT_FLAGS.
+	* i386-init.h: Regenerated.
+
+2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* opcodes/arc-dis.c (print_insn_arc): Changed.
+
 2016-08-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix typo in opcode, camellia_fi ->

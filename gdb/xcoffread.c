@@ -195,9 +195,10 @@ eb_complaint (int arg1)
 	     _("Mismatched .eb symbol ignored starting at symnum %d"), arg1);
 }
 
-static void xcoff_initial_scan (struct objfile *, int);
+static void xcoff_initial_scan (struct objfile *, symfile_add_flags);
 
-static void scan_xcoff_symtab (struct objfile *);
+static void scan_xcoff_symtab (minimal_symbol_reader &,
+			       struct objfile *);
 
 static char *xcoff_next_symbol_text (struct objfile *);
 
@@ -908,10 +909,10 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
    This function can read past the end of the symbol table
    (into the string table) but this does no harm.  */
 
-/* Create a new minimal symbol (using prim_record_minimal_symbol_and_info).
+/* Create a new minimal symbol (using record_with_info).
 
    Creation of all new minimal symbols should go through this function
-   rather than calling the various prim_record_[...] functions in order
+   rather than calling the various record functions in order
    to make sure that all symbol addresses get properly relocated.
 
    Arguments are:
@@ -925,18 +926,17 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
    OBJFILE - the objfile associated with the minimal symbol.  */
 
 static void
-record_minimal_symbol (const char *name, CORE_ADDR address,
+record_minimal_symbol (minimal_symbol_reader &reader,
+		       const char *name, CORE_ADDR address,
 		       enum minimal_symbol_type ms_type,
 		       int n_scnum,
 		       struct objfile *objfile)
 {
-
   if (name[0] == '.')
     ++name;
 
-  prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       secnum_to_section (n_scnum, objfile),
-				       objfile);
+  reader.record_with_info (name, address, ms_type,
+			   secnum_to_section (n_scnum, objfile));
 }
 
 /* xcoff has static blocks marked in `.bs', `.es' pairs.  They cannot be
@@ -1026,7 +1026,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
   union internal_auxent fcn_aux_saved = main_aux;
   struct context_stack *newobj;
 
-  char *filestring = " _start_ ";	/* Name of the current file.  */
+  const char *filestring = pst->filename;	/* Name of the current file.  */
 
   const char *last_csect_name;	/* Last seen csect's name.  */
 
@@ -2178,7 +2178,8 @@ function_outside_compilation_unit_complaint (const char *arg1)
 }
 
 static void
-scan_xcoff_symtab (struct objfile *objfile)
+scan_xcoff_symtab (minimal_symbol_reader &reader,
+		   struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section.  */
@@ -2288,7 +2289,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 			if (!misc_func_recorded)
 			  {
 			    record_minimal_symbol
-			      (last_csect_name, last_csect_val,
+			      (reader, last_csect_name, last_csect_val,
 			       mst_text, last_csect_sec, objfile);
 			    misc_func_recorded = 1;
 			  }
@@ -2343,7 +2344,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		       table, except for section symbols.  */
 		    if (*namestring != '.')
 		      record_minimal_symbol
-			(namestring, symbol.n_value,
+			(reader, namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 symbol.n_scnum, objfile);
 		    break;
@@ -2381,7 +2382,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 			main_aux[0].x_sym.x_fcnary.x_fcn.x_lnnoptr;
 
 		    record_minimal_symbol
-		      (namestring, symbol.n_value,
+		      (reader, namestring, symbol.n_value,
 		       sclass == C_HIDEXT ? mst_file_text : mst_text,
 		       symbol.n_scnum, objfile);
 		    misc_func_recorded = 1;
@@ -2396,7 +2397,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		       symbols, we will choose mst_text over
 		       mst_solib_trampoline.  */
 		    record_minimal_symbol
-		      (namestring, symbol.n_value,
+		      (reader, namestring, symbol.n_value,
 		       mst_solib_trampoline, symbol.n_scnum, objfile);
 		    misc_func_recorded = 1;
 		    break;
@@ -2418,7 +2419,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		       XMC_BS might be possible too.  */
 		    if (*namestring != '.')
 		      record_minimal_symbol
-			(namestring, symbol.n_value,
+			(reader, namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 symbol.n_scnum, objfile);
 		    break;
@@ -2434,7 +2435,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		       table, except for section symbols.  */
 		    if (*namestring != '.')
 		      record_minimal_symbol
-			(namestring, symbol.n_value,
+			(reader, namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
 			 symbol.n_scnum, objfile);
 		    break;
@@ -2462,7 +2463,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		   it as a function.  This will take care of functions like
 		   strcmp() compiled by xlc.  */
 
-		record_minimal_symbol (last_csect_name, last_csect_val,
+		record_minimal_symbol (reader, last_csect_name, last_csect_val,
 				       mst_text, last_csect_sec, objfile);
 		misc_func_recorded = 1;
 	      }
@@ -2924,7 +2925,7 @@ xcoff_get_toc_offset (struct objfile *objfile)
    loaded).  */
 
 static void
-xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
+xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd;
   int val;
@@ -3006,18 +3007,17 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
   free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
-  init_minimal_symbol_collection ();
-  make_cleanup_discard_minimal_symbols ();
+  minimal_symbol_reader reader (objfile);
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  scan_xcoff_symtab (objfile);
+  scan_xcoff_symtab (reader, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
 
-  install_minimal_symbols (objfile);
+  reader.install ();
 
   /* DWARF2 sections.  */
 

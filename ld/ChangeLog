@@ -1,3 +1,480 @@
+2016-10-31  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ldmain.c (add_archive_element): Initialize input->header.type.
+	* plugin.c (plugin_maybe_claim): Assert the statement is an input
+	statement.
+
+2016-10-15  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/spu_ovl.o_c: Regenerate.
+
+2016-10-14  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/DWARF.sc: Add .debug_addr.
+
+2016-10-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-i386/pr19636-1d-nacl.d: Adjust for objdump change.
+	* testsuite/ld-i386/pr19636-2c-nacl.d: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.dd: Likewise.
+	* testsuite/ld-x86-64/plt-nacl.pd: Likewise.
+	* testsuite/ld-x86-64/pr19636-2d-nacl.d: Likewise.
+
+2016-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* ld-aarch64/emit-relocs-515-be.d: Adjust output to match change
+	in objdump.
+	* ld-aarch64/emit-relocs-515.d: Likewise.
+	* ld-aarch64/emit-relocs-516-be.d: Likewise.
+	* ld-aarch64/emit-relocs-516.d: Likewise.
+	* ld-aarch64/farcall-b-plt.d: Likewise.
+	* ld-aarch64/farcall-bl-plt.d: Likewise.
+	* ld-aarch64/gc-plt-relocs.d: Likewise.
+	* ld-aarch64/tls-desc-ie.d: Likewise.
+	* ld-aarch64/tls-tiny-desc.d: Likewise.
+	* ld-aarch64/tls-tiny-gd.d: Likewise.
+	* ld-aarch64/tls-tiny-ie.d: Likewise.
+	* ld-arm/arm-app-abs32.d: Likewise.
+	* ld-arm/arm-app.d: Likewise.
+	* ld-arm/arm-lib-plt32.d: Likewise.
+	* ld-arm/arm-lib.d: Likewise.
+	* ld-arm/armthumb-lib.d: Likewise.
+	* ld-arm/cortex-a8-fix-b-plt.d: Likewise.
+	* ld-arm/cortex-a8-fix-bcc-plt.d: Likewise.
+	* ld-arm/cortex-a8-fix-bl-plt.d: Likewise.
+	* ld-arm/cortex-a8-fix-bl-rel-plt.d: Likewise.
+	* ld-arm/cortex-a8-fix-blx-plt.d: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-app2.d: Likewise.
+	* ld-arm/farcall-mixed-lib-v4t.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/ifunc-10.dd: Likewise.
+	* ld-arm/ifunc-14.dd: Likewise.
+	* ld-arm/ifunc-15.dd: Likewise.
+	* ld-arm/ifunc-3.dd: Likewise.
+	* ld-arm/ifunc-4.dd: Likewise.
+	* ld-arm/ifunc-9.dd: Likewise.
+	* ld-arm/long-plt-format.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-lib.d: Likewise.
+	* ld-arm/tls-lib-loc.d: Likewise.
+	* ld-cris/dso-pltdis1.d: Likewise.
+	* ld-cris/dso-pltdis2.d: Likewise.
+	* ld-cris/dso12-pltdis.d: Likewise.
+	* ld-elf/symbolic-func.r: Likewise.
+	* ld-frv/fdpic-pie-1.d: Likewise.
+	* ld-frv/fdpic-pie-2.d: Likewise.
+	* ld-frv/fdpic-pie-6.d: Likewise.
+	* ld-frv/fdpic-pie-7.d: Likewise.
+	* ld-frv/fdpic-pie-8.d: Likewise.
+	* ld-frv/fdpic-shared-1.d: Likewise.
+	* ld-frv/fdpic-shared-2.d: Likewise.
+	* ld-frv/fdpic-shared-3.d: Likewise.
+	* ld-frv/fdpic-shared-4.d: Likewise.
+	* ld-frv/fdpic-shared-5.d: Likewise.
+	* ld-frv/fdpic-shared-6.d: Likewise.
+	* ld-frv/fdpic-shared-7.d: Likewise.
+	* ld-frv/fdpic-shared-8.d: Likewise.
+	* ld-frv/fdpic-shared-local-2.d: Likewise.
+	* ld-frv/fdpic-shared-local-8.d: Likewise.
+	* ld-frv/fdpic-static-1.d: Likewise.
+	* ld-frv/fdpic-static-2.d: Likewise.
+	* ld-frv/fdpic-static-6.d: Likewise.
+	* ld-frv/fdpic-static-7.d: Likewise.
+	* ld-frv/fdpic-static-8.d: Likewise.
+	* ld-frv/tls-dynamic-2.d: Likewise.
+	* ld-frv/tls-initial-shared-2.d: Likewise.
+	* ld-frv/tls-relax-shared-2.d: Likewise.
+	* ld-frv/tls-shared-2.d: Likewise.
+	* ld-i386/plt-nacl.pd: Likewise.
+	* ld-i386/plt-pic-nacl.pd: Likewise.
+	* ld-i386/plt-pic.pd: Likewise.
+	* ld-i386/plt.pd: Likewise.
+	* ld-i386/pr19636-1d-nacl.d: Likewise.
+	* ld-i386/pr19636-1d.d: Likewise.
+	* ld-i386/pr19636-2c-nacl.d: Likewise.
+	* ld-i386/pr19636-2c.d: Likewise.
+	* ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-22-x86-64.d: Likewise.
+	* ld-ifunc/pr17154-i386.d: Likewise.
+	* ld-ifunc/pr17154-x86-64.d: Likewise.
+	* ld-m68k/plt1-68020.d: Likewise.
+	* ld-m68k/plt1-cpu32.d: Likewise.
+	* ld-m68k/plt1-isab.d: Likewise.
+	* ld-m68k/plt1-isac.d: Likewise.
+	* ld-metag/shared.d: Likewise.
+	* ld-metag/stub_pic_app.d: Likewise.
+	* ld-metag/stub_pic_shared.d: Likewise.
+	* ld-metag/stub_shared.d: Likewise.
+	* ld-s390/tlsbin_64.dd: Likewise.
+	* ld-s390/tlspic_64.dd: Likewise.
+	* ld-tic6x/shlib-1.dd: Likewise.
+	* ld-tic6x/shlib-1b.dd: Likewise.
+	* ld-tic6x/shlib-1rb.dd: Likewise.
+	* ld-tic6x/shlib-app-1.dd: Likewise.
+	* ld-tic6x/shlib-app-1b.dd: Likewise.
+	* ld-tic6x/shlib-app-1r.dd: Likewise.
+	* ld-tic6x/shlib-app-1rb.dd: Likewise.
+	* ld-tic6x/shlib-noindex.dd: Likewise.
+	* ld-vax-elf/export-class-data.dd: Likewise.
+	* ld-vax-elf/plt-local-lib.dd: Likewise.
+	* ld-vax-elf/plt-local.dd: Likewise.
+	* ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* ld-x86-64/bnd-plt-1.d: Likewise.
+	* ld-x86-64/gotpcrel1.dd: Likewise.
+	* ld-x86-64/libno-plt-1b.dd: Likewise.
+	* ld-x86-64/load1c-nacl.d: Likewise.
+	* ld-x86-64/load1c.d: Likewise.
+	* ld-x86-64/load1d-nacl.d: Likewise.
+	* ld-x86-64/load1d.d: Likewise.
+	* ld-x86-64/mov1a.d: Likewise.
+	* ld-x86-64/mov1b.d: Likewise.
+	* ld-x86-64/mov1c.d: Likewise.
+	* ld-x86-64/mov1d.d: Likewise.
+	* ld-x86-64/mov2a.d: Likewise.
+	* ld-x86-64/mov2b.d: Likewise.
+	* ld-x86-64/mov2c.d: Likewise.
+	* ld-x86-64/mov2d.d: Likewise.
+	* ld-x86-64/mpx3.dd: Likewise.
+	* ld-x86-64/mpx4.dd: Likewise.
+	* ld-x86-64/no-plt-1a.dd: Likewise.
+	* ld-x86-64/no-plt-1b.dd: Likewise.
+	* ld-x86-64/no-plt-1c.dd: Likewise.
+	* ld-x86-64/no-plt-1e.dd: Likewise.
+	* ld-x86-64/no-plt-1f.dd: Likewise.
+	* ld-x86-64/no-plt-1g.dd: Likewise.
+	* ld-x86-64/plt-main-bnd.dd: Likewise.
+	* ld-x86-64/plt-nacl.pd: Likewise.
+	* ld-x86-64/plt.pd: Likewise.
+	* ld-x86-64/pr18591.d: Likewise.
+	* ld-x86-64/pr19609-1c.d: Likewise.
+	* ld-x86-64/pr19609-1e.d: Likewise.
+	* ld-x86-64/pr19609-1j.d: Likewise.
+	* ld-x86-64/pr19609-1l.d: Likewise.
+	* ld-x86-64/pr19609-1m.d: Likewise.
+	* ld-x86-64/pr19609-5b.d: Likewise.
+	* ld-x86-64/pr19609-5c.d: Likewise.
+	* ld-x86-64/pr19609-5e.d: Likewise.
+	* ld-x86-64/pr19609-6b.d: Likewise.
+	* ld-x86-64/pr19609-7b.d: Likewise.
+	* ld-x86-64/pr19609-7d.d: Likewise.
+	* ld-x86-64/pr19636-2d.d: Likewise.
+	* ld-x86-64/pr20093-1.d: Likewise.
+	* ld-x86-64/pr20093-2.d: Likewise.
+	* ld-x86-64/pr20253-1b.d: Likewise.
+	* ld-x86-64/pr20253-1d.d: Likewise.
+	* ld-x86-64/pr20253-1f.d: Likewise.
+	* ld-x86-64/pr20253-1h.d: Likewise.
+	* ld-x86-64/pr20253-1j.d: Likewise.
+	* ld-x86-64/pr20253-1l.d: Likewise.
+	* ld-x86-64/protected3.d: Likewise.
+	* ld-x86-64/tlsbin.dd: Likewise.
+	* ld-x86-64/tlsbin2.dd: Likewise.
+	* ld-x86-64/tlsbindesc.dd: Likewise.
+	* ld-x86-64/tlsdesc-nacl.pd: Likewise.
+	* ld-x86-64/tlsdesc.dd: Likewise.
+	* ld-x86-64/tlsdesc.pd: Likewise.
+	* ld-x86-64/tlsgd10.dd: Likewise.
+	* ld-x86-64/tlsgd5.dd: Likewise.
+	* ld-x86-64/tlsgd6.dd: Likewise.
+	* ld-x86-64/tlsgd8.dd: Likewise.
+	* ld-x86-64/tlsgdesc.dd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+	* ld-x86-64/tlspic2.dd: Likewise.
+
+2016-10-11  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20535
+	* emultempl/elf32.em (_search_needed): Add support for pseudo
+	environment variables supported by ld.so.  Namely $ORIGIN, $LIB
+	and $PLATFORM.
+	* configure.ac: Add getauxval to list AC_CHECK_FUNCS list.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2016-10-11  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_do_assignments_1): Descend into output section
+	statements that do not yet have bfd sections.  Set symbol section
+	temporarily for symbols defined in such statements to the undefined
+	section.  Don't error on data or reloc statements until final phase.
+	* ldexp.c (exp_fold_tree_1 <etree_assign>): Handle bfd_und_section
+	in expld.section.
+	* testsuite/ld-mmix/bpo-10.d: Adjust.
+	* testsuite/ld-mmix/bpo-11.d: Adjust.
+
+2016-10-10  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* emulparams/elf64_s390.sh: Move binary start to 16M.
+	* testsuite/ld-s390/tlsbin_64.dd: Adjust testcases accordingly.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (MAX): Define.
+	(exp_unop, exp_binop, exp_trinop): Alloc at least enough for
+	etree_type.value.
+
+2016-10-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (is_generic_elf): New, extracted from..
+	* testsuite/ld-elf/elf.exp: ..here.
+
+2016-10-06  Ludovic Courtès  <ludo@gnu.org>
+
+	* emulparams/elf32bmipn32-defs.sh: Shift quote of
+	"x$EMULATION_NAME" to the left to work around
+	<http://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-007>.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* lexsup.c: Spell fall through comments consistently and add
+	missing fall through comments.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (asymbol_from_plugin_symbol): Avoid compiler warning
+	by adding return.
+
+2016-10-04  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Expression Section): Update result of arithmetic
+	expressions.
+	* ldexp.c (arith_result_section): New function.
+	(fold_binary): Use it.
+
+2016-10-04  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_value_fold): New function.
+	(exp_unop, exp_binop, exp_trinop): Use it.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/v850.sc: Don't reference __ctbp, __ep, __gp when
+	not relocating.
+	* scripttempl/v850_rh850.sc: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20528
+	* testsuite/ld-elf/pr20528a.d: xfail generic elf targets.  Allow
+	multiple .text sections for hppa-linux.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (default_bfd_error_handler): New function pointer.
+	(ld_bfd_error_handler): New function.
+	(main): Arrange to call it on bfd errors/warnings.
+	(ld_bfd_assert_handler): Enable tail call.
+
+2016-09-30  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (ignore_bfd_errors): Update params.
+
+2016-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20528
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	merge 2 sections with different SHF_EXCLUDE.
+	* testsuite/ld-elf/pr20528a.d: New file.
+	* testsuite/ld-elf/pr20528a.s: Likewise.
+	* testsuite/ld-elf/pr20528b.d: Likewise.
+	* testsuite/ld-elf/pr20528b.s: Likewise.
+
+2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	PR ld/20608
+	* testsuite/ld-arm/arm-elf.exp: Handle new testcase.
+	* testsuite/ld-arm/farcall-mixed-app2.d: New file.
+	* testsuite/ld-arm/farcall-mixed-app2.r: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.s: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.sym: Likewise.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/attr-gnu-4-4.s: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-14.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-24.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-34.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-41.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-32.d: Adjust expected warning.
+	* testsuite/ld-powerpc/attr-gnu-8-23.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-01.d: Adjust expected output.
+	* testsuite/ld-powerpc/attr-gnu-4-02.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-03.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-10.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-11.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-20.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-22.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-33.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-8-11.d: Likewise.
+	* testsuite/ld-powerpc/powerpc.exp: Don't run deleted tests.
+
+2016-09-23  Akihiko Odaki  <akihiko.odaki.4i@stu.hosei.ac.jp>
+
+	PR ld/20595
+	* testsuite/ld-arm/unwind-4.d: Add -q option to linker command
+	line and -r option to objdump command line.  Match emitted relocs
+	to make sure that superflous relocs are not generated.
+
+2016-09-23  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* emulparams/elf64_s390.sh: Change TEXT_START_ADDR to 256MB.
+	* testsuite/ld-s390/tlsbin_64.dd: Adjust testcase accordingly.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+
+2016-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (_try_needed): In verbose mode, report failed
+	attempts to find a needed library.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/ld-aarch64/emit-relocs-28.d: Expect spaces after ","
+	in addresses.
+	* testsuite/ld-aarch64/emit-relocs-301-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-301.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-302-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-302.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-310-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-310.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-313.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-515-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-515.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-516-be.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-516.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-531.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-532.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-533.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-534.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-535.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-536.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-537.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-538.d: Likewise.
+	* testsuite/ld-aarch64/erratum835769.d: Likewise.
+	* testsuite/ld-aarch64/erratum843419.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-plt.d: Likewise.
+	* testsuite/ld-aarch64/gc-plt-relocs.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-21.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-7c.d: Likewise.
+	* testsuite/ld-aarch64/tls-desc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-desc-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-desc.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-ie-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-large-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-all.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gd-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-large-desc-ie-be.d: Likewise.
+	* testsuite/ld-aarch64/tls-relax-large-desc-ie.d: Likewise.
+	* testsuite/ld-aarch64/tls-tiny-desc.d: Likewise.
+	* testsuite/ld-aarch64/tls-tiny-gd.d: Likewise.
+
+2016-09-21  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/ld-aarch64/emit-relocs-280.d: Match branch comments.
+	* testsuite/ld-aarch64/weak-undefined.d: Likewise.
+
+2016-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.texinfo (Input Section Basics): Expand the description of
+	EXCLUDE_FILE.
+
+2016-09-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/cmse-veneers.s: Add a test for ARMv8-M Security
+	Extensions entry functions in absolute section.
+	* testsuite/ld-arm/cmse-veneers.rd: Adapt expected output accordingly.
+
+2016-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/tls-dtpoff.dd: New file.
+	* testsuite/ld-arc/tls-dtpoff.rd: Likewise.
+	* testsuite/ld-arc/tls-dtpoff.s: Likewise.
+	* testsuite/ld-arc/tls-relocs.ld: Likewise.
+	* testsuite/ld-arc/arc.exp: Add new tdpoff test.
+
+2016-09-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20537
+	* emultempl/elf32.em: More OPTION_xxx values into an enum.  Add
+	OPTION_NO_EH_FRAME_HDR.
+	(_add_options): Add support for --no-eh-frame-hdr.
+	* ld.texinfo: Document new option.
+	* lexsup.c (elf_shlib_list_options): List new option.
+	* NEWS: Mention the new option.
+
+2016-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20550
+	* testsuite/ld-x86-64/pr20550a.s: New file.
+	* testsuite/ld-x86-64/pr20550b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp (x86_64tests): Add tests for
+	PR ld/20550.
+
+2016-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (CFLAGS_FOR_TARGET): Define as a copy of CFLAGS but
+	without any sanitization options.
+	(CXXFLAGS_FOR_TARGET): Define as a copy of CXXFLAGS but	without
+	any sanitization options.
+	(check-DEJAGNU): Pass CFLAGS_FOR_TARGET and CXXFLAGS_FOR_TARGET
+	as CFLAGS and CXXFLAGS respectively.
+
+2016-09-02  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20545
+	* testsuite/ld-avr/avr-prop-7.d: New test.
+	* testsuite/ld-avr/avr-prop-7.s: New test.
+	* testsuite/ld-avr/avr-prop-8.d: New test.
+	* testsuite/ld-avr/avr-prop-8.s: New test.
+
+2016-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr20513c.d: Limit to *-*-linux* and *-*-gnu*
+	targets.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+
+2016-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20513
+	* testsuite/ld-elf/pr20513a.d: New file.
+	* testsuite/ld-elf/pr20513a.s: Likewise.
+	* testsuite/ld-elf/pr20513b.d: Likewise.
+	* testsuite/ld-elf/pr20513b.s: Likewise.
+	* testsuite/ld-elf/pr20513c.d: Likewise.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+	* testsuite/ld-elf/pr20513e.d: Likewise.
+	* testsuite/ld-elf/pr20513f.d: Likewise.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	PR 20513
+	* ldlang.c (section_already_linked): Deal with SHF_EXCLUDE sections.
+
+2016-08-31  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/vle-multiseg-1.d: Adjust to suit segment change.
+	* testsuite/ld-powerpc/vle-multiseg-2.d: Likewise.
+	* testsuite/ld-powerpc/vle-multiseg-3.d: Likewise.
+	* testsuite/ld-powerpc/vle-multiseg-6.d: Likewise.
+	* testsuite/ld-powerpc/vle-reloc-2.d: Likewise.
+
+2016-08-30  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/tls_gs-01.d: Set to XFAIL on arc*-*-elf*.
+	* testsuite/ld-arc/tls_ie-01.d: Likewise.
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/19784 tests only

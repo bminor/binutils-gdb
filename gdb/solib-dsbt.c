@@ -917,15 +917,6 @@ enable_break (void)
   return 0;
 }
 
-/* Once the symbols from a shared object have been loaded in the usual
-   way, we are called to do any system specific symbol handling that
-   is needed.  */
-
-static void
-dsbt_special_symbol_handling (void)
-{
-}
-
 static void
 dsbt_relocate_main_executable (void)
 {
@@ -1074,7 +1065,6 @@ _initialize_dsbt_solib (void)
   dsbt_so_ops.free_so = dsbt_free_so;
   dsbt_so_ops.clear_solib = dsbt_clear_solib;
   dsbt_so_ops.solib_create_inferior_hook = dsbt_solib_create_inferior_hook;
-  dsbt_so_ops.special_symbol_handling = dsbt_special_symbol_handling;
   dsbt_so_ops.current_sos = dsbt_current_sos;
   dsbt_so_ops.open_symbol_file_object = open_symbol_file_object;
   dsbt_so_ops.in_dynsym_resolve_code = dsbt_in_dynsym_resolve_code;

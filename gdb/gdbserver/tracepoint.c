@@ -4534,7 +4534,7 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	    trace_debug ("lib stopped due to full buffer.");
 	  if (ipa_stopping_tracepoint)
 	    trace_debug ("lib stopped due to tpoint");
-	  if (ipa_stopping_tracepoint)
+	  if (ipa_error_tracepoint)
 	    trace_debug ("lib stopped due to error");
 	}
 

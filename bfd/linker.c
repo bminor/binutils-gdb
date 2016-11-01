@@ -1477,7 +1477,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
       row = COMMON_ROW;
       if (!bfd_link_relocatable (info)
 	  && strcmp (name, "__gnu_lto_slim") == 0)
-	(*_bfd_error_handler)
+	_bfd_error_handler
 	  (_("%s: plugin needed to handle lto object"),
 	   bfd_get_filename (abfd));
     }
@@ -1738,7 +1738,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  if (inh->type == bfd_link_hash_indirect
 	      && inh->u.i.link == h)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: indirect symbol `%s' to `%s' is a loop"),
 		 abfd, name, string);
 	      bfd_set_error (bfd_error_invalid_operation);
@@ -2606,7 +2607,8 @@ default_indirect_link_order (bfd *output_bfd,
 	 because somebody is attempting to link together different
 	 types of object files.  Handling this case correctly is
 	 difficult, and sometimes impossible.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("Attempt to do relocatable link with %s input and %s output"),
 	 bfd_get_target (input_bfd), bfd_get_target (output_bfd));
       bfd_set_error (bfd_error_wrong_format);
@@ -2892,6 +2894,7 @@ _bfd_handle_already_linked (asection *sec,
 
     case SEC_LINK_DUPLICATES_ONE_ONLY:
       info->callbacks->einfo
+	/* xgettext:c-format */
 	(_("%B: ignoring duplicate section `%A'\n"),
 	 sec->owner, sec);
       break;
@@ -2901,6 +2904,7 @@ _bfd_handle_already_linked (asection *sec,
 	;
       else if (sec->size != l->sec->size)
 	info->callbacks->einfo
+	  /* xgettext:c-format */
 	  (_("%B: duplicate section `%A' has different size\n"),
 	   sec->owner, sec);
       break;
@@ -2910,6 +2914,7 @@ _bfd_handle_already_linked (asection *sec,
 	;
       else if (sec->size != l->sec->size)
 	info->callbacks->einfo
+	  /* xgettext:c-format */
 	  (_("%B: duplicate section `%A' has different size\n"),
 	   sec->owner, sec);
       else if (sec->size != 0)
@@ -2918,15 +2923,18 @@ _bfd_handle_already_linked (asection *sec,
 
 	  if (!bfd_malloc_and_get_section (sec->owner, sec, &sec_contents))
 	    info->callbacks->einfo
+	      /* xgettext:c-format */
 	      (_("%B: could not read contents of section `%A'\n"),
 	       sec->owner, sec);
 	  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
 						&l_sec_contents))
 	    info->callbacks->einfo
+	      /* xgettext:c-format */
 	      (_("%B: could not read contents of section `%A'\n"),
 	       l->sec->owner, l->sec);
 	  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
 	    info->callbacks->einfo
+	      /* xgettext:c-format */
 	      (_("%B: duplicate section `%A' has different contents\n"),
 	       sec->owner, sec);
 
@@ -3330,5 +3338,62 @@ bfd_boolean
 _bfd_generic_link_check_relocs (bfd *abfd ATTRIBUTE_UNUSED,
 				struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
+  return TRUE;
+}
+
+/*
+FUNCTION
+	bfd_merge_private_bfd_data
+
+SYNOPSIS
+	bfd_boolean bfd_merge_private_bfd_data
+	  (bfd *ibfd, struct bfd_link_info *info);
+
+DESCRIPTION
+	Merge private BFD information from the BFD @var{ibfd} to the
+	the output file BFD when linking.  Return <<TRUE>> on success,
+	<<FALSE>> on error.  Possible error returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_merge_private_bfd_data(ibfd, info) \
+.     BFD_SEND ((info)->output_bfd, _bfd_merge_private_bfd_data, \
+.		(ibfd, info))
+*/
+
+/*
+INTERNAL_FUNCTION
+	_bfd_generic_verify_endian_match
+
+SYNOPSIS
+	bfd_boolean _bfd_generic_verify_endian_match
+	  (bfd *ibfd, struct bfd_link_info *info);
+
+DESCRIPTION
+	Can be used from / for bfd_merge_private_bfd_data to check that
+	endianness matches between input and output file.  Returns
+	TRUE for a match, otherwise returns FALSE and emits an error.
+*/
+
+bfd_boolean
+_bfd_generic_verify_endian_match (bfd *ibfd, struct bfd_link_info *info)
+{
+  bfd *obfd = info->output_bfd;
+
+  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
+      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
+    {
+      if (bfd_big_endian (ibfd))
+	_bfd_error_handler (_("%B: compiled for a big endian system "
+			      "and target is little endian"), ibfd);
+      else
+	_bfd_error_handler (_("%B: compiled for a little endian system "
+			      "and target is big endian"), ibfd);
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
+
   return TRUE;
 }

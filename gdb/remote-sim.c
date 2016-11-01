@@ -554,7 +554,7 @@ gdbsim_kill (struct target_ops *ops)
 
   /* There is no need to `kill' running simulator - the simulator is
      not running.  Mourning it is enough.  */
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* Load an executable file into the target process.  This is expected to

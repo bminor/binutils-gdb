@@ -176,6 +176,7 @@ struct gdbarch
   const struct floatformat ** double_format;
   int long_double_bit;
   const struct floatformat ** long_double_format;
+  gdbarch_floatformat_for_type_ftype *floatformat_for_type;
   int ptr_bit;
   int addr_bit;
   int dwarf2_addr_size;
@@ -376,6 +377,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
+  gdbarch->floatformat_for_type = default_floatformat_for_type;
   gdbarch->ptr_bit = gdbarch->int_bit;
   gdbarch->char_signed = -1;
   gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
@@ -522,6 +524,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of long_double_bit, invalid_p == 0 */
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = floatformats_ieee_double;
+  /* Skip verify of floatformat_for_type, invalid_p == 0 */
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (gdbarch->addr_bit == 0)
     gdbarch->addr_bit = gdbarch_ptr_bit (gdbarch);
@@ -972,6 +975,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: float_format = %s\n",
                       pformat (gdbarch->float_format));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: floatformat_for_type = <%s>\n",
+                      host_address_to_string (gdbarch->floatformat_for_type));
   fprintf_unfiltered (file,
                       "gdbarch_dump: fp0_regnum = %s\n",
                       plongest (gdbarch->fp0_regnum));
@@ -1727,6 +1733,23 @@ set_gdbarch_long_double_format (struct gdbarch *gdbarch,
                                 const struct floatformat ** long_double_format)
 {
   gdbarch->long_double_format = long_double_format;
+}
+
+const struct floatformat **
+gdbarch_floatformat_for_type (struct gdbarch *gdbarch, const char *name, int length)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->floatformat_for_type != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_floatformat_for_type called\n");
+  return gdbarch->floatformat_for_type (gdbarch, name, length);
+}
+
+void
+set_gdbarch_floatformat_for_type (struct gdbarch *gdbarch,
+                                  gdbarch_floatformat_for_type_ftype floatformat_for_type)
+{
+  gdbarch->floatformat_for_type = floatformat_for_type;
 }
 
 int

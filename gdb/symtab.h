@@ -137,7 +137,7 @@ struct general_symbol_info
     struct obstack *obstack;
 
     /* This is used by languages which wish to store a demangled name.
-       currently used by Ada, C++, Java, and Objective C.  */
+       currently used by Ada, C++, and Objective C.  */
     const char *demangled_name;
   }
   language_specific;
@@ -261,7 +261,7 @@ extern const char *symbol_demangled_name
 extern int demangle;
 
 /* Macro that returns the name to be used when sorting and searching symbols.
-   In  C++ and Java, we search for the demangled form of a name,
+   In C++, we search for the demangled form of a name,
    and so sort symbols accordingly.  In Ada, however, we search by mangled
    name.  If there is no distinct demangled name, then SYMBOL_SEARCH_NAME
    returns the same value (same pointer) as SYMBOL_LINKAGE_NAME.  */

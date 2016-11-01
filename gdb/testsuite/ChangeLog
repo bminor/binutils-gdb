@@ -1,3 +1,319 @@
+2016-10-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/maint.exp <maint info line-table w/o a file name>: Use
+	gdb_test_multiple, tighten regexps and match symtabs and line
+	tables incrementally.
+
+2016-10-28  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/foll-exec.exp (do_exec_tests): Make test pattern more
+	general.
+
+2016-10-25  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/exec-invalid-sysroot.exp: New file.
+
+2016-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/morestack.exp: Try to build it using -fuse-ld=gold first.
+
+2016-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (get_compiler_info): Generalize gcc_compile regexp.
+
+2016-10-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+    	* gdb.base/killed-outside.exp: Remove $options from a call to
+    	`prepare_for_testing'.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
+	Change test message.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp (test_trace_save_wrong_num_args):
+	Update comment.
+
+2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/mi-trace-save.exp: New file.
+
+2016-10-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/code_elim.exp (get_var_address): Remove.
+	* gdb.base/relocate.exp: Likewise.
+	* gdb.base/shreloc.exp: Likewise.
+	* lib/gdb.exp (get_var_address): New.
+
+2016-10-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/structs.exp: Invoke gdb_skip_float_test, and do
+	floating point tests if $skip_float_test is false.
+
+2016-10-12  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.python/py-value.c (main): Check if argv is NULL before using it.
+	* gdb.python/py-value.exp (test_value_in_inferior): Don't use hardcoded
+	argc values.
+	Add 1 to argc so we guarantee distinct initial/modified argc values.
+
+2016-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/powerpc-prologue.c (optimized_1): New declaration.
+
+2016-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/powerpc-prologue.exp: Use standard_output_file
+	* gdb.arch/ppc64-symtab-cordic.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+
+2016-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.xml/tdesc-regs.exp: Set regdir to "arm/".
+
+2016-10-07  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.python/python.exp: Test decode_line("*0").
+
+2016-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-value.exp (test_value_creation): Add test for large
+	unsigned 64-bit value.
+
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* gdb.compile/compile.exp: Change java tests to rust.
+	* gdb.base/setshow.exp: Change java tests to rust.
+	* gdb.base/default.exp: Remove java from language list.
+	* README (Examples): Update language example.
+	* gdb.python/py-lookup-type.exp (test_lookup_type): Remove java
+	test.
+	* lib/gdb.exp (skip_java_tests): Remove.
+	* lib/java.exp: Remove.
+	* gdb.java: Remove.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdb.arch/mips-fcr.exp: New test.
+	* gdb.arch/mips-fcr.c: Source for the new test.
+
+2016-10-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdb.base/solib-disc.exp: Use `standard_output_file'
+	throughout.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/jit-simple-dl.c: New file.
+	* gdb.base/jit-simple-jit.c: New file, factored out from ...
+	* gdb.base/jit-simple.c: ... this.
+	* gdb.base/jit-simple.exp (jit_run): Delete.
+	(build_jit): New proc.
+	(jit_test_reread): Recompile either the main program or the shared
+	library, depending on what is being tested.  Skip changing address
+	if caller wants to.  Compare before/after addresses.  If testing
+	standalone, explicitly load the binary.  Test "maint info
+	breakpoints".
+	(top level): Add "standalone vs shared lib" and "change address"
+	vs "same address" axes.
+
+2016-10-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/jit-simple.exp (top level) Delete get_compiler_info
+	call.
+	(jit_run): Delete.
+	(jit_test_reread): Use with_test_prefix.  Reload the main binary
+	explicitly.  Compare the before/after addresses of the JIT
+	descriptor.
+
+2016-08-15  Doug Evans  <dje@google.com>
+
+	* gdb.xml/extra-regs.xml: Update, end field now required, default type
+	for single bitfields is bool.
+	* gdb.xml/tdesc-regs.exp: Ditto.
+
+2016-10-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-signal.exp (backtrace 10): Fix #2 typo.
+
+2016-10-05  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (support_complex_tests): Return zero if
+	gdb_skip_float_test return true.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* gdb.mi/user-selected-context-sync.exp: New file.
+	* gdb.mi/user-selected-context-sync.c: New file.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Adapt
+	=thread-select-event check.
+
+2016-09-29  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp <cmprb>: Update tests to account for
+	the compulsory L operand changes.
+	* gdb.arch/powerpc-power.s: Likewise.
+
+2016-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/20609 - attach of JIT-debug-enabled inf 7.11.1 regression
+	* gdb.base/jit-attach-pie.c: New file.
+	* gdb.base/jit-attach-pie.exp: New file.
+
+2016-09-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/infcall-input.c: New file.
+	* gdb.base/infcall-input.exp: New file.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp: Rename mi_gdb_exit.
+	(gdb_exit): Rename it to ...
+	(gdbserver_gdb_exit): ...  Close GDBserver.
+	(gdb_exit): New proc, call gdbserver_gdb_exit.
+	(mi_gdb_exit): Likewise.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* boards/gdbserver-base.exp (gdb_server_prog): Set the absolute
+	path.
+	* boards/remote-gdbserver-on-localhost.exp: Use gdbserver-base.
+	Remove duplication.
+
+2016-09-22  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdbserver-support.exp: Check the existence of
+	gdbserver_orig_gdb_exit rather than gdbserver_gdb_exit.
+
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.xml/tdesc-regs.exp: set core-regs for arc*-*-elf32.
+
+2016-09-21  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/20604:
+	* gdb.base/quit.exp: New file.
+
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: New file.
+
+2016-09-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdb.arch/mips16-thunks.exp: Use `standard_output_file'
+	throughout.
+
+2016-09-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp: No longer skip hardware breakpoint tests on s390.
+
+2016-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/casts.cc (decltype): Move it ...
+	(main): ... with its call to ...
+	* gdb.cp/casts03.cc: ... a new file.
+	* gdb.cp/casts.exp: Add new file casts03.cc, move decltype test to it.
+
+2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/m-static.h (gnu_obj_4::somewhere): Use constexpr for C++11.
+
+2016-09-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.s: Update Power9 instruction tests
+	and sync up the test with tests in gas/testsuite/gas/ppc.
+	* gdb.arch/powerpc-power.exp: Likewise.
+
+2016-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/future.exp: Set CCACHE_DISABLE, clear CCACHE_NODISABLE.
+
+2016-09-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/stap-probe.c (m1): New variable 'dummy', necessary to
+	make m1's definition to be different from m2's.  Use 'dummy' as an
+	argument for probe 'two'.
+
+2016-09-10  Jon Beniston  <jon@beniston.com>
+
+	* lib/mi-support.exp (mi_gdb_target_load): Use target_sim_options
+	for sim target.
+
+2016-09-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu-ifunc-lib.c (resolver_hwcap): New external
+	variable declaration.
+	(gnu_ifunc): Add parameter hwcap.  Store it in resolver_hwcap.
+	* gdb.base/gnu-ifunc.c (resolver_hwcap): New global variable.
+	* gdb.base/gnu-ifunc.exp: Add test to verify that the resolver
+	received HWCAP as its argument.
+
+2016-09-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/new-ui-pending-input.c: New file.
+	* gdb.base/new-ui-pending-input.exp: New file.
+	* gdb.exp (clear_gdb_spawn_id): New procedure.
+	(with_spawn_id): Check whether gdb_spawn_id exists before
+	referencing it.  If gdb_spawn_id didn't exist on entry, clear it
+	on exit.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/float128.c: New file.
+	* gdb.base/float128.exp: Likewise.
+	* gdb.base/floatn.c: Likewise.
+	* gdb.base/floatn.exp: Likewise.
+
+2016-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cp/hang.exp: Remove reference to TYPE_FLAG_STUB in comment.
+
+2016-09-05  Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/19927
+	* gdb.python/py-unwind-maint.exp: Adjust tests to not expect that
+	unwinders are immediately called as side effect of "source" or
+	"disable unwinder" commands.
+	* gdb.python/py-recurse-unwind.exp: Remove setup_kfail calls.
+
+2016-09-02  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/return-nodebug.exp: Skip the test if	skip_float_test
+	is true and $type is "float" or "double".
+
+2016-09-02  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-neon.exp: Skip it if gdb_skip_float_test returns
+	true.
+	* gdb.base/call-ar-st.exp: Invoke gdb_skip_float_test.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/call-sc.exp: Invoke gdb_skip_float_test and use its
+	return value instead of gdb,skip_float_test.
+	* gdb.base/callfuncs.exp: Invoke gdb_skip_float_test.
+	(do_function_calls): Use its return value instead of
+	gdb,skip_float_test.
+	* gdb.base/finish.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/return.exp: Likewise.
+	* gdb.base/return2.exp: Likewise.
+	* gdb.base/varargs.exp: Likewise.
+	* lib/gdb.exp (gdb_skip_float_test): Change it to
+	gdb_caching_proc.  Detect the broken ptrace on arm-linux.
+
+2016-08-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.multi/tids.exp: Test "thread apply all".
+
 2016-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/default.exp (tty): Remove.

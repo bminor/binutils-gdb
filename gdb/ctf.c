@@ -29,8 +29,8 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "tracefile.h"
-
 #include <ctype.h>
+#include <algorithm>
 
 /* GDB saves trace buffers and other information (such as trace
    status) got from the remote target into Common Trace Format (CTF).
@@ -1397,7 +1397,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	 and this address falls within a read-only section, fallback
 	 to reading from executable, up to LOW_ADDR_AVAILABLE  */
       if (offset < low_addr_available)
-	len = min (len, low_addr_available - offset);
+	len = std::min (len, low_addr_available - offset);
       res = exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 
       if (res == TARGET_XFER_OK)

@@ -591,9 +591,9 @@ hppa_add_stub (const char *stub_name,
 				      TRUE, FALSE);
   if (hsh == NULL)
     {
-      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
-			     section->owner,
-			     stub_name);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%B: cannot create stub entry %s"),
+			  section->owner, stub_name);
       return NULL;
     }
 
@@ -842,7 +842,8 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	  && (!htab->has_22bit_branch
 	      || sym_value - 8 + (1 << (22 + 1)) >= (1 << (22 + 2))))
 	{
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
 	     hsh->target_section->owner,
 	     stub_sec,
@@ -1280,7 +1281,8 @@ elf32_hppa_check_relocs (bfd *abfd,
 	case R_PARISC_DPREL21L:
 	  if (bfd_link_pic (info))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B: relocation %s can not be used when making a shared object; recompile with -fPIC"),
 		 abfd,
 		 elf_hppa_howto_table[r_type].name);
@@ -2789,9 +2791,9 @@ get_local_syms (bfd *output_bfd, bfd *input_bfd, struct bfd_link_info *info)
 		    }
 		  else
 		    {
-		      (*_bfd_error_handler) (_("%B: duplicate export stub %s"),
-					     input_bfd,
-					     stub_name);
+		      /* xgettext:c-format */
+		      _bfd_error_handler (_("%B: duplicate export stub %s"),
+					  input_bfd, stub_name);
 		    }
 		}
 	    }
@@ -3443,7 +3445,8 @@ final_link_relocate (asection *input_section,
 		/* We must have a ldil instruction.  It's too hard to find
 		   and convert the associated add instruction, so issue an
 		   error.  */
-		(*_bfd_error_handler)
+		_bfd_error_handler
+		  /* xgettext:c-format */
 		  (_("%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
 		   input_bfd,
 		   input_section,
@@ -3608,7 +3611,8 @@ final_link_relocate (asection *input_section,
   if (max_branch_offset != 0
       && value + addend + max_branch_offset >= 2*max_branch_offset)
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext:c-format */
 	(_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
 	 input_bfd,
 	 input_section,
@@ -3953,7 +3957,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		}
 	      plabel = 1;
 	    }
-	  /* Fall through and possibly emit a dynamic relocation.  */
+	  /* Fall through.  */
 
 	case R_PARISC_DIR17F:
 	case R_PARISC_DIR17R:
@@ -4298,7 +4302,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	{
 	  if (rstatus == bfd_reloc_notsupported || !warned_undef)
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
 		(_("%B(%A+0x%lx): cannot handle %s for %s"),
 		 input_bfd,
 		 input_section,
@@ -4615,7 +4620,7 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
 	      != (sgot->output_offset
 		  + sgot->output_section->vma))
 	    {
-	      (*_bfd_error_handler)
+	      _bfd_error_handler
 		(_(".got section not immediately after .plt section"));
 	      return FALSE;
 	    }

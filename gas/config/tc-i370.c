@@ -956,6 +956,7 @@ i370_dc (int unused ATTRIBUTE_UNUSED)
       break;
     case 'E':  /* 32-bit */
       type = 'f';
+      /* Fall through.  */
     case 'D':  /* 64-bit */
       md_atof (type, tmp, &nbytes);
       p = frag_more (nbytes);

@@ -35,6 +35,10 @@ final (int arg)
 
 volatile int gnu_ifunc_initialized;
 
+/* This stores the argument received by the ifunc resolver.  */
+
+volatile unsigned long resolver_hwcap = -1;
+
 static void
 gnu_ifunc_pre (void)
 {

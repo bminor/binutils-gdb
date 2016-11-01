@@ -35,6 +35,6 @@ gdb_load ${binfile}
 
 runto func
 gdb_test "backtrace 10" \
-    "#0  ($hex in )?func.*\r\n#1  <signal handler called>\r\n#2  ($hex in)?main.*"
+    "#0  ($hex in )?func.*\r\n#1  <signal handler called>\r\n#2  ($hex in )?main.*"
 
 gdb_test "finish" "Run till exit from \#0  func.*<signal handler called>"

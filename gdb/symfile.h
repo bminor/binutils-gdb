@@ -23,6 +23,8 @@
 /* This file requires that you first include "bfd.h".  */
 #include "symtab.h"
 #include "probe.h"
+#include "symfile-add-flags.h"
+#include "objfile-flags.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -347,7 +349,7 @@ struct sym_fns
      file we are reading.  SYMFILE_FLAGS are the flags passed to
      symbol_file_add & co.  */
 
-  void (*sym_read) (struct objfile *, int);
+  void (*sym_read) (struct objfile *, symfile_add_flags);
 
   /* Read the partial symbols for an objfile.  This may be NULL, in which case
      gdb has to check other ways if this objfile has any symbols.  This may
@@ -436,7 +438,7 @@ extern void add_compunit_symtab_to_objfile (struct compunit_symtab *cu);
 
 extern void add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *);
 
-extern void clear_symtab_users (int add_flags);
+extern void clear_symtab_users (symfile_add_flags add_flags);
 
 extern enum language deduce_language_from_filename (const char *);
 
@@ -445,34 +447,14 @@ extern enum language deduce_language_from_filename (const char *);
    function.  */
 extern void add_filename_language (const char *ext, enum language lang);
 
-/* This enum encodes bit-flags passed as ADD_FLAGS parameter to
-   symbol_file_add, etc.  */
+extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
+					struct section_addr_info *, objfile_flags);
 
-enum symfile_add_flags
-  {
-    /* Be chatty about what you are doing.  */
-    SYMFILE_VERBOSE = 1 << 1,
-
-    /* This is the main symbol file (as opposed to symbol file for dynamically
-       loaded code).  */
-    SYMFILE_MAINLINE = 1 << 2,
-
-    /* Do not call breakpoint_re_set when adding this symbol file.  */
-    SYMFILE_DEFER_BP_RESET = 1 << 3,
-
-    /* Do not immediately read symbols for this file.  By default,
-       symbols are read when the objfile is created.  */
-    SYMFILE_NO_READ = 1 << 4
-  };
-
-extern struct objfile *symbol_file_add (const char *, int,
-					struct section_addr_info *, int);
-
-extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, int,
+extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_add_flags,
                                                  struct section_addr_info *,
-                                                 int, struct objfile *parent);
+                                                 objfile_flags, struct objfile *parent);
 
-extern void symbol_file_add_separate (bfd *, const char *, int,
+extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
 				      struct objfile *);
 
 extern char *find_separate_debug_file_by_debuglink (struct objfile *);
@@ -561,7 +543,8 @@ extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, struct obj_section *);
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Load symbols from a file.  */
-extern void symbol_file_add_main (const char *args, int from_tty);
+extern void symbol_file_add_main (const char *args,
+				  symfile_add_flags add_flags);
 
 /* Clear GDB symbol tables.  */
 extern void symbol_file_clear (int from_tty);
@@ -652,7 +635,8 @@ void dwarf2_free_objfile (struct objfile *);
 
 /* From mdebugread.c */
 
-extern void mdebug_build_psymtabs (struct objfile *,
+extern void mdebug_build_psymtabs (minimal_symbol_reader &,
+				   struct objfile *,
 				   const struct ecoff_debug_swap *,
 				   struct ecoff_debug_info *);
 

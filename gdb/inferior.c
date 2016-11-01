@@ -253,6 +253,9 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 
   inf->pid = 0;
   inf->fake_pid_p = 0;
+  xfree (inf->priv);
+  inf->priv = NULL;
+
   if (inf->vfork_parent != NULL)
     {
       inf->vfork_parent->vfork_child = NULL;
@@ -548,6 +551,24 @@ inferior_pid_to_str (int pid)
     return _("<null>");
 }
 
+/* See inferior.h.  */
+
+void
+print_selected_inferior (struct ui_out *uiout)
+{
+  char buf[PATH_MAX + 256];
+  struct inferior *inf = current_inferior ();
+
+  xsnprintf (buf, sizeof (buf),
+	     _("[Switching to inferior %d [%s] (%s)]\n"),
+	     inf->num,
+	     inferior_pid_to_str (inf->pid),
+	     (inf->pspace->pspace_exec_filename != NULL
+	      ? inf->pspace->pspace_exec_filename
+	      : _("<noexec>")));
+  ui_out_text (uiout, buf);
+}
+
 /* Prints the list of inferiors and their details on UIOUT.  This is a
    version of 'info_inferior_command' suitable for use from MI.
 
@@ -633,17 +654,15 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 static void
 detach_inferior_command (char *args, int from_tty)
 {
-  int num, pid;
   struct thread_info *tp;
-  struct get_number_or_range_state state;
 
   if (!args || !*args)
     error (_("Requires argument (inferior id(s) to detach)"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
 
       if (!valid_gdb_inferior_id (num))
 	{
@@ -651,7 +670,7 @@ detach_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      pid = gdb_inferior_id_to_pid (num);
+      int pid = gdb_inferior_id_to_pid (num);
       if (pid == 0)
 	{
 	  warning (_("Inferior ID %d is not running."), num);
@@ -674,17 +693,15 @@ detach_inferior_command (char *args, int from_tty)
 static void
 kill_inferior_command (char *args, int from_tty)
 {
-  int num, pid;
   struct thread_info *tp;
-  struct get_number_or_range_state state;
 
   if (!args || !*args)
     error (_("Requires argument (inferior id(s) to kill)"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
 
       if (!valid_gdb_inferior_id (num))
 	{
@@ -692,7 +709,7 @@ kill_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      pid = gdb_inferior_id_to_pid (num);
+      int pid = gdb_inferior_id_to_pid (num);
       if (pid == 0)
 	{
 	  warning (_("Inferior ID %d is not running."), num);
@@ -726,13 +743,6 @@ inferior_command (char *args, int from_tty)
   if (inf == NULL)
     error (_("Inferior ID %d not known."), num);
 
-  printf_filtered (_("[Switching to inferior %d [%s] (%s)]\n"),
-		   inf->num,
-		   inferior_pid_to_str (inf->pid),
-		   (inf->pspace->pspace_exec_filename != NULL
-		    ? inf->pspace->pspace_exec_filename
-		    : _("<noexec>")));
-
   if (inf->pid != 0)
     {
       if (inf->pid != ptid_get_pid (inferior_ptid))
@@ -746,9 +756,10 @@ inferior_command (char *args, int from_tty)
 	  switch_to_thread (tp->ptid);
 	}
 
-      printf_filtered (_("[Switching to thread %s (%s)] "),
-		       print_thread_id (inferior_thread ()),
-		       target_pid_to_str (inferior_ptid));
+      observer_notify_user_selected_context_changed
+	(USER_SELECTED_INFERIOR
+	 | USER_SELECTED_THREAD
+	 | USER_SELECTED_FRAME);
     }
   else
     {
@@ -758,14 +769,8 @@ inferior_command (char *args, int from_tty)
       set_current_inferior (inf);
       switch_to_thread (null_ptid);
       set_current_program_space (inf->pspace);
-    }
 
-  if (inf->pid != 0 && is_running (inferior_ptid))
-    ui_out_text (current_uiout, "(running)\n");
-  else if (inf->pid != 0)
-    {
-      ui_out_text (current_uiout, "\n");
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+      observer_notify_user_selected_context_changed (USER_SELECTED_INFERIOR);
     }
 }
 
@@ -782,18 +787,14 @@ info_inferiors_command (char *args, int from_tty)
 static void
 remove_inferior_command (char *args, int from_tty)
 {
-  int num;
-  struct inferior *inf;
-  struct get_number_or_range_state state;
-
   if (args == NULL || *args == '\0')
     error (_("Requires an argument (inferior id(s) to remove)"));
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
-      inf = find_inferior_id (num);
+      int num = parser.get_number ();
+      struct inferior *inf = find_inferior_id (num);
 
       if (inf == NULL)
 	{
@@ -853,7 +854,11 @@ add_inferior_command (char *args, int from_tty)
   int i, copies = 1;
   char *exec = NULL;
   char **argv;
+  symfile_add_flags add_flags = 0;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
 
   if (args)
     {
@@ -902,7 +907,7 @@ add_inferior_command (char *args, int from_tty)
 	  switch_to_thread (null_ptid);
 
 	  exec_file_attach (exec, from_tty);
-	  symbol_file_add_main (exec, from_tty);
+	  symbol_file_add_main (exec, add_flags);
 	}
     }
 

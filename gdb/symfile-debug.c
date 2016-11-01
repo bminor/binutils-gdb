@@ -442,14 +442,14 @@ debug_sym_init (struct objfile *objfile)
 }
 
 static void
-debug_sym_read (struct objfile *objfile, int symfile_flags)
+debug_sym_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   const struct debug_sym_fns_data *debug_data
     = ((const struct debug_sym_fns_data *)
        objfile_data (objfile, symfile_debug_objfile_data_key));
 
   fprintf_filtered (gdb_stdlog, "sf->sym_read (%s, 0x%x)\n",
-		    objfile_debug_name (objfile), symfile_flags);
+		    objfile_debug_name (objfile), (unsigned) symfile_flags);
 
   debug_data->real_sf->sym_read (objfile, symfile_flags);
 }

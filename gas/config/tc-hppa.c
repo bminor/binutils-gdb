@@ -3505,8 +3505,9 @@ pa_ip (char *str)
 			/* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
 		      }
-		    else if (*args == 'e')
+		    else
 		      {
+			gas_assert (*args == 'e');
 			/* Stash the ma/mb flag temporarily in the
 			   instruction.  We will use (and remove it)
 			   later when handling 'J', 'K', '<' & '>'.  */
@@ -5431,6 +5432,7 @@ pa_ip (char *str)
 		{
 		case SGL:
 		  opcode |= 0x20;
+		  /* Fall through.  */
 		case DBL:
 		  the_insn.fpof1 = flag;
 		  continue;

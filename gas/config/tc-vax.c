@@ -1796,8 +1796,10 @@ vip_op (char *optext, struct vop *vopP)
 	{
 	case 'l':
 	  mode += 2;
+	  /* Fall through.  */
 	case 'w':
 	  mode += 2;
+	  /* Fall through.  */
 	case ' ':	/* Assumed B^ until our caller changes it.  */
 	case 'b':
 	  break;

@@ -450,7 +450,6 @@ tui			Stephane Carrez		Stephane.Carrez@gmail.com
 ia64			Kevin Buettner		kevinb@redhat.com
 AIX			Kevin Buettner		kevinb@redhat.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
-gdb.java tests		Anthony Green		green@redhat.com
 FreeBSD native & host	David O'Brien		obrien@freebsd.org
 event loop		Elena Zannoni		elena.zannoni@oracle.com
 generic symtabs		Elena Zannoni		elena.zannoni@oracle.com
@@ -572,6 +571,7 @@ Mark Kettenis					kettenis@gnu.org
 Marc Khouzam					marc.khouzam@ericsson.com
 Toshihito Kikuchi					k.toshihito@yahoo.de
 Jim Kingdon					kingdon@panix.com
+Anton Kolesov					anton.kolesov@synopsys.com
 Paul Koning					paul_koning@dell.com
 Marcin Kościelnicki				koriakin@0x04.net
 Jan Kratochvil					jan.kratochvil@redhat.com

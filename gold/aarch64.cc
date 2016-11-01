@@ -7084,13 +7084,13 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	  // Return false to stop further processing this reloc.
 	  return false;
 	}
-      // Fallthrough
+      // Fall through.
     case elfcpp::R_AARCH64_JUMP26:
       if (Reloc::maybe_apply_stub(r_type, relinfo, rela, view, address,
 				  gsym, psymval, object,
 				  target->stub_group_size_))
 	break;
-      // Fallthrough
+      // Fall through.
     case elfcpp::R_AARCH64_TSTBR14:
     case elfcpp::R_AARCH64_CONDBR19:
       reloc_status = Reloc::template pcrela_general<32>(
@@ -8126,7 +8126,7 @@ Target_aarch64<size, big_endian>::is_erratum_835769_sequence(
     typename elfcpp::Swap<32,big_endian>::Valtype insn2)
 {
   uint32_t rt;
-  uint32_t rt2;
+  uint32_t rt2 = 0;
   uint32_t rn;
   uint32_t rm;
   uint32_t ra;

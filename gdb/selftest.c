@@ -18,22 +18,18 @@
 
 #include "defs.h"
 #include "selftest.h"
-#include "vec.h"
-
-typedef self_test_function *self_test_function_ptr;
-
-DEF_VEC_P (self_test_function_ptr);
+#include <vector>
 
 /* All the tests that have been registered.  */
 
-static VEC (self_test_function_ptr) *tests;
+static std::vector<self_test_function *> tests;
 
 /* See selftest.h.  */
 
 void
 register_self_test (self_test_function *function)
 {
-  VEC_safe_push (self_test_function_ptr, tests, function);
+  tests.push_back (function);
 }
 
 /* See selftest.h.  */
@@ -41,17 +37,15 @@ register_self_test (self_test_function *function)
 void
 run_self_tests (void)
 {
-  int i;
-  self_test_function_ptr func;
   int failed = 0;
 
-  for (i = 0; VEC_iterate (self_test_function_ptr, tests, i, func); ++i)
+  for (int i = 0; i < tests.size (); ++i)
     {
       QUIT;
 
       TRY
 	{
-	  (*func) ();
+	  tests[i] ();
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -62,6 +56,6 @@ run_self_tests (void)
       END_CATCH
     }
 
-  printf_filtered (_("Ran %u unit tests, %d failed\n"),
-		   VEC_length (self_test_function_ptr, tests), failed);
+  printf_filtered (_("Ran %lu unit tests, %d failed\n"),
+		   (long) tests.size (), failed);
 }

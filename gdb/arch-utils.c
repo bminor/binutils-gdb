@@ -241,6 +241,34 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
   *frame_offset = 0;
 }
 
+/* Return a floating-point format for a floating-point variable of
+   length LEN in bits.  If non-NULL, NAME is the name of its type.
+   If no suitable type is found, return NULL.  */
+
+const struct floatformat **
+default_floatformat_for_type (struct gdbarch *gdbarch,
+			      const char *name, int len)
+{
+  const struct floatformat **format = NULL;
+
+  if (len == gdbarch_half_bit (gdbarch))
+    format = gdbarch_half_format (gdbarch);
+  else if (len == gdbarch_float_bit (gdbarch))
+    format = gdbarch_float_format (gdbarch);
+  else if (len == gdbarch_double_bit (gdbarch))
+    format = gdbarch_double_format (gdbarch);
+  else if (len == gdbarch_long_double_bit (gdbarch))
+    format = gdbarch_long_double_format (gdbarch);
+  /* On i386 the 'long double' type takes 96 bits,
+     while the real number of used bits is only 80,
+     both in processor and in memory.
+     The code below accepts the real bit size.  */
+  else if (gdbarch_long_double_format (gdbarch) != NULL
+	   && len == gdbarch_long_double_format (gdbarch)[0]->totalsize)
+    format = gdbarch_long_double_format (gdbarch);
+
+  return format;
+}
 
 int
 generic_convert_register_p (struct gdbarch *gdbarch, int regnum,

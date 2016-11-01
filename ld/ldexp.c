@@ -417,6 +417,32 @@ fold_unary (etree_type *tree)
     }
 }
 
+/* Arithmetic operators, bitwise AND, bitwise OR and XOR keep the
+   section of one of their operands only when the other operand is a
+   plain number.  Losing the section when operating on two symbols,
+   ie. a result of a plain number, is required for subtraction and
+   XOR.  It's justifiable for the other operations on the grounds that
+   adding, multiplying etc. two section relative values does not
+   really make sense unless they are just treated as numbers.
+   The same argument could be made for many expressions involving one
+   symbol and a number.  For example, "1 << x" and "100 / x" probably
+   should not be given the section of x.  The trouble is that if we
+   fuss about such things the rules become complex and it is onerous
+   to document ld expression evaluation.  */
+static void
+arith_result_section (const etree_value_type *lhs)
+{
+  if (expld.result.section == lhs->section)
+    {
+      if (expld.section == bfd_abs_section_ptr
+	  && !config.sane_expr)
+	/* Duplicate the insanity in exp_fold_tree_1 case etree_value.  */
+	expld.result.section = bfd_abs_section_ptr;
+      else
+	expld.result.section = NULL;
+    }
+}
+
 static void
 fold_binary (etree_type *tree)
 {
@@ -483,26 +509,10 @@ fold_binary (etree_type *tree)
 
       switch (tree->type.node_code)
 	{
-	  /* Arithmetic operators, bitwise AND, bitwise OR and XOR
-	     keep the section of one of their operands only when the
-	     other operand is a plain number.  Losing the section when
-	     operating on two symbols, ie. a result of a plain number,
-	     is required for subtraction and XOR.  It's justifiable
-	     for the other operations on the grounds that adding,
-	     multiplying etc. two section relative values does not
-	     really make sense unless they are just treated as
-	     numbers.
-	     The same argument could be made for many expressions
-	     involving one symbol and a number.  For example,
-	     "1 << x" and "100 / x" probably should not be given the
-	     section of x.  The trouble is that if we fuss about such
-	     things the rules become complex and it is onerous to
-	     document ld expression evaluation.  */
 #define BOP(x, y) \
 	case x:							\
 	  expld.result.value = lhs.value y expld.result.value;	\
-	  if (expld.result.section == lhs.section)		\
-	    expld.result.section = NULL;			\
+	  arith_result_section (&lhs);				\
 	  break;
 
 	  /* Comparison operators, logical AND, and logical OR always
@@ -536,8 +546,7 @@ fold_binary (etree_type *tree)
 				  % (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
 	    einfo (_("%F%S %% by zero\n"), tree->binary.rhs);
-	  if (expld.result.section == lhs.section)
-	    expld.result.section = NULL;
+	  arith_result_section (&lhs);
 	  break;
 
 	case '/':
@@ -546,8 +555,7 @@ fold_binary (etree_type *tree)
 				  / (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
 	    einfo (_("%F%S / by zero\n"), tree->binary.rhs);
-	  if (expld.result.section == lhs.section)
-	    expld.result.section = NULL;
+	  arith_result_section (&lhs);
 	  break;
 
 	case MAX_K:
@@ -1069,6 +1077,7 @@ exp_fold_tree_1 (etree_type *tree)
 		 before relaxation and so be stripped incorrectly.  */
 	      if (expld.phase == lang_mark_phase_enum
 		  && expld.section != bfd_abs_section_ptr
+		  && expld.section != bfd_und_section_ptr
 		  && !(expld.result.valid_p
 		       && expld.result.value == 0
 		       && (is_value (tree->assign.src, 0)
@@ -1077,7 +1086,8 @@ exp_fold_tree_1 (etree_type *tree)
 			   || is_align_conditional (tree->assign.src))))
 		expld.section->flags |= SEC_KEEP;
 
-	      if (!expld.result.valid_p)
+	      if (!expld.result.valid_p
+		  || expld.section == bfd_und_section_ptr)
 		{
 		  if (expld.phase != lang_mark_phase_enum)
 		    einfo (_("%F%S invalid assignment to"
@@ -1252,25 +1262,46 @@ exp_fold_tree_no_dot (etree_type *tree)
   exp_fold_tree_1 (tree);
 }
 
+static void
+exp_value_fold (etree_type *tree)
+{
+  exp_fold_tree_no_dot (tree);
+  if (expld.result.valid_p)
+    {
+      tree->type.node_code = INT;
+      tree->value.value = expld.result.value;
+      tree->value.str = NULL;
+      tree->type.node_class = etree_value;
+    }
+}
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 etree_type *
 exp_binop (int code, etree_type *lhs, etree_type *rhs)
 {
-  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->binary));
-
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->binary),
+						      sizeof (new_e->value)));
   new_e->type.node_code = code;
   new_e->type.filename = lhs->type.filename;
   new_e->type.lineno = lhs->type.lineno;
   new_e->binary.lhs = lhs;
   new_e->binary.rhs = rhs;
   new_e->type.node_class = etree_binary;
+  if (lhs->type.node_class == etree_value
+      && rhs->type.node_class == etree_value
+      && code != ALIGN_K
+      && code != DATA_SEGMENT_ALIGN
+      && code != DATA_SEGMENT_RELRO_END)
+    exp_value_fold (new_e);
   return new_e;
 }
 
 etree_type *
 exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
 {
-  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->trinary));
-
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->trinary),
+						      sizeof (new_e->value)));
   new_e->type.node_code = code;
   new_e->type.filename = cond->type.filename;
   new_e->type.lineno = cond->type.lineno;
@@ -1278,19 +1309,29 @@ exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
   new_e->trinary.cond = cond;
   new_e->trinary.rhs = rhs;
   new_e->type.node_class = etree_trinary;
+  if (cond->type.node_class == etree_value
+      && lhs->type.node_class == etree_value
+      && rhs->type.node_class == etree_value)
+    exp_value_fold (new_e);
   return new_e;
 }
 
 etree_type *
 exp_unop (int code, etree_type *child)
 {
-  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->unary));
-
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->unary),
+						      sizeof (new_e->value)));
   new_e->unary.type.node_code = code;
   new_e->unary.type.filename = child->type.filename;
   new_e->unary.type.lineno = child->type.lineno;
   new_e->unary.child = child;
   new_e->unary.type.node_class = etree_unary;
+  if (child->type.node_class == etree_value
+      && code != ALIGN_K
+      && code != ABSOLUTE
+      && code != NEXT
+      && code != DATA_SEGMENT_END)
+    exp_value_fold (new_e);
   return new_e;
 }
 

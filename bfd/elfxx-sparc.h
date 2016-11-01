@@ -145,4 +145,4 @@ extern bfd_boolean _bfd_sparc_elf_object_p
 extern bfd_vma _bfd_sparc_elf_plt_sym_val
   (bfd_vma, const asection *, const arelent *);
 extern bfd_boolean _bfd_sparc_elf_merge_private_bfd_data
-  (bfd *, bfd *);
+  (bfd *, struct bfd_link_info *);

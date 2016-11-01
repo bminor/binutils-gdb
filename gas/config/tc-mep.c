@@ -1708,7 +1708,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 	    operand = MEP_OPERAND_PCREL17A2;
 	    break;
 	  }
-	/* ...FALLTHROUGH... */
+	/* Fall through.  */
 
       case MEP_INSN_JMP:
 	addend = target_address_for (fragP);
@@ -1723,6 +1723,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 
       case MEP_INSN_BNEZ:
 	bit = 1;
+	/* Fall through.  */
       case MEP_INSN_BEQZ:
 	fragP->fr_opcode[1^e] = bit | (addend & 0xfe);
 	operand = MEP_OPERAND_PCREL8A2;
@@ -1730,6 +1731,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 
       case MEP_INSN_BNEI:
 	bit = 4;
+	/* Fall through.  */
       case MEP_INSN_BEQI:
 	if (subtype_mappings[fragP->fr_subtype].growth)
 	  {

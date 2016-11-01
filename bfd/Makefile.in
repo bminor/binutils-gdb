@@ -288,6 +288,7 @@ TDEFINES = @TDEFINES@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
+WARN_CFLAGS_FOR_BUILD = @WARN_CFLAGS_FOR_BUILD@
 WARN_WRITE_STRINGS = @WARN_WRITE_STRINGS@
 XGETTEXT = @XGETTEXT@
 abs_builddir = @abs_builddir@
@@ -1169,13 +1170,14 @@ noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES = 
 BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
 LOCAL_H_DEPS = libbfd.h sysdep.h config.h
-BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c bfdio.c bfdwin.c \
-	archive.c corefile.c targets.c format.c compress.c
+BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
+	bfdio.c bfdwin.c section.c archures.c reloc.c \
+	syms.c bfd.c archive.c corefile.c targets.c format.c \
+	linker.c simple.c compress.c
 
 BFD64_H_FILES = archive64.c
-LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c bfdio.c bfdwin.c \
-	cache.c reloc.c archures.c elf.c
+LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
+	cache.c reloc.c archures.c linker.c
 
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 MOSTLYCLEANFILES = ofiles stamp-ofiles

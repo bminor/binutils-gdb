@@ -2439,9 +2439,8 @@ class Stub_control
   // the stubbed branches.
   Stub_control(int32_t size, bool no_size_errors)
     : state_(NO_GROUP), stub_group_size_(abs(size)),
-      stub14_group_size_(abs(size) >> 10),
       stubs_always_before_branch_(size < 0),
-      suppress_size_errors_(no_size_errors),
+      suppress_size_errors_(no_size_errors), group_size_(0),
       group_end_addr_(0), owner_(NULL), output_section_(NULL)
   {
   }
@@ -2479,24 +2478,28 @@ class Stub_control
 
   State state_;
   uint32_t stub_group_size_;
-  uint32_t stub14_group_size_;
   bool stubs_always_before_branch_;
   bool suppress_size_errors_;
+  // Current max size of group.  Starts at stub_group_size_ but is
+  // reduced to stub_group_size_/1024 on seeing a section with
+  // external conditional branches.
+  uint32_t group_size_;
   uint64_t group_end_addr_;
+  // owner_ and output_section_ specify the section to which stubs are
+  // attached.  The stubs are placed at the end of this section.
   const Output_section::Input_section* owner_;
   Output_section* output_section_;
 };
 
 // Return true iff input section can be handled by current stub
-// group.
+// group.  Sections are presented to this function in reverse order,
+// so the first section is the tail of the group.
 
 bool
 Stub_control::can_add_to_stub_group(Output_section* o,
 				    const Output_section::Input_section* i,
 				    bool has14)
 {
-  uint32_t group_size
-    = has14 ? this->stub14_group_size_ : this->stub_group_size_;
   bool whole_sec = o->order() == ORDER_INIT || o->order() == ORDER_FINI;
   uint64_t this_size;
   uint64_t start_addr = o->address();
@@ -2510,46 +2513,90 @@ Stub_control::can_add_to_stub_group(Output_section* o,
       start_addr += i->relobj()->output_section_offset(i->shndx());
       this_size = i->data_size();
     }
-  uint64_t end_addr = start_addr + this_size;
-  bool toobig = this_size > group_size;
 
-  if (toobig && !this->suppress_size_errors_)
+  uint32_t group_size = this->stub_group_size_;
+  if (has14)
+    this->group_size_ = group_size = group_size >> 10;
+
+  if (this_size > group_size && !this->suppress_size_errors_)
     gold_warning(_("%s:%s exceeds group size"),
 		 i->relobj()->name().c_str(),
 		 i->relobj()->section_name(i->shndx()).c_str());
 
-  if (this->state_ != HAS_STUB_SECTION
-      && (!whole_sec || this->output_section_ != o)
-      && (this->state_ == NO_GROUP
-	  || this->group_end_addr_ - end_addr < group_size))
-    {
-      this->owner_ = i;
-      this->output_section_ = o;
-    }
+  gold_debug(DEBUG_TARGET, "maybe add%s %s:%s size=%#llx total=%#llx",
+	     has14 ? " 14bit" : "",
+	     i->relobj()->name().c_str(),
+	     i->relobj()->section_name(i->shndx()).c_str(),
+	     (long long) this_size,
+	     (long long) this->group_end_addr_ - start_addr);
 
-  if (this->state_ == NO_GROUP)
+  uint64_t end_addr = start_addr + this_size;
+  if (this->state_ == HAS_STUB_SECTION)
     {
-      this->state_ = FINDING_STUB_SECTION;
-      this->group_end_addr_ = end_addr;
-    }
-  else if (this->group_end_addr_ - start_addr < group_size)
-    ;
-  // Adding this section would make the group larger than GROUP_SIZE.
-  else if (this->state_ == FINDING_STUB_SECTION
-	   && !this->stubs_always_before_branch_
-	   && !toobig)
-    {
-      // But wait, there's more!  Input sections up to GROUP_SIZE
-      // bytes before the stub table can be handled by it too.
-      this->state_ = HAS_STUB_SECTION;
-      this->group_end_addr_ = end_addr;
+      // Can we add this section, which is before the stubs, to the
+      // group?
+      if (this->group_end_addr_ - start_addr <= this->group_size_)
+	return true;
     }
   else
     {
-      this->state_ = NO_GROUP;
-      return false;
+      // Stubs are added at the end of "owner_".
+      // The current section can always be the stub owner, except when
+      // whole_sec is true and the current section isn't the last of
+      // the pasted sections.  (This restriction for the whole_sec
+      // case is just to simplify the corner case mentioned in
+      // group_sections.)
+      // Note that "owner_" itself is not necessarily part of the
+      // group of sections served by these stubs!
+      if (!whole_sec || this->output_section_ != o)
+	{
+	  this->owner_ = i;
+	  this->output_section_ = o;
+	}
+
+      if (this->state_ == FINDING_STUB_SECTION)
+	{
+	  if (this->group_end_addr_ - start_addr <= this->group_size_)
+	    return true;
+	  // The group after the stubs has reached maximum size.
+	  // Now see about adding sections before the stubs to the
+	  // group.  If the current section has a 14-bit branch and
+	  // the group after the stubs exceeds group_size_ (because
+	  // they didn't have 14-bit branches), don't add sections
+	  // before the stubs:  The size of stubs for such a large
+	  // group may exceed the reach of a 14-bit branch.
+	  if (!this->stubs_always_before_branch_
+	      && this_size <= this->group_size_
+	      && this->group_end_addr_ - end_addr <= this->group_size_)
+	    {
+	      gold_debug(DEBUG_TARGET, "adding before stubs");
+	      this->state_ = HAS_STUB_SECTION;
+	      this->group_end_addr_ = end_addr;
+	      return true;
+	    }
+	}
+      else if (this->state_ == NO_GROUP)
+	{
+	  // Only here on very first use of Stub_control
+	  this->state_ = FINDING_STUB_SECTION;
+	  this->group_size_ = group_size;
+	  this->group_end_addr_ = end_addr;
+	  return true;
+	}
+      else
+	gold_unreachable();
     }
-  return true;
+
+  gold_debug(DEBUG_TARGET, "nope, didn't fit\n");
+
+  // The section fails to fit in the current group.  Set up a few
+  // things for the next group.  owner_ and output_section_ will be
+  // set later after we've retrieved those values for the current
+  // group.
+  this->state_ = FINDING_STUB_SECTION;
+  this->group_size_ = group_size;
+  this->group_end_addr_ = end_addr;
+  return false;
 }
 
 // Look over all the input sections, deciding where to place stubs.
@@ -2887,7 +2934,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	}
       this->stub_tables_.clear();
       this->stub_group_size_ = this->stub_group_size_ / 4 * 3;
-      gold_info(_("%s: stub group size is too large; retrying with %d"),
+      gold_info(_("%s: stub group size is too large; retrying with %#x"),
 		program_name, this->stub_group_size_);
       this->group_sections(layout, task, true);
     }
@@ -6045,7 +6092,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	  ppc_object->set_opd_discard(reloc.get_r_offset());
 	  break;
 	}
-      // Fall thru
+      // Fall through.
     case elfcpp::R_PPC64_UADDR64:
     case elfcpp::R_POWERPC_ADDR32:
     case elfcpp::R_POWERPC_UADDR32:
@@ -6152,7 +6199,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 		      || gsym->is_preemptible())))
 	    target->make_plt_entry(symtab, layout, gsym);
 	}
-      // Fall thru
+      // Fall through.
 
     case elfcpp::R_PPC64_REL64:
     case elfcpp::R_POWERPC_REL32:
@@ -7542,6 +7589,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size != 64)
 	// R_PPC_TLSGD, R_PPC_TLSLD, R_PPC_EMB_RELST_LO, R_PPC_EMB_RELST_HI
 	break;
+      // Fall through.
     case elfcpp::R_POWERPC_TPREL16:
     case elfcpp::R_POWERPC_TPREL16_LO:
     case elfcpp::R_POWERPC_TPREL16_HI:
@@ -7565,6 +7613,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	// R_PPC_EMB_NADDR32, R_PPC_EMB_NADDR16, R_PPC_EMB_NADDR16_LO
 	// R_PPC_EMB_NADDR16_HI, R_PPC_EMB_NADDR16_HA, R_PPC_EMB_SDAI16
 	break;
+      // Fall through.
     case elfcpp::R_POWERPC_DTPREL16:
     case elfcpp::R_POWERPC_DTPREL16_LO:
     case elfcpp::R_POWERPC_DTPREL16_HI:
@@ -7593,6 +7642,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
       branch_bit = 1 << 21;
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
       {
@@ -7957,6 +8007,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  maybe_dq_reloc = true;
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16:
     case elfcpp::R_POWERPC_REL16:
     case elfcpp::R_PPC64_TOC16:
@@ -7991,6 +8042,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_MRKREF, R_PPC_EMB_RELST_LO, R_PPC_EMB_RELST_HA
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_PPC64_TOC16_HI:
@@ -8011,6 +8063,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_RELSEC16, R_PPC_EMB_RELST_HI, R_PPC_EMB_BIT_FLD
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_PPC64_TOC16_HA:
@@ -8033,6 +8086,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR16_LO
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHER:
     case elfcpp::R_PPC64_TPREL16_HIGHER:
       Reloc::addr16_hi2(view, value);
@@ -8042,6 +8096,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR16_HI
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHERA:
     case elfcpp::R_PPC64_TPREL16_HIGHERA:
       Reloc::addr16_ha2(view, value);
@@ -8051,6 +8106,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR16_HA
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHEST:
     case elfcpp::R_PPC64_TPREL16_HIGHEST:
       Reloc::addr16_hi3(view, value);
@@ -8060,6 +8116,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_SDAI16
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_HIGHESTA:
     case elfcpp::R_PPC64_TPREL16_HIGHESTA:
       Reloc::addr16_ha3(view, value);
@@ -8070,11 +8127,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 32)
 	// R_PPC_EMB_NADDR32, R_PPC_EMB_NADDR16
 	goto unsupp;
+      // Fall through.
     case elfcpp::R_PPC64_TPREL16_DS:
     case elfcpp::R_PPC64_TPREL16_LO_DS:
       if (size == 32)
 	// R_PPC_TLSGD, R_PPC_TLSLD
 	break;
+      // Fall through.
     case elfcpp::R_PPC64_ADDR16_DS:
     case elfcpp::R_PPC64_ADDR16_LO_DS:
     case elfcpp::R_PPC64_TOC16_DS:

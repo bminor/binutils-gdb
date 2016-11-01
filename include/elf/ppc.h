@@ -219,11 +219,18 @@ END_RELOC_NUMBERS (R_PPC_max)
 enum
 {
   /* 0-3 are generic.  */
-  Tag_GNU_Power_ABI_FP = 4, /* Value 1 for hard-float, 2 for
-			       soft-float, 3 for single=precision 
-			       hard-float; 0 for not tagged or not
-			       using any ABIs affected by the
-			       differences.  */
+
+  /* FP ABI, low 2 bits:
+     1 for double precision hard-float,
+     2 for soft-float,
+     3 for single precision hard-float.
+     0 for not tagged or not using any ABIs affected by the differences.
+     Next 2 bits:
+     1 for ibm long double
+     2 for 64-bit long double
+     3 for IEEE long double.
+     0 for not tagged or not using any ABIs affected by the differences.  */
+  Tag_GNU_Power_ABI_FP = 4,
 
   /* Value 1 for general purpose registers only, 2 for AltiVec
      registers, 3 for SPE registers; 0 for not tagged or not using any

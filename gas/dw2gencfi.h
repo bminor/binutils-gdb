@@ -41,6 +41,7 @@ extern void cfi_add_advance_loc (struct symbol *);
 extern void cfi_add_label (const char *);
 
 extern void cfi_add_CFA_offset (unsigned, offsetT);
+extern void cfi_add_CFA_val_offset (unsigned, offsetT);
 extern void cfi_add_CFA_def_cfa (unsigned, offsetT);
 extern void cfi_add_CFA_register (unsigned, unsigned);
 extern void cfi_add_CFA_def_cfa_register (unsigned);

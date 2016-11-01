@@ -1,3 +1,122 @@
+2016-10-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (apply_relocations): Fail if the symbol table section
+	linked to by the reloc section does not have either the SHT_SYMTAB
+	or SHT_DYNSYM type.
+	(print_gnu_note): Decode the contents of NT_GNU_HWCAP notes.
+	Print the contents of unknown note types.
+	(process_note): Add the file and section to the parameter list.
+	Use print_symbol to display the note name.
+	Display the contents of unknown note types.
+	(process_corefile_note_segment): Rename to process_notes_at.
+	Add section parameter.  Apply relocations to the notes when
+	loading from a section.  Display section name when processing
+	notes in a section.
+	* testsuite/binutils-all/readelf.n: Update expected output.
+
+2016-10-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_dynamic_type): Add DT_SYMTAB_SHNDX.
+	(get_machine_type): Add EM_CLOUDSHIELD, EM_COREA_1ST,
+	EM_COREA_2ND, EM_OPEN8, EM_VIDEOCORE5, EM_56800EX, EM_BA1, EM_BA2,
+	EM_XCORE, EM_MCHP_PIC, EM_KM32, EM_KMX32, EM_KMX16, EM_KMX8,
+	EM_KVARC, EM_CDP, EM_COGE, EM_COOL, EM_NORC, EM_CSR_KALIMBA,
+	EM_Z80, EM_AMDGPU, EM_RISCV.
+	(get_osabi_name): Add ELFOSABI_CLOUDABI and ELFOSABI_OPENVS.
+	(get_group_flags): Update to handle flags in the
+	GRP_MASKOS and GRP_MASKPROC ranges.
+
+2016-10-14  Luis Machado  <lgustavo@codesourcery.com>
+
+	* testsuite/lib/utils-lib.exp (run_dump_test): Call remote_download
+	to copy file to remote host.
+
+2016-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (is_significant_symbol_name): New function.
+	(remove_useless_symbols): Do not remove significanr symbols.
+	(find_symbol_for_address): If an exact match for the specified
+	address has not been found, try scanning the dynamic relocs to see
+	if one of these matches the address.  If so, use the symbol
+	associated with the reloc.
+	(objdump_print_addr_with_symbol): Do not print offsets to symbols
+	with no value.
+	(disassemble_section): Only use dynamic relocs if the user
+	requested this.
+	(disassemble_data): Always load dynamic relocs if they are
+	available.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* dlltool.c: Spell fall through comments consistently.
+	* objcopy.c: Likewise.
+	* readelf.c: Likewise.
+	* dwarf.c: Add missing fall through comments.
+	* elfcomm.c: Likewise.
+	* sysinfo.y: Likewise.
+	* readelf.c: Likewise.  Also remove extraneous comments.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* cxxfilt.c (usage): Add ATTRIBUTE_NORETURN.
+	* elfedit.c (usage): Likewise.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage, strip_usage): Likewise.
+	* srconv.c (show_usage): Likewise.
+	* strings.c (usage): Likewise.
+	* sysdump.c (show_usage): Likewise.
+	* srconv.c: Remove unneeded forward function declarations.
+	* strings.c: Likewise.
+	* sysdump.c: Likewise.
+
+2016-10-06  Alan Modra  <amodra@gmail.com>
+
+	* coffdump.c (dump_coff_where): Add missing break.
+	* stabs.c (stab_xcoff_builtin_type): Likewise.
+
+2016-09-29  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_arch_specific): Call process_power_specific
+	for EM_PPC64.
+
+2016-09-26  Vlad Zakharov  <vzakhar@synopsys.com>
+
+	* Makefile.am: Replace AM_CLFAGS with AM_CFLAGS_FOR_BUILD
+	when building with CC_FOR_BUILD compiler.
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (display_power_gnu_attribute): Catch truncated section
+	for all powerpc attributes.  Display long double ABI.  Don't
+	capitalize words, except for names.  Show known bits of tag values
+	when some unknown bits are present.  Whitespace fixes.
+
+2016-09-26  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (get_elf_symbol_type): Don't use sprintf with translated
+	strings, use asprintf instead.
+	(get_coff_symbol_type): Likewise.
+
+2016-09-19  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (print_symbol): Remove is_synthetic param.  Test sym->flags
+	instead.
+	(print_size_symbols, print_symbols): Adjust to suit, deleting
+	now unused synth_count param and fromsynth var.
+	(display_rel_file): Adjust, localizing synth_count.
+
+2016-09-14  Ed Maste  <emaste@freebsd.org>
+
+	* readelf.c (process_mips_specific): Fix typo in error message.
+
+2016-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (request_dump_bynumber): Only call memcpy if
+	dump_sects is not NULL.
+
 2016-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (load_specific_debug_section): Check the external

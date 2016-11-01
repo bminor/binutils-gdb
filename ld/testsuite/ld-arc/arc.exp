@@ -35,6 +35,11 @@ set arccommon_tests {
         "-q -T sda-relocs.ld -A elf32-arclittle" "" "-mcpu=archs -EL" {sda-relocs.s}
         {{objdump -fdw sda-relocs.dd} {readelf --relocs sda-relocs.rd}}
         "sda-relocs.so" }
+    { "TLS reloc dtpoff"
+        "-q -T tls-relocs.ld -A elf32-arclittle" "" "-mcpu=archs -EL"
+	{tls-dtpoff.s}
+        {{objdump -fdw tls-dtpoff.dd} {readelf --relocs tls-dtpoff.rd}}
+        "sda-relocs.so" }
 }
 
 run_ld_link_tests $arccommon_tests

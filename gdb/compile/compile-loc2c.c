@@ -48,9 +48,9 @@ struct insn_info
 
   unsigned int label : 1;
 
-  /* Whether this instruction is DW_OP_GNU_push_tls_address.  This is
-     a hack until we can add a feature to glibc to let us properly
-     generate code for TLS.  */
+  /* Whether this instruction is DW_OP_GNU_push_tls_address or
+     DW_OP_form_tls_address.  This is a hack until we can add a
+     feature to glibc to let us properly generate code for TLS.  */
 
   unsigned int is_tls : 1;
 };
@@ -323,6 +323,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
+	case DW_OP_form_tls_address:
 	  info[ndx].is_tls = 1;
 	  break;
 

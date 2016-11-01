@@ -1276,6 +1276,7 @@ arm_reg_alt_syntax (char **ccp, char *start, struct reg_entry *reg,
 	if (*ccp != start && processor <= 15)
 	  return processor;
       }
+      /* Fall through.  */
 
     case REG_TYPE_MMXWC:
       /* WC includes WCG.  ??? I'm not sure this is true for all
@@ -7426,6 +7427,21 @@ encode_arm_vfp_reg (int reg, enum vfp_reg_pos pos)
 static void
 encode_arm_shift (int i)
 {
+  /* register-shifted register.  */
+  if (inst.operands[i].immisreg)
+    {
+      int index;
+      for (index = 0; index <= i; ++index)
+	{
+	  gas_assert (inst.operands[index].present);
+	  if (inst.operands[index].isreg && inst.operands[index].reg == REG_PC)
+	    as_warn (UNPRED_REG ("r15"));
+	}
+
+      if (inst.operands[i].imm == REG_PC)
+	as_warn (UNPRED_REG ("r15"));
+    }
+
   if (inst.operands[i].shift_kind == SHIFT_RRX)
     inst.instruction |= SHIFT_ROR << 5;
   else
@@ -17773,7 +17789,7 @@ opcode_lookup (char **str)
 	case OT_odd_infix_unc:
 	  if (!unified_syntax)
 	    return 0;
-	  /* else fall through */
+	  /* Fall through.  */
 
 	case OT_csuffix:
 	case OT_csuffixF:
@@ -18813,7 +18829,6 @@ static const struct asm_psr v7m_psrs[] =
   {"primask",	   0x10}, {"PRIMASK",	   0x10},
   {"basepri",	   0x11}, {"BASEPRI",	   0x11},
   {"basepri_max",  0x12}, {"BASEPRI_MAX",  0x12},
-  {"basepri_max",  0x12}, {"BASEPRI_MASK", 0x12}, /* Typo, preserved for backwards compatibility.  */
   {"faultmask",	   0x13}, {"FAULTMASK",	   0x13},
   {"control",	   0x14}, {"CONTROL",	   0x14},
   {"msp_ns",	   0x88}, {"MSP_NS",	   0x88},
@@ -22843,6 +22858,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_OFFSET_IMM:
       if (!fixP->fx_done && seg->use_rela_p)
 	value = 0;
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_LITERAL:
       sign = value > 0;
@@ -23201,6 +23217,7 @@ md_apply_fix (fixS *	fixP,
 	  newval = md_chars_to_number (buf, INSN_SIZE);
 	  fixP->fx_done = 0;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_PLT32:
 #endif
@@ -24093,6 +24110,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_8_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_16:
       if (fixp->fx_pcrel)
@@ -24100,6 +24118,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_16_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_32:
       if (fixp->fx_pcrel)
@@ -24107,6 +24126,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_32_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_MOVW:
       if (fixp->fx_pcrel)
@@ -24114,6 +24134,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_MOVW_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_MOVT:
       if (fixp->fx_pcrel)
@@ -24121,6 +24142,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_MOVT_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_THUMB_MOVW:
       if (fixp->fx_pcrel)
@@ -24128,6 +24150,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_THUMB_MOVW_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_ARM_THUMB_MOVT:
       if (fixp->fx_pcrel)
@@ -24135,6 +24158,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  code = BFD_RELOC_ARM_THUMB_MOVT_PCREL;
 	  break;
 	}
+      /* Fall through.  */
 
     case BFD_RELOC_NONE:
     case BFD_RELOC_ARM_PCREL_BRANCH:
@@ -25359,17 +25383,17 @@ static const struct arm_cpu_option_table arm_cpus[] =
 								  "Cortex-A15"),
   ARM_CPU_OPT ("cortex-a17",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A17"),
-  ARM_CPU_OPT ("cortex-a32",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a32",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A32"),
-  ARM_CPU_OPT ("cortex-a35",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a35",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A35"),
-  ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A53"),
-  ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A57"),
-  ARM_CPU_OPT ("cortex-a72",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a72",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A72"),
-  ARM_CPU_OPT ("cortex-a73",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("cortex-a73",    ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A73"),
   ARM_CPU_OPT ("cortex-r4",	ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"),
   ARM_CPU_OPT ("cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
@@ -25388,10 +25412,10 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-m1",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"),
   ARM_CPU_OPT ("cortex-m0",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0"),
   ARM_CPU_OPT ("cortex-m0plus",	ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0+"),
-  ARM_CPU_OPT ("exynos-m1",	ARM_ARCH_V8A,	 FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("exynos-m1",	ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Samsung " \
 								  "Exynos M1"),
-  ARM_CPU_OPT ("qdf24xx",	ARM_ARCH_V8A,	 FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("qdf24xx",	ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Qualcomm "
 								  "QDF24XX"),
 
@@ -25416,7 +25440,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   /* APM X-Gene family.  */
   ARM_CPU_OPT ("xgene1",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 	                                                          "APM X-Gene 1"),
-  ARM_CPU_OPT ("xgene2",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+  ARM_CPU_OPT ("xgene2",        ARM_ARCH_V8A_CRC, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 	                                                          "APM X-Gene 2"),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }

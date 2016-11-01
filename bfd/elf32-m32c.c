@@ -301,6 +301,7 @@ m32c_info_to_howto_rela
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type >= (unsigned int) R_M32C_max)
     {
+      /* xgettext:c-format */
       _bfd_error_handler (_("%B: invalid M32C reloc number: %d"), abfd, r_type);
       r_type = 0;
     }
@@ -817,8 +818,9 @@ m32c_elf_set_private_flags (bfd *abfd, flagword flags)
    object file when linking.  */
 
 static bfd_boolean
-m32c_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword old_flags, old_partial;
   flagword new_flags, new_partial;
   bfd_boolean error = FALSE;
@@ -830,9 +832,10 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   old_flags = elf_elfheader (obfd)->e_flags;
 
 #ifdef DEBUG
-  (*_bfd_error_handler) ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
-			 old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
-			 bfd_get_filename (ibfd));
+  _bfd_error_handler
+    ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
+     old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
+     bfd_get_filename (ibfd));
 #endif
 
   if (!elf_flags_init (obfd))
@@ -876,7 +879,8 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (new_opt[0])
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: compiled with %s and linked with modules compiled with %s"),
 	     bfd_get_filename (ibfd), new_opt, old_opt);
 	}
@@ -888,7 +892,8 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (new_flags != old_flags)
 	{
 	  error = TRUE;
-	  (*_bfd_error_handler)
+	  _bfd_error_handler
+	    /* xgettext:c-format */
 	    (_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
 	}

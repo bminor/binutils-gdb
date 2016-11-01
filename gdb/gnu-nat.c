@@ -2074,7 +2074,7 @@ gnu_kill_inferior (struct target_ops *ops)
       task_terminate (task->port);
       inf_set_pid (gnu_current_inf, -1);
     }
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* Clean up after the inferior dies.  */

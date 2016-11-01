@@ -14004,16 +14004,16 @@ ada_language_arch_info (struct gdbarch *gdbarch,
     = arch_character_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
   lai->primitive_type_vector [ada_primitive_type_float]
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "float", NULL);
+		       "float", gdbarch_float_format (gdbarch));
   lai->primitive_type_vector [ada_primitive_type_double]
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "long_float", NULL);
+		       "long_float", gdbarch_double_format (gdbarch));
   lai->primitive_type_vector [ada_primitive_type_long_long]
     = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
 			 0, "long_long_integer");
   lai->primitive_type_vector [ada_primitive_type_long_double]
-    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "long_long_float", NULL);
+    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+		       "long_long_float", gdbarch_long_double_format (gdbarch));
   lai->primitive_type_vector [ada_primitive_type_natural]
     = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
 			 0, "natural");

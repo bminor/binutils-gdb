@@ -474,9 +474,41 @@ gdb_test "maint" \
     "\"maintenance\" must be followed by the name of a maintenance command\\.\r\nList.*unambiguous\\..*" \
     "maint w/o args"
 
-gdb_test "maint info line-table" \
-    "symtab: \[^\n\r\]+${srcfile}.*\\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX.*LINE.*ADDRESS.*" \
-    "maint info line-table w/o a file name"
+# Test that "main info line-table" w/o a file name shows the symtab for
+# $srcfile.
+set saw_srcfile 0
+set test "maint info line-table w/o a file name"
+gdb_test_multiple "maint info line-table" $test {
+    -re "symtab: \[^\n\r\]+${srcfile} \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS" {
+	set saw_srcfile 1
+	exp_continue
+    }
+    -re "symtab: \[^\n\r\]+ \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS" {
+	# Match each symtab to avoid overflowing expect's buffer.
+	exp_continue
+    }
+    -re "$decimal\[ \t\]+$decimal\[ \t\]+$hex\r\n" {
+	# Line table entries can be long too:
+	#
+	#  INDEX    LINE ADDRESS
+	#  0          29 0x00000000004006f6
+	#  1          30 0x00000000004006fa
+	#  2          31 0x0000000000400704
+	#  3          42 0x0000000000400706
+	#  4          43 0x0000000000400719
+	#  5          44 0x0000000000400722
+	#  6          45 0x0000000000400740
+	#  (...)
+	#  454       129 0x00007ffff7df1d28
+	#  455         0 0x00007ffff7df1d3f
+	#
+	# Match each line to avoid overflowing expect's buffer.
+	exp_continue
+    }
+    -re "$gdb_prompt $" {
+	gdb_assert $saw_srcfile $test
+    }
+}
 
 gdb_test "maint info line-table ${srcfile}" \
     "symtab: \[^\n\r\]+${srcfile}.*INDEX.*LINE.*ADDRESS.*" \

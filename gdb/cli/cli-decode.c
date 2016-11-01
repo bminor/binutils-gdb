@@ -253,6 +253,7 @@ add_cmd (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
   c->user_commands = NULL;
   c->cmd_pointer = NULL;
   c->alias_chain = NULL;
+  c->suppress_notification = NULL;
 
   return c;
 }
@@ -883,7 +884,22 @@ add_com_alias (const char *name, const char *oldname, enum command_class theclas
 {
   return add_alias_cmd (name, oldname, theclass, abbrev_flag, &cmdlist);
 }
-
+
+/* Add an element with a suppress notification to the list of commands.  */
+
+struct cmd_list_element *
+add_com_suppress_notification (const char *name, enum command_class theclass,
+			       cmd_cfunc_ftype *fun, const char *doc,
+			       int *suppress_notification)
+{
+  struct cmd_list_element *element;
+
+  element = add_cmd (name, theclass, fun, doc, &cmdlist);
+  element->suppress_notification = suppress_notification;
+
+  return element;
+}
+
 /* Recursively walk the commandlist structures, and print out the
    documentation of commands that match our regex in either their
    name, or their documentation.
@@ -1885,7 +1901,19 @@ void
 cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
 {
   if (cmd_func_p (cmd))
-    (*cmd->func) (cmd, args, from_tty);
+    {
+      struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+
+      if (cmd->suppress_notification != NULL)
+	{
+	  make_cleanup_restore_integer (cmd->suppress_notification);
+	  *cmd->suppress_notification = 1;
+	}
+
+      (*cmd->func) (cmd, args, from_tty);
+
+      do_cleanups (cleanups);
+    }
   else
     error (_("Invalid command"));
 }

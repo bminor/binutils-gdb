@@ -2287,6 +2287,7 @@ build_indexed_byte (operand *op, int format ATTRIBUTE_UNUSED, int move_insn)
 
 	    default:
 	      as_bad (_("Invalid accumulator register."));
+	      /* Fall through.  */
 
 	    case REG_D:
 	      byte = 0xE6;

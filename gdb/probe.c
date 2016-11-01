@@ -35,6 +35,7 @@
 #include "ax-gdb.h"
 #include "location.h"
 #include <ctype.h>
+#include <algorithm>
 
 typedef struct bound_probe bound_probe_s;
 DEF_VEC_O (bound_probe_s);
@@ -432,7 +433,7 @@ gen_ui_out_table_header_info (VEC (bound_probe_s) *probes,
 	      if (val == NULL)
 		continue;
 
-	      size_max = max (strlen (val), size_max);
+	      size_max = std::max (strlen (val), size_max);
 	    }
 	  do_cleanups (c2);
 	}
@@ -644,10 +645,11 @@ info_probes_for_ops (const char *arg, int from_tty,
     {
       const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
-      size_type = max (strlen (probe_type), size_type);
-      size_name = max (strlen (probe->probe->name), size_name);
-      size_provider = max (strlen (probe->probe->provider), size_provider);
-      size_objname = max (strlen (objfile_name (probe->objfile)), size_objname);
+      size_type = std::max (strlen (probe_type), size_type);
+      size_name = std::max (strlen (probe->probe->name), size_name);
+      size_provider = std::max (strlen (probe->probe->provider), size_provider);
+      size_objname = std::max (strlen (objfile_name (probe->objfile)),
+			       size_objname);
     }
 
   ui_out_table_header (current_uiout, size_type, ui_left, "type", _("Type"));

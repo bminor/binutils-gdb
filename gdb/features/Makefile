@@ -44,7 +44,8 @@
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
 WHICH = aarch64 \
-	arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
+	arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
+	arm/arm-with-neon \
 	i386/i386 i386/i386-linux \
 	i386/i386-mmx i386/i386-mmx-linux \
 	i386/amd64 i386/amd64-linux \
@@ -67,6 +68,9 @@ WHICH = aarch64 \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
 	rs6000/powerpc-vsx64l rs6000/powerpc-cell32l rs6000/powerpc-cell64l \
+	rs6000/powerpc-isa205-32l rs6000/powerpc-isa205-64l \
+	rs6000/powerpc-isa205-altivec32l rs6000/powerpc-isa205-altivec64l \
+	rs6000/powerpc-isa205-vsx32l rs6000/powerpc-isa205-vsx64l \
 	s390-linux32 s390-linux64 s390x-linux64 \
 	s390-linux32v1 s390-linux64v1 s390x-linux64v1 \
 	s390-linux32v2 s390-linux64v2 s390x-linux64v2 \
@@ -78,34 +82,9 @@ WHICH = aarch64 \
 # Record which registers should be sent to GDB by default after stop.
 aarch64-expedite = x29,sp,pc
 arm-expedite = r11,sp,pc
-i386/i386-expedite = ebp,esp,eip
-i386/i386-linux-expedite = ebp,esp,eip
-i386/amd64-expedite = rbp,rsp,rip
-i386/amd64-linux-expedite = rbp,rsp,rip
-i386/i386-avx-expedite = ebp,esp,eip
-i386/i386-avx-linux-expedite = ebp,esp,eip
-i386/i386-mpx-expedite = ebp,esp,eip
-i386/i386-avx-mpx-expedite = ebp,esp,eip
-i386/i386-mpx-linux-expedite = ebp,esp,eip
-i386/i386-avx-mpx-linux-expedite = ebp,esp,eip
-i386/i386-avx512-expedite = ebp,esp,eip
-i386/i386-avx512-linux-expedite = ebp,esp,eip
-i386/i386-mmx-expedite = ebp,esp,eip
-i386/i386-mmx-linux-expedite = ebp,esp,eip
-i386/amd64-avx-expedite = rbp,rsp,rip
-i386/amd64-avx-linux-expedite = rbp,rsp,rip
-i386/amd64-mpx-expedite = rbp,rsp,rip
-i386/amd64-avx-mpx-expedite = rbp,rsp,rip
-i386/amd64-mpx-linux-expedite = rbp,rsp,rip
-i386/amd64-avx-mpx-linux-expedite = rbp,rsp,rip
-i386/amd64-avx512-expedite = rbp,rsp,rip
-i386/amd64-avx512-linux-expedite = rbp,rsp,rip
-i386/x32-expedite = rbp,rsp,rip
-i386/x32-linux-expedite = rbp,rsp,rip
-i386/x32-avx-expedite = rbp,rsp,rip
-i386/x32-avx-linux-expedite = rbp,rsp,rip
-i386/x32-avx512-expedite = rbp,rsp,rip
-i386/x32-avx512-linux-expedite = rbp,rsp,rip
+i386-expedite = ebp,esp,eip
+amd64-expedite = rbp,rsp,rip
+x32-expedite = rbp,rsp,rip
 mips-expedite = r29,pc
 mips-dsp-expedite = r29,pc
 mips64-expedite = r29,pc
@@ -148,13 +127,15 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # to make on the command line.
 XMLTOC = \
 	aarch64.xml \
-	arm-with-iwmmxt.xml \
-	arm-with-m-fpa-layout.xml \
-	arm-with-m-vfp-d16.xml \
-	arm-with-m.xml \
-	arm-with-neon.xml \
-	arm-with-vfpv2.xml \
-	arm-with-vfpv3.xml \
+	arc-v2.xml \
+	arc-arcompact.xml \
+	arm/arm-with-iwmmxt.xml \
+	arm/arm-with-m-fpa-layout.xml \
+	arm/arm-with-m-vfp-d16.xml \
+	arm/arm-with-m.xml \
+	arm/arm-with-neon.xml \
+	arm/arm-with-vfpv2.xml \
+	arm/arm-with-vfpv3.xml \
 	i386/amd64-avx-linux.xml \
 	i386/amd64-avx.xml \
 	i386/amd64-avx512-linux.xml \
@@ -237,6 +218,10 @@ XMLTOC = \
 	s390x-linux64v1.xml \
 	s390x-linux64v2.xml \
 	s390x-te-linux64.xml \
+	s390-tevx-linux64.xml \
+	s390-vx-linux64.xml \
+	s390x-tevx-linux64.xml \
+	s390x-vx-linux64.xml \
 	tic6x-c62x-linux.xml \
 	tic6x-c62x.xml \
 	tic6x-c64x-linux.xml \
@@ -268,7 +253,7 @@ cfiles: $(CFILES)
 	sh ../../move-if-change $@.tmp $@
 
 # Other dependencies.
-$(outdir)/arm-with-iwmmxt.dat: arm-core.xml xscale-iwmmxt.xml
+$(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
 $(outdir)/i386/i386.dat: i386/32bit-core.xml i386/32bit-sse.xml
 $(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
 			       i386/32bit-linux.xml

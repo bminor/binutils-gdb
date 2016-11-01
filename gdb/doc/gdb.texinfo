@@ -7941,7 +7941,7 @@ Any expression valid in the current working language.
 
 @item @var{funcaddr}
 An address of a function or procedure derived from its name.  In C,
-C@t{++}, Java, Objective-C, Fortran, minimal, and assembly, this is
+C@t{++}, Objective-C, Fortran, minimal, and assembly, this is
 simply the function's name @var{function} (and actually a special case
 of a valid expression).  In Pascal and Modula-2, this is
 @code{&@var{function}}.  In Ada, this is @code{@var{function}'Address}
@@ -13678,7 +13678,7 @@ the data directly into @var{filename} in its own filesystem, which may be
 more efficient if the trace buffer is very large.  (Note, however, that
 @code{target tfile} can only read from files accessible to the host.)
 By default, this command will save trace frame in tfile format.
-You can supply the optional argument @code{-ctf} to save date in CTF
+You can supply the optional argument @code{-ctf} to save data in CTF
 format.  The @dfn{Common Trace Format} (CTF) is proposed as a trace format
 that can be shared by multiple debugging and tracing tools.  Please go to
 @indicateurl{http://www.efficios.com/ctf} to get more information.
@@ -14440,7 +14440,7 @@ being set automatically by @value{GDBN}.
 @node Supported Languages
 @section Supported Languages
 
-@value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran, Java,
+@value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran,
 OpenCL C, Pascal, Rust, assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
@@ -22017,6 +22017,7 @@ acceptable commands.
 
 
 @menu
+* ARC::                         Synopsys ARC
 * ARM::                         ARM
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
@@ -22026,6 +22027,30 @@ acceptable commands.
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
 @end menu
+
+@node ARC
+@subsection Synopsys ARC
+@cindex Synopsys ARC
+@cindex ARC specific commands
+@cindex ARC600
+@cindex ARC700
+@cindex ARC EM
+@cindex ARC HS
+
+@value{GDBN} provides the following ARC-specific commands:
+
+@table @code
+@item set debug arc
+@kindex set debug arc
+Control the level of ARC specific debug messages.  Use 0 for no messages (the
+default) and 1 for debug messages.  At present higher values offer no further
+messages.
+
+@item show debug arc
+@kindex show debug arc
+Show the level of ARC specific debugging in operation.
+
+@end table
 
 @node ARM
 @subsection ARM
@@ -25807,13 +25832,13 @@ identifier for thread and frame to operate on.
 Usually, each top-level window in a frontend allows the user to select
 a thread and a frame, and remembers the user selection for further
 operations.  However, in some cases @value{GDBN} may suggest that the
-current thread be changed.  For example, when stopping on a breakpoint
-it is reasonable to switch to the thread where breakpoint is hit.  For
-another example, if the user issues the CLI @samp{thread} command via
-the frontend, it is desirable to change the frontend's selected thread to the
-one specified by user.  @value{GDBN} communicates the suggestion to
-change current thread using the @samp{=thread-selected} notification.
-No such notification is available for the selected frame at the moment.
+current thread or frame be changed.  For example, when stopping on a
+breakpoint it is reasonable to switch to the thread where breakpoint is
+hit.  For another example, if the user issues the CLI @samp{thread} or
+@samp{frame} commands via the frontend, it is desirable to change the
+frontend's selection to the one specified by user.  @value{GDBN}
+communicates the suggestion to change current thread and frame using the
+@samp{=thread-selected} notification.
 
 Note that historically, MI shares the selected thread with CLI, so 
 frontends used the @code{-thread-select} to execute commands in the
@@ -26459,13 +26484,18 @@ A thread either was created, or has exited.  The @var{id} field
 contains the global @value{GDBN} identifier of the thread.  The @var{gid}
 field identifies the thread group this thread belongs to.
 
-@item =thread-selected,id="@var{id}"
-Informs that the selected thread was changed as result of the last
-command.  This notification is not emitted as result of @code{-thread-select}
-command but is emitted whenever an MI command that is not documented
-to change the selected thread actually changes it.  In particular,
-invoking, directly or indirectly (via user-defined command), the CLI
-@code{thread} command, will generate this notification.
+@item =thread-selected,id="@var{id}"[,frame="@var{frame}"]
+Informs that the selected thread or frame were changed.  This notification
+is not emitted as result of the @code{-thread-select} or
+@code{-stack-select-frame} commands, but is emitted whenever an MI command
+that is not documented to change the selected thread and frame actually
+changes them.  In particular, invoking, directly or indirectly
+(via user-defined command), the CLI @code{thread} or @code{frame} commands,
+will generate this notification.  Changing the thread or frame from another
+user interface (see @ref{Interpreters}) will also generate this notification.
+
+The @var{frame} field is only present if the newly selected thread is
+stopped.  See @ref{GDB/MI Frame Information} for the format of its value.
 
 We suggest that in response to this notification, front ends
 highlight the selected thread and cause subsequent commands to apply to
@@ -30904,13 +30934,17 @@ body=[variable=@{name="$trace_timestamp",initial="0"@}
 @subsubheading Synopsis
 
 @smallexample
- -trace-save [-r ] @var{filename}
+ -trace-save [ -r ] [ -ctf ] @var{filename}
 @end smallexample
 
 Saves the collected trace data to @var{filename}.  Without the
 @samp{-r} option, the data is downloaded from the target and saved
 in a local file.  With the @samp{-r} option the target is asked
 to perform the save.
+
+By default, this command will save the trace in the tfile format.  You can
+supply the optional @samp{-ctf} argument to save it the CTF format. See
+@ref{Trace Files} for more information about CTF.
 
 @subsubheading @value{GDBN} Command
 
@@ -30926,7 +30960,7 @@ The corresponding @value{GDBN} command is @samp{tsave}.
  -trace-start
 @end smallexample
 
-Starts a tracing experiments.  The result of this command does not
+Starts a tracing experiment.  The result of this command does not
 have any fields.
 
 @subsubheading @value{GDBN} Command
@@ -35225,8 +35259,7 @@ Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} packet are
 determined by the @value{GDBN} internal gdbarch functions
-@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.  The
-specification of several standard @samp{g} packets is specified below.
+@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.
 
 When reading registers from a trace frame (@pxref{Analyze Collected
 Data,,Using the Collected Data}), the stub may also return a string of
@@ -35497,13 +35530,16 @@ for success in non-stop mode (@pxref{Remote Non-Stop})
 @cindex @samp{vCont} packet
 @anchor{vCont packet}
 Resume the inferior, specifying different actions for each thread.
-If an action is specified with no @var{thread-id}, then it is applied to any
-threads that don't have a specific action specified; if no default action is
-specified then other threads should remain stopped in all-stop mode and
-in their current state in non-stop mode.
-Specifying multiple
-default actions is an error; specifying no actions is also an error.
-Thread IDs are specified using the syntax described in @ref{thread-id syntax}.
+
+For each inferior thread, the leftmost action with a matching
+@var{thread-id} is applied.  Threads that don't match any action
+remain in their current state.  Thread IDs are specified using the
+syntax described in @ref{thread-id syntax}.  If multiprocess
+extensions (@pxref{multiprocess extensions}) are supported, actions
+can be specified to match all threads in a process by using the
+@samp{p@var{pid}.-1} form of the @var{thread-id}.  An action with no
+@var{thread-id} matches all threads.  Specifying no actions is an
+error.
 
 Currently supported actions are:
 
@@ -35548,11 +35584,17 @@ the corresponding stop reply should indicate that the thread has stopped with
 signal @samp{0}, regardless of whether the target uses some other signal
 as an implementation detail.
 
+The server must ignore @samp{c}, @samp{C}, @samp{s}, @samp{S}, and
+@samp{r} actions for threads that are already running.  Conversely,
+the server must ignore @samp{t} actions for threads that are already
+stopped.
+
+@emph{Note:} In non-stop mode, a thread is considered running until
+@value{GDBN} acknowleges an asynchronous stop notification for it with
+the @samp{vStopped} packet (@pxref{Remote Non-Stop}).
+
 The stub must support @samp{vCont} if it reports support for
-multiprocess extensions (@pxref{multiprocess extensions}).  Note that in
-this case @samp{vCont} actions can be specified to apply to all threads
-in a process by using the @samp{p@var{pid}.-1} form of the
-@var{thread-id}.
+multiprocess extensions (@pxref{multiprocess extensions}).
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -35723,22 +35765,25 @@ be implemented in an idempotent way.}
 @itemx Z0,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}@r{[};cmds:@var{persist},@var{cmd_list}@dots{}@r{]}
 @cindex @samp{z0} packet
 @cindex @samp{Z0} packet
-Insert (@samp{Z0}) or remove (@samp{z0}) a memory breakpoint at address
+Insert (@samp{Z0}) or remove (@samp{z0}) a software breakpoint at address
 @var{addr} of type @var{kind}.
 
-A memory breakpoint is implemented by replacing the instruction at
+A software breakpoint is implemented by replacing the instruction at
 @var{addr} with a software breakpoint or trap instruction.  The
-@var{kind} is target-specific and typically indicates the size of
-the breakpoint in bytes that should be inserted.  E.g., the @sc{arm}
-and @sc{mips} can insert either a 2 or 4 byte breakpoint.  Some
-architectures have additional meanings for @var{kind};
-@var{cond_list} is an optional list of conditional expressions in bytecode
-form that should be evaluated on the target's side.  These are the
-conditions that should be taken into consideration when deciding if
-the breakpoint trigger should be reported back to @var{GDBN}.
+@var{kind} is target-specific and typically indicates the size of the
+breakpoint in bytes that should be inserted.  E.g., the @sc{arm} and
+@sc{mips} can insert either a 2 or 4 byte breakpoint.  Some
+architectures have additional meanings for @var{kind}
+(@pxref{Architecture-Specific Protocol Details}); if no
+architecture-specific value is being used, it should be @samp{0}.
+@var{kind} is hex-encoded.  @var{cond_list} is an optional list of
+conditional expressions in bytecode form that should be evaluated on
+the target's side.  These are the conditions that should be taken into
+consideration when deciding if the breakpoint trigger should be
+reported back to @value{GDBN}.
 
 See also the @samp{swbreak} stop reason (@pxref{swbreak stop reason})
-for how to best report a memory breakpoint event to @value{GDBN}.
+for how to best report a software breakpoint event to @value{GDBN}.
 
 The @var{cond_list} parameter is comprised of a series of expressions,
 concatenated without separators. Each expression has the following form:
@@ -35767,10 +35812,8 @@ actual conditional expression in bytecode form.
 
 @end table
 
-see @ref{Architecture-Specific Protocol Details}.
-
 @emph{Implementation note: It is possible for a target to copy or move
-code that contains memory breakpoints (e.g., when implementing
+code that contains software breakpoints (e.g., when implementing
 overlays).  The behavior of this packet, in the presence of such a
 target, is not defined.}
 
@@ -35785,15 +35828,16 @@ for an error
 @end table
 
 @item z1,@var{addr},@var{kind}
-@itemx Z1,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}
+@itemx Z1,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}@r{[};cmds:@var{persist},@var{cmd_list}@dots{}@r{]}
 @cindex @samp{z1} packet
 @cindex @samp{Z1} packet
 Insert (@samp{Z1}) or remove (@samp{z1}) a hardware breakpoint at
 address @var{addr}.
 
 A hardware breakpoint is implemented using a mechanism that is not
-dependant on being able to modify the target's memory.  The @var{kind}
-and @var{cond_list} have the same meaning as in @samp{Z0} packets.
+dependent on being able to modify the target's memory.  The
+@var{kind}, @var{cond_list}, and @var{cmd_list} arguments have the
+same meaning as in @samp{Z0} packets.
 
 @emph{Implementation note: A hardware breakpoint is not affected by code
 movement.}
@@ -35873,6 +35917,10 @@ when the target halts.  In the below the exact meaning of @dfn{signal
 number} is defined by the header @file{include/gdb/signals.h} in the
 @value{GDBN} source code.
 
+In non-stop mode, the server will simply reply @samp{OK} to commands
+such as @samp{vCont}; any stop will be the subject of a future
+notification.  @xref{Remote Non-Stop}.
+
 As in the description of request packets, we include spaces in the
 reply templates for clarity; these are not part of the reply packet's
 syntax.  No @value{GDBN} stop reply packet uses spaces to separate its
@@ -35951,7 +35999,7 @@ for more information.
 
 @item swbreak
 @anchor{swbreak stop reason}
-The packet indicates a memory breakpoint instruction was executed,
+The packet indicates a software breakpoint instruction was executed,
 irrespective of whether it was @value{GDBN} that planted the
 breakpoint or the breakpoint is hardcoded in the program.  The @var{r}
 part must be left empty.
@@ -36038,7 +36086,8 @@ The packet indicates that the thread was just created.  The new thread
 is stopped until @value{GDBN} sets it running with a resumption packet
 (@pxref{vCont packet}).  This packet should not be sent by default;
 @value{GDBN} requests it with the @ref{QThreadEvents} packet.  See
-also the @samp{w} (@ref{thread exit event}) remote reply below.
+also the @samp{w} (@pxref{thread exit event}) remote reply below.  The
+@var{r} part is ignored.
 
 @end table
 
@@ -36047,10 +36096,11 @@ also the @samp{w} (@ref{thread exit event}) remote reply below.
 The process exited, and @var{AA} is the exit status.  This is only
 applicable to certain targets.
 
-The second form of the response, including the process ID of the exited
-process, can be used only when @value{GDBN} has reported support for
-multiprocess protocol extensions; see @ref{multiprocess extensions}.
-The @var{pid} is formatted as a big-endian hex string.
+The second form of the response, including the process ID of the
+exited process, can be used only when @value{GDBN} has reported
+support for multiprocess protocol extensions; see @ref{multiprocess
+extensions}.  Both @var{AA} and @var{pid} are formatted as big-endian
+hex strings.
 
 @item X @var{AA}
 @itemx X @var{AA} ; process:@var{pid}
@@ -36059,7 +36109,8 @@ The process terminated with signal @var{AA}.
 The second form of the response, including the process ID of the
 terminated process, can be used only when @value{GDBN} has reported
 support for multiprocess protocol extensions; see @ref{multiprocess
-extensions}.  The @var{pid} is formatted as a big-endian hex string.
+extensions}.  Both @var{AA} and @var{pid} are formatted as big-endian
+hex strings.
 
 @anchor{thread exit event}
 @cindex thread exit event, remote reply
@@ -36068,6 +36119,7 @@ extensions}.  The @var{pid} is formatted as a big-endian hex string.
 The thread exited, and @var{AA} is the exit status.  This response
 should not be sent by default; @value{GDBN} requests it with the
 @ref{QThreadEvents} packet.  See also @ref{thread create event} above.
+@var{AA} is formatted as a big-endian hex string.
 
 @item N
 There are no resumed threads left in the target.  In other words, even
@@ -38639,7 +38691,7 @@ the process shall be repeated.
 The process of asynchronous notification can be illustrated by the
 following example:
 @smallexample
-<- @code{%%Stop:T0505:98e7ffbf;04:4ce6ffbf;08:b1b6e54c;thread:p7526.7526;core:0;}
+<- @code{%Stop:T0505:98e7ffbf;04:4ce6ffbf;08:b1b6e54c;thread:p7526.7526;core:0;}
 @code{...}
 -> @code{vStopped}
 <- @code{T0505:68f37db7;04:40f37db7;08:63850408;thread:p7526.7528;core:0;}
@@ -40683,16 +40735,13 @@ Bitfield values may be named with the empty string, @samp{""},
 in which case the field is ``filler'' and its value is not printed.
 Not all bits need to be specified, so ``filler'' fields are optional.
 
-The @var{start} value is required, and @var{end} and @var{type}
-are optional.
+The @var{start} and @var{end} values are required, and @var{type}
+is optional.
 The field's @var{start} must be less than or equal to its @var{end},
 and zero represents the least significant bit.
-The default value of @var{end} is @var{start}, a single bit field.
 
-The default value of @var{type} depends on whether the
-@var{end} was specified.  If @var{end} is specified then the default
-value of @var{type} is an unsigned integer.  If @var{end} is unspecified
-then the default value of @var{type} is @code{bool}.
+The default value of @var{type} is @code{bool} for single bit fields,
+and an unsigned integer otherwise.
 
 Which to choose?  Structures or flags?
 
@@ -40907,6 +40956,7 @@ registers using the capitalization used in the description.
 
 @menu
 * AArch64 Features::
+* ARC Features::
 * ARM Features::
 * i386 Features::
 * MicroBlaze Features::
@@ -40931,6 +40981,45 @@ targets.  It should contain registers @samp{x0} through @samp{x30},
 The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
 it should contain registers @samp{v0} through @samp{v31}, @samp{fpsr},
 and @samp{fpcr}.
+
+@node ARC Features
+@subsection ARC Features
+@cindex target descriptions, ARC Features
+
+ARC processors are highly configurable, so even core registers and their number
+are not completely predetermined.  In addition flags and PC registers which are
+important to @value{GDBN} are not ``core'' registers in ARC.  It is required
+that one of the core registers features is present.
+@samp{org.gnu.gdb.arc.aux-minimal} feature is mandatory.
+
+The @samp{org.gnu.gdb.arc.core.v2} feature is required for ARC EM and ARC HS
+targets with a normal register file.  It should contain registers @samp{r0}
+through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
+@samp{lp_count} and @samp{pcl}.  This feature may contain register @samp{ilink}
+and any of extension core registers @samp{r32} through @samp{r59/acch}.
+@samp{ilink} and extension core registers are not available to read/write, when
+debugging GNU/Linux applications, thus @samp{ilink} is made optional.
+
+The @samp{org.gnu.gdb.arc.core-reduced.v2} feature is required for ARC EM and
+ARC HS targets with a reduced register file.  It should contain registers
+@samp{r0} through @samp{r3}, @samp{r10} through @samp{r15}, @samp{gp},
+@samp{fp}, @samp{sp}, @samp{r30}, @samp{blink}, @samp{lp_count} and @samp{pcl}.
+This feature may contain register @samp{ilink} and any of extension core
+registers @samp{r32} through @samp{r59/acch}.
+
+The @samp{org.gnu.gdb.arc.core.arcompact} feature is required for ARCompact
+targets with a normal register file.  It should contain registers @samp{r0}
+through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
+@samp{lp_count} and @samp{pcl}.  This feature may contain registers
+@samp{ilink1}, @samp{ilink2} and any of extension core registers @samp{r32}
+through @samp{r59/acch}.  @samp{ilink1} and @samp{ilink2} and extension core
+registers are not available when debugging GNU/Linux applications.  The only
+difference with @samp{org.gnu.gdb.arc.core.v2} feature is in the names of
+@samp{ilink1} and @samp{ilink2} registers and that @samp{r30} is mandatory in
+ARC v2, but @samp{ilink2} is optional on ARCompact.
+
+The @samp{org.gnu.gdb.arc.aux-minimal} feature is required for all ARC
+targets.  It should contain registers @samp{pc} and @samp{status32}.
 
 @node ARM Features
 @subsection ARM Features
@@ -41577,7 +41666,7 @@ switch (die->tag)
     break;
   case DW_TAG_enumerator:
     kind = VARIABLE;
-    is_static = (language != CPLUS && language != JAVA);
+    is_static = language != CPLUS;
     break;
   case DW_TAG_subprogram:
     kind = FUNCTION;
@@ -41601,7 +41690,7 @@ switch (die->tag)
   case DW_TAG_union_type:
   case DW_TAG_enumeration_type:
     kind = TYPE;
-    is_static = (language != CPLUS && language != JAVA);
+    is_static = language != CPLUS;
     break;
   default:
     assert (0);

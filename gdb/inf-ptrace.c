@@ -287,7 +287,7 @@ inf_ptrace_kill (struct target_ops *ops)
   ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3)0, 0);
   waitpid (pid, &status, 0);
 
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* Interrupt the inferior.  */

@@ -527,7 +527,8 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
     /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
     if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
       {
-	(*_bfd_error_handler)
+	/* xgettext:c-format */
+	_bfd_error_handler
 	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
 	   abfd, a->NumberOfRvaAndSizes);
 	bfd_set_error (bfd_error_bad_value);
@@ -879,6 +880,8 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   /* Only use a real timestamp if the option was chosen.  */
   if ((pe_data (abfd)->insert_timestamp))
     H_PUT_32 (abfd, time (0), filehdr_out->f_timdat);
+  else
+    H_PUT_32 (abfd, 0, filehdr_out->f_timdat);
 
   PUT_FILEHDR_SYMPTR (abfd, filehdr_in->f_symptr,
 		      filehdr_out->f_symptr);
@@ -1082,9 +1085,10 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 	H_PUT_16 (abfd, scnhdr_int->s_nlnno, scnhdr_ext->s_nlnno);
       else
 	{
-	  (*_bfd_error_handler) (_("%s: line number overflow: 0x%lx > 0xffff"),
-				 bfd_get_filename (abfd),
-				 scnhdr_int->s_nlnno);
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%s: line number overflow: 0x%lx > 0xffff"),
+			      bfd_get_filename (abfd),
+			      scnhdr_int->s_nlnno);
 	  bfd_set_error (bfd_error_file_truncated);
 	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nlnno);
 	  ret = 0;
@@ -1314,6 +1318,7 @@ pe_print_idata (bfd * abfd, void * vfile)
         }
     }
 
+  /* xgettext:c-format */
   fprintf (file, _("\nThere is an import table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
@@ -1359,6 +1364,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 	       _("\nFunction descriptor located at the start address: %04lx\n"),
 	       (unsigned long int) (abfd->start_address));
       fprintf (file,
+	       /* xgettext:c-format */
 	       _("\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"),
 	       start_address, loadable_toc_address, toc_address);
       if (data != NULL)
@@ -1662,11 +1668,13 @@ pe_print_edata (bfd * abfd, void * vfile)
   if (datasize < 36)
     {
       fprintf (file,
+	       /* xgettext:c-format */
 	       _("\nThere is an export table in %s, but it is too small (%d)\n"),
 	       section->name, (int) datasize);
       return TRUE;
     }
 
+  /* xgettext:c-format */
   fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
@@ -1705,6 +1713,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	   _("Time/Date stamp \t\t%lx\n"), (unsigned long) edt.time_stamp);
 
   fprintf (file,
+	   /* xgettext:c-format */
 	   _("Major/Minor \t\t\t%d/%d\n"), edt.major_ver, edt.minor_ver);
 
   fprintf (file,
@@ -1813,12 +1822,14 @@ pe_print_edata (bfd * abfd, void * vfile)
       /* PR 17512: file: bb68816e.  */
       || edt.num_names * 4 < edt.num_names
       || (data + edt.npt_addr - adj) < data)
+    /* xgettext:c-format */
     fprintf (file, _("\tInvalid Name Pointer Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.npt_addr,
 	     (long) edt.num_names);
   /* PR 17512: file: 140-147171-0.004.  */
   else if (edt.ot_addr + (edt.num_names * 2) - adj >= datasize
 	   || data + edt.ot_addr - adj < data)
+    /* xgettext:c-format */
     fprintf (file, _("\tInvalid Ordinal Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.ot_addr,
 	     (long) edt.num_names);
@@ -1832,6 +1843,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 
       if ((name_ptr - adj) >= datasize)
 	{
+	  /* xgettext:c-format */
 	  fprintf (file, _("\t[%4ld] <corrupt offset: %lx>\n"),
 		   (long) ord, (long) name_ptr);
 	}
@@ -1885,6 +1897,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
   stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
     fprintf (file,
+	     /* xgettext:c-format */
 	     _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
 	     (long) stop, onaline);
 
@@ -1906,6 +1919,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
   /* PR 17512: file: 002-193900-0.004.  */
   if (datasize < stop)
     {
+      /* xgettext:c-format */
       fprintf (file, _("Virtual size of .pdata section (%ld) larger than real size (%ld)\n"),
 	       (long) stop, (long) datasize);
       return FALSE;
@@ -2080,6 +2094,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
   stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
     fprintf (file,
+	     /* xgettext:c-format */
 	     _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
 	     (long) stop, onaline);
 
@@ -2237,6 +2252,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 	break;
 
       fprintf (file,
+	       /* xgettext:c-format */
 	       _("\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"),
 	       (unsigned long) virtual_address, size, size, number);
 
@@ -2254,6 +2270,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 	    t = (sizeof (tbl) / sizeof (tbl[0])) - 1;
 
 	  fprintf (file,
+		   /* xgettext:c-format */
 		   _("\treloc %4d offset %4x [%4lx] %s"),
 		   j, off, (unsigned long) (off + virtual_address), tbl[t]);
 
@@ -2314,6 +2331,7 @@ rsrc_print_resource_entries (FILE *         file,
   if (data + 8 >= regions->section_end)
     return regions->section_end + 1;
 
+  /* xgettext:c-format */
   fprintf (file, _("%03x %*.s Entry: "), (int)(data - regions->section_start), indent, " ");
 
   entry = (unsigned long) bfd_get_32 (abfd, data);
@@ -2397,6 +2415,7 @@ rsrc_print_resource_entries (FILE *         file,
       || leaf < regions->section_start)
     return regions->section_end + 1;
 
+  /* xgettext:c-format */
   fprintf (file, _("%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
 	   (int) (entry), indent, " ",
 	   addr = (long) bfd_get_32 (abfd, leaf),
@@ -2446,6 +2465,7 @@ rsrc_print_resource_directory (FILE *         file,
       return regions->section_end + 1;
     }
 
+  /* xgettext:c-format */
   fprintf (file, _(" Table: Char: %d, Time: %08lx, Ver: %d/%d, Num Names: %d, IDs: %d\n"),
 	   (int) bfd_get_32 (abfd, data),
 	   (long) bfd_get_32 (abfd, data + 4),
@@ -2565,10 +2585,10 @@ rsrc_print_section (bfd * abfd, void * vfile)
     }
 
   if (regions.strings_start != NULL)
-    fprintf (file, " String table starts at offset: %#03x\n",
+    fprintf (file, _(" String table starts at offset: %#03x\n"),
 	     (int) (regions.strings_start - regions.section_start));
   if (regions.resource_start != NULL)
-    fprintf (file, " Resources start at offset: %#03x\n",
+    fprintf (file, _(" Resources start at offset: %#03x\n"),
 	     (int) (regions.resource_start - regions.section_start));
 
   free (regions.section_start);
@@ -2697,7 +2717,8 @@ pe_print_debugdata (bfd * abfd, void * vfile)
           for (i = 0; i < cvinfo->SignatureLength; i++)
             sprintf (&signature[i*2], "%02x", cvinfo->Signature[i] & 0xff);
 
-          fprintf (file, "(format %c%c%c%c signature %s age %ld)\n",
+	  /* xgettext:c-format */
+          fprintf (file, _("(format %c%c%c%c signature %s age %ld)\n"),
 		   buffer[0], buffer[1], buffer[2], buffer[3],
 		   signature, cvinfo->Age);
         }
@@ -2959,6 +2980,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size + (addr - section->vma)
 	      > bfd_get_section_size (section))
 	    {
+	      /* xgettext:c-format */
 	      _bfd_error_handler (_("%B: Data Directory size (%lx) exceeds space left in section (%lx)"),
 				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 				  bfd_get_section_size (section) - (addr - section->vma));

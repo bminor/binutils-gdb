@@ -141,10 +141,12 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	 conversion process.  */
       if (PyLong_Check (end_obj))
         end = PyLong_AsUnsignedLongLong (end_obj);
+#if PY_MAJOR_VERSION == 2
       else if (PyInt_Check (end_obj))
         /* If the end_pc value is specified without a trailing 'L', end_obj will
            be an integer and not a long integer.  */
         end = PyInt_AsLong (end_obj);
+#endif
       else
         {
           Py_DECREF (end_obj);

@@ -1628,6 +1628,25 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   record_tdep->ioctl_FIOQSIZE = 0x40086680;
 }
 
+/* Return a floating-point format for a floating-point variable of
+   length LEN in bits.  If non-NULL, NAME is the name of its type.
+   If no suitable type is found, return NULL.  */
+
+const struct floatformat **
+ppc_floatformat_for_type (struct gdbarch *gdbarch,
+                          const char *name, int len)
+{
+  if (len == 128 && name)
+    if (strcmp (name, "__float128") == 0
+        || strcmp (name, "_Float128") == 0
+        || strcmp (name, "_Float64x") == 0
+        || strcmp (name, "complex _Float128") == 0
+        || strcmp (name, "complex _Float64x") == 0)
+      return floatformats_ia64_quad;
+
+  return default_floatformat_for_type (gdbarch, name, len);
+}
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
@@ -1650,6 +1669,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
      size of type actually used in each case.  */
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
+
+  /* Support for floating-point data type variants.  */
+  set_gdbarch_floatformat_for_type (gdbarch, ppc_floatformat_for_type);
 
   /* Handle inferior calls during interrupted system calls.  */
   set_gdbarch_write_pc (gdbarch, ppc_linux_write_pc);

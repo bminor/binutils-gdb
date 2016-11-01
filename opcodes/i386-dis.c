@@ -988,7 +988,6 @@ enum
   PREFIX_MOD_3_0FAE_REG_4,
   PREFIX_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
-  PREFIX_RM_0_0FAE_REG_7,
   PREFIX_0FB8,
   PREFIX_0FBC,
   PREFIX_0FBD,
@@ -4092,13 +4091,6 @@ static const struct dis386 prefix_table[][4] = {
     { "clflush",	{ Mb }, 0 },
     { Bad_Opcode },
     { "clflushopt",	{ Mb }, 0 },
-  },
-
-  /* PREFIX_RM_0_0FAE_REG_7 */
-  {
-    { "sfence",		{ Skip_MODRM }, 0 },
-    { Bad_Opcode },
-    { "pcommit",		{ Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0FB8 */
@@ -7591,7 +7583,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 20 */
-    { "ptest",		{ XX }, PREFIX_OPCODE },
+    { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -12484,7 +12476,8 @@ static const struct dis386 rm_table[][8] = {
   },
   {
     /* RM_0FAE_REG_7 */
-    { PREFIX_TABLE (PREFIX_RM_0_0FAE_REG_7) },
+    { "sfence",		{ Skip_MODRM }, 0 },
+
   },
 };
 
@@ -13022,17 +13015,20 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	}
       codep++;
       vex.w = *codep & 0x80;
-      if (vex.w && address_mode == mode_64bit)
-	rex |= REX_W;
-
-      vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit
-	  && vex.register_specifier > 0x7)
+      if (address_mode == mode_64bit)
 	{
-	  dp = &bad_opcode;
-	  return dp;
+	  if (vex.w)
+	    rex |= REX_W;
+	  vex.register_specifier = (~(*codep >> 3)) & 0xf;
 	}
-
+      else
+	{
+	  /* For the 3-byte VEX prefix in 32-bit mode, the REX_B bit
+	     is ignored, other REX bits are 0 and the highest bit in
+	     VEX.vvvv is also ignored.  */
+	  rex = 0;
+	  vex.register_specifier = (~(*codep >> 3)) & 0x7;
+	}
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
@@ -13072,16 +13068,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       rex_ignored = rex;
       rex = (*codep & 0x80) ? 0 : REX_R;
 
+      /* For the 2-byte VEX prefix in 32-bit mode, the highest bit in
+	 VEX.vvvv is 1.  */
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit
-	  && vex.register_specifier > 0x7)
-	{
-	  dp = &bad_opcode;
-	  return dp;
-	}
-
       vex.w = 0;
-
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
@@ -14095,7 +14085,6 @@ putop (const char *in_template, int sizeflag)
 	  cond = 0;
 	  break;
 	case '{':
-	  alt = 0;
 	  if (intel_syntax)
 	    {
 	      while (*++p != '|')
@@ -14851,13 +14840,14 @@ intel_operand_size (int bytemode, int sizeflag)
 	  oappend ("QWORD PTR ");
 	  break;
 	}
+      /* Fall through.  */
     case stack_v_mode:
       if (address_mode == mode_64bit && ((sizeflag & DFLAG) || (rex & REX_W)))
 	{
 	  oappend ("QWORD PTR ");
 	  break;
 	}
-      /* FALLTHRU */
+      /* Fall through.  */
     case v_mode:
     case v_swap_mode:
     case dq_mode:
@@ -15234,6 +15224,7 @@ OP_E_register (int bytemode, int sizeflag)
 	  names = names64;
 	  break;
 	}
+      /* Fall through.  */
     case stack_v_mode:
       if (address_mode == mode_64bit && ((sizeflag & DFLAG) || (rex & REX_W)))
 	{
@@ -15241,7 +15232,7 @@ OP_E_register (int bytemode, int sizeflag)
 	  break;
 	}
       bytemode = v_mode;
-      /* FALLTHRU */
+      /* Fall through.  */
     case v_mode:
     case v_swap_mode:
     case dq_mode:
@@ -15265,6 +15256,11 @@ OP_E_register (int bytemode, int sizeflag)
       break;
     case mask_bd_mode:
     case mask_mode:
+      if (reg > 0x7)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
       names = names_mask;
       break;
     case 0:
@@ -15322,7 +15318,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      shift = vex.w ? 3 : 2;
 	      break;
 	    }
-	  /* Fall through if vex.b == 0.  */
+	  /* Fall through.  */
 	case xmmqd_mode:
 	case xmmdw_mode:
 	case ymmq_mode:
@@ -15522,7 +15518,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	    if (riprel)
 	      {
 		set_op (disp, 1);
-		oappend (sizeflag & AFLAG ? "(%rip)" : "(%eip)");
+		oappend (!addr32flag ? "(%rip)" : "(%eip)");
 	      }
 	  }
 
@@ -15537,7 +15533,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	  if (intel_syntax && riprel)
 	    {
 	      set_op (disp, 1);
-	      oappend (sizeflag & AFLAG ? "rip" : "eip");
+	      oappend (!addr32flag ? "rip" : "eip");
 	    }
 	  *obufp = '\0';
 	  if (havebase)
@@ -15794,6 +15790,11 @@ OP_G (int bytemode, int sizeflag)
       break;
     case mask_bd_mode:
     case mask_mode:
+      if ((modrm.reg + add) > 0x7)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
       oappend (names_mask[modrm.reg + add]);
       break;
     default:
@@ -17224,6 +17225,11 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
+	  if (reg > 0x7)
+	    {
+	      oappend ("(bad)");
+	      return;
+	    }
 	  names = names_mask;
 	  break;
 	default:
@@ -17244,6 +17250,11 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
+	  if (reg > 0x7)
+	    {
+	      oappend ("(bad)");
+	      return;
+	    }
 	  names = names_mask;
 	  break;
 	default:
@@ -17302,6 +17313,7 @@ get_vex_imm8 (int sizeflag, int opnum)
 		    if (base != 5)
 		      /* No displacement. */
 		      break;
+		    /* Fall through.  */
 		  case 2:
 		    /* 4 byte displacement.  */
 		    bytes_before_imm += 4;
@@ -17328,6 +17340,7 @@ get_vex_imm8 (int sizeflag, int opnum)
 		  if (modrm.rm != 6)
 		    /* No displacement. */
 		    break;
+		  /* Fall through.  */
 		case 2:
 		  /* 2 byte displacement.  */
 		  bytes_before_imm += 2;

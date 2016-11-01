@@ -1518,7 +1518,10 @@ valpy_long (PyObject *self)
     }
   END_CATCH
 
-  return gdb_py_long_from_longest (l);
+  if (TYPE_UNSIGNED (type))
+    return gdb_py_long_from_ulongest (l);
+  else
+    return gdb_py_long_from_longest (l);
 }
 
 /* Implements conversion to float.  */
@@ -1642,6 +1645,7 @@ convert_value_from_python (PyObject *obj)
 	  else
 	    value = value_from_longest (builtin_type_pylong, l);
 	}
+#if PY_MAJOR_VERSION == 2
       else if (PyInt_Check (obj))
 	{
 	  long l = PyInt_AsLong (obj);
@@ -1649,6 +1653,7 @@ convert_value_from_python (PyObject *obj)
 	  if (! PyErr_Occurred ())
 	    value = value_from_longest (builtin_type_pyint, l);
 	}
+#endif
       else if (PyFloat_Check (obj))
 	{
 	  double d = PyFloat_AsDouble (obj);

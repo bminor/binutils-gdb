@@ -355,6 +355,14 @@ lwp_stop_reason (struct lwp_info *lwp)
   return lwp->stop_reason;
 }
 
+/* See nat/linux-nat.h.  */
+
+int
+lwp_is_stepping (struct lwp_info *lwp)
+{
+  return lwp->step;
+}
+
 
 /* Trivial list manipulation functions to keep track of a list of
    new stopped processes.  */
@@ -1245,7 +1253,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	  int exit_code = WEXITSTATUS (status);
 
 	  target_terminal_ours ();
-	  target_mourn_inferior ();
+	  target_mourn_inferior (inferior_ptid);
 	  if (exit_code == 0)
 	    error (_("Unable to attach: program exited normally."));
 	  else
@@ -1257,7 +1265,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	  enum gdb_signal signo;
 
 	  target_terminal_ours ();
-	  target_mourn_inferior ();
+	  target_mourn_inferior (inferior_ptid);
 
 	  signo = gdb_signal_from_host (WTERMSIG (status));
 	  error (_("Unable to attach: program terminated with signal "
@@ -3776,7 +3784,7 @@ linux_nat_kill (struct target_ops *ops)
       iterate_over_lwps (ptid, kill_wait_callback, NULL);
     }
 
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 static void
@@ -4289,7 +4297,7 @@ cleanup_target_stop (void *arg)
   gdb_assert (arg != NULL);
 
   /* Unpause all */
-  target_resume (*ptid, 0, GDB_SIGNAL_0);
+  target_continue_no_signal (*ptid);
 }
 
 static VEC(static_tracepoint_marker_p) *

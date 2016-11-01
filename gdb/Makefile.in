@@ -79,11 +79,6 @@ MSGMERGE = msgmerge
 PACKAGE = @PACKAGE@
 CATALOGS = @CATALOGS@
 
-# The name of the compiler to use.
-COMPILER = @COMPILER@
-# Set to CFLAGS or CXXFLAGS, depending on compiler/language.
-COMPILER_CFLAGS = @COMPILER_CFLAGS@
-
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
 # -traditional flag.  Otherwise the ioctl calls in inflow.c
@@ -91,6 +86,7 @@ COMPILER_CFLAGS = @COMPILER_CFLAGS@
 # distribution will fix your include files up.
 CC=@CC@
 CXX=@CXX@
+CXX_DIALECT= @CXX_DIALECT@
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
@@ -99,7 +95,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(COMPILER)
+COMPILE.pre = $(CXX) $(CXX_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -129,8 +125,8 @@ MAKEHTMLFLAGS =
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
-#CC_LD=gcc -static
-CC_LD=$(COMPILER)
+#CC_LD=g++ -static
+CC_LD=$(CXX) $(CXX_DIALECT)
 
 # Where is our "include" directory?  Typically $(srcdir)/../include.
 # This is essentially the header file directory for the library
@@ -568,7 +564,7 @@ INTERNAL_CPPFLAGS = @CPPFLAGS@ @GUILE_CPPFLAGS@ @PYTHON_CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE = \
-	$(COMPILER_CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
+	$(CXXFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) $(ZLIBINC) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
 	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
@@ -584,7 +580,7 @@ LDFLAGS = @LDFLAGS@
 # and have it work; that's why CFLAGS is here.
 # PROFILE_CFLAGS is _not_ included, however, because we use monstartup.
 INTERNAL_LDFLAGS = \
-	$(COMPILER_CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) \
+	$(CXXFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) \
 	$(LDFLAGS) $(CONFIG_LDFLAGS)
 
 # If your system is missing alloca(), or, more likely, it's there but
@@ -657,6 +653,7 @@ ALL_64_TARGET_OBS = \
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
+	arc-tdep.o \
 	armbsd-tdep.o arm.o arm-linux.o arm-linux-tdep.o \
 	arm-get-next-pcs.o arm-symbian-tdep.o \
 	armnbsd-tdep.o armobsd-tdep.o \
@@ -746,6 +743,7 @@ FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"CXX=$(CXX)" \
+	"CXX_DIALECT=$(CXX_DIALECT)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"DLLTOOL=$(DLLTOOL)" \
 	"LDFLAGS=$(LDFLAGS)" \
@@ -856,7 +854,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	infcmd.c inflow.c infrun.c \
 	inline-frame.c \
 	interps.c \
-	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c jv-varobj.c \
 	language.c linespec.c location.c minidebug.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
@@ -897,7 +894,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
 	common/btrace-common.c common/fileio.c common/common-regcache.c \
-	common/signals-state-save-restore.c \
+	common/signals-state-save-restore.c common/new-op.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -911,7 +908,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 HFILES_NO_SRCDIR = \
 common/gdb_signals.h nat/gdb_thread_db.h common/gdb_vecs.h \
 common/x86-xstate.h nat/linux-ptrace.h nat/mips-linux-watch.h \
-proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
+proc-utils.h aarch64-tdep.h arc-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h x86bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
@@ -949,7 +946,7 @@ interps.h auxv.h gdbcmd.h tramp-frame.h mipsnbsd-tdep.h	\
 amd64-linux-tdep.h linespec.h location.h i387-tdep.h mn10300-tdep.h \
 sparc64-tdep.h ppcobsd-tdep.h \
 coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
-m68k-tdep.h spu-tdep.h jv-lang.h environ.h amd64-tdep.h \
+m68k-tdep.h spu-tdep.h environ.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
@@ -1063,7 +1060,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ui-out.o cli-out.o \
 	varobj.o vec.o \
 	go-lang.o go-valprint.o go-typeprint.o \
-	jv-lang.o jv-valprint.o jv-typeprint.o jv-varobj.o \
 	m2-lang.o opencl-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	selftest.o sentinel-frame.o \
 	complaints.o typeprint.o \
@@ -1092,7 +1088,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
 	common-exceptions.o btrace-common.o fileio.o \
-	common-regcache.o \
+	common-regcache.o new-op.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -1111,12 +1107,10 @@ YYFILES = c-exp.c \
 	cp-name-parser.c \
 	ada-lex.c \
 	ada-exp.c \
-	jv-exp.c \
 	d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 YYOBJ = c-exp.o \
 	cp-name-parser.o \
 	ada-exp.o \
-	jv-exp.o \
 	d-exp.o f-exp.o go-exp.o m2-exp.o p-exp.o rust-exp.o
 
 # Things which need to be built when making a distribution.
@@ -1488,7 +1482,6 @@ local-maintainer-clean:
 	rm -f c-exp.c \
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
-		jv-exp.tab \
 		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
@@ -1669,6 +1662,7 @@ ALLDEPFILES = \
 	alpha-tdep.c alpha-mdebug-tdep.c \
 	alpha-linux-tdep.c \
 	alphabsd-tdep.c alphafbsd-tdep.c alphanbsd-tdep.c alphaobsd-tdep.c \
+	arc-tdep.c \
 	amd64-nat.c amd64-tdep.c \
 	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \
@@ -2291,6 +2285,10 @@ common-regcache.o: ${srcdir}/common/common-regcache.c
 
 signals-state-save-restore.o: $(srcdir)/common/signals-state-save-restore.c
 	$(COMPILE) $(srcdir)/common/signals-state-save-restore.c
+	$(POSTCOMPILE)
+
+new-op.o: ${srcdir}/common/new-op.c
+	$(COMPILE) $(srcdir)/common/new-op.c
 	$(POSTCOMPILE)
 
 #

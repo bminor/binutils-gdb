@@ -27,7 +27,8 @@ struct bfd;
 
 /* Read the export table and convert it to minimal symbol table
    entries */
-extern void read_pe_exported_syms (struct objfile *objfile);
+extern void read_pe_exported_syms (minimal_symbol_reader &reader,
+				   struct objfile *objfile);
 
 /* Extract from ABFD the offset of the .text section.
    Returns default value 0x1000 if information is not found.  */

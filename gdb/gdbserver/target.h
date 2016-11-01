@@ -517,9 +517,6 @@ int kill_inferior (int);
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)
 
-#define mourn_inferior(PROC) \
-  (*the_target->mourn) (PROC)
-
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
 
@@ -537,10 +534,6 @@ int kill_inferior (int);
 
 #define target_async(enable) \
   (the_target->async ? (*the_target->async) (enable) : 0)
-
-#define target_supports_multi_process() \
-  (the_target->supports_multi_process ? \
-   (*the_target->supports_multi_process) () : 0)
 
 #define target_process_qsupported(features, count)	\
   do							\

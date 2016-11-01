@@ -237,6 +237,7 @@ encode_as (int reg, int as, LocalData *ld, int ext)
 	  break;
 	case MSR_None:
 	  SA (0);
+	  break;
 	default:
 	  SM (reg, 0);
 	  break;

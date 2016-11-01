@@ -23,6 +23,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
+set skip_float_test [gdb_skip_float_test]
+
 proc return_1 { type } {
     global gdb_prompt
 
@@ -77,7 +79,7 @@ proc return_void { } {
 }
 
 proc return2_tests { } {
-    global gdb_prompt
+    global gdb_prompt skip_float_test
 
     if { ! [ runto_main ] } then {
 	untested return2.exp
@@ -92,7 +94,7 @@ proc return2_tests { } {
     if { ! [istarget "m6811-*-*"] && ![istarget "h8300*-*"] } then {
         return_1 "long_long"
     }
-    if ![target_info exists gdb,skip_float_tests] {
+    if {!$skip_float_test} {
 	return_1 "float"
 	if { ! [istarget "m6811-*-*"] } then {
 	    return_1 "double"

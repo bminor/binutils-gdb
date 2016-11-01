@@ -65,11 +65,10 @@ m4_include([common/common.m4])
 dnl For libiberty_INIT.
 m4_include(libiberty.m4)
 
-dnl For --enable-build-with-cxx and COMPILER.
-m4_include(build-with-cxx.m4)
-
 dnl For GDB_AC_PTRACE.
 m4_include(ptrace.m4)
+
+m4_include(ax_cxx_compile_stdcxx.m4)
 
 ## ----------------------------------------- ##
 ## ANSIfy the C compiler whenever possible.  ##

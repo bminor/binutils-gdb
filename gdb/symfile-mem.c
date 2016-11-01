@@ -91,6 +91,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   struct section_addr_info *sai;
   unsigned int i;
   struct cleanup *cleanup;
+  symfile_add_flags add_flags = 0;
 
   if (bfd_get_flavour (templ) != bfd_target_elf_flavour)
     error (_("add-symbol-file-from-memory not supported for this target"));
@@ -126,9 +127,11 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
       }
   sai->num_sections = i;
 
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
+
   objf = symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
-				   from_tty ? SYMFILE_VERBOSE : 0,
-                                   sai, OBJF_SHARED, NULL);
+				   add_flags, sai, OBJF_SHARED, NULL);
 
   add_target_sections_of_objfile (objf);
 

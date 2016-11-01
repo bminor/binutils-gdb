@@ -756,6 +756,8 @@ typedef asection * (*elf_gc_mark_hook_fn)
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
+struct bfd_elf_section_reloc_data;
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -768,7 +770,7 @@ struct elf_backend_data
   /* The ELF machine code (EM_xxxx) for this backend.  */
   int elf_machine_code;
 
-  /* EI_OSABI. */
+  /* EI_OSABI.  */
   int elf_osabi;
 
   /* The maximum page size for this backend.  */
@@ -1173,6 +1175,11 @@ struct elf_backend_data
     (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
      struct elf_link_hash_entry **);
 
+  /* Update relocations.  It is allowed to change the number and the order.
+     In such a case hashes should be invalidated.  */
+  void (*elf_backend_update_relocs)
+    (asection *, struct bfd_elf_section_reloc_data *);
+
   /* Count relocations.  Not called for relocatable links
      or if all relocs are being preserved in the output.  */
   unsigned int (*elf_backend_count_relocs)
@@ -1319,7 +1326,7 @@ struct elf_backend_data
      Elf_Internal_Shdr *osection);
 		
   /* Used to handle bad SHF_LINK_ORDER input.  */
-  bfd_error_handler_type link_order_error_handler;
+  void (*link_order_error_handler) (const char *, ...);
 
   /* Name of the PLT relocation section.  */
   const char *relplt_name;
@@ -1376,7 +1383,7 @@ struct elf_backend_data
   /* This is non-zero if static TLS segments require a special alignment.  */
   unsigned static_tls_alignment;
 
-  /* Alignment for the PT_GNU_STACK segment. */
+  /* Alignment for the PT_GNU_STACK segment.  */
   unsigned stack_align;
 
   /* Flag bits to assign to a section of type SHT_STRTAB.  */
@@ -1672,13 +1679,13 @@ struct output_elf_obj_tdata
    symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
    field in the ELF header structure.  */
 enum elf_gnu_symbols
-  {
-    elf_gnu_symbol_none = 0,
-    elf_gnu_symbol_any = 1 << 0,
-    elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
-    elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
-    elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
-  };
+{
+  elf_gnu_symbol_none = 0,
+  elf_gnu_symbol_any = 1 << 0,
+  elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
+  elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
+  elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
+};
 
 typedef struct elf_section_list
 {
@@ -1686,8 +1693,7 @@ typedef struct elf_section_list
   unsigned int               ndx;
   struct elf_section_list *  next;
 } elf_section_list;
-  
-    
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -2385,8 +2391,10 @@ extern unsigned int _bfd_elf_ppc_at_tprel_transform
   (unsigned int, unsigned int);
 /* PowerPC elf_object_p tweak.  */
 extern bfd_boolean _bfd_elf_ppc_set_arch (bfd *);
+/* PowerPC .gnu.attributes handling common to both 32-bit and 64-bit.  */
+extern void _bfd_elf_ppc_merge_fp_attributes (bfd *, struct bfd_link_info *);
 
-/* Exported interface for writing elf corefile notes. */
+/* Exported interface for writing elf corefile notes.  */
 extern char *elfcore_write_note
   (bfd *, char *, int *, const char *, int, const void *, int);
 extern char *elfcore_write_prpsinfo
@@ -2500,7 +2508,8 @@ extern char *_bfd_elf_attr_strdup (bfd *, const char *);
 extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
 extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, unsigned int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
-extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
+extern bfd_boolean _bfd_elf_merge_object_attributes
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_list (bfd *, bfd *);
 extern Elf_Internal_Shdr *_bfd_elf_single_rel_hdr (asection *sec);

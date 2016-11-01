@@ -32,6 +32,8 @@
 #include "rust-lang.h"
 #include "valprint.h"
 #include "varobj.h"
+#include <string>
+#include <vector>
 
 extern initialize_file_ftype _initialize_rust_language;
 
@@ -1128,8 +1130,10 @@ rust_language_arch_info (struct gdbarch *gdbarch,
   types[rust_primitive_isize] = arch_integer_type (gdbarch, length, 0, "isize");
   types[rust_primitive_usize] = arch_integer_type (gdbarch, length, 1, "usize");
 
-  types[rust_primitive_f32] = arch_float_type (gdbarch, 32, "f32", NULL);
-  types[rust_primitive_f64] = arch_float_type (gdbarch, 64, "f64", NULL);
+  types[rust_primitive_f32] = arch_float_type (gdbarch, 32, "f32",
+					       floatformats_ieee_single);
+  types[rust_primitive_f64] = arch_float_type (gdbarch, 64, "f64",
+					       floatformats_ieee_double);
 
   types[rust_primitive_unit] = arch_integer_type (gdbarch, 0, 1, "()");
 
@@ -1152,10 +1156,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   int i;
   int num_args = exp->elts[*pos + 1].longconst;
   const char *method;
-  char *name;
   struct value *function, *result, *arg0;
-  struct value **args;
-  struct cleanup *cleanup;
   struct type *type, *fn_type;
   const struct block *block;
   struct block_symbol sym;
@@ -1181,8 +1182,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
       return arg0;
     }
 
-  args = XNEWVEC (struct value *, num_args + 1);
-  cleanup = make_cleanup (xfree, args);
+  std::vector<struct value *> args (num_args + 1);
   args[0] = arg0;
 
   /* We don't yet implement real Deref semantics.  */
@@ -1198,17 +1198,16 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   if (TYPE_TAG_NAME (type) == NULL)
     error (_("Method call on nameless type"));
 
-  name = concat (TYPE_TAG_NAME (type), "::", method, (char *) NULL);
-  make_cleanup (xfree, name);
+  std::string name = std::string (TYPE_TAG_NAME (type)) + "::" + method;
 
   block = get_selected_block (0);
-  sym = lookup_symbol (name, block, VAR_DOMAIN, NULL);
+  sym = lookup_symbol (name.c_str (), block, VAR_DOMAIN, NULL);
   if (sym.symbol == NULL)
-    error (_("Could not find function named '%s'"), name);
+    error (_("Could not find function named '%s'"), name.c_str ());
 
   fn_type = SYMBOL_TYPE (sym.symbol);
   if (TYPE_NFIELDS (fn_type) == 0)
-    error (_("Function '%s' takes no arguments"), name);
+    error (_("Function '%s' takes no arguments"), name.c_str ());
 
   if (TYPE_CODE (TYPE_FIELD_TYPE (fn_type, 0)) == TYPE_CODE_PTR)
     args[0] = value_addr (args[0]);
@@ -1221,8 +1220,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     result = value_zero (TYPE_TARGET_TYPE (fn_type), not_lval);
   else
-    result = call_function_by_hand (function, num_args + 1, args);
-  do_cleanups (cleanup);
+    result = call_function_by_hand (function, num_args + 1, args.data ());
   return result;
 }
 
@@ -1599,14 +1597,11 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	  {
 	    CORE_ADDR addr;
 	    int i;
-	    struct value **eltvec = XNEWVEC (struct value *, copies);
-	    struct cleanup *cleanup = make_cleanup (xfree, eltvec);
+	    std::vector<struct value *> eltvec (copies);
 
 	    for (i = 0; i < copies; ++i)
 	      eltvec[i] = elt;
-	    result = value_array (0, copies - 1, eltvec);
-
-	    do_cleanups (cleanup);
+	    result = value_array (0, copies - 1, eltvec.data ());
 	  }
 	else
 	  {
@@ -2034,14 +2029,12 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
       if (scope[0] != '\0')
 	{
-	  char *scopedname = concat (scope, "::", name, (char *) NULL);
-	  struct cleanup *cleanup = make_cleanup (xfree, scopedname);
+	  std::string scopedname = std::string (scope) + "::" + name;
 
-	  result = lookup_symbol_in_static_block (scopedname, block,
+	  result = lookup_symbol_in_static_block (scopedname.c_str (), block,
 						  domain);
 	  if (result.symbol == NULL)
-	    result = lookup_global_symbol (scopedname, block, domain);
-	  do_cleanups (cleanup);
+	    result = lookup_global_symbol (scopedname.c_str (), block, domain);
 	}
     }
   return result;

@@ -39,64 +39,90 @@ extern int get_number_const (const char **);
 
 extern int get_number (char **);
 
-/* An object of this type is passed to get_number_or_range.  It must
-   be initialized by calling init_number_or_range.  This type is
-   defined here so that it can be stack-allocated, but all members
-   other than `finished' and `string' should be treated as opaque.  */
+/* Parse a number or a range.
+   A number will be of the form handled by get_number.
+   A range will be of the form <number1> - <number2>, and
+   will represent all the integers between number1 and number2,
+   inclusive.  */
 
-struct get_number_or_range_state
+class number_or_range_parser
 {
-  /* Non-zero if parsing has completed.  */
-  int finished;
+public:
+  /* Default construction.  Must call init before calling
+     get_next.  */
+  number_or_range_parser () {}
+
+  /* Calls init automatically.  */
+  number_or_range_parser (const char *string);
+
+  /* STRING is the string to be parsed.  */
+  void init (const char *string);
+
+  /* While processing a range, this fuction is called iteratively; At
+     each call it will return the next value in the range.
+
+     At the beginning of parsing a range, the char pointer
+     STATE->m_cur_tok will be advanced past <number1> and left
+     pointing at the '-' token.  Subsequent calls will not advance the
+     pointer until the range is completed.  The call that completes
+     the range will advance the pointer past <number2>.  */
+  int get_number ();
+
+  /* Setup internal state such that get_next() returns numbers in the
+     START_VALUE to END_VALUE range.  END_PTR is where the string is
+     advanced to when get_next() returns END_VALUE.  */
+  void setup_range (int start_value, int end_value,
+		    const char *end_ptr);
+
+  /* Returns true if parsing has completed.  */
+  bool finished () const
+  { return m_finished; }
+
+  /* Return the string being parsed.  When parsing has finished, this
+     points past the last parsed token.  */
+  const char *cur_tok () const
+  { return m_cur_tok; }
+
+  /* True when parsing a range.  */
+  bool in_range () const
+  { return m_in_range; }
+
+  /* When parsing a range, the final value in the range.  */
+  int end_value () const
+  { return m_end_value; }
+
+  /* When parsing a range, skip past the final token in the range.  */
+  void skip_range ()
+  {
+    gdb_assert (m_in_range);
+    m_cur_tok = m_end_ptr;
+  }
+
+private:
+  /* No need for these.  They are intentionally not defined anywhere.  */
+  number_or_range_parser (const number_or_range_parser &);
+  number_or_range_parser &operator= (const number_or_range_parser &);
+
+  /* True if parsing has completed.  */
+  bool m_finished;
 
   /* The string being parsed.  When parsing has finished, this points
      past the last parsed token.  */
-  const char *string;
+  const char *m_cur_tok;
 
   /* Last value returned.  */
-  int last_retval;
+  int m_last_retval;
 
   /* When parsing a range, the final value in the range.  */
-  int end_value;
+  int m_end_value;
 
   /* When parsing a range, a pointer past the final token in the
      range.  */
-  const char *end_ptr;
+  const char *m_end_ptr;
 
-  /* Non-zero when parsing a range.  */
-  int in_range;
+  /* True when parsing a range.  */
+  bool m_in_range;
 };
-
-/* Initialize a get_number_or_range_state for use with
-   get_number_or_range_state.  STRING is the string to be parsed.  */
-
-extern void init_number_or_range (struct get_number_or_range_state *state,
-				  const char *string);
-
-/* Parse a number or a range.
-   A number will be of the form handled by get_number.
-   A range will be of the form <number1> - <number2>, and 
-   will represent all the integers between number1 and number2,
-   inclusive.
-
-   While processing a range, this fuction is called iteratively;
-   At each call it will return the next value in the range.
-
-   At the beginning of parsing a range, the char pointer STATE->string will
-   be advanced past <number1> and left pointing at the '-' token.
-   Subsequent calls will not advance the pointer until the range
-   is completed.  The call that completes the range will advance
-   the pointer past <number2>.  */
-
-extern int get_number_or_range (struct get_number_or_range_state *state);
-
-/* Setups STATE such that get_number_or_range returns numbers in range
-   START_VALUE to END_VALUE.  When get_number_or_range returns
-   END_VALUE, the STATE string is advanced to END_PTR.  */
-
-extern void number_range_setup_range (struct get_number_or_range_state *state,
-				      int start_value, int end_value,
-				      const char *end_ptr);
 
 /* Accept a number and a string-form list of numbers such as is 
    accepted by get_number_or_range.  Return TRUE if the number is

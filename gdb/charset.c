@@ -589,71 +589,30 @@ convert_between_encodings (const char *from, const char *to,
 
 
 
-/* An iterator that returns host wchar_t's from a target string.  */
-struct wchar_iterator
-{
-  /* The underlying iconv descriptor.  */
-  iconv_t desc;
-
-  /* The input string.  This is updated as convert characters.  */
-  const gdb_byte *input;
-  /* The number of bytes remaining in the input.  */
-  size_t bytes;
-
-  /* The width of an input character.  */
-  size_t width;
-
-  /* The output buffer and its size.  */
-  gdb_wchar_t *out;
-  size_t out_size;
-};
-
 /* Create a new iterator.  */
-struct wchar_iterator *
-make_wchar_iterator (const gdb_byte *input, size_t bytes, 
-		     const char *charset, size_t width)
+wchar_iterator::wchar_iterator (const gdb_byte *input, size_t bytes, 
+				const char *charset, size_t width)
+: m_input (input),
+  m_bytes (bytes),
+  m_width (width),
+  m_out (1)
 {
-  struct wchar_iterator *result;
-  iconv_t desc;
-
-  desc = iconv_open (INTERMEDIATE_ENCODING, charset);
-  if (desc == (iconv_t) -1)
+  m_desc = iconv_open (INTERMEDIATE_ENCODING, charset);
+  if (m_desc == (iconv_t) -1)
     perror_with_name (_("Converting character sets"));
-
-  result = XNEW (struct wchar_iterator);
-  result->desc = desc;
-  result->input = input;
-  result->bytes = bytes;
-  result->width = width;
-
-  result->out = XNEW (gdb_wchar_t);
-  result->out_size = 1;
-
-  return result;
 }
 
-static void
-do_cleanup_iterator (void *p)
+wchar_iterator::~wchar_iterator ()
 {
-  struct wchar_iterator *iter = (struct wchar_iterator *) p;
-
-  iconv_close (iter->desc);
-  xfree (iter->out);
-  xfree (iter);
-}
-
-struct cleanup *
-make_cleanup_wchar_iterator (struct wchar_iterator *iter)
-{
-  return make_cleanup (do_cleanup_iterator, iter);
+  if (m_desc != (iconv_t) -1)
+    iconv_close (m_desc);
 }
 
 int
-wchar_iterate (struct wchar_iterator *iter,
-	       enum wchar_iterate_result *out_result,
-	       gdb_wchar_t **out_chars,
-	       const gdb_byte **ptr,
-	       size_t *len)
+wchar_iterator::iterate (enum wchar_iterate_result *out_result,
+			 gdb_wchar_t **out_chars,
+			 const gdb_byte **ptr,
+			 size_t *len)
 {
   size_t out_request;
 
@@ -663,17 +622,17 @@ wchar_iterate (struct wchar_iterator *iter,
      invalid input sequence -- but we want to reliably report this to
      our caller so it can emit an escape sequence.  */
   out_request = 1;
-  while (iter->bytes > 0)
+  while (m_bytes > 0)
     {
-      ICONV_CONST char *inptr = (ICONV_CONST char *) iter->input;
-      char *outptr = (char *) &iter->out[0];
-      const gdb_byte *orig_inptr = iter->input;
-      size_t orig_in = iter->bytes;
+      ICONV_CONST char *inptr = (ICONV_CONST char *) m_input;
+      char *outptr = (char *) m_out.data ();
+      const gdb_byte *orig_inptr = m_input;
+      size_t orig_in = m_bytes;
       size_t out_avail = out_request * sizeof (gdb_wchar_t);
       size_t num;
-      size_t r = iconv (iter->desc, &inptr, &iter->bytes, &outptr, &out_avail);
+      size_t r = iconv (m_desc, &inptr, &m_bytes, &outptr, &out_avail);
 
-      iter->input = (gdb_byte *) inptr;
+      m_input = (gdb_byte *) inptr;
 
       if (r == (size_t) -1)
 	{
@@ -688,10 +647,10 @@ wchar_iterate (struct wchar_iterator *iter,
 	      /* Otherwise skip the first invalid character, and let
 		 the caller know about it.  */
 	      *out_result = wchar_iterate_invalid;
-	      *ptr = iter->input;
-	      *len = iter->width;
-	      iter->input += iter->width;
-	      iter->bytes -= iter->width;
+	      *ptr = m_input;
+	      *len = m_width;
+	      m_input += m_width;
+	      m_bytes -= m_width;
 	      return 0;
 
 	    case E2BIG:
@@ -702,20 +661,17 @@ wchar_iterate (struct wchar_iterator *iter,
 		break;
 
 	      ++out_request;
-	      if (out_request > iter->out_size)
-		{
-		  iter->out_size = out_request;
-		  iter->out = XRESIZEVEC (gdb_wchar_t, iter->out, out_request);
-		}
+	      if (out_request > m_out.size ())
+		m_out.reserve (out_request);
 	      continue;
 
 	    case EINVAL:
 	      /* Incomplete input sequence.  Let the caller know, and
 		 arrange for future calls to see EOF.  */
 	      *out_result = wchar_iterate_incomplete;
-	      *ptr = iter->input;
-	      *len = iter->bytes;
-	      iter->bytes = 0;
+	      *ptr = m_input;
+	      *len = m_bytes;
+	      m_bytes = 0;
 	      return 0;
 
 	    default:
@@ -727,9 +683,9 @@ wchar_iterate (struct wchar_iterator *iter,
       /* We converted something.  */
       num = out_request - out_avail / sizeof (gdb_wchar_t);
       *out_result = wchar_iterate_ok;
-      *out_chars = iter->out;
+      *out_chars = m_out.data ();
       *ptr = orig_inptr;
-      *len = orig_in - iter->bytes;
+      *len = orig_in - m_bytes;
       return num;
     }
 

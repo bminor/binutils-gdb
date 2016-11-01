@@ -17,7 +17,7 @@ Disassembly of section .text:
 			10010: R_AARCH64_MOVW_GOTOFF_G0_NC	globalb
    10014:	f2800100 	movk	x0, #0x8
 			10014: R_AARCH64_MOVW_GOTOFF_G0_NC	globalc
-   10018:	f8606820 	ldr	x0, \[x1,x0\]
+   10018:	f8606820 	ldr	x0, \[x1, x0\]
    1001c:	00000000 	\.word	0x00000000
 			1001c: R_AARCH64_PREL64	_GLOBAL_OFFSET_TABLE_
    10020:	0000ffe4 	\.word	0x0000ffe4

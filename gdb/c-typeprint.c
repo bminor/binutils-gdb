@@ -30,7 +30,6 @@
 #include "c-lang.h"
 #include "typeprint.h"
 #include "cp-abi.h"
-#include "jv-lang.h"
 #include "cp-support.h"
 
 static void c_type_print_varspec_prefix (struct type *,
@@ -465,7 +464,7 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
    parameter types get removed their possible const and volatile qualifiers to
    match demangled linkage name parameters part of such function type.
    LANGUAGE is the language in which TYPE was defined.  This is a necessary
-   evil since this code is used by the C, C++, and Java backends.  */
+   evil since this code is used by the C and C++.  */
 
 void
 c_type_print_args (struct type *type, struct ui_file *stream,
@@ -504,10 +503,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	  param_type = make_cv_type (0, 0, param_type, NULL);
 	}
 
-      if (language == language_java)
-	java_print_type (param_type, "", stream, -1, 0, flags);
-      else
-	c_print_type (param_type, "", stream, -1, 0, flags);
+      c_print_type (param_type, "", stream, -1, 0, flags);
       printed_any = 1;
     }
 
@@ -524,8 +520,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	}
     }
   else if (!printed_any
-	   && ((TYPE_PROTOTYPED (type) && language != language_java)
-	       || language == language_cplus))
+	   && (TYPE_PROTOTYPED (type) || language == language_cplus))
     fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");

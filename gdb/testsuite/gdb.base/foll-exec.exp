@@ -191,7 +191,7 @@ proc do_exec_tests {} {
 
    send_gdb "continue\n"
    gdb_expect {
-     -re ".*xecuting new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .*$gdb_prompt $"\
+     -re ".*xecuting new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*$gdb_prompt $"\
                      {pass "hit catch exec"}
      -re "$gdb_prompt $" {fail "hit catch exec"}
      timeout         {fail "(timeout) hit catch exec"}

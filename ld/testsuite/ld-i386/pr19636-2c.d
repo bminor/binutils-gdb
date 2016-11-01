@@ -23,6 +23,6 @@ Disassembly of section .text:
 0+150 <_start>:
 [ 	]*[a-f0-9]+:	3b 80 fc ff ff ff    	cmp    -0x4\(%eax\),%eax
 [ 	]*[a-f0-9]+:	ff a0 fc ff ff ff    	jmp    \*-0x4\(%eax\)
-[ 	]*[a-f0-9]+:	e8 df ff ff ff       	call   140 <_start-0x10>
+[ 	]*[a-f0-9]+:	e8 df ff ff ff       	call   140 <.*>
 [ 	]*[a-f0-9]+:	3d 00 00 00 00       	cmp    \$0x0,%eax
-[ 	]*[a-f0-9]+:	e8 fc ff ff ff       	call   167 <_start\+0x17>
+[ 	]*[a-f0-9]+:	e8 fc ff ff ff       	call   167 <.*>

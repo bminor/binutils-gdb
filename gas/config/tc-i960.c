@@ -577,6 +577,7 @@ get_cdisp (const char *dispP, /* Displacement as specified in source instruction
     {
     case O_illegal:
       as_bad (_("expression syntax error"));
+      break;
 
     case O_symbol:
       if (S_GET_SEGMENT (e.X_add_symbol) == now_seg
@@ -1040,7 +1041,7 @@ parse_memop (memS *memP,	/* Where to put the results.  */
     case I_BIT:
       /* Treat missing displacement as displacement of 0.  */
       mode |= D_BIT;
-      /* Fall into next case.  */
+      /* Fall through.  */
     case D_BIT | A_BIT | I_BIT:
     case D_BIT | I_BIT:
       /* Set MEMB bit in mode, and OR in mode bits.  */
@@ -1675,6 +1676,7 @@ md_assemble (char *textP)
 	      mem_fmt (args, oP, 1);
 	      break;
 	    }
+	  /* Fall through.  */
 	case MEM2:
 	case MEM4:
 	case MEM8:

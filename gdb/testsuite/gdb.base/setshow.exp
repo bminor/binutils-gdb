@@ -211,10 +211,10 @@ gdb_test "show history size" "The size of the command history is 100..*" "show h
 gdb_test "set language asm" ".*" "set language asm" 
 #test show language asm
 gdb_test "show language" "The current source language is \"asm\"..*" "show language (asm)" 
-#test set language java, with a trailing space
-gdb_test_no_output "set language java " "set language java"
-#test show language java
-gdb_test "show language" "The current source language is \"java\"..*" "show language (java)" 
+#test set language rust, with a trailing space
+gdb_test_no_output "set language rust " "set language rust"
+#test show language rust
+gdb_test "show language" "The current source language is \"rust\"..*" "show language (rust)" 
 #test completion for set language.
 gdb_test "complete set language min" "set language minimal" \
   "complete set language minimal"

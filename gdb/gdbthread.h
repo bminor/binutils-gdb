@@ -630,6 +630,10 @@ extern void validate_registers_access (void);
    true iff we ever detected multiple threads.  */
 extern int show_thread_that_caused_stop (void);
 
+/* Print the message for a thread or/and frame selected.  */
+extern void print_selected_thread_frame (struct ui_out *uiout,
+					 user_selected_what selection);
+
 extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */

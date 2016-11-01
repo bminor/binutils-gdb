@@ -41,8 +41,11 @@ static int s390_arch_size = 0;
    Since with S/390 a newer CPU always supports everything from its
    predecessors this will accept every valid asm input.  */
 static unsigned int current_cpu = S390_OPCODE_MAXCPU - 1;
+/* All facilities are enabled by default.  */
+static unsigned int current_flags = S390_INSTR_FLAG_FACILITY_MASK;
+/* The mode mask default is picked in init_default_arch depending on
+   the current cpu.  */
 static unsigned int current_mode_mask = 0;
-static unsigned int current_flags = 0;
 
 /* Set to TRUE if the highgprs flag in the ELF header needs to be set
    for the output file.  */
@@ -269,20 +272,24 @@ s390_parse_cpu (const char *         arg,
   static struct
   {
     const char * name;
-    unsigned int len;
+    unsigned int name_len;
+    const char * alt_name;
+    unsigned int alt_name_len;
     unsigned int flags;
   } cpu_table[S390_OPCODE_MAXCPU] =
   {
-    { STRING_COMMA_LEN ("g5"), 0 },
-    { STRING_COMMA_LEN ("g6"), 0 },
-    { STRING_COMMA_LEN ("z900"), 0 },
-    { STRING_COMMA_LEN ("z990"), 0 },
-    { STRING_COMMA_LEN ("z9-109"), 0 },
-    { STRING_COMMA_LEN ("z9-ec"), 0 },
-    { STRING_COMMA_LEN ("z10"), 0 },
-    { STRING_COMMA_LEN ("z196"), 0 },
-    { STRING_COMMA_LEN ("zEC12"), S390_INSTR_FLAG_HTM },
-    { STRING_COMMA_LEN ("z13"), S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
+    { STRING_COMMA_LEN ("g5"), STRING_COMMA_LEN ("arch3"), 0 },
+    { STRING_COMMA_LEN ("g6"), STRING_COMMA_LEN (""), 0 },
+    { STRING_COMMA_LEN ("z900"), STRING_COMMA_LEN ("arch5"), 0 },
+    { STRING_COMMA_LEN ("z990"), STRING_COMMA_LEN ("arch6"), 0 },
+    { STRING_COMMA_LEN ("z9-109"), STRING_COMMA_LEN (""), 0 },
+    { STRING_COMMA_LEN ("z9-ec"), STRING_COMMA_LEN ("arch7"), 0 },
+    { STRING_COMMA_LEN ("z10"), STRING_COMMA_LEN ("arch8"), 0 },
+    { STRING_COMMA_LEN ("z196"), STRING_COMMA_LEN ("arch9"), 0 },
+    { STRING_COMMA_LEN ("zEC12"), STRING_COMMA_LEN ("arch10"),
+      S390_INSTR_FLAG_HTM },
+    { STRING_COMMA_LEN ("z13"), STRING_COMMA_LEN ("arch11"),
+      S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
   };
   static struct
   {
@@ -309,17 +316,31 @@ s390_parse_cpu (const char *         arg,
     {
       for (icpu = 0; icpu < S390_OPCODE_MAXCPU; icpu++)
 	{
-	  unsigned int l;
+	  unsigned int l, l_alt;
 
-	  l = cpu_table[icpu].len;
+	  l = cpu_table[icpu].name_len;
+
 	  if (strncmp (arg, cpu_table[icpu].name, l) == 0
 	      && (arg[l] == 0 || arg[l] == '+'))
 	    {
 	      arg += l;
 	      break;
 	    }
+
+	  l_alt = cpu_table[icpu].alt_name_len;
+
+	  if (l_alt > 0
+	      && strncmp (arg, cpu_table[icpu].alt_name, l_alt) == 0
+	      && (arg[l_alt] == 0 || arg[l_alt] == '+'))
+	    {
+	      arg += l_alt;
+	      break;
+	    }
 	}
     }
+
+  if (icpu == S390_OPCODE_MAXCPU)
+    return S390_OPCODE_MAXCPU;
 
   ilp_bak = input_line_pointer;
   if (icpu != S390_OPCODE_MAXCPU)
@@ -908,6 +929,7 @@ s390_exp_compare (expressionS *exp1, expressionS *exp2)
 
     case O_big:
       as_bad (_("Can't handle O_big in s390_exp_compare"));
+      return 0;
 
     case O_symbol:     /* X_add_symbol & X_add_number must be equal.  */
     case O_symbol_rva:

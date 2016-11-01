@@ -380,21 +380,22 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
 /* Return the full pathname of the main executable, or NULL if not
    found.  The returned pathname is malloc'ed and must be freed by
    the caller.  If FD is non-NULL, *FD is set to either -1 or an open
-   file handle for the main executable.
-
-   The search algorithm used is described in solib_find_1's comment
-   above.  */
+   file handle for the main executable.  */
 
 char *
 exec_file_find (char *in_pathname, int *fd)
 {
-  char *result = solib_find_1 (in_pathname, fd, 0);
+  char *result;
+  const char *fskind = effective_target_file_system_kind ();
 
-  if (result == NULL)
+  if (in_pathname == NULL)
+    return NULL;
+
+  if (*gdb_sysroot != '\0' && IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname))
     {
-      const char *fskind = effective_target_file_system_kind ();
+      result = solib_find_1 (in_pathname, fd, 0);
 
-      if (fskind == file_system_kind_dos_based)
+      if (result == NULL && fskind == file_system_kind_dos_based)
 	{
 	  char *new_pathname;
 
@@ -404,6 +405,21 @@ exec_file_find (char *in_pathname, int *fd)
 
 	  result = solib_find_1 (new_pathname, fd, 0);
 	}
+    }
+  else
+    {
+      /* It's possible we don't have a full path, but rather just a
+	 filename.  Some targets, such as HP-UX, don't provide the
+	 full path, sigh.
+
+	 Attempt to qualify the filename against the source path.
+	 (If that fails, we'll just fall back on the original
+	 filename.  Not much more we can do...)  */
+
+      if (!source_full_path_of (in_pathname, &result))
+	result = xstrdup (in_pathname);
+      if (fd != NULL)
+	*fd = -1;
     }
 
   return result;
@@ -669,7 +685,7 @@ master_so_list (void)
    loaded.  */
 
 int
-solib_read_symbols (struct so_list *so, int flags)
+solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 {
   if (so->symbols_loaded)
     {
@@ -999,8 +1015,10 @@ solib_add (const char *pattern, int from_tty,
   {
     int any_matches = 0;
     int loaded_any_symbols = 0;
-    const int flags =
-        SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
+    symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
+
+    if (from_tty)
+        add_flags |= SYMFILE_VERBOSE;
 
     for (gdb = so_list_head; gdb; gdb = gdb->next)
       if (! pattern || re_exec (gdb->so_name))
@@ -1024,7 +1042,7 @@ solib_add (const char *pattern, int from_tty,
 		    printf_unfiltered (_("Symbols already loaded for %s\n"),
 				       gdb->so_name);
 		}
-	      else if (solib_read_symbols (gdb, flags))
+	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = 1;
 	    }
 	}
@@ -1038,13 +1056,9 @@ solib_add (const char *pattern, int from_tty,
 
     if (loaded_any_symbols)
       {
-	const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-
 	/* Getting new symbols may change our opinion about what is
 	   frameless.  */
 	reinit_frame_cache ();
-
-	ops->special_symbol_handling ();
       }
   }
 }
@@ -1361,8 +1375,10 @@ reload_shared_libraries_1 (int from_tty)
       char *filename, *found_pathname = NULL;
       bfd *abfd;
       int was_loaded = so->symbols_loaded;
-      const int flags =
-	SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
+      symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
+
+      if (from_tty)
+	add_flags |= SYMFILE_VERBOSE;
 
       filename = tilde_expand (so->so_original_name);
       make_cleanup (xfree, filename);
@@ -1411,7 +1427,7 @@ reload_shared_libraries_1 (int from_tty)
 
 	    if (!got_error
 		&& (auto_solib_add || was_loaded || libpthread_solib_p (so)))
-	      solib_read_symbols (so, flags);
+	      solib_read_symbols (so, add_flags);
 	}
     }
 
@@ -1468,8 +1484,6 @@ reload_shared_libraries (char *ignored, int from_tty,
      structures that are now freed.  Also, getting new symbols may
      change our opinion about what is frameless.  */
   reinit_frame_cache ();
-
-  ops->special_symbol_handling ();
 }
 
 /* Wrapper for reload_shared_libraries that replaces "remote:"

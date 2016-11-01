@@ -2128,8 +2128,36 @@ class Target_arm : public Sized_target<32, big_endian>
       stub_tables_(), stub_factory_(Stub_factory::get_instance()),
       should_force_pic_veneer_(false),
       arm_input_section_map_(), attributes_section_data_(NULL),
-      fix_cortex_a8_(false), cortex_a8_relocs_info_()
-  { }
+      fix_cortex_a8_(false), cortex_a8_relocs_info_(),
+      target1_reloc_(elfcpp::R_ARM_ABS32),
+      // This can be any reloc type but usually is R_ARM_GOT_PREL.
+      target2_reloc_(elfcpp::R_ARM_GOT_PREL)
+  {
+    if (parameters->options().user_set_target1_rel())
+      {
+	// FIXME: This is not strictly compatible with ld, which allows both
+	// --target1-abs and --target-rel to be given.
+	if (parameters->options().user_set_target1_abs())
+	  gold_error(_("Cannot use both --target1-abs and --target1-rel."));
+	else
+	  this->target1_reloc_ = elfcpp::R_ARM_REL32;
+      }
+    // We don't need to handle --target1-abs because target1_reloc_ is set
+    // to elfcpp::R_ARM_ABS32 in the member initializer list.
+
+    if (parameters->options().user_set_target2())
+      {
+	const char* target2 = parameters->options().target2();
+	if (strcmp(target2, "rel") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_REL32;
+	else if (strcmp(target2, "abs") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_ABS32;
+	else if (strcmp(target2, "got-rel") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_GOT_PREL;
+	else
+	  gold_unreachable();
+      }
+  }
 
   // Whether we force PCI branch veneers.
   bool
@@ -2391,8 +2419,8 @@ class Target_arm : public Sized_target<32, big_endian>
   rel_irelative_section(Layout*);
 
   // Map platform-specific reloc types
-  static unsigned int
-  get_real_reloc_type(unsigned int r_type);
+  unsigned int
+  get_real_reloc_type(unsigned int r_type) const;
 
   //
   // Methods to support stub-generations.
@@ -3002,6 +3030,11 @@ class Target_arm : public Sized_target<32, big_endian>
   bool fix_cortex_a8_;
   // Map addresses to relocs for Cortex-A8 erratum.
   Cortex_a8_relocs_info cortex_a8_relocs_info_;
+  // What R_ARM_TARGET1 maps to. It can be R_ARM_REL32 or R_ARM_ABS32.
+  unsigned int target1_reloc_;
+  // What R_ARM_TARGET2 maps to. It should be one of R_ARM_REL32, R_ARM_ABS32
+  // and R_ARM_GOT_PREL.
+  unsigned int target2_reloc_;
 };
 
 template<bool big_endian>
@@ -8520,7 +8553,7 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
   if (is_discarded)
     return;
 
-  r_type = get_real_reloc_type(r_type);
+  r_type = target->get_real_reloc_type(r_type);
 
   // A local STT_GNU_IFUNC symbol may require a PLT entry.
   bool is_ifunc = lsym.get_st_type() == elfcpp::STT_GNU_IFUNC;
@@ -8926,7 +8959,7 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
       && this->reloc_needs_plt_for_ifunc(object, r_type))
     target->make_plt_entry(symtab, layout, gsym);
 
-  r_type = get_real_reloc_type(r_type);
+  r_type = target->get_real_reloc_type(r_type);
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
@@ -9552,7 +9585,7 @@ Target_arm<big_endian>::Relocate::relocate(
 
   const elfcpp::Rel<32, big_endian> rel(preloc);
   unsigned int r_type = elfcpp::elf_r_type<32>(rel.get_r_info());
-  r_type = get_real_reloc_type(r_type);
+  r_type = target->get_real_reloc_type(r_type);
   const Arm_reloc_property* reloc_property =
     arm_reloc_property_table->get_implemented_static_reloc_property(r_type);
   if (reloc_property == NULL)
@@ -10262,7 +10295,9 @@ Target_arm<big_endian>::Classify_reloc::get_size_for_reloc(
     unsigned int r_type,
     Relobj* object)
 {
-  r_type = get_real_reloc_type(r_type);
+  Target_arm<big_endian>* arm_target =
+      Target_arm<big_endian>::default_target();
+  r_type = arm_target->get_real_reloc_type(r_type);
   const Arm_reloc_property* arp =
       arm_reloc_property_table->get_implemented_static_reloc_property(r_type);
   if (arp != NULL)
@@ -10686,17 +10721,15 @@ Target_arm<big_endian>::do_dynsym_value(const Symbol* gsym) const
 //
 template<bool big_endian>
 unsigned int
-Target_arm<big_endian>::get_real_reloc_type(unsigned int r_type)
+Target_arm<big_endian>::get_real_reloc_type(unsigned int r_type) const
 {
   switch (r_type)
     {
     case elfcpp::R_ARM_TARGET1:
-      // This is either R_ARM_ABS32 or R_ARM_REL32;
-      return elfcpp::R_ARM_ABS32;
+      return this->target1_reloc_;
 
     case elfcpp::R_ARM_TARGET2:
-      // This can be any reloc type but usually is R_ARM_GOT_PREL
-      return elfcpp::R_ARM_GOT_PREL;
+      return this->target2_reloc_;
 
     default:
       return r_type;
@@ -12787,7 +12820,7 @@ Target_arm<big_endian>::apply_cortex_a8_workaround(
       // branch to the stub.  We use the THUMB-2 encoding here.
       upper_insn = 0xf000U;
       lower_insn = 0xb800U;
-      // Fall through
+      // Fall through.
     case arm_stub_a8_veneer_b:
     case arm_stub_a8_veneer_bl:
     case arm_stub_a8_veneer_blx:

@@ -37,6 +37,7 @@
 
 #include "sparc-tdep.h"
 #include "sparc-ravenscar-thread.h"
+#include <algorithm>
 
 struct regset;
 
@@ -561,7 +562,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
     }
 
   /* Always allocate at least six words.  */
-  sp -= max (6, num_elements) * 4;
+  sp -= std::max (6, num_elements) * 4;
 
   /* The psABI says that "Software convention requires space for the
      struct/union return value pointer, even if the word is unused."  */

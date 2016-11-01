@@ -25,6 +25,7 @@
 #include "gdbcore.h"
 #include "dis-asm.h"
 #include "source.h"
+#include <algorithm>
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -713,7 +714,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	}
 
       if (sal.end != 0)
-	end_pc = min (sal.end, high);
+	end_pc = std::min (sal.end, high);
       else
 	end_pc = pc + 1;
       num_displayed += dump_insns (gdbarch, uiout, di, pc, end_pc,
