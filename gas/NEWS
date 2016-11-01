@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the RISC-V architecture.
+
 Changes in 2.27:
 
 * Default to --enable-compressed-debug-sections=gas for Linux/x86 targets.

@@ -1,3 +1,17 @@
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* Makefile.am: Add riscv files.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the support for this target.
+	* configure.tgt: Add riscv entries.
+	* emulparams/elf32lriscv-defs.sh: New file.
+	* emulparams/elf32lriscv.sh: New file.
+	* emulparams/elf64lriscv-defs.sh: New file.
+	* emulparams/elf64lriscv.sh: New file.
+	* emultempl/riscvelf.em: New file.
+
 2016-10-31  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* ldmain.c (add_archive_element): Initialize input->header.type.

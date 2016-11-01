@@ -120,12 +120,14 @@ if { [is_elf_format] } then {
     run_dump_test "group2"
     case $target_triplet in {
 	{ hppa64*-*-hpux* } { }
+	{ riscv*-*-* } { }
 	default {
 	    run_dump_test "groupautoa"
 	}
     }
     case $target_triplet in {
 	{ hppa64*-*-hpux* } { }
+	{ riscv*-*-* } { }
 	{ xtensa*-*-* } { }
 	default {
 	    run_dump_test "groupautob"
@@ -144,6 +146,7 @@ if { [is_elf_format] } then {
 	{ mn10300-*-* } { }
 	{ msp43*-*-* } { }
 	{ rl78-*-* } { }
+	{ riscv*-*-* } { }
 	{ rx-*-* } { }
 	default {
 	    # The next test can fail if the target does not convert fixups

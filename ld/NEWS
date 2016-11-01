@@ -1,6 +1,6 @@
 -*- text -*-
 
-Changes in 2.28:
+* Add support for the RISC-V architecture.
 
 * The command line option --no-eh-frame-hdr can now be used in ELF based
   linkers to disable the automatic generation of .eh_frame_hdr sections.

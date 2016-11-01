@@ -122,6 +122,7 @@ or1k*|or1knd*)	 targ_archs=bfd_or1k_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
 pj*)		 targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*)	 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+riscv*)		 targ_archs=bfd_riscv_arch ;;
 rs6000)		 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 s390*)		 targ_archs=bfd_s390_arch ;;
 sh*)		 targ_archs=bfd_sh_arch ;;
@@ -1358,6 +1359,20 @@ case "${targ}" in
     targ_defvec=powerpc_pe_le_vec
     targ_selvecs="powerpc_pei_le_vec powerpc_pei_vec powerpc_pe_le_vec powerpc_pe_vec"
     ;;
+
+#ifdef BFD64
+  riscv32-*-*)
+    targ_defvec=riscv_elf32_vec
+    targ_selvecs="riscv_elf32_vec"
+    want64=true
+    ;;
+
+  riscv64-*-*)
+    targ_defvec=riscv_elf64_vec
+    targ_selvecs="riscv_elf32_vec riscv_elf64_vec"
+    want64=true
+    ;;
+#endif
 
   rl78-*-elf)
     targ_defvec=rl78_elf32_vec

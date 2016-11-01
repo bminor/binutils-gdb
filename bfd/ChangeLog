@@ -1,3 +1,22 @@
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* Makefile.am: Add entries for riscv32-elf and riscv64-elf.
+	* config.bdf: Likewise.
+	* configure.ac: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* archures.c: Add bfd_riscv_arch.
+	* reloc.c: Add riscv relocs.
+	* targets.c: Add riscv_elf32_vec and riscv_elf64_vec.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf-bfd.h: Add RISCV_ELF_DATA to enum elf_target_id.
+	* elfnn-riscv.c: New file.
+	* elfxx-riscv.c: New file.
+	* elfxx-riscv.h: New file.
+
 2016-10-31  Alan Modra  <amodra@gmail.com>
 
 	PR 20748

@@ -12552,7 +12552,7 @@ $as_echo "#define NDS32_DEFAULT_AUDIO_EXT 1" >>confdefs.h
 $as_echo "$enable_audio_ext" >&6; }
 	;;
 
-      i386 | s390 | sparc)
+      i386 | riscv | s390 | sparc)
 	if test $this_target = $target ; then
 
 cat >>confdefs.h <<_ACEOF

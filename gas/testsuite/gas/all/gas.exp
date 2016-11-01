@@ -159,10 +159,10 @@ case $target_triplet in {
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
-	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
+	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
-	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
+	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	setup_xfail "*-*-aix*"
 	# SOM uses a different syntax for .comm
@@ -277,8 +277,8 @@ if {    ![istarget *c30*-*-*]
      && ![istarget hppa*-*-*] } then {
     # The vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
-    # msp430 and mn10[23]00 emit two relocs to handle the difference of two symbols.
-    setup_xfail "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "vax*-*-vms*"
+    # msp430, mn10[23]00 and riscv emit two relocs to handle the difference of two symbols.
+    setup_xfail "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
     do_930509a
 }
 

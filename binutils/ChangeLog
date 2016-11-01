@@ -1,3 +1,17 @@
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* readelf.c (guess_is_rela): Add EM_RISCV.
+	(get_machine_name): Likewise.
+	(dump_relocations): Add support for riscv relocations.
+	(get_machine_flags): Add support for riscv flags.
+	(is_32bit_abs_reloc): Add R_RISCV_32.
+	(is_64bit_abs_reloc): Add R_RISCV_64.
+	(is_none_reloc): Add R_RISCV_NONE.
+	* testsuite/binutils-all/objdump.exp (cpus_expected): Add riscv.
+	Expect the debug_ranges test to fail.
+
 2016-10-17  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (apply_relocations): Fail if the symbol table section

@@ -1,3 +1,24 @@
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* Makefile.am: Add riscv files.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the support for this architecture.
+	* configure.in: Define a default architecture.
+	* configure: Regenerate.
+	* configure.tgt: Add entries for riscv.
+	* doc/as.texinfo: Likewise.
+	* testsuite/gas/all/gas.exp: Expect the redef tests to fail.
+	* testsuite/gas/elf/elf.exp: Expect the groupauto tests to fail.
+	* config/tc-riscv.c: New file.
+	* config/tc-riscv.h: New file.
+	* doc/c-riscv.texi: New file.
+	* testsuite/gas/riscv: New directory.
+	* testsuite/gas/riscv/riscv.exp: New file.
+	* testsuite/gas/riscv/t_insns.d: New file.
+	* testsuite/gas/riscv/t_insns.s: New file.
+
 2016-10-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (arc_target): Delete.

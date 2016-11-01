@@ -1647,6 +1647,25 @@ PowerPC processor.
 
 @end ifset
 
+@ifset RISCV
+
+@ifclear man
+@xref{RISC-V-Opts}, for the options available when @value{AS} is configured
+for a RISC-V processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+RISC-V  processor.
+@c man end
+@c man begin INCLUDE
+@include c-riscv.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
 @c man begin OPTIONS
 @ifset RX
 See the info pages for documentation of the RX-specific options.

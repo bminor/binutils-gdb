@@ -1,3 +1,13 @@
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* dis-asm.h: Add prototypes for print_insn_riscv and
+	print_riscv_disassembler_options.
+	* elf/riscv.h: New file.
+	* opcode/riscv-opc.h: New file.
+	* opcode/riscv.h: New file.
+
 2016-10-17  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (DT_SYMTAB_SHNDX): Define.

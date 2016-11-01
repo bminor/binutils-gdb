@@ -1,3 +1,14 @@
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* configure.ac: Add entry for bfd_riscv_arch.
+	* configure: Regenerate.
+	* disassemble.c (disassembler): Add support for riscv.
+	(disassembler_usage): Likewise.
+	* riscv-dis.c: New file.
+	* riscv-opc.c: New file.
+
 2016-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PREFIX_RM_0_0FAE_REG_7): Removed.
