@@ -5935,6 +5935,18 @@ v4fnmaddss, 3, 0xf2ab, None, 1, CpuAVX512_4FMAPS, Modrm|EVex=4|Masking=3|VexOpco
 
 // AVX512_4FMAPS instructions end
 
+// AVX512_4VNNIW instructions
+
+vp4dpwssd, 3, 0xf252, None, 1, CpuAVX512_4VNNIW, Modrm|EVex=1|Masking=3|VexOpcode=1|VexVVVV=1|VexW=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegZMM, RegZMM }
+vp4dpwssd, 3, 0xf252, None, 1, CpuAVX512_4VNNIW|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=1|VexVVVV=1|VexW=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegXMM, RegXMM }
+vp4dpwssd, 3, 0xf252, None, 1, CpuAVX512_4VNNIW|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=1|VexVVVV=1|VexW=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegYMM, RegYMM }
+
+vp4dpwssds, 3, 0xf253, None, 1, CpuAVX512_4VNNIW, Modrm|EVex=1|Masking=3|VexOpcode=1|VexVVVV=1|VexW=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegZMM, RegZMM }
+vp4dpwssds, 3, 0xf253, None, 1, CpuAVX512_4VNNIW|CpuAVX512VL, Modrm|EVex=2|Masking=3|VexOpcode=1|VexVVVV=1|VexW=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegXMM, RegXMM }
+vp4dpwssds, 3, 0xf253, None, 1, CpuAVX512_4VNNIW|CpuAVX512VL, Modrm|EVex=3|Masking=3|VexOpcode=1|VexVVVV=1|VexW=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegYMM, RegYMM }
+
+// AVX512_4VNNIW instructions
+
 // CLZERO instructions
 
 clzero, 0, 0xf01fc, None, 3, CpuCLZERO, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

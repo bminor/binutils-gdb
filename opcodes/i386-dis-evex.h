@@ -387,8 +387,8 @@ static const struct dis386 evex_table[][256] = {
     /* 50 */
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3852) },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3853) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -2004,6 +2004,20 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vrsqrt14s%XW",	{ XMScalar, VexScalar, EXxmm_mdq }, 0 },
+  },
+  /* PREFIX_EVEX_0F3852 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vp4dpwssd",	{ XM, Vex, EXxmm }, 0 },
+  },
+  /* PREFIX_EVEX_0F3853 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vp4dpwssds",	{ XM, Vex, EXxmm }, 0 },
   },
   /* PREFIX_EVEX_0F3858 */
   {
