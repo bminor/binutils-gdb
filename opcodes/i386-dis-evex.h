@@ -2202,12 +2202,14 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfmsub132p%XW",	{ XM, Vex, EXx, EXxEVexR }, 0 },
+    { "v4fmaddps",	{ XM, Vex, Mxmm }, 0 },
   },
   /* PREFIX_EVEX_0F389B */
   {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfmsub132s%XW",	{ XMScalar, VexScalar, EXxmm_mdq, EXxEVexR }, 0 },
+    { "v4fmaddss",	{ XMScalar, VexScalar, Mxmm }, 0 },
   },
   /* PREFIX_EVEX_0F389C */
   {
@@ -2286,12 +2288,14 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfmsub213p%XW",	{ XM, Vex, EXx, EXxEVexR }, 0 },
+    { "v4fnmaddps",	{ XM, Vex, Mxmm }, 0 },
   },
   /* PREFIX_EVEX_0F38AB */
   {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfmsub213s%XW",	{ XMScalar, VexScalar, EXxmm_mdq, EXxEVexR }, 0 },
+    { "v4fnmaddss",	{ XMScalar, VexScalar, Mxmm }, 0 },
   },
   /* PREFIX_EVEX_0F38AC */
   {

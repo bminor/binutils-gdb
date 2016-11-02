@@ -1,3 +1,20 @@
+2016-11-02  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c. (enum): Add PREFIX_EVEX_0F389A,
+	PREFIX_EVEX_0F389B, PREFIX_EVEX_0F38AA, PREFIX_EVEX_0F38AB.
+	* i386-dis-evex.h (evex_table): Updated.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_4FMAPS_FLAGS,
+	CPU_ANY_AVX512_4FMAPS_FLAGS. Update CPU_ANY_AVX512F_FLAGS.
+	(cpu_flags): Add CpuAVX512_4FMAPS.
+	(opcode_modifiers): Add ImplicitQuadGroup modifier.
+	* i386-opc.h (AVX512_4FMAP): New.
+	(i386_cpu_flags): Add cpuavx512_4fmaps.
+	(ImplicitQuadGroup): New.
+	(i386_opcode_modifier): Add implicitquadgroup.
+	* i386-opc.tbl: Add Intel AVX512_4FMAPS instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Ditto.
+
 2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
 	    Andrew Waterman <andrew@sifive.com>
 

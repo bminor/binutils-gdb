@@ -192,6 +192,8 @@ enum
   CpuAVX512IFMA,
   /* Intel AVX-512 VBMI Instructions support required.  */
   CpuAVX512VBMI,
+  /* Intel AVX-512 4FMAPS Instructions support required.  */
+  CpuAVX512_4FMAPS,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -315,6 +317,7 @@ typedef union i386_cpu_flags
       unsigned int cpuclwb:1;
       unsigned int cpuavx512ifma:1;
       unsigned int cpuavx512vbmi:1;
+      unsigned int cpuavx512_4fmaps:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
@@ -559,6 +562,11 @@ enum
   /* Default mask isn't allowed.  */
   NoDefMask,
 
+  /* The second operand must be a vector register, {x,y,z}mmN, where N is a multiple of 4.
+     It implicitly denotes the register group of {x,y,z}mmN - {x,y,z}mm(N + 3).
+   */
+  ImplicitQuadGroup,
+
   /* Compatible with old (<= 2.8.1) versions of gcc  */
   OldGcc,
   /* AT&T mnemonic.  */
@@ -635,6 +643,7 @@ typedef struct i386_opcode_modifier
   unsigned int sae:1;
   unsigned int disp8memshift:3;
   unsigned int nodefmask:1;
+  unsigned int implicitquadgroup:1;
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;

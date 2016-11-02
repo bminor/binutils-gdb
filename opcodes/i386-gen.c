@@ -217,6 +217,8 @@ static initializer cpu_flag_init[] =
     "CPU_AVX512F_FLAGS|CpuAVX512IFMA" },
   { "CPU_AVX512VBMI_FLAGS",
     "CPU_AVX512F_FLAGS|CpuAVX512VBMI" },
+  { "CPU_AVX512_4FMAPS_FLAGS",
+    "CPU_AVX512F_FLAGS|CpuAVX512_4FMAPS" },
   { "CPU_L1OM_FLAGS",
     "unknown" },
   { "CPU_K1OM_FLAGS",
@@ -284,7 +286,7 @@ static initializer cpu_flag_init[] =
   { "CPU_ANY_AVX2_FLAGS",
     "CpuAVX2" },
   { "CPU_ANY_AVX512F_FLAGS",
-    "CpuVREX|CpuRegZMM|CpuRegMask|CpuAVX512CD|CpuAVX512ER|CpuAVX512PF|CpuAVX512DQ|CpuAVX512BW|CpuAVX512VL|CpuAVX512IFMA|CpuAVX512VBMI|CpuAVX512F" },
+    "CpuVREX|CpuRegZMM|CpuRegMask|CpuAVX512CD|CpuAVX512ER|CpuAVX512PF|CpuAVX512DQ|CpuAVX512BW|CpuAVX512VL|CpuAVX512IFMA|CpuAVX512VBMI|CpuAVX512_4FMAPS|CpuAVX512F" },
   { "CPU_ANY_AVX512CD_FLAGS",
     "CpuAVX512CD" },
   { "CPU_ANY_AVX512ER_FLAGS",
@@ -301,6 +303,8 @@ static initializer cpu_flag_init[] =
     "CpuAVX512IFMA" },
   { "CPU_ANY_AVX512VBMI_FLAGS",
     "CpuAVX512VBMI" },
+  { "CPU_ANY_AVX512_4FMAPS_FLAGS",
+    "CpuAVX512_4FMAPS" },
 };
 
 static initializer operand_type_init[] =
@@ -504,6 +508,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuMPX),
   BITFIELD (CpuAVX512IFMA),
   BITFIELD (CpuAVX512VBMI),
+  BITFIELD (CpuAVX512_4FMAPS),
   BITFIELD (CpuMWAITX),
   BITFIELD (CpuCLZERO),
   BITFIELD (CpuOSPKE),
@@ -579,6 +584,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (SAE),
   BITFIELD (Disp8MemShift),
   BITFIELD (NoDefMask),
+  BITFIELD (ImplicitQuadGroup),
   BITFIELD (OldGcc),
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),
