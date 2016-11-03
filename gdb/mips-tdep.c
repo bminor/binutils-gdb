@@ -108,6 +108,23 @@ static const char *const mips_abi_strings[] = {
   NULL
 };
 
+/* Enum describing the different kinds of breakpoints.  */
+
+enum mips_breakpoint_kind
+{
+  /* 16-bit MIPS16 mode breakpoint.  */
+  MIPS_BP_KIND_MIPS16 = 2,
+
+  /* 16-bit microMIPS mode breakpoint.  */
+  MIPS_BP_KIND_MICROMIPS16 = 3,
+
+  /* 32-bit standard MIPS mode breakpoint.  */
+  MIPS_BP_KIND_MIPS32 = 4,
+
+  /* 32-bit microMIPS mode breakpoint.  */
+  MIPS_BP_KIND_MICROMIPS32 = 5,
+};
+
 /* For backwards compatibility we default to MIPS16.  This flag is
    overridden as soon as unambiguous ELF file flags tell us the
    compressed ISA encoding used.  */
@@ -7097,16 +7114,7 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
     }
 }
 
-/* Determine the remote breakpoint kind suitable for the PC.  The following
-   kinds are used:
-
-   * 2 -- 16-bit MIPS16 mode breakpoint,
-
-   * 3 -- 16-bit microMIPS mode breakpoint,
-
-   * 4 -- 32-bit standard MIPS mode breakpoint,
-
-   * 5 -- 32-bit microMIPS mode breakpoint.  */
+/* Determine the remote breakpoint kind suitable for the PC.  */
 
 static void
 mips_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
@@ -7117,21 +7125,23 @@ mips_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
   if (mips_pc_is_mips16 (gdbarch, pc))
     {
       *pcptr = unmake_compact_addr (pc);
-      *kindptr = 2;
+      *kindptr = MIPS_BP_KIND_MIPS16;
     }
   else if (mips_pc_is_micromips (gdbarch, pc))
     {
       ULONGEST insn;
       int status;
-      int size;
 
       insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &status);
-      size = status ? 2 : mips_insn_size (ISA_MICROMIPS, insn) == 2 ? 2 : 4;
+      if (status || (mips_insn_size (ISA_MICROMIPS, insn) == 2))
+	*kindptr = MIPS_BP_KIND_MICROMIPS16;
+      else
+	*kindptr = MIPS_BP_KIND_MICROMIPS32;
+
       *pcptr = unmake_compact_addr (pc);
-      *kindptr = size | 1;
     }
   else
-    *kindptr = 4;
+    *kindptr = MIPS_BP_KIND_MIPS32;
 }
 
 /* Return non-zero if the standard MIPS instruction INST has a branch

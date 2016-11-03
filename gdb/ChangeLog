@@ -1,5 +1,11 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* mips-tdep.c (mips_breakpoint_kind): New enum.
+	(mips_breakpoint_from_pc): Use it.
+	(mips_remote_breakpoint_from_pc): Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): New macro.
 	(SET_GDBARCH_BREAKPOINT_MANIPULATION): New macro.
 	aarch64-tdep.c (aarch64_breakpoint_from_pc): Remove.  Use
