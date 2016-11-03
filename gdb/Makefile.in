@@ -1894,6 +1894,7 @@ po/$(PACKAGE).pot: force
 	     -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
 	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
 	     -e '/^#line.*y.tab.c/d' \
+	     -e 's/YY_NULL/YY_NULLPTR/g' \
 	  < $@.tmp > $@
 	rm -f $@.tmp
 .l.c:

@@ -1,4 +1,8 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (.y.c): Replace YY_NULL with YY_NULLPTR.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
 	    Pedro Alves <palves@redhat.com>
 
 	* aarch64-tdep.c (aarch64_default_breakpoint): Change it to
