@@ -7131,15 +7131,6 @@ mips_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 
 GDBARCH_BREAKPOINT_FROM_PC (mips)
 
-/* Determine the remote breakpoint kind suitable for the PC.  */
-
-static void
-mips_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-				int *kindptr)
-{
-  *kindptr = mips_breakpoint_kind_from_pc (gdbarch, pcptr);
-}
-
 /* Return non-zero if the standard MIPS instruction INST has a branch
    delay slot (i.e. it is a jump or branch instruction).  This function
    is based on mips32_next_pc.  */
@@ -8736,8 +8727,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   SET_GDBARCH_BREAKPOINT_MANIPULATION (mips);
-  set_gdbarch_remote_breakpoint_from_pc (gdbarch,
-					 mips_remote_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address (gdbarch,
 					 mips_adjust_breakpoint_address);
 

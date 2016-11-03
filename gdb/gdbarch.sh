@@ -569,10 +569,6 @@ m:int:breakpoint_kind_from_pc:CORE_ADDR *pcptr:pcptr::0:
 # SIZE is set to the software breakpoint's length in memory.
 m:const gdb_byte *:sw_breakpoint_from_kind:int kind, int *size:kind, size::NULL::0
 
-# Return the adjusted address and kind to use for Z0/Z1 packets.
-# KIND is usually the memory length of the breakpoint, but may have a
-# different target-specific meaning.
-m:void:remote_breakpoint_from_pc:CORE_ADDR *pcptr, int *kindptr:pcptr, kindptr:0:default_remote_breakpoint_from_pc::0
 M:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
 m:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
 m:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0

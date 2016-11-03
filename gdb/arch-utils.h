@@ -228,9 +228,6 @@ extern int default_has_shared_address_space (struct gdbarch *);
 extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 					     CORE_ADDR addr, char **msg);
 
-extern void default_remote_breakpoint_from_pc (struct gdbarch *,
-					       CORE_ADDR *pcptr, int *kindptr);
-
 extern void default_gen_return_address (struct gdbarch *gdbarch,
 					struct agent_expr *ax,
 					struct axs_value *value,

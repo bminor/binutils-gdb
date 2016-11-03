@@ -1,5 +1,18 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arch-utils.c (default_remote_breakpoint_from_pc): Remove.
+	* arch-utils.h (default_remote_breakpoint_from_pc): Remove.
+	* arm-tdep.c (arm_remote_breakpoint_from_pc): Remove.
+	(arm_gdbarch_init): Don't call
+	set_gdbarch_remote_breakpoint_from_pc.
+	* gdbarch.sh (remote_breakpoint_from_pc): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* mips-tdep.c (mips_remote_breakpoint_from_pc): Remove.
+	(mips_gdbarch_init): Don't call
+	set_gdbarch_remote_breakpoint_from_pc.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* breakpoint.h (struct bp_target_info) <placed_size>: Remove.
 	<kind>: New field.
 	Update all users.

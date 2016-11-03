@@ -232,7 +232,6 @@ struct gdbarch
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_breakpoint_kind_from_pc_ftype *breakpoint_kind_from_pc;
   gdbarch_sw_breakpoint_from_kind_ftype *sw_breakpoint_from_kind;
-  gdbarch_remote_breakpoint_from_pc_ftype *remote_breakpoint_from_pc;
   gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address;
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
   gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
@@ -406,7 +405,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->address_to_pointer = unsigned_address_to_pointer;
   gdbarch->return_in_first_hidden_param_p = default_return_in_first_hidden_param_p;
   gdbarch->sw_breakpoint_from_kind = NULL;
-  gdbarch->remote_breakpoint_from_pc = default_remote_breakpoint_from_pc;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->remote_register_number = default_remote_register_number;
@@ -589,7 +587,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->breakpoint_kind_from_pc == 0)
     fprintf_unfiltered (log, "\n\tbreakpoint_kind_from_pc");
   /* Skip verify of sw_breakpoint_from_kind, invalid_p == 0 */
-  /* Skip verify of remote_breakpoint_from_pc, invalid_p == 0 */
   /* Skip verify of adjust_breakpoint_address, has predicate.  */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
@@ -1290,9 +1287,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: relocate_instruction = <%s>\n",
                       host_address_to_string (gdbarch->relocate_instruction));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: remote_breakpoint_from_pc = <%s>\n",
-                      host_address_to_string (gdbarch->remote_breakpoint_from_pc));
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_register_number = <%s>\n",
                       host_address_to_string (gdbarch->remote_register_number));
@@ -2826,23 +2820,6 @@ set_gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch,
                                      gdbarch_sw_breakpoint_from_kind_ftype sw_breakpoint_from_kind)
 {
   gdbarch->sw_breakpoint_from_kind = sw_breakpoint_from_kind;
-}
-
-void
-gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *kindptr)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->remote_breakpoint_from_pc != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_breakpoint_from_pc called\n");
-  gdbarch->remote_breakpoint_from_pc (gdbarch, pcptr, kindptr);
-}
-
-void
-set_gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch,
-                                       gdbarch_remote_breakpoint_from_pc_ftype remote_breakpoint_from_pc)
-{
-  gdbarch->remote_breakpoint_from_pc = remote_breakpoint_from_pc;
 }
 
 int

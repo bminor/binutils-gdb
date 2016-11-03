@@ -564,14 +564,6 @@ typedef const gdb_byte * (gdbarch_sw_breakpoint_from_kind_ftype) (struct gdbarch
 extern const gdb_byte * gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size);
 extern void set_gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, gdbarch_sw_breakpoint_from_kind_ftype *sw_breakpoint_from_kind);
 
-/* Return the adjusted address and kind to use for Z0/Z1 packets.
-   KIND is usually the memory length of the breakpoint, but may have a
-   different target-specific meaning. */
-
-typedef void (gdbarch_remote_breakpoint_from_pc_ftype) (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *kindptr);
-extern void gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *kindptr);
-extern void set_gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_remote_breakpoint_from_pc_ftype *remote_breakpoint_from_pc);
-
 extern int gdbarch_adjust_breakpoint_address_p (struct gdbarch *gdbarch);
 
 typedef CORE_ADDR (gdbarch_adjust_breakpoint_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR bpaddr);

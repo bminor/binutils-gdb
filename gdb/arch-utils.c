@@ -841,13 +841,6 @@ default_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
 }
 
 void
-default_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-				   int *kindptr)
-{
-  gdbarch_breakpoint_from_pc (gdbarch, pcptr, kindptr);
-}
-
-void
 default_gen_return_address (struct gdbarch *gdbarch,
 			    struct agent_expr *ax, struct axs_value *value,
 			    CORE_ADDR scope)

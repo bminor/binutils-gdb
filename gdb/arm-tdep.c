@@ -7911,14 +7911,6 @@ arm_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 
 GDBARCH_BREAKPOINT_FROM_PC (arm)
 
-static void
-arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			       int *kindptr)
-{
-
-  *kindptr = arm_breakpoint_kind_from_pc (gdbarch, pcptr);
-}
-
 /* Extract from an array REGBUF containing the (raw) register state a
    function return value of type TYPE, and copy that, in virtual
    format, into VALBUF.  */
@@ -9427,8 +9419,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   SET_GDBARCH_BREAKPOINT_MANIPULATION (arm);
-  set_gdbarch_remote_breakpoint_from_pc (gdbarch,
-					 arm_remote_breakpoint_from_pc);
 
   /* Information about registers, etc.  */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
