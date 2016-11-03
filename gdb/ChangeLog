@@ -1,3 +1,11 @@
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (default_memory_insert_breakpoint): Don't check
+	'bp' against NULL.
+	* microblaze-linux-tdep.c (microblaze_linux_memory_remove_breakpoint):
+	Likewise.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Likewise.
+
 2016-11-02  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2loc.c (dwarf_evaluate_loc_desc::get_base_type): Rename

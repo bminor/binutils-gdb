@@ -45,8 +45,6 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
-  if (bp == NULL)
-    error (_("Software breakpoints not implemented for this target."));
 
   bp_tgt->placed_address = addr;
   bp_tgt->placed_size = bplen;
