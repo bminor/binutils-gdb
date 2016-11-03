@@ -7843,16 +7843,8 @@ static const gdb_byte arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
 static const gdb_byte arm_default_thumb_le_breakpoint[] = THUMB_LE_BREAKPOINT;
 static const gdb_byte arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
 
-/* Determine the type and size of breakpoint to insert at PCPTR.  Uses
-   the program counter value to determine whether a 16-bit or 32-bit
-   breakpoint should be used.  It returns a pointer to a string of
-   bytes that encode a breakpoint instruction, stores the length of
-   the string to *lenptr, and adjusts the program counter (if
-   necessary) to point to the actual memory location where the
-   breakpoint should be inserted.  */
-
-static const unsigned char *
-arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
+static int
+arm_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
@@ -7866,38 +7858,61 @@ arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
       if (tdep->thumb2_breakpoint != NULL)
 	{
 	  gdb_byte buf[2];
+
 	  if (target_read_memory (*pcptr, buf, 2) == 0)
 	    {
 	      unsigned short inst1;
+
 	      inst1 = extract_unsigned_integer (buf, 2, byte_order_for_code);
 	      if (thumb_insn_size (inst1) == 4)
-		{
-		  *lenptr = tdep->thumb2_breakpoint_size;
-		  return tdep->thumb2_breakpoint;
-		}
+		return ARM_BP_KIND_THUMB2;
 	    }
 	}
 
-      *lenptr = tdep->thumb_breakpoint_size;
-      return tdep->thumb_breakpoint;
+      return ARM_BP_KIND_THUMB;
     }
   else
+    return ARM_BP_KIND_ARM;
+
+}
+
+static const gdb_byte *
+arm_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  switch (kind)
     {
-      *lenptr = tdep->arm_breakpoint_size;
+    case ARM_BP_KIND_ARM:
+      *size = tdep->arm_breakpoint_size;
       return tdep->arm_breakpoint;
+    case ARM_BP_KIND_THUMB:
+      *size = tdep->thumb_breakpoint_size;
+      return tdep->thumb_breakpoint;
+    case ARM_BP_KIND_THUMB2:
+      *size = tdep->thumb2_breakpoint_size;
+      return tdep->thumb2_breakpoint;
+    default:
+      gdb_assert_not_reached ("unexpected arm breakpoint kind");
     }
 }
+
+/* Determine the type and size of breakpoint to insert at PCPTR.  Uses
+   the program counter value to determine whether a 16-bit or 32-bit
+   breakpoint should be used.  It returns a pointer to a string of
+   bytes that encode a breakpoint instruction, stores the length of
+   the string to *lenptr, and adjusts the program counter (if
+   necessary) to point to the actual memory location where the
+   breakpoint should be inserted.  */
+
+GDBARCH_BREAKPOINT_FROM_PC (arm)
 
 static void
 arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			       int *kindptr)
 {
-  arm_breakpoint_from_pc (gdbarch, pcptr, kindptr);
 
-  if (arm_pc_is_thumb (gdbarch, *pcptr) && *kindptr == 4)
-    /* The documented magic value for a 32-bit Thumb-2 breakpoint, so
-       that this is not confused with a 32-bit ARM breakpoint.  */
-    *kindptr = ARM_BP_KIND_THUMB2;
+  *kindptr = arm_breakpoint_kind_from_pc (gdbarch, pcptr);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state a
@@ -9407,7 +9422,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Breakpoint manipulation.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (arm);
   set_gdbarch_remote_breakpoint_from_pc (gdbarch,
 					 arm_remote_breakpoint_from_pc);
 

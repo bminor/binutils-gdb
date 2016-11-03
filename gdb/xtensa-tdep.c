@@ -1959,6 +1959,14 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
   return sp + SP_ALIGNMENT;
 }
 
+static int
+xtensa_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  if (gdbarch_tdep (gdbarch)->isa_use_density_instructions)
+    return 2;
+  else
+    return 4;
+}
 
 /* Return a breakpoint for the current location of PC.  We always use
    the density version if we have density instructions (regardless of the
@@ -1969,44 +1977,35 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 #define DENSITY_BIG_BREAKPOINT { 0xd2, 0x0f }
 #define DENSITY_LITTLE_BREAKPOINT { 0x2d, 0xf0 }
 
-static const unsigned char *
-xtensa_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			   int *lenptr)
+static const gdb_byte *
+xtensa_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
-  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
-  static unsigned char density_big_breakpoint[] = DENSITY_BIG_BREAKPOINT;
-  static unsigned char density_little_breakpoint[] = DENSITY_LITTLE_BREAKPOINT;
+  *size = kind;
 
-  DEBUGTRACE ("xtensa_breakpoint_from_pc (pc = 0x%08x)\n", (int) *pcptr);
-
-  if (gdbarch_tdep (gdbarch)->isa_use_density_instructions)
+  if (kind == 4)
     {
+      static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
+      static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	{
-	  *lenptr = sizeof (density_big_breakpoint);
-	  return density_big_breakpoint;
-	}
+	return big_breakpoint;
       else
-	{
-	  *lenptr = sizeof (density_little_breakpoint);
-	  return density_little_breakpoint;
-	}
+	return little_breakpoint;
     }
   else
     {
+      static unsigned char density_big_breakpoint[] = DENSITY_BIG_BREAKPOINT;
+      static unsigned char density_little_breakpoint[]
+	= DENSITY_LITTLE_BREAKPOINT;
+
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	{
-	  *lenptr = sizeof (big_breakpoint);
-	  return big_breakpoint;
-	}
+	return density_big_breakpoint;
       else
-	{
-	  *lenptr = sizeof (little_breakpoint);
-	  return little_breakpoint;
-	}
+	return density_little_breakpoint;
     }
 }
+
+GDBARCH_BREAKPOINT_FROM_PC (xtensa)
 
 /* Call0 ABI support routines.  */
 
@@ -3239,7 +3238,7 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Set breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, xtensa_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (xtensa);
 
   /* After breakpoint instruction or illegal instruction, pc still
      points at break instruction, so don't decrement.  */

@@ -318,15 +318,18 @@ tic6x_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 				 NULL);
 }
 
-/* This is the implementation of gdbarch method breakpiont_from_pc.  */
+static int
+tic6x_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  return 4;
+}
 
 static const gdb_byte *
-tic6x_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
-			  int *bp_size)
+tic6x_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  *bp_size = 4;
+  *size = kind;
 
   if (tdep == NULL || tdep->breakpoint == NULL)
     {
@@ -338,6 +341,10 @@ tic6x_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
   else
     return tdep->breakpoint;
 }
+
+/* This is the implementation of gdbarch method breakpiont_from_pc.  */
+
+GDBARCH_BREAKPOINT_FROM_PC (tic6x)
 
 /* This is the implementation of gdbarch method print_insn.  */
 
@@ -1295,7 +1302,7 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_skip_prologue (gdbarch, tic6x_skip_prologue);
-  set_gdbarch_breakpoint_from_pc (gdbarch, tic6x_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (tic6x);
 
   set_gdbarch_unwind_pc (gdbarch, tic6x_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, tic6x_unwind_sp);

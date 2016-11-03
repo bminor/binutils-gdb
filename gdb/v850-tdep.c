@@ -1168,13 +1168,18 @@ v850_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-static const unsigned char *
-v850_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			 int *lenptr)
+static int
+v850_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
-  *lenptr = 2;
+  return 2;
+}
 
-  switch (gdbarch_bfd_arch_info (gdbarch)->mach)
+static const gdb_byte *
+v850_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  *size = kind;
+
+    switch (gdbarch_bfd_arch_info (gdbarch)->mach)
     {
     case bfd_mach_v850e2:
     case bfd_mach_v850e2v3:
@@ -1198,6 +1203,8 @@ v850_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
       break;
     }
 }
+
+GDBARCH_BREAKPOINT_FROM_PC (v850)
 
 static struct v850_frame_cache *
 v850_alloc_frame_cache (struct frame_info *this_frame)
@@ -1448,7 +1455,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, v850_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (v850);
   set_gdbarch_return_value (gdbarch, v850_return_value);
   set_gdbarch_push_dummy_call (gdbarch, v850_push_dummy_call);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);

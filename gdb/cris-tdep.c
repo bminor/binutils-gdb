@@ -1391,26 +1391,34 @@ cris_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return sp;
 }
 
-/* Use the program counter to determine the contents and size of a breakpoint
-   instruction.  It returns a pointer to a string of bytes that encode a
-   breakpoint instruction, stores the length of the string to *lenptr, and
-   adjusts pcptr (if necessary) to point to the actual memory location where
-   the breakpoint should be inserted.  */
+static int
+cris_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  return 2;
+}
 
-static const unsigned char *
-cris_breakpoint_from_pc (struct gdbarch *gdbarch,
-			 CORE_ADDR *pcptr, int *lenptr)
+static const gdb_byte *
+cris_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   static unsigned char break8_insn[] = {0x38, 0xe9};
   static unsigned char break15_insn[] = {0x3f, 0xe9};
-  *lenptr = 2;
+
+  *size = kind;
 
   if (tdep->cris_mode == cris_mode_guru)
     return break15_insn;
   else
     return break8_insn;
 }
+
+/* Use the program counter to determine the contents and size of a breakpoint
+   instruction.  It returns a pointer to a string of bytes that encode a
+   breakpoint instruction, stores the length of the string to *lenptr, and
+   adjusts pcptr (if necessary) to point to the actual memory location where
+   the breakpoint should be inserted.  */
+
+GDBARCH_BREAKPOINT_FROM_PC (cris)
 
 /* Returns 1 if spec_reg is applicable to the current gdbarch's CRIS version,
    0 otherwise.  */
@@ -4123,7 +4131,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, cris_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (cris);
   
   set_gdbarch_unwind_pc (gdbarch, cris_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, cris_unwind_sp);

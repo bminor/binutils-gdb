@@ -26,6 +26,17 @@ struct minimal_symbol;
 struct type;
 struct gdbarch_info;
 
+#define GDBARCH_BREAKPOINT_FROM_PC(ARCH)			       \
+  static const gdb_byte *					       \
+  ARCH##_breakpoint_from_pc (struct gdbarch *gdbarch,		       \
+			     CORE_ADDR *pcptr,				\
+			     int *lenptr)				\
+  {									\
+    int kind = ARCH##_breakpoint_kind_from_pc (gdbarch, pcptr);	\
+								     \
+    return ARCH##_sw_breakpoint_from_kind (gdbarch, kind, lenptr);   \
+  }
+
 #define GDBARCH_BREAKPOINT_MANIPULATION(ARCH,BREAK_INSN)	      \
   static const gdb_byte *					      \
   ARCH##_breakpoint_from_pc (struct gdbarch *gdbarch,		      \
@@ -38,6 +49,23 @@ struct gdbarch_info;
 
 #define SET_GDBARCH_BREAKPOINT_MANIPULATION(ARCH)	\
   set_gdbarch_breakpoint_from_pc (gdbarch, ARCH##_breakpoint_from_pc)
+
+#define GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN(ARCH, \
+					       LITTLE_BREAK_INSN,	\
+					       BIG_BREAK_INSN)		\
+  static const gdb_byte *						\
+  ARCH##_breakpoint_from_pc (struct gdbarch *gdbarch,			\
+			     CORE_ADDR *pcptr,				\
+			     int *lenptr)				\
+  {									\
+    gdb_static_assert (ARRAY_SIZE (LITTLE_BREAK_INSN)			\
+		       == ARRAY_SIZE (BIG_BREAK_INSN));		\
+    *lenptr = sizeof (LITTLE_BREAK_INSN);				\
+    if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)		\
+      return BIG_BREAK_INSN;						\
+    else								\
+      return LITTLE_BREAK_INSN;					\
+  }
 
 /* An implementation of gdbarch_displaced_step_copy_insn for
    processors that don't need to modify the instruction before

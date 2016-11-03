@@ -7035,6 +7035,89 @@ gdb_print_insn_mips_n64 (bfd_vma memaddr, struct disassemble_info *info)
   return gdb_print_insn_mips (memaddr, info);
 }
 
+static int
+mips_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  CORE_ADDR pc = *pcptr;
+
+  if (mips_pc_is_mips16 (gdbarch, pc))
+    {
+      *pcptr = unmake_compact_addr (pc);
+      return MIPS_BP_KIND_MIPS16;
+    }
+  else if (mips_pc_is_micromips (gdbarch, pc))
+    {
+      ULONGEST insn;
+      int status;
+
+      *pcptr = unmake_compact_addr (pc);
+      insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &status);
+      if (status || (mips_insn_size (ISA_MICROMIPS, insn) == 2))
+	return MIPS_BP_KIND_MICROMIPS16;
+      else
+	return MIPS_BP_KIND_MICROMIPS32;
+    }
+  else
+    return MIPS_BP_KIND_MIPS32;
+}
+
+static const gdb_byte *
+mips_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+
+  switch (kind)
+    {
+    case MIPS_BP_KIND_MIPS16:
+      {
+	static gdb_byte mips16_big_breakpoint[] = { 0xe8, 0xa5 };
+	static gdb_byte mips16_little_breakpoint[] = { 0xa5, 0xe8 };
+
+	*size = 2;
+	if (byte_order_for_code == BFD_ENDIAN_BIG)
+	  return mips16_big_breakpoint;
+	else
+	  return mips16_little_breakpoint;
+      }
+    case MIPS_BP_KIND_MICROMIPS16:
+      {
+	static gdb_byte micromips16_big_breakpoint[] = { 0x46, 0x85 };
+	static gdb_byte micromips16_little_breakpoint[] = { 0x85, 0x46 };
+
+	*size = 2;
+
+	if (byte_order_for_code == BFD_ENDIAN_BIG)
+	  return micromips16_big_breakpoint;
+	else
+	  return micromips16_little_breakpoint;
+      }
+    case MIPS_BP_KIND_MICROMIPS32:
+      {
+	static gdb_byte micromips32_big_breakpoint[] = { 0, 0x5, 0, 0x7 };
+	static gdb_byte micromips32_little_breakpoint[] = { 0x5, 0, 0x7, 0 };
+
+	*size = 4;
+	if (byte_order_for_code == BFD_ENDIAN_BIG)
+	  return micromips32_big_breakpoint;
+	else
+	  return micromips32_little_breakpoint;
+      }
+    case MIPS_BP_KIND_MIPS32:
+      {
+	static gdb_byte big_breakpoint[] = { 0, 0x5, 0, 0xd };
+	static gdb_byte little_breakpoint[] = { 0xd, 0, 0x5, 0 };
+
+	*size = 4;
+	if (byte_order_for_code == BFD_ENDIAN_BIG)
+	  return big_breakpoint;
+	else
+	  return little_breakpoint;
+      }
+    default:
+      gdb_assert_not_reached ("unexpected mips breakpoint kind");
+    };
+}
+
 /* This function implements gdbarch_breakpoint_from_pc.  It uses the
    program counter value to determine whether a 16- or 32-bit breakpoint
    should be used.  It returns a pointer to a string of bytes that encode a
@@ -7042,77 +7125,7 @@ gdb_print_insn_mips_n64 (bfd_vma memaddr, struct disassemble_info *info)
    adjusts pc (if necessary) to point to the actual memory location where
    the breakpoint should be inserted.  */
 
-static const gdb_byte *
-mips_breakpoint_from_pc (struct gdbarch *gdbarch,
-			 CORE_ADDR *pcptr, int *lenptr)
-{
-  CORE_ADDR pc = *pcptr;
-
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    {
-      if (mips_pc_is_mips16 (gdbarch, pc))
-	{
-	  static gdb_byte mips16_big_breakpoint[] = { 0xe8, 0xa5 };
-	  *pcptr = unmake_compact_addr (pc);
-	  *lenptr = sizeof (mips16_big_breakpoint);
-	  return mips16_big_breakpoint;
-	}
-      else if (mips_pc_is_micromips (gdbarch, pc))
-	{
-	  static gdb_byte micromips16_big_breakpoint[] = { 0x46, 0x85 };
-	  static gdb_byte micromips32_big_breakpoint[] = { 0, 0x5, 0, 0x7 };
-	  ULONGEST insn;
-	  int err;
-	  int size;
-
-	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &err);
-	  size = err ? 2 : mips_insn_size (ISA_MICROMIPS, insn);
-	  *pcptr = unmake_compact_addr (pc);
-	  *lenptr = size;
-	  return (size == 2) ? micromips16_big_breakpoint
-			     : micromips32_big_breakpoint;
-	}
-      else
-	{
-	  static gdb_byte big_breakpoint[] = { 0, 0x5, 0, 0xd };
-
-	  *lenptr = sizeof (big_breakpoint);
-	  return big_breakpoint;
-	}
-    }
-  else
-    {
-      if (mips_pc_is_mips16 (gdbarch, pc))
-	{
-	  static gdb_byte mips16_little_breakpoint[] = { 0xa5, 0xe8 };
-	  *pcptr = unmake_compact_addr (pc);
-	  *lenptr = sizeof (mips16_little_breakpoint);
-	  return mips16_little_breakpoint;
-	}
-      else if (mips_pc_is_micromips (gdbarch, pc))
-	{
-	  static gdb_byte micromips16_little_breakpoint[] = { 0x85, 0x46 };
-	  static gdb_byte micromips32_little_breakpoint[] = { 0x5, 0, 0x7, 0 };
-	  ULONGEST insn;
-	  int err;
-	  int size;
-
-	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &err);
-	  size = err ? 2 : mips_insn_size (ISA_MICROMIPS, insn);
-	  *pcptr = unmake_compact_addr (pc);
-	  *lenptr = size;
-	  return (size == 2) ? micromips16_little_breakpoint
-			     : micromips32_little_breakpoint;
-	}
-      else
-	{
-	  static gdb_byte little_breakpoint[] = { 0xd, 0, 0x5, 0 };
-
-	  *lenptr = sizeof (little_breakpoint);
-	  return little_breakpoint;
-	}
-    }
-}
+GDBARCH_BREAKPOINT_FROM_PC (mips)
 
 /* Determine the remote breakpoint kind suitable for the PC.  */
 
@@ -7120,28 +7133,7 @@ static void
 mips_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 				int *kindptr)
 {
-  CORE_ADDR pc = *pcptr;
-
-  if (mips_pc_is_mips16 (gdbarch, pc))
-    {
-      *pcptr = unmake_compact_addr (pc);
-      *kindptr = MIPS_BP_KIND_MIPS16;
-    }
-  else if (mips_pc_is_micromips (gdbarch, pc))
-    {
-      ULONGEST insn;
-      int status;
-
-      insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &status);
-      if (status || (mips_insn_size (ISA_MICROMIPS, insn) == 2))
-	*kindptr = MIPS_BP_KIND_MICROMIPS16;
-      else
-	*kindptr = MIPS_BP_KIND_MICROMIPS32;
-
-      *pcptr = unmake_compact_addr (pc);
-    }
-  else
-    *kindptr = MIPS_BP_KIND_MIPS32;
+  *kindptr = mips_breakpoint_kind_from_pc (gdbarch, pcptr);
 }
 
 /* Return non-zero if the standard MIPS instruction INST has a branch

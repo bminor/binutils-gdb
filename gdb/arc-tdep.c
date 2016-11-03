@@ -715,9 +715,7 @@ static const gdb_byte arc_brk_s_le[] = { 0xff, 0x7f };
 static const gdb_byte arc_brk_be[] = { 0x25, 0x6f, 0x00, 0x3f };
 static const gdb_byte arc_brk_le[] = { 0x6f, 0x25, 0x3f, 0x00 };
 
-/* Implement the "breakpoint_from_pc" gdbarch method.
-
-   For ARC ELF, breakpoint uses the 16-bit BRK_S instruction, which is 0x7fff
+/* For ARC ELF, breakpoint uses the 16-bit BRK_S instruction, which is 0x7fff
    (little endian) or 0xff7f (big endian).  We used to insert BRK_S even
    instead of 32-bit instructions, which works mostly ok, unless breakpoint is
    inserted into delay slot instruction.  In this case if branch is taken
@@ -734,15 +732,12 @@ static const gdb_byte arc_brk_le[] = { 0x6f, 0x25, 0x3f, 0x00 };
    NB: Baremetal GDB uses BRK[_S], while user-space GDB uses TRAP_S.  BRK[_S]
    is much better because it doesn't commit unlike TRAP_S, so it can be set in
    delay slots; however it cannot be used in user-mode, hence usage of TRAP_S
-   in GDB for user-space.
+   in GDB for user-space.  */
 
-   PCPTR is a pointer to the PC where we want to place a breakpoint.  LENPTR
-   is a number of bytes used by the breakpoint.  Returns the byte sequence of
-   a breakpoint instruction.  */
+/* Implement the "breakpoint_kind_from_pc" gdbarch method.  */
 
-static const gdb_byte *
-arc_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			int *lenptr)
+static int
+arc_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   size_t length_with_limm = gdb_insn_length (gdbarch, *pcptr);
 
@@ -751,20 +746,33 @@ arc_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
      bytes for 32-bit instructions.  */
   if ((length_with_limm == 4 || length_with_limm == 8)
       && !arc_mach_is_arc600 (gdbarch))
+    return sizeof (arc_brk_le);
+  else
+    return sizeof (arc_brk_s_le);
+}
+
+/* Implement the "sw_breakpoint_from_kind" gdbarch method.  */
+
+static const gdb_byte *
+arc_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  *size = kind;
+
+  if (kind == sizeof (arc_brk_le))
     {
-      *lenptr = sizeof (arc_brk_le);
       return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	      ? arc_brk_be
 	      : arc_brk_le);
     }
   else
     {
-      *lenptr = sizeof (arc_brk_s_le);
       return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	      ? arc_brk_s_be
 	      : arc_brk_s_le);
     }
 }
+
+GDBARCH_BREAKPOINT_FROM_PC (arc)
 
 /* Implement the "unwind_pc" gdbarch method.  */
 
@@ -1229,7 +1237,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, arc_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, arc_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (arc);
 
   /* On ARC 600 BRK_S instruction advances PC, unlike other ARC cores.  */
   if (!arc_mach_is_arc600 (gdbarch))

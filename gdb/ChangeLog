@@ -1,5 +1,35 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arch-utils.h (GDBARCH_BREAKPOINT_FROM_PC): New macro.
+	(GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN): New macro.
+	* arm-tdep.c (arm_breakpoint_from_pc): Remove.
+	(arm_breakpoint_kind_from_pc): New function.
+	(arm_sw_breakpoint_from_kind): New function.
+	(arm_breakpoint_from_pc): Call arm_breakpoint_kind_from_pc
+	and arm_sw_breakpoint_from_kind.
+	Use GDBARCH_BREAKPOINT_FROM_PC.
+	(arm_remote_breakpoint_from_pc): Call
+	arm_breakpoint_kind_from_pc.
+	(arm_gdbarch_init): Replace set_gdbarch_breakpoint_from_pc
+	with SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* arc-tdep.c: Likewise.
+	* bfin-tdep.c: Likewise.
+	* cris-tdep.c: Likewise.
+	* iq2000-tdep.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* mt-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+	* score-tdep.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* mips-tdep.c (mips_breakpoint_kind): New enum.
 	(mips_breakpoint_from_pc): Use it.
 	(mips_remote_breakpoint_from_pc): Likewise.

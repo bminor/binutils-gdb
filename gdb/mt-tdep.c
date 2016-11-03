@@ -449,25 +449,32 @@ mt_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return pc;
 }
 
-/* The breakpoint instruction must be the same size as the smallest
-   instruction in the instruction set.
-
-   The BP for ms1 is defined as 0x68000000 (BREAK).
-   The BP for ms2 is defined as 0x69000000 (illegal).  */
+static int
+mt_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  return 4;
+}
 
 static const gdb_byte *
-mt_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
-		       int *bp_size)
+mt_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
+  /* The breakpoint instruction must be the same size as the smallest
+     instruction in the instruction set.
+
+     The BP for ms1 is defined as 0x68000000 (BREAK).
+     The BP for ms2 is defined as 0x69000000 (illegal).  */
   static gdb_byte ms1_breakpoint[] = { 0x68, 0, 0, 0 };
   static gdb_byte ms2_breakpoint[] = { 0x69, 0, 0, 0 };
 
-  *bp_size = 4;
+  *size = kind;
+
   if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
     return ms2_breakpoint;
-  
+
   return ms1_breakpoint;
 }
+
+GDBARCH_BREAKPOINT_FROM_PC (mt)
 
 /* Select the correct coprocessor register bank.  Return the pseudo
    regnum we really want to read.  */
@@ -1162,7 +1169,7 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_write (gdbarch, mt_pseudo_register_write);
   set_gdbarch_skip_prologue (gdbarch, mt_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, mt_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (mt);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_print_insn (gdbarch, print_insn_mt);

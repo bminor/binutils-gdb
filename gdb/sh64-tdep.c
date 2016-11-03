@@ -253,11 +253,24 @@ pc_is_isa32 (bfd_vma memaddr)
     return 0;
 }
 
-static const unsigned char *
-sh64_breakpoint_from_pc (struct gdbarch *gdbarch,
-			 CORE_ADDR *pcptr, int *lenptr)
+static int
+sh64_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
-  /* The BRK instruction for shmedia is 
+  if (pc_is_isa32 (*pcptr))
+    {
+      *pcptr = UNMAKE_ISA32_ADDR (*pcptr);
+      return 4;
+    }
+  else
+    return 2;
+}
+
+static const gdb_byte *
+sh64_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  *size = kind;
+
+  /* The BRK instruction for shmedia is
      01101111 11110101 11111111 11110000
      which translates in big endian mode to 0x6f, 0xf5, 0xff, 0xf0
      and in little endian mode to 0xf0, 0xff, 0xf5, 0x6f */
@@ -267,43 +280,33 @@ sh64_breakpoint_from_pc (struct gdbarch *gdbarch,
      which translates in big endian mode to 0x0, 0x3b
      and in little endian mode to 0x3b, 0x0 */
 
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+  if (kind == 4)
     {
-      if (pc_is_isa32 (*pcptr))
-	{
-	  static unsigned char big_breakpoint_media[] = {
-	    0x6f, 0xf5, 0xff, 0xf0
-	  };
-	  *pcptr = UNMAKE_ISA32_ADDR (*pcptr);
-	  *lenptr = sizeof (big_breakpoint_media);
-	  return big_breakpoint_media;
-	}
+      static unsigned char big_breakpoint_media[] = {
+	0x6f, 0xf5, 0xff, 0xf0
+      };
+      static unsigned char little_breakpoint_media[] = {
+	0xf0, 0xff, 0xf5, 0x6f
+      };
+
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	return big_breakpoint_media;
       else
-	{
-	  static unsigned char big_breakpoint_compact[] = {0x0, 0x3b};
-	  *lenptr = sizeof (big_breakpoint_compact);
-	  return big_breakpoint_compact;
-	}
+	return little_breakpoint_media;
     }
   else
     {
-      if (pc_is_isa32 (*pcptr))
-	{
-	  static unsigned char little_breakpoint_media[] = {
-	    0xf0, 0xff, 0xf5, 0x6f
-	  };
-	  *pcptr = UNMAKE_ISA32_ADDR (*pcptr);
-	  *lenptr = sizeof (little_breakpoint_media);
-	  return little_breakpoint_media;
-	}
+      static unsigned char big_breakpoint_compact[] = {0x0, 0x3b};
+      static unsigned char little_breakpoint_compact[] = {0x3b, 0x0};
+
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	return big_breakpoint_compact;
       else
-	{
-	  static unsigned char little_breakpoint_compact[] = {0x3b, 0x0};
-	  *lenptr = sizeof (little_breakpoint_compact);
-	  return little_breakpoint_compact;
-	}
+	return little_breakpoint_compact;
     }
 }
+
+GDBARCH_BREAKPOINT_FROM_PC (sh64)
 
 /* Prologue looks like
    [mov.l       <regs>,@-r15]...
@@ -2410,7 +2413,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, sh64_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, sh64_pseudo_register_write);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, sh64_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (sh64);
 
   set_gdbarch_print_insn (gdbarch, print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);

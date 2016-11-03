@@ -967,18 +967,11 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-static const unsigned char *
-rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
-			   int *bp_size)
-{
-  static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
-  static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
-  *bp_size = 4;
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    return big_breakpoint;
-  else
-    return little_breakpoint;
-}
+static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
+static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
+
+GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN (rs6000, little_breakpoint,
+					big_breakpoint)
 
 /* Instruction masks for displaced stepping.  */
 #define BRANCH_MASK 0xfc000000
@@ -6486,7 +6479,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_main_prologue (gdbarch, rs6000_skip_main_prologue);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (rs6000);
 
   /* The value of symbols of type N_SO and N_FUN maybe null when
      it shouldn't be.  */
