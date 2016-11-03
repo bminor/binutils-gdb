@@ -1,5 +1,52 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): Define
+	breakpoint_kind_from_pc and sw_breakpoint_from_kind.
+	(GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN): Likewise.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): Call
+	set_gdbarch_breakpoint_kind_from_pc and
+	set_gdbarch_sw_breakpoint_from_kind.
+	* arm-tdep.c: Add comments.
+	* bfin-tdep.c: Likewise.
+	* breakpoint.c (breakpoint_kind): New function.
+	(insert_bp_location): Set target_info.placed_size and
+	target_info.placed_address.
+	(bkpt_insert_location): Likewise.
+	* cris-tdep.c: Add comments.
+	* gdbarch.sh (breakpoint_kind_from_pc): New.
+	(sw_breakpoint_from_kind): New.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Don't set
+	bp_tgt->placed_size.
+	(ia64_memory_remove_breakpoint): Don't assert
+	bp_tgt->placed_size.
+	(ia64_breakpoint_kind_from_pc): New function.
+	(ia64_gdbarch_init): Install ia64_breakpoint_kind_from_pc.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Don't set
+	bp_tgt->placed_size.
+	* mem-break.c (default_memory_insert_breakpoint): Don't set
+	bp_tgt->placed_size.  Call gdbarch_sw_breakpoint_from_kind.
+	(default_memory_remove_breakpoint): Call
+	gdbarch_sw_breakpoint_from_kind.
+	(memory_validate_breakpoint): Don't check bp_tgt->placed_size.
+	* mips-tdep.c: Add comments.
+	* mt-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* record-full.c (record_full_insert_breakpoint): Don't call
+	gdbarch_breakpoint_from_pc.  Don't set bp_tgt->placed_address
+	and bp_tgt->placed_size.
+	* remote.c (remote_insert_breakpoint): Don't call
+	gdbarch_remote_breakpoint_from_pc.  Use bp_tgt->placed_size.
+	Don't set bp_tgt->placed_address and bp_tgt->placed_size.
+	(remote_insert_hw_breakpoint): Likewise.
+	* score-tdep.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* arch-utils.h (GDBARCH_BREAKPOINT_FROM_PC): New macro.
 	(GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN): New macro.
 	* arm-tdep.c (arm_breakpoint_from_pc): Remove.

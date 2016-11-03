@@ -719,8 +719,6 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
 		    paddress (gdbarch, bp_tgt->placed_address));
   replace_slotN_contents (bundle, IA64_BREAKPOINT, slotnum);
 
-  bp_tgt->placed_size = bp_tgt->shadow_len;
-
   val = target_write_memory (addr + shadow_slotnum, bundle + shadow_slotnum,
 			     bp_tgt->shadow_len);
 
@@ -783,8 +781,7 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       slotnum = 2;
     }
 
-  gdb_assert (bp_tgt->placed_size == BUNDLE_LEN - shadow_slotnum);
-  gdb_assert (bp_tgt->placed_size == bp_tgt->shadow_len);
+  gdb_assert (bp_tgt->shadow_len == BUNDLE_LEN - shadow_slotnum);
 
   instr_breakpoint = slotN_contents (bundle_mem, slotnum);
   if (instr_breakpoint != IA64_BREAKPOINT)
@@ -810,6 +807,15 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
   do_cleanups (cleanup);
   return val;
+}
+
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
+static int
+ia64_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  /* A place holder of gdbarch method breakpoint_kind_from_pc.   */
+  return 0;
 }
 
 /* As gdbarch_breakpoint_from_pc ranges have byte granularity and ia64
@@ -4009,6 +4015,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_memory_remove_breakpoint (gdbarch,
 					ia64_memory_remove_breakpoint);
   set_gdbarch_breakpoint_from_pc (gdbarch, ia64_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, ia64_breakpoint_kind_from_pc);
   set_gdbarch_read_pc (gdbarch, ia64_read_pc);
   set_gdbarch_write_pc (gdbarch, ia64_write_pc);
 

@@ -1694,6 +1694,8 @@ nios2_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   return nios2_analyze_prologue (gdbarch, start_pc, start_pc, &cache, NULL);
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 nios2_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
@@ -1713,6 +1715,8 @@ nios2_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
   else
     return NIOS2_OPCODE_SIZE;
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 nios2_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

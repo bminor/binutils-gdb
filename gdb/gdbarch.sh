@@ -560,6 +560,15 @@ M:CORE_ADDR:skip_entrypoint:CORE_ADDR ip:ip
 
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
 m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
+
+# Return the breakpoint kind for this target based on *PCPTR.
+m:int:breakpoint_kind_from_pc:CORE_ADDR *pcptr:pcptr::0:
+
+# Return the software breakpoint from KIND.  KIND can have target
+# specific meaning like the Z0 kind parameter.
+# SIZE is set to the software breakpoint's length in memory.
+m:const gdb_byte *:sw_breakpoint_from_kind:int kind, int *size:kind, size::NULL::0
+
 # Return the adjusted address and kind to use for Z0/Z1 packets.
 # KIND is usually the memory length of the breakpoint, but may have a
 # different target-specific meaning.

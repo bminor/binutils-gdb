@@ -449,11 +449,15 @@ mt_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return pc;
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 mt_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   return 4;
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 mt_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

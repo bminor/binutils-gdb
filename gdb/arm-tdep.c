@@ -7843,6 +7843,8 @@ static const gdb_byte arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
 static const gdb_byte arm_default_thumb_le_breakpoint[] = THUMB_LE_BREAKPOINT;
 static const gdb_byte arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 arm_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
@@ -7875,6 +7877,8 @@ arm_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
     return ARM_BP_KIND_ARM;
 
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 arm_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

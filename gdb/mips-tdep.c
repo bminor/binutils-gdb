@@ -7035,6 +7035,8 @@ gdb_print_insn_mips_n64 (bfd_vma memaddr, struct disassemble_info *info)
   return gdb_print_insn_mips (memaddr, info);
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 mips_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
@@ -7060,6 +7062,8 @@ mips_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
   else
     return MIPS_BP_KIND_MIPS32;
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 mips_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

@@ -568,6 +568,8 @@ bfin_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return map_gcc_gdb[reg];
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 bfin_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
@@ -582,6 +584,8 @@ bfin_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
   else
     return 2;
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 bfin_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

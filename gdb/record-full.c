@@ -1673,16 +1673,6 @@ record_full_insert_breakpoint (struct target_ops *ops,
 
       in_target_beneath = 1;
     }
-  else
-    {
-      CORE_ADDR addr = bp_tgt->reqstd_address;
-      int bplen;
-
-      gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
-
-      bp_tgt->placed_address = addr;
-      bp_tgt->placed_size = bplen;
-    }
 
   /* Use the existing entries if found in order to avoid duplication
      in record_full_breakpoints.  */

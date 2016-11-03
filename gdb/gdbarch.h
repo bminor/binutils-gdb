@@ -550,6 +550,20 @@ typedef const gdb_byte * (gdbarch_breakpoint_from_pc_ftype) (struct gdbarch *gdb
 extern const gdb_byte * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
 
+/* Return the breakpoint kind for this target based on *PCPTR. */
+
+typedef int (gdbarch_breakpoint_kind_from_pc_ftype) (struct gdbarch *gdbarch, CORE_ADDR *pcptr);
+extern int gdbarch_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr);
+extern void set_gdbarch_breakpoint_kind_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_kind_from_pc_ftype *breakpoint_kind_from_pc);
+
+/* Return the software breakpoint from KIND.  KIND can have target
+   specific meaning like the Z0 kind parameter.
+   SIZE is set to the software breakpoint's length in memory. */
+
+typedef const gdb_byte * (gdbarch_sw_breakpoint_from_kind_ftype) (struct gdbarch *gdbarch, int kind, int *size);
+extern const gdb_byte * gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size);
+extern void set_gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, gdbarch_sw_breakpoint_from_kind_ftype *sw_breakpoint_from_kind);
+
 /* Return the adjusted address and kind to use for Z0/Z1 packets.
    KIND is usually the memory length of the breakpoint, but may have a
    different target-specific meaning. */

@@ -306,6 +306,8 @@ score3_adjust_pc_and_fetch_inst (CORE_ADDR *pcptr, int *lenptr,
   return &inst;
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 score7_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
@@ -334,6 +336,8 @@ score7_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
       return 4;
     }
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 score7_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
@@ -366,6 +370,8 @@ score7_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 
 GDBARCH_BREAKPOINT_FROM_PC (score7)
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 score3_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
@@ -376,6 +382,8 @@ score3_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 
   return len;
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 score3_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

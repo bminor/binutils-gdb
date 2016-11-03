@@ -418,11 +418,15 @@ sh_sh4al_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
   return register_names[reg_nr];
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
 static int
 sh_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   return 2;
 }
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
 
 static const gdb_byte *
 sh_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)

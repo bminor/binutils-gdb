@@ -2603,6 +2603,14 @@ build_target_command_list (struct bp_location *bl)
     bl->target_info.persist = 1;
 }
 
+/* Return the kind of breakpoint on address *ADDR.  */
+
+static int
+breakpoint_kind (struct bp_location *bl, CORE_ADDR *addr)
+{
+  return gdbarch_breakpoint_kind_from_pc (bl->gdbarch, addr);
+}
+
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
    DISABLED_BREAKS, and HW_BREAKPOINT_ERROR are used to report problems.
@@ -2762,6 +2770,9 @@ insert_bp_location (struct bp_location *bl,
 		    {
 		      int val;
 
+		      bl->overlay_target_info.placed_size
+			= breakpoint_kind (bl, &addr);
+		      bl->overlay_target_info.placed_address = addr;
 		      val = target_insert_breakpoint (bl->gdbarch,
 						      &bl->overlay_target_info);
 		      if (val)
@@ -13113,6 +13124,11 @@ bkpt_re_set (struct breakpoint *b)
 static int
 bkpt_insert_location (struct bp_location *bl)
 {
+  CORE_ADDR addr = bl->target_info.reqstd_address;
+
+  bl->target_info.placed_size = breakpoint_kind (bl, &addr);
+  bl->target_info.placed_address = addr;
+
   if (bl->loc_type == bp_loc_hardware_breakpoint)
     return target_insert_hw_breakpoint (bl->gdbarch, &bl->target_info);
   else

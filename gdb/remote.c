@@ -9710,8 +9710,6 @@ remote_insert_breakpoint (struct target_ops *ops,
       if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
 	set_general_process ();
 
-      gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
-
       rs = get_remote_state ();
       p = rs->buf;
       endbuf = rs->buf + get_remote_packet_size ();
@@ -9721,7 +9719,7 @@ remote_insert_breakpoint (struct target_ops *ops,
       *(p++) = ',';
       addr = (ULONGEST) remote_address_masked (addr);
       p += hexnumstr (p, addr);
-      xsnprintf (p, endbuf - p, ",%d", bpsize);
+      xsnprintf (p, endbuf - p, ",%d", bp_tgt->placed_size);
 
       if (remote_supports_cond_breakpoints (ops))
 	remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
@@ -9737,8 +9735,6 @@ remote_insert_breakpoint (struct target_ops *ops,
 	case PACKET_ERROR:
 	  return -1;
 	case PACKET_OK:
-	  bp_tgt->placed_address = addr;
-	  bp_tgt->placed_size = bpsize;
 	  return 0;
 	case PACKET_UNKNOWN:
 	  break;
@@ -10015,12 +10011,6 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   struct remote_state *rs;
   char *p, *endbuf;
   char *message;
-  int bpsize;
-
-  /* The length field should be set to the size of a breakpoint
-     instruction, even though we aren't inserting one ourselves.  */
-
-  gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
   if (packet_support (PACKET_Z1) == PACKET_DISABLE)
     return -1;
@@ -10040,7 +10030,7 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 
   addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  xsnprintf (p, endbuf - p, ",%x", bpsize);
+  xsnprintf (p, endbuf - p, ",%x", bp_tgt->placed_size);
 
   if (remote_supports_cond_breakpoints (self))
     remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
@@ -10064,8 +10054,6 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
     case PACKET_UNKNOWN:
       return -1;
     case PACKET_OK:
-      bp_tgt->placed_address = addr;
-      bp_tgt->placed_size = bpsize;
       return 0;
     }
   internal_error (__FILE__, __LINE__,
