@@ -252,9 +252,9 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
    *LEN and optionally adjust *PC to point to the correct memory
    location for inserting the breakpoint.  */
 
-static gdb_byte break_insn[] = { 3 };
+constexpr gdb_byte vax_break_insn[] = { 3 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (vax, break_insn)
+typedef BP_MANIPULATION (vax_break_insn) vax_breakpoint;
 
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
@@ -495,7 +495,8 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dummy_id (gdbarch, vax_dummy_id);
 
   /* Breakpoint info */
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (vax);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, vax_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, vax_breakpoint::bp_from_kind);
 
   /* Misc info */
   set_gdbarch_deprecated_function_start_offset (gdbarch, 2);

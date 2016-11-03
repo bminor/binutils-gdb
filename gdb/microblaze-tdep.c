@@ -134,9 +134,9 @@ microblaze_fetch_instruction (CORE_ADDR pc)
   return extract_unsigned_integer (buf, 4, byte_order);
 }
 
-static gdb_byte break_insn[] = MICROBLAZE_BREAKPOINT;
+constexpr gdb_byte microblaze_break_insn[] = MICROBLAZE_BREAKPOINT;
 
-GDBARCH_BREAKPOINT_MANIPULATION (microblaze, break_insn)
+typedef BP_MANIPULATION (microblaze_break_insn) microblaze_breakpoint;
 
 
 /* Allocate and initialize a frame cache.  */
@@ -731,7 +731,10 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (microblaze);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       microblaze_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       microblaze_breakpoint::bp_from_kind);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 

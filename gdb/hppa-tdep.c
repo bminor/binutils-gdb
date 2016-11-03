@@ -604,9 +604,9 @@ hppa_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-static const unsigned char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
+constexpr gdb_byte hppa_break_insn[] = {0x00, 0x01, 0x00, 0x04};
 
-GDBARCH_BREAKPOINT_MANIPULATION (hppa, breakpoint)
+typedef BP_MANIPULATION (hppa_break_insn) hppa_breakpoint;
 
 /* Return the name of a register.  */
 
@@ -3182,7 +3182,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
       
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (hppa);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, hppa_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, hppa_breakpoint::bp_from_kind);
   set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
 
   /* Frame unwind methods.  */

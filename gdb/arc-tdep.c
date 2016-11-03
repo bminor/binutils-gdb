@@ -1235,7 +1235,8 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, arc_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (arc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, arc_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, arc_sw_breakpoint_from_kind);
 
   /* On ARC 600 BRK_S instruction advances PC, unlike other ARC cores.  */
   if (!arc_mach_is_arc600 (gdbarch))

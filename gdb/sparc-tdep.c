@@ -641,9 +641,9 @@ sparc32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    encode a breakpoint instruction, store the length of the string in
    *LEN and optionally adjust *PC to point to the correct memory
    location for inserting the breakpoint.  */
-static const gdb_byte break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
+constexpr gdb_byte sparc_break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (sparc, break_insn)
+typedef BP_MANIPULATION (sparc_break_insn) sparc_breakpoint;
 
 
 /* Allocate and initialize a frame cache.  */
@@ -1703,7 +1703,10 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (sparc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       sparc_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       sparc_breakpoint::bp_from_kind);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 

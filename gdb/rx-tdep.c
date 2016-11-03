@@ -992,9 +992,9 @@ rx_return_value (struct gdbarch *gdbarch,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-static gdb_byte breakpoint[] = { 0x00 };
+constexpr gdb_byte rx_break_insn[] = { 0x00 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (rx, breakpoint)
+typedef BP_MANIPULATION (rx_break_insn) rx_breakpoint;
 
 /* Implement the dwarf_reg_to_regnum" gdbarch method.  */
 
@@ -1092,7 +1092,8 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, RX_SP_REGNUM);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (rx);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, rx_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, rx_breakpoint::bp_from_kind);
   set_gdbarch_skip_prologue (gdbarch, rx_skip_prologue);
 
   set_gdbarch_print_insn (gdbarch, print_insn_rx);

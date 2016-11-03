@@ -1496,7 +1496,10 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (target_mach)
     {
     case bfd_mach_score7:
-      SET_GDBARCH_BREAKPOINT_MANIPULATION (score7);
+      set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+					   score7_breakpoint_kind_from_pc);
+      set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+					   score7_sw_breakpoint_from_kind);
       set_gdbarch_skip_prologue (gdbarch, score7_skip_prologue);
       set_gdbarch_stack_frame_destroyed_p (gdbarch,
 					   score7_stack_frame_destroyed_p);
@@ -1508,7 +1511,10 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_score3:
-      SET_GDBARCH_BREAKPOINT_MANIPULATION (score3);
+      set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+					   score3_breakpoint_kind_from_pc);
+      set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+					   score3_sw_breakpoint_from_kind);
       set_gdbarch_skip_prologue (gdbarch, score3_skip_prologue);
       set_gdbarch_stack_frame_destroyed_p (gdbarch,
 					   score3_stack_frame_destroyed_p);

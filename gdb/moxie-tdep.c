@@ -68,9 +68,9 @@ moxie_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return sp & ~1;
 }
 
-static unsigned char breakpoint[] = { 0x35, 0x00 };
+constexpr gdb_byte moxie_break_insn[] = { 0x35, 0x00 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (moxie, breakpoint)
+typedef BP_MANIPULATION (moxie_break_insn) moxie_breakpoint;
 
 /* Moxie register names.  */
 
@@ -1131,7 +1131,10 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, moxie_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (moxie);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       moxie_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       moxie_breakpoint::bp_from_kind);
   set_gdbarch_frame_align (gdbarch, moxie_frame_align);
 
   frame_base_set_default (gdbarch, &moxie_frame_base);

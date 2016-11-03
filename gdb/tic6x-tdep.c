@@ -1302,7 +1302,10 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_skip_prologue (gdbarch, tic6x_skip_prologue);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (tic6x);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       tic6x_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       tic6x_sw_breakpoint_from_kind);
 
   set_gdbarch_unwind_pc (gdbarch, tic6x_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, tic6x_unwind_sp);

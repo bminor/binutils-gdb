@@ -967,11 +967,11 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
-static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
+constexpr gdb_byte big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
+constexpr gdb_byte little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
 
-GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN (rs6000, little_breakpoint,
-					big_breakpoint)
+typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
+  rs6000_breakpoint;
 
 /* Instruction masks for displaced stepping.  */
 #define BRANCH_MASK 0xfc000000
@@ -6479,7 +6479,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_main_prologue (gdbarch, rs6000_skip_main_prologue);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (rs6000);
+
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       rs6000_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       rs6000_breakpoint::bp_from_kind);
 
   /* The value of symbols of type N_SO and N_FUN maybe null when
      it shouldn't be.  */

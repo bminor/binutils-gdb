@@ -277,9 +277,9 @@ msp430_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   return regnum;
 }
 
-static gdb_byte breakpoint[] = { 0x43, 0x43 };
+constexpr gdb_byte msp430_break_insn[] = { 0x43, 0x43 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (msp430, breakpoint)
+typedef BP_MANIPULATION (msp430_break_insn) msp430_breakpoint;
 
 /* Define a "handle" struct for fetching the next opcode.  */
 
@@ -993,7 +993,10 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   /* Breakpoints.  */
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (msp430);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       msp430_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       msp430_breakpoint::bp_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   /* Disassembly.  */

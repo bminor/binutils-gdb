@@ -1,4 +1,161 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves <palves@redhat.com>
+
+	* aarch64-tdep.c (aarch64_default_breakpoint): Change it to
+	constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(aarch64_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* alpha-tdep.c (break_insn): Rename to alpha_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(alpha_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* arc-tdep.c (arc_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): Remove.
+	(struct bp_manipulation): New.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): Remove.
+	(struct bp_manipulation_endian): New.
+	(BP_MANIPULATION): New.
+	(BP_MANIPULATION_ENDIAN): New.
+	* arm-tdep.c (arm_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* avr-tdep.c (avr_break_insn): Change it constexpr.
+	(avr_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise.
+	* frv-tdep.c (breakpoint): Rename it to frv_break_insn, and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(frv_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* ft32-tdep.c (breakpoint): Rename it to ft32_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(ft32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* h8300-tdep.c (breakpoint): Rename it to h8300_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(h8300_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* hppa-tdep.c (breakpoint): Rename it to h8300_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(hppa_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* i386-tdep.c (break_insn): Rename it to i386_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(i386_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* iq2000-tdep.c (iq2000_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* lm32-tdep.c (breakpoint): Rename it to lm32_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(lm32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m32c-tdep.c (break_insn): Rename it to m32c_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m32c_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (breakpoint): Rename it to m68hc11_break_insn and
+	change its type to constexpr.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m68hc11_gdbarch_init): Don't use SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m68k-tdep.c (break_insn): Rename it to m68k_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m68k_gdbarch_init):  Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m88k-tdep.c (break_insn): Rename it to m88k_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m88k_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* mep-tdep.c (breakpoint): Rename it to mep_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(mep_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* microblaze-tdep.c (break_insn): Rename it to
+	microblaze_break_insn and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(microblaze_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (breakpoint): Rename it to mn10300_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(mn10300_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* moxie-tdep.c (breakpoint): Rename it to moxie_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(moxie_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* msp430-tdep.c (breakpoint): Rename it to msp430_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(msp430_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* mt-tdep.c (mt_gdbarch_init): Likewise.
+	* nds32-tdep.c (break_insn): Rename it to nds32_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(nds32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* nios2-tdep.c (nios2_gdbarch_init): Likewise.
+	* rl78-tdep.c (breakpoint): Rename it to rl78_break_ins
+	and change its type to rl78_break_insn.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(rl78_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* rs6000-tdep.c (big_breakpoint): Change its type to
+	constexpr.
+	(little_breakpoint): Likewise.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN.
+	(rs6000_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* rx-tdep.c (breakpoint): Rename it to rx_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(rx_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* s390-linux-tdep.c (breakpoint): Rename it to s390_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION
+	(s390_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* score-tdep.c (score_gdbarch_init): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* sparc-tdep.c (break_insn): Rename it to sparc_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(sparc32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* spu-tdep.c (breakpoint): Rename it to spu_break_insn and change
+	its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(spu_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* tic6x-tdep.c (tic6x_gdbarch_init): Likewise.
+	* tilegx-tdep.c (breakpoint): Rename it to tilegx_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(tilegx_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* vax-tdep.c (break_insn): Rename it to vax_break_insn and
+	change its type to constexpr.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(vax_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* xstormy16-tdep.c (breakpoint): Rename it to
+	xstormy16_break_insn and change its type to constexpr.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(xstormy16_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* xtensa-tdep.c (xtensa_gdbarch_init): Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_override_mode): Remove.
 	(arm_pc_is_thumb): Update.

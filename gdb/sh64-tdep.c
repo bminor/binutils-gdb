@@ -2411,7 +2411,8 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, sh64_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, sh64_pseudo_register_write);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (sh64);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, sh64_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, sh64_sw_breakpoint_from_kind);
 
   set_gdbarch_print_insn (gdbarch, print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);

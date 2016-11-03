@@ -3240,7 +3240,10 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Set breakpoints.  */
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (xtensa);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       xtensa_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       xtensa_sw_breakpoint_from_kind);
 
   /* After breakpoint instruction or illegal instruction, pc still
      points at break instruction, so don't decrement.  */

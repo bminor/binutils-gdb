@@ -79,9 +79,9 @@ ft32_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 }
 
 
-static const gdb_byte breakpoint[] = { 0x02, 0x00, 0x34, 0x00 };
+constexpr gdb_byte ft32_break_insn[] = { 0x02, 0x00, 0x34, 0x00 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (ft32, breakpoint)
+typedef BP_MANIPULATION (ft32_break_insn) ft32_breakpoint;
 
 /* FT32 register names.  */
 
@@ -624,7 +624,8 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, ft32_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (ft32);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, ft32_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, ft32_breakpoint::bp_from_kind);
   set_gdbarch_frame_align (gdbarch, ft32_frame_align);
 
   frame_base_set_default (gdbarch, &ft32_frame_base);

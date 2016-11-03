@@ -772,9 +772,9 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
    {0x61, 0xcc}, but instructions may be as short as one byte.
    Correspondence with Renesas revealed that the one byte sequence
    0xff is used when a one byte breakpoint instruction is required.  */
-static gdb_byte breakpoint[] = { 0xff };
+constexpr gdb_byte rl78_break_insn[] = { 0xff };
 
-GDBARCH_BREAKPOINT_MANIPULATION (rl78, breakpoint)
+typedef BP_MANIPULATION (rl78_break_insn) rl78_breakpoint;
 
 /* Define a "handle" struct for fetching the next opcode.  */
 
@@ -1452,7 +1452,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_addr_bits_remove (gdbarch, rl78_addr_bits_remove);
 
   /* Breakpoints.  */
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (rl78);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, rl78_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, rl78_breakpoint::bp_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   /* Disassembly.  */

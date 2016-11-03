@@ -1457,7 +1457,8 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (v850);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, v850_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, v850_sw_breakpoint_from_kind);
   set_gdbarch_return_value (gdbarch, v850_return_value);
   set_gdbarch_push_dummy_call (gdbarch, v850_push_dummy_call);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);

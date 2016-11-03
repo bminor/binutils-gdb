@@ -843,10 +843,10 @@ tilegx_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 /* 64-bit pattern for a { bpt ; nop } bundle.  */
-static const unsigned char breakpoint[] =
+constexpr gdb_byte tilegx_break_insn[] =
   { 0x00, 0x50, 0x48, 0x51, 0xae, 0x44, 0x6a, 0x28 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (tilegx, breakpoint)
+typedef BP_MANIPULATION (tilegx_break_insn) tilegx_breakpoint;
 
 /* Normal frames.  */
 
@@ -1049,7 +1049,10 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, tilegx_push_dummy_call);
   set_gdbarch_get_longjmp_target (gdbarch, tilegx_get_longjmp_target);
   set_gdbarch_write_pc (gdbarch, tilegx_write_pc);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (tilegx);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       tilegx_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       tilegx_breakpoint::bp_from_kind);
   set_gdbarch_return_value (gdbarch, tilegx_return_value);
 
   set_gdbarch_print_insn (gdbarch, print_insn_tilegx);

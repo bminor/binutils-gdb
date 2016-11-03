@@ -913,9 +913,9 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    it as a NOP.  Thus, it should be ok.  Since the avr is currently a remote
    only target, this shouldn't be a problem (I hope).  TRoth/2003-05-14  */
 
-static const unsigned char avr_break_insn [] = { 0x98, 0x95 };
+constexpr gdb_byte avr_break_insn [] = { 0x98, 0x95 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (avr, avr_break_insn)
+typedef BP_MANIPULATION (avr_break_insn) avr_breakpoint;
 
 /* Determine, for architecture GDBARCH, how a return value of TYPE
    should be returned.  If it is supposed to be returned in registers,
@@ -1509,7 +1509,8 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, avr_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (avr);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, avr_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, avr_breakpoint::bp_from_kind);
 
   frame_unwind_append_unwinder (gdbarch, &avr_frame_unwind);
   frame_base_set_default (gdbarch, &avr_frame_base);

@@ -831,7 +831,10 @@ iq2000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_format        (gdbarch, floatformats_ieee_double);
   set_gdbarch_long_double_format   (gdbarch, floatformats_ieee_double);
   set_gdbarch_return_value	   (gdbarch, iq2000_return_value);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (iq2000);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       iq2000_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       iq2000_sw_breakpoint_from_kind);
   set_gdbarch_frame_args_skip      (gdbarch, 0);
   set_gdbarch_skip_prologue        (gdbarch, iq2000_skip_prologue);
   set_gdbarch_inner_than           (gdbarch, core_addr_lessthan);

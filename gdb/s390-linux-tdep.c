@@ -3550,9 +3550,9 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
 
 
 /* Breakpoints.  */
-static const gdb_byte breakpoint[] = { 0x0, 0x1 };
+constexpr gdb_byte s390_break_insn[] = { 0x0, 0x1 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (s390, breakpoint)
+typedef BP_MANIPULATION (s390_break_insn) s390_breakpoint;
 
 /* Address handling.  */
 
@@ -7975,7 +7975,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (s390);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, s390_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, s390_breakpoint::bp_from_kind);
   set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);

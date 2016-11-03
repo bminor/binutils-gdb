@@ -1171,7 +1171,8 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_write (gdbarch, mt_pseudo_register_write);
   set_gdbarch_skip_prologue (gdbarch, mt_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (mt);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, mt_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, mt_sw_breakpoint_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_print_insn (gdbarch, print_insn_mt);

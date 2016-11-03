@@ -1918,9 +1918,9 @@ mep_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 
 /* Breakpoints.  */
-static unsigned char breakpoint[] = { 0x70, 0x32 };
+constexpr gdb_byte mep_break_insn[] = { 0x70, 0x32 };
 
-GDBARCH_BREAKPOINT_MANIPULATION (mep, breakpoint)
+typedef BP_MANIPULATION (mep_break_insn) mep_breakpoint;
 
 
 /* Frames and frame unwinding.  */
@@ -2484,7 +2484,8 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, mep_gdb_print_insn); 
 
   /* Breakpoints.  */
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (mep);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, mep_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, mep_breakpoint::bp_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, mep_skip_prologue);
 

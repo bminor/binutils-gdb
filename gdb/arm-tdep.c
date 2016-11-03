@@ -9447,7 +9447,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Breakpoint manipulation.  */
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (arm);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, arm_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, arm_sw_breakpoint_from_kind);
   set_gdbarch_breakpoint_kind_from_current_state (gdbarch,
 						  arm_breakpoint_kind_from_current_state);
 

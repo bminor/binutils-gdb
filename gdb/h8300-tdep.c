@@ -1243,9 +1243,9 @@ h8300s_dbg_reg_to_regnum (struct gdbarch *gdbarch, int regno)
 }
 
 /*static unsigned char breakpoint[] = { 0x7A, 0xFF }; *//* ??? */
-static const unsigned char breakpoint[] = { 0x01, 0x80 };	/* Sleep */
+constexpr gdb_byte h8300_break_insn[] = { 0x01, 0x80 };	/* Sleep */
 
-GDBARCH_BREAKPOINT_MANIPULATION (h8300, breakpoint)
+typedef BP_MANIPULATION (h8300_break_insn) h8300_breakpoint;
 
 static struct gdbarch *
 h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -1371,7 +1371,10 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows up.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  SET_GDBARCH_BREAKPOINT_MANIPULATION (h8300);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       h8300_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       h8300_breakpoint::bp_from_kind);
   set_gdbarch_push_dummy_call (gdbarch, h8300_push_dummy_call);
 
   set_gdbarch_char_signed (gdbarch, 0);
