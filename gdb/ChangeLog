@@ -1,5 +1,11 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* breakpoint.h (struct bp_target_info) <placed_size>: Remove.
+	<kind>: New field.
+	Update all users.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): Define
 	breakpoint_kind_from_pc and sw_breakpoint_from_kind.
 	(GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN): Likewise.

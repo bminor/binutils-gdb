@@ -44,7 +44,7 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
   int val;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
-  bp = gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->placed_size, &bplen);
+  bp = gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->kind, &bplen);
 
   /* Save the memory contents in the shadow_contents buffer and then
      write the breakpoint instruction.  */
@@ -76,7 +76,7 @@ default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 {
   int bplen;
 
-  gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->placed_size, &bplen);
+  gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->kind, &bplen);
 
   return target_write_raw_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
 				  bplen);

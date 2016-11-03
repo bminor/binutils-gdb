@@ -2770,7 +2770,7 @@ insert_bp_location (struct bp_location *bl,
 		    {
 		      int val;
 
-		      bl->overlay_target_info.placed_size
+		      bl->overlay_target_info.kind
 			= breakpoint_kind (bl, &addr);
 		      bl->overlay_target_info.placed_address = addr;
 		      val = target_insert_breakpoint (bl->gdbarch,
@@ -13126,7 +13126,7 @@ bkpt_insert_location (struct bp_location *bl)
 {
   CORE_ADDR addr = bl->target_info.reqstd_address;
 
-  bl->target_info.placed_size = breakpoint_kind (bl, &addr);
+  bl->target_info.kind = breakpoint_kind (bl, &addr);
   bl->target_info.placed_address = addr;
 
   if (bl->loc_type == bp_loc_hardware_breakpoint)

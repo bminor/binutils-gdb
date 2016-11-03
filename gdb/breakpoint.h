@@ -260,13 +260,9 @@ struct bp_target_info
   /* The length of the data cached in SHADOW_CONTENTS.  */
   int shadow_len;
 
-  /* The size of the placed breakpoint, according to
-     gdbarch_breakpoint_from_pc, when the breakpoint was inserted.
-     This is generally the same as SHADOW_LEN, unless we did not need
-     to read from the target to implement the memory breakpoint
-     (e.g. if a remote stub handled the details).  We may still need
-     the size to remove the breakpoint safely.  */
-  int placed_size;
+  /* The breakpoint's kind.  It is used in 'kind' parameter in Z
+     packets.  */
+  int kind;
 
   /* Vector of conditions the target should evaluate if it supports target-side
      breakpoint conditions.  */
