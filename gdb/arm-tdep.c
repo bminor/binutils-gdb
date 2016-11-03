@@ -144,13 +144,6 @@ static const char *const arm_mode_strings[] =
 static const char *arm_fallback_mode_string = "auto";
 static const char *arm_force_mode_string = "auto";
 
-/* Internal override of the execution mode.  -1 means no override,
-   0 means override to ARM mode, 1 means override to Thumb mode.
-   The effect is the same as if arm_force_mode has been set by the
-   user (except the internal override has precedence over a user's
-   arm_force_mode override).  */
-static int arm_override_mode = -1;
-
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
 
@@ -422,10 +415,6 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   /* If bit 0 of the address is set, assume this is a Thumb address.  */
   if (IS_THUMB_ADDR (memaddr))
     return 1;
-
-  /* Respect internal mode override if active.  */
-  if (arm_override_mode != -1)
-    return arm_override_mode;
 
   /* If the user wants to override the symbol table, let him.  */
   if (strcmp (arm_force_mode_string, "arm") == 0)
@@ -4255,9 +4244,6 @@ arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
 				   struct address_space *aspace,
 				   CORE_ADDR pc)
 {
-  scoped_restore save_override_mode
-    = make_scoped_restore (&arm_override_mode,
-			   (int) IS_THUMB_ADDR (pc));
   pc = gdbarch_addr_bits_remove (gdbarch, pc);
 
   insert_single_step_breakpoint (gdbarch, aspace, pc);

@@ -1,5 +1,11 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (arm_override_mode): Remove.
+	(arm_pc_is_thumb): Update.
+	(arm_insert_single_step_breakpoint): Update.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* arch-utils.c (default_breakpoint_kind_from_current_state):
 	New function.
 	* arch-utils.h (default_breakpoint_kind_from_current_state):
