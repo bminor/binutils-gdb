@@ -54,7 +54,8 @@ static void
 convert_one_symbol (compile_cplus_instance *instance,
 		    struct block_symbol sym, bool is_global, bool is_local)
 {
-  gcc_type sym_type;
+  /* Squash compiler warning.  */
+  gcc_type sym_type = 0;
   const char *filename = symbol_symtab (sym.symbol)->filename;
   unsigned short line = SYMBOL_LINE (sym.symbol);
 
