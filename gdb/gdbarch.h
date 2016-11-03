@@ -564,6 +564,14 @@ typedef const gdb_byte * (gdbarch_sw_breakpoint_from_kind_ftype) (struct gdbarch
 extern const gdb_byte * gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size);
 extern void set_gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, gdbarch_sw_breakpoint_from_kind_ftype *sw_breakpoint_from_kind);
 
+/* Return the breakpoint kind for this target based on the current
+   processor state (e.g. the current instruction mode on ARM) and the
+   *PCPTR.  In default, it is gdbarch->breakpoint_kind_from_pc. */
+
+typedef int (gdbarch_breakpoint_kind_from_current_state_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR *pcptr);
+extern int gdbarch_breakpoint_kind_from_current_state (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR *pcptr);
+extern void set_gdbarch_breakpoint_kind_from_current_state (struct gdbarch *gdbarch, gdbarch_breakpoint_kind_from_current_state_ftype *breakpoint_kind_from_current_state);
+
 extern int gdbarch_adjust_breakpoint_address_p (struct gdbarch *gdbarch);
 
 typedef CORE_ADDR (gdbarch_adjust_breakpoint_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR bpaddr);

@@ -569,6 +569,11 @@ m:int:breakpoint_kind_from_pc:CORE_ADDR *pcptr:pcptr::0:
 # SIZE is set to the software breakpoint's length in memory.
 m:const gdb_byte *:sw_breakpoint_from_kind:int kind, int *size:kind, size::NULL::0
 
+# Return the breakpoint kind for this target based on the current
+# processor state (e.g. the current instruction mode on ARM) and the
+# *PCPTR.  In default, it is gdbarch->breakpoint_kind_from_pc.
+m:int:breakpoint_kind_from_current_state:struct regcache *regcache, CORE_ADDR *pcptr:regcache, pcptr:0:default_breakpoint_kind_from_current_state::0
+
 M:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
 m:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
 m:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0

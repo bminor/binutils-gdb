@@ -218,6 +218,10 @@ extern const gdb_byte *default_breakpoint_from_pc (struct gdbarch *gdbarch,
 						   CORE_ADDR *pcptr,
 						   int *lenptr);
 
+extern int default_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
+						       struct regcache *regcache,
+						       CORE_ADDR *pcptr);
+
 extern void default_gen_return_address (struct gdbarch *gdbarch,
 					struct agent_expr *ax,
 					struct axs_value *value,

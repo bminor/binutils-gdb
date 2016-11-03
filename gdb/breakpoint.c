@@ -2603,12 +2603,26 @@ build_target_command_list (struct bp_location *bl)
     bl->target_info.persist = 1;
 }
 
-/* Return the kind of breakpoint on address *ADDR.  */
+/* Return the kind of breakpoint on address *ADDR.  Get the kind
+   of breakpoint according to ADDR except single-step breakpoint.
+   Get the kind of single-step breakpoint according to the current
+   registers state.  */
 
 static int
 breakpoint_kind (struct bp_location *bl, CORE_ADDR *addr)
 {
-  return gdbarch_breakpoint_kind_from_pc (bl->gdbarch, addr);
+  if (bl->owner->type == bp_single_step)
+    {
+      struct thread_info *thr = find_thread_global_id (bl->owner->thread);
+      struct regcache *regcache;
+
+      regcache = get_thread_regcache (thr->ptid);
+
+      return gdbarch_breakpoint_kind_from_current_state (bl->gdbarch,
+							 regcache, addr);
+    }
+  else
+    return gdbarch_breakpoint_kind_from_pc (bl->gdbarch, addr);
 }
 
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint

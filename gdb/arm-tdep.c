@@ -7901,6 +7901,59 @@ arm_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
+/* Implement the breakpoint_kind_from_current_state gdbarch method.  */
+
+static int
+arm_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
+					struct regcache *regcache,
+					CORE_ADDR *pcptr)
+{
+  gdb_byte buf[4];
+
+  /* Check the memory pointed by PC is readable.  */
+  if (target_read_memory (regcache_read_pc (regcache), buf, 4) == 0)
+    {
+      struct arm_get_next_pcs next_pcs_ctx;
+      CORE_ADDR pc;
+      int i;
+      VEC (CORE_ADDR) *next_pcs = NULL;
+      struct cleanup *old_chain
+	= make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+
+      arm_get_next_pcs_ctor (&next_pcs_ctx,
+			     &arm_get_next_pcs_ops,
+			     gdbarch_byte_order (gdbarch),
+			     gdbarch_byte_order_for_code (gdbarch),
+			     0,
+			     regcache);
+
+      next_pcs = arm_get_next_pcs (&next_pcs_ctx);
+
+      /* If MEMADDR is the next instruction of current pc, do the
+	 software single step computation, and get the thumb mode by
+	 the destination address.  */
+      for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
+	{
+	  if (UNMAKE_THUMB_ADDR (pc) == *pcptr)
+	    {
+	      do_cleanups (old_chain);
+
+	      if (IS_THUMB_ADDR (pc))
+		{
+		  *pcptr = MAKE_THUMB_ADDR (*pcptr);
+		  return arm_breakpoint_kind_from_pc (gdbarch, pcptr);
+		}
+	      else
+		return ARM_BP_KIND_ARM;
+	    }
+	}
+
+      do_cleanups (old_chain);
+    }
+
+  return arm_breakpoint_kind_from_pc (gdbarch, pcptr);
+}
+
 /* Extract from an array REGBUF containing the (raw) register state a
    function return value of type TYPE, and copy that, in virtual
    format, into VALBUF.  */
@@ -9409,6 +9462,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   SET_GDBARCH_BREAKPOINT_MANIPULATION (arm);
+  set_gdbarch_breakpoint_kind_from_current_state (gdbarch,
+						  arm_breakpoint_kind_from_current_state);
 
   /* Information about registers, etc.  */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);

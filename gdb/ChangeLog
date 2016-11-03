@@ -1,5 +1,21 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arch-utils.c (default_breakpoint_kind_from_current_state):
+	New function.
+	* arch-utils.h (default_breakpoint_kind_from_current_state):
+	Declare.
+	* arm-tdep.c (arm_breakpoint_kind_from_current_state): New
+	function.
+	(arm_gdbarch_init): Call
+	set_gdbarch_breakpoint_kind_from_current_state.
+	* breakpoint.c (breakpoint_kind): Call
+	gdbarch_breakpoint_kind_from_current_state for single step
+	breakpoint.  Update comments.
+	* gdbarch.sh (breakpoint_kind_from_current_state): New.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* arch-utils.c (default_breakpoint_from_pc): New function.
 	* arch-utils.h (GDBARCH_BREAKPOINT_FROM_PC): Remove.
 	(GDBARCH_BREAKPOINT_MANIPULATION): Don't use
