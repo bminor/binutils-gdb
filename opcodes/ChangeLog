@@ -1,5 +1,24 @@
 2016-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (REG_82): Removed.
+	(X86_64_82_REG_0): Likewise.
+	(X86_64_82_REG_1): Likewise.
+	(X86_64_82_REG_2): Likewise.
+	(X86_64_82_REG_3): Likewise.
+	(X86_64_82_REG_4): Likewise.
+	(X86_64_82_REG_5): Likewise.
+	(X86_64_82_REG_6): Likewise.
+	(X86_64_82_REG_7): Likewise.
+	(X86_64_82): New.
+	(dis386): Use X86_64_82 instead of REG_82.
+	(reg_table): Remove REG_82.
+	(x86_64_table): Add X86_64_82.  Remove X86_64_82_REG_0,
+	X86_64_82_REG_1, X86_64_82_REG_2, X86_64_82_REG_3,
+	X86_64_82_REG_4, X86_64_82_REG_5, X86_64_82_REG_6 and
+	X86_64_82_REG_7.
+
+2016-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/20754
 	* i386-dis.c (REG_82): New.
 	(X86_64_82_REG_0): Likewise.
