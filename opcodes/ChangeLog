@@ -1,3 +1,10 @@
+2016-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (REG_82): Renamed to ...
+	(REG_83): This.
+	(dis386): Updated.
+	(reg_table): Likewise.
+
 2016-11-02  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-dis.c (enum): Add PREFIX_EVEX_0F3852, PREFIX_EVEX_0F3853.

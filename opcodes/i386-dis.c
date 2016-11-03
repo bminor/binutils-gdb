@@ -706,7 +706,7 @@ enum
 {
   REG_80 = 0,
   REG_81,
-  REG_82,
+  REG_83,
   REG_8F,
   REG_C0,
   REG_C1,
@@ -2663,7 +2663,7 @@ static const struct dis386 dis386[] = {
   { REG_TABLE (REG_80) },
   { REG_TABLE (REG_81) },
   { Bad_Opcode },
-  { REG_TABLE (REG_82) },
+  { REG_TABLE (REG_83) },
   { "testB",		{ Eb, Gb }, 0 },
   { "testS",		{ Ev, Gv }, 0 },
   { "xchgB",		{ Ebh2, Gb }, 0 },
@@ -3400,7 +3400,7 @@ static const struct dis386 reg_table[][8] = {
     { "xorQ",	{ Evh1, Iv }, 0 },
     { "cmpQ",	{ Ev, Iv }, 0 },
   },
-  /* REG_82 */
+  /* REG_83 */
   {
     { "addQ",	{ Evh1, sIb }, 0 },
     { "orQ",	{ Evh1, sIb }, 0 },
