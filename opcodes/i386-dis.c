@@ -706,6 +706,7 @@ enum
 {
   REG_80 = 0,
   REG_81,
+  REG_82,
   REG_83,
   REG_8F,
   REG_C0,
@@ -1694,6 +1695,14 @@ enum
   X86_64_63,
   X86_64_6D,
   X86_64_6F,
+  X86_64_82_REG_0,
+  X86_64_82_REG_1,
+  X86_64_82_REG_2,
+  X86_64_82_REG_3,
+  X86_64_82_REG_4,
+  X86_64_82_REG_5,
+  X86_64_82_REG_6,
+  X86_64_82_REG_7,
   X86_64_9A,
   X86_64_C4,
   X86_64_C5,
@@ -2662,7 +2671,7 @@ static const struct dis386 dis386[] = {
   /* 80 */
   { REG_TABLE (REG_80) },
   { REG_TABLE (REG_81) },
-  { Bad_Opcode },
+  { REG_TABLE (REG_82) },
   { REG_TABLE (REG_83) },
   { "testB",		{ Eb, Gb }, 0 },
   { "testS",		{ Ev, Gv }, 0 },
@@ -3399,6 +3408,17 @@ static const struct dis386 reg_table[][8] = {
     { "subQ",	{ Evh1, Iv }, 0 },
     { "xorQ",	{ Evh1, Iv }, 0 },
     { "cmpQ",	{ Ev, Iv }, 0 },
+  },
+  /* REG_82 */
+  {
+    { X86_64_TABLE (X86_64_82_REG_0) },
+    { X86_64_TABLE (X86_64_82_REG_1) },
+    { X86_64_TABLE (X86_64_82_REG_2) },
+    { X86_64_TABLE (X86_64_82_REG_3) },
+    { X86_64_TABLE (X86_64_82_REG_4) },
+    { X86_64_TABLE (X86_64_82_REG_5) },
+    { X86_64_TABLE (X86_64_82_REG_6) },
+    { X86_64_TABLE (X86_64_82_REG_7) },
   },
   /* REG_83 */
   {
@@ -6885,6 +6905,46 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { "outs{R|}", { indirDXr, Xz }, 0 },
     { "outs{G|}", { indirDXr, Xz }, 0 },
+  },
+
+  /* X86_64_82_REG_0 */
+  {
+    { "addA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_1 */
+  {
+    { "orA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_2 */
+  {
+    { "adcA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_3 */
+  {
+    { "sbbA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_4 */
+  {
+    { "andA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_5 */
+  {
+    { "subA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_6 */
+  {
+    { "xorA",	{ Ebh1, Ib }, 0 },
+  },
+
+  /* X86_64_82_REG_7 */
+  {
+    { "cmpA",	{ Eb, Ib }, 0 },
   },
 
   /* X86_64_9A */
