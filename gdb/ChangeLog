@@ -1,5 +1,22 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arch-utils.c (default_breakpoint_from_pc): New function.
+	* arch-utils.h (GDBARCH_BREAKPOINT_FROM_PC): Remove.
+	(GDBARCH_BREAKPOINT_MANIPULATION): Don't use
+	GDBARCH_BREAKPOINT_FROM_PC.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): Don't call
+	set_gdbarch_breakpoint_from_pc.
+	(default_breakpoint_from_pc): Remove declaration.
+	* gdbarch.sh (breakpoint_from_pc): Add its default implementation.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arm-tdep.c: Don't use GDBARCH_BREAKPOINT_FROM_PC.
+	* arc-tdep.c, bfin-tdep.c, cris-tdep.c, iq2000-tdep.c: Likewise.
+	* m32r-tdep.c, mips-tdep.c, mt-tdep.c: Likewise.
+	* nios2-tdep.c, score-tdep.c, sh-tdep.c: Likewise.
+	* sh64-tdep.c, tic6x-tdep.c, v850-tdep.c, xtensa-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* arch-utils.c (default_remote_breakpoint_from_pc): Remove.
 	* arch-utils.h (default_remote_breakpoint_from_pc): Remove.
 	* arm-tdep.c (arm_remote_breakpoint_from_pc): Remove.

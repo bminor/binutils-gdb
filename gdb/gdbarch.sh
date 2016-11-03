@@ -559,7 +559,7 @@ M:CORE_ADDR:skip_main_prologue:CORE_ADDR ip:ip
 M:CORE_ADDR:skip_entrypoint:CORE_ADDR ip:ip
 
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
-m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
+m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr:0:default_breakpoint_from_pc::0
 
 # Return the breakpoint kind for this target based on *PCPTR.
 m:int:breakpoint_kind_from_pc:CORE_ADDR *pcptr:pcptr::0:

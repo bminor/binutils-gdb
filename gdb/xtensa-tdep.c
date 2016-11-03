@@ -2009,8 +2009,6 @@ xtensa_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (xtensa)
-
 /* Call0 ABI support routines.  */
 
 /* Return true, if PC points to "ret" or "ret.n".  */ 

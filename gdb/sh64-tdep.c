@@ -306,8 +306,6 @@ sh64_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (sh64)
-
 /* Prologue looks like
    [mov.l       <regs>,@-r15]...
    [sts.l       pr,@-r15]

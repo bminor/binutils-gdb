@@ -772,8 +772,6 @@ arc_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (arc)
-
 /* Implement the "unwind_pc" gdbarch method.  */
 
 static CORE_ADDR

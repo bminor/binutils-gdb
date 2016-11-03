@@ -1208,8 +1208,6 @@ v850_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (v850)
-
 static struct v850_frame_cache *
 v850_alloc_frame_cache (struct frame_info *this_frame)
 {

@@ -368,8 +368,6 @@ score7_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (score7)
-
 /* Implement the breakpoint_kind_from_pc gdbarch method.  */
 
 static int
@@ -405,8 +403,6 @@ score3_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
   index = ((byte_order == BFD_ENDIAN_BIG) ? 0 : 3) + (kind / 2 - 1);
   return score_break_insns[index];
 }
-
-GDBARCH_BREAKPOINT_FROM_PC (score3)
 
 static CORE_ADDR
 score_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)

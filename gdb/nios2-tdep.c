@@ -1772,10 +1772,6 @@ nios2_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-/* Implement the breakpoint_from_pc gdbarch hook.  */
-
-GDBARCH_BREAKPOINT_FROM_PC (nios2)
-
 /* Implement the print_insn gdbarch method.  */
 
 static int

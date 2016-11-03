@@ -404,6 +404,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->pointer_to_address = unsigned_pointer_to_address;
   gdbarch->address_to_pointer = unsigned_address_to_pointer;
   gdbarch->return_in_first_hidden_param_p = default_return_in_first_hidden_param_p;
+  gdbarch->breakpoint_from_pc = default_breakpoint_from_pc;
   gdbarch->sw_breakpoint_from_kind = NULL;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
@@ -582,8 +583,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_entrypoint, has predicate.  */
   if (gdbarch->inner_than == 0)
     fprintf_unfiltered (log, "\n\tinner_than");
-  if (gdbarch->breakpoint_from_pc == 0)
-    fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
+  /* Skip verify of breakpoint_from_pc, invalid_p == 0 */
   if (gdbarch->breakpoint_kind_from_pc == 0)
     fprintf_unfiltered (log, "\n\tbreakpoint_kind_from_pc");
   /* Skip verify of sw_breakpoint_from_kind, invalid_p == 0 */

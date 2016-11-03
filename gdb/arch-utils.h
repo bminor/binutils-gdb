@@ -26,17 +26,6 @@ struct minimal_symbol;
 struct type;
 struct gdbarch_info;
 
-#define GDBARCH_BREAKPOINT_FROM_PC(ARCH)			       \
-  static const gdb_byte *					       \
-  ARCH##_breakpoint_from_pc (struct gdbarch *gdbarch,		       \
-			     CORE_ADDR *pcptr,				\
-			     int *lenptr)				\
-  {									\
-    int kind = ARCH##_breakpoint_kind_from_pc (gdbarch, pcptr);	\
-								     \
-    return ARCH##_sw_breakpoint_from_kind (gdbarch, kind, lenptr);   \
-  }
-
 #define GDBARCH_BREAKPOINT_MANIPULATION(ARCH,BREAK_INSN)	      \
   static int							      \
   ARCH##_breakpoint_kind_from_pc (struct gdbarch *gdbarch,	      \
@@ -50,11 +39,9 @@ struct gdbarch_info;
   {								      \
     *size = kind;						      \
     return BREAK_INSN;						      \
-  }								      \
-  GDBARCH_BREAKPOINT_FROM_PC (ARCH)
+  }
 
 #define SET_GDBARCH_BREAKPOINT_MANIPULATION(ARCH)			\
-  set_gdbarch_breakpoint_from_pc (gdbarch, ARCH##_breakpoint_from_pc);	\
   set_gdbarch_breakpoint_kind_from_pc (gdbarch,			\
 				       ARCH##_breakpoint_kind_from_pc); \
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,			\
@@ -80,8 +67,7 @@ struct gdbarch_info;
       return BIG_BREAK_INSN;					      \
     else							      \
       return LITTLE_BREAK_INSN;				      \
-  }								      \
-  GDBARCH_BREAKPOINT_FROM_PC (ARCH)
+  }
 
 /* An implementation of gdbarch_displaced_step_copy_insn for
    processors that don't need to modify the instruction before
@@ -227,6 +213,10 @@ extern int default_has_shared_address_space (struct gdbarch *);
 
 extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 					     CORE_ADDR addr, char **msg);
+
+extern const gdb_byte *default_breakpoint_from_pc (struct gdbarch *gdbarch,
+						   CORE_ADDR *pcptr,
+						   int *lenptr);
 
 extern void default_gen_return_address (struct gdbarch *gdbarch,
 					struct agent_expr *ax,

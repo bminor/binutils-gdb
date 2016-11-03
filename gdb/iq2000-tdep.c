@@ -490,8 +490,6 @@ iq2000_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 	  == BFD_ENDIAN_BIG) ? big_breakpoint : little_breakpoint;
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (iq2000)
-
 /* Target function return value methods: */
 
 /* Function: store_return_value

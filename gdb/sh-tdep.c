@@ -454,8 +454,6 @@ sh_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (sh)
-
 /* Prologue looks like
    mov.l	r14,@-r15
    sts.l	pr,@-r15

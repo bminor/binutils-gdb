@@ -346,10 +346,6 @@ tic6x_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     return tdep->breakpoint;
 }
 
-/* This is the implementation of gdbarch method breakpiont_from_pc.  */
-
-GDBARCH_BREAKPOINT_FROM_PC (tic6x)
-
 /* This is the implementation of gdbarch method print_insn.  */
 
 static int

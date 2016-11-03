@@ -7122,15 +7122,6 @@ mips_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     };
 }
 
-/* This function implements gdbarch_breakpoint_from_pc.  It uses the
-   program counter value to determine whether a 16- or 32-bit breakpoint
-   should be used.  It returns a pointer to a string of bytes that encode a
-   breakpoint instruction, stores the length of the string to *lenptr, and
-   adjusts pc (if necessary) to point to the actual memory location where
-   the breakpoint should be inserted.  */
-
-GDBARCH_BREAKPOINT_FROM_PC (mips)
-
 /* Return non-zero if the standard MIPS instruction INST has a branch
    delay slot (i.e. it is a jump or branch instruction).  This function
    is based on mips32_next_pc.  */

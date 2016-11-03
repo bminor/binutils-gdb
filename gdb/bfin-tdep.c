@@ -601,14 +601,6 @@ bfin_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     return bfin_breakpoint;
 }
 
-/* This function implements the 'breakpoint_from_pc' gdbarch method.
-   It returns a pointer to a string of bytes that encode a breakpoint
-   instruction, stores the length of the string to *lenptr, and
-   adjusts the program counter (if necessary) to point to the actual
-   memory location where the breakpoint should be inserted.  */
-
-GDBARCH_BREAKPOINT_FROM_PC (bfin)
-
 static void
 bfin_extract_return_value (struct type *type,
 			   struct regcache *regs,

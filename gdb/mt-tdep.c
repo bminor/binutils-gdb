@@ -478,8 +478,6 @@ mt_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
   return ms1_breakpoint;
 }
 
-GDBARCH_BREAKPOINT_FROM_PC (mt)
-
 /* Select the correct coprocessor register bank.  Return the pseudo
    regnum we really want to read.  */
 
