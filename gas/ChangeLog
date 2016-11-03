@@ -1,3 +1,19 @@
+2016-11-02  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (SBIT_SHIFT): New.
+	(T2_SBIT_SHIFT): Likewise.
+	(t32_insn_ok): Return TRUE for MOV in ARMv8-M Baseline.
+	(md_apply_fix): Try UINT16 encoding when ARM/Thumb modified immediate
+	encoding failed.
+	* testsuite/gas/arm/archv6t2-bad.s: New error case.
+	* testsuite/gas/arm/archv6t2-bad.l: New error match.
+	* testsuite/gas/arm/archv6t2.s: New testcase.
+	* testsuite/gas/arm/archv6t2.d: New expected result.
+	* testsuite/gas/arm/archv8m.s: New testcase.
+	* testsuite/gas/arm/archv8m-base.d: New expected result.
+	* testsuite/gas/arm/archv8m-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-1.d: Likewise.
+
 2016-11-02  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* config/tc-i386.c: (cpu_arch) Add .avx512_4vnniw.

@@ -685,9 +685,11 @@ struct asm_opcode
 #define T2_SUBS_PC_LR	0xf3de8f00
 
 #define DATA_OP_SHIFT	21
+#define SBIT_SHIFT	20
 
 #define T2_OPCODE_MASK	0xfe1fffff
 #define T2_DATA_OP_SHIFT 21
+#define T2_SBIT_SHIFT	 20
 
 #define A_COND_MASK         0xf0000000
 #define A_PUSH_POP_OP_MASK  0x0fff0000
@@ -18270,6 +18272,13 @@ t32_insn_ok (arm_feature_set arch, const struct asm_opcode *opcode)
       && opcode->tencode == do_t_branch)
     return TRUE;
 
+  /* MOV accepts T1/T3 encodings under Baseline, T3 encoding is 32bit.  */
+  if (ARM_CPU_HAS_FEATURE (arch, arm_ext_v8m)
+      && opcode->tencode == do_t_mov_cmp
+      /* Make sure CMP instruction is not affected.  */
+      && opcode->aencode == do_mov)
+    return TRUE;
+
   /* Wide instruction variants of all instructions with narrow *and* wide
      variants become available with ARMv6t2.  Other opcodes are either
      narrow-only or wide-only and are thus available if OPCODE is valid.  */
@@ -22773,6 +22782,23 @@ md_apply_fix (fixS *	fixP,
 	     changing the opcode.  */
 	  if (newimm == (unsigned int) FAIL)
 	    newimm = negate_data_op (&temp, value);
+	  /* MOV accepts both ARM modified immediate (A1 encoding) and
+	     UINT16 (A2 encoding) when possible, MOVW only accepts UINT16.
+	     When disassembling, MOV is preferred when there is no encoding
+	     overlap.  */
+	  if (newimm == (unsigned int) FAIL
+	      && ((temp >> DATA_OP_SHIFT) & 0xf) == OPCODE_MOV
+	      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
+	      && !((temp >> SBIT_SHIFT) & 0x1)
+	      && value >= 0 && value <= 0xffff)
+	    {
+	      /* Clear bits[23:20] to change encoding from A1 to A2.  */
+	      temp &= 0xff0fffff;
+	      /* Encoding high 4bits imm.  Code below will encode the remaining
+		 low 12bits.  */
+	      temp |= (value & 0x0000f000) << 4;
+	      newimm = value & 0x00000fff;
+	    }
 	}
 
       if (newimm == (unsigned int) FAIL)
@@ -23089,32 +23115,59 @@ md_apply_fix (fixS *	fixP,
       newval |= md_chars_to_number (buf+2, THUMB_SIZE);
 
       newimm = FAIL;
-      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
+      if ((fixP->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
+	   /* ARMv8-M Baseline MOV will reach here, but it doesn't support
+	      Thumb2 modified immediate encoding (T2).  */
+	   && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
 	  || fixP->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM)
 	{
 	  newimm = encode_thumb32_immediate (value);
 	  if (newimm == (unsigned int) FAIL)
 	    newimm = thumb32_negate_data_op (&newval, value);
 	}
-      if (fixP->fx_r_type != BFD_RELOC_ARM_T32_IMMEDIATE
-	  && newimm == (unsigned int) FAIL)
+      if (newimm == (unsigned int) FAIL)
 	{
-	  /* Turn add/sum into addw/subw.  */
-	  if (fixP->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM)
-	    newval = (newval & 0xfeffffff) | 0x02000000;
-	  /* No flat 12-bit imm encoding for addsw/subsw.  */
-	  if ((newval & 0x00100000) == 0)
+	  if (fixP->fx_r_type != BFD_RELOC_ARM_T32_IMMEDIATE)
 	    {
-	      /* 12 bit immediate for addw/subw.  */
-	      if (value < 0)
+	      /* Turn add/sum into addw/subw.  */
+	      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM)
+		newval = (newval & 0xfeffffff) | 0x02000000;
+	      /* No flat 12-bit imm encoding for addsw/subsw.  */
+	      if ((newval & 0x00100000) == 0)
 		{
-		  value = -value;
-		  newval ^= 0x00a00000;
+		  /* 12 bit immediate for addw/subw.  */
+		  if (value < 0)
+		    {
+		      value = -value;
+		      newval ^= 0x00a00000;
+		    }
+		  if (value > 0xfff)
+		    newimm = (unsigned int) FAIL;
+		  else
+		    newimm = value;
 		}
-	      if (value > 0xfff)
-		newimm = (unsigned int) FAIL;
-	      else
-		newimm = value;
+	    }
+	  else
+	    {
+	      /* MOV accepts both Thumb2 modified immediate (T2 encoding) and
+		 UINT16 (T3 encoding), MOVW only accepts UINT16.  When
+		 disassembling, MOV is preferred when there is no encoding
+		 overlap.
+		 NOTE: MOV is using ORR opcode under Thumb 2 mode.  */
+	      if (((newval >> T2_DATA_OP_SHIFT) & 0xf) == T2_OPCODE_ORR
+		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m)
+		  && !((newval >> T2_SBIT_SHIFT) & 0x1)
+		  && value >= 0 && value <=0xffff)
+		{
+		  /* Toggle bit[25] to change encoding from T2 to T3.  */
+		  newval ^= 1 << 25;
+		  /* Clear bits[19:16].  */
+		  newval &= 0xfff0ffff;
+		  /* Encoding high 4bits imm.  Code below will encode the
+		     remaining low 12bits.  */
+		  newval |= (value & 0x0000f000) << 4;
+		  newimm = value & 0x00000fff;
+		}
 	    }
 	}
 

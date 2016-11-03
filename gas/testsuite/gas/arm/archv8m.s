@@ -11,6 +11,14 @@ tt    r8, r9
 ttt   r0, r1
 ttt   r8, r9
 movw  r0, #0xF123
+@ mov accept all immediate formats, including T3.  It's also the suggested
+@ assembly to use.
+mov   r8, #0xF123
+@ .w means wide, specifies that the assembler must select a 32-bit encoding for
+@ the instruction if it is possible, it should accept both T2 (Thumb modified
+@ immediate) and T3 (UINT16) encoding.  See the section "Standard assembler
+@ syntax fields" on latest ARM-ARM.
+mov.w r8, #0xF123
 movw  r8, #0xF123
 movt  r0, #0xF123
 movt  r8, #0xF123
