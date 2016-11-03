@@ -216,16 +216,10 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 /* Create a breakpoint instruction.  */
+static const gdb_byte breakpoint[4] = { OP_RAISE << 2, 0, 0, 2 };
 
-static const gdb_byte *
-lm32_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			 int *lenptr)
-{
-  static const gdb_byte breakpoint[4] = { OP_RAISE << 2, 0, 0, 2 };
+GDBARCH_BREAKPOINT_MANIPULATION (lm32, breakpoint)
 
-  *lenptr = sizeof (breakpoint);
-  return breakpoint;
-}
 
 /* Setup registers and stack for faking a call to a function in the 
    inferior.  */
@@ -563,7 +557,7 @@ lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_unwinder (gdbarch, &lm32_frame_unwind);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, lm32_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (lm32);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* Calling functions in the inferior.  */

@@ -588,14 +588,9 @@ static const char *disassembly_flavor = att_flavor;
 
    This function is 64-bit safe.  */
 
-static const gdb_byte *
-i386_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static gdb_byte break_insn[] = { 0xcc }; /* int 3 */
+static const gdb_byte break_insn[] = { 0xcc }; /* int 3 */
 
-  *len = sizeof (break_insn);
-  return break_insn;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (i386, break_insn)
 
 /* Displaced instruction handling.  */
 
@@ -8458,7 +8453,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (i386);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
   set_gdbarch_max_insn_length (gdbarch, I386_MAX_INSN_LEN);
 

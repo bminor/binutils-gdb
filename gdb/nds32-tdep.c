@@ -281,24 +281,10 @@ nds32_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return align_down (sp, 8);
 }
 
-/* Implement the "breakpoint_from_pc" gdbarch method.
+/* The same insn machine code is used for little-endian and big-endian.  */
+static const gdb_byte break_insn[] = { 0xEA, 0x00 };
 
-   Use the program counter to determine the contents and size of a
-   breakpoint instruction.  Return a pointer to a string of bytes that
-   encode a breakpoint instruction, store the length of the string in
-   *LENPTR and optionally adjust *PCPTR to point to the correct memory
-   location for inserting the breakpoint.  */
-
-static const gdb_byte *
-nds32_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			  int *lenptr)
-{
-  /* The same insn machine code is used for little-endian and big-endian.  */
-  static const gdb_byte break_insn[] = { 0xEA, 0x00 };
-
-  *lenptr = sizeof (break_insn);
-  return break_insn;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (nds32, break_insn)
 
 /* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
 
@@ -2157,7 +2143,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, nds32_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, nds32_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (nds32);
 
   set_gdbarch_frame_align (gdbarch, nds32_frame_align);
   frame_base_set_default (gdbarch, &nds32_frame_base);

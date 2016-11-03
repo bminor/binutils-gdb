@@ -1,5 +1,39 @@
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): New macro.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): New macro.
+	aarch64-tdep.c (aarch64_breakpoint_from_pc): Remove.  Use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(aarch64_gdbarch_init): Replace set_gdbarch_breakpoint_from_pc
+	with SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* alpha-tdep.c: Likewise.
+	* avr-tdep.c: Likewise.
+	* frv-tdep.c: Likewise.
+	* ft32-tdep.c: Likewise.
+	* h8300-tdep.c: Likewise.
+	* hppa-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* lm32-tdep.c: Likewise.
+	* m32c-tdep.c: Likewise.
+	* m68hc11-tdep.c: Likewise.
+	* m68k-tdep.c: Likewise.
+	* m88k-tdep.c: Likewise.
+	* mep-tdep.c: Likewise.
+	* microblaze-tdep.c: Likewise.
+	* mn10300-tdep.c: Likewise.
+	* moxie-tdep.c: Likewise.
+	* msp430-tdep.c: Likewise.
+	* rl78-tdep.c: Likewise.
+	* rx-tdep.c: Likewise.
+	* s390-linux-tdep.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* vax-tdep.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* mem-break.c (default_memory_insert_breakpoint): Don't check
 	'bp' against NULL.
 	* microblaze-linux-tdep.c (microblaze_linux_memory_remove_breakpoint):

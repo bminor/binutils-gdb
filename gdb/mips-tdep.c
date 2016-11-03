@@ -8729,7 +8729,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_value_to_register (gdbarch, mips_value_to_register);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (mips);
   set_gdbarch_remote_breakpoint_from_pc (gdbarch,
 					 mips_remote_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address (gdbarch,

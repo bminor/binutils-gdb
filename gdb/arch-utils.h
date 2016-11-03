@@ -26,6 +26,19 @@ struct minimal_symbol;
 struct type;
 struct gdbarch_info;
 
+#define GDBARCH_BREAKPOINT_MANIPULATION(ARCH,BREAK_INSN)	      \
+  static const gdb_byte *					      \
+  ARCH##_breakpoint_from_pc (struct gdbarch *gdbarch,		      \
+			     CORE_ADDR *pcptr,			      \
+			     int *lenptr)			      \
+  {								      \
+    *lenptr = sizeof (BREAK_INSN);				      \
+    return BREAK_INSN;						      \
+  }
+
+#define SET_GDBARCH_BREAKPOINT_MANIPULATION(ARCH)	\
+  set_gdbarch_breakpoint_from_pc (gdbarch, ARCH##_breakpoint_from_pc)
+
 /* An implementation of gdbarch_displaced_step_copy_insn for
    processors that don't need to modify the instruction before
    single-stepping the displaced copy.

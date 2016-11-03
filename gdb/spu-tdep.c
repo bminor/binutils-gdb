@@ -1570,16 +1570,9 @@ spu_return_value (struct gdbarch *gdbarch, struct value *function,
 
 
 /* Breakpoints.  */
+static const gdb_byte breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
 
-static const gdb_byte *
-spu_breakpoint_from_pc (struct gdbarch *gdbarch,
-			CORE_ADDR * pcptr, int *lenptr)
-{
-  static const gdb_byte breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
-
-  *lenptr = sizeof breakpoint;
-  return breakpoint;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (spu, breakpoint)
 
 static int
 spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
@@ -2797,7 +2790,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoints.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
-  set_gdbarch_breakpoint_from_pc (gdbarch, spu_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (spu);
   set_gdbarch_memory_remove_breakpoint (gdbarch, spu_memory_remove_breakpoint);
   set_gdbarch_software_single_step (gdbarch, spu_software_single_step);
   set_gdbarch_get_longjmp_target (gdbarch, spu_get_longjmp_target);

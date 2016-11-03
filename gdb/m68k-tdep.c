@@ -57,14 +57,9 @@
 #define BPT_VECTOR 0xf
 #endif
 
-static const gdb_byte *
-m68k_local_breakpoint_from_pc (struct gdbarch *gdbarch,
-			       CORE_ADDR *pcptr, int *lenptr)
-{
-  static gdb_byte break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
-  *lenptr = sizeof (break_insn);
-  return break_insn;
-}
+static gdb_byte break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
+
+GDBARCH_BREAKPOINT_MANIPULATION (m68k, break_insn)
 
 
 /* Construct types for ISA-specific registers.  */
@@ -1196,7 +1191,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, long_double_format[0]->totalsize);
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
-  set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (m68k);
 
   /* Stack grows down.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

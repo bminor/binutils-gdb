@@ -645,14 +645,10 @@ alpha_return_in_memory_always (struct type *type)
   return 1;
 }
 
-static const gdb_byte *
-alpha_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static const gdb_byte break_insn[] = { 0x80, 0, 0, 0 }; /* call_pal bpt */
 
-  *len = sizeof(break_insn);
-  return break_insn;
-}
+static const gdb_byte break_insn[] = { 0x80, 0, 0, 0 }; /* call_pal bpt */
+
+GDBARCH_BREAKPOINT_MANIPULATION (alpha, break_insn)
 
 
 /* This returns the PC of the first insn after the prologue.
@@ -1822,7 +1818,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (alpha);
   set_gdbarch_decr_pc_after_break (gdbarch, ALPHA_INSN_SIZE);
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
 

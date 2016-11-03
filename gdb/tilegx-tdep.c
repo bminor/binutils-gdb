@@ -842,19 +842,11 @@ tilegx_write_pc (struct regcache *regcache, CORE_ADDR pc)
                                   INT_SWINT_1_SIGRETURN);
 }
 
-/* This is the implementation of gdbarch method breakpoint_from_pc.  */
+/* 64-bit pattern for a { bpt ; nop } bundle.  */
+static const unsigned char breakpoint[] =
+  { 0x00, 0x50, 0x48, 0x51, 0xae, 0x44, 0x6a, 0x28 };
 
-static const unsigned char *
-tilegx_breakpoint_from_pc (struct gdbarch *gdbarch,
-			   CORE_ADDR *pcptr, int *lenptr)
-{
-  /* 64-bit pattern for a { bpt ; nop } bundle.  */
-  static const unsigned char breakpoint[] =
-    { 0x00, 0x50, 0x48, 0x51, 0xae, 0x44, 0x6a, 0x28 };
-
-  *lenptr = sizeof (breakpoint);
-  return breakpoint;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (tilegx, breakpoint)
 
 /* Normal frames.  */
 
@@ -1057,7 +1049,7 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, tilegx_push_dummy_call);
   set_gdbarch_get_longjmp_target (gdbarch, tilegx_get_longjmp_target);
   set_gdbarch_write_pc (gdbarch, tilegx_write_pc);
-  set_gdbarch_breakpoint_from_pc (gdbarch, tilegx_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (tilegx);
   set_gdbarch_return_value (gdbarch, tilegx_return_value);
 
   set_gdbarch_print_insn (gdbarch, print_insn_tilegx);

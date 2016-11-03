@@ -277,17 +277,9 @@ msp430_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   return regnum;
 }
 
-/* Implement the "breakpoint_from_pc" gdbarch method.  */
+static gdb_byte breakpoint[] = { 0x43, 0x43 };
 
-static const gdb_byte *
-msp430_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			   int *lenptr)
-{
-  static gdb_byte breakpoint[] = { 0x43, 0x43 };
-
-  *lenptr = sizeof breakpoint;
-  return breakpoint;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (msp430, breakpoint)
 
 /* Define a "handle" struct for fetching the next opcode.  */
 
@@ -1001,7 +993,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, msp430_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (msp430);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   /* Disassembly.  */

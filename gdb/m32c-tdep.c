@@ -990,16 +990,9 @@ make_regs (struct gdbarch *arch)
 
 
 /* Breakpoints.  */
+static const unsigned char break_insn[] = { 0x00 };	/* brk */
 
-static const unsigned char *
-m32c_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static unsigned char break_insn[] = { 0x00 };	/* brk */
-
-  *len = sizeof (break_insn);
-  return break_insn;
-}
-
+GDBARCH_BREAKPOINT_MANIPULATION (m32c, break_insn)
 
 
 /* Prologue analysis.  */
@@ -2652,7 +2645,7 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_m32c);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, m32c_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (m32c);
 
   /* Prologue analysis and unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

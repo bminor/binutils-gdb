@@ -1592,15 +1592,7 @@ aarch64_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
    1101.0100.0010.0000.0000.0000.0000.0000 = 0xd4200000.  */
 static const gdb_byte aarch64_default_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
 
-/* Implement the "breakpoint_from_pc" gdbarch method.  */
-
-static const gdb_byte *
-aarch64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			    int *lenptr)
-{
-  *lenptr = sizeof (aarch64_default_breakpoint);
-  return aarch64_default_breakpoint;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (aarch64, aarch64_default_breakpoint)
 
 /* Extract from an array REGS containing the (raw) register state a
    function return value of type TYPE, and copy that, in virtual
@@ -2762,7 +2754,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Breakpoint manipulation.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, aarch64_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (aarch64);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
   set_gdbarch_software_single_step (gdbarch, aarch64_software_single_step);
 

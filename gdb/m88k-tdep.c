@@ -97,16 +97,11 @@ m88k_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
    encode a breakpoint instruction, store the length of the string in
    *LEN and optionally adjust *PC to point to the correct memory
    location for inserting the breakpoint.  */
-   
-static const gdb_byte *
-m88k_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  /* tb 0,r0,511 */
-  static gdb_byte break_insn[] = { 0xf0, 0x00, 0xd1, 0xff };
 
-  *len = sizeof (break_insn);
-  return break_insn;
-}
+/* tb 0,r0,511 */
+static gdb_byte break_insn[] = { 0xf0, 0x00, 0xd1, 0xff };
+
+GDBARCH_BREAKPOINT_MANIPULATION (m88k, break_insn)
 
 static CORE_ADDR
 m88k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
@@ -857,7 +852,7 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, m88k_return_value);
 
   set_gdbarch_addr_bits_remove (gdbarch, m88k_addr_bits_remove);
-  set_gdbarch_breakpoint_from_pc (gdbarch, m88k_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (m88k);
   set_gdbarch_unwind_pc (gdbarch, m88k_unwind_pc);
   set_gdbarch_write_pc (gdbarch, m88k_write_pc);
 

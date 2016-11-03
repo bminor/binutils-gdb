@@ -322,15 +322,9 @@ mn10300_write_pc (struct regcache *regcache, CORE_ADDR val)
    The Matsushita mn10x00 processors have single byte instructions
    so we need a single byte breakpoint.  Matsushita hasn't defined
    one, so we defined it ourselves.  */
+static gdb_byte breakpoint[] = {0xff};
 
-static const unsigned char *
-mn10300_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
-			    int *bp_size)
-{
-  static gdb_byte breakpoint[] = {0xff};
-  *bp_size = 1;
-  return breakpoint;
-}
+GDBARCH_BREAKPOINT_MANIPULATION (mn10300, breakpoint)
 
 /* Model the semantics of pushing a register onto the stack.  This
    is a helper function for mn10300_analyze_prologue, below.  */
@@ -1444,7 +1438,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Stack unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, mn10300_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (mn10300);
   /* decr_pc_after_break?  */
   /* Disassembly.  */
   set_gdbarch_print_insn (gdbarch, print_insn_mn10300);

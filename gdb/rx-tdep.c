@@ -992,14 +992,9 @@ rx_return_value (struct gdbarch *gdbarch,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-/* Implement the "breakpoint_from_pc" gdbarch method.  */
-static const gdb_byte *
-rx_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
-{
-  static gdb_byte breakpoint[] = { 0x00 };
-  *lenptr = sizeof breakpoint;
-  return breakpoint;
-}
+static gdb_byte breakpoint[] = { 0x00 };
+
+GDBARCH_BREAKPOINT_MANIPULATION (rx, breakpoint)
 
 /* Implement the dwarf_reg_to_regnum" gdbarch method.  */
 
@@ -1097,7 +1092,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, RX_SP_REGNUM);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
-  set_gdbarch_breakpoint_from_pc (gdbarch, rx_breakpoint_from_pc);
+  SET_GDBARCH_BREAKPOINT_MANIPULATION (rx);
   set_gdbarch_skip_prologue (gdbarch, rx_skip_prologue);
 
   set_gdbarch_print_insn (gdbarch, print_insn_rx);
