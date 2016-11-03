@@ -25,7 +25,7 @@ msgstr ""
 "Project-Id-Version: bfd-2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2016-10-15 18:25+0200\n"
+"PO-Revision-Date: 2016-10-27 23:31+0200\n"
 "Last-Translator: Ask Hjorth Larsen <asklarsen@gmail.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
@@ -3906,7 +3906,7 @@ msgstr "bfd_mach_o_read_symtab_symbol: navn uden for gyldigt interval (%lu >= %l
 #: mach-o.c:2997
 #, c-format
 msgid "bfd_mach_o_read_symtab_symbol: symbol \"%s\" specified invalid section %d (max %lu): setting to undefined"
-msgstr "bfd_mach_o_read_symtab_symbol: symbolet \"%s\" angiv ugyldigt afsnit %d (maks %lu): sætter til udefineret"
+msgstr "bfd_mach_o_read_symtab_symbol: symbolet \"%s\" angav ugyldigt afsnit %d (maks %lu): sætter til udefineret"
 
 #: mach-o.c:3013
 #, c-format
@@ -6508,18 +6508,18 @@ msgid ""
 " vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
 "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
 msgstr ""
-" vma:\t\tStart-    Slut-     EH-        EH-    Prologsluts-  Undtagelses-\n"
-"     \t\tadresse   adresse   håndterer  data   adresse       maske\n"
+" vma:\t\tStart-   Slut-    EH-      EH-     Prologslut- Undtagelses-\n"
+"     \t\tadresse  adresse  håndt.   data    adresse     maske\n"
 
 #: peigen.c:1705 pepigen.c:1705 pex64igen.c:1705
 #, c-format
 msgid " Register save millicode"
-msgstr " Registergemnings millikode"
+msgstr " Registergemnings-millikode"
 
 #: peigen.c:1708 pepigen.c:1708 pex64igen.c:1708
 #, c-format
 msgid " Register restore millicode"
-msgstr " Registergenskabnings millikode"
+msgstr " Registergenskabnings-millikode"
 
 #: peigen.c:1711 pepigen.c:1711 pex64igen.c:1711
 #, c-format
@@ -6533,8 +6533,8 @@ msgid ""
 " vma:\t\tBegin    Prolog   Function Flags    Exception EH\n"
 "     \t\tAddress  Length   Length   32b exc  Handler   Data\n"
 msgstr ""
-" vma:\t\tStart    Prolog   Funktion Flag    Undtagelse EH\n"
-"     \t\tAdresse  Længde   Længde   32b exc Håndtering Data\n"
+" vma:\t\tStart    Prolog   Funktion Flag    Undt.-     EH\n"
+"     \t\tAdresse  Længde   Længde   32b exc Håndt.     Data\n"
 
 #: peigen.c:1937 pepigen.c:1937 pex64igen.c:1937
 #, c-format
@@ -6574,12 +6574,12 @@ msgstr "navn: [værdi: %08lx længde %d]: "
 #: peigen.c:2054 pepigen.c:2054 pex64igen.c:2054
 #, c-format
 msgid "<corrupt string length: %#x>"
-msgstr "<ugyldig strenglængde: %#x>"
+msgstr "<beskadiget strenglængde: %#x>"
 
 #: peigen.c:2057 pepigen.c:2057 pex64igen.c:2057
 #, c-format
 msgid "<corrupt string offset: %#lx>"
-msgstr "<ugyldig strengforskydning: %#lx>"
+msgstr "<beskadiget strengforskydning: %#lx>"
 
 #: peigen.c:2060 pepigen.c:2060 pex64igen.c:2060
 #, c-format
@@ -6687,255 +6687,3 @@ msgstr "%B: kan ikke udfylde DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)], da .id
 #: peigen.c:3801 pepigen.c:3801 pex64igen.c:3801
 msgid "%B: unable to fill in DataDictionary[9] because __tls_used is missing"
 msgstr "%B: kan ikke udfylde DataDictionary[9], da __tls_used mangler"
-
-#~ msgid ""
-#~ "%B(%s): warning: interworking not enabled.\n"
-#~ "  first occurrence: %B: thumb call to arm"
-#~ msgstr ""
-#~ "%B(%s): advarsel: samvirken (interworking) er ikke aktiveret.\n"
-#~ "  første forekomst: %B: thumb-kald til arm"
-
-#~ msgid "DIV usage mismatch between %B and %B"
-#~ msgstr "Uoverensstemmelse i DIV-forbrug mellem %B og %B"
-
-#~ msgid "relocation references a different segment"
-#~ msgstr "relokering refererer et andet segment"
-
-#~ msgid "%B: bad relocation section name `%s'"
-#~ msgstr "%B: fejlagtigt relokeringsafsnitsnavn \"%s\""
-
-#~ msgid " [64-bit doubles]"
-#~ msgstr " [64 bit-doubles]"
-
-#~ msgid " [dsp]"
-#~ msgstr " [dsp]"
-
-#~ msgid "%B: relocation type %d not implemented"
-#~ msgstr "%B: relokeringstypen %d er ikke implementeret"
-
-#~ msgid "warning: %B and %B differ in position-dependence of data addressing"
-#~ msgstr "advarsel: %B og %B har forskellig positionsafhængighed af dataadressering"
-
-#~ msgid "warning: %B and %B differ in position-dependence of code addressing"
-#~ msgstr "advarsel: %B og %B har forskellig positionsafhængighed af kodeadressering"
-
-#~ msgid "%B(%A+0x%lx): cannot reach %s"
-#~ msgstr "%B(%A+0x%lx): kan ikke nå %s"
-
-#~ msgid "%B(%A+0x%lx): automatic multiple TOCs not supported using your crt files; recompile with -mminimal-toc or upgrade gcc"
-#~ msgstr "%B(%A+0x%lx): flere automatiske TOC'er understøttes ikke med dine crt-filer; genkompilér med -mminimal-toc eller opgradér gcc"
-
-#~ msgid "Warning: %B uses -msingle-float, %B uses -mdouble-float"
-#~ msgstr "Advarsel: %B bruger -msingle-float, %B bruger -mdouble-float"
-
-#~ msgid "Warning: %B uses -msingle-float, %B uses -mips32r2 -mfp64"
-#~ msgstr "Advarsel: %B bruger -msingle-float, %B bruger -mips32r2 -mfp64"
-
-#~ msgid "Warning: %B uses -mdouble-float, %B uses -mips32r2 -mfp64"
-#~ msgstr "Advarsel: %B bruger -mdouble-float, %B bruger -mips32r2 -mfp64"
-
-#~ msgid "%B: warning: ignoring duplicate section `%A'\n"
-#~ msgstr "%B: advarsel: ignorerer gentaget afsnit \"%A\"\n"
-
-#~ msgid "%B: warning: duplicate section `%A' has different size\n"
-#~ msgstr "%B: advarsel: gentaget afsnit \"%A\" har forskellig længde\n"
-
-#~ msgid "Mach-O header:\n"
-#~ msgstr "Mach-O-header:\n"
-
-# eller skal det være magisk tal?
-#~ msgid " magic     : %08lx\n"
-#~ msgstr " magi      : %08lx\n"
-
-#~ msgid " cputype   : %08lx (%s)\n"
-#~ msgstr " cputype   : %08lx (%s)\n"
-
-#~ msgid " filetype  : %08lx (%s)\n"
-#~ msgstr " filtype   : %08lx (%s)\n"
-
-# ?
-#~ msgid " ncmds     : %08lx (%lu)\n"
-#~ msgstr " nkmd'er   : %08lx (%lu)\n"
-
-# kan ikke så godt gøre de her konsistente
-#~ msgid " sizeofcmds: %08lx\n"
-#~ msgstr " sizeofcmds: %08lx\n"
-
-#~ msgid " flags     : %08lx ("
-#~ msgstr " flag      : %08lx ("
-
-#~ msgid " reserved  : %08x\n"
-#~ msgstr " reserveret: %08x\n"
-
-#~ msgid "Segments and Sections:\n"
-#~ msgstr "Segmenter og afsnit:\n"
-
-#~ msgid " #: Segment name     Section name     Address\n"
-#~ msgstr " #: Segmentnavn      Afsnitsnavn     Adresse\n"
-
-#~ msgid "Symbol %s replaced by %s\n"
-#~ msgstr "Symbol %s erstattet med %s\n"
-
-# src/menus.c:341
-#~ msgid "Missing IHCONST"
-#~ msgstr "IHCONST mangler"
-
-# src/menus.c:341
-#~ msgid "Missing IHIHALF"
-#~ msgstr "IHIHALF mangler"
-
-#~ msgid "missing IHCONST reloc"
-#~ msgstr "IHCONST-relokering mangler"
-
-#~ msgid "missing IHIHALF reloc"
-#~ msgstr "IHIHALF-relokering mangler"
-
-#~ msgid "  first occurrence: %s: arm call to thumb"
-#~ msgstr "  første forekomst: %s: arm-kald til thumb"
-
-#~ msgid "  first occurrence: %s: thumb call to arm"
-#~ msgstr "  første forekomst: %s: thumb-kald til arm"
-
-#~ msgid "reloc against unsupported section"
-#~ msgstr "relokering mod afsnit som ikke understøttes"
-
-#~ msgid "Dwarf Error: DW_FORM_strp offset (%lu) greater than or equal to .debug_str size (%lu)."
-#~ msgstr "Dwarf-fejl: DW_FORM_strp-afstanden (%lu) større end eller lig med størrelsen på .debug_str (%lu)."
-
-#~ msgid "Dwarf Error: Can't find .debug_abbrev section."
-#~ msgstr "Dwarf-fejl: Kan ikke finde afsnittet .debug_abbrev."
-
-#~ msgid "Dwarf Error: Abbrev offset (%lu) greater than or equal to .debug_abbrev size (%lu)."
-#~ msgstr "Dwarf-fejl: Forkortelsesafstanden (%lu) større end eller lig med størrelsen .debug_abbrev (%lu)."
-
-#~ msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
-#~ msgstr "%s: advarsel: uløselig relokering mod symbol \"%s\" fra afsnittet %s"
-
-#~ msgid "%s: Not enough room for program headers (allocated %u, need %u)"
-#~ msgstr "%s: Ikke tilstrækkeligt med plads for programhoveder (allokerede %u, behøver %u)"
-
-#~ msgid "Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"
-#~ msgstr "Fejl: Første afsnit i segmentet (%s) begynder ved 0x%x mens segmentet begynder ved 0x%x"
-
-#~ msgid "%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
-#~ msgstr "%s: advarsel: uløselig relokering %d mod symbol \"%s\" fra afsnittet %s"
-
-#~ msgid "ERROR: %s is compiled for EABI version %d, whereas %s is compiled for version %d"
-#~ msgstr "FEJL: %s er oversat for EABI version %d, mens %s er oversat for version %d"
-
-#~ msgid "%s: unresolvable relocation %s against symbol `%s' from %s section"
-#~ msgstr "%s: uløselig relokering %s mod symbol \"%s\" fra afsnittet %s"
-
-#~ msgid "%s: relocation %s should not be used when making a shared object; recompile with -fPIC"
-#~ msgstr "%s: relokeringen %s bør ikke bruges når et delt objekt oprettes; genoversæt med -fPIC"
-
-#~ msgid "%s(%s+0x%lx): fixing %s"
-#~ msgstr "%s(%s+0x%lx): retter %s"
-
-#~ msgid " [m68000]"
-#~ msgstr " [m68000]"
-
-#~ msgid "v850ea architecture"
-#~ msgstr "v850ea-arkitektur"
-
-#~ msgid "%s: check_relocs: unhandled reloc type %d"
-#~ msgstr "%s: check_relocs: uhåndteret relokeringstype %d"
-
-#~ msgid "Error: out of memory"
-#~ msgstr "Fejl: ikke mere hukommelse"
-
-#~ msgid "local symbols in discarded section %s"
-#~ msgstr "lokale symboler i bortkastet afsnit %s"
-
-#~ msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
-#~ msgstr "%s: %s+0x%lx: hop til stubrutine som ikke er jal"
-
-#~ msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
-#~ msgstr "%s: ISA (-mips%d) passer ikke med tidligere moduler (-mips%d)"
-
-#~ msgid "%s: ISA mismatch (%d) with previous modules (%d)"
-#~ msgstr "%s: ISA (%d) passer ikke med tidligere moduler (%d)"
-
-#~ msgid " [mips1]"
-#~ msgstr " [mips1]"
-
-#~ msgid " [mips2]"
-#~ msgstr " [mips2]"
-
-#~ msgid " [mips3]"
-#~ msgstr " [mips3]"
-
-#~ msgid " [mips4]"
-#~ msgstr " [mips4]"
-
-#~ msgid " [mips5]"
-#~ msgstr " [mips5]"
-
-#~ msgid " [mips32]"
-#~ msgstr " [mips32]"
-
-#~ msgid " [mips64]"
-#~ msgstr " [mips64]"
-
-#~ msgid " [mips16]"
-#~ msgstr " [mips16]"
-
-#~ msgid " [32bitmode]"
-#~ msgstr " [32-bittilstand]"
-
-#~ msgid "bfd_make_section (%s) failed"
-#~ msgstr "bfd_make_section (%s) mislykkedes"
-
-#~ msgid "bfd_set_section_flags (%s, %x) failed"
-#~ msgstr "bfd_set_section_flags (%s, %x) mislykkedes"
-
-#~ msgid "Size mismatch section %s=%lx, %s=%lx"
-#~ msgstr "Størrelsen passer ikke på afsnit %s=%lx, %s=%lx"
-
-#~ msgid "unknown gsd/egsd subtype %d"
-#~ msgstr "ukendt gsd/egsd-undertype %d"
-
-#~ msgid "failed to enter %s"
-#~ msgstr "mislykkedes med at gå ind i %s"
-
-#~ msgid "No Mem !"
-#~ msgstr "Ingen hukommelse!"
-
-#~ msgid "%s: no symbol \"%s\""
-#~ msgstr "%s: intet symbol \"%s\""
-
-#~ msgid "reserved STO cmd %d"
-#~ msgstr "reserveret STO-kommando %d"
-
-#~ msgid "reserved OPR cmd %d"
-#~ msgstr "reserveret OPR-kommando %d"
-
-#~ msgid "reserved CTL cmd %d"
-#~ msgstr "reserveret CTL-kommando %d"
-
-#~ msgid "stack-from-image not implemented"
-#~ msgstr "stack-from-image er ikke implementeret"
-
-#~ msgid "stack-entry-mask not fully implemented"
-#~ msgstr "stack-entry-mask er ikke helt implementeret"
-
-#~ msgid "stack-local-symbol not fully implemented"
-#~ msgstr "stack-local-symbol er ikke helt implementeret"
-
-#~ msgid "stack-literal not fully implemented"
-#~ msgstr "stack-literal er ikke helt implementeret"
-
-#~ msgid "stack-local-symbol-entry-point-mask not fully implemented"
-#~ msgstr "stack-local-symbol-entry-point-mask er ikke helt implementeret"
-
-#~ msgid "obj code %d not found"
-#~ msgstr "objektkode %d kunne ikke findes"
-
-#~ msgid "%s: dynamic relocation against speculation fixup"
-#~ msgstr "%s: dynamisk relokering uden spekulationsrettelser"
-
-#~ msgid "%s: speculation fixup against undefined weak symbol"
-#~ msgstr "%s: spekulationsfix mod udefineret svagt symbol"
-
-#~ msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
-#~ msgstr "%s: relokering giver overløb 1: 0x%lx > 0xffff"

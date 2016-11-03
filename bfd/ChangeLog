@@ -1,3 +1,7 @@
+2016-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2016-11-01  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* reloc.c (bfd_default_reloc_type_lookup) <BFD_RELOC_CTOR>: Do
