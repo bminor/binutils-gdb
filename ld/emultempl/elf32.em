@@ -472,16 +472,6 @@ fragment <<EOF
   return TRUE;
 }
 
-EOF
-if [ "x${NATIVE}" = xyes ] ; then
-fragment <<EOF
-#ifdef HAVE_GETAUXVAL
-#include <sys/auxv.h>
-#endif
-EOF
-fi
-fragment <<EOF
-
 /* Search for a needed file in a path.  */
 
 static bfd_boolean
@@ -615,25 +605,12 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	    case 'P':
 	      if (strcmp (var + 2, "LATFORM") == 0)
 		{
-		  /* PLATFORM - replace with a string corresponding
-		     to the processor type of the host system.
-
-		     FIXME: Supporting this token might be a bad idea,
-		     especially for non-native linkers.  It has the potential
-		     to find incorrect results.  Maybe issuing a warning
-		     message would be safer.  Current policy: wait and see if
-		     somebody complains.  */
-		  replacement = "$OUTPUT_ARCH";
-EOF
-# We use getauxval() if it is available, but only for natives.
-if [ "x${NATIVE}" = xyes ] ; then
-fragment <<EOF
-#ifdef HAVE_GETAUXVAL
-		  replacement = (char *) getauxval (AT_PLATFORM);
-#endif
-EOF
-fi
-fragment <<EOF
+		  /* Supporting $PLATFORM in a cross-hosted environment is not
+		     possible.  Supporting it in a native environment involves
+		     loading the <sys/auxv.h> header file which loads the
+		     system <elf.h> header file, which conflicts with the
+		     "include/elf/mips.h" header file.  */
+		  replacement = NULL;
 		}
 	      break;
 
@@ -665,7 +642,7 @@ fragment <<EOF
 		/* We only issue an "unrecognised" message in verbose mode
 		   as the $<foo> token might be a legitimate component of
 		   a path name in the target's file system.  */
-		info_msg (_("unrecognised token '%s' in search path\n"), var);
+		info_msg (_("unrecognised or unsupported token '%s' in search path\n"), var);
 
 	      if (end)
 		/* Restore the path separator.  */

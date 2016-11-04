@@ -1,3 +1,12 @@
+2016-11-04  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (search_needed): Remove use of getauxval and
+	inclusion of <sys/auxv.h>.  Replace support for $PLATFORM with a
+	warning message.
+	* configure.ac (AC_CHECK_FUNCS): Remove getauxval.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ldlang.h (struct lang_wild_statement_struct): Add
