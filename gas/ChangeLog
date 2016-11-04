@@ -1,3 +1,14 @@
+2016-11-04  Nathan Sidwell  <nathan@acm.org>
+
+	gas/
+	* input-scrub.c (partial_size): Make size_t.
+	(buffer_length): Likewise.  Adjust meaning.
+	(struct input_save): Adjust partial_size type.
+	(input_scrub_reinit): New.
+	(input_scrub_push, input_scrub_begin): Use it.
+	(input_scrub_next_buffer): Fix buffer extension logic. Only scan
+	newly read buffer for newline.
+
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (find_opcode_match): Use insert function to
