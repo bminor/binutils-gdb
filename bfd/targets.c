@@ -1305,8 +1305,8 @@ static const bfd_target * const _bfd_target_vector[] =
 	&powerpc_xcoff_vec,
 #endif
 
-	&riscv_elf32_vec,
 #ifdef BFD64
+	&riscv_elf32_vec,
 	&riscv_elf64_vec,
 #endif
 	&rl78_elf32_vec,

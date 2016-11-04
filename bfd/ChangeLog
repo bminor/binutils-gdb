@@ -1,3 +1,8 @@
+2016-11-04  Nick Clifton  <nickc@redhat.com>
+
+	* targets.c (bfd_target_vector): Only add riscv_elf32_vec target
+	when supporting 64-bit BFD targets.
+
 2016-11-03  Tristan Gingold  <gingold@adacore.com>
 
 	* config.bfd: Deprecate many old triplets.
