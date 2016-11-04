@@ -1,3 +1,14 @@
+2016-11-04  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	* Makefile.am (CPU_DOCS): Add c-riscv.texi.
+	* Makefile.in: Regenerate.
+	* doc/all.texi: Set RISCV.
+	* doc/as.texinfo: Add RISCV options.
+	Add RISC-V-Dependent node.
+	Include c-riscv.texi.
+	* doc/c-riscv.texi: Rename RISC-V Options to RISC-V-Opts.
+
 2016-11-03  Graham Markall  <graham.markall@embecosm.com>
 
 	* testsuite/gas/arc/nps400-6.s: Change ldbit tests so that limm

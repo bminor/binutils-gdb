@@ -511,6 +511,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mint-register=@var{number}}]
    [@b{-mgcc-abi}|@b{-mrx-abi}]
 @end ifset
+@ifset RISCV
+
+@emph{Target RISC-V options:}
+   [@b{-m32}|@b{-m64}]
+   [@b{-mrvc}]
+   [@b{-mhard-float}|@b{-msoft-float}]
+@end ifset
 @ifset S390
 
 @emph{Target s390 options:}
@@ -7592,6 +7599,9 @@ subject, see the hardware manufacturer's manual.
 @ifset RL78
 * RL78-Dependent::              RL78 Dependent Features
 @end ifset
+@ifset RISCV
+* RISC-V-Dependent::            RISC-V Dependent Features
+@end ifset
 @ifset RX
 * RX-Dependent::                RX Dependent Features
 @end ifset
@@ -7817,6 +7827,10 @@ family.
 
 @ifset RL78
 @include c-rl78.texi
+@end ifset
+
+@ifset RISCV
+@include c-riscv.texi
 @end ifset
 
 @ifset RX

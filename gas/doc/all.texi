@@ -63,6 +63,7 @@
 @set PJ
 @set PPC
 @set RL78
+@set RISCV
 @set RX
 @set S390
 @set SCORE

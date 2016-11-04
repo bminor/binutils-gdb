@@ -15,10 +15,10 @@
 
 @cindex RISC-V support
 @menu
-* RISC-V Options::      RISC-V Options
+* RISC-V-Opts::      RISC-V Options
 @end menu
 
-@node RISC-V Options
+@node RISC-V-Opts
 @section Options
 
 The following table lists all availiable RISC-V specific options
@@ -40,8 +40,8 @@ Enables the C ISA subset for compressed instructions.
 Select the floating-point ABI, hard-float has F registers while soft-float
 doesn't.
 
-@cindex @samp{-march=RV{32,64}{G,I}{M,}{A,}{F,}{D,}{C,}} option, RISC-V
-@item -march=RV{32,64}{G,I}{M,}{A,}{F,}{D,}{C,}
+@cindex @samp{-march=ISA} option, RISC-V
+@item -march=ISA
 Select the base isa, as specified by ISA.  For example -march=RV32IMA.
 
 @end table
