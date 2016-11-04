@@ -131,6 +131,7 @@ recognized:
 @code{cortex-r5},
 @code{cortex-r7},
 @code{cortex-r8},
+@code{cortex-m33},
 @code{cortex-m23},
 @code{cortex-m7},
 @code{cortex-m4},

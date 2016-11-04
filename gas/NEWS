@@ -2,7 +2,7 @@
 
 * Add support for the RISC-V architecture.
 
-* Add support for the ARM Cortex-M23 processor.
+* Add support for the ARM Cortex-M23 and Cortex-M33 processors.
 
 Changes in 2.27:
 

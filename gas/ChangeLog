@@ -1,5 +1,12 @@
 2016-11-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (cortex-m33): Declare new processor.
+	* doc/c-arm.texi (-mcpu ARM command line option): Document new
+	Cortex-M33 processor.
+	* NEWS: Mention ARM Cortex-M33 support.
+
+2016-11-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (cortex-m23): Declare new processor.
 	* doc/c-arm.texi (-mcpu ARM command line option): Document new
 	Cortex-M23 processor.
