@@ -901,7 +901,7 @@ ui_out_query_field (struct ui_out *uiout, int colno,
   return 0;
 }
 
-/* Initalize private members at startup.  */
+/* Initialize private members at startup.  */
 
 struct ui_out *
 ui_out_new (const struct ui_out_impl *impl, void *data,

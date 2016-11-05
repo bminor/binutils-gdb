@@ -2401,7 +2401,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
      arg was not supplied to avoid probing beyond the end of valid memory.
      If memory is full of garbage that classifies as c0opc_uninteresting.
      If this fails (eg. if no symbols) pc ends up 0 as it was.
-     Intialize the Call0 frame and register tracking info.
+     Initialize the Call0 frame and register tracking info.
      Assume it's Call0 until an 'entry' instruction is encountered.
      Assume we may be in the prologue until we hit a flow control instr.  */
 

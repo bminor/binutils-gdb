@@ -912,7 +912,7 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
   else
     m_symtab_enabled = 0;
 
-  /* Initalize timer to keep track of how long we waited for the user.  */
+  /* Initialize timer to keep track of how long we waited for the user.  */
   reset_prompt_for_continue_wait_time ();
 }
 

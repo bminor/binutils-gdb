@@ -1642,7 +1642,7 @@ static char *wrap_indent;
 static int wrap_column;
 
 
-/* Inialize the number of lines per page and chars per line.  */
+/* Initialize the number of lines per page and chars per line.  */
 
 void
 init_page_info (void)
@@ -1873,7 +1873,7 @@ prompt_for_continue (void)
   do_cleanups (old_chain);
 }
 
-/* Initalize timer to keep track of how long we waited for the user.  */
+/* Initialize timer to keep track of how long we waited for the user.  */
 
 void
 reset_prompt_for_continue_wait_time (void)

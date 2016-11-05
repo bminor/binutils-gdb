@@ -1,3 +1,14 @@
+2016-11-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (scoped_command_stats::scoped_command_stats): Fix typo.
+	* ppcnbsd-tdep.c (_initialize_ppcnbsd_tdep): Likewise.
+	* ppcobsd-tdep.c (_initialize_ppcobsd_tdep): Likewise.
+	* ui-out.c (ui_out_new): Likewise.
+	* utils.c (init_page_info): Likewise.
+	(reset_prompt_for_continue_wait_time): Likewise.
+	* windows-nat.c (windows_init_thread_list): Likewise.
+	* xtensa-tdep.c (call0_analyze_prologue): Likewise.
+
 2016-10-29  Manish Goregaokar  <manish@mozilla.com>
 
     * rust-exp.y: Parse `sizeof(exp)` as `UNOP_SIZEOF`

@@ -292,7 +292,7 @@ _initialize_ppcobsd_tdep (void)
 			  ppcobsd_init_abi);
 
   /* Avoid initializing the register offsets again if they were
-     already initailized by ppcobsd-nat.c.  */
+     already initialized by ppcobsd-nat.c.  */
   if (ppcobsd_reg_offsets.pc_offset == 0)
     {
       /* General-purpose registers.  */
