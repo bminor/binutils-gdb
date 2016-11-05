@@ -1,3 +1,7 @@
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-ref.h: New file.
+
 2017-01-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli-out.c (cli_ui_out::do_redirect): Change return type to
