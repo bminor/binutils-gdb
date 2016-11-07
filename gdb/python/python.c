@@ -99,6 +99,7 @@ const struct extension_language_defn extension_language_python =
 #include "gdbthread.h"
 #include "interps.h"
 #include "event-top.h"
+#include "py-ref.h"
 
 /* True if Python has been successfully initialized, false
    otherwise.  */
@@ -1266,24 +1267,20 @@ static PyObject *
 gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 {
   struct program_space *ps;
-  PyObject *list;
 
-  list = PyList_New (0);
-  if (!list)
+  gdbpy_ref list (PyList_New (0));
+  if (list == NULL)
     return NULL;
 
   ALL_PSPACES (ps)
   {
     PyObject *item = pspace_to_pspace_object (ps);
 
-    if (!item || PyList_Append (list, item) == -1)
-      {
-	Py_DECREF (list);
-	return NULL;
-      }
+    if (!item || PyList_Append (list.get (), item) == -1)
+      return NULL;
   }
 
-  return list;
+  return list.release ();
 }
 
 
@@ -1366,24 +1363,20 @@ static PyObject *
 gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
 {
   struct objfile *objf;
-  PyObject *list;
 
-  list = PyList_New (0);
-  if (!list)
+  gdbpy_ref list (PyList_New (0));
+  if (list == NULL)
     return NULL;
 
   ALL_OBJFILES (objf)
   {
     PyObject *item = objfile_to_objfile_object (objf);
 
-    if (!item || PyList_Append (list, item) == -1)
-      {
-	Py_DECREF (list);
-	return NULL;
-      }
+    if (!item || PyList_Append (list.get (), item) == -1)
+      return NULL;
   }
 
-  return list;
+  return list.release ();
 }
 
 /* Compute the list of active python type printers and store them in
