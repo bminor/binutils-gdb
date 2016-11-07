@@ -27,6 +27,7 @@
 #include "completer.h"
 #include "expression.h"
 #include "language.h"
+#include "py-ref.h"
 
 extern PyTypeObject fnpy_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
@@ -37,22 +38,19 @@ static PyObject *
 convert_values_to_python (int argc, struct value **argv)
 {
   int i;
-  PyObject *result = PyTuple_New (argc);
+  gdbpy_ref result (PyTuple_New (argc));
 
-  if (! result)
+  if (result == NULL)
     return NULL;
 
   for (i = 0; i < argc; ++i)
     {
-      PyObject *elt = value_to_value_object (argv[i]);
-      if (! elt)
-	{
-	  Py_DECREF (result);
-	  return NULL;
-	}
-      PyTuple_SetItem (result, i, elt);
+      gdbpy_ref elt (value_to_value_object (argv[i]));
+      if (elt == NULL)
+	return NULL;
+      PyTuple_SetItem (result.get (), i, elt.release ());
     }
-  return result;
+  return result.release ();
 }
 
 /* Call a Python function object's invoke method.  */
@@ -172,21 +170,18 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
   if (PyObject_HasAttrString (self, "__doc__"))
     {
-      PyObject *ds_obj = PyObject_GetAttrString (self, "__doc__");
+      gdbpy_ref ds_obj (PyObject_GetAttrString (self, "__doc__"));
       if (ds_obj != NULL)
 	{
-	  if (gdbpy_is_string (ds_obj))
+	  if (gdbpy_is_string (ds_obj.get ()))
 	    {
-	      docstring = python_string_to_host_string (ds_obj);
+	      docstring = python_string_to_host_string (ds_obj.get ());
 	      if (docstring == NULL)
 		{
 		  Py_DECREF (self);
-		  Py_DECREF (ds_obj);
 		  return -1;
 		}
 	    }
-
-	  Py_DECREF (ds_obj);
 	}
     }
   if (! docstring)

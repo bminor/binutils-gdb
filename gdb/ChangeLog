@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-function.c (convert_values_to_python, fnpy_init): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-cmd.c (gdbpy_string_to_argv): Use gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
