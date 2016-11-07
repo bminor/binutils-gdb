@@ -1865,6 +1865,16 @@ specifies the first set of directories to search.  The
 either by specifying a list of names separated by colons, or by
 appearing multiple times.
 
+The tokens @var{$ORIGIN} and @var{$LIB} can appear in these search
+directories.  They will be replaced by the full path to the directory
+containing the program or shared object in the case of @var{$ORIGIN}
+and either @samp{lib} - for 32-bit binaries - or @samp{lib64} - for
+64-bit binaries - in the case of @var{$LIB}.
+
+The alternative form of these tokens - @var{$@{ORIGIN@}} and
+@var{$@{LIB@}} can also be used.  The token @var{$PLATFORM} is not
+supported.
+
 This option should be used with caution as it overrides the search path
 that may have been hard compiled into a shared library. In such a case it
 is possible to use unintentionally a different search path than the

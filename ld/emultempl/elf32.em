@@ -495,6 +495,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
   len = strlen (name);
   while (1)
     {
+      unsigned offset = 0;
       char * var;
       char *filename, *sset;
 
@@ -527,8 +528,10 @@ gld${EMULATION_NAME}_search_needed (const char *path,
       /* PR 20535: Support the same pseudo-environment variables that
 	 are supported by ld.so.  Namely, $ORIGIN, $LIB and $PLATFORM.
          Since there can be more than one occurrence of these tokens in
-	 the path we loop until no more are found.  */
-      while ((var = strchr (filename, '$')) != NULL)
+	 the path we loop until no more are found.  Since we might not
+	 be able to substitute some of the tokens we maintain an offset
+	 into the filename for where we should begin our scan.  */
+      while ((var = strchr (filename + offset, '$')) != NULL)
 	{
 	  /* The ld.so manual page does not say, but I am going to assume that
 	     these tokens are terminated by a directory seperator character
@@ -536,13 +539,14 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	     $ORIGIN should only be used at the start of a path, but that is
 	     not enforced here.
 
-	     FIXME: The ld.so manual page also states that it allows ${ORIGIN}
-	     ${LIB} and ${PLATFORM}.  We should support these variants too.
+	     The ld.so manual page also states that it allows ${ORIGIN},
+	     ${LIB} and ${PLATFORM}, so these are supported as well.
 
 	     FIXME: The code could be a lot cleverer about allocating space
 	     for the processed string.  */
 	  char *    end = strchr (var, '/');
 	  char *    replacement = NULL;
+	  char *    v = var + 1;
 	  char *    freeme = NULL;
 	  unsigned  flen = strlen (filename);
 
@@ -550,16 +554,27 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	    /* Temporarily terminate the filename at the end of the token.  */
 	    * end = 0;
 
-	  switch (var[1])
+	  if (*v == '{')
+	    ++ v;
+	  switch (*v++)
 	    {
 	    case 'O':
-	      if (strcmp (var + 2, "RIGIN") == 0)
+	      if (strcmp (v, "RIGIN") == 0 || strcmp (v, "RIGIN}") == 0)
 		{
 		  /* ORIGIN - replace with the full path to the directory
 		     containing the program or shared object.  */
 		  if (needed.by == NULL)
-		    break;
-		  replacement = bfd_get_filename (needed.by);
+		    {
+		      if (link_info.output_bfd == NULL)
+			{
+			  break;
+			}
+		      else
+			replacement = bfd_get_filename (link_info.output_bfd);
+		    }
+		  else
+		    replacement = bfd_get_filename (needed.by);
+
 		  if (replacement)
 		    {
 		      char * slash;
@@ -582,7 +597,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	      break;
 
 	    case 'L':
-	      if (strcmp (var + 2, "IB") == 0)
+	      if (strcmp (v, "IB") == 0 || strcmp (v, "IB}") == 0)
 		{
 		  /* LIB - replace with "lib" in 32-bit environments
 		     and "lib64" in 64-bit environments.  */
@@ -603,17 +618,12 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	      break;
 
 	    case 'P':
-	      if (strcmp (var + 2, "LATFORM") == 0)
-		{
-		  /* Supporting $PLATFORM in a cross-hosted environment is not
-		     possible.  Supporting it in a native environment involves
-		     loading the <sys/auxv.h> header file which loads the
-		     system <elf.h> header file, which conflicts with the
-		     "include/elf/mips.h" header file.  */
-		  replacement = NULL;
-		}
-	      break;
-
+	      /* Supporting $PLATFORM in a cross-hosted environment is not
+		 possible.  Supporting it in a native environment involves
+		 loading the <sys/auxv.h> header file which loads the
+		 system <elf.h> header file, which conflicts with the
+		 "include/elf/mips.h" header file.  */
+	      /* Fall through.  */
 	    default:
 	      break;
 	    }
@@ -623,14 +633,20 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	      char * filename2 = xmalloc (flen + strlen (replacement));
 
 	      if (end)
-		sprintf (filename2, "%.*s%s/%s",
-			 (int)(var - filename), filename,
-			 replacement, end + 1);
+		{
+		  sprintf (filename2, "%.*s%s/%s",
+			   (int)(var - filename), filename,
+			   replacement, end + 1);
+		  offset = (var - filename) + 1 + strlen (replacement);
+		}
 	      else
-		sprintf (filename2, "%.*s%s",
-			 (int)(var - filename), filename,
-			 replacement);
-		
+		{
+		  sprintf (filename2, "%.*s%s",
+			   (int)(var - filename), filename,
+			   replacement);
+		  offset = var - filename + strlen (replacement);
+		}
+
 	      free (filename);
 	      filename = filename2;
 	      /* There is no need to restore the path separator (when
@@ -647,12 +663,17 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 	      if (end)
 		/* Restore the path separator.  */
 		* end = '/';
+
+	      /* PR 20784: Make sure that we resume the scan
+	         *after* the token that we could not replace.  */
+	      offset = (var + 1) - filename;
 	    }
 
 	  free (freeme);
 	}
 
       needed.name = filename;
+
       if (gld${EMULATION_NAME}_try_needed (&needed, force))
 	return TRUE;
 

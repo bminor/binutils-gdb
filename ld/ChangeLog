@@ -1,5 +1,14 @@
 2016-11-07  Nick Clifton  <nickc@redhat.com>
 
+	PR ld/20784
+	* emultempl/elf32.em (search_needed): Fix infinite loop when
+	unable to process a token.  Add support for curly braced enclosed
+	tokens.
+	* ld.texinfo (--rpath-link): Document supprot for $ORIGIN and
+	$LIB.
+
+2016-11-07  Nick Clifton  <nickc@redhat.com>
+
 	* ld.texinfo (--compress-debug-sections): Expand documentation of
 	this option.
 
