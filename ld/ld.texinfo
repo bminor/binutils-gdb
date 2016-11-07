@@ -2319,17 +2319,28 @@ hash tables.  The default is @code{sysv}.
 @itemx --compress-debug-sections=zlib
 @itemx --compress-debug-sections=zlib-gnu
 @itemx --compress-debug-sections=zlib-gabi
-On ELF platforms , these options control how DWARF debug sections are
-compressed using zlib.  @option{--compress-debug-sections=none} doesn't
-compress DWARF debug sections.
-@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
-sections and rename debug section names to begin with @samp{.zdebug}
-instead of @samp{.debug}.  @option{--compress-debug-sections=zlib}
-and @option{--compress-debug-sections=zlib-gabi}
-compress DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
-The default behaviour varies depending upon the target involved and
-the configure options used to build the toolchain.  The default can be
-determined by examing the output from the linker's @option{--help} option.
+On ELF platforms, these options control how DWARF debug sections are
+compressed using zlib.
+
+@option{--compress-debug-sections=none} doesn't compress DWARF debug
+sections.  @option{--compress-debug-sections=zlib-gnu} compresses
+DWARF debug sections and renames them to begin with @samp{.zdebug}
+instead of @samp{.debug}.  @option{--compress-debug-sections=zlib-gabi}
+also compresses DWARF debug sections, but rather than renaming them it
+sets the SHF_COMPRESSED flag in the sections' headers.
+
+The @option{--compress-debug-sections=zlib} option is an alias for
+@option{--compress-debug-sections=zlib-gabi}.
+
+Note that this option overrides any compression in input debug
+sections, so if a binary is linked with @option{--compress-debug-sections=none}
+for example, then any compressed debug sections in input files will be
+uncompressed before they are copied into the output binary.
+
+The default compression behaviour varies depending upon the target
+involved and the configure options used to build the toolchain.  The
+default can be determined by examining the output from the linker's
+@option{--help} option.
 
 @kindex --reduce-memory-overheads
 @item --reduce-memory-overheads
