@@ -1,5 +1,9 @@
 2016-11-07  Doug Evans  <dje@google.com>
 
+	* python/py-unwind.c (unwind_infopy_str): Fix use of VEC_iterate.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
 	* configure.tgt (x86_64-*-elf*): Remove i386bsd-tdep.o.
 
 2016-11-04  Simon Marchi  <simon.marchi@polymtl.ca>

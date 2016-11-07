@@ -212,9 +212,7 @@ unwind_infopy_str (PyObject *self)
 
     get_user_print_options (&opts);
     fprintf_unfiltered (strfile, "\nSaved registers: (");
-    for (i = 0;
-         i < VEC_iterate (saved_reg, unwind_info->saved_regs, i, reg);
-         i++)
+    for (i = 0; VEC_iterate (saved_reg, unwind_info->saved_regs, i, reg); i++)
       {
         struct value *value = value_object_to_value (reg->value);
 
