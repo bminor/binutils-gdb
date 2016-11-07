@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-symbol.c (gdbpy_lookup_symbol): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-value.c (value_has_field, get_field_flag)
 	(get_field_type, valpy_getitem, convert_value_from_python): Use
 	gdbpy_ref.
