@@ -754,7 +754,8 @@ valpy_getitem (PyObject *self, PyObject *key)
       struct value *res_val = NULL;
 
       if (field)
-	res_val = value_struct_elt (&tmp, NULL, field, 0, NULL);
+	res_val = value_struct_elt (&tmp, NULL, field, NULL,
+				    "struct/class/union");
       else if (bitpos >= 0)
 	res_val = value_struct_elt_bitpos (&tmp, bitpos, field_type,
 					   "struct/class/union");

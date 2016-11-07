@@ -1,5 +1,10 @@
 2016-11-07  Doug Evans  <dje@google.com>
 
+	* guile/scm-value.c (gdbscm_value_field): Fix call to value_struct_elt.
+	* python/py-value.c (valpy_getitem): Ditto.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
 	* i386-tdep.c (i386_gdbarch_init): Add comments.
 
 2016-11-07  Doug Evans  <dje@google.com>

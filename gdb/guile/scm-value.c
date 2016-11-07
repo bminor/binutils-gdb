@@ -726,7 +726,8 @@ gdbscm_value_field (SCM self, SCM field_scm)
     {
       struct value *tmp = value;
 
-      res_val = value_struct_elt (&tmp, NULL, field, NULL, NULL);
+      res_val = value_struct_elt (&tmp, NULL, field, NULL,
+				  "struct/class/union");
     }
   CATCH (except, RETURN_MASK_ALL)
     {
