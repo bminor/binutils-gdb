@@ -52,18 +52,15 @@ gdbpy_free_xmethod_worker_data (const struct extension_language_defn *extlang,
 				void *data)
 {
   struct gdbpy_worker_data *worker_data = (struct gdbpy_worker_data *) data;
-  struct cleanup *cleanups;
 
   gdb_assert (worker_data->worker != NULL && worker_data->this_type != NULL);
 
   /* We don't do much here, but we still need the GIL.  */
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   Py_DECREF (worker_data->worker);
   Py_DECREF (worker_data->this_type);
   xfree (worker_data);
-
-  do_cleanups (cleanups);
 }
 
 /* Implementation of clone_xmethod_worker_data for Python.  */
@@ -74,20 +71,17 @@ gdbpy_clone_xmethod_worker_data (const struct extension_language_defn *extlang,
 {
   struct gdbpy_worker_data *worker_data
     = (struct gdbpy_worker_data *) data, *new_data;
-  struct cleanup *cleanups;
 
   gdb_assert (worker_data->worker != NULL && worker_data->this_type != NULL);
 
   /* We don't do much here, but we still need the GIL.  */
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   new_data = XCNEW (struct gdbpy_worker_data);
   new_data->worker = worker_data->worker;
   new_data->this_type = worker_data->this_type;
   Py_INCREF (new_data->worker);
   Py_INCREF (new_data->this_type);
-
-  do_cleanups (cleanups);
 
   return new_data;
 }

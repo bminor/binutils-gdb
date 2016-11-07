@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-xmethods.c (gdbpy_free_xmethod_worker_data)
+	(gdbpy_clone_xmethod_worker_data): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-type.c (save_objfile_types): Use gdbpy_enter.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
