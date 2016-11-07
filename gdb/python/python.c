@@ -202,23 +202,28 @@ const struct extension_language_ops python_extension_ops =
 struct gdbarch *python_gdbarch;
 const struct language_defn *python_language;
 
-/* Restore global language and architecture and Python GIL state
-   when leaving the Python interpreter.  */
-
-struct python_env
+gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
+			   const struct language_defn *language)
+: m_gdbarch (python_gdbarch),
+  m_language (python_language)
 {
-  struct active_ext_lang_state *previous_active;
-  PyGILState_STATE state;
-  struct gdbarch *gdbarch;
-  const struct language_defn *language;
-  PyObject *error_type, *error_value, *error_traceback;
-};
+  /* We should not ever enter Python unless initialized.  */
+  if (!gdb_python_initialized)
+    error (_("Python not initialized"));
 
-static void
-restore_python_env (void *p)
+  m_previous_active = set_active_ext_lang (&extension_language_python);
+
+  m_state = PyGILState_Ensure ();
+
+  python_gdbarch = gdbarch;
+  python_language = language;
+
+  /* Save it and ensure ! PyErr_Occurred () afterwards.  */
+  PyErr_Fetch (&m_error_type, &m_error_value, &m_error_traceback);
+}
+
+gdbpy_enter::~gdbpy_enter ()
 {
-  struct python_env *env = (struct python_env *)p;
-
   /* Leftover Python error is forbidden by Python Exception Handling.  */
   if (PyErr_Occurred ())
     {
@@ -227,15 +232,21 @@ restore_python_env (void *p)
       warning (_("internal error: Unhandled Python exception"));
     }
 
-  PyErr_Restore (env->error_type, env->error_value, env->error_traceback);
+  PyErr_Restore (m_error_type, m_error_value, m_error_traceback);
 
-  PyGILState_Release (env->state);
-  python_gdbarch = env->gdbarch;
-  python_language = env->language;
+  PyGILState_Release (m_state);
+  python_gdbarch = m_gdbarch;
+  python_language = m_language;
 
-  restore_active_ext_lang (env->previous_active);
+  restore_active_ext_lang (m_previous_active);
+}
 
-  xfree (env);
+static void
+restore_python_env (void *p)
+{
+  gdbpy_enter *env = (gdbpy_enter *) p;
+
+  delete env;
 }
 
 /* Called before entering the Python interpreter to install the
@@ -248,23 +259,7 @@ struct cleanup *
 ensure_python_env (struct gdbarch *gdbarch,
                    const struct language_defn *language)
 {
-  struct python_env *env = XNEW (struct python_env);
-
-  /* We should not ever enter Python unless initialized.  */
-  if (!gdb_python_initialized)
-    error (_("Python not initialized"));
-
-  env->previous_active = set_active_ext_lang (&extension_language_python);
-
-  env->state = PyGILState_Ensure ();
-  env->gdbarch = python_gdbarch;
-  env->language = python_language;
-
-  python_gdbarch = gdbarch;
-  python_language = language;
-
-  /* Save it and ensure ! PyErr_Occurred () afterwards.  */
-  PyErr_Fetch (&env->error_type, &env->error_value, &env->error_traceback);
+  gdbpy_enter *env = new gdbpy_enter (gdbarch, language);
 
   return make_cleanup (restore_python_env, env);
 }

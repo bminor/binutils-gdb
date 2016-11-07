@@ -1,5 +1,12 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (gdbpy_enter): New constructor.
+	(~gdbpy_enter): New destructor.
+	(restore_python_env, ensure_python_env): Rewrite.
+	* python/python-internal.h (gdbpy_enter): New class.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-symbol.c (gdbpy_lookup_symbol): Use gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>

@@ -501,6 +501,31 @@ int gdbpy_initialize_unwind (void)
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 struct cleanup *make_cleanup_py_xdecref (PyObject *py);
 
+/* Called before entering the Python interpreter to install the
+   current language and architecture to be used for Python values.
+   Also set the active extension language for GDB so that SIGINT's
+   are directed our way, and if necessary install the right SIGINT
+   handler.  */
+class gdbpy_enter
+{
+ public:
+
+  gdbpy_enter (struct gdbarch *gdbarch, const struct language_defn *language);
+
+  ~gdbpy_enter ();
+
+  gdbpy_enter (const gdbpy_enter &) = delete;
+  gdbpy_enter &operator= (const gdbpy_enter &) = delete;
+
+ private:
+
+  struct active_ext_lang_state *m_previous_active;
+  PyGILState_STATE m_state;
+  struct gdbarch *m_gdbarch;
+  const struct language_defn *m_language;
+  PyObject *m_error_type, *m_error_value, *m_error_traceback;
+};
+
 struct cleanup *ensure_python_env (struct gdbarch *gdbarch,
 				   const struct language_defn *language);
 
