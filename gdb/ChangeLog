@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-type.c (convert_field, make_fielditem, typy_fields)
+	(typy_range): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-threadevent.c (create_thread_event_object): Use
 	gdbpy_ref.
 	* python/py-stopevent.c (create_stop_event_object): Simplify.
