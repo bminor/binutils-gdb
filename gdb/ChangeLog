@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-objfile.c (py_free_objfile): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-inferior.c (python_on_normal_stop, python_on_resume)
 	(python_on_inferior_call_pre, python_on_inferior_call_post)
 	(python_on_memory_change, python_on_register_change)
