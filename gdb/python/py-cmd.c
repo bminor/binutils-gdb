@@ -27,6 +27,7 @@
 #include "cli/cli-decode.h"
 #include "completer.h"
 #include "language.h"
+#include "py-ref.h"
 
 /* Struct representing built-in completion types.  */
 struct cmdpy_completer
@@ -784,13 +785,12 @@ PyTypeObject cmdpy_object_type =
 PyObject *
 gdbpy_string_to_argv (PyObject *self, PyObject *args)
 {
-  PyObject *py_argv;
   const char *input;
 
   if (!PyArg_ParseTuple (args, "s", &input))
     return NULL;
 
-  py_argv = PyList_New (0);
+  gdbpy_ref py_argv (PyList_New (0));
   if (py_argv == NULL)
     return NULL;
 
@@ -805,21 +805,18 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
       for (i = 0; c_argv[i] != NULL; ++i)
 	{
-	  PyObject *argp = PyString_FromString (c_argv[i]);
+	  gdbpy_ref argp (PyString_FromString (c_argv[i]));
 
 	  if (argp == NULL
-	      || PyList_Append (py_argv, argp) < 0)
+	      || PyList_Append (py_argv.get (), argp.get ()) < 0)
 	    {
-	      Py_XDECREF (argp);
-	      Py_DECREF (py_argv);
 	      freeargv (c_argv);
 	      return NULL;
 	    }
-	  Py_DECREF (argp);
 	}
 
       freeargv (c_argv);
     }
 
-  return py_argv;
+  return py_argv.release ();
 }

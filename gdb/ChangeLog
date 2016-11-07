@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-cmd.c (gdbpy_string_to_argv): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-type.c (convert_field, make_fielditem, typy_fields)
 	(typy_range): Use gdbpy_ref.
 
