@@ -477,22 +477,14 @@ build_inferior_list (struct inferior *inf, void *arg)
 PyObject *
 gdbpy_inferiors (PyObject *unused, PyObject *unused2)
 {
-  PyObject *list, *tuple;
-
-  list = PyList_New (0);
-  if (!list)
+  gdbpy_ref list (PyList_New (0));
+  if (list == NULL)
     return NULL;
 
-  if (iterate_over_inferiors (build_inferior_list, list))
-    {
-      Py_DECREF (list);
-      return NULL;
-    }
+  if (iterate_over_inferiors (build_inferior_list, list.get ()))
+    return NULL;
 
-  tuple = PyList_AsTuple (list);
-  Py_DECREF (list);
-
-  return tuple;
+  return PyList_AsTuple (list.get ());
 }
 
 /* Membuf and memory manipulation.  */
