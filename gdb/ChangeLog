@@ -1,5 +1,13 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-inferior.c (python_on_normal_stop, python_on_resume)
+	(python_on_inferior_call_pre, python_on_inferior_call_post)
+	(python_on_memory_change, python_on_register_change)
+	(python_inferior_exit, python_new_objfile, add_thread_object)
+	(delete_thread_object, py_free_inferior): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-finishbreakpoint.c (bpfinishpy_handle_stop)
 	(bpfinishpy_handle_exit): Use gdbpy_enter.
 

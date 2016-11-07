@@ -81,7 +81,6 @@ extern PyTypeObject membuf_object_type
 static void
 python_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  struct cleanup *cleanup;
   enum gdb_signal stop_signal;
 
   if (!gdb_python_initialized)
@@ -92,28 +91,22 @@ python_on_normal_stop (struct bpstats *bs, int print_frame)
 
   stop_signal = inferior_thread ()->suspend.stop_signal;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   if (emit_stop_event (bs, stop_signal) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 static void
 python_on_resume (ptid_t ptid)
 {
-  struct cleanup *cleanup;
-
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   if (emit_continue_event (ptid) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 /* Callback, registered as an observer, that notifies Python listeners
@@ -122,14 +115,10 @@ python_on_resume (ptid_t ptid)
 static void
 python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   if (emit_inferior_call_event (INFERIOR_CALL_PRE, thread, address) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 /* Callback, registered as an observer, that notifies Python listeners
@@ -138,14 +127,10 @@ python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 static void
 python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   if (emit_inferior_call_event (INFERIOR_CALL_POST, thread, address) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 /* Callback, registered as an observer, that notifies Python listeners
@@ -155,14 +140,10 @@ python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 static void
 python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len, const bfd_byte *data)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   if (emit_memory_changed_event (addr, len) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 /* Callback, registered as an observer, that notifies Python listeners
@@ -172,34 +153,27 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
 static void
 python_on_register_change (struct frame_info *frame, int regnum)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   if (emit_register_changed_event (frame, regnum) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 static void
 python_inferior_exit (struct inferior *inf)
 {
-  struct cleanup *cleanup;
   const LONGEST *exit_code = NULL;
 
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   if (inf->has_exit_code)
     exit_code = &inf->exit_code;
 
   if (emit_exited_event (exit_code, inf) < 0)
     gdbpy_print_stack ();
-
-  do_cleanups (cleanup);
 }
 
 /* Callback used to notify Python listeners about new objfiles loaded in the
@@ -209,15 +183,13 @@ python_inferior_exit (struct inferior *inf)
 static void
 python_new_objfile (struct objfile *objfile)
 {
-  struct cleanup *cleanup;
-
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (objfile != NULL
-			       ? get_objfile_arch (objfile)
-			       : target_gdbarch (),
-			       current_language);
+  gdbpy_enter enter_py (objfile != NULL
+			? get_objfile_arch (objfile)
+			: target_gdbarch (),
+			current_language);
 
   if (objfile == NULL)
     {
@@ -229,8 +201,6 @@ python_new_objfile (struct objfile *objfile)
       if (emit_new_objfile_event (objfile) < 0)
 	gdbpy_print_stack ();
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Return a reference to the Python object of type Inferior
@@ -312,7 +282,6 @@ find_thread_object (ptid_t ptid)
 static void
 add_thread_object (struct thread_info *tp)
 {
-  struct cleanup *cleanup;
   thread_object *thread_obj;
   inferior_object *inf_obj;
   struct threadlist_entry *entry;
@@ -320,13 +289,12 @@ add_thread_object (struct thread_info *tp)
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (python_gdbarch, python_language);
+  gdbpy_enter enter_py (python_gdbarch, python_language);
 
   thread_obj = create_thread_object (tp);
   if (!thread_obj)
     {
       gdbpy_print_stack ();
-      do_cleanups (cleanup);
       return;
     }
 
@@ -338,29 +306,23 @@ add_thread_object (struct thread_info *tp)
 
   inf_obj->threads = entry;
   inf_obj->nthreads++;
-
-  do_cleanups (cleanup);
 }
 
 static void
 delete_thread_object (struct thread_info *tp, int ignore)
 {
-  struct cleanup *cleanup;
   inferior_object *inf_obj;
   struct threadlist_entry **entry, *tmp;
 
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (python_gdbarch, python_language);
+  gdbpy_enter enter_py (python_gdbarch, python_language);
 
   inf_obj
     = (inferior_object *) find_inferior_object (ptid_get_pid (tp->ptid));
   if (!inf_obj)
-    {
-      do_cleanups (cleanup);
-      return;
-    }
+    return;
 
   /* Find thread entry in its inferior's thread_list.  */
   for (entry = &inf_obj->threads; *entry != NULL; entry =
@@ -371,7 +333,6 @@ delete_thread_object (struct thread_info *tp, int ignore)
   if (!*entry)
     {
       Py_DECREF (inf_obj);
-      do_cleanups (cleanup);
       return;
     }
 
@@ -384,8 +345,6 @@ delete_thread_object (struct thread_info *tp, int ignore)
   Py_DECREF (tmp->thread_obj);
   Py_DECREF (inf_obj);
   xfree (tmp);
-
-  do_cleanups (cleanup);
 }
 
 static PyObject *
@@ -828,15 +787,13 @@ infpy_dealloc (PyObject *obj)
 static void
 py_free_inferior (struct inferior *inf, void *datum)
 {
-
-  struct cleanup *cleanup;
   inferior_object *inf_obj = (inferior_object *) datum;
   struct threadlist_entry *th_entry, *th_tmp;
 
   if (!gdb_python_initialized)
     return;
 
-  cleanup = ensure_python_env (python_gdbarch, python_language);
+  gdbpy_enter enter_py (python_gdbarch, python_language);
 
   inf_obj->inferior = NULL;
 
@@ -853,7 +810,6 @@ py_free_inferior (struct inferior *inf, void *datum)
   inf_obj->nthreads = 0;
 
   Py_DECREF ((PyObject *) inf_obj);
-  do_cleanups (cleanup);
 }
 
 /* Implementation of gdb.selected_inferior() -> gdb.Inferior.
