@@ -13830,15 +13830,15 @@ static const unsigned char float_mem_mode[] = {
 #define ST { OP_ST, 0 }
 #define STi { OP_STi, 0 }
 
-#define FGRPd9_2 NULL, { { NULL, 0 } }, 0
-#define FGRPd9_4 NULL, { { NULL, 1 } }, 0
-#define FGRPd9_5 NULL, { { NULL, 2 } }, 0
-#define FGRPd9_6 NULL, { { NULL, 3 } }, 0
-#define FGRPd9_7 NULL, { { NULL, 4 } }, 0
-#define FGRPda_5 NULL, { { NULL, 5 } }, 0
-#define FGRPdb_4 NULL, { { NULL, 6 } }, 0
-#define FGRPde_3 NULL, { { NULL, 7 } }, 0
-#define FGRPdf_4 NULL, { { NULL, 8 } }, 0
+#define FGRPd9_2 NULL, { { NULL, 1 } }, 0
+#define FGRPd9_4 NULL, { { NULL, 2 } }, 0
+#define FGRPd9_5 NULL, { { NULL, 3 } }, 0
+#define FGRPd9_6 NULL, { { NULL, 4 } }, 0
+#define FGRPd9_7 NULL, { { NULL, 5 } }, 0
+#define FGRPda_5 NULL, { { NULL, 6 } }, 0
+#define FGRPdb_4 NULL, { { NULL, 7 } }, 0
+#define FGRPde_3 NULL, { { NULL, 8 } }, 0
+#define FGRPdf_4 NULL, { { NULL, 9 } }, 0
 
 static const struct dis386 float_reg[][8] = {
   /* d8 */
@@ -13932,48 +13932,53 @@ static const struct dis386 float_reg[][8] = {
 };
 
 static char *fgrps[][8] = {
-  /* d9_2  0 */
+  /* Bad opcode 0 */
+  {
+    "(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
+  },
+
+  /* d9_2  1 */
   {
     "fnop","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 
-  /* d9_4  1 */
+  /* d9_4  2 */
   {
     "fchs","fabs","(bad)","(bad)","ftst","fxam","(bad)","(bad)",
   },
 
-  /* d9_5  2 */
+  /* d9_5  3 */
   {
     "fld1","fldl2t","fldl2e","fldpi","fldlg2","fldln2","fldz","(bad)",
   },
 
-  /* d9_6  3 */
+  /* d9_6  4 */
   {
     "f2xm1","fyl2x","fptan","fpatan","fxtract","fprem1","fdecstp","fincstp",
   },
 
-  /* d9_7  4 */
+  /* d9_7  5 */
   {
     "fprem","fyl2xp1","fsqrt","fsincos","frndint","fscale","fsin","fcos",
   },
 
-  /* da_5  5 */
+  /* da_5  6 */
   {
     "(bad)","fucompp","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 
-  /* db_4  6 */
+  /* db_4  7 */
   {
     "fNeni(8087 only)","fNdisi(8087 only)","fNclex","fNinit",
     "fNsetpm(287 only)","frstpm(287 only)","(bad)","(bad)",
   },
 
-  /* de_3  7 */
+  /* de_3  8 */
   {
     "(bad)","fcompp","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 
-  /* df_4  8 */
+  /* df_4  9 */
   {
     "fNstsw","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },

@@ -1,3 +1,17 @@
+2016-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20775
+	* i386-dis.c (FGRPd9_2): Replace 0 with 1.
+	(FGRPd9_4): Replace 1 with 2.
+	(FGRPd9_5): Replace 2 with 3.
+	(FGRPd9_6): Replace 3 with 4.
+	(FGRPd9_7): Replace 4 with 5.
+	(FGRPda_5): Replace 5 with 6.
+	(FGRPdb_4): Replace 6 with 7.
+	(FGRPde_3): Replace 7 with 8.
+	(FGRPdf_4): Replace 8 with 9.
+	(fgrps): Add an entry for Bad_Opcode.
+
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-opc.c (arc_flag_operands): Add F_DI14.

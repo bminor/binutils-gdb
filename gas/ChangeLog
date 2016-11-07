@@ -1,3 +1,10 @@
+2016-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20775
+	* testsuite/gas/i386/i386.exp: Run fpu-bad.
+	* testsuite/gas/i386/fpu-bad.d: New file.
+	* testsuite/gas/i386/fpu-bad.s: Likewise.
+
 2016-11-04  Nathan Sidwell  <nathan@acm.org>
 
 	gas/
