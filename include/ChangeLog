@@ -1,3 +1,8 @@
+2016-11-07  Jason Merrill  <jason@redhat.com>
+
+	* demangle.h (enum demangle_component_type): Add
+	DEMANGLE_COMPONENT_NOEXCEPT, DEMANGLE_COMPONENT_THROW_SPEC.
+
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_IMM_ROT1,
