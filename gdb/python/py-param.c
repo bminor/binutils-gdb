@@ -27,6 +27,7 @@
 #include "completer.h"
 #include "language.h"
 #include "arch-utils.h"
+#include "py-ref.h"
 
 /* Parameter constants and their values.  */
 struct parm_constant
@@ -329,15 +330,14 @@ static gdb::unique_xmalloc_ptr<char>
 call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
 {
   gdb::unique_xmalloc_ptr<char> data;
-  PyObject *result = PyObject_CallMethodObjArgs (obj, method, arg, NULL);
+  gdbpy_ref result (PyObject_CallMethodObjArgs (obj, method, arg, NULL));
 
-  if (! result)
+  if (result == NULL)
     return NULL;
 
-  if (gdbpy_is_string (result))
+  if (gdbpy_is_string (result.get ()))
     {
-      data = python_string_to_host_string (result);
-      Py_DECREF (result);
+      data = python_string_to_host_string (result.get ());
       if (! data)
 	return NULL;
     }
@@ -345,7 +345,6 @@ call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Parameter must return a string value."));
-      Py_DECREF (result);
       return NULL;
     }
 

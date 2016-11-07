@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-param.c (call_doc_function): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-linetable.c (build_line_table_tuple_from_pcs)
 	(ltpy_get_all_source_lines): Use gdbpy_ref.
 
