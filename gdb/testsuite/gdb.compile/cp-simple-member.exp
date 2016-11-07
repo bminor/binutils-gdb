@@ -1,4 +1,4 @@
-# Copyright 2015, 2016 Free Software Foundation, Inc.
+# Copyright 2015-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,15 +55,20 @@ CompileExpression::add_exp "myenum me = E_B; var = me;" 11
 CompileExpression::add_exp "A::s_protected_ = N::AB; var = A::s_protected_;" 21
 CompileExpression::add_exp "A::s_private_ = E_B; var = A::s_private_;" 11
 CompileExpression::add_exp "N::ANON_E ae = N::AD; var = ae;" 23
+CompileExpression::add_imp {a.*pmi} 1
+CompileExpression::add_exp {a.public_ = 2; var = a.*pmi; a.public_ = 1} 2
 CompileExpression::run_tests "code"
 #CompileExpression::run_tests "print"
 
 # Test some compilation failures
 set failed {\r\nCompilation failed\.}
+# !!keiths: This should actually really work...
 gdb_test "compile code a.s_public_ = E_B" \
     ".*assignment of read-only variable 'A::s_public_'$failed"
+
 gdb_test "compile code get_values ()" \
     ".*too few arguments to function.*$failed"
+
 gdb_test "compile code ATYPE i;" \
     ".*.ATYPE. was not declared in this scope$failed"
 

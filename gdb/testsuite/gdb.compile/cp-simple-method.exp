@@ -1,4 +1,4 @@
-# Copyright 2015 Free Software Foundation, Inc.
+# Copyright 2015-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,5 +60,9 @@ CompileExpression::add_imp "a->get_var2 (a->get_var (), A::get_1 (2));" 336
 CompileExpression::add_imp "get_value ()" 200
 CompileExpression::add_imp "get_value (a)" 21
 CompileExpression::add_imp "get_value (get_value ())" 200
+CompileExpression::add_imp {(a->*pmf) (1)} 101
+CompileExpression::add_exp {pmf = &A::get_var1; var = (a->*pmf) (2); pmf = &A::get_var} 84
+CompileExpression::add_imp {(a->**pmf_p) (1)} 101
+
 CompileExpression::run_tests "code"
 #CompileExpression::run_tests "print"

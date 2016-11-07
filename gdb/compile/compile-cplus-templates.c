@@ -762,8 +762,7 @@ define_template_parameters_generic
 		/* This type must previously have been converted,
 		   or GCC will error with "definition of TYPE inside
 		   template parameter list."  */
-		default_type = instance->convert_type (type,
-						       GCC_CP_ACCESS_NONE);
+		default_type = instance->convert_type (type);
 	      }
 
 	    gcc_type abstract_type
@@ -780,8 +779,7 @@ define_template_parameters_generic
 
 	    /* Get the argument's type.  This type must also have been
 	     previously defined (or declared) to prevent errors.  */
-	    gcc_type abstract_type
-	      = instance->convert_type (ptype, GCC_CP_ACCESS_NONE);
+	    gcc_type abstract_type = instance->convert_type (ptype);
 	    defn->set_parameter_abstract_type (i, abstract_type);
 
 	    if (defn->default_argument (i) != NULL)
@@ -858,8 +856,7 @@ compile_cplus_instance::enumerate_template_arguments
 	case type_parameter:
 	  {
 	    gcc_type type
-	      = convert_type (SYMBOL_TYPE (arg_info->arguments[i]),
-			      GCC_CP_ACCESS_NONE);
+	      = convert_type (SYMBOL_TYPE (arg_info->arguments[i]));
 
 	    dest->elements[i].type = type;
 	  }
@@ -903,8 +900,7 @@ define_default_template_parameter_types
 	    {
 	    case type_parameter:
 	    case value_parameter:
-	      instance->convert_type (SYMBOL_TYPE (defn->default_argument (i)),
-				      GCC_CP_ACCESS_NONE);
+	      instance->convert_type (SYMBOL_TYPE (defn->default_argument (i)));
 	      break;
 
 	    case template_parameter:
@@ -1174,7 +1170,7 @@ class function_template_definer
       {
 	struct type *temp = TYPE_TARGET_TYPE (SYMBOL_TYPE (&tsym->base));
 
-	return_type = m_instance->convert_type (temp, GCC_CP_ACCESS_NONE);
+	return_type = m_instance->convert_type (temp);
       }
 
     // Get the parameters' definitions, and put them into ARRAY.
@@ -1208,7 +1204,7 @@ class function_template_definer
 	      {
 		// The parameter's type is a concrete type.
 		array.elements[i - artificials]
-		  = m_instance->convert_type (arg_type, GCC_CP_ACCESS_NONE);
+		  = m_instance->convert_type (arg_type);
 	      }
 	    else
 	      {
@@ -1238,8 +1234,7 @@ class function_template_definer
 
 	/* Get the defining class's type.  This should already be in the
 	   cache.  */
-	class_type = m_instance->convert_type (defn->parent_type (),
-					       GCC_CP_ACCESS_NONE);
+	class_type = m_instance->convert_type (defn->parent_type ());
 
 	// Add any virtuality flags.
 	if (TYPE_FN_FIELD_VIRTUAL_P (methods, defn->midx ()))

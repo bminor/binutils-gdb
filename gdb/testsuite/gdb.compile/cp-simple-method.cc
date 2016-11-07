@@ -1,4 +1,4 @@
-/* Copyright 2015 Free Software Foundation, Inc.
+/* Copyright 2015, 2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,44 +19,48 @@ static int get_value (const A* a);
 class A
 {
 public:
+  typedef int ATYPE;
+
   A (void) : a_ (21) {}
-  int get_var (void) { return a_; }
-  int get_var (unsigned long a) { return 100; }
-  int get_var (int a) { return 101; }
-  int get_var (float a) { return 102; }
-  int get_var (void *a) { return 103;}
-  int get_var (A& lr) { return 104; }
-  int get_var (A const& lr) { return 105; }
+  ATYPE get_var (void) { return a_; }
+  ATYPE get_var (unsigned long a) { return 100; }
+  ATYPE get_var (ATYPE a) { return 101; }
+  ATYPE get_var (float a) { return 102; }
+  ATYPE get_var (void *a) { return 103;}
+  ATYPE get_var (A& lr) { return 104; }
+  ATYPE get_var (A const& lr) { return 105; }
 
-  int get_var1 (int n) { return a_ << n; }
-  int get_var2 (int incr, unsigned n) { return (a_ + incr) << n; }
+  ATYPE get_var1 (int n) { return a_ << n; }
+  ATYPE get_var2 (int incr, unsigned n) { return (a_ + incr) << n; }
 
-  static int get_1 (int a) { return a + 1; }
-  static int get_2 (int a, int b) { return a + b + 2; }
+  static ATYPE get_1 (int a) { return a + 1; }
+  static ATYPE get_2 (int a, int b) { return a + b + 2; }
 
-  friend int get_value (const A*);
+  friend ATYPE get_value (const A*);
 
 private:
-  int a_;
+  ATYPE a_;
 };
 
-static int
-get_value (int a)
+static A::ATYPE
+get_value (A::ATYPE a)
 {
   return a;
 }
 
-static int
+static A::ATYPE
 get_value (const A* a)
 {
   return a->a_;
 }
 
-static int
+static A::ATYPE
 get_value (void)
 {
   return 200;
 }
+
+typedef int (A::*PMF) (A::ATYPE);
 
 int
 main (void)
@@ -67,6 +71,9 @@ main (void)
   unsigned long ul = 0xdeadbeef;
   A const* ac = a;
 
+  PMF pmf = &A::get_var;
+  PMF *pmf_p = &pmf;
+
   var -= a->get_var ();		// break here
   var -= a->get_var (1);
   var -= a->get_var (ul);
@@ -76,6 +83,9 @@ main (void)
   var -= a->get_var (*ac);
   var -= a->get_var1 (1);
   var -= a->get_var2 (1, 2);
+  var += (a->*pmf) (1);
+  var -= (a->**pmf_p) (1);
+
   return var - A::get_1 (1) + A::get_2 (1, 2) + get_value ()
     + get_value (get_value ()) + get_value (a);
 }

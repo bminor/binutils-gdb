@@ -64,8 +64,7 @@ convert_one_symbol (compile_cplus_instance *instance,
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else if (!SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym.symbol))
-    sym_type = instance->convert_type (SYMBOL_TYPE (sym.symbol),
-				       GCC_CP_ACCESS_NONE);
+    sym_type = instance->convert_type (SYMBOL_TYPE (sym.symbol));
 
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
@@ -388,7 +387,7 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
       break;
     }
 
-  sym_type = instance->convert_type (type, GCC_CP_ACCESS_NONE);
+  sym_type = instance->convert_type (type);
   instance->push_namespace ("");
   // FIXME: push (and, after the call, pop) any other namespaces, if
   // any, and drop the above when defining a class member.  drop any

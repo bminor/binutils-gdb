@@ -414,7 +414,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	{
 	  /* The type is defined inside another class(es).  Convert that
 	     type instead of defining this type.  */
-	  convert_type (SYMBOL_TYPE (comp.bsymbol.symbol), GCC_CP_ACCESS_NONE);
+	  convert_type (SYMBOL_TYPE (comp.bsymbol.symbol));
 
 	  /* If the original type (passed in to us) is defined in a nested
 	     class, the previous call will give us that type's gcc_type.
@@ -479,8 +479,7 @@ static gcc_type
 ccp_convert_reference (compile_cplus_instance *instance,
 		       struct type *type)
 {
-  gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type),
-					    GCC_CP_ACCESS_NONE);
+  gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type));
 
   /* !!keiths: GDB does not currently do anything with rvalue references.
      [Except set the type code to TYPE_CODE_ERROR!  */
@@ -502,8 +501,7 @@ static gcc_type
 ccp_convert_pointer (compile_cplus_instance *instance,
 		     struct type *type)
 {
-  gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type),
-					    GCC_CP_ACCESS_NONE);
+  gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type));
 
   return convert_pointer_base (instance, target);
 }
@@ -513,11 +511,8 @@ ccp_convert_pointer (compile_cplus_instance *instance,
 static gcc_type
 ccp_convert_array (compile_cplus_instance *instance, struct type *type)
 {
-  gcc_type element_type;
   struct type *range = TYPE_INDEX_TYPE (type);
-
-  element_type = instance->convert_type (TYPE_TARGET_TYPE (type),
-					 GCC_CP_ACCESS_NONE);
+  gcc_type element_type = instance->convert_type (TYPE_TARGET_TYPE (type));
 
   if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
     {
@@ -598,8 +593,7 @@ ccp_convert_typedef (compile_cplus_instance *instance,
   instance->enter_scope (scope);
 
   // Convert the typedef's real type.
-  gcc_type typedef_type = instance->convert_type (check_typedef (type),
-						  GCC_CP_ACCESS_NONE);
+  gcc_type typedef_type = instance->convert_type (check_typedef (type));
 
   instance->new_decl ("typedef", name,
 		      GCC_CP_SYMBOL_TYPEDEF | nested_access,
@@ -671,8 +665,7 @@ ccp_convert_struct_or_union_members (compile_cplus_instance *instance,
 	continue;
 
       field_type
-	= instance->convert_type (TYPE_FIELD_TYPE (type, i),
-				  GCC_CP_ACCESS_NONE);
+	= instance->convert_type (TYPE_FIELD_TYPE (type, i));
 
       if (field_is_static (&TYPE_FIELD (type, i)))
 	{
@@ -751,7 +744,7 @@ ccp_convert_struct_or_union_members (compile_cplus_instance *instance,
 
 /* Convert a method type to its gcc representation.  */
 
-static gcc_type __attribute__ ((used))
+static gcc_type
 ccp_convert_method (compile_cplus_instance *instance,
 		    struct type *parent_type, struct type *method_type)
 {
@@ -762,7 +755,7 @@ ccp_convert_method (compile_cplus_instance *instance,
   /* Get the actual (proto)type of the method, as a function.  */
   func_type = ccp_convert_func (instance, method_type, 1);
 
-  class_type = instance->convert_type (parent_type, GCC_CP_ACCESS_NONE);
+  class_type = instance->convert_type (parent_type);
   quals = (enum gcc_cp_qualifiers) 0;
   if (TYPE_CONST (method_type))
     quals |= GCC_CP_QUALIFIER_CONST;
@@ -773,6 +766,22 @@ ccp_convert_method (compile_cplus_instance *instance,
   rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
   result = instance->build_method_type (class_type, func_type, quals, rquals);
   return result;
+}
+
+// Convert a member or method pointer represented by TYPE.
+
+static gcc_type
+ccp_convert_memberptr (compile_cplus_instance *instance, struct type *type)
+{
+  struct type *containing_class = TYPE_SELF_TYPE (type);
+
+  if (containing_class == NULL)
+    return GCC_TYPE_NONE;
+
+  gcc_type class_type = instance->convert_type (containing_class);
+  gcc_type member_type = instance->convert_type (TYPE_TARGET_TYPE (type));
+
+  return instance->build_pointer_to_member_type (class_type, member_type);
 }
 
 #define OPHASH1(A) ((uint32_t) A << 16)
@@ -1389,8 +1398,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 		| (BASETYPE_VIA_VIRTUAL (type, i)
 		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
 		   : GCC_CP_FLAG_BASECLASS_NOFLAG);
-	      bases.elements[i] = instance->convert_type (base_type,
-							  GCC_CP_ACCESS_NONE);
+	      bases.elements[i] = instance->convert_type (base_type);
 	    }
 	}
 
@@ -1517,8 +1525,7 @@ ccp_convert_func (compile_cplus_instance *instance, struct type *type,
 
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
-  return_type = instance->convert_type (TYPE_TARGET_TYPE (type),
-					GCC_CP_ACCESS_NONE);
+  return_type = instance->convert_type (TYPE_TARGET_TYPE (type));
 
   array.n_elements = TYPE_NFIELDS (type);
   array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (type));
@@ -1533,8 +1540,7 @@ ccp_convert_func (compile_cplus_instance *instance, struct type *type,
       else
 	{
 	  array.elements[i - artificials]
-	    = instance->convert_type (TYPE_FIELD_TYPE (type, i),
-				      GCC_CP_ACCESS_NONE);
+	    = instance->convert_type (TYPE_FIELD_TYPE (type, i));
 	}
     }
 
@@ -1614,7 +1620,7 @@ ccp_convert_qualified (compile_cplus_instance *instance,
   gcc_cp_qualifiers_flags quals = (enum gcc_cp_qualifiers) 0;
   gcc_type result;
 
-  unqual_converted = instance->convert_type (unqual, GCC_CP_ACCESS_NONE);
+  unqual_converted = instance->convert_type (unqual);
 
   if (TYPE_CONST (type))
     quals |= GCC_CP_QUALIFIER_CONST;
@@ -1632,8 +1638,7 @@ static gcc_type
 ccp_convert_complex (compile_cplus_instance *instance,
 		     struct type *type)
 {
-  gcc_type base = instance->convert_type (TYPE_TARGET_TYPE (type),
-					  GCC_CP_ACCESS_NONE);
+  gcc_type base = instance->convert_type (TYPE_TARGET_TYPE (type));
 
   return instance->build_complex_type (base);
 }
@@ -1721,10 +1726,13 @@ convert_type_cplus_basic (compile_cplus_instance *instance,
     case TYPE_CODE_FUNC:
       return ccp_convert_func (instance, type, 0);
 
-#if 0
     case TYPE_CODE_METHOD:
-      return ccp_convert_method (instance, type);
-#endif
+      return ccp_convert_method (instance, TYPE_SELF_TYPE (type), type);
+
+    case TYPE_CODE_MEMBERPTR:
+    case TYPE_CODE_METHODPTR:
+      return ccp_convert_memberptr (instance, type);
+      break;
 
     case TYPE_CODE_INT:
       return ccp_convert_int (instance, type);
@@ -1960,7 +1968,7 @@ compile_cplus_instance::push_namespace (const char *name)
 {
   DECLARE_FORWARD (push_namespace, name);
 
-  return forward ("%s", name);
+  return forward ("\"%s\"", name);
 }
 
 // See description in gcc-cp-fe.def.
@@ -1970,7 +1978,7 @@ compile_cplus_instance::pop_namespace (const char *opt_name)
 {
   DECLARE_FORWARD (pop_namespace);
 
-  return forward ("%s", opt_name);
+  return forward ("\"%s\"", opt_name);
 }
 
 // See description in gcc-cp-fe.def.
@@ -2259,6 +2267,17 @@ compile_cplus_instance::start_new_template_decl (const char *generic)
   DECLARE_FORWARD (start_new_template_decl);
 
   return forward ("for generic %s\n", generic);
+}
+
+// See description in gcc-cp-fe.def.
+
+gcc_type
+compile_cplus_instance::build_pointer_to_member_type (gcc_type class_type,
+						      gcc_type member_type)
+{
+  DECLARE_FORWARD (build_pointer_to_member_type, class_type, member_type);
+
+  return forward ("%lld %lld", class_type, member_type);
 }
 
 #undef DECLARE_FORWARD

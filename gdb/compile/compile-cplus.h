@@ -120,22 +120,21 @@ namespace compile
        add it to INSTANCE's list of template definitions and scan for default
        values.  */
 
-    void
-    maybe_define_new_function_template (const struct symbol *sym,
-					struct type *parent_type,
-					int f_idx, int m_idx);
+    void maybe_define_new_function_template (const struct symbol *sym,
+					     struct type *parent_type,
+					     int f_idx, int m_idx);
 
     /* If TYPE (with declaration name DECL_NAME) represents a concrete instance
        of a new class template, note the new template definition.  */
 
-    void
-    maybe_define_new_class_template (struct type *type, const char *decl_name);
+    void maybe_define_new_class_template (struct type *type,
+					  const char *decl_name);
 
     /* Find the generic template definition for TSYM or NULL if none was
        found.  */
 
-    function_template_defn *
-    find_function_template_defn (struct template_symbol *tsym);
+    function_template_defn *find_function_template_defn
+      (struct template_symbol *tsym);
 
     /* Search for an existing class template definition based on TYPE.
        Returns NULL if no template based on TYPE is known.  */
@@ -154,12 +153,13 @@ namespace compile
 
        If this type was defined in another type, NESTED_ACCESS should indicate
        the accessibility of this type (or GCC_CP_ACCESS_NONE if not a nested
-       type).
+       type).  GCC_CP_ACCESS_NONE is the default nested access.
 
        The new GCC type is returned.  */
 
-    gcc_type convert_type (struct type *type,
-			   enum gcc_cp_symbol_kind nested_access);
+    gcc_type convert_type
+      (struct type *type,
+       enum gcc_cp_symbol_kind nested_access = GCC_CP_ACCESS_NONE);
 
     /* Factory method to create a new scope based on TYPE with name TYPE_NAME.
        [TYPE_NAME could be TYPE_NAME or SYMBOL_NATURAL_NAME.]
@@ -171,34 +171,68 @@ namespace compile
 
     compile_scope new_scope (const char *type_name, struct type *type);
 
-    /* Enter the given NEW_SCOPE.
-
-       Scopes are always pushed onto the internal stack of scopes, but they
-       are only pushed to the plug-in when necessary.  */
+    // Enter the given NEW_SCOPE.
 
     void enter_scope (compile_scope &scope);
 
-    /* Leave the current scope.
-
-       Scopes are always removed from the internal stack of scopes, but they
-       are only popped from the plug-in when necessary.  */
+    // Leave the current scope.
 
     void leave_scope ();
 
     // !!keiths: YUCK!
     // Plug-in forwards
 
+    gcc_type bool_type ();
+
+    gcc_decl build_add_enum_constant (gcc_type enum_type, const char *name,
+				      unsigned long value);
+
+    gcc_type build_array_type (gcc_type element_type, int num_elements);
+
     bool build_constant (gcc_type type, const char *name, unsigned long value,
 			 const char *filename, unsigned int line_number);
 
-    gcc_decl specialize_function_template (struct template_symbol *concrete,
-					   gcc_address address,
-					   const char *filename,
-					   unsigned int line_number);
+    gcc_type build_complex_type (gcc_type element_type);
 
-    gcc_decl specialize_class_template (struct type *concrete,
-					const char *filename,
-					unsigned int line_number);
+    gcc_type build_function_type (gcc_type return_type,
+				  const struct gcc_type_array *argument_types,
+				  bool is_varargs);
+
+    gcc_type build_method_type (gcc_type class_type, gcc_type func_type,
+				enum gcc_cp_qualifiers quals,
+				enum gcc_cp_ref_qualifiers rquals);
+
+    gcc_type build_qualified_type (gcc_type unqualified_type,
+				   enum gcc_cp_qualifiers qualifiers);
+
+    gcc_type build_pointer_to_member_type (gcc_type class_type,
+					   gcc_type member_type);
+
+    gcc_type build_pointer_type (gcc_type base_type);
+
+    gcc_type build_reference_type (gcc_type base_type,
+				   enum gcc_cp_ref_qualifiers rquals);
+
+    gcc_type build_vla_array_type (gcc_type element_type,
+				   const char *upper_bound_name);
+
+    gcc_type build_vector_type (gcc_type element_type, int num_elements);
+
+    gcc_type char_type ();
+
+    gcc_type error (const char *message);
+
+    bool finish_enum_type (gcc_type enum_type);
+
+    // NAME for debugging
+    bool finish_record_or_union (const char *name, unsigned long size_in_bytes);
+
+    gcc_type float_type (unsigned long size_in_bytes, const char *builtin_name);
+
+    gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes,
+		       const char *builtin_name);
+
+    gcc_expr literal_expr (gcc_type type, unsigned long value);
 
     // DECL_DESC for debugging only
     gcc_decl new_decl (const char *decl_desc, const char *name,
@@ -207,74 +241,9 @@ namespace compile
 		       gcc_address address,
 		       const char *filename, unsigned int line_number);
 
-    bool push_namespace (const char *name);
-
-    // NAME is for debugging only
-    bool pop_namespace (const char *name);
-
-    gcc_type error (const char *message);
-
-    gcc_type build_reference_type (gcc_type base_type,
-				   enum gcc_cp_ref_qualifiers rquals);
-
-    gcc_type build_pointer_type (gcc_type base_type);
-
-    gcc_type build_vla_array_type (gcc_type element_type,
-				   const char *upper_bound_name);
-
-    gcc_type build_vector_type (gcc_type element_type, int num_elements);
-
-    gcc_type build_array_type (gcc_type element_type, int num_elements);
-
     gcc_decl new_field (const char *field_name, gcc_type field_type,
 			enum gcc_cp_symbol_kind field_flags,
 			unsigned long bitsize, unsigned long bitpos);
-
-    gcc_type build_method_type (gcc_type class_type, gcc_type func_type,
-				enum gcc_cp_qualifiers quals,
-				enum gcc_cp_ref_qualifiers rquals);
-
-    // NAME only for debugging
-    gcc_type start_class_definition (const char *name, gcc_decl typedecl,
-				     const struct gcc_vbase_array *base_classes,
-				     const char *filename,
-				     unsigned int line_number);
-
-    // NAME for debugging
-    bool finish_record_or_union (const char *name, unsigned long size_in_bytes);
-
-    gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes,
-		       const char *builtin_name);
-
-    gcc_type start_new_enum_type (const char *name,
-				  gcc_type underlying_int_type,
-				  enum gcc_cp_symbol_kind flags,
-				  const char *filename,
-				  unsigned int line_number);
-
-    gcc_decl build_add_enum_constant (gcc_type enum_type, const char *name,
-				      unsigned long value);
-
-    bool finish_enum_type (gcc_type enum_type);
-
-    gcc_type build_function_type (gcc_type return_type,
-				  const struct gcc_type_array *argument_types,
-				  bool is_varargs);
-
-    gcc_type char_type ();
-
-    gcc_type float_type (unsigned long size_in_bytes, const char *builtin_name);
-
-    gcc_type void_type ();
-
-    gcc_type bool_type ();
-
-    gcc_type build_qualified_type (gcc_type unqualified_type,
-				   enum gcc_cp_qualifiers qualifiers);
-
-    gcc_type build_complex_type (gcc_type element_type);
-
-    gcc_expr literal_expr (gcc_type type, unsigned long value);
 
     gcc_type new_template_typename_parm (const char *id, bool pack_p,
 					 gcc_type default_type,
@@ -286,8 +255,37 @@ namespace compile
 				      const char *filename,
 				      unsigned int line_number);
 
+    // NAME is for debugging only
+    bool pop_namespace (const char *name);
+
+    bool push_namespace (const char *name);
+
+    gcc_decl specialize_class_template (struct type *concrete,
+					const char *filename,
+					unsigned int line_number);
+
+    gcc_decl specialize_function_template (struct template_symbol *concrete,
+					   gcc_address address,
+					   const char *filename,
+					   unsigned int line_number);
+
+    // NAME only for debugging
+    gcc_type start_class_definition (const char *name, gcc_decl typedecl,
+				     const struct gcc_vbase_array *base_classes,
+				     const char *filename,
+				     unsigned int line_number);
+
+    gcc_type start_new_enum_type (const char *name,
+				  gcc_type underlying_int_type,
+				  enum gcc_cp_symbol_kind flags,
+				  const char *filename,
+				  unsigned int line_number);
+
     // GENERIC only for debugging
     bool start_new_template_decl (const char *generic);
+
+    gcc_type void_type ();
+
 
   private:
 
@@ -358,12 +356,9 @@ namespace compile
    If the given method should be ignored (not defined to the plug-in),
    IGNORE will be true.  */
 
-  extern const char *
-  maybe_canonicalize_special_function (const char *field_name,
-				       const struct fn_field *method_field,
-				       const struct type *method_type,
-				       char **outname,
-				       bool *ignore);
+  const char *maybe_canonicalize_special_function
+    (const char *field_name, const struct fn_field *method_field,
+     const struct type *method_type, char **outname, bool *ignore);
 };
 
 /* A callback suitable for use as the GCC C++ symbol oracle.  */

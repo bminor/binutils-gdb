@@ -70,11 +70,14 @@ get_values (const A& a)
   return val;			// = 85
 }
 
+typedef int A::*PMI;
+
 int
 main (void)
 {
   A a;
   int var = 1234;
+  PMI pmi = &A::public_;
 
-  return get_values (a);		// break here
+  return a.*pmi + get_values (a);		// break here
 }

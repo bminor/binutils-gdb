@@ -22,7 +22,7 @@
 #include "compile-internal.h"
 
 #include <string>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 /* Debugging flag for the "compile" family of commands.  */
 
@@ -52,8 +52,7 @@ public:
 
   // Returns the GCC options to be passed during compilation.
 
-  const std::string &
-  gcc_target_options () const
+  const std::string &gcc_target_options () const
   {
     return m_gcc_target_options;
   }
@@ -86,7 +85,6 @@ public:
 
   unsigned int version () const;
 
-
   // Set the plug-in's verbosity level.
 
   void set_verbose (int level);
@@ -95,8 +93,8 @@ public:
 
   void set_driver_filename (const char *filename);
 
-  // Set the regular expression used to match the configury triplet
-  // prefix to the compiler.
+  /* Set the regular expression used to match the configury triplet
+     prefix to the compiler.  */
 
   void set_triplet_regexp (const char *regexp);
 
@@ -154,17 +152,18 @@ protected:
      and error tracking.  */
 
   typedef std::pair<struct type *, gcc_type> type_map_item_t;
-  typedef std::tr1::unordered_map<struct type *, gcc_type> type_map_t;
+  typedef std::unordered_map<struct type *, gcc_type> type_map_t;
   typedef std::pair<const struct symbol *, std::string> symbol_err_map_item_t;
-  typedef std::tr1::unordered_map<const struct symbol *, std::string> symbol_err_map_t;
+  typedef std::unordered_map<const struct symbol *, std::string>
+    symbol_err_map_t;
 
-  /* The GCC front end.  */
+  // The GCC front end.
   struct gcc_base_context *m_gcc_fe;
 
-  /* The "scope" of this compilation.  */
+  // The "scope" of this compilation.
   enum compile_i_scope_types m_scope;
 
-  /* The block in which an expression is being parsed.  */
+  // The block in which an expression is being parsed.
   const struct block *m_block;
 
   /* Specify "-std=gnu11", "-std=gnu++11" or similar.  These options are put
@@ -178,7 +177,7 @@ protected:
   symbol_err_map_t m_symbol_err_map;
 };
 
-/* Define header and footers for different scopes.  */
+// Define header and footers for different scopes.
 
 /* A simple scope just declares a function named "_gdb_expr", takes no
    arguments and returns no value.  */
@@ -191,8 +190,9 @@ protected:
 #define COMPILE_I_EXPR_VAL "__gdb_expr_val"
 #define COMPILE_I_EXPR_PTR_TYPE "__gdb_expr_ptr_type"
 
-/* A "type" to indicate a NULL type.  */
-#define GCC_TYPE_NONE ((gcc_type) -1)
+// A "type" to indicate a NULL type.
+
+const gcc_type GCC_TYPE_NONE = (gcc_type) -1;
 
 /* Call gdbarch_register_name (GDBARCH, REGNUM) and convert its result
    to a form suitable for the compiler source.  The register names
