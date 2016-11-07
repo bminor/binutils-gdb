@@ -791,14 +791,14 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
   struct gdbpy_breakpoint_object *bp_obj = b->py_bp_object;
   PyObject *py_bp = (PyObject *) bp_obj;
   struct gdbarch *garch;
-  struct cleanup *cleanup;
 
   if (bp_obj == NULL)
     return EXT_LANG_BP_STOP_UNSET;
 
   stop = -1;
   garch = b->gdbarch ? b->gdbarch : get_current_arch ();
-  cleanup = ensure_python_env (garch, current_language);
+
+  gdbpy_enter enter_py (garch, current_language);
 
   if (bp_obj->is_finish_bp)
     bpfinishpy_pre_stop_hook (bp_obj);
@@ -829,8 +829,6 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
   if (bp_obj->is_finish_bp)
     bpfinishpy_post_stop_hook (bp_obj);
 
-  do_cleanups (cleanup);
-
   if (stop < 0)
     return EXT_LANG_BP_STOP_UNSET;
   return stop ? EXT_LANG_BP_STOP_YES : EXT_LANG_BP_STOP_NO;
@@ -844,21 +842,17 @@ int
 gdbpy_breakpoint_has_cond (const struct extension_language_defn *extlang,
 			   struct breakpoint *b)
 {
-  int has_func;
   PyObject *py_bp;
   struct gdbarch *garch;
-  struct cleanup *cleanup;
 
   if (b->py_bp_object == NULL)
     return 0;
 
   py_bp = (PyObject *) b->py_bp_object;
   garch = b->gdbarch ? b->gdbarch : get_current_arch ();
-  cleanup = ensure_python_env (garch, current_language);
-  has_func = PyObject_HasAttrString (py_bp, stop_func);
-  do_cleanups (cleanup);
 
-  return has_func;
+  gdbpy_enter enter_py (garch, current_language);
+  return PyObject_HasAttrString (py_bp, stop_func);
 }
 
 

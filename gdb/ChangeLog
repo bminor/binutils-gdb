@@ -1,5 +1,11 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-breakpoint.c (gdbpy_breakpoint_cond_says_stop): Use
+	gdbpy_enter.
+	(gdbpy_breakpoint_has_cond): Likewise.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (gdbpy_enter): New constructor.
 	(~gdbpy_enter): New destructor.
 	(restore_python_env, ensure_python_env): Rewrite.
