@@ -434,20 +434,17 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 {
   int ret;
   char *script;
-  struct cleanup *cleanup;
 
   if (cmd->body_count != 1)
     error (_("Invalid \"python\" block structure."));
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   script = compute_python_string (cmd->body_list[0]);
   ret = PyRun_SimpleString (script);
   xfree (script);
   if (ret)
     error (_("Error while executing Python code."));
-
-  do_cleanups (cleanup);
 }
 
 /* Implementation of the gdb "python" command.  */
@@ -888,11 +885,8 @@ static void
 gdbpy_source_script (const struct extension_language_defn *extlang,
 		     FILE *file, const char *filename)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
   python_run_simple_file (file, filename);
-  do_cleanups (cleanup);
 }
 
 
@@ -924,9 +918,7 @@ static struct serial_event *gdbpy_serial_event;
 static void
 gdbpy_run_events (int error, gdb_client_data client_data)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Clear the event fd.  Do this before flushing the events list, so
      that any new event post afterwards is sure to re-awake the event
@@ -953,8 +945,6 @@ gdbpy_run_events (int error, gdb_client_data client_data)
       Py_DECREF (item->event);
       xfree (item);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Submit an event to the gdb thread.  */
@@ -1297,17 +1287,14 @@ gdbpy_source_objfile_script (const struct extension_language_defn *extlang,
 			     struct objfile *objfile, FILE *file,
 			     const char *filename)
 {
-  struct cleanup *cleanups;
-
   if (!gdb_python_initialized)
     return;
 
-  cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
   gdbpy_current_objfile = objfile;
 
   python_run_simple_file (file, filename);
 
-  do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;
 }
 
@@ -1322,17 +1309,14 @@ gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
 			      struct objfile *objfile, const char *name,
 			      const char *script)
 {
-  struct cleanup *cleanups;
-
   if (!gdb_python_initialized)
     return;
 
-  cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
   gdbpy_current_objfile = objfile;
 
   PyRun_SimpleString (script);
 
-  do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;
 }
 
@@ -1383,13 +1367,12 @@ static void
 gdbpy_start_type_printers (const struct extension_language_defn *extlang,
 			   struct ext_lang_type_printers *ext_printers)
 {
-  struct cleanup *cleanups;
   PyObject *type_module, *func = NULL, *printers_obj = NULL;
 
   if (!gdb_python_initialized)
     return;
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   type_module = PyImport_ImportModule ("gdb.types");
   if (type_module == NULL)
@@ -1414,7 +1397,6 @@ gdbpy_start_type_printers (const struct extension_language_defn *extlang,
  done:
   Py_XDECREF (type_module);
   Py_XDECREF (func);
-  do_cleanups (cleanups);
 }
 
 /* If TYPE is recognized by some type printer, store in *PRETTIED_TYPE
@@ -1429,7 +1411,6 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
 			   const struct ext_lang_type_printers *ext_printers,
 			   struct type *type, char **prettied_type)
 {
-  struct cleanup *cleanups;
   PyObject *type_obj, *type_module = NULL, *func = NULL;
   PyObject *result_obj = NULL;
   PyObject *printers_obj = (PyObject *) ext_printers->py_type_printers;
@@ -1441,7 +1422,7 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return EXT_LANG_RC_NOP;
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   type_obj = type_to_type_object (type);
   if (type_obj == NULL)
@@ -1484,7 +1465,6 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
   Py_XDECREF (type_module);
   Py_XDECREF (func);
   Py_XDECREF (result_obj);
-  do_cleanups (cleanups);
   if (result != NULL)
     {
       *prettied_type = result.release ();
@@ -1500,7 +1480,6 @@ static void
 gdbpy_free_type_printers (const struct extension_language_defn *extlang,
 			  struct ext_lang_type_printers *ext_printers)
 {
-  struct cleanup *cleanups;
   PyObject *printers = (PyObject *) ext_printers->py_type_printers;
 
   if (printers == NULL)
@@ -1509,9 +1488,8 @@ gdbpy_free_type_printers (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
   Py_DECREF (printers);
-  do_cleanups (cleanups);
 }
 
 #else /* HAVE_PYTHON */

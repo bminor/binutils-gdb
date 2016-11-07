@@ -1,5 +1,13 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (gdbpy_eval_from_control_command)
+	(gdbpy_source_script, gdbpy_run_events)
+	(gdbpy_source_objfile_script, gdbpy_execute_objfile_script)
+	(gdbpy_free_type_printers, gdbpy_finish_initialization): Use
+	gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-progspace.c (py_free_pspace): Use gdbpy_enter.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
