@@ -918,7 +918,6 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
 
   if (!evregpy_no_listeners_p (gdb_py_events.breakpoint_created))
     {
-      Py_INCREF (newbp);
       if (evpy_emit_event ((PyObject *) newbp,
 			   gdb_py_events.breakpoint_created) < 0)
 	gdbpy_print_stack ();
@@ -946,10 +945,7 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
 	{
 	  if (!evregpy_no_listeners_p (gdb_py_events.breakpoint_deleted))
 	    {
-	      PyObject *bp_obj_alias = (PyObject *) bp_obj;
-
-	      Py_INCREF (bp_obj_alias);
-	      if (evpy_emit_event (bp_obj_alias,
+	      if (evpy_emit_event ((PyObject *) bp_obj,
 				   gdb_py_events.breakpoint_deleted) < 0)
 		gdbpy_print_stack ();
 	    }
@@ -981,7 +977,6 @@ gdbpy_breakpoint_modified (struct breakpoint *b)
 	{
 	  if (!evregpy_no_listeners_p (gdb_py_events.breakpoint_modified))
 	    {
-	      Py_INCREF (bp_obj);
 	      if (evpy_emit_event (bp_obj,
 				   gdb_py_events.breakpoint_modified) < 0)
 		gdbpy_print_stack ();

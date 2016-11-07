@@ -1,5 +1,34 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-threadevent.c (create_thread_event_object): Use
+	gdbpy_ref.
+	* python/py-stopevent.c (create_stop_event_object): Simplify.
+	(emit_stop_event): Use gdbpy_ref.
+	* python/py-signalevent.c (create_signal_event_object): Use
+	gdbpy_ref.
+	* python/py-newobjfileevent.c (create_new_objfile_event_object)
+	(emit_new_objfile_event, create_clear_objfiles_event_object)
+	(emit_clear_objfiles_event): Use gdbpy_ref.
+	* python/py-infevents.c (create_inferior_call_event_object)
+	(create_register_changed_event_object)
+	(create_memory_changed_event_object, emit_inferior_call_event)
+	(emit_memory_changed_event, emit_register_changed_event): Use
+	gdbpy_ref.
+	* python/py-exitedevent.c (create_exited_event_object)
+	(emit_exited_event): Use gdbpy_ref.
+	* python/py-event.h (evpy_emit_event): Remove
+	CPYCHECKER_STEALS_REFERENCE_TO_ARG annotation.
+	* python/py-event.c (evpy_emit_event): Use gdbpy_ref.
+	* python/py-continueevent.c (emit_continue_event): Use
+	gdbpy_ref.
+	* python/py-breakpoint.c (gdbpy_breakpoint_created)
+	(gdbpy_breakpoint_deleted, gdbpy_breakpoint_modified): Use
+	gdbpy_ref.
+	* python/py-bpevent.c (create_breakpoint_event_object): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-ref.h: New file.
 
 2017-01-10  Simon Marchi  <simon.marchi@ericsson.com>

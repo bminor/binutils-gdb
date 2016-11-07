@@ -24,6 +24,7 @@
 #include "command.h"
 #include "python-internal.h"
 #include "inferior.h"
+#include "py-ref.h"
 
 /* This macro creates the following functions:
 
@@ -121,8 +122,7 @@ extern int emit_register_changed_event (struct frame_info *frame,
 				        int regnum);
 extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
-                            eventregistry_object *registry)
-  CPYCHECKER_STEALS_REFERENCE_TO_ARG (1);
+                            eventregistry_object *registry);
 
 extern PyObject *create_event_object (PyTypeObject *py_type);
 extern PyObject *create_thread_event_object (PyTypeObject *py_type);
