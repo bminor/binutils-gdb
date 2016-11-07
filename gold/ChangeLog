@@ -1,3 +1,8 @@
+2016-11-04  Loïc Yhuel <loic.yhuel@softathome.com>
+
+	* configure.ac: add missing '$'.
+	* configure: Regenerate.
+
 2016-10-21  Gergely Nagy  <ngg@tresorit.com>
 
 	PR gold/17704
