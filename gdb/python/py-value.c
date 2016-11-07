@@ -29,6 +29,7 @@
 #include "python.h"
 
 #include "python-internal.h"
+#include "py-ref.h"
 
 /* Even though Python scalar types directly map to host types, we use
    target types here to remain consistent with the values system in
@@ -578,14 +579,13 @@ value_has_field (struct value *v, PyObject *field)
 {
   struct type *parent_type, *val_type;
   enum type_code type_code;
-  PyObject *type_object = PyObject_GetAttrString (field, "parent_type");
+  gdbpy_ref type_object (PyObject_GetAttrString (field, "parent_type"));
   int has_field = 0;
 
   if (type_object == NULL)
     return -1;
 
-  parent_type = type_object_to_type (type_object);
-  Py_DECREF (type_object);
+  parent_type = type_object_to_type (type_object.get ());
   if (parent_type == NULL)
     {
       PyErr_SetString (PyExc_TypeError,
@@ -625,16 +625,12 @@ value_has_field (struct value *v, PyObject *field)
 static int
 get_field_flag (PyObject *field, const char *flag_name)
 {
-  int flag_value;
-  PyObject *flag_object = PyObject_GetAttrString (field, flag_name);
+  gdbpy_ref flag_object (PyObject_GetAttrString (field, flag_name));
 
   if (flag_object == NULL)
     return -1;
 
-  flag_value = PyObject_IsTrue (flag_object);
-  Py_DECREF (flag_object);
-
-  return flag_value;
+  return PyObject_IsTrue (flag_object.get ());
 }
 
 /* Return the "type" attribute of a gdb.Field object.
@@ -643,13 +639,12 @@ get_field_flag (PyObject *field, const char *flag_name)
 static struct type *
 get_field_type (PyObject *field)
 {
-  PyObject *ftype_obj = PyObject_GetAttrString (field, "type");
+  gdbpy_ref ftype_obj (PyObject_GetAttrString (field, "type"));
   struct type *ftype;
 
   if (ftype_obj == NULL)
     return NULL;
-  ftype = type_object_to_type (ftype_obj);
-  Py_DECREF (ftype_obj);
+  ftype = type_object_to_type (ftype_obj.get ());
   if (ftype == NULL)
     PyErr_SetString (PyExc_TypeError,
 		     _("'type' attribute of gdb.Field object is not a "
@@ -705,25 +700,19 @@ valpy_getitem (PyObject *self, PyObject *key)
 	}
       else
 	{
-	  PyObject *name_obj = PyObject_GetAttrString (key, "name");
+	  gdbpy_ref name_obj (PyObject_GetAttrString (key, "name"));
 
 	  if (name_obj == NULL)
 	    return NULL;
 
 	  if (name_obj != Py_None)
 	    {
-	      field = python_string_to_host_string (name_obj);
-	      Py_DECREF (name_obj);
+	      field = python_string_to_host_string (name_obj.get ());
 	      if (field == NULL)
 		return NULL;
 	    }
 	  else
 	    {
-	      PyObject *bitpos_obj;
-	      int valid;
-
-	      Py_DECREF (name_obj);
-
 	      if (!PyObject_HasAttrString (key, "bitpos"))
 		{
 		  PyErr_SetString (PyExc_AttributeError,
@@ -732,12 +721,10 @@ valpy_getitem (PyObject *self, PyObject *key)
 
 		  return NULL;
 		}
-	      bitpos_obj = PyObject_GetAttrString (key, "bitpos");
+	      gdbpy_ref bitpos_obj (PyObject_GetAttrString (key, "bitpos"));
 	      if (bitpos_obj == NULL)
 		return NULL;
-	      valid = gdb_py_int_as_long (bitpos_obj, &bitpos);
-	      Py_DECREF (bitpos_obj);
-	      if (!valid)
+	      if (!gdb_py_int_as_long (bitpos_obj.get (), &bitpos))
 		return NULL;
 
 	      field_type = get_field_type (key);
@@ -1620,13 +1607,13 @@ convert_value_from_python (PyObject *obj)
 	         ULONGEST instead.  */
 	      if (PyErr_ExceptionMatches (PyExc_OverflowError))
 		{
-		  PyObject *etype, *evalue, *etraceback, *zero;
+		  PyObject *etype, *evalue, *etraceback;
 
 		  PyErr_Fetch (&etype, &evalue, &etraceback);
-		  zero = PyInt_FromLong (0);
+		  gdbpy_ref zero (PyInt_FromLong (0));
 
 		  /* Check whether obj is positive.  */
-		  if (PyObject_RichCompareBool (obj, zero, Py_GT) > 0)
+		  if (PyObject_RichCompareBool (obj, zero.get (), Py_GT) > 0)
 		    {
 		      ULONGEST ul;
 
@@ -1637,8 +1624,6 @@ convert_value_from_python (PyObject *obj)
 		  else
 		    /* There's nothing we can do.  */
 		    PyErr_Restore (etype, evalue, etraceback);
-
-		  Py_DECREF (zero);
 		}
 	    }
 	  else
