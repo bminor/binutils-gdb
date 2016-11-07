@@ -8316,6 +8316,8 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 }
 
 
+/* Note: This is called for both i386 and amd64.  */
+
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -8333,7 +8335,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  /* Allocate space for the new architecture.  */
+  /* Allocate space for the new architecture.  Assume i386 for now.  */
   tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
@@ -8560,7 +8562,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_insn_is_ret (gdbarch, i386_insn_is_ret);
   set_gdbarch_insn_is_jump (gdbarch, i386_insn_is_jump);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  */
+  /* Hook in ABI-specific overrides, if they have been registered.
+     Note: If INFO specifies a 64 bit arch, this is where we turn
+     a 32-bit i386 into a 64-bit amd64.  */
   info.tdep_info = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 

@@ -1,5 +1,9 @@
 2016-11-07  Doug Evans  <dje@google.com>
 
+	* i386-tdep.c (i386_gdbarch_init): Add comments.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
 	* python/py-unwind.c (unwind_infopy_str): Fix use of VEC_iterate.
 
 2016-11-07  Doug Evans  <dje@google.com>
