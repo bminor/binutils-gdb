@@ -5133,7 +5133,7 @@ is not writable.
 
 @defvar LazyString.type
 This attribute holds the type that is represented by the lazy string's
-type.  For a lazy string this will always be a pointer type.  To
+type.  For a lazy string this is a pointer or array type.  To
 resolve this to the lazy string's character type, use the type's
 @code{target} method.  @xref{Types In Python}.  This attribute is not
 writable.
