@@ -30,6 +30,7 @@
 #include "demangle.h"
 #include "mi/mi-cmds.h"
 #include "python-internal.h"
+#include "py-ref.h"
 
 enum mi_print_types
 {
@@ -56,17 +57,16 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
 	     struct symbol **sym, struct block **sym_block,
 	     const struct language_defn **language)
 {
-  PyObject *result = PyObject_CallMethod (obj, "symbol", NULL);
+  gdbpy_ref result (PyObject_CallMethod (obj, "symbol", NULL));
 
   if (result == NULL)
     return EXT_LANG_BT_ERROR;
 
   /* For 'symbol' callback, the function can return a symbol or a
      string.  */
-  if (gdbpy_is_string (result))
+  if (gdbpy_is_string (result.get ()))
     {
-      *name = python_string_to_host_string (result);
-      Py_DECREF (result);
+      *name = python_string_to_host_string (result.get ());
 
       if (*name == NULL)
 	return EXT_LANG_BT_ERROR;
@@ -83,14 +83,12 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
     {
       /* This type checks 'result' during the conversion so we
 	 just call it unconditionally and check the return.  */
-      *sym = symbol_object_to_symbol (result);
+      *sym = symbol_object_to_symbol (result.get ());
       /* TODO: currently, we have no way to recover the block in which SYMBOL
 	 was found, so we have no block to return.  Trying to evaluate SYMBOL
 	 will yield an incorrect value when it's located in a FRAME and
 	 evaluated from another frame (as permitted in nested functions).  */
       *sym_block = NULL;
-
-      Py_DECREF (result);
 
       if (*sym == NULL)
 	{
@@ -130,7 +128,7 @@ extract_value (PyObject *obj, struct value **value)
 {
   if (PyObject_HasAttrString (obj, "value"))
     {
-      PyObject *vresult = PyObject_CallMethod (obj, "value", NULL);
+      gdbpy_ref vresult (PyObject_CallMethod (obj, "value", NULL));
 
       if (vresult == NULL)
 	return EXT_LANG_BT_ERROR;
@@ -140,14 +138,12 @@ extract_value (PyObject *obj, struct value **value)
 	 value.  */
       if (vresult == Py_None)
 	{
-	  Py_DECREF (vresult);
 	  *value = NULL;
 	  return EXT_LANG_BT_OK;
 	}
       else
 	{
-	  *value = convert_value_from_python (vresult);
-	  Py_DECREF (vresult);
+	  *value = convert_value_from_python (vresult.get ());
 
 	  if (*value == NULL)
 	    return EXT_LANG_BT_ERROR;
@@ -316,20 +312,17 @@ get_py_iter_from_func (PyObject *filter, char *func)
 {
   if (PyObject_HasAttrString (filter, func))
     {
-      PyObject *result = PyObject_CallMethod (filter, func, NULL);
+      gdbpy_ref result (PyObject_CallMethod (filter, func, NULL));
 
       if (result != NULL)
 	{
 	  if (result == Py_None)
 	    {
-	      return result;
+	      return result.release ();
 	    }
 	  else
 	    {
-	      PyObject *iterator = PyObject_GetIter (result);
-
-	      Py_DECREF (result);
-	      return iterator;
+	      return PyObject_GetIter (result.get ());
 	    }
 	}
     }
@@ -1441,60 +1434,39 @@ static PyObject *
 bootstrap_python_frame_filters (struct frame_info *frame,
 				int frame_low, int frame_high)
 {
-  struct cleanup *cleanups =
-    make_cleanup (null_cleanup, NULL);
-  PyObject *module, *sort_func, *iterable, *frame_obj, *iterator;
-  PyObject *py_frame_low, *py_frame_high;
-
-  frame_obj = frame_info_to_frame_object (frame);
+  gdbpy_ref frame_obj (frame_info_to_frame_object (frame));
   if (frame_obj == NULL)
-    goto error;
-  make_cleanup_py_decref (frame_obj);
+    return NULL;
 
-  module = PyImport_ImportModule ("gdb.frames");
+  gdbpy_ref module (PyImport_ImportModule ("gdb.frames"));
   if (module == NULL)
-    goto error;
-  make_cleanup_py_decref (module);
+    return NULL;
 
-  sort_func = PyObject_GetAttrString (module, "execute_frame_filters");
+  gdbpy_ref sort_func (PyObject_GetAttrString (module.get (),
+					       "execute_frame_filters"));
   if (sort_func == NULL)
-    goto error;
-  make_cleanup_py_decref (sort_func);
+    return NULL;
 
-  py_frame_low = PyInt_FromLong (frame_low);
+  gdbpy_ref py_frame_low (PyInt_FromLong (frame_low));
   if (py_frame_low == NULL)
-    goto error;
-  make_cleanup_py_decref (py_frame_low);
+    return NULL;
 
-  py_frame_high = PyInt_FromLong (frame_high);
+  gdbpy_ref py_frame_high (PyInt_FromLong (frame_high));
   if (py_frame_high == NULL)
-    goto error;
-  make_cleanup_py_decref (py_frame_high);
+    return NULL;
 
-  iterable = PyObject_CallFunctionObjArgs (sort_func, frame_obj,
-					   py_frame_low,
-					   py_frame_high,
-					   NULL);
+  gdbpy_ref iterable (PyObject_CallFunctionObjArgs (sort_func.get (),
+						    frame_obj.get (),
+						    py_frame_low.get (),
+						    py_frame_high.get (),
+						    NULL));
   if (iterable == NULL)
-    goto error;
-
-  do_cleanups (cleanups);
+    return NULL;
 
   if (iterable != Py_None)
-    {
-      iterator = PyObject_GetIter (iterable);
-      Py_DECREF (iterable);
-    }
+    return PyObject_GetIter (iterable.get ());
   else
-    {
-      return iterable;
-    }
-
-  return iterator;
-
- error:
-  do_cleanups (cleanups);
-  return NULL;
+    return iterable.release ();
 }
 
 /*  This is the only publicly exported function in this file.  FRAME
