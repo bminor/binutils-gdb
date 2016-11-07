@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-progspace.c (py_free_pspace): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-objfile.c (py_free_objfile): Use gdbpy_enter.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
