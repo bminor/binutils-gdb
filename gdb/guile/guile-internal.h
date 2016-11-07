@@ -561,6 +561,8 @@ extern SCM tyscm_scm_from_type (struct type *type);
 extern type_smob *tyscm_get_type_smob_arg_unsafe (SCM type_scm, int arg_pos,
 						  const char *func_name);
 
+extern struct type *tyscm_scm_to_type (SCM t_scm);
+
 extern struct type *tyscm_type_smob_type (type_smob *t_smob);
 
 extern SCM tyscm_scm_from_field (SCM type_scm, int field_num);

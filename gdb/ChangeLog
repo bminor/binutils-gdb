@@ -1,3 +1,8 @@
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
+	* guile/scm-type.c (tyscm_scm_to_type): New function.
+
 2017-03-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* inf-ptrace.c (inf_ptrace_peek_poke): Change the type to
