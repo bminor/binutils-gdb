@@ -392,13 +392,10 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b, void *args)
 static void
 bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 {
-  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
-                                               current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb,
                             bs == NULL ? NULL : bs->breakpoint_at);
-
-  do_cleanups (cleanup);
 }
 
 /* Attached to `exit' notifications, triggers all the necessary out of
@@ -407,12 +404,9 @@ bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 static void
 bpfinishpy_handle_exit (struct inferior *inf)
 {
-  struct cleanup *cleanup = ensure_python_env (target_gdbarch (),
-                                               current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb, NULL);
-
-  do_cleanups (cleanup);
 }
 
 /* Initialize the Python finish breakpoint code.  */
