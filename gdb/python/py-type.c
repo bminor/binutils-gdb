@@ -1048,14 +1048,13 @@ save_objfile_types (struct objfile *objfile, void *datum)
 {
   type_object *obj = (type_object *) datum;
   htab_t copied_types;
-  struct cleanup *cleanup;
 
   if (!gdb_python_initialized)
     return;
 
   /* This prevents another thread from freeing the objects we're
      operating on.  */
-  cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
 
   copied_types = create_copied_types_hash (objfile);
 
@@ -1074,8 +1073,6 @@ save_objfile_types (struct objfile *objfile, void *datum)
     }
 
   htab_delete (copied_types);
-
-  do_cleanups (cleanup);
 }
 
 static void
