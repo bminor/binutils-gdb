@@ -96,9 +96,8 @@ static void
 cmdpy_destroyer (struct cmd_list_element *self, void *context)
 {
   cmdpy_object *cmd;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Release our hold on the command object.  */
   cmd = (cmdpy_object *) context;
@@ -110,8 +109,6 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
   xfree ((char *) self->name);
   xfree ((char *) self->doc);
   xfree ((char *) self->prefixname);
-
-  do_cleanups (cleanup);
 }
 
 /* Called by gdb to invoke the command.  */
@@ -287,9 +284,8 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 				 const char *text, const char *word)
 {
   PyObject *resultobj = NULL;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Calling our helper to obtain the PyObject of the Python
      function.  */
@@ -324,7 +320,6 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
  done:
 
   Py_XDECREF (resultobj);
-  do_cleanups (cleanup);
 }
 
 /* Called by gdb for command completion.  */
@@ -335,9 +330,8 @@ cmdpy_completer (struct cmd_list_element *command,
 {
   PyObject *resultobj = NULL;
   VEC (char_ptr) *result = NULL;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Calling our helper to obtain the PyObject of the Python
      function.  */
@@ -404,7 +398,6 @@ cmdpy_completer (struct cmd_list_element *command,
  done:
 
   Py_XDECREF (resultobj);
-  do_cleanups (cleanup);
 
   return result;
 }
