@@ -1,5 +1,14 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-prettyprint.c (search_pp_list)
+	(find_pretty_printer_from_objfiles)
+	(find_pretty_printer_from_progspace)
+	(find_pretty_printer_from_gdb, find_pretty_printer)
+	(gdbpy_get_display_hint, gdbpy_get_varobj_pretty_printer): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-param.c (call_doc_function): Use gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
