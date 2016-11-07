@@ -762,28 +762,20 @@ build_bp_list (struct breakpoint *b, void *arg)
 PyObject *
 gdbpy_breakpoints (PyObject *self, PyObject *args)
 {
-  PyObject *list, *tuple;
-
   if (bppy_live == 0)
     return PyTuple_New (0);
 
-  list = PyList_New (0);
-  if (!list)
+  gdbpy_ref list (PyList_New (0));
+  if (list == NULL)
     return NULL;
 
   /* If iterate_over_breakpoints returns non NULL it signals an error
      condition.  In that case abandon building the list and return
      NULL.  */
-  if (iterate_over_breakpoints (build_bp_list, list) != NULL)
-    {
-      Py_DECREF (list);
-      return NULL;
-    }
+  if (iterate_over_breakpoints (build_bp_list, list.get ()) != NULL)
+    return NULL;
 
-  tuple = PyList_AsTuple (list);
-  Py_DECREF (list);
-
-  return tuple;
+  return PyList_AsTuple (list.get ());
 }
 
 /* Call the "stop" method (if implemented) in the breakpoint

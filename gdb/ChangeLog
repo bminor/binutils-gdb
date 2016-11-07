@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-breakpoint.c (gdbpy_breakpoints): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-inferior.c (gdbpy_inferiors): Use gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
