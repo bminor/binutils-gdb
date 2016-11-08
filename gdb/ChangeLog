@@ -1,5 +1,11 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-script.c (execute_control_command): Assume insert_args
+	never returns NULL.
+	(insert_args): Assume xmalloc never returns NULL.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (COMMON_OBS): Add utils-selftests.o.
 	* common/common-utils.c (string_printf): New function.
 	* common/common-utils.h: Include <string>.
