@@ -1,5 +1,12 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (type_as_string): Use ui_file_as_string and return
+	std::string.
+	(type_as_string_and_cleanup): Delete.
+	(ada_lookup_struct_elt_type): Use type_as_string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* gdbarch.sh (verify_gdbarch): Use ui_file_as_string and
 	std::string.
 	* gdbarch.c: Regenerate.
