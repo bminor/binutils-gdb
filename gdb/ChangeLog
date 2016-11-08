@@ -1,5 +1,10 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-setshow.c (do_show_command): Adjust to use
+	ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (escape_buffer): Use ui_file_as_string and return
 	std::string.
 	(putpkt_binary, read_frame): Adjust to use std::string.

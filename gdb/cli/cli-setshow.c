@@ -653,13 +653,12 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
     ui_out_field_stream (uiout, "value", stb);
   else
     {
-      char *value = ui_file_xstrdup (stb, NULL);
+      std::string value = ui_file_as_string (stb);
 
-      make_cleanup (xfree, value);
       if (c->show_value_func != NULL)
-	c->show_value_func (gdb_stdout, from_tty, c, value);
+	c->show_value_func (gdb_stdout, from_tty, c, value.c_str ());
       else
-	deprecated_show_value_hack (gdb_stdout, from_tty, c, value);
+	deprecated_show_value_hack (gdb_stdout, from_tty, c, value.c_str ());
     }
   do_cleanups (old_chain);
 
