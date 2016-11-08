@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (python_interactive_command): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (gdbpy_before_prompt_hook): Use gdbpy_enter,
 	gdbpy_ref.
 

@@ -321,7 +321,7 @@ python_interactive_command (char *arg, int from_tty)
 
   arg = skip_spaces (arg);
 
-  ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   if (arg && *arg)
     {
