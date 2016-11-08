@@ -102,8 +102,9 @@ static void disable_command (char *, int);
 
 static void enable_command (char *, int);
 
-static void map_breakpoint_numbers (char *, void (*) (struct breakpoint *,
-						      void *),
+static void map_breakpoint_numbers (const char *,
+				    void (*) (struct breakpoint *,
+					      void *),
 				    void *);
 
 static void ignore_command (char *, int);
@@ -1338,7 +1339,7 @@ struct commands_info
   int from_tty;
 
   /* The breakpoint range spec.  */
-  char *arg;
+  const char *arg;
 
   /* Non-NULL if the body of the commands are being read from this
      already-parsed command.  */
@@ -1399,7 +1400,7 @@ do_map_commands_command (struct breakpoint *b, void *data)
 }
 
 static void
-commands_command_1 (char *arg, int from_tty, 
+commands_command_1 (const char *arg, int from_tty,
 		    struct command_line *control)
 {
   struct cleanup *cleanups;
@@ -1412,32 +1413,22 @@ commands_command_1 (char *arg, int from_tty,
      extra reference to the commands that we must clean up.  */
   cleanups = make_cleanup_decref_counted_command_line (&info.cmd);
 
+  std::string new_arg;
+
   if (arg == NULL || !*arg)
     {
       if (breakpoint_count - prev_breakpoint_count > 1)
-	arg = xstrprintf ("%d-%d", prev_breakpoint_count + 1, 
-			  breakpoint_count);
+	new_arg = string_printf ("%d-%d", prev_breakpoint_count + 1,
+				 breakpoint_count);
       else if (breakpoint_count > 0)
-	arg = xstrprintf ("%d", breakpoint_count);
-      else
-	{
-	  /* So that we don't try to free the incoming non-NULL
-	     argument in the cleanup below.  Mapping breakpoint
-	     numbers will fail in this case.  */
-	  arg = NULL;
-	}
+	new_arg = string_printf ("%d", breakpoint_count);
     }
   else
-    /* The command loop has some static state, so we need to preserve
-       our argument.  */
-    arg = xstrdup (arg);
+    new_arg = arg;
 
-  if (arg != NULL)
-    make_cleanup (xfree, arg);
+  info.arg = new_arg.c_str ();
 
-  info.arg = arg;
-
-  map_breakpoint_numbers (arg, do_map_commands_command, &info);
+  map_breakpoint_numbers (info.arg, do_map_commands_command, &info);
 
   if (info.cmd == NULL)
     error (_("No breakpoints specified."));
@@ -1457,7 +1448,7 @@ commands_command (char *arg, int from_tty)
    This is used by cli-script.c to DTRT with breakpoint commands
    that are part of if and while bodies.  */
 enum command_control_type
-commands_from_control_command (char *arg, struct command_line *cmd)
+commands_from_control_command (const char *arg, struct command_line *cmd)
 {
   commands_command_1 (arg, 0, cmd);
   return simple_control;
@@ -14795,8 +14786,9 @@ ignore_command (char *args, int from_tty)
    whose numbers are given in ARGS.  */
 
 static void
-map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
-						      void *),
+map_breakpoint_numbers (const char *args,
+			void (*function) (struct breakpoint *,
+					  void *),
 			void *data)
 {
   int num;

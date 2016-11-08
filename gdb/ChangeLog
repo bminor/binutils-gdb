@@ -1,5 +1,15 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (struct commands_info) <arg>: Constify.
+	(commands_command_1): Constify 'arg' parameter.  Use std::string
+	and string_printf.
+	(commands_from_control_command): Constify 'arg' parameter.
+	(map_breakpoint_numbers): Constify 'args' parameter.
+	* breakpoint.h (commands_from_control_command): Constify 'arg'
+	parameter.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-script.c (execute_control_command): Assume insert_args
 	never returns NULL.
 	(insert_args): Assume xmalloc never returns NULL.
