@@ -1143,7 +1143,7 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
    is found, attempt to step through it.  A breakpoint is placed at the end of 
    the sequence.  */
 
-int 
+VEC (CORE_ADDR) *
 ppc_deal_with_atomic_sequence (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1159,11 +1159,12 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
   if ((insn & LWARX_MASK) != LWARX_INSTRUCTION
       && (insn & LWARX_MASK) != LDARX_INSTRUCTION)
-    return 0;
+    return NULL;
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -1201,7 +1202,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   /* Assume that the atomic sequence ends with a stwcx/stdcx instruction.  */
   if ((insn & STWCX_MASK) != STWCX_INSTRUCTION
       && (insn & STWCX_MASK) != STDCX_INSTRUCTION)
-    return 0;
+    return NULL;
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
@@ -1217,11 +1218,10 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
-  /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
 
-  return 1;
+  return next_pcs;
 }
 
 

@@ -259,7 +259,7 @@ CORE_ADDR arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 
 int arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self);
 
-int arm_software_single_step (struct frame_info *);
+VEC (CORE_ADDR) *arm_software_single_step (struct frame_info *);
 int arm_is_thumb (struct regcache *regcache);
 int arm_frame_is_thumb (struct frame_info *frame);
 

@@ -299,11 +299,10 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 
 /* Insert a single step breakpoint.  */
 
-static int
+static VEC (CORE_ADDR) *
 moxie_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR addr;
   gdb_byte buf[4];
   uint16_t inst;
@@ -311,6 +310,7 @@ moxie_software_single_step (struct frame_info *frame)
   ULONGEST fp;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct regcache *regcache = get_current_regcache ();
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   addr = get_frame_pc (frame);
 
@@ -338,8 +338,9 @@ moxie_software_single_step (struct frame_info *frame)
 	    case 0x09: /* bleu */
 	      /* Insert breaks on both branches, because we can't currently tell
 		 which way things will go.  */
-	      insert_single_step_breakpoint (gdbarch, aspace, addr + 2);
-	      insert_single_step_breakpoint (gdbarch, aspace, addr + 2 + INST2OFFSET(inst));
+	      VEC_safe_push (CORE_ADDR, next_pcs, addr + 2);
+	      VEC_safe_push (CORE_ADDR, next_pcs,
+			     addr + 2 + INST2OFFSET(inst));
 	      break;
 	    default:
 	      {
@@ -351,7 +352,7 @@ moxie_software_single_step (struct frame_info *frame)
       else
 	{
 	  /* This is a Form 2 instruction.  They are all 16 bits.  */
-	  insert_single_step_breakpoint (gdbarch, aspace, addr + 2);
+	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 2);
 	}
     }
   else
@@ -398,7 +399,7 @@ moxie_software_single_step (struct frame_info *frame)
 	case 0x32: /* udiv.l */
 	case 0x33: /* mod.l */
 	case 0x34: /* umod.l */
-	  insert_single_step_breakpoint (gdbarch, aspace, addr + 2);
+	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 2);
 	  break;
 
 	  /* 32-bit instructions.  */
@@ -408,7 +409,7 @@ moxie_software_single_step (struct frame_info *frame)
 	case 0x37: /* sto.b */
 	case 0x38: /* ldo.s */
 	case 0x39: /* sto.s */
-	  insert_single_step_breakpoint (gdbarch, aspace, addr + 4);
+	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 4);
 	  break;
 
 	  /* 48-bit instructions.  */
@@ -421,32 +422,27 @@ moxie_software_single_step (struct frame_info *frame)
 	case 0x20: /* ldi.s (immediate) */
 	case 0x22: /* lda.s */
 	case 0x24: /* sta.s */
-	  insert_single_step_breakpoint (gdbarch, aspace, addr + 6);
+	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 6);
 	  break;
 
 	  /* Control flow instructions.	 */
 	case 0x03: /* jsra */
 	case 0x1a: /* jmpa */
-	  insert_single_step_breakpoint (gdbarch, aspace,
-					 moxie_process_readu (addr + 2,
-							      buf, 4,
-							      byte_order));
+	  VEC_safe_push (CORE_ADDR, next_pcs,
+			 moxie_process_readu (addr + 2, buf, 4, byte_order));
 	  break;
 
 	case 0x04: /* ret */
 	  regcache_cooked_read_unsigned (regcache, MOXIE_FP_REGNUM, &fp);
-	  insert_single_step_breakpoint (gdbarch, aspace,
-					 moxie_process_readu (fp + 4,
-							      buf, 4,
-							      byte_order));
+	  VEC_safe_push (CORE_ADDR, next_pcs,
+			 moxie_process_readu (fp + 4, buf, 4, byte_order));
 	  break;
 
 	case 0x19: /* jsr */
 	case 0x25: /* jmp */
 	  regcache_raw_read (regcache,
 			     (inst >> 4) & 0xf, (gdb_byte *) & tmpu32);
-	  insert_single_step_breakpoint (gdbarch, aspace,
-					 tmpu32);
+	  VEC_safe_push (CORE_ADDR, next_pcs, tmpu32);
 	  break;
 
 	case 0x30: /* swi */
@@ -456,7 +452,7 @@ moxie_software_single_step (struct frame_info *frame)
 	}
     }
 
-  return 1;
+  return next_pcs;
 }
 
 /* Implement the "read_pc" gdbarch method.  */

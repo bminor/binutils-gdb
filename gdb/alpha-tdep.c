@@ -765,11 +765,10 @@ static const int stq_c_opcode = 0x2f;
    is found, attempt to step through it.  A breakpoint is placed at the end of 
    the sequence.  */
 
-static int 
+static VEC (CORE_ADDR) *
 alpha_deal_with_atomic_sequence (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR pc = get_frame_pc (frame);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
@@ -780,11 +779,12 @@ alpha_deal_with_atomic_sequence (struct frame_info *frame)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a LDL_L/LDQ_L instruction.  */
   if (INSN_OPCODE (insn) != ldl_l_opcode
       && INSN_OPCODE (insn) != ldq_l_opcode)
-    return 0;
+    return NULL;
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -803,8 +803,8 @@ alpha_deal_with_atomic_sequence (struct frame_info *frame)
 	  immediate = (immediate ^ 0x400000) - 0x400000;
 
 	  if (bc_insn_count >= 1)
-	    return 0; /* More than one branch found, fallback 
-			 to the standard single-step code.  */
+	    return NULL; /* More than one branch found, fallback 
+			    to the standard single-step code.  */
 
 	  breaks[1] = loc + ALPHA_INSN_SIZE + immediate;
 
@@ -820,7 +820,7 @@ alpha_deal_with_atomic_sequence (struct frame_info *frame)
   /* Assume that the atomic sequence ends with a STL_C/STQ_C instruction.  */
   if (INSN_OPCODE (insn) != stl_c_opcode
       && INSN_OPCODE (insn) != stq_c_opcode)
-    return 0;
+    return NULL;
 
   closing_insn = loc;
   loc += ALPHA_INSN_SIZE;
@@ -835,11 +835,10 @@ alpha_deal_with_atomic_sequence (struct frame_info *frame)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
-  /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
 
-  return 1;
+  return next_pcs;
 }
 
 
@@ -1718,18 +1717,17 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
   return (pc + ALPHA_INSN_SIZE);
 }
 
-int
+VEC (CORE_ADDR) *
 alpha_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
-  CORE_ADDR pc, next_pc;
+  CORE_ADDR pc;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   pc = get_frame_pc (frame);
-  next_pc = alpha_next_pc (frame, pc);
 
-  insert_single_step_breakpoint (gdbarch, aspace, next_pc);
-  return 1;
+  VEC_safe_push (CORE_ADDR, next_pcs, alpha_next_pc (frame, pc));
+  return next_pcs;
 }
 
 

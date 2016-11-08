@@ -3877,9 +3877,8 @@ mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 #define SC_OPCODE 0x38
 #define SCD_OPCODE 0x3c
 
-static int
-mips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
- 				struct address_space *aspace, CORE_ADDR pc)
+static VEC (CORE_ADDR) *
+mips_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
@@ -3889,11 +3888,12 @@ mips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
   int index;
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   insn = mips_fetch_instruction (gdbarch, ISA_MIPS, loc, NULL);
   /* Assume all atomic sequences start with a ll/lld instruction.  */
   if (itype_op (insn) != LL_OPCODE && itype_op (insn) != LLD_OPCODE)
-    return 0;
+    return NULL;
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -3957,7 +3957,7 @@ mips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 
   /* Assume that the atomic sequence ends with a sc/scd instruction.  */
   if (itype_op (insn) != SC_OPCODE && itype_op (insn) != SCD_OPCODE)
-    return 0;
+    return NULL;
 
   loc += MIPS_INSN32_SIZE;
 
@@ -3971,14 +3971,13 @@ mips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 
   /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
 
-  return 1;
+  return next_pcs;
 }
 
-static int
+static VEC (CORE_ADDR) *
 micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
-				     struct address_space *aspace,
 				     CORE_ADDR pc)
 {
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
@@ -3991,16 +3990,17 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
   ULONGEST insn;
   int insn_count;
   int index;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a ll/lld instruction.  */
   insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, loc, NULL);
   if (micromips_op (insn) != 0x18)	/* POOL32C: bits 011000 */
-    return 0;
+    return NULL;
   loc += MIPS_INSN16_SIZE;
   insn <<= 16;
   insn |= mips_fetch_instruction (gdbarch, ISA_MICROMIPS, loc, NULL);
   if ((b12s4_op (insn) & 0xb) != 0x3)	/* LL, LLD: bits 011000 0x11 */
-    return 0;
+    return NULL;
   loc += MIPS_INSN16_SIZE;
 
   /* Assume all atomic sequences end with an sc/scd instruction.  Assume
@@ -4097,24 +4097,24 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 	          && b5s5_op (insn) != 0x18)
 				/* JRADDIUSP: bits 010001 11000 */
 	        break;
-	      return 0; /* Fall back to the standard single-step code. */
+	      return NULL; /* Fall back to the standard single-step code. */
 
 	    case 0x33: /* B16: bits 110011 */
-	      return 0; /* Fall back to the standard single-step code. */
+	      return NULL; /* Fall back to the standard single-step code. */
 	    }
 	  break;
 	}
       if (is_branch)
 	{
 	  if (last_breakpoint >= 1)
-	    return 0; /* More than one branch found, fallback to the
+	    return NULL; /* More than one branch found, fallback to the
 			 standard single-step code.  */
 	  breaks[1] = branch_bp;
 	  last_breakpoint++;
 	}
     }
   if (!sc_found)
-    return 0;
+    return NULL;
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;
@@ -4126,21 +4126,20 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 
   /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
 
-  return 1;
+  return next_pcs;
 }
 
-static int
-deal_with_atomic_sequence (struct gdbarch *gdbarch,
-			   struct address_space *aspace, CORE_ADDR pc)
+static VEC (CORE_ADDR) *
+deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   if (mips_pc_is_mips (pc))
-    return mips_deal_with_atomic_sequence (gdbarch, aspace, pc);
+    return mips_deal_with_atomic_sequence (gdbarch, pc);
   else if (mips_pc_is_micromips (gdbarch, pc))
-    return micromips_deal_with_atomic_sequence (gdbarch, aspace, pc);
+    return micromips_deal_with_atomic_sequence (gdbarch, pc);
   else
-    return 0;
+    return NULL;
 }
 
 /* mips_software_single_step() is called just before we want to resume
@@ -4148,21 +4147,22 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch,
    or kernel single-step support (MIPS on GNU/Linux for example).  We find
    the target of the coming instruction and breakpoint it.  */
 
-int
+VEC (CORE_ADDR) *
 mips_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR pc, next_pc;
+  VEC (CORE_ADDR) *next_pcs;
 
   pc = get_frame_pc (frame);
-  if (deal_with_atomic_sequence (gdbarch, aspace, pc))
-    return 1;
+  next_pcs = deal_with_atomic_sequence (gdbarch, pc);
+  if (next_pcs != NULL)
+    return next_pcs;
 
   next_pc = mips_next_pc (frame, pc);
 
-  insert_single_step_breakpoint (gdbarch, aspace, next_pc);
-  return 1;
+  VEC_safe_push (CORE_ADDR, next_pcs, next_pc);
+  return next_pcs;
 }
 
 /* Test whether the PC points to the return instruction at the

@@ -1530,6 +1530,12 @@ extern void delete_command (char *arg, int from_tty);
 extern void insert_single_step_breakpoint (struct gdbarch *,
 					   struct address_space *, 
 					   CORE_ADDR);
+
+/* Insert all software single step breakpoints for the current frame.
+   Return true if any software single step breakpoints are inserted,
+   otherwise, return false.  */
+extern int insert_single_step_breakpoints (struct gdbarch *);
+
 /* Check if any hardware watchpoints have triggered, according to the
    target.  */
 int watchpoints_triggered (struct target_waitstatus *);

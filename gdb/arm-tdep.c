@@ -6286,12 +6286,11 @@ arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
    single-step support.  We find the target of the coming instructions
    and breakpoint them.  */
 
-int
+VEC (CORE_ADDR) *
 arm_software_single_step (struct frame_info *frame)
 {
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct address_space *aspace = get_regcache_aspace (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
   CORE_ADDR pc;
   int i;
@@ -6313,12 +6312,9 @@ arm_software_single_step (struct frame_info *frame)
       VEC_replace (CORE_ADDR, next_pcs, i, pc);
     }
 
-  for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    insert_single_step_breakpoint (gdbarch, aspace, pc);
+  discard_cleanups (old_chain);
 
-  do_cleanups (old_chain);
-
-  return 1;
+  return next_pcs;
 }
 
 /* Cleanup/copy SVC (SWI) instructions.  These two functions are overridden

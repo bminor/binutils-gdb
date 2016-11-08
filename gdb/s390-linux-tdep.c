@@ -722,7 +722,7 @@ s390_is_partial_instruction (struct gdbarch *gdbarch, CORE_ADDR loc, int *len)
    process about 4kiB of it each time, leading to O(n**2) memory and time
    complexity.  */
 
-static int
+static VEC (CORE_ADDR) *
 s390_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -731,33 +731,33 @@ s390_software_single_step (struct frame_info *frame)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len;
   uint16_t insn;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Special handling only if recording.  */
   if (!record_full_is_used ())
-    return 0;
+    return NULL;
 
   /* First, match a partial instruction.  */
   if (!s390_is_partial_instruction (gdbarch, loc, &len))
-    return 0;
+    return NULL;
 
   loc += len;
 
   /* Second, look for a branch back to it.  */
   insn = read_memory_integer (loc, 2, byte_order);
   if (insn != 0xa714) /* BRC with mask 1 */
-    return 0;
+    return NULL;
 
   insn = read_memory_integer (loc + 2, 2, byte_order);
   if (insn != (uint16_t) -(len / 2))
-    return 0;
+    return NULL;
 
   loc += 4;
 
   /* Found it, step past the whole thing.  */
+  VEC_safe_push (CORE_ADDR, next_pcs, loc);
 
-  insert_single_step_breakpoint (gdbarch, aspace, loc);
-
-  return 1;
+  return next_pcs;
 }
 
 static int

@@ -1599,7 +1599,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-static int
+static VEC (CORE_ADDR) *
 sparc_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *arch = get_frame_arch (frame);
@@ -1608,6 +1608,7 @@ sparc_software_single_step (struct frame_info *frame)
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   pc = get_frame_register_unsigned (frame, tdep->pc_regnum);
   orig_npc = npc = get_frame_register_unsigned (frame, tdep->npc_regnum);
@@ -1615,10 +1616,10 @@ sparc_software_single_step (struct frame_info *frame)
   /* Analyze the instruction at PC.  */
   nnpc = sparc_analyze_control_transfer (frame, pc, &npc);
   if (npc != 0)
-    insert_single_step_breakpoint (arch, aspace, npc);
+    VEC_safe_push (CORE_ADDR, next_pcs, npc);
 
   if (nnpc != 0)
-    insert_single_step_breakpoint (arch, aspace, nnpc);
+    VEC_safe_push (CORE_ADDR, next_pcs, nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going
@@ -1626,7 +1627,7 @@ sparc_software_single_step (struct frame_info *frame)
   gdb_assert (npc != 0 || nnpc != 0 || orig_npc == 0);
   gdb_assert (nnpc != npc || orig_npc == 0);
 
-  return 1;
+  return next_pcs;
 }
 
 static void

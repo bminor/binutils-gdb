@@ -699,16 +699,15 @@ tic6x_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 
 /* This is the implementation of gdbarch method software_single_step.  */
 
-static int
+static VEC (CORE_ADDR) *
 tic6x_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR next_pc = tic6x_get_next_pc (frame, get_frame_pc (frame));
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  insert_single_step_breakpoint (gdbarch, aspace, next_pc);
+  VEC_safe_push (CORE_ADDR, next_pcs, next_pc);
 
-  return 1;
+  return next_pcs;
 }
 
 /* This is the implementation of gdbarch method frame_align.  */

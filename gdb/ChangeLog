@@ -1,5 +1,46 @@
 2016-11-08  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_software_single_step): Return
+	VEC (CORE_ADDR) *.  Return NULL instead of 0.  Don't call
+	insert_single_step_breakpoint.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Likewise.
+	(alpha_software_single_step): Likewise.
+	* alpha-tdep.h (alpha_software_single_step): Update declaration.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Return
+	VEC (CORE_ADDR) *.  Return NULL instead of 0.
+	* arm-tdep.c (arm_software_single_step): Return NULL instead of	0.
+	* arm-tdep.h (arm_software_single_step): Update declaration.
+	* breakpoint.c (insert_single_step_breakpoints): New function.
+	* breakpoint.h (insert_single_step_breakpoints): Declare.
+	* cris-tdep.c (cris_software_single_step): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	* gdbarch.sh (software_single_step): Change it to return
+	VEC (CORE_ADDR) *.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* infrun.c (maybe_software_singlestep): Adjust.
+	* mips-tdep.c (mips_deal_with_atomic_sequence): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	(micromips_deal_with_atomic_sequence): Likewise.
+	(deal_with_atomic_sequence): Likewise.
+	(mips_software_single_step): Likewise.
+	* mips-tdep.h (mips_software_single_step): Update declaration.
+	* moxie-tdep.c (moxie_software_single_step): Likewise.
+	* nios2-tdep.c (nios2_software_single_step): Likewise.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Update
+	declaration.
+	* record-full.c (record_full_resume): Adjust.
+	(record_full_wait_1): Likewise.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	* rs6000-tdep.c	(ppc_deal_with_atomic_sequence): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	* s390-linux-tdep.c (s390_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* spu-tdep.c (spu_software_single_step): Likewise.
+	* tic6x-tdep.c (tic6x_software_single_step): Likewise.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-tdep.c (arm_linux_software_single_step): Write
 	adjusted address back to vector.  Call insert_single_step_breakpoint
 	in a new loop.

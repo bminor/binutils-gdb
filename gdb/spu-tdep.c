@@ -1610,17 +1610,17 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
 /* Software single-stepping support.  */
 
-static int
+static VEC (CORE_ADDR) *
 spu_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
   int offset, reg;
   gdb_byte buf[4];
   ULONGEST lslr;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   pc = get_frame_pc (frame);
 
@@ -1643,8 +1643,7 @@ spu_software_single_step (struct frame_info *frame)
   else
     next_pc = (SPUADDR_ADDR (pc) + 4) & lslr;
 
-  insert_single_step_breakpoint (gdbarch,
-				 aspace, SPUADDR (SPUADDR_SPU (pc), next_pc));
+  VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc), next_pc));
 
   if (is_branch (insn, &offset, &reg))
     {
@@ -1674,11 +1673,11 @@ spu_software_single_step (struct frame_info *frame)
 
       target = target & lslr;
       if (target != next_pc)
-	insert_single_step_breakpoint (gdbarch, aspace,
-				       SPUADDR (SPUADDR_SPU (pc), target));
+	VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc),
+						     target));
     }
 
-  return 1;
+  return next_pcs;
 }
 
 

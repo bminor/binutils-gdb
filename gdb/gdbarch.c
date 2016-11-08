@@ -3165,7 +3165,7 @@ gdbarch_software_single_step_p (struct gdbarch *gdbarch)
   return gdbarch->software_single_step != NULL;
 }
 
-int
+VEC (CORE_ADDR) *
 gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);

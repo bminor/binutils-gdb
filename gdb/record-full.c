@@ -976,17 +976,7 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
                   record_full_resume_step = 1;
                 }
               else
-                {
-                  /* This is a continue.
-                     Try to insert a soft single step breakpoint.  */
-                  if (!gdbarch_software_single_step (gdbarch,
-                                                     get_current_frame ()))
-                    {
-                      /* This system don't want use soft single step.
-                         Use hard sigle step.  */
-                      step = 1;
-                    }
-                }
+		step = !insert_single_step_breakpoints (gdbarch);
             }
         }
 
@@ -1168,9 +1158,9 @@ record_full_wait_1 (struct target_ops *ops,
 			     If insert success, set step to 0.  */
 			  set_executing (inferior_ptid, 0);
 			  reinit_frame_cache ();
-			  if (gdbarch_software_single_step (gdbarch,
-                                                            get_current_frame ()))
-			    step = 0;
+
+			  step = !insert_single_step_breakpoints (gdbarch);
+
 			  set_executing (inferior_ptid, 1);
 			}
 

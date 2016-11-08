@@ -677,18 +677,19 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
    FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
    target can single step.  If not, then implement single step using breakpoints.
   
-   A return value of 1 means that the software_single_step breakpoints
-   were inserted; 0 means they were not.  Multiple breakpoints may be
-   inserted for some instructions such as conditional branch.  However,
-   each implementation must always evaluate the condition and only put
-   the breakpoint at the branch destination if the condition is true, so
-   that we ensure forward progress when stepping past a conditional
-   branch to self. */
+   Return a vector of addresses on which the software single step
+   breakpoints should be inserted.  NULL means software single step is
+   not used.
+   Multiple breakpoints may be inserted for some instructions such as
+   conditional branch.  However, each implementation must always evaluate
+   the condition and only put the breakpoint at the branch destination if
+   the condition is true, so that we ensure forward progress when stepping
+   past a conditional branch to self. */
 
 extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_software_single_step_ftype) (struct frame_info *frame);
-extern int gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame);
+typedef VEC (CORE_ADDR) * (gdbarch_software_single_step_ftype) (struct frame_info *frame);
+extern VEC (CORE_ADDR) * gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
 
 /* Return non-zero if the processor is executing a delay slot and a
