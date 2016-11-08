@@ -950,7 +950,10 @@ arm_linux_software_single_step (struct frame_info *frame)
   next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
+    {
+      pc = gdbarch_addr_bits_remove (gdbarch, pc);
+      insert_single_step_breakpoint (gdbarch, aspace, pc);
+    }
 
   do_cleanups (old_chain);
 

@@ -1,3 +1,15 @@
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_software_single_step): Don't
+	call arm_insert_single_step_breakpoint, call
+	insert_single_step_breakpoint instead.
+	* arm-tdep.c (arm_insert_single_step_breakpoint): Remove.
+	(arm_software_single_step): Don't call
+	arm_insert_single_step_breakpoint, call
+	insert_single_step_breakpoint instead.
+	* arm-tdep.h (arm_insert_single_step_breakpoint): Remove
+	declaration.
+
 2016-11-08  Cordian A. Daniluk  <th3c0r1uk@gmail.com>
 
 	PR breakpoints/20739

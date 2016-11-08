@@ -4235,20 +4235,6 @@ convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
 			       &d, dbl);
 }
 
-/* Like insert_single_step_breakpoint, but make sure we use a breakpoint
-   of the appropriate mode (as encoded in the PC value), even if this
-   differs from what would be expected according to the symbol tables.  */
-
-void
-arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
-				   struct address_space *aspace,
-				   CORE_ADDR pc)
-{
-  pc = gdbarch_addr_bits_remove (gdbarch, pc);
-
-  insert_single_step_breakpoint (gdbarch, aspace, pc);
-}
-
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
    the buffer to be NEW_LEN bytes ending at ENDADDR.  Return
    NULL if an error occurs.  BUF is freed.  */
@@ -6322,7 +6308,10 @@ arm_software_single_step (struct frame_info *frame)
   next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
+    {
+      pc = gdbarch_addr_bits_remove (gdbarch, pc);
+      insert_single_step_breakpoint (gdbarch, aspace, pc);
+    }
 
   do_cleanups (old_chain);
 
