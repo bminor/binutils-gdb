@@ -1,3 +1,10 @@
+2016-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20701
+	* i386-dis.c (THREE_BYTE_0F7A): Removed.
+	(dis386_twobyte): Don't use THREE_BYTE_0F7A.
+	(three_byte_table): Remove THREE_BYTE_0F7A.
+
 2016-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/20775
