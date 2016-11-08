@@ -601,16 +601,14 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
     }
 }
 
-/* Load OBJECT_FILE into inferior memory.  Throw an error otherwise.
-   Caller must fully dispose the return value by calling compile_object_run.
-   SOURCE_FILE's copy is stored into the returned object.
-   Caller should free both OBJECT_FILE and SOURCE_FILE immediatelly after this
-   function returns.
-   Function returns NULL only for COMPILE_I_PRINT_ADDRESS_SCOPE when
-   COMPILE_I_PRINT_VALUE_SCOPE should have been used instead.  */
+/* Load the object file specified in FILE_NAMES into inferior memory.
+   Throw an error otherwise.  Caller must fully dispose the return
+   value by calling compile_object_run.  Returns NULL only for
+   COMPILE_I_PRINT_ADDRESS_SCOPE when COMPILE_I_PRINT_VALUE_SCOPE
+   should have been used instead.  */
 
 struct compile_module *
-compile_object_load (const char *object_file, const char *source_file,
+compile_object_load (const compile_file_names &file_names,
 		     enum compile_i_scope_types scope, void *scope_data)
 {
   struct cleanup *cleanups, *cleanups_free_objfile;
@@ -633,7 +631,7 @@ compile_object_load (const char *object_file, const char *source_file,
   struct type *expect_return_type;
   struct munmap_list *munmap_list_head = NULL;
 
-  filename = tilde_expand (object_file);
+  filename = tilde_expand (file_names.object_file ());
   cleanups = make_cleanup (xfree, filename);
 
   abfd = gdb_bfd_open (filename, gnutarget, -1);
@@ -824,7 +822,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   retval = XNEW (struct compile_module);
   retval->objfile = objfile;
-  retval->source_file = xstrdup (source_file);
+  retval->source_file = xstrdup (file_names.source_file ());
   retval->func_sym = func_sym;
   retval->regs_addr = regs_addr;
   retval->scope = scope;

@@ -152,16 +152,16 @@ extern int c_textual_element_type (struct type *, char);
 
 extern struct compile_instance *c_get_compile_context (void);
 
-/* This takes the user-supplied text and returns a newly malloc'd bit
-   of code to compile.
+/* This takes the user-supplied text and returns a new bit of code to
+   compile.
 
    This is used as the la_compute_program language method; see that
    for a description of the arguments.  */
 
-extern char *c_compute_program (struct compile_instance *inst,
-				const char *input,
-				struct gdbarch *gdbarch,
-				const struct block *expr_block,
-				CORE_ADDR expr_pc);
+extern std::string c_compute_program (struct compile_instance *inst,
+				      const char *input,
+				      struct gdbarch *gdbarch,
+				      const struct block *expr_block,
+				      CORE_ADDR expr_pc);
 
 #endif /* !defined (C_LANG_H) */

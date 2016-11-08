@@ -406,8 +406,8 @@ struct language_defn
        If 'la_get_gcc_context' is not defined, then this method is
        ignored.
 
-       This takes the user-supplied text and returns a newly malloc'd
-       bit of code to compile.  The caller owns the result.
+       This takes the user-supplied text and returns a new bit of code
+       to compile.
 
        INST is the compiler instance being used.
        INPUT is the user's input text.
@@ -416,11 +416,11 @@ struct language_defn
        parsed.
        EXPR_PC is the PC at which the expression is being parsed.  */
 
-    char *(*la_compute_program) (struct compile_instance *inst,
-				 const char *input,
-				 struct gdbarch *gdbarch,
-				 const struct block *expr_block,
-				 CORE_ADDR expr_pc);
+    std::string (*la_compute_program) (struct compile_instance *inst,
+				       const char *input,
+				       struct gdbarch *gdbarch,
+				       const struct block *expr_block,
+				       CORE_ADDR expr_pc);
 
     /* Add fields above this point, so the magic number is always last.  */
     /* Magic number for compat checking.  */

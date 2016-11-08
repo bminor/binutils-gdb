@@ -1,5 +1,26 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* c-lang.h (c_compute_program): Now returns std::string.
+	* compile/compile-internal.h (class compile_file_names): New
+	class.
+	* compile/compile-object-load.c (compile_object_load): Replace
+	object_file and source_file parameters with a compile_file_names
+	parameter.  Adjust.
+	* compile-object-load.h: Include "compile-internal.h".
+	(compile_object_load): Replace object_file and source_file
+	parameters with a compile_file_names parameter.
+	* compile/compile-c-support.c (c_compute_program): Now returns a
+	std::string.  Use ui_file_as_string.
+	* compile/compile.c (get_new_file_names): Remove parameters and
+	return a compile_file_names instead.
+	(compile_to_object): Now returns a compile_file_names.  Use
+	ui_file_as_string.
+	(eval_compile_command): Use compile_file_names.
+	* language.h (struct language_defn) <la_compute_program>: Now
+	returns std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-setshow.c (do_show_command): Adjust to use
 	ui_file_as_string and std::string.
 
