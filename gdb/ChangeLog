@@ -1,5 +1,9 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* top.c (quit_confirm): Use ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* gdbcmd.h (execute_command_to_string): Now returns std::string.
 	(lookup_struct_elt_type): Adjust to use std::string.
 	* top.c (execute_command_to_string): Use ui_file_as_string and

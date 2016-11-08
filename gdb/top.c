@@ -1576,8 +1576,6 @@ quit_confirm (void)
 {
   struct ui_file *stb;
   struct cleanup *old_chain;
-  char *str;
-  int qr;
 
   /* Don't even ask if we're only debugging a core file inferior.  */
   if (!have_live_inferiors ())
@@ -1591,12 +1589,11 @@ quit_confirm (void)
   iterate_over_inferiors (print_inferior_quit_action, stb);
   fprintf_filtered (stb, _("\nQuit anyway? "));
 
-  str = ui_file_xstrdup (stb, NULL);
-  make_cleanup (xfree, str);
+  std::string str = ui_file_as_string (stb);
 
-  qr = query ("%s", str);
   do_cleanups (old_chain);
-  return qr;
+
+  return query ("%s", str.c_str ());
 }
 
 /* Prepare to exit GDB cleanly by undoing any changes made to the
