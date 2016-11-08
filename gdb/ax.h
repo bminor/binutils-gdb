@@ -170,12 +170,6 @@ struct agent_expr
 /* An agent_expr owning pointer.  */
 typedef gdb::unique_ptr<agent_expr> agent_expr_up;
 
-/* Pointer to an agent_expr structure.  */
-typedef struct agent_expr *agent_expr_p;
-
-/* Vector of pointers to agent expressions.  */
-DEF_VEC_P (agent_expr_p);
-
 /* The actual values of the various bytecode operations.  */
 
 enum agent_op

@@ -2298,7 +2298,7 @@ build_target_condition_list (struct bp_location *bl)
   struct bp_location *loc;
 
   /* Release conditions left over from a previous insert.  */
-  VEC_free (agent_expr_p, bl->target_info.conditions);
+  bl->target_info.conditions.clear ();
 
   /* This is only meaningful if the target is
      evaluating conditions and if the user has
@@ -2371,10 +2371,11 @@ build_target_condition_list (struct bp_location *bl)
 	  && loc->pspace->num == bl->pspace->num
 	  && loc->owner->enable_state == bp_enabled
 	  && loc->enabled)
-	/* Add the condition to the vector.  This will be used later to send the
-	   conditions to the target.  */
-	VEC_safe_push (agent_expr_p, bl->target_info.conditions,
-		       loc->cond_bytecode.get ());
+	{
+	  /* Add the condition to the vector.  This will be used later
+	     to send the conditions to the target.  */
+	  bl->target_info.conditions.push_back (loc->cond_bytecode.get ());
+	}
     }
 
   return;
@@ -2481,8 +2482,8 @@ build_target_command_list (struct bp_location *bl)
   int modified = bl->needs_update;
   struct bp_location *loc;
 
-  /* Release commands left over from a previous insert.  */
-  VEC_free (agent_expr_p, bl->target_info.tcommands);
+  /* Clear commands left over from a previous insert.  */
+  bl->target_info.tcommands.clear ();
 
   if (!target_can_run_breakpoint_commands ())
     return;
@@ -2565,10 +2566,11 @@ build_target_command_list (struct bp_location *bl)
 	  && loc->pspace->num == bl->pspace->num
 	  && loc->owner->enable_state == bp_enabled
 	  && loc->enabled)
-	/* Add the command to the vector.  This will be used later
-	   to send the commands to the target.  */
-	VEC_safe_push (agent_expr_p, bl->target_info.tcommands,
-		       loc->cmd_bytecode.get ());
+	{
+	  /* Add the command to the vector.  This will be used later
+	     to send the commands to the target.  */
+	  bl->target_info.tcommands.push_back (loc->cmd_bytecode.get ());
+	}
     }
 
   bl->target_info.persist = 0;
@@ -12888,9 +12890,6 @@ static void
 bp_location_dtor (struct bp_location *self)
 {
   xfree (self->function_name);
-
-  VEC_free (agent_expr_p, self->target_info.conditions);
-  VEC_free (agent_expr_p, self->target_info.tcommands);
 }
 
 static const struct bp_location_ops bp_location_ops =

@@ -26,6 +26,7 @@
 #include "command.h"
 #include "break-common.h"
 #include "probe.h"
+#include <vector>
 
 struct value;
 struct block;
@@ -264,13 +265,13 @@ struct bp_target_info
      packets.  */
   int kind;
 
-  /* Vector of conditions the target should evaluate if it supports target-side
-     breakpoint conditions.  */
-  VEC(agent_expr_p) *conditions;
+  /* Conditions the target should evaluate if it supports target-side
+     breakpoint conditions.  These are non-owning pointers.  */
+  std::vector<agent_expr *> conditions;
 
-  /* Vector of commands the target should evaluate if it supports
-     target-side breakpoint commands.  */
-  VEC(agent_expr_p) *tcommands;
+  /* Commands the target should evaluate if it supports target-side
+     breakpoint commands.  These are non-owning pointers.  */
+  std::vector<agent_expr *> tcommands;
 
   /* Flag that is true if the breakpoint should be left in place even
      when GDB is not connected.  */
