@@ -1066,7 +1066,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
 	ada-valprint.o c-valprint.o cp-valprint.o d-valprint.o f-valprint.o \
 	m2-valprint.o \
-	ser-event.o serial.o mdebugread.o top.o utils.o \
+	ser-event.o serial.o mdebugread.o top.o utils.o utils-selftests.o \
 	ui-file.o \
 	user-regs.o \
 	frame.o frame-unwind.o doublest.o \

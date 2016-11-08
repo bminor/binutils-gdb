@@ -1,3 +1,11 @@
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_OBS): Add utils-selftests.o.
+	* common/common-utils.c (string_printf): New function.
+	* common/common-utils.h: Include <string>.
+	(string_printf): Declare.
+	* utils-selftests.c: New file.
+
 2016-11-08  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_software_single_step): Return
