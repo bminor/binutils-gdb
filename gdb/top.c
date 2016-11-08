@@ -690,12 +690,11 @@ execute_command (char *p, int from_tty)
    returned string, do not display it to the screen.  BATCH_FLAG will be
    temporarily set to true.  */
 
-char *
+std::string
 execute_command_to_string (char *p, int from_tty)
 {
   struct ui_file *str_file;
   struct cleanup *cleanup;
-  char *retval;
 
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */
@@ -725,7 +724,7 @@ execute_command_to_string (char *p, int from_tty)
 
   execute_command (p, from_tty);
 
-  retval = ui_file_xstrdup (str_file, NULL);
+  std::string retval = ui_file_as_string (str_file);
 
   do_cleanups (cleanup);
 

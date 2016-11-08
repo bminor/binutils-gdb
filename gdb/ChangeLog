@@ -1,5 +1,16 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* gdbcmd.h (execute_command_to_string): Now returns std::string.
+	(lookup_struct_elt_type): Adjust to use std::string.
+	* top.c (execute_command_to_string): Use ui_file_as_string and
+	return std::string.
+	* guile/guile.c (gdbscm_execute_gdb_command): Adjust to use
+	std::string.
+	* python/python.c (execute_gdb_command): Adjust to use
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Use
 	ui_file_as_string and adjust to use std::string.
 	* guile/scm-disasm.c (gdbscm_arch_disassemble): Likewise.

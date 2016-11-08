@@ -614,7 +614,6 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *from_tty_obj = NULL, *to_string_obj = NULL;
   int from_tty, to_string;
   static char *keywords[] = {"command", "from_tty", "to_string", NULL };
-  char *result = NULL;
 
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O!O!", keywords, &arg,
 				     &PyBool_Type, &from_tty_obj,
@@ -639,6 +638,8 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       to_string = cmp;
     }
 
+  std::string to_string_res;
+
   TRY
     {
       /* Copy the argument text in case the command modifies it.  */
@@ -657,13 +658,9 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
       prevent_dont_repeat ();
       if (to_string)
-	result = execute_command_to_string (copy, from_tty);
+	to_string_res = execute_command_to_string (copy, from_tty);
       else
-	{
-	  result = NULL;
-	  execute_command (copy, from_tty);
-	}
-
+	execute_command (copy, from_tty);
       do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
@@ -675,12 +672,8 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
   /* Do any commands attached to breakpoint we stopped at.  */
   bpstat_do_actions ();
 
-  if (result)
-    {
-      PyObject *r = PyString_FromString (result);
-      xfree (result);
-      return r;
-    }
+  if (to_string)
+    return PyString_FromString (to_string_res.c_str ());
   Py_RETURN_NONE;
 }
 
