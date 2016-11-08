@@ -1005,76 +1005,70 @@ static enum ext_lang_rc
 gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
 			  const char *current_gdb_prompt)
 {
-  struct cleanup *cleanup;
-  gdb::unique_xmalloc_ptr<char> prompt;
-
   if (!gdb_python_initialized)
     return EXT_LANG_RC_NOP;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   if (gdb_python_module
       && PyObject_HasAttrString (gdb_python_module, "prompt_hook"))
     {
-      PyObject *hook;
-
-      hook = PyObject_GetAttrString (gdb_python_module, "prompt_hook");
+      gdbpy_ref hook (PyObject_GetAttrString (gdb_python_module,
+					      "prompt_hook"));
       if (hook == NULL)
-	goto fail;
-
-      make_cleanup_py_decref (hook);
-
-      if (PyCallable_Check (hook))
 	{
-	  PyObject *result;
-	  PyObject *current_prompt;
+	  gdbpy_print_stack ();
+	  return EXT_LANG_RC_ERROR;
+	}
 
-	  current_prompt = PyString_FromString (current_gdb_prompt);
+      if (PyCallable_Check (hook.get ()))
+	{
+	  gdbpy_ref current_prompt (PyString_FromString (current_gdb_prompt));
 	  if (current_prompt == NULL)
-	    goto fail;
+	    {
+	      gdbpy_print_stack ();
+	      return EXT_LANG_RC_ERROR;
+	    }
 
-	  result = PyObject_CallFunctionObjArgs (hook, current_prompt, NULL);
-
-	  Py_DECREF (current_prompt);
-
+	  gdbpy_ref result (PyObject_CallFunctionObjArgs (hook.get (),
+							  current_prompt.get (),
+							  NULL));
 	  if (result == NULL)
-	    goto fail;
-
-	  make_cleanup_py_decref (result);
+	    {
+	      gdbpy_print_stack ();
+	      return EXT_LANG_RC_ERROR;
+	    }
 
 	  /* Return type should be None, or a String.  If it is None,
 	     fall through, we will not set a prompt.  If it is a
 	     string, set  PROMPT.  Anything else, set an exception.  */
-	  if (result != Py_None && ! PyString_Check (result))
+	  if (result != Py_None && ! PyString_Check (result.get ()))
 	    {
 	      PyErr_Format (PyExc_RuntimeError,
 			    _("Return from prompt_hook must " \
 			      "be either a Python string, or None"));
-	      goto fail;
+	      gdbpy_print_stack ();
+	      return EXT_LANG_RC_ERROR;
 	    }
 
 	  if (result != Py_None)
 	    {
-	      prompt = python_string_to_host_string (result);
+	      gdb::unique_xmalloc_ptr<char>
+		prompt (python_string_to_host_string (result.get ()));
 
 	      if (prompt == NULL)
-		goto fail;
+		{
+		  gdbpy_print_stack ();
+		  return EXT_LANG_RC_ERROR;
+		}
+
+	      set_prompt (prompt.get ());
+	      return EXT_LANG_RC_OK;
 	    }
 	}
     }
 
-  /* If a prompt has been set, PROMPT will not be NULL.  If it is
-     NULL, do not set the prompt.  */
-  if (prompt != NULL)
-    set_prompt (prompt.get ());
-
-  do_cleanups (cleanup);
-  return prompt != NULL ? EXT_LANG_RC_OK : EXT_LANG_RC_NOP;
-
- fail:
-  gdbpy_print_stack ();
-  do_cleanups (cleanup);
-  return EXT_LANG_RC_ERROR;
+  return EXT_LANG_RC_NOP;
 }
 
 
