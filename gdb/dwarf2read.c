@@ -8487,7 +8487,6 @@ dwarf2_compute_name (const char *name,
 	  long length;
 	  const char *prefix;
 	  struct ui_file *buf;
-	  char *intermediate_name;
 	  const char *canonical_name = NULL;
 
 	  prefix = determine_prefix (die, cu);
@@ -8656,26 +8655,24 @@ dwarf2_compute_name (const char *name,
 		}
 	    }
 
-	  intermediate_name = ui_file_xstrdup (buf, &length);
+	  std::string intermediate_name = ui_file_as_string (buf);
 	  ui_file_delete (buf);
 
 	  if (cu->language == language_cplus)
 	    canonical_name
-	      = dwarf2_canonicalize_name (intermediate_name, cu,
+	      = dwarf2_canonicalize_name (intermediate_name.c_str (), cu,
 					  &objfile->per_bfd->storage_obstack);
 
 	  /* If we only computed INTERMEDIATE_NAME, or if
 	     INTERMEDIATE_NAME is already canonical, then we need to
 	     copy it to the appropriate obstack.  */
-	  if (canonical_name == NULL || canonical_name == intermediate_name)
+	  if (canonical_name == NULL || canonical_name == intermediate_name.c_str ())
 	    name = ((const char *)
 		    obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				   intermediate_name,
-				   strlen (intermediate_name)));
+				   intermediate_name.c_str (),
+				   intermediate_name.length ()));
 	  else
 	    name = canonical_name;
-
-	  xfree (intermediate_name);
 	}
     }
 
