@@ -1,5 +1,13 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-script.c (execute_control_command): Use std::string
+	instead of cleanups.
+	(locate_arg): Constify return type.
+	(insert_args): Constify paremeter.  Simplify using std::string.
+	Return a std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (struct commands_info) <arg>: Constify.
 	(commands_command_1): Constify 'arg' parameter.  Use std::string
 	and string_printf.
