@@ -482,9 +482,9 @@ rust_printstr (struct ui_file *stream, struct type *type,
 
 static void
 val_print_struct (struct type *type, const gdb_byte *valaddr,
-		              int embedded_offset, CORE_ADDR address, struct ui_file *stream,
-		              int recurse, const struct value *val,
-		              const struct value_print_options *options)
+		  int embedded_offset, CORE_ADDR address, struct ui_file *stream,
+		  int recurse, const struct value *val,
+		  const struct value_print_options *options)
 {
   int i;
   int first_field;

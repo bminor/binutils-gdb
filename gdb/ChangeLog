@@ -1,3 +1,7 @@
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* rust-lang.c (val_print_struct): Fix indentation.
+
 2016-11-08  Lionel Flandrin  <lionel@svkt.org>
 
 	* remote.c (process_g_packet): Detect truncated registers in 'g'
