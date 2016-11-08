@@ -1362,7 +1362,6 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 void
 mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 {
-  struct expression *expr;
   struct cleanup *old_chain;
   struct value *val;
   struct ui_file *stb;
@@ -1376,11 +1375,9 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
     error (_("-data-evaluate-expression: "
 	     "Usage: -data-evaluate-expression expression"));
 
-  expr = parse_expression (argv[0]);
+  expression_up expr = parse_expression (argv[0]);
 
-  make_cleanup (free_current_contents, &expr);
-
-  val = evaluate_expression (expr);
+  val = evaluate_expression (expr.get ());
 
   /* Print the result of the expression evaluation.  */
   get_user_print_options (&opts);
@@ -2743,7 +2740,6 @@ mi_cmd_ada_task_info (char *command, char **argv, int argc)
 static void
 print_variable_or_computed (char *expression, enum print_values values)
 {
-  struct expression *expr;
   struct cleanup *old_chain;
   struct value *val;
   struct ui_file *stb;
@@ -2753,14 +2749,12 @@ print_variable_or_computed (char *expression, enum print_values values)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  expr = parse_expression (expression);
-
-  make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (expression);
 
   if (values == PRINT_SIMPLE_VALUES)
-    val = evaluate_type (expr);
+    val = evaluate_type (expr.get ());
   else
-    val = evaluate_expression (expr);
+    val = evaluate_expression (expr.get ());
 
   if (values != PRINT_NO_VALUES)
     make_cleanup_ui_out_tuple_begin_end (uiout, NULL);

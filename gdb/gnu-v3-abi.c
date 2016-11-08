@@ -1195,7 +1195,6 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
   char *type_name;
   struct cleanup *cleanup;
   struct value *type_val;
-  struct expression *expr;
   struct type *result;
 
   type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
@@ -1206,10 +1205,9 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
      mis-parse.  Another approach might be to re-use the demangler's
      internal form to reconstruct the type somehow.  */
 
-  expr = parse_expression (type_name);
-  make_cleanup (xfree, expr);
+  expression_up expr = parse_expression (type_name);
 
-  type_val = evaluate_type (expr);
+  type_val = evaluate_type (expr.get ());
   result = value_type (type_val);
 
   do_cleanups (cleanup);

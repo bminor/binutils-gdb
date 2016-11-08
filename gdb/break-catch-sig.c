@@ -371,7 +371,7 @@ create_signal_catchpoint (int tempflag, VEC (gdb_signal_type) *filter,
   struct signal_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
 
-  c = XNEW (struct signal_catchpoint);
+  c = new signal_catchpoint ();
   init_catchpoint (&c->base, gdbarch, tempflag, NULL, &signal_catchpoint_ops);
   c->signals_to_be_caught = filter;
   c->catch_all = catch_all;

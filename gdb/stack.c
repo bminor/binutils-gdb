@@ -2433,13 +2433,12 @@ return_command (char *retval_exp, int from_tty)
      message.  */
   if (retval_exp)
     {
-      struct expression *retval_expr = parse_expression (retval_exp);
-      struct cleanup *old_chain = make_cleanup (xfree, retval_expr);
+      expression_up retval_expr = parse_expression (retval_exp);
       struct type *return_type = NULL;
 
       /* Compute the return value.  Should the computation fail, this
          call throws an error.  */
-      return_value = evaluate_expression (retval_expr);
+      return_value = evaluate_expression (retval_expr.get ());
 
       /* Cast return value to the return type of the function.  Should
          the cast fail, this call throws an error.  */
@@ -2454,7 +2453,6 @@ return_command (char *retval_exp, int from_tty)
 		     "Please use an explicit cast of the value to return."));
 	  return_type = value_type (return_value);
 	}
-      do_cleanups (old_chain);
       return_type = check_typedef (return_type);
       return_value = value_cast (return_type, return_value);
 

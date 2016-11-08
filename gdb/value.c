@@ -2113,9 +2113,7 @@ init_if_undefined_command (char* args, int from_tty)
   struct internalvar* intvar;
 
   /* Parse the expression - this is taken from set_command().  */
-  struct expression *expr = parse_expression (args);
-  register struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (args);
 
   /* Validate the expression.
      Was the expression an assignment?
@@ -2133,9 +2131,7 @@ init_if_undefined_command (char* args, int from_tty)
   /* Only evaluate the expression if the lvalue is void.
      This may still fail if the expresssion is invalid.  */
   if (intvar->kind == INTERNALVAR_VOID)
-    evaluate_expression (expr);
-
-  do_cleanups (old_chain);
+    evaluate_expression (expr.get ());
 }
 
 

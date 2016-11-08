@@ -440,9 +440,7 @@ print_command_trace (const char *cmd)
 enum command_control_type
 execute_control_command (struct command_line *cmd)
 {
-  struct expression *expr;
   struct command_line *current;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
   struct value *val;
   struct value *val_mark;
   int loop;
@@ -489,8 +487,7 @@ execute_control_command (struct command_line *cmd)
 
 	/* Parse the loop control expression for the while statement.  */
 	std::string new_line = insert_args (cmd->line);
-	expr = parse_expression (new_line.c_str ());
-	make_cleanup (free_current_contents, &expr);
+	expression_up expr = parse_expression (new_line.c_str ());
 
 	ret = simple_control;
 	loop = 1;
@@ -504,7 +501,7 @@ execute_control_command (struct command_line *cmd)
 
 	    /* Evaluate the expression.  */
 	    val_mark = value_mark ();
-	    val = evaluate_expression (expr);
+	    val = evaluate_expression (expr.get ());
 	    cond_result = value_true (val);
 	    value_free_to_mark (val_mark);
 
@@ -555,15 +552,14 @@ execute_control_command (struct command_line *cmd)
 
 	/* Parse the conditional for the if statement.  */
 	std::string new_line = insert_args (cmd->line);
-	expr = parse_expression (new_line.c_str ());
-	make_cleanup (free_current_contents, &expr);
+	expression_up expr = parse_expression (new_line.c_str ());
 
 	current = NULL;
 	ret = simple_control;
 
 	/* Evaluate the conditional.  */
 	val_mark = value_mark ();
-	val = evaluate_expression (expr);
+	val = evaluate_expression (expr.get ());
 
 	/* Choose which arm to take commands from based on the value
 	   of the conditional expression.  */
@@ -618,8 +614,6 @@ execute_control_command (struct command_line *cmd)
       warning (_("Invalid control type in canned commands structure."));
       break;
     }
-
-  do_cleanups (old_chain);
 
   return ret;
 }

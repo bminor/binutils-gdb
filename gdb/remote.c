@@ -12354,7 +12354,7 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	 capabilities at definition time.  */
       if (remote_supports_cond_tracepoints ())
 	{
-	  aexpr = gen_eval_for_expr (tpaddr, loc->cond);
+	  aexpr = gen_eval_for_expr (tpaddr, loc->cond.get ());
 	  aexpr_chain = make_cleanup_free_agent_expr (aexpr);
 	  xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":X%x,",
 		     aexpr->len);

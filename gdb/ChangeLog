@@ -1,5 +1,89 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_read_renaming_var_value): Use expression_up.
+	(struct ada_catchpoint_location) <excep_cond_expr>: Now an
+	expression_up.
+	(ada_catchpoint_location_dtor): Reset excep_cond_expr instead of
+	using xfree.
+	(create_excep_cond_exprs): Use expression_up and gdb::move.
+	(allocate_location_exception): Use new instead of XNEW.
+	(should_stop_exception): Likewise.  Adjust to use expression_up.
+	(create_ada_exception_catchpoint): Use new instead of XNEW.
+	* ax-gdb.c (agent_eval_command_one): Use expression_up instead of
+	cleanups.
+	(maint_agent_printf_command): Use expression_up.
+	* break-catch-sig.c (create_signal_catchpoint): Use new instead of
+	XNEW.
+	* break-catch-syscall.c (create_syscall_event_catchpoint):
+	Likewise.
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use new instead
+	of XCNEW.  Use gdb::unique_ptr instead of cleanups.
+	* breakpoint.c (set_breakpoint_condition, update_watchpoint)
+	(parse_cmd_to_aexpr, watchpoint_check)
+	(bpstat_check_breakpoint_conditions, watchpoint_locations_match):
+	Adjust to use expression_up.
+	(init_bp_location): Adjust.
+	(free_bp_location): Use delete instead of xfree.
+	(set_raw_breakpoint_without_location, set_raw_breakpoint)
+	(add_solib_catchpoint, create_fork_vfork_event_catchpoint)
+	(new_single_step_breakpoint, create_breakpoint_sal): Use new
+	instead of XNEW.
+	(find_condition_and_thread): Adjust to use expression_up.
+	(create_breakpoint): Use new instead of XNEW.
+	(dtor_watchpoint): Don't xfree expression pointers, they're
+	unique_ptr's now.
+	(insert_watchpoint, remove_watchpoint): Adjust.
+	(watch_command_1): Use expression_up.  Use new instead of XCNEW.
+	(catch_exec_command_1): Use new instead of XNEW.
+	(bp_location_dtor): Don't xfree expression pointers, they're
+	unique_ptr's now.
+	(base_breakpoint_allocate_location)
+	(strace_marker_create_breakpoints_sal): Use new instead of XNEW.
+	(delete_breakpoint): Use delete instead of xfree.
+	* breakpoint.h (struct bp_location) <cond>: Now an
+	unique_ptr<expression> instead of a raw pointer.
+	(struct watchpoint) <exp, cond_exp>: Likewise.
+	* cli/cli-script.c (execute_control_command): Use expression_up
+	instead of cleanups.
+	* dtrace-probe.c (dtrace_process_dof_probe): Use expression_up.
+	* eval.c (parse_and_eval_address, parse_and_eval_long)
+	(parse_and_eval, parse_to_comma_and_eval, parse_and_eval_type):
+	Use expression_up instead of cleanups.
+	* expression.h (expression_up): New typedef.
+	(parse_expression, parse_expression_with_language, parse_exp_1):
+	Change return type to expression_up.
+	* mi/mi-main.c (mi_cmd_data_evaluate_expression)
+	(print_variable_or_computed): Use expression_up.
+	* objc-lang.c (print_object_command): Use expression_up instead of
+	cleanups.
+	* parse.c (parse_exp_1, parse_exp_in_context)
+	(parse_exp_in_context_1, parse_expression)
+	(parse_expression_with_language): Return an expression_up instead
+	of a raw pointer.
+	(parse_expression_for_completion): Use expression_up.
+	* printcmd.c (struct display) <exp>: Now an expression_up instead
+	of a raw pointer.
+	(print_command_1, output_command_const, set_command, x_command):
+	Use expression_up instead of cleanups.
+	(display_command): Likewise.  Use new instead of XNEW.
+	(free_display): Use delete instead of xfree.
+	(do_one_display): Adjust to use expression_up.
+	* remote.c (remote_download_tracepoint): Likewise.
+	* stack.c (return_command): Likewise.
+	* tracepoint.c (validate_actionline, encode_actions_1): Use
+	expression_up instead of cleanups.
+	* typeprint.c (whatis_exp, maintenance_print_type): Likewise.
+	* value.c (init_if_undefined_command): Likewise.
+	* varobj.c (struct varobj_root) <exp>: Now an expression_up
+	instead of a raw pointer.
+	(varobj_create): Adjust.
+	(varobj_set_value): Use an expression_up instead of cleanups.
+	(new_root_variable): Use new instead of XNEW.
+	(free_variable): Use delete instead of xfree.
+	(value_of_root_1): Use std::swap.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-script.c (execute_control_command): Use std::string
 	instead of cleanups.
 	(locate_arg): Constify return type.

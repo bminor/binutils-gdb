@@ -115,12 +115,12 @@ static void free_funcalls (void *ignore);
 static int prefixify_subexp (struct expression *, struct expression *, int,
 			     int);
 
-static struct expression *parse_exp_in_context (const char **, CORE_ADDR,
-						const struct block *, int, 
-						int, int *);
-static struct expression *parse_exp_in_context_1 (const char **, CORE_ADDR,
-						  const struct block *, int,
-						  int, int *);
+static expression_up parse_exp_in_context (const char **, CORE_ADDR,
+					   const struct block *, int,
+					   int, int *);
+static expression_up parse_exp_in_context_1 (const char **, CORE_ADDR,
+					     const struct block *, int,
+					     int, int *);
 
 void _initialize_parse (void);
 
@@ -1108,14 +1108,14 @@ prefixify_subexp (struct expression *inexpr,
 
    If COMMA is nonzero, stop if a comma is reached.  */
 
-struct expression *
+expression_up
 parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
 	     int comma)
 {
   return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL);
 }
 
-static struct expression *
+static expression_up
 parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
 		      int comma, int void_context_p, int *out_subexp)
@@ -1131,7 +1131,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
    left-hand-side of the struct op.  If not doing such completion, it
    is left untouched.  */
 
-static struct expression *
+static expression_up
 parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 			const struct block *block,
 			int comma, int void_context_p, int *out_subexp)
@@ -1254,18 +1254,16 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   discard_cleanups (old_chain);
 
   *stringptr = lexptr;
-  return ps.expout;
+  return expression_up (ps.expout);
 }
 
 /* Parse STRING as an expression, and complain if this fails
    to use up all of the contents of STRING.  */
 
-struct expression *
+expression_up
 parse_expression (const char *string)
 {
-  struct expression *exp;
-
-  exp = parse_exp_1 (&string, 0, 0, 0);
+  expression_up exp = parse_exp_1 (&string, 0, 0, 0);
   if (*string)
     error (_("Junk after end of expression."));
   return exp;
@@ -1274,11 +1272,10 @@ parse_expression (const char *string)
 /* Same as parse_expression, but using the given language (LANG)
    to parse the expression.  */
 
-struct expression *
+expression_up
 parse_expression_with_language (const char *string, enum language lang)
 {
   struct cleanup *old_chain = NULL;
-  struct expression *expr;
 
   if (current_language->la_language != lang)
     {
@@ -1286,7 +1283,7 @@ parse_expression_with_language (const char *string, enum language lang)
       set_language (lang);
     }
 
-  expr = parse_expression (string);
+  expression_up expr = parse_expression (string);
 
   if (old_chain != NULL)
     do_cleanups (old_chain);
@@ -1305,14 +1302,14 @@ struct type *
 parse_expression_for_completion (const char *string, char **name,
 				 enum type_code *code)
 {
-  struct expression *exp = NULL;
+  expression_up exp;
   struct value *val;
   int subexp;
 
   TRY
     {
       parse_completion = 1;
-      exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp);
+      exp = gdb::move (parse_exp_in_context (&string, 0, 0, 0, 0, &subexp));
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
@@ -1333,24 +1330,17 @@ parse_expression_for_completion (const char *string, char **name,
     }
 
   if (expout_last_struct == -1)
-    {
-      xfree (exp);
-      return NULL;
-    }
+    return NULL;
 
-  *name = extract_field_op (exp, &subexp);
+  *name = extract_field_op (exp.get (), &subexp);
   if (!*name)
-    {
-      xfree (exp);
-      return NULL;
-    }
+    return NULL;
 
   /* This might throw an exception.  If so, we want to let it
      propagate.  */
-  val = evaluate_subexpression_type (exp, subexp);
+  val = evaluate_subexpression_type (exp.get (), subexp);
   /* (*NAME) is a part of the EXP memory block freed below.  */
   *name = xstrdup (*name);
-  xfree (exp);
 
   return value_type (val);
 }

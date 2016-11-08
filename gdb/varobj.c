@@ -64,12 +64,12 @@ varobj_enable_pretty_printing (void)
 /* Data structures */
 
 /* Every root variable has one of these structures saved in its
-   varobj.  Members which must be free'd are noted.  */
+   varobj.  */
 struct varobj_root
 {
 
-  /* Alloc'd expression for this parent.  */
-  struct expression *exp;
+  /* The expression for this parent.  */
+  expression_up exp;
 
   /* Block for which this expression is valid.  */
   const struct block *valid_block;
@@ -379,13 +379,13 @@ varobj_create (char *objname,
          But if it fails, we still go on with a call to evaluate_type().  */
       TRY
 	{
-	  value = evaluate_expression (var->root->exp);
+	  value = evaluate_expression (var->root->exp.get ());
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
 	  /* Error getting the value.  Try to at least get the
 	     right type.  */
-	  struct value *type_only_value = evaluate_type (var->root->exp);
+	  struct value *type_only_value = evaluate_type (var->root->exp.get ());
 
 	  var->type = value_type (type_only_value);
 	}
@@ -1051,7 +1051,6 @@ varobj_set_value (struct varobj *var, char *expression)
   /* The argument "expression" contains the variable's new value.
      We need to first construct a legal expression for this -- ugh!  */
   /* Does this cover all the bases?  */
-  struct expression *exp;
   struct value *value = NULL; /* Initialize to keep gcc happy.  */
   int saved_input_radix = input_radix;
   const char *s = expression;
@@ -1059,16 +1058,15 @@ varobj_set_value (struct varobj *var, char *expression)
   gdb_assert (varobj_editable_p (var));
 
   input_radix = 10;		/* ALWAYS reset to decimal temporarily.  */
-  exp = parse_exp_1 (&s, 0, 0, 0);
+  expression_up exp = parse_exp_1 (&s, 0, 0, 0);
   TRY
     {
-      value = evaluate_expression (exp);
+      value = evaluate_expression (exp.get ());
     }
 
   CATCH (except, RETURN_MASK_ERROR)
     {
       /* We cannot proceed without a valid expression.  */
-      xfree (exp);
       return 0;
     }
   END_CATCH
@@ -2095,7 +2093,7 @@ new_root_variable (void)
 {
   struct varobj *var = new_variable ();
 
-  var->root = XNEW (struct varobj_root);
+  var->root = new varobj_root ();
   var->root->lang_ops = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
@@ -2126,12 +2124,8 @@ free_variable (struct varobj *var)
   varobj_clear_saved_item (var->dynamic);
   value_free (var->value);
 
-  /* Free the expression if this is a root variable.  */
   if (is_root_p (var))
-    {
-      xfree (var->root->exp);
-      xfree (var->root);
-    }
+    delete var->root;
 
   xfree (var->name);
   xfree (var->obj_name);
@@ -2296,7 +2290,7 @@ value_of_root_1 (struct varobj **var_handle)
          expression fails we want to just return NULL.  */
       TRY
 	{
-	  new_val = evaluate_expression (var->root->exp);
+	  new_val = evaluate_expression (var->root->exp.get ());
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -2355,10 +2349,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	     button, for example).  Naturally, those locations are not
 	     correct in other frames, so update the expression.  */
 
-         struct expression *tmp_exp = var->root->exp;
-
-         var->root->exp = tmp_var->root->exp;
-         tmp_var->root->exp = tmp_exp;
+	  std::swap (var->root->exp, tmp_var->root->exp);
 
 	  varobj_delete (tmp_var, 0);
 	  *type_changed = 0;

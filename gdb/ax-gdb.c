@@ -2581,7 +2581,6 @@ static void
 agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
 {
   struct cleanup *old_chain = 0;
-  struct expression *expr;
   struct agent_expr *agent;
   const char *arg;
   int trace_string = 0;
@@ -2601,16 +2600,15 @@ agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
     }
   else
     {
-      expr = parse_exp_1 (&arg, pc, block_for_pc (pc), 0);
-      old_chain = make_cleanup (free_current_contents, &expr);
+      expression_up expr = parse_exp_1 (&arg, pc, block_for_pc (pc), 0);
       if (eval)
 	{
 	  gdb_assert (trace_string == 0);
-	  agent = gen_eval_for_expr (pc, expr);
+	  agent = gen_eval_for_expr (pc, expr.get ());
 	}
       else
-	agent = gen_trace_for_expr (pc, expr, trace_string);
-      make_cleanup_free_agent_expr (agent);
+	agent = gen_trace_for_expr (pc, expr.get (), trace_string);
+      old_chain = make_cleanup_free_agent_expr (agent);
     }
 
   ax_reqs (agent);
@@ -2696,7 +2694,6 @@ static void
 maint_agent_printf_command (char *exp, int from_tty)
 {
   struct cleanup *old_chain = 0;
-  struct expression *expr;
   struct expression *argvec[100];
   struct agent_expr *agent;
   struct frame_info *fi = get_current_frame ();	/* need current scope */
@@ -2748,8 +2745,8 @@ maint_agent_printf_command (char *exp, int from_tty)
       const char *cmd1;
 
       cmd1 = cmdrest;
-      expr = parse_exp_1 (&cmd1, 0, (struct block *) 0, 1);
-      argvec[nargs] = expr;
+      expression_up expr = parse_exp_1 (&cmd1, 0, (struct block *) 0, 1);
+      argvec[nargs] = expr.release ();
       ++nargs;
       cmdrest = cmd1;
       if (*cmdrest == ',')

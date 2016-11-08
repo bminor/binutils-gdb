@@ -393,8 +393,6 @@ static void
 handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  struct exception_catchpoint *cp;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   regex_t *pattern = NULL;
 
   if (except_rx != NULL)
@@ -406,8 +404,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			   _("invalid type-matching regexp"));
     }
 
-  cp = XCNEW (struct exception_catchpoint);
-  make_cleanup (xfree, cp);
+  gdb::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
 
   init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);
@@ -421,7 +418,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
   re_set_exception_catchpoint (&cp->base);
 
   install_breakpoint (0, &cp->base, 1);
-  discard_cleanups (cleanup);
+  cp.release ();
 }
 
 /* Look for an "if" token in *STRING.  The "if" token must be preceded

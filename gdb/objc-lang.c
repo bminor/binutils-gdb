@@ -1193,14 +1193,11 @@ print_object_command (char *args, int from_tty)
 "The 'print-object' command requires an argument (an Objective-C object)");
 
   {
-    struct expression *expr = parse_expression (args);
-    struct cleanup *old_chain = 
-      make_cleanup (free_current_contents, &expr);
+    expression_up expr = parse_expression (args);
     int pc = 0;
 
     object = evaluate_subexp (builtin_type (expr->gdbarch)->builtin_data_ptr,
-			      expr, &pc, EVAL_NORMAL);
-    do_cleanups (old_chain);
+			      expr.get (), &pc, EVAL_NORMAL);
   }
 
   /* Validate the address for sanity.  */

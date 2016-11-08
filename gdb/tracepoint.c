@@ -701,7 +701,6 @@ void
 validate_actionline (const char *line, struct breakpoint *b)
 {
   struct cmd_list_element *c;
-  struct expression *exp = NULL;
   struct cleanup *old_chain = NULL;
   const char *tmp_p;
   const char *p;
@@ -755,9 +754,8 @@ validate_actionline (const char *line, struct breakpoint *b)
 	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
 	      p = tmp_p;
-	      exp = parse_exp_1 (&p, loc->address,
-				 block_for_pc (loc->address), 1);
-	      old_chain = make_cleanup (free_current_contents, &exp);
+	      expression_up exp = parse_exp_1 (&p, loc->address,
+					       block_for_pc (loc->address), 1);
 
 	      if (exp->elts[0].opcode == OP_VAR_VALUE)
 		{
@@ -780,8 +778,8 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* We have something to collect, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
 		 long.  */
-	      aexpr = gen_trace_for_expr (loc->address, exp, trace_string);
-	      make_cleanup_free_agent_expr (aexpr);
+	      aexpr = gen_trace_for_expr (loc->address, exp.get (), trace_string);
+	      old_chain = make_cleanup_free_agent_expr (aexpr);
 
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
 		error (_("Expression is too complicated."));
@@ -809,15 +807,14 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      p = tmp_p;
 
 	      /* Only expressions are allowed for this action.  */
-	      exp = parse_exp_1 (&p, loc->address,
-				 block_for_pc (loc->address), 1);
-	      old_chain = make_cleanup (free_current_contents, &exp);
+	      expression_up exp = parse_exp_1 (&p, loc->address,
+					       block_for_pc (loc->address), 1);
 
 	      /* We have something to evaluate, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
 		 long.  */
-	      aexpr = gen_eval_for_expr (loc->address, exp);
-	      make_cleanup_free_agent_expr (aexpr);
+	      aexpr = gen_eval_for_expr (loc->address, exp.get ());
+	      old_chain = make_cleanup_free_agent_expr (aexpr);
 
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
 		error (_("Expression is too complicated."));
@@ -1399,7 +1396,6 @@ encode_actions_1 (struct command_line *action,
 		  struct collection_list *stepping_list)
 {
   const char *action_exp;
-  struct expression *exp = NULL;
   int i;
   struct value *tempval;
   struct cmd_list_element *cmd;
@@ -1501,12 +1497,11 @@ encode_actions_1 (struct command_line *action,
 	      else
 		{
 		  unsigned long addr;
-		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
 
-		  exp = parse_exp_1 (&action_exp, tloc->address,
-				     block_for_pc (tloc->address), 1);
-		  old_chain = make_cleanup (free_current_contents, &exp);
+		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
+						   block_for_pc (tloc->address),
+						   1);
 
 		  switch (exp->elts[0].opcode)
 		    {
@@ -1528,13 +1523,13 @@ encode_actions_1 (struct command_line *action,
 
 		    case UNOP_MEMVAL:
 		      /* Safe because we know it's a simple expression.  */
-		      tempval = evaluate_expression (exp);
+		      tempval = evaluate_expression (exp.get ());
 		      addr = value_address (tempval);
 		      /* Initialize the TYPE_LENGTH if it is a typedef.  */
 		      check_typedef (exp->elts[1].type);
 		      add_memrange (collect, memrange_absolute, addr,
 				    TYPE_LENGTH (exp->elts[1].type));
-		      append_exp (exp, &collect->computed);
+		      append_exp (exp.get (), &collect->computed);
 		      break;
 
 		    case OP_VAR_VALUE:
@@ -1556,7 +1551,7 @@ encode_actions_1 (struct command_line *action,
 		      break;
 
 		    default:	/* Full-fledged expression.  */
-		      aexpr = gen_trace_for_expr (tloc->address, exp,
+		      aexpr = gen_trace_for_expr (tloc->address, exp.get (),
 						  trace_string);
 
 		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
@@ -1589,10 +1584,9 @@ encode_actions_1 (struct command_line *action,
 			    }
 			}
 
-		      append_exp (exp, &collect->computed);
+		      append_exp (exp.get (), &collect->computed);
 		      break;
 		    }		/* switch */
-		  do_cleanups (old_chain);
 		}		/* do */
 	    }
 	  while (action_exp && *action_exp++ == ',');
@@ -1605,14 +1599,13 @@ encode_actions_1 (struct command_line *action,
 	      action_exp = skip_spaces_const (action_exp);
 
 		{
-		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
 
-		  exp = parse_exp_1 (&action_exp, tloc->address,
-				     block_for_pc (tloc->address), 1);
-		  old_chain = make_cleanup (free_current_contents, &exp);
+		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
+						   block_for_pc (tloc->address),
+						   1);
 
-		  aexpr = gen_eval_for_expr (tloc->address, exp);
+		  aexpr = gen_eval_for_expr (tloc->address, exp.get ());
 		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		  ax_reqs (aexpr);
@@ -1622,8 +1615,6 @@ encode_actions_1 (struct command_line *action,
 		  /* Even though we're not officially collecting, add
 		     to the collect list anyway.  */
 		  add_aexpr (collect, aexpr);
-
-		  do_cleanups (old_chain);
 		}		/* do */
 	    }
 	  while (action_exp && *action_exp++ == ',');

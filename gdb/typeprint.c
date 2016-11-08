@@ -400,7 +400,6 @@ type_to_string (struct type *type)
 static void
 whatis_exp (char *exp, int show)
 {
-  struct expression *expr;
   struct value *val;
   struct cleanup *old_chain;
   struct type *real_type = NULL;
@@ -451,9 +450,8 @@ whatis_exp (char *exp, int show)
 	  exp = skip_spaces (exp);
 	}
 
-      expr = parse_expression (exp);
-      make_cleanup (free_current_contents, &expr);
-      val = evaluate_type (expr);
+      expression_up expr = parse_expression (exp);
+      val = evaluate_type (expr.get ());
     }
   else
     val = access_value_history (0);
@@ -600,13 +598,10 @@ maintenance_print_type (char *type_name, int from_tty)
 {
   struct value *val;
   struct type *type;
-  struct cleanup *old_chain;
-  struct expression *expr;
 
   if (type_name != NULL)
     {
-      expr = parse_expression (type_name);
-      old_chain = make_cleanup (free_current_contents, &expr);
+      expression_up expr = parse_expression (type_name);
       if (expr->elts[0].opcode == OP_TYPE)
 	{
 	  /* The user expression names a type directly, just use that type.  */
@@ -616,14 +611,13 @@ maintenance_print_type (char *type_name, int from_tty)
 	{
 	  /* The user expression may name a type indirectly by naming an
 	     object of that type.  Find that indirectly named type.  */
-	  val = evaluate_type (expr);
+	  val = evaluate_type (expr.get ());
 	  type = value_type (val);
 	}
       if (type != NULL)
 	{
 	  recursive_dump_type (type, 0);
 	}
-      do_cleanups (old_chain);
     }
 }
 
