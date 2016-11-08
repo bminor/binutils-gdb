@@ -1,5 +1,12 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ui-file.c (do_ui_file_as_string, ui_file_as_string): New
+	functions.
+	* ui-file.h: Include <string>.
+	(ui_file_as_string): New declaration.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_read_renaming_var_value): Use expression_up.
 	(struct ada_catchpoint_location) <excep_cond_expr>: Now an
 	expression_up.
