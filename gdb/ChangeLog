@@ -1,3 +1,8 @@
+2016-11-08  Lionel Flandrin  <lionel@svkt.org>
+
+	* remote.c (process_g_packet): Detect truncated registers in 'g'
+	packets and raise an error.
+
 2016-11-07  Doug Evans  <dje@google.com>
 
 	* guile/scm-value.c (gdbscm_value_field): Fix call to value_struct_elt.
