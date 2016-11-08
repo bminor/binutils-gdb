@@ -1,3 +1,25 @@
+2016-11-08  Igor Tsimbalist  <tigor.tools@gmail.com>
+
+	* dwarf2.c (comp_unit): Add new fields 'lookup_funcinfo_table' and
+	'number_of_functions' to keep lookup table and number of entries in
+	the table.
+	(line_sequence): Add new fields 'line_info_lookup' and 'num_lines'
+	to keep lookup table and number of entries in the table.
+	(lookup_funcinfo): New structure for lookup table for function
+	references.
+	(build_line_info_table): New function to create and build the lookup
+	table for line information.
+	(lookup_address_in_line_info_table): Use the lookup table instead of
+	traverse a linked list.
+	(compare_lookup_funcinfos): New compare fuction used in sorting of
+	lookup table for function references.
+	(build_lookup_funcinfo_table): New function to create, build and
+	sort the lookup table for functions references.
+	(lookup_address_in_function_table): Use the table instead of
+	traverse a linked list.
+	(_bfd_dwarf2_cleanup_debug_info): Free memory from function references
+	lookup table.
+
 2016-11-04  Nick Clifton  <nickc@redhat.com>
 
 	* targets.c (bfd_target_vector): Only add riscv_elf32_vec target
