@@ -181,10 +181,7 @@ static void trace_dump_command (char *, int);
 /* support routines */
 
 struct collection_list;
-static void add_aexpr (struct collection_list *, struct agent_expr *);
 static char *mem2hex (gdb_byte *, char *, int);
-static void add_register (struct collection_list *collection,
-			  unsigned int regno);
 
 static struct command_line *
   all_tracepoint_actions_and_cleanup (struct breakpoint *t);
@@ -852,83 +849,70 @@ enum {
 
 /* MEMRANGE functions: */
 
-static int memrange_cmp (const void *, const void *);
+/* Compare memranges for std::sort.  */
 
-/* Compare memranges for qsort.  */
-static int
-memrange_cmp (const void *va, const void *vb)
+static bool
+memrange_comp (const memrange &a, const memrange &b)
 {
-  const struct memrange *a = (const struct memrange *) va;
-  const struct memrange *b = (const struct memrange *) vb;
+  if (a.type == b.type)
+    {
+      if (a.type == memrange_absolute)
+	return (bfd_vma) a.start < (bfd_vma) b.start;
+      else
+	return a.start < b.start;
+    }
 
-  if (a->type < b->type)
-    return -1;
-  if (a->type > b->type)
-    return 1;
-  if (a->type == memrange_absolute)
-    {
-      if ((bfd_vma) a->start < (bfd_vma) b->start)
-	return -1;
-      if ((bfd_vma) a->start > (bfd_vma) b->start)
-	return 1;
-    }
-  else
-    {
-      if (a->start < b->start)
-	return -1;
-      if (a->start > b->start)
-	return 1;
-    }
-  return 0;
+  return a.type < b.type;
 }
 
-/* Sort the memrange list using qsort, and merge adjacent memranges.  */
-static void
-memrange_sortmerge (struct collection_list *memranges)
-{
-  int a, b;
+/* Sort the memrange list using std::sort, and merge adjacent memranges.  */
 
-  qsort (memranges->list, memranges->next_memrange,
-	 sizeof (struct memrange), memrange_cmp);
-  if (memranges->next_memrange > 0)
+static void
+memrange_sortmerge (std::vector<memrange> &memranges)
+{
+  if (!memranges.empty ())
     {
-      for (a = 0, b = 1; b < memranges->next_memrange; b++)
+      int a, b;
+
+      std::sort (memranges.begin (), memranges.end (), memrange_comp);
+
+      for (a = 0, b = 1; b < memranges.size (); b++)
 	{
 	  /* If memrange b overlaps or is adjacent to memrange a,
 	     merge them.  */
-	  if (memranges->list[a].type == memranges->list[b].type
-	      && memranges->list[b].start <= memranges->list[a].end)
+	  if (memranges[a].type == memranges[b].type
+	      && memranges[b].start <= memranges[a].end)
 	    {
-	      if (memranges->list[b].end > memranges->list[a].end)
-		memranges->list[a].end = memranges->list[b].end;
+	      if (memranges[b].end > memranges[a].end)
+		memranges[a].end = memranges[b].end;
 	      continue;		/* next b, same a */
 	    }
 	  a++;			/* next a */
 	  if (a != b)
-	    memcpy (&memranges->list[a], &memranges->list[b],
-		    sizeof (struct memrange));
+	    memranges[a] = memranges[b];
 	}
-      memranges->next_memrange = a + 1;
+      memranges.resize (a + 1);
     }
 }
 
 /* Add a register to a collection list.  */
-static void
-add_register (struct collection_list *collection, unsigned int regno)
+
+void
+collection_list::add_register (unsigned int regno)
 {
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
-  if (regno >= (8 * sizeof (collection->regs_mask)))
+  if (regno >= (8 * sizeof (m_regs_mask)))
     error (_("Internal: register number %d too large for tracepoint"),
 	   regno);
-  collection->regs_mask[regno / 8] |= 1 << (regno % 8);
+  m_regs_mask[regno / 8] |= 1 << (regno % 8);
 }
 
 /* Add a memrange to a collection list.  */
-static void
-add_memrange (struct collection_list *memranges, 
-	      int type, bfd_signed_vma base,
-	      unsigned long len)
+
+void
+collection_list::add_memrange (int type, bfd_signed_vma base,
+			       unsigned long len)
 {
   if (info_verbose)
     {
@@ -938,31 +922,22 @@ add_memrange (struct collection_list *memranges,
     }
 
   /* type: memrange_absolute == memory, other n == basereg */
-  memranges->list[memranges->next_memrange].type = type;
   /* base: addr if memory, offset if reg relative.  */
-  memranges->list[memranges->next_memrange].start = base;
   /* len: we actually save end (base + len) for convenience */
-  memranges->list[memranges->next_memrange].end = base + len;
-  memranges->next_memrange++;
-  if (memranges->next_memrange >= memranges->listsize)
-    {
-      memranges->listsize *= 2;
-      memranges->list = (struct memrange *) xrealloc (memranges->list,
-						      memranges->listsize);
-    }
+  m_memranges.push_back (memrange (type, base, base + len));
 
   if (type != memrange_absolute)    /* Better collect the base register!  */
-    add_register (memranges, type);
+    add_register (type);
 }
 
 /* Add a symbol to a collection list.  */
-static void
-collect_symbol (struct collection_list *collect, 
-		struct symbol *sym,
-		struct gdbarch *gdbarch,
-		long frame_regno, long frame_offset,
-		CORE_ADDR scope,
-		int trace_string)
+
+void
+collection_list::collect_symbol (struct symbol *sym,
+				 struct gdbarch *gdbarch,
+				 long frame_regno, long frame_offset,
+				 CORE_ADDR scope,
+				 int trace_string)
 {
   unsigned long len;
   unsigned int reg;
@@ -997,19 +972,19 @@ collect_symbol (struct collection_list *collect,
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	treat_as_expr = 1;
       else
-	add_memrange (collect, memrange_absolute, offset, len);
+	add_memrange (memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
       reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
       if (info_verbose)
 	printf_filtered ("LOC_REG[parm] %s: ", 
 			 SYMBOL_PRINT_NAME (sym));
-      add_register (collect, reg);
+      add_register (reg);
       /* Check for doubles stored in two registers.  */
       /* FIXME: how about larger types stored in 3 or more regs?  */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
 	  len > register_size (gdbarch, reg))
-	add_register (collect, reg + 1);
+	add_register (reg + 1);
       break;
     case LOC_REF_ARG:
       printf_filtered ("Sorry, don't know how to do LOC_REF_ARG yet.\n");
@@ -1026,7 +1001,7 @@ collect_symbol (struct collection_list *collect,
 	  printf_vma (offset);
 	  printf_filtered (" from frame ptr reg %d\n", reg);
 	}
-      add_memrange (collect, reg, offset, len);
+      add_memrange (reg, offset, len);
       break;
     case LOC_REGPARM_ADDR:
       reg = SYMBOL_VALUE (sym);
@@ -1038,7 +1013,7 @@ collect_symbol (struct collection_list *collect,
 	  printf_vma (offset);
 	  printf_filtered (" from reg %d\n", reg);
 	}
-      add_memrange (collect, reg, offset, len);
+      add_memrange (reg, offset, len);
       break;
     case LOC_LOCAL:
       reg = frame_regno;
@@ -1050,7 +1025,7 @@ collect_symbol (struct collection_list *collect,
 	  printf_vma (offset);
 	  printf_filtered (" from frame ptr reg %d\n", reg);
 	}
-      add_memrange (collect, reg, offset, len);
+      add_memrange (reg, offset, len);
       break;
 
     case LOC_UNRESOLVED:
@@ -1092,7 +1067,7 @@ collect_symbol (struct collection_list *collect,
       report_agent_reqs_errors (aexpr);
 
       discard_cleanups (old_chain1);
-      add_aexpr (collect, aexpr);
+      add_aexpr (aexpr);
 
       /* Take care of the registers.  */
       if (aexpr->reg_mask_len > 0)
@@ -1108,7 +1083,7 @@ collect_symbol (struct collection_list *collect,
 		  for (ndx2 = 0; ndx2 < 8; ndx2++)
 		    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
 		      /* It's used -- record it.  */
-		      add_register (collect, ndx1 * 8 + ndx2);
+		      add_register (ndx1 * 8 + ndx2);
 		}
 	    }
 	}
@@ -1138,25 +1113,30 @@ do_collect_symbol (const char *print_name,
 {
   struct add_local_symbols_data *p = (struct add_local_symbols_data *) cb_data;
 
-  collect_symbol (p->collect, sym, p->gdbarch, p->frame_regno,
-		  p->frame_offset, p->pc, p->trace_string);
+  p->collect->collect_symbol (sym, p->gdbarch, p->frame_regno,
+			      p->frame_offset, p->pc, p->trace_string);
   p->count++;
 
-  VEC_safe_push (char_ptr, p->collect->wholly_collected,
-		 xstrdup (print_name));
+  p->collect->add_wholly_collected (print_name);
+}
+
+void
+collection_list::add_wholly_collected (const char *print_name)
+{
+  m_wholly_collected.push_back (print_name);
 }
 
 /* Add all locals (or args) symbols to collection list.  */
-static void
-add_local_symbols (struct collection_list *collect,
-		   struct gdbarch *gdbarch, CORE_ADDR pc,
-		   long frame_regno, long frame_offset, int type,
-		   int trace_string)
+
+void
+collection_list::add_local_symbols (struct gdbarch *gdbarch, CORE_ADDR pc,
+				    long frame_regno, long frame_offset, int type,
+				    int trace_string)
 {
   const struct block *block;
   struct add_local_symbols_data cb_data;
 
-  cb_data.collect = collect;
+  cb_data.collect = this;
   cb_data.gdbarch = gdbarch;
   cb_data.pc = pc;
   cb_data.frame_regno = frame_regno;
@@ -1194,64 +1174,32 @@ add_local_symbols (struct collection_list *collect,
     }
 }
 
-static void
-add_static_trace_data (struct collection_list *collection)
+void
+collection_list::add_static_trace_data ()
 {
   if (info_verbose)
     printf_filtered ("collect static trace data\n");
-  collection->strace_data = 1;
+  m_strace_data = true;
 }
 
-/* worker function */
-static void
-clear_collection_list (struct collection_list *list)
+collection_list::collection_list ()
+  : m_regs_mask (),
+    m_strace_data (false)
 {
-  int ndx;
-
-  list->next_memrange = 0;
-  for (ndx = 0; ndx < list->next_aexpr_elt; ndx++)
-    {
-      free_agent_expr (list->aexpr_list[ndx]);
-      list->aexpr_list[ndx] = NULL;
-    }
-  list->next_aexpr_elt = 0;
-  memset (list->regs_mask, 0, sizeof (list->regs_mask));
-  list->strace_data = 0;
-
-  xfree (list->aexpr_list);
-  xfree (list->list);
-
-  VEC_free (char_ptr, list->wholly_collected);
-  VEC_free (char_ptr, list->computed);
+  m_memranges.reserve (128);
+  m_aexprs.reserve (128);
 }
 
-/* A cleanup wrapper for function clear_collection_list.  */
-
-static void
-do_clear_collection_list (void *list)
+collection_list::~collection_list ()
 {
-  struct collection_list *l = (struct collection_list *) list;
-
-  clear_collection_list (l);
-}
-
-/* Initialize collection_list CLIST.  */
-
-static void
-init_collection_list (struct collection_list *clist)
-{
-  memset (clist, 0, sizeof *clist);
-
-  clist->listsize = 128;
-  clist->list = XCNEWVEC (struct memrange, clist->listsize);
-
-  clist->aexpr_listsize = 128;
-  clist->aexpr_list = XCNEWVEC (struct agent_expr *, clist->aexpr_listsize);
+  for (int ndx = 0; ndx < m_aexprs.size (); ndx++)
+    free_agent_expr (m_aexprs[ndx]);
 }
 
 /* Reduce a collection list to string form (for gdb protocol).  */
-static char **
-stringify_collection_list (struct collection_list *list)
+
+char **
+collection_list::stringify ()
 {
   char temp_buf[2048];
   char tmp2[40];
@@ -1261,10 +1209,10 @@ stringify_collection_list (struct collection_list *list)
   char *end;
   long i;
 
-  count = 1 + 1 + list->next_memrange + list->next_aexpr_elt + 1;
+  count = 1 + 1 + m_memranges.size () + m_aexprs.size () + 1;
   str_list = (char *(*)[]) xmalloc (count * sizeof (char *));
 
-  if (list->strace_data)
+  if (m_strace_data)
     {
       if (info_verbose)
 	printf_filtered ("\nCollecting static trace data\n");
@@ -1274,10 +1222,10 @@ stringify_collection_list (struct collection_list *list)
       ndx++;
     }
 
-  for (i = sizeof (list->regs_mask) - 1; i > 0; i--)
-    if (list->regs_mask[i] != 0)    /* Skip leading zeroes in regs_mask.  */
+  for (i = sizeof (m_regs_mask) - 1; i > 0; i--)
+    if (m_regs_mask[i] != 0)    /* Skip leading zeroes in regs_mask.  */
       break;
-  if (list->regs_mask[i] != 0)	/* Prepare to send regs_mask to the stub.  */
+  if (m_regs_mask[i] != 0)	/* Prepare to send regs_mask to the stub.  */
     {
       if (info_verbose)
 	printf_filtered ("\nCollecting registers (mask): 0x");
@@ -1287,8 +1235,8 @@ stringify_collection_list (struct collection_list *list)
 	{
 	  QUIT;			/* Allow user to bail out with ^C.  */
 	  if (info_verbose)
-	    printf_filtered ("%02X", list->regs_mask[i]);
-	  sprintf (end, "%02X", list->regs_mask[i]);
+	    printf_filtered ("%02X", m_regs_mask[i]);
+	  sprintf (end, "%02X", m_regs_mask[i]);
 	  end += 2;
 	}
       (*str_list)[ndx] = xstrdup (temp_buf);
@@ -1296,18 +1244,19 @@ stringify_collection_list (struct collection_list *list)
     }
   if (info_verbose)
     printf_filtered ("\n");
-  if (list->next_memrange > 0 && info_verbose)
+  if (!m_memranges.empty () && info_verbose)
     printf_filtered ("Collecting memranges: \n");
-  for (i = 0, count = 0, end = temp_buf; i < list->next_memrange; i++)
+  for (i = 0, count = 0, end = temp_buf; i < m_memranges.size (); i++)
     {
       QUIT;			/* Allow user to bail out with ^C.  */
-      sprintf_vma (tmp2, list->list[i].start);
+      sprintf_vma (tmp2, m_memranges[i].start);
       if (info_verbose)
 	{
 	  printf_filtered ("(%d, %s, %ld)\n", 
-			   list->list[i].type, 
+			   m_memranges[i].type,
 			   tmp2, 
-			   (long) (list->list[i].end - list->list[i].start));
+			   (long) (m_memranges[i].end
+				   - m_memranges[i].start));
 	}
       if (count + 27 > MAX_AGENT_EXPR_LEN)
 	{
@@ -1318,39 +1267,39 @@ stringify_collection_list (struct collection_list *list)
 	}
 
       {
-        bfd_signed_vma length = list->list[i].end - list->list[i].start;
+        bfd_signed_vma length
+	  = m_memranges[i].end - m_memranges[i].start;
 
         /* The "%X" conversion specifier expects an unsigned argument,
            so passing -1 (memrange_absolute) to it directly gives you
            "FFFFFFFF" (or more, depending on sizeof (unsigned)).
            Special-case it.  */
-        if (list->list[i].type == memrange_absolute)
+        if (m_memranges[i].type == memrange_absolute)
           sprintf (end, "M-1,%s,%lX", tmp2, (long) length);
         else
-          sprintf (end, "M%X,%s,%lX", list->list[i].type, tmp2, (long) length);
+          sprintf (end, "M%X,%s,%lX", m_memranges[i].type, tmp2, (long) length);
       }
 
       count += strlen (end);
       end = temp_buf + count;
     }
 
-  for (i = 0; i < list->next_aexpr_elt; i++)
+  for (i = 0; i < m_aexprs.size (); i++)
     {
       QUIT;			/* Allow user to bail out with ^C.  */
-      if ((count + 10 + 2 * list->aexpr_list[i]->len) > MAX_AGENT_EXPR_LEN)
+      if ((count + 10 + 2 * m_aexprs[i]->len) > MAX_AGENT_EXPR_LEN)
 	{
 	  (*str_list)[ndx] = savestring (temp_buf, count);
 	  ndx++;
 	  count = 0;
 	  end = temp_buf;
 	}
-      sprintf (end, "X%08X,", list->aexpr_list[i]->len);
+      sprintf (end, "X%08X,", m_aexprs[i]->len);
       end += 10;		/* 'X' + 8 hex digits + ',' */
       count += 10;
 
-      end = mem2hex (list->aexpr_list[i]->buf, 
-		     end, list->aexpr_list[i]->len);
-      count += 2 * list->aexpr_list[i]->len;
+      end = mem2hex (m_aexprs[i]->buf, end, m_aexprs[i]->len);
+      count += 2 * m_aexprs[i]->len;
     }
 
   if (count != 0)
@@ -1373,18 +1322,21 @@ stringify_collection_list (struct collection_list *list)
 
 /* Add the printed expression EXP to *LIST.  */
 
-static void
-append_exp (struct expression *exp, VEC(char_ptr) **list)
+void
+collection_list::append_exp (struct expression *exp)
 {
   struct ui_file *tmp_stream = mem_fileopen ();
-  char *text;
 
   print_expression (exp, tmp_stream);
 
-  text = ui_file_xstrdup (tmp_stream, NULL);
-
-  VEC_safe_push (char_ptr, *list, text);
+  m_computed.push_back (ui_file_as_string (tmp_stream));
   ui_file_delete (tmp_stream);
+}
+
+void
+collection_list::finish ()
+{
+  memrange_sortmerge (m_memranges);
 }
 
 static void
@@ -1426,29 +1378,27 @@ encode_actions_1 (struct command_line *action,
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
 		  for (i = 0; i < gdbarch_num_regs (target_gdbarch ()); i++)
-		    add_register (collect, i);
+		    collect->add_register (i);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$arg", action_exp, 4))
 		{
-		  add_local_symbols (collect,
-				     target_gdbarch (),
-				     tloc->address,
-				     frame_reg,
-				     frame_offset,
-				     'A',
-				     trace_string);
+		  collect->add_local_symbols (target_gdbarch (),
+					      tloc->address,
+					      frame_reg,
+					      frame_offset,
+					      'A',
+					      trace_string);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$loc", action_exp, 4))
 		{
-		  add_local_symbols (collect,
-				     target_gdbarch (),
-				     tloc->address,
-				     frame_reg,
-				     frame_offset,
-				     'L',
-				     trace_string);
+		  collect->add_local_symbols (target_gdbarch (),
+					      tloc->address,
+					      frame_reg,
+					      frame_offset,
+					      'L',
+					      trace_string);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$_ret", action_exp, 5))
@@ -1465,7 +1415,7 @@ encode_actions_1 (struct command_line *action,
 		  report_agent_reqs_errors (aexpr);
 
 		  discard_cleanups (old_chain1);
-		  add_aexpr (collect, aexpr);
+		  collect->add_aexpr (aexpr);
 
 		  /* take care of the registers */
 		  if (aexpr->reg_mask_len > 0)
@@ -1480,9 +1430,10 @@ encode_actions_1 (struct command_line *action,
 			      /* assume chars have 8 bits */
 			      for (ndx2 = 0; ndx2 < 8; ndx2++)
 				if (aexpr->reg_mask[ndx1] & (1 << ndx2))
-				  /* it's used -- record it */
-				  add_register (collect, 
-						ndx1 * 8 + ndx2);
+				  {
+				    /* It's used -- record it.  */
+				    collect->add_register (ndx1 * 8 + ndx2);
+				  }
 			    }
 			}
 		    }
@@ -1491,7 +1442,7 @@ encode_actions_1 (struct command_line *action,
 		}
 	      else if (0 == strncasecmp ("$_sdata", action_exp, 7))
 		{
-		  add_static_trace_data (collect);
+		  collect->add_static_trace_data ();
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else
@@ -1517,7 +1468,7 @@ encode_actions_1 (struct command_line *action,
 					  name);
 			if (info_verbose)
 			  printf_filtered ("OP_REGISTER: ");
-			add_register (collect, i);
+			collect->add_register (i);
 			break;
 		      }
 
@@ -1527,9 +1478,9 @@ encode_actions_1 (struct command_line *action,
 		      addr = value_address (tempval);
 		      /* Initialize the TYPE_LENGTH if it is a typedef.  */
 		      check_typedef (exp->elts[1].type);
-		      add_memrange (collect, memrange_absolute, addr,
-				    TYPE_LENGTH (exp->elts[1].type));
-		      append_exp (exp.get (), &collect->computed);
+		      collect->add_memrange (memrange_absolute, addr,
+					     TYPE_LENGTH (exp->elts[1].type));
+		      collect->append_exp (exp.get ());
 		      break;
 
 		    case OP_VAR_VALUE:
@@ -1537,16 +1488,13 @@ encode_actions_1 (struct command_line *action,
 			struct symbol *sym = exp->elts[2].symbol;
 			char_ptr name = (char_ptr) SYMBOL_NATURAL_NAME (sym);
 
-			collect_symbol (collect,
-					exp->elts[2].symbol,
-					target_gdbarch (),
-					frame_reg,
-					frame_offset,
-					tloc->address,
-					trace_string);
-			VEC_safe_push (char_ptr,
-				       collect->wholly_collected,
-				       name);
+			collect->collect_symbol (exp->elts[2].symbol,
+						 target_gdbarch (),
+						 frame_reg,
+						 frame_offset,
+						 tloc->address,
+						 trace_string);
+			collect->add_wholly_collected (name);
 		      }
 		      break;
 
@@ -1561,7 +1509,7 @@ encode_actions_1 (struct command_line *action,
 		      report_agent_reqs_errors (aexpr);
 
 		      discard_cleanups (old_chain1);
-		      add_aexpr (collect, aexpr);
+		      collect->add_aexpr (aexpr);
 
 		      /* Take care of the registers.  */
 		      if (aexpr->reg_mask_len > 0)
@@ -1577,14 +1525,15 @@ encode_actions_1 (struct command_line *action,
 				  /* Assume chars have 8 bits.  */
 				  for (ndx2 = 0; ndx2 < 8; ndx2++)
 				    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
-				      /* It's used -- record it.  */
-				      add_register (collect, 
-						    ndx1 * 8 + ndx2);
+				      {
+					/* It's used -- record it.  */
+					collect->add_register (ndx1 * 8 + ndx2);
+				      }
 				}
 			    }
 			}
 
-		      append_exp (exp.get (), &collect->computed);
+		      collect->append_exp (exp.get ());
 		      break;
 		    }		/* switch */
 		}		/* do */
@@ -1614,7 +1563,7 @@ encode_actions_1 (struct command_line *action,
 		  discard_cleanups (old_chain1);
 		  /* Even though we're not officially collecting, add
 		     to the collect list anyway.  */
-		  add_aexpr (collect, aexpr);
+		  collect->add_aexpr (aexpr);
 		}		/* do */
 	    }
 	  while (action_exp && *action_exp++ == ',');
@@ -1635,27 +1584,17 @@ encode_actions_1 (struct command_line *action,
 }
 
 /* Encode actions of tracepoint TLOC->owner and fill TRACEPOINT_LIST
-   and STEPPING_LIST.  Return a cleanup pointer to clean up both
-   TRACEPOINT_LIST and STEPPING_LIST.  */
+   and STEPPING_LIST.  */
 
-struct cleanup *
-encode_actions_and_make_cleanup (struct bp_location *tloc,
-				 struct collection_list *tracepoint_list,
-				 struct collection_list *stepping_list)
+void
+encode_actions (struct bp_location *tloc,
+		struct collection_list *tracepoint_list,
+		struct collection_list *stepping_list)
 {
   struct command_line *actions;
   int frame_reg;
   LONGEST frame_offset;
-  struct cleanup *back_to, *return_chain;
 
-  return_chain = make_cleanup (null_cleanup, NULL);
-  init_collection_list (tracepoint_list);
-  init_collection_list (stepping_list);
-
-  make_cleanup (do_clear_collection_list, tracepoint_list);
-  make_cleanup (do_clear_collection_list, stepping_list);
-
-  back_to = make_cleanup (null_cleanup, NULL);
   gdbarch_virtual_frame_pointer (tloc->gdbarch,
 				 tloc->address, &frame_reg, &frame_offset);
 
@@ -1664,11 +1603,8 @@ encode_actions_and_make_cleanup (struct bp_location *tloc,
   encode_actions_1 (actions, tloc, frame_reg, frame_offset,
 		    tracepoint_list, stepping_list);
 
-  memrange_sortmerge (tracepoint_list);
-  memrange_sortmerge (stepping_list);
-
-  do_cleanups (back_to);
-  return return_chain;
+  tracepoint_list->finish ();
+  stepping_list->finish ();
 }
 
 /* Render all actions into gdb protocol.  */
@@ -1678,32 +1614,20 @@ encode_actions_rsp (struct bp_location *tloc, char ***tdp_actions,
 		    char ***stepping_actions)
 {
   struct collection_list tracepoint_list, stepping_list;
-  struct cleanup *cleanup;
 
   *tdp_actions = NULL;
   *stepping_actions = NULL;
 
-  cleanup = encode_actions_and_make_cleanup (tloc, &tracepoint_list,
-					     &stepping_list);
+  encode_actions (tloc, &tracepoint_list, &stepping_list);
 
-  *tdp_actions = stringify_collection_list (&tracepoint_list);
-  *stepping_actions = stringify_collection_list (&stepping_list);
-
-  do_cleanups (cleanup);
+  *tdp_actions = tracepoint_list.stringify ();
+  *stepping_actions = stepping_list.stringify ();
 }
 
-static void
-add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
+void
+collection_list::add_aexpr (struct agent_expr *aexpr)
 {
-  if (collect->next_aexpr_elt >= collect->aexpr_listsize)
-    {
-      collect->aexpr_list = XRESIZEVEC (struct agent_expr *,
-					collect->aexpr_list,
-					2 * collect->aexpr_listsize);
-      collect->aexpr_listsize *= 2;
-    }
-  collect->aexpr_list[collect->next_aexpr_elt] = aexpr;
-  collect->next_aexpr_elt++;
+  m_aexprs.push_back (aexpr);
 }
 
 static void

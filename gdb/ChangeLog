@@ -1,5 +1,69 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-main.c (print_variable_or_computed): Constify 'expression'
+	parameter.
+	(mi_cmd_trace_frame_collected): Call encode_actions instead of
+	encode_actions_and_make_cleanup.  Adjust to use std::vector.
+	* tracepoint.c (memrange_cmp): Delete.
+	(memrange_comp): New.
+	(memrange_sortmerge): Take a memrange vector as parameter instead
+	of a collection_list.  Use std::sort instead of qsort.
+	(add_register): Now a method of collection_list.  Adjust to m_
+	prefix of data fields.
+	(add_memrange): Now a method of collection_list.  Adjust to m_
+	prefix of data fields.  Adjust to use std::vector.
+	(collect_symbol): Now a method of collection_list.  Adjust to m_
+	prefix of data fields.
+	(do_collect_symbol): Adjust.  Call add_wholly_collected instead of
+	accessing the vector directly.
+	(collection_list::add_wholly_collected): New.
+	(add_local_symbols): Now a method of collection_list.
+	(add_static_trace_data): Now a method of collection_list.  Adjust
+	to use bool.
+	(clear_collection_list, do_clear_collection_list): Delete.
+	(init_collection_list): Delete.
+	(collection_list::collection_list): New.
+	(collection_list::~collection_list): New.
+	(stringify_collection_list): Rename to ...
+	(collection_list::stringify): ... this and adjust to being a
+	method of collection_list.  Adjust to use of std::vector.
+	(append_exp): Now a method of collection_list.  Use
+	ui_file_as_string.  Adjust to std::vector.
+	(collection_list::finish): New.
+	(encode_actions_1): Adjust.
+	(encode_actions_and_make_cleanup): Rename to ...
+	(encode_actions)... this.  No longer returns a cleanup.  No longer
+	call init_collection_list nor install do_clear_collection_list
+	cleanups.  Call collection_list::finish instead of
+	memrange_sortmerge directly.
+	(encode_actions_rsp): Adjust to call encode_actions instead of
+	encode_actions_and_make_cleanup.  Adjust to method renames.
+	(add_aexpr): Now a method of collection_list.
+	* tracepoint.h: Include <vector> and <string>.
+	(struct memrange): Add constructors.
+	(struct collection_list): Now a class.
+	(class collection_list) <collection_list, ~collection_list,
+	add_wholly_collected, append_exp, add_aexpr, add_register,
+	add_memrange, collect_symbol, add_local_symbols,
+	add_static_trace_data, finish, stringify, wholly_collected, and
+	computed>: New methods.
+	<regs_mask>: Rename to ...
+	<m_regs_mask>: ... this.
+	<listsize, next_memrange, list>: Delete fields.
+	<m_memranges>: New field.
+	<aexpr_listsize, next_aexpr_elt, aexpr_list>: Delete fields.
+	<m_aexprs>: New field.
+	<strace_data>: Rename to ...
+	<m_strace_data>: ... this.  Now a bool.
+	<wholly_collected>: Rename to ...
+	<m_wholly_collected>: ... this.  Now a std::vector<std::string>.
+	<computed>: Rename to ...
+	<m_computed>: ... this.  Now a std::vector<std::string>.
+	(encode_actions_and_make_cleanup): Delete declaration.
+	(encode_actions): New declaration.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* ui-file.c (do_ui_file_as_string, ui_file_as_string): New
 	functions.
 	* ui-file.h: Include <string>.

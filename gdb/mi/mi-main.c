@@ -2738,7 +2738,7 @@ mi_cmd_ada_task_info (char *command, char **argv, int argc)
 /* Print EXPRESSION according to VALUES.  */
 
 static void
-print_variable_or_computed (char *expression, enum print_values values)
+print_variable_or_computed (const char *expression, enum print_values values)
 {
   struct cleanup *old_chain;
   struct value *val;
@@ -2864,8 +2864,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
   old_chain = make_cleanup_restore_current_thread ();
   select_frame (get_current_frame ());
 
-  encode_actions_and_make_cleanup (tloc, &tracepoint_list,
-				   &stepping_list);
+  encode_actions (tloc, &tracepoint_list, &stepping_list);
 
   if (stepping_frame)
     clist = &stepping_list;
@@ -2877,13 +2876,19 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
   /* Explicitly wholly collected variables.  */
   {
     struct cleanup *list_cleanup;
-    char *p;
     int i;
 
     list_cleanup = make_cleanup_ui_out_list_begin_end (uiout,
 						       "explicit-variables");
-    for (i = 0; VEC_iterate (char_ptr, clist->wholly_collected, i, p); i++)
-      print_variable_or_computed (p, var_print_values);
+
+    const std::vector<std::string> &wholly_collected
+      = clist->wholly_collected ();
+    for (size_t i = 0; i < wholly_collected.size (); i++)
+      {
+	const std::string &str = wholly_collected[i];
+	print_variable_or_computed (str.c_str (), var_print_values);
+      }
+
     do_cleanups (list_cleanup);
   }
 
@@ -2896,8 +2901,14 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
     list_cleanup
       = make_cleanup_ui_out_list_begin_end (uiout,
 					    "computed-expressions");
-    for (i = 0; VEC_iterate (char_ptr, clist->computed, i, p); i++)
-      print_variable_or_computed (p, comp_print_values);
+
+    const std::vector<std::string> &computed = clist->computed ();
+    for (size_t i = 0; i < computed.size (); i++)
+      {
+	const std::string &str = computed[i];
+	print_variable_or_computed (str.c_str (), comp_print_values);
+      }
+
     do_cleanups (list_cleanup);
   }
 
