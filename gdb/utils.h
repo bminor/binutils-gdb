@@ -100,6 +100,18 @@ extern struct cleanup *make_cleanup_free_so (struct so_list *so);
 
 extern struct cleanup *make_cleanup_restore_current_language (void);
 
+/* A deleter for a hash table.  */
+struct htab_deleter
+{
+  void operator() (htab *ptr) const
+  {
+    htab_delete (ptr);
+  }
+};
+
+/* A unique_ptr wrapper for htab_t.  */
+typedef std::unique_ptr<htab, htab_deleter> htab_up;
+
 extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
 
 struct parser_state;

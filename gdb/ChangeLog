@@ -1,5 +1,12 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (htab_deleter): New struct.
+	(htab_up): New typedef.
+	* python/py-framefilter.c (gdbpy_apply_frame_filter): Use
+	gdbpy_enter, gdbpy_ref, htab_up.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-unwind.c (pending_frame_invalidate): Remove.
 	(pyuw_sniffer): Use gdbpy_enter and gdbpy_ref.
 

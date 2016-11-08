@@ -1491,11 +1491,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 			  struct ui_out *out, int frame_low, int frame_high)
 {
   struct gdbarch *gdbarch = NULL;
-  struct cleanup *cleanups;
   enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
-  PyObject *iterable;
-  PyObject *item;
-  htab_t levels_printed;
 
   if (!gdb_python_initialized)
     return EXT_LANG_BT_NO_FILTERS;
@@ -1511,9 +1507,10 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
     }
   END_CATCH
 
-  cleanups = ensure_python_env (gdbarch, current_language);
+  gdbpy_enter enter_py (gdbarch, current_language);
 
-  iterable = bootstrap_python_frame_filters (frame, frame_low, frame_high);
+  gdbpy_ref iterable (bootstrap_python_frame_filters (frame, frame_low,
+						      frame_high));
 
   if (iterable == NULL)
     {
@@ -1531,34 +1528,36 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	 default backtrace.  */
 
       gdbpy_print_stack ();
-      do_cleanups (cleanups);
       return EXT_LANG_BT_NO_FILTERS;
     }
 
   /* If iterable is None, then there are no frame filters registered.
      If this is the case, defer to default GDB printing routines in MI
      and CLI.  */
-  make_cleanup_py_decref (iterable);
   if (iterable == Py_None)
+    return EXT_LANG_BT_NO_FILTERS;
+
+  htab_up levels_printed (htab_create (20,
+				       htab_hash_pointer,
+				       htab_eq_pointer,
+				       NULL));
+
+  while (true)
     {
-      success = EXT_LANG_BT_NO_FILTERS;
-      goto done;
-    }
+      gdbpy_ref item (PyIter_Next (iterable.get ()));
 
-  levels_printed = htab_create (20,
-				htab_hash_pointer,
-				htab_eq_pointer,
-				NULL);
-  make_cleanup_htab_delete (levels_printed);
+      if (item == NULL)
+	{
+	  if (PyErr_Occurred ())
+	    {
+	      gdbpy_print_stack ();
+	      return EXT_LANG_BT_ERROR;
+	    }
+	  break;
+	}
 
-  while ((item = PyIter_Next (iterable)))
-    {
-      struct cleanup *item_cleanup = make_cleanup_py_decref (item);
-
-      success = py_print_frame (item, flags, args_type, out, 0,
-				levels_printed);
-
-      do_cleanups (item_cleanup);
+      success = py_print_frame (item.get (), flags, args_type, out, 0,
+				levels_printed.get ());
 
       /* Do not exit on error printing a single frame.  Print the
 	 error and continue with other frames.  */
@@ -1566,17 +1565,5 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	gdbpy_print_stack ();
     }
 
-  if (item == NULL && PyErr_Occurred ())
-    goto error;
-
- done:
-  do_cleanups (cleanups);
   return success;
-
-  /* Exit and abandon backtrace on error, printing the exception that
-     is set.  */
- error:
-  gdbpy_print_stack ();
-  do_cleanups (cleanups);
-  return EXT_LANG_BT_ERROR;
 }
