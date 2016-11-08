@@ -120,7 +120,7 @@ rust_union_is_untagged (struct type *type)
 static struct disr_info
 rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
                     int embedded_offset, CORE_ADDR address,
-                    const struct value *val)
+                    struct value *val)
 {
   int i;
   struct disr_info ret;
@@ -235,7 +235,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   cleanup = make_cleanup_ui_file_delete (temp_file);
   /* The first value of the first field (or any field)
      is the discriminant value.  */
-  c_val_print (TYPE_FIELD_TYPE (disr_type, 0), valaddr,
+  c_val_print (TYPE_FIELD_TYPE (disr_type, 0),
 	       (embedded_offset + TYPE_FIELD_BITPOS (type, 0) / 8
 		+ TYPE_FIELD_BITPOS (disr_type, 0) / 8),
 	       address, temp_file,
@@ -479,9 +479,9 @@ rust_printstr (struct ui_file *stream, struct type *type,
 /* rust_print_type branch for structs and untagged unions.  */
 
 static void
-val_print_struct (struct type *type, const gdb_byte *valaddr,
-		  int embedded_offset, CORE_ADDR address, struct ui_file *stream,
-		  int recurse, const struct value *val,
+val_print_struct (struct type *type, int embedded_offset,
+		  CORE_ADDR address, struct ui_file *stream,
+		  int recurse, struct value *val,
 		  const struct value_print_options *options)
 {
   int i;
@@ -536,7 +536,6 @@ val_print_struct (struct type *type, const gdb_byte *valaddr,
         }
 
       val_print (TYPE_FIELD_TYPE (type, i),
-           valaddr,
            embedded_offset + TYPE_FIELD_BITPOS (type, i) / 8,
            address,
            stream, recurse + 1, val, &opts,
@@ -572,11 +571,13 @@ static const struct generic_val_print_decorations rust_decorations =
 /* la_val_print implementation for Rust.  */
 
 static void
-rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
+rust_val_print (struct type *type, int embedded_offset,
 		CORE_ADDR address, struct ui_file *stream, int recurse,
-		const struct value *val,
+		struct value *val,
 		const struct value_print_options *options)
 {
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+
   type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
@@ -613,7 +614,7 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
-      c_val_print (type, valaddr, embedded_offset, address, stream,
+      c_val_print (type, embedded_offset, address, stream,
 		   recurse, val, options);
       break;
 
@@ -672,7 +673,7 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
      fields.  */
   if (rust_union_is_untagged (type))
     {
-      val_print_struct (type, valaddr, embedded_offset, address, stream,
+      val_print_struct (type, embedded_offset, address, stream,
 			  recurse, val, options);
       break;
     }
@@ -728,7 +729,6 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 				TYPE_FIELD_NAME (variant_type, j));
 
 	    val_print (TYPE_FIELD_TYPE (variant_type, j),
-		       valaddr,
 		       (embedded_offset
 			+ TYPE_FIELD_BITPOS (type, disr.field_no) / 8
 			+ TYPE_FIELD_BITPOS (variant_type, j) / 8),
@@ -745,14 +745,14 @@ rust_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_STRUCT:
-      val_print_struct (type, valaddr, embedded_offset, address, stream,
-       recurse, val, options);
+      val_print_struct (type, embedded_offset, address, stream,
+			recurse, val, options);
       break;
 
     default:
     generic_print:
       /* Nothing special yet.  */
-      generic_val_print (type, valaddr, embedded_offset, address, stream,
+      generic_val_print (type, embedded_offset, address, stream,
 			 recurse, val, options, &rust_decorations);
     }
 }

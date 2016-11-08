@@ -726,7 +726,6 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  get_no_prettyformat_print_options (&opts);
 	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, regnum),
-		     value_contents_for_printing (val),
 		     0, 0, file, 0, val,
 		     &opts, current_language);
 	  fputs_filtered ("\n", file);

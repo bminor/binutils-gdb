@@ -82,7 +82,7 @@ static void cp_print_static_field (struct type *, struct value *,
 static void cp_print_value (struct type *, struct type *,
 			    const gdb_byte *, LONGEST,
 			    CORE_ADDR, struct ui_file *,
-			    int, const struct value *,
+			    int, struct value *,
 			    const struct value_print_options *,
 			    struct type **);
 
@@ -156,7 +156,7 @@ void
 cp_print_value_fields (struct type *type, struct type *real_type,
 		       const gdb_byte *valaddr, LONGEST offset,
 		       CORE_ADDR address, struct ui_file *stream,
-		       int recurse, const struct value *val,
+		       int recurse, struct value *val,
 		       const struct value_print_options *options,
 		       struct type **dont_print_vb,
 		       int dont_print_statmem)
@@ -353,7 +353,6 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 		  opts.deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
-			     valaddr, 
 			     offset + TYPE_FIELD_BITPOS (type, i) / 8,
 			     address,
 			     stream, recurse + 1, val, &opts,
@@ -420,7 +419,7 @@ cp_print_value_fields_rtti (struct type *type,
 			    const gdb_byte *valaddr, LONGEST offset,
 			    CORE_ADDR address,
 			    struct ui_file *stream, int recurse,
-			    const struct value *val,
+			    struct value *val,
 			    const struct value_print_options *options,
 			    struct type **dont_print_vb, 
 			    int dont_print_statmem)
@@ -462,7 +461,7 @@ static void
 cp_print_value (struct type *type, struct type *real_type,
 		const gdb_byte *valaddr, LONGEST offset,
 		CORE_ADDR address, struct ui_file *stream,
-		int recurse, const struct value *val,
+		int recurse, struct value *val,
 		const struct value_print_options *options,
 		struct type **dont_print_vb)
 {
@@ -489,7 +488,7 @@ cp_print_value (struct type *type, struct type *real_type,
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       const char *basename = TYPE_NAME (baseclass);
       const gdb_byte *base_valaddr = NULL;
-      const struct value *base_val = NULL;
+      struct value *base_val = NULL;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -708,7 +707,7 @@ cp_print_static_field (struct type *type,
 
   opts = *options;
   opts.deref_ref = 0;
-  val_print (type, value_contents_for_printing (val), 
+  val_print (type,
 	     value_embedded_offset (val),
 	     value_address (val),
 	     stream, recurse, val,

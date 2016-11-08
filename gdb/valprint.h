@@ -115,9 +115,9 @@ extern void maybe_print_array_index (struct type *index_type, LONGEST index,
                                      struct ui_file *stream,
 				     const struct value_print_options *);
 
-extern void val_print_array_elements (struct type *, const gdb_byte *, LONGEST,
+extern void val_print_array_elements (struct type *, LONGEST,
 				      CORE_ADDR, struct ui_file *, int,
-				      const struct value *,
+				      struct value *,
 				      const struct value_print_options *,
 				      unsigned int);
 
@@ -125,8 +125,8 @@ extern void val_print_type_code_int (struct type *, const gdb_byte *,
 				     struct ui_file *);
 
 extern void val_print_scalar_formatted (struct type *,
-					const gdb_byte *, LONGEST,
-					const struct value *,
+					LONGEST,
+					struct value *,
 					const struct value_print_options *,
 					int,
 					struct ui_file *);
@@ -193,10 +193,10 @@ struct generic_val_print_decorations
 };
 
 
-extern void generic_val_print (struct type *type, const gdb_byte *valaddr,
+extern void generic_val_print (struct type *type,
 			       int embedded_offset, CORE_ADDR address,
 			       struct ui_file *stream, int recurse,
-			       const struct value *original_value,
+			       struct value *original_value,
 			       const struct value_print_options *options,
 			       const struct generic_val_print_decorations *);
 

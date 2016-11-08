@@ -1,5 +1,89 @@
 2016-11-08  Yao Qi  <yao.qi@linaro.org>
 
+	* ada-lang.h (ada_val_print): Remove second parameter.  Remove
+	const from "struct value *".
+	* ada-valprint.c (print_field_values): Remove const from
+	"struct value *".
+	(val_print_packed_array_elements): Likewise.
+	(print_variant_part): Likewise.
+	(ada_val_print_string): Likewise.
+	(ada_val_print_gnat_array): Likewise.
+	(ada_val_print_ptr): Likewise.
+	(ada_val_print_num): Likewise.
+	(ada_val_print_enum): Likewise.
+	(ada_val_print_flt): Likewise.
+	(ada_val_print_union): Likewise.
+	(ada_val_print_struct_union): Likewise.
+	(ada_val_print_ref): Likewise.
+	(ada_val_print_1): Remove second parameter.  Remove const from
+	"struct value *".
+	(ada_val_print): Likewise.
+	* c-lang.h (c_val_print): Likewise.
+	* c-valprint.c (c_val_print_array): Remove const from
+	"struct value *".
+	(c_val_print_ptr): Likewise.
+	(c_val_print_struct): Likewise.
+	(c_val_print_union): Likewise.
+	(c_val_print_int): Likewise.
+	(c_val_print_memberptr): Likewise.
+	(c_val_print): Remove second parameter.  Remove const from
+	"struct value *".  All callers updated.
+	* cp-valprint.c (cp_print_value): Remove const from
+	"struct value *".
+	(cp_print_value_fields): Likewise.
+	(c_val_print_value): Likewise.
+	* d-lang.h (d_val_print): Remove second parameter.  Remove const
+	from "struct value *".
+	* d-valprint.c (dynamic_array_type): Likewise.
+	(d_val_print): Likewise.
+	* f-lang.h (f_val_print): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	* go-lang.h (go_val_print): Likewise.
+	* go-valprint.c (print_go_string): Likewise.
+	(go_val_print): Likewise.
+	* language.c (unk_lang_val_print): Likewise.
+	* language.h (struct language_defn) <la_val_print>: Likewise.
+	Update comments.
+	(LA_VAL_PRINT): Remove.
+	* m2-lang.h (m2_val_print): Remove const from
+	"struct value *".
+	* m2-valprint.c (m2_print_array_contents): Likewise.
+	(m2_val_print): Likewise.
+	* p-lang.h (pascal_val_print): Remove second parameter.  Remove
+	const from "struct value *".
+	(pascal_object_print_value_fields): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	(pascal_object_print_value_fields): Likewise.
+	(pascal_object_print_value): Likewise.
+	* rust-lang.c (rust_get_disr_info): Likewise.
+	(val_print_struct): Likewise.
+	(rust_val_print): Likewise.
+	* valprint.c (generic_val_print_array): Likewise.
+	(generic_val_print_ptr): Likewise.
+	(generic_val_print_memberptr): Likewise.
+	(generic_val_print_ref): Likewise.
+	(generic_val_print_enum): Likewise.
+	(generic_val_print_flags): Likewise.
+	(generic_val_print_func): Likewise.
+	(generic_val_print_bool): Likewise.
+	(generic_val_print_int): Likewise.
+	(generic_val_print_char): Likewise.
+	(generic_val_print_float): Likewise.
+	(generic_val_print_decfloat): Likewise.
+	(generic_val_print_complex): Likewise.
+	(generic_val_print): Likewise.
+	(val_print): Likewise.
+	(common_val_print): Likewise.
+	(val_print_type_code_flags): Likewise.
+	(val_print_scalar_formatted): Likewise.
+	(val_print_array_elements): Likewise.
+	* valprint.h (val_print_array_elements): Update declaration.
+	(val_print_scalar_formatted): Likewise.
+	(generic_val_print): Likewise.
+	* value.h (val_print): Likewise.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
 	* mt-tdep.c (mt_registers_info): Call
 	get_frame_register_value instead of
 	deprecated_frame_register_read.

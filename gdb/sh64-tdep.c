@@ -2048,13 +2048,13 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
   get_formatted_print_options (&opts, 'x');
   opts.deref_ref = 1;
   val_print (register_type (gdbarch, regnum),
-	     value_contents_for_printing (val), 0, 0,
+	     0, 0,
 	     file, 0, val, &opts, current_language);
   fprintf_filtered (file, "\t");
   get_formatted_print_options (&opts, 0);
   opts.deref_ref = 1;
   val_print (register_type (gdbarch, regnum),
-	     value_contents_for_printing (val), 0, 0,
+	     0, 0,
 	     file, 0, val, &opts, current_language);
   fprintf_filtered (file, "\n");
 }

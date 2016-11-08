@@ -322,7 +322,6 @@ print_formatted (struct value *val, int size,
     /* User specified format, so don't look to the type to tell us
        what to do.  */
     val_print_scalar_formatted (type,
-				value_contents_for_printing (val),
 				value_embedded_offset (val),
 				val,
 				options, size, stream);

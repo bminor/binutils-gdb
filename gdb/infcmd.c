@@ -2315,7 +2315,6 @@ default_print_one_register_info (struct ui_file *file,
       opts.deref_ref = 1;
 
       val_print (regtype,
-		 value_contents_for_printing (val),
 		 value_embedded_offset (val), 0,
 		 file, 0, val, &opts, current_language);
 
@@ -2334,7 +2333,6 @@ default_print_one_register_info (struct ui_file *file,
       get_formatted_print_options (&opts, 'x');
       opts.deref_ref = 1;
       val_print (regtype,
-		 value_contents_for_printing (val),
 		 value_embedded_offset (val), 0,
 		 file, 0, val, &opts, current_language);
       /* If not a vector register, print it also according to its
@@ -2345,7 +2343,6 @@ default_print_one_register_info (struct ui_file *file,
 	  opts.deref_ref = 1;
 	  fprintf_filtered (file, "\t");
 	  val_print (regtype,
-		     value_contents_for_printing (val),
 		     value_embedded_offset (val), 0,
 		     file, 0, val, &opts, current_language);
 	}

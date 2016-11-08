@@ -80,10 +80,10 @@ extern struct block_symbol d_lookup_nested_symbol (struct type *, const char *,
 
 /* Defined in d-valprint.c  */
 
-extern void d_val_print (struct type *type, const gdb_byte *valaddr,
+extern void d_val_print (struct type *type,
 			 int embedded_offset, CORE_ADDR address,
 			 struct ui_file *stream, int recurse,
-			 const struct value *val,
+			 struct value *val,
 			 const struct value_print_options *options);
 
 #endif /* !defined (D_LANG_H) */
