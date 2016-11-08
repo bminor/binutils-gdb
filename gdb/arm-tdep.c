@@ -9584,7 +9584,7 @@ _initialize_arm_tdep (void)
   const char *setdesc;
   const char *const *regnames;
   int i;
-  static char *helptext;
+  static std::string helptext;
   char regdesc[1024], *rdptr = regdesc;
   size_t rest = sizeof (regdesc);
 
@@ -9655,14 +9655,14 @@ _initialize_arm_tdep (void)
 		      _("The valid values are:\n"),
 		      regdesc,
 		      _("The default is \"std\"."));
-  helptext = ui_file_xstrdup (stb, NULL);
+  helptext = ui_file_as_string (stb);
   ui_file_delete (stb);
 
   add_setshow_enum_cmd("disassembler", no_class,
 		       valid_disassembly_styles, &disassembly_style,
 		       _("Set the disassembly style."),
 		       _("Show the disassembly style."),
-		       helptext,
+		       helptext.c_str (),
 		       set_disassembly_style_sfunc,
 		       NULL, /* FIXME: i18n: The disassembly style is
 				\"%s\".  */

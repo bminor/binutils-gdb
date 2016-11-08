@@ -1,5 +1,10 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* arm-tdep.c (_initialize_arm_tdep): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* utils.c (error_stream): Use ui_file_as_string and std::string.
 
 2016-11-08  Pedro Alves  <palves@redhat.com>
