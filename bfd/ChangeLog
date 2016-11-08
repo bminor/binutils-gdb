@@ -1,3 +1,8 @@
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2.c (struct funcinfo) <is_linkage>: Type is bfd_boolean,
+	not "bfd boolean".
+
 2016-11-08  Igor Tsimbalist  <tigor.tools@gmail.com>
 
 	* dwarf2.c (comp_unit): Add new fields 'lookup_funcinfo_table' and

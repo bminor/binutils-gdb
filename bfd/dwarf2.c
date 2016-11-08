@@ -1280,7 +1280,7 @@ struct funcinfo
   /* Source location line number.  */
   int			line;
   int			tag;
-  bfd			boolean is_linkage;
+  bfd_boolean		is_linkage;
   const char *		name;
   struct arange		arange;
   /* Where the symbol is defined.  */
