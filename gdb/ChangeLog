@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-unwind.c (pending_frame_invalidate): Remove.
+	(pyuw_sniffer): Use gdbpy_enter and gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-xmethods.c (gdbpy_free_xmethod_worker_data)
 	(gdbpy_clone_xmethod_worker_data): Use gdbpy_enter.
 

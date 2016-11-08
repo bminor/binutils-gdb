@@ -28,6 +28,7 @@
 #include "regcache.h"
 #include "valprint.h"
 #include "user-regs.h"
+#include "py-ref.h"
 
 #define TRACE_PY_UNWIND(level, args...) if (pyuw_debug >= level)  \
   { fprintf_unfiltered (gdb_stdlog, args); }
@@ -465,15 +466,6 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
                                     frame_id_build_special (sp, pc, special));
 }
 
-/* Invalidate PendingFrame instance.  */
-
-static void
-pending_frame_invalidate (void *pyo_pending_frame)
-{
-  if (pyo_pending_frame != NULL)
-    ((pending_frame_object *) pyo_pending_frame)->frame_info = NULL;
-}
-
 /* frame_unwind.this_id method.  */
 
 static void
@@ -517,25 +509,26 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
               void **cache_ptr)
 {
   struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
-  struct cleanup *cleanups = ensure_python_env (gdbarch, current_language);
-  PyObject *pyo_execute;
-  PyObject *pyo_pending_frame;
-  PyObject *pyo_unwind_info;
   cached_frame_info *cached_frame;
+
+  gdbpy_enter enter_py (gdbarch, current_language);
 
   TRACE_PY_UNWIND (3, "%s (SP=%s, PC=%s)\n", __FUNCTION__,
                    paddress (gdbarch, get_frame_sp (this_frame)),
                    paddress (gdbarch, get_frame_pc (this_frame)));
 
   /* Create PendingFrame instance to pass to sniffers.  */
-  pyo_pending_frame  = (PyObject *) PyObject_New (pending_frame_object,
-                                                  &pending_frame_object_type);
+  pending_frame_object *pfo = PyObject_New (pending_frame_object,
+					    &pending_frame_object_type);
+  gdbpy_ref pyo_pending_frame ((PyObject *) pfo);
   if (pyo_pending_frame == NULL)
-    goto error;
-  ((pending_frame_object *) pyo_pending_frame)->gdbarch = gdbarch;
-  ((pending_frame_object *) pyo_pending_frame)->frame_info = this_frame;
-  make_cleanup_py_decref (pyo_pending_frame);
-  make_cleanup (pending_frame_invalidate, (void *) pyo_pending_frame);
+    {
+      gdbpy_print_stack ();
+      return 0;
+    }
+  pfo->gdbarch = gdbarch;
+  scoped_restore invalidate_frame = make_scoped_restore (&pfo->frame_info,
+							 this_frame);
 
   /* Run unwinders.  */
   if (gdb_python_module == NULL
@@ -544,27 +537,36 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
       PyErr_SetString (PyExc_NameError,
                        "Installation error: gdb.execute_unwinders function "
                        "is missing");
-      goto error;
+      gdbpy_print_stack ();
+      return 0;
     }
-  pyo_execute = PyObject_GetAttrString (gdb_python_module, "execute_unwinders");
+  gdbpy_ref pyo_execute (PyObject_GetAttrString (gdb_python_module,
+						 "execute_unwinders"));
   if (pyo_execute == NULL)
-    goto error;
-  make_cleanup_py_decref (pyo_execute);
-  pyo_unwind_info
-      = PyObject_CallFunctionObjArgs (pyo_execute, pyo_pending_frame, NULL);
+    {
+      gdbpy_print_stack ();
+      return 0;
+    }
+
+  gdbpy_ref pyo_unwind_info
+    (PyObject_CallFunctionObjArgs (pyo_execute.get (),
+				   pyo_pending_frame.get (), NULL));
   if (pyo_unwind_info == NULL)
-    goto error;
-  make_cleanup_py_decref (pyo_unwind_info);
+    {
+      gdbpy_print_stack ();
+      return 0;
+    }
   if (pyo_unwind_info == Py_None)
-    goto cannot_unwind;
+    return 0;
 
   /* Received UnwindInfo, cache data.  */
-  if (PyObject_IsInstance (pyo_unwind_info,
+  if (PyObject_IsInstance (pyo_unwind_info.get (),
                            (PyObject *) &unwind_info_object_type) <= 0)
     error (_("A Unwinder should return gdb.UnwindInfo instance."));
 
   {
-    unwind_info_object *unwind_info = (unwind_info_object *) pyo_unwind_info;
+    unwind_info_object *unwind_info =
+      (unwind_info_object *) pyo_unwind_info.get ();
     int reg_count = VEC_length (saved_reg, unwind_info->saved_regs);
     saved_reg *reg;
     int i;
@@ -595,15 +597,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   }
 
   *cache_ptr = cached_frame;
-  do_cleanups (cleanups);
   return 1;
-
- error:
-  gdbpy_print_stack ();
-  /* Fallthrough.  */
- cannot_unwind:
-  do_cleanups (cleanups);
-  return 0;
 }
 
 /* Frame cache release shim.  */
