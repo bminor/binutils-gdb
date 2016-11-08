@@ -17,6 +17,7 @@
 #include "python-internal.h"
 #include "varobj.h"
 #include "varobj-iter.h"
+#include "py-ref.h"
 
 /* A dynamic varobj iterator "class" for python pretty-printed
    varobjs.  This inherits struct varobj_iter.  */
@@ -167,28 +168,23 @@ py_varobj_iter_new (struct varobj *var, PyObject *pyiter)
 struct varobj_iter *
 py_varobj_get_iterator (struct varobj *var, PyObject *printer)
 {
-  PyObject *children;
   PyObject *iter;
   struct py_varobj_iter *py_iter;
-  struct cleanup *back_to = varobj_ensure_python_env (var);
+
+  gdbpy_enter_varobj enter_py (var);
 
   if (!PyObject_HasAttr (printer, gdbpy_children_cst))
-    {
-      do_cleanups (back_to);
-      return NULL;
-    }
+    return NULL;
 
-  children = PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-					 NULL);
+  gdbpy_ref children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
+						  NULL));
   if (children == NULL)
     {
       gdbpy_print_stack ();
       error (_("Null value returned for children"));
     }
 
-  make_cleanup_py_decref (children);
-
-  iter = PyObject_GetIter (children);
+  iter = PyObject_GetIter (children.get ());
   if (iter == NULL)
     {
       gdbpy_print_stack ();
@@ -196,8 +192,6 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer)
     }
 
   py_iter = py_varobj_iter_new (var, iter);
-
-  do_cleanups (back_to);
 
   return &py_iter->base;
 }

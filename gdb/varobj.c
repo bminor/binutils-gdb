@@ -233,6 +233,13 @@ varobj_ensure_python_env (const struct varobj *var)
   return ensure_python_env (var->root->exp->gdbarch,
 			    var->root->exp->language_defn);
 }
+
+/* See python-internal.h.  */
+gdbpy_enter_varobj::gdbpy_enter_varobj (const struct varobj *var)
+: gdbpy_enter (var->root->exp->gdbarch, var->root->exp->language_defn)
+{
+}
+
 #endif
 
 /* Return the full FRAME which corresponds to the given CORE_ADDR

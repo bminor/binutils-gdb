@@ -526,6 +526,18 @@ class gdbpy_enter
   PyObject *m_error_type, *m_error_value, *m_error_traceback;
 };
 
+/* Like gdbpy_enter, but takes a varobj.  This is a subclass just to
+   make constructor delegation a little nicer.  */
+class gdbpy_enter_varobj : public gdbpy_enter
+{
+ public:
+
+  /* This is defined in varobj.c, where it can access varobj
+     internals.  */
+  gdbpy_enter_varobj (const struct varobj *var);
+
+};
+
 struct cleanup *ensure_python_env (struct gdbarch *gdbarch,
 				   const struct language_defn *language);
 

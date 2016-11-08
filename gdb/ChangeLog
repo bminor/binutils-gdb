@@ -1,5 +1,12 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (gdbpy_enter_varobj): New constructor.
+	* python/python-internal.h (gdbpy_enter_varobj): New class.
+	* python/py-varobj.c (py_varobj_get_iterator): Use
+	gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-xmethods.c (gdbpy_get_xmethod_result_type): Use
 	gdbpy_enter, gdbpy_ref, unique_xmalloc_ptr.
 	(gdbpy_invoke_xmethod): Use gdbpy_ref, gdbpy_enter.
