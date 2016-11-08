@@ -1,5 +1,10 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* printcmd.c (eval_command): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* top.c (quit_confirm): Use ui_file_as_string and std::string.
 
 2016-11-08  Pedro Alves  <palves@redhat.com>
