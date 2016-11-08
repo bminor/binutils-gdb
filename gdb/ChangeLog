@@ -1,4 +1,9 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* language.c (add_language): Use ui_file_as_string and adjust to
+	use std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (struct disr_info) <name>: Now a std::string.
