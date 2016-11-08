@@ -368,10 +368,10 @@ type_print (struct type *type, const char *varstring, struct ui_file *stream,
 /* Print TYPE to a string, returning it.  The caller is responsible for
    freeing the string.  */
 
-char *
+std::string
 type_to_string (struct type *type)
 {
-  char *s = NULL;
+  std::string s;
   struct ui_file *stb;
   struct cleanup *old_chain;
 
@@ -381,11 +381,10 @@ type_to_string (struct type *type)
   TRY
     {
       type_print (type, "", stb, -1);
-      s = ui_file_xstrdup (stb, NULL);
+      s = ui_file_as_string (stb);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      s = NULL;
     }
   END_CATCH
 

@@ -19,7 +19,7 @@
 typedef struct varobj_item
 {
   /* Name of this item.  */
-  char *name;
+  std::string name;
 
   /* Value of this item.  */
   struct value *value;
@@ -67,6 +67,6 @@ struct varobj_iter_ops
       if ((ITER) != NULL)		       \
 	{				       \
 	  (ITER)->ops->dtor (ITER);	       \
-	  xfree (ITER);		       \
+	  delete (ITER);		       \
 	}				       \
     } while (0)

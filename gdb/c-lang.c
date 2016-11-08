@@ -356,14 +356,11 @@ c_get_string (struct value *value, gdb_byte **buffer,
 
  error:
   {
-    char *type_str;
-
-    type_str = type_to_string (type);
-    if (type_str)
+    std::string type_str = type_to_string (type);
+    if (!type_str.empty ())
       {
-	make_cleanup (xfree, type_str);
 	error (_("Trying to read string with inappropriate type `%s'."),
-	       type_str);
+	       type_str.c_str ());
       }
     else
       error (_("Trying to read string with inappropriate type."));

@@ -992,7 +992,7 @@ extern void modify_field (struct type *type, gdb_byte *addr,
 extern void type_print (struct type *type, const char *varstring,
 			struct ui_file *stream, int show);
 
-extern char *type_to_string (struct type *type);
+extern std::string type_to_string (struct type *type);
 
 extern gdb_byte *baseclass_addr (struct type *type, int index,
 				 gdb_byte *valaddr,

@@ -2055,13 +2055,11 @@ convert_ast_to_type (struct parser_state *state,
 	obstack_1grow (&work_obstack, '(');
 	for (i = 0; VEC_iterate (type_ptr, args, i, type); ++i)
 	  {
-	    char *type_name = type_to_string (type);
+	    std::string type_name = type_to_string (type);
 
 	    if (i > 0)
 	      obstack_1grow (&work_obstack, ',');
-	    obstack_grow_str (&work_obstack, type_name);
-
-	    xfree (type_name);
+	    obstack_grow_str (&work_obstack, type_name.c_str ());
 	  }
 
 	obstack_grow_str0 (&work_obstack, ")");
@@ -2109,13 +2107,12 @@ convert_name (struct parser_state *state, const struct rust_op *operation)
   obstack_1grow (&work_obstack, '<');
   for (i = 0; VEC_iterate (type_ptr, types, i, type); ++i)
     {
-      char *type_name = type_to_string (type);
+      std::string type_name = type_to_string (type);
 
       if (i > 0)
 	obstack_1grow (&work_obstack, ',');
 
-      obstack_grow_str (&work_obstack, type_name);
-      xfree (type_name);
+      obstack_grow_str (&work_obstack, type_name.c_str ());
     }
   obstack_grow_str0 (&work_obstack, ">");
 

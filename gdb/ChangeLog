@@ -1,5 +1,133 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_name_for_lookup, type_as_string): Use and return
+	std::string.
+	(type_as_string_and_cleanup): Delete.
+	(ada_lookup_struct_elt_type): Use type_as_string.
+	* ada-lang.h (ada_name_for_lookup): Now returns std::string.
+	* ada-varobj.c (ada_varobj_scalar_image): Return a std::string.
+	(ada_varobj_describe_child): Make 'child_name' and
+	'child_path_expr' parameters std::string pointers.
+	(ada_varobj_describe_struct_child, ada_varobj_describe_ptr_child):
+	Likewise, and use string_printf.
+	(ada_varobj_describe_simple_array_child)
+	(ada_varobj_describe_child): Likewise.
+	(ada_varobj_get_name_of_child, ada_varobj_get_path_expr_of_child)
+	(ada_varobj_get_value_image)
+	(ada_varobj_get_value_of_array_variable)
+	(ada_varobj_get_value_of_variable, ada_name_of_variable)
+	(ada_name_of_child, ada_path_expr_of_child)
+	(ada_value_of_variable): Now returns std::string.  Use
+	string_printf.
+	(ada_value_of_child): Adjust.
+	* break-catch-throw.c (check_status_exception_catchpoint): Adjust
+	to use std::string.
+	* breakpoint.c (watch_command_1): Adjust to use std::string.
+	* c-lang.c (c_get_string): Adjust to use std::string.
+	* c-typeprint.c (print_name_maybe_canonical): Use std::string.
+	* c-varobj.c (varobj_is_anonymous_child): Use ==/!= std::string
+	operators.
+	(c_name_of_variable): Now returns a std::string.
+	(c_describe_child): The 'cname' and 'cfull_expression' output
+	parameters are now std::string pointers.  Adjust.
+	(c_name_of_child, c_path_expr_of_child, c_value_of_variable)
+	(cplus_number_of_children): Adjust to use std::string and
+	string_printf.
+	(cplus_name_of_variable): Now returns a std::string.
+	(cplus_describe_child): The 'cname' and 'cfull_expression' output
+	parameters are now std::string pointers.  Adjust.
+	(cplus_name_of_child, cplus_path_expr_of_child)
+	(cplus_value_of_variable): Now returns a std::string.
+	* cp-abi.c (cplus_typename_from_type_info): Return std::string.
+	* cp-abi.h (cplus_typename_from_type_info): Return std::string.
+	(struct cp_abi_ops) <get_typename_from_type_info>: Return
+	std::string.
+	* cp-support.c (inspect_type): Use std::string.
+	(cp_canonicalize_string_full, cp_canonicalize_string_no_typedefs)
+	(cp_canonicalize_string): Return std::string and adjust.
+	* cp-support.h (cp_canonicalize_string)
+	(cp_canonicalize_string_no_typedefs, cp_canonicalize_string_full):
+	Return std::string.
+	* dbxread.c (read_dbx_symtab): Use std::string.
+	* dwarf2read.c (dwarf2_canonicalize_name): Adjust to use std::string.
+	* gdbcmd.h (lookup_struct_elt_type): Adjust to use std::string.
+	* gnu-v3-abi.c (gnuv3_get_typeid): Use std::string.
+	(gnuv3_get_typename_from_type_info): Return a std::string and
+	adjust.
+	(gnuv3_get_type_from_type_info): Adjust to use std::string.
+	* guile/guile.c (gdbscm_execute_gdb_command): Adjust to use
+	std::string.
+	* infcmd.c (print_return_value_1): Adjust to use std::string.
+	* linespec.c (find_linespec_symbols): Adjust to
+	demangle_for_lookup API change.  Use std::string.
+	* mi/mi-cmd-var.c (print_varobj, mi_cmd_var_set_format)
+	(mi_cmd_var_info_type, mi_cmd_var_info_path_expression)
+	(mi_cmd_var_info_expression, mi_cmd_var_evaluate_expression)
+	(mi_cmd_var_assign, varobj_update_one): Adjust to use std::string.
+	* minsyms.c (lookup_minimal_symbol): Use std::string.
+	* python/py-varobj.c (py_varobj_iter_next): Use new instead of
+	XNEW.  vitem->name is a std::string now, adjust.
+	* rust-exp.y (convert_ast_to_type, convert_name): Adjust to use
+	std::string.
+	* stabsread.c (define_symbol): Adjust to use std::string.
+	* symtab.c (demangle_for_lookup): Now returns 'const char *'.  Add
+	a demangle_result_storage parameter.  Use it for storage.
+	(lookup_symbol_in_language)
+	(lookup_symbol_in_objfile_from_linkage_name): Adjust to new
+	demangle_for_lookup API.
+	* symtab.h (struct demangle_result_storage): New type.
+	(demangle_for_lookup): Now returns 'const char *'.  Add a
+	demangle_result_storage parameter.
+	* typeprint.c (type_to_string): Return std::string and use
+	ui_file_as_string.
+	* value.h (type_to_string): Change return type to std::string.
+	* varobj-iter.h (struct varobj_item) <name>: Now a std::string.
+	(varobj_iter_delete): Use delete instead of xfree.
+	* varobj.c (create_child): Return std::string instead of char * in
+	output parameter.
+	(name_of_variable, name_of_child, my_value_of_variable): Return
+	std::string instead of char *.
+	(varobj_create, varobj_get_handle): Constify 'objname' parameter.
+	Adjust to std::string fields.
+	(varobj_get_objname): Return a const char * instead of a char *.
+	(varobj_get_expression): Return a std::string.
+	(varobj_list_children): Adjust to use std::string.
+	(varobj_get_type): Return a std::string.
+	(varobj_get_path_expr): Return a const char * instead of a char *.
+	Adjust to std::string fields.
+	(varobj_get_formatted_value, varobj_get_value): Return a
+	std::string.
+	(varobj_set_value): Change type of 'expression' parameter to
+	std::string.  Use std::string.
+	(install_new_value): Use std::string.
+	(delete_variable_1): Adjust to use std::string.
+	(create_child): Change the 'name' parameter to a std::string
+	reference.  Swap it into the new item's name.
+	(create_child_with_value): Swap item's name into the new child's
+	name.  Use string_printf.
+	(new_variable): Use new instead of XNEW.
+	(free_variable): Don't xfree fields that are now std::string.
+	(name_of_variable, name_of_child): Now returns std::string.
+	(value_of_root): Adjust to use std::string.
+	(my_value_of_variable, varobj_value_get_print_value): Return
+	and use std::string.
+	(varobj_value_get_print_value): Adjust to use ui_file_as_string
+	and std::string.
+	* varobj.h (struct varobj) <name, path_expr, obj_name,
+	print_value>: Now std::string's.
+	<name_of_variable, name_of_child, path_expr_of_child,
+	value_of_variable>: Return std::string.
+	(varobj_create, varobj_get_handle): Constify 'objname' parameter.
+	(varobj_get_objname): Return a const char * instead of a char *.
+	(varobj_get_expression, varobj_get_type): Return a std::string.
+	(varobj_get_path_expr): Return a const char * instead of a char *.
+	(varobj_get_formatted_value, varobj_get_value): Return a
+	std::string.
+	(varobj_set_value): Constify 'expression' parameter.
+	(varobj_value_get_print_value): Return a std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* language.c (add_language): Use ui_file_as_string and adjust to
 	use std::string.
 

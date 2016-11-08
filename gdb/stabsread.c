@@ -649,7 +649,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   int deftype;
   int synonym = 0;
   int i;
-  char *new_name = NULL;
 
   /* We would like to eliminate nameless symbols, but keep their types.
      E.g. stab entry ":t10=*2" should produce a type 10, which is a pointer
@@ -733,6 +732,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   else
     {
     normal:
+      std::string new_name;
+
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
 	{
 	  char *name = (char *) alloca (p - string + 1);
@@ -741,10 +742,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  name[p - string] = '\0';
 	  new_name = cp_canonicalize_string (name);
 	}
-      if (new_name != NULL)
+      if (!new_name.empty ())
 	{
-	  SYMBOL_SET_NAMES (sym, new_name, strlen (new_name), 1, objfile);
-	  xfree (new_name);
+	  SYMBOL_SET_NAMES (sym,
+			    new_name.c_str (), new_name.length (),
+			    1, objfile);
 	}
       else
 	SYMBOL_SET_NAMES (sym, string, p - string, 1, objfile);
@@ -1642,17 +1644,18 @@ again:
 	  type_name = NULL;
 	  if (current_subfile->language == language_cplus)
 	    {
-	      char *new_name, *name = (char *) alloca (p - *pp + 1);
+	      char *name = (char *) alloca (p - *pp + 1);
 
 	      memcpy (name, *pp, p - *pp);
 	      name[p - *pp] = '\0';
-	      new_name = cp_canonicalize_string (name);
-	      if (new_name != NULL)
+
+	      std::string new_name = cp_canonicalize_string (name);
+	      if (!new_name.empty ())
 		{
 		  type_name
 		    = (char *) obstack_copy0 (&objfile->objfile_obstack,
-					      new_name, strlen (new_name));
-		  xfree (new_name);
+					      new_name.c_str (),
+					      new_name.length ());
 		}
 	    }
 	  if (type_name == NULL)

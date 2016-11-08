@@ -19524,14 +19524,14 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
 {
   if (name && cu->language == language_cplus)
     {
-      char *canon_name = cp_canonicalize_string (name);
+      std::string canon_name = cp_canonicalize_string (name);
 
-      if (canon_name != NULL)
+      if (!canon_name.empty ())
 	{
-	  if (strcmp (canon_name, name) != 0)
-	    name = (const char *) obstack_copy0 (obstack, canon_name,
-						 strlen (canon_name));
-	  xfree (canon_name);
+	  if (canon_name != name)
+	    name = (const char *) obstack_copy0 (obstack,
+						 canon_name.c_str (),
+						 canon_name.length ());
 	}
     }
 

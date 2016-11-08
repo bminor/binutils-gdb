@@ -1770,10 +1770,10 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 }
 
 /* Compute the demangled form of NAME as used by the various symbol
-   lookup functions.  The result is stored in *RESULT_NAME.  Returns a
-   cleanup which can be used to clean up the result.
+   lookup functions.  The result can either be the input NAME
+   directly, or a pointer to a buffer owned by the STORAGE object.
 
-   For Ada, this function just sets *RESULT_NAME to NAME, unmodified.
+   For Ada, this function just returns NAME, unmodified.
    Normally, Ada symbol lookups are performed using the encoded name
    rather than the demangled name, and so it might seem to make sense
    for this function to return an encoded version of NAME.
@@ -1787,59 +1787,38 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
    characters to become lowercase, and thus cause the symbol lookup
    to fail.  */
 
-struct cleanup *
+const char *
 demangle_for_lookup (const char *name, enum language lang,
-		     const char **result_name)
+		     demangle_result_storage &storage)
 {
-  char *demangled_name = NULL;
-  const char *modified_name = NULL;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, 0);
-
-  modified_name = name;
-
   /* If we are using C++, D, or Go, demangle the name before doing a
      lookup, so we can always binary search.  */
   if (lang == language_cplus)
     {
-      demangled_name = gdb_demangle (name, DMGL_ANSI | DMGL_PARAMS);
-      if (demangled_name)
-	{
-	  modified_name = demangled_name;
-	  make_cleanup (xfree, demangled_name);
-	}
-      else
-	{
-	  /* If we were given a non-mangled name, canonicalize it
-	     according to the language (so far only for C++).  */
-	  demangled_name = cp_canonicalize_string (name);
-	  if (demangled_name)
-	    {
-	      modified_name = demangled_name;
-	      make_cleanup (xfree, demangled_name);
-	    }
-	}
+      char *demangled_name = gdb_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name != NULL)
+	return storage.set_malloc_ptr (demangled_name);
+
+      /* If we were given a non-mangled name, canonicalize it
+	 according to the language (so far only for C++).  */
+      std::string canon = cp_canonicalize_string (name);
+      if (!canon.empty ())
+	return storage.swap_string (canon);
     }
   else if (lang == language_d)
     {
-      demangled_name = d_demangle (name, 0);
-      if (demangled_name)
-	{
-	  modified_name = demangled_name;
-	  make_cleanup (xfree, demangled_name);
-	}
+      char *demangled_name = d_demangle (name, 0);
+      if (demangled_name != NULL)
+	return storage.set_malloc_ptr (demangled_name);
     }
   else if (lang == language_go)
     {
-      demangled_name = go_demangle (name, 0);
-      if (demangled_name)
-	{
-	  modified_name = demangled_name;
-	  make_cleanup (xfree, demangled_name);
-	}
+      char *demangled_name = go_demangle (name, 0);
+      if (demangled_name != NULL)
+	return storage.set_malloc_ptr (demangled_name);
     }
 
-  *result_name = modified_name;
-  return cleanup;
+  return name;
 }
 
 /* See symtab.h.
@@ -1859,15 +1838,11 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 			   const domain_enum domain, enum language lang,
 			   struct field_of_this_result *is_a_field_of_this)
 {
-  const char *modified_name;
-  struct block_symbol returnval;
-  struct cleanup *cleanup = demangle_for_lookup (name, lang, &modified_name);
+  demangle_result_storage storage;
+  const char *modified_name = demangle_for_lookup (name, lang, storage);
 
-  returnval = lookup_symbol_aux (modified_name, block, domain, lang,
-				 is_a_field_of_this);
-  do_cleanups (cleanup);
-
-  return returnval;
+  return lookup_symbol_aux (modified_name, block, domain, lang,
+			    is_a_field_of_this);
 }
 
 /* See symtab.h.  */
@@ -2278,10 +2253,10 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
 					    domain_enum domain)
 {
   enum language lang = current_language->la_language;
-  const char *modified_name;
-  struct cleanup *cleanup = demangle_for_lookup (linkage_name, lang,
-						 &modified_name);
   struct objfile *main_objfile, *cur_objfile;
+
+  demangle_result_storage storage;
+  const char *modified_name = demangle_for_lookup (linkage_name, lang, storage);
 
   if (objfile->separate_debug_objfile_backlink)
     main_objfile = objfile->separate_debug_objfile_backlink;
@@ -2300,13 +2275,9 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
 	result = lookup_symbol_in_objfile_symtabs (cur_objfile, STATIC_BLOCK,
 						   modified_name, domain);
       if (result.symbol != NULL)
-	{
-	  do_cleanups (cleanup);
-	  return result;
-	}
+	return result;
     }
 
-  do_cleanups (cleanup);
   return (struct block_symbol) {NULL, NULL};
 }
 

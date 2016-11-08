@@ -156,7 +156,7 @@ static int install_variable (struct varobj *);
 
 static void uninstall_variable (struct varobj *);
 
-static struct varobj *create_child (struct varobj *, int, char *);
+static struct varobj *create_child (struct varobj *, int, std::string &);
 
 static struct varobj *
 create_child_with_value (struct varobj *parent, int index,
@@ -184,16 +184,16 @@ static int install_new_value (struct varobj *var, struct value *value,
 
 static int number_of_children (const struct varobj *);
 
-static char *name_of_variable (const struct varobj *);
+static std::string name_of_variable (const struct varobj *);
 
-static char *name_of_child (struct varobj *, int);
+static std::string name_of_child (struct varobj *, int);
 
 static struct value *value_of_root (struct varobj **var_handle, int *);
 
 static struct value *value_of_child (const struct varobj *parent, int index);
 
-static char *my_value_of_variable (struct varobj *var,
-				   enum varobj_display_formats format);
+static std::string my_value_of_variable (struct varobj *var,
+					 enum varobj_display_formats format);
 
 static int is_root_p (const struct varobj *var);
 
@@ -270,8 +270,8 @@ find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
 /* Creates a varobj (not its children).  */
 
 struct varobj *
-varobj_create (char *objname,
-	       char *expression, CORE_ADDR frame, enum varobj_type type)
+varobj_create (const char *objname,
+	       const char *expression, CORE_ADDR frame, enum varobj_type type)
 {
   struct varobj *var;
   struct cleanup *old_chain;
@@ -351,9 +351,9 @@ varobj_create (char *objname,
 
       var->format = variable_default_display (var);
       var->root->valid_block = innermost_block;
-      var->name = xstrdup (expression);
+      var->name = expression;
       /* For a root var, the name and the expr are the same.  */
-      var->path_expr = xstrdup (expression);
+      var->path_expr = expression;
 
       /* When the frame is different from the current frame, 
          we must select the appropriate frame before parsing
@@ -418,7 +418,7 @@ varobj_create (char *objname,
 
   if ((var != NULL) && (objname != NULL))
     {
-      var->obj_name = xstrdup (objname);
+      var->obj_name = objname;
 
       /* If a varobj name is duplicated, the install will fail so
          we must cleanup.  */
@@ -452,7 +452,7 @@ varobj_gen_name (void)
    error if OBJNAME cannot be found.  */
 
 struct varobj *
-varobj_get_handle (char *objname)
+varobj_get_handle (const char *objname)
 {
   struct vlist *cv;
   const char *chp;
@@ -465,7 +465,7 @@ varobj_get_handle (char *objname)
     }
 
   cv = *(varobj_table + index);
-  while ((cv != NULL) && (strcmp (cv->var->obj_name, objname) != 0))
+  while (cv != NULL && cv->var->obj_name != objname)
     cv = cv->next;
 
   if (cv == NULL)
@@ -476,16 +476,16 @@ varobj_get_handle (char *objname)
 
 /* Given the handle, return the name of the object.  */
 
-char *
+const char *
 varobj_get_objname (const struct varobj *var)
 {
-  return var->obj_name;
+  return var->obj_name.c_str ();
 }
 
-/* Given the handle, return the expression represented by the object.  The
-   result must be freed by the caller.  */
+/* Given the handle, return the expression represented by the
+   object.  */
 
-char *
+std::string
 varobj_get_expression (const struct varobj *var)
 {
   return name_of_variable (var);
@@ -544,7 +544,6 @@ varobj_set_display_format (struct varobj *var,
   if (varobj_value_is_changeable_p (var) 
       && var->value && !value_lazy (var->value))
     {
-      xfree (var->print_value);
       var->print_value = varobj_value_get_print_value (var->value,
 						       var->format, var);
     }
@@ -867,7 +866,6 @@ varobj_get_num_children (struct varobj *var)
 VEC (varobj_p)*
 varobj_list_children (struct varobj *var, int *from, int *to)
 {
-  char *name;
   int i, children_changed;
 
   var->dynamic->children_requested = 1;
@@ -904,7 +902,7 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 	  /* Either it's the first call to varobj_list_children for
 	     this variable object, and the child was never created,
 	     or it was explicitly deleted by the client.  */
-	  name = name_of_child (var, i);
+	  std::string name = name_of_child (var, i);
 	  existing = create_child (var, i, name);
 	  VEC_replace (varobj_p, var->children, i, existing);
 	}
@@ -929,14 +927,14 @@ varobj_add_child (struct varobj *var, struct varobj_item *item)
    prints on the console.  The caller is responsible for freeing the string.
    */
 
-char *
+std::string
 varobj_get_type (struct varobj *var)
 {
   /* For the "fake" variables, do not return a type.  (Its type is
      NULL, too.)
      Do not return a type for invalid variables as well.  */
   if (CPLUS_FAKE_CHILD (var) || !var->root->is_valid)
-    return NULL;
+    return std::string ();
 
   return type_to_string (var->type);
 }
@@ -984,10 +982,11 @@ varobj_get_path_expr_parent (const struct varobj *var)
 
 /* Return a pointer to the full rooted expression of varobj VAR.
    If it has not been computed yet, compute it.  */
-char *
+
+const char *
 varobj_get_path_expr (const struct varobj *var)
 {
-  if (var->path_expr == NULL)
+  if (var->path_expr.empty ())
     {
       /* For root varobjs, we initialize path_expr
 	 when creating varobj, so here it should be
@@ -998,7 +997,7 @@ varobj_get_path_expr (const struct varobj *var)
       mutable_var->path_expr = (*var->root->lang_ops->path_expr_of_child) (var);
     }
 
-  return var->path_expr;
+  return var->path_expr.c_str ();
 }
 
 const struct language_defn *
@@ -1027,14 +1026,14 @@ varobj_is_dynamic_p (const struct varobj *var)
   return var->dynamic->pretty_printer != NULL;
 }
 
-char *
+std::string
 varobj_get_formatted_value (struct varobj *var,
 			    enum varobj_display_formats format)
 {
   return my_value_of_variable (var, format);
 }
 
-char *
+std::string
 varobj_get_value (struct varobj *var)
 {
   return my_value_of_variable (var, var->format);
@@ -1045,7 +1044,7 @@ varobj_get_value (struct varobj *var)
 /* Note: Invokes functions that can call error().  */
 
 int
-varobj_set_value (struct varobj *var, char *expression)
+varobj_set_value (struct varobj *var, const char *expression)
 {
   struct value *val = NULL; /* Initialize to keep gcc happy.  */
   /* The argument "expression" contains the variable's new value.
@@ -1245,18 +1244,12 @@ update_type_if_necessary (struct varobj *var, struct value *new_value)
       get_user_print_options (&opts);
       if (opts.objectprint)
 	{
-	  struct type *new_type;
-	  char *curr_type_str, *new_type_str;
-	  int type_name_changed;
+	  struct type *new_type = value_actual_type (new_value, 0, 0);
+	  std::string new_type_str = type_to_string (new_type);
+	  std::string curr_type_str = varobj_get_type (var);
 
-	  new_type = value_actual_type (new_value, 0, 0);
-	  new_type_str = type_to_string (new_type);
-	  curr_type_str = varobj_get_type (var);
-	  type_name_changed = strcmp (curr_type_str, new_type_str) != 0;
-	  xfree (curr_type_str);
-	  xfree (new_type_str);
-
-	  if (type_name_changed)
+	  /* Did the type name change?  */
+	  if (curr_type_str != new_type_str)
 	    {
 	      var->type = new_type;
 
@@ -1292,7 +1285,6 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   int need_to_fetch;
   int changed = 0;
   int intentionally_not_fetched = 0;
-  char *print_value = NULL;
 
   /* We need to know the varobj's type to decide if the value should
      be fetched or not.  C++ fake children (public/protected/private)
@@ -1374,6 +1366,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      values.  Don't get string rendering if the value is
      lazy -- if it is, the code above has decided that the value
      should not be fetched.  */
+  std::string print_value;
   if (value != NULL && !value_lazy (value)
       && var->dynamic->pretty_printer == NULL)
     print_value = varobj_value_get_print_value (value, var->format, var);
@@ -1417,8 +1410,8 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	      gdb_assert (!value_lazy (var->value));
 	      gdb_assert (!value_lazy (value));
 
-	      gdb_assert (var->print_value != NULL && print_value != NULL);
-	      if (strcmp (var->print_value, print_value) != 0)
+	      gdb_assert (!var->print_value.empty () && !print_value.empty ());
+	      if (var->print_value != print_value)
 		changed = 1;
 	    }
 	}
@@ -1449,17 +1442,14 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      to see if the variable changed.  */
   if (var->dynamic->pretty_printer != NULL)
     {
-      xfree (print_value);
       print_value = varobj_value_get_print_value (var->value, var->format,
 						  var);
-      if ((var->print_value == NULL && print_value != NULL)
-	  || (var->print_value != NULL && print_value == NULL)
-	  || (var->print_value != NULL && print_value != NULL
-	      && strcmp (var->print_value, print_value) != 0))
-	changed = 1;
+      if ((var->print_value.empty () && !print_value.empty ())
+	  || (!var->print_value.empty () && print_value.empty ())
+	  || (!var->print_value.empty () && !print_value.empty ()
+	      && var->print_value != print_value))
+	  changed = 1;
     }
-  if (var->print_value)
-    xfree (var->print_value);
   var->print_value = print_value;
 
   gdb_assert (!var->value || value_type (var->value));
@@ -1854,9 +1844,9 @@ delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
     return;
 
   /* Otherwise, add it to the list of deleted ones and proceed to do so.  */
-  /* If the name is null, this is a temporary variable, that has not
+  /* If the name is empty, this is a temporary variable, that has not
      yet been installed, don't report it, it belongs to the caller...  */
-  if (var->obj_name != NULL)
+  if (!var->obj_name.empty ())
     {
       *delcountp = *delcountp + 1;
     }
@@ -1871,7 +1861,7 @@ delete_variable_1 (int *delcountp, struct varobj *var, int only_children_p,
       VEC_replace (varobj_p, var->parent->children, var->index, NULL);
     }
 
-  if (var->obj_name != NULL)
+  if (!var->obj_name.empty ())
     uninstall_variable (var);
 
   /* Free memory associated with this variable.  */
@@ -1888,13 +1878,13 @@ install_variable (struct varobj *var)
   unsigned int index = 0;
   unsigned int i = 1;
 
-  for (chp = var->obj_name; *chp; chp++)
+  for (chp = var->obj_name.c_str (); *chp; chp++)
     {
       index = (index + (i++ * (unsigned int) *chp)) % VAROBJ_TABLE_SIZE;
     }
 
   cv = *(varobj_table + index);
-  while ((cv != NULL) && (strcmp (cv->var->obj_name, var->obj_name) != 0))
+  while (cv != NULL && cv->var->obj_name != var->obj_name)
     cv = cv->next;
 
   if (cv != NULL)
@@ -1933,27 +1923,27 @@ uninstall_variable (struct varobj *var)
   unsigned int i = 1;
 
   /* Remove varobj from hash table.  */
-  for (chp = var->obj_name; *chp; chp++)
+  for (chp = var->obj_name.c_str (); *chp; chp++)
     {
       index = (index + (i++ * (unsigned int) *chp)) % VAROBJ_TABLE_SIZE;
     }
 
   cv = *(varobj_table + index);
   prev = NULL;
-  while ((cv != NULL) && (strcmp (cv->var->obj_name, var->obj_name) != 0))
+  while (cv != NULL && cv->var->obj_name != var->obj_name)
     {
       prev = cv;
       cv = cv->next;
     }
 
   if (varobjdebug)
-    fprintf_unfiltered (gdb_stdlog, "Deleting %s\n", var->obj_name);
+    fprintf_unfiltered (gdb_stdlog, "Deleting %s\n", var->obj_name.c_str ());
 
   if (cv == NULL)
     {
       warning
 	("Assertion failed: Could not find variable object \"%s\" to delete",
-	 var->obj_name);
+	 var->obj_name.c_str ());
       return;
     }
 
@@ -1983,7 +1973,7 @@ uninstall_variable (struct varobj *var)
 	    {
 	      warning (_("Assertion failed: Could not find "
 		         "varobj \"%s\" in root list"),
-		       var->obj_name);
+		       var->obj_name.c_str ());
 	      return;
 	    }
 	  if (prer == NULL)
@@ -2000,11 +1990,11 @@ uninstall_variable (struct varobj *var)
    The created VAROBJ takes ownership of the allocated NAME.  */
 
 static struct varobj *
-create_child (struct varobj *parent, int index, char *name)
+create_child (struct varobj *parent, int index, std::string &name)
 {
   struct varobj_item item;
 
-  item.name = name;
+  std::swap (item.name, name);
   item.value = value_of_child (parent, index);
 
   return create_child_with_value (parent, index, &item);
@@ -2015,21 +2005,22 @@ create_child_with_value (struct varobj *parent, int index,
 			 struct varobj_item *item)
 {
   struct varobj *child;
-  char *childs_name;
 
   child = new_variable ();
 
   /* NAME is allocated by caller.  */
-  child->name = item->name;
+  std::swap (child->name, item->name);
   child->index = index;
   child->parent = parent;
   child->root = parent->root;
 
   if (varobj_is_anonymous_child (child))
-    childs_name = xstrprintf ("%s.%d_anonymous", parent->obj_name, index);
+    child->obj_name = string_printf ("%s.%d_anonymous",
+				     parent->obj_name.c_str (), index);
   else
-    childs_name = xstrprintf ("%s.%s", parent->obj_name, item->name);
-  child->obj_name = childs_name;
+    child->obj_name = string_printf ("%s.%s",
+				     parent->obj_name.c_str (),
+				     child->name.c_str ());
 
   install_variable (child);
 
@@ -2059,10 +2050,7 @@ new_variable (void)
 {
   struct varobj *var;
 
-  var = XNEW (struct varobj);
-  var->name = NULL;
-  var->path_expr = NULL;
-  var->obj_name = NULL;
+  var = new varobj ();
   var->index = -1;
   var->type = NULL;
   var->value = NULL;
@@ -2072,7 +2060,6 @@ new_variable (void)
   var->format = FORMAT_NATURAL;
   var->root = NULL;
   var->updated = 0;
-  var->print_value = NULL;
   var->frozen = 0;
   var->not_fetched = 0;
   var->dynamic = XNEW (struct varobj_dynamic);
@@ -2127,12 +2114,8 @@ free_variable (struct varobj *var)
   if (is_root_p (var))
     delete var->root;
 
-  xfree (var->name);
-  xfree (var->obj_name);
-  xfree (var->print_value);
-  xfree (var->path_expr);
   xfree (var->dynamic);
-  xfree (var);
+  delete var;
 }
 
 static void
@@ -2203,17 +2186,17 @@ number_of_children (const struct varobj *var)
   return (*var->root->lang_ops->number_of_children) (var);
 }
 
-/* What is the expression for the root varobj VAR? Returns a malloc'd
-   string.  */
-static char *
+/* What is the expression for the root varobj VAR? */
+
+static std::string
 name_of_variable (const struct varobj *var)
 {
   return (*var->root->lang_ops->name_of_variable) (var);
 }
 
-/* What is the name of the INDEX'th child of VAR? Returns a malloc'd
-   string.  */
-static char *
+/* What is the name of the INDEX'th child of VAR?  */
+
+static std::string
 name_of_child (struct varobj *var, int index)
 {
   return (*var->root->lang_ops->name_of_child) (var, index);
@@ -2331,17 +2314,16 @@ value_of_root (struct varobj **var_handle, int *type_changed)
   if (var->root->floating)
     {
       struct varobj *tmp_var;
-      char *old_type, *new_type;
 
-      tmp_var = varobj_create (NULL, var->name, (CORE_ADDR) 0,
+      tmp_var = varobj_create (NULL, var->name.c_str (), (CORE_ADDR) 0,
 			       USE_SELECTED_FRAME);
       if (tmp_var == NULL)
 	{
 	  return NULL;
 	}
-      old_type = varobj_get_type (var);
-      new_type = varobj_get_type (tmp_var);
-      if (strcmp (old_type, new_type) == 0)
+      std::string old_type = varobj_get_type (var);
+      std::string new_type = varobj_get_type (tmp_var);
+      if (old_type == new_type)
 	{
 	  /* The expression presently stored inside var->root->exp
 	     remembers the locations of local variables relatively to
@@ -2356,7 +2338,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	}
       else
 	{
-	  tmp_var->obj_name = xstrdup (var->obj_name);
+	  tmp_var->obj_name = var->obj_name;
 	  tmp_var->from = var->from;
 	  tmp_var->to = var->to;
 	  varobj_delete (var, 0);
@@ -2366,8 +2348,6 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	  var = *var_handle;
 	  *type_changed = 1;
 	}
-      xfree (old_type);
-      xfree (new_type);
     }
   else
     {
@@ -2410,7 +2390,7 @@ value_of_child (const struct varobj *parent, int index)
 }
 
 /* GDB already has a command called "value_of_variable".  Sigh.  */
-static char *
+static std::string
 my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
   if (var->root->is_valid)
@@ -2420,7 +2400,7 @@ my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
       return (*var->root->lang_ops->value_of_variable) (var, format);
     }
   else
-    return NULL;
+    return std::string ();
 }
 
 void
@@ -2432,14 +2412,13 @@ varobj_formatted_print_options (struct value_print_options *opts,
   opts->raw = 1;
 }
 
-char *
+std::string
 varobj_value_get_print_value (struct value *value,
 			      enum varobj_display_formats format,
 			      const struct varobj *var)
 {
   struct ui_file *stb;
   struct cleanup *old_chain;
-  char *thevalue = NULL;
   struct value_print_options opts;
   struct type *type = NULL;
   long len = 0;
@@ -2449,10 +2428,12 @@ varobj_value_get_print_value (struct value *value,
   int string_print = 0;
 
   if (value == NULL)
-    return NULL;
+    return std::string ();
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
+
+  std::string thevalue;
 
 #if HAVE_PYTHON
   if (gdb_python_initialized)
@@ -2518,8 +2499,8 @@ varobj_value_get_print_value (struct value *value,
 			      xfree (hint);
 			    }
 
-			  len = strlen (s);
-			  thevalue = (char *) xmemdup (s, len + 1, len + 1);
+			  thevalue = std::string (s);
+			  len = thevalue.size ();
 			  gdbarch = get_type_arch (value_type (value));
 			  type = builtin_type (gdbarch)->builtin_char;
 			  xfree (s);
@@ -2529,8 +2510,6 @@ varobj_value_get_print_value (struct value *value,
 			      do_cleanups (old_chain);
 			      return thevalue;
 			    }
-
-			  make_cleanup (xfree, thevalue);
 			}
 		      else
 			gdbpy_print_stack ();
@@ -2549,8 +2528,9 @@ varobj_value_get_print_value (struct value *value,
   varobj_formatted_print_options (&opts, format);
 
   /* If the THEVALUE has contents, it is a regular string.  */
-  if (thevalue)
-    LA_PRINT_STRING (stb, type, (gdb_byte *) thevalue, len, encoding, 0, &opts);
+  if (!thevalue.empty ())
+    LA_PRINT_STRING (stb, type, (gdb_byte *) thevalue.c_str (),
+		     len, encoding, 0, &opts);
   else if (string_print)
     /* Otherwise, if string_print is set, and it is not a regular
        string, it is a lazy string.  */
@@ -2559,7 +2539,7 @@ varobj_value_get_print_value (struct value *value,
     /* All other cases.  */
     common_val_print (value, stb, 0, &opts, current_language);
 
-  thevalue = ui_file_xstrdup (stb, NULL);
+  thevalue = ui_file_as_string (stb);
 
   do_cleanups (old_chain);
   return thevalue;
@@ -2672,11 +2652,11 @@ varobj_invalidate_iter (struct varobj *var, void *unused)
 
       /* Try to create a varobj with same expression.  If we succeed
 	 replace the old varobj, otherwise invalidate it.  */
-      tmp_var = varobj_create (NULL, var->name, (CORE_ADDR) 0,
+      tmp_var = varobj_create (NULL, var->name.c_str (), (CORE_ADDR) 0,
 			       USE_CURRENT_FRAME);
       if (tmp_var != NULL) 
 	{ 
-	  tmp_var->obj_name = xstrdup (var->obj_name);
+	  tmp_var->obj_name = var->obj_name;
 	  varobj_delete (var, 0);
 	  install_variable (tmp_var);
 	}

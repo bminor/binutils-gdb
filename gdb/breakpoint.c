@@ -11390,14 +11390,13 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
     {
       struct type *t = value_type (val);
       CORE_ADDR addr = value_as_address (val);
-      char *name;
 
       t = check_typedef (TYPE_TARGET_TYPE (check_typedef (t)));
-      name = type_to_string (t);
 
-      w->exp_string_reparse = xstrprintf ("* (%s *) %s", name,
+      std::string name = type_to_string (t);
+
+      w->exp_string_reparse = xstrprintf ("* (%s *) %s", name.c_str (),
 					  core_addr_to_string (addr));
-      xfree (name);
 
       w->exp_string = xstrprintf ("-location %.*s",
 				  (int) (exp_end - exp_start), exp_start);

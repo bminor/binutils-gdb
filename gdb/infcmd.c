@@ -1688,16 +1688,11 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
     }
   else
     {
-      struct cleanup *oldchain;
-      char *type_name;
-
-      type_name = type_to_string (rv->type);
-      oldchain = make_cleanup (xfree, type_name);
+      std::string type_name = type_to_string (rv->type);
       ui_out_text (uiout, "Value returned has type: ");
-      ui_out_field_string (uiout, "return-type", type_name);
+      ui_out_field_string (uiout, "return-type", type_name.c_str ());
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
-      do_cleanups (oldchain);
     }
 }
 

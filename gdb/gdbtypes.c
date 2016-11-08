@@ -1572,7 +1572,6 @@ struct type *
 lookup_struct_elt_type (struct type *type, const char *name, int noerr)
 {
   int i;
-  char *type_name;
 
   for (;;)
     {
@@ -1586,9 +1585,9 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT 
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     {
-      type_name = type_to_string (type);
-      make_cleanup (xfree, type_name);
-      error (_("Type %s is not a structure or union type."), type_name);
+      std::string type_name = type_to_string (type);
+      error (_("Type %s is not a structure or union type."),
+	     type_name.c_str ());
     }
 
 #if 0
@@ -1640,9 +1639,8 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
       return NULL;
     }
 
-  type_name = type_to_string (type);
-  make_cleanup (xfree, type_name);
-  error (_("Type %s has no component named %s."), type_name, name);
+  std::string type_name = type_to_string (type);
+  error (_("Type %s has no component named %s."), type_name.c_str (), name);
 }
 
 /* Store in *MAX the largest number representable by unsigned integer type

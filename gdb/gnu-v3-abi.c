@@ -1081,7 +1081,7 @@ gnuv3_get_typeid (struct value *value)
   struct gdbarch *gdbarch;
   struct cleanup *cleanup;
   struct value *result;
-  char *type_name, *canonical;
+  std::string type_name, canonical;
 
   /* We have to handle values a bit trickily here, to allow this code
      to work properly with non_lvalue values that are really just
@@ -1101,20 +1101,16 @@ gnuv3_get_typeid (struct value *value)
   gdbarch = get_type_arch (type);
 
   type_name = type_to_string (type);
-  if (type_name == NULL)
+  if (type_name.empty ())
     error (_("cannot find typeinfo for unnamed type"));
-  cleanup = make_cleanup (xfree, type_name);
 
   /* We need to canonicalize the type name here, because we do lookups
      using the demangled name, and so we must match the format it
      uses.  E.g., GDB tends to use "const char *" as a type name, but
      the demangler uses "char const *".  */
-  canonical = cp_canonicalize_string (type_name);
-  if (canonical != NULL)
-    {
-      make_cleanup (xfree, canonical);
-      type_name = canonical;
-    }
+  canonical = cp_canonicalize_string (type_name.c_str ());
+  if (!canonical.empty ())
+    type_name = canonical;
 
   typeinfo_type = gnuv3_get_typeid_type (gdbarch);
 
@@ -1129,33 +1125,30 @@ gnuv3_get_typeid (struct value *value)
 
       vtable = gnuv3_get_vtable (gdbarch, type, address);
       if (vtable == NULL)
-	error (_("cannot find typeinfo for object of type '%s'"), type_name);
+	error (_("cannot find typeinfo for object of type '%s'"),
+	       type_name.c_str ());
       typeinfo_value = value_field (vtable, vtable_field_type_info);
       result = value_ind (value_cast (make_pointer_type (typeinfo_type, NULL),
 				      typeinfo_value));
     }
   else
     {
-      char *sym_name;
-      struct bound_minimal_symbol minsym;
-
-      sym_name = concat ("typeinfo for ", type_name, (char *) NULL);
-      make_cleanup (xfree, sym_name);
-      minsym = lookup_minimal_symbol (sym_name, NULL, NULL);
+      std::string sym_name = std::string ("typeinfo for ") + type_name;
+      bound_minimal_symbol minsym
+	= lookup_minimal_symbol (sym_name.c_str (), NULL, NULL);
 
       if (minsym.minsym == NULL)
-	error (_("could not find typeinfo symbol for '%s'"), type_name);
+	error (_("could not find typeinfo symbol for '%s'"), type_name.c_str ());
 
       result = value_at_lazy (typeinfo_type, BMSYMBOL_VALUE_ADDRESS (minsym));
     }
 
-  do_cleanups (cleanup);
   return result;
 }
 
 /* Implement the 'get_typename_from_type_info' method.  */
 
-static char *
+static std::string
 gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 {
   struct gdbarch *gdbarch = get_type_arch (value_type (type_info_ptr));
@@ -1183,8 +1176,8 @@ gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
   /* Strip off @plt and version suffixes.  */
   atsign = strchr (class_name, '@');
   if (atsign != NULL)
-    return savestring (class_name, atsign - class_name);
-  return xstrdup (class_name);
+    return std::string (class_name, atsign - class_name);
+  return class_name;
 }
 
 /* Implement the 'get_type_from_type_info' method.  */
@@ -1192,26 +1185,14 @@ gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 static struct type *
 gnuv3_get_type_from_type_info (struct value *type_info_ptr)
 {
-  char *type_name;
-  struct cleanup *cleanup;
-  struct value *type_val;
-  struct type *result;
-
-  type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
-  cleanup = make_cleanup (xfree, type_name);
-
   /* We have to parse the type name, since in general there is not a
      symbol for a type.  This is somewhat bogus since there may be a
      mis-parse.  Another approach might be to re-use the demangler's
      internal form to reconstruct the type somehow.  */
-
-  expression_up expr = parse_expression (type_name);
-
-  type_val = evaluate_type (expr.get ());
-  result = value_type (type_val);
-
-  do_cleanups (cleanup);
-  return result;
+  std::string type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
+  expression_up expr (parse_expression (type_name.c_str ()));
+  struct value *type_val = evaluate_type (expr.get ());
+  return value_type (type_val);
 }
 
 /* Determine if we are currently in a C++ thunk.  If so, get the address
