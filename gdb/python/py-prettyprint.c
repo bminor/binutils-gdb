@@ -682,12 +682,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 				const struct language_defn *language)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  PyObject *printer = NULL;
-  PyObject *val_obj = NULL;
   struct value *value;
-  gdb::unique_xmalloc_ptr<char> hint;
-  struct cleanup *cleanups;
-  enum ext_lang_rc result = EXT_LANG_RC_NOP;
   enum string_repr_result print_result;
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
@@ -698,52 +693,42 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return EXT_LANG_RC_NOP;
 
-  cleanups = ensure_python_env (gdbarch, language);
+  gdbpy_enter enter_py (gdbarch, language);
 
   /* Instantiate the printer.  */
   value = value_from_component (val, type, embedded_offset);
 
-  val_obj = value_to_value_object (value);
-  if (! val_obj)
+  gdbpy_ref val_obj (value_to_value_object (value));
+  if (val_obj == NULL)
     {
-      result = EXT_LANG_RC_ERROR;
-      goto done;
+      print_stack_unless_memory_error (stream);
+      return EXT_LANG_RC_ERROR;
     }
 
   /* Find the constructor.  */
-  printer = find_pretty_printer (val_obj);
-  Py_DECREF (val_obj);
-
+  gdbpy_ref printer (find_pretty_printer (val_obj.get ()));
   if (printer == NULL)
     {
-      result = EXT_LANG_RC_ERROR;
-      goto done;
+      print_stack_unless_memory_error (stream);
+      return EXT_LANG_RC_ERROR;
     }
 
-  make_cleanup_py_decref (printer);
   if (printer == Py_None)
-    {
-      result = EXT_LANG_RC_NOP;
-      goto done;
-    }
+    return EXT_LANG_RC_NOP;
 
   /* If we are printing a map, we want some special formatting.  */
-  hint = gdbpy_get_display_hint (printer);
+  gdb::unique_xmalloc_ptr<char> hint (gdbpy_get_display_hint (printer.get ()));
 
   /* Print the section */
-  print_result = print_string_repr (printer, hint.get (), stream, recurse,
-				    options, language, gdbarch);
+  print_result = print_string_repr (printer.get (), hint.get (), stream,
+				    recurse, options, language, gdbarch);
   if (print_result != string_repr_error)
-    print_children (printer, hint.get (), stream, recurse, options, language,
-		    print_result == string_repr_none);
+    print_children (printer.get (), hint.get (), stream, recurse, options,
+		    language, print_result == string_repr_none);
 
-  result = EXT_LANG_RC_OK;
-
- done:
   if (PyErr_Occurred ())
     print_stack_unless_memory_error (stream);
-  do_cleanups (cleanups);
-  return result;
+  return EXT_LANG_RC_OK;
 }
 
 

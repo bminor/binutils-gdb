@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Use
+	gdbpy_enter, gdbpy_ref, unique_xmalloc_ptr.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (htab_deleter): New struct.
 	(htab_up): New typedef.
 	* python/py-framefilter.c (gdbpy_apply_frame_filter): Use
