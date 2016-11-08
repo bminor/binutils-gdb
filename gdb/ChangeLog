@@ -1,5 +1,14 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type): Use
+	gdbpy_enter, gdbpy_ref, unique_xmalloc_ptr.
+	(gdbpy_invoke_xmethod): Use gdbpy_ref, gdbpy_enter.
+	(gdbpy_get_xmethod_arg_types): Use gdbpy_ref,
+	unique_xmalloc_ptr.
+	(gdbpy_get_xmethod_arg_types): Use gdbpy_ref, gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-xmethods.c (invoke_match_method): Use
 	gdbpy_ref.
 

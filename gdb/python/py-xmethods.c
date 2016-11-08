@@ -311,86 +311,84 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
   struct gdbpy_worker_data *worker_data
     = (struct gdbpy_worker_data *) worker->data;
   PyObject *py_worker = worker_data->worker;
-  PyObject *get_arg_types_method;
-  PyObject *py_argtype_list, *list_iter = NULL, *item;
-  struct cleanup *cleanups;
-  struct type **type_array, *obj_type;
+  struct type *obj_type;
   int i = 1, arg_count;
+  gdbpy_ref list_iter;
 
   /* Set nargs to -1 so that any premature return from this function returns
      an invalid/unusable number of arg types.  */
   *nargs = -1;
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  get_arg_types_method =  PyObject_GetAttrString (py_worker,
-						  get_arg_types_method_name);
+  gdbpy_ref get_arg_types_method
+    (PyObject_GetAttrString (py_worker, get_arg_types_method_name));
   if (get_arg_types_method == NULL)
     {
       gdbpy_print_stack ();
-      do_cleanups (cleanups);
-
       return EXT_LANG_RC_ERROR;
     }
-  make_cleanup_py_decref (get_arg_types_method);
 
-  py_argtype_list = PyObject_CallMethodObjArgs (py_worker,
-						py_get_arg_types_method_name,
-						NULL);
+  gdbpy_ref py_argtype_list
+    (PyObject_CallMethodObjArgs (py_worker, py_get_arg_types_method_name,
+				 NULL));
   if (py_argtype_list == NULL)
     {
       gdbpy_print_stack ();
-      do_cleanups (cleanups);
-
       return EXT_LANG_RC_ERROR;
     }
-  make_cleanup_py_decref (py_argtype_list);
+
   if (py_argtype_list == Py_None)
     arg_count = 0;
-  else if (PySequence_Check (py_argtype_list))
+  else if (PySequence_Check (py_argtype_list.get ()))
     {
-      arg_count = PySequence_Size (py_argtype_list);
+      arg_count = PySequence_Size (py_argtype_list.get ());
       if (arg_count == -1)
 	{
 	  gdbpy_print_stack ();
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
 
-      list_iter = PyObject_GetIter (py_argtype_list);
+      list_iter.reset (PyObject_GetIter (py_argtype_list.get ()));
       if (list_iter == NULL)
 	{
 	  gdbpy_print_stack ();
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
-      make_cleanup_py_decref (list_iter);
     }
   else
     arg_count = 1;
 
   /* Include the 'this' argument in the size.  */
-  type_array = XCNEWVEC (struct type *, arg_count + 1);
+  gdb::unique_xmalloc_ptr<struct type *> type_array
+    (XCNEWVEC (struct type *, arg_count + 1));
   i = 1;
   if (list_iter != NULL)
     {
-      while ((item = PyIter_Next (list_iter)) != NULL)
+      while (true)
 	{
-	  struct type *arg_type = type_object_to_type (item);
+	  gdbpy_ref item (PyIter_Next (list_iter.get ()));
+	  if (item == NULL)
+	    {
+	      if (PyErr_Occurred ())
+		{
+		  gdbpy_print_stack ();
+		  return EXT_LANG_RC_ERROR;
+		}
+	      break;
+	    }
 
-	  Py_DECREF (item);
+	  struct type *arg_type = type_object_to_type (item.get ());
 	  if (arg_type == NULL)
 	    {
 	      PyErr_SetString (PyExc_TypeError,
 			       _("Arg type returned by the get_arg_types "
 				 "method of a debug method worker object is "
 				 "not a gdb.Type object."));
-	      break;
+	      return EXT_LANG_RC_ERROR;
 	    }
 
-	  type_array[i] = arg_type;
+	  (type_array.get ())[i] = arg_type;
 	  i++;
 	}
     }
@@ -398,7 +396,7 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
     {
       /* py_argtype_list is not actually a list but a single gdb.Type
 	 object.  */
-      struct type *arg_type = type_object_to_type (py_argtype_list);
+      struct type *arg_type = type_object_to_type (py_argtype_list.get ());
 
       if (arg_type == NULL)
 	{
@@ -406,30 +404,23 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
 			   _("Arg type returned by the get_arg_types method "
 			     "of an xmethod worker object is not a gdb.Type "
 			     "object."));
+	  return EXT_LANG_RC_ERROR;
 	}
       else
 	{
-	  type_array[i] = arg_type;
+	  (type_array.get ())[i] = arg_type;
 	  i++;
 	}
-    }
-  if (PyErr_Occurred ())
-    {
-      gdbpy_print_stack ();
-      do_cleanups (cleanups);
-      xfree (type_array);
-
-      return EXT_LANG_RC_ERROR;
     }
 
   /* Add the type of 'this' as the first argument.  The 'this' pointer should
      be a 'const' value.  Hence, create a 'const' variant of the 'this' pointer
      type.  */
   obj_type = type_object_to_type (worker_data->this_type);
-  type_array[0] = make_cv_type (1, 0, lookup_pointer_type (obj_type), NULL);
+  (type_array.get ())[0] = make_cv_type (1, 0, lookup_pointer_type (obj_type),
+					 NULL);
   *nargs = i;
-  *arg_types = type_array;
-  do_cleanups (cleanups);
+  *arg_types = type_array.release ();
 
   return EXT_LANG_RC_OK;
 }
@@ -446,26 +437,21 @@ gdbpy_get_xmethod_result_type (const struct extension_language_defn *extlang,
   struct gdbpy_worker_data *worker_data
     = (struct gdbpy_worker_data *) worker->data;
   PyObject *py_worker = worker_data->worker;
-  PyObject *py_value_obj, *py_arg_tuple, *py_result_type;
-  PyObject *get_result_type_method;
   struct type *obj_type, *this_type;
-  struct cleanup *cleanups;
   int i;
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* First see if there is a get_result_type method.
      If not this could be an old xmethod (pre 7.9.1).  */
-  get_result_type_method
-    = PyObject_GetAttrString (py_worker, get_result_type_method_name);
+  gdbpy_ref get_result_type_method
+    (PyObject_GetAttrString (py_worker, get_result_type_method_name));
   if (get_result_type_method == NULL)
     {
       PyErr_Clear ();
-      do_cleanups (cleanups);
       *result_type_ptr = NULL;
       return EXT_LANG_RC_OK;
     }
-  make_cleanup_py_decref (get_result_type_method);
 
   obj_type = check_typedef (value_type (obj));
   this_type = check_typedef (type_object_to_type (worker_data->this_type));
@@ -488,51 +474,55 @@ gdbpy_get_xmethod_result_type (const struct extension_language_defn *extlang,
       if (!types_equal (obj_type, this_type))
 	obj = value_cast (this_type, obj);
     }
-  py_value_obj = value_to_value_object (obj);
+  gdbpy_ref py_value_obj (value_to_value_object (obj));
   if (py_value_obj == NULL)
-    goto Fail;
-  make_cleanup_py_decref (py_value_obj);
+    {
+      gdbpy_print_stack ();
+      return EXT_LANG_RC_ERROR;
+    }
 
-  py_arg_tuple = PyTuple_New (nargs + 1);
+  gdbpy_ref py_arg_tuple (PyTuple_New (nargs + 1));
   if (py_arg_tuple == NULL)
-    goto Fail;
-  make_cleanup_py_decref (py_arg_tuple);
+    {
+      gdbpy_print_stack ();
+      return EXT_LANG_RC_ERROR;
+    }
 
-  /* PyTuple_SET_ITEM steals the reference of the element.  Hence INCREF the
-     reference to the 'this' object as we have a cleanup to DECREF it.  */
-  Py_INCREF (py_value_obj);
-  PyTuple_SET_ITEM (py_arg_tuple, 0, py_value_obj);
+  /* PyTuple_SET_ITEM steals the reference of the element, hence the
+     release.  */
+  PyTuple_SET_ITEM (py_arg_tuple.get (), 0, py_value_obj.release ());
 
   for (i = 0; i < nargs; i++)
     {
       PyObject *py_value_arg = value_to_value_object (args[i]);
 
       if (py_value_arg == NULL)
-	goto Fail;
-      PyTuple_SET_ITEM (py_arg_tuple, i + 1, py_value_arg);
+	{
+	  gdbpy_print_stack ();
+	  return EXT_LANG_RC_ERROR;
+	}
+      PyTuple_SET_ITEM (py_arg_tuple.get (), i + 1, py_value_arg);
     }
 
-  py_result_type = PyObject_CallObject (get_result_type_method, py_arg_tuple);
+  gdbpy_ref py_result_type
+    (PyObject_CallObject (get_result_type_method.get (), py_arg_tuple.get ()));
   if (py_result_type == NULL)
-    goto Fail;
-  make_cleanup_py_decref (py_result_type);
+    {
+      gdbpy_print_stack ();
+      return EXT_LANG_RC_ERROR;
+    }
 
-  *result_type_ptr = type_object_to_type (py_result_type);
+  *result_type_ptr = type_object_to_type (py_result_type.get ());
   if (*result_type_ptr == NULL)
     {
       PyErr_SetString (PyExc_TypeError,
 		       _("Type returned by the get_result_type method of an"
 			 " xmethod worker object is not a gdb.Type object."));
-      goto Fail;
+      gdbpy_print_stack ();
+      return EXT_LANG_RC_ERROR;
     }
 
-  do_cleanups (cleanups);
   return EXT_LANG_RC_OK;
-
- Fail:
-  gdbpy_print_stack ();
-  do_cleanups (cleanups);
-  return EXT_LANG_RC_ERROR;
 }
 
 /* Implementation of invoke_xmethod for Python.  */
@@ -543,15 +533,13 @@ gdbpy_invoke_xmethod (const struct extension_language_defn *extlang,
 		      struct value *obj, struct value **args, int nargs)
 {
   int i;
-  struct cleanup *cleanups;
-  PyObject *py_value_obj, *py_arg_tuple, *py_result;
   struct type *obj_type, *this_type;
   struct value *res = NULL;
   struct gdbpy_worker_data *worker_data
     = (struct gdbpy_worker_data *) worker->data;
   PyObject *xmethod_worker = worker_data->worker;
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   obj_type = check_typedef (value_type (obj));
   this_type = check_typedef (type_object_to_type (worker_data->this_type));
@@ -574,26 +562,23 @@ gdbpy_invoke_xmethod (const struct extension_language_defn *extlang,
       if (!types_equal (obj_type, this_type))
 	obj = value_cast (this_type, obj);
     }
-  py_value_obj = value_to_value_object (obj);
+  gdbpy_ref py_value_obj (value_to_value_object (obj));
   if (py_value_obj == NULL)
     {
       gdbpy_print_stack ();
       error (_("Error while executing Python code."));
     }
-  make_cleanup_py_decref (py_value_obj);
 
-  py_arg_tuple = PyTuple_New (nargs + 1);
+  gdbpy_ref py_arg_tuple (PyTuple_New (nargs + 1));
   if (py_arg_tuple == NULL)
     {
       gdbpy_print_stack ();
       error (_("Error while executing Python code."));
     }
-  make_cleanup_py_decref (py_arg_tuple);
 
-  /* PyTuple_SET_ITEM steals the reference of the element.  Hence INCREF the
-     reference to the 'this' object as we have a cleanup to DECREF it.  */
-  Py_INCREF (py_value_obj);
-  PyTuple_SET_ITEM (py_arg_tuple, 0, py_value_obj);
+  /* PyTuple_SET_ITEM steals the reference of the element, hence the
+     release.  */
+  PyTuple_SET_ITEM (py_arg_tuple.get (), 0, py_value_obj.release ());
 
   for (i = 0; i < nargs; i++)
     {
@@ -605,20 +590,20 @@ gdbpy_invoke_xmethod (const struct extension_language_defn *extlang,
 	  error (_("Error while executing Python code."));
 	}
 
-      PyTuple_SET_ITEM (py_arg_tuple, i + 1, py_value_arg);
+      PyTuple_SET_ITEM (py_arg_tuple.get (), i + 1, py_value_arg);
     }
 
-  py_result = PyObject_CallObject (xmethod_worker, py_arg_tuple);
+  gdbpy_ref py_result (PyObject_CallObject (xmethod_worker,
+					    py_arg_tuple.get ()));
   if (py_result == NULL)
     {
       gdbpy_print_stack ();
       error (_("Error while executing Python code."));
     }
-  make_cleanup_py_decref (py_result);
 
   if (py_result != Py_None)
     {
-      res = convert_value_from_python (py_result);
+      res = convert_value_from_python (py_result.get ());
       if (res == NULL)
 	{
 	  gdbpy_print_stack ();
@@ -630,8 +615,6 @@ gdbpy_invoke_xmethod (const struct extension_language_defn *extlang,
       res = allocate_value (lookup_typename (python_language, python_gdbarch,
 					     "void", NULL, 0));
     }
-
-  do_cleanups (cleanups);
 
   return res;
 }
