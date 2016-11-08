@@ -1,5 +1,9 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ui-out.c (ui_out_field_stream): Use ui_file_as_string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* ada-valprint.c (ada_print_floating): Use ui_file_as_string and
 	std::string.
 

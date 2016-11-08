@@ -425,16 +425,13 @@ ui_out_field_stream (struct ui_out *uiout,
 		     const char *fldname,
 		     struct ui_file *stream)
 {
-  long length;
-  char *buffer = ui_file_xstrdup (stream, &length);
-  struct cleanup *old_cleanup = make_cleanup (xfree, buffer);
+  std::string buffer = ui_file_as_string (stream);
 
-  if (length > 0)
-    ui_out_field_string (uiout, fldname, buffer);
+  if (!buffer.empty ())
+    ui_out_field_string (uiout, fldname, buffer.c_str ());
   else
     ui_out_field_skip (uiout, fldname);
   ui_file_rewind (stream);
-  do_cleanups (old_cleanup);
 }
 
 /* Used to omit a field.  */
