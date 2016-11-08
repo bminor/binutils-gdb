@@ -1,5 +1,10 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* c-exp.y (OPERATOR NEW): Adjust to use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* c-lang.h (c_compute_program): Now returns std::string.
 	* compile/compile-internal.h (class compile_file_names): New
 	class.
