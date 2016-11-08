@@ -1,3 +1,10 @@
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* mt-tdep.c (mt_registers_info): Call
+	get_frame_register_value instead of
+	deprecated_frame_register_read.
+	* sh64-tdep.c (sh64_do_register): Likewise.
+
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
 	* ax.h (agent_expr_p): Delete.

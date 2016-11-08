@@ -712,11 +712,10 @@ mt_registers_info (struct gdbarch *gdbarch,
                || regnum == MT_COPRO_PSEUDOREG_REGNUM)
 	{
 	  /* Special output handling for the 'coprocessor' register.  */
-	  gdb_byte *buf;
 	  struct value_print_options opts;
+	  struct value *val;
 
-	  buf = (gdb_byte *) alloca (register_size (gdbarch, MT_COPRO_REGNUM));
-	  deprecated_frame_register_read (frame, MT_COPRO_REGNUM, buf);
+	  val = get_frame_register_value (frame, MT_COPRO_REGNUM);
 	  /* And print.  */
 	  regnum = MT_COPRO_PSEUDOREG_REGNUM;
 	  fputs_filtered (gdbarch_register_name (gdbarch, regnum),
@@ -726,8 +725,9 @@ mt_registers_info (struct gdbarch *gdbarch,
 				 file);
 	  get_no_prettyformat_print_options (&opts);
 	  opts.deref_ref = 1;
-	  val_print (register_type (gdbarch, regnum), buf,
-		     0, 0, file, 0, NULL,
+	  val_print (register_type (gdbarch, regnum),
+		     value_contents_for_printing (val),
+		     0, 0, file, 0, val,
 		     &opts, current_language);
 	  fputs_filtered ("\n", file);
 	}
