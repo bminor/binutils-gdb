@@ -1,5 +1,10 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ada-valprint.c (ada_print_floating): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* xtensa-tdep.c (xtensa_verify_config): Use ui_file_as_string and
 	std::string.
 

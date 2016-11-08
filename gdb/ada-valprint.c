@@ -298,49 +298,50 @@ static void
 ada_print_floating (const gdb_byte *valaddr, struct type *type,
 		    struct ui_file *stream)
 {
-  char *s, *result;
   struct ui_file *tmp_stream = mem_fileopen ();
   struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_stream);
 
   print_floating (valaddr, type, tmp_stream);
-  result = ui_file_xstrdup (tmp_stream, NULL);
-  make_cleanup (xfree, result);
+
+  std::string s = ui_file_as_string (tmp_stream);
+  size_t skip_count = 0;
 
   /* Modify for Ada rules.  */
 
-  s = strstr (result, "inf");
-  if (s == NULL)
-    s = strstr (result, "Inf");
-  if (s == NULL)
-    s = strstr (result, "INF");
-  if (s != NULL)
-    strcpy (s, "Inf");
+  size_t pos = s.find ("inf");
+  if (pos == std::string::npos)
+    pos = s.find ("Inf");
+  if (pos == std::string::npos)
+    pos = s.find ("INF");
+  if (pos != std::string::npos)
+    s.replace (pos, 3, "Inf");
 
-  if (s == NULL)
+  if (pos == std::string::npos)
     {
-      s = strstr (result, "nan");
-      if (s == NULL)
-	s = strstr (result, "NaN");
-      if (s == NULL)
-	s = strstr (result, "Nan");
-      if (s != NULL)
+      pos = s.find ("nan");
+      if (pos == std::string::npos)
+	pos = s.find ("NaN");
+      if (pos == std::string::npos)
+	pos = s.find ("Nan");
+      if (pos != std::string::npos)
 	{
-	  s[0] = s[2] = 'N';
-	  if (result[0] == '-')
-	    result += 1;
+	  s[pos] = s[pos + 2] = 'N';
+	  if (s[0] == '-')
+	    skip_count = 1;
 	}
     }
 
-  if (s == NULL && strchr (result, '.') == NULL)
+  if (pos == std::string::npos
+      && s.find ('.') == std::string::npos)
     {
-      s = strchr (result, 'e');
-      if (s == NULL)
-	fprintf_filtered (stream, "%s.0", result);
+      pos = s.find ('e');
+      if (pos == std::string::npos)
+	fprintf_filtered (stream, "%s.0", s.c_str ());
       else
-	fprintf_filtered (stream, "%.*s.0%s", (int) (s-result), result, s);
+	fprintf_filtered (stream, "%.*s.0%s", (int) pos, s.c_str (), &s[pos]);
     }
   else
-    fprintf_filtered (stream, "%s", result);
+    fprintf_filtered (stream, "%s", &s[skip_count]);
 
   do_cleanups (cleanups);
 }
