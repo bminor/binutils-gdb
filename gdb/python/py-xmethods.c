@@ -26,6 +26,7 @@
 
 #include "python.h"
 #include "python-internal.h"
+#include "py-ref.h"
 
 static const char enabled_field_name[] = "enabled";
 static const char match_method_name[] = "match";
@@ -156,33 +157,26 @@ gdbpy_get_matching_xmethod_workers
    struct type *obj_type, const char *method_name,
    xmethod_worker_vec **dm_vec)
 {
-  struct cleanup *cleanups;
   struct objfile *objfile;
   VEC (xmethod_worker_ptr) *worker_vec = NULL;
-  PyObject *py_type, *py_progspace;
-  PyObject *py_xmethod_matcher_list = NULL, *list_iter, *matcher;
+  PyObject *py_progspace;
 
   gdb_assert (obj_type != NULL && method_name != NULL);
 
-  cleanups = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  py_type = type_to_type_object (obj_type);
+  gdbpy_ref py_type (type_to_type_object (obj_type));
   if (py_type == NULL)
     {
       gdbpy_print_stack ();
-      do_cleanups (cleanups);
-
       return EXT_LANG_RC_ERROR;
     }
-  make_cleanup_py_decref (py_type);
 
   /* Create an empty list of debug methods.  */
-  py_xmethod_matcher_list = PyList_New (0);
+  gdbpy_ref py_xmethod_matcher_list (PyList_New (0));
   if (py_xmethod_matcher_list == NULL)
     {
       gdbpy_print_stack ();
-      do_cleanups (cleanups);
-
       return EXT_LANG_RC_ERROR;
     }
 
@@ -192,28 +186,23 @@ gdbpy_get_matching_xmethod_workers
   ALL_OBJFILES (objfile)
     {
       PyObject *py_objfile = objfile_to_objfile_object (objfile);
-      PyObject *objfile_matchers, *temp = py_xmethod_matcher_list;
 
       if (py_objfile == NULL)
 	{
 	  gdbpy_print_stack ();
-	  Py_DECREF (py_xmethod_matcher_list);
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
 
-      objfile_matchers = objfpy_get_xmethods (py_objfile, NULL);
-      py_xmethod_matcher_list = PySequence_Concat (temp, objfile_matchers);
-      Py_DECREF (temp);
-      Py_DECREF (objfile_matchers);
-      if (py_xmethod_matcher_list == NULL)
+      gdbpy_ref objfile_matchers (objfpy_get_xmethods (py_objfile, NULL));
+      gdbpy_ref temp (PySequence_Concat (py_xmethod_matcher_list.get (),
+					 objfile_matchers.get ()));
+      if (temp == NULL)
 	{
 	  gdbpy_print_stack ();
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
+
+      py_xmethod_matcher_list = std::move (temp);
     }
 
   /* Gather debug methods matchers registered with the current program
@@ -221,26 +210,21 @@ gdbpy_get_matching_xmethod_workers
   py_progspace = pspace_to_pspace_object (current_program_space);
   if (py_progspace != NULL)
     {
-      PyObject *temp = py_xmethod_matcher_list;
-      PyObject *pspace_matchers = pspy_get_xmethods (py_progspace, NULL);
+      gdbpy_ref pspace_matchers (pspy_get_xmethods (py_progspace, NULL));
 
-      py_xmethod_matcher_list = PySequence_Concat (temp, pspace_matchers);
-      Py_DECREF (temp);
-      Py_DECREF (pspace_matchers);
-      if (py_xmethod_matcher_list == NULL)
+      gdbpy_ref temp (PySequence_Concat (py_xmethod_matcher_list.get (),
+					 pspace_matchers.get ()));
+      if (temp == NULL)
 	{
 	  gdbpy_print_stack ();
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
+
+      py_xmethod_matcher_list = std::move (temp);
     }
   else
     {
       gdbpy_print_stack ();
-      Py_DECREF (py_xmethod_matcher_list);
-      do_cleanups (cleanups);
-
       return EXT_LANG_RC_ERROR;
     }
 
@@ -248,117 +232,96 @@ gdbpy_get_matching_xmethod_workers
   if (gdb_python_module != NULL
       && PyObject_HasAttrString (gdb_python_module, matchers_attr_str))
     {
-      PyObject *gdb_matchers;
-      PyObject *temp = py_xmethod_matcher_list;
-
-      gdb_matchers = PyObject_GetAttrString (gdb_python_module,
-					     matchers_attr_str);
+      gdbpy_ref gdb_matchers (PyObject_GetAttrString (gdb_python_module,
+						      matchers_attr_str));
       if (gdb_matchers != NULL)
 	{
-	  py_xmethod_matcher_list = PySequence_Concat (temp, gdb_matchers);
-	  Py_DECREF (temp);
-	  Py_DECREF (gdb_matchers);
-	  if (py_xmethod_matcher_list == NULL)
+	  gdbpy_ref temp (PySequence_Concat (py_xmethod_matcher_list.get (),
+					     gdb_matchers.get ()));
+	  if (temp == NULL)
 	    {
 	      gdbpy_print_stack ();
-	      do_cleanups (cleanups);
-
 	      return EXT_LANG_RC_ERROR;
 	    }
+
+	  py_xmethod_matcher_list = std::move (temp);
 	}
       else
 	{
 	  gdbpy_print_stack ();
-	  Py_DECREF (py_xmethod_matcher_list);
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
     }
 
-  /* Safe to make a cleanup for py_xmethod_matcher_list now as it
-     will not change any more.  */
-  make_cleanup_py_decref (py_xmethod_matcher_list);
-
-  list_iter = PyObject_GetIter (py_xmethod_matcher_list);
+  gdbpy_ref list_iter (PyObject_GetIter (py_xmethod_matcher_list.get ()));
   if (list_iter == NULL)
     {
       gdbpy_print_stack ();
-      do_cleanups (cleanups);
-
       return EXT_LANG_RC_ERROR;
     }
-  while ((matcher = PyIter_Next (list_iter)) != NULL)
+  while (true)
     {
-      PyObject *match_result = invoke_match_method (matcher, py_type,
-						    method_name);
+      gdbpy_ref matcher (PyIter_Next (list_iter.get ()));
+      if (matcher == NULL)
+	{
+	  if (PyErr_Occurred ())
+	    {
+	      gdbpy_print_stack ();
+	      return EXT_LANG_RC_ERROR;
+	    }
+	  break;
+	}
+
+      gdbpy_ref match_result (invoke_match_method (matcher.get (),
+						   py_type.get (),
+						   method_name));
 
       if (match_result == NULL)
 	{
 	  gdbpy_print_stack ();
-	  Py_DECREF (matcher);
-	  do_cleanups (cleanups);
-
 	  return EXT_LANG_RC_ERROR;
 	}
       if (match_result == Py_None)
 	; /* This means there was no match.  */
-      else if (PySequence_Check (match_result))
+      else if (PySequence_Check (match_result.get ()))
 	{
-	  PyObject *iter = PyObject_GetIter (match_result);
-	  PyObject *py_worker;
+	  gdbpy_ref iter (PyObject_GetIter (match_result.get ()));
 
 	  if (iter == NULL)
 	    {
 	      gdbpy_print_stack ();
-	      Py_DECREF (matcher);
-	      Py_DECREF (match_result);
-	      do_cleanups (cleanups);
-
 	      return EXT_LANG_RC_ERROR;
 	    }
-	  while ((py_worker = PyIter_Next (iter)) != NULL)
+	  while (true)
 	    {
 	      struct xmethod_worker *worker;
 
-	      worker = new_python_xmethod_worker (py_worker, py_type);
-	      VEC_safe_push (xmethod_worker_ptr, worker_vec, worker);
-	      Py_DECREF (py_worker);
-	    }
-	  Py_DECREF (iter);
-	  /* Report any error that could have occurred while iterating.  */
-	  if (PyErr_Occurred ())
-	    {
-	      gdbpy_print_stack ();
-	      Py_DECREF (matcher);
-	      Py_DECREF (match_result);
-	      do_cleanups (cleanups);
+	      gdbpy_ref py_worker (PyIter_Next (iter.get ()));
+	      if (py_worker == NULL)
+		{
+		  if (PyErr_Occurred ())
+		    {
+		      gdbpy_print_stack ();
+		      return EXT_LANG_RC_ERROR;
+		    }
+		  break;
+		}
 
-	      return EXT_LANG_RC_ERROR;
+	      worker = new_python_xmethod_worker (py_worker.get (),
+						  py_type.get ());
+	      VEC_safe_push (xmethod_worker_ptr, worker_vec, worker);
 	    }
 	}
       else
 	{
 	  struct xmethod_worker *worker;
 
-	  worker = new_python_xmethod_worker (match_result, py_type);
+	  worker = new_python_xmethod_worker (match_result.get (),
+					      py_type.get ());
 	  VEC_safe_push (xmethod_worker_ptr, worker_vec, worker);
 	}
-
-      Py_DECREF (match_result);
-      Py_DECREF (matcher);
-    }
-  Py_DECREF (list_iter);
-  /* Report any error that could have occurred while iterating.  */
-  if (PyErr_Occurred ())
-    {
-      gdbpy_print_stack ();
-      do_cleanups (cleanups);
-
-      return EXT_LANG_RC_ERROR;
     }
 
-  do_cleanups (cleanups);
   *dm_vec = worker_vec;
 
   return EXT_LANG_RC_OK;

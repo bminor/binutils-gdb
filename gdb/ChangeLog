@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-xmethods.c (gdbpy_get_matching_xmethod_workers): use
+	gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (python_interactive_command): Use gdbpy_enter.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
