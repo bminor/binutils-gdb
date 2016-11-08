@@ -1,5 +1,12 @@
 2016-11-08  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-tdep.c (arm_linux_software_single_step): Write
+	adjusted address back to vector.  Call insert_single_step_breakpoint
+	in a new loop.
+	* arm-tdep.c (arm_software_single_step): Likewise.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-linux-tdep.c (arm_linux_software_single_step): Don't
 	call arm_insert_single_step_breakpoint, call
 	insert_single_step_breakpoint instead.
