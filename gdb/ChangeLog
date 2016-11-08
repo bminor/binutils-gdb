@@ -1,4 +1,12 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (struct disr_info) <name>: Now a std::string.
+	(rust_get_disr_info): Use ui_file_as_string and adjust to use
+	std::string.
+	(rust_val_print): Adjust to use std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (print_target_wait_results): Use ui_file_as_string and
 	std::string.
