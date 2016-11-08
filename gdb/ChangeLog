@@ -1,5 +1,19 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Use
+	ui_file_as_string and adjust to use std::string.
+	* guile/scm-disasm.c (gdbscm_arch_disassemble): Likewise.
+	* guile/scm-frame.c (frscm_print_frame_smob): Likewise.
+	* guile/scm-type.c (tyscm_type_name): Use ui_file_as_string and
+	adjust to use std::string.  Throw exception directly instead of
+	returning it in EXCP output parameter.
+	(tyscm_print_type_smob, gdbscm_type_print_name): Adjust to
+	tyscm_type_name interface change.
+	* guile/scm-value.c (vlscm_print_value_smob, gdbscm_value_print):
+	Use ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* arm-tdep.c (_initialize_arm_tdep): Use ui_file_as_string and
 	std::string.
 

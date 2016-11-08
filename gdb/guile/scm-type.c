@@ -99,16 +99,12 @@ tyscm_type_smob_type (type_smob *t_smob)
   return t_smob->type;
 }
 
-/* Return the name of TYPE in expanded form.
-   Space for the result is malloc'd, caller must free.
-   If there's an error computing the name, the result is NULL and the
-   exception is stored in *EXCP.  */
+/* Return the name of TYPE in expanded form.  If there's an error
+   computing the name, throws the gdb exception with scm_throw.  */
 
-static char *
-tyscm_type_name (struct type *type, SCM *excp)
+static std::string
+tyscm_type_name (struct type *type)
 {
-  char *name = NULL;
-
   TRY
     {
       struct cleanup *old_chain;
@@ -119,17 +115,19 @@ tyscm_type_name (struct type *type, SCM *excp)
 
       LA_PRINT_TYPE (type, "", stb, -1, 0, &type_print_raw_options);
 
-      name = ui_file_xstrdup (stb, NULL);
+      std::string name = ui_file_as_string (stb);
       do_cleanups (old_chain);
+
+      return name;
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      *excp = gdbscm_scm_from_gdb_exception (except);
-      return NULL;
+      SCM excp = gdbscm_scm_from_gdb_exception (except);
+      gdbscm_throw (excp);
     }
   END_CATCH
 
-  return name;
+  gdb_assert_not_reached ("no way to get here");
 }
 
 /* Administrivia for type smobs.  */
@@ -207,11 +205,7 @@ static int
 tyscm_print_type_smob (SCM self, SCM port, scm_print_state *pstate)
 {
   type_smob *t_smob = (type_smob *) SCM_SMOB_DATA (self);
-  SCM exception;
-  char *name = tyscm_type_name (t_smob->type, &exception);
-
-  if (name == NULL)
-    gdbscm_throw (exception);
+  std::string name = tyscm_type_name (t_smob->type);
 
   /* pstate->writingp = zero if invoked by display/~A, and nonzero if
      invoked by write/~S.  What to do here may need to evolve.
@@ -220,7 +214,7 @@ tyscm_print_type_smob (SCM self, SCM port, scm_print_state *pstate)
   if (pstate->writingp)
     gdbscm_printf (port, "#<%s ", type_smob_name);
 
-  scm_puts (name, port);
+  scm_puts (name.c_str (), port);
 
   if (pstate->writingp)
     scm_puts (">", port);
@@ -608,16 +602,8 @@ gdbscm_type_print_name (SCM self)
   type_smob *t_smob
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
-  char *thetype;
-  SCM exception, result;
-
-  thetype = tyscm_type_name (type, &exception);
-
-  if (thetype == NULL)
-    gdbscm_throw (exception);
-
-  result = gdbscm_scm_from_c_string (thetype);
-  xfree (thetype);
+  std::string thetype = tyscm_type_name (type);
+  SCM result = gdbscm_scm_from_c_string (thetype.c_str ());
 
   return result;
 }

@@ -157,16 +157,14 @@ frscm_print_frame_smob (SCM self, SCM port, scm_print_state *pstate)
 {
   frame_smob *f_smob = (frame_smob *) SCM_SMOB_DATA (self);
   struct ui_file *strfile;
-  char *s;
 
   gdbscm_printf (port, "#<%s ", frame_smob_name);
 
   strfile = mem_fileopen ();
   fprint_frame_id (strfile, f_smob->frame_id);
-  s = ui_file_xstrdup (strfile, NULL);
-  gdbscm_printf (port, "%s", s);
+  std::string s = ui_file_as_string (strfile);
+  gdbscm_printf (port, "%s", s.c_str ());
   ui_file_delete (strfile);
-  xfree (s);
 
   scm_puts (">", port);
 

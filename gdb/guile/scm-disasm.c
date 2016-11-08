@@ -282,7 +282,6 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
   for (pc = start, i = 0; pc <= end && i < count; )
     {
       int insn_len = 0;
-      char *as = NULL;
       struct ui_file *memfile = mem_fileopen ();
       struct cleanup *cleanups = make_cleanup_ui_file_delete (memfile);
 
@@ -302,15 +301,14 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 	}
       END_CATCH
 
-      as = ui_file_xstrdup (memfile, NULL);
+      std::string as = ui_file_as_string (memfile);
 
-      result = scm_cons (dascm_make_insn (pc, as, insn_len),
+      result = scm_cons (dascm_make_insn (pc, as.c_str (), insn_len),
 			 result);
 
       pc += insn_len;
       i++;
       do_cleanups (cleanups);
-      xfree (as);
     }
 
   return scm_reverse_x (result, SCM_EOL);
