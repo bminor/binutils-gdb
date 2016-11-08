@@ -3066,8 +3066,6 @@ xtensa_verify_config (struct gdbarch *gdbarch)
   struct ui_file *log;
   struct cleanup *cleanups;
   struct gdbarch_tdep *tdep;
-  long length;
-  char *buf;
 
   tdep = gdbarch_tdep (gdbarch);
   log = mem_fileopen ();
@@ -3099,11 +3097,10 @@ xtensa_verify_config (struct gdbarch *gdbarch)
   if (tdep->a0_base == -1)
     fprintf_unfiltered (log, _("\n\ta0_base: No Ax registers"));
 
-  buf = ui_file_xstrdup (log, &length);
-  make_cleanup (xfree, buf);
-  if (length > 0)
+  std::string buf = ui_file_as_string (log);
+  if (!buf.empty ())
     internal_error (__FILE__, __LINE__,
-		    _("the following are invalid: %s"), buf);
+		    _("the following are invalid: %s"), buf.c_str ());
   do_cleanups (cleanups);
 }
 

@@ -1,5 +1,10 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* xtensa-tdep.c (xtensa_verify_config): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (dwarf2_compute_name): Use ui_file_as_string and
 	std::string.
 
