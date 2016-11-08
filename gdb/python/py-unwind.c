@@ -236,12 +236,9 @@ unwind_infopy_str (PyObject *self)
       }
     fprintf_unfiltered (strfile, ")");
   }
-  {
-    char *s = ui_file_xstrdup (strfile, NULL);
 
-    result = PyString_FromString (s);
-    xfree (s);
-  }
+  std::string s = ui_file_as_string (strfile);
+  result = PyString_FromString (s.c_str ());
   ui_file_delete (strfile);
   return result;
 }

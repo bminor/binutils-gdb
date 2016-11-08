@@ -80,17 +80,13 @@ frame_object_to_frame_info (PyObject *obj)
 static PyObject *
 frapy_str (PyObject *self)
 {
-  char *s;
   PyObject *result;
   struct ui_file *strfile;
 
   strfile = mem_fileopen ();
   fprint_frame_id (strfile, ((frame_object *) self)->frame_id);
-  s = ui_file_xstrdup (strfile, NULL);
-  result = PyString_FromString (s);
-  xfree (s);
-
-  return result;
+  std::string s = ui_file_as_string (strfile);
+  return PyString_FromString (s.c_str ());
 }
 
 /* Implementation of gdb.Frame.is_valid (self) -> Boolean.

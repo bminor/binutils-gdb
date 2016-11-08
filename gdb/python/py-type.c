@@ -1010,8 +1010,7 @@ typy_template_argument (PyObject *self, PyObject *args)
 static PyObject *
 typy_str (PyObject *self)
 {
-  char *thetype = NULL;
-  long length = 0;
+  std::string thetype;
   PyObject *result;
 
   TRY
@@ -1025,18 +1024,17 @@ typy_str (PyObject *self)
       LA_PRINT_TYPE (type_object_to_type (self), "", stb, -1, 0,
 		     &type_print_raw_options);
 
-      thetype = ui_file_xstrdup (stb, &length);
+      thetype = ui_file_as_string (stb);
       do_cleanups (old_chain);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      xfree (thetype);
       GDB_PY_HANDLE_EXCEPTION (except);
     }
   END_CATCH
 
-  result = PyUnicode_Decode (thetype, length, host_charset (), NULL);
-  xfree (thetype);
+  result = PyUnicode_Decode (thetype.c_str (), thetype.length (),
+			     host_charset (), NULL);
 
   return result;
 }

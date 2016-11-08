@@ -487,9 +487,8 @@ bppy_get_commands (PyObject *self, void *closure)
   struct breakpoint *bp = self_bp->bp;
   long length;
   struct ui_file *string_file;
-  struct cleanup *chain;
   PyObject *result;
-  char *cmdstr;
+  struct cleanup *chain;
 
   BPPY_REQUIRE_VALID (self_bp);
 
@@ -514,9 +513,8 @@ bppy_get_commands (PyObject *self, void *closure)
   END_CATCH
 
   ui_out_redirect (current_uiout, NULL);
-  cmdstr = ui_file_xstrdup (string_file, &length);
-  make_cleanup (xfree, cmdstr);
-  result = host_string_to_python_string (cmdstr);
+  std::string cmdstr = ui_file_as_string (string_file);
+  result = host_string_to_python_string (cmdstr.c_str ());
   do_cleanups (chain);
   return result;
 }

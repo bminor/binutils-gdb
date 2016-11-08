@@ -1,5 +1,16 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* python/py-arch.c (archpy_disassemble): Use ui_file_as_string and
+	std::string.
+	* python/py-breakpoint.c (bppy_get_commands): Use
+	ui_file_as_string and std::string.
+	* python/py-frame.c (frapy_str): Likewise.
+	* python/py-type.c (typy_str): Likewise.
+	* python/py-unwind.c (unwind_infopy_str): Likewise.
+	* python/py-value.c (valpy_str): Likewise.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* printcmd.c (eval_command): Use ui_file_as_string and
 	std::string.
 
