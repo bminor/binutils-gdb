@@ -94,59 +94,33 @@ static PyObject *
 invoke_match_method (PyObject *matcher, PyObject *py_obj_type,
 		     const char *xmethod_name)
 {
-  PyObject *py_xmethod_name;
-  PyObject *match_method, *enabled_field, *match_result;
-  struct cleanup *cleanups;
   int enabled;
 
-  cleanups = make_cleanup (null_cleanup, NULL);
-
-  enabled_field = PyObject_GetAttrString (matcher, enabled_field_name);
+  gdbpy_ref enabled_field (PyObject_GetAttrString (matcher,
+						   enabled_field_name));
   if (enabled_field == NULL)
-    {
-      do_cleanups (cleanups);
-      return NULL;
-    }
-  make_cleanup_py_decref (enabled_field);
+    return NULL;
 
-  enabled = PyObject_IsTrue (enabled_field);
+  enabled = PyObject_IsTrue (enabled_field.get ());
   if (enabled == -1)
-    {
-      do_cleanups (cleanups);
-      return NULL;
-    }
+    return NULL;
   if (enabled == 0)
     {
       /* Return 'None' if the matcher is not enabled.  */
-      do_cleanups (cleanups);
       Py_RETURN_NONE;
     }
 
-  match_method = PyObject_GetAttrString (matcher, match_method_name);
+  gdbpy_ref match_method (PyObject_GetAttrString (matcher, match_method_name));
   if (match_method == NULL)
-    {
-      do_cleanups (cleanups);
-      return NULL;
-    }
-  make_cleanup_py_decref (match_method);
+    return NULL;
 
-  py_xmethod_name = PyString_FromString (xmethod_name);
+  gdbpy_ref py_xmethod_name (PyString_FromString (xmethod_name));
   if (py_xmethod_name == NULL)
-    {
-      do_cleanups (cleanups);
-      return NULL;
-    }
-  make_cleanup_py_decref (py_xmethod_name);
+    return NULL;
 
-  match_result = PyObject_CallMethodObjArgs (matcher,
-					     py_match_method_name,
-					     py_obj_type,
-					     py_xmethod_name,
-					     NULL);
-
-  do_cleanups (cleanups);
-
-  return match_result;
+  return PyObject_CallMethodObjArgs (matcher, py_match_method_name,
+				     py_obj_type, py_xmethod_name.get (),
+				     NULL);
 }
 
 /* Implementation of get_matching_xmethod_workers for Python.  */
