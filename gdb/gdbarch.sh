@@ -1878,7 +1878,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   struct ui_file *log;
   struct cleanup *cleanups;
   long length;
-  char *buf;
 
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
@@ -1924,12 +1923,11 @@ do
     fi
 done
 cat <<EOF
-  buf = ui_file_xstrdup (log, &length);
-  make_cleanup (xfree, buf);
-  if (length > 0)
+  std::string buf = ui_file_as_string (log);
+  if (!buf.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
-                    buf);
+                    buf.c_str ());
   do_cleanups (cleanups);
 }
 EOF

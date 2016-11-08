@@ -1,5 +1,11 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* gdbarch.sh (verify_gdbarch): Use ui_file_as_string and
+	std::string.
+	* gdbarch.c: Regenerate.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* c-exp.y (OPERATOR NEW): Adjust to use ui_file_as_string and
 	std::string.
 
