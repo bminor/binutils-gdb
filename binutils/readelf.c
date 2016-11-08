@@ -5978,7 +5978,7 @@ process_section_headers (FILE * file)
 	case SHT_REL:
 	case SHT_RELA:
 	  if (section->sh_link < 1
-	      || section->sh_link > elf_header.e_shnum
+	      || section->sh_link >= elf_header.e_shnum
 	      || (section_headers[section->sh_link].sh_type != SHT_SYMTAB
 		  && section_headers[section->sh_link].sh_type != SHT_DYNSYM))
 	    warn (_("[%2u]: Link field (%u) should index a symtab section.\n"),
@@ -5992,7 +5992,7 @@ process_section_headers (FILE * file)
 	case SHT_GNU_verdef:
 	case SHT_GNU_LIBLIST:
 	  if (section->sh_link < 1
-	      || section->sh_link > elf_header.e_shnum
+	      || section->sh_link >= elf_header.e_shnum
 	      || section_headers[section->sh_link].sh_type != SHT_STRTAB)
 	    warn (_("[%2u]: Link field (%u) should index a string section.\n"),
 		  i, section->sh_link);
@@ -6025,7 +6025,7 @@ process_section_headers (FILE * file)
 	case SHT_REL:
 	case SHT_RELA:
 	  if (section->sh_info < 1
-	      || section->sh_info > elf_header.e_shnum
+	      || section->sh_info >= elf_header.e_shnum
 	      || (section_headers[section->sh_info].sh_type != SHT_PROGBITS
 		  && section_headers[section->sh_info].sh_type != SHT_NOBITS
 		  && section_headers[section->sh_info].sh_type != SHT_NOTE
@@ -6072,7 +6072,7 @@ process_section_headers (FILE * file)
 	    ;
 	  else if (section->sh_flags & SHF_INFO_LINK)
 	    {
-	      if (section->sh_info < 1 || section->sh_info > elf_header.e_shnum)
+	      if (section->sh_info < 1 || section->sh_info >= elf_header.e_shnum)
 		warn (_("[%2u]: Expected link to another section in info field"), i);
 	    }
 	  else if (section->sh_type < SHT_LOOS && section->sh_info != 0)

@@ -1,3 +1,9 @@
+2016-11-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20794
+	* readelf.c (process_section_headers): Fix off-by-one error when
+	checking for invalid sh_link and sh_info fields.
+
 2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* objcopy.c (copy_section): Add extra calls to free for error
