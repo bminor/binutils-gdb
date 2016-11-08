@@ -8650,23 +8650,20 @@ remote_send (char **buf,
     error (_("Remote failure reply: %s"), *buf);
 }
 
-/* Return a pointer to an xmalloc'ed string representing an escaped
-   version of BUF, of len N.  E.g. \n is converted to \\n, \t to \\t,
-   etc.  The caller is responsible for releasing the returned
-   memory.  */
+/* Return a string representing an escaped version of BUF, of len N.
+   E.g. \n is converted to \\n, \t to \\t, etc.  */
 
-static char *
+static std::string
 escape_buffer (const char *buf, int n)
 {
   struct cleanup *old_chain;
   struct ui_file *stb;
-  char *str;
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
   fputstrn_unfiltered (buf, n, '\\', stb);
-  str = ui_file_xstrdup (stb, NULL);
+  std::string str = ui_file_as_string (stb);
   do_cleanups (old_chain);
   return str;
 }
@@ -8750,15 +8747,12 @@ putpkt_binary (const char *buf, int cnt)
 
       if (remote_debug)
 	{
-	  struct cleanup *old_chain;
-	  char *str;
-
 	  *p = '\0';
-	  str = escape_buffer (buf2, p - buf2);
-	  old_chain = make_cleanup (xfree, str);
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str);
+
+	  std::string str = escape_buffer (buf2, p - buf2);
+
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str.c_str ());
 	  gdb_flush (gdb_stdlog);
-	  do_cleanups (old_chain);
 	}
       remote_serial_write (buf2, p - buf2);
 
@@ -8836,15 +8830,11 @@ putpkt_binary (const char *buf, int cnt)
 		  {
 		    if (remote_debug)
 		      {
-			struct cleanup *old_chain;
-			char *str;
+			std::string str = escape_buffer (rs->buf, val);
 
-			str = escape_buffer (rs->buf, val);
-			old_chain = make_cleanup (xfree, str);
 			fprintf_unfiltered (gdb_stdlog,
 					    "  Notification received: %s\n",
-					    str);
-			do_cleanups (old_chain);
+					    str.c_str ());
 		      }
 		    handle_notification (rs->notif_state, rs->buf);
 		    /* We're in sync now, rewait for the ack.  */
@@ -9010,16 +9000,12 @@ read_frame (char **buf_p,
 
 	    if (remote_debug)
 	      {
-		struct cleanup *old_chain;
-		char *str;
+		std::string str = escape_buffer (buf, bc);
 
-		str = escape_buffer (buf, bc);
-		old_chain = make_cleanup (xfree, str);
 		fprintf_unfiltered (gdb_stdlog,
 				    "Bad checksum, sentsum=0x%x, "
 				    "csum=0x%x, buf=%s\n",
-				    pktcsum, csum, str);
-		do_cleanups (old_chain);
+				    pktcsum, csum, str.c_str ());
 	      }
 	    /* Number of characters in buffer ignoring trailing
                NULL.  */
@@ -9193,13 +9179,9 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	{
 	  if (remote_debug)
 	    {
-	     struct cleanup *old_chain;
-	     char *str;
+	      std::string str = escape_buffer (*buf, val);
 
-	     str = escape_buffer (*buf, val);
-	     old_chain = make_cleanup (xfree, str);
-	     fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str);
-	     do_cleanups (old_chain);
+	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str.c_str ());
 	    }
 
 	  /* Skip the ack char if we're in no-ack mode.  */
@@ -9218,15 +9200,11 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 
 	  if (remote_debug)
 	    {
-	      struct cleanup *old_chain;
-	      char *str;
+	      std::string str = escape_buffer (*buf, val);
 
-	      str = escape_buffer (*buf, val);
-	      old_chain = make_cleanup (xfree, str);
 	      fprintf_unfiltered (gdb_stdlog,
 				  "  Notification received: %s\n",
-				  str);
-	      do_cleanups (old_chain);
+				  str.c_str ());
 	    }
 	  if (is_notif != NULL)
 	    *is_notif = 1;

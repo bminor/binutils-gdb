@@ -1,5 +1,11 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (escape_buffer): Use ui_file_as_string and return
+	std::string.
+	(putpkt_binary, read_frame): Adjust to use std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* python/py-arch.c (archpy_disassemble): Use ui_file_as_string and
 	std::string.
 	* python/py-breakpoint.c (bppy_get_commands): Use
