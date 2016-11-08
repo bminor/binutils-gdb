@@ -480,10 +480,9 @@ verror (const char *string, va_list args)
 void
 error_stream (struct ui_file *stream)
 {
-  char *message = ui_file_xstrdup (stream, NULL);
+  std::string message = ui_file_as_string (stream);
 
-  make_cleanup (xfree, message);
-  error (("%s"), message);
+  error (("%s"), message.c_str ());
 }
 
 /* Emit a message and abort.  */
