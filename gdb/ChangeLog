@@ -1,5 +1,48 @@
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
+	* ax-gdb.c (is_nontrivial_conversion): Use agent_expr_up.
+	(gen_trace_for_var, gen_trace_for_expr, gen_eval_for_expr)
+	(gen_trace_for_return_address, gen_printf): Use and return an
+	agent_expr_up.  Don't use make_cleanup_free_agent_expr.
+	(agent_eval_command_one, maint_agent_printf_command): Use
+	agent_expr_up.  Don't use make_cleanup_free_agent_expr.
+	* ax-gdb.h (gen_trace_for_expr, gen_trace_for_var)
+	(gen_trace_for_return_address, gen_eval_for_expr, gen_printf): Use
+	agent_expr_up.
+	* ax-general.c (new_agent_expr): Rename to ...
+	(agent_expr::agent_expr): ... this, and now a constructor.
+	(free_agent_expr): Rename to ...
+	(agent_expr::~agent_exp): ... this, and now a destructor.
+	(do_free_agent_expr_cleanup, make_cleanup_free_agent_expr):
+	Delete.
+	* ax.h (struct agent_expr): Add ctor/dtor.
+	(agent_expr_up): New typedef.
+	(new_agent_expr, free_agent_expr, make_cleanup_free_agent_expr):
+	Delete declarations.
+	* breakpoint.c (parse_cond_to_aexpr): Use and return an
+	agent_expr_up.  Don't use make_cleanup_free_agent_expr.
+	(build_target_condition_list): Adjust to use agent_expr_up.
+	(parse_cmd_to_aexpr): Use and return an agent_expr_up.  Don't use
+	make_cleanup_free_agent_expr.
+	(build_target_command_list): Adjust to use agent_expr_up.
+	(force_breakpoint_reinsertion): Adjust to use agent_expr_up.
+	(bp_location_dtor): Remove unnecessary free_agent_expr and xfree
+	calls.
+	* breakpoint.h (struct bp_target_info) <cond_bytecode,
+	cmd_bytecode>: Now agent_expr_up's.
+	* remote.c (remote_download_tracepoint): Adjust to use
+	agent_expr_up and remove use of make_cleanup_free_agent_expr.
+	* tracepoint.c (validate_actionline, collect_symbol): Adjust to
+	use agent_expr_up and remove uses of make_cleanup_free_agent_expr.
+	(collection_list::~collection_list): Call delete instead of
+	free_agent_expr.
+	(encode_actions_1): Adjust to use agent_expr_up and remove uses of
+	make_cleanup_free_agent_expr.
+	(add_aexpr): Change parameter type to agent_expr_up; Return a raw
+	agent_expr pointer.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_name_for_lookup, type_as_string): Use and return
 	std::string.
 	(type_as_string_and_cleanup): Delete.

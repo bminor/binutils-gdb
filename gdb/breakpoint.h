@@ -344,7 +344,7 @@ struct bp_location
   /* Conditional expression in agent expression
      bytecode form.  This is used for stub-side breakpoint
      condition evaluation.  */
-  struct agent_expr *cond_bytecode;
+  agent_expr_up cond_bytecode;
 
   /* Signals that the condition has changed since the last time
      we updated the global location list.  This means the condition
@@ -361,7 +361,7 @@ struct bp_location
 
   enum condition_status condition_changed;
 
-  struct agent_expr *cmd_bytecode;
+  agent_expr_up cmd_bytecode;
 
   /* Signals that breakpoint conditions and/or commands need to be
      re-synched with the target.  This has no use other than

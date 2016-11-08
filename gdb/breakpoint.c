@@ -2256,19 +2256,19 @@ unduplicated_should_be_inserted (struct bp_location *bl)
    by the bytecode interpreter.  Return NULL if there was
    any error during parsing.  */
 
-static struct agent_expr *
+static agent_expr_up
 parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
 {
-  struct agent_expr *aexpr = NULL;
-
-  if (!cond)
+  if (cond == NULL)
     return NULL;
+
+  agent_expr_up aexpr;
 
   /* We don't want to stop processing, so catch any errors
      that may show up.  */
   TRY
     {
-      aexpr = gen_eval_for_expr (scope, cond);
+      aexpr = gdb::move (gen_eval_for_expr (scope, cond));
     }
 
   CATCH (ex, RETURN_MASK_ERROR)
@@ -2276,7 +2276,6 @@ parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
       /* If we got here, it means the condition could not be parsed to a valid
 	 bytecode expression and thus can't be evaluated on the target's side.
 	 It's no use iterating through the conditions.  */
-      return NULL;
     }
   END_CATCH
 
@@ -2321,14 +2320,12 @@ build_target_condition_list (struct bp_location *bl)
 	{
 	  if (modified)
 	    {
-	      struct agent_expr *aexpr;
-
 	      /* Re-parse the conditions since something changed.  In that
 		 case we already freed the condition bytecodes (see
 		 force_breakpoint_reinsertion).  We just
 		 need to parse the condition to bytecodes again.  */
-	      aexpr = parse_cond_to_aexpr (bl->address, loc->cond.get ());
-	      loc->cond_bytecode = aexpr;
+	      loc->cond_bytecode = parse_cond_to_aexpr (bl->address,
+							loc->cond.get ());
 	    }
 
 	  /* If we have a NULL bytecode expression, it means something
@@ -2359,8 +2356,7 @@ build_target_condition_list (struct bp_location *bl)
 	      if (!loc->cond_bytecode)
 		return;
 
-	      free_agent_expr (loc->cond_bytecode);
-	      loc->cond_bytecode = NULL;
+	      loc->cond_bytecode.reset ();
 	    }
 	}
     }
@@ -2378,7 +2374,7 @@ build_target_condition_list (struct bp_location *bl)
 	/* Add the condition to the vector.  This will be used later to send the
 	   conditions to the target.  */
 	VEC_safe_push (agent_expr_p, bl->target_info.conditions,
-		       loc->cond_bytecode);
+		       loc->cond_bytecode.get ());
     }
 
   return;
@@ -2388,19 +2384,18 @@ build_target_condition_list (struct bp_location *bl)
    bytecode suitable for evaluation by the bytecode interpreter.
    Return NULL if there was any error during parsing.  */
 
-static struct agent_expr *
+static agent_expr_up
 parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 {
   struct cleanup *old_cleanups = 0;
   struct expression **argvec;
-  struct agent_expr *aexpr = NULL;
   const char *cmdrest;
   const char *format_start, *format_end;
   struct format_piece *fpieces;
   int nargs;
   struct gdbarch *gdbarch = get_current_arch ();
 
-  if (!cmd)
+  if (cmd == NULL)
     return NULL;
 
   cmdrest = cmd;
@@ -2450,20 +2445,21 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 	++cmdrest;
     }
 
+  agent_expr_up aexpr;
+
   /* We don't want to stop processing, so catch any errors
      that may show up.  */
   TRY
     {
-      aexpr = gen_printf (scope, gdbarch, 0, 0,
-			  format_start, format_end - format_start,
-			  fpieces, nargs, argvec);
+      aexpr = gdb::move (gen_printf (scope, gdbarch, 0, 0,
+				     format_start, format_end - format_start,
+				     fpieces, nargs, argvec));
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
       /* If we got here, it means the command could not be parsed to a valid
 	 bytecode expression and thus can't be evaluated on the target's side.
 	 It's no use iterating through the other commands.  */
-      aexpr = NULL;
     }
   END_CATCH
 
@@ -2520,15 +2516,13 @@ build_target_command_list (struct bp_location *bl)
 	{
 	  if (modified)
 	    {
-	      struct agent_expr *aexpr;
-
 	      /* Re-parse the commands since something changed.  In that
 		 case we already freed the command bytecodes (see
 		 force_breakpoint_reinsertion).  We just
 		 need to parse the command to bytecodes again.  */
-	      aexpr = parse_cmd_to_aexpr (bl->address,
-					  loc->owner->extra_string);
-	      loc->cmd_bytecode = aexpr;
+	      loc->cmd_bytecode
+		= parse_cmd_to_aexpr (bl->address,
+				      loc->owner->extra_string);
 	    }
 
 	  /* If we have a NULL bytecode expression, it means something
@@ -2556,8 +2550,7 @@ build_target_command_list (struct bp_location *bl)
 	      if (loc->cmd_bytecode == NULL)
 		return;
 
-	      free_agent_expr (loc->cmd_bytecode);
-	      loc->cmd_bytecode = NULL;
+	      loc->cmd_bytecode.reset ();
 	    }
 	}
     }
@@ -2575,7 +2568,7 @@ build_target_command_list (struct bp_location *bl)
 	/* Add the command to the vector.  This will be used later
 	   to send the commands to the target.  */
 	VEC_safe_push (agent_expr_p, bl->target_info.tcommands,
-		       loc->cmd_bytecode);
+		       loc->cmd_bytecode.get ());
     }
 
   bl->target_info.persist = 0;
@@ -12408,11 +12401,7 @@ force_breakpoint_reinsertion (struct bp_location *bl)
 
       /* Free the agent expression bytecode as well.  We will compute
 	 it later on.  */
-      if (loc->cond_bytecode)
-	{
-	  free_agent_expr (loc->cond_bytecode);
-	  loc->cond_bytecode = NULL;
-	}
+      loc->cond_bytecode.reset ();
     }
 }
 /* Called whether new breakpoints are created, or existing breakpoints
@@ -12898,8 +12887,6 @@ say_where (struct breakpoint *b)
 static void
 bp_location_dtor (struct bp_location *self)
 {
-  if (self->cond_bytecode)
-    free_agent_expr (self->cond_bytecode);
   xfree (self->function_name);
 
   VEC_free (agent_expr_p, self->target_info.conditions);

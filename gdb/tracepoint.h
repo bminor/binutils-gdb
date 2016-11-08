@@ -249,7 +249,9 @@ public:
 
   void append_exp (struct expression *exp);
 
-  void add_aexpr (struct agent_expr *aexpr);
+  /* Add AEXPR to the list, taking ownership.  */
+  void add_aexpr (agent_expr_up aexpr);
+
   void add_register (unsigned int regno);
   void add_memrange (int type, bfd_signed_vma base,
 		     unsigned long len);

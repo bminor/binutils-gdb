@@ -702,7 +702,6 @@ validate_actionline (const char *line, struct breakpoint *b)
   const char *tmp_p;
   const char *p;
   struct bp_location *loc;
-  struct agent_expr *aexpr;
   struct tracepoint *t = (struct tracepoint *) b;
 
   /* If EOF is typed, *line is NULL.  */
@@ -775,17 +774,16 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* We have something to collect, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
 		 long.  */
-	      aexpr = gen_trace_for_expr (loc->address, exp.get (), trace_string);
-	      old_chain = make_cleanup_free_agent_expr (aexpr);
+	      agent_expr_up aexpr = gen_trace_for_expr (loc->address,
+							exp.get (),
+							trace_string);
 
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
 		error (_("Expression is too complicated."));
 
-	      ax_reqs (aexpr);
+	      ax_reqs (aexpr.get ());
 
-	      report_agent_reqs_errors (aexpr);
-
-	      do_cleanups (old_chain);
+	      report_agent_reqs_errors (aexpr.get ());
 	    }
 	}
       while (p && *p++ == ',');
@@ -810,16 +808,13 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* We have something to evaluate, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
 		 long.  */
-	      aexpr = gen_eval_for_expr (loc->address, exp.get ());
-	      old_chain = make_cleanup_free_agent_expr (aexpr);
+	      agent_expr_up aexpr = gen_eval_for_expr (loc->address, exp.get ());
 
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
 		error (_("Expression is too complicated."));
 
-	      ax_reqs (aexpr);
-	      report_agent_reqs_errors (aexpr);
-
-	      do_cleanups (old_chain);
+	      ax_reqs (aexpr.get ());
+	      report_agent_reqs_errors (aexpr.get ());
 	    }
 	}
       while (p && *p++ == ',');
@@ -1045,10 +1040,10 @@ collection_list::collect_symbol (struct symbol *sym,
   /* Expressions are the most general case.  */
   if (treat_as_expr)
     {
-      struct agent_expr *aexpr;
       struct cleanup *old_chain1 = NULL;
 
-      aexpr = gen_trace_for_var (scope, gdbarch, sym, trace_string);
+      agent_expr_up aexpr = gen_trace_for_var (scope, gdbarch,
+					       sym, trace_string);
 
       /* It can happen that the symbol is recorded as a computed
 	 location, but it's been optimized away and doesn't actually
@@ -1060,33 +1055,28 @@ collection_list::collect_symbol (struct symbol *sym,
 	  return;
 	}
 
-      old_chain1 = make_cleanup_free_agent_expr (aexpr);
+      ax_reqs (aexpr.get ());
 
-      ax_reqs (aexpr);
-
-      report_agent_reqs_errors (aexpr);
-
-      discard_cleanups (old_chain1);
-      add_aexpr (aexpr);
+      report_agent_reqs_errors (aexpr.get ());
 
       /* Take care of the registers.  */
       if (aexpr->reg_mask_len > 0)
 	{
-	  int ndx1, ndx2;
-
-	  for (ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
+	  for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
 	    {
 	      QUIT;	/* Allow user to bail out with ^C.  */
 	      if (aexpr->reg_mask[ndx1] != 0)
 		{
 		  /* Assume chars have 8 bits.  */
-		  for (ndx2 = 0; ndx2 < 8; ndx2++)
+		  for (int ndx2 = 0; ndx2 < 8; ndx2++)
 		    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
 		      /* It's used -- record it.  */
 		      add_register (ndx1 * 8 + ndx2);
 		}
 	    }
 	}
+
+      add_aexpr (gdb::move (aexpr));
     }
 }
 
@@ -1193,7 +1183,7 @@ collection_list::collection_list ()
 collection_list::~collection_list ()
 {
   for (int ndx = 0; ndx < m_aexprs.size (); ndx++)
-    free_agent_expr (m_aexprs[ndx]);
+    delete m_aexprs[ndx];
 }
 
 /* Reduce a collection list to string form (for gdb protocol).  */
@@ -1351,7 +1341,6 @@ encode_actions_1 (struct command_line *action,
   int i;
   struct value *tempval;
   struct cmd_list_element *cmd;
-  struct agent_expr *aexpr;
 
   for (; action; action = action->next)
     {
@@ -1403,32 +1392,24 @@ encode_actions_1 (struct command_line *action,
 		}
 	      else if (0 == strncasecmp ("$_ret", action_exp, 5))
 		{
-		  struct cleanup *old_chain1 = NULL;
+		  agent_expr_up aexpr
+		    = gen_trace_for_return_address (tloc->address,
+						    target_gdbarch (),
+						    trace_string);
 
-		  aexpr = gen_trace_for_return_address (tloc->address,
-							target_gdbarch (),
-							trace_string);
-
-		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
-
-		  ax_reqs (aexpr);
-		  report_agent_reqs_errors (aexpr);
-
-		  discard_cleanups (old_chain1);
-		  collect->add_aexpr (aexpr);
+		  ax_reqs (aexpr.get ());
+		  report_agent_reqs_errors (aexpr.get ());
 
 		  /* take care of the registers */
 		  if (aexpr->reg_mask_len > 0)
 		    {
-		      int ndx1, ndx2;
-
-		      for (ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
+		      for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
 			{
 			  QUIT;	/* allow user to bail out with ^C */
 			  if (aexpr->reg_mask[ndx1] != 0)
 			    {
 			      /* assume chars have 8 bits */
-			      for (ndx2 = 0; ndx2 < 8; ndx2++)
+			      for (int ndx2 = 0; ndx2 < 8; ndx2++)
 				if (aexpr->reg_mask[ndx1] & (1 << ndx2))
 				  {
 				    /* It's used -- record it.  */
@@ -1438,6 +1419,7 @@ encode_actions_1 (struct command_line *action,
 			}
 		    }
 
+		  collect->add_aexpr (gdb::move (aexpr));
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$_sdata", action_exp, 7))
@@ -1499,31 +1481,24 @@ encode_actions_1 (struct command_line *action,
 		      break;
 
 		    default:	/* Full-fledged expression.  */
-		      aexpr = gen_trace_for_expr (tloc->address, exp.get (),
-						  trace_string);
+		      agent_expr_up aexpr = gen_trace_for_expr (tloc->address,
+								exp.get (),
+								trace_string);
 
-		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
+		      ax_reqs (aexpr.get ());
 
-		      ax_reqs (aexpr);
-
-		      report_agent_reqs_errors (aexpr);
-
-		      discard_cleanups (old_chain1);
-		      collect->add_aexpr (aexpr);
+		      report_agent_reqs_errors (aexpr.get ());
 
 		      /* Take care of the registers.  */
 		      if (aexpr->reg_mask_len > 0)
 			{
-			  int ndx1;
-			  int ndx2;
-
-			  for (ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
+			  for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
 			    {
 			      QUIT;	/* Allow user to bail out with ^C.  */
 			      if (aexpr->reg_mask[ndx1] != 0)
 				{
 				  /* Assume chars have 8 bits.  */
-				  for (ndx2 = 0; ndx2 < 8; ndx2++)
+				  for (int ndx2 = 0; ndx2 < 8; ndx2++)
 				    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
 				      {
 					/* It's used -- record it.  */
@@ -1533,6 +1508,7 @@ encode_actions_1 (struct command_line *action,
 			    }
 			}
 
+		      collect->add_aexpr (gdb::move (aexpr));
 		      collect->append_exp (exp.get ());
 		      break;
 		    }		/* switch */
@@ -1554,16 +1530,15 @@ encode_actions_1 (struct command_line *action,
 						   block_for_pc (tloc->address),
 						   1);
 
-		  aexpr = gen_eval_for_expr (tloc->address, exp.get ());
-		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
+		  agent_expr_up aexpr = gen_eval_for_expr (tloc->address,
+							   exp.get ());
 
-		  ax_reqs (aexpr);
-		  report_agent_reqs_errors (aexpr);
+		  ax_reqs (aexpr.get ());
+		  report_agent_reqs_errors (aexpr.get ());
 
-		  discard_cleanups (old_chain1);
 		  /* Even though we're not officially collecting, add
 		     to the collect list anyway.  */
-		  collect->add_aexpr (aexpr);
+		  collect->add_aexpr (gdb::move (aexpr));
 		}		/* do */
 	    }
 	  while (action_exp && *action_exp++ == ',');
@@ -1625,9 +1600,9 @@ encode_actions_rsp (struct bp_location *tloc, char ***tdp_actions,
 }
 
 void
-collection_list::add_aexpr (struct agent_expr *aexpr)
+collection_list::add_aexpr (agent_expr_up aexpr)
 {
-  m_aexprs.push_back (aexpr);
+  m_aexprs.push_back (aexpr.release ());
 }
 
 static void
