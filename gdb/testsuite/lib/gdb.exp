@@ -117,6 +117,10 @@ set octal "\[0-7\]+"
 
 set inferior_exited_re "(\\\[Inferior \[0-9\]+ \\(.*\\) exited)"
 
+# A regular expression that matches a value history number.
+# E.g., $1, $2, etc.
+set valnum_re "\\\$$decimal"
+
 ### Only procedures should come after this point.
 
 #
@@ -6004,6 +6008,15 @@ proc capture_command_output { command prefix } {
 proc multi_line { args } {
     return [join $args "\r\n"]
 }
+
+# Similar to the above, but while multi_line is meant to be used to
+# match GDB output, this one is meant to be used to build strings to
+# send as GDB input.
+
+proc multi_line_input { args } {
+    return [join $args "\n"]
+}
+
 
 # Always load compatibility stuff.
 load_lib future.exp

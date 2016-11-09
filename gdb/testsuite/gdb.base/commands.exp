@@ -23,91 +23,183 @@ if { [prepare_for_testing commands.exp commands run.c {debug additional_flags=-D
     return -1
 }
 
+# Run to FUNCTION.  If that fails, issue a FAIL and make the caller
+# return.
+
+proc runto_or_return {function} {
+    if { ![runto factorial] } {
+	fail "cannot run to $function"
+	return -code return
+    }
+}
+
 proc_with_prefix gdbvar_simple_if_test {} {
     global gdb_prompt
+    global valnum_re
 
     gdb_test_no_output "set \$foo = 0" "set foo"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if \$foo == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
-	    "\\\$\[0-9\]* = 0xdeadbeef" "#1"
+    gdb_test \
+	[multi_line_input \
+	     {if $foo == 1} \
+	     {  p/x 0xfeedface} \
+	     {else} \
+	     {  p/x 0xdeadbeef} \
+	     {end}] \
+	"$valnum_re = 0xdeadbeef" \
+	"#1"
+
     # All this test should do is print 0xfeedface once.
-    gdb_test "if \$foo == 0\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
-	    "\\\$\[0-9\]* = 0xfeedface" "#2"
+    gdb_test \
+	[multi_line_input \
+	     {if $foo == 0} \
+	     {  p/x 0xfeedface} \
+	     {else} \
+	     {  p/x 0xdeadbeef} \
+	     {end}] \
+	"$valnum_re = 0xfeedface" \
+	"#2"
 }
 
 proc_with_prefix gdbvar_simple_while_test {} {
     global gdb_prompt
+    global valnum_re
 
     gdb_test_no_output "set \$foo = 5" "set foo"
     # This test should print 0xfeedface five times.
-    gdb_test "while \$foo > 0\np/x 0xfeedface\nset \$foo -= 1\nend" \
-	    "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
-	    "#1"
+    gdb_test \
+	[multi_line_input \
+	     {while $foo > 0} \
+	     {  p/x 0xfeedface} \
+	     {  set $foo -= 1} \
+	     {end}] \
+	[multi_line \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface"] \
+	"#1"
 }
 
 proc_with_prefix gdbvar_complex_if_while_test {} {
     global gdb_prompt
+    global valnum_re
 
-    gdb_test_no_output "set \$foo = 4" \
-	"set foo"
+    gdb_test_no_output "set \$foo = 4" "set foo"
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while \$foo > 0\nset \$foo -= 1\nif \(\$foo % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" \
-	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
-	    "#1"
+    gdb_test \
+	[multi_line_input \
+	     {while $foo > 0} \
+	     {  set $foo -= 1} \
+	     {  if ($foo % 2) == 1} \
+	     {    p/x 0xdeadbeef} \
+	     {  else} \
+	     {    p/x 0xfeedface} \
+	     {  end} \
+	     {end}] \
+	[multi_line \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface"] \
+	"#1"
 }
 
 proc_with_prefix progvar_simple_if_test {} {
     global gdb_prompt
+    global valnum_re
 
-    if { ![runto factorial] } then { gdb_suppress_tests; }
+    runto_or_return factorial
+
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=5" ".*" "set value to 5"
+    gdb_test "p value=5" " = 5" "set value to 5"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
-	    "\\\$\[0-9\]* = 0xdeadbeef" \
-	    "#1"
+    gdb_test \
+	[multi_line_input \
+	     {if value == 1} \
+	     {  p/x 0xfeedface} \
+	     {else} \
+	     {  p/x 0xdeadbeef} \
+	     {end}] \
+	"$valnum_re = 0xdeadbeef" \
+	"#1"
+
     # All this test should do is print 0xfeedface once.
-    gdb_test "if value == 5\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
-	    "\\\$\[0-9\]* = 0xfeedface" \
-	    "#2"
-    gdb_stop_suppressing_tests
+    gdb_test \
+	[multi_line_input \
+	     {if value == 5} \
+	     {  p/x 0xfeedface} \
+	     {else} \
+	     {  p/x 0xdeadbeef} \
+	     {end}] \
+	"$valnum_re = 0xfeedface" \
+	"#2"
 }
 
 proc_with_prefix progvar_simple_while_test {} {
     global gdb_prompt
+    global valnum_re
 
-    if { ![runto factorial] } then { gdb_suppress_tests }
+    runto_or_return factorial
+
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=5" ".*" "set value to 5"
+    gdb_test "p value=5" " = 5" "set value to 5"
     # This test should print 0xfeedface five times.
-    gdb_test "while value > 0\np/x 0xfeedface\nset value -= 1\nend" \
-	    "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
-	    "#1"
-    gdb_stop_suppressing_tests
+    gdb_test \
+	[multi_line_input \
+	     {while value > 0} \
+	     {  p/x 0xfeedface} \
+	     {  set value -= 1} \
+	     {end}] \
+	[multi_line \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xfeedface"] \
+	"#1"
 }
 
 proc_with_prefix progvar_complex_if_while_test {} {
     global gdb_prompt
+    global valnum_re
 
-    if { ![runto factorial] } then { gdb_suppress_tests }
+    runto_or_return factorial
+
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=4" ".*" "set value to 4"
-    # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" \
-	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
-	    "#1"
-    gdb_stop_suppressing_tests
+    gdb_test "p value=4" " = 4" "set value to 4"
+    # This test should alternate between 0xdeadbeef and 0xfeedface two
+    # times.
+    gdb_test \
+	[multi_line_input \
+	     {while value > 0} \
+	     {  set value -= 1} \
+	     {  if (value % 2) == 1} \
+	     {    p/x 0xdeadbeef} \
+	     {  else} \
+	     {    p/x 0xfeedface} \
+	     {  end} \
+	     {end}] \
+	[multi_line \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface"] \
+	"#1"
 }
 
 proc_with_prefix if_while_breakpoint_command_test {} {
+    global valnum_re
 
-    if { ![runto factorial] } then { gdb_suppress_tests }
+    runto_or_return factorial
+
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=5" ".*" "set value to 5"
+    gdb_test "p value=5" " = 5" "set value to 5"
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial"
 
@@ -118,14 +210,28 @@ proc_with_prefix if_while_breakpoint_command_test {} {
     }
 
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" \
-	    "" \
-	    "commands part 2"
-    gdb_test "continue" \
-	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
-	    "#1"
+    gdb_test \
+	[multi_line_input \
+	     {while value > 0} \
+	     {  set value -= 1} \
+	     {  if (value % 2) == 1} \
+	     {    p/x 0xdeadbeef} \
+	     {  else} \
+	     {    p/x 0xfeedface} \
+	     {  end} \
+	     {end} \
+	     {end}] \
+	"" \
+	"commands part 2"
+    gdb_test \
+	"continue" \
+	[multi_line \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface"] \
+	"#1"
     gdb_test "info break" "while.*set.*if.*p/x.*else.*p/x.*end.*"
-    gdb_stop_suppressing_tests
 }
 
 # Test that we can run the inferior from breakpoint commands.
@@ -135,11 +241,11 @@ proc_with_prefix if_while_breakpoint_command_test {} {
 # subsection "Breakpoint command lists".
 
 proc_with_prefix infrun_breakpoint_command_test {} {
+    runto_or_return factorial
 
-    if { ![runto factorial] } then { gdb_suppress_tests }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=6" ".*" "set value to 6"
+    gdb_test "p value=6" " = 6" "set value to 6"
     delete_breakpoints
     gdb_test "break factorial if value == 5" "Breakpoint.*at.*"
 
@@ -159,29 +265,32 @@ proc_with_prefix infrun_breakpoint_command_test {} {
 
     gdb_test "continue" \
 	"Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*"
-
-    gdb_stop_suppressing_tests
 }
 
 proc_with_prefix breakpoint_command_test {} {
+    runto_or_return factorial
 
-    if { ![runto factorial] } then { gdb_suppress_tests; }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=6" ".*" "set value to 6"
+    gdb_test "p value=6" " = 6" "set value to 6"
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*"
-    gdb_test "commands\nprintf \"Now the value is %d\\n\", value\nend" \
-	"End with.*" "commands"
+    gdb_test \
+	[multi_line_input \
+	     {commands} \
+	     {  printf "Now the value is %d\n", value} \
+	     {end}] \
+	"End with.*" \
+	"commands"
     gdb_test "continue" \
 	    "Breakpoint \[0-9\]*, factorial.*Now the value is 5"
     gdb_test "print value" " = 5"
-    gdb_stop_suppressing_tests
 }
 
 # Test a simple user defined command (with arguments)
 proc_with_prefix user_defined_command_test {} {
     global gdb_prompt
+    global valnum_re
 
     gdb_test_no_output "set \$foo = 4" "set foo"
 
@@ -192,13 +301,31 @@ proc_with_prefix user_defined_command_test {} {
     }
 
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while \$arg0 > 0\nset \$arg0 -= 1\nif \(\$arg0 % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" \
-	    "" \
-	    "enter commands"
+    gdb_test \
+	[multi_line_input \
+	     {while $arg0 > 0} \
+	     {  set $arg0 -= 1} \
+	     {  if ($arg0 % 2) == 1} \
+	     {    p/x 0xdeadbeef} \
+	     {  else} \
+	     {    p/x 0xfeedface} \
+	     {  end} \
+	     {end} \
+	     {end}] \
+	"" \
+	"enter commands"
 
-    gdb_test "mycommand \$foo" \
-	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
-	    "execute user-defined command"
+    global decimal
+    set valnum_re "\\\$$decimal"
+
+    gdb_test \
+	{mycommand $foo} \
+	[multi_line \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface" \
+	     "$valnum_re = 0xdeadbeef" \
+	     "$valnum_re = 0xfeedface"] \
+	"execute user-defined command"
    gdb_test "show user mycommand" \
 	"  while \\\$arg0.*set.*    if \\\(\\\$arg0.*p/x.*    else\[^\n\].*p/x.*    end\[^\n\].*  end\[^\n\].*" \
 	   "display user command"
@@ -233,7 +360,8 @@ proc_with_prefix watchpoint_command_test {} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
-    if { ![runto factorial] } then { return }
+    runto_or_return factorial
+
     delete_breakpoints
 
     # Verify that we can create a watchpoint, and give it a commands
@@ -298,60 +426,44 @@ proc_with_prefix watchpoint_command_test {} {
 
 proc_with_prefix test_command_prompt_position {} {
     global gdb_prompt
+    global valnum_re
 
-    if { ![runto factorial] } then { gdb_suppress_tests; }
+    runto_or_return factorial
+
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*"
     gdb_test "p value=5" ".*" "set value to 5"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
-	    "\\\$\[0-9\]* = 0xdeadbeef" \
-	    "if test"
-    
+    gdb_test \
+	[multi_line_input \
+	     {if value == 1} \
+	     {  p/x 0xfeedface} \
+	     {else} \
+	     {  p/x 0xdeadbeef} \
+	     {end}] \
+	"$valnum_re = 0xdeadbeef" \
+	"if test"
+
     # Now let's test for the correct position of the '>' in gdb's
     # prompt for commands.  It should be at the beginning of the line,
     # and not after one space.
 
-    send_gdb "commands\n"
-    gdb_expect {
-	-re "Type commands.*End with.*\[\r\n\]>$" { 
-	    send_gdb "printf \"Now the value is %d\\n\", value\n"
-	    gdb_expect {
+    set test "> OK"
+    gdb_test_multiple "commands" $test {
+	-re "Type commands.*End with.*\[\r\n\]>$" {
+	    gdb_test_multiple "printf \"Now the value is %d\\n\", value" $test {
 		-re "^printf.*value\r\n>$" {
-		    send_gdb "end\n"
-		    gdb_expect {
+		    gdb_test_multiple "end" $test {
 			-re "^end\r\n$gdb_prompt $" { 
-			    pass "> OK"
-			}
-			-re ".*$gdb_prompt $" { 
-			    fail "some other message"
-			}
-			timeout  { 
-			    fail "(timeout) 1"
+			    pass $test
 			}
 		    }
 		}
-		-re "^ >$" { fail "> not OK" }
-		-re ".*$gdb_prompt $"   { 
-		    fail "wrong message"
-		}
-		timeout    { 
-		    fail "(timeout) 2"
-		}
 	    }
 	}
-	-re "Type commands.*End with.*\[\r\n\] >$" { 
-	    fail "prompt not OK"
-	}
-	-re ".*$gdb_prompt $" { 
-	    fail "commands"
-	}
-	timeout { fail "(timeout) 3" }
     }
-
-    gdb_stop_suppressing_tests
 }
 
 
@@ -480,20 +592,22 @@ proc_with_prefix temporary_breakpoint_commands {} {
 # Test that GDB can handle $arg0 outside of user functions without
 # crashing.
 proc_with_prefix stray_arg0_test { } {
+    global valnum_re
+
     gdb_test "print \$arg0" \
-	"\\\$\[0-9\]* = void" \
+	"$valnum_re = void" \
 	"#1"
 
     gdb_test "if 1 == 1\nprint \$arg0\nend" \
-	"\\\$\[0-9\]* = void" \
+	"$valnum_re = void" \
 	"#2"
 
     gdb_test "print \$arg0 = 1" \
-	"\\\$\[0-9\]* = 1" \
+	"$valnum_re = 1" \
 	"#3"
 
     gdb_test "print \$arg0" \
-	"\\\$\[0-9\]* = 1" \
+	"$valnum_re = 1" \
 	"#4"
 }
 
@@ -685,7 +799,14 @@ proc_with_prefix error_clears_commands_left {} {
     gdb_test_no_output "end" "main commands 2c"
 
     gdb_run_cmd
-    gdb_test "" "hook-stop1\r\n.*\r\ncmd1\r\nUndefined command: \"errorcommandxy\"\\.  Try \"help\"\\." "cmd1 error"
+    gdb_test \
+	"" \
+	[multi_line \
+	     "hook-stop1" \
+	     ".*" \
+	     "cmd1" \
+	     "Undefined command: \"errorcommandxy\"\\.  Try \"help\"\\."] \
+	"cmd1 error"
 
     gdb_test {echo idle\n} "\r\nidle" "no cmd2"
 }
@@ -693,13 +814,20 @@ proc_with_prefix error_clears_commands_left {} {
 proc_with_prefix redefine_hook_test {} {
     global gdb_prompt
 
-    gdb_test "define one\nend" \
-      "" \
-      "define one"
+    gdb_test \
+	[multi_line_input \
+	     "define one"\
+	     "end"] \
+	"" \
+	"define one"
 
-    gdb_test "define hook-one\necho hibob\\n\nend" \
-      "" \
-      "define hook-one"
+    gdb_test \
+	[multi_line_input \
+	     "define hook-one" \
+	     "echo hibob\\n" \
+	     "end"] \
+	"" \
+	"define hook-one"
 
     set test "redefine one"
     gdb_test_multiple "define one" $test {
@@ -713,13 +841,9 @@ proc_with_prefix redefine_hook_test {} {
 	}
     }
 
-    gdb_test "end" \
-	    "" \
-	    "enter commands for one redefinition"
+    gdb_test "end" "" "enter commands for one redefinition"
 
-    gdb_test "one" \
-	    "hibob" \
-	    "execute one command"
+    gdb_test "one" "hibob" "execute one command"
 }
 
 proc_with_prefix redefine_backtrace_test {} {
@@ -737,16 +861,15 @@ proc_with_prefix redefine_backtrace_test {} {
 	}
     }
 
-    gdb_test "echo hibob\\n\nend" \
-	    "" \
-	    "enter commands"
+    gdb_test \
+	[multi_line_input \
+	     "echo hibob\\n" \
+	     "end"] \
+	"" \
+	"enter commands"
 
-    gdb_test "backtrace" \
-	    "hibob" \
-	    "execute backtrace command"
-    gdb_test "bt" \
-	    "hibob" \
-	    "execute bt command"
+    gdb_test "backtrace" "hibob" "execute backtrace command"
+    gdb_test "bt" "hibob" "execute bt command"
 }
 
 gdbvar_simple_if_test
