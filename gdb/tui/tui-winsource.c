@@ -604,8 +604,11 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
   char *src_line_buf;
   int i, line_width, max_lines;
 
-  max_lines = win_info->generic.height;	/* Less the highlight box.  */
-  line_width = win_info->generic.width - 1;
+  /* The window width/height includes the highlight box.  Determine actual
+     content dimensions, including string null-terminators.  */
+  max_lines = win_info->generic.height - 2;
+  line_width = win_info->generic.width - 2 + 1;
+
   /*
    * Allocate the buffer for the source lines.  Do this only once
    * since they will be re-used for all source displays.  The only
