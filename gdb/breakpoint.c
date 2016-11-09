@@ -2268,7 +2268,7 @@ parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
      that may show up.  */
   TRY
     {
-      aexpr = gdb::move (gen_eval_for_expr (scope, cond));
+      aexpr = std::move (gen_eval_for_expr (scope, cond));
     }
 
   CATCH (ex, RETURN_MASK_ERROR)
@@ -2452,7 +2452,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
      that may show up.  */
   TRY
     {
-      aexpr = gdb::move (gen_printf (scope, gdbarch, 0, 0,
+      aexpr = std::move (gen_printf (scope, gdbarch, 0, 0,
 				     format_start, format_end - format_start,
 				     fpieces, nargs, argvec));
     }

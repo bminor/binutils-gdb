@@ -243,7 +243,6 @@ class collection_list
 {
 public:
   collection_list ();
-  ~collection_list ();
 
   void add_wholly_collected (const char *print_name);
 
@@ -282,8 +281,7 @@ private:
 
   std::vector<memrange> m_memranges;
 
-  /* Vector owns pointers.  */
-  std::vector<agent_expr *> m_aexprs;
+  std::vector<agent_expr_up> m_aexprs;
 
   /* True is the user requested a collection of "$_sdata", "static
      tracepoint data".  */

@@ -1076,7 +1076,7 @@ collection_list::collect_symbol (struct symbol *sym,
 	    }
 	}
 
-      add_aexpr (gdb::move (aexpr));
+      add_aexpr (std::move (aexpr));
     }
 }
 
@@ -1178,12 +1178,6 @@ collection_list::collection_list ()
 {
   m_memranges.reserve (128);
   m_aexprs.reserve (128);
-}
-
-collection_list::~collection_list ()
-{
-  for (int ndx = 0; ndx < m_aexprs.size (); ndx++)
-    delete m_aexprs[ndx];
 }
 
 /* Reduce a collection list to string form (for gdb protocol).  */
@@ -1419,7 +1413,7 @@ encode_actions_1 (struct command_line *action,
 			}
 		    }
 
-		  collect->add_aexpr (gdb::move (aexpr));
+		  collect->add_aexpr (std::move (aexpr));
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$_sdata", action_exp, 7))
@@ -1508,7 +1502,7 @@ encode_actions_1 (struct command_line *action,
 			    }
 			}
 
-		      collect->add_aexpr (gdb::move (aexpr));
+		      collect->add_aexpr (std::move (aexpr));
 		      collect->append_exp (exp.get ());
 		      break;
 		    }		/* switch */
@@ -1538,7 +1532,7 @@ encode_actions_1 (struct command_line *action,
 
 		  /* Even though we're not officially collecting, add
 		     to the collect list anyway.  */
-		  collect->add_aexpr (gdb::move (aexpr));
+		  collect->add_aexpr (std::move (aexpr));
 		}		/* do */
 	    }
 	  while (action_exp && *action_exp++ == ',');
@@ -1602,7 +1596,7 @@ encode_actions_rsp (struct bp_location *tloc, char ***tdp_actions,
 void
 collection_list::add_aexpr (agent_expr_up aexpr)
 {
-  m_aexprs.push_back (aexpr.release ());
+  m_aexprs.push_back (std::move (aexpr));
 }
 
 static void

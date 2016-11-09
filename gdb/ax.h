@@ -168,7 +168,7 @@ struct agent_expr
   };
 
 /* An agent_expr owning pointer.  */
-typedef gdb::unique_ptr<agent_expr> agent_expr_up;
+typedef std::unique_ptr<agent_expr> agent_expr_up;
 
 /* The actual values of the various bytecode operations.  */
 

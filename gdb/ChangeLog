@@ -1,5 +1,22 @@
 2016-11-09  Pedro Alves  <palves@redhat.com>
 
+	* ax-gdb.c (agent_eval_command_one): Use std::move instead of
+	gdb::move.
+	* ax.h (agent_expr_up): Use std::unique_ptr instead of
+	gdb::unique_ptr.
+	* breakpoint.c (parse_cond_to_aexpr): Use std::move instead of
+	gdb::move.
+	* tracepoint.c (collection_list::collect_symbol): Likewise.
+	(collection_list::~collection_list): Delete.
+	(encode_actions_1): Use std::move instead of gdb::move.
+	(collection_list::add_aexpr): Use std::move instead of
+	unique_ptr::release.
+	* tracepoint.h (collection_list) <~collection_list>: Delete
+	declaration.
+	<m_aexprs>: Now a vector of agent_ptr_up.
+
+2016-11-09  Pedro Alves  <palves@redhat.com>
+
 	* main.c (struct cmdarg): Add constructor.
 	(captured_main_1): Use vector::emplace_back.
 	* tracepoint.c (collection_list::add_memrange): Likewise.

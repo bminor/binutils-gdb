@@ -2555,7 +2555,7 @@ agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
   arg = exp;
   if (!eval && strcmp (arg, "$_ret") == 0)
     {
-      agent = gdb::move (gen_trace_for_return_address (pc, get_current_arch (),
+      agent = std::move (gen_trace_for_return_address (pc, get_current_arch (),
 						       trace_string));
     }
   else
@@ -2565,10 +2565,10 @@ agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
       if (eval)
 	{
 	  gdb_assert (trace_string == 0);
-	  agent = gdb::move (gen_eval_for_expr (pc, expr.get ()));
+	  agent = std::move (gen_eval_for_expr (pc, expr.get ()));
 	}
       else
-	agent = gdb::move (gen_trace_for_expr (pc, expr.get (), trace_string));
+	agent = std::move (gen_trace_for_expr (pc, expr.get (), trace_string));
     }
 
   ax_reqs (agent.get ());
