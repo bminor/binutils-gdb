@@ -172,7 +172,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   enum tui_status ret = TUI_FAILURE;
   int i;
   int offset = TUI_DISASM_WIN->detail.source_info.horizontal_offset;
-  int max_lines;
+  int max_lines, line_width;
   CORE_ADDR cur_pc;
   struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_default_tab_len ();
@@ -193,8 +193,9 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   TUI_DISASM_WIN->detail.source_info.start_line_or_addr.u.addr = pc;
   cur_pc = locator->content[0]->which_element.locator.addr;
 
-  max_lines = TUI_DISASM_WIN->generic.height - 2;	/* Account for
-							   hilite.  */
+  /* Window size, excluding highlight box.  */
+  max_lines = TUI_DISASM_WIN->generic.height - 2;
+  line_width = TUI_DISASM_WIN->generic.width - 2;
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   asm_lines = XALLOCAVEC (struct tui_asm_line, max_lines);
@@ -233,20 +234,15 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
       src = &element->which_element.source;
       strcpy (line, asm_lines[i].addr_string);
       cur_len = strlen (line);
-
-      /* Add spaces to make the instructions start on the same
-	 column.  */
-      while (cur_len < insn_pos)
-        {
-          strcat (line, " ");
-          cur_len++;
-        }
-
-      strcat (line, asm_lines[i].insn);
+      memset (line + cur_len, ' ', insn_pos - cur_len);
+      strcpy (line + insn_pos, asm_lines[i].insn);
 
       /* Now copy the line taking the offset into account.  */
       if (strlen (line) > offset)
-        strcpy (src->line, &line[offset]);
+	{
+	  strncpy (src->line, &line[offset], line_width);
+	  src->line[line_width] = '\0';
+	}
       else
         src->line[0] = '\0';
 

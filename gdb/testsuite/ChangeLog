@@ -1,3 +1,9 @@
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/tui-layout.c: New file.
+	* gdb.base/tui-layout.exp: Use tui-layout.c, to ensure that the
+	disassembly window contains very long lines.
+
 2016-11-08  Tom Tromey  <tom@tromey.com>
 
 	* gdb.python/py-value.exp (test_value_creation): Make "long" test

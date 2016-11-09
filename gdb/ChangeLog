@@ -1,3 +1,8 @@
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tui/tui-disasm.c (tui_set_disassem_content): Fix line buffer
+	overrun due to unchecked strcpy.
+
 2016-11-09  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (find_inferior_task_it): Fix indentation.
