@@ -1,5 +1,10 @@
 2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* tui/tui-disasm.c (tui_set_disassem_content): Fix calculation of
+	the longest disassembly line's length.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* tui/tui-disasm.c (tui_set_disassem_content): Fix line buffer
 	overrun due to unchecked strcpy.
 

@@ -178,7 +178,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   int tab_len = tui_default_tab_len ();
   struct tui_asm_line *asm_lines;
   int insn_pos;
-  int addr_size, max_size;
+  int addr_size, insn_size;
   char *line;
   
   if (pc == 0)
@@ -203,9 +203,9 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   tui_disassemble (gdbarch, asm_lines, pc, max_lines);
 
-  /* See what is the maximum length of an address and of a line.  */
+  /* Determine maximum address- and instruction lengths.  */
   addr_size = 0;
-  max_size = 0;
+  insn_size = 0;
   for (i = 0; i < max_lines; i++)
     {
       size_t len = strlen (asm_lines[i].addr_string);
@@ -213,15 +213,16 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (len > addr_size)
         addr_size = len;
 
-      len = strlen (asm_lines[i].insn) + tab_len;
-      if (len > max_size)
-        max_size = len;
+      len = strlen (asm_lines[i].insn);
+      if (len > insn_size)
+	insn_size = len;
     }
-  max_size += addr_size + tab_len;
+
+  /* Align instructions to the same column.  */
+  insn_pos = (1 + (addr_size / tab_len)) * tab_len;
 
   /* Allocate memory to create each line.  */
-  line = (char*) alloca (max_size);
-  insn_pos = (1 + (addr_size / tab_len)) * tab_len;
+  line = (char*) alloca (insn_pos + insn_size + 1);
 
   /* Now construct each line.  */
   for (i = 0; i < max_lines; i++)
