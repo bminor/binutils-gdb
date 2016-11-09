@@ -1918,6 +1918,14 @@ proc foreach_with_prefix {var list body} {
     }
 }
 
+# Like TCL's native proc, but defines a procedure that wraps its body
+# within 'with_test_prefix "$proc_name" { ... }'.
+proc proc_with_prefix {name arguments body} {
+    # Define the advertised proc.
+    proc $name $arguments [list with_test_prefix $name $body]
+}
+
+
 # Run BODY in the context of the caller.  After BODY is run, the variables
 # listed in VARS will be reset to the values they had before BODY was run.
 #

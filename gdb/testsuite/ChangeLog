@@ -1,3 +1,19 @@
+2016-11-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/commands.exp (gdbvar_simple_if_test)
+	(gdbvar_simple_while_test, gdbvar_complex_if_while_test)
+	(progvar_simple_if_test, progvar_simple_while_test)
+	(progvar_complex_if_while_test, if_while_breakpoint_command_test)
+	(infrun_breakpoint_command_test, breakpoint_command_test)
+	(user_defined_command_test, watchpoint_command_test)
+	(test_command_prompt_position, deprecated_command_test)
+	(bp_deleted_in_command, temporary_breakpoint_commands)
+	(stray_arg0_test, source_file_with_indented_comment)
+	(recursive_source_test, if_commands_test)
+	(error_clears_commands_left, redefine_hook_test)
+	(redefine_backtrace_test): Use proc_with_prefix.
+	* lib/gdb.exp (proc_with_prefix): New proc.
+
 2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/tui-layout.c: New file.
