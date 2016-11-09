@@ -599,4 +599,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	82 eb 01             	sub    \$0x1,%bl
  +[a-f0-9]+:	82 f3 01             	xor    \$0x1,%bl
  +[a-f0-9]+:	82 fb 01             	cmp    \$0x1,%bl
+ +[a-f0-9]+:	62 f3 7d 08 15 e8 ab 	vpextrw \$0xab,%xmm5,%eax
 #pass

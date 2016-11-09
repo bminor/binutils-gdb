@@ -252,7 +252,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ed { OP_E, d_mode }
 #define Edq { OP_E, dq_mode }
 #define Edqw { OP_E, dqw_mode }
-#define EdqwS { OP_E, dqw_swap_mode }
 #define Edqb { OP_E, dqb_mode }
 #define Edb { OP_E, db_mode }
 #define Edw { OP_E, dw_mode }
@@ -556,7 +555,6 @@ enum
   dq_mode,
   /* registers like dq_mode, memory like w_mode.  */
   dqw_mode,
-  dqw_swap_mode,
   bnd_mode,
   /* 4- or 6-byte pointer operand */
   f_mode,
@@ -14552,7 +14550,6 @@ intel_operand_size (int bytemode, int sizeflag)
     case w_mode:
     case dw_mode:
     case dqw_mode:
-    case dqw_swap_mode:
       oappend ("WORD PTR ");
       break;
     case indir_v_mode:
@@ -14907,8 +14904,7 @@ OP_E_register (int bytemode, int sizeflag)
 
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == b_swap_mode
-	  || bytemode == v_swap_mode
-	  || bytemode == dqw_swap_mode))
+	  || bytemode == v_swap_mode))
     swap_operand ();
 
   switch (bytemode)
@@ -14960,7 +14956,6 @@ OP_E_register (int bytemode, int sizeflag)
     case dqb_mode:
     case dqd_mode:
     case dqw_mode:
-    case dqw_swap_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	names = names64;
@@ -15016,7 +15011,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	case dqw_mode:
 	case dw_mode:
-	case dqw_swap_mode:
 	  shift = 1;
 	  break;
 	case dqb_mode:
@@ -15490,7 +15484,6 @@ OP_G (int bytemode, int sizeflag)
     case dqb_mode:
     case dqd_mode:
     case dqw_mode:
-    case dqw_swap_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	oappend (names64[modrm.reg + add]);
@@ -16345,7 +16338,6 @@ OP_EX (int bytemode, int sizeflag)
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == x_swap_mode
 	  || bytemode == d_swap_mode
-	  || bytemode == dqw_swap_mode
 	  || bytemode == d_scalar_swap_mode
 	  || bytemode == q_swap_mode
 	  || bytemode == q_scalar_swap_mode))

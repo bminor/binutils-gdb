@@ -2561,7 +2561,7 @@ static const struct dis386 evex_table[][256] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpextrw",	{ EdqwS, XM, Ib }, 0 },
+    { "vpextrw",	{ Edqw, XM, Ib }, 0 },
   },
   /* PREFIX_EVEX_0F3A16 */
   {

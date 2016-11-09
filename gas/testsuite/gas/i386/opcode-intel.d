@@ -600,4 +600,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	82 eb 01             	sub    bl,0x1
  +[a-f0-9]+:	82 f3 01             	xor    bl,0x1
  +[a-f0-9]+:	82 fb 01             	cmp    bl,0x1
+ +[a-f0-9]+:	62 f3 7d 08 15 e8 ab 	vpextrw eax,xmm5,0xab
 #pass

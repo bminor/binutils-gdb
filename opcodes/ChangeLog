@@ -1,5 +1,19 @@
 2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/20799
+	* i386-dis-evex.h (evex_table): Replace EdqwS with Edqw.
+	* i386-dis.c (EdqwS): Removed.
+	(dqw_swap_mode): Likewise.
+	(intel_operand_size): Don't check dqw_swap_mode.
+	(OP_E_register): Likewise.
+	(OP_E_memory): Likewise.
+	(OP_G): Likewise.
+	(OP_EX): Likewise.
+	* i386-opc.tbl: Remove "S" from EVEX vpextrw.
+	* i386-tbl.h: Regerated.
+
+2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.tbl: Merge AVX512F vmovq.
 	* i386-tbl.h: Regerated.
 
