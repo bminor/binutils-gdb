@@ -1,3 +1,27 @@
+2016-11-09  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (find_inferior_task_it): Fix indentation.
+	(find_inferior_notify_it): Remove.
+	(find_inferior_pid_it): New function.
+	(darwin_find_inferior_by_notify): Remove.
+	(darwin_find_inferior_by_pid): New function.
+	(darwin_find_new_inferior): New function.
+	(darwin_check_message_ndr): New function from
+	darwin_decode_exception_message.
+	(darwin_decode_exception_message): Call darwin_check_message_ndr.
+	Handle SIGTRAP addressed to an unknown task (when a task spawned).
+	(darwin_decode_notify_message): New function.
+	(darwin_decode_message): Handle unknown task.
+	(darwin_deallocate_threads): New function from darwin_mourn_inferior.
+	(darwin_mourn_inferior): Use darwin_deallocate_threads and
+	darwin_deallocate_exception_ports.
+	(darwin_deallocate_exception_ports): New function from
+	darwin_mourn_inferior.
+	(darwin_setup_exceptions): New function from darwin_attach_pid.
+	(darwin_setup_request_notification): Likewise.
+	(darwin_attach_pid): Call darwin_setup_request_notification and
+	darwin_setup_request_notification.
+
 2016-11-08  Tom Tromey  <tom@tromey.com>
 
 	* python/py-framefilter.c (py_print_frame): Use
