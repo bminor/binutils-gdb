@@ -1,3 +1,20 @@
+2016-11-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.mi/user-selected-context-sync.exp (with_test_prefix_procname):
+	Remove.
+	(test_setup): Define with proc_with_prefix.
+	(test_cli_inferior): Likewise.
+	(test_cli_thread): Likewise.
+	(test_cli_frame): Likewise.
+	(test_cli_select_frame): Likewise.
+	(test_cli_up_down): Likewise.
+	(test_mi_thread_select): Likewise.
+	(test_mi_stack_select_frame): Likewise.
+	(test_cli_in_mi_inferior): Likewise.
+	(test_cli_in_mi_thread): Likewise.
+	(test_cli_in_mi_frame): Likewise.
+	(top level): Do not use with_test_prefix_procname.
+
 2016-11-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/commands.exp (gdbvar_simple_if_test)
