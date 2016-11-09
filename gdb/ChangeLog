@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-varobj.c (py_varobj_iter_dtor, py_varobj_iter_next):
+	Use gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (gdbpy_enter_varobj): New constructor.
 	* python/python-internal.h (gdbpy_enter_varobj): New class.
 	* python/py-varobj.c (py_varobj_get_iterator): Use

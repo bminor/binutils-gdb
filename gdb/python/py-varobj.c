@@ -39,11 +39,8 @@ static void
 py_varobj_iter_dtor (struct varobj_iter *self)
 {
   struct py_varobj_iter *dis = (struct py_varobj_iter *) self;
-  struct cleanup *back_to = varobj_ensure_python_env (self->var);
-
+  gdbpy_enter_varobj enter_py (self->var);
   Py_XDECREF (dis->iter);
-
-  do_cleanups (back_to);
 }
 
 /* Implementation of the 'next' method of pretty-printed varobj
@@ -53,8 +50,6 @@ static varobj_item *
 py_varobj_iter_next (struct varobj_iter *self)
 {
   struct py_varobj_iter *t = (struct py_varobj_iter *) self;
-  struct cleanup *back_to;
-  PyObject *item;
   PyObject *py_v;
   varobj_item *vitem;
   const char *name = NULL;
@@ -62,9 +57,9 @@ py_varobj_iter_next (struct varobj_iter *self)
   if (!gdb_python_initialized)
     return NULL;
 
-  back_to = varobj_ensure_python_env (self->var);
+  gdbpy_enter_varobj enter_py (self->var);
 
-  item = PyIter_Next (t->iter);
+  gdbpy_ref item (PyIter_Next (t->iter));
 
   if (item == NULL)
     {
@@ -92,7 +87,7 @@ py_varobj_iter_next (struct varobj_iter *self)
 
 	  name_str = xstrprintf ("<error at %d>",
 				 self->next_raw_index++);
-	  item = Py_BuildValue ("(ss)", name_str, value_str.get ());
+	  item.reset (Py_BuildValue ("(ss)", name_str, value_str.get ()));
 	  xfree (name_str);
 	  if (item == NULL)
 	    {
@@ -108,7 +103,7 @@ py_varobj_iter_next (struct varobj_iter *self)
 	}
     }
 
-  if (!PyArg_ParseTuple (item, "sO", &name, &py_v))
+  if (!PyArg_ParseTuple (item.get (), "sO", &name, &py_v))
     {
       gdbpy_print_stack ();
       error (_("Invalid item from the child list"));
@@ -121,7 +116,6 @@ py_varobj_iter_next (struct varobj_iter *self)
   vitem->name = name;
 
   self->next_raw_index++;
-  do_cleanups (back_to);
   return vitem;
 }
 
