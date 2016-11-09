@@ -145,7 +145,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
 	       strlen (RUST_ENUM_PREFIX)) == 0)
     {
-      char *tail, *token, *name, *saveptr = NULL;
+      char *tail, *token, *saveptr = NULL;
       unsigned long fieldno;
       struct type *member_type;
       LONGEST value;
@@ -158,9 +158,8 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
       /* Optimized enums have only one field.  */
       member_type = TYPE_FIELD_TYPE (type, 0);
 
-      name = xstrdup (TYPE_FIELD_NAME (type, 0));
-      cleanup = make_cleanup (xfree, name);
-      tail = name + strlen (RUST_ENUM_PREFIX);
+      gdb::unique_xmalloc_ptr<char> name (xstrdup (TYPE_FIELD_NAME (type, 0)));
+      tail = name.get () + strlen (RUST_ENUM_PREFIX);
 
       /* The location of the value that doubles as a discriminant is
          stored in the name of the field, as
@@ -203,7 +202,6 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
 		      + rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (type, 0))));
 	}
 
-      do_cleanups (cleanup);
       return ret;
     }
 

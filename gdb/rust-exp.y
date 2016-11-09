@@ -974,15 +974,13 @@ super_name (const struct rust_op *ident, unsigned int n_supers)
     {
       int i;
       int len;
-      VEC (int) *offsets = NULL;
+      std::vector<int> offsets;
       unsigned int current_len;
-      struct cleanup *cleanup;
 
-      cleanup = make_cleanup (VEC_cleanup (int), &offsets);
       current_len = cp_find_first_component (scope);
       while (scope[current_len] != '\0')
 	{
-	  VEC_safe_push (int, offsets, current_len);
+	  offsets.push_back (current_len);
 	  gdb_assert (scope[current_len] == ':');
 	  /* The "::".  */
 	  current_len += 2;
@@ -990,13 +988,11 @@ super_name (const struct rust_op *ident, unsigned int n_supers)
 						  + current_len);
 	}
 
-      len = VEC_length (int, offsets);
+      len = offsets.size ();
       if (n_supers >= len)
 	error (_("Too many super:: uses from '%s'"), scope);
 
-      offset = VEC_index (int, offsets, len - n_supers);
-
-      do_cleanups (cleanup);
+      offset = offsets[len - n_supers];
     }
   else
     offset = strlen (scope);
@@ -1424,13 +1420,11 @@ lex_number (void)
   int is_integer = 0;
   int could_be_decimal = 1;
   int implicit_i32 = 0;
-  char *type_name = NULL;
+  const char *type_name = NULL;
   struct type *type;
   int end_index;
   int type_index = -1;
-  int i, out;
-  char *number;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  int i;
 
   match = regexec (&number_regex, lexptr, ARRAY_SIZE (subexps), subexps, 0);
   /* Failure means the regexp is broken.  */
@@ -1492,29 +1486,28 @@ lex_number (void)
     }
 
   /* Compute the type name if we haven't already.  */
+  std::string type_name_holder;
   if (type_name == NULL)
     {
       gdb_assert (type_index != -1);
-      type_name = xstrndup (lexptr + subexps[type_index].rm_so,
-			   (subexps[type_index].rm_eo
-			    - subexps[type_index].rm_so));
-      make_cleanup (xfree, type_name);
+      type_name_holder = std::string (lexptr + subexps[type_index].rm_so,
+				      (subexps[type_index].rm_eo
+				       - subexps[type_index].rm_so));
+      type_name = type_name_holder.c_str ();
     }
 
   /* Look up the type.  */
   type = rust_type (type_name);
 
   /* Copy the text of the number and remove the "_"s.  */
-  number = xstrndup (lexptr, end_index);
-  make_cleanup (xfree, number);
-  for (i = out = 0; number[i]; ++i)
+  std::string number;
+  for (i = 0; i < end_index && lexptr[i]; ++i)
     {
-      if (number[i] == '_')
+      if (lexptr[i] == '_')
 	could_be_decimal = 0;
       else
-	number[out++] = number[i];
+	number.push_back (lexptr[i]);
     }
-  number[out] = '\0';
 
   /* Advance past the match.  */
   lexptr += subexps[0].rm_eo;
@@ -1524,6 +1517,8 @@ lex_number (void)
     {
       uint64_t value;
       int radix = 10;
+      int offset = 0;
+
       if (number[0] == '0')
 	{
 	  if (number[1] == 'x')
@@ -1534,12 +1529,12 @@ lex_number (void)
 	    radix = 2;
 	  if (radix != 10)
 	    {
-	      number += 2;
+	      offset = 2;
 	      could_be_decimal = 0;
 	    }
 	}
 
-      value = strtoul (number, NULL, radix);
+      value = strtoul (number.c_str () + offset, NULL, radix);
       if (implicit_i32 && value >= ((uint64_t) 1) << 31)
 	type = rust_type ("i64");
 
@@ -1548,11 +1543,10 @@ lex_number (void)
     }
   else
     {
-      rustyylval.typed_val_float.dval = strtod (number, NULL);
+      rustyylval.typed_val_float.dval = strtod (number.c_str (), NULL);
       rustyylval.typed_val_float.type = type;
     }
 
-  do_cleanups (cleanup);
   return is_integer ? (could_be_decimal ? DECIMAL_INTEGER : INTEGER) : FLOAT;
 }
 
@@ -1959,18 +1953,16 @@ static const char *convert_name (struct parser_state *state,
 /* Convert a vector of rust_ops representing types to a vector of
    types.  */
 
-static VEC (type_ptr) *
+static std::vector<struct type *>
 convert_params_to_types (struct parser_state *state, VEC (rust_op_ptr) *params)
 {
   int i;
   const struct rust_op *op;
-  VEC (type_ptr) *result = NULL;
-  struct cleanup *cleanup = make_cleanup (VEC_cleanup (type_ptr), &result);
+  std::vector<struct type *> result;
 
   for (i = 0; VEC_iterate (rust_op_ptr, params, i, op); ++i)
-    VEC_safe_push (type_ptr, result, convert_ast_to_type (state, op));
+    result.push_back (convert_ast_to_type (state, op));
 
-  discard_cleanups (cleanup);
   return result;
 }
 
@@ -2022,40 +2014,33 @@ convert_ast_to_type (struct parser_state *state,
 
     case TYPE_CODE_FUNC:
       {
-	VEC (type_ptr) *args
-	  = convert_params_to_types (state, *operation->right.params);
-	struct cleanup *cleanup
-	  = make_cleanup (VEC_cleanup (type_ptr), &args);
+	std::vector<struct type *> args
+	  (convert_params_to_types (state, *operation->right.params));
 	struct type **argtypes = NULL;
 
 	type = convert_ast_to_type (state, operation->left.op);
-	if (!VEC_empty (type_ptr, args))
-	  argtypes = VEC_address (type_ptr, args);
+	if (!args.empty ())
+	  argtypes = args.data ();
 
 	result
-	  = lookup_function_type_with_arguments (type,
-						 VEC_length (type_ptr, args),
+	  = lookup_function_type_with_arguments (type, args.size (),
 						 argtypes);
 	result = lookup_pointer_type (result);
-
-	do_cleanups (cleanup);
       }
       break;
 
     case TYPE_CODE_STRUCT:
       {
-	VEC (type_ptr) *args
-	  = convert_params_to_types (state, *operation->left.params);
-	struct cleanup *cleanup
-	  = make_cleanup (VEC_cleanup (type_ptr), &args);
+	std::vector<struct type *> args
+	  (convert_params_to_types (state, *operation->left.params));
 	int i;
 	struct type *type;
 	const char *name;
 
 	obstack_1grow (&work_obstack, '(');
-	for (i = 0; VEC_iterate (type_ptr, args, i, type); ++i)
+	for (i = 0; i < args.size (); ++i)
 	  {
-	    std::string type_name = type_to_string (type);
+	    std::string type_name = type_to_string (args[i]);
 
 	    if (i > 0)
 	      obstack_1grow (&work_obstack, ',');
@@ -2070,8 +2055,6 @@ convert_ast_to_type (struct parser_state *state,
 	result = rust_lookup_type (name, expression_context_block);
 	if (result == NULL)
 	  error (_("could not find tuple type '%s'"), name);
-
-	do_cleanups (cleanup);
       }
       break;
 
@@ -2090,24 +2073,21 @@ convert_ast_to_type (struct parser_state *state,
 static const char *
 convert_name (struct parser_state *state, const struct rust_op *operation)
 {
-  VEC (type_ptr) *types;
-  struct cleanup *cleanup;
   int i;
-  struct type *type;
 
   gdb_assert (operation->opcode == OP_VAR_VALUE);
 
   if (operation->right.params == NULL)
     return operation->left.sval.ptr;
 
-  types = convert_params_to_types (state, *operation->right.params);
-  cleanup = make_cleanup (VEC_cleanup (type_ptr), &types);
+  std::vector<struct type *> types
+    (convert_params_to_types (state, *operation->right.params));
 
   obstack_grow_str (&work_obstack, operation->left.sval.ptr);
   obstack_1grow (&work_obstack, '<');
-  for (i = 0; VEC_iterate (type_ptr, types, i, type); ++i)
+  for (i = 0; i < types.size (); ++i)
     {
-      std::string type_name = type_to_string (type);
+      std::string type_name = type_to_string (types[i]);
 
       if (i > 0)
 	obstack_1grow (&work_obstack, ',');
@@ -2115,8 +2095,6 @@ convert_name (struct parser_state *state, const struct rust_op *operation)
       obstack_grow_str (&work_obstack, type_name.c_str ());
     }
   obstack_grow_str0 (&work_obstack, ">");
-
-  do_cleanups (cleanup);
 
   return (const char *) obstack_finish (&work_obstack);
 }

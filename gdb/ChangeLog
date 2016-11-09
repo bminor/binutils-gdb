@@ -1,5 +1,13 @@
 2016-11-12  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (super_name): Use std::vector.
+	(lex_number): Use std::string.
+	(convert_params_to_types): Return std::vector.
+	(convert_ast_to_type, convert_name): Update.
+	* rust-lang.c (rust_get_disr_info): Use unique_xmalloc_ptr.
+
+2016-11-12  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_get_disr_info): Use std::string in one more
 	spot.
 
