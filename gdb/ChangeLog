@@ -1,3 +1,8 @@
+2016-11-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_get_disr_info): Use std::string in one more
+	spot.
+
 2016-11-11  Yao Qi  <yao.qi@linaro.org>
 
 	* spu-tdep.c (spu_software_single_step): Don't call

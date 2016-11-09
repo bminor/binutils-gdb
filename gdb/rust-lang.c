@@ -222,7 +222,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
          with the first field being the actual type works.  */
       const char *field_name = TYPE_NAME (TYPE_FIELD_TYPE (type, 0));
       const char *last = rust_last_path_segment (field_name);
-      ret.name = concat (TYPE_NAME (type), "::", last, (char *) NULL);
+      ret.name = std::string (TYPE_NAME (type)) + "::" + last;
       ret.field_no = RUST_ENCODED_ENUM_REAL;
       ret.is_encoded = 1;
       return ret;
