@@ -16,12 +16,12 @@
 
 2016-10-29  Manish Goregaokar  <manish@mozilla.com>
 
-    * gdb.rust/simple.exp: Add tests for `sizeof(expr)`
+	* gdb.rust/simple.exp: Add tests for `sizeof(expr)`.
 
 2016-10-27  Manish Goregaokar  <manish@mozilla.com>
 
-    * gdb.rust/simple.rs: Add test for univariant enums without discriminants
-    and for encoded struct-like enums
+	* gdb.rust/simple.rs: Add test for univariant enums without
+	discriminants and for encoded struct-like enums.
 
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
@@ -48,8 +48,8 @@
 
 2016-10-19  Maciej W. Rozycki  <macro@imgtec.com>
 
-    	* gdb.base/killed-outside.exp: Remove $options from a call to
-    	`prepare_for_testing'.
+	* gdb.base/killed-outside.exp: Remove $options from a call to
+	`prepare_for_testing'.
 
 2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
 
@@ -169,14 +169,14 @@
 	gdb_skip_float_test return true.
 
 2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
-2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/20487
 	* gdb.mi/user-selected-context-sync.exp: New file.
 	* gdb.mi/user-selected-context-sync.c: New file.
 
 2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
-2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/20487
 	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Adapt
@@ -345,9 +345,9 @@
 
 2016-08-24  Kevin Buettner  <kevinb@redhat.com>
 
-    	* gdb.python/py-recurse-unwind.c: New file.
-    	* gdb.python/py-recurse-unwind.py: New file.
-    	* gdb.python/py-recurse-unwind.exp: New file.
+	* gdb.python/py-recurse-unwind.c: New file.
+	* gdb.python/py-recurse-unwind.py: New file.
+	* gdb.python/py-recurse-unwind.exp: New file.
 
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
@@ -609,8 +609,8 @@
 
 2016-07-06  Manish Goregaokar  <manish@mozilla.com>
 
-	* simple.rs: Add test for raw pointer subscripting
-	* simple.exp: Add test expectations
+	* simple.rs: Add test for raw pointer subscripting.
+	* simple.exp: Add test expectations.
 
 2016-07-05  Yao Qi  <yao.qi@linaro.org>
 

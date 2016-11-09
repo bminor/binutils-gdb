@@ -780,23 +780,23 @@
 
 2016-10-29  Manish Goregaokar  <manish@mozilla.com>
 
-    * rust-exp.y: Parse `sizeof(exp)` as `UNOP_SIZEOF`
+	* rust-exp.y: Parse `sizeof(exp)` as `UNOP_SIZEOF`.
 
 2016-10-28  Manish Goregaokar  <manish@mozilla.com>
 
-    * rust-lang.c (rust_union_is_untagged): Add function to
-    check if a union is an untagged unioni
-    (rust_val_print): Handle printing of untagged union values
-    (rust_print_type): Handle printing of untagged union types
-    (rust_evaluate_subexp): Handle evaluating field
-    access on untagged unions
+	* rust-lang.c (rust_union_is_untagged): Add function to check if a
+	union is an untagged union.
+	(rust_val_print): Handle printing of untagged union values.
+	(rust_print_type): Handle printing of untagged union types.
+	(rust_evaluate_subexp): Handle evaluating field access on untagged
+	unions.
 
 2016-10-27  Manish Goregaokar  <manish@mozilla.com>
 
-    * rust-lang.c (rust_get_disr_info): Treat univariant enums
-    without discriminants as encoded enums with a real field
-    * rust-lang.c (rust_evaluate_subexp): Handle field access
-    on encoded struct-like enums
+	* rust-lang.c (rust_get_disr_info): Treat univariant enums without
+	discriminants as encoded enums with a real field.
+	* rust-lang.c (rust_evaluate_subexp): Handle field access on
+	encoded struct-like enums.
 
 2016-11-03  Yao Qi  <yao.qi@linaro.org>
 
@@ -3735,7 +3735,7 @@
 
 2016-07-06  Manish Goregaokar  <manish@mozilla.com>
 
-	* rust-lang.c (rust_subscript): Allow subscripting pointers
+	* rust-lang.c (rust_subscript): Allow subscripting pointers.
 
 2016-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
