@@ -618,23 +618,8 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
     {
       src_line_buf = (char *) 
 	xmalloc ((max_lines * line_width) * sizeof (char));
-      if (src_line_buf == (char *) NULL)
-	{
-	  fputs_unfiltered ("Unable to Allocate Memory for "
-			    "Source or Disassembly Display.\n",
-			    gdb_stderr);
-	  return TUI_FAILURE;
-	}
       /* Allocate the content list.  */
       win_info->generic.content = tui_alloc_content (max_lines, SRC_WIN);
-      if (win_info->generic.content == NULL)
-	{
-	  xfree (src_line_buf);
-	  fputs_unfiltered ("Unable to Allocate Memory for "
-			    "Source or Disassembly Display.\n",
-			    gdb_stderr);
-	  return TUI_FAILURE;
-	}
       for (i = 0; i < max_lines; i++)
 	win_info->generic.content[i]->which_element.source.line
 	  = src_line_buf + (line_width * i);

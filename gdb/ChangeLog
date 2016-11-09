@@ -1,5 +1,10 @@
 2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* tui/tui-winsource.c (tui_alloc_source_buffer): Remove
+	failed-xmalloc handling.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* tui/tui-winsource.c (tui_alloc_source_buffer): Subtract
 	highlight box's overhead when calculating the content height.
 
