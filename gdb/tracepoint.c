@@ -919,7 +919,7 @@ collection_list::add_memrange (int type, bfd_signed_vma base,
   /* type: memrange_absolute == memory, other n == basereg */
   /* base: addr if memory, offset if reg relative.  */
   /* len: we actually save end (base + len) for convenience */
-  m_memranges.push_back (memrange (type, base, base + len));
+  m_memranges.emplace_back (type, base, base + len);
 
   if (type != memrange_absolute)    /* Better collect the base register!  */
     add_register (type);
