@@ -1,6 +1,7 @@
 2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Merge AVX512F vmovq.
+	* i386-tbl.h: Regerated.
 
 2016-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
