@@ -1,3 +1,7 @@
+2016-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/b.d: Update test result.
+
 2016-11-22  Alan Modra  <amodra@gmail.com>
 
 	PR 20744

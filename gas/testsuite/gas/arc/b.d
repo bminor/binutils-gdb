@@ -39,8 +39,8 @@ Disassembly of section .text:
   78:	0789 ffcf           	b	0 <text_label>
   7c:	0785 ffef           	b.d	0 <text_label>
   80:	264a 7000           	mov	0,0
-  84:	077c ffe1           	b.deq	-132
+  84:	077c ffe1           	beq.d	-132
   88:	264a 7000           	mov	0,0
   8c:	0774 ffc2           	bne	-140
-  90:	0770 ffe6           	b.dnc	-144
+  90:	0770 ffe6           	bnc.d	-144
   94:	264a 7000           	mov	0,0

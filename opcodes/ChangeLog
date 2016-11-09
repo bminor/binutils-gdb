@@ -1,3 +1,8 @@
+2016-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-tbl.h: Reorder conditional flags with delay flags for 'b'
+	instructions.
+
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* aarch64-tbl.h (QL_V3SAMEHSD_ROT, QL_ELEMENT_ROT): Define.
