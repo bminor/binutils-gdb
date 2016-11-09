@@ -1,3 +1,8 @@
+2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20754
+	* testsuite/gas/i386/opcode-suffix.d: Updated.
+
 2016-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/20775
