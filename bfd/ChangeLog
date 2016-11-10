@@ -4,6 +4,12 @@
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Bind defined
 	symbol locally in PIE.
 
+2016-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20801
+	* compress.c (bfd_get_full_section_contents): Provide a more
+	helpful error message when a section is too large to load.
+
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2.c (struct funcinfo) <is_linkage>: Type is bfd_boolean,
