@@ -1,3 +1,11 @@
+2016-11-10  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* testsuite/ld-aarch64/pie-bind-locally-a.s: New test source.
+	* testsuite/ld-aarch64/pie-bind-locally-b.s: Likewise.
+	* testsuite/ld-aarch64/pie-bind-locally.d: New testcase.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcase.
+
 2016-11-07  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20784

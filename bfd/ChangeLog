@@ -1,3 +1,9 @@
+2016-11-10  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Bind defined
+	symbol locally in PIE.
+
 2016-11-08  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2.c (struct funcinfo) <is_linkage>: Type is bfd_boolean,
