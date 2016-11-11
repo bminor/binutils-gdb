@@ -1,5 +1,11 @@
 2016-11-11  Yao Qi  <yao.qi@linaro.org>
 
+	* spu-tdep.c (spu_software_single_step): Don't call
+	get_frame_register_bytes, call get_frame_register_unsigned
+	instead.
+
+2016-11-11  Yao Qi  <yao.qi@linaro.org>
+
 	* cp-valprint.c (cp_print_value): Remove local base_valaddr.
 	* extension-priv.h (struct extension_language_ops)
 	<apply_val_pretty_printer>: Remove the second parameter.

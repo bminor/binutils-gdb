@@ -1652,24 +1652,7 @@ spu_software_single_step (struct frame_info *frame)
       if (reg == SPU_PC_REGNUM)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
-	{
-	  int optim, unavail;
-
-	  if (get_frame_register_bytes (frame, reg, 0, 4, buf,
-					 &optim, &unavail))
-	    target += extract_unsigned_integer (buf, 4, byte_order) & -4;
-	  else
-	    {
-	      if (optim)
-		throw_error (OPTIMIZED_OUT_ERROR,
-			     _("Could not determine address of "
-			       "single-step breakpoint."));
-	      if (unavail)
-		throw_error (NOT_AVAILABLE_ERROR,
-			     _("Could not determine address of "
-			       "single-step breakpoint."));
-	    }
-	}
+	target += get_frame_register_unsigned (frame, reg) & -4;
 
       target = target & lslr;
       if (target != next_pc)
