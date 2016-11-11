@@ -1,5 +1,10 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* config/tc-aarch64.c (aarch64_archs): Add "armv8.3-a".
+	* doc/c-aarch64.texi (-march): Likewise.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): Fix "simd" and "crypto".
 	* testsuite/gas/aarch64/illegal-crypto-nofp.d: New.
 	* testsuite/gas/aarch64/illegal-crypto-nofp.l: New.
