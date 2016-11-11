@@ -2629,6 +2629,9 @@ program when given the @option{-D} (@option{--dynamic}) option.
 The output format is similar to that produced by the @option{--syms}
 option, except that an extra field is inserted before the symbol's
 name, giving the version information associated with the symbol.
+If the version is the default version to be used when resolving
+unversioned references to the symbol then it's displayed as is,
+otherwise it's put into parentheses.
 
 @item --special-syms
 When displaying symbols include those which the target considers to be
