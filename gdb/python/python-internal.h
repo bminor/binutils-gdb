@@ -315,10 +315,10 @@ extern int gdbpy_auto_load_enabled (const struct extension_language_defn *);
 
 extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
   (const struct extension_language_defn *,
-   struct type *type, const gdb_byte *valaddr,
+   struct type *type,
    LONGEST embedded_offset, CORE_ADDR address,
    struct ui_file *stream, int recurse,
-   const struct value *val,
+   struct value *val,
    const struct value_print_options *options,
    const struct language_defn *language);
 extern enum ext_lang_bt_status gdbpy_apply_frame_filter

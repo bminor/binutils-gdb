@@ -490,7 +490,6 @@ cp_print_value (struct type *type, struct type *real_type,
       int skip = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       const char *basename = TYPE_NAME (baseclass);
-      const gdb_byte *base_valaddr = NULL;
       struct value *base_val = NULL;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -551,18 +550,15 @@ cp_print_value (struct type *type, struct type *real_type,
 		  thisoffset = 0;
 		  boffset = 0;
 		  thistype = baseclass;
-		  base_valaddr = value_contents_for_printing_const (base_val);
 		  do_cleanups (back_to);
 		}
 	      else
 		{
-		  base_valaddr = valaddr;
 		  base_val = val;
 		}
 	    }
 	  else
 	    {
-	      base_valaddr = valaddr;
 	      base_val = val;
 	    }
 	}
@@ -591,7 +587,7 @@ cp_print_value (struct type *type, struct type *real_type,
 	     baseclass if possible.  */
 	  if (!options->raw)
 	    result
-	      = apply_ext_lang_val_pretty_printer (baseclass, base_valaddr,
+	      = apply_ext_lang_val_pretty_printer (baseclass,
 						   thisoffset + boffset,
 						   value_address (base_val),
 						   stream, recurse,

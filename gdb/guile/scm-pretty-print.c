@@ -957,10 +957,10 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 
 enum ext_lang_rc
 gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
-				 struct type *type, const gdb_byte *valaddr,
+				 struct type *type,
 				 LONGEST embedded_offset, CORE_ADDR address,
 				 struct ui_file *stream, int recurse,
-				 const struct value *val,
+				 struct value *val,
 				 const struct value_print_options *options,
 				 const struct language_defn *language)
 {
@@ -973,6 +973,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   struct cleanup *cleanups;
   enum ext_lang_rc result = EXT_LANG_RC_NOP;
   enum string_repr_result print_result;
+  const gdb_byte *valaddr = value_contents_for_printing (val);
 
   /* No pretty-printer support for unavailable values.  */
   if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
@@ -984,9 +985,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Instantiate the printer.  */
-  if (valaddr)
-    valaddr += embedded_offset;
-  value = value_from_contents_and_address (type, valaddr,
+  value = value_from_contents_and_address (type, valaddr + embedded_offset,
 					   address + embedded_offset);
 
   set_value_component_location (value, val);

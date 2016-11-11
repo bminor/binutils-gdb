@@ -1,5 +1,25 @@
 2016-11-11  Yao Qi  <yao.qi@linaro.org>
 
+	* cp-valprint.c (cp_print_value): Remove local base_valaddr.
+	* extension-priv.h (struct extension_language_ops)
+	<apply_val_pretty_printer>: Remove the second parameter.
+	Remove const from "struct value *".  Callers updated.
+	* extension.c (apply_ext_lang_val_pretty_printer): Update
+	comments.  Remove parameter valaddr.  Remove const from
+	"struct value *".
+	* extension.h (apply_ext_lang_val_pretty_printer): Update
+	declaration.
+	* guile/guile-internal.h (gdbscm_apply_val_pretty_printer):
+	Update declaration.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):
+	Remove parameter valaddr.  Remove const from "struct value *".
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer):
+	Likewise.
+	* python/python-internal.h (gdbpy_apply_val_pretty_printer):
+	Update declaration.
+
+2016-11-11  Yao Qi  <yao.qi@linaro.org>
+
 	* c-lang.h (cp_print_value_fields): Update declaration.
 	* cp-valprint.c (cp_print_value): Update declaration.
 	(cp_print_value_fields): Remove parameter valaddr.  Callers
