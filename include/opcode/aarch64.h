@@ -140,6 +140,7 @@ enum aarch64_opnd
 
   AARCH64_OPND_Rd_SP,	/* Integer Rd or SP.  */
   AARCH64_OPND_Rn_SP,	/* Integer Rn or SP.  */
+  AARCH64_OPND_Rm_SP,	/* Integer Rm or SP.  */
   AARCH64_OPND_PAIRREG,	/* Paired register operand.  */
   AARCH64_OPND_Rm_EXT,	/* Integer Rm extended.  */
   AARCH64_OPND_Rm_SFT,	/* Integer Rm shifted.  */

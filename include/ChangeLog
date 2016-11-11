@@ -1,5 +1,9 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_Rm_SP.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_V8_3): Define.
 	(AARCH64_ARCH_V8_3): Define.
 	(AARCH64_ARCH_V8_1, AARCH64_ARCH_V8_2): Simplify.

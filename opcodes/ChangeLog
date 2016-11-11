@@ -1,5 +1,14 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* aarch64-tbl.h (arch64_opcode_table): Add pacga.
+	(AARCH64_OPERANDS): Add Rm_SP.
+	* aarch64-opc.c (aarch64_print_operand): Handle AARCH64_OPND_Rm_SP.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* aarch64-tbl.h (arch64_opcode_table): Add pacia, pacib, pacda, pacdb, autia,
 	autib, autda, autdb, paciza, pacizb, pacdza, pacdzb, autiza, autizb, autdza,
 	autdzb, xpaci, xpacd.

@@ -32,3 +32,5 @@ Disassembly of section \.text:
   5c:	dac13fe5 	autdzb	x5
   60:	dac143e5 	xpaci	x5
   64:	dac147e5 	xpacd	x5
+  68:	9ac33041 	pacga	x1, x2, x3
+  6c:	9adf3041 	pacga	x1, x2, sp

@@ -2694,6 +2694,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("asr",   0x1ac02800, 0x7fe0fc00, dp_2src, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF | F_ALIAS),
   CORE_INSN ("rorv",  0x1ac02c00, 0x7fe0fc00, dp_2src, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF | F_HAS_ALIAS),
   CORE_INSN ("ror",   0x1ac02c00, 0x7fe0fc00, dp_2src, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF | F_ALIAS),
+  V8_3_INSN ("pacga", 0x9ac03000, 0xffe0fc00, dp_2src, OP3 (Rd, Rn, Rm_SP), QL_I3SAMEX, 0),
   /* CRC instructions.  */
   _CRC_INSN ("crc32b", 0x1ac04000, 0xffe0fc00, dp_2src, OP3 (Rd, Rn, Rm), QL_I3SAMEW, 0),
   _CRC_INSN ("crc32h", 0x1ac04400, 0xffe0fc00, dp_2src, OP3 (Rd, Rn, Rm), QL_I3SAMEW, 0),
@@ -3986,6 +3987,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(INT_REG, regno, "Rd_SP", OPD_F_MAYBE_SP, F(FLD_Rd),		\
       "an integer or stack pointer register")				\
     Y(INT_REG, regno, "Rn_SP", OPD_F_MAYBE_SP, F(FLD_Rn),		\
+      "an integer or stack pointer register")				\
+    Y(INT_REG, regno, "Rm_SP", OPD_F_MAYBE_SP, F(FLD_Rm),		\
       "an integer or stack pointer register")				\
     X(INT_REG, 0, ext_regno_pair, "PAIRREG", 0, F(),			\
       "the second reg of a pair")					\

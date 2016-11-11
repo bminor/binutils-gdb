@@ -4983,6 +4983,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_Rd_SP:
     case AARCH64_OPND_Rn_SP:
+    case AARCH64_OPND_Rm_SP:
     case AARCH64_OPND_Fd:
     case AARCH64_OPND_Fn:
     case AARCH64_OPND_Fm:
@@ -5314,6 +5315,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rd_SP:
 	case AARCH64_OPND_Rn_SP:
 	case AARCH64_OPND_SVE_Rn_SP:
+	case AARCH64_OPND_Rm_SP:
 	  po_int_reg_or_fail (REG_TYPE_R_SP);
 	  break;
 

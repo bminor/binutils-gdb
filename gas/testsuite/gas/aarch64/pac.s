@@ -32,3 +32,6 @@
 
 	xpaci x5
 	xpacd x5
+
+	pacga x1, x2, x3
+	pacga x1, x2, sp

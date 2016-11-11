@@ -2989,6 +2989,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rd_SP:
     case AARCH64_OPND_Rn_SP:
     case AARCH64_OPND_SVE_Rn_SP:
+    case AARCH64_OPND_Rm_SP:
       assert (opnd->qualifier == AARCH64_OPND_QLF_W
 	      || opnd->qualifier == AARCH64_OPND_QLF_WSP
 	      || opnd->qualifier == AARCH64_OPND_QLF_X
