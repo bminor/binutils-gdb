@@ -1,5 +1,10 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* testsuite/gas/aarch64/pac.s: Add ARMv8.3 branch instruction tests.
+	* testsuite/gas/aarch64/pac.d: Likewise.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* config/tc-aarch64.c (process_omitted_operand): Handle AARCH64_OPND_Rm_SP.
 	(parse_operands): Likewise.
 	* testsuite/gas/aarch64/pac.s: Add pacga.

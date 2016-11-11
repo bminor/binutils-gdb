@@ -35,3 +35,22 @@
 
 	pacga x1, x2, x3
 	pacga x1, x2, sp
+
+	/* Combined instructions.  */
+	braa x1, x2
+	braa x3, sp
+	brab x1, x2
+	brab x3, sp
+	blraa x1, x2
+	blraa x3, sp
+	blrab x1, x2
+	blrab x3, sp
+	braaz x5
+	brabz x5
+	blraaz x5
+	blrabz x5
+
+	retaa
+	retab
+	eretaa
+	eretab

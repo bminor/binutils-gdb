@@ -34,3 +34,19 @@ Disassembly of section \.text:
   64:	dac147e5 	xpacd	x5
   68:	9ac33041 	pacga	x1, x2, x3
   6c:	9adf3041 	pacga	x1, x2, sp
+  70:	d71f0822 	braa	x1, x2
+  74:	d71f087f 	braa	x3, sp
+  78:	d71f0c22 	brab	x1, x2
+  7c:	d71f0c7f 	brab	x3, sp
+  80:	d73f0822 	blraa	x1, x2
+  84:	d73f087f 	blraa	x3, sp
+  88:	d73f0c22 	blrab	x1, x2
+  8c:	d73f0c7f 	blrab	x3, sp
+  90:	d61f08bf 	braaz	x5
+  94:	d61f0cbf 	brabz	x5
+  98:	d63f08bf 	blraaz	x5
+  9c:	d63f0cbf 	blrabz	x5
+  a0:	d65f0bff 	retaa
+  a4:	d65f0fff 	retab
+  a8:	d69f0bff 	eretaa
+  ac:	d69f0fff 	eretab
