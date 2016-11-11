@@ -101,6 +101,7 @@ if [istarget sparc*-*-*] {
     run_list_test "pr19910-2"
     run_dump_test "dcti-couples-v8"
     run_dump_test "dcti-couples-v9c"
+    run_dump_test "pr20732"
 }
 
 if [istarget sparc-*-vxworks*] {

@@ -1,3 +1,12 @@
+2016-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20732
+	* expr.c (integer_constant): If tc_allow_L_suffix is defined and
+	non-zero then accept a L or LL suffix.
+	* testsuite/gas/sparc/pr20732.d: New test source file.
+	* testsuite/gas/sparc/pr20732.d: New test output file.
+	* testsuite/gas/sparc/sparc.exp: Run new test.
+
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* testsuite/gas/aarch64/pac.s: Add ARMv8.3 branch instruction tests.
