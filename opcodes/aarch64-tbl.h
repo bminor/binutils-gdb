@@ -1904,6 +1904,8 @@ static const aarch64_feature_set aarch64_feature_stat_profile =
   AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0);
 static const aarch64_feature_set aarch64_feature_sve =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0);
+static const aarch64_feature_set aarch64_feature_v8_3 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_3, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -1919,6 +1921,7 @@ static const aarch64_feature_set aarch64_feature_sve =
 #define STAT_PROFILE	&aarch64_feature_stat_profile
 #define ARMV8_2		&aarch64_feature_v8_2
 #define SVE		&aarch64_feature_sve
+#define ARMV8_3		&aarch64_feature_v8_3
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, NULL }
@@ -1945,6 +1948,8 @@ static const aarch64_feature_set aarch64_feature_sve =
 #define _SVE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE, OPS, QUALS, \
     FLAGS | F_STRICT, TIED, NULL }
+#define V8_3_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_3, OPS, QUALS, FLAGS, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3144,6 +3149,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("wfi", 0xd503207f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("sev", 0xd503209f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("sevl",0xd50320bf, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("xpaclri", 0xd50320ff, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("pacia1716", 0xd503211f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("pacib1716", 0xd503215f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("autia1716", 0xd503219f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("autib1716", 0xd50321df, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
   {"esb", 0xd503221f, 0xffffffff, ic_system, 0, RAS, OP0 (), {}, F_ALIAS, 0, NULL},
   {"psb", 0xd503223f, 0xffffffff, ic_system, 0, STAT_PROFILE, OP1 (BARRIER_PSB), {}, F_ALIAS, 0, NULL},
   CORE_INSN ("clrex", 0xd503305f, 0xfffff0ff, ic_system, 0, OP1 (UIMM4), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
@@ -3158,6 +3168,14 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("msr", 0xd5000000, 0xffe00000, ic_system, 0, OP2 (SYSREG, Rt), QL_SRC_X, 0),
   CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, Cn, Cm, UIMM3_OP2), QL_SYSL, 0),
   CORE_INSN ("mrs", 0xd5200000, 0xffe00000, ic_system, 0, OP2 (Rt, SYSREG), QL_DST_X, 0),
+  V8_3_INSN ("paciaz",  0xd503231f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("paciasp", 0xd503233f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("pacibz",  0xd503235f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("pacibsp", 0xd503237f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("autiaz",  0xd503239f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("autiasp", 0xd50323bf, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("autibz",  0xd50323df, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
+  V8_3_INSN ("autibsp", 0xd50323ff, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
   /* Test & branch (immediate).  */
   CORE_INSN ("tbz", 0x36000000, 0x7f000000, testbranch, 0, OP3 (Rt, BIT_NUM, ADDR_PCREL14), QL_PCREL_14, 0),
   CORE_INSN ("tbnz",0x37000000, 0x7f000000, testbranch, 0, OP3 (Rt, BIT_NUM, ADDR_PCREL14), QL_PCREL_14, 0),

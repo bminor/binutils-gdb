@@ -19,14 +19,14 @@ Disassembly of section \.text:
   2c:	d503209f 	sev
   30:	d50320bf 	sevl
   34:	d50320df 	hint	#0x6
-  38:	d50320ff 	hint	#0x7
-  3c:	d503211f 	hint	#0x8
+  38:	d50320ff 	(hint	#0x7|xpaclri)
+  3c:	d503211f 	(hint	#0x8|pacia1716)
   40:	d503213f 	hint	#0x9
-  44:	d503215f 	hint	#0xa
+  44:	d503215f 	(hint	#0xa|pacib1716)
   48:	d503217f 	hint	#0xb
-  4c:	d503219f 	hint	#0xc
+  4c:	d503219f 	(hint	#0xc|autia1716)
   50:	d50321bf 	hint	#0xd
-  54:	d50321df 	hint	#0xe
+  54:	d50321df 	(hint	#0xe|autib1716)
   58:	d50321ff 	hint	#0xf
   5c:	d503221f 	(hint	#0x10|esb)
   60:	d503223f 	(hint	#0x11|psb	csync)
@@ -36,14 +36,14 @@ Disassembly of section \.text:
   70:	d50322bf 	hint	#0x15
   74:	d50322df 	hint	#0x16
   78:	d50322ff 	hint	#0x17
-  7c:	d503231f 	hint	#0x18
-  80:	d503233f 	hint	#0x19
-  84:	d503235f 	hint	#0x1a
-  88:	d503237f 	hint	#0x1b
-  8c:	d503239f 	hint	#0x1c
-  90:	d50323bf 	hint	#0x1d
-  94:	d50323df 	hint	#0x1e
-  98:	d50323ff 	hint	#0x1f
+  7c:	d503231f 	(hint	#0x18|paciaz)
+  80:	d503233f 	(hint	#0x19|paciasp)
+  84:	d503235f 	(hint	#0x1a|pacibz)
+  88:	d503237f 	(hint	#0x1b|pacibsp)
+  8c:	d503239f 	(hint	#0x1c|autiaz)
+  90:	d50323bf 	(hint	#0x1d|autiasp)
+  94:	d50323df 	(hint	#0x1e|autibz)
+  98:	d50323ff 	(hint	#0x1f|autibsp)
   9c:	d503241f 	hint	#0x20
   a0:	d503243f 	hint	#0x21
   a4:	d503245f 	hint	#0x22

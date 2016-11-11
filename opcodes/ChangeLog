@@ -1,5 +1,14 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_v8_3, ARMV8_3, V8_3_INSN): New.
+	(arch64_opcode_table): Add xpaclri, pacia1716, pacib1716, autia1716,
+	autib1716, paciaz, paciasp, pacibz, pacibsp, autiaz, autiasp, autibz,
+	autibsp.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* aarch64-gen.c (find_alias_opcode): Increase max_num_aliases to 32.
 
 2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
