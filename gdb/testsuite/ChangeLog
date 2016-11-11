@@ -1,3 +1,7 @@
+2016-11-11  Catherine Moore  <clm@codesourcery.com>
+
+	* gdb.base/dump.exp: Identify verilog format dump tests as such.
+
 2016-11-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/commands.exp (runto_or_return): New procedure.
