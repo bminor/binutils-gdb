@@ -80,7 +80,7 @@ static void cp_print_static_field (struct type *, struct value *,
 				   const struct value_print_options *);
 
 static void cp_print_value (struct type *, struct type *,
-			    const gdb_byte *, LONGEST,
+			    LONGEST,
 			    CORE_ADDR, struct ui_file *,
 			    int, struct value *,
 			    const struct value_print_options *,
@@ -154,7 +154,7 @@ cp_is_vtbl_member (struct type *type)
 
 void
 cp_print_value_fields (struct type *type, struct type *real_type,
-		       const gdb_byte *valaddr, LONGEST offset,
+		       LONGEST offset,
 		       CORE_ADDR address, struct ui_file *stream,
 		       int recurse, struct value *val,
 		       const struct value_print_options *options,
@@ -194,7 +194,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
      duplicates of virtual baseclasses.  */
 
   if (n_baseclasses > 0)
-    cp_print_value (type, real_type, valaddr, 
+    cp_print_value (type, real_type,
 		    offset, address, stream,
 		    recurse + 1, val, options,
 		    dont_print_vb);
@@ -228,6 +228,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
       vptr_fieldno = get_vptr_fieldno (type, &vptr_basetype);
       for (i = n_baseclasses; i < len; i++)
 	{
+	  const gdb_byte *valaddr = value_contents_for_printing (val);
+
 	  /* If requested, skip printing of static fields.  */
 	  if (!options->static_field_print
 	      && field_is_static (&TYPE_FIELD (type, i)))
@@ -449,7 +451,7 @@ cp_print_value_fields_rtti (struct type *type,
   if (!real_type)
     real_type = type;
 
-  cp_print_value_fields (type, real_type, valaddr, offset,
+  cp_print_value_fields (type, real_type, offset,
 			 address, stream, recurse, val, options,
 			 dont_print_vb, dont_print_statmem);
 }
@@ -459,7 +461,7 @@ cp_print_value_fields_rtti (struct type *type,
 
 static void
 cp_print_value (struct type *type, struct type *real_type,
-		const gdb_byte *valaddr, LONGEST offset,
+		LONGEST offset,
 		CORE_ADDR address, struct ui_file *stream,
 		int recurse, struct value *val,
 		const struct value_print_options *options,
@@ -471,6 +473,7 @@ cp_print_value (struct type *type, struct type *real_type,
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
   LONGEST thisoffset;
   struct type *thistype;
+  const gdb_byte *valaddr = value_contents_for_printing (val);
 
   if (dont_print_vb == 0)
     {
@@ -596,7 +599,7 @@ cp_print_value (struct type *type, struct type *real_type,
 						   current_language);
 
 	  if (!result)
-	    cp_print_value_fields (baseclass, thistype, base_valaddr,
+	    cp_print_value_fields (baseclass, thistype,
 				   thisoffset + boffset,
 				   value_address (base_val),
 				   stream, recurse, base_val, options,
@@ -671,7 +674,6 @@ cp_print_static_field (struct type *type,
 		    sizeof (CORE_ADDR));
       type = check_typedef (type);
       cp_print_value_fields (type, value_enclosing_type (val),
-			     value_contents_for_printing (val),
 			     value_embedded_offset (val), addr,
 			     stream, recurse, val,
 			     options, NULL, 1);

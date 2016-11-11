@@ -1,3 +1,11 @@
+2016-11-11  Yao Qi  <yao.qi@linaro.org>
+
+	* c-lang.h (cp_print_value_fields): Update declaration.
+	* cp-valprint.c (cp_print_value): Update declaration.
+	(cp_print_value_fields): Remove parameter valaddr.  Callers
+	updated.
+	(cp_print_value): Likewise.
+
 2016-11-09  Tom Tromey  <tom@tromey.com>
 
 	* varobj.h (varobj_get_display_hint): Change return type.

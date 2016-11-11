@@ -398,7 +398,7 @@ m2_val_print (struct type *type, int embedded_offset,
 	m2_print_unbounded_array (type, valaddr, embedded_offset,
 				  address, stream, recurse, options);
       else
-	cp_print_value_fields (type, type, valaddr, embedded_offset,
+	cp_print_value_fields (type, type, embedded_offset,
 			       address, stream, recurse, original_value,
 			       options, NULL, 0);
       break;
