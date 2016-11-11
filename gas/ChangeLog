@@ -1,5 +1,12 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* testsuite/gas/aarch64/sysreg-3.s: New.
+	* testsuite/gas/aarch64/sysreg-3.d: New.
+	* testsuite/gas/aarch64/illegal-sysreg-3.l: New.
+	* testsuite/gas/aarch64/illegal-sysreg-3.d: New.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* testsuite/gas/aarch64/system-3.s: New.
 	* testsuite/gas/aarch64/system-3.d: New.
 	* testsuite/gas/aarch64/system.d: Update expected output.

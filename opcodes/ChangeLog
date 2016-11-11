@@ -1,5 +1,12 @@
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): Add apiakeylo_el1, apiakeyhi_el1,
+	apibkeylo_el1, apibkeyhi_el1, apdakeylo_el1, apdakeyhi_el1,
+	apdbkeylo_el1, apdbkeyhi_el1, apgakeylo_el1 and apgakeyhi_el1.
+	(aarch64_sys_reg_supported_p): Add feature test for new registers.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_v8_3, ARMV8_3, V8_3_INSN): New.
 	(arch64_opcode_table): Add xpaclri, pacia1716, pacib1716, autia1716,
 	autib1716, paciaz, paciasp, pacibz, pacibsp, autiaz, autiasp, autibz,
