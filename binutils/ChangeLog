@@ -1,3 +1,18 @@
+2016-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20751
+	* nm.c (with_symbol_versions): New local variable.
+	(long_options): Add --with-symbol-versions.
+	(usage): Mention --with-symbol-versions.
+	(print_symbol): If with_symbol_versions is set then display the
+	version information associated with the symbol.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi (nm): Document the new option.
+	(objdump): Describe how symbol version information is displayed
+	for dynamic symbol dumps.
+	(readelf): Describe how symbol version information is displayed.
+	* testsuite/binutils-all/nm.exp: Add a test of the new feature.
+
 2016-11-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20794

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* The nm program has a new command lien option (--with-version-strings)
+  which will display a symbol's version information, if any, after the
+  symbol's name.
+
 * The ARC port of objdump now accepts a -M option to specify the extra
   instruction class(es) that should be disassembled.
 
