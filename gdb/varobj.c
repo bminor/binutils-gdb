@@ -2431,7 +2431,7 @@ varobj_value_get_print_value (struct value *value,
     {
       PyObject *value_formatter =  var->dynamic->pretty_printer;
 
-      varobj_ensure_python_env (var);
+      gdbpy_enter_varobj enter_py (var);
 
       if (value_formatter)
 	{
@@ -2446,24 +2446,21 @@ varobj_value_get_print_value (struct value *value,
 	  if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
 	    {
 	      struct value *replacement;
-	      PyObject *output = NULL;
 
-	      output = apply_varobj_pretty_printer (value_formatter,
-						    &replacement,
-						    stb);
+	      gdbpy_ref output (apply_varobj_pretty_printer (value_formatter,
+							     &replacement,
+							     stb));
 
 	      /* If we have string like output ...  */
-	      if (output)
+	      if (output != NULL)
 		{
-		  make_cleanup_py_decref (output);
-
 		  /* If this is a lazy string, extract it.  For lazy
 		     strings we always print as a string, so set
 		     string_print.  */
-		  if (gdbpy_is_lazy_string (output))
+		  if (gdbpy_is_lazy_string (output.get ()))
 		    {
-		      gdbpy_extract_lazy_string (output, &str_addr, &type,
-						 &len, &encoding);
+		      gdbpy_extract_lazy_string (output.get (), &str_addr,
+						 &type, &len, &encoding);
 		      string_print = 1;
 		    }
 		  else
@@ -2475,7 +2472,7 @@ varobj_value_get_print_value (struct value *value,
 			 string as a value.  */
 
 		      gdb::unique_xmalloc_ptr<char> s
-			= python_string_to_target_string (output);
+			= python_string_to_target_string (output.get ());
 
 		      if (s)
 			{
