@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (python_run_simple_file): Use
+	unique_xmalloc_ptr, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-prettyprint.c (print_stack_unless_memory_error)
 	(print_string_repr, print_children): Use gdbpy_ref.
 	(dummy_python_frame): New class.

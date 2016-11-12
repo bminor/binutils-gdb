@@ -349,25 +349,17 @@ python_run_simple_file (FILE *file, const char *filename)
 
 #else /* _WIN32 */
 
-  char *full_path;
-  PyObject *python_file;
-  struct cleanup *cleanup;
-
   /* Because we have a string for a filename, and are using Python to
      open the file, we need to expand any tilde in the path first.  */
-  full_path = tilde_expand (filename);
-  cleanup = make_cleanup (xfree, full_path);
-  python_file = PyFile_FromString (full_path, "r");
-  if (! python_file)
+  gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
+  gdbpy_ref python_file (PyFile_FromString (full_path.get (), "r"));
+  if (python_file == NULL)
     {
-      do_cleanups (cleanup);
       gdbpy_print_stack ();
-      error (_("Error while opening file: %s"), full_path);
+      error (_("Error while opening file: %s"), full_path.get ());
     }
 
-  make_cleanup_py_decref (python_file);
-  PyRun_SimpleFile (PyFile_AsFile (python_file), filename);
-  do_cleanups (cleanup);
+  PyRun_SimpleFile (PyFile_AsFile (python_file.get ()), filename);
 
 #endif /* _WIN32 */
 }
