@@ -62,34 +62,28 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
   struct value *value = NULL;
   /* 'result' must be set to NULL, this initially indicates whether
      the function was called, or not.  */
-  PyObject *result = NULL;
-  PyObject *callable, *args;
-  struct cleanup *cleanup;
+  gdbpy_ref result;
 
-  cleanup = ensure_python_env (gdbarch, language);
+  gdbpy_enter enter_py (gdbarch, language);
 
-  args = convert_values_to_python (argc, argv);
+  gdbpy_ref args (convert_values_to_python (argc, argv));
   /* convert_values_to_python can return NULL on error.  If we
      encounter this, do not call the function, but allow the Python ->
      error code conversion below to deal with the Python exception.
      Note, that this is different if the function simply does not
      have arguments.  */
 
-  if (args)
+  if (args != NULL)
     {
-      callable = PyObject_GetAttrString ((PyObject *) cookie, "invoke");
-      if (! callable)
-	{
-	  Py_DECREF (args);
-	  error (_("No method named 'invoke' in object."));
-	}
+      gdbpy_ref callable (PyObject_GetAttrString ((PyObject *) cookie,
+						  "invoke"));
+      if (callable == NULL)
+	error (_("No method named 'invoke' in object."));
 
-      result = PyObject_Call (callable, args, NULL);
-      Py_DECREF (callable);
-      Py_DECREF (args);
+      result.reset (PyObject_Call (callable.get (), args.get (), NULL));
     }
 
-  if (!result)
+  if (result == NULL)
     {
       PyObject *ptype, *pvalue, *ptraceback;
 
@@ -141,16 +135,12 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 	}
     }
 
-  value = convert_value_from_python (result);
+  value = convert_value_from_python (result.get ());
   if (value == NULL)
     {
-      Py_DECREF (result);
       gdbpy_print_stack ();
       error (_("Error while executing Python code."));
     }
-
-  Py_DECREF (result);
-  do_cleanups (cleanup);
 
   return value;
 }

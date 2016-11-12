@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-function.c (fnpy_call): Use gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-cmd.c (cmdpy_function): Use gdbpy_enter, gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
