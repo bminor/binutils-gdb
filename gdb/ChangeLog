@@ -1,5 +1,14 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-prettyprint.c (print_stack_unless_memory_error)
+	(print_string_repr, print_children): Use gdbpy_ref.
+	(dummy_python_frame): New class.
+	(dummy_python_frame::dummy_python_frame): Rename from
+	push_dummy_python_frame.
+	(py_restore_tstate): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (py_print_frame): Use gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>

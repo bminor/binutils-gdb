@@ -252,13 +252,13 @@ print_stack_unless_memory_error (struct ui_file *stream)
 {
   if (PyErr_ExceptionMatches (gdbpy_gdb_memory_error))
     {
-      struct cleanup *cleanup;
       PyObject *type, *value, *trace;
 
       PyErr_Fetch (&type, &value, &trace);
-      cleanup = make_cleanup_py_decref (type);
-      make_cleanup_py_decref (value);
-      make_cleanup_py_decref (trace);
+
+      gdbpy_ref type_ref (type);
+      gdbpy_ref value_ref (value);
+      gdbpy_ref trace_ref (trace);
 
       gdb::unique_xmalloc_ptr<char>
 	msg (gdbpy_exception_to_string (type, value));
@@ -268,8 +268,6 @@ print_stack_unless_memory_error (struct ui_file *stream)
       else
 	fprintf_filtered (stream, _("<error reading variable: %s>"),
 			  msg.get ());
-
-      do_cleanups (cleanup);
     }
   else
     gdbpy_print_stack ();
@@ -286,17 +284,14 @@ print_string_repr (PyObject *printer, const char *hint,
 		   struct gdbarch *gdbarch)
 {
   struct value *replacement = NULL;
-  PyObject *py_str = NULL;
   enum string_repr_result result = string_repr_ok;
 
-  py_str = pretty_print_one_value (printer, &replacement);
-  if (py_str)
+  gdbpy_ref py_str (pretty_print_one_value (printer, &replacement));
+  if (py_str != NULL)
     {
-      struct cleanup *cleanup = make_cleanup_py_decref (py_str);
-
       if (py_str == Py_None)
 	result = string_repr_none;
-      else if (gdbpy_is_lazy_string (py_str))
+      else if (gdbpy_is_lazy_string (py_str.get ()))
 	{
 	  CORE_ADDR addr;
 	  long length;
@@ -304,7 +299,7 @@ print_string_repr (PyObject *printer, const char *hint,
 	  gdb::unique_xmalloc_ptr<char> encoding;
 	  struct value_print_options local_opts = *options;
 
-	  gdbpy_extract_lazy_string (py_str, &addr, &type,
+	  gdbpy_extract_lazy_string (py_str.get (), &addr, &type,
 				     &length, &encoding);
 
 	  local_opts.addressprint = 0;
@@ -313,22 +308,20 @@ print_string_repr (PyObject *printer, const char *hint,
 	}
       else
 	{
-	  PyObject *string;
-
-	  string = python_string_to_target_python_string (py_str);
-	  if (string)
+	  gdbpy_ref string
+	    (python_string_to_target_python_string (py_str.get ()));
+	  if (string != NULL)
 	    {
 	      char *output;
 	      long length;
 	      struct type *type;
 
-	      make_cleanup_py_decref (string);
 #ifdef IS_PY3K
-	      output = PyBytes_AS_STRING (string);
-	      length = PyBytes_GET_SIZE (string);
+	      output = PyBytes_AS_STRING (string.get ());
+	      length = PyBytes_GET_SIZE (string.get ());
 #else
-	      output = PyString_AsString (string);
-	      length = PyString_Size (string);
+	      output = PyString_AsString (string.get ());
+	      length = PyString_Size (string.get ());
 #endif
 	      type = builtin_type (gdbarch)->builtin_char;
 
@@ -344,8 +337,6 @@ print_string_repr (PyObject *printer, const char *hint,
 	      print_stack_unless_memory_error (stream);
 	    }
 	}
-
-      do_cleanups (cleanup);
     }
   else if (replacement)
     {
@@ -364,80 +355,84 @@ print_string_repr (PyObject *printer, const char *hint,
 }
 
 #ifndef IS_PY3K
-static void
-py_restore_tstate (void *p)
-{
-  PyFrameObject *frame = (PyFrameObject *) p;
-  PyThreadState *tstate = PyThreadState_GET ();
-
-  tstate->frame = frame;
-}
 
 /* Create a dummy PyFrameObject, needed to work around
    a Python-2.4 bug with generators.  */
-static PyObject *
-push_dummy_python_frame (void)
+class dummy_python_frame
 {
-  PyObject *empty_string, *null_tuple, *globals;
+ public:
+
+  dummy_python_frame ();
+
+  ~dummy_python_frame ()
+  {
+    if (m_valid)
+      m_tstate->frame = m_saved_frame;
+  }
+
+  bool failed () const
+  {
+    return !m_valid;
+  }
+
+ private:
+
+  bool m_valid;
+  PyFrameObject *m_saved_frame;
+  gdbpy_ref m_frame;
+  PyThreadState *m_tstate;
+};
+
+dummy_python_frame::dummy_python_frame ()
+: m_valid (false),
+  m_saved_frame (NULL),
+  m_tstate (NULL)
+{
   PyCodeObject *code;
   PyFrameObject *frame;
-  PyThreadState *tstate;
 
-  empty_string = PyString_FromString ("");
-  if (!empty_string)
-    return NULL;
+  gdbpy_ref empty_string (PyString_FromString (""));
+  if (empty_string == NULL)
+    return;
 
-  null_tuple = PyTuple_New (0);
-  if (!null_tuple)
-    {
-      Py_DECREF (empty_string);
-      return NULL;
-    }
+  gdbpy_ref null_tuple (PyTuple_New (0));
+  if (null_tuple == NULL)
+    return;
 
-  code = PyCode_New (0,			/* argcount */
-		     0,			/* nlocals */
-		     0,			/* stacksize */
-		     0,			/* flags */
-		     empty_string,	/* code */
-		     null_tuple,	/* consts */
-		     null_tuple,	/* names */
-		     null_tuple,	/* varnames */
+  code = PyCode_New (0,			  /* argcount */
+		     0,			  /* locals */
+		     0,			  /* stacksize */
+		     0,			  /* flags */
+		     empty_string.get (), /* code */
+		     null_tuple.get (),	  /* consts */
+		     null_tuple.get (),	  /* names */
+		     null_tuple.get (),	  /* varnames */
 #if PYTHON_API_VERSION >= 1010
-		     null_tuple,	/* freevars */
-		     null_tuple,	/* cellvars */
+		     null_tuple.get (),	  /* freevars */
+		     null_tuple.get (),	  /* cellvars */
 #endif
-		     empty_string,	/* filename */
-		     empty_string,	/* name */
-		     1,			/* firstlineno */
-		     empty_string	/* lnotab */
-		    );
+		     empty_string.get (), /* filename */
+		     empty_string.get (), /* name */
+		     1,			  /* firstlineno */
+		     empty_string.get ()  /* lnotab */
+		     );
+  if (code == NULL)
+    return;
+  gdbpy_ref code_holder ((PyObject *) code);
 
-  Py_DECREF (empty_string);
-  Py_DECREF (null_tuple);
+  gdbpy_ref globals (PyDict_New ());
+  if (globals == NULL)
+    return;
 
-  if (!code)
-    return NULL;
+  m_tstate = PyThreadState_GET ();
+  frame = PyFrame_New (m_tstate, code, globals.get (), NULL);
+  if (frame == NULL)
+    return;
 
-  globals = PyDict_New ();
-  if (!globals)
-    {
-      Py_DECREF (code);
-      return NULL;
-    }
-
-  tstate = PyThreadState_GET ();
-
-  frame = PyFrame_New (tstate, code, globals, NULL);
-
-  Py_DECREF (globals);
-  Py_DECREF (code);
-
-  if (!frame)
-    return NULL;
-
-  tstate->frame = frame;
-  make_cleanup (py_restore_tstate, frame->f_back);
-  return (PyObject *) frame;
+  m_frame.reset ((PyObject *) frame);
+  m_tstate->frame = frame;
+  m_saved_frame = frame->f_back;
+  m_valid = true;
 }
 #endif
 
@@ -453,11 +448,6 @@ print_children (PyObject *printer, const char *hint,
 {
   int is_map, is_array, done_flag, pretty;
   unsigned int i;
-  PyObject *children, *iter;
-#ifndef IS_PY3K
-  PyObject *frame;
-#endif
-  struct cleanup *cleanups;
 
   if (! PyObject_HasAttr (printer, gdbpy_children_cst))
     return;
@@ -467,23 +457,20 @@ print_children (PyObject *printer, const char *hint,
   is_map = hint && ! strcmp (hint, "map");
   is_array = hint && ! strcmp (hint, "array");
 
-  children = PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-					 NULL);
-  if (! children)
+  gdbpy_ref children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
+						  NULL));
+  if (children == NULL)
     {
       print_stack_unless_memory_error (stream);
       return;
     }
 
-  cleanups = make_cleanup_py_decref (children);
-
-  iter = PyObject_GetIter (children);
-  if (!iter)
+  gdbpy_ref iter (PyObject_GetIter (children.get ()));
+  if (iter == NULL)
     {
       print_stack_unless_memory_error (stream);
-      goto done;
+      return;
     }
-  make_cleanup_py_decref (iter);
 
   /* Use the prettyformat_arrays option if we are printing an array,
      and the pretty option otherwise.  */
@@ -501,23 +488,22 @@ print_children (PyObject *printer, const char *hint,
      where it insists on having a non-NULL tstate->frame when
      a generator is called.  */
 #ifndef IS_PY3K
-  frame = push_dummy_python_frame ();
-  if (!frame)
+  dummy_python_frame frame;
+  if (frame.failed ())
     {
       gdbpy_print_stack ();
-      goto done;
+      return;
     }
-  make_cleanup_py_decref (frame);
 #endif
 
   done_flag = 0;
   for (i = 0; i < options->print_max; ++i)
     {
-      PyObject *py_v, *item = PyIter_Next (iter);
+      PyObject *py_v;
       const char *name;
-      struct cleanup *inner_cleanup;
 
-      if (! item)
+      gdbpy_ref item (PyIter_Next (iter.get ()));
+      if (item == NULL)
 	{
 	  if (PyErr_Occurred ())
 	    print_stack_unless_memory_error (stream);
@@ -528,16 +514,15 @@ print_children (PyObject *printer, const char *hint,
 	  break;
 	}
 
-      if (! PyTuple_Check (item) || PyTuple_Size (item) != 2)
+      if (! PyTuple_Check (item.get ()) || PyTuple_Size (item.get ()) != 2)
 	{
 	  PyErr_SetString (PyExc_TypeError,
 			   _("Result of children iterator not a tuple"
 			     " of two elements."));
 	  gdbpy_print_stack ();
-	  Py_DECREF (item);
 	  continue;
 	}
-      if (! PyArg_ParseTuple (item, "sO", &name, &py_v))
+      if (! PyArg_ParseTuple (item.get (), "sO", &name, &py_v))
 	{
 	  /* The user won't necessarily get a stack trace here, so provide
 	     more context.  */
@@ -545,10 +530,8 @@ print_children (PyObject *printer, const char *hint,
 	    fprintf_unfiltered (gdb_stderr,
 				_("Bad result from children iterator.\n"));
 	  gdbpy_print_stack ();
-	  Py_DECREF (item);
 	  continue;
 	}
-      inner_cleanup = make_cleanup_py_decref (item);
 
       /* Print initial "{".  For other elements, there are three
 	 cases:
@@ -643,8 +626,6 @@ print_children (PyObject *printer, const char *hint,
 
       if (is_map && i % 2 == 0)
 	fputs_filtered ("] = ", stream);
-
-      do_cleanups (inner_cleanup);
     }
 
   if (i)
@@ -665,9 +646,6 @@ print_children (PyObject *printer, const char *hint,
 	}
       fputs_filtered ("}", stream);
     }
-
- done:
-  do_cleanups (cleanups);
 }
 
 enum ext_lang_rc
