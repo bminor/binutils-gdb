@@ -538,9 +538,6 @@ class gdbpy_enter_varobj : public gdbpy_enter
 
 };
 
-struct cleanup *ensure_python_env (struct gdbarch *gdbarch,
-				   const struct language_defn *language);
-
 extern struct gdbarch *python_gdbarch;
 extern const struct language_defn *python_language;
 

@@ -226,14 +226,6 @@ is_root_p (const struct varobj *var)
 }
 
 #ifdef HAVE_PYTHON
-/* Helper function to install a Python environment suitable for
-   use during operations on VAR.  */
-struct cleanup *
-varobj_ensure_python_env (const struct varobj *var)
-{
-  return ensure_python_env (var->root->exp->gdbarch,
-			    var->root->exp->language_defn);
-}
 
 /* See python-internal.h.  */
 gdbpy_enter_varobj::gdbpy_enter_varobj (const struct varobj *var)

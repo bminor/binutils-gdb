@@ -1,5 +1,13 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (ensure_python_env, restore_python_env):
+	Remove.
+	* python/python-internal.h (ensure_python_env): Don't declare.
+	* varobj.h (varobj_ensure_python_env): Don't declare.
+	* varobj.c (varobj_ensure_python_env): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (varobj_value_get_print_value): Use
 	gdbpy_enter_varobj.
 

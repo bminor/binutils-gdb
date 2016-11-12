@@ -241,29 +241,6 @@ gdbpy_enter::~gdbpy_enter ()
   restore_active_ext_lang (m_previous_active);
 }
 
-static void
-restore_python_env (void *p)
-{
-  gdbpy_enter *env = (gdbpy_enter *) p;
-
-  delete env;
-}
-
-/* Called before entering the Python interpreter to install the
-   current language and architecture to be used for Python values.
-   Also set the active extension language for GDB so that SIGINT's
-   are directed our way, and if necessary install the right SIGINT
-   handler.  */
-
-struct cleanup *
-ensure_python_env (struct gdbarch *gdbarch,
-                   const struct language_defn *language)
-{
-  gdbpy_enter *env = new gdbpy_enter (gdbarch, language);
-
-  return make_cleanup (restore_python_env, env);
-}
-
 /* Set the quit flag.  */
 
 static void
