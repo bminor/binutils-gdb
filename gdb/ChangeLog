@@ -1,5 +1,14 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-prettyprint.c (print_string_repr, print_children):
+	Update.
+	* python/py-lazy-string.c (gdbpy_extract_lazy_string): Change type
+	of "encoding".
+	* varobj.c (varobj_value_get_print_value): Update.
+	* python/python-internal.h (gdbpy_extract_lazy_string): Update.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (varobj_get_display_hint)
 	(dynamic_varobj_has_child_method, install_new_value_visualizer)
 	(varobj_set_visualizer, free_variable): Use

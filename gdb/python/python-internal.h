@@ -583,7 +583,8 @@ gdb::unique_xmalloc_ptr<char> gdbpy_exception_to_string (PyObject *ptype,
 int gdbpy_is_lazy_string (PyObject *result);
 void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
 				struct type **str_type,
-				long *length, char **encoding);
+				long *length,
+				gdb::unique_xmalloc_ptr<char> *encoding);
 
 int gdbpy_is_value_object (PyObject *obj);
 

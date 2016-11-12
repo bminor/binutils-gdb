@@ -2413,7 +2413,7 @@ varobj_value_get_print_value (struct value *value,
   struct value_print_options opts;
   struct type *type = NULL;
   long len = 0;
-  char *encoding = NULL;
+  gdb::unique_xmalloc_ptr<char> encoding;
   /* Initialize it just to avoid a GCC false warning.  */
   CORE_ADDR str_addr = 0;
   int string_print = 0;
@@ -2464,7 +2464,6 @@ varobj_value_get_print_value (struct value *value,
 		    {
 		      gdbpy_extract_lazy_string (output, &str_addr, &type,
 						 &len, &encoding);
-		      make_cleanup (free_current_contents, &encoding);
 		      string_print = 1;
 		    }
 		  else
@@ -2520,11 +2519,11 @@ varobj_value_get_print_value (struct value *value,
   /* If the THEVALUE has contents, it is a regular string.  */
   if (!thevalue.empty ())
     LA_PRINT_STRING (stb, type, (gdb_byte *) thevalue.c_str (),
-		     len, encoding, 0, &opts);
+		     len, encoding.get (), 0, &opts);
   else if (string_print)
     /* Otherwise, if string_print is set, and it is not a regular
        string, it is a lazy string.  */
-    val_print_string (type, encoding, str_addr, len, stb, &opts);
+    val_print_string (type, encoding.get (), str_addr, len, stb, &opts);
   else
     /* All other cases.  */
     common_val_print (value, stb, 0, &opts, current_language);

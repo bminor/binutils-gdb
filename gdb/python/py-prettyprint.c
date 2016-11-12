@@ -301,15 +301,14 @@ print_string_repr (PyObject *printer, const char *hint,
 	  CORE_ADDR addr;
 	  long length;
 	  struct type *type;
-	  char *encoding = NULL;
+	  gdb::unique_xmalloc_ptr<char> encoding;
 	  struct value_print_options local_opts = *options;
 
-	  make_cleanup (free_current_contents, &encoding);
 	  gdbpy_extract_lazy_string (py_str, &addr, &type,
 				     &length, &encoding);
 
 	  local_opts.addressprint = 0;
-	  val_print_string (type, encoding, addr, (int) length,
+	  val_print_string (type, encoding.get (), addr, (int) length,
 			    stream, &local_opts);
 	}
       else
@@ -610,14 +609,13 @@ print_children (PyObject *printer, const char *hint,
 	  CORE_ADDR addr;
 	  struct type *type;
 	  long length;
-	  char *encoding = NULL;
+	  gdb::unique_xmalloc_ptr<char> encoding;
 	  struct value_print_options local_opts = *options;
 
-	  make_cleanup (free_current_contents, &encoding);
 	  gdbpy_extract_lazy_string (py_v, &addr, &type, &length, &encoding);
 
 	  local_opts.addressprint = 0;
-	  val_print_string (type, encoding, addr, (int) length, stream,
+	  val_print_string (type, encoding.get (), addr, (int) length, stream,
 			    &local_opts);
 	}
       else if (gdbpy_is_string (py_v))
