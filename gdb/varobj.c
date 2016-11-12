@@ -34,6 +34,7 @@
 #if HAVE_PYTHON
 #include "python/python.h"
 #include "python/python-internal.h"
+#include "python/py-ref.h"
 #else
 typedef int PyObject;
 #endif
@@ -570,17 +571,13 @@ varobj_get_display_hint (const struct varobj *var)
   gdb::unique_xmalloc_ptr<char> result;
 
 #if HAVE_PYTHON
-  struct cleanup *back_to;
-
   if (!gdb_python_initialized)
     return NULL;
 
-  back_to = varobj_ensure_python_env (var);
+  gdbpy_enter_varobj enter_py (var);
 
   if (var->dynamic->pretty_printer != NULL)
     result = gdbpy_get_display_hint (var->dynamic->pretty_printer);
-
-  do_cleanups (back_to);
 #endif
 
   return result;
@@ -702,17 +699,13 @@ install_dynamic_child (struct varobj *var,
 static int
 dynamic_varobj_has_child_method (const struct varobj *var)
 {
-  struct cleanup *back_to;
   PyObject *printer = var->dynamic->pretty_printer;
-  int result;
 
   if (!gdb_python_initialized)
     return 0;
 
-  back_to = varobj_ensure_python_env (var);
-  result = PyObject_HasAttr (printer, gdbpy_children_cst);
-  do_cleanups (back_to);
-  return result;
+  gdbpy_enter_varobj enter_py (var);
+  return PyObject_HasAttr (printer, gdbpy_children_cst);
 }
 #endif
 
@@ -1220,16 +1213,12 @@ install_new_value_visualizer (struct varobj *var)
 
   if (var->dynamic->constructor != Py_None && var->value != NULL)
     {
-      struct cleanup *cleanup;
-
-      cleanup = varobj_ensure_python_env (var);
+      gdbpy_enter_varobj enter_py (var);
 
       if (var->dynamic->constructor == NULL)
 	install_default_visualizer (var);
       else
 	construct_visualizer (var, var->dynamic->constructor);
-
-      do_cleanups (cleanup);
     }
 #else
   /* Do nothing.  */
@@ -1489,35 +1478,31 @@ void
 varobj_set_visualizer (struct varobj *var, const char *visualizer)
 {
 #if HAVE_PYTHON
-  PyObject *mainmod, *globals, *constructor;
-  struct cleanup *back_to;
+  PyObject *mainmod;
 
   if (!gdb_python_initialized)
     return;
 
-  back_to = varobj_ensure_python_env (var);
+  gdbpy_enter_varobj enter_py (var);
 
   mainmod = PyImport_AddModule ("__main__");
-  globals = PyModule_GetDict (mainmod);
-  Py_INCREF (globals);
-  make_cleanup_py_decref (globals);
+  gdbpy_ref globals (PyModule_GetDict (mainmod));
+  Py_INCREF (globals.get ());
 
-  constructor = PyRun_String (visualizer, Py_eval_input, globals, globals);
+  gdbpy_ref constructor (PyRun_String (visualizer, Py_eval_input,
+				       globals.get (), globals.get ()));
 
-  if (! constructor)
+  if (constructor == NULL)
     {
       gdbpy_print_stack ();
       error (_("Could not evaluate visualizer expression: %s"), visualizer);
     }
 
-  construct_visualizer (var, constructor);
-  Py_XDECREF (constructor);
+  construct_visualizer (var, constructor.get ());
 
   /* If there are any children now, wipe them.  */
   varobj_delete (var, 1 /* children only */);
   var->num_children = -1;
-
-  do_cleanups (back_to);
 #else
   error (_("Python support required"));
 #endif
@@ -2106,11 +2091,10 @@ free_variable (struct varobj *var)
 #if HAVE_PYTHON
   if (var->dynamic->pretty_printer != NULL)
     {
-      struct cleanup *cleanup = varobj_ensure_python_env (var);
+      gdbpy_enter_varobj enter_py (var);
 
       Py_XDECREF (var->dynamic->constructor);
       Py_XDECREF (var->dynamic->pretty_printer);
-      do_cleanups (cleanup);
     }
 #endif
 

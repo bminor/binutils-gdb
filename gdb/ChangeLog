@@ -1,5 +1,12 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_get_display_hint)
+	(dynamic_varobj_has_child_method, install_new_value_visualizer)
+	(varobj_set_visualizer, free_variable): Use
+	gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (python_command): Use gdbpy_enter, gdbpy_ref.
 	(do_finish_initialization): New function.  Use gdbpy_ref.
 	(gdbpy_finish_initialization): Use gdbpy_enter.  Call
