@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (py_print_frame): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (ensure_python_env, restore_python_env):
 	Remove.
 	* python/python-internal.h (ensure_python_env): Don't declare.

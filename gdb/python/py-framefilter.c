@@ -1171,8 +1171,7 @@ py_print_frame (PyObject *filter, int flags,
       /* Print frame function name.  */
       if (PyObject_HasAttrString (filter, "function"))
 	{
-	  PyObject *py_func = PyObject_CallMethod (filter, "function", NULL);
-	  struct cleanup *py_func_cleanup;
+	  gdbpy_ref py_func (PyObject_CallMethod (filter, "function", NULL));
 	  const char *function = NULL;
 
 	  if (py_func == NULL)
@@ -1180,11 +1179,10 @@ py_print_frame (PyObject *filter, int flags,
 	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
-	  py_func_cleanup = make_cleanup_py_decref (py_func);
 
-	  if (gdbpy_is_string (py_func))
+	  if (gdbpy_is_string (py_func.get ()))
 	    {
-	      function_to_free = python_string_to_host_string (py_func);
+	      function_to_free = python_string_to_host_string (py_func.get ());
 
 	      if (function_to_free == NULL)
 		{
@@ -1194,12 +1192,12 @@ py_print_frame (PyObject *filter, int flags,
 
 	      function = function_to_free.get ();
 	    }
-	  else if (PyLong_Check (py_func))
+	  else if (PyLong_Check (py_func.get ()))
 	    {
 	      CORE_ADDR addr;
 	      struct bound_minimal_symbol msymbol;
 
-	      if (get_addr_from_python (py_func, &addr) < 0)
+	      if (get_addr_from_python (py_func.get (), &addr) < 0)
 		{
 		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
@@ -1233,8 +1231,6 @@ py_print_frame (PyObject *filter, int flags,
 	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
-
-	  do_cleanups (py_func_cleanup);
 	}
     }
 
@@ -1267,20 +1263,18 @@ py_print_frame (PyObject *filter, int flags,
 
       if (PyObject_HasAttrString (filter, "filename"))
 	{
-	  PyObject *py_fn = PyObject_CallMethod (filter, "filename", NULL);
-	  struct cleanup *py_fn_cleanup;
+	  gdbpy_ref py_fn (PyObject_CallMethod (filter, "filename", NULL));
 
 	  if (py_fn == NULL)
 	    {
 	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
-	  py_fn_cleanup = make_cleanup_py_decref (py_fn);
 
 	  if (py_fn != Py_None)
 	    {
 	      gdb::unique_xmalloc_ptr<char>
-		filename (python_string_to_host_string (py_fn));
+		filename (python_string_to_host_string (py_fn.get ()));
 
 	      if (filename == NULL)
 		{
@@ -1304,13 +1298,11 @@ py_print_frame (PyObject *filter, int flags,
 		}
 	      END_CATCH
 	    }
-	  do_cleanups (py_fn_cleanup);
 	}
 
       if (PyObject_HasAttrString (filter, "line"))
 	{
-	  PyObject *py_line = PyObject_CallMethod (filter, "line", NULL);
-	  struct cleanup *py_line_cleanup;
+	  gdbpy_ref py_line (PyObject_CallMethod (filter, "line", NULL));
 	  int line;
 
 	  if (py_line == NULL)
@@ -1318,11 +1310,10 @@ py_print_frame (PyObject *filter, int flags,
 	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
-	  py_line_cleanup = make_cleanup_py_decref (py_line);
 
 	  if (py_line != Py_None)
 	    {
-	      line = PyLong_AsLong (py_line);
+	      line = PyLong_AsLong (py_line.get ());
 	      if (PyErr_Occurred ())
 		{
 		  do_cleanups (cleanup_stack);
@@ -1343,7 +1334,6 @@ py_print_frame (PyObject *filter, int flags,
 		}
 	      END_CATCH
 	    }
-	  do_cleanups (py_line_cleanup);
 	}
     }
 
@@ -1376,17 +1366,13 @@ py_print_frame (PyObject *filter, int flags,
     }
 
   {
-    PyObject *elided;
-    struct cleanup *elided_cleanup;
-
     /* Finally recursively print elided frames, if any.  */
-    elided = get_py_iter_from_func (filter, "elided");
+    gdbpy_ref elided (get_py_iter_from_func (filter, "elided"));
     if (elided == NULL)
       {
 	do_cleanups (cleanup_stack);
 	return EXT_LANG_BT_ERROR;
       }
-    elided_cleanup = make_cleanup_py_decref (elided);
 
     if (elided != Py_None)
       {
@@ -1397,16 +1383,14 @@ py_print_frame (PyObject *filter, int flags,
 	if (! out->is_mi_like_p ())
 	  indent++;
 
-	while ((item = PyIter_Next (elided)))
+	while ((item = PyIter_Next (elided.get ())))
 	  {
-	    struct cleanup *item_cleanup = make_cleanup_py_decref (item);
+	    gdbpy_ref item_ref (item);
 
 	    enum ext_lang_bt_status success = py_print_frame (item, flags,
 							      args_type, out,
 							      indent,
 							      levels_printed);
-
-	    do_cleanups (item_cleanup);
 
 	    if (success == EXT_LANG_BT_ERROR)
 	      {
@@ -1420,7 +1404,6 @@ py_print_frame (PyObject *filter, int flags,
 	    return EXT_LANG_BT_ERROR;
 	  }
       }
-    do_cleanups (elided_cleanup);
   }
 
   do_cleanups (cleanup_stack);
