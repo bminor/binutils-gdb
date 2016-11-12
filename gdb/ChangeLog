@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-cmd.c (cmdpy_function): Use gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-varobj.c (py_varobj_iter_dtor, py_varobj_iter_next):
 	Use gdbpy_enter_varobj.
 

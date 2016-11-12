@@ -117,10 +117,8 @@ static void
 cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 {
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
-  PyObject *argobj, *ttyobj, *result;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   if (! obj)
     error (_("Invalid invocation of Python command object."));
@@ -129,7 +127,6 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
       if (obj->command->prefixname)
 	{
 	  /* A prefix command does not need an invoke method.  */
-	  do_cleanups (cleanup);
 	  return;
 	}
       error (_("Python command object missing 'invoke' method."));
@@ -137,21 +134,21 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 
   if (! args)
     args = "";
-  argobj = PyUnicode_Decode (args, strlen (args), host_charset (), NULL);
-  if (! argobj)
+  gdbpy_ref argobj (PyUnicode_Decode (args, strlen (args), host_charset (),
+				      NULL));
+  if (argobj == NULL)
     {
       gdbpy_print_stack ();
       error (_("Could not convert arguments to Python string."));
     }
 
-  ttyobj = from_tty ? Py_True : Py_False;
-  Py_INCREF (ttyobj);
-  result = PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst, argobj,
-				       ttyobj, NULL);
-  Py_DECREF (argobj);
-  Py_DECREF (ttyobj);
+  gdbpy_ref ttyobj (from_tty ? Py_True : Py_False);
+  Py_INCREF (ttyobj.get ());
+  gdbpy_ref result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
+						argobj.get (), ttyobj.get (),
+						NULL));
 
-  if (! result)
+  if (result == NULL)
     {
       PyObject *ptype, *pvalue, *ptraceback;
 
@@ -199,9 +196,6 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	  error ("%s", msg.get ());
 	}
     }
-
-  Py_DECREF (result);
-  do_cleanups (cleanup);
 }
 
 /* Helper function for the Python command completers (both "pure"
