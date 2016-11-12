@@ -363,18 +363,24 @@ get_set_value (char *args, int from_tty,
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);
   gdb::unique_xmalloc_ptr<char> set_doc_string;
-  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
-					       current_language);
-  PyObject *set_doc_func = PyString_FromString ("get_set_string");
 
-  if (! set_doc_func)
-    goto error;
+  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_ref set_doc_func (PyString_FromString ("get_set_string"));
 
-  if (PyObject_HasAttr (obj, set_doc_func))
+  if (set_doc_func == NULL)
     {
-      set_doc_string = call_doc_function (obj, set_doc_func, NULL);
+      gdbpy_print_stack ();
+      return;
+    }
+
+  if (PyObject_HasAttr (obj, set_doc_func.get ()))
+    {
+      set_doc_string = call_doc_function (obj, set_doc_func.get (), NULL);
       if (! set_doc_string)
-	goto error;
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
     }
   else
     {
@@ -385,16 +391,6 @@ get_set_value (char *args, int from_tty,
     }
 
   fprintf_filtered (gdb_stdout, "%s\n", set_doc_string.get ());
-
-  Py_XDECREF (set_doc_func);
-  do_cleanups (cleanup);
-  return;
-
- error:
-  Py_XDECREF (set_doc_func);
-  gdbpy_print_stack ();
-  do_cleanups (cleanup);
-  return;
 }
 
 /* A callback function that is registered against the respective
@@ -410,24 +406,33 @@ get_show_value (struct ui_file *file, int from_tty,
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);
   gdb::unique_xmalloc_ptr<char> show_doc_string;
-  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
-					       current_language);
-  PyObject *show_doc_func = PyString_FromString ("get_show_string");
 
-  if (! show_doc_func)
-    goto error;
+  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_ref show_doc_func (PyString_FromString ("get_show_string"));
 
-  if (PyObject_HasAttr (obj, show_doc_func))
+  if (show_doc_func == NULL)
     {
-      PyObject *val_obj = PyString_FromString (value);
+      gdbpy_print_stack ();
+      return;
+    }
 
-      if (! val_obj)
-	goto error;
+  if (PyObject_HasAttr (obj, show_doc_func.get ()))
+    {
+      gdbpy_ref val_obj (PyString_FromString (value));
 
-      show_doc_string = call_doc_function (obj, show_doc_func, val_obj);
-      Py_DECREF (val_obj);
+      if (val_obj == NULL)
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
+
+      show_doc_string = call_doc_function (obj, show_doc_func.get (),
+					   val_obj.get ());
       if (! show_doc_string)
-	goto error;
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
 
       fprintf_filtered (file, "%s\n", show_doc_string.get ());
     }
@@ -439,16 +444,6 @@ get_show_value (struct ui_file *file, int from_tty,
       show_doc_string  = get_doc_string (obj, show_doc_cst);
       fprintf_filtered (file, "%s %s\n", show_doc_string.get (), value);
     }
-
-  Py_XDECREF (show_doc_func);
-  do_cleanups (cleanup);
-  return;
-
- error:
-  Py_XDECREF (show_doc_func);
-  gdbpy_print_stack ();
-  do_cleanups (cleanup);
-  return;
 }
 
 
