@@ -452,9 +452,7 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 static void
 python_command (char *arg, int from_tty)
 {
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -467,12 +465,11 @@ python_command (char *arg, int from_tty)
   else
     {
       struct command_line *l = get_command_line (python_control, "");
+      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
 
-      make_cleanup_free_command_lines (&l);
       execute_control_command_untraced (l);
+      do_cleanups (cleanup);
     }
-
-  do_cleanups (cleanup);
 }
 
 
@@ -1819,26 +1816,20 @@ message == an error message without a stack will be printed."),
 
 #ifdef HAVE_PYTHON
 
-/* Perform the remaining python initializations.
-   These must be done after GDB is at least mostly initialized.
-   E.g., The "info pretty-printer" command needs the "info" prefix
-   command installed.
-   This is the extension_language_ops.finish_initialization "method".  */
+/* Helper function for gdbpy_finish_initialization.  This does the
+   work and then returns false if an error has occurred and must be
+   displayed, or true on success.  */
 
-static void
-gdbpy_finish_initialization (const struct extension_language_defn *extlang)
+static bool
+do_finish_initialization (const struct extension_language_defn *extlang)
 {
   PyObject *m;
-  char *gdb_pythondir;
   PyObject *sys_path;
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (get_current_arch (), current_language);
 
   /* Add the initial data-directory to sys.path.  */
 
-  gdb_pythondir = concat (gdb_datadir, SLASH_STRING, "python", (char *) NULL);
-  make_cleanup (xfree, gdb_pythondir);
+  std::string gdb_pythondir = (std::string (gdb_datadir) + SLASH_STRING
+			       + "python");
 
   sys_path = PySys_GetObject ("path");
 
@@ -1854,27 +1845,21 @@ gdbpy_finish_initialization (const struct extension_language_defn *extlang)
     }
   if (sys_path && PyList_Check (sys_path))
     {
-      PyObject *pythondir;
-      int err;
-
-      pythondir = PyString_FromString (gdb_pythondir);
-      if (pythondir == NULL)
-	goto fail;
-
-      err = PyList_Insert (sys_path, 0, pythondir);
-      Py_DECREF (pythondir);
-      if (err)
-	goto fail;
+      gdbpy_ref pythondir (PyString_FromString (gdb_pythondir.c_str ()));
+      if (pythondir == NULL || PyList_Insert (sys_path, 0, pythondir.get ()))
+	return false;
     }
   else
-    goto fail;
+    return false;
 
   /* Import the gdb module to finish the initialization, and
      add it to __main__ for convenience.  */
   m = PyImport_AddModule ("__main__");
   if (m == NULL)
-    goto fail;
+    return false;
 
+  /* Keep the reference to gdb_python_module since it is in a global
+     variable.  */
   gdb_python_module = PyImport_ImportModule ("gdb");
   if (gdb_python_module == NULL)
     {
@@ -1885,24 +1870,31 @@ gdbpy_finish_initialization (const struct extension_language_defn *extlang)
 		 "Could not load the Python gdb module from `%s'.\n"
 		 "Limited Python support is available from the _gdb module.\n"
 		 "Suggest passing --data-directory=/path/to/gdb/data-directory.\n"),
-		 gdb_pythondir);
-      do_cleanups (cleanup);
-      return;
+	       gdb_pythondir.c_str ());
+      /* We return "success" here as we've already emitted the
+	 warning.  */
+      return true;
     }
 
-  if (gdb_pymodule_addobject (m, "gdb", gdb_python_module) < 0)
-    goto fail;
+  return gdb_pymodule_addobject (m, "gdb", gdb_python_module) >= 0;
+}
 
-  /* Keep the reference to gdb_python_module since it is in a global
-     variable.  */
+/* Perform the remaining python initializations.
+   These must be done after GDB is at least mostly initialized.
+   E.g., The "info pretty-printer" command needs the "info" prefix
+   command installed.
+   This is the extension_language_ops.finish_initialization "method".  */
 
-  do_cleanups (cleanup);
-  return;
+static void
+gdbpy_finish_initialization (const struct extension_language_defn *extlang)
+{
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
- fail:
-  gdbpy_print_stack ();
-  warning (_("internal error: Unhandled Python exception"));
-  do_cleanups (cleanup);
+  if (!do_finish_initialization (extlang))
+    {
+      gdbpy_print_stack ();
+      warning (_("internal error: Unhandled Python exception"));
+    }
 }
 
 /* Return non-zero if Python has successfully initialized.
