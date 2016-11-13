@@ -1,3 +1,7 @@
+2016-11-13  Anthony Green  <green@moxielogic.org>
+
+	* config/tc-moxie.c (md_assemble): Assemble 'bad' opcode.
+
 2016-11-11  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20732
