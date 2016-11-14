@@ -1,3 +1,8 @@
+2016-12-02  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/main-subprogram.c: New file.
+	* gdb.dwarf2/main-subprogram.exp: New file.
+
 2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/maint.exp: Remove timeout handling for gdb_test_multiple.

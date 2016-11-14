@@ -1105,6 +1105,9 @@ struct partial_die_info
     unsigned int has_pc_info : 1;
     unsigned int may_be_inlined : 1;
 
+    /* This DIE has been marked DW_AT_main_subprogram.  */
+    unsigned int main_subprogram : 1;
+
     /* Flag set if the SCOPE field of this structure has been
        computed.  */
     unsigned int scope_set : 1;
@@ -6930,6 +6933,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       &objfile->static_psymbols,
 			       addr, cu->language, objfile);
 	}
+
+      if (pdi->main_subprogram && actual_name != NULL)
+	set_objfile_main_name (objfile, actual_name, cu->language);
       break;
     case DW_TAG_constant:
       {
@@ -15949,19 +15955,18 @@ read_partial_die (const struct die_reader_specs *reader,
 	     to describe functions' calling conventions.
 
 	     However, because it's a necessary piece of information in
-	     Fortran, and because DW_CC_program is the only piece of debugging
-	     information whose definition refers to a 'main program' at all,
-	     several compilers have begun marking Fortran main programs with
-	     DW_CC_program --- even when those functions use the standard
-	     calling conventions.
+	     Fortran, and before DWARF 4 DW_CC_program was the only
+	     piece of debugging information whose definition refers to
+	     a 'main program' at all, several compilers marked Fortran
+	     main programs with DW_CC_program --- even when those
+	     functions use the standard calling conventions.
 
-	     So until DWARF specifies a way to provide this information and
-	     compilers pick up the new representation, we'll support this
-	     practice.  */
+	     Although DWARF now specifies a way to provide this
+	     information, we support this practice for backward
+	     compatibility.  */
 	  if (DW_UNSND (&attr) == DW_CC_program
-	      && cu->language == language_fortran
-	      && part_die->name != NULL)
-	    set_objfile_main_name (objfile, part_die->name, language_fortran);
+	      && cu->language == language_fortran)
+	    part_die->main_subprogram = 1;
 	  break;
 	case DW_AT_inline:
 	  if (DW_UNSND (&attr) == DW_INL_inlined
@@ -15976,6 +15981,10 @@ read_partial_die (const struct die_reader_specs *reader,
 	      part_die->is_dwz = (attr.form == DW_FORM_GNU_ref_alt
 				  || cu->per_cu->is_dwz);
 	    }
+	  break;
+
+	case DW_AT_main_subprogram:
+	  part_die->main_subprogram = DW_UNSND (&attr);
 	  break;
 
 	default:

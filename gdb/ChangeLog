@@ -1,3 +1,13 @@
+2016-12-02  Tom Tromey  <tom@tromey.com>
+
+	PR symtab/16264:
+	* dwarf2read.c (struct partial_die_info) <main_subprogram>: New
+	member.
+	(add_partial_symbol): Call set_objfile_main_name.
+	(read_partial_die): Handle DW_AT_main_subprogram.
+	<DW_AT_calling_convention>: don't call set_objfile_main_name, but
+	set main_subprogram flag.
+
 2016-12-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracefile-tfile.c (tfile_write_status): Adjust to renames.
