@@ -4693,10 +4693,17 @@ do_ifunc_pointer:
 	     symbols it's the symbol itself relative to GOT.  */
 	  if (h != NULL
 	      /* See PLT32 handling.  */
-	      && h->plt.offset != (bfd_vma) -1
+	      && (h->plt.offset != (bfd_vma) -1
+		  || eh->plt_got.offset != (bfd_vma) -1)
 	      && htab->elf.splt != NULL)
 	    {
-	      if (htab->plt_bnd != NULL)
+	      if (eh->plt_got.offset != (bfd_vma) -1)
+		{
+		  /* Use the GOT PLT.  */
+		  resolved_plt = htab->plt_got;
+		  plt_offset = eh->plt_got.offset;
+		}
+	      else if (htab->plt_bnd != NULL)
 		{
 		  resolved_plt = htab->plt_bnd;
 		  plt_offset = eh->plt_bnd.offset;

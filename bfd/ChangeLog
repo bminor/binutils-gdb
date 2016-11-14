@@ -1,3 +1,9 @@
+2016-11-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20800
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Also check
+	plt_got.offset for R_X86_64_PLTOFF64.
+
 2016-11-14  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Fix typo: Faal -> Fall.
