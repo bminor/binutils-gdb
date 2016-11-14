@@ -1,3 +1,12 @@
+2016-11-14  Rudy  <jacky.chouchou@yandex.ru>
+
+	PR binutils/20814
+	* dlltool.c (struct export): Remove hint field.
+	(make_one_lib_file): Store the ordinal value for IDATA6 not the
+	hint.
+	(gen_lib_file): Delete reference to hint field.
+	(mangle_defs): Delete computation of hint field.
+
 2016-11-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20751
