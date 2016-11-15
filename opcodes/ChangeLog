@@ -1,5 +1,51 @@
 2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* arc-opc.c (insert_ra_chk): New function.
+	(insert_rb_chk): Likewise.
+	(insert_rad): Update text error message.
+	(insert_rcd): Likewise.
+	(insert_rhv2): Likewise.
+	(insert_r0): Likewise.
+	(insert_r1): Likewise.
+	(insert_r2): Likewise.
+	(insert_r3): Likewise.
+	(insert_sp): Likewise.
+	(insert_gp): Likewise.
+	(insert_pcl): Likewise.
+	(insert_blink): Likewise.
+	(insert_ilink1): Likewise.
+	(insert_ilink2): Likewise.
+	(insert_ras): Likewise.
+	(insert_rbs): Likewise.
+	(insert_rcs): Likewise.
+	(insert_simm3s): Likewise.
+	(insert_rrange): Likewise.
+	(insert_fpel): Likewise.
+	(insert_blinkel): Likewise.
+	(insert_pcel): Likewise.
+	(insert_nps_3bit_dst): Likewise.
+	(insert_nps_3bit_dst_short): Likewise.
+	(insert_nps_3bit_src2_short): Likewise.
+	(insert_nps_bitop_size_2b): Likewise.
+	(MAKE_SRC_POS_INSERT_EXTRACT_FUNCS): Likewise.
+	(RA_CHK): Define.
+	(RB): Adjust.
+	(RB_CHK): Define.
+	(RC): Adjust.
+	* arc-dis.c (print_insn_arc): Add LOAD and STORE class.
+	* arc-tbl.h (div, divu): All instructions are DIVREM class.
+	Change first insn argument to check for LP_COUNT usage.
+	(rem): Likewise.
+	(ld, ldd): All instructions are LOAD class.  Change first insn
+	argument to check for LP_COUNT usage.
+	(st, std): All instructions are STORE class.
+	(mac, mpy, dmac, mul, dmpy): All instructions are MPY class.
+	Change first insn argument to check for LP_COUNT usage.
+	(mov): All instructions are MOVE class.  Change first insn
+	argument to check for LP_COUNT usage.
+
+2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* arc-dis.c (is_compatible_p): Remove function.
 	(skip_this_opcode): Don't add any decoding class to decode list.
 	Remove warning.

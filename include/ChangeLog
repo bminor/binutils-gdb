@@ -1,3 +1,8 @@
+2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (insn_class_t): Add DIVREM, LOAD, MOVE, MPY, STORE
+	instruction classes.
+
 2016-11-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* opcode/sparc.h (sparc_opcode_arch): New fields hwcaps and

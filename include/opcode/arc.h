@@ -47,17 +47,22 @@ typedef enum
   BMU,
   BRANCH,
   CONTROL,
+  DIVREM,
   DPI,
   DSP,
   FLOAT,
   INVALID,
   JUMP,
   KERNEL,
+  LOAD,
   LOGICAL,
   MEMORY,
+  MOVE,
+  MPY,
   NET,
   PROTOCOL_DECODE,
   PMU,
+  STORE,
   XY
 } insn_class_t;
 

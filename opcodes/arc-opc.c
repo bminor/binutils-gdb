@@ -30,12 +30,35 @@
    instructions. All NPS400 features are built into all ARC target builds as
    this reduces the chances that regressions might creep in.  */
 
+/* Insert RA register into a 32-bit opcode, with checks.  */
+static unsigned long long
+insert_ra_chk (unsigned long long insn,
+	       long long int value,
+	       const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value == 60)
+    *errmsg = _("LP_COUNT register cannot be used as destination register");
+
+  return insn | (value & 0x3F);
+}
 /* Insert RB register into a 32-bit opcode.  */
 static unsigned long long
 insert_rb (unsigned long long insn,
 	   long long int value,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
+  return insn | ((value & 0x07) << 24) | (((value >> 3) & 0x07) << 12);
+}
+
+/* Insert RB register with checks.  */
+static unsigned long long
+insert_rb_chk (unsigned long long insn,
+	       long long int value,
+	       const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value == 60)
+    *errmsg = _("LP_COUNT register cannot be used as destination register");
+
   return insn | ((value & 0x07) << 24) | (((value >> 3) & 0x07) << 12);
 }
 
@@ -58,7 +81,9 @@ insert_rad (unsigned long long insn,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value & 0x01)
-    *errmsg = _("Improper register value.");
+    *errmsg = _("cannot use odd number destination register");
+  if (value == 60)
+    *errmsg = _("LP_COUNT register cannot be used as destination register");
 
   return insn | (value & 0x3F);
 }
@@ -69,7 +94,7 @@ insert_rcd (unsigned long long insn,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value & 0x01)
-    *errmsg = _("Improper register value.");
+    *errmsg = _("cannot use odd number source register");
 
   return insn | ((value & 0x3F) << 6);
 }
@@ -142,7 +167,7 @@ insert_rhv2 (unsigned long long insn,
 {
   if (value == 0x1E)
     *errmsg =
-      _("Register R30 is a limm indicator for this type of instruction.");
+      _("Register R30 is a limm indicator");
   return insn |= ((value & 0x07) << 5) | ((value >> 3) & 0x03);
 }
 
@@ -161,7 +186,7 @@ insert_r0 (unsigned long long insn,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 0)
-    *errmsg = _("Register must be R0.");
+    *errmsg = _("Register must be R0");
   return insn;
 }
 
@@ -179,7 +204,7 @@ insert_r1 (unsigned long long insn,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 1)
-    *errmsg = _("Register must be R1.");
+    *errmsg = _("Register must be R1");
   return insn;
 }
 
@@ -196,7 +221,7 @@ insert_r2 (unsigned long long insn,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 2)
-    *errmsg = _("Register must be R2.");
+    *errmsg = _("Register must be R2");
   return insn;
 }
 
@@ -213,7 +238,7 @@ insert_r3 (unsigned long long insn,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 3)
-    *errmsg = _("Register must be R3.");
+    *errmsg = _("Register must be R3");
   return insn;
 }
 
@@ -230,7 +255,7 @@ insert_sp (unsigned long long insn,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 28)
-    *errmsg = _("Register must be SP.");
+    *errmsg = _("Register must be SP");
   return insn;
 }
 
@@ -247,7 +272,7 @@ insert_gp (unsigned long long insn,
 	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 26)
-    *errmsg = _("Register must be GP.");
+    *errmsg = _("Register must be GP");
   return insn;
 }
 
@@ -264,7 +289,7 @@ insert_pcl (unsigned long long insn,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 63)
-    *errmsg = _("Register must be PCL.");
+    *errmsg = _("Register must be PCL");
   return insn;
 }
 
@@ -281,7 +306,7 @@ insert_blink (unsigned long long insn,
 	      const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 31)
-    *errmsg = _("Register must be BLINK.");
+    *errmsg = _("Register must be BLINK");
   return insn;
 }
 
@@ -298,7 +323,7 @@ insert_ilink1 (unsigned long long insn,
 	       const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 29)
-    *errmsg = _("Register must be ILINK1.");
+    *errmsg = _("Register must be ILINK1");
   return insn;
 }
 
@@ -315,7 +340,7 @@ insert_ilink2 (unsigned long long insn,
 	       const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value != 30)
-    *errmsg = _("Register must be ILINK2.");
+    *errmsg = _("Register must be ILINK2");
   return insn;
 }
 
@@ -346,7 +371,7 @@ insert_ras (unsigned long long insn,
       insn |= (value - 8);
       break;
     default:
-      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      *errmsg = _("Register must be either r0-r3 or r12-r15");
       break;
     }
   return insn;
@@ -383,7 +408,7 @@ insert_rbs (unsigned long long insn,
       insn |= ((value - 8)) << 8;
       break;
     default:
-      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      *errmsg = _("Register must be either r0-r3 or r12-r15");
       break;
     }
   return insn;
@@ -420,7 +445,7 @@ insert_rcs (unsigned long long insn,
       insn |= ((value - 8)) << 5;
       break;
     default:
-      *errmsg = _("Register must be either r0-r3 or r12-r15.");
+      *errmsg = _("Register must be either r0-r3 or r12-r15");
       break;
     }
   return insn;
@@ -470,7 +495,7 @@ insert_simm3s (unsigned long long insn,
       tmp = 0x06;
       break;
     default:
-      *errmsg = _("Accepted values are from -1 to 6.");
+      *errmsg = _("Accepted values are from -1 to 6");
       break;
     }
 
@@ -498,12 +523,12 @@ insert_rrange (unsigned long long insn,
   int reg2 = value & 0xFFFF;
   if (reg1 != 13)
     {
-      *errmsg = _("First register of the range should be r13.");
+      *errmsg = _("First register of the range should be r13");
       return insn;
     }
   if (reg2 < 13 || reg2 > 26)
     {
-      *errmsg = _("Last register of the range doesn't fit.");
+      *errmsg = _("Last register of the range doesn't fit");
       return insn;
     }
   insn |= ((reg2 - 12) & 0x0F) << 1;
@@ -524,7 +549,7 @@ insert_fpel (unsigned long long insn,
 {
   if (value != 27)
     {
-      *errmsg = _("Invalid register number, should be fp.");
+      *errmsg = _("Invalid register number, should be fp");
       return insn;
     }
 
@@ -546,7 +571,7 @@ insert_blinkel (unsigned long long insn,
 {
   if (value != 31)
     {
-      *errmsg = _("Invalid register number, should be blink.");
+      *errmsg = _("Invalid register number, should be blink");
       return insn;
     }
 
@@ -568,7 +593,7 @@ insert_pclel (unsigned long long insn,
 {
   if (value != 63)
     {
-      *errmsg = _("Invalid register number, should be pcl.");
+      *errmsg = _("Invalid register number, should be pcl");
       return insn;
     }
 
@@ -664,7 +689,7 @@ insert_nps_3bit_reg_at_##OFFSET##_##NAME		         \
       insn |= (value - 8) << (OFFSET);                           \
       break;                                                     \
     default:                                                     \
-      *errmsg = _("Register must be either r0-r3 or r12-r15.");  \
+      *errmsg = _("Register must be either r0-r3 or r12-r15");  \
       break;                                                     \
     }                                                            \
   return insn;                                                   \
@@ -712,7 +737,7 @@ insert_nps_bitop_size_2b (unsigned long long insn ATTRIBUTE_UNUSED,
       break;
     default:
       value = 0;
-      *errmsg = _("Invalid size, should be 1, 2, 4, or 8.");
+      *errmsg = _("Invalid size, should be 1, 2, 4, or 8");
       break;
     }
 
@@ -822,7 +847,7 @@ insert_nps_##NAME##_pos (unsigned long long insn ATTRIBUTE_UNUSED,      \
      value = value / 8;                                       \
      break;                                                   \
    default:                                                   \
-     *errmsg = _("Invalid position, should be 0, 8, 16, or 24.");       \
+     *errmsg = _("Invalid position, should be 0, 8, 16, or 24");       \
      value = 0;                                               \
   }                                                           \
   insn |= (value << SHIFT);                                    \
@@ -1529,9 +1554,13 @@ const struct arc_operand arc_operands[] =
      instructions.  */
 #define RA		(IGNORED + 1)
   { 6, 0, 0, ARC_OPERAND_IR, 0, 0 },
-#define RB		(RA + 1)
+#define RA_CHK		(RA + 1)
+  { 6, 0, 0, ARC_OPERAND_IR, insert_ra_chk, 0 },
+#define RB		(RA_CHK + 1)
   { 6, 12, 0, ARC_OPERAND_IR, insert_rb, extract_rb },
-#define RC		(RB + 1)
+#define RB_CHK		(RB + 1)
+  { 6, 12, 0, ARC_OPERAND_IR, insert_rb_chk, extract_rb },
+#define RC		(RB_CHK + 1)
   { 6, 6, 0, ARC_OPERAND_IR, 0, 0 },
 #define RBdup		(RC + 1)
   { 6, 12, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_rb, extract_rb },

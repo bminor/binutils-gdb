@@ -750,8 +750,10 @@ arc_opcode_to_insn_type (const struct arc_opcode *opcode)
 	    insn_type = dis_branch;
 	}
       break;
+    case LOAD:
+    case STORE:
     case MEMORY:
-      insn_type = dis_dref; /* FIXME! DB indicates mov as memory! */
+      insn_type = dis_dref;
       break;
     default:
       insn_type = dis_nonbranch;
