@@ -1,3 +1,8 @@
+2016-11-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/bitfield-parent-optimized-out.exp: Fix DWARF code for
+	the definition of struct S.
+
 2016-11-11  Catherine Moore  <clm@codesourcery.com>
 
 	* gdb.base/dump.exp: Identify verilog format dump tests as such.
