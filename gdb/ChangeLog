@@ -1,5 +1,20 @@
 2016-11-15  Pedro Alves  <palves@redhat.com>
 
+	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
+	38237baf99386101934cd93278023aa4ae523ec0.
+	* gnulib/configure, gnulib/config.in: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/canonicalize-lgpl.c: Update.
+	* gnulib/import/extra/snippet/c++defs.h: Update.
+	* gnulib/import/m4/stdint.m4: Update.
+	* gnulib/import/m4/stdlib_h.m4: Update.
+	* gnulib/import/math.in.h: Update.
+	* gnulib/import/stdlib.in.h: Update.
+	* gnulib/import/sys_time.in.h: Update.
+
+2016-11-15  Pedro Alves  <palves@redhat.com>
+
 	* common/common-defs.h: Update comment.
 	* common/gdb_unique_ptr.h: Update header comment and copyright
 	year.
