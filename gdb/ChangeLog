@@ -1,3 +1,23 @@
+2016-11-15  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (create_excep_cond_exprs): Use std::move instead of
+	gdb::move.
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use
+	std::unique_ptr instead of gdb::unique_ptr.
+	* breakpoint.c (watch_command_1): Use std::move instead of
+	gdb::move.
+	* cli/cli-dump.c (dump_memory_to_file, restore_binary_file): Use
+	std::unique_ptr instead of gdb::unique_ptr.
+	* dtrace-probe.c (dtrace_process_dof_probe): Use std::move instead
+	of gdb::move.
+	* elfread.c (elf_read_minimal_symbols): Use std::unique_ptr
+	instead of gdb::unique_ptr.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use std::unique_ptr
+	instead of gdb::unique_ptr.
+	* parse.c (parse_expression_for_completion): Use std::move instead
+	of gdb::move.
+	* printcmd.c (display_command): std::move instead of gdb::move.
+
 2016-11-14  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* nat/linux-btrace.c (perf_event_read): Allow data_head < size.

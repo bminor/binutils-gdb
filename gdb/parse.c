@@ -1309,7 +1309,7 @@ parse_expression_for_completion (const char *string, char **name,
   TRY
     {
       parse_completion = 1;
-      exp = gdb::move (parse_exp_in_context (&string, 0, 0, 0, 0, &subexp));
+      exp = std::move (parse_exp_in_context (&string, 0, 0, 0, 0, &subexp));
     }
   CATCH (except, RETURN_MASK_ERROR)
     {

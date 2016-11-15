@@ -11378,7 +11378,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   b->thread = thread;
   b->disposition = disp_donttouch;
   b->pspace = current_program_space;
-  w->exp = gdb::move (exp);
+  w->exp = std::move (exp);
   w->exp_valid_block = exp_valid_block;
   w->cond_exp_valid_block = cond_exp_valid_block;
   if (just_location)

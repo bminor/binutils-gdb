@@ -1136,7 +1136,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
     {
       long i;
 
-      gdb::unique_ptr<asymbol *[]>
+      std::unique_ptr<asymbol *[]>
 	synth_symbol_table (new asymbol *[synthcount]);
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;

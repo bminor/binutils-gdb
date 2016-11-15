@@ -1779,7 +1779,7 @@ display_command (char *arg, int from_tty)
   newobj = new display ();
 
   newobj->exp_string = xstrdup (exp);
-  newobj->exp = gdb::move (expr);
+  newobj->exp = std::move (expr);
   newobj->block = innermost_block;
   newobj->pspace = current_program_space;
   newobj->number = ++display_number;

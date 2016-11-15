@@ -399,7 +399,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			   _("invalid type-matching regexp"));
     }
 
-  gdb::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
+  std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
 
   init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);

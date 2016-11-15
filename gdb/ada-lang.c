@@ -12347,7 +12347,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 	  s = cond_string;
 	  TRY
 	    {
-	      exp = gdb::move (parse_exp_1 (&s, bl->address,
+	      exp = std::move (parse_exp_1 (&s, bl->address,
 					    block_for_pc (bl->address),
 					    0));
 	    }
@@ -12360,7 +12360,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 	  END_CATCH
 	}
 
-      ada_loc->excep_cond_expr = gdb::move (exp);
+      ada_loc->excep_cond_expr = std::move (exp);
     }
 
   do_cleanups (old_chain);

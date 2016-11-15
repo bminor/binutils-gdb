@@ -1504,7 +1504,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   /* Create a buffer and read it in.  */
   total_bytes = word_size * nr_rows * nr_cols;
 
-  gdb::unique_ptr<gdb_byte[]> mbuf (new gdb_byte[total_bytes]);
+  std::unique_ptr<gdb_byte[]> mbuf (new gdb_byte[total_bytes]);
 
   /* Dispatch memory reads to the topmost target, not the flattened
      current_target.  */
