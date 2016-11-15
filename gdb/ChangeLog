@@ -1,5 +1,12 @@
 2016-11-15  Pedro Alves  <palves@redhat.com>
 
+	* common/common-defs.h: Update comment.
+	* common/gdb_unique_ptr.h: Update header comment and copyright
+	year.
+	(gdb::unique_ptr, gdb::move): Delete.
+
+2016-11-15  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (create_excep_cond_exprs): Use std::move instead of
 	gdb::move.
 	* break-catch-throw.c (handle_gnu_v3_exceptions): Use
