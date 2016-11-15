@@ -364,7 +364,8 @@ void
 compile_cplus_instance::leave_scope ()
 {
   // Get the current scope and remove it from the internal list of scopes.
-  compile_scope &current = m_scopes.back ();
+  compile_scope current = m_scopes.back ();
+
   m_scopes.pop_back ();
 
   if (current.m_pushed)
