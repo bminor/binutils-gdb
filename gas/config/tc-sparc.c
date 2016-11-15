@@ -4957,7 +4957,10 @@ cons_fix_new_sparc (fragS *frag,
 	  case 8: r = BFD_RELOC_SPARC_TLS_DTPOFF64; break;
 	  }
     }
-  else if (sparc_no_align_cons)
+  else if (sparc_no_align_cons
+	   || /* PR 20803 - relocs in the .eh_frame section
+		 need to support unaligned access.  */
+	   strcmp (now_seg->name, ".eh_frame") == 0)
     {
       switch (nbytes)
 	{
