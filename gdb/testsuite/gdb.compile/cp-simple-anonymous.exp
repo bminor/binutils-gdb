@@ -1,4 +1,4 @@
-# Copyright 2015 Free Software Foundation, Inc.
+# Copyright 2015-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,13 +45,13 @@ gdb_continue_to_breakpoint "testing location"
 # Reminder, "var" is an integer; all these types get converted to `int'.
 CompileExpression::new "var"
 CompileExpression::add_imp "anon_e" 3
-CompileExpression::add_imp "anon_u.aa" 97
+CompileExpression::add_imp "anon_u.aa" {97( 'a')?}
 CompileExpression::add_imp "anon_s.len" 11
 CompileExpression::add_imp "a.u.b" 0
 CompileExpression::add_imp "a.s.len" 5
 CompileExpression::add_imp "a.e" 10
-CompileExpression::add_imp "(*anon_s.ptr == 'a')" 1
-CompileExpression::add_imp "(*a.s.ptr != 'h')" 0
+CompileExpression::add_imp "(*anon_s.ptr == 'a')" (1|true)
+CompileExpression::add_imp "(*a.s.ptr != 'h')" (0|false)
 CompileExpression::add_imp "A::BB" 11
 CompileExpression::run_tests "code"
 #CompileExpression::run_tests "print"

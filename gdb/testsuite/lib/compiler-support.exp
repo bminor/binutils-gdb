@@ -170,7 +170,7 @@ namespace eval ::CompileExpression {
 
 	foreach exp_test $expr_list_ {
 	    set exp [lindex $exp_test 0]
-	    set result [string_to_regexp [lindex $exp_test 1]]
+	    set result [lindex $exp_test 1]
 	    set is_explicit [lindex $exp_test 2]
 	    set tst [lindex $exp_test 3]
 	    set fail_list [lindex $exp_test 4]
@@ -185,7 +185,7 @@ namespace eval ::CompileExpression {
 	    }
 
 	    if {[string match $cmd "print"]} {
-		if {!$is_expilcit} {
+		if {!$is_explicit} {
 		    eval setup_failures_ $fail_print
 		    gdb_test "compile print $exp" $result $tst
 		}
