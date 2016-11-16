@@ -1,3 +1,8 @@
+2016-11-16  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Use unique_ptr and
+	new gdb_byte[] instead of malloc and cleanups.
+
 2016-11-17  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (collection_list::add_memrange): Add gdbarch

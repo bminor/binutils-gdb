@@ -2568,9 +2568,8 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   gdb_byte *unpacked;
   const int is_scalar = is_scalar_type (type);
   const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
-  gdb_byte *staging = NULL;
+  std::unique_ptr<gdb_byte[]> staging;
   int staging_len = 0;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   type = ada_check_typedef (type);
 
@@ -2589,14 +2588,13 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	 we do, is unpack the data into a byte-aligned buffer, and then
 	 use that buffer as our object's value for resolving the type.  */
       staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-      staging = (gdb_byte *) malloc (staging_len);
-      make_cleanup (xfree, staging);
+      staging.reset (new gdb_byte[staging_len]);
 
       ada_unpack_from_contents (src, bit_offset, bit_size,
-			        staging, staging_len,
+			        staging.get (), staging_len,
 				is_big_endian, has_negatives (type),
 				is_scalar);
-      type = resolve_dynamic_type (type, staging, 0);
+      type = resolve_dynamic_type (type, staging.get (), 0);
       if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 	{
 	  /* This happens when the length of the object is dynamic,
@@ -2656,7 +2654,6 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (bit_size == 0)
     {
       memset (unpacked, 0, TYPE_LENGTH (type));
-      do_cleanups (old_chain);
       return v;
     }
 
@@ -2665,14 +2662,13 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       /* Small short-cut: If we've unpacked the data into a buffer
 	 of the same size as TYPE's length, then we can reuse that,
 	 instead of doing the unpacking again.  */
-      memcpy (unpacked, staging, staging_len);
+      memcpy (unpacked, staging.get (), staging_len);
     }
   else
     ada_unpack_from_contents (src, bit_offset, bit_size,
 			      unpacked, TYPE_LENGTH (type),
 			      is_big_endian, has_negatives (type), is_scalar);
 
-  do_cleanups (old_chain);
   return v;
 }
 
