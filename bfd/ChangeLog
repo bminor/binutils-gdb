@@ -1,3 +1,13 @@
+2016-11-15  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20789
+	* bfd/elf32-avr.c (elf32_avr_adjust_diff_reloc_value): Do signed
+	manipulation of diff value, and don't assume sym2 is less than sym1.
+	(elf32_avr_adjust_reloc_if_spans_insn): New function.
+	(elf32_avr_relax_delete_bytes): Use elf32_avr_adjust_diff_reloc_value,
+	and remove redundant did_pad.
+
+
 2016-11-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20800

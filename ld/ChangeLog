@@ -1,3 +1,10 @@
+2016-11-15  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20789
+	* ld/testsuite/ld-avr/pr20789.d: New test.
+	* ld/testsuite/ld-avr/pr20789.s: New test.
+
+
 2016-11-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20800
