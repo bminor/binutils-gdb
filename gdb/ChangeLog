@@ -1,5 +1,9 @@
 2016-11-17  Pedro Alves  <palves@redhat.com>
 
+	* c-exp.y (c_print_token): Use parser_fprintf instead of fprintf.
+
+2016-11-17  Pedro Alves  <palves@redhat.com>
+
 	* ctf.c [USE_WIN32API] (mkdir): Delete.
 
 2016-11-16  Pedro Alves  <palves@redhat.com>
