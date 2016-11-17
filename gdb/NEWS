@@ -11,6 +11,11 @@
   compiler.  The --disable-build-with-cxx configure option has been
   removed.
 
+* Building GDB and GDBserver now requires GNU make >= 3.81.
+
+  It is no longer supported to build GDB or GDBserver with another
+  implementation of the make program or an earlier version of GNU make.
+
 * Native debugging on MS-Windows supports command-line redirection
 
   Command-line arguments used for starting programs on MS-Windows can

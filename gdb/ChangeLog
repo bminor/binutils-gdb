@@ -1,3 +1,7 @@
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* NEWS: Mention requirement of GNU make.
+
 2016-11-17  Pedro Alves  <palves@redhat.com>
 
 	* c-exp.y (c_print_token): Use parser_fprintf instead of fprintf.
