@@ -451,7 +451,23 @@ static const struct cpu_type
 };
 
 /* Information about the cpu/variant we're assembling for.  */
-static struct cpu_type selected_cpu;
+static struct cpu_type selected_cpu = { 0, 0, 0, 0, 0 };
+
+/* A table with options.  */
+static const struct feature_type
+{
+  unsigned feature;
+  unsigned cpus;
+  const char *name;
+}
+  feature_list[] =
+{
+  { ARC_CD, ARC_OPCODE_ARCV2, "code-density" },
+  { ARC_NPS400, ARC_OPCODE_ARC700, "nps400" },
+  { ARC_SPFP, ARC_OPCODE_ARCFPX, "single-precision FPX" },
+  { ARC_DPFP, ARC_OPCODE_ARCFPX, "double-precision FPX" },
+  { ARC_FPUDA, ARC_OPCODE_ARCv2EM, "double assist FP" }
+};
 
 /* Used by the arc_reloc_op table.  Order is important.  */
 #define O_gotoff  O_md1     /* @gotoff relocation.  */
@@ -775,6 +791,27 @@ md_number_to_chars_midend (char *buf, unsigned long long val, int n)
     }
 }
 
+/* Check if a feature is allowed for a specific CPU.  */
+
+static void
+arc_check_feature (void)
+{
+  unsigned i;
+
+  if (!selected_cpu.features
+      || !selected_cpu.name)
+    return;
+  for (i = 0; (i < ARRAY_SIZE (feature_list)); i++)
+    {
+      if ((selected_cpu.features & feature_list[i].feature)
+	  && !(selected_cpu.flags & feature_list[i].cpus))
+	{
+	  as_bad (_("invalid %s option for %s cpu"), feature_list[i].name,
+		  selected_cpu.name);
+	}
+    }
+}
+
 /* Select an appropriate entry from CPU_TYPES based on ARG and initialise
    the relevant static global variables.  Parameter SEL describes where
    this selection originated from.  */
@@ -789,6 +826,10 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
      other source.  */
   gas_assert (sel != MACH_SELECTION_FROM_DEFAULT
               || mach_selection_mode == MACH_SELECTION_NONE);
+
+  if ((mach_selection_mode == MACH_SELECTION_FROM_CPU_DIRECTIVE)
+      && (sel == MACH_SELECTION_FROM_CPU_DIRECTIVE))
+    as_bad (_("Multiple .cpu directives found"));
 
   /* Look for a matching entry in CPU_TYPES array.  */
   for (i = 0; cpu_types[i].name; ++i)
@@ -807,22 +848,25 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
                   && selected_cpu.mach != cpu_types[i].mach)
                 {
                   as_warn (_("Command-line value overrides \".cpu\" directive"));
-                  return;
                 }
+	      return;
             }
 
-          /* Initialise static global data about selected machine type.  */
-          selected_cpu.flags = cpu_types[i].flags;
-          selected_cpu.name = cpu_types[i].name;
-          selected_cpu.features = cpu_types[i].features;
-          selected_cpu.mach = cpu_types[i].mach;
-          cpu_flags = cpu_types[i].eflags;
+	  /* Initialise static global data about selected machine type.  */
+	  selected_cpu.flags = cpu_types[i].flags;
+	  selected_cpu.name = cpu_types[i].name;
+	  selected_cpu.features |= cpu_types[i].features;
+	  selected_cpu.mach = cpu_types[i].mach;
+	  cpu_flags = cpu_types[i].eflags;
           break;
         }
     }
 
   if (!cpu_types[i].name)
     as_fatal (_("unknown architecture: %s\n"), arg);
+
+  /* Check if set features are compatible with the chosen CPU.  */
+  arc_check_feature ();
   gas_assert (cpu_flags != 0);
   selected_cpu.eflags = (arc_initial_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
   mach_selection_mode = sel;
@@ -3304,11 +3348,8 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_CD:
-      /* This option has an effect only on ARC EM.  */
-      if (selected_cpu.flags & ARC_OPCODE_ARCv2EM)
-	selected_cpu.features |= ARC_CD;
-      else
-	as_warn (_("Code density option invalid for selected CPU"));
+      selected_cpu.features |= ARC_CD;
+      arc_check_feature ();
       break;
 
     case OPTION_RELAX:
@@ -3317,22 +3358,22 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_NPS400:
       selected_cpu.features |= ARC_NPS400;
+      arc_check_feature ();
       break;
 
     case OPTION_SPFP:
       selected_cpu.features |= ARC_SPFP;
+      arc_check_feature ();
       break;
 
     case OPTION_DPFP:
       selected_cpu.features |= ARC_DPFP;
+      arc_check_feature ();
       break;
 
     case OPTION_FPUDA:
-      /* This option has an effect only on ARC EM.  */
-      if (selected_cpu.flags & ARC_OPCODE_ARCv2EM)
-	selected_cpu.features |= ARC_FPUDA;
-      else
-	as_warn (_("FPUDA invalid for selected CPU"));
+      selected_cpu.features |= ARC_FPUDA;
+      arc_check_feature ();
       break;
 
     /* Dummy options are accepted but have no effect.  */

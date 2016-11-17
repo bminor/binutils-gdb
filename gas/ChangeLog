@@ -1,3 +1,20 @@
+2016-11-18  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/cl-warn.s: New file.
+	* testsuite/gas/arc/cpu-pseudop-1.d: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-1.s: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-2.d: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-2.s: Likewise.
+	* testsuite/gas/arc/cpu-warn2.s: Likewise.
+	* config/tc-arc.c (selected_cpu): Initialize.
+	(feature_type): New struct.
+	(feature_list): New variable.
+	(arc_check_feature): New function.
+	(arc_select_cpu): Check for .cpu duplicates. Don't overwrite the
+	current cpu features. Check if a feature is available for a given
+	cpu.
+	(md_parse_option): Test if features are available for a given cpu.
+
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_IMM_ROT*.
