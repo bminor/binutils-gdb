@@ -1,3 +1,13 @@
+2016-11-17  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (collection_list::add_memrange): Add gdbarch
+	parameter.  Use paddress instead of printf_vma.  Adjust recursive
+	calls.
+	(collection_list::stringify): Use paddress and phex_nz instead of
+	sprintf_vma.  Adjust add_memrange call.
+	* tracepoint.h (collection_list::add_memrange): Add gdbarch
+	parameter.
+
 2016-11-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* frame.c (get_prev_frame): Stash frame id for current frame

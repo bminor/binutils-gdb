@@ -252,7 +252,8 @@ public:
   void add_aexpr (agent_expr_up aexpr);
 
   void add_register (unsigned int regno);
-  void add_memrange (int type, bfd_signed_vma base,
+  void add_memrange (struct gdbarch *gdbarch,
+		     int type, bfd_signed_vma base,
 		     unsigned long len);
   void collect_symbol (struct symbol *sym,
 		       struct gdbarch *gdbarch,

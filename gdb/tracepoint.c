@@ -906,15 +906,12 @@ collection_list::add_register (unsigned int regno)
 /* Add a memrange to a collection list.  */
 
 void
-collection_list::add_memrange (int type, bfd_signed_vma base,
+collection_list::add_memrange (struct gdbarch *gdbarch,
+			       int type, bfd_signed_vma base,
 			       unsigned long len)
 {
   if (info_verbose)
-    {
-      printf_filtered ("(%d,", type);
-      printf_vma (base);
-      printf_filtered (",%ld)\n", len);
-    }
+    printf_filtered ("(%d,%s,%ld)\n", type, paddress (gdbarch, base), len);
 
   /* type: memrange_absolute == memory, other n == basereg */
   /* base: addr if memory, offset if reg relative.  */
@@ -955,19 +952,16 @@ collection_list::collect_symbol (struct symbol *sym,
       offset = SYMBOL_VALUE_ADDRESS (sym);
       if (info_verbose)
 	{
-	  char tmp[40];
-
-	  sprintf_vma (tmp, offset);
 	  printf_filtered ("LOC_STATIC %s: collect %ld bytes at %s.\n",
 			   SYMBOL_PRINT_NAME (sym), len,
-			   tmp /* address */);
+			   paddress (gdbarch, offset));
 	}
       /* A struct may be a C++ class with static fields, go to general
 	 expression handling.  */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	treat_as_expr = 1;
       else
-	add_memrange (memrange_absolute, offset, len);
+	add_memrange (gdbarch, memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
       reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
@@ -991,36 +985,36 @@ collection_list::collect_symbol (struct symbol *sym,
       offset = frame_offset + SYMBOL_VALUE (sym);
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset ",
-			   SYMBOL_PRINT_NAME (sym), len);
-	  printf_vma (offset);
-	  printf_filtered (" from frame ptr reg %d\n", reg);
+	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset %s"
+			   " from frame ptr reg %d\n",
+			   SYMBOL_PRINT_NAME (sym), len,
+			   paddress (gdbarch, offset), reg);
 	}
-      add_memrange (reg, offset, len);
+      add_memrange (gdbarch, reg, offset, len);
       break;
     case LOC_REGPARM_ADDR:
       reg = SYMBOL_VALUE (sym);
       offset = 0;
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_REGPARM_ADDR %s: Collect %ld bytes at offset ",
-			   SYMBOL_PRINT_NAME (sym), len);
-	  printf_vma (offset);
-	  printf_filtered (" from reg %d\n", reg);
+	  printf_filtered ("LOC_REGPARM_ADDR %s: Collect %ld bytes at offset %s"
+			   " from reg %d\n",
+			   SYMBOL_PRINT_NAME (sym), len,
+			   paddress (gdbarch, offset), reg);
 	}
-      add_memrange (reg, offset, len);
+      add_memrange (gdbarch, reg, offset, len);
       break;
     case LOC_LOCAL:
       reg = frame_regno;
       offset = frame_offset + SYMBOL_VALUE (sym);
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset ",
-			   SYMBOL_PRINT_NAME (sym), len);
-	  printf_vma (offset);
-	  printf_filtered (" from frame ptr reg %d\n", reg);
+	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset %s"
+			   " from frame ptr reg %d\n",
+			   SYMBOL_PRINT_NAME (sym), len,
+			   paddress (gdbarch, offset), reg);
 	}
-      add_memrange (reg, offset, len);
+      add_memrange (gdbarch, reg, offset, len);
       break;
 
     case LOC_UNRESOLVED:
@@ -1186,7 +1180,6 @@ char **
 collection_list::stringify ()
 {
   char temp_buf[2048];
-  char tmp2[40];
   int count;
   int ndx = 0;
   char *(*str_list)[];
@@ -1233,12 +1226,12 @@ collection_list::stringify ()
   for (i = 0, count = 0, end = temp_buf; i < m_memranges.size (); i++)
     {
       QUIT;			/* Allow user to bail out with ^C.  */
-      sprintf_vma (tmp2, m_memranges[i].start);
       if (info_verbose)
 	{
 	  printf_filtered ("(%d, %s, %ld)\n", 
 			   m_memranges[i].type,
-			   tmp2, 
+			   paddress (target_gdbarch (),
+				     m_memranges[i].start),
 			   (long) (m_memranges[i].end
 				   - m_memranges[i].start));
 	}
@@ -1259,9 +1252,11 @@ collection_list::stringify ()
            "FFFFFFFF" (or more, depending on sizeof (unsigned)).
            Special-case it.  */
         if (m_memranges[i].type == memrange_absolute)
-          sprintf (end, "M-1,%s,%lX", tmp2, (long) length);
+          sprintf (end, "M-1,%s,%lX", phex_nz (m_memranges[i].start, 0),
+		   (long) length);
         else
-          sprintf (end, "M%X,%s,%lX", m_memranges[i].type, tmp2, (long) length);
+          sprintf (end, "M%X,%s,%lX", m_memranges[i].type,
+		   phex_nz (m_memranges[i].start, 0), (long) length);
       }
 
       count += strlen (end);
@@ -1454,7 +1449,8 @@ encode_actions_1 (struct command_line *action,
 		      addr = value_address (tempval);
 		      /* Initialize the TYPE_LENGTH if it is a typedef.  */
 		      check_typedef (exp->elts[1].type);
-		      collect->add_memrange (memrange_absolute, addr,
+		      collect->add_memrange (target_gdbarch (),
+					     memrange_absolute, addr,
 					     TYPE_LENGTH (exp->elts[1].type));
 		      collect->append_exp (exp.get ());
 		      break;
