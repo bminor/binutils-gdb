@@ -1,5 +1,185 @@
 2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	(PYTHON_CFLAGS): Move up.
+	(%.o: $(srcdir)/arch/%.c): New rule.
+	(%.o: $(srcdir)/cli/%.c): New rule.
+	(%.o: $(srcdir)/common/%.c): New rule.
+	(%.o: $(srcdir)/compile/%.c): New rule.
+	(%.o: $(srcdir)/gdbtk/generic/%.c): New rule.
+	(%.o: $(srcdir)/guile/%.c): New rule.
+	(%.o: $(srcdir)/mi/%.c): New rule.
+	(%.o: $(srcdir)/nat/%.c): New rule.
+	(%.o: $(srcdir)/python/%.c): New rule.
+	(%.o: $(srcdir)/target/%.c): New rule.
+	(%.o: $(srcdir)/tui/%.c): New rule.
+	(cli-cmds.o): Remove.
+	(cli-decode.o): Likewise.
+	(cli-dump.o): Likewise.
+	(cli-interp.o): Likewise.
+	(cli-logging.o): Likewise.
+	(cli-script.o): Likewise.
+	(cli-setshow.o): Likewise.
+	(cli-utils.o): Likewise.
+	(compile.o): Likewise.
+	(compile-c-types.o): Likewise.
+	(compile-c-symbols.o): Likewise.
+	(compile-object-load.o): Likewise.
+	(compile-object-run.o): Likewise.
+	(compile-loc2c.o): Likewise.
+	(compile-c-support.o): Likewise.
+	(gdbtk.o): Likewise.
+	(gdbtk-bp.o): Likewise.
+	(gdbtk-cmds.o): Likewise.
+	(gdbtk-hooks.o): Likewise.
+	(gdbtk-interp.o): Likewise.
+	(gdbtk-main.o): Likewise.
+	(gdbtk-register.o): Likewise.
+	(gdbtk-stack.o): Likewise.
+	(gdbtk-varobj.o): Likewise.
+	(gdbtk-wrapper.o): Likewise.
+	(mi-cmd-break.o): Likewise.
+	(mi-cmd-catch.o): Likewise.
+	(mi-cmd-disas.o): Likewise.
+	(mi-cmd-env.o): Likewise.
+	(mi-cmd-file.o): Likewise.
+	(mi-cmd-info.o): Likewise.
+	(mi-cmds.o): Likewise.
+	(mi-cmd-stack.o): Likewise.
+	(mi-cmd-target.o): Likewise.
+	(mi-cmd-var.o): Likewise.
+	(mi-console.o): Likewise.
+	(mi-getopt.o): Likewise.
+	(mi-interp.o): Likewise.
+	(mi-main.o): Likewise.
+	(mi-out.o): Likewise.
+	(mi-parse.o): Likewise.
+	(mi-symbol-cmds.o): Likewise.
+	(mi-common.o): Likewise.
+	(signals.o): Likewise.
+	(common-utils.o): Likewise.
+	(gdb_vecs.o): Likewise.
+	(xml-utils.o): Likewise.
+	(ptid.o): Likewise.
+	(buffer.o): Likewise.
+	(filestuff.o): Likewise.
+	(format.o): Likewise.
+	(vec.o): Likewise.
+	(print-utils.o): Likewise.
+	(rsp-low.o): Likewise.
+	(errors.o): Likewise.
+	(common-debug.o): Likewise.
+	(cleanups.o): Likewise.
+	(common-exceptions.o
+	(posix-strerror.o): Likewise.
+	(mingw-strerror.o): Likewise.
+	(btrace-common.o): Likewise.
+	(fileio.o): Likewise.
+	(common-regcache.o): Likewise.
+	(signals-state-save-restore.o): Likewise.
+	(new-op.o): Likewise.
+	(waitstatus.o): Likewise.
+	(arm.o): Likewise.
+	(arm-linux.o): Likewise.
+	(arm-get-next-pcs.o): Likewise.
+	(x86-dregs.o): Likewise.
+	(linux-btrace.o): Likewise.
+	(linux-osdata.o): Likewise.
+	(linux-procfs.o): Likewise.
+	(linux-ptrace.o): Likewise.
+	(linux-waitpid.o): Likewise.
+	(mips-linux-watch.o): Likewise.
+	(ppc-linux.o): Likewise.
+	(linux-personality.o): Likewise.
+	(x86-linux.o): Likewise.
+	(x86-linux-dregs.o): Likewise.
+	(amd64-linux-siginfo.o): Likewise.
+	(linux-namespaces.o): Likewise.
+	(aarch64-linux-hw-point.o): Likewise.
+	(aarch64-linux.o): Likewise.
+	(aarch64-insn.o): Likewise.
+	(tui.o): Likewise.
+	(tui-command.o): Likewise.
+	(tui-data.o): Likewise.
+	(tui-disasm.o): Likewise.
+	(tui-file.o): Likewise.
+	(tui-hooks.o): Likewise.
+	(tui-interp.o): Likewise.
+	(tui-io.o): Likewise.
+	(tui-layout.o): Likewise.
+	(tui-out.o): Likewise.
+	(tui-regs.o): Likewise.
+	(tui-source.o): Likewise.
+	(tui-stack.o): Likewise.
+	(tui-win.o): Likewise.
+	(tui-windata.o): Likewise.
+	(tui-wingeneral.o): Likewise.
+	(tui-winsource.o): Likewise.
+	(guile.o): Likewise.
+	(scm-arch.o): Likewise.
+	(scm-auto-load.o): Likewise.
+	(scm-block.o): Likewise.
+	(scm-breakpoint.o): Likewise.
+	(scm-cmd.o): Likewise.
+	(scm-disasm.o): Likewise.
+	(scm-exception.o): Likewise.
+	(scm-frame.o): Likewise.
+	(scm-gsmob.o): Likewise.
+	(scm-iterator.o): Likewise.
+	(scm-lazy-string.o): Likewise.
+	(scm-math.o): Likewise.
+	(scm-objfile.o): Likewise.
+	(scm-param.o): Likewise.
+	(scm-ports.o): Likewise.
+	(scm-pretty-print.o): Likewise.
+	(scm-progspace.o): Likewise.
+	(scm-safe-call.o): Likewise.
+	(scm-string.o): Likewise.
+	(scm-symbol.o): Likewise.
+	(scm-symtab.o): Likewise.
+	(scm-type.o): Likewise.
+	(scm-utils.o): Likewise.
+	(scm-value.o): Likewise.
+	(python.o): Likewise.
+	(py-arch.o): Likewise.
+	(py-auto-load.o): Likewise.
+	(py-block.o): Likewise.
+	(py-bpevent.o): Likewise.
+	(py-breakpoint.o): Likewise.
+	(py-cmd.o): Likewise.
+	(py-continueevent.o): Likewise.
+	(py-xmethods.o): Likewise.
+	(py-event.o): Likewise.
+	(py-evtregistry.o): Likewise.
+	(py-evts.o): Likewise.
+	(py-exitedevent.o): Likewise.
+	(py-finishbreakpoint.o): Likewise.
+	(py-frame.o): Likewise.
+	(py-framefilter.o): Likewise.
+	(py-function.o): Likewise.
+	(py-gdb-readline.o): Likewise.
+	(py-inferior.o): Likewise.
+	(py-infevents.o): Likewise.
+	(py-infthread.o): Likewise.
+	(py-lazy-string.o): Likewise.
+	(py-linetable.o): Likewise.
+	(py-newobjfileevent.o): Likewise.
+	(py-objfile.o): Likewise.
+	(py-param.o): Likewise.
+	(py-prettyprint.o): Likewise.
+	(py-progspace.o): Likewise.
+	(py-signalevent.o): Likewise.
+	(py-stopevent.o): Likewise.
+	(py-symbol.o): Likewise.
+	(py-symtab.o): Likewise.
+	(py-threadevent.o): Likewise.
+	(py-type.o): Likewise.
+	(py-unwind.o): Likewise.
+	(py-utils.o): Likewise.
+	(py-value.o): Likewise.
+	(py-varobj.o): Likewise.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (.c.o): Replace rule with ...
 	(%.o: %.c): ... this one.
 	(.po.gmo): Replace rule with ...
