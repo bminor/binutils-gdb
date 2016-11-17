@@ -1,3 +1,7 @@
+2016-11-16  Mark Wielaard  <mark@klomp.org>
+
+	* cxxfilt.c (main): Recognize rust_demangling.
+
 2016-11-14  Rudy  <jacky.chouchou@yandex.ru>
 
 	PR binutils/20814
