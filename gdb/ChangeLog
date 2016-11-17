@@ -1,5 +1,19 @@
 2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (.c.o): Replace rule with ...
+	(%.o: %.c): ... this one.
+	(.po.gmo): Replace rule with ...
+	(%.gmo: %.po): ... this one.
+	(.po.pox): Replace rule with ...
+	(%.pox: %.po): ... this one.
+	(.y.c): Replace rule with ...
+	(%.c: %.y): ... this one.
+	(.l.c): Replace rule with ...
+	(%.c: %.l): ... this one.
+	(.SUFFIXES): Remove all instances.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in: Remove @GMAKE_TRUE@ prefixes and removes lines
 	prefixed with @GMAKE_FALSE@.  Update comment related to non-GNU
 	make.

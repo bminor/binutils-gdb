@@ -256,7 +256,7 @@ FLAGS_TO_PASS = \
 # All generated files which can be included by another file.
 generated_files = config.h $(GNULIB_H)
 
-.c.o:
+%.o: %.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
