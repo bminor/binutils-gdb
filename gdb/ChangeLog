@@ -1,5 +1,13 @@
 2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in: Remove @GMAKE_TRUE@ prefixes and removes lines
+	prefixed with @GMAKE_FALSE@.  Update comment related to non-GNU
+	make.
+	* configure.ac: Remove checks for the make program.
+	* configure: Re-generate.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* NEWS: Mention requirement of GNU make.
 
 2016-11-17  Pedro Alves  <palves@redhat.com>

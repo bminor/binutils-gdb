@@ -974,26 +974,24 @@ reg-tilegx32.c : $(srcdir)/../regformats/reg-tilegx32.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx32.dat reg-tilegx32.c
 
 #
-# Dependency tracking.  Most of this is conditional on GNU Make being
-# found by configure; if GNU Make is not found, we fall back to a
-# simpler scheme.
+# Dependency tracking.
 #
 
-@GMAKE_TRUE@ifeq ($(DEPMODE),depmode=gcc3)
+ifeq ($(DEPMODE),depmode=gcc3)
 # Note that we put the dependencies into a .Tpo file, then move them
 # into place if the compile succeeds.  We need this because gcc does
 # not atomically write the dependency output file.
-@GMAKE_TRUE@override COMPILE.post = -c -o $@ -MT $@ -MMD -MP \
-@GMAKE_TRUE@	-MF $(DEPDIR)/$(basename $(@F)).Tpo
-@GMAKE_TRUE@override POSTCOMPILE = @mv $(DEPDIR)/$(basename $(@F)).Tpo \
-@GMAKE_TRUE@	$(DEPDIR)/$(basename $(@F)).Po
-@GMAKE_TRUE@else
-@GMAKE_TRUE@override COMPILE.pre = source='$<' object='$@' libtool=no \
-@GMAKE_TRUE@	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) $(CC)
+override COMPILE.post = -c -o $@ -MT $@ -MMD -MP \
+	-MF $(DEPDIR)/$(basename $(@F)).Tpo
+override POSTCOMPILE = @mv $(DEPDIR)/$(basename $(@F)).Tpo \
+	$(DEPDIR)/$(basename $(@F)).Po
+else
+override COMPILE.pre = source='$<' object='$@' libtool=no \
+	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) $(CC)
 # depcomp handles atomicity for us, so we don't need a postcompile
 # step.
-@GMAKE_TRUE@override POSTCOMPILE =
-@GMAKE_TRUE@endif
+override POSTCOMPILE =
+endif
 
 # A list of all the objects we might care about in this build, for
 # dependency tracking.
@@ -1002,13 +1000,13 @@ all_object_files = $(OBS) $(GDBREPLAY_OBS) $(IPA_OBJS)
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,
 # and the .VARIABLES variable was introduced at the same time.
-@GMAKE_TRUE@ifdef .VARIABLES
-@GMAKE_TRUE@$(all_object_files): | $(generated_files)
-@GMAKE_TRUE@else
+ifdef .VARIABLES
+$(all_object_files): | $(generated_files)
+else
 $(all_object_files) : $(generated_files)
-@GMAKE_TRUE@endif
+endif
 
 # Dependencies.
-@GMAKE_TRUE@-include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
+-include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
 
 # This is the end of "Makefile.in".

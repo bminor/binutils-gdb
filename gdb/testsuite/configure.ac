@@ -25,17 +25,6 @@ AC_CANONICAL_TARGET
 
 ACX_NONCANONICAL_TARGET
 
-# Check for the 'make' the user wants to use.
-AC_CHECK_PROGS(MAKE, make)
-MAKE_IS_GNU=
-case "`$MAKE --version 2>&1 | sed 1q`" in
-  *GNU*)
-    MAKE_IS_GNU=yes
-    ;;
-esac
-AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
-AC_PROG_MAKE_SET
-
 # Enable gdbtk.
 AC_ARG_ENABLE(gdbtk,
 [  --enable-gtk            enable gdbtk graphical user interface (GUI)],,
