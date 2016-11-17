@@ -1,5 +1,12 @@
 2016-11-23  Pedro Alves  <palves@redhat.com>
 
+	* event-loop.c (handle_file_event): Use warning.
+	* linux-low.c (linux_resume_one_lwp_throw): Use warning.
+	* mem-break.c (add_breakpoint_condition, add_breakpoint_commands):
+	Use warning.
+
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (check_zombie_leaders): Use debug_printf for debug
 	output.
 	* notif.c (handle_notif_ack, notif_event_enque): Likewise.
