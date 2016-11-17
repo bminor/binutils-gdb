@@ -304,11 +304,6 @@ ctf_target_save (struct trace_file_writer *self,
   return 0;
 }
 
-#ifdef USE_WIN32API
-#undef mkdir
-#define mkdir(pathname, mode) mkdir (pathname)
-#endif
-
 /* This is the implementation of trace_file_write_ops method
    start.  It creates the directory DIRNAME, metadata and datastream
    in the directory.  */

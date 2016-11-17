@@ -1,3 +1,7 @@
+2016-11-17  Pedro Alves  <palves@redhat.com>
+
+	* ctf.c [USE_WIN32API] (mkdir): Delete.
+
 2016-11-16  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c (ada_value_primitive_packed_val): Use unique_ptr and
