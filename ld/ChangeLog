@@ -1,3 +1,7 @@
+2016-11-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* emulparams/arclinux_prof.sh: Remove duplicate TEMPLATE_NAME.
+
 2016-11-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 20815
