@@ -3164,14 +3164,12 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	case R_SPARC_GOTDATA_OP_HIX22:
 	case R_SPARC_GOTDATA_OP_LOX10:
 	  if (SYMBOL_REFERENCES_LOCAL (info, h))
-	    r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
-		      ? R_SPARC_GOTDATA_HIX22
-		      : R_SPARC_GOTDATA_LOX10);
-	  else
-	    r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
-		      ? R_SPARC_GOT22
-		      : R_SPARC_GOT10);
-	  howto = _bfd_sparc_elf_howto_table + r_type;
+	    {
+	      r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
+			? R_SPARC_GOTDATA_HIX22
+			: R_SPARC_GOTDATA_LOX10);
+	      howto = _bfd_sparc_elf_howto_table + r_type;
+	    }
 	  break;
 
 	case R_SPARC_GOTDATA_OP:
@@ -3193,6 +3191,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  relocation = gdopoff (info, relocation);
 	  break;
 
+	case R_SPARC_GOTDATA_OP_HIX22:
+	case R_SPARC_GOTDATA_OP_LOX10:
 	case R_SPARC_GOT10:
 	case R_SPARC_GOT13:
 	case R_SPARC_GOT22:
@@ -4017,7 +4017,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  r = bfd_reloc_ok;
 	}
       else if (r_type == R_SPARC_HIX22
-	       || r_type == R_SPARC_GOTDATA_HIX22)
+	       || r_type == R_SPARC_GOTDATA_HIX22
+	       || r_type == R_SPARC_GOTDATA_OP_HIX22)
 	{
 	  bfd_vma x;
 
@@ -4036,7 +4037,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 				  relocation);
 	}
       else if (r_type == R_SPARC_LOX10
-	       || r_type == R_SPARC_GOTDATA_LOX10)
+	       || r_type == R_SPARC_GOTDATA_LOX10
+	       || r_type == R_SPARC_GOTDATA_OP_LOX10)
 	{
 	  bfd_vma x;
 

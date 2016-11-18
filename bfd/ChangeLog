@@ -1,3 +1,11 @@
+2016-11-18  James Clarke  <jrtc27@jrtc27.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Don't convert
+	R_SPARC_GOTDATA_OP_HIX22 and R_SPARC_GOTDATA_OP_LOX10 to
+	R_SPARC_GOT* for non-local references. Instead, treat them like
+	R_SPARC_GOTDATA_HIX22/R_SPARC_GOTDATA_LOX10 when filling in the
+	immediate with the calculated relocation.
+
 2016-11-18  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20675
