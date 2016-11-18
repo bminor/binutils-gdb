@@ -1,3 +1,14 @@
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_ADDR_SIMM10.
+	(fix_insn): Likewise.
+	(warn_unpredictable_ldst): Handle ldst_imm10.
+	* testsuite/gas/aarch64/pac.s: Add ldraa and ldrab tests.
+	* testsuite/gas/aarch64/pac.d: Likewise.
+	* testsuite/gas/aarch64/illegal-ldraa.s: New.
+	* testsuite/gas/aarch64/illegal-ldraa.l: New.
+	* testsuite/gas/aarch64/illegal-ldraa.d: New.
+
 2016-11-15  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20803

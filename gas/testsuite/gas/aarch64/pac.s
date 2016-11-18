@@ -54,3 +54,26 @@
 	retab
 	eretaa
 	eretab
+
+	ldraa x1, [x2]
+	ldraa x1, [x2,#0]
+	ldraa x3, [x4,#-8]
+	ldraa x5, [x6,#8]
+	ldraa x7, [x8,#4088]
+	ldraa x8, [x9,#-4096]
+	ldraa x2, [sp]
+	ldraa x4, [sp,#-2000]
+	ldrab x1, [x2]
+	ldrab x1, [x2,#0]
+	ldrab x3, [x4,#-8]
+	ldrab x5, [x6,#8]
+	ldrab x7, [x8,#4088]
+	ldrab x8, [x9,#-4096]
+	ldrab x2, [sp]
+	ldrab x4, [sp,#-2000]
+	ldraa x2, [x3, #8]!
+	ldraa x4, [x5, #-8]!
+	ldraa x6, [sp, #4088]!
+	ldrab x2, [x3, #8]!
+	ldrab x4, [x5, #-8]!
+	ldrab x6, [sp, #4088]!

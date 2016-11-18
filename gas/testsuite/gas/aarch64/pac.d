@@ -50,3 +50,25 @@ Disassembly of section \.text:
   a4:	d65f0fff 	retab
   a8:	d69f0bff 	eretaa
   ac:	d69f0fff 	eretab
+  b0:	f8200441 	ldraa	x1, \[x2\]
+  b4:	f8200441 	ldraa	x1, \[x2\]
+  b8:	f87ff483 	ldraa	x3, \[x4, #-8\]
+  bc:	f82014c5 	ldraa	x5, \[x6, #8\]
+  c0:	f83ff507 	ldraa	x7, \[x8, #4088\]
+  c4:	f8600528 	ldraa	x8, \[x9, #-4096\]
+  c8:	f82007e2 	ldraa	x2, \[sp\]
+  cc:	f87067e4 	ldraa	x4, \[sp, #-2000\]
+  d0:	f8a00441 	ldrab	x1, \[x2\]
+  d4:	f8a00441 	ldrab	x1, \[x2\]
+  d8:	f8fff483 	ldrab	x3, \[x4, #-8\]
+  dc:	f8a014c5 	ldrab	x5, \[x6, #8\]
+  e0:	f8bff507 	ldrab	x7, \[x8, #4088\]
+  e4:	f8e00528 	ldrab	x8, \[x9, #-4096\]
+  e8:	f8a007e2 	ldrab	x2, \[sp\]
+  ec:	f8f067e4 	ldrab	x4, \[sp, #-2000\]
+  f0:	f8201c62 	ldraa	x2, \[x3, #8\]!
+  f4:	f87ffca4 	ldraa	x4, \[x5, #-8\]!
+  f8:	f83fffe6 	ldraa	x6, \[sp, #4088\]!
+  fc:	f8a01c62 	ldrab	x2, \[x3, #8\]!
+ 100:	f8fffca4 	ldrab	x4, \[x5, #-8\]!
+ 104:	f8bfffe6 	ldrab	x6, \[sp, #4088\]!

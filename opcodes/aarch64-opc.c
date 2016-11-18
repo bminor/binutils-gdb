@@ -253,6 +253,7 @@ const aarch64_field fields[] =
     { 16,  6 },	/* immr: in bitfield and logical immediate instructions.  */
     { 16,  3 },	/* immb: in advsimd shift by immediate instructions.  */
     { 19,  4 },	/* immh: in advsimd shift by immediate instructions.  */
+    { 22,  1 },	/* S: in LDRAA and LDRAB instructions.  */
     { 22,  1 },	/* N: in logical (immediate) instructions.  */
     { 11,  1 },	/* index: in ld/st inst deciding the pre/post-index.  */
     { 24,  1 },	/* index2: in ld/st pair inst deciding the pre/post-index.  */
@@ -1528,6 +1529,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      return 0;
 	    }
 	  break;
+	case ldst_imm10:
+	  if (opnd->addr.writeback == 1 && opnd->addr.preind != 1)
+	    {
+	      set_syntax_error (mismatch_detail, idx,
+				_("unexpected address writeback"));
+	      return 0;
+	    }
+	  break;
 	case ldst_imm9:
 	case ldstpair_indexed:
 	case asisdlsep:
@@ -1583,6 +1592,20 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  set_other_error (mismatch_detail, idx,
 			   _("negative or unaligned offset expected"));
 	  return 0;
+
+	case AARCH64_OPND_ADDR_SIMM10:
+	  /* Scaled signed 10 bits immediate offset.  */
+	  if (!value_in_range_p (opnd->addr.offset.imm, -4096, 4088))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx, -4096, 4088);
+	      return 0;
+	    }
+	  if (!value_aligned_p (opnd->addr.offset.imm, 8))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, 8);
+	      return 0;
+	    }
+	  break;
 
 	case AARCH64_OPND_SIMD_ADDR_POST:
 	  /* AdvSIMD load/store multiple structures, post-index.  */
@@ -3408,6 +3431,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
+    case AARCH64_OPND_ADDR_SIMM10:
     case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:

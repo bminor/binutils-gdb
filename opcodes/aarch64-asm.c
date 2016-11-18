@@ -606,6 +606,30 @@ aarch64_ins_addr_simm (const aarch64_operand *self,
   return NULL;
 }
 
+/* Encode the address operand for e.g. LDRAA <Xt>, [<Xn|SP>{, #<simm>}].  */
+const char *
+aarch64_ins_addr_simm10 (const aarch64_operand *self,
+			 const aarch64_opnd_info *info,
+			 aarch64_insn *code,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int imm;
+
+  /* Rn */
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  /* simm10 */
+  imm = info->addr.offset.imm >> 3;
+  insert_field (self->fields[1], code, imm >> 9, 0);
+  insert_field (self->fields[2], code, imm, 0);
+  /* writeback */
+  if (info->addr.writeback)
+    {
+      assert (info->addr.preind == 1 && info->addr.postind == 0);
+      insert_field (self->fields[3], code, 1, 0);
+    }
+  return NULL;
+}
+
 /* Encode the address operand for e.g. LDRSW <Xt>, [<Xn|SP>{, #<pimm>}].  */
 const char *
 aarch64_ins_addr_uimm12 (const aarch64_operand *self,

@@ -80,6 +80,7 @@ enum aarch64_field_kind
   FLD_immr,
   FLD_immb,
   FLD_immh,
+  FLD_S_imm10,
   FLD_N,
   FLD_index,
   FLD_index2,

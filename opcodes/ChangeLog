@@ -1,3 +1,20 @@
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* aarch64-tbl.h (QL_X1NIL): New.
+	(arch64_opcode_table): Add ldraa, ldrab.
+	(AARCH64_OPERANDS): Add "ADDR_SIMM10".
+	* aarch64-asm.h (aarch64_ins_addr_simm10): Declare.
+	* aarch64-asm.c (aarch64_ins_addr_simm10): Define.
+	* aarch64-dis.h (aarch64_ext_addr_simm10): Declare.
+	* aarch64-dis.c (aarch64_ext_addr_simm10): Define.
+	* aarch64-opc.h (enum aarch64_field_kind): Add FLD_S_simm10.
+	* aarch64-opc.c (fields): Add data for FLD_S_simm10.
+	(operand_general_constraint_met_p): Handle AARCH64_OPND_ADDR_SIMM10.
+	(aarch64_print_operand): Likewise.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
 2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* aarch64-tbl.h (arch64_opcode_table): Add braa, brab, blraa, blrab, braaz,

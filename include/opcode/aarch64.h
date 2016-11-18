@@ -225,6 +225,7 @@ enum aarch64_opnd
 				   friendly feature of using LDR/STR as the
 				   the mnemonic name for LDUR/STUR instructions
 				   wherever there is no ambiguity.  */
+  AARCH64_OPND_ADDR_SIMM10,	/* Address of signed 10-bit immediate.  */
   AARCH64_OPND_ADDR_UIMM12,	/* Address of unsigned 12-bit immediate.  */
   AARCH64_OPND_SIMD_ADDR_SIMPLE,/* Address of ld/st multiple structures.  */
   AARCH64_OPND_SIMD_ADDR_POST,	/* Address of ld/st multiple post-indexed.  */
@@ -465,6 +466,7 @@ enum aarch64_insn_class
   ldst_immpost,
   ldst_immpre,
   ldst_imm9,	/* immpost or immpre */
+  ldst_imm10,	/* LDRAA/LDRAB */
   ldst_pos,
   ldst_regoff,
   ldst_unpriv,

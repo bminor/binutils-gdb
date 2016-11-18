@@ -981,6 +981,27 @@ aarch64_ext_addr_uimm12 (const aarch64_operand *self, aarch64_opnd_info *info,
   return 1;
 }
 
+/* Decode the address operand for e.g. LDRAA <Xt>, [<Xn|SP>{, #<simm>}].  */
+int
+aarch64_ext_addr_simm10 (const aarch64_operand *self, aarch64_opnd_info *info,
+			 aarch64_insn code,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  aarch64_insn imm;
+
+  info->qualifier = get_expected_qualifier (inst, info->idx);
+  /* Rn */
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+  /* simm10 */
+  imm = extract_fields (code, 0, 2, self->fields[1], self->fields[2]);
+  info->addr.offset.imm = sign_extend (imm, 9) << 3;
+  if (extract_field (self->fields[3], code, 0) == 1) {
+    info->addr.writeback = 1;
+    info->addr.preind = 1;
+  }
+  return 1;
+}
+
 /* Decode the address operand for e.g.
      LD1 {<Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>}, [<Xn|SP>], <Xm|#<amount>>.  */
 int
