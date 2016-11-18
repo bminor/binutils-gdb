@@ -1,3 +1,9 @@
+2016-11-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20675
+	* elf32-metag.c (elf_metag_relocate_section): Replace abort with
+	an informative error message.
+
 2016-11-15  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/20789

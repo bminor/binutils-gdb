@@ -1820,7 +1820,7 @@ elf_metag_relocate_section (bfd *output_bfd,
 	      }
 
 	    if (tls_type == GOT_UNKNOWN)
-	      abort();
+	      abort ();
 
 	    if ((off & 1) != 0)
 	      off &= ~1;
@@ -1880,7 +1880,14 @@ elf_metag_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			/* We don't support changing the TLS model.  */
-			abort ();
+			/* PR 20675 */
+			if (bfd_link_pic (info))
+			  _bfd_error_handler (_("%B(%A): multiple TLS models are not supported"),
+					      input_bfd, input_section, name);
+			else
+			  _bfd_error_handler (_("%B(%A): shared library symbol %s encountered whilst performing a static link"),
+					      input_bfd, input_section, name);
+			return FALSE;
 		      }
 
 		    cur_off += 8;
