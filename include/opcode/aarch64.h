@@ -204,6 +204,9 @@ enum aarch64_opnd
   AARCH64_OPND_HALF,	/* #<imm16>{, LSL #<shift>} operand in move wide.  */
   AARCH64_OPND_FBITS,	/* FP #<fbits> operand in e.g. SCVTF */
   AARCH64_OPND_IMM_MOV,	/* Immediate operand for the MOV alias.  */
+  AARCH64_OPND_IMM_ROT1,	/* Immediate rotate operand for FCMLA.  */
+  AARCH64_OPND_IMM_ROT2,	/* Immediate rotate operand for indexed FCMLA.  */
+  AARCH64_OPND_IMM_ROT3,	/* Immediate rotate operand for FCADD.  */
 
   AARCH64_OPND_COND,	/* Standard condition as the last operand.  */
   AARCH64_OPND_COND1,	/* Same as the above, but excluding AL and NV.  */
@@ -595,6 +598,8 @@ enum aarch64_op
   OP_MOVZ_P_P_P,
   OP_NOTS_P_P_P_Z,
   OP_NOT_P_P_P_Z,
+
+  OP_FCMLA_ELEM,	/* ARMv8.3, indexed element version.  */
 
   OP_TOTAL_NUM,		/* Pseudo.  */
 };

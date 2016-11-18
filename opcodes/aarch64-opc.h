@@ -137,6 +137,9 @@ enum aarch64_field_kind
   FLD_SVE_tszl_19,
   FLD_SVE_xs_14,
   FLD_SVE_xs_22,
+  FLD_rotate1,
+  FLD_rotate2,
+  FLD_rotate3,
 };
 
 /* Field description.  */

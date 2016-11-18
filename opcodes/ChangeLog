@@ -1,5 +1,23 @@
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* aarch64-tbl.h (QL_V3SAMEHSD_ROT, QL_ELEMENT_ROT): Define.
+	(aarch64_feature_simd_v8_3, SIMD_V8_3): Define.
+	(aarch64_opcode_table): Add fcmla and fcadd.
+	(AARCH64_OPERANDS): Add IMM_ROT{1,2,3}.
+	* aarch64-asm.h (aarch64_ins_imm_rotate): Declare.
+	* aarch64-asm.c (aarch64_ins_imm_rotate): Define.
+	* aarch64-dis.h (aarch64_ext_imm_rotate): Declare.
+	* aarch64-dis.c (aarch64_ext_imm_rotate): Define.
+	* aarch64-opc.h (enum aarch64_field_kind): Add FLD_rotate{1,2,3}.
+	* aarch64-opc.c (fields): Add FLD_rotate{1,2,3}.
+	(operand_general_constraint_met_p): Rotate and index range check.
+	(aarch64_print_operand): Handle rotate operand.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* aarch64-tbl.h (arch64_opcode_table): Add ldaprb, ldaprh, ldapr.
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.

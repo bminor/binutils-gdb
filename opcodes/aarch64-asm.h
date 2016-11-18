@@ -92,6 +92,7 @@ AARCH64_DECL_OPD_INSERTER (ins_sve_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_sve_scale);
 AARCH64_DECL_OPD_INSERTER (ins_sve_shlimm);
 AARCH64_DECL_OPD_INSERTER (ins_sve_shrimm);
+AARCH64_DECL_OPD_INSERTER (ins_imm_rotate);
 
 #undef AARCH64_DECL_OPD_INSERTER
 

@@ -351,6 +351,14 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	default:
 	  return 0;
 	}
+
+      if (inst->opcode->op == OP_FCMLA_ELEM)
+	{
+	  /* Complex operand takes two elements.  */
+	  if (info->reglane.index & 1)
+	    return 0;
+	  info->reglane.index /= 2;
+	}
     }
 
   return 1;
@@ -700,6 +708,40 @@ aarch64_ext_fpimm (const aarch64_operand *self, aarch64_opnd_info *info,
 {
   info->imm.value = extract_all_fields (self, code);
   info->imm.is_fp = 1;
+  return 1;
+}
+
+/* Decode rotate immediate for FCMLA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #rotate.  */
+int
+aarch64_ext_imm_rotate (const aarch64_operand *self, aarch64_opnd_info *info,
+			const aarch64_insn code,
+			const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  uint64_t rot = extract_field (self->fields[0], code, 0);
+
+  switch (info->type)
+    {
+    case AARCH64_OPND_IMM_ROT1:
+    case AARCH64_OPND_IMM_ROT2:
+      /* rot	value
+	 0	0
+	 1	90
+	 2	180
+	 3	270  */
+      assert (rot < 4U);
+      break;
+    case AARCH64_OPND_IMM_ROT3:
+      /* rot	value
+	 0	90
+	 1	270  */
+      assert (rot < 2U);
+      rot = 2 * rot + 1;
+      break;
+    default:
+      assert (0);
+      return 0;
+    }
+  info->imm.value = rot * 90;
   return 1;
 }
 

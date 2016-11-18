@@ -125,19 +125,28 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
     {
       /* index for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
          or SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>].  */
+      unsigned index = info->reglane.index;
+
+      if (inst->opcode->op == OP_FCMLA_ELEM)
+	/* Complex operand takes two elements.  */
+	index *= 2;
+
       switch (info->qualifier)
 	{
 	case AARCH64_OPND_QLF_S_H:
 	  /* H:L:M */
-	  insert_fields (code, info->reglane.index, 0, 3, FLD_M, FLD_L, FLD_H);
+	  assert (index < 8);
+	  insert_fields (code, index, 0, 3, FLD_M, FLD_L, FLD_H);
 	  break;
 	case AARCH64_OPND_QLF_S_S:
 	  /* H:L */
-	  insert_fields (code, info->reglane.index, 0, 2, FLD_L, FLD_H);
+	  assert (index < 4);
+	  insert_fields (code, index, 0, 2, FLD_L, FLD_H);
 	  break;
 	case AARCH64_OPND_QLF_S_D:
 	  /* H */
-	  insert_field (FLD_H, code, info->reglane.index, 0);
+	  assert (index < 2);
+	  insert_field (FLD_H, code, index, 0);
 	  break;
 	default:
 	  assert (0);
@@ -424,6 +433,41 @@ aarch64_ins_fpimm (const aarch64_operand *self, const aarch64_opnd_info *info,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED)
 {
   insert_all_fields (self, code, info->imm.value);
+  return NULL;
+}
+
+/* Insert field rot for the rotate immediate in
+   FCMLA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #<rotate>.  */
+const char *
+aarch64_ins_imm_rotate (const aarch64_operand *self,
+			const aarch64_opnd_info *info,
+			aarch64_insn *code, const aarch64_inst *inst)
+{
+  uint64_t rot = info->imm.value / 90;
+
+  switch (info->type)
+    {
+    case AARCH64_OPND_IMM_ROT1:
+    case AARCH64_OPND_IMM_ROT2:
+      /* value	rot
+	 0	0
+	 90	1
+	 180	2
+	 270	3  */
+      assert (rot < 4U);
+      break;
+    case AARCH64_OPND_IMM_ROT3:
+      /* value	rot
+	 90	0
+	 270	1  */
+      rot = (rot - 1) / 2;
+      assert (rot < 2U);
+      break;
+    default:
+      assert (0);
+    }
+  insert_field (self->fields[0], code, rot, inst->opcode->mask);
+
   return NULL;
 }
 

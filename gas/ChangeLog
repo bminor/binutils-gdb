@@ -1,5 +1,14 @@
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_IMM_ROT*.
+	* testsuite/gas/aarch64/advsimd-armv8_3.d: New.
+	* testsuite/gas/aarch64/advsimd-armv8_3.s: New.
+	* testsuite/gas/aarch64/illegal-fcmla.s: New.
+	* testsuite/gas/aarch64/illegal-fcmla.l: New.
+	* testsuite/gas/aarch64/illegal-fcmla.d: New.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.s: Add ldaprb, ldaprh, ldapr tests.
 	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.d: Likewise.
 	* testsuite/gas/aarch64/illegal-ldapr.s: Likewise.
