@@ -1,5 +1,13 @@
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.s: Add ldaprb, ldaprh, ldapr tests.
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-ldapr.s: Likewise.
+	* testsuite/gas/aarch64/illegal-ldapr.d: Likewise.
+	* testsuite/gas/aarch64/illegal-ldapr.l: Likewise.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* testsuite/gas/aarch64/fp-armv8_3.s: Add fjcvtzs test.
 	* testsuite/gas/aarch64/fp-armv8_3.d: Likewise.
 	* testsuite/gas/aarch64/illegal-fjcvtzs.s: Likewise.

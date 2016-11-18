@@ -1,5 +1,12 @@
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* aarch64-tbl.h (arch64_opcode_table): Add ldaprb, ldaprh, ldapr.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* aarch64-tbl.h (arch64_opcode_table): Add fjcvtzs.
 	(QL_FP2INT_W_D, aarch64_feature_fp_v8_3, FP_V8_3): Define.
 	* aarch64-asm-2.c: Regenerate.

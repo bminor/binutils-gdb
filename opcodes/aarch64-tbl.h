@@ -2958,6 +2958,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("ldaxp", 0x887f8000, 0xbfe08000, ldstexcl, 0, OP3 (Rt, Rt2, ADDR_SIMPLE), QL_R2NIL, F_GPRSIZE_IN_Q),
   CORE_INSN ("stlr", 0x889ffc00, 0xbfe08000, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q),
   CORE_INSN ("ldar", 0x88dffc00, 0xbfeffc00, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q),
+  V8_3_INSN ("ldaprb", 0x38bfc000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
+  V8_3_INSN ("ldaprh", 0x78bfc000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
+  V8_3_INSN ("ldapr", 0xb8bfc000, 0xbffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q),
   /* Limited Ordering Regions load/store instructions.  */
   _LOR_INSN ("ldlar",  0x88df7c00, 0xbfe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL,       F_GPRSIZE_IN_Q),
   _LOR_INSN ("ldlarb", 0x08df7c00, 0xffe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
