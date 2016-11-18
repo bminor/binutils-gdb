@@ -1,3 +1,8 @@
+2016-11-18  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Add missing comma after
+	xref.
+
 2016-10-29  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Packets) <vCont>: Remove mention of default

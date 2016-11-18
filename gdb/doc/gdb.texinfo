@@ -26568,7 +26568,7 @@ group corresponding to the affected inferior.
 
 The @var{method} field indicates the method used to record execution.  If the
 method in use supports multiple recording formats, @var{format} will be present
-and contain the currently used format.  @xref{Process Record and Replay}
+and contain the currently used format.  @xref{Process Record and Replay},
 for existing method and format values.
 
 @item =cmd-param-changed,param=@var{param},value=@var{value}
