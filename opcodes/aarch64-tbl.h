@@ -318,6 +318,12 @@
   QLF2 (X, S_H),			\
 }
 
+/* e.g. FJCVTZS <Wd>, <Dn>.  */
+#define QL_FP2INT_W_D			\
+{					\
+  QLF2 (W, S_D),			\
+}
+
 /* e.g. FMOV <Xd>, <Vn>.D[1].  */
 #define QL_XVD1			\
 {				\
@@ -1912,6 +1918,8 @@ static const aarch64_feature_set aarch64_feature_sve =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_v8_3 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_3, 0);
+static const aarch64_feature_set aarch64_feature_fp_v8_3 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_3 | AARCH64_FEATURE_FP, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -1928,6 +1936,7 @@ static const aarch64_feature_set aarch64_feature_v8_3 =
 #define ARMV8_2		&aarch64_feature_v8_2
 #define SVE		&aarch64_feature_sve
 #define ARMV8_3		&aarch64_feature_v8_3
+#define FP_V8_3		&aarch64_feature_fp_v8_3
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, NULL }
@@ -2789,6 +2798,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   FF16_INSN ("fcvtzu",0x1ef90000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
   __FP_INSN ("fmov",  0x9eae0000, 0xfffffc00, float2int, 0, OP2 (Rd, VnD1), QL_XVD1, 0),
   __FP_INSN ("fmov",  0x9eaf0000, 0xfffffc00, float2int, 0, OP2 (VdD1, Rn), QL_VD1X, 0),
+  {"fjcvtzs", 0x1e7e0000, 0xfffffc00, float2int, 0, FP_V8_3, OP2 (Rd, Fn), QL_FP2INT_W_D, 0, 0, NULL },
   /* Floating-point conditional compare.  */
   __FP_INSN ("fccmp", 0x1e200400, 0xff200c10, floatccmp, 0, OP4 (Fn, Fm, NZCV, COND), QL_FCCMP, F_FPTYPE),
   FF16_INSN ("fccmp", 0x1ee00400, 0xff200c10, floatccmp, OP4 (Fn, Fm, NZCV, COND), QL_FCCMP_H, F_FPTYPE),

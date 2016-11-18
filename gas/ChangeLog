@@ -1,5 +1,16 @@
 2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* testsuite/gas/aarch64/fp-armv8_3.s: Add fjcvtzs test.
+	* testsuite/gas/aarch64/fp-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-fjcvtzs.s: Likewise.
+	* testsuite/gas/aarch64/illegal-fjcvtzs.d: Likewise.
+	* testsuite/gas/aarch64/illegal-fjcvtzs.l: Likewise.
+	* testsuite/gas/aarch64/illegal-nofp-armv8_3.s: Likewise.
+	* testsuite/gas/aarch64/illegal-nofp-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-nofp-armv8_3.l: Likewise.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_ADDR_SIMM10.
 	(fix_insn): Likewise.
 	(warn_unpredictable_ldst): Handle ldst_imm10.
