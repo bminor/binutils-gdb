@@ -1,3 +1,9 @@
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_scan_prologue, call0_analyze_prologue):
+	Drop xtensa_default_isa initialization.
+	(xtensa_gdbarch_init): Initialize xtensa_default_isa.
+
 2017-03-27  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2read.c (file_entry) <dir_index>: Add comment.

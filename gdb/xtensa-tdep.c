@@ -1151,8 +1151,6 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
   if (start_addr == 0)
     return fp_regnum;
 
-  if (!xtensa_default_isa)
-    xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
   gdb_assert (XTENSA_ISA_BSZ >= xtensa_isa_maxlength (isa));
   ins = xtensa_insnbuf_alloc (isa);
@@ -2427,8 +2425,6 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   cache->call0 = 1;
   rtmp = (xtensa_c0reg_t*) alloca(nregs * sizeof(xtensa_c0reg_t));
 
-  if (!xtensa_default_isa)
-    xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
   gdb_assert (XTENSA_ISA_BSZ >= xtensa_isa_maxlength (isa));
   ins = xtensa_insnbuf_alloc (isa);
@@ -3185,6 +3181,9 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
 
   DEBUGTRACE ("gdbarch_init()\n");
+
+  if (!xtensa_default_isa)
+    xtensa_default_isa = xtensa_isa_init (0, 0);
 
   /* We have to set the byte order before we call gdbarch_alloc.  */
   info.byte_order = XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
