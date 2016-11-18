@@ -1981,10 +1981,9 @@ check_zombie_leaders (void)
 	     thread execs).  */
 
 	  if (debug_threads)
-	    fprintf (stderr,
-		     "CZL: Thread group leader %d zombie "
-		     "(it exited, or another thread execd).\n",
-		     leader_pid);
+	    debug_printf ("CZL: Thread group leader %d zombie "
+			  "(it exited, or another thread execd).\n",
+			  leader_pid);
 
 	  delete_lwp (leader_lp);
 	}
