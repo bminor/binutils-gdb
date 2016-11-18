@@ -1,5 +1,14 @@
 2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
+	for a single specified register or for all registers in
+	a0_base..a0_base + C0_NREGS range.
+	(supply_gregset_reg): Call regcache_raw_supply for a single
+	specified register or for all registers in a0_base..a0_base +
+	C0_NREGS range.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* arch/xtensa.h (C0_NREGS): Add definition.
 	* xtensa-tdep.c (C0_NREGS): Remove definition.
 
