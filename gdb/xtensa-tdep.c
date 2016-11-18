@@ -3107,6 +3107,8 @@ xtensa_derive_tdep (struct gdbarch_tdep *tdep)
 
 /* Special registers 0..255 (core).  */
 #define XTENSA_DBREGN_SREG(n)  (0x0200+(n))
+/* User registers 0..255.  */
+#define XTENSA_DBREGN_UREG(n)  (0x0300+(n))
 
   for (rmap = tdep->regmap, n = 0; rmap->target_number != -1; n++, rmap++)
     {
@@ -3138,6 +3140,8 @@ xtensa_derive_tdep (struct gdbarch_tdep *tdep)
 	tdep->litbase_regnum = n;
       else if (rmap->target_number == XTENSA_DBREGN_SREG(230))
 	tdep->ps_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_UREG(231))
+	tdep->threadptr_regnum = n;
 #if 0
       else if (rmap->target_number == XTENSA_DBREGN_SREG(226))
 	tdep->interrupt_regnum = n;

@@ -1,5 +1,15 @@
 2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
+	for THREADPTR register.
+	(supply_gregset_reg): Call regcache_raw_supply for THREADPTR
+	register.
+	* xtensa-tdep.c (XTENSA_DBREGN_UREG): New definition.
+	(xtensa_derive_tdep): Initialize tdep->threadptr_regnum.
+	* xtensa-tdep.h (gdbarch_tdep::threadptr_regnum): New field.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* xtensa-tdep.c (xtensa_pseudo_register_read): Treat all
 	registers above gdbarch_num_regs (gdbarch) as privileged in
 	call0 ABI.
