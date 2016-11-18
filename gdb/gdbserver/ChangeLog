@@ -1,3 +1,10 @@
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* linux-xtensa-low.c (xtensa_fill_gregset): Call collect_register
+	for all registers in a0_regnum..a0_regnum + C0_NREGS range.
+	(xtensa_store_gregset): Call supply_register for all registers in
+	a0_regnum..a0_regnum + C0_NREGS range.
+
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in (%-ipa.o: %-ipa.c): New rule.

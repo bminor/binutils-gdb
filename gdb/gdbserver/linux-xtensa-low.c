@@ -59,6 +59,20 @@ xtensa_fill_gregset (struct regcache *regcache, void *buf)
       ptr += register_size (tdesc, i);
     }
 
+  if (XSHAL_ABI == XTHAL_ABI_CALL0)
+    {
+      int a0_regnum = find_regno (tdesc, "a0");
+      ptr = (char *) &rset[R_A0 + 4 * rset[R_WB]];
+
+      for (i = a0_regnum; i < a0_regnum + C0_NREGS; i++)
+	{
+	  if ((4 * rset[R_WB] + i - a0_regnum) == XCHAL_NUM_AREGS)
+	    ptr = (char *) &rset[R_A0];
+	  collect_register (regcache, i, ptr);
+	  ptr += register_size (tdesc, i);
+	}
+    }
+
   /* Loop registers, if hardware has it.  */
 
 #if XCHAL_HAVE_LOOPS
@@ -92,6 +106,20 @@ xtensa_store_gregset (struct regcache *regcache, const void *buf)
     {
       supply_register (regcache, i, ptr);
       ptr += register_size (tdesc, i);
+    }
+
+  if (XSHAL_ABI == XTHAL_ABI_CALL0)
+    {
+      int a0_regnum = find_regno (tdesc, "a0");
+      ptr = (char *) &rset[R_A0 + (4 * rset[R_WB]) % XCHAL_NUM_AREGS];
+
+      for (i = a0_regnum; i < a0_regnum + C0_NREGS; i++)
+	{
+	  if ((4 * rset[R_WB] + i - a0_regnum) == XCHAL_NUM_AREGS)
+	    ptr = (char *) &rset[R_A0];
+	  supply_register (regcache, i, ptr);
+	  ptr += register_size (tdesc, i);
+	}
     }
 
   /* Loop registers, if hardware has it.  */
