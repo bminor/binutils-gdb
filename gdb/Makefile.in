@@ -1151,7 +1151,7 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/gdbtk/generic/%.c
-	$(COMPILE) $(all_gdbtk_cflags) %<
+	$(COMPILE) $(all_gdbtk_cflags) $<
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/guile/%.c

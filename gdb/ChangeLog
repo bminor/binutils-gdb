@@ -1,3 +1,7 @@
+2016-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (%.o: $(srcdir)/gdbtk/generic/%.c): Fix typo.
+
 2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	(PYTHON_CFLAGS): Move up.
