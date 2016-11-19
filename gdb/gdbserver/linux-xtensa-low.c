@@ -36,6 +36,7 @@ enum regnum {
 	R_LBEG,	R_LEND,	R_LCOUNT,
 	R_SAR,
 	R_WS, R_WB,
+	R_THREADPTR,
 	R_A0 = 64
 };
 
@@ -86,6 +87,11 @@ xtensa_fill_gregset (struct regcache *regcache, void *buf)
   collect_register_by_name (regcache, "ps", (char*)&rset[R_PS]);
   collect_register_by_name (regcache, "windowbase", (char*)&rset[R_WB]);
   collect_register_by_name (regcache, "windowstart", (char*)&rset[R_WS]);
+
+#if XCHAL_HAVE_THREADPTR
+  collect_register_by_name (regcache, "threadptr",
+			    (char *) &rset[R_THREADPTR]);
+#endif
 }
 
 static void
@@ -135,6 +141,11 @@ xtensa_store_gregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "ps", (char*)&rset[R_PS]);
   supply_register_by_name (regcache, "windowbase", (char*)&rset[R_WB]);
   supply_register_by_name (regcache, "windowstart", (char*)&rset[R_WS]);
+
+#if XCHAL_HAVE_THREADPTR
+  supply_register_by_name (regcache, "threadptr",
+			   (char *) &rset[R_THREADPTR]);
+#endif
 }
 
 /* Xtensa GNU/Linux PTRACE interface includes extended register set.  */

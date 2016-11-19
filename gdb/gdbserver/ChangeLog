@@ -1,5 +1,13 @@
 2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* linux-xtensa-low.c (regnum::R_THREADPTR): New enum member.
+	(xtensa_fill_gregset): Call collect_register_by_name for
+	threadptr register.
+	(xtensa_store_gregset): Call supply_register_by_name for
+	threadptr register.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* linux-xtensa-low.c (xtensa_fill_gregset): Call collect_register
 	for all registers in a0_regnum..a0_regnum + C0_NREGS range.
 	(xtensa_store_gregset): Call supply_register for all registers in
