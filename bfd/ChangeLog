@@ -1,3 +1,8 @@
+2016-11-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Do not
+	apply the negative GOT offset optimization in 64-bit code.
+
 2016-11-18  James Clarke  <jrtc27@jrtc27.com>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Don't convert
