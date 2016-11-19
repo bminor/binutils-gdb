@@ -1097,6 +1097,22 @@ Do not use vasprintf(), instead use xstrvprintf"
     fail("vasprintf")
 }
 
+BEGIN { doc["printf_vma"] = "\
+Do not use printf_vma, instead use paddress or phex_nz"
+    category["printf_vma"] = ari_code
+}
+/(^|[^_[:alnum:]])printf_vma[[:space:]]*\(/ {
+    fail("printf_vma")
+}
+
+BEGIN { doc["sprintf_vma"] = "\
+Do not use sprintf_vma, instead use paddress or phex_nz"
+    category["sprintf_vma"] = ari_code
+}
+/(^|[^_[:alnum:]])sprintf_vma[[:space:]]*\(/ {
+    fail("sprintf_vma")
+}
+
 # More generic memory operations
 
 BEGIN { doc["bzero"] = "\

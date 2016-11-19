@@ -1,3 +1,8 @@
+2016-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* contrib/ari/gdb_ari.sh: Add detection of printf_vma and
+	sprintf_vma.
+
 2016-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in (%.o: $(srcdir)/gdbtk/generic/%.c): Fix typo.
