@@ -1,5 +1,12 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-cmd.c (cmdpy_completer_helper): Use gdbpy_ref.  Remove
+	extra incref.
+	(cmdpy_completer_handle_brkchars, cmdpy_completer, cmdpy_init):
+	Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-breakpoint.c (gdbpy_breakpoint_cond_says_stop): Use
 	gdbpy_ref.
 
