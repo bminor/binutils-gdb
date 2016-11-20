@@ -693,13 +693,12 @@ enumerate_locals (PyObject *iter,
 		  int print_args_field,
 		  struct frame_info *frame)
 {
-  PyObject *item;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
   opts.deref_ref = 1;
 
-  while ((item = PyIter_Next (iter)))
+  while (true)
     {
       const struct language_defn *language;
       gdb::unique_xmalloc_ptr<char> sym_name;
@@ -710,16 +709,21 @@ enumerate_locals (PyObject *iter,
       int local_indent = 8 + (8 * indent);
       struct cleanup *locals_cleanups;
 
-      locals_cleanups = make_cleanup_py_decref (item);
+      gdbpy_ref item (PyIter_Next (iter));
+      if (item == NULL)
+	break;
 
-      success = extract_sym (item, &sym_name, &sym, &sym_block, &language);
+      locals_cleanups = make_cleanup (null_cleanup, NULL);
+
+      success = extract_sym (item.get (), &sym_name, &sym, &sym_block,
+			     &language);
       if (success == EXT_LANG_BT_ERROR)
 	{
 	  do_cleanups (locals_cleanups);
 	  goto error;
 	}
 
-      success = extract_value (item, &val);
+      success = extract_value (item.get (), &val);
       if (success == EXT_LANG_BT_ERROR)
 	{
 	  do_cleanups (locals_cleanups);
@@ -827,10 +831,8 @@ enumerate_locals (PyObject *iter,
       END_CATCH
     }
 
-  if (item == NULL && PyErr_Occurred ())
-    goto error;
-
-  return EXT_LANG_BT_OK;
+  if (!PyErr_Occurred ())
+    return EXT_LANG_BT_OK;
 
  error:
   return EXT_LANG_BT_ERROR;
@@ -846,28 +848,24 @@ py_mi_print_variables (PyObject *filter, struct ui_out *out,
 		       struct frame_info *frame)
 {
   struct cleanup *old_chain;
-  PyObject *args_iter;
-  PyObject *locals_iter;
 
-  args_iter = get_py_iter_from_func (filter, "frame_args");
-  old_chain = make_cleanup_py_xdecref (args_iter);
+  gdbpy_ref args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
-    goto error;
+    return EXT_LANG_BT_ERROR;
 
-  locals_iter = get_py_iter_from_func (filter, "frame_locals");
+  gdbpy_ref locals_iter (get_py_iter_from_func (filter, "frame_locals"));
   if (locals_iter == NULL)
-    goto error;
+    return EXT_LANG_BT_ERROR;
 
-  make_cleanup_py_decref (locals_iter);
-  make_cleanup_ui_out_list_begin_end (out, "variables");
+  old_chain = make_cleanup_ui_out_list_begin_end (out, "variables");
 
   if (args_iter != Py_None)
-    if (enumerate_args (args_iter, out, args_type, 1, frame)
+    if (enumerate_args (args_iter.get (), out, args_type, 1, frame)
 	== EXT_LANG_BT_ERROR)
       goto error;
 
   if (locals_iter != Py_None)
-    if (enumerate_locals (locals_iter, out, 1, args_type, 1, frame)
+    if (enumerate_locals (locals_iter.get (), out, 1, args_type, 1, frame)
 	== EXT_LANG_BT_ERROR)
       goto error;
 
@@ -890,17 +888,16 @@ py_print_locals (PyObject *filter,
 		 int indent,
 		 struct frame_info *frame)
 {
-  PyObject *locals_iter = get_py_iter_from_func (filter,
-						 "frame_locals");
-  struct cleanup *old_chain = make_cleanup_py_xdecref (locals_iter);
+  struct cleanup *old_chain;
 
+  gdbpy_ref locals_iter (get_py_iter_from_func (filter, "frame_locals"));
   if (locals_iter == NULL)
-    goto locals_error;
+    return EXT_LANG_BT_ERROR;
 
-  make_cleanup_ui_out_list_begin_end (out, "locals");
+  old_chain = make_cleanup_ui_out_list_begin_end (out, "locals");
 
   if (locals_iter != Py_None)
-    if (enumerate_locals (locals_iter, out, indent, args_type,
+    if (enumerate_locals (locals_iter.get (), out, indent, args_type,
 			  0, frame) == EXT_LANG_BT_ERROR)
       goto locals_error;
 
@@ -923,13 +920,13 @@ py_print_args (PyObject *filter,
 	       enum ext_lang_frame_args args_type,
 	       struct frame_info *frame)
 {
-  PyObject *args_iter  = get_py_iter_from_func (filter, "frame_args");
-  struct cleanup *old_chain = make_cleanup_py_xdecref (args_iter);
+  struct cleanup *old_chain;
 
+  gdbpy_ref args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
-    goto args_error;
+    return EXT_LANG_BT_ERROR;
 
-  make_cleanup_ui_out_list_begin_end (out, "args");
+  old_chain = make_cleanup_ui_out_list_begin_end (out, "args");
 
   TRY
     {
@@ -945,7 +942,7 @@ py_print_args (PyObject *filter,
   END_CATCH
 
   if (args_iter != Py_None)
-    if (enumerate_args (args_iter, out, args_type, 0, frame)
+    if (enumerate_args (args_iter.get (), out, args_type, 0, frame)
 	== EXT_LANG_BT_ERROR)
       goto args_error;
 

@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (py_mi_print_variables): Use gdbpy_ref.
+	(py_print_locals, enumerate_locals, py_print_args): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (enumerate_args): Use gdbpy_ref.
 
 2017-01-10  Tom Tromey  <tom@tromey.com>
