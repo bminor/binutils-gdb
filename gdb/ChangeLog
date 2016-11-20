@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-breakpoint.c (gdbpy_breakpoint_cond_says_stop): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-arch.c (archpy_disassemble): Use gdbpy_ref.  Don't
 	decref results of PyArg_ParseTupleAndKeywords.
 

@@ -805,12 +805,12 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
 
   if (PyObject_HasAttrString (py_bp, stop_func))
     {
-      PyObject *result = PyObject_CallMethod (py_bp, stop_func, NULL);
+      gdbpy_ref result (PyObject_CallMethod (py_bp, stop_func, NULL));
 
       stop = 1;
-      if (result)
+      if (result != NULL)
 	{
-	  int evaluate = PyObject_IsTrue (result);
+	  int evaluate = PyObject_IsTrue (result.get ());
 
 	  if (evaluate == -1)
 	    gdbpy_print_stack ();
@@ -819,8 +819,6 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
 	     the Python breakpoint wants GDB to continue.  */
 	  if (! evaluate)
 	    stop = 0;
-
-	  Py_DECREF (result);
 	}
       else
 	gdbpy_print_stack ();
