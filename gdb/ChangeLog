@@ -1,5 +1,29 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (make_cleanup_htab_delete): Don't declare.
+	* utils.c (do_htab_delete_cleanup, make_cleanup_htab_delete):
+	Remove.
+	* linespec.c (decode_compound_collector): Add constructor,
+	destructor.
+	(lookup_prefix_sym): Remove cleanup.
+	(symtab_collector): Add constructor, destructor.
+	(collect_symtabs_from_filename): Remove cleanup.
+	* disasm.c (do_mixed_source_and_assembly): Use htab_up.
+	* compile/compile-c-symbols.c (generate_c_for_variable_locations):
+	Use htab_up.
+	* gnu-v3-abi.c (gnuv3_print_vtable): Use htab_up.
+	* dwarf2read.c (dw2_expand_symtabs_matching)
+	(dw2_map_symbol_filenames, dwarf_decode_macros)
+	(write_psymtabs_to_index): Use htab_up.
+	* dwarf2loc.c (func_verify_no_selftailcall)
+	(call_site_find_chain_1, func_verify_no_selftailcall)
+	(chain_candidate, call_site_find_chain_1): Use std::unordered_set,
+	std::vector, gdb::unique_xmalloc_ptr.
+	(call_sitep): Remove typedef.
+	(dwarf2_locexpr_baton_eval): Remove unused variable.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python-internal.h (make_cleanup_py_decref)
 	(make_cleanup_py_xdecref): Don't declare.
 	* python/py-utils.c (py_decref, make_cleanup_py_decref)

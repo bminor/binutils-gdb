@@ -498,14 +498,12 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   int i, nlines;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *cleanups;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain;
   struct cleanup *ui_out_list_chain;
   CORE_ADDR pc;
   struct symtab *last_symtab;
   int last_line;
-  htab_t dis_line_table;
 
   gdb_assert (main_symtab != NULL && SYMTAB_LINETABLE (main_symtab) != NULL);
 
@@ -515,8 +513,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
      but if that text is for code that will be disassembled later, then
      we'll want to defer printing it until later with its associated code.  */
 
-  dis_line_table = allocate_dis_line_table ();
-  cleanups = make_cleanup_htab_delete (dis_line_table);
+  htab_up dis_line_table (allocate_dis_line_table ());
 
   pc = low;
 
@@ -548,7 +545,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
       pc += length;
 
       if (sal.symtab != NULL)
-	add_dis_line_entry (dis_line_table, sal.symtab, sal.line);
+	add_dis_line_entry (dis_line_table.get (), sal.symtab, sal.line);
     }
 
   /* Second pass: print the disassembly.
@@ -565,9 +562,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
      which is where we put file name and source line contents output.
 
      Cleanup usage:
-     cleanups:
-       For things created at the beginning of this function and need to be
-       kept until the end of this function.
      ui_out_chain
        Handles the outer "asm_insns" list.
      ui_out_tuple_chain
@@ -625,7 +619,8 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		     not associated with code that we'll print later.  */
 		  for (l = sal.line - 1; l > last_line; --l)
 		    {
-		      if (line_has_code_p (dis_line_table, sal.symtab, l))
+		      if (line_has_code_p (dis_line_table.get (),
+					   sal.symtab, l))
 			break;
 		    }
 		  if (l < sal.line - 1)
@@ -728,7 +723,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
     }
 
   do_cleanups (ui_out_chain);
-  do_cleanups (cleanups);
 }
 
 static void

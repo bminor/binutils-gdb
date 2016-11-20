@@ -112,8 +112,6 @@ struct htab_deleter
 /* A unique_ptr wrapper for htab_t.  */
 typedef std::unique_ptr<htab, htab_deleter> htab_up;
 
-extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
-
 struct parser_state;
 extern struct cleanup *make_cleanup_clear_parser_state
   (struct parser_state **p);

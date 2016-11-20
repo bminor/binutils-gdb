@@ -724,8 +724,7 @@ generate_c_for_variable_locations (struct compile_c_instance *compiler,
 				   const struct block *block,
 				   CORE_ADDR pc)
 {
-  struct cleanup *cleanup, *outer;
-  htab_t symhash;
+  struct cleanup *outer;
   const struct block *static_block = block_static_block (block);
   unsigned char *registers_used;
 
@@ -739,9 +738,8 @@ generate_c_for_variable_locations (struct compile_c_instance *compiler,
 
   /* Ensure that a given name is only entered once.  This reflects the
      reality of shadowing.  */
-  symhash = htab_create_alloc (1, hash_symname, eq_symname, NULL,
-			       xcalloc, xfree);
-  cleanup = make_cleanup_htab_delete (symhash);
+  htab_up symhash (htab_create_alloc (1, hash_symname, eq_symname, NULL,
+				      xcalloc, xfree));
 
   while (1)
     {
@@ -754,7 +752,7 @@ generate_c_for_variable_locations (struct compile_c_instance *compiler,
 	   sym != NULL;
 	   sym = block_iterator_next (&iter))
 	{
-	  if (!symbol_seen (symhash, sym))
+	  if (!symbol_seen (symhash.get (), sym))
 	    generate_c_for_for_one_variable (compiler, stream, gdbarch,
 					     registers_used, pc, sym);
 	}
@@ -766,7 +764,6 @@ generate_c_for_variable_locations (struct compile_c_instance *compiler,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  do_cleanups (cleanup);
   discard_cleanups (outer);
   return registers_used;
 }

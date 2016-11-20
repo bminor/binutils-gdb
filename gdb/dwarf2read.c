@@ -3897,17 +3897,12 @@ dw2_expand_symtabs_matching
 
   if (file_matcher != NULL)
     {
-      struct cleanup *cleanup;
-      htab_t visited_found, visited_not_found;
-
-      visited_found = htab_create_alloc (10,
-					 htab_hash_pointer, htab_eq_pointer,
-					 NULL, xcalloc, xfree);
-      cleanup = make_cleanup_htab_delete (visited_found);
-      visited_not_found = htab_create_alloc (10,
-					     htab_hash_pointer, htab_eq_pointer,
-					     NULL, xcalloc, xfree);
-      make_cleanup_htab_delete (visited_not_found);
+      htab_up visited_found (htab_create_alloc (10, htab_hash_pointer,
+						htab_eq_pointer,
+						NULL, xcalloc, xfree));
+      htab_up visited_not_found (htab_create_alloc (10, htab_hash_pointer,
+						    htab_eq_pointer,
+						    NULL, xcalloc, xfree));
 
       /* The rule is CUs specify all the files, including those used by
 	 any TU, so there's no need to scan TUs here.  */
@@ -3931,9 +3926,9 @@ dw2_expand_symtabs_matching
 	  if (file_data == NULL)
 	    continue;
 
-	  if (htab_find (visited_not_found, file_data) != NULL)
+	  if (htab_find (visited_not_found.get (), file_data) != NULL)
 	    continue;
-	  else if (htab_find (visited_found, file_data) != NULL)
+	  else if (htab_find (visited_found.get (), file_data) != NULL)
 	    {
 	      per_cu->v.quick->mark = 1;
 	      continue;
@@ -3965,13 +3960,11 @@ dw2_expand_symtabs_matching
 	    }
 
 	  slot = htab_find_slot (per_cu->v.quick->mark
-				 ? visited_found
-				 : visited_not_found,
+				 ? visited_found.get ()
+				 : visited_not_found.get (),
 				 file_data, INSERT);
 	  *slot = file_data;
 	}
-
-      do_cleanups (cleanup);
     }
 
   for (iter = 0; iter < index->symbol_table_slots; ++iter)
@@ -4138,11 +4131,9 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 			  void *data, int need_fullname)
 {
   int i;
-  struct cleanup *cleanup;
-  htab_t visited = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
-				      NULL, xcalloc, xfree);
+  htab_up visited (htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
+				      NULL, xcalloc, xfree));
 
-  cleanup = make_cleanup_htab_delete (visited);
   dw2_setup (objfile);
 
   /* The rule is CUs specify all the files, including those used by
@@ -4155,7 +4146,8 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 
       if (per_cu->v.quick->compunit_symtab)
 	{
-	  void **slot = htab_find_slot (visited, per_cu->v.quick->file_names,
+	  void **slot = htab_find_slot (visited.get (),
+					per_cu->v.quick->file_names,
 					INSERT);
 
 	  *slot = per_cu->v.quick->file_names;
@@ -4177,7 +4169,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
       if (file_data == NULL)
 	continue;
 
-      slot = htab_find_slot (visited, file_data, INSERT);
+      slot = htab_find_slot (visited.get (), file_data, INSERT);
       if (*slot)
 	{
 	  /* Already visited.  */
@@ -4196,8 +4188,6 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 	  (*fun) (file_data->file_names[j], this_real_name, data);
 	}
     }
-
-  do_cleanups (cleanup);
 }
 
 static int
@@ -21583,7 +21573,6 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
   unsigned int offset_size = cu->header.offset_size;
   const gdb_byte *opcode_definitions[256];
   struct cleanup *cleanup;
-  htab_t include_hash;
   void **slot;
   struct dwarf2_section_info *section;
   const char *section_name;
@@ -21749,16 +21738,16 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
      command-line macro definitions/undefinitions.  This flag is unset when we
      reach the first DW_MACINFO_start_file entry.  */
 
-  include_hash = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
-				    NULL, xcalloc, xfree);
-  cleanup = make_cleanup_htab_delete (include_hash);
+  htab_up include_hash (htab_create_alloc (1, htab_hash_pointer,
+					   htab_eq_pointer,
+					   NULL, xcalloc, xfree));
   mac_ptr = section->buffer + offset;
-  slot = htab_find_slot (include_hash, mac_ptr, INSERT);
+  slot = htab_find_slot (include_hash.get (), mac_ptr, INSERT);
   *slot = (void *) mac_ptr;
   dwarf_decode_macro_bytes (abfd, mac_ptr, mac_end,
 			    current_file, lh, section,
-			    section_is_gnu, 0, offset_size, include_hash);
-  do_cleanups (cleanup);
+			    section_is_gnu, 0, offset_size,
+			    include_hash.get ());
 }
 
 /* Check if the attribute's form is a DW_FORM_block*
@@ -23287,8 +23276,6 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   struct mapped_symtab *symtab;
   offset_type val, size_of_contents, total_len;
   struct stat st;
-  htab_t psyms_seen;
-  htab_t cu_index_htab;
   struct psymtab_cu_index_map *psymtab_cu_index_map;
 
   if (dwarf2_per_objfile->using_index)
@@ -23326,19 +23313,18 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   obstack_init (&types_cu_list);
   make_cleanup_obstack_free (&types_cu_list);
 
-  psyms_seen = htab_create_alloc (100, htab_hash_pointer, htab_eq_pointer,
-				  NULL, xcalloc, xfree);
-  make_cleanup_htab_delete (psyms_seen);
+  htab_up psyms_seen (htab_create_alloc (100, htab_hash_pointer,
+					 htab_eq_pointer,
+					 NULL, xcalloc, xfree));
 
   /* While we're scanning CU's create a table that maps a psymtab pointer
      (which is what addrmap records) to its index (which is what is recorded
      in the index file).  This will later be needed to write the address
      table.  */
-  cu_index_htab = htab_create_alloc (100,
-				     hash_psymtab_cu_index,
-				     eq_psymtab_cu_index,
-				     NULL, xcalloc, xfree);
-  make_cleanup_htab_delete (cu_index_htab);
+  htab_up cu_index_htab (htab_create_alloc (100,
+					    hash_psymtab_cu_index,
+					    eq_psymtab_cu_index,
+					    NULL, xcalloc, xfree));
   psymtab_cu_index_map = XNEWVEC (struct psymtab_cu_index_map,
 				  dwarf2_per_objfile->n_comp_units);
   make_cleanup (xfree, psymtab_cu_index_map);
@@ -23362,12 +23348,13 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 	continue;
 
       if (psymtab->user == NULL)
-	recursively_write_psymbols (objfile, psymtab, symtab, psyms_seen, i);
+	recursively_write_psymbols (objfile, psymtab, symtab,
+				    psyms_seen.get (), i);
 
       map = &psymtab_cu_index_map[i];
       map->psymtab = psymtab;
       map->cu_index = i;
-      slot = htab_find_slot (cu_index_htab, map, INSERT);
+      slot = htab_find_slot (cu_index_htab.get (), map, INSERT);
       gdb_assert (slot != NULL);
       gdb_assert (*slot == NULL);
       *slot = map;
@@ -23380,7 +23367,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
     }
 
   /* Dump the address map.  */
-  write_address_map (objfile, &addr_obstack, cu_index_htab);
+  write_address_map (objfile, &addr_obstack, cu_index_htab.get ());
 
   /* Write out the .debug_type entries, if any.  */
   if (dwarf2_per_objfile->signatured_types)
@@ -23390,7 +23377,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       sig_data.objfile = objfile;
       sig_data.symtab = symtab;
       sig_data.types_list = &types_cu_list;
-      sig_data.psyms_seen = psyms_seen;
+      sig_data.psyms_seen = psyms_seen.get ();
       sig_data.cu_index = dwarf2_per_objfile->n_comp_units;
       htab_traverse_noresize (dwarf2_per_objfile->signatured_types,
 			      write_one_signatured_type, &sig_data);

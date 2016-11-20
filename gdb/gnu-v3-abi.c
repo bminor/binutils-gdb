@@ -940,7 +940,6 @@ gnuv3_print_vtable (struct value *value)
   struct type *type;
   struct value *vtable;
   struct value_print_options opts;
-  htab_t offset_hash;
   struct cleanup *cleanup;
   VEC (value_and_voffset_p) *result_vec = NULL;
   struct value_and_voffset *iter;
@@ -976,13 +975,12 @@ gnuv3_print_vtable (struct value *value)
       return;
     }
 
-  offset_hash = htab_create_alloc (1, hash_value_and_voffset,
-				   eq_value_and_voffset,
-				   xfree, xcalloc, xfree);
-  cleanup = make_cleanup_htab_delete (offset_hash);
-  make_cleanup (VEC_cleanup (value_and_voffset_p), &result_vec);
+  htab_up offset_hash (htab_create_alloc (1, hash_value_and_voffset,
+					  eq_value_and_voffset,
+					  xfree, xcalloc, xfree));
+  cleanup = make_cleanup (VEC_cleanup (value_and_voffset_p), &result_vec);
 
-  compute_vtable_size (offset_hash, &result_vec, value);
+  compute_vtable_size (offset_hash.get (), &result_vec, value);
 
   qsort (VEC_address (value_and_voffset_p, result_vec),
 	 VEC_length (value_and_voffset_p, result_vec),
