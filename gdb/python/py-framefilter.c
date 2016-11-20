@@ -1009,7 +1009,6 @@ py_print_frame (PyObject *filter, int flags,
   struct frame_info *frame = NULL;
   struct cleanup *cleanup_stack;
   struct value_print_options opts;
-  PyObject *py_inf_frame;
   int print_level, print_frame_info, print_args, print_locals;
   gdb::unique_xmalloc_ptr<char> function_to_free;
 
@@ -1024,14 +1023,11 @@ py_print_frame (PyObject *filter, int flags,
   /* Get the underlying frame.  This is needed to determine GDB
   architecture, and also, in the cases of frame variables/arguments to
   read them if they returned filter object requires us to do so.  */
-  py_inf_frame = PyObject_CallMethod (filter, "inferior_frame", NULL);
+  gdbpy_ref py_inf_frame (PyObject_CallMethod (filter, "inferior_frame", NULL));
   if (py_inf_frame == NULL)
     return EXT_LANG_BT_ERROR;
 
-  frame = frame_object_to_frame_info (py_inf_frame);;
-
-  Py_DECREF (py_inf_frame);
-
+  frame = frame_object_to_frame_info (py_inf_frame.get ());
   if (frame == NULL)
     return EXT_LANG_BT_ERROR;
 
@@ -1085,7 +1081,7 @@ py_print_frame (PyObject *filter, int flags,
 	 address printing.  */
       if (PyObject_HasAttrString (filter, "address"))
 	{
-	  PyObject *paddr = PyObject_CallMethod (filter, "address", NULL);
+	  gdbpy_ref paddr (PyObject_CallMethod (filter, "address", NULL));
 
 	  if (paddr == NULL)
 	    {
@@ -1095,16 +1091,14 @@ py_print_frame (PyObject *filter, int flags,
 
 	  if (paddr != Py_None)
 	    {
-	      if (get_addr_from_python (paddr, &address) < 0)
+	      if (get_addr_from_python (paddr.get (), &address) < 0)
 		{
-		  Py_DECREF (paddr);
 		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
 		}
 
 	      has_addr = 1;
 	    }
-	  Py_DECREF (paddr);
 	}
     }
 

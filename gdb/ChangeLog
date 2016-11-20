@@ -1,5 +1,9 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (py_print_frame): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-finishbreakpoint.c (bpfinishpy_out_of_scope): Use
 	gdbpy_ref.
 
