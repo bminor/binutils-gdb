@@ -497,7 +497,6 @@ enumerate_args (PyObject *iter,
 		int print_args_field,
 		struct frame_info *frame)
 {
-  PyObject *item;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
@@ -517,7 +516,7 @@ enumerate_args (PyObject *iter,
   CATCH (except, RETURN_MASK_ALL)
     {
       gdbpy_convert_exception (except);
-      goto error;
+      return EXT_LANG_BT_ERROR;
     }
   END_CATCH
 
@@ -525,11 +524,11 @@ enumerate_args (PyObject *iter,
       commas in the argument output is correct.  At the end of the
       loop block collect another item from the iterator, and, if it is
       not null emit a comma.  */
-  item = PyIter_Next (iter);
+  gdbpy_ref item (PyIter_Next (iter));
   if (item == NULL && PyErr_Occurred ())
-    goto error;
+    return EXT_LANG_BT_ERROR;
 
-  while (item)
+  while (item != NULL)
     {
       const struct language_defn *language;
       gdb::unique_xmalloc_ptr<char> sym_name;
@@ -538,22 +537,14 @@ enumerate_args (PyObject *iter,
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
 
-      success = extract_sym (item, &sym_name, &sym, &sym_block, &language);
+      success = extract_sym (item.get (), &sym_name, &sym, &sym_block,
+			     &language);
       if (success == EXT_LANG_BT_ERROR)
-	{
-	  Py_DECREF (item);
-	  goto error;
-	}
+	return EXT_LANG_BT_ERROR;
 
-      success = extract_value (item, &val);
+      success = extract_value (item.get (), &val);
       if (success == EXT_LANG_BT_ERROR)
-	{
-	  Py_DECREF (item);
-	  goto error;
-	}
-
-      Py_DECREF (item);
-      item = NULL;
+	return EXT_LANG_BT_ERROR;
 
       if (sym && out->is_mi_like_p ()
 	  && ! mi_should_print (sym, MI_PRINT_ARGS))
@@ -571,7 +562,7 @@ enumerate_args (PyObject *iter,
 	    {
 	      PyErr_SetString (PyExc_RuntimeError,
 			       _("No symbol or value provided."));
-	      goto error;
+	      return EXT_LANG_BT_ERROR;
 	    }
 
 	  TRY
@@ -581,7 +572,7 @@ enumerate_args (PyObject *iter,
 	  CATCH (except, RETURN_MASK_ALL)
 	    {
 	      gdbpy_convert_exception (except);
-	      goto error;
+	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
 
@@ -599,7 +590,7 @@ enumerate_args (PyObject *iter,
 		{
 		  xfree (arg.error);
 		  xfree (entryarg.error);
-		  goto error;
+		  return EXT_LANG_BT_ERROR;
 		}
 	    }
 
@@ -617,7 +608,7 @@ enumerate_args (PyObject *iter,
 		      xfree (arg.error);
 		      xfree (entryarg.error);
 		      gdbpy_convert_exception (except);
-		      goto error;
+		      return EXT_LANG_BT_ERROR;
 		    }
 		  END_CATCH
 		}
@@ -626,9 +617,9 @@ enumerate_args (PyObject *iter,
 				       args_type, print_args_field, NULL)
 		  == EXT_LANG_BT_ERROR)
 		{
-		      xfree (arg.error);
-		      xfree (entryarg.error);
-		      goto error;
+		  xfree (arg.error);
+		  xfree (entryarg.error);
+		  return EXT_LANG_BT_ERROR;
 		}
 	    }
 
@@ -643,14 +634,14 @@ enumerate_args (PyObject *iter,
 	      if (py_print_single_arg (out, sym_name.get (), NULL, val, &opts,
 				       args_type, print_args_field,
 				       language) == EXT_LANG_BT_ERROR)
-		goto error;
+		return EXT_LANG_BT_ERROR;
 	    }
 	}
 
       /* Collect the next item from the iterator.  If
 	 this is the last item, do not print the
 	 comma.  */
-      item = PyIter_Next (iter);
+      item.reset (PyIter_Next (iter));
       if (item != NULL)
 	{
 	  TRY
@@ -659,14 +650,13 @@ enumerate_args (PyObject *iter,
 	    }
 	  CATCH (except, RETURN_MASK_ALL)
 	    {
-	      Py_DECREF (item);
 	      gdbpy_convert_exception (except);
-	      goto error;
+	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
 	}
       else if (PyErr_Occurred ())
-	goto error;
+	return EXT_LANG_BT_ERROR;
 
       TRY
 	{
@@ -674,17 +664,13 @@ enumerate_args (PyObject *iter,
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
-	  Py_DECREF (item);
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  return EXT_LANG_BT_ERROR;
 	}
       END_CATCH
     }
 
   return EXT_LANG_BT_OK;
-
- error:
-  return EXT_LANG_BT_ERROR;
 }
 
 
