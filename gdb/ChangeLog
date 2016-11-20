@@ -1,5 +1,10 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-unwind.c (pyuw_object_attribute_to_pointer): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (eval_python_command, gdbpy_decode_line)
 	(gdbpy_run_events, gdbpy_start_type_printers)
 	(gdbpy_apply_type_printers): Use gdbpy_ref.

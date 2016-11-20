@@ -177,18 +177,17 @@ pyuw_object_attribute_to_pointer (PyObject *pyo, const char *attr_name,
 
   if (PyObject_HasAttrString (pyo, attr_name))
     {
-      PyObject *pyo_value = PyObject_GetAttrString (pyo, attr_name);
+      gdbpy_ref pyo_value (PyObject_GetAttrString (pyo, attr_name));
 
       if (pyo_value != NULL && pyo_value != Py_None)
         {
-          rc = pyuw_value_obj_to_pointer (pyo_value, addr);
+          rc = pyuw_value_obj_to_pointer (pyo_value.get (), addr);
           if (!rc)
             PyErr_Format (
                 PyExc_ValueError,
                 _("The value of the '%s' attribute is not a pointer."),
                 attr_name);
         }
-      Py_XDECREF (pyo_value);
     }
   return rc;
 }
