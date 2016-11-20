@@ -1,5 +1,13 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-utils.c (unicode_to_encoded_string)
+	(python_string_to_target_string)
+	(python_string_to_target_python_string)
+	(python_string_to_host_string, gdbpy_obj_to_string)
+	(get_addr_from_python): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-unwind.c (pyuw_object_attribute_to_pointer): Use
 	gdbpy_ref.
 
