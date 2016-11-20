@@ -498,9 +498,6 @@ int gdbpy_initialize_xmethods (void)
 int gdbpy_initialize_unwind (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
-struct cleanup *make_cleanup_py_decref (PyObject *py);
-struct cleanup *make_cleanup_py_xdecref (PyObject *py);
-
 /* Called before entering the Python interpreter to install the
    current language and architecture to be used for Python values.
    Also set the active extension language for GDB so that SIGINT's

@@ -1,5 +1,12 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python-internal.h (make_cleanup_py_decref)
+	(make_cleanup_py_xdecref): Don't declare.
+	* python/py-utils.c (py_decref, make_cleanup_py_decref)
+	(py_xdecref, make_cleanup_py_xdecref): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (py_mi_print_variables): Use gdbpy_ref.
 	(py_print_locals, enumerate_locals, py_print_args): Use gdbpy_ref.
 
