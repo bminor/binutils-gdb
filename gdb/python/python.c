@@ -264,7 +264,7 @@ gdbpy_check_quit_flag (const struct extension_language_defn *extlang)
 static int
 eval_python_command (const char *command)
 {
-  PyObject *m, *d, *v;
+  PyObject *m, *d;
 
   m = PyImport_AddModule ("__main__");
   if (m == NULL)
@@ -273,11 +273,10 @@ eval_python_command (const char *command)
   d = PyModule_GetDict (m);
   if (d == NULL)
     return -1;
-  v = PyRun_StringFlags (command, Py_single_input, d, d, NULL);
+  gdbpy_ref v (PyRun_StringFlags (command, Py_single_input, d, d, NULL));
   if (v == NULL)
     return -1;
 
-  Py_DECREF (v);
 #ifndef IS_PY3K
   if (Py_FlushLine ())
     PyErr_Clear ();
@@ -672,9 +671,8 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct symtab_and_line sal;
   char *arg = NULL;
   struct cleanup *cleanups;
-  PyObject *result = NULL;
-  PyObject *return_result = NULL;
-  PyObject *unparsed = NULL;
+  gdbpy_ref result;
+  gdbpy_ref unparsed;
   struct event_location *location = NULL;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
@@ -723,9 +721,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     {
       int i;
 
-      result = PyTuple_New (sals.nelts);
-      if (! result)
-	goto error;
+      result.reset (PyTuple_New (sals.nelts));
+      if (result == NULL)
+	{
+	  do_cleanups (cleanups);
+	  return NULL;
+	}
       for (i = 0; i < sals.nelts; ++i)
 	{
 	  PyObject *obj;
@@ -733,50 +734,47 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 	  obj = symtab_and_line_to_sal_object (sals.sals[i]);
 	  if (! obj)
 	    {
-	      Py_DECREF (result);
-	      goto error;
+	      do_cleanups (cleanups);
+	      return NULL;
 	    }
 
-	  PyTuple_SetItem (result, i, obj);
+	  PyTuple_SetItem (result.get (), i, obj);
 	}
     }
   else
     {
-      result = Py_None;
+      result.reset (Py_None);
       Py_INCREF (Py_None);
     }
 
-  return_result = PyTuple_New (2);
-  if (! return_result)
+  gdbpy_ref return_result (PyTuple_New (2));
+  if (return_result == NULL)
     {
-      Py_DECREF (result);
-      goto error;
+      do_cleanups (cleanups);
+      return NULL;
     }
 
   if (arg != NULL && strlen (arg) > 0)
     {
-      unparsed = PyString_FromString (arg);
+      unparsed.reset (PyString_FromString (arg));
       if (unparsed == NULL)
 	{
-	  Py_DECREF (result);
-	  Py_DECREF (return_result);
-	  return_result = NULL;
-	  goto error;
+	  do_cleanups (cleanups);
+	  return NULL;
 	}
     }
   else
     {
-      unparsed = Py_None;
+      unparsed.reset (Py_None);
       Py_INCREF (Py_None);
     }
 
-  PyTuple_SetItem (return_result, 0, unparsed);
-  PyTuple_SetItem (return_result, 1, result);
+  PyTuple_SetItem (return_result.get (), 0, unparsed.release ());
+  PyTuple_SetItem (return_result.get (), 1, result.release ());
 
- error:
   do_cleanups (cleanups);
 
-  return return_result;
+  return return_result.release ();
 }
 
 /* Parse a string and evaluate it as an expression.  */
@@ -893,8 +891,6 @@ gdbpy_run_events (int error, gdb_client_data client_data)
 
   while (gdbpy_event_list)
     {
-      PyObject *call_result;
-
       /* Dispatching the event might push a new element onto the event
 	 loop, so we update here "atomically enough".  */
       struct gdbpy_event *item = gdbpy_event_list;
@@ -903,11 +899,10 @@ gdbpy_run_events (int error, gdb_client_data client_data)
 	gdbpy_event_list_end = &gdbpy_event_list;
 
       /* Ignore errors.  */
-      call_result = PyObject_CallObject (item->event, NULL);
+      gdbpy_ref call_result (PyObject_CallObject (item->event, NULL));
       if (call_result == NULL)
 	PyErr_Clear ();
 
-      Py_XDECREF (call_result);
       Py_DECREF (item->event);
       xfree (item);
     }
@@ -1327,36 +1322,33 @@ static void
 gdbpy_start_type_printers (const struct extension_language_defn *extlang,
 			   struct ext_lang_type_printers *ext_printers)
 {
-  PyObject *type_module, *func = NULL, *printers_obj = NULL;
+  PyObject *printers_obj = NULL;
 
   if (!gdb_python_initialized)
     return;
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  type_module = PyImport_ImportModule ("gdb.types");
+  gdbpy_ref type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
     {
       gdbpy_print_stack ();
-      goto done;
+      return;
     }
 
-  func = PyObject_GetAttrString (type_module, "get_type_recognizers");
+  gdbpy_ref func (PyObject_GetAttrString (type_module.get (),
+					  "get_type_recognizers"));
   if (func == NULL)
     {
       gdbpy_print_stack ();
-      goto done;
+      return;
     }
 
-  printers_obj = PyObject_CallFunctionObjArgs (func, (char *) NULL);
+  printers_obj = PyObject_CallFunctionObjArgs (func.get (), (char *) NULL);
   if (printers_obj == NULL)
     gdbpy_print_stack ();
   else
     ext_printers->py_type_printers = printers_obj;
-
- done:
-  Py_XDECREF (type_module);
-  Py_XDECREF (func);
 }
 
 /* If TYPE is recognized by some type printer, store in *PRETTIED_TYPE
@@ -1371,8 +1363,6 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
 			   const struct ext_lang_type_printers *ext_printers,
 			   struct type *type, char **prettied_type)
 {
-  PyObject *type_obj, *type_module = NULL, *func = NULL;
-  PyObject *result_obj = NULL;
   PyObject *printers_obj = (PyObject *) ext_printers->py_type_printers;
   gdb::unique_xmalloc_ptr<char> result;
 
@@ -1384,53 +1374,49 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  type_obj = type_to_type_object (type);
+  gdbpy_ref type_obj (type_to_type_object (type));
   if (type_obj == NULL)
     {
       gdbpy_print_stack ();
-      goto done;
+      return EXT_LANG_RC_ERROR;
     }
 
-  type_module = PyImport_ImportModule ("gdb.types");
+  gdbpy_ref type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
     {
       gdbpy_print_stack ();
-      goto done;
+      return EXT_LANG_RC_ERROR;
     }
 
-  func = PyObject_GetAttrString (type_module, "apply_type_recognizers");
+  gdbpy_ref func (PyObject_GetAttrString (type_module.get (),
+					  "apply_type_recognizers"));
   if (func == NULL)
     {
       gdbpy_print_stack ();
-      goto done;
+      return EXT_LANG_RC_ERROR;
     }
 
-  result_obj = PyObject_CallFunctionObjArgs (func, printers_obj,
-					     type_obj, (char *) NULL);
+  gdbpy_ref result_obj (PyObject_CallFunctionObjArgs (func.get (), printers_obj,
+						      type_obj.get (),
+						      (char *) NULL));
   if (result_obj == NULL)
     {
       gdbpy_print_stack ();
-      goto done;
+      return EXT_LANG_RC_ERROR;
     }
 
-  if (result_obj != Py_None)
+  if (result_obj == Py_None)
+    return EXT_LANG_RC_NOP;
+
+  result = python_string_to_host_string (result_obj.get ());
+  if (result == NULL)
     {
-      result = python_string_to_host_string (result_obj);
-      if (result == NULL)
-	gdbpy_print_stack ();
+      gdbpy_print_stack ();
+      return EXT_LANG_RC_ERROR;
     }
 
- done:
-  Py_XDECREF (type_obj);
-  Py_XDECREF (type_module);
-  Py_XDECREF (func);
-  Py_XDECREF (result_obj);
-  if (result != NULL)
-    {
-      *prettied_type = result.release ();
-      return EXT_LANG_RC_OK;
-    }
-  return EXT_LANG_RC_ERROR;
+  *prettied_type = result.release ();
+  return EXT_LANG_RC_OK;
 }
 
 /* Free the result of start_type_printers.
