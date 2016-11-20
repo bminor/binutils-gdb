@@ -307,15 +307,14 @@ get_doc_string (PyObject *object, PyObject *attr)
 
   if (PyObject_HasAttr (object, attr))
     {
-      PyObject *ds_obj = PyObject_GetAttr (object, attr);
+      gdbpy_ref ds_obj (PyObject_GetAttr (object, attr));
 
-      if (ds_obj && gdbpy_is_string (ds_obj))
+      if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
-	  result = python_string_to_host_string (ds_obj);
+	  result = python_string_to_host_string (ds_obj.get ());
 	  if (result == NULL)
 	    gdbpy_print_stack ();
 	}
-      Py_XDECREF (ds_obj);
     }
   if (! result)
     result.reset (xstrdup (_("This command is not documented.")));
@@ -587,23 +586,22 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
 
   for (i = 0; i < size; ++i)
     {
-      PyObject *item = PySequence_GetItem (enum_values, i);
+      gdbpy_ref item (PySequence_GetItem (enum_values, i));
 
-      if (! item)
+      if (item == NULL)
 	{
 	  do_cleanups (back_to);
 	  return 0;
 	}
-      if (! gdbpy_is_string (item))
+      if (! gdbpy_is_string (item.get ()))
 	{
-	  Py_DECREF (item);
 	  do_cleanups (back_to);
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("The enumeration item not a string."));
 	  return 0;
 	}
-      self->enumeration[i] = python_string_to_host_string (item).release ();
-      Py_DECREF (item);
+      self->enumeration[i]
+	= python_string_to_host_string (item.get ()).release ();
       if (self->enumeration[i] == NULL)
 	{
 	  do_cleanups (back_to);
