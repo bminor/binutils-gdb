@@ -251,27 +251,23 @@ find_thread_object (ptid_t ptid)
 {
   int pid;
   struct threadlist_entry *thread;
-  PyObject *inf_obj;
   thread_object *found = NULL;
 
   pid = ptid_get_pid (ptid);
   if (pid == 0)
     return NULL;
 
-  inf_obj = find_inferior_object (pid);
-
-  if (! inf_obj)
+  gdbpy_ref inf_obj (find_inferior_object (pid));
+  if (inf_obj == NULL)
     return NULL;
 
-  for (thread = ((inferior_object *)inf_obj)->threads; thread;
+  for (thread = ((inferior_object *)(inf_obj.get ()))->threads; thread;
        thread = thread->next)
     if (ptid_equal (thread->thread_obj->thread->ptid, ptid))
       {
 	found = thread->thread_obj;
 	break;
       }
-
-  Py_DECREF (inf_obj);
 
   if (found)
     return found;
@@ -416,19 +412,12 @@ static int
 build_inferior_list (struct inferior *inf, void *arg)
 {
   PyObject *list = (PyObject *) arg;
-  PyObject *inferior = inferior_to_inferior_object (inf);
-  int success = 0;
+  gdbpy_ref inferior (inferior_to_inferior_object (inf));
 
-  if (! inferior)
+  if (inferior  == NULL)
     return 0;
 
-  success = PyList_Append (list, inferior);
-  Py_DECREF (inferior);
-
-  if (success)
-    return 1;
-
-  return 0;
+  return PyList_Append (list, inferior.get ()) ? 1 : 0;
 }
 
 /* Implementation of gdb.inferiors () -> (gdb.Inferior, ...).
