@@ -187,6 +187,9 @@ struct btrace_function
   btrace_function_flags flags;
 };
 
+typedef struct btrace_function *btrace_fun_p;
+DEF_VEC_P (btrace_fun_p);
+
 /* A branch trace instruction iterator.  */
 struct btrace_insn_iterator
 {
@@ -336,6 +339,10 @@ struct btrace_thread_info
      branch trace available, both will be non-NULL.  */
   struct btrace_function *begin;
   struct btrace_function *end;
+
+  /* Vector of pointer to decoded function segments.  These are in execution
+     order with the first element == BEGIN and the last element == END.  */
+  VEC (btrace_fun_p) *functions;
 
   /* The function level offset.  When added to each function's LEVEL,
      this normalizes the function levels such that the smallest level

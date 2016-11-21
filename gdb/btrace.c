@@ -1839,13 +1839,19 @@ btrace_fetch (struct thread_info *tp)
   /* Compute the trace, provided we have any.  */
   if (!btrace_data_empty (&btrace))
     {
+      struct btrace_function *bfun;
+
       /* Store the raw trace data.  The stored data will be cleared in
 	 btrace_clear, so we always append the new trace.  */
       btrace_data_append (&btinfo->data, &btrace);
       btrace_maint_clear (btinfo);
 
+      VEC_truncate (btrace_fun_p, btinfo->functions, 0);
       btrace_clear_history (btinfo);
       btrace_compute_ftrace (tp, &btrace);
+
+      for (bfun = btinfo->begin; bfun != NULL; bfun = bfun->flow.next)
+	VEC_safe_push (btrace_fun_p, btinfo->functions, bfun);
     }
 
   do_cleanups (cleanup);
@@ -1867,6 +1873,8 @@ btrace_clear (struct thread_info *tp)
   reinit_frame_cache ();
 
   btinfo = &tp->btrace;
+
+  VEC_free (btrace_fun_p, btinfo->functions);
 
   it = btinfo->begin;
   while (it != NULL)
@@ -2458,20 +2466,45 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
 			    unsigned int number)
 {
   const struct btrace_function *bfun;
+  unsigned int upper, lower;
 
-  for (bfun = btinfo->end; bfun != NULL; bfun = bfun->flow.prev)
-    if (bfun->insn_offset <= number)
+  if (VEC_empty (btrace_fun_p, btinfo->functions))
+      return 0;
+
+  lower = 0;
+  bfun = VEC_index (btrace_fun_p, btinfo->functions, lower);
+  if (number < bfun->insn_offset)
+    return 0;
+
+  upper = VEC_length (btrace_fun_p, btinfo->functions) - 1;
+  bfun = VEC_index (btrace_fun_p, btinfo->functions, upper);
+  if (number >= bfun->insn_offset + ftrace_call_num_insn (bfun))
+    return 0;
+
+  /* We assume that there are no holes in the numbering.  */
+  for (;;)
+    {
+      const unsigned int average = lower + (upper - lower) / 2;
+
+      bfun = VEC_index (btrace_fun_p, btinfo->functions, average);
+
+      if (number < bfun->insn_offset)
+	{
+	  upper = average - 1;
+	  continue;
+	}
+
+      if (number >= bfun->insn_offset + ftrace_call_num_insn (bfun))
+	{
+	  lower = average + 1;
+	  continue;
+	}
+
       break;
-
-  if (bfun == NULL)
-    return 0;
-
-  if (bfun->insn_offset + ftrace_call_num_insn (bfun) <= number)
-    return 0;
+    }
 
   it->function = bfun;
   it->index = number - bfun->insn_offset;
-
   return 1;
 }
 
