@@ -1,3 +1,11 @@
+2016-11-21  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Invoke ACX_PROG_CMP_IGNORE_INITIAL.
+	* Makefile.am (comparison): Rewrite using do_compare.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2016-11-18  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/cl-warn.s: New file.

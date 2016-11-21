@@ -257,6 +257,7 @@ builddir = @builddir@
 cgen_cpu_prefix = @cgen_cpu_prefix@
 datadir = @datadir@
 datarootdir = @datarootdir@
+do_compare = @do_compare@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@

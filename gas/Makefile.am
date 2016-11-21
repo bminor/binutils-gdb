@@ -667,21 +667,15 @@ stage3:
 
 against=stage2
 
-# This rule is derived from corresponding code in the Makefile.in for gcc.
-# The "tail +16c" is to bypass headers which may include timestamps or
-# temporary assembly file names.
 comparison:
 	x=0 ; \
 	for file in *.@OBJEXT@ ; do \
-	  tail +16c ./$$file > tmp-foo1; \
-	  if tail +16c ${against}/$$file > tmp-foo2 2>/dev/null ; then \
-	    if cmp tmp-foo1 tmp-foo2 ; then \
-	      true ; \
-	    else \
-	      echo $$file differs ; \
-	      x=1 ; \
-	    fi ; \
-	  else true; fi ; \
+	  f1=./$$file; f2=${against}/$$file; \
+	  $(do_compare) > /dev/null 2>&1; \
+	  if test $$? -ne 0; then \
+	    echo $$file differs ; \
+	    x=1 ; \
+	  fi ; \
 	done ; \
 	exit $$x
 	-rm -f tmp-foo*
