@@ -1,3 +1,8 @@
+2016-11-21  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* layout.cc: Include windows.h and rpcdce.h (for MinGW32).
+	(Layout::create_build_id): Generate uuid using UuidCreate().
+
 2016-11-04  Loïc Yhuel <loic.yhuel@softathome.com>
 
 	* configure.ac: add missing '$'.
