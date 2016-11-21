@@ -21,6 +21,8 @@
 #include "inferior.h"
 #include "record.h"
 #include "python-internal.h"
+#include "py-record-btrace.h"
+#include "py-record-full.h"
 #include "target.h"
 
 /* Python Record object.  */
@@ -57,6 +59,14 @@ recpy_ptid (PyObject *self, void* closure)
 static PyObject *
 recpy_method (PyObject *self, void* closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_FULL)
+    return recpy_full_method (self, closure);
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_method (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -65,6 +75,14 @@ recpy_method (PyObject *self, void* closure)
 static PyObject *
 recpy_format (PyObject *self, void* closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_FULL)
+    return recpy_full_format (self, closure);
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_format (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -73,6 +91,11 @@ recpy_format (PyObject *self, void* closure)
 static PyObject *
 recpy_goto (PyObject *self, PyObject *value)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_goto (self, value);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -81,6 +104,11 @@ recpy_goto (PyObject *self, PyObject *value)
 static PyObject *
 recpy_replay_position (PyObject *self, void *closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_replay_position (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -89,6 +117,11 @@ recpy_replay_position (PyObject *self, void *closure)
 static PyObject *
 recpy_instruction_history (PyObject *self, void* closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_instruction_history (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -97,6 +130,11 @@ recpy_instruction_history (PyObject *self, void* closure)
 static PyObject *
 recpy_function_call_history (PyObject *self, void* closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_function_call_history (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -105,6 +143,11 @@ recpy_function_call_history (PyObject *self, void* closure)
 static PyObject *
 recpy_begin (PyObject *self, void* closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_begin (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
@@ -113,6 +156,11 @@ recpy_begin (PyObject *self, void* closure)
 static PyObject *
 recpy_end (PyObject *self, void* closure)
 {
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_end (self, closure);
+
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 

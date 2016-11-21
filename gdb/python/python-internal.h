@@ -104,7 +104,9 @@
 
 #define PyInt_Check PyLong_Check
 #define PyInt_FromLong PyLong_FromLong
+#define PyInt_FromSsize_t PyLong_FromSsize_t
 #define PyInt_AsLong PyLong_AsLong
+#define PyInt_AsSsize_t PyLong_AsSsize_t
 
 #define PyString_FromString PyUnicode_FromString
 #define PyString_Decode PyUnicode_Decode
@@ -438,6 +440,8 @@ int gdbpy_initialize_auto_load (void)
 int gdbpy_initialize_values (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_frames (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_btrace (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_record (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
