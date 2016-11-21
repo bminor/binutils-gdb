@@ -1,3 +1,15 @@
+2016-11-21  Yao Qi  <yao.qi@linaro.org>
+
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):
+	Don't call value_from_contents_and_address and
+	set_value_address.  Call value_from_component.
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer):
+	Likewise.
+	* value.c (value_from_component): New function.
+	* value.h (value_from_component): Likewise.
+	* valarith.c (value_subscripted_rvalue): Call
+	value_from_component.
+
 2016-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* contrib/ari/gdb_ari.sh: Add detection of printf_vma and

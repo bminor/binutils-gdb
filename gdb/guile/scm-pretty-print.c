@@ -985,16 +985,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Instantiate the printer.  */
-  value = value_from_contents_and_address (type, valaddr + embedded_offset,
-					   address + embedded_offset);
-
-  set_value_component_location (value, val);
-  /* set_value_component_location resets the address, so we may
-     need to set it again.  */
-  if (VALUE_LVAL (value) != lval_internalvar
-      && VALUE_LVAL (value) != lval_internalvar_component
-      && VALUE_LVAL (value) != lval_computed)
-    set_value_address (value, address + embedded_offset);
+  value = value_from_component (val, type, embedded_offset);
 
   val_obj = vlscm_scm_from_value (value);
   if (gdbscm_is_exception (val_obj))

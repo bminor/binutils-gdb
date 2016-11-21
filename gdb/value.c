@@ -3795,6 +3795,31 @@ value_from_history_ref (const char *h, const char **endp)
   return access_value_history (index);
 }
 
+/* Get the component value (offset by OFFSET bytes) of a struct or
+   union WHOLE.  Component's type is TYPE.  */
+
+struct value *
+value_from_component (struct value *whole, struct type *type, LONGEST offset)
+{
+  struct value *v;
+
+  if (VALUE_LVAL (whole) == lval_memory && value_lazy (whole))
+    v = allocate_value_lazy (type);
+  else
+    {
+      v = allocate_value (type);
+      value_contents_copy (v, value_embedded_offset (v),
+			   whole, value_embedded_offset (whole) + offset,
+			   type_length_units (type));
+    }
+  v->offset = value_offset (whole) + offset + value_embedded_offset (whole);
+  set_value_component_location (v, whole);
+  VALUE_REGNUM (v) = VALUE_REGNUM (whole);
+  VALUE_FRAME_ID (v) = VALUE_FRAME_ID (whole);
+
+  return v;
+}
+
 struct value *
 coerce_ref_if_computed (const struct value *arg)
 {
