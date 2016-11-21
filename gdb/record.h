@@ -91,4 +91,12 @@ extern struct target_ops *find_record_target (void);
    it does anything.  */
 extern void record_preopen (void);
 
+/* Start recording with the given METHOD and FORMAT.  NULL means default method
+   or format.  Throw on failure or invalid method / format.  */
+extern void record_start (const char *method, const char *format,
+			  int from_tty);
+
+/* Stop recording.  Throw on failure.  */
+extern void record_stop (int from_tty);
+
 #endif /* _RECORD_H_ */
