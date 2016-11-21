@@ -1611,7 +1611,7 @@ build_line_info_table (struct line_info_table *  table,
   struct line_info** line_info_lookup;
   struct line_info*  each_line;
   unsigned int       num_lines;
-  unsigned int       index;
+  unsigned int       line_index;
 
   if (seq->line_info_lookup != NULL)
     return TRUE;
@@ -1634,11 +1634,11 @@ build_line_info_table (struct line_info_table *  table,
     return FALSE;
 
   /* Create the line information lookup table.  */
-  index = num_lines;
+  line_index = num_lines;
   for (each_line = seq->last_line; each_line; each_line = each_line->prev_line)
-    line_info_lookup[--index] = each_line;
+    line_info_lookup[--line_index] = each_line;
 
-  BFD_ASSERT (index == 0);
+  BFD_ASSERT (line_index == 0);
 
   seq->num_lines = num_lines;
   seq->line_info_lookup = line_info_lookup;
@@ -2259,7 +2259,7 @@ build_lookup_funcinfo_table (struct comp_unit * unit)
   unsigned int number_of_functions = unit->number_of_functions;
   struct funcinfo *each;
   struct lookup_funcinfo *entry;
-  size_t index;
+  size_t func_index;
   struct arange *range;
   bfd_vma low_addr, high_addr;
 
@@ -2273,10 +2273,10 @@ build_lookup_funcinfo_table (struct comp_unit * unit)
     return FALSE;
 
   /* Populate the function info lookup table.  */
-  index = number_of_functions;
+  func_index = number_of_functions;
   for (each = unit->function_table; each; each = each->prev_func)
     {
-      entry = &lookup_funcinfo_table[--index];
+      entry = &lookup_funcinfo_table[--func_index];
       entry->funcinfo = each;
 
       /* Calculate the lowest and highest address for this function entry.  */
@@ -2295,7 +2295,7 @@ build_lookup_funcinfo_table (struct comp_unit * unit)
       entry->high_addr = high_addr;
     }
 
-  BFD_ASSERT (index == 0);
+  BFD_ASSERT (func_index == 0);
 
   /* Sort the function by address.  */
   qsort (lookup_funcinfo_table,
@@ -2305,9 +2305,9 @@ build_lookup_funcinfo_table (struct comp_unit * unit)
 
   /* Calculate the high watermark for each function in the lookup table.  */
   high_addr = lookup_funcinfo_table[0].high_addr;
-  for (index = 1; index < number_of_functions; index++)
+  for (func_index = 1; func_index < number_of_functions; func_index++)
     {
-      entry = &lookup_funcinfo_table[index];
+      entry = &lookup_funcinfo_table[func_index];
       if (entry->high_addr > high_addr)
 	high_addr = entry->high_addr;
       else

@@ -1,3 +1,10 @@
+2016-11-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* dwarf2.c (build_line_info_table): Rename `index' local
+	variable to `line_index'.
+	(build_lookup_funcinfo_table): Rename `index' local variable to
+	`func_index'.
+
 2016-11-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Do not
