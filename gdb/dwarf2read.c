@@ -2479,7 +2479,6 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
 static struct dwz_file *
 dwarf2_get_dwz_file (void)
 {
-  bfd *dwz_bfd;
   char *data;
   struct cleanup *cleanup;
   const char *filename;
@@ -2523,14 +2522,11 @@ dwarf2_get_dwz_file (void)
 
   /* First try the file name given in the section.  If that doesn't
      work, try to use the build-id instead.  */
-  dwz_bfd = gdb_bfd_open (filename, gnutarget, -1);
+  gdb_bfd_ref_ptr dwz_bfd (gdb_bfd_open (filename, gnutarget, -1));
   if (dwz_bfd != NULL)
     {
-      if (!build_id_verify (dwz_bfd, buildid_len, buildid))
-	{
-	  gdb_bfd_unref (dwz_bfd);
-	  dwz_bfd = NULL;
-	}
+      if (!build_id_verify (dwz_bfd.get (), buildid_len, buildid))
+	dwz_bfd.release ();
     }
 
   if (dwz_bfd == NULL)
@@ -2542,13 +2538,13 @@ dwarf2_get_dwz_file (void)
 
   result = OBSTACK_ZALLOC (&dwarf2_per_objfile->objfile->objfile_obstack,
 			   struct dwz_file);
-  result->dwz_bfd = dwz_bfd;
+  result->dwz_bfd = dwz_bfd.release ();
 
-  bfd_map_over_sections (dwz_bfd, locate_dwz_sections, result);
+  bfd_map_over_sections (result->dwz_bfd, locate_dwz_sections, result);
 
   do_cleanups (cleanup);
 
-  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, dwz_bfd);
+  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, result->dwz_bfd);
   dwarf2_per_objfile->dwz_file = result;
   return result;
 }
@@ -10454,10 +10450,9 @@ lookup_dwo_unit_in_dwp (struct dwp_file *dwp_file, const char *comp_dir,
    If unable to find/open the file, return NULL.
    NOTE: This function is derived from symfile_bfd_open.  */
 
-static bfd *
+static gdb_bfd_ref_ptr
 try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
 {
-  bfd *sym_bfd;
   int desc, flags;
   char *absolute_name;
   /* Blech.  OPF_TRY_CWD_FIRST also disables searching the path list if
@@ -10486,23 +10481,20 @@ try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
   if (desc < 0)
     return NULL;
 
-  sym_bfd = gdb_bfd_open (absolute_name, gnutarget, desc);
+  gdb_bfd_ref_ptr sym_bfd (gdb_bfd_open (absolute_name, gnutarget, desc));
   xfree (absolute_name);
   if (sym_bfd == NULL)
     return NULL;
-  bfd_set_cacheable (sym_bfd, 1);
+  bfd_set_cacheable (sym_bfd.get (), 1);
 
-  if (!bfd_check_format (sym_bfd, bfd_object))
-    {
-      gdb_bfd_unref (sym_bfd); /* This also closes desc.  */
-      return NULL;
-    }
+  if (!bfd_check_format (sym_bfd.get (), bfd_object))
+    return NULL;
 
   /* Success.  Record the bfd as having been included by the objfile's bfd.
      This is important because things like demangled_names_hash lives in the
      objfile's per_bfd space and may have references to things like symbol
      names that live in the DWO/DWP file's per_bfd space.  PR 16426.  */
-  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, sym_bfd);
+  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd, sym_bfd.get ());
 
   return sym_bfd;
 }
@@ -10514,11 +10506,9 @@ try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
    Upon success, the canonicalized path of the file is stored in the bfd,
    same as symfile_bfd_open.  */
 
-static bfd *
+static gdb_bfd_ref_ptr
 open_dwo_file (const char *file_name, const char *comp_dir)
 {
-  bfd *abfd;
-
   if (IS_ABSOLUTE_PATH (file_name))
     return try_open_dwop_file (file_name, 0 /*is_dwp*/, 0 /*search_cwd*/);
 
@@ -10531,7 +10521,8 @@ open_dwo_file (const char *file_name, const char *comp_dir)
 
       /* NOTE: If comp_dir is a relative path, this will also try the
 	 search path, which seems useful.  */
-      abfd = try_open_dwop_file (path_to_try, 0 /*is_dwp*/, 1 /*search_cwd*/);
+      gdb_bfd_ref_ptr abfd (try_open_dwop_file (path_to_try, 0 /*is_dwp*/,
+						1 /*search_cwd*/));
       xfree (path_to_try);
       if (abfd != NULL)
 	return abfd;
@@ -10617,10 +10608,9 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwo_file *dwo_file;
-  bfd *dbfd;
   struct cleanup *cleanups;
 
-  dbfd = open_dwo_file (dwo_name, comp_dir);
+  gdb_bfd_ref_ptr dbfd (open_dwo_file (dwo_name, comp_dir));
   if (dbfd == NULL)
     {
       if (dwarf_read_debug)
@@ -10630,11 +10620,12 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
   dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
   dwo_file->dwo_name = dwo_name;
   dwo_file->comp_dir = comp_dir;
-  dwo_file->dbfd = dbfd;
+  dwo_file->dbfd = dbfd.release ();
 
   cleanups = make_cleanup (free_dwo_file_cleanup, dwo_file);
 
-  bfd_map_over_sections (dbfd, dwarf2_locate_dwo_sections, &dwo_file->sections);
+  bfd_map_over_sections (dwo_file->dbfd, dwarf2_locate_dwo_sections,
+			 &dwo_file->sections);
 
   dwo_file->cu = create_dwo_cu (dwo_file);
 
@@ -10786,12 +10777,11 @@ allocate_dwp_loaded_cutus_table (struct objfile *objfile)
    Upon success, the canonicalized path of the file is stored in the bfd,
    same as symfile_bfd_open.  */
 
-static bfd *
+static gdb_bfd_ref_ptr
 open_dwp_file (const char *file_name)
 {
-  bfd *abfd;
-
-  abfd = try_open_dwop_file (file_name, 1 /*is_dwp*/, 1 /*search_cwd*/);
+  gdb_bfd_ref_ptr abfd (try_open_dwop_file (file_name, 1 /*is_dwp*/,
+					    1 /*search_cwd*/));
   if (abfd != NULL)
     return abfd;
 
@@ -10825,7 +10815,6 @@ open_and_init_dwp_file (void)
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwp_file *dwp_file;
   char *dwp_name;
-  bfd *dbfd;
   struct cleanup *cleanups = make_cleanup (null_cleanup, 0);
 
   /* Try to find first .dwp for the binary file before any symbolic links
@@ -10847,7 +10836,7 @@ open_and_init_dwp_file (void)
     dwp_name = xstrprintf ("%s.dwp", objfile->original_name);
   make_cleanup (xfree, dwp_name);
 
-  dbfd = open_dwp_file (dwp_name);
+  gdb_bfd_ref_ptr dbfd (open_dwp_file (dwp_name));
   if (dbfd == NULL
       && strcmp (objfile->original_name, objfile_name (objfile)) != 0)
     {
@@ -10865,17 +10854,18 @@ open_and_init_dwp_file (void)
       return NULL;
     }
   dwp_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwp_file);
-  dwp_file->name = bfd_get_filename (dbfd);
-  dwp_file->dbfd = dbfd;
+  dwp_file->name = bfd_get_filename (dbfd.get ());
+  dwp_file->dbfd = dbfd.release ();
   do_cleanups (cleanups);
 
   /* +1: section 0 is unused */
-  dwp_file->num_sections = bfd_count_sections (dbfd) + 1;
+  dwp_file->num_sections = bfd_count_sections (dwp_file->dbfd) + 1;
   dwp_file->elf_sections =
     OBSTACK_CALLOC (&objfile->objfile_obstack,
 		    dwp_file->num_sections, asection *);
 
-  bfd_map_over_sections (dbfd, dwarf2_locate_common_dwp_sections, dwp_file);
+  bfd_map_over_sections (dwp_file->dbfd, dwarf2_locate_common_dwp_sections,
+			 dwp_file);
 
   dwp_file->cus = create_dwp_hash_table (dwp_file, 0);
 
@@ -10895,7 +10885,8 @@ open_and_init_dwp_file (void)
   dwp_file->version = dwp_file->cus->version;
 
   if (dwp_file->version == 2)
-    bfd_map_over_sections (dbfd, dwarf2_locate_v2_dwp_sections, dwp_file);
+    bfd_map_over_sections (dwp_file->dbfd, dwarf2_locate_v2_dwp_sections,
+			   dwp_file);
 
   dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table (objfile);
   dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table (objfile);

@@ -1,5 +1,78 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* windows-tdep.c (windows_xfer_shared_library): Update.
+	* windows-nat.c (windows_make_so): Update.
+	* utils.h (make_cleanup_bfd_unref): Remove.
+	* utils.c (do_bfd_close_cleanup, make_cleanup_bfd_unref): Remove.
+	* symfile.h (symfile_bfd_open)
+	(find_separate_debug_file_in_section): Return gdb_bfd_ref_ptr.
+	* symfile.c (read_symbols, symbol_file_add)
+	(separate_debug_file_exists): Update.
+	(symfile_bfd_open): Return gdb_bfd_ref_ptr.
+	(generic_load, reread_symbols): Update.
+	* symfile-mem.c (symbol_file_add_from_memory): Update.
+	* spu-linux-nat.c (spu_bfd_open): Return gdb_bfd_ref_ptr.
+	(spu_symbol_file_add_from_memory): Update.
+	* solist.h (struct target_so_ops) <bfd_open>: Return
+	gdb_bfd_ref_ptr.
+	(solib_bfd_fopen, solib_bfd_open): Return gdb_bfd_ref_ptr.
+	* solib.c (solib_bfd_fopen, solib_bfd_open): Return
+	gdb_bfd_ref_ptr.
+	(solib_map_sections, reload_shared_libraries_1): Update.
+	* solib-svr4.c (enable_break): Update.
+	* solib-spu.c (spu_bfd_fopen): Return gdb_bfd_ref_ptr.
+	* solib-frv.c (enable_break2): Update.
+	* solib-dsbt.c (enable_break): Update.
+	* solib-darwin.c (gdb_bfd_mach_o_fat_extract): Return
+	gdb_bfd_ref_ptr.
+	(darwin_solib_get_all_image_info_addr_at_init): Update.
+	(darwin_bfd_open): Return gdb_bfd_ref_ptr.
+	* solib-aix.c (solib_aix_bfd_open): Return gdb_bfd_ref_ptr.
+	* record-full.c (record_full_save): Update.
+	* python/py-objfile.c (objfpy_add_separate_debug_file): Update.
+	* procfs.c (insert_dbx_link_bpt_in_file): Update.
+	* minidebug.c (find_separate_debug_file_in_section): Return
+	gdb_bfd_ref_ptr.
+	* machoread.c (macho_add_oso_symfile): Change abfd to
+	gdb_bfd_ref_ptr.
+	(macho_symfile_read_all_oso): Update.
+	(macho_check_dsym): Return gdb_bfd_ref_ptr.
+	(macho_symfile_read): Update.
+	* jit.c (bfd_open_from_target_memory): Return gdb_bfd_ref_ptr.
+	(jit_bfd_try_read_symtab): Update.
+	* gdb_bfd.h (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
+	(gdb_bfd_openw, gdb_bfd_openr_iovec)
+	(gdb_bfd_openr_next_archived_file, gdb_bfd_fdopenr): Return
+	gdb_bfd_ref_ptr.
+	(gdb_bfd_ref_policy): New struct.
+	(gdb_bfd_ref_ptr): New typedef.
+	* gdb_bfd.c (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
+	(gdb_bfd_openw, gdb_bfd_openr_iovec)
+	(gdb_bfd_openr_next_archived_file, gdb_bfd_fdopenr): Return
+	gdb_bfd_ref_ptr.
+	* gcore.h (create_gcore_bfd): Return gdb_bfd_ref_ptr.
+	* gcore.c (create_gcore_bfd): Return gdb_bfd_ref_ptr.
+	(gcore_command): Update.
+	* exec.c (exec_file_attach): Update.
+	* elfread.c (elf_symfile_read): Update.
+	* dwarf2read.c (dwarf2_get_dwz_file): Update.
+	(try_open_dwop_file, open_dwo_file): Return gdb_bfd_ref_ptr.
+	(open_and_init_dwo_file): Update.
+	(open_dwp_file): Return gdb_bfd_ref_ptr.
+	(open_and_init_dwp_file): Update.
+	* corelow.c (core_open): Update.
+	* compile/compile-object-load.c (compile_object_load): Update.
+	* common/gdb_ref_ptr.h (ref_ptr::operator->): New operator.
+	* coffread.c (coff_symfile_read): Update.
+	* cli/cli-dump.c (bfd_openr_or_error, bfd_openw_or_error): Return
+	gdb_bfd_ref_ptr.  Rename.
+	(dump_bfd_file, restore_command): Update.
+	* build-id.h (build_id_to_debug_bfd): Return gdb_bfd_ref_ptr.
+	* build-id.c (build_id_to_debug_bfd): Return gdb_bfd_ref_ptr.
+	(find_separate_debug_file_by_buildid): Update.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* common/gdb_ref_ptr.h: New file.
 	* python/py-ref.h (struct gdbpy_ref_policy): New.
 	(gdbpy_ref): Now a typedef.

@@ -445,9 +445,9 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      bfd *abfd = symfile_bfd_open (file_name);
+      gdb_bfd_ref_ptr abfd (symfile_bfd_open (file_name));
 
-      symbol_file_add_separate (abfd, file_name, 0, obj->objfile);
+      symbol_file_add_separate (abfd.get (), file_name, 0, obj->objfile);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

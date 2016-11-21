@@ -20,7 +20,9 @@
 #if !defined (GCORE_H)
 #define GCORE_H 1
 
-extern bfd *create_gcore_bfd (const char *filename);
+#include "gdb_bfd.h"
+
+extern gdb_bfd_ref_ptr create_gcore_bfd (const char *filename);
 extern void write_gcore_file (bfd *obfd);
 extern bfd *load_corefile (char *filename, int from_tty);
 extern int objfile_find_memory_regions (struct target_ops *self,

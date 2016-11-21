@@ -2571,7 +2571,7 @@ record_full_save (struct target_ops *self, const char *recfilename)
 			recfilename);
 
   /* Open the output file.  */
-  obfd = create_gcore_bfd (recfilename);
+  obfd = create_gcore_bfd (recfilename).release ();
   old_cleanups = make_cleanup (record_full_save_cleanups, obfd);
 
   /* Save the current record entry to "cur_record_full_list".  */

@@ -81,8 +81,6 @@ extern struct cleanup *(make_cleanup_free_section_addr_info
 
 extern struct cleanup *make_cleanup_fclose (FILE *file);
 
-extern struct cleanup *make_cleanup_bfd_unref (bfd *abfd);
-
 struct obstack;
 extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
 

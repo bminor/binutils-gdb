@@ -258,7 +258,9 @@ exec_file_attach (const char *filename, int from_tty)
      this at the end of the function; but acquiring it now lets the
      BFD cache return it if this call refers to the same file.  */
   gdb_bfd_ref (exec_bfd);
-  cleanups = make_cleanup_bfd_unref (exec_bfd);
+  gdb_bfd_ref_ptr exec_bfd_holder (exec_bfd);
+
+  cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Remove any previous exec file.  */
   exec_close ();
@@ -333,11 +335,13 @@ exec_file_attach (const char *filename, int from_tty)
 	  make_cleanup (xfree, canonical_pathname);
 	}
 
+      gdb_bfd_ref_ptr temp;
       if (write_files && !load_via_target)
-	exec_bfd = gdb_bfd_fopen (canonical_pathname, gnutarget,
-				  FOPEN_RUB, scratch_chan);
+	temp = gdb_bfd_fopen (canonical_pathname, gnutarget,
+			      FOPEN_RUB, scratch_chan);
       else
-	exec_bfd = gdb_bfd_open (canonical_pathname, gnutarget, scratch_chan);
+	temp = gdb_bfd_open (canonical_pathname, gnutarget, scratch_chan);
+      exec_bfd = temp.release ();
 
       if (!exec_bfd)
 	{

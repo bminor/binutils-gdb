@@ -49,15 +49,15 @@ static int gcore_memory_sections (bfd *);
 /* create_gcore_bfd -- helper for gcore_command (exported).
    Open a new bfd core file for output, and return the handle.  */
 
-bfd *
+gdb_bfd_ref_ptr
 create_gcore_bfd (const char *filename)
 {
-  bfd *obfd = gdb_bfd_openw (filename, default_gcore_target ());
+  gdb_bfd_ref_ptr obfd (gdb_bfd_openw (filename, default_gcore_target ()));
 
-  if (!obfd)
+  if (obfd == NULL)
     error (_("Failed to open '%s' for output."), filename);
-  bfd_set_format (obfd, bfd_core);
-  bfd_set_arch_mach (obfd, default_gcore_arch (), default_gcore_mach ());
+  bfd_set_format (obfd.get (), bfd_core);
+  bfd_set_arch_mach (obfd.get (), default_gcore_arch (), default_gcore_mach ());
   return obfd;
 }
 
@@ -174,7 +174,7 @@ gcore_command (char *args, int from_tty)
 		      "Opening corefile '%s' for output.\n", corefilename);
 
   /* Open the output file.  */
-  obfd = create_gcore_bfd (corefilename);
+  obfd = create_gcore_bfd (corefilename).release ();
 
   /* Need a cleanup that will close and delete the file.  */
   bfd_chain = make_cleanup (do_bfd_delete_cleanup, obfd);

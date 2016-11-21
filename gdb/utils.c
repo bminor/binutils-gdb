@@ -151,18 +151,6 @@ make_cleanup_freeargv (char **arg)
   return make_cleanup (do_freeargv, arg);
 }
 
-static void
-do_bfd_close_cleanup (void *arg)
-{
-  gdb_bfd_unref ((bfd *) arg);
-}
-
-struct cleanup *
-make_cleanup_bfd_unref (bfd *abfd)
-{
-  return make_cleanup (do_bfd_close_cleanup, abfd);
-}
-
 /* Helper function which does the work for make_cleanup_fclose.  */
 
 static void

@@ -143,6 +143,12 @@ class ref_ptr
     return result;
   }
 
+  /* Let users refer to members of the underlying pointer.  */
+  T *operator-> () const
+  {
+    return m_obj;
+  }
+
  private:
 
   T *m_obj;
