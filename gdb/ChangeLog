@@ -1,5 +1,11 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* common/gdb_ref_ptr.h: New file.
+	* python/py-ref.h (struct gdbpy_ref_policy): New.
+	(gdbpy_ref): Now a typedef.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (make_cleanup_htab_delete): Don't declare.
 	* utils.c (do_htab_delete_cleanup, make_cleanup_htab_delete):
 	Remove.
