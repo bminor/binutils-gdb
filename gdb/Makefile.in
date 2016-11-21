@@ -1160,6 +1160,7 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 
 %.o: $(srcdir)/mi/%.c
 	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 %.o: ${srcdir}/nat/%.c
 	$(COMPILE) $<
