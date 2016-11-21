@@ -1,5 +1,16 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* record-full.c (record_full_save_cleanups): Remove.
+	(record_full_save): Use gdb::unlinker.
+	* gcore.c (do_bfd_delete_cleanup): Remove.
+	(gcore_command): Use gdb::unlinker, unique_xmalloc_ptr.  Remove
+	cleanups.
+	* dwarf2read.c (unlink_if_set): Remove.
+	(write_psymtabs_to_index): Use gdb::unlinker.
+	* common/gdb_unlinker.h: New file.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* windows-tdep.c (windows_xfer_shared_library): Update.
 	* windows-nat.c (windows_make_so): Update.
 	* utils.h (make_cleanup_bfd_unref): Remove.

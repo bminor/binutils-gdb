@@ -69,6 +69,7 @@
 #include "filestuff.h"
 #include "build-id.h"
 #include "namespace.h"
+#include "common/gdb_unlinker.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -23165,16 +23166,6 @@ write_obstack (FILE *file, struct obstack *obstack)
     error (_("couldn't data write to file"));
 }
 
-/* Unlink a file if the argument is not NULL.  */
-
-static void
-unlink_if_set (void *p)
-{
-  char **filename = (char **) p;
-  if (*filename)
-    unlink (*filename);
-}
-
 /* A helper struct used when iterating over debug_types.  */
 struct signatured_type_index_data
 {
@@ -23259,7 +23250,7 @@ static void
 write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 {
   struct cleanup *cleanup;
-  char *filename, *cleanup_filename;
+  char *filename;
   struct obstack contents, addr_obstack, constant_pool, symtab_obstack;
   struct obstack cu_list, types_cu_list;
   int i;
@@ -23289,8 +23280,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   if (!out_file)
     error (_("Can't open `%s' for writing"), filename);
 
-  cleanup_filename = filename;
-  make_cleanup (unlink_if_set, &cleanup_filename);
+  gdb::unlinker unlink_file (filename);
 
   symtab = create_mapped_symtab ();
   make_cleanup (cleanup_mapped_symtab, symtab);
@@ -23429,9 +23419,8 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 
   fclose (out_file);
 
-  /* We want to keep the file, so we set cleanup_filename to NULL
-     here.  See unlink_if_set.  */
-  cleanup_filename = NULL;
+  /* We want to keep the file.  */
+  unlink_file.keep ();
 
   do_cleanups (cleanup);
 }

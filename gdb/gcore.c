@@ -35,6 +35,7 @@
 #include "gdb_bfd.h"
 #include "readline/tilde.h"
 #include <algorithm>
+#include "common/gdb_unlinker.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -135,59 +136,44 @@ write_gcore_file (bfd *obfd)
     throw_exception (except);
 }
 
-static void
-do_bfd_delete_cleanup (void *arg)
-{
-  bfd *obfd = (bfd *) arg;
-  const char *filename = obfd->filename;
-
-  gdb_bfd_unref ((bfd *) arg);
-  unlink (filename);
-}
-
 /* gcore_command -- implements the 'gcore' command.
    Generate a core file from the inferior process.  */
 
 static void
 gcore_command (char *args, int from_tty)
 {
-  struct cleanup *filename_chain;
-  struct cleanup *bfd_chain;
-  char *corefilename;
-  bfd *obfd;
+  gdb::unique_xmalloc_ptr<char> corefilename;
 
   /* No use generating a corefile without a target process.  */
   if (!target_has_execution)
     noprocess ();
 
   if (args && *args)
-    corefilename = tilde_expand (args);
+    corefilename.reset (tilde_expand (args));
   else
     {
       /* Default corefile name is "core.PID".  */
-      corefilename = xstrprintf ("core.%d", ptid_get_pid (inferior_ptid));
+      corefilename.reset (xstrprintf ("core.%d", ptid_get_pid (inferior_ptid)));
     }
-  filename_chain = make_cleanup (xfree, corefilename);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout,
-		      "Opening corefile '%s' for output.\n", corefilename);
+		      "Opening corefile '%s' for output.\n",
+		      corefilename.get ());
 
   /* Open the output file.  */
-  obfd = create_gcore_bfd (corefilename).release ();
+  gdb_bfd_ref_ptr obfd (create_gcore_bfd (corefilename.get ()));
 
-  /* Need a cleanup that will close and delete the file.  */
-  bfd_chain = make_cleanup (do_bfd_delete_cleanup, obfd);
+  /* Arrange to unlink the file on failure.  */
+  gdb::unlinker unlink_file (corefilename.get ());
 
   /* Call worker function.  */
-  write_gcore_file (obfd);
+  write_gcore_file (obfd.get ());
 
   /* Succeeded.  */
-  discard_cleanups (bfd_chain);
-  gdb_bfd_unref (obfd);
+  unlink_file.keep ();
 
-  fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename);
-  do_cleanups (filename_chain);
+  fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename.get ());
 }
 
 static unsigned long

@@ -35,6 +35,7 @@
 #include "gdb_bfd.h"
 #include "observer.h"
 #include "infrun.h"
+#include "common/gdb_unlinker.h"
 
 #include <signal.h>
 
@@ -2537,17 +2538,6 @@ cmd_record_full_restore (char *args, int from_tty)
   record_full_open (args, from_tty);
 }
 
-static void
-record_full_save_cleanups (void *data)
-{
-  bfd *obfd = (bfd *) data;
-  char *pathname = xstrdup (bfd_get_filename (obfd));
-
-  gdb_bfd_unref (obfd);
-  unlink (pathname);
-  xfree (pathname);
-}
-
 /* Save the execution log to a file.  We use a modified elf corefile
    format, with an extra section for our data.  */
 
@@ -2558,9 +2548,7 @@ record_full_save (struct target_ops *self, const char *recfilename)
   uint32_t magic;
   struct regcache *regcache;
   struct gdbarch *gdbarch;
-  struct cleanup *old_cleanups;
   struct cleanup *set_cleanups;
-  bfd *obfd;
   int save_size = 0;
   asection *osec = NULL;
   int bfd_offset = 0;
@@ -2571,8 +2559,10 @@ record_full_save (struct target_ops *self, const char *recfilename)
 			recfilename);
 
   /* Open the output file.  */
-  obfd = create_gcore_bfd (recfilename).release ();
-  old_cleanups = make_cleanup (record_full_save_cleanups, obfd);
+  gdb_bfd_ref_ptr obfd (create_gcore_bfd (recfilename));
+
+  /* Arrange to remove the output file on failure.  */
+  gdb::unlinker unlink_file (recfilename);
 
   /* Save the current record entry to "cur_record_full_list".  */
   cur_record_full_list = record_full_list;
@@ -2615,20 +2605,20 @@ record_full_save (struct target_ops *self, const char *recfilename)
       }
 
   /* Make the new bfd section.  */
-  osec = bfd_make_section_anyway_with_flags (obfd, "precord",
+  osec = bfd_make_section_anyway_with_flags (obfd.get (), "precord",
                                              SEC_HAS_CONTENTS
                                              | SEC_READONLY);
   if (osec == NULL)
     error (_("Failed to create 'precord' section for corefile %s: %s"),
 	   recfilename,
            bfd_errmsg (bfd_get_error ()));
-  bfd_set_section_size (obfd, osec, save_size);
-  bfd_set_section_vma (obfd, osec, 0);
-  bfd_set_section_alignment (obfd, osec, 0);
-  bfd_section_lma (obfd, osec) = 0;
+  bfd_set_section_size (obfd.get (), osec, save_size);
+  bfd_set_section_vma (obfd.get (), osec, 0);
+  bfd_set_section_alignment (obfd.get (), osec, 0);
+  bfd_section_lma (obfd.get (), osec) = 0;
 
   /* Save corefile state.  */
-  write_gcore_file (obfd);
+  write_gcore_file (obfd.get ());
 
   /* Write out the record log.  */
   /* Write the magic code.  */
@@ -2638,7 +2628,7 @@ record_full_save (struct target_ops *self, const char *recfilename)
 			"  Writing 4-byte magic cookie "
 			"RECORD_FULL_FILE_MAGIC (0x%s)\n",
 		      phex_nz (magic, 4));
-  bfdcore_write (obfd, osec, &magic, sizeof (magic), &bfd_offset);
+  bfdcore_write (obfd.get (), osec, &magic, sizeof (magic), &bfd_offset);
 
   /* Save the entries to recfd and forward execute to the end of
      record list.  */
@@ -2653,7 +2643,7 @@ record_full_save (struct target_ops *self, const char *recfilename)
           uint64_t addr;
 
 	  type = record_full_list->type;
-          bfdcore_write (obfd, osec, &type, sizeof (type), &bfd_offset);
+          bfdcore_write (obfd.get (), osec, &type, sizeof (type), &bfd_offset);
 
           switch (record_full_list->type)
             {
@@ -2668,11 +2658,11 @@ record_full_save (struct target_ops *self, const char *recfilename)
 
               /* Write regnum.  */
               regnum = netorder32 (record_full_list->u.reg.num);
-              bfdcore_write (obfd, osec, &regnum,
+              bfdcore_write (obfd.get (), osec, &regnum,
 			     sizeof (regnum), &bfd_offset);
 
               /* Write regval.  */
-              bfdcore_write (obfd, osec,
+              bfdcore_write (obfd.get (), osec,
 			     record_full_get_loc (record_full_list),
 			     record_full_list->u.reg.len, &bfd_offset);
               break;
@@ -2690,15 +2680,16 @@ record_full_save (struct target_ops *self, const char *recfilename)
 
 	      /* Write memlen.  */
 	      len = netorder32 (record_full_list->u.mem.len);
-	      bfdcore_write (obfd, osec, &len, sizeof (len), &bfd_offset);
+	      bfdcore_write (obfd.get (), osec, &len, sizeof (len),
+			     &bfd_offset);
 
 	      /* Write memaddr.  */
 	      addr = netorder64 (record_full_list->u.mem.addr);
-	      bfdcore_write (obfd, osec, &addr, 
+	      bfdcore_write (obfd.get (), osec, &addr, 
 			     sizeof (addr), &bfd_offset);
 
 	      /* Write memval.  */
-	      bfdcore_write (obfd, osec,
+	      bfdcore_write (obfd.get (), osec,
 			     record_full_get_loc (record_full_list),
 			     record_full_list->u.mem.len, &bfd_offset);
               break;
@@ -2712,12 +2703,12 @@ record_full_save (struct target_ops *self, const char *recfilename)
 				      (unsigned long) sizeof (count));
 		/* Write signal value.  */
 		signal = netorder32 (record_full_list->u.end.sigval);
-		bfdcore_write (obfd, osec, &signal,
+		bfdcore_write (obfd.get (), osec, &signal,
 			       sizeof (signal), &bfd_offset);
 
 		/* Write insn count.  */
 		count = netorder32 (record_full_list->u.end.insn_num);
-		bfdcore_write (obfd, osec, &count,
+		bfdcore_write (obfd.get (), osec, &count,
 			       sizeof (count), &bfd_offset);
                 break;
             }
@@ -2746,8 +2737,7 @@ record_full_save (struct target_ops *self, const char *recfilename)
     }
 
   do_cleanups (set_cleanups);
-  gdb_bfd_unref (obfd);
-  discard_cleanups (old_cleanups);
+  unlink_file.keep ();
 
   /* Succeeded.  */
   printf_filtered (_("Saved core file %s with execution log.\n"),
