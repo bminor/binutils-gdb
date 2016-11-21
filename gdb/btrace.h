@@ -405,9 +405,12 @@ extern void parse_xml_btrace_conf (struct btrace_config *conf, const char *xml);
 extern const struct btrace_insn *
   btrace_insn_get (const struct btrace_insn_iterator *);
 
+/* Return the error code for a branch trace instruction iterator.  Returns zero
+   if there is no error, i.e. the instruction is valid.  */
+extern int btrace_insn_get_error (const struct btrace_insn_iterator *);
+
 /* Return the instruction number for a branch trace iterator.
-   Returns one past the maximum instruction number for the end iterator.
-   Returns zero if the iterator does not point to a valid instruction.  */
+   Returns one past the maximum instruction number for the end iterator.  */
 extern unsigned int btrace_insn_number (const struct btrace_insn_iterator *);
 
 /* Initialize a branch trace instruction iterator to point to the begin/end of
@@ -433,7 +436,7 @@ extern unsigned int btrace_insn_prev (struct btrace_insn_iterator *,
 extern int btrace_insn_cmp (const struct btrace_insn_iterator *lhs,
 			    const struct btrace_insn_iterator *rhs);
 
-/* Find an instruction in the function branch trace by its number.
+/* Find an instruction or gap in the function branch trace by its number.
    If the instruction is found, initialize the branch trace instruction
    iterator to point to this instruction and return non-zero.
    Return zero otherwise.  */

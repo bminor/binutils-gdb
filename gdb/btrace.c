@@ -141,6 +141,21 @@ ftrace_debug (const struct btrace_function *bfun, const char *prefix)
 		prefix, fun, file, level, ibegin, iend);
 }
 
+/* Return the number of instructions in a given function call segment.  */
+
+static unsigned int
+ftrace_call_num_insn (const struct btrace_function* bfun)
+{
+  if (bfun == NULL)
+    return 0;
+
+  /* A gap is always counted as one instruction.  */
+  if (bfun->errcode != 0)
+    return 1;
+
+  return VEC_length (btrace_insn_s, bfun->insn);
+}
+
 /* Return non-zero if BFUN does not match MFUN and FUN,
    return zero otherwise.  */
 
@@ -216,8 +231,7 @@ ftrace_new_function (struct btrace_function *prev,
       prev->flow.next = bfun;
 
       bfun->number = prev->number + 1;
-      bfun->insn_offset = (prev->insn_offset
-			   + VEC_length (btrace_insn_s, prev->insn));
+      bfun->insn_offset = prev->insn_offset + ftrace_call_num_insn (prev);
       bfun->level = prev->level;
     }
 
@@ -2178,18 +2192,18 @@ btrace_insn_get (const struct btrace_insn_iterator *it)
 
 /* See btrace.h.  */
 
+int
+btrace_insn_get_error (const struct btrace_insn_iterator *it)
+{
+  return it->function->errcode;
+}
+
+/* See btrace.h.  */
+
 unsigned int
 btrace_insn_number (const struct btrace_insn_iterator *it)
 {
-  const struct btrace_function *bfun;
-
-  bfun = it->function;
-
-  /* Return zero if the iterator points to a gap in the trace.  */
-  if (bfun->errcode != 0)
-    return 0;
-
-  return bfun->insn_offset + it->index;
+  return it->function->insn_offset + it->index;
 }
 
 /* See btrace.h.  */
@@ -2384,37 +2398,6 @@ btrace_insn_cmp (const struct btrace_insn_iterator *lhs,
   lnum = btrace_insn_number (lhs);
   rnum = btrace_insn_number (rhs);
 
-  /* A gap has an instruction number of zero.  Things are getting more
-     complicated if gaps are involved.
-
-     We take the instruction number offset from the iterator's function.
-     This is the number of the first instruction after the gap.
-
-     This is OK as long as both lhs and rhs point to gaps.  If only one of
-     them does, we need to adjust the number based on the other's regular
-     instruction number.  Otherwise, a gap might compare equal to an
-     instruction.  */
-
-  if (lnum == 0 && rnum == 0)
-    {
-      lnum = lhs->function->insn_offset;
-      rnum = rhs->function->insn_offset;
-    }
-  else if (lnum == 0)
-    {
-      lnum = lhs->function->insn_offset;
-
-      if (lnum == rnum)
-	lnum -= 1;
-    }
-  else if (rnum == 0)
-    {
-      rnum = rhs->function->insn_offset;
-
-      if (rnum == lnum)
-	rnum -= 1;
-    }
-
   return (int) (lnum - rnum);
 }
 
@@ -2426,26 +2409,15 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
 			    unsigned int number)
 {
   const struct btrace_function *bfun;
-  unsigned int end, length;
 
   for (bfun = btinfo->end; bfun != NULL; bfun = bfun->flow.prev)
-    {
-      /* Skip gaps. */
-      if (bfun->errcode != 0)
-	continue;
-
-      if (bfun->insn_offset <= number)
-	break;
-    }
+    if (bfun->insn_offset <= number)
+      break;
 
   if (bfun == NULL)
     return 0;
 
-  length = VEC_length (btrace_insn_s, bfun->insn);
-  gdb_assert (length > 0);
-
-  end = bfun->insn_offset + length;
-  if (end <= number)
+  if (bfun->insn_offset + ftrace_call_num_insn (bfun) <= number)
     return 0;
 
   it->function = bfun;

@@ -443,28 +443,12 @@ record_btrace_info (struct target_ops *self)
       calls = btrace_call_number (&call);
 
       btrace_insn_end (&insn, btinfo);
-
       insns = btrace_insn_number (&insn);
-      if (insns != 0)
-	{
-	  /* The last instruction does not really belong to the trace.  */
-	  insns -= 1;
-	}
-      else
-	{
-	  unsigned int steps;
 
-	  /* Skip gaps at the end.  */
-	  do
-	    {
-	      steps = btrace_insn_prev (&insn, 1);
-	      if (steps == 0)
-		break;
-
-	      insns = btrace_insn_number (&insn);
-	    }
-	  while (insns == 0);
-	}
+      /* If the last instruction is not a gap, it is the current instruction
+	 that is not actually part of the record.  */
+      if (btrace_insn_get (&insn) != NULL)
+	insns -= 1;
 
       gaps = btinfo->ngaps;
     }
@@ -737,7 +721,11 @@ btrace_insn_history (struct ui_out *uiout,
 	  /* We have trace so we must have a configuration.  */
 	  gdb_assert (conf != NULL);
 
-	  btrace_ui_out_decode_error (uiout, it.function->errcode,
+	  uiout->field_fmt ("insn-number", "%u",
+			    btrace_insn_number (&it));
+	  uiout->text ("\t");
+
+	  btrace_ui_out_decode_error (uiout, btrace_insn_get_error (&it),
 				      conf->format);
 	}
       else
@@ -2828,7 +2816,9 @@ record_btrace_goto (struct target_ops *self, ULONGEST insn)
   tp = require_btrace_thread ();
 
   found = btrace_find_insn_by_number (&it, &tp->btrace, number);
-  if (found == 0)
+
+  /* Check if the instruction could not be found or is a gap.  */
+  if (found == 0 || btrace_insn_get (&it) == NULL)
     error (_("No such instruction."));
 
   record_btrace_set_replay (tp, &it);
