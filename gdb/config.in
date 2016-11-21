@@ -381,6 +381,9 @@
 /* Define if sys/ptrace.h defines the PT_GETXMMREGS request. */
 #undef HAVE_PT_GETXMMREGS
 
+/* Define to 1 if you have the `pt_insn_event' function. */
+#undef HAVE_PT_INSN_EVENT
+
 /* Define to 1 if you have the `pwrite' function. */
 #undef HAVE_PWRITE
 
@@ -461,6 +464,12 @@
 
 /* Define to 1 if `struct ptrace_lwpinfo' is a member of `pl_tdname'. */
 #undef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
+
+/* Define to 1 if `struct pt_insn' is a member of `enabled'. */
+#undef HAVE_STRUCT_PT_INSN_ENABLED
+
+/* Define to 1 if `struct pt_insn' is a member of `resynced'. */
+#undef HAVE_STRUCT_PT_INSN_RESYNCED
 
 /* Define to 1 if your system has struct reg in <machine/reg.h>. */
 #undef HAVE_STRUCT_REG
