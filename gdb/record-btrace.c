@@ -468,63 +468,11 @@ static void
 btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
 			    enum btrace_format format)
 {
-  const char *errstr;
-  int is_error;
-
-  errstr = _("unknown");
-  is_error = 1;
-
-  switch (format)
-    {
-    default:
-      break;
-
-    case BTRACE_FORMAT_BTS:
-      switch (errcode)
-	{
-	default:
-	  break;
-
-	case BDE_BTS_OVERFLOW:
-	  errstr = _("instruction overflow");
-	  break;
-
-	case BDE_BTS_INSN_SIZE:
-	  errstr = _("unknown instruction");
-	  break;
-	}
-      break;
-
-#if defined (HAVE_LIBIPT)
-    case BTRACE_FORMAT_PT:
-      switch (errcode)
-	{
-	case BDE_PT_USER_QUIT:
-	  is_error = 0;
-	  errstr = _("trace decode cancelled");
-	  break;
-
-	case BDE_PT_DISABLED:
-	  is_error = 0;
-	  errstr = _("disabled");
-	  break;
-
-	case BDE_PT_OVERFLOW:
-	  is_error = 0;
-	  errstr = _("overflow");
-	  break;
-
-	default:
-	  if (errcode < 0)
-	    errstr = pt_errstr (pt_errcode (errcode));
-	  break;
-	}
-      break;
-#endif /* defined (HAVE_LIBIPT)  */
-    }
+  const char *errstr = btrace_decode_error (format, errcode);
 
   uiout->text (_("["));
-  if (is_error)
+  /* ERRCODE > 0 indicates notifications on BTRACE_FORMAT_PT.  */
+  if (!(format == BTRACE_FORMAT_PT && errcode > 0))
     {
       uiout->text (_("decode error ("));
       uiout->field_int ("errcode", errcode);

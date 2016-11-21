@@ -384,6 +384,11 @@ extern void btrace_disable (struct thread_info *);
    target_teardown_btrace instead of target_disable_btrace.  */
 extern void btrace_teardown (struct thread_info *);
 
+/* Return a human readable error string for the given ERRCODE in FORMAT.
+   The pointer will never be NULL and must not be freed.  */
+
+extern const char *btrace_decode_error (enum btrace_format format, int errcode);
+
 /* Fetch the branch trace for a single thread.  */
 extern void btrace_fetch (struct thread_info *);
 

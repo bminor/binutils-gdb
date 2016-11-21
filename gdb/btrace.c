@@ -1725,6 +1725,55 @@ btrace_maint_clear (struct btrace_thread_info *btinfo)
 
 /* See btrace.h.  */
 
+const char *
+btrace_decode_error (enum btrace_format format, int errcode)
+{
+  switch (format)
+    {
+    case BTRACE_FORMAT_BTS:
+      switch (errcode)
+	{
+	case BDE_BTS_OVERFLOW:
+	  return _("instruction overflow");
+
+	case BDE_BTS_INSN_SIZE:
+	  return _("unknown instruction");
+
+	default:
+	  break;
+	}
+      break;
+
+#if defined (HAVE_LIBIPT)
+    case BTRACE_FORMAT_PT:
+      switch (errcode)
+	{
+	case BDE_PT_USER_QUIT:
+	  return _("trace decode cancelled");
+
+	case BDE_PT_DISABLED:
+	  return _("disabled");
+
+	case BDE_PT_OVERFLOW:
+	  return _("overflow");
+
+	default:
+	  if (errcode < 0)
+	    return pt_errstr (pt_errcode (errcode));
+	  break;
+	}
+      break;
+#endif /* defined (HAVE_LIBIPT)  */
+
+    default:
+      break;
+    }
+
+  return _("unknown");
+}
+
+/* See btrace.h.  */
+
 void
 btrace_fetch (struct thread_info *tp)
 {
