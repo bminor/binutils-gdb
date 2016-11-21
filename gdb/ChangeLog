@@ -1,5 +1,12 @@
 2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (handle_pt_insn_events): New.
+	(ftrace_add_pt): Call handle_pt_insn_events.  Rename ERRCODE into
+	STATUS.  Split into this and ...
+	(handle_pt_insn_event_flags): ... this.
+
+2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* configure.ac: Check for pt_insn_event, struct pt_insn.enabled,
 	and struct pt_insn.resynced.
 	* configure: Regenerated.

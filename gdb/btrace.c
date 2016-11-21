@@ -1187,6 +1187,103 @@ pt_btrace_insn (const struct pt_insn &insn)
 	  pt_btrace_insn_flags (insn)};
 }
 
+/* Handle instruction decode events (libipt-v2).  */
+
+static int
+handle_pt_insn_events (struct btrace_thread_info *btinfo,
+		       struct pt_insn_decoder *decoder,
+		       std::vector<unsigned int> &gaps, int status)
+{
+#if defined (HAVE_PT_INSN_EVENT)
+  while (status & pts_event_pending)
+    {
+      struct btrace_function *bfun;
+      struct pt_event event;
+      uint64_t offset;
+
+      status = pt_insn_event (decoder, &event, sizeof (event));
+      if (status < 0)
+	break;
+
+      switch (event.type)
+	{
+	default:
+	  break;
+
+	case ptev_enabled:
+	  if (event.variant.enabled.resumed == 0 && !btinfo->functions.empty ())
+	    {
+	      bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
+
+	      pt_insn_get_offset (decoder, &offset);
+
+	      warning (_("Non-contiguous trace at instruction %u (offset = 0x%"
+			 PRIx64 ")."), bfun->insn_offset - 1, offset);
+	    }
+
+	  break;
+
+	case ptev_overflow:
+	  bfun = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW, gaps);
+
+	  pt_insn_get_offset (decoder, &offset);
+
+	  warning (_("Overflow at instruction %u (offset = 0x%" PRIx64 ")."),
+		   bfun->insn_offset - 1, offset);
+
+	  break;
+	}
+    }
+#endif /* defined (HAVE_PT_INSN_EVENT) */
+
+  return status;
+}
+
+/* Handle events indicated by flags in INSN (libipt-v1).  */
+
+static void
+handle_pt_insn_event_flags (struct btrace_thread_info *btinfo,
+			    struct pt_insn_decoder *decoder,
+			    const struct pt_insn &insn,
+			    std::vector<unsigned int> &gaps)
+{
+#if defined (HAVE_STRUCT_PT_INSN_ENABLED)
+  /* Tracing is disabled and re-enabled each time we enter the kernel.  Most
+     times, we continue from the same instruction we stopped before.  This is
+     indicated via the RESUMED instruction flag.  The ENABLED instruction flag
+     means that we continued from some other instruction.  Indicate this as a
+     trace gap except when tracing just started.  */
+  if (insn.enabled && !btinfo->functions.empty ())
+    {
+      struct btrace_function *bfun;
+      uint64_t offset;
+
+      bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
+
+      pt_insn_get_offset (decoder, &offset);
+
+      warning (_("Non-contiguous trace at instruction %u (offset = 0x%" PRIx64
+		 ", pc = 0x%" PRIx64 ")."), bfun->insn_offset - 1, offset,
+	       insn.ip);
+    }
+#endif /* defined (HAVE_STRUCT_PT_INSN_ENABLED) */
+
+#if defined (HAVE_STRUCT_PT_INSN_RESYNCED)
+  /* Indicate trace overflows.  */
+  if (insn.resynced)
+    {
+      struct btrace_function *bfun;
+      uint64_t offset;
+
+      bfun = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW, gaps);
+
+      pt_insn_get_offset (decoder, &offset);
+
+      warning (_("Overflow at instruction %u (offset = 0x%" PRIx64 ", pc = 0x%"
+		 PRIx64 ")."), bfun->insn_offset - 1, offset, insn.ip);
+    }
+#endif /* defined (HAVE_STRUCT_PT_INSN_RESYNCED) */
+}
 
 /* Add function branch trace to BTINFO using DECODER.  */
 
@@ -1198,58 +1295,34 @@ ftrace_add_pt (struct btrace_thread_info *btinfo,
 {
   struct btrace_function *bfun;
   uint64_t offset;
-  int errcode;
+  int status;
 
   for (;;)
     {
       struct pt_insn insn;
 
-      errcode = pt_insn_sync_forward (decoder);
-      if (errcode < 0)
+      status = pt_insn_sync_forward (decoder);
+      if (status < 0)
 	{
-	  if (errcode != -pte_eos)
+	  if (status != -pte_eos)
 	    warning (_("Failed to synchronize onto the Intel Processor "
-		       "Trace stream: %s."), pt_errstr (pt_errcode (errcode)));
+		       "Trace stream: %s."), pt_errstr (pt_errcode (status)));
 	  break;
 	}
 
       for (;;)
 	{
-	  errcode = pt_insn_next (decoder, &insn, sizeof(insn));
-	  if (errcode < 0)
+	  /* Handle events from the previous iteration or synchronization.  */
+	  status = handle_pt_insn_events (btinfo, decoder, gaps, status);
+	  if (status < 0)
 	    break;
 
-	  /* Look for gaps in the trace - unless we're at the beginning.  */
-	  if (!btinfo->functions.empty ())
-	    {
-	      /* Tracing is disabled and re-enabled each time we enter the
-		 kernel.  Most times, we continue from the same instruction we
-		 stopped before.  This is indicated via the RESUMED instruction
-		 flag.  The ENABLED instruction flag means that we continued
-		 from some other instruction.  Indicate this as a trace gap.  */
-	      if (insn.enabled)
-		{
-		  bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
+	  status = pt_insn_next (decoder, &insn, sizeof(insn));
+	  if (status < 0)
+	    break;
 
-		  pt_insn_get_offset (decoder, &offset);
-
-		  warning (_("Non-contiguous trace at instruction %u (offset "
-			     "= 0x%" PRIx64 ", pc = 0x%" PRIx64 ")."),
-			   bfun->insn_offset - 1, offset, insn.ip);
-		}
-	    }
-
-	  /* Indicate trace overflows.  */
-	  if (insn.resynced)
-	    {
-	      bfun = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW, gaps);
-
-	      pt_insn_get_offset (decoder, &offset);
-
-	      warning (_("Overflow at instruction %u (offset = 0x%" PRIx64
-			 ", pc = 0x%" PRIx64 ")."), bfun->insn_offset - 1,
-		       offset, insn.ip);
-	    }
+	  /* Handle events indicated by flags in INSN.  */
+	  handle_pt_insn_event_flags (btinfo, decoder, insn, gaps);
 
 	  bfun = ftrace_update_function (btinfo, insn.ip);
 
@@ -1260,17 +1333,17 @@ ftrace_add_pt (struct btrace_thread_info *btinfo,
 	  ftrace_update_insns (bfun, &btinsn);
 	}
 
-      if (errcode == -pte_eos)
+      if (status == -pte_eos)
 	break;
 
       /* Indicate the gap in the trace.  */
-      bfun = ftrace_new_gap (btinfo, errcode, gaps);
+      bfun = ftrace_new_gap (btinfo, status, gaps);
 
       pt_insn_get_offset (decoder, &offset);
 
       warning (_("Decode error (%d) at instruction %u (offset = 0x%" PRIx64
-		 ", pc = 0x%" PRIx64 "): %s."), errcode, bfun->insn_offset - 1,
-	       offset, insn.ip, pt_errstr (pt_errcode (errcode)));
+		 ", pc = 0x%" PRIx64 "): %s."), status, bfun->insn_offset - 1,
+	       offset, insn.ip, pt_errstr (pt_errcode (status)));
     }
 }
 
