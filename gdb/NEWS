@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.12
 
+* Python Scripting
+
+  ** New functions to start, stop and access a running btrace recording.
+
 * GDB now supports recording and replaying rdrand and rdseed Intel 64
   instructions.
 
