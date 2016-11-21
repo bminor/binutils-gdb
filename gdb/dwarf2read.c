@@ -4271,10 +4271,9 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       /* This isn't really ideal: all the data we allocate on the
 	 objfile's obstack is still uselessly kept around.  However,
 	 freeing it seems unsafe.  */
-      struct cleanup *cleanups = make_cleanup_discard_psymtabs (objfile);
-
+      psymtab_discarder psymtabs (objfile);
       dwarf2_build_psymtabs_hard (objfile);
-      discard_cleanups (cleanups);
+      psymtabs.keep ();
     }
   CATCH (except, RETURN_MASK_ERROR)
     {

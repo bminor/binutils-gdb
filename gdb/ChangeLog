@@ -1,5 +1,13 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (dwarf2_build_psymtabs): Use psymtab_discarder.
+	* psympriv.h (make_cleanup_discard_psymtabs): Don't declare.
+	* psymtab.c (discard_psymtabs_upto): Remove.
+	(make_cleanup_discard_psymtabs): Remove.
+	(struct psymtab_state): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* record-full.c (record_full_save_cleanups): Remove.
 	(record_full_save): Use gdb::unlinker.
 	* gcore.c (do_bfd_delete_cleanup): Remove.
