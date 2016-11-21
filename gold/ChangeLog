@@ -1,3 +1,8 @@
+2016-11-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20693
+	* gold.cc (queue_middle_tasks): Force valid target earlier.
+
 2016-11-21  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* layout.cc: Include windows.h and rpcdce.h (for MinGW32).
