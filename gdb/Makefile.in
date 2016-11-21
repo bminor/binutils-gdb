@@ -460,6 +460,7 @@ SUBDIR_PYTHON_OBS = \
 	py-param.o \
 	py-prettyprint.o \
 	py-progspace.o \
+	py-record.o \
 	py-signalevent.o \
 	py-stopevent.o \
 	py-symbol.o \
@@ -500,6 +501,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-param.c \
 	python/py-prettyprint.c \
 	python/py-progspace.c \
+	python/py-record.c \
 	python/py-signalevent.c \
 	python/py-stopevent.c \
 	python/py-symbol.c \

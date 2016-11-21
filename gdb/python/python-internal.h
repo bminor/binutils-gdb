@@ -369,6 +369,9 @@ PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
 PyObject *gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_lookup_global_symbol (PyObject *self, PyObject *args,
 				      PyObject *kw);
+PyObject *gdbpy_start_recording (PyObject *self, PyObject *args);
+PyObject *gdbpy_current_recording (PyObject *self, PyObject *args);
+PyObject *gdbpy_stop_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_newest_frame (PyObject *self, PyObject *args);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
 PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
@@ -435,6 +438,8 @@ int gdbpy_initialize_auto_load (void)
 int gdbpy_initialize_values (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_frames (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_record (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_symtabs (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;

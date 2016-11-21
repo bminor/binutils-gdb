@@ -1628,6 +1628,7 @@ do_start_initialization ()
       || gdbpy_initialize_values () < 0
       || gdbpy_initialize_frames () < 0
       || gdbpy_initialize_commands () < 0
+      || gdbpy_initialize_record () < 0
       || gdbpy_initialize_symbols () < 0
       || gdbpy_initialize_symtabs () < 0
       || gdbpy_initialize_blocks () < 0
@@ -1909,6 +1910,18 @@ Return the selected frame object." },
   { "frame_stop_reason_string", gdbpy_frame_stop_reason_string, METH_VARARGS,
     "stop_reason_string (Integer) -> String.\n\
 Return a string explaining unwind stop reason." },
+
+  { "start_recording", gdbpy_start_recording, METH_VARARGS,
+    "start_recording ([method] [, format]) -> gdb.Record.\n\
+Start recording with the given method.  If no method is given, will fall back\n\
+to the system default method.  If no format is given, will fall back to the\n\
+default format for the given method."},
+  { "current_recording", gdbpy_current_recording, METH_NOARGS,
+    "current_recording () -> gdb.Record.\n\
+Return current recording object." },
+  { "stop_recording", gdbpy_stop_recording, METH_NOARGS,
+    "stop_recording () -> None.\n\
+Stop current recording." },
 
   { "lookup_type", (PyCFunction) gdbpy_lookup_type,
     METH_VARARGS | METH_KEYWORDS,
