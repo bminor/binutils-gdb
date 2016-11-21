@@ -1,3 +1,11 @@
+2016-11-21  Renlin Li  <renlin.li@arm.com>
+
+	PR gas/20827
+	* config/tc-arm.c (encode_arm_shift): Don't assert for operands not
+	presented.
+	* testsuite/gas/arm/add-shift-two.d: New.
+	* testsuite/gas/arm/add-shift-two.s: New.
+
 2016-11-21  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Invoke ACX_PROG_CMP_IGNORE_INITIAL.
