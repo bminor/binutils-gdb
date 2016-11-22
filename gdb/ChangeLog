@@ -1,5 +1,14 @@
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+	(alpha_next_pc): Replace parameter frame with regcache.
+	Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_software_single_step): Call
 	get_regcache_arch instead of get_frame_arch.  Call
 	regcache_read_pc instead of get_frame_pc.

@@ -768,8 +768,9 @@ static const int stq_c_opcode = 0x2f;
 static VEC (CORE_ADDR) *
 alpha_deal_with_atomic_sequence (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  CORE_ADDR pc = get_frame_pc (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
@@ -1597,9 +1598,9 @@ fp_register_sign_bit (LONGEST reg)
    the target of the coming instruction and breakpoint it.  */
 
 static CORE_ADDR
-alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
+alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   unsigned int insn;
   unsigned int op;
   int regno;
@@ -1615,7 +1616,7 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
     {
       /* Jump format: target PC is:
 	 RB & ~3  */
-      return (get_frame_register_unsigned (frame, (insn >> 16) & 0x1f) & ~3);
+      return (regcache_raw_get_unsigned (regcache, (insn >> 16) & 0x1f) & ~3);
     }
 
   if ((op & 0x30) == 0x30)
@@ -1646,7 +1647,7 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
             regno += gdbarch_fp0_regnum (gdbarch);
 	}
       
-      rav = get_frame_register_signed (frame, regno);
+      rav = regcache_raw_get_signed (regcache, regno);
 
       switch (op)
 	{
@@ -1720,13 +1721,14 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
 VEC (CORE_ADDR) *
 alpha_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc;
   VEC (CORE_ADDR) *next_pcs = NULL;
 
-  pc = get_frame_pc (frame);
+  pc = regcache_read_pc (regcache);
 
-  VEC_safe_push (CORE_ADDR, next_pcs, alpha_next_pc (frame, pc));
+  VEC_safe_push (CORE_ADDR, next_pcs, alpha_next_pc (regcache, pc));
   return next_pcs;
 }
 
