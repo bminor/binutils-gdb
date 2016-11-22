@@ -2790,16 +2790,14 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 				       struct dwarf2_per_cu_data *per_cu)
 {
   int in_reg;
-  struct cleanup *old_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
+
+  scoped_value_mark free_values;
 
   symbol_needs_eval_context ctx;
 
   ctx.needs = SYMBOL_NEEDS_NONE;
   ctx.per_cu = per_cu;
-
-  old_chain = make_cleanup_value_free_to_mark (value_mark ());
-
   ctx.gdbarch = get_objfile_arch (objfile);
   ctx.addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx.ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
@@ -2819,8 +2817,6 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
         if (ctx.pieces[i].location == DWARF_VALUE_REGISTER)
           in_reg = 1;
     }
-
-  do_cleanups (old_chain);
 
   if (in_reg)
     ctx.needs = SYMBOL_NEEDS_FRAME;

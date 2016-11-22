@@ -178,11 +178,10 @@ valpy_dereference (PyObject *self, PyObject *args)
   TRY
     {
       struct value *res_val;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       res_val = value_ind (((value_object *) self)->value);
       result = value_to_value_object (res_val);
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -209,7 +208,7 @@ valpy_referenced_value (PyObject *self, PyObject *args)
   TRY
     {
       struct value *self_val, *res_val;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       self_val = ((value_object *) self)->value;
       switch (TYPE_CODE (check_typedef (value_type (self_val))))
@@ -226,7 +225,6 @@ valpy_referenced_value (PyObject *self, PyObject *args)
         }
 
       result = value_to_value_object (res_val);
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -247,12 +245,10 @@ valpy_reference_value (PyObject *self, PyObject *args)
   TRY
     {
       struct value *self_val;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       self_val = ((value_object *) self)->value;
       result = value_to_value_object (value_ref (self_val));
-
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -273,13 +269,11 @@ valpy_const_value (PyObject *self, PyObject *args)
   TRY
     {
       struct value *self_val, *res_val;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       self_val = ((value_object *) self)->value;
       res_val = make_cv_value (1, 0, self_val);
       result = value_to_value_object (res_val);
-
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -301,12 +295,10 @@ valpy_get_address (PyObject *self, void *closure)
       TRY
 	{
 	  struct value *res_val;
-	  struct cleanup *cleanup
-	    = make_cleanup_value_free_to_mark (value_mark ());
+	  scoped_value_mark free_values;
 
 	  res_val = value_addr (val_obj->value);
 	  val_obj->address = value_to_value_object (res_val);
-	  do_cleanups (cleanup);
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
@@ -354,7 +346,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
   TRY
     {
       struct value *val = obj->value;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       type = value_type (val);
       type = check_typedef (type);
@@ -387,8 +379,6 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 	  /* Re-use object's static type.  */
 	  type = NULL;
 	}
-
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -428,7 +418,7 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
 	value = value_ind (value);
@@ -436,8 +426,6 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
       str_obj = gdbpy_create_lazy_string_object (value_address (value), length,
 						 user_encoding,
 						 value_type (value));
-
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -514,7 +502,7 @@ valpy_do_cast (PyObject *self, PyObject *args, enum exp_opcode op)
     {
       struct value *val = ((value_object *) self)->value;
       struct value *res_val;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       if (op == UNOP_DYNAMIC_CAST)
 	res_val = value_dynamic_cast (type, val);
@@ -527,7 +515,6 @@ valpy_do_cast (PyObject *self, PyObject *args, enum exp_opcode op)
 	}
 
       result = value_to_value_object (res_val);
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -737,8 +724,8 @@ valpy_getitem (PyObject *self, PyObject *key)
   TRY
     {
       struct value *tmp = self_value->value;
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
       struct value *res_val = NULL;
+      scoped_value_mark free_values;
 
       if (field)
 	res_val = value_struct_elt (&tmp, NULL, field.get (), NULL,
@@ -783,7 +770,6 @@ valpy_getitem (PyObject *self, PyObject *key)
 
       if (res_val)
 	result = value_to_value_object (res_val);
-      do_cleanups (cleanup);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
@@ -861,12 +847,11 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
 
   TRY
     {
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (mark);
+      scoped_value_mark free_values;
       struct value *return_value;
 
       return_value = call_function_by_hand (function, args_count, vargs);
       result = value_to_value_object (return_value);
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1014,10 +999,11 @@ valpy_binop_throw (enum valpy_opcode opcode, PyObject *self, PyObject *other)
   PyObject *result = NULL;
 
   struct value *arg1, *arg2;
-  struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
   struct value *res_val = NULL;
   enum exp_opcode op = OP_NULL;
   int handled = 0;
+
+  scoped_value_mark free_values;
 
   /* If the gdb.Value object is the second operand, then it will be
      passed to us as the OTHER argument, and SELF will be an entirely
@@ -1026,17 +1012,11 @@ valpy_binop_throw (enum valpy_opcode opcode, PyObject *self, PyObject *other)
      python as well.  */
   arg1 = convert_value_from_python (self);
   if (arg1 == NULL)
-    {
-      do_cleanups (cleanup);
-      return NULL;
-    }
+    return NULL;
 
   arg2 = convert_value_from_python (other);
   if (arg2 == NULL)
-    {
-      do_cleanups (cleanup);
-      return NULL;
-    }
+    return NULL;
 
   switch (opcode)
     {
@@ -1130,7 +1110,6 @@ valpy_binop_throw (enum valpy_opcode opcode, PyObject *self, PyObject *other)
   if (res_val)
     result = value_to_value_object (res_val);
 
-  do_cleanups (cleanup);
   return result;
 }
 
@@ -1209,12 +1188,11 @@ valpy_negative (PyObject *self)
   TRY
     {
       /* Perhaps overkill, but consistency has some virtue.  */
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
       struct value *val;
 
       val = value_neg (((value_object *) self)->value);
       result = value_to_value_object (val);
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1239,12 +1217,10 @@ valpy_absolute (PyObject *self)
 
   TRY
     {
-      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+      scoped_value_mark free_values;
 
       if (value_less (value, value_zero (value_type (value), not_lval)))
 	isabs = 0;
-
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1362,14 +1338,13 @@ valpy_richcompare_throw (PyObject *self, PyObject *other, int op)
   int result;
   struct value *value_other;
   struct value *value_self;
-  struct value *mark = value_mark ();
   struct cleanup *cleanup;
+
+  scoped_value_mark free_values;
 
   value_other = convert_value_from_python (other);
   if (value_other == NULL)
     return -1;
-
-  cleanup = make_cleanup_value_free_to_mark (mark);
 
   value_self = ((value_object *) self)->value;
 
@@ -1403,7 +1378,6 @@ valpy_richcompare_throw (PyObject *self, PyObject *other, int op)
       break;
     }
 
-  do_cleanups (cleanup);
   return result;
 }
 

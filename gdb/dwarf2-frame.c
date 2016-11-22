@@ -403,10 +403,9 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  CORE_ADDR initial, int initial_in_stack_memory)
 {
   CORE_ADDR result;
-  struct cleanup *old_chain;
 
   dwarf_expr_executor ctx;
-  old_chain = make_cleanup_value_free_to_mark (value_mark ());
+  scoped_value_mark free_values;
 
   ctx.this_frame = this_frame;
   ctx.gdbarch = get_frame_arch (this_frame);
@@ -429,8 +428,6 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
       error (_("\
 Not implemented: computing unwound register using explicit value operator"));
     }
-
-  do_cleanups (old_chain);
 
   return result;
 }
