@@ -1,5 +1,11 @@
 2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+        * contrib/expect-read1.sh: Fix spelling in comments.
+        * gdb_buildall.sh: Fix spelling in comments.
+        * gdb_mbuild.sh: Fix spelling in comments.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
         * configure.ac: Fix spelling in comments.
         * configure: Regenerate.
 

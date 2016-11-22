@@ -103,7 +103,7 @@ builddir=`cd $2 && /bin/pwd` || exit 1
 make=${MAKE:-make}
 MAKE=${make}
 export MAKE
-# We dont want GDB do dump cores.
+# We don't want GDB do dump cores.
 ulimit -c 0
 
 # Just make sure we're in the right directory.
