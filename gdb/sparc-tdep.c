@@ -1501,7 +1501,7 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
    software single-step mechanism.  */
 
 static CORE_ADDR
-sparc_analyze_control_transfer (struct frame_info *frame,
+sparc_analyze_control_transfer (struct regcache *regcache,
 				CORE_ADDR pc, CORE_ADDR *npc)
 {
   unsigned long insn = sparc_fetch_instruction (pc);
@@ -1552,8 +1552,11 @@ sparc_analyze_control_transfer (struct frame_info *frame,
     }
   else if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3a)
     {
+      struct frame_info *frame = get_current_frame ();
+
       /* Trap instruction (TRAP).  */
-      return gdbarch_tdep (get_frame_arch (frame))->step_trap (frame, insn);
+      return gdbarch_tdep (get_regcache_arch (regcache))->step_trap (frame,
+								     insn);
     }
 
   /* FIXME: Handle DONE and RETRY instructions.  */
@@ -1602,19 +1605,19 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
 static VEC (CORE_ADDR) *
 sparc_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *arch = get_frame_arch (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
-  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
   VEC (CORE_ADDR) *next_pcs = NULL;
 
-  pc = get_frame_register_unsigned (frame, tdep->pc_regnum);
-  orig_npc = npc = get_frame_register_unsigned (frame, tdep->npc_regnum);
+  pc = regcache_raw_get_unsigned (regcache, tdep->pc_regnum);
+  orig_npc = npc = regcache_raw_get_unsigned (regcache, tdep->npc_regnum);
 
   /* Analyze the instruction at PC.  */
-  nnpc = sparc_analyze_control_transfer (frame, pc, &npc);
+  nnpc = sparc_analyze_control_transfer (regcache, pc, &npc);
   if (npc != 0)
     VEC_safe_push (CORE_ADDR, next_pcs, npc);
 
