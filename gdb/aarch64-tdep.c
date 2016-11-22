@@ -2227,11 +2227,12 @@ value_of_aarch64_user_reg (struct frame_info *frame, const void *baton)
 static VEC (CORE_ADDR) *
 aarch64_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   const int insn_size = 4;
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
-  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = { -1, -1 };
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn = 0;

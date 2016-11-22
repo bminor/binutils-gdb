@@ -1,5 +1,11 @@
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_software_single_step): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (regcache_raw_get_signed): New function.
 	* regcache.h (regcache_raw_get_signed): Declare.
 
