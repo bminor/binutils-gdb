@@ -92,40 +92,59 @@
    otherwise.  */
 #define v9notv9a	(MASK_V9)
 
+/* Hardware capability sets, used to keep sparc_opcode_archs easy to
+   read.  */
+#define HWS_V8 HWCAP_MUL32 | HWCAP_DIV32 | HWCAP_FSMULD
+#define HWS_V9 HWS_V8 | HWCAP_POPC
+#define HWS_VA HWS_V9 | HWCAP_VIS
+#define HWS_VB HWS_VA | HWCAP_VIS2
+#define HWS_VC HWS_VB | HWCAP_ASI_BLK_INIT
+#define HWS_VD HWS_VC | HWCAP_FMAF | HWCAP_VIS3 | HWCAP_HPC
+#define HWS_VE HWS_VD                                                   \
+  | HWCAP_AES | HWCAP_DES | HWCAP_KASUMI | HWCAP_CAMELLIA               \
+  | HWCAP_MD5 | HWCAP_SHA1 | HWCAP_SHA256 |HWCAP_SHA512 | HWCAP_MPMUL   \
+  | HWCAP_MONT | HWCAP_CRC32C | HWCAP_CBCOND | HWCAP_PAUSE
+#define HWS_VV HWS_VE | HWCAP_FJFMAU | HWCAP_IMA
+#define HWS_VM HWS_VV
+
+#define HWS2_VM							\
+  HWCAP2_VIS3B | HWCAP2_ADP | HWCAP2_SPARC5 | HWCAP2_MWAIT	\
+  | HWCAP2_XMPMUL | HWCAP2_XMONT
+
 /* Table of opcode architectures.
    The order is defined in opcode/sparc.h.  */
 
 const struct sparc_opcode_arch sparc_opcode_archs[] =
 {
-  { "v6", MASK_V6 },
-  { "v7", MASK_V6 | MASK_V7 },
-  { "v8", MASK_V6 | MASK_V7 | MASK_V8 },
-  { "leon", MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON },
-  { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET },
-  { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE },
+  { "v6", MASK_V6, 0, 0 },
+  { "v7", MASK_V6 | MASK_V7, 0, 0 },
+  { "v8", MASK_V6 | MASK_V7 | MASK_V8, HWS_V8, 0 },
+  { "leon", MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON, HWS_V8, 0 },
+  { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET, HWS_V8, 0 },
+  { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE, HWS_V8, 0 },
   /* ??? Don't some v8 priviledged insns conflict with v9?  */
-  { "v9", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 },
+  { "v9", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9, HWS_V9, 0 },
   /* v9 with ultrasparc additions */
-  { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A },
+  { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A, HWS_VA, 0 },
   /* v9 with cheetah additions */
-  { "v9b", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B },
+  { "v9b", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B, HWS_VB, 0 },
   /* v9 with UA2005 and T1 additions.  */
   { "v9c", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
-            | MASK_V9C) },
+            | MASK_V9C), HWS_VC, 0 },
   /* v9 with UA2007 and T3 additions.  */
   { "v9d", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
-            | MASK_V9C | MASK_V9D) },
+            | MASK_V9C | MASK_V9D), HWS_VD, 0 },
   /* v9 with OSA2011 and T4 additions modulus integer multiply-add.  */
   { "v9e", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
-            | MASK_V9C | MASK_V9D | MASK_V9E) },
+            | MASK_V9C | MASK_V9D | MASK_V9E), HWS_VE, 0 },
   /* V9 with OSA2011 and T4 additions, integer multiply and Fujitsu fp
      multiply-add.  */
   { "v9v", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
-            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V) },
+            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V), HWS_VV, 0 },
   /* v9 with OSA2015 and M7 additions.  */
   { "v9m", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
-            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M) },
-  { NULL, 0 }
+            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M), HWS_VM, HWS2_VM },
+  { NULL, 0, 0, 0 }
 };
 
 /* Given NAME, return it's architecture entry.  */

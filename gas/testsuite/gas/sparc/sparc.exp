@@ -90,6 +90,7 @@ if [istarget sparc*-*-*] {
 	run_dump_test "pcrel64"
 	run_dump_test "plt64"
 	run_dump_test "gotop64"
+        run_list_test "hwcaps-bump" "-bump"
     }
 
     run_dump_test "synth"

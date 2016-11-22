@@ -1,3 +1,21 @@
+2016-11-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c: Move HWS_* and HWS2_* definitions to
+	opcodes/sparc-opc.c.
+	(sparc_arch): Clarify the new role of the hwcap_allowed and
+	hwcap2_allowed fields.
+	(sparc_arch_table): Remove HWS_* and HWS2_* instances from
+	hwcap_allowed and hwcap2_allowed respectively.
+	(md_parse_option): Include the opcode arch hwcaps when processing
+	-A.
+	(sparc_ip): Use the current opcode arch hwcaps to update
+	hwcap_allowed, as well as the hwcaps of the instruction triggering
+	the bump.
+	* testsuite/gas/sparc/hwcaps-bump.s: New file.
+	* testsuite/gas/sparc/hwcaps-bump.l: Likewise.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run tests in
+	hwcaps-bump.
+
 2016-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/b.d: Update test result.
