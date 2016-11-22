@@ -1,3 +1,8 @@
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* value.c (value_from_component): Use VALUE_NEXT_FRAME_ID
+	instead of VALUE_FROM_ID.
+
 2016-11-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in (%o: $(srcdir)/mi/%.c): Add missing POSTCOMPILE

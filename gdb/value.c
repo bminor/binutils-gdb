@@ -3815,7 +3815,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
   v->offset = value_offset (whole) + offset + value_embedded_offset (whole);
   set_value_component_location (v, whole);
   VALUE_REGNUM (v) = VALUE_REGNUM (whole);
-  VALUE_FRAME_ID (v) = VALUE_FRAME_ID (whole);
+  VALUE_NEXT_FRAME_ID (v) = VALUE_NEXT_FRAME_ID (whole);
 
   return v;
 }
