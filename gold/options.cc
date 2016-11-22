@@ -146,8 +146,10 @@ One_option::print() const
   for (; len < 30; ++len)
     std::putchar(' ');
 
-  // TODO: if we're boolean, add " (default)" when appropriate.
-  printf("%s\n", gettext(this->helpstring));
+  printf("%s", gettext(this->helpstring));
+  if (this->is_default)
+    printf(" (%s)", _("default"));
+  printf("\n");
 }
 
 void
@@ -876,7 +878,7 @@ parse_short_option(int argc, const char** argv, int pos_in_argv_i,
   // We handle -z as a special case.
   static gold::options::One_option dash_z("", gold::options::DASH_Z,
 					  'z', "", NULL, "Z-OPTION", false,
-					  NULL);
+					  NULL, false);
   gold::options::One_option* retval = NULL;
   if (this_argv[pos_in_argv_i] == 'z')
     retval = &dash_z;
