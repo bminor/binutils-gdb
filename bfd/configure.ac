@@ -1156,7 +1156,7 @@ fi
 AC_SUBST(supports_plugins)
 AC_SUBST(lt_cv_dlopen_libs)
 
-# Determine the host dependant file_ptr a.k.a. off_t type.  In order
+# Determine the host dependent file_ptr a.k.a. off_t type.  In order
 # prefer: off64_t - if ftello64 and fseeko64, off_t - if ftello and
 # fseeko, long.  This assumes that sizeof off_t is .ge. sizeof long.
 # Hopefully a reasonable assumption since fseeko et.al. should be

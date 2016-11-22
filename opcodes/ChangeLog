@@ -1,3 +1,7 @@
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
 2016-11-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (HWS_V8): Definition moved from

@@ -1,3 +1,8 @@
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure.ac: Fix spelling in comments.
+        * configure: Regenerate.
+
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
 	* gdbarch.sh (software_single_step): Change parameter from frame_info

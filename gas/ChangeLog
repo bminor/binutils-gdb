@@ -1,3 +1,7 @@
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
 2016-11-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c: Move HWS_* and HWS2_* definitions to

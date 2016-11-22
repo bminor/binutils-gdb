@@ -597,7 +597,7 @@ fi
 
 # Since GDB uses Readline, we need termcap functionality.  In many
 # cases this will be provided by the curses library, but some systems
-# have a seperate termcap library, or no curses library at all.
+# have a separate termcap library, or no curses library at all.
 
 case $host_os in
   cygwin*)
