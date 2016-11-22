@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Please keep lists in this file sorted alphabetically, with one item per line.
+# See gdb/Makefile.in for guidelines on ordering files and directories.
+
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
@@ -146,43 +149,74 @@ INTERNAL_LDFLAGS = $(LDFLAGS) @RDYNAMIC@
 
 # All source files that go into linking GDB remote server.
 
-SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
-	$(srcdir)/mem-break.c $(srcdir)/proc-service.c \
-	$(srcdir)/proc-service.list $(srcdir)/regcache.c \
-	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
-	$(srcdir)/thread-db.c $(srcdir)/utils.c $(srcdir)/debug.c \
+SFILES = \
+	$(srcdir)/debug.c \
+	$(srcdir)/dll.c \
+	$(srcdir)/gdbreplay.c \
+	$(srcdir)/hostio.c \
+	$(srcdir)/hostio-errno.c \
+	$(srcdir)/i387-fp.c \
+	$(srcdir)/inferiors.c \
 	$(srcdir)/linux-aarch64-low.c \
-	$(srcdir)/linux-arm-low.c $(srcdir)/linux-bfin-low.c \
-	$(srcdir)/linux-cris-low.c $(srcdir)/linux-crisv32-low.c \
-	${srcdir}/x86-low.c $(srcdir)/i387-fp.c \
-	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
+	$(srcdir)/linux-arm-low.c \
+	$(srcdir)/linux-bfin-low.c \
+	$(srcdir)/linux-cris-low.c \
+	$(srcdir)/linux-crisv32-low.c \
+	$(srcdir)/linux-ia64-low.c \
+	$(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
-	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
+	$(srcdir)/linux-m68k-low.c \
+	$(srcdir)/linux-mips-low.c \
 	$(srcdir)/linux-nios2-low.c \
-	$(srcdir)/linux-ppc-low.c $(srcdir)/nat/ppc-linux.c \
+	$(srcdir)/linux-ppc-low.c \
 	$(srcdir)/linux-s390-low.c \
-	$(srcdir)/linux-sh-low.c $(srcdir)/linux-sparc-low.c \
+	$(srcdir)/linux-sh-low.c \
+	$(srcdir)/linux-sparc-low.c \
+	$(srcdir)/linux-tile-low.c \
 	$(srcdir)/linux-x86-low.c \
 	$(srcdir)/linux-xtensa-low.c \
-	$(srcdir)/linux-tile-low.c \
-	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
-	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
-	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c \
-	$(srcdir)/common/vec.c $(srcdir)/common/gdb_vecs.c \
-	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
-	$(srcdir)/nat/linux-osdata.c $(srcdir)/common/ptid.c \
-	$(srcdir)/nat/linux-personality.c \
-	$(srcdir)/common/buffer.c $(srcdir)/nat/linux-btrace.c \
-	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
-	$(srcdir)/nat/mips-linux-watch.c $(srcdir)/common/print-utils.c \
-	$(srcdir)/common/rsp-low.c $(srcdir)/common/errors.c \
-	$(srcdir)/common/common-debug.c $(srcdir)/common/cleanups.c \
-	$(srcdir)/common/common-exceptions.c $(srcdir)/symbol.c \
+	$(srcdir)/mem-break.c \
+	$(srcdir)/proc-service.c \
+	$(srcdir)/proc-service.list \
+	$(srcdir)/regcache.c \
+	$(srcdir)/remote-utils.c \
+	$(srcdir)/server.c \
+	$(srcdir)/symbol.c \
+	$(srcdir)/target.c \
+	$(srcdir)/thread-db.c \
+	$(srcdir)/utils.c \
+	$(srcdir)/win32-arm-low.c \
+	$(srcdir)/win32-i386-low.c \
+	$(srcdir)/win32-low.c \
+	$(srcdir)/wincecompat.c \
+	$(srcdir)/x86-low.c \
+	$(srcdir)/arch/arm.c \
+	$(srcdir)/arch/arm-get-next-pcs.c \
+	$(srcdir)/arch/arm-linux.c \
 	$(srcdir)/common/btrace-common.c \
-	$(srcdir)/common/fileio.c $(srcdir)/nat/linux-namespaces.c \
-	$(srcdir)/arch/arm.c $(srcdir)/common/common-regcache.c \
-	$(srcdir)/arch/arm-linux.c $(srcdir)/arch/arm-get-next-pcs.c \
-	$(srcdir)/common/new-op.c
+	$(srcdir)/common/buffer.c \
+	$(srcdir)/common/cleanups.c \
+	$(srcdir)/common/common-debug.c \
+	$(srcdir)/common/common-exceptions.c \
+	$(srcdir)/common/common-regcache.c \
+	$(srcdir)/common/common-utils.c \
+	$(srcdir)/common/errors.c \
+	$(srcdir)/common/fileio.c \
+	$(srcdir)/common/filestuff.c \
+	$(srcdir)/common/gdb_vecs.c \
+	$(srcdir)/common/new-op.c \
+	$(srcdir)/common/print-utils.c \
+	$(srcdir)/common/ptid.c \
+	$(srcdir)/common/rsp-low.c \
+	$(srcdir)/common/vec.c \
+	$(srcdir)/common/xml-utils.c \
+	$(srcdir)/nat/linux-btrace.c \
+	$(srcdir)/nat/linux-namespaces.c \
+	$(srcdir)/nat/linux-osdata.c \
+	$(srcdir)/nat/linux-personality.c \
+	$(srcdir)/nat/mips-linux-watch.c \
+	$(srcdir)/nat/ppc-linux.c \
+	$(srcdir)/target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -191,14 +225,50 @@ LIBOBJS = @LIBOBJS@
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
-OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
-      target.o waitstatus.o utils.o debug.o version.o vec.o gdb_vecs.o \
-      mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
-      common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
-      tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
-      common-exceptions.o symbol.o btrace-common.o fileio.o common-regcache.o \
-      signals-state-save-restore.o new-op.o \
-      $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
+OBS = \
+	agent.o \
+	ax.o \
+	btrace-common.o \
+	buffer.o \
+	cleanups.o \
+	common-debug.o \
+	common-exceptions.o \
+	common-regcache.o \
+	common-utils.o \
+	debug.o \
+	dll.o \
+	errors.o \
+	event-loop.o \
+	fileio.o \
+	filestuff.o \
+	format.o \
+	gdb_vecs.o \
+	hostio.o \
+	inferiors.o \
+	mem-break.o \
+	new-op.o \
+	notif.o \
+	print-utils.o \
+	ptid.o \
+	regcache.o \
+	remote-utils.o \
+	rsp-low.o \
+	server.o \
+	signals.o \
+	signals-state-save-restore.o \
+	symbol.o \
+	target.o \
+	tdesc.o \
+	tracepoint.o \
+	utils.o \
+	vec.o \
+	version.o \
+	waitstatus.o \
+	xml-utils.o \
+	$(DEPFILES) \
+	$(LIBOBJS) \
+	$(XML_BUILTIN)
+
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@

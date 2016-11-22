@@ -1,3 +1,7 @@
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/default.exp: Fix output of "set language".
+
 2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Remove @GMAKE_TRUE@ prefixes and removes lines

@@ -1,3 +1,19 @@
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Add comment about file lists ordering.
+	(SUBDIR_CLI_OBS, SUBDIR_CLI_SRCS, SUBDIR_MI_OBS, SUBDIR_MI_SRCS,
+	SUBDIR_TUI_OBS, SUBDIR_TUI_SRCS, SUBDIR_GCC_COMPILE_OBS,
+	SUBDIR_GCC_COMPILE_SRCS, SUBDIR_GUILE_OBS, SUBDIR_GUILE_SRCS,
+	SUBDIR_PYTHON_OBS, SUBDIR_PYTHON_SRCS, SUBDIR_GDBTK_OBS,
+	SUBDIR_GDBTK_SRCS, XMLFILES, REMOTE_OBS, ALL_64_TARGET_OBS,
+	ALL_TARGET_OBS, SFILES, HFILES_NO_SRCDIR, HFILES_WITH_SRCDIR,
+	COMMON_OBS, YYFILES, YYOBJ, generated_files, ALLDEPFILES):
+	Flatten list and order alphabetically.
+	* data-directory/Makefile.in: Add comment about file lists
+	ordering.
+	(GEN_SYSCALLS_FILES, PYTHON_FILE_LIST): Flatten list and order
+	alphabetically.
+
 2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
         * contrib/expect-read1.sh: Fix spelling in comments.

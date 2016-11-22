@@ -1,3 +1,8 @@
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (SFILES, OBS): Flatten list and order
+	alphabetically.
+
 2016-11-23  Pedro Alves  <palves@redhat.com>
 
 	* event-loop.c (handle_file_event): Use warning.
