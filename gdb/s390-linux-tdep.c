@@ -725,9 +725,9 @@ s390_is_partial_instruction (struct gdbarch *gdbarch, CORE_ADDR loc, int *len)
 static VEC (CORE_ADDR) *
 s390_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
-  CORE_ADDR loc = get_frame_pc (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR loc = regcache_read_pc (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len;
   uint16_t insn;

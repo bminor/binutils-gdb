@@ -1,5 +1,11 @@
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* s390-linux-tdep.c (s390_software_single_step): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* sparc-tdep.c (sparc_analyze_control_transfer): Replace parameter
 	frame with regcache.  Call get_current_frame.
 	(sparc_software_single_step): Call get_regcache_arch instead of
