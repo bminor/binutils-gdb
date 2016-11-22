@@ -1,5 +1,9 @@
 2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in: Fix whitespace formatting.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (SFILES, OBS): Flatten list and order
 	alphabetically.
 

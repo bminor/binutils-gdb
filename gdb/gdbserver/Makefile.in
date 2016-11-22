@@ -54,7 +54,7 @@ RANLIB = @RANLIB@
 
 CC = @CC@
 CXX = @CXX@
-CXX_DIALECT= @CXX_DIALECT@
+CXX_DIALECT = @CXX_DIALECT@
 AR = @AR@
 AR_FLAGS = rc
 
@@ -73,8 +73,8 @@ POSTCOMPILE = @true
 # Directory containing source files.  Don't clean up the spacing,
 # this exact string is matched for by the "configure" script.
 srcdir = @srcdir@
-abs_top_srcdir=@abs_top_srcdir@
-abs_srcdir=@abs_srcdir@
+abs_top_srcdir = @abs_top_srcdir@
+abs_srcdir = @abs_srcdir@
 VPATH = @srcdir@
 
 # It is also possible that you will need to add -I/usr/include/sys to the
@@ -83,11 +83,11 @@ VPATH = @srcdir@
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
-#CC_LD=g++ -static
-CC_LD=$(CXX) $(CXX_DIALECT)
+#CC_LD = g++ -static
+CC_LD = $(CXX) $(CXX_DIALECT)
 
 # Where is the "include" directory?  Traditionally ../include or ./include
-INCLUDE_DIR =  ${srcdir}/../../include
+INCLUDE_DIR = ${srcdir}/../../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
 LIBIBERTY_BUILDDIR = build-libiberty-gdbserver
@@ -137,10 +137,10 @@ CXXFLAGS = @CXXFLAGS@
 CPPFLAGS = @CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS_BASE =  ${CXXFLAGS} ${GLOBAL_CFLAGS} \
+INTERNAL_CFLAGS_BASE = ${CXXFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${CPPFLAGS}
-INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
-INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
+INTERNAL_WARN_CFLAGS = ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
+INTERNAL_CFLAGS = ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -386,12 +386,12 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
 	$(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
 
-IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o \
+IPA_OBJS = ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o \
 	regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o \
 	tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o errors-ipa.o \
 	${IPA_DEPFILES}
 
-IPA_LIB=libinproctrace.so
+IPA_LIB = libinproctrace.so
 
 $(IPA_LIB): $(IPA_OBJS) ${ADD_DEPS} ${CDEPS}
 	rm -f $(IPA_LIB)
@@ -526,7 +526,7 @@ stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 # GNU Make 3.63 has a different problem: it keeps tacking command line
 # overrides onto the definition of $(MAKE).  This variable setting
 # will remove them.
-MAKEOVERRIDES=
+MAKEOVERRIDES =
 
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 

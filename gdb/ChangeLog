@@ -1,5 +1,9 @@
 2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in: Fix whitespace formatting.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (ALL_64_TARGET_OBS, ALL_TARGET_OBS,
 	HFILES_NO_SRCDIR, ALLDEPFILES): Rename files.
 	* alphabsd-nat.c: Rename to ...

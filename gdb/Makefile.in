@@ -103,9 +103,9 @@ CATALOGS = @CATALOGS@
 # -traditional flag.  Otherwise the ioctl calls in inflow.c
 # will be incorrectly compiled.  The "fixincludes" script in the gcc
 # distribution will fix your include files up.
-CC=@CC@
-CXX=@CXX@
-CXX_DIALECT= @CXX_DIALECT@
+CC = @CC@
+CXX = @CXX@
+CXX_DIALECT = @CXX_DIALECT@
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@
@@ -124,7 +124,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 top_srcdir = @top_srcdir@
 
-YACC=@YACC@
+YACC = @YACC@
 
 # This is used to rebuild ada-lex.c from ada-lex.l.  If the program is
 # not defined, but ada-lex.c is present, compilation will continue,
@@ -144,13 +144,13 @@ MAKEHTMLFLAGS =
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
-#CC_LD=g++ -static
-CC_LD=$(CXX) $(CXX_DIALECT)
+#CC_LD = g++ -static
+CC_LD = $(CXX) $(CXX_DIALECT)
 
 # Where is our "include" directory?  Typically $(srcdir)/../include.
 # This is essentially the header file directory for the library
 # routines in libiberty.
-INCLUDE_DIR =  $(srcdir)/../include
+INCLUDE_DIR = $(srcdir)/../include
 INCLUDE_CFLAGS = -I$(INCLUDE_DIR)
 
 # Where is the "-liberty" library?  Typically in ../libiberty.
@@ -253,8 +253,8 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-utils.c
 
 SUBDIR_CLI_DEPS =
-SUBDIR_CLI_LDFLAGS=
-SUBDIR_CLI_CFLAGS=
+SUBDIR_CLI_LDFLAGS =
+SUBDIR_CLI_CFLAGS =
 
 #
 # MI sub directory definitons
@@ -298,13 +298,12 @@ SUBDIR_MI_SRCS = \
 	mi/mi-symbol-cmds.c
 
 SUBDIR_MI_DEPS =
-SUBDIR_MI_LDFLAGS=
-SUBDIR_MI_CFLAGS=
+SUBDIR_MI_LDFLAGS =
+SUBDIR_MI_CFLAGS =
 
 #
 # TUI sub directory definitions
 #
-
 SUBDIR_TUI_OBS = \
 	tui.o \
 	tui-command.o \
@@ -344,9 +343,8 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-winsource.c
 
 SUBDIR_TUI_DEPS =
-SUBDIR_TUI_LDFLAGS=
-SUBDIR_TUI_CFLAGS= \
-	-DTUI=1
+SUBDIR_TUI_LDFLAGS =
+SUBDIR_TUI_CFLAGS = -DTUI=1
 
 #
 # GCC Compile support sub-directory definitions
@@ -371,8 +369,9 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-object-run.c \
 	compile/compile-object-run.h
 
+#
 # Guile sub directory definitons for guile support.
-
+#
 SUBDIR_GUILE_OBS = \
 	guile.o \
 	scm-arch.o \
@@ -428,8 +427,8 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-value.c
 
 SUBDIR_GUILE_DEPS =
-SUBDIR_GUILE_LDFLAGS=
-SUBDIR_GUILE_CFLAGS=
+SUBDIR_GUILE_LDFLAGS =
+SUBDIR_GUILE_CFLAGS =
 
 #
 # python sub directory definitons
@@ -515,8 +514,8 @@ SUBDIR_PYTHON_SRCS = \
 	python/python.c
 
 SUBDIR_PYTHON_DEPS =
-SUBDIR_PYTHON_LDFLAGS=
-SUBDIR_PYTHON_CFLAGS=
+SUBDIR_PYTHON_LDFLAGS =
+SUBDIR_PYTHON_CFLAGS =
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -556,7 +555,7 @@ WIN32LDAPP = @WIN32LDAPP@
 
 LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
-IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+IDE_CFLAGSv = $(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
 
 ALL_TCL_CFLAGS = $(TCL_CFLAGS) $(TK_CFLAGS)
 
@@ -593,16 +592,16 @@ SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk-wrapper.c
 
 SUBDIR_GDBTK_DEPS = $(LIBGUI) $(TCL_DEPS) $(TK_DEPS)
-SUBDIR_GDBTK_LDFLAGS=
-SUBDIR_GDBTK_CFLAGS= -DGDBTK
+SUBDIR_GDBTK_LDFLAGS =
+SUBDIR_GDBTK_CFLAGS = -DGDBTK
 
-CONFIG_OBS= @CONFIG_OBS@
-CONFIG_SRCS= @CONFIG_SRCS@
-CONFIG_DEPS= @CONFIG_DEPS@
+CONFIG_OBS = @CONFIG_OBS@
+CONFIG_SRCS = @CONFIG_SRCS@
+CONFIG_DEPS = @CONFIG_DEPS@
 CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
-ENABLE_CFLAGS= @ENABLE_CFLAGS@
-CONFIG_ALL= @CONFIG_ALL@
-CONFIG_CLEAN= @CONFIG_CLEAN@
+ENABLE_CFLAGS = @ENABLE_CFLAGS@
+CONFIG_ALL = @CONFIG_ALL@
+CONFIG_CLEAN = @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
@@ -674,15 +673,15 @@ CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-DIST=gdb
+DIST = gdb
 
-LINT=/usr/5bin/lint
-LINTFLAGS= $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
+LINT = /usr/5bin/lint
+LINTFLAGS = $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
 	$(INTL_CFLAGS)
 
 RUNTEST = runtest
-RUNTESTFLAGS=
+RUNTESTFLAGS =
 
 # XML files to build in to GDB.
 XMLFILES = \
@@ -1841,7 +1840,7 @@ generated_files = \
 	$(NAT_GENERATED_FILES)
 
 # Flags needed to compile Python code
-PYTHON_CFLAGS=@PYTHON_CFLAGS@
+PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
 all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
@@ -2165,7 +2164,7 @@ init.c: $(INIT_FILES)
 # against that.
 #
 # init.o is very important.  It pulls in the rest of GDB.
-LIBGDB_OBS= $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
+LIBGDB_OBS = $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
 libgdb.a: $(LIBGDB_OBS)
 	-rm -f libgdb.a
 	$(AR) q libgdb.a $(LIBGDB_OBS)
@@ -2425,7 +2424,7 @@ force_update:
 # GNU Make 3.63 has a different problem: it keeps tacking command line
 # overrides onto the definition of $(MAKE).  This variable setting
 # will remove them.
-MAKEOVERRIDES=
+MAKEOVERRIDES =
 
 ALLDEPFILES = \
 	aarch64-linux-nat.c \
