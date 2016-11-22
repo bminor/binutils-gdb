@@ -428,7 +428,7 @@ extern const struct target_desc *i386_target_description (uint64_t xcr0);
 extern int i386_mpx_enabled (void);
 
 
-/* Functions and variables exported from i386bsd-tdep.c.  */
+/* Functions and variables exported from i386-bsd-tdep.c.  */
 
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
 extern CORE_ADDR i386fbsd_sigtramp_start_addr;

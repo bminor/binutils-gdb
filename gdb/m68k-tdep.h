@@ -101,7 +101,7 @@ struct gdbarch_tdep
 extern void m68k_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 
 
-/* Functions exported from m68kbsd-tdep.c.  */
+/* Functions exported from m68k-bsd-tdep.c.  */
 
 extern int m68kbsd_fpreg_offset (struct gdbarch *gdbarch, int regnum);
 

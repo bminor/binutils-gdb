@@ -276,7 +276,7 @@ extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 
 extern int arm_process_record (struct gdbarch *gdbarch, 
                                struct regcache *regcache, CORE_ADDR addr);
-/* Functions exported from armbsd-tdep.h.  */
+/* Functions exported from arm-bsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
