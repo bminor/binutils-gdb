@@ -2126,9 +2126,9 @@ static const struct frame_unwind nios2_stub_frame_unwind =
    branch prediction.  */
 
 static CORE_ADDR
-nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
+nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   unsigned int insn;
@@ -2146,10 +2146,10 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
     
   if (nios2_match_branch (insn, op, mach, &ra, &rb, &imm, &cond))
     {
-      int ras = get_frame_register_signed (frame, ra);
-      int rbs = get_frame_register_signed (frame, rb);
-      unsigned int rau = get_frame_register_unsigned (frame, ra);
-      unsigned int rbu = get_frame_register_unsigned (frame, rb);
+      int ras = regcache_raw_get_signed (regcache, ra);
+      int rbs = regcache_raw_get_signed (regcache, rb);
+      unsigned int rau = regcache_raw_get_unsigned (regcache, ra);
+      unsigned int rbu = regcache_raw_get_unsigned (regcache, rb);
 
       pc += op->size;
       switch (cond)
@@ -2192,7 +2192,7 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 
   else if (nios2_match_jmpr (insn, op, mach, &ra)
 	   || nios2_match_callr (insn, op, mach, &ra))
-    pc = get_frame_register_unsigned (frame, ra);
+    pc = regcache_raw_get_unsigned (regcache, ra);
 
   else if (nios2_match_ldwm (insn, op, mach, &uimm, &ra, &imm, &wb, &id, &ret)
 	   && ret)
@@ -2200,15 +2200,15 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
       /* If ra is in the reglist, we have to use the value saved in the
 	 stack frame rather than the current value.  */
       if (uimm & (1 << NIOS2_RA_REGNUM))
-	pc = nios2_unwind_pc (gdbarch, frame);
+	pc = nios2_unwind_pc (gdbarch, get_current_frame ());
       else
-	pc = get_frame_register_unsigned (frame, NIOS2_RA_REGNUM);
+	pc = regcache_raw_get_unsigned (regcache, NIOS2_RA_REGNUM);
     }
 
   else if (nios2_match_trap (insn, op, mach, &uimm) && uimm == 0)
     {
       if (tdep->syscall_next_pc != NULL)
-	return tdep->syscall_next_pc (frame, op);
+	return tdep->syscall_next_pc (get_current_frame (), op);
     }
 
   else
@@ -2222,8 +2222,9 @@ nios2_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 static VEC (CORE_ADDR) *
 nios2_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  CORE_ADDR next_pc = nios2_get_next_pc (frame, get_frame_pc (frame));
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR next_pc = nios2_get_next_pc (regcache, regcache_read_pc (regcache));
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   VEC_safe_push (CORE_ADDR, next_pcs, next_pc);

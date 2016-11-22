@@ -1,5 +1,13 @@
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* nios2-tdep.c (nios2_get_next_pc): Replace parameter frame
+	with regcache.  Call regcache_raw_get_signed instead of
+	get_frame_register_unsigned.
+	(nios2_software_single_step): Call get_regcache_arch
+	instead of get_frame_arch.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* moxie-tdep.c (moxie_software_single_step): Call
 	get_regcache_arch instead of get_frame_arch.  Call
 	regcache_read_pc instead of get_frame_pc.
