@@ -922,9 +922,8 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 /* Insert a single step breakpoint at the next executed instruction.  */
 
 static VEC (CORE_ADDR) *
-arm_linux_software_single_step (struct frame_info *frame)
+arm_linux_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
   CORE_ADDR pc;

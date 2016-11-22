@@ -6287,9 +6287,8 @@ arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
    and breakpoint them.  */
 
 VEC (CORE_ADDR) *
-arm_software_single_step (struct frame_info *frame)
+arm_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
   CORE_ADDR pc;

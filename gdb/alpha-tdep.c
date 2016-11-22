@@ -766,9 +766,8 @@ static const int stq_c_opcode = 0x2f;
    the sequence.  */
 
 static VEC (CORE_ADDR) *
-alpha_deal_with_atomic_sequence (struct frame_info *frame)
+alpha_deal_with_atomic_sequence (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
@@ -1719,9 +1718,8 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 VEC (CORE_ADDR) *
-alpha_software_single_step (struct frame_info *frame)
+alpha_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc;
   VEC (CORE_ADDR) *next_pcs = NULL;

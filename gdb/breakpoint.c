@@ -15193,15 +15193,16 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
 int
 insert_single_step_breakpoints (struct gdbarch *gdbarch)
 {
-  struct frame_info *frame = get_current_frame ();
+  struct regcache *regcache = get_current_regcache ();
   VEC (CORE_ADDR) * next_pcs;
 
-  next_pcs = gdbarch_software_single_step (gdbarch, frame);
+  next_pcs = gdbarch_software_single_step (gdbarch, regcache);
 
   if (next_pcs != NULL)
     {
       int i;
       CORE_ADDR pc;
+      struct frame_info *frame = get_current_frame ();
       struct address_space *aspace = get_frame_address_space (frame);
 
       for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)

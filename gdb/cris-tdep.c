@@ -2061,9 +2061,8 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
    Either one ordinary target or two targets for branches may be found.  */
 
 static VEC (CORE_ADDR) *
-cris_software_single_step (struct frame_info *frame)
+cris_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   inst_env_type inst_env;
   VEC (CORE_ADDR) *next_pcs = NULL;

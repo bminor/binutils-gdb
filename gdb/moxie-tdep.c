@@ -300,9 +300,8 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 /* Insert a single step breakpoint.  */
 
 static VEC (CORE_ADDR) *
-moxie_software_single_step (struct frame_info *frame)
+moxie_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   gdb_byte buf[4];

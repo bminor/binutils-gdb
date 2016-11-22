@@ -4149,9 +4149,8 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
    the target of the coming instruction and breakpoint it.  */
 
 VEC (CORE_ADDR) *
-mips_software_single_step (struct frame_info *frame)
+mips_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc, next_pc;
   VEC (CORE_ADDR) *next_pcs;

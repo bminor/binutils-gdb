@@ -1,5 +1,34 @@
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* gdbarch.sh (software_single_step): Change parameter from frame_info
+	to regcache.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* aarch64-tdep.c (aarch64_software_single_step): Change parameter
+	from frame_info to regcache.  Don't call get_current_regcache.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Likewise.
+	(alpha_software_single_step): Likewise.
+	* alpha-tdep.h (alpha_software_single_step): Update declaration.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Likewise.
+	* arm-tdep.c (arm_software_single_step): Likewise.
+	* arm-tdep.h (arm_software_single_step): Likewise.
+	* breakpoint.c (insert_single_step_breakpoint): Pass regcache to
+	gdbarch_software_single_step.
+	* cris-tdep.c (cris_software_single_step): Change parameter from
+	frame_info to regcache.  Don't call get_current_regcache.
+	* mips-tdep.c (mips_software_single_step): Likewise.
+	* mips-tdep.h (mips_software_single_step): Update declaration.
+	* moxie-tdep.c (moxie_software_single_step): Likewise.
+	* nios2-tdep.c (nios2_software_single_step): Likewise.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Update declaration.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Likewise.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Likewise.
+	* s390-linux-tdep.c (s390_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* spu-tdep.c (spu_software_single_step): Likewise.
+	* tic6x-tdep.c (tic6x_software_single_step): Likewise.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* spu-tdep.c (spu_software_single_step): Call get_regcache_arch
 	instead of get_frame_arch.  Call regcache_read_pc instead of
 	get_frame_pc.  Call regcache_raw_get_unsigned instead of

@@ -2225,9 +2225,8 @@ value_of_aarch64_user_reg (struct frame_info *frame, const void *baton)
    single step through atomic sequences on AArch64.  */
 
 static VEC (CORE_ADDR) *
-aarch64_software_single_step (struct frame_info *frame)
+aarch64_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   const int insn_size = 4;

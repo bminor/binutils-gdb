@@ -3164,13 +3164,13 @@ gdbarch_software_single_step_p (struct gdbarch *gdbarch)
 }
 
 VEC (CORE_ADDR) *
-gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->software_single_step != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_software_single_step called\n");
-  return gdbarch->software_single_step (frame);
+  return gdbarch->software_single_step (regcache);
 }
 
 void

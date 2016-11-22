@@ -1144,9 +1144,8 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
    the sequence.  */
 
 VEC (CORE_ADDR) *
-ppc_deal_with_atomic_sequence (struct frame_info *frame)
+ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = regcache_read_pc (regcache);

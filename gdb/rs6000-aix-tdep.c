@@ -674,9 +674,8 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 /* AIX does not support PT_STEP.  Simulate it.  */
 
 static VEC (CORE_ADDR) *
-rs6000_software_single_step (struct frame_info *frame)
+rs6000_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii, insn;
@@ -689,7 +688,7 @@ rs6000_software_single_step (struct frame_info *frame)
 
   insn = read_memory_integer (loc, 4, byte_order);
 
-  next_pcs = ppc_deal_with_atomic_sequence (frame);
+  next_pcs = ppc_deal_with_atomic_sequence (regcache);
   if (next_pcs != NULL)
     return next_pcs;
   

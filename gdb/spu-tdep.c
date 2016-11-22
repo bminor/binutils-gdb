@@ -1611,9 +1611,8 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 /* Software single-stepping support.  */
 
 static VEC (CORE_ADDR) *
-spu_software_single_step (struct frame_info *frame)
+spu_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;

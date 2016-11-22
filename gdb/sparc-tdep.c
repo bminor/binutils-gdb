@@ -1603,9 +1603,8 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
 }
 
 static VEC (CORE_ADDR) *
-sparc_software_single_step (struct frame_info *frame)
+sparc_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   CORE_ADDR npc, nnpc;

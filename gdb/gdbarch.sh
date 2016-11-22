@@ -634,7 +634,7 @@ m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # the condition and only put the breakpoint at the branch destination if
 # the condition is true, so that we ensure forward progress when stepping
 # past a conditional branch to self.
-F:VEC (CORE_ADDR) *:software_single_step:struct frame_info *frame:frame
+F:VEC (CORE_ADDR) *:software_single_step:struct regcache *regcache:regcache
 
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.

@@ -2220,9 +2220,8 @@ nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 /* Implement the software_single_step gdbarch method.  */
 
 static VEC (CORE_ADDR) *
-nios2_software_single_step (struct frame_info *frame)
+nios2_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR next_pc = nios2_get_next_pc (regcache, regcache_read_pc (regcache));
   VEC (CORE_ADDR) *next_pcs = NULL;
