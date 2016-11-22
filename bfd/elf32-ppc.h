@@ -49,6 +49,9 @@ struct ppc_elf_params
      defined in a shared library.  */
   int pic_fixup;
 
+  /* Relocate 16A relocs as 16D and vice versa.  */
+  int vle_reloc_fixup;
+
   bfd_vma pagesize;
 };
 

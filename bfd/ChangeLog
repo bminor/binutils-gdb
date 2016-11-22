@@ -1,5 +1,21 @@
 2016-11-22  Alan Modra  <amodra@gmail.com>
 
+	PR 20744
+	* elf32-ppc.h (struct ppc_elf_params): Add vle_reloc_fixup field.
+	* elf32-ppc.c: Include opcode/ppc.h.
+	(ppc_elf_howto_raw): Correct dst_mask for R_PPC_VLE_LO16A,
+	R_PPC_VLE_LO16D, R_PPC_VLE_HI16A, R_PPC_VLE_HI16D, R_PPC_VLE_HA16A,
+	R_PPC_VLE_HA16D, R_PPC_VLE_SDAREL_LO16A, R_PPC_VLE_SDAREL_LO16D,
+	R_PPC_VLE_SDAREL_HI16A, R_PPC_VLE_SDAREL_HI16D,
+	R_PPC_VLE_SDAREL_HA16A, and R_PPC_VLE_SDAREL_HA16D relocs.
+	(ppc_elf_link_hash_table_create): Update default_params init.
+	(ppc_elf_vle_split16): Correct shift and mask.  Add params.
+	Report or fix insn/reloc mismatches.
+	(ppc_elf_relocate_section): Pass input_section, offset and fixup
+	to ppc_elf_vle_split16.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (ppc64_elf_relocate_section): Calculate d_offset for
 	input_bfd.  Replace occurrences of output_bfd as bfd_get_32 and
 	bfd_put_32 param with input_bfd.

@@ -1,6 +1,19 @@
 -*- text -*-
 
-* The nm program has a new command lien option (--with-version-strings)
+* This version of binutils fixes a problem with PowerPC VLE 16A and 16D
+  relocations which were functionally swapped, for example,
+  R_PPC_VLE_HA16A performed like R_PPC_VLE_HA16D while R_PPC_VLE_HA16D
+  performed like R_PPC_VLE_HA16A.  This could have been fixed by
+  renumbering relocations, which would keep object files created by an
+  older version of gas compatible with a newer ld.  However, that would
+  require an ABI update, affecting other assemblers and linkers that
+  create and process the relocations correctly.  It is recommended that
+  all VLE object files be recompiled, but ld can modify the relocations
+  if --vle-reloc-fixup is passed to ld.  If the new ld command line
+  option is not used, ld will ld warn on finding relocations inconsistent
+  with the instructions being relocated.
+
+* The nm program has a new command line option (--with-version-strings)
   which will display a symbol's version information, if any, after the
   symbol's name.
 

@@ -2617,22 +2617,6 @@ struct ppc_fixup
 
 #define MAX_INSN_FIXUPS (5)
 
-/* Form I16L.  */
-#define E_OR2I_INSN		0x7000C000
-#define E_AND2I_DOT_INSN	0x7000C800
-#define E_OR2IS_INSN		0x7000D000
-#define E_LIS_INSN		0x7000E000
-#define	E_AND2IS_DOT_INSN	0x7000E800
-
-/* Form I16A.  */
-#define E_ADD2I_DOT_INSN	0x70008800
-#define E_ADD2IS_INSN		0x70009000
-#define E_CMP16I_INSN		0x70009800
-#define E_MULL2I_INSN		0x7000A000
-#define E_CMPL16I_INSN		0x7000A800
-#define E_CMPH16I_INSN		0x7000B000
-#define E_CMPHL16I_INSN		0x7000B800
-
 /* This routine is called for each instruction to be assembled.  */
 
 void
@@ -3113,14 +3097,14 @@ md_assemble (char *str)
 		{
 		  int tmp_insn = insn & opcode->mask;
 
-		  int use_d_reloc = (tmp_insn == E_OR2I_INSN
+		  int use_a_reloc = (tmp_insn == E_OR2I_INSN
 				     || tmp_insn == E_AND2I_DOT_INSN
 				     || tmp_insn == E_OR2IS_INSN
 				     || tmp_insn == E_LIS_INSN
 				     || tmp_insn == E_AND2IS_DOT_INSN);
 
 
-		  int use_a_reloc = (tmp_insn == E_ADD2I_DOT_INSN
+		  int use_d_reloc = (tmp_insn == E_ADD2I_DOT_INSN
 				     || tmp_insn == E_ADD2IS_INSN
 				     || tmp_insn == E_CMP16I_INSN
 				     || tmp_insn == E_MULL2I_INSN

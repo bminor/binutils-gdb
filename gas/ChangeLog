@@ -1,3 +1,10 @@
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* config/tc-ppc.c: Delete VLE insn defines.
+	(md_assemble): Swap use_a_reloc and use_d_reloc.
+	* testsuite/gas/ppc/vle-reloc.d: Update.
+
 2016-11-21  Renlin Li  <renlin.li@arm.com>
 
 	PR gas/20827

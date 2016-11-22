@@ -1,3 +1,9 @@
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* emultempl/ppc32elf.em (params): Update initializer.  Handle
+	--vle-reloc-fixup command line arg.
+
 2016-11-15  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/20789

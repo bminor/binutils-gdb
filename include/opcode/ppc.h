@@ -448,6 +448,23 @@ ppc_optional_operand_value (const struct powerpc_operand *operand)
   return 0;
 }
 
+/* PowerPC VLE insns.  */
+/* Form I16L, uses 16A relocs.  */
+#define E_OR2I_INSN		0x7000C000
+#define E_AND2I_DOT_INSN	0x7000C800
+#define E_OR2IS_INSN		0x7000D000
+#define E_LIS_INSN		0x7000E000
+#define	E_AND2IS_DOT_INSN	0x7000E800
+
+/* Form I16A, uses 16D relocs.  */
+#define E_ADD2I_DOT_INSN	0x70008800
+#define E_ADD2IS_INSN		0x70009000
+#define E_CMP16I_INSN		0x70009800
+#define E_MULL2I_INSN		0x7000A000
+#define E_CMPL16I_INSN		0x7000A800
+#define E_CMPH16I_INSN		0x7000B000
+#define E_CMPHL16I_INSN		0x7000B800
+
 #ifdef __cplusplus
 }
 #endif

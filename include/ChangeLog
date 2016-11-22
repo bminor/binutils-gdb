@@ -1,3 +1,8 @@
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* opcode/ppc.h: Define VLE insns using 16A and 16D relocs.
+
 2016-11-03  David Tolnay <dtolnay@gmail.com>
 	    Mark Wielaard  <mark@klomp.org>
 
