@@ -728,7 +728,17 @@ class scoped_value_mark
 
   ~scoped_value_mark ()
   {
-    value_free_to_mark (m_value);
+    free_to_mark ();
+  }
+
+  /* Free the values currently on the value stack.  */
+  void free_to_mark ()
+  {
+    if (m_value != NULL)
+      {
+	value_free_to_mark (m_value);
+	m_value = NULL;
+      }
   }
 
  private:

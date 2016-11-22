@@ -1,5 +1,13 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* value.h (scoped_value_mark::~scoped_value_mark): Call
+	free_to_mark.
+	(scoped_value_mark::free_to_mark): New method.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use
+	scoped_value_mark.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-value.c (valpy_dereference, valpy_referenced_value)
 	(valpy_reference_value, valpy_const_value, valpy_get_address)
 	(valpy_get_dynamic_type, valpy_lazy_string, valpy_do_cast)
