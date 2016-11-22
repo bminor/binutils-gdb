@@ -1613,7 +1613,8 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 static VEC (CORE_ADDR) *
 spu_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
@@ -1622,7 +1623,7 @@ spu_software_single_step (struct frame_info *frame)
   ULONGEST lslr;
   VEC (CORE_ADDR) *next_pcs = NULL;
 
-  pc = get_frame_pc (frame);
+  pc = regcache_read_pc (regcache);
 
   if (target_read_memory (pc, buf, 4))
     throw_error (MEMORY_ERROR, _("Could not read instruction at %s."),
@@ -1631,7 +1632,7 @@ spu_software_single_step (struct frame_info *frame)
   insn = extract_unsigned_integer (buf, 4, byte_order);
 
   /* Get local store limit.  */
-  lslr = get_frame_register_unsigned (frame, SPU_LSLR_REGNUM);
+  lslr = regcache_raw_get_unsigned (regcache, SPU_LSLR_REGNUM);
   if (!lslr)
     lslr = (ULONGEST) -1;
 
@@ -1652,7 +1653,7 @@ spu_software_single_step (struct frame_info *frame)
       if (reg == SPU_PC_REGNUM)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
-	target += get_frame_register_unsigned (frame, reg) & -4;
+	target += regcache_raw_get_unsigned (regcache, reg) & -4;
 
       target = target & lslr;
       if (target != next_pc)
