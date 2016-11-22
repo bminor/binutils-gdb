@@ -1,5 +1,14 @@
 2016-11-22  Yao Qi  <yao.qi@linaro.org>
 
+	* cris-tdep.c (find_step_target): Replace parameter frame
+	with regcache.  Call get_regcache_arch instead of
+	get_frame_arch.  Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+	(cris_software_single_step): Call get_regcache_arch instead
+	of get_frame_arch.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
 	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Call
 	get_regcache_arch instead of get_frame_arch.  Call
 	regcache_read_pc instead of get_frame_pc.

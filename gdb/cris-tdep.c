@@ -1989,25 +1989,25 @@ find_cris_op (unsigned short insn, inst_env_type *inst_env)
    actually an internal error.  */
 
 static int
-find_step_target (struct frame_info *frame, inst_env_type *inst_env)
+find_step_target (struct regcache *regcache, inst_env_type *inst_env)
 {
   int i;
   int offset;
   unsigned short insn;
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Create a local register image and set the initial state.  */
   for (i = 0; i < NUM_GENREGS; i++)
     {
       inst_env->reg[i] = 
-	(unsigned long) get_frame_register_unsigned (frame, i);
+	(unsigned long) regcache_raw_get_unsigned (regcache, i);
     }
   offset = NUM_GENREGS;
   for (i = 0; i < NUM_SPECREGS; i++)
     {
       inst_env->preg[i] = 
-	(unsigned long) get_frame_register_unsigned (frame, offset + i);
+	(unsigned long) regcache_raw_get_unsigned (regcache, offset + i);
     }
   inst_env->branch_found = 0;
   inst_env->slot_needed = 0;
@@ -2063,13 +2063,14 @@ find_step_target (struct frame_info *frame, inst_env_type *inst_env)
 static VEC (CORE_ADDR) *
 cris_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   inst_env_type inst_env;
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Analyse the present instruction environment and insert 
      breakpoints.  */
-  int status = find_step_target (frame, &inst_env);
+  int status = find_step_target (regcache, &inst_env);
   if (status == -1)
     {
       /* Could not find a target.  Things are likely to go downhill 
