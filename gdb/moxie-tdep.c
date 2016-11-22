@@ -302,17 +302,17 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 static VEC (CORE_ADDR) *
 moxie_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   gdb_byte buf[4];
   uint16_t inst;
   uint32_t tmpu32;
   ULONGEST fp;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct regcache *regcache = get_current_regcache ();
   VEC (CORE_ADDR) *next_pcs = NULL;
 
-  addr = get_frame_pc (frame);
+  addr = regcache_read_pc (regcache);
 
   inst = (uint16_t) moxie_process_readu (addr, buf, 2, byte_order);
 
