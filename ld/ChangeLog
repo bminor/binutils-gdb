@@ -1,5 +1,7 @@
 2016-11-23  Nick Clifton  <nickc@redhat.com>
 
+	* testsuite/ld-arm/vxworks2.sd: Update expected readelf output.
+
 	PR ld/20815
 	* ld.texinfo: Note that PT_TLS can be used as a segment type.
 	* testsuite/ld-discard/discard.ld: Add space for program headers.
