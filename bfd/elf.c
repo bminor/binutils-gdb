@@ -4254,7 +4254,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 	 PT_INTERP segment.  In this case, assume we also need a
 	 PT_PHDR segment, although that may not be true for all
 	 targets.  */
-      segs += 2;
+      segs += 3;
     }
 
   if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
@@ -4438,7 +4438,10 @@ elf_modify_segment_map (bfd *abfd,
 	}
       (*m)->count = new_count;
 
-      if (remove_empty_load && (*m)->p_type == PT_LOAD && (*m)->count == 0)
+      if (remove_empty_load
+	  && (*m)->p_type == PT_LOAD
+	  && (*m)->count == 0
+	  && !(*m)->includes_phdrs)
 	*m = (*m)->next;
       else
 	m = &(*m)->next;
@@ -4488,6 +4491,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       asection *dynsec, *eh_frame_hdr;
       bfd_size_type amt;
       bfd_vma addr_mask, wrap_to = 0;
+      bfd_boolean linker_created_pt_phdr_segment = FALSE;
 
       /* Select the allocated sections, and sort them.  */
 
@@ -4540,7 +4544,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  m->p_flags = PF_R | PF_X;
 	  m->p_flags_valid = 1;
 	  m->includes_phdrs = 1;
-
+	  linker_created_pt_phdr_segment = TRUE;
 	  *pm = m;
 	  pm = &m->next;
 
@@ -4591,7 +4595,19 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      || ((sections[0]->lma & addr_mask) % maxpagesize
 		  < phdr_size % maxpagesize)
 	      || (sections[0]->lma & addr_mask & -maxpagesize) < wrap_to)
-	    phdr_in_segment = FALSE;
+	    {
+	      /* PR 20815: The ELF standard says that a PT_PHDR segment, if
+		 present, must be included as part of the memory image of the
+		 program.  Ie it must be part of a PT_LOAD segment as well.
+		 If we have had to create our own PT_PHDR segment, but it is
+		 not going to be covered by the first PT_LOAD segment, then
+		 force the inclusion if we can...  */
+	      if ((abfd->flags & D_PAGED) != 0
+		  && linker_created_pt_phdr_segment)
+		phdr_in_segment = TRUE;
+	      else
+		phdr_in_segment = FALSE;
+	    }
 	}
 
       for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
@@ -5773,16 +5789,25 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
       else if (m->count != 0)
 	{
 	  unsigned int i;
+
 	  if (p->p_type != PT_LOAD
 	      && (p->p_type != PT_NOTE
 		  || bfd_get_format (abfd) != bfd_core))
 	    {
+	      /* A user specified segment layout may include a PHDR
+		 segment that overlaps with a LOAD segment...  */
+	      if (p->p_type == PT_PHDR)
+		{
+		  m->count = 0;
+		  continue;
+		}
+
 	      if (m->includes_filehdr || m->includes_phdrs)
 		{
 		  /* PR 17512: file: 2195325e.  */
 		  _bfd_error_handler
-		    (_("%B: warning: non-load segment includes file header and/or program header"),
-		     abfd);
+		    (_("%B: error: non-load segment %d includes file header and/or program header"),
+		     abfd, (int)(p - phdrs));
 		  return FALSE;
 		}
 
@@ -5827,6 +5852,52 @@ find_section_in_list (unsigned int i, elf_section_list * list)
     if (list->ndx == i)
       break;
   return list;
+}
+
+/* Compare function used when sorting the program header table.
+   The ELF standard requires that a PT_PHDR segment, if present,
+   must appear before any PT_LOAD segments.  It also requires
+   that all PT_LOAD segments are sorted into order of increasing
+   p_vaddr.  */
+
+static signed int
+phdr_sorter (const void * a, const void * b)
+{
+  Elf_Internal_Phdr * ahdr = (Elf_Internal_Phdr *) a;
+  Elf_Internal_Phdr * bhdr = (Elf_Internal_Phdr *) b;
+
+  switch (ahdr->p_type)
+    {
+    case PT_LOAD:
+      switch (bhdr->p_type)
+	{
+	case PT_PHDR:
+	  return 1;
+	case PT_LOAD:
+	  if (ahdr->p_vaddr < bhdr->p_vaddr)
+	    return -1;
+	  if (ahdr->p_vaddr > bhdr->p_vaddr)
+	    return 1;
+	  return 0;
+	default:
+	  return 0;
+	}
+      break;
+    case PT_PHDR:
+      switch (bhdr->p_type)
+	{
+	case PT_PHDR:
+	  _bfd_error_handler (_("error: multiple PHDR segments detecetd"));
+	  return 0;
+	case PT_LOAD:
+	  return -1;
+	default:
+	  return 0;
+	}
+      break;
+    default:
+      return 0;
+    }
 }
 
 /* Work out the file positions of all the sections.  This is called by
@@ -5892,6 +5963,7 @@ assign_file_positions_except_relocs (bfd *abfd,
     }
   else
     {
+      Elf_Internal_Phdr * map;
       unsigned int alloc;
 
       /* Assign file positions for the loaded sections based on the
@@ -5930,9 +6002,46 @@ assign_file_positions_except_relocs (bfd *abfd,
 
       /* Write out the program headers.  */
       alloc = elf_program_header_size (abfd) / bed->s->sizeof_phdr;
+
+      /* Sort the program headers into the ordering required by the ELF standard.  */
+      if (alloc == 0)
+	return TRUE;
+
+      map = (Elf_Internal_Phdr *) xmalloc (alloc * sizeof (* tdata->phdr));
+      memcpy (map, tdata->phdr, alloc * sizeof (* tdata->phdr));
+      qsort (map, alloc, sizeof (* tdata->phdr), phdr_sorter);
+	  
+      /* PR ld/20815 - Check that the program header segment, if present, will
+	 be loaded into memory.  FIXME: The check below is not sufficient as
+	 really all PT_LOAD segments should be checked before issuing an error
+	 message.  Plus the PHDR segment does not have to be the first segment
+	 in the program header table.  But this version of the check should
+	 catch all real world use cases.  */
+      if (alloc > 1
+	  && map[0].p_type == PT_PHDR
+	  && ! bed->elf_backend_allow_non_load_phdr (abfd, map, alloc)
+	  && map[1].p_type == PT_LOAD
+	  && (map[1].p_vaddr > map[0].p_vaddr
+	      || (map[1].p_vaddr + map[1].p_memsz) < (map[0].p_vaddr + map[0].p_memsz)))
+	{
+	  /* The fix for this error is usually to edit the linker script being
+	     used and set up the program headers manually.  Either that or
+	     leave room for the headers at the start of the SECTIONS.  */
+	  _bfd_error_handler (_("\
+%B: error: PHDR segment not covered by LOAD segment"),
+			      abfd);
+	  free (map);
+	  return FALSE;
+	}
+
       if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
-	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
-	return FALSE;
+	  || bed->s->write_out_phdrs (abfd, map, alloc) != 0)
+	{
+	  free (map);
+	  return FALSE;
+	}
+
+      free (map);
     }
 
   return TRUE;

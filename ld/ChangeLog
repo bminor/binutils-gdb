@@ -1,3 +1,44 @@
+2016-11-23  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* ld.texinfo: Note that PT_TLS can be used as a segment type.
+	* testsuite/ld-discard/discard.ld: Add space for program headers.
+	* testsuite/ld-elf/flags1.ld: Likewise.
+	* testsuite/ld-elf/maxpage3.t: Likewise.
+	* testsuite/ld-elf/noload-1.t: Likewise.
+	* testsuite/ld-elf/orphan.ld: Likewise.
+	* testsuite/ld-elf/overlay.t: Likewise.
+	* testsuite/ld-elf/pr14052.t: Likewise.
+	* testsuite/ld-elf/pr19539.t: Likewise.
+	* testsuite/ld-elf/provide-hidden-1.ld: Likewise.
+	* testsuite/ld-elf/provide-hidden-s.ld: Likewise.
+	* testsuite/ld-elf/weak-dyn-1.ld: Likewise.
+	* testsuite/ld-i386/pr19539.t: Likewise.
+	* testsuite/ld-scripts/defined.t: Likewise.
+	* testsuite/ld-scripts/defined6.t: Likewise.
+	* testsuite/ld-scripts/dynamic-sections.t: Likewise.
+	* testsuite/ld-scripts/empty-aligned.t: Likewise.
+	* testsuite/ld-scripts/provide-2.t: Likewise.
+	* testsuite/ld-scripts/provide-4.t: Likewise.
+	* testsuite/ld-vax-elf/plt-local.ld: Likewise.
+	* testsuite/ld-x86-64/pr19539.t: Likewise.
+	* testsuite/ld-elf/ehdr_start-missing.d: Do not initialise the
+	dynamic linker.
+	* testsuite/ld-elf/ehdr_start-weak.d: Likewise.
+	* testsuite/ld-elf/elf.exp (pr14170, pr17068): Likewise.
+	* testsuite/ld-elf/loadaddr1.d: Update expected readelf output.
+	* testsuite/ld-elf/noload-2.d: Likewise.
+	* testsuite/ld-powerpc/vxworks2.sd: Likewise.
+	* testsuite/ld-scripts/phdrs3a.d: Likewise.
+	* testsuite/ld-scripts/size-2.d: Likewise.
+	* testsuite/ld-elf/group.ld: Add program headers.
+	* testsuite/ld-elf/overlay.d: Skip for SPU.
+	* testsuite/ld-elf/flags1.d: Skip for RX.
+	* testsuite/ld-elf/pr19162.d: Skip for HPPA64.
+	* testsuite/ld-elf/pr19539.d: Skip for ALPHA.
+	* testsuite/ld-scripts/empty-orphan.t: Update program headers.
+	* testsuite/ld-scripts/size-2.t: Likewise.
+
 2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
         * configure: Regenerate.

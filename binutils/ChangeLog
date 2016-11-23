@@ -1,3 +1,9 @@
+2016-11-23  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* readelf.c (process_program_headers): Check PT_LOAD and PT_PHDR
+	segments for validity.
+
 2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
         * configure: Regenerate.

@@ -756,7 +756,8 @@ elf_object_p (bfd *abfd)
 	     So we are kind, and reset the string index value to 0
 	     so that at least some processing can be done.  */
 	  i_ehdrp->e_shstrndx = SHN_UNDEF;
-	  _bfd_error_handler (_("warning: %s has a corrupt string table index - ignoring"), abfd->filename);
+	  _bfd_error_handler (_("warning: %s has a corrupt string table index - ignoring"),
+			      abfd->filename);
 	}
     }
   else if (i_ehdrp->e_shstrndx != SHN_UNDEF)
@@ -973,6 +974,7 @@ elf_write_out_phdrs (bfd *abfd,
   while (count--)
     {
       Elf_External_Phdr extphdr;
+
       elf_swap_phdr_out (abfd, phdr, &extphdr);
       if (bfd_bwrite (&extphdr, sizeof (Elf_External_Phdr), abfd)
 	  != sizeof (Elf_External_Phdr))

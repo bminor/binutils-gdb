@@ -1077,6 +1077,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_modify_program_headers)
     (bfd *, struct bfd_link_info *);
 
+  /* This function is called to see if the PHDR header should be
+     checked for validity.  */
+  bfd_boolean (*elf_backend_allow_non_load_phdr)
+    (bfd *,  const Elf_Internal_Phdr *, unsigned);
+
   /* This function is called before section garbage collection to
      mark entry symbol sections.  */
   void (*gc_keep)

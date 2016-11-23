@@ -2666,6 +2666,14 @@ elf64_hppa_additional_program_headers (bfd *abfd,
   return 0;
 }
 
+static bfd_boolean
+elf64_hppa_allow_non_load_phdr (bfd *abfd ATTRIBUTE_UNUSED,
+				const Elf_Internal_Phdr *phdr ATTRIBUTE_UNUSED,
+				unsigned int count ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
 /* Allocate and initialize any program headers required by this
    specific backend.
 
@@ -2692,6 +2700,7 @@ elf64_hppa_modify_segment_map (bfd *abfd,
       for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 	if (m->p_type == PT_PHDR)
 	  break;
+
       if (m == NULL)
 	{
 	  m = ((struct elf_segment_map *)
@@ -4083,6 +4092,9 @@ const struct elf_size_info hppa64_elf_size_info =
 
 #define elf_backend_modify_segment_map \
 	elf64_hppa_modify_segment_map
+
+#define elf_backend_allow_non_load_phdr \
+	elf64_hppa_allow_non_load_phdr
 
 #define elf_backend_link_output_symbol_hook \
 	elf64_hppa_link_output_symbol_hook

@@ -3797,7 +3797,7 @@ get_segment_type (unsigned long p_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOPROC+%lx", p_type - PT_LOPROC);
+	  sprintf (buff, "LOPROC+%#lx", p_type - PT_LOPROC);
 	}
       else if ((p_type >= PT_LOOS) && (p_type <= PT_HIOS))
 	{
@@ -3822,7 +3822,7 @@ get_segment_type (unsigned long p_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOOS+%lx", p_type - PT_LOOS);
+	  sprintf (buff, "LOOS+%#lx", p_type - PT_LOOS);
 	}
       else
 	snprintf (buff, sizeof (buff), _("<unknown>: %lx"), p_type);
@@ -4770,6 +4770,7 @@ process_program_headers (FILE * file)
 {
   Elf_Internal_Phdr * segment;
   unsigned int i;
+  Elf_Internal_Phdr * previous_load = NULL;
 
   if (elf_header.e_phnum == 0)
     {
@@ -4901,13 +4902,39 @@ process_program_headers (FILE * file)
 		      (segment->p_flags & PF_X ? 'E' : ' '));
 	      print_vma (segment->p_align, HEX);
 	    }
-	}
 
-      if (do_segments)
-	putc ('\n', stdout);
+	  putc ('\n', stdout);
+	}
 
       switch (segment->p_type)
 	{
+	case PT_LOAD:
+	  if (previous_load
+	      && previous_load->p_vaddr > segment->p_vaddr)
+	    error (_("LOAD segments must be sorted in order of increasing VirtAddr\n"));
+	  if (segment->p_memsz < segment->p_filesz)
+	    error (_("the segment's file size is larger than its memory size\n"));
+	  previous_load = segment;
+	  break;
+
+	case PT_PHDR:
+	  /* PR 20815 - Verify that the program header is loaded into memory.  */
+	  if (i > 0 && previous_load != NULL)
+	    error (_("the PHDR segment must occur before any LOAD segment\n"));
+	  if (elf_header.e_machine != EM_PARISC)
+	    {
+	      unsigned int j;
+
+	      for (j = 1; j < elf_header.e_phnum; j++)
+		if (program_headers[j].p_vaddr <= segment->p_vaddr
+		    && (program_headers[j].p_vaddr + program_headers[j].p_memsz)
+		    >= (segment->p_vaddr + segment->p_filesz))
+		  break;
+	      if (j == elf_header.e_phnum)
+		error (_("the PHDR segment is not covered by a LOAD segment\n"));
+	    }
+	  break;
+
 	case PT_DYNAMIC:
 	  if (dynamic_addr)
 	    error (_("more than one dynamic segment\n"));
@@ -6068,7 +6095,9 @@ process_section_headers (FILE * file)
 	  if (section->sh_type == SHT_NOBITS)
 	    /* NOBITS section headers with non-zero sh_info fields can be
 	       created when a binary is stripped of everything but its debug
-	       information.  The stripped sections have their headers preserved but their types set to SHT_NOBITS.  so do not check this type of section.  */
+	       information.  The stripped sections have their headers
+	       preserved but their types set to SHT_NOBITS.  So do not check
+	       this type of section.  */
 	    ;
 	  else if (section->sh_flags & SHF_INFO_LINK)
 	    {

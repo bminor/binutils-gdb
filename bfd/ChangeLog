@@ -1,3 +1,32 @@
+2016-11-23  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* elf.c (elf_modify_segment_map): Allow empty LOAD segments if
+	they contain the program headers.
+	(_bfd_elf_map_sections_to_segments): If the linker created the
+	PHDR segment then always attempt to include it in a LOAD segment.
+	(assign_file_positions_for_non_load_sections): Allow LOAD segments
+	to overlap PHDR segments.
+	(phdr_sorter): New function.  Sorts program headers.
+	(assign_file_positions_except_relocs): Sort the program headers
+	before writing them out.  Issue an error if the PHDR segment is
+	not covered by a LOAD segment, unless the backend allows it.
+	* elf-bfd.h (struct elf_backend_data): Add
+	elf_backend_allow_non_load_phdr.
+	* elfxx-target.h (elf_backend_allow_non_load_phdr): Provide
+	default definition that returns FALSE.
+	(elfNN_bed): Initialise the elf_backend_allow_non_load_phdr
+	field.
+	* elf64-hppa.c (elf64_hppa_allow_non_load_phdr): New function.
+	Returns TRUE.
+	(elf_backend_allow_non_load_phdr): Define.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Do not
+	place the interpreter string into the .interp section if the
+	nointerp flag is set in the link info structure.
+	* elf32-arc.c (elf_arc_size_dynamic_sections): Likewise.
+	* elf32-score7.c (score_elf_final_link_relocate): Allow for the
+	_gp symbol not being part of the output.
+
 2016-11-23  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add dtrel_excludes_plt.

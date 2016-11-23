@@ -5359,6 +5359,9 @@ ABI.
 @item @code{PT_PHDR} (6)
 Indicates a segment where the program headers may be found.
 
+@item @code{PT_TLS} (7)
+Indicates a segment containing thread local storage.
+
 @item @var{expression}
 An expression giving the numeric type of the program header.  This may
 be used for types not defined above.

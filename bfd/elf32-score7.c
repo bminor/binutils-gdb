@@ -1852,9 +1852,12 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
       bh = bfd_link_hash_lookup (info->hash, "_gp", 0, 0, 1);
       if (bh != NULL && bh->type == bfd_link_hash_defined)
-        elf_gp (output_bfd) = (bh->u.def.value
-                               + bh->u.def.section->output_section->vma
-                               + bh->u.def.section->output_offset);
+	{
+	  elf_gp (output_bfd) = (bh->u.def.value
+				 + bh->u.def.section->output_offset);
+	  if (bh->u.def.section->output_section)
+	    elf_gp (output_bfd) += bh->u.def.section->output_section->vma;
+	}
       else if (bfd_link_relocatable (info))
         {
           bfd_vma lo = -1;
