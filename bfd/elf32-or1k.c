@@ -616,11 +616,6 @@ struct elf_or1k_link_hash_table
   struct elf_link_hash_table root;
 
   /* Short-cuts to get to dynamic linker sections.  */
-  asection *sgot;
-  asection *sgotplt;
-  asection *srelgot;
-  asection *splt;
-  asection *srelplt;
   asection *sdynbss;
   asection *srelbss;
 
@@ -820,7 +815,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
   sreloc = elf_section_data (input_section)->sreloc;
 
-  sgot = htab->sgot;
+  sgot = htab->root.sgot;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -887,11 +882,11 @@ or1k_elf_relocate_section (bfd *output_bfd,
         {
         case R_OR1K_PLT26:
           {
-            if (htab->splt != NULL && h != NULL
+            if (htab->root.splt != NULL && h != NULL
                 && h->plt.offset != (bfd_vma) -1)
               {
-                relocation = (htab->splt->output_section->vma
-                              + htab->splt->output_offset
+                relocation = (htab->root.splt->output_section->vma
+                              + htab->root.splt->output_offset
                               + h->plt.offset);
               }
             break;
@@ -969,7 +964,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
                       /* We need to generate a R_OR1K_RELATIVE reloc
                          for the dynamic linker.  */
-                      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+                      srelgot = htab->root.srelgot;
                       BFD_ASSERT (srelgot != NULL);
 
                       outrel.r_offset = (sgot->output_section->vma
@@ -1365,46 +1360,6 @@ or1k_elf_gc_sweep_hook (bfd *abfd,
   return TRUE;
 }
 
-/* Create .got, .gotplt, and .rela.got sections in DYNOBJ, and set up
-   shortcuts to them in our hash table.  */
-
-static bfd_boolean
-create_got_section (bfd *dynobj, struct bfd_link_info *info)
-{
-  struct elf_or1k_link_hash_table *htab;
-  asection *s;
-
-  /* This function may be called more than once.  */
-  s = bfd_get_section_by_name (dynobj, ".got");
-  if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
-    return TRUE;
-
-  htab = or1k_elf_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  if (! _bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
-  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-
-  if (! htab->sgot || ! htab->sgotplt || ! htab->srelgot)
-    abort ();
-
-  if (! bfd_set_section_flags (dynobj, htab->srelgot, SEC_ALLOC
-                               | SEC_LOAD
-                               | SEC_HAS_CONTENTS
-                               | SEC_IN_MEMORY
-                               | SEC_LINKER_CREATED
-                               | SEC_READONLY)
-      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
-    return FALSE;
-
-  return TRUE;
-}
-
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
@@ -1536,11 +1491,11 @@ or1k_elf_check_relocs (bfd *abfd,
         case R_OR1K_TLS_GD_LO16:
         case R_OR1K_TLS_IE_HI16:
         case R_OR1K_TLS_IE_LO16:
-          if (htab->sgot == NULL)
+          if (htab->root.sgot == NULL)
             {
               if (dynobj == NULL)
                 htab->root.dynobj = dynobj = abfd;
-              if (! create_got_section (dynobj, info))
+              if (!_bfd_elf_create_got_section (dynobj, info))
                 return FALSE;
             }
 
@@ -1735,7 +1690,7 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
 
   dynobj = htab->root.dynobj;
 
-  sgot = htab->sgotplt;
+  sgot = htab->root.sgotplt;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
   if (htab->root.dynamic_sections_created)
@@ -1761,17 +1716,17 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
               continue;
 
             case DT_PLTGOT:
-              s = htab->sgotplt;
+              s = htab->root.sgotplt;
               dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 
             case DT_JMPREL:
-              s = htab->srelplt;
+              s = htab->root.srelplt;
               dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 
             case DT_PLTRELSZ:
-              s = htab->srelplt;
+              s = htab->root.srelplt;
               dyn.d_un.d_val = s->size;
               break;
 
@@ -1785,9 +1740,9 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
                  the linker script arranges for .rela.plt to follow all
                  other relocation sections, we don't have to worry
                  about changing the DT_RELA entry.  */
-              if (htab->srelplt != NULL)
+              if (htab->root.srelplt != NULL)
                 {
-                  s = htab->srelplt;
+                  s = htab->root.srelplt;
                   dyn.d_un.d_val -= s->size;
                 }
               break;
@@ -1797,7 +1752,7 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
 
 
       /* Fill in the first entry in the procedure linkage table.  */
-      splt = htab->splt;
+      splt = htab->root.splt;
       if (splt && splt->size > 0)
         {
           if (bfd_link_pic (info))
@@ -1846,8 +1801,8 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
       elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
     }
 
-  if (htab->sgot && htab->sgot->size > 0)
-    elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize = 4;
+  if (htab->root.sgot && htab->root.sgot->size > 0)
+    elf_section_data (htab->root.sgot->output_section)->this_hdr.sh_entsize = 4;
 
   return TRUE;
 }
@@ -1883,9 +1838,9 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
          it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      splt = htab->splt;
-      sgot = htab->sgotplt;
-      srela = htab->srelplt;
+      splt = htab->root.splt;
+      sgot = htab->root.sgotplt;
+      srela = htab->root.srelplt;
       BFD_ASSERT (splt != NULL && sgot != NULL && srela != NULL);
 
       /* Get the index in the procedure linkage table which
@@ -1903,8 +1858,8 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* Fill in the entry in the procedure linkage table.  */
       if (! bfd_link_pic (info))
         {
-          got_addr += htab->sgotplt->output_section->vma
-            + htab->sgotplt->output_offset;
+          got_addr += htab->root.sgotplt->output_section->vma
+            + htab->root.sgotplt->output_offset;
           bfd_put_32 (output_bfd, PLT_ENTRY_WORD0 | ((got_addr >> 16) & 0xffff),
                       splt->contents + h->plt.offset);
           bfd_put_32 (output_bfd, PLT_ENTRY_WORD1 | (got_addr & 0xffff),
@@ -1966,8 +1921,8 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       /* This symbol has an entry in the global offset table.  Set it
          up.  */
-      sgot = htab->sgot;
-      srela = htab->srelgot;
+      sgot = htab->root.sgot;
+      srela = htab->root.srelgot;
       BFD_ASSERT (sgot != NULL && srela != NULL);
 
       rela.r_offset = (sgot->output_section->vma
@@ -2219,7 +2174,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
         {
-          asection *s = htab->splt;
+          asection *s = htab->root.splt;
 
           /* If this is the first .plt entry, make room for the special
              first entry.  */
@@ -2245,10 +2200,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
           /* We also need to make an entry in the .got.plt section, which
              will be placed in the .got section by the linker script.  */
-          htab->sgotplt->size += 4;
+          htab->root.sgotplt->size += 4;
 
           /* We also need to make an entry in the .rel.plt section.  */
-          htab->srelplt->size += sizeof (Elf32_External_Rela);
+          htab->root.srelplt->size += sizeof (Elf32_External_Rela);
         }
       else
         {
@@ -2277,7 +2232,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
             return FALSE;
         }
 
-      s = htab->sgot;
+      s = htab->root.sgot;
 
       h->got.offset = s->size;
 
@@ -2292,9 +2247,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h))
         {
           if (tls_type == TLS_GD)
-            htab->srelgot->size += 2 * sizeof (Elf32_External_Rela);
+            htab->root.srelgot->size += 2 * sizeof (Elf32_External_Rela);
           else
-            htab->srelgot->size += sizeof (Elf32_External_Rela);
+            htab->root.srelgot->size += sizeof (Elf32_External_Rela);
         }
     }
   else
@@ -2492,8 +2447,8 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
-      s = htab->sgot;
-      srel = htab->srelgot;
+      s = htab->root.sgot;
+      srel = htab->root.srelgot;
       local_tls_type = (unsigned char *) elf_or1k_local_tls_type (ibfd);
       for (; local_got < end_local_got; ++local_got)
         {
@@ -2535,9 +2490,9 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if ((s->flags & SEC_LINKER_CREATED) == 0)
         continue;
 
-      if (s == htab->splt
-          || s == htab->sgot
-          || s == htab->sgotplt
+      if (s == htab->root.splt
+          || s == htab->root.sgot
+          || s == htab->root.sgotplt
           || s == htab->sdynbss)
         {
           /* Strip this section if we don't need it; see the
@@ -2545,7 +2500,7 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
         }
       else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
         {
-          if (s->size != 0 && s != htab->srelplt)
+          if (s->size != 0 && s != htab->root.srelplt)
             relocs = TRUE;
 
           /* We use the reloc_count field as a counter if we need
@@ -2601,7 +2556,7 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
            return FALSE;
        }
 
-     if (htab->splt->size != 0)
+     if (htab->root.splt->size != 0)
        {
          if (! add_dynamic_entry (DT_PLTGOT, 0)
              || ! add_dynamic_entry (DT_PLTRELSZ, 0)
@@ -2647,19 +2602,17 @@ or1k_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  if (!htab->sgot && !create_got_section (dynobj, info))
+  if (!htab->root.sgot && !_bfd_elf_create_got_section (dynobj, info))
     return FALSE;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->splt = bfd_get_section_by_name (dynobj, ".plt");
-  htab->srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
   htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
   if (!bfd_link_pic (info))
     htab->srelbss = bfd_get_section_by_name (dynobj, ".rela.bss");
 
-  if (!htab->splt || !htab->srelplt || !htab->sdynbss
+  if (!htab->root.splt || !htab->root.srelplt || !htab->sdynbss
       || (!bfd_link_pic (info) && !htab->srelbss))
     abort ();
 

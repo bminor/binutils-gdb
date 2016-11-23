@@ -1439,8 +1439,7 @@ tilegx_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* This function may be called more than once.  */
-  s = bfd_get_linker_section (abfd, ".got");
-  if (s != NULL)
+  if (htab->sgot != NULL)
     return TRUE;
 
   flags = bed->dynamic_sec_flags;

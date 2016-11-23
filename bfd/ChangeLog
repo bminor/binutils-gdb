@@ -1,5 +1,261 @@
 2016-11-23  Alan Modra  <amodra@gmail.com>
 
+	* elf-m10300.c (mn10300_elf_check_relocs): Use elf htab shortcuts
+	to dynamic sections.
+	(mn10300_elf_final_link_relocate): Likewise.
+	(_bfd_mn10300_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_size_dynamic_sections): Likewise.
+	(_bfd_mn10300_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_finish_dynamic_sections): Likewise.
+	* elf32-bfin.c (bfin_check_relocs): Likewise.
+	(bfin_relocate_section): Likewise.
+	(bfin_gc_sweep_hook): Likewise.
+	(struct bfinfdpic_elf_link_hash_table): Delete sgot, sgotrel, splt
+	and spltrel.
+	(bfinfdpic_got_section, bfinfdpic_gotrel_section,
+	bfinfdpic_plt_section, bfinfdpic_pltrel_section): Define using elf
+	shortcut sections.
+	(_bfin_create_got_section): Use elf htab shortcuts to dyn sections.
+	Delete dead code.
+	(bfin_finish_dynamic_symbol): Use elf htab shortcuts to dyn sections.
+	(bfin_size_dynamic_sections): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_create_got_section): Likewise.
+	(cr16_elf_check_relocs): Likewise.
+	(cr16_elf_final_link_relocate): Likewise.
+	(_bfd_cr16_elf_create_dynamic_sections): Likewise.
+	(_bfd_cr16_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_cr16_elf_size_dynamic_sections): Likewise.
+	(_bfd_cr16_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_cr16_elf_finish_dynamic_sections): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	(elf_cris_finish_dynamic_symbol): Likewise.
+	(elf_cris_finish_dynamic_sections): Likewise.
+	(cris_elf_gc_sweep_hook): Likewise.
+	(elf_cris_adjust_gotplt_to_got): Likewise.
+	(elf_cris_adjust_dynamic_symbol): Likewise.
+	(cris_elf_check_relocs): Likewise.  Delete dead code.
+	(elf_cris_size_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(elf_cris_discard_excess_program_dynamics): Likewise.
+	* elf32-frv.c (struct frvfdpic_elf_link_hash_table): Delete sgot,
+	sgotrel, splt and spltrel.
+	(frvfdpic_got_section, frvfdpic_gotrel_section,
+	frvfdpic_plt_section, frvfdpic_pltrel_section): Define using elf
+	shortcut sections.
+	(_frv_create_got_section): Likewise.
+	* elf32-hppa.c (struct elf32_hppa_link_hash_table): Delete sgot,
+	srelgot, splt and srelplt.
+	(hppa_build_one_stub): Use elf htab shortcuts to dynamic sections.
+	(elf32_hppa_create_dynamic_sections): Likewise.
+	(elf32_hppa_check_relocs): Likewise.
+	(allocate_plt_static): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+	(elf32_hppa_finish_dynamic_sections): Likewise.
+	* elf32-i370.c (i370_elf_finish_dynamic_sections): Likewise.
+	* elf32-lm32.c (struct elf_lm32_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(lm32fdpic_got_section, lm32fdpic_gotrel_section): Define using elf
+	shortcut sections.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(lm32_elf_relocate_section): Use elf htab shortcuts to dyn sections.
+	(lm32_elf_check_relocs): Likewise.
+	(lm32_elf_finish_dynamic_sections): Likewise.
+	(lm32_elf_finish_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(lm32_elf_size_dynamic_sections): Likewise.
+	(lm32_elf_create_dynamic_sections): Likewise.
+	* elf32-m32c.c (m32c_elf_relocate_section): Likewise.
+	(m32c_elf_check_relocs): Likewise.
+	(m32c_elf_finish_dynamic_sections): Likewise.
+	(m32c_elf_always_size_sections): Likewise.
+	* elf32-m32r.c (struct elf_m32r_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(m32r_elf_create_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(allocate_dynrelocs): Likewise.
+	(m32r_elf_size_dynamic_sections): Likewise.
+	(m32r_elf_relocate_section): Likewise.
+	(m32r_elf_finish_dynamic_symbol): Likewise.
+	(m32r_elf_finish_dynamic_sections): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68k.c (elf_m68k_partition_multi_got): Likewise.
+	(elf_m68k_check_relocs): Likewise.
+	(elf_m68k_adjust_dynamic_symbol): Likewise.
+	(elf_m68k_size_dynamic_sections): Likewise.
+	(elf_m68k_relocate_section): Likewise.
+	(elf_m68k_finish_dynamic_symbol): Likewise.
+	(elf_m68k_finish_dynamic_sections): Likewise.
+	* elf32-metag.c (struct elf_metag_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(elf_metag_relocate_section): Use elf htab shortcuts to dynamic
+	sections.
+	(elf_metag_create_dynamic_sections): Likewise.  Allocate got header
+	here in .got.
+	(elf_metag_check_relocs): Use elf htab shortcuts to dynamic sections.
+	(allocate_dynrelocs): Likewise.
+	(elf_metag_size_dynamic_sections): Likewise.
+	(elf_metag_finish_dynamic_symbol): Likewise.
+	(elf_metag_finish_dynamic_sections): Likewise.
+	(elf_metag_size_stubs): Likewise.
+	(elf_backend_got_header_size): Don't define.
+	(elf_backend_want_got_plt): Define.
+	* elf32-microblaze.c (struct elf32_mb_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelpl.
+	(microblaze_elf_relocate_section): Use elf htab shortcuts to dynamic
+	sections.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(microblaze_elf_check_relocs): Use elf htab shortcuts to dyn sections.
+	(microblaze_elf_create_dynamic_sections): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(microblaze_elf_size_dynamic_sections): Likewise.
+	(microblaze_elf_finish_dynamic_symbol): Likewise.
+	(microblaze_elf_finish_dynamic_sections): Likewise.
+	* elf32-nds32.c (nds32_elf_link_hash_table_create): Don't NULL
+	already zero fields.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(nds32_elf_create_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(allocate_dynrelocs): Likewise.
+	(nds32_elf_size_dynamic_sections): Likewise.
+	(nds32_elf_relocate_section): Likewise.
+	(nds32_elf_finish_dynamic_symbol): Likewise.
+	(nds32_elf_finish_dynamic_sections): Likewise.
+	(nds32_elf_check_relocs): Likewise.
+	(calculate_plt_memory_address): Likewise.
+	(calculate_got_memory_address): Likewise.
+	* elf32-nds32.h (struct elf_nds32_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	* elf32-or1k.c (struct elf_or1k_link_hash_table): Likewise.
+	(or1k_elf_relocate_section): Use elf htab shortcuts to dyn sections.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(or1k_elf_check_relocs): Use elf htab shortcuts to dynamic sections.
+	(or1k_elf_finish_dynamic_sections): Likewise.
+	(or1k_elf_finish_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(or1k_elf_size_dynamic_sections): Likewise.
+	(or1k_elf_create_dynamic_sections): Likewise.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Delete got, relgot,
+	plt, relplt, iplt, reliplt and sgotplt.
+	(ppc_elf_create_got): Use elf htab shortcuts to dynamic sections.
+	(ppc_elf_create_glink): Likewise.
+	(ppc_elf_create_dynamic_sections): Likewise.
+	(ppc_elf_check_relocs): Likewise.
+	(ppc_elf_select_plt_layout): Likewise.
+	(ppc_elf_tls_setup): Likewise.
+	(allocate_got): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_reloc_type_class): Likewise.
+	(ppc_elf_finish_dynamic_sections): Likewise.
+	* elf32-rl78.c (rl78_elf_relocate_section): Likewise.
+	(rl78_elf_check_relocs): Likewise.
+	(rl78_elf_finish_dynamic_sections): Likewise.
+	(rl78_elf_always_size_sections): Likewise.
+	* elf32-s390.c 	(create_got_section): Delete.
+	(elf_s390_create_dynamic_sections): Use _bfd_elf_create_got_section.
+	(elf_s390_check_relocs): Likewise.
+	* elf32-score.c (score_elf_create_got_section): Set elf shortcuts.
+	(s3_bfd_score_elf_finish_dynamic_sections): Use elf shortcuts.
+	* elf32-score7.c (score_elf_create_got_section): As above.
+	(s7_bfd_score_elf_finish_dynamic_sections): As above.
+	* elf32-sh.c (struct elf_sh_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(create_got_section): Don't set them.
+	(sh_elf_create_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(allocate_dynrelocs): Likewise.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_add_rofixup): Likewise.
+	(sh_elf_relocate_section): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_finish_dynamic_symbol): Likewise.
+	(sh_elf_finish_dynamic_sections): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_finish_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_create_got_section): Likewise.
+	* elf32-vax.c (elf_vax_check_relocs): Likewise.
+	(elf_vax_adjust_dynamic_symbol): Likewise.
+	(elf_vax_always_size_sections): Likewise.
+	(elf_vax_instantiate_got_entries): Likewise.
+	(elf_vax_relocate_section): Likewise.
+	(elf_vax_finish_dynamic_symbol): Likewise.
+	(elf_vax_finish_dynamic_sections): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_check_relocs): Likewise.
+	(xstormy16_elf_always_size_sections): Likewise.
+	(xstormy16_elf_relocate_section): Likewise.
+	(xstormy16_elf_finish_dynamic_sections): Likewise.
+	* elf32-xtensa.c (struct elf_xtensa_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(elf_xtensa_create_dynamic_sections): Use elf htab shortcuts to
+	dynamic sections.
+	(elf_xtensa_allocate_dynrelocs): Likewise.
+	(elf_xtensa_allocate_local_got_size): Likewise.
+	(elf_xtensa_size_dynamic_sections): Likewise.
+	(elf_xtensa_relocate_section): Likewise.
+	(elf_xtensa_finish_dynamic_sections): Likewise.
+	(shrink_dynamic_reloc_sections): Likewise.
+	(elf_xtensa_get_plt_section): Likewise.
+	(elf_xtensa_get_gotplt_section): Likewise.
+	(xtensa_callback_required_dependence): Likewise.
+	* elf64-alpha.c (elf64_alpha_create_dynamic_sections): Set elf htab
+	shortcuts to dynamic sections.
+	(elf64_alpha_adjust_dynamic_symbol): Use elf htab shortcuts to
+	dynamic sections.
+	(elf64_alpha_size_plt_section): Likewise.
+	(elf64_alpha_size_rela_got_1): Likewise.
+	(elf64_alpha_size_rela_got_section): Likewise.
+	(elf64_alpha_relocate_section): Likewise.
+	(elf64_alpha_finish_dynamic_symbol): Likewise.
+	(elf64_alpha_finish_dynamic_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Likewise.
+	* elf64-s390.c (create_got_section): Delete.
+	(elf_s390_create_dynamic_sections): Use _bfd_elf_create_got_section.
+	(elf_s390_check_relocs): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Use elf htab shortcuts to
+	dynamic sections.
+	(sh_elf64_check_relocs): Likewise.
+	(sh64_elf64_adjust_dynamic_symbol): Likewise.
+	(sh64_elf64_size_dynamic_sections): Likewise.
+	(sh64_elf64_finish_dynamic_symbol): Likewise.
+	(sh64_elf64_finish_dynamic_sections): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Likewise.
+	* elfnn-aarch64.c (aarch64_elf_create_got_section): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_size_dynamic_sections): Likewise.
+	(elfNN_ia64_finish_dynamic_sections): Likewise.
+	* elfnn-riscv.c (riscv_elf_create_got_section): Likewise.
+	* elfxx-mips.c (struct mips_elf_link_hash_table): Delete srellt,
+	sgotplt, splt and sgot.
+	(mips_elf_initialize_tls_slots): Use elf htab shortcuts to dynamic
+	sections.
+	(mips_elf_gotplt_index): Likewise.
+	(mips_elf_primary_global_got_index): Likewise.
+	(mips_elf_global_got_index): Likewise.
+	(mips_elf_got_offset_from_index): Likewise.
+	(mips_elf_create_local_got_entry): Likewise.
+	(mips_elf_create_got_section): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	(mips_elf_lay_out_got): Likewise.
+	(mips_elf_set_plt_sym_value): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	(mips_finish_exec_plt): Likewise.
+	(mips_vxworks_finish_exec_plt): Likewise.
+	(mips_vxworks_finish_shared_plt): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	* elfxx-sparc.c (sparc_finish_dyn): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_create_got_section): Likewise.
+
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
 	* po/BLD-POTFILES.in: Regenerate.
 	* po/SRC-POTFILES.in: Regenerate.
 

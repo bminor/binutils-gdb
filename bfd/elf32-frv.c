@@ -805,16 +805,8 @@ struct frvfdpic_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* A pointer to the .got section.  */
-  asection *sgot;
-  /* A pointer to the .rel.got section.  */
-  asection *sgotrel;
   /* A pointer to the .rofixup section.  */
   asection *sgotfixup;
-  /* A pointer to the .plt section.  */
-  asection *splt;
-  /* A pointer to the .rel.plt section.  */
-  asection *spltrel;
   /* GOT base offset.  */
   bfd_vma got0;
   /* Location of the first non-lazy PLT entry, i.e., the number of
@@ -837,15 +829,15 @@ struct frvfdpic_elf_link_hash_table
   == FRV_ELF_DATA ? ((struct frvfdpic_elf_link_hash_table *) ((p)->hash)) : NULL)
 
 #define frvfdpic_got_section(info) \
-  (frvfdpic_hash_table (info)->sgot)
+  (frvfdpic_hash_table (info)->elf.sgot)
 #define frvfdpic_gotrel_section(info) \
-  (frvfdpic_hash_table (info)->sgotrel)
+  (frvfdpic_hash_table (info)->elf.srelgot)
 #define frvfdpic_gotfixup_section(info) \
   (frvfdpic_hash_table (info)->sgotfixup)
 #define frvfdpic_plt_section(info) \
-  (frvfdpic_hash_table (info)->splt)
+  (frvfdpic_hash_table (info)->elf.splt)
 #define frvfdpic_pltrel_section(info) \
-  (frvfdpic_hash_table (info)->spltrel)
+  (frvfdpic_hash_table (info)->elf.srelplt)
 #define frvfdpic_relocs_info(info) \
   (frvfdpic_hash_table (info)->relocs_info)
 #define frvfdpic_got_initial_offset(info) \
@@ -4175,7 +4167,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   int offset;
 
   /* This function may be called more than once.  */
-  s = bfd_get_linker_section (abfd, ".got");
+  s = elf_hash_table (info)->sgot;
   if (s != NULL)
     return TRUE;
 
@@ -4190,17 +4182,10 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   pltflags = flags;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
+  elf_hash_table (info)->sgot = s;
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
-
-  if (bed->want_got_plt)
-    {
-      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
-      if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, ptralign))
-	return FALSE;
-    }
 
   if (bed->want_got_sym)
     {
@@ -4226,7 +4211,6 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
      data for the got.  */
   if (IS_FDPIC (abfd))
     {
-      frvfdpic_got_section (info) = s;
       frvfdpic_relocs_info (info) = htab_try_create (1,
 						     frvfdpic_relocs_info_hash,
 						     frvfdpic_relocs_info_eq,
@@ -4236,11 +4220,10 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
       s = bfd_make_section_anyway_with_flags (abfd, ".rel.got",
 					      (flags | SEC_READONLY));
+      elf_hash_table (info)->srelgot = s;
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
-
-      frvfdpic_gotrel_section (info) = s;
 
       /* Machine-specific.  */
       s = bfd_make_section_anyway_with_flags (abfd, ".rofixup",

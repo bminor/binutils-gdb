@@ -4578,7 +4578,6 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
   for (dyncon = sdyn->contents; dyncon < dynconend; dyncon += dynsize)
     {
       Elf_Internal_Dyn dyn;
-      const char *name;
       bfd_boolean size;
 
       bed->s->swap_dyn_in (dynobj, dyncon, &dyn);
@@ -4621,30 +4620,36 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
+	  asection *s;
+
 	  switch (dyn.d_tag)
 	    {
-	    case DT_PLTGOT:   name = ".plt"; size = FALSE; break;
-	    case DT_PLTRELSZ: name = ".rela.plt"; size = TRUE; break;
-	    case DT_JMPREL:   name = ".rela.plt"; size = FALSE; break;
-	    default:	      name = NULL; size = FALSE; break;
+	    case DT_PLTGOT:
+	      s = htab->elf.splt;
+	      size = FALSE;
+	      break;
+	    case DT_PLTRELSZ:
+	      s = htab->elf.srelplt;
+	      size = TRUE;
+	      break;
+	    case DT_JMPREL:
+	      s = htab->elf.srelplt;
+	      size = FALSE;
+	      break;
+	    default:
+	      continue;
 	    }
 
-	  if (name != NULL)
+	  if (s == NULL)
+	    dyn.d_un.d_val = 0;
+	  else
 	    {
-	      asection *s;
-
-	      s = bfd_get_linker_section (dynobj, name);
-	      if (s == NULL)
-		dyn.d_un.d_val = 0;
+	      if (!size)
+		dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      else
-		{
-		  if (! size)
-		    dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
-		  else
-		    dyn.d_un.d_val = s->size;
-		}
-	      bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
+		dyn.d_un.d_val = s->size;
 	    }
+	  bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
     }
   return TRUE;

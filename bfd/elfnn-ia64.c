@@ -2983,10 +2983,10 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   bfd_boolean relplt = FALSE;
 
-  dynobj = elf_hash_table(info)->dynobj;
   ia64_info = elfNN_ia64_hash_table (info);
   if (ia64_info == NULL)
     return FALSE;
+  dynobj = ia64_info->root.dynobj;
   ia64_info->self_dtpmod_offset = (bfd_vma) -1;
   BFD_ASSERT(dynobj != NULL);
   data.info = info;
@@ -3052,8 +3052,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* If we've got a .plt, we need some extra memory for the dynamic
 	 linker.  We stuff these in .got.plt.  */
-      sec = bfd_get_linker_section (dynobj, ".got.plt");
-      sec->size = 8 * PLT_RESERVED_WORDS;
+      ia64_info->root.sgotplt->size = 8 * PLT_RESERVED_WORDS;
     }
 
   /* Allocate the PLTOFF entries.  */
@@ -3176,7 +3175,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
-  if (elf_hash_table (info)->dynamic_sections_created)
+  if (ia64_info->root.dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the values
 	 later (in finish_dynamic_sections) but we must add the entries now
@@ -4621,14 +4620,14 @@ elfNN_ia64_finish_dynamic_sections (bfd *abfd,
 
   dynobj = ia64_info->root.dynobj;
 
-  if (elf_hash_table (info)->dynamic_sections_created)
+  if (ia64_info->root.dynamic_sections_created)
     {
       ElfNN_External_Dyn *dyncon, *dynconend;
       asection *sdyn, *sgotplt;
       bfd_vma gp_val;
 
       sdyn = bfd_get_linker_section (dynobj, ".dynamic");
-      sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
+      sgotplt = ia64_info->root.sgotplt;
       BFD_ASSERT (sdyn != NULL);
       dyncon = (ElfNN_External_Dyn *) sdyn->contents;
       dynconend = (ElfNN_External_Dyn *) (sdyn->contents + sdyn->size);
