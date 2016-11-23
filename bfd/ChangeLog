@@ -1,3 +1,8 @@
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
         * warning.m4: Fix spelling in comments.
