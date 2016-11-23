@@ -1,3 +1,8 @@
+2016-11-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Make sure the
+	hwcaps-bump test is run with 64-bit objects.
+
 2016-11-23  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* config/tc-riscv.c: Add missing break.
