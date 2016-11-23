@@ -4547,27 +4547,6 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
 	      s = htab->etab.srelplt;
 	      dyn.d_un.d_val = s->size;
 	      break;
-
-	    case DT_RELASZ:
-	      /* Don't count procedure linkage table relocs in the
-		 overall reloc count.  */
-	      s = htab->etab.srelplt;
-	      if (s == NULL)
-		continue;
-	      dyn.d_un.d_val -= s->size;
-	      break;
-
-	    case DT_RELA:
-	      /* We may not be using the standard ELF linker script.
-		 If .rela.plt is the first .rela section, we adjust
-		 DT_RELA to not include it.  */
-	      s = htab->etab.srelplt;
-	      if (s == NULL)
-		continue;
-	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
-		continue;
-	      dyn.d_un.d_ptr += s->size;
-	      break;
 	    }
 
 	  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -4670,6 +4649,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_want_plt_sym	     0
 #define elf_backend_got_header_size	     8
 #define elf_backend_rela_normal		     1
+#define elf_backend_dtrel_excludes_plt	     1
 
 #define TARGET_BIG_SYM		hppa_elf32_vec
 #define TARGET_BIG_NAME		"elf32-hppa"

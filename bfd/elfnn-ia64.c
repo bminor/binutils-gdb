@@ -4663,13 +4663,6 @@ elfNN_ia64_finish_dynamic_sections (bfd *abfd,
 	      dyn.d_un.d_ptr = (sgotplt->output_section->vma
 				+ sgotplt->output_offset);
 	      break;
-
-	    case DT_RELASZ:
-	      /* Do not have RELASZ include JMPREL.  This makes things
-		 easier on ld.so.  This is not what the rest of BFD set up.  */
-	      dyn.d_un.d_val -= (ia64_info->minplt_entries
-				 * sizeof (ElfNN_External_Rela));
-	      break;
 	    }
 
 	  bfd_elfNN_swap_dyn_out (abfd, &dyn, dyncon);
@@ -5074,6 +5067,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_fixup_symbol	_bfd_elf_link_hash_fixup_symbol
 #define elf_backend_reloc_type_class	elfNN_ia64_reloc_type_class
 #define elf_backend_rela_normal		1
+#define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_special_sections	elfNN_ia64_special_sections
 #define elf_backend_default_execstack	0
 

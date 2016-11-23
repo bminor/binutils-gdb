@@ -1427,6 +1427,10 @@ struct elf_backend_data
      backend relocate_section routine for relocatable linking.  */
   unsigned rela_normal : 1;
 
+  /* Set if DT_REL/DT_RELA/DT_RELSZ/DT_RELASZ should not include PLT
+     relocations.  */
+  unsigned dtrel_excludes_plt : 1;
+
   /* TRUE if addresses "naturally" sign extend.  This is used when
      swapping in from Elf32 when BFD64.  */
   unsigned sign_extend_vma : 1;

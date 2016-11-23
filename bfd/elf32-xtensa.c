@@ -3429,17 +3429,6 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 	case DT_PLTRELSZ:
 	  dyn.d_un.d_val = htab->elf.srelplt->size;
 	  break;
-
-	case DT_RELASZ:
-	  /* Adjust RELASZ to not include JMPREL.  This matches what
-	     glibc expects and what is done for several other ELF
-	     targets (e.g., i386, alpha), but the "correct" behavior
-	     seems to be unresolved.  Since the linker script arranges
-	     for .rela.plt to follow all other relocation sections, we
-	     don't have to worry about changing the DT_RELA entry.  */
-	  if (htab->elf.srelplt)
-	    dyn.d_un.d_val -= htab->elf.srelplt->size;
-	  break;
 	}
 
       bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -11341,6 +11330,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_got_header_size	4
 #define elf_backend_want_dynbss		0
 #define elf_backend_want_got_plt	1
+#define elf_backend_dtrel_excludes_plt	1
 
 #define elf_info_to_howto		     elf_xtensa_info_to_howto_rela
 

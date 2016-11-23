@@ -11237,15 +11237,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *attr_section = NULL;
   bfd_vma attr_size = 0;
   const char *std_attrs_section;
+  struct elf_link_hash_table *htab = elf_hash_table (info);
 
-  if (! is_elf_hash_table (info->hash))
+  if (!is_elf_hash_table (htab))
     return FALSE;
 
   if (bfd_link_pic (info))
     abfd->flags |= DYNAMIC;
 
-  dynamic = elf_hash_table (info)->dynamic_sections_created;
-  dynobj = elf_hash_table (info)->dynobj;
+  dynamic = htab->dynamic_sections_created;
+  dynobj = htab->dynobj;
 
   emit_relocs = (bfd_link_relocatable (info)
 		 || info->emitrelocations);
@@ -11462,8 +11463,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   if (! bfd_link_relocatable (info) && merged)
-    elf_link_hash_traverse (elf_hash_table (info),
-			    _bfd_elf_link_sec_merge_syms, abfd);
+    elf_link_hash_traverse (htab, _bfd_elf_link_sec_merge_syms, abfd);
 
   /* Figure out the file positions for everything but the symbol table
      and the relocs.  We set symcount to force assign_section_numbers
@@ -11526,11 +11526,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (max_sym_count < 20)
     max_sym_count = 20;
-  elf_hash_table (info)->strtabsize = max_sym_count;
+  htab->strtabsize = max_sym_count;
   amt = max_sym_count * sizeof (struct elf_sym_strtab);
-  elf_hash_table (info)->strtab
-    = (struct elf_sym_strtab *) bfd_malloc (amt);
-  if (elf_hash_table (info)->strtab == NULL)
+  htab->strtab = (struct elf_sym_strtab *) bfd_malloc (amt);
+  if (htab->strtab == NULL)
     goto error_return;
   /* The real buffer will be allocated in elf_link_swap_symbols_out.  */
   flinfo.symshndxbuf
@@ -11642,12 +11641,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	goto error_return;
     }
 
-  if (elf_hash_table (info)->tls_sec)
+  if (htab->tls_sec)
     {
       bfd_vma base, end = 0;
       asection *sec;
 
-      for (sec = elf_hash_table (info)->tls_sec;
+      for (sec = htab->tls_sec;
 	   sec && (sec->flags & SEC_THREAD_LOCAL);
 	   sec = sec->next)
 	{
@@ -11663,13 +11662,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    }
 	  end = sec->vma + size;
 	}
-      base = elf_hash_table (info)->tls_sec->vma;
+      base = htab->tls_sec->vma;
       /* Only align end of TLS section if static TLS doesn't have special
 	 alignment requirements.  */
       if (bed->static_tls_alignment == 1)
-	end = align_power (end,
-			   elf_hash_table (info)->tls_sec->alignment_power);
-      elf_hash_table (info)->tls_size = end - base;
+	end = align_power (end, htab->tls_sec->alignment_power);
+      htab->tls_size = end - base;
     }
 
   /* Reorder SHF_LINK_ORDER sections.  */
@@ -11817,20 +11815,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   symtab_hdr->sh_info = bfd_get_symcount (abfd);
 
   if (dynamic
-      && elf_hash_table (info)->dynsym != NULL
-      && (elf_hash_table (info)->dynsym->output_section
-	  != bfd_abs_section_ptr))
+      && htab->dynsym != NULL
+      && htab->dynsym->output_section != bfd_abs_section_ptr)
     {
       Elf_Internal_Sym sym;
-      bfd_byte *dynsym = elf_hash_table (info)->dynsym->contents;
+      bfd_byte *dynsym = htab->dynsym->contents;
 
-      o = elf_hash_table (info)->dynsym->output_section;
-      elf_section_data (o)->this_hdr.sh_info
-	= elf_hash_table (info)->local_dynsymcount + 1;
+      o = htab->dynsym->output_section;
+      elf_section_data (o)->this_hdr.sh_info = htab->local_dynsymcount + 1;
 
       /* Write out the section symbols for the output sections.  */
       if (bfd_link_pic (info)
-	  || elf_hash_table (info)->is_relocatable_executable)
+	  || htab->is_relocatable_executable)
 	{
 	  asection *s;
 
@@ -11861,10 +11857,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
 
       /* Write out the local dynsyms.  */
-      if (elf_hash_table (info)->dynlocal)
+      if (htab->dynlocal)
 	{
 	  struct elf_link_local_dynamic_entry *e;
-	  for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
+	  for (e = htab->dynlocal; e ; e = e->next)
 	    {
 	      asection *s;
 	      bfd_byte *dest;
@@ -12049,8 +12045,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      {
 		struct elf_link_hash_entry *h;
 
-		h = elf_link_hash_lookup (elf_hash_table (info), name,
-					  FALSE, FALSE, TRUE);
+		h = elf_link_hash_lookup (htab, name, FALSE, FALSE, TRUE);
 		if (h != NULL
 		    && (h->root.type == bfd_link_hash_defined
 			|| h->root.type == bfd_link_hash_defweak))
@@ -12172,6 +12167,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 			}
 		    }
 		}
+	      if (bed->dtrel_excludes_plt && htab->srelplt != NULL)
+		{
+		  /* Don't count procedure linkage table relocs in the
+		     overall reloc count.  */
+		  if (dyn.d_tag == DT_RELSZ || dyn.d_tag == DT_RELASZ)
+		    dyn.d_un.d_val -= htab->srelplt->size;
+		  /* If .rela.plt is the first .rela section, exclude
+		     it from DT_RELA.  */
+		  else if (dyn.d_un.d_ptr == (htab->srelplt->output_section->vma
+					      + htab->srelplt->output_offset))
+		    dyn.d_un.d_ptr += htab->srelplt->size;
+		}
 	      break;
 	    }
 	  bed->s->swap_dyn_out (dynobj, &dyn, dyncon);
@@ -12224,9 +12231,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		 created by _bfd_elf_link_create_dynamic_sections.  */
 	      continue;
 	    }
-	  if (elf_hash_table (info)->stab_info.stabstr == o)
+	  if (htab->stab_info.stabstr == o)
 	    continue;
-	  if (elf_hash_table (info)->eh_info.hdr_sec == o)
+	  if (htab->eh_info.hdr_sec == o)
 	    continue;
 	  if (strcmp (o->name, ".dynstr") != 0)
 	    {
@@ -12245,8 +12252,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      off = elf_section_data (o->output_section)->this_hdr.sh_offset;
 	      if (bfd_seek (abfd, off, SEEK_SET) != 0
-		  || ! _bfd_elf_strtab_emit (abfd,
-					     elf_hash_table (info)->dynstr))
+		  || !_bfd_elf_strtab_emit (abfd, htab->dynstr))
 		goto error_return;
 	    }
 	}
@@ -12262,9 +12268,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* If we have optimized stabs strings, output them.  */
-  if (elf_hash_table (info)->stab_info.stabstr != NULL)
+  if (htab->stab_info.stabstr != NULL)
     {
-      if (! _bfd_write_stab_strings (abfd, &elf_hash_table (info)->stab_info))
+      if (!_bfd_write_stab_strings (abfd, &htab->stab_info))
 	goto error_return;
     }
 

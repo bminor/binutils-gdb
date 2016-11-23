@@ -2617,6 +2617,8 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_default_use_rela_p		1
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size		(4 * 3)
+#undef elf_backend_dtrel_excludes_plt
+#define elf_backend_dtrel_excludes_plt		1
 
 #undef elf_backend_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol \

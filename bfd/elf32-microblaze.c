@@ -3331,46 +3331,51 @@ microblaze_elf_finish_dynamic_sections (bfd *output_bfd,
       asection *splt;
       Elf32_External_Dyn *dyncon, *dynconend;
 
-      splt = htab->elf.splt;
-      BFD_ASSERT (splt != NULL && sdyn != NULL);
-
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
       dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
         {
           Elf_Internal_Dyn dyn;
-          const char *name;
+	  asection *s;
           bfd_boolean size;
 
           bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
 
           switch (dyn.d_tag)
             {
-            case DT_PLTGOT:   name = ".got.plt"; size = FALSE; break;
-            case DT_PLTRELSZ: name = ".rela.plt"; size = TRUE; break;
-            case DT_JMPREL:   name = ".rela.plt"; size = FALSE; break;
-            case DT_RELA:     name = ".rela.dyn"; size = FALSE; break;
-            case DT_RELASZ:   name = ".rela.dyn"; size = TRUE; break;
-            default:	  name = NULL; size = FALSE; break;
+	    case DT_PLTGOT:
+	      s = htab->elf.sgotplt;
+	      size = FALSE;
+	      break;
+
+	    case DT_PLTRELSZ:
+	      s = htab->elf.srelplt;
+	      size = TRUE;
+	      break;
+
+	    case DT_JMPREL:
+	      s = htab->elf.srelplt;
+	      size = FALSE;
+	      break;
+
+	    default:
+	      continue;
             }
 
-          if (name != NULL)
-            {
-              asection *s;
-
-              s = bfd_get_section_by_name (output_bfd, name);
-              if (s == NULL)
-                dyn.d_un.d_val = 0;
-              else
-                {
-                  if (! size)
-                    dyn.d_un.d_ptr = s->vma;
-                  else
-                    dyn.d_un.d_val = s->size;
-                }
-              bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-            }
+	  if (s == NULL)
+	    dyn.d_un.d_val = 0;
+	  else
+	    {
+	      if (!size)
+		dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
+	      else
+		dyn.d_un.d_val = s->size;
+	    }
+	  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
         }
+
+      splt = htab->elf.splt;
+      BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       /* Clear the first entry in the procedure linkage table,
 	 and put a nop in the last four bytes.  */
@@ -3465,6 +3470,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define elf_backend_plt_readonly    		1
 #define elf_backend_got_header_size 		12
 #define elf_backend_rela_normal     		1
+#define elf_backend_dtrel_excludes_plt		1
 
 #define elf_backend_adjust_dynamic_symbol       microblaze_elf_adjust_dynamic_symbol
 #define elf_backend_create_dynamic_sections     microblaze_elf_create_dynamic_sections

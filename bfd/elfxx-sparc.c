@@ -4582,17 +4582,7 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 
       bed->s->swap_dyn_in (dynobj, dyncon, &dyn);
 
-      if (htab->is_vxworks && dyn.d_tag == DT_RELASZ)
-	{
-	  /* On VxWorks, DT_RELASZ should not include the relocations
-	     in .rela.plt.  */
-	  if (htab->elf.srelplt)
-	    {
-	      dyn.d_un.d_val -= htab->elf.srelplt->size;
-	      bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
-	    }
-	}
-      else if (htab->is_vxworks && dyn.d_tag == DT_PLTGOT)
+      if (htab->is_vxworks && dyn.d_tag == DT_PLTGOT)
 	{
 	  /* On VxWorks, DT_PLTGOT should point to the start of the GOT,
 	     not to the start of the PLT.  */

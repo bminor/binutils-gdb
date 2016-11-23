@@ -11714,13 +11714,6 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_ptr = s->vma;
 	      break;
 
-	    case DT_RELASZ:
-	      BFD_ASSERT (htab->is_vxworks);
-	      /* The count does not include the JUMP_SLOT relocations.  */
-	      if (htab->root.srelplt)
-		dyn.d_un.d_val -= htab->root.srelplt->size;
-	      break;
-
 	    case DT_PLTREL:
 	      BFD_ASSERT (htab->use_plts_and_copy_relocs);
 	      if (htab->is_vxworks)

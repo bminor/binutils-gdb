@@ -10468,15 +10468,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_ptr = got;
 	      break;
 
-	    case DT_RELASZ:
-	      if (htab->is_vxworks)
-		{
-		  if (htab->elf.srelplt)
-		    dyn.d_un.d_ptr -= htab->elf.srelplt->size;
-		  break;
-		}
-	      continue;
-
 	    default:
 	      if (htab->is_vxworks
 		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
@@ -11054,6 +11045,8 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_plt_readonly		1
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size		12
+#undef elf_backend_dtrel_excludes_plt
+#define elf_backend_dtrel_excludes_plt		1
 
 #undef bfd_elf32_get_synthetic_symtab
 

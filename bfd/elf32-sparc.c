@@ -332,6 +332,8 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_plt_readonly		1
 #undef  elf_backend_got_header_size
 #define elf_backend_got_header_size		12
+#undef  elf_backend_dtrel_excludes_plt
+#define elf_backend_dtrel_excludes_plt		1
 #undef  elf_backend_add_symbol_hook
 #define elf_backend_add_symbol_hook \
   elf_vxworks_add_symbol_hook

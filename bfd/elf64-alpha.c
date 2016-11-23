@@ -5057,16 +5057,6 @@ elf64_alpha_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_ptr = srelaplt ? (srelaplt->output_section->vma
 					   + srelaplt->output_offset) : 0;
 	      break;
-
-	    case DT_RELASZ:
-	      /* My interpretation of the TIS v1.1 ELF document indicates
-		 that RELASZ should not include JMPREL.  This is not what
-		 the rest of the BFD does.  It is, however, what the
-		 glibc ld.so wants.  Do this fixup here until we found
-		 out who is right.  */
-	      if (srelaplt)
-		dyn.d_un.d_val -= srelaplt->size;
-	      break;
 	    }
 
 	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -5596,6 +5586,7 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 0
+#define elf_backend_dtrel_excludes_plt 1
 
 #include "elf64-target.h"
 

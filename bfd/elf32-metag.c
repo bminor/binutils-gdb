@@ -3331,28 +3331,6 @@ elf_metag_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_val = s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
-
-	    case DT_RELASZ:
-	      /* Don't count procedure linkage table relocs in the
-		 overall reloc count.  */
-	      if (htab->etab.srelplt) {
-		s = htab->etab.srelplt;
-		dyn.d_un.d_val -= s->size;
-	      }
-	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	      break;
-
-	    case DT_RELA:
-	      /* We may not be using the standard ELF linker script.
-		 If .rela.plt is the first .rela section, we adjust
-		 DT_RELA to not include it.  */
-	      if (htab->etab.srelplt) {
-		s = htab->etab.srelplt;
-		if (dyn.d_un.d_ptr == s->output_section->vma + s->output_offset)
-		  dyn.d_un.d_ptr += s->size;
-	      }
-	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	      break;
 	    }
 
 	}
@@ -4314,6 +4292,7 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_want_got_sym		0
 #define elf_backend_want_plt_sym		0
 #define elf_backend_plt_readonly		1
+#define elf_backend_dtrel_excludes_plt		1
 
 #define bfd_elf32_bfd_reloc_type_lookup	metag_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	metag_reloc_name_lookup

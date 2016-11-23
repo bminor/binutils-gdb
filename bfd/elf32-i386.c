@@ -5746,31 +5746,6 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	      s = htab->elf.srelplt;
 	      dyn.d_un.d_val = s->size;
 	      break;
-
-	    case DT_RELSZ:
-	      /* My reading of the SVR4 ABI indicates that the
-		 procedure linkage table relocs (DT_JMPREL) should be
-		 included in the overall relocs (DT_REL).  This is
-		 what Solaris does.  However, UnixWare can not handle
-		 that case.  Therefore, we override the DT_RELSZ entry
-		 here to make it not include the JMPREL relocs.  */
-	      s = htab->elf.srelplt;
-	      if (s == NULL)
-		continue;
-	      dyn.d_un.d_val -= s->size;
-	      break;
-
-	    case DT_REL:
-	      /* We may not be using the standard ELF linker script.
-		 If .rel.plt is the first .rel section, we adjust
-		 DT_REL to not include it.  */
-	      s = htab->elf.srelplt;
-	      if (s == NULL)
-		continue;
-	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
-		continue;
-	      dyn.d_un.d_ptr += s->size;
-	      break;
 	    }
 
 	  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -6075,6 +6050,7 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_alignment	4
+#define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_extern_protected_data 1
 #define elf_backend_caches_rawsize	1
 

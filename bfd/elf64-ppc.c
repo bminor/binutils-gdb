@@ -75,6 +75,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
 #define elf_backend_rela_normal 1
+#define elf_backend_dtrel_excludes_plt 1
 #define elf_backend_default_execstack 0
 
 #define bfd_elf64_mkobject		      ppc64_elf_mkobject
@@ -15563,27 +15564,6 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_PLTRELSZ:
 	      dyn.d_un.d_val = htab->elf.srelplt->size;
-	      break;
-
-	    case DT_RELASZ:
-	      /* Don't count procedure linkage table relocs in the
-		 overall reloc count.  */
-	      s = htab->elf.srelplt;
-	      if (s == NULL)
-		continue;
-	      dyn.d_un.d_val -= s->size;
-	      break;
-
-	    case DT_RELA:
-	      /* We may not be using the standard ELF linker script.
-		 If .rela.plt is the first .rela section, we adjust
-		 DT_RELA to not include it.  */
-	      s = htab->elf.srelplt;
-	      if (s == NULL)
-		continue;
-	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
-		continue;
-	      dyn.d_un.d_ptr += s->size;
 	      break;
 	    }
 

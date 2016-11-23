@@ -2735,22 +2735,6 @@ _bfd_cr16_elf_finish_dynamic_sections (bfd * output_bfd,
               dyn.d_un.d_val = s->size;
               bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
               break;
-
-            case DT_RELASZ:
-              /* My reading of the SVR4 ABI indicates that the
-                 procedure linkage table relocs (DT_JMPREL) should be
-                 included in the overall relocs (DT_RELA).  This is
-                 what Solaris does.  However, UnixWare can not handle
-                 that case.  Therefore, we override the DT_RELASZ entry
-                 here to make it not include the JMPREL relocs.  Since
-                 the linker script arranges for .rela.plt to follow all
-                 other relocation sections, we don't have to worry
-                 about changing the DT_RELA entry.  */
-              s = elf_hash_table (info)->srelplt;
-              if (s != NULL)
-                dyn.d_un.d_val -= s->size;
-              bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-              break;
             }
         }
 
@@ -2968,5 +2952,6 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 #define elf_backend_plt_readonly        1
 #define elf_backend_want_plt_sym        0
 #define elf_backend_got_header_size     12
+#define elf_backend_dtrel_excludes_plt	1
 
 #include "elf32-target.h"

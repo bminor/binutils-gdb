@@ -1,5 +1,93 @@
 2016-11-23  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_backend_data): Add dtrel_excludes_plt.
+	* elfxx-target.h (elf_backend_dtrel_excludes_plt): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (bfd_elf_final_link): Add and use htab variable.  Handle
+	dtrel_excludes_plt.
+	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-arc.c (elf_arc_finish_dynamic_sections): Delete DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Delete code
+	subtracting off plt relocs from DT_RELSZ, DT_RELASZ.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-cr16.c (_bfd_cr16_elf_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-cris.c (elf_cris_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Delete DT_RELASZ
+	and DT_RELA code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Delete DT_RELSZ
+	and DT_REL code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-lm32.c (lm32_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-m32r.c (m32r_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-m68k.c (elf_m68k_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-metag.c (elf_metag_finish_dynamic_sections): Delete DT_RELASZ
+	and DT_RELA code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Delete
+	DT_RELASZ and DT_RELA code.  Use ELF htab shortcuts for other
+	dynamic sections.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-mips.c (elf_backend_dtrel_excludes_plt): Define.
+	* elf32-nds32.c (nds32_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-or1k.c (or1k_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-sh.c (sh_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-sparc.c (elf_backend_dtrel_excludes_plt): Define.
+	* elf32-vax.c (elf_vax_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-alpha.c (elf64_alpha_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Delete DT_RELASZ
+	and DT_RELA code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-sh64.c (sh64_elf64_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elfnn-ia64.c (elfNN_ia64_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	* elfxx-sparc.c (sparc_finish_dyn): Delete DT_RELASZ code.
+
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
 	* elf-m10300.c (mn10300_elf_check_relocs): Use elf htab shortcuts
 	to dynamic sections.
 	(mn10300_elf_final_link_relocate): Likewise.

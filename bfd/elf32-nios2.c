@@ -5366,20 +5366,6 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
-	    case DT_RELASZ:
-	      /* The procedure linkage table relocs (DT_JMPREL) should
-		 not be included in the overall relocs (DT_RELA).
-		 Therefore, we override the DT_RELASZ entry here to
-		 make it not include the JMPREL relocs.  Since the
-		 linker script arranges for .rela.plt to follow all
-		 other relocation sections, we don't have to worry
-		 about changing the DT_RELA entry.  */
-	      s = htab->root.srelplt;
-	      if (s != NULL)
-		dyn.d_un.d_val -= s->size;
-	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	      break;
-
 	    case DT_NIOS2_GP:
 	      s = htab->root.sgotplt;
 	      dyn.d_un.d_ptr
@@ -6278,6 +6264,7 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_got_plt	1
 #define elf_backend_rela_normal		1
+#define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_relocate_section	  nios2_elf32_relocate_section
 #define elf_backend_section_flags	  nios2_elf32_section_flags
