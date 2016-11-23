@@ -24,8 +24,6 @@
 #include "arch-utils.h"
 #include <ctype.h>
 #include <signal.h>
-#include "gdb_sys_time.h"
-#include <time.h>
 #include "command.h"
 #include "gdbcmd.h"
 #include "symtab.h"
@@ -39,7 +37,6 @@
 #include "objfiles.h"
 #include "value.h"
 #include "top.h"
-#include "timeval-utils.h"
 #include "maint.h"
 #include "selftest.h"
 
@@ -822,23 +819,21 @@ scoped_command_stats::~scoped_command_stats ()
 
   if (m_time_enabled && per_command_time)
     {
-      long cmd_time = get_run_time () - m_start_cpu_time;
-      struct timeval now_wall_time, delta_wall_time, wait_time;
+      using namespace std::chrono;
 
-      gettimeofday (&now_wall_time, NULL);
-      timeval_sub (&delta_wall_time,
-		   &now_wall_time, &m_start_wall_time);
+      run_time_clock::duration cmd_time
+	= run_time_clock::now () - m_start_cpu_time;
 
+      steady_clock::duration wall_time
+	= steady_clock::now () - m_start_wall_time;
       /* Subtract time spend in prompt_for_continue from walltime.  */
-      wait_time = get_prompt_for_continue_wait_time ();
-      timeval_sub (&delta_wall_time, &delta_wall_time, &wait_time);
+      wall_time -= get_prompt_for_continue_wait_time ();
 
       printf_unfiltered (!m_msg_type
-			 ? _("Startup time: %ld.%06ld (cpu), %ld.%06ld (wall)\n")
-			 : _("Command execution time: %ld.%06ld (cpu), %ld.%06ld (wall)\n"),
-			 cmd_time / 1000000, cmd_time % 1000000,
-			 (long) delta_wall_time.tv_sec,
-			 (long) delta_wall_time.tv_usec);
+			 ? _("Startup time: %.6f (cpu), %.6f (wall)\n")
+			 : _("Command execution time: %.6f (cpu), %.6f (wall)\n"),
+			 duration<double> (cmd_time).count (),
+			 duration<double> (wall_time).count ());
     }
 
   if (m_space_enabled && per_command_space)
@@ -892,8 +887,10 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
 
   if (msg_type == 0 || per_command_time)
     {
-      m_start_cpu_time = get_run_time ();
-      gettimeofday (&m_start_wall_time, NULL);
+      using namespace std::chrono;
+
+      m_start_cpu_time = run_time_clock::now ();
+      m_start_wall_time = steady_clock::now ();
       m_time_enabled = 1;
     }
   else

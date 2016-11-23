@@ -1,3 +1,69 @@
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add common/run-time-clock.c.
+	(HFILES_NO_SRCDIR): Add common/run-time-clock.h.
+	(COMMON_OBS): Add run-time-clock.o.
+	* common/run-time-clock.c, common/run-time-clock.h: New files.
+	* defs.h (struct timeval, print_transfer_performance): Delete
+	declarations.
+	* event-loop.c (struct gdb_timer) <when>: Now a
+	std::chrono::steady_clock::time_point.
+	(create_timer): use std::chrono::steady_clock instead of
+	gettimeofday.  Use new instead of malloc.
+	(delete_timer): Use delete instead of xfree.
+	(duration_cast_timeval): New.
+	(update_wait_timeout): Use std::chrono::steady_clock instead of
+	gettimeofday.
+	* maint.c: Include <chrono> instead of "gdb_sys_time.h", <time.h>
+	and "timeval-utils.h".
+	(scoped_command_stats::~scoped_command_stats)
+	(scoped_command_stats::scoped_command_stats): Use
+	std::chrono::steady_clock instead of gettimeofday.  Use
+	user_cpu_time_clock instead of get_run_time.
+	* maint.h: Include "run-time-clock.h" and <chrono>.
+	(scoped_command_stats): <m_start_cpu_time>: Now a
+	user_cpu_time_clock::time_point.
+	<m_start_wall_time>: Now a std::chrono::steady_clock::time_point.
+	* mi/mi-main.c: Include "run-time-clock.h" and <chrono> instead of
+	"gdb_sys_time.h" and <sys/resource.h>.
+	(rusage): Delete.
+	(mi_execute_command): Use new instead of XNEW.
+	(mi_load_progress): Use std::chrono::steady_clock instead of
+	gettimeofday.
+	(timestamp): Rewrite in terms of std::chrono::steady_clock,
+	user_cpu_time_clock and system_cpu_time_clock.
+	(timeval_diff): Delete.
+	(print_diff): Adjust to use std::chrono::steady_clock,
+	user_cpu_time_clock and system_cpu_time_clock.
+	* mi/mi-parse.h: Include "run-time-clock.h" and <chrono> instead
+	of "gdb_sys_time.h".
+	(struct mi_timestamp): Change fields types to
+	std::chrono::steady_clock::time_point, user_cpu_time_clock::time
+	and system_cpu_time_clock::time_point, instead of struct timeval.
+	* symfile.c: Include <chrono> instead of <time.h> and
+	"gdb_sys_time.h".
+	(struct time_range): New.
+	(generic_load): Use std::chrono::steady_clock instead of
+	gettimeofday.
+	(print_transfer_performance): Replace timeval parameters with a
+	std::chrono::steady_clock::duration parameter.  Adjust.
+	* utils.c: Include <chrono> instead of "timeval-utils.h",
+	"gdb_sys_time.h", and <time.h>.
+	(prompt_for_continue_wait_time): Now a
+	std::chrono::steady_clock::duration.
+	(defaulted_query, prompt_for_continue): Use
+	std::chrono::steady_clock instead of
+	gettimeofday/timeval_sub/timeval_add.
+	(reset_prompt_for_continue_wait_time): Use
+	std::chrono::steady_clock::duration instead of struct timeval.
+	(get_prompt_for_continue_wait_time): Return a
+	std::chrono::steady_clock::duration instead of struct timeval.
+	(vfprintf_unfiltered): Use std::chrono::steady_clock instead of
+	gettimeofday.  Use std::string.  Use '.' instead of ':'.
+	* utils.h: Include <chrono>.
+	(get_prompt_for_continue_wait_time): Return a
+	std::chrono::steady_clock::duration instead of struct timeval.
+
 2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Fix whitespace formatting.

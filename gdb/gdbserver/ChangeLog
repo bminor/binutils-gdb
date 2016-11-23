@@ -1,3 +1,12 @@
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
+	* debug.c: Include <chrono> instead of "gdb_sys_time.h".
+	(debug_vprintf): Use std::chrono::steady_clock instead of
+	gettimeofday.  Use '.' instead of ':'.
+	* tracepoint.c: Include <chrono> instead of "gdb_sys_time.h".
+	(get_timestamp): Use std::chrono::steady_clock instead of
+	gettimeofday.
+
 2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Fix whitespace formatting.

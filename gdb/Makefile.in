@@ -1201,6 +1201,7 @@ SFILES = \
 	common/print-utils.c \
 	common/ptid.c \
 	common/rsp-low.c \
+	common/run-time-clock.c \
 	common/signals.c \
 	common/signals-state-save-restore.c \
 	common/vec.c \
@@ -1485,6 +1486,7 @@ HFILES_NO_SRCDIR = \
 	common/ptid.h \
 	common/queue.h \
 	common/rsp-low.h \
+	common/run-time-clock.h \
 	common/signals-state-save-restore.h \
 	common/symbol.h \
 	common/vec.h \
@@ -1739,6 +1741,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	registry.o \
 	reverse.o \
 	rsp-low.o \
+	run-time-clock.o \
 	rust-lang.o \
 	selftest.o \
 	sentinel-frame.o \
