@@ -1548,11 +1548,30 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
     {
       size_t len = nbits / 8;
 
-      while (len--)
+      /* Use a faster method for byte-aligned copies.  */
+      if (avail == 0)
 	{
-	  buf |= *(bits_big_endian ? source-- : source++) << avail;
-	  *(bits_big_endian ? dest-- : dest++) = buf;
-	  buf >>= 8;
+	  if (bits_big_endian)
+	    {
+	      dest -= len;
+	      source -= len;
+	      memcpy (dest + 1, source + 1, len);
+	    }
+	  else
+	    {
+	      memcpy (dest, source, len);
+	      dest += len;
+	      source += len;
+	    }
+	}
+      else
+	{
+	  while (len--)
+	    {
+	      buf |= *(bits_big_endian ? source-- : source++) << avail;
+	      *(bits_big_endian ? dest-- : dest++) = buf;
+	      buf >>= 8;
+	    }
 	}
       nbits %= 8;
     }

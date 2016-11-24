@@ -1,4 +1,9 @@
 2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (copy_bitwise): Use memcpy for the middle part, if
+	it is byte-aligned.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* dwarf2loc.c (bits_to_str, check_copy_bitwise)
