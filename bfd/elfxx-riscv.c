@@ -479,7 +479,7 @@ static reloc_howto_type howto_table[] =
   HOWTO (R_RISCV_ADD8,			/* type */
 	 0,				/* rightshift */
 	 0,				/* size */
-	 32,				/* bitsize */
+	 8,				/* bitsize */
 	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */

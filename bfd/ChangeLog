@@ -1,3 +1,7 @@
+2016-11-24  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* bfd/elfxx-riscv.c (howto_table): Fix bitsize of R_RISCV_ADD8.
+
 2016-11-23  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20815
