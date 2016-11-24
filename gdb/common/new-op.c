@@ -76,7 +76,7 @@ operator new (std::size_t sz)
 }
 
 void *
-operator new (std::size_t sz, const std::nothrow_t&)
+operator new (std::size_t sz, const std::nothrow_t&) noexcept
 {
   /* malloc (0) is unpredictable; avoid it.  */
   if (sz == 0)
@@ -91,7 +91,7 @@ operator new[] (std::size_t sz)
 }
 
 void*
-operator new[] (std::size_t sz, const std::nothrow_t&)
+operator new[] (std::size_t sz, const std::nothrow_t&) noexcept
 {
   return ::operator new (sz, std::nothrow);
 }

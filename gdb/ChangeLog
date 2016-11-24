@@ -1,3 +1,8 @@
+2016-11-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* common/new-op.c (operator new): Mark 'noexcept'.
+	(operator new[]): Likewise.
+
 2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf2loc.c (copy_bitwise): Use memcpy for the middle part, if
