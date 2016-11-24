@@ -32,7 +32,7 @@ Dwarf::assemble $asm_file {
 	    {DW_AT_name main.c}
 	} {
 	    declare_labels int_type_label short_type_label
-	    declare_labels struct_s_label
+	    declare_labels struct_s_label struct_t_label
 
 	    int_type_label: base_type {
 		{name "int"}
@@ -55,6 +55,24 @@ Dwarf::assemble $asm_file {
 		    {type :$int_type_label}
 		    {data_bit_offset 8 DW_FORM_udata}
 		    {bit_size 24 DW_FORM_udata}
+		}
+	    }
+
+	    struct_t_label: structure_type {
+		{name t}
+		{byte_size 4 DW_FORM_sdata}
+	    } {
+		member {
+		    {name a}
+		    {type :$int_type_label}
+		    {data_member_location 0 DW_FORM_udata}
+		    {bit_size 9 DW_FORM_udata}
+		}
+		member {
+		    {name b}
+		    {type :$int_type_label}
+		    {data_bit_offset 9 DW_FORM_udata}
+		    {bit_size 23 DW_FORM_udata}
 		}
 	    }
 
@@ -84,6 +102,18 @@ Dwarf::assemble $asm_file {
 			bit_piece 24 0
 		    } SPECIAL_expr}
 		}
+		DW_TAG_variable {
+		    {name def_t}
+		    {type :$struct_t_label}
+		    {location {
+			const1u 0
+			stack_value
+			bit_piece 9 0
+			const1s -1
+			stack_value
+			bit_piece 23 0
+		    } SPECIAL_expr}
+		}
 	    }
 	}
     }
@@ -99,5 +129,6 @@ if ![runto_main] {
 }
 
 gdb_test "print def_s" " = \\{a = 0, b = -1\\}"
+gdb_test "print def_t" " = \\{a = 0, b = -1\\}"
 gdb_test "print undef_int" " = <optimized out>"
 gdb_test "print undef_s.a" " = <optimized out>"

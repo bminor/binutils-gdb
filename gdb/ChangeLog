@@ -1,5 +1,12 @@
 2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (extract_bits_primitive): Remove.
+	(extract_bits): Remove.
+	(copy_bitwise): Rewrite.  Fixes a possible corruption that may
+	occur for non-byte-aligned copies.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	PR gdb/12616
 	* dwarf2read.c (dwarf2_add_field): Handle the DWARF V4 attribute
 	DW_AT_data_bit_offset.

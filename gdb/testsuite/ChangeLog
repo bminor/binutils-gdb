@@ -1,5 +1,10 @@
 2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.dwarf2/nonvar-access.exp: Add a test for accessing
+	non-byte-aligned bit fields.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	PR gdb/12616
 	* gdb.dwarf2/nonvar-access.exp: New testcase.  Check that GDB
 	respects the DW_AT_data_bit_offset attribute.

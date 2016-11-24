@@ -1491,175 +1491,79 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
   return c;
 }
 
-/* The lowest-level function to extract bits from a byte buffer.
-   SOURCE is the buffer.  It is updated if we read to the end of a
-   byte.
-   SOURCE_OFFSET_BITS is the offset of the first bit to read.  It is
-   updated to reflect the number of bits actually read.
-   NBITS is the number of bits we want to read.  It is updated to
-   reflect the number of bits actually read.  This function may read
-   fewer bits.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.
-   This function returns the extracted bits.  */
-
-static unsigned int
-extract_bits_primitive (const gdb_byte **source,
-			unsigned int *source_offset_bits,
-			int *nbits, int bits_big_endian)
-{
-  unsigned int avail, mask, datum;
-
-  gdb_assert (*source_offset_bits < 8);
-
-  avail = 8 - *source_offset_bits;
-  if (avail > *nbits)
-    avail = *nbits;
-
-  mask = (1 << avail) - 1;
-  datum = **source;
-  if (bits_big_endian)
-    datum >>= 8 - (*source_offset_bits + *nbits);
-  else
-    datum >>= *source_offset_bits;
-  datum &= mask;
-
-  *nbits -= avail;
-  *source_offset_bits += avail;
-  if (*source_offset_bits >= 8)
-    {
-      *source_offset_bits -= 8;
-      ++*source;
-    }
-
-  return datum;
-}
-
-/* Extract some bits from a source buffer and move forward in the
-   buffer.
-   
-   SOURCE is the source buffer.  It is updated as bytes are read.
-   SOURCE_OFFSET_BITS is the offset into SOURCE.  It is updated as
-   bits are read.
-   NBITS is the number of bits to read.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.
-   
-   This function returns the bits that were read.  */
-
-static unsigned int
-extract_bits (const gdb_byte **source, unsigned int *source_offset_bits,
-	      int nbits, int bits_big_endian)
-{
-  unsigned int datum;
-
-  gdb_assert (nbits > 0 && nbits <= 8);
-
-  datum = extract_bits_primitive (source, source_offset_bits, &nbits,
-				  bits_big_endian);
-  if (nbits > 0)
-    {
-      unsigned int more;
-
-      more = extract_bits_primitive (source, source_offset_bits, &nbits,
-				     bits_big_endian);
-      if (bits_big_endian)
-	datum <<= nbits;
-      else
-	more <<= nbits;
-      datum |= more;
-    }
-
-  return datum;
-}
-
-/* Write some bits into a buffer and move forward in the buffer.
-   
-   DATUM is the bits to write.  The low-order bits of DATUM are used.
-   DEST is the destination buffer.  It is updated as bytes are
-   written.
-   DEST_OFFSET_BITS is the bit offset in DEST at which writing is
-   done.
-   NBITS is the number of valid bits in DATUM.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.  */
+/* Copy NBITS bits from SOURCE to DEST starting at the given bit
+   offsets.  Use the bit order as specified by BITS_BIG_ENDIAN.
+   Source and destination buffers must not overlap.  */
 
 static void
-insert_bits (unsigned int datum,
-	     gdb_byte *dest, unsigned int dest_offset_bits,
-	     int nbits, int bits_big_endian)
+copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
+	      const gdb_byte *source, ULONGEST source_offset,
+	      ULONGEST nbits, int bits_big_endian)
 {
-  unsigned int mask;
+  unsigned int buf, avail;
 
-  gdb_assert (dest_offset_bits + nbits <= 8);
+  if (nbits == 0)
+    return;
 
-  mask = (1 << nbits) - 1;
   if (bits_big_endian)
     {
-      datum <<= 8 - (dest_offset_bits + nbits);
-      mask <<= 8 - (dest_offset_bits + nbits);
+      /* Start from the end, then work backwards.  */
+      dest_offset += nbits - 1;
+      dest += dest_offset / 8;
+      dest_offset = 7 - dest_offset % 8;
+      source_offset += nbits - 1;
+      source += source_offset / 8;
+      source_offset = 7 - source_offset % 8;
     }
   else
     {
-      datum <<= dest_offset_bits;
-      mask <<= dest_offset_bits;
+      dest += dest_offset / 8;
+      dest_offset %= 8;
+      source += source_offset / 8;
+      source_offset %= 8;
     }
 
-  gdb_assert ((datum & ~mask) == 0);
+  /* Fill BUF with DEST_OFFSET bits from the destination and 8 -
+     SOURCE_OFFSET bits from the source.  */
+  buf = *(bits_big_endian ? source-- : source++) >> source_offset;
+  buf <<= dest_offset;
+  buf |= *dest & ((1 << dest_offset) - 1);
 
-  *dest = (*dest & ~mask) | datum;
-}
+  /* NBITS: bits yet to be written; AVAIL: BUF's fill level.  */
+  nbits += dest_offset;
+  avail = dest_offset + 8 - source_offset;
 
-/* Copy bits from a source to a destination.
-   
-   DEST is where the bits should be written.
-   DEST_OFFSET_BITS is the bit offset into DEST.
-   SOURCE is the source of bits.
-   SOURCE_OFFSET_BITS is the bit offset into SOURCE.
-   BIT_COUNT is the number of bits to copy.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.  */
-
-static void
-copy_bitwise (gdb_byte *dest, unsigned int dest_offset_bits,
-	      const gdb_byte *source, unsigned int source_offset_bits,
-	      unsigned int bit_count,
-	      int bits_big_endian)
-{
-  unsigned int dest_avail;
-  int datum;
-
-  /* Reduce everything to byte-size pieces.  */
-  dest += dest_offset_bits / 8;
-  dest_offset_bits %= 8;
-  source += source_offset_bits / 8;
-  source_offset_bits %= 8;
-
-  dest_avail = 8 - dest_offset_bits % 8;
-
-  /* See if we can fill the first destination byte.  */
-  if (dest_avail < bit_count)
+  /* Flush 8 bits from BUF, if appropriate.  */
+  if (nbits >= 8 && avail >= 8)
     {
-      datum = extract_bits (&source, &source_offset_bits, dest_avail,
-			    bits_big_endian);
-      insert_bits (datum, dest, dest_offset_bits, dest_avail, bits_big_endian);
-      ++dest;
-      dest_offset_bits = 0;
-      bit_count -= dest_avail;
+      *(bits_big_endian ? dest-- : dest++) = buf;
+      buf >>= 8;
+      avail -= 8;
+      nbits -= 8;
     }
 
-  /* Now, either DEST_OFFSET_BITS is byte-aligned, or we have fewer
-     than 8 bits remaining.  */
-  gdb_assert (dest_offset_bits % 8 == 0 || bit_count < 8);
-  for (; bit_count >= 8; bit_count -= 8)
+  /* Copy the middle part.  */
+  if (nbits >= 8)
     {
-      datum = extract_bits (&source, &source_offset_bits, 8, bits_big_endian);
-      *dest++ = (gdb_byte) datum;
+      size_t len = nbits / 8;
+
+      while (len--)
+	{
+	  buf |= *(bits_big_endian ? source-- : source++) << avail;
+	  *(bits_big_endian ? dest-- : dest++) = buf;
+	  buf >>= 8;
+	}
+      nbits %= 8;
     }
 
-  /* Finally, we may have a few leftover bits.  */
-  gdb_assert (bit_count <= 8 - dest_offset_bits % 8);
-  if (bit_count > 0)
+  /* Write the last byte.  */
+  if (nbits)
     {
-      datum = extract_bits (&source, &source_offset_bits, bit_count,
-			    bits_big_endian);
-      insert_bits (datum, dest, dest_offset_bits, bit_count, bits_big_endian);
+      if (avail < nbits)
+	buf |= *source << avail;
+
+      buf &= (1 << nbits) - 1;
+      *dest = (*dest & (~0 << nbits)) | buf;
     }
 }
 
