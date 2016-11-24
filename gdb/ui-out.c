@@ -87,8 +87,6 @@ struct ui_out_table
 
 
 /* The ui_out structure */
-/* Any change here requires a corresponding one in the initialization
-   of the default uiout, which is statically initialized.  */
 
 struct ui_out
   {

@@ -202,9 +202,6 @@ typedef void (data_destroy_ftype) (struct ui_out *uiout);
 
 /* ui-out-impl */
 
-/* IMPORTANT: If you change this structure, make sure to change the default
-   initialization in ui-out.c.  */
-
 struct ui_out_impl
   {
     table_begin_ftype *table_begin;
