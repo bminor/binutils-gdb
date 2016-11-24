@@ -1,4 +1,14 @@
 2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* dwarf2loc.c (bits_to_str, check_copy_bitwise)
+	(copy_bitwise_tests): New functions.
+	(_initialize_dwarf2loc): Register the new function
+	copy_bitwise_tests as a unit test.
+	* selftest.c (run_self_tests): Improve the failure message's
+	wording and formatting.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf2loc.c (extract_bits_primitive): Remove.
 	(extract_bits): Remove.

@@ -50,8 +50,7 @@ run_self_tests (void)
       CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  ++failed;
-	  exception_fprintf (gdb_stderr, ex,
-			     _("Self test threw exception"));
+	  exception_fprintf (gdb_stderr, ex, _("Self test failed: "));
 	}
       END_CATCH
     }
