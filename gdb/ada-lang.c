@@ -12343,9 +12343,9 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 	  s = cond_string;
 	  TRY
 	    {
-	      exp = std::move (parse_exp_1 (&s, bl->address,
-					    block_for_pc (bl->address),
-					    0));
+	      exp = parse_exp_1 (&s, bl->address,
+				 block_for_pc (bl->address),
+				 0);
 	    }
 	  CATCH (e, RETURN_MASK_ERROR)
 	    {

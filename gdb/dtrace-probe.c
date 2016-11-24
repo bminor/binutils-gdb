@@ -430,8 +430,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 
 	  TRY
 	    {
-	      expr = std::move (parse_expression_with_language (arg.type_str,
-								language_c));
+	      expr = parse_expression_with_language (arg.type_str, language_c);
 	    }
 	  CATCH (ex, RETURN_MASK_ERROR)
 	    {
