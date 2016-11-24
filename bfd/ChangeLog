@@ -1,3 +1,9 @@
+2016-11-24  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* elf32-arm.c (elf32_arm_final_link_relocate): Bind defined symbol
+	locally in PIE.
+
 2016-11-24  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* bfd/elfxx-riscv.c (howto_table): Fix bitsize of R_RISCV_ADD8.

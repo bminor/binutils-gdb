@@ -1,3 +1,11 @@
+2016-11-24  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* testsuite/ld-arm/pie-bind-locally-a.s: New test source.
+	* testsuite/ld-arm/pie-bind-locally-b.s: Likewise.
+	* testsuite/ld-arm/pie-bind-locally.d: New testcase.
+	* testsuite/ld-arm/arm-elf.exp: Run new testcase.
+
 2016-11-24  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20858
