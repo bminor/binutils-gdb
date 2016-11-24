@@ -1,3 +1,10 @@
+2016-11-24  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20858
+	* emultempl/elf32.em (_search_needed): Allow for path separator
+	and terminating NUL byte when allocating space for new $ORIGIN
+	path.
+
 2016-11-23  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-arm/vxworks2.sd: Update expected readelf output.

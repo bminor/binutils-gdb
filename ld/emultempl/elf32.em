@@ -585,7 +585,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 			{
 			  char * current_dir = getpwd ();
 
-			  freeme = xmalloc (strlen (replacement) + strlen (current_dir));
+			  freeme = xmalloc (strlen (replacement) + strlen (current_dir) + 2);
 			  sprintf (freeme, "%s/%s", current_dir, replacement);
 			}
 
