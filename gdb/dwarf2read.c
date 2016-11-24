@@ -12584,6 +12584,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 				 - bit_offset - FIELD_BITSIZE (*fp)));
 	    }
 	}
+      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+      if (attr != NULL)
+	SET_FIELD_BITPOS (*fp, (FIELD_BITPOS (*fp)
+				+ dwarf2_get_attr_constant_value (attr, 0)));
 
       /* Get name of field.  */
       fieldname = dwarf2_name (die, cu);
