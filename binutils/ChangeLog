@@ -1,3 +1,13 @@
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* dwarf.c: Fix spelling in comments.
+	* dwarf.h: Fix spelling in comments.
+	* objcopy.c: Fix spelling in comments.
+	* od-macho.c: Fix spelling in comments.
+	* rclex.c: Fix spelling in comments.
+	* readelf.c: Fix spelling in comments.
+	* stabs.c: Fix spelling in comments.
+
 2016-11-23  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20815

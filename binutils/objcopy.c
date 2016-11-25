@@ -1748,7 +1748,7 @@ add_redefine_syms_file (const char *filename)
   free (buf);
 }
 
-/* Copy unkown object file IBFD onto OBFD.
+/* Copy unknown object file IBFD onto OBFD.
    Returns TRUE upon success, FALSE otherwise.  */
 
 static bfd_boolean

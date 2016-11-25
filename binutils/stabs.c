@@ -2691,7 +2691,7 @@ parse_stab_members (void *dhandle, struct stab_handle *info,
 	    case '*':
 	      /* virtual member function, followed by index.  The sign
 		 bit is supposedly set to distinguish
-		 pointers-to-methods from virtual function indicies.  */
+		 pointers-to-methods from virtual function indices.  */
 	      ++*pp;
 	      voffset = parse_number (pp, (bfd_boolean *) NULL);
 	      if (**pp != ';')

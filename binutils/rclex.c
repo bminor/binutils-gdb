@@ -40,7 +40,7 @@
 
 static int rcdata_mode;
 
-/* Whether we are supressing lines from cpp (including windows.h or
+/* Whether we are suppressing lines from cpp (including windows.h or
    headers from your C sources may bring in externs and typedefs).
    When active, we return IGNORED_TOKEN, which lets us ignore these
    outside of resource constructs.  Thus, it isn't required to protect

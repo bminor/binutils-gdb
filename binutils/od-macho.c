@@ -259,7 +259,7 @@ bfd_mach_o_print_flags (const bfd_mach_o_xlat_name *table,
     printf ("-");
 }
 
-/* Print a bfd_uint64_t, using a platform independant style.  */
+/* Print a bfd_uint64_t, using a platform independent style.  */
 
 static void
 printf_uint64 (bfd_uint64_t v)

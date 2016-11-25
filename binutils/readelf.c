@@ -9966,7 +9966,7 @@ process_version_sections (FILE * file)
 		int j;
 		int isum;
 
-		/* Check for very large indicies.  */
+		/* Check for very large indices.  */
 		if (idx > (size_t) (endbuf - (char *) edefs))
 		  break;
 
