@@ -1,5 +1,20 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* testsuite/gas/arm/local_function.d: Fix spelling in comments.
+	* testsuite/gas/arm/req.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1_t2.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1xD.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1xD_t2.s: Fix spelling in comments.
+	* testsuite/gas/mcore/allinsn.s: Fix spelling in comments.
+	* testsuite/gas/mips/24k-triple-stores-5.s: Fix spelling in comments.
+	* testsuite/gas/mips/delay.d: Fix spelling in comments.
+	* testsuite/gas/mips/nodelay.d: Fix spelling in comments.
+	* testsuite/gas/mips/r5900-full.s: Fix spelling in comments.
+	* testsuite/gas/mips/r5900.s: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* as.h: Fix spelling in comments.
 	* config/obj-ecoff.c: Fix spelling in comments.
 	* config/obj-macho.c: Fix spelling in comments.
