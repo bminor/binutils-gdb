@@ -539,7 +539,7 @@ class Layout
   // and ALIGN are the extra flags and alignment of the segment.
   struct Unique_segment_info
   {
-    // Identifier for the segment.  ELF segments dont have names.  This
+    // Identifier for the segment.  ELF segments don't have names.  This
     // is used as the name of the output section mapped to the segment.
     const char* name;
     // Additional segment flags.

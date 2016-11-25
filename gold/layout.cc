@@ -2585,7 +2585,7 @@ Layout::relaxation_loop_body(
   return off;
 }
 
-// Search the list of patterns and find the postion of the given section
+// Search the list of patterns and find the position of the given section
 // name in the output section.  If the section name matches a glob
 // pattern and a non-glob name, then the non-glob position takes
 // precedence.  Return 0 if no match is found.

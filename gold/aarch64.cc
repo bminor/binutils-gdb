@@ -156,7 +156,7 @@ public:
     uint64_t imm = ((adrp >> 29) & mask2) | (((adrp >> 5) & mask19) << 2);
     // Retrieve msb of 21-bit-signed imm for sign extension.
     uint64_t msbt = (imm >> 20) & 1;
-    // Real value is imm multipled by 4k. Value now has 33-bit information.
+    // Real value is imm multiplied by 4k. Value now has 33-bit information.
     int64_t value = imm << 12;
     // Sign extend to 64-bit by repeating msbt 31 (64-33) times and merge it
     // with value.
@@ -1022,7 +1022,7 @@ public:
   { this->erratum_address_ = addr; }
 
   // Comparator used to group Erratum_stubs in a set by (obj, shndx,
-  // sh_offset). We do not include 'type' in the calculation, becuase there is
+  // sh_offset). We do not include 'type' in the calculation, because there is
   // at most one stub type at (obj, shndx, sh_offset).
   bool
   operator<(const Erratum_stub<size, big_endian>& k) const

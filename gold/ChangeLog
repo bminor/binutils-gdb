@@ -1,3 +1,18 @@
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* aarch64.cc: Fix spelling in comments.
+	* arm.cc: Fix spelling in comments.
+	* icf.cc: Fix spelling in comments.
+	* layout.cc: Fix spelling in comments.
+	* layout.h: Fix spelling in comments.
+	* mips.cc: Fix spelling in comments.
+	* output.h: Fix spelling in comments.
+	* plugin.h: Fix spelling in comments.
+	* script-sections.h: Fix spelling in comments.
+	* script.h: Fix spelling in comments.
+	* stringpool.h: Fix spelling in comments.
+	* tilegx.cc: Fix spelling in comments.
+
 2016-11-22  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20346

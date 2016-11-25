@@ -11215,7 +11215,7 @@ Target_arm<big_endian>::attributes_accept_div(int arch, int profile,
     {
     case 0:
       // Integer divide allowed if instruction contained in
-      // archetecture.
+      // architecture.
       if (arch == elfcpp::TAG_CPU_ARCH_V7 && (profile == 'R' || profile == 'M'))
         return true;
       else if (arch >= elfcpp::TAG_CPU_ARCH_V7E_M)
