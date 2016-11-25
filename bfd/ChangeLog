@@ -1,3 +1,9 @@
+2016-11-25  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	PR ld/20193
+	* peXXigen.c (rsrc_process_section): Do not shrink the merged
+	.rsrc section.
+
 2016-11-24  Jiong Wang  <jiong.wang@arm.com>
 
 	PR target/20737
