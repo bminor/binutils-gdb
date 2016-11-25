@@ -1,5 +1,9 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* deffilep.y: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* scripttempl/ia64vms.sc: Fix spelling in comments.
 	* scripttempl/ip2k.sc: Fix spelling in comments.
 	* scripttempl/v850.sc: Fix spelling in comments.
