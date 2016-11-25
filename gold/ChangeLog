@@ -1,5 +1,9 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* aarch64-reloc.def: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* aarch64.cc: Fix spelling in comments.
 	* arm.cc: Fix spelling in comments.
 	* icf.cc: Fix spelling in comments.
