@@ -513,7 +513,7 @@ struct m68k_cpu
   unsigned long arch;	/* Architecture features.  */
   const enum m68k_register *control_regs;	/* Control regs on chip */
   const char *name;	/* Name */
-  int alias;       	/* Alias for a cannonical name.  If 1, then
+  int alias;       	/* Alias for a canonical name.  If 1, then
 			   succeeds canonical name, if -1 then
 			   succeeds canonical name, if <-1 ||>1 this is a
 			   deprecated name, and the next/previous name
@@ -1469,7 +1469,7 @@ m68k_ip (char *instring)
       char *old = input_line_pointer;
       *old = '\n';
       input_line_pointer = p;
-      /* Ahh - it's a motorola style psuedo op.  */
+      /* Ahh - it's a motorola style pseudo op.  */
       mote_pseudo_table[opcode->m_opnum].poc_handler
 	(mote_pseudo_table[opcode->m_opnum].poc_val);
       input_line_pointer = old;
@@ -4597,7 +4597,7 @@ md_begin (void)
 	m68k_rel32 = 0;
     }
 
-  /* First sort the opcode table into alphabetical order to seperate
+  /* First sort the opcode table into alphabetical order to separate
      the order that the assembler wants to see the opcodes from the
      order that the disassembler wants to see them.  */
   m68k_sorted_opcodes = XNEWVEC (const struct m68k_opcode *, m68k_numopcodes);

@@ -4711,7 +4711,7 @@ struct mips_arg_info
   unsigned int last_op_int;
 
   /* If true, match routines should assume that no later instruction
-     alternative matches and should therefore be as accomodating as
+     alternative matches and should therefore be as accommodating as
      possible.  Match routines should not report errors if something
      is only invalid for !LAX_MATCH.  */
   bfd_boolean lax_match;
@@ -9785,7 +9785,7 @@ small_offset_p (unsigned int range, unsigned int align, unsigned int offbits)
  * optimizing code generation.
  *   One interesting optimization is when several store macros appear
  * consecutively that would load AT with the upper half of the same address.
- * The ensuing load upper instructions are ommited. This implies some kind
+ * The ensuing load upper instructions are omitted. This implies some kind
  * of global optimization. We currently only optimize within a single macro.
  *   For many of the load and store macros if the address is specified as a
  * constant expression in the first 64k of memory (ie ld $2,0x4000c) we
@@ -11809,7 +11809,7 @@ macro (struct mips_cl_insn *ip, char *str)
       else if (offbits != 16)
 	{
 	  /* The offset field is too narrow to be used for a low-part
-	     relocation, so load the whole address into the auxillary
+	     relocation, so load the whole address into the auxiliary
 	     register.  */
 	  load_address (tempreg, &offset_expr, &used_at);
 	  if (breg != 0)

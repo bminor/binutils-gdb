@@ -4085,14 +4085,14 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
     case O_constant:
       exp.X_add_symbol = section_symbol (now_seg);
       exp.X_op = O_symbol;
-      /* Fall thru */
+      /* Fallthru */
     case O_symbol:
       if (exp.X_add_number == 0)
 	{
 	  reloc->u.a.offset_sym = exp.X_add_symbol;
 	  break;
 	}
-      /* Fall thru */
+      /* Fallthru */
     default:
       reloc->u.a.offset_sym = make_expr_symbol (&exp);
       break;

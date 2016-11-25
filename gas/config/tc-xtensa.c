@@ -5507,7 +5507,7 @@ md_assemble (char *str)
   orig_insn.is_specific_opcode = (has_underbar || !use_transform ());
   orig_insn.opcode = xtensa_opcode_lookup (isa, opname);
 
-  /* Special case: Check for "CALLXn.TLS" psuedo op.  If found, grab its
+  /* Special case: Check for "CALLXn.TLS" pseudo op.  If found, grab its
      extra argument and set the opcode to "CALLXn".  */
   if (orig_insn.opcode == XTENSA_UNDEFINED
       && strncasecmp (opname, "callx", 5) == 0)
@@ -5556,7 +5556,7 @@ md_assemble (char *str)
 	}
     }
 
-  /* Special case: Check for "j.l" psuedo op.  */
+  /* Special case: Check for "j.l" pseudo op.  */
   if (orig_insn.opcode == XTENSA_UNDEFINED
       && strncasecmp (opname, "j.l", 3) == 0)
     {

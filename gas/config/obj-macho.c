@@ -29,7 +29,7 @@
    which subsections are generated like __text, __const etc.
 
    The well-known as short-hand section switch directives like .text, .data
-   etc. are mapped onto predefined segment/section pairs using facilites
+   etc. are mapped onto predefined segment/section pairs using facilities
    supplied by the mach-o port of bfd.
 
    A number of additional mach-o short-hand section switch directives are

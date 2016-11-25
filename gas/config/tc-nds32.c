@@ -91,7 +91,7 @@ static int enable_relax_relocs = 1;
 static int enable_relax_ex9 = 0;
 /* The value will be used in RELAX_ENTRY.  */
 static int enable_relax_ifc = 0;
-/* Save option -O for perfomance.  */
+/* Save option -O for performance.  */
 static int optimize = 0;
 /* Save option -Os for code size.  */
 static int optimize_for_space = 0;
@@ -5233,7 +5233,7 @@ md_assemble (char *str)
   if (!nds32_check_insn_available (insn, str))
     return;
 
-  /* Make sure the begining of text being 2-byte align.  */
+  /* Make sure the beginning of text being 2-byte align.  */
   nds32_adjust_label (1);
   fld = insn.field;
   /* Try to allocate the max size to guarantee relaxable same branch
@@ -6440,7 +6440,7 @@ elf_nds32_final_processing (void)
   elf_elfheader (stdoutput)->e_flags |= nds32_elf_flags;
 }
 
-/* Implement md_apply_fix.  Apply the fix-up or tranform the fix-up for
+/* Implement md_apply_fix.  Apply the fix-up or transform the fix-up for
    later relocation generation.  */
 
 void
@@ -6463,7 +6463,7 @@ nds32_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       fixP->fx_addnumber = value;
       fixP->tc_fix_data = NULL;
 
-      /* Tranform specific relocations here for later relocation generation.
+      /* Transform specific relocations here for later relocation generation.
 	 Tag data here for ex9 relaxtion and tag tls data for linker.  */
       switch (fixP->fx_r_type)
 	{

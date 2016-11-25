@@ -7250,7 +7250,7 @@ s3_apply_fix (fixS *fixP, valueT *valP, segT seg)
         }
       else
         {
-          /* In differnt section.  */
+          /* In different section.  */
           if ((S_GET_SEGMENT (fixP->fx_addsy) != seg) ||
               (fixP->fx_addsy != NULL && S_IS_EXTERNAL (fixP->fx_addsy)))
             value = fixP->fx_offset;

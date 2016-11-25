@@ -1,3 +1,51 @@
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* as.h: Fix spelling in comments.
+	* config/obj-ecoff.c: Fix spelling in comments.
+	* config/obj-macho.c: Fix spelling in comments.
+	* config/tc-aarch64.c: Fix spelling in comments.
+	* config/tc-arc.c: Fix spelling in comments.
+	* config/tc-arm.c: Fix spelling in comments.
+	* config/tc-avr.c: Fix spelling in comments.
+	* config/tc-cr16.c: Fix spelling in comments.
+	* config/tc-epiphany.c: Fix spelling in comments.
+	* config/tc-frv.c: Fix spelling in comments.
+	* config/tc-hppa.c: Fix spelling in comments.
+	* config/tc-hppa.h: Fix spelling in comments.
+	* config/tc-i370.c: Fix spelling in comments.
+	* config/tc-m68hc11.c: Fix spelling in comments.
+	* config/tc-m68k.c: Fix spelling in comments.
+	* config/tc-mcore.c: Fix spelling in comments.
+	* config/tc-mep.c: Fix spelling in comments.
+	* config/tc-metag.c: Fix spelling in comments.
+	* config/tc-mips.c: Fix spelling in comments.
+	* config/tc-mn10200.c: Fix spelling in comments.
+	* config/tc-mn10300.c: Fix spelling in comments.
+	* config/tc-nds32.c: Fix spelling in comments.
+	* config/tc-nios2.c: Fix spelling in comments.
+	* config/tc-ns32k.c: Fix spelling in comments.
+	* config/tc-pdp11.c: Fix spelling in comments.
+	* config/tc-ppc.c: Fix spelling in comments.
+	* config/tc-riscv.c: Fix spelling in comments.
+	* config/tc-rx.c: Fix spelling in comments.
+	* config/tc-score.c: Fix spelling in comments.
+	* config/tc-score7.c: Fix spelling in comments.
+	* config/tc-sparc.c: Fix spelling in comments.
+	* config/tc-tic54x.c: Fix spelling in comments.
+	* config/tc-vax.c: Fix spelling in comments.
+	* config/tc-xgate.h: Fix spelling in comments.
+	* config/tc-xtensa.c: Fix spelling in comments.
+	* config/tc-z80.c: Fix spelling in comments.
+	* dwarf2dbg.c: Fix spelling in comments.
+	* input-file.h: Fix spelling in comments.
+	* itbl-ops.c: Fix spelling in comments.
+	* read.c: Fix spelling in comments.
+	* stabs.c: Fix spelling in comments.
+	* symbols.c: Fix spelling in comments.
+	* write.c: Fix spelling in comments.
+	* testsuite/gas/all/itbl-test.c: Fix spelling in comments.
+	* testsuite/gas/tic4x/opclasses.h: Fix spelling in comments.
+
 2016-11-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c (sparc_ip): Avoid emitting a cbcond error

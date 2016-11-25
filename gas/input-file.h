@@ -18,7 +18,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-/*"input_file.c":Operating-system dependant functions to read source files.*/
+/*"input_file.c":Operating-system dependent functions to read source files.*/
 
 /*
  * No matter what the operating system, this module must provide the

@@ -333,7 +333,7 @@ const pseudo_typeS md_pseudo_table[] =
    displacement base-adjust as there are other routines that must
    consider this. Also, as we have two various offset-adjusts in the
    ns32k (acb versus br/brs/jsr/bcond), two set of limits would have
-   had to be used.  Now we dont have to think about that.  */
+   had to be used.  Now we don't have to think about that.  */
 
 const relax_typeS md_relax_table[] =
 {
@@ -985,10 +985,10 @@ encode_operand (int argc,
 	  argv[i] = freeptr;
 	  pcrel -= 1;		/* Make pcrel 0 in spite of what case 'p':
 				   wants.  */
-	  /* fall thru */
+	  /* fallthru */
 	case 'p':		/* Displacement - pc relative addressing.  */
 	  pcrel += 1;
-	  /* fall thru */
+	  /* fallthru */
 	case 'd':		/* Displacement.  */
 	  iif.instr_size += suffixP[i] ? suffixP[i] : 4;
 	  IIF (12, 2, suffixP[i], (unsigned long) argv[i], 0,
@@ -1818,7 +1818,7 @@ convert_iif (void)
 		  {
 		    /* Frag it.  */
 		    if (exprP.X_op_symbol)
-		      /* We cant relax this case.  */
+		      /* We can't relax this case.  */
 		      as_fatal (_("Can't relax difference"));
 		    else
 		      {

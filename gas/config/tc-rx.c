@@ -1077,7 +1077,7 @@ scan_for_infix_rx_pseudo_ops (char * str)
   if (dot == NULL || dot == str)
     return FALSE;
 
-  /* A real pseudo-op must be preceeded by whitespace.  */
+  /* A real pseudo-op must be preceded by whitespace.  */
   if (dot[-1] != ' ' && dot[-1] != '\t')
     return FALSE;
 
@@ -2671,7 +2671,7 @@ rx_elf_final_processing (void)
   elf_elfheader (stdoutput)->e_flags |= elf_flags;
 }
 
-/* Scan the current input line for occurances of Renesas
+/* Scan the current input line for occurrences of Renesas
    local labels and replace them with the GAS version.  */
 
 void

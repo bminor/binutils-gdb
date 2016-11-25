@@ -1263,7 +1263,7 @@ BSR (bfd_vma val, int amount)
 static char *expr_end;
 
 /* Values for `special_case'.
-   Instructions that require wierd handling because they're longer than
+   Instructions that require weird handling because they're longer than
    4 bytes.  */
 #define SPECIAL_CASE_NONE	0
 #define	SPECIAL_CASE_SET	1

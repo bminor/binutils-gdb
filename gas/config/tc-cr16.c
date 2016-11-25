@@ -1471,7 +1471,7 @@ gettrap (char *s)
     if (strcasecmp (trap->name, s) == 0)
       return trap->entry;
 
-  /* To make compatable with CR16 4.1 tools, the below 3-lines of
+  /* To make compatible with CR16 4.1 tools, the below 3-lines of
    * code added. Refer: Development Tracker item #123 */
   for (trap = cr16_traps; trap < (cr16_traps + NUMTRAPS); trap++)
     if (trap->entry  == (unsigned int) atoi (s))
@@ -2385,7 +2385,7 @@ next_insn:
 
       for (i = 0; i < insn->nargs; i++)
         {
-         /* For BAL (ra),disp17 instuction only. And also set the
+         /* For BAL (ra),disp17 instruction only. And also set the
             DISP24a relocation type.  */
          if (IS_INSN_MNEMONIC ("bal") && (instruction->size == 2) && i == 0)
            {

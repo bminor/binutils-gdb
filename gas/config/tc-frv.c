@@ -727,7 +727,7 @@ frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
 	      buffer[0] |= 0x80;
 	    }
 	  /* The branch is in the middle.  Split this vliw insn into first
-	     and second parts.  Insert the NOP inbetween.  */
+	     and second parts.  Insert the NOP between.  */
 
           second_part->insn_list = insert_before_insn;
 	  second_part->insn_list->type = VLIW_BRANCH_HAS_NOPS;
@@ -767,7 +767,7 @@ frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
 	    }
 
 	/* The branch is in the middle.  Split this vliw insn into first
-	   and second parts.  Insert the NOP inbetween.  */
+	   and second parts.  Insert the NOP in between.  */
           second_part->insn_list = insert_before_insn;
 	  second_part->insn_list->type = VLIW_BRANCH_HAS_NOPS;
           second_part->next      = vliw_to_split->next;

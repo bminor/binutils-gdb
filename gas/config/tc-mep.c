@@ -1146,7 +1146,7 @@ mep_check_ivc2_scheduling (void)
 
 /* The scheduling functions are just filters for invalid combinations.
    If there is a violation, they terminate assembly.  Otherise they
-   just fall through.  Succesful combinations cause no side effects
+   just fall through.  Successful combinations cause no side effects
    other than valid nop insertion.  */
 
 static void
@@ -1219,7 +1219,7 @@ md_assemble (char * str)
 		     + copro insn
 
                  We want to handle the general case where more than
-                 one instruction can be preceeded by a +.  This will
+                 one instruction can be preceded by a +.  This will
                  happen later if we add support for internally parallel
                  coprocessors.  We'll make the parsing nice and general
                  so that it can handle an arbitrary number of insns
@@ -1299,7 +1299,7 @@ md_assemble (char * str)
 	  /* Check for a + with a core insn and abort if found. */
 	  if (!thisInsnIsCopro)
 	    {
-	      as_fatal("A core insn cannot be preceeded by a +.\n");
+	      as_fatal("A core insn cannot be preceded by a +.\n");
 	      return;
 	    }
 
@@ -2185,7 +2185,7 @@ mep_cleanup (void)
 {
   /* Take care of any insns left to be parallelized when the file ends.
      This is mainly here to handle the case where the file ends with an
-     insn preceeded by a + or the file ends unexpectedly.  */
+     insn preceded by a + or the file ends unexpectedly.  */
   if (mode == VLIW)
     mep_process_saved_insns ();
 }

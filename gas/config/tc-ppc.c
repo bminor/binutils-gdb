@@ -2952,7 +2952,7 @@ md_assemble (char *str)
 		      }
 		    break;
 		  }
-		/* Fall thru */
+		/* Fallthru */
 
 	      case BFD_RELOC_PPC64_ADDR16_HIGH:
 		ex.X_add_number = PPC_HI (ex.X_add_number);
@@ -2974,7 +2974,7 @@ md_assemble (char *str)
 		      }
 		    break;
 		  }
-		/* Fall thru */
+		/* Fallthru */
 
 	      case BFD_RELOC_PPC64_ADDR16_HIGHA:
 		ex.X_add_number = PPC_HA (ex.X_add_number);
@@ -6579,7 +6579,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	    }
 	  break;
 	}
-      /* Fall thru */
+      /* Fallthru */
 
     case BFD_RELOC_PPC_VLE_HI16A:
     case BFD_RELOC_PPC_VLE_HI16D:
@@ -6602,7 +6602,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	    }
 	  break;
 	}
-      /* Fall thru */
+      /* Fallthru */
 
     case BFD_RELOC_PPC_VLE_HA16A:
     case BFD_RELOC_PPC_VLE_HA16D:
@@ -6744,7 +6744,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC_VLE_SDAREL_HA16A:
 	case BFD_RELOC_PPC_VLE_SDAREL_HA16D:
 	  gas_assert (fixP->fx_addsy != NULL);
-	  /* Fall thru */
+	  /* Fallthru */
 
 	case BFD_RELOC_PPC_TLS:
 	case BFD_RELOC_PPC_TLSGD:
@@ -6868,7 +6868,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	      && !S_IS_DEFINED (fixP->fx_addsy)
 	      && !S_IS_WEAK (fixP->fx_addsy))
 	    S_SET_WEAK (fixP->fx_addsy);
-	  /* Fall thru */
+	  /* Fallthru */
 
 	case BFD_RELOC_VTABLE_ENTRY:
 	  fixP->fx_done = 0;

@@ -1440,7 +1440,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  /* Facilitate hand-crafted unwind info.  */
 	  if (strcmp (section->name, UNWIND_SECTION_NAME) == 0)
 	    code = R_PARISC_SEGREL32;
-	  /* Fall thru */
+	  /* Fallthru */
 
 	default:
 	  reloc->addend = fixp->fx_offset;

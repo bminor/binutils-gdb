@@ -1286,7 +1286,7 @@ md_show_usage (FILE *stream)
 {
   fprintf (stream, "\
 \n\
-PDP-11 instruction set extentions:\n\
+PDP-11 instruction set extensions:\n\
 \n\
 -m(no-)cis		allow (disallow) commersial instruction set\n\
 -m(no-)csm		allow (disallow) CSM instruction\n\

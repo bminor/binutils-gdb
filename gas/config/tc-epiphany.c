@@ -288,7 +288,7 @@ epiphany_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
 	case BFD_RELOC_EPIPHANY_HIGH:
 	  value >>= 16;
-	  /* fall thru */
+	  /* fallthru */
 	case BFD_RELOC_EPIPHANY_LOW:
 	  value = (((value & 0xff) << 5) | insn[0])
 	    | (insn[1] << 8)
@@ -340,7 +340,7 @@ epiphany_handle_align (fragS *fragp)
 }
 
 /* Read a comma separated incrementing list of register names
-   and form a bit mask of upto 15 registers 0..14.  */
+   and form a bit mask of up to 15 registers 0..14.  */
 
 static const char *
 parse_reglist (const char * s, int * mask)
@@ -502,7 +502,7 @@ epiphany_assemble (const char *str)
 	    return;
 	  }
       }
-      /* fall-thru.  */
+      /* fallthru */
 
     case OP4_LDSTRX:
       {
@@ -994,7 +994,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
 	return BFD_RELOC_EPIPHANY_LOW;
       else
 	as_bad ("unknown imm16 operand");
-      /* fall-thru */
+      /* fallthru */
 
     default:
       break;

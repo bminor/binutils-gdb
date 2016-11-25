@@ -1766,7 +1766,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
     case C (COND_JUMP, DISP32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
       {
-	/* A conditional branch wont fit into 12 bits so:
+	/* A conditional branch won't fit into 12 bits so:
 	  	b!cond	1f
 	  	jmpi	0f
 	  	.align 2

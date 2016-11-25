@@ -647,7 +647,7 @@ first_error (const char *error)
     set_syntax_error (error);
 }
 
-/* Similiar to first_error, but this function accepts formatted error
+/* Similar to first_error, but this function accepts formatted error
    message.  */
 static void
 first_error_fmt (const char *format, ...)

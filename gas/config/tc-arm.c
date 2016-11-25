@@ -3045,7 +3045,7 @@ s_ccs_ref (int unused ATTRIBUTE_UNUSED)
 }
 
 /*  If name is not NULL, then it is used for marking the beginning of a
-    function, wherease if it is NULL then it means the function end.  */
+    function, whereas if it is NULL then it means the function end.  */
 static void
 asmfunc_debug (const char * name)
 {
@@ -7306,7 +7306,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
    The only binary encoding difference is the Coprocessor number.  Coprocessor
    9 is used for half-precision calculations or conversions.  The format of the
-   instruction is the same as the equivalent Coprocessor 10 instuction that
+   instruction is the same as the equivalent Coprocessor 10 instruction that
    exists for Single-Precision operation.  */
 
 static void
@@ -13083,7 +13083,7 @@ do_t_swi (void)
   if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6m))
     {
       if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_os)
-	  /* This only applies to the v6m howver, not later architectures.  */
+	  /* This only applies to the v6m however, not later architectures.  */
 	  && ! ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7))
 	as_bad (_("SVC is not permitted on this architecture"));
       ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, arm_ext_os);
@@ -17950,7 +17950,7 @@ now_it_add_mask (int cond)
 	for covering other cases.
 
 	Calling handle_it_state () may not transition the IT block state to
-	OUTSIDE_IT_BLOCK immediatelly, since the (current) state could be
+	OUTSIDE_IT_BLOCK immediately, since the (current) state could be
 	still queried. Instead, if the FSM determines that the state should
 	be transitioned to OUTSIDE_IT_BLOCK, a flag is marked to be closed
 	after the tencode () function: that's what it_fsm_post_encode () does.
@@ -18041,7 +18041,7 @@ handle_it_state (void)
       switch (inst.it_insn_type)
 	{
 	case OUTSIDE_IT_INSN:
-	  /* The closure of the block shall happen immediatelly,
+	  /* The closure of the block shall happen immediately,
 	     so any in_it_block () call reports the block as closed.  */
 	  force_automatic_it_block_close ();
 	  break;

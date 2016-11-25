@@ -4717,7 +4717,7 @@ parse_dtemplate (const char *line, metag_insn *insn,
   return l;
 }
 
-/* Parse a DSP Template definiton memory reference, e.g
+/* Parse a DSP Template definition memory reference, e.g
    [A0.7+A0.5++]. DSPRAM is set to true by this function if this
    template definition is a DSP RAM template definition.  */
 static const char *
@@ -4739,7 +4739,7 @@ template_mem_ref(const char *line, metag_addr *addr,
   return l;
 }
 
-/* Sets LOAD to TRUE if this is a Template load definiton (otherwise
+/* Sets LOAD to TRUE if this is a Template load definition (otherwise
    it's a store). Fills out ADDR, TEMPLATE_REG and ADDR_UNIT.  */
 static const char *
 parse_template_regs (const char *line, bfd_boolean *load,
@@ -5626,7 +5626,7 @@ parse_dalu (const char *line, metag_insn *insn,
   if ((template->meta_opcode >> 26) & 0x1)
     ls_shift = INVALID_SHIFT;
 
-  /* The Condition Is Always (CA) bit must be set if we're targetting a
+  /* The Condition Is Always (CA) bit must be set if we're targeting a
      Ux.r register as the destination. This means that we can't have
      any other condition bits set.  */
   if (!is_same_data_unit (regs[1]->unit, regs[0]->unit))
