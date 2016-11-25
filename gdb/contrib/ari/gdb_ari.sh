@@ -567,16 +567,6 @@ Function name in first column should be restricted to function implementation"
 }
 
 
-# Functions without any parameter should have (void)
-# after their name not simply ().
-BEGIN { doc["no parameter function"] = "\
-Function having no parameter should be declared with funcname (void)."
-    category["no parameter function"] = ari_code
-}
-/^[a-zA-Z][a-z0-9A-Z_]*[[:space:]]*\(\)/ {
-    fail("no parameter function")
-}
-
 BEGIN { doc["hash"] = "\
 Do not use ` #...'\'', instead use `#...'\''(some compilers only correctly \
 parse a C preprocessor directive when `#'\'' is the first character on \

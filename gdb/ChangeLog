@@ -1,3 +1,7 @@
+2016-11-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* contrib/ari/gdb_ari.sh (no parameter function): Remove check.
+
 2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in: Fix typo.
