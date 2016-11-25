@@ -128,7 +128,7 @@
     should run in parallel with addresses vector (FirstThunk), i.e. that they
     should have same number of elements and terminated with zero. We violate
     this, since FirstThunk points directly into machine code. But in practice,
-    OS loader implemented the sane way: it goes thru OriginalFirstThunk and
+    OS loader implemented the sane way: it goes through OriginalFirstThunk and
     puts addresses to FirstThunk, not something else. It once again should be
     noted that dll and symbol name structures are reused across fixup entries
     and should be there anyway to support standard import stuff, so sustained

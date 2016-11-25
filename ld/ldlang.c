@@ -3704,7 +3704,7 @@ map_input_to_output_sections
 	     processed the segment marker.  Originally, the linker
 	     treated segment directives (like -Ttext on the
 	     command-line) as section directives.  We honor the
-	     section directive semantics for backwards compatibilty;
+	     section directive semantics for backwards compatibility;
 	     linker scripts that do not specifically check for
 	     SEGMENT_START automatically get the old semantics.  */
 	  if (!s->address_statement.segment
@@ -6880,7 +6880,7 @@ lang_process (void)
 	 are any more to be added to the link before we call the
 	 emulation's after_open hook.  We create a private list of
 	 input statements for this purpose, which we will eventually
-	 insert into the global statment list after the first claimed
+	 insert into the global statement list after the first claimed
 	 file.  */
       added = *stat_ptr;
       /* We need to manipulate all three chains in synchrony.  */

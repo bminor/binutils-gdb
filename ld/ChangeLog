@@ -1,3 +1,11 @@
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* deffile.h: Fix spelling in comments.
+	* ld.h: Fix spelling in comments.
+	* ldlang.c: Fix spelling in comments.
+	* ldmisc.c: Fix spelling in comments.
+	* pe-dll.c: Fix spelling in comments.
+
 2016-11-24  Jiong Wang  <jiong.wang@arm.com>
 
 	PR target/20737
