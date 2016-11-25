@@ -1,5 +1,9 @@
 2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* Makefile.in: Fix typo.
+
+2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* record-full.c (record_full_resume): Fix typos in comment.
 
 2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
