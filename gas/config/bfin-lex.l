@@ -362,7 +362,7 @@ static long parse_int (char **end)
         fmt = 'd';
         break;
 
-      case '0':  /* Accept different formated integers hex octal and binary. */
+      case '0':  /* Accept different formatted integers hex octal and binary. */
         {
 	  char c = *++arg;
           arg++;

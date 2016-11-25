@@ -1,5 +1,9 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* config/bfin-lex.l: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* testsuite/gas/all/gas.exp: Fix spelling in comments.
 	* testsuite/gas/cris/cris.exp: Fix spelling in comments.
 	* testsuite/gas/hppa/basic/basic.exp: Fix spelling in comments.
