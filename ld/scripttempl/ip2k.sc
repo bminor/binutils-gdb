@@ -31,7 +31,7 @@ MEMORY
 SECTIONS
 {
 	/* Allocated memory end markers
-	   (initialized to start of appropiate memory address).  */
+	   (initialized to start of appropriate memory address).  */
 	__data_end  = 0x01000100;
 	__pram_end  = 0x02000000;
 	__flash_end = 0x02010000;

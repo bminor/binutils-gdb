@@ -74,7 +74,7 @@ SECTIONS
     *(.IA_64.pltoff)
   }
   \$TFR\$ ALIGN (16) : {
-    /* Tranfer vector.  */
+    /* Transfer vector.  */
     __entry = .;
     *(.transfer)
   }

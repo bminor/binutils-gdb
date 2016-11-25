@@ -1,5 +1,12 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* scripttempl/ia64vms.sc: Fix spelling in comments.
+	* scripttempl/ip2k.sc: Fix spelling in comments.
+	* scripttempl/v850.sc: Fix spelling in comments.
+	* scripttempl/v850_rh850.sc: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* emultempl/avrelf.em: Fix spelling in comments.
 	* emultempl/elf32.em: Fix spelling in comments.
 	* emultempl/pe.em: Fix spelling in comments.
