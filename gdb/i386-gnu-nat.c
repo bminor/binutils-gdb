@@ -307,7 +307,7 @@ i386_gnu_dr_set (const struct i386_debug_state *regs, struct proc *thread)
 static void
 i386_gnu_dr_set_control_one (struct proc *thread, void *arg)
 {
-  unsigned long *control = arg;
+  unsigned long *control = (unsigned long *) arg;
   struct i386_debug_state regs;
 
   i386_gnu_dr_get (&regs, thread);
@@ -337,7 +337,7 @@ struct reg_addr
 static void
 i386_gnu_dr_set_addr_one (struct proc *thread, void *arg)
 {
-  struct reg_addr *reg_addr = arg;
+  struct reg_addr *reg_addr = (struct reg_addr *) arg;
   struct i386_debug_state regs;
 
   i386_gnu_dr_get (&regs, thread);
