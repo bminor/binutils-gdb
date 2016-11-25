@@ -2937,17 +2937,18 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		     handle the R_SPARC_5 immediate directly here so that
 		     we don't need to add support for multiple relocations
 		     in one instruction just yet.  */
-		  if (the_insn.reloc == BFD_RELOC_SPARC_5)
+		  if (the_insn.reloc == BFD_RELOC_SPARC_5
+                      && ((insn->match & OP(0x3)) == 0))
 		    {
 		      valueT val = the_insn.exp.X_add_number;
 
+		      the_insn.reloc = BFD_RELOC_NONE;
 		      if (! in_bitfield_range (val, 0x1f))
 			{
 			  error_message = _(": Immediate value in cbcond is out of range.");
 			  goto error;
 			}
 		      opcode |= val & 0x1f;
-		      the_insn.reloc = BFD_RELOC_NONE;
 		    }
 		}
 

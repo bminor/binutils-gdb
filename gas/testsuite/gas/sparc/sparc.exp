@@ -53,6 +53,7 @@ if [istarget sparc*-*-*] {
         run_dump_test "pause"
         run_dump_test "save-args"
         run_dump_test "cbcond"
+        run_list_test "cbcond-diag" "-64"
         run_dump_test "cfr"
         run_dump_test "crypto"
         run_dump_test "edge"

@@ -1,3 +1,11 @@
+2016-11-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Avoid emitting a cbcond error
+	messages for non-cbcond instructions.
+	* testsuite/gas/sparc/cbcond-diag.s: New file.
+	* testsuite/gas/sparc/cbcond-diag.l: Likewise.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run cbcond-diag tests.
+
 2016-11-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/sparc.exp (gas_64_check): Make sure the
