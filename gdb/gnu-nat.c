@@ -2110,6 +2110,16 @@ cur_inf (void)
 }
 
 static void
+gnu_ptrace_me (void)
+{
+  /* We're in the child; make this process stop as soon as it execs.  */
+  struct inf *inf = cur_inf ();
+  inf_debug (inf, "tracing self");
+  if (ptrace (PTRACE_TRACEME) != 0)
+    error (_("ptrace (PTRACE_TRACEME) failed!"));
+}
+
+static void
 gnu_create_inferior (struct target_ops *ops, 
 		     char *exec_file, char *allargs, char **env,
 		     int from_tty)
@@ -2117,17 +2127,9 @@ gnu_create_inferior (struct target_ops *ops,
   struct inf *inf = cur_inf ();
   int pid;
 
-  void trace_me (void)
-  {
-    /* We're in the child; make this process stop as soon as it execs.  */
-    inf_debug (inf, "tracing self");
-    if (ptrace (PTRACE_TRACEME) != 0)
-      error (_("ptrace (PTRACE_TRACEME) failed!"));
-  }
-
   inf_debug (inf, "creating inferior");
 
-  pid = fork_inferior (exec_file, allargs, env, trace_me,
+  pid = fork_inferior (exec_file, allargs, env, gnu_ptrace_me,
                        NULL, NULL, NULL, NULL);
 
   /* Attach to the now stopped child, which is actually a shell...  */

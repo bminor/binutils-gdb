@@ -1,5 +1,9 @@
 2016-12-08  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (gnu_create_inferior): Move nested "trace_me"
+	function...
+	(gnu_ptrace_me): ... here.
+
 	* i386-gnu-nat.c (i386_gnu_dr_set_control_one)
 	(i386_gnu_dr_set_addr_one): Explicitly cast "void *".
 
