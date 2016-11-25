@@ -719,7 +719,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	  auto_overlay_file = optarg;
 	  break;
 	}
-      /* Fall thru */
+      /* Fallthru */
 
     case OPTION_SPU_AUTO_RELINK:
       params.auto_overlay |= 2;

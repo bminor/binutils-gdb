@@ -36,7 +36,7 @@ fragment <<EOF
 static lang_input_statement_type *stub_file;
 static asection *avr_stub_section;
 
-/* Variables set by the command-line parameters and transfered
+/* Variables set by the command-line parameters and transferred
    to the bfd without use of global shared variables.  */
 
 static bfd_boolean avr_no_stubs = FALSE;

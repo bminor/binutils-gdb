@@ -534,7 +534,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
       while ((var = strchr (filename + offset, '$')) != NULL)
 	{
 	  /* The ld.so manual page does not say, but I am going to assume that
-	     these tokens are terminated by a directory seperator character
+	     these tokens are terminated by a directory separator character
 	     (/) or the end of the string.  There is also an implication that
 	     $ORIGIN should only be used at the start of a path, but that is
 	     not enforced here.
@@ -1512,7 +1512,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
     case etree_provide:
     case etree_provided:
       provide = TRUE;
-      /* Fall thru */
+      /* Fallthru */
     case etree_assign:
       /* We call record_link_assignment even if the symbol is defined.
 	 This is because if it is defined by a dynamic object, we

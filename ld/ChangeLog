@@ -1,5 +1,13 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* emultempl/avrelf.em: Fix spelling in comments.
+	* emultempl/elf32.em: Fix spelling in comments.
+	* emultempl/pe.em: Fix spelling in comments.
+	* emultempl/pep.em: Fix spelling in comments.
+	* emultempl/spuelf.em: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* testsuite/ld-sh/arch/arch.exp: Fix spelling in comments.
 	* testsuite/ld-sh/rd-sh.exp: Fix spelling in comments.
 	* testsuite/ld-sh/sh64/rd-sh64.exp: Fix spelling in comments.
