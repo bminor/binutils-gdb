@@ -1,3 +1,7 @@
+2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infcmd.c (interrupt_command): Fix typo in comment.
+
 2016-11-24  John Baldwin  <jhb@FreeBSD.org>
 
 	* ada-lang.c (create_excep_cond_exprs): Do not use 'std::move'.

@@ -3063,7 +3063,7 @@ interrupt_target_1 (int all_threads)
 
 /* interrupt [-a]
    Stop the execution of the target while running in async mode, in
-   the backgound.  In all-stop, stop the whole process.  In non-stop
+   the background.  In all-stop, stop the whole process.  In non-stop
    mode, stop the current thread only by default, or stop all threads
    if the `-a' switch is used.  */
 
