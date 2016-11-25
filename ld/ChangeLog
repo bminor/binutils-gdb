@@ -1,5 +1,14 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* testsuite/ld-arm/stm32l4xx-fix-all.s: Fix spelling in comments.
+	* testsuite/ld-arm/thumb2-b-interwork.s: Fix spelling in comments.
+	* testsuite/ld-arm/thumb2-bl.s: Fix spelling in comments.
+	* testsuite/ld-s390/tlspic1.s: Fix spelling in comments.
+	* testsuite/ld-s390/tlspic1_64.s: Fix spelling in comments.
+	* testsuite/ld-scripts/section-match-1.d: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* deffile.h: Fix spelling in comments.
 	* ld.h: Fix spelling in comments.
 	* ldlang.c: Fix spelling in comments.
