@@ -2792,17 +2792,23 @@ active_inf (void)
 
 
 static void
-set_task_pause_cmd (char *args, int from_tty)
+set_task_pause_cmd (int arg, int from_tty)
 {
   struct inf *inf = cur_inf ();
   int old_sc = inf->pause_sc;
 
-  inf->pause_sc = parse_bool_arg (args, "set task pause");
+  inf->pause_sc = arg;
 
   if (old_sc == 0 && inf->pause_sc != 0)
     /* If the task is currently unsuspended, immediately suspend it,
        otherwise wait until the next time it gets control.  */
     inf_suspend (inf);
+}
+
+static void
+set_task_pause_cmd (char *args, int from_tty)
+{
+  set_task_pause_cmd (parse_bool_arg (args, "set task pause"), from_tty);
 }
 
 static void
@@ -2991,15 +2997,21 @@ show_sig_thread_cmd (char *args, int from_tty)
 
 
 static void
-set_signals_cmd (char *args, int from_tty)
+set_signals_cmd (int arg, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
-  inf->want_signals = parse_bool_arg (args, "set signals");
+  inf->want_signals = arg;
 
   if (inf->task && inf->want_signals != inf->traced)
     /* Make this take effect immediately in a running process.  */
     inf_set_traced (inf, inf->want_signals);
+}
+
+static void
+set_signals_cmd (char *args, int from_tty)
+{
+  set_signals_cmd(parse_bool_arg (args, "set signals"), from_tty);
 }
 
 static void
@@ -3015,15 +3027,20 @@ show_signals_cmd (char *args, int from_tty)
 }
 
 static void
-set_exceptions_cmd (char *args, int from_tty)
+set_exceptions_cmd (int arg, int from_tty)
 {
   struct inf *inf = cur_inf ();
-  int val = parse_bool_arg (args, "set exceptions");
 
   /* Make this take effect immediately in a running process.  */
   /* XXX */ ;
 
-  inf->want_exceptions = val;
+  inf->want_exceptions = arg;
+}
+
+static void
+set_exceptions_cmd (char *args, int from_tty)
+{
+  set_exceptions_cmd (parse_bool_arg (args, "set exceptions"), from_tty);
 }
 
 static void
@@ -3078,11 +3095,11 @@ static void
 set_noninvasive_cmd (char *args, int from_tty)
 {
   /* Invert the sense of the arg for each component.  */
-  char *inv_args = parse_bool_arg (args, "set noninvasive") ? "off" : "on";
+  int inv_arg = parse_bool_arg (args, "set noninvasive") ? 0 : 1;
 
-  set_task_pause_cmd (inv_args, from_tty);
-  set_signals_cmd (inv_args, from_tty);
-  set_exceptions_cmd (inv_args, from_tty);
+  set_task_pause_cmd (inv_arg, from_tty);
+  set_signals_cmd (inv_arg, from_tty);
+  set_exceptions_cmd (inv_arg, from_tty);
 }
 
 

@@ -1,5 +1,10 @@
 2016-12-08  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (set_task_pause_cmd, set_signals_cmd)
+	(set_exceptions_cmd): Add variants taking an "int arg" instead of
+	a "char *".  Make the "char *" variants use the former.
+	(set_noninvasive_cmd): Also use the "int arg" variants.
+
 	* gnu-nat.c (gnu_create_inferior): Move nested "trace_me"
 	function...
 	(gnu_ptrace_me): ... here.
