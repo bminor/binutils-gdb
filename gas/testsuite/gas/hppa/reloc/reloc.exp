@@ -657,7 +657,7 @@ if [istarget hppa*-*-*] then {
     # Make sure we put the right relocation entry on a BLE instruction.
     do_ble_relocation_test
 
-    # Make sure relocation reductions are not too agressive about
+    # Make sure relocation reductions are not too aggressive about
     # adjusting relocations against some symbols.
     do_relocation_reduction_tests
 

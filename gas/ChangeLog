@@ -1,5 +1,15 @@
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
+	* testsuite/gas/all/gas.exp: Fix spelling in comments.
+	* testsuite/gas/cris/cris.exp: Fix spelling in comments.
+	* testsuite/gas/hppa/basic/basic.exp: Fix spelling in comments.
+	* testsuite/gas/hppa/parse/parse.exp: Fix spelling in comments.
+	* testsuite/gas/hppa/reloc/reloc.exp: Fix spelling in comments.
+	* testsuite/gas/sh/arch/arch.exp: Fix spelling in comments.
+	* testsuite/gas/tic4x/tic4x.exp: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
 	* testsuite/gas/arm/local_function.d: Fix spelling in comments.
 	* testsuite/gas/arm/req.s: Fix spelling in comments.
 	* testsuite/gas/arm/vfp1.s: Fix spelling in comments.

@@ -17,7 +17,7 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # dejagnu@gnu.org
 
-# Written by the Center for Software Science at the Univeristy of Utah
+# Written by the Center for Software Science at the University of Utah
 # and by Cygnus Support.
 
 proc do_imem {} {
