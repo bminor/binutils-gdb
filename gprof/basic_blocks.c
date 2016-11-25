@@ -311,7 +311,7 @@ print_exec_counts (void)
    line of a file in sequential order.
 
    Global variable bb_annotate_all_lines enables execution count
-   compression (counts are supressed if identical to the last one)
+   compression (counts are suppressed if identical to the last one)
    and prints counts on all executed lines.  Otherwise, print
    all basic-block execution counts exactly once on the line
    that starts the basic-block.  */
