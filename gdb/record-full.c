@@ -969,7 +969,7 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
             }
           else
             {
-              /* This arch support soft sigle step.  */
+              /* This arch supports soft single step.  */
               if (thread_has_single_step_breakpoints_set (inferior_thread ()))
                 {
                   /* This is a soft single step.  */
