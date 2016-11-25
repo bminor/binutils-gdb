@@ -1,5 +1,19 @@
 2016-12-08  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (proc_get_exception_port, proc_set_exception_port)
+	(INF_RESUME_MSGPORT_RPC, proc_get_state, _proc_get_exc_port)
+	(proc_steal_exc_port, proc_restore_exc_port, make_proc)
+	(inf_startup, inf_set_pid, inf_validate_procinfo)
+	(inf_validate_task_sc, inf_set_traced, inf_validate_procs)
+	(inf_signal, inf_continue, gnu_wait, S_exception_raise_request)
+	(do_mach_notify_dead_name, S_proc_wait_reply)
+	(S_msg_sig_post_untraced_reply, S_msg_sig_post_reply)
+	(port_msgs_queued, gnu_read_inferior, gnu_write_inferior)
+	(gnu_find_memory_regions, steal_exc_port, thread_takeover_sc_cmd)
+	(flush_inferior_icache): Instead of "error_t" use "kern_return_t".
+	* i386-gnu-nat.c (fetch_fpregs, store_fpregs, i386_gnu_dr_get)
+	(i386_gnu_dr_set): Likewise.
+
 	* gnu-nat.c (set_task_pause_cmd, set_signals_cmd)
 	(set_exceptions_cmd): Add variants taking an "int arg" instead of
 	a "char *".  Make the "char *" variants use the former.

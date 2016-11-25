@@ -113,8 +113,8 @@ void proc_abort (struct proc *proc, int force);
 struct proc *make_proc (struct inf *inf, mach_port_t port, int tid);
 struct proc *_proc_free (struct proc *proc);
 int proc_update_sc (struct proc *proc);
-error_t proc_get_exception_port (struct proc *proc, mach_port_t * port);
-error_t proc_set_exception_port (struct proc *proc, mach_port_t port);
+kern_return_t proc_get_exception_port (struct proc *proc, mach_port_t * port);
+kern_return_t proc_set_exception_port (struct proc *proc, mach_port_t port);
 static mach_port_t _proc_get_exc_port (struct proc *proc);
 void proc_steal_exc_port (struct proc *proc, mach_port_t exc_port);
 void proc_restore_exc_port (struct proc *proc);
@@ -133,7 +133,7 @@ int proc_trace (struct proc *proc, int set);
    afterwards).  This effects INF's threads' resume_sc count.  */
 #define INF_RESUME_MSGPORT_RPC(inf, rpc_expr) \
   (inf_set_threads_resume_sc_for_signal_thread (inf) \
-   ? ({ error_t __e; \
+   ? ({ kern_return_t __e; \
 	inf_resume (inf); \
 	__e = INF_MSGPORT_RPC (inf, rpc_expr); \
 	inf_suspend (inf); \
@@ -367,7 +367,7 @@ proc_get_state (struct proc *proc, int will_modify)
   if (!proc->state_valid)
     {
       mach_msg_type_number_t state_size = THREAD_STATE_SIZE;
-      error_t err =
+      kern_return_t err =
 	thread_get_state (proc->port, THREAD_STATE_FLAVOR,
 			  (thread_state_t) &proc->state, &state_size);
 
@@ -387,7 +387,7 @@ proc_get_state (struct proc *proc, int will_modify)
 
 
 /* Set PORT to PROC's exception port.  */
-error_t
+kern_return_t
 proc_get_exception_port (struct proc * proc, mach_port_t * port)
 {
   if (proc_is_task (proc))
@@ -397,7 +397,7 @@ proc_get_exception_port (struct proc * proc, mach_port_t * port)
 }
 
 /* Set PROC's exception port to PORT.  */
-error_t
+kern_return_t
 proc_set_exception_port (struct proc * proc, mach_port_t port)
 {
   proc_debug (proc, "setting exception port: %lu", port);
@@ -412,7 +412,7 @@ static mach_port_t
 _proc_get_exc_port (struct proc *proc)
 {
   mach_port_t exc_port;
-  error_t err = proc_get_exception_port (proc, &exc_port);
+  kern_return_t err = proc_get_exception_port (proc, &exc_port);
 
   if (err)
     /* PROC must be dead.  */
@@ -438,7 +438,7 @@ proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
 
   if (cur_exc_port)
     {
-      error_t err = 0;
+      kern_return_t err = 0;
 
       proc_debug (proc, "inserting exception port: %lu", exc_port);
 
@@ -481,7 +481,7 @@ proc_restore_exc_port (struct proc *proc)
 
   if (cur_exc_port)
     {
-      error_t err = 0;
+      kern_return_t err = 0;
 
       proc_debug (proc, "restoring real exception port");
 
@@ -537,7 +537,7 @@ static int next_thread_id = 1;
 struct proc *
 make_proc (struct inf *inf, mach_port_t port, int tid)
 {
-  error_t err;
+  kern_return_t err;
   mach_port_t prev_port = MACH_PORT_NULL;
   struct proc *proc = XNEW (struct proc);
 
@@ -713,7 +713,7 @@ inf_cleanup (struct inf *inf)
 void
 inf_startup (struct inf *inf, int pid)
 {
-  error_t err;
+  kern_return_t err;
 
   inf_debug (inf, "startup: pid = %d", pid);
 
@@ -745,7 +745,7 @@ inf_set_pid (struct inf *inf, pid_t pid)
     task_port = MACH_PORT_NULL;
   else
     {
-      error_t err = proc_pid2task (proc_server, pid, &task_port);
+      kern_return_t err = proc_pid2task (proc_server, pid, &task_port);
 
       if (err)
 	error (_("Error getting task for pid %d: %s"),
@@ -794,7 +794,7 @@ inf_validate_procinfo (struct inf *inf)
   struct procinfo *pi;
   mach_msg_type_number_t pi_len = 0;
   int info_flags = 0;
-  error_t err =
+  kern_return_t err =
     proc_getprocinfo (proc_server, inf->pid, &info_flags,
 		      (procinfo_t *) &pi, &pi_len, &noise, &noise_len);
 
@@ -822,7 +822,7 @@ inf_validate_task_sc (struct inf *inf)
   mach_msg_type_number_t pi_len = 0;
   int info_flags = PI_FETCH_TASKINFO;
   int suspend_count = -1;
-  error_t err;
+  kern_return_t err;
 
  retry:
   err = proc_getprocinfo (proc_server, inf->pid, &info_flags,
@@ -875,7 +875,7 @@ inf_set_traced (struct inf *inf, int on)
     /* Make it take effect immediately.  */
     {
       sigset_t mask = on ? ~(sigset_t) 0 : 0;
-      error_t err =
+      kern_return_t err =
 	INF_RESUME_MSGPORT_RPC (inf, msg_set_init_int (msgport, refport,
 						       INIT_TRACEMASK, mask));
 
@@ -1007,7 +1007,7 @@ inf_validate_procs (struct inf *inf)
 
   if (task)
     {
-      error_t err = task_threads (task->port, &threads, &num_threads);
+      kern_return_t err = task_threads (task->port, &threads, &num_threads);
 
       inf_debug (inf, "fetching threads");
       if (err)
@@ -1324,7 +1324,7 @@ inf_restore_exc_ports (struct inf *inf)
 void
 inf_signal (struct inf *inf, enum gdb_signal sig)
 {
-  error_t err = 0;
+  kern_return_t err = 0;
   int host_sig = gdb_signal_to_host (sig);
 
 #define NAME gdb_signal_to_name (sig)
@@ -1413,7 +1413,7 @@ void
 inf_continue (struct inf *inf)
 {
   process_t proc;
-  error_t err = proc_pid2proc (proc_server, inf->pid, &proc);
+  kern_return_t err = proc_pid2proc (proc_server, inf->pid, &proc);
 
   if (!err)
     {
@@ -1454,7 +1454,7 @@ gnu_wait (struct target_ops *ops,
       mach_msg_type_t type;
       int data[8000];
     } msg;
-  error_t err;
+  kern_return_t err;
   struct proc *thread;
   struct inf *inf = gnu_current_inf;
 
@@ -1646,7 +1646,7 @@ rewait:
 
 
 /* The rpc handler called by exc_server.  */
-error_t
+kern_return_t
 S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 			   thread_t thread_port, task_t task_port,
 			   int exception, int code, int subcode)
@@ -1743,7 +1743,7 @@ inf_task_died_status (struct inf *inf)
 }
 
 /* Notify server routines.  The only real one is dead name notification.  */
-error_t
+kern_return_t
 do_mach_notify_dead_name (mach_port_t notify, mach_port_t dead_port)
 {
   struct inf *inf = waiting_inf;
@@ -1806,8 +1806,8 @@ ILL_RPC (do_mach_notify_send_once,
 
 /* Process_reply server routines.  We only use process_wait_reply.  */
 
-error_t
-S_proc_wait_reply (mach_port_t reply, error_t err,
+kern_return_t
+S_proc_wait_reply (mach_port_t reply, kern_return_t err,
 		   int status, int sigcode, rusage_t rusage, pid_t pid)
 {
   struct inf *inf = waiting_inf;
@@ -1922,8 +1922,8 @@ ILL_RPC (S_proc_get_code_reply,
 
 /* Msg_reply server routines.  We only use msg_sig_post_untraced_reply.  */
 
-error_t
-S_msg_sig_post_untraced_reply (mach_port_t reply, error_t err)
+kern_return_t
+S_msg_sig_post_untraced_reply (mach_port_t reply, kern_return_t err)
 {
   struct inf *inf = waiting_inf;
 
@@ -1953,14 +1953,14 @@ S_msg_sig_post_untraced_reply (mach_port_t reply, error_t err)
 }
 
 ILL_RPC (S_msg_sig_post_reply,
-	 mach_port_t reply, error_t err)
+	 mach_port_t reply, kern_return_t err)
 
 /* Returns the number of messages queued for the receive right PORT.  */
 static mach_port_msgcount_t
 port_msgs_queued (mach_port_t port)
 {
   struct mach_port_status status;
-  error_t err =
+  kern_return_t err =
     mach_port_get_receive_status (mach_task_self (), port, &status);
 
   if (err)
@@ -2288,7 +2288,7 @@ gnu_thread_alive (struct target_ops *ops, ptid_t ptid)
 static int
 gnu_read_inferior (task_t task, CORE_ADDR addr, gdb_byte *myaddr, int length)
 {
-  error_t err;
+  kern_return_t err;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
   vm_size_t aligned_length =
   (vm_size_t) round_page (addr + length) - low_address;
@@ -2335,7 +2335,7 @@ static int
 gnu_write_inferior (task_t task, CORE_ADDR addr,
 		    const gdb_byte *myaddr, int length)
 {
-  error_t err = 0;
+  kern_return_t err;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
   vm_size_t aligned_length =
   (vm_size_t) round_page (addr + length) - low_address;
@@ -2550,7 +2550,7 @@ static int
 gnu_find_memory_regions (struct target_ops *self,
 			 find_memory_region_ftype func, void *data)
 {
-  error_t err;
+  kern_return_t err;
   task_t task;
   vm_address_t region_address, last_region_address, last_region_end;
   vm_prot_t last_protection;
@@ -2901,7 +2901,7 @@ show_thread_default_detach_sc_cmd (char *args, int from_tty)
 static void
 steal_exc_port (struct proc *proc, mach_port_t name)
 {
-  error_t err;
+  kern_return_t err;
   mach_port_t port;
   mach_msg_type_name_t port_type;
 
@@ -3389,7 +3389,7 @@ thread_takeover_sc_cmd (char *args, int from_tty)
   thread_basic_info_data_t _info;
   thread_basic_info_t info = &_info;
   mach_msg_type_number_t info_len = THREAD_BASIC_INFO_COUNT;
-  error_t err =
+  kern_return_t err =
   thread_info (thread->port, THREAD_BASIC_INFO, (int *) &info, &info_len);
   if (err)
     error (("%s."), safe_strerror (err));
@@ -3500,7 +3500,7 @@ void
 flush_inferior_icache (CORE_ADDR pc, int amount)
 {
   vm_machine_attribute_val_t flush = MATTR_VAL_ICACHE_FLUSH;
-  error_t ret;
+  kern_return_t ret;
 
   ret = vm_machine_attribute (gnu_current_inf->task->port,
 			      pc,

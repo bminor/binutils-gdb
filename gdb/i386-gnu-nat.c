@@ -58,7 +58,7 @@ fetch_fpregs (struct regcache *regcache, struct proc *thread)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
-  error_t err;
+  kern_return_t err;
 
   err = thread_get_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, &count);
@@ -148,7 +148,7 @@ store_fpregs (const struct regcache *regcache, struct proc *thread, int regno)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
-  error_t err;
+  kern_return_t err;
 
   err = thread_get_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, &count);
@@ -279,7 +279,7 @@ static void
 i386_gnu_dr_get (struct i386_debug_state *regs, struct proc *thread)
 {
   mach_msg_type_number_t count = i386_DEBUG_STATE_COUNT;
-  error_t err;
+  kern_return_t err;
 
   err = thread_get_state (thread->port, i386_DEBUG_STATE,
 			  (thread_state_t) regs, &count);
@@ -293,7 +293,7 @@ i386_gnu_dr_get (struct i386_debug_state *regs, struct proc *thread)
 static void
 i386_gnu_dr_set (const struct i386_debug_state *regs, struct proc *thread)
 {
-  error_t err;
+  kern_return_t err;
 
   err = thread_set_state (thread->port, i386_DEBUG_STATE,
 			  (thread_state_t) regs, i386_DEBUG_STATE_COUNT);
