@@ -175,7 +175,6 @@ static void uo_message (struct ui_out *uiout, int verbosity,
 static void uo_wrap_hint (struct ui_out *uiout, char *identstring);
 static void uo_flush (struct ui_out *uiout);
 static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);
-static void uo_data_destroy (struct ui_out *uiout);
 
 /* Prototypes for local functions */
 
@@ -708,15 +707,6 @@ uo_redirect (struct ui_out *uiout, struct ui_file *outstream)
   return 0;
 }
 
-void
-uo_data_destroy (struct ui_out *uiout)
-{
-  if (!uiout->impl->data_destroy)
-    return;
-
-  uiout->impl->data_destroy (uiout);
-}
-
 /* local functions */
 
 /* List of column headers manipulation routines.  */
@@ -902,26 +892,4 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   uiout->table.header_last = NULL;
   uiout->table.header_next = NULL;
   return uiout;
-}
-
-/* Free  UIOUT and the memory areas it references.  */
-
-void
-ui_out_destroy (struct ui_out *uiout)
-{
-  int i;
-  struct ui_out_level *current;
-
-  /* Make sure that all levels are freed in the case where levels have
-     been pushed, but not popped before the ui_out object is
-     destroyed.  */
-  for (i = 0;
-       VEC_iterate (ui_out_level_p, uiout->levels, i, current);
-       ++i)
-    xfree (current);
-
-  VEC_free (ui_out_level_p, uiout->levels);
-  uo_data_destroy (uiout);
-  clear_table (uiout);
-  xfree (uiout);
 }
