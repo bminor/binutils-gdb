@@ -62,9 +62,8 @@ static void mi_field_fmt (struct ui_out *uiout, int fldno,
 			  va_list args) ATTRIBUTE_PRINTF (6, 0);
 static void mi_spaces (struct ui_out *uiout, int numspaces);
 static void mi_text (struct ui_out *uiout, const char *string);
-static void mi_message (struct ui_out *uiout, int verbosity,
-			const char *format, va_list args)
-     ATTRIBUTE_PRINTF (3, 0);
+static void mi_message (struct ui_out *uiout, const char *format, va_list args)
+     ATTRIBUTE_PRINTF (2, 0);
 static void mi_wrap_hint (struct ui_out *uiout, const char *identstring);
 static void mi_flush (struct ui_out *uiout);
 static int mi_redirect (struct ui_out *uiout, struct ui_file *outstream);
@@ -267,8 +266,7 @@ mi_text (struct ui_out *uiout, const char *string)
 }
 
 void
-mi_message (struct ui_out *uiout, int verbosity,
-	    const char *format, va_list args)
+mi_message (struct ui_out *uiout, const char *format, va_list args)
 {
 }
 

@@ -717,7 +717,7 @@ info_probes_for_ops (const char *arg, int from_tty,
   do_cleanups (cleanup);
 
   if (!any_found)
-    ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+    ui_out_message (current_uiout, _("No probes matched.\n"));
 }
 
 /* Implementation of the `info probes' command.  */
@@ -747,7 +747,7 @@ enable_probes_command (char *arg, int from_tty)
   probes = collect_probes (objname, provider, probe_name, NULL);
   if (VEC_empty (bound_probe_s, probes))
     {
-      ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+      ui_out_message (current_uiout, _("No probes matched.\n"));
       do_cleanups (cleanup);
       return;
     }
@@ -761,12 +761,12 @@ enable_probes_command (char *arg, int from_tty)
       if (pops->enable_probe != NULL)
 	{
 	  pops->enable_probe (probe->probe);
-	  ui_out_message (current_uiout, 0,
+	  ui_out_message (current_uiout,
 			  _("Probe %s:%s enabled.\n"),
 			  probe->probe->provider, probe->probe->name);
 	}
       else
-	ui_out_message (current_uiout, 0,
+	ui_out_message (current_uiout,
 			_("Probe %s:%s cannot be enabled.\n"),
 			probe->probe->provider, probe->probe->name);
     }
@@ -793,7 +793,7 @@ disable_probes_command (char *arg, int from_tty)
   probes = collect_probes (objname, provider, probe_name, NULL /* pops */);
   if (VEC_empty (bound_probe_s, probes))
     {
-      ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+      ui_out_message (current_uiout, _("No probes matched.\n"));
       do_cleanups (cleanup);
       return;
     }
@@ -807,12 +807,12 @@ disable_probes_command (char *arg, int from_tty)
       if (pops->disable_probe != NULL)
 	{
 	  pops->disable_probe (probe->probe);
-	  ui_out_message (current_uiout, 0,
+	  ui_out_message (current_uiout,
 			  _("Probe %s:%s disabled.\n"),
 			  probe->probe->provider, probe->probe->name);
 	}
       else
-	ui_out_message (current_uiout, 0,
+	ui_out_message (current_uiout,
 			_("Probe %s:%s cannot be disabled.\n"),
 			probe->probe->provider, probe->probe->name);
     }

@@ -119,15 +119,12 @@ extern void ui_out_spaces (struct ui_out *uiout, int numspaces);
 
 extern void ui_out_text (struct ui_out *uiout, const char *string);
 
-extern void ui_out_message (struct ui_out *uiout, int verbosity,
-			    const char *format, ...)
-     ATTRIBUTE_PRINTF (3, 4);
+extern void ui_out_message (struct ui_out *uiout, const char *format, ...)
+     ATTRIBUTE_PRINTF (2, 3);
 
 extern void ui_out_wrap_hint (struct ui_out *uiout, const char *identstring);
 
 extern void ui_out_flush (struct ui_out *uiout);
-
-extern int ui_out_get_verblvl (struct ui_out *uiout);
 
 extern int ui_out_test_flags (struct ui_out *uiout, int mask);
 
@@ -183,9 +180,9 @@ typedef void (field_fmt_ftype) (struct ui_out * uiout, int fldno, int width,
 typedef void (spaces_ftype) (struct ui_out * uiout, int numspaces);
 typedef void (text_ftype) (struct ui_out * uiout,
 			   const char *string);
-typedef void (message_ftype) (struct ui_out * uiout, int verbosity,
+typedef void (message_ftype) (struct ui_out * uiout,
 			      const char *format, va_list args)
-     ATTRIBUTE_FPTR_PRINTF(3,0);
+     ATTRIBUTE_FPTR_PRINTF(2,0);
 typedef void (wrap_hint_ftype) (struct ui_out * uiout, const char *identstring);
 typedef void (flush_ftype) (struct ui_out * uiout);
 typedef int (redirect_ftype) (struct ui_out * uiout,

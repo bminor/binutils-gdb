@@ -6954,9 +6954,9 @@ breakpoint_1 (char *args, int allflag,
       if (!filter)
 	{
 	  if (args == NULL || *args == '\0')
-	    ui_out_message (uiout, 0, "No breakpoints or watchpoints.\n");
+	    ui_out_message (uiout, "No breakpoints or watchpoints.\n");
 	  else
-	    ui_out_message (uiout, 0, 
+	    ui_out_message (uiout,
 			    "No breakpoint or watchpoint matching '%s'.\n",
 			    args);
 	}
@@ -7012,9 +7012,9 @@ watchpoints_info (char *args, int from_tty)
   if (num_printed == 0)
     {
       if (args == NULL || *args == '\0')
-	ui_out_message (uiout, 0, "No watchpoints.\n");
+	ui_out_message (uiout, "No watchpoints.\n");
       else
-	ui_out_message (uiout, 0, "No watchpoint matching '%s'.\n", args);
+	ui_out_message (uiout, "No watchpoint matching '%s'.\n", args);
     }
 }
 
@@ -15478,9 +15478,9 @@ tracepoints_info (char *args, int from_tty)
   if (num_printed == 0)
     {
       if (args == NULL || *args == '\0')
-	ui_out_message (uiout, 0, "No tracepoints.\n");
+	ui_out_message (uiout, "No tracepoints.\n");
       else
-	ui_out_message (uiout, 0, "No tracepoint matching '%s'.\n", args);
+	ui_out_message (uiout, "No tracepoint matching '%s'.\n", args);
     }
 
   default_collect_info ();

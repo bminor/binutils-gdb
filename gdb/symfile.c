@@ -1962,7 +1962,7 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     {
       /* The write is just starting.  Let the user know we've started
 	 this section.  */
-      ui_out_message (current_uiout, 0, "Loading section %s, size %s lma %s\n",
+      ui_out_message (current_uiout, "Loading section %s, size %s lma %s\n",
 		      args->section_name, hex_string (args->section_size),
 		      paddress (target_gdbarch (), args->lma));
       return;

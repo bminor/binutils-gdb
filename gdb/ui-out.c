@@ -169,9 +169,9 @@ static void uo_field_fmt (struct ui_out *uiout, int fldno, int width,
      ATTRIBUTE_PRINTF (6, 0);
 static void uo_spaces (struct ui_out *uiout, int numspaces);
 static void uo_text (struct ui_out *uiout, const char *string);
-static void uo_message (struct ui_out *uiout, int verbosity,
+static void uo_message (struct ui_out *uiout,
 			const char *format, va_list args)
-     ATTRIBUTE_PRINTF (3, 0);
+     ATTRIBUTE_PRINTF (2, 0);
 static void uo_wrap_hint (struct ui_out *uiout, const char *identstring);
 static void uo_flush (struct ui_out *uiout);
 static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);
@@ -494,13 +494,12 @@ ui_out_text (struct ui_out *uiout,
 }
 
 void
-ui_out_message (struct ui_out *uiout, int verbosity,
-		const char *format,...)
+ui_out_message (struct ui_out *uiout, const char *format, ...)
 {
   va_list args;
 
   va_start (args, format);
-  uo_message (uiout, verbosity, format, args);
+  uo_message (uiout, format, args);
   va_end (args);
 }
 
@@ -527,16 +526,6 @@ int
 ui_out_test_flags (struct ui_out *uiout, int mask)
 {
   return (uiout->flags & mask);
-}
-
-/* Obtain the current verbosity level (as stablished by the
-   'set verbositylevel' command.  */
-
-int
-ui_out_get_verblvl (struct ui_out *uiout)
-{
-  /* FIXME: not implemented yet.  */
-  return 0;
 }
 
 int
@@ -673,13 +662,13 @@ uo_text (struct ui_out *uiout,
 }
 
 void
-uo_message (struct ui_out *uiout, int verbosity,
+uo_message (struct ui_out *uiout,
 	    const char *format,
 	    va_list args)
 {
   if (!uiout->impl->message)
     return;
-  uiout->impl->message (uiout, verbosity, format, args);
+  uiout->impl->message (uiout, format, args);
 }
 
 void

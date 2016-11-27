@@ -1401,10 +1401,10 @@ auto_load_info_scripts (char *pattern, int from_tty,
   if (nr_scripts == 0)
     {
       if (pattern && *pattern)
-	ui_out_message (uiout, 0, "No auto-load scripts matching %s.\n",
+	ui_out_message (uiout, "No auto-load scripts matching %s.\n",
 			pattern);
       else
-	ui_out_message (uiout, 0, "No auto-load scripts.\n");
+	ui_out_message (uiout, "No auto-load scripts.\n");
     }
 }
 

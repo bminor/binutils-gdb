@@ -1,5 +1,27 @@
 2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* mi/mi-out.c (mi_message): Remove verbosity argument.
+	* ada-tasks.c (print_ada_task_info, info_task, task_command):
+	Update call.
+	* auto-load.c (auto_load_info_scripts): Likewise.
+	* breakpoint.c (breakpoint_1, watchpoints_info, tracepoints_info):
+	Likewise.
+	* cli-out.c (cli_message): Remove verbosity argument.
+	* inferior.c (print_inferior): Update call.
+	* linux-thread-db.c (info_auto_load_libthread_db): Likewise.
+	* probe.c (info_probes_for_ops): Likewise.
+	* skip.c (skip_info): Likewise.
+	* solib.c (info_sharedlibrary_command): Likewise.
+	* symfile.c (load_progress): Likewise.
+	* thread.c (print_thread_info_1): Likewise.
+	* ui-out.c (uo_message, ui_out_message): Remove verbosity argument.
+	(ui_out_get_verblvl): Remove.
+	* ui-out.h (ui_out_message): Remove verbosity argument.
+	(ui_out_get_verblvl): Remove.
+	(message_ftype): Remove verbosity argument.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* mi/mi-out.c (mi_wrap_hint): Constify argument.
 	* cli-out.c (cli_wrap_hint): Likewise.
 	* ui-out.c (ui_out_wrap_hint, uo_wrap_hint): Likewise.

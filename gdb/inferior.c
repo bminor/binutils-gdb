@@ -594,7 +594,7 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 
   if (inf_count == 0)
     {
-      ui_out_message (uiout, 0, "No inferiors.\n");
+      ui_out_message (uiout, "No inferiors.\n");
       return;
     }
 

@@ -1013,7 +1013,7 @@ print_ada_task_info (struct ui_out *uiout,
 
   if (ada_build_task_list () == 0)
     {
-      ui_out_message (uiout, 0,
+      ui_out_message (uiout,
 		      _("Your application does not use any Ada tasks.\n"));
       return;
     }
@@ -1163,7 +1163,7 @@ info_task (struct ui_out *uiout, char *taskno_str, struct inferior *inf)
 
   if (ada_build_task_list () == 0)
     {
-      ui_out_message (uiout, 0,
+      ui_out_message (uiout,
 		      _("Your application does not use any Ada tasks.\n"));
       return;
     }
@@ -1328,7 +1328,7 @@ task_command (char *taskno_str, int from_tty)
 
   if (ada_build_task_list () == 0)
     {
-      ui_out_message (uiout, 0,
+      ui_out_message (uiout,
 		      _("Your application does not use any Ada tasks.\n"));
       return;
     }

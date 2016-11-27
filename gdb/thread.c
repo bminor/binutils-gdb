@@ -1231,9 +1231,9 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
       if (n_threads == 0)
 	{
 	  if (requested_threads == NULL || *requested_threads == '\0')
-	    ui_out_message (uiout, 0, _("No threads.\n"));
+	    ui_out_message (uiout, _("No threads.\n"));
 	  else
-	    ui_out_message (uiout, 0, _("No threads match '%s'.\n"),
+	    ui_out_message (uiout, _("No threads match '%s'.\n"),
 			    requested_threads);
 	  do_cleanups (old_chain);
 	  return;
@@ -1372,12 +1372,12 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 	}
 
       if (!ptid_equal (inferior_ptid, null_ptid) && is_exited (inferior_ptid))
-	ui_out_message (uiout, 0, "\n\
+	ui_out_message (uiout, "\n\
 The current thread <Thread ID %s> has terminated.  See `help thread'.\n",
 			print_thread_id (inferior_thread ()));
       else if (thread_list != NULL
 	       && ptid_equal (inferior_ptid, null_ptid))
-	ui_out_message (uiout, 0, "\n\
+	ui_out_message (uiout, "\n\
 No selected thread.  See `help thread'.\n");
     }
 }

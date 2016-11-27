@@ -1668,7 +1668,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   do_cleanups (back_to);
 
   if (info_count == 0)
-    ui_out_message (uiout, 0, _("No auto-loaded libthread-db.\n"));
+    ui_out_message (uiout, _("No auto-loaded libthread-db.\n"));
 }
 
 static void
