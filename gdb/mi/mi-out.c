@@ -95,7 +95,6 @@ static const struct ui_out_impl mi_ui_out_impl =
 
 /* Prototypes for local functions */
 
-extern void _initialize_mi_out (void);
 static void field_separator (struct ui_out *uiout);
 static void mi_open (struct ui_out *uiout, const char *name,
 		     enum ui_out_type type);
@@ -358,17 +357,6 @@ mi_close (struct ui_out *uiout, enum ui_out_type type)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   data->suppress_field_separator = 0;
-}
-
-/* Add a string to the buffer.  */
-
-void
-mi_out_buffered (struct ui_out *uiout, char *string)
-{
-  mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
-
-  fprintf_unfiltered (stream, "%s", string);
 }
 
 /* Clear the buffer.  */

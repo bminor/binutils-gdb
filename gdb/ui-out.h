@@ -69,10 +69,6 @@ extern void ui_out_begin (struct ui_out *uiout,
 
 extern void ui_out_end (struct ui_out *uiout, enum ui_out_type type);
 
-extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
-						 enum ui_out_type level_type,
-						 const char *id);
-
 /* A table can be considered a special tuple/list combination with the
    implied structure: ``table = { hdr = { header, ... } , body = [ {
    field, ... }, ... ] }''.  If NR_ROWS is negative then there is at
@@ -130,10 +126,6 @@ extern void ui_out_message (struct ui_out *uiout, int verbosity,
 extern void ui_out_wrap_hint (struct ui_out *uiout, char *identstring);
 
 extern void ui_out_flush (struct ui_out *uiout);
-
-extern int ui_out_set_flags (struct ui_out *uiout, int mask);
-
-extern int ui_out_clear_flags (struct ui_out *uiout, int mask);
 
 extern int ui_out_get_verblvl (struct ui_out *uiout);
 

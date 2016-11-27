@@ -1,5 +1,18 @@
 2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (_initialize_ui_out): Remove.
+	(ui_out_set_flags): Remove.
+	(ui_out_clear_flags): Remove.
+	* ui-out.h (ui_out_begin_cleanup_end): Remove.
+	(ui_out_begin_cleanup_end): Remove.
+	(ui_out_set_flags): Remove.
+	(ui_out_clear_flags): Remove.
+	* mi/mi-out.c (_initialize_mi_out): Remove.
+	(mi_out_buffered): Remove.
+	* mi/mi-out.h (mi_out_buffered): Remove.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.h (struct ui_out_impl): Remove comment.
 	* ui-out.c (struct ui_out): Remove comment.
 

@@ -179,7 +179,6 @@ static void uo_data_destroy (struct ui_out *uiout);
 
 /* Prototypes for local functions */
 
-extern void _initialize_ui_out (void);
 static void append_header_to_list (struct ui_out *uiout, int width,
 				   enum ui_align alignment, const char *col_name,
 				   const char *colhdr);
@@ -522,26 +521,6 @@ int
 ui_out_redirect (struct ui_out *uiout, struct ui_file *outstream)
 {
   return uo_redirect (uiout, outstream);
-}
-
-/* Set the flags specified by the mask given.  */
-int
-ui_out_set_flags (struct ui_out *uiout, int mask)
-{
-  int oldflags = uiout->flags;
-
-  uiout->flags |= mask;
-  return oldflags;
-}
-
-/* Clear the flags specified by the mask given.  */
-int
-ui_out_clear_flags (struct ui_out *uiout, int mask)
-{
-  int oldflags = uiout->flags;
-
-  uiout->flags &= ~mask;
-  return oldflags;
 }
 
 /* Test the flags against the mask given.  */
@@ -945,12 +924,4 @@ ui_out_destroy (struct ui_out *uiout)
   uo_data_destroy (uiout);
   clear_table (uiout);
   xfree (uiout);
-}
-
-/* Standard gdb initialization hook.  */
-
-void
-_initialize_ui_out (void)
-{
-  /* nothing needs to be done */
 }
