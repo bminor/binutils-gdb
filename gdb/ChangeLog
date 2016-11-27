@@ -1,5 +1,15 @@
 2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* mi/mi-out.c (mi_wrap_hint): Constify argument.
+	* cli-out.c (cli_wrap_hint): Likewise.
+	* ui-out.c (ui_out_wrap_hint, uo_wrap_hint): Likewise.
+	* ui-out.h (ui_out_wrap_hint, wrap_hint_ftype): Likewise.
+	* utils.c (wrap_here): Likewise.
+	(wrap_indent): Constify.
+	* utils.h (wrap_here): Constify argument.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (uo_redirect): Return the return value from the
 	implementation function.
 

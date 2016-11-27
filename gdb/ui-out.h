@@ -123,7 +123,7 @@ extern void ui_out_message (struct ui_out *uiout, int verbosity,
 			    const char *format, ...)
      ATTRIBUTE_PRINTF (3, 4);
 
-extern void ui_out_wrap_hint (struct ui_out *uiout, char *identstring);
+extern void ui_out_wrap_hint (struct ui_out *uiout, const char *identstring);
 
 extern void ui_out_flush (struct ui_out *uiout);
 
@@ -186,7 +186,7 @@ typedef void (text_ftype) (struct ui_out * uiout,
 typedef void (message_ftype) (struct ui_out * uiout, int verbosity,
 			      const char *format, va_list args)
      ATTRIBUTE_FPTR_PRINTF(3,0);
-typedef void (wrap_hint_ftype) (struct ui_out * uiout, char *identstring);
+typedef void (wrap_hint_ftype) (struct ui_out * uiout, const char *identstring);
 typedef void (flush_ftype) (struct ui_out * uiout);
 typedef int (redirect_ftype) (struct ui_out * uiout,
 			      struct ui_file * outstream);

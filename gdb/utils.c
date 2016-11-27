@@ -1628,7 +1628,7 @@ static char *wrap_pointer;
 
 /* String to indent by if the wrap occurs.  Must not be NULL if wrap_column
    is non-zero.  */
-static char *wrap_indent;
+static const char *wrap_indent;
 
 /* Column number on the screen where wrap_buffer begins, or 0 if wrapping
    is not in effect.  */
@@ -1911,7 +1911,7 @@ reinitialize_more_filter (void)
    used to force out output from the wrap_buffer.  */
 
 void
-wrap_here (char *indent)
+wrap_here (const char *indent)
 {
   /* This should have been allocated, but be paranoid anyway.  */
   if (!wrap_buffer)

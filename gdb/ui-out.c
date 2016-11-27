@@ -172,7 +172,7 @@ static void uo_text (struct ui_out *uiout, const char *string);
 static void uo_message (struct ui_out *uiout, int verbosity,
 			const char *format, va_list args)
      ATTRIBUTE_PRINTF (3, 0);
-static void uo_wrap_hint (struct ui_out *uiout, char *identstring);
+static void uo_wrap_hint (struct ui_out *uiout, const char *identstring);
 static void uo_flush (struct ui_out *uiout);
 static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);
 
@@ -505,7 +505,7 @@ ui_out_message (struct ui_out *uiout, int verbosity,
 }
 
 void
-ui_out_wrap_hint (struct ui_out *uiout, char *identstring)
+ui_out_wrap_hint (struct ui_out *uiout, const char *identstring)
 {
   uo_wrap_hint (uiout, identstring);
 }
@@ -683,7 +683,7 @@ uo_message (struct ui_out *uiout, int verbosity,
 }
 
 void
-uo_wrap_hint (struct ui_out *uiout, char *identstring)
+uo_wrap_hint (struct ui_out *uiout, const char *identstring)
 {
   if (!uiout->impl->wrap_hint)
     return;

@@ -290,7 +290,7 @@ cli_message (struct ui_out *uiout, int verbosity,
 }
 
 static void
-cli_wrap_hint (struct ui_out *uiout, char *identstring)
+cli_wrap_hint (struct ui_out *uiout, const char *identstring)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
 
