@@ -1,5 +1,10 @@
 2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (uo_redirect): Return the return value from the
+	implementation function.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (ui_out_destroy, uo_data_destroy): Remove.
 	* ui-out.h (ui_out_destroy): Remove.
 

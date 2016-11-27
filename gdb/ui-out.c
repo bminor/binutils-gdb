@@ -703,8 +703,7 @@ uo_redirect (struct ui_out *uiout, struct ui_file *outstream)
 {
   if (!uiout->impl->redirect)
     return -1;
-  uiout->impl->redirect (uiout, outstream);
-  return 0;
+  return uiout->impl->redirect (uiout, outstream);
 }
 
 /* local functions */
