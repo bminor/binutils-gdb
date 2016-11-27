@@ -27,14 +27,14 @@
 typedef struct ui_file *ui_filep;
 DEF_VEC_P (ui_filep);
 
-struct ui_out_data
+struct mi_ui_out_data
   {
     int suppress_field_separator;
     int suppress_output;
     int mi_version;
     VEC (ui_filep) *streams;
   };
-typedef struct ui_out_data mi_out_data;
+typedef struct mi_ui_out_data mi_out_data;
 
 /* These are the MI output functions */
 

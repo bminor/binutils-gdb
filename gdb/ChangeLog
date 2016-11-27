@@ -1,5 +1,10 @@
 2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* mi/mi-out.c (ui_out_data): Rename to ...
+	(mi_ui_out_data): ... this.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (_initialize_ui_out): Remove.
 	(ui_out_set_flags): Remove.
 	(ui_out_clear_flags): Remove.
