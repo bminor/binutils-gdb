@@ -1,3 +1,10 @@
+2016-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 20815
+	* testsuite/ld-elf/loadaddr1.d: Update.
+	* testsuite/ld-powerpc/vle-multiseg-5.d: Update.
+	* testsuite/ld-scripts/phdrs3a.d: Update.
+
 2016-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/indirect.exp: Add a test for PR 18720.
