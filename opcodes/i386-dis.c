@@ -12670,11 +12670,15 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	rex |= REX_W;
 
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit
-	  && vex.register_specifier > 0x7)
+      if (address_mode != mode_64bit)
 	{
-	  dp = &bad_opcode;
-	  return dp;
+	  /* In 16/32-bit mode REX_B is silently ignored.  */
+	  rex &= ~REX_B;
+	  if (vex.register_specifier > 0x7)
+	    {
+	      dp = &bad_opcode;
+	      return dp;
+	    }
 	}
 
       vex.length = (*codep & 0x4) ? 256 : 128;

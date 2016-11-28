@@ -1,3 +1,10 @@
+2016-11-28  Ramiro Polla  <ramiro@hex-rays.com>
+	    Amit Pawar  <amit.pawar@amd.com>
+
+	PR binutils/20637
+	* i386-dis.c (get_valid_dis386): Ignore REX_B for 32-bit XOP
+	instructions.
+
 2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
         * configure: Regenerate.
