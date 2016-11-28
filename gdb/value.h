@@ -448,7 +448,7 @@ extern struct frame_id *deprecated_value_next_frame_id_hack (struct value *);
 #define VALUE_FRAME_ID(val) (get_prev_frame_id_by_id (VALUE_NEXT_FRAME_ID (val)))
 
 /* Register number if the value is from a register.  */
-extern short *deprecated_value_regnum_hack (struct value *);
+extern int *deprecated_value_regnum_hack (struct value *);
 #define VALUE_REGNUM(val) (*deprecated_value_regnum_hack (val))
 
 /* Return value after lval_funcs->coerce_ref (after check_typedef).  Return

@@ -3827,7 +3827,6 @@ value_slice (struct value *array, int lowbound, int length)
       }
 
     set_value_component_location (slice, array);
-    VALUE_NEXT_FRAME_ID (slice) = VALUE_NEXT_FRAME_ID (array);
     set_value_offset (slice, value_offset (array) + offset);
   }
 
