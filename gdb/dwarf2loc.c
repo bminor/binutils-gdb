@@ -1465,6 +1465,10 @@ struct piece_closure
 
   /* The pieces themselves.  */
   struct dwarf_expr_piece *pieces;
+
+  /* Frame ID of frame to which a register value is relative, used
+     only by DWARF_VALUE_REGISTER.  */
+  struct frame_id frame_id;
 };
 
 /* Allocate a closure for a value formed from separately-described
@@ -1473,7 +1477,7 @@ struct piece_closure
 static struct piece_closure *
 allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 			int n_pieces, struct dwarf_expr_piece *pieces,
-			int addr_size)
+			int addr_size, struct frame_info *frame)
 {
   struct piece_closure *c = XCNEW (struct piece_closure);
   int i;
@@ -1483,6 +1487,10 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
   c->n_pieces = n_pieces;
   c->addr_size = addr_size;
   c->pieces = XCNEWVEC (struct dwarf_expr_piece, n_pieces);
+  if (frame == NULL)
+    c->frame_id = null_frame_id;
+  else
+    c->frame_id = get_frame_id (frame);
 
   memcpy (c->pieces, pieces, n_pieces * sizeof (struct dwarf_expr_piece));
   for (i = 0; i < n_pieces; ++i)
@@ -1731,17 +1739,11 @@ read_pieced_value (struct value *v)
   gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (v);
-  struct frame_info *frame;
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
-
-  /* VALUE_FRAME_ID is used instead of VALUE_NEXT_FRAME_ID here
-     because FRAME is passed to get_frame_register_bytes(), which
-     does its own "->next" operation.  */
-  frame = frame_find_by_id (VALUE_FRAME_ID (v));
 
   if (value_type (v) != value_enclosing_type (v))
     internal_error (__FILE__, __LINE__,
@@ -1802,6 +1804,7 @@ read_pieced_value (struct value *v)
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
+	    struct frame_info *frame = frame_find_by_id (c->frame_id);
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
 	    int optim, unavail;
@@ -2370,10 +2373,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (ctx.num_pieces > 0)
     {
       struct piece_closure *c;
-      struct frame_id frame_id
-        = frame == NULL 
-	  ? null_frame_id
-	  : get_frame_id (get_next_frame_sentinel_okay (frame));
       ULONGEST bit_size = 0;
       int i;
 
@@ -2383,12 +2382,11 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	invalid_synthetic_pointer ();
 
       c = allocate_piece_closure (per_cu, ctx.num_pieces, ctx.pieces,
-				  ctx.addr_size);
+				  ctx.addr_size, frame);
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
       do_cleanups (value_chain);
       retval = allocate_computed_value (type, &pieced_value_funcs, c);
-      VALUE_NEXT_FRAME_ID (retval) = frame_id;
       set_value_offset (retval, byte_offset);
     }
   else
