@@ -5,6 +5,13 @@
 	(elf_link_output_extsym): Don't change bind from global to
 	local when linking executable.
 
+2016-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* elf.c (phdr_sorter): Delete.
+	(assign_file_positions_except_relocs): Do not sort program
+	headers.
+
 2016-11-25  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	PR ld/20193

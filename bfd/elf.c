@@ -5854,52 +5854,6 @@ find_section_in_list (unsigned int i, elf_section_list * list)
   return list;
 }
 
-/* Compare function used when sorting the program header table.
-   The ELF standard requires that a PT_PHDR segment, if present,
-   must appear before any PT_LOAD segments.  It also requires
-   that all PT_LOAD segments are sorted into order of increasing
-   p_vaddr.  */
-
-static signed int
-phdr_sorter (const void * a, const void * b)
-{
-  Elf_Internal_Phdr * ahdr = (Elf_Internal_Phdr *) a;
-  Elf_Internal_Phdr * bhdr = (Elf_Internal_Phdr *) b;
-
-  switch (ahdr->p_type)
-    {
-    case PT_LOAD:
-      switch (bhdr->p_type)
-	{
-	case PT_PHDR:
-	  return 1;
-	case PT_LOAD:
-	  if (ahdr->p_vaddr < bhdr->p_vaddr)
-	    return -1;
-	  if (ahdr->p_vaddr > bhdr->p_vaddr)
-	    return 1;
-	  return 0;
-	default:
-	  return 0;
-	}
-      break;
-    case PT_PHDR:
-      switch (bhdr->p_type)
-	{
-	case PT_PHDR:
-	  _bfd_error_handler (_("error: multiple PHDR segments detecetd"));
-	  return 0;
-	case PT_LOAD:
-	  return -1;
-	default:
-	  return 0;
-	}
-      break;
-    default:
-      return 0;
-    }
-}
-
 /* Work out the file positions of all the sections.  This is called by
    _bfd_elf_compute_section_file_positions.  All the section sizes and
    VMAs must be known before this is called.
@@ -5963,7 +5917,6 @@ assign_file_positions_except_relocs (bfd *abfd,
     }
   else
     {
-      Elf_Internal_Phdr * map;
       unsigned int alloc;
 
       /* Assign file positions for the loaded sections based on the
@@ -6007,22 +5960,24 @@ assign_file_positions_except_relocs (bfd *abfd,
       if (alloc == 0)
 	return TRUE;
 
-      map = (Elf_Internal_Phdr *) xmalloc (alloc * sizeof (* tdata->phdr));
-      memcpy (map, tdata->phdr, alloc * sizeof (* tdata->phdr));
-      qsort (map, alloc, sizeof (* tdata->phdr), phdr_sorter);
-	  
       /* PR ld/20815 - Check that the program header segment, if present, will
 	 be loaded into memory.  FIXME: The check below is not sufficient as
 	 really all PT_LOAD segments should be checked before issuing an error
 	 message.  Plus the PHDR segment does not have to be the first segment
 	 in the program header table.  But this version of the check should
-	 catch all real world use cases.  */
+	 catch all real world use cases.
+
+	 FIXME: We used to have code here to sort the PT_LOAD segments into
+	 ascending order, as per the ELF spec.  But this breaks some programs,
+	 including the Linux kernel.  But really either the spec should be
+         changed or the programs updated.  */
       if (alloc > 1
-	  && map[0].p_type == PT_PHDR
-	  && ! bed->elf_backend_allow_non_load_phdr (abfd, map, alloc)
-	  && map[1].p_type == PT_LOAD
-	  && (map[1].p_vaddr > map[0].p_vaddr
-	      || (map[1].p_vaddr + map[1].p_memsz) < (map[0].p_vaddr + map[0].p_memsz)))
+	  && tdata->phdr[0].p_type == PT_PHDR
+	  && ! bed->elf_backend_allow_non_load_phdr (abfd, tdata->phdr, alloc)
+	  && tdata->phdr[1].p_type == PT_LOAD
+	  && (tdata->phdr[1].p_vaddr > tdata->phdr[0].p_vaddr
+	      || (tdata->phdr[1].p_vaddr + tdata->phdr[1].p_memsz)
+	      <  (tdata->phdr[0].p_vaddr + tdata->phdr[0].p_memsz)))
 	{
 	  /* The fix for this error is usually to edit the linker script being
 	     used and set up the program headers manually.  Either that or
@@ -6030,18 +5985,12 @@ assign_file_positions_except_relocs (bfd *abfd,
 	  _bfd_error_handler (_("\
 %B: error: PHDR segment not covered by LOAD segment"),
 			      abfd);
-	  free (map);
 	  return FALSE;
 	}
 
       if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
-	  || bed->s->write_out_phdrs (abfd, map, alloc) != 0)
-	{
-	  free (map);
-	  return FALSE;
-	}
-
-      free (map);
+	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
+	return FALSE;
     }
 
   return TRUE;
