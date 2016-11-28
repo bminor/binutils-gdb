@@ -1,5 +1,9 @@
 2016-11-30  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (get_program_header_size): Revert accidental change.
+
+2016-11-30  Alan Modra  <amodra@gmail.com>
+
 	PR ld/20886
 	* elf64-ppc.c (ppc64_elf_size_stubs): Make rawsize max size seen
 	on any pass past STUB_SHRINK_ITER.

@@ -4254,7 +4254,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 	 PT_INTERP segment.  In this case, assume we also need a
 	 PT_PHDR segment, although that may not be true for all
 	 targets.  */
-      segs += 3;
+      segs += 2;
     }
 
   if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
