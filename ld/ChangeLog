@@ -1,3 +1,8 @@
+2016-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/indirect.exp: Add a test for PR 18720.
+	* testsuite/ld-elf/pr18720.rd: New file.
+
 2016-11-27  Alan Modra  <amodra@gmail.com>
 
 	PR 20815

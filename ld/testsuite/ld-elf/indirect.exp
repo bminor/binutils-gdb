@@ -91,6 +91,9 @@ set build_tests {
   {"Build pr18720b1.o"
    "-r -nostdlib tmpdir/pr18720b.o" ""
    {dummy.c} {} "pr18720b1.o"}
+  {"Build pr18720a"
+   "tmpdir/pr18720a.o tmpdir/pr18720b.o tmpdir/libpr18720c.so" ""
+   {check-ptr-eq.c} {{readelf {--dyn-syms} pr18720.rd}} "pr18720a"}
   {"Build libpr19553b.so"
    "-shared -Wl,--version-script=pr19553.map" "-fPIC"
    {pr19553b.c} {} "libpr19553b.so"}

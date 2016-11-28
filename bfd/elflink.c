@@ -2654,18 +2654,35 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
       && (h->root.u.def.section->owner->flags & (DYNAMIC | BFD_PLUGIN)) == 0)
     h->def_regular = 1;
 
+  /* If a weak undefined symbol has non-default visibility, we also
+     hide it from the dynamic linker.  */
+  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+      && h->root.type == bfd_link_hash_undefweak)
+    (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
+
+  /* A hidden versioned symbol in executable should be forced local if
+     it is is locally defined, not referenced by shared library and not
+     exported.  */
+  else if (bfd_link_executable (eif->info)
+	   && h->versioned == versioned_hidden
+	   && !eif->info->export_dynamic
+	   && !h->dynamic
+	   && !h->ref_dynamic
+	   && h->def_regular)
+    (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
+
   /* If -Bsymbolic was used (which means to bind references to global
      symbols to the definition within the shared object), and this
      symbol was defined in a regular object, then it actually doesn't
      need a PLT entry.  Likewise, if the symbol has non-default
      visibility.  If the symbol has hidden or internal visibility, we
      will force it local.  */
-  if (h->needs_plt
-      && bfd_link_pic (eif->info)
-      && is_elf_hash_table (eif->info->hash)
-      && (SYMBOLIC_BIND (eif->info, h)
-	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-      && h->def_regular)
+  else if (h->needs_plt
+	   && bfd_link_pic (eif->info)
+	   && is_elf_hash_table (eif->info->hash)
+	   && (SYMBOLIC_BIND (eif->info, h)
+	       || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	   && h->def_regular)
     {
       bfd_boolean force_local;
 
@@ -2673,12 +2690,6 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 		     || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN);
       (*bed->elf_backend_hide_symbol) (eif->info, h, force_local);
     }
-
-  /* If a weak undefined symbol has non-default visibility, we also
-     hide it from the dynamic linker.  */
-  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-      && h->root.type == bfd_link_hash_undefweak)
-    (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
 
   /* If this is a weak defined symbol in a dynamic object, and we know
      the real definition in the dynamic object, copy interesting flags
@@ -9249,16 +9260,6 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   long indx;
   int ret;
   unsigned int type;
-  /* A symbol is bound locally if it is forced local or it is locally
-     defined, hidden versioned, not referenced by shared library and
-     not exported when linking executable.  */
-  bfd_boolean local_bind = (h->forced_local
-			    || (bfd_link_executable (flinfo->info)
-				&& !flinfo->info->export_dynamic
-				&& !h->dynamic
-				&& !h->ref_dynamic
-				&& h->def_regular
-				&& h->versioned == versioned_hidden));
 
   if (h->root.type == bfd_link_hash_warning)
     {
@@ -9270,12 +9271,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   /* Decide whether to output this symbol in this pass.  */
   if (eoinfo->localsyms)
     {
-      if (!local_bind)
+      if (!h->forced_local)
 	return TRUE;
     }
   else
     {
-      if (local_bind)
+      if (h->forced_local)
 	return TRUE;
     }
 
@@ -9492,7 +9493,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	abort ();
       }
 
-  if (local_bind)
+  if (h->forced_local)
     {
       sym.st_info = ELF_ST_INFO (STB_LOCAL, type);
       /* Turn off visibility on local symbol.  */
@@ -9603,10 +9604,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       /* Since there is no version information in the dynamic string,
 	 if there is no version info in symbol version section, we will
 	 have a run-time problem if not linking executable, referenced
-	 by shared library, not locally defined, or not bound locally.
-      */
+	 by shared library, or not bound locally.  */
       if (h->verinfo.verdef == NULL
-	  && !local_bind
 	  && (!bfd_link_executable (flinfo->info)
 	      || h->ref_dynamic
 	      || !h->def_regular))

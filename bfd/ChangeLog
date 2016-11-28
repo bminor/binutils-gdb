@@ -1,3 +1,10 @@
+2016-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_fix_symbol_flags): Hide hidden versioned
+	symbol in executable.
+	(elf_link_output_extsym): Don't change bind from global to
+	local when linking executable.
+
 2016-11-25  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	PR ld/20193
