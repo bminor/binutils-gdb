@@ -1539,9 +1539,7 @@ value_lval_const (const struct value *value)
 CORE_ADDR
 value_address (const struct value *value)
 {
-  if (value->lval == lval_internalvar
-      || value->lval == lval_internalvar_component
-      || value->lval == lval_xcallable)
+  if (value->lval != lval_memory)
     return 0;
   if (value->parent != NULL)
     return value_address (value->parent) + value->offset;
@@ -1557,9 +1555,7 @@ value_address (const struct value *value)
 CORE_ADDR
 value_raw_address (const struct value *value)
 {
-  if (value->lval == lval_internalvar
-      || value->lval == lval_internalvar_component
-      || value->lval == lval_xcallable)
+  if (value->lval != lval_memory)
     return 0;
   return value->location.address;
 }
@@ -1567,9 +1563,7 @@ value_raw_address (const struct value *value)
 void
 set_value_address (struct value *value, CORE_ADDR addr)
 {
-  gdb_assert (value->lval != lval_internalvar
-	      && value->lval != lval_internalvar_component
-	      && value->lval != lval_xcallable);
+  gdb_assert (value->lval == lval_memory);
   value->location.address = addr;
 }
 
@@ -3268,6 +3262,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
     }
 
   v = allocate_value (ftype);
+  VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
       set_value_address (v, BLOCK_START (SYMBOL_BLOCK_VALUE (sym)));
@@ -3654,8 +3649,8 @@ value_from_contents_and_address_unresolved (struct type *type,
     v = allocate_value_lazy (type);
   else
     v = value_from_contents (type, valaddr);
-  set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
+  set_value_address (v, address);
   return v;
 }
 
@@ -3680,8 +3675,8 @@ value_from_contents_and_address (struct type *type,
   if (TYPE_DATA_LOCATION (resolved_type_no_typedef) != NULL
       && TYPE_DATA_LOCATION_KIND (resolved_type_no_typedef) == PROP_CONST)
     address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
-  set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
+  set_value_address (v, address);
   return v;
 }
 

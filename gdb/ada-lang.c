@@ -4473,8 +4473,8 @@ ensure_lval (struct value *val)
       const CORE_ADDR addr =
         value_as_long (value_allocate_space_in_inferior (len));
 
-      set_value_address (val, addr);
       VALUE_LVAL (val) = lval_memory;
+      set_value_address (val, addr);
       write_memory (addr, value_contents (val), len);
     }
 
