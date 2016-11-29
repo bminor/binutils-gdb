@@ -1062,7 +1062,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       if (!bfd_malloc_and_get_section (abfd, newsect, &contents))
 	return FALSE;
 
-      elf_parse_notes (abfd, (char *) contents, hdr->sh_size, -1);
+      elf_parse_notes (abfd, (char *) contents, hdr->sh_size, hdr->sh_offset);
       free (contents);
     }
 

@@ -1,3 +1,8 @@
+2016-12-02  Gary Benson  <gbenson@redhat.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Pass offset to
+	elf_parse_notes.
+
 2016-12-02  Josh Conner  <joshconner@google.com>
 
 	* configure.tgt: Add support for fuchsia (OS).
