@@ -601,8 +601,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
   TRY
     {
       /* Copy the argument text in case the command modifies it.  */
-      char *copy = xstrdup (arg);
-      struct cleanup *cleanup = make_cleanup (xfree, copy);
+      std::string copy (arg);
       struct interp *interp;
 
       scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
@@ -614,12 +613,11 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       interp = interp_lookup (current_ui, "console");
       current_uiout = interp_ui_out (interp);
 
-      prevent_dont_repeat ();
+      scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
-	to_string_res = execute_command_to_string (copy, from_tty);
+	to_string_res = execute_command_to_string (&copy[0], from_tty);
       else
-	execute_command (copy, from_tty);
-      do_cleanups (cleanup);
+	execute_command (&copy[0], from_tty);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

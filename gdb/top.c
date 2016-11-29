@@ -755,13 +755,10 @@ dont_repeat (void)
 /* Prevent dont_repeat from working, and return a cleanup that
    restores the previous state.  */
 
-struct cleanup *
+scoped_restore_tmpl<int>
 prevent_dont_repeat (void)
 {
-  struct cleanup *result = make_cleanup_restore_integer (&suppress_dont_repeat);
-
-  suppress_dont_repeat = 1;
-  return result;
+  return make_scoped_restore (&suppress_dont_repeat, 1);
 }
 
 

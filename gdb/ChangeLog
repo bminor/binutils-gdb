@@ -1,5 +1,14 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* top.c (prevent_dont_repeat): Change return type.
+	* python/python.c (execute_gdb_command): Use std::string.
+	Update.
+	* guile/guile.c (gdbscm_execute_gdb_command): Update.
+	* command.h (prevent_dont_repeat): Change return type.
+	* breakpoint.c (bpstat_do_actions_1): Update.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* value.h (scoped_value_mark::~scoped_value_mark): Call
 	free_to_mark.
 	(scoped_value_mark::free_to_mark): New method.
