@@ -832,7 +832,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 {
   int i;
   struct demangle_component *demangled;
-  struct demangle_parse_info *info = NULL;
+  std::unique_ptr<demangle_parse_info> info;
   const char *err;
   struct type *argtype;
   struct cleanup *cleanup;
@@ -860,7 +860,6 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
       return NULL;
     }
   demangled = info->tree;
-  cleanup = make_cleanup_cp_demangled_name_parse_free (info);
 
   /* Strip off component names.  */
   while (demangled->type == DEMANGLE_COMPONENT_QUAL_NAME
@@ -869,7 +868,6 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 
   if (demangled->type != DEMANGLE_COMPONENT_TEMPLATE)
     {
-      do_cleanups (cleanup);
       PyErr_SetString (PyExc_RuntimeError, _("Type is not a template."));
       return NULL;
     }
@@ -882,14 +880,12 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 
   if (! demangled)
     {
-      do_cleanups (cleanup);
       PyErr_Format (PyExc_RuntimeError, _("No argument %d in template."),
 		    argno);
       return NULL;
     }
 
   argtype = typy_lookup_type (demangled->u.s_binary.left, block);
-  do_cleanups (cleanup);
   if (! argtype)
     return NULL;
 

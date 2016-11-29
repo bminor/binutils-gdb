@@ -1,5 +1,28 @@
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-type.c (typy_legacy_template_argument): Update.
+	* cp-support.h (struct demangle_parse_info) (demangle_parse_info,
+	~demangle_parse_info): Declare new members.
+	(cp_demangled_name_to_comp): Return unique_ptr.
+	(cp_demangled_name_parse_free)
+	(make_cleanup_cp_demangled_name_parse_free)
+	(cp_new_demangle_parse_info): Remove.
+	* cp-support.c (do_demangled_name_parse_free_cleanup)
+	(make_cleanup_cp_demangled_name_parse_free): Remove.
+	(inspect_type, cp_canonicalize_string_full)
+	(cp_canonicalize_string): Update.
+	(mangled_name_to_comp): Change return type.
+	(cp_class_name_from_physname, method_name_from_physname)
+	(cp_func_name, cp_remove_params): Update.
+	* cp-name-parser.y (demangle_parse_info): New constructor, from
+	cp_new_demangle_parse_info.
+	(~demangle_parse_info): New destructor, from
+	cp_demangled_name_parse_free.
+	(cp_merge_demangle_parse_infos): Update.
+	(cp_demangled_name_to_comp): Change return type.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
 	* top.c (prevent_dont_repeat): Change return type.
 	* python/python.c (execute_gdb_command): Use std::string.
 	Update.
