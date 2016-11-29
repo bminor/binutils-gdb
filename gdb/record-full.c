@@ -821,7 +821,7 @@ static void
 record_full_open_1 (const char *name, int from_tty)
 {
   if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
+    fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open_1\n");
 
   /* check exec */
   if (!target_has_execution)

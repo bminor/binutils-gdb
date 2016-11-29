@@ -1,3 +1,7 @@
+2016-11-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* record-full.c (record_full_open_1): Fix debug output.
+
 2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* mi/mi-out.c (mi_message): Remove verbosity argument.
