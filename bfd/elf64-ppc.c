@@ -12540,7 +12540,10 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	   stub_sec = stub_sec->next)
 	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
 	  {
-	    stub_sec->rawsize = stub_sec->size;
+	    if (htab->stub_iteration <= STUB_SHRINK_ITER
+		|| stub_sec->rawsize < stub_sec->size)
+	      /* Past STUB_SHRINK_ITER, rawsize is the max size seen.  */
+	      stub_sec->rawsize = stub_sec->size;
 	    stub_sec->size = 0;
 	    stub_sec->reloc_count = 0;
 	    stub_sec->flags &= ~SEC_RELOC;
