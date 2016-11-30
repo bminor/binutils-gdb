@@ -1412,6 +1412,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
       asection *		    sec;
       struct elf_link_hash_entry *  h2;
       const char *                  msg;
+      bfd_boolean		    unresolved_reloc = FALSE;
 
       struct arc_relocation_data reloc_data =
       {
@@ -1499,6 +1500,14 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	}
       else
 	{
+	  bfd_boolean warned, ignored;
+	  bfd_vma relocation ATTRIBUTE_UNUSED;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned, ignored);
+
 	  /* TODO: This code is repeated from below.  We should
 	     clean it and remove duplications.
 	     Sec is used check for discarded sections.

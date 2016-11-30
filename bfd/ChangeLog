@@ -1,3 +1,8 @@
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Added "call" to
+	RELOC_FOR_GLOBAL_SYMBOL macro.
+
 2018-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* elf32-arc.c (elf_arc_relocate_section): Small refactor and condition
