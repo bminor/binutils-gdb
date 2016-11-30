@@ -1,3 +1,10 @@
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* disable-implicit-rules.mk: New file.
+	* Makefile.in: Include disable-implicit-rules.mk.
+	* data-directory/Makefile.in: Likewise.
+	* gnulib/Makefile.in: Likewise.
+
 2016-11-30  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_scan_prologue): Read memory as unsigned integer.

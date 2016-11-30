@@ -1,3 +1,7 @@
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Include disable-implicit-rules.mk.
+
 2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.dwarf2/nonvar-access.exp: Add a test for accessing

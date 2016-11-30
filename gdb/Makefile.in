@@ -2909,4 +2909,7 @@ endif
 # Dependencies.
 -include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
 
+# Disable implicit make rules.
+include $(srcdir)/disable-implicit-rules.mk
+
 ### end of the gdb Makefile.in.

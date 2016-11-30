@@ -287,4 +287,7 @@ force_update:
 # will remove them.
 MAKEOVERRIDES=
 
+# Disable implicit make rules.
+include $(srcdir)/../disable-implicit-rules.mk
+
 ### end of the libgnu Makefile.in.
