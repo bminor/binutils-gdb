@@ -1,3 +1,8 @@
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable-running.c: New.
+	* gdb.btrace/enable-running.exp: New.
+
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.arch/amd64-gs_base.c: New file.

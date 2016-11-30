@@ -1,5 +1,13 @@
 2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_enable): Do not call btrace_add_pc for
+	BTRACE_FORMAT_PT or if can_access_registers_ptid returns false.
+	(btrace_fetch): Assert can_access_registers_ptid.
+	* record-btrace.c (require_btrace_thread, record_btrace_info): Call
+	validate_registers_access.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdbthread.h (can_access_registers_ptid): New.
 	* thread.c (can_access_registers_ptid): New.
 

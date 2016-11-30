@@ -117,6 +117,8 @@ require_btrace_thread (void)
   if (tp == NULL)
     error (_("No thread."));
 
+  validate_registers_access ();
+
   btrace_fetch (tp);
 
   if (btrace_is_empty (tp))
@@ -416,6 +418,8 @@ record_btrace_info (struct target_ops *self)
   tp = find_thread_ptid (inferior_ptid);
   if (tp == NULL)
     error (_("No thread."));
+
+  validate_registers_access ();
 
   btinfo = &tp->btrace;
 
