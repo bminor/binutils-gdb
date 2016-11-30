@@ -4909,9 +4909,13 @@ process_program_headers (FILE * file)
       switch (segment->p_type)
 	{
 	case PT_LOAD:
+#if 0 /* Do not warn about out of order PT_LOAD segments.  Although officially
+	 required by the ELF standard, several programs, including the Linux
+	 kernel, make use of non-ordered segments.  */
 	  if (previous_load
 	      && previous_load->p_vaddr > segment->p_vaddr)
 	    error (_("LOAD segments must be sorted in order of increasing VirtAddr\n"));
+#endif
 	  if (segment->p_memsz < segment->p_filesz)
 	    error (_("the segment's file size is larger than its memory size\n"));
 	  previous_load = segment;

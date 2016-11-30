@@ -1,3 +1,9 @@
+2016-11-30  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* readelf.c (process_program_headers): Do not warn about out of
+	order PT_LOAD segments.
+
 2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/binutils-all/arc/objdump.exp (Warning test): Update
