@@ -1713,16 +1713,22 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	    }
 	}
 
+
+#define IS_ARC_PCREL_TYPE(TYPE) \
+  (   (TYPE == R_ARC_PC32)      \
+   || (TYPE == R_ARC_32_PCREL))
+
       switch (r_type)
 	{
 	  case R_ARC_32:
 	  case R_ARC_32_ME:
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
-	    if ((bfd_link_pic (info))
-		&& ((r_type != R_ARC_PC32 && r_type != R_ARC_32_PCREL)
+	    if (bfd_link_pic (info)
+		&& (!IS_ARC_PCREL_TYPE (r_type)
 		    || (h != NULL
 			&& h->dynindx != -1
+			&& !h->def_regular
 			&& (!info->symbolic || !h->def_regular))))
 	      {
 		Elf_Internal_Rela outrel;
@@ -1739,16 +1745,13 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 							   info,
 							   input_section,
 							   rel->r_offset);
+
 		if (outrel.r_offset == (bfd_vma) -1)
 		  skip = TRUE;
 
 		outrel.r_addend = rel->r_addend;
 		outrel.r_offset += (input_section->output_section->vma
 				    + input_section->output_offset);
-
-#define IS_ARC_PCREL_TYPE(TYPE) \
-  (   (TYPE == R_ARC_PC32)      \
-   || (TYPE == R_ARC_32_PCREL))
 
 		if (skip)
 		  {
@@ -1757,10 +1760,10 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 		  }
 		else if (h != NULL
 			 && h->dynindx != -1
-			 && ((IS_ARC_PCREL_TYPE (r_type))
-			 || !(bfd_link_executable (info)
-			      || SYMBOLIC_BIND (info, h))
-			 || ! h->def_regular))
+			 && (IS_ARC_PCREL_TYPE (r_type)
+			     || !(bfd_link_executable (info)
+				  || SYMBOLIC_BIND (info, h))
+			     || ! h->def_regular))
 		  {
 		    BFD_ASSERT (h != NULL);
 		    if ((input_section->flags & SEC_ALLOC) != 0)

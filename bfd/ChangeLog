@@ -1,3 +1,8 @@
+2018-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Small refactor and condition
+	changes.
+
 2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* config/tc-arc.c (md_undefined_symbol): Changed.
