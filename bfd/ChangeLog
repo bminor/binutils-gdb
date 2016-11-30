@@ -1,3 +1,9 @@
+2016-11-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20886
+	* elf64-ppc.c (ppc64_elf_size_stubs): Make rawsize max size seen
+	on any pass past STUB_SHRINK_ITER.
+
 2016-11-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_fix_symbol_flags): Hide hidden versioned
