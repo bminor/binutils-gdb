@@ -1807,10 +1807,11 @@ arm_scan_prologue (struct frame_info *this_frame,
 	 the callee (or at the present moment if this is the innermost frame).
 	 The value stored there should be the address of the stmfd + 8.  */
       CORE_ADDR frame_loc;
-      LONGEST return_value;
+      ULONGEST return_value;
 
       frame_loc = get_frame_register_unsigned (this_frame, ARM_FP_REGNUM);
-      if (!safe_read_memory_integer (frame_loc, 4, byte_order, &return_value))
+      if (!safe_read_memory_unsigned_integer (frame_loc, 4, byte_order,
+					      &return_value))
         return;
       else
         {
@@ -2659,19 +2660,19 @@ arm_exidx_unwind_sniffer (const struct frame_unwind *self,
 	 ensure this, so that e.g. pthread cancellation works.  */
       if (arm_frame_is_thumb (this_frame))
 	{
-	  LONGEST insn;
+	  ULONGEST insn;
 
-	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 2, 2,
-					byte_order_for_code, &insn)
+	  if (safe_read_memory_unsigned_integer (get_frame_pc (this_frame) - 2,
+						 2, byte_order_for_code, &insn)
 	      && (insn & 0xff00) == 0xdf00 /* svc */)
 	    exc_valid = 1;
 	}
       else
 	{
-	  LONGEST insn;
+	  ULONGEST insn;
 
-	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 4, 4,
-					byte_order_for_code, &insn)
+	  if (safe_read_memory_unsigned_integer (get_frame_pc (this_frame) - 4,
+						 4, byte_order_for_code, &insn)
 	      && (insn & 0x0f000000) == 0x0f000000 /* svc */)
 	    exc_valid = 1;
 	}

@@ -1,3 +1,8 @@
+2016-11-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_scan_prologue): Read memory as unsigned integer.
+	(arm_exidx_unwind_sniffer): Likewise.
+
 2016-11-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* record-full.c (record_full_open_1): Fix debug output.
