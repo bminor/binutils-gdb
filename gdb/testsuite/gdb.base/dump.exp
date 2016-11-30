@@ -152,10 +152,10 @@ make_dump_file "dump tekhex val [set intstr1.tekhex] intstruct" \
 	"dump struct as value, tekhex"
 
 make_dump_file "dump verilog val [set intarr1.verilog] intarray" \
-	"dump array as value, intel hex"
+	"dump array as value, verilog"
 
 make_dump_file "dump verilog val [set intstr1.verilog] intstruct" \
-	"dump struct as value, intel hex"
+	"dump struct as value, verilog"
 
 proc capture_value { expression args } {
     global gdb_prompt

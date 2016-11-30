@@ -76,10 +76,10 @@ extern void c_print_typedef (struct type *,
 			     struct symbol *,
 			     struct ui_file *);
 
-extern void c_val_print (struct type *, const gdb_byte *,
+extern void c_val_print (struct type *,
 			 int, CORE_ADDR,
 			 struct ui_file *, int,
-			 const struct value *,
+			 struct value *,
 			 const struct value_print_options *);
 
 extern void c_value_print (struct value *, struct ui_file *,
@@ -123,16 +123,16 @@ extern void cp_print_class_member (const gdb_byte *, struct type *,
 				   struct ui_file *, char *);
 
 extern void cp_print_value_fields (struct type *, struct type *,
-				   const gdb_byte *, LONGEST, CORE_ADDR,
+				   LONGEST, CORE_ADDR,
 				   struct ui_file *, int,
-				   const struct value *,
+				   struct value *,
 				   const struct value_print_options *,
 				   struct type **, int);
 
 extern void cp_print_value_fields_rtti (struct type *,
 					const gdb_byte *, LONGEST, CORE_ADDR,
 					struct ui_file *, int,
-					const struct value *,
+					struct value *,
 					const struct value_print_options *,
 					struct type **, int);
 
@@ -152,16 +152,16 @@ extern int c_textual_element_type (struct type *, char);
 
 extern struct compile_instance *c_get_compile_context (void);
 
-/* This takes the user-supplied text and returns a newly malloc'd bit
-   of code to compile.
+/* This takes the user-supplied text and returns a new bit of code to
+   compile.
 
    This is used as the la_compute_program language method; see that
    for a description of the arguments.  */
 
-extern char *c_compute_program (struct compile_instance *inst,
-				const char *input,
-				struct gdbarch *gdbarch,
-				const struct block *expr_block,
-				CORE_ADDR expr_pc);
+extern std::string c_compute_program (struct compile_instance *inst,
+				      const char *input,
+				      struct gdbarch *gdbarch,
+				      const struct block *expr_block,
+				      CORE_ADDR expr_pc);
 
 #endif /* !defined (C_LANG_H) */

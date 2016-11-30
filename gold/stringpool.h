@@ -118,7 +118,7 @@ class Chunked_vector
       {
 	this->chunks_.resize((n + chunk_size - 1) / chunk_size);
 	// We need to call reserve() of all chunks since changing
-	// this->chunks_ casues Element_vectors to be copied.  The
+	// this->chunks_ causes Element_vectors to be copied.  The
 	// reserved capacity of an Element_vector may be lost in copying.
 	for (size_t i = 0; i < this->chunks_.size(); ++i)
 	  this->chunks_[i].reserve(chunk_size);

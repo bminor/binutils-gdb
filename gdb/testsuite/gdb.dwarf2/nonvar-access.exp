@@ -1,0 +1,134 @@
+# Copyright 2016 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test accessing "non-variable" variables, i.e., variables which are
+# optimized to a constant DWARF location expression and/or
+# partially/fully optimized out.
+
+load_lib dwarf.exp
+
+if {![dwarf2_support]} { return 0 }
+
+standard_testfile main.c nonvar-access-dw.S
+
+# Make some DWARF for the test.
+set asm_file [standard_output_file $srcfile2]
+
+Dwarf::assemble $asm_file {
+    cu {} {
+	compile_unit {
+	    {DW_AT_name main.c}
+	} {
+	    declare_labels int_type_label short_type_label
+	    declare_labels struct_s_label struct_t_label
+
+	    int_type_label: base_type {
+		{name "int"}
+		{encoding @DW_ATE_signed}
+		{byte_size 4 DW_FORM_sdata}
+	    }
+
+	    struct_s_label: structure_type {
+		{name s}
+		{byte_size 4 DW_FORM_sdata}
+	    } {
+		member {
+		    {name a}
+		    {type :$int_type_label}
+		    {data_member_location 0 DW_FORM_udata}
+		    {bit_size 8 DW_FORM_udata}
+		}
+		member {
+		    {name b}
+		    {type :$int_type_label}
+		    {data_bit_offset 8 DW_FORM_udata}
+		    {bit_size 24 DW_FORM_udata}
+		}
+	    }
+
+	    struct_t_label: structure_type {
+		{name t}
+		{byte_size 4 DW_FORM_sdata}
+	    } {
+		member {
+		    {name a}
+		    {type :$int_type_label}
+		    {data_member_location 0 DW_FORM_udata}
+		    {bit_size 9 DW_FORM_udata}
+		}
+		member {
+		    {name b}
+		    {type :$int_type_label}
+		    {data_bit_offset 9 DW_FORM_udata}
+		    {bit_size 23 DW_FORM_udata}
+		}
+	    }
+
+	    DW_TAG_subprogram {
+		{name main}
+		{DW_AT_external 1 flag}
+		{low_pc [gdb_target_symbol main] DW_FORM_addr}
+		{high_pc [gdb_target_symbol main]+0x10000 DW_FORM_addr}
+	    } {
+		DW_TAG_variable {
+		    {name undef_int}
+		    {type :$int_type_label}
+		}
+		DW_TAG_variable {
+		    {name undef_s}
+		    {type :$struct_s_label}
+		}
+		DW_TAG_variable {
+		    {name def_s}
+		    {type :$struct_s_label}
+		    {location {
+			const1u 0
+			stack_value
+			bit_piece 8 0
+			const1s -1
+			stack_value
+			bit_piece 24 0
+		    } SPECIAL_expr}
+		}
+		DW_TAG_variable {
+		    {name def_t}
+		    {type :$struct_t_label}
+		    {location {
+			const1u 0
+			stack_value
+			bit_piece 9 0
+			const1s -1
+			stack_value
+			bit_piece 23 0
+		    } SPECIAL_expr}
+		}
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} \
+	  [list $srcfile $asm_file] {nodebug}] } {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+gdb_test "print def_s" " = \\{a = 0, b = -1\\}"
+gdb_test "print def_t" " = \\{a = 0, b = -1\\}"
+gdb_test "print undef_int" " = <optimized out>"
+gdb_test "print undef_s.a" " = <optimized out>"

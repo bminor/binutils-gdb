@@ -373,10 +373,10 @@ skip_info (char *arg, int from_tty)
   if (num_printable_entries == 0)
     {
       if (arg == NULL)
-	ui_out_message (current_uiout, 0, _("\
+	ui_out_message (current_uiout, _("\
 Not skipping any files or functions.\n"));
       else
-	ui_out_message (current_uiout, 0,
+	ui_out_message (current_uiout,
 			_("No skiplist entries found with number %s.\n"), arg);
 
       return;

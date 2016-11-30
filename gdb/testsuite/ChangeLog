@@ -1,3 +1,120 @@
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/nonvar-access.exp: Add a test for accessing
+	non-byte-aligned bit fields.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/12616
+	* gdb.dwarf2/nonvar-access.exp: New testcase.  Check that GDB
+	respects the DW_AT_data_bit_offset attribute.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/default.exp: Fix output of "set language".
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Remove @GMAKE_TRUE@ prefixes and removes lines
+	prefixed with @GMAKE_FALSE@.  Update comment related to non-GNU
+	make.
+	* configure.ac: Remove checks for the make program.
+	* configure: Re-generate.
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.python/py-recurse-unwind.c (main): Add loop.
+	* gdb.python/py-recurse-unwind.py (TestUnwinder): Add calls
+	to read_register() and gdb.parse_and_eval().  Make each code
+	call a separate case that can be individually tested.
+	* gdb.python/py-recurse-unwind.exp (cont_and_backtrace): New
+	proc. Call cont_and_backtrace for each of the code paths that
+	we want to test in the unwinder.
+
+2016-11-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/bitfield-parent-optimized-out.exp: Fix DWARF code for
+	the definition of struct S.
+
+2016-11-11  Catherine Moore  <clm@codesourcery.com>
+
+	* gdb.base/dump.exp: Identify verilog format dump tests as such.
+
+2016-11-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/commands.exp (runto_or_return): New procedure.
+	(gdbvar_simple_if_test, gdbvar_simple_while_test)
+	(gdbvar_complex_if_while_test, progvar_simple_if_test)
+	(progvar_simple_while_test, progvar_complex_if_while_test)
+	(if_while_breakpoint_command_test)
+	(infrun_breakpoint_command_test, breakpoint_command_test)
+	(user_defined_command_test, watchpoint_command_test)
+	(test_command_prompt_position, redefine_hook_test)
+	(stray_arg0_test, error_clears_commands_left, redefine_hook_test)
+	(redefine_backtrace_test): Use runto_or_return, $valnum_re,
+	multi_line_input and multi_line.  Remove gdb_expect and
+	gdb_stop_suppressing_tests uses.
+	* lib/gdb.exp (valnum_re): New global.
+	(multi_line_input): New procedure.
+
+2016-11-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.mi/user-selected-context-sync.exp (with_test_prefix_procname):
+	Remove.
+	(test_setup): Define with proc_with_prefix.
+	(test_cli_inferior): Likewise.
+	(test_cli_thread): Likewise.
+	(test_cli_frame): Likewise.
+	(test_cli_select_frame): Likewise.
+	(test_cli_up_down): Likewise.
+	(test_mi_thread_select): Likewise.
+	(test_mi_stack_select_frame): Likewise.
+	(test_cli_in_mi_inferior): Likewise.
+	(test_cli_in_mi_thread): Likewise.
+	(test_cli_in_mi_frame): Likewise.
+	(top level): Do not use with_test_prefix_procname.
+
+2016-11-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/commands.exp (gdbvar_simple_if_test)
+	(gdbvar_simple_while_test, gdbvar_complex_if_while_test)
+	(progvar_simple_if_test, progvar_simple_while_test)
+	(progvar_complex_if_while_test, if_while_breakpoint_command_test)
+	(infrun_breakpoint_command_test, breakpoint_command_test)
+	(user_defined_command_test, watchpoint_command_test)
+	(test_command_prompt_position, deprecated_command_test)
+	(bp_deleted_in_command, temporary_breakpoint_commands)
+	(stray_arg0_test, source_file_with_indented_comment)
+	(recursive_source_test, if_commands_test)
+	(error_clears_commands_left, redefine_hook_test)
+	(redefine_backtrace_test): Use proc_with_prefix.
+	* lib/gdb.exp (proc_with_prefix): New proc.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/tui-layout.c: New file.
+	* gdb.base/tui-layout.exp: Use tui-layout.c, to ensure that the
+	disassembly window contains very long lines.
+
+2016-11-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-value.exp (test_value_creation): Make "long" test
+	depend on Python 2.
+
+2016-11-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-framefilter.py (ElidingFrameDecorator.address):
+	New method.
+
+2016-10-29  Manish Goregaokar  <manish@mozilla.com>
+
+	* gdb.rust/simple.exp: Add tests for `sizeof(expr)`.
+
+2016-10-27  Manish Goregaokar  <manish@mozilla.com>
+
+	* gdb.rust/simple.rs: Add test for univariant enums without
+	discriminants and for encoded struct-like enums.
+
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/maint.exp <maint info line-table w/o a file name>: Use
@@ -23,8 +140,8 @@
 
 2016-10-19  Maciej W. Rozycki  <macro@imgtec.com>
 
-    	* gdb.base/killed-outside.exp: Remove $options from a call to
-    	`prepare_for_testing'.
+	* gdb.base/killed-outside.exp: Remove $options from a call to
+	`prepare_for_testing'.
 
 2016-10-17  Simon Marchi  <simon.marchi@ericsson.com>
 
@@ -144,14 +261,14 @@
 	gdb_skip_float_test return true.
 
 2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
-2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/20487
 	* gdb.mi/user-selected-context-sync.exp: New file.
 	* gdb.mi/user-selected-context-sync.c: New file.
 
 2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
-2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/20487
 	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Adapt
@@ -320,9 +437,9 @@
 
 2016-08-24  Kevin Buettner  <kevinb@redhat.com>
 
-    	* gdb.python/py-recurse-unwind.c: New file.
-    	* gdb.python/py-recurse-unwind.py: New file.
-    	* gdb.python/py-recurse-unwind.exp: New file.
+	* gdb.python/py-recurse-unwind.c: New file.
+	* gdb.python/py-recurse-unwind.py: New file.
+	* gdb.python/py-recurse-unwind.exp: New file.
 
 2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
 
@@ -584,8 +701,8 @@
 
 2016-07-06  Manish Goregaokar  <manish@mozilla.com>
 
-	* simple.rs: Add test for raw pointer subscripting
-	* simple.exp: Add test expectations
+	* simple.rs: Add test for raw pointer subscripting.
+	* simple.exp: Add test expectations.
 
 2016-07-05  Yao Qi  <yao.qi@linaro.org>
 

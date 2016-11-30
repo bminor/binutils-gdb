@@ -162,7 +162,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
 {
   struct exception_catchpoint *self
     = (struct exception_catchpoint *) bs->breakpoint_at;
-  char *type_name = NULL;
+  std::string type_name;
 
   bkpt_breakpoint_ops.check_status (bs);
   if (bs->stop == 0)
@@ -174,17 +174,14 @@ check_status_exception_catchpoint (struct bpstats *bs)
   TRY
     {
       struct value *typeinfo_arg;
-      char *canon;
+      std::string canon;
 
       fetch_probe_arguments (NULL, &typeinfo_arg);
       type_name = cplus_typename_from_type_info (typeinfo_arg);
 
-      canon = cp_canonicalize_string (type_name);
-      if (canon != NULL)
-	{
-	  xfree (type_name);
-	  type_name = canon;
-	}
+      canon = cp_canonicalize_string (type_name.c_str ());
+      if (!canon.empty ())
+	std::swap (type_name, canon);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -192,12 +189,10 @@ check_status_exception_catchpoint (struct bpstats *bs)
     }
   END_CATCH
 
-  if (type_name != NULL)
+  if (!type_name.empty ())
     {
-      if (regexec (self->pattern, type_name, 0, NULL, 0) != 0)
+      if (regexec (self->pattern, type_name.c_str (), 0, NULL, 0) != 0)
 	bs->stop = 0;
-
-      xfree (type_name);
     }
 }
 
@@ -393,8 +388,6 @@ static void
 handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  struct exception_catchpoint *cp;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   regex_t *pattern = NULL;
 
   if (except_rx != NULL)
@@ -406,8 +399,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			   _("invalid type-matching regexp"));
     }
 
-  cp = XCNEW (struct exception_catchpoint);
-  make_cleanup (xfree, cp);
+  std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
 
   init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);
@@ -421,7 +413,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
   re_set_exception_catchpoint (&cp->base);
 
   install_breakpoint (0, &cp->base, 1);
-  discard_cleanups (cleanup);
+  cp.release ();
 }
 
 /* Look for an "if" token in *STRING.  The "if" token must be preceded

@@ -323,6 +323,12 @@ const struct demangler_engine libiberty_demanglers[] =
   }
   ,
   {
+    RUST_DEMANGLING_STYLE_STRING,
+    rust_demangling,
+    "Rust style demangling"
+  }
+  ,
+  {
     NULL, unknown_demangling, NULL
   }
 };
@@ -874,10 +880,26 @@ cplus_demangle (const char *mangled, int options)
     work->options |= (int) current_demangling_style & DMGL_STYLE_MASK;
 
   /* The V3 ABI demangling is implemented elsewhere.  */
-  if (GNU_V3_DEMANGLING || AUTO_DEMANGLING)
+  if (GNU_V3_DEMANGLING || RUST_DEMANGLING || AUTO_DEMANGLING)
     {
       ret = cplus_demangle_v3 (mangled, work->options);
-      if (ret || GNU_V3_DEMANGLING)
+      if (GNU_V3_DEMANGLING)
+	return ret;
+
+      if (ret)
+	{
+	  /* Rust symbols are GNU_V3 mangled plus some extra subtitutions.
+	     The subtitutions are always smaller, so do in place changes.  */
+	  if (rust_is_mangled (ret))
+	    rust_demangle_sym (ret);
+	  else if (RUST_DEMANGLING)
+	    {
+	      free (ret);
+	      ret = NULL;
+	    }
+	}
+
+      if (ret || RUST_DEMANGLING)
 	return ret;
     }
 
@@ -903,6 +925,27 @@ cplus_demangle (const char *mangled, int options)
   return (ret);
 }
 
+char *
+rust_demangle (const char *mangled, int options)
+{
+  /* Rust symbols are GNU_V3 mangled plus some extra subtitutions.  */
+  char *ret = cplus_demangle_v3 (mangled, options);
+
+  /* The Rust subtitutions are always smaller, so do in place changes.  */
+  if (ret != NULL)
+    {
+      if (rust_is_mangled (ret))
+	rust_demangle_sym (ret);
+      else
+	{
+	  free (ret);
+	  ret = NULL;
+	}
+    }
+
+  return ret;
+}
+
 /* Demangle ada names.  The encoding is documented in gcc/ada/exp_dbug.ads.  */
 
 char *
@@ -911,7 +954,7 @@ ada_demangle (const char *mangled, int option ATTRIBUTE_UNUSED)
   int len0;
   const char* p;
   char *d;
-  char *demangled;
+  char *demangled = NULL;
   
   /* Discard leading _ada_, which is used for library level subprograms.  */
   if (strncmp (mangled, "_ada_", 5) == 0)
@@ -1156,6 +1199,7 @@ ada_demangle (const char *mangled, int option ATTRIBUTE_UNUSED)
   return demangled;
 
  unknown:
+  XDELETEVEC (demangled);
   len0 = strlen (mangled);
   demangled = XNEWVEC (char, len0 + 3);
 
@@ -1653,12 +1697,13 @@ demangle_signature (struct work_stuff *work,
 					   0);
 	      if (!(work->constructor & 1))
 		expect_return_type = 1;
-	      (*mangled)++;
+	      if (!**mangled)
+		success = 0;
+	      else
+	        (*mangled)++;
 	      break;
 	    }
-	  else
-	    /* fall through */
-	    {;}
+	  /* fall through */
 
 	default:
 	  if (AUTO_DEMANGLING || GNU_DEMANGLING)
@@ -2134,6 +2179,8 @@ demangle_template (struct work_stuff *work, const char **mangled,
 	{
 	  int idx;
 	  (*mangled)++;
+	  if (**mangled == '\0')
+	    return (0);
 	  (*mangled)++;
 
 	  idx = consume_count_with_underscores (mangled);
@@ -2978,7 +3025,7 @@ gnu_special (struct work_stuff *work, const char **mangled, string *declp)
   int success = 1;
   const char *p;
 
-  if ((*mangled)[0] == '_'
+  if ((*mangled)[0] == '_' && (*mangled)[1] != '\0'
       && strchr (cplus_markers, (*mangled)[1]) != NULL
       && (*mangled)[2] == '_')
     {
@@ -2992,7 +3039,7 @@ gnu_special (struct work_stuff *work, const char **mangled, string *declp)
 		&& (*mangled)[3] == 't'
 		&& (*mangled)[4] == '_')
 	       || ((*mangled)[1] == 'v'
-		   && (*mangled)[2] == 't'
+		   && (*mangled)[2] == 't' && (*mangled)[3] != '\0'
 		   && strchr (cplus_markers, (*mangled)[3]) != NULL)))
     {
       /* Found a GNU style virtual table, get past "_vt<CPLUS_MARKER>"
@@ -3762,11 +3809,12 @@ do_type (struct work_stuff *work, const char **mangled, string *result)
 		    break;
 		  }
 
-		if (*(*mangled)++ != 'F')
+		if (*(*mangled) != 'F')
 		  {
 		    success = 0;
 		    break;
 		  }
+		(*mangled)++;
 	      }
 	    if ((member && !demangle_nested_args (work, mangled, &decl))
 		|| **mangled != '_')
@@ -4023,6 +4071,7 @@ demangle_fund_type (struct work_stuff *work,
 	  success = 0;
 	  break;
 	}
+      /* fall through */
     case 'I':
       (*mangled)++;
       if (**mangled == '_')

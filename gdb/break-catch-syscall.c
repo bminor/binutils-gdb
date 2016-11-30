@@ -433,7 +433,7 @@ create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
   struct syscall_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
 
-  c = XNEW (struct syscall_catchpoint);
+  c = new syscall_catchpoint ();
   init_catchpoint (&c->base, gdbarch, tempflag, NULL, ops);
   c->syscalls_to_be_caught = filter;
 

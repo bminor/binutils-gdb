@@ -19,6 +19,9 @@
 #ifndef MAINT_H
 #define MAINT_H
 
+#include "run-time-clock.h"
+#include <chrono>
+
 extern void set_per_command_time (int);
 
 extern void set_per_command_space (int);
@@ -48,8 +51,8 @@ class scoped_command_stats
   int m_time_enabled : 1;
   int m_space_enabled : 1;
   int m_symtab_enabled : 1;
-  long m_start_cpu_time;
-  struct timeval m_start_wall_time;
+  run_time_clock::time_point m_start_cpu_time;
+  std::chrono::steady_clock::time_point m_start_wall_time;
   long m_start_space;
   /* Total number of symtabs (over all objfiles).  */
   int m_start_nr_symtabs;

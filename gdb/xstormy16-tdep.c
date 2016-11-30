@@ -506,14 +506,9 @@ xstormy16_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-static const unsigned char *
-xstormy16_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			      int *lenptr)
-{
-  static unsigned char breakpoint[] = { 0x06, 0x0 };
-  *lenptr = sizeof (breakpoint);
-  return breakpoint;
-}
+constexpr gdb_byte xstormy16_break_insn[] = { 0x06, 0x0 };
+
+typedef BP_MANIPULATION (xstormy16_break_insn) xstormy16_breakpoint;
 
 /* Given a pointer to a jump table entry, return the address
    of the function it jumps to.  Return 0 if not found.  */
@@ -843,7 +838,10 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* These values and methods are used when gdb calls a target function.  */
   set_gdbarch_push_dummy_call (gdbarch, xstormy16_push_dummy_call);
-  set_gdbarch_breakpoint_from_pc (gdbarch, xstormy16_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       xstormy16_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       xstormy16_breakpoint::bp_from_kind);
   set_gdbarch_return_value (gdbarch, xstormy16_return_value);
 
   set_gdbarch_skip_trampoline_code (gdbarch, xstormy16_skip_trampoline_code);

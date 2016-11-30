@@ -38,6 +38,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
+#include "selftest.h"
 #include <algorithm>
 #include <vector>
 
@@ -515,10 +516,14 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
     per_cu_dwarf_call (this, die_offset, per_cu);
   }
 
-  /* Callback function for dwarf2_evaluate_loc_desc.  */
-  struct type *impl_get_base_type (cu_offset die_offset) OVERRIDE
+  struct type *get_base_type (cu_offset die_offset, int size) OVERRIDE
   {
-    return dwarf2_get_die_type (die_offset, per_cu);
+    struct type *result = dwarf2_get_die_type (die_offset, per_cu);
+    if (result == NULL)
+      error (_("Could not find type for DW_OP_GNU_const_type"));
+    if (size != 0 && TYPE_LENGTH (result) != size)
+      error (_("DW_OP_GNU_const_type has different sizes for type and data"));
+    return result;
   }
 
   /* Callback function for dwarf2_evaluate_loc_desc.
@@ -553,7 +558,6 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
   {
     struct frame_info *caller_frame;
     struct dwarf2_per_cu_data *caller_per_cu;
-    struct dwarf_expr_baton baton_local;
     struct call_site_parameter *parameter;
     const gdb_byte *data_src;
     size_t size;
@@ -570,17 +574,20 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
       throw_error (NO_ENTRY_VALUE_ERROR,
 		   _("Cannot resolve DW_AT_GNU_call_site_data_value"));
 
-    baton_local.frame = caller_frame;
-    baton_local.per_cu = caller_per_cu;
-    baton_local.obj_address = 0;
+    scoped_restore save_frame = make_scoped_restore (&this->frame,
+						     caller_frame);
+    scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
+						      caller_per_cu);
+    scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
+							(CORE_ADDR) 0);
 
     scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
     this->gdbarch
-      = get_objfile_arch (dwarf2_per_cu_objfile (baton_local.per_cu));
+      = get_objfile_arch (dwarf2_per_cu_objfile (per_cu));
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
-    this->addr_size = dwarf2_per_cu_addr_size (baton_local.per_cu);
+    this->addr_size = dwarf2_per_cu_addr_size (per_cu);
     scoped_restore save_offset = make_scoped_restore (&this->offset);
-    this->offset = dwarf2_per_cu_text_offset (baton_local.per_cu);
+    this->offset = dwarf2_per_cu_text_offset (per_cu);
 
     this->eval (data_src, size);
   }
@@ -1458,6 +1465,10 @@ struct piece_closure
 
   /* The pieces themselves.  */
   struct dwarf_expr_piece *pieces;
+
+  /* Frame ID of frame to which a register value is relative, used
+     only by DWARF_VALUE_REGISTER.  */
+  struct frame_id frame_id;
 };
 
 /* Allocate a closure for a value formed from separately-described
@@ -1466,7 +1477,7 @@ struct piece_closure
 static struct piece_closure *
 allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 			int n_pieces, struct dwarf_expr_piece *pieces,
-			int addr_size)
+			int addr_size, struct frame_info *frame)
 {
   struct piece_closure *c = XCNEW (struct piece_closure);
   int i;
@@ -1476,6 +1487,10 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
   c->n_pieces = n_pieces;
   c->addr_size = addr_size;
   c->pieces = XCNEWVEC (struct dwarf_expr_piece, n_pieces);
+  if (frame == NULL)
+    c->frame_id = null_frame_id;
+  else
+    c->frame_id = get_frame_id (frame);
 
   memcpy (c->pieces, pieces, n_pieces * sizeof (struct dwarf_expr_piece));
   for (i = 0; i < n_pieces; ++i)
@@ -1485,177 +1500,235 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
   return c;
 }
 
-/* The lowest-level function to extract bits from a byte buffer.
-   SOURCE is the buffer.  It is updated if we read to the end of a
-   byte.
-   SOURCE_OFFSET_BITS is the offset of the first bit to read.  It is
-   updated to reflect the number of bits actually read.
-   NBITS is the number of bits we want to read.  It is updated to
-   reflect the number of bits actually read.  This function may read
-   fewer bits.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.
-   This function returns the extracted bits.  */
+/* Copy NBITS bits from SOURCE to DEST starting at the given bit
+   offsets.  Use the bit order as specified by BITS_BIG_ENDIAN.
+   Source and destination buffers must not overlap.  */
 
-static unsigned int
-extract_bits_primitive (const gdb_byte **source,
-			unsigned int *source_offset_bits,
-			int *nbits, int bits_big_endian)
+static void
+copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
+	      const gdb_byte *source, ULONGEST source_offset,
+	      ULONGEST nbits, int bits_big_endian)
 {
-  unsigned int avail, mask, datum;
+  unsigned int buf, avail;
 
-  gdb_assert (*source_offset_bits < 8);
+  if (nbits == 0)
+    return;
 
-  avail = 8 - *source_offset_bits;
-  if (avail > *nbits)
-    avail = *nbits;
-
-  mask = (1 << avail) - 1;
-  datum = **source;
   if (bits_big_endian)
-    datum >>= 8 - (*source_offset_bits + *nbits);
-  else
-    datum >>= *source_offset_bits;
-  datum &= mask;
-
-  *nbits -= avail;
-  *source_offset_bits += avail;
-  if (*source_offset_bits >= 8)
     {
-      *source_offset_bits -= 8;
-      ++*source;
+      /* Start from the end, then work backwards.  */
+      dest_offset += nbits - 1;
+      dest += dest_offset / 8;
+      dest_offset = 7 - dest_offset % 8;
+      source_offset += nbits - 1;
+      source += source_offset / 8;
+      source_offset = 7 - source_offset % 8;
+    }
+  else
+    {
+      dest += dest_offset / 8;
+      dest_offset %= 8;
+      source += source_offset / 8;
+      source_offset %= 8;
     }
 
-  return datum;
-}
+  /* Fill BUF with DEST_OFFSET bits from the destination and 8 -
+     SOURCE_OFFSET bits from the source.  */
+  buf = *(bits_big_endian ? source-- : source++) >> source_offset;
+  buf <<= dest_offset;
+  buf |= *dest & ((1 << dest_offset) - 1);
 
-/* Extract some bits from a source buffer and move forward in the
-   buffer.
-   
-   SOURCE is the source buffer.  It is updated as bytes are read.
-   SOURCE_OFFSET_BITS is the offset into SOURCE.  It is updated as
-   bits are read.
-   NBITS is the number of bits to read.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.
-   
-   This function returns the bits that were read.  */
+  /* NBITS: bits yet to be written; AVAIL: BUF's fill level.  */
+  nbits += dest_offset;
+  avail = dest_offset + 8 - source_offset;
 
-static unsigned int
-extract_bits (const gdb_byte **source, unsigned int *source_offset_bits,
-	      int nbits, int bits_big_endian)
-{
-  unsigned int datum;
-
-  gdb_assert (nbits > 0 && nbits <= 8);
-
-  datum = extract_bits_primitive (source, source_offset_bits, &nbits,
-				  bits_big_endian);
-  if (nbits > 0)
+  /* Flush 8 bits from BUF, if appropriate.  */
+  if (nbits >= 8 && avail >= 8)
     {
-      unsigned int more;
+      *(bits_big_endian ? dest-- : dest++) = buf;
+      buf >>= 8;
+      avail -= 8;
+      nbits -= 8;
+    }
 
-      more = extract_bits_primitive (source, source_offset_bits, &nbits,
-				     bits_big_endian);
-      if (bits_big_endian)
-	datum <<= nbits;
+  /* Copy the middle part.  */
+  if (nbits >= 8)
+    {
+      size_t len = nbits / 8;
+
+      /* Use a faster method for byte-aligned copies.  */
+      if (avail == 0)
+	{
+	  if (bits_big_endian)
+	    {
+	      dest -= len;
+	      source -= len;
+	      memcpy (dest + 1, source + 1, len);
+	    }
+	  else
+	    {
+	      memcpy (dest, source, len);
+	      dest += len;
+	      source += len;
+	    }
+	}
       else
-	more <<= nbits;
-      datum |= more;
+	{
+	  while (len--)
+	    {
+	      buf |= *(bits_big_endian ? source-- : source++) << avail;
+	      *(bits_big_endian ? dest-- : dest++) = buf;
+	      buf >>= 8;
+	    }
+	}
+      nbits %= 8;
     }
 
-  return datum;
+  /* Write the last byte.  */
+  if (nbits)
+    {
+      if (avail < nbits)
+	buf |= *source << avail;
+
+      buf &= (1 << nbits) - 1;
+      *dest = (*dest & (~0 << nbits)) | buf;
+    }
 }
 
-/* Write some bits into a buffer and move forward in the buffer.
-   
-   DATUM is the bits to write.  The low-order bits of DATUM are used.
-   DEST is the destination buffer.  It is updated as bytes are
-   written.
-   DEST_OFFSET_BITS is the bit offset in DEST at which writing is
-   done.
-   NBITS is the number of valid bits in DATUM.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.  */
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+/* Helper function for the unit test of copy_bitwise.  Convert NBITS bits
+   out of BITS, starting at OFFS, to the respective '0'/'1'-string.  MSB0
+   specifies whether to assume big endian bit numbering.  Store the
+   resulting (not null-terminated) string at STR.  */
 
 static void
-insert_bits (unsigned int datum,
-	     gdb_byte *dest, unsigned int dest_offset_bits,
-	     int nbits, int bits_big_endian)
+bits_to_str (char *str, const gdb_byte *bits, ULONGEST offs,
+	     ULONGEST nbits, int msb0)
 {
-  unsigned int mask;
+  unsigned int j;
+  size_t i;
 
-  gdb_assert (dest_offset_bits + nbits <= 8);
-
-  mask = (1 << nbits) - 1;
-  if (bits_big_endian)
+  for (i = offs / 8, j = offs % 8; nbits; i++, j = 0)
     {
-      datum <<= 8 - (dest_offset_bits + nbits);
-      mask <<= 8 - (dest_offset_bits + nbits);
+      unsigned int ch = bits[i];
+      for (; j < 8 && nbits; j++, nbits--)
+	*str++ = (ch & (msb0 ? (1 << (7 - j)) : (1 << j))) ? '1' : '0';
     }
-  else
-    {
-      datum <<= dest_offset_bits;
-      mask <<= dest_offset_bits;
-    }
-
-  gdb_assert ((datum & ~mask) == 0);
-
-  *dest = (*dest & ~mask) | datum;
 }
 
-/* Copy bits from a source to a destination.
-   
-   DEST is where the bits should be written.
-   DEST_OFFSET_BITS is the bit offset into DEST.
-   SOURCE is the source of bits.
-   SOURCE_OFFSET_BITS is the bit offset into SOURCE.
-   BIT_COUNT is the number of bits to copy.
-   BITS_BIG_ENDIAN is taken directly from gdbarch.  */
+/* Check one invocation of copy_bitwise with the given parameters.  */
 
 static void
-copy_bitwise (gdb_byte *dest, unsigned int dest_offset_bits,
-	      const gdb_byte *source, unsigned int source_offset_bits,
-	      unsigned int bit_count,
-	      int bits_big_endian)
+check_copy_bitwise (const gdb_byte *dest, unsigned int dest_offset,
+		    const gdb_byte *source, unsigned int source_offset,
+		    unsigned int nbits, int msb0)
 {
-  unsigned int dest_avail;
-  int datum;
+  size_t len = align_up (dest_offset + nbits, 8);
+  char *expected = (char *) alloca (len + 1);
+  char *actual = (char *) alloca (len + 1);
+  gdb_byte *buf = (gdb_byte *) alloca (len / 8);
 
-  /* Reduce everything to byte-size pieces.  */
-  dest += dest_offset_bits / 8;
-  dest_offset_bits %= 8;
-  source += source_offset_bits / 8;
-  source_offset_bits %= 8;
+  /* Compose a '0'/'1'-string that represents the expected result of
+     copy_bitwise below:
+      Bits from [0, DEST_OFFSET) are filled from DEST.
+      Bits from [DEST_OFFSET, DEST_OFFSET + NBITS) are filled from SOURCE.
+      Bits from [DEST_OFFSET + NBITS, LEN) are filled from DEST.
 
-  dest_avail = 8 - dest_offset_bits % 8;
+     E.g., with:
+      dest_offset: 4
+      nbits:       2
+      len:         8
+      dest:        00000000
+      source:      11111111
 
-  /* See if we can fill the first destination byte.  */
-  if (dest_avail < bit_count)
+     We should end up with:
+      buf:         00001100
+                   DDDDSSDD (D=dest, S=source)
+  */
+  bits_to_str (expected, dest, 0, len, msb0);
+  bits_to_str (expected + dest_offset, source, source_offset, nbits, msb0);
+
+  /* Fill BUF with data from DEST, apply copy_bitwise, and convert the
+     result to a '0'/'1'-string.  */
+  memcpy (buf, dest, len / 8);
+  copy_bitwise (buf, dest_offset, source, source_offset, nbits, msb0);
+  bits_to_str (actual, buf, 0, len, msb0);
+
+  /* Compare the resulting strings.  */
+  expected[len] = actual[len] = '\0';
+  if (strcmp (expected, actual) != 0)
+    error (_("copy_bitwise %s != %s (%u+%u -> %u)"),
+	   expected, actual, source_offset, nbits, dest_offset);
+}
+
+/* Unit test for copy_bitwise.  */
+
+static void
+copy_bitwise_tests (void)
+{
+  /* Data to be used as both source and destination buffers.  The two
+     arrays below represent the lsb0- and msb0- encoded versions of the
+     following bit string, respectively:
+       00000000 00011111 11111111 01001000 10100101 11110010
+     This pattern is chosen such that it contains:
+     - constant 0- and 1- chunks of more than a full byte;
+     - 0/1- and 1/0 transitions on all bit positions within a byte;
+     - several sufficiently asymmetric bytes.
+  */
+  static const gdb_byte data_lsb0[] = {
+    0x00, 0xf8, 0xff, 0x12, 0xa5, 0x4f
+  };
+  static const gdb_byte data_msb0[] = {
+    0x00, 0x1f, 0xff, 0x48, 0xa5, 0xf2
+  };
+
+  constexpr size_t data_nbits = 8 * sizeof (data_lsb0);
+  constexpr unsigned max_nbits = 24;
+
+  /* Try all combinations of:
+      lsb0/msb0 bit order (using the respective data array)
+       X [0, MAX_NBITS] copy bit width
+       X feasible source offsets for the given copy bit width
+       X feasible destination offsets
+  */
+  for (int msb0 = 0; msb0 < 2; msb0++)
     {
-      datum = extract_bits (&source, &source_offset_bits, dest_avail,
-			    bits_big_endian);
-      insert_bits (datum, dest, dest_offset_bits, dest_avail, bits_big_endian);
-      ++dest;
-      dest_offset_bits = 0;
-      bit_count -= dest_avail;
-    }
+      const gdb_byte *data = msb0 ? data_msb0 : data_lsb0;
 
-  /* Now, either DEST_OFFSET_BITS is byte-aligned, or we have fewer
-     than 8 bits remaining.  */
-  gdb_assert (dest_offset_bits % 8 == 0 || bit_count < 8);
-  for (; bit_count >= 8; bit_count -= 8)
-    {
-      datum = extract_bits (&source, &source_offset_bits, 8, bits_big_endian);
-      *dest++ = (gdb_byte) datum;
-    }
+      for (unsigned int nbits = 1; nbits <= max_nbits; nbits++)
+	{
+	  const unsigned int max_offset = data_nbits - nbits;
 
-  /* Finally, we may have a few leftover bits.  */
-  gdb_assert (bit_count <= 8 - dest_offset_bits % 8);
-  if (bit_count > 0)
-    {
-      datum = extract_bits (&source, &source_offset_bits, bit_count,
-			    bits_big_endian);
-      insert_bits (datum, dest, dest_offset_bits, bit_count, bits_big_endian);
+	  for (unsigned source_offset = 0;
+	       source_offset <= max_offset;
+	       source_offset++)
+	    {
+	      for (unsigned dest_offset = 0;
+		   dest_offset <= max_offset;
+		   dest_offset++)
+		{
+		  check_copy_bitwise (data + dest_offset / 8,
+				      dest_offset % 8,
+				      data + source_offset / 8,
+				      source_offset % 8,
+				      nbits, msb0);
+		}
+	    }
+	}
+
+      /* Special cases: copy all, copy nothing.  */
+      check_copy_bitwise (data_lsb0, 0, data_msb0, 0, data_nbits, msb0);
+      check_copy_bitwise (data_msb0, 0, data_lsb0, 0, data_nbits, msb0);
+      check_copy_bitwise (data, data_nbits - 7, data, 9, 0, msb0);
     }
 }
+
+} /* namespace selftests */
+
+#endif /* GDB_SELF_TEST */
 
 static void
 read_pieced_value (struct value *v)
@@ -1666,7 +1739,6 @@ read_pieced_value (struct value *v)
   gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (v);
-  struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
@@ -1732,6 +1804,7 @@ read_pieced_value (struct value *v)
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
+	    struct frame_info *frame = frame_find_by_id (c->frame_id);
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
 	    int optim, unavail;
@@ -1835,13 +1908,18 @@ write_pieced_value (struct value *to, struct value *from)
   const gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (to);
-  struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
+  struct frame_info *frame;
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));
 
+  /* VALUE_FRAME_ID is used instead of VALUE_NEXT_FRAME_ID here
+     because FRAME is passed to get_frame_register_bytes() and
+     put_frame_register_bytes(), both of which do their own "->next"
+     operations.  */
+  frame = frame_find_by_id (VALUE_FRAME_ID (to));
   if (frame == NULL)
     {
       mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
@@ -2295,7 +2373,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (ctx.num_pieces > 0)
     {
       struct piece_closure *c;
-      struct frame_id frame_id = get_frame_id (frame);
       ULONGEST bit_size = 0;
       int i;
 
@@ -2305,12 +2382,11 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	invalid_synthetic_pointer ();
 
       c = allocate_piece_closure (per_cu, ctx.num_pieces, ctx.pieces,
-				  ctx.addr_size);
+				  ctx.addr_size, frame);
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
       do_cleanups (value_chain);
       retval = allocate_computed_value (type, &pieced_value_funcs, c);
-      VALUE_FRAME_ID (retval) = frame_id;
       set_value_offset (retval, byte_offset);
     }
   else
@@ -2702,6 +2778,12 @@ class symbol_needs_eval_context : public dwarf_expr_context
 
   /* CFA accesses require a frame.  */
   CORE_ADDR get_frame_cfa () OVERRIDE
+  {
+    needs = SYMBOL_NEEDS_FRAME;
+    return 1;
+  }
+
+  CORE_ADDR get_frame_pc () OVERRIDE
   {
     needs = SYMBOL_NEEDS_FRAME;
     return 1;
@@ -4598,4 +4680,8 @@ _initialize_dwarf2loc (void)
 			     NULL,
 			     show_entry_values_debug,
 			     &setdebuglist, &showdebuglist);
+
+#if GDB_SELF_TEST
+  register_self_test (selftests::copy_bitwise_tests);
+#endif
 }

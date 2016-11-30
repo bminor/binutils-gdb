@@ -63,15 +63,15 @@ struct demangle_parse_info
 
 /* Functions from cp-support.c.  */
 
-extern char *cp_canonicalize_string (const char *string);
+extern std::string cp_canonicalize_string (const char *string);
 
-extern char *cp_canonicalize_string_no_typedefs (const char *string);
+extern std::string cp_canonicalize_string_no_typedefs (const char *string);
 
 typedef const char *(canonicalization_ftype) (struct type *, void *);
 
-extern char *cp_canonicalize_string_full (const char *string,
-					  canonicalization_ftype *finder,
-					  void *data);
+extern std::string cp_canonicalize_string_full (const char *string,
+						canonicalization_ftype *finder,
+						void *data);
 
 extern char *cp_class_name_from_physname (const char *physname);
 

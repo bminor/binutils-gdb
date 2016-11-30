@@ -315,10 +315,10 @@ extern int gdbpy_auto_load_enabled (const struct extension_language_defn *);
 
 extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
   (const struct extension_language_defn *,
-   struct type *type, const gdb_byte *valaddr,
+   struct type *type,
    LONGEST embedded_offset, CORE_ADDR address,
    struct ui_file *stream, int recurse,
-   const struct value *val,
+   struct value *val,
    const struct value_print_options *options,
    const struct language_defn *language);
 extern enum ext_lang_bt_status gdbpy_apply_frame_filter
@@ -533,14 +533,15 @@ int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 
 PyObject *python_string_to_unicode (PyObject *obj);
-char *unicode_to_target_string (PyObject *unicode_str);
-char *python_string_to_target_string (PyObject *obj);
+gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);
+gdb::unique_xmalloc_ptr<char> python_string_to_target_string (PyObject *obj);
 PyObject *python_string_to_target_python_string (PyObject *obj);
-char *python_string_to_host_string (PyObject *obj);
+gdb::unique_xmalloc_ptr<char> python_string_to_host_string (PyObject *obj);
 PyObject *host_string_to_python_string (const char *str);
 int gdbpy_is_string (PyObject *obj);
-char *gdbpy_obj_to_string (PyObject *obj);
-char *gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue);
+gdb::unique_xmalloc_ptr<char> gdbpy_obj_to_string (PyObject *obj);
+gdb::unique_xmalloc_ptr<char> gdbpy_exception_to_string (PyObject *ptype,
+							 PyObject *pvalue);
 
 int gdbpy_is_lazy_string (PyObject *result);
 void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
@@ -555,7 +556,7 @@ PyObject *apply_varobj_pretty_printer (PyObject *print_obj,
 				       struct value **replacement,
 				       struct ui_file *stream);
 PyObject *gdbpy_get_varobj_pretty_printer (struct value *value);
-char *gdbpy_get_display_hint (PyObject *printer);
+gdb::unique_xmalloc_ptr<char> gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);
 
 void bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj);

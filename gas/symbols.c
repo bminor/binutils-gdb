@@ -262,7 +262,7 @@ define_sym_at_dot (symbolS *symbolP)
 
 symbolS *
 colon (/* Just seen "x:" - rattle symbols & frags.  */
-       const char *sym_name	/* Symbol name, as a cannonical string.  */
+       const char *sym_name	/* Symbol name, as a canonical string.  */
        /* We copy this string: OK to alter later.  */)
 {
   symbolS *symbolP;	/* Symbol we are working with.  */
@@ -1541,7 +1541,7 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 	    case O_register:
 	      if (!symbol_equated_p (symbolP))
 		break;
-	      /* Fall thru.  */
+	      /* Fallthru.  */
 	    case O_symbol:
 	    case O_symbol_rva:
 	      symbolP = exp.X_add_symbol;
@@ -1661,7 +1661,7 @@ define_dollar_label (long label)
 
 /* Caller must copy returned name: we re-use the area for the next name.
 
-   The mth occurence of label n: is turned into the symbol "Ln^Am"
+   The mth occurrence of label n: is turned into the symbol "Ln^Am"
    where n is the label number and m is the instance number. "L" makes
    it a label discarded unless debugging and "^A"('\1') ensures no
    ordinary symbol SHOULD get the same name as a local label
@@ -1826,7 +1826,7 @@ fb_label_instance (long label)
 
 /* Caller must copy returned name: we re-use the area for the next name.
 
-   The mth occurence of label n: is turned into the symbol "Ln^Bm"
+   The mth occurrence of label n: is turned into the symbol "Ln^Bm"
    where n is the label number and m is the instance number. "L" makes
    it a label discarded unless debugging and "^B"('\2') ensures no
    ordinary symbol SHOULD get the same name as a local label

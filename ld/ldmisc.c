@@ -425,7 +425,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		  ++fmt;
 		  break;
 		}
-	      /* Fall thru */
+	      /* Fallthru */
 
 	    default:
 	      fprintf (fp, "%%%c", fmt[-1]);

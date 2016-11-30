@@ -26,6 +26,52 @@ struct minimal_symbol;
 struct type;
 struct gdbarch_info;
 
+template <size_t bp_size, const gdb_byte *break_insn>
+struct bp_manipulation
+{
+  static int
+  kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+  {
+    return bp_size;
+  }
+
+  static const gdb_byte *
+  bp_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+  {
+    *size = kind;
+    return break_insn;
+  }
+};
+
+template <size_t bp_size,
+	  const gdb_byte *break_insn_little,
+	  const gdb_byte *break_insn_big>
+struct bp_manipulation_endian
+{
+  static int
+  kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+  {
+    return bp_size;
+  }
+
+  static const gdb_byte *
+  bp_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+  {
+    *size = kind;
+    if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+      return break_insn_big;
+    else
+      return break_insn_little;
+  }
+};
+
+#define BP_MANIPULATION(BREAK_INSN) \
+  bp_manipulation<sizeof (BREAK_INSN), BREAK_INSN>
+
+#define BP_MANIPULATION_ENDIAN(BREAK_INSN_LITTLE, BREAK_INSN_BIG) \
+  bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE),		  \
+  BREAK_INSN_LITTLE, BREAK_INSN_BIG>
+
 /* An implementation of gdbarch_displaced_step_copy_insn for
    processors that don't need to modify the instruction before
    single-stepping the displaced copy.
@@ -171,8 +217,13 @@ extern int default_has_shared_address_space (struct gdbarch *);
 extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 					     CORE_ADDR addr, char **msg);
 
-extern void default_remote_breakpoint_from_pc (struct gdbarch *,
-					       CORE_ADDR *pcptr, int *kindptr);
+extern const gdb_byte *default_breakpoint_from_pc (struct gdbarch *gdbarch,
+						   CORE_ADDR *pcptr,
+						   int *lenptr);
+
+extern int default_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
+						       struct regcache *regcache,
+						       CORE_ADDR *pcptr);
 
 extern void default_gen_return_address (struct gdbarch *gdbarch,
 					struct agent_expr *ax,

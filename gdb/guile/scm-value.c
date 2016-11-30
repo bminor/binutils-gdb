@@ -141,7 +141,6 @@ static int
 vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
 {
   value_smob *v_smob = (value_smob *) SCM_SMOB_DATA (self);
-  char *s = NULL;
   struct value_print_options opts;
 
   if (pstate->writingp)
@@ -162,7 +161,9 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
       struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
 
       common_val_print (v_smob->value, stb, 0, &opts, current_language);
-      s = ui_file_xstrdup (stb, NULL);
+
+      std::string s = ui_file_as_string (stb);
+      scm_puts (s.c_str (), port);
 
       do_cleanups (old_chain);
     }
@@ -171,12 +172,6 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
   END_CATCH
-
-  if (s != NULL)
-    {
-      scm_puts (s, port);
-      xfree (s);
-    }
 
   if (pstate->writingp)
     scm_puts (">", port);
@@ -726,7 +721,8 @@ gdbscm_value_field (SCM self, SCM field_scm)
     {
       struct value *tmp = value;
 
-      res_val = value_struct_elt (&tmp, NULL, field, NULL, NULL);
+      res_val = value_struct_elt (&tmp, NULL, field, NULL,
+				  "struct/class/union");
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1281,7 +1277,7 @@ gdbscm_value_print (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
   struct value_print_options opts;
-  char *s = NULL;
+  std::string s;
   SCM result;
 
   get_user_print_options (&opts);
@@ -1293,7 +1289,7 @@ gdbscm_value_print (SCM self)
       struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
 
       common_val_print (value, stb, 0, &opts, current_language);
-      s = ui_file_xstrdup (stb, NULL);
+      s = ui_file_as_string (stb);
 
       do_cleanups (old_chain);
     }
@@ -1308,9 +1304,8 @@ gdbscm_value_print (SCM self)
      IWBN to use scm_take_locale_string here, but we'd have to temporarily
      override the default port conversion handler because contrary to
      documentation it doesn't necessarily free the input string.  */
-  result = scm_from_stringn (s, strlen (s), host_charset (),
+  result = scm_from_stringn (s.c_str (), s.size (), host_charset (),
 			     SCM_FAILED_CONVERSION_QUESTION_MARK);
-  xfree (s);
 
   return result;
 }

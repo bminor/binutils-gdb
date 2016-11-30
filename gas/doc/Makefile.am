@@ -81,6 +81,7 @@ CPU_DOCS = \
 	c-pj.texi \
 	c-ppc.texi \
 	c-rl78.texi \
+	c-riscv.texi \
 	c-rx.texi \
 	c-s390.texi \
 	c-score.texi \

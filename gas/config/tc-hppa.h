@@ -166,7 +166,7 @@ int hppa_fix_adjustable (struct fix *);
    limitations as those for the 32-bit SOM target.  */
 #define DIFF_EXPR_OK 1
 
-/* Handle .type psuedo.  Given a type string of `millicode', set the
+/* Handle .type pseudo.  Given a type string of `millicode', set the
    internal elf symbol type to STT_PARISC_MILLI, and return
    BSF_FUNCTION for the BFD symbol type.  */
 #define md_elf_symbol_type(name, sym, elf)				\

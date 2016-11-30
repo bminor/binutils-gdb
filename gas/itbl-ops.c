@@ -540,7 +540,7 @@ itbl_assemble (char *name, char *s)
 				return 0;	/-* error; invalid operand *-/
 				break;
 			*/
-	  /* If not a symbol, fall thru to IMMED */
+	  /* If not a symbol, fallthru to IMMED */
 	case e_immed:
 	  if (*n == '0' && *(n + 1) == 'x')	/* hex begins 0x...  */
 	    {

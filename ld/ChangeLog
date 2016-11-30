@@ -1,3 +1,246 @@
+2016-11-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* emulparams/arclinux_prof.sh: Remove duplicate TEMPLATE_NAME.
+
+2016-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 20815
+	* testsuite/ld-elf/loadaddr1.d: Update.
+	* testsuite/ld-powerpc/vle-multiseg-5.d: Update.
+	* testsuite/ld-scripts/phdrs3a.d: Update.
+
+2016-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/indirect.exp: Add a test for PR 18720.
+	* testsuite/ld-elf/pr18720.rd: New file.
+
+2016-11-27  Alan Modra  <amodra@gmail.com>
+
+	PR 20815
+	* testsuite/ld-powerpc/vle-multiseg-5.d: Update.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* deffilep.y: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* scripttempl/ia64vms.sc: Fix spelling in comments.
+	* scripttempl/ip2k.sc: Fix spelling in comments.
+	* scripttempl/v850.sc: Fix spelling in comments.
+	* scripttempl/v850_rh850.sc: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* emultempl/avrelf.em: Fix spelling in comments.
+	* emultempl/elf32.em: Fix spelling in comments.
+	* emultempl/pe.em: Fix spelling in comments.
+	* emultempl/pep.em: Fix spelling in comments.
+	* emultempl/spuelf.em: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* testsuite/ld-sh/arch/arch.exp: Fix spelling in comments.
+	* testsuite/ld-sh/rd-sh.exp: Fix spelling in comments.
+	* testsuite/ld-sh/sh64/rd-sh64.exp: Fix spelling in comments.
+	* testsuite/ld-undefined/undefined.exp: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* testsuite/ld-arm/stm32l4xx-fix-all.s: Fix spelling in comments.
+	* testsuite/ld-arm/thumb2-b-interwork.s: Fix spelling in comments.
+	* testsuite/ld-arm/thumb2-bl.s: Fix spelling in comments.
+	* testsuite/ld-s390/tlspic1.s: Fix spelling in comments.
+	* testsuite/ld-s390/tlspic1_64.s: Fix spelling in comments.
+	* testsuite/ld-scripts/section-match-1.d: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* deffile.h: Fix spelling in comments.
+	* ld.h: Fix spelling in comments.
+	* ldlang.c: Fix spelling in comments.
+	* ldmisc.c: Fix spelling in comments.
+	* pe-dll.c: Fix spelling in comments.
+
+2016-11-24  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* testsuite/ld-arm/pie-bind-locally-a.s: New test source.
+	* testsuite/ld-arm/pie-bind-locally-b.s: Likewise.
+	* testsuite/ld-arm/pie-bind-locally.d: New testcase.
+	* testsuite/ld-arm/arm-elf.exp: Run new testcase.
+
+2016-11-24  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20858
+	* emultempl/elf32.em (_search_needed): Allow for path separator
+	and terminating NUL byte when allocating space for new $ORIGIN
+	path.
+
+2016-11-23  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-arm/vxworks2.sd: Update expected readelf output.
+
+	PR ld/20815
+	* ld.texinfo: Note that PT_TLS can be used as a segment type.
+	* testsuite/ld-discard/discard.ld: Add space for program headers.
+	* testsuite/ld-elf/flags1.ld: Likewise.
+	* testsuite/ld-elf/maxpage3.t: Likewise.
+	* testsuite/ld-elf/noload-1.t: Likewise.
+	* testsuite/ld-elf/orphan.ld: Likewise.
+	* testsuite/ld-elf/overlay.t: Likewise.
+	* testsuite/ld-elf/pr14052.t: Likewise.
+	* testsuite/ld-elf/pr19539.t: Likewise.
+	* testsuite/ld-elf/provide-hidden-1.ld: Likewise.
+	* testsuite/ld-elf/provide-hidden-s.ld: Likewise.
+	* testsuite/ld-elf/weak-dyn-1.ld: Likewise.
+	* testsuite/ld-i386/pr19539.t: Likewise.
+	* testsuite/ld-scripts/defined.t: Likewise.
+	* testsuite/ld-scripts/defined6.t: Likewise.
+	* testsuite/ld-scripts/dynamic-sections.t: Likewise.
+	* testsuite/ld-scripts/empty-aligned.t: Likewise.
+	* testsuite/ld-scripts/provide-2.t: Likewise.
+	* testsuite/ld-scripts/provide-4.t: Likewise.
+	* testsuite/ld-vax-elf/plt-local.ld: Likewise.
+	* testsuite/ld-x86-64/pr19539.t: Likewise.
+	* testsuite/ld-elf/ehdr_start-missing.d: Do not initialise the
+	dynamic linker.
+	* testsuite/ld-elf/ehdr_start-weak.d: Likewise.
+	* testsuite/ld-elf/elf.exp (pr14170, pr17068): Likewise.
+	* testsuite/ld-elf/loadaddr1.d: Update expected readelf output.
+	* testsuite/ld-elf/noload-2.d: Likewise.
+	* testsuite/ld-powerpc/vxworks2.sd: Likewise.
+	* testsuite/ld-scripts/phdrs3a.d: Likewise.
+	* testsuite/ld-scripts/size-2.d: Likewise.
+	* testsuite/ld-elf/group.ld: Add program headers.
+	* testsuite/ld-elf/overlay.d: Skip for SPU.
+	* testsuite/ld-elf/flags1.d: Skip for RX.
+	* testsuite/ld-elf/pr19162.d: Skip for HPPA64.
+	* testsuite/ld-elf/pr19539.d: Skip for ALPHA.
+	* testsuite/ld-scripts/empty-orphan.t: Update program headers.
+	* testsuite/ld-scripts/size-2.t: Likewise.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* emultempl/ppc32elf.em (params): Update initializer.  Handle
+	--vle-reloc-fixup command line arg.
+
+2016-11-15  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20789
+	* ld/testsuite/ld-avr/pr20789.d: New test.
+	* ld/testsuite/ld-avr/pr20789.s: New test.
+
+
+2016-11-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20800
+	* testsuite/ld-x86-64/pr20800a.S: New file.
+	* testsuite/ld-x86-64/pr20800b.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/20800 test.
+
+2016-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args): Add break at end of default case.
+
+2016-11-10  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* testsuite/ld-aarch64/pie-bind-locally-a.s: New test source.
+	* testsuite/ld-aarch64/pie-bind-locally-b.s: Likewise.
+	* testsuite/ld-aarch64/pie-bind-locally.d: New testcase.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcase.
+
+2016-11-07  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20784
+	* emultempl/elf32.em (search_needed): Fix infinite loop when
+	unable to process a token.  Add support for curly braced enclosed
+	tokens.
+	* ld.texinfo (--rpath-link): Document supprot for $ORIGIN and
+	$LIB.
+
+2016-11-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (--compress-debug-sections): Expand documentation of
+	this option.
+
+2016-11-04  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (search_needed): Remove use of getauxval and
+	inclusion of <sys/auxv.h>.  Replace support for $PLATFORM with a
+	warning message.
+	* configure.ac (AC_CHECK_FUNCS): Remove getauxval.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldlang.h (struct lang_wild_statement_struct): Add
+	exclude_name_list field.
+	* ldlang.c (walk_wild_file_in_exclude_list): New function.
+	(walk_wild_consider_section): Use new
+	walk_wild_file_in_exclude_list function.
+	(walk_wild_file): Add call to walk_wild_file_in_exclude_list.
+	(print_wild_statement): Print new exclude_name_list field.
+	(lang_add_wild): Initialise new exclude_name_list field.
+	* testsuite/ld-scripts/exclude-file-1.d: New file.
+	* testsuite/ld-scripts/exclude-file-1.map: New file.
+	* testsuite/ld-scripts/exclude-file-1.t: New file.
+	* testsuite/ld-scripts/exclude-file-2.d: New file.
+	* testsuite/ld-scripts/exclude-file-2.map: New file.
+	* testsuite/ld-scripts/exclude-file-2.t: New file.
+	* testsuite/ld-scripts/exclude-file-3.d: New file.
+	* testsuite/ld-scripts/exclude-file-3.map: New file.
+	* testsuite/ld-scripts/exclude-file-3.t: New file.
+	* testsuite/ld-scripts/exclude-file-4.d: New file.
+	* testsuite/ld-scripts/exclude-file-4.map: New file.
+	* testsuite/ld-scripts/exclude-file-4.t: New file.
+	* testsuite/ld-scripts/exclude-file-a.s: New file.
+	* testsuite/ld-scripts/exclude-file-b.s: New file.
+	* testsuite/ld-scripts/exclude-file.exp: New file.
+	* ld.texinfo (Input Section Basics): Update description of
+	EXCLUDE_FILE to cover the new features.
+	* NEWS: Mention new EXCLUDE_FILE usage.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (run_dump_test): Use object file names
+	based on the original source file name.
+	* testsuite/ld-discard/extern.d: Update object file names.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+	* testsuite/ld-elf/orphan-8.map: Likewise.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Add
+	xc16x-*-elf to the list of targets that don't support -shared.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldgram.y: Rename file_NAME_list to section_NAME_list
+	throughout.
+
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* Makefile.am: Add riscv files.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the support for this target.
+	* configure.tgt: Add riscv entries.
+	* emulparams/elf32lriscv-defs.sh: New file.
+	* emulparams/elf32lriscv.sh: New file.
+	* emulparams/elf64lriscv-defs.sh: New file.
+	* emulparams/elf64lriscv.sh: New file.
+	* emultempl/riscvelf.em: New file.
+
 2016-10-31  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* ldmain.c (add_archive_element): Initialize input->header.type.

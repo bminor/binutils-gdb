@@ -515,6 +515,14 @@ integer_constant (int radix, expressionS *expressionP)
   if (tc_allow_U_suffix && (c == 'U' || c == 'u'))
     c = * input_line_pointer++;
 
+#ifndef tc_allow_L_suffix
+#define tc_allow_L_suffix 1
+#endif
+  /* PR 20732: Look for, and ignore, a L or LL suffix to the number.  */
+  if (tc_allow_L_suffix)
+    while (c == 'L' || c == 'l')
+      c = * input_line_pointer++;
+
   if (small)
     {
       /* Here with number, in correct radix. c is the next char.

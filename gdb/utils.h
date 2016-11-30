@@ -23,6 +23,7 @@
 
 #include "exceptions.h"
 #include "common/scoped_restore.h"
+#include <chrono>
 
 extern void initialize_utils (void);
 
@@ -51,7 +52,7 @@ extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 /* Reset the prompt_for_continue clock.  */
 void reset_prompt_for_continue_wait_time (void);
 /* Return the time spent in prompt_for_continue.  */
-struct timeval get_prompt_for_continue_wait_time (void);
+std::chrono::steady_clock::duration get_prompt_for_continue_wait_time ();
 
 /* Parsing utilites.  */
 
@@ -145,7 +146,7 @@ extern int yquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void begin_line (void);
 
-extern void wrap_here (char *);
+extern void wrap_here (const char *);
 
 extern void reinitialize_more_filter (void);
 

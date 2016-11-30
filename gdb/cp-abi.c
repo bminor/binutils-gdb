@@ -212,7 +212,7 @@ cplus_type_from_type_info (struct value *value)
 
 /* See cp-abi.h.  */
 
-char *
+std::string
 cplus_typename_from_type_info (struct value *value)
 {
   if (current_cp_abi.get_typename_from_type_info == NULL)

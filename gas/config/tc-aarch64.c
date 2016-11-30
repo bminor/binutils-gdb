@@ -647,7 +647,7 @@ first_error (const char *error)
     set_syntax_error (error);
 }
 
-/* Similiar to first_error, but this function accepts formatted error
+/* Similar to first_error, but this function accepts formatted error
    message.  */
 static void
 first_error_fmt (const char *format, ...)
@@ -4983,6 +4983,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_Rd_SP:
     case AARCH64_OPND_Rn_SP:
+    case AARCH64_OPND_Rm_SP:
     case AARCH64_OPND_Fd:
     case AARCH64_OPND_Fn:
     case AARCH64_OPND_Fm:
@@ -5314,6 +5315,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rd_SP:
 	case AARCH64_OPND_Rn_SP:
 	case AARCH64_OPND_SVE_Rn_SP:
+	case AARCH64_OPND_Rm_SP:
 	  po_int_reg_or_fail (REG_TYPE_R_SP);
 	  break;
 
@@ -5559,6 +5561,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_UIMM7:
 	case AARCH64_OPND_SVE_UIMM8:
 	case AARCH64_OPND_SVE_UIMM8_53:
+	case AARCH64_OPND_IMM_ROT1:
+	case AARCH64_OPND_IMM_ROT2:
+	case AARCH64_OPND_IMM_ROT3:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
 	  break;
@@ -6007,6 +6012,25 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      || (!info->addr.preind && !info->addr.postind)
 	      || (operands[i] == AARCH64_OPND_ADDR_SIMM9_2
 		  && info->addr.writeback))
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  if (inst.reloc.type != BFD_RELOC_UNUSED)
+	    {
+	      set_syntax_error (_("relocation not allowed"));
+	      goto failure;
+	    }
+	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
+					      /* addr_off_p */ 1,
+					      /* need_libopcodes_p */ 1,
+					      /* skip_p */ 0);
+	  break;
+
+	case AARCH64_OPND_ADDR_SIMM10:
+	  po_misc_or_fail (parse_address (&str, info));
+	  if (info->addr.pcrel || info->addr.offset.is_reg
+	      || !info->addr.preind || info->addr.postind)
 	    {
 	      set_syntax_error (_("invalid addressing mode"));
 	      goto failure;
@@ -6479,6 +6503,7 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
     {
     case ldst_pos:
     case ldst_imm9:
+    case ldst_imm10:
     case ldst_unscaled:
     case ldst_unpriv:
       /* Loading/storing the base register is unpredictable if writeback.  */
@@ -7348,6 +7373,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
+    case AARCH64_OPND_ADDR_SIMM10:
     case AARCH64_OPND_ADDR_UIMM12:
       /* Immediate offset in an address.  */
       insn = get_aarch64_insn (buf);
@@ -8337,6 +8363,9 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
+  {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8,
+			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+   "Qualcomm Falkor"},
   {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Qualcomm QDF24XX"},
@@ -8371,6 +8400,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8-a", AARCH64_ARCH_V8},
   {"armv8.1-a", AARCH64_ARCH_V8_1},
   {"armv8.2-a", AARCH64_ARCH_V8_2},
+  {"armv8.3-a", AARCH64_ARCH_V8_3},
   {NULL, AARCH64_ARCH_NONE}
 };
 
@@ -8386,13 +8416,13 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0),
 			AARCH64_ARCH_NONE},
   {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0),
-			AARCH64_ARCH_NONE},
+			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
   {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0),
 			AARCH64_ARCH_NONE},
   {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0),
 			AARCH64_ARCH_NONE},
   {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0),
-			AARCH64_ARCH_NONE},
+			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
   {"pan",		AARCH64_FEATURE (AARCH64_FEATURE_PAN, 0),
 			AARCH64_ARCH_NONE},
   {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0),

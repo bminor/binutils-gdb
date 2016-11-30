@@ -60,7 +60,7 @@ proc test_template_insn_reg_mem { args } {
     }
 
     # Any extra replacements (like modifying the test name to something
-    # else than the @OC@ modification).  Replaces occurences of @OR@.
+    # else than the @OC@ modification).  Replaces occurrences of @OR@.
     if { [llength $args] >= 11 } then {
 	set extra_OR_replace [lindex $args 10]
     } else {

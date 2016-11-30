@@ -326,7 +326,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
    to the inferior when the expression was created, and EXPR_PC
    indicates the value of $PC.  */
 
-char *
+std::string
 c_compute_program (struct compile_instance *inst,
 		   const char *input,
 		   struct gdbarch *gdbarch,
@@ -334,7 +334,7 @@ c_compute_program (struct compile_instance *inst,
 		   CORE_ADDR expr_pc)
 {
   struct ui_file *buf, *var_stream = NULL;
-  char *code;
+  std::string code;
   struct cleanup *cleanup;
   struct compile_c_instance *context = (struct compile_c_instance *) inst;
 
@@ -435,7 +435,7 @@ c_compute_program (struct compile_instance *inst,
     fputs_unfiltered ("}\n", buf);
 
   add_code_footer (inst->scope, buf);
-  code = ui_file_xstrdup (buf, NULL);
+  code = ui_file_as_string (buf);
   do_cleanups (cleanup);
   return code;
 }

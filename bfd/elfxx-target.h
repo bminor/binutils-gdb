@@ -479,6 +479,10 @@
 #ifndef elf_backend_modify_program_headers
 #define elf_backend_modify_program_headers	0
 #endif
+#ifndef elf_backend_allow_non_load_phdr
+#define elf_backend_allow_non_load_phdr	\
+  ((bfd_boolean (*) (bfd *, const Elf_Internal_Phdr *, unsigned)) bfd_false)
+#endif
 #ifndef elf_backend_ecoff_debug_swap
 #define elf_backend_ecoff_debug_swap	0
 #endif
@@ -632,6 +636,10 @@
 #define elf_backend_rela_normal 0
 #endif
 
+#ifndef elf_backend_dtrel_excludes_plt
+#define elf_backend_dtrel_excludes_plt 0
+#endif
+
 #ifndef elf_backend_plt_sym_val
 #define elf_backend_plt_sym_val NULL
 #endif
@@ -761,6 +769,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_additional_program_headers,
   elf_backend_modify_segment_map,
   elf_backend_modify_program_headers,
+  elf_backend_allow_non_load_phdr,
   elf_backend_gc_keep,
   elf_backend_gc_mark_dynamic_ref,
   elf_backend_gc_mark_hook,
@@ -835,6 +844,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_default_use_rela_p,
   elf_backend_rela_plts_and_copies_p,
   elf_backend_rela_normal,
+  elf_backend_dtrel_excludes_plt,
   elf_backend_sign_extend_vma,
   elf_backend_want_got_plt,
   elf_backend_plt_readonly,

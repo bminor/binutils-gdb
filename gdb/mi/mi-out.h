@@ -26,7 +26,6 @@ struct ui_file;
 extern struct ui_out *mi_out_new (int mi_version);
 extern void mi_out_put (struct ui_out *uiout, struct ui_file *stream);
 extern void mi_out_rewind (struct ui_out *uiout);
-extern void mi_out_buffered (struct ui_out *uiout, char *string);
 
 /* Return the version number of the current MI.  */
 extern int mi_version (struct ui_out *uiout);

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add support for the RISC-V architecture.
+
+* Add support for the ARM Cortex-M23 and Cortex-M33 processors.
+
 Changes in 2.27:
 
 * Default to --enable-compressed-debug-sections=gas for Linux/x86 targets.

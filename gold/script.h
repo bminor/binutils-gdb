@@ -538,7 +538,7 @@ class Script_options
   // SECTIONS clause.
   typedef std::vector<Symbol_assignment*> Symbol_assignments;
 
-  // We keep a list of all assertions whcih occur outside of a
+  // We keep a list of all assertions which occur outside of a
   // SECTIONS clause.
   typedef std::vector<Script_assertion*> Assertions;
 

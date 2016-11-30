@@ -821,7 +821,7 @@ static void
 record_full_open_1 (const char *name, int from_tty)
 {
   if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open\n");
+    fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open_1\n");
 
   /* check exec */
   if (!target_has_execution)
@@ -969,24 +969,14 @@ record_full_resume (struct target_ops *ops, ptid_t ptid, int step,
             }
           else
             {
-              /* This arch support soft sigle step.  */
+              /* This arch supports soft single step.  */
               if (thread_has_single_step_breakpoints_set (inferior_thread ()))
                 {
                   /* This is a soft single step.  */
                   record_full_resume_step = 1;
                 }
               else
-                {
-                  /* This is a continue.
-                     Try to insert a soft single step breakpoint.  */
-                  if (!gdbarch_software_single_step (gdbarch,
-                                                     get_current_frame ()))
-                    {
-                      /* This system don't want use soft single step.
-                         Use hard sigle step.  */
-                      step = 1;
-                    }
-                }
+		step = !insert_single_step_breakpoints (gdbarch);
             }
         }
 
@@ -1168,9 +1158,9 @@ record_full_wait_1 (struct target_ops *ops,
 			     If insert success, set step to 0.  */
 			  set_executing (inferior_ptid, 0);
 			  reinit_frame_cache ();
-			  if (gdbarch_software_single_step (gdbarch,
-                                                            get_current_frame ()))
-			    step = 0;
+
+			  step = !insert_single_step_breakpoints (gdbarch);
+
 			  set_executing (inferior_ptid, 1);
 			}
 
@@ -1672,16 +1662,6 @@ record_full_insert_breakpoint (struct target_ops *ops,
 	return ret;
 
       in_target_beneath = 1;
-    }
-  else
-    {
-      CORE_ADDR addr = bp_tgt->reqstd_address;
-      int bplen;
-
-      gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
-
-      bp_tgt->placed_address = addr;
-      bp_tgt->placed_size = bplen;
     }
 
   /* Use the existing entries if found in order to avoid duplication

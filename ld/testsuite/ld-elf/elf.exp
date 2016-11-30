@@ -75,7 +75,7 @@ if { ![istarget hppa64*-hpux*] } {
 	setup_xfail "bfin-*-*"
 	run_ld_link_tests {
 	    {"PR ld/14170"
-		"tmpdir/pr14170a.o tmpdir/pr14170.so" "" "" "pr14170c.s"
+		"--no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" "" "pr14170c.s"
 		{ } "pr14170" }
 	}
     }
@@ -112,7 +112,7 @@ if { [check_shared_lib_support] } then {
     setup_xfail "bfin-*-*"
     run_ld_link_tests {
 	{"pr17068 link --as-needed lib in group"
-	    "--as-needed" "--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a --end-group" ""
+	    "--as-needed --no-dynamic-linker" "--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a --end-group" ""
 	    {start.s pr17068.s} {} "pr17068"}
     }
     # xfail on tic6x due to non-PIC/non-PID warnings

@@ -247,7 +247,15 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	{
 	  p = (bfd_byte *) bfd_malloc (sz);
 	  if (p == NULL)
+	    {
+	      /* PR 20801: Provide a more helpful error message.  */
+	      if (bfd_get_error () == bfd_error_no_memory)
+		_bfd_error_handler
+		  /* xgettext:c-format */
+		  (_("error: %B(%A) is too large (%#lx bytes)"),
+		  abfd, sec, (long) sz);
 	    return FALSE;
+	    }
 	}
 
       if (!bfd_get_section_contents (abfd, sec, p, 0, sz))

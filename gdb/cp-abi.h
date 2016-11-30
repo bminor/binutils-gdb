@@ -196,10 +196,9 @@ extern struct type *cplus_type_from_type_info (struct value *value);
 
 /* Given a value which holds a pointer to a std::type_info, return the
    name of the type which that type_info represents.  Throw an
-   exception if the type name cannot be found.  The result is
-   xmalloc'd and must be freed by the caller.  */
+   exception if the type name cannot be found.  */
 
-extern char *cplus_typename_from_type_info (struct value *value);
+extern std::string cplus_typename_from_type_info (struct value *value);
 
 /* Determine if we are currently in a C++ thunk.  If so, get the
    address of the routine we are thunking to and continue to there
@@ -245,7 +244,7 @@ struct cp_abi_ops
   struct value *(*get_typeid) (struct value *value);
   struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
   struct type *(*get_type_from_type_info) (struct value *value);
-  char *(*get_typename_from_type_info) (struct value *value);
+  std::string (*get_typename_from_type_info) (struct value *value);
   CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
   int (*pass_by_reference) (struct type *type);
 };

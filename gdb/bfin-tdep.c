@@ -568,28 +568,32 @@ bfin_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return map_gcc_gdb[reg];
 }
 
-/* This function implements the 'breakpoint_from_pc' gdbarch method.
-   It returns a pointer to a string of bytes that encode a breakpoint
-   instruction, stores the length of the string to *lenptr, and
-   adjusts the program counter (if necessary) to point to the actual
-   memory location where the breakpoint should be inserted.  */
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
 
-static const unsigned char *
-bfin_breakpoint_from_pc (struct gdbarch *gdbarch,
-			 CORE_ADDR *pcptr, int *lenptr)
+static int
+bfin_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned short iw;
-  static unsigned char bfin_breakpoint[] = {0xa1, 0x00, 0x00, 0x00};
-  static unsigned char bfin_sim_breakpoint[] = {0x25, 0x00, 0x00, 0x00};
 
   iw = read_memory_unsigned_integer (*pcptr, 2, byte_order);
 
   if ((iw & 0xf000) >= 0xc000)
     /* 32-bit instruction.  */
-    *lenptr = 4;
+    return 4;
   else
-    *lenptr = 2;
+    return 2;
+}
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
+
+static const gdb_byte *
+bfin_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  static unsigned char bfin_breakpoint[] = {0xa1, 0x00, 0x00, 0x00};
+  static unsigned char bfin_sim_breakpoint[] = {0x25, 0x00, 0x00, 0x00};
+
+  *size = kind;
 
   if (strcmp (target_shortname, "sim") == 0)
     return bfin_sim_breakpoint;
@@ -826,7 +830,8 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, bfin_return_value);
   set_gdbarch_skip_prologue (gdbarch, bfin_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, bfin_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, bfin_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, bfin_sw_breakpoint_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_unwind_pc (gdbarch, bfin_unwind_pc);

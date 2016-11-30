@@ -1,3 +1,580 @@
+2016-11-30  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (get_program_header_size): Revert accidental change.
+
+2016-11-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20886
+	* elf64-ppc.c (ppc64_elf_size_stubs): Make rawsize max size seen
+	on any pass past STUB_SHRINK_ITER.
+
+2016-11-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_fix_symbol_flags): Hide hidden versioned
+	symbol in executable.
+	(elf_link_output_extsym): Don't change bind from global to
+	local when linking executable.
+
+2016-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* elf.c (phdr_sorter): Delete.
+	(assign_file_positions_except_relocs): Do not sort program
+	headers.
+
+2016-11-25  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	PR ld/20193
+	* peXXigen.c (rsrc_process_section): Do not shrink the merged
+	.rsrc section.
+
+2016-11-24  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* elf32-arm.c (elf32_arm_final_link_relocate): Bind defined symbol
+	locally in PIE.
+
+2016-11-24  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* bfd/elfxx-riscv.c (howto_table): Fix bitsize of R_RISCV_ADD8.
+
+2016-11-23  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* elf.c (elf_modify_segment_map): Allow empty LOAD segments if
+	they contain the program headers.
+	(_bfd_elf_map_sections_to_segments): If the linker created the
+	PHDR segment then always attempt to include it in a LOAD segment.
+	(assign_file_positions_for_non_load_sections): Allow LOAD segments
+	to overlap PHDR segments.
+	(phdr_sorter): New function.  Sorts program headers.
+	(assign_file_positions_except_relocs): Sort the program headers
+	before writing them out.  Issue an error if the PHDR segment is
+	not covered by a LOAD segment, unless the backend allows it.
+	* elf-bfd.h (struct elf_backend_data): Add
+	elf_backend_allow_non_load_phdr.
+	* elfxx-target.h (elf_backend_allow_non_load_phdr): Provide
+	default definition that returns FALSE.
+	(elfNN_bed): Initialise the elf_backend_allow_non_load_phdr
+	field.
+	* elf64-hppa.c (elf64_hppa_allow_non_load_phdr): New function.
+	Returns TRUE.
+	(elf_backend_allow_non_load_phdr): Define.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Do not
+	place the interpreter string into the .interp section if the
+	nointerp flag is set in the link info structure.
+	* elf32-arc.c (elf_arc_size_dynamic_sections): Likewise.
+	* elf32-score7.c (score_elf_final_link_relocate): Allow for the
+	_gp symbol not being part of the output.
+
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add dtrel_excludes_plt.
+	* elfxx-target.h (elf_backend_dtrel_excludes_plt): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (bfd_elf_final_link): Add and use htab variable.  Handle
+	dtrel_excludes_plt.
+	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-arc.c (elf_arc_finish_dynamic_sections): Delete DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Delete code
+	subtracting off plt relocs from DT_RELSZ, DT_RELASZ.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-cr16.c (_bfd_cr16_elf_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-cris.c (elf_cris_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Delete DT_RELASZ
+	and DT_RELA code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Delete DT_RELSZ
+	and DT_REL code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-lm32.c (lm32_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-m32r.c (m32r_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-m68k.c (elf_m68k_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-metag.c (elf_metag_finish_dynamic_sections): Delete DT_RELASZ
+	and DT_RELA code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Delete
+	DT_RELASZ and DT_RELA code.  Use ELF htab shortcuts for other
+	dynamic sections.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-mips.c (elf_backend_dtrel_excludes_plt): Define.
+	* elf32-nds32.c (nds32_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-or1k.c (or1k_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-sh.c (sh_elf_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-sparc.c (elf_backend_dtrel_excludes_plt): Define.
+	* elf32-vax.c (elf_vax_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-alpha.c (elf64_alpha_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Delete DT_RELASZ
+	and DT_RELA code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-sh64.c (sh64_elf64_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elfnn-ia64.c (elfNN_ia64_finish_dynamic_sections): Delete DT_RELASZ
+	code.
+	(elf_backend_dtrel_excludes_plt): Define.
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Delete
+	DT_RELASZ code.
+	* elfxx-sparc.c (sparc_finish_dyn): Delete DT_RELASZ code.
+
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
+	* elf-m10300.c (mn10300_elf_check_relocs): Use elf htab shortcuts
+	to dynamic sections.
+	(mn10300_elf_final_link_relocate): Likewise.
+	(_bfd_mn10300_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_size_dynamic_sections): Likewise.
+	(_bfd_mn10300_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_finish_dynamic_sections): Likewise.
+	* elf32-bfin.c (bfin_check_relocs): Likewise.
+	(bfin_relocate_section): Likewise.
+	(bfin_gc_sweep_hook): Likewise.
+	(struct bfinfdpic_elf_link_hash_table): Delete sgot, sgotrel, splt
+	and spltrel.
+	(bfinfdpic_got_section, bfinfdpic_gotrel_section,
+	bfinfdpic_plt_section, bfinfdpic_pltrel_section): Define using elf
+	shortcut sections.
+	(_bfin_create_got_section): Use elf htab shortcuts to dyn sections.
+	Delete dead code.
+	(bfin_finish_dynamic_symbol): Use elf htab shortcuts to dyn sections.
+	(bfin_size_dynamic_sections): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_create_got_section): Likewise.
+	(cr16_elf_check_relocs): Likewise.
+	(cr16_elf_final_link_relocate): Likewise.
+	(_bfd_cr16_elf_create_dynamic_sections): Likewise.
+	(_bfd_cr16_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_cr16_elf_size_dynamic_sections): Likewise.
+	(_bfd_cr16_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_cr16_elf_finish_dynamic_sections): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	(elf_cris_finish_dynamic_symbol): Likewise.
+	(elf_cris_finish_dynamic_sections): Likewise.
+	(cris_elf_gc_sweep_hook): Likewise.
+	(elf_cris_adjust_gotplt_to_got): Likewise.
+	(elf_cris_adjust_dynamic_symbol): Likewise.
+	(cris_elf_check_relocs): Likewise.  Delete dead code.
+	(elf_cris_size_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(elf_cris_discard_excess_program_dynamics): Likewise.
+	* elf32-frv.c (struct frvfdpic_elf_link_hash_table): Delete sgot,
+	sgotrel, splt and spltrel.
+	(frvfdpic_got_section, frvfdpic_gotrel_section,
+	frvfdpic_plt_section, frvfdpic_pltrel_section): Define using elf
+	shortcut sections.
+	(_frv_create_got_section): Likewise.
+	* elf32-hppa.c (struct elf32_hppa_link_hash_table): Delete sgot,
+	srelgot, splt and srelplt.
+	(hppa_build_one_stub): Use elf htab shortcuts to dynamic sections.
+	(elf32_hppa_create_dynamic_sections): Likewise.
+	(elf32_hppa_check_relocs): Likewise.
+	(allocate_plt_static): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+	(elf32_hppa_finish_dynamic_sections): Likewise.
+	* elf32-i370.c (i370_elf_finish_dynamic_sections): Likewise.
+	* elf32-lm32.c (struct elf_lm32_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(lm32fdpic_got_section, lm32fdpic_gotrel_section): Define using elf
+	shortcut sections.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(lm32_elf_relocate_section): Use elf htab shortcuts to dyn sections.
+	(lm32_elf_check_relocs): Likewise.
+	(lm32_elf_finish_dynamic_sections): Likewise.
+	(lm32_elf_finish_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(lm32_elf_size_dynamic_sections): Likewise.
+	(lm32_elf_create_dynamic_sections): Likewise.
+	* elf32-m32c.c (m32c_elf_relocate_section): Likewise.
+	(m32c_elf_check_relocs): Likewise.
+	(m32c_elf_finish_dynamic_sections): Likewise.
+	(m32c_elf_always_size_sections): Likewise.
+	* elf32-m32r.c (struct elf_m32r_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(m32r_elf_create_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(allocate_dynrelocs): Likewise.
+	(m32r_elf_size_dynamic_sections): Likewise.
+	(m32r_elf_relocate_section): Likewise.
+	(m32r_elf_finish_dynamic_symbol): Likewise.
+	(m32r_elf_finish_dynamic_sections): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68k.c (elf_m68k_partition_multi_got): Likewise.
+	(elf_m68k_check_relocs): Likewise.
+	(elf_m68k_adjust_dynamic_symbol): Likewise.
+	(elf_m68k_size_dynamic_sections): Likewise.
+	(elf_m68k_relocate_section): Likewise.
+	(elf_m68k_finish_dynamic_symbol): Likewise.
+	(elf_m68k_finish_dynamic_sections): Likewise.
+	* elf32-metag.c (struct elf_metag_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(elf_metag_relocate_section): Use elf htab shortcuts to dynamic
+	sections.
+	(elf_metag_create_dynamic_sections): Likewise.  Allocate got header
+	here in .got.
+	(elf_metag_check_relocs): Use elf htab shortcuts to dynamic sections.
+	(allocate_dynrelocs): Likewise.
+	(elf_metag_size_dynamic_sections): Likewise.
+	(elf_metag_finish_dynamic_symbol): Likewise.
+	(elf_metag_finish_dynamic_sections): Likewise.
+	(elf_metag_size_stubs): Likewise.
+	(elf_backend_got_header_size): Don't define.
+	(elf_backend_want_got_plt): Define.
+	* elf32-microblaze.c (struct elf32_mb_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelpl.
+	(microblaze_elf_relocate_section): Use elf htab shortcuts to dynamic
+	sections.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(microblaze_elf_check_relocs): Use elf htab shortcuts to dyn sections.
+	(microblaze_elf_create_dynamic_sections): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(microblaze_elf_size_dynamic_sections): Likewise.
+	(microblaze_elf_finish_dynamic_symbol): Likewise.
+	(microblaze_elf_finish_dynamic_sections): Likewise.
+	* elf32-nds32.c (nds32_elf_link_hash_table_create): Don't NULL
+	already zero fields.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(nds32_elf_create_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(allocate_dynrelocs): Likewise.
+	(nds32_elf_size_dynamic_sections): Likewise.
+	(nds32_elf_relocate_section): Likewise.
+	(nds32_elf_finish_dynamic_symbol): Likewise.
+	(nds32_elf_finish_dynamic_sections): Likewise.
+	(nds32_elf_check_relocs): Likewise.
+	(calculate_plt_memory_address): Likewise.
+	(calculate_got_memory_address): Likewise.
+	* elf32-nds32.h (struct elf_nds32_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	* elf32-or1k.c (struct elf_or1k_link_hash_table): Likewise.
+	(or1k_elf_relocate_section): Use elf htab shortcuts to dyn sections.
+	(create_got_section): Delete.  Use _bfd_elf_create_got_section instead.
+	(or1k_elf_check_relocs): Use elf htab shortcuts to dynamic sections.
+	(or1k_elf_finish_dynamic_sections): Likewise.
+	(or1k_elf_finish_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(or1k_elf_size_dynamic_sections): Likewise.
+	(or1k_elf_create_dynamic_sections): Likewise.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Delete got, relgot,
+	plt, relplt, iplt, reliplt and sgotplt.
+	(ppc_elf_create_got): Use elf htab shortcuts to dynamic sections.
+	(ppc_elf_create_glink): Likewise.
+	(ppc_elf_create_dynamic_sections): Likewise.
+	(ppc_elf_check_relocs): Likewise.
+	(ppc_elf_select_plt_layout): Likewise.
+	(ppc_elf_tls_setup): Likewise.
+	(allocate_got): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_reloc_type_class): Likewise.
+	(ppc_elf_finish_dynamic_sections): Likewise.
+	* elf32-rl78.c (rl78_elf_relocate_section): Likewise.
+	(rl78_elf_check_relocs): Likewise.
+	(rl78_elf_finish_dynamic_sections): Likewise.
+	(rl78_elf_always_size_sections): Likewise.
+	* elf32-s390.c 	(create_got_section): Delete.
+	(elf_s390_create_dynamic_sections): Use _bfd_elf_create_got_section.
+	(elf_s390_check_relocs): Likewise.
+	* elf32-score.c (score_elf_create_got_section): Set elf shortcuts.
+	(s3_bfd_score_elf_finish_dynamic_sections): Use elf shortcuts.
+	* elf32-score7.c (score_elf_create_got_section): As above.
+	(s7_bfd_score_elf_finish_dynamic_sections): As above.
+	* elf32-sh.c (struct elf_sh_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(create_got_section): Don't set them.
+	(sh_elf_create_dynamic_sections): Use elf htab shortcuts to dynamic
+	sections.
+	(allocate_dynrelocs): Likewise.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_add_rofixup): Likewise.
+	(sh_elf_relocate_section): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_finish_dynamic_symbol): Likewise.
+	(sh_elf_finish_dynamic_sections): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_finish_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_create_got_section): Likewise.
+	* elf32-vax.c (elf_vax_check_relocs): Likewise.
+	(elf_vax_adjust_dynamic_symbol): Likewise.
+	(elf_vax_always_size_sections): Likewise.
+	(elf_vax_instantiate_got_entries): Likewise.
+	(elf_vax_relocate_section): Likewise.
+	(elf_vax_finish_dynamic_symbol): Likewise.
+	(elf_vax_finish_dynamic_sections): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_check_relocs): Likewise.
+	(xstormy16_elf_always_size_sections): Likewise.
+	(xstormy16_elf_relocate_section): Likewise.
+	(xstormy16_elf_finish_dynamic_sections): Likewise.
+	* elf32-xtensa.c (struct elf_xtensa_link_hash_table): Delete sgot,
+	sgotplt, srelgot, splt and srelplt.
+	(elf_xtensa_create_dynamic_sections): Use elf htab shortcuts to
+	dynamic sections.
+	(elf_xtensa_allocate_dynrelocs): Likewise.
+	(elf_xtensa_allocate_local_got_size): Likewise.
+	(elf_xtensa_size_dynamic_sections): Likewise.
+	(elf_xtensa_relocate_section): Likewise.
+	(elf_xtensa_finish_dynamic_sections): Likewise.
+	(shrink_dynamic_reloc_sections): Likewise.
+	(elf_xtensa_get_plt_section): Likewise.
+	(elf_xtensa_get_gotplt_section): Likewise.
+	(xtensa_callback_required_dependence): Likewise.
+	* elf64-alpha.c (elf64_alpha_create_dynamic_sections): Set elf htab
+	shortcuts to dynamic sections.
+	(elf64_alpha_adjust_dynamic_symbol): Use elf htab shortcuts to
+	dynamic sections.
+	(elf64_alpha_size_plt_section): Likewise.
+	(elf64_alpha_size_rela_got_1): Likewise.
+	(elf64_alpha_size_rela_got_section): Likewise.
+	(elf64_alpha_relocate_section): Likewise.
+	(elf64_alpha_finish_dynamic_symbol): Likewise.
+	(elf64_alpha_finish_dynamic_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Likewise.
+	* elf64-s390.c (create_got_section): Delete.
+	(elf_s390_create_dynamic_sections): Use _bfd_elf_create_got_section.
+	(elf_s390_check_relocs): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Use elf htab shortcuts to
+	dynamic sections.
+	(sh_elf64_check_relocs): Likewise.
+	(sh64_elf64_adjust_dynamic_symbol): Likewise.
+	(sh64_elf64_size_dynamic_sections): Likewise.
+	(sh64_elf64_finish_dynamic_symbol): Likewise.
+	(sh64_elf64_finish_dynamic_sections): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Likewise.
+	* elfnn-aarch64.c (aarch64_elf_create_got_section): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_size_dynamic_sections): Likewise.
+	(elfNN_ia64_finish_dynamic_sections): Likewise.
+	* elfnn-riscv.c (riscv_elf_create_got_section): Likewise.
+	* elfxx-mips.c (struct mips_elf_link_hash_table): Delete srellt,
+	sgotplt, splt and sgot.
+	(mips_elf_initialize_tls_slots): Use elf htab shortcuts to dynamic
+	sections.
+	(mips_elf_gotplt_index): Likewise.
+	(mips_elf_primary_global_got_index): Likewise.
+	(mips_elf_global_got_index): Likewise.
+	(mips_elf_got_offset_from_index): Likewise.
+	(mips_elf_create_local_got_entry): Likewise.
+	(mips_elf_create_got_section): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	(mips_elf_lay_out_got): Likewise.
+	(mips_elf_set_plt_sym_value): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	(mips_finish_exec_plt): Likewise.
+	(mips_vxworks_finish_exec_plt): Likewise.
+	(mips_vxworks_finish_shared_plt): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	* elfxx-sparc.c (sparc_finish_dyn): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_create_got_section): Likewise.
+
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * warning.m4: Fix spelling in comments.
+        * configure.ac: Fix spelling in comments.
+        * configure: Regenerate.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* elf32-ppc.h (struct ppc_elf_params): Add vle_reloc_fixup field.
+	* elf32-ppc.c: Include opcode/ppc.h.
+	(ppc_elf_howto_raw): Correct dst_mask for R_PPC_VLE_LO16A,
+	R_PPC_VLE_LO16D, R_PPC_VLE_HI16A, R_PPC_VLE_HI16D, R_PPC_VLE_HA16A,
+	R_PPC_VLE_HA16D, R_PPC_VLE_SDAREL_LO16A, R_PPC_VLE_SDAREL_LO16D,
+	R_PPC_VLE_SDAREL_HI16A, R_PPC_VLE_SDAREL_HI16D,
+	R_PPC_VLE_SDAREL_HA16A, and R_PPC_VLE_SDAREL_HA16D relocs.
+	(ppc_elf_link_hash_table_create): Update default_params init.
+	(ppc_elf_vle_split16): Correct shift and mask.  Add params.
+	Report or fix insn/reloc mismatches.
+	(ppc_elf_relocate_section): Pass input_section, offset and fixup
+	to ppc_elf_vle_split16.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc64_elf_relocate_section): Calculate d_offset for
+	input_bfd.  Replace occurrences of output_bfd as bfd_get_32 and
+	bfd_put_32 param with input_bfd.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.  Also
+	ppc_elf_vle_split16 param.
+	(ppc_elf_vle_split16): Rename output_bfd param to input_bfd.
+
+2016-11-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* dwarf2.c (build_line_info_table): Rename `index' local
+	variable to `line_index'.
+	(build_lookup_funcinfo_table): Rename `index' local variable to
+	`func_index'.
+
+2016-11-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Do not
+	apply the negative GOT offset optimization in 64-bit code.
+
+2016-11-18  James Clarke  <jrtc27@jrtc27.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Don't convert
+	R_SPARC_GOTDATA_OP_HIX22 and R_SPARC_GOTDATA_OP_LOX10 to
+	R_SPARC_GOT* for non-local references. Instead, treat them like
+	R_SPARC_GOTDATA_HIX22/R_SPARC_GOTDATA_LOX10 when filling in the
+	immediate with the calculated relocation.
+
+2016-11-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20675
+	* elf32-metag.c (elf_metag_relocate_section): Replace abort with
+	an informative error message.
+
+2016-11-15  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/20789
+	* bfd/elf32-avr.c (elf32_avr_adjust_diff_reloc_value): Do signed
+	manipulation of diff value, and don't assume sym2 is less than sym1.
+	(elf32_avr_adjust_reloc_if_spans_insn): New function.
+	(elf32_avr_relax_delete_bytes): Use elf32_avr_adjust_diff_reloc_value,
+	and remove redundant did_pad.
+
+
+2016-11-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20800
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Also check
+	plt_got.offset for R_X86_64_PLTOFF64.
+
+2016-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Fix typo: Faal -> Fall.
+
+2016-11-11  Luke Allardyce  <lukeallardyce@gmail.com>
+
+	PR ld/20722
+	* coffcode.h (coff_slurp_symbol_table): Accept C_HIDDEN symbols,
+	but treat them as debugging symbols.
+
+2016-11-10  Jiong Wang  <jiong.wang@arm.com>
+
+	PR target/20737
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Bind defined
+	symbol locally in PIE.
+
+2016-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20801
+	* compress.c (bfd_get_full_section_contents): Provide a more
+	helpful error message when a section is too large to load.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2.c (struct funcinfo) <is_linkage>: Type is bfd_boolean,
+	not "bfd boolean".
+
+2016-11-08  Igor Tsimbalist  <tigor.tools@gmail.com>
+
+	* dwarf2.c (comp_unit): Add new fields 'lookup_funcinfo_table' and
+	'number_of_functions' to keep lookup table and number of entries in
+	the table.
+	(line_sequence): Add new fields 'line_info_lookup' and 'num_lines'
+	to keep lookup table and number of entries in the table.
+	(lookup_funcinfo): New structure for lookup table for function
+	references.
+	(build_line_info_table): New function to create and build the lookup
+	table for line information.
+	(lookup_address_in_line_info_table): Use the lookup table instead of
+	traverse a linked list.
+	(compare_lookup_funcinfos): New compare fuction used in sorting of
+	lookup table for function references.
+	(build_lookup_funcinfo_table): New function to create, build and
+	sort the lookup table for functions references.
+	(lookup_address_in_function_table): Use the table instead of
+	traverse a linked list.
+	(_bfd_dwarf2_cleanup_debug_info): Free memory from function references
+	lookup table.
+
+2016-11-04  Nick Clifton  <nickc@redhat.com>
+
+	* targets.c (bfd_target_vector): Only add riscv_elf32_vec target
+	when supporting 64-bit BFD targets.
+
+2016-11-03  Tristan Gingold  <gingold@adacore.com>
+
+	* config.bfd: Deprecate many old triplets.
+
+2016-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
+2016-11-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* reloc.c (bfd_default_reloc_type_lookup) <BFD_RELOC_CTOR>: Do
+	not fall through to the default case.
+
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* Makefile.am: Add entries for riscv32-elf and riscv64-elf.
+	* config.bdf: Likewise.
+	* configure.ac: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* archures.c: Add bfd_riscv_arch.
+	* reloc.c: Add riscv relocs.
+	* targets.c: Add riscv_elf32_vec and riscv_elf64_vec.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf-bfd.h: Add RISCV_ELF_DATA to enum elf_target_id.
+	* elfnn-riscv.c: New file.
+	* elfxx-riscv.c: New file.
+	* elfxx-riscv.h: New file.
+
 2016-10-31  Alan Modra  <amodra@gmail.com>
 
 	PR 20748

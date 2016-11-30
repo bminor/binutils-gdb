@@ -707,6 +707,7 @@ parse_args (unsigned argc, char **argv)
 
 	default:
 	  einfo (_("%P%F: use the --help option for usage information\n"));
+	  break;
 
 	case 1:			/* File name.  */
 	  lang_add_input_file (optarg, lang_input_file_is_file_enum, NULL);

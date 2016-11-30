@@ -119,7 +119,7 @@ struct display
     char *exp_string;
 
     /* Expression to be evaluated and displayed.  */
-    struct expression *exp;
+    expression_up exp;
 
     /* Item number of this auto-display item.  */
     int number;
@@ -322,7 +322,6 @@ print_formatted (struct value *val, int size,
     /* User specified format, so don't look to the type to tell us
        what to do.  */
     val_print_scalar_formatted (type,
-				value_contents_for_printing (val),
 				value_embedded_offset (val),
 				val,
 				options, size, stream);
@@ -1243,8 +1242,6 @@ print_value (struct value *val, const struct format_data *fmtp)
 static void
 print_command_1 (const char *exp, int voidprint)
 {
-  struct expression *expr;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct value *val;
   struct format_data fmt;
 
@@ -1252,9 +1249,8 @@ print_command_1 (const char *exp, int voidprint)
 
   if (exp && *exp)
     {
-      expr = parse_expression (exp);
-      make_cleanup (free_current_contents, &expr);
-      val = evaluate_expression (expr);
+      expression_up expr = parse_expression (exp);
+      val = evaluate_expression (expr.get ());
     }
   else
     val = access_value_history (0);
@@ -1262,8 +1258,6 @@ print_command_1 (const char *exp, int voidprint)
   if (voidprint || (val && value_type (val) &&
 		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
     print_value (val, &fmt);
-
-  do_cleanups (old_chain);
 }
 
 static void
@@ -1292,8 +1286,6 @@ output_command (char *exp, int from_tty)
 void
 output_command_const (const char *exp, int from_tty)
 {
-  struct expression *expr;
-  struct cleanup *old_chain;
   char format = 0;
   struct value *val;
   struct format_data fmt;
@@ -1310,10 +1302,9 @@ output_command_const (const char *exp, int from_tty)
       format = fmt.format;
     }
 
-  expr = parse_expression (exp);
-  old_chain = make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
-  val = evaluate_expression (expr);
+  val = evaluate_expression (expr.get ());
 
   annotate_value_begin (value_type (val));
 
@@ -1325,16 +1316,12 @@ output_command_const (const char *exp, int from_tty)
 
   wrap_here ("");
   gdb_flush (gdb_stdout);
-
-  do_cleanups (old_chain);
 }
 
 static void
 set_command (char *exp, int from_tty)
 {
-  struct expression *expr = parse_expression (exp);
-  struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
   if (expr->nelts >= 1)
     switch (expr->elts[0].opcode)
@@ -1352,8 +1339,7 @@ set_command (char *exp, int from_tty)
 	  (_("Expression is not an assignment (and might have no effect)"));
       }
 
-  evaluate_expression (expr);
-  do_cleanups (old_chain);
+  evaluate_expression (expr.get ());
 }
 
 static void
@@ -1676,7 +1662,6 @@ address_info (char *exp, int from_tty)
 static void
 x_command (char *exp, int from_tty)
 {
-  struct expression *expr;
   struct format_data fmt;
   struct cleanup *old_chain;
   struct value *val;
@@ -1698,14 +1683,13 @@ x_command (char *exp, int from_tty)
 
   if (exp != 0 && *exp != 0)
     {
-      expr = parse_expression (exp);
+      expression_up expr = parse_expression (exp);
       /* Cause expression not to be there any more if this command is
          repeated with Newline.  But don't clobber a user-defined
          command's definition.  */
       if (from_tty)
 	*exp = 0;
-      old_chain = make_cleanup (free_current_contents, &expr);
-      val = evaluate_expression (expr);
+      val = evaluate_expression (expr.get ());
       if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
@@ -1718,7 +1702,6 @@ x_command (char *exp, int from_tty)
 	next_address = value_as_address (val);
 
       next_gdbarch = expr->gdbarch;
-      do_cleanups (old_chain);
     }
 
   if (!next_gdbarch)
@@ -1764,7 +1747,6 @@ static void
 display_command (char *arg, int from_tty)
 {
   struct format_data fmt;
-  struct expression *expr;
   struct display *newobj;
   const char *exp = arg;
 
@@ -1792,12 +1774,12 @@ display_command (char *arg, int from_tty)
     }
 
   innermost_block = NULL;
-  expr = parse_expression (exp);
+  expression_up expr = parse_expression (exp);
 
-  newobj = XNEW (struct display);
+  newobj = new display ();
 
   newobj->exp_string = xstrdup (exp);
-  newobj->exp = expr;
+  newobj->exp = std::move (expr);
   newobj->block = innermost_block;
   newobj->pspace = current_program_space;
   newobj->number = ++display_number;
@@ -1826,8 +1808,7 @@ static void
 free_display (struct display *d)
 {
   xfree (d->exp_string);
-  xfree (d->exp);
-  xfree (d);
+  delete d;
 }
 
 /* Clear out the display_chain.  Done when new symtabs are loaded,
@@ -1951,8 +1932,7 @@ do_one_display (struct display *d)
      expression if the current architecture has changed.  */
   if (d->exp != NULL && d->exp->gdbarch != get_current_arch ())
     {
-      xfree (d->exp);
-      d->exp = NULL;
+      d->exp.reset ();
       d->block = NULL;
     }
 
@@ -2025,7 +2005,7 @@ do_one_display (struct display *d)
 	  struct value *val;
 	  CORE_ADDR addr;
 
-	  val = evaluate_expression (d->exp);
+	  val = evaluate_expression (d->exp.get ());
 	  addr = value_as_address (val);
 	  if (d->format.format == 'i')
 	    addr = gdbarch_addr_bits_remove (d->exp->gdbarch, addr);
@@ -2062,7 +2042,7 @@ do_one_display (struct display *d)
         {
 	  struct value *val;
 
-	  val = evaluate_expression (d->exp);
+	  val = evaluate_expression (d->exp.get ());
 	  print_formatted (val, d->format.size, &opts, gdb_stdout);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
@@ -2222,10 +2202,9 @@ clear_dangling_display_expressions (struct objfile *objfile)
 	continue;
 
       if (lookup_objfile_from_block (d->block) == objfile
-	  || (d->exp && exp_uses_objfile (d->exp, objfile)))
+	  || (d->exp != NULL && exp_uses_objfile (d->exp.get (), objfile)))
       {
-	xfree (d->exp);
-	d->exp = NULL;
+	d->exp.reset ();
 	d->block = NULL;
       }
     }
@@ -2739,14 +2718,12 @@ eval_command (char *arg, int from_tty)
 {
   struct ui_file *ui_out = mem_fileopen ();
   struct cleanup *cleanups = make_cleanup_ui_file_delete (ui_out);
-  char *expanded;
 
   ui_printf (arg, ui_out);
 
-  expanded = ui_file_xstrdup (ui_out, NULL);
-  make_cleanup (xfree, expanded);
+  std::string expanded = ui_file_as_string (ui_out);
 
-  execute_command (expanded, from_tty);
+  execute_command (&expanded[0], from_tty);
 
   do_cleanups (cleanups);
 }

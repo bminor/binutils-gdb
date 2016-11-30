@@ -1,3 +1,69 @@
+2016-11-03  David Tolnay <dtolnay@gmail.com>
+	    Mark Wielaard  <mark@klomp.org>
+
+	* Makefile.in (CFILES): Add rust-demangle.c.
+	(REQUIRED_OFILES): Add rust-demangle.o.
+	* cplus-dem.c (libiberty_demanglers): Add rust_demangling case.
+	(cplus_demangle): Handle RUST_DEMANGLING.
+	(rust_demangle): New function.
+	* rust-demangle.c: New file.
+	* testsuite/Makefile.in (really-check): Add check-rust-demangle.
+	(check-rust-demangle): New rule.
+	* testsuite/rust-demangle-expected: New file.
+
+2016-11-15  Mark Wielaard  <mark@klomp.org>
+
+	* cp-demangle.c (d_expression_1): Make sure third expression
+	exists for ?: and fold expressions.
+	* testsuite/demangle-expected: Add examples of strings that could
+	crash the demangler because of missing expression.
+
+2016-11-14  Mark Wielaard  <mark@klomp.org>
+
+	* cplus-dem.c (demangle_signature): After 'H', template function,
+	no success and don't advance position if end of string reached.
+	(demangle_template): After 'z', template name, return zero on
+	premature end of string.
+	(gnu_special): Guard strchr against searching for zero characters.
+	(do_type): If member, only advance mangled string when 'F' found.
+	* testsuite/demangle-expected: Add examples of strings that could
+	crash the demangler by reading past end of input.
+
+2016-11-06  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac (ac_libiberty_warn_cflags): Add -Wshadow=local.
+	* configure: Regenerated.
+
+2016-11-07  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (is_fnqual_component_type): New.
+	(d_encoding, d_print_comp_inner, d_print_mod_list): Use it.
+	(FNQUAL_COMPONENT_CASE): New.
+	(d_make_comp, has_return_type, d_print_comp_inner)
+	(d_print_function_type): Use it.
+	(next_is_type_qual): New.
+	(d_cv_qualifiers, d_print_mod): Handle noexcept and throw-spec.
+
+2016-11-02  Mark Wielaard  <mjw@redhat.com>
+
+	* cplus-dem.c (demangle_signature): Move fall through comment.
+	(demangle_fund_type): Add fall through comment between 'G' and 'I'.
+	* hashtab.c (iterative_hash): Add fall through comments.
+	* regex.c (regex_compile): Add Fall through comment after '+'/'?'.
+	(byte_re_match_2_internal): Add Fall through comment after jump_n.
+	Change "Note fall through" to "Fall through".
+	(common_op_match_null_string_p): Return false after set_number_at
+	instead of fall through.
+
+2016-11-01  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (d_ctor_dtor_name): Handle inheriting constructor.
+
+2016-10-31  Mark Wielaard  <mjw@redhat.com>
+
+	* cplus-dem.c (ada_demangle): Initialize demangled to NULL and
+	XDELETEVEC demangled when unknown.
+
 2016-10-17  Nick Clifton  <nickc@redhat.com>
 
 	* Sync with gcc.

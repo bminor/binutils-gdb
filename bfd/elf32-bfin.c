@@ -1226,28 +1226,9 @@ bfin_check_relocs (bfd * abfd,
 		return FALSE;
 	    }
 
-	  if (sgot == NULL)
-	    {
-	      sgot = bfd_get_linker_section (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
-	    }
-
-	  if (srelgot == NULL && (h != NULL || bfd_link_pic (info)))
-	    {
-	      srelgot = bfd_get_linker_section (dynobj, ".rela.got");
-	      if (srelgot == NULL)
-		{
-		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
-				    | SEC_READONLY);
-		  srelgot = bfd_make_section_anyway_with_flags (dynobj,
-								".rela.got",
-								flags);
-		  if (srelgot == NULL
-		      || !bfd_set_section_alignment (dynobj, srelgot, 2))
-		    return FALSE;
-		}
-	    }
+	  sgot = elf_hash_table (info)->sgot;
+	  srelgot = elf_hash_table (info)->srelgot;
+	  BFD_ASSERT (sgot != NULL);
 
 	  if (h != NULL)
 	    {
@@ -1480,19 +1461,16 @@ bfin_relocate_section (bfd * output_bfd,
 	  {
 	    bfd_vma off;
 
-	  if (dynobj == NULL)
-	    {
-	      /* Create the .got section.  */
-	      elf_hash_table (info)->dynobj = dynobj = output_bfd;
-	      if (!_bfd_elf_create_got_section (dynobj, info))
-		return FALSE;
-	    }
-
-	    if (sgot == NULL)
+	    if (dynobj == NULL)
 	      {
-		sgot = bfd_get_linker_section (dynobj, ".got");
-		BFD_ASSERT (sgot != NULL);
+		/* Create the .got section.  */
+		elf_hash_table (info)->dynobj = dynobj = output_bfd;
+		if (!_bfd_elf_create_got_section (dynobj, info))
+		  return FALSE;
 	      }
+
+	    sgot = elf_hash_table (info)->sgot;
+	    BFD_ASSERT (sgot != NULL);
 
 	    if (h != NULL)
 	      {
@@ -1556,7 +1534,7 @@ bfin_relocate_section (bfd * output_bfd,
 			Elf_Internal_Rela outrel;
 			bfd_byte *loc;
 
-			s = bfd_get_linker_section (dynobj, ".rela.got");
+			s = elf_hash_table (info)->srelgot;
 			BFD_ASSERT (s != NULL);
 
 			outrel.r_offset = (sgot->output_section->vma
@@ -1684,8 +1662,8 @@ bfin_gc_sweep_hook (bfd * abfd,
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
-  sgot = bfd_get_linker_section (dynobj, ".got");
-  srelgot = bfd_get_linker_section (dynobj, ".rela.got");
+  sgot = elf_hash_table (info)->sgot;
+  srelgot = elf_hash_table (info)->srelgot;
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -1742,16 +1720,8 @@ struct bfinfdpic_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* A pointer to the .got section.  */
-  asection *sgot;
-  /* A pointer to the .rel.got section.  */
-  asection *sgotrel;
   /* A pointer to the .rofixup section.  */
   asection *sgotfixup;
-  /* A pointer to the .plt section.  */
-  asection *splt;
-  /* A pointer to the .rel.plt section.  */
-  asection *spltrel;
   /* GOT base offset.  */
   bfd_vma got0;
   /* Location of the first non-lazy PLT entry, i.e., the number of
@@ -1772,15 +1742,15 @@ struct bfinfdpic_elf_link_hash_table
   == BFIN_ELF_DATA ? ((struct bfinfdpic_elf_link_hash_table *) ((info)->hash)) : NULL)
 
 #define bfinfdpic_got_section(info) \
-  (bfinfdpic_hash_table (info)->sgot)
+  (bfinfdpic_hash_table (info)->elf.sgot)
 #define bfinfdpic_gotrel_section(info) \
-  (bfinfdpic_hash_table (info)->sgotrel)
+  (bfinfdpic_hash_table (info)->elf.srelgot)
 #define bfinfdpic_gotfixup_section(info) \
   (bfinfdpic_hash_table (info)->sgotfixup)
 #define bfinfdpic_plt_section(info) \
-  (bfinfdpic_hash_table (info)->splt)
+  (bfinfdpic_hash_table (info)->elf.splt)
 #define bfinfdpic_pltrel_section(info) \
-  (bfinfdpic_hash_table (info)->spltrel)
+  (bfinfdpic_hash_table (info)->elf.srelplt)
 #define bfinfdpic_relocs_info(info) \
   (bfinfdpic_hash_table (info)->relocs_info)
 #define bfinfdpic_got_initial_offset(info) \
@@ -3395,7 +3365,7 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
   int ptralign;
 
   /* This function may be called more than once.  */
-  s = bfd_get_linker_section (abfd, ".got");
+  s = elf_hash_table (info)->sgot;
   if (s != NULL)
     return TRUE;
 
@@ -3410,17 +3380,10 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
   pltflags = flags;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
+  elf_hash_table (info)->sgot = s;
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
-
-  if (bed->want_got_plt)
-    {
-      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
-      if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, ptralign))
-	return FALSE;
-    }
 
   if (bed->want_got_sym)
     {
@@ -3446,7 +3409,6 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
      data for the got.  */
   if (IS_FDPIC (abfd))
     {
-      bfinfdpic_got_section (info) = s;
       bfinfdpic_relocs_info (info) = htab_try_create (1,
 						      bfinfdpic_relocs_info_hash,
 						      bfinfdpic_relocs_info_eq,
@@ -5129,10 +5091,6 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 			    struct elf_link_hash_entry *h,
 			    Elf_Internal_Sym * sym)
 {
-  bfd *dynobj;
-
-  dynobj = elf_hash_table (info)->dynobj;
-
   if (h->got.offset != (bfd_vma) - 1)
     {
       asection *sgot;
@@ -5143,8 +5101,8 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
       /* This symbol has an entry in the global offset table.
          Set it up.  */
 
-      sgot = bfd_get_linker_section (dynobj, ".got");
-      srela = bfd_get_linker_section (dynobj, ".rela.got");
+      sgot = elf_hash_table (info)->sgot;
+      srela = elf_hash_table (info)->srelgot;
       BFD_ASSERT (sgot != NULL && srela != NULL);
 
       rela.r_offset = (sgot->output_section->vma
@@ -5395,7 +5353,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
          not actually use these entries.  Reset the size of .rela.got,
          which will cause it to get stripped from the output file
          below.  */
-      s = bfd_get_linker_section (dynobj, ".rela.got");
+      s = elf_hash_table (info)->srelgot;
       if (s != NULL)
 	s->size = 0;
     }

@@ -287,6 +287,8 @@ run_dump_test "rela-abs-relative"
 run_dump_test "rela-abs-relative-be"
 run_dump_test "rela-abs-relative-opt"
 
+run_dump_test "pie-bind-locally"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
     {} "copy-reloc-so.so"}

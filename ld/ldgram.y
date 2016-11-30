@@ -92,7 +92,7 @@ static int error_index;
 %type <etree> opt_exp_without_type opt_subalign opt_align
 %type <fill> fill_opt fill_exp
 %type <name_list> exclude_name_list
-%type <wildcard_list> file_NAME_list
+%type <wildcard_list> section_NAME_list
 %type <flag_info_list> sect_flag_list
 %type <flag_info> sect_flags
 %type <name> memspec_opt casesymlist
@@ -596,8 +596,8 @@ exclude_name_list:
 			}
 	;
 
-file_NAME_list:
-		file_NAME_list opt_comma wildcard_spec
+section_NAME_list:
+		section_NAME_list opt_comma wildcard_spec
 			{
 			  struct wildcard_list *tmp;
 			  tmp = (struct wildcard_list *) xmalloc (sizeof *tmp);
@@ -635,11 +635,11 @@ input_section_spec_no_keep:
 			  tmp.section_flag_list = $1;
 			  lang_add_wild (&tmp, NULL, ldgram_had_keep);
 			}
-        |	'[' file_NAME_list ']'
+        |	'[' section_NAME_list ']'
 			{
 			  lang_add_wild (NULL, $2, ldgram_had_keep);
 			}
-        |	sect_flags '[' file_NAME_list ']'
+        |	sect_flags '[' section_NAME_list ']'
 			{
 			  struct wildcard_spec tmp;
 			  tmp.name = NULL;
@@ -648,11 +648,11 @@ input_section_spec_no_keep:
 			  tmp.section_flag_list = $1;
 			  lang_add_wild (&tmp, $3, ldgram_had_keep);
 			}
-	|	wildcard_spec '(' file_NAME_list ')'
+	|	wildcard_spec '(' section_NAME_list ')'
 			{
 			  lang_add_wild (&$1, $3, ldgram_had_keep);
 			}
-	|	sect_flags wildcard_spec '(' file_NAME_list ')'
+	|	sect_flags wildcard_spec '(' section_NAME_list ')'
 			{
 			  $2.section_flag_list = $1;
 			  lang_add_wild (&$2, $4, ldgram_had_keep);

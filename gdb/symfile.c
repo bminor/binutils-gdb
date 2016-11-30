@@ -61,8 +61,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <time.h>
-#include "gdb_sys_time.h"
+#include <chrono>
 
 #include "psymtab.h"
 
@@ -1963,7 +1962,7 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     {
       /* The write is just starting.  Let the user know we've started
 	 this section.  */
-      ui_out_message (current_uiout, 0, "Loading section %s, size %s lma %s\n",
+      ui_out_message (current_uiout, "Loading section %s, size %s lma %s\n",
 		      args->section_name, hex_string (args->section_size),
 		      paddress (target_gdbarch (), args->lma));
       return;
@@ -2066,11 +2065,15 @@ clear_memory_write_data (void *arg)
   VEC_free (memory_write_request_s, vec);
 }
 
+static void print_transfer_performance (struct ui_file *stream,
+					unsigned long data_count,
+					unsigned long write_count,
+				        std::chrono::steady_clock::duration d);
+
 void
 generic_load (const char *args, int from_tty)
 {
   bfd *loadfile_bfd;
-  struct timeval start_time, end_time;
   char *filename;
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   struct load_section_data cbdata;
@@ -2131,13 +2134,15 @@ generic_load (const char *args, int from_tty)
 
   bfd_map_over_sections (loadfile_bfd, load_section_callback, &cbdata);
 
-  gettimeofday (&start_time, NULL);
+  using namespace std::chrono;
+
+  steady_clock::time_point start_time = steady_clock::now ();
 
   if (target_write_memory_blocks (cbdata.requests, flash_discard,
 				  load_progress) != 0)
     error (_("Load failed"));
 
-  gettimeofday (&end_time, NULL);
+  steady_clock::time_point end_time = steady_clock::now ();
 
   entry = bfd_get_start_address (loadfile_bfd);
   entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
@@ -2160,32 +2165,32 @@ generic_load (const char *args, int from_tty)
 
   print_transfer_performance (gdb_stdout, total_progress.data_count,
 			      total_progress.write_count,
-			      &start_time, &end_time);
+			      end_time - start_time);
 
   do_cleanups (old_cleanups);
 }
 
-/* Report how fast the transfer went.  */
+/* Report on STREAM the performance of a memory transfer operation,
+   such as 'load'.  DATA_COUNT is the number of bytes transferred.
+   WRITE_COUNT is the number of separate write operations, or 0, if
+   that information is not available.  TIME is how long the operation
+   lasted.  */
 
-void
+static void
 print_transfer_performance (struct ui_file *stream,
 			    unsigned long data_count,
 			    unsigned long write_count,
-			    const struct timeval *start_time,
-			    const struct timeval *end_time)
+			    std::chrono::steady_clock::duration time)
 {
-  ULONGEST time_count;
+  using namespace std::chrono;
   struct ui_out *uiout = current_uiout;
 
-  /* Compute the elapsed time in milliseconds, as a tradeoff between
-     accuracy and overflow.  */
-  time_count = (end_time->tv_sec - start_time->tv_sec) * 1000;
-  time_count += (end_time->tv_usec - start_time->tv_usec) / 1000;
+  milliseconds ms = duration_cast<milliseconds> (time);
 
   ui_out_text (uiout, "Transfer rate: ");
-  if (time_count > 0)
+  if (ms.count () > 0)
     {
-      unsigned long rate = ((ULONGEST) data_count * 1000) / time_count;
+      unsigned long rate = ((ULONGEST) data_count * 1000) / ms.count ();
 
       if (ui_out_is_mi_like_p (uiout))
 	{

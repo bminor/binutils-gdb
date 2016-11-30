@@ -706,8 +706,8 @@ handle_general_set (char *own_buf)
     {
       if (remote_debug)
 	{
-	  fprintf (stderr, "[noack mode enabled]\n");
-	  fflush (stderr);
+	  debug_printf ("[noack mode enabled]\n");
+	  debug_flush ();
 	}
 
       noack_mode = 1;
@@ -746,7 +746,7 @@ handle_general_set (char *own_buf)
       non_stop = req;
 
       if (remote_debug)
-	fprintf (stderr, "[%s mode enabled]\n", req_str);
+	debug_printf ("[%s mode enabled]\n", req_str);
 
       write_ok (own_buf);
       return;
@@ -762,10 +762,9 @@ handle_general_set (char *own_buf)
 
       if (remote_debug)
 	{
-	  if (disable_randomization)
-	    fprintf (stderr, "[address space randomization disabled]\n");
-	  else
-	    fprintf (stderr, "[address space randomization enabled]\n");
+	  debug_printf (disable_randomization
+			? "[address space randomization disabled]\n"
+			: "[address space randomization enabled]\n");
 	}
 
       write_ok (own_buf);
@@ -795,7 +794,7 @@ handle_general_set (char *own_buf)
       /* Update the flag.  */
       use_agent = req;
       if (remote_debug)
-	fprintf (stderr, "[%s agent]\n", req ? "Enable" : "Disable");
+	debug_printf ("[%s agent]\n", req ? "Enable" : "Disable");
       write_ok (own_buf);
       return;
     }
@@ -832,7 +831,7 @@ handle_general_set (char *own_buf)
 	{
 	  const char *req_str = report_thread_events ? "enabled" : "disabled";
 
-	  fprintf (stderr, "[thread events are now %s]\n", req_str);
+	  debug_printf ("[thread events are now %s]\n", req_str);
 	}
 
       write_ok (own_buf);

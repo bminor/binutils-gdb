@@ -1550,6 +1550,7 @@ HAVE_REALPATH
 HAVE_RANDOM_R
 HAVE_RANDOM_H
 HAVE_RANDOM
+HAVE_QSORT_R
 HAVE_PTSNAME_R
 HAVE_PTSNAME
 HAVE_POSIX_OPENPT
@@ -6235,6 +6236,7 @@ fi
   HAVE_POSIX_OPENPT=1;
   HAVE_PTSNAME=1;
   HAVE_PTSNAME_R=1;
+  HAVE_QSORT_R=1;
   HAVE_RANDOM=1;
   HAVE_RANDOM_H=1;
   HAVE_RANDOM_R=1;
@@ -8426,6 +8428,15 @@ uintptr_t h = UINTPTR_MAX;
 #endif
 intmax_t i = INTMAX_MAX;
 uintmax_t j = UINTMAX_MAX;
+
+/* Check that SIZE_MAX has the correct type, if possible.  */
+#if 201112 <= __STDC_VERSION__
+int k = _Generic (SIZE_MAX, size_t: 0);
+#elif (2 <= __GNUC__ || defined __IBM__TYPEOF__ \
+       || (0x5110 <= __SUNPRO_C && !__STDC__))
+extern size_t k;
+extern __typeof__ (SIZE_MAX) k;
+#endif
 
 #include <limits.h> /* for CHAR_BIT */
 #define TYPE_MINIMUM(t) \
@@ -17828,7 +17839,7 @@ $as_echo "$gl_cv_next_stdlib_h" >&6; }
 
 
 
-    for gl_func in _Exit atoll canonicalize_file_name getloadavg getsubopt grantpt     initstate initstate_r mkdtemp mkostemp mkostemps mkstemp mkstemps     posix_openpt ptsname ptsname_r random random_r realpath rpmatch     secure_getenv setenv setstate setstate_r srandom srandom_r     strtod strtoll strtoull unlockpt unsetenv; do
+    for gl_func in _Exit atoll canonicalize_file_name getloadavg getsubopt grantpt     initstate initstate_r mkdtemp mkostemp mkostemps mkstemp mkstemps     posix_openpt ptsname ptsname_r qsort_r random random_r realpath rpmatch     secure_getenv setenv setstate setstate_r srandom srandom_r     strtod strtoll strtoull unlockpt unsetenv; do
     as_gl_Symbol=`$as_echo "gl_cv_have_raw_decl_$gl_func" | $as_tr_sh`
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $gl_func is declared without a macro" >&5
 $as_echo_n "checking whether $gl_func is declared without a macro... " >&6; }

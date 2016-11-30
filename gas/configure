@@ -644,6 +644,7 @@ WARN_WRITE_STRINGS
 NO_WERROR
 WARN_CFLAGS_FOR_BUILD
 WARN_CFLAGS
+do_compare
 OTOOL64
 OTOOL
 LIPO
@@ -10986,7 +10987,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10989 "configure"
+#line 10990 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11092,7 +11093,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11095 "configure"
+#line 11096 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11653,6 +11654,36 @@ rm -rf conftest*
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to compare bootstrapped objects" >&5
+$as_echo_n "checking how to compare bootstrapped objects... " >&6; }
+if test "${gcc_cv_prog_cmp_skip+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+   echo abfoo >t1
+  echo cdfoo >t2
+  gcc_cv_prog_cmp_skip='tail +16c $$f1 > tmp-foo1; tail +16c $$f2 > tmp-foo2; cmp tmp-foo1 tmp-foo2'
+  if cmp t1 t2 2 2 > /dev/null 2>&1; then
+    if cmp t1 t2 1 1 > /dev/null 2>&1; then
+      :
+    else
+      gcc_cv_prog_cmp_skip='cmp $$f1 $$f2 16 16'
+    fi
+  fi
+  if cmp --ignore-initial=2 t1 t2 > /dev/null 2>&1; then
+    if cmp --ignore-initial=1 t1 t2 > /dev/null 2>&1; then
+      :
+    else
+      gcc_cv_prog_cmp_skip='cmp --ignore-initial=16 $$f1 $$f2'
+    fi
+  fi
+  rm t1 t2
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_cv_prog_cmp_skip" >&5
+$as_echo "$gcc_cv_prog_cmp_skip" >&6; }
+do_compare="$gcc_cv_prog_cmp_skip"
+
+
 
 # Check whether --enable-targets was given.
 if test "${enable_targets+set}" = set; then :
@@ -11772,7 +11803,7 @@ fi
 rm -f conftest*
 
 
-# Verify CC_FOR_BUILD to be compatible with waring flags
+# Verify CC_FOR_BUILD to be compatible with warning flags
 
 # Add -Wshadow if the compiler is a sufficiently recent version of GCC.
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -12552,7 +12583,7 @@ $as_echo "#define NDS32_DEFAULT_AUDIO_EXT 1" >>confdefs.h
 $as_echo "$enable_audio_ext" >&6; }
 	;;
 
-      i386 | s390 | sparc)
+      i386 | riscv | s390 | sparc)
 	if test $this_target = $target ; then
 
 cat >>confdefs.h <<_ACEOF

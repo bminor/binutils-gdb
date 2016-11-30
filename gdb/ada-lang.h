@@ -168,9 +168,9 @@ extern void ada_print_type (struct type *, const char *, struct ui_file *, int,
 extern void ada_print_typedef (struct type *type, struct symbol *new_symbol,
 			       struct ui_file *stream);
 
-extern void ada_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
+extern void ada_val_print (struct type *, int, CORE_ADDR,
 			   struct ui_file *, int,
-			   const struct value *,
+			   struct value *,
 			   const struct value_print_options *);
 
 extern void ada_value_print (struct value *, struct ui_file *,
@@ -370,7 +370,7 @@ extern char *ada_breakpoint_rewrite (char *, int *);
 
 extern char *ada_main_name (void);
 
-extern char *ada_name_for_lookup (const char *name);
+extern std::string ada_name_for_lookup (const char *name);
 
 extern void create_ada_exception_catchpoint
   (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,

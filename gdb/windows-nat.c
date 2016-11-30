@@ -409,7 +409,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
   return th;
 }
 
-/* Clear out any old thread list and reintialize it to a
+/* Clear out any old thread list and reinitialize it to a
    pristine state.  */
 static void
 windows_init_thread_list (void)

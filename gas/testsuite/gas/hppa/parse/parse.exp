@@ -192,7 +192,7 @@ if [istarget hppa*-*-*] then {
     setup_xfail "hppa*-*-*elf*" "hppa*-*-linux*" "hppa*64*-*-*"
     gas_test "ssbug.s" "" "" "Check for acceptance of non-default subspaces"
 
-    # To be compatable with certain "features" of the HP compiler
+    # To be compatible with certain "features" of the HP compiler
     # non-existant registers should default to %r0.
     gas_test "defbug.s" "" "" "Missing register should default to %%r0"
 

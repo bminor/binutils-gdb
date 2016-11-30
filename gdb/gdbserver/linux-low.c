@@ -1981,10 +1981,9 @@ check_zombie_leaders (void)
 	     thread execs).  */
 
 	  if (debug_threads)
-	    fprintf (stderr,
-		     "CZL: Thread group leader %d zombie "
-		     "(it exited, or another thread execd).\n",
-		     leader_pid);
+	    debug_printf ("CZL: Thread group leader %d zombie "
+			  "(it exited, or another thread execd).\n",
+			  leader_pid);
 
 	  delete_lwp (leader_lp);
 	}
@@ -4461,10 +4460,10 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	  if (fast_tp_collecting == 0)
 	    {
 	      if (step == 0)
-		fprintf (stderr, "BAD - reinserting but not stepping.\n");
+		warning ("BAD - reinserting but not stepping.");
 	      if (lwp->suspended)
-		fprintf (stderr, "BAD - reinserting and suspended(%d).\n",
-			 lwp->suspended);
+		warning ("BAD - reinserting and suspended(%d).",
+				 lwp->suspended);
 	    }
 	}
 

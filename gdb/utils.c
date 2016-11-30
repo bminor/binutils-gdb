@@ -37,7 +37,6 @@
 #endif
 
 #include <signal.h>
-#include "timeval-utils.h"
 #include "gdbcmd.h"
 #include "serial.h"
 #include "bfd.h"
@@ -61,8 +60,7 @@
 
 #include "readline/readline.h"
 
-#include "gdb_sys_time.h"
-#include <time.h>
+#include <chrono>
 
 #include "gdb_usleep.h"
 #include "interps.h"
@@ -98,7 +96,7 @@ static void set_width (void);
    Modified in prompt_for_continue and defaulted_query.
    Used in report_command_stats.  */
 
-static struct timeval prompt_for_continue_wait_time;
+static std::chrono::steady_clock::duration prompt_for_continue_wait_time;
 
 /* A flag indicating whether to timestamp debugging messages.  */
 
@@ -480,10 +478,9 @@ verror (const char *string, va_list args)
 void
 error_stream (struct ui_file *stream)
 {
-  char *message = ui_file_xstrdup (stream, NULL);
+  std::string message = ui_file_as_string (stream);
 
-  make_cleanup (xfree, message);
-  error (("%s"), message);
+  error (("%s"), message.c_str ());
 }
 
 /* Emit a message and abort.  */
@@ -1185,9 +1182,6 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   int def_value;
   char def_answer, not_def_answer;
   char *y_string, *n_string, *question, *prompt;
-  /* Used to add duration we waited for user to respond to
-     prompt_for_continue_wait_time.  */
-  struct timeval prompt_started, prompt_ended, prompt_delta;
   struct cleanup *old_chain;
 
   /* Set up according to which answer is the default.  */
@@ -1262,8 +1256,10 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 		      annotation_level > 1 ? "\n\032\032query\n" : "");
   make_cleanup (xfree, prompt);
 
-  /* Used for calculating time spend waiting for user.  */
-  gettimeofday (&prompt_started, NULL);
+  /* Used to add duration we waited for user to respond to
+     prompt_for_continue_wait_time.  */
+  using namespace std::chrono;
+  steady_clock::time_point prompt_started = steady_clock::now ();
 
   prepare_to_handle_input ();
 
@@ -1308,10 +1304,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     }
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */
-  gettimeofday (&prompt_ended, NULL);
-  timeval_sub (&prompt_delta, &prompt_ended, &prompt_started);
-  timeval_add (&prompt_for_continue_wait_time,
-               &prompt_for_continue_wait_time, &prompt_delta);
+  prompt_for_continue_wait_time += steady_clock::now () - prompt_started;
 
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
@@ -1635,14 +1628,14 @@ static char *wrap_pointer;
 
 /* String to indent by if the wrap occurs.  Must not be NULL if wrap_column
    is non-zero.  */
-static char *wrap_indent;
+static const char *wrap_indent;
 
 /* Column number on the screen where wrap_buffer begins, or 0 if wrapping
    is not in effect.  */
 static int wrap_column;
 
 
-/* Inialize the number of lines per page and chars per line.  */
+/* Initialize the number of lines per page and chars per line.  */
 
 void
 init_page_info (void)
@@ -1817,12 +1810,11 @@ prompt_for_continue (void)
 {
   char *ignore;
   char cont_prompt[120];
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
-  struct timeval prompt_started, prompt_ended, prompt_delta;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-
-  gettimeofday (&prompt_started, NULL);
+  using namespace std::chrono;
+  steady_clock::time_point prompt_started = steady_clock::now ();
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032pre-prompt-for-continue\n"));
@@ -1845,10 +1837,7 @@ prompt_for_continue (void)
   make_cleanup (xfree, ignore);
 
   /* Add time spend in this routine to prompt_for_continue_wait_time.  */
-  gettimeofday (&prompt_ended, NULL);
-  timeval_sub (&prompt_delta, &prompt_ended, &prompt_started);
-  timeval_add (&prompt_for_continue_wait_time,
-               &prompt_for_continue_wait_time, &prompt_delta);
+  prompt_for_continue_wait_time += steady_clock::now () - prompt_started;
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032post-prompt-for-continue\n"));
@@ -1873,20 +1862,20 @@ prompt_for_continue (void)
   do_cleanups (old_chain);
 }
 
-/* Initalize timer to keep track of how long we waited for the user.  */
+/* Initialize timer to keep track of how long we waited for the user.  */
 
 void
 reset_prompt_for_continue_wait_time (void)
 {
-  static const struct timeval zero_timeval = { 0 };
+  using namespace std::chrono;
 
-  prompt_for_continue_wait_time = zero_timeval;
+  prompt_for_continue_wait_time = steady_clock::duration::zero ();
 }
 
 /* Fetch the cumulative time spent in prompt_for_continue.  */
 
-struct timeval
-get_prompt_for_continue_wait_time (void)
+std::chrono::steady_clock::duration
+get_prompt_for_continue_wait_time ()
 {
   return prompt_for_continue_wait_time;
 }
@@ -1922,7 +1911,7 @@ reinitialize_more_filter (void)
    used to force out output from the wrap_buffer.  */
 
 void
-wrap_here (char *indent)
+wrap_here (const char *indent)
 {
   /* This should have been allocated, but be paranoid anyway.  */
   if (!wrap_buffer)
@@ -2309,21 +2298,21 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
   old_cleanups = make_cleanup (xfree, linebuffer);
   if (debug_timestamp && stream == gdb_stdlog)
     {
-      struct timeval tm;
-      char *timestamp;
+      using namespace std::chrono;
       int len, need_nl;
 
-      gettimeofday (&tm, NULL);
+      steady_clock::time_point now = steady_clock::now ();
+      seconds s = duration_cast<seconds> (now.time_since_epoch ());
+      microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
 
       len = strlen (linebuffer);
       need_nl = (len > 0 && linebuffer[len - 1] != '\n');
 
-      timestamp = xstrprintf ("%ld:%ld %s%s",
-			      (long) tm.tv_sec, (long) tm.tv_usec,
-			      linebuffer,
-			      need_nl ? "\n": "");
-      make_cleanup (xfree, timestamp);
-      fputs_unfiltered (timestamp, stream);
+      std::string timestamp = string_printf ("%ld.%06ld %s%s",
+					     (long) s.count (),
+					     (long) us.count (),
+					     linebuffer, need_nl ? "\n": "");
+      fputs_unfiltered (timestamp.c_str (), stream);
     }
   else
     fputs_unfiltered (linebuffer, stream);

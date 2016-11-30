@@ -378,7 +378,7 @@ class Plugin_manager
   Mapfile* mapfile_;
   Task_token* this_blocker_;
 
-  // An extra directory to seach for the libraries passed by
+  // An extra directory to search for the libraries passed by
   // add_input_library.
   std::string extra_search_path_;
   Lock* lock_;

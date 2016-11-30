@@ -75,7 +75,7 @@ extern struct relax_type md_relax_table[];
 
 /* GAS only handles relaxations for pc-relative data targeting addresses
    in the same segment, we have to encode all other cases  */
-/* FIXME: impliment this.  */
+/* FIXME: implement this.  */
 /* #define md_relax_frag(SEG, FRAGP, STRETCH)		\
  ((FRAGP)->fr_symbol != NULL				\
   && S_GET_SEGMENT ((FRAGP)->fr_symbol) == (SEG)	\

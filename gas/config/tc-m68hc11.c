@@ -555,7 +555,7 @@ md_parse_option (int c, const char *arg)
 	current_architecture = cpu6812 | cpu6812s | cpu9s12x;
      else if ((strcasecmp (arg, "m9s12xg") == 0)
           || (strcasecmp (arg, "xgate") == 0))
-	/* xgate for backwards compatability */
+	/* xgate for backwards compatibility */
 	current_architecture = cpuxgate;
       else
 	as_bad (_("Option `%s' is not recognized."), arg);

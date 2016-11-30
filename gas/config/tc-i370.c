@@ -1376,7 +1376,7 @@ symbol_locate (symbolS *symbolP,
 }
 
 /* i370_addr_offset() will convert operand expressions
-   that appear to be absolute into thier base-register
+   that appear to be absolute into their base-register
    relative form.  These expressions come in two types:
 
    (1) of the form "* + const" * where "*" means
@@ -1482,7 +1482,7 @@ i370_addr_cons (expressionS *exp)
       expression (exp);
 
       /* We use a simple string name to collapse together
-         multiple refrences to the same address literal.  */
+         multiple references to the same address literal.  */
       name_len = strcspn (sym_name, ", ");
       delim = *(sym_name + name_len);
       *(sym_name + name_len) = 0x0;

@@ -981,7 +981,6 @@ gdbscm_breakpoint_commands (SCM self)
   struct ui_file *string_file;
   struct cleanup *chain;
   SCM result;
-  char *cmdstr;
 
   bp = bp_smob->bp;
 
@@ -1004,9 +1003,8 @@ gdbscm_breakpoint_commands (SCM self)
     }
   END_CATCH
 
-  cmdstr = ui_file_xstrdup (string_file, &length);
-  make_cleanup (xfree, cmdstr);
-  result = gdbscm_scm_from_c_string (cmdstr);
+  std::string cmdstr = ui_file_as_string (string_file);
+  result = gdbscm_scm_from_c_string (cmdstr.c_str ());
 
   do_cleanups (chain);
   return result;

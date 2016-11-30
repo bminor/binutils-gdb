@@ -1,3 +1,93 @@
+2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (insn_class_t): Add DIVREM, LOAD, MOVE, MPY, STORE
+	instruction classes.
+
+2016-11-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/sparc.h (sparc_opcode_arch): New fields hwcaps and
+	hwcaps2.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* opcode/ppc.h: Define VLE insns using 16A and 16D relocs.
+
+2016-11-03  David Tolnay <dtolnay@gmail.com>
+	    Mark Wielaard  <mark@klomp.org>
+
+	* demangle.h (DMGL_RUST): New macro.
+	(DMGL_STYLE_MASK): Add DMGL_RUST.
+	(demangling_styles): Add dlang_rust.
+	(RUST_DEMANGLING_STYLE_STRING): New macro.
+	(RUST_DEMANGLING): New macro.
+	(rust_demangle): New prototype.
+	(rust_is_mangled): Likewise.
+	(rust_demangle_sym): Likewise.
+
+2016-11-07  Jason Merrill  <jason@redhat.com>
+
+	* demangle.h (enum demangle_component_type): Add
+	DEMANGLE_COMPONENT_NOEXCEPT, DEMANGLE_COMPONENT_THROW_SPEC.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_IMM_ROT1,
+	AARCH64_OPND_IMM_ROT2, AARCH64_OPND_IMM_ROT3.
+	(enum aarch64_op): Add OP_FCMLA_ELEM.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_ADDR_SIMM10.
+	(enum aarch64_insn_class): Add ldst_imm10.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_Rm_SP.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_V8_3): Define.
+	(AARCH64_ARCH_V8_3): Define.
+	(AARCH64_ARCH_V8_1, AARCH64_ARCH_V8_2): Simplify.
+
+2016-11-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (ARM_AEXT_V8M_MAIN_DSP): Define.
+	(ARM_AEXT2_V8M_MAIN_DSP): Likewise.
+	(ARM_ARCH_V8M_MAIN_DSP): Likewise.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* opcode/arc.h: Add PROTOCOL_DECODE to insn_class_t.
+
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h (struct arc_opcode): Change type of opcode and mask
+	fields.
+	(struct arc_long_opcode): Delete.
+	(struct arc_operand): Change types for insert and extract
+	handlers.
+
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* opcode/arc.h: Make macros 64-bit safe.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* opcode/arc.h (arc_opcode_len): Declare.
+	(ARC_SHORT): Delete.
+
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* dis-asm.h: Add prototypes for print_insn_riscv and
+	print_riscv_disassembler_options.
+	* elf/riscv.h: New file.
+	* opcode/riscv-opc.h: New file.
+	* opcode/riscv.h: New file.
+
 2016-10-17  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (DT_SYMTAB_SHNDX): Define.

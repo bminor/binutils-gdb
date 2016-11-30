@@ -1174,29 +1174,9 @@ mn10300_elf_check_relocs (bfd *abfd,
 	    default:                  tls_type = GOT_NORMAL; break;
 	    }
 
-	  if (sgot == NULL)
-	    {
-	      sgot = htab->root.sgot;
-	      BFD_ASSERT (sgot != NULL);
-	    }
-
-	  if (srelgot == NULL
-	      && (h != NULL || bfd_link_pic (info)))
-	    {
-	      srelgot = bfd_get_linker_section (dynobj, ".rela.got");
-	      if (srelgot == NULL)
-		{
-		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
-				    | SEC_READONLY);
-		  srelgot = bfd_make_section_anyway_with_flags (dynobj,
-								".rela.got",
-								flags);
-		  if (srelgot == NULL
-		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
-		    goto fail;
-		}
-	    }
+	  sgot = htab->root.sgot;
+	  srelgot = htab->root.srelgot;
+	  BFD_ASSERT (sgot != NULL && srelgot != NULL);
 
 	  if (r_type == R_MN10300_TLS_LD)
 	    {
@@ -1819,7 +1799,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 
       if (!htab->tls_ldm_got.rel_emitted)
 	{
-	  asection * srelgot = bfd_get_linker_section (dynobj, ".rela.got");
+	  asection *srelgot = htab->root.srelgot;
 	  Elf_Internal_Rela rel;
 
 	  BFD_ASSERT (srelgot != NULL);
@@ -1896,10 +1876,9 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 
 	      if (bfd_link_pic (info))
 		{
-		  asection * srelgot;
+		  asection *srelgot = htab->root.srelgot;;
 		  Elf_Internal_Rela outrel;
 
-		  srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 		  BFD_ASSERT (srelgot != NULL);
 
 		  outrel.r_offset = (sgot->output_section->vma
@@ -4973,7 +4952,7 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
       s->size += 4;
 
       /* We also need to make an entry in the .rela.plt section.  */
-      s = bfd_get_linker_section (dynobj, ".rela.plt");
+      s = htab->root.srelplt;
       BFD_ASSERT (s != NULL);
       s->size += sizeof (Elf32_External_Rela);
 
@@ -5056,7 +5035,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -5078,7 +5057,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
 
   if (htab->tls_ldm_got.refcount > 0)
     {
-      s = bfd_get_linker_section (dynobj, ".rela.got");
+      s = htab->root.srelgot;
       BFD_ASSERT (s != NULL);
       s->size += sizeof (Elf32_External_Rela);
     }
@@ -5242,7 +5221,7 @@ _bfd_mn10300_elf_finish_dynamic_symbol (bfd * output_bfd,
 
       splt = htab->root.splt;
       sgot = htab->root.sgotplt;
-      srel = bfd_get_linker_section (dynobj, ".rela.plt");
+      srel = htab->root.srelplt;
       BFD_ASSERT (splt != NULL && sgot != NULL && srel != NULL);
 
       /* Get the index in the procedure linkage table which
@@ -5320,7 +5299,7 @@ _bfd_mn10300_elf_finish_dynamic_symbol (bfd * output_bfd,
 
       /* This symbol has an entry in the global offset table.  Set it up.  */
       sgot = htab->root.sgot;
-      srel = bfd_get_linker_section (dynobj, ".rela.got");
+      srel = htab->root.srelgot;
       BFD_ASSERT (sgot != NULL && srel != NULL);
 
       rel.r_offset = (sgot->output_section->vma
@@ -5449,7 +5428,6 @@ _bfd_mn10300_elf_finish_dynamic_sections (bfd * output_bfd,
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
-	  const char * name;
 	  asection * s;
 
 	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
@@ -5460,36 +5438,19 @@ _bfd_mn10300_elf_finish_dynamic_sections (bfd * output_bfd,
 	      break;
 
 	    case DT_PLTGOT:
-	      name = ".got";
+	      s = htab->root.sgot;
 	      goto get_vma;
 
 	    case DT_JMPREL:
-	      name = ".rela.plt";
+	      s = htab->root.srelplt;
 	    get_vma:
-	      s = bfd_get_linker_section (dynobj, name);
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = bfd_get_linker_section (dynobj, ".rela.plt");
+	      s = htab->root.srelplt;
 	      dyn.d_un.d_val = s->size;
-	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	      break;
-
-	    case DT_RELASZ:
-	      /* My reading of the SVR4 ABI indicates that the
-		 procedure linkage table relocs (DT_JMPREL) should be
-		 included in the overall relocs (DT_RELA).  This is
-		 what Solaris does.  However, UnixWare can not handle
-		 that case.  Therefore, we override the DT_RELASZ entry
-		 here to make it not include the JMPREL relocs.  Since
-		 the linker script arranges for .rela.plt to follow all
-		 other relocation sections, we don't have to worry
-		 about changing the DT_RELA entry.  */
-	      s = bfd_get_linker_section (dynobj, ".rela.plt");
-	      if (s != NULL)
-		dyn.d_un.d_val -= s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 	    }
@@ -5632,5 +5593,6 @@ mn10300_elf_mkobject (bfd *abfd)
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
+#define elf_backend_dtrel_excludes_plt	1
 
 #include "elf32-target.h"

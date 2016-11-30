@@ -345,6 +345,7 @@ run_dump_test "movw-shared-3"
 run_dump_test "movw-shared-4"
 run_dump_test "rel32-reject"
 run_dump_test "rel32-reject-pie"
+run_dump_test "pie-bind-locally"
 
 # Exclude non-ARM-EABI targets.
 

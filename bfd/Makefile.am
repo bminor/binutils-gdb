@@ -148,6 +148,7 @@ ALL_MACHINES = \
 	cpu-plugin.lo \
 	cpu-powerpc.lo \
 	cpu-rs6000.lo \
+	cpu-riscv.lo \
 	cpu-rl78.lo \
 	cpu-rx.lo \
 	cpu-s390.lo \
@@ -235,6 +236,7 @@ ALL_MACHINES_CFILES = \
 	cpu-plugin.c \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
+	cpu-riscv.c \
 	cpu-rl78.c \
 	cpu-rx.c \
 	cpu-s390.c \
@@ -671,18 +673,21 @@ BFD64_BACKENDS = \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
 	elf64-ia64-vms.lo \
+	elfxx-ia64.lo \
+	elfn32-mips.lo \
 	elf64-mips.lo \
+	elfxx-mips.lo \
 	elf64-mmix.lo \
 	elf64-ppc.lo \
+	elf32-riscv.lo \
+	elf64-riscv.lo \
+	elfxx-riscv.lo \
 	elf64-s390.lo \
 	elf64-sh64.lo \
 	elf64-sparc.lo \
 	elf64-tilegx.lo \
 	elf64-x86-64.lo \
 	elf64.lo \
-	elfn32-mips.lo \
-	elfxx-ia64.lo \
-	elfxx-mips.lo \
 	mach-o-aarch64.lo \
 	mach-o-x86-64.lo \
 	mmo.lo \
@@ -722,6 +727,7 @@ BFD64_BACKENDS_CFILES = \
 	elfxx-aarch64.c \
 	elfxx-ia64.c \
 	elfxx-mips.c \
+	elfxx-riscv.c \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
@@ -785,7 +791,9 @@ SOURCE_CFILES = \
 
 BUILD_CFILES = \
 	elf32-aarch64.c elf64-aarch64.c \
-	elf32-ia64.c elf64-ia64.c peigen.c pepigen.c pex64igen.c
+	elf32-ia64.c elf64-ia64.c \
+	elf32-riscv.c elf64-riscv.c \
+	peigen.c pepigen.c pex64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
@@ -954,6 +962,18 @@ elf64-ia64.c : elfnn-ia64.c
 	rm -f elf64-ia64.c
 	$(SED) -e s/NN/64/g < $(srcdir)/elfnn-ia64.c > elf64-ia64.new
 	mv -f elf64-ia64.new elf64-ia64.c
+
+elf32-riscv.c : elfnn-riscv.c
+	rm -f elf32-riscv.c
+	echo "#line 1 \"$(srcdir)/elfnn-riscv.c\"" > elf32-riscv.new
+	sed -e s/NN/32/g < $(srcdir)/elfnn-riscv.c >> elf32-riscv.new
+	mv -f elf32-riscv.new elf32-riscv.c
+
+elf64-riscv.c : elfnn-riscv.c
+	rm -f elf64-riscv.c
+	echo "#line 1 \"$(srcdir)/elfnn-riscv.c\"" > elf64-riscv.new
+	sed -e s/NN/64/g < $(srcdir)/elfnn-riscv.c >> elf64-riscv.new
+	mv -f elf64-riscv.new elf64-riscv.c
 
 peigen.c : peXXigen.c
 	rm -f peigen.c

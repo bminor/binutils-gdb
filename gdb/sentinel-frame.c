@@ -51,7 +51,7 @@ sentinel_frame_prev_register (struct frame_info *this_frame,
   struct value *value;
 
   value = regcache_cooked_read_value (cache->regcache, regnum);
-  VALUE_FRAME_ID (value) = get_frame_id (this_frame);
+  VALUE_NEXT_FRAME_ID (value) = sentinel_frame_id;
 
   return value;
 }

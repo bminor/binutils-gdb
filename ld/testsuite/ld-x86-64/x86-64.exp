@@ -991,6 +991,14 @@ if { [isnative] && [which $CC] != 0 } {
 		"plt-main.out" \
 		"-fPIC" \
 	    ] \
+	    [list \
+		"Run pr20800" \
+		"-pie -z now" \
+		"" \
+		{ pr20800a.S pr20800b.S } \
+		"pr20800" \
+		"pass.out" \
+	    ] \
 	]
     }
 

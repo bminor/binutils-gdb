@@ -2874,7 +2874,7 @@ class Output_data_dynamic : public Output_section_data
       DYNAMIC_NUMBER = -1U,
       // Section size.
       DYNAMIC_SECTION_SIZE = -2U,
-      // Symbol adress.
+      // Symbol address.
       DYNAMIC_SYMBOL = -3U,
       // String.
       DYNAMIC_STRING = -4U,

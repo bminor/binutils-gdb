@@ -540,7 +540,7 @@ contains_register(symbolS *sym)
     return 0;
 }
 
-/* Parse general expression, not loooking for indexed adressing.  */
+/* Parse general expression, not loooking for indexed addressing.  */
 static const char *
 parse_exp_not_indexed (const char *s, expressionS *op)
 {

@@ -1231,7 +1231,7 @@ This should work unless it involves constant data structures referencing symbols
 	      undef->type = bfd_link_hash_defweak;
 	      /* We replace original name with __imp_ prefixed, this
 		 1) may trash memory 2) leads to duplicate symbol generation.
-		 Still, IMHO it's better than having name poluted.  */
+		 Still, IMHO it's better than having name polluted.  */
 	      undef->root.string = sym->root.string;
 	      undef->u.def.value = sym->u.def.value;
 	      undef->u.def.section = sym->u.def.section;

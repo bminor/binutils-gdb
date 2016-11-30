@@ -2240,7 +2240,6 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 	      GET_SYMBOL_OR_SECTION (DT_PLTGOT, NULL, ".plt")
 	      GET_SYMBOL_OR_SECTION (DT_JMPREL, NULL, ".rela.plt")
 	      GET_SYMBOL_OR_SECTION (DT_PLTRELSZ, NULL, ".rela.plt")
-	      GET_SYMBOL_OR_SECTION (DT_RELASZ, NULL, ".rela.plt")
 	      GET_SYMBOL_OR_SECTION (DT_VERSYM, NULL, ".gnu.version")
 	      GET_SYMBOL_OR_SECTION (DT_VERDEF, NULL, ".gnu.version_d")
 	      GET_SYMBOL_OR_SECTION (DT_VERNEED, NULL, ".gnu.version_r")
@@ -2287,12 +2286,6 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 
 		  case DT_PLTRELSZ:
 		    internal_dyn.d_un.d_val = s->size;
-		    do_it = TRUE;
-		    break;
-
-		  case DT_RELASZ:
-		    if (s != NULL)
-		      internal_dyn.d_un.d_val -= s->size;
 		    do_it = TRUE;
 		    break;
 
@@ -2370,7 +2363,7 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
 
       /* Set the contents of the .interp section to the
 	 interpreter.  */
-      if (!bfd_link_pic (info))
+      if (!bfd_link_pic (info) && !info->nointerp)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -2628,6 +2621,7 @@ elf32_arc_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_rela_plts_and_copies_p 1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
+#define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_may_use_rel_p	0
 #define elf_backend_may_use_rela_p	1

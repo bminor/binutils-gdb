@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This tool excercise any incomplete reads handling in the testsuite by
+# This tool exercises any incomplete reads handling in the testsuite by
 # simulating read always returns just 1 character.
 # Testsuite incompatibilities are tracked as GDB PR testsuite/12649.
 

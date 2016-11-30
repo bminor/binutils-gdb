@@ -667,7 +667,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 {
   struct gdb_exception except = exception_none;
   value_object *self_value = (value_object *) self;
-  char *field = NULL;
+  gdb::unique_xmalloc_ptr<char> field;
   struct type *base_class_type = NULL, *field_type = NULL;
   long bitpos = -1;
   PyObject *result = NULL;
@@ -754,7 +754,8 @@ valpy_getitem (PyObject *self, PyObject *key)
       struct value *res_val = NULL;
 
       if (field)
-	res_val = value_struct_elt (&tmp, NULL, field, 0, NULL);
+	res_val = value_struct_elt (&tmp, NULL, field.get (), NULL,
+				    "struct/class/union");
       else if (bitpos >= 0)
 	res_val = value_struct_elt_bitpos (&tmp, bitpos, field_type,
 					   "struct/class/union");
@@ -803,7 +804,6 @@ valpy_getitem (PyObject *self, PyObject *key)
     }
   END_CATCH
 
-  xfree (field);
   GDB_PY_HANDLE_EXCEPTION (except);
 
   return result;
@@ -895,7 +895,7 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
 static PyObject *
 valpy_str (PyObject *self)
 {
-  char *s = NULL;
+  std::string s;
   PyObject *result;
   struct value_print_options opts;
 
@@ -909,7 +909,7 @@ valpy_str (PyObject *self)
 
       common_val_print (((value_object *) self)->value, stb, 0,
 			&opts, python_language);
-      s = ui_file_xstrdup (stb, NULL);
+      s = ui_file_as_string (stb);
 
       do_cleanups (old_chain);
     }
@@ -919,8 +919,7 @@ valpy_str (PyObject *self)
     }
   END_CATCH
 
-  result = PyUnicode_Decode (s, strlen (s), host_charset (), NULL);
-  xfree (s);
+  result = PyUnicode_Decode (s.c_str (), s.length (), host_charset (), NULL);
 
   return result;
 }
@@ -1663,17 +1662,11 @@ convert_value_from_python (PyObject *obj)
 	}
       else if (gdbpy_is_string (obj))
 	{
-	  char *s;
-
-	  s = python_string_to_target_string (obj);
+	  gdb::unique_xmalloc_ptr<char> s
+	    = python_string_to_target_string (obj);
 	  if (s != NULL)
-	    {
-	      struct cleanup *old;
-
-	      old = make_cleanup (xfree, s);
-	      value = value_cstring (s, strlen (s), builtin_type_pychar);
-	      do_cleanups (old);
-	    }
+	    value = value_cstring (s.get (), strlen (s.get ()),
+				   builtin_type_pychar);
 	}
       else if (PyObject_TypeCheck (obj, &value_object_type))
 	value = value_copy (((value_object *) obj)->value);

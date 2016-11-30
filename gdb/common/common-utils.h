@@ -20,6 +20,8 @@
 #ifndef COMMON_UTILS_H
 #define COMMON_UTILS_H
 
+#include <string>
+
 /* If possible, define FUNCTION_NAME, a macro containing the name of
    the function being defined.  Since this macro may not always be
    defined, all uses must be protected by appropriate macro definition
@@ -55,6 +57,10 @@ char *xstrvprintf (const char *format, va_list ap)
 /* Like snprintf, but throw an error if the output buffer is too small.  */
 int xsnprintf (char *str, size_t size, const char *format, ...)
      ATTRIBUTE_PRINTF (3, 4);
+
+/* Returns a std::string built from a printf-style format string.  */
+std::string string_printf (const char* fmt, ...)
+  ATTRIBUTE_PRINTF (1, 2);
 
 /* Make a copy of the string at PTR with LEN characters
    (and add a null character at the end in the copy).

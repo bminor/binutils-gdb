@@ -1112,8 +1112,15 @@ value_assign (struct value *toval, struct value *fromval)
 	struct gdbarch *gdbarch;
 	int value_reg;
 
-	/* Figure out which frame this is in currently.  */
+	/* Figure out which frame this is in currently.
+	
+	   We use VALUE_FRAME_ID for obtaining the value's frame id instead of
+	   VALUE_NEXT_FRAME_ID due to requiring a frame which may be passed to
+	   put_frame_register_bytes() below.  That function will (eventually)
+	   perform the necessary unwind operation by first obtaining the next
+	   frame.  */
 	frame = frame_find_by_id (VALUE_FRAME_ID (toval));
+
 	value_reg = VALUE_REGNUM (toval);
 
 	if (!frame)
@@ -1333,7 +1340,7 @@ address_of_variable (struct symbol *var, const struct block *b)
 	struct frame_info *frame;
 	const char *regname;
 
-	frame = frame_find_by_id (VALUE_FRAME_ID (val));
+	frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (val));
 	gdb_assert (frame);
 
 	regname = gdbarch_register_name (get_frame_arch (frame),
@@ -3820,7 +3827,6 @@ value_slice (struct value *array, int lowbound, int length)
       }
 
     set_value_component_location (slice, array);
-    VALUE_FRAME_ID (slice) = VALUE_FRAME_ID (array);
     set_value_offset (slice, value_offset (array) + offset);
   }
 

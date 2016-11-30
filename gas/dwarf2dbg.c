@@ -1223,7 +1223,7 @@ dwarf2dbg_convert_frag (fragS *frag)
 
   if (DWARF2_USE_FIXED_ADVANCE_PC)
     {
-      /* If linker relaxation is enabled then the distance bewteen the two
+      /* If linker relaxation is enabled then the distance between the two
 	 symbols in the frag->fr_symbol expression might change.  Hence we
 	 cannot rely upon the value computed by resolve_symbol_value.
 	 Instead we leave the expression unfinalized and allow
@@ -1280,7 +1280,7 @@ process_entries (segT seg, struct line_entry *e)
       char * name;
       const char * sec_name;
 
-      /* Switch to the relevent sub-section before we start to emit
+      /* Switch to the relevant sub-section before we start to emit
 	 the line number table.
 
 	 FIXME: These sub-sections do not have a normal Line Number

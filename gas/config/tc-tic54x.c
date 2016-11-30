@@ -1670,7 +1670,7 @@ tic54x_align_words (int arg)
   s_align_bytes (count << 1);
 }
 
-/* Initialize multiple-bit fields withing a single word of memory.  */
+/* Initialize multiple-bit fields within a single word of memory.  */
 
 static void
 tic54x_field (int ignore ATTRIBUTE_UNUSED)

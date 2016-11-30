@@ -216,7 +216,7 @@
         \mnem\()        r3,[0xffffffff,1]
         \mnem\()        r4,[0x12345678]
         \mnem\()        r5,[r6,r7]
-        \mnem\()        r8,[r9,0xffffffff]
+        \mnem\()        r8,[r9,0xfeffffff]
         \mnem\()        r10,[0xffffffff,r11]
         .endm
 

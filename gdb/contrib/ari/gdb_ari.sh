@@ -567,16 +567,6 @@ Function name in first column should be restricted to function implementation"
 }
 
 
-# Functions without any parameter should have (void)
-# after their name not simply ().
-BEGIN { doc["no parameter function"] = "\
-Function having no parameter should be declared with funcname (void)."
-    category["no parameter function"] = ari_code
-}
-/^[a-zA-Z][a-z0-9A-Z_]*[[:space:]]*\(\)/ {
-    fail("no parameter function")
-}
-
 BEGIN { doc["hash"] = "\
 Do not use ` #...'\'', instead use `#...'\''(some compilers only correctly \
 parse a C preprocessor directive when `#'\'' is the first character on \
@@ -1095,6 +1085,22 @@ Do not use vasprintf(), instead use xstrvprintf"
 }
 /(^|[^_[:alnum:]])vasprintf[[:space:]]*\(/ {
     fail("vasprintf")
+}
+
+BEGIN { doc["printf_vma"] = "\
+Do not use printf_vma, instead use paddress or phex_nz"
+    category["printf_vma"] = ari_code
+}
+/(^|[^_[:alnum:]])printf_vma[[:space:]]*\(/ {
+    fail("printf_vma")
+}
+
+BEGIN { doc["sprintf_vma"] = "\
+Do not use sprintf_vma, instead use paddress or phex_nz"
+    category["sprintf_vma"] = ari_code
+}
+/(^|[^_[:alnum:]])sprintf_vma[[:space:]]*\(/ {
+    fail("sprintf_vma")
 }
 
 # More generic memory operations

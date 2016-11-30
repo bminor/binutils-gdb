@@ -1287,7 +1287,8 @@ score_elf_create_got_section (bfd *abfd,
   /* We have to use an alignment of 2**4 here because this is hardcoded
      in the function stub generation and in the linker script.  */
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
-   if (s == NULL
+  elf_hash_table (info)->sgot = s;
+  if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
@@ -1304,6 +1305,7 @@ score_elf_create_got_section (bfd *abfd,
   h->non_elf = 0;
   h->def_regular = 1;
   h->type = STT_OBJECT;
+  elf_hash_table (info)->hgot = h;
 
   if (bfd_link_pic (info)
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -1850,9 +1852,12 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
       bh = bfd_link_hash_lookup (info->hash, "_gp", 0, 0, 1);
       if (bh != NULL && bh->type == bfd_link_hash_defined)
-        elf_gp (output_bfd) = (bh->u.def.value
-                               + bh->u.def.section->output_section->vma
-                               + bh->u.def.section->output_offset);
+	{
+	  elf_gp (output_bfd) = (bh->u.def.value
+				 + bh->u.def.section->output_offset);
+	  if (bh->u.def.section->output_section)
+	    elf_gp (output_bfd) += bh->u.def.section->output_section->vma;
+	}
       else if (bfd_link_relocatable (info))
         {
           bfd_vma lo = -1;
@@ -3438,8 +3443,7 @@ s7_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
               break;
 
             case DT_PLTGOT:
-              name = ".got";
-              s = bfd_get_linker_section (dynobj, name);
+              s = elf_hash_table (info)->sgot;
               dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 

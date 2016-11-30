@@ -424,13 +424,9 @@ frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
   internal_error (__FILE__, __LINE__, _("Bad register number %d"), reg);
 }
 
-static const unsigned char *
-frv_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenp)
-{
-  static unsigned char breakpoint[] = {0xc0, 0x70, 0x00, 0x01};
-  *lenp = sizeof (breakpoint);
-  return breakpoint;
-}
+constexpr gdb_byte frv_break_insn[] = {0xc0, 0x70, 0x00, 0x01};
+
+typedef BP_MANIPULATION (frv_break_insn) frv_breakpoint;
 
 /* Define the maximum number of instructions which may be packed into a
    bundle (VLIW instruction).  */
@@ -1537,7 +1533,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_skip_main_prologue (gdbarch, frv_skip_main_prologue);
-  set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, frv_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, frv_breakpoint::bp_from_kind);
   set_gdbarch_adjust_breakpoint_address
     (gdbarch, frv_adjust_breakpoint_address);
 

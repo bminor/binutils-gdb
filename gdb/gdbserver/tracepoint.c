@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "gdb_sys_time.h"
+#include <chrono>
 #include <inttypes.h>
 #include "ax.h"
 #include "tdesc.h"
@@ -7410,12 +7410,10 @@ getauxval (unsigned long type)
 static LONGEST
 get_timestamp (void)
 {
-   struct timeval tv;
+  using namespace std::chrono;
 
-   if (gettimeofday (&tv, 0) != 0)
-     return -1;
-   else
-     return (LONGEST) tv.tv_sec * 1000000 + tv.tv_usec;
+  steady_clock::time_point now = steady_clock::now ();
+  return duration_cast<microseconds> (now.time_since_epoch ()).count ();
 }
 
 void

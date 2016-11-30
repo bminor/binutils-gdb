@@ -444,7 +444,12 @@ enum cmdarg_kind
 };
 
 /* Arguments of --command option and its counterpart.  */
-struct cmdarg {
+struct cmdarg
+{
+  cmdarg (cmdarg_kind type_, char *string_)
+    : type (type_), string (string_)
+  {}
+
   /* Type of this option.  */
   enum cmdarg_kind type;
 
@@ -745,32 +750,16 @@ captured_main_1 (struct captured_main_args *context)
 	    pidarg = optarg;
 	    break;
 	  case 'x':
-	    {
-	      struct cmdarg cmdarg = { CMDARG_FILE, optarg };
-
-	      cmdarg_vec.push_back (cmdarg);
-	    }
+	    cmdarg_vec.emplace_back (CMDARG_FILE, optarg);
 	    break;
 	  case 'X':
-	    {
-	      struct cmdarg cmdarg = { CMDARG_COMMAND, optarg };
-
-	      cmdarg_vec.push_back (cmdarg);
-	    }
+	    cmdarg_vec.emplace_back (CMDARG_COMMAND, optarg);
 	    break;
 	  case OPT_IX:
-	    {
-	      struct cmdarg cmdarg = { CMDARG_INIT_FILE, optarg };
-
-	      cmdarg_vec.push_back (cmdarg);
-	    }
+	    cmdarg_vec.emplace_back (CMDARG_INIT_FILE, optarg);
 	    break;
 	  case OPT_IEX:
-	    {
-	      struct cmdarg cmdarg = { CMDARG_INIT_COMMAND, optarg };
-
-	      cmdarg_vec.push_back (cmdarg);
-	    }
+	    cmdarg_vec.emplace_back (CMDARG_INIT_COMMAND, optarg);
 	    break;
 	  case 'B':
 	    batch_flag = batch_silent = 1;

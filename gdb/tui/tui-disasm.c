@@ -172,13 +172,13 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   enum tui_status ret = TUI_FAILURE;
   int i;
   int offset = TUI_DISASM_WIN->detail.source_info.horizontal_offset;
-  int max_lines;
+  int max_lines, line_width;
   CORE_ADDR cur_pc;
   struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_default_tab_len ();
   struct tui_asm_line *asm_lines;
   int insn_pos;
-  int addr_size, max_size;
+  int addr_size, insn_size;
   char *line;
   
   if (pc == 0)
@@ -193,8 +193,9 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   TUI_DISASM_WIN->detail.source_info.start_line_or_addr.u.addr = pc;
   cur_pc = locator->content[0]->which_element.locator.addr;
 
-  max_lines = TUI_DISASM_WIN->generic.height - 2;	/* Account for
-							   hilite.  */
+  /* Window size, excluding highlight box.  */
+  max_lines = TUI_DISASM_WIN->generic.height - 2;
+  line_width = TUI_DISASM_WIN->generic.width - 2;
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   asm_lines = XALLOCAVEC (struct tui_asm_line, max_lines);
@@ -202,9 +203,9 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   tui_disassemble (gdbarch, asm_lines, pc, max_lines);
 
-  /* See what is the maximum length of an address and of a line.  */
+  /* Determine maximum address- and instruction lengths.  */
   addr_size = 0;
-  max_size = 0;
+  insn_size = 0;
   for (i = 0; i < max_lines; i++)
     {
       size_t len = strlen (asm_lines[i].addr_string);
@@ -212,15 +213,16 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (len > addr_size)
         addr_size = len;
 
-      len = strlen (asm_lines[i].insn) + tab_len;
-      if (len > max_size)
-        max_size = len;
+      len = strlen (asm_lines[i].insn);
+      if (len > insn_size)
+	insn_size = len;
     }
-  max_size += addr_size + tab_len;
+
+  /* Align instructions to the same column.  */
+  insn_pos = (1 + (addr_size / tab_len)) * tab_len;
 
   /* Allocate memory to create each line.  */
-  line = (char*) alloca (max_size);
-  insn_pos = (1 + (addr_size / tab_len)) * tab_len;
+  line = (char*) alloca (insn_pos + insn_size + 1);
 
   /* Now construct each line.  */
   for (i = 0; i < max_lines; i++)
@@ -233,20 +235,15 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
       src = &element->which_element.source;
       strcpy (line, asm_lines[i].addr_string);
       cur_len = strlen (line);
-
-      /* Add spaces to make the instructions start on the same
-	 column.  */
-      while (cur_len < insn_pos)
-        {
-          strcat (line, " ");
-          cur_len++;
-        }
-
-      strcat (line, asm_lines[i].insn);
+      memset (line + cur_len, ' ', insn_pos - cur_len);
+      strcpy (line + insn_pos, asm_lines[i].insn);
 
       /* Now copy the line taking the offset into account.  */
       if (strlen (line) > offset)
-        strcpy (src->line, &line[offset]);
+	{
+	  strncpy (src->line, &line[offset], line_width);
+	  src->line[line_width] = '\0';
+	}
       else
         src->line[0] = '\0';
 

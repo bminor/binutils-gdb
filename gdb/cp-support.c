@@ -288,14 +288,12 @@ inspect_type (struct demangle_parse_info *info,
 
 		 Canonicalize the name again, and store it in the
 		 current node (RET_COMP).  */
-	      char *canon = cp_canonicalize_string_no_typedefs (name);
+	      std::string canon = cp_canonicalize_string_no_typedefs (name);
 
-	      if (canon != NULL)
+	      if (!canon.empty ())
 		{
-		  /* Copy the canonicalization into the obstack and
-		     free CANON.  */
-		  name = copy_string_to_obstack (&info->obstack, canon, &len);
-		  xfree (canon);
+		  /* Copy the canonicalization into the obstack.  */
+		  name = copy_string_to_obstack (&info->obstack, canon.c_str (), &len);
 		}
 
 	      ret_comp->u.s_name.s = name;
@@ -529,22 +527,21 @@ replace_typedefs (struct demangle_parse_info *info,
     }
 }
 
-/* Parse STRING and convert it to canonical form, resolving any typedefs.
-   If parsing fails, or if STRING is already canonical, return NULL.
-   Otherwise return the canonical form.  The return value is allocated via
-   xmalloc.  If FINDER is not NULL, then type components are passed to
-   FINDER to be looked up.  DATA is passed verbatim to FINDER.  */
+/* Parse STRING and convert it to canonical form, resolving any
+   typedefs.  If parsing fails, or if STRING is already canonical,
+   return the empty string.  Otherwise return the canonical form.  If
+   FINDER is not NULL, then type components are passed to FINDER to be
+   looked up.  DATA is passed verbatim to FINDER.  */
 
-char *
+std::string
 cp_canonicalize_string_full (const char *string,
 			     canonicalization_ftype *finder,
 			     void *data)
 {
-  char *ret;
+  std::string ret;
   unsigned int estimated_len;
   struct demangle_parse_info *info;
 
-  ret = NULL;
   estimated_len = strlen (string) * 2;
   info = cp_demangled_name_to_comp (string, NULL);
   if (info != NULL)
@@ -554,18 +551,15 @@ cp_canonicalize_string_full (const char *string,
 
       /* Convert the tree back into a string.  */
       ret = cp_comp_to_string (info->tree, estimated_len);
-      gdb_assert (ret != NULL);
+      gdb_assert (!ret.empty ());
 
       /* Free the parse information.  */
       cp_demangled_name_parse_free (info);
 
       /* Finally, compare the original string with the computed
 	 name, returning NULL if they are the same.  */
-      if (strcmp (string, ret) == 0)
-	{
-	  xfree (ret);
-	  return NULL;
-	}
+      if (ret == string)
+	return std::string ();
     }
 
   return ret;
@@ -574,46 +568,42 @@ cp_canonicalize_string_full (const char *string,
 /* Like cp_canonicalize_string_full, but always passes NULL for
    FINDER.  */
 
-char *
+std::string
 cp_canonicalize_string_no_typedefs (const char *string)
 {
   return cp_canonicalize_string_full (string, NULL, NULL);
 }
 
 /* Parse STRING and convert it to canonical form.  If parsing fails,
-   or if STRING is already canonical, return NULL.  Otherwise return
-   the canonical form.  The return value is allocated via xmalloc.  */
+   or if STRING is already canonical, return the empty string.
+   Otherwise return the canonical form.  */
 
-char *
+std::string
 cp_canonicalize_string (const char *string)
 {
   struct demangle_parse_info *info;
   unsigned int estimated_len;
-  char *ret;
 
   if (cp_already_canonical (string))
-    return NULL;
+    return std::string ();
 
   info = cp_demangled_name_to_comp (string, NULL);
   if (info == NULL)
-    return NULL;
+    return std::string ();
 
   estimated_len = strlen (string) * 2;
-  ret = cp_comp_to_string (info->tree, estimated_len);
+  std::string ret = cp_comp_to_string (info->tree, estimated_len);
   cp_demangled_name_parse_free (info);
 
-  if (ret == NULL)
+  if (ret.empty ())
     {
       warning (_("internal error: string \"%s\" failed to be canonicalized"),
 	       string);
-      return NULL;
+      return std::string ();
     }
 
-  if (strcmp (string, ret) == 0)
-    {
-      xfree (ret);
-      return NULL;
-    }
+  if (ret == string)
+    return std::string ();
 
   return ret;
 }

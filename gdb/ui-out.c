@@ -87,8 +87,6 @@ struct ui_out_table
 
 
 /* The ui_out structure */
-/* Any change here requires a corresponding one in the initialization
-   of the default uiout, which is statically initialized.  */
 
 struct ui_out
   {
@@ -171,17 +169,15 @@ static void uo_field_fmt (struct ui_out *uiout, int fldno, int width,
      ATTRIBUTE_PRINTF (6, 0);
 static void uo_spaces (struct ui_out *uiout, int numspaces);
 static void uo_text (struct ui_out *uiout, const char *string);
-static void uo_message (struct ui_out *uiout, int verbosity,
+static void uo_message (struct ui_out *uiout,
 			const char *format, va_list args)
-     ATTRIBUTE_PRINTF (3, 0);
-static void uo_wrap_hint (struct ui_out *uiout, char *identstring);
+     ATTRIBUTE_PRINTF (2, 0);
+static void uo_wrap_hint (struct ui_out *uiout, const char *identstring);
 static void uo_flush (struct ui_out *uiout);
 static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);
-static void uo_data_destroy (struct ui_out *uiout);
 
 /* Prototypes for local functions */
 
-extern void _initialize_ui_out (void);
 static void append_header_to_list (struct ui_out *uiout, int width,
 				   enum ui_align alignment, const char *col_name,
 				   const char *colhdr);
@@ -425,16 +421,13 @@ ui_out_field_stream (struct ui_out *uiout,
 		     const char *fldname,
 		     struct ui_file *stream)
 {
-  long length;
-  char *buffer = ui_file_xstrdup (stream, &length);
-  struct cleanup *old_cleanup = make_cleanup (xfree, buffer);
+  std::string buffer = ui_file_as_string (stream);
 
-  if (length > 0)
-    ui_out_field_string (uiout, fldname, buffer);
+  if (!buffer.empty ())
+    ui_out_field_string (uiout, fldname, buffer.c_str ());
   else
     ui_out_field_skip (uiout, fldname);
   ui_file_rewind (stream);
-  do_cleanups (old_cleanup);
 }
 
 /* Used to omit a field.  */
@@ -501,18 +494,17 @@ ui_out_text (struct ui_out *uiout,
 }
 
 void
-ui_out_message (struct ui_out *uiout, int verbosity,
-		const char *format,...)
+ui_out_message (struct ui_out *uiout, const char *format, ...)
 {
   va_list args;
 
   va_start (args, format);
-  uo_message (uiout, verbosity, format, args);
+  uo_message (uiout, format, args);
   va_end (args);
 }
 
 void
-ui_out_wrap_hint (struct ui_out *uiout, char *identstring)
+ui_out_wrap_hint (struct ui_out *uiout, const char *identstring)
 {
   uo_wrap_hint (uiout, identstring);
 }
@@ -529,41 +521,11 @@ ui_out_redirect (struct ui_out *uiout, struct ui_file *outstream)
   return uo_redirect (uiout, outstream);
 }
 
-/* Set the flags specified by the mask given.  */
-int
-ui_out_set_flags (struct ui_out *uiout, int mask)
-{
-  int oldflags = uiout->flags;
-
-  uiout->flags |= mask;
-  return oldflags;
-}
-
-/* Clear the flags specified by the mask given.  */
-int
-ui_out_clear_flags (struct ui_out *uiout, int mask)
-{
-  int oldflags = uiout->flags;
-
-  uiout->flags &= ~mask;
-  return oldflags;
-}
-
 /* Test the flags against the mask given.  */
 int
 ui_out_test_flags (struct ui_out *uiout, int mask)
 {
   return (uiout->flags & mask);
-}
-
-/* Obtain the current verbosity level (as stablished by the
-   'set verbositylevel' command.  */
-
-int
-ui_out_get_verblvl (struct ui_out *uiout)
-{
-  /* FIXME: not implemented yet.  */
-  return 0;
 }
 
 int
@@ -700,17 +662,17 @@ uo_text (struct ui_out *uiout,
 }
 
 void
-uo_message (struct ui_out *uiout, int verbosity,
+uo_message (struct ui_out *uiout,
 	    const char *format,
 	    va_list args)
 {
   if (!uiout->impl->message)
     return;
-  uiout->impl->message (uiout, verbosity, format, args);
+  uiout->impl->message (uiout, format, args);
 }
 
 void
-uo_wrap_hint (struct ui_out *uiout, char *identstring)
+uo_wrap_hint (struct ui_out *uiout, const char *identstring)
 {
   if (!uiout->impl->wrap_hint)
     return;
@@ -730,17 +692,7 @@ uo_redirect (struct ui_out *uiout, struct ui_file *outstream)
 {
   if (!uiout->impl->redirect)
     return -1;
-  uiout->impl->redirect (uiout, outstream);
-  return 0;
-}
-
-void
-uo_data_destroy (struct ui_out *uiout)
-{
-  if (!uiout->impl->data_destroy)
-    return;
-
-  uiout->impl->data_destroy (uiout);
+  return uiout->impl->redirect (uiout, outstream);
 }
 
 /* local functions */
@@ -901,7 +853,7 @@ ui_out_query_field (struct ui_out *uiout, int colno,
   return 0;
 }
 
-/* Initalize private members at startup.  */
+/* Initialize private members at startup.  */
 
 struct ui_out *
 ui_out_new (const struct ui_out_impl *impl, void *data,
@@ -928,34 +880,4 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   uiout->table.header_last = NULL;
   uiout->table.header_next = NULL;
   return uiout;
-}
-
-/* Free  UIOUT and the memory areas it references.  */
-
-void
-ui_out_destroy (struct ui_out *uiout)
-{
-  int i;
-  struct ui_out_level *current;
-
-  /* Make sure that all levels are freed in the case where levels have
-     been pushed, but not popped before the ui_out object is
-     destroyed.  */
-  for (i = 0;
-       VEC_iterate (ui_out_level_p, uiout->levels, i, current);
-       ++i)
-    xfree (current);
-
-  VEC_free (ui_out_level_p, uiout->levels);
-  uo_data_destroy (uiout);
-  clear_table (uiout);
-  xfree (uiout);
-}
-
-/* Standard gdb initialization hook.  */
-
-void
-_initialize_ui_out (void)
-{
-  /* nothing needs to be done */
 }

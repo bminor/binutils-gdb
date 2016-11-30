@@ -879,6 +879,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
     name_at_pc = NULL;
 
   function = allocate_value (func_func_type);
+  VALUE_LVAL (function) = lval_memory;
   set_value_address (function, pc);
 
   /* STT_GNU_IFUNC resolver functions usually receive the HWCAP vector as
@@ -992,6 +993,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   gdb_assert (b->loc->next == NULL);
 
   func_func = allocate_value (func_func_type);
+  VALUE_LVAL (func_func) = lval_memory;
   set_value_address (func_func, b->loc->related_address);
 
   value = allocate_value (value_type);
@@ -1136,7 +1138,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
     {
       long i;
 
-      gdb::unique_ptr<asymbol *[]>
+      std::unique_ptr<asymbol *[]>
 	synth_symbol_table (new asymbol *[synthcount]);
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;

@@ -13,11 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-standard_testfile start.c
+standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} $srcfile] } {
-    return -1
+set ccopts {debug quiet}
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" \
+	  executable $ccopts] != "" } {
+    # Maybe the compiler can't handle arbitrarily long identfier names.
+    # Try with a shorter version.
+    lappend ccopts "additional_flags=-DSHORT_IDENTIFIERS"
+    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" \
+	      executable $ccopts] != "" } {
+	untested "compile"
+	return -1
+    }
 }
+
+clean_restart "$binfile"
 
 if {[skip_tui_tests]} {
     # TUI support is disabled.  Check for error message.

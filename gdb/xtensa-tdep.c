@@ -1959,6 +1959,16 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
   return sp + SP_ALIGNMENT;
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
+static int
+xtensa_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  if (gdbarch_tdep (gdbarch)->isa_use_density_instructions)
+    return 2;
+  else
+    return 4;
+}
 
 /* Return a breakpoint for the current location of PC.  We always use
    the density version if we have density instructions (regardless of the
@@ -1969,42 +1979,33 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 #define DENSITY_BIG_BREAKPOINT { 0xd2, 0x0f }
 #define DENSITY_LITTLE_BREAKPOINT { 0x2d, 0xf0 }
 
-static const unsigned char *
-xtensa_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			   int *lenptr)
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
+
+static const gdb_byte *
+xtensa_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
-  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
-  static unsigned char density_big_breakpoint[] = DENSITY_BIG_BREAKPOINT;
-  static unsigned char density_little_breakpoint[] = DENSITY_LITTLE_BREAKPOINT;
+  *size = kind;
 
-  DEBUGTRACE ("xtensa_breakpoint_from_pc (pc = 0x%08x)\n", (int) *pcptr);
-
-  if (gdbarch_tdep (gdbarch)->isa_use_density_instructions)
+  if (kind == 4)
     {
+      static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
+      static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	{
-	  *lenptr = sizeof (density_big_breakpoint);
-	  return density_big_breakpoint;
-	}
+	return big_breakpoint;
       else
-	{
-	  *lenptr = sizeof (density_little_breakpoint);
-	  return density_little_breakpoint;
-	}
+	return little_breakpoint;
     }
   else
     {
+      static unsigned char density_big_breakpoint[] = DENSITY_BIG_BREAKPOINT;
+      static unsigned char density_little_breakpoint[]
+	= DENSITY_LITTLE_BREAKPOINT;
+
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	{
-	  *lenptr = sizeof (big_breakpoint);
-	  return big_breakpoint;
-	}
+	return density_big_breakpoint;
       else
-	{
-	  *lenptr = sizeof (little_breakpoint);
-	  return little_breakpoint;
-	}
+	return density_little_breakpoint;
     }
 }
 
@@ -2400,7 +2401,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
      arg was not supplied to avoid probing beyond the end of valid memory.
      If memory is full of garbage that classifies as c0opc_uninteresting.
      If this fails (eg. if no symbols) pc ends up 0 as it was.
-     Intialize the Call0 frame and register tracking info.
+     Initialize the Call0 frame and register tracking info.
      Assume it's Call0 until an 'entry' instruction is encountered.
      Assume we may be in the prologue until we hit a flow control instr.  */
 
@@ -3065,8 +3066,6 @@ xtensa_verify_config (struct gdbarch *gdbarch)
   struct ui_file *log;
   struct cleanup *cleanups;
   struct gdbarch_tdep *tdep;
-  long length;
-  char *buf;
 
   tdep = gdbarch_tdep (gdbarch);
   log = mem_fileopen ();
@@ -3098,11 +3097,10 @@ xtensa_verify_config (struct gdbarch *gdbarch)
   if (tdep->a0_base == -1)
     fprintf_unfiltered (log, _("\n\ta0_base: No Ax registers"));
 
-  buf = ui_file_xstrdup (log, &length);
-  make_cleanup (xfree, buf);
-  if (length > 0)
+  std::string buf = ui_file_as_string (log);
+  if (!buf.empty ())
     internal_error (__FILE__, __LINE__,
-		    _("the following are invalid: %s"), buf);
+		    _("the following are invalid: %s"), buf.c_str ());
   do_cleanups (cleanups);
 }
 
@@ -3239,7 +3237,10 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Set breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, xtensa_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       xtensa_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       xtensa_sw_breakpoint_from_kind);
 
   /* After breakpoint instruction or illegal instruction, pc still
      points at break instruction, so don't decrement.  */

@@ -1,3 +1,494 @@
+2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (find_opcode_match): New function argument
+	errmsg.
+	(assemble_tokens): Collect and report the eventual error message
+	found during opcode matching process.
+	* testsuite/gas/arc/lpcount-err.s: New file.
+	* testsuite/gas/arc/add_s-err.s: Update error message.
+
+2016-11-28  Ramiro Polla  <ramiro@hex-rays.com>
+	    Amit Pawar  <amit.pawar@amd.com>
+
+	PR binutils/20637
+	* testsuite/gas/i386/xop32reg.d: New file.
+	* testsuite/gas/i386/xop32reg.s: New file.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* arparse.y: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* config/bfin-lex.l: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* testsuite/gas/all/gas.exp: Fix spelling in comments.
+	* testsuite/gas/cris/cris.exp: Fix spelling in comments.
+	* testsuite/gas/hppa/basic/basic.exp: Fix spelling in comments.
+	* testsuite/gas/hppa/parse/parse.exp: Fix spelling in comments.
+	* testsuite/gas/hppa/reloc/reloc.exp: Fix spelling in comments.
+	* testsuite/gas/sh/arch/arch.exp: Fix spelling in comments.
+	* testsuite/gas/tic4x/tic4x.exp: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* testsuite/gas/arm/local_function.d: Fix spelling in comments.
+	* testsuite/gas/arm/req.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1_t2.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1xD.s: Fix spelling in comments.
+	* testsuite/gas/arm/vfp1xD_t2.s: Fix spelling in comments.
+	* testsuite/gas/mcore/allinsn.s: Fix spelling in comments.
+	* testsuite/gas/mips/24k-triple-stores-5.s: Fix spelling in comments.
+	* testsuite/gas/mips/delay.d: Fix spelling in comments.
+	* testsuite/gas/mips/nodelay.d: Fix spelling in comments.
+	* testsuite/gas/mips/r5900-full.s: Fix spelling in comments.
+	* testsuite/gas/mips/r5900.s: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* as.h: Fix spelling in comments.
+	* config/obj-ecoff.c: Fix spelling in comments.
+	* config/obj-macho.c: Fix spelling in comments.
+	* config/tc-aarch64.c: Fix spelling in comments.
+	* config/tc-arc.c: Fix spelling in comments.
+	* config/tc-arm.c: Fix spelling in comments.
+	* config/tc-avr.c: Fix spelling in comments.
+	* config/tc-cr16.c: Fix spelling in comments.
+	* config/tc-epiphany.c: Fix spelling in comments.
+	* config/tc-frv.c: Fix spelling in comments.
+	* config/tc-hppa.c: Fix spelling in comments.
+	* config/tc-hppa.h: Fix spelling in comments.
+	* config/tc-i370.c: Fix spelling in comments.
+	* config/tc-m68hc11.c: Fix spelling in comments.
+	* config/tc-m68k.c: Fix spelling in comments.
+	* config/tc-mcore.c: Fix spelling in comments.
+	* config/tc-mep.c: Fix spelling in comments.
+	* config/tc-metag.c: Fix spelling in comments.
+	* config/tc-mips.c: Fix spelling in comments.
+	* config/tc-mn10200.c: Fix spelling in comments.
+	* config/tc-mn10300.c: Fix spelling in comments.
+	* config/tc-nds32.c: Fix spelling in comments.
+	* config/tc-nios2.c: Fix spelling in comments.
+	* config/tc-ns32k.c: Fix spelling in comments.
+	* config/tc-pdp11.c: Fix spelling in comments.
+	* config/tc-ppc.c: Fix spelling in comments.
+	* config/tc-riscv.c: Fix spelling in comments.
+	* config/tc-rx.c: Fix spelling in comments.
+	* config/tc-score.c: Fix spelling in comments.
+	* config/tc-score7.c: Fix spelling in comments.
+	* config/tc-sparc.c: Fix spelling in comments.
+	* config/tc-tic54x.c: Fix spelling in comments.
+	* config/tc-vax.c: Fix spelling in comments.
+	* config/tc-xgate.h: Fix spelling in comments.
+	* config/tc-xtensa.c: Fix spelling in comments.
+	* config/tc-z80.c: Fix spelling in comments.
+	* dwarf2dbg.c: Fix spelling in comments.
+	* input-file.h: Fix spelling in comments.
+	* itbl-ops.c: Fix spelling in comments.
+	* read.c: Fix spelling in comments.
+	* stabs.c: Fix spelling in comments.
+	* symbols.c: Fix spelling in comments.
+	* write.c: Fix spelling in comments.
+	* testsuite/gas/all/itbl-test.c: Fix spelling in comments.
+	* testsuite/gas/tic4x/opclasses.h: Fix spelling in comments.
+
+2016-11-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Avoid emitting a cbcond error
+	messages for non-cbcond instructions.
+	* testsuite/gas/sparc/cbcond-diag.s: New file.
+	* testsuite/gas/sparc/cbcond-diag.l: Likewise.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run cbcond-diag tests.
+
+2016-11-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Make sure the
+	hwcaps-bump test is run with 64-bit objects.
+
+2016-11-23  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-riscv.c: Add missing break.
+
+2016-11-23  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
+2016-11-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c: Move HWS_* and HWS2_* definitions to
+	opcodes/sparc-opc.c.
+	(sparc_arch): Clarify the new role of the hwcap_allowed and
+	hwcap2_allowed fields.
+	(sparc_arch_table): Remove HWS_* and HWS2_* instances from
+	hwcap_allowed and hwcap2_allowed respectively.
+	(md_parse_option): Include the opcode arch hwcaps when processing
+	-A.
+	(sparc_ip): Use the current opcode arch hwcaps to update
+	hwcap_allowed, as well as the hwcaps of the instruction triggering
+	the bump.
+	* testsuite/gas/sparc/hwcaps-bump.s: New file.
+	* testsuite/gas/sparc/hwcaps-bump.l: Likewise.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run tests in
+	hwcaps-bump.
+
+2016-11-22  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/b.d: Update test result.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* config/tc-ppc.c: Delete VLE insn defines.
+	(md_assemble): Swap use_a_reloc and use_d_reloc.
+	* testsuite/gas/ppc/vle-reloc.d: Update.
+
+2016-11-21  Renlin Li  <renlin.li@arm.com>
+
+	PR gas/20827
+	* config/tc-arm.c (encode_arm_shift): Don't assert for operands not
+	presented.
+	* testsuite/gas/arm/add-shift-two.d: New.
+	* testsuite/gas/arm/add-shift-two.s: New.
+
+2016-11-21  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Invoke ACX_PROG_CMP_IGNORE_INITIAL.
+	* Makefile.am (comparison): Rewrite using do_compare.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2016-11-18  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/cl-warn.s: New file.
+	* testsuite/gas/arc/cpu-pseudop-1.d: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-1.s: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-2.d: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-2.s: Likewise.
+	* testsuite/gas/arc/cpu-warn2.s: Likewise.
+	* config/tc-arc.c (selected_cpu): Initialize.
+	(feature_type): New struct.
+	(feature_list): New variable.
+	(arc_check_feature): New function.
+	(arc_select_cpu): Check for .cpu duplicates. Don't overwrite the
+	current cpu features. Check if a feature is available for a given
+	cpu.
+	(md_parse_option): Test if features are available for a given cpu.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_IMM_ROT*.
+	* testsuite/gas/aarch64/advsimd-armv8_3.d: New.
+	* testsuite/gas/aarch64/advsimd-armv8_3.s: New.
+	* testsuite/gas/aarch64/illegal-fcmla.s: New.
+	* testsuite/gas/aarch64/illegal-fcmla.l: New.
+	* testsuite/gas/aarch64/illegal-fcmla.d: New.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.s: Add ldaprb, ldaprh, ldapr tests.
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-ldapr.s: Likewise.
+	* testsuite/gas/aarch64/illegal-ldapr.d: Likewise.
+	* testsuite/gas/aarch64/illegal-ldapr.l: Likewise.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/aarch64/fp-armv8_3.s: Add fjcvtzs test.
+	* testsuite/gas/aarch64/fp-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-fjcvtzs.s: Likewise.
+	* testsuite/gas/aarch64/illegal-fjcvtzs.d: Likewise.
+	* testsuite/gas/aarch64/illegal-fjcvtzs.l: Likewise.
+	* testsuite/gas/aarch64/illegal-nofp-armv8_3.s: Likewise.
+	* testsuite/gas/aarch64/illegal-nofp-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/illegal-nofp-armv8_3.l: Likewise.
+
+2016-11-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_ADDR_SIMM10.
+	(fix_insn): Likewise.
+	(warn_unpredictable_ldst): Handle ldst_imm10.
+	* testsuite/gas/aarch64/pac.s: Add ldraa and ldrab tests.
+	* testsuite/gas/aarch64/pac.d: Likewise.
+	* testsuite/gas/aarch64/illegal-ldraa.s: New.
+	* testsuite/gas/aarch64/illegal-ldraa.l: New.
+	* testsuite/gas/aarch64/illegal-ldraa.d: New.
+
+2016-11-15  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20803
+	* config/tc-sparc.c (cons_fix_new_sparc): Use unaligned relocs in
+	the .eh_frame section.
+
+2016-11-13  Anthony Green  <green@moxielogic.org>
+
+	* config/tc-moxie.c (md_assemble): Assemble 'bad' opcode.
+
+2016-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20732
+	* expr.c (integer_constant): If tc_allow_L_suffix is defined and
+	non-zero then accept a L or LL suffix.
+	* testsuite/gas/sparc/pr20732.d: New test source file.
+	* testsuite/gas/sparc/pr20732.d: New test output file.
+	* testsuite/gas/sparc/sparc.exp: Run new test.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/aarch64/pac.s: Add ARMv8.3 branch instruction tests.
+	* testsuite/gas/aarch64/pac.d: Likewise.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (process_omitted_operand): Handle AARCH64_OPND_Rm_SP.
+	(parse_operands): Likewise.
+	* testsuite/gas/aarch64/pac.s: Add pacga.
+	* testsuite/gas/aarch64/pac.d: Add pacga.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/aarch64/pac.s: New.
+	* testsuite/gas/aarch64/pac.d: New.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/aarch64/sysreg-3.s: New.
+	* testsuite/gas/aarch64/sysreg-3.d: New.
+	* testsuite/gas/aarch64/illegal-sysreg-3.l: New.
+	* testsuite/gas/aarch64/illegal-sysreg-3.d: New.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/aarch64/system-3.s: New.
+	* testsuite/gas/aarch64/system-3.d: New.
+	* testsuite/gas/aarch64/system.d: Update expected output.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (aarch64_archs): Add "armv8.3-a".
+	* doc/c-aarch64.texi (-march): Likewise.
+
+2016-11-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Fix "simd" and "crypto".
+	* testsuite/gas/aarch64/illegal-crypto-nofp.d: New.
+	* testsuite/gas/aarch64/illegal-crypto-nofp.l: New.
+	* testsuite/gas/aarch64/illegal-fp16-nofp.d: New.
+	* testsuite/gas/aarch64/illegal-fp16-nofp.l: New.
+	* testsuite/gas/aarch64/illegal-fp16-nofp.s: New.
+
+2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20799
+	* testsuite/gas/i386/opcode.s: Add a test for EVEX vpextrw.
+	* testsuite/gas/i386/opcode-intel.d: Updated.
+	* testsuite/gas/i386/opcode-suffix.d: Likewise.
+	* testsuite/gas/i386/opcode.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512bw-opts.s: Remove vpextrw
+	tests.
+	* testsuite/gas/i386/x86-64-avx512bw-opts-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-avx512bw-opts.d: Likewise.
+
+2016-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20754
+	* testsuite/gas/i386/opcode-suffix.d: Updated.
+
+2016-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20775
+	* testsuite/gas/i386/i386.exp: Run fpu-bad.
+	* testsuite/gas/i386/fpu-bad.d: New file.
+	* testsuite/gas/i386/fpu-bad.s: Likewise.
+
+2016-11-04  Nathan Sidwell  <nathan@acm.org>
+
+	gas/
+	* input-scrub.c (partial_size): Make size_t.
+	(buffer_length): Likewise.  Adjust meaning.
+	(struct input_save): Adjust partial_size type.
+	(input_scrub_reinit): New.
+	(input_scrub_push, input_scrub_begin): Use it.
+	(input_scrub_next_buffer): Fix buffer extension logic. Only scan
+	newly read buffer for newline.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (find_opcode_match): Use insert function to
+	validate matching address type operands.
+	* testsuite/gas/arc/nps400-10.d: New file.
+	* testsuite/gas/arc/nps400-10.s: New file.
+
+2016-11-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (cortex-m33): Declare new processor.
+	* doc/c-arm.texi (-mcpu ARM command line option): Document new
+	Cortex-M33 processor.
+	* NEWS: Mention ARM Cortex-M33 support.
+
+2016-11-04  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (cortex-m23): Declare new processor.
+	* doc/c-arm.texi (-mcpu ARM command line option): Document new
+	Cortex-M23 processor.
+	* NEWS: Mention ARM Cortex-M23 support.
+
+2016-11-04  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	* Makefile.am (CPU_DOCS): Add c-riscv.texi.
+	* Makefile.in: Regenerate.
+	* doc/all.texi: Set RISCV.
+	* doc/as.texinfo: Add RISCV options.
+	Add RISC-V-Dependent node.
+	Include c-riscv.texi.
+	* doc/c-riscv.texi: Rename RISC-V Options to RISC-V-Opts.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* testsuite/gas/arc/nps400-6.s: Change ldbit tests so that limm
+	operands are out of the range of an s9, in order to fix the test.
+	* testsuite/gas/arc/nps400-6.d: Updated to match new expected output.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* testsuite/gas/arc/nps-400-9.d: Added.
+	* testsuite/gas/arc/nps-400-9.s: Added.
+
+2016-11-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (struct arc_insn): Change type of insn field.
+	(md_number_to_chars_midend): Support 6- and 8-byte values.
+	(emit_insn0): Update debug output.
+	(find_opcode_match): Likewise.
+	(build_fake_opcode_hash_entry): Delete.
+	(find_special_case_long_opcode): Delete.
+	(find_special_case): Remove long format special case handling.
+	(insert_operand): Change instruction type and update debug print
+	format.
+	(assemble_insn): Change instruction type, update debug print
+	formats, and remove unneeded assert.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* config/tc-arc.c (assemble_insn): Replace use of ARC_SHORT with
+	arc_opcode_len.
+
+2016-11-03  Graham Markall  <graham.markall@embecosm.com>
+
+	* config/tc-arc.c (struct arc_insn): Replace short_insn flag with
+	len field.
+	(apply_fixups): Update to use len field.
+	(emit_insn0): Simplify code, making use of len field.
+	(md_convert_frag): Update to use len field.
+	(assemble_insn): Update to use len field.
+
+2016-11-03  Siddhesh Poyarekar  <siddhesh.poyarekar@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add falkor.
+	* config/tc-arm.c (arm_cpus): Likewise.
+	* doc/c-aarch64.texi: Likewise.
+	* doc/c-arm.texi: Likewise.
+
+2016-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/20754
+	* testsuite/gas/i386/opcode.s: Add tests for opcode 0x82.
+	* testsuite/gas/i386/opcode-intel.d: Updated.
+	* testsuite/gas/i386/opcode.d: Likewise.
+
+2016-11-02  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (SBIT_SHIFT): New.
+	(T2_SBIT_SHIFT): Likewise.
+	(t32_insn_ok): Return TRUE for MOV in ARMv8-M Baseline.
+	(md_apply_fix): Try UINT16 encoding when ARM/Thumb modified immediate
+	encoding failed.
+	* testsuite/gas/arm/archv6t2-bad.s: New error case.
+	* testsuite/gas/arm/archv6t2-bad.l: New error match.
+	* testsuite/gas/arm/archv6t2.s: New testcase.
+	* testsuite/gas/arm/archv6t2.d: New expected result.
+	* testsuite/gas/arm/archv8m.s: New testcase.
+	* testsuite/gas/arm/archv8m-base.d: New expected result.
+	* testsuite/gas/arm/archv8m-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-1.d: Likewise.
+
+2016-11-02  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c: (cpu_arch) Add .avx512_4vnniw.
+	(cpu_noarch): Add noavx512_4vnniw.
+	* doc/c-i386.texi: Document avx512_4vnniw, noavx512_4vnniw.
+	* testsuite/gas/i386/i386.exp: Run AVX512_4VNNIW tests.
+	* testsuite/gas/i386/avx512_4vnniwd_vl-intel.d: New test.
+	* testsuite/gas/i386/avx512_4vnniwd_vl.d: Ditto.
+	* testsuite/gas/i386/avx512_4vnniwd_vl.s: Ditto.
+	* testsuite/gas/i386/avx512_4vnniwd-intel.d: Ditto.
+	* testsuite/gas/i386/avx512_4vnniwd.d: Ditto.
+	* testsuite/gas/i386/avx512_4vnniwd.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4vnniwd_vl-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4vnniwd_vl.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4vnniwd_vl.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4vnniwd-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4vnniwd.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4vnniwd.s: Ditto.
+
+2016-11-02  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_4fmaps.
+	(cpu_noarch): Add noavx512_4fmaps.
+	(process_operands): Handle implicit quad group.
+	* doc/c-i386.texi: Document avx512_4fmaps, noavx512_4fmaps.
+	* testsuite/gas/i386/i386.exp: Add AVX512_4FMAPS tests.
+	* testsuite/gas/i386/avx512_4fmaps_vl-intel.d: New test.
+	* testsuite/gas/i386/avx512_4fmaps_vl.d: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps_vl.s: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps-intel.d: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps.d: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps.s: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps-warn.l: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps-warn.s: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps_vl-warn.l: Ditto.
+	* testsuite/gas/i386/avx512_4fmaps_vl-warn.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps_vl-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps_vl.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps_vl.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps-warn.l: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps-warn.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps_vl-warn.l: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_4fmaps_vl-warn.s: Ditto.
+
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* Makefile.am: Add riscv files.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the support for this architecture.
+	* configure.in: Define a default architecture.
+	* configure: Regenerate.
+	* configure.tgt: Add entries for riscv.
+	* doc/as.texinfo: Likewise.
+	* testsuite/gas/all/gas.exp: Expect the redef tests to fail.
+	* testsuite/gas/elf/elf.exp: Expect the groupauto tests to fail.
+	* config/tc-riscv.c: New file.
+	* config/tc-riscv.h: New file.
+	* doc/c-riscv.texi: New file.
+	* testsuite/gas/riscv: New directory.
+	* testsuite/gas/riscv/riscv.exp: New file.
+	* testsuite/gas/riscv/t_insns.d: New file.
+	* testsuite/gas/riscv/t_insns.s: New file.
+
 2016-10-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-arc.c (arc_target): Delete.

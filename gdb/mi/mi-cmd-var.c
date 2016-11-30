@@ -49,34 +49,27 @@ print_varobj (struct varobj *var, enum print_values print_values,
 	      int print_expression)
 {
   struct ui_out *uiout = current_uiout;
-  char *type;
   int thread_id;
-  char *display_hint;
 
   ui_out_field_string (uiout, "name", varobj_get_objname (var));
   if (print_expression)
     {
-      char *exp = varobj_get_expression (var);
+      std::string exp = varobj_get_expression (var);
 
-      ui_out_field_string (uiout, "exp", exp);
-      xfree (exp);
+      ui_out_field_string (uiout, "exp", exp.c_str ());
     }
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
   
   if (mi_print_value_p (var, print_values))
     {
-      char *val = varobj_get_value (var);
+      std::string val = varobj_get_value (var);
 
-      ui_out_field_string (uiout, "value", val);
-      xfree (val);
+      ui_out_field_string (uiout, "value", val.c_str ());
     }
 
-  type = varobj_get_type (var);
-  if (type != NULL)
-    {
-      ui_out_field_string (uiout, "type", type);
-      xfree (type);
-    }
+  std::string type = varobj_get_type (var);
+  if (!type.empty ())
+    ui_out_field_string (uiout, "type", type.c_str ());
 
   thread_id = varobj_get_thread_id (var);
   if (thread_id > 0)
@@ -85,12 +78,9 @@ print_varobj (struct varobj *var, enum print_values print_values,
   if (varobj_get_frozen (var))
     ui_out_field_int (uiout, "frozen", 1);
 
-  display_hint = varobj_get_display_hint (var);
+  gdb::unique_xmalloc_ptr<char> display_hint = varobj_get_display_hint (var);
   if (display_hint)
-    {
-      ui_out_field_string (uiout, "displayhint", display_hint);
-      xfree (display_hint);
-    }
+    ui_out_field_string (uiout, "displayhint", display_hint.get ());
 
   if (varobj_is_dynamic_p (var))
     ui_out_field_int (uiout, "dynamic", 1);
@@ -246,7 +236,6 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
 {
   enum varobj_display_formats format;
   struct varobj *var;
-  char *val;
   struct ui_out *uiout = current_uiout;
 
   if (argc != 2)
@@ -264,9 +253,8 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
   ui_out_field_string (uiout, "format", varobj_format_string[(int) format]);
  
   /* Report the value in the new format.  */
-  val = varobj_get_value (var);
-  ui_out_field_string (uiout, "value", val);
-  xfree (val);
+  std::string val = varobj_get_value (var);
+  ui_out_field_string (uiout, "value", val.c_str ());
 }
 
 void
@@ -386,7 +374,6 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   enum print_values print_values;
   int ix;
   int from, to;
-  char *display_hint;
 
   if (argc < 1 || argc > 4)
     error (_("-var-list-children: Usage: "
@@ -416,12 +403,9 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   else
     print_values = PRINT_NO_VALUES;
 
-  display_hint = varobj_get_display_hint (var);
+  gdb::unique_xmalloc_ptr<char> display_hint = varobj_get_display_hint (var);
   if (display_hint)
-    {
-      ui_out_field_string (uiout, "displayhint", display_hint);
-      xfree (display_hint);
-    }
+    ui_out_field_string (uiout, "displayhint", display_hint.get ());
 
   if (from < to)
     {
@@ -454,18 +438,15 @@ mi_cmd_var_info_type (char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
-  char *type_name;
 
   if (argc != 1)
     error (_("-var-info-type: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified.  */
   var = varobj_get_handle (argv[0]);
-  type_name = varobj_get_type (var);
 
-  ui_out_field_string (uiout, "type", type_name);
-
-  xfree (type_name);
+  std::string type_name = varobj_get_type (var);
+  ui_out_field_string (uiout, "type", type_name.c_str ());
 }
 
 void
@@ -473,7 +454,6 @@ mi_cmd_var_info_path_expression (char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
-  char *path_expr;
 
   if (argc != 1)
     error (_("Usage: NAME."));
@@ -481,7 +461,7 @@ mi_cmd_var_info_path_expression (char *command, char **argv, int argc)
   /* Get varobj handle, if a valid var obj name was specified.  */
   var = varobj_get_handle (argv[0]);
   
-  path_expr = varobj_get_path_expr (var);
+  const char *path_expr = varobj_get_path_expr (var);
 
   ui_out_field_string (uiout, "path_expr", path_expr);
 }
@@ -492,7 +472,6 @@ mi_cmd_var_info_expression (char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   const struct language_defn *lang;
   struct varobj *var;
-  char *exp;
 
   if (argc != 1)
     error (_("-var-info-expression: Usage: NAME."));
@@ -504,9 +483,8 @@ mi_cmd_var_info_expression (char *command, char **argv, int argc)
 
   ui_out_field_string (uiout, "lang", lang->la_natural_name);
 
-  exp = varobj_get_expression (var);
-  ui_out_field_string (uiout, "exp", exp);
-  xfree (exp);
+  std::string exp = varobj_get_expression (var);
+  ui_out_field_string (uiout, "exp", exp.c_str ());
 }
 
 void
@@ -588,17 +566,15 @@ mi_cmd_var_evaluate_expression (char *command, char **argv, int argc)
    
   if (formatFound)
     {
-      char *val = varobj_get_formatted_value (var, format);
+      std::string val = varobj_get_formatted_value (var, format);
 
-      ui_out_field_string (uiout, "value", val);
-      xfree (val);
+      ui_out_field_string (uiout, "value", val.c_str ());
     }
   else
     {
-      char *val = varobj_get_value (var);
+      std::string val = varobj_get_value (var);
 
-      ui_out_field_string (uiout, "value", val);
-      xfree (val);
+      ui_out_field_string (uiout, "value", val.c_str ());
     }
 }
 
@@ -607,7 +583,6 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
-  char *expression, *val;
 
   if (argc != 2)
     error (_("-var-assign: Usage: NAME EXPRESSION."));
@@ -618,7 +593,7 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   if (!varobj_editable_p (var))
     error (_("-var-assign: Variable object is not editable"));
 
-  expression = xstrdup (argv[1]);
+  const char *expression = argv[1];
 
   /* MI command '-var-assign' may write memory, so suppress memory
      changed notification if it does.  */
@@ -629,9 +604,8 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
     error (_("-var-assign: Could not assign "
 	     "expression to variable object"));
 
-  val = varobj_get_value (var);
-  ui_out_field_string (uiout, "value", val);
-  xfree (val);
+  std::string val = varobj_get_value (var);
+  ui_out_field_string (uiout, "value", val.c_str ());
 }
 
 /* Type used for parameters passing to mi_cmd_var_update_iter.  */
@@ -739,7 +713,6 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
   
   for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
     {
-      char *display_hint;
       int from, to;
       struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
@@ -752,10 +725,9 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	case VAROBJ_IN_SCOPE:
 	  if (mi_print_value_p (r->varobj, print_values))
 	    {
-	      char *val = varobj_get_value (r->varobj);
+	      std::string val = varobj_get_value (r->varobj);
 
-	      ui_out_field_string (uiout, "value", val);
-	      xfree (val);
+	      ui_out_field_string (uiout, "value", val.c_str ());
 	    }
 	  ui_out_field_string (uiout, "in_scope", "true");
 	  break;
@@ -777,22 +749,19 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 
       if (r->type_changed)
 	{
-	  char *type_name = varobj_get_type (r->varobj);
+	  std::string type_name = varobj_get_type (r->varobj);
 
-	  ui_out_field_string (uiout, "new_type", type_name);
-	  xfree (type_name);
+	  ui_out_field_string (uiout, "new_type", type_name.c_str ());
 	}
 
       if (r->type_changed || r->children_changed)
 	ui_out_field_int (uiout, "new_num_children", 
 			  varobj_get_num_children (r->varobj));
 
-      display_hint = varobj_get_display_hint (r->varobj);
+      gdb::unique_xmalloc_ptr<char> display_hint
+	= varobj_get_display_hint (r->varobj);
       if (display_hint)
-	{
-	  ui_out_field_string (uiout, "displayhint", display_hint);
-	  xfree (display_hint);
-	}
+	ui_out_field_string (uiout, "displayhint", display_hint.get ());
 
       if (varobj_is_dynamic_p (r->varobj))
 	ui_out_field_int (uiout, "dynamic", 1);

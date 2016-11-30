@@ -53,6 +53,7 @@ if [istarget sparc*-*-*] {
         run_dump_test "pause"
         run_dump_test "save-args"
         run_dump_test "cbcond"
+        run_list_test "cbcond-diag" "-64"
         run_dump_test "cfr"
         run_dump_test "crypto"
         run_dump_test "edge"
@@ -90,6 +91,7 @@ if [istarget sparc*-*-*] {
 	run_dump_test "pcrel64"
 	run_dump_test "plt64"
 	run_dump_test "gotop64"
+        run_list_test "hwcaps-bump" "-64 -bump"
     }
 
     run_dump_test "synth"
@@ -101,6 +103,7 @@ if [istarget sparc*-*-*] {
     run_list_test "pr19910-2"
     run_dump_test "dcti-couples-v8"
     run_dump_test "dcti-couples-v9c"
+    run_dump_test "pr20732"
 }
 
 if [istarget sparc-*-vxworks*] {

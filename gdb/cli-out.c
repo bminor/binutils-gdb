@@ -272,25 +272,20 @@ cli_text (struct ui_out *uiout, const char *string)
   fputs_filtered (string, stream);
 }
 
-static void ATTRIBUTE_PRINTF (3, 0)
-cli_message (struct ui_out *uiout, int verbosity,
-	     const char *format, va_list args)
+static void ATTRIBUTE_PRINTF (2, 0)
+cli_message (struct ui_out *uiout, const char *format, va_list args)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
 
   if (data->suppress_output)
     return;
 
-  if (ui_out_get_verblvl (uiout) >= verbosity)
-    {
-      struct ui_file *stream = VEC_last (ui_filep, data->streams);
-
-      vfprintf_unfiltered (stream, format, args);
-    }
+  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  vfprintf_unfiltered (stream, format, args);
 }
 
 static void
-cli_wrap_hint (struct ui_out *uiout, char *identstring)
+cli_wrap_hint (struct ui_out *uiout, const char *identstring)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
 

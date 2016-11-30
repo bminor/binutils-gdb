@@ -1,5 +1,5 @@
 %{
-/* arparse.y - Stange script language parser */
+/* arparse.y - Strange script language parser */
 
 /* Copyright (C) 1992-2016 Free Software Foundation, Inc.
 

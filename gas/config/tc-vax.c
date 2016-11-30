@@ -188,7 +188,7 @@ int flag_want_pic;		/* -k */
 #define BB (1+-128)
 #define WF (2+ 32767)
 #define WB (2+-32768)
-/* Dont need LF, LB because they always reach. [They are coded as 0.]  */
+/* Don't need LF, LB because they always reach. [They are coded as 0.]  */
 
 #define C(a,b) ENCODE_RELAX(a,b)
 /* This macro has no side-effects.  */

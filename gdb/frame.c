@@ -43,6 +43,15 @@
 #include "hashtab.h"
 #include "valprint.h"
 
+/* The sentinel frame terminates the innermost end of the frame chain.
+   If unwound, it returns the information needed to construct an
+   innermost frame.
+
+   The current frame, which is the innermost frame, can be found at
+   sentinel_frame->prev.  */
+
+static struct frame_info *sentinel_frame;
+
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
 static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
 
@@ -65,7 +74,7 @@ enum cached_copy_status
 
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
-   wait_for_inferior) each time the inferior stops; current_frame
+   wait_for_inferior) each time the inferior stops; sentinel_frame
    points to it.  Additional frames get allocated (in get_prev_frame)
    as needed, and are chained through the next and prev fields.  Any
    time that the frame cache becomes invalid (most notably when we
@@ -323,6 +332,8 @@ fprint_frame_id (struct ui_file *file, struct frame_id id)
     fprintf_unfiltered (file, "!stack");
   else if (id.stack_status == FID_STACK_UNAVAILABLE)
     fprintf_unfiltered (file, "stack=<unavailable>");
+  else if (id.stack_status == FID_STACK_SENTINEL)
+    fprintf_unfiltered (file, "stack=<sentinel>");
   else
     fprintf_unfiltered (file, "stack=%s", hex_string (id.stack_addr));
   fprintf_unfiltered (file, ",");
@@ -562,6 +573,7 @@ frame_unwind_caller_id (struct frame_info *next_frame)
 }
 
 const struct frame_id null_frame_id = { 0 }; /* All zeros.  */
+const struct frame_id sentinel_frame_id = { 0, 0, 0, FID_STACK_SENTINEL, 0, 1, 0 };
 const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_INVALID, 0, 1, 0 };
 
 struct frame_id
@@ -796,6 +808,10 @@ frame_find_by_id (struct frame_id id)
      about it.  Should it instead return get_current_frame()?  */
   if (!frame_id_p (id))
     return NULL;
+
+  /* Check for the sentinel frame.  */
+  if (frame_id_eq (id, sentinel_frame_id))
+    return sentinel_frame;
 
   /* Try using the frame stash first.  Finding it there removes the need
      to perform the search by looping over all frames, which can be very
@@ -1474,10 +1490,9 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
   /* Link this frame back to itself.  The frame is self referential
      (the unwound PC is the same as the pc), so make it so.  */
   frame->next = frame;
-  /* Make the sentinel frame's ID valid, but invalid.  That way all
-     comparisons with it should fail.  */
+  /* The sentinel frame has a special ID.  */
   frame->this_id.p = 1;
-  frame->this_id.value = null_frame_id;
+  frame->this_id.value = sentinel_frame_id;
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ create_sentinel_frame (...) -> ");
@@ -1486,10 +1501,6 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
     }
   return frame;
 }
-
-/* Info about the innermost stack frame (contents of FP register).  */
-
-static struct frame_info *current_frame;
 
 /* Cache for frame addresses already read by gdb.  Valid only while
    inferior is stopped.  Control variables for the frame cache should
@@ -1511,6 +1522,8 @@ static struct frame_info *get_prev_frame_always_1 (struct frame_info *this_frame
 struct frame_info *
 get_current_frame (void)
 {
+  struct frame_info *current_frame;
+
   /* First check, and report, the lack of registers.  Having GDB
      report "No stack!" or "No memory" when the target doesn't even
      have registers is very confusing.  Besides, "printcmd.exp"
@@ -1526,29 +1539,23 @@ get_current_frame (void)
   if (get_traceframe_number () < 0)
     validate_registers_access ();
 
-  if (current_frame == NULL)
-    {
-      int stashed;
-      struct frame_info *sentinel_frame =
-	create_sentinel_frame (current_program_space, get_current_regcache ());
+  if (sentinel_frame == NULL)
+    sentinel_frame =
+      create_sentinel_frame (current_program_space, get_current_regcache ());
 
-      /* Set the current frame before computing the frame id, to avoid
-	 recursion inside compute_frame_id, in case the frame's
-	 unwinder decides to do a symbol lookup (which depends on the
-	 selected frame's block).
+  /* Set the current frame before computing the frame id, to avoid
+     recursion inside compute_frame_id, in case the frame's
+     unwinder decides to do a symbol lookup (which depends on the
+     selected frame's block).
 
-	 This call must always succeed.  In particular, nothing inside
-	 get_prev_frame_always_1 should try to unwind from the
-	 sentinel frame, because that could fail/throw, and we always
-	 want to leave with the current frame created and linked in --
-	 we should never end up with the sentinel frame as outermost
-	 frame.  */
-      current_frame = get_prev_frame_always_1 (sentinel_frame);
-      gdb_assert (current_frame != NULL);
-
-      /* No need to compute the frame id yet.  That'll be done lazily
-	 from inside get_frame_id instead.  */
-    }
+     This call must always succeed.  In particular, nothing inside
+     get_prev_frame_always_1 should try to unwind from the
+     sentinel frame, because that could fail/throw, and we always
+     want to leave with the current frame created and linked in --
+     we should never end up with the sentinel frame as outermost
+     frame.  */
+  current_frame = get_prev_frame_always_1 (sentinel_frame);
+  gdb_assert (current_frame != NULL);
 
   return current_frame;
 }
@@ -1729,6 +1736,25 @@ get_next_frame (struct frame_info *this_frame)
     return NULL;
 }
 
+/* Return the frame that THIS_FRAME calls.  If THIS_FRAME is the
+   innermost (i.e. current) frame, return the sentinel frame.  Thus,
+   unlike get_next_frame(), NULL will never be returned.  */
+
+struct frame_info *
+get_next_frame_sentinel_okay (struct frame_info *this_frame)
+{
+  gdb_assert (this_frame != NULL);
+
+  /* Note that, due to the manner in which the sentinel frame is
+     constructed, this_frame->next still works even when this_frame
+     is the sentinel frame.  But we disallow it here anyway because
+     calling get_next_frame_sentinel_okay() on the sentinel frame
+     is likely a coding error.  */
+  gdb_assert (this_frame != sentinel_frame);
+
+  return this_frame->next;
+}
+
 /* Observer for the target_changed event.  */
 
 static void
@@ -1745,7 +1771,7 @@ reinit_frame_cache (void)
   struct frame_info *fi;
 
   /* Tear down all frame caches.  */
-  for (fi = current_frame; fi != NULL; fi = fi->prev)
+  for (fi = sentinel_frame; fi != NULL; fi = fi->prev)
     {
       if (fi->prologue_cache && fi->unwind->dealloc_cache)
 	fi->unwind->dealloc_cache (fi, fi->prologue_cache);
@@ -1757,10 +1783,10 @@ reinit_frame_cache (void)
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
 
-  if (current_frame != NULL)
+  if (sentinel_frame != NULL)
     annotate_frames_invalid ();
 
-  current_frame = NULL;		/* Invalidate cache */
+  sentinel_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
   frame_stash_invalidate ();
   if (frame_debug)
@@ -2194,6 +2220,17 @@ get_prev_frame (struct frame_info *this_frame)
      something should be calling get_selected_frame() or
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
+  
+  /* If this_frame is the current frame, then compute and stash
+     its frame id prior to fetching and computing the frame id of the
+     previous frame.  Otherwise, the cycle detection code in
+     get_prev_frame_if_no_cycle() will not work correctly.  When
+     get_frame_id() is called later on, an assertion error will
+     be triggered in the event of a cycle between the current
+     frame and its previous frame.  */
+  if (this_frame->level == 0)
+    get_frame_id (this_frame);
+
   frame_pc_p = get_frame_pc_if_available (this_frame, &frame_pc);
 
   /* tausq/2004-12-07: Dummy frames are skipped because it doesn't make much
@@ -2277,6 +2314,22 @@ get_prev_frame (struct frame_info *this_frame)
     }
 
   return get_prev_frame_always (this_frame);
+}
+
+struct frame_id
+get_prev_frame_id_by_id (struct frame_id id)
+{
+  struct frame_id prev_id;
+  struct frame_info *frame;
+  
+  frame = frame_find_by_id (id);
+
+  if (frame != NULL)
+    prev_id = get_frame_id (get_prev_frame (frame));
+  else
+    prev_id = null_frame_id;
+
+  return prev_id;
 }
 
 CORE_ADDR

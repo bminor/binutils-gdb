@@ -743,7 +743,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{-u}|@option{--undefined-only}] [@option{-V}|@option{--version}]
    [@option{-X 32_64}] [@option{--defined-only}] [@option{--no-demangle}]
    [@option{--plugin} @var{name}] [@option{--size-sort}] [@option{--special-syms}]
-   [@option{--synthetic}] [@option{--target=}@var{bfdname}]
+   [@option{--synthetic}] [@option{--with-symbol-versions}] [@option{--target=}@var{bfdname}]
    [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -1030,6 +1030,14 @@ used to mark transitions between ARM code, THUMB code and data.
 Include synthetic symbols in the output.  These are special symbols
 created by the linker for various purposes.  They are not shown by
 default since they are not part of the binary's original source code.
+
+@item --with-symbol-versions
+Enables the display of symbol version information if any exists.  The
+version string is displayed as a suffix to the symbol name, preceeded by
+an @@ character.  For example @samp{foo@@VER_1}.  If the version is
+the default version to be used when resolving unversioned references
+to the symbol then it is displayed as a suffix preceeded by two @@
+characters.  For example @samp{foo@@@@VER_2}.
 
 @item --target=@var{bfdname}
 @cindex object code format
@@ -2617,6 +2625,13 @@ Print the dynamic symbol table entries of the file.  This is only
 meaningful for dynamic objects, such as certain types of shared
 libraries.  This is similar to the information provided by the @samp{nm}
 program when given the @option{-D} (@option{--dynamic}) option.
+
+The output format is similar to that produced by the @option{--syms}
+option, except that an extra field is inserted before the symbol's
+name, giving the version information associated with the symbol.
+If the version is the default version to be used when resolving
+unversioned references to the symbol then it's displayed as is,
+otherwise it's put into parentheses.
 
 @item --special-syms
 When displaying symbols include those which the target considers to be
@@ -4591,11 +4606,19 @@ Displays the detailed section information. Implies @option{-S}.
 @itemx --syms
 @cindex ELF symbol table information
 Displays the entries in symbol table section of the file, if it has one.
+If a symbol has version information associated with it then this is
+displayed as well.  The version string is displayed as a suffix to the
+symbol name, preceeded by an @@ character.  For example
+@samp{foo@@VER_1}.  If the version is the default version to be used
+when resolving unversioned references to the symbol then it is
+displayed as a suffix preceeded by two @@ characters.  For example
+@samp{foo@@@@VER_2}.
 
 @item --dyn-syms
 @cindex ELF dynamic symbol table information
 Displays the entries in dynamic symbol table section of the file, if it
-has one.
+has one.  The output format is the same as the format used by the
+@option{--syms} option.
 
 @item -e
 @itemx --headers

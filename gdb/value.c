@@ -205,16 +205,22 @@ struct value
   /* If the value has been released.  */
   unsigned int released : 1;
 
-  /* Register number if the value is from a register.  */
-  short regnum;
-
   /* Location of value (if lval).  */
   union
   {
-    /* If lval == lval_memory, this is the address in the inferior.
-       If lval == lval_register, this is the byte offset into the
-       registers structure.  */
+    /* If lval == lval_memory, this is the address in the inferior  */
     CORE_ADDR address;
+
+    /*If lval == lval_register, the value is from a register.  */
+    struct
+    {
+      /* Register number.  */
+      int regnum;
+      /* Frame ID of "next" frame to which a register value is relative.
+	 If the register value is found relative to frame F, then the
+	 frame id of F->next will be stored in next_frame_id.  */
+      struct frame_id next_frame_id;
+    } reg;
 
     /* Pointer to internal variable.  */
     struct internalvar *internalvar;
@@ -236,10 +242,8 @@ struct value
   } location;
 
   /* Describes offset of a value within lval of a structure in target
-     addressable memory units.  If lval == lval_memory, this is an offset to
-     the address.  If lval == lval_register, this is a further offset from
-     location.address within the registers structure.  Note also the member
-     embedded_offset below.  */
+     addressable memory units.  Note also the member embedded_offset
+     below.  */
   LONGEST offset;
 
   /* Only used for bitfields; number of bits contained in them.  */
@@ -261,10 +265,6 @@ struct value
      single read from the target when displaying multiple
      bitfields.  */
   struct value *parent;
-
-  /* Frame register value is relative to.  This will be described in
-     the lval enum above as "lval_register".  */
-  struct frame_id frame_id;
 
   /* Type of the value.  */
   struct type *type;
@@ -943,11 +943,9 @@ allocate_value_lazy (struct type *type)
   val->enclosing_type = type;
   VALUE_LVAL (val) = not_lval;
   val->location.address = 0;
-  VALUE_FRAME_ID (val) = null_frame_id;
   val->offset = 0;
   val->bitpos = 0;
   val->bitsize = 0;
-  VALUE_REGNUM (val) = -1;
   val->lazy = 1;
   val->embedded_offset = 0;
   val->pointed_to_offset = 0;
@@ -1541,9 +1539,7 @@ value_lval_const (const struct value *value)
 CORE_ADDR
 value_address (const struct value *value)
 {
-  if (value->lval == lval_internalvar
-      || value->lval == lval_internalvar_component
-      || value->lval == lval_xcallable)
+  if (value->lval != lval_memory)
     return 0;
   if (value->parent != NULL)
     return value_address (value->parent) + value->offset;
@@ -1559,9 +1555,7 @@ value_address (const struct value *value)
 CORE_ADDR
 value_raw_address (const struct value *value)
 {
-  if (value->lval == lval_internalvar
-      || value->lval == lval_internalvar_component
-      || value->lval == lval_xcallable)
+  if (value->lval != lval_memory)
     return 0;
   return value->location.address;
 }
@@ -1569,9 +1563,7 @@ value_raw_address (const struct value *value)
 void
 set_value_address (struct value *value, CORE_ADDR addr)
 {
-  gdb_assert (value->lval != lval_internalvar
-	      && value->lval != lval_internalvar_component
-	      && value->lval != lval_xcallable);
+  gdb_assert (value->lval == lval_memory);
   value->location.address = addr;
 }
 
@@ -1582,15 +1574,15 @@ deprecated_value_internalvar_hack (struct value *value)
 }
 
 struct frame_id *
-deprecated_value_frame_id_hack (struct value *value)
+deprecated_value_next_frame_id_hack (struct value *value)
 {
-  return &value->frame_id;
+  return &value->location.reg.next_frame_id;
 }
 
-short *
+int *
 deprecated_value_regnum_hack (struct value *value)
 {
-  return &value->regnum;
+  return &value->location.reg.regnum;
 }
 
 int
@@ -1786,8 +1778,6 @@ value_copy (struct value *arg)
   val->offset = arg->offset;
   val->bitpos = arg->bitpos;
   val->bitsize = arg->bitsize;
-  VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
-  VALUE_REGNUM (val) = VALUE_REGNUM (arg);
   val->lazy = arg->lazy;
   val->embedded_offset = value_embedded_offset (arg);
   val->pointed_to_offset = arg->pointed_to_offset;
@@ -2113,9 +2103,7 @@ init_if_undefined_command (char* args, int from_tty)
   struct internalvar* intvar;
 
   /* Parse the expression - this is taken from set_command().  */
-  struct expression *expr = parse_expression (args);
-  register struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (args);
 
   /* Validate the expression.
      Was the expression an assignment?
@@ -2133,9 +2121,7 @@ init_if_undefined_command (char* args, int from_tty)
   /* Only evaluate the expression if the lvalue is void.
      This may still fail if the expresssion is invalid.  */
   if (intvar->kind == INTERNALVAR_VOID)
-    evaluate_expression (expr);
-
-  do_cleanups (old_chain);
+    evaluate_expression (expr.get ());
 }
 
 
@@ -3231,8 +3217,6 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 		   + value_embedded_offset (arg1));
     }
   set_value_component_location (v, arg1);
-  VALUE_REGNUM (v) = VALUE_REGNUM (arg1);
-  VALUE_FRAME_ID (v) = VALUE_FRAME_ID (arg1);
   return v;
 }
 
@@ -3278,6 +3262,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
     }
 
   v = allocate_value (ftype);
+  VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
       set_value_address (v, BLOCK_START (SYMBOL_BLOCK_VALUE (sym)));
@@ -3664,8 +3649,8 @@ value_from_contents_and_address_unresolved (struct type *type,
     v = allocate_value_lazy (type);
   else
     v = value_from_contents (type, valaddr);
-  set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
+  set_value_address (v, address);
   return v;
 }
 
@@ -3690,8 +3675,8 @@ value_from_contents_and_address (struct type *type,
   if (TYPE_DATA_LOCATION (resolved_type_no_typedef) != NULL
       && TYPE_DATA_LOCATION_KIND (resolved_type_no_typedef) == PROP_CONST)
     address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
-  set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
+  set_value_address (v, address);
   return v;
 }
 
@@ -3795,6 +3780,29 @@ value_from_history_ref (const char *h, const char **endp)
     }
 
   return access_value_history (index);
+}
+
+/* Get the component value (offset by OFFSET bytes) of a struct or
+   union WHOLE.  Component's type is TYPE.  */
+
+struct value *
+value_from_component (struct value *whole, struct type *type, LONGEST offset)
+{
+  struct value *v;
+
+  if (VALUE_LVAL (whole) == lval_memory && value_lazy (whole))
+    v = allocate_value_lazy (type);
+  else
+    {
+      v = allocate_value (type);
+      value_contents_copy (v, value_embedded_offset (v),
+			   whole, value_embedded_offset (whole) + offset,
+			   type_length_units (type));
+    }
+  v->offset = value_offset (whole) + offset + value_embedded_offset (whole);
+  set_value_component_location (v, whole);
+
+  return v;
 }
 
 struct value *
@@ -3978,7 +3986,7 @@ value_fetch_lazy (struct value *val)
     }
   else if (VALUE_LVAL (val) == lval_register)
     {
-      struct frame_info *frame;
+      struct frame_info *next_frame;
       int regnum;
       struct type *type = check_typedef (value_type (val));
       struct value *new_val = val, *mark = value_mark ();
@@ -3989,27 +3997,33 @@ value_fetch_lazy (struct value *val)
 
       while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
 	{
-	  struct frame_id frame_id = VALUE_FRAME_ID (new_val);
+	  struct frame_id next_frame_id = VALUE_NEXT_FRAME_ID (new_val);
 
-	  frame = frame_find_by_id (frame_id);
+	  next_frame = frame_find_by_id (next_frame_id);
 	  regnum = VALUE_REGNUM (new_val);
 
-	  gdb_assert (frame != NULL);
+	  gdb_assert (next_frame != NULL);
 
 	  /* Convertible register routines are used for multi-register
 	     values and for interpretation in different types
 	     (e.g. float or int from a double register).  Lazy
 	     register values should have the register's natural type,
 	     so they do not apply.  */
-	  gdb_assert (!gdbarch_convert_register_p (get_frame_arch (frame),
+	  gdb_assert (!gdbarch_convert_register_p (get_frame_arch (next_frame),
 						   regnum, type));
 
-	  new_val = get_frame_register_value (frame, regnum);
+	  /* FRAME was obtained, above, via VALUE_NEXT_FRAME_ID. 
+	     Since a "->next" operation was performed when setting
+	     this field, we do not need to perform a "next" operation
+	     again when unwinding the register.  That's why
+	     frame_unwind_register_value() is called here instead of
+	     get_frame_register_value().  */
+	  new_val = frame_unwind_register_value (next_frame, regnum);
 
 	  /* If we get another lazy lval_register value, it means the
-	     register is found by reading it from the next frame.
-	     get_frame_register_value should never return a value with
-	     the frame id pointing to FRAME.  If it does, it means we
+	     register is found by reading it from NEXT_FRAME's next frame.
+	     frame_unwind_register_value should never return a value with
+	     the frame id pointing to NEXT_FRAME.  If it does, it means we
 	     either have two consecutive frames with the same frame id
 	     in the frame chain, or some code is trying to unwind
 	     behind get_prev_frame's back (e.g., a frame unwind
@@ -4018,7 +4032,7 @@ value_fetch_lazy (struct value *val)
 	     in this situation.  */
 	  if (VALUE_LVAL (new_val) == lval_register
 	      && value_lazy (new_val)
-	      && frame_id_eq (VALUE_FRAME_ID (new_val), frame_id))
+	      && frame_id_eq (VALUE_NEXT_FRAME_ID (new_val), next_frame_id))
 	    internal_error (__FILE__, __LINE__,
 			    _("infinite loop while fetching a register"));
 	}
@@ -4038,6 +4052,9 @@ value_fetch_lazy (struct value *val)
       if (frame_debug)
 	{
 	  struct gdbarch *gdbarch;
+	  struct frame_info *frame;
+	  /* VALUE_FRAME_ID is used here, instead of VALUE_NEXT_FRAME_ID,
+	     so that the frame level will be shown correctly.  */
 	  frame = frame_find_by_id (VALUE_FRAME_ID (val));
 	  regnum = VALUE_REGNUM (val);
 	  gdbarch = get_frame_arch (frame);

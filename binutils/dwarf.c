@@ -200,7 +200,7 @@ dwarf_vmatoa_1 (const char *fmtch, dwarf_vma value, unsigned num_bytes)
 
   if (num_bytes)
     {
-      /* Printf does not have a way of specifiying a maximum field width for an
+      /* Printf does not have a way of specifying a maximum field width for an
 	 integer value, so we print the full value into a buffer and then select
 	 the precision we need.  */
       snprintf (ret, sizeof (buf[0].place), DWARF_VMA_FMT_LONG, value);
@@ -7563,7 +7563,7 @@ dwarf_select_sections_by_names (const char *names)
       { "macro", & do_debug_macinfo, 1 },
       { "pubnames", & do_debug_pubnames, 1 },
       { "pubtypes", & do_debug_pubtypes, 1 },
-      /* This entry is for compatability
+      /* This entry is for compatibility
 	 with earlier versions of readelf.  */
       { "ranges", & do_debug_aranges, 1 },
       { "rawline", & do_debug_lines, FLAG_DEBUG_LINES_RAW },

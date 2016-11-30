@@ -95,14 +95,9 @@ evaluate_subexp (struct type *expect_type, struct expression *exp,
 CORE_ADDR
 parse_and_eval_address (const char *exp)
 {
-  struct expression *expr = parse_expression (exp);
-  CORE_ADDR addr;
-  struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
-  addr = value_as_address (evaluate_expression (expr));
-  do_cleanups (old_chain);
-  return addr;
+  return value_as_address (evaluate_expression (expr.get ()));
 }
 
 /* Like parse_and_eval_address, but treats the value of the expression
@@ -110,27 +105,17 @@ parse_and_eval_address (const char *exp)
 LONGEST
 parse_and_eval_long (const char *exp)
 {
-  struct expression *expr = parse_expression (exp);
-  LONGEST retval;
-  struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
-  retval = value_as_long (evaluate_expression (expr));
-  do_cleanups (old_chain);
-  return (retval);
+  return value_as_long (evaluate_expression (expr.get ()));
 }
 
 struct value *
 parse_and_eval (const char *exp)
 {
-  struct expression *expr = parse_expression (exp);
-  struct value *val;
-  struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
-  val = evaluate_expression (expr);
-  do_cleanups (old_chain);
-  return val;
+  return evaluate_expression (expr.get ());
 }
 
 /* Parse up to a comma (or to a closeparen)
@@ -140,14 +125,9 @@ parse_and_eval (const char *exp)
 struct value *
 parse_to_comma_and_eval (const char **expp)
 {
-  struct expression *expr = parse_exp_1 (expp, 0, (struct block *) 0, 1);
-  struct value *val;
-  struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_exp_1 (expp, 0, (struct block *) 0, 1);
 
-  val = evaluate_expression (expr);
-  do_cleanups (old_chain);
-  return val;
+  return evaluate_expression (expr.get ());
 }
 
 /* Evaluate an expression in internal prefix form
@@ -3104,14 +3084,13 @@ struct type *
 parse_and_eval_type (char *p, int length)
 {
   char *tmp = (char *) alloca (length + 4);
-  struct expression *expr;
 
   tmp[0] = '(';
   memcpy (tmp + 1, p, length);
   tmp[length + 1] = ')';
   tmp[length + 2] = '0';
   tmp[length + 3] = '\0';
-  expr = parse_expression (tmp);
+  expression_up expr = parse_expression (tmp);
   if (expr->elts[0].opcode != UNOP_CAST)
     error (_("Internal error in eval_type."));
   return expr->elts[1].type;

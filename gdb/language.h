@@ -219,9 +219,6 @@ struct language_defn
        
        TYPE is the type of the sub-object to be printed.
 
-       CONTENTS holds the bits of the value.  This holds the entire
-       enclosing object.
-
        EMBEDDED_OFFSET is the offset into the outermost object of the
        sub-object represented by TYPE.  This is the object which this
        call should print.  Note that the enclosing type is not
@@ -237,10 +234,9 @@ struct language_defn
        printing.  */
 
     void (*la_val_print) (struct type *type,
-			  const gdb_byte *contents,
 			  int embedded_offset, CORE_ADDR address,
 			  struct ui_file *stream, int recurse,
-			  const struct value *val,
+			  struct value *val,
 			  const struct value_print_options *options);
 
     /* Print a top-level value using syntax appropriate for this language.  */
@@ -406,8 +402,8 @@ struct language_defn
        If 'la_get_gcc_context' is not defined, then this method is
        ignored.
 
-       This takes the user-supplied text and returns a newly malloc'd
-       bit of code to compile.  The caller owns the result.
+       This takes the user-supplied text and returns a new bit of code
+       to compile.
 
        INST is the compiler instance being used.
        INPUT is the user's input text.
@@ -416,11 +412,11 @@ struct language_defn
        parsed.
        EXPR_PC is the PC at which the expression is being parsed.  */
 
-    char *(*la_compute_program) (struct compile_instance *inst,
-				 const char *input,
-				 struct gdbarch *gdbarch,
-				 const struct block *expr_block,
-				 CORE_ADDR expr_pc);
+    std::string (*la_compute_program) (struct compile_instance *inst,
+				       const char *input,
+				       struct gdbarch *gdbarch,
+				       const struct block *expr_block,
+				       CORE_ADDR expr_pc);
 
     /* Add fields above this point, so the magic number is always last.  */
     /* Magic number for compat checking.  */
@@ -515,9 +511,6 @@ extern enum language set_language (enum language);
 #define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
   (current_language->la_print_typedef(type,new_symbol,stream))
 
-#define LA_VAL_PRINT(type,valaddr,offset,addr,stream,val,recurse,options) \
-  (current_language->la_val_print(type,valaddr,offset,addr,stream, \
-				  val,recurse,options))
 #define LA_VALUE_PRINT(val,stream,options) \
   (current_language->la_value_print(val,stream,options))
 

@@ -127,7 +127,7 @@ extern enum ExtReadWrite arcExtMap_coreReadWrite (int);
 extern const char * arcExtMap_coreRegName (int);
 extern const char * arcExtMap_auxRegName (long);
 extern const char * arcExtMap_condCodeName (int);
-extern const extInstruction_t *arcExtMap_insn (int, int);
+extern const extInstruction_t *arcExtMap_insn (int, unsigned long long);
 extern struct arc_opcode *arcExtMap_genOpcode (const extInstruction_t *,
 					       unsigned arc_target,
 					       const char **errmsg);

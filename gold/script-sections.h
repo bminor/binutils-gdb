@@ -279,7 +279,7 @@ class Script_sections
   size_t
   total_header_size(Layout* layout) const;
 
-  // Return the amount we have to subtract from the LMA to accomodate
+  // Return the amount we have to subtract from the LMA to accommodate
   // headers of the given size.
   uint64_t
   header_size_adjustment(uint64_t lma, size_t sizeof_headers) const;

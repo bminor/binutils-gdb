@@ -224,7 +224,7 @@ extern void * xcrealloc (void *, size_t, size_t);
 
 extern dwarf_vma read_leb128 (unsigned char *, unsigned int *, bfd_boolean, const unsigned char * const);
 
-/* A callback into the client.  Retuns TRUE if there is a
+/* A callback into the client.  Returns TRUE if there is a
    relocation against the given debug section at the given
    offset.  */
 extern bfd_boolean reloc_at (struct dwarf_section *, dwarf_vma);

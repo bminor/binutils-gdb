@@ -1,3 +1,102 @@
+2016-11-30  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* readelf.c (process_program_headers): Do not warn about out of
+	order PT_LOAD segments.
+
+2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/binutils-all/arc/objdump.exp (Warning test): Update
+	test.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* dwarf.c: Fix spelling in comments.
+	* dwarf.h: Fix spelling in comments.
+	* objcopy.c: Fix spelling in comments.
+	* od-macho.c: Fix spelling in comments.
+	* rclex.c: Fix spelling in comments.
+	* readelf.c: Fix spelling in comments.
+	* stabs.c: Fix spelling in comments.
+
+2016-11-23  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20815
+	* readelf.c (process_program_headers): Check PT_LOAD and PT_PHDR
+	segments for validity.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
+2016-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* NEWS: Mention PowerPC VLE relocation error.
+
+2016-11-16  Mark Wielaard  <mark@klomp.org>
+
+	* cxxfilt.c (main): Recognize rust_demangling.
+
+2016-11-14  Rudy  <jacky.chouchou@yandex.ru>
+
+	PR binutils/20814
+	* dlltool.c (struct export): Remove hint field.
+	(make_one_lib_file): Store the ordinal value for IDATA6 not the
+	hint.
+	(gen_lib_file): Delete reference to hint field.
+	(mangle_defs): Delete computation of hint field.
+
+2016-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20751
+	* nm.c (with_symbol_versions): New local variable.
+	(long_options): Add --with-symbol-versions.
+	(usage): Mention --with-symbol-versions.
+	(print_symbol): If with_symbol_versions is set then display the
+	version information associated with the symbol.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi (nm): Document the new option.
+	(objdump): Describe how symbol version information is displayed
+	for dynamic symbol dumps.
+	(readelf): Describe how symbol version information is displayed.
+	* testsuite/binutils-all/nm.exp: Add a test of the new feature.
+
+2016-11-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20794
+	* readelf.c (process_section_headers): Fix off-by-one error when
+	checking for invalid sh_link and sh_info fields.
+
+2016-11-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (copy_section): Add extra calls to free for error
+	paths.
+
+2016-11-04  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-mode.el (dwarf-browse): Set default-directory.  Bump
+	version number.
+
+2016-11-04  Palmer Dabbelt <palmer@dabbelt.com>
+
+	* MAINTAINERS: Add myself and Andrew Waterman as maintainers for
+	the RISC-V target.
+
+2016-11-01  Palmer Dabbelt  <palmer@dabbelt.com>
+	    Andrew Waterman <andrew@sifive.com>
+
+	Add support for RISC-V architecture.
+	* readelf.c (guess_is_rela): Add EM_RISCV.
+	(get_machine_name): Likewise.
+	(dump_relocations): Add support for riscv relocations.
+	(get_machine_flags): Add support for riscv flags.
+	(is_32bit_abs_reloc): Add R_RISCV_32.
+	(is_64bit_abs_reloc): Add R_RISCV_64.
+	(is_none_reloc): Add R_RISCV_NONE.
+	* testsuite/binutils-all/objdump.exp (cpus_expected): Add riscv.
+	Expect the debug_ranges test to fail.
+
 2016-10-17  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (apply_relocations): Fail if the symbol table section

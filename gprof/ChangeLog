@@ -1,3 +1,14 @@
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* basic_blocks.c: Fix spelling in comments.
+	* cg_arcs.c: Fix spelling in comments.
+	* cg_print.c: Fix spelling in comments.
+	* corefile.c: Fix spelling in comments.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
 2016-10-06  Tom Tromey  <tromey@sourceware.org>
 
 	PR gprof/20656

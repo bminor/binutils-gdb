@@ -1010,8 +1010,7 @@ typy_template_argument (PyObject *self, PyObject *args)
 static PyObject *
 typy_str (PyObject *self)
 {
-  char *thetype = NULL;
-  long length = 0;
+  std::string thetype;
   PyObject *result;
 
   TRY
@@ -1025,18 +1024,17 @@ typy_str (PyObject *self)
       LA_PRINT_TYPE (type_object_to_type (self), "", stb, -1, 0,
 		     &type_print_raw_options);
 
-      thetype = ui_file_xstrdup (stb, &length);
+      thetype = ui_file_as_string (stb);
       do_cleanups (old_chain);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      xfree (thetype);
       GDB_PY_HANDLE_EXCEPTION (except);
     }
   END_CATCH
 
-  result = PyUnicode_Decode (thetype, length, host_charset (), NULL);
-  xfree (thetype);
+  result = PyUnicode_Decode (thetype.c_str (), thetype.length (),
+			     host_charset (), NULL);
 
   return result;
 }
@@ -1199,10 +1197,9 @@ static PyObject *
 typy_getitem (PyObject *self, PyObject *key)
 {
   struct type *type = ((type_object *) self)->type;
-  char *field;
   int i;
 
-  field = python_string_to_host_string (key);
+  gdb::unique_xmalloc_ptr<char> field = python_string_to_host_string (key);
   if (field == NULL)
     return NULL;
 
@@ -1218,7 +1215,7 @@ typy_getitem (PyObject *self, PyObject *key)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
+      if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
 	{
 	  return convert_field (type, i);
 	}

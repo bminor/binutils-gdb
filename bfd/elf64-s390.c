@@ -730,30 +730,6 @@ elf_s390_link_hash_table_create (bfd *abfd)
   return &ret->elf.root;
 }
 
-/* Create .got, .gotplt, and .rela.got sections in DYNOBJ, and set up
-   shortcuts to them in our hash table.  */
-
-static bfd_boolean
-create_got_section (bfd *dynobj,
-		    struct bfd_link_info *info)
-{
-  struct elf_s390_link_hash_table *htab;
-
-  if (! _bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  htab = elf_s390_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  htab->elf.sgot = bfd_get_linker_section (dynobj, ".got");
-  htab->elf.sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
-  htab->elf.srelgot = bfd_get_linker_section (dynobj, ".rela.got");
-  if (!htab->elf.sgot || !htab->elf.sgotplt || !htab->elf.srelgot)
-    abort ();
-  return TRUE;
-}
-
 /* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
    .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
    hash table.  */
@@ -768,14 +744,12 @@ elf_s390_create_dynamic_sections (bfd *dynobj,
   if (htab == NULL)
     return FALSE;
 
-  if (!htab->elf.sgot && !create_got_section (dynobj, info))
+  if (!htab->elf.sgot && !_bfd_elf_create_got_section (dynobj, info))
     return FALSE;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->elf.splt = bfd_get_linker_section (dynobj, ".plt");
-  htab->elf.srelplt = bfd_get_linker_section (dynobj, ".rela.plt");
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!bfd_link_pic (info))
     htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
@@ -1016,7 +990,7 @@ elf_s390_check_relocs (bfd *abfd,
 	    {
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!create_got_section (htab->elf.dynobj, info))
+	      if (!_bfd_elf_create_got_section (htab->elf.dynobj, info))
 		return FALSE;
 	    }
 	}

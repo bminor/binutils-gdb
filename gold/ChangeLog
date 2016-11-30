@@ -1,3 +1,54 @@
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* aarch64-reloc.def: Fix spelling in comments.
+
+2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+	* aarch64.cc: Fix spelling in comments.
+	* arm.cc: Fix spelling in comments.
+	* icf.cc: Fix spelling in comments.
+	* layout.cc: Fix spelling in comments.
+	* layout.h: Fix spelling in comments.
+	* mips.cc: Fix spelling in comments.
+	* output.h: Fix spelling in comments.
+	* plugin.h: Fix spelling in comments.
+	* script-sections.h: Fix spelling in comments.
+	* script.h: Fix spelling in comments.
+	* stringpool.h: Fix spelling in comments.
+	* tilegx.cc: Fix spelling in comments.
+
+2016-11-22  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20346
+	* options.cc (One_option::print): Print "(default)" when appropriate.
+	* options.h: Clean up and re-sort options.
+	(One_option::is_default): New data member.
+	(One_option::One_option): Add is_default parameter; adjust all calls.
+	(DEFINE_var): Add is_default__ parameter; adjust all calls.
+	(DEFINE_bool): Set is_default based on default_value__.
+	(DEFINE_bool_ignore): New macro.
+	(--no-eh-frame-hdr): New option.
+	(--enable-new-dtags): Remove mention of DT_FLAGS.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure: Regenerate.
+
+2016-11-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20693
+	* gold.cc (queue_middle_tasks): Force valid target earlier.
+
+2016-11-21  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* layout.cc: Include windows.h and rpcdce.h (for MinGW32).
+	(Layout::create_build_id): Generate uuid using UuidCreate().
+
+2016-11-04  Loïc Yhuel <loic.yhuel@softathome.com>
+
+	* configure.ac: add missing '$'.
+	* configure: Regenerate.
+
 2016-10-21  Gergely Nagy  <ngg@tresorit.com>
 
 	PR gold/17704

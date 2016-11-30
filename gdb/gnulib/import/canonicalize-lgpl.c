@@ -83,6 +83,11 @@
 # define DOUBLE_SLASH_IS_DISTINCT_ROOT 0
 #endif
 
+/* Define this independently so that stdint.h is not a prerequisite.  */
+#ifndef SIZE_MAX
+# define SIZE_MAX ((size_t) -1)
+#endif
+
 #if !FUNC_REALPATH_WORKS || defined _LIBC
 
 static void
@@ -194,7 +199,6 @@ __realpath (const char *name, char *resolved)
 #else
       struct stat st;
 #endif
-      int n;
 
       /* Skip sequence of multiple path-separators.  */
       while (ISSLASH (*start))
@@ -275,6 +279,7 @@ __realpath (const char *name, char *resolved)
             {
               char *buf;
               size_t len;
+              ssize_t n;
 
               if (++num_links > MAXSYMLINKS)
                 {
@@ -311,7 +316,8 @@ __realpath (const char *name, char *resolved)
                 }
 
               len = strlen (end);
-              if ((long int) (n + len) >= path_max)
+              /* Check that n + len + 1 doesn't overflow and is <= path_max. */
+              if (n >= SIZE_MAX - len || n + len >= path_max)
                 {
                   freea (buf);
                   __set_errno (ENAMETOOLONG);

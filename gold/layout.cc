@@ -34,6 +34,10 @@
 #include "libiberty.h"
 #include "md5.h"
 #include "sha1.h"
+#ifdef __MINGW32__
+#include <windows.h>
+#include <rpcdce.h>
+#endif
 
 #include "parameters.h"
 #include "options.h"
@@ -2581,7 +2585,7 @@ Layout::relaxation_loop_body(
   return off;
 }
 
-// Search the list of patterns and find the postion of the given section
+// Search the list of patterns and find the position of the given section
 // name in the output section.  If the section name matches a glob
 // pattern and a non-glob name, then the non-glob position takes
 // precedence.  Return 0 if no match is found.
@@ -3067,6 +3071,7 @@ Layout::create_build_id()
     descsz = 160 / 8;
   else if (strcmp(style, "uuid") == 0)
     {
+#ifndef __MINGW32__
       const size_t uuidsz = 128 / 8;
 
       char buffer[uuidsz];
@@ -3089,6 +3094,26 @@ Layout::create_build_id()
 
       desc.assign(buffer, uuidsz);
       descsz = uuidsz;
+#else // __MINGW32__
+      UUID uuid;
+      typedef RPC_STATUS (RPC_ENTRY *UuidCreateFn)(UUID *Uuid);
+
+      HMODULE rpc_library = LoadLibrary("rpcrt4.dll");
+      if (!rpc_library)
+	gold_error(_("--build-id=uuid failed: could not load rpcrt4.dll"));
+      else
+	{
+	  UuidCreateFn uuid_create = reinterpret_cast<UuidCreateFn>(
+	      GetProcAddress(rpc_library, "UuidCreate"));
+	  if (!uuid_create)
+	    gold_error(_("--build-id=uuid failed: could not find UuidCreate"));
+	  else if (uuid_create(&uuid) != RPC_S_OK)
+	    gold_error(_("__build_id=uuid failed: call UuidCreate() failed"));
+	  FreeLibrary(rpc_library);
+	}
+      desc.assign(reinterpret_cast<const char *>(&uuid), sizeof(UUID));
+      descsz = sizeof(UUID);
+#endif // __MINGW32__
     }
   else if (strncmp(style, "0x", 2) == 0)
     {

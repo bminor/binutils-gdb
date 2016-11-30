@@ -1,5 +1,6 @@
 SECTIONS
 {
+  . = SIZEOF_HEADERS;
   .text : { *(.text) }
   .data : { *(.data) }
   .bss : { *(.bss) *(COMMON) }

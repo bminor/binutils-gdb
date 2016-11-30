@@ -311,7 +311,6 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
   int from_tty = 0, to_string = 0;
   const SCM keywords[] = { from_tty_keyword, to_string_keyword, SCM_BOOL_F };
   char *command;
-  char *result = NULL;
   struct cleanup *cleanups;
   struct gdb_exception except = exception_none;
 
@@ -324,6 +323,8 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
      executed.  */
   cleanups = make_cleanup (xfree, command);
 
+  std::string to_string_res;
+
   TRY
     {
       struct cleanup *inner_cleanups;
@@ -333,12 +334,9 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 
       prevent_dont_repeat ();
       if (to_string)
-	result = execute_command_to_string (command, from_tty);
+	to_string_res = execute_command_to_string (command, from_tty);
       else
-	{
-	  execute_command (command, from_tty);
-	  result = NULL;
-	}
+	execute_command (command, from_tty);
 
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
@@ -354,12 +352,8 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
   do_cleanups (cleanups);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
-  if (result)
-    {
-      SCM r = gdbscm_scm_from_c_string (result);
-      xfree (result);
-      return r;
-    }
+  if (to_string)
+    return gdbscm_scm_from_c_string (to_string_res.c_str ());
   return SCM_UNSPECIFIED;
 }
 

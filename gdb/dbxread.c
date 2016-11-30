@@ -1664,20 +1664,16 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	  sym_name = NULL;	/* pacify "gcc -Werror" */
  	  if (psymtab_language == language_cplus)
  	    {
-	      char *new_name, *name = (char *) xmalloc (p - namestring + 1);
- 	      memcpy (name, namestring, p - namestring);
-
- 	      name[p - namestring] = '\0';
- 	      new_name = cp_canonicalize_string (name);
- 	      if (new_name != NULL)
- 		{
- 		  sym_len = strlen (new_name);
+	      std::string name (namestring, p - namestring);
+	      std::string new_name = cp_canonicalize_string (name.c_str ());
+	      if (!new_name.empty ())
+		{
+		  sym_len = new_name.length ();
 		  sym_name = (char *) obstack_copy0 (&objfile->objfile_obstack,
-						     new_name, sym_len);
- 		  xfree (new_name);
- 		}
-              xfree (name);
- 	    }
+						     new_name.c_str (),
+						     sym_len);
+		}
+	    }
 
  	  if (sym_len == 0)
  	    {

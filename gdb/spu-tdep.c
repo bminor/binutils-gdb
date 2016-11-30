@@ -1570,16 +1570,9 @@ spu_return_value (struct gdbarch *gdbarch, struct value *function,
 
 
 /* Breakpoints.  */
+constexpr gdb_byte spu_break_insn[] = { 0x00, 0x00, 0x3f, 0xff };
 
-static const gdb_byte *
-spu_breakpoint_from_pc (struct gdbarch *gdbarch,
-			CORE_ADDR * pcptr, int *lenptr)
-{
-  static const gdb_byte breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
-
-  *lenptr = sizeof breakpoint;
-  return breakpoint;
-}
+typedef BP_MANIPULATION (spu_break_insn) spu_breakpoint;
 
 static int
 spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
@@ -1617,19 +1610,19 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
 /* Software single-stepping support.  */
 
-static int
-spu_software_single_step (struct frame_info *frame)
+static VEC (CORE_ADDR) *
+spu_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
   int offset, reg;
   gdb_byte buf[4];
   ULONGEST lslr;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  pc = get_frame_pc (frame);
+  pc = regcache_read_pc (regcache);
 
   if (target_read_memory (pc, buf, 4))
     throw_error (MEMORY_ERROR, _("Could not read instruction at %s."),
@@ -1638,7 +1631,7 @@ spu_software_single_step (struct frame_info *frame)
   insn = extract_unsigned_integer (buf, 4, byte_order);
 
   /* Get local store limit.  */
-  lslr = get_frame_register_unsigned (frame, SPU_LSLR_REGNUM);
+  lslr = regcache_raw_get_unsigned (regcache, SPU_LSLR_REGNUM);
   if (!lslr)
     lslr = (ULONGEST) -1;
 
@@ -1650,8 +1643,7 @@ spu_software_single_step (struct frame_info *frame)
   else
     next_pc = (SPUADDR_ADDR (pc) + 4) & lslr;
 
-  insert_single_step_breakpoint (gdbarch,
-				 aspace, SPUADDR (SPUADDR_SPU (pc), next_pc));
+  VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc), next_pc));
 
   if (is_branch (insn, &offset, &reg))
     {
@@ -1660,32 +1652,15 @@ spu_software_single_step (struct frame_info *frame)
       if (reg == SPU_PC_REGNUM)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
-	{
-	  int optim, unavail;
-
-	  if (get_frame_register_bytes (frame, reg, 0, 4, buf,
-					 &optim, &unavail))
-	    target += extract_unsigned_integer (buf, 4, byte_order) & -4;
-	  else
-	    {
-	      if (optim)
-		throw_error (OPTIMIZED_OUT_ERROR,
-			     _("Could not determine address of "
-			       "single-step breakpoint."));
-	      if (unavail)
-		throw_error (NOT_AVAILABLE_ERROR,
-			     _("Could not determine address of "
-			       "single-step breakpoint."));
-	    }
-	}
+	target += regcache_raw_get_unsigned (regcache, reg) & -4;
 
       target = target & lslr;
       if (target != next_pc)
-	insert_single_step_breakpoint (gdbarch, aspace,
-				       SPUADDR (SPUADDR_SPU (pc), target));
+	VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc),
+						     target));
     }
 
-  return 1;
+  return next_pcs;
 }
 
 
@@ -2797,7 +2772,8 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoints.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
-  set_gdbarch_breakpoint_from_pc (gdbarch, spu_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, spu_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, spu_breakpoint::bp_from_kind);
   set_gdbarch_memory_remove_breakpoint (gdbarch, spu_memory_remove_breakpoint);
   set_gdbarch_software_single_step (gdbarch, spu_software_single_step);
   set_gdbarch_get_longjmp_target (gdbarch, spu_get_longjmp_target);

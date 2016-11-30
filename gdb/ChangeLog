@@ -1,3 +1,2157 @@
+2016-11-30  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_scan_prologue): Read memory as unsigned integer.
+	(arm_exidx_unwind_sniffer): Likewise.
+
+2016-11-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* record-full.c (record_full_open_1): Fix debug output.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* mi/mi-out.c (mi_message): Remove verbosity argument.
+	* ada-tasks.c (print_ada_task_info, info_task, task_command):
+	Update call.
+	* auto-load.c (auto_load_info_scripts): Likewise.
+	* breakpoint.c (breakpoint_1, watchpoints_info, tracepoints_info):
+	Likewise.
+	* cli-out.c (cli_message): Remove verbosity argument.
+	* inferior.c (print_inferior): Update call.
+	* linux-thread-db.c (info_auto_load_libthread_db): Likewise.
+	* probe.c (info_probes_for_ops): Likewise.
+	* skip.c (skip_info): Likewise.
+	* solib.c (info_sharedlibrary_command): Likewise.
+	* symfile.c (load_progress): Likewise.
+	* thread.c (print_thread_info_1): Likewise.
+	* ui-out.c (uo_message, ui_out_message): Remove verbosity argument.
+	(ui_out_get_verblvl): Remove.
+	* ui-out.h (ui_out_message): Remove verbosity argument.
+	(ui_out_get_verblvl): Remove.
+	(message_ftype): Remove verbosity argument.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* mi/mi-out.c (mi_wrap_hint): Constify argument.
+	* cli-out.c (cli_wrap_hint): Likewise.
+	* ui-out.c (ui_out_wrap_hint, uo_wrap_hint): Likewise.
+	* ui-out.h (ui_out_wrap_hint, wrap_hint_ftype): Likewise.
+	* utils.c (wrap_here): Likewise.
+	(wrap_indent): Constify.
+	* utils.h (wrap_here): Constify argument.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (uo_redirect): Return the return value from the
+	implementation function.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (ui_out_destroy, uo_data_destroy): Remove.
+	* ui-out.h (ui_out_destroy): Remove.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* mi/mi-out.c (ui_out_data): Rename to ...
+	(mi_ui_out_data): ... this.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (_initialize_ui_out): Remove.
+	(ui_out_set_flags): Remove.
+	(ui_out_clear_flags): Remove.
+	* ui-out.h (ui_out_begin_cleanup_end): Remove.
+	(ui_out_begin_cleanup_end): Remove.
+	(ui_out_set_flags): Remove.
+	(ui_out_clear_flags): Remove.
+	* mi/mi-out.c (_initialize_mi_out): Remove.
+	(mi_out_buffered): Remove.
+	* mi/mi-out.h (mi_out_buffered): Remove.
+
+2016-11-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.h (struct ui_out_impl): Remove comment.
+	* ui-out.c (struct ui_out): Remove comment.
+
+2016-11-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* contrib/ari/gdb_ari.sh (no parameter function): Remove check.
+
+2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in: Fix typo.
+
+2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* record-full.c (record_full_resume): Fix typos in comment.
+
+2016-11-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infcmd.c (interrupt_command): Fix typo in comment.
+
+2016-11-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* ada-lang.c (create_excep_cond_exprs): Do not use 'std::move'.
+	* ax-gdb.c (agent_eval_command_one): Likewise.
+	(agent_eval_command_one): Likewise.
+	* breakpoint.c (parse_cond_to_aexpr): Likewise.
+	(parse_cmd_to_aexpr): Likewise.
+	* dtrace-probe.c (dtrace_process_dof_probe): Likewise.
+	* parse.c (parse_expression_for_completion): Likewise.
+
+2016-11-24  John Baldwin  <jhb@FreeBSD.org>
+
+	* common/new-op.c (operator new): Mark 'noexcept'.
+	(operator new[]): Likewise.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (copy_bitwise): Use memcpy for the middle part, if
+	it is byte-aligned.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* dwarf2loc.c (bits_to_str, check_copy_bitwise)
+	(copy_bitwise_tests): New functions.
+	(_initialize_dwarf2loc): Register the new function
+	copy_bitwise_tests as a unit test.
+	* selftest.c (run_self_tests): Improve the failure message's
+	wording and formatting.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (extract_bits_primitive): Remove.
+	(extract_bits): Remove.
+	(copy_bitwise): Rewrite.  Fixes a possible corruption that may
+	occur for non-byte-aligned copies.
+
+2016-11-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/12616
+	* dwarf2read.c (dwarf2_add_field): Handle the DWARF V4 attribute
+	DW_AT_data_bit_offset.
+
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add common/run-time-clock.c.
+	(HFILES_NO_SRCDIR): Add common/run-time-clock.h.
+	(COMMON_OBS): Add run-time-clock.o.
+	* common/run-time-clock.c, common/run-time-clock.h: New files.
+	* defs.h (struct timeval, print_transfer_performance): Delete
+	declarations.
+	* event-loop.c (struct gdb_timer) <when>: Now a
+	std::chrono::steady_clock::time_point.
+	(create_timer): use std::chrono::steady_clock instead of
+	gettimeofday.  Use new instead of malloc.
+	(delete_timer): Use delete instead of xfree.
+	(duration_cast_timeval): New.
+	(update_wait_timeout): Use std::chrono::steady_clock instead of
+	gettimeofday.
+	* maint.c: Include <chrono> instead of "gdb_sys_time.h", <time.h>
+	and "timeval-utils.h".
+	(scoped_command_stats::~scoped_command_stats)
+	(scoped_command_stats::scoped_command_stats): Use
+	std::chrono::steady_clock instead of gettimeofday.  Use
+	user_cpu_time_clock instead of get_run_time.
+	* maint.h: Include "run-time-clock.h" and <chrono>.
+	(scoped_command_stats): <m_start_cpu_time>: Now a
+	user_cpu_time_clock::time_point.
+	<m_start_wall_time>: Now a std::chrono::steady_clock::time_point.
+	* mi/mi-main.c: Include "run-time-clock.h" and <chrono> instead of
+	"gdb_sys_time.h" and <sys/resource.h>.
+	(rusage): Delete.
+	(mi_execute_command): Use new instead of XNEW.
+	(mi_load_progress): Use std::chrono::steady_clock instead of
+	gettimeofday.
+	(timestamp): Rewrite in terms of std::chrono::steady_clock,
+	user_cpu_time_clock and system_cpu_time_clock.
+	(timeval_diff): Delete.
+	(print_diff): Adjust to use std::chrono::steady_clock,
+	user_cpu_time_clock and system_cpu_time_clock.
+	* mi/mi-parse.h: Include "run-time-clock.h" and <chrono> instead
+	of "gdb_sys_time.h".
+	(struct mi_timestamp): Change fields types to
+	std::chrono::steady_clock::time_point, user_cpu_time_clock::time
+	and system_cpu_time_clock::time_point, instead of struct timeval.
+	* symfile.c: Include <chrono> instead of <time.h> and
+	"gdb_sys_time.h".
+	(struct time_range): New.
+	(generic_load): Use std::chrono::steady_clock instead of
+	gettimeofday.
+	(print_transfer_performance): Replace timeval parameters with a
+	std::chrono::steady_clock::duration parameter.  Adjust.
+	* utils.c: Include <chrono> instead of "timeval-utils.h",
+	"gdb_sys_time.h", and <time.h>.
+	(prompt_for_continue_wait_time): Now a
+	std::chrono::steady_clock::duration.
+	(defaulted_query, prompt_for_continue): Use
+	std::chrono::steady_clock instead of
+	gettimeofday/timeval_sub/timeval_add.
+	(reset_prompt_for_continue_wait_time): Use
+	std::chrono::steady_clock::duration instead of struct timeval.
+	(get_prompt_for_continue_wait_time): Return a
+	std::chrono::steady_clock::duration instead of struct timeval.
+	(vfprintf_unfiltered): Use std::chrono::steady_clock instead of
+	gettimeofday.  Use std::string.  Use '.' instead of ':'.
+	* utils.h: Include <chrono>.
+	(get_prompt_for_continue_wait_time): Return a
+	std::chrono::steady_clock::duration instead of struct timeval.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Fix whitespace formatting.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (ALL_64_TARGET_OBS, ALL_TARGET_OBS,
+	HFILES_NO_SRCDIR, ALLDEPFILES): Rename files.
+	* alphabsd-nat.c: Rename to ...
+	* alpha-bsd-nat.c: ... this, adjust include.
+	* alphabsd-tdep.c: Rename to ...
+	* alpha-bsd-tdep.c: ... this, adjust include.
+	* alphabsd-tdep.h: Rename to ...
+	* alpha-bsd-tdep.h: ... this, adjust include barrier and comment.
+	* alphafbsd-tdep.c: Rename to ...
+	* alpha-fbsd-tdep.c: ... this.
+	* alphanbsd-tdep.c: Rename to ...
+	* alpha-nbsd-tdep.c: ... this, adjust include.
+	* alphaobsd-tdep.c: Rename to ...
+	* alpha-obsd-tdep.c: ... this, adjust include.
+	* amd64bsd-nat.c: Rename to ...
+	* amd64-bsd-nat.c: ... this, adjust include.
+	* amd64fbsd-nat.c: Rename to ...
+	* amd64-fbsd-nat.c: ... this, adjust include.
+	* amd64fbsd-tdep.c: Rename to ...
+	* amd64-fbsd-tdep.c: ... this, adjust include.
+	* amd64nbsd-nat.c: Rename to ...
+	* amd64-nbsd-nat.c: ... this.
+	* amd64nbsd-tdep.c: Rename to ...
+	* amd64-nbsd-tdep.c: ... this.
+	* amd64obsd-nat.c: Rename to ...
+	* amd64-obsd-nat.c: ... this.
+	* amd64obsd-tdep.c: Rename to ...
+	* amd64-obsd-tdep.c: ... this.
+	* amd64-tdep.h: Update comments.
+	* armbsd-tdep.c: Rename to ...
+	* arm-bsd-tdep.c: ... this.
+	* armnbsd-nat.c: Rename to ...
+	* arm-nbsd-nat.c: ... this.
+	* armnbsd-tdep.c: Rename to ...
+	* arm-nbsd-tdep.c: ... this.
+	* armobsd-tdep.c: Rename to ...
+	* arm-obsd-tdep.c: ... this.
+	* arm-tdep.h: Update comments.
+	* hppabsd-tdep.c: Rename to ...
+	* hppa-bsd-tdep.c: ... this, adjust include.
+	* hppabsd-tdep.h: Rename to ...
+	* hppa-bsd-tdep.h: ... this, adjust include barrier and comment.
+	* hppanbsd-nat.c: Rename to ...
+	* hppa-nbsd-nat.c: ... this.
+	* hppanbsd-tdep.c: Rename to ...
+	* hppa-nbsd-tdep.c: ... this, adjust include.
+	* hppaobsd-nat.c: Rename to ...
+	* hppa-obsd-nat.c: ... this.
+	* hppaobsd-tdep.c: Rename to ...
+	* hppa-obsd-tdep.c: ... this, adjust include.
+	* i386bsd-nat.c: Rename to ...
+	* i386-bsd-nat.c: ... this, adjust include.
+	* i386bsd-nat.h: Rename to ...
+	* i386-bsd-nat.h: ... this, adjust include barrier and comment.
+	* i386bsd-tdep.c: Rename to ...
+	* i386-bsd-tdep.c: ... this.
+	* i386fbsd-nat.c: Rename to ...
+	* i386-fbsd-nat.c: ... this, adjust include.
+	* i386fbsd-tdep.c: Rename to ...
+	* i386-fbsd-tdep.c: ... this, adjust include.
+	* i386fbsd-tdep.h: Rename to ...
+	* i386-fbsd-tdep.h: ... this, adjust include barrier and comment.
+	* i386gnu-nat.c: Rename to ...
+	* i386-gnu-nat.c: ... this.
+	* i386gnu-tdep.c: Rename to ...
+	* i386-gnu-tdep.c: ... this.
+	* i386nbsd-nat.c: Rename to ...
+	* i386-nbsd-nat.c: ... this, adjust include.
+	* i386nbsd-tdep.c: Rename to ...
+	* i386-nbsd-tdep.c: ... this.
+	* i386obsd-nat.c: Rename to ...
+	* i386-obsd-nat.c: ... this, adjust include.
+	* i386obsd-tdep.c: Rename to ...
+	* i386-obsd-tdep.c: ... this.
+	* i386v4-nat.c: Rename to ...
+	* i386-v4-nat.c: ... this.
+	* i386-tdep.h: Update comments.
+	* m68k-tdep.h: Update comments.
+	* m68kbsd-nat.c: Rename to ...
+	* m68k-bsd-nat.c: ... this.
+	* m68kbsd-tdep.c: Rename to ...
+	* m68k-bsd-tdep.c: ... this.
+	* m68klinux-nat.c: Rename to ...
+	* m68k-linux-nat.c: ... this.
+	* m68klinux-tdep.c: Rename to ...
+	* m68k-linux-tdep.c: ... this.
+	* m88kbsd-nat.c: Rename to ...
+	* m88k-bsd-nat.c: ... this.
+	* mipsnbsd-nat.c: Rename to ...
+	* mips-nbsd-nat.c: ... this, adjust include.
+	* mipsnbsd-tdep.c: Rename to ...
+	* mips-nbsd-tdep.c: ... this, adjust include.
+	* mipsnbsd-tdep.h: Rename to ...
+	* mips-nbsd-tdep.h: ... this, adjust include barrier and comment.
+	* mips64obsd-nat.c: Rename to ...
+	* mips64-obsd-nat.c: ... this.
+	* mips64obsd-tdep.c: Rename to ...
+	* mips64-obsd-tdep.c: ... this.
+	* ppcfbsd-nat.c: Rename to ...
+	* ppc-fbsd-nat.c: ... this, adjust include.
+	* ppcfbsd-tdep.c: Rename to ...
+	* ppc-fbsd-tdep.c: ... this, adjust include.
+	* ppcfbsd-tdep.h: Rename to ...
+	* ppc-fbsd-tdep.h: ... this, adjust include barrier and comment.
+	* ppcnbsd-nat.c: Rename to ...
+	* ppc-nbsd-nat.c: ... this, adjust include.
+	* ppcnbsd-tdep.c: Rename to ...
+	* ppc-nbsd-tdep.c: ... this, adjust include.
+	* ppcnbsd-tdep.h: Rename to ...
+	* ppc-nbsd-tdep.h: ... this, adjust include barrier and comment.
+	* ppcobsd-nat.c: Rename to ...
+	* ppc-obsd-nat.c: ... this, adjust include.
+	* ppcobsd-tdep.c: Rename to ...
+	* ppc-obsd-tdep.c: ... this, adjust include.
+	* ppcobsd-tdep.h: Rename to ...
+	* ppc-obsd-tdep.h: ... this, adjust include barrier and comment.
+	* shnbsd-nat.c: Rename to ...
+	* sh-nbsd-nat.c: ... this.
+	* shnbsd-tdep.c: Rename to ...
+	* sh-nbsd-tdep.c: ... this.
+	* sparcnbsd-nat.c: Rename to ...
+	* sparc-nbsd-nat.c: ... this.
+	* sparcnbsd-tdep.c: Rename to ...
+	* sparc-nbsd-tdep.c: ... this.
+	* sparcobsd-tdep.c: Rename to ...
+	* sparc-obsd-tdep.c: ... this.
+	* sparc64fbsd-nat.c: Rename to ...
+	* sparc64-fbsd-nat.c: ... this.
+	* sparc64fbsd-tdep.c: Rename to ...
+	* sparc64-fbsd-tdep.c: ... this.
+	* sparc64nbsd-nat.c: Rename to ...
+	* sparc64-nbsd-nat.c: ... this.
+	* sparc64nbsd-tdep.c: Rename to ...
+	* sparc64-nbsd-tdep.c: ... this.
+	* sparc64obsd-nat.c: Rename to ...
+	* sparc64-obsd-nat.c: ... this.
+	* sparc64obsd-tdep.c: Rename to ...
+	* sparc64-obsd-tdep.c: ... this.
+	* sparc64-tdep.h: Update comments.
+	* vaxbsd-nat.c: Rename to ...
+	* vax-bsd-nat.c: ... this.
+	* vaxnbsd-tdep.c: Rename to ...
+	* vax-nbsd-tdep.c: ... this.
+	* vaxobsd-tdep.c: Rename to ...
+	* vax-obsd-tdep.c: ... this.
+	* x86bsd-nat.h: Rename to ...
+	* x86-bsd-nat.h: ... this, adjust include barrier and comment.
+	* x86bsd-nat.c: Rename to ...
+	* x86-bsd-nat.c: ... this, adjust include.
+	* configure.tgt: Update renamed files.
+	* config/alpha/fbsd.mh: Update renamed files.
+	* config/alpha/nbsd.mh: Update renamed files.
+	* config/arm/nbsdelf.mh: Update renamed files.
+	* config/djgpp/fnchange.lst: Update renamed files.
+	* config/i386/fbsd.mh: Update renamed files.
+	* config/i386/fbsd64.mh: Update renamed files.
+	* config/i386/i386gnu.mh: Update renamed files.
+	* config/i386/i386sol2.mh: Update renamed files.
+	* config/i386/nbsd64.mh: Update renamed files.
+	* config/i386/nbsdelf.mh: Update renamed files.
+	* config/i386/obsd.mh: Update renamed files.
+	* config/i386/obsd64.mh: Update renamed files.
+	* config/i386/sol2-64.mh: Update renamed files.
+	* config/m68k/linux.mh: Update renamed files.
+	* config/m68k/nbsdelf.mh: Update renamed files.
+	* config/m68k/obsd.mh: Update renamed files.
+	* config/m88k/obsd.mh: Update renamed files.
+	* config/mips/nbsd.mh: Update renamed files.
+	* config/mips/obsd64.mh: Update renamed files.
+	* config/pa/nbsd.mh: Update renamed files.
+	* config/pa/obsd.mh: Update renamed files.
+	* config/powerpc/fbsd.mh: Update renamed files.
+	* config/powerpc/nbsd.mh: Update renamed files.
+	* config/powerpc/obsd.mh: Update renamed files.
+	* config/sh/nbsd.mh: Update renamed files.
+	* config/sparc/fbsd.mh: Update renamed files.
+	* config/sparc/nbsd64.mh: Update renamed files.
+	* config/sparc/nbsdelf.mh: Update renamed files.
+	* config/sparc/obsd64.mh: Update renamed files.
+	* config/vax/nbsdelf.mh: Update renamed files.
+	* config/vax/obsd.mh: Update renamed files.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Add comment about file lists ordering.
+	(SUBDIR_CLI_OBS, SUBDIR_CLI_SRCS, SUBDIR_MI_OBS, SUBDIR_MI_SRCS,
+	SUBDIR_TUI_OBS, SUBDIR_TUI_SRCS, SUBDIR_GCC_COMPILE_OBS,
+	SUBDIR_GCC_COMPILE_SRCS, SUBDIR_GUILE_OBS, SUBDIR_GUILE_SRCS,
+	SUBDIR_PYTHON_OBS, SUBDIR_PYTHON_SRCS, SUBDIR_GDBTK_OBS,
+	SUBDIR_GDBTK_SRCS, XMLFILES, REMOTE_OBS, ALL_64_TARGET_OBS,
+	ALL_TARGET_OBS, SFILES, HFILES_NO_SRCDIR, HFILES_WITH_SRCDIR,
+	COMMON_OBS, YYFILES, YYOBJ, generated_files, ALLDEPFILES):
+	Flatten list and order alphabetically.
+	* data-directory/Makefile.in: Add comment about file lists
+	ordering.
+	(GEN_SYSCALLS_FILES, PYTHON_FILE_LIST): Flatten list and order
+	alphabetically.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * contrib/expect-read1.sh: Fix spelling in comments.
+        * gdb_buildall.sh: Fix spelling in comments.
+        * gdb_mbuild.sh: Fix spelling in comments.
+
+2016-11-22  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
+
+        * configure.ac: Fix spelling in comments.
+        * configure: Regenerate.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbarch.sh (software_single_step): Change parameter from frame_info
+	to regcache.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* aarch64-tdep.c (aarch64_software_single_step): Change parameter
+	from frame_info to regcache.  Don't call get_current_regcache.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Likewise.
+	(alpha_software_single_step): Likewise.
+	* alpha-tdep.h (alpha_software_single_step): Update declaration.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Likewise.
+	* arm-tdep.c (arm_software_single_step): Likewise.
+	* arm-tdep.h (arm_software_single_step): Likewise.
+	* breakpoint.c (insert_single_step_breakpoint): Pass regcache to
+	gdbarch_software_single_step.
+	* cris-tdep.c (cris_software_single_step): Change parameter from
+	frame_info to regcache.  Don't call get_current_regcache.
+	* mips-tdep.c (mips_software_single_step): Likewise.
+	* mips-tdep.h (mips_software_single_step): Update declaration.
+	* moxie-tdep.c (moxie_software_single_step): Likewise.
+	* nios2-tdep.c (nios2_software_single_step): Likewise.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Update declaration.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Likewise.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Likewise.
+	* s390-linux-tdep.c (s390_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* spu-tdep.c (spu_software_single_step): Likewise.
+	* tic6x-tdep.c (tic6x_software_single_step): Likewise.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* spu-tdep.c (spu_software_single_step): Call get_regcache_arch
+	instead of get_frame_arch.  Call regcache_read_pc instead of
+	get_frame_pc.  Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* tic6x-tdep.c (tic6x_condition_true): Replace frame with
+	regcache.  Call regcache_raw_get_signed instead of
+	get_frame_register_signed.
+	(tic6x_get_next_pc): Likewise.  Caller updated.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* rs6000-aix-tdep.c (branch_dest): Replace parameter frame with
+	regcache.  Call get_regcache_arch instead of get_frame_arch.
+	Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+	(rs6000_software_single_step): Likewise.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* s390-linux-tdep.c (s390_software_single_step): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* sparc-tdep.c (sparc_analyze_control_transfer): Replace parameter
+	frame with regcache.  Call get_current_frame.
+	(sparc_software_single_step): Call get_regcache_arch instead of
+	get_frame_arch.  Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* nios2-tdep.c (nios2_get_next_pc): Replace parameter frame
+	with regcache.  Call regcache_raw_get_signed instead of
+	get_frame_register_unsigned.
+	(nios2_software_single_step): Call get_regcache_arch
+	instead of get_frame_arch.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* moxie-tdep.c (moxie_software_single_step): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-tdep.c (mips32_bc1_pc): Replace parameter frame with
+	regcache.  Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+	(mips32_next_pc): Likewise.
+	(micromips_bc1_pc): Likewise.
+	(micromips_next_pc): Likewise.
+	(extended_mips16_next_pc): Likewise.
+	(mips16_next_pc): Likewise.
+	(mips_next_pc): Likewise.
+	(mips_software_single_step): Call get_regcache_arch instead
+	of get_frame_arch.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* cris-tdep.c (find_step_target): Replace parameter frame
+	with regcache.  Call get_regcache_arch instead of
+	get_frame_arch.  Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+	(cris_software_single_step): Call get_regcache_arch instead
+	of get_frame_arch.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+	(alpha_next_pc): Replace parameter frame with regcache.
+	Call regcache_raw_get_unsigned instead of
+	get_frame_register_unsigned.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_software_single_step): Call
+	get_regcache_arch instead of get_frame_arch.  Call
+	regcache_read_pc instead of get_frame_pc.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_raw_get_signed): New function.
+	* regcache.h (regcache_raw_get_signed): Declare.
+
+2016-11-22  Yao Qi  <yao.qi@linaro.org>
+
+	* value.c (value_from_component): Use VALUE_NEXT_FRAME_ID
+	instead of VALUE_FROM_ID.
+
+2016-11-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (%o: $(srcdir)/mi/%.c): Add missing POSTCOMPILE
+	step.
+
+2016-11-21  Yao Qi  <yao.qi@linaro.org>
+
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):
+	Don't call value_from_contents_and_address and
+	set_value_address.  Call value_from_component.
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer):
+	Likewise.
+	* value.c (value_from_component): New function.
+	* value.h (value_from_component): Likewise.
+	* valarith.c (value_subscripted_rvalue): Call
+	value_from_component.
+
+2016-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* contrib/ari/gdb_ari.sh: Add detection of printf_vma and
+	sprintf_vma.
+
+2016-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (%.o: $(srcdir)/gdbtk/generic/%.c): Fix typo.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	(PYTHON_CFLAGS): Move up.
+	(%.o: $(srcdir)/arch/%.c): New rule.
+	(%.o: $(srcdir)/cli/%.c): New rule.
+	(%.o: $(srcdir)/common/%.c): New rule.
+	(%.o: $(srcdir)/compile/%.c): New rule.
+	(%.o: $(srcdir)/gdbtk/generic/%.c): New rule.
+	(%.o: $(srcdir)/guile/%.c): New rule.
+	(%.o: $(srcdir)/mi/%.c): New rule.
+	(%.o: $(srcdir)/nat/%.c): New rule.
+	(%.o: $(srcdir)/python/%.c): New rule.
+	(%.o: $(srcdir)/target/%.c): New rule.
+	(%.o: $(srcdir)/tui/%.c): New rule.
+	(cli-cmds.o): Remove.
+	(cli-decode.o): Likewise.
+	(cli-dump.o): Likewise.
+	(cli-interp.o): Likewise.
+	(cli-logging.o): Likewise.
+	(cli-script.o): Likewise.
+	(cli-setshow.o): Likewise.
+	(cli-utils.o): Likewise.
+	(compile.o): Likewise.
+	(compile-c-types.o): Likewise.
+	(compile-c-symbols.o): Likewise.
+	(compile-object-load.o): Likewise.
+	(compile-object-run.o): Likewise.
+	(compile-loc2c.o): Likewise.
+	(compile-c-support.o): Likewise.
+	(gdbtk.o): Likewise.
+	(gdbtk-bp.o): Likewise.
+	(gdbtk-cmds.o): Likewise.
+	(gdbtk-hooks.o): Likewise.
+	(gdbtk-interp.o): Likewise.
+	(gdbtk-main.o): Likewise.
+	(gdbtk-register.o): Likewise.
+	(gdbtk-stack.o): Likewise.
+	(gdbtk-varobj.o): Likewise.
+	(gdbtk-wrapper.o): Likewise.
+	(mi-cmd-break.o): Likewise.
+	(mi-cmd-catch.o): Likewise.
+	(mi-cmd-disas.o): Likewise.
+	(mi-cmd-env.o): Likewise.
+	(mi-cmd-file.o): Likewise.
+	(mi-cmd-info.o): Likewise.
+	(mi-cmds.o): Likewise.
+	(mi-cmd-stack.o): Likewise.
+	(mi-cmd-target.o): Likewise.
+	(mi-cmd-var.o): Likewise.
+	(mi-console.o): Likewise.
+	(mi-getopt.o): Likewise.
+	(mi-interp.o): Likewise.
+	(mi-main.o): Likewise.
+	(mi-out.o): Likewise.
+	(mi-parse.o): Likewise.
+	(mi-symbol-cmds.o): Likewise.
+	(mi-common.o): Likewise.
+	(signals.o): Likewise.
+	(common-utils.o): Likewise.
+	(gdb_vecs.o): Likewise.
+	(xml-utils.o): Likewise.
+	(ptid.o): Likewise.
+	(buffer.o): Likewise.
+	(filestuff.o): Likewise.
+	(format.o): Likewise.
+	(vec.o): Likewise.
+	(print-utils.o): Likewise.
+	(rsp-low.o): Likewise.
+	(errors.o): Likewise.
+	(common-debug.o): Likewise.
+	(cleanups.o): Likewise.
+	(common-exceptions.o
+	(posix-strerror.o): Likewise.
+	(mingw-strerror.o): Likewise.
+	(btrace-common.o): Likewise.
+	(fileio.o): Likewise.
+	(common-regcache.o): Likewise.
+	(signals-state-save-restore.o): Likewise.
+	(new-op.o): Likewise.
+	(waitstatus.o): Likewise.
+	(arm.o): Likewise.
+	(arm-linux.o): Likewise.
+	(arm-get-next-pcs.o): Likewise.
+	(x86-dregs.o): Likewise.
+	(linux-btrace.o): Likewise.
+	(linux-osdata.o): Likewise.
+	(linux-procfs.o): Likewise.
+	(linux-ptrace.o): Likewise.
+	(linux-waitpid.o): Likewise.
+	(mips-linux-watch.o): Likewise.
+	(ppc-linux.o): Likewise.
+	(linux-personality.o): Likewise.
+	(x86-linux.o): Likewise.
+	(x86-linux-dregs.o): Likewise.
+	(amd64-linux-siginfo.o): Likewise.
+	(linux-namespaces.o): Likewise.
+	(aarch64-linux-hw-point.o): Likewise.
+	(aarch64-linux.o): Likewise.
+	(aarch64-insn.o): Likewise.
+	(tui.o): Likewise.
+	(tui-command.o): Likewise.
+	(tui-data.o): Likewise.
+	(tui-disasm.o): Likewise.
+	(tui-file.o): Likewise.
+	(tui-hooks.o): Likewise.
+	(tui-interp.o): Likewise.
+	(tui-io.o): Likewise.
+	(tui-layout.o): Likewise.
+	(tui-out.o): Likewise.
+	(tui-regs.o): Likewise.
+	(tui-source.o): Likewise.
+	(tui-stack.o): Likewise.
+	(tui-win.o): Likewise.
+	(tui-windata.o): Likewise.
+	(tui-wingeneral.o): Likewise.
+	(tui-winsource.o): Likewise.
+	(guile.o): Likewise.
+	(scm-arch.o): Likewise.
+	(scm-auto-load.o): Likewise.
+	(scm-block.o): Likewise.
+	(scm-breakpoint.o): Likewise.
+	(scm-cmd.o): Likewise.
+	(scm-disasm.o): Likewise.
+	(scm-exception.o): Likewise.
+	(scm-frame.o): Likewise.
+	(scm-gsmob.o): Likewise.
+	(scm-iterator.o): Likewise.
+	(scm-lazy-string.o): Likewise.
+	(scm-math.o): Likewise.
+	(scm-objfile.o): Likewise.
+	(scm-param.o): Likewise.
+	(scm-ports.o): Likewise.
+	(scm-pretty-print.o): Likewise.
+	(scm-progspace.o): Likewise.
+	(scm-safe-call.o): Likewise.
+	(scm-string.o): Likewise.
+	(scm-symbol.o): Likewise.
+	(scm-symtab.o): Likewise.
+	(scm-type.o): Likewise.
+	(scm-utils.o): Likewise.
+	(scm-value.o): Likewise.
+	(python.o): Likewise.
+	(py-arch.o): Likewise.
+	(py-auto-load.o): Likewise.
+	(py-block.o): Likewise.
+	(py-bpevent.o): Likewise.
+	(py-breakpoint.o): Likewise.
+	(py-cmd.o): Likewise.
+	(py-continueevent.o): Likewise.
+	(py-xmethods.o): Likewise.
+	(py-event.o): Likewise.
+	(py-evtregistry.o): Likewise.
+	(py-evts.o): Likewise.
+	(py-exitedevent.o): Likewise.
+	(py-finishbreakpoint.o): Likewise.
+	(py-frame.o): Likewise.
+	(py-framefilter.o): Likewise.
+	(py-function.o): Likewise.
+	(py-gdb-readline.o): Likewise.
+	(py-inferior.o): Likewise.
+	(py-infevents.o): Likewise.
+	(py-infthread.o): Likewise.
+	(py-lazy-string.o): Likewise.
+	(py-linetable.o): Likewise.
+	(py-newobjfileevent.o): Likewise.
+	(py-objfile.o): Likewise.
+	(py-param.o): Likewise.
+	(py-prettyprint.o): Likewise.
+	(py-progspace.o): Likewise.
+	(py-signalevent.o): Likewise.
+	(py-stopevent.o): Likewise.
+	(py-symbol.o): Likewise.
+	(py-symtab.o): Likewise.
+	(py-threadevent.o): Likewise.
+	(py-type.o): Likewise.
+	(py-unwind.o): Likewise.
+	(py-utils.o): Likewise.
+	(py-value.o): Likewise.
+	(py-varobj.o): Likewise.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (.c.o): Replace rule with ...
+	(%.o: %.c): ... this one.
+	(.po.gmo): Replace rule with ...
+	(%.gmo: %.po): ... this one.
+	(.po.pox): Replace rule with ...
+	(%.pox: %.po): ... this one.
+	(.y.c): Replace rule with ...
+	(%.c: %.y): ... this one.
+	(.l.c): Replace rule with ...
+	(%.c: %.l): ... this one.
+	(.SUFFIXES): Remove all instances.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Remove @GMAKE_TRUE@ prefixes and removes lines
+	prefixed with @GMAKE_FALSE@.  Update comment related to non-GNU
+	make.
+	* configure.ac: Remove checks for the make program.
+	* configure: Re-generate.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* NEWS: Mention requirement of GNU make.
+
+2016-11-17  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (c_print_token): Use parser_fprintf instead of fprintf.
+
+2016-11-17  Pedro Alves  <palves@redhat.com>
+
+	* ctf.c [USE_WIN32API] (mkdir): Delete.
+
+2016-11-16  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Use unique_ptr and
+	new gdb_byte[] instead of malloc and cleanups.
+
+2016-11-17  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (collection_list::add_memrange): Add gdbarch
+	parameter.  Use paddress instead of printf_vma.  Adjust recursive
+	calls.
+	(collection_list::stringify): Use paddress and phex_nz instead of
+	sprintf_vma.  Adjust add_memrange call.
+	* tracepoint.h (collection_list::add_memrange): Add gdbarch
+	parameter.
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* frame.c (get_prev_frame): Stash frame id for current frame
+	prior to computing frame id for previous frame.
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* python/py-unwind.c (pending_framepy_read_register): Use
+	value_of_register() instead of get_frame_register_value().
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* value.h (VALUE_FRAME_ID): Rename to VALUE_NEXT_FRAME_ID. Update
+	comment.  Create new VALUE_FRAME_ID which is defined in terms of
+	VALUE_NEXT_FRAME_ID.
+	(deprecated_value_frame_id_hack): Rename to
+	deprecated_value_next_frame_id_hack.
+	* dwarf2loc.c, findvar.c, frame-unwind.c, sentinel-frame.c,
+	valarith.c, valops.c, value.c: Adjust nearly all occurences of
+	VALUE_FRAME_ID to VALUE_NEXT_FRAME_ID.	Add comments for those
+	which did not change.
+	* value.c (struct value): Rename frame_id field to next_frame_id.
+	Update comment.
+	(deprecated_value_frame_id_hack): Rename to
+	deprecated_value_next_frame_id_hack.
+	(value_fetch_lazy): Call frame_unwind_register_value()
+	instead of get_frame_register_value().
+	* frame.c (get_prev_frame_id_by_id): New function.
+	* frame.h (get_prev_frame_id_by_id): Declare.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Make
+	VALUE_NEXT_FRAME_ID refer to the next frame.
+	* findvar.c (value_of_register_lazy): Likewise.
+	(default_value_from_register): Likewise.
+	(value_from_register): Likewise.
+	* frame_unwind.c (frame_unwind_got_optimized): Likewise.
+	* sentinel-frame.c (sentinel_frame_prev_register): Likewise.
+	* value.h (VALUE_FRAME_ID): Update comment describing this macro.
+
+2016-11-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* frame.h (enum frame_id_stack_status): Add FID_STACK_SENTINEL.
+	(struct frame_id): Increase number of bits required for storing
+	stack status to 3 from 2.
+	(sentinel_frame_id): New declaration.
+	(get_next_frame_sentinel_okay): Declare.
+	(frame_find_by_id_sentinel_okay): Declare.
+	* frame.c (current_frame): Rename this static global to...
+	(sentinel_frame): ...this static global, which has also been
+	moved an earlier location in the file.
+	(fprint_frame_id): Add case for sentinel frame id.
+	(get_frame_id): Return early for sentinel frame.
+	(sentinel_frame_id): Define.
+	(frame_find_by_id): Add case for sentinel_frame_id.
+	(create_sentinel_frame): Use sentinel_frame_id for this_id.value
+	instead of null_frame_id.
+	(get_current_frame): Add local declaration for `current_frame'.
+	Remove local declaration for `sentinel_frame.'
+	(get_next_frame_sentinel_okay): New function.
+	(reinit_frame_cache): Use `sentinel_frame' in place of
+	`current_frame'.
+
+2016-11-15  Pedro Alves  <palves@redhat.com>
+
+	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
+	38237baf99386101934cd93278023aa4ae523ec0.
+	* gnulib/configure, gnulib/config.in: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/canonicalize-lgpl.c: Update.
+	* gnulib/import/extra/snippet/c++defs.h: Update.
+	* gnulib/import/m4/stdint.m4: Update.
+	* gnulib/import/m4/stdlib_h.m4: Update.
+	* gnulib/import/math.in.h: Update.
+	* gnulib/import/stdlib.in.h: Update.
+	* gnulib/import/sys_time.in.h: Update.
+
+2016-11-15  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h: Update comment.
+	* common/gdb_unique_ptr.h: Update header comment and copyright
+	year.
+	(gdb::unique_ptr, gdb::move): Delete.
+
+2016-11-15  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (create_excep_cond_exprs): Use std::move instead of
+	gdb::move.
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use
+	std::unique_ptr instead of gdb::unique_ptr.
+	* breakpoint.c (watch_command_1): Use std::move instead of
+	gdb::move.
+	* cli/cli-dump.c (dump_memory_to_file, restore_binary_file): Use
+	std::unique_ptr instead of gdb::unique_ptr.
+	* dtrace-probe.c (dtrace_process_dof_probe): Use std::move instead
+	of gdb::move.
+	* elfread.c (elf_read_minimal_symbols): Use std::unique_ptr
+	instead of gdb::unique_ptr.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use std::unique_ptr
+	instead of gdb::unique_ptr.
+	* parse.c (parse_expression_for_completion): Use std::move instead
+	of gdb::move.
+	* printcmd.c (display_command): std::move instead of gdb::move.
+
+2016-11-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.c (perf_event_read): Allow data_head < size.
+	* nat/linux-btrace.c (perf_event_read_all): Do not adjust size.
+
+2016-11-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y (super_name): Use std::vector.
+	(lex_number): Use std::string.
+	(convert_params_to_types): Return std::vector.
+	(convert_ast_to_type, convert_name): Update.
+	* rust-lang.c (rust_get_disr_info): Use unique_xmalloc_ptr.
+
+2016-11-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_get_disr_info): Use std::string in one more
+	spot.
+
+2016-11-11  Yao Qi  <yao.qi@linaro.org>
+
+	* spu-tdep.c (spu_software_single_step): Don't call
+	get_frame_register_bytes, call get_frame_register_unsigned
+	instead.
+
+2016-11-11  Yao Qi  <yao.qi@linaro.org>
+
+	* cp-valprint.c (cp_print_value): Remove local base_valaddr.
+	* extension-priv.h (struct extension_language_ops)
+	<apply_val_pretty_printer>: Remove the second parameter.
+	Remove const from "struct value *".  Callers updated.
+	* extension.c (apply_ext_lang_val_pretty_printer): Update
+	comments.  Remove parameter valaddr.  Remove const from
+	"struct value *".
+	* extension.h (apply_ext_lang_val_pretty_printer): Update
+	declaration.
+	* guile/guile-internal.h (gdbscm_apply_val_pretty_printer):
+	Update declaration.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):
+	Remove parameter valaddr.  Remove const from "struct value *".
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer):
+	Likewise.
+	* python/python-internal.h (gdbpy_apply_val_pretty_printer):
+	Update declaration.
+
+2016-11-11  Yao Qi  <yao.qi@linaro.org>
+
+	* c-lang.h (cp_print_value_fields): Update declaration.
+	* cp-valprint.c (cp_print_value): Update declaration.
+	(cp_print_value_fields): Remove parameter valaddr.  Callers
+	updated.
+	(cp_print_value): Likewise.
+
+2016-11-09  Tom Tromey  <tom@tromey.com>
+
+	* varobj.h (varobj_get_display_hint): Change return type.
+	* varobj.c (varobj_get_display_hint): Return unique_xmalloc_ptr.
+	(varobj_value_get_print_value): Update.
+	* python/python.c (gdbpy_before_prompt_hook, gdbpy_print_stack)
+	(gdbpy_apply_type_printers): Update.
+	* python/python-internal.h (unicode_to_target_string)
+	(python_string_to_target_string, python_string_to_host_string)
+	(gdbpy_obj_to_string, gdbpy_exception_to_string)
+	(gdbpy_get_display_hint): Change return types.
+	* python/py-varobj.c (py_varobj_iter_next): Update.
+	* python/py-value.c (valpy_getitem, convert_value_from_python):
+	Update.
+	* python/py-utils.c (unicode_to_encoded_string)
+	(unicode_to_target_string, python_string_to_target_string)
+	(python_string_to_host_string, gdbpy_obj_to_string)
+	(gdbpy_exception_to_string): Return unique_xmalloc_ptr.
+	* python/py-unwind.c (pyuw_parse_register_id): Update.
+	* python/py-type.c (typy_getitem): Update.
+	* python/py-prettyprint.c (gdbpy_get_display_hint)
+	(print_stack_unless_memory_error, print_children)
+	(gdbpy_apply_val_pretty_printer): Update.
+	* python/py-param.c (set_parameter_value): Update.
+	(get_doc_string, call_doc_function): Return unique_xmalloc_ptr.
+	(get_set_value, get_show_value, compute_enum_values, parmpy_init):
+	Update.
+	* python/py-infthread.c (thpy_set_name): Update.
+	* python/py-function.c (fnpy_call, fnpy_init): Update.
+	* python/py-framefilter.c (extract_sym): Change "name" to
+	unique_xmalloc_ptr.
+	(enumerate_args, enumerate_locals): Update.
+	(py_print_frame): Use unique_xmalloc_ptr.
+	* python/py-frame.c (frapy_read_var): Update.  Remove cleanup.
+	* python/py-cmd.c (cmdpy_function, cmdpy_completer, cmdpy_init):
+	Update.
+	* python/py-breakpoint.c (bppy_set_condition): Use
+	unique_xmalloc_ptr.
+	(bppy_init): Likewise.  Remove cleanup.
+	(local_setattro): Update.
+	* mi/mi-cmd-var.c (print_varobj, mi_cmd_var_list_children)
+	(varobj_update_one): Update.
+
+2016-11-09  Pedro Alves  <palves@redhat.com>
+
+	* ax-gdb.c (agent_eval_command_one): Use std::move instead of
+	gdb::move.
+	* ax.h (agent_expr_up): Use std::unique_ptr instead of
+	gdb::unique_ptr.
+	* breakpoint.c (parse_cond_to_aexpr): Use std::move instead of
+	gdb::move.
+	* tracepoint.c (collection_list::collect_symbol): Likewise.
+	(collection_list::~collection_list): Delete.
+	(encode_actions_1): Use std::move instead of gdb::move.
+	(collection_list::add_aexpr): Use std::move instead of
+	unique_ptr::release.
+	* tracepoint.h (collection_list) <~collection_list>: Delete
+	declaration.
+	<m_aexprs>: Now a vector of agent_ptr_up.
+
+2016-11-09  Pedro Alves  <palves@redhat.com>
+
+	* main.c (struct cmdarg): Add constructor.
+	(captured_main_1): Use vector::emplace_back.
+	* tracepoint.c (collection_list::add_memrange): Likewise.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tui/tui-winsource.c (tui_alloc_source_buffer): Remove
+	failed-xmalloc handling.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tui/tui-winsource.c (tui_alloc_source_buffer): Subtract
+	highlight box's overhead when calculating the content height.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tui/tui-disasm.c (tui_set_disassem_content): Fix calculation of
+	the longest disassembly line's length.
+
+2016-11-09  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* tui/tui-disasm.c (tui_set_disassem_content): Fix line buffer
+	overrun due to unchecked strcpy.
+
+2016-11-09  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (find_inferior_task_it): Fix indentation.
+	(find_inferior_notify_it): Remove.
+	(find_inferior_pid_it): New function.
+	(darwin_find_inferior_by_notify): Remove.
+	(darwin_find_inferior_by_pid): New function.
+	(darwin_find_new_inferior): New function.
+	(darwin_check_message_ndr): New function from
+	darwin_decode_exception_message.
+	(darwin_decode_exception_message): Call darwin_check_message_ndr.
+	Handle SIGTRAP addressed to an unknown task (when a task spawned).
+	(darwin_decode_notify_message): New function.
+	(darwin_decode_message): Handle unknown task.
+	(darwin_deallocate_threads): New function from darwin_mourn_inferior.
+	(darwin_mourn_inferior): Use darwin_deallocate_threads and
+	darwin_deallocate_exception_ports.
+	(darwin_deallocate_exception_ports): New function from
+	darwin_mourn_inferior.
+	(darwin_setup_exceptions): New function from darwin_attach_pid.
+	(darwin_setup_request_notification): Likewise.
+	(darwin_attach_pid): Call darwin_setup_request_notification and
+	darwin_setup_request_notification.
+
+2016-11-08  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (py_print_frame): Use
+	get_addr_from_python.  Check for errors when getting line number.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* ada-lang.h (ada_val_print): Remove second parameter.  Remove
+	const from "struct value *".
+	* ada-valprint.c (print_field_values): Remove const from
+	"struct value *".
+	(val_print_packed_array_elements): Likewise.
+	(print_variant_part): Likewise.
+	(ada_val_print_string): Likewise.
+	(ada_val_print_gnat_array): Likewise.
+	(ada_val_print_ptr): Likewise.
+	(ada_val_print_num): Likewise.
+	(ada_val_print_enum): Likewise.
+	(ada_val_print_flt): Likewise.
+	(ada_val_print_union): Likewise.
+	(ada_val_print_struct_union): Likewise.
+	(ada_val_print_ref): Likewise.
+	(ada_val_print_1): Remove second parameter.  Remove const from
+	"struct value *".
+	(ada_val_print): Likewise.
+	* c-lang.h (c_val_print): Likewise.
+	* c-valprint.c (c_val_print_array): Remove const from
+	"struct value *".
+	(c_val_print_ptr): Likewise.
+	(c_val_print_struct): Likewise.
+	(c_val_print_union): Likewise.
+	(c_val_print_int): Likewise.
+	(c_val_print_memberptr): Likewise.
+	(c_val_print): Remove second parameter.  Remove const from
+	"struct value *".  All callers updated.
+	* cp-valprint.c (cp_print_value): Remove const from
+	"struct value *".
+	(cp_print_value_fields): Likewise.
+	(c_val_print_value): Likewise.
+	* d-lang.h (d_val_print): Remove second parameter.  Remove const
+	from "struct value *".
+	* d-valprint.c (dynamic_array_type): Likewise.
+	(d_val_print): Likewise.
+	* f-lang.h (f_val_print): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	* go-lang.h (go_val_print): Likewise.
+	* go-valprint.c (print_go_string): Likewise.
+	(go_val_print): Likewise.
+	* language.c (unk_lang_val_print): Likewise.
+	* language.h (struct language_defn) <la_val_print>: Likewise.
+	Update comments.
+	(LA_VAL_PRINT): Remove.
+	* m2-lang.h (m2_val_print): Remove const from
+	"struct value *".
+	* m2-valprint.c (m2_print_array_contents): Likewise.
+	(m2_val_print): Likewise.
+	* p-lang.h (pascal_val_print): Remove second parameter.  Remove
+	const from "struct value *".
+	(pascal_object_print_value_fields): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	(pascal_object_print_value_fields): Likewise.
+	(pascal_object_print_value): Likewise.
+	* rust-lang.c (rust_get_disr_info): Likewise.
+	(val_print_struct): Likewise.
+	(rust_val_print): Likewise.
+	* valprint.c (generic_val_print_array): Likewise.
+	(generic_val_print_ptr): Likewise.
+	(generic_val_print_memberptr): Likewise.
+	(generic_val_print_ref): Likewise.
+	(generic_val_print_enum): Likewise.
+	(generic_val_print_flags): Likewise.
+	(generic_val_print_func): Likewise.
+	(generic_val_print_bool): Likewise.
+	(generic_val_print_int): Likewise.
+	(generic_val_print_char): Likewise.
+	(generic_val_print_float): Likewise.
+	(generic_val_print_decfloat): Likewise.
+	(generic_val_print_complex): Likewise.
+	(generic_val_print): Likewise.
+	(val_print): Likewise.
+	(common_val_print): Likewise.
+	(val_print_type_code_flags): Likewise.
+	(val_print_scalar_formatted): Likewise.
+	(val_print_array_elements): Likewise.
+	* valprint.h (val_print_array_elements): Update declaration.
+	(val_print_scalar_formatted): Likewise.
+	(generic_val_print): Likewise.
+	* value.h (val_print): Likewise.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* mt-tdep.c (mt_registers_info): Call
+	get_frame_register_value instead of
+	deprecated_frame_register_read.
+	* sh64-tdep.c (sh64_do_register): Likewise.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ax.h (agent_expr_p): Delete.
+	(DEF_VEC_P (agent_expr_p)): Delete.
+	* breakpoint.c (build_target_condition_list)
+	(build_target_command_list): Adjust to use of std::vector.
+	(bp_location_dtor): Remove now unnecessary VEC_free calls.
+	* breakpoint.h: Include <vector>.
+	(struct bp_target_info) <conditions, tcommands>: Now
+	std::vector's.
+	* remote.c (remote_add_target_side_condition): bp_tgt->conditions
+	is now a std::vector; adjust.
+	(remote_add_target_side_commands, remote_insert_breakpoint):
+	bp_tgt->tcommands is now a std::vector; adjust.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ax-gdb.c (is_nontrivial_conversion): Use agent_expr_up.
+	(gen_trace_for_var, gen_trace_for_expr, gen_eval_for_expr)
+	(gen_trace_for_return_address, gen_printf): Use and return an
+	agent_expr_up.  Don't use make_cleanup_free_agent_expr.
+	(agent_eval_command_one, maint_agent_printf_command): Use
+	agent_expr_up.  Don't use make_cleanup_free_agent_expr.
+	* ax-gdb.h (gen_trace_for_expr, gen_trace_for_var)
+	(gen_trace_for_return_address, gen_eval_for_expr, gen_printf): Use
+	agent_expr_up.
+	* ax-general.c (new_agent_expr): Rename to ...
+	(agent_expr::agent_expr): ... this, and now a constructor.
+	(free_agent_expr): Rename to ...
+	(agent_expr::~agent_exp): ... this, and now a destructor.
+	(do_free_agent_expr_cleanup, make_cleanup_free_agent_expr):
+	Delete.
+	* ax.h (struct agent_expr): Add ctor/dtor.
+	(agent_expr_up): New typedef.
+	(new_agent_expr, free_agent_expr, make_cleanup_free_agent_expr):
+	Delete declarations.
+	* breakpoint.c (parse_cond_to_aexpr): Use and return an
+	agent_expr_up.  Don't use make_cleanup_free_agent_expr.
+	(build_target_condition_list): Adjust to use agent_expr_up.
+	(parse_cmd_to_aexpr): Use and return an agent_expr_up.  Don't use
+	make_cleanup_free_agent_expr.
+	(build_target_command_list): Adjust to use agent_expr_up.
+	(force_breakpoint_reinsertion): Adjust to use agent_expr_up.
+	(bp_location_dtor): Remove unnecessary free_agent_expr and xfree
+	calls.
+	* breakpoint.h (struct bp_target_info) <cond_bytecode,
+	cmd_bytecode>: Now agent_expr_up's.
+	* remote.c (remote_download_tracepoint): Adjust to use
+	agent_expr_up and remove use of make_cleanup_free_agent_expr.
+	* tracepoint.c (validate_actionline, collect_symbol): Adjust to
+	use agent_expr_up and remove uses of make_cleanup_free_agent_expr.
+	(collection_list::~collection_list): Call delete instead of
+	free_agent_expr.
+	(encode_actions_1): Adjust to use agent_expr_up and remove uses of
+	make_cleanup_free_agent_expr.
+	(add_aexpr): Change parameter type to agent_expr_up; Return a raw
+	agent_expr pointer.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_name_for_lookup, type_as_string): Use and return
+	std::string.
+	(type_as_string_and_cleanup): Delete.
+	(ada_lookup_struct_elt_type): Use type_as_string.
+	* ada-lang.h (ada_name_for_lookup): Now returns std::string.
+	* ada-varobj.c (ada_varobj_scalar_image): Return a std::string.
+	(ada_varobj_describe_child): Make 'child_name' and
+	'child_path_expr' parameters std::string pointers.
+	(ada_varobj_describe_struct_child, ada_varobj_describe_ptr_child):
+	Likewise, and use string_printf.
+	(ada_varobj_describe_simple_array_child)
+	(ada_varobj_describe_child): Likewise.
+	(ada_varobj_get_name_of_child, ada_varobj_get_path_expr_of_child)
+	(ada_varobj_get_value_image)
+	(ada_varobj_get_value_of_array_variable)
+	(ada_varobj_get_value_of_variable, ada_name_of_variable)
+	(ada_name_of_child, ada_path_expr_of_child)
+	(ada_value_of_variable): Now returns std::string.  Use
+	string_printf.
+	(ada_value_of_child): Adjust.
+	* break-catch-throw.c (check_status_exception_catchpoint): Adjust
+	to use std::string.
+	* breakpoint.c (watch_command_1): Adjust to use std::string.
+	* c-lang.c (c_get_string): Adjust to use std::string.
+	* c-typeprint.c (print_name_maybe_canonical): Use std::string.
+	* c-varobj.c (varobj_is_anonymous_child): Use ==/!= std::string
+	operators.
+	(c_name_of_variable): Now returns a std::string.
+	(c_describe_child): The 'cname' and 'cfull_expression' output
+	parameters are now std::string pointers.  Adjust.
+	(c_name_of_child, c_path_expr_of_child, c_value_of_variable)
+	(cplus_number_of_children): Adjust to use std::string and
+	string_printf.
+	(cplus_name_of_variable): Now returns a std::string.
+	(cplus_describe_child): The 'cname' and 'cfull_expression' output
+	parameters are now std::string pointers.  Adjust.
+	(cplus_name_of_child, cplus_path_expr_of_child)
+	(cplus_value_of_variable): Now returns a std::string.
+	* cp-abi.c (cplus_typename_from_type_info): Return std::string.
+	* cp-abi.h (cplus_typename_from_type_info): Return std::string.
+	(struct cp_abi_ops) <get_typename_from_type_info>: Return
+	std::string.
+	* cp-support.c (inspect_type): Use std::string.
+	(cp_canonicalize_string_full, cp_canonicalize_string_no_typedefs)
+	(cp_canonicalize_string): Return std::string and adjust.
+	* cp-support.h (cp_canonicalize_string)
+	(cp_canonicalize_string_no_typedefs, cp_canonicalize_string_full):
+	Return std::string.
+	* dbxread.c (read_dbx_symtab): Use std::string.
+	* dwarf2read.c (dwarf2_canonicalize_name): Adjust to use std::string.
+	* gdbcmd.h (lookup_struct_elt_type): Adjust to use std::string.
+	* gnu-v3-abi.c (gnuv3_get_typeid): Use std::string.
+	(gnuv3_get_typename_from_type_info): Return a std::string and
+	adjust.
+	(gnuv3_get_type_from_type_info): Adjust to use std::string.
+	* guile/guile.c (gdbscm_execute_gdb_command): Adjust to use
+	std::string.
+	* infcmd.c (print_return_value_1): Adjust to use std::string.
+	* linespec.c (find_linespec_symbols): Adjust to
+	demangle_for_lookup API change.  Use std::string.
+	* mi/mi-cmd-var.c (print_varobj, mi_cmd_var_set_format)
+	(mi_cmd_var_info_type, mi_cmd_var_info_path_expression)
+	(mi_cmd_var_info_expression, mi_cmd_var_evaluate_expression)
+	(mi_cmd_var_assign, varobj_update_one): Adjust to use std::string.
+	* minsyms.c (lookup_minimal_symbol): Use std::string.
+	* python/py-varobj.c (py_varobj_iter_next): Use new instead of
+	XNEW.  vitem->name is a std::string now, adjust.
+	* rust-exp.y (convert_ast_to_type, convert_name): Adjust to use
+	std::string.
+	* stabsread.c (define_symbol): Adjust to use std::string.
+	* symtab.c (demangle_for_lookup): Now returns 'const char *'.  Add
+	a demangle_result_storage parameter.  Use it for storage.
+	(lookup_symbol_in_language)
+	(lookup_symbol_in_objfile_from_linkage_name): Adjust to new
+	demangle_for_lookup API.
+	* symtab.h (struct demangle_result_storage): New type.
+	(demangle_for_lookup): Now returns 'const char *'.  Add a
+	demangle_result_storage parameter.
+	* typeprint.c (type_to_string): Return std::string and use
+	ui_file_as_string.
+	* value.h (type_to_string): Change return type to std::string.
+	* varobj-iter.h (struct varobj_item) <name>: Now a std::string.
+	(varobj_iter_delete): Use delete instead of xfree.
+	* varobj.c (create_child): Return std::string instead of char * in
+	output parameter.
+	(name_of_variable, name_of_child, my_value_of_variable): Return
+	std::string instead of char *.
+	(varobj_create, varobj_get_handle): Constify 'objname' parameter.
+	Adjust to std::string fields.
+	(varobj_get_objname): Return a const char * instead of a char *.
+	(varobj_get_expression): Return a std::string.
+	(varobj_list_children): Adjust to use std::string.
+	(varobj_get_type): Return a std::string.
+	(varobj_get_path_expr): Return a const char * instead of a char *.
+	Adjust to std::string fields.
+	(varobj_get_formatted_value, varobj_get_value): Return a
+	std::string.
+	(varobj_set_value): Change type of 'expression' parameter to
+	std::string.  Use std::string.
+	(install_new_value): Use std::string.
+	(delete_variable_1): Adjust to use std::string.
+	(create_child): Change the 'name' parameter to a std::string
+	reference.  Swap it into the new item's name.
+	(create_child_with_value): Swap item's name into the new child's
+	name.  Use string_printf.
+	(new_variable): Use new instead of XNEW.
+	(free_variable): Don't xfree fields that are now std::string.
+	(name_of_variable, name_of_child): Now returns std::string.
+	(value_of_root): Adjust to use std::string.
+	(my_value_of_variable, varobj_value_get_print_value): Return
+	and use std::string.
+	(varobj_value_get_print_value): Adjust to use ui_file_as_string
+	and std::string.
+	* varobj.h (struct varobj) <name, path_expr, obj_name,
+	print_value>: Now std::string's.
+	<name_of_variable, name_of_child, path_expr_of_child,
+	value_of_variable>: Return std::string.
+	(varobj_create, varobj_get_handle): Constify 'objname' parameter.
+	(varobj_get_objname): Return a const char * instead of a char *.
+	(varobj_get_expression, varobj_get_type): Return a std::string.
+	(varobj_get_path_expr): Return a const char * instead of a char *.
+	(varobj_get_formatted_value, varobj_get_value): Return a
+	std::string.
+	(varobj_set_value): Constify 'expression' parameter.
+	(varobj_value_get_print_value): Return a std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* language.c (add_language): Use ui_file_as_string and adjust to
+	use std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (struct disr_info) <name>: Now a std::string.
+	(rust_get_disr_info): Use ui_file_as_string and adjust to use
+	std::string.
+	(rust_val_print): Adjust to use std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (print_target_wait_results): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (type_as_string): Use ui_file_as_string and return
+	std::string.
+	(type_as_string_and_cleanup): Delete.
+	(ada_lookup_struct_elt_type): Use type_as_string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh (verify_gdbarch): Use ui_file_as_string and
+	std::string.
+	* gdbarch.c: Regenerate.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (OPERATOR NEW): Adjust to use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* c-lang.h (c_compute_program): Now returns std::string.
+	* compile/compile-internal.h (class compile_file_names): New
+	class.
+	* compile/compile-object-load.c (compile_object_load): Replace
+	object_file and source_file parameters with a compile_file_names
+	parameter.  Adjust.
+	* compile-object-load.h: Include "compile-internal.h".
+	(compile_object_load): Replace object_file and source_file
+	parameters with a compile_file_names parameter.
+	* compile/compile-c-support.c (c_compute_program): Now returns a
+	std::string.  Use ui_file_as_string.
+	* compile/compile.c (get_new_file_names): Remove parameters and
+	return a compile_file_names instead.
+	(compile_to_object): Now returns a compile_file_names.  Use
+	ui_file_as_string.
+	(eval_compile_command): Use compile_file_names.
+	* language.h (struct language_defn) <la_compute_program>: Now
+	returns std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-setshow.c (do_show_command): Adjust to use
+	ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (escape_buffer): Use ui_file_as_string and return
+	std::string.
+	(putpkt_binary, read_frame): Adjust to use std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* python/py-arch.c (archpy_disassemble): Use ui_file_as_string and
+	std::string.
+	* python/py-breakpoint.c (bppy_get_commands): Use
+	ui_file_as_string and std::string.
+	* python/py-frame.c (frapy_str): Likewise.
+	* python/py-type.c (typy_str): Likewise.
+	* python/py-unwind.c (unwind_infopy_str): Likewise.
+	* python/py-value.c (valpy_str): Likewise.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* printcmd.c (eval_command): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* top.c (quit_confirm): Use ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* gdbcmd.h (execute_command_to_string): Now returns std::string.
+	(lookup_struct_elt_type): Adjust to use std::string.
+	* top.c (execute_command_to_string): Use ui_file_as_string and
+	return std::string.
+	* guile/guile.c (gdbscm_execute_gdb_command): Adjust to use
+	std::string.
+	* python/python.c (execute_gdb_command): Adjust to use
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Use
+	ui_file_as_string and adjust to use std::string.
+	* guile/scm-disasm.c (gdbscm_arch_disassemble): Likewise.
+	* guile/scm-frame.c (frscm_print_frame_smob): Likewise.
+	* guile/scm-type.c (tyscm_type_name): Use ui_file_as_string and
+	adjust to use std::string.  Throw exception directly instead of
+	returning it in EXCP output parameter.
+	(tyscm_print_type_smob, gdbscm_type_print_name): Adjust to
+	tyscm_type_name interface change.
+	* guile/scm-value.c (vlscm_print_value_smob, gdbscm_value_print):
+	Use ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (_initialize_arm_tdep): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (error_stream): Use ui_file_as_string and std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ui-out.c (ui_out_field_stream): Use ui_file_as_string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ada-valprint.c (ada_print_floating): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* xtensa-tdep.c (xtensa_verify_config): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (dwarf2_compute_name): Use ui_file_as_string and
+	std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-main.c (print_variable_or_computed): Constify 'expression'
+	parameter.
+	(mi_cmd_trace_frame_collected): Call encode_actions instead of
+	encode_actions_and_make_cleanup.  Adjust to use std::vector.
+	* tracepoint.c (memrange_cmp): Delete.
+	(memrange_comp): New.
+	(memrange_sortmerge): Take a memrange vector as parameter instead
+	of a collection_list.  Use std::sort instead of qsort.
+	(add_register): Now a method of collection_list.  Adjust to m_
+	prefix of data fields.
+	(add_memrange): Now a method of collection_list.  Adjust to m_
+	prefix of data fields.  Adjust to use std::vector.
+	(collect_symbol): Now a method of collection_list.  Adjust to m_
+	prefix of data fields.
+	(do_collect_symbol): Adjust.  Call add_wholly_collected instead of
+	accessing the vector directly.
+	(collection_list::add_wholly_collected): New.
+	(add_local_symbols): Now a method of collection_list.
+	(add_static_trace_data): Now a method of collection_list.  Adjust
+	to use bool.
+	(clear_collection_list, do_clear_collection_list): Delete.
+	(init_collection_list): Delete.
+	(collection_list::collection_list): New.
+	(collection_list::~collection_list): New.
+	(stringify_collection_list): Rename to ...
+	(collection_list::stringify): ... this and adjust to being a
+	method of collection_list.  Adjust to use of std::vector.
+	(append_exp): Now a method of collection_list.  Use
+	ui_file_as_string.  Adjust to std::vector.
+	(collection_list::finish): New.
+	(encode_actions_1): Adjust.
+	(encode_actions_and_make_cleanup): Rename to ...
+	(encode_actions)... this.  No longer returns a cleanup.  No longer
+	call init_collection_list nor install do_clear_collection_list
+	cleanups.  Call collection_list::finish instead of
+	memrange_sortmerge directly.
+	(encode_actions_rsp): Adjust to call encode_actions instead of
+	encode_actions_and_make_cleanup.  Adjust to method renames.
+	(add_aexpr): Now a method of collection_list.
+	* tracepoint.h: Include <vector> and <string>.
+	(struct memrange): Add constructors.
+	(struct collection_list): Now a class.
+	(class collection_list) <collection_list, ~collection_list,
+	add_wholly_collected, append_exp, add_aexpr, add_register,
+	add_memrange, collect_symbol, add_local_symbols,
+	add_static_trace_data, finish, stringify, wholly_collected, and
+	computed>: New methods.
+	<regs_mask>: Rename to ...
+	<m_regs_mask>: ... this.
+	<listsize, next_memrange, list>: Delete fields.
+	<m_memranges>: New field.
+	<aexpr_listsize, next_aexpr_elt, aexpr_list>: Delete fields.
+	<m_aexprs>: New field.
+	<strace_data>: Rename to ...
+	<m_strace_data>: ... this.  Now a bool.
+	<wholly_collected>: Rename to ...
+	<m_wholly_collected>: ... this.  Now a std::vector<std::string>.
+	<computed>: Rename to ...
+	<m_computed>: ... this.  Now a std::vector<std::string>.
+	(encode_actions_and_make_cleanup): Delete declaration.
+	(encode_actions): New declaration.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ui-file.c (do_ui_file_as_string, ui_file_as_string): New
+	functions.
+	* ui-file.h: Include <string>.
+	(ui_file_as_string): New declaration.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_read_renaming_var_value): Use expression_up.
+	(struct ada_catchpoint_location) <excep_cond_expr>: Now an
+	expression_up.
+	(ada_catchpoint_location_dtor): Reset excep_cond_expr instead of
+	using xfree.
+	(create_excep_cond_exprs): Use expression_up and gdb::move.
+	(allocate_location_exception): Use new instead of XNEW.
+	(should_stop_exception): Likewise.  Adjust to use expression_up.
+	(create_ada_exception_catchpoint): Use new instead of XNEW.
+	* ax-gdb.c (agent_eval_command_one): Use expression_up instead of
+	cleanups.
+	(maint_agent_printf_command): Use expression_up.
+	* break-catch-sig.c (create_signal_catchpoint): Use new instead of
+	XNEW.
+	* break-catch-syscall.c (create_syscall_event_catchpoint):
+	Likewise.
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use new instead
+	of XCNEW.  Use gdb::unique_ptr instead of cleanups.
+	* breakpoint.c (set_breakpoint_condition, update_watchpoint)
+	(parse_cmd_to_aexpr, watchpoint_check)
+	(bpstat_check_breakpoint_conditions, watchpoint_locations_match):
+	Adjust to use expression_up.
+	(init_bp_location): Adjust.
+	(free_bp_location): Use delete instead of xfree.
+	(set_raw_breakpoint_without_location, set_raw_breakpoint)
+	(add_solib_catchpoint, create_fork_vfork_event_catchpoint)
+	(new_single_step_breakpoint, create_breakpoint_sal): Use new
+	instead of XNEW.
+	(find_condition_and_thread): Adjust to use expression_up.
+	(create_breakpoint): Use new instead of XNEW.
+	(dtor_watchpoint): Don't xfree expression pointers, they're
+	unique_ptr's now.
+	(insert_watchpoint, remove_watchpoint): Adjust.
+	(watch_command_1): Use expression_up.  Use new instead of XCNEW.
+	(catch_exec_command_1): Use new instead of XNEW.
+	(bp_location_dtor): Don't xfree expression pointers, they're
+	unique_ptr's now.
+	(base_breakpoint_allocate_location)
+	(strace_marker_create_breakpoints_sal): Use new instead of XNEW.
+	(delete_breakpoint): Use delete instead of xfree.
+	* breakpoint.h (struct bp_location) <cond>: Now an
+	unique_ptr<expression> instead of a raw pointer.
+	(struct watchpoint) <exp, cond_exp>: Likewise.
+	* cli/cli-script.c (execute_control_command): Use expression_up
+	instead of cleanups.
+	* dtrace-probe.c (dtrace_process_dof_probe): Use expression_up.
+	* eval.c (parse_and_eval_address, parse_and_eval_long)
+	(parse_and_eval, parse_to_comma_and_eval, parse_and_eval_type):
+	Use expression_up instead of cleanups.
+	* expression.h (expression_up): New typedef.
+	(parse_expression, parse_expression_with_language, parse_exp_1):
+	Change return type to expression_up.
+	* mi/mi-main.c (mi_cmd_data_evaluate_expression)
+	(print_variable_or_computed): Use expression_up.
+	* objc-lang.c (print_object_command): Use expression_up instead of
+	cleanups.
+	* parse.c (parse_exp_1, parse_exp_in_context)
+	(parse_exp_in_context_1, parse_expression)
+	(parse_expression_with_language): Return an expression_up instead
+	of a raw pointer.
+	(parse_expression_for_completion): Use expression_up.
+	* printcmd.c (struct display) <exp>: Now an expression_up instead
+	of a raw pointer.
+	(print_command_1, output_command_const, set_command, x_command):
+	Use expression_up instead of cleanups.
+	(display_command): Likewise.  Use new instead of XNEW.
+	(free_display): Use delete instead of xfree.
+	(do_one_display): Adjust to use expression_up.
+	* remote.c (remote_download_tracepoint): Likewise.
+	* stack.c (return_command): Likewise.
+	* tracepoint.c (validate_actionline, encode_actions_1): Use
+	expression_up instead of cleanups.
+	* typeprint.c (whatis_exp, maintenance_print_type): Likewise.
+	* value.c (init_if_undefined_command): Likewise.
+	* varobj.c (struct varobj_root) <exp>: Now an expression_up
+	instead of a raw pointer.
+	(varobj_create): Adjust.
+	(varobj_set_value): Use an expression_up instead of cleanups.
+	(new_root_variable): Use new instead of XNEW.
+	(free_variable): Use delete instead of xfree.
+	(value_of_root_1): Use std::swap.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-script.c (execute_control_command): Use std::string
+	instead of cleanups.
+	(locate_arg): Constify return type.
+	(insert_args): Constify paremeter.  Simplify using std::string.
+	Return a std::string.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (struct commands_info) <arg>: Constify.
+	(commands_command_1): Constify 'arg' parameter.  Use std::string
+	and string_printf.
+	(commands_from_control_command): Constify 'arg' parameter.
+	(map_breakpoint_numbers): Constify 'args' parameter.
+	* breakpoint.h (commands_from_control_command): Constify 'arg'
+	parameter.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-script.c (execute_control_command): Assume insert_args
+	never returns NULL.
+	(insert_args): Assume xmalloc never returns NULL.
+
+2016-11-08  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_OBS): Add utils-selftests.o.
+	* common/common-utils.c (string_printf): New function.
+	* common/common-utils.h: Include <string>.
+	(string_printf): Declare.
+	* utils-selftests.c: New file.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_software_single_step): Return
+	VEC (CORE_ADDR) *.  Return NULL instead of 0.  Don't call
+	insert_single_step_breakpoint.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Likewise.
+	(alpha_software_single_step): Likewise.
+	* alpha-tdep.h (alpha_software_single_step): Update declaration.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Return
+	VEC (CORE_ADDR) *.  Return NULL instead of 0.
+	* arm-tdep.c (arm_software_single_step): Return NULL instead of	0.
+	* arm-tdep.h (arm_software_single_step): Update declaration.
+	* breakpoint.c (insert_single_step_breakpoints): New function.
+	* breakpoint.h (insert_single_step_breakpoints): Declare.
+	* cris-tdep.c (cris_software_single_step): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	* gdbarch.sh (software_single_step): Change it to return
+	VEC (CORE_ADDR) *.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* infrun.c (maybe_software_singlestep): Adjust.
+	* mips-tdep.c (mips_deal_with_atomic_sequence): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	(micromips_deal_with_atomic_sequence): Likewise.
+	(deal_with_atomic_sequence): Likewise.
+	(mips_software_single_step): Likewise.
+	* mips-tdep.h (mips_software_single_step): Update declaration.
+	* moxie-tdep.c (moxie_software_single_step): Likewise.
+	* nios2-tdep.c (nios2_software_single_step): Likewise.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Update
+	declaration.
+	* record-full.c (record_full_resume): Adjust.
+	(record_full_wait_1): Likewise.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	* rs6000-tdep.c	(ppc_deal_with_atomic_sequence): Return
+	VEC (CORE_ADDR) *.  Don't call insert_single_step_breakpoint.
+	* s390-linux-tdep.c (s390_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* spu-tdep.c (spu_software_single_step): Likewise.
+	* tic6x-tdep.c (tic6x_software_single_step): Likewise.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_software_single_step): Write
+	adjusted address back to vector.  Call insert_single_step_breakpoint
+	in a new loop.
+	* arm-tdep.c (arm_software_single_step): Likewise.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_software_single_step): Don't
+	call arm_insert_single_step_breakpoint, call
+	insert_single_step_breakpoint instead.
+	* arm-tdep.c (arm_insert_single_step_breakpoint): Remove.
+	(arm_software_single_step): Don't call
+	arm_insert_single_step_breakpoint, call
+	insert_single_step_breakpoint instead.
+	* arm-tdep.h (arm_insert_single_step_breakpoint): Remove
+	declaration.
+
+2016-11-08  Cordian A. Daniluk  <th3c0r1uk@gmail.com>
+
+	PR breakpoints/20739
+	* breakpoint.c (check_fast_tracepoint_sals): Don't print duplicate
+	0x prefix.
+
+2016-11-08  Yao Qi  <yao.qi@linaro.org>
+
+	* rust-lang.c (val_print_struct): Fix indentation.
+
+2016-11-08  Lionel Flandrin  <lionel@svkt.org>
+
+	* remote.c (process_g_packet): Detect truncated registers in 'g'
+	packets and raise an error.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
+	* guile/scm-value.c (gdbscm_value_field): Fix call to value_struct_elt.
+	* python/py-value.c (valpy_getitem): Ditto.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
+	* i386-tdep.c (i386_gdbarch_init): Add comments.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
+	* python/py-unwind.c (unwind_infopy_str): Fix use of VEC_iterate.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
+	* configure.tgt (x86_64-*-elf*): Remove i386bsd-tdep.o.
+
+2016-11-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (scoped_command_stats::scoped_command_stats): Fix typo.
+	* ppcnbsd-tdep.c (_initialize_ppcnbsd_tdep): Likewise.
+	* ppcobsd-tdep.c (_initialize_ppcobsd_tdep): Likewise.
+	* ui-out.c (ui_out_new): Likewise.
+	* utils.c (init_page_info): Likewise.
+	(reset_prompt_for_continue_wait_time): Likewise.
+	* windows-nat.c (windows_init_thread_list): Likewise.
+	* xtensa-tdep.c (call0_analyze_prologue): Likewise.
+
+2016-10-29  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-exp.y: Parse `sizeof(exp)` as `UNOP_SIZEOF`.
+
+2016-10-28  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-lang.c (rust_union_is_untagged): Add function to check if a
+	union is an untagged union.
+	(rust_val_print): Handle printing of untagged union values.
+	(rust_print_type): Handle printing of untagged union types.
+	(rust_evaluate_subexp): Handle evaluating field access on untagged
+	unions.
+
+2016-10-27  Manish Goregaokar  <manish@mozilla.com>
+
+	* rust-lang.c (rust_get_disr_info): Treat univariant enums without
+	discriminants as encoded enums with a real field.
+	* rust-lang.c (rust_evaluate_subexp): Handle field access on
+	encoded struct-like enums.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (.y.c): Replace YY_NULL with YY_NULLPTR.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves <palves@redhat.com>
+
+	* aarch64-tdep.c (aarch64_default_breakpoint): Change it to
+	constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(aarch64_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* alpha-tdep.c (break_insn): Rename to alpha_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(alpha_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* arc-tdep.c (arc_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): Remove.
+	(struct bp_manipulation): New.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): Remove.
+	(struct bp_manipulation_endian): New.
+	(BP_MANIPULATION): New.
+	(BP_MANIPULATION_ENDIAN): New.
+	* arm-tdep.c (arm_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* avr-tdep.c (avr_break_insn): Change it constexpr.
+	(avr_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise.
+	* frv-tdep.c (breakpoint): Rename it to frv_break_insn, and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(frv_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* ft32-tdep.c (breakpoint): Rename it to ft32_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(ft32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* h8300-tdep.c (breakpoint): Rename it to h8300_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(h8300_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* hppa-tdep.c (breakpoint): Rename it to h8300_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(hppa_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* i386-tdep.c (break_insn): Rename it to i386_break_insn.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(i386_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* iq2000-tdep.c (iq2000_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* lm32-tdep.c (breakpoint): Rename it to lm32_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(lm32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m32c-tdep.c (break_insn): Rename it to m32c_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m32c_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (breakpoint): Rename it to m68hc11_break_insn and
+	change its type to constexpr.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m68hc11_gdbarch_init): Don't use SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m68k-tdep.c (break_insn): Rename it to m68k_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m68k_gdbarch_init):  Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* m88k-tdep.c (break_insn): Rename it to m88k_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(m88k_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* mep-tdep.c (breakpoint): Rename it to mep_break_insn and change
+	its type to constexpr.  Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(mep_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* microblaze-tdep.c (break_insn): Rename it to
+	microblaze_break_insn and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(microblaze_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (breakpoint): Rename it to mn10300_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(mn10300_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* moxie-tdep.c (breakpoint): Rename it to moxie_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(moxie_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* msp430-tdep.c (breakpoint): Rename it to msp430_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(msp430_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* mt-tdep.c (mt_gdbarch_init): Likewise.
+	* nds32-tdep.c (break_insn): Rename it to nds32_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(nds32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* nios2-tdep.c (nios2_gdbarch_init): Likewise.
+	* rl78-tdep.c (breakpoint): Rename it to rl78_break_ins
+	and change its type to rl78_break_insn.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(rl78_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* rs6000-tdep.c (big_breakpoint): Change its type to
+	constexpr.
+	(little_breakpoint): Likewise.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN.
+	(rs6000_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* rx-tdep.c (breakpoint): Rename it to rx_break_insn and
+	change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(rx_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* s390-linux-tdep.c (breakpoint): Rename it to s390_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION
+	(s390_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* score-tdep.c (score_gdbarch_init): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* sparc-tdep.c (break_insn): Rename it to sparc_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(sparc32_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* spu-tdep.c (breakpoint): Rename it to spu_break_insn and change
+	its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(spu_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* tic6x-tdep.c (tic6x_gdbarch_init): Likewise.
+	* tilegx-tdep.c (breakpoint): Rename it to tilegx_break_insn
+	and change its type to constexpr.  Don't use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(tilegx_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* vax-tdep.c (break_insn): Rename it to vax_break_insn and
+	change its type to constexpr.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(vax_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* xstormy16-tdep.c (breakpoint): Rename it to
+	xstormy16_break_insn and change its type to constexpr.
+	Don't use GDBARCH_BREAKPOINT_MANIPULATION.
+	(xstormy16_gdbarch_init): Don't use
+	SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* xtensa-tdep.c (xtensa_gdbarch_init): Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_override_mode): Remove.
+	(arm_pc_is_thumb): Update.
+	(arm_insert_single_step_breakpoint): Update.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arch-utils.c (default_breakpoint_kind_from_current_state):
+	New function.
+	* arch-utils.h (default_breakpoint_kind_from_current_state):
+	Declare.
+	* arm-tdep.c (arm_breakpoint_kind_from_current_state): New
+	function.
+	(arm_gdbarch_init): Call
+	set_gdbarch_breakpoint_kind_from_current_state.
+	* breakpoint.c (breakpoint_kind): Call
+	gdbarch_breakpoint_kind_from_current_state for single step
+	breakpoint.  Update comments.
+	* gdbarch.sh (breakpoint_kind_from_current_state): New.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arch-utils.c (default_breakpoint_from_pc): New function.
+	* arch-utils.h (GDBARCH_BREAKPOINT_FROM_PC): Remove.
+	(GDBARCH_BREAKPOINT_MANIPULATION): Don't use
+	GDBARCH_BREAKPOINT_FROM_PC.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): Don't call
+	set_gdbarch_breakpoint_from_pc.
+	(default_breakpoint_from_pc): Remove declaration.
+	* gdbarch.sh (breakpoint_from_pc): Add its default implementation.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arm-tdep.c: Don't use GDBARCH_BREAKPOINT_FROM_PC.
+	* arc-tdep.c, bfin-tdep.c, cris-tdep.c, iq2000-tdep.c: Likewise.
+	* m32r-tdep.c, mips-tdep.c, mt-tdep.c: Likewise.
+	* nios2-tdep.c, score-tdep.c, sh-tdep.c: Likewise.
+	* sh64-tdep.c, tic6x-tdep.c, v850-tdep.c, xtensa-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arch-utils.c (default_remote_breakpoint_from_pc): Remove.
+	* arch-utils.h (default_remote_breakpoint_from_pc): Remove.
+	* arm-tdep.c (arm_remote_breakpoint_from_pc): Remove.
+	(arm_gdbarch_init): Don't call
+	set_gdbarch_remote_breakpoint_from_pc.
+	* gdbarch.sh (remote_breakpoint_from_pc): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* mips-tdep.c (mips_remote_breakpoint_from_pc): Remove.
+	(mips_gdbarch_init): Don't call
+	set_gdbarch_remote_breakpoint_from_pc.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.h (struct bp_target_info) <placed_size>: Remove.
+	<kind>: New field.
+	Update all users.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): Define
+	breakpoint_kind_from_pc and sw_breakpoint_from_kind.
+	(GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN): Likewise.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): Call
+	set_gdbarch_breakpoint_kind_from_pc and
+	set_gdbarch_sw_breakpoint_from_kind.
+	* arm-tdep.c: Add comments.
+	* bfin-tdep.c: Likewise.
+	* breakpoint.c (breakpoint_kind): New function.
+	(insert_bp_location): Set target_info.placed_size and
+	target_info.placed_address.
+	(bkpt_insert_location): Likewise.
+	* cris-tdep.c: Add comments.
+	* gdbarch.sh (breakpoint_kind_from_pc): New.
+	(sw_breakpoint_from_kind): New.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Don't set
+	bp_tgt->placed_size.
+	(ia64_memory_remove_breakpoint): Don't assert
+	bp_tgt->placed_size.
+	(ia64_breakpoint_kind_from_pc): New function.
+	(ia64_gdbarch_init): Install ia64_breakpoint_kind_from_pc.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Don't set
+	bp_tgt->placed_size.
+	* mem-break.c (default_memory_insert_breakpoint): Don't set
+	bp_tgt->placed_size.  Call gdbarch_sw_breakpoint_from_kind.
+	(default_memory_remove_breakpoint): Call
+	gdbarch_sw_breakpoint_from_kind.
+	(memory_validate_breakpoint): Don't check bp_tgt->placed_size.
+	* mips-tdep.c: Add comments.
+	* mt-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* record-full.c (record_full_insert_breakpoint): Don't call
+	gdbarch_breakpoint_from_pc.  Don't set bp_tgt->placed_address
+	and bp_tgt->placed_size.
+	* remote.c (remote_insert_breakpoint): Don't call
+	gdbarch_remote_breakpoint_from_pc.  Use bp_tgt->placed_size.
+	Don't set bp_tgt->placed_address and bp_tgt->placed_size.
+	(remote_insert_hw_breakpoint): Likewise.
+	* score-tdep.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arch-utils.h (GDBARCH_BREAKPOINT_FROM_PC): New macro.
+	(GDBARCH_BREAKPOINT_MANIPULATION_ENDIAN): New macro.
+	* arm-tdep.c (arm_breakpoint_from_pc): Remove.
+	(arm_breakpoint_kind_from_pc): New function.
+	(arm_sw_breakpoint_from_kind): New function.
+	(arm_breakpoint_from_pc): Call arm_breakpoint_kind_from_pc
+	and arm_sw_breakpoint_from_kind.
+	Use GDBARCH_BREAKPOINT_FROM_PC.
+	(arm_remote_breakpoint_from_pc): Call
+	arm_breakpoint_kind_from_pc.
+	(arm_gdbarch_init): Replace set_gdbarch_breakpoint_from_pc
+	with SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* arc-tdep.c: Likewise.
+	* bfin-tdep.c: Likewise.
+	* cris-tdep.c: Likewise.
+	* iq2000-tdep.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* mt-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+	* score-tdep.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-tdep.c (mips_breakpoint_kind): New enum.
+	(mips_breakpoint_from_pc): Use it.
+	(mips_remote_breakpoint_from_pc): Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* arch-utils.h (GDBARCH_BREAKPOINT_MANIPULATION): New macro.
+	(SET_GDBARCH_BREAKPOINT_MANIPULATION): New macro.
+	aarch64-tdep.c (aarch64_breakpoint_from_pc): Remove.  Use
+	GDBARCH_BREAKPOINT_MANIPULATION.
+	(aarch64_gdbarch_init): Replace set_gdbarch_breakpoint_from_pc
+	with SET_GDBARCH_BREAKPOINT_MANIPULATION.
+	* alpha-tdep.c: Likewise.
+	* avr-tdep.c: Likewise.
+	* frv-tdep.c: Likewise.
+	* ft32-tdep.c: Likewise.
+	* h8300-tdep.c: Likewise.
+	* hppa-tdep.c: Likewise.
+	* i386-tdep.c: Likewise.
+	* lm32-tdep.c: Likewise.
+	* m32c-tdep.c: Likewise.
+	* m68hc11-tdep.c: Likewise.
+	* m68k-tdep.c: Likewise.
+	* m88k-tdep.c: Likewise.
+	* mep-tdep.c: Likewise.
+	* microblaze-tdep.c: Likewise.
+	* mn10300-tdep.c: Likewise.
+	* moxie-tdep.c: Likewise.
+	* msp430-tdep.c: Likewise.
+	* rl78-tdep.c: Likewise.
+	* rx-tdep.c: Likewise.
+	* s390-linux-tdep.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* vax-tdep.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+
+2016-11-03  Yao Qi  <yao.qi@linaro.org>
+
+	* mem-break.c (default_memory_insert_breakpoint): Don't check
+	'bp' against NULL.
+	* microblaze-linux-tdep.c (microblaze_linux_memory_remove_breakpoint):
+	Likewise.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Likewise.
+
+2016-11-02  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (dwarf_evaluate_loc_desc::get_base_type): Rename
+	from impl_get_base_type.  Rewrite.
+	(struct dwarf_expr_baton): Remove.
+	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value): Save and
+	restore more fields.
+	(symbol_needs_eval_context::get_frame_pc): New method.
+	* dwarf2expr.h (dwarf_expr_context::get_base_type): Now public,
+	virtual.
+	(dwarf_expr_context::impl_get_base_type): Remove.
+	* dwarf2expr.c (dwarf_expr_context::get_base_type): Remove.
+
 2016-10-31  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* configure.ac <mips-sgi-irix5*>: Remove <sys/proc.h> _KMEMUSER
@@ -2578,7 +4732,7 @@
 
 2016-07-06  Manish Goregaokar  <manish@mozilla.com>
 
-	* rust-lang.c (rust_subscript): Allow subscripting pointers
+	* rust-lang.c (rust_subscript): Allow subscripting pointers.
 
 2016-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

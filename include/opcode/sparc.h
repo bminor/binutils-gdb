@@ -80,6 +80,10 @@ typedef struct sparc_opcode_arch
      (SPARC_OPCODE_ARCH_MASK (..._V6) | SPARC_OPCODE_ARCH_MASK (..._V7)).
      These are short's because sparc_opcode.architecture is.  */
   short supported;
+  /* Bitmaps describing the set of hardware capabilities implemented
+     by the opcode arch.  */
+  int hwcaps;
+  int hwcaps2;
 } sparc_opcode_arch;
 
 extern const struct sparc_opcode_arch sparc_opcode_archs[];

@@ -198,7 +198,6 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
        || (end_obj == NULL && count_obj == NULL && pc == start);)
     {
       int insn_len = 0;
-      char *as = NULL;
       struct ui_file *memfile = mem_fileopen ();
       PyObject *insn_dict = PyDict_New ();
 
@@ -232,18 +231,20 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
         }
       END_CATCH
 
-      as = ui_file_xstrdup (memfile, NULL);
+      std::string as = ui_file_as_string (memfile);
+
       if (PyDict_SetItemString (insn_dict, "addr",
                                 gdb_py_long_from_ulongest (pc))
           || PyDict_SetItemString (insn_dict, "asm",
-                                   PyString_FromString (*as ? as : "<unknown>"))
+                                   PyString_FromString (!as.empty ()
+							? as.c_str ()
+							: "<unknown>"))
           || PyDict_SetItemString (insn_dict, "length",
                                    PyInt_FromLong (insn_len)))
         {
           Py_DECREF (result_list);
 
           ui_file_delete (memfile);
-          xfree (as);
 
           return NULL;
         }
@@ -251,7 +252,6 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       pc += insn_len;
       i++;
       ui_file_delete (memfile);
-      xfree (as);
     }
 
   return result_list;

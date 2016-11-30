@@ -156,7 +156,6 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
   if (! result)
     {
       PyObject *ptype, *pvalue, *ptraceback;
-      char *msg;
 
       PyErr_Fetch (&ptype, &pvalue, &ptraceback);
 
@@ -164,8 +163,8 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	 When fetching the error message we need to make our own copy,
 	 we no longer own ptype, pvalue after the call to PyErr_Restore.  */
 
-      msg = gdbpy_exception_to_string (ptype, pvalue);
-      make_cleanup (xfree, msg);
+      gdb::unique_xmalloc_ptr<char>
+	msg (gdbpy_exception_to_string (ptype, pvalue));
 
       if (msg == NULL)
 	{
@@ -190,7 +189,7 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	  PyErr_Restore (ptype, pvalue, ptraceback);
 	  gdbpy_print_stack ();
 	  if (msg != NULL && *msg != '\0')
-	    error (_("Error occurred in Python command: %s"), msg);
+	    error (_("Error occurred in Python command: %s"), msg.get ());
 	  else
 	    error (_("Error occurred in Python command."));
 	}
@@ -199,7 +198,7 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	  Py_XDECREF (ptype);
 	  Py_XDECREF (pvalue);
 	  Py_XDECREF (ptraceback);
-	  error ("%s", msg);
+	  error ("%s", msg.get ());
 	}
     }
 
@@ -374,7 +373,6 @@ cmdpy_completer (struct cmd_list_element *command,
 
       while ((elt = PyIter_Next (iter)) != NULL)
 	{
-	  char *item;
 
 	  if (! gdbpy_is_string (elt))
 	    {
@@ -382,7 +380,8 @@ cmdpy_completer (struct cmd_list_element *command,
 	      Py_DECREF (elt);
 	      continue;
 	    }
-	  item = python_string_to_host_string (elt);
+	  gdb::unique_xmalloc_ptr<char>
+	    item (python_string_to_host_string (elt));
 	  Py_DECREF (elt);
 	  if (item == NULL)
 	    {
@@ -390,7 +389,7 @@ cmdpy_completer (struct cmd_list_element *command,
 	      PyErr_Clear ();
 	      continue;
 	    }
-	  VEC_safe_push (char_ptr, result, item);
+	  VEC_safe_push (char_ptr, result, item.release ());
 	}
 
       Py_DECREF (iter);
@@ -604,7 +603,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
       if (ds_obj && gdbpy_is_string (ds_obj))
 	{
-	  docstring = python_string_to_host_string (ds_obj);
+	  docstring = python_string_to_host_string (ds_obj).release ();
 	  if (docstring == NULL)
 	    {
 	      xfree (cmd_name);

@@ -1,3 +1,52 @@
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
+	* debug.c: Include <chrono> instead of "gdb_sys_time.h".
+	(debug_vprintf): Use std::chrono::steady_clock instead of
+	gettimeofday.  Use '.' instead of ':'.
+	* tracepoint.c: Include <chrono> instead of "gdb_sys_time.h".
+	(get_timestamp): Use std::chrono::steady_clock instead of
+	gettimeofday.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Fix whitespace formatting.
+
+2016-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (SFILES, OBS): Flatten list and order
+	alphabetically.
+
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c (handle_file_event): Use warning.
+	* linux-low.c (linux_resume_one_lwp_throw): Use warning.
+	* mem-break.c (add_breakpoint_condition, add_breakpoint_commands):
+	Use warning.
+
+2016-11-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (check_zombie_leaders): Use debug_printf for debug
+	output.
+	* notif.c (handle_notif_ack, notif_event_enque): Likewise.
+	* remote-utils.c (putpkt_binary_1, readchar, getpkt): Use
+	debug_printf and debug_flush for debug output.
+	* server.c (handle_general_set): Likewise.
+	* thread-db.c (try_thread_db_load): Use debug_printf for debug
+	output.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (.c.o): Replace rule with ...
+	(%.o: %.c): ... this one.
+
+2016-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Remove @GMAKE_TRUE@ prefixes and removes lines
+	prefixed with @GMAKE_FALSE@.  Update comment related to non-GNU
+	make.
+	* configure.ac: Remove checks for the make program.
+	* configure: Re-generate.
+
 2016-10-28  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (CXX_DIALECT): Get from configure.

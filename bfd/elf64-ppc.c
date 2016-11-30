@@ -75,6 +75,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
 #define elf_backend_rela_normal 1
+#define elf_backend_dtrel_excludes_plt 1
 #define elf_backend_default_execstack 0
 
 #define bfd_elf64_mkobject		      ppc64_elf_mkobject
@@ -12616,7 +12617,10 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	   stub_sec = stub_sec->next)
 	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
 	  {
-	    stub_sec->rawsize = stub_sec->size;
+	    if (htab->stub_iteration <= STUB_SHRINK_ITER
+		|| stub_sec->rawsize < stub_sec->size)
+	      /* Past STUB_SHRINK_ITER, rawsize is the max size seen.  */
+	      stub_sec->rawsize = stub_sec->size;
 	    stub_sec->size = 0;
 	    stub_sec->reloc_count = 0;
 	    stub_sec->flags &= ~SEC_RELOC;
@@ -13345,7 +13349,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   bfd_boolean is_opd;
   /* Assume 'at' branch hints.  */
   bfd_boolean is_isa_v2 = TRUE;
-  bfd_vma d_offset = (bfd_big_endian (output_bfd) ? 2 : 0);
+  bfd_vma d_offset = (bfd_big_endian (input_bfd) ? 2 : 0);
 
   /* Initialize howto table if needed.  */
   if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
@@ -13602,11 +13606,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC64_LO_DS_OPT:
-	  insn = bfd_get_32 (output_bfd, contents + rel->r_offset - d_offset);
+	  insn = bfd_get_32 (input_bfd, contents + rel->r_offset - d_offset);
 	  if ((insn & (0x3f << 26)) != 58u << 26)
 	    abort ();
 	  insn += (14u << 26) - (58u << 26);
-	  bfd_put_32 (output_bfd, insn, contents + rel->r_offset - d_offset);
+	  bfd_put_32 (input_bfd, insn, contents + rel->r_offset - d_offset);
 	  r_type = R_PPC64_TOC16_LO;
 	  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 	  break;
@@ -13661,7 +13665,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
 	      rel->r_offset -= d_offset;
-	      bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, NOP, contents + rel->r_offset);
 	      r_type = R_PPC64_NONE;
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 	    }
@@ -13673,11 +13677,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
 	    toctprel:
-	      insn = bfd_get_32 (output_bfd,
+	      insn = bfd_get_32 (input_bfd,
 				 contents + rel->r_offset - d_offset);
 	      insn &= 31 << 21;
 	      insn |= 0x3c0d0000;	/* addis 0,13,0 */
-	      bfd_put_32 (output_bfd, insn,
+	      bfd_put_32 (input_bfd, insn,
 			  contents + rel->r_offset - d_offset);
 	      r_type = R_PPC64_TPREL16_HA;
 	      if (toc_symndx != 0)
@@ -13697,11 +13701,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (tls_mask != 0
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
-	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset);
+	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      insn = _bfd_elf_ppc_at_tls_transform (insn, 13);
 	      if (insn == 0)
 		abort ();
-	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 	      /* Was PPC64_TLS which sits on insn boundary, now
 		 PPC64_TPREL16_LO which is at low-order half-word.  */
 	      rel->r_offset += d_offset;
@@ -13737,7 +13741,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  rel->r_offset -= d_offset;
-		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
+		  bfd_put_32 (input_bfd, NOP, contents + rel->r_offset);
 		  r_type = R_PPC64_NONE;
 		}
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
@@ -13775,7 +13779,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 need to keep the destination reg.  It may be
 		 something other than the usual r3, and moved to r3
 		 before the call by intervening code.  */
-	      insn1 = bfd_get_32 (output_bfd,
+	      insn1 = bfd_get_32 (input_bfd,
 				  contents + rel->r_offset - d_offset);
 	      if ((tls_mask & tls_gd) != 0)
 		{
@@ -13831,20 +13835,20 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      rel[1].r_addend = rel->r_addend;
 		    }
 		}
-	      bfd_put_32 (output_bfd, insn1,
+	      bfd_put_32 (input_bfd, insn1,
 			  contents + rel->r_offset - d_offset);
 	      if (offset != (bfd_vma) -1)
 		{
-		  insn3 = bfd_get_32 (output_bfd,
+		  insn3 = bfd_get_32 (input_bfd,
 				      contents + offset + 4);
 		  if (insn3 == NOP
 		      || insn3 == CROR_151515 || insn3 == CROR_313131)
 		    {
 		      rel[1].r_offset += 4;
-		      bfd_put_32 (output_bfd, insn2, contents + offset + 4);
+		      bfd_put_32 (input_bfd, insn2, contents + offset + 4);
 		      insn2 = NOP;
 		    }
-		  bfd_put_32 (output_bfd, insn2, contents + offset);
+		  bfd_put_32 (input_bfd, insn2, contents + offset);
 		}
 	      if ((tls_mask & tls_gd) == 0
 		  && (tls_gd == 0 || toc_symndx != 0))
@@ -13884,16 +13888,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
-	      insn3 = bfd_get_32 (output_bfd,
+	      insn3 = bfd_get_32 (input_bfd,
 				  contents + offset + 4);
 	      if (insn3 == NOP
 		  || insn3 == CROR_151515 || insn3 == CROR_313131)
 		{
 		  rel->r_offset += 4;
-		  bfd_put_32 (output_bfd, insn2, contents + offset + 4);
+		  bfd_put_32 (input_bfd, insn2, contents + offset + 4);
 		  insn2 = NOP;
 		}
-	      bfd_put_32 (output_bfd, insn2, contents + offset);
+	      bfd_put_32 (input_bfd, insn2, contents + offset);
 	      if ((tls_mask & TLS_TPRELGD) == 0 && toc_symndx != 0)
 		goto again;
 	    }
@@ -13927,16 +13931,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      insn2 = 0x38630000;	/* addi 3,3,0 */
-	      insn3 = bfd_get_32 (output_bfd,
+	      insn3 = bfd_get_32 (input_bfd,
 				  contents + offset + 4);
 	      if (insn3 == NOP
 		  || insn3 == CROR_151515 || insn3 == CROR_313131)
 		{
 		  rel->r_offset += 4;
-		  bfd_put_32 (output_bfd, insn2, contents + offset + 4);
+		  bfd_put_32 (input_bfd, insn2, contents + offset + 4);
 		  insn2 = NOP;
 		}
-	      bfd_put_32 (output_bfd, insn2, contents + offset);
+	      bfd_put_32 (input_bfd, insn2, contents + offset);
 	      goto again;
 	    }
 	  break;
@@ -13991,10 +13995,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if ((insn1 & ~0xfffc) == LD_R2_0R12
 		  && insn2 == ADD_R2_R2_R12)
 		{
-		  bfd_put_32 (output_bfd,
+		  bfd_put_32 (input_bfd,
 			      LIS_R2 + PPC_HA (relocation),
 			      contents + rel->r_offset);
-		  bfd_put_32 (output_bfd,
+		  bfd_put_32 (input_bfd,
 			      ADDI_R2_R2 + PPC_LO (relocation),
 			      contents + rel->r_offset + 4);
 		}
@@ -14013,10 +14017,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if ((insn1 & ~0xfffc) == LD_R2_0R12
 		      && insn2 == ADD_R2_R2_R12)
 		    {
-		      bfd_put_32 (output_bfd,
+		      bfd_put_32 (input_bfd,
 				  ADDIS_R2_R12 + PPC_HA (relocation),
 				  contents + rel->r_offset);
-		      bfd_put_32 (output_bfd,
+		      bfd_put_32 (input_bfd,
 				  ADDI_R2_R2 + PPC_LO (relocation),
 				  contents + rel->r_offset + 4);
 		    }
@@ -14045,8 +14049,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      unsigned int insn1, insn2;
 	      bfd_vma offset = rel->r_offset - d_offset;
-	      insn1 = bfd_get_32 (output_bfd, contents + offset);
-	      insn2 = bfd_get_32 (output_bfd, contents + offset + 4);
+	      insn1 = bfd_get_32 (input_bfd, contents + offset);
+	      insn2 = bfd_get_32 (input_bfd, contents + offset + 4);
 	      if ((insn1 & 0xffff0000) == ADDIS_R2_R12
 		  && (insn2 & 0xffff0000) == ADDI_R2_R2)
 		{
@@ -14055,7 +14059,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  rel->r_addend -= d_offset;
 		  rel[1].r_info = ELF64_R_INFO (r_symndx, R_PPC64_ADDR16_LO);
 		  rel[1].r_addend -= d_offset + 4;
-		  bfd_put_32 (output_bfd, LIS_R2, contents + offset);
+		  bfd_put_32 (input_bfd, LIS_R2, contents + offset);
 		}
 	    }
 	  break;
@@ -14096,7 +14100,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRNTAKEN:
 	case R_PPC64_REL14_BRNTAKEN:
-	  insn |= bfd_get_32 (output_bfd,
+	  insn |= bfd_get_32 (input_bfd,
 			      contents + rel->r_offset) & ~(0x01 << 21);
 	  /* Fall through.  */
 
@@ -14315,7 +14319,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    insn ^= 0x01 << 21;
 		}
 
-	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 	    }
 
 	  /* NOP out calls to undefined weak functions.
@@ -14328,7 +14332,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   && relocation == 0
 		   && addend == 0)
 	    {
-	      bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
+	      bfd_put_32 (input_bfd, NOP, contents + rel->r_offset);
 	      goto copy_reloc;
 	    }
 	  break;
@@ -14701,10 +14705,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 defined before using them.  */
 	      bfd_byte *p = contents + rel->r_offset - d_offset;
 
-	      insn = bfd_get_32 (output_bfd, p);
+	      insn = bfd_get_32 (input_bfd, p);
 	      insn = _bfd_elf_ppc_at_tprel_transform (insn, 13);
 	      if (insn != 0)
-		bfd_put_32 (output_bfd, insn, p);
+		bfd_put_32 (input_bfd, insn, p);
 	      break;
 	    }
 	  if (htab->elf.tls_sec != NULL)
@@ -15563,27 +15567,6 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_PLTRELSZ:
 	      dyn.d_un.d_val = htab->elf.srelplt->size;
-	      break;
-
-	    case DT_RELASZ:
-	      /* Don't count procedure linkage table relocs in the
-		 overall reloc count.  */
-	      s = htab->elf.srelplt;
-	      if (s == NULL)
-		continue;
-	      dyn.d_un.d_val -= s->size;
-	      break;
-
-	    case DT_RELA:
-	      /* We may not be using the standard ELF linker script.
-		 If .rela.plt is the first .rela section, we adjust
-		 DT_RELA to not include it.  */
-	      s = htab->elf.srelplt;
-	      if (s == NULL)
-		continue;
-	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
-		continue;
-	      dyn.d_un.d_ptr += s->size;
 	      break;
 	    }
 

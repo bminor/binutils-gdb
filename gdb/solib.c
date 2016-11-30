@@ -1163,16 +1163,16 @@ info_sharedlibrary_command (char *pattern, int from_tty)
   if (nr_libs == 0)
     {
       if (pattern)
-	ui_out_message (uiout, 0,
+	ui_out_message (uiout,
 			_("No shared libraries matched.\n"));
       else
-	ui_out_message (uiout, 0,
+	ui_out_message (uiout,
 			_("No shared libraries loaded at this time.\n"));
     }
   else
     {
       if (so_missing_debug_info)
-	ui_out_message (uiout, 0,
+	ui_out_message (uiout,
 			_("(*): Shared library is missing "
 			  "debugging information.\n"));
     }

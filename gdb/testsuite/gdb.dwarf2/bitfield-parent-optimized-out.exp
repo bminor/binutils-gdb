@@ -43,19 +43,18 @@ Dwarf::assemble $asm_file {
 
 	    struct_label: structure_type {
 		{name S}
-		{byte_size 4 DW_FORM_sdata}
+		{byte_size 8 DW_FORM_sdata}
 	    } {
 		member {
 		    {name bitfield}
 		    {type :$int_label}
 		    {bit_size 12 DW_FORM_sdata}
 		    {bit_offset 20 DW_FORM_sdata}
-		    {data_member_location 2 DW_FORM_sdata}
 		}
 		member {
 		    {name intfield}
 		    {type :$int_label}
-		    {data_member_location 2 DW_FORM_sdata}
+		    {data_member_location 4 DW_FORM_sdata}
 		}
 	    }
 

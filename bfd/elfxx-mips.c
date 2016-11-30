@@ -453,12 +453,8 @@ struct mips_elf_link_hash_table
      being used.  */
   asection *srelbss;
   asection *sdynbss;
-  asection *srelplt;
   asection *srelplt2;
-  asection *sgotplt;
-  asection *splt;
   asection *sstubs;
-  asection *sgot;
 
   /* The master GOT information.  */
   struct mips_got_info *got_info;
@@ -3356,7 +3352,7 @@ mips_elf_initialize_tls_slots (bfd *abfd, struct bfd_link_info *info,
   if (htab == NULL)
     return;
 
-  sgot = htab->sgot;
+  sgot = htab->root.sgot;
 
   indx = 0;
   if (h != NULL)
@@ -3483,8 +3479,8 @@ mips_elf_gotplt_index (struct bfd_link_info *info,
   BFD_ASSERT (h->plt.plist->gotplt_index != MINUS_ONE);
 
   /* Calculate the address of the associated .got.plt entry.  */
-  got_address = (htab->sgotplt->output_section->vma
-		 + htab->sgotplt->output_offset
+  got_address = (htab->root.sgotplt->output_section->vma
+		 + htab->root.sgotplt->output_offset
 		 + (h->plt.plist->gotplt_index
 		    * MIPS_ELF_GOT_SIZE (info->output_bfd)));
 
@@ -3548,7 +3544,7 @@ mips_elf_primary_global_got_index (bfd *obfd, struct bfd_link_info *info,
   g = mips_elf_bfd_got (obfd, FALSE);
   got_index = ((h->dynindx - global_got_dynindx + g->local_gotno)
 	       * MIPS_ELF_GOT_SIZE (obfd));
-  BFD_ASSERT (got_index < htab->sgot->size);
+  BFD_ASSERT (got_index < htab->root.sgot->size);
 
   return got_index;
 }
@@ -3582,7 +3578,7 @@ mips_elf_global_got_index (bfd *obfd, struct bfd_link_info *info, bfd *ibfd,
   BFD_ASSERT (entry);
 
   gotidx = entry->gotidx;
-  BFD_ASSERT (gotidx > 0 && gotidx < htab->sgot->size);
+  BFD_ASSERT (gotidx > 0 && gotidx < htab->root.sgot->size);
 
   if (lookup.tls_type)
     {
@@ -3670,7 +3666,7 @@ mips_elf_got_offset_from_index (struct bfd_link_info *info, bfd *output_bfd,
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  sgot = htab->sgot;
+  sgot = htab->root.sgot;
   gp = _bfd_get_gp_value (output_bfd)
     + mips_elf_adjust_gp (output_bfd, htab->got_info, input_bfd);
 
@@ -3733,7 +3729,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
       BFD_ASSERT (entry);
 
       gotidx = entry->gotidx;
-      BFD_ASSERT (gotidx > 0 && gotidx < htab->sgot->size);
+      BFD_ASSERT (gotidx > 0 && gotidx < htab->root.sgot->size);
 
       return entry;
     }
@@ -3773,7 +3769,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   *entry = lookup;
   *loc = entry;
 
-  MIPS_ELF_PUT_WORD (abfd, value, htab->sgot->contents + entry->gotidx);
+  MIPS_ELF_PUT_WORD (abfd, value, htab->root.sgot->contents + entry->gotidx);
 
   /* These GOT entries need a dynamic relocation on VxWorks.  */
   if (htab->is_vxworks)
@@ -3784,8 +3780,8 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
       bfd_vma got_address;
 
       s = mips_elf_rel_dyn_section (info, FALSE);
-      got_address = (htab->sgot->output_section->vma
-		     + htab->sgot->output_offset
+      got_address = (htab->root.sgot->output_section->vma
+		     + htab->root.sgot->output_offset
 		     + entry->gotidx);
 
       rloc = s->contents + (s->reloc_count++ * sizeof (Elf32_External_Rela));
@@ -5137,7 +5133,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   BFD_ASSERT (htab != NULL);
 
   /* This function may be called more than once.  */
-  if (htab->sgot)
+  if (htab->root.sgot)
     return TRUE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
@@ -5149,7 +5145,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
-  htab->sgot = s;
+  htab->root.sgot = s;
 
   /* Define the symbol _GLOBAL_OFFSET_TABLE_.  We don't do this in the
      linker script because we don't want to define the symbol if we
@@ -5183,7 +5179,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 					  | SEC_LINKER_CREATED);
   if (s == NULL)
     return FALSE;
-  htab->sgotplt = s;
+  htab->root.sgotplt = s;
 
   return TRUE;
 }
@@ -5605,7 +5601,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     {
       bfd_boolean micromips_p = MICROMIPS_P (abfd);
 
-      sec = htab->splt;
+      sec = htab->root.splt;
       symbol = (sec->output_section->vma
 		+ sec->output_offset
 		+ htab->plt_header_size
@@ -5721,7 +5717,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	      if (!TLS_RELOC_P (r_type)
 		  && !elf_hash_table (info)->dynamic_sections_created)
 		/* This is a static link.  We must initialize the GOT entry.  */
-		MIPS_ELF_PUT_WORD (dynobj, symbol, htab->sgot->contents + g);
+		MIPS_ELF_PUT_WORD (dynobj, symbol, htab->root.sgot->contents + g);
 	    }
 	}
       else if (!htab->is_vxworks
@@ -7899,19 +7895,13 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Cache the sections created above.  */
-  htab->splt = bfd_get_linker_section (abfd, ".plt");
   htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
   if (htab->is_vxworks)
-    {
-      htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
-      htab->srelplt = bfd_get_linker_section (abfd, ".rela.plt");
-    }
-  else
-    htab->srelplt = bfd_get_linker_section (abfd, ".rel.plt");
+    htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
   if (!htab->sdynbss
       || (htab->is_vxworks && !htab->srelbss && !bfd_link_pic (info))
-      || !htab->srelplt
-      || !htab->splt)
+      || !htab->root.srelplt
+      || !htab->root.splt)
     abort ();
 
   /* Do the usual VxWorks handling.  */
@@ -9218,7 +9208,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
          for PLT offset calculations.  */
       if (htab->plt_mips_offset + htab->plt_comp_offset == 0)
 	{
-	  BFD_ASSERT (htab->sgotplt->size == 0);
+	  BFD_ASSERT (htab->root.sgotplt->size == 0);
 	  BFD_ASSERT (htab->plt_got_index == 0);
 
 	  /* If we're using the PLT additions to the psABI, each PLT
@@ -9226,12 +9216,12 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     Encourage better cache usage by aligning.  We do this
 	     lazily to avoid pessimizing traditional objects.  */
 	  if (!htab->is_vxworks
-	      && !bfd_set_section_alignment (dynobj, htab->splt, 5))
+	      && !bfd_set_section_alignment (dynobj, htab->root.splt, 5))
 	    return FALSE;
 
 	  /* Make sure that .got.plt is word-aligned.  We do this lazily
 	     for the same reason as above.  */
-	  if (!bfd_set_section_alignment (dynobj, htab->sgotplt,
+	  if (!bfd_set_section_alignment (dynobj, htab->root.sgotplt,
 					  MIPS_ELF_LOG_FILE_ALIGN (dynobj)))
 	    return FALSE;
 
@@ -9336,9 +9326,9 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	hmips->use_plt_entry = TRUE;
 
       /* Make room for the R_MIPS_JUMP_SLOT relocation.  */
-      htab->srelplt->size += (htab->is_vxworks
-			      ? MIPS_ELF_RELA_SIZE (dynobj)
-			      : MIPS_ELF_REL_SIZE (dynobj));
+      htab->root.srelplt->size += (htab->is_vxworks
+				   ? MIPS_ELF_RELA_SIZE (dynobj)
+				   : MIPS_ELF_REL_SIZE (dynobj));
 
       /* Make room for the .rela.plt.unloaded relocations.  */
       if (htab->is_vxworks && !bfd_link_pic (info))
@@ -9463,7 +9453,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  s = htab->sgot;
+  s = htab->root.sgot;
   if (s == NULL)
     return TRUE;
 
@@ -9741,7 +9731,7 @@ mips_elf_set_plt_sym_value (struct mips_elf_link_hash_entry *h, void *data)
       if (htab->is_vxworks)
 	val += 8;
 
-      h->root.root.u.def.section = htab->splt;
+      h->root.root.u.def.section = htab->root.splt;
       h->root.root.u.def.value = val;
       h->root.other = other;
     }
@@ -9790,7 +9780,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 
          Also create the _PROCEDURE_LINKAGE_TABLE_ symbol if we
          haven't already in _bfd_elf_create_dynamic_sections.  */
-      if (htab->splt && htab->plt_mips_offset + htab->plt_comp_offset != 0)
+      if (htab->root.splt && htab->plt_mips_offset + htab->plt_comp_offset != 0)
 	{
 	  bfd_boolean micromips_p = (MICROMIPS_P (output_bfd)
 				     && !htab->plt_mips_offset);
@@ -9800,8 +9790,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  bfd_vma size;
 
 	  BFD_ASSERT (htab->use_plts_and_copy_relocs);
-	  BFD_ASSERT (htab->sgotplt->size == 0);
-	  BFD_ASSERT (htab->splt->size == 0);
+	  BFD_ASSERT (htab->root.sgotplt->size == 0);
+	  BFD_ASSERT (htab->root.splt->size == 0);
 
 	  if (htab->is_vxworks && bfd_link_pic (info))
 	    size = 4 * ARRAY_SIZE (mips_vxworks_shared_plt0_entry);
@@ -9820,17 +9810,17 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 
 	  htab->plt_header_is_comp = micromips_p;
 	  htab->plt_header_size = size;
-	  htab->splt->size = (size
-			      + htab->plt_mips_offset
-			      + htab->plt_comp_offset);
-	  htab->sgotplt->size = (htab->plt_got_index
-				 * MIPS_ELF_GOT_SIZE (dynobj));
+	  htab->root.splt->size = (size
+				   + htab->plt_mips_offset
+				   + htab->plt_comp_offset);
+	  htab->root.sgotplt->size = (htab->plt_got_index
+				      * MIPS_ELF_GOT_SIZE (dynobj));
 
 	  mips_elf_link_hash_traverse (htab, mips_elf_set_plt_sym_value, info);
 
 	  if (htab->root.hplt == NULL)
 	    {
-	      h = _bfd_elf_define_linkage_sym (dynobj, info, htab->splt,
+	      h = _bfd_elf_define_linkage_sym (dynobj, info, htab->root.splt,
 					       "_PROCEDURE_LINKAGE_TABLE_");
 	      htab->root.hplt = h;
 	      if (h == NULL)
@@ -9916,7 +9906,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       else if (SGI_COMPAT (output_bfd)
 	       && CONST_STRNEQ (name, ".compact_rel"))
 	s->size += mips_elf_hash_table (info)->compact_rel_size;
-      else if (s == htab->splt)
+      else if (s == htab->root.splt)
 	{
 	  /* If the last PLT entry has a branch delay slot, allocate
 	     room for an extra nop to fill the delay slot.  This is
@@ -9926,8 +9916,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	    s->size += 4;
 	}
       else if (! CONST_STRNEQ (name, ".init")
-	       && s != htab->sgot
-	       && s != htab->sgotplt
+	       && s != htab->root.sgot
+	       && s != htab->root.sgotplt
 	       && s != htab->sstubs
 	       && s != htab->sdynbss)
 	{
@@ -10059,7 +10049,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	      && !MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_OPTIONS, 0))
 	    return FALSE;
 	}
-      if (htab->splt->size > 0)
+      if (htab->root.splt->size > 0)
 	{
 	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_PLTREL, 0))
 	    return FALSE;
@@ -10711,25 +10701,25 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       BFD_ASSERT (htab->use_plts_and_copy_relocs);
       BFD_ASSERT (h->dynindx != -1);
-      BFD_ASSERT (htab->splt != NULL);
+      BFD_ASSERT (htab->root.splt != NULL);
       BFD_ASSERT (got_index != MINUS_ONE);
       BFD_ASSERT (!h->def_regular);
 
       /* Calculate the address of the PLT header.  */
       isa_bit = htab->plt_header_is_comp;
-      header_address = (htab->splt->output_section->vma
-			+ htab->splt->output_offset + isa_bit);
+      header_address = (htab->root.splt->output_section->vma
+			+ htab->root.splt->output_offset + isa_bit);
 
       /* Calculate the address of the .got.plt entry.  */
-      got_address = (htab->sgotplt->output_section->vma
-		     + htab->sgotplt->output_offset
+      got_address = (htab->root.sgotplt->output_section->vma
+		     + htab->root.sgotplt->output_offset
 		     + got_index * MIPS_ELF_GOT_SIZE (dynobj));
 
       got_address_high = ((got_address + 0x8000) >> 16) & 0xffff;
       got_address_low = got_address & 0xffff;
 
       /* Initially point the .got.plt entry at the PLT header.  */
-      loc = (htab->sgotplt->contents + got_index * MIPS_ELF_GOT_SIZE (dynobj));
+      loc = (htab->root.sgotplt->contents + got_index * MIPS_ELF_GOT_SIZE (dynobj));
       if (ABI_64_P (output_bfd))
 	bfd_put_64 (output_bfd, header_address, loc);
       else
@@ -10744,10 +10734,10 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 	  plt_offset = htab->plt_header_size + h->plt.plist->mips_offset;
 
-	  BFD_ASSERT (plt_offset <= htab->splt->size);
+	  BFD_ASSERT (plt_offset <= htab->root.splt->size);
 
 	  /* Find out where the .plt entry should go.  */
-	  loc = htab->splt->contents + plt_offset;
+	  loc = htab->root.splt->contents + plt_offset;
 
 	  /* Pick the load opcode.  */
 	  load = MIPS_ELF_LOAD_WORD (output_bfd);
@@ -10783,10 +10773,10 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  plt_offset = (htab->plt_header_size + htab->plt_mips_offset
 			+ h->plt.plist->comp_offset);
 
-	  BFD_ASSERT (plt_offset <= htab->splt->size);
+	  BFD_ASSERT (plt_offset <= htab->root.splt->size);
 
 	  /* Find out where the .plt entry should go.  */
-	  loc = htab->splt->contents + plt_offset;
+	  loc = htab->root.splt->contents + plt_offset;
 
 	  /* Fill in the PLT entry itself.  */
 	  if (!MICROMIPS_P (output_bfd))
@@ -10822,8 +10812,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 	      BFD_ASSERT (got_address % 4 == 0);
 
-	      loc_address = (htab->splt->output_section->vma
-			     + htab->splt->output_offset + plt_offset);
+	      loc_address = (htab->root.splt->output_section->vma
+			     + htab->root.splt->output_offset + plt_offset);
 	      gotpc_offset = got_address - ((loc_address | 3) ^ 3);
 
 	      /* ADDIUPC has a span of +/-16MB, check we're in range.  */
@@ -10834,8 +10824,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 		    (_("%B: `%A' offset of %ld from `%A' "
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
-		     htab->sgotplt->output_section,
-		     htab->splt->output_section,
+		     htab->root.sgotplt->output_section,
+		     htab->root.splt->output_section,
 		     (long) gotpc_offset);
 		  bfd_set_error (bfd_error_no_error);
 		  return FALSE;
@@ -10851,7 +10841,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	}
 
       /* Emit an R_MIPS_JUMP_SLOT relocation against the .got.plt entry.  */
-      mips_elf_output_dynamic_relocation (output_bfd, htab->srelplt,
+      mips_elf_output_dynamic_relocation (output_bfd, htab->root.srelplt,
 					  got_index - 2, h->dynindx,
 					  R_MIPS_JUMP_SLOT, got_address);
 
@@ -11015,7 +11005,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   BFD_ASSERT (h->dynindx != -1
 	      || h->forced_local);
 
-  sgot = htab->sgot;
+  sgot = htab->root.sgot;
   g = htab->got_info;
   BFD_ASSERT (g != NULL);
 
@@ -11051,7 +11041,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 							   &e)))
 	    {
 	      offset = p->gotidx;
-	      BFD_ASSERT (offset > 0 && offset < htab->sgot->size);
+	      BFD_ASSERT (offset > 0 && offset < htab->root.sgot->size);
 	      if (bfd_link_pic (info)
 		  || (elf_hash_table (info)->dynamic_sections_created
 		      && p->d.h != NULL
@@ -11198,18 +11188,18 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
       gotplt_index = h->plt.plist->gotplt_index;
 
       BFD_ASSERT (h->dynindx != -1);
-      BFD_ASSERT (htab->splt != NULL);
+      BFD_ASSERT (htab->root.splt != NULL);
       BFD_ASSERT (gotplt_index != MINUS_ONE);
-      BFD_ASSERT (plt_offset <= htab->splt->size);
+      BFD_ASSERT (plt_offset <= htab->root.splt->size);
 
       /* Calculate the address of the .plt entry.  */
-      plt_address = (htab->splt->output_section->vma
-		     + htab->splt->output_offset
+      plt_address = (htab->root.splt->output_section->vma
+		     + htab->root.splt->output_offset
 		     + plt_offset);
 
       /* Calculate the address of the .got.plt entry.  */
-      got_address = (htab->sgotplt->output_section->vma
-		     + htab->sgotplt->output_offset
+      got_address = (htab->root.sgotplt->output_section->vma
+		     + htab->root.sgotplt->output_offset
 		     + gotplt_index * MIPS_ELF_GOT_SIZE (output_bfd));
 
       /* Calculate the offset of the .got.plt entry from
@@ -11222,11 +11212,11 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 
       /* Fill in the initial value of the .got.plt entry.  */
       bfd_put_32 (output_bfd, plt_address,
-		  (htab->sgotplt->contents
+		  (htab->root.sgotplt->contents
 		   + gotplt_index * MIPS_ELF_GOT_SIZE (output_bfd)));
 
       /* Find out where the .plt entry should go.  */
-      loc = htab->splt->contents + plt_offset;
+      loc = htab->root.splt->contents + plt_offset;
 
       if (bfd_link_pic (info))
 	{
@@ -11275,7 +11265,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 	}
 
       /* Emit an R_MIPS_JUMP_SLOT relocation against the .got.plt entry.  */
-      loc = (htab->srelplt->contents
+      loc = (htab->root.srelplt->contents
 	     + gotplt_index * sizeof (Elf32_External_Rela));
       rel.r_offset = got_address;
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_JUMP_SLOT);
@@ -11288,7 +11278,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 
   BFD_ASSERT (h->dynindx != -1 || h->forced_local);
 
-  sgot = htab->sgot;
+  sgot = htab->root.sgot;
   g = htab->got_info;
   BFD_ASSERT (g != NULL);
 
@@ -11366,8 +11356,8 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
     plt_entry = micromips_o32_exec_plt0_entry;
 
   /* Calculate the value of .got.plt.  */
-  gotplt_value = (htab->sgotplt->output_section->vma
-		  + htab->sgotplt->output_offset);
+  gotplt_value = (htab->root.sgotplt->output_section->vma
+		  + htab->root.sgotplt->output_offset);
   gotplt_value_high = ((gotplt_value + 0x8000) >> 16) & 0xffff;
   gotplt_value_low = gotplt_value & 0xffff;
 
@@ -11377,7 +11367,7 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 	      || ~(gotplt_value | 0x7fffffff) == 0);
 
   /* Install the PLT header.  */
-  loc = htab->splt->contents;
+  loc = htab->root.splt->contents;
   if (plt_entry == micromips_o32_exec_plt0_entry)
     {
       bfd_vma gotpc_offset;
@@ -11386,8 +11376,8 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 
       BFD_ASSERT (gotplt_value % 4 == 0);
 
-      loc_address = (htab->splt->output_section->vma
-		     + htab->splt->output_offset);
+      loc_address = (htab->root.splt->output_section->vma
+		     + htab->root.splt->output_offset);
       gotpc_offset = gotplt_value - ((loc_address | 3) ^ 3);
 
       /* ADDIUPC has a span of +/-16MB, check we're in range.  */
@@ -11397,8 +11387,8 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%B: `%A' offset of %ld from `%A' beyond the range of ADDIUPC"),
 	     output_bfd,
-	     htab->sgotplt->output_section,
-	     htab->splt->output_section,
+	     htab->root.sgotplt->output_section,
+	     htab->root.splt->output_section,
 	     (long) gotpc_offset);
 	  bfd_set_error (bfd_error_no_error);
 	  return FALSE;
@@ -11463,10 +11453,11 @@ mips_vxworks_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
   got_value_low = got_value & 0xffff;
 
   /* Calculate the address of the PLT header.  */
-  plt_address = htab->splt->output_section->vma + htab->splt->output_offset;
+  plt_address = (htab->root.splt->output_section->vma
+		 + htab->root.splt->output_offset);
 
   /* Install the PLT header.  */
-  loc = htab->splt->contents;
+  loc = htab->root.splt->contents;
   bfd_put_32 (output_bfd, plt_entry[0] | got_value_high, loc);
   bfd_put_32 (output_bfd, plt_entry[1] | got_value_low, loc + 4);
   bfd_put_32 (output_bfd, plt_entry[2], loc + 8);
@@ -11527,7 +11518,7 @@ mips_vxworks_finish_shared_plt (bfd *output_bfd, struct bfd_link_info *info)
   /* We just need to copy the entry byte-by-byte.  */
   for (i = 0; i < ARRAY_SIZE (mips_vxworks_shared_plt0_entry); i++)
     bfd_put_32 (output_bfd, mips_vxworks_shared_plt0_entry[i],
-		htab->splt->contents + i * 4);
+		htab->root.splt->contents + i * 4);
 }
 
 /* Finish up the dynamic sections.  */
@@ -11549,7 +11540,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
-  sgot = htab->sgot;
+  sgot = htab->root.sgot;
   gg = htab->got_info;
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -11597,12 +11588,12 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTGOT:
-	      s = htab->sgot;
+	      s = htab->root.sgot;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_MIPS_PLTGOT:
-	      s = htab->sgotplt;
+	      s = htab->root.sgotplt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
@@ -11723,13 +11714,6 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_ptr = s->vma;
 	      break;
 
-	    case DT_RELASZ:
-	      BFD_ASSERT (htab->is_vxworks);
-	      /* The count does not include the JUMP_SLOT relocations.  */
-	      if (htab->srelplt)
-		dyn.d_un.d_val -= htab->srelplt->size;
-	      break;
-
 	    case DT_PLTREL:
 	      BFD_ASSERT (htab->use_plts_and_copy_relocs);
 	      if (htab->is_vxworks)
@@ -11740,13 +11724,13 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_PLTRELSZ:
 	      BFD_ASSERT (htab->use_plts_and_copy_relocs);
-	      dyn.d_un.d_val = htab->srelplt->size;
+	      dyn.d_un.d_val = htab->root.srelplt->size;
 	      break;
 
 	    case DT_JMPREL:
 	      BFD_ASSERT (htab->use_plts_and_copy_relocs);
-	      dyn.d_un.d_ptr = (htab->srelplt->output_section->vma
-				+ htab->srelplt->output_offset);
+	      dyn.d_un.d_ptr = (htab->root.srelplt->output_section->vma
+				+ htab->root.srelplt->output_offset);
 	      break;
 
 	    case DT_TEXTREL:
@@ -11977,7 +11961,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
       }
   }
 
-  if (htab->splt && htab->splt->size > 0)
+  if (htab->root.splt && htab->root.splt->size > 0)
     {
       if (htab->is_vxworks)
 	{

@@ -1,3 +1,9 @@
+2016-11-07  Doug Evans  <dje@google.com>
+
+	* config.sub: Sync with upstream version 2016-11-03.
+	git://git.sv.gnu.org/config.git
+	* config.guess: Sync with upstream version 2016-10-02.
+
 2016-09-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* .gitignore: Add archives and make stamps.

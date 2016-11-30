@@ -4319,26 +4319,8 @@ rsrc_process_section (bfd * abfd,
   rsrc_write_directory (& write_data, & new_table);
 
   /* Step five: Replace the old contents with the new.
-     We recompute the size as we may have lost entries due to mergeing.  */
-  size = ((write_data.next_data - new_data) + 3) & ~ 3;
-
-  {
-    int page_size;
-
-    if (coff_data (abfd)->link_info)
-      {
-	page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
-
-	/* If no file alignment has been set, default to one.
-	   This repairs 'ld -r' for arm-wince-pe target.  */
-	if (page_size == 0)
-	  page_size = 1;
-      }
-    else
-      page_size = PE_DEF_FILE_ALIGNMENT;
-    size = (size + page_size - 1) & - page_size;
-  }
-
+     We don't recompute the size as it's too late here to shrink section.
+     See PR ld/20193 for more details.  */
   bfd_set_section_contents (pfinfo->output_bfd, sec, new_data, 0, size);
   sec->size = sec->rawsize = size;
 

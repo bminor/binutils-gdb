@@ -559,11 +559,21 @@ M:CORE_ADDR:skip_main_prologue:CORE_ADDR ip:ip
 M:CORE_ADDR:skip_entrypoint:CORE_ADDR ip:ip
 
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
-m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
-# Return the adjusted address and kind to use for Z0/Z1 packets.
-# KIND is usually the memory length of the breakpoint, but may have a
-# different target-specific meaning.
-m:void:remote_breakpoint_from_pc:CORE_ADDR *pcptr, int *kindptr:pcptr, kindptr:0:default_remote_breakpoint_from_pc::0
+m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr:0:default_breakpoint_from_pc::0
+
+# Return the breakpoint kind for this target based on *PCPTR.
+m:int:breakpoint_kind_from_pc:CORE_ADDR *pcptr:pcptr::0:
+
+# Return the software breakpoint from KIND.  KIND can have target
+# specific meaning like the Z0 kind parameter.
+# SIZE is set to the software breakpoint's length in memory.
+m:const gdb_byte *:sw_breakpoint_from_kind:int kind, int *size:kind, size::NULL::0
+
+# Return the breakpoint kind for this target based on the current
+# processor state (e.g. the current instruction mode on ARM) and the
+# *PCPTR.  In default, it is gdbarch->breakpoint_kind_from_pc.
+m:int:breakpoint_kind_from_current_state:struct regcache *regcache, CORE_ADDR *pcptr:regcache, pcptr:0:default_breakpoint_kind_from_current_state::0
+
 M:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
 m:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
 m:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0
@@ -616,14 +626,15 @@ m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
 # target can single step.  If not, then implement single step using breakpoints.
 #
-# A return value of 1 means that the software_single_step breakpoints
-# were inserted; 0 means they were not.  Multiple breakpoints may be
-# inserted for some instructions such as conditional branch.  However,
-# each implementation must always evaluate the condition and only put
-# the breakpoint at the branch destination if the condition is true, so
-# that we ensure forward progress when stepping past a conditional
-# branch to self.
-F:int:software_single_step:struct frame_info *frame:frame
+# Return a vector of addresses on which the software single step
+# breakpoints should be inserted.  NULL means software single step is
+# not used.
+# Multiple breakpoints may be inserted for some instructions such as
+# conditional branch.  However, each implementation must always evaluate
+# the condition and only put the breakpoint at the branch destination if
+# the condition is true, so that we ensure forward progress when stepping
+# past a conditional branch to self.
+F:VEC (CORE_ADDR) *:software_single_step:struct regcache *regcache:regcache
 
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.
@@ -1867,7 +1878,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   struct ui_file *log;
   struct cleanup *cleanups;
   long length;
-  char *buf;
 
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
@@ -1913,12 +1923,11 @@ do
     fi
 done
 cat <<EOF
-  buf = ui_file_xstrdup (log, &length);
-  make_cleanup (xfree, buf);
-  if (length > 0)
+  std::string buf = ui_file_as_string (log);
+  if (!buf.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
-                    buf);
+                    buf.c_str ());
   do_cleanups (cleanups);
 }
 EOF

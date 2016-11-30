@@ -3,7 +3,7 @@
 #ld: -shared -z max-page-size=0x200000
 #readelf: -l --wide
 #target: *-*-linux* *-*-gnu* *-*-nacl*
-#notarget: arc*-*-* hppa-*-*
+#notarget: arc*-*-* hppa*-*-*
 # arc target has an extra 64K stack section.
 # hppa fails due to PR 12376.
 
