@@ -2799,6 +2799,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	  const Symbol_value<size>* psymval
 	    = this->object_->local_symbol(this->r_sym_);
 	  Symbol_value<size> symval;
+	  if (psymval->is_section_symbol())
+	    symval.set_is_section_symbol();
 	  typedef Sized_relobj_file<size, big_endian> ObjType;
 	  typename ObjType::Compute_final_local_value_status status
 	    = this->object_->compute_final_local_value(this->r_sym_, psymval,
