@@ -120,7 +120,7 @@ push_level (struct ui_out *uiout,
   struct ui_out_level *current;
 
   uiout->level++;
-  current = XNEW (struct ui_out_level);
+  current = new ui_out_level ();
   current->field_count = 0;
   current->type = type;
   VEC_safe_push (ui_out_level_p, uiout->levels, current);
@@ -139,7 +139,7 @@ pop_level (struct ui_out *uiout,
   gdb_assert (uiout->level > 0);
   gdb_assert (current_level (uiout)->type == type);
   current = VEC_pop (ui_out_level_p, uiout->levels);
-  xfree (current);
+  delete current;
   uiout->level--;
   return uiout->level + 1;
 }
@@ -708,8 +708,9 @@ clear_header_list (struct ui_out *uiout)
       uiout->table.header_first = uiout->table.header_first->next;
       xfree (uiout->table.header_next->colhdr);
       xfree (uiout->table.header_next->col_name);
-      xfree (uiout->table.header_next);
+      delete uiout->table.header_next;
     }
+
   gdb_assert (uiout->table.header_first == NULL);
   uiout->table.header_last = NULL;
   uiout->table.header_next = NULL;
@@ -724,7 +725,7 @@ append_header_to_list (struct ui_out *uiout,
 {
   struct ui_out_hdr *temphdr;
 
-  temphdr = XNEW (struct ui_out_hdr);
+  temphdr = new ui_out_hdr ();
   temphdr->width = width;
   temphdr->alignment = alignment;
   /* We have to copy the column title as the original may be an
@@ -859,8 +860,8 @@ struct ui_out *
 ui_out_new (const struct ui_out_impl *impl, void *data,
 	    int flags)
 {
-  struct ui_out *uiout = XNEW (struct ui_out);
-  struct ui_out_level *current = XNEW (struct ui_out_level);
+  struct ui_out *uiout = new ui_out ();
+  struct ui_out_level *current = new ui_out_level ();
 
   uiout->data = data;
   uiout->impl = impl;

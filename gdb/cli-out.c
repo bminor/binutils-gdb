@@ -47,7 +47,7 @@ cli_uiout_dtor (struct ui_out *ui_out)
   cli_out_data *data = (cli_out_data *) ui_out_data (ui_out);
 
   VEC_free (ui_filep, data->streams);
-  xfree (data);
+  delete data;
 }
 
 /* These are the CLI output functions */
@@ -395,7 +395,7 @@ struct ui_out *
 cli_out_new (struct ui_file *stream)
 {
   int flags = ui_source_list;
-  cli_out_data *data = XNEW (cli_out_data);
+  cli_out_data *data = new cli_out_data ();
 
   cli_out_data_ctor (data, stream);
   return ui_out_new (&cli_ui_out_impl, data, flags);

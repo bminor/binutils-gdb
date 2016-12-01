@@ -413,7 +413,7 @@ mi_out_data_dtor (struct ui_out *ui_out)
   mi_out_data *data = (mi_out_data *) ui_out_data (ui_out);
 
   VEC_free (ui_filep, data->streams);
-  xfree (data);
+  delete data;
 }
 
 /* Initialize private members at startup.  */
@@ -422,7 +422,7 @@ struct ui_out *
 mi_out_new (int mi_version)
 {
   int flags = 0;
-  mi_out_data *data = XNEW (mi_out_data);
+  mi_out_data *data = new mi_out_data ();
   struct ui_file *stream = mem_fileopen ();
 
   mi_out_data_ctor (data, mi_version, stream);

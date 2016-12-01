@@ -1,5 +1,18 @@
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli-out.c (cli_uiout_dtor): Use delete instead of xfree.
+	(cli_out_new): Use new instead of XNEW.
+	* mi/mi-out.c (mi_out_data_dtor): Use delete instead of xfree.
+	(mi_out_new): Use new instead of XNEW.
+	* tui/tui-out.c (tui_out_new): Likewise.
+	* ui-out.c (push_level): Likewise.
+	(pop_level): Use delete instead of xfree.
+	(clear_header_list): Use delete instead of xfree.
+	(append_header_to_list): Use new instead of XNEW.
+	(ui_out_new): Likewise.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* disable-implicit-rules.mk: New file.
 	* Makefile.in: Include disable-implicit-rules.mk.
 	* data-directory/Makefile.in: Likewise.
