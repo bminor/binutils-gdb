@@ -1,5 +1,23 @@
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli-out.h (cli_ui_out_data) <streams>: Change type to
+	std::vector.
+	* cli-out.c: Remove vec.h include.
+	(cli_uiout_dtor): Update.
+	(cli_field_fmt): Update.
+	(cli_spaces): Update.
+	(cli_text): Update.
+	(cli_message): Update.
+	(cli_flush): Update.
+	(cli_redirect): Update.
+	(out_field_fmt): Update.
+	(field_separator): Update.
+	(cli_out_data_ctor): Update.
+	(cli_out_new): Update.
+	(cli_out_set_stream): Update.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* mi/mi-out.c: Remove vec.h include.
 	(mi_ui_out_data) <streams>: Change type to std::vector.
 	(mi_field_string): Update.

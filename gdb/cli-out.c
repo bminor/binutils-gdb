@@ -24,7 +24,6 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "completer.h"
-#include "vec.h"
 #include "readline/readline.h"
 
 typedef struct cli_ui_out_data cli_out_data;
@@ -46,7 +45,6 @@ cli_uiout_dtor (struct ui_out *ui_out)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (ui_out);
 
-  VEC_free (ui_filep, data->streams);
   delete data;
 }
 
@@ -239,7 +237,7 @@ cli_field_fmt (struct ui_out *uiout, int fldno,
   if (data->suppress_output)
     return;
 
-  stream = VEC_last (ui_filep, data->streams);
+  stream = data->streams.back ();
   vfprintf_filtered (stream, format, args);
 
   if (align != ui_noalign)
@@ -255,7 +253,7 @@ cli_spaces (struct ui_out *uiout, int numspaces)
   if (data->suppress_output)
     return;
 
-  stream = VEC_last (ui_filep, data->streams);
+  stream = data->streams.back ();
   print_spaces_filtered (numspaces, stream);
 }
 
@@ -268,7 +266,7 @@ cli_text (struct ui_out *uiout, const char *string)
   if (data->suppress_output)
     return;
 
-  stream = VEC_last (ui_filep, data->streams);
+  stream = data->streams.back ();
   fputs_filtered (string, stream);
 }
 
@@ -280,7 +278,7 @@ cli_message (struct ui_out *uiout, const char *format, va_list args)
   if (data->suppress_output)
     return;
 
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  struct ui_file *stream = data->streams.back ();
   vfprintf_unfiltered (stream, format, args);
 }
 
@@ -298,7 +296,7 @@ static void
 cli_flush (struct ui_out *uiout)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  struct ui_file *stream = data->streams.back ();
 
   gdb_flush (stream);
 }
@@ -313,9 +311,9 @@ cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
 
   if (outstream != NULL)
-    VEC_safe_push (ui_filep, data->streams, outstream);
+    data->streams.push_back (outstream);
   else
-    VEC_pop (ui_filep, data->streams);
+    data->streams.pop_back ();
 
   return 0;
 }
@@ -332,7 +330,7 @@ out_field_fmt (struct ui_out *uiout, int fldno,
 	       const char *format,...)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  struct ui_file *stream = data->streams.back ();
   va_list args;
 
   va_start (args, format);
@@ -347,7 +345,7 @@ static void
 field_separator (void)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (current_uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  struct ui_file *stream = data->streams.back ();
 
   fputc_filtered (' ', stream);
 }
@@ -383,8 +381,7 @@ cli_out_data_ctor (cli_out_data *self, struct ui_file *stream)
 {
   gdb_assert (stream != NULL);
 
-  self->streams = NULL;
-  VEC_safe_push (ui_filep, self->streams, stream);
+  self->streams.push_back (stream);
 
   self->suppress_output = 0;
 }
@@ -406,13 +403,13 @@ cli_out_set_stream (struct ui_out *uiout, struct ui_file *stream)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
   struct ui_file *old;
-  
-  old = VEC_pop (ui_filep, data->streams);
-  VEC_quick_push (ui_filep, data->streams, stream);
+
+  old = data->streams.back ();
+  data->streams.back () = stream;
 
   return old;
 }
-
+
 /* CLI interface to display tab-completion matches.  */
 
 /* CLI version of displayer.crlf.  */

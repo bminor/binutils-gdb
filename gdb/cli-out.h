@@ -21,19 +21,14 @@
 #define CLI_OUT_H
 
 #include "ui-out.h"
-#include "vec.h"
-
-/* Used for cli_ui_out_data->streams.  */
-
-typedef struct ui_file *ui_filep;
-DEF_VEC_P (ui_filep);
+#include <vector>
 
 /* These are exported so that they can be extended by other `ui_out'
    implementations, like TUI's.  */
 
 struct cli_ui_out_data
   {
-    VEC (ui_filep) *streams;
+    std::vector<ui_file *> streams;
     int suppress_output;
   };
 
