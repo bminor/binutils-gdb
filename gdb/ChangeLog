@@ -1,3 +1,16 @@
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.c (struct ui_out_hdr) <next>: Remove.
+	(struct ui_out_table) <header_first, header_last, header_next>: Remove.
+	<headers, headers_iterator>: New fields.
+	(ui_out_table_body): Update for the new data structure.
+	(ui_out_begin): Likewise.
+	(clear_header_list): Likewise.
+	(append_header_to_list): Likewise.
+	(get_next_header): Likewise.
+	(ui_out_query_field): Likewise.
+	(ui_out_new): Likewise.
+
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ui-out.c (struct ui_out_table) <id>: Change type to

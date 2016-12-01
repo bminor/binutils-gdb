@@ -38,7 +38,6 @@ struct ui_out_hdr
     enum ui_align alignment;
     char *col_name;
     char *colhdr;
-    struct ui_out_hdr *next;
   };
 
 struct ui_out_level
@@ -75,14 +74,11 @@ struct ui_out_table
      call).  */
   std::string id;
 
-  /* Points to the first table header (if any).  */
-  struct ui_out_hdr *header_first;
+  /* Pointers to the column headers.  */
+  std::vector<std::unique_ptr<ui_out_hdr>> headers;
 
-  /* Points to the last table header (if any).  */
-  struct ui_out_hdr *header_last;
-
-  /* Points to header of NEXT column to format.  */
-  struct ui_out_hdr *header_next;
+  /* Iterator over the headers vector, used when printing successive fields.  */
+  std::vector<std::unique_ptr<ui_out_hdr>>::const_iterator headers_iterator;
 
 };
 
@@ -224,13 +220,12 @@ after a table_begin and before a table_end."));
     internal_error (__FILE__, __LINE__,
 		    _("extra table_body call not allowed; there must be \
 only one table_body after a table_begin and before a table_end."));
-  if (uiout->table.header_next->colno != uiout->table.columns)
+  if (uiout->table.headers.size () != uiout->table.columns)
     internal_error (__FILE__, __LINE__,
 		    _("number of headers differ from number of table \
 columns."));
 
   uiout->table.body_flag = 1;
-  uiout->table.header_next = uiout->table.header_first;
 
   uo_table_body (uiout);
 }
@@ -314,7 +309,7 @@ specified after table_body."));
      got a new table row.  Put the header pointer back to the start.  */
   if (uiout->table.body_flag
       && uiout->table.entry_level == new_level)
-    uiout->table.header_next = uiout->table.header_first;
+    uiout->table.headers_iterator = uiout->table.headers.begin ();
 
   uo_begin (uiout, type, new_level, id);
 }
@@ -699,18 +694,14 @@ uo_redirect (struct ui_out *uiout, struct ui_file *outstream)
 static void
 clear_header_list (struct ui_out *uiout)
 {
-  while (uiout->table.header_first != NULL)
+  for (auto &it : uiout->table.headers)
     {
-      uiout->table.header_next = uiout->table.header_first;
-      uiout->table.header_first = uiout->table.header_first->next;
-      xfree (uiout->table.header_next->colhdr);
-      xfree (uiout->table.header_next->col_name);
-      delete uiout->table.header_next;
+      xfree (it->colhdr);
+      xfree (it->col_name);
     }
 
-  gdb_assert (uiout->table.header_first == NULL);
-  uiout->table.header_last = NULL;
-  uiout->table.header_next = NULL;
+  uiout->table.headers.clear ();
+  uiout->table.headers_iterator = uiout->table.headers.end ();
 }
 
 static void
@@ -720,9 +711,8 @@ append_header_to_list (struct ui_out *uiout,
 		       const char *col_name,
 		       const char *colhdr)
 {
-  struct ui_out_hdr *temphdr;
+  std::unique_ptr<ui_out_hdr> temphdr (new ui_out_hdr ());
 
-  temphdr = new ui_out_hdr ();
   temphdr->width = width;
   temphdr->alignment = alignment;
   /* We have to copy the column title as the original may be an
@@ -739,20 +729,9 @@ append_header_to_list (struct ui_out *uiout,
   else
     temphdr->col_name = NULL;
 
-  temphdr->next = NULL;
-  if (uiout->table.header_first == NULL)
-    {
-      temphdr->colno = 1;
-      uiout->table.header_first = temphdr;
-      uiout->table.header_last = temphdr;
-    }
-  else
-    {
-      temphdr->colno = uiout->table.header_last->colno + 1;
-      uiout->table.header_last->next = temphdr;
-      uiout->table.header_last = temphdr;
-    }
-  uiout->table.header_next = uiout->table.header_last;
+  temphdr->colno = uiout->table.headers.size () + 1;
+
+  uiout->table.headers.push_back (std::move (temphdr));
 }
 
 /* Extract the format information for the NEXT header and advance
@@ -766,14 +745,19 @@ get_next_header (struct ui_out *uiout,
 		 char **colhdr)
 {
   /* There may be no headers at all or we may have used all columns.  */
-  if (uiout->table.header_next == NULL)
+  if (uiout->table.headers_iterator == uiout->table.headers.end ())
     return 0;
-  *colno = uiout->table.header_next->colno;
-  *width = uiout->table.header_next->width;
-  *alignment = uiout->table.header_next->alignment;
-  *colhdr = uiout->table.header_next->colhdr;
+
+  ui_out_hdr *hdr = uiout->table.headers_iterator->get ();
+
+  *colno = hdr->colno;
+  *width = hdr->width;
+  *alignment = hdr->alignment;
+  *colhdr = hdr->colhdr;
+
   /* Advance the header pointer to the next entry.  */
-  uiout->table.header_next = uiout->table.header_next->next;
+  uiout->table.headers_iterator++;
+
   return 1;
 }
 
@@ -834,21 +818,26 @@ int
 ui_out_query_field (struct ui_out *uiout, int colno,
 		    int *width, int *alignment, char **col_name)
 {
-  struct ui_out_hdr *hdr;
-
   if (!uiout->table.flag)
     return 0;
 
-  for (hdr = uiout->table.header_first; hdr; hdr = hdr->next)
-    if (hdr->colno == colno)
-      {
-	*width = hdr->width;
-	*alignment = hdr->alignment;
-	*col_name = hdr->col_name;
-	return 1;
-      }
+  /* Column numbers are 1-based, so convert to 0-based index.  */
+  int index = colno - 1;
 
-  return 0;
+  if (index >= 0 && index < uiout->table.headers.size ())
+    {
+      ui_out_hdr *hdr = uiout->table.headers[index].get ();
+
+      gdb_assert (colno == hdr->colno);
+
+      *width = hdr->width;
+      *alignment = hdr->alignment;
+      *col_name = hdr->col_name;
+
+      return 1;
+    }
+  else
+    return 0;
 }
 
 /* Initialize private members at startup.  */
@@ -872,8 +861,7 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   current->field_count = 0;
   uiout->levels.push_back (std::move (current));
 
-  uiout->table.header_first = NULL;
-  uiout->table.header_last = NULL;
-  uiout->table.header_next = NULL;
+  uiout->table.headers_iterator = uiout->table.headers.end ();
+
   return uiout;
 }
