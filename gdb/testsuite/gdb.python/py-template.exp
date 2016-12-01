@@ -21,7 +21,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 	  {debug c++}] != "" } {
-    untested "couldn't compile ${srcfile}"
+    untested "failed to compile"
     return -1
 }
 

@@ -52,7 +52,7 @@ if [get_compiler_info] {
 
 if { [gdb_compile_shlib ${srcdir}/${subdir}/$libsrc $lib_so $lib_opts] != ""
      || [gdb_compile ${srcdir}/${subdir}/$srcfile $binfile executable $exec_opts] != ""} {
-    untested "could not compile dynamic executable $binfile."
+    untested "failed to compile first testcase"
     return -1
 }
 
@@ -144,7 +144,7 @@ gdb_test "info sym $expect_out(1,string)" "gnu_ifunc in section .*" "info sym <g
 
 if { [gdb_compile ${srcdir}/${subdir}/$libsrc $lib_o object {}] != ""
      || [gdb_compile "${srcdir}/${subdir}/$srcfile $lib_o" $staticbinfile executable {debug}] != "" } {
-    untested "could not compile static executable $staticbinfile."
+    untested "failed to compile second testcase"
     return -1
 }
 

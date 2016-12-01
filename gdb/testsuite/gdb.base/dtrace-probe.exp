@@ -23,7 +23,7 @@ proc dtrace_test {} {
     standard_testfile
     
     if {[dtrace_build_usdt_test_program] == -1} {
-        untested "could not compile test program"
+        untested "failed to compile"
         return -1
     }
 

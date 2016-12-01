@@ -26,7 +26,7 @@ gdb_start
 
 set result [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}]
 if {$result != "" } then {
-    untested remote.exp
+    untested "failed to compile"
     return -1
 }
 

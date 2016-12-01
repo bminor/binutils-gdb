@@ -31,7 +31,7 @@ for { set size [expr 2 * 1024 * 1024] } { $size > 10 } { set size [expr $size / 
       == "" } break
 }
 if { $size < 10 } {
-     untested huge.exp
+     untested "size less than 10"
      return -1
 }
 
@@ -43,7 +43,7 @@ set prev_timeout $timeout
 set timeout 30
 
 if { ! [ runto_main ] } then {
-    untested huge.exp
+    untested "couldn't run to main"
     return -1
 }
 

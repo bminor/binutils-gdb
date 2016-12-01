@@ -31,13 +31,13 @@ set lib_opts [gdb_target_symbol_prefix_flags]
 
 if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""} {
-    untested "could not compile either $libsrc1 or $libsrc2"
+    untested "failed to compile shared library"
     return -1
 }
 
 set exec_opts [list debug shlib=$lib_sl1 shlib_load]
 if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "" } {
-    untested "failed to compile $srcfile"
+    untested "failed to compile"
     return -1
 }
 
@@ -508,7 +508,7 @@ gdb_load_shlib $libipa
 lappend exec_opts "shlib=$libipa"
 
 if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "" } {
-    untested "failed to compile $srcfile"
+    untested "failed to compile with in-process agent library"
     return -1
 }
 

@@ -20,7 +20,7 @@ standard_testfile .c
 
 # Build the test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested jump.exp
+     untested "failed to compile"
      return -1
     }
 

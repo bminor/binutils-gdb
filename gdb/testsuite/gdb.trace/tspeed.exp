@@ -22,7 +22,7 @@ set ipalib [get_in_proc_agent]
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable [concat {debug nowarnings c} shlib=$ipalib]] != "" } {
-    untested tspeed.exp
+    untested "failed to compile"
     return -1
 }
 

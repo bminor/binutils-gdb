@@ -38,7 +38,7 @@ if {[is_remote host]} {
 
 if {[prepare_for_testing ${testfile}.exp $testfile $srcfile \
 	 [list debug "additional_flags=-DPI_TXT=\"$pi_txt\" -DCOPY1_TXT=\"$copy1_txt\""]]} {
-     untested checkpoint.exp
+     untested "failed to compile"
      return -1
 }
 

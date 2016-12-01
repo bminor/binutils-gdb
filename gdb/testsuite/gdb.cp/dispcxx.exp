@@ -18,7 +18,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc
 
 if [get_compiler_info "c++"] {
-    untested dispcxx.exp
+    untested "couldn't find a valid c++ compiler"
     return -1
 }
 

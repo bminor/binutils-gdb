@@ -146,7 +146,7 @@ gdb_expect {
 # sets: "auto" and the default.  In this situation, this set of tests
 # is pointless.
 if {[llength [array names charsets]] < 3} {
-    untested charset.exp
+    untested "fewer than 3 charsets"
     return -1
 }
 

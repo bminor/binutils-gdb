@@ -24,7 +24,7 @@ if [target_info exists gdb,cannot_call_functions] {
 }
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
-    untested "compile failed"
+    untested "failed to compile"
     return -1
 }
 

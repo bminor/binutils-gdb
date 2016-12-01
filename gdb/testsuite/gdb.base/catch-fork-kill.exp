@@ -41,7 +41,7 @@ foreach kind {"fork" "vfork"} {
     set testfile [set testfile_$kind]
     if {[build_executable $testfile.exp $testfile ${srcfile} \
 	     ${compile_options}] == -1} {
-	untested "failed to compile $testfile"
+	untested "failed to compile"
 	return -1
     }
 }

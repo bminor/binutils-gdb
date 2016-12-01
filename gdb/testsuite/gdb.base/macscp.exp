@@ -30,7 +30,7 @@ if [test_compiler_info gcc*] {
 if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${objfile}" \
 	  object $options] != "" 
      || [gdb_compile "${objfile}" "${binfile}" executable $options] != "" } {
-    untested macscp.exp
+    untested "failed to compile"
     return -1
 }
 

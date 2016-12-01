@@ -26,7 +26,7 @@ if [is_remote target] then {
 standard_testfile .c
 
 if { [prepare_for_testing ${testfile}.exp $testfile ${srcfile} debug] } {
-    untested label.exp
+    untested "failed to compile"
     return -1
 }
 

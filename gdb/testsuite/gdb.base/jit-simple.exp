@@ -64,12 +64,12 @@ proc build_shared_jit {{options ""}} {
 }
 
 if {[build_standalone_jit] == -1} {
-    untested "could not compile $binfile"
+    untested "failed to compile standalone testcase"
     return
 }
 
 if {[build_shared_jit] == -1} {
-    untested "could not compile $binfile_lib"
+    untested "failed to compile shared library testcase"
     return
 }
 

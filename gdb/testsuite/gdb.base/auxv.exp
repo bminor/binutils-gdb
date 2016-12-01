@@ -33,7 +33,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 		  {debug additional_flags=-DUSE_RLIMIT}] != ""
      && [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 		  {debug}] != "" } {
-    untested "couldn't compile ${srcdir}/${subdir}/${srcfile}"
+    untested "failed to compile"
     return -1
 }
 

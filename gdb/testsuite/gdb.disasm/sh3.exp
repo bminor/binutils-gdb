@@ -25,7 +25,7 @@ set testfile "sh3"
 set srcfile ${srcdir}/${subdir}/${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcfile}" "${binfile}" executable ""] != "" } {
-     untested sh3.exp
+     untested "failed to compile"
      return -1
 }
 

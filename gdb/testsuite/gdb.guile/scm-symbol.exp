@@ -138,7 +138,7 @@ gdb_test "guile (print (symbol-symtab t))" "= #<gdb:symtab .*gdb.guile/scm-symbo
 # C++ tests
 # Recompile binary.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" executable "debug c++"] != "" } {
-    untested "couldn't compile ${srcfile} in c++ mode"
+    untested "failed to compile in C++ mode"
     return -1
 }
 

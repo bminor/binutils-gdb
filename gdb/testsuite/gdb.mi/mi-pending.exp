@@ -41,12 +41,12 @@ if [get_compiler_info] {
 
 if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""} {
-    untested "could not compile either $libsrc1 or $libsrc2"
+    untested "failed to compile shared library"
     return -1
 }
 
 if { [gdb_compile_pthreads $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
-    untested "could not compile  $srcdir/$subdir/$srcfile."
+    untested "failed to compile"
     return -1
 }
 

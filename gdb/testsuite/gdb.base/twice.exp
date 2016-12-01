@@ -26,7 +26,7 @@ close $fileid
 gdb_remote_download host ${srcdir}/${subdir}/twice.c
 
 if  { [gdb_compile $local_srcfile "${binfile}" executable $options] != "" } {
-     untested twice.exp
+     untested "failed to compile"
      return -1
 }
 

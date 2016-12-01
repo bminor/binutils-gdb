@@ -20,7 +20,7 @@ standard_testfile args.c
 
 if {[prepare_for_testing $testfile.exp ${testfile}! $srcfile \
 	 {debug nowarnings}]} {
-    untested bang.exp
+    untested "failed to compile"
     return -1
 }
 

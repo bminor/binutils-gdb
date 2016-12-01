@@ -32,7 +32,7 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 # Note we have to compile WITH optimization and WITHOUT debugging information to expose the bug.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {"additional_flags=-O2"}] != "" } {
-    untested gdb1558.exp
+    untested "failed to compile"
     return -1
 }
 

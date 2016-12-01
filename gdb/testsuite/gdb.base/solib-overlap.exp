@@ -70,7 +70,7 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""
 	 || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-	untested "could not compile ${binfile_lib1_test_msg}, ${binfile_lib2_test_msg} or ${binfile_test_msg}."
+	untested "failed to compile"
 	return -1
     }
 
@@ -92,7 +92,7 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""} {
-	untested "could not recompile ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
+	untested "failed to compile shared library"
 	kill_wait_spawned_process $test_spawn_id
 	return -1
     }

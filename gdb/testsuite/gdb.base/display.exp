@@ -20,7 +20,7 @@ standard_testfile
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile \
 	 {debug nowarnings}]} {
-    untested display.exp
+    untested "failed to compile"
     return -1
 }
 

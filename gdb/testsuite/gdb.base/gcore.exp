@@ -20,12 +20,12 @@
 standard_testfile
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
-    untested $testfile.exp
+    untested "failed to compile"
     return -1
 }
 
 if { ! [ runto_main ] } then {
-    untested gcore.exp
+    untested "couldn't run to main"
     return -1
 }
 

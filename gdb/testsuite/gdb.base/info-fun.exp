@@ -40,7 +40,7 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $sep_lib_flags] != ""
 	 || [gdb_compile $srcdir/$subdir/${srcfile} ${binfile} \
 		 executable $bin_flags] != "" } {
-      untested "could not compile $binfile_lib or $binfile."
+      untested "failed to compile"
       return -1
     }
 

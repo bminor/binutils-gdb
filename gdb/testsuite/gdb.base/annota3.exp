@@ -33,7 +33,7 @@ if [is_remote target] then {
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-    untested annota3.exp
+    untested "failed to compile"
     return -1
 }
 

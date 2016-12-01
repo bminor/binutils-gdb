@@ -27,7 +27,7 @@ set testfile "e500-prologue"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {}] != "" } {
-    unsupported "testcase compile failed."
+    unsupported "failed to compile"
     return -1
 }
 

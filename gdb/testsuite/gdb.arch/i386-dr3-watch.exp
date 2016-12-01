@@ -26,7 +26,7 @@ if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
 standard_testfile
 
 if [prepare_for_testing ${testfile}.exp ${binfile} ${srcfile} {debug $additional_flags}] {
-    untested "failed to compile ${testfile}"
+    untested "failed to compile"
     return -1
 }
 

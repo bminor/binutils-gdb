@@ -28,7 +28,7 @@ if [target_info exists no_long_long] {
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $exec_opts] != "" } {
-     untested whatis.exp
+     untested "failed to compile"
      return -1
 }
 

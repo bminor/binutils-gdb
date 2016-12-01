@@ -30,7 +30,7 @@ standard_testfile
 set compile_options debug
 
 if {[build_executable $testfile.exp $testfile $srcfile $compile_options] == -1} {
-    untested "failed to compile $testfile"
+    untested "failed to compile main testcase"
     return -1
 }
 
@@ -38,7 +38,7 @@ set testfile2 "vforked-prog"
 set srcfile2 ${testfile2}.c
 
 if {[build_executable $testfile.exp $testfile2 $srcfile2 $compile_options] == -1} {
-    untested "failed to compile $testfile2"
+    untested "failed to compile secondary testcase"
     return -1
 }
 

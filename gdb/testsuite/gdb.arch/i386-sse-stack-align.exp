@@ -31,7 +31,7 @@ if [info exists COMPILE] {
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {
-    unsupported "cannot compile ${srcfile}"
+    unsupported "failed to compile"
     return -1
 }
 

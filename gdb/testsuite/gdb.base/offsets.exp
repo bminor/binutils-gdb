@@ -19,7 +19,7 @@ standard_testfile offsets.c
 
 if { [prepare_for_testing "failed to prepare for testing large offsets" \
 	  ${testfile} ${srcfile}] } {
-    untested offsets.exp
+    untested "failed to compile"
     return -1
 }
 

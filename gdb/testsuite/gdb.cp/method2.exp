@@ -23,7 +23,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc
 
 if  {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
-     untested method2.exp
+     untested "failed to compile"
      return -1
 }
 

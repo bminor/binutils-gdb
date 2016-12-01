@@ -271,7 +271,7 @@ if { [lindex $exec_output 0] != 0 } {
 }
 
 if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
-     untested weird.exp
+     untested "failed to compile"
      return -1
 }
 

@@ -42,7 +42,7 @@ if [get_compiler_info] {
 
 if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
      || [gdb_compile ${srcfile_main} ${binfile} executable $bin_flags] != "" } {
-  untested "could not compile $binfile_lib or $binfile."
+  untested "failed to compile"
   return -1
 }
 

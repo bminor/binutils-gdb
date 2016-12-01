@@ -28,7 +28,7 @@ set exec2 ${binfile}2
 
 if { [gdb_compile [file join $srcdir $subdir $srcfile] $objfile \
 	  object [list debug]] != "" } {
-    untested "compile failed"
+    untested "failed to compile"
     return -1
 }
 

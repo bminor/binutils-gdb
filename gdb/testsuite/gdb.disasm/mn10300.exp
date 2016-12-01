@@ -27,7 +27,7 @@ set testfile "mn10300"
 set srcfile ${srcdir}/${subdir}/${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcfile}" "${binfile}" executable ""] != "" } {
-     untested mn10300.exp
+     untested "failed to compile"
      return -1
 }
 

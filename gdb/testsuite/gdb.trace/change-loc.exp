@@ -39,7 +39,7 @@ set additional_flags [list debug shlib=$lib_sl1 shlib_load [gdb_target_symbol_pr
 if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $additional_flags] != ""} {
-    untested "could not compile either $libsrc1 or $srcdir/$subdir/$srcfile."
+    untested "failed to compile"
     return -1
 }
 

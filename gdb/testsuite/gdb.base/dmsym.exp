@@ -26,7 +26,7 @@ set dmsym_o [standard_output_file dmsym.o]
 if {[gdb_compile "${srcdir}/${subdir}/dmsym.c" \
                  $dmsym_o \
                  object {}] != ""} {
-  untested dmsym.exp
+  untested "failed to compile object file"
   return -1
 }
 
@@ -34,7 +34,7 @@ if {[gdb_compile \
       [list ${srcdir}/${subdir}/dmsym_main.c $dmsym_o] \
       [standard_output_file ${testfile}] \
       executable {debug}] != ""} {
-    untested dmsym.exp
+    untested "failed to compile"
     return -1
 }
 

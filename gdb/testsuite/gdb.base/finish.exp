@@ -90,7 +90,7 @@ proc finish_tests { } {
     global gdb_prompt skip_float_test
 
     if { ! [ runto_main ] } then {
-	untested finish.exp
+	untested "couldn't run to main"
 	return -1
     }
 

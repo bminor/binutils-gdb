@@ -33,7 +33,7 @@ set testfile "gdb1291"
 set srcfile ${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ""] != "" } {
-    untested gdb1291.exp
+    untested "failed to compile"
     return -1
 }
 

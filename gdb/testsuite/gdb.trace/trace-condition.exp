@@ -46,7 +46,7 @@ set remote_libipa [gdb_load_shlib $libipa]
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable [list debug $additional_flags shlib=$libipa] ] != "" } {
-    untested "failed to compile ftrace tests"
+    untested "failed to compile"
     return -1
 }
 

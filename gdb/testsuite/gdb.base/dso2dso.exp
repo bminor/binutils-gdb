@@ -41,13 +41,13 @@ set binfile_libdso1 [standard_output_file $libdso1.so]
 
 if { [gdb_compile_shlib $srcfile_libdso2 $binfile_libdso2 \
 	[list debug additional_flags=-fPIC]] != "" } {
-  untested "could not compile $binfile_libdso2."
+  untested "failed to compile shared library 2"
   return -1
 }
 
 if { [gdb_compile_shlib $srcfile_libdso1 $binfile_libdso1 \
 	[list debug additional_flags=-fPIC]] != "" } {
-  untested "could not compile $binfile_libdso1."
+  untested "failed to compile shared library 1"
   return -1
 }
 

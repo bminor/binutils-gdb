@@ -24,7 +24,7 @@ if [get_compiler_info] {
 }
 
 if  { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" $libfile {debug f90}] != "" } {
-    untested "couldn't compile ${srclibfile}"
+    untested "failed to compile shared library"
     return -1
 }
 
@@ -33,7 +33,7 @@ if  { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" $libfile {debug f90
 # warnings on ignored $libfile abort the process.
 
 if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable [list debug f90 shlib=$libfile]] != "" } {
-    untested "couldn't compile ${srcfile}"
+    untested "failed to compile"
     return -1
 }
 

@@ -25,7 +25,7 @@
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested cvexpr.exp
+     untested "failed to compile"
      return -1
 }
 

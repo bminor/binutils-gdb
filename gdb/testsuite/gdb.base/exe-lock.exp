@@ -23,7 +23,7 @@ standard_testfile arrayidx.c
 append binfile $EXEEXT
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "couldn't compile ${srcfile}"
+    untested "failed to compile"
     return -1
 }
 

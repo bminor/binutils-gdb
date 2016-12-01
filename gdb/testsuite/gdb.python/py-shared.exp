@@ -28,14 +28,14 @@ set libsrc   ${libfile}.c
 set library  [standard_output_file ${libfile}.sl]
 
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${libsrc} ${library} "debug"] != "" } {
-    untested "could not compile shared library."
+    untested "failed to compile shared library"
     return -1
 }
 
 set exec_opts [list debug shlib=${library}]
 
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
-    untested "could not compile $binfile."
+    untested "failed to compile"
     return -1
 }
 

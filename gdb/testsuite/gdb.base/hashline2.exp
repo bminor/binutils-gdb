@@ -30,7 +30,7 @@ puts $fd "int main () { return 0; } /* set breakpoint here */"
 close $fd
 
 if { [gdb_compile $new_srcfile "${binfile}" executable {debug}] != "" } {
-    untested hashline2.exp
+    untested "failed to compile"
     return -1
 }
 

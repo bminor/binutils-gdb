@@ -21,7 +21,7 @@ append binfile .o
 
 remote_exec build "rm -f ${binfile}"
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {
-     untested relocate.exp
+     untested "failed to compile"
      return -1
 }
 

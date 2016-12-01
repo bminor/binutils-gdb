@@ -39,7 +39,7 @@ proc build_inferior {exefile lang} {
 
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object "debug $lang"] != ""
 	 || [gdb_compile "${objfile}" "${exefile}" executable "debug $lang"] != "" } {
-	untested "couldn't compile ${srcfile} in $lang mode"
+	untested "failed to compile in $lang mode"
 	return -1
     }
     return 0

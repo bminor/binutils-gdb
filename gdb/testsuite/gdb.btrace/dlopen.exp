@@ -26,7 +26,7 @@ set binfile_lib [standard_output_file $basename_lib.so]
 
 if { [gdb_compile_shlib $srcfile_lib $binfile_lib \
 	  [list additional_flags=-fPIC]] != "" } {
-    untested "could not compile $binfile_lib."
+    untested "failed to compile shared library"
     return -1
 }
 

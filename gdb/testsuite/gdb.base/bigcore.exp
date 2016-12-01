@@ -42,7 +42,7 @@ standard_testfile .c
 set corefile [standard_output_file ${binfile}.corefile]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested bigcore.exp
+     untested "failed to compile"
      return -1
 }
 

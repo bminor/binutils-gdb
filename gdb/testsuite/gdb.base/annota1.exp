@@ -34,7 +34,7 @@ set breakpoints_invalid "\r\n\032\032breakpoints-invalid\r\n"
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-    untested annota1.exp
+    untested "failed to compile"
     return -1
 }
 

@@ -321,7 +321,7 @@ mi_gdb_test "-var-update c" \
 gdb_exit
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" \
 	   executable {debug c++ additional_flags=-DMI}] != "" } {
-    untested "couldn't compile ${srcfile} in c++ mode"
+    untested "failed to compile in C++ mode"
     return -1
 }
 

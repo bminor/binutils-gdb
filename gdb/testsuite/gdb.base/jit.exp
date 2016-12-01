@@ -14,13 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if {[skip_shlib_tests]} {
-    untested jit.exp
+    untested "skipping shared library tests"
     return -1
 }
 
 if {[get_compiler_info]} {
-    warning "Could not get compiler info"
-    untested jit.exp
+    untested "could not get compiler info"
     return 1
 }
 

@@ -23,7 +23,7 @@ set baseone base/one/thefile.cc
 set basetwo base/two/thefile.cc
 
 if {[skip_cplus_tests]} {
-    unsupported linespec.exp
+    unsupported "skipping c++ tests"
     return
 }
 

@@ -33,7 +33,7 @@ close $fd
 # the bug.  Using $new_srcfile here won't trigger the bug.
 set compile_name [relative_filename $objdir $new_srcfile]
 if { [gdb_compile $compile_name "${binfile}" executable {debug}] != "" } {
-    untested hashline1.exp
+    untested "failed to compile"
     return -1
 }
 

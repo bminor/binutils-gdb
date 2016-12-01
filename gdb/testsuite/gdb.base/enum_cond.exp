@@ -21,7 +21,7 @@ standard_testfile .c
 
 set opts [list debug additional_flags=-fshort-enums]
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {
-    untested "could not compile ${srcfile}"
+    untested "failed to compile"
     return -1
 }
 

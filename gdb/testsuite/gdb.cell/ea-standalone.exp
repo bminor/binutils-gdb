@@ -30,7 +30,7 @@ if {[skip_cell_tests]} {
 
 # Compile SPU binary.
 if { [gdb_compile_cell_spu $srcfile $binary executable {debug}]  != "" } {
-  unsupported "compile spu binary failed, so all tests in this file will automatically fail."
+  unsupported "failed to compile"
   return -1
 }
 

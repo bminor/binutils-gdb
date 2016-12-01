@@ -37,7 +37,7 @@ if [get_compiler_info] {
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
-    untested "could not compile either $libsrc or $srcdir/$subdir/$srcfile."
+    untested "failed to compile"
     return -1
 }
 

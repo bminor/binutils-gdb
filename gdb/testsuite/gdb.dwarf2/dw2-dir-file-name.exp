@@ -327,7 +327,7 @@ lappend opts "additional_flags=-DFDIR=\"fdir\""
 lappend opts "additional_flags=-DFILE=\"${srctmpfile}\""
 
 if { [gdb_compile "${asmsrcfile} ${srcdir}/${subdir}/$srcfile" "${binfile}" executable $opts] != "" } {
-    untested "cannot compile ${asmsrcfile} or $srcfile"
+    untested "failed to compile"
     return -1
 }
 

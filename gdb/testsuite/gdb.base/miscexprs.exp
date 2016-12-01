@@ -40,7 +40,7 @@ set additional_flags "additional_flags=${storage}"
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug ${additional_flags} nowarnings]] != "" } {
-    untested miscexprs.exp
+    untested "failed to compile"
     return -1
 }
 

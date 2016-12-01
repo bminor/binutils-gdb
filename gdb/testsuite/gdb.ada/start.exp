@@ -20,7 +20,7 @@ if { [skip_ada_tests] } { return -1 }
 # This testcase verifies the behavior of the `start' command, which
 # does not work when we use the gdb stub...
 if [target_info exists use_gdb_stub] {
-    untested start.exp
+    untested "skipping test due to gdb stub"
     return
 }
 
@@ -34,7 +34,7 @@ clean_restart ${testfile}
 
 # Verify that "start" lands inside the right procedure.
 if { [gdb_start_cmd] < 0 } {
-    untested start
+    untested "start failed to land inside the right procedure"
     return -1
 }
 

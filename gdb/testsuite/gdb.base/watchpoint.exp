@@ -23,7 +23,7 @@ if [get_compiler_info] {
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested watchpoint.exp
+     untested "failed to compile"
      return -1
 }
 
