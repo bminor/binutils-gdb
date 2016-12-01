@@ -1,3 +1,9 @@
+2016-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20895
+	* symbols.c (resolve_symbol_value): Gracefully handle erroneous
+	symbolic expressions.
+
 2016-11-29  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (find_opcode_match): New function argument
