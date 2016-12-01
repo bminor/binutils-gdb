@@ -1,6 +1,13 @@
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2016-12-01  Cary Coutant  <ccoutant@gmail.com>
+	PR gold/20807
+	* aarch64.cc (Target_aarch64::scan_reloc_section_for_stubs): Handle
+	section symbols correctly.
+	* arm.cc (Target_arm): Likewise.
+	* powerpc.cc (Target_powerpc): Likewise.
+
 	2016-08-31  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (class Stub_control): Delete stub14_group_size_
 	and has14_.  Add group_size_.

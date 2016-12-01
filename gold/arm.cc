@@ -11998,6 +11998,8 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
 	  if (!is_defined_in_discarded_section)
 	    {
 	      typedef Sized_relobj_file<32, big_endian> ObjType;
+	      if (psymval->is_section_symbol())
+		symval.set_is_section_symbol();
 	      typename ObjType::Compute_final_local_value_status status =
 		arm_object->compute_final_local_value(r_sym, psymval, &symval,
 						      relinfo->symtab);
