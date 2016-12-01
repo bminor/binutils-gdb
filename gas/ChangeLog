@@ -1,5 +1,8 @@
 2016-12-01  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/20898
+	* app.c (do_scrub_chars): Do not attempt to unget EOF.
+
 	PR gas/20897
 	* subsegs.c (subsegs_print_statistics): Do nothing if no output
 	file was created.
