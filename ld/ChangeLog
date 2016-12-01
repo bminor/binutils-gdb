@@ -1,3 +1,8 @@
+2016-12-01  Rudy Y  <rudyy.id@gmail.com>
+
+	PR ld/20880
+	* pe-dll.c (make_one): Use the hint if the ordinal is -1.
+
 2016-12-01  Yury Norov  <ynorov@caviumnetworks.com>
 
 	PR ld/20868
