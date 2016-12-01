@@ -1,5 +1,9 @@
 2016-12-01  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/20897
+	* subsegs.c (subsegs_print_statistics): Do nothing if no output
+	file was created.
+
 	PR gas/20895
 	* symbols.c (resolve_symbol_value): Gracefully handle erroneous
 	symbolic expressions.

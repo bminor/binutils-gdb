@@ -297,6 +297,10 @@ subsegs_print_statistics (FILE *file)
   frchainS *frchp;
   asection *s;
 
+  /* PR 20897 - check to see if the output bfd was actually created.  */
+  if (stdoutput == NULL)
+    return;
+
   fprintf (file, "frag chains:\n");
   for (s = stdoutput->sections; s; s = s->next)
     {
