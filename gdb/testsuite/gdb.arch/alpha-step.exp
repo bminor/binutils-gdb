@@ -94,7 +94,7 @@ proc test_stepi {function } {
     
     gdb_test "x /i \$pc" \
              "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fneg.*" \
-             "Check stepi over fb$function stopped on fneg instruction"
+             "check stepi over fb$function stopped on fneg instruction"
 
 }
 

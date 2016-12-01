@@ -242,11 +242,11 @@ gdb_test "tbreak $srcfile:factorial" "Temporary breakpoint.*at.* file .*$srcfile
 
 gdb_test "tbreak $bp_location1" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location1.*" \
-    "Temporary breakpoint line number #1"
+    "temporary breakpoint line number #1"
 
 gdb_test "tbreak $bp_location6" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location6.*" \
-    "Temporary breakpoint line number #2"
+    "temporary breakpoint line number #2"
 
 #
 # test break at line number in file
@@ -254,7 +254,7 @@ gdb_test "tbreak $bp_location6" \
 
 gdb_test "tbreak $srcfile:$bp_location2" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location2.*" \
-    "Temporary breakpoint line number in file #1"
+    "temporary breakpoint line number in file #1"
 
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
 gdb_test  "tbreak $srcfile:$bp_location11" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location11.*" "Temporary breakpoint line number in file #2"

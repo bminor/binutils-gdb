@@ -160,12 +160,12 @@ if ![runto_main] then {
 
 gdb_test "break vector_fun" \
  "Breakpoint 2 at.*e500-regs.c, line \[0-9\]+\\." \
- "Set breakpoint at vector_fun"
+ "set breakpoint at vector_fun"
 
 # Actually it is nuch easier to see these results printed in hex.
 # gdb_test "set output-radix 16" \
 #   "Output radix now set to decimal 16, hex 10, octal 20." \
-#   "Set output radix to hex"
+#   "set output radix to hex"
 
 gdb_test "continue" \
   "Breakpoint 2, vector_fun .a=.-2, -2., b=.1, 1.*e500-regs.c.*ev_create_s32 .2, 2.;" \

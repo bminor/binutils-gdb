@@ -117,4 +117,4 @@ gdb_test "cont" \
 	 "Going to second breakpoint"
 gdb_test "print i" \
 	 ".* = 5.*" \
-	 "Value of i after assignment"
+	 "value of i after assignment"

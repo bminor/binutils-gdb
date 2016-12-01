@@ -54,4 +54,4 @@ test_debug_expr "print /x {char\[4\]} array" \
 # This caused gdb to output garbage and possibly segfault
 gdb_test "print \"hello\"" \
     ".*OP_STRING\[^\r\n\]*Language-specific string type: 0.*\[\r\n\]\\$$decimal = \"hello\"\[\r\n\].*" \
-    "String evaluation with debug expr"
+    "string evaluation with debug expr"

@@ -75,7 +75,7 @@ delete_breakpoints
 
 gdb_test "awatch shared_var thread $thread_num" \
     "Hardware access \\(read/write\\) watchpoint .*: shared_var.*" \
-    "Watchpoint on shared variable"
+    "watchpoint on shared variable"
 
 gdb_test "info breakpoint \$bpnum" \
     "stop only in thread $thread_num" \

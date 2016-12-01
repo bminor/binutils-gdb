@@ -45,7 +45,7 @@ mi_continue_to_line \
 
 mi_gdb_test "-var-create vta * vta" \
     "\\^done,name=\"vta\",numchild=\"2\",.*" \
-    "Create bt varobj"
+    "create bt varobj"
 
 mi_gdb_test "-var-list-children vta" \
     "\\^done,numchild=\"2\",children=\\\[child={name=\"vta.n\",exp=\"n\",numchild=\"0\",type=\"bar\\.int\"},child={name=\"vta.f\",exp=\"f\",numchild=\"0\",type=\"array \\(1 .. n\\) of character\"}\\\],.*" \

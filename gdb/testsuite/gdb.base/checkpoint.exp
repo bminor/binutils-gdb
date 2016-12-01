@@ -154,7 +154,7 @@ gdb_test "continue" "breakpoint 3.*" "break3 one"
 
 gdb_test "shell diff -s $pi_txt $copy1_txt" \
     "Files .*pi.txt and .*copy1.txt are identical.*" \
-    "Diff input and output one"
+    "diff input and output one"
 
 #
 # And now run from various checkpoints, allowing 
@@ -207,7 +207,7 @@ gdb_test "print lines" " = 1162.*" "verify lines 7 two"
 
 gdb_test "shell diff -s $pi_txt $copy1_txt" \
     "Files .*pi.txt and .*copy1.txt are identical.*" \
-    "Diff input and output two"
+    "diff input and output two"
 
 # 
 # OK, now allow the original program to delete the output file, 
@@ -272,23 +272,23 @@ gdb_test "print ftell (out) > 100000" " = 1.*" "outfile still open 10"
 delete_breakpoints
 gdb_test "continue" \
     "Deleting copy.*$inferior_exited_re normally.*Switching to.*" \
-    "Exit, dropped into next fork one"
+    "exit, dropped into next fork one"
 
 gdb_test "continue" \
     "Deleting copy.*$inferior_exited_re normally.*Switching to.*" \
-    "Exit, dropped into next fork two"
+    "exit, dropped into next fork two"
 
 gdb_test "continue" \
     "Deleting copy.*$inferior_exited_re normally.*Switching to.*" \
-    "Exit, dropped into next fork three"
+    "exit, dropped into next fork three"
 
 gdb_test "continue" \
     "Deleting copy.*$inferior_exited_re normally.*Switching to.*" \
-    "Exit, dropped into next fork four"
+    "exit, dropped into next fork four"
 
 gdb_test "continue" \
     "Deleting copy.*$inferior_exited_re normally.*Switching to.*" \
-    "Exit, dropped into next fork five"
+    "exit, dropped into next fork five"
 
 #
 # There should be still at least five forks left

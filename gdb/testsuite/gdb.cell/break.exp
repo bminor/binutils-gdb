@@ -60,7 +60,7 @@ gdb_load ${ppu_bin}
 # shouldn't prompt for anything.
 gdb_test "delete breakpoints" \
 	 "" \
-	 "No prompt when deleting non-existing breakpoints"
+	 "no prompt when deleting non-existing breakpoints"
 
 gdb_test "break main" \
 	 "Breakpoint.*at.* file .*$testfile.c, line.*" \

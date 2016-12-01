@@ -64,7 +64,7 @@ if [supports_process_record] {
 
 gdb_test "break $endmain" \
     "Breakpoint $decimal at .*$srcfile, line $endmain\." \
-    "BP at end of main"
+    "breakpoint at end of main"
 
 gdb_test "continue" "Breakpoint .* end main .*" "run to end of main"
 

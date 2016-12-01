@@ -170,12 +170,12 @@ gdb_expect_list "info vector" ".*$gdb_prompt $" {
 
 gdb_test "break vector_fun" \
  "Breakpoint 2 at.*altivec-regs.c, line \[0-9\]+\\." \
- "Set breakpoint at vector_fun"
+ "set breakpoint at vector_fun"
 
 # Actually it is nuch easier to see these results printed in hex.
 gdb_test "set output-radix 16" \
   "Output radix now set to decimal 16, hex 10, octal 20." \
-  "Set output radix to hex"
+  "set output radix to hex"
 
 gdb_test "continue" \
   "Breakpoint 2, vector_fun .a=.0xfefefefe, 0xfefefefe, 0xfefefefe, 0xfefefefe., b=.0x1010101, 0x1010101, 0x1010101, 0x1010101.*altivec-regs.c.*vec_splat_u8.2..;" \

@@ -179,7 +179,7 @@ gdb_py_test_multiple "expression completion command" \
 
 gdb_test "complete expr_test bar\." \
     "expr_test bar\.bc.*expr_test bar\.ij.*" \
-    "Test completion through complete command"
+    "test completion through complete command"
 
 if { [readline_is_used] } {
     set test "complete 'expr_test bar.i'"

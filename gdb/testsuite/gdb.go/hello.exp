@@ -39,7 +39,7 @@ setup_xfail "*-*-*"
 
 gdb_test "print st" \
     ".* = $hex \"\"" \
-    "Starting string check"
+    "starting string check"
 
 if { [gdb_breakpoint ${srcfile}:${bp_location1}] } {
     pass "setting breakpoint 1"
@@ -49,4 +49,4 @@ gdb_test "cont" "Breakpoint .*:${bp_location1}.*" "going to first breakpoint"
 
 gdb_test "print st" \
     ".* = $hex \"Hello, world!\"" \
-    "String after assignment check"
+    "string after assignment check"

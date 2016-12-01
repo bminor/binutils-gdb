@@ -45,7 +45,7 @@ mi_continue_to_line \
 
 mi_gdb_test "-var-create bt * bt" \
     "\\^done,name=\"bt\",numchild=\"3\",.*" \
-    "Create bt varobj"
+    "create bt varobj"
 
 mi_gdb_test "-var-update 1 *" \
     "\\^done,changelist=\\\[\\\]" \

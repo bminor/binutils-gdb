@@ -28,23 +28,23 @@ gdb_load $binfile
 
 gdb_test "tvariable \$tvar1" \
   "Trace state variable \\\$tvar1 created, with initial value 0." \
-  "Create a trace state variable"
+  "create a trace state variable"
 
 gdb_test "tvariable \$tvar2 = 45" \
   "Trace state variable \\\$tvar2 created, with initial value 45." \
-  "Create a trace state variable with initial value"
+  "create a trace state variable with initial value"
 
 gdb_test "tvariable \$tvar2 = -92" \
   "Trace state variable \\\$tvar2 now has initial value -92." \
-  "Change initial value of a trace state variable"
+  "change initial value of a trace state variable"
 
 gdb_test "tvariable \$tvar3 = 2 + 3" \
   "Trace state variable \\\$tvar3 created, with initial value 5." \
-  "Create a trace state variable with expression"
+  "create a trace state variable with expression"
 
 gdb_test "tvariable \$tvar3 = 1234567000000" \
   "Trace state variable \\\$tvar3 now has initial value 1234567000000." \
-  "Init trace state variable to a 64-bit value"
+  "init trace state variable to a 64-bit value"
 
 gdb_test "tvariable $" \
   "Must supply a non-empty variable name" \
@@ -97,7 +97,7 @@ gdb_test "delete tvariable" \
 
 gdb_test "info tvariables" \
   "No trace state variables.*" \
-  "List tvariables after deleting all"
+  "list tvariables after deleting all"
 
 # Now try running a trace.
 
@@ -120,7 +120,7 @@ if { $trcpt1 <= 0 } then {
 
 gdb_test "tvariable \$tvar5 = 15" \
   "Trace state variable \\\$tvar5 created, with initial value 15." \
-  "Create a trace state variable tvar5"
+  "create a trace state variable tvar5"
 
 gdb_trace_setactions "collect tsv for first tracepoint" \
 	"$trcpt1" \

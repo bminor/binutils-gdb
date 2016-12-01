@@ -42,15 +42,15 @@ clean_restart ${testfile}
 #
 gdb_test "compile code int i=2;" \
     "The program must be running for the compile command to work.*" \
-    "Test compile code command without running inferior"
+    "test compile code command without running inferior"
 
 gdb_test "compile int i=2;" \
     "The program must be running for the compile command to work.*" \
-    "Test compile command without running inferior"
+    "test compile command without running inferior"
 
 gdb_test "compile file -r ${srcdir}/${subdir}/${testfile}-mod.c" \
     "The program must be running for the compile command to work.*" \
-    "Test compile file command without running inferior"
+    "test compile file command without running inferior"
 
 if ![runto_main] {
     return -1
@@ -79,7 +79,7 @@ gdb_test_no_output "compile -raw -- void _gdb_expr(){int i = 5;}" \
 
 gdb_test "compile -- -r  void _gdb_expr(){int i = 5;}" \
     ".* error: 'r' undeclared \\(first use in this function\\).*" \
-    "Test delimiter with -r after it"
+    "test delimiter with -r after it"
 
 gdb_test "p globalvar" " = 10" "expect 10"
 
@@ -339,7 +339,7 @@ gdb_test "compile file -r" \
     "Test compile file and raw option without a filename"
 gdb_test "compile file -z" \
     "Unknown argument.*" \
-    "Test compile file with unknown argument"
+    "test compile file with unknown argument"
 
 
 # LOC_CONST tests.

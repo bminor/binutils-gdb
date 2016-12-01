@@ -80,7 +80,7 @@ gdb_breakpoint dmsym_main.c:[gdb_get_line_number "BREAK" dmsym_main.c]
 gdb_run_cmd
 gdb_test "" \
          "Breakpoint $num, pck__foo__bar__minsym__2 \\(\\) at.*" \
-         "Run until breakpoint at BREAK"
+         "run until breakpoint at BREAK"
 
 gdb_test "continue" \
          "Breakpoint $num, main \\(\\) at.*"

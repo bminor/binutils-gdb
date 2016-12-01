@@ -274,7 +274,7 @@ proc test_with_self { } {
     # disassemble yourself
     gdb_test "x/10i main" \
 	    "x/10i.*main.*main($cxx_main_args_re)?.$decimal.*main($cxx_main_args_re)?.$decimal.*" \
-	    "Disassemble main"
+	    "disassemble main"
 
     # We'll need this when we send a ^C to GDB.  Need to do it before we
     # run the program and gdb starts saving and restoring tty states.

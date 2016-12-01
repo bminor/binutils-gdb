@@ -46,7 +46,7 @@ if [supports_process_record] {
 set end_of_main [gdb_get_line_number "set breakpoint 10a here" ]
 gdb_test "break $end_of_main" \
     "Breakpoint $decimal at .*$srcfile, line $end_of_main\." \
-    "BP at end of main"
+    "breakpoint at end of main"
 
 # This can take awhile.
 with_timeout_factor 20 {

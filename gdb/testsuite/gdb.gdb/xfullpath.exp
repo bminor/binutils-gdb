@@ -52,7 +52,7 @@ proc test_with_self {} {
     # An empty filename
     gdb_test "print gdb_realpath (\"\")" \
              ".\[0-9\]+ =.*\"\"" \
-             "An empty filename"
+             "an empty filename"
 
     return 0
 }

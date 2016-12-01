@@ -72,7 +72,7 @@ proc test_bkpt_basic { } {
 
 	gdb_test "python print (blist\[1\].location)" \
 	    "py-breakpoint\.c:${mult_line}*" \
-	    "Check breakpoint location @mult_line"
+	    "check breakpoint location @mult_line"
 
 	# Check hit and ignore counts. 
 	gdb_test "python print (blist\[1\].hit_count)" \
@@ -392,7 +392,7 @@ proc test_bkpt_eval_funcs { } {
 
 	gdb_test "python eval_bp2.stop = stop_func"  \
 	    "RuntimeError: Only one stop condition allowed.  There is currently a GDB.*" \
-	    "Assign stop function to a breakpoint that has a condition"
+	    "assign stop function to a breakpoint that has a condition"
 
 	delete_breakpoints
 	gdb_breakpoint [gdb_get_line_number "Break at multiply."]

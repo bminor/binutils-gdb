@@ -80,7 +80,7 @@ gdb_test "p exceptions.throw_function_with_handler()" " = 2"
 # does not handle it.  It should be rewound.
 gdb_test "p exceptions.throw_function()" \
     "The program being debugged entered a std::terminate call, .*" \
-    "Call a function that raises an exception without a handler."
+    "call a function that raises an exception without a handler."
 
 # Make sure that after rewinding we are back at the call parent.
 gdb_test "bt" \
@@ -103,12 +103,12 @@ gdb_test_multiple "set unwind-on-terminating-exception off" \
 # Check that it is turned off.
 gdb_test "show unwind-on-terminating-exception" \
     "exception is unhandled while in a call dummy is off.*" \
-    "Turn off unwind on terminating exception flag"
+    "turn off unwind on terminating exception flag"
 
 # Check that the old behaviour is restored.
 gdb_test "p exceptions.throw_function()" \
     "The program being debugged was signaled while in a function called .*" \
-    "Call a function that raises an exception with unwinding off.."
+    "call a function that raises an exception with unwinding off.."
 
 # Restart the inferior back at main.
 if ![runto_main] then {
@@ -129,7 +129,7 @@ gdb_test_multiple "set unwindonsignal on" "turn unwindonsignal on" {
 # Check that it is turned on.
 gdb_test "show unwindonsignal" \
     "signal is received while in a call dummy is on.*" \
-    "Turn on unwind on signal"
+    "turn on unwind on signal"
 
 # Check to see if new behaviour interferes with
 # normal signal handling in inferior function calls.
@@ -145,7 +145,7 @@ gdb_test_multiple "set unwindonsignal off" "turn unwindonsignal off" {
 # Check that it is actually turned off.
 gdb_test "show unwindonsignal" \
     "signal is received while in a call dummy is off.*" \
-    "Turn off unwind on signal"
+    "turn off unwind on signal"
 
 # Check to see if new behaviour interferes with
 # normal signal handling in inferior function calls.

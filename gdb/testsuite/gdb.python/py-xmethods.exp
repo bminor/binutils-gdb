@@ -125,7 +125,7 @@ gdb_test "p g.mul<double>(2.0)" "From Python G<>::mul.*" \
   "After: g.mul<double>(2.0)"
 gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
 gdb_test "p g_ptr->mul<char>('a')" "From Python G<>::mul.*" \
-  "After: g_ptr->mul<char>('a')"
+  "after: g_ptr->mul<char>('a')"
 
 # Tests for 'disable/enable xmethod' command.
 gdb_test_no_output "disable xmethod progspace G_methods" \

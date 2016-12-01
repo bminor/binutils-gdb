@@ -39,7 +39,7 @@ if [supports_process_record] {
 set breakloc [gdb_get_line_number "end of main" "$srcfile"]
 gdb_test "break $breakloc" \
     "Breakpoint $decimal at .*$srcfile, line $breakloc\." \
-    "BP at end of main"
+    "breakpoint at end of main"
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
 

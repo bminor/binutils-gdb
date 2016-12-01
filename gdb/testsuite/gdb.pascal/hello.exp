@@ -50,7 +50,7 @@ gdb_test "cont" \
          "Going to first breakpoint"
 gdb_test "print st" \
 	 ".* = ''.*" \
-	 "Empty string check"
+	 "empty string check"
 
 # This test also fails for gpc because the program
 # stops after the string has been written
@@ -63,4 +63,4 @@ gdb_test "cont" \
 	 "Going to second breakpoint"
 gdb_test "print st" \
 	 ".* = 'Hello, world!'.*" \
-	 "String after assignment check"
+	 "string after assignment check"

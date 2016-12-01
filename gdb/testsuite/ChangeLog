@@ -2,6 +2,62 @@
 
 	Fix test names starting with uppercase throughout the files.
 
+	* gdb.ada/array_return.exp
+	* gdb.ada/expr_delims.exp
+	* gdb.ada/mi_dyn_arr.exp
+	* gdb.ada/mi_interface.exp
+	* gdb.ada/mi_var_array.exp
+	* gdb.ada/watch_arg.exp
+	* gdb.arch/alpha-step.exp
+	* gdb.arch/altivec-regs.exp
+	* gdb.arch/e500-regs.exp
+	* gdb.arch/powerpc-d128-regs.exp
+	* gdb.base/arrayidx.exp
+	* gdb.base/break.exp
+	* gdb.base/checkpoint.exp
+	* gdb.base/debug-expr.exp
+	* gdb.base/dmsym.exp
+	* gdb.base/radix.exp
+	* gdb.base/sepdebug.exp
+	* gdb.base/testenv.exp
+	* gdb.base/watch_thread_num.exp
+	* gdb.base/watchpoint-cond-gone.exp
+	* gdb.cell/break.exp
+	* gdb.cell/ea-cache.exp
+	* gdb.compile/compile.exp
+	* gdb.cp/gdb2495.exp
+	* gdb.gdb/selftest.exp
+	* gdb.gdb/xfullpath.exp
+	* gdb.go/hello.exp
+	* gdb.go/integers.exp
+	* gdb.objc/basicclass.exp
+	* gdb.pascal/hello.exp
+	* gdb.pascal/integers.exp
+	* gdb.python/py-breakpoint.exp
+	* gdb.python/py-cmd.exp
+	* gdb.python/py-linetable.exp
+	* gdb.python/py-xmethods.exp
+	* gdb.python/python.exp
+	* gdb.reverse/consecutive-precsave.exp
+	* gdb.reverse/finish-precsave.exp
+	* gdb.reverse/i386-precsave.exp
+	* gdb.reverse/machinestate-precsave.exp
+	* gdb.reverse/sigall-precsave.exp
+	* gdb.reverse/solib-precsave.exp
+	* gdb.reverse/step-precsave.exp
+	* gdb.reverse/until-precsave.exp
+	* gdb.reverse/watch-precsave.exp
+	* gdb.threads/leader-exit.exp
+	* gdb.threads/pthreads.exp
+	* gdb.threads/wp-replication.exp
+	* gdb.trace/actions.exp
+	* gdb.trace/mi-tsv-changed.exp
+	* gdb.trace/tsv.exp
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
+	Fix test names starting with uppercase throughout the files.
+
 	* gdb.arch/i386-bp_permanent.exp
 	* gdb.arch/i386-gnu-cfi.exp
 	* gdb.base/disasm-end-cu.exp

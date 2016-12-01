@@ -56,7 +56,7 @@ global decimal
 
 gdb_test "break $end_of_main" \
     "Breakpoint $decimal at .*$srcfile, line $end_of_main\." \
-    "BP at end of main"
+    "breakpoint at end of main"
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
 

@@ -408,7 +408,7 @@ gdb_py_test_silent_cmd "set python print-stack none" \
     "Test print-stack set setting to none" 1
 gdb_test "show python print-stack" \
     "The mode of Python stack printing on error is \"none\".*" \
-    "Test print-stack show setting to none"
+    "test print-stack show setting to none"
 
 gdb_py_test_silent_cmd "set python print-stack message" \
     "Test print-stack set setting to message" 1

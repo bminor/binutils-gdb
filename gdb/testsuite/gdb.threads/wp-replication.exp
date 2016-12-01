@@ -102,7 +102,7 @@ delete_breakpoints
 # Prepare to create all the threads.
 gdb_test "break thread_started" \
 	 "Breakpoint \[0-9\]+ at .*: file .*${srcfile}, line .*" \
-	 "Breakpoint on thread_started"
+	 "breakpoint on thread_started"
 
 # Move all threads to where they're supposed to be for testing.
 for { set i 0 } { $i < $NR_THREADS } { incr i } {
