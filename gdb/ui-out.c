@@ -29,16 +29,66 @@
 #include <memory>
 #include <string>
 
-/* table header structures */
+/* A header of a ui_out_table.  */
 
-struct ui_out_hdr
+class ui_out_hdr
+{
+ public:
+
+  explicit ui_out_hdr (int number, int min_width, ui_align alignment,
+		       const std::string &name, const std::string &header)
+  : m_number (number),
+    m_min_width (min_width),
+    m_alignment (alignment),
+    m_name (name),
+    m_header (header)
   {
-    int colno;
-    int width;
-    enum ui_align alignment;
-    std::string col_name;
-    std::string col_hdr;
-  };
+  }
+
+  int number () const
+  {
+    return m_number;
+  }
+
+  int min_width () const
+  {
+    return m_min_width;
+  }
+
+  ui_align alignment () const
+  {
+    return m_alignment;
+  }
+
+  const std::string &header () const
+  {
+    return m_header;
+  }
+
+  const std::string &name () const
+  {
+    return m_name;
+  }
+
+ private:
+
+  /* The number of the table column this header represents, 1-based.  */
+  int m_number;
+
+  /* Minimal column width in characters.  May or may not be applicable,
+     depending on the actual implementation of ui_out.  */
+  int m_min_width;
+
+  /* Alignment of the content in the column.  May or may not be applicable,
+     depending on the actual implementation of ui_out.  */
+  ui_align m_alignment;
+
+  /* Internal column name, used to internally refer to the column.  */
+  std::string m_name;
+
+  /* Printed header text of the column.  */
+  std::string m_header;
+};
 
 struct ui_out_level
   {
@@ -705,17 +755,9 @@ append_header_to_list (struct ui_out *uiout,
 		       const std::string &col_name,
 		       const std::string &col_hdr)
 {
-  std::unique_ptr<ui_out_hdr> temphdr (new ui_out_hdr ());
-
-  temphdr->width = width;
-  temphdr->alignment = alignment;
-
-  /* Make our own copy of the strings, since the lifetime of the original
-     versions may be too short.  */
-  temphdr->col_hdr = col_hdr;
-  temphdr->col_name = col_name;
-
-  temphdr->colno = uiout->table.headers.size () + 1;
+  std::unique_ptr<ui_out_hdr> temphdr(
+    new ui_out_hdr (uiout->table.headers.size () + 1, width,
+		    alignment, col_name, col_hdr));
 
   uiout->table.headers.push_back (std::move (temphdr));
 }
@@ -736,10 +778,10 @@ get_next_header (struct ui_out *uiout,
 
   ui_out_hdr *hdr = uiout->table.headers_iterator->get ();
 
-  *colno = hdr->colno;
-  *width = hdr->width;
-  *alignment = hdr->alignment;
-  *col_hdr = hdr->col_hdr.c_str ();
+  *colno = hdr->number ();
+  *width = hdr->min_width ();
+  *alignment = hdr->alignment ();
+  *col_hdr = hdr->header ().c_str ();
 
   /* Advance the header pointer to the next entry.  */
   uiout->table.headers_iterator++;
@@ -814,11 +856,11 @@ ui_out_query_field (struct ui_out *uiout, int colno,
     {
       ui_out_hdr *hdr = uiout->table.headers[index].get ();
 
-      gdb_assert (colno == hdr->colno);
+      gdb_assert (colno == hdr->number ());
 
-      *width = hdr->width;
-      *alignment = hdr->alignment;
-      *col_name = hdr->col_name.c_str ();
+      *width = hdr->min_width ();
+      *alignment = hdr->alignment ();
+      *col_name = hdr->name ().c_str ();
 
       return 1;
     }

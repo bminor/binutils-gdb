@@ -1,5 +1,13 @@
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (struct ui_out_hdr): Replace with ...
+	(class ui_out_hdr): ... this.
+	(append_header_to_list): Update.
+	(get_next_header): Update.
+	(ui_out_query_field): Update.
+
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* mi/mi-out.c (mi_table_header): Change char * args to
 	std::string.
 	* cli-out.c (cli_table_header): Likewise.
