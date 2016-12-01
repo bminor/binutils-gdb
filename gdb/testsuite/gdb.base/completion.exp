@@ -717,7 +717,7 @@ gdb_expect {
 }
 
 # Empty COMMAND sends no newline while " " sends the newline we need.
-gdb_test " " "Source directories searched: .*" "Glob remaining of directory test"
+gdb_test " " "Source directories searched: .*" "glob remaining of directory test"
 
 gdb_test "complete file ./gdb.base/compl" \
     "file ./gdb.base/completion\\.exp.*" \

@@ -52,7 +52,7 @@ for {set f 0} {$f < 3} {incr f} {
     }
 
     # Select frame.
-    gdb_test "frame ${f}" "#${f}.*" "Switch to frame ${f}"
+    gdb_test "frame ${f}" "#${f}.*" "switch to frame ${f}"
 
     gdb_test "p/x \$rax" ".*$pattern_rax_rbx_rcx_print.*" \
 	"print \$rax in frame ${f}"

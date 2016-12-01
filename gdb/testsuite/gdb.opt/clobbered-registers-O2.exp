@@ -36,7 +36,7 @@ if { ![runto start_sequence] } then {
    return
 }
 
-gdb_test "frame 1" "#1.*in gen_movsd.*" "Backtracing"
+gdb_test "frame 1" "#1.*in gen_movsd.*" "backtracing"
 
 gdb_test_multiple "print operand0" "print operand0" {
     -re "\\\$$decimal = <optimized out>\r\n$gdb_prompt $" { pass "print operand0"}

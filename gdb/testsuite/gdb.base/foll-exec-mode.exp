@@ -164,7 +164,7 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 	} elseif {$infswitch == "infswitch"} {
 	    # Two inferiors, we have switched to the original program.
 	    set expected_inf $testfile
-	    gdb_test "inferior 1" "Switching to inferior 1.*$testfile.*" "Switch inferiors"
+	    gdb_test "inferior 1" "Switching to inferior 1.*$testfile.*" "switch inferiors"
 	} else {
 	    # Two inferiors, run the execd program
 	    set expected_inf $testfile2

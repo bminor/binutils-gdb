@@ -51,7 +51,7 @@ gdb_load ${binfile}
 # that we end up back at the caller and not at the second instruction.
 
 gdb_breakpoint foo
-gdb_test "run" "Breakpoint 1, .* in foo.*" "Breakpoint at foo"
+gdb_test "run" "Breakpoint 1, .* in foo.*" "breakpoint at foo"
 
 set test "stepi till main"
 gdb_test_multiple "stepi" "${test}" {
@@ -97,9 +97,9 @@ set foo_last "(bar - 4)"
 gdb_breakpoint "*$foo_last"
 
 gdb_test "continue" "Breakpoint \[0-9\]*,.* in foo.*"
-gdb_test "backtrace" "in foo.*in main.*" "Backtrace from last insn in foo"
+gdb_test "backtrace" "in foo.*in main.*" "backtrace from last insn in foo"
 gdb_test "stepi" "in foo.*" "stepi to nullified instruction stays in foo"
-gdb_test "backtrace" "in foo.*in main.*" "Backtrace from nullified insn"
+gdb_test "backtrace" "in foo.*in main.*" "backtrace from nullified insn"
 gdb_test "stepi" "in main.*" "stepi to main"
 
 # In the third test, we verify that backtraces from nullified instructions

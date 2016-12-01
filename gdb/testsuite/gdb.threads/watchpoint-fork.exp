@@ -51,7 +51,7 @@ proc test {type symbol} {
 		return
 	    }
 
-	    gdb_test "watch var" "atchpoint \[0-9\]+: var" "Set the watchpoint"
+	    gdb_test "watch var" "atchpoint \[0-9\]+: var" "set the watchpoint"
 
 	    # It is never hit but it should not be left over in the fork()ed-off child.
 	    if [skip_hw_breakpoint_tests] {
@@ -102,7 +102,7 @@ proc test {type symbol} {
 		return
 	    }
 
-	    gdb_test "watch var" "atchpoint \[0-9\]+: var" "Set the watchpoint"
+	    gdb_test "watch var" "atchpoint \[0-9\]+: var" "set the watchpoint"
 
 	    # It should not be left over in the fork()ed-off child.
 	    gdb_test "$hbreak marker" {reakpoint [0-9]+.*}

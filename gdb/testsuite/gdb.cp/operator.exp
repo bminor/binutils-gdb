@@ -33,7 +33,7 @@ gdb_test "p a == 'a'" "= 12" "global operator overload"
 # Test ADL operator
 gdb_test "p bc == 1" "= 22" "ADL operator"
 gdb_test "p bc == 'a'" "= 23" "ADL operator overload"
-gdb_test "p B::BD::operator== (bc,'a')" "= 24" "Fully qualified explicit operator call"
+gdb_test "p B::BD::operator== (bc,'a')" "= 24" "fully qualified explicit operator call"
 
 # Test operator imported from anonymous namespace
 gdb_test "p d == 1" "= 33" "anonymous namespace operator"

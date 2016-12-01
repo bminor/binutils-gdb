@@ -50,7 +50,7 @@ delete_breakpoints
 
 set nl "\[\r\n\]+"
 
-gdb_test "watch myrec.x" ".*atchpoint \[0-9\]+: myrec\.x" "Set watchpoint"
+gdb_test "watch myrec.x" ".*atchpoint \[0-9\]+: myrec\.x" "set watchpoint"
 
 gdb_test "next" \
     ".*${nl}.*atchpoint \[0-9\]+: myrec\.x${nl}Old value = 0${nl}New value = 5${nl}.*" \

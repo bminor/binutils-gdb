@@ -40,10 +40,10 @@ if { [gdb_breakpoint ${bp_location1}] } {
     pass "setting breakpoint 1"
 }
 setup_xfail "*-*-*" ;# mangling issues IIRC
-gdb_test "cont" "Breakpoint .*:${bp_location1}.*" "Going to first breakpoint"
+gdb_test "cont" "Breakpoint .*:${bp_location1}.*" "going to first breakpoint"
 
 if { [gdb_breakpoint ${bp_location2}] } {
     pass "setting breakpoint 2"
 }
 setup_xfail "*-*-*" ;# mangling issues IIRC
-gdb_test "cont" "Breakpoint .*:${bp_location2_regexp}.*" "Going to second breakpoint"
+gdb_test "cont" "Breakpoint .*:${bp_location2_regexp}.*" "going to second breakpoint"

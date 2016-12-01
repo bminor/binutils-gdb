@@ -101,7 +101,7 @@ mi_expect_stop "breakpoint-hit" "thread_func" ".*" ".*" ".*" \
     "Run till MI pending breakpoint on thread_func"
 
 # Delete thread creation breakpoint to enable more than 1 thread to be created.
-mi_gdb_test "-break-delete 3" "\\^done" "Delete breakpoint 3"
+mi_gdb_test "-break-delete 3" "\\^done" "delete breakpoint 3"
 
 # Set pending breakpoint with a thread via MI.
 mi_gdb_test "-break-insert -p 2 -f pendfunc3" \

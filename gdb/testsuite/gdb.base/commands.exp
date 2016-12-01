@@ -476,14 +476,14 @@ proc_with_prefix deprecated_command_test {} {
     gdb_test "p 5" \
 	    "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" \
 	    "p deprecated warning, with replacement"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away /1/"
+    gdb_test "p 5" ".\[0-9\]* = 5.*" "deprecated warning goes away /1/"
 
     gdb_test_no_output "maintenance deprecate p \"new_p\"" "maintenance deprecate p \"new_p\" /2/"
     gdb_test_no_output "maintenance deprecate print \"new_print\"" 
     gdb_test "p 5" \
 	    "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" \
 	    "both alias and command are deprecated"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away /2/"
+    gdb_test "p 5" ".\[0-9\]* = 5.*" "deprecated warning goes away /2/"
 
     gdb_test_no_output "maintenance deprecate set remote memory-read-packet-size \"srm\" " \
 	    "deprecate long command /1/"

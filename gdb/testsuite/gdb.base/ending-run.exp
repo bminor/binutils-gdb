@@ -74,8 +74,8 @@ gdb_test_multiple "info line ending-run.c:$break1_line" "" {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_nine $expect_out(1,string)
         gdb_test "b ending-run.c:$break1_line" ".*Breakpoint 6.*ending-run.c, line $break1_line.*"
-        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 7.*" "Breakpoint 7 at *ending-run.c:$break1_line"
-        gdb_test "cle" ".*Deleted breakpoints 4 6 7.*" "Clear 2 by default"
+        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 7.*" "breakpoint 7 at *ending-run.c:$break1_line"
+        gdb_test "cle" ".*Deleted breakpoints 4 6 7.*" "clear 2 by default"
     }
     -re ".*$gdb_prompt $" {
         fail "need to fix test for new compile outcome"

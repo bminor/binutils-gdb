@@ -40,7 +40,7 @@ if { [gdb_breakpoint ${srcfile}:${bp_location1}] } {
     pass "setting breakpoint 1"
 }
 
-gdb_test "cont" "Breakpoint .*:${bp_location1}.*" "Going to first breakpoint"
+gdb_test "cont" "Breakpoint .*:${bp_location1}.*" "going to first breakpoint"
 
 gdb_test_no_output "disable"
 
@@ -48,4 +48,4 @@ if { [gdb_breakpoint ${srcfile}:${bp_location2}] } {
     pass "setting breakpoint 2"
 }
 
-gdb_test "cont" "Breakpoint .*:${bp_location2}.*" "Going to second breakpoint"
+gdb_test "cont" "Breakpoint .*:${bp_location2}.*" "going to second breakpoint"

@@ -420,7 +420,7 @@ delete_breakpoints
 # test temporary breakpoint at function
 #
 
-gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "Temporary breakpoint function"
+gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
 
 #
 # test break at function in file
@@ -436,7 +436,7 @@ gdb_test "tbreak $bp_location1" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location1.*" \
     "Temporary breakpoint line number #1"
 
-gdb_test "tbreak $bp_location6" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "Temporary breakpoint line number #2"
+gdb_test "tbreak $bp_location6" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "temporary breakpoint line number #2"
 
 #
 # test break at line number in file

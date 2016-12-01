@@ -1,5 +1,93 @@
 2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
 
+	Fix test names starting with uppercase throughout the files.
+
+	* gdb.arch/i386-mpx-simple_segv.exp
+	* gdb.arch/i386-mpx.exp
+	* gdb.arch/i386-permbkpt.exp
+	* gdb.arch/pa-nullify.exp
+	* gdb.arch/powerpc-d128-regs.exp
+	* gdb.arch/vsx-regs.exp
+	* gdb.base/bfp-test.exp
+	* gdb.base/break.exp
+	* gdb.base/breakpoint-shadow.exp
+	* gdb.base/callfuncs.exp
+	* gdb.base/charset.exp
+	* gdb.base/commands.exp
+	* gdb.base/completion.exp
+	* gdb.base/dfp-test.exp
+	* gdb.base/echo.exp
+	* gdb.base/ending-run.exp
+	* gdb.base/eval.exp
+	* gdb.base/expand-psymtabs.exp
+	* gdb.base/float128.exp
+	* gdb.base/floatn.exp
+	* gdb.base/foll-exec-mode.exp
+	* gdb.base/gdb1056.exp
+	* gdb.base/gdb11531.exp
+	* gdb.base/kill-after-signal.exp
+	* gdb.base/multi-forks.exp
+	* gdb.base/overlays.exp
+	* gdb.base/pending.exp
+	* gdb.base/sepdebug.exp
+	* gdb.base/testenv.exp
+	* gdb.base/valgrind-db-attach.exp
+	* gdb.base/watch_thread_num.exp
+	* gdb.base/watchpoint-cond-gone.exp
+	* gdb.base/watchpoint.exp
+	* gdb.base/watchpoints.exp
+	* gdb.cp/arg-reference.exp
+	* gdb.cp/baseenum.exp
+	* gdb.cp/operator.exp
+	* gdb.cp/shadow.exp
+	* gdb.dwarf2/dw2-op-out-param.exp
+	* gdb.dwarf2/dw2-reg-undefined.exp
+	* gdb.go/chan.exp
+	* gdb.go/hello.exp
+	* gdb.go/integers.exp
+	* gdb.go/methods.exp
+	* gdb.go/package.exp
+	* gdb.guile/scm-parameter.exp
+	* gdb.guile/scm-progspace.exp
+	* gdb.guile/scm-value.exp
+	* gdb.mi/mi-pending.exp
+	* gdb.mi/user-selected-context-sync.exp
+	* gdb.multi/multi-attach.exp
+	* gdb.multi/tids.exp
+	* gdb.opt/clobbered-registers-O2.exp
+	* gdb.pascal/floats.exp
+	* gdb.pascal/integers.exp
+	* gdb.python/py-block.exp
+	* gdb.python/py-events.exp
+	* gdb.python/py-parameter.exp
+	* gdb.python/py-symbol.exp
+	* gdb.python/py-symtab.exp
+	* gdb.python/py-type.exp
+	* gdb.python/py-value.exp
+	* gdb.python/py-xmethods.exp
+	* gdb.python/python.exp
+	* gdb.reverse/break-precsave.exp
+	* gdb.reverse/consecutive-precsave.exp
+	* gdb.reverse/finish-precsave.exp
+	* gdb.reverse/i386-precsave.exp
+	* gdb.reverse/machinestate-precsave.exp
+	* gdb.reverse/sigall-precsave.exp
+	* gdb.reverse/solib-precsave.exp
+	* gdb.reverse/step-precsave.exp
+	* gdb.reverse/until-precsave.exp
+	* gdb.reverse/watch-precsave.exp
+	* gdb.server/ext-attach.exp
+	* gdb.server/ext-restart.exp
+	* gdb.server/ext-run.exp
+	* gdb.server/ext-wrapper.exp
+	* gdb.stabs/gdb11479.exp
+	* gdb.stabs/weird.exp
+	* gdb.threads/attach-many-short-lived-threads.exp
+	* gdb.threads/kill.exp
+	* gdb.threads/watchpoint-fork.exp
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
 	Fix test names starting with uppercase throughout all the files below.
 
 	* gdb.ada/array_return.exp

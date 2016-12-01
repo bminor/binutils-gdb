@@ -22,4 +22,4 @@ gdb_start
 # test the echo command
 #
 
-gdb_test "echo Hello world!\\n" "Hello world!" "Echo test"
+gdb_test "echo Hello world!\\n" "Hello world!" "echo test"

@@ -99,7 +99,7 @@ if { ![runto_main] } {
 set bp_line [gdb_get_line_number "set breakpoint here"]
 gdb_breakpoint  $bp_line
 
-gdb_test "show env" ".*TEST_GDB_GLOBAL=.*" "Test passing TEST_GDB_GLOBAL to GDB"
+gdb_test "show env" ".*TEST_GDB_GLOBAL=.*" "test passing TEST_GDB_GLOBAL to GDB"
 # First test with only inherited TEST_GDB_GLOBAL
 gdb_test "continue" \
   ".*TEST_GDB_GLOBAL=Global environment value.*Program found 1 variables starting with TEST_GDB.*" \

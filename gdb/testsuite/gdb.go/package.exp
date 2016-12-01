@@ -46,4 +46,4 @@ set bp_location1_regexp {package2[.]Foo.*package2[.]go:}
 if { [gdb_breakpoint ${bp_location1}] } {
     pass "setting breakpoint 1"
 }
-gdb_test "cont" "Breakpoint .*${bp_location1_regexp}.*" "Going to first breakpoint"
+gdb_test "cont" "Breakpoint .*${bp_location1_regexp}.*" "going to first breakpoint"

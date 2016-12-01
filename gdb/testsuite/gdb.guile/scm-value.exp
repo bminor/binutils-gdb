@@ -290,7 +290,7 @@ proc test_value_after_death {} {
     gdb_test "kill" "" "kill the inferior" \
 	"Kill the program being debugged. .y or n. $" \
 	"y"
-    gdb_test "file" "" "Discard the symbols" \
+    gdb_test "file" "" "discard the symbols" \
 	"Discard symbol table from.*y or n. $" \
 	"y"
 

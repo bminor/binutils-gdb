@@ -18,5 +18,5 @@ gdb_start
 
 gdb_test_no_output "set \$a = 10" "Initialize \$a."
 
-gdb_test "eval \"echo %d\\n\", \$a++" "10" "First eval."
-gdb_test "eval \"echo %d\\n\", \$a*2" "22" "Second eval."
+gdb_test "eval \"echo %d\\n\", \$a++" "10" "first eval."
+gdb_test "eval \"echo %d\\n\", \$a*2" "22" "second eval."

@@ -35,5 +35,5 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list
 
 clean_restart ${binfile}
 
-gdb_test "break main" "" "First permanent break"
-gdb_test "break main" "" "Second permanent break"
+gdb_test "break main" "" "first permanent break"
+gdb_test "break main" "" "second permanent break"

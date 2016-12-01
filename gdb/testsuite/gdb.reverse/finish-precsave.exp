@@ -47,7 +47,7 @@ gdb_test "record save $precsave" \
     "Saved core file $precsave with execution log\."  \
     "save process recfile"
 
-gdb_test "kill" "" "Kill process, prepare to debug log file" \
+gdb_test "kill" "" "kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
 gdb_test "record restore $precsave" \

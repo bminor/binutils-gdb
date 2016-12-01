@@ -199,9 +199,9 @@ if { $core_loaded == -1 } {
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
-    gdb_test "info reg vs$i" "vs$i.*$vector_register2" "Restore vs$i from core file"
+    gdb_test "info reg vs$i" "vs$i.*$vector_register2" "restore vs$i from core file"
 }
 
 for {set i 32} {$i < 64} {incr i 1} {
-    gdb_test "info reg vs$i" "vs$i.*$vector_register3" "Restore vs$i from core file"
+    gdb_test "info reg vs$i" "vs$i.*$vector_register3" "restore vs$i from core file"
 }

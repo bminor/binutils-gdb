@@ -41,8 +41,8 @@ gdb_test_multiple "disass main" $test {
     }
 }
 
-gdb_test "b [gdb_get_line_number "break-first"]" "Breakpoint \[0-9\] at .*" "First breakpoint placed"
-gdb_test "b [gdb_get_line_number "break-second"]" "Breakpoint \[0-9\] at .*" "Second breakpoint placed"
+gdb_test "b [gdb_get_line_number "break-first"]" "Breakpoint \[0-9\] at .*" "first breakpoint placed"
+gdb_test "b [gdb_get_line_number "break-second"]" "Breakpoint \[0-9\] at .*" "second breakpoint placed"
 
 # Disassemble main, and compare the output to the original output
 # before breakpoints were inserted.  TEST is used as test message.

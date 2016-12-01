@@ -30,4 +30,4 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
 }
 
-gdb_test "ptype foo" "type = int \\\(Obj\\\)" "No false reference"
+gdb_test "ptype foo" "type = int \\\(Obj\\\)" "no false reference"
