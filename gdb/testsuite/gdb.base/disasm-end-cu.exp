@@ -33,7 +33,7 @@ if {$main_addr == 0 || $dummy_3_addr == 0 || $dummy_3_addr <= $main_addr} {
     return -1
 }
 
-gdb_test_multiple "disassemble /m ${main_addr},${dummy_3_addr}" "Disassemble address range with source" {
+gdb_test_multiple "disassemble /m ${main_addr},${dummy_3_addr}" "disassemble address range with source" {
     -re "Dump of assembler code from ${main_addr} to ${dummy_3_addr}:\r\nEnd of assembler dump\." {
         fail "no output from the disassemble command"
     }

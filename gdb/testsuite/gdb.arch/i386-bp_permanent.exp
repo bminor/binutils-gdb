@@ -51,7 +51,7 @@ if ![runto_main] then {
 
 set function "standard"
 
-set retcode [gdb_test_multiple "disassemble $function" "Disassemble function '$function'" {
+set retcode [gdb_test_multiple "disassemble $function" "disassemble function '$function'" {
     -re "($hex) <\\+0>.*($hex) <\\+$decimal>.*int3.*($hex) <\\+$decimal>.*leave.*$gdb_prompt $" {
       set address_bp $expect_out(2,string)
       set address_after_bp $expect_out(3,string)

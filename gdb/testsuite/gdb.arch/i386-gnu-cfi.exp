@@ -71,7 +71,7 @@ gdb_test "up 3" \
          "gate \\(\[^()\]*\\) at .*gate.c.*" \
          "shift up to the modified frame"
 
-gdb_test_multiple "info frame" "Existence of the CFI inserted register" {
+gdb_test_multiple "info frame" "existence of the CFI inserted register" {
     -re "Stack level 3, frame at (0x\[0-9a-f\]+):.*Saved registers:.* ecx at (0x\[0-9a-f\]+),.*" {
 	pass "existence of the CFI inserted register"
 	if { [string compare $expect_out(1,string) $expect_out(2,string)] } then {

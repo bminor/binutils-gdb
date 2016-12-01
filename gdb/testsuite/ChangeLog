@@ -2,6 +2,23 @@
 
 	Fix test names starting with uppercase throughout the files.
 
+	* gdb.arch/i386-bp_permanent.exp
+	* gdb.arch/i386-gnu-cfi.exp
+	* gdb.base/disasm-end-cu.exp
+	* gdb.base/macscp.exp
+	* gdb.base/pending.exp
+	* gdb.base/watch_thread_num.exp
+	* gdb.cp/exception.exp
+	* gdb.cp/gdb2495.exp
+	* gdb.cp/local.exp
+	* gdb.python/py-evsignal.exp
+	* gdb.python/python.exp
+	* gdb.trace/tracecmd.exp
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
+	Fix test names starting with uppercase throughout the files.
+
 	* gdb.base/charset.exp
 	* gdb.base/eval.exp
 	* gdb.base/multi-forks.exp

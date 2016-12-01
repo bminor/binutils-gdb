@@ -161,7 +161,7 @@ gdb_test "help trace" "Set a tracepoint at .*" "1.14: help trace"
 gdb_delete_tracepoints
 
 # Acceptance vs rejection of a location are target-specific, so allow both.
-gdb_test_multiple "ftrace gdb_recursion_test" "Set a fast tracepoint" {
+gdb_test_multiple "ftrace gdb_recursion_test" "set a fast tracepoint" {
     -re "Fast tracepoint $decimal at $hex: file.*$srcfile, line $testline1.*$gdb_prompt $" {
 	pass "set a fast tracepoint"
     }

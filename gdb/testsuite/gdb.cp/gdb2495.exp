@@ -121,7 +121,7 @@ if ![runto_main] then {
 # behaviour; it should not.  Test both on and off states.
 
 # Turn on unwind on signal behaviour.
-gdb_test_multiple "set unwindonsignal on" "Turn unwindonsignal on" {
+gdb_test_multiple "set unwindonsignal on" "turn unwindonsignal on" {
     -re "$gdb_prompt $" {pass "set unwindonsignal on"}
     timeout {fail "(timeout) set unwindonsignal on"}
 }
@@ -137,7 +137,7 @@ gdb_test "p exceptions.raise_signal(1)" \
     "To change this behavior use \"set unwindonsignal off\".*"
 
 # And reverse - turn off again.
-gdb_test_multiple "set unwindonsignal off" "Turn unwindonsignal off" {
+gdb_test_multiple "set unwindonsignal off" "turn unwindonsignal off" {
     -re "$gdb_prompt $" {pass "set unwindonsignal off"}
     timeout {fail "(timeout) set unwindonsignal off"}
 }

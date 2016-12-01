@@ -322,7 +322,7 @@ gdb_test_multiple "set prompt blah " "set blah in GDB" {
     }
 }
 
-gdb_test_multiple "python gdb.prompt_hook = None" "Delete hook" {
+gdb_test_multiple "python gdb.prompt_hook = None" "delete hook" {
     -re "\[\r\n\]$newprompt2 $" {
 	pass "delete old hook"
     }
