@@ -7497,8 +7497,8 @@ fsturs (sim_cpu *cpu, int32_t offset)
   unsigned int st = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_set_mem_u32 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
-		       aarch64_get_vec_u32 (cpu, rn, 0));
+  aarch64_set_mem_u32 (cpu, aarch64_get_reg_u64 (cpu, rn, 1) + offset,
+		       aarch64_get_vec_u32 (cpu, st, 0));
 }
 
 /* Store 64 bit unscaled signed 9 bit.  */
@@ -7509,8 +7509,8 @@ fsturd (sim_cpu *cpu, int32_t offset)
   unsigned int st = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_set_mem_u64 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
-		       aarch64_get_vec_u64 (cpu, rn, 0));
+  aarch64_set_mem_u64 (cpu, aarch64_get_reg_u64 (cpu, rn, 1) + offset,
+		       aarch64_get_vec_u64 (cpu, st, 0));
 }
 
 /* Store 128 bit unscaled signed 9 bit.  */
@@ -7522,9 +7522,9 @@ fsturq (sim_cpu *cpu, int32_t offset)
   FRegister a;
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_get_FP_long_double (cpu, rn, & a);
+  aarch64_get_FP_long_double (cpu, st, & a);
   aarch64_set_mem_long_double (cpu,
-			       aarch64_get_reg_u64 (cpu, st, 1)
+			       aarch64_get_reg_u64 (cpu, rn, 1)
 			       + offset, a);
 }
 
