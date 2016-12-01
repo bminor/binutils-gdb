@@ -30,7 +30,7 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 
@@ -50,7 +50,7 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 
@@ -70,7 +70,7 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 

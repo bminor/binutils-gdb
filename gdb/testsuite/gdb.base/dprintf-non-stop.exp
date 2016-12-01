@@ -15,7 +15,7 @@
 
 if [is_remote target] then {
     # Testing with remote/non-stop is racy at the moment.
-    unsupported "Testing dprintf with remote/non-stop is not supported."
+    unsupported "testing dprintf with remote/non-stop is not supported."
     return 0
 }
 
@@ -33,7 +33,7 @@ save_vars { GDBFLAGS } {
 }
 
 if ![runto main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return -1
 }
 

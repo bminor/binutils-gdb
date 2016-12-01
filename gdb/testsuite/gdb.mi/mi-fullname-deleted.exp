@@ -26,13 +26,13 @@ set srcfileabs [standard_output_file $srcfile]
 
 # "//$srcfile" It is used for the test of compare_filenames_for_search.
 if { [regsub {/[^/]+$} $srcfileabs {/\0} srcfileabs] != 1 } {
-    xfail "Cannot double the last slash separator"
+    xfail "cannot double the last slash separator"
     return -1
 }
 
 if { [regsub {^(/[^/]+)/} $srcfileabs {\1subst/} srcfileabssubst] != 1
      || [regsub {^(/[^/]+)/.*$} $srcfileabs {\1} initdir] != 1 } {
-    xfail "Missing root subdirectory"
+    xfail "missing root subdirectory"
     return -1
 }
 

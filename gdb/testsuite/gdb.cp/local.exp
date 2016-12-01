@@ -166,7 +166,7 @@ gdb_test "up" ".*main.*" "up from marker2"
 set eol "\[\t \]*\[\r\n\]+\[\t \]*"
 gdb_test_multiple "ptype Local" "Local out of scope" {
     -re "No symbol \"Local\" in current context.*${gdb_prompt} $" {
-        pass "Local out of scope"
+        pass "local out of scope"
     }
     -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}.*${eol}    char loc_foo\\(char\\);${eol}}${eol}${gdb_prompt} " {
         # GCC emits STABS debugging information in a way that doesn't

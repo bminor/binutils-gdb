@@ -35,13 +35,13 @@ gdb_expect {
 	    send_gdb "y\n"
 	    gdb_expect {
 		-re "$gdb_prompt $" {
-		    fail "Delete all breakpoints when none (unexpected prompt)"
+		    fail "delete all breakpoints when none (unexpected prompt)"
 		}
-		timeout	{ fail "Delete all breakpoints when none (timeout after unexpected prompt)" }
+		timeout	{ fail "delete all breakpoints when none (timeout after unexpected prompt)" }
 	    }
 	}
-     -re ".*$gdb_prompt $"       { pass "Delete all breakpoints when none" }
-    timeout	            { fail "Delete all breakpoints when none (timeout)" }
+     -re ".*$gdb_prompt $"       { pass "delete all breakpoints when none" }
+    timeout	            { fail "delete all breakpoints when none (timeout)" }
 }
 
 #

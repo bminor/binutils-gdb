@@ -56,7 +56,7 @@ gdb_load ${binfile}
 gdb_load_shlib $libobj
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

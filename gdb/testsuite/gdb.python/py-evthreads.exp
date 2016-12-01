@@ -46,7 +46,7 @@ gdb_breakpoint "thread2"
 gdb_breakpoint "thread3"
 
 gdb_run_cmd
-set test "Run to breakpoint 1"
+set test "run to breakpoint 1"
 gdb_test_multiple "" $test {
     -re "event type: stop\r\nstop reason: breakpoint\r\nfirst breakpoint number: 1\r\nbreakpoint number: 1\r\nthread num: 1\r\n.*$gdb_prompt $" {
         pass $test

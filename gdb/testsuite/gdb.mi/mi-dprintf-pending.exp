@@ -36,12 +36,12 @@ if {[get_compiler_info]} {
 }
 
 if {[gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""} {
-    untested "Could not compile $libsrc1"
+    untested "could not compile $libsrc1"
     return -1
 }
 
 if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
-    untested "Could not compile $srcdir/$subdir/$srcfile"
+    untested "could not compile $srcdir/$subdir/$srcfile"
     return -1
 }
 

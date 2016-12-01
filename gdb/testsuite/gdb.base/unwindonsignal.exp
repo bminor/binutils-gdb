@@ -22,7 +22,7 @@ if [target_info exists gdb,nosignals] {
 # Some targets can't do function calls, so don't even bother with this
 # test.
 if [target_info exists gdb,cannot_call_functions] {
-    unsupported "This target can not call functions"
+    unsupported "this target can not call functions"
     continue
 }
 
@@ -34,7 +34,7 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
 }
 
 if { ![runto_main] } {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

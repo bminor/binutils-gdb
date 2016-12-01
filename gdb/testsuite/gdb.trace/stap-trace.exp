@@ -42,7 +42,7 @@ proc compile_stap_bin {exec_name {arg ""}} {
     if { [gdb_compile "$srcdir/$subdir/$srcfile" \
 	      [standard_output_file $exec_name] \
 	      executable [concat $arg debug nowarnings]] != "" } {
-	untested "Could not compile ${srcfile}"
+	untested "could not compile ${srcfile}"
 	return 0
     }
 

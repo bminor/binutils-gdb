@@ -21,7 +21,7 @@ if [target_info exists gdb,nosignals] {
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile test program"
+    untested "couldn't compile test program"
     return -1
 }
 

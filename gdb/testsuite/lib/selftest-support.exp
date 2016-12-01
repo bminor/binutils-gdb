@@ -72,7 +72,7 @@ proc selftest_setup { executable function } {
     }
 
     if { $gdb_file_cmd_debug_info != "debug" } then {
-	untested "No debug information, skipping testcase."
+	untested "no debug information, skipping testcase."
 	return -1
     }
 

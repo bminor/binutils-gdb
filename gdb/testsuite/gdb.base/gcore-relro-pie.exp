@@ -41,7 +41,7 @@ clean_restart ${stripped_binfile}
 
 # The binary is stripped of debug info, but not minsyms.
 if ![runto break_here] {
-    fail "Can't run to break_here"
+    fail "can't run to break_here"
     return -1
 }
 

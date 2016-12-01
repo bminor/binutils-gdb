@@ -36,7 +36,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 set gcorefile ${objdir}/${subdir}/${testfile}.gcore
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {}] != "" } {
-    unsupported "Testcase compile failed."
+    unsupported "testcase compile failed."
     return -1
 }
 

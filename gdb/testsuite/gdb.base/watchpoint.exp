@@ -347,7 +347,7 @@ proc test_watchpoint_triggered_in_syscall {} {
     # Run until we get to the first marker function.
     set x 0
     set y 0
-    set testname "Watch buffer passed to read syscall"
+    set testname "watch buffer passed to read syscall"
     if [runto marker2] then {
 	gdb_test "watch buf\[0\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[0\\\]"
 	gdb_test "watch buf\[1\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[1\\\]"

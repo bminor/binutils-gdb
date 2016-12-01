@@ -19,7 +19,7 @@ if { [prepare_for_testing set-noassign.exp "set-noassign" start.c {debug nowarni
 }
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

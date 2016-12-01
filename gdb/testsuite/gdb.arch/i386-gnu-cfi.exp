@@ -73,11 +73,11 @@ gdb_test "up 3" \
 
 gdb_test_multiple "info frame" "Existence of the CFI inserted register" {
     -re "Stack level 3, frame at (0x\[0-9a-f\]+):.*Saved registers:.* ecx at (0x\[0-9a-f\]+),.*" {
-	pass "Existence of the CFI inserted register"
+	pass "existence of the CFI inserted register"
 	if { [string compare $expect_out(1,string) $expect_out(2,string)] } then {
-	    fail "Value of the CFI inserted register"
+	    fail "value of the CFI inserted register"
 	} else {
-	    pass "Value of the CFI inserted register"
+	    pass "value of the CFI inserted register"
 	}
     }
 }

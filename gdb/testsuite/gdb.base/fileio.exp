@@ -225,7 +225,7 @@ gdb_test continue \
 "Continuing\\..*rename 2:.*EISDIR$stop_msg" \
 "Renaming a file to existing directory returns EISDIR"
 
-set test "Renaming a directory to a non-empty directory returns ENOTEMPTY or EEXIST"
+set test "renaming a directory to a non-empty directory returns ENOTEMPTY or EEXIST"
 gdb_test_multiple continue "${test}" {
     -re "Continuing\\..*rename 3:.*(ENOTEMPTY|EEXIST)$stop_msg$gdb_prompt $" {
 	pass "${test}"

@@ -53,7 +53,7 @@ if !$use_gdb_stub {
 # Ok, on to real life
 #
 if ![runto_main] then {
-    fail "Could not run to main - other tests will fail."
+    fail "could not run to main - other tests will fail."
     continue
 }
 

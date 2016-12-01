@@ -34,16 +34,16 @@ if {[skip_cell_tests]} {
 
 # Compile SPU binary.
 if { [gdb_compile_cell_spu $spu_src $spu_bin executable {debug}]  != "" } {
-  unsupported "Compiling spu binary failed."
+  unsupported "compiling spu binary failed."
   return -1
 }
 # Compile PPU binary.
 if { [gdb_cell_embedspu $spu_bin $spu_bin-embed.o {debug}]  != "" } {
-  unsupported "Embedding spu binary failed."
+  unsupported "embedding spu binary failed."
   return -1
 }
 if { [gdb_compile_cell_ppu [list $ppu_src $spu_bin-embed.o] $ppu_bin executable {debug}] != "" } {
-  unsupported "Compiling ppu binary failed."
+  unsupported "compiling ppu binary failed."
   return -1
 }
 
@@ -74,7 +74,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${ppu_bin}
 
 if ![runto_main] then {
-  fail "Can't run to main"
+  fail "can't run to main"
   return 0
 }
 

@@ -77,7 +77,7 @@ foreach test_value {0 1} {
 
 	    # Some targets do not allow manually writing a breakpoint to a
 	    # certain memory address, like QEMU.  In that case, just bail out.
-	    unsupported "Cannot write to address $bp_address"
+	    unsupported "cannot write to address $bp_address"
 	    return -1
 	}
 	-re " = .*$gdb_prompt $" {

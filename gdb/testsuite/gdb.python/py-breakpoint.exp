@@ -38,7 +38,7 @@ proc test_bkpt_basic { } {
 	gdb_test "python print (gdb.breakpoints())" "\\(\\)"
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -123,7 +123,7 @@ proc test_bkpt_deletion { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -161,7 +161,7 @@ proc test_bkpt_cond_and_cmds { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -213,7 +213,7 @@ proc test_bkpt_invisible { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -263,7 +263,7 @@ proc test_watchpoints { } {
 	}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -288,7 +288,7 @@ proc test_bkpt_internal { } {
 	    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 	}
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 	delete_breakpoints
@@ -318,7 +318,7 @@ proc test_bkpt_eval_funcs { } {
 	    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 	}
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 	delete_breakpoints
@@ -434,7 +434,7 @@ proc test_bkpt_temporary { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 	delete_breakpoints

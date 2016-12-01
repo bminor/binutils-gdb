@@ -16,7 +16,7 @@
 standard_testfile .c
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile ${srcfile}"
+    untested "couldn't compile ${srcfile}"
     return -1
 }
 

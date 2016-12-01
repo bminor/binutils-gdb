@@ -119,7 +119,7 @@ proc test { func } {
 set n_testcases [get_integer_valueof "n_testcases" 0]
 
 if { ${n_testcases} == 0 } {
-    untested "No test"
+    untested "no test"
     return 1
 }
 

@@ -59,7 +59,7 @@ set retcode [gdb_test_multiple "disassemble $function" "Disassemble function '$f
 }]
 
 if {$retcode != 0} {
-  fail "Disassemble failed, skipping entire test."
+  fail "disassemble failed, skipping entire test."
   return -1
 }
 

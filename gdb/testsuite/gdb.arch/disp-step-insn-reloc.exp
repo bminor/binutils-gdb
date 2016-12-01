@@ -31,7 +31,7 @@ if [prepare_for_testing $expfile $executable $srcfile \
 }
 
 if ![runto_main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return -1
 }
 
@@ -53,7 +53,7 @@ proc read_testcase { n } {
 
 set n_testcases [get_integer_valueof "n_testcases" 0]
 if { ${n_testcases} == 0 } {
-    untested "No instruction relocation to test"
+    untested "no instruction relocation to test"
     return 1
 }
 

@@ -36,14 +36,14 @@ if { ![runto_main] } then {
 
 gdb_test_multiple "next" "check for TE support" {
     -re "Program received signal SIGILL,.*\r\n$gdb_prompt $" {
-	unsupported "No TE support."
+	unsupported "no TE support."
 	return
     }
     -re "\[0-9\]+.*\r\n$gdb_prompt $" {
 	pass "TE support available"
     }
     -re "$gdb_prompt $" {
-	unsupported "No TE support (unknown error)."
+	unsupported "no TE support (unknown error)."
 	return
     }
 }

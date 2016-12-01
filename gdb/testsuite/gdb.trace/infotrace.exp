@@ -102,12 +102,12 @@ gdb_trace_setactions "collect on tracepoint 1" "1" \
 	"collect gdb_struct1_test" "^$"
 gdb_run_cmd
 if {[gdb_test "" "Breakpoint ${decimal}, main.*"] != 0} {
-    fail "Can't run to main"
+    fail "can't run to main"
     return -1
 }
 
 if { ![gdb_target_supports_trace] } then {
-    unsupported "Current target does not support trace"
+    unsupported "current target does not support trace"
     return 1
 }
 

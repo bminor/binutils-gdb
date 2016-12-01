@@ -63,7 +63,7 @@ remote_exec build "mkdir [file dirname $new_name]"
 remote_exec build "ln -s ${binfile}${EXEEXT} $new_name"
 clean_restart ${testfile}${EXEEXT}
 if { $gdb_file_cmd_debug_info != "debug" } then {
-    fail "No debug information found."
+    fail "no debug information found."
 }
 
 # Restore subdir
@@ -71,7 +71,7 @@ set subdir ${old_subdir}
 
 clean_restart ${testfile}${EXEEXT}
 if { $gdb_file_cmd_debug_info != "debug" } then {
-    fail "No debug information found."
+    fail "no debug information found."
 }
 
 #

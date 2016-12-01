@@ -16,7 +16,7 @@
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile test program"
+    untested "couldn't compile test program"
     return -1
 }
 
@@ -25,7 +25,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 clean_restart ${binfile}
 
 if ![runto marker1] {
-    untested "Couldn't run to marker1"
+    untested "couldn't run to marker1"
 }
 
 gdb_test "print foo_ptr" "\\\$$decimal = \\\(struct foo \\\*\\\) $hex"

@@ -27,14 +27,14 @@ if { [gdb_compile_pthreads \
 	  "${srcdir}/${subdir}/${srcfile}" \
 	  "${binfile}" \
 	  executable {debug}] != "" } {
-    untested "Couldn't compile test program."
+    untested "couldn't compile test program."
     return -1
 }
 
 clean_restart $executable
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

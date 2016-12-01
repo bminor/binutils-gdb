@@ -56,7 +56,7 @@ if ![runto_main] then {
 # case.
 
 if { [is_address_zero_readable] } {
-    untested "Memory at address 0 is possibly executable"
+    untested "memory at address 0 is possibly executable"
     return
 }
 
@@ -119,7 +119,7 @@ proc after_segv { } {
 
 # Check that the address table and SIGSEGV correspond.
 
-set test "Verify that ${signame} occurs at the last STEPI insn"
+set test "verify that ${signame} occurs at the last STEPI insn"
 if {[string compare $segv_addr [at_segv]] == 0} {
     pass "$test"
 } else {

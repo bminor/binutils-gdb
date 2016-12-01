@@ -41,12 +41,12 @@ if [get_compiler_info] {
 
 if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""} {
-    untested "Could not compile either $libsrc1 or $libsrc2"
+    untested "could not compile either $libsrc1 or $libsrc2"
     return -1
 }
 
 if { [gdb_compile_pthreads $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
-    untested "Could not compile  $srcdir/$subdir/$srcfile."
+    untested "could not compile  $srcdir/$subdir/$srcfile."
     return -1
 }
 
@@ -111,7 +111,7 @@ mi_gdb_test "-break-insert -p 2 -f pendfunc3" \
 mi_send_resuming_command "exec-continue" "continuing execution to thread condition"
 
 # Check if we stopped in thread 2 like we should.
-set testname "Run till MI pending breakpoint on pendfunc3 on thread 2"
+set testname "run till MI pending breakpoint on pendfunc3 on thread 2"
 gdb_expect {
     -re "\\*stopped,reason=\"breakpoint-hit\",disp=\"keep\",bkptno=\"4\",frame=\{addr=\"$hex\",func=\"pendfunc3\".*thread-id=\"2\".*" {
 	pass $testname

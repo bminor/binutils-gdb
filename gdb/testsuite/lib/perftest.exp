@@ -90,7 +90,7 @@ namespace eval PerfTest {
 
 	if { [string compare $GDB_PERFTEST_MODE "run"] != 0 } {
 	    if { [eval compile {$compile}] } {
-		untested "Could not compile source files."
+		untested "could not compile source files."
 		return
 	    }
 	}

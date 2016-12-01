@@ -60,7 +60,7 @@ gdb_test "continue" ".*Breakpoint .*loop.*" "Stopped in loop"
 
 gdb_test_multiple "thread" "Thread command" {
     -re ".*Current thread is (\[0-9\]*).*$gdb_prompt $" {
-	pass "Thread command" 
+	pass "thread command"
     }
 }
 

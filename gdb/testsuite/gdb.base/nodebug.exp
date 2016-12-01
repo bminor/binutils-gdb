@@ -31,7 +31,7 @@ if [test_compiler_info "xlc-*"] {
 }
 
 if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "" } {
-    untested "Couldn't compile $srcfile."
+    untested "couldn't compile $srcfile."
     return -1
 }
 

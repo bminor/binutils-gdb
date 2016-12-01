@@ -43,7 +43,7 @@ gdb_test_no_output "set can-use-hw-watchpoints 1" ""
 
 # Run to `main' where we begin our tests.
 if ![runto_main] then {
-    fail "Failed to run to main"
+    fail "failed to run to main"
     return 0
 }
 
@@ -86,7 +86,7 @@ gdb_test_no_output "set breakpoint always-inserted off"
 # (through board settings) that it did not support them in the first place.
 # Just exit.
 if { $hwatch_count == 0} {
-  fail "No hardware watchpoints available"
+  fail "no hardware watchpoints available"
   return 0
 }
 

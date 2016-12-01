@@ -42,7 +42,7 @@ set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlope
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {
-    untested "Couldn't compile $libsrc or $srcfile."
+    untested "couldn't compile $libsrc or $srcfile."
     return -1
 }
 

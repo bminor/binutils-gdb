@@ -38,19 +38,19 @@ if [get_compiler_info] {
 # Compile the first without debug info so that
 # stepping and reverse stepping doesn't end up inside them.
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib1src} ${library1} ""] != "" } {
-    untested "Could not compile shared library1."
+    untested "could not compile shared library1."
     return -1
 }
 
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib2src} ${library2} "debug"] != "" } {
-    untested "Could not compile shared library2."
+    untested "could not compile shared library2."
     return -1
 }
 
 set exec_opts [list debug shlib=${library1} shlib=${library2}]
 
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
-    untested "Could not compile $binfile."
+    untested "could not compile $binfile."
     return -1
 }
      

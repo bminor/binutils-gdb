@@ -305,7 +305,7 @@ gdb_expect 60 {
 	pass "weirdx.o read without error"
     }
     -re ".*$gdb_prompt $" {
-	fail "Errors reading weirdx.o"
+	fail "errors reading weirdx.o"
     }
     timeout {
 	perror "couldn't load $binfile into $GDB (timed out)."

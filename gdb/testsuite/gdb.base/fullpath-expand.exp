@@ -16,7 +16,7 @@
 standard_testfile .c fullpath-expand-func.c
 
 if [is_remote host] {
-    unsupported "Compiling on a remote host does not support a filename with directory."
+    unsupported "compiling on a remote host does not support a filename with directory."
     return 0
 }
 

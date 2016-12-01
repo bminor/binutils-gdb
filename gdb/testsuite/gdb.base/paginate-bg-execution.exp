@@ -33,7 +33,7 @@ proc test_bg_execution_pagination_return {} {
 	clean_restart $binfile
 
 	if ![runto_main] then {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return 0
 	}
 
@@ -76,7 +76,7 @@ proc test_bg_execution_pagination_cancel { how } {
 	clean_restart $binfile
 
 	if ![runto_main] then {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return 0
 	}
 

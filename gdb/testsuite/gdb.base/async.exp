@@ -63,7 +63,7 @@ proc test_background {command before_prompt after_prompt {message ""}} {
 	    fail "$message"
 	}
 	-re ".*Asynchronous execution not supported on this target\..*" {
-	    unsupported "Asynchronous execution not supported: $message"
+	    unsupported "asynchronous execution not supported: $message"
 	}
 	timeout  {
 	    fail "$message (timeout)"

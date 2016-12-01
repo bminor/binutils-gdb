@@ -43,11 +43,11 @@ proc address_get { testname } {
 set test "set disable-randomization off"
 gdb_test_multiple "${test}" "${test}" {
     -re "Disabling randomization .* unsupported .*$gdb_prompt $" {
-	untested "Disabling randomization is not supported on this Linux GDB"
+	untested "disabling randomization is not supported on this Linux GDB"
 	return -1
     }
     -re "No symbol .* in current context.*$gdb_prompt $" {
-	untested "Disabling randomization is not supported on this GDB platform"
+	untested "disabling randomization is not supported on this GDB platform"
 	return -1
     }
     -re "$gdb_prompt $" {
@@ -62,7 +62,7 @@ set addr1 [address_get "randomized first address"]
 set addr2 [address_get "randomized second address"]
 set test "randomized addresses should not match"
 if [string equal $addr1 $addr2] {
-    untested "No randomization detected on this system"
+    untested "no randomization detected on this system"
     return -1
 } else {
     pass $test

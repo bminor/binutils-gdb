@@ -40,7 +40,7 @@ proc do_test {sync_command} {
     mi_gdb_exit
 
     if {[mi_gdb_start "separate-mi-tty"] != 0} {
-	fail "Could not start gdb"
+	fail "could not start gdb"
 	return
     }
 

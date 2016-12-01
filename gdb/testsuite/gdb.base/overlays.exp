@@ -171,7 +171,7 @@ gdb_expect {
     -re ".*ovly2, "	 	{ fail ".ovly2  not unmapped by .ovly3"  }
     -re ".*data00,"		{ fail ".data00 not unmapped by .data01" }
     -re ".*data02,"		{ fail ".data02 not unmapped by .data03" }
-    -re ".*$gdb_prompt $"	{ pass "Automatic unmapping"             }
+    -re ".*$gdb_prompt $"	{ pass "automatic unmapping"             }
     timeout			{ fail "(timeout) Automatic unmapping"   }
 }
 

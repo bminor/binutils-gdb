@@ -53,7 +53,7 @@ proc test_remove_inferiors { } {
 	     "load binary"
 
     if {![runto_main]} {
-	fail "Couldn't run to main."
+	fail "couldn't run to main."
 	return
     }
 

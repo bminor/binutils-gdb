@@ -36,7 +36,7 @@ proc get_first_mapped_address {} {
             set addr $expect_out(1,string)
         }
         -re "$gdb_prompt $" {
-            unsupported "Current target does not support 'info proc mappings'"
+            unsupported "current target does not support 'info proc mappings'"
         }
     }
     return ${addr}

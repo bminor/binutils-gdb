@@ -62,7 +62,7 @@ proc symlink_resolve {file} {
 
 	set loop [expr $loop + 1]
 	if {$loop > 30} {
-	    fail "Looping symlink resolution for $file"
+	    fail "looping symlink resolution for $file"
 	    return ""
 	}
     }

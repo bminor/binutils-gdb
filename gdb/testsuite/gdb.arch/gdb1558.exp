@@ -50,7 +50,7 @@ gdb_test "b sub2" "Breakpoint 3.*" "set breakpoint at sub2"
 
 gdb_run_cmd
 
-set test "Hits breakpoint at main after function called from main"
+set test "hits breakpoint at main after function called from main"
 gdb_test_multiple "" $test {
     -re "Breakpoint 1.*main .*$gdb_prompt $" {
 	pass $test

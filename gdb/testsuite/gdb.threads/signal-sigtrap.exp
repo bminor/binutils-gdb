@@ -37,7 +37,7 @@ proc test { sigtrap_thread } {
 	clean_restart ${binfile}
 
 	if ![runto "thread_function"] then {
-	    fail "Can't run to thread_function"
+	    fail "can't run to thread_function"
 	    return 0
 	}
 

@@ -51,7 +51,7 @@ remote_file target delete $tfile_basic
 remote_file target delete $tfile_error
 
 if { ![generate_tracefile $binfile] } {
-    unsupported "Unable to generate trace file"
+    unsupported "unable to generate trace file"
     return -1
 }
 

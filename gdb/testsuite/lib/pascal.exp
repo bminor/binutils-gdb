@@ -158,7 +158,7 @@ proc gdb_compile_pascal {source destfile type options} {
     } elseif { $pascal_compiler_is_gpc == 1 } {
         set result [gpc_compile $source $destfile $type $options]
     } else {
-	unsupported "No pascal compiler found"
+	unsupported "no pascal compiler found"
 	return "No pascal compiler. Compilation failed."
     }
 

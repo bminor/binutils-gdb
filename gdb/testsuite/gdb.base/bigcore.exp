@@ -21,7 +21,7 @@
 # mechanism that would let it efficiently access a remote corefile.
 
 if ![isnative] then {
-    untested "Remote system"
+    untested "remote system"
     return
 }
 
@@ -34,7 +34,7 @@ if { [istarget "*-*-*bsd*"]
      || [istarget "*-*-solaris*"] 
      || [istarget "*-*-darwin*"] 
      || [istarget "*-*-cygwin*"] } {
-    untested "Kernel lacks sparse corefile support (PR gdb/1551)"
+    untested "kernel lacks sparse corefile support (PR gdb/1551)"
     return
 }
 
@@ -146,7 +146,7 @@ foreach pat [list core.${inferior_pid} ${testfile}.core core] {
 }
 
 if { $file == "" } {
-    untested "Can't generate a core file"
+    untested "can't generate a core file"
     return 0
 }
 

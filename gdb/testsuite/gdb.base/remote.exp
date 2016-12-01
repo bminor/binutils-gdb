@@ -127,7 +127,7 @@ set sizeof_random_data [get_sizeof "random_data" 48*1024]
 # Part THREE: Check the upload behavour
 #
 if ![runto_main] then {
-    fail "Cannot run to main"
+    fail "cannot run to main"
 }
 
 # Carefully check memory around each of the most common packet edge

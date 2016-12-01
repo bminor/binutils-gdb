@@ -70,14 +70,14 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""
 	 || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-	untested "Could not compile ${binfile_lib1_test_msg}, ${binfile_lib2_test_msg} or ${binfile_test_msg}."
+	untested "could not compile ${binfile_lib1_test_msg}, ${binfile_lib2_test_msg} or ${binfile_test_msg}."
 	return -1
     }
 
     if {[catch "system \"prelink -N -r ${prelink_lib1} ${binfile_lib1}\""] != 0
 	|| [catch "system \"prelink -N -r ${prelink_lib2} ${binfile_lib2}\""] != 0} {
 	# Maybe we don't have prelink.
-	untested "Could not prelink ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
+	untested "could not prelink ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
 	return -1
     }
 
@@ -92,7 +92,7 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""} {
-	untested "Could not recompile ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
+	untested "could not recompile ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
 	kill_wait_spawned_process $test_spawn_id
 	return -1
     }

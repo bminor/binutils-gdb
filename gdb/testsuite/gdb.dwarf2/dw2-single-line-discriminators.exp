@@ -36,7 +36,7 @@ if { [prepare_for_testing "${testfile}.exp" "${testfile}" $srcfile {nodebug}] } 
 }
 
 if ![runto_main] then {
-    fail "Cannot run to main."
+    fail "cannot run to main."
     continue
 }
 

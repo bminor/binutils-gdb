@@ -26,7 +26,7 @@ if [prepare_for_testing $expfile $executable $srcfile \
 }
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -45,7 +45,7 @@ proc test_tstart_tstop_tstart { } {
 	# Start with a fresh gdb.
 	clean_restart ${executable}
 	if ![runto_main] {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return -1
 	}
 
@@ -72,7 +72,7 @@ proc test_tstart_tstart { } {
 	# Start with a fresh gdb.
 	clean_restart ${executable}
 	if ![runto_main] {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return -1
 	}
 
@@ -99,7 +99,7 @@ proc test_buffer_full_tstart { } {
 	# Start with a fresh gdb.
 	clean_restart ${executable}
 	if ![runto_main] {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return -1
 	}
 

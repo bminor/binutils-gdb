@@ -37,7 +37,7 @@ gdb_file_cmd $binfile
 # all subsequent line numbers are relative to this first one (baseline)
 set baseline  [gdb_find_recursion_test_baseline $srcfile]
 if { $baseline == -1 } then {
-    fail "Could not find gdb_recursion_test function"
+    fail "could not find gdb_recursion_test function"
     return
 }
 
@@ -163,9 +163,9 @@ gdb_delete_tracepoints
 # Acceptance vs rejection of a location are target-specific, so allow both.
 gdb_test_multiple "ftrace gdb_recursion_test" "Set a fast tracepoint" {
     -re "Fast tracepoint $decimal at $hex: file.*$srcfile, line $testline1.*$gdb_prompt $" {
-	pass "Set a fast tracepoint"
+	pass "set a fast tracepoint"
     }
     -re ".*May not have a fast tracepoint at $hex.*$gdb_prompt $" {
-	pass "Declined to set a fast tracepoint"
+	pass "declined to set a fast tracepoint"
     }
 }

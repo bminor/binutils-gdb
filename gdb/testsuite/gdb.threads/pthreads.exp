@@ -189,13 +189,13 @@ proc check_control_c {} {
 
     # Verify that all threads are running.
     if [all_threads_running] then {
-	pass "All threads running after startup"
+	pass "all threads running after startup"
     }
 
     # Send a continue followed by ^C to the process to stop it.
     gdb_test_multiple "continue" "continue with all threads running" {
 	-re "Continuing." {
-	    pass "Continue with all threads running"
+	    pass "continue with all threads running"
 	}
     }
     after 2000
@@ -217,7 +217,7 @@ proc check_control_c {} {
 
     # Verify that all threads can be run again after a ^C stop.
     if [all_threads_running] then {
-	pass "All threads running after continuing from ^C stop"
+	pass "all threads running after continuing from ^C stop"
     }
     return 0
 }

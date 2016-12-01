@@ -40,7 +40,7 @@ if [get_compiler_info] {
 # Some targets can't do function calls, so don't even bother with this
 # test.
 if [target_info exists gdb,cannot_call_functions] {
-    unsupported "This target can not call functions"
+    unsupported "this target can not call functions"
     continue
 }
 

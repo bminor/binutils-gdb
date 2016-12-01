@@ -91,7 +91,7 @@ set ok 0
 gdb_run_cmd
 gdb_test_multiple "" "Run to main" {
     -re "Temporary breakpoint 4,.*$gdb_prompt $" {
-	pass "Run to main"
+	pass "run to main"
 	set ok 1
     }
 }

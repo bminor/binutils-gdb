@@ -24,7 +24,7 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {}] != "" } {
-    unsupported "Testcase compile failed."
+    unsupported "testcase compile failed."
     return -1
 }
 
@@ -38,7 +38,7 @@ proc test_stepi {function } {
     # of the previous tests, this makes sure that it doesn't affect
     # this series of tests.
     if ![runto_main] then {
-        fail "Can't run to main"
+        fail "can't run to main"
         return 0
     }
 

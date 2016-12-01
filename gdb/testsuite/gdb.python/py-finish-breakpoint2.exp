@@ -28,7 +28,7 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
 if { [skip_python_tests] } { continue }
 
 if ![runto_main] then {
-    fail "Cannot run to main."
+    fail "cannot run to main."
     return 0
 }
 

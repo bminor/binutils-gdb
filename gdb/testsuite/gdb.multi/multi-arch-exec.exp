@@ -78,7 +78,7 @@ if { [prepare_for_testing ${testfile}.exp ${exec2} "${srcfile2}" \
 
 clean_restart ${exec1}
 if ![runto_main] then {
-    fail "Couldn't run to main"
+    fail "couldn't run to main"
     return -1
 }
 

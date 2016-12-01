@@ -33,7 +33,7 @@ if { [skip_python_tests] } { continue }
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

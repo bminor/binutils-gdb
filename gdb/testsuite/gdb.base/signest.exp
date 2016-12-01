@@ -39,7 +39,7 @@ if ![runto_main] then {
 # case.
 
 if { [is_address_zero_readable] } {
-    untested "Memory at address 0 is possibly executable"
+    untested "memory at address 0 is possibly executable"
     return -1
 }
 

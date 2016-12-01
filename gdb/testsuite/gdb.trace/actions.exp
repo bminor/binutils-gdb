@@ -39,7 +39,7 @@ gdb_file_cmd $binfile
 
 set baseline  [gdb_find_recursion_test_baseline $srcfile]
 if { $baseline == -1 } then {
-    fail "Could not find gdb_recursion_test function"
+    fail "could not find gdb_recursion_test function"
     return
 }
 
@@ -243,7 +243,7 @@ gdb_load $binfile
 gdb_breakpoint "main"
 gdb_run_cmd
 if {[gdb_test "" "Breakpoint .*"] != 0} {
-    fail "Can't run to main"
+    fail "can't run to main"
     return -1
 }
 

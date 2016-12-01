@@ -30,14 +30,14 @@ set options [list debug [gdb_target_symbol_prefix_flags] \
 
 # Check that the target supports trace.
 if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
-    untested "Couldn't compile test program"
+    untested "couldn't compile test program"
     return -1
 }
 
 clean_restart ${testfile}
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -53,19 +53,19 @@ set remote_libipa [gdb_load_shlib $libipa]
 lappend options shlib=$libipa
 
 if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
-    untested "Couldn't compile test program with in-process agent library"
+    untested "couldn't compile test program with in-process agent library"
     return -1
 }
 
 clean_restart ${executable}
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
 if { [gdb_test "info sharedlibrary" ".*${remote_libipa}.*" "IPA loaded"] != 0 } {
-    untested "Could not find IPA lib loaded"
+    untested "could not find IPA lib loaded"
     return 1
 }
 

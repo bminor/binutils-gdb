@@ -45,7 +45,7 @@ gdb_test "set displaced-stepping on" ""
 gdb_test "show displaced-stepping" ".* displaced stepping .* is on.*"
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

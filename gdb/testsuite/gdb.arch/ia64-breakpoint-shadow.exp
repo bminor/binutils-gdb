@@ -22,7 +22,7 @@ set testfile ia64-breakpoint-shadow
 set srcfile ${testfile}.S
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile test program"
+    untested "couldn't compile test program"
     return -1
 }
 

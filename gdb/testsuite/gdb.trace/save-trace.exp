@@ -38,7 +38,7 @@ gdb_file_cmd $binfile
 # all subsequent line numbers are relative to this first one (baseline)
 set baseline  [gdb_find_recursion_test_baseline $srcfile]
 if { $baseline == -1 } then {
-    fail "Could not find gdb_recursion_test function"
+    fail "could not find gdb_recursion_test function"
     return
 }
 

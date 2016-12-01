@@ -94,7 +94,7 @@ proc run_skip_bench { kind text } {
     global SKIP_STEP_COUNT SKIP_DIRECTIVE_COUNT
 
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return -1
     }
 

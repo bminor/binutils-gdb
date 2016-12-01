@@ -184,7 +184,7 @@ proc test_template_calls {} {
     global gdb_prompt
 
     if [target_info exists gdb,cannot_call_functions] {
-	unsupported "This target can not call functions"
+	unsupported "this target can not call functions"
 	return
     }
 

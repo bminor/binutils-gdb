@@ -37,7 +37,7 @@ proc spawn_shell {} {
 
     set res [remote_spawn host "/bin/sh"]
     if { $res < 0 || $res == "" } {
-	unsupported "Spawning shell failed."
+	unsupported "spawning shell failed."
 	return 0
     }
 

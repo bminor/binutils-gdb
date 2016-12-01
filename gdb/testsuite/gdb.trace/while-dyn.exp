@@ -35,7 +35,7 @@ runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
 if { ![gdb_target_supports_trace] } then {
-    unsupported "Current target does not support trace"
+    unsupported "current target does not support trace"
     return 1
 }
 

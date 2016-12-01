@@ -30,7 +30,7 @@ if { [skip_guile_tests] } { continue }
 proc run_lang_tests {exefile lang} {
     global srcdir subdir srcfile testfile hex
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
-	untested "Couldn't compile ${srcfile} in $lang mode"
+	untested "couldn't compile ${srcfile} in $lang mode"
 	return
     }
 
