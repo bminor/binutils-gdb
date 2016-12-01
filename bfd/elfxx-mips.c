@@ -5920,7 +5920,6 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	    value = mips_elf_high (addend + gp - p - 1);
 	  else
 	    value = mips_elf_high (addend + gp - p);
-	  overflowed_p = mips_elf_overflow_p (value, 16);
 	}
       break;
 

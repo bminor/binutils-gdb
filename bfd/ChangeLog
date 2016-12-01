@@ -1,3 +1,9 @@
+2016-12-01  Ma Jiang  <ma.jiang@zte.com.cn>
+
+	PR ld/16720
+	* elfxx-mips.c (mips_elf_calculate_relocation): Remove overflow
+	test for HI16 relocs.
+
 2016-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20891
