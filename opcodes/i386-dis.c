@@ -16975,7 +16975,8 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  names = names_mask;
 	  break;
 	default:
-	  abort ();
+	  /* See PR binutils/20893 for a reproducer.  */
+	  oappend ("(bad)");
 	  return;
 	}
       break;
