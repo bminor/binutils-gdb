@@ -1,6 +1,6 @@
 2016-12-01  Jim Wilson  <jim.wilson@linaro.org>
 
-	* sim/aarch64/simulator.c (fsturs): Switch use of rn and st variables.
+	* simulator.c (fsturs): Switch use of rn and st variables.
 	(fsturd, fsturq): Likewise
 
 2016-08-15  Mike Frysinger  <vapier@gentoo.org>
