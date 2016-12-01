@@ -5841,24 +5841,29 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       else
 	{
 	  /* GD->IE relaxation
-	     ADD  x0, #:tlsgd_lo12:var  => ldr  x0, [x0, #:gottprel_lo12:var]
+	     ADD  x0, #:tlsgd_lo12:var  => ldr  R0, [x0, #:gottprel_lo12:var]
 	     BL   __tls_get_addr        => mrs  x1, tpidr_el0
 	       R_AARCH64_CALL26
-	     NOP                        => add  x0, x1, x0
-	   */
+	     NOP                        => add  R0, R1, R0
+
+	     Where R is x for lp64 mode, and w for ilp32 mode.  */
 
 	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
 
 	  /* Remove the relocation on the BL instruction.  */
 	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
 
-	  bfd_putl32 (0xf9400000, contents + rel->r_offset);
-
 	  /* We choose to fixup the BL and NOP instructions using the
 	     offset from the second relocation to allow flexibility in
 	     scheduling instructions between the ADD and BL.  */
-	  bfd_putl32 (0xd53bd041, contents + rel[1].r_offset);
+#if ARCH_SIZE == 32
+	  bfd_putl32 (0xb9400000, contents + rel->r_offset);
+	  bfd_putl32 (0x0b000020, contents + rel[1].r_offset + 4);
+#else
+	  bfd_putl32 (0xf9400000, contents + rel->r_offset);
 	  bfd_putl32 (0x8b000020, contents + rel[1].r_offset + 4);
+#endif
+	  bfd_putl32 (0xd53bd041, contents + rel[1].r_offset);
 	  return bfd_reloc_continue;
 	}
 

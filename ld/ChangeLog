@@ -1,3 +1,11 @@
+2016-12-01  Yury Norov  <ynorov@caviumnetworks.com>
+
+	PR ld/20868
+	* testsuite/ld-aarch64/tls-relax-gd-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/relocs-ilp32.ld: Linker script for the new
+	test.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run the new test.
+
 2016-11-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* emulparams/arclinux_prof.sh: Remove duplicate TEMPLATE_NAME.

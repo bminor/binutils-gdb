@@ -1,3 +1,9 @@
+2016-12-01  Yury Norov  <ynorov@caviumnetworks.com>
+
+	PR ld/20868
+	* elfnn-aarch64.c (elfNN_aarch64_tls_relax): Use 32-bit accesses
+	to the GOT when operating in 32-bit mode.
+
 2016-12-01  Ma Jiang  <ma.jiang@zte.com.cn>
 
 	PR ld/16720
