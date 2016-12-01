@@ -2666,7 +2666,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   char *buf;
 
   *filename_ptr = abfd->filename;
-  *functionname_ptr = 0;
+  *functionname_ptr = NULL;
   *line_ptr = 0;
   if (disriminator_ptr)
     *disriminator_ptr = 0;
@@ -2811,9 +2811,17 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 	*filename_ptr = main_file_name;
       else
 	{
-	  sprintf (buf, "%s%s", directory_name, main_file_name);
-	  *filename_ptr = buf;
-	  buf += filelen + 1;
+	  if (buf == NULL)
+	    /* PR binutils/20891: In a corrupt input file both
+	       main_file_name and directory_name can be empty...  */
+	    * filename_ptr = NULL;
+	  else
+	    {
+	      snprintf (buf, filelen + 1, "%s%s", directory_name,
+			main_file_name);
+	      *filename_ptr = buf;
+	      buf += filelen + 1;
+	    }
 	}
     }
 
