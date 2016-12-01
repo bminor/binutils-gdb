@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 /* table header structures */
 
@@ -72,7 +73,7 @@ struct ui_out_table
 
   /* String identifying the table (as specified in the table_begin
      call).  */
-  char *id;
+  std::string id;
 
   /* Points to the first table header (if any).  */
   struct ui_out_hdr *header_first;
@@ -194,8 +195,7 @@ static void verify_field (struct ui_out *uiout, int *fldno, int *width,
 
 static void
 ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
-		    int nr_rows,
-		    const char *tblid)
+		    int nr_rows, const std::string &tblid)
 {
   if (uiout->table.flag)
     internal_error (__FILE__, __LINE__,
@@ -206,13 +206,11 @@ previous table_end."));
   uiout->table.body_flag = 0;
   uiout->table.entry_level = uiout->level + 1;
   uiout->table.columns = nbrofcols;
-  if (tblid != NULL)
-    uiout->table.id = xstrdup (tblid);
-  else
-    uiout->table.id = NULL;
+  uiout->table.id = tblid;
+
   clear_header_list (uiout);
 
-  uo_table_begin (uiout, nbrofcols, nr_rows, uiout->table.id);
+  uo_table_begin (uiout, nbrofcols, nr_rows, uiout->table.id.c_str ());
 }
 
 void
@@ -577,8 +575,7 @@ uo_table_header (struct ui_out *uiout, int width, enum ui_align align,
 static void
 clear_table (struct ui_out *uiout)
 {
-  xfree (uiout->table.id);
-  uiout->table.id = NULL;
+  uiout->table.id.clear ();
   clear_header_list (uiout);
 }
 
@@ -875,7 +872,6 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   current->field_count = 0;
   uiout->levels.push_back (std::move (current));
 
-  uiout->table.id = NULL;
   uiout->table.header_first = NULL;
   uiout->table.header_last = NULL;
   uiout->table.header_next = NULL;

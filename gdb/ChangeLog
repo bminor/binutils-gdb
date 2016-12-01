@@ -1,5 +1,15 @@
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (struct ui_out_table) <id>: Change type to
+	std::string.
+	(ui_out_table_begin): Change tblid parameter type to
+	std::string, adapt code.
+	update following type change.
+	(clear_table): Update.
+	(ui_out_new): Update.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli-out.h (cli_ui_out_data) <streams>: Change type to
 	std::vector.
 	* cli-out.c: Remove vec.h include.
