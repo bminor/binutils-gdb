@@ -33,7 +33,7 @@ proc test_delete_alias { alias } {
     # First of all, remove all previous breakpoints if there were any,
     # and then verify that we do not have any breakpoint lying around.
     gdb_test_no_output "delete" \
-             "Remove all breakpoints ($alias)"
+             "remove all breakpoints ($alias)"
 
     gdb_test "info break" \
              "No breakpoints or watchpoints." \

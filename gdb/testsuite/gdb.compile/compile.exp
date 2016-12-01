@@ -66,16 +66,16 @@ if {[skip_compile_feature_tests]} {
 #
 
 gdb_test_no_output "compile -- f = 10" \
-    "Test abbreviations and code delimiter"
+    "test abbreviations and code delimiter"
 
 gdb_test "compile f = 10;" ".*= 10;: No such file.*" \
     "Test abbreviations and code collision"
 
 gdb_test_no_output "compile -r -- void _gdb_expr(){int i = 5;}" \
-    "Test delimiter with -r"
+    "test delimiter with -r"
 
 gdb_test_no_output "compile -raw -- void _gdb_expr(){int i = 5;}" \
-    "Test delimiter with -raw"
+    "test delimiter with -raw"
 
 gdb_test "compile -- -r  void _gdb_expr(){int i = 5;}" \
     ".* error: 'r' undeclared \\(first use in this function\\).*" \

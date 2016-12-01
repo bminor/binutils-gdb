@@ -2,6 +2,20 @@
 
 	Fix test names starting with uppercase throughout the files.
 
+	* gdb.ada/assign_1.exp
+	* gdb.ada/boolean_expr.exp
+	* gdb.base/arrayidx.exp
+	* gdb.base/del.exp
+	* gdb.base/gcore-buffer-overflow.exp
+	* gdb.base/testenv.exp
+	* gdb.compile/compile.exp
+	* gdb.python/py-framefilter-invalidarg.exp
+	* gdb.python/py-framefilter.exp
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
+	Fix test names starting with uppercase throughout the files.
+
 	* gdb.ada/array_return.exp
 	* gdb.ada/expr_delims.exp
 	* gdb.ada/mi_dyn_arr.exp

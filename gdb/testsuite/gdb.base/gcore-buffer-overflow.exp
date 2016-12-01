@@ -32,7 +32,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 clean_restart ${binfile}
 
 gdb_test_no_output "set args ${pattern}"	\
-    "Set buffer exceeding arguments"
+    "set buffer exceeding arguments"
 
 if { ! [ runto_main ] } then {
     untested gcore-buffer-overflow.exp

@@ -34,7 +34,7 @@ if ![runto_main] then {
 # First, print the array without the indexes
 
 gdb_test_no_output "set print array-indexes off" \
-         "Set print array-indexes to off"
+         "set print array-indexes to off"
 
 gdb_test "print array" \
          "\\{1, 2, 3, 4\\}" \
@@ -43,7 +43,7 @@ gdb_test "print array" \
 # Second, print the same array with the indexes
 
 gdb_test_no_output "set print array-indexes on" \
-         "Set print array-indexes to on"
+         "set print array-indexes to on"
 
 gdb_test "print array" \
          "\\{\\\[0\\\] = 1, \\\[1\\\] = 2, \\\[2\\\] = 3, \\\[3\\\] = 4\\}" \
