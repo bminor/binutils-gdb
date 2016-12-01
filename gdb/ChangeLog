@@ -1,5 +1,18 @@
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (enum ui_out_table_state): New enum.
+	(struct ui_out_table) <body_flag>: Remove field.
+	<state>: New field.
+	(ui_out_table_begin): Replace usages of body_flag with state.
+	(ui_out_table_body): Likewise.
+	(ui_out_table_end): Likewise.
+	(ui_out_table_header): Likewise.
+	(ui_out_begin): Likewise.
+	(verify_field): Likewise.
+	(ui_out_new): Likewise.
+
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.h (ui_out_begin_ftype): Remove level parameter.
 	(ui_out_end_ftype): Likewise.
 	* ui-out.c (struct ui_out) <level>: Replace field with a method

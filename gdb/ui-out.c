@@ -126,6 +126,16 @@ class ui_out_level
   int m_field_count;
 };
 
+/* States (steps) of a table generation.  */
+
+enum ui_out_table_state
+{
+  /* We are generating the table headers.  */
+  TABLE_STATE_HEADERS,
+
+  /* We are generating the table body.  */
+  TABLE_STATE_BODY,
+};
 
 /* Tables are special.  Maintain a separate structure that tracks
    their state.  At present an output can only contain a single table
@@ -136,9 +146,7 @@ struct ui_out_table
   /* If on, a table is being generated.  */
   int flag;
 
-  /* If on, the body of a table is being generated.  If off, the table
-     header is being generated.  */
-  int body_flag;
+  ui_out_table_state state;
 
   /* The level at which each entry of the table is to be found.  A row
      (a tuple) is made up of entries.  Consequently ENTRY_LEVEL is one
@@ -271,7 +279,7 @@ ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
 previous table_end."));
 
   uiout->table.flag = 1;
-  uiout->table.body_flag = 0;
+  uiout->table.state = TABLE_STATE_HEADERS;
   uiout->table.entry_level = uiout->level () + 1;
   uiout->table.columns = nbrofcols;
   uiout->table.id = tblid;
@@ -288,16 +296,18 @@ ui_out_table_body (struct ui_out *uiout)
     internal_error (__FILE__, __LINE__,
 		    _("table_body outside a table is not valid; it must be \
 after a table_begin and before a table_end."));
-  if (uiout->table.body_flag)
+
+  if (uiout->table.state == TABLE_STATE_BODY)
     internal_error (__FILE__, __LINE__,
 		    _("extra table_body call not allowed; there must be \
 only one table_body after a table_begin and before a table_end."));
+
   if (uiout->table.headers.size () != uiout->table.columns)
     internal_error (__FILE__, __LINE__,
 		    _("number of headers differ from number of table \
 columns."));
 
-  uiout->table.body_flag = 1;
+  uiout->table.state = TABLE_STATE_BODY;
 
   uo_table_body (uiout);
 }
@@ -310,7 +320,7 @@ ui_out_table_end (struct ui_out *uiout)
 		    _("misplaced table_end or missing table_begin."));
 
   uiout->table.entry_level = 0;
-  uiout->table.body_flag = 0;
+  uiout->table.state = TABLE_STATE_HEADERS;
   uiout->table.flag = 0;
 
   uo_table_end (uiout);
@@ -321,7 +331,7 @@ void
 ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		     const std::string &col_name, const std::string &col_hdr)
 {
-  if (!uiout->table.flag || uiout->table.body_flag)
+  if (!uiout->table.flag || uiout->table.state != TABLE_STATE_HEADERS)
     internal_error (__FILE__, __LINE__,
 		    _("table header must be specified after table_begin \
 and before table_body."));
@@ -352,7 +362,7 @@ ui_out_begin (struct ui_out *uiout,
 	      enum ui_out_type type,
 	      const char *id)
 {
-  if (uiout->table.flag && !uiout->table.body_flag)
+  if (uiout->table.flag && uiout->table.state != TABLE_STATE_BODY)
     internal_error (__FILE__, __LINE__,
 		    _("table header or table_body expected; lists must be \
 specified after table_body."));
@@ -376,7 +386,7 @@ specified after table_body."));
 
   /* If the push puts us at the same level as a table row entry, we've
      got a new table row.  Put the header pointer back to the start.  */
-  if (uiout->table.body_flag
+  if (uiout->table.state == TABLE_STATE_BODY
       && uiout->table.entry_level == uiout->level ())
     uiout->table.headers_iterator = uiout->table.headers.begin ();
 
@@ -817,17 +827,16 @@ verify_field (struct ui_out *uiout, int *fldno, int *width,
   ui_out_level *current = current_level (uiout);
   const char *text;
 
-  if (uiout->table.flag)
+  if (uiout->table.flag && uiout->table.state != TABLE_STATE_BODY)
     {
-      if (!uiout->table.body_flag)
-	internal_error (__FILE__, __LINE__,
-			_("table_body missing; table fields must be \
+      internal_error (__FILE__, __LINE__,
+		      _("table_body missing; table fields must be \
 specified after table_body and inside a list."));
     }
 
   current->inc_field_count ();
 
-  if (uiout->table.body_flag
+  if (uiout->table.state == TABLE_STATE_BODY
       && uiout->table.entry_level == uiout->level ()
       && get_next_header (uiout, fldno, width, align, &text))
     {
@@ -891,7 +900,7 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   uiout->impl = impl;
   uiout->flags = flags;
   uiout->table.flag = 0;
-  uiout->table.body_flag = 0;
+  uiout->table.state = TABLE_STATE_HEADERS;
 
   /* Create the ui-out level #1, the default level.  */
   push_level (uiout, ui_out_type_tuple);
