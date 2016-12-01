@@ -762,6 +762,7 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
       asection *sec;
       bfd_vma sz;
       asymbol *temp;
+      int synthetic = (sym->flags & BSF_SYNTHETIC);
 
       if (from + size < fromend)
 	{
@@ -777,9 +778,11 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 
       sec = bfd_get_section (sym);
 
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+      /* Synthetic symbols don't have a full type set of data available, thus
+	 we can't rely on that information for the symbol size.  */
+      if (!synthetic && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	sz = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-      else if (bfd_is_com_section (sec))
+      else if (!synthetic && bfd_is_com_section (sec))
 	sz = sym->value;
       else
 	{

@@ -1,3 +1,8 @@
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
+	* nm.c (sort_symbols_by_size): Don't read symbol size if symbol
+	is synthetic.
+
 2016-11-30  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20815
