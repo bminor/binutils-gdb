@@ -94,11 +94,7 @@ gdb_test "info breakpoints" \
     "gdb2495\.cc.*"
 
 # Turn off this new behaviour.
-gdb_test_multiple "set unwind-on-terminating-exception off" \
-    "Turn unwind-on-terminating-exception off" {
-    -re "$gdb_prompt $" {pass "set unwinn-on-terminating-exception off"}
-    timeout {fail "(timeout) set unwind-on-terminating-exception off"}
-}
+gdb_test_no_output "set unwind-on-terminating-exception off"
 
 # Check that it is turned off.
 gdb_test "show unwind-on-terminating-exception" \

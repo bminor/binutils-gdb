@@ -1,5 +1,11 @@
 2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.cp/gdb2495.exp: Replace gdb_test_multiple
+	with gdb_test_no_output.
+	Use command as test name.
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
 	Fix test names starting with uppercase throughout the files.
 
 	* gdb.ada/assign_1.exp
