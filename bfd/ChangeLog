@@ -4,6 +4,10 @@
 	* aoutx.h (find_nearest_line): Handle the case where the main file
 	name and the directory name are both empty.
 
+	PR binutils/20892
+	* aoutx.h (find_nearest_line): Handle the case where the function
+	name is empty.
+
 2016-11-30  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (get_program_header_size): Revert accidental change.

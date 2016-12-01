@@ -2830,6 +2830,12 @@ NAME (aout, find_nearest_line) (bfd *abfd,
       const char *function = func->name;
       char *colon;
 
+      if (buf == NULL)
+	{
+	  /* PR binutils/20892: In a corrupt input file func can be empty.  */
+	  * functionname_ptr = NULL;
+	  return TRUE;
+	}
       /* The caller expects a symbol name.  We actually have a
 	 function name, without the leading underscore.  Put the
 	 underscore back in, so that the caller gets a symbol name.  */
