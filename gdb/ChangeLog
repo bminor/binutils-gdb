@@ -1,5 +1,43 @@
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (enum ui_out_table_state): Move to class
+	ui_out_table as ui_out_table::state.
+	(struct ui_out_table): Change to ...
+	(class ui_out_table): ... this.
+	<flag>: Remove.
+	<entry_level>: Rename to ...
+	<m_entry_level>: ... this.
+	<columns>: Rename to ...
+	<m_nr_cols>: ... this.
+	<id>: Rename to ...
+	<m_id>: ... this.
+	<headers>: Rename to ...
+	<m_headers>: ... this.
+	<headers_iterator>: Rename to ...
+	<m_headers_iterator>: ... this.
+	<start_body, append_header, start_row, get_next_header,
+	query_field, current_state, entry_level>: New methods.
+	(struct ui_out) <table>: Change type to unique_ptr to
+	ui_out_table.
+	(append_header_to_list, get_next_header, clear_header_list,
+	clear_table): Remove.
+	(ui_out_table_begin): Instantiate ui_out_table object.  Update
+	table check.
+	(ui_out_table_body): Update table check, replace code with call
+	to ui_out_table::start_body.
+	(ui_out_table_end): Update table check, replace manual cleanup
+	with assignment of uiout->table unique_ptr to nullptr.
+	(ui_out_table_header): Update table check, replace call to
+	append_header_to_list with call to append_header method.
+	(ui_out_begin): Remove one table state check, update another.
+	Replace code with call to start_row method.
+	(verify_field): Update table checks.
+	(ui_out_query_field): Update table check, replace code with call
+	to query_field method.
+	(ui_out_new): Remove table initialization code.
+
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (enum ui_out_table_state): New enum.
 	(struct ui_out_table) <body_flag>: Remove field.
 	<state>: New field.
