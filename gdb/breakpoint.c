@@ -6062,7 +6062,7 @@ wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
 {
   static char wrap_indent[80];
   int i, total_width, width, align;
-  char *text;
+  const char *text;
 
   total_width = 0;
   for (i = 1; ui_out_query_field (uiout, i, &width, &align, &text); i++)

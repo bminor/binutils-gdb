@@ -94,8 +94,7 @@ cli_table_end (struct ui_out *uiout)
 
 static void
 cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
-		  const char *col_name,
-		  const char *colhdr)
+		  const std::string &col_name, const std::string &col_hdr)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
 
@@ -104,7 +103,7 @@ cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 
   /* Always go through the function pointer (virtual function call).
      We may have been extended.  */
-  uo_field_string (uiout, 0, width, alignment, 0, colhdr);
+  uo_field_string (uiout, 0, width, alignment, 0, col_hdr.c_str ());
 }
 
 /* Mark beginning of a list */

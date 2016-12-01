@@ -1,5 +1,25 @@
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* mi/mi-out.c (mi_table_header): Change char * args to
+	std::string.
+	* cli-out.c (cli_table_header): Likewise.
+	* ui-out.h (table_header_ftype): Likewise.
+	(ui_out_table_header): Constify colhdr argument.
+	(ui_out_query_field): Constify col_name argument.
+	* ui-out.c (ui_out_hdr) <col_name, colhdr>: Change type to
+	std::string.
+	(uo_table_header): Change char * args to std::string.
+	(ui_out_table_header): Likewise.
+	(get_next_header): Constify colhdr argument and adapt.
+	(clear_header_list): Don't free col_name/colhdr fields.
+	(append_header_to_list): Change char * args to std::string and
+	adapt.
+	(verify_field): Constify variable.
+	(ui_out_query_field): Constify col_name argument and adapt.
+	* breakpoint.c (wrap_indent_at_field): Constify variable.
+
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (struct ui_out_hdr) <next>: Remove.
 	(struct ui_out_table) <header_first, header_last, header_next>: Remove.
 	<headers, headers_iterator>: New fields.

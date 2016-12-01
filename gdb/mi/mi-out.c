@@ -41,8 +41,9 @@ static void mi_table_begin (struct ui_out *uiout, int nbrofcols,
 static void mi_table_body (struct ui_out *uiout);
 static void mi_table_end (struct ui_out *uiout);
 static void mi_table_header (struct ui_out *uiout, int width,
-			     enum ui_align alig, const char *col_name,
-			     const char *colhdr);
+			     enum ui_align alignment,
+			     const std::string &col_name,
+			     const std::string &col_hdr);
 static void mi_begin (struct ui_out *uiout, enum ui_out_type type,
 		      int level, const char *id);
 static void mi_end (struct ui_out *uiout, enum ui_out_type type, int level);
@@ -140,7 +141,7 @@ mi_table_end (struct ui_out *uiout)
 
 void
 mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
-		 const char *col_name, const char *colhdr)
+		 const std::string &col_name, const std::string &col_hdr)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
@@ -150,8 +151,8 @@ mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
   mi_open (uiout, NULL, ui_out_type_tuple);
   mi_field_int (uiout, 0, 0, ui_center, "width", width);
   mi_field_int (uiout, 0, 0, ui_center, "alignment", alignment);
-  mi_field_string (uiout, 0, 0, ui_center, "col_name", col_name);
-  mi_field_string (uiout, 0, width, alignment, "colhdr", colhdr);
+  mi_field_string (uiout, 0, 0, ui_center, "col_name", col_name.c_str ());
+  mi_field_string (uiout, 0, width, alignment, "colhdr", col_hdr.c_str ());
   mi_close (uiout, ui_out_type_tuple);
 }
 

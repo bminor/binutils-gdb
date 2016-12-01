@@ -74,8 +74,9 @@ extern void ui_out_end (struct ui_out *uiout, enum ui_out_type type);
    field, ... }, ... ] }''.  If NR_ROWS is negative then there is at
    least one row.  */
 extern void ui_out_table_header (struct ui_out *uiout, int width,
-				 enum ui_align align, const char *col_name,
-				 const char *colhdr);
+				 enum ui_align align,
+				 const std::string &col_name,
+				 const std::string &col_hdr);
 
 extern void ui_out_table_body (struct ui_out *uiout);
 
@@ -129,7 +130,8 @@ extern void ui_out_flush (struct ui_out *uiout);
 extern int ui_out_test_flags (struct ui_out *uiout, int mask);
 
 extern int ui_out_query_field (struct ui_out *uiout, int colno,
-			       int *width, int *alignment, char **col_name);
+			       int *width, int *alignment,
+			       const char **col_name);
 
 /* HACK: Code in GDB is currently checking to see the type of ui_out
    builder when determining which output to produce.  This function is
@@ -152,8 +154,9 @@ typedef void (table_begin_ftype) (struct ui_out * uiout,
 typedef void (table_body_ftype) (struct ui_out * uiout);
 typedef void (table_end_ftype) (struct ui_out * uiout);
 typedef void (table_header_ftype) (struct ui_out * uiout, int width,
-				   enum ui_align align, const char *col_name,
-				   const char *colhdr);
+				   enum ui_align align,
+				   const std::string &col_name,
+				   const std::string &col_hdr);
 /* Note: level 0 is the top-level so LEVEL is always greater than
    zero.  */
 typedef void (ui_out_begin_ftype) (struct ui_out *uiout,

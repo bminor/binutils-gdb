@@ -36,8 +36,8 @@ struct ui_out_hdr
     int colno;
     int width;
     enum ui_align alignment;
-    char *col_name;
-    char *colhdr;
+    std::string col_name;
+    std::string col_hdr;
   };
 
 struct ui_out_level
@@ -148,8 +148,9 @@ static void uo_table_begin (struct ui_out *uiout, int nbrofcols,
 static void uo_table_body (struct ui_out *uiout);
 static void uo_table_end (struct ui_out *uiout);
 static void uo_table_header (struct ui_out *uiout, int width,
-			     enum ui_align align, const char *col_name,
-			     const char *colhdr);
+			     enum ui_align align,
+			     const std::string &col_name,
+			     const std::string &col_hdr);
 static void uo_begin (struct ui_out *uiout,
 		      enum ui_out_type type,
 		      int level, const char *id);
@@ -176,10 +177,11 @@ static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);
 /* Prototypes for local functions */
 
 static void append_header_to_list (struct ui_out *uiout, int width,
-				   enum ui_align alignment, const char *col_name,
-				   const char *colhdr);
+				   enum ui_align alignment,
+				   const std::string &col_name,
+				   const std::string &col_hdr);
 static int get_next_header (struct ui_out *uiout, int *colno, int *width,
-			    enum ui_align *alignment, char **colhdr);
+			    enum ui_align *alignment, const char **col_hdr);
 static void clear_header_list (struct ui_out *uiout);
 static void clear_table (struct ui_out *uiout);
 static void verify_field (struct ui_out *uiout, int *fldno, int *width,
@@ -247,17 +249,16 @@ ui_out_table_end (struct ui_out *uiout)
 
 void
 ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
-		     const char *col_name,
-		     const char *colhdr)
+		     const std::string &col_name, const std::string &col_hdr)
 {
   if (!uiout->table.flag || uiout->table.body_flag)
     internal_error (__FILE__, __LINE__,
 		    _("table header must be specified after table_begin \
 and before table_body."));
 
-  append_header_to_list (uiout, width, alignment, col_name, colhdr);
+  append_header_to_list (uiout, width, alignment, col_name, col_hdr);
 
-  uo_table_header (uiout, width, alignment, col_name, colhdr);
+  uo_table_header (uiout, width, alignment, col_name, col_hdr);
 }
 
 static void
@@ -557,12 +558,11 @@ uo_table_end (struct ui_out *uiout)
 
 void
 uo_table_header (struct ui_out *uiout, int width, enum ui_align align,
-		 const char *col_name,
-		 const char *colhdr)
+		 const std::string &col_name, const std::string &col_hdr)
 {
   if (!uiout->impl->table_header)
     return;
-  uiout->impl->table_header (uiout, width, align, col_name, colhdr);
+  uiout->impl->table_header (uiout, width, align, col_name, col_hdr);
 }
 
 /* Clear the table associated with UIOUT.  */
@@ -694,12 +694,6 @@ uo_redirect (struct ui_out *uiout, struct ui_file *outstream)
 static void
 clear_header_list (struct ui_out *uiout)
 {
-  for (auto &it : uiout->table.headers)
-    {
-      xfree (it->colhdr);
-      xfree (it->col_name);
-    }
-
   uiout->table.headers.clear ();
   uiout->table.headers_iterator = uiout->table.headers.end ();
 }
@@ -708,26 +702,18 @@ static void
 append_header_to_list (struct ui_out *uiout,
 		       int width,
 		       enum ui_align alignment,
-		       const char *col_name,
-		       const char *colhdr)
+		       const std::string &col_name,
+		       const std::string &col_hdr)
 {
   std::unique_ptr<ui_out_hdr> temphdr (new ui_out_hdr ());
 
   temphdr->width = width;
   temphdr->alignment = alignment;
-  /* We have to copy the column title as the original may be an
-     automatic.  */
-  if (colhdr != NULL)
-    temphdr->colhdr = xstrdup (colhdr);
-  else
-    temphdr->colhdr = NULL;
 
-  if (col_name != NULL)
-    temphdr->col_name = xstrdup (col_name);
-  else if (colhdr != NULL)
-    temphdr->col_name = xstrdup (colhdr);
-  else
-    temphdr->col_name = NULL;
+  /* Make our own copy of the strings, since the lifetime of the original
+     versions may be too short.  */
+  temphdr->col_hdr = col_hdr;
+  temphdr->col_name = col_name;
 
   temphdr->colno = uiout->table.headers.size () + 1;
 
@@ -742,7 +728,7 @@ get_next_header (struct ui_out *uiout,
 		 int *colno,
 		 int *width,
 		 enum ui_align *alignment,
-		 char **colhdr)
+		 const char **col_hdr)
 {
   /* There may be no headers at all or we may have used all columns.  */
   if (uiout->table.headers_iterator == uiout->table.headers.end ())
@@ -753,7 +739,7 @@ get_next_header (struct ui_out *uiout,
   *colno = hdr->colno;
   *width = hdr->width;
   *alignment = hdr->alignment;
-  *colhdr = hdr->colhdr;
+  *col_hdr = hdr->col_hdr.c_str ();
 
   /* Advance the header pointer to the next entry.  */
   uiout->table.headers_iterator++;
@@ -771,7 +757,7 @@ verify_field (struct ui_out *uiout, int *fldno, int *width,
 	      enum ui_align *align)
 {
   struct ui_out_level *current = current_level (uiout);
-  char *text;
+  const char *text;
 
   if (uiout->table.flag)
     {
@@ -816,7 +802,7 @@ ui_out_data (struct ui_out *uiout)
 /* Access table field parameters.  */
 int
 ui_out_query_field (struct ui_out *uiout, int colno,
-		    int *width, int *alignment, char **col_name)
+		    int *width, int *alignment, const char **col_name)
 {
   if (!uiout->table.flag)
     return 0;
@@ -832,7 +818,7 @@ ui_out_query_field (struct ui_out *uiout, int colno,
 
       *width = hdr->width;
       *alignment = hdr->alignment;
-      *col_name = hdr->col_name;
+      *col_name = hdr->col_name.c_str ();
 
       return 1;
     }
