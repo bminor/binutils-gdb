@@ -1,5 +1,17 @@
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (ui_out_level_p): Remove typedef.
+	(DEF_VEC_P (ui_out_level_p)): Remove definition.
+	(struct ui_out) <levels>: Change type to vector of unique_ptr of
+	ui_out_level.
+	(current_level): Update.
+	(push_level): Update.
+	(pop_level): Update, don't manually delete the ui_out_level
+	instance.
+	(ui_out_new): Update.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli-out.c (cli_uiout_dtor): Use delete instead of xfree.
 	(cli_out_new): Use new instead of XNEW.
 	* mi/mi-out.c (mi_out_data_dtor): Use delete instead of xfree.

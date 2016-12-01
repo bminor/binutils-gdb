@@ -25,6 +25,9 @@
 #include "language.h"
 #include "ui-out.h"
 
+#include <vector>
+#include <memory>
+
 /* table header structures */
 
 struct ui_out_hdr
@@ -45,9 +48,6 @@ struct ui_out_level
     enum ui_out_type type;
   };
 
-/* Define uiout->level vector types and operations.  */
-typedef struct ui_out_level *ui_out_level_p;
-DEF_VEC_P (ui_out_level_p);
 
 /* Tables are special.  Maintain a separate structure that tracks
    their state.  At present an output can only contain a single table
@@ -99,7 +99,7 @@ struct ui_out
     int level;
 
     /* Vector to store and track the ui-out levels.  */
-    VEC (ui_out_level_p) *levels;
+    std::vector<std::unique_ptr<ui_out_level>> levels;
 
     /* A table, if any.  At present only a single table is supported.  */
     struct ui_out_table table;
@@ -109,7 +109,7 @@ struct ui_out
 static struct ui_out_level *
 current_level (struct ui_out *uiout)
 {
-  return VEC_index (ui_out_level_p, uiout->levels, uiout->level);
+  return uiout->levels[uiout->level].get ();
 }
 
 /* Create a new level, of TYPE.  Return the new level's index.  */
@@ -117,13 +117,14 @@ static int
 push_level (struct ui_out *uiout,
 	    enum ui_out_type type)
 {
-  struct ui_out_level *current;
+  std::unique_ptr<ui_out_level> current (new ui_out_level ());
 
-  uiout->level++;
-  current = new ui_out_level ();
   current->field_count = 0;
   current->type = type;
-  VEC_safe_push (ui_out_level_p, uiout->levels, current);
+
+  uiout->level++;
+  uiout->levels.push_back (std::move (current));
+
   return uiout->level;
 }
 
@@ -133,14 +134,13 @@ static int
 pop_level (struct ui_out *uiout,
 	   enum ui_out_type type)
 {
-  struct ui_out_level *current;
-
   /* We had better not underflow the buffer.  */
   gdb_assert (uiout->level > 0);
   gdb_assert (current_level (uiout)->type == type);
-  current = VEC_pop (ui_out_level_p, uiout->levels);
-  delete current;
+
+  uiout->levels.pop_back ();
   uiout->level--;
+
   return uiout->level + 1;
 }
 
@@ -861,7 +861,7 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
 	    int flags)
 {
   struct ui_out *uiout = new ui_out ();
-  struct ui_out_level *current = new ui_out_level ();
+  std::unique_ptr<ui_out_level> current (new ui_out_level ());
 
   uiout->data = data;
   uiout->impl = impl;
@@ -869,12 +869,11 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   uiout->table.flag = 0;
   uiout->table.body_flag = 0;
   uiout->level = 0;
-  uiout->levels = NULL;
 
   /* Create uiout->level 0, the default level.  */
   current->type = ui_out_type_tuple;
   current->field_count = 0;
-  VEC_safe_push (ui_out_level_p, uiout->levels, current);
+  uiout->levels.push_back (std::move (current));
 
   uiout->table.id = NULL;
   uiout->table.header_first = NULL;
