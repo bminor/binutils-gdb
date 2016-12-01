@@ -157,14 +157,12 @@ typedef void (table_header_ftype) (struct ui_out * uiout, int width,
 				   enum ui_align align,
 				   const std::string &col_name,
 				   const std::string &col_hdr);
-/* Note: level 0 is the top-level so LEVEL is always greater than
-   zero.  */
+
 typedef void (ui_out_begin_ftype) (struct ui_out *uiout,
 				   enum ui_out_type type,
-				   int level, const char *id);
+				   const char *id);
 typedef void (ui_out_end_ftype) (struct ui_out *uiout,
-				 enum ui_out_type type,
-				 int level);
+				 enum ui_out_type type);
 typedef void (field_int_ftype) (struct ui_out * uiout, int fldno, int width,
 				enum ui_align align,
 				const char *fldname, int value);

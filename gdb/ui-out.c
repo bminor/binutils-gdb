@@ -170,11 +170,13 @@ struct ui_out
     const struct ui_out_impl *impl;
     void *data;
 
-    /* Current level.  */
-    int level;
-
     /* Vector to store and track the ui-out levels.  */
     std::vector<std::unique_ptr<ui_out_level>> levels;
+
+    int level () const
+    {
+      return this->levels.size ();
+    }
 
     /* A table, if any.  At present only a single table is supported.  */
     struct ui_out_table table;
@@ -184,36 +186,30 @@ struct ui_out
 static ui_out_level *
 current_level (struct ui_out *uiout)
 {
-  return uiout->levels[uiout->level].get ();
+  return uiout->levels.back ().get ();
 }
 
-/* Create a new level, of TYPE.  Return the new level's index.  */
-static int
+/* Create a new level, of TYPE.  */
+static void
 push_level (struct ui_out *uiout,
 	    enum ui_out_type type)
 {
   std::unique_ptr<ui_out_level> level (new ui_out_level (type));
 
   uiout->levels.push_back (std::move (level));
-  uiout->level++;
-
-  return uiout->level;
 }
 
-/* Discard the current level, return the discarded level's index.
-   TYPE is the type of the level being discarded.  */
-static int
+/* Discard the current level.  TYPE is the type of the level being
+   discarded.  */
+static void
 pop_level (struct ui_out *uiout,
 	   enum ui_out_type type)
 {
   /* We had better not underflow the buffer.  */
-  gdb_assert (uiout->level > 0);
+  gdb_assert (uiout->level () > 0);
   gdb_assert (current_level (uiout)->type () == type);
 
   uiout->levels.pop_back ();
-  uiout->level--;
-
-  return uiout->level + 1;
 }
 
 /* These are the interfaces to implementation functions.  */
@@ -228,10 +224,9 @@ static void uo_table_header (struct ui_out *uiout, int width,
 			     const std::string &col_hdr);
 static void uo_begin (struct ui_out *uiout,
 		      enum ui_out_type type,
-		      int level, const char *id);
+		      const char *id);
 static void uo_end (struct ui_out *uiout,
-		    enum ui_out_type type,
-		    int level);
+		    enum ui_out_type type);
 static void uo_field_int (struct ui_out *uiout, int fldno, int width,
 			  enum ui_align align, const char *fldname, int value);
 static void uo_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -277,7 +272,7 @@ previous table_end."));
 
   uiout->table.flag = 1;
   uiout->table.body_flag = 0;
-  uiout->table.entry_level = uiout->level + 1;
+  uiout->table.entry_level = uiout->level () + 1;
   uiout->table.columns = nbrofcols;
   uiout->table.id = tblid;
 
@@ -357,8 +352,6 @@ ui_out_begin (struct ui_out *uiout,
 	      enum ui_out_type type,
 	      const char *id)
 {
-  int new_level;
-
   if (uiout->table.flag && !uiout->table.body_flag)
     internal_error (__FILE__, __LINE__,
 		    _("table header or table_body expected; lists must be \
@@ -379,24 +372,24 @@ specified after table_body."));
     verify_field (uiout, &fldno, &width, &align);
   }
 
-  new_level = push_level (uiout, type);
+  push_level (uiout, type);
 
   /* If the push puts us at the same level as a table row entry, we've
      got a new table row.  Put the header pointer back to the start.  */
   if (uiout->table.body_flag
-      && uiout->table.entry_level == new_level)
+      && uiout->table.entry_level == uiout->level ())
     uiout->table.headers_iterator = uiout->table.headers.begin ();
 
-  uo_begin (uiout, type, new_level, id);
+  uo_begin (uiout, type, id);
 }
 
 void
 ui_out_end (struct ui_out *uiout,
 	    enum ui_out_type type)
 {
-  int old_level = pop_level (uiout, type);
+  pop_level (uiout, type);
 
-  uo_end (uiout, type, old_level);
+  uo_end (uiout, type);
 }
 
 struct ui_out_end_cleanup_data
@@ -652,22 +645,20 @@ clear_table (struct ui_out *uiout)
 void
 uo_begin (struct ui_out *uiout,
 	  enum ui_out_type type,
-	  int level,
 	  const char *id)
 {
   if (uiout->impl->begin == NULL)
     return;
-  uiout->impl->begin (uiout, type, level, id);
+  uiout->impl->begin (uiout, type, id);
 }
 
 void
 uo_end (struct ui_out *uiout,
-	enum ui_out_type type,
-	int level)
+	enum ui_out_type type)
 {
   if (uiout->impl->end == NULL)
     return;
-  uiout->impl->end (uiout, type, level);
+  uiout->impl->end (uiout, type);
 }
 
 void
@@ -832,17 +823,12 @@ verify_field (struct ui_out *uiout, int *fldno, int *width,
 	internal_error (__FILE__, __LINE__,
 			_("table_body missing; table fields must be \
 specified after table_body and inside a list."));
-      /* NOTE: cagney/2001-12-08: There was a check here to ensure
-	 that this code was only executed when uiout->level was
-	 greater than zero.  That no longer applies - this code is run
-	 before each table row tuple is started and at that point the
-	 level is zero.  */
     }
 
   current->inc_field_count ();
 
   if (uiout->table.body_flag
-      && uiout->table.entry_level == uiout->level
+      && uiout->table.entry_level == uiout->level ()
       && get_next_header (uiout, fldno, width, align, &text))
     {
       if (*fldno != current->field_count ())
@@ -906,11 +892,9 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   uiout->flags = flags;
   uiout->table.flag = 0;
   uiout->table.body_flag = 0;
-  uiout->level = 0;
 
-  /* Create uiout->level 0, the default level.  */
-  std::unique_ptr<ui_out_level> level (new ui_out_level (ui_out_type_tuple));
-  uiout->levels.push_back (std::move (level));
+  /* Create the ui-out level #1, the default level.  */
+  push_level (uiout, ui_out_type_tuple);
 
   uiout->table.headers_iterator = uiout->table.headers.end ();
 

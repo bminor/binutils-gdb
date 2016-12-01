@@ -1,5 +1,31 @@
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.h (ui_out_begin_ftype): Remove level parameter.
+	(ui_out_end_ftype): Likewise.
+	* ui-out.c (struct ui_out) <level>: Replace field with a method
+	that dynamically computes the result.
+	(current_level): Get vector's back item instead of using
+	uiout->level.
+	(push_level): Make return type void.
+	(pop_level): Make return type void and update access to
+	ui_out::level.
+	(uo_begin): Remove level parameter.
+	(uo_end): Likewise.
+	(ui_out_table_begin): Update access to uiout::level.
+	(ui_out_begin): Don't read return value from push_level, call
+	uiout->level() instead, update call to uo_begin.
+	(ui_out_end): Don't read return value from pop_level, update
+	call to uo_end.
+	(verify_field): Update access to uiout->level.
+	(ui_out_new): Don't initialize ui_out::level, call push_level
+	to push the initial level instead of doing it by hand.
+	* cli-out.c (cli_begin): Remove level parameter.
+	(cli_end): Likewise.
+	* mi/mi-out.c (mi_begin): Likewise.
+	(mi_end): Likewise.
+
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (struct ui_out_level): Replace with ...
 	(class ui_out_level): ... this.
 	(current_level): Update.

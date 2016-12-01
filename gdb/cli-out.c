@@ -111,7 +111,6 @@ cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 static void
 cli_begin (struct ui_out *uiout,
 	   enum ui_out_type type,
-	   int level,
 	   const char *id)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
@@ -124,8 +123,7 @@ cli_begin (struct ui_out *uiout,
 
 static void
 cli_end (struct ui_out *uiout,
-	 enum ui_out_type type,
-	 int level)
+	 enum ui_out_type type)
 {
   cli_out_data *data = (cli_out_data *) ui_out_data (uiout);
 

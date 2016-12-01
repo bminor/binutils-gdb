@@ -45,8 +45,8 @@ static void mi_table_header (struct ui_out *uiout, int width,
 			     const std::string &col_name,
 			     const std::string &col_hdr);
 static void mi_begin (struct ui_out *uiout, enum ui_out_type type,
-		      int level, const char *id);
-static void mi_end (struct ui_out *uiout, enum ui_out_type type, int level);
+		      const char *id);
+static void mi_end (struct ui_out *uiout, enum ui_out_type type);
 static void mi_field_int (struct ui_out *uiout, int fldno, int width,
 			  enum ui_align alig, const char *fldname, int value);
 static void mi_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -159,8 +159,7 @@ mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 /* Mark beginning of a list.  */
 
 void
-mi_begin (struct ui_out *uiout, enum ui_out_type type, int level,
-	  const char *id)
+mi_begin (struct ui_out *uiout, enum ui_out_type type, const char *id)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
@@ -173,7 +172,7 @@ mi_begin (struct ui_out *uiout, enum ui_out_type type, int level,
 /* Mark end of a list.  */
 
 void
-mi_end (struct ui_out *uiout, enum ui_out_type type, int level)
+mi_end (struct ui_out *uiout, enum ui_out_type type)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
