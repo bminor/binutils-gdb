@@ -22,17 +22,14 @@
 #include "defs.h"
 #include "ui-out.h"
 #include "mi-out.h"
-#include "vec.h"
-
-typedef struct ui_file *ui_filep;
-DEF_VEC_P (ui_filep);
+#include <vector>
 
 struct mi_ui_out_data
   {
     int suppress_field_separator;
     int suppress_output;
     int mi_version;
-    VEC (ui_filep) *streams;
+    std::vector<ui_file *> streams;
   };
 typedef struct mi_ui_out_data mi_out_data;
 
@@ -222,7 +219,7 @@ mi_field_string (struct ui_out *uiout, int fldno, int width,
   if (data->suppress_output)
     return;
 
-  stream = VEC_last (ui_filep, data->streams);
+  stream = data->streams.back ();
   field_separator (uiout);
   if (fldname)
     fprintf_unfiltered (stream, "%s=", fldname);
@@ -245,7 +242,7 @@ mi_field_fmt (struct ui_out *uiout, int fldno, int width,
   if (data->suppress_output)
     return;
 
-  stream = VEC_last (ui_filep, data->streams);
+  stream = data->streams.back ();
   field_separator (uiout);
   if (fldname)
     fprintf_unfiltered (stream, "%s=\"", fldname);
@@ -280,7 +277,7 @@ void
 mi_flush (struct ui_out *uiout)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  struct ui_file *stream = data->streams.back ();
 
   gdb_flush (stream);
 }
@@ -291,9 +288,9 @@ mi_redirect (struct ui_out *uiout, struct ui_file *outstream)
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
   if (outstream != NULL)
-    VEC_safe_push (ui_filep, data->streams, outstream);
+    data->streams.push_back (outstream);
   else
-    VEC_pop (ui_filep, data->streams);
+    data->streams.pop_back ();
 
   return 0;
 }
@@ -306,7 +303,7 @@ static void
 field_separator (struct ui_out *uiout)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  ui_file *stream = data->streams.back ();
 
   if (data->suppress_field_separator)
     data->suppress_field_separator = 0;
@@ -318,7 +315,7 @@ static void
 mi_open (struct ui_out *uiout, const char *name, enum ui_out_type type)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  ui_file *stream = data->streams.back ();
 
   field_separator (uiout);
   data->suppress_field_separator = 1;
@@ -341,7 +338,7 @@ static void
 mi_close (struct ui_out *uiout, enum ui_out_type type)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  ui_file *stream = data->streams.back ();
 
   switch (type)
     {
@@ -363,7 +360,7 @@ void
 mi_out_rewind (struct ui_out *uiout)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *stream = VEC_last (ui_filep, data->streams);
+  ui_file *stream = data->streams.back ();
 
   ui_file_rewind (stream);
 }
@@ -374,7 +371,7 @@ void
 mi_out_put (struct ui_out *uiout, struct ui_file *stream)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-  struct ui_file *outstream = VEC_last (ui_filep, data->streams);
+  ui_file *outstream = data->streams.back ();
 
   ui_file_put (outstream, ui_file_write_for_put, stream);
   ui_file_rewind (outstream);
@@ -397,8 +394,7 @@ mi_out_data_ctor (mi_out_data *self, int mi_version, struct ui_file *stream)
 {
   gdb_assert (stream != NULL);
 
-  self->streams = NULL;
-  VEC_safe_push (ui_filep, self->streams, stream);
+  self->streams.push_back (stream);
 
   self->suppress_field_separator = 0;
   self->suppress_output = 0;
@@ -412,7 +408,6 @@ mi_out_data_dtor (struct ui_out *ui_out)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (ui_out);
 
-  VEC_free (ui_filep, data->streams);
   delete data;
 }
 

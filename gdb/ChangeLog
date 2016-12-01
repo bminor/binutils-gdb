@@ -1,5 +1,22 @@
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* mi/mi-out.c: Remove vec.h include.
+	(mi_ui_out_data) <streams>: Change type to std::vector.
+	(mi_field_string): Update.
+	(mi_field_fmt): Update.
+	(mi_flush): Update.
+	(mi_redirect): Update.
+	(field_separator): Update.
+	(mi_open): Update.
+	(mi_close): Update.
+	(mi_out_buffered): Update.
+	(mi_out_rewind): Update.
+	(mi_out_put): Update.
+	(mi_out_data_ctor): Update.
+	(mi_out_data_dtor): Don't free streams.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (ui_out_level_p): Remove typedef.
 	(DEF_VEC_P (ui_out_level_p)): Remove definition.
 	(struct ui_out) <levels>: Change type to vector of unique_ptr of
