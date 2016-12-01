@@ -36,7 +36,7 @@ gdb_exit
 gdb_start
 
 # Manually switch the language to opencl
-gdb_test_no_output "set language opencl" "No prompt when setting the language to opencl"
+gdb_test_no_output "set language opencl" "no prompt when setting the language to opencl"
 
 # Check OpenCL data types (GDB)
 gdb_test "whatis bool" "type = bool"
@@ -194,8 +194,8 @@ gdb_test "whatis double16" "type = double16"
 gdb_test "p sizeof(double16)" " = 128"
 
 # Set the language back to the default: "auto; currently c"
-gdb_test_no_output "set language c" "No prompt when setting the language to c"
-gdb_test_no_output "set language auto" "No prompt when setting the language to auto"
+gdb_test_no_output "set language c" "no prompt when setting the language to c"
+gdb_test_no_output "set language auto" "no prompt when setting the language to auto"
 
 # Load the OpenCL app
 gdb_reinitialize_dir $srcdir/$subdir

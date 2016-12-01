@@ -178,4 +178,4 @@ gdb_test "python print (a\[0\].is_valid())" "True" "test symbol validity"
 delete_breakpoints
 gdb_unload
 gdb_test "python print (a\[0\].is_valid())" "False" "test symbol non-validity"
-gdb_test_no_output "python a = None" "Test symbol destructor"
+gdb_test_no_output "python a = None" "test symbol destructor"

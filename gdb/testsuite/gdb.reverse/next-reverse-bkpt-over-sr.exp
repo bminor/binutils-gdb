@@ -40,7 +40,7 @@ if ![runto_main] then {
 
 if [supports_process_record] {
     # Activate process record/replay
-    gdb_test_no_output "record" "Turn on process record"
+    gdb_test_no_output "record" "turn on process record"
 }
 
 set lineno [gdb_get_line_number "STEP INTO THIS CALL"]

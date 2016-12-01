@@ -16,7 +16,7 @@
 gdb_exit
 gdb_start
 
-gdb_test_no_output "set \$a = 10" "Initialize \$a."
+gdb_test_no_output "set \$a = 10" "initialize \$a."
 
 gdb_test "eval \"echo %d\\n\", \$a++" "10" "first eval."
 gdb_test "eval \"echo %d\\n\", \$a*2" "22" "second eval."

@@ -103,6 +103,6 @@ gdb_py_test_multiple "input command-calling function" \
   "CallCommand ()" "" \
   "end" ""
 
-gdb_test_no_output "set var \$foo = \$call_command()" "Setting a value from a function which executes a command."
+gdb_test_no_output "set var \$foo = \$call_command()" "setting a value from a function which executes a command."
 # There was a bug where GDB would segfault in the second call, so try calling again.
-gdb_test_no_output "set var \$foo = \$call_command()" "Setting a value from a function which executes a command, again."
+gdb_test_no_output "set var \$foo = \$call_command()" "setting a value from a function which executes a command, again."

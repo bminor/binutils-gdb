@@ -55,9 +55,9 @@ gdb_test "python print (gblock.is_global)" "True" "is the global block"
 gdb_test "python print (sblock.is_static)" "True" "is the static block"
 
 # Move up superblock(s) until we reach function block_func.
-gdb_test_no_output "python block = block.superblock" "Get superblock"
+gdb_test_no_output "python block = block.superblock" "get superblock"
 gdb_test "python print (block.function)" "None" "second anonymous block"
-gdb_test_no_output "python block = block.superblock" "Get superblock 2"
+gdb_test_no_output "python block = block.superblock" "get superblock 2"
 gdb_test "python print (block.function)" "block_func" \
          "Print superblock 2 function"
 

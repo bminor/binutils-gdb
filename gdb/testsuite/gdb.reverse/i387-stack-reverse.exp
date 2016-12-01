@@ -36,7 +36,7 @@ runto main
 # Record to end of main
 
 set location [gdb_get_line_number "END I387-FLOAT-REVERSE"]
-gdb_test_no_output "record" "Turn on process record"
+gdb_test_no_output "record" "turn on process record"
 gdb_test "until $location" ".*$srcfile:$location.*" \
     "record to end of main"
 

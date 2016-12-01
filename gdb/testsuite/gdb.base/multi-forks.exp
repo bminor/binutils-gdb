@@ -178,7 +178,7 @@ gdb_test "detach inferior 5" "Detaching .*" "detach 5"
 #
 
 for {set i 6} { $i <= 16} {incr i} {
-    gdb_test_no_output "kill inferior $i" "Kill $i"
+    gdb_test_no_output "kill inferior $i" "kill $i"
     gdb_test "info inferior $i" "<null>.*" "did kill $i"
 }
 

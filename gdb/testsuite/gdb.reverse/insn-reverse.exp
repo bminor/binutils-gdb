@@ -71,7 +71,7 @@ proc test { func } {
 	}
 
 	# Activate process record/replay
-	gdb_test_no_output "record" "Turn on process record"
+	gdb_test_no_output "record" "turn on process record"
 
 	# Registers contents before each forward single step.
 	set count 0

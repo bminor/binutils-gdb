@@ -152,7 +152,7 @@ gdb_test_no_output "disable xmethod progspace E_methods;method_int" \
   "disable xmethod progspace E_methods;method_int"
 gdb_test "info xmethod progspace E_methods;method_int" ".* \\\[disabled\\\]" \
   "info xmethod xmethods E_methods;method_int"
-gdb_test_no_output "disable xmethod progspace G_methods" "Disable G_methods 2"
+gdb_test_no_output "disable xmethod progspace G_methods" "disable G_methods 2"
 gdb_test "info xmethod progspace" ".*G_methods \\\[disabled\\\].*" \
   "info xmethod progspace"
 

@@ -75,7 +75,7 @@ with_test_prefix "program unloaded" {
 
 gdb_test "add-inferior" "Added inferior 2" "create new inferior"
 gdb_test "inferior 2" ".*" "switch to new inferior"
-gdb_test_no_output "remove-inferiors 1" "Remove first inferior"
+gdb_test_no_output "remove-inferiors 1" "remove first inferior"
 
 with_test_prefix "inferior removed" {
     gdb_test "gu (print (progspace-valid? progspace))" "= #f"

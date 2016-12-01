@@ -82,5 +82,5 @@ gdb_unload
 gdb_test "python print (sal.is_valid())" "False" "test sal.is_valid"
 gdb_test "python print (symtab.is_valid())" "False" "test symtab.is_valid()"
 
-gdb_test_no_output "python sal = None" "Test sal destructor"
-gdb_test_no_output "python symtab = None" "Test symtab destructor"
+gdb_test_no_output "python sal = None" "test sal destructor"
+gdb_test_no_output "python symtab = None" "test symtab destructor"

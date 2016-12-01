@@ -2,6 +2,55 @@
 
 	Fix test names starting with uppercase throughout the files.
 
+	* gdb.base/charset.exp
+	* gdb.base/eval.exp
+	* gdb.base/multi-forks.exp
+	* gdb.guile/scm-progspace.exp
+	* gdb.opencl/datatypes.exp
+	* gdb.python/py-block.exp
+	* gdb.python/py-function.exp
+	* gdb.python/py-symbol.exp
+	* gdb.python/py-symtab.exp
+	* gdb.python/py-xmethods.exp
+	* gdb.reverse/break-precsave.exp
+	* gdb.reverse/break-reverse.exp
+	* gdb.reverse/consecutive-precsave.exp
+	* gdb.reverse/consecutive-reverse.exp
+	* gdb.reverse/finish-precsave.exp
+	* gdb.reverse/finish-reverse-bkpt.exp
+	* gdb.reverse/finish-reverse.exp
+	* gdb.reverse/fstatat-reverse.exp
+	* gdb.reverse/getresuid-reverse.exp
+	* gdb.reverse/i386-precsave.exp
+	* gdb.reverse/i386-reverse.exp
+	* gdb.reverse/i386-sse-reverse.exp
+	* gdb.reverse/i387-stack-reverse.exp
+	* gdb.reverse/insn-reverse.exp
+	* gdb.reverse/machinestate-precsave.exp
+	* gdb.reverse/machinestate.exp
+	* gdb.reverse/next-reverse-bkpt-over-sr.exp
+	* gdb.reverse/pipe-reverse.exp
+	* gdb.reverse/readv-reverse.exp
+	* gdb.reverse/recvmsg-reverse.exp
+	* gdb.reverse/rerun-prec.exp
+	* gdb.reverse/s390-mvcle.exp
+	* gdb.reverse/sigall-precsave.exp
+	* gdb.reverse/sigall-reverse.exp
+	* gdb.reverse/solib-precsave.exp
+	* gdb.reverse/solib-reverse.exp
+	* gdb.reverse/step-precsave.exp
+	* gdb.reverse/step-reverse.exp
+	* gdb.reverse/time-reverse.exp
+	* gdb.reverse/until-precsave.exp
+	* gdb.reverse/until-reverse.exp
+	* gdb.reverse/waitpid-reverse.exp
+	* gdb.reverse/watch-precsave.exp
+	* gdb.reverse/watch-reverse.exp
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
+	Fix test names starting with uppercase throughout the files.
+
 	* gdb.arch/i386-mpx-simple_segv.exp
 	* gdb.arch/i386-mpx.exp
 	* gdb.arch/i386-permbkpt.exp
