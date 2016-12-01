@@ -1,5 +1,15 @@
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ui-out.c (struct ui_out_level): Replace with ...
+	(class ui_out_level): ... this.
+	(current_level): Update.
+	(push_level): Update.
+	(pop_level): Update.
+	(verify_field): Update.
+	(ui_out_new): Update.
+
+2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ui-out.c (struct ui_out_hdr): Replace with ...
 	(class ui_out_hdr): ... this.
 	(append_header_to_list): Update.

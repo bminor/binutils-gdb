@@ -90,13 +90,41 @@ class ui_out_hdr
   std::string m_header;
 };
 
-struct ui_out_level
+/* A level of nesting (either a list or a tuple) in a ui_out output.  */
+
+class ui_out_level
+{
+ public:
+
+  explicit ui_out_level (ui_out_type type)
+  : m_type (type),
+    m_field_count (0)
   {
-    /* Count each field; the first element is for non-list fields.  */
-    int field_count;
-    /* The type of this level.  */
-    enum ui_out_type type;
-  };
+  }
+
+  ui_out_type type () const
+  {
+    return m_type;
+  }
+
+  int field_count () const
+  {
+    return m_field_count;
+  }
+
+  void inc_field_count ()
+  {
+    m_field_count++;
+  }
+
+ private:
+
+  /* The type of this level.  */
+  ui_out_type m_type;
+
+  /* Count each field; the first element is for non-list fields.  */
+  int m_field_count;
+};
 
 
 /* Tables are special.  Maintain a separate structure that tracks
@@ -153,7 +181,7 @@ struct ui_out
   };
 
 /* The current (inner most) level.  */
-static struct ui_out_level *
+static ui_out_level *
 current_level (struct ui_out *uiout)
 {
   return uiout->levels[uiout->level].get ();
@@ -164,13 +192,10 @@ static int
 push_level (struct ui_out *uiout,
 	    enum ui_out_type type)
 {
-  std::unique_ptr<ui_out_level> current (new ui_out_level ());
+  std::unique_ptr<ui_out_level> level (new ui_out_level (type));
 
-  current->field_count = 0;
-  current->type = type;
-
+  uiout->levels.push_back (std::move (level));
   uiout->level++;
-  uiout->levels.push_back (std::move (current));
 
   return uiout->level;
 }
@@ -183,7 +208,7 @@ pop_level (struct ui_out *uiout,
 {
   /* We had better not underflow the buffer.  */
   gdb_assert (uiout->level > 0);
-  gdb_assert (current_level (uiout)->type == type);
+  gdb_assert (current_level (uiout)->type () == type);
 
   uiout->levels.pop_back ();
   uiout->level--;
@@ -798,7 +823,7 @@ static void
 verify_field (struct ui_out *uiout, int *fldno, int *width,
 	      enum ui_align *align)
 {
-  struct ui_out_level *current = current_level (uiout);
+  ui_out_level *current = current_level (uiout);
   const char *text;
 
   if (uiout->table.flag)
@@ -814,13 +839,13 @@ specified after table_body and inside a list."));
 	 level is zero.  */
     }
 
-  current->field_count += 1;
+  current->inc_field_count ();
 
   if (uiout->table.body_flag
       && uiout->table.entry_level == uiout->level
       && get_next_header (uiout, fldno, width, align, &text))
     {
-      if (*fldno != current->field_count)
+      if (*fldno != current->field_count ())
 	internal_error (__FILE__, __LINE__,
 			_("ui-out internal error in handling headers."));
     }
@@ -828,7 +853,7 @@ specified after table_body and inside a list."));
     {
       *width = 0;
       *align = ui_noalign;
-      *fldno = current->field_count;
+      *fldno = current->field_count ();
     }
 }
 
@@ -875,7 +900,6 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
 	    int flags)
 {
   struct ui_out *uiout = new ui_out ();
-  std::unique_ptr<ui_out_level> current (new ui_out_level ());
 
   uiout->data = data;
   uiout->impl = impl;
@@ -885,9 +909,8 @@ ui_out_new (const struct ui_out_impl *impl, void *data,
   uiout->level = 0;
 
   /* Create uiout->level 0, the default level.  */
-  current->type = ui_out_type_tuple;
-  current->field_count = 0;
-  uiout->levels.push_back (std::move (current));
+  std::unique_ptr<ui_out_level> level (new ui_out_level (ui_out_type_tuple));
+  uiout->levels.push_back (std::move (level));
 
   uiout->table.headers_iterator = uiout->table.headers.end ();
 
