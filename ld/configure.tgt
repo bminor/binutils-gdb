@@ -54,6 +54,8 @@ aarch64-*-cloudabi*)	targ_emul=aarch64cloudabi
 			targ_extra_emuls=aarch64cloudabib ;;
 aarch64-*-freebsd*)	targ_emul=aarch64fbsd
 			targ_extra_emuls="aarch64fbsdb aarch64elf" ;;
+aarch64-*-fuchsia*)	targ_emul=aarch64elf
+			targ_extra_emuls="aarch64elfb armelf armelfb" ;;
 aarch64_be-*-linux*)	targ_emul=aarch64linuxb
 			targ_extra_libpath="aarch64linux aarch64linux32 aarch64linux32b armelfb_linux_eabi armelf_linux_eabi"
 			targ_extra_emuls="aarch64elfb aarch64elf aarch64elf32 aarch64elf32b armelfb armelf $targ_extra_libpath" ;;
@@ -150,6 +152,9 @@ arm*-*-uclinux*)	targ_emul=armelf_linux
 			;;
 arm-*-vxworks)		targ_emul=armelf_vxworks ;;
 arm*-*-conix*)		targ_emul=armelf ;;
+arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
+			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
+			;;
 avr-*-*)		targ_emul=avr2
 			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
 			;;
@@ -316,7 +321,7 @@ i[3-7]86-*-elfiamcu)	targ_emul=elf_iamcu
 			targ_extra_emuls=elf_i386 ;;
 i[3-7]86-*-elf*)	targ_emul=elf_i386
 			targ_extra_emuls=elf_iamcu ;;
-x86_64-*-elf* | x86_64-*-rtems*)
+x86_64-*-elf* | x86_64-*-rtems* | x86_64-*-fuchsia*)
 			targ_emul=elf_x86_64
 			targ_extra_emuls="elf_i386 elf_iamcu elf32_x86_64 elf_l1om elf_k1om"
 			targ_extra_libpath="elf_i386 elf_iamcu elf32_x86_64 elf_l1om elf_k1om"

@@ -1,3 +1,12 @@
+2016-12-02  Josh Conner  <joshconner@google.com>
+
+        * Makefile.am: Add dependency information for earmelf_fuchsia.c.
+        * Makefile.in: Regenerate.
+        * configure.tgt: Add support for aarch64-*-fuchsia, arm*-*-fuchsia*, and
+        x86_64-*-fuchsia* targets.
+        * emulparams/armelf_fuchsia.sh: New file.
+        * emulparams/armelfb_fuchsia.sh: New file.
+
 2016-12-01  Rudy Y  <rudyy.id@gmail.com>
 
 	PR ld/20880

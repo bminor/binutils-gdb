@@ -123,6 +123,7 @@ generic_target=${cpu_type}-$vendor-$os
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${generic_target} in
   aarch64*-*-elf | aarch64*-*-rtems*)	fmt=elf;;
+  aarch64*-*-fuchsia*)			fmt=elf;;
   aarch64*-*-linux*)			fmt=elf em=linux ;;
 
   alpha-*-*vms*)			fmt=evax ;;
@@ -161,6 +162,7 @@ case ${generic_target} in
 					fmt=coff em=wince-pe ;;
   arm-*-pe)				fmt=coff em=pe ;;
   arm-*-riscix*)			fmt=aout em=riscix ;;
+  arm-*-fuchsia*)			fmt=elf ;;
 
   avr-*-*)				fmt=elf bfd_gas=yes ;;
 
@@ -221,6 +223,7 @@ case ${generic_target} in
   i386-*-coff)				fmt=coff ;;
   i386-*-elfiamcu)			fmt=elf arch=iamcu ;;
   i386-*-elf*)				fmt=elf ;;
+  i386-*-fuchsia*)			fmt=elf ;;
   i386-*-kaos*)				fmt=elf ;;
   i386-*-bsd*)				fmt=aout em=386bsd ;;
   i386-*-nacl*)				fmt=elf em=nacl

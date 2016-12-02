@@ -1,3 +1,7 @@
+2016-12-02  Josh Conner  <joshconner@google.com>
+
+	* configure.tgt: Add support for fuchsia (OS).
+
 2016-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/20898

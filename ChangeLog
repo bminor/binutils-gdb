@@ -1,3 +1,8 @@
+2016-12-02  Josh Conner  <joshconner@google.com>
+
+	* configure.ac: Add fuchsia to targets that use ELF.
+	* configure: Regenerated.
+
 2016-11-07  Doug Evans  <dje@google.com>
 
 	* config.sub: Sync with upstream version 2016-11-03.
