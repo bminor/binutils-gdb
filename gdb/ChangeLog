@@ -1,3 +1,19 @@
+2016-12-02  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* aarch64-tdep.c: Include "selftest.h".
+	(abstract_instruction_reader): New class.
+	(instruction_reader): New class.
+	(aarch64_analyze_prologue): Add new parameter reader.  Call
+	reader.read instead of read_memory_unsigned_integer.
+	[GDB_SELF_TEST] (instruction_reader_test): New class.
+	(aarch64_analyze_prologue_test): New function.
+	(_initialize_aarch64_tdep) [GDB_SELF_TEST]: Register
+	selftests::aarch64_analyze_prologue_test.
+	* trad-frame.c (trad_frame_cache_zalloc):
+	(trad_frame_alloc_saved_regs): Add a new function.
+	* trad-frame.h (trad_frame_alloc_saved_regs): Declare.
+
 2016-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ui-out.c (enum ui_out_table_state): Move to class
