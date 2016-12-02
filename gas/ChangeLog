@@ -1,3 +1,24 @@
+2016-12-02  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/cpu-em-err.s: New file.
+	* testsuite/gas/arc/cpu-em4-err.s: Likewise.
+	* testsuite/gas/arc/cpu-fpuda-err.s: Likewise.
+	* testsuite/gas/arc/cpu-hs-err.s: Likewise.
+	* testsuite/gas/arc/cpu-quarkse-err.s: Likewise.
+	* testsuite/gas/arc/noargs_a7.s: Add .cpu.
+	* config/tc-arc.c (ARC_CPU_TYPE_A6xx): Define.
+	(ARC_CPU_TYPE_A7xx): Likewise.
+	(ARC_CPU_TYPE_AV2EM): Likewise.
+	(ARC_CPU_TYPE_AV2HS): Likewise.
+	(cpu_types): Update list of known CPU names.
+	(arc_show_cpu_list): New function.
+	(md_show_usage): Print accepted CPU names.
+	(cl_features): New variable.
+	(arc_select_cpu): Use cl_features.
+	(arc_option): Allow various .cpu names.
+	(md_parse_option): Set cl_features.
+	* doc/c-arc.texi: Update -mcpu and .cpu documentation.
+
 2016-12-02  Josh Conner  <joshconner@google.com>
 
 	* configure.tgt: Add support for fuchsia (OS).
