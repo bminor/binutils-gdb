@@ -58,6 +58,10 @@ proc take_gdb_out_of_choice_menu {} {
     gdb_test_multiple " " " " {
         -re ".*$gdb_prompt $" {
         }
+	timeout {
+	    perror "could not resynchronize to command prompt (timeout)"
+	    continue
+	}
     }
 }
 

@@ -1,3 +1,8 @@
+2016-12-02  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/ovldbreak.exp (take_gdb_out_of_choice_menu): Restore
+	timeout handling.
+
 2016-12-02  Tom Tromey  <tom@tromey.com>
 
 	* gdb.dwarf2/main-subprogram.c: New file.
