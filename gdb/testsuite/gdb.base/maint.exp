@@ -297,9 +297,6 @@ gdb_test_multiple "maint print msymbols msymbols_output2 ${testfile}" "maint pri
 		    -re ".*$gdb_prompt $" {
 		        fail "maint print msymbols"
 		    }
-		    timeout {
-		        fail "(timeout) maint print msymbols"
-		    }
 		}
 		gdb_test "shell rm -f msymbols_output2" ".*" \
 		    "shell rm -f msymbols_output2"
@@ -307,16 +304,10 @@ gdb_test_multiple "maint print msymbols msymbols_output2 ${testfile}" "maint pri
 	    -re ".*$gdb_prompt $" {
 		fail "maint print msymbols"
 	    }
-	    timeout {
-	    	fail "(timeout) maint print msymbols"
-	    }
 	}
     }
     -re ".*$gdb_prompt $" {
 	fail "maint print msymbols"
-    }
-    timeout {
-	fail "(timeout) maint print msymbols"
     }
 }
 gdb_test "cd ${mydir}" \

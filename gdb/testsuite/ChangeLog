@@ -1,5 +1,12 @@
 2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.base/maint.exp: Remove timeout handling for gdb_test_multiple.
+	* gdb.cp/gdb2495.exp: Likewise and convert gdb_test_multiple into
+	gdb_test_no_output for a couple of cases.
+	* gdb.cp/ovldbreak.exp: Remove timeout handling for gdb_test_multiple.
+
+2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
+
 	Fix test names and standardize compilation error messages throughout
 	the following files:
 
