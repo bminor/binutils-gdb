@@ -1,5 +1,9 @@
 2016-12-02  Nick Clifton  <nickc@redhat.com>
 
+	PR ld/20910
+	* ldmain.c (main): Prevent evaluation of %<char> sequences when
+	printing out a linker script.
+
 	PR ld/20911
 	* ldctor.c (ldctor_build_sets): Produce alternative error message
 	if the reloc was being applied to a special section.

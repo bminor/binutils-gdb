@@ -368,7 +368,7 @@ main (int argc, char **argv)
 	  while ((n = fread (buf, 1, ld_bufsz - 1, saved_script_handle)) > 0)
 	    {
 	      buf[n] = 0;
-	      info_msg (buf);
+	      info_msg ("%s", buf);
 	    }
 	  rewind (saved_script_handle);
 	  free (buf);
