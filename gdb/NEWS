@@ -32,6 +32,9 @@
 
 * Support for Java programs compiled with gcj has been removed.
 
+* User commands now accept an unlimited number of arguments.
+  Previously, only up to 10 was accepted.
+
 * The "eval" command now expands user-defined command arguments.
 
   This makes it easier to process a variable number of arguments:

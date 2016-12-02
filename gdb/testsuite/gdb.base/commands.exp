@@ -440,6 +440,49 @@ proc_with_prefix user_defined_command_args_stack_test {} {
     gdb_test "args_stack_command 31 32 33" $expected "execute command"
 }
 
+# Test a simple user defined command with many arguments.  GDB <= 7.12
+# used to have a hard coded limit of 10 arguments.
+
+proc_with_prefix user_defined_command_manyargs_test {} {
+    global gdb_prompt
+
+    set test "define command"
+    gdb_test_multiple "define manyargs" $test {
+	-re "End with"  {
+	    pass $test
+	}
+    }
+
+    # Define a function that doubles its arguments.
+    gdb_test \
+	[multi_line \
+	     {printf "nargs=%d:", $argc} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", 2 * $arg%d\n", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {end}] \
+	"" \
+	"enter commands"
+
+    # Some random number of arguments, as long as higher than 10.
+    set nargs 100
+
+    set cmd "manyargs"
+    for {set i 1} {$i <= $nargs} {incr i} {
+	append cmd " $i"
+    }
+
+    set expected "nargs=$nargs:"
+    for {set i 1} {$i <= $nargs} {incr i} {
+	append expected " " [expr 2 * $i]
+    }
+
+    gdb_test $cmd $expected "execute command"
+}
+
 proc_with_prefix watchpoint_command_test {} {
     global gdb_prompt
 
@@ -972,6 +1015,7 @@ breakpoint_command_test
 user_defined_command_test
 user_defined_command_args_eval
 user_defined_command_args_stack_test
+user_defined_command_manyargs_test
 watchpoint_command_test
 test_command_prompt_position
 deprecated_command_test

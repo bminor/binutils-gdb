@@ -24057,9 +24057,9 @@ files.
 @cindex arguments, to user-defined commands
 A @dfn{user-defined command} is a sequence of @value{GDBN} commands to
 which you assign a new name as a command.  This is done with the
-@code{define} command.  User commands may accept up to 10 arguments
+@code{define} command.  User commands may accept an unlimited number of arguments
 separated by whitespace.  Arguments are accessed within the user command
-via @code{$arg0@dots{}$arg9}.  A trivial example:
+via @code{$arg0@dots{}$argN}.  A trivial example:
 
 @smallexample
 define adder
@@ -24083,7 +24083,7 @@ functions calls.
 @cindex argument count in user-defined commands
 @cindex how many arguments (user-defined commands)
 In addition, @code{$argc} may be used to find out how many arguments have
-been passed.  This expands to a number in the range 0@dots{}10.
+been passed.
 
 @smallexample
 define adder

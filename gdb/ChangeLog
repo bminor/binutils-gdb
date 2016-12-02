@@ -1,5 +1,25 @@
 2016-12-02  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that user commands now accept an unlimited number
+	of arguments.
+	* cli/cli-script.c: Include <vector>.
+	(struct string_view): New type.
+	(MAXUSERARGS): Delete.
+	(struct user_args): Now a C++ class.
+	(user_args_stack): New.
+	(struct scoped_user_args_level): New type.
+	(execute_user_command): Use scoped_user_args_level.
+	(arg_cleanup): Delete.
+	(setup_user_args): Deleted, and refactored as ...
+	(user_args::user_args): ... this new constructor.  Limit of number
+	of arguments removed.
+	(insert_user_defined_cmd_args): Defer to user_args_stack.
+	(user_args::insert_args): New, bits based on old
+	insert_user_defined_cmd_args with limit of number of arguments
+	eliminated.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
 	PR cli/20559
 	* NEWS: Mention "eval" expands user-defined command arguments.
 	* cli/cli-script.c (execute_control_command): Adjust to rename.

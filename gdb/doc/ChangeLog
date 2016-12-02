@@ -1,5 +1,10 @@
 2016-12-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (User-defined Commands): Limit on number of
+	arguments passed to user-defined commands removed; update.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
 	PR cli/20559
 	* gdb.texinfo (Define): Add example of using "eval" to process a
 	variable number of arguments.
