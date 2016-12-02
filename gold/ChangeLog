@@ -1,5 +1,11 @@
 2016-12-01  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/20717
+	* script-sections.cc (Script_sections): Set *keep to false when
+	no match.
+
+2016-12-01  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/20834
 	* target.h (Target::default_text_segment_address): Bump default
 	start address up to ABI page size.

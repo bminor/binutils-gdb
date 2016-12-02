@@ -3538,6 +3538,7 @@ Script_sections::output_section_name(
 
   *output_section_slot = NULL;
   *psection_type = Script_sections::ST_NONE;
+  *keep = false;
 
   return section_name;
 }
