@@ -1,5 +1,9 @@
 2016-12-02  Nick Clifton  <nickc@redhat.com>
 
+	PR lf/20908
+	* elflink.c (bfd_elf_final_link): Check for ELF flavour binaries
+	when following indirect links.
+
 	PR ld/20909
 	* aoutx.h (aout_link_add_symbols): Fix off-by-one error in check
 	for an illegal string offset.

@@ -11342,6 +11342,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      asection *sec;
 
 	      sec = p->u.indirect.section;
+	      /* See PR 20908 for a reproducer.  */
+	      if (bfd_get_flavour (sec->owner) != bfd_target_elf_flavour)
+		{
+		  _bfd_error_handler (_("%B: not in ELF format"), sec->owner);
+		  goto error_return;
+		}
 	      esdi = elf_section_data (sec);
 
 	      /* Mark all sections which are to be included in the
