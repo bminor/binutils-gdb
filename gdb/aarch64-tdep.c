@@ -395,6 +395,35 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	    regs[rn] = pv_add_constant (regs[rn], imm);
 
 	}
+      else if ((inst.opcode->iclass == ldst_imm9 /* Signed immediate.  */
+		|| (inst.opcode->iclass == ldst_pos /* Unsigned immediate.  */
+		    && (inst.opcode->op == OP_STR_POS
+			|| inst.opcode->op == OP_STRF_POS)))
+	       && inst.operands[1].addr.base_regno == AARCH64_SP_REGNUM
+	       && strcmp ("str", inst.opcode->name) == 0)
+	{
+	  /* STR (immediate) */
+	  unsigned int rt = inst.operands[0].reg.regno;
+	  int32_t imm = inst.operands[1].addr.offset.imm;
+	  unsigned int rn = inst.operands[1].addr.base_regno;
+	  bool is64
+	    = (aarch64_get_qualifier_esize (inst.operands[0].qualifier) == 8);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
+		      || inst.operands[0].type == AARCH64_OPND_Ft);
+
+	  if (inst.operands[0].type == AARCH64_OPND_Ft)
+	    {
+	      /* Only bottom 64-bit of each V register (D register) need
+		 to be preserved.  */
+	      gdb_assert (inst.operands[0].qualifier == AARCH64_OPND_QLF_S_D);
+	      rt += AARCH64_X_REGISTER_COUNT;
+	    }
+
+	  pv_area_store (stack, pv_add_constant (regs[rn], imm),
+			 is64 ? 8 : 4, regs[rt]);
+	  if (inst.operands[1].addr.writeback)
+	    regs[rn] = pv_add_constant (regs[rn], imm);
+	}
       else if (inst.opcode->iclass == testbranch)
 	{
 	  /* Stop analysis on branch.  */
@@ -543,6 +572,52 @@ aarch64_analyze_prologue_test (void)
 
 	SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
 		    == -1);
+      }
+  }
+
+  /* Test a prologue in which STR is used and frame pointer is not
+     used.  */
+  {
+    struct aarch64_prologue_cache cache;
+    cache.saved_regs = trad_frame_alloc_saved_regs (gdbarch);
+
+    static const uint32_t insns[] = {
+      0xf81d0ff3, /* str	x19, [sp, #-48]! */
+      0xb9002fe0, /* str	w0, [sp, #44] */
+      0xf90013e1, /* str	x1, [sp, #32]*/
+      0xfd000fe0, /* str	d0, [sp, #24] */
+      0xaa0203f3, /* mov	x19, x2 */
+      0xf94013e0, /* ldr	x0, [sp, #32] */
+    };
+    instruction_reader_test reader (insns);
+
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
+
+    SELF_CHECK (end == 4 * 5);
+
+    SELF_CHECK (cache.framereg == AARCH64_SP_REGNUM);
+    SELF_CHECK (cache.framesize == 48);
+
+    for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
+      {
+	if (i == 1)
+	  SELF_CHECK (cache.saved_regs[i].addr == -16);
+	else if (i == 19)
+	  SELF_CHECK (cache.saved_regs[i].addr == -48);
+	else
+	  SELF_CHECK (cache.saved_regs[i].addr == -1);
+      }
+
+    for (int i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
+      {
+	int regnum = gdbarch_num_regs (gdbarch);
+
+	if (i == 0)
+	  SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
+		      == -24);
+	else
+	  SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
+		      == -1);
       }
   }
 }

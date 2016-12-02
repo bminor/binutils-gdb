@@ -1,6 +1,13 @@
 2016-12-02  Yao Qi  <yao.qi@linaro.org>
 	    Pedro Alves  <palves@redhat.com>
 
+	* aarch64-tdep.c (aarch64_analyze_prologue): Recognize STR
+	instruction.
+	(aarch64_analyze_prologue_test): More tests.
+
+2016-12-02  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
 	* aarch64-tdep.c: Include "selftest.h".
 	(abstract_instruction_reader): New class.
 	(instruction_reader): New class.
