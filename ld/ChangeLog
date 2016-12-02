@@ -1,5 +1,9 @@
 2016-12-02  Nick Clifton  <nickc@redhat.com>
 
+	PR ld/20911
+	* ldctor.c (ldctor_build_sets): Produce alternative error message
+	if the reloc was being applied to a special section.
+
 	PR ld/20912
 	* emultempl/elf32.em (_place_orphan): Test for ELF format of the
 	orphan before looking for the SHF_EXCLUDE flag.
