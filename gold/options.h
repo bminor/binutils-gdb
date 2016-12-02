@@ -1133,6 +1133,11 @@ class General_options
 		N_("Print symbols defined and used for each input"),
 		N_("FILENAME"));
 
+  DEFINE_special(push_state, options::TWO_DASHES, '\0',
+		 N_("Save the state of flags related to input files"), NULL);
+  DEFINE_special(pop_state, options::TWO_DASHES, '\0',
+		 N_("Restore the state of flags related to input files"), NULL);
+
   // q
 
   DEFINE_bool(emit_relocs, options::TWO_DASHES, 'q', false,
@@ -1516,6 +1521,10 @@ class General_options
   static Object_format
   string_to_object_format(const char* arg);
 
+  // Convert an Object_format to string.
+  static const char*
+  object_format_to_string(Object_format);
+
   // Note: these functions are not very fast.
   Object_format format_enum() const;
   Object_format oformat_enum() const;
@@ -1608,6 +1617,10 @@ class General_options
   Incremental_disposition
   incremental_disposition() const
   { return this->incremental_disposition_; }
+
+  void
+  set_incremental_disposition(Incremental_disposition disp)
+  { this->incremental_disposition_ = disp; }
 
   // The disposition to use for startup files (those that precede the
   // first --incremental-changed, etc. option).
@@ -1740,6 +1753,9 @@ class General_options
   void
   add_plugin_option(const char* opt);
 
+  void
+  copy_from_posdep_options(const Position_dependent_options&);
+
   // Whether we printed version information.
   bool printed_version_;
   // Whether to mark the stack as executable.
@@ -1783,6 +1799,8 @@ class General_options
   Endianness endianness_;
   // What local symbols to discard.
   Discard_locals discard_locals_;
+  // Stack of saved options for --push-state/--pop-state.
+  std::vector<Position_dependent_options*> options_stack_;
 };
 
 // The position-dependent options.  We use this to store the state of
@@ -1813,7 +1831,8 @@ class Position_dependent_options
 			     = Position_dependent_options::default_options_)
   { copy_from_options(options); }
 
-  void copy_from_options(const General_options& options)
+  void
+  copy_from_options(const General_options& options)
   {
     this->set_as_needed(options.as_needed());
     this->set_Bdynamic(options.Bdynamic());
