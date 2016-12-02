@@ -382,6 +382,64 @@ proc_with_prefix user_defined_command_args_eval {} {
     gdb_test "command_args_eval 1 2 3" "argc = 3, 1 2 3" "execute command"
 }
 
+# Test that the $argc/$argN variables are pushed on/popped from the
+# args stack correctly when a user-defined command calls another
+# user-defined command (or in this case, recurses).
+
+proc_with_prefix user_defined_command_args_stack_test {} {
+    global gdb_prompt
+
+    gdb_test_multiple "define args_stack_command" \
+	"define args_stack_command" {
+	    -re "End with"  {
+		pass "define"
+	    }
+	}
+
+    # Make a command that refers to $argc/$argN before and after
+    # recursing.  Also, vary the number of arguments passed to each
+    # recursion point.
+    gdb_test \
+	[multi_line \
+	     {printf "before, argc = %d,", $argc} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", $arg%d", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {} \
+	     {} \
+	     {if $argc == 3} \
+	     {  args_stack_command 21 22} \
+	     {end} \
+	     {if $argc == 2} \
+	     {  args_stack_command 11} \
+	     {end} \
+	     {} \
+	     {} \
+	     {printf "after, argc = %d,", $argc} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", $arg%d", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {end}] \
+	"" \
+	"enter commands"
+
+    set expected \
+	[multi_line \
+	     "before, argc = 3, 31 32 33" \
+	     "before, argc = 2, 21 22" \
+	     "before, argc = 1, 11" \
+	     "after, argc = 1, 11" \
+	     "after, argc = 2, 21 22" \
+	     "after, argc = 3, 31 32 33"]
+    gdb_test "args_stack_command 31 32 33" $expected "execute command"
+}
+
 proc_with_prefix watchpoint_command_test {} {
     global gdb_prompt
 
@@ -913,6 +971,7 @@ infrun_breakpoint_command_test
 breakpoint_command_test
 user_defined_command_test
 user_defined_command_args_eval
+user_defined_command_args_stack_test
 watchpoint_command_test
 test_command_prompt_position
 deprecated_command_test

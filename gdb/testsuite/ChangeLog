@@ -1,5 +1,11 @@
 2016-12-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/commands.exp (user_defined_command_args_stack_test):
+	New procedure.
+	(top level): Call it.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
 	PR cli/20559
 	* gdb.base/commands.exp (user_defined_command_args_eval): New
 	procedure.
