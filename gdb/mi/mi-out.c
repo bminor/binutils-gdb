@@ -27,7 +27,6 @@
 struct mi_ui_out_data
   {
     int suppress_field_separator;
-    int suppress_output;
     int mi_version;
     std::vector<ui_file *> streams;
   };
@@ -118,8 +117,6 @@ mi_table_body (struct ui_out *uiout)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
-  if (data->suppress_output)
-    return;
   /* close the table header line if there were any headers */
   mi_close (uiout, ui_out_type_list);
   mi_open (uiout, "body", ui_out_type_list);
@@ -132,7 +129,6 @@ mi_table_end (struct ui_out *uiout)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
-  data->suppress_output = 0;
   mi_close (uiout, ui_out_type_list); /* body */
   mi_close (uiout, ui_out_type_tuple);
 }
@@ -144,9 +140,6 @@ mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		 const std::string &col_name, const std::string &col_hdr)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-
-  if (data->suppress_output)
-    return;
 
   mi_open (uiout, NULL, ui_out_type_tuple);
   mi_field_int (uiout, 0, 0, ui_center, "width", width);
@@ -163,9 +156,6 @@ mi_begin (struct ui_out *uiout, enum ui_out_type type, const char *id)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
 
-  if (data->suppress_output)
-    return;
-
   mi_open (uiout, id, type);
 }
 
@@ -175,9 +165,6 @@ void
 mi_end (struct ui_out *uiout, enum ui_out_type type)
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-
-  if (data->suppress_output)
-    return;
 
   mi_close (uiout, type);
 }
@@ -190,9 +177,6 @@ mi_field_int (struct ui_out *uiout, int fldno, int width,
 {
   char buffer[20];	/* FIXME: how many chars long a %d can become? */
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
-
-  if (data->suppress_output)
-    return;
 
   xsnprintf (buffer, sizeof (buffer), "%d", value);
   mi_field_string (uiout, fldno, width, alignment, fldname, buffer);
@@ -216,9 +200,6 @@ mi_field_string (struct ui_out *uiout, int fldno, int width,
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
   struct ui_file *stream;
 
-  if (data->suppress_output)
-    return;
-
   stream = data->streams.back ();
   field_separator (uiout);
   if (fldname)
@@ -238,9 +219,6 @@ mi_field_fmt (struct ui_out *uiout, int fldno, int width,
 {
   mi_out_data *data = (mi_out_data *) ui_out_data (uiout);
   struct ui_file *stream;
-
-  if (data->suppress_output)
-    return;
 
   stream = data->streams.back ();
   field_separator (uiout);
@@ -397,7 +375,6 @@ mi_out_data_ctor (mi_out_data *self, int mi_version, struct ui_file *stream)
   self->streams.push_back (stream);
 
   self->suppress_field_separator = 0;
-  self->suppress_output = 0;
   self->mi_version = mi_version;
 }
 

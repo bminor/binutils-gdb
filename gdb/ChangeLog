@@ -1,3 +1,16 @@
+2016-12-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-out.c (mi_ui_out_data) <suppress_output>: Remove.
+	(mi_table_body): Remove suppress_output check.
+	(mi_table_end): Likewise.
+	(mi_table_header): Likewise.
+	(mi_begin): Likewise.
+	(mi_end): Likewise.
+	(mi_field_int): Likewise.
+	(mi_field_string): Likewise.
+	(mi_field_fmt): Likewise.
+	(mi_out_data_ctor): Likewise.
+
 2016-12-02  Yao Qi  <yao.qi@linaro.org>
 	    Pedro Alves  <palves@redhat.com>
 
