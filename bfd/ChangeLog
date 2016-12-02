@@ -1,3 +1,9 @@
+2016-12-02  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20909
+	* aoutx.h (aout_link_add_symbols): Fix off-by-one error in check
+	for an illegal string offset.
+
 2016-12-02  Gary Benson  <gbenson@redhat.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Pass offset to
