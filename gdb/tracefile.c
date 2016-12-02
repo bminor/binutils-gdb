@@ -306,7 +306,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 }
 
 static void
-trace_save_command (char *args, int from_tty)
+tsave_command (char *args, int from_tty)
 {
   int target_does_save = 0;
   char **argv;
@@ -500,7 +500,7 @@ extern initialize_file_ftype _initialize_tracefile;
 void
 _initialize_tracefile (void)
 {
-  add_com ("tsave", class_trace, trace_save_command, _("\
+  add_com ("tsave", class_trace, tsave_command, _("\
 Save the trace data to a file.\n\
 Use the '-ctf' option to save the data to CTF format.\n\
 Use the '-r' option to direct the target to save directly to the file,\n\

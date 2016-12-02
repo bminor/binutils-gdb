@@ -77,7 +77,7 @@ enum trace_stop_reason
   {
     trace_stop_reason_unknown,
     trace_never_run,
-    tstop_command,
+    trace_stop_command,
     trace_buffer_full,
     trace_disconnected,
     tracepoint_passcount,

@@ -166,17 +166,17 @@ char *trace_notes = NULL;
 char *trace_stop_notes = NULL;
 
 /* ======= Important command functions: ======= */
-static void trace_actions_command (char *, int);
-static void trace_start_command (char *, int);
-static void trace_stop_command (char *, int);
-static void trace_status_command (char *, int);
-static void trace_find_command (char *, int);
-static void trace_find_pc_command (char *, int);
-static void trace_find_tracepoint_command (char *, int);
-static void trace_find_line_command (char *, int);
-static void trace_find_range_command (char *, int);
-static void trace_find_outside_command (char *, int);
-static void trace_dump_command (char *, int);
+static void actions_command (char *, int);
+static void tstart_command (char *, int);
+static void tstop_command (char *, int);
+static void tstatus_command (char *, int);
+static void tfind_command (char *, int);
+static void tfind_pc_command (char *, int);
+static void tfind_tracepoint_command (char *, int);
+static void tfind_line_command (char *, int);
+static void tfind_range_command (char *, int);
+static void tfind_outside_command (char *, int);
+static void tdump_command (char *, int);
 
 /* support routines */
 
@@ -645,7 +645,7 @@ decode_agent_options (const char *exp, int *trace_string)
 
 /* Enter a list of actions for a tracepoint.  */
 static void
-trace_actions_command (char *args, int from_tty)
+actions_command (char *args, int from_tty)
 {
   struct tracepoint *t;
   struct command_line *l;
@@ -1780,7 +1780,7 @@ start_tracing (char *notes)
    anybody else messing with the target.  */
 
 static void
-trace_start_command (char *args, int from_tty)
+tstart_command (char *args, int from_tty)
 {
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
@@ -1800,7 +1800,7 @@ trace_start_command (char *args, int from_tty)
    of the trace run's status.  */
 
 static void
-trace_stop_command (char *args, int from_tty)
+tstop_command (char *args, int from_tty)
 {
   if (!current_trace_status ()->running)
     error (_("Trace is not running."));
@@ -1857,7 +1857,7 @@ stop_tracing (char *note)
 
 /* tstatus command */
 static void
-trace_status_command (char *args, int from_tty)
+tstatus_command (char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
   int status, ix;
@@ -1892,7 +1892,7 @@ trace_status_command (char *args, int from_tty)
 	case trace_never_run:
 	  printf_filtered (_("No trace has been run on the target.\n"));
 	  break;
-	case tstop_command:
+	case trace_stop_command:
 	  if (ts->stop_desc)
 	    printf_filtered (_("Trace stopped by a tstop command (%s).\n"),
 			     ts->stop_desc);
@@ -2069,7 +2069,7 @@ trace_status_mi (int on_stop)
 	{
 	  switch (ts->stop_reason)
 	    {
-	    case tstop_command:
+	    case trace_stop_command:
 	      stop_reason = "request";
 	      break;
 	    case trace_buffer_full:
@@ -2246,7 +2246,7 @@ tfind_1 (enum trace_find_type type, int num,
 #if 0 /* dubious now?  */
 	  /* The following will not recurse, since it's
 	     special-cased.  */
-	  trace_find_command ("-1", from_tty);
+	  tfind_command ("-1", from_tty);
 #endif
 	}
     }
@@ -2344,7 +2344,7 @@ check_trace_running (struct trace_status *status)
 
 /* tfind command */
 static void
-trace_find_command (char *args, int from_tty)
+tfind_command (char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
@@ -2380,21 +2380,21 @@ trace_find_command (char *args, int from_tty)
 
 /* tfind end */
 static void
-trace_find_end_command (char *args, int from_tty)
+tfind_end_command (char *args, int from_tty)
 {
-  trace_find_command ("-1", from_tty);
+  tfind_command ("-1", from_tty);
 }
 
 /* tfind start */
 static void
-trace_find_start_command (char *args, int from_tty)
+tfind_start_command (char *args, int from_tty)
 {
-  trace_find_command ("0", from_tty);
+  tfind_command ("0", from_tty);
 }
 
 /* tfind pc command */
 static void
-trace_find_pc_command (char *args, int from_tty)
+tfind_pc_command (char *args, int from_tty)
 {
   CORE_ADDR pc;
 
@@ -2410,7 +2410,7 @@ trace_find_pc_command (char *args, int from_tty)
 
 /* tfind tracepoint command */
 static void
-trace_find_tracepoint_command (char *args, int from_tty)
+tfind_tracepoint_command (char *args, int from_tty)
 {
   int tdp;
   struct tracepoint *tp;
@@ -2446,7 +2446,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
    corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void
-trace_find_line_command (char *args, int from_tty)
+tfind_line_command (char *args, int from_tty)
 {
   static CORE_ADDR start_pc, end_pc;
   struct symtabs_and_lines sals;
@@ -2511,7 +2511,7 @@ trace_find_line_command (char *args, int from_tty)
 
 /* tfind range command */
 static void
-trace_find_range_command (char *args, int from_tty)
+tfind_range_command (char *args, int from_tty)
 {
   static CORE_ADDR start, stop;
   char *tmp;
@@ -2542,7 +2542,7 @@ trace_find_range_command (char *args, int from_tty)
 
 /* tfind outside command */
 static void
-trace_find_outside_command (char *args, int from_tty)
+tfind_outside_command (char *args, int from_tty)
 {
   CORE_ADDR start, stop;
   char *tmp;
@@ -2928,7 +2928,7 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
 /* The tdump command.  */
 
 static void
-trace_dump_command (char *args, int from_tty)
+tdump_command (char *args, int from_tty)
 {
   int stepping_frame = 0;
   struct bp_location *loc;
@@ -3492,7 +3492,7 @@ Status line: '%s'\n"), p, line);
 	  ts->stop_reason = tracepoint_passcount;
 	  ts->stopping_tracepoint = val;
 	}
-      else if (strncmp (p, stop_reason_names[tstop_command], p1 - p) == 0)
+      else if (strncmp (p, stop_reason_names[trace_stop_command], p1 - p) == 0)
 	{
 	  p2 = strchr (++p1, ':');
 	  if (!p2 || p2 > p3)
@@ -3510,7 +3510,7 @@ Status line: '%s'\n"), p, line);
 	    ts->stop_desc = xstrdup ("");
 
 	  p = unpack_varlen_hex (++p2, &val);
-	  ts->stop_reason = tstop_command;
+	  ts->stop_reason = trace_stop_command;
 	}
       else if (strncmp (p, stop_reason_names[trace_disconnected], p1 - p) == 0)
 	{
@@ -4245,7 +4245,7 @@ _initialize_tracepoint (void)
 	   _("Tracing of program execution without stopping the program."),
 	   &cmdlist);
 
-  add_com ("tdump", class_trace, trace_dump_command,
+  add_com ("tdump", class_trace, tdump_command,
 	   _("Print everything collected at the current tracepoint."));
 
   c = add_com ("tvariable", class_trace, trace_variable_command,_("\
@@ -4270,58 +4270,58 @@ Status of trace state variables and their values.\n\
 List target static tracepoints markers.\n\
 "));
 
-  add_prefix_cmd ("tfind", class_trace, trace_find_command, _("\
+  add_prefix_cmd ("tfind", class_trace, tfind_command, _("\
 Select a trace frame;\n\
 No argument means forward by one frame; '-' means backward by one frame."),
 		  &tfindlist, "tfind ", 1, &cmdlist);
 
-  add_cmd ("outside", class_trace, trace_find_outside_command, _("\
+  add_cmd ("outside", class_trace, tfind_outside_command, _("\
 Select a trace frame whose PC is outside the given range (exclusive).\n\
 Usage: tfind outside addr1, addr2"),
 	   &tfindlist);
 
-  add_cmd ("range", class_trace, trace_find_range_command, _("\
+  add_cmd ("range", class_trace, tfind_range_command, _("\
 Select a trace frame whose PC is in the given range (inclusive).\n\
 Usage: tfind range addr1,addr2"),
 	   &tfindlist);
 
-  add_cmd ("line", class_trace, trace_find_line_command, _("\
+  add_cmd ("line", class_trace, tfind_line_command, _("\
 Select a trace frame by source line.\n\
 Argument can be a line number (with optional source file),\n\
 a function name, or '*' followed by an address.\n\
 Default argument is 'the next source line that was traced'."),
 	   &tfindlist);
 
-  add_cmd ("tracepoint", class_trace, trace_find_tracepoint_command, _("\
+  add_cmd ("tracepoint", class_trace, tfind_tracepoint_command, _("\
 Select a trace frame by tracepoint number.\n\
 Default is the tracepoint for the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("pc", class_trace, trace_find_pc_command, _("\
+  add_cmd ("pc", class_trace, tfind_pc_command, _("\
 Select a trace frame by PC.\n\
 Default is the current PC, or the PC of the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("end", class_trace, trace_find_end_command, _("\
+  add_cmd ("end", class_trace, tfind_end_command, _("\
 De-select any trace frame and resume 'live' debugging."),
 	   &tfindlist);
 
   add_alias_cmd ("none", "end", class_trace, 0, &tfindlist);
 
-  add_cmd ("start", class_trace, trace_find_start_command,
+  add_cmd ("start", class_trace, tfind_start_command,
 	   _("Select the first trace frame in the trace buffer."),
 	   &tfindlist);
 
-  add_com ("tstatus", class_trace, trace_status_command,
+  add_com ("tstatus", class_trace, tstatus_command,
 	   _("Display the status of the current trace data collection."));
 
-  add_com ("tstop", class_trace, trace_stop_command, _("\
+  add_com ("tstop", class_trace, tstop_command, _("\
 Stop trace data collection.\n\
 Usage: tstop [ <notes> ... ]\n\
 Any arguments supplied are recorded with the trace as a stop reason and\n\
 reported by tstatus (if the target supports trace notes)."));
 
-  add_com ("tstart", class_trace, trace_start_command, _("\
+  add_com ("tstart", class_trace, tstart_command, _("\
 Start trace data collection.\n\
 Usage: tstart [ <notes> ... ]\n\
 Any arguments supplied are recorded with the trace as a note and\n\
@@ -4362,7 +4362,7 @@ Accepts a comma-separated list of (one or more) expressions.\n\
 The result of each evaluation will be discarded.\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
-  add_com ("actions", class_trace, trace_actions_command, _("\
+  add_com ("actions", class_trace, actions_command, _("\
 Specify the actions to be taken at a tracepoint.\n\
 Tracepoint actions may include collecting of specified data,\n\
 single-stepping, or enabling/disabling other tracepoints,\n\
