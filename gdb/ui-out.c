@@ -702,7 +702,7 @@ ui_out_redirect (struct ui_out *uiout, struct ui_file *outstream)
 
 /* Test the flags against the mask given.  */
 int
-ui_out_test_flags (struct ui_out *uiout, int mask)
+ui_out_test_flags (struct ui_out *uiout, ui_out_flags mask)
 {
   return (uiout->flags & mask);
 }
@@ -923,7 +923,7 @@ ui_out_query_field (struct ui_out *uiout, int colno,
 
 struct ui_out *
 ui_out_new (const struct ui_out_impl *impl, void *data,
-	    int flags)
+	    ui_out_flags flags)
 {
   struct ui_out *uiout = new ui_out ();
 

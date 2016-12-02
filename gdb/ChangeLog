@@ -1,3 +1,17 @@
+2016-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ui-out.h: Include "common/enum-flags.h".
+	(enum ui_flags): Rename to ...
+	(enum ui_out_flag): ... this.
+	(ui_out_flags): Define enum flag type.
+	(ui_out_test_flags): Change type of parameter to ui_out_flags.
+	(ui_out_new): Likewise.
+	* ui-out.c (ui_out_test_flags): Likewise.
+	(ui_out_new): Likewise.
+	* cli-out.c (cli_out_new): Update variable type.
+	* mi/mi-out.c (mi_out_new): Likewise.
+	* tui/tui-out.c (tui_out_new): Likewise.
+
 2016-12-02  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention that user commands now accept an unlimited number

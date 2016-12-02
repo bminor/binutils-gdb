@@ -388,7 +388,7 @@ cli_out_data_ctor (cli_out_data *self, struct ui_file *stream)
 struct ui_out *
 cli_out_new (struct ui_file *stream)
 {
-  int flags = ui_source_list;
+  ui_out_flags flags = ui_source_list;
   cli_out_data *data = new cli_out_data ();
 
   cli_out_data_ctor (data, stream);

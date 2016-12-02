@@ -23,6 +23,8 @@
 #ifndef UI_OUT_H
 #define UI_OUT_H 1
 
+#include "common/enum-flags.h"
+
 /* The ui_out structure */
 
 struct ui_out;
@@ -45,12 +47,12 @@ enum ui_align
   };
 
 /* flags enum */
-enum ui_flags
+enum ui_out_flag
   {
-    ui_from_tty = 1,
-    ui_source_list = 2
+    ui_source_list = (1 << 0),
   };
 
+DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
 
 /* Prototypes for ui-out API.  */
 
@@ -127,7 +129,7 @@ extern void ui_out_wrap_hint (struct ui_out *uiout, const char *identstring);
 
 extern void ui_out_flush (struct ui_out *uiout);
 
-extern int ui_out_test_flags (struct ui_out *uiout, int mask);
+extern int ui_out_test_flags (struct ui_out *uiout, ui_out_flags mask);
 
 extern int ui_out_query_field (struct ui_out *uiout, int colno,
 			       int *width, int *alignment,
@@ -222,9 +224,8 @@ extern void uo_field_string (struct ui_out *uiout, int fldno, int width,
 
 /* Create a ui_out object */
 
-extern struct ui_out *ui_out_new (const struct ui_out_impl *impl,
-				  void *data,
-				  int flags);
+extern struct ui_out *ui_out_new (const struct ui_out_impl *impl, void *data,
+				  ui_out_flags flags);
 
 /* Redirect the ouptut of a ui_out object temporarily.  */
 

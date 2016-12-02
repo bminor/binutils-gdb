@@ -393,7 +393,7 @@ mi_out_data_dtor (struct ui_out *ui_out)
 struct ui_out *
 mi_out_new (int mi_version)
 {
-  int flags = 0;
+  ui_out_flags flags = 0;
   mi_out_data *data = new mi_out_data ();
   struct ui_file *stream = mem_fileopen ();
 

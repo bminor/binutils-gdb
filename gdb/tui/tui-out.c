@@ -145,7 +145,7 @@ tui_text (struct ui_out *uiout, const char *string)
 struct ui_out *
 tui_out_new (struct ui_file *stream)
 {
-  int flags = 0;
+  ui_out_flags flags = 0;
 
   tui_out_data *data = new tui_out_data ();
 
