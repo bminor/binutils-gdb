@@ -1,3 +1,10 @@
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR cli/20559
+	* gdb.texinfo (Define): Add example of using "eval" to process a
+	variable number of arguments.
+	(Output) <eval>: Add anchor.
+
 2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Likewise.

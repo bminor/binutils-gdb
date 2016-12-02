@@ -24096,6 +24096,21 @@ define adder
 end
 @end smallexample
 
+Combining with the @code{eval} command (@pxref{eval}) makes it easier
+to process a variable number of arguments:
+
+@smallexample
+define adder
+  set $i = 0
+  set $sum = 0
+  while $i < $argc
+    eval "set $sum = $sum + $arg%d", $i
+    set $i = $i + 1
+  end
+  print $sum
+end
+@end smallexample
+
 @table @code
 
 @kindex define
@@ -24526,6 +24541,7 @@ Here's an example of printing DFP types using the above conversion letters:
 printf "D32: %Hf - D64: %Df - D128: %DDf\n",1.2345df,1.2E10dd,1.2E1dl
 @end smallexample
 
+@anchor{eval}
 @kindex eval
 @item eval @var{template}, @var{expressions}@dots{}
 Convert the values of one or more @var{expressions} under the control of

@@ -352,6 +352,36 @@ proc_with_prefix user_defined_command_test {} {
 	"display user-defined empty command"
 }
 
+# Test that "eval" in a user-defined command expands $argc/$argN.
+
+proc_with_prefix user_defined_command_args_eval {} {
+    global gdb_prompt
+
+    gdb_test_multiple "define command_args_eval" \
+	"define command_args_eval" {
+	    -re "End with"  {
+		pass "define"
+	    }
+	}
+
+    # Make a command that constructs references to $argc and $argN via
+    # eval.
+    gdb_test \
+	[multi_line \
+	     {eval "printf \"argc = %%d,\", $arg%c", 'c'} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", $arg%d", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {end}] \
+	"" \
+	"enter commands"
+
+    gdb_test "command_args_eval 1 2 3" "argc = 3, 1 2 3" "execute command"
+}
+
 proc_with_prefix watchpoint_command_test {} {
     global gdb_prompt
 
@@ -882,6 +912,7 @@ if_while_breakpoint_command_test
 infrun_breakpoint_command_test
 breakpoint_command_test
 user_defined_command_test
+user_defined_command_args_eval
 watchpoint_command_test
 test_command_prompt_position
 deprecated_command_test

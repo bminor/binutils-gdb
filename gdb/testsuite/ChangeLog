@@ -1,3 +1,10 @@
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR cli/20559
+	* gdb.base/commands.exp (user_defined_command_args_eval): New
+	procedure.
+	(top level): Call it.
+
 2016-12-02  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/ovldbreak.exp (take_gdb_out_of_choice_menu): Restore

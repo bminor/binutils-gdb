@@ -41,8 +41,6 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 				void (*validator)(char *, void *),
 				void *closure);
 
-static std::string insert_args (const char *line);
-
 static struct cleanup * setup_user_args (char *p);
 
 static char *read_next_line (void);
@@ -455,7 +453,7 @@ execute_control_command (struct command_line *cmd)
     case simple_control:
       {
 	/* A simple command, execute it and return.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	execute_command (&new_line[0], 0);
 	ret = cmd->control_type;
 	break;
@@ -486,7 +484,7 @@ execute_control_command (struct command_line *cmd)
 	print_command_trace (buffer);
 
 	/* Parse the loop control expression for the while statement.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	expression_up expr = parse_expression (new_line.c_str ());
 
 	ret = simple_control;
@@ -551,7 +549,7 @@ execute_control_command (struct command_line *cmd)
 	print_command_trace (buffer);
 
 	/* Parse the conditional for the if statement.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	expression_up expr = parse_expression (new_line.c_str ());
 
 	current = NULL;
@@ -591,7 +589,7 @@ execute_control_command (struct command_line *cmd)
       {
 	/* Breakpoint commands list, record the commands in the
 	   breakpoint's command list and return.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	ret = commands_from_control_command (new_line.c_str (), cmd);
 	break;
       }
@@ -782,13 +780,12 @@ locate_arg (const char *p)
   return NULL;
 }
 
-/* Insert the user defined arguments stored in user_arg into the $arg
-   arguments found in line.  */
+/* See cli-script.h.  */
 
-static std::string
-insert_args (const char *line)
+std::string
+insert_user_defined_cmd_args (const char *line)
 {
-  /* If we are not in a user-defined function, treat $argc, $arg0, et
+  /* If we are not in a user-defined command, treat $argc, $arg0, et
      cetera as normal convenience variables.  */
   if (user_args == NULL)
     return line;

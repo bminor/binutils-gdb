@@ -53,6 +53,12 @@ extern struct cleanup *
 
 extern void execute_user_command (struct cmd_list_element *c, char *args);
 
+/* If we're in a user-defined command, replace any $argc/$argN
+   reference found in LINE with the arguments that were passed to the
+   command.  Otherwise, treat $argc/$argN as normal convenience
+   variables.  */
+extern std::string insert_user_defined_cmd_args (const char *line);
+
 /* Exported to top.c */
 
 extern void print_command_trace (const char *cmd);

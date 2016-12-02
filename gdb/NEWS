@@ -32,6 +32,18 @@
 
 * Support for Java programs compiled with gcj has been removed.
 
+* The "eval" command now expands user-defined command arguments.
+
+  This makes it easier to process a variable number of arguments:
+
+   define mycommand
+     set $i = 0
+     while $i < $argc
+       eval "print $arg%d", $i
+       set $i = $i + 1
+     end
+   end
+
 * New targets
 
 Synopsys ARC			arc*-*-elf32

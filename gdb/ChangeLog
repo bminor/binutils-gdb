@@ -1,3 +1,15 @@
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR cli/20559
+	* NEWS: Mention "eval" expands user-defined command arguments.
+	* cli/cli-script.c (execute_control_command): Adjust to rename.
+	(insert_args): Rename to ...
+	(insert_user_defined_cmd_args): ... this, and make extern.
+	* cli/cli-script.h (insert_user_defined_cmd_args): New
+	declaration.
+	* printcmd.c: Include "cli/cli-script.h".
+	(eval_command): Call insert_user_defined_cmd_args.
+
 2016-12-02  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/16264:
