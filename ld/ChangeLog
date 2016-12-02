@@ -1,3 +1,9 @@
+2016-12-02  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20912
+	* emultempl/elf32.em (_place_orphan): Test for ELF format of the
+	orphan before looking for the SHF_EXCLUDE flag.
+
 2016-12-02  Josh Conner  <joshconner@google.com>
 
         * Makefile.am: Add dependency information for earmelf_fuchsia.c.

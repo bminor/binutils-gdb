@@ -2062,9 +2062,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	if (os->bfd_section != NULL
 	    && (os->bfd_section->flags == 0
 		|| ((!bfd_link_relocatable (&link_info)
-		     || (((elf_section_flags (s)
-			  ^ elf_section_flags (os->bfd_section))
-			 & SHF_EXCLUDE) == 0))
+		     || (iself && (((elf_section_flags (s)
+				     ^ elf_section_flags (os->bfd_section))
+				    & SHF_EXCLUDE) == 0)))
 		    && ((s->flags ^ os->bfd_section->flags)
 		     & (SEC_LOAD | SEC_ALLOC)) == 0
 		    && _bfd_elf_match_sections_by_type (link_info.output_bfd,
