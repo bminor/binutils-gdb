@@ -5063,11 +5063,11 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry *fdh;
 
-  if (eh->elf.root.type == bfd_link_hash_indirect)
-    return TRUE;
-
   if (eh->elf.root.type == bfd_link_hash_warning)
     eh = (struct ppc_link_hash_entry *) eh->elf.root.u.i.link;
+
+  if (eh->elf.root.type == bfd_link_hash_indirect)
+    return TRUE;
 
   if (eh->elf.root.root.string[0] != '.')
     abort ();
