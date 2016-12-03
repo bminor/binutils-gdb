@@ -1,5 +1,10 @@
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elfvers/vers.exp (objdump_dynsymstuff): Don't abort
+	on non-empty results with empty expected.
+
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-cdtest/cdtest-foo.cc: Test for __GNUG__ >= 2.
 
 2016-12-03  Alan Modra  <amodra@gmail.com>
