@@ -1,5 +1,42 @@
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_link_hash_entry): Delete "was_undefined".
+	(struct ppc_link_hash_table): Delete "twiddled_syms".  Add
+	"need_func_desc_adj".
+	(lookup_fdh): Link direct fdh sym via oh field and set flags.
+	(make_fdh): Make strong and weak undefined function descriptor
+	symbols.
+	(ppc64_elf_merge_symbol): New function.
+	(elf_backend_merge_symbol): Define.
+	(ppc64_elf_archive_symbol_lookup): Don't test undefweak for fake
+	function descriptors.
+	(add_symbol_adjust): Don't twiddle symbols to undefweak.
+	Propagate more ref flags to function descriptor symbol.  Make
+	some function descriptor symbols dynamic.
+	(ppc64_elf_before_check_relocs): Only run add_symbol_adjust for
+	ELFv1.  Set need_func_desc_adj.  Don't fix undefs list.
+	(ppc64_elf_check_relocs): Set non_ir_ref for descriptors.
+	Don't call lookup_fdh here.
+	(ppc64_elf_gc_sections): New function.
+	(bfd_elf64_bfd_gc_sections): Define.
+	(ppc64_elf_gc_mark_hook): Mark descriptor.
+	(func_desc_adjust): Don't make fake function descriptor syms strong
+	here.  Exit earlier on non-dotsyms.  Take note of elf.dynamic
+	flag when deciding whether a dynamic function descriptor might
+	be needed.  Transfer elf.dynamic and set elf.needs_plt.  Move
+	plt regardless of visibility.  Make descriptor dynamic if
+	entry sym is dynamic, not for other cases.
+	(ppc64_elf_func_desc_adjust): Don't run func_desc_adjust if
+	already done.
+	(ppc64_elf_edit_opd): Use oh field rather than lookup_fdh.
+	(ppc64_elf_size_stubs): Likewise.
+	(ppc_build_one_stub): Don't clear was_undefined.  Only set sym
+	undefweak if stub symbol is defined.
+	(undo_symbol_twiddle, ppc64_elf_restore_symbols): Delete.
+	* elf64-ppc.h (ppc64_elf_restore_symbols): Don't declare.
+
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_hide_symbol): Access hash table as
 	elf_link_hash_table rather than ppc_link_hash_table.
 

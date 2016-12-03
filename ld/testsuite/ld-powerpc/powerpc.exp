@@ -299,6 +299,10 @@ if [ supports_ppc64 ] then {
     run_dump_test "tlsld"
     run_dump_test "relocsort"
     run_dump_test "addpcis"
+    run_dump_test "dotsym1"
+    run_dump_test "dotsym2"
+    run_dump_test "dotsym3"
+    run_dump_test "dotsym4"
 }
 
 run_dump_test "tlsld32"

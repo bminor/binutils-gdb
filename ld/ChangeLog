@@ -1,5 +1,17 @@
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Don't call
+	ppc64_elf_restore_symbols.
+	* testsuite/ld-powerpc/dotsym1.d: New.
+	* testsuite/ld-powerpc/dotsym2.d: New.
+	* testsuite/ld-powerpc/dotsym3.d: New.
+	* testsuite/ld-powerpc/dotsym4.d: New.
+	* testsuite/ld-powerpc/dotsymref.s: New.
+	* testsuite/ld-powerpc/nodotsym.s: New.
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
+
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/indirect1b.c: Give dot-symbol a version too.
 	* testsuite/ld-elf/indirect2.c: Likewise.
 	* testsuite/ld-elf/indirect3b.c: Likewise.

@@ -94,5 +94,3 @@ bfd_boolean ppc64_elf_size_stubs
 (struct bfd_link_info *);
 bfd_boolean ppc64_elf_build_stubs
   (struct bfd_link_info *, char **);
-void ppc64_elf_restore_symbols
-  (struct bfd_link_info *info);
