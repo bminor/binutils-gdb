@@ -149,7 +149,7 @@ set lto_link_tests [list \
    {pr12760b.c} {} "libpr12760.a"] \
   [list "PR ld/12760" \
    "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12760a.o -Wl,--start-group tmpdir/libpr12760.a -Wl,--end-group" "" \
-   {dummy.c} {} "pr12760.exe" "c" "pr12760a.c:6: warning: Bad bar"] \
+   {dummy.c} {} "pr12760.exe" "c" "pr12760a.c:6: warning: Bad \\.?bar"] \
   [list "Build libpr13183.a" \
    "-T" "-flto -O2 $lto_fat" \
    {pr13183a.c} {} "libpr13183.a"] \
@@ -392,21 +392,21 @@ if { [is_elf_format] && [check_lto_shared_available] } {
     run_cc_link_tests $lto_link_elf_tests
     set testname "PR ld/15146 (2)"
     set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
-    if { [ regexp "undefined reference to symbol 'xxx'" $exec_output ] } {
+    if { [ regexp "undefined reference to symbol '\\.?xxx'" $exec_output ] } {
 	pass $testname
     } {
 	fail $testname
     }
     set testname "PR ld/16746 (3)"
     set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr16746b.o tmpdir/pr16746d.o"]
-    if { [ regexp "warning: foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
+    if { [ regexp "warning: \\.?foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
 	pass $testname
     } {
 	fail $testname
     }
     set testname "PR ld/16746 (4)"
     set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr16746d.o tmpdir/pr16746b.o"]
-    if { [ regexp "warning: foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
+    if { [ regexp "warning: \\.?foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
 	pass $testname
     } {
 	fail $testname
@@ -455,7 +455,7 @@ if { [at_least_gcc_version 4 7] } {
     }
     set testname "PR ld/12942 (3)"
     set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
-    if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
+    if { [ regexp "undefined reference to `\\.?link_error\\(\\)'" $exec_output ] } {
         pass $testname
     } {
         fail $testname
@@ -492,7 +492,7 @@ proc pr20103 {cflags libs} {
 
     set testname "PR ld/20103 ($cflags $libs)"
     set exec_output [run_host_cmd "$CC" "$cflags $libs"]
-    if { [ regexp "undefined reference to `dead'" $exec_output ] } {
+    if { [ regexp "undefined reference to `\\.?dead'" $exec_output ] } {
         pass "$testname (1)"
     } {
         fail "$testname (1)"

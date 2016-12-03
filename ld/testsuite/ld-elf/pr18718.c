@@ -10,6 +10,9 @@ new_foo (void)
 }
 
 __asm__(".symver new_foo, foo@@VERS_2.0");
+#if defined __powerpc64__ && defined _CALL_AIXDESC && !defined _CALL_LINUX
+__asm__(".symver .new_foo, .foo@@VERS_2.0");
+#endif
 
 #if defined(__GNUC__) && (__GNUC__ * 1000 + __GNUC_MINOR__) >= 4005
 __attribute__ ((noinline, noclone))

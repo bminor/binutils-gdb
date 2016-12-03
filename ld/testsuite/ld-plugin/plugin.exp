@@ -106,11 +106,15 @@ if { $can_compile && \
     set failed_compile 1
 }
 
+set dotsym 0
 if { $can_compile && !$failed_compile } {
     # Find out if symbols have prefix on this platform before setting tests.
     catch "exec $NM tmpdir/func.o" plugin_nm_output
     if { [regexp "_func" "$plugin_nm_output"] } {
 	set _ "_"
+    }
+    if { [regexp "\\.func" "$plugin_nm_output"] } {
+	set dotsym 1
     }
 }
 
@@ -121,6 +125,9 @@ set testsrcfiles_notext "tmpdir/main.o $srcdir/$subdir/func.c"
 # Rather than having libs we just define dummy values for anything
 # we may need to link a target exe; we aren't going to run it anyway.
 set libs "[ld_simple_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}puts=${_}main"
+if { $dotsym } {
+    append libs " --defsym .printf=.main --defsym .puts=.main"
+}
 
 set plugin_tests [list \
     [list "load plugin" "-plugin $plugin_path \

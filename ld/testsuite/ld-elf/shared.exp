@@ -454,14 +454,14 @@ if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
 }
 set testname "--no-add-needed -shared"
 set exec_output [run_host_cmd "$CC" "-shared tmpdir/libneeded1pic.o -Wl,--no-add-needed,-z,defs -Ltmpdir -lneeded1a"]
-if { [ regexp "undefined reference to `bar'" $exec_output ] } {
+if { [ regexp "undefined reference to `\.?bar'" $exec_output ] } {
     pass $testname
 } {
     fail $testname
 }
 set testname "--no-copy-dt-needed-entries -shared"
 set exec_output [run_host_cmd "$CC" "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries,-z,defs -Ltmpdir -lneeded1a"]
-if { [ regexp "undefined reference to `bar'" $exec_output ] } {
+if { [ regexp "undefined reference to `\.?bar'" $exec_output ] } {
     pass $testname
 } {
     fail $testname

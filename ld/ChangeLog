@@ -1,5 +1,71 @@
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/indirect1b.c: Give dot-symbol a version too.
+	* testsuite/ld-elf/indirect2.c: Likewise.
+	* testsuite/ld-elf/indirect3b.c: Likewise.
+	* testsuite/ld-elf/indirect4b.c: Likewise.
+	* testsuite/ld-elf/pr18718.c: Likewise.
+	* testsuite/ld-elf/pr18720b.c: Likewise.
+	* testsuite/ld-elf/pr19553c.c: Likewise.
+	* testsuite/ld-elfvers/vers.h (FUNC_SYMVER): Define.
+	* testsuite/ld-elfvers/vers1.c: Use FUNC_SYMVER for functions.
+	* testsuite/ld-elfvers/vers4.c: Likewise.
+	* testsuite/ld-elfvers/vers5.c: Likewise.
+	* testsuite/ld-elfvers/vers6.c: Likewise.
+	* testsuite/ld-elfvers/vers7a.c: Likewise.
+	* testsuite/ld-elfvers/vers9.c: Likewise.
+	* testsuite/ld-elfvers/vers15.c: Likewise.
+	* testsuite/ld-elfvers/vers18.c: Likewise.
+	* testsuite/ld-elfvers/vers22a.c: Likewise.
+	* testsuite/ld-elfvers/vers23a.c: Likewise.
+	* testsuite/ld-elfvers/vers27d1.c: Likewise.
+	* testsuite/ld-elfvers/vers21.c: Likewise.
+	(_old_bar): Use attribute weak rather than asm weak.
+	* testsuite/ld-ifunc/pr16467b.c: Give dot-symbol a version.
+	* testsuite/ld-plugin/pr12760b.c: Define warning on .bar rather than
+	bar for ppc64 -mcall-aixdesc.
+	* testsuite/ld-plugin/pr16746a.c: Similarly for foobar.
+	* testsuite/ld-plugin/pr16746b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Allow dot-symbol in warnings and errors.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-plugin/plugin-6.d: Likewise.
+	* testsuite/ld-plugin/plugin-7.d: Likewise.
+	* testsuite/ld-plugin/plugin-8.d: Likewise.
+	* testsuite/ld-plugin/plugin-13.d: Likewise.
+	* testsuite/ld-plugin/plugin-14.d: Likewise.
+	* testsuite/ld-plugin/plugin-15.d: Likewise.
+	* testsuite/ld-plugin/plugin-16.d: Likewise.
+	* testsuite/ld-plugin/plugin-20.d: Likewise.
+	* testsuite/ld-plugin/plugin-21.d: Likewise.
+	* testsuite/ld-plugin/plugin-22.d: Likewise.
+	* testsuite/ld-plugin/plugin-23.d: Likewise.
+	* testsuite/ld-plugin/plugin.exp: Define .main and .puts for ppc64
+	-mcall-aixdesc.
+	* testsuite/ld-elfvers/vers.exp (test_ar): Trim dot-symbols.
+	(objdump_dynsymstuff): Likewise.
+	(objdump_symstuff): Likewise.  Pack flags to keep column count
+	consistent.
+	* testsuite/ld-elfweak/elfweak.exp (objdump_dynsymstuff,
+	objdump_symstuff): As for vers.exp.
+	* testsuite/ld-elfvers/vers6.sym: Allow dot-symbols.
+	* testsuite/ld-elfvers/vers1.sym: Allow missing F flag for
+	-mcall-aixdesc .opd syms and adjust for flag packing.
+	* testsuite/ld-elfvers/vers4.sym: Likewise.
+	* testsuite/ld-elfvers/vers4a.sym: Likewise.
+	* testsuite/ld-elfvers/vers7a.sym: Likewise.
+	* testsuite/ld-elfvers/vers9.sym: Likewise.
+	* testsuite/ld-elfvers/vers15.sym: Likewise.
+	* testsuite/ld-elfvers/vers18.sym: Likewise.
+	* testsuite/ld-elfvers/vers21.sym: Likewise.
+	* testsuite/ld-elfvers/vers22a.sym: Likewise.
+	* testsuite/ld-elfvers/vers23a.sym: Likewise.
+	* testsuite/ld-elfvers/vers27d.sym: Likewise.
+	* testsuite/ld-elfweak/strong.sym: Likewise.
+	* testsuite/ld-elfweak/strongcomm.sym: Likewise.
+	* testsuite/ld-elfweak/strongdata.sym: Likewise.
+
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elfvers/vers.exp (objdump_dynsymstuff): Don't abort
 	on non-empty results with empty expected.
 
