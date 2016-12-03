@@ -5951,8 +5951,9 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
       /* LD->LE relaxation (tiny):
 	 adr  x0, :tlsldm:x  => mrs x0, tpidr_el0
-	 bl   __tls_get_addr => add x0, x0, TCB_SIZE
-       */
+	 bl   __tls_get_addr => add R0, R0, TCB_SIZE
+
+	 Where R is x for lp64 mode, and w for ilp32 mode.  */
       if (is_local)
 	{
 	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
@@ -5960,7 +5961,11 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	  /* No need of CALL26 relocation for tls_get_addr.  */
 	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
 	  bfd_putl32 (0xd53bd040, contents + rel->r_offset + 0);
+#if ARCH_SIZE == 64
 	  bfd_putl32 (0x91004000, contents + rel->r_offset + 4);
+#else
+	  bfd_putl32 (0x11002000, contents + rel->r_offset + 4);
+#endif
 	  return bfd_reloc_ok;
 	}
       return bfd_reloc_continue;
@@ -5978,17 +5983,22 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
       /* LD->LE relaxation (small):
-	 add   x0, #:tlsldm_lo12:x => add x0, x0, TCB_SIZE
+	 add   x0, #:tlsldm_lo12:x => add R0, R0, TCB_SIZE
 	 bl   __tls_get_addr       => nop
-       */
+
+	 Where R is x for lp64 mode, and w for ilp32 mode.  */
       if (is_local)
 	{
 	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
 	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
 	  /* No need of CALL26 relocation for tls_get_addr.  */
 	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
+#if ARCH_SIZE == 64
 	  bfd_putl32 (0x91004000, contents + rel->r_offset + 0);
-	  bfd_putl32 (0xd503201f, contents + rel->r_offset + 4);
+#else
+	  bfd_putl32 (0x11002000, contents + rel->r_offset + 0);
+#endif
+	  bfd_putl32 (INSN_NOP, contents + rel->r_offset + 4);
 	  return bfd_reloc_ok;
 	}
       return bfd_reloc_continue;

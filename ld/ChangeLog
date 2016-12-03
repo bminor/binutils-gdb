@@ -1,3 +1,10 @@
+2016-12-14  Yury Norov <ynorov@caviumnetworks.com>
+
+	* ld/testsuite/ld-aarch64/aarch64-elf.exp: Add tests for tiny and
+	small ld-le relaxations in ilp32 mode.
+	* ld/testsuite/ld-aarch64/tls-relax-ld-le-small-ilp32.d: New file.
+	* ld/testsuite/ld-aarch64/tls-relax-ld-le-tiny-ilp32.d: New file.
+
 2016-12-13  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64_choose_lp64_emul): New

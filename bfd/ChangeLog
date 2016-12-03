@@ -1,3 +1,8 @@
+2016-12-14  Yury Norov <ynorov@caviumnetworks.com>
+
+         * bfd/elfnn-aarch64.c: fix TLS relaxations for ilp32 where
+         TCB_SIZE is used.
+
 2016-12-13  Alan Modra  <amodra@gmail.com>
 
 	* elf64-hppa.c (elf64_hppa_modify_segment_map): Don't add PHDR
