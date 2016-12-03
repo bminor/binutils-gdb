@@ -7392,7 +7392,7 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
       if (fh == NULL)
 	{
 	  const char *p, *q;
-	  struct ppc_link_hash_table *htab;
+	  struct elf_link_hash_table *htab = elf_hash_table (info);
 	  char save;
 
 	  /* We aren't supposed to use alloca in BFD because on
@@ -7407,12 +7407,8 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 	  p = eh->elf.root.root.string - 1;
 	  save = *p;
 	  *(char *) p = '.';
-	  htab = ppc_hash_table (info);
-	  if (htab == NULL)
-	    return;
-
 	  fh = (struct ppc_link_hash_entry *)
-	    elf_link_hash_lookup (&htab->elf, p, FALSE, FALSE, FALSE);
+	    elf_link_hash_lookup (htab, p, FALSE, FALSE, FALSE);
 	  *(char *) p = save;
 
 	  /* Unfortunately, if it so happens that the string we were
@@ -7426,7 +7422,7 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 		--q, --p;
 	      if (q < eh->elf.root.root.string && *p == '.')
 		fh = (struct ppc_link_hash_entry *)
-		  elf_link_hash_lookup (&htab->elf, p, FALSE, FALSE, FALSE);
+		  elf_link_hash_lookup (htab, p, FALSE, FALSE, FALSE);
 	    }
 	  if (fh != NULL)
 	    {

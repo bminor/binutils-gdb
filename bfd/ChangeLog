@@ -1,5 +1,10 @@
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_hide_symbol): Access hash table as
+	elf_link_hash_table rather than ppc_link_hash_table.
+
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (add_symbol_adjust): Delete dead code.
 
 2016-12-03  Alan Modra  <amodra@gmail.com>
