@@ -1,5 +1,9 @@
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (add_symbol_adjust): Delete dead code.
+
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (add_symbol_adjust): Correct order of tests for
 	warning and indirect symbols.
 

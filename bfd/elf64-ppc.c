@@ -5195,14 +5195,6 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
       p = &eh->u.next_dot_sym;
     }
 
-  /* Clear the list for non-ppc64 input files.  */
-  p = &htab->dot_syms;
-  while ((eh = *p) != NULL)
-    {
-      *p = NULL;
-      p = &eh->u.next_dot_sym;
-    }
-
   /* We need to fix the undefs list for any syms we have twiddled to
      undefweak.  */
   if (htab->twiddled_syms)
