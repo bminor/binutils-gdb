@@ -1,3 +1,8 @@
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't copy dynamic
+	flags when direct symbol is versioned_hidden.
+
 2016-12-02  Nick Clifton  <nickc@redhat.com>
 
 	PR lf/20908
