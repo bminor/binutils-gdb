@@ -1,3 +1,7 @@
+2016-12-03  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (try_copy_symbol_type): Remove unnecessary check.
+
 2016-12-02  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20910

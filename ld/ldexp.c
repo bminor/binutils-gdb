@@ -990,16 +990,12 @@ is_align_conditional (const etree_type *tree)
 static void
 try_copy_symbol_type (struct bfd_link_hash_entry *h, etree_type *src)
 {
-  if (src->type.node_class == etree_name)
-    {
-      struct bfd_link_hash_entry *hsrc;
+  struct bfd_link_hash_entry *hsrc;
 
-      hsrc = bfd_link_hash_lookup (link_info.hash, src->name.name,
-				    FALSE, FALSE, TRUE);
-      if (hsrc)
-	bfd_copy_link_hash_symbol_type (link_info.output_bfd, h,
-						    hsrc);
-    }
+  hsrc = bfd_link_hash_lookup (link_info.hash, src->name.name,
+			       FALSE, FALSE, TRUE);
+  if (hsrc != NULL)
+    bfd_copy_link_hash_symbol_type (link_info.output_bfd, h, hsrc);
 }
 
 static void
