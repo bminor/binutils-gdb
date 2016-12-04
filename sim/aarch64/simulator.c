@@ -13353,7 +13353,7 @@ tbnz (sim_cpu *cpu, uint32_t  pos, int32_t offset)
   unsigned rt = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (aarch64_get_reg_u64 (cpu, rt, NO_SP) & (1 << pos))
+  if (aarch64_get_reg_u64 (cpu, rt, NO_SP) & (((uint64_t) 1) << pos))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
 
@@ -13364,7 +13364,7 @@ tbz (sim_cpu *cpu, uint32_t  pos, int32_t offset)
   unsigned rt = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (!(aarch64_get_reg_u64 (cpu, rt, NO_SP) & (1 << pos)))
+  if (!(aarch64_get_reg_u64 (cpu, rt, NO_SP) & (((uint64_t) 1) << pos)))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
 
@@ -13407,7 +13407,7 @@ dexTestBranchImmediate (sim_cpu *cpu)
      instr[18,5]  = simm14 : signed offset counted in words
      instr[4,0]   = uimm5  */
 
-  uint32_t pos = ((INSTR (31, 31) << 4) | INSTR (23, 19));
+  uint32_t pos = ((INSTR (31, 31) << 5) | INSTR (23, 19));
   int32_t offset = simm32 (aarch64_get_instr (cpu), 18, 5) << 2;
 
   NYI_assert (30, 25, 0x1b);

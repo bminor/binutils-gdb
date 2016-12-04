@@ -1,3 +1,8 @@
+2016-12-03  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (tbnz, tbz): Cast 1 to uint64_t before shifting.
+	(dexTestBranchImmediate): Shift high bit of pos by 5 not 4.
+
 2016-12-01  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (fsturs): Switch use of rn and st variables.
