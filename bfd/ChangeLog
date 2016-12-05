@@ -5,6 +5,9 @@
 
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/20907
+	* peicode.h (pe_ILF_build_a_bfd): Replace abort with error return.
+
 	PR binutils/20921
 	* aoutx.h (squirt_out_relocs): Check for and report any relocs
 	that could not be recognised.

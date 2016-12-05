@@ -892,8 +892,8 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   if (import_name_type == IMPORT_ORDINAL)
     {
       if (ordinal == 0)
-	/* XXX - treat as IMPORT_NAME ??? */
-	abort ();
+	/* See PR 20907 for a reproducer.  */
+	goto error_return;
 
 #ifdef COFF_WITH_pex64
       ((unsigned int *) id4->contents)[0] = ordinal;
