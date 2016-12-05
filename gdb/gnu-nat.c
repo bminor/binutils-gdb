@@ -20,14 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
-
-#include <ctype.h>
-#include <limits.h>
-#include <setjmp.h>
-#include <signal.h>
-#include <sys/ptrace.h>
-
+/* Mach/Hurd headers are not yet ready for C++ compilation.  */
+extern "C"
+{
 #include <mach.h>
 #include <mach_error.h>
 #include <mach/exception.h>
@@ -48,6 +43,15 @@
 #include <hurd/sigpreempt.h>
 
 #include <portinfo.h>
+}
+
+#include "defs.h"
+
+#include <ctype.h>
+#include <limits.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <sys/ptrace.h>
 
 #include "inferior.h"
 #include "symtab.h"
@@ -63,12 +67,16 @@
 #include "gnu-nat.h"
 #include "inf-child.h"
 
+/* MIG stubs are not yet ready for C++ compilation.  */
+extern "C"
+{
 #include "exc_request_S.h"
 #include "notify_S.h"
 #include "process_reply_S.h"
 #include "msg_reply_S.h"
 #include "exc_request_U.h"
 #include "msg_U.h"
+}
 
 static process_t proc_server = MACH_PORT_NULL;
 
@@ -1443,6 +1451,12 @@ struct inf *gnu_current_inf = 0;
    multi-threaded, we don't bother to lock this.  */
 struct inf *waiting_inf;
 
+/* MIG stubs are not yet ready for C++ compilation.  */
+extern "C" int exc_server (mach_msg_header_t *, mach_msg_header_t *);
+extern "C" int msg_reply_server (mach_msg_header_t *, mach_msg_header_t *);
+extern "C" int notify_server (mach_msg_header_t *, mach_msg_header_t *);
+extern "C" int process_reply_server (mach_msg_header_t *, mach_msg_header_t *);
+
 /* Wait for something to happen in the inferior, returning what in STATUS.  */
 static ptid_t
 gnu_wait (struct target_ops *ops,
@@ -1457,11 +1471,6 @@ gnu_wait (struct target_ops *ops,
   kern_return_t err;
   struct proc *thread;
   struct inf *inf = gnu_current_inf;
-
-  extern int exc_server (mach_msg_header_t *, mach_msg_header_t *);
-  extern int msg_reply_server (mach_msg_header_t *, mach_msg_header_t *);
-  extern int notify_server (mach_msg_header_t *, mach_msg_header_t *);
-  extern int process_reply_server (mach_msg_header_t *, mach_msg_header_t *);
 
   gdb_assert (inf->task);
 

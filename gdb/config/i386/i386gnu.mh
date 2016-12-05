@@ -32,6 +32,9 @@ MIGCOM = $(MIG) -cc cat - /dev/null
 	$(CPP) $(CPPFLAGS) $($*-MIGUFLAGS) -x c $< \
 	| $(MIGCOM) -sheader /dev/null -server /dev/null -user $*_U.c -header $*_U.h
 
+# MIG stubs are not yet ready for C++ compilation.
+%_S.o %_U.o : COMPILE.post += -x c
+
 NAT_GENERATED_FILES = notify_S.h notify_S.c \
 	process_reply_S.h process_reply_S.c \
 	msg_reply_S.h msg_reply_S.c msg_U.h msg_U.c \

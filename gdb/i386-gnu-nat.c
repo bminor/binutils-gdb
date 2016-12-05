@@ -17,16 +17,20 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Mach/Hurd headers are not yet ready for C++ compilation.  */
+extern "C"
+{
+#include <mach.h>
+#include <mach_error.h>
+#include <mach/message.h>
+#include <mach/exception.h>
+}
+
 #include "defs.h"
 #include "x86-nat.h"
 #include "inferior.h"
 #include "floatformat.h"
 #include "regcache.h"
-
-#include <mach.h>
-#include <mach_error.h>
-#include <mach/message.h>
-#include <mach/exception.h>
 
 #include "i386-tdep.h"
 

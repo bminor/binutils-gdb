@@ -1,5 +1,11 @@
 2016-12-08  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* config/i386/i386gnu.mh (%_S.o %_U.o): Add "-x c" to
+	"COMPILE.post".
+	* gnu-nat.c: #include Mach/Hurd headers before all others.  Wrap
+	Mach/Hurd headers and MIG stubs' prototypes in 'extern "C"'.
+	* i386-gnu-nat.c: Likewise.
+
 	* gnu-nat.c (proc_get_exception_port, proc_set_exception_port)
 	(INF_RESUME_MSGPORT_RPC, proc_get_state, _proc_get_exc_port)
 	(proc_steal_exc_port, proc_restore_exc_port, make_proc)
