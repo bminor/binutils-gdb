@@ -1,3 +1,9 @@
+2016-12-05  Alyssa Milburn <amilburn@zall.org>
+
+	* testsuite/ld-sparc/wdispcall.s: New file.
+	* testsuite/ld-sparc/wdispcall.dd: Likewise.
+	* testsuite/ld-sparc/sparc.exp: Run new test.
+
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Don't call

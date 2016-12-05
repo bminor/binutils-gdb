@@ -1,3 +1,8 @@
+2016-12-05  Alyssa Milburn <amilburn@zall.org>
+
+	* elfxx-sparc.c: Do not stop processing relocations after
+	partially relaxing a call with WDISP30.
+
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20922
