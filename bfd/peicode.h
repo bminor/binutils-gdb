@@ -1269,7 +1269,8 @@ pe_ILF_object_p (bfd * abfd)
     }
 
   symbol_name = (char *) ptr;
-  source_dll  = symbol_name + strlen (symbol_name) + 1;
+  /* See PR 20905 for an example of where the strnlen is necessary.  */
+  source_dll  = symbol_name + strnlen (symbol_name, size - 1) + 1;
 
   /* Verify that the strings are null terminated.  */
   if (ptr[size - 1] != 0

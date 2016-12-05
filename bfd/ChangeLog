@@ -5,6 +5,10 @@
 
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/20905
+	* peicode.h (pe_ILF_object_p): Use strnlen to avoid running over
+	the end of the string buffer.
+
 	PR binutils/20907
 	* peicode.h (pe_ILF_build_a_bfd): Replace abort with error return.
 
