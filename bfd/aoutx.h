@@ -1955,6 +1955,7 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
 
   PUT_WORD (abfd, g->address, natptr->r_address);
 
+  BFD_ASSERT (g->howto != NULL);
   r_length = g->howto->size ;	/* Size as a power of two.  */
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
   /* XXX This relies on relocs coming from a.out files.  */
@@ -2393,16 +2394,34 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	MY_swap_ext_reloc_out (abfd, *generic,
-			       (struct reloc_ext_external *) natptr);
+	{
+	  if ((*generic)->howto == NULL)
+	    {
+	      bfd_set_error (bfd_error_invalid_operation);
+	      _bfd_error_handler (_("%B: attempt to write out unknown reloc type"), abfd);
+	      return FALSE;
+	    }
+	  MY_swap_ext_reloc_out (abfd, *generic,
+				 (struct reloc_ext_external *) natptr);
+	}
     }
   else
     {
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	MY_swap_std_reloc_out (abfd, *generic,
-			       (struct reloc_std_external *) natptr);
+	{
+	  /* PR 20921: If the howto field has not been initialised then skip
+	     this reloc.  */
+	  if ((*generic)->howto == NULL)
+	    {
+	      bfd_set_error (bfd_error_invalid_operation);
+	      _bfd_error_handler (_("%B: attempt to write out unknown reloc type"), abfd);
+	      return FALSE;
+	    }
+	  MY_swap_std_reloc_out (abfd, *generic,
+				 (struct reloc_std_external *) natptr);
+	}
     }
 
   if (bfd_bwrite ((void *) native, natsize, abfd) != natsize)

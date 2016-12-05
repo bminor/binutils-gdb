@@ -5,6 +5,10 @@
 
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/20921
+	* aoutx.h (squirt_out_relocs): Check for and report any relocs
+	that could not be recognised.
+
 	PR binutils/20922
 	* elf.c (find_link): Check for null headers before attempting to
 	match them.
