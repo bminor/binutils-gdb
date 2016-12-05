@@ -2225,8 +2225,9 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
       // Decide whether this symbol should go into the output file.
 
-      if ((shndx < shnum && out_sections[shndx] == NULL)
-	  || shndx == this->discarded_eh_frame_shndx_)
+      if (is_ordinary
+	  && ((shndx < shnum && out_sections[shndx] == NULL)
+	      || shndx == this->discarded_eh_frame_shndx_))
 	{
 	  lv.set_no_output_symtab_entry();
 	  gold_assert(!lv.needs_output_dynsym_entry());

@@ -1,3 +1,13 @@
+2016-12-05  Cary Coutant  <ccoutant@gmail.com>
+	    Tristan Gingold  <gingold@adacore.com>
+
+	* object.cc (Sized_relobj_file::do_count_local_symbols): Check
+	is_ordinary before using shndx.
+	* testsuite/Makefile.am (file_in_many_sections_test.sh): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/file_in_many_sections.c: New source file.
+	* testsuite/file_in_many_sections_test.sh: New script.
+
 2016-12-01  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20717

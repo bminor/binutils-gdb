@@ -1339,6 +1339,16 @@ many_sections_r_test.o: many_sections_test.o gcctestdir/ld
 many_sections_r_test: many_sections_r_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ many_sections_r_test.o $(LIBS)
 
+check_SCRIPTS += file_in_many_sections_test.sh
+check_DATA += file_in_many_sections.stdout
+MOSTLYCLEANFILES += file_in_many_sections
+file_in_many_sections.o: file_in_many_sections.c many_sections_define.h
+	$(COMPILE) -c -fdata-sections -o $@ $(srcdir)/file_in_many_sections.c
+file_in_many_sections: file_in_many_sections.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ file_in_many_sections.o -Wl,--gc-sections
+file_in_many_sections.stdout: file_in_many_sections
+	$(TEST_READELF) -s $< > $@
+
 check_PROGRAMS += initpri1
 initpri1_SOURCES = initpri1.c
 initpri1_DEPENDENCIES = gcctestdir/ld
