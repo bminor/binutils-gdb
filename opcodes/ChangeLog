@@ -1,5 +1,10 @@
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): Add vcmla and vcadd.
+	(print_insn_coprocessor): Add 'V' format for neon D or Q regs.
+
+2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* arm-dis.c (coprocessor_opcodes): Add vjcvt.
 
 2016-12-01  Nick Clifton  <nickc@redhat.com>

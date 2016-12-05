@@ -1,3 +1,16 @@
+2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-arm.c (do_vcmla, do_vcadd): Define.
+	(neon_scalar_for_vcmla): Define.
+	(enum operand_parse_code): Add OP_IROT1 and OP_IROT2.
+	(NEON_ENC_TAB): Add DDSI and QQSI variants.
+	(insns): Add vcmla and vcadd.
+	* testsuite/gas/arm/armv8_3-a-simd.d: New.
+	* testsuite/gas/arm/armv8_3-a-simd.s: New.
+	* testsuite/gas/arm/armv8_3-a-simd-bad.d: New.
+	* testsuite/gas/arm/armv8_3-a-simd-bad.l: New.
+	* testsuite/gas/arm/armv8_3-a-simd-bad.s: New.
+
 2016-12-05  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/textauxregister-1.d: New file.
