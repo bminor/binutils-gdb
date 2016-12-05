@@ -1,3 +1,9 @@
+2016-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20923
+	* objcopy.c (mark_symbols_used_in_relocations): Check for a null
+	symbol pointer before attempting to mark the symbol as kept.
+
 2016-12-01  Luis Machado  <lgustavo@codesourcery.com>
 
 	* nm.c (sort_symbols_by_size): Don't read symbol size if symbol
