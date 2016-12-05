@@ -1,3 +1,8 @@
+2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-arm.c (arm_archs): Add "armv8.3-a".
+	* doc/c-arm.texi (-march): Add "armv8.3-a".
+
 2016-12-02  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/cpu-em-err.s: New file.
