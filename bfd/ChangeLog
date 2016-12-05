@@ -4,6 +4,10 @@
 	* aoutx.h (aout_link_add_symbols): Replace BFD_ASSERT with return
 	FALSE.
 
+	PR ld/20924
+	(aout_link_add_symbols): Fix off by one error checking for
+	overflow of string offset.
+
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_entry): Delete "was_undefined".
