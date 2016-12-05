@@ -234,6 +234,8 @@ static const arm_feature_set arm_ext_ras =
 /* FP16 instructions.  */
 static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
+static const arm_feature_set arm_ext_v8_3 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
@@ -17440,6 +17442,16 @@ do_crc32cw (void)
   do_crc32_1 (1, 2);
 }
 
+static void
+do_vjcvt (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+	      _(BAD_FPU));
+  neon_check_type (2, NS_FD, N_S32, N_F64);
+  do_vfp_sp_dp_cvt ();
+  do_vfp_cond_or_thumb ();
+}
+
 
 /* Overall per-instruction processing.	*/
 
@@ -19781,6 +19793,12 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_ras
  TUE ("esb", 320f010, f3af8010, 0, (), noargs,  noargs),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & arm_ext_v8_3
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8_3
+ NCE (vjcvt, eb90bc0, 2, (RVS, RVD), vjcvt),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */

@@ -1,3 +1,7 @@
+2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): Add vjcvt.
+
 2016-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20893

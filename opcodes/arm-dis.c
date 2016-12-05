@@ -971,6 +971,10 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
     0x0e300940, 0x0fb00f50, "vsub%c.f16\t%y1, %y2, %y0"},
 
+  /* ARMv8.3 javascript conversion instruction.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0x0eb90bc0, 0x0fbf0fd0, "vjcvt%c.s32.f64\t%y1, %z0"},
+
   {ARM_FEATURE_CORE_LOW (0), 0, 0, 0}
 };
 

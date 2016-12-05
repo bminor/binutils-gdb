@@ -1,5 +1,15 @@
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	* config/tc-arm.c (arm_ext_v8_3, do_vjcvt): Define.
+	(insns): Add vjcvt.
+	* testsuite/gas/aarch64/armv8_3-a-fp.s: New.
+	* testsuite/gas/aarch64/armv8_3-a-fp.d: New.
+	* testsuite/gas/aarch64/armv8_3-a-fp-bad.s: New.
+	* testsuite/gas/aarch64/armv8_3-a-fp-bad.d: New.
+	* testsuite/gas/aarch64/armv8_3-a-fp-bad.l: New.
+
+2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	* config/tc-arm.c (arm_archs): Add "armv8.3-a".
 	* doc/c-arm.texi (-march): Add "armv8.3-a".
 
