@@ -1,3 +1,9 @@
+2016-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20904
+	* as.h (SKIP_ALL_WHITESPACE): New macro.
+	* expr.c (operand): Use it.
+
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-arm.c (do_vcmla, do_vcadd): Define.
