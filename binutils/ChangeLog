@@ -1,3 +1,7 @@
+2016-12-05  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* MAINTAINERS: Add myself as maintainer for the SPARC targets.
+
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20923
