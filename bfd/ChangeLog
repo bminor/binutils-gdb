@@ -1,3 +1,9 @@
+2016-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20925
+	* aoutx.h (aout_link_add_symbols): Replace BFD_ASSERT with return
+	FALSE.
+
 2016-12-03  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_entry): Delete "was_undefined".

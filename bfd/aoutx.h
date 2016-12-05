@@ -3089,7 +3089,9 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	case N_INDR | N_EXT:
 	  /* An indirect symbol.  The next symbol is the symbol
 	     which this one really is.  */
-	  BFD_ASSERT (p + 1 < pend);
+	  /* See PR 20925 for a reproducer.  */
+	  if (p + 1 >= pend)
+	    return FALSE;
 	  ++p;
 	  /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
 	  if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
