@@ -1,3 +1,8 @@
+2016-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20906
+	* ldlex.l: Check for bogus strings in linker scripts.
+
 2016-12-05  Alyssa Milburn <amilburn@zall.org>
 
 	* testsuite/ld-sparc/wdispcall.s: New file.
