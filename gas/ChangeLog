@@ -1,3 +1,15 @@
+2016-12-05  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/textauxregister-1.d: New file.
+	* testsuite/gas/arc/textauxregister-1.s: Likewise.
+	* testsuite/gas/arc/textcondcode-err.s: Likewise.
+	* testsuite/gas/arc/textcoreregister-err.s: Likewise.
+	* config/tc-arc.c (tokenize_extregister): Return bfd_boolean,
+	don't check second argument of extension auxiliary register for
+	signess.
+	(arc_extcorereg): Consider the return of tokenize_extregister
+	function call.
+
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-arm.c (arm_ext_v8_3, do_vjcvt): Define.

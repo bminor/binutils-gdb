@@ -4545,7 +4545,7 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
   create_extinst_section (&einsn);
 }
 
-static void
+static bfd_boolean
 tokenize_extregister (extRegister_t *ereg, int opertype)
 {
   char *name;
@@ -4570,20 +4570,23 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 
   if (*input_line_pointer != ',')
     {
-      as_bad (_("expected comma after register name"));
+      as_bad (_("expected comma after name"));
       ignore_rest_of_line ();
       free (name);
-      return;
+      return FALSE;
     }
   input_line_pointer++;
   number = get_absolute_expression ();
 
-  if (number < 0)
+  if ((number < 0)
+      && (opertype != EXT_AUX_REGISTER))
     {
-      as_bad (_("negative operand number %d"), number);
+      as_bad (_("%s second argument cannot be a negative number %d"),
+	      isCore_p ? "extCoreRegister's" : "extCondCode's",
+	      number);
       ignore_rest_of_line ();
       free (name);
-      return;
+      return FALSE;
     }
 
   if (isReg_p)
@@ -4596,7 +4599,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("expected comma after register number"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
 
       input_line_pointer++;
@@ -4617,7 +4620,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("invalid mode"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
       else
 	{
@@ -4635,7 +4638,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("expected comma after register mode"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
 
       input_line_pointer++;
@@ -4650,7 +4653,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("shortcut designator invalid"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
       else
 	{
@@ -4662,6 +4665,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
   ereg->name = name;
   ereg->number = number;
   ereg->imode  = imode;
+  return TRUE;
 }
 
 /* Create an extension register/condition description in the arc
@@ -4737,7 +4741,8 @@ arc_extcorereg (int opertype)
   struct arc_flag_operand *ccode;
 
   memset (&ereg, 0, sizeof (ereg));
-  tokenize_extregister (&ereg, opertype);
+  if (!tokenize_extregister (&ereg, opertype))
+    return;
 
   switch (opertype)
     {
