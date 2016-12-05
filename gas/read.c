@@ -5533,6 +5533,12 @@ next_char_of_string (void)
   c = *input_line_pointer++ & CHAR_MASK;
   switch (c)
     {
+    case 0:
+      /* PR 20902: Do not advance past the end of the buffer.  */
+      -- input_line_pointer;
+      c = NOT_A_CHAR;
+      break;
+
     case '\"':
       c = NOT_A_CHAR;
       break;
@@ -5627,6 +5633,12 @@ next_char_of_string (void)
 	  as_warn (_("unterminated string; newline inserted"));
 	  c = '\n';
 	  bump_line_counters ();
+	  break;
+
+	case 0:
+	  /* Do not advance past the end of the buffer.  */
+	  -- input_line_pointer;
+	  c = NOT_A_CHAR;
 	  break;
 
 	default:
