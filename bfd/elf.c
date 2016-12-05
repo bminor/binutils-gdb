@@ -1271,13 +1271,19 @@ find_link (const bfd * obfd, const Elf_Internal_Shdr * iheader, const unsigned i
   Elf_Internal_Shdr ** oheaders = elf_elfsections (obfd);
   unsigned int i;
 
-  if (section_match (oheaders[hint], iheader))
+  BFD_ASSERT (iheader != NULL);
+
+  /* See PR 20922 for a reproducer of the NULL test.  */
+  if (oheaders[hint] != NULL
+      && section_match (oheaders[hint], iheader))
     return hint;
 
   for (i = 1; i < elf_numsections (obfd); i++)
     {
       Elf_Internal_Shdr * oheader = oheaders[i];
 
+      if (oheader == NULL)
+	continue;
       if (section_match (oheader, iheader))
 	/* FIXME: Do we care if there is a potential for
 	   multiple matches ?  */

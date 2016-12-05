@@ -1,5 +1,9 @@
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/20922
+	* elf.c (find_link): Check for null headers before attempting to
+	match them.
+
 	PR ld/20925
 	* aoutx.h (aout_link_add_symbols): Replace BFD_ASSERT with return
 	FALSE.
