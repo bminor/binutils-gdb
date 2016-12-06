@@ -1,3 +1,11 @@
+2017-02-21  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2016-12-06  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ok_lo_toc_insn): Add r_type param.  Recognize
+	lq,lfq,lxv,lxsd,lxssp,lfdp,stq,stfq,stxv,stxsd,stxssp,stfdp.
+	Don't match lmd and stmd.
+
 2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21168

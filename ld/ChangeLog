@@ -1,3 +1,14 @@
+2017-02-21  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2016-12-06  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-powerpc/tocopt7.s,
+	* testsuite/ld-powerpc/tocopt7.out,
+	* testsuite/ld-powerpc/tocopt7.d: New test.
+	* testsuite/ld-powerpc/tocopt8.s,
+	* testsuite/ld-powerpc/tocopt8.d: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
 2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21168

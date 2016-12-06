@@ -8803,12 +8803,14 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Return TRUE iff INSN is one we expect on a _LO variety toc/got reloc.  */
+/* Return TRUE iff INSN with a relocation of R_TYPE is one we expect
+   on a _LO variety toc/got reloc.  */
 
 static bfd_boolean
-ok_lo_toc_insn (unsigned int insn)
+ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
 {
-  return ((insn & (0x3f << 26)) == 14u << 26 /* addi */
+  return ((insn & (0x3f << 26)) == 12u << 26 /* addic */
+	  || (insn & (0x3f << 26)) == 14u << 26 /* addi */
 	  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
 	  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
 	  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
@@ -8822,11 +8824,20 @@ ok_lo_toc_insn (unsigned int insn)
 	  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
 	  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
 	  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
-	  || ((insn & (0x3f << 26)) == 58u << 26 /* lwa,ld,lmd */
-	      && (insn & 3) != 1)
-	  || ((insn & (0x3f << 26)) == 62u << 26 /* std, stmd */
-	      && ((insn & 3) == 0 || (insn & 3) == 3))
-	  || (insn & (0x3f << 26)) == 12u << 26 /* addic */);
+	  || (insn & (0x3f << 26)) == 56u << 26 /* lq,lfq */
+	  || ((insn & (0x3f << 26)) == 57u << 26 /* lxsd,lxssp,lfdp */
+	      /* Exclude lfqu by testing reloc.  If relocs are ever
+		 defined for the reduced D field in psq_lu then those
+		 will need testing too.  */
+	      && r_type != R_PPC64_TOC16_LO && r_type != R_PPC64_GOT16_LO)
+	  || ((insn & (0x3f << 26)) == 58u << 26 /* ld,lwa */
+	      && (insn & 1) == 0)
+	  || (insn & (0x3f << 26)) == 60u << 26 /* stfq */
+	  || ((insn & (0x3f << 26)) == 61u << 26 /* lxv,stx{v,sd,ssp},stfdp */
+	      /* Exclude stfqu.  psq_stu as above for psq_lu.  */
+	      && r_type != R_PPC64_TOC16_LO && r_type != R_PPC64_GOT16_LO)
+	  || ((insn & (0x3f << 26)) == 62u << 26 /* std,stq */
+	      && (insn & 1) == 0));
 }
 
 /* Examine all relocs referencing .toc sections in order to remove
@@ -9131,7 +9142,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			}
 		      insn = bfd_get_32 (ibfd, buf);
 		      if (insn_check == check_lo
-			  ? !ok_lo_toc_insn (insn)
+			  ? !ok_lo_toc_insn (insn, r_type)
 			  : ((insn & ((0x3f << 26) | 0x1f << 16))
 			     != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
 			{
