@@ -3394,11 +3394,20 @@ s_space (int mult)
 	{
 	  offsetT i;
 
-	  if (mult == 0)
-	    mult = 1;
-	  bytes = mult * exp.X_add_number;
-	  for (i = 0; i < exp.X_add_number; i++)
-	    emit_expr (&val, mult);
+	  /* PR 20901: Check for excessive values.
+	     FIXME: 1<<10 is an arbitrary limit.  Maybe use maxpagesize instead ?  */
+	  if (exp.X_add_number < 0 || exp.X_add_number > (1 << 10))
+	    as_bad (_("size value for s_space directive too large: %lx"),
+		    (long) exp.X_add_number);
+	  else
+	    {
+	      if (mult == 0)
+		mult = 1;
+	      bytes = mult * exp.X_add_number;
+
+	      for (i = 0; i < exp.X_add_number; i++)
+		emit_expr (&val, mult);
+	    }
 	}
     }
   else

@@ -1,5 +1,9 @@
 2016-12-06  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/20901
+	* read.c (s_space): Place an upper limit on the number of spaces
+	generated.
+
 	PR gas/20896
 	* testsuite/gas/mmix/err-byte1.s: Adjust expected warning messages
 	to account for patch to next_char_of_string.
