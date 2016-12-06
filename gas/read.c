@@ -3397,7 +3397,7 @@ s_space (int mult)
 	  /* PR 20901: Check for excessive values.
 	     FIXME: 1<<10 is an arbitrary limit.  Maybe use maxpagesize instead ?  */
 	  if (exp.X_add_number < 0 || exp.X_add_number > (1 << 10))
-	    as_bad (_("size value for s_space directive too large: %lx"),
+	    as_bad (_("size value for space directive too large: %lx"),
 		    (long) exp.X_add_number);
 	  else
 	    {
