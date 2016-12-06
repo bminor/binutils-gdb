@@ -1576,12 +1576,14 @@ deprecated_value_internalvar_hack (struct value *value)
 struct frame_id *
 deprecated_value_next_frame_id_hack (struct value *value)
 {
+  gdb_assert (value->lval == lval_register);
   return &value->location.reg.next_frame_id;
 }
 
 int *
 deprecated_value_regnum_hack (struct value *value)
 {
+  gdb_assert (value->lval == lval_register);
   return &value->location.reg.regnum;
 }
 

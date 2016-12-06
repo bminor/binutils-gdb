@@ -1,3 +1,11 @@
+2016-12-06  Yao Qi  <yao.qi@linaro.org>
+
+	* frame.c (frame_register_unwind): Set *realnump if *lvalp is
+	lval_register.
+	* value.c (deprecated_value_next_frame_id_hack): Assert
+	value->lval is lval_register.
+	(deprecated_value_regnum_hack): Likewise.
+
 2016-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ui-out.h: Include "common/enum-flags.h".
