@@ -1346,6 +1346,16 @@ copy_special_section_fields (const bfd *ibfd,
      in the input bfd.  */
   if (iheader->sh_link != SHN_UNDEF)
     {
+      /* See PR 20931 for a reproducer.  */
+      if (iheader->sh_link >= elf_numsections (ibfd))
+	{
+	  (* _bfd_error_handler)
+	    /* xgettext:c-format */
+	    (_("%B: Invalid sh_link field (%d) in section number %d"),
+	     ibfd, iheader->sh_link, secnum);
+	  return FALSE;
+	}
+
       sh_link = find_link (obfd, iheaders[iheader->sh_link], iheader->sh_link);
       if (sh_link != SHN_UNDEF)
 	{
