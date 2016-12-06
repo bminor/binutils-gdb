@@ -1,3 +1,9 @@
+2016-12-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20929
+	* aoutx.h (squirt_out_relocs): Check for relocs without an
+	associated symbol.
+
 2016-12-06  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ok_lo_toc_insn): Add r_type param.  Recognize

@@ -2395,10 +2395,15 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
 	{
-	  if ((*generic)->howto == NULL)
+	  /* PR 20921: If the howto field has not been initialised then skip
+	     this reloc.
+	     PR 20929: Similarly for the symbol field.  */
+	  if ((*generic)->howto == NULL
+	      || (*generic)->sym_ptr_ptr == NULL)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      _bfd_error_handler (_("%B: attempt to write out unknown reloc type"), abfd);
+	      _bfd_error_handler (_("\
+%B: attempt to write out unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_ext_reloc_out (abfd, *generic,
@@ -2411,12 +2416,12 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
 	{
-	  /* PR 20921: If the howto field has not been initialised then skip
-	     this reloc.  */
-	  if ((*generic)->howto == NULL)
+	  if ((*generic)->howto == NULL
+	      || (*generic)->sym_ptr_ptr == NULL)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      _bfd_error_handler (_("%B: attempt to write out unknown reloc type"), abfd);
+	      _bfd_error_handler (_("\
+%B: attempt to write out unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_std_reloc_out (abfd, *generic,
