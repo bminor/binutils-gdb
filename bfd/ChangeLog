@@ -1,3 +1,9 @@
+2016-12-06  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ok_lo_toc_insn): Add r_type param.  Recognize
+	lq,lfq,lxv,lxsd,lxssp,lfdp,stq,stfq,stxv,stxsd,stxssp,stfdp.
+	Don't match lmd and stmd.
+
 2016-12-05  Alyssa Milburn <amilburn@zall.org>
 
 	* elfxx-sparc.c: Do not stop processing relocations after

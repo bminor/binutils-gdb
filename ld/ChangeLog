@@ -1,3 +1,12 @@
+2016-12-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tocopt7.s,
+	* testsuite/ld-powerpc/tocopt7.out,
+	* testsuite/ld-powerpc/tocopt7.d: New test.
+	* testsuite/ld-powerpc/tocopt8.s,
+	* testsuite/ld-powerpc/tocopt8.d: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
 2016-12-05  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20906
