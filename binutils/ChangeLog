@@ -1,3 +1,10 @@
+2016-12-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20930
+	* objcopy.c (mark_symbols_used_in_relocations): Check for a null
+	symbol pointer pointer before attempting to mark the symbol as
+	kept.
+
 2016-12-05  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* MAINTAINERS: Add myself as maintainer for the SPARC targets.

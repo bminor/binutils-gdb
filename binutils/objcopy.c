@@ -3551,8 +3551,9 @@ mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
      special bfd section symbols, then mark it with BSF_KEEP.  */
   for (i = 0; i < relcount; i++)
     {
-      /* See PR 20923 for a reproducer for the NULL test.  */
+      /* See PRs 20923 and 20930 for reproducers for the NULL tests.  */
       if (relpp[i]->sym_ptr_ptr != NULL
+	  && * relpp[i]->sym_ptr_ptr != NULL
 	  && *relpp[i]->sym_ptr_ptr != bfd_com_section_ptr->symbol
 	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section_ptr->symbol
 	  && *relpp[i]->sym_ptr_ptr != bfd_und_section_ptr->symbol)
