@@ -1,3 +1,8 @@
+2016-12-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.c (inferior_command): Remove duplicate
+	find_inferior_id call.
+
 2016-12-06  Yao Qi  <yao.qi@linaro.org>
 
 	* frame.c (frame_register_unwind): Set *realnump if *lvalp is

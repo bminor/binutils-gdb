@@ -763,9 +763,6 @@ inferior_command (char *args, int from_tty)
     }
   else
     {
-      struct inferior *inf;
-
-      inf = find_inferior_id (num);
       set_current_inferior (inf);
       switch_to_thread (null_ptid);
       set_current_program_space (inf->pspace);
