@@ -2384,16 +2384,17 @@ The following MIPS specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _("\n\
-  msa             Recognize MSA instructions.\n"));
+  msa                      Recognize MSA instructions.\n"));
 
   fprintf (stream, _("\n\
-  virt            Recognize the virtualization ASE instructions.\n"));
+  virt                     Recognize the virtualization ASE instructions.\n"));
 
   fprintf (stream, _("\n\
-  xpa            Recognize the eXtended Physical Address (XPA) ASE instructions.\n"));
+  xpa                      Recognize the eXtended Physical Address (XPA)\n\
+                           ASE instructions.\n"));
 
   fprintf (stream, _("\n\
-  gpr-names=ABI            Print GPR names according to  specified ABI.\n\
+  gpr-names=ABI            Print GPR names according to specified ABI.\n\
                            Default: based on binary being disassembled.\n"));
 
   fprintf (stream, _("\n\
@@ -2407,7 +2408,7 @@ with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _("\n\
   hwr-names=ARCH           Print HWR names according to specified \n\
-			   architecture.\n\
+                           architecture.\n\
                            Default: based on binary being disassembled.\n"));
 
   fprintf (stream, _("\n\
