@@ -577,6 +577,9 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if (h == NULL)
     return provide;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->versioned == unknown)
     {
       /* Set versioned if symbol version is unknown.  */
@@ -624,11 +627,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
       hv->root.u.i.link = (struct bfd_link_hash_entry *) h;
       (*bed->elf_backend_copy_indirect_symbol) (info, h, hv);
       break;
-    case bfd_link_hash_warning:
-      /* See PR 20932 for a reproducer.  */
-      _bfd_error_handler (_("%B: Attempt to assign a value to warning symbol '%s'"),
-			  output_bfd, name);
-      bfd_set_error (bfd_error_invalid_operation);
+    default:
+      BFD_FAIL ();
       return FALSE;
     }
 
