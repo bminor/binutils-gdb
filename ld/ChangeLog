@@ -1,3 +1,7 @@
+2016-12-08  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2016-12-06  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tocopt7.s,

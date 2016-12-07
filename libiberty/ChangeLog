@@ -1,3 +1,7 @@
+2016-12-08  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2016-12-06  DJ Delorie  <dj@redhat.com>
 
 	* argv.c (expandargv): Check for directories passed as @-files.
