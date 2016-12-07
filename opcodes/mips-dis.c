@@ -1801,7 +1801,7 @@ print_mips16_insn_arg (struct disassemble_info *info,
 
       if (operand->type == OP_SAVE_RESTORE_LIST)
 	{
-	  /* Handle this case here because of the complex interation
+	  /* Handle this case here because of the complex interaction
 	     with the EXTEND opcode.  */
 	  unsigned int amask, nargs, nstatics, nsreg, smask, frame_size, i, j;
 	  const char *sep;
