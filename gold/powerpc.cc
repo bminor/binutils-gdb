@@ -70,6 +70,10 @@ class Target_powerpc;
 
 struct Stub_table_owner
 {
+  Stub_table_owner()
+    : output_section(NULL), owner(NULL)
+  { }
+
   Output_section* output_section;
   const Output_section::Input_section* owner;
 };
@@ -275,7 +279,7 @@ public:
   set_stub_table(unsigned int shndx, unsigned int stub_index)
   {
     if (shndx >= this->stub_table_index_.size())
-      this->stub_table_index_.resize(shndx + 1);
+      this->stub_table_index_.resize(shndx + 1, -1);
     this->stub_table_index_[shndx] = stub_index;
   }
 
@@ -2720,6 +2724,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
   Target_powerpc<size, big_endian>* target =
     static_cast<Target_powerpc<size, big_endian>*>(
       parameters->sized_target<size, big_endian>());
+  bool ok = true;
+
   if (gsym != NULL
       ? gsym->use_plt_offset(Scan::get_reference_flags(this->r_type_, target))
       : this->object_->local_has_plt_offset(this->r_sym_))
@@ -2745,13 +2751,13 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	    from += (this->object_->output_section(this->shndx_)->address()
 		     + this->offset_);
 	  if (gsym != NULL)
-	    return stub_table->add_plt_call_entry(from,
-						  this->object_, gsym,
-						  this->r_type_, this->addend_);
+	    ok = stub_table->add_plt_call_entry(from,
+						this->object_, gsym,
+						this->r_type_, this->addend_);
 	  else
-	    return stub_table->add_plt_call_entry(from,
-						  this->object_, this->r_sym_,
-						  this->r_type_, this->addend_);
+	    ok = stub_table->add_plt_call_entry(from,
+						this->object_, this->r_sym_,
+						this->r_type_, this->addend_);
 	}
     }
   else
@@ -2838,12 +2844,22 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 			   && gsym != NULL
 			   && gsym->source() == Symbol::IN_OUTPUT_DATA
 			   && gsym->output_data() == target->savres_section());
-	  return stub_table->add_long_branch_entry(this->object_,
-						   this->r_type_,
-						   from, to, save_res);
+	  ok = stub_table->add_long_branch_entry(this->object_,
+						 this->r_type_,
+						 from, to, save_res);
 	}
     }
-  return true;
+  if (!ok)
+    gold_debug(DEBUG_TARGET,
+	       "branch at %s:%s+%#lx\n"
+	       "can't reach stub attached to %s:%s",
+	       this->object_->name().c_str(),
+	       this->object_->section_name(this->shndx_).c_str(),
+	       (unsigned long) this->offset_,
+	       stub_table->relobj()->name().c_str(),
+	       stub_table->relobj()->section_name(stub_table->shndx()).c_str());
+
+  return ok;
 }
 
 // Relaxation hook.  This is where we do stub generation.

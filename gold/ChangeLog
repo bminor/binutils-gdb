@@ -1,3 +1,10 @@
+2016-12-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Stub_table_owner): Provide constructor.
+	(Powerpc_relobj::set_stub_table): Resize fill with -1.
+	(Target_powerpc::Branch_info::make_stub): Provide target debug
+	output on returning false.
+
 2016-12-05  Cary Coutant  <ccoutant@gmail.com>
 	    Tristan Gingold  <gingold@adacore.com>
 
