@@ -3217,7 +3217,7 @@ is_opcode_valid (const struct mips_opcode *mo)
   int fp_s, fp_d;
   unsigned int i;
 
-  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+  if (ISA_HAS_64BIT_REGS (isa))
     for (i = 0; i < ARRAY_SIZE (mips_ases); i++)
       if ((ase & mips_ases[i].flags) == mips_ases[i].flags)
 	ase |= mips_ases[i].flags64;
