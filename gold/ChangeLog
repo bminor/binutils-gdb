@@ -2,6 +2,17 @@
 
 	Apply from master
 	2016-12-07  Alan Modra  <amodra@gmail.com>
+	PR gold/20878
+	* powerpc.cc (Stub_control): Replace stubs_always_before_branch_
+	with stubs_always_after_branch_, group_end_addr_ with
+	group_start_addr_.
+	(Stub_control::can_add_to_stub_group): Rewrite to suit scanning
+	sections by increasing address.
+	(Target_powerpc::group_sections): Scan that way.  Delete corner
+	case.
+	* options.h (--stub-group-size): Update help string.
+
+	2016-12-07  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Stub_table_owner): Provide constructor.
 	(Powerpc_relobj::set_stub_table): Resize fill with -1.
 	(Target_powerpc::Branch_info::make_stub): Provide target debug
