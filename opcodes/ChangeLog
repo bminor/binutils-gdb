@@ -1,5 +1,10 @@
 2016-12-07  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips16-opc.c (mips16_opcodes): Update comment naming structure
+	members.
+
+2016-12-07  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (print_mips_disassembler_options): Reformat output.
 
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>

@@ -181,7 +181,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 
 const struct mips_opcode mips16_opcodes[] =
 {
-/* name,    args,	match,	mask,		pinfo,	         	pinfo2, membership */
+/* name,    args,	match,	mask,		pinfo,			pinfo2, membership,	ase,	exclusions */
 {"nop",	    "",		0x6500, 0xffff,		0,			RD_16,		I1,	0,	0 }, /* move $0,$Z */
 {"la",	    "x,A",	0x0800, 0xf800,		WR_1,			RD_PC,		I1,	0,	0 },
 {"abs",	    "x,w",	0, (int) M_ABS,		INSN_MACRO,		0,		I1,	0,	0 },
