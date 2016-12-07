@@ -1,5 +1,9 @@
 2016-12-07  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* opcode/mips.h (INSN_CHIP_MASK): Update according to bit use.
+
+2016-12-07  Maciej W. Rozycki  <macro@imgtec.com>
+
     	* opcode/mips.h (ASE_DSPR3): Add a comment.
 
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>

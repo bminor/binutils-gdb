@@ -1194,7 +1194,7 @@ static const unsigned int mips_isa_table[] = {
 #undef ISAF
 
 /* Masks used for Chip specific instructions.  */
-#define INSN_CHIP_MASK		  0xc3ff0f20
+#define INSN_CHIP_MASK		  0xc3ff4f60
 
 /* Cavium Networks Octeon instructions.  */
 #define INSN_OCTEON		  0x00000800
