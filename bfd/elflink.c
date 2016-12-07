@@ -625,8 +625,11 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
       (*bed->elf_backend_copy_indirect_symbol) (info, h, hv);
       break;
     case bfd_link_hash_warning:
-      abort ();
-      break;
+      /* See PR 20932 for a reproducer.  */
+      _bfd_error_handler (_("%B: Attempt to assign a value to warning symbol '%s'"),
+			  output_bfd, name);
+      bfd_set_error (bfd_error_invalid_operation);
+      return FALSE;
     }
 
   /* If this symbol is being provided by the linker script, and it is

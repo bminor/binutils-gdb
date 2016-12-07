@@ -1,3 +1,9 @@
+2016-12-07  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20932
+	* elflink.c (bfd_elf_record_link_assignment): Replace call to
+	abort with an error message and error return value.
+
 2016-12-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20931
