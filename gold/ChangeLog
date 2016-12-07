@@ -1,5 +1,13 @@
 2016-12-07  Alan Modra  <amodra@gmail.com>
 
+	* options.h (--stub-group-multi): New PowerPC option.
+	* powerpc.cc (Stub_control): Add multi_os_ var and param
+	to constructor.  Sort start_ var later.  Comment State.
+	(Stub_control::can_add_to_stub_group): Heed multi_os_.
+	(Target_powerpc::group_sections): Update.
+
+2016-12-07  Alan Modra  <amodra@gmail.com>
+
 	PR gold/20878
 	* powerpc.cc (Stub_control): Replace stubs_always_before_branch_
 	with stubs_always_after_branch_, group_end_addr_ with
