@@ -1101,6 +1101,10 @@ class General_options
 		"stubs are always after the group. 1 means use default size"),
 	     N_("SIZE"));
 
+  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', false,
+	      N_("(PowerpC only) Allow a group of stubs to serve multiple "
+		 "output sections"), NULL);
+
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,
 	      N_("Use less memory and more disk I/O "
 		 "(included only for compatibility with GNU ld)"), NULL);

@@ -2441,11 +2441,11 @@ class Stub_control
   // value of the parameter --stub-group-size.  If --stub-group-size
   // is passed a negative value, we restrict stubs to be always after
   // the stubbed branches.
-  Stub_control(int32_t size, bool no_size_errors)
-    : state_(NO_GROUP), stub_group_size_(abs(size)),
-      stubs_always_after_branch_(size < 0),
-      suppress_size_errors_(no_size_errors), group_size_(0),
-      group_start_addr_(0), owner_(NULL), output_section_(NULL)
+  Stub_control(int32_t size, bool no_size_errors, bool multi_os)
+    : stub_group_size_(abs(size)), stubs_always_after_branch_(size < 0),
+      suppress_size_errors_(no_size_errors), multi_os_(multi_os),
+      state_(NO_GROUP), group_size_(0), group_start_addr_(0),
+      owner_(NULL), output_section_(NULL)
   {
   }
 
@@ -2475,15 +2475,20 @@ class Stub_control
  private:
   typedef enum
   {
+    // Initial state.
     NO_GROUP,
+    // Adding group sections before the stubs.
     FINDING_STUB_SECTION,
+    // Adding group sections after the stubs.
     HAS_STUB_SECTION
   } State;
 
-  State state_;
   uint32_t stub_group_size_;
   bool stubs_always_after_branch_;
   bool suppress_size_errors_;
+  // True if a stub group can serve multiple output sections.
+  bool multi_os_;
+  State state_;
   // Current max size of group.  Starts at stub_group_size_ but is
   // reduced to stub_group_size_/1024 on seeing a section with
   // external conditional branches.
@@ -2537,7 +2542,19 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 	      ? this_size
 	      : (long long) end_addr - this->group_start_addr_));
 
-  if (this->state_ == HAS_STUB_SECTION)
+  if (this->state_ == NO_GROUP)
+    {
+      // Only here on very first use of Stub_control
+      this->owner_ = i;
+      this->output_section_ = o;
+      this->state_ = FINDING_STUB_SECTION;
+      this->group_size_ = group_size;
+      this->group_start_addr_ = start_addr;
+      return true;
+    }
+  else if (!this->multi_os_ && this->output_section_ != o)
+    ;
+  else if (this->state_ == HAS_STUB_SECTION)
     {
       // Can we add this section, which is after the stubs, to the
       // group?
@@ -2571,20 +2588,13 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 	  return true;
 	}
     }
-  else if (this->state_ == NO_GROUP)
-    {
-      // Only here on very first use of Stub_control
-      this->owner_ = i;
-      this->output_section_ = o;
-      this->state_ = FINDING_STUB_SECTION;
-      this->group_size_ = group_size;
-      this->group_start_addr_ = start_addr;
-      return true;
-    }
   else
     gold_unreachable();
 
-  gold_debug(DEBUG_TARGET, "nope, didn't fit\n");
+  gold_debug(DEBUG_TARGET,
+	     !this->multi_os_ && this->output_section_ != o
+	     ? "nope, new output section\n"
+	     : "nope, didn't fit\n");
 
   // The section fails to fit in the current group.  Set up a few
   // things for the next group.  owner_ and output_section_ will be
@@ -2604,7 +2614,8 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
 						 const Task*,
 						 bool no_size_errors)
 {
-  Stub_control stub_control(this->stub_group_size_, no_size_errors);
+  Stub_control stub_control(this->stub_group_size_, no_size_errors,
+			    parameters->options().stub_group_multi());
 
   // Group input sections and insert stub table
   Stub_table_owner* table_owner = NULL;
