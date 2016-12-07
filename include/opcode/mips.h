@@ -1260,6 +1260,7 @@ static const unsigned int mips_isa_table[] = {
 #define ASE_MSA64		0x00001000
 /* eXtended Physical Address (XPA) Extension.  */
 #define ASE_XPA			0x00002000
+/* DSP R3 Module.  */
 #define ASE_DSPR3		0x00004000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */

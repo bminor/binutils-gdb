@@ -1,3 +1,7 @@
+2016-12-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+    	* opcode/mips.h (ASE_DSPR3): Add a comment.
+
 2016-12-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* opcode/arm.h (ARM_EXT2_V8_3A, ARM_AEXT2_V8_3A): New.
