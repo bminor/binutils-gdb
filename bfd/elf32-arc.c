@@ -55,17 +55,20 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     Elf_Internal_Rela _rel;						\
     bfd_byte * _loc;							\
 									\
-    BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
-    _loc = _htab->srel##SECTION->contents				\
-      + ((_htab->srel##SECTION->reloc_count)				\
-	 * sizeof (Elf32_External_Rela));				\
-    _htab->srel##SECTION->reloc_count++;				\
-    _rel.r_addend = ADDEND;						\
-    _rel.r_offset = (_htab->s##SECTION)->output_section->vma		\
-      + (_htab->s##SECTION)->output_offset + OFFSET;			\
-    BFD_ASSERT ((long) SYM_IDX != -1);					\
-    _rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);				\
-    bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
+    if (_htab->dynamic_sections_created == TRUE)				\
+      {									\
+	BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
+    	_loc = _htab->srel##SECTION->contents				\
+    	  + ((_htab->srel##SECTION->reloc_count)			\
+    	     * sizeof (Elf32_External_Rela));				\
+    	_htab->srel##SECTION->reloc_count++;				\
+    	_rel.r_addend = ADDEND;						\
+    	_rel.r_offset = (_htab->s##SECTION)->output_section->vma	\
+    	  + (_htab->s##SECTION)->output_offset + OFFSET;		\
+    	BFD_ASSERT ((long) SYM_IDX != -1);				\
+    	_rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);			\
+    	bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
+      }									\
   }
 
 

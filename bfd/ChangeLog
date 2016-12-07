@@ -1,3 +1,8 @@
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (ADD_RELA): Changed to only work when dynamic
+	object is created.
+
 2017-06-08  Richard Earnshaw  <rearnsha@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Remove assertion
