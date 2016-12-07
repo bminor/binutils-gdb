@@ -1216,8 +1216,7 @@ class General_options
   DEFINE_int(stub_group_size, options::TWO_DASHES , '\0', 1,
 	     N_("(ARM, PowerPC only) The maximum distance from instructions "
 		"in a group of sections to their stubs. Negative values mean "
-		"stubs are always after (PowerPC before) the group. 1 means "
-		"use default size"),
+		"stubs are always after the group. 1 means use default size"),
 	     N_("SIZE"));
 
   DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
