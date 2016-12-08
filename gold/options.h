@@ -1102,7 +1102,7 @@ class General_options
 	     N_("SIZE"));
 
   DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', false,
-	      N_("(PowerpC only) Allow a group of stubs to serve multiple "
+	      N_("(PowerPC only) Allow a group of stubs to serve multiple "
 		 "output sections"), NULL);
 
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,

@@ -1,6 +1,9 @@
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2016-12-08  Alan Modra  <amodra@gmail.com>
+	* options.h (--stub-group-multi): Fix typo.
+
 	2016-12-07  Alan Modra  <amodra@gmail.com>
 	* options.h (--stub-group-multi): New PowerPC option.
 	* powerpc.cc (Stub_control): Add multi_os_ var and param
