@@ -79,6 +79,8 @@ struct gdbarch;
 struct ui_file;
 struct ui_out;
 
+#define INVALID_FRAME_LEVEL -1
+
 /* Status of a given frame's stack.  */
 
 enum frame_id_stack_status

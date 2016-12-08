@@ -42,6 +42,7 @@
 #include "tracepoint.h"
 #include "hashtab.h"
 #include "valprint.h"
+#include "user-selection.h"
 
 /* The sentinel frame terminates the innermost end of the frame chain.
    If unwound, it returns the information needed to construct an
@@ -1791,6 +1792,7 @@ reinit_frame_cache (void)
 
   sentinel_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
+  global_user_selection ()->select_frame (NULL, false);
   frame_stash_invalidate ();
   if (frame_debug)
     fprintf_unfiltered (gdb_stdlog, "{ reinit_frame_cache () }\n");

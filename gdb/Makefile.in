@@ -1189,6 +1189,7 @@ SFILES = \
 	ui-file.h \
 	ui-out.c \
 	user-regs.c \
+	user-selection.c \
 	utils.c \
 	valarith.c \
 	valops.c \
@@ -1791,6 +1792,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ui-file.o \
 	ui-out.o \
 	user-regs.o \
+	user-selection.o \
 	utils.o \
 	utils-selftests.o \
 	valarith.o \

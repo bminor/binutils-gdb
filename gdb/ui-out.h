@@ -220,4 +220,24 @@ private:
 typedef ui_out_emit_type<ui_out_type_tuple> ui_out_emit_tuple;
 typedef ui_out_emit_type<ui_out_type_list> ui_out_emit_list;
 
+template <class T>
+class scoped_restore_suppress_output
+{
+public:
+  scoped_restore_suppress_output (T* obj)
+  : m_obj (obj),
+    m_val (m_obj->suppress_output ())
+  {}
+
+  ~scoped_restore_suppress_output ()
+  {
+    m_obj->suppress_output (m_val);
+  }
+
+private:
+
+  T* m_obj;
+  bool m_val;
+};
+
 #endif /* UI_OUT_H */

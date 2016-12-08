@@ -35,6 +35,7 @@
 #include "arch-utils.h"
 #include "target-descriptions.h"
 #include "readline/tilde.h"
+#include "user-selection.h"
 
 void _initialize_inferiors (void);
 
@@ -554,9 +555,8 @@ inferior_pid_to_str (int pid)
 /* See inferior.h.  */
 
 void
-print_selected_inferior (struct ui_out *uiout)
+print_selected_inferior (struct ui_out *uiout, struct inferior *inf)
 {
-  struct inferior *inf = current_inferior ();
   const char *filename = inf->pspace->pspace_exec_filename;
 
   if (filename == NULL)
@@ -566,8 +566,7 @@ print_selected_inferior (struct ui_out *uiout)
 		  inf->num, inferior_pid_to_str (inf->pid), filename);
 }
 
-/* Prints the list of inferiors and their details on UIOUT.  This is a
-   version of 'info_inferior_command' suitable for use from MI.
+/* Prints the list of inferiors and their details on UIOUT.
 
    If REQUESTED_INFERIORS is not NULL, it's a list of GDB ids of the
    inferiors that should be printed.  Otherwise, all inferiors are
@@ -579,6 +578,7 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
   struct inferior *inf;
   struct cleanup *old_chain;
   int inf_count = 0;
+  struct inferior *selected_inferior = global_user_selection ()->inferior ();
 
   /* Compute number of inferiors we will print.  */
   for (inf = inferior_list; inf; inf = inf->next)
@@ -612,7 +612,7 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 
       chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-      if (inf == current_inferior ())
+      if (inf == selected_inferior)
 	uiout->field_string ("current", "*");
       else
 	uiout->field_skip ("current");
@@ -732,6 +732,7 @@ inferior_command (char *args, int from_tty)
 {
   struct inferior *inf;
   int num;
+  user_selection *us = global_user_selection ();
 
   num = parse_and_eval_long (args);
 
@@ -739,31 +740,12 @@ inferior_command (char *args, int from_tty)
   if (inf == NULL)
     error (_("Inferior ID %d not known."), num);
 
-  if (inf->pid != 0)
+  /* Keep the old behavior of printing "Switching to inferior X" even if it was
+     already the selected inferior.  */
+  if (!us->select_inferior (inf, true))
     {
-      if (inf->pid != ptid_get_pid (inferior_ptid))
-	{
-	  struct thread_info *tp;
-
-	  tp = any_thread_of_process (inf->pid);
-	  if (!tp)
-	    error (_("Inferior has no threads."));
-
-	  switch_to_thread (tp->ptid);
-	}
-
-      observer_notify_user_selected_context_changed
-	(USER_SELECTED_INFERIOR
-	 | USER_SELECTED_THREAD
-	 | USER_SELECTED_FRAME);
-    }
-  else
-    {
-      set_current_inferior (inf);
-      switch_to_thread (null_ptid);
-      set_current_program_space (inf->pspace);
-
-      observer_notify_user_selected_context_changed (USER_SELECTED_INFERIOR);
+      print_selected_inferior (current_uiout, us->inferior ());
+      print_selected_thread_frame (current_uiout, us, USER_SELECTED_THREAD | USER_SELECTED_FRAME);
     }
 }
 
@@ -783,6 +765,8 @@ remove_inferior_command (char *args, int from_tty)
   if (args == NULL || *args == '\0')
     error (_("Requires an argument (inferior id(s) to remove)"));
 
+  struct inferior *selected_inferior = global_user_selection ()->inferior ();
+
   number_or_range_parser parser (args);
   while (!parser.finished ())
     {
@@ -795,7 +779,7 @@ remove_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      if (inf == current_inferior ())
+      if (inf == selected_inferior)
 	{
 	  warning (_("Can not remove current inferior %d."), num);
 	  continue;

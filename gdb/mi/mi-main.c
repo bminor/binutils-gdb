@@ -54,6 +54,7 @@
 #include "extension.h"
 #include "gdbcmd.h"
 #include "observer.h"
+#include "user-selection.h"
 
 #include <ctype.h>
 #include "run-time-clock.h"
@@ -560,31 +561,15 @@ mi_cmd_target_flash_erase (char *command, char **argv, int argc)
 void
 mi_cmd_thread_select (char *command, char **argv, int argc)
 {
-  enum gdb_rc rc;
-  char *mi_error_message;
-  ptid_t previous_ptid = inferior_ptid;
-
   if (argc != 1)
     error (_("-thread-select: USAGE: threadnum."));
 
-  rc = gdb_thread_select (current_uiout, argv[0], &mi_error_message);
+  thread_select (argv[0], false);
 
-  /* If thread switch did not succeed don't notify or print.  */
-  if (rc == GDB_RC_FAIL)
-    {
-      make_cleanup (xfree, mi_error_message);
-      error ("%s", mi_error_message);
-    }
+  user_selection *us = global_user_selection ();
 
-  print_selected_thread_frame (current_uiout,
+  print_selected_thread_frame (current_uiout, us,
 			       USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-
-  /* Notify if the thread has effectively changed.  */
-  if (!ptid_equal (inferior_ptid, previous_ptid))
-    {
-      observer_notify_user_selected_context_changed (USER_SELECTED_THREAD
-						     | USER_SELECTED_FRAME);
-    }
 }
 
 void
@@ -2025,6 +2010,8 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
       {
 	char *argv[2];
 
+	apply_global_user_selection ();
+
 	/* A CLI command was read from the input stream.  */
 	/* This "feature" will be removed as soon as we have a
 	   complete set of mi commands.  */
@@ -2085,34 +2072,6 @@ mi_print_exception (const char *token, struct gdb_exception exception)
   fputs_unfiltered ("\n", mi->raw_stdout);
 }
 
-/* Determine whether the parsed command already notifies the
-   user_selected_context_changed observer.  */
-
-static int
-command_notifies_uscc_observer (struct mi_parse *command)
-{
-  if (command->op == CLI_COMMAND)
-    {
-      /* CLI commands "thread" and "inferior" already send it.  */
-      return (strncmp (command->command, "thread ", 7) == 0
-	      || strncmp (command->command, "inferior ", 9) == 0);
-    }
-  else /* MI_COMMAND */
-    {
-      if (strcmp (command->command, "interpreter-exec") == 0
-	  && command->argc > 1)
-	{
-	  /* "thread" and "inferior" again, but through -interpreter-exec.  */
-	  return (strncmp (command->argv[1], "thread ", 7) == 0
-		  || strncmp (command->argv[1], "inferior ", 9) == 0);
-	}
-
-      else
-	/* -thread-select already sends it.  */
-	return strcmp (command->command, "thread-select") == 0;
-    }
-}
-
 void
 mi_execute_command (const char *cmd, int from_tty)
 {
@@ -2139,7 +2098,6 @@ mi_execute_command (const char *cmd, int from_tty)
 
   if (command != NULL)
     {
-      ptid_t previous_ptid = inferior_ptid;
       struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
       command->token = token;
@@ -2178,39 +2136,6 @@ mi_execute_command (const char *cmd, int from_tty)
 
       bpstat_do_actions ();
 
-      if (/* The notifications are only output when the top-level
-	     interpreter (specified on the command line) is MI.  */
-	  interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
-	  /* Don't try report anything if there are no threads --
-	     the program is dead.  */
-	  && thread_count () != 0
-	  /* If the command already reports the thread change, no need to do it
-	     again.  */
-	  && !command_notifies_uscc_observer (command))
-	{
-	  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
-	  int report_change = 0;
-
-	  if (command->thread == -1)
-	    {
-	      report_change = (!ptid_equal (previous_ptid, null_ptid)
-			       && !ptid_equal (inferior_ptid, previous_ptid)
-			       && !ptid_equal (inferior_ptid, null_ptid));
-	    }
-	  else if (!ptid_equal (inferior_ptid, null_ptid))
-	    {
-	      struct thread_info *ti = inferior_thread ();
-
-	      report_change = (ti->global_num != command->thread);
-	    }
-
-	  if (report_change)
-	    {
-		observer_notify_user_selected_context_changed
-		  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-	    }
-	}
-
       mi_parse_free (command);
 
       do_cleanups (cleanup);
@@ -2223,6 +2148,8 @@ mi_cmd_execute (struct mi_parse *parse)
   struct cleanup *cleanup;
 
   cleanup = prepare_execute_command ();
+
+  apply_global_user_selection ();
 
   if (parse->all && parse->thread_group != -1)
     error (_("Cannot specify --thread-group together with --all"));

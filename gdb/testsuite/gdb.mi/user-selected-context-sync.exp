@@ -112,7 +112,7 @@ proc make_cli_re { mode inf thread frame } {
 	set thread_re $all_stop_thread_re
 
 	if [thread_is_running $mode $thread] {
-	    set thread_re "$thread_re\\\(running\\\)"
+	    set thread_re "$thread_re \\\(running\\\)"
 	}
 
 	append cli_re $thread_re
@@ -543,8 +543,10 @@ proc_with_prefix test_cli_inferior { mode } {
 	match_re_or_ensure_not_output $mi_re "event on MI"
     }
 
-    # Do the 'inferior' command on the currently selected inferior.  For now,
-    # GDB naively re-outputs everything.
+    # Do the 'inferior' command on the currently selected inferior.
+
+    set mi_re ""
+    
     with_spawn_id $gdb_main_spawn_id {
 	gdb_test "inferior 2" $cli_re "CLI select inferior again"
     }
@@ -927,8 +929,7 @@ proc_with_prefix test_mi_thread_select { mode } {
 	with_spawn_id $gdb_main_spawn_id {
 	    # This doesn't work as of now, no event is sent on CLI.  It is
 	    # commented out so we don't have to wait for the timeout every time.
-	    # match_re_or_ensure_not_output "$cli_re\r\n" "-thread-select, event on cli"
-	    kfail "gdb/20631" "thread-select, event on cli"
+	    match_re_or_ensure_not_output "$cli_re\r\n" "-thread-select, event on cli"
 	}
     }
 
@@ -1027,8 +1028,11 @@ proc_with_prefix test_cli_in_mi_inferior { mode cli_in_mi_mode } {
 	match_re_or_ensure_not_output "$cli_re\r\n" "select inferior, event on CLI"
     }
 
-    # Do the 'inferior' command on the currently selected inferior.  For now,
-    # GDB naively re-outputs everything.
+    # Do the 'inferior' command on the currently selected inferior.
+
+    set mi_re ""
+    set cli_re ""
+
     with_spawn_id $mi_spawn_id {
 	mi_gdb_test $command $mi_re "select inferior again"
     }
@@ -1232,7 +1236,7 @@ proc_with_prefix test_cli_in_mi_frame { mode cli_in_mi_mode } {
 	if { $mode == "all-stop" } {
 	    set mi_re [make_cli_in_mi_re $command $cli_in_mi_mode $mode 0 -1 -1 -1 1]
 	} else {
-	    set mi_re "\\^error,msg=\"No stack\\.\""
+	    set mi_re "\\^done"
 	}
 	set cli_re ""
 

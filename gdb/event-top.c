@@ -40,6 +40,7 @@
 #include "buffer.h"
 #include "ser-event.h"
 #include "gdb_select.h"
+#include "user-selection.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -581,6 +582,9 @@ command_handler (char *command)
     reinitialize_more_filter ();
 
   scoped_command_stats stat_reporter (true);
+
+  /* Before executing the command, apply the user selection to the gdb core.  */
+  apply_global_user_selection ();
 
   /* Do not execute commented lines.  */
   for (c = command; *c == ' ' || *c == '\t'; c++)

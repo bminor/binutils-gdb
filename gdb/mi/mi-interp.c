@@ -39,6 +39,7 @@
 #include "cli-out.h"
 #include "thread-fsm.h"
 #include "cli/cli-interp.h"
+#include "user-selection.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
@@ -1282,15 +1283,16 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
    changed.  */
 
 static void
-mi_user_selected_context_changed (user_selected_what selection)
+mi_on_global_user_selection_changed (user_selection *us,
+				  user_selected_what selection)
 {
-  struct thread_info *tp;
+  struct inferior *inf = us->inferior ();
+  struct thread_info *thread = us->thread ();
+  struct frame_info *frame = us->frame ();
 
   /* Don't send an event if we're responding to an MI command.  */
   if (mi_suppress_notification.user_selected_context)
     return;
-
-  tp = find_thread_ptid (inferior_ptid);
 
   SWITCH_THRU_ALL_UIS ()
     {
@@ -1311,23 +1313,19 @@ mi_user_selected_context_changed (user_selected_what selection)
       target_terminal_ours_for_output ();
 
       if (selection & USER_SELECTED_INFERIOR)
-	print_selected_inferior (mi->cli_uiout);
+	print_selected_inferior (mi->cli_uiout, inf);
 
-      if (tp != NULL
+      if (thread != NULL
 	  && (selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME)))
 	{
-	  print_selected_thread_frame (mi->cli_uiout, selection);
+	  print_selected_thread_frame (mi->cli_uiout, us, selection);
 
 	  fprintf_unfiltered (mi->event_channel,
 			      "thread-selected,id=\"%d\"",
-			      tp->global_num);
+			      thread->global_num);
 
-	  if (tp->state != THREAD_RUNNING)
-	    {
-	      if (has_stack_frames ())
-		print_stack_frame_to_uiout (mi_uiout, get_selected_frame (NULL),
-					    1, SRC_AND_LOC, 1);
-	    }
+	  if (thread->state != THREAD_RUNNING && frame != nullptr)
+	    print_stack_frame_to_uiout (mi_uiout, frame, 1, SRC_AND_LOC, 1);
 	}
 
       gdb_flush (mi->event_channel);
@@ -1439,6 +1437,6 @@ _initialize_mi_interp (void)
   observer_attach_command_param_changed (mi_command_param_changed);
   observer_attach_memory_changed (mi_memory_changed);
   observer_attach_sync_execution_done (mi_on_sync_execution_done);
-  observer_attach_user_selected_context_changed
-    (mi_user_selected_context_changed);
+  observer_attach_global_user_selection_changed
+    (mi_on_global_user_selection_changed);
 }

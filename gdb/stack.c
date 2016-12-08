@@ -52,6 +52,9 @@
 #include "symfile.h"
 #include "extension.h"
 #include "observer.h"
+#include "user-selection.h"
+#include "common/scoped_restore.h"
+#include "cli-out.h"
 
 /* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
@@ -1281,7 +1284,7 @@ print_frame (struct frame_info *frame, int print_level,
    this function never returns NULL).  When SELECTED_FRAME_P is non-NULL
    set its target to indicate that the default selected frame was used.  */
 
-static struct frame_info *
+struct frame_info *
 parse_frame_specification (const char *frame_exp, int *selected_frame_p)
 {
   int numargs;
@@ -2300,14 +2303,21 @@ find_relative_frame (struct frame_info *frame, int *level_offset_ptr)
    See parse_frame_specification for more info on proper frame
    expressions.  */
 
-void
+static void
 select_frame_command (char *level_exp, int from_tty)
 {
-  struct frame_info *prev_frame = get_selected_frame_if_set ();
+  cli_ui_out *uiout = dynamic_cast<cli_ui_out *> (current_uiout);
+  scoped_restore_suppress_output<cli_ui_out> restore (uiout);
+  user_selection *us = global_user_selection ();
 
-  select_frame (parse_frame_specification (level_exp, NULL));
-  if (get_selected_frame_if_set () != prev_frame)
-    observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+  uiout->suppress_output (true);
+
+  if (level_exp != nullptr)
+    {
+      struct frame_info *frame = parse_frame_specification (level_exp, NULL);
+
+      us->select_frame (frame, true);
+    }
 }
 
 /* The "frame" command.  With no argument, print the selected frame
@@ -2317,20 +2327,30 @@ select_frame_command (char *level_exp, int from_tty)
 static void
 frame_command (char *level_exp, int from_tty)
 {
-  struct frame_info *prev_frame = get_selected_frame_if_set ();
+  user_selection *us = global_user_selection ();
 
-  select_frame (parse_frame_specification (level_exp, NULL));
-  if (get_selected_frame_if_set () != prev_frame)
-    observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+  if (level_exp == nullptr)
+    {
+      if (us->thread () != nullptr
+	  && is_stopped (us->thread ()))
+	print_selected_thread_frame (current_uiout, us, USER_SELECTED_FRAME);
+      else
+	current_uiout->message (_("No stack.\n"));
+    }
   else
-    print_selected_thread_frame (current_uiout, USER_SELECTED_FRAME);
+    {
+      struct frame_info *frame = parse_frame_specification (level_exp, NULL);
+
+      if (!us->select_frame (frame, true))
+	print_selected_thread_frame (current_uiout, us, USER_SELECTED_FRAME);
+    }
 }
 
 /* Select the frame up one or COUNT_EXP stack levels from the
    previously selected frame, and print it briefly.  */
 
 static void
-up_silently_base (const char *count_exp)
+up_command (char *count_exp, int from_tty)
 {
   struct frame_info *frame;
   int count = 1;
@@ -2341,27 +2361,29 @@ up_silently_base (const char *count_exp)
   frame = find_relative_frame (get_selected_frame ("No stack."), &count);
   if (count != 0 && count_exp == NULL)
     error (_("Initial frame selected; you cannot go up."));
-  select_frame (frame);
+
+  user_selection *us = global_user_selection ();
+  us->select_frame (frame, true);
 }
 
 static void
 up_silently_command (char *count_exp, int from_tty)
 {
-  up_silently_base (count_exp);
-}
+  cli_ui_out *uiout = dynamic_cast<cli_ui_out *> (current_uiout);
 
-static void
-up_command (char *count_exp, int from_tty)
-{
-  up_silently_base (count_exp);
-  observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+  gdb_assert (uiout != nullptr);
+
+  scoped_restore_suppress_output<cli_ui_out> restore (uiout);
+  uiout->suppress_output (true);
+
+  up_command (count_exp, from_tty);
 }
 
 /* Select the frame down one or COUNT_EXP stack levels from the previously
    selected frame, and print it briefly.  */
 
 static void
-down_silently_base (const char *count_exp)
+down_command (char *count_exp, int from_tty)
 {
   struct frame_info *frame;
   int count = -1;
@@ -2380,20 +2402,21 @@ down_silently_base (const char *count_exp)
       error (_("Bottom (innermost) frame selected; you cannot go down."));
     }
 
-  select_frame (frame);
+  user_selection *us = global_user_selection ();
+  us->select_frame (frame, true);
 }
 
 static void
 down_silently_command (char *count_exp, int from_tty)
 {
-  down_silently_base (count_exp);
-}
+  cli_ui_out *uiout = dynamic_cast<cli_ui_out *> (current_uiout);
 
-static void
-down_command (char *count_exp, int from_tty)
-{
-  down_silently_base (count_exp);
-  observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
+  gdb_assert (uiout != nullptr);
+
+  scoped_restore_suppress_output<cli_ui_out> restore (uiout);
+  uiout->suppress_output (true);
+
+  down_command (count_exp, from_tty);
 }
 
 void
@@ -2518,9 +2541,7 @@ return_command (char *retval_exp, int from_tty)
     frame_pop (get_current_frame ());
 
   select_frame (get_current_frame ());
-  /* If interactive, print the frame that is now current.  */
-  if (from_tty)
-    print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+  global_user_selection ()->select_frame (get_selected_frame (NULL), true);
 }
 
 /* Sets the scope to input function name, provided that the function

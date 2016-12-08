@@ -32,6 +32,12 @@ public:
 
   ui_file *set_stream (ui_file *stream);
 
+  bool suppress_output ()
+  { return m_suppress_output; }
+
+  void suppress_output (bool val)
+  { m_suppress_output = val; }
+
 protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows,
@@ -61,9 +67,6 @@ protected:
   virtual void do_wrap_hint (const char *identstring) override;
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
-
-  bool suppress_output ()
-  { return m_suppress_output; }
 
 private:
 

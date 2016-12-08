@@ -33,6 +33,7 @@
 #include "target-descriptions.h"
 #include "buffer.h"
 #include <algorithm>
+#include "user-selection.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -601,6 +602,7 @@ tfile_close (struct target_ops *self)
 
   pid = ptid_get_pid (inferior_ptid);
   inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
+  global_user_selection ()->select_thread (NULL, false);
   exit_inferior_silent (pid);
 
   close (trace_fd);

@@ -34,6 +34,7 @@
 #include "extension.h"
 #include <ctype.h>
 #include "mi-parse.h"
+#include "user-selection.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -696,7 +697,10 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
   if (argc == 0 || argc > 1)
     error (_("-stack-select-frame: Usage: FRAME_SPEC"));
 
-  select_frame_command (argv[0], 1 /* not used */ );
+  struct frame_info *frame = parse_frame_specification (argv[0], NULL);
+  user_selection *us = global_user_selection ();
+
+  us->select_frame (frame, true);
 }
 
 void

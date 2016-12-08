@@ -69,6 +69,7 @@
 #include "cli-out.h"
 #include "tracepoint.h"
 #include "inf-loop.h"
+#include "user-selection.h"
 
 #if defined(TUI)
 # include "tui/tui.h"
@@ -2179,6 +2180,7 @@ gdb_init (char *argv0)
      exec_bfd of the current program space.  */
   initialize_progspace ();
   initialize_inferiors ();
+  init_global_user_selection ();
   initialize_current_architecture ();
   init_cli_cmds();
   init_main ();			/* But that omits this file!  Do it now.  */

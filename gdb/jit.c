@@ -41,6 +41,7 @@
 #include "gdb_bfd.h"
 #include "readline/tilde.h"
 #include "completer.h"
+#include "user-selection.h"
 
 static const char *jit_reader_dir = NULL;
 
@@ -226,6 +227,7 @@ jit_reader_load_command (char *args, int from_tty)
 
   loaded_jit_reader = jit_reader_load (so_name);
   reinit_frame_cache ();
+  global_user_selection ()->select_frame (NULL, false);
   jit_inferior_created_hook ();
   do_cleanups (prev_cleanup);
 }
@@ -239,6 +241,7 @@ jit_reader_unload_command (char *args, int from_tty)
     error (_("No JIT reader loaded."));
 
   reinit_frame_cache ();
+  global_user_selection ()->select_frame (NULL, false);
   jit_inferior_exit_hook (current_inferior ());
   loaded_jit_reader->functions->destroy (loaded_jit_reader->functions);
 
