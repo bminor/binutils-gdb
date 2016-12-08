@@ -1914,36 +1914,36 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	  if (!pcrel_op->include_isa_bit && use_extend)
 	    baseaddr = memaddr - 2;
 	  else if (!pcrel_op->include_isa_bit)
-	     {
-	       bfd_byte buffer[2];
+	    {
+	      bfd_byte buffer[2];
 
-	       /* If this instruction is in the delay slot of a JAL/JALX
-		  instruction, the base address is the address of the
-		  JAL/JALX instruction.  If it is in the delay slot of
-		  a JR/JALR instruction, the base address is the address
-		  of the JR/JALR instruction.  This test is unreliable:
-		  we have no way of knowing whether the previous word is
-		  instruction or data.  */
-	       if (info->read_memory_func (memaddr - 4, buffer, 2, info) == 0
-		   && (((info->endian == BFD_ENDIAN_BIG
-			 ? bfd_getb16 (buffer)
-			 : bfd_getl16 (buffer))
-			& 0xf800) == 0x1800))
-		 baseaddr = memaddr - 4;
-	       else if (info->read_memory_func (memaddr - 2, buffer, 2,
-						info) == 0
-			&& (((info->endian == BFD_ENDIAN_BIG
-			      ? bfd_getb16 (buffer)
-			      : bfd_getl16 (buffer))
-			     & 0xf89f) == 0xe800)
-			&& (((info->endian == BFD_ENDIAN_BIG
-			      ? bfd_getb16 (buffer)
-			      : bfd_getl16 (buffer))
-			     & 0x0060) != 0x0060))
-		 baseaddr = memaddr - 2;
-	       else
-		 baseaddr = memaddr;
-	     }
+	      /* If this instruction is in the delay slot of a JAL/JALX
+		 instruction, the base address is the address of the
+		 JAL/JALX instruction.  If it is in the delay slot of
+		 a JR/JALR instruction, the base address is the address
+		 of the JR/JALR instruction.  This test is unreliable:
+		 we have no way of knowing whether the previous word is
+		 instruction or data.  */
+	      if (info->read_memory_func (memaddr - 4, buffer, 2, info) == 0
+		  && (((info->endian == BFD_ENDIAN_BIG
+			? bfd_getb16 (buffer)
+			: bfd_getl16 (buffer))
+		       & 0xf800) == 0x1800))
+		baseaddr = memaddr - 4;
+	      else if (info->read_memory_func (memaddr - 2, buffer, 2,
+					       info) == 0
+		       && (((info->endian == BFD_ENDIAN_BIG
+			     ? bfd_getb16 (buffer)
+			     : bfd_getl16 (buffer))
+			    & 0xf89f) == 0xe800)
+		       && (((info->endian == BFD_ENDIAN_BIG
+			     ? bfd_getb16 (buffer)
+			     : bfd_getl16 (buffer))
+			    & 0x0060) != 0x0060))
+		baseaddr = memaddr - 2;
+	      else
+		baseaddr = memaddr;
+	    }
 	}
 
       print_insn_arg (info, state, opcode, operand, baseaddr + 1, uval);
