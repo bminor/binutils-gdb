@@ -1,3 +1,7 @@
+2016-12-09  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* inferior.c (print_selected_inferior): Avoid PATH_MAX usage.
+
 2016-12-08  Simon Marchi  <simon.marchi@ericsson.com>
 	    Thomas Schwinge  <thomas@codesourcery.com>
 

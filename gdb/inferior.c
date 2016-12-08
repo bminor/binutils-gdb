@@ -556,17 +556,12 @@ inferior_pid_to_str (int pid)
 void
 print_selected_inferior (struct ui_out *uiout)
 {
-  char buf[PATH_MAX + 256];
   struct inferior *inf = current_inferior ();
-
-  xsnprintf (buf, sizeof (buf),
-	     _("[Switching to inferior %d [%s] (%s)]\n"),
-	     inf->num,
-	     inferior_pid_to_str (inf->pid),
-	     (inf->pspace->pspace_exec_filename != NULL
-	      ? inf->pspace->pspace_exec_filename
-	      : _("<noexec>")));
-  ui_out_text (uiout, buf);
+  const char *filename = inf->pspace->pspace_exec_filename;
+  if (filename == NULL)
+    filename = _("<noexec>");
+  ui_out_message (uiout, _("[Switching to inferior %d [%s] (%s)]\n"),
+		  inf->num, inferior_pid_to_str (inf->pid), filename);
 }
 
 /* Prints the list of inferiors and their details on UIOUT.  This is a
