@@ -292,8 +292,8 @@ public:
 	  = static_cast<Target_powerpc<size, big_endian>*>(
 	      parameters->sized_target<size, big_endian>());
 	unsigned int indx = this->stub_table_index_[shndx];
-	gold_assert(indx < target->stub_tables().size());
-	return target->stub_tables()[indx];
+	if (indx < target->stub_tables().size())
+	  return target->stub_tables()[indx];
       }
     return NULL;
   }
