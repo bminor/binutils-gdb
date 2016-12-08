@@ -1,3 +1,9 @@
+2016-12-08  Simon Marchi  <simon.marchi@ericsson.com>
+	    Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gnu-nat.c (set_sig_thread_cmd): Use parse_thread_id instead of
+	global_thread_id_to_ptid.
+
 2016-12-08  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* config/i386/i386gnu.mh (%_S.o %_U.o): Add "-x c" to

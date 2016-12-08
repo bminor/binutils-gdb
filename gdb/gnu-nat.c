@@ -63,6 +63,7 @@ extern "C"
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "gdb_obstack.h"
+#include "tid-parse.h"
 
 #include "gnu-nat.h"
 #include "inf-child.h"
@@ -2975,19 +2976,14 @@ set_sig_thread_cmd (char *args, int from_tty)
 
   if (!args || (!isdigit (*args) && strcmp (args, "none") != 0))
     error (_("Illegal argument to \"set signal-thread\" command.\n"
-	   "Should be an integer thread ID, or `none'."));
+	     "Should be a thread ID, or \"none\"."));
 
   if (strcmp (args, "none") == 0)
     inf->signal_thread = 0;
   else
     {
-      ptid_t ptid = global_thread_id_to_ptid (atoi (args));
-
-      if (ptid_equal (ptid, minus_one_ptid))
-	error (_("Thread ID %s not known.  "
-		 "Use the \"info threads\" command to\n"
-	       "see the IDs of currently known threads."), args);
-      inf->signal_thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
+      struct thread_info *tp = parse_thread_id (args, NULL);
+      inf->signal_thread = inf_tid_to_thread (inf, ptid_get_lwp (tp->ptid));
     }
 }
 
