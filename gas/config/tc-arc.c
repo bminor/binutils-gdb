@@ -3449,10 +3449,10 @@ static void
 arc_show_cpu_list (FILE *stream)
 {
   int i, offset;
-  static const char *spaces = "                          ";
+  static const char *space_buf = "                          ";
 
-  fprintf (stream, "%s", spaces);
-  offset = strlen (spaces);
+  fprintf (stream, "%s", space_buf);
+  offset = strlen (space_buf);
   for (i = 0; cpu_types[i].name != NULL; ++i)
     {
       bfd_boolean last = (cpu_types[i + 1].name == NULL);
@@ -3462,8 +3462,8 @@ arc_show_cpu_list (FILE *stream)
          characters, then it's time for a new line.  */
       if (offset + strlen (cpu_types[i].name) + (last ? 0 : 2) > 80)
         {
-          fprintf (stream, "\n%s", spaces);
-          offset = strlen (spaces);
+          fprintf (stream, "\n%s", space_buf);
+          offset = strlen (space_buf);
         }
 
       fprintf (stream, "%s%s", cpu_types[i].name, (last ? "\n" : ", "));

@@ -1,5 +1,10 @@
 2016-12-08  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-arc.c (arc_show_cpu_list): Rename `spaces' local
+	variable to `space_buf'.
+
+2016-12-08  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-arm.c (encode_arm_shift): Rename `index' local
 	variable to `op_index'.
 
