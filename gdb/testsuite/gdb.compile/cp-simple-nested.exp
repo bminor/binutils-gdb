@@ -43,11 +43,10 @@ gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
 gdb_continue_to_breakpoint "testing location"
 
 CompileExpression::new "var"
-CompileExpression::add_imp "i1.a_" 2
-CompileExpression::add_imp "i2.a_" 3
-CompileExpression::add_exp "A::Inner1 *i1p = &i1; var = i1p->a_;" 2
-CompileExpression::add_exp "A::Inner1::Inner2 *i2p = &i2; var = i2p->a_;" 3
-CompileExpression::add_exp "A::Inner1 &r1 = i1; var = r1.a_;" 2
-CompileExpression::add_exp "A::Inner1::Inner2 &r2 = i2; var = r2.a_;" 3
-CompileExpression::run_tests "code"
-#CompileExpression::run_tests "print"
+CompileExpression::test "i1.a_" 2
+CompileExpression::test "i2.a_" 3
+CompileExpression::test "A::Inner1 *i1p = &i1; var = i1p->a_;" 2 -explicit
+CompileExpression::test "A::Inner1::Inner2 *i2p = &i2; var = i2p->a_;" 3 \
+    -explicit
+CompileExpression::test "A::Inner1 &r1 = i1; var = r1.a_;" 2 -explicit
+CompileExpression::test "A::Inner1::Inner2 &r2 = i2; var = r2.a_;" 3 -explicit

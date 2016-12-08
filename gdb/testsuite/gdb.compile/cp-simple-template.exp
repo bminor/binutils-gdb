@@ -43,37 +43,34 @@ gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
 gdb_continue_to_breakpoint "testing location"
 
 CompileExpression::new "var"
-CompileExpression::add_imp "mytemplate<int, 1> ()" -1
-CompileExpression::add_imp "mytemplate<int, 1> (1)" 2
-CompileExpression::add_imp "mytemplate<0> ()" 0
-CompileExpression::add_imp "mytemplate ()" 100
-CompileExpression::add_imp "a.tempmethod ()" 20 \
+CompileExpression::test "mytemplate<int, 1> ()" -1
+CompileExpression::test "mytemplate<int, 1> (1)" 2
+CompileExpression::test "mytemplate<0> ()" 0
+CompileExpression::test "mytemplate ()" 100
+CompileExpression::test "a.tempmethod ()" {(20|{value = 20})} \
     -print {xfail *-*-* gcc/debug/49348} \
     -value {xfail *-*-* gcc/debug/49348}
-CompileExpression::add_imp "a.tempmethod<A> ()" 20
-CompileExpression::add_imp "a.tempmethod<int> ()" -20
-CompileExpression::add_imp "defaultvals ()" 10
-CompileExpression::add_imp "defaultvals<int, 20> ()" 20
-CompileExpression::add_imp "deduct (1234)" 1234
-CompileExpression::add_imp "o + 3" -33
-CompileExpression::add_imp "mod_test (i)" 1
-CompileExpression::add_imp "mod_test (cpi)" 2
-CompileExpression::add_imp "mod_test (cpci)" 3
-CompileExpression::add_imp "cddd.get1 ()" -30
-CompileExpression::add_imp "cddd.get2 ()" 107
-CompileExpression::add_imp "cddd.get3 ()" 3
-CompileExpression::add_imp "cdd.get1 ()" 100
-CompileExpression::add_imp "cdd.get2 ()" 107
-CompileExpression::add_imp "cdd.get3 ()" 3
-CompileExpression::add_imp "cd.get1 ()" 101
-CompileExpression::add_imp "cd.get2 ()" 107
-CompileExpression::add_imp "cd.get3 ()" 3
-CompileExpression::add_imp "c.get1 ()" 102
-CompileExpression::add_imp "c.get2 ()" 107
-CompileExpression::add_imp "c.get3 ()" 12
-
-CompileExpression::run_tests "code"
-#CompileExpression::run_tests "print"
+CompileExpression::test "a.tempmethod<A> ()" {(20|{value = 20})}
+CompileExpression::test "a.tempmethod<int> ()" -20
+CompileExpression::test "defaultvals ()" {(10|{value = 10})}
+CompileExpression::test "defaultvals<int, 20> ()" 20
+CompileExpression::test "deduct (1234)" 1234
+CompileExpression::test "o + 3" {(-33|{v_ = 33})}
+CompileExpression::test "mod_test (i)" 1
+CompileExpression::test "mod_test (cpi)" 2
+CompileExpression::test "mod_test (cpci)" 3
+CompileExpression::test "cddd.get1 ()" {(-30|{v_ = 30})}
+CompileExpression::test "cddd.get2 ()" 107
+CompileExpression::test "cddd.get3 ()" 3
+CompileExpression::test "cdd.get1 ()" 100
+CompileExpression::test "cdd.get2 ()" 107
+CompileExpression::test "cdd.get3 ()" 3
+CompileExpression::test "cd.get1 ()" 101
+CompileExpression::test "cd.get2 ()" {107( 'k')?}
+CompileExpression::test "cd.get3 ()" 3
+CompileExpression::test "c.get1 ()" 102
+CompileExpression::test "c.get2 ()" {107( 'k')?}
+CompileExpression::test "c.get3 ()" 12
 
 # Some explicit tests that don't fit neatly into CompileExpression (yet)
 gdb_test "compile print ret_test<char>()" \

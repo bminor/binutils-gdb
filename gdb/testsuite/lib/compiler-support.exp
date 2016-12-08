@@ -46,46 +46,51 @@ proc skip_compile_feature_tests {} {
 # "compile code" expressions.
 # CompileExpression::new "var"
 #
-# Add the expression "foo;" with result/value 3.
-# CompileExpression::add_imp "foo;" 3
-#
-# Add the expression "a = function (3); var = a;" with the result 21.
-# CompileExpression::add_exp "a = function (3); var = a;" 21
-#
-# Run tests using "compile print".
-# CompileExpression::run_tests "print"
-# ---> Runs the following tests (name of tests ignored for illustration)
-#    gdb_test "compile print foo;" "= 3"
-#    # "explicit" expressions are ignored
-#
-# Run the tests using "compile code".
-# CompileExpression::run_tests "code"
+# Test the implicit expression "foo;" with result/value 3.
+# CompileExpression::test "foo;" 3
 # ---> Runs the following tests (name of tests ignored for illustration)
 #    gdb_test_no_output "compile code var = foo;"
 #    gdb_test "p var" "= 3"
-#    gdb_test_no_output "compoile code a = function (3); var = a;"
+#    gdb_test "compile print foo;" "= 3"
+#
+# Test the explicit expression "a = function (3); var = a;" with the result 21.
+# CompileExpression::test "a = function (3); var = a;" 21 -explicit
+# ---> Runs the following tests (name of tests ignored for illustration)
+#    gdb_test_no_output "compile code a = function (3); var = a;"
 #    gdb_test "p var" "= 21"
 #
-# Additional option flags that may be passed to add_mp or add_exp:
+# Additional option flags may be passed to test to control the behavior
+# of the test harness:
+#
+# Pass -explicit to specify that the test uses an explicit expression,
+# one which sets the value of the variable (see above).  Only the code test
+# will be run.
+#
+# Otherwise, all expressions are considered implicit.
+#
 # Pass -value, -compile, and/or -print to indicate that the value,
-# compile, or print steps will optionally fail. Specify -xfail or
-# -kfail to indicate how each particular step will fail.  These may be
+# compile, or print steps will optionally fail. Specify "xfail" or
+# "kfail" to indicate how each particular step will fail.  These may be
 # followed by any accepted DejaGNU parameters such as architecture and
 # bug#.
 #
-# -compile and -value are used when "code" tests are run, the former
+# -compile and -value are used when a "code" test is run, the former
 # specifying that the "compile code" command (to GDB) will fail or pass
 # in the prescribed manner.  -value indicates that the "print $VARIABLE"
 # command (to GDB) will fail in the prescribed manner.
 #
 # -print is used to specify that an expression will fail in the presribed
-# manner when "print" tests are run.
+# manner when "print" test is executed.
 #
 # Pass "-name NAME" to set an optional test name.  If not specified,
 # the harness will use test names such as "compile code EXPR" and
 # "result of compile code EXPR".
 #
-# These options must be passed LAST to the add_imp/add_exp.
+# Pass "-noprint" or "-nocode" to suppress print or code tests, respectively,
+# This is useful when the expression being tested modifies the object
+# being tested, e.g., "a++".
+#
+# These options must be passed LAST to CompileExpression::test.
 #
 # Examples:
 #
@@ -103,103 +108,79 @@ namespace eval ::CompileExpression {
     # must be in scope when tests are run.
     variable varName_ {}
 
-    # A list containing all the expressions to test.
-    # The format is EXPR RESULT IS_EXPLICIT TEST_NAME OPT_FAIL_LIST
-    variable expr_list_ {}
-
     # Start a new expression list.  VARNAME is the name of the variable
     # that will be printed to check if the result of the test was
     # successful.
     proc new {varname} {
 	variable varName_
-	variable expr_list_
 
 	set varName_ $varname
-	set expr_list_ {}
     }
 
-    # Add an "implicit" expression to the list of tests to run.
+    # Test an expression.
+    #
+    # See the preamble for a list of valid optional arguments.
     #
     # Implicit expressions will be sent to GDB in the form
     # "$varName = $EXP".  "p $varName" will be used to decide the pass
     # or fail status of the test.
     #
-    # The name of the test may be optionally specified.
+    # Explicit expressions will be sent to GDB as-is and tested using only
+    # "compile code".  The expression should set the value of the variable
+    # $varName, which is then printed to determine whether the test passed
+    # or failed.
     #
-    # Unlike explicit expressions, implicit expressions may be tested
-    # with both "compile print" and "compile code".
+    # Unlike explicit expressions, implicit expressions are tested with both
+    # "compile print" and "compile code".
 
-    proc add_imp {exp result {tst ""} args} {
-	variable expr_list_
+    proc test {exp result args} {
+	parse_args {{compile {"" ""}} {value {"" ""}} {print {"" ""}} {name ""}
+	    {noprint} {nocode} {explicit}}
 
-	parse_args {{compile {"" ""}} {value {"" ""}} {print {"" ""}} {name ""}}
-	lappend expr_list_ [list $exp $result 0 $name \
-				[list $compile $value $print]]
+	if {!$nocode} {
+	    do_test_ code $exp $result $explicit $name \
+		[list $compile $value $print]
+	}
+	if {!$noprint} {
+	    do_test_ print $exp $result $explicit $name \
+		[list $compile $value $print]
+	}
     }
 
-    # Add an "explicit" expression to the list of tests to run.
-    #
-    # Explicit expressions will be sent to GDB as-is.  The expression
-    # should set the value of the variable $varName, which is then printed
-    # to determine whether the test passed or failed.
-    #
-    # The name of the test may be optionally specified.
-    #
-    # Unlike implicit expressions, explicit expressions cannot be tested
-    # with "compile print."  If run_tests is called with "print", any
-    # explicit expressions in the expression list will be ignored.
+    # Run a compile test for CMD ("print" or "code").
 
-    proc add_exp {exp result args} {
-	variable expr_list_
-
-	parse_args {{compile {"" ""}} {value {"" ""}} {print {"" ""}} {name ""}}
-	lappend expr_list_ [list $exp $result 1 $name \
-				[list $compile $value $print]]
-    }
-
-    # Run compile tests for CMD ("print" or "code").
-
-    proc run_tests {cmd} {
+    proc do_test_ {cmd exp result is_explicit tst fail_list} {
 	variable varName_
-	variable expr_list_
 
 	if {![string match $cmd "code"]
 	    && ![string match $cmd "print"]} {
 	    error "invalid command, $cmd; should be \"print\" or \"compile\""
 	}
 
-	foreach exp_test $expr_list_ {
-	    set exp [lindex $exp_test 0]
-	    set result [lindex $exp_test 1]
-	    set is_explicit [lindex $exp_test 2]
-	    set tst [lindex $exp_test 3]
-	    set fail_list [lindex $exp_test 4]
+	# Get expected result of test.  Will be "" if test is
+	# expected to PASS.
+	lassign $fail_list fail_compile fail_value fail_print
 
-	    # Get expected result of test.  Will be "" if test is
-	    # expected to PASS.
-	    lassign $fail_list fail_compile fail_value fail_print
+	# Set a test name if one hasn't been provided.
+	if {$tst == ""} {
+	    set tst "compile $cmd $exp"
+	}
 
-	    # Set a test name if one hasn't been provided.
-	    if {$tst == ""} {
-		set tst "compile $cmd $exp"
+	if {[string match $cmd "print"]} {
+	    if {!$is_explicit} {
+		eval setup_failures_ $fail_print
+		gdb_test "compile print $exp" $result $tst
 	    }
-
-	    if {[string match $cmd "print"]} {
-		if {!$is_explicit} {
-		    eval setup_failures_ $fail_print
-		    gdb_test "compile print $exp" $result $tst
-		}
+	} else {
+	    if {$is_explicit} {
+		set command "compile code $exp"
 	    } else {
-		if {$is_explicit} {
-		    set command "compile code $exp"
-		} else {
-		    set command "compile code $varName_ = $exp"
-		}
-		eval setup_failures_ $fail_compile
-		gdb_test_no_output $command $tst
-		eval setup_failures_ $fail_value
-		gdb_test "p $varName_" "= $result" "result of $tst"
+		set command "compile code $varName_ = $exp"
 	    }
+	    eval setup_failures_ $fail_compile
+	    gdb_test_no_output $command $tst
+	    eval setup_failures_ $fail_value
+	    gdb_test "p $varName_" "= $result" "result of $tst"
 	}
     }
 
