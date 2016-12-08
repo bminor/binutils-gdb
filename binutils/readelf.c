@@ -4900,7 +4900,7 @@ process_program_headers (FILE * file)
 		      (segment->p_flags & PF_R ? 'R' : ' '),
 		      (segment->p_flags & PF_W ? 'W' : ' '),
 		      (segment->p_flags & PF_X ? 'E' : ' '));
-	      print_vma (segment->p_align, HEX);
+	      print_vma (segment->p_align, PREFIX_HEX);
 	    }
 
 	  putc ('\n', stdout);
