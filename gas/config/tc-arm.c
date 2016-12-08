@@ -7436,14 +7436,14 @@ encode_arm_shift (int i)
   /* register-shifted register.  */
   if (inst.operands[i].immisreg)
     {
-      int index;
-      for (index = 0; index <= i; ++index)
+      int op_index;
+      for (op_index = 0; op_index <= i; ++op_index)
 	{
 	  /* Check the operand only when it's presented.  In pre-UAL syntax,
 	     if the destination register is the same as the first operand, two
 	     register form of the instruction can be used.  */
-	  if (inst.operands[index].present && inst.operands[index].isreg
-	      && inst.operands[index].reg == REG_PC)
+	  if (inst.operands[op_index].present && inst.operands[op_index].isreg
+	      && inst.operands[op_index].reg == REG_PC)
 	    as_warn (UNPRED_REG ("r15"));
 	}
 
