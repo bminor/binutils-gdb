@@ -1,3 +1,9 @@
+2016-12-08  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-pcrel.d: New test.
+	* testsuite/binutils-all/mips/mips16-pcrel.s: New test source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new test.
+
 2016-12-08  Étienne Buira  <etienne.buira@gmail.com>
 
 	* readelf.c (process_program_headers): Always use hex prefix when

@@ -1917,12 +1917,12 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	     {
 	       bfd_byte buffer[2];
 
-	       /* If this instruction is in the delay slot of a JR
+	       /* If this instruction is in the delay slot of a JAL/JALX
 		  instruction, the base address is the address of the
-		  JR instruction.  If it is in the delay slot of a JALR
-		  instruction, the base address is the address of the
-		  JALR instruction.  This test is unreliable: we have
-		  no way of knowing whether the previous word is
+		  JAL/JALX instruction.  If it is in the delay slot of
+		  a JR/JALR instruction, the base address is the address
+		  of the JR/JALR instruction.  This test is unreliable:
+		  we have no way of knowing whether the previous word is
 		  instruction or data.  */
 	       if (info->read_memory_func (memaddr - 4, buffer, 2, info) == 0
 		   && (((info->endian == BFD_ENDIAN_BIG
@@ -1935,7 +1935,11 @@ print_mips16_insn_arg (struct disassemble_info *info,
 			&& (((info->endian == BFD_ENDIAN_BIG
 			      ? bfd_getb16 (buffer)
 			      : bfd_getl16 (buffer))
-			     & 0xf81f) == 0xe800))
+			     & 0xf89f) == 0xe800)
+			&& (((info->endian == BFD_ENDIAN_BIG
+			      ? bfd_getb16 (buffer)
+			      : bfd_getl16 (buffer))
+			     & 0x0060) != 0x0060))
 		 baseaddr = memaddr - 2;
 	       else
 		 baseaddr = memaddr;

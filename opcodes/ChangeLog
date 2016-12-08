@@ -1,5 +1,11 @@
 2016-12-08  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (print_mips16_insn_arg): Avoid delay-slot
+	adjustment for PC-relative operations following MIPS16e compact
+	jumps or undefined RR/J(AL)R(C) encodings.
+
+2016-12-08  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* aarch64-asm.c (aarch64_ins_reglane): Rename `index' local
 	variable to `reglane_index'.
 
