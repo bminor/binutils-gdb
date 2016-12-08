@@ -1,3 +1,7 @@
+2016-12-08  Luis Machado  <lgustavo@codesourcery.com>
+
+	* ppc-dis.c (get_powerpc_dialect): Check NULL info->section.
+
 2016-12-07  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-dis.c (print_mips16_insn_arg): Fix comment typo.

@@ -236,7 +236,7 @@ get_powerpc_dialect (struct disassemble_info *info)
 
   /* Disassemble according to the section headers flags for VLE-mode.  */
   if (dialect & PPC_OPCODE_VLE
-      && info->section->owner != NULL
+      && info->section != NULL && info->section->owner != NULL
       && bfd_get_flavour (info->section->owner) == bfd_target_elf_flavour
       && elf_object_id (info->section->owner) == PPC32_ELF_DATA
       && (elf_section_flags (info->section) & SHF_PPC_VLE) != 0)
