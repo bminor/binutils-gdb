@@ -164,6 +164,7 @@ ALL_EMULATION_SOURCES = \
 	earcelf.c \
 	earcelf_prof.c \
 	earclinux.c \
+	earclinux_nps.c \
 	earclinux_prof.c \
 	earm_epoc_pe.c \
 	earm_wince_pe.c \
@@ -728,6 +729,11 @@ earcelf_prof.c: $(srcdir)/emulparams/arcelf_prof.sh \
 
 #for linux on arc
 earclinux.c: $(srcdir)/emulparams/arclinux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
+  $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
+
+earclinux_nps.c: $(srcdir)/emulparams/arclinux_nps.sh \
+  $(srcdir)/emulparams/arc-nps.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
   $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
 
