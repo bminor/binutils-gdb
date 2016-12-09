@@ -2042,7 +2042,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
       status = (*info->read_memory_func) (memaddr, buffer, 2, info);
       if (status != 0)
 	{
-	  infprintf (is, "extend 0x%x", (unsigned int) extend);
+	  infprintf (is, "extend\t0x%x", (unsigned int) extend);
 	  (*info->memory_error_func) (status, memaddr, info);
 	  return -1;
 	}
@@ -2055,7 +2055,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
       /* Check for an extend opcode followed by an extend opcode.  */
       if ((insn & 0xf800) == 0xf000)
 	{
-	  infprintf (is, "extend 0x%x", (unsigned int) extend);
+	  infprintf (is, "extend\t0x%x", (unsigned int) extend);
 	  info->insn_type = dis_noninsn;
 	  return length;
 	}
@@ -2078,7 +2078,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	    {
 	      if (use_extend)
 		{
-		  infprintf (is, "extend 0x%x", (unsigned int) extend);
+		  infprintf (is, "extend\t0x%x", (unsigned int) extend);
 		  info->insn_type = dis_noninsn;
 		  return length - 2;
 		}
@@ -2147,7 +2147,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 #undef GET_OP
 
   if (use_extend)
-    infprintf (is, "0x%x", extend | 0xf000);
+    infprintf (is, "0x%x ", extend | 0xf000);
   infprintf (is, "0x%x", insn);
   info->insn_type = dis_noninsn;
 
