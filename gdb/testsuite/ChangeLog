@@ -1,3 +1,15 @@
+2016-12-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/all-architectures-0.exp: New file.
+	* gdb.base/all-architectures-1.exp: New file.
+	* gdb.base/all-architectures-2.exp: New file.
+	* gdb.base/all-architectures-3.exp: New file.
+	* gdb.base/all-architectures-4.exp: New file.
+	* gdb.base/all-architectures-5.exp: New file.
+	* gdb.base/all-architectures-6.exp: New file.
+	* gdb.base/all-architectures-7.exp: New file.
+	* gdb.base/all-architectures.exp.in: New file.
+
 2016-12-09  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.perf/skip-prologue.exp: Add parameter COMPILE.
