@@ -1,5 +1,9 @@
 2016-12-09  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips16-opc.c (decode_mips16_operand) <'>'>: Remove cases.
+
+2016-12-09  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips16-opc.c (decode_mips16_operand) <'e'>: Use HINT rather
 	than UINT.
 

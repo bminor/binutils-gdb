@@ -8723,7 +8723,6 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  break;
 
 	case '<':
-	case '>':
 	case '4':
 	case '5':
 	case 'H':

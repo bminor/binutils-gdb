@@ -76,7 +76,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     switch (type)
       {
       case '<': UINT (5, 0);
-      case '>': UINT (5, 0);
       case '[': UINT (6, 0);
       case ']': UINT (6, 0);
 
@@ -105,7 +104,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     switch (type)
       {
       case '<': INT_ADJ (3, 2, 8, 0, FALSE);
-      case '>': INT_ADJ (3, 8, 8, 0, FALSE);
       case '[': INT_ADJ (3, 2, 8, 0, FALSE);
       case ']': INT_ADJ (3, 8, 8, 0, FALSE);
 

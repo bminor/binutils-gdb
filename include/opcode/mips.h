@@ -1809,7 +1809,6 @@ extern int bfd_mips_num_opcodes;
    The remaining codes may be extended.  Except as otherwise noted,
    the full extended operand is a 16 bit signed value.
    "<" 3 bit unsigned shift count * 0 (MIPS16OP_*_RZ) (full 5 bit unsigned)
-   ">" 3 bit unsigned shift count * 0 (MIPS16OP_*_RX) (full 5 bit unsigned)
    "[" 3 bit unsigned shift count * 0 (MIPS16OP_*_RZ) (full 6 bit unsigned)
    "]" 3 bit unsigned shift count * 0 (MIPS16OP_*_RX) (full 6 bit unsigned)
    "4" 4 bit signed immediate * 0 (MIPS16OP_*_IMM4) (full 15 bit signed)
@@ -1834,7 +1833,7 @@ extern int bfd_mips_num_opcodes;
 
    Characters used so far, for quick reference when adding more:
    "   456 8 0"
-   "[]<>"
+   "[]<"
    "ABCDE  HI KLM  P RS UVWXYZ"
    "a   e   ijklm  pq    vwxyz"
   */
