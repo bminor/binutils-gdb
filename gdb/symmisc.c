@@ -139,7 +139,7 @@ print_objfile_statistics (void)
                      blockvectors);
 
     if (OBJSTAT (objfile, sz_strtab) > 0)
-      printf_filtered (_("  Space used by a.out string tables: %d\n"),
+      printf_filtered (_("  Space used by string tables: %d\n"),
 		       OBJSTAT (objfile, sz_strtab));
     printf_filtered (_("  Total memory used for objfile obstack: %s\n"),
 		     pulongest (obstack_memory_used (&objfile

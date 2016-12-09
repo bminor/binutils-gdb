@@ -235,7 +235,7 @@ static void
 sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* OpenBSD/sparc is very similar to NetBSD/sparc ELF.  */
-  sparc32nbsd_elf_init_abi (info, gdbarch);
+  sparc32nbsd_init_abi (info, gdbarch);
 
   set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
@@ -253,6 +253,6 @@ void _initialize_sparc32obsd_tdep (void);
 void
 _initialize_sparc32obsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_OPENBSD,
 			  sparc32obsd_init_abi);
 }

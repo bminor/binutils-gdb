@@ -165,6 +165,6 @@ void _initialize_mips64obsd_tdep (void);
 void
 _initialize_mips64obsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_OPENBSD,
 			  mips64obsd_init_abi);
 }

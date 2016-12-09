@@ -213,6 +213,6 @@ extern initialize_file_ftype _initialize_hppanbsd_tdep;
 void
 _initialize_hppanbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_NETBSD,
 			  hppanbsd_init_abi);
 }

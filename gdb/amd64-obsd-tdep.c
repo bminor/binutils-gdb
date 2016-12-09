@@ -35,44 +35,6 @@
 #include "solib-svr4.h"
 #include "bsd-uthread.h"
 
-/* Support for core dumps.  */
-
-static void
-amd64obsd_supply_regset (const struct regset *regset,
-			 struct regcache *regcache, int regnum,
-			 const void *regs, size_t len)
-{
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE);
-
-  i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  amd64_supply_fxsave (regcache, regnum,
-		       ((const gdb_byte *)regs) + tdep->sizeof_gregset);
-}
-
-static const struct regset amd64obsd_combined_regset =
-  {
-    NULL, amd64obsd_supply_regset, NULL
-  };
-
-static void
-amd64obsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
-					iterate_over_regset_sections_cb *cb,
-					void *cb_data,
-					const struct regcache *regcache)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* OpenBSD core dumps don't use seperate register sets for the
-     general-purpose and floating-point registers.  */
-
-  cb (".reg", tdep->sizeof_gregset + I387_SIZEOF_FXSAVE,
-      &amd64obsd_combined_regset, NULL, cb_data);
-}
-
-
 /* Support for signal handlers.  */
 
 /* Default page size.  */
@@ -483,17 +445,6 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Unwind kernel trap frames correctly.  */
   frame_unwind_prepend_unwinder (gdbarch, &amd64obsd_trapframe_unwind);
 }
-
-/* Traditional (a.out) NetBSD-style core dumps.  */
-
-static void
-amd64obsd_core_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  amd64obsd_init_abi (info, gdbarch);
-
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, amd64obsd_iterate_over_regset_sections);
-}
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -506,9 +457,5 @@ _initialize_amd64obsd_tdep (void)
   gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_OPENBSD_ELF, amd64obsd_init_abi);
-
-  /* OpenBSD uses traditional (a.out) NetBSD-style core dumps.  */
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_NETBSD_AOUT, amd64obsd_core_init_abi);
+			  GDB_OSABI_OPENBSD, amd64obsd_init_abi);
 }

@@ -129,60 +129,6 @@ m68kbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 
-/* Signal trampolines.  */
-
-static void
-m68kobsd_sigtramp_cache_init (const struct tramp_frame *self,
-			      struct frame_info *this_frame,
-			      struct trad_frame_cache *this_cache,
-			      CORE_ADDR func)
-{
-  CORE_ADDR addr, base, pc;
-  int regnum;
-
-  base = get_frame_register_unsigned (this_frame, M68K_SP_REGNUM);
-
-  /* The 'addql #4,%sp' instruction at offset 8 adjusts the stack
-     pointer.  Adjust the frame base accordingly.  */
-  pc = get_frame_register_unsigned (this_frame, M68K_PC_REGNUM);
-  if ((pc - func) > 8)
-    base -= 4;
-
-  /* Get frame pointer, stack pointer, program counter and processor
-     state from `struct sigcontext'.  */
-  addr = get_frame_memory_unsigned (this_frame, base + 8, 4);
-  trad_frame_set_reg_addr (this_cache, M68K_FP_REGNUM, addr + 8);
-  trad_frame_set_reg_addr (this_cache, M68K_SP_REGNUM, addr + 12);
-  trad_frame_set_reg_addr (this_cache, M68K_PC_REGNUM, addr + 20);
-  trad_frame_set_reg_addr (this_cache, M68K_PS_REGNUM, addr + 24);
-
-  /* The sc_ap member of `struct sigcontext' points to additional
-     hardware state.  Here we find the missing registers.  */
-  addr = get_frame_memory_unsigned (this_frame, addr + 16, 4) + 4;
-  for (regnum = M68K_D0_REGNUM; regnum < M68K_FP_REGNUM; regnum++, addr += 4)
-    trad_frame_set_reg_addr (this_cache, regnum, addr);
-
-  /* Construct the frame ID using the function start.  */
-  trad_frame_set_id (this_cache, frame_id_build (base, func));
-}
-
-static const struct tramp_frame m68kobsd_sigtramp = {
-  SIGTRAMP_FRAME,
-  2,
-  {
-    { 0x206f, -1 }, { 0x000c, -1},	/* moveal %sp@(12),%a0 */
-    { 0x4e90, -1 },			/* jsr %a0@ */
-    { 0x588f, -1 },			/* addql #4,%sp */
-    { 0x4e41, -1 },			/* trap #1 */
-    { 0x2f40, -1 }, { 0x0004, -1 },	/* moveal %d0,%sp@(4) */
-    { 0x7001, -1 },			/* moveq #SYS_exit,%d0 */
-    { 0x4e40, -1 },			/* trap #0 */
-    { TRAMP_SENTINEL_INSN, -1 }
-  },
-  m68kobsd_sigtramp_cache_init
-};
-
-
 static void
 m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -195,30 +141,6 @@ m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, m68kbsd_iterate_over_regset_sections);
-}
-
-/* OpenBSD and NetBSD a.out.  */
-
-static void
-m68kbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  m68kbsd_init_abi (info, gdbarch);
-
-  tdep->struct_return = reg_struct_return;
-
-  tramp_frame_prepend_unwinder (gdbarch, &m68kobsd_sigtramp);
-}
-
-/* NetBSD ELF.  */
-
-static void
-m68kbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  m68kbsd_init_abi (info, gdbarch);
 
   /* NetBSD ELF uses the SVR4 ABI.  */
   m68k_svr4_init_abi (info, gdbarch);
@@ -230,41 +152,12 @@ m68kbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-static enum gdb_osabi
-m68kbsd_aout_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "a.out-m68k-netbsd") == 0
-      || strcmp (bfd_get_target (abfd), "a.out-m68k4k-netbsd") == 0)
-    return GDB_OSABI_NETBSD_AOUT;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
-static enum gdb_osabi
-m68kbsd_core_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_AOUT;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_m68kbsd_tdep (void);
 
 void
 _initialize_m68kbsd_tdep (void)
 {
-  gdbarch_register_osabi_sniffer (bfd_arch_m68k, bfd_target_aout_flavour,
-				  m68kbsd_aout_osabi_sniffer);
-
-  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_m68k, bfd_target_unknown_flavour,
-				  m68kbsd_core_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_NETBSD_AOUT,
-			  m68kbsd_aout_init_abi);
-  gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_NETBSD_ELF,
-			  m68kbsd_elf_init_abi);
+  gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_NETBSD,
+			  m68kbsd_init_abi);
 }

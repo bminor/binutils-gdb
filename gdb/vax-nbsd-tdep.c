@@ -41,6 +41,6 @@ void _initialize_vaxnbsd_tdep (void);
 void
 _initialize_vaxnbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_vax, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_vax, 0, GDB_OSABI_NETBSD,
 			  vaxnbsd_elf_init_abi);
 }

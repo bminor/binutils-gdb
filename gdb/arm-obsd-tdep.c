@@ -116,25 +116,12 @@ armobsd_init_abi (struct gdbarch_info info,
 }
 
 
-static enum gdb_osabi
-armobsd_core_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_OPENBSD_ELF;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_armobsd_tdep;
 
 void
 _initialize_armobsd_tdep (void)
 {
-  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_arm, bfd_target_unknown_flavour,
-                                  armobsd_core_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_OPENBSD,
 			  armobsd_init_abi);
 }

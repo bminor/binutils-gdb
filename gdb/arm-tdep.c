@@ -8990,11 +8990,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       switch (bfd_get_flavour (info.abfd))
 	{
-	case bfd_target_aout_flavour:
-	  /* Assume it's an old APCS-style ABI.  */
-	  arm_abi = ARM_ABI_APCS;
-	  break;
-
 	case bfd_target_coff_flavour:
 	  /* Assume it's an old APCS-style ABI.  */
 	  /* XXX WinCE?  */

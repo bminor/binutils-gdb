@@ -262,33 +262,15 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-/* OpenBSD uses uses the traditional NetBSD core file format, even for
-   ports that use ELF.  */
-#define GDB_OSABI_NETBSD_CORE GDB_OSABI_OPENBSD_ELF
-
-static enum gdb_osabi
-ppcobsd_core_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_CORE;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_ppcobsd_tdep (void);
 
 void
 _initialize_ppcobsd_tdep (void)
 {
-  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_powerpc, bfd_target_unknown_flavour,
-                                  ppcobsd_core_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_OPENBSD,
 			  ppcobsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_OPENBSD,
 			  ppcobsd_init_abi);
 
   /* Avoid initializing the register offsets again if they were

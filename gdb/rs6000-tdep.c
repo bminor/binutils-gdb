@@ -6530,8 +6530,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.osabi)
     {
     case GDB_OSABI_LINUX:
-    case GDB_OSABI_NETBSD_AOUT:
-    case GDB_OSABI_NETBSD_ELF:
+    case GDB_OSABI_NETBSD:
     case GDB_OSABI_UNKNOWN:
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
       frame_unwind_append_unwinder (gdbarch, &rs6000_epilogue_frame_unwind);

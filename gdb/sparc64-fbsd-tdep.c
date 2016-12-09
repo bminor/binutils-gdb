@@ -248,5 +248,5 @@ void
 _initialize_sparc64fbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
-			  GDB_OSABI_FREEBSD_ELF, sparc64fbsd_init_abi);
+			  GDB_OSABI_FREEBSD, sparc64fbsd_init_abi);
 }

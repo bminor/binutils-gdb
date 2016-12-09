@@ -873,7 +873,6 @@ ALL_TARGET_OBS = \
 	tilegx-tdep.o \
 	v850-tdep.o \
 	vax-nbsd-tdep.o \
-	vax-obsd-tdep.o \
 	vax-tdep.o \
 	windows-tdep.o \
 	xcoffread.o \

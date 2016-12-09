@@ -129,5 +129,5 @@ _initialize_amd64nbsd_tdep (void)
   gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_NETBSD_ELF, amd64nbsd_init_abi);
+			  GDB_OSABI_NETBSD, amd64nbsd_init_abi);
 }

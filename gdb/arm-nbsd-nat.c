@@ -409,25 +409,6 @@ armnbsd_store_registers (struct target_ops *ops,
     }
 }
 
-struct md_core
-{
-  struct reg intreg;
-  struct fpreg freg;
-};
-
-static void
-fetch_core_registers (struct regcache *regcache,
-		      char *core_reg_sect, unsigned core_reg_size,
-		      int which, CORE_ADDR ignore)
-{
-  struct md_core *core_reg = (struct md_core *) core_reg_sect;
-  int regno;
-  CORE_ADDR r_pc;
-
-  arm_supply_gregset (regcache, &core_reg->intreg);
-  arm_supply_fparegset (regcache, &core_reg->freg);
-}
-
 static void
 fetch_elfcore_registers (struct regcache *regcache,
 			 char *core_reg_sect, unsigned core_reg_size,
@@ -468,15 +449,6 @@ fetch_elfcore_registers (struct regcache *regcache,
     }
 }
 
-static struct core_fns arm_netbsd_core_fns =
-{
-  bfd_target_unknown_flavour,		/* core_flovour.  */
-  default_check_format,			/* check_format.  */
-  default_core_sniffer,			/* core_sniffer.  */
-  fetch_core_registers,			/* core_read_registers.  */
-  NULL
-};
-
 static struct core_fns arm_netbsd_elfcore_fns =
 {
   bfd_target_elf_flavour,		/* core_flovour.  */
@@ -496,6 +468,5 @@ _initialize_arm_netbsd_nat (void)
   t->to_store_registers = armnbsd_store_registers;
   add_target (t);
 
-  deprecated_add_core_fns (&arm_netbsd_core_fns);
   deprecated_add_core_fns (&arm_netbsd_elfcore_fns);
 }

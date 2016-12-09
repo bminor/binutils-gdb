@@ -1,3 +1,114 @@
+2016-12-09  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove vax-obsd-tdep.o.
+	* alpha-fbsd-tdep.c (_initialize_alphafbsd_tdep): Adjust.
+	* alpha-nbsd-tdep.c: Move comment to _initialize_alphanbsd_tdep.
+	(alphanbsd_core_osabi_sniffer): Delete.
+	(_initialize_alphanbsd_tdep): No longer handle a.out.
+	* alpha-obsd-tdep.c (_initialize_alphaobsd_tdep): Adjust.
+	* amd64-fbsd-tdep.c (_initialize_amd64fbsd_tdep): Adjust.
+	* amd64-nbsd-tdep.c (_initialize_amd64nbsd_tdep): Adjust.
+	* amd64-obsd-tdep.c (amd64obsd_supply_regset)
+	(amd64obsd_combined_regset)
+	(amd64obsd_iterate_over_regset_sections, amd64obsd_core_init_abi):
+	Delete.
+	(_initialize_amd64obsd_tdep): Don't handle a.out.
+	* arm-nbsd-nat.c (struct md_core, fetch_core_registers)
+	(arm_netbsd_core_fns): Delete.
+	(_initialize_arm_netbsd_nat): Don't register arm_netbsd_core_fns.
+	* arm-nbsd-tdep.c (arm_netbsd_aout_init_abi)
+	(arm_netbsd_aout_osabi_sniffer): Delete.
+	(_initialize_arm_netbsd_tdep): Don't handle a.out.
+	* arm-obsd-tdep.c (armobsd_core_osabi_sniffer): Delete.
+	(_initialize_armobsd_tdep): Don't handle a.out.
+	* arm-tdep.c (arm_gdbarch_init): Remove bfd_target_aout_flavour
+	case.
+	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): Remove
+	SunOS a.out handling.
+	* configure.tgt (vax-*-netbsd* | vax-*-knetbsd*-gnu): Remove
+	vax-obsd-tdep.o from gdb_target_objs.
+	(vax-*-openbsd*): Likewise.
+	(*-*-freebsd*): Adjust default gdb_osabi.
+	(*-*-openbsd*): Likewise.
+	* dbxread.c (block_address_function_relative): Delete.
+	(dbx_symfile_read): Remove reference to
+	block_address_function_relative.
+	(dbx_symfile_read): Don't call read_dbx_dynamic_symtab.
+	(read_dbx_dynamic_symtab): Delete.
+	(process_one_symbol): Remove references to
+	block_address_function_relative.
+	* defs.h (GDB_OSABI_FREEBSD_AOUT, GDB_OSABI_NETBSD_AOUT): Remove.
+	(GDB_OSABI_FREEBSD_ELF): Rename to ...
+	(GDB_OSABI_FREEBSD): ... this.
+	(GDB_OSABI_NETBSD_ELF): Rename to ...
+	(GDB_OSABI_NETBSD): ... this.
+	(GDB_OSABI_OPENBSD_ELF): Rename to ...
+	(GDB_OSABI_OPENBSD): ... this.
+	(GDB_OSABI_HPUX_ELF, GDB_OSABI_HPUX_SOM): Remove.
+	* fbsd-tdep.c: Adjust comment.
+	* hppa-nbsd-tdep.c (_initialize_hppanbsd_tdep): Adjust.
+	* hppa-obsd-tdep.c (GDB_OSABI_NETBSD_CORE): Delete.
+	(hppaobsd_core_osabi_sniffer): Delete.
+	(_initialize_hppabsd_tdep): Don't handle a.out.
+	* hppa-tdep.c (hppa_stub_frame_unwind_cache): Don't handle
+	GDB_OSABI_HPUX_SOM.
+	(hppa_gdbarch_init): Likewise.
+	* i386-bsd-tdep.c (i386bsd_aout_osabi_sniffer)
+	(i386bsd_core_osabi_sniffer, _initialize_i386bsd_tdep): Delete.
+	* i386-fbsd-tdep.c (i386fbsdaout_init_abi): Delete.  Merge bits
+	with ...
+	(i386fbsd_init_abi): ... this.
+	(_initialize_i386fbsd_tdep): Don't handle a.out.
+	* i386-nbsd-tdep.c (_initialize_i386nbsd_tdep): Adjust.
+	* i386-obsd-tdep.c (i386obsd_aout_supply_regset)
+	(i386obsd_aout_gregset)
+	(i386obsd_aout_iterate_over_regset_sections): Delete.
+	(i386obsd_init_abi): Merge with i386obsd_elf_init_abi.
+	(i386obsd_aout_init_abi): Delete.
+	(_initialize_i386obsd_tdep): Don't handle a.out.
+	* m68k-bsd-tdep.c (m68kobsd_sigtramp_cache_init)
+	(m68kobsd_sigtramp): Delete.
+	(m68kbsd_init_abi): Merge with ...
+	(m68kbsd_elf_init_abi): ... this, and delete it.
+	(m68kbsd_aout_init_abi): Delete.
+	(m68kbsd_aout_osabi_sniffer, m68kbsd_core_osabi_sniffer): Delete.
+	(_initialize_m68kbsd_tdep): Don't handle a.out.
+	* mips-nbsd-tdep.c (_initialize_mipsnbsd_tdep): Adjust.
+	* mips64-obsd-tdep.c (_initialize_mips64obsd_tdep): Adjust.
+	* osabi.c (gdb_osabi_names): Remove "a.out" entries.  Drop "ELF"
+	suffixes.  Remove "HP-UX" entries.
+	(generic_elf_osabi_sniff_abi_tag_sections): Adjust.
+	(generic_elf_osabi_sniffer): No longer handle GDB_OSABI_HPUX_ELF.
+	Adjust.
+	(_initialize_ppcfbsd_tdep): Adjust.
+	* ppc-nbsd-tdep.c (_initialize_ppcnbsd_tdep): Adjust.
+	* ppc-obsd-tdep.c (GDB_OSABI_NETBSD_CORE)
+	(ppcobsd_core_osabi_sniffer): Delete.
+	(_initialize_ppcobsd_tdep): Don't handle a.out.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Adjust.
+	* sh-nbsd-tdep.c (GDB_OSABI_NETBSD_CORE)
+	(shnbsd_core_osabi_sniffer): Delete.
+	(_initialize_shnbsd_tdep): Don't handle a.out.
+	* solib.c (clear_solib): Don't handle SunOS/a.out.
+	* sparc-nbsd-tdep.c (sparc32nbsd_init_abi): Make extern.
+	(sparc32nbsd_aout_init_abi): Delete.
+	(sparc32nbsd_elf_init_abi): Merged into sparc32nbsd_init_abi.
+	(sparcnbsd_aout_osabi_sniffer): Delete.
+	(GDB_OSABI_NETBSD_CORE, sparcnbsd_core_osabi_sniffer): Delete.
+	(_initialize_sparcnbsd_tdep): No longer handle a.out.
+	* sparc-obsd-tdep.c (sparc32obsd_init_abi)
+	(_initialize_sparc32obsd_tdep): Adjust.
+	* sparc-tdep.h (sparc32nbsd_elf_init_abi): Rename to ...
+	(sparc32nbsd_init_abi): ... this.
+	* sparc64-fbsd-tdep.c (_initialize_sparc64fbsd_tdep): Adjust.
+	* sparc64-nbsd-tdep.c (_initialize_sparc64nbsd_tdep): Adjust.
+	* sparc64-obsd-tdep.c (_initialize_sparc64obsd_tdep): Adjust.
+	* stabsread.c: Update comment.
+	* symmisc.c (print_objfile_statistics): Don't mention "a.out" in
+	output.
+	* vax-nbsd-tdep.c (_initialize_vaxnbsd_tdep): Adjust.
+	* vax-obsd-tdep.c: Delete file.
+
 2016-12-09  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/20954

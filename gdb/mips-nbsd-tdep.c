@@ -380,6 +380,6 @@ extern initialize_file_ftype _initialize_mipsnbsd_tdep;
 void
 _initialize_mipsnbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_NETBSD,
 			  mipsnbsd_init_abi);
 }

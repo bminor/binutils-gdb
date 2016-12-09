@@ -18,10 +18,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Support routines for reading and decoding debugging information in
-   the "stabs" format.  This format is used with many systems that use
-   the a.out object file format, as well as some systems that use
-   COFF or ELF where the stabs data is placed in a special section.
-   Avoid placing any object file format specific code in this file.  */
+   the "stabs" format.  This format is used by some systems that use
+   COFF or ELF where the stabs data is placed in a special section (as
+   well as with many old systems that used the a.out object file
+   format).  Avoid placing any object file format specific code in
+   this file.  */
 
 #include "defs.h"
 #include "bfd.h"
