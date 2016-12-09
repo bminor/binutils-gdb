@@ -1,5 +1,34 @@
 2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/buffer-size.exp: Add unsupported/untested message if
+	the test is skipped.
+	* gdb.btrace/data.exp: Likewise.
+	* gdb.btrace/delta.exp: Likewise.
+	* gdb.btrace/dlopen.exp: Likewise.
+	* gdb.btrace/enable-running.exp: Likewise.
+	* gdb.btrace/enable.exp: Likewise.
+	* gdb.btrace/exception.exp: Likewise.
+	* gdb.btrace/function_call_history.exp: Likewise.
+	* gdb.btrace/gcore.exp: Likewise.
+	* gdb.btrace/instruction_history.exp: Likewise.
+	* gdb.btrace/multi-thread-step.exp: Likewise.
+	* gdb.btrace/nohist.exp: Likewise.
+	* gdb.btrace/non-stop.exp: Likewise.
+	* gdb.btrace/reconnect.exp: Likewise.
+	* gdb.btrace/record_goto-step.exp: Likewise.
+	* gdb.btrace/record_goto.exp: Likewise.
+	* gdb.btrace/rn-dl-bind.exp: Likewise.
+	* gdb.btrace/segv.exp: Likewise.
+	* gdb.btrace/step.exp: Likewise.
+	* gdb.btrace/stepi.exp: Likewise.
+	* gdb.btrace/tailcall-only.exp: Likewise.
+	* gdb.btrace/tailcall.exp: Likewise.
+	* gdb.btrace/tsx.exp: Likewise.
+	* gdb.btrace/unknown_functions.exp: Likewise.
+	* gdb.btrace/vdso.exp: Likewise.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/enable-running.c: New.
 	* gdb.btrace/enable-running.exp: New.
 

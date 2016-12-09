@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# check for btrace support
-if { [skip_btrace_tests] } { return -1 }
+if { [skip_btrace_tests] } {
+    unsupported "target does not support record-btrace"
+    return -1
+}
 
-
-# start inferior
 standard_testfile
 if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" "$binfile" executable {debug}] != "" } {
+    untested "failed to prepare"
     return -1
 }
 clean_restart $testfile
@@ -29,6 +30,7 @@ clean_restart $testfile
 gdb_test_no_output "set non-stop on"
 
 if ![runto_main] {
+    untested "failed to run to main"
     return -1
 }
 
