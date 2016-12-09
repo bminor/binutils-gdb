@@ -1,3 +1,9 @@
+2016-12-09  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16-extend.d: New test.
+	* testsuite/gas/mips/mips16-extend.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2016-12-08  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-arc.c (arc_show_cpu_list): Rename `spaces' local

@@ -1,5 +1,10 @@
 2016-12-09  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips16-opc.c (decode_mips16_operand) <'e'>: Use HINT rather
+	than UINT.
+
+2016-12-09  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (print_insn_mips16): Use a tab rather than a space
 	to separate `extend' and its uninterpreted argument output.
 	Separate hexadecimal halves of undecoded extended instructions

@@ -61,7 +61,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     case 'Z': MAPPED_REG (3, 0, GP, reg_m16_map);
 
     case 'a': JUMP (26, 0, 2);
-    case 'e': UINT (11, 0);
+    case 'e': HINT (11, 0);
     case 'i': JALX (26, 0, 2);
     case 'l': SPECIAL (6, 5, ENTRY_EXIT_LIST);
     case 'm': SPECIAL (7, 0, SAVE_RESTORE_LIST);
