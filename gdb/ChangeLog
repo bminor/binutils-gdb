@@ -1,3 +1,10 @@
+2016-12-09  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/20953
+	* rl78-tdep.c (rl78_psw_type): New function.
+	(rl78_register_type): Call rl78_psw_type.
+	(rl78_gdbarch_init): Move code to rl78_psw_type.
+
 2016-10-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR build/20712
