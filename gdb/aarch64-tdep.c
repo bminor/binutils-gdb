@@ -213,7 +213,7 @@ class instruction_reader : public abstract_instruction_reader
  public:
   ULONGEST read (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
   {
-    return read_memory_unsigned_integer (memaddr, len, byte_order);
+    return read_code_unsigned_integer (memaddr, len, byte_order);
   }
 };
 

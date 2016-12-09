@@ -1,5 +1,11 @@
 2016-12-09  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (instruction_reader::read): Call
+	read_code_unsigned_integer instead of
+	read_memory_unsigned_integer.
+
+2016-12-09  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c (skip_prologue_function): Call
 	read_code_unsigned_integer instead of
 	read_memory_unsigned_integer.
