@@ -1,5 +1,21 @@
 2016-12-09  Yao Qi  <yao.qi@linaro.org>
 
+	PR tdep/20954
+	* rx-tdep.c (rx_psw_type): New function.
+	(rx_fpsw_type): New function.
+	(rx_register_type): Call rx_psw_type and rx_fpsw_type.
+	(rx_gdbarch_init): Move code to rx_psw_type and
+	rx_fpsw_type.
+
+2016-12-09  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/20953
+	* rl78-tdep.c (rl78_psw_type): New function.
+	(rl78_register_type): Call rl78_psw_type.
+	(rl78_gdbarch_init): Move code to rl78_psw_type.
+
+2016-12-09  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (instruction_reader::read): Call
 	read_code_unsigned_integer instead of
 	read_memory_unsigned_integer.
