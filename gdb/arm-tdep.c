@@ -570,9 +570,9 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 	 implementation (this is hand-written ARM assembler in glibc).  */
 
       if (!is_thumb
-	  && read_memory_unsigned_integer (pc, 4, byte_order_for_code)
+	  && read_code_unsigned_integer (pc, 4, byte_order_for_code)
 	     == 0xe3e00a0f /* mov r0, #0xffff0fff */
-	  && read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code)
+	  && read_code_unsigned_integer (pc + 4, 4, byte_order_for_code)
 	     == 0xe240f01f) /* sub pc, r0, #31 */
 	return 1;
     }
@@ -659,7 +659,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
     {
       unsigned short insn;
 
-      insn = read_memory_unsigned_integer (start, 2, byte_order_for_code);
+      insn = read_code_unsigned_integer (start, 2, byte_order_for_code);
 
       if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
 	{
@@ -790,8 +790,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  unsigned short inst2;
 
-	  inst2 = read_memory_unsigned_integer (start + 2, 2,
-						byte_order_for_code);
+	  inst2 = read_code_unsigned_integer (start + 2, 2,
+					      byte_order_for_code);
 
 	  if ((insn & 0xf800) == 0xf000 && (inst2 & 0xe800) == 0xe800)
 	    {
@@ -1134,7 +1134,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
   if (is_thumb)
     {
       unsigned short insn1
-	= read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+	= read_code_unsigned_integer (pc, 2, byte_order_for_code);
 
       if ((insn1 & 0xf800) == 0x4800) /* ldr Rd, #immed */
 	{
@@ -1147,14 +1147,14 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
       else if ((insn1 & 0xfbf0) == 0xf240) /* movw Rd, #const */
 	{
 	  unsigned short insn2
-	    = read_memory_unsigned_integer (pc + 2, 2, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 2, 2, byte_order_for_code);
 
 	  low = EXTRACT_MOVW_MOVT_IMM_T (insn1, insn2);
 
 	  insn1
-	    = read_memory_unsigned_integer (pc + 4, 2, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 4, 2, byte_order_for_code);
 	  insn2
-	    = read_memory_unsigned_integer (pc + 6, 2, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 6, 2, byte_order_for_code);
 
 	  /* movt Rd, #const */
 	  if ((insn1 & 0xfbc0) == 0xf2c0)
@@ -1169,7 +1169,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
   else
     {
       unsigned int insn
-	= read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+	= read_code_unsigned_integer (pc, 4, byte_order_for_code);
 
       if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, [PC, #immed] */
 	{
@@ -1185,7 +1185,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
 	  low = EXTRACT_MOVW_MOVT_IMM_A (insn);
 
 	  insn
-	    = read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 4, 4, byte_order_for_code);
 
 	  if ((insn & 0x0ff00000) == 0x03400000) /* movt Rd, #const */
 	    {
@@ -1257,7 +1257,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
     {
       unsigned int destreg;
       unsigned short insn
-	= read_memory_unsigned_integer (pc + offset, 2, byte_order_for_code);
+	= read_code_unsigned_integer (pc + offset, 2, byte_order_for_code);
 
       /* Step 2: ldr Rd, [Rn, #immed], encoding T1.  */
       if ((insn & 0xf800) != 0x6800)
@@ -1266,8 +1266,8 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 	return pc;
       destreg = bits (insn, 0, 2);
 
-      insn = read_memory_unsigned_integer (pc + offset + 2, 2,
-					   byte_order_for_code);
+      insn = read_code_unsigned_integer (pc + offset + 2, 2,
+					 byte_order_for_code);
       /* Step 3: str Rd, [Rn, #immed], encoding T1.  */
       if ((insn & 0xf800) != 0x6000)
 	return pc;
@@ -1278,7 +1278,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
     {
       unsigned int destreg;
       unsigned int insn
-	= read_memory_unsigned_integer (pc + offset, 4, byte_order_for_code);
+	= read_code_unsigned_integer (pc + offset, 4, byte_order_for_code);
 
       /* Step 2: ldr Rd, [Rn, #immed], encoding A1.  */
       if ((insn & 0x0e500000) != 0x04100000)
@@ -1287,7 +1287,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 	return pc;
       destreg = bits (insn, 12, 15);
       /* Step 3: str Rd, [Rn, #immed], encoding A1.  */
-      insn = read_memory_unsigned_integer (pc + offset + 4,
+      insn = read_code_unsigned_integer (pc + offset + 4,
 					   4, byte_order_for_code);
       if ((insn & 0x0e500000) != 0x04000000)
 	return pc;
@@ -1511,7 +1511,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
        current_pc += 4)
     {
       unsigned int insn
-	= read_memory_unsigned_integer (current_pc, 4, byte_order_for_code);
+	= read_code_unsigned_integer (current_pc, 4, byte_order_for_code);
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
@@ -4250,7 +4250,7 @@ extend_buffer_earlier (gdb_byte *buf, CORE_ADDR endaddr,
   new_buf = (gdb_byte *) xmalloc (new_len);
   memcpy (new_buf + bytes_to_read, buf, old_len);
   xfree (buf);
-  if (target_read_memory (endaddr - new_len, new_buf, bytes_to_read) != 0)
+  if (target_read_code (endaddr - new_len, new_buf, bytes_to_read) != 0)
     {
       xfree (new_buf);
       return NULL;
@@ -4314,7 +4314,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
     return bpaddr;
 
   buf = (gdb_byte *) xmalloc (buf_len);
-  if (target_read_memory (bpaddr - buf_len, buf, buf_len) != 0)
+  if (target_read_code (bpaddr - buf_len, buf, buf_len) != 0)
     return bpaddr;
   any = 0;
   for (i = 0; i < buf_len; i += 2)
