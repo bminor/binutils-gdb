@@ -1,3 +1,10 @@
+2016-12-21: Yury Norov <ynorov@caviumnetworks.com>
+            Andreas Schwab <schwab@suse.de>
+
+	* cpu-aarch64.c: Fix word and address size declaration in
+	ilp32 mode in bfd_arch_info_type bfd_aarch64_arch_ilp32
+	structure.
+
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Use
