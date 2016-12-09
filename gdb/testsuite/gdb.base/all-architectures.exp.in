@@ -209,13 +209,6 @@ with_test_prefix "tests" {
 		continue
 	    }
 
-	    if {$arch == "rx"} {
-		if {$want_tests_messages} {
-		    kfail "set architecture rx" "gdb/20954"
-		}
-		continue
-	    }
-
 	    if {$arch == "auto"} {
 		continue
 	    }
