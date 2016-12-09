@@ -37,7 +37,14 @@ if ![info exists SKIP_PROLOGUE_COUNT] {
 PerfTest::assemble {
     global srcdir subdir srcfile binfile
 
-    if { [gdb_compile "$srcdir/$subdir/$srcfile" ${binfile} executable {debug}] != "" } {
+    if [info exists COMPILE] {
+	set opts {debug}
+    } else {
+	set opts {nodebug}
+    }
+
+    if { [gdb_compile "$srcdir/$subdir/$srcfile" ${binfile} executable $opts] != "" } {
+	untested "failed to compile"
 	return -1
     }
 
