@@ -1,5 +1,13 @@
 2016-12-12  Yao Qi  <yao.qi@linaro.org>
 
+	* rx-dis.c: Include <setjmp.h>
+	(struct private): New.
+	(rx_get_byte): Check return value of read_memory_func, and
+	call memory_error_func and OPCODES_SIGLONGJMP on error.
+	(print_insn_rx): Call OPCODES_SIGSETJMP.
+
+2016-12-12  Yao Qi  <yao.qi@linaro.org>
+
 	* rl78-dis.c: Include <setjmp.h>.
 	(struct private): New.
 	(rl78_get_byte): Check return value of read_memory_func, and
