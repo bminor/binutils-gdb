@@ -2009,6 +2009,33 @@ script_test_14: $(srcdir)/script_test_14.t script_test_14.o gcctestdir/ld
 script_test_14.stdout: script_test_14
 	$(TEST_OBJDUMP) -s script_test_14 > $@
 
+# Test BSS section placement at end of segment.
+check_SCRIPTS += script_test_15a.sh
+check_DATA += script_test_15a.stdout
+MOSTLYCLEANFILES += script_test_15a
+script_test_15a: $(srcdir)/script_test_15a.t script_test_15.o gcctestdir/ld
+	gcctestdir/ld -o $@ script_test_15.o -T $(srcdir)/script_test_15a.t
+script_test_15a.stdout: script_test_15a
+	$(TEST_READELF) -lSW script_test_15a > $@
+
+# Test BSS section placement in middle of segment.
+check_SCRIPTS += script_test_15b.sh
+check_DATA += script_test_15b.stdout
+MOSTLYCLEANFILES += script_test_15b
+script_test_15b: $(srcdir)/script_test_15b.t script_test_15.o gcctestdir/ld
+	gcctestdir/ld -o $@ script_test_15.o -T $(srcdir)/script_test_15b.t
+script_test_15b.stdout: script_test_15b
+	$(TEST_READELF) -lSW script_test_15b > $@
+
+# Test orphan BSS section placement.
+check_SCRIPTS += script_test_15c.sh
+check_DATA += script_test_15c.stdout
+MOSTLYCLEANFILES += script_test_15c
+script_test_15c: $(srcdir)/script_test_15c.t script_test_15.o gcctestdir/ld
+	gcctestdir/ld -o $@ script_test_15.o -T $(srcdir)/script_test_15c.t
+script_test_15c.stdout: script_test_15c
+	$(TEST_READELF) -lSW script_test_15c > $@
+
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 

@@ -1,6 +1,37 @@
 2016-12-11  Cary Coutant  <ccoutant@gmail.com>
 
-	* Makefile.in: Regenerate.
+	PR gold/16711
+	* output.cc (Output_section::set_final_data_size): Calculate data size
+	based on relative offset rather than file offset.
+	(Output_segment::set_section_addresses): Track file offset separately
+	from address offset.
+	(Output_segment::set_section_list_addresses): Add pfoff parameter.
+	Track file offset separately.  Don't move file offset for BSS
+	sections.
+	* output.h (Output_segment::set_section_list_addresses): Add pfoff
+	parameter.
+	* script-sections.cc (Orphan_section_placement): Add PLACE_LAST_ALLOC.
+	(Orphan_section_placement::Orphan_section_placement): Initialize it.
+	(Orphan_section_placement::output_section_init): Track last allocated
+	section.
+	(Orphan_section_placement::find_place): Place BSS after last allocated
+	section.
+	(Output_section_element_input::set_section_addresses): Always override
+	input section alignment when SUBALIGN is specified.
+	(Output_section_definition::set_section_addresses): Override alignment
+	of output section when SUBALIGN is specified.
+
+	* testsuite/Makefile.am (script_test_15a, script_test_15b)
+	(script_test_15c): New test cases.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_2.cc: Adjust expected layout.
+	* testsuite/script_test_15.c: New source file.
+	* testsuite/script_test_15a.sh: New shell script.
+	* testsuite/script_test_15a.t: New linker script.
+	* testsuite/script_test_15b.sh: New shell script.
+	* testsuite/script_test_15b.t: New linker script.
+	* testsuite/script_test_15c.sh: New shell script.
+	* testsuite/script_test_15c.t: New linker script.
 
 2016-12-08  Alan Modra  <amodra@gmail.com>
 

@@ -329,6 +329,7 @@ class Orphan_section_placement
     PLACE_TLS,
     PLACE_TLS_BSS,
     PLACE_BSS,
+    PLACE_LAST_ALLOC,
     PLACE_REL,
     PLACE_INTERP,
     PLACE_NONALLOC,
@@ -368,6 +369,7 @@ Orphan_section_placement::Orphan_section_placement()
   this->initialize_place(PLACE_TLS, NULL);
   this->initialize_place(PLACE_TLS_BSS, NULL);
   this->initialize_place(PLACE_BSS, ".bss");
+  this->initialize_place(PLACE_LAST_ALLOC, NULL);
   this->initialize_place(PLACE_REL, NULL);
   this->initialize_place(PLACE_INTERP, ".interp");
   this->initialize_place(PLACE_NONALLOC, NULL);
@@ -395,6 +397,15 @@ Orphan_section_placement::output_section_init(const std::string& name,
 {
   bool first_init = this->first_init_;
   this->first_init_ = false;
+
+  // Remember the last allocated section. Any orphan bss sections
+  // will be placed after it.
+  if (os != NULL
+      && (os->flags() & elfcpp::SHF_ALLOC) != 0)
+    {
+      this->places_[PLACE_LAST_ALLOC].location = location;
+      this->places_[PLACE_LAST_ALLOC].have_location = true;
+    }
 
   for (int i = 0; i < PLACE_MAX; ++i)
     {
@@ -509,7 +520,7 @@ Orphan_section_placement::find_place(Output_section* os,
 	  follow = PLACE_TEXT;
 	  break;
 	case PLACE_BSS:
-	  follow = PLACE_DATA;
+	  follow = PLACE_LAST_ALLOC;
 	  break;
 	case PLACE_REL:
 	  follow = PLACE_TEXT;
@@ -1751,16 +1762,16 @@ Output_section_element_input::set_section_addresses(
 	   p != matching_sections[i].end();
 	   ++p)
 	{
-	  // Override the original address alignment if SUBALIGN is specified
-	  // and is greater than the original alignment.  We need to make a
-	  // copy of the input section to modify the alignment.
+	  // Override the original address alignment if SUBALIGN is specified.
+	  // We need to make a copy of the input section to modify the
+	  // alignment.
 	  Output_section::Input_section sis(p->input_section());
 
 	  uint64_t this_subalign = sis.addralign();
 	  if (!sis.is_input_section())
 	    sis.output_section_data()->finalize_data_size();
 	  uint64_t data_size = sis.data_size();
-	  if (this_subalign < subalign)
+	  if (subalign > 0)
 	    {
 	      this_subalign = subalign;
 	      sis.set_addralign(subalign);
@@ -2463,6 +2474,35 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 	this->output_section_->set_addralign(align);
     }
 
+  uint64_t subalign;
+  if (this->subalign_ == NULL)
+    subalign = 0;
+  else
+    {
+      Output_section* subalign_section;
+      subalign = this->subalign_->eval_with_dot(symtab, layout, true,
+						*dot_value, NULL,
+						&subalign_section, NULL,
+						false);
+      if (subalign_section != NULL)
+	gold_warning(_("subalign of section %s is not absolute"),
+		     this->name_.c_str());
+
+      // Reserve a value of 0 to mean there is no SUBALIGN property.
+      if (subalign == 0)
+	subalign = 1;
+
+      // The external alignment of the output section must be at least
+      // as large as that of the input sections.  If there is no
+      // explicit ALIGN property, we set the output section alignment
+      // to match the input section alignment.
+      if (align < subalign || this->align_ == NULL)
+	{
+	  align = subalign;
+	  this->output_section_->set_addralign(align);
+	}
+    }
+
   address = align_address(address, align);
 
   uint64_t start_address = address;
@@ -2546,21 +2586,6 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     }
 
   this->evaluated_load_address_ = laddr;
-
-  uint64_t subalign;
-  if (this->subalign_ == NULL)
-    subalign = 0;
-  else
-    {
-      Output_section* subalign_section;
-      subalign = this->subalign_->eval_with_dot(symtab, layout, true,
-						*dot_value, NULL,
-						&subalign_section, NULL,
-						false);
-      if (subalign_section != NULL)
-	gold_warning(_("subalign of section %s is not absolute"),
-		     this->name_.c_str());
-    }
 
   std::string fill;
   if (this->fill_ != NULL)

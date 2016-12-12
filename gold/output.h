@@ -4851,8 +4851,8 @@ class Output_segment
   // Set the section addresses in an Output_data_list.
   uint64_t
   set_section_list_addresses(Layout*, bool reset, Output_data_list*,
-			     uint64_t addr, off_t* poff, unsigned int* pshndx,
-			     bool* in_tls);
+			     uint64_t addr, off_t* poff, off_t* fpoff,
+			     unsigned int* pshndx, bool* in_tls);
 
   // Return the number of Output_sections in an Output_data_list.
   unsigned int
