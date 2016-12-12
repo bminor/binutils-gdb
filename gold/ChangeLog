@@ -1,5 +1,12 @@
 2016-12-13  Alan Modra  <amodra@gmail.com>
 
+	PR gold/16711
+	* testsuite/script_test_15a.sh: Allows larger p_filesz.
+	* testsuite/script_test_15b.sh: Likewise.
+	* testsuite/script_test_15c.sh: Likewise.
+
+2016-12-13  Alan Modra  <amodra@gmail.com>
+
 	PR gold/20717
 	* testsuite/pr20717.t: Add .got output section containing .toc.
 

@@ -38,5 +38,5 @@ check()
     fi
 }
 
-check script_test_15b.stdout "LOAD.*0x0010.. 0x0010.. RW"
+check script_test_15b.stdout "LOAD.*0x001... 0x001... RW"
 check script_test_15b.stdout "01.*\\.bss .*\\.data .*\\.data.extra"
