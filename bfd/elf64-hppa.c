@@ -2688,38 +2688,29 @@ elf64_hppa_allow_non_load_phdr (bfd *abfd ATTRIBUTE_UNUSED,
    existence of a .interp section.  */
 
 static bfd_boolean
-elf64_hppa_modify_segment_map (bfd *abfd,
-			       struct bfd_link_info *info ATTRIBUTE_UNUSED)
+elf64_hppa_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf_segment_map *m;
-  asection *s;
 
-  s = bfd_get_section_by_name (abfd, ".interp");
-  if (! s)
+  m = elf_seg_map (abfd);
+  if (info != NULL && !info->user_phdrs && m != NULL && m->p_type != PT_PHDR)
     {
-      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
-	if (m->p_type == PT_PHDR)
-	  break;
-
+      m = ((struct elf_segment_map *)
+	   bfd_zalloc (abfd, (bfd_size_type) sizeof *m));
       if (m == NULL)
-	{
-	  m = ((struct elf_segment_map *)
-	       bfd_zalloc (abfd, (bfd_size_type) sizeof *m));
-	  if (m == NULL)
-	    return FALSE;
+	return FALSE;
 
-	  m->p_type = PT_PHDR;
-	  m->p_flags = PF_R | PF_X;
-	  m->p_flags_valid = 1;
-	  m->p_paddr_valid = 1;
-	  m->includes_phdrs = 1;
+      m->p_type = PT_PHDR;
+      m->p_flags = PF_R | PF_X;
+      m->p_flags_valid = 1;
+      m->p_paddr_valid = 1;
+      m->includes_phdrs = 1;
 
-	  m->next = elf_seg_map (abfd);
-	  elf_seg_map (abfd) = m;
-	}
+      m->next = elf_seg_map (abfd);
+      elf_seg_map (abfd) = m;
     }
 
-  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
+  for (m = elf_seg_map (abfd) ; m != NULL; m = m->next)
     if (m->p_type == PT_LOAD)
       {
 	unsigned int i;

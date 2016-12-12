@@ -1,5 +1,11 @@
 2016-12-13  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/nobits-1.d: Remove xfail for hppa64.
+	* testsuite/ld-elf/note-1.d: Likewise.
+	* testsuite/ld-elf/note-2.d: Likewise.
+
+2016-12-13  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/flags1.d: Run for RX.
 	* testsuite/ld-scripts/phdrs.exp: Likewise.
 	* testsuite/ld-scripts/pr14962.d: Likewise.
