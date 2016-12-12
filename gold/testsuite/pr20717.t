@@ -1,0 +1,4 @@
+SECTIONS
+{
+    .dummy : { KEEP (*(.dummy)) }
+}

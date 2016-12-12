@@ -220,6 +220,16 @@ pr14265: pr14265.o
 pr14265.stdout: pr14265
 	$(TEST_NM) --format=bsd --numeric-sort $< > $@
 
+check_SCRIPTS += pr20717.sh
+check_DATA += pr20717.stdout
+MOSTLYCLEANFILES += pr20717
+pr20717.o: pr20717.c
+	$(COMPILE) -O0 -ffunction-sections -c -o $@ $<
+pr20717: pr20717.o gcctestdir/ld $(srcdir)/pr20717.t
+	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -Wl,-T,$(srcdir)/pr20717.t -o $@ $<
+pr20717.stdout: pr20717
+	$(TEST_NM) $< > $@
+
 check_SCRIPTS += gc_dynamic_list_test.sh
 check_DATA += gc_dynamic_list_test.stdout
 MOSTLYCLEANFILES += gc_dynamic_list_test

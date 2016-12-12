@@ -1,3 +1,12 @@
+2016-12-11  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/20717
+	* testsuite/Makefile.am (pr20717): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/pr20717.c: New test source file.
+	* testsuite/pr20717.sh: New test script.
+	* testsuite/pr20717.t: New test linker script.
+
 2016-12-11  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/16711
@@ -80,6 +89,7 @@
 	* testsuite/file_in_many_sections_test.sh: New script.
 
 2016-12-01  Cary Coutant  <ccoutant@gmail.com>
+	    Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	PR gold/20717
 	* script-sections.cc (Script_sections): Set *keep to false when
