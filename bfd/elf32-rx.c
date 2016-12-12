@@ -3200,9 +3200,11 @@ rx_elf_object_p (bfd * abfd)
   int i;
   unsigned int u;
   Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
-  int nphdrs = elf_elfheader (abfd)->e_phnum;
+  Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
+  int nphdrs = ehdr->e_phnum;
   sec_ptr bsec;
   static int saw_be = FALSE;
+  bfd_vma end_phdroff;
 
   /* We never want to automatically choose the non-swapping big-endian
      target.  The user can only get that explicitly, such as with -I
@@ -3227,6 +3229,17 @@ rx_elf_object_p (bfd * abfd)
      corresponds (based on matching file offsets) and use its VMA
      information to reconstruct the p_vaddr field we clobbered when we
      wrote it out.  */
+  /* If PT_LOAD headers include the ELF file header or program headers
+     then the PT_LOAD header does not start with some section contents.
+     Making adjustments based on the difference between sh_offset and
+     p_offset is nonsense in such cases.  Exclude them.  Note that
+     since standard linker scripts for RX do not use SIZEOF_HEADERS,
+     the linker won't normally create PT_LOAD segments covering the
+     headers so this is mainly for passing the ld testsuite.
+     FIXME.  Why are we looking at non-PT_LOAD headers here?  */
+  end_phdroff = ehdr->e_ehsize;
+  if (ehdr->e_phoff != 0)
+    end_phdroff = ehdr->e_phoff + nphdrs * ehdr->e_phentsize;
   for (i=0; i<nphdrs; i++)
     {
       for (u=0; u<elf_tdata(abfd)->num_elf_sections; u++)
@@ -3234,6 +3247,7 @@ rx_elf_object_p (bfd * abfd)
 	  Elf_Internal_Shdr *sec = elf_tdata(abfd)->elf_sect_ptr[u];
 
 	  if (phdr[i].p_filesz
+	      && phdr[i].p_offset >= end_phdroff
 	      && phdr[i].p_offset <= (bfd_vma) sec->sh_offset
 	      && sec->sh_size > 0
 	      && sec->sh_type != SHT_NOBITS

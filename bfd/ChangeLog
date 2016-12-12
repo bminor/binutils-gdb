@@ -1,3 +1,8 @@
+2016-12-13  Alan Modra  <amodra@gmail.com>
+
+	* elf32-rx.c (elf32_rx_modify_program_headers): Don't adjust
+	segments that include the ELF file header or program headers.
+
 2016-12-08  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20932
