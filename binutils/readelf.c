@@ -11731,7 +11731,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_960:
       return reloc_type == 2; /* R_960_32.  */
     case EM_AARCH64:
-      return reloc_type == 258; /* R_AARCH64_ABS32 */
+      return (reloc_type == 258
+	      || reloc_type == 1); /* R_AARCH64_ABS32 || R_AARCH64_P32_ABS32 */
     case EM_ADAPTEVA_EPIPHANY:
       return reloc_type == 3;
     case EM_ALPHA:
