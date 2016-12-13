@@ -1,3 +1,11 @@
+2016-12-13  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20522
+	* layout.cc (Layout::choose_output_section): Add is_reloc parameter.
+	Adjust all callers.  Do not use linker script for is_reloc sections.
+	(Layout::layout_reloc): Pass is_reloc == true.
+	* layout.h (Layout::choose_output_section): Add is_reloc parameter.
+
 2016-12-12  Igor Kudrin  <ikudrin@accesssoftek.com>
 	    Cary Coutant  <ccoutant@gmail.com>
 

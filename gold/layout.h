@@ -1149,7 +1149,7 @@ class Layout
   choose_output_section(const Relobj* relobj, const char* name,
 			elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
 			bool is_input_section, Output_section_order order,
-			bool is_relro);
+			bool is_relro, bool is_reloc);
 
   // Create a new Output_section.
   Output_section*

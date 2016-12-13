@@ -941,7 +941,7 @@ Output_section*
 Layout::choose_output_section(const Relobj* relobj, const char* name,
 			      elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
 			      bool is_input_section, Output_section_order order,
-			      bool is_relro)
+			      bool is_relro, bool is_reloc)
 {
   // We should not see any input sections after we have attached
   // sections to segments.
@@ -949,7 +949,7 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
 
   flags = this->get_output_section_flags(flags);
 
-  if (this->script_options_->saw_sections_clause())
+  if (this->script_options_->saw_sections_clause() && !is_reloc)
     {
       // We are using a SECTIONS clause, so the output section is
       // chosen based only on the name.
@@ -1184,7 +1184,7 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	{
 	  os = this->choose_output_section(object, name, sh_type,
 					   shdr.get_sh_flags(), true,
-					   ORDER_INVALID, false);
+					   ORDER_INVALID, false, false);
 	}
       else
 	{
@@ -1313,7 +1313,7 @@ Layout::layout_reloc(Sized_relobj_file<size, big_endian>* object,
       || (data_section->flags() & elfcpp::SHF_GROUP) == 0)
     os = this->choose_output_section(object, name.c_str(), sh_type,
 				     shdr.get_sh_flags(), false,
-				     ORDER_INVALID, false);
+				     ORDER_INVALID, false, true);
   else
     {
       const char* n = this->namepool_.add(name.c_str(), true, NULL);
@@ -1506,7 +1506,7 @@ Layout::make_eh_frame_section(const Relobj* object)
   Output_section* os = this->choose_output_section(object, ".eh_frame",
 						   elfcpp::SHT_PROGBITS,
 						   elfcpp::SHF_ALLOC, false,
-						   ORDER_EHFRAME, false);
+						   ORDER_EHFRAME, false, false);
   if (os == NULL)
     return NULL;
 
@@ -1523,7 +1523,7 @@ Layout::make_eh_frame_section(const Relobj* object)
 	    this->choose_output_section(NULL, ".eh_frame_hdr",
 					elfcpp::SHT_PROGBITS,
 					elfcpp::SHF_ALLOC, false,
-					ORDER_EHFRAME, false);
+					ORDER_EHFRAME, false, false);
 
 	  if (hdr_os != NULL)
 	    {
@@ -1592,7 +1592,7 @@ Layout::add_to_gdb_index(bool is_type_unit,
       Output_section* os = this->choose_output_section(NULL, ".gdb_index",
 						       elfcpp::SHT_PROGBITS, 0,
 						       false, ORDER_INVALID,
-						       false);
+						       false, false);
       if (os == NULL)
 	return;
 
@@ -1616,7 +1616,8 @@ Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
 				Output_section_order order, bool is_relro)
 {
   Output_section* os = this->choose_output_section(NULL, name, type, flags,
-						   false, order, is_relro);
+						   false, order, is_relro,
+						   false);
   if (os != NULL)
     os->add_output_section_data(posd);
   return os;
@@ -2157,7 +2158,7 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 						       (elfcpp::SHF_ALLOC
 							| elfcpp::SHF_WRITE),
 						       false, ORDER_RELRO,
-						       true);
+						       true, false);
 
   // A linker script may discard .dynamic, so check for NULL.
   if (this->dynamic_section_ != NULL)
@@ -2939,7 +2940,8 @@ Layout::create_note(const char* name, int note_type,
     }
   Output_section* os = this->choose_output_section(NULL, section_name,
 						   elfcpp::SHT_NOTE,
-						   flags, false, order, false);
+						   flags, false, order, false,
+						   false);
   if (os == NULL)
     return NULL;
 
@@ -4297,7 +4299,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 						       elfcpp::SHF_ALLOC,
 						       false,
 						       ORDER_DYNAMIC_LINKER,
-						       false);
+						       false, false);
 
   // Check for NULL as a linker script may discard .dynsym.
   if (dynsym != NULL)
@@ -4334,7 +4336,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	this->choose_output_section(NULL, ".dynsym_shndx",
 				    elfcpp::SHT_SYMTAB_SHNDX,
 				    elfcpp::SHF_ALLOC,
-				    false, ORDER_DYNAMIC_LINKER, false);
+				    false, ORDER_DYNAMIC_LINKER, false, false);
 
       if (dynsym_xindex != NULL)
 	{
@@ -4362,7 +4364,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 						       elfcpp::SHF_ALLOC,
 						       false,
 						       ORDER_DYNAMIC_LINKER,
-						       false);
+						       false, false);
   *pdynstr = dynstr;
   if (dynstr != NULL)
     {
@@ -4396,7 +4398,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
       Output_section* hashsec =
 	this->choose_output_section(NULL, ".gnu.hash", elfcpp::SHT_GNU_HASH,
 				    elfcpp::SHF_ALLOC, false,
-				    ORDER_DYNAMIC_LINKER, false);
+				    ORDER_DYNAMIC_LINKER, false, false);
 
       Output_section_data* hashdata = new Output_data_const_buffer(phash,
 								   hashlen,
@@ -4432,7 +4434,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
       Output_section* hashsec =
 	this->choose_output_section(NULL, ".hash", elfcpp::SHT_HASH,
 				    elfcpp::SHF_ALLOC, false,
-				    ORDER_DYNAMIC_LINKER, false);
+				    ORDER_DYNAMIC_LINKER, false, false);
 
       Output_section_data* hashdata = new Output_data_const_buffer(phash,
 								   hashlen,
@@ -4539,7 +4541,7 @@ Layout::sized_create_version_sections(
 						     elfcpp::SHF_ALLOC,
 						     false,
 						     ORDER_DYNAMIC_LINKER,
-						     false);
+						     false, false);
 
   // Check for NULL since a linker script may discard this section.
   if (vsec != NULL)
@@ -4570,7 +4572,8 @@ Layout::sized_create_version_sections(
       vdsec = this->choose_output_section(NULL, ".gnu.version_d",
 					  elfcpp::SHT_GNU_verdef,
 					  elfcpp::SHF_ALLOC,
-					  false, ORDER_DYNAMIC_LINKER, false);
+					  false, ORDER_DYNAMIC_LINKER, false,
+					  false);
 
       if (vdsec != NULL)
 	{
@@ -4602,7 +4605,8 @@ Layout::sized_create_version_sections(
       vnsec = this->choose_output_section(NULL, ".gnu.version_r",
 					  elfcpp::SHT_GNU_verneed,
 					  elfcpp::SHF_ALLOC,
-					  false, ORDER_DYNAMIC_LINKER, false);
+					  false, ORDER_DYNAMIC_LINKER, false,
+					  false);
 
       if (vnsec != NULL)
 	{
@@ -4651,7 +4655,7 @@ Layout::create_interp(const Target* target)
 						     elfcpp::SHT_PROGBITS,
 						     elfcpp::SHF_ALLOC,
 						     false, ORDER_INTERP,
-						     false);
+						     false, false);
   if (osec != NULL)
     osec->add_output_section_data(odata);
 }
