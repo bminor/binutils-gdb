@@ -30,6 +30,13 @@
 	* testsuite/ld-aarch64/limit-b.d: Likewise.
 	* testsuite/ld-aarch64/limit-bl.d: Likewise.
 
+2016-12-13  Awson  <kyrab@mail.ru>
+
+	PR ld/19254
+	* scripttempl/pe.sc (.fini): KEEP this section.
+	(.gcc_except_table): Likewise.
+	(.pdata): Also accept .pdata*.
+
 2016-12-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/nobits-1.d: Remove xfail for hppa64.
