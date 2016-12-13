@@ -1,3 +1,35 @@
+2016-12-13  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64_choose_lp64_emul): New
+	function.
+	(run_dump_test_lp64): New function which pass LP64 mode options to both
+	assembler and linker when building test binary.
+	(aarch64elftests): Remove eh-frame-merge test.
+	(eh-frame-merge-lp64): Restrict eh-frame-merge test to LP64 only.
+	(run_dump_test): Migrate to run_dump_test_lp64 if the test source was
+	written for LP64 only.
+	* testsuite/ld-aarch64/erratum843419.d: Support ILP32 mode.
+	* testsuite/ld-aarch64/farcall-b-defsym.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-defsym.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-plt.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-15.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-16.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-5a-local.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-5a.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-5b-local.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-5b.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-5r-local.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-6a.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-6b.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-7a.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-7b.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-8.d: Likewise.
+	* testsuite/ld-aarch64/limit-b.d: Likewise.
+	* testsuite/ld-aarch64/limit-bl.d: Likewise.
+
 2016-12-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/nobits-1.d: Remove xfail for hppa64.
