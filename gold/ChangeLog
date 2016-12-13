@@ -1,5 +1,17 @@
 2016-12-13  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/20749
+	* options.h (--orphan-handling): New option.
+	(General_options::Orphan_handling): New enum.
+	(General_options::orphan_handling_enum): New method.
+	(General_options::set_orphan_handling_enum): New method.
+	(General_options::orphan_handling_enum_): New data member.
+	* options.cc (General_options::General_options): Initialize new member.
+	(General_options::finalize): Convert --orphan-handling argument to enum.
+	* script-sections.cc (Script_sections::output_section_name): Check it.
+
+2016-12-13  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/20522
 	* layout.cc (Layout::choose_output_section): Add is_reloc parameter.
 	Adjust all callers.  Do not use linker script for is_reloc sections.

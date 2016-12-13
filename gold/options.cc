@@ -998,7 +998,8 @@ General_options::General_options()
     section_starts_(),
     fix_v4bx_(FIX_V4BX_NONE),
     endianness_(ENDIANNESS_NOT_SET),
-    discard_locals_(DISCARD_SEC_MERGE)
+    discard_locals_(DISCARD_SEC_MERGE),
+    orphan_handling_enum_(ORPHAN_PLACE)
 {
   // Turn off option registration once construction is complete.
   gold::options::ready_to_register = false;
@@ -1155,6 +1156,19 @@ General_options::finalize()
       // Testing COLLECT_NO_DEMANGLE makes our default demangling
       // behaviour identical to that of gcc's linker wrapper.
       this->set_do_demangle(getenv("COLLECT_NO_DEMANGLE") == NULL);
+    }
+
+  // Parse the --orphan-handling argument.
+  if (this->user_set_orphan_handling())
+    {
+      if (strcmp(this->orphan_handling(), "place") == 0)
+        this->set_orphan_handling_enum(ORPHAN_PLACE);
+      else if (strcmp(this->orphan_handling(), "discard") == 0)
+        this->set_orphan_handling_enum(ORPHAN_DISCARD);
+      else if (strcmp(this->orphan_handling(), "warn") == 0)
+        this->set_orphan_handling_enum(ORPHAN_WARN);
+      else if (strcmp(this->orphan_handling(), "error") == 0)
+        this->set_orphan_handling_enum(ORPHAN_ERROR);
     }
 
   // -M is equivalent to "-Map -".

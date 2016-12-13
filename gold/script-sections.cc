@@ -3592,13 +3592,37 @@ Script_sections::output_section_name(
 	}
     }
 
-  // If we couldn't find a mapping for the name, the output section
-  // gets the name of the input section.
-
+  // We have an orphan section.
   *output_section_slot = NULL;
   *psection_type = Script_sections::ST_NONE;
   *keep = false;
 
+  General_options::Orphan_handling orphan_handling =
+      parameters->options().orphan_handling_enum();
+  if (orphan_handling == General_options::ORPHAN_DISCARD)
+    return NULL;
+  if (orphan_handling == General_options::ORPHAN_ERROR)
+    {
+      if (file_name == NULL)
+	gold_error(_("unplaced orphan section '%s'"), section_name);
+      else
+	gold_error(_("unplaced orphan section '%s' from '%s'"),
+		   section_name, file_name);
+      return NULL;
+    }
+  if (orphan_handling == General_options::ORPHAN_WARN)
+    {
+      if (file_name == NULL)
+	gold_warning(_("orphan section '%s' is being placed in section '%s'"),
+		     section_name, section_name);
+      else
+	gold_warning(_("orphan section '%s' from '%s' is being placed "
+		       "in section '%s'"),
+		     section_name, file_name, section_name);
+    }
+
+  // If we couldn't find a mapping for the name, the output section
+  // gets the name of the input section.
   return section_name;
 }
 

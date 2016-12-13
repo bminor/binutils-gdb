@@ -1072,6 +1072,10 @@ class General_options
   DEFINE_uint(optimize, options::EXACTLY_ONE_DASH, 'O', 0,
 	      N_("Optimize output file size"), N_("LEVEL"));
 
+  DEFINE_enum(orphan_handling, options::TWO_DASHES, '\0', "place",
+	      N_("Orphan section handling"), N_("[place,discard,warn,error]"),
+	      {"place", "discard", "warn", "error"});
+
   // p
 
   DEFINE_bool(p, options::ONE_DASH, 'p', false,
@@ -1684,6 +1688,22 @@ class General_options
   discard_sec_merge() const
   { return this->discard_locals_ == DISCARD_SEC_MERGE; }
 
+  enum Orphan_handling
+  {
+    // Place orphan sections normally (default).
+    ORPHAN_PLACE,
+    // Discard all orphan sections.
+    ORPHAN_DISCARD,
+    // Warn when placing orphan sections.
+    ORPHAN_WARN,
+    // Issue error for orphan sections.
+    ORPHAN_ERROR
+  };
+
+  Orphan_handling
+  orphan_handling_enum() const
+  { return this->orphan_handling_enum_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1738,6 +1758,10 @@ class General_options
   void
   set_static(bool value)
   { static_ = value; }
+
+  void
+  set_orphan_handling_enum(Orphan_handling value)
+  { this->orphan_handling_enum_ = value; }
 
   // These are called by finalize() to set up the search-path correctly.
   void
@@ -1804,6 +1828,8 @@ class General_options
   Discard_locals discard_locals_;
   // Stack of saved options for --push-state/--pop-state.
   std::vector<Position_dependent_options*> options_stack_;
+  // Orphan handling option, decoded to an enum value.
+  Orphan_handling orphan_handling_enum_;
 };
 
 // The position-dependent options.  We use this to store the state of
