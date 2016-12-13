@@ -1659,54 +1659,33 @@ set_flags_for_add32 (sim_cpu *cpu, int32_t value1, int32_t value2)
   aarch64_set_CPSR (cpu, flags);
 }
 
+#define NEG(a) (((a) & signbit) == signbit)
+#define POS(a) (((a) & signbit) == 0)
+
 static void
 set_flags_for_add64 (sim_cpu *cpu, uint64_t value1, uint64_t value2)
 {
-  int64_t   sval1 = value1;
-  int64_t   sval2 = value2;
-  uint64_t  result = value1 + value2;
-  int64_t   sresult = sval1 + sval2;
-  uint32_t  flags = 0;
+  uint64_t result = value1 + value2;
+  uint32_t flags = 0;
+  uint64_t signbit = 1ULL << 63;
 
   if (result == 0)
     flags |= Z;
 
-  if (result & (1ULL << 63))
+  if (NEG (result))
     flags |= N;
 
-  if (sval1 < 0)
-    {
-      if (sval2 < 0)
-	{
-	  /* Negative plus a negative.  Overflow happens if
-	     the result is greater than either of the operands.  */
-	  if (sresult > sval1 || sresult > sval2)
-	    flags |= V;
-	}
-      /* else Negative plus a positive.  Overflow cannot happen.  */
-    }
-  else /* value1 is +ve.  */
-    {
-      if (sval2 < 0)
-	{
-	  /* Overflow can only occur if we computed "0 - MININT".  */
-	  if (sval1 == 0 && sval2 == (1LL << 63))
-	    flags |= V;
-	}
-      else
-	{
-	  /* Postive plus positive - overflow has happened if the
-	     result is smaller than either of the operands.  */
-	  if (result < value1 || result < value2)
-	    flags |= V | C;
-	}
-    }
+  if (   (NEG (value1) && NEG (value2))
+      || (NEG (value1) && POS (result))
+      || (NEG (value2) && POS (result)))
+    flags |= C;
+
+  if (   (NEG (value1) && NEG (value2) && POS (result))
+      || (POS (value1) && POS (value2) && NEG (result)))
+    flags |= V;
 
   aarch64_set_CPSR (cpu, flags);
 }
-
-#define NEG(a) (((a) & signbit) == signbit)
-#define POS(a) (((a) & signbit) == 0)
 
 static void
 set_flags_for_sub32 (sim_cpu *cpu, uint32_t value1, uint32_t value2)

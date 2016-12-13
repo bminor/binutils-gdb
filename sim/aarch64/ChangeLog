@@ -1,3 +1,9 @@
+2016-12-13  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (NEG, POS): Move before set_flags_for_add64.
+	(set_flags_for_add64): Replace with a modified copy of
+	set_flags_for_sub64.
+
 2016-12-03  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (tbnz, tbz): Cast 1 to uint64_t before shifting.
