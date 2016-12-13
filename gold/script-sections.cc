@@ -313,6 +313,10 @@ class Orphan_section_placement
   bool
   find_place(Output_section*, Elements_iterator** pwhere);
 
+  // Update PLACE_LAST_ALLOC.
+  void
+  update_last_alloc(Elements_iterator where);
+
   // Return the iterator being used for sections at the very end of
   // the linker script.
   Elements_iterator
@@ -519,6 +523,11 @@ Orphan_section_placement::find_place(Output_section* os,
 	case PLACE_RODATA:
 	  follow = PLACE_TEXT;
 	  break;
+	case PLACE_DATA:
+	  follow = PLACE_RODATA;
+	  if (!this->places_[PLACE_RODATA].have_location)
+	    follow = PLACE_TEXT;
+	  break;
 	case PLACE_BSS:
 	  follow = PLACE_LAST_ALLOC;
 	  break;
@@ -555,6 +564,20 @@ Orphan_section_placement::find_place(Output_section* os,
   this->places_[index].have_location = true;
 
   return ret;
+}
+
+// Update PLACE_LAST_ALLOC.
+void
+Orphan_section_placement::update_last_alloc(Elements_iterator elem)
+{
+  Elements_iterator prev = elem;
+  --prev;
+  if (this->places_[PLACE_LAST_ALLOC].have_location
+      && this->places_[PLACE_LAST_ALLOC].location == prev)
+    {
+      this->places_[PLACE_LAST_ALLOC].have_location = true;
+      this->places_[PLACE_LAST_ALLOC].location = elem;
+    }
 }
 
 // Return the iterator being used for sections at the very end of the
@@ -3617,6 +3640,9 @@ Script_sections::place_orphan(Output_section* os)
       Sections_elements::iterator last = osp->last_place();
       *where = this->sections_elements_->insert(last, orphan);
     }
+
+  if ((os->flags() & elfcpp::SHF_ALLOC) != 0)
+    osp->update_last_alloc(*where);
 }
 
 // Set the addresses of all the output sections.  Walk through all the
@@ -3926,10 +3952,10 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
   Output_segment* first_seg = NULL;
   Output_segment* current_seg = NULL;
   bool is_current_seg_readonly = true;
-  Layout::Section_list::iterator plast = sections.end();
   uint64_t last_vma = 0;
   uint64_t last_lma = 0;
   uint64_t last_size = 0;
+  bool in_bss = false;
   for (Layout::Section_list::iterator p = sections.begin();
        p != sections.end();
        ++p)
@@ -3956,7 +3982,7 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
 	  // skipping a page.
 	  need_new_segment = true;
 	}
-      else if (is_bss_section(*plast) && !is_bss_section(*p))
+      else if (in_bss && !is_bss_section(*p))
 	{
 	  // A non-BSS section can not follow a BSS section in the
 	  // same segment.
@@ -3988,6 +4014,7 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
 	  if (first_seg == NULL)
 	    first_seg = current_seg;
 	  is_current_seg_readonly = true;
+	  in_bss = false;
 	}
 
       current_seg->add_output_section_to_load(layout, *p, seg_flags);
@@ -3995,7 +4022,9 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
       if (((*p)->flags() & elfcpp::SHF_WRITE) != 0)
 	is_current_seg_readonly = false;
 
-      plast = p;
+      if (is_bss_section(*p) && size > 0)
+        in_bss = true;
+
       last_vma = vma;
       last_lma = lma;
       last_size = size;

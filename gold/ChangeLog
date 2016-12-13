@@ -1,3 +1,13 @@
+2016-12-12  Cary Coutant  <ccoutant@gmail.com>
+
+	* script-sections.cc (Orphan_section_placement::update_last_alloc):
+	New method.
+	(Orphan_section_placement::find_place): Place orphan .data section
+	after either RODATA or TEXT.
+	(Script_sections::place_orphan): Call update_last_alloc for allocated
+	sections.
+	(Script_sections::create_segments): Improve handling of BSS.
+
 2016-12-13  Alan Modra  <amodra@gmail.com>
 
 	PR gold/16711
