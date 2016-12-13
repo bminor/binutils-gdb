@@ -1258,6 +1258,23 @@ record_btrace_call_history_from (struct target_ops *self,
   record_btrace_call_history_range (self, begin, end, flags);
 }
 
+/* The to_record_method method of target record-btrace.  */
+
+static enum record_method
+record_btrace_record_method (struct target_ops *self, ptid_t ptid)
+{
+  const struct btrace_config *config;
+  struct thread_info * const tp = find_thread_ptid (ptid);
+
+  if (tp == NULL)
+    error (_("No thread."));
+
+  if (tp->btrace.target == NULL)
+    return RECORD_METHOD_NONE;
+
+  return RECORD_METHOD_BTRACE;
+}
+
 /* The to_record_is_replaying method of target record-btrace.  */
 
 static int
@@ -2833,6 +2850,7 @@ init_record_btrace_ops (void)
   ops->to_call_history = record_btrace_call_history;
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
+  ops->to_record_method = record_btrace_record_method;
   ops->to_record_is_replaying = record_btrace_is_replaying;
   ops->to_record_will_replay = record_btrace_will_replay;
   ops->to_record_stop_replaying = record_btrace_stop_replaying_all;

@@ -1803,6 +1803,14 @@ record_full_execution_direction (struct target_ops *self)
   return record_full_execution_dir;
 }
 
+/* The to_record_method method of target record-full.  */
+
+enum record_method
+record_full_record_method (struct target_ops *self, ptid_t ptid)
+{
+  return RECORD_METHOD_FULL;
+}
+
 static void
 record_full_info (struct target_ops *self)
 {
@@ -1992,6 +2000,7 @@ init_record_full_ops (void)
   record_full_ops.to_get_bookmark = record_full_get_bookmark;
   record_full_ops.to_goto_bookmark = record_full_goto_bookmark;
   record_full_ops.to_execution_direction = record_full_execution_direction;
+  record_full_ops.to_record_method = record_full_record_method;
   record_full_ops.to_info_record = record_full_info;
   record_full_ops.to_save_record = record_full_save;
   record_full_ops.to_delete_record = record_full_delete;
@@ -2242,6 +2251,7 @@ init_record_full_core_ops (void)
   record_full_core_ops.to_goto_bookmark = record_full_goto_bookmark;
   record_full_core_ops.to_execution_direction
     = record_full_execution_direction;
+  record_full_core_ops.to_record_method = record_full_record_method;
   record_full_core_ops.to_info_record = record_full_info;
   record_full_core_ops.to_delete_record = record_full_delete;
   record_full_core_ops.to_record_is_replaying = record_full_is_replaying;

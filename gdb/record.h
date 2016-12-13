@@ -37,6 +37,19 @@ extern struct cmd_list_element *info_record_cmdlist;
 extern const struct frame_unwind record_btrace_frame_unwind;
 extern const struct frame_unwind record_btrace_tailcall_frame_unwind;
 
+/* A list of different recording methods.  */
+enum record_method
+{
+  /* No or unknown record method.  */
+  RECORD_METHOD_NONE,
+
+  /* Record method "full".  */
+  RECORD_METHOD_FULL,
+
+  /* Record method "btrace".  */
+  RECORD_METHOD_BTRACE
+};
+
 /* A list of flags specifying what record target methods should print.  */
 enum record_print_flag
 {
