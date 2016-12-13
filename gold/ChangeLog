@@ -1,3 +1,15 @@
+2016-12-12  Igor Kudrin  <ikudrin@accesssoftek.com>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/14676
+	* script-sections.cc (Output_section_definition::output_section_name):
+	For linker-generated sections, compare with output section name.
+	* testsuite/Makefile.am (script_test_13): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_13.c: New source file.
+	* testsuite/script_test_13.sh: New script.
+	* testsuite/script_test_13.t: New linker script.
+
 2016-12-12  Cary Coutant  <ccoutant@gmail.com>
 
 	* script-sections.cc (Orphan_section_placement::update_last_alloc):

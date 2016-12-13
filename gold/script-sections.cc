@@ -2291,6 +2291,17 @@ Output_section_definition::output_section_name(
     Script_sections::Section_type* psection_type,
     bool* keep)
 {
+  // If the input section is linker-created, just look for a match
+  // on the output section name.
+  if (file_name == NULL && this->name_ != "/DISCARD/")
+    {
+      if (this->name_ != section_name)
+	return NULL;
+      *slot = &this->output_section_;
+      *psection_type = this->section_type();
+      return this->name_.c_str();
+    }
+
   // Ask each element whether it matches NAME.
   for (Output_section_elements::const_iterator p = this->elements_.begin();
        p != this->elements_.end();

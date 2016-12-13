@@ -365,11 +365,11 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4 script_test_5 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_6 script_test_7 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8 script_test_9 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_14 script_test_15a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15b script_test_15c \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list dynamic_list.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin1.a libthin3.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthinall.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_13 script_test_14 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15a script_test_15b \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15c dynamic_list \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout libthin1.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin3.a libthinall.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_2.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_4.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libthin2.a alt/libthin4.a
@@ -390,6 +390,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test error message when a vtable is undefined.
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
+
+# Test for ordering internally created sections with a linker script.
 
 # Test for SORT_BY_INIT_PRIORITY.
 
@@ -417,6 +419,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_13.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_14.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15a.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15b.sh \
@@ -469,6 +472,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_13.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_14.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15a.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_15b.stdout \
@@ -5115,6 +5119,8 @@ script_test_8.sh.log: script_test_8.sh
 	@p='script_test_8.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_9.sh.log: script_test_9.sh
 	@p='script_test_9.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_13.sh.log: script_test_13.sh
+	@p='script_test_13.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_14.sh.log: script_test_14.sh
 	@p='script_test_14.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_15a.sh.log: script_test_15a.sh
@@ -6664,6 +6670,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12b.o: script_test_12b.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_13.o: script_test_13.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -fPIC -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_13: $(srcdir)/script_test_13.t script_test_13.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ script_test_13.o -T $(srcdir)/script_test_13.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_13.stdout: script_test_13
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW script_test_13 > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_14.o: script_test_14.s
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_14: $(srcdir)/script_test_14.t script_test_14.o gcctestdir/ld

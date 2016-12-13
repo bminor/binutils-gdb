@@ -2008,6 +2008,17 @@ script_test_12a.o: script_test_12a.c
 script_test_12b.o: script_test_12b.c
 	$(COMPILE) -O0 -c -o $@ $<
 
+# Test for ordering internally created sections with a linker script.
+check_SCRIPTS += script_test_13.sh
+check_DATA += script_test_13.stdout
+MOSTLYCLEANFILES += script_test_13
+script_test_13.o: script_test_13.c
+	$(COMPILE) -O0 -c -fPIC -o $@ $<
+script_test_13: $(srcdir)/script_test_13.t script_test_13.o gcctestdir/ld
+	gcctestdir/ld -shared -o $@ script_test_13.o -T $(srcdir)/script_test_13.t
+script_test_13.stdout: script_test_13
+	$(TEST_READELF) -SW script_test_13 > $@
+
 # Test for SORT_BY_INIT_PRIORITY.
 check_SCRIPTS += script_test_14.sh
 check_DATA += script_test_14.stdout
