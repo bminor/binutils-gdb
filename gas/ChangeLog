@@ -1,3 +1,12 @@
+2016-12-13 Renlin Li <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (AARCH64_REG_TYPES): Remove CN register.
+	(get_reg_expected_msg): Remove CN register case.
+	(parse_operands): rewrite parser for CRn, CRm operand.
+	(reg_names): Remove CN register.
+	* testsuite/gas/aarch64/diagnostic.s: Add a new test case.
+	* testsuite/gas/aarch64/diagnostic.l: Adjust error message.
+
 2016-12-13  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/testsuite/gas/aarch64/addsub.d: Support ILP32 mode.

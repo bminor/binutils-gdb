@@ -113,7 +113,6 @@ enum aarch64_operand_class
   AARCH64_OPND_CLASS_SIMD_ELEMENT,
   AARCH64_OPND_CLASS_SISD_REG,
   AARCH64_OPND_CLASS_SIMD_REGLIST,
-  AARCH64_OPND_CLASS_CP_REG,
   AARCH64_OPND_CLASS_SVE_REG,
   AARCH64_OPND_CLASS_PRED_REG,
   AARCH64_OPND_CLASS_ADDRESS,
@@ -170,8 +169,8 @@ enum aarch64_opnd
 			   structure to all lanes.  */
   AARCH64_OPND_LEt,	/* AdvSIMD Vector Element list.  */
 
-  AARCH64_OPND_Cn,	/* Co-processor register in CRn field.  */
-  AARCH64_OPND_Cm,	/* Co-processor register in CRm field.  */
+  AARCH64_OPND_CRn,	/* Co-processor register in CRn field.  */
+  AARCH64_OPND_CRm,	/* Co-processor register in CRm field.  */
 
   AARCH64_OPND_IDX,	/* AdvSIMD EXT index operand.  */
   AARCH64_OPND_IMM_VLSL,/* Immediate for shifting vector registers left.  */
@@ -394,6 +393,7 @@ enum aarch64_opnd_qualifier
   AARCH64_OPND_QLF_P_M,
 
   /* Constraint on value.  */
+  AARCH64_OPND_QLF_CR,		/* CRn, CRm. */
   AARCH64_OPND_QLF_imm_0_7,
   AARCH64_OPND_QLF_imm_0_15,
   AARCH64_OPND_QLF_imm_0_31,

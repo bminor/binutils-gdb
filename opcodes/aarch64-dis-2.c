@@ -18694,8 +18694,6 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 26:
     case 27:
     case 28:
-    case 36:
-    case 37:
     case 144:
     case 145:
     case 146:
@@ -18740,6 +18738,8 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_ldst_reglist_r (self, info, code, inst);
     case 35:
       return aarch64_ext_ldst_elemlist (self, info, code, inst);
+    case 36:
+    case 37:
     case 38:
     case 48:
     case 49:

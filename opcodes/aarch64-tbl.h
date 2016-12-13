@@ -59,13 +59,13 @@
 /* e.g. SYS #<op1>, <Cn>, <Cm>, #<op2>{, <Xt>}.  */
 #define QL_SYS			\
 {				\
-  QLF5(NIL,NIL,NIL,NIL,X),	\
+  QLF5(NIL,CR,CR,NIL,X),	\
 }
 
 /* e.g. SYSL <Xt>, #<op1>, <Cn>, <Cm>, #<op2>.  */
 #define QL_SYSL			\
 {				\
-  QLF5(X,NIL,NIL,NIL,NIL),	\
+  QLF5(X,NIL,CR,CR,NIL),	\
 }
 
 /* e.g. ADRP <Xd>, <label>.  */
@@ -3237,13 +3237,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("dsb", 0xd503309f, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
   CORE_INSN ("dmb", 0xd50330bf, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
   CORE_INSN ("isb", 0xd50330df, 0xfffff0ff, ic_system, 0, OP1 (BARRIER_ISB), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
-  CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, Cn, Cm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
+  CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("at",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_AT, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("ic",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_IC, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("tlbi",0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_TLBI, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("msr", 0xd5000000, 0xffe00000, ic_system, 0, OP2 (SYSREG, Rt), QL_SRC_X, 0),
-  CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, Cn, Cm, UIMM3_OP2), QL_SYSL, 0),
+  CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, CRn, CRm, UIMM3_OP2), QL_SYSL, 0),
   CORE_INSN ("mrs", 0xd5200000, 0xffe00000, ic_system, 0, OP2 (Rt, SYSREG), QL_DST_X, 0),
   V8_3_INSN ("paciaz",  0xd503231f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
   V8_3_INSN ("paciasp", 0xd503233f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
@@ -4084,9 +4084,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a SIMD vector register list")					\
     Y(SIMD_REGLIST, ldst_elemlist, "LEt", 0, F(),			\
       "a SIMD vector element list")					\
-    Y(CP_REG, regno, "Cn", 0, F(FLD_CRn),				\
+    Y(IMMEDIATE, imm, "CRn", 0, F(FLD_CRn),				\
       "a 4-bit opcode field named for historical reasons C0 - C15")	\
-    Y(CP_REG, regno, "Cm", 0, F(FLD_CRm),				\
+    Y(IMMEDIATE, imm, "CRm", 0, F(FLD_CRm),				\
       "a 4-bit opcode field named for historical reasons C0 - C15")	\
     Y(IMMEDIATE, imm, "IDX", 0, F(FLD_imm4),				\
       "an immediate as the index of the least significant byte")	\

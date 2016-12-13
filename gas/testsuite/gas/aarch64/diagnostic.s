@@ -67,6 +67,7 @@
 	prfm	PLDL3KEEP, [x9, x15, sxtx #2]
 	sysl	x7, #1, C16, C30, #1
 	sysl	x7, #1, C15, C77, #1
+	sysl	x7, #1, x15, C1, #1
 	add	x0, xzr, x7, uxtx #5
 	mov	x0, ##5
 	bad expression
