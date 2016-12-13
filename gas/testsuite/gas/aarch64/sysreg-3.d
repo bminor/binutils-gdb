@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	d5182100 	msr	apiakeylo_el1, x0
    4:	d5382100 	mrs	x0, apiakeylo_el1
    8:	d5182121 	msr	apiakeyhi_el1, x1

@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	dac10083 	pacia	x3, x4
    4:	dac103e5 	pacia	x5, sp
    8:	dac10483 	pacib	x3, x4

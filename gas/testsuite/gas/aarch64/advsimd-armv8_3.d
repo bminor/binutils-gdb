@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
 [^:]+:	6ec3c441 	fcmla	v1.2d, v2.2d, v3.2d, #0
 [^:]+:	6ec3cc41 	fcmla	v1.2d, v2.2d, v3.2d, #90
 [^:]+:	6ec3d441 	fcmla	v1.2d, v2.2d, v3.2d, #180

@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	d50320ff 	xpaclri
    4:	d50320ff 	xpaclri
    8:	d503211f 	pacia1716

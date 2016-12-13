@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	38bfc0e1 	ldaprb	w1, \[x7\]
    4:	38bfc0e1 	ldaprb	w1, \[x7\]
    8:	38bfc0e1 	ldaprb	w1, \[x7\]
