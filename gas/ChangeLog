@@ -1,5 +1,18 @@
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (md_convert_frag): Report an error instead of
+	asserting on `ext'.
+	* testsuite/gas/mips/mips16-branch-unextended-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-unextended-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-unextended-1.s: New test
+	source.
+	* testsuite/gas/mips/mips16-branch-unextended-2.s: New test.
+	* testsuite/gas/mips/mips16-branch-unextended.l: New stderr
+	output.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16-sprel-swap.d: New test.
 	* testsuite/gas/mips/mips16-sprel-swap.s: New test source.
 	* testsuite/gas/mips/mips.exp: Run the new test.

@@ -18369,10 +18369,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 			    _("unsupported relocation"));
 	      break;
 	    }
-	  if (reloc != BFD_RELOC_NONE)
+	  if (reloc == BFD_RELOC_NONE)
+	    ;
+	  else if (ext)
 	    {
-	      gas_assert (ext);
-
 	      exp.X_op = O_symbol;
 	      exp.X_add_symbol = fragp->fr_symbol;
 	      exp.X_add_number = fragp->fr_offset;
@@ -18387,6 +18387,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		 in 2 octets.  */
 	      fixp->fx_no_overflow = 1;
 	    }
+	  else
+	    as_bad_where (fragp->fr_file, fragp->fr_line,
+			  _("invalid unextended operand value"));
 	}
       else
 	mips16_immed (fragp->fr_file, fragp->fr_line, type,
