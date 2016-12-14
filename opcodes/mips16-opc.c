@@ -284,9 +284,9 @@ const struct mips_opcode mips16_opcodes[] =
 {"jr",	    "R",	0xe820, 0xffff,		UBD,			RD_31,		I1,	0,	0 },
 {"j",	    "x",	0xe800, 0xf8ff,		RD_1|UBD,		0,		I1,	0,	0 },
 {"j",	    "R",	0xe820, 0xffff,		UBD,			RD_31,		I1,	0,	0 },
-/* MIPS16e compact branches.  We keep them near the ordinary branches
-   so that we easily find them when converting a normal branch to a
-   compact one.  */
+/* MIPS16e compact jumps.  We keep them near the ordinary jumps
+   so that we easily find them when converting a normal jump
+   to a compact one.  */
 {"jalrc",   "x",	0xe8c0, 0xf8ff,		RD_1|WR_31|NODS,	UBR,		I32,	0,	0 },
 {"jalrc",   "R,x",	0xe8c0, 0xf8ff,		RD_2|WR_31|NODS,	UBR,		I32,	0,	0 },
 {"jrc",	    "x",	0xe880, 0xf8ff,		RD_1|NODS,		UBR,		I32,	0,	0 },
@@ -346,7 +346,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"sw",	    "x,V(S)",	0xd000, 0xf800,		RD_1,			RD_SP,		I1,	0,	0 },
 {"sw",	    "R,V(S)",	0x6200, 0xff00,		0,			RD_31|RD_SP,	I1,	0,	0 },
 {"xor",	    "x,y",	0xe80e, 0xf81f,		MOD_1|RD_2, 	0,		I1,	0,	0 },
-  /* MIPS16e additions */
+  /* MIPS16e additions; see above for compact jumps.  */
 {"restore", "M",	0x6400, 0xff80,		WR_31|NODS,		MOD_SP,		I32,	0,	0 },
 {"save",    "m",	0x6480, 0xff80,		NODS,			RD_31|MOD_SP,	I32,	0,	0 },
 {"sdbbp",   "6",	0xe801, 0xf81f,		TRAP,			0,		I32,	0,	0 },
