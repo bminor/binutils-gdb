@@ -1101,7 +1101,7 @@ typedef struct
   unsigned char flags2[4];
 } Elf_External_ABIFlags_v0;
 
-typedef struct
+typedef struct elf_internal_abiflags_v0
 {
   /* Version of flags structure.  */
   unsigned short version;

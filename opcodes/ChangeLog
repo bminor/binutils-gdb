@@ -1,5 +1,11 @@
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (mips_convert_abiflags_ases): New function.
+	(set_default_mips_dis_options): Also infer ASE flags from ELF
+	file structures.
+
+2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (set_default_mips_dis_options): Reorder ELF file
 	header flag interpretation code.
 

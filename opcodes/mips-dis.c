@@ -764,6 +764,40 @@ is_micromips (Elf_Internal_Ehdr *header)
   return 0;
 }
 
+/* Convert ASE flags from .MIPS.abiflags to internal values.  */
+
+static unsigned long
+mips_convert_abiflags_ases (unsigned long afl_ases)
+{
+  unsigned long opcode_ases = 0;
+
+  if (afl_ases & AFL_ASE_DSP)
+    opcode_ases |= ASE_DSP;
+  if (afl_ases & AFL_ASE_DSPR2)
+    opcode_ases |= ASE_DSPR2;
+  if (afl_ases & AFL_ASE_EVA)
+    opcode_ases |= ASE_EVA;
+  if (afl_ases & AFL_ASE_MCU)
+    opcode_ases |= ASE_MCU;
+  if (afl_ases & AFL_ASE_MDMX)
+    opcode_ases |= ASE_MDMX;
+  if (afl_ases & AFL_ASE_MIPS3D)
+    opcode_ases |= ASE_MIPS3D;
+  if (afl_ases & AFL_ASE_MT)
+    opcode_ases |= ASE_MT;
+  if (afl_ases & AFL_ASE_SMARTMIPS)
+    opcode_ases |= ASE_SMARTMIPS;
+  if (afl_ases & AFL_ASE_VIRT)
+    opcode_ases |= ASE_VIRT;
+  if (afl_ases & AFL_ASE_MSA)
+    opcode_ases |= ASE_MSA;
+  if (afl_ases & AFL_ASE_XPA)
+    opcode_ases |= ASE_XPA;
+  if (afl_ases & AFL_ASE_DSPR3)
+    opcode_ases |= ASE_DSPR3;
+  return opcode_ases;
+}
+
 static void
 set_default_mips_dis_options (struct disassemble_info *info)
 {
@@ -810,14 +844,20 @@ set_default_mips_dis_options (struct disassemble_info *info)
   /* Update settings according to the ELF file header flags.  */
   if (info->flavour == bfd_target_elf_flavour && info->section != NULL)
     {
-      Elf_Internal_Ehdr *header;
+      struct bfd *abfd = info->section->owner;
+      Elf_Internal_Ehdr *header = elf_elfheader (abfd);
+      Elf_Internal_ABIFlags_v0 *abiflags = bfd_mips_elf_get_abiflags (abfd);
 
-      header = elf_elfheader (info->section->owner);
       /* If an ELF "newabi" binary, use the n32/(n)64 GPR names.  */
       if (is_newabi (header))
 	mips_gpr_names = mips_gpr_names_newabi;
       /* If a microMIPS binary, then don't use MIPS16 bindings.  */
       micromips_ase = is_micromips (header);
+      /* OR in any extra ASE flags set in ELF file structures.  */
+      if (abiflags)
+	mips_ase |= mips_convert_abiflags_ases (abiflags->ases);
+      else if (header->e_flags & EF_MIPS_ARCH_ASE_MDMX)
+	mips_ase |= ASE_MDMX;
     }
 }
 

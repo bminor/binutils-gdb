@@ -16327,6 +16327,16 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
+/* Return the ABI flags associated with ABFD if available.  */
+
+Elf_Internal_ABIFlags_v0 *
+bfd_mips_elf_get_abiflags (bfd *abfd)
+{
+  struct mips_elf_obj_tdata *tdata = mips_elf_tdata (abfd);
+
+  return tdata->abiflags_valid ? &tdata->abiflags : NULL;
+}
+
 void
 _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
 {

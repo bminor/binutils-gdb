@@ -1,3 +1,10 @@
+2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* bfd-in.h (elf_internal_abiflags_v0): New struct declaration.
+	(bfd_mips_elf_get_abiflags): New prototype.
+	* elfxx-mips.c (bfd_mips_elf_get_abiflags): New function.
+	* bfd-in2.h: Regenerate.
+
 2016-12-14  Yury Norov <ynorov@caviumnetworks.com>
 
          * bfd/elfnn-aarch64.c: fix TLS relaxations for ilp32 where
