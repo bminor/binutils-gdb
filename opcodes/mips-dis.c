@@ -785,19 +785,6 @@ set_default_mips_dis_options (struct disassemble_info *info)
   mips_hwr_names = mips_hwr_names_numeric;
   no_aliases = 0;
 
-  /* Update settings according to the ELF file header flags.  */
-  if (info->flavour == bfd_target_elf_flavour && info->section != NULL)
-    {
-      Elf_Internal_Ehdr *header;
-
-      header = elf_elfheader (info->section->owner);
-      /* If an ELF "newabi" binary, use the n32/(n)64 GPR names.  */
-      if (is_newabi (header))
-	mips_gpr_names = mips_gpr_names_newabi;
-      /* If a microMIPS binary, then don't use MIPS16 bindings.  */
-      micromips_ase = is_micromips (header);
-    }
-
   /* Set ISA, architecture, and cp0 register names as best we can.  */
 #if ! SYMTAB_AVAILABLE
   /* This is running out on a target machine, not in a host tool.
@@ -819,6 +806,19 @@ set_default_mips_dis_options (struct disassemble_info *info)
       mips_hwr_names = chosen_arch->hwr_names;
     }
 #endif
+
+  /* Update settings according to the ELF file header flags.  */
+  if (info->flavour == bfd_target_elf_flavour && info->section != NULL)
+    {
+      Elf_Internal_Ehdr *header;
+
+      header = elf_elfheader (info->section->owner);
+      /* If an ELF "newabi" binary, use the n32/(n)64 GPR names.  */
+      if (is_newabi (header))
+	mips_gpr_names = mips_gpr_names_newabi;
+      /* If a microMIPS binary, then don't use MIPS16 bindings.  */
+      micromips_ase = is_micromips (header);
+    }
 }
 
 static void

@@ -1,5 +1,10 @@
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (set_default_mips_dis_options): Reorder ELF file
+	header flag interpretation code.
+
+2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips16-opc.c (mips16_opcodes): Set RD_SP rather than RD_PC in
 	`pinfo2' with SP-relative "sd" entries.
 
