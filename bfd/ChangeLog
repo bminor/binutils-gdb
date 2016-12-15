@@ -1,3 +1,10 @@
+2016-12-15  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20968
+	PR ld/20908
+	* elflink.c (bfd_elf_final_link): Revert 2016-12-02 change.  Move
+	reloc counting code later after ELF flavour test.
+
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* bfd-in.h (elf_internal_abiflags_v0): New struct declaration.
