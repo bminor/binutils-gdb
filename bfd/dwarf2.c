@@ -100,6 +100,12 @@ struct dwarf2_debug
   /* Pointer to the end of the .debug_info section memory buffer.  */
   bfd_byte *info_ptr_end;
 
+  /* Pointer to the original bfd for which debug was loaded.  This is what
+     we use to compare and so check that the cached debug data is still
+     valid - it saves having to possibly dereference the gnu_debuglink each
+     time.  */
+  bfd *orig_bfd;
+
   /* Pointer to the bfd, section and address of the beginning of the
      section.  The bfd might be different than expected because of
      gnu_debuglink sections.  */
@@ -3897,8 +3903,20 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 
   if (stash != NULL)
     {
-      if (section_vma_same (abfd, stash))
-	return TRUE;
+      if (stash->orig_bfd == abfd
+          && section_vma_same (abfd, stash))
+        {
+          /* Check that we did previously find some debug information
+             before attempting to make use of it.  */
+          if (stash->bfd_ptr != NULL)
+            {
+              if (do_place && !place_sections (abfd, stash))
+                return FALSE;
+              return TRUE;
+            }
+
+          return FALSE;
+        }
       _bfd_dwarf2_cleanup_debug_info (abfd, pinfo);
       memset (stash, 0, amt);
     }
@@ -3908,6 +3926,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
       if (! stash)
 	return FALSE;
     }
+  stash->orig_bfd = abfd;
   stash->debug_sections = debug_sections;
   stash->syms = symbols;
   if (!save_section_vma (abfd, stash))

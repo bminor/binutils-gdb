@@ -1,0 +1,4 @@
+tmpdir/dwarf2b\.o:\(\.data\+0x0\): multiple definition of `global_var'
+tmpdir/dwarf2a\.o:\(\.data\+0x0\): first defined here
+tmpdir/dwarf2b\.o:\(\.data\+0x4\): multiple definition of `other_var'
+tmpdir/dwarf2a\.o:\(\.data\+0x4\): first defined here

@@ -1,5 +1,14 @@
 2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/ld-elf/dwarf.exp (build_tests): Add new tests.
+	* testsuite/ld-elf/dwarf2.err: New file.
+	* testsuite/ld-elf/dwarf2a.c: New file.
+	* testsuite/ld-elf/dwarf2b.c: New file.
+	* testsuite/ld-elf/dwarf3.c: New file.
+	* testsuite/ld-elf/dwarf3.err: New file.
+
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Add warning,
 	error, warning_output, and error_output actions.  Remove separate
 	warnings parameter.
