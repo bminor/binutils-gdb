@@ -725,13 +725,12 @@ info_mach_regions_recurse_command (char *args, int from_tty)
 static void
 info_mach_region_command (char *exp, int from_tty)
 {
-  struct expression *expr;
   struct value *val;
   mach_vm_address_t address;
   struct inferior *inf;
 
-  expr = parse_expression (exp);
-  val = evaluate_expression (expr);
+  expression_up expr = parse_expression (exp);
+  val = evaluate_expression (expr.get ());
   if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
     {
       val = value_ind (val);
