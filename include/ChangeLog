@@ -1,3 +1,7 @@
+2016-12-16  fincs  <fincs.alt1@gmail.com>
+
+	* bfdlink.h (struct bfd_link_info): Add gc_keep_exported.
+
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf/mips.h (Elf_Internal_ABIFlags_v0): Also declare struct

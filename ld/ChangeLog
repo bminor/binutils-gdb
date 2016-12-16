@@ -1,3 +1,9 @@
+2016-12-16  fincs  <fincs.alt1@gmail.com>
+
+	* ld.texinfo: Document --gc-keep-exported.
+	* ldlex.h (enum option_values): Add OPTION_GC_KEEP_EXPORTED.
+	* lexsup.c (parse_args): Add handling for --gc-keep-exported.
+
 2016-12-14  Yury Norov <ynorov@caviumnetworks.com>
 
 	* ld/testsuite/ld-aarch64/aarch64-elf.exp: Add tests for tiny and

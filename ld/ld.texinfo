@@ -1558,6 +1558,18 @@ default behaviour (of not listing the sections that are removed) can
 be restored by specifying @samp{--no-print-gc-sections} on the command
 line.
 
+@kindex --gc-keep-exported
+@cindex garbage collection
+@item --gc-keep-exported
+When @samp{--gc-sections} is enabled, this option prevents garbage
+collection of unused input sections that contain global symbols having
+default or protected visibility.  This option is intended to be used for
+executables where unreferenced sections would otherwise be garbage
+collected regardless of the external visibility of contained symbols.
+Note that this option has no effect when linking shared objects since
+it is already the default behaviour.  This option is only supported for
+ELF format targets.
+
 @kindex --print-output-format
 @cindex output format
 @item --print-output-format

@@ -1,3 +1,9 @@
+2016-12-16  fincs  <fincs.alt1@gmail.com>
+
+	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Add handling
+	for info->gc_keep_exported.
+	(bfd_elf_gc_sections): Likewise.
+
 2016-12-15  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20968

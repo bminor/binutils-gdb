@@ -328,6 +328,9 @@ struct bfd_link_info
   /* TRUE if unreferenced sections should be removed.  */
   unsigned int gc_sections: 1;
 
+  /* TRUE if exported symbols should be kept during section gc.  */
+  unsigned int gc_keep_exported: 1;
+
   /* TRUE if every symbol should be reported back via the notice
      callback.  */
   unsigned int notice_all: 1;
