@@ -1,5 +1,33 @@
 2016-12-22  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/17643
+	* options.h (-z bndplt): New option.
+	* x86_64.cc (Output_data_plt_x86_64::regular_count): New method.
+	(Output_data_plt_x86_64::address_for_global): Move implementation into
+	virtual method.
+	(Output_data_plt_x86_64::address_for_local): Likewise.
+	(Output_data_plt_x86_64::got): New method.
+	(Output_data_plt_x86_64::got_plt): New method.
+	(Output_data_plt_x86_64::got_irelative): New method.
+	(Output_data_plt_x86_64::do_address_for_global): New virtual method.
+	(Output_data_plt_x86_64::do_address_for_local): New virtual method.
+	(class Output_data_plt_x86_64_bnd): New class.
+	(Target_x86_64::do_make_data_plt): Move out of line and specialize
+	for each size (both overloads).
+	(Output_data_plt_x86_64::set_final_data_size): Cosmetic changes.
+	* testsuite/Makefile.am (bnd_plt_1): New test case.
+	(bnd_ifunc_1): New test case.
+	(bnd_ifunc_2): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/bnd_ifunc_1.s: New source file. 
+	* testsuite/bnd_ifunc_1.sh: New shell script.
+	* testsuite/bnd_ifunc_2.s: New source file.
+	* testsuite/bnd_ifunc_2.sh: New shell script.
+	* testsuite/bnd_plt_1.s: New source file.
+	* testsuite/bnd_plt_1.sh: New shell script.
+
+2016-12-22  Cary Coutant  <ccoutant@gmail.com>
+
 	* layout.cc (Layout::finalize): Track count of forced-local symbols
 	in .dynsym.
 	(Layout::create_symtab_sections): Add local_dynamic_count parameter;

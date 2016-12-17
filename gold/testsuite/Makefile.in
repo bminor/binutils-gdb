@@ -813,10 +813,18 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_89 = split_i386_1 split_i386_2 split_i386_3 \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_4 split_i386_r
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_90 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_91 = split_x86_64_1.stdout split_x86_64_2.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
-
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_90 = split_x86_64.sh \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	bnd_plt_1.sh \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	bnd_ifunc_1.sh \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	bnd_ifunc_2.sh
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_91 = split_x86_64_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_3.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_4.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_r.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	bnd_plt_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	bnd_ifunc_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	bnd_ifunc_2.stdout
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_92 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_4 split_x86_64_r
 
@@ -3352,7 +3360,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_5_LDADD = 
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_SOURCES = exception_test_main.cc
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_DEPENDENCIES = gcctestdir/ld exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS)
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS) -Wl,-z,bndplt
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDADD = exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
@@ -5224,6 +5232,12 @@ split_i386.sh.log: split_i386.sh
 	@p='split_i386.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_x86_64.sh.log: split_x86_64.sh
 	@p='split_x86_64.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+bnd_plt_1.sh.log: bnd_plt_1.sh
+	@p='bnd_plt_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+bnd_ifunc_1.sh.log: bnd_ifunc_1.sh
+	@p='bnd_ifunc_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+bnd_ifunc_2.sh.log: bnd_ifunc_2.sh
+	@p='bnd_ifunc_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_x32.sh.log: split_x32.sh
 	@p='split_x32.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_abs_global.sh.log: arm_abs_global.sh
@@ -7318,6 +7332,24 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -r split_x86_64_1.o split_x86_64_n.o -o split_x86_64_r > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_plt_1.o: bnd_plt_1.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) --64 -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_plt_1.so: bnd_plt_1.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -shared -z bndplt bnd_plt_1.o -o $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_plt_1.stdout: bnd_plt_1.so
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_ifunc_1.o: bnd_ifunc_1.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) --64 -madd-bnd-prefix -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_ifunc_1.so: bnd_ifunc_1.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -shared -z bndplt bnd_ifunc_1.o -o $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_ifunc_1.stdout: bnd_ifunc_1.so
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_ifunc_2.o: bnd_ifunc_2.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) --64 -madd-bnd-prefix -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_ifunc_2.so: bnd_ifunc_2.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -shared -z bndplt bnd_ifunc_2.o -o $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@bnd_ifunc_2.stdout: bnd_ifunc_2.so
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
 @DEFAULT_TARGET_X32_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x32_1.o: split_x32_1.s
 @DEFAULT_TARGET_X32_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_X32_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x32_2.o: split_x32_2.s
