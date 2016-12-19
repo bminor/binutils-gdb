@@ -1,4 +1,23 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.h (xlen): Delete.
+	* config/tc-riscv.c (xlen): Make static.
+	(abi_xlen): New variable.
+	(options): Replace OPTION_{M32,M64,MSOFT_FLOAT,MHARD_FLOAT,MRVC}
+	with OPTION_MABI.
+	(md_longopts): Likewise.
+	(md_parse_option): Likewise.
+	(riscv_elf_final_processing): Likewise.
+	* doc/as.texinfo (Target RISC-V options): Likewise.
+	* doc/c-riscv.texi (OPTIONS): Likewise.
+	* config/tc-riscv.c (float_mode): Removed.
+	(float_abi): New type, specifies the floating-point ABI.
+	(riscv_set_abi): New function.
+	(riscv_add_subset): Only allow lower-case ISA names and require
+	them to start with "rv".
+	(riscv_after_parse_args): Likewise.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
 	    Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* config/tc-riscv.c (riscv_set_options): Add relax.

@@ -1,5 +1,10 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
+	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Use
+	EF_RISCV_FLOAT_ABI_SOFT instead of EF_RISCV_SOFT_FLOAT.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
 	* elfnn-riscv.c (bfd_riscv_get_max_alignment): Return bfd_vma
 	instead of unsigned int.
 

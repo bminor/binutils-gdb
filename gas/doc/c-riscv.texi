@@ -25,24 +25,17 @@ The following table lists all availiable RISC-V specific options
 
 @c man begin OPTIONS
 @table @gcctabopt
-@cindex @samp{-m32} option, RISC-V
-@cindex @samp{-m64} option, RISC-V
-@item -m32 | -m64
-Select the base ISA, either RV32 or RV64.
-
-@cindex @samp{-mrvc} option, RISC-V
-@item -mrvc
-Enables the C ISA subset for compressed instructions.
-
-@cindex @samp{-msoft-float} option, RISC-V
-@cindex @samp{-mhard-float} option, RISC-V
-@item -msoft-float | -mhard-float
-Select the floating-point ABI, hard-float has F registers while soft-float
-doesn't.
 
 @cindex @samp{-march=ISA} option, RISC-V
 @item -march=ISA
-Select the base isa, as specified by ISA.  For example -march=RV32IMA.
+Select the base isa, as specified by ISA.  For example -march=rv32ima.
+
+@cindex @samp{-mabi=ABI} option, RISC-V
+@item -mabi=ABI
+Selects the ABI, which is either "ilp32" or "lp64", optionally followed
+by "f", "d", or "q" to indicate single-precision, double-precision, or
+quad-precision floating-point calling convention, or none to indicate
+the soft-float calling convention.
 
 @end table
 @c man end

@@ -1,4 +1,11 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* elf/riscv.h (EF_RISCV_SOFT_FLOAT): Don't define.
+	(EF_RISCV_FLOAT_ABI, EF_RISCV_FLOAT_ABI_SOFT): Define.
+	(EF_RISCV_FLOAT_ABI_SINGLE, EF_RISCV_FLOAT_ABI_DOUBLE): Define.
+	(EF_RISCV_FLOAT_ABI_QUAD): Define.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
 	    Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elf/riscv.h: Add R_RISCV_TPREL_I through R_RISCV_SET32.

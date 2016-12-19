@@ -1,3 +1,9 @@
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* readelf.c (get_machine_flags): Use
+	EF_RISCV_FLOAT_ABI_{SOFT,SINGLE,DOBULE,QUAD) instead of
+	EF_RISCV_{SOFT,HARD}_FLOAT.
+
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/binutils-all/mips/mips-ase-1.d: New test.

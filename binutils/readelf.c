@@ -3317,8 +3317,25 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_RISCV:
 	  if (e_flags & EF_RISCV_RVC)
 	    strcat (buf, ", RVC");
-	  if (e_flags & EF_RISCV_SOFT_FLOAT)
-	    strcat (buf, ", soft-float ABI");
+
+	  switch (e_flags & EF_RISCV_FLOAT_ABI)
+	    {
+	    case EF_RISCV_FLOAT_ABI_SOFT:
+	      strcat (buf, ", soft-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_SINGLE:
+	      strcat (buf, ", single-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_DOUBLE:
+	      strcat (buf, ", double-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_QUAD:
+	      strcat (buf, ", quad-float ABI");
+	      break;
+	    }
 	  break;
 
 	case EM_SH:

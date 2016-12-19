@@ -1,5 +1,10 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
+	* riscv-dis.c (riscv_disassemble_insn): Default to the ELF's
+	XLEN when none is provided.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
 	* riscv-opc.c: Formatting fixes.
 
 2016-12-20  Alan Modra  <amodra@gmail.com>

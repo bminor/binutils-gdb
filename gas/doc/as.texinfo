@@ -514,9 +514,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset RISCV
 
 @emph{Target RISC-V options:}
-   [@b{-m32}|@b{-m64}]
-   [@b{-mrvc}]
-   [@b{-mhard-float}|@b{-msoft-float}]
+   [@b{-march}=@var{ISA}]
+   [@b{-mabi}=@var{ABI}]
 @end ifset
 @ifset S390
 

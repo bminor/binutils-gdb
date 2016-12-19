@@ -94,7 +94,19 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* File may contain compressed instructions.  */
 #define EF_RISCV_RVC 0x0001
 
-/* File uses the soft-float calling convention.  */
-#define EF_RISCV_SOFT_FLOAT 0x0002
+/* Which floating-point ABI a file uses.  */
+#define EF_RISCV_FLOAT_ABI 0x0006
+
+/* File uses the soft-float ABI.  */
+#define EF_RISCV_FLOAT_ABI_SOFT 0x0000
+
+/* File uses the single-float ABI.  */
+#define EF_RISCV_FLOAT_ABI_SINGLE 0x0002
+
+/* File uses the double-float ABI.  */
+#define EF_RISCV_FLOAT_ABI_DOUBLE 0x0004
+
+/* File uses the quad-float ABI.  */
+#define EF_RISCV_FLOAT_ABI_QUAD 0x0006
 
 #endif /* _ELF_RISCV_H */
