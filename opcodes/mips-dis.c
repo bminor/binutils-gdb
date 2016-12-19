@@ -839,7 +839,6 @@ set_default_mips_dis_options (struct disassemble_info *info)
       mips_cp1_names = chosen_arch->cp1_names;
       mips_hwr_names = chosen_arch->hwr_names;
     }
-#endif
 
   /* Update settings according to the ELF file header flags.  */
   if (info->flavour == bfd_target_elf_flavour && info->section != NULL)
@@ -866,6 +865,7 @@ set_default_mips_dis_options (struct disassemble_info *info)
       else if (header->e_flags & EF_MIPS_ARCH_ASE_MDMX)
 	mips_ase |= ASE_MDMX;
     }
+#endif
 }
 
 static void

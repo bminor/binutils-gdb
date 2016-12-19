@@ -1,5 +1,10 @@
 2016-12-19  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (set_default_mips_dis_options) [SYMTAB_AVAILABLE]:
+	Only examine ELF file structures here.
+
+2016-12-19  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (set_default_mips_dis_options) [BFD64]: Only call
 	`bfd_mips_elf_get_abiflags' here.
 
