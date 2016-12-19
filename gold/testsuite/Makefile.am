@@ -3721,6 +3721,14 @@ arm_target2.o: arm_target2.s
 MOSTLYCLEANFILES += arm_target1_abs arm_target1_rel \
 		    arm_target2_rel arm_target2_abs arm_target2_got_rel
 
+# The test demonstrates why the constructor of a target object should not access options.
+check_DATA += arm_target_lazy_init
+MOSTLYCLEANFILES += arm_target_lazy_init
+arm_target_lazy_init: arm_target_lazy_init.o arm_target_lazy_init.t ../ld-new
+	../ld-new -T $(srcdir)/arm_target_lazy_init.t -o $@ $<
+arm_target_lazy_init.o: arm_target_lazy_init.s
+	$(TEST_AS) -EL -o $@ $<
+
 endif DEFAULT_TARGET_ARM
 
 if DEFAULT_TARGET_AARCH64

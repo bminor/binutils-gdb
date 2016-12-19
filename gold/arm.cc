@@ -2132,32 +2132,7 @@ class Target_arm : public Sized_target<32, big_endian>
       target1_reloc_(elfcpp::R_ARM_ABS32),
       // This can be any reloc type but usually is R_ARM_GOT_PREL.
       target2_reloc_(elfcpp::R_ARM_GOT_PREL)
-  {
-    if (parameters->options().user_set_target1_rel())
-      {
-	// FIXME: This is not strictly compatible with ld, which allows both
-	// --target1-abs and --target-rel to be given.
-	if (parameters->options().user_set_target1_abs())
-	  gold_error(_("Cannot use both --target1-abs and --target1-rel."));
-	else
-	  this->target1_reloc_ = elfcpp::R_ARM_REL32;
-      }
-    // We don't need to handle --target1-abs because target1_reloc_ is set
-    // to elfcpp::R_ARM_ABS32 in the member initializer list.
-
-    if (parameters->options().user_set_target2())
-      {
-	const char* target2 = parameters->options().target2();
-	if (strcmp(target2, "rel") == 0)
-	  this->target2_reloc_ = elfcpp::R_ARM_REL32;
-	else if (strcmp(target2, "abs") == 0)
-	  this->target2_reloc_ = elfcpp::R_ARM_ABS32;
-	else if (strcmp(target2, "got-rel") == 0)
-	  this->target2_reloc_ = elfcpp::R_ARM_GOT_PREL;
-	else
-	  gold_unreachable();
-      }
-  }
+  { }
 
   // Whether we force PCI branch veneers.
   bool
@@ -2571,6 +2546,30 @@ class Target_arm : public Sized_target<32, big_endian>
     // as the default.
     gold_assert(arm_reloc_property_table == NULL);
     arm_reloc_property_table = new Arm_reloc_property_table();
+    if (parameters->options().user_set_target1_rel())
+      {
+	// FIXME: This is not strictly compatible with ld, which allows both
+	// --target1-abs and --target-rel to be given.
+	if (parameters->options().user_set_target1_abs())
+	  gold_error(_("Cannot use both --target1-abs and --target1-rel."));
+	else
+	  this->target1_reloc_ = elfcpp::R_ARM_REL32;
+      }
+    // We don't need to handle --target1-abs because target1_reloc_ is set
+    // to elfcpp::R_ARM_ABS32 in the member initializer list.
+
+    if (parameters->options().user_set_target2())
+      {
+	const char* target2 = parameters->options().target2();
+	if (strcmp(target2, "rel") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_REL32;
+	else if (strcmp(target2, "abs") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_ABS32;
+	else if (strcmp(target2, "got-rel") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_GOT_PREL;
+	else
+	  gold_unreachable();
+      }
   }
 
   // Virtual function which is set to return true by a target if

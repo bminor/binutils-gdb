@@ -1,3 +1,12 @@
+2016-12-19  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* arm.cc (Target_arm::Target_arm): Move initialization code ...
+	(Target_arm::do_select_as_default_target): ... to here.
+	* testsuite/Makefile.am (arm_target_lazy_init): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_target_lazy_init.s: New source file.
+	* testsuite/arm_target_lazy_init.t: New linker script.
+
 2016-12-19  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20976
