@@ -1,5 +1,10 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
+	* riscv-opc.c (riscv_opcodes): Rename the "*.sc" instructions to
+	"*.aqrl".
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
 	* riscv-opc.c (riscv_opcodes): Mark the rd* and csr* aliases as
 	INSN_ALIAS.
 
