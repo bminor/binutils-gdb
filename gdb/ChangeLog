@@ -1,3 +1,21 @@
+2016-12-22  Doug Evans  <xdje42@gmail.com>
+
+	* NEWS: Document new syntax for "mt print symbols", "mt print psymbols"
+	and "mt print msymbols" commands.
+	* psymtab.c (DEV_TTY): Delete.
+	(dump_psymtab_addrmap): Don't dump if psymtabs_addrmap is NULL.
+	(maintenance_print_psymbols): Rewrite for new syntax:
+	mt print psymbols [-objfile objfile] [-pc address] [outfile]
+	mt print psymbols [-objfile objfile] [-source source] [outfile]
+	(_initialize_psymtab): Update help text.
+	* symmisc.c (maintenance_print_symbols): Rewrite for new syntax:
+	mt print symbols [-pc address] [outfile]
+	mt print symbols [-objfile objfile] [-source source] [outfile]
+	(maintenance_print_msymbols): Rewrite for new syntax:
+	mt print msymbols [-objfile objfile] [outfile]
+	Only print symbols for the current progspace.
+	(_initialize_symmisc): Update help text.
+
 2016-12-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ui-out.h (ui_out_begin, ui_out_end, ui_out_table_header,

@@ -1,3 +1,8 @@
+2016-12-22  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Symbols): Update docs for symbol printing maintenance
+	commands.
+
 2016-12-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (User-defined Commands): Limit on number of

@@ -1,3 +1,8 @@
+2016-12-22  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/maint.exp: Update tests for maint print symbols, psymbols
+	and msymbols.
+
 2016-12-19  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): Remove.

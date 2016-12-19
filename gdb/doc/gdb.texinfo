@@ -17243,21 +17243,32 @@ entered from the keyboard causes symbol information to be loaded.
 @cindex partial symbol dump
 @kindex maint print msymbols
 @cindex minimal symbol dump
-@item maint print symbols @var{filename}
-@itemx maint print psymbols @var{filename}
-@itemx maint print msymbols @var{filename}
-Write a dump of debugging symbol data into the file @var{filename}.
-These commands are used to debug the @value{GDBN} symbol-reading code.  Only
-symbols with debugging data are included.  If you use @samp{maint print
-symbols}, @value{GDBN} includes all the symbols for which it has already
-collected full details: that is, @var{filename} reflects symbols for
-only those files whose symbols @value{GDBN} has read.  You can use the
-command @code{info sources} to find out which files these are.  If you
-use @samp{maint print psymbols} instead, the dump shows information about
-symbols that @value{GDBN} only knows partially---that is, symbols defined in
-files that @value{GDBN} has skimmed, but not yet read completely.  Finally,
-@samp{maint print msymbols} dumps just the minimal symbol information
-required for each object file from which @value{GDBN} has read some symbols.
+@item maint print symbols @r{[}-pc @var{address}@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print symbols @r{[}-objfile @var{objfile}@r{]} @r{[}-source @var{source}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print psymbols @r{[}-objfile @var{objfile}@r{]} @r{[}-pc @var{address}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print psymbols @r{[}-objfile @var{objfile}@r{]} @r{[}-source @var{source}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print msymbols @r{[}-objfile @var{objfile}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+Write a dump of debugging symbol data into the file @var{filename} or
+the terminal if @var{filename} is unspecified.
+If @code{-objfile @var{objfile}} is specified, only dump symbols for
+that objfile.
+If @code{-pc @var{address}} is specified, only dump symbols for the file
+with code at that address.  Note that @var{address} may be a symbol like
+@code{main}.
+If @code{-source @var{source}} is specified, only dump symbols for that
+source file.
+
+These commands are used to debug the @value{GDBN} symbol-reading code.
+These commands do not modify internal @value{GDBN} state, therefore
+@samp{maint print symbols} will only print symbols for already expanded symbol
+tables.
+You can use the command @code{info sources} to find out which files these are.
+If you use @samp{maint print psymbols} instead, the dump shows information
+about symbols that @value{GDBN} only knows partially---that is, symbols
+defined in files that @value{GDBN} has skimmed, but not yet read completely.
+Finally, @samp{maint print msymbols} just dumps ``minimal symbols'', e.g.,
+``ELF symbols''.
+
 @xref{Files, ,Commands to Specify Files}, for a discussion of how
 @value{GDBN} reads symbols (in the description of @code{symbol-file}).
 

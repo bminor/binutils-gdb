@@ -80,6 +80,13 @@ Synopsys ARC			arc*-*-elf32
 * Fortran: Support structures with fields of dynamic types and 
   arrays of dynamic types.
 
+* The symbol dumping maintenance commands have new syntax.
+maint print symbols [-pc address] [--] [filename]
+maint print symbols [-objfile objfile] [-source source] [--] [filename]
+maint print psymbols [-objfile objfile] [-pc address] [--] [filename]
+maint print psymbols [-objfile objfile] [-source source] [--] [filename]
+maint print msymbols [-objfile objfile] [--] [filename]
+
 * GDB now supports multibit bitfields and enums in target register
   descriptions.
 
