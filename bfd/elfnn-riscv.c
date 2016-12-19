@@ -2759,7 +2759,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 
 /* Traverse all output sections and return the max alignment.  */
 
-static unsigned int
+static bfd_vma
 _bfd_riscv_get_max_alignment (asection *sec)
 {
   unsigned int max_alignment_power = 0;
@@ -2771,7 +2771,7 @@ _bfd_riscv_get_max_alignment (asection *sec)
 	max_alignment_power = o->alignment_power;
     }
 
-  return 1 << max_alignment_power;
+  return (bfd_vma) 1 << max_alignment_power;
 }
 
 /* Relax non-PIC global variable references.  */

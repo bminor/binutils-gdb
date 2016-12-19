@@ -1,4 +1,9 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (bfd_riscv_get_max_alignment): Return bfd_vma
+	instead of unsigned int.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
 	    Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* reloc.c (BFD_RELOC_RISCV_TPREL_I): New relocation.
