@@ -1,3 +1,8 @@
+2016-12-19  Christian Groessler  <chris@groessler.org>
+
+	* elf32-arm.c (elf32_arm_popcount): Rename from 'popcount'.  Make
+	'sum' local variable signed.
+
 2016-12-16  fincs  <fincs.alt1@gmail.com>
 
 	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Add handling
