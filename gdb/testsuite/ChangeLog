@@ -1,3 +1,9 @@
+2016-12-19  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Remove.
+	(test_with_self): Don't call do_steps_and_nexts, and remove
+	code about stepping into xmalloc.
+
 2016-12-09  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/all-architectures.exp.in: Remove kfail for rx.
