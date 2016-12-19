@@ -1,3 +1,7 @@
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c: Formatting fixes.
+
 2016-12-20  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add riscv files.

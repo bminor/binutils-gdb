@@ -220,7 +220,7 @@ riscv_make_plt_entry (bfd_vma got, bfd_vma addr, uint32_t *entry)
      nop */
 
   entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got, addr));
-  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART(got, addr));
+  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got, addr));
   entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
   entry[3] = RISCV_NOP;
 }
@@ -2329,7 +2329,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   if (h->got.offset != (bfd_vma) -1
-      && !(riscv_elf_hash_entry(h)->tls_type & (GOT_TLS_GD | GOT_TLS_IE)))
+      && !(riscv_elf_hash_entry (h)->tls_type & (GOT_TLS_GD | GOT_TLS_IE)))
     {
       asection *sgot;
       asection *srela;

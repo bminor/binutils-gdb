@@ -28,6 +28,7 @@
 #include "itbl-ops.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "struc-symbol.h"
 
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
@@ -511,29 +512,29 @@ validate_riscv_insn (const struct riscv_opcode *opc)
       case 'C': /* RVC */
 	switch (c = *p++)
 	  {
-	  case 'a': used_bits |= ENCODE_RVC_J_IMM(-1U); break;
+	  case 'a': used_bits |= ENCODE_RVC_J_IMM (-1U); break;
 	  case 'c': break; /* RS1, constrained to equal sp */
 	  case 'i': used_bits |= ENCODE_RVC_SIMM3(-1U); break;
-	  case 'j': used_bits |= ENCODE_RVC_IMM(-1U); break;
-	  case 'k': used_bits |= ENCODE_RVC_LW_IMM(-1U); break;
-	  case 'l': used_bits |= ENCODE_RVC_LD_IMM(-1U); break;
-	  case 'm': used_bits |= ENCODE_RVC_LWSP_IMM(-1U); break;
-	  case 'n': used_bits |= ENCODE_RVC_LDSP_IMM(-1U); break;
-	  case 'p': used_bits |= ENCODE_RVC_B_IMM(-1U); break;
+	  case 'j': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case 'k': used_bits |= ENCODE_RVC_LW_IMM (-1U); break;
+	  case 'l': used_bits |= ENCODE_RVC_LD_IMM (-1U); break;
+	  case 'm': used_bits |= ENCODE_RVC_LWSP_IMM (-1U); break;
+	  case 'n': used_bits |= ENCODE_RVC_LDSP_IMM (-1U); break;
+	  case 'p': used_bits |= ENCODE_RVC_B_IMM (-1U); break;
 	  case 's': USE_BITS (OP_MASK_CRS1S, OP_SH_CRS1S); break;
 	  case 't': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
-	  case 'u': used_bits |= ENCODE_RVC_IMM(-1U); break;
-	  case 'v': used_bits |= ENCODE_RVC_IMM(-1U); break;
+	  case 'u': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case 'v': used_bits |= ENCODE_RVC_IMM (-1U); break;
 	  case 'w': break; /* RS1S, constrained to equal RD */
 	  case 'x': break; /* RS2S, constrained to equal RD */
-	  case 'K': used_bits |= ENCODE_RVC_ADDI4SPN_IMM(-1U); break;
-	  case 'L': used_bits |= ENCODE_RVC_ADDI16SP_IMM(-1U); break;
-	  case 'M': used_bits |= ENCODE_RVC_SWSP_IMM(-1U); break;
-	  case 'N': used_bits |= ENCODE_RVC_SDSP_IMM(-1U); break;
+	  case 'K': used_bits |= ENCODE_RVC_ADDI4SPN_IMM (-1U); break;
+	  case 'L': used_bits |= ENCODE_RVC_ADDI16SP_IMM (-1U); break;
+	  case 'M': used_bits |= ENCODE_RVC_SWSP_IMM (-1U); break;
+	  case 'N': used_bits |= ENCODE_RVC_SDSP_IMM (-1U); break;
 	  case 'U': break; /* RS1, constrained to equal RD */
 	  case 'V': USE_BITS (OP_MASK_CRS2, OP_SH_CRS2); break;
-	  case '<': used_bits |= ENCODE_RVC_IMM(-1U); break;
-	  case '>': used_bits |= ENCODE_RVC_IMM(-1U); break;
+	  case '<': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case '>': used_bits |= ENCODE_RVC_IMM (-1U); break;
 	  case 'T': USE_BITS (OP_MASK_CRS2, OP_SH_CRS2); break;
 	  case 'D': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
 	  default:
@@ -563,11 +564,11 @@ validate_riscv_insn (const struct riscv_opcode *opc)
       case 'P':	USE_BITS (OP_MASK_PRED,		OP_SH_PRED); break;
       case 'Q':	USE_BITS (OP_MASK_SUCC,		OP_SH_SUCC); break;
       case 'o':
-      case 'j': used_bits |= ENCODE_ITYPE_IMM(-1U); break;
-      case 'a':	used_bits |= ENCODE_UJTYPE_IMM(-1U); break;
-      case 'p':	used_bits |= ENCODE_SBTYPE_IMM(-1U); break;
-      case 'q':	used_bits |= ENCODE_STYPE_IMM(-1U); break;
-      case 'u':	used_bits |= ENCODE_UTYPE_IMM(-1U); break;
+      case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
+      case 'a':	used_bits |= ENCODE_UJTYPE_IMM (-1U); break;
+      case 'p':	used_bits |= ENCODE_SBTYPE_IMM (-1U); break;
+      case 'q':	used_bits |= ENCODE_STYPE_IMM (-1U); break;
+      case 'u':	used_bits |= ENCODE_UTYPE_IMM (-1U); break;
       case '[': break;
       case ']': break;
       case '0': break;
@@ -661,7 +662,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
     {
       reloc_howto_type *howto;
 
-      gas_assert(address_expr);
+      gas_assert (address_expr);
       if (reloc_type == BFD_RELOC_12_PCREL
 	  || reloc_type == BFD_RELOC_RISCV_JMP)
 	{
@@ -814,7 +815,7 @@ static symbolS *
 make_internal_label (void)
 {
   return (symbolS *) local_symbol_make (FAKE_LABEL_NAME, now_seg,
-					(valueT) frag_now_fix(), frag_now);
+					(valueT) frag_now_fix (), frag_now);
 }
 
 /* Load an entry from the GOT.  */
@@ -874,14 +875,14 @@ load_const (int reg, expressionS *ep)
       return;
     }
 
-  if (xlen > 32 && !IS_SEXT_32BIT_NUM(ep->X_add_number))
+  if (xlen > 32 && !IS_SEXT_32BIT_NUM (ep->X_add_number))
     {
       /* Reduce to a signed 32-bit constant using SLLI and ADDI.  */
       while (((upper.X_add_number >> shift) & 1) == 0)
 	shift++;
 
       upper.X_add_number = (int64_t) upper.X_add_number >> shift;
-      load_const(reg, &upper);
+      load_const (reg, &upper);
 
       macro_build (NULL, "slli", "d,s,>", reg, reg, shift);
       if (lower.X_add_number != 0)
@@ -1469,8 +1470,8 @@ rvc_lui:
 		  my_getExpression (imm_expr, s);
 		  check_absolute_expr (ip, imm_expr);
 		  if ((unsigned long) imm_expr->X_add_number > 0xfff)
-		    as_warn(_("Improper CSR address (%lu)"),
-			    (unsigned long) imm_expr->X_add_number);
+		    as_warn (_("Improper CSR address (%lu)"),
+			     (unsigned long) imm_expr->X_add_number);
 		  INSERT_OPERAND (CSR, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
@@ -2242,7 +2243,7 @@ md_convert_frag_branch (fragS *fragp)
 	    goto done;
 
 	  default:
-	    abort();
+	    abort ();
 	}
     }
 

@@ -1,3 +1,11 @@
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c: Formatting and comment fixes throughout.
+	* elfxx-riscv.c: Likewise.
+	(howto_table): Change the src_mask field from MINUS_ONE to 0 for
+	R_RISCV_TLS_DTPMOD32, R_RISCV_TLS_DTPMOD64, R_RISCV_TLS_DTPREL32,
+	R_RISCV_TLS_DTPREL64, R_RISCV_TLS_TPREL32, R_RISCV_TLS_TPREL64.
+
 2016-12-20  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Improve

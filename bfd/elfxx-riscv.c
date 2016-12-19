@@ -63,7 +63,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_32",			/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 0xffffffff,			/* dst_mask */
+	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 64 bit relocation.  */
@@ -93,7 +93,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_RELATIVE",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 0xffffffff,			/* dst_mask */
+	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_COPY,			/* type */
@@ -106,8 +106,8 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_COPY",		/* name */
 	 FALSE,				/* partial_inplace */
-	 0x0,         			/* src_mask */
-	 0x0,		        	/* dst_mask */
+	 0,         			/* src_mask */
+	 0,		        	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_JUMP_SLOT,		/* type */
@@ -120,8 +120,8 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_JUMP_SLOT",		/* name */
 	 FALSE,				/* partial_inplace */
-	 0x0,         			/* src_mask */
-	 0x0,		        	/* dst_mask */
+	 0,         			/* src_mask */
+	 0,		        	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* Dynamic TLS relocations.  */
@@ -135,7 +135,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPMOD32",	/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -149,7 +149,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPMOD64",	/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -163,7 +163,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPREL32",	/* name */
 	 TRUE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -177,7 +177,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPREL64",	/* name */
 	 TRUE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -191,7 +191,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_TPREL32",		/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -205,7 +205,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_TPREL64",		/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -238,9 +238,6 @@ static reloc_howto_type howto_table[] =
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
-					/* This needs complex overflow
-					   detection, because the upper 36
-					   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_JAL",			/* name */
 	 FALSE,				/* partial_inplace */
@@ -264,7 +261,7 @@ static reloc_howto_type howto_table[] =
 					/* dst_mask */
 	 TRUE),				/* pcrel_offset */
 
-  /* 32-bit PC-relative function call (AUIPC/JALR).  */
+  /* Like R_RISCV_CALL, but not locally binding.  */
   HOWTO (R_RISCV_CALL_PLT,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -460,7 +457,7 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
-  /* TLS LE thread pointer usage.  */
+  /* TLS LE thread pointer usage.  May be relaxed.  */
   HOWTO (R_RISCV_TPREL_ADD,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -665,9 +662,6 @@ static reloc_howto_type howto_table[] =
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
-					/* This needs complex overflow
-					   detection, because the upper 36
-					   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RVC_JUMP",		/* name */
 	 FALSE,				/* partial_inplace */
@@ -690,7 +684,7 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_RVC_IMM (-1U),		/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
-  /* High 12 bits of 32-bit load or add.  */
+  /* GP-relative load.  */
   HOWTO (R_RISCV_GPREL_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -705,7 +699,7 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
-  /* High 12 bits of 32-bit store.  */
+  /* GP-relative store.  */
   HOWTO (R_RISCV_GPREL_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */

@@ -1,3 +1,7 @@
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.c: Formatting and comment fixes throughout.
+
 2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (md_convert_frag): Report an error instead of

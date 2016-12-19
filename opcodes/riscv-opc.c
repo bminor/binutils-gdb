@@ -34,8 +34,7 @@ const char * const riscv_gpr_names_numeric[NGPR] =
   "x24",  "x25",  "x26",  "x27",  "x28",  "x29",  "x30",  "x31"
 };
 
-const char * const riscv_gpr_names_abi[NGPR] =
-{
+const char * const riscv_gpr_names_abi[NGPR] = {
   "zero", "ra", "sp",  "gp",  "tp", "t0",  "t1",  "t2",
   "s0",   "s1", "a0",  "a1",  "a2", "a3",  "a4",  "a5",
   "a6",   "a7", "s2",  "s3",  "s4", "s5",  "s6",  "s7",
@@ -50,8 +49,7 @@ const char * const riscv_fpr_names_numeric[NFPR] =
   "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31"
 };
 
-const char * const riscv_fpr_names_abi[NFPR] =
-{
+const char * const riscv_fpr_names_abi[NFPR] = {
   "ft0", "ft1", "ft2",  "ft3",  "ft4", "ft5", "ft6",  "ft7",
   "fs0", "fs1", "fa0",  "fa1",  "fa2", "fa3", "fa4",  "fa5",
   "fa6", "fa7", "fs2",  "fs3",  "fs4", "fs5", "fs6",  "fs7",
@@ -72,9 +70,9 @@ const char * const riscv_fpr_names_abi[NFPR] =
 #define MASK_RS2 (OP_MASK_RS2 << OP_SH_RS2)
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
 #define MASK_CRS2 (OP_MASK_CRS2 << OP_SH_CRS2)
-#define MASK_IMM ENCODE_ITYPE_IMM(-1U)
-#define MASK_RVC_IMM ENCODE_RVC_IMM(-1U)
-#define MASK_UIMM ENCODE_UTYPE_IMM(-1U)
+#define MASK_IMM ENCODE_ITYPE_IMM (-1U)
+#define MASK_RVC_IMM ENCODE_RVC_IMM (-1U)
+#define MASK_UIMM ENCODE_UTYPE_IMM (-1U)
 #define MASK_RM (OP_MASK_RM << OP_SH_RM)
 #define MASK_PRED (OP_MASK_PRED << OP_SH_PRED)
 #define MASK_SUCC (OP_MASK_SUCC << OP_SH_SUCC)
@@ -240,7 +238,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"or",        "I",   "d,s,t",  MATCH_OR, MASK_OR, match_opcode, 0 },
 {"or",        "I",   "d,s,j",  MATCH_ORI, MASK_ORI, match_opcode, INSN_ALIAS },
 {"auipc",     "I",   "d,u",  MATCH_AUIPC, MASK_AUIPC, match_opcode, 0 },
-{"seqz",      "I",   "d,s",  MATCH_SLTIU | ENCODE_ITYPE_IMM(1), MASK_SLTIU | MASK_IMM, match_opcode, INSN_ALIAS },
+{"seqz",      "I",   "d,s",  MATCH_SLTIU | ENCODE_ITYPE_IMM (1), MASK_SLTIU | MASK_IMM, match_opcode, INSN_ALIAS },
 {"snez",      "I",   "d,t",  MATCH_SLTU, MASK_SLTU | MASK_RS1, match_opcode, INSN_ALIAS },
 {"sltz",      "I",   "d,s",  MATCH_SLT, MASK_SLT | MASK_RS2, match_opcode, INSN_ALIAS },
 {"sgtz",      "I",   "d,t",  MATCH_SLT, MASK_SLT | MASK_RS1, match_opcode, INSN_ALIAS },
