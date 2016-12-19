@@ -718,11 +718,13 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test that __ehdr_start is defined correctly when used with a linker script.
 
 # Test that __ehdr_start is not overridden when supplied by the user.
+
+# Test that the -d option (force common allocation) works correctly.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_71 = start_lib_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_3 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_5
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_5 pr20976
 
 # Test that --gdb-index functions correctly without gcc-generated pubnames.
 
@@ -1191,7 +1193,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_3$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_5$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ehdr_start_test_5$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr20976$(EXEEXT)
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_40 = incremental_test_2$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_3$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_4$(EXEEXT) \
@@ -1917,6 +1920,13 @@ pr20308d_test_LINK = $(CCLD) $(pr20308d_test_CFLAGS) $(CFLAGS) \
 pr20308e_test_OBJECTS = $(am_pr20308e_test_OBJECTS)
 pr20308e_test_LINK = $(CCLD) $(pr20308e_test_CFLAGS) $(CFLAGS) \
 	$(pr20308e_test_LDFLAGS) $(LDFLAGS) -o $@
+pr20976_SOURCES = pr20976.c
+pr20976_OBJECTS = pr20976.$(OBJEXT)
+pr20976_LDADD = $(LDADD)
+pr20976_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_protected_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_2.$(OBJEXT) \
@@ -2381,7 +2391,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(pr20216c_test_SOURCES) $(pr20216d_test_SOURCES) \
 	$(pr20216e_test_SOURCES) $(pr20308a_test_SOURCES) \
 	$(pr20308b_test_SOURCES) $(pr20308c_test_SOURCES) \
-	$(pr20308d_test_SOURCES) $(pr20308e_test_SOURCES) \
+	$(pr20308d_test_SOURCES) $(pr20308e_test_SOURCES) pr20976.c \
 	$(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
@@ -4050,6 +4060,12 @@ pr20308d_test$(EXEEXT): $(pr20308d_test_OBJECTS) $(pr20308d_test_DEPENDENCIES) $
 pr20308e_test$(EXEEXT): $(pr20308e_test_OBJECTS) $(pr20308e_test_DEPENDENCIES) $(EXTRA_pr20308e_test_DEPENDENCIES) 
 	@rm -f pr20308e_test$(EXEEXT)
 	$(pr20308e_test_LINK) $(pr20308e_test_OBJECTS) $(pr20308e_test_LDADD) $(LIBS)
+@GCC_FALSE@pr20976$(EXEEXT): $(pr20976_OBJECTS) $(pr20976_DEPENDENCIES) $(EXTRA_pr20976_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f pr20976$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(pr20976_OBJECTS) $(pr20976_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@pr20976$(EXEEXT): $(pr20976_OBJECTS) $(pr20976_DEPENDENCIES) $(EXTRA_pr20976_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f pr20976$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(pr20976_OBJECTS) $(pr20976_LDADD) $(LIBS)
 protected_1$(EXEEXT): $(protected_1_OBJECTS) $(protected_1_DEPENDENCIES) $(EXTRA_protected_1_DEPENDENCIES) 
 	@rm -f protected_1$(EXEEXT)
 	$(protected_1_LINK) $(protected_1_OBJECTS) $(protected_1_LDADD) $(LIBS)
@@ -4409,6 +4425,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr20308d_test-pr20308_def.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr20308d_test-pr20308_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr20308e_test-pr20308_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr20976.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
@@ -5583,6 +5600,8 @@ ehdr_start_test_3.log: ehdr_start_test_3$(EXEEXT)
 	@p='ehdr_start_test_3$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ehdr_start_test_5.log: ehdr_start_test_5$(EXEEXT)
 	@p='ehdr_start_test_5$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+pr20976.log: pr20976$(EXEEXT)
+	@p='pr20976$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 incremental_test_2.log: incremental_test_2$(EXEEXT)
 	@p='incremental_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 incremental_test_3.log: incremental_test_3$(EXEEXT)
@@ -7138,6 +7157,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--defsym=bar=foo defsym_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@defsym_test.o: defsym_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr20976: pr20976-d.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ pr20976-d.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr20976-d.o: pr20976.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -d -o $@ pr20976.o
 
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.

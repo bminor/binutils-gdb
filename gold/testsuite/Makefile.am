@@ -2923,6 +2923,13 @@ defsym_test: defsym_test.o gcctestdir/ld
 defsym_test.o: defsym_test.c
 	$(COMPILE) -c -o $@ $<
 
+# Test that the -d option (force common allocation) works correctly.
+check_PROGRAMS += pr20976
+pr20976: pr20976-d.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ pr20976-d.o
+pr20976-d.o: pr20976.o gcctestdir/ld
+	gcctestdir/ld -r -d -o $@ pr20976.o
+
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.
 

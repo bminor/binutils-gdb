@@ -3111,7 +3111,11 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	    // In object files symbol values are section
 	    // relative.
 	    if (parameters->options().relocatable())
-	      sym_value -= od->address();
+	      {
+		Output_section* os = od->output_section();
+		gold_assert(os != NULL);
+		sym_value -= os->address();
+	      }
 	  }
 	  break;
 
