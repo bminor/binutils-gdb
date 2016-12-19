@@ -1,3 +1,17 @@
+2015-12-20  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.c (riscv_pseudo_table): Remove "align",
+	"p2align", and "balign".
+	(s_align): Remove.
+	(riscv_handle_align): New function.
+	(riscv_frag_align_code): Likewise.
+	(riscv_make_nops): Likewise.
+	* config/tc-riscv.h (MAX_MEM_FOR_RS_ALIGN_CODE): Change to 7.
+	(HANDLE_ALIGN): Define.
+	(md_do_align): Define.
+	(riscv_handle_align): Declare.
+	(riscv_frag_align_code): Likewise.
+
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
 	* config/tc-riscv.h (xlen): Delete.

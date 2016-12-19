@@ -2185,63 +2185,82 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Align to a given power of two.  */
-
 static void
-s_align (int bytes_p)
+riscv_make_nops (char *buf, bfd_vma bytes)
 {
-  int fill_value = 0, fill_value_specified = 0;
-  int min_text_alignment = riscv_opts.rvc ? 2 : 4;
-  int alignment = get_absolute_expression(), bytes;
+  bfd_vma i = 0;
 
-  if (bytes_p)
+  if (bytes % 4 == 2)
     {
-      bytes = alignment;
-      if (bytes < 1 || (bytes & (bytes-1)) != 0)
-	as_bad (_("alignment not a power of 2: %d"), bytes);
-      for (alignment = 0; bytes > 1; bytes >>= 1)
-	alignment++;
+      md_number_to_chars (buf, RVC_NOP, 2);
+      i += 2;
     }
 
-  bytes = 1 << alignment;
+  gas_assert ((bytes - i) % 4 == 0);
 
-  if (alignment < 0 || alignment > 31)
-    as_bad (_("unsatisfiable alignment: %d"), alignment);
+  for ( ; i < bytes; i += 4)
+    md_number_to_chars (buf + i, RISCV_NOP, 4);
+}
 
-  if (*input_line_pointer == ',')
+/* Called from md_do_align.  Used to create an alignment frag in a
+   code section by emitting a worst-case NOP sequence that the linker
+   will later relax to the correct number of NOPs.  We can't compute
+   the correct alignment now because of other linker relaxations.  */
+
+bfd_boolean
+riscv_frag_align_code (int n)
+{
+  bfd_vma bytes = (bfd_vma)1 << n;
+  bfd_vma min_text_alignment = riscv_opts.rvc ? 2 : 4;
+
+  /* When not relaxing, riscv_handle_align handles code alignment.  */
+  if (!riscv_opts.relax)
+    return FALSE;
+
+  if (bytes > min_text_alignment)
     {
-      ++input_line_pointer;
-      fill_value = get_absolute_expression ();
-      fill_value_specified = 1;
-    }
-
-  if (!fill_value_specified
-      && subseg_text_p (now_seg)
-      && bytes > min_text_alignment)
-    {
-      /* Emit the worst-case NOP string.  The linker will delete any
-	 unnecessary NOPs.  This allows us to support code alignment
-	 in spite of linker relaxations.  */
-      bfd_vma i, worst_case_bytes = bytes - min_text_alignment;
+      bfd_vma worst_case_bytes = bytes - min_text_alignment;
       char *nops = frag_more (worst_case_bytes);
-      for (i = 0; i < worst_case_bytes - 2; i += 4)
-	md_number_to_chars (nops + i, RISCV_NOP, 4);
-      if (i < worst_case_bytes)
-	md_number_to_chars (nops + i, RVC_NOP, 2);
-
       expressionS ex;
+
       ex.X_op = O_constant;
       ex.X_add_number = worst_case_bytes;
+
+      riscv_make_nops (nops, worst_case_bytes);
 
       fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
 		   &ex, FALSE, BFD_RELOC_RISCV_ALIGN);
     }
-  else if (alignment)
-    frag_align (alignment, fill_value, 0);
 
-  record_alignment (now_seg, alignment);
+  return TRUE;
+}
 
-  demand_empty_rest_of_line ();
+/* Implement HANDLE_ALIGN.  */
+
+void
+riscv_handle_align (fragS *fragP)
+{
+  switch (fragP->fr_type)
+    {
+    case rs_align_code:
+      /* When relaxing, riscv_frag_align_code handles code alignment.  */
+      if (!riscv_opts.relax)
+	{
+	  bfd_signed_vma count = fragP->fr_next->fr_address
+				 - fragP->fr_address - fragP->fr_fix;
+
+	  if (count <= 0)
+	    break;
+
+	  count &= MAX_MEM_FOR_RS_ALIGN_CODE;
+	  riscv_make_nops (fragP->fr_literal + fragP->fr_fix, count);
+	  fragP->fr_var = count;
+	}
+      break;
+
+    default:
+      break;
+    }
 }
 
 int
@@ -2488,9 +2507,6 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"dtprelword", s_dtprel, 4},
   {"dtpreldword", s_dtprel, 8},
   {"bss", s_bss, 0},
-  {"align", s_align, 0},
-  {"p2align", s_align, 0},
-  {"balign", s_align, 1},
   {"uleb128", s_riscv_leb128, 0},
   {"sleb128", s_riscv_leb128, 1},
 
