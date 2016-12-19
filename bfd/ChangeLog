@@ -1,5 +1,10 @@
 2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Perform symbol lookup
+	before trying to fine matching file and line information.
+
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2.c (struct dwarf2_debug): Add orig_bfd member.
 	(_bfd_dwarf2_slurp_debug_info): If stashed debug information does
 	not match current bfd, then reload debug information.  Record bfd

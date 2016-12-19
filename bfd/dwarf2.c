@@ -4155,6 +4155,38 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     {
       BFD_ASSERT (section != NULL && functionname_ptr != NULL);
       addr = offset;
+
+      /* If we have no SYMBOL but the section we're looking at is not a
+         code section, then take a look through the list of symbols to see
+         if we have a symbol at the address we're looking for.  If we do
+         then use this to look up line information.  This will allow us to
+         give file and line results for data symbols.  We exclude code
+         symbols here, if we look up a function symbol and then look up the
+         line information we'll actually return the line number for the
+         opening '{' rather than the function definition line.  This is
+         because looking up by symbol uses the line table, in which the
+         first line for a function is usually the opening '{', while
+         looking up the function by section + offset uses the
+         DW_AT_decl_line from the function DW_TAG_subprogram for the line,
+         which will be the line of the function name.  */
+      if ((section->flags & SEC_CODE) == 0)
+	{
+	  asymbol **tmp;
+
+	  for (tmp = symbols; (*tmp) != NULL; ++tmp)
+	    if ((*tmp)->the_bfd == abfd
+		&& (*tmp)->section == section
+		&& (*tmp)->value == offset
+		&& ((*tmp)->flags & BSF_SECTION_SYM) == 0)
+	      {
+		symbol = *tmp;
+		do_line = TRUE;
+                /* For local symbols, keep going in the hope we find a
+                   global.  */
+                if ((symbol->flags & BSF_GLOBAL) != 0)
+                  break;
+	      }
+	}
     }
 
   if (section->output_section)

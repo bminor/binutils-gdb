@@ -1,5 +1,10 @@
 2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/ld-elf/shared.exp: Update expected results.
+	* testsuite/ld-elf/dwarf2.err: Likewise
+
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/ld-elf/dwarf.exp (build_tests): Add new tests.
 	* testsuite/ld-elf/dwarf2.err: New file.
 	* testsuite/ld-elf/dwarf2a.c: New file.
