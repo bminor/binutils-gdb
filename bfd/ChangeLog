@@ -1,3 +1,8 @@
+2016-12-20  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Improve
+	error message when linking elf32 and elf64.
+
 2016-12-19  Christian Groessler  <chris@groessler.org>
 
 	* elf32-arm.c (elf32_arm_popcount): Rename from 'popcount'.  Make

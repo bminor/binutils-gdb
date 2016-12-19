@@ -2561,8 +2561,9 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
     {
       (*_bfd_error_handler)
-	(_("%B: ABI is incompatible with that of the selected emulation"),
-	 ibfd);
+	(_("%B: ABI is incompatible with that of the selected emulation:\n"
+	   "  target emulation `%s' does not match `%s'"),
+	 ibfd, bfd_get_target (ibfd), bfd_get_target (obfd));
       return FALSE;
     }
 
