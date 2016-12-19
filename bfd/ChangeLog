@@ -1,4 +1,34 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
+	    Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* reloc.c (BFD_RELOC_RISCV_TPREL_I): New relocation.
+	(BFD_RELOC_RISCV_TPREL_S): Likewise.
+	(BFD_RELOC_RISCV_RELAX): Likewise.
+	(BFD_RELOC_RISCV_CFA): Likewise.
+	(BFD_RELOC_RISCV_SUB6): Likewise.
+	(BFD_RELOC_RISCV_SET8): Likewise.
+	(BFD_RELOC_RISCV_SET8): Likewise.
+	(BFD_RELOC_RISCV_SET16): Likewise.
+	(BFD_RELOC_RISCV_SET32): Likewise.
+	* elfnn-riscv.c (perform_relocation): Handle the new
+	relocations.
+	(_bfd_riscv_relax_tls_le): Likewise.
+	(_bfd_riscv_relax_align): Likewise.
+	(_bfd_riscv_relax_section): Likewise.
+	(howto_table): Likewise.
+	(riscv_reloc_map): Likewise.
+	(relax_func_t): New type.
+	(_bfd_riscv_relax_call): Add reserve_size argument, which
+	controls the maximal offset pessimism.  Correct type of max_alignment.
+	(_bfd_riscv_relax_lui): Likewise.
+	(_bfd_riscv_relax_tls_le): Likewise.
+	(_bfd_riscv_relax_align): Likewise.
+	(_bfd_riscv_relax_section): Compute the required reserve size
+	when relocating and use it to when calling relax_func.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c: Formatting and comment fixes throughout.
 	* elfxx-riscv.c: Likewise.

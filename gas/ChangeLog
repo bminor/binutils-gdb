@@ -1,4 +1,23 @@
 2016-12-20  Andrew Waterman  <andrew@sifive.com>
+	    Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-riscv.c (riscv_set_options): Add relax.
+	(riscv_opts): Likewise.
+	(s_riscv_option): Add relax and norelax.
+	(riscv_apply_const_reloc): New function.
+	(append_insn): Move constant relocation handling to
+	riscv_apply_const_reloc.
+	(md_pcrel_from): Likewise.
+	(parse_relocation): Skip BFD_RELOC_UNUSED.
+	(md_pcrel_from): Handle BFD_RELOC_RISCV_SUB6,
+	BFD_RELOC_RISCV_RELAX, BFD_RELOC_RISCV_CFA.
+	(md_apply_fix): Likewise.
+	(riscv_pre_output_hook): New function.
+	* config/tc-riscv.h (md_pre_output_hook): Define.
+	(riscv_pre_output_hook): Declare.
+	(DWARF_CIE_DATA_ALIGNMENT): Always -4.
+
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
 
 	* config/tc-riscv.c: Formatting and comment fixes throughout.
 

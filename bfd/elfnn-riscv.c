@@ -1493,6 +1493,7 @@ perform_relocation (const reloc_howto_type *howto,
     case R_RISCV_LO12_I:
     case R_RISCV_GPREL_I:
     case R_RISCV_TPREL_LO12_I:
+    case R_RISCV_TPREL_I:
     case R_RISCV_PCREL_LO12_I:
       value = ENCODE_ITYPE_IMM (value);
       break;
@@ -1500,6 +1501,7 @@ perform_relocation (const reloc_howto_type *howto,
     case R_RISCV_LO12_S:
     case R_RISCV_GPREL_S:
     case R_RISCV_TPREL_LO12_S:
+    case R_RISCV_TPREL_S:
     case R_RISCV_PCREL_LO12_S:
       value = ENCODE_STYPE_IMM (value);
       break;
@@ -1548,10 +1550,15 @@ perform_relocation (const reloc_howto_type *howto,
     case R_RISCV_ADD16:
     case R_RISCV_ADD32:
     case R_RISCV_ADD64:
+    case R_RISCV_SUB6:
     case R_RISCV_SUB8:
     case R_RISCV_SUB16:
     case R_RISCV_SUB32:
     case R_RISCV_SUB64:
+    case R_RISCV_SET6:
+    case R_RISCV_SET8:
+    case R_RISCV_SET16:
+    case R_RISCV_SET32:
     case R_RISCV_TLS_DTPREL32:
     case R_RISCV_TLS_DTPREL64:
       break;
@@ -1817,6 +1824,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	case R_RISCV_NONE:
+	case R_RISCV_RELAX:
 	case R_RISCV_TPREL_ADD:
 	case R_RISCV_COPY:
 	case R_RISCV_JUMP_SLOT:
@@ -1830,6 +1838,10 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_RVC_LUI:
 	case R_RISCV_LO12_I:
 	case R_RISCV_LO12_S:
+	case R_RISCV_SET6:
+	case R_RISCV_SET8:
+	case R_RISCV_SET16:
+	case R_RISCV_SET32:
 	  /* These require no special handling beyond perform_relocation.  */
 	  break;
 
@@ -1923,6 +1935,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  }
 	  break;
 
+	case R_RISCV_SUB6:
 	case R_RISCV_SUB8:
 	case R_RISCV_SUB16:
 	case R_RISCV_SUB32:
@@ -1953,6 +1966,11 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_TPREL_LO12_I:
 	case R_RISCV_TPREL_LO12_S:
 	  relocation = tpoff (info, relocation);
+	  break;
+
+	case R_RISCV_TPREL_I:
+	case R_RISCV_TPREL_S:
+	  relocation = tpoff (info, relocation);
 	  if (VALID_ITYPE_IMM (relocation + rel->r_addend))
 	    {
 	      /* We can use tp as the base register.  */
@@ -1961,6 +1979,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      insn |= X_TP << OP_SH_RS1;
 	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 	    }
+	  else
+	    r = bfd_reloc_overflow;
 	  break;
 
 	case R_RISCV_GPREL_I:
@@ -2668,6 +2688,11 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count)
   return TRUE;
 }
 
+typedef bfd_boolean (*relax_func_t) (bfd *, asection *, asection *,
+				     struct bfd_link_info *,
+				     Elf_Internal_Rela *,
+				     bfd_vma, bfd_vma, bfd_vma, bfd_boolean *);
+
 /* Relax AUIPC + JALR into JAL.  */
 
 static bfd_boolean
@@ -2675,7 +2700,8 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 		       struct bfd_link_info *link_info,
 		       Elf_Internal_Rela *rel,
 		       bfd_vma symval,
-		       unsigned int max_alignment,
+		       bfd_vma max_alignment,
+		       bfd_vma reserve_size ATTRIBUTE_UNUSED,
 		       bfd_boolean *again)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -2757,7 +2783,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      struct bfd_link_info *link_info,
 		      Elf_Internal_Rela *rel,
 		      bfd_vma symval,
-		      unsigned int max_alignment,
+		      bfd_vma max_alignment,
+		      bfd_vma reserve_size,
 		      bfd_boolean *again)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -2773,8 +2800,10 @@ _bfd_riscv_relax_lui (bfd *abfd,
   /* Is the reference in range of x0 or gp?
      Valid gp range conservatively because of alignment issue.  */
   if (VALID_ITYPE_IMM (symval)
-      || (symval >= gp && VALID_ITYPE_IMM (symval - gp + max_alignment))
-      || (symval < gp && VALID_ITYPE_IMM (symval - gp - max_alignment)))
+      || (symval >= gp
+	  && VALID_ITYPE_IMM (symval - gp + max_alignment + reserve_size))
+      || (symval < gp
+	  && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size)))
     {
       unsigned sym = ELFNN_R_SYM (rel->r_info);
       switch (ELFNN_R_TYPE (rel->r_info))
@@ -2832,20 +2861,35 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 			 struct bfd_link_info *link_info,
 			 Elf_Internal_Rela *rel,
 			 bfd_vma symval,
-			 unsigned int max_alignment ATTRIBUTE_UNUSED,
+			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
+			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			 bfd_boolean *again)
 {
   /* See if this symbol is in range of tp.  */
   if (RISCV_CONST_HIGH_PART (tpoff (link_info, symval)) != 0)
     return TRUE;
 
-  /* We can delete the unnecessary LUI and tp add.  The LO12 reloc will be
-     made directly tp-relative.  */
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
-  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+  switch (ELFNN_R_TYPE (rel->r_info))
+    {
+    case R_RISCV_TPREL_LO12_I:
+      rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_TPREL_I);
+      return TRUE;
 
-  *again = TRUE;
-  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4);
+    case R_RISCV_TPREL_LO12_S:
+      rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_TPREL_S);
+      return TRUE;
+
+    case R_RISCV_TPREL_HI20:
+    case R_RISCV_TPREL_ADD:
+      /* We can delete the unnecessary instruction and reloc.  */
+      rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+      *again = TRUE;
+      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4);
+
+    default:
+      abort ();
+    }
 }
 
 /* Implement R_RISCV_ALIGN by deleting excess alignment NOPs.  */
@@ -2856,7 +2900,8 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 			struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			Elf_Internal_Rela *rel,
 			bfd_vma symval,
-			unsigned int max_alignment ATTRIBUTE_UNUSED,
+			bfd_vma max_alignment ATTRIBUTE_UNUSED,
+			bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			bfd_boolean *again ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -2909,7 +2954,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   Elf_Internal_Rela *relocs;
   bfd_boolean ret = FALSE;
   unsigned int i;
-  unsigned int max_alignment;
+  bfd_vma max_alignment, reserve_size = 0;
 
   *again = FALSE;
 
@@ -2935,7 +2980,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
     {
       asection *sym_sec;
       Elf_Internal_Rela *rel = relocs + i;
-      typeof (&_bfd_riscv_relax_call) relax_func = NULL;
+      relax_func_t relax_func;
       int type = ELFNN_R_TYPE (rel->r_info);
       bfd_vma symval;
 
@@ -2947,13 +2992,26 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		   || type == R_RISCV_LO12_I
 		   || type == R_RISCV_LO12_S)
 	    relax_func = _bfd_riscv_relax_lui;
-	  else if (type == R_RISCV_TPREL_HI20 || type == R_RISCV_TPREL_ADD)
+	  else if (type == R_RISCV_TPREL_HI20
+		   || type == R_RISCV_TPREL_ADD
+		   || type == R_RISCV_TPREL_LO12_I
+		   || type == R_RISCV_TPREL_LO12_S)
 	    relax_func = _bfd_riscv_relax_tls_le;
+	  else
+	    continue;
+
+	  /* Only relax this reloc if it is paired with R_RISCV_RELAX.  */
+	  if (i == sec->reloc_count - 1
+	      || ELFNN_R_TYPE ((rel + 1)->r_info) != R_RISCV_RELAX
+	      || rel->r_offset != (rel + 1)->r_offset)
+	    continue;
+
+	  /* Skip over the R_RISCV_RELAX.  */
+	  i++;
 	}
       else if (type == R_RISCV_ALIGN)
 	relax_func = _bfd_riscv_relax_align;
-
-      if (!relax_func)
+      else
 	continue;
 
       data->relocs = relocs;
@@ -2978,6 +3036,8 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* A local symbol.  */
 	  Elf_Internal_Sym *isym = ((Elf_Internal_Sym *) symtab_hdr->contents
 				    + ELFNN_R_SYM (rel->r_info));
+	  reserve_size = (isym->st_size - rel->r_addend) > isym->st_size
+	    ? 0 : isym->st_size - rel->r_addend;
 
 	  if (isym->st_shndx == SHN_UNDEF)
 	    sym_sec = sec, symval = sec_addr (sec) + rel->r_offset;
@@ -3011,13 +3071,16 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  else
 	    symval = sec_addr (h->root.u.def.section) + h->root.u.def.value;
 
+	  if (h->type != STT_FUNC)
+	    reserve_size =
+	      (h->size - rel->r_addend) > h->size ? 0 : h->size - rel->r_addend;
 	  sym_sec = h->root.u.def.section;
 	}
 
       symval += rel->r_addend;
 
       if (!relax_func (abfd, sec, sym_sec, info, rel, symval,
-		       max_alignment, again))
+		       max_alignment, reserve_size, again))
 	goto fail;
     }
 

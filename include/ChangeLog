@@ -1,3 +1,8 @@
+2016-12-20  Andrew Waterman  <andrew@sifive.com>
+	    Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf/riscv.h: Add R_RISCV_TPREL_I through R_RISCV_SET32.
+
 2016-12-16  fincs  <fincs.alt1@gmail.com>
 
 	* bfdlink.h (struct bfd_link_info): Add gc_keep_exported.

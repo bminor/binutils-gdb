@@ -74,12 +74,14 @@ struct riscv_set_options
 {
   int pic; /* Generate position-independent code.  */
   int rvc; /* Generate RVC code.  */
+  int relax; /* Emit relocs the linker is allowed to relax.  */
 };
 
 static struct riscv_set_options riscv_opts =
 {
   0,	/* pic */
   0,	/* rvc */
+  1,	/* relax */
 };
 
 static void
@@ -648,6 +650,28 @@ md_begin (void)
   record_alignment (text_section, riscv_opts.rvc ? 1 : 2);
 }
 
+static insn_t
+riscv_apply_const_reloc (bfd_reloc_code_real_type reloc_type, bfd_vma value)
+{
+  switch (reloc_type)
+    {
+    case BFD_RELOC_32:
+      return value;
+
+    case BFD_RELOC_RISCV_HI20:
+      return ENCODE_UTYPE_IMM (RISCV_CONST_HIGH_PART (value));
+
+    case BFD_RELOC_RISCV_LO12_S:
+      return ENCODE_STYPE_IMM (value);
+
+    case BFD_RELOC_RISCV_LO12_I:
+      return ENCODE_ITYPE_IMM (value);
+
+    default:
+      abort ();
+    }
+}
+
 /* Output an instruction.  IP is the instruction information.
    ADDRESS_EXPR is an operand of the instruction to be used with
    RELOC_TYPE.  */
@@ -676,43 +700,22 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 	  return;
 	}
       else if (address_expr->X_op == O_constant)
+	ip->insn_opcode |= riscv_apply_const_reloc (reloc_type,
+						    address_expr->X_add_number);
+      else
 	{
-	  switch (reloc_type)
-	    {
-	    case BFD_RELOC_32:
-	      ip->insn_opcode |= address_expr->X_add_number;
-	      goto append;
+	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
+	  if (howto == NULL)
+	    as_bad (_("Unsupported RISC-V relocation number %d"), reloc_type);
 
-	    case BFD_RELOC_RISCV_HI20:
-	      {
-		insn_t imm = RISCV_CONST_HIGH_PART (address_expr->X_add_number);
-		ip->insn_opcode |= ENCODE_UTYPE_IMM (imm);
-		goto append;
-	      }
+	  ip->fixp = fix_new_exp (ip->frag, ip->where,
+				  bfd_get_reloc_size (howto),
+				  address_expr, FALSE, reloc_type);
 
-	    case BFD_RELOC_RISCV_LO12_S:
-	      ip->insn_opcode |= ENCODE_STYPE_IMM (address_expr->X_add_number);
-	      goto append;
-
-	    case BFD_RELOC_RISCV_LO12_I:
-	      ip->insn_opcode |= ENCODE_ITYPE_IMM (address_expr->X_add_number);
-	      goto append;
-
-	    default:
-	      break;
-	    }
+	  ip->fixp->fx_tcbit = riscv_opts.relax;
 	}
-
-	howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
-	if (howto == NULL)
-	  as_bad (_("Unsupported RISC-V relocation number %d"), reloc_type);
-
-	ip->fixp = fix_new_exp (ip->frag, ip->where,
-				bfd_get_reloc_size (howto),
-				address_expr, FALSE, reloc_type);
     }
 
-append:
   add_fixed_insn (ip);
   install_insn (ip);
 }
@@ -1085,7 +1088,8 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc,
 
 	/* Check whether the output BFD supports this relocation.
 	   If not, issue an error and fall back on something safe.  */
-	if (!bfd_reloc_type_lookup (stdoutput, percent_op->reloc))
+	if (*reloc != BFD_RELOC_UNUSED
+	    && !bfd_reloc_type_lookup (stdoutput, *reloc))
 	  {
 	    as_bad ("relocation %s isn't supported by the current ABI",
 		    percent_op->str);
@@ -1826,45 +1830,56 @@ md_pcrel_from (fixS *fixP)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
+  unsigned int subtype;
   bfd_byte *buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
+  bfd_boolean relaxable = FALSE;
 
   /* Remember value for tc_gen_reloc.  */
   fixP->fx_addnumber = *valP;
 
   switch (fixP->fx_r_type)
     {
-    case BFD_RELOC_RISCV_TLS_GOT_HI20:
-    case BFD_RELOC_RISCV_TLS_GD_HI20:
-    case BFD_RELOC_RISCV_TLS_DTPREL32:
-    case BFD_RELOC_RISCV_TLS_DTPREL64:
-    case BFD_RELOC_RISCV_TPREL_HI20:
-    case BFD_RELOC_RISCV_TPREL_LO12_I:
-    case BFD_RELOC_RISCV_TPREL_LO12_S:
-    case BFD_RELOC_RISCV_TPREL_ADD:
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      /* Fall through.  */
-
-    case BFD_RELOC_RISCV_GOT_HI20:
-    case BFD_RELOC_RISCV_PCREL_HI20:
     case BFD_RELOC_RISCV_HI20:
     case BFD_RELOC_RISCV_LO12_I:
     case BFD_RELOC_RISCV_LO12_S:
+      bfd_putl32 (riscv_apply_const_reloc (fixP->fx_r_type, *valP)
+		  | bfd_getl32 (buf), buf);
+      relaxable = TRUE;
+      break;
+
+    case BFD_RELOC_RISCV_GOT_HI20:
+    case BFD_RELOC_RISCV_PCREL_HI20:
     case BFD_RELOC_RISCV_ADD8:
     case BFD_RELOC_RISCV_ADD16:
     case BFD_RELOC_RISCV_ADD32:
     case BFD_RELOC_RISCV_ADD64:
+    case BFD_RELOC_RISCV_SUB6:
     case BFD_RELOC_RISCV_SUB8:
     case BFD_RELOC_RISCV_SUB16:
     case BFD_RELOC_RISCV_SUB32:
     case BFD_RELOC_RISCV_SUB64:
-      gas_assert (fixP->fx_addsy != NULL);
-      /* Nothing needed to do.  The value comes from the reloc entry.  */
+    case BFD_RELOC_RISCV_RELAX:
+      break;
+
+    case BFD_RELOC_RISCV_TPREL_HI20:
+    case BFD_RELOC_RISCV_TPREL_LO12_I:
+    case BFD_RELOC_RISCV_TPREL_LO12_S:
+    case BFD_RELOC_RISCV_TPREL_ADD:
+      relaxable = TRUE;
+      /* Fall through.  */
+
+    case BFD_RELOC_RISCV_TLS_GOT_HI20:
+    case BFD_RELOC_RISCV_TLS_GD_HI20:
+    case BFD_RELOC_RISCV_TLS_DTPREL32:
+    case BFD_RELOC_RISCV_TLS_DTPREL64:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
       break;
 
     case BFD_RELOC_64:
     case BFD_RELOC_32:
     case BFD_RELOC_16:
     case BFD_RELOC_8:
+    case BFD_RELOC_RISCV_CFA:
       if (fixP->fx_addsy && fixP->fx_subsy)
 	{
 	  fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
@@ -1893,6 +1908,49 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    case BFD_RELOC_8:
 	      fixP->fx_r_type = BFD_RELOC_RISCV_ADD8;
 	      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB8;
+	      break;
+
+	    case BFD_RELOC_RISCV_CFA:
+	      /* Load the byte to get the subtype.  */
+	      subtype = bfd_get_8 (NULL, &fixP->fx_frag->fr_literal[fixP->fx_where]);
+	      switch (subtype)
+		{
+		case DW_CFA_advance_loc1:
+		  fixP->fx_where++;
+		  fixP->fx_next->fx_where++;
+		  fixP->fx_r_type = BFD_RELOC_RISCV_SET8;
+		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB8;
+		  break;
+
+		case DW_CFA_advance_loc2:
+		  fixP->fx_size = 2;
+		  fixP->fx_where++;
+		  fixP->fx_next->fx_size = 2;
+		  fixP->fx_next->fx_where++;
+		  fixP->fx_r_type = BFD_RELOC_RISCV_SET16;
+		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB16;
+		  break;
+
+		case DW_CFA_advance_loc4:
+		  fixP->fx_size = 4;
+		  fixP->fx_where++;
+		  fixP->fx_next->fx_size = 4;
+		  fixP->fx_next->fx_where++;
+		  fixP->fx_r_type = BFD_RELOC_RISCV_SET32;
+		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB32;
+		  break;
+
+		default:
+		  if (subtype < 0x80 && (subtype & 0x40))
+		    {
+		      /* DW_CFA_advance_loc */
+		      fixP->fx_r_type = BFD_RELOC_RISCV_SET6;
+		      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB6;
+		    }
+		  else
+		    as_fatal (_("internal error: bad CFA value #%d"), subtype);
+		  break;
+		}
 	      break;
 
 	    default:
@@ -1954,10 +2012,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       break;
 
-    case BFD_RELOC_RISCV_PCREL_LO12_S:
-    case BFD_RELOC_RISCV_PCREL_LO12_I:
     case BFD_RELOC_RISCV_CALL:
     case BFD_RELOC_RISCV_CALL_PLT:
+      relaxable = TRUE;
+      break;
+
+    case BFD_RELOC_RISCV_PCREL_LO12_S:
+    case BFD_RELOC_RISCV_PCREL_LO12_I:
     case BFD_RELOC_RISCV_ALIGN:
       break;
 
@@ -1966,7 +2027,53 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type) != NULL)
 	as_fatal (_("internal error: bad relocation #%d"), fixP->fx_r_type);
     }
+
+  /* Add an R_RISCV_RELAX reloc if the reloc is relaxable.  */
+  if (relaxable && fixP->fx_tcbit && fixP->fx_addsy != NULL)
+    {
+      fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
+      fixP->fx_next->fx_addsy = fixP->fx_next->fx_subsy = NULL;
+      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_RELAX;
+    }
 }
+
+/* Because the value of .cfi_remember_state may changed after relaxation,
+   we insert a fix to relocate it again in link-time.  */
+
+void
+riscv_pre_output_hook (void)
+{
+  const frchainS *frch;
+  const asection *s;
+
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frch = seg_info (s)->frchainP; frch; frch = frch->frch_next)
+      {
+	const fragS *frag;
+
+	for (frag = frch->frch_root; frag; frag = frag->fr_next)
+	  {
+	    if (frag->fr_type == rs_cfa)
+	      {
+		const fragS *loc4_frag;
+		expressionS exp;
+
+		symbolS *add_symbol = frag->fr_symbol->sy_value.X_add_symbol;
+		symbolS *op_symbol = frag->fr_symbol->sy_value.X_op_symbol;
+
+		exp.X_op = O_subtract;
+		exp.X_add_symbol = add_symbol;
+		exp.X_add_number = 0;
+		exp.X_op_symbol = op_symbol;
+
+		loc4_frag = (fragS *) frag->fr_opcode;
+		fix_new_exp (loc4_frag, (int) frag->fr_offset, 1, &exp, 0,
+			     BFD_RELOC_RISCV_CFA);
+	      }
+	  }
+      }
+}
+
 
 /* This structure is used to hold a stack of .option values.  */
 
@@ -1998,10 +2105,10 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     riscv_opts.pic = TRUE;
   else if (strcmp (name, "nopic") == 0)
     riscv_opts.pic = FALSE;
-  else if (strcmp (name, "soft-float") == 0)
-    float_mode = FLOAT_MODE_SOFT;
-  else if (strcmp (name, "hard-float") == 0)
-    float_mode = FLOAT_MODE_HARD;
+  else if (strcmp (name, "relax") == 0)
+    riscv_opts.relax = TRUE;
+  else if (strcmp (name, "norelax") == 0)
+    riscv_opts.relax = FALSE;
   else if (strcmp (name, "push") == 0)
     {
       struct riscv_option_stack *s;
