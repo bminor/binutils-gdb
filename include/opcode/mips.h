@@ -753,6 +753,14 @@ struct mips_opcode
   unsigned long exclusions;
 };
 
+/* Return true if MO is an instruction that requires 32-bit encoding.  */
+
+static inline bfd_boolean
+mips_opcode_32bit_p (const struct mips_opcode *mo)
+{
+  return mo->mask >> 16 != 0;
+}
+
 /* These are the characters which may appear in the args field of an
    instruction.  They appear in the order in which the fields appear
    when the instruction is used.  Commas and parentheses in the args

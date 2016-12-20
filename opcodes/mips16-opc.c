@@ -273,13 +273,12 @@ const struct mips_opcode mips16_opcodes[] =
 {"exit",    "L",	0xef09, 0xff1f,		TRAP,			0,		I1,	0,	0 },
 {"entry",   "",		0xe809, 0xffff,		TRAP,			0,		I1,	0,	0 },
 {"entry",   "l",	0xe809, 0xf81f,		TRAP,			0,		I1,	0,	0 },
-{"extend",  "e",	0xf000, 0xf800,		0,			0,		I1,	0,	0 },
 {"jalr",    "x",	0xe840, 0xf8ff,		RD_1|WR_31|UBD,		0,		I1,	0,	0 },
 {"jalr",    "R,x",	0xe840, 0xf8ff,		RD_2|WR_31|UBD,		0,		I1,	0,	0 },
 {"jal",     "x",	0xe840, 0xf8ff,		RD_1|WR_31|UBD,		0,		I1,	0,	0 },
 {"jal",     "R,x",	0xe840, 0xf8ff,		RD_2|WR_31|UBD,		0,		I1,	0,	0 },
-{"jal",	    "a",	0x1800, 0xfc00,		WR_31|UBD,		0,		I1,	0,	0 },
-{"jalx",    "i",	0x1c00, 0xfc00,		WR_31|UBD,		0,		I1,	0,	0 },
+{"jal",	    "a",	0x18000000, 0xfc000000,	WR_31|UBD,		0,		I1,	0,	0 },
+{"jalx",    "i",	0x1c000000, 0xfc000000,	WR_31|UBD,		0,		I1,	0,	0 },
 {"jr",	    "x",	0xe800, 0xf8ff,		RD_1|UBD,		0,		I1,	0,	0 },
 {"jr",	    "R",	0xe820, 0xffff,		UBD,			RD_31,		I1,	0,	0 },
 {"j",	    "x",	0xe800, 0xf8ff,		RD_1|UBD,		0,		I1,	0,	0 },
@@ -356,6 +355,9 @@ const struct mips_opcode mips16_opcodes[] =
 {"zeb",	    "x",	0xe811, 0xf8ff,		MOD_1,			0,		I32,	0,	0 },
 {"zeh",	    "x",	0xe831, 0xf8ff,		MOD_1,			0,		I32,	0,	0 },
 {"zew",	    "x",	0xe851, 0xf8ff,		MOD_1,			0,		I64,	0,	0 },
+  /* Place EXTEND last so that it catches any prefix that didn't match
+     anything.  */
+{"extend",  "e",	0xf000, 0xf800,		0,			0,		I1,	0,	0 },
 };
 
 const int bfd_mips16_num_opcodes =

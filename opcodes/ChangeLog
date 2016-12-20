@@ -1,5 +1,16 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (print_mips16_insn_arg): Always handle `extend' and
+	`insn' together, with `extend' as the high-order 16 bits.
+	(match_kind): New enum.
+	(print_insn_mips16): Rework for 32-bit instruction matching.
+	Do not dump EXTEND prefixes here.
+	* mips16-opc.c (mips16_opcodes): Move "extend" entry to the end.
+	Recode `match' and `mask' fields as 32-bit in absolute "jal" and
+	"jalx" entries.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips16-opc.c (mips16_opcodes): Set membership to I3 rather
 	than I1 for the "ddiv", "ddivu", "drem", "dremu" and "dsubu"
 	INSN_MACRO entries.

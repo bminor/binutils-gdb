@@ -1,5 +1,38 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (micromips_insn_length): Use
+	`mips_opcode_32bit_p'.
+	(is_size_valid): Adjust description.
+	(is_size_valid_16): New function.
+	(validate_mips_insn): Use `mips_opcode_32bit_p' in MIPS16
+	operand decoding.
+	(validate_mips16_insn): Remove `a' and `i' operand code special
+	casing, use `mips_opcode_32bit_p' to determine instruction
+	width.
+	(append_insn): Adjust forced MIPS16 instruction size
+	determination.
+	(match_mips16_insn): Likewise.  Don't shift the instruction's
+	opcode with the `a' and `i' operand codes.  Use
+	`mips_opcode_32bit_p' in operand decoding.
+	(match_mips16_insns): Check for forced instruction size's
+	validity.
+	(mips16_ip): Don't force instruction size in the `noautoextend'
+	mode.
+	* testsuite/gas/mips/mips16-jal-e.d: New test.
+	* testsuite/gas/mips/mips16-jal-t.d: New test.
+	* testsuite/gas/mips/mips16-macro-e.d: New test.
+	* testsuite/gas/mips/mips16-macro-t.d: New test.
+	* testsuite/gas/mips/mips16-jal-t.l: New stderr output.
+	* testsuite/gas/mips/mips16-macro-e.l: New stderr output.
+	* testsuite/gas/mips/mips16-macro-t.l: New stderr output.
+	* testsuite/gas/mips/mips16-jal-e.s: New test source.
+	* testsuite/gas/mips/mips16-jal-t.s: New test source.
+	* testsuite/gas/mips/mips16-macro-e.s: New test source.
+	* testsuite/gas/mips/mips16-macro-t.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16-macro.l: New list test.
 	* testsuite/gas/mips/mips.exp: Run the new test.
 

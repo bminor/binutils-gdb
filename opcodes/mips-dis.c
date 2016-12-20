@@ -1927,13 +1927,11 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	}
 
       if (operand->size == 26)
-	/* In this case INSN is the first two bytes of the instruction
-	   and EXTEND is the second two bytes.  */
-	uval = ((insn & 0x1f) << 21) | ((insn & 0x3e0) << 11) | extend;
+	uval = ((extend & 0x1f) << 21) | ((extend & 0x3e0) << 11) | insn;
       else
 	{
 	  /* Calculate the full field value.  */
-	  uval = mips_extract_operand (operand, insn);
+	  uval = mips_extract_operand (operand, (extend << 16) | insn);
 	  if (use_extend)
 	    {
 	      ext_operand = decode_mips16_operand (type, TRUE);
@@ -2015,6 +2013,15 @@ is_mips16_plt_tail (struct disassemble_info *info, bfd_vma addr)
   return FALSE;
 }
 
+/* Whether none, a 32-bit or a 16-bit instruction match has been done.  */
+
+enum match_kind
+{
+  MATCH_NONE,
+  MATCH_FULL,
+  MATCH_SHORT
+};
+
 /* Disassemble mips16 instructions.  */
 
 static int
@@ -2023,13 +2030,13 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   const fprintf_ftype infprintf = info->fprintf_func;
   int status;
   bfd_byte buffer[4];
-  int length;
-  int insn;
-  bfd_boolean use_extend;
-  int extend = 0;
   const struct mips_opcode *op, *opend;
   struct mips_print_arg_state state;
   void *is = info->stream;
+  bfd_boolean have_second;
+  unsigned int second;
+  unsigned int first;
+  unsigned int full;
 
   info->bytes_per_chunk = 2;
   info->display_endian = info->endian;
@@ -2070,44 +2077,26 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
       return -1;
     }
 
-  length = 2;
-
   if (info->endian == BFD_ENDIAN_BIG)
-    insn = bfd_getb16 (buffer);
+    first = bfd_getb16 (buffer);
   else
-    insn = bfd_getl16 (buffer);
+    first = bfd_getl16 (buffer);
 
-  /* Handle the extend opcode specially.  */
-  use_extend = FALSE;
-  if ((insn & 0xf800) == 0xf000)
+  status = (*info->read_memory_func) (memaddr + 2, buffer, 2, info);
+  if (status == 0)
     {
-      use_extend = TRUE;
-      extend = insn & 0x7ff;
-
-      memaddr += 2;
-
-      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
-      if (status != 0)
-	{
-	  infprintf (is, "extend\t0x%x", (unsigned int) extend);
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-
+      have_second = TRUE;
       if (info->endian == BFD_ENDIAN_BIG)
-	insn = bfd_getb16 (buffer);
+	second = bfd_getb16 (buffer);
       else
-	insn = bfd_getl16 (buffer);
-
-      /* Check for an extend opcode followed by an extend opcode.  */
-      if ((insn & 0xf800) == 0xf000)
-	{
-	  infprintf (is, "extend\t0x%x", (unsigned int) extend);
-	  info->insn_type = dis_noninsn;
-	  return length;
-	}
-
-      length += 2;
+	second = bfd_getl16 (buffer);
+      full = (first << 16) | second;
+    }
+  else
+    {
+      have_second = FALSE;
+      second = 0;
+      full = first;
     }
 
   /* FIXME: Should probably use a hash table on the major opcode here.  */
@@ -2115,37 +2104,35 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   opend = mips16_opcodes + bfd_mips16_num_opcodes;
   for (op = mips16_opcodes; op < opend; op++)
     {
-      if (op->pinfo != INSN_MACRO
-	  && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
-	  && (insn & op->mask) == op->match)
+      enum match_kind match;
+
+      if (op->pinfo == INSN_MACRO
+	  || (no_aliases && (op->pinfo2 & INSN2_ALIAS)))
+	match = MATCH_NONE;
+      else if (mips_opcode_32bit_p (op))
+	{
+	  if (have_second
+	      && (full & op->mask) == op->match)
+	    match = MATCH_FULL;
+	  else
+	    match = MATCH_NONE;
+	}
+      else if ((first & op->mask) == op->match)
+	{
+	  match = MATCH_SHORT;
+	  second = 0;
+	  full = first;
+	}
+      else if ((first & 0xf800) == 0xf000
+	       && have_second
+	       && (second & op->mask) == op->match)
+	match = MATCH_FULL;
+      else
+	match = MATCH_NONE;
+
+      if (match != MATCH_NONE)
 	{
 	  const char *s;
-
-	  if (op->args[0] == 'a' || op->args[0] == 'i')
-	    {
-	      if (use_extend)
-		{
-		  infprintf (is, "extend\t0x%x", (unsigned int) extend);
-		  info->insn_type = dis_noninsn;
-		  return length - 2;
-		}
-
-	      use_extend = FALSE;
-
-	      memaddr += 2;
-
-	      status = (*info->read_memory_func) (memaddr, buffer, 2,
-						  info);
-	      if (status == 0)
-		{
-		  use_extend = TRUE;
-		  if (info->endian == BFD_ENDIAN_BIG)
-		    extend = bfd_getb16 (buffer);
-		  else
-		    extend = bfd_getl16 (buffer);
-		  length += 2;
-		}
-	    }
 
 	  infprintf (is, "%s", op->name);
 	  if (op->args[0] != '\0')
@@ -2156,7 +2143,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	    {
 	      if (*s == ','
 		  && s[1] == 'w'
-		  && GET_OP (insn, RX) == GET_OP (insn, RY))
+		  && GET_OP (full, RX) == GET_OP (full, RY))
 		{
 		  /* Skip the register and the comma.  */
 		  ++s;
@@ -2164,14 +2151,25 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 		}
 	      if (*s == ','
 		  && s[1] == 'v'
-		  && GET_OP (insn, RZ) == GET_OP (insn, RX))
+		  && GET_OP (full, RZ) == GET_OP (full, RX))
 		{
 		  /* Skip the register and the comma.  */
 		  ++s;
 		  continue;
 		}
-	      print_mips16_insn_arg (info, &state, op, *s, memaddr, insn,
-				     use_extend, extend, s[1] == '(');
+	      switch (match)
+		{
+		  case MATCH_FULL:
+		    print_mips16_insn_arg (info, &state, op, *s, memaddr + 2,
+					   second, TRUE, first, s[1] == '(');
+		    break;
+		  case MATCH_SHORT:
+		    print_mips16_insn_arg (info, &state, op, *s, memaddr,
+					   first, FALSE, 0, s[1] == '(');
+		    break;
+		  case MATCH_NONE:	/* Stop the compiler complaining.  */
+		    break;
+		}
 	    }
 
 	  /* Figure out branch instruction type and delay slot information.  */
@@ -2188,17 +2186,15 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	  else if ((op->pinfo2 & INSN2_COND_BRANCH) != 0)
 	    info->insn_type = dis_condbranch;
 
-	  return length;
+	  return match == MATCH_FULL ? 4 : 2;
 	}
     }
 #undef GET_OP
 
-  if (use_extend)
-    infprintf (is, "0x%x ", extend | 0xf000);
-  infprintf (is, "0x%x", insn);
+  infprintf (is, "0x%x", first);
   info->insn_type = dis_noninsn;
 
-  return length;
+  return 2;
 }
 
 /* Disassemble microMIPS instructions.  */
