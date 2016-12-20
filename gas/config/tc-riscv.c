@@ -2190,14 +2190,20 @@ riscv_make_nops (char *buf, bfd_vma bytes)
 {
   bfd_vma i = 0;
 
-  if (bytes % 4 == 2)
+  /* RISC-V instructions cannot begin or end on odd addresses, so this case
+     means we are not within a valid instruction sequence.  It is thus safe
+     to use a zero byte, even though that is not a valid instruction.  */
+  if (bytes % 2 == 1)
+    buf[i++] = 0;
+
+  /* Use at most one 2-byte NOP.  */
+  if ((bytes - i) % 4 == 2)
     {
-      md_number_to_chars (buf, RVC_NOP, 2);
+      md_number_to_chars (buf + i, RVC_NOP, 2);
       i += 2;
     }
 
-  gas_assert ((bytes - i) % 4 == 0);
-
+  /* Fill the remainder with 4-byte NOPs.  */
   for ( ; i < bytes; i += 4)
     md_number_to_chars (buf + i, RISCV_NOP, 4);
 }
@@ -2210,8 +2216,12 @@ riscv_make_nops (char *buf, bfd_vma bytes)
 bfd_boolean
 riscv_frag_align_code (int n)
 {
-  bfd_vma bytes = (bfd_vma)1 << n;
-  bfd_vma min_text_alignment = riscv_opts.rvc ? 2 : 4;
+  bfd_vma bytes = (bfd_vma) 1 << n;
+  bfd_vma min_text_alignment_order = riscv_opts.rvc ? 1 : 2;
+  bfd_vma min_text_alignment = (bfd_vma) 1 << min_text_alignment_order;
+
+  /* First, get back to minimal alignment.  */
+  frag_align_code (min_text_alignment_order, 0);
 
   /* When not relaxing, riscv_handle_align handles code alignment.  */
   if (!riscv_opts.relax)
