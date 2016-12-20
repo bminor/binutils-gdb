@@ -215,7 +215,7 @@ check_DATA += pr14265.stdout
 MOSTLYCLEANFILES += pr14265
 pr14265.o: pr14265.c
 	$(COMPILE) -O0 -c -o $@ $<
-pr14265: pr14265.o
+pr14265: pr14265.o gcctestdir/ld $(srcdir)/pr14265.t
 	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -Wl,-T,$(srcdir)/pr14265.t -o $@ $<
 pr14265.stdout: pr14265
 	$(TEST_NM) --format=bsd --numeric-sort $< > $@
@@ -765,9 +765,9 @@ weak_undef_file1.o: weak_undef_file1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 weak_undef_file2.o: weak_undef_file2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
-weak_undef_lib.so: weak_undef_file1.o
+weak_undef_lib.so: weak_undef_file1.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1.o
-alt/weak_undef_lib.so: weak_undef_file2.o
+alt/weak_undef_lib.so: weak_undef_file2.o gcctestdir/ld
 	test -d alt || mkdir -p alt
 	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 
@@ -1051,33 +1051,33 @@ x86_64_mov_to_lea7.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --x32 -o $@ $<
 x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --64 -o $@ $<
-x86_64_mov_to_lea1: x86_64_mov_to_lea1.o
+x86_64_mov_to_lea1: x86_64_mov_to_lea1.o ../ld-new
 	../ld-new -Bsymbolic -shared  -melf_x86_64  -o $@ $<
-x86_64_mov_to_lea2: x86_64_mov_to_lea1.o
+x86_64_mov_to_lea2: x86_64_mov_to_lea1.o ../ld-new
 	../ld-new -pie -melf_x86_64  -o $@ $<
-x86_64_mov_to_lea3: x86_64_mov_to_lea1.o
+x86_64_mov_to_lea3: x86_64_mov_to_lea1.o ../ld-new
 	../ld-new -melf_x86_64  -o $@ $<
-x86_64_mov_to_lea4: x86_64_mov_to_lea2.o
+x86_64_mov_to_lea4: x86_64_mov_to_lea2.o ../ld-new
 	../ld-new -Bsymbolic -shared  -melf32_x86_64  -o $@ $<
-x86_64_mov_to_lea5: x86_64_mov_to_lea2.o
+x86_64_mov_to_lea5: x86_64_mov_to_lea2.o ../ld-new
 	../ld-new -pie -melf32_x86_64  -o $@ $<
-x86_64_mov_to_lea6: x86_64_mov_to_lea2.o
+x86_64_mov_to_lea6: x86_64_mov_to_lea2.o ../ld-new
 	../ld-new -melf32_x86_64  -o $@ $<
-x86_64_mov_to_lea7: x86_64_mov_to_lea3.o
+x86_64_mov_to_lea7: x86_64_mov_to_lea3.o ../ld-new
 	../ld-new -melf32_x86_64 -pie -o $@ $<
-x86_64_mov_to_lea8: x86_64_mov_to_lea4.o
+x86_64_mov_to_lea8: x86_64_mov_to_lea4.o ../ld-new
 	../ld-new -melf_x86_64 -pie -o $@ $<
-x86_64_mov_to_lea9: x86_64_mov_to_lea5.o
+x86_64_mov_to_lea9: x86_64_mov_to_lea5.o ../ld-new
 	../ld-new -melf32_x86_64  -o $@ $<
-x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
+x86_64_mov_to_lea10: x86_64_mov_to_lea6.o ../ld-new
 	../ld-new -melf_x86_64  -o $@ $<
-x86_64_mov_to_lea11: x86_64_mov_to_lea2.o
+x86_64_mov_to_lea11: x86_64_mov_to_lea2.o ../ld-new
 	../ld-new -melf32_x86_64 -shared  -o $@ $<
-x86_64_mov_to_lea12: x86_64_mov_to_lea1.o
+x86_64_mov_to_lea12: x86_64_mov_to_lea1.o ../ld-new
 	../ld-new -melf_x86_64 -shared  -o $@ $<
-x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
+x86_64_mov_to_lea13: x86_64_mov_to_lea7.o ../ld-new
 	../ld-new -melf32_x86_64 -shared  -o $@ $<
-x86_64_mov_to_lea14: x86_64_mov_to_lea8.o
+x86_64_mov_to_lea14: x86_64_mov_to_lea8.o ../ld-new
 	../ld-new -melf_x86_64 -shared  -o $@ $<
 x86_64_mov_to_lea1.stdout: x86_64_mov_to_lea1
 	$(TEST_OBJDUMP) -dw $< > $@
@@ -1237,21 +1237,21 @@ i386_mov_to_lea4.o: i386_mov_to_lea4.s
 	$(TEST_AS) --32 -o $@ $<
 i386_mov_to_lea5.o: i386_mov_to_lea5.s
 	$(TEST_AS) --32 -o $@ $<
-i386_mov_to_lea1: i386_mov_to_lea1.o
+i386_mov_to_lea1: i386_mov_to_lea1.o ../ld-new
 	../ld-new -Bsymbolic -shared -melf_i386  -o $@ $<
-i386_mov_to_lea2: i386_mov_to_lea1.o
+i386_mov_to_lea2: i386_mov_to_lea1.o ../ld-new
 	../ld-new  -pie -melf_i386  -o $@ $<
-i386_mov_to_lea3: i386_mov_to_lea1.o
+i386_mov_to_lea3: i386_mov_to_lea1.o ../ld-new
 	../ld-new -melf_i386  -o $@ $<
-i386_mov_to_lea4: i386_mov_to_lea1.o
+i386_mov_to_lea4: i386_mov_to_lea1.o ../ld-new
 	../ld-new -melf_i386 -shared  -o $@ $<
-i386_mov_to_lea5: i386_mov_to_lea2.o
+i386_mov_to_lea5: i386_mov_to_lea2.o ../ld-new
 	../ld-new -melf_i386 -shared  -o $@ $<
-i386_mov_to_lea6: i386_mov_to_lea3.o
+i386_mov_to_lea6: i386_mov_to_lea3.o ../ld-new
 	../ld-new -melf_i386 -shared  -o $@ $<
-i386_mov_to_lea7: i386_mov_to_lea4.o
+i386_mov_to_lea7: i386_mov_to_lea4.o ../ld-new
 	../ld-new -melf_i386 -shared  -o $@ $<
-i386_mov_to_lea8: i386_mov_to_lea5.o
+i386_mov_to_lea8: i386_mov_to_lea5.o ../ld-new
 	../ld-new -melf_i386 -shared  -o $@ $<
 i386_mov_to_lea1.stdout: i386_mov_to_lea1
 	$(TEST_OBJDUMP) -dw $< > $@
@@ -2282,7 +2282,7 @@ plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
 
-plugin_test.so: plugin_test.o
+plugin_test.so: plugin_test.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
@@ -2341,7 +2341,7 @@ plugin_final_layout.stdout: plugin_final_layout
 plugin_final_layout_readelf.stdout: plugin_final_layout
 	$(TEST_READELF) -Wl plugin_final_layout > plugin_final_layout_readelf.stdout
 
-plugin_section_order.so: plugin_section_order.o
+plugin_section_order.so: plugin_section_order.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 plugin_section_order.o: plugin_section_order.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
@@ -2356,7 +2356,7 @@ plugin_layout_with_alignment: plugin_layout_with_alignment.o plugin_section_alig
 plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
 	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
 
-plugin_section_alignment.so: plugin_section_alignment.o
+plugin_section_alignment.so: plugin_section_alignment.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared plugin_section_alignment.o
 plugin_section_alignment.o: plugin_section_alignment.cc
 	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
@@ -2389,7 +2389,7 @@ alt/libexclude_libs_test_3.a: exclude_libs_test_3.o
 check_PROGRAMS += local_labels_test
 local_labels_test.o: ver_test_6.c
 	$(COMPILE) -g -c -Wa,-L -o $@ $<
-local_labels_test: local_labels_test.o
+local_labels_test: local_labels_test.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ local_labels_test.o
 
 check_PROGRAMS += discard_locals_test
@@ -2476,7 +2476,7 @@ check_PROGRAMS += searched_file_test
 MOSTLYCLEANFILES += searched_file_test searched_file_test_lib.o \
                     alt/searched_file_test_lib.a
 searched_file_test_SOURCES = searched_file_test.cc
-searched_file_test_DEPENDENCIES = alt/searched_file_test_lib.a
+searched_file_test_DEPENDENCIES = gcctestdir/ld alt/searched_file_test_lib.a
 searched_file_test_LDFLAGS = -Bgcctestdir/ -Lalt
 searched_file_test_LDADD = -l:searched_file_test_lib.a
 searched_file_test_lib.o: searched_file_test_lib.cc
@@ -3358,7 +3358,7 @@ check_DATA += arm_attr_merge_6.stdout arm_attr_merge_6r.stdout \
 arm_attr_merge_6.stdout: arm_attr_merge_6
 	$(TEST_READELF) -A $< > $@
 
-arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o
+arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o ../ld-new
 	../ld-new -o $@ arm_attr_merge_6a.o arm_attr_merge_6b.o
 
 arm_attr_merge_6a.o: arm_attr_merge_6a.s
@@ -3370,13 +3370,13 @@ arm_attr_merge_6b.o: arm_attr_merge_6b.s
 arm_attr_merge_6r.stdout: arm_attr_merge_6r
 	$(TEST_READELF) -A $< > $@
 
-arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o
+arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o ../ld-new
 	../ld-new -o $@ arm_attr_merge_6b.o arm_attr_merge_6a.o
 
 arm_attr_merge_7.stdout: arm_attr_merge_7
 	$(TEST_READELF) -A $< > $@
 
-arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o
+arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o ../ld-new
 	../ld-new -o $@ arm_attr_merge_7a.o arm_attr_merge_7b.o
 
 arm_attr_merge_7a.o: arm_attr_merge_7a.s

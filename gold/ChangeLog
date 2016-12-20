@@ -1,3 +1,9 @@
+2016-12-20  Cary Coutant  <ccoutant@gmail.com>
+
+	* testsuite/Makefile.am: Add missing dependencies on gcctestdir/ld
+	or ../ld-new.
+	* testsuite/Makefile.in: Regenerate.
+
 2016-12-19  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20949

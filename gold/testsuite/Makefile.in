@@ -3267,7 +3267,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_SOURCES = searched_file_test.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_DEPENDENCIES = alt/searched_file_test_lib.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_DEPENDENCIES = gcctestdir/ld alt/searched_file_test_lib.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDFLAGS = -Bgcctestdir/ -Lalt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDADD = -l:searched_file_test_lib.a
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1static_SOURCES = ifuncmain1.c
@@ -5829,7 +5829,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) gc_orphan_section_test > gc_orphan_section_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265.o: pr14265.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265: pr14265.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265: pr14265.o gcctestdir/ld $(srcdir)/pr14265.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -Wl,-T,$(srcdir)/pr14265.t -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265.stdout: pr14265
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) --format=bsd --numeric-sort $< > $@
@@ -6034,9 +6034,9 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file2.o: weak_undef_file2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_lib.so: weak_undef_file1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_lib.so: weak_undef_file1.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/weak_undef_lib.so: weak_undef_file2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/weak_undef_lib.so: weak_undef_file2.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libweak_undef_2.a: weak_undef_file3.o weak_undef_file4.o
@@ -6167,33 +6167,33 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) --x32 -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) --64 -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea1: x86_64_mov_to_lea1.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea1: x86_64_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -Bsymbolic -shared  -melf_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea2: x86_64_mov_to_lea1.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea2: x86_64_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -pie -melf_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea3: x86_64_mov_to_lea1.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea3: x86_64_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea4: x86_64_mov_to_lea2.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea4: x86_64_mov_to_lea2.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -Bsymbolic -shared  -melf32_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea5: x86_64_mov_to_lea2.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea5: x86_64_mov_to_lea2.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -pie -melf32_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea6: x86_64_mov_to_lea2.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea6: x86_64_mov_to_lea2.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea7: x86_64_mov_to_lea3.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea7: x86_64_mov_to_lea3.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64 -pie -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea8: x86_64_mov_to_lea4.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea8: x86_64_mov_to_lea4.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64 -pie -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea9: x86_64_mov_to_lea5.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea9: x86_64_mov_to_lea5.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea10: x86_64_mov_to_lea6.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea11: x86_64_mov_to_lea2.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea11: x86_64_mov_to_lea2.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64 -shared  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea12: x86_64_mov_to_lea1.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea12: x86_64_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64 -shared  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea13: x86_64_mov_to_lea7.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64 -shared  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea14: x86_64_mov_to_lea8.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea14: x86_64_mov_to_lea8.o ../ld-new
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64 -shared  -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea1.stdout: x86_64_mov_to_lea1
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
@@ -6283,21 +6283,21 @@ uninstall-am:
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) --32 -o $@ $<
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea5.o: i386_mov_to_lea5.s
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) --32 -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea1: i386_mov_to_lea1.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea1: i386_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -Bsymbolic -shared -melf_i386  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea2: i386_mov_to_lea1.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea2: i386_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new  -pie -melf_i386  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea3: i386_mov_to_lea1.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea3: i386_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_i386  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea4: i386_mov_to_lea1.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea4: i386_mov_to_lea1.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_i386 -shared  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea5: i386_mov_to_lea2.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea5: i386_mov_to_lea2.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_i386 -shared  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea6: i386_mov_to_lea3.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea6: i386_mov_to_lea3.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_i386 -shared  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea7: i386_mov_to_lea4.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea7: i386_mov_to_lea4.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_i386 -shared  -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea8: i386_mov_to_lea5.o
+@DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea8: i386_mov_to_lea5.o ../ld-new
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_i386 -shared  -o $@ $<
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea1.stdout: i386_mov_to_lea1
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
@@ -6847,7 +6847,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_start_lib_test_2.syms: plugin_start_lib_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.so: plugin_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.so: plugin_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.o: plugin_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
@@ -6891,7 +6891,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_final_layout_readelf.stdout: plugin_final_layout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -Wl plugin_final_layout > plugin_final_layout_readelf.stdout
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_order.so: plugin_section_order.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_order.so: plugin_section_order.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_order.o: plugin_section_order.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
@@ -6902,7 +6902,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_layout_with_alignment.stdout: plugin_layout_with_alignment
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_NM) -n --synthetic plugin_layout_with_alignment > plugin_layout_with_alignment.stdout
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_alignment.so: plugin_section_alignment.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_alignment.so: plugin_section_alignment.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared plugin_section_alignment.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_section_alignment.o: plugin_section_alignment.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
@@ -6917,7 +6917,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
 @GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test.o: ver_test_6.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -g -c -Wa,-L -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test: local_labels_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test: local_labels_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ local_labels_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test.syms: discard_locals_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
@@ -7480,7 +7480,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6.stdout: arm_attr_merge_6
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -A $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o ../ld-new
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_attr_merge_6a.o arm_attr_merge_6b.o
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6a.o: arm_attr_merge_6a.s
@@ -7492,13 +7492,13 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6r.stdout: arm_attr_merge_6r
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -A $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o ../ld-new
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_attr_merge_6b.o arm_attr_merge_6a.o
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7.stdout: arm_attr_merge_7
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -A $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o ../ld-new
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_attr_merge_7a.o arm_attr_merge_7b.o
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7a.o: arm_attr_merge_7a.s
