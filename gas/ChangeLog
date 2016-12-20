@@ -1,3 +1,8 @@
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips.exp: Limit remaining tests that
+	require NewABI support to `has_newabi' targets.
+
 2015-12-20  Andrew Waterman  <andrew@sifive.com>
 
 	* config/tc-riscv.c (riscv_pseudo_table): Remove "align",
