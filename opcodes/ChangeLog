@@ -1,3 +1,7 @@
+2016-12-21 Andrew Waterman <andrew@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Reorder jal and call entries.
+
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-dis.c (mips_arch_choices): Use ISA_MIPS64 rather than
