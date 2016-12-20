@@ -164,11 +164,14 @@ class Script_sections
   // type specified in script.  This can be SCRIPT_SECTION_TYPE_NONE if
   // no type is specified.
   // *KEEP indicates whether the section should survive garbage collection.
+  // MATCH_INPUT_SPEC indicates whether the section should be matched
+  // with input section specs or simply against the output section name
+  // (i.e., for linker-created sections like .dynamic).
   const char*
   output_section_name(const char* file_name, const char* section_name,
 		      Output_section*** output_section_slot,
 		      Section_type* pscript_section_type,
-		      bool* keep);
+		      bool* keep, bool match_input_spec);
 
   // Place a marker for an orphan output section into the SECTIONS
   // clause.

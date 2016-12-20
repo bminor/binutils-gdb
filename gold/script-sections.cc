@@ -632,7 +632,7 @@ class Sections_element
   // Output_section_definition.
   virtual const char*
   output_section_name(const char*, const char*, Output_section***,
-		      Script_sections::Section_type*, bool*)
+		      Script_sections::Section_type*, bool*, bool)
   { return NULL; }
 
   // Initialize OSP with an output section.
@@ -2003,7 +2003,7 @@ class Output_section_definition : public Sections_element
   const char*
   output_section_name(const char* file_name, const char* section_name,
 		      Output_section***, Script_sections::Section_type*,
-		      bool*);
+		      bool*, bool);
 
   // Initialize OSP with an output section.
   void
@@ -2289,11 +2289,12 @@ Output_section_definition::output_section_name(
     const char* section_name,
     Output_section*** slot,
     Script_sections::Section_type* psection_type,
-    bool* keep)
+    bool* keep,
+    bool match_input_spec)
 {
-  // If the input section is linker-created, just look for a match
+  // If the section is a linker-created output section, just look for a match
   // on the output section name.
-  if (file_name == NULL && this->name_ != "/DISCARD/")
+  if (!match_input_spec && this->name_ != "/DISCARD/")
     {
       if (this->name_ != section_name)
 	return NULL;
@@ -3568,7 +3569,8 @@ Script_sections::output_section_name(
     const char* section_name,
     Output_section*** output_section_slot,
     Script_sections::Section_type* psection_type,
-    bool* keep)
+    bool* keep,
+    bool is_input_section)
 {
   for (Sections_elements::const_iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
@@ -3576,7 +3578,8 @@ Script_sections::output_section_name(
     {
       const char* ret = (*p)->output_section_name(file_name, section_name,
 						  output_section_slot,
-						  psection_type, keep);
+						  psection_type, keep,
+						  is_input_section);
 
       if (ret != NULL)
 	{
