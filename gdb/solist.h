@@ -127,7 +127,7 @@ struct target_so_ops
        If TEMP_PATHNAME is non-NULL: If the file is successfully opened a
        pointer to a malloc'd and realpath'd copy of SONAME is stored there,
        otherwise NULL is stored there.  */
-    int (*find_and_open_solib) (char *soname,
+    int (*find_and_open_solib) (const char *soname,
         unsigned o_flags, char **temp_pathname);
 
     /* Hook for looking up global symbols in a library-specific way.  */
@@ -172,10 +172,10 @@ void free_so (struct so_list *so);
 struct so_list *master_so_list (void);
 
 /* Find main executable binary file.  */
-extern char *exec_file_find (char *in_pathname, int *fd);
+extern char *exec_file_find (const char *in_pathname, int *fd);
 
 /* Find shared library binary file.  */
-extern char *solib_find (char *in_pathname, int *fd);
+extern char *solib_find (const char *in_pathname, int *fd);
 
 /* Open BFD for shared library file.  */
 extern bfd *solib_bfd_fopen (char *pathname, int fd);

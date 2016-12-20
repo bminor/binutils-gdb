@@ -152,7 +152,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 */
 
 static char *
-solib_find_1 (char *in_pathname, int *fd, int is_solib)
+solib_find_1 (const char *in_pathname, int *fd, int is_solib)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   int found_file = -1;
@@ -383,7 +383,7 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
    file handle for the main executable.  */
 
 char *
-exec_file_find (char *in_pathname, int *fd)
+exec_file_find (const char *in_pathname, int *fd)
 {
   char *result;
   const char *fskind = effective_target_file_system_kind ();
@@ -434,7 +434,7 @@ exec_file_find (char *in_pathname, int *fd)
    above.  */
 
 char *
-solib_find (char *in_pathname, int *fd)
+solib_find (const char *in_pathname, int *fd)
 {
   const char *solib_symbols_extension
     = gdbarch_solib_symbols_extension (target_gdbarch ());
@@ -443,7 +443,7 @@ solib_find (char *in_pathname, int *fd)
      extension.  */
   if (solib_symbols_extension != NULL)
     {
-      char *p = in_pathname + strlen (in_pathname);
+      const char *p = in_pathname + strlen (in_pathname);
 
       while (p > in_pathname && *p != '.')
 	p--;

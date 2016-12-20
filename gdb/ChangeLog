@@ -1,4 +1,16 @@
 2016-12-20  Pedro Alves  <palves@redhat.com>
+
+	* nto-tdep.c (nto_find_and_open_solib): Constify 'solib'
+	parameter.
+	* nto-tdep.h (nto_find_and_open_solib): Constify 'solib'
+	parameter.
+	* solib.c (solib_find_1, exec_file_find, solib_find): Constify
+	in_pathname' parameter.
+	* solist.h (struct target_so_ops) <find_and_open_solib>: Constify
+	'soname' parameter.
+	(exec_file_find, solib_find): Constify 'in_pathname' parameter.
+
+2016-12-20  Pedro Alves  <palves@redhat.com>
 	    Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/20977

@@ -87,7 +87,8 @@ nto_map_arch_to_cputype (const char *arch)
 }
 
 int
-nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
+nto_find_and_open_solib (const char *solib, unsigned o_flags,
+			 char **temp_pathname)
 {
   char *buf, *arch_path, *nto_root;
   const char *endian;
