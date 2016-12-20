@@ -1,5 +1,13 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/loc-swap.s: Use zeros rather than NOPs for
+	trailing alignment padding.
+	* testsuite/gas/mips/loc-swap.d: Adjust accordingly.
+	* testsuite/gas/mips/micromips@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap-dis.d: Likewise.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (micromips_insn_length): Use
 	`mips_opcode_32bit_p'.
 	(is_size_valid): Adjust description.
