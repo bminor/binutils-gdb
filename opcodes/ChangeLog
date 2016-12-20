@@ -1,3 +1,9 @@
+2016-12-20  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add riscv files.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2016-12-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-dis.c (set_default_mips_dis_options) [SYMTAB_AVAILABLE]:
