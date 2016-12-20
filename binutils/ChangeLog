@@ -1,5 +1,10 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/binutils-all/mips/mips16-undecoded.s: Use `.module'
+	rather than `.set' to set the ISA level.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/binutils-all/mips/mips16-extend-noinsn.d: Adjust
 	test for separate EXTEND prefix disassembly.
 

@@ -658,7 +658,7 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   /* This entry, mips16, is here only for ISA/processor selection; do
      not print its name.  */
-  { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS3, 0,
+  { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS64, 0,
     mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
     mips_hwr_names_numeric },
 };
@@ -2105,6 +2105,9 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   for (op = mips16_opcodes; op < opend; op++)
     {
       enum match_kind match;
+
+      if (!opcode_is_member (op, mips_isa, mips_ase, mips_processor))
+	continue;
 
       if (op->pinfo == INSN_MACRO
 	  || (no_aliases && (op->pinfo2 & INSN2_ALIAS)))

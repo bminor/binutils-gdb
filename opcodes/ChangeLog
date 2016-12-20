@@ -1,5 +1,12 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (mips_arch_choices): Use ISA_MIPS64 rather than
+	ISA_MIPS3 as the `isa' selection in the `bfd_mach_mips16' entry.
+	(print_insn_mips16): Check opcode entries for validity against
+	the ISA level and ASE set selected.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (print_mips16_insn_arg): Always handle `extend' and
 	`insn' together, with `extend' as the high-order 16 bits.
 	(match_kind): New enum.

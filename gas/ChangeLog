@@ -1,5 +1,22 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16-sub.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-sub.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16-sub.d: New test.
+	* testsuite/gas/mips/mips16e-sub.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16e-sub.d: New test.
+	* testsuite/gas/mips/mips16-64@mips16e-sub.d: New test.
+	* testsuite/gas/mips/mips16e-64-sub.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16e-64-sub.d: New test.
+	* testsuite/gas/mips/mips16-64@mips16e-64-sub.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16e-64-sub.d: New test.
+	* testsuite/gas/mips/mips16-sub.s: New test source.
+	* testsuite/gas/mips/mips16e-sub.s: New test source.
+	* testsuite/gas/mips/mips16e-64-sub.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16e.s: Add a RESTORE instruction.
 	* testsuite/gas/mips/mips16e.d: Adjust accordingly.
 
