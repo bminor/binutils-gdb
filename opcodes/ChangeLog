@@ -1,6 +1,12 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips16-opc.c (mips16_opcodes): Set membership to I3 rather
+	than I1 for the "ddiv", "ddivu", "drem", "dremu" and "dsubu"
+	INSN_MACRO entries.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips16-opc.c (mips16_opcodes): Set membership to I3 rather
 	than I1 for the SP-relative "sd"/$ra entry (SDRASP minor
 	opcode).
 

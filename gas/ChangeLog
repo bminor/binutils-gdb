@@ -1,5 +1,10 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16-macro.l: New list test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16-sdrasp.d: New test.
 	* testsuite/gas/mips/mips16-sdrasp.l: New stderr output.
 	* testsuite/gas/mips/mips16-sdrasp.s: New test source.
