@@ -1,4 +1,12 @@
 2016-12-20  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20977
+	* event-top.c (GDB_NOEXCEPT): Define.
+	(gdb_rl_callback_read_char_wrapper_noexcept): Use GDB_NOEXCEPT
+	instead of noexcept and use (void) instead of ().
+	(gdb_rl_callback_handler): Use GDB_NOEXCEPT instead of noexcept.
+
+2016-12-20  Pedro Alves  <palves@redhat.com>
 	    Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/20977

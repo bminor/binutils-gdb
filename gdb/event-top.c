@@ -73,6 +73,14 @@ static void async_stop_sig (gdb_client_data);
 #endif
 static void async_sigterm_handler (gdb_client_data arg);
 
+#ifndef __cplusplus
+# define GDB_NOEXCEPT
+#elif __cplusplus < 201103L
+# define GDB_NOEXCEPT throw ()
+#else
+# define GDB_NOEXCEPT noexcept
+#endif
+
 /* Instead of invoking (and waiting for) readline to read the command
    line and pass it back for processing, we use readline's alternate
    interface, via callback functions, so that the event loop can react
@@ -162,7 +170,7 @@ void (*after_char_processing_hook) (void);
    (sjlj-based) C++ exceptions.  */
 
 static struct gdb_exception
-gdb_rl_callback_read_char_wrapper_noexcept () noexcept
+gdb_rl_callback_read_char_wrapper_noexcept (void) GDB_NOEXCEPT
 {
   struct gdb_exception gdb_expt = exception_none;
 
@@ -203,7 +211,7 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
    (sjlj-based) C++ exceptions.  */
 
 static void
-gdb_rl_callback_handler (char *rl) noexcept
+gdb_rl_callback_handler (char *rl) GDB_NOEXCEPT
 {
   struct gdb_exception gdb_rl_expt = exception_none;
   struct ui *ui = current_ui;
