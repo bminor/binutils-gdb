@@ -157,10 +157,12 @@ void (*after_char_processing_hook) (void);
    sjlj-based TRY/CATCH mechanism, which knows to handle multiple
    levels of active setjmp/longjmp frames, needed in order to handle
    the readline callback recursing, as happens with e.g., secondary
-   prompts / queries, through gdb_readline_wrapper.  */
+   prompts / queries, through gdb_readline_wrapper.  This must be
+   noexcept in order to avoid problems with mixing sjlj and
+   (sjlj-based) C++ exceptions.  */
 
-static void
-gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
+static struct gdb_exception
+gdb_rl_callback_read_char_wrapper_noexcept () noexcept
 {
   struct gdb_exception gdb_expt = exception_none;
 
@@ -180,6 +182,15 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
     }
   END_CATCH_SJLJ
 
+  return gdb_expt;
+}
+
+static void
+gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
+{
+  struct gdb_exception gdb_expt
+    = gdb_rl_callback_read_char_wrapper_noexcept ();
+
   /* Rethrow using the normal EH mechanism.  */
   if (gdb_expt.reason < 0)
     throw_exception (gdb_expt);
@@ -187,10 +198,12 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 
 /* GDB's readline callback handler.  Calls the current INPUT_HANDLER,
    and propagates GDB exceptions/errors thrown from INPUT_HANDLER back
-   across readline.  See gdb_rl_callback_read_char_wrapper.  */
+   across readline.  See gdb_rl_callback_read_char_wrapper.  This must
+   be noexcept in order to avoid problems with mixing sjlj and
+   (sjlj-based) C++ exceptions.  */
 
 static void
-gdb_rl_callback_handler (char *rl)
+gdb_rl_callback_handler (char *rl) noexcept
 {
   struct gdb_exception gdb_rl_expt = exception_none;
   struct ui *ui = current_ui;
