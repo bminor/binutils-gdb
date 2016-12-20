@@ -1,5 +1,47 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16.d: Adjust test for multiple MIPS16
+	ISA testing.
+	* testsuite/gas/mips/mips16-64.d: Adjust test for multiple
+	MIPS16 ISA testing.
+	* testsuite/gas/mips/mips16e-64.d: Adjust test for multiple
+	MIPS16 ISA testing.
+	* testsuite/gas/mips/mips16-macro.d: Adjust test for multiple
+	MIPS16 ISA testing.
+	* testsuite/gas/mips/mips16e-64.s: Ensure MIPS16 ISA annotation.
+	* testsuite/gas/mips/mips16e-64.l: Rename to...
+	* testsuite/gas/mips/mips16e-32@mips16e-64.l: ... this.
+	* testsuite/gas/mips/mips16-64@mips16.d: New test.
+	* testsuite/gas/mips/mips16-64@mips16-64.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16e-64.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-macro.d: New test.
+	* testsuite/gas/mips/mips16-64@mips16-macro.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16-macro.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-macro-e.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16-macro-e.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-macro-t.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16-macro-t.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16e-64.l: New stderr output.
+	* testsuite/gas/mips/mips16-32@mips16-macro.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e-32@mips16-macro.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-32@mips16-macro-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e-32@mips16-macro-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-32@mips16-macro-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e-32@mips16-macro-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips.exp: Run `mips16', `mips16-64',
+	`mips16-macro', `mips16-macro-t', `mips16-macro-e' and
+	`mips16e-64' testing across multiple MIPS16 ISAs.  Fold
+	`mips16-macro' and `mips16e-64' list test invocations into
+	corresponding dump tests.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips.exp (run_dump_test_arch): Add
 	`mips16e' and `mips16' prefixes.
 	(run_list_test_arch): Likewise.

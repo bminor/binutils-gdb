@@ -867,16 +867,19 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "uld2-eb" [mips_arch_list_matching mips3 !mips32r6]
     run_dump_test_arches "uld2-el" [mips_arch_list_matching mips3 !mips32r6]
 
-    run_dump_test "mips16"
+    run_dump_test_arches "mips16"	[mips_arch_list_matching mips16-64]
     if { $has_newabi } {
-	run_dump_test "mips16-64"
+	run_dump_test_arches "mips16-64" \
+					[mips_arch_list_matching mips16-64]
     }
-    run_dump_test "mips16-macro"
-    run_list_test "mips16-macro" "-32 -march=mips1"
-    run_dump_test "mips16-macro-t" "{{as} {-march=mips3}}"
-    run_dump_test "mips16-macro-e" "{{as} {-march=mips3}}"
+    run_dump_test_arches "mips16-macro"	[mips_arch_list_matching mips16-32]
+    run_dump_test_arches "mips16-macro-t" \
+					[mips_arch_list_matching mips16-32]
+    run_dump_test_arches "mips16-macro-e" \
+					[mips_arch_list_matching mips16-32]
     # Check MIPS16e extensions
     run_dump_test_arches "mips16e"	[mips_arch_list_matching mips16e-32]
+    run_dump_test_arches "mips16e-64"	[mips_arch_list_matching mips16e-32]
     # Check jalx handling
     run_dump_test "mips16-jalx"
     run_dump_test "mips-jalx"
@@ -1330,8 +1333,6 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16e-jrc"
     run_dump_test "mips16e-save"
     run_list_test "mips16e-save-err" "-march=mips32 -32"
-    run_dump_test "mips16e-64"
-    run_list_test "mips16e-64" "-march=mips32 -32"
     run_dump_test "mips16-intermix"
     run_dump_test "mips16-extend"
     run_dump_test "mips16-sprel-swap"
