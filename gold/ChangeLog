@@ -1,5 +1,10 @@
 2016-12-19  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/20949
+	* script.cc (Lex::get_token): Don't look ahead past NUL characters.
+
+2016-12-19  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/14676
 	PR gold/20983
 	* layout.h (Layout::choose_output_section): Add match_input_spec
