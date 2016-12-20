@@ -1,5 +1,19 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips.exp (run_dump_test_arch): Add
+	`mips16e' and `mips16' prefixes.
+	(run_list_test_arch): Likewise.
+	Rename `mips16' architecture to `mips16-32'.  Add `mips16-64',
+	`mips16e-32' and `mips16e-64' architectures.  Update `rol64',
+	`mips16e', `elf${el}-rel2' and `elf-rel4' test invocations
+	accordingly.
+	* testsuite/gas/mips/mips16e@branch-swap-3.d: New test.
+	* testsuite/gas/mips/mips16e@branch-swap-4.d: New test.
+	* testsuite/gas/mips/mips16e@loc-swap-dis.d: New test.
+	* testsuite/gas/mips/mips16e@loc-swap.d: New test.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/loc-swap.s: Use zeros rather than NOPs for
 	trailing alignment padding.
 	* testsuite/gas/mips/loc-swap.d: Adjust accordingly.

@@ -324,6 +324,12 @@ proc run_dump_test_arch { name opts arch } {
 
     set proparch [lindex [mips_arch_properties $arch 0] 0]
     set prefixes [list ${proparch}@ ]
+    if { [ string match "mips16e*" $proparch ] } {
+	lappend prefixes mips16e@
+    }
+    if { [ string match "mips16*" $proparch ] } {
+	lappend prefixes mips16@
+    }
     if { [ string match "octeon*" $proparch ] && $proparch != "octeon" } {
 	lappend prefixes octeon@
     }
@@ -374,6 +380,12 @@ proc run_list_test_arch { name opts arch } {
     set testname "MIPS $name ([concat $opts [mips_arch_displayname $arch]])"
     set proparch [lindex [mips_arch_properties $arch 0] 0]
     set prefixes [list ${proparch}@ ]
+    if { [ string match "mips16e*" $proparch ] } {
+	lappend prefixes mips16e@
+    }
+    if { [ string match "mips16*" $proparch ] } {
+	lappend prefixes mips16@
+    }
     if { [ string match "octeon*" $proparch ] && $proparch != "octeon" } {
 	lappend prefixes octeon@
     }
@@ -470,8 +482,14 @@ mips_arch_create mips64r6 64	mips64r5 { mips32r6 ror } \
 			{ -march=mips64r6 -mtune=mips64r6 --defsym r6=} \
 			{ -mmips:isa64r6 } \
 			{ mipsisa64r6-*-* mipsisa64r6el-*-* }
-mips_arch_create mips16	32	{}	{} \
-			{ -march=mips1 -mips16 } { -mmips:16 }
+mips_arch_create mips16-32 32	{}	{} \
+			{ -march=mips1 -mips16 } { -mmips:3000 }
+mips_arch_create mips16-64 64	mips16-32	{} \
+			{ -march=mips3 -mips16 } { -mmips:4000 }
+mips_arch_create mips16e-32 32	mips16-32	{} \
+			{ -march=mips32 -mips16 } { -mmips:isa32 }
+mips_arch_create mips16e-64 64	mips16-64 { mips16e-32 } \
+			{ -march=mips64 -mips16 } { -mmips:isa64 }
 mips_arch_create micromips 64	mips64r2 {} \
 			{ -march=mips64r2 -mmicromips } {}
 mips_arch_create r3000 	32	mips1	{} \
@@ -820,7 +838,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "rol"		[mips_arch_list_matching mips1 !ror]
     run_dump_test_arches "rol-hw" 	[mips_arch_list_matching ror]
 
-    run_dump_test_arches "rol64"	[mips_arch_list_matching gpr64 !ror]
+    run_dump_test_arches "rol64" \
+				[mips_arch_list_matching gpr64 !ror !mips16-32]
     run_dump_test_arches "rol64-hw"	[mips_arch_list_matching gpr64 ror]
 
     run_dump_test "sb"
@@ -857,8 +876,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-macro-t" "{{as} {-march=mips3}}"
     run_dump_test "mips16-macro-e" "{{as} {-march=mips3}}"
     # Check MIPS16e extensions
-    run_dump_test_arches "mips16e" [mips_arch_list_matching mips32 !micromips \
-					!mips32r6]
+    run_dump_test_arches "mips16e"	[mips_arch_list_matching mips16e-32]
     # Check jalx handling
     run_dump_test "mips16-jalx"
     run_dump_test "mips-jalx"
@@ -1074,10 +1092,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips-abi32-pic2"
 
     run_dump_test "elf${el}-rel"
-    run_dump_test_arches "elf${el}-rel2" [mips_arch_list_matching gpr64 !singlefloat]
+    run_dump_test_arches "elf${el}-rel2" \
+			[mips_arch_list_matching gpr64 !singlefloat !mips16-32]
     run_dump_test "e32${el}-rel2"
     run_dump_test "elf${el}-rel3"
-    run_dump_test_arches "elf-rel4" [mips_arch_list_matching gpr64]
+    run_dump_test_arches "elf-rel4" [mips_arch_list_matching gpr64 !mips16-32]
     run_dump_test "e32-rel4"
     run_dump_test "elf-rel5"
     run_dump_test "elf-rel6"
