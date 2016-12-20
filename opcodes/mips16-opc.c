@@ -322,7 +322,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"sb",	    "y,5(x)",	0xc000, 0xf800,		RD_1|RD_3,		0,		I1,	0,	0 },
 {"sd",	    "y,D(x)",	0x7800, 0xf800,		RD_1|RD_3, 		0,		I3,	0,	0 },
 {"sd",	    "y,D(S)",	0xf900, 0xff00,		RD_1, 			RD_SP,		I3,	0,	0 },
-{"sd",	    "R,C(S)",	0xfa00, 0xff00,		0,			RD_31|RD_SP,	I1,	0,	0 },
+{"sd",	    "R,C(S)",	0xfa00, 0xff00,		0,			RD_31|RD_SP,	I3,	0,	0 },
 {"sh",	    "y,H(x)",	0xc800, 0xf800,		RD_1|RD_3,		0,		I1,	0,	0 },
 {"sllv",    "y,x",	0xe804, 0xf81f,		MOD_1|RD_2, 	0,		I1,	0,	0 },
 {"sll",	    "x,w,<",	0x3000, 0xf803,		WR_1|RD_2,		0,		I1,	0,	0 },
