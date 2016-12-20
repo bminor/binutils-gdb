@@ -74,4 +74,9 @@
   )
 (add-hook 'c-mode-common-hook 'gdb-comment-hook)
 
+;; Set c-set-offset 'innamespace as a safe value to be used in .dir-locals.el.
+(setq safe-local-variable-values
+      (cons safe-local-variable-values
+	    '((eval c-set-offset 'innamespace 0)
+	      (c-offsets-alist (innamespace . 0)))))
 ;;; gdb-code-style.el ends here

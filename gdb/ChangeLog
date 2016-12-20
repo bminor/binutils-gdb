@@ -1,3 +1,10 @@
+2016-12-20  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* .dir-locals.el: Set c++ mode for the directory and set indent
+	properly.
+	* gdb-code-style.el: Set c-set-offset 'innamespace as a safe value
+	to be used in .dir-locals.el.
+
 2016-12-16  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* darwin-nat-info.c (info_mach_region_command): Use expression_up.
