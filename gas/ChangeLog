@@ -1,5 +1,10 @@
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e.s: Add a RESTORE instruction.
+	* testsuite/gas/mips/mips16e.d: Adjust accordingly.
+
+2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16.d: Adjust test for multiple MIPS16
 	ISA testing.
 	* testsuite/gas/mips/mips16-64.d: Adjust test for multiple
