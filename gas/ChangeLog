@@ -1,3 +1,8 @@
+2016-12-21 Tim Newsome <tim@sifive.com>
+
+	* config/tc-riscv.c (riscv_pre_output_hook): Remove const from
+	loc4_frag.
+
 2016-12-21  Alan Modra  <amodra@gmail.com>
 
 	* doc/c-lm32.texi: Fix chars with high bit set.

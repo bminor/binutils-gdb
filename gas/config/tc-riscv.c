@@ -2061,7 +2061,7 @@ riscv_pre_output_hook (void)
 	  {
 	    if (frag->fr_type == rs_cfa)
 	      {
-		const fragS *loc4_frag;
+		fragS *loc4_frag;
 		expressionS exp;
 
 		symbolS *add_symbol = frag->fr_symbol->sy_value.X_add_symbol;
