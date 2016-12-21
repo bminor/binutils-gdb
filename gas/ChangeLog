@@ -11,6 +11,12 @@
 	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.d: Ditto.
 	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.s: Ditto.
 
+2017-01-09  Andrew Waterman <andrew@sifive.com>
+
+	* config/tc-riscv.c (append_insn): Don't eagerly apply relocations
+	against constants.
+	(md_apply_fix): Mark relocations against constants as "done."
+
 2017-01-09  Palmer Dabbelt <palmer@dabbelt.com>
 	    Kito Cheng <kito.cheng@gmail.com>
 

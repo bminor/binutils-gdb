@@ -1879,7 +1879,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_RISCV_TLS_GD_HI20:
     case BFD_RELOC_RISCV_TLS_DTPREL32:
     case BFD_RELOC_RISCV_TLS_DTPREL64:
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      if (fixP->fx_addsy != NULL)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("TLS relocation against a constant"));
       break;
 
     case BFD_RELOC_64:
@@ -2034,6 +2038,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type) != NULL)
 	as_fatal (_("internal error: bad relocation #%d"), fixP->fx_r_type);
     }
+
+  if (fixP->fx_subsy != NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line,
+		  _("unsupported symbol subtraction"));
 
   /* Add an R_RISCV_RELAX reloc if the reloc is relaxable.  */
   if (relaxable && fixP->fx_tcbit && fixP->fx_addsy != NULL)
