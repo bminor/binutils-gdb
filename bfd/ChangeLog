@@ -1,3 +1,14 @@
+2016-12-22  Alan Modra  <amodra@gmail.com>
+
+	* libbfd-in.h (_bfd_vms_lib_slurp_armap): Use _bfd_noarchive function.
+	(_bfd_vms_lib_slurp_extended_name_table: Likewise.
+	(_bfd_vms_lib_construct_extended_name_table: Likewise.
+	(_bfd_vms_lib_truncate_arname: Likewise.
+	(_bfd_vms_lib_write_armap: Likewise.
+	(_bfd_vms_lib_read_ar_hdr: Likewise.
+	(_bfd_vms_lib_write_ar_hdr: Likewise.
+	* libbfd.h: Regenerate.
+
 2016-12-21: Yury Norov <ynorov@caviumnetworks.com>
             Andreas Schwab <schwab@suse.de>
 
