@@ -1,3 +1,8 @@
+2016-12-21  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* ldlang.c (size_input_section): Avoid calling insert_pad
+	if output_section_statement->ignored is set.
+
 2016-12-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/sysroot-prefix.exp: Fix chars with high bit set.
