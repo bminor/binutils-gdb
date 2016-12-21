@@ -1,3 +1,9 @@
+2016-12-21  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (set_flags_for_float_compare): Add code to handle Inf.
+	Add comment to document NaN issue.
+	(set_flags_for_double_compare): Likewise.
+
 2016-12-13  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (NEG, POS): Move before set_flags_for_add64.

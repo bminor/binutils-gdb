@@ -8468,8 +8468,22 @@ set_flags_for_float_compare (sim_cpu *cpu, float fvalue1, float fvalue2)
 {
   uint32_t flags;
 
+  /* FIXME: Add exception raising.  */
   if (isnan (fvalue1) || isnan (fvalue2))
     flags = C|V;
+  else if (isinf (fvalue1) && isinf (fvalue2))
+    {
+      /* Subtracting two infinities may give a NaN.  We only need to compare
+	 the signs, which we can get from isinf.  */
+      int result = isinf (fvalue1) - isinf (fvalue2);
+
+      if (result == 0)
+	flags = Z|C;
+      else if (result < 0)
+	flags = N;
+      else /* (result > 0).  */
+	flags = C;
+    }
   else
     {
       float result = fvalue1 - fvalue2;
@@ -8540,8 +8554,22 @@ set_flags_for_double_compare (sim_cpu *cpu, double dval1, double dval2)
 {
   uint32_t flags;
 
+  /* FIXME: Add exception raising.  */
   if (isnan (dval1) || isnan (dval2))
     flags = C|V;
+  else if (isinf (dval1) && isinf (dval2))
+    {
+      /* Subtracting two infinities may give a NaN.  We only need to compare
+	 the signs, which we can get from isinf.  */
+      int result = isinf (dval1) - isinf (dval2);
+
+      if (result == 0)
+	flags = Z|C;
+      else if (result < 0)
+	flags = N;
+      else /* (result > 0).  */
+	flags = C;
+    }
   else
     {
       double result = dval1 - dval2;
