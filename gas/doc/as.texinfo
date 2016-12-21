@@ -3066,12 +3066,13 @@ sequence.
 @cindex single character constant
 @cindex character, single
 @cindex constant, single character
-A single character may be written as a single quote immediately
-followed by that character.  The same escapes apply to characters as
-to strings.  So if you want to write the character backslash, you
-must write @kbd{'\\} where the first @code{\} escapes the second
-@code{\}.  As you can see, the quote is an acute accent, not a
-grave accent.  A newline
+A single character may be written as a single quote immediately followed by
+that character.  Some backslash escapes apply to characters, @code{\b},
+@code{\f}, @code{\n}, @code{\r}, @code{\t}, and @code{\"} with the same meaning
+as for strings, plus @code{\'} for a single quote.  So if you want to write the
+character backslash, you must write @kbd{'\\} where the first @code{\} escapes
+the second @code{\}.  As you can see, the quote is an acute accent, not a grave
+accent.  A newline
 @ifclear GENERIC
 @ifclear abnormal-separator
 (or semicolon @samp{;})
