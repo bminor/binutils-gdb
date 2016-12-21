@@ -1,3 +1,8 @@
+2016-12-21  Alan Modra  <amodra@gmail.com>
+
+	* coff/pe.h: Fix comment chars with high bit set.
+	* opcode/xgate.h: Likewise.
+
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* opcode/mips.h (mips_opcode_32bit_p): New inline function.

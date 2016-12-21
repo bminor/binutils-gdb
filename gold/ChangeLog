@@ -1,3 +1,7 @@
+2016-12-21  Alan Modra  <amodra@gmail.com>
+
+	* arm.cc: Fix comment chars with high bit set.
+
 2016-12-20  Cary Coutant  <ccoutant@gmail.com>
 
 	* testsuite/Makefile.am: Add missing dependencies on gcctestdir/ld

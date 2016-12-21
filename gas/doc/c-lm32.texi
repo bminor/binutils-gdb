@@ -10,7 +10,7 @@
 
 @ifclear GENERIC
 @node Machine Dependencies
-@chapter LM£" Dependent Features
+@chapter LM32 Dependent Features
 @end ifclear
 
 @cindex LM32 support

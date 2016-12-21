@@ -3424,7 +3424,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	     const Symbol_value<32>* psymval, Arm_address address,
 	     Arm_address thumb_bit);
 
-  // R_ARM_THM_JUMP6: S + A – P
+  // R_ARM_THM_JUMP6: S + A - P
   static inline typename This::Status
   thm_jump6(unsigned char* view,
 	    const Sized_relobj_file<32, big_endian>* object,
@@ -3435,7 +3435,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
-    // bit[9]:bit[7:3]:’0’ (mask: 0x02f8)
+    // bit[9]:bit[7:3]:'0' (mask: 0x02f8)
     Reltype addend = (((val & 0x0200) >> 3) | ((val & 0x00f8) >> 2));
     Reltype x = (psymval->value(object, addend) - address);
     val = (val & 0xfd07) | ((x  & 0x0040) << 3) | ((val & 0x003e) << 2);
@@ -3446,7 +3446,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    : This::STATUS_OKAY);
   }
 
-  // R_ARM_THM_JUMP8: S + A – P
+  // R_ARM_THM_JUMP8: S + A - P
   static inline typename This::Status
   thm_jump8(unsigned char* view,
 	    const Sized_relobj_file<32, big_endian>* object,
@@ -3466,7 +3466,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    : This::STATUS_OKAY);
   }
 
-  // R_ARM_THM_JUMP11: S + A – P
+  // R_ARM_THM_JUMP11: S + A - P
   static inline typename This::Status
   thm_jump11(unsigned char* view,
 	    const Sized_relobj_file<32, big_endian>* object,

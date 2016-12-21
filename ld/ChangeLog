@@ -1,3 +1,7 @@
+2016-12-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/sysroot-prefix.exp: Fix chars with high bit set.
+
 2016-12-16  fincs  <fincs.alt1@gmail.com>
 
 	* ld.texinfo: Document --gc-keep-exported.

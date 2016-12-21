@@ -1,5 +1,10 @@
 2016-12-21  Alan Modra  <amodra@gmail.com>
 
+	* doc/c-lm32.texi: Fix chars with high bit set.
+	* testsuite/gas/bfin/vector2.s: Likewise.
+
+2016-12-21  Alan Modra  <amodra@gmail.com>
+
 	PR gas/10946
 	* doc/as.texinfo (Chars): Document escape sequences.
 
