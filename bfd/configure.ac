@@ -786,20 +786,11 @@ else	# all_targets is true
     selarchs=`echo $selarchs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
 fi	# all_targets is true
 
-if test "x$want_64_bit_archive" = xunset; then
-  # 64-bit MIPS and s390 ELF targets use 64-bit archives.
-  case "${bfd_backends}" in
-    *elf64-mips* | *elf64-s390*)
-      want_64_bit_archive=true
-      ;;
-  esac
-fi
-
 # 64-bit archives need a 64-bit bfd_vma.
 if test "x$want_64_bit_archive" = xtrue; then
   want64=true
   AC_DEFINE(USE_64_BIT_ARCHIVE, 1,
-    [Define if we should use 64-bit archives.])
+    [Define if 64-bit archives should always be used.])
 fi
 
 case ${host64}-${target64}-${want64} in
