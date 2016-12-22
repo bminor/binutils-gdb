@@ -1,3 +1,12 @@
+2016-12-21  Cary Coutant  <ccoutant@gmail.com>
+
+	* output.cc (Output_segment::first_section): Return NULL if there are
+	no sections in the segment.
+	* output.h (Output_segment::first_section_load_address): Assert that
+	first section is not NULL.
+	* symtab.cc (Symbol_table::sized_write_globals): Attach linker-created
+	segment-relative symbols to first section of the segment.
+
 2016-12-21  Alan Modra  <amodra@gmail.com>
 
 	* arm.cc: Fix comment chars with high bit set.

@@ -4741,6 +4741,7 @@ class Output_segment
   first_section_load_address() const
   {
     const Output_section* os = this->first_section();
+    gold_assert(os != NULL);
     return os->has_load_address() ? os->load_address() : os->address();
   }
 
