@@ -1320,7 +1320,9 @@ struct step_over_info
 static struct step_over_info step_over_info;
 
 /* Record the address of the breakpoint/instruction we're currently
-   stepping over.  */
+   stepping over.
+   N.B. We record the aspace and address now, instead of say just the thread,
+   because when we need the info later the thread may be running.  */
 
 static void
 set_step_over_info (struct address_space *aspace, CORE_ADDR address,

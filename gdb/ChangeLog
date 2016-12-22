@@ -1,5 +1,9 @@
 2016-12-22  Doug Evans  <xdje42@gmail.com>
 
+	* infrun.c (set_step_over_info): Add comment.
+
+2016-12-22  Doug Evans  <xdje42@gmail.com>
+
 	* NEWS: Document new syntax for "mt print symbols", "mt print psymbols"
 	and "mt print msymbols" commands.
 	* psymtab.c (DEV_TTY): Delete.
