@@ -1,3 +1,8 @@
+2016-12-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/sysroot-prefix.exp (sysroot_prefix_test_setup):
+	Call perror rather than error on "as" or "ar" failures.
+
 2016-12-21  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* ldlang.c (size_input_section): Avoid calling insert_pad
