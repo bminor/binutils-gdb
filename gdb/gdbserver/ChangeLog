@@ -1,3 +1,8 @@
+2017-03-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add "common/environ.c".
+	(OBJS): Add "common/environ.h".
+
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* configure.ac: Check if the fs_base and gs_base members of

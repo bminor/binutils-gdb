@@ -1061,7 +1061,6 @@ SFILES = \
 	dwarf2loc.c \
 	dwarf2read.c \
 	elfread.c \
-	environ.c \
 	eval.c \
 	event-loop.c \
 	event-top.c \
@@ -1207,6 +1206,7 @@ SFILES = \
 	common/common-regcache.c \
 	common/common-utils.c \
 	common/errors.c \
+	common/environ.c \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
@@ -1285,7 +1285,6 @@ HFILES_NO_SRCDIR = \
 	dwarf2-frame-tailcall.h \
 	dwarf2expr.h \
 	dwarf2loc.h \
-	environ.h \
 	event-loop.h \
 	event-top.h \
 	exceptions.h \
@@ -1486,6 +1485,7 @@ HFILES_NO_SRCDIR = \
 	common/common-types.h \
 	common/common-utils.h \
 	common/errors.h \
+	common/environ.h \
 	common/fileio.h \
 	common/format.h \
 	common/gdb_assert.h \

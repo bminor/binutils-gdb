@@ -201,6 +201,7 @@ SFILES = \
 	$(srcdir)/common/common-regcache.c \
 	$(srcdir)/common/common-utils.c \
 	$(srcdir)/common/errors.c \
+	$(srcdir)/common/environ.c \
 	$(srcdir)/common/fileio.c \
 	$(srcdir)/common/filestuff.c \
 	$(srcdir)/common/gdb_vecs.c \
@@ -238,6 +239,7 @@ OBS = \
 	debug.o \
 	dll.o \
 	errors.o \
+	environ.o \
 	event-loop.o \
 	fileio.o \
 	filestuff.o \
@@ -780,6 +782,9 @@ agent.o: ../common/agent.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 errors.o: ../common/errors.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+environ.o: ../common/environ.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 common-debug.o: ../common/common-debug.c

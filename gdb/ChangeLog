@@ -1,3 +1,14 @@
+2017-03-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Replace "environ.c" with
+	"common/environ.c".
+	(HFILES_NO_SRCDIR): Likewise, for "environ.h".
+	* environ.c: Include "common-defs.h" instead of "defs.h.  Moved
+	to...
+	* common/environ.c: ... here.
+	* environ.h: Moved to...
+	* common/environ.h: ... here.
+
 2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gdbarch.sh (pstring_ptr): New static function.
