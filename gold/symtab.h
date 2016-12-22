@@ -1574,12 +1574,13 @@ class Symbol_table
   get_copy_source(const Symbol* sym) const;
 
   // Set the dynamic symbol indexes.  INDEX is the index of the first
-  // global dynamic symbol.  Pointers to the symbols are stored into
+  // global dynamic symbol.  Return the count of forced-local symbols in
+  // *PFORCED_LOCAL_COUNT.  Pointers to the symbols are stored into
   // the vector.  The names are stored into the Stringpool.  This
   // returns an updated dynamic symbol index.
   unsigned int
-  set_dynsym_indexes(unsigned int index, std::vector<Symbol*>*,
-		     Stringpool*, Versions*);
+  set_dynsym_indexes(unsigned int index, unsigned int* pforced_local_count,
+		     std::vector<Symbol*>*, Stringpool*, Versions*);
 
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol indexes,
@@ -1928,9 +1929,11 @@ class Symbol_table
   unsigned int output_count_;
   // The file offset of the global dynamic symbols, or 0 if none.
   off_t dynamic_offset_;
-  // The index of the first global dynamic symbol.
+  // The index of the first global dynamic symbol (including
+  // forced-local symbols).
   unsigned int first_dynamic_global_index_;
-  // The number of global dynamic symbols, or 0 if none.
+  // The number of global dynamic symbols (including forced-local symbols),
+  // or 0 if none.
   unsigned int dynamic_count_;
   // The symbol hash table.
   Symbol_table_type table_;

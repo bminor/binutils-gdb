@@ -1,3 +1,28 @@
+2016-12-22  Cary Coutant  <ccoutant@gmail.com>
+
+	* layout.cc (Layout::finalize): Track count of forced-local symbols
+	in .dynsym.
+	(Layout::create_symtab_sections): Add local_dynamic_count parameter;
+	use that instead of sh_info value.
+	(Layout::create_dynamic_symtab): Add pforced_local_dynamic_count
+	parameter; pass it to Symtab::set_dynsym_indexes().  Include forced
+	locals in sh_info value.  Pass index of first real global to
+	Dynobj::create_gnu_hash_table() and Dynobj::create_elf_hash_table().
+	* layout.h (Layout::create_symtab_sections): Add local_dynamic_count
+	parameter.
+	(Layout::create_dynamic_symtab): Add pforced_local_dynamic_count
+	parameter.
+	* symtab.cc (Symbol_table::set_dynsym_indexes): Add pforced_local_count
+	parameter.  Process forced-local symbols first and return the count.
+	(Symbol_table::finalize): Update comments.
+	* symtab.h (Symbol_table::set_dynsym_indexes): Add pforced_local_count
+	parameter.
+	(Symbol_table::first_dynamic_global_index_): Update comment.
+	(Symbol_table::dynamic_count_): Update comment.
+	* testsuite/Makefile.am (ifuncmod1.sh): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/ifuncmod1.sh: New shell script.
+
 2016-12-21  Cary Coutant  <ccoutant@gmail.com>
 
 	* symtab.cc (Symbol_table::define_special_symbol): Add is_forced_local

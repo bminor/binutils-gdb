@@ -2531,6 +2531,11 @@ ifuncmain1static_LDADD = ifuncdep1.o
 check_PROGRAMS += ifuncmain1picstatic
 ifuncmain1picstatic: ifuncmain1pic.o ifuncmod1.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -static ifuncmain1pic.o ifuncmod1.o
+
+check_SCRIPTS += ifuncmod1.sh
+check_DATA += ifuncmod1.so.stderr
+ifuncmod1.so.stderr: ifuncmod1.so
+	$(TEST_READELF) -s $< > /dev/null 2> $@
 endif
 endif
 

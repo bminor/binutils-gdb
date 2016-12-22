@@ -1067,7 +1067,7 @@ class Layout
   // Create the output sections for the symbol table.
   void
   create_symtab_sections(const Input_objects*, Symbol_table*,
-			 unsigned int, off_t*);
+			 unsigned int, off_t*, unsigned int);
 
   // Create the .shstrtab section.
   Output_section*
@@ -1082,6 +1082,7 @@ class Layout
   create_dynamic_symtab(const Input_objects*, Symbol_table*,
 			Output_section** pdynstr,
 			unsigned int* plocal_dynamic_count,
+			unsigned int* pforced_local_dynamic_count,
 			std::vector<Symbol*>* pdynamic_symbols,
 			Versions* versions);
 

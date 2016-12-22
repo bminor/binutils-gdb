@@ -2696,6 +2696,9 @@ off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 		 Target* target, const Task* task)
 {
+  unsigned int local_dynamic_count = 0;
+  unsigned int forced_local_dynamic_count = 0;
+
   target->finalize_sections(this, input_objects, symtab);
 
   this->count_local_symbols(task, input_objects);
@@ -2716,11 +2719,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       // Create the dynamic symbol table, including the hash table.
       Output_section* dynstr;
       std::vector<Symbol*> dynamic_symbols;
-      unsigned int local_dynamic_count;
       Versions versions(*this->script_options()->version_script_info(),
 			&this->dynpool_);
       this->create_dynamic_symtab(input_objects, symtab, &dynstr,
-				  &local_dynamic_count, &dynamic_symbols,
+				  &local_dynamic_count,
+				  &forced_local_dynamic_count,
+				  &dynamic_symbols,
 				  &versions);
 
       // Create the .interp section to hold the name of the
@@ -2741,7 +2745,9 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
       // Create the version sections.  We can't do this until the
       // dynamic string table is complete.
-      this->create_version_sections(&versions, symtab, local_dynamic_count,
+      this->create_version_sections(&versions, symtab,
+				    (local_dynamic_count
+				     + forced_local_dynamic_count),
 				    dynamic_symbols, dynstr);
 
       // Set the size of the _DYNAMIC symbol.  We can't do this until
@@ -2811,7 +2817,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   shndx = this->set_section_indexes(shndx);
 
   // Create the symbol table sections.
-  this->create_symtab_sections(input_objects, symtab, shndx, &off);
+  this->create_symtab_sections(input_objects, symtab, shndx, &off,
+			       local_dynamic_count);
   if (!parameters->doing_static_link())
     this->assign_local_dynsym_offsets(input_objects);
 
@@ -3999,7 +4006,8 @@ void
 Layout::create_symtab_sections(const Input_objects* input_objects,
 			       Symbol_table* symtab,
 			       unsigned int shnum,
-			       off_t* poff)
+			       off_t* poff,
+			       unsigned int local_dynamic_count)
 {
   int symsize;
   unsigned int align;
@@ -4053,18 +4061,15 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
   gold_assert(static_cast<off_t>(local_symcount * symsize) == off);
 
   off_t dynoff;
-  size_t dyn_global_index;
   size_t dyncount;
   if (this->dynsym_section_ == NULL)
     {
       dynoff = 0;
-      dyn_global_index = 0;
       dyncount = 0;
     }
   else
     {
-      dyn_global_index = this->dynsym_section_->info();
-      off_t locsize = dyn_global_index * this->dynsym_section_->entsize();
+      off_t locsize = local_dynamic_count * this->dynsym_section_->entsize();
       dynoff = this->dynsym_section_->offset() + locsize;
       dyncount = (this->dynsym_section_->data_size() - locsize) / symsize;
       gold_assert(static_cast<off_t>(dyncount * symsize)
@@ -4072,7 +4077,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
     }
 
   off_t global_off = off;
-  off = symtab->finalize(off, dynoff, dyn_global_index, dyncount,
+  off = symtab->finalize(off, dynoff, local_dynamic_count, dyncount,
 			 &this->sympool_, &local_symcount);
 
   if (!parameters->options().strip_all())
@@ -4238,12 +4243,18 @@ Layout::allocated_output_section_count() const
 }
 
 // Create the dynamic symbol table.
+// *PLOCAL_DYNAMIC_COUNT will be set to the number of local symbols
+// from input objects, and *PFORCED_LOCAL_DYNAMIC_COUNT will be set
+// to the number of global symbols that have been forced local.
+// We need to remember the former because the forced-local symbols are
+// written along with the global symbols in Symtab::write_globals().
 
 void
 Layout::create_dynamic_symtab(const Input_objects* input_objects,
 			      Symbol_table* symtab,
 			      Output_section** pdynstr,
 			      unsigned int* plocal_dynamic_count,
+			      unsigned int* pforced_local_dynamic_count,
 			      std::vector<Symbol*>* pdynamic_symbols,
 			      Versions* pversions)
 {
@@ -4278,10 +4289,14 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
     }
 
   unsigned int local_symcount = index;
-  *plocal_dynamic_count = local_symcount;
+  unsigned int forced_local_count = 0;
 
-  index = symtab->set_dynsym_indexes(index, pdynamic_symbols,
-				     &this->dynpool_, pversions);
+  index = symtab->set_dynsym_indexes(index, &forced_local_count,
+				     pdynamic_symbols, &this->dynpool_,
+				     pversions);
+
+  *plocal_dynamic_count = local_symcount;
+  *pforced_local_dynamic_count = forced_local_count;
 
   int symsize;
   unsigned int align;
@@ -4316,7 +4331,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 							       "** dynsym");
       dynsym->add_output_section_data(odata);
 
-      dynsym->set_info(local_symcount);
+      dynsym->set_info(local_symcount + forced_local_count);
       dynsym->set_entsize(symsize);
       dynsym->set_addralign(align);
 
@@ -4400,7 +4415,8 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
     {
       unsigned char* phash;
       unsigned int hashlen;
-      Dynobj::create_gnu_hash_table(*pdynamic_symbols, local_symcount,
+      Dynobj::create_gnu_hash_table(*pdynamic_symbols,
+				    local_symcount + forced_local_count,
 				    &phash, &hashlen);
 
       Output_section* hashsec =
@@ -4437,7 +4453,8 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
     {
       unsigned char* phash;
       unsigned int hashlen;
-      Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
+      Dynobj::create_elf_hash_table(*pdynamic_symbols,
+				    local_symcount + forced_local_count,
 				    &phash, &hashlen);
 
       Output_section* hashsec =
