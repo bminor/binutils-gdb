@@ -1,3 +1,13 @@
+2016-12-23  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/20464
+	PR binutils/14625
+	* configure.ac: Revert 2016-05-25 configure change setting
+	want_64_bit_archive for mips64 and s390x.  Revise USE_64_BIT_ARCHIVE
+	description.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2016-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.27.90
