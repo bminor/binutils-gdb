@@ -204,6 +204,7 @@ SFILES = \
 	$(srcdir)/common/environ.c \
 	$(srcdir)/common/fileio.c \
 	$(srcdir)/common/filestuff.c \
+	$(srcdir)/common/job-control.c \
 	$(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/new-op.c \
 	$(srcdir)/common/print-utils.c \
@@ -234,6 +235,7 @@ OBS = \
 	cleanups.o \
 	common-debug.o \
 	common-exceptions.o \
+	job-control.o \
 	common-regcache.o \
 	common-utils.o \
 	debug.o \

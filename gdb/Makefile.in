@@ -1235,6 +1235,7 @@ SFILES = \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
+	common/job-control.c \
 	common/gdb_vecs.c \
 	common/new-op.c \
 	common/print-utils.c \
@@ -1510,6 +1511,7 @@ HFILES_NO_SRCDIR = \
 	common/common-regcache.h \
 	common/common-types.h \
 	common/common-utils.h \
+	common/job-control.h \
 	common/errors.h \
 	common/environ.h \
 	common/fileio.h \
@@ -1664,6 +1666,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-agent.o \
 	common-debug.o \
 	common-exceptions.o \
+	job-control.o \
 	common-regcache.o \
 	common-utils.o \
 	complaints.o \

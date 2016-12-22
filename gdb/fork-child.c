@@ -33,6 +33,7 @@
 #include "filestuff.h"
 #include "top.h"
 #include "signals-state-save-restore.h"
+#include "job-control.h"
 #include <signal.h>
 #include <vector>
 

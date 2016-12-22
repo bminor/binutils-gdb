@@ -65,6 +65,7 @@
 #include "gdb_usleep.h"
 #include "interps.h"
 #include "gdb_regex.h"
+#include "job-control.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -101,10 +102,6 @@ static std::chrono::steady_clock::duration prompt_for_continue_wait_time;
 /* A flag indicating whether to timestamp debugging messages.  */
 
 static int debug_timestamp = 0;
-
-/* Nonzero if we have job control.  */
-
-int job_control;
 
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an

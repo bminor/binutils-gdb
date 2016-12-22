@@ -1,3 +1,8 @@
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILE): Add "common/job-control.c".
+	(OBS): Add "job-control.o".
+
 2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile: Remove "@host_makefile_frag@".

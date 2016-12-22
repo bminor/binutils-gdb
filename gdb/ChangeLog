@@ -1,3 +1,22 @@
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add "common/job-control.c".
+	(HFILES_NO_SRCDIR): Add "common/job-control.h".
+	(COMMON_OBS): Add "job-control.o".
+	* common/job-control.c: New file, with contents from
+	"gdb/inflow.c".
+	* common/job-control.h: New file, with contents from "terminal.h".
+	* fork-child.c: Include "job-control.h".
+	* inflow.c: Include "job-control.h".
+	(gdb_setpgid): Move to "common/common-inflow.c".
+	(_initialize_inflow): Move setting of "job_control" to
+	"handle_job_control".
+	* terminal.h (job_control): Moved to "common/common-terminal.h".
+	(gdb_setpgid): Likewise.
+	* top.c: Include "job_control.h".
+	* utils.c: Likewise.
+	(job_control): Moved to "job-control.c".
+
 2017-06-07  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add gdb_regex.c.
