@@ -1508,6 +1508,7 @@ HFILES_NO_SRCDIR = \
 	common/common-debug.h \
 	common/common-defs.h \
 	common/common-exceptions.h \
+	common/common-gdbthread.h \
 	common/common-regcache.h \
 	common/common-types.h \
 	common/common-utils.h \

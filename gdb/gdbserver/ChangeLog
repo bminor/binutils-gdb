@@ -1,5 +1,9 @@
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* inferiors.c (switch_to_thread): New function.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* Makefile.in (SFILE): Add "common/job-control.c".
 	(OBS): Add "job-control.o".
 

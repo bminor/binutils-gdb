@@ -1,5 +1,13 @@
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-gdbthread.h".
+	* common/common-gdbthread.h: New file, with parts from
+	"gdb/gdbthread.h".
+	* gdbthread.h: Include "common-gdbthread.h".
+	(switch_to_thread): Moved to "common/common-gdbthread.h".
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* Makefile.in (SFILES): Add "common/job-control.c".
 	(HFILES_NO_SRCDIR): Add "common/job-control.h".
 	(COMMON_OBS): Add "job-control.o".
