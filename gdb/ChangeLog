@@ -1,3 +1,417 @@
+2016-12-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ui-out.h (ui_out_begin, ui_out_end, ui_out_table_header,
+	ui_out_table_body,  ui_out_field_int, ui_out_field_fmt_int,
+	ui_out_field_core_addr, ui_out_field_string, ui_out_field_stream,
+	ui_out_field_fmt, ui_out_field_skip, ui_out_spaces, ui_out_text,
+	ui_out_message, ui_out_wrap_hint, ui_out_flush, ui_out_test_flags,
+	ui_out_query_field, ui_out_is_mi_like_p, ui_out_redirect):
+	Remove, replace with a method in class ui_out.
+	(table_begin_ftype): Remove, replace with pure virtual method in
+	class ui_out.
+	(table_body_ftype): Likewise.
+	(table_end_ftype): Likewise.
+	(table_header_ftype): Likewise.
+	(ui_out_begin_ftype): Likewise.
+	(ui_out_end_ftype): Likewise.
+	(field_int_ftype): Likewise.
+	(field_skip_ftype): Likewise.
+	(field_string_ftype): Likewise.
+	(field_fmt_ftype): Likewise.
+	(spaces_ftype): Likewise.
+	(text_ftype): Likewise.
+	(message_ftype): Likewise.
+	(wrap_hint_ftype): Likewise.
+	(flush_ftype): Likewise.
+	(redirect_ftype): Likewise.
+	(data_destroy_ftype): Likewise.
+	(struct ui_out_impl): Remove, replace with class ui_out.
+	(ui_out_new): Remove.
+	(class ui_out): New class.
+	* ui-out.c (struct ui_out): Remove, replaced with class ui_out.
+	(current_level): Remove, replace with ui_out method.
+	(push_level): Likewise.
+	(pop_level): Likewise.
+	(uo_table_begin, uo_table_body, uo_table_end, uo_table_header,
+	uo_begin, uo_end, uo_field_int, uo_field_skip, uo_field_fmt,
+	uo_spaces, uo_text, uo_message, uo_wrap_hint, uo_flush,
+	uo_redirect, uo_field_string): Remove.
+	(ui_out_table_begin): Replace with ...
+	(ui_out::table_begin): ... this.
+	(ui_out_table_body): Replace with ...
+	(ui_out::table_body): ... this.
+	(ui_out_table_end): Replace with ...
+	(ui_out::table_end): ... this.
+	(ui_out_table_header): Replace with ...
+	(ui_out::table_header): ... this.
+	(ui_out_begin): Replace with ...
+	(ui_out::begin): ... this.
+	(ui_out_end): Replace with ...
+	(ui_out::end): ... this.
+	(ui_out_field_int): Replace with ...
+	(ui_out::field_int): ... this.
+	(ui_out_field_fmt_int): Replace with ...
+	(ui_out::field_fmt_int): ... this.
+	(ui_out_field_core_addr): Replace with ...
+	(ui_out::field_core_addr): ... this.
+	(ui_out_field_stream): Replace with ...
+	(ui_out::field_stream): ... this.
+	(ui_out_field_skip): Replace with ...
+	(ui_out::field_skip): ... this.
+	(ui_out_field_string): Replace with ...
+	(ui_out::field_string): ... this.
+	(ui_out_field_fmt): Replace with ...
+	(ui_out::field_fmt): ... this.
+	(ui_out_spaces): Replace with ...
+	(ui_out::spaces): ... this.
+	(ui_out_text): Replace with ...
+	(ui_out::text): ... this.
+	(ui_out_message): Replace with ...
+	(ui_out::message): ... this.
+	(ui_out_wrap_hint): Replace with ...
+	(ui_out::wrap_hint): ... this.
+	(ui_out_flush): Replace with ...
+	(ui_out::flush): ... this.
+	(ui_out_redirect): Replace with ...
+	(ui_out::redirect): ... this.
+	(ui_out_test_flags): Replace with ...
+	(ui_out::test_flags): ... this.
+	(ui_out_is_mi_like_p): Replace with ...
+	(ui_out::is_mi_like_p): ... this.
+	(verify_field): Replace with ...
+	(ui_out::verify_field): ... this.
+	(ui_out_query_field): Replace with ...
+	(ui_out::query_table_field): ... this.
+	(ui_out_data): Remove.
+	(ui_out_new): Remove, replace with ...
+	(ui_out::ui_out): ... this constructor.
+	(do_cleanup_table_end, make_cleanup_ui_out_tuple_begin_end,
+	do_cleanup_end, make_cleanup_ui_out_tuple_begin_end,
+	make_cleanup_ui_out_list_begin_end): Update fallouts of struct
+	ui_out -> class ui_out change.
+	* cli-out.c (cli_out_data): Remove.
+	(cli_uiout_dtor): Remove.
+	(cli_table_begin): Replace with ...
+	(cli_ui_out::do_table_begin): ... this new method.
+	(cli_table_body): Replace with ...
+	(cli_ui_out::do_table_body): ... this new method.
+	(cli_table_end): Replace with ...
+	(cli_ui_out::do_table_end): ... this new method.
+	(cli_table_header): Replace with ...
+	(cli_ui_out::do_table_header): ... this new method.
+	(cli_begin): Replace with ...
+	(cli_ui_out::do_begin): ... this new method.
+	(cli_end): Replace with ...
+	(cli_ui_out::do_end): ... this new method.
+	(cli_field_int): Replace with ...
+	(cli_ui_out::do_field_int): ... this new method.
+	(cli_field_skip): Replace with ...
+	(cli_ui_out::do_field_skip): ... this new method.
+	(cli_field_string): Replace with ...
+	(cli_ui_out::do_field_string): ... this new method.
+	(cli_field_fmt): Replace with ...
+	(cli_ui_out::do_field_fmt): ... this new method.
+	(cli_spaces): Replace with ...
+	(cli_ui_out::do_spaces): ... this new method.
+	(cli_text): Replace with ...
+	(cli_ui_out::do_text): ... this new method.
+	(cli_message): Replace with ...
+	(cli_ui_out::do_message): ... this new method.
+	(cli_wrap_hint): Replace with ...
+	(cli_ui_out::do_wrap_hint): ... this new method.
+	(cli_flush): Replace with ...
+	(cli_ui_out::do_flush): ... this new method.
+	(cli_redirect): Replace with ...
+	(cli_ui_out::do_redirect): ... this new method.
+	(out_field_fmt): Replace with ...
+	(cli_ui_out::out_field_fmt): ... this new method.
+	(field_separator): Replace with ...
+	(cli_ui_out::field_separator): ... this new method.
+	(cli_out_set_stream): Replace with ...
+	(cli_ui_out::set_stream): ... this new method.
+	(cli_ui_out_impl): Remove.
+	(cli_out_data_ctor): Remove.
+	(cli_ui_out_impl::cli_ui_out_impl): New constructor.
+	(cli_ui_out_impl::~cli_ui_out_impl): New destructor.
+	(cli_out_new): Change return type to cli_ui_out *, instantiate a
+	cli_ui_out.
+	* cli-out.h (cli_ui_out_data): Remove, replace with class
+	cli_ui_out.
+	(class cli_ui_out): New class.
+	(cli_ui_out_impl): Remove.
+	(cli_out_data_ctor): Remove.
+	(cli_out_new): Change return type to cli_ui_out*.
+	(cli_out_set_stream): Remove.
+	* cli/cli-interp.c (struct cli_interp) <cli_uiout>: Change type
+	to cli_ui_out*.
+	(cli_interpreter_resume): Adapt.
+	(cli_interpreter_exec): Adapt.
+	* mi/mi-out.c (mi_ui_out_data, mi_out_data): Remove.
+	(mi_ui_out_impl): Remove.
+	(mi_table_begin): Replace with ...
+	(mi_ui_out::do_table_begin): ... this.
+	(mi_table_body): Replace with ...
+	(mi_ui_out::do_table_body): ... this.
+	(mi_table_end): Replace with ...
+	(mi_ui_out::do_table_end): ... this.
+	(mi_table_header): Replace with ...
+	(mi_ui_out::do_table_header): ... this.
+	(mi_begin): Replace with ...
+	(mi_ui_out::do_begin): ... this.
+	(mi_end): Replace with ...
+	(mi_ui_out::do_end): ... this.
+	(mi_field_int): Replace with ...
+	(mi_ui_out::do_field_int): ... this.
+	(mi_field_skip): Replace with ...
+	(mi_ui_out::do_field_skip): ... this.
+	(mi_field_string): Replace with ...
+	(mi_ui_out::do_field_string): ... this.
+	(mi_field_fmt): Replace with ...
+	(mi_ui_out::do_field_fmt): ... this.
+	(mi_spaces): Replace with ...
+	(mi_ui_out::do_spaces): ... this.
+	(mi_text): Replace with ...
+	(mi_ui_out::do_text): ... this.
+	(mi_message): Replace with ...
+	(mi_ui_out::do_message): ... this.
+	(mi_wrap_hint): Replace with ...
+	(mi_ui_out::do_wrap_hint): ... this.
+	(mi_flush): Replace with ...
+	(mi_ui_out::do_flush): ... this.
+	(mi_redirect): Replace with ...
+	(mi_ui_out::do_redirect):
+	(field_separator): Replace with ...
+	(mi_ui_out::field_separator):
+	(mi_open): Replace with ...
+	(mi_ui_out::open): ... this.
+	(mi_close): Replace with ...
+	(mi_ui_out::close): ... this.
+	(mi_out_rewind): Replace with ...
+	(mi_ui_out::rewind): ... this.
+	(mi_out_put): Replace with ...
+	(mi_ui_out::put): ... this.
+	(mi_version): Replace with ...
+	(mi_ui_out::version): ... this.
+	(mi_out_data_ctor): Replace with ...
+	(mi_ui_out::mi_ui_out): ... this.
+	(mi_out_data_dtor): Replace with ...
+	(mi_ui_out::~mi_ui_out): ... this.
+	(mi_out_new): Change return type to mi_ui_out*, instantiate
+	an mi_ui_out object.
+	(as_mi_ui_out): New function.
+	(mi_version): Update fallouts of struct ui_out to class ui_out
+	transition.
+	(mi_out_put): Likewise.
+	(mi_out_rewind): Likewise.
+	* mi/mi-out.h (mi_out_new): Change return type to mi_ui_out*.
+	* tui/tui-out.c (tui_ui_out_data, tui_out_data, tui_ui_out_impl):
+	Remove.
+	(tui_field_int): Replace with ...
+	(tui_ui_out::do_field_int): ... this.
+	(tui_field_string): Replace with ...
+	(tui_ui_out::do_field_string): ... this.
+	(tui_field_fmt): Replace with ...
+	(tui_ui_out::do_field_fmt): ... this.
+	(tui_text): Replace with ...
+	(tui_ui_out::do_text): ... this.
+	(tui_out_new): Change return type to tui_ui_out*, instantiate
+	tui_ui_out object.
+	(tui_ui_out::tui_ui_out): New.
+	* tui/tui-out.h: New file.
+	* tui/tui.h (tui_out_new): Move declaration to tui/tui-out.h.
+	* tui/tui-io.c: Include tui/tui-out.h.
+	(tui_old_uiout): Change type to cli_ui_out*.
+	(tui_setup_io): Use dynamic_cast.
+	* tui/tui-io.h (tui_old_uiout): Change type to cli_ui_out*.
+	* tui/tui-interp.c (tui_resume): Adapt.
+	* ada-lang.c (print_it_exception): Update fallouts of struct
+	ui_out to class ui_out transition.
+	(print_one_exception): Likewise.
+	(print_mention_exception): Likewise.
+	* ada-tasks.c (print_ada_task_info): Likewise.
+	(info_task): Likewise.
+	(task_command): Likewise.
+	* auto-load.c (print_script): Likewise.
+	(auto_load_info_scripts): Likewise.
+	(info_auto_load_cmd): Likewise.
+	* break-catch-sig.c (signal_catchpoint_print_one): Likewise.
+	* break-catch-syscall.c (print_it_catch_syscall): Likewise.
+	(print_one_catch_syscall): Likewise.
+	* break-catch-throw.c (print_it_exception_catchpoint): Likewise.
+	(print_one_exception_catchpoint): Likewise.
+	(print_one_detail_exception_catchpoint): Likewise.
+	(print_mention_exception_catchpoint): Likewise.
+	* breakpoint.c (maybe_print_thread_hit_breakpoint): Likewise.
+	(print_solib_event): Likewise.
+	(watchpoint_check): Likewise.
+	(wrap_indent_at_field): Likewise.
+	(print_breakpoint_location): Likewise.
+	(output_thread_groups): Likewise.
+	(print_one_breakpoint_location): Likewise.
+	(breakpoint_1): Likewise.
+	(default_collect_info): Likewise.
+	(watchpoints_info): Likewise.
+	(print_it_catch_fork): Likewise.
+	(print_one_catch_fork): Likewise.
+	(print_it_catch_vfork): Likewise.
+	(print_one_catch_vfork): Likewise.
+	(print_it_catch_solib): Likewise.
+	(print_one_catch_solib): Likewise.
+	(print_it_catch_exec): Likewise.
+	(print_one_catch_exec): Likewise.
+	(mention): Likewise.
+	(print_it_ranged_breakpoint): Likewise.
+	(print_one_ranged_breakpoint): Likewise.
+	(print_one_detail_ranged_breakpoint): Likewise.
+	(print_mention_ranged_breakpoint): Likewise.
+	(print_it_watchpoint): Likewise.
+	(print_mention_watchpoint): Likewise.
+	(print_it_masked_watchpoint): Likewise.
+	(print_one_detail_masked_watchpoint): Likewise.
+	(print_mention_masked_watchpoint): Likewise.
+	(bkpt_print_it): Likewise.
+	(tracepoint_print_one_detail): Likewise.
+	(tracepoint_print_mention): Likewise.
+	(update_static_tracepoint): Likewise.
+	(tracepoints_info): Likewise.
+	(save_breakpoints): Likewise.
+	* cli/cli-cmds.c (complete_command): Likewise.
+	* cli/cli-logging.c (set_logging_redirect): Likewise.
+	(pop_output_files): Likewise.
+	(handle_redirections): Likewise.
+	* cli/cli-script.c (print_command_lines): Likewise.
+	* cli/cli-setshow.c (do_show_command): Likewise.
+	(cmd_show_list): Likewise.
+	* cp-abi.c (list_cp_abis): Likewise.
+	(show_cp_abi_cmd): Likewise.
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Likewise.
+	* disasm.c (gdb_pretty_print_insn): Likewise.
+	(do_mixed_source_and_assembly_deprecated): Likewise.
+	(do_mixed_source_and_assembly): Likewise.
+	* gdb_bfd.c (print_one_bfd): Likewise.
+	(maintenance_info_bfds): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Likewise.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Likewise.
+	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault): Likewise.
+	* i386-tdep.c (i386_mpx_print_bounds): Likewise.
+	* infcmd.c (run_command_1): Likewise.
+	(print_return_value_1): Likewise.
+	* inferior.c (print_selected_inferior): Likewise.
+	(print_inferior): Likewise.
+	* infrun.c (print_end_stepping_range_reason): Likewise.
+	(print_signal_exited_reason): Likewise.
+	(print_exited_reason): Likewise.
+	(print_signal_received_reason): Likewise.
+	(print_no_history_reason): Likewise.
+	* interps.c (interp_set): Likewise.
+	* linespec.c (decode_line_full): Likewise.
+	* linux-thread-db.c (info_auto_load_libthread_db): Likewise.
+	* mi/mi-cmd-env.c (mi_cmd_env_pwd): Likewise.
+	(mi_cmd_env_path): Likewise.
+	(mi_cmd_env_dir): Likewise.
+	(mi_cmd_inferior_tty_show): Likewise.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file): Likewise.
+	(print_partial_file_name): Likewise.
+	(mi_cmd_file_list_exec_source_files): Likewise.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions): Likewise.
+	(mi_cmd_info_gdb_mi_command): Likewise.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_info_depth): Likewise.
+	(mi_cmd_stack_list_args): Likewise.
+	(list_arg_or_local): Likewise.
+	* mi/mi-cmd-var.c (print_varobj): Likewise.
+	(mi_cmd_var_create): Likewise.
+	(mi_cmd_var_delete): Likewise.
+	(mi_cmd_var_set_format): Likewise.
+	(mi_cmd_var_show_format): Likewise.
+	(mi_cmd_var_info_num_children): Likewise.
+	(mi_cmd_var_list_children): Likewise.
+	(mi_cmd_var_info_type): Likewise.
+	(mi_cmd_var_info_path_expression): Likewise.
+	(mi_cmd_var_info_expression): Likewise.
+	(mi_cmd_var_show_attributes): Likewise.
+	(mi_cmd_var_evaluate_expression): Likewise.
+	(mi_cmd_var_assign): Likewise.
+	(varobj_update_one): Likewise.
+	* mi/mi-interp.c (as_mi_interp): Likewise.
+	(mi_on_normal_stop_1): Likewise.
+	(mi_tsv_modified): Likewise.
+	(mi_breakpoint_created): Likewise.
+	(mi_breakpoint_modified): Likewise.
+	(mi_solib_loaded): Likewise.
+	(mi_solib_unloaded): Likewise.
+	(mi_command_param_changed): Likewise.
+	(mi_memory_changed): Likewise.
+	(mi_user_selected_context_changed): Likewise.
+	* mi/mi-main.c (print_one_inferior): Likewise.
+	(output_cores): Likewise.
+	(list_available_thread_groups): Likewise.
+	(mi_cmd_data_list_register_names): Likewise.
+	(mi_cmd_data_list_changed_registers): Likewise.
+	(output_register): Likewise.
+	(mi_cmd_data_evaluate_expression): Likewise.
+	(mi_cmd_data_read_memory): Likewise.
+	(mi_cmd_data_read_memory_bytes): Likewise.
+	(mi_cmd_list_features): Likewise.
+	(mi_cmd_list_target_features): Likewise.
+	(mi_cmd_add_inferior): Likewise.
+	(mi_execute_command): Likewise.
+	(mi_load_progress): Likewise.
+	(print_variable_or_computed): Likewise.
+	(mi_cmd_trace_frame_collected): Likewise.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Likewise.
+	* osdata.c (info_osdata_command): Likewise.
+	* probe.c (gen_ui_out_table_header_info): Likewise.
+	(print_ui_out_not_applicables): Likewise.
+	(print_ui_out_info): Likewise.
+	(info_probes_for_ops): Likewise.
+	(enable_probes_command): Likewise.
+	(disable_probes_command): Likewise.
+	* progspace.c (print_program_space): Likewise.
+	* python/py-breakpoint.c (bppy_get_commands): Likewise.
+	* python/py-framefilter.c (py_print_type): Likewise.
+	(py_print_value): Likewise.
+	(py_print_single_arg): Likewise.
+	(enumerate_args): Likewise.
+	(enumerate_locals): Likewise.
+	(py_print_args): Likewise.
+	(py_print_frame): Likewise.
+	* record-btrace.c (btrace_ui_out_decode_error): Likewise.
+	(btrace_call_history_insn_range): Likewise.
+	(btrace_call_history_src_line): Likewise.
+	(btrace_call_history): Likewise.
+	* remote.c (show_remote_cmd): Likewise.
+	* skip.c (skip_info): Likewise.
+	* solib.c (info_sharedlibrary_command): Likewise.
+	* source.c (print_source_lines_base): Likewise.
+	* spu-tdep.c (info_spu_event_command): Likewise.
+	(info_spu_signal_command): Likewise.
+	(info_spu_mailbox_list): Likewise.
+	(info_spu_dma_cmdlist): Likewise.
+	(info_spu_dma_command): Likewise.
+	(info_spu_proxydma_command): Likewise.
+	* stack.c (print_stack_frame): Likewise.
+	(print_frame_arg): Likewise.
+	(read_frame_arg): Likewise.
+	(print_frame_args): Likewise.
+	(print_frame_info): Likewise.
+	(print_frame): Likewise.
+	* symfile.c (load_progress): Likewise.
+	(generic_load): Likewise.
+	(print_transfer_performance): Likewise.
+	* thread.c (do_captured_list_thread_ids): Likewise.
+	(print_thread_info_1): Likewise.
+	(restore_selected_frame): Likewise.
+	(do_captured_thread_select): Likewise.
+	(print_selected_thread_frame): Likewise.
+	* top.c (execute_command_to_string): Likewise.
+	* tracepoint.c (tvariables_info_1): Likewise.
+	(trace_status_mi): Likewise.
+	(tfind_1): Likewise.
+	(print_one_static_tracepoint_marker): Likewise.
+	(info_static_tracepoint_markers_command): Likewise.
+	* utils.c (do_ui_out_redirect_pop): Likewise.
+	(fputs_maybe_filtered): Likewise.
+
 2016-12-20  Pedro Alves  <palves@redhat.com>
 
 	* nto-tdep.c (nto_find_and_open_solib): Constify 'solib'

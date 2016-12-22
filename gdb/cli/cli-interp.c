@@ -34,7 +34,7 @@
 struct cli_interp
 {
   /* The ui_out for the console interpreter.  */
-  struct ui_out *cli_uiout;
+  cli_ui_out *cli_uiout;
 };
 
 /* Suppress notification struct.  */
@@ -281,10 +281,10 @@ cli_interpreter_resume (void *data)
      previously writing to gdb_stdout, then set it to the new
      gdb_stdout afterwards.  */
 
-  stream = cli_out_set_stream (cli->cli_uiout, gdb_stdout);
+  stream = cli->cli_uiout->set_stream (gdb_stdout);
   if (stream != gdb_stdout)
     {
-      cli_out_set_stream (cli->cli_uiout, stream);
+      cli->cli_uiout->set_stream (stream);
       stream = NULL;
     }
 
@@ -293,7 +293,7 @@ cli_interpreter_resume (void *data)
   ui->input_handler = command_line_handler;
 
   if (stream != NULL)
-    cli_out_set_stream (cli->cli_uiout, gdb_stdout);
+    cli->cli_uiout->set_stream (gdb_stdout);
 
   return 1;
 }
@@ -324,9 +324,9 @@ cli_interpreter_exec (void *data, const char *command_str)
 
      It is important that it gets reset everytime, since the user
      could set gdb to use a different interpreter.  */
-  old_stream = cli_out_set_stream (cli->cli_uiout, gdb_stdout);
+  old_stream = cli->cli_uiout->set_stream (gdb_stdout);
   result = safe_execute_command (cli->cli_uiout, str, 1);
-  cli_out_set_stream (cli->cli_uiout, old_stream);
+  cli->cli_uiout->set_stream (old_stream);
   return result;
 }
 

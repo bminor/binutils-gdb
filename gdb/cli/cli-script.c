@@ -201,13 +201,13 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
   while (list)
     {
       if (depth)
-	ui_out_spaces (uiout, 2 * depth);
+	uiout->spaces (2 * depth);
 
       /* A simple command, print it and continue.  */
       if (list->control_type == simple_control)
 	{
-	  ui_out_field_string (uiout, NULL, list->line);
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, list->line);
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -216,8 +216,8 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
          and continue. */
       if (list->control_type == continue_control)
 	{
-	  ui_out_field_string (uiout, NULL, "loop_continue");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "loop_continue");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -226,8 +226,8 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	 continue.  */
       if (list->control_type == break_control)
 	{
-	  ui_out_field_string (uiout, NULL, "loop_break");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "loop_break");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -241,15 +241,15 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	     token.  See comment in process_next_line for explanation.
 	     Here, take care not print 'while-stepping' twice.  */
 	  if (list->control_type == while_control)
-	    ui_out_field_fmt (uiout, NULL, "while %s", list->line);
+	    uiout->field_fmt (NULL, "while %s", list->line);
 	  else
-	    ui_out_field_string (uiout, NULL, list->line);
-	  ui_out_text (uiout, "\n");
+	    uiout->field_string (NULL, list->line);
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -258,8 +258,8 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	 continueing.  */
       if (list->control_type == if_control)
 	{
-	  ui_out_field_fmt (uiout, NULL, "if %s", list->line);
-	  ui_out_text (uiout, "\n");
+	  uiout->field_fmt (NULL, "if %s", list->line);
+	  uiout->text ("\n");
 	  /* The true arm.  */
 	  print_command_lines (uiout, list->body_list[0], depth + 1);
 
@@ -267,16 +267,16 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  if (list->body_count == 2)
 	    {
 	      if (depth)
-		ui_out_spaces (uiout, 2 * depth);
-	      ui_out_field_string (uiout, NULL, "else");
-	      ui_out_text (uiout, "\n");
+		uiout->spaces (2 * depth);
+	      uiout->field_string (NULL, "else");
+	      uiout->text ("\n");
 	      print_command_lines (uiout, list->body_list[1], depth + 1);
 	    }
 
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -286,55 +286,55 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
       if (list->control_type == commands_control)
 	{
 	  if (*(list->line))
-	    ui_out_field_fmt (uiout, NULL, "commands %s", list->line);
+	    uiout->field_fmt (NULL, "commands %s", list->line);
 	  else
-	    ui_out_field_string (uiout, NULL, "commands");
-	  ui_out_text (uiout, "\n");
+	    uiout->field_string (NULL, "commands");
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
 
       if (list->control_type == python_control)
 	{
-	  ui_out_field_string (uiout, NULL, "python");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "python");
+	  uiout->text ("\n");
 	  /* Don't indent python code at all.  */
 	  print_command_lines (uiout, *list->body_list, 0);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
 
       if (list->control_type == compile_control)
 	{
-	  ui_out_field_string (uiout, NULL, "compile expression");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "compile expression");
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, 0);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
 
       if (list->control_type == guile_control)
 	{
-	  ui_out_field_string (uiout, NULL, "guile");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "guile");
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}

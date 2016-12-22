@@ -32,6 +32,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
+#include "tui/tui-out.h"
 #include "ui-out.h"
 #include "cli-out.h"
 #include <fcntl.h>
@@ -114,7 +115,7 @@ struct ui_out *tui_out;
 /* GDB output files in non-curses mode.  */
 static struct ui_file *tui_old_stdout;
 static struct ui_file *tui_old_stderr;
-struct ui_out *tui_old_uiout;
+cli_ui_out *tui_old_uiout;
 
 /* Readline previous hooks.  */
 static rl_getc_func_t *tui_old_rl_getc_function;
@@ -459,7 +460,8 @@ tui_setup_io (int mode)
       /* Keep track of previous gdb output.  */
       tui_old_stdout = gdb_stdout;
       tui_old_stderr = gdb_stderr;
-      tui_old_uiout = current_uiout;
+      tui_old_uiout = dynamic_cast<cli_ui_out *> (current_uiout);
+      gdb_assert (tui_old_uiout != nullptr);
 
       /* Reconfigure gdb output.  */
       gdb_stdout = tui_stdout;

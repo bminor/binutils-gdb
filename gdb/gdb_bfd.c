@@ -964,10 +964,10 @@ print_one_bfd (void **slot, void *data)
   struct cleanup *inner;
 
   inner = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-  ui_out_field_int (uiout, "refcount", gdata->refc);
-  ui_out_field_string (uiout, "addr", host_address_to_string (abfd));
-  ui_out_field_string (uiout, "filename", bfd_get_filename (abfd));
-  ui_out_text (uiout, "\n");
+  uiout->field_int ("refcount", gdata->refc);
+  uiout->field_string ("addr", host_address_to_string (abfd));
+  uiout->field_string ("filename", bfd_get_filename (abfd));
+  uiout->text ("\n");
   do_cleanups (inner);
 
   return 1;
@@ -982,11 +982,11 @@ maintenance_info_bfds (char *arg, int from_tty)
   struct ui_out *uiout = current_uiout;
 
   cleanup = make_cleanup_ui_out_table_begin_end (uiout, 3, -1, "bfds");
-  ui_out_table_header (uiout, 10, ui_left, "refcount", "Refcount");
-  ui_out_table_header (uiout, 18, ui_left, "addr", "Address");
-  ui_out_table_header (uiout, 40, ui_left, "filename", "Filename");
+  uiout->table_header (10, ui_left, "refcount", "Refcount");
+  uiout->table_header (18, ui_left, "addr", "Address");
+  uiout->table_header (40, ui_left, "filename", "Filename");
 
-  ui_out_table_body (uiout);
+  uiout->table_body ();
   htab_traverse (all_bfds, print_one_bfd, uiout);
 
   do_cleanups (cleanup);

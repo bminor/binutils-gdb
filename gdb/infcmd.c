@@ -590,16 +590,16 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   if (from_tty)
     {
-      ui_out_field_string (uiout, NULL, "Starting program");
-      ui_out_text (uiout, ": ");
+      uiout->field_string (NULL, "Starting program");
+      uiout->text (": ");
       if (exec_file)
-	ui_out_field_string (uiout, "execfile", exec_file);
-      ui_out_spaces (uiout, 1);
+	uiout->field_string ("execfile", exec_file);
+      uiout->spaces (1);
       /* We call get_inferior_args() because we might need to compute
 	 the value now.  */
-      ui_out_field_string (uiout, "infargs", get_inferior_args ());
-      ui_out_text (uiout, "\n");
-      ui_out_flush (uiout);
+      uiout->field_string ("infargs", get_inferior_args ());
+      uiout->text ("\n");
+      uiout->flush ();
     }
 
   /* Done with ARGS.  */
@@ -1676,23 +1676,23 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
       /* Print it.  */
       stb = mem_fileopen ();
       old_chain = make_cleanup_ui_file_delete (stb);
-      ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
+      uiout->text ("Value returned is ");
+      uiout->field_fmt ("gdb-result-var", "$%d",
 			rv->value_history_index);
-      ui_out_text (uiout, " = ");
+      uiout->text (" = ");
       get_no_prettyformat_print_options (&opts);
       value_print (rv->value, stb, &opts);
-      ui_out_field_stream (uiout, "return-value", stb);
-      ui_out_text (uiout, "\n");
+      uiout->field_stream ("return-value", stb);
+      uiout->text ("\n");
       do_cleanups (old_chain);
     }
   else
     {
       std::string type_name = type_to_string (rv->type);
-      ui_out_text (uiout, "Value returned has type: ");
-      ui_out_field_string (uiout, "return-type", type_name.c_str ());
-      ui_out_text (uiout, ".");
-      ui_out_text (uiout, " Cannot determine contents\n");
+      uiout->text ("Value returned has type: ");
+      uiout->field_string ("return-type", type_name.c_str ());
+      uiout->text (".");
+      uiout->text (" Cannot determine contents\n");
     }
 }
 

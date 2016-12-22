@@ -219,7 +219,7 @@ py_print_type (struct ui_out *out, struct value *val)
       cleanup = make_cleanup_ui_file_delete (stb);
       check_typedef (value_type (val));
       type_print (value_type (val), "", stb, -1);
-      ui_out_field_stream (out, "type", stb);
+      out->field_stream ("type", stb);
       do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
@@ -290,7 +290,7 @@ py_print_value (struct ui_out *out, struct value *val,
 	  stb = mem_fileopen ();
 	  cleanup = make_cleanup_ui_file_delete (stb);
 	  common_val_print (val, stb, indent, opts, language);
-	  ui_out_field_stream (out, "value", stb);
+	  out->field_stream ("value", stb);
 	  do_cleanups (cleanup);
 	}
       CATCH (except, RETURN_MASK_ALL)
@@ -388,7 +388,7 @@ py_print_single_arg (struct ui_out *out,
       if the value is a frame argument.  This is denoted in this
       function with PRINT_ARGS_FIELD which is flag from the caller to
       emit the ARGS field.  */
-      if (ui_out_is_mi_like_p (out))
+      if (out->is_mi_like_p ())
 	{
 	  if (print_args_field || args_type != NO_VALUES)
 	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
@@ -420,19 +420,19 @@ py_print_single_arg (struct ui_out *out,
 	    {
 	      fputs_filtered ("@entry", stb);
 	    }
-	  ui_out_field_stream (out, "name", stb);
+	  out->field_stream ("name", stb);
 	}
       else
 	/* Otherwise, just output the name.  */
-	ui_out_field_string (out, "name", sym_name);
+	out->field_string ("name", sym_name);
 
       annotate_arg_name_end ();
 
-      if (! ui_out_is_mi_like_p (out))
-	ui_out_text (out, "=");
+      if (! out->is_mi_like_p ())
+	out->text ("=");
 
       if (print_args_field)
-	ui_out_field_int (out, "arg", 1);
+	out->field_int ("arg", 1);
 
       /* For MI print the type, but only for simple values.  This seems
 	 weird, but this is how MI choose to format the various output
@@ -453,8 +453,8 @@ py_print_single_arg (struct ui_out *out,
 
 	  /* If the output is to the CLI, and the user option "set print
 	     frame-arguments" is set to none, just output "...".  */
-	  if (! ui_out_is_mi_like_p (out) && args_type == NO_VALUES)
-	    ui_out_field_string (out, "value", "...");
+	  if (! out->is_mi_like_p () && args_type == NO_VALUES)
+	    out->field_string ("value", "...");
 	  else
 	    {
 	      /* Otherwise, print the value for both MI and the CLI, except
@@ -464,7 +464,7 @@ py_print_single_arg (struct ui_out *out,
 		  if (val == NULL)
 		    {
 		      gdb_assert (fa != NULL && fa->error != NULL);
-		      ui_out_field_fmt (out, "value",
+		      out->field_fmt ("value",
 					_("<error reading variable: %s>"),
 					fa->error);
 		    }
@@ -562,7 +562,7 @@ enumerate_args (PyObject *iter,
       Py_DECREF (item);
       item = NULL;
 
-      if (sym && ui_out_is_mi_like_p (out)
+      if (sym && out->is_mi_like_p ()
 	  && ! mi_should_print (sym, MI_PRINT_ARGS))
 	continue;
 
@@ -616,8 +616,8 @@ enumerate_args (PyObject *iter,
 		{
 		  TRY
 		    {
-		      ui_out_text (out, ", ");
-		      ui_out_wrap_hint (out, "    ");
+		      out->text (", ");
+		      out->wrap_hint ("    ");
 		    }
 		  CATCH (except, RETURN_MASK_ALL)
 		    {
@@ -662,7 +662,7 @@ enumerate_args (PyObject *iter,
 	{
 	  TRY
 	    {
-	      ui_out_text (out, ", ");
+	      out->text (", ");
 	    }
 	  CATCH (except, RETURN_MASK_ALL)
 	    {
@@ -747,7 +747,7 @@ enumerate_locals (PyObject *iter,
 	  goto error;
 	}
 
-      if (sym != NULL && ui_out_is_mi_like_p (out)
+      if (sym != NULL && out->is_mi_like_p ()
 	  && ! mi_should_print (sym, MI_PRINT_LOCALS))
 	{
 	  do_cleanups (locals_cleanups);
@@ -773,23 +773,23 @@ enumerate_locals (PyObject *iter,
       /* With PRINT_NO_VALUES, MI does not emit a tuple normally as
 	 each output contains only one field.  The exception is
 	 -stack-list-variables, which always provides a tuple.  */
-      if (ui_out_is_mi_like_p (out))
+      if (out->is_mi_like_p ())
 	{
 	  if (print_args_field || args_type != NO_VALUES)
 	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
 	}
       TRY
 	{
-	  if (! ui_out_is_mi_like_p (out))
+	  if (! out->is_mi_like_p ())
 	    {
 	      /* If the output is not MI we indent locals.  */
-	      ui_out_spaces (out, local_indent);
+	      out->spaces (local_indent);
 	    }
 
-	  ui_out_field_string (out, "name", sym_name.get ());
+	  out->field_string ("name", sym_name.get ());
 
-	  if (! ui_out_is_mi_like_p (out))
-	    ui_out_text (out, " = ");
+	  if (! out->is_mi_like_p ())
+	    out->text (" = ");
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -810,7 +810,7 @@ enumerate_locals (PyObject *iter,
 
       /* CLI always prints values for locals.  MI uses the
 	 simple/no/all system.  */
-      if (! ui_out_is_mi_like_p (out))
+      if (! out->is_mi_like_p ())
 	{
 	  int val_indent = (indent + 1) * 4;
 
@@ -838,7 +838,7 @@ enumerate_locals (PyObject *iter,
 
       TRY
 	{
-	  ui_out_text (out, "\n");
+	  out->text ("\n");
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -955,8 +955,8 @@ py_print_args (PyObject *filter,
   TRY
     {
       annotate_frame_args ();
-      if (! ui_out_is_mi_like_p (out))
-	ui_out_text (out, " (");
+      if (! out->is_mi_like_p ())
+	out->text (" (");
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -972,8 +972,8 @@ py_print_args (PyObject *filter,
 
   TRY
     {
-      if (! ui_out_is_mi_like_p (out))
-	ui_out_text (out, ")");
+      if (! out->is_mi_like_p ())
+	out->text (")");
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1077,7 +1077,7 @@ py_print_frame (PyObject *filter, int flags,
 	{
 	  TRY
 	    {
-	      ui_out_spaces (out, indent*4);
+	      out->spaces (indent * 4);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -1133,14 +1133,14 @@ py_print_frame (PyObject *filter, int flags,
 	     architecture from the eliding frame.  If that is the case, do
 	     not print 'level', but print spaces.  */
 	  if (*slot == frame)
-	    ui_out_field_skip (out, "level");
+	    out->field_skip ("level");
 	  else
 	    {
 	      *slot = frame;
 	      annotate_frame_begin (print_level ? level : 0,
 				    gdbarch, address);
-	      ui_out_text (out, "#");
-	      ui_out_field_fmt_int (out, 2, ui_left, "level",
+	      out->text ("#");
+	      out->field_fmt_int (2, ui_left, "level",
 				    level);
 	    }
 	}
@@ -1162,9 +1162,9 @@ py_print_frame (PyObject *filter, int flags,
 	  TRY
 	    {
 	      annotate_frame_address ();
-	      ui_out_field_core_addr (out, "addr", gdbarch, address);
+	      out->field_core_addr ("addr", gdbarch, address);
 	      annotate_frame_address_end ();
-	      ui_out_text (out, " in ");
+	      out->text (" in ");
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -1229,9 +1229,9 @@ py_print_frame (PyObject *filter, int flags,
 	    {
 	      annotate_frame_function_name ();
 	      if (function == NULL)
-		ui_out_field_skip (out, "func");
+		out->field_skip ("func");
 	      else
-		ui_out_field_string (out, "func", function);
+		out->field_string ("func", function);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -1297,10 +1297,10 @@ py_print_frame (PyObject *filter, int flags,
 
 	      TRY
 		{
-		  ui_out_wrap_hint (out, "   ");
-		  ui_out_text (out, " at ");
+		  out->wrap_hint ("   ");
+		  out->text (" at ");
 		  annotate_frame_source_file ();
-		  ui_out_field_string (out, "file", filename.get ());
+		  out->field_string ("file", filename.get ());
 		  annotate_frame_source_file_end ();
 		}
 	      CATCH (except, RETURN_MASK_ERROR)
@@ -1338,9 +1338,9 @@ py_print_frame (PyObject *filter, int flags,
 
 	      TRY
 		{
-		  ui_out_text (out, ":");
+		  out->text (":");
 		  annotate_frame_source_line ();
-		  ui_out_field_int (out, "line", line);
+		  out->field_int ("line", line);
 		}
 	      CATCH (except, RETURN_MASK_ERROR)
 		{
@@ -1356,12 +1356,12 @@ py_print_frame (PyObject *filter, int flags,
 
   /* For MI we need to deal with the "children" list population of
      elided frames, so if MI output detected do not send newline.  */
-  if (! ui_out_is_mi_like_p (out))
+  if (! out->is_mi_like_p ())
     {
       TRY
 	{
 	  annotate_frame_end ();
-	  ui_out_text (out, "\n");
+	  out->text ("\n");
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -1401,7 +1401,7 @@ py_print_frame (PyObject *filter, int flags,
 
 	make_cleanup_ui_out_list_begin_end (out, "children");
 
-	if (! ui_out_is_mi_like_p (out))
+	if (! out->is_mi_like_p ())
 	  indent++;
 
 	while ((item = PyIter_Next (elided)))

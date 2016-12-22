@@ -218,7 +218,7 @@ do_ui_out_redirect_pop (void *arg)
 {
   struct ui_out *uiout = (struct ui_out *) arg;
 
-  if (ui_out_redirect (uiout, NULL) < 0)
+  if (uiout->redirect (NULL) < 0)
     warning (_("Cannot restore redirection of the current output protocol"));
 }
 
@@ -2034,7 +2034,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       || batch_flag
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
-      || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
+      || interp_ui_out (top_level_interpreter ())->is_mi_like_p ())
     {
       fputs_unfiltered (linebuffer, stream);
       return;

@@ -649,8 +649,8 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
      code to print the value out.  For the latter there should be
      MI and CLI specific versions.  */
 
-  if (ui_out_is_mi_like_p (uiout))
-    ui_out_field_stream (uiout, "value", stb);
+  if (uiout->is_mi_like_p ())
+    uiout->field_stream ("value", stb);
   else
     {
       std::string value = ui_file_as_string (stb);
@@ -684,8 +684,8 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
 	    = make_cleanup_ui_out_tuple_begin_end (uiout, "optionlist");
 	  const char *new_prefix = strstr (list->prefixname, "show ") + 5;
 
-	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "prefix", new_prefix);
+	  if (uiout->is_mi_like_p ())
+	    uiout->field_string ("prefix", new_prefix);
 	  cmd_show_list (*list->prefixlist, from_tty, new_prefix);
 	  /* Close the tuple.  */
 	  do_cleanups (optionlist_chain);
@@ -697,9 +697,9 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
 	      struct cleanup *option_chain
 		= make_cleanup_ui_out_tuple_begin_end (uiout, "option");
 
-	      ui_out_text (uiout, prefix);
-	      ui_out_field_string (uiout, "name", list->name);
-	      ui_out_text (uiout, ":  ");
+	      uiout->text (prefix);
+	      uiout->field_string ("name", list->name);
+	      uiout->text (":  ");
 	      if (list->type == show_cmd)
 		do_show_command ((char *) NULL, from_tty, list);
 	      else

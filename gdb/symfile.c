@@ -1962,9 +1962,10 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     {
       /* The write is just starting.  Let the user know we've started
 	 this section.  */
-      ui_out_message (current_uiout, "Loading section %s, size %s lma %s\n",
-		      args->section_name, hex_string (args->section_size),
-		      paddress (target_gdbarch (), args->lma));
+      current_uiout->message ("Loading section %s, size %s lma %s\n",
+			      args->section_name,
+			      hex_string (args->section_size),
+			      paddress (target_gdbarch (), args->lma));
       return;
     }
 
@@ -2146,11 +2147,11 @@ generic_load (const char *args, int from_tty)
 
   entry = bfd_get_start_address (loadfile_bfd);
   entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
-  ui_out_text (uiout, "Start address ");
-  ui_out_field_fmt (uiout, "address", "%s", paddress (target_gdbarch (), entry));
-  ui_out_text (uiout, ", load size ");
-  ui_out_field_fmt (uiout, "load-size", "%lu", total_progress.data_count);
-  ui_out_text (uiout, "\n");
+  uiout->text ("Start address ");
+  uiout->field_fmt ("address", "%s", paddress (target_gdbarch (), entry));
+  uiout->text (", load size ");
+  uiout->field_fmt ("load-size", "%lu", total_progress.data_count);
+  uiout->text ("\n");
   regcache_write_pc (get_current_regcache (), entry);
 
   /* Reset breakpoints, now that we have changed the load image.  For
@@ -2187,39 +2188,39 @@ print_transfer_performance (struct ui_file *stream,
 
   milliseconds ms = duration_cast<milliseconds> (time);
 
-  ui_out_text (uiout, "Transfer rate: ");
+  uiout->text ("Transfer rate: ");
   if (ms.count () > 0)
     {
       unsigned long rate = ((ULONGEST) data_count * 1000) / ms.count ();
 
-      if (ui_out_is_mi_like_p (uiout))
+      if (uiout->is_mi_like_p ())
 	{
-	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate * 8);
-	  ui_out_text (uiout, " bits/sec");
+	  uiout->field_fmt ("transfer-rate", "%lu", rate * 8);
+	  uiout->text (" bits/sec");
 	}
       else if (rate < 1024)
 	{
-	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate);
-	  ui_out_text (uiout, " bytes/sec");
+	  uiout->field_fmt ("transfer-rate", "%lu", rate);
+	  uiout->text (" bytes/sec");
 	}
       else
 	{
-	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate / 1024);
-	  ui_out_text (uiout, " KB/sec");
+	  uiout->field_fmt ("transfer-rate", "%lu", rate / 1024);
+	  uiout->text (" KB/sec");
 	}
     }
   else
     {
-      ui_out_field_fmt (uiout, "transferred-bits", "%lu", (data_count * 8));
-      ui_out_text (uiout, " bits in <1 sec");
+      uiout->field_fmt ("transferred-bits", "%lu", (data_count * 8));
+      uiout->text (" bits in <1 sec");
     }
   if (write_count > 0)
     {
-      ui_out_text (uiout, ", ");
-      ui_out_field_fmt (uiout, "write-rate", "%lu", data_count / write_count);
-      ui_out_text (uiout, " bytes/write");
+      uiout->text (", ");
+      uiout->field_fmt ("write-rate", "%lu", data_count / write_count);
+      uiout->text (" bytes/write");
     }
-  ui_out_text (uiout, ".\n");
+  uiout->text (".\n");
 }
 
 /* This function allows the addition of incrementally linked object files.

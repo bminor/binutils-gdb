@@ -134,8 +134,8 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
      neither of it.  At least do not try to push OUTPUT if the pop
      already failed.  */
 
-  if (ui_out_redirect (uiout, NULL) < 0
-      || ui_out_redirect (uiout, output) < 0)
+  if (uiout->redirect (NULL) < 0
+      || uiout->redirect (output) < 0)
     warning (_("Current output protocol does not support redirection"));
 
   do_cleanups (cleanups);
@@ -178,8 +178,8 @@ pop_output_files (void)
   saved_output.targerr = NULL;
 
   /* Stay consistent with handle_redirections.  */
-  if (!ui_out_is_mi_like_p (current_uiout))
-    ui_out_redirect (current_uiout, NULL);
+  if (!current_uiout->is_mi_like_p ())
+    current_uiout->redirect (NULL);
 }
 
 /* This is a helper for the `set logging' command.  */
@@ -245,9 +245,9 @@ handle_redirections (int from_tty)
     }
 
   /* Don't do the redirect for MI, it confuses MI's ui-out scheme.  */
-  if (!ui_out_is_mi_like_p (current_uiout))
+  if (!current_uiout->is_mi_like_p ())
     {
-      if (ui_out_redirect (current_uiout, output) < 0)
+      if (current_uiout->redirect (output) < 0)
 	warning (_("Current output protocol does not support redirection"));
     }
 }

@@ -193,47 +193,47 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 
   if (insn->number != 0)
     {
-      ui_out_field_fmt (uiout, "insn-number", "%u", insn->number);
-      ui_out_text (uiout, "\t");
+      uiout->field_fmt ("insn-number", "%u", insn->number);
+      uiout->text ("\t");
     }
 
   if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
     {
       if (insn->is_speculative)
 	{
-	  ui_out_field_string (uiout, "is-speculative", "?");
+	  uiout->field_string ("is-speculative", "?");
 
 	  /* The speculative execution indication overwrites the first
 	     character of the PC prefix.
 	     We assume a PC prefix length of 3 characters.  */
 	  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	    ui_out_text (uiout, pc_prefix (pc) + 1);
+	    uiout->text (pc_prefix (pc) + 1);
 	  else
-	    ui_out_text (uiout, "  ");
+	    uiout->text ("  ");
 	}
       else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	ui_out_text (uiout, pc_prefix (pc));
+	uiout->text (pc_prefix (pc));
       else
-	ui_out_text (uiout, "   ");
+	uiout->text ("   ");
     }
   else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-    ui_out_text (uiout, pc_prefix (pc));
-  ui_out_field_core_addr (uiout, "address", gdbarch, pc);
+    uiout->text (pc_prefix (pc));
+  uiout->field_core_addr ("address", gdbarch, pc);
 
   if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
 			       &line, &unmapped))
     {
       /* We don't care now about line, filename and unmapped.  But we might in
 	 the future.  */
-      ui_out_text (uiout, " <");
+      uiout->text (" <");
       if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
-	ui_out_field_string (uiout, "func-name", name);
-      ui_out_text (uiout, "+");
-      ui_out_field_int (uiout, "offset", offset);
-      ui_out_text (uiout, ">:\t");
+	uiout->field_string ("func-name", name);
+      uiout->text ("+");
+      uiout->field_int ("offset", offset);
+      uiout->text (">:\t");
     }
   else
-    ui_out_text (uiout, ":\t");
+    uiout->text (":\t");
 
   if (filename != NULL)
     xfree (filename);
@@ -267,18 +267,18 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 	  spacer = " ";
 	}
 
-      ui_out_field_stream (uiout, "opcodes", opcode_stream);
-      ui_out_text (uiout, "\t");
+      uiout->field_stream ("opcodes", opcode_stream);
+      uiout->text ("\t");
 
       do_cleanups (cleanups);
     }
   else
     size = gdbarch_print_insn (gdbarch, pc, di);
 
-  ui_out_field_stream (uiout, "inst", stb);
+  uiout->field_stream ("inst", stb);
   ui_file_rewind (stb);
   do_cleanups (ui_out_chain);
-  ui_out_text (uiout, "\n");
+  uiout->text ("\n");
 
   return size;
 }
@@ -474,7 +474,7 @@ do_mixed_source_and_assembly_deprecated
 	  do_cleanups (ui_out_tuple_chain);
 	  ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
 	  ui_out_list_chain = make_cleanup (null_cleanup, 0);
-	  ui_out_text (uiout, "\n");
+	  uiout->text ("\n");
 	}
       if (how_many >= 0 && num_displayed >= how_many)
 	break;
@@ -648,7 +648,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	{
 	  /* Skip the newline if this is the first instruction.  */
 	  if (pc > low)
-	    ui_out_text (uiout, "\n");
+	    uiout->text ("\n");
 	  if (ui_out_tuple_chain != NULL)
 	    {
 	      gdb_assert (ui_out_list_chain != NULL);
@@ -663,12 +663,11 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		 output includes the source specs for each line.  */
 	      if (sal.symtab != NULL)
 		{
-		  ui_out_text (uiout,
-			       symtab_to_filename_for_display (sal.symtab));
+		  uiout->text (symtab_to_filename_for_display (sal.symtab));
 		}
 	      else
-		ui_out_text (uiout, "unknown");
-	      ui_out_text (uiout, ":\n");
+		uiout->text ("unknown");
+	      uiout->text (":\n");
 	    }
 	  if (start_preceding_line_to_display > 0)
 	    {
@@ -700,7 +699,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	  if (sal.symtab != NULL)
 	    print_source_lines (sal.symtab, sal.line, sal.line + 1, psl_flags);
 	  else
-	    ui_out_text (uiout, _("--- no source info for this pc ---\n"));
+	    uiout->text (_("--- no source info for this pc ---\n"));
 	  ui_out_list_chain
 	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
 	}

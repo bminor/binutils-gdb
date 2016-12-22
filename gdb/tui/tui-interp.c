@@ -252,10 +252,10 @@ tui_resume (void *data)
      previously writing to gdb_stdout, then set it to the new
      gdb_stdout afterwards.  */
 
-  stream = cli_out_set_stream (tui_old_uiout, gdb_stdout);
+  stream = tui_old_uiout->set_stream (gdb_stdout);
   if (stream != gdb_stdout)
     {
-      cli_out_set_stream (tui_old_uiout, stream);
+      tui_old_uiout->set_stream (stream);
       stream = NULL;
     }
 
@@ -264,7 +264,7 @@ tui_resume (void *data)
   ui->input_handler = command_line_handler;
 
   if (stream != NULL)
-    cli_out_set_stream (tui_old_uiout, gdb_stdout);
+    tui_old_uiout->set_stream (gdb_stdout);
 
   if (tui_start_enabled)
     tui_enable ();

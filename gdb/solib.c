@@ -1110,13 +1110,12 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 					 "SharedLibraryTable");
 
   /* The "- 1" is because ui_out adds one space between columns.  */
-  ui_out_table_header (uiout, addr_width - 1, ui_left, "from", "From");
-  ui_out_table_header (uiout, addr_width - 1, ui_left, "to", "To");
-  ui_out_table_header (uiout, 12 - 1, ui_left, "syms-read", "Syms Read");
-  ui_out_table_header (uiout, 0, ui_noalign,
-		       "name", "Shared Object Library");
+  uiout->table_header (addr_width - 1, ui_left, "from", "From");
+  uiout->table_header (addr_width - 1, ui_left, "to", "To");
+  uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
+  uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
 
-  ui_out_table_body (uiout);
+  uiout->table_body ();
 
   for (so = so_list_head; so; so = so->next)
     {
@@ -1131,29 +1130,28 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 
       if (so->addr_high != 0)
 	{
-	  ui_out_field_core_addr (uiout, "from", gdbarch, so->addr_low);
-	  ui_out_field_core_addr (uiout, "to", gdbarch, so->addr_high);
+	  uiout->field_core_addr ("from", gdbarch, so->addr_low);
+	  uiout->field_core_addr ("to", gdbarch, so->addr_high);
 	}
       else
 	{
-	  ui_out_field_skip (uiout, "from");
-	  ui_out_field_skip (uiout, "to");
+	  uiout->field_skip ("from");
+	  uiout->field_skip ("to");
 	}
 
-      if (! ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ()))
+      if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
 	  && so->symbols_loaded
 	  && !objfile_has_symbols (so->objfile))
 	{
 	  so_missing_debug_info = 1;
-	  ui_out_field_string (uiout, "syms-read", "Yes (*)");
+	  uiout->field_string ("syms-read", "Yes (*)");
 	}
       else
-	ui_out_field_string (uiout, "syms-read", 
-			     so->symbols_loaded ? "Yes" : "No");
+	uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
 
-      ui_out_field_string (uiout, "name", so->so_name);
+      uiout->field_string ("name", so->so_name);
 
-      ui_out_text (uiout, "\n");
+      uiout->text ("\n");
 
       do_cleanups (lib_cleanup);
     }
@@ -1163,17 +1161,14 @@ info_sharedlibrary_command (char *pattern, int from_tty)
   if (nr_libs == 0)
     {
       if (pattern)
-	ui_out_message (uiout,
-			_("No shared libraries matched.\n"));
+	uiout->message (_("No shared libraries matched.\n"));
       else
-	ui_out_message (uiout,
-			_("No shared libraries loaded at this time.\n"));
+	uiout->message (_("No shared libraries loaded at this time.\n"));
     }
   else
     {
       if (so_missing_debug_info)
-	ui_out_message (uiout,
-			_("(*): Shared library is missing "
+	uiout->message (_("(*): Shared library is missing "
 			  "debugging information.\n"));
     }
 }

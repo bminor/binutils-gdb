@@ -12469,18 +12469,17 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 
   annotate_catchpoint (b->number);
 
-  if (ui_out_is_mi_like_p (uiout))
+  if (uiout->is_mi_like_p ())
     {
-      ui_out_field_string (uiout, "reason",
+      uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
 
-  ui_out_text (uiout,
-               b->disposition == disp_del ? "\nTemporary catchpoint "
-	                                  : "\nCatchpoint ");
-  ui_out_field_int (uiout, "bkptno", b->number);
-  ui_out_text (uiout, ", ");
+  uiout->text (b->disposition == disp_del
+	       ? "\nTemporary catchpoint " : "\nCatchpoint ");
+  uiout->field_int ("bkptno", b->number);
+  uiout->text (", ");
 
   /* ada_exception_name_addr relies on the selected frame being the
      current frame.  Need to do this here because this function may be
@@ -12519,8 +12518,8 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	     hit.  We used ui_out_text to make sure that this extra
 	     info does not pollute the exception name in the MI case.  */
 	  if (ex == ada_catch_exception_unhandled)
-	    ui_out_text (uiout, "unhandled ");
-	  ui_out_field_string (uiout, "exception-name", exception_name);
+	    uiout->text ("unhandled ");
+	  uiout->field_string ("exception-name", exception_name);
 	}
 	break;
       case ada_catch_assert:
@@ -12529,10 +12528,10 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	   that his program just hit an assertion-failure catchpoint.
 	   We used ui_out_text because this info does not belong in
 	   the MI output.  */
-	ui_out_text (uiout, "failed assertion");
+	uiout->text ("failed assertion");
 	break;
     }
-  ui_out_text (uiout, " at ");
+  uiout->text (" at ");
   ada_find_printable_frame (get_current_frame ());
 
   return PRINT_SRC_AND_LOC;
@@ -12553,7 +12552,7 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
   if (opts.addressprint)
     {
       annotate_field (4);
-      ui_out_field_core_addr (uiout, "addr", b->loc->gdbarch, b->loc->address);
+      uiout->field_core_addr ("addr", b->loc->gdbarch, b->loc->address);
     }
 
   annotate_field (5);
@@ -12565,20 +12564,20 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
           {
             char *msg = xstrprintf (_("`%s' Ada exception"), c->excep_string);
 
-            ui_out_field_string (uiout, "what", msg);
+            uiout->field_string ("what", msg);
             xfree (msg);
           }
         else
-          ui_out_field_string (uiout, "what", "all Ada exceptions");
+          uiout->field_string ("what", "all Ada exceptions");
         
         break;
 
       case ada_catch_exception_unhandled:
-        ui_out_field_string (uiout, "what", "unhandled Ada exceptions");
+        uiout->field_string ("what", "unhandled Ada exceptions");
         break;
       
       case ada_catch_assert:
-        ui_out_field_string (uiout, "what", "failed Ada assertions");
+        uiout->field_string ("what", "failed Ada assertions");
         break;
 
       default:
@@ -12597,10 +12596,10 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct ui_out *uiout = current_uiout;
 
-  ui_out_text (uiout, b->disposition == disp_del ? _("Temporary catchpoint ")
+  uiout->text (b->disposition == disp_del ? _("Temporary catchpoint ")
                                                  : _("Catchpoint "));
-  ui_out_field_int (uiout, "bkptno", b->number);
-  ui_out_text (uiout, ": ");
+  uiout->field_int ("bkptno", b->number);
+  uiout->text (": ");
 
   switch (ex)
     {
@@ -12610,19 +12609,19 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
 	    char *info = xstrprintf (_("`%s' Ada exception"), c->excep_string);
 	    struct cleanup *old_chain = make_cleanup (xfree, info);
 
-	    ui_out_text (uiout, info);
+	    uiout->text (info);
 	    do_cleanups (old_chain);
 	  }
         else
-          ui_out_text (uiout, _("all Ada exceptions"));
+          uiout->text (_("all Ada exceptions"));
         break;
 
       case ada_catch_exception_unhandled:
-        ui_out_text (uiout, _("unhandled Ada exceptions"));
+        uiout->text (_("unhandled Ada exceptions"));
         break;
       
       case ada_catch_assert:
-        ui_out_text (uiout, _("failed Ada assertions"));
+        uiout->text (_("failed Ada assertions"));
         break;
 
       default:

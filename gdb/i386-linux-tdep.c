@@ -429,27 +429,22 @@ i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
 
   is_upper = (access > upper_bound ? 1 : 0);
 
-  ui_out_text (uiout, "\n");
+  uiout->text ("\n");
   if (is_upper)
-    ui_out_field_string (uiout, "sigcode-meaning",
-			 _("Upper bound violation"));
+    uiout->field_string ("sigcode-meaning", _("Upper bound violation"));
   else
-    ui_out_field_string (uiout, "sigcode-meaning",
-			 _("Lower bound violation"));
+    uiout->field_string ("sigcode-meaning", _("Lower bound violation"));
 
-  ui_out_text (uiout, _(" while accessing address "));
-  ui_out_field_fmt (uiout, "bound-access", "%s",
-		    paddress (gdbarch, access));
+  uiout->text (_(" while accessing address "));
+  uiout->field_fmt ("bound-access", "%s", paddress (gdbarch, access));
 
-  ui_out_text (uiout, _("\nBounds: [lower = "));
-  ui_out_field_fmt (uiout, "lower-bound", "%s",
-		    paddress (gdbarch, lower_bound));
+  uiout->text (_("\nBounds: [lower = "));
+  uiout->field_fmt ("lower-bound", "%s", paddress (gdbarch, lower_bound));
 
-  ui_out_text (uiout, _(", upper = "));
-  ui_out_field_fmt (uiout, "upper-bound", "%s",
-		    paddress (gdbarch, upper_bound));
+  uiout->text (_(", upper = "));
+  uiout->field_fmt ("upper-bound", "%s", paddress (gdbarch, upper_bound));
 
-  ui_out_text (uiout, _("]"));
+  uiout->text (_("]"));
 }
 
 /* Parse the arguments of current system call instruction and record

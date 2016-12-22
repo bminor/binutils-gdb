@@ -13785,8 +13785,8 @@ show_remote_cmd (char *args, int from_tty)
 	struct cleanup *option_chain
 	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
 
-	ui_out_field_string (uiout, "name", list->name);
-	ui_out_text (uiout, ":  ");
+	uiout->field_string ("name", list->name);
+	uiout->text (":  ");
 	if (list->type == show_cmd)
 	  do_show_command (NULL, from_tty, list);
 	else

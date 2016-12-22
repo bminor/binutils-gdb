@@ -107,7 +107,7 @@ display_mi_prompt (struct mi_interp *mi)
 static struct mi_interp *
 as_mi_interp (struct interp *interp)
 {
-  if (ui_out_is_mi_like_p (interp_ui_out (interp)))
+  if (interp_ui_out (interp)->is_mi_like_p ())
     return (struct mi_interp *) interp_data (interp);
   return NULL;
 }
@@ -674,8 +674,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
 	  enum async_reply_reason reason;
 
 	  reason = thread_fsm_async_reply_reason (tp->thread_fsm);
-	  ui_out_field_string (mi_uiout, "reason",
-			       async_reason_lookup (reason));
+	  mi_uiout->field_string ("reason", async_reason_lookup (reason));
 	}
       print_stop_event (mi_uiout);
 
@@ -683,21 +682,21 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
       if (should_print_stop_to_console (console_interp, tp))
 	print_stop_event (mi->cli_uiout);
 
-      ui_out_field_int (mi_uiout, "thread-id", tp->global_num);
+      mi_uiout->field_int ("thread-id", tp->global_num);
       if (non_stop)
 	{
 	  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end 
 	    (mi_uiout, "stopped-threads");
 
-	  ui_out_field_int (mi_uiout, NULL, tp->global_num);
+	  mi_uiout->field_int (NULL, tp->global_num);
 	  do_cleanups (back_to);
 	}
       else
-	ui_out_field_string (mi_uiout, "stopped-threads", "all");
+	mi_uiout->field_string ("stopped-threads", "all");
 
       core = target_core_of_thread (inferior_ptid);
       if (core != -1)
-	ui_out_field_int (mi_uiout, "core", core);
+	mi_uiout->field_int ("core", core);
     }
   
   fputs_unfiltered ("*stopped", mi->raw_stdout);
@@ -855,15 +854,15 @@ mi_tsv_modified (const struct trace_state_variable *tsv)
       fprintf_unfiltered (mi->event_channel,
 			  "tsv-modified");
 
-      ui_out_redirect (mi_uiout, mi->event_channel);
+      mi_uiout->redirect (mi->event_channel);
 
-      ui_out_field_string (mi_uiout, "name", tsv->name);
-      ui_out_field_string (mi_uiout, "initial",
+      mi_uiout->field_string ("name", tsv->name);
+      mi_uiout->field_string ("initial",
 			   plongest (tsv->initial_value));
       if (tsv->value_known)
-	ui_out_field_string (mi_uiout, "current", plongest (tsv->value));
+	mi_uiout->field_string ("current", plongest (tsv->value));
 
-      ui_out_redirect (mi_uiout, NULL);
+      mi_uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -905,7 +904,7 @@ mi_breakpoint_created (struct breakpoint *b)
 	 break if anything is output to mi_uiout prior to calling the
 	 breakpoint_created notifications.  So, we use
 	 ui_out_redirect.  */
-      ui_out_redirect (mi_uiout, mi->event_channel);
+      mi_uiout->redirect (mi->event_channel);
       TRY
 	{
 	  gdb_breakpoint_query (mi_uiout, b->number, NULL);
@@ -915,7 +914,7 @@ mi_breakpoint_created (struct breakpoint *b)
 	}
       END_CATCH
 
-      ui_out_redirect (mi_uiout, NULL);
+      mi_uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -984,7 +983,7 @@ mi_breakpoint_modified (struct breakpoint *b)
 	 break if anything is output to mi_uiout prior to calling the
 	 breakpoint_created notifications.  So, we use
 	 ui_out_redirect.  */
-      ui_out_redirect (mi->mi_uiout, mi->event_channel);
+      mi->mi_uiout->redirect (mi->event_channel);
       TRY
 	{
 	  gdb_breakpoint_query (mi->mi_uiout, b->number, NULL);
@@ -994,7 +993,7 @@ mi_breakpoint_modified (struct breakpoint *b)
 	}
       END_CATCH
 
-      ui_out_redirect (mi->mi_uiout, NULL);
+      mi->mi_uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -1139,19 +1138,18 @@ mi_solib_loaded (struct so_list *solib)
 
       fprintf_unfiltered (mi->event_channel, "library-loaded");
 
-      ui_out_redirect (uiout, mi->event_channel);
+      uiout->redirect (mi->event_channel);
 
-      ui_out_field_string (uiout, "id", solib->so_original_name);
-      ui_out_field_string (uiout, "target-name", solib->so_original_name);
-      ui_out_field_string (uiout, "host-name", solib->so_name);
-      ui_out_field_int (uiout, "symbols-loaded", solib->symbols_loaded);
+      uiout->field_string ("id", solib->so_original_name);
+      uiout->field_string ("target-name", solib->so_original_name);
+      uiout->field_string ("host-name", solib->so_name);
+      uiout->field_int ("symbols-loaded", solib->symbols_loaded);
       if (!gdbarch_has_global_solist (target_gdbarch ()))
 	{
-	  ui_out_field_fmt (uiout, "thread-group", "i%d",
-			    current_inferior ()->num);
+	  uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 	}
 
-      ui_out_redirect (uiout, NULL);
+      uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -1178,18 +1176,17 @@ mi_solib_unloaded (struct so_list *solib)
 
       fprintf_unfiltered (mi->event_channel, "library-unloaded");
 
-      ui_out_redirect (uiout, mi->event_channel);
+      uiout->redirect (mi->event_channel);
 
-      ui_out_field_string (uiout, "id", solib->so_original_name);
-      ui_out_field_string (uiout, "target-name", solib->so_original_name);
-      ui_out_field_string (uiout, "host-name", solib->so_name);
+      uiout->field_string ("id", solib->so_original_name);
+      uiout->field_string ("target-name", solib->so_original_name);
+      uiout->field_string ("host-name", solib->so_name);
       if (!gdbarch_has_global_solist (target_gdbarch ()))
 	{
-	  ui_out_field_fmt (uiout, "thread-group", "i%d",
-			    current_inferior ()->num);
+	  uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 	}
 
-      ui_out_redirect (uiout, NULL);
+      uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -1221,12 +1218,12 @@ mi_command_param_changed (const char *param, const char *value)
 
       fprintf_unfiltered (mi->event_channel, "cmd-param-changed");
 
-      ui_out_redirect (mi_uiout, mi->event_channel);
+      mi_uiout->redirect (mi->event_channel);
 
-      ui_out_field_string (mi_uiout, "param", param);
-      ui_out_field_string (mi_uiout, "value", value);
+      mi_uiout->field_string ("param", param);
+      mi_uiout->field_string ("value", value);
 
-      ui_out_redirect (mi_uiout, NULL);
+      mi_uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -1260,11 +1257,11 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 
       fprintf_unfiltered (mi->event_channel, "memory-changed");
 
-      ui_out_redirect (mi_uiout, mi->event_channel);
+      mi_uiout->redirect (mi->event_channel);
 
-      ui_out_field_fmt (mi_uiout, "thread-group", "i%d", inferior->num);
-      ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch (), memaddr);
-      ui_out_field_fmt (mi_uiout, "len", "%s", hex_string (len));
+      mi_uiout->field_fmt ("thread-group", "i%d", inferior->num);
+      mi_uiout->field_core_addr ("addr", target_gdbarch (), memaddr);
+      mi_uiout->field_fmt ("len", "%s", hex_string (len));
 
       /* Append 'type=code' into notification if MEMADDR falls in the range of
 	 sections contain code.  */
@@ -1275,10 +1272,10 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 						  sec->the_bfd_section);
 
 	  if (flags & SEC_CODE)
-	    ui_out_field_string (mi_uiout, "type", "code");
+	    mi_uiout->field_string ("type", "code");
 	}
 
-      ui_out_redirect (mi_uiout, NULL);
+      mi_uiout->redirect (NULL);
 
       gdb_flush (mi->event_channel);
 
@@ -1311,7 +1308,7 @@ mi_user_selected_context_changed (user_selected_what selection)
 
       mi_uiout = interp_ui_out (top_level_interpreter ());
 
-      ui_out_redirect (mi_uiout, mi->event_channel);
+      mi_uiout->redirect (mi->event_channel);
 
       old_chain = make_cleanup_ui_out_redirect_pop (mi_uiout);
 

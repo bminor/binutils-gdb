@@ -497,21 +497,21 @@ bppy_get_commands (PyObject *self, void *closure)
   string_file = mem_fileopen ();
   chain = make_cleanup_ui_file_delete (string_file);
 
-  ui_out_redirect (current_uiout, string_file);
+  current_uiout->redirect (string_file);
   TRY
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      ui_out_redirect (current_uiout, NULL);
+      current_uiout->redirect (NULL);
       do_cleanups (chain);
       gdbpy_convert_exception (except);
       return NULL;
     }
   END_CATCH
 
-  ui_out_redirect (current_uiout, NULL);
+  current_uiout->redirect (NULL);
   std::string cmdstr = ui_file_as_string (string_file);
   result = host_string_to_python_string (cmdstr.c_str ());
   do_cleanups (chain);
