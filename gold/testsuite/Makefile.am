@@ -1739,6 +1739,11 @@ ver_test_8_1.so: two_file_test_1_pic.o two_file_test_1b_pic.o ver_test_8_2.so gc
 ver_test_8_2.so: two_file_test_2_pic.o $(srcdir)/ver_test_8.script gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_8.script two_file_test_2_pic.o
 
+check_SCRIPTS += ver_test_8.sh
+check_DATA += ver_test_8_2.so.syms
+ver_test_8_2.so.syms: ver_test_8_2.so
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
+
 check_PROGRAMS += ver_test_9
 ver_test_9_SOURCES = ver_test_main.cc
 ver_test_9_DEPENDENCIES = gcctestdir/ld ver_test_9.so

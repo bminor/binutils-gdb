@@ -1,5 +1,20 @@
 2016-12-21  Cary Coutant  <ccoutant@gmail.com>
 
+	* symtab.cc (Symbol_table::define_special_symbol): Add is_forced_local
+	parameter; if set, do not check version script.
+	(Symbol_table::do_define_in_output_data): Pass is_forced_local for
+	STB_LOCAL predefined symbols.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+	* symtab.h (Symbol_table::define_special_symbol): Add is_forced_local
+	parameter. Adjust all callers.
+	* testsuite/Makefile.am (ver_test_8.sh): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* ver_test_8.sh: New test script.
+
+2016-12-21  Cary Coutant  <ccoutant@gmail.com>
+
 	* output.cc (Output_segment::first_section): Return NULL if there are
 	no sections in the segment.
 	* output.h (Output_segment::first_section_load_address): Assert that

@@ -1790,7 +1790,7 @@ class Symbol_table
   Sized_symbol<size>*
   define_special_symbol(const char** pname, const char** pversion,
 			bool only_if_ref, Sized_symbol<size>** poldsym,
-			bool* resolve_oldsym);
+			bool* resolve_oldsym, bool is_forced_local);
 
   // Define a symbol in an Output_data, sized version.
   template<int size>
