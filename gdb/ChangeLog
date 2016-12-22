@@ -1,5 +1,12 @@
 2020-12-22  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* arc-linux-tdep.c (arc_linux_sc_reg_offsets): New static variable.
+	(arc_linux_is_sigtramp): New function.
+	(arc_linux_sigcontext_addr): Likewise.
+	(arc_linux_init_osabi): Use them.
+
+2020-12-22  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* arc-tdep.c (arc_make_sigtramp_frame_cache): New function.
 	(arc_sigtramp_frame_this_id): Likewise.
 	(arc_sigtramp_frame_prev_register): Likewise.
