@@ -682,9 +682,6 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 			    address_expr->X_add_number);
 	  return;
 	}
-      else if (address_expr->X_op == O_constant)
-	ip->insn_opcode |= riscv_apply_const_reloc (reloc_type,
-						    address_expr->X_add_number);
       else
 	{
 	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
@@ -1851,6 +1848,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_RISCV_LO12_S:
       bfd_putl32 (riscv_apply_const_reloc (fixP->fx_r_type, *valP)
 		  | bfd_getl32 (buf), buf);
+      if (fixP->fx_addsy == NULL)
+	fixP->fx_done = TRUE;
       relaxable = TRUE;
       break;
 
