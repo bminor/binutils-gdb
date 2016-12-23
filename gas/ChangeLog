@@ -1,5 +1,14 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (mips16_ip): Handle `.e' and `.t' instruction
+	suffixes followed by a null character rather than a space too.
+	* testsuite/gas/mips/mips16-insn-length-noargs.d: New test.
+	* testsuite/gas/mips/mips16-insn-length-noargs.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16-extend-swap.d: New test.
 	* testsuite/gas/mips/mips16-extend-swap.s: New test source.
 	* testsuite/gas/mips/mips.exp: Run the new test.
