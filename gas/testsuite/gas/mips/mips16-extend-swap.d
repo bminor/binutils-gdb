@@ -13,10 +13,13 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> f123      	extend	0x123
 [0-9a-f]+ <[^>]*> 1c00 0000 	jalx	00000000 <foo>
 [0-9a-f]+ <[^>]*> 6500      	nop
-[0-9a-f]+ <[^>]*> f123 eb00 	jr	v1
+[0-9a-f]+ <[^>]*> f123      	extend	0x123
+[0-9a-f]+ <[^>]*> eb00      	jr	v1
 [0-9a-f]+ <[^>]*> 6500      	nop
-[0-9a-f]+ <[^>]*> f123 e820 	jr	ra
+[0-9a-f]+ <[^>]*> f123      	extend	0x123
+[0-9a-f]+ <[^>]*> e820      	jr	ra
 [0-9a-f]+ <[^>]*> 6500      	nop
-[0-9a-f]+ <[^>]*> f123 eb40 	jalr	v1
+[0-9a-f]+ <[^>]*> f123      	extend	0x123
+[0-9a-f]+ <[^>]*> eb40      	jalr	v1
 [0-9a-f]+ <[^>]*> 6500      	nop
 	\.\.\.

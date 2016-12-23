@@ -3293,6 +3293,8 @@ is_size_valid_16 (const struct mips_opcode *mo)
     return FALSE;
   if (forced_insn_length == 2 && mips_opcode_32bit_p (mo))
     return FALSE;
+  if (forced_insn_length == 4 && (mo->pinfo2 & INSN2_SHORT_ONLY))
+    return FALSE;
   return TRUE;
 }
 

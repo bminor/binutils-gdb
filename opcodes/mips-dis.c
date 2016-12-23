@@ -2129,6 +2129,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	}
       else if ((first & 0xf800) == 0xf000
 	       && have_second
+	       && !(op->pinfo2 & INSN2_SHORT_ONLY)
 	       && (second & op->mask) == op->match)
 	match = MATCH_FULL;
       else

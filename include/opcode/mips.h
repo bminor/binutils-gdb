@@ -1114,6 +1114,10 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
 #define INSN2_VU0_CHANNEL_SUFFIX    0x00004000
 /* Instruction has a forbidden slot.  */
 #define INSN2_FORBIDDEN_SLOT        0x00008000
+/* Opcode table entry is for a short MIPS16 form only.  An extended
+   encoding may still exist, but with a separate opcode table entry
+   required.  */
+#define INSN2_SHORT_ONLY	    0x00010000
 
 /* Masks used to mark instructions to indicate which MIPS ISA level
    they were introduced in.  INSN_ISA_MASK masks an enumeration that
