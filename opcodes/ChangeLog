@@ -1,5 +1,10 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips16-opc.c (mips16_opcodes): Set NODS in `pinfo' for
+	"extend".
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (set_default_mips_dis_options): Use
 	HAVE_BFD_MIPS_ELF_GET_ABIFLAGS rather than BFD64 to guard the
 	call to `bfd_mips_elf_get_abiflags'.
