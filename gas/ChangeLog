@@ -1,5 +1,42 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (is_size_valid_16): Disallow a `.e' suffix
+	instruction size override for INSN2_SHORT_ONLY opcode table
+	entries.
+	* testsuite/gas/mips/mips16-extend-swap.d: Adjust output.
+	* testsuite/gas/mips/mips16-macro-e.l: Adjust error messages.
+	* testsuite/gas/mips/mips16-32@mips16-macro-e.l: Adjust error
+	messages.
+	* testsuite/gas/mips/mips16e-32@mips16-macro-e.l: Adjust error
+	messages.
+	* testsuite/gas/mips/mips16-insn-e.d: New test.
+	* testsuite/gas/mips/mips16-insn-t.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-insn-e.d: New test.
+	* testsuite/gas/mips/mips16-64@mips16-insn-e.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16-insn-e.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-insn-t.d: New test.
+	* testsuite/gas/mips/mips16-64@mips16-insn-t.d: New test.
+	* testsuite/gas/mips/mips16e-32@mips16-insn-t.d: New test.
+	* testsuite/gas/mips/mips16-insn-e.l: New stderr output.
+	* testsuite/gas/mips/mips16-insn-t.l: New stderr output.
+	* testsuite/gas/mips/mips16-32@mips16-insn-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-64@mips16-insn-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e-32@mips16-insn-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-32@mips16-insn-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-64@mips16-insn-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e-32@mips16-insn-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-insn-e.s: New test source.
+	* testsuite/gas/mips/mips16-insn-t.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (match_mips16_insn): Remove the `6' operand
 	code special case and its associated comment.
 

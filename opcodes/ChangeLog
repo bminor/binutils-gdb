@@ -1,5 +1,20 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (print_insn_mips16): Disallow EXTEND prefix
+	matching for INSN2_SHORT_ONLY opcode table entries.
+	* mips16-opc.c (SH): New macro.
+	(mips16_opcodes): Set SH in `pinfo2' for non-extensible
+	instruction entries: "nop", "addu", "and", "break", "cmp",
+	"daddu", "ddiv", "ddivu", "div", "divu", "dmult", "dmultu",
+	"drem", "dremu", "dsllv", "dsll", "dsrav", "dsra", "dsrlv",
+	"dsrl", "dsubu", "exit", "entry", "jalr", "jal", "jr", "j",
+	"jalrc", "jrc", "mfhi", "mflo", "move", "mult", "multu", "neg",
+	"not", "or", "rem", "remu", "sllv", "sll", "slt", "sltu",
+	"srav", "sra", "srlv", "srl", "subu", "xor", "sdbbp", "seb",
+	"seh", "sew", "zeb", "zeh", "zew" and "extend".
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips16-opc.c (decode_mips16_operand) <'6'>: Remove extended
 	encoding support.
 
