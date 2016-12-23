@@ -1,3 +1,21 @@
+Changes in 1.14:
+
+* Add -z bndplt option (x86-64 only) to support Intel MPX.
+
+* Add --orphan-handling option.
+
+* Add --stub-group-multi option (PowerPC only).
+
+* Add --target1-rel, --target1-abs, --target2 options (Arm only).
+
+* Add -z stack-size option.
+
+* Add --be8 option (Arm only).
+
+* Add HIDDEN support in linker scripts.
+
+* Add SORT_BY_INIT_PRIORITY support in linker scripts.
+
 Changes in 1.12:
 
 * Add a configure option --enable-relro to decide whether -z relro should
