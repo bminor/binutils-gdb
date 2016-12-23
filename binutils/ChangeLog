@@ -1,5 +1,9 @@
 2016-12-23  Tristan Gingold  <gingold@adacore.com>
 
+	* NEWS: Add marker for 2.28.
+
+2016-12-23  Tristan Gingold  <gingold@adacore.com>
+
 	* po/binutils.pot: Regenerate.
 
 2016-12-20  Maciej W. Rozycki  <macro@imgtec.com>

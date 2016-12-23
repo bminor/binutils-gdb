@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.28:
+
 * The EXCLUDE_FILE linker script construct can now be applied outside of the
   section list in order for the exclusions to apply over all input sections in
   the list.

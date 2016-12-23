@@ -1,5 +1,9 @@
 2016-12-23  Tristan Gingold  <gingold@adacore.com>
 
+	* NEWS: Add marker for 2.28.
+
+2016-12-23  Tristan Gingold  <gingold@adacore.com>
+
 	* po/ld.pot: Regenerate.
 
 2016-12-22  Alan Modra  <amodra@gmail.com>

@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.28:
+
 * Add support for the RISC-V architecture.
 
 * Add support for the ARM Cortex-M23 and Cortex-M33 processors.
