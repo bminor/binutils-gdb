@@ -1,4 +1,16 @@
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (handle_general_set): Handle new packet
+	"QStartupWithShell".
+	(handle_query): Add "QStartupWithShell" to the list of supported
+	packets.
+	(gdbserver_usage): Add help text explaining the
+	new "--startup-with-shell" and "--no-startup-with-shell" CLI
+	options.
+	(captured_main): Recognize and act upon the presence of the new
+	CLI options.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add "nat/fork-inferior.o".

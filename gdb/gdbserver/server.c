@@ -767,6 +767,31 @@ handle_general_set (char *own_buf)
       return;
     }
 
+  if (startswith (own_buf, "QStartupWithShell:"))
+    {
+      const char *value = own_buf + strlen ("QStartupWithShell:");
+
+      if (strcmp (value, "1") == 0)
+	startup_with_shell = true;
+      else if (strcmp (value, "0") == 0)
+	startup_with_shell = false;
+      else
+	{
+	  /* Unknown value.  */
+	  fprintf (stderr, "Unknown value to startup-with-shell: %s\n",
+		   own_buf);
+	  write_enn (own_buf);
+	  return;
+	}
+
+      if (remote_debug)
+	debug_printf (_("[Inferior will %s started with shell]"),
+		      startup_with_shell ? "be" : "not be");
+
+      write_ok (own_buf);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -2203,7 +2228,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
 
       sprintf (own_buf,
-	       "PacketSize=%x;QPassSignals+;QProgramSignals+",
+	       "PacketSize=%x;QPassSignals+;QProgramSignals+;QStartupWithShell+",
 	       PBUFSIZ - 1);
 
       if (target_supports_catch_syscall ())
@@ -3309,6 +3334,13 @@ gdbserver_usage (FILE *stream)
 	   "  --no-disable-randomization\n"
 	   "                        Don't disable address space randomization when\n"
 	   "                        starting PROG.\n"
+	   "  --startup-with-shell\n"
+	   "                        Start PROG using a shell.  I.e., execs a shell that\n"
+	   "                        then execs PROG.  (default)\n"
+	   "  --no-startup-with-shell\n"
+	   "                        Exec PROG directly instead of using a shell.\n"
+	   "                        Disables argument globbing and variable substitution\n"
+	   "                        on UNIX-like systems.\n"
 	   "\n"
 	   "Debug options:\n"
 	   "\n"
@@ -3601,6 +3633,10 @@ captured_main (int argc, char *argv[])
 	disable_randomization = 1;
       else if (strcmp (*next_arg, "--no-disable-randomization") == 0)
 	disable_randomization = 0;
+      else if (strcmp (*next_arg, "--startup-with-shell") == 0)
+	startup_with_shell = true;
+      else if (strcmp (*next_arg, "--no-startup-with-shell") == 0)
+	startup_with_shell = false;
       else if (strcmp (*next_arg, "--once") == 0)
 	run_once = 1;
       else

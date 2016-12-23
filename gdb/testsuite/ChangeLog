@@ -1,5 +1,10 @@
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* gdb.base/startup-with-shell.c: New file.
+	* gdb.base/startup-with-shell.exp: Likewise.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* gdb.server/non-existing-program.exp: Update regex in order to
 	reflect the fact that gdbserver is now using fork_inferior (with a
 	shell) to startup the inferior.

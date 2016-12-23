@@ -1,3 +1,11 @@
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting) <startup-with-shell>: Add @anchor.
+	(Connecting) <Remote Packet>: Add "startup-with-shell"
+	and "QStartupWithShell" to the table.
+	(Remote Protocol) <QStartupWithShell>: New item, explaining the
+	packet.
+
 2017-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Packets): Document vMustReplyEmpty packet.

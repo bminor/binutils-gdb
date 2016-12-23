@@ -1,4 +1,17 @@
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS (Changes since GDB 8.0): Announce that GDBserver is now
+	able to start inferiors	using a shell.
+	(New remote packets): Announce new packet "QStartupWithShell".
+	* remote.c: Add PACKET_QStartupWithShell.
+	(extended_remote_create_inferior): Handle new
+	PACKET_QStartupWithShell.
+	(remote_protocol_features) <QStartupWithShell>: New entry for
+	PACKET_QStartupWithShell.
+	(_initialize_remote): Call "add_packet_config_cmd" for
+	QStartupShell.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-inferior.h"
