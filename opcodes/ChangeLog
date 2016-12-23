@@ -1,5 +1,12 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (print_mips16_insn_arg): Simplify processing of
+	extended operands.
+	* mips16-opc.c (decode_mips16_operand): Switch the extended
+	form of the `<' operand type to LSB position 22.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips16-opc.c (decode_mips16_operand): Replace `0' and `4'
 	operand codes with `.' and `F' respectively.
 	(mips16_opcodes): Likewise.
