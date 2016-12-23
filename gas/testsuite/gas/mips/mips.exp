@@ -1352,6 +1352,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips16-branch-unextended-1"
     run_dump_test "mips16-branch-unextended-2"
+    run_dump_test "mips16-relax-unextended-1"
+    run_dump_test "mips16-relax-unextended-2"
     run_dump_test "mips16-jal-t"
     run_dump_test "mips16-jal-e"
 
