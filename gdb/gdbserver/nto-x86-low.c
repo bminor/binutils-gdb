@@ -25,7 +25,7 @@
 #include <x86/context.h>
 
 
-/* Definition auto generated from reg-i386.dep.  */
+/* Defined in auto-generated build-time file gdb/gdbserver/i386.c.  */
 extern void init_registers_i386 ();
 extern struct reg *regs_i386;
 extern const struct target_desc *tdesc_i386;
