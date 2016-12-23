@@ -1,5 +1,11 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips16-opc.c (decode_mips16_operand): Add `0', `1', `2', `3',
+	`4' and `s' operand codes.
+	(mips16_opcodes): Add "asmacro" entry.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-dis.c (print_mips16_insn_arg): Simplify processing of
 	extended operands.
 	* mips16-opc.c (decode_mips16_operand): Switch the extended

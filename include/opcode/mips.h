@@ -1809,12 +1809,18 @@ extern int bfd_mips_num_opcodes;
    "R" return address register ($ra or $31)
    "X" 5 bit MIPS register (MIPS16OP_*_REGR32)
    "Y" 5 bit MIPS register (MIPS16OP_*_REG32R)
+   "0" 5-bit ASMACRO p0 immediate
+   "1" 3-bit ASMACRO p1 immediate
+   "2" 3-bit ASMACRO p2 immediate
+   "3" 5-bit ASMACRO p3 immediate
+   "4" 3-bit ASMACRO p4 immediate
    "6" 6 bit unsigned break code (MIPS16OP_*_IMM6)
    "a" 26 bit jump address
    "i" likewise, but flips bit 0
    "e" 11 bit extension value
    "l" register list for entry instruction
    "L" register list for exit instruction
+   "s" 3-bit ASMACRO select immediate
 
    "I" an immediate value used for macros
 
@@ -1844,10 +1850,10 @@ extern int bfd_mips_num_opcodes;
    "M" 7 bit register list for restore instruction (18 bit extended)
 
    Characters used so far, for quick reference when adding more:
-   "    56 8  "
+   "0123456 8 "
    ".[]<"
    "ABCDEF HI KLM  P RS UVWXYZ"
-   "a   e   ijklm  pq    vwxyz"
+   "a   e   ijklm  pq s  vwxyz"
   */
 
 /* Save/restore encoding for the args field when all 4 registers are

@@ -1357,6 +1357,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-jal-t"
     run_dump_test "mips16-jal-e"
 
+    run_dump_test_arches "mips16-asmacro" [mips_arch_list_matching mips16-32]
+
     run_dump_test "vxworks1"
     run_dump_test "vxworks1-xgot"
     run_dump_test "vxworks1-el"

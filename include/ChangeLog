@@ -1,5 +1,10 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* opcode/mips.h: Document `0', `1', `2', `3', `4' and `s'
+	operand codes.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* opcode/mips.h: Replace `0' and `4' operand codes with `.' and
 	`F' respectively.
 

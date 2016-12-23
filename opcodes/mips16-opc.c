@@ -51,6 +51,11 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     {
     case '.': MAPPED_REG (0, 0, GP, reg_0_map);
 
+    case '0': HINT (5, 0);
+    case '1': HINT (3, 5);
+    case '2': HINT (3, 8);
+    case '3': HINT (5, 16);
+    case '4': HINT (3, 21);
     case '6': UINT (6, 5);
 
     case 'L': SPECIAL (6, 5, ENTRY_EXIT_LIST);
@@ -67,6 +72,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     case 'i': JALX (26, 0, 2);
     case 'l': SPECIAL (6, 5, ENTRY_EXIT_LIST);
     case 'm': SPECIAL (7, 0, SAVE_RESTORE_LIST);
+    case 's': HINT (3, 24);
     case 'v': OPTIONAL_MAPPED_REG (3, 8, GP, reg_m16_map);
     case 'w': OPTIONAL_MAPPED_REG (3, 5, GP, reg_m16_map);
     case 'x': MAPPED_REG (3, 8, GP, reg_m16_map);
@@ -357,6 +363,9 @@ const struct mips_opcode mips16_opcodes[] =
 {"zeb",	    "x",	0xe811, 0xf8ff,		MOD_1,			SH,		I32,	0,	0 },
 {"zeh",	    "x",	0xe831, 0xf8ff,		MOD_1,			SH,		I32,	0,	0 },
 {"zew",	    "x",	0xe851, 0xf8ff,		MOD_1,			SH,		I64,	0,	0 },
+  /* Place asmacro at the bottom so that it catches any implementation
+     specific macros that didn't match anything.  */
+{"asmacro", "s,0,1,2,3,4", 0xf000e000, 0xf800f800, 0,			0,		I32,	0,	0 },
   /* Place EXTEND last so that it catches any prefix that didn't match
      anything.  */
 {"extend",  "e",	0xf000, 0xf800,		NODS,			SH,		I1,	0,	0 },

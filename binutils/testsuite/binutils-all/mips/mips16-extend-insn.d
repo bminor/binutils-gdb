@@ -198,14 +198,10 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> f123 d0c0 	sw	s0,6432\(sp\)
 [0-9a-f]+ <[^>]*> f123 d0e0 	sw	s0,6432\(sp\)
 [0-9a-f]+ <[^>]*> f123 d800 	sw	s0,6432\(s0\)
-[0-9a-f]+ <[^>]*> f123      	extend	0x123
-[0-9a-f]+ <[^>]*> e000      	daddu	s0,s0
-[0-9a-f]+ <[^>]*> f123      	extend	0x123
-[0-9a-f]+ <[^>]*> e001      	addu	s0,s0
-[0-9a-f]+ <[^>]*> f123      	extend	0x123
-[0-9a-f]+ <[^>]*> e002      	dsubu	s0,s0
-[0-9a-f]+ <[^>]*> f123      	extend	0x123
-[0-9a-f]+ <[^>]*> e003      	subu	s0,s0
+[0-9a-f]+ <[^>]*> f123 e000 	asmacro	0x1,0x0,0x0,0x0,0x3,0x1
+[0-9a-f]+ <[^>]*> f123 e001 	asmacro	0x1,0x1,0x0,0x0,0x3,0x1
+[0-9a-f]+ <[^>]*> f123 e002 	asmacro	0x1,0x2,0x0,0x0,0x3,0x1
+[0-9a-f]+ <[^>]*> f123 e003 	asmacro	0x1,0x3,0x0,0x0,0x3,0x1
 [0-9a-f]+ <[^>]*> f123      	extend	0x123
 [0-9a-f]+ <[^>]*> e800      	jr	s0
 [0-9a-f]+ <[^>]*> f123      	extend	0x123
