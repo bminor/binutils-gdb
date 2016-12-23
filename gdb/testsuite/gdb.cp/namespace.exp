@@ -40,7 +40,7 @@ if {[test_compiler_info {gcc-[0-3]-*}]
     set xfail_class_types 1
 }
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] {debug c++}]} {
     return -1
 }

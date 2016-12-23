@@ -27,7 +27,7 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
     return 0
 }
 
-if { [prepare_for_testing "${test}.exp" "${test}" ${test}.S {nodebug}] } {
+if { [prepare_for_testing "failed to prepare" "${test}" ${test}.S {nodebug}] } {
     return -1
 }
 

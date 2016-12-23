@@ -23,8 +23,7 @@
 standard_testfile
 set linefile ${testfile}.inp
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
-    untested $testfile.exp
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 

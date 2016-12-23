@@ -26,7 +26,7 @@ if { ![istarget s390-*-*] && ![istarget s390x-*-* ] } {
 
 standard_testfile .c
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 

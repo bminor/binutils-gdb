@@ -30,7 +30,7 @@ if [mi_gdb_start] {
 standard_testfile var-cmd.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested mi-var-block.exp
+    untested "failed to compile"
     return -1
 }
 

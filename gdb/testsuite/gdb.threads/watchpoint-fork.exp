@@ -89,7 +89,7 @@ proc test {type symbol} {
 	    set executable ${testfile}-${type}-mt
 	    set srcfile_main ${srcdir}/${subdir}/${testfile}-mt.c
 	    if { [gdb_compile_pthreads "${srcfile_main} ${srcfile_type}" [standard_output_file ${executable}] executable [list debug "additional_flags=-D$symbol -DTHREAD"]] != "" } {
-		untested ${testfile}.exp
+		untested "failed to compile"
 		return
 	    }
 	    clean_restart $executable

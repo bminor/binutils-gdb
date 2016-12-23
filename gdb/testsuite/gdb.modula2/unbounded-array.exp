@@ -19,8 +19,7 @@
 
 standard_testfile unbounded1.c
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug quiet}]} {
-    untested $testfile.exp
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug quiet}]} {
     return -1
 }
 

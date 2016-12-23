@@ -26,8 +26,7 @@ if {[is_remote target]} {
 set testfile "solib-corrupted"
 set srcfile start.c
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
-    untested ${testfile}.exp
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 

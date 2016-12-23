@@ -24,9 +24,8 @@ if [get_compiler_info] {
 
 standard_testfile opaque0.c opaque1.c
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] debug]} {
-    untested $testfile.exp
     return -1
 }
 

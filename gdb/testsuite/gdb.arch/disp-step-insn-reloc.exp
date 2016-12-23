@@ -24,9 +24,8 @@ if { ![support_displaced_stepping] } {
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
 
-if [prepare_for_testing $expfile $executable $srcfile \
+if [prepare_for_testing "failed to prepare" $executable $srcfile \
 	[list debug $additional_flags]] {
-    untested "failed to prepare for tests"
     return -1
 }
 

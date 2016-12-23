@@ -23,7 +23,7 @@ if {[skip_gdbserver_tests]} {
     return 0
 }
 
-if { [prepare_for_testing ${testfile}.exp ${testfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile}] } {
     return -1
 }
 

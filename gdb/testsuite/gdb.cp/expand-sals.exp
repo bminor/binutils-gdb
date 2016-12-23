@@ -16,7 +16,7 @@
 if { [skip_cplus_tests] } { continue }
 
 set srcfile expand-sals.cc
-if { [prepare_for_testing expand-sals.exp expand-sals $srcfile {debug c++}] } {
+if { [prepare_for_testing "failed to prepare" expand-sals $srcfile {debug c++}] } {
     return -1
 }
 if ![runto_main] {

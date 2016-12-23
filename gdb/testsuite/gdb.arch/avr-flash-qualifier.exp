@@ -30,7 +30,7 @@ if {[test_compiler_info {gcc-[0-4]-[0-6]}]} {
 }
 
 standard_testfile
-if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}]} {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
   return -1
 }
 

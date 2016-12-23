@@ -25,7 +25,7 @@ standard_testfile
 # on ARM, causing the PC to acquire a wrong value.  That's why we use
 # the "-Wl,-Ttext-segment" option compile the binary.
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     [list debug ldflags=-Wl,-Ttext-segment=0xb0000000]] } {
     return -1
 }

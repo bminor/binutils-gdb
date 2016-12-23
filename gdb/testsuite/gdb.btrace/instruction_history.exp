@@ -22,7 +22,7 @@ if { [skip_btrace_tests] } { return -1 }
 
 # compile and run to main
 standard_testfile .c .S
-if [prepare_for_testing $testfile.exp $testfile "$srcfile $srcfile2" {debug}] {
+if [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" {debug}] {
     return -1
 }
 if ![runto_main] {

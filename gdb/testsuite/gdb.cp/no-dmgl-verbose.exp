@@ -20,7 +20,7 @@ standard_testfile .cc
 if { [skip_cplus_tests] } { continue }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object {c++ debug}] != "" } {
-     untested ${testfile}.exp
+     untested "failed to compile"
      return -1
 }
 

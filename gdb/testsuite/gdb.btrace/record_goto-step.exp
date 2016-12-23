@@ -23,7 +23,7 @@ if { [skip_btrace_tests] } { return -1 }
 standard_testfile record_goto.c
 
 # start inferior
-if [prepare_for_testing record_goto-step.exp $testfile $srcfile] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
     return -1
 }
 

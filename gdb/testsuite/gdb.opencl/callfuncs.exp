@@ -28,7 +28,7 @@ set clprogram [remote_download target ${srcdir}/${subdir}/${testfile}.cl]
 
 # Compile the generic OpenCL host app
 if { [gdb_compile_opencl_hostapp "${clprogram}" "${testfile}" "" ] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

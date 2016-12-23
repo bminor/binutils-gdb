@@ -43,7 +43,7 @@ if [info exists COMPILE] {
 }
 
 # start inferior
-if [prepare_for_testing stepi.exp $testfile $srcfile] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
     return -1
 }
 

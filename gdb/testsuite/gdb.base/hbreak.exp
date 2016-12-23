@@ -19,7 +19,7 @@ if {[skip_hw_breakpoint_tests]} {
 
 set test hbreak
 set srcfile ${test}.c
-if { [prepare_for_testing ${test}.exp ${test} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" ${test} ${srcfile}] } {
     return -1
 }
 

@@ -20,7 +20,7 @@ if { ![is_aarch32_target] } {
 
 standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     [list debug]] } {
     return -1
 }

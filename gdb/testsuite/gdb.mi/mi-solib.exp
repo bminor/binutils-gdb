@@ -17,7 +17,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi2"
 
 if {[skip_shlib_tests]} {
-    untested mi-solib.exp
+    untested "skipping shared library tests"
     return -1
 }
 

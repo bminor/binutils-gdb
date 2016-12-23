@@ -24,7 +24,7 @@
 standard_testfile
 set executable $testfile
 
-if { [prepare_for_testing $testfile.exp $executable $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $executable $srcfile] } {
     return -1
 }
 

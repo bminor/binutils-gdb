@@ -56,7 +56,7 @@ set nl "\[\r\n\]+"
 set timeout 30
 
 if { ! [ runto_main ] } then {
-    untested gcore-thread.exp
+    untested "could not run to main"
     return -1
 }
 

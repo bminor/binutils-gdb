@@ -20,7 +20,7 @@ if { [skip_ada_tests] } { return -1 }
 # This testcase verifies the behavior of the `start' command, which
 # does not work when we use the gdb stub...
 if [target_info exists use_gdb_stub] {
-    untested exec_changed.exp
+    untested "skipping tests due to use_gdb_stub"
     return
 }
 

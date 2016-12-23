@@ -499,10 +499,10 @@ proc perform_all_tests {} {
 
 # Perform all tests with and without function prototypes.
 
-if { ![prepare_for_testing ${testfile}.exp $testfile $srcfile "$compile_flags additional_flags=-DPROTOTYPES"] } {
+if { ![prepare_for_testing "failed to prepare" $testfile $srcfile "$compile_flags additional_flags=-DPROTOTYPES"] } {
     perform_all_tests
 }
 
-if { ![prepare_for_testing ${testfile}.exp $testfile $srcfile "$compile_flags additional_flags=-DNO_PROTOTYPES"] } {
+if { ![prepare_for_testing "failed to prepare" $testfile $srcfile "$compile_flags additional_flags=-DNO_PROTOTYPES"] } {
     with_test_prefix "noproto" perform_all_tests
 }

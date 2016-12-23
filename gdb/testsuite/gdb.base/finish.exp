@@ -18,7 +18,7 @@
 set skip_float_test [gdb_skip_float_test]
 
 # re-use the program from the "return2" test.
-if { [prepare_for_testing finish.exp finish return2.c] } {
+if { [prepare_for_testing "failed to prepare" finish return2.c] } {
     return -1
 }
 

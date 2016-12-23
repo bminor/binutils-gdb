@@ -37,7 +37,7 @@ set binfile [standard_output_file ${testfile}]
 set additional_flags [gdb_target_symbol_prefix_flags]
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfilec} ${srcdir}/${subdir}/${srcfileasm}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested i386-gnu-cfi.exp
+    untested "failed to compile"
     return -1
 }
 

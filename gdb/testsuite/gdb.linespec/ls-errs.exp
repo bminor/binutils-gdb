@@ -37,7 +37,7 @@ proc do_test {lang} {
 	lappend options "c++"
     }
 
-    if {[prepare_for_testing $testfile $exefile $srcfile $options]} {
+    if {[prepare_for_testing "failed to prepare" $exefile $srcfile $options]} {
 	return -1
     }
 

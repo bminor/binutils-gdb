@@ -27,7 +27,7 @@ if [is_ilp32_target] {
     set ptrbits 64
 }
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} \
+if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile $srcfile2] \
 	  [list nodebug additional_flags=-DPTRBITS=$ptrbits]] } {
     return -1

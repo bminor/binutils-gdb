@@ -18,7 +18,7 @@ if [is_remote target] then {
     continue
 }
 
-if { [prepare_for_testing term.exp term term.c] } {
+if { [prepare_for_testing "failed to prepare" term term.c] } {
     return -1
 }
 

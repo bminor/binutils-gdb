@@ -19,7 +19,7 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-if { [prepare_for_testing dw2-noloc.exp "dw2-noloc" {dw2-noloc-main.c dw2-noloc.S} {nodebug}] } {
+if { [prepare_for_testing "failed to prepare" "dw2-noloc" {dw2-noloc-main.c dw2-noloc.S} {nodebug}] } {
     return -1
 }
 

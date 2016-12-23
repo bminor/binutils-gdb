@@ -21,7 +21,7 @@
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DVARIABLE=var1}] != "" } {
-    untested chng-syms.exp
+    untested "failed to compile"
     return -1
 }
 

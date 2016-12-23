@@ -25,7 +25,7 @@ standard_testfile
 
 # discard local symbols
 set ldflags "additional_flags=-Wl,-x"
-if [prepare_for_testing $testfile.exp $testfile $srcfile $ldflags] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile $ldflags] {
     return -1
 }
 if ![runto test] {

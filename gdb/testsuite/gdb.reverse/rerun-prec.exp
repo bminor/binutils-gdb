@@ -19,7 +19,7 @@ if {![supports_reverse] || ![supports_process_record]} {
 
 standard_testfile
 
-if {[prepare_for_testing $testfile.exp $testfile [list $srcfile]]} {
+if {[prepare_for_testing "failed to prepare" $testfile [list $srcfile]]} {
     return -1
 }
 

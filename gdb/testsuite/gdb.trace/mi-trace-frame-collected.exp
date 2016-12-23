@@ -17,7 +17,7 @@ load_lib trace-support.exp
 
 standard_testfile actions.c
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] } {
     return -1
 }
 

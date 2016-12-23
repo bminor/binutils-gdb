@@ -24,7 +24,7 @@ set srcfuncfile ${testfile}-func.c
 set srcmainfile ${testfile}-main.c
 set executable ${testfile}
 
-if {[prepare_for_testing_full $testfile.exp \
+if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile {} $srcfile {} $srcfuncfile {} \
 	      $srcmainfile debug]]} {
     return -1

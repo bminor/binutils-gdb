@@ -19,7 +19,7 @@
 standard_testfile
 set exefile $testfile
 
-if {[prepare_for_testing $testfile $exefile $srcfile {debug}]} {
+if {[prepare_for_testing "failed to prepare" $exefile $srcfile {debug}]} {
     return -1
 }
 

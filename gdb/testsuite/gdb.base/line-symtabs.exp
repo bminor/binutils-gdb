@@ -16,7 +16,7 @@
 
 standard_testfile .c line-symtabs.h
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 

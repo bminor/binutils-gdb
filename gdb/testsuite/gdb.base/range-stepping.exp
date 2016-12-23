@@ -18,7 +18,7 @@ load_lib "range-stepping-support.exp"
 standard_testfile
 set executable $testfile
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug}] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] } {
     return -1
 }
 

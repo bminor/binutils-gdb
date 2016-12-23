@@ -23,12 +23,12 @@ if ![istarget *-*-linux*] then {
     return
 }
 
-if { [prepare_for_testing current-lwp-dead.exp current-lwp-dead] } {
+if { [prepare_for_testing "failed to prepare" current-lwp-dead] } {
     return -1
 }
 
 if {[runto_main] <= 0} {
-    untested current-lwp-dead.exp
+    untested "could not run to main"
     return -1
 }
 

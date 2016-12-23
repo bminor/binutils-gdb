@@ -23,7 +23,7 @@
 #
 
 
-if { [prepare_for_testing float.exp float float.c] } {
+if { [prepare_for_testing "failed to prepare" float float.c] } {
     return -1
 }
 

@@ -21,7 +21,7 @@ standard_testfile .cc dw4-sig-types-b.cc
 # Since we pass an explicit -gdwarf-4 -fdebug-types-section to the compiler,
 # we let that be the test of whether the target supports it.
 
-if { [prepare_for_testing "${testfile}.exp" "${testfile}" \
+if { [prepare_for_testing "failed to prepare" "${testfile}" \
 	  [list $srcfile $srcfile2] \
 	  {debug c++ additional_flags=-gdwarf-4 additional_flags=-fdebug-types-section}] } {
     return -1

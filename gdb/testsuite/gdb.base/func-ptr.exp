@@ -17,7 +17,7 @@
 # Trying to print foo->bar if foo is a pointer to a typedef of a pointer
 # to a function will put gdb into an infinite loop.
 
-if { [prepare_for_testing func-ptr.exp "func-ptr" {func-ptr.c} {debug}] } {
+if { [prepare_for_testing "failed to prepare" "func-ptr" {func-ptr.c} {debug}] } {
     return -1
 }
 

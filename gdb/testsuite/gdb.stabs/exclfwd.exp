@@ -22,7 +22,7 @@
 
 standard_testfile exclfwd1.c exclfwd2.c
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] debug]} {
     return -1
 }

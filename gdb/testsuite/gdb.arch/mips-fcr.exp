@@ -24,7 +24,7 @@ if { ![istarget "mips*-*-*"] } then {
 
 standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile}] } {
     return
 }
 

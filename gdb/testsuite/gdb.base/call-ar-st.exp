@@ -35,8 +35,7 @@ if [get_compiler_info] {
 
 set skip_float_test [gdb_skip_float_test]
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
-    untested $testfile.exp
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 

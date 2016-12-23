@@ -31,7 +31,7 @@ if [target_info exists gdb,cannot_call_functions] {
 set dp_location [gdb_get_line_number "set dprintf here"]
 set bp_location [gdb_get_line_number "set breakpoint here"]
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 

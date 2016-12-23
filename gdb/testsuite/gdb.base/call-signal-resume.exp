@@ -29,7 +29,7 @@ if [target_info exists gdb,nosignals] {
 standard_testfile call-signals.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested call-signal-resume.exp
+     untested "failed to compile"
      return -1
 }
 

@@ -30,7 +30,7 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 set opts {}
 
-if {[prepare_for_testing ${testfile}.exp ${binfile} $srcfile {additional_flags=-g}]} {
+if {[prepare_for_testing "failed to prepare" ${binfile} $srcfile {additional_flags=-g}]} {
     return -1
 }
 

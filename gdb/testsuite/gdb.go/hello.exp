@@ -23,14 +23,14 @@ if { [skip_go_tests] } { continue }
 
 standard_testfile .go
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug go}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug go}] } {
     return -1
 }
 
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 
 if { [go_runto_main] < 0 } {
-    untested $testfile
+    untested "could not run to main"
     return -1
 }
 

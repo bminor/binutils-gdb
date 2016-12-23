@@ -31,12 +31,12 @@ set link-flags "-m h8300sxelf"
 
 
 if {[target_assemble $srcfile $objfile "${asm-flags}"] != ""} then {
-     untested t03_add.exp
+     untested "failed to assemble"
      return -1
 }
 
 if {[target_link $objfile $binfile "${link-flags}"] != ""} then {
-     untested t03_add.exp
+     untested "failed to link"
      return -1
 }
 

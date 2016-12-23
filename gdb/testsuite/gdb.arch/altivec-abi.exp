@@ -40,7 +40,7 @@ proc altivec_abi_tests { extra_flags force_abi } {
     set compile_flags "debug nowarnings $extra_flags"
 
     if  { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $compile_flags] != "" } {
-	untested altivec-abi.exp
+	untested "failed to compile"
 	return -1
     }
 
@@ -62,7 +62,7 @@ proc altivec_abi_tests { extra_flags force_abi } {
 
     # Run to `main' where we begin our tests.
     if ![runto_main] then {
-	untested altivec-abi.exp
+	untested "could not run to main"
 	return -1
     }
 

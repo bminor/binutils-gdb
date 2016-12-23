@@ -26,7 +26,7 @@ if { ![is_x86_like_target] } {
     return 0
 }
 
-if { [prepare_for_testing "${test}.exp" "${test}" \
+if { [prepare_for_testing "failed to prepare" "${test}" \
       {watch-notconst.c watch-notconst2.S} {nodebug}] } {
     return -1
 }

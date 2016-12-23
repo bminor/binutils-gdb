@@ -19,7 +19,7 @@
 if { [skip_fortran_tests] } { return -1 }
 
 standard_testfile .f90
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug additional_flags=-fbackslash f90}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug additional_flags=-fbackslash f90}] } {
     return -1
 }
 

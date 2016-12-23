@@ -17,7 +17,7 @@
 # Also verifies that breakpoint enabling/disabling works properly
 # with duplicated breakpoints.
 
-if { [prepare_for_testing break-always.exp break-always break-always.c] } {
+if { [prepare_for_testing "failed to prepare" break-always break-always.c] } {
     return -1
 }
 

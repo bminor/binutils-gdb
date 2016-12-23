@@ -19,9 +19,8 @@ standard_testfile .c watchpoint-cond-gone-stripped.c
 # Stepping into a dynamic function trampoline or stepping out of MAIN may work
 # but it is not a reliable FAIL case.
 
-if {[prepare_for_testing_full $testfile.exp \
+if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile debug $srcfile debug $srcfile2 {}]]} {
-    untested $testfile.exp
     return -1
 }
 

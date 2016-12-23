@@ -42,7 +42,7 @@ if [test_compiler_info gcc*] {
 }
 
 if  { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $compile_flags] != "" } {
-     untested vsx-regs.exp
+     untested "failed to compile"
      return -1
 }
 

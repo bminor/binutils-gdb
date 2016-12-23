@@ -15,12 +15,12 @@
 
 set testname func-ptrs
 set srcfile ${testname}.c
-if { [prepare_for_testing ${testname}.exp ${testname} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testname} ${srcfile}] } {
     return -1
 }
 
 if { ![runto_main] } {
-    untested ${testname}.exp
+    untested "could not run to main"
     return -1
 }
 

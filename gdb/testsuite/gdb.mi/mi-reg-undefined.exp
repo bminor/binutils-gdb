@@ -34,7 +34,7 @@ if [mi_gdb_start] {
 standard_testfile .S
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested mi-reg-undefined.exp
+     untested "failed to compile"
      return -1
 }
 

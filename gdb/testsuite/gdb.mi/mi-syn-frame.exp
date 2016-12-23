@@ -27,7 +27,7 @@ set MIFLAGS "-i=mi"
 standard_testfile
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested mi-syn-frame.exp
+     untested "failed to compile"
      return -1
 }
 

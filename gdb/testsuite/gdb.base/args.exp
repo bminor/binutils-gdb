@@ -27,7 +27,7 @@ standard_testfile
 
 if {[build_executable $testfile.exp $testfile \
 	 $srcfile {debug nowarnings}] == -1} {
-    untested $testfile.exp
+    untested "failed to compile"
     return -1
 }
 

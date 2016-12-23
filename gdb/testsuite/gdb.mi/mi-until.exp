@@ -32,7 +32,7 @@ if [mi_gdb_start] {
 standard_testfile until.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested mi-until.exp
+     untested "failed to compile"
      return -1
 }
 

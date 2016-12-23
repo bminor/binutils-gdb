@@ -15,7 +15,7 @@
 
 standard_testfile "vla-sub.f90"
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     {debug f90 quiet}] } {
     return -1
 }

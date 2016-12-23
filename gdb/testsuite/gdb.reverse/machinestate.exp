@@ -41,7 +41,7 @@ if ![supports_reverse] {
 
 standard_testfile .c ms1.c
 
-if { [prepare_for_testing $testfile.exp $testfile \
+if { [prepare_for_testing "failed to prepare" $testfile \
 	  [list $srcfile $srcfile2]] } {
     return -1
 }

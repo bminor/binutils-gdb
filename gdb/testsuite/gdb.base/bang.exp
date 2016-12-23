@@ -18,9 +18,8 @@
 
 standard_testfile args.c
 
-if {[prepare_for_testing $testfile.exp ${testfile}! $srcfile \
+if {[prepare_for_testing "failed to prepare" ${testfile}! $srcfile \
 	 {debug nowarnings}]} {
-    untested "failed to compile"
     return -1
 }
 

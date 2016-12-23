@@ -31,7 +31,7 @@ if { [is_x86_like_target] } {
     return 0
 }
 
-if { [prepare_for_testing "${test}.exp" "${test}" ${sfile} {nodebug additional_flags=-nostdlib}] } {
+if { [prepare_for_testing "failed to prepare" "${test}" ${sfile} {nodebug additional_flags=-nostdlib}] } {
     return -1
 }
 

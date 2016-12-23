@@ -20,7 +20,7 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     return
 }
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {}] } {
     return -1
 }
 

@@ -22,13 +22,12 @@ if [target_info exists gdb,nosignals] {
     return -1
 }
 
-if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug}] {
-    untested ${testfile}.exp
+if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] {
     return -1
 }
 
 if ![runto_main] then {
-    untested ${testfile}.exp
+    untested "could not run to main"
     return -1
 }
 

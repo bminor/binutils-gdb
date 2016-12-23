@@ -18,7 +18,7 @@ load_lib "pascal.exp"
 standard_testfile .pas
 
 if {[gdb_compile_pascal "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug class]] != "" } {
-    untested $testfile.exp
+    untested "failed to compile"
     return -1
 }
 

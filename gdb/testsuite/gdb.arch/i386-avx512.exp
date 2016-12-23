@@ -28,7 +28,7 @@ standard_testfile
 
 set comp_flags "-mavx512f -I${srcdir}/../nat"
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
      [list debug nowarnings additional_flags=${comp_flags}]] } {
     return -1
 }

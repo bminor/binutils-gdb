@@ -20,7 +20,7 @@ if ![istarget *-*-linux*] then {
     return
 }
 
-if { [prepare_for_testing clone-new-thread-event.exp clone-new-thread-event] } {
+if { [prepare_for_testing "failed to prepare" clone-new-thread-event] } {
     return -1
 }
 

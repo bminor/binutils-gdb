@@ -28,7 +28,7 @@ if ![istarget "powerpc64*-*"] then {
 standard_testfile
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
-     untested powerpc-d128-regs.exp
+     untested "failed to compile"
      return -1
 }
 

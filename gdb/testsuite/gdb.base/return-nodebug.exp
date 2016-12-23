@@ -54,7 +54,7 @@ foreach type {{signed char} {short} {int} {long} {long long} {float} {double}} {
 
     set additional_flags "additional_flags=-DTYPE=$typeesc"
 
-    if {[prepare_for_testing_full $testfile.exp \
+    if {[prepare_for_testing_full "failed to prepare" \
 	     [list ${testfile}-${typenospace} debug \
 		  $srcfile [list debug $additional_flags] \
 		  $srcfile2 [list $additional_flags]]]} {

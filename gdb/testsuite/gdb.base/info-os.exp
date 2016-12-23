@@ -28,7 +28,7 @@ if [gdb_skip_xml_test] then {
 }
 
 # Compile test program.
-if { [prepare_for_testing ${testfile}.exp $testfile $srcfile {debug additional_flags=-lpthread}] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug additional_flags=-lpthread}] } {
     fail "cannot compile test program"
     return -1
 }

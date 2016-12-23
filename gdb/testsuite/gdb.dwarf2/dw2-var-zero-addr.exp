@@ -21,7 +21,7 @@ if {![dwarf2_support]} {
 
 standard_testfile .S main.c
 
-if [prepare_for_testing ${testfile}.exp ${testfile} \
+if [prepare_for_testing "failed to prepare" ${testfile} \
 	[list $srcfile $srcfile2] {nodebug}] {
     return -1
 }

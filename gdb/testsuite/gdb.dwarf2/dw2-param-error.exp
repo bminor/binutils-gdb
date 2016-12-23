@@ -21,7 +21,7 @@ if {![dwarf2_support]} {
 
 standard_testfile .S dw2-param-error-main.c
 
-if { [prepare_for_testing ${testfile}.exp "${testfile}" \
+if { [prepare_for_testing "failed to prepare" "${testfile}" \
 	  [list $srcfile2 $srcfile] {nodebug}] } {
     return -1
 }

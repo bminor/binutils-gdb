@@ -22,8 +22,7 @@ if {![istarget "powerpc*-*-*"]} then {
 
 standard_testfile .S
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
-    untested powerpc-stackless.exp
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 

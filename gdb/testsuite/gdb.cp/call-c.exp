@@ -23,7 +23,7 @@ set objfilecpp [standard_output_file ${testfile}.o]
 if {[gdb_compile "$srcdir/$subdir/${srcfile2}" "${objfilec}" object {debug}] != ""
     || [gdb_compile "$srcdir/$subdir/${srcfile}" "${objfilecpp}" object {c++ debug}] != ""
     || [gdb_compile "${objfilecpp} ${objfilec}" "${binfile}" executable {c++ debug}] != ""} {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

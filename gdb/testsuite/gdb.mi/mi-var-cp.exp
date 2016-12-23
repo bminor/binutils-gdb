@@ -30,7 +30,7 @@ if [get_compiler_info "c++"] {
 }
 
 if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""} {
-  untested $testfile.exp
+  untested "failed to compile"
   return -1
 }
 

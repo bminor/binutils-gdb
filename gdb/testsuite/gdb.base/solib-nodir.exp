@@ -36,7 +36,7 @@ if { [get_compiler_info]
      || [gdb_gnu_strip_debug $binlibfile]
      || [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] != ""
      || [gdb_compile "${objfile} ${binlibfile}" "${binfile}" executable {}] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

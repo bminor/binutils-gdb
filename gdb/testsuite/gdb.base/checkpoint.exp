@@ -36,9 +36,8 @@ if {[is_remote host]} {
     set copy1_txt [standard_output_file copy1.txt]
 }
 
-if {[prepare_for_testing ${testfile}.exp $testfile $srcfile \
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 	 [list debug "additional_flags=-DPI_TXT=\"$pi_txt\" -DCOPY1_TXT=\"$copy1_txt\""]]} {
-     untested "failed to compile"
      return -1
 }
 

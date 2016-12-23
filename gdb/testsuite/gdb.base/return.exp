@@ -15,7 +15,7 @@
 
 # This file was written by Jeff Law. (law@cs.utah.edu)
 
-if { [prepare_for_testing return.exp "return"] } {
+if { [prepare_for_testing "failed to prepare" "return"] } {
     return -1
 }
 

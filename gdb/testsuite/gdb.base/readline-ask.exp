@@ -17,7 +17,7 @@ standard_testfile .c
 set inputrc ${srcdir}/${subdir}/${testfile}.inputrc
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

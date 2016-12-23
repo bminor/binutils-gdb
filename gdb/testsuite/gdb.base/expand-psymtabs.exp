@@ -37,7 +37,7 @@ if [get_compiler_info] {
 }
 
 # We intentionally compile the source file in twice.
-if {[prepare_for_testing_full $testfile.exp \
+if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile debug $srcfile {debug additional_flags=-DFIRST} \
 	      $srcfile debug]]} {
     return -1

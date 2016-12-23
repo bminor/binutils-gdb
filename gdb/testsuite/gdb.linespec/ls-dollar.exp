@@ -23,7 +23,7 @@ if {[skip_cplus_tests]} {
     return
 }
 
-if {[prepare_for_testing $testfile $exefile $srcfile \
+if {[prepare_for_testing "failed to prepare" $exefile $srcfile \
 	 {debug nowarnings c++}]} {
     return -1
 }

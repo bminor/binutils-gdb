@@ -15,8 +15,7 @@
 
 standard_testfile .f
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90 quiet}]} {
-    untested "failed to compile"
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90 quiet}]} {
     return -1
 }
 

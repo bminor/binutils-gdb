@@ -27,9 +27,8 @@ if { [info proc gdb_reconnect] == "" } {
     return -1
 }
 
-if [prepare_for_testing $expfile $executable $srcfile \
+if [prepare_for_testing "failed to prepare" $executable $srcfile \
         {debug nowarnings}] {
-    untested "failed to prepare for trace tests"
     return -1
 }
 

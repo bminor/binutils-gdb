@@ -19,7 +19,7 @@
 
 standard_testfile
 
-if { [prepare_for_testing commands.exp commands run.c {debug additional_flags=-DFAKEARGV}] } {
+if { [prepare_for_testing "failed to prepare" commands run.c {debug additional_flags=-DFAKEARGV}] } {
     return -1
 }
 

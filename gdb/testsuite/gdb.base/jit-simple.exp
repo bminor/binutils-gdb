@@ -25,7 +25,7 @@
 # address between runs.
 
 if {[skip_shlib_tests]} {
-    untested jit-simple.exp
+    untested "skipping shared library tests"
     return -1
 }
 
@@ -79,7 +79,7 @@ set binfile_dl $binfile-dl
 set options [list debug shlib=${binfile_lib}]
 if {[gdb_compile ${srcdir}/${subdir}/${srcfile_dl} $binfile_dl executable \
 	 [list debug shlib=$binfile_lib]] == -1 } {
-    untested jit-simple.exp
+    untested "failed to compile"
     return -1
 }
 

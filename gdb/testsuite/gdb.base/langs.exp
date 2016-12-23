@@ -22,7 +22,7 @@ if [is_remote host] {
 }
 
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} \
+if {[prepare_for_testing "failed to prepare" ${testfile} \
 	 [list $srcfile $srcfile2 $srcfile3] {debug}]} {
     return -1
 }

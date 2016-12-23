@@ -40,8 +40,7 @@ set asm_file [standard_output_file ${srcfile2}]
 # For that, we ask GDB by debugging our implref-struct program.
 # Any program would do, but since we already have implref-struct
 # specifically for this testcase, might as well use that.
-if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] {
-    untested ${testfile}.exp
+if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug c++}] {
     return -1
 }
 
@@ -130,7 +129,7 @@ Dwarf::assemble ${asm_file} {
     }
 }
 
-if [prepare_for_testing ${testfile}.exp ${executable} [list ${asm_file} ${srcfile}] {}] {
+if [prepare_for_testing "failed to prepare" ${executable} [list ${asm_file} ${srcfile}] {}] {
     return -1
 }
 

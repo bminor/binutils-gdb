@@ -24,7 +24,7 @@ gdb_start
 standard_testfile actions.c
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
-    untested save-trace.exp
+    untested "failed to compile"
     return -1
 }
 gdb_reinitialize_dir $srcdir/$subdir

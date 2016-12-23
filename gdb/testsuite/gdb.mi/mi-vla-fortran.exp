@@ -28,7 +28,7 @@ standard_testfile vla.f90
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
      {debug f90}] != "" } {
-     untested mi-vla-fortran.exp
+     untested "failed to compile"
      return -1
 }
 

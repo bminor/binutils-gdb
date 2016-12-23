@@ -20,7 +20,7 @@ if { [skip_tsx_tests] } { return -1 }
 
 # compile and run to main
 standard_testfile .c x86-tsx.S
-if [prepare_for_testing tsx.exp $testfile "$srcfile $srcfile2" {debug}] {
+if [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" {debug}] {
     return -1
 }
 if ![runto_main] {

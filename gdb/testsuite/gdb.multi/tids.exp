@@ -23,7 +23,7 @@ standard_testfile
 # gdbserver modes are supported.  Only non-extended gdbserver is not
 # supported.
 if [target_info exists use_gdb_stub] {
-    untested ${testfile}.exp
+    untested "using gdb stub"
     return
 }
 

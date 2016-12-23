@@ -31,7 +31,7 @@ if { ![test_compiler_info gcc*] } {
     return 0
 }
 
-if { [prepare_for_testing $testfile.exp $testfile $testfile.c {debug}] } {
+if { [prepare_for_testing "failed to prepare" $testfile $testfile.c {debug}] } {
     return -1
 }
 

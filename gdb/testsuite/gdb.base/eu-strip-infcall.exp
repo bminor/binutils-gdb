@@ -22,7 +22,7 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
 set test "eu-strip"
 set status [remote_exec build "eu-strip -f ${binfile}.debug $binfile"]
 if {[lindex $status 0] != 0} {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return 0
 }
 

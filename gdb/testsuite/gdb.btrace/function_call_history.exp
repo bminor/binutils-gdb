@@ -22,7 +22,7 @@ if { [skip_btrace_tests] } { return -1 }
 
 # start inferior
 standard_testfile
-if [prepare_for_testing function_call_history.exp $testfile {} {debug}] {
+if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
     return -1
 }
 if ![runto_main] {

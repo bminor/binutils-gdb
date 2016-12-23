@@ -16,7 +16,7 @@
 standard_testfile lspec.cc
 
 if {[skip_cplus_tests]} {
-    unsupported ${testfile}.exp
+    unsupported "skipping C++ tests"
     return
 }
 

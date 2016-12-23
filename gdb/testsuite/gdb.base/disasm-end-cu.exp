@@ -17,7 +17,7 @@
 # units displaying source lines.  This checks that the disassemble routine
 # can handle our use of line number 0 to mark the end of sequence.
 
-if { [prepare_for_testing disasm-end-cu.exp "disasm-end-cu" {disasm-end-cu-1.c disasm-end-cu-2.c} {debug}] } {
+if { [prepare_for_testing "failed to prepare" "disasm-end-cu" {disasm-end-cu-1.c disasm-end-cu-2.c} {debug}] } {
     return -1
 }
 

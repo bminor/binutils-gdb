@@ -22,7 +22,6 @@ if ![istarget *-*-linux*] then {
 }
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
-    untested "failed to compile"
     return -1
 }
 

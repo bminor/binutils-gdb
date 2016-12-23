@@ -21,7 +21,7 @@ if [target_info exists use_gdb_stub] {
     return
 }
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
 }
 

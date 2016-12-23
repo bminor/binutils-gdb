@@ -28,7 +28,7 @@ if {![istarget "powerpc*"] || ![is_lp64_target]} {
 
 standard_testfile .S
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug quiet}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug quiet}] } {
     return -1
 }
 

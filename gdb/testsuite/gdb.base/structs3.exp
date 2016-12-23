@@ -17,7 +17,7 @@
 
 standard_testfile .c
 
-if { [prepare_for_testing structs3.exp "structs3" "" {debug}] } {
+if { [prepare_for_testing "failed to prepare" "structs3" "" {debug}] } {
     return -1
 }
 

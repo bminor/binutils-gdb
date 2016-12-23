@@ -15,7 +15,7 @@
 
 standard_testfile .cc namespace-enum-main.cc
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] {debug c++}]} {
     return -1
 }

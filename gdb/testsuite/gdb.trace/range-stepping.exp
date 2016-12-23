@@ -19,7 +19,7 @@ load_lib "range-stepping-support.exp"
 standard_testfile
 set executable $testfile
 
-if [prepare_for_testing $testfile.exp $executable $srcfile \
+if [prepare_for_testing "failed to prepare" $executable $srcfile \
 	{debug nowarnings}] {
     return -1
 }

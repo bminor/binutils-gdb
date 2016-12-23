@@ -30,8 +30,7 @@ if [get_compiler_info] {
     return -1
 }
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug nowarnings}]} {
-    untested $testfile.exp
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarnings}]} {
     return -1
 }
 

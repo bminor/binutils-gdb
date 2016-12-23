@@ -29,7 +29,7 @@ standard_testfile .S
 set additional_flags [gdb_target_symbol_prefix_flags_asm]
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested i386-permbkpt.exp
+    untested "failed to compile"
     return -1
 }
 

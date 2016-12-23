@@ -46,7 +46,7 @@ if [info exists COMPILE] {
     return -1
 }
 
-if [prepare_for_testing tailcall-only.exp $testfile $srcfile $opts] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] {
     return -1
 }
 if ![runto_main] {

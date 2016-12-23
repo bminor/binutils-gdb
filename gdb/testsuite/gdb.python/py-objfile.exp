@@ -20,7 +20,7 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 
@@ -99,7 +99,7 @@ gdb_test "python print(objfile.username)" "None" \
 
 # Now build another copy of the testcase, this time without debug info.
 
-if { [prepare_for_testing ${testfile}.exp ${testfile}2 ${srcfile} {nodebug ldflags=-Wl,--strip-debug}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile}2 ${srcfile} {nodebug ldflags=-Wl,--strip-debug}] } {
     return -1
 }
 

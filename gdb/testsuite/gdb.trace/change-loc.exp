@@ -358,7 +358,7 @@ gdb_load_shlib $libipa
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable \
 	  [list debug nowarnings shlib=$libipa shlib=$lib_sl1 shlib_load] ] != "" } {
-    untested change-loc.exp
+    untested "failed to compile"
     return -1
 }
 

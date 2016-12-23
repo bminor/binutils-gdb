@@ -30,7 +30,7 @@ if [target_info exists gdb,nosignals] {
 standard_testfile
 
 if {[build_executable $testfile.exp $testfile $srcfile debug]} {
-    untested $testfile.exp
+    untested "failed to compile"
     return -1
 }
 

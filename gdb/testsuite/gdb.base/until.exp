@@ -16,7 +16,7 @@
 # until.exp -- Expect script to test 'until' in gdb
 
 set srcfile break.c
-if { [prepare_for_testing until.exp "until" {break.c break1.c} {debug nowarnings}] } {
+if { [prepare_for_testing "failed to prepare" "until" {break.c break1.c} {debug nowarnings}] } {
     return -1
 }
 

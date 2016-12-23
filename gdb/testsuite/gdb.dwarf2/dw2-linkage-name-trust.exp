@@ -28,7 +28,7 @@ if {![dwarf2_support]} {
 standard_testfile .S
 set executable ${testfile}
 
-if {[prepare_for_testing_full $testfile.exp \
+if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile c++ $testfile-main.cc {c++ debug} \
 	      $srcfile {}]]} {
     return -1

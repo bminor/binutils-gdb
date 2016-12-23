@@ -23,7 +23,7 @@
 
 standard_testfile .c charset-malloc.c
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} [list $srcfile $srcfile2]] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} [list $srcfile $srcfile2]] } {
     return -1
 }
 

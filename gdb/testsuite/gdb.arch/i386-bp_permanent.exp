@@ -31,7 +31,7 @@ set additional_flags [gdb_target_symbol_prefix_flags]
 # Don't use "debug", so that we don't have line information for the assembly
 # fragments.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list $additional_flags]] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

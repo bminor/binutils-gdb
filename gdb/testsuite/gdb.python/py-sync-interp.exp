@@ -36,7 +36,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 if { [skip_python_tests] } { continue }
 gdb_exit
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 

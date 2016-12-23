@@ -19,9 +19,8 @@ if ![supports_reverse] {
 
 standard_testfile
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 	 [list debug]]} {
-    untested ${testfile}.exp
     return -1
 }
 if { ![runto main] } then {

@@ -24,12 +24,12 @@ if { [skip_go_tests] } { continue }
 standard_testfile package1.go package2.go
 
 if  { [gdb_compile "${srcdir}/${subdir}/${testfile}2.go" "${binfile}2.o" object {debug go}] != "" } {
-    untested $testfile
+    untested "failed to compile"
     return -1
 }
  
 if  { [gdb_compile "${srcdir}/${subdir}/${testfile}1.go ${binfile}2.o" "${binfile}" executable "debug go libdir=[standard_output_file {}]"] != "" } {
-    untested $testfile
+    untested "failed to compile"
     return -1
 }
 

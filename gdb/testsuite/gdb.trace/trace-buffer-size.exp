@@ -17,9 +17,8 @@ load_lib "trace-support.exp"
 
 standard_testfile
 
-if [prepare_for_testing ${testfile}.exp $testfile $srcfile \
+if [prepare_for_testing "failed to prepare" $testfile $srcfile \
         {debug nowarnings}] {
-    untested "failed to prepare for trace tests"
     return -1
 }
 

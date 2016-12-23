@@ -20,9 +20,8 @@ set ws "\[ \t\]+"
 
 standard_testfile break.c break1.c
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] {debug nowarnings}]} {
-    untested $testfile.exp
     return -1
 }
 
@@ -40,7 +39,7 @@ gdb_test_multiple "info proc" "info proc without a process" {
 }
 
 if { ! [ runto_main ] } then {
-    untested info-proc.exp
+    untested "could not run to main"
     return -1
 }
 

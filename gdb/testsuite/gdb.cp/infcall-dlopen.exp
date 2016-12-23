@@ -27,7 +27,7 @@ set lib_dlopen [shlib_target_file ${testfile}.so]
 
 # Use completely arbitrary file for $libfile source.
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} ${libfile} {debug c++}] != ""
-     || [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++ shlib_load}] } {
+     || [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug c++ shlib_load}] } {
     return -1
 }
 

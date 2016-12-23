@@ -42,7 +42,7 @@ set testsubdir [standard_output_file ""]
 set envirodir [string_to_regexp $testsubdir]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested mi-basics.exp
+     untested "failed to compile"
      return -1
 }
 

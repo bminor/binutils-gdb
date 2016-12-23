@@ -28,7 +28,7 @@ if [mi_gdb_start] {
 standard_testfile "mi-read-memory"
  
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}.c" "${binfile}" executable {debug}] != "" } {
-     untested mi-fill-memory.exp
+     untested "failed to compile"
      return -1
 }
 

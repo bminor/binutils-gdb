@@ -29,7 +29,7 @@ standard_testfile py-framefilter-mi.c
 set pyfile py-framefilter.py
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DMI}] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

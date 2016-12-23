@@ -20,7 +20,7 @@ standard_testfile .c
 
 remote_exec build "rm -f ${binfile}"
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested step-test.exp
+     untested "failed to compile"
      return -1
 }
 

@@ -21,7 +21,7 @@ append binfile .o
 if { [skip_cplus_tests] } { continue }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {c++ debug}] != "" } {
-     untested cp-relocate.exp
+     untested "failed to compile"
      return -1
 }
 

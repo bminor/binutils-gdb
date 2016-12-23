@@ -17,7 +17,7 @@
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug additional_flags=-fstack-check nowarnings]] != "" } {
-     untested stack-checking.exp
+     untested "failed to compile"
      return -1
 }
 

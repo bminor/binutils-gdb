@@ -19,7 +19,7 @@
 standard_testfile
 
 if { [build_executable ${testfile}.exp ${testfile} ${testfile}.c {debug}] } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 

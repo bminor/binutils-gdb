@@ -27,7 +27,7 @@ if { [skip_gdbserver_tests] } {
 standard_testfile basics.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested mi-file-transfer.exp
+    untested "failed to compile"
     return -1
 }
 

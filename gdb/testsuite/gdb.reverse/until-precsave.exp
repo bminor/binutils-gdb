@@ -24,7 +24,7 @@ if ![supports_process_record] {
 standard_testfile until-reverse.c ur1.c
 set precsave [standard_output_file until.precsave]
 
-if { [prepare_for_testing $testfile.exp $testfile \
+if { [prepare_for_testing "failed to prepare" $testfile \
 	  [list $srcfile $srcfile2]] } {
     return -1
 }

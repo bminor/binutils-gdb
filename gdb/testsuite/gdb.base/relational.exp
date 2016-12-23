@@ -25,7 +25,7 @@
 # test running programs
 #
 
-if { [prepare_for_testing relational.exp relational int-type.c {debug nowarnings}] } {
+if { [prepare_for_testing "failed to prepare" relational int-type.c {debug nowarnings}] } {
     return -1
 }
 

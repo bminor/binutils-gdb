@@ -26,7 +26,7 @@ if [gdb_skip_stdio_test "a2run.exp"] {
 
 standard_testfile run.c
 
-if { [prepare_for_testing ${testfile}.exp $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 

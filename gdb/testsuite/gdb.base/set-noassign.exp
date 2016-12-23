@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-if { [prepare_for_testing set-noassign.exp "set-noassign" start.c {debug nowarnings}] } {
+if { [prepare_for_testing "failed to prepare" "set-noassign" start.c {debug nowarnings}] } {
     return -1
 }
 

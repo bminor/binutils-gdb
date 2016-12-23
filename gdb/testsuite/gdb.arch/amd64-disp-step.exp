@@ -30,7 +30,7 @@ standard_testfile .S
 set additional_flags "-Wa,-g"
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested amd64-disp-step.exp
+    untested "failed to compile"
     return -1
 }
 

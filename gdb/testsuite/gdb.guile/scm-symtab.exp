@@ -20,7 +20,7 @@ load_lib gdb-guile.exp
 
 standard_testfile scm-symtab.c scm-symtab-2.c
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] debug]} {
     return
 }

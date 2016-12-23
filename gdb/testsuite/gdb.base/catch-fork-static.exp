@@ -34,7 +34,7 @@ if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
 # Reusing foll-fork.c since it's a simple forking program.
 standard_testfile foll-fork.c
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} $srcfile \
+if { [prepare_for_testing "failed to prepare" ${testfile} $srcfile \
       {additional_flags=-static}] } {
     return -1
 }

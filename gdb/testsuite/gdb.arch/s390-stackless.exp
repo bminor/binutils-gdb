@@ -20,7 +20,7 @@ if {![istarget "s390*-*-*"]} then {
 
 standard_testfile .S
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 

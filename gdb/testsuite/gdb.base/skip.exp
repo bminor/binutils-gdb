@@ -16,7 +16,7 @@
 # This file was written by Justin Lebar. (justin.lebar@gmail.com)
 # And further hacked on by Doug Evans. (dje@google.com)
 
-if { [prepare_for_testing skip.exp "skip" \
+if { [prepare_for_testing "failed to prepare" "skip" \
                           {skip.c skip1.c } \
                           {debug nowarnings}] } {
     return -1

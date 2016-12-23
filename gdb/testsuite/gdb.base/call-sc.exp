@@ -59,7 +59,7 @@ proc start_scalars_test { type } {
 	# built the second test case since we can't use prototypes
 	warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
 	if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags} additional_flags=-DNO_PROTOTYPES"] != "" } {
-	    untested call-sc.exp
+	    untested "failed to compile"
 	    return -1
 	}
     }

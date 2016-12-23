@@ -35,7 +35,7 @@ set additional_flags {-ffunction-sections -Wl,--gc-sections}
 if {[build_executable_from_specs $testfile.exp $testfile \
        {c++ additional_flags=-Wl,--gc-sections} \
        $srcfile {debug c++ additional_flags=-ffunction-sections}]} {
-    untested $testfile.exp
+    untested "failed to compile"
     return -1
 }
 

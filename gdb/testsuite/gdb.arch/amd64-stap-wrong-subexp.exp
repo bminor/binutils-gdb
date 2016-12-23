@@ -20,8 +20,7 @@ if { ![istarget "x86_64-*-*"] || ![is_lp64_target] } {
 
 standard_testfile amd64-stap-wrong-subexp.S
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
-    untested amd64-stap-wrong-subexp.exp
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 

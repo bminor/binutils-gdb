@@ -30,7 +30,7 @@ if { [gdb_compile_shlib $srcfile_lib $binfile_lib \
     return -1
 }
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile \
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 	  [list additional_flags=-DDSO_NAME=\"$binfile_lib\" libs=-ldl]] } {
     return -1
 }

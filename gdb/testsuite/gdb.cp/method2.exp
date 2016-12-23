@@ -22,8 +22,7 @@ if { [skip_cplus_tests] } { continue }
 
 standard_testfile .cc
 
-if  {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
-     untested "failed to compile"
+if  {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
      return -1
 }
 

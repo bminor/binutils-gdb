@@ -24,7 +24,7 @@ if {![dwarf2_support]} {
 standard_testfile .S
 set dwarf_srcfile "file1.txt"
 
-if {[prepare_for_testing_full $testfile.exp \
+if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile \
 	      {debug additional_flags=-static additional_flags=-nostdlib} \
 	      main.c -g0 $srcfile nodebug]]} {

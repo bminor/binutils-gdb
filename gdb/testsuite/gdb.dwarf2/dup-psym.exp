@@ -23,7 +23,7 @@ if {![dwarf2_support]} {
 
 standard_testfile .S
 
-if {[prepare_for_testing_full $testfile.exp \
+if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile {debug} main.c debug $srcfile nodebug]]} {
     return -1
 }

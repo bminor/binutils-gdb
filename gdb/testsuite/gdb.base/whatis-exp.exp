@@ -29,7 +29,7 @@
 # test running programs
 #
 
-if { [prepare_for_testing whatis-exp.exp whatis-exp int-type.c {debug nowarnings}] } {
+if { [prepare_for_testing "failed to prepare" whatis-exp int-type.c {debug nowarnings}] } {
     return -1
 }
 

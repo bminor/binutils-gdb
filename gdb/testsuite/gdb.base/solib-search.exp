@@ -17,14 +17,14 @@
 # is properly reset when the path is changed.
 
 if {[is_remote target] || [skip_shlib_tests]} {
-    untested solib-search.exp
+    untested "skipping remote target and shared library tests"
     return -1
 }
 
 # This is required by gdb_compile_shlib.
 if {[get_compiler_info]} {
     warning "Could not get compiler info"
-    untested solib-search.exp
+    untested "no compiler info"
     return 1
 }
 

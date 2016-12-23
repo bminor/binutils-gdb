@@ -31,7 +31,7 @@ if { ! [target_info exists gdb,nosignals] } {
 }
 
 if {[build_executable $testfile.exp $testfile $srcfile $options] == -1} {
-    untested $testfile.exp
+    untested "failed to compile"
     return -1
 }
 

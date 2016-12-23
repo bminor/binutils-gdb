@@ -75,8 +75,7 @@ if {[target_info exists gdb,no_hardware_watchpoints]} {
     return -1
 }
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
-    untested ${testfile}.exp
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 

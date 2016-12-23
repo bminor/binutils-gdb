@@ -39,7 +39,7 @@ if [mi_gdb_start] {
 standard_testfile basics.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested mi-async.exp
+     untested "failed to compile"
      return -1
 }
 

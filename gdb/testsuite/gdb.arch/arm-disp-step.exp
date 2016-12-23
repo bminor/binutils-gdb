@@ -26,7 +26,7 @@ standard_testfile .S
 
 set additional_flags "-Wa,-g"
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile [list debug $additional_flags]] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile [list debug $additional_flags]] } {
     return -1
 }
 

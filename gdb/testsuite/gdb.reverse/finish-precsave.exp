@@ -23,7 +23,7 @@ if ![supports_reverse] {
 standard_testfile finish-reverse.c
 set precsave [standard_output_file finish.precsave]
 
-if { [prepare_for_testing $testfile.exp "$testfile" $srcfile] } {
+if { [prepare_for_testing "failed to prepare" "$testfile" $srcfile] } {
     return -1
 }
 

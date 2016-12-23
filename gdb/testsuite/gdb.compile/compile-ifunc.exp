@@ -17,7 +17,7 @@ standard_testfile
 
 with_test_prefix "nodebug" {
 
-    if { [prepare_for_testing ${testfile}.exp "$testfile-nodebug" $srcfile {}] } {
+    if { [prepare_for_testing "failed to prepare" "$testfile-nodebug" $srcfile {}] } {
 	return -1
     }
 
@@ -44,7 +44,7 @@ with_test_prefix "nodebug" {
 
 with_test_prefix "debug" {
 
-    if { [prepare_for_testing ${testfile}.exp "$testfile-debug" $srcfile] } {
+    if { [prepare_for_testing "failed to prepare" "$testfile-debug" $srcfile] } {
 	return -1
     }
 

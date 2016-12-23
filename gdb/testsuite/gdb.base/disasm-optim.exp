@@ -21,7 +21,7 @@ if { ![istarget "x86_64-*-linux*"] } {
 
 standard_testfile .S
 
-if { [prepare_for_testing ${testfile}.exp $testfile ${testfile}.S {nodebug}] } {
+if { [prepare_for_testing "failed to prepare" $testfile ${testfile}.S {nodebug}] } {
     return -1
 }
 

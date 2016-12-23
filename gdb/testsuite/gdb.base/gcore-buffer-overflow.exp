@@ -23,7 +23,7 @@ set pattern  0123456789012345678901234567890123456789012345678901234567890123456
 append binfile -${pattern}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested ${testfile}.exp
+     untested "failed to compile"
      return -1
 }
 
@@ -35,7 +35,7 @@ gdb_test_no_output "set args ${pattern}"	\
     "set buffer exceeding arguments"
 
 if { ! [ runto_main ] } then {
-    untested gcore-buffer-overflow.exp
+    untested "could not run to main"
     return -1
 }
 

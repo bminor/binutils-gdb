@@ -21,13 +21,13 @@ if {[skip_rust_tests]} {
 }
 
 standard_testfile .rs
-if {[prepare_for_testing ${testfile}.exp $testfile $srcfile {debug rust}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
     return -1
 }
 
 set line [gdb_get_line_number "set breakpoint 1 here"]
 if {![runto ${srcfile}:$line]} {
-    untested $testfile
+    untested "could not run to breakpoint"
     return -1
 }
 

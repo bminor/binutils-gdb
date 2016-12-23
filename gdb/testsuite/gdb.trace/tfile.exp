@@ -40,7 +40,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  [list debug \
 	       "additional_flags=-DTFILE_DIR=\"$tfile_dir\""]] \
 	 != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 
