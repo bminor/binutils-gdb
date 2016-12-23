@@ -1823,6 +1823,7 @@ print_mips16_insn_arg (struct disassemble_info *info,
   const fprintf_ftype infprintf = info->fprintf_func;
   void *is = info->stream;
   const struct mips_operand *operand, *ext_operand;
+  unsigned short ext_size;
   unsigned int uval;
   bfd_vma baseaddr;
 
@@ -1927,29 +1928,26 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	  info->data_size = 1 << int_op->shift;
 	}
 
-      if (operand->size == 26)
-	uval = ((extend & 0x1f) << 21) | ((extend & 0x3e0) << 11) | insn;
-      else
+      ext_size = 0;
+      if (use_extend)
 	{
-	  /* Calculate the full field value.  */
-	  uval = mips_extract_operand (operand, (extend << 16) | insn);
-	  if (use_extend)
+	  ext_operand = decode_mips16_operand (type, TRUE);
+	  if (ext_operand != operand)
 	    {
-	      ext_operand = decode_mips16_operand (type, TRUE);
-	      if (ext_operand != operand)
-		{
-		  operand = ext_operand;
-		  if (operand->size == 16)
-		    uval = (((extend & 0x1f) << 11) | (extend & 0x7e0)
-			    | (uval & 0x1f));
-		  else if (operand->size == 15)
-		    uval |= ((extend & 0xf) << 11) | (extend & 0x7f0);
-		  else
-		    uval = ((((extend >> 6) & 0x1f) | (extend & 0x20))
-			    & ((1U << operand->size) - 1));
-		}
+	      ext_size = ext_operand->size;
+	      operand = ext_operand;
 	    }
 	}
+      if (operand->size == 26)
+	uval = ((extend & 0x1f) << 21) | ((extend & 0x3e0) << 11) | insn;
+      else if (ext_size == 16)
+	uval = ((extend & 0x1f) << 11) | (extend & 0x7e0) | (insn & 0x1f);
+      else if (ext_size == 15)
+	uval = ((extend & 0xf) << 11) | (extend & 0x7f0) | (insn & 0xf);
+      else if (ext_size == 6)
+	uval = ((extend >> 6) & 0x1f) | (extend & 0x20);
+      else
+	uval = mips_extract_operand (operand, (extend << 16) | insn);
 
       baseaddr = memaddr + 2;
       if (operand->type == OP_PCREL)

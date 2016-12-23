@@ -77,7 +77,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
   if (extended_p)
     switch (type)
       {
-      case '<': UINT (5, 0);
+      case '<': UINT (5, 22);
       case '[': UINT (6, 0);
       case ']': UINT (6, 0);
 

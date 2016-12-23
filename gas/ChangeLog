@@ -1,5 +1,10 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (mips16_immed): Limit `mips16_immed_extend'
+	use to operands whose LSB position is zero.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (match_mips16_insn): Don't update
 	`forced_insn_length' or the instruction opcode if an operand
 	requires an extended instruction form, but an unextended one

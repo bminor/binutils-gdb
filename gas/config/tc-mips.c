@@ -14023,7 +14023,7 @@ mips16_immed (const char *file, unsigned int line, int type,
 		      _("operand value out of range for instruction"));
     }
   uval = ((unsigned int) val >> operand->shift) - operand->bias;
-  if (length == 2)
+  if (length == 2 || operand->root.lsb != 0)
     *insn = mips_insert_operand (&operand->root, *insn, uval);
   else
     *insn |= mips16_immed_extend (uval, operand->root.size);
