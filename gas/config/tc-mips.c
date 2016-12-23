@@ -13857,13 +13857,14 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
   char *end, *s, c;
   struct mips_opcode *first;
   struct mips_operand_token *tokens;
-
-  forced_insn_length = 0;
+  unsigned int l;
 
   for (s = str; ISLOWER (*s); ++s)
     ;
   end = s;
   c = *end;
+
+  l = 0;
   switch (c)
     {
     case '\0':
@@ -13874,23 +13875,27 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
       break;
 
     case '.':
-      if (s[1] == 't' && s[2] == ' ')
+      s++;
+      if (*s == 't')
 	{
-	  forced_insn_length = 2;
-	  s += 3;
-	  break;
+	  l = 2;
+	  s++;
 	}
-      else if (s[1] == 'e' && s[2] == ' ')
+      else if (*s == 'e')
 	{
-	  forced_insn_length = 4;
-	  s += 3;
-	  break;
+	  l = 4;
+	  s++;
 	}
+      if (*s == '\0')
+	break;
+      else if (*s++ == ' ')
+	break;
       /* Fall through.  */
     default:
       set_insn_error (0, _("unrecognized opcode"));
       return;
     }
+  forced_insn_length = l;
 
   *end = 0;
   first = (struct mips_opcode *) hash_find (mips16_op_hash, str);
