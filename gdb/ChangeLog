@@ -1,4 +1,67 @@
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-inferior.h"
+	and "nat/fork-inferior.h".
+	* common/common-inferior.h: New file, with contents from
+	"gdb/inferior.h".
+	* commom/common-utils.c: Include "common-utils.h".
+	(stringify_argv): New function.
+	* common/common-utils.h (stringify_argv): New prototype.
+	* configure.nat: Add "fork-inferior.o" as a dependency for
+	"*linux*", "fbsd*" and "nbsd*" hosts.
+	* corefile.c (get_exec_file): Update comment.
+	* darwin-nat.c (darwin_ptrace_him): Call "gdb_startup_inferior"
+	instead of "startup_inferior".
+	(darwin_create_inferior): Call "add_thread_silent" after
+	"fork_inferior".
+	* fork-child.c: Cleanup unnecessary includes.
+	(SHELL_FILE): Move to "common/common-fork-child.c".
+	(environ): Likewise.
+	(exec_wrapper): Initialize.
+	(get_exec_wrapper): New function.
+	(breakup_args): Move to "common/common-fork-child.c"; rename to
+	"breakup_args_for_exec".
+	(escape_bang_in_quoted_argument): Move to
+	"common/common-fork-child.c".
+	(saved_ui): New variable.
+	(prefork_hook): New function.
+	(postfork_hook): Likewise.
+	(postfork_child_hook): Likewise.
+	(gdb_startup_inferior): Likewise.
+	(fork_inferior): Move to "common/common-fork-child.c".  Update
+	function to support gdbserver.
+	(startup_inferior): Likewise.
+	* gdbcore.h (get_exec_file): Remove declaration.
+	* gnu-nat.c (gnu_create_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* inf-ptrace.c: Include "nat/fork-inferior.h" and "utils.h".
+	(inf_ptrace_create_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* inferior.h: Include "common-inferior.h".
+	(trace_start_error): Move to "common/common-utils.h".
+	(trace_start_error_with_name): Likewise.
+	(fork_inferior): Move prototype to "nat/fork-inferior.h".
+	(startup_inferior): Likewise.
+	(gdb_startup_inferior): New prototype.
+	* nat/fork-inferior.c: New file, with contents from "fork-child.c".
+	* nat/fork-inferior.h: New file.
+	* procfs.c (procfs_init_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* target.h (target_terminal_init): Move prototype to
+	"target/target.h".
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* target/target.h (target_terminal_init): New prototype, moved
+	from "target.h".
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* utils.c (gdb_flush_out_err): New function.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-gdbthread.h".
 	* common/common-gdbthread.h: New file, with parts from

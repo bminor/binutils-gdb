@@ -1,3 +1,9 @@
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.server/non-existing-program.exp: Update regex in order to
+	reflect the fact that gdbserver is now using fork_inferior (with a
+	shell) to startup the inferior.
+
 2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/watch-cond-infcall.exp: Don't run if target doesn't

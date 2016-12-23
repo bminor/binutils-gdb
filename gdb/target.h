@@ -1538,16 +1538,8 @@ extern int target_terminal_is_inferior (void);
 
 extern int target_terminal_is_ours (void);
 
-/* Initialize the terminal settings we record for the inferior,
-   before we actually run the inferior.  */
-
-extern void target_terminal_init (void);
-
-/* Put the inferior's terminal settings into effect.  This is
-   preparation for starting or resuming the inferior.  This is a no-op
-   unless called with the main UI as current UI.  */
-
-extern void target_terminal_inferior (void);
+/* For target_terminal_init, target_terminal_inferior and
+   target_terminal_ours, see target/target.h.  */
 
 /* Put some of our terminal settings into effect, enough to get proper
    results from our output, but do not change into or out of RAW mode
@@ -1556,12 +1548,6 @@ extern void target_terminal_inferior (void);
    UI as current UI.  */
 
 extern void target_terminal_ours_for_output (void);
-
-/* Put our terminal settings into effect.  First record the inferior's
-   terminal settings so they can be restored properly later.  This is
-   a no-op unless called with the main UI as current UI.  */
-
-extern void target_terminal_ours (void);
 
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */

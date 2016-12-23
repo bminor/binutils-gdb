@@ -36,6 +36,19 @@
 #include "dll.h"
 #include "hostio.h"
 #include <vector>
+#include "common-inferior.h"
+#include "job-control.h"
+#include "environ.h"
+
+/* The environment to pass to the inferior when creating it.  */
+
+struct gdb_environ *our_environ = NULL;
+
+/* Start the inferior using a shell.  */
+
+/* We always try to start the inferior using a shell.  */
+
+int startup_with_shell = 1;
 
 /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
    `vCont'.  Note the multi-process extensions made `vCont' a
@@ -79,8 +92,9 @@ static int vCont_supported;
    space randomization feature before starting an inferior.  */
 int disable_randomization = 1;
 
-static std::vector<char *> program_argv;
-static std::vector<char *> wrapper_argv;
+static char *program_name = NULL;
+static std::vector<char *> program_args;
+static std::string wrapper_argv;
 
 int pass_signals[GDB_SIGNAL_LAST];
 int program_signals[GDB_SIGNAL_LAST];
@@ -93,22 +107,6 @@ int program_signals_p;
 
 unsigned long signal_pid;
 
-#ifdef SIGTTOU
-/* A file descriptor for the controlling terminal.  */
-int terminal_fd;
-
-/* TERMINAL_FD's original foreground group.  */
-pid_t old_foreground_pgrp;
-
-/* Hand back terminal ownership to the original foreground group.  */
-
-static void
-restore_old_foreground_pgrp (void)
-{
-  tcsetpgrp (terminal_fd, old_foreground_pgrp);
-}
-#endif
-
 /* Set if you want to disable optional thread related packets support
    in gdbserver, for the sake of testing GDB against stubs that don't
    support them.  */
@@ -118,8 +116,8 @@ int disable_packet_qC;
 int disable_packet_qfThreadInfo;
 
 /* Last status reported to GDB.  */
-static struct target_waitstatus last_status;
-static ptid_t last_ptid;
+struct target_waitstatus last_status;
+ptid_t last_ptid;
 
 char *own_buf;
 static unsigned char *mem_buf;
@@ -238,94 +236,31 @@ target_running (void)
   return get_first_thread () != NULL;
 }
 
-static int
-start_inferior (char **argv)
+/* See common/common-inferior.h.  */
+
+const char *
+get_exec_wrapper ()
 {
-  std::vector<char *> new_argv;
+  return !wrapper_argv.empty () ? wrapper_argv.c_str () : NULL;
+}
 
-  if (!wrapper_argv.empty ())
-    new_argv.insert (new_argv.begin (),
-		     wrapper_argv.begin (),
-		     wrapper_argv.end ());
+/* See common/common-inferior.h.  */
 
-  for (int i = 0; argv[i] != NULL; ++i)
-    new_argv.push_back (argv[i]);
+char *
+get_exec_file (int err)
+{
+  if (err && program_name == NULL)
+    error (_("No executable file specified."));
 
-  new_argv.push_back (NULL);
+  return program_name;
+}
 
-  if (debug_threads)
-    {
-      for (int i = 0; i < new_argv.size (); ++i)
-	debug_printf ("new_argv[%d] = \"%s\"\n", i, new_argv[i]);
-      debug_flush ();
-    }
+/* See server.h.  */
 
-#ifdef SIGTTOU
-  signal (SIGTTOU, SIG_DFL);
-  signal (SIGTTIN, SIG_DFL);
-#endif
-
-  signal_pid = create_inferior (new_argv[0], &new_argv[0]);
-
-  /* FIXME: we don't actually know at this point that the create
-     actually succeeded.  We won't know that until we wait.  */
-  fprintf (stderr, "Process %s created; pid = %ld\n", argv[0],
-	   signal_pid);
-  fflush (stderr);
-
-#ifdef SIGTTOU
-  signal (SIGTTOU, SIG_IGN);
-  signal (SIGTTIN, SIG_IGN);
-  terminal_fd = fileno (stderr);
-  old_foreground_pgrp = tcgetpgrp (terminal_fd);
-  tcsetpgrp (terminal_fd, signal_pid);
-  atexit (restore_old_foreground_pgrp);
-#endif
-
-  if (!wrapper_argv.empty ())
-    {
-      ptid_t ptid = pid_to_ptid (signal_pid);
-
-      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-
-      if (last_status.kind == TARGET_WAITKIND_STOPPED)
-	{
-	  do
-	    {
-	      target_continue_no_signal (ptid);
-
-	      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-	      if (last_status.kind != TARGET_WAITKIND_STOPPED)
-		break;
-
-	      current_thread->last_resume_kind = resume_stop;
-	      current_thread->last_status = last_status;
-	    }
-	  while (last_status.value.sig != GDB_SIGNAL_TRAP);
-	}
-      target_post_create_inferior ();
-      return signal_pid;
-    }
-
-  /* Wait till we are at 1st instruction in program, return new pid
-     (assuming success).  */
-  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-
-  /* At this point, the target process, if it exits, is stopped.  Do not call
-     the function target_post_create_inferior if the process has already
-     exited, as the target implementation of the routine may rely on the
-     process being live. */
-  if (last_status.kind != TARGET_WAITKIND_EXITED
-      && last_status.kind != TARGET_WAITKIND_SIGNALLED)
-    {
-      target_post_create_inferior ();
-      current_thread->last_resume_kind = resume_stop;
-      current_thread->last_status = last_status;
-    }
-  else
-    target_mourn_inferior (last_ptid);
-
-  return signal_pid;
+struct gdb_environ *
+get_environ ()
+{
+  return our_environ;
 }
 
 static int
@@ -2848,6 +2783,7 @@ handle_v_run (char *own_buf)
 {
   char *p, *next_p;
   std::vector<char *> new_argv;
+  char *new_program_name = NULL;
   int i, new_argc;
 
   new_argc = 0;
@@ -2866,42 +2802,94 @@ handle_v_run (char *own_buf)
       if (i == 0 && p == next_p)
 	{
 	  /* No program specified.  */
-	  new_argv.push_back (NULL);
+	  new_program_name = NULL;
+	}
+      else if (p == next_p)
+	{
+	  /* Empty argument.  */
+	  new_argv.push_back (xstrdup ("''"));
 	}
       else
 	{
 	  size_t len = (next_p - p) / 2;
+	  /* ARG is the unquoted argument received via the RSP.  */
 	  char *arg = (char *) xmalloc (len + 1);
+	  /* FULL_ARGS will contain the quoted version of ARG.  */
+	  char *full_arg = (char *) xmalloc ((len + 1) * 2);
+	  /* These are pointers used to navigate the strings above.  */
+	  char *tmp_arg = arg;
+	  char *tmp_full_arg = full_arg;
+	  int need_quote = 0;
 
 	  hex2bin (p, (gdb_byte *) arg, len);
 	  arg[len] = '\0';
-	  new_argv.push_back (arg);
-	}
 
+	  while (*tmp_arg != '\0')
+	    {
+	      switch (*tmp_arg)
+		{
+		case '\n':
+		  /* Quote \n.  */
+		  *tmp_full_arg = '\'';
+		  ++tmp_full_arg;
+		  need_quote = 1;
+		  break;
+
+		case '\'':
+		  /* Quote single quote.  */
+		  *tmp_full_arg = '\\';
+		  ++tmp_full_arg;
+		  break;
+
+		default:
+		  break;
+		}
+
+	      *tmp_full_arg = *tmp_arg;
+	      ++tmp_full_arg;
+	      ++tmp_arg;
+	    }
+
+	  if (need_quote)
+	    *tmp_full_arg++ = '\'';
+
+	  /* Finish FULL_ARG and push it into the vector containing
+	     the argv.  */
+	  *tmp_full_arg = '\0';
+	  if (i == 0)
+	    new_program_name = full_arg;
+	  else
+	    new_argv.push_back (full_arg);
+	  xfree (arg);
+	}
       if (*next_p)
 	next_p++;
     }
   new_argv.push_back (NULL);
 
-  if (new_argv[0] == NULL)
+  if (new_program_name == NULL)
     {
       /* GDB didn't specify a program to run.  Use the program from the
 	 last run with the new argument list.  */
-      if (program_argv.empty ())
+      if (program_name == NULL)
 	{
 	  write_enn (own_buf);
 	  free_vector_argv (new_argv);
 	  return 0;
 	}
-
-      new_argv.push_back (xstrdup (program_argv[0]));
+    }
+  else
+    {
+      xfree (program_name);
+      program_name = new_program_name;
     }
 
   /* Free the old argv and install the new one.  */
-  free_vector_argv (program_argv);
-  program_argv = new_argv;
+  free_vector_argv (program_args);
+  program_args = new_argv;
 
-  start_inferior (&program_argv[0]);
+  create_inferior (program_name, program_args);
+
   if (last_status.kind == TARGET_WAITKIND_STOPPED)
     {
       prepare_resume_reply (own_buf, last_ptid, &last_status);
@@ -3527,8 +3515,15 @@ captured_main (int argc, char *argv[])
 	  tmp = next_arg;
 	  while (*next_arg != NULL && strcmp (*next_arg, "--") != 0)
 	    {
-	      wrapper_argv.push_back (*next_arg);
+	      wrapper_argv += *next_arg;
+	      wrapper_argv += ' ';
 	      next_arg++;
+	    }
+
+	  if (!wrapper_argv.empty ())
+	    {
+	      /* Erase the last whitespace.  */
+	      wrapper_argv.erase (wrapper_argv.end () - 1);
 	    }
 
 	  if (next_arg == tmp || *next_arg == NULL)
@@ -3666,8 +3661,13 @@ captured_main (int argc, char *argv[])
       exit (1);
     }
 
+  /* Gather information about the environment.  */
+  our_environ = make_environ ();
+  init_environ (our_environ);
+
   initialize_async_io ();
   initialize_low ();
+  have_job_control ();
   initialize_event_loop ();
   if (target_supports_tracepoints ())
     initialize_tracepoint ();
@@ -3681,12 +3681,13 @@ captured_main (int argc, char *argv[])
       int i, n;
 
       n = argc - (next_arg - argv);
-      for (i = 0; i < n; i++)
-	program_argv.push_back (xstrdup (next_arg[i]));
-      program_argv.push_back (NULL);
+      program_name = xstrdup (next_arg[0]);
+      for (i = 1; i < n; i++)
+	program_args.push_back (xstrdup (next_arg[i]));
+      program_args.push_back (NULL);
 
       /* Wait till we are at first instruction in program.  */
-      start_inferior (&program_argv[0]);
+      create_inferior (program_name, program_args);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -4301,9 +4302,10 @@ process_serial_event (void)
 	  fprintf (stderr, "GDBserver restarting\n");
 
 	  /* Wait till we are at 1st instruction in prog.  */
-	  if (!program_argv.empty ())
+	  if (program_name != NULL)
 	    {
-	      start_inferior (&program_argv[0]);
+	      create_inferior (program_name, program_args);
+
 	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 		{
 		  /* Stopped at the first instruction of the target

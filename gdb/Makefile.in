@@ -1525,6 +1525,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
+	common/common-inferior.h \
 	common/host-defs.h \
 	common/print-utils.h \
 	common/ptid.h \
@@ -1565,6 +1566,7 @@ HFILES_NO_SRCDIR = \
 	nat/amd64-linux-siginfo.h \
 	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
+	nat/fork-inferior.h \
 	nat/linux-btrace.h \
 	nat/linux-namespaces.h \
 	nat/linux-nat.h \

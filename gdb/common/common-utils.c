@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
+#include "common-utils.h"
 #include "host-defs.h"
 #include <ctype.h>
 
@@ -327,4 +328,27 @@ free_vector_argv (std::vector<char *> &v)
     xfree (el);
 
   v.clear ();
+}
+
+/* See common/common-utils.h.  */
+
+std::string
+stringify_argv (const std::vector<char *> &args)
+{
+  std::string ret;
+
+  if (!args.empty ())
+    {
+      for (auto s : args)
+	if (s != NULL)
+	  {
+	    ret += s;
+	    ret += ' ';
+	  }
+
+      /* Erase the last whitespace.  */
+      ret.erase (ret.end () - 1);
+    }
+
+  return ret;
 }

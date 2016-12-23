@@ -218,6 +218,7 @@ SFILES = \
 	$(srcdir)/nat/linux-personality.c \
 	$(srcdir)/nat/mips-linux-watch.c \
 	$(srcdir)/nat/ppc-linux.c \
+	$(srcdir)/nat/fork-inferior.c \
 	$(srcdir)/target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@

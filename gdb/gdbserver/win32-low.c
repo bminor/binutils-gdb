@@ -608,13 +608,13 @@ create_process (const char *program, char *args,
 }
 
 /* Start a new process.
-   PROGRAM is a path to the program to execute.
-   ARGS is a standard NULL-terminated array of arguments,
-   to be passed to the inferior as ``argv''.
+   PROGRAM is the program name.
+   PROGRAM_ARGS is the vector containing the inferior's args.
    Returns the new PID on success, -1 on failure.  Registers the new
    process with the process list.  */
 static int
-win32_create_inferior (char *program, char **program_args)
+win32_create_inferior (const char *program,
+		       const std::vector<char *> &program_args)
 {
 #ifndef USE_WIN32API
   char real_path[PATH_MAX];
@@ -622,11 +622,12 @@ win32_create_inferior (char *program, char **program_args)
 #endif
   BOOL ret;
   DWORD flags;
-  char *args;
   int argslen;
   int argc;
   PROCESS_INFORMATION pi;
   DWORD err;
+  std::string str_program_args = stringify_argv (program_args);
+  char *args = (char *) str_program_args.c_str ();
 
   /* win32_wait needs to know we're not attaching.  */
   attaching = 0;
@@ -652,18 +653,6 @@ win32_create_inferior (char *program, char **program_args)
   program = real_path;
 #endif
 
-  argslen = 1;
-  for (argc = 1; program_args[argc]; argc++)
-    argslen += strlen (program_args[argc]) + 1;
-  args = (char *) alloca (argslen);
-  args[0] = '\0';
-  for (argc = 1; program_args[argc]; argc++)
-    {
-      /* FIXME: Can we do better about quoting?  How does Cygwin
-	 handle this?  */
-      strcat (args, " ");
-      strcat (args, program_args[argc]);
-    }
   OUTMSG2 (("Command line is \"%s\"\n", args));
 
 #ifdef CREATE_NEW_PROCESS_GROUP

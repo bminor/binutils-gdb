@@ -148,4 +148,18 @@ extern int in_queued_stop_replies (ptid_t ptid);
 /* Definition for any syscall, used for unfiltered syscall reporting.  */
 #define ANY_SYSCALL (-2)
 
+/* After fork_inferior has been called, we need to adjust a few
+   signals and call startup_inferior to start the inferior and consume
+   its first events.  This is done here.  PID is the pid of the new
+   inferior and PROGRAM is its name.  */
+extern void post_fork_inferior (int pid, const char *program);
+
+/* Get the 'struct gdb_environ *' being used in the current
+   session.  */
+extern struct gdb_environ *get_environ ();
+
+extern target_waitstatus last_status;
+extern ptid_t last_ptid;
+extern unsigned long signal_pid;
+
 #endif /* SERVER_H */

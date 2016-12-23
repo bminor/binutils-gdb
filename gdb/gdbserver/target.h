@@ -28,6 +28,7 @@
 #include "target/waitstatus.h"
 #include "mem-break.h"
 #include "btrace-common.h"
+#include <vector>
 
 struct emit_ops;
 struct buffer;
@@ -67,13 +68,13 @@ struct target_ops
   /* Start a new process.
 
      PROGRAM is a path to the program to execute.
-     ARGS is a standard NULL-terminated array of arguments,
-     to be passed to the inferior as ``argv''.
+     PROGRAM_ARGS is a standard NULL-terminated array of arguments,
+     to be passed to the inferior as ``argv'' (along with PROGRAM).
 
      Returns the new PID on success, -1 on failure.  Registers the new
      process with the process list.  */
-
-  int (*create_inferior) (char *program, char **args);
+  int (*create_inferior) (const char *program,
+			  const std::vector<char *> &program_args);
 
   /* Do additional setup after a new process is created, including
      exec-wrapper completion.  */
@@ -480,8 +481,8 @@ extern struct target_ops *the_target;
 
 void set_target_ops (struct target_ops *);
 
-#define create_inferior(program, args) \
-  (*the_target->create_inferior) (program, args)
+#define create_inferior(program, program_args)	\
+  (*the_target->create_inferior) (program, program_args)
 
 #define target_post_create_inferior()			 \
   do							 \
