@@ -847,11 +847,12 @@ set_default_mips_dis_options (struct disassemble_info *info)
       Elf_Internal_Ehdr *header = elf_elfheader (abfd);
       Elf_Internal_ABIFlags_v0 *abiflags = NULL;
 
-      /* We won't ever get here if !BFD64, because we won't then have
-	 a MIPS/ELF BFD, however we need to guard against a link error
-	 in a `--enable-targets=...' configuration with a 32-bit host,
-	 where the MIPS target is a secondary.  */
-#ifdef BFD64
+      /* We won't ever get here if !HAVE_BFD_MIPS_ELF_GET_ABIFLAGS,
+	 because we won't then have a MIPS/ELF BFD, however we need
+	 to guard against a link error in a `--enable-targets=...'
+	 configuration with a 32-bit host where the MIPS target is
+	 a secondary, or with MIPS/ECOFF configurations.  */
+#ifdef HAVE_BFD_MIPS_ELF_GET_ABIFLAGS
       abiflags = bfd_mips_elf_get_abiflags (abfd);
 #endif
       /* If an ELF "newabi" binary, use the n32/(n)64 GPR names.  */
