@@ -1064,7 +1064,7 @@ generic_link_check_archive_element (bfd *abfd,
 	    return FALSE;
 	  /* Potentially, the add_archive_element hook may have set a
 	     substitute BFD for us.  */
-	  return generic_link_add_object_symbols (abfd, info);
+	  return bfd_link_add_symbols (abfd, info);
 	}
 
       /* P is a common symbol.  */

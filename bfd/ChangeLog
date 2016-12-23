@@ -1,5 +1,10 @@
 2016-12-23  Alan Modra  <amodra@gmail.com>
 
+	* linker.c (generic_link_check_archive_element): Call target
+	bfd_link_add_symbols to add element symbols.
+
+2016-12-23  Alan Modra  <amodra@gmail.com>
+
 	* linker.c (generic_link_add_symbols): Delete.  Merge into..
 	(_bfd_generic_link_add_symbols): ..here.
 	(generic_link_check_archive_element_no_collect): Delete.
