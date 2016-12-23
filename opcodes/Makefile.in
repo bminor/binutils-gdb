@@ -80,7 +80,9 @@ DIST_COMMON = ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/po/Make-in $(srcdir)/../depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../config/acx.m4 \
+	$(top_srcdir)/../bfd/warning.m4 \
+	$(top_srcdir)/../config/acinclude.m4 \
+	$(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
@@ -187,6 +189,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BFDHDIR = @BFDHDIR@
+BFDLIB = @BFDLIB@
 BFD_MACHINES = @BFD_MACHINES@
 BUILD_LIBS = @BUILD_LIBS@
 BUILD_LIB_DEPS = @BUILD_LIB_DEPS@
@@ -603,8 +607,9 @@ CFILES = \
 ALL_MACHINES = $(TARGET_LIBOPCODES_CFILES:.c=.lo)
 OFILES = @BFD_MACHINES@
 
-# development.sh is used to determine -Werror default.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
+# development.sh is used to determine -Werror default, libbfd.la is needed
+# for function availability checks.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh ../bfd/libbfd.la
 AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
 libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 # It's desirable to list ../bfd/libbfd.la in DEPENDENCIES and LIBADD.

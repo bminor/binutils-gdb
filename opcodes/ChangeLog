@@ -1,3 +1,15 @@
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (set_default_mips_dis_options): Use
+	HAVE_BFD_MIPS_ELF_GET_ABIFLAGS rather than BFD64 to guard the
+	call to `bfd_mips_elf_get_abiflags'.
+	* configure.ac: Check for `bfd_mips_elf_get_abiflags' in BFD.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add `libbfd.la'.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+
 2016-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
