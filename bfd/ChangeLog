@@ -1,3 +1,7 @@
+2016-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* po/bfd.pot: Regenerate.
+
 2016-12-22  Alan Modra  <amodra@gmail.com>
 
 	* libbfd-in.h (_bfd_vms_lib_slurp_armap): Use _bfd_noarchive function.

@@ -1,3 +1,7 @@
+2016-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* po/gas.pot: Regenerate.
+
 2016-12-21  Andrew Waterman  <andrew@sifive.com>
 
 	* config/tc-riscv.c (riscv_make_nops): Emit 2-byte NOPs.

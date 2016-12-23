@@ -1,3 +1,7 @@
+2016-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* po/gprof.pot: Regenerate.
+
 2016-11-27  Ambrogino Modigliani  <ambrogino.modigliani@gmail.com>
 
 	* basic_blocks.c: Fix spelling in comments.
