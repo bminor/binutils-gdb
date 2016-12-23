@@ -1341,6 +1341,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test "mips16e-save-err" "-march=mips32 -32"
     run_dump_test "mips16-intermix"
     run_dump_test "mips16-extend"
+    run_dump_test "mips16-extend-swap"
     run_dump_test "mips16-sprel-swap"
     run_dump_test "mips16-sdrasp"
 

@@ -357,7 +357,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"zew",	    "x",	0xe851, 0xf8ff,		MOD_1,			0,		I64,	0,	0 },
   /* Place EXTEND last so that it catches any prefix that didn't match
      anything.  */
-{"extend",  "e",	0xf000, 0xf800,		0,			0,		I1,	0,	0 },
+{"extend",  "e",	0xf000, 0xf800,		NODS,			0,		I1,	0,	0 },
 };
 
 const int bfd_mips16_num_opcodes =

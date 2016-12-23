@@ -1,3 +1,9 @@
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16-extend-swap.d: New test.
+	* testsuite/gas/mips/mips16-extend-swap.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2016-12-23  Joe Seymour  <joe.s@somniumtech.com>
 
 	* config/tc-msp430.c (msp430_mcu_data): Sync with data from TI's
