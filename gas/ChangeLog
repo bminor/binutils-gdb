@@ -1,5 +1,11 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (mips16_macro_build): Replace `0' and `4'
+	operand codes with `.' and `F' respectively.
+	(mips16_macro): Likewise.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (is_size_valid_16): Disallow a `.e' suffix
 	instruction size override for INSN2_SHORT_ONLY opcode table
 	entries.

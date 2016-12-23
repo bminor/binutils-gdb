@@ -8758,15 +8758,15 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	case ')':
 	  break;
 
-	case '0':
+	case '.':
 	case 'S':
 	case 'P':
 	case 'R':
 	  break;
 
 	case '<':
-	case '4':
 	case '5':
+	case 'F':
 	case 'H':
 	case 'W':
 	case 'D':
@@ -13531,7 +13531,7 @@ mips16_macro (struct mips_cl_insn *ip)
       s = "mfhi";
     do_div3:
       start_noreorder ();
-      macro_build (NULL, dbl ? "ddiv" : "div", "0,x,y", op[1], op[2]);
+      macro_build (NULL, dbl ? "ddiv" : "div", ".,x,y", op[1], op[2]);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bnez", "x,p", op[2]);
       macro_build (NULL, "break", "6", 7);
@@ -13561,7 +13561,7 @@ mips16_macro (struct mips_cl_insn *ip)
       s2 = "mfhi";
     do_divu3:
       start_noreorder ();
-      macro_build (NULL, s, "0,x,y", op[1], op[2]);
+      macro_build (NULL, s, ".,x,y", op[1], op[2]);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bnez", "x,p", op[2]);
       macro_build (NULL, "break", "6", 7);
@@ -13583,7 +13583,7 @@ mips16_macro (struct mips_cl_insn *ip)
     case M_SUBU_I:
     do_subu:
       imm_expr.X_add_number = -imm_expr.X_add_number;
-      macro_build (&imm_expr, dbl ? "daddiu" : "addiu", "y,x,4", op[0], op[1]);
+      macro_build (&imm_expr, dbl ? "daddiu" : "addiu", "y,x,F", op[0], op[1]);
       break;
 
     case M_SUBU_I_2:

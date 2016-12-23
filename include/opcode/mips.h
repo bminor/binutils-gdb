@@ -1803,7 +1803,7 @@ extern int bfd_mips_num_opcodes;
    "Z" 3 bit register (MIPS16OP_*_MOVE32Z)
    "v" 3 bit same register as source and destination (MIPS16OP_*_RX)
    "w" 3 bit same register as source and destination (MIPS16OP_*_RY)
-   "0" zero register ($0)
+   "." zero register ($0)
    "S" stack pointer ($sp or $29)
    "P" program counter
    "R" return address register ($ra or $31)
@@ -1823,8 +1823,8 @@ extern int bfd_mips_num_opcodes;
    "<" 3 bit unsigned shift count * 0 (MIPS16OP_*_RZ) (full 5 bit unsigned)
    "[" 3 bit unsigned shift count * 0 (MIPS16OP_*_RZ) (full 6 bit unsigned)
    "]" 3 bit unsigned shift count * 0 (MIPS16OP_*_RX) (full 6 bit unsigned)
-   "4" 4 bit signed immediate * 0 (MIPS16OP_*_IMM4) (full 15 bit signed)
    "5" 5 bit unsigned immediate * 0 (MIPS16OP_*_IMM5)
+   "F" 4 bit signed immediate * 0 (MIPS16OP_*_IMM4) (full 15 bit signed)
    "H" 5 bit unsigned immediate * 2 (MIPS16OP_*_IMM5)
    "W" 5 bit unsigned immediate * 4 (MIPS16OP_*_IMM5)
    "D" 5 bit unsigned immediate * 8 (MIPS16OP_*_IMM5)
@@ -1844,9 +1844,9 @@ extern int bfd_mips_num_opcodes;
    "M" 7 bit register list for restore instruction (18 bit extended)
 
    Characters used so far, for quick reference when adding more:
-   "   456 8 0"
-   "[]<"
-   "ABCDE  HI KLM  P RS UVWXYZ"
+   "    56 8  "
+   ".[]<"
+   "ABCDEF HI KLM  P RS UVWXYZ"
    "a   e   ijklm  pq    vwxyz"
   */
 
