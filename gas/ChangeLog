@@ -1,5 +1,23 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (match_mips16_insn): Don't update
+	`forced_insn_length' or the instruction opcode if an operand
+	requires an extended instruction form, but an unextended one
+	has been requested.
+	* testsuite/gas/mips/mips16-relax-unextended-1.d: New test.
+	* testsuite/gas/mips/mips16-relax-unextended-2.d: New test.
+	* testsuite/gas/mips/mips16-relax-unextended-1.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-relax-unextended-2.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-relax-unextended-1.s: New test
+	source.
+	* testsuite/gas/mips/mips16-relax-unextended-2.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (mips16_macro_build): Replace `0' and `4'
 	operand codes with `.' and `F' respectively.
 	(mips16_macro): Likewise.
