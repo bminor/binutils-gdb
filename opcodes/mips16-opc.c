@@ -50,6 +50,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
   switch (type)
     {
     case '0': MAPPED_REG (0, 0, GP, reg_0_map);
+    case '6': UINT (6, 5);
 
     case 'L': SPECIAL (6, 5, ENTRY_EXIT_LIST);
     case 'M': SPECIAL (7, 0, SAVE_RESTORE_LIST);
@@ -81,7 +82,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 
       case '4': SINT (15, 0);
       case '5': SINT (16, 0);
-      case '6': SINT (16, 0);
       case '8': SINT (16, 0);
 
       case 'A': PCREL (16, 0, TRUE, 0, 2, FALSE, FALSE);
@@ -109,7 +109,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 
       case '4': SINT (4, 0);
       case '5': UINT (5, 0);
-      case '6': UINT (6, 5);
       case '8': UINT (8, 0);
 
       case 'A': PCREL (8, 0, FALSE, 2, 2, FALSE, FALSE);

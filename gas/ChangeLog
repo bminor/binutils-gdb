@@ -1,5 +1,10 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (match_mips16_insn): Remove the `6' operand
+	code special case and its associated comment.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (mips16_ip): Handle `.e' and `.t' instruction
 	suffixes followed by a null character rather than a space too.
 	* testsuite/gas/mips/mips16-insn-length-noargs.d: New test.
