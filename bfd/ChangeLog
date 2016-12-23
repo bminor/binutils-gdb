@@ -1,5 +1,19 @@
 2016-12-23  Alan Modra  <amodra@gmail.com>
 
+	* linker.c (generic_link_add_symbols): Delete.  Merge into..
+	(_bfd_generic_link_add_symbols): ..here.
+	(generic_link_check_archive_element_no_collect): Delete.
+	(generic_link_check_archive_element_collect): Likewise.
+	(generic_link_add_object_symbols): Remove "collect" param.  Update
+	callers.
+	(generic_link_add_symbol_list): Likewise.
+	(generic_link_check_archive_element): Likewise.  Call
+	bfd_link_add_symbols rather than generic_link_add_object_symbols.
+	* libbfd-in.h (_bfd_generic_link_add_symbols_collect): Delete.
+	* libbfd.h: Regenerate.
+
+2016-12-23  Alan Modra  <amodra@gmail.com>
+
 	PR binutils/20464
 	PR binutils/14625
 	* configure.ac: Revert 2016-05-25 configure change setting
