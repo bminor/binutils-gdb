@@ -1,5 +1,10 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* opcode/mips.h: Replace `0' and `4' operand codes with `.' and
+	`F' respectively.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* opcode/mips.h (INSN2_SHORT_ONLY): New macro.
 
 2016-12-21  Alan Modra  <amodra@gmail.com>

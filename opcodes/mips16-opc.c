@@ -49,7 +49,8 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 {
   switch (type)
     {
-    case '0': MAPPED_REG (0, 0, GP, reg_0_map);
+    case '.': MAPPED_REG (0, 0, GP, reg_0_map);
+
     case '6': UINT (6, 5);
 
     case 'L': SPECIAL (6, 5, ENTRY_EXIT_LIST);
@@ -80,7 +81,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
       case '[': UINT (6, 0);
       case ']': UINT (6, 0);
 
-      case '4': SINT (15, 0);
       case '5': SINT (16, 0);
       case '8': SINT (16, 0);
 
@@ -89,6 +89,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
       case 'C': SINT (16, 0);
       case 'D': SINT (16, 0);
       case 'E': PCREL (16, 0, TRUE, 0, 2, FALSE, FALSE);
+      case 'F': SINT (15, 0);
       case 'H': SINT (16, 0);
       case 'K': SINT (16, 0);
       case 'U': UINT (16, 0);
@@ -107,7 +108,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
       case '[': INT_ADJ (3, 2, 8, 0, FALSE);
       case ']': INT_ADJ (3, 8, 8, 0, FALSE);
 
-      case '4': SINT (4, 0);
       case '5': UINT (5, 0);
       case '8': UINT (8, 0);
 
@@ -116,6 +116,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
       case 'C': INT_ADJ (8, 0, 255, 3, FALSE);	/* (0 .. 255) << 3 */
       case 'D': INT_ADJ (5, 0, 31, 3, FALSE);	/* (0 .. 31) << 3 */
       case 'E': PCREL (5, 0, FALSE, 2, 2, FALSE, FALSE);
+      case 'F': SINT (4, 0);
       case 'H': INT_ADJ (5, 0, 31, 1, FALSE);	/* (0 .. 31) << 1 */
       case 'K': INT_ADJ (8, 0, 127, 3, FALSE);	/* (-128 .. 127) << 3 */
       case 'U': UINT (8, 0);
@@ -184,14 +185,14 @@ const struct mips_opcode mips16_opcodes[] =
 {"nop",	    "",		0x6500, 0xffff,		0,			SH|RD_16,	I1,	0,	0 }, /* move $0,$Z */
 {"la",	    "x,A",	0x0800, 0xf800,		WR_1,			RD_PC,		I1,	0,	0 },
 {"abs",	    "x,w",	0, (int) M_ABS,		INSN_MACRO,		0,		I1,	0,	0 },
-{"addiu",   "y,x,4",	0x4000, 0xf810,		WR_1|RD_2,		0,		I1,	0,	0 },
+{"addiu",   "y,x,F",	0x4000, 0xf810,		WR_1|RD_2,		0,		I1,	0,	0 },
 {"addiu",   "x,k",	0x4800, 0xf800,		MOD_1,			0,		I1,	0,	0 },
 {"addiu",   "S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
 {"addiu",   "S,S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
 {"addiu",   "x,P,V",	0x0800, 0xf800,		WR_1,			RD_PC,		I1,	0,	0 },
 {"addiu",   "x,S,V",	0x0000, 0xf800,		WR_1,			RD_SP,		I1,	0,	0 },
 {"addu",    "z,v,y",	0xe001, 0xf803,		WR_1|RD_2|RD_3,		SH,		I1,	0,	0 },
-{"addu",    "y,x,4",	0x4000, 0xf810,		WR_1|RD_2,		0,		I1,	0,	0 },
+{"addu",    "y,x,F",	0x4000, 0xf810,		WR_1|RD_2,		0,		I1,	0,	0 },
 {"addu",    "x,k",	0x4800, 0xf800,		MOD_1,			0,		I1,	0,	0 },
 {"addu",    "S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
 {"addu",    "S,S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
@@ -228,33 +229,33 @@ const struct mips_opcode mips16_opcodes[] =
 {"cmp",	    "x,y",	0xe80a, 0xf81f,		RD_1|RD_2|WR_T,		SH,		I1,	0,	0 },
 {"cmp",     "x,U",	0x7000, 0xf800,		RD_1|WR_T,		0,		I1,	0,	0 },
 {"dla",	    "y,E",	0xfe00, 0xff00,		WR_1, 			RD_PC,		I3,	0,	0 },
-{"daddiu",  "y,x,4",	0x4010, 0xf810,		WR_1|RD_2, 		0,		I3,	0,	0 },
+{"daddiu",  "y,x,F",	0x4010, 0xf810,		WR_1|RD_2, 		0,		I3,	0,	0 },
 {"daddiu",  "y,j",	0xfd00, 0xff00,		MOD_1,			0,		I3,	0,	0 },
 {"daddiu",  "S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
 {"daddiu",  "S,S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
 {"daddiu",  "y,P,W",	0xfe00, 0xff00,		WR_1,	 		RD_PC,		I3,	0,	0 },
 {"daddiu",  "y,S,W",	0xff00, 0xff00,		WR_1,			RD_SP,		I3,	0,	0 },
 {"daddu",   "z,v,y",	0xe000, 0xf803,		WR_1|RD_2|RD_3,		SH,		I3,	0,	0 },
-{"daddu",   "y,x,4",	0x4010, 0xf810,		WR_1|RD_2, 		0,		I3,	0,	0 },
+{"daddu",   "y,x,F",	0x4010, 0xf810,		WR_1|RD_2, 		0,		I3,	0,	0 },
 {"daddu",   "y,j",	0xfd00, 0xff00,		MOD_1,			0,		I3,	0,	0 },
 {"daddu",   "S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
 {"daddu",   "S,S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
 {"daddu",   "y,P,W",	0xfe00, 0xff00,		WR_1,	 		RD_PC,		I3,	0,	0 },
 {"daddu",   "y,S,W",	0xff00, 0xff00,		WR_1,			RD_SP,		I3,	0,	0 },
-{"ddiv",    "0,x,y",	0xe81e, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
+{"ddiv",    ".,x,y",	0xe81e, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
 {"ddiv",    "z,v,y",	0, (int) M_DDIV_3,	INSN_MACRO,		0,		I3,	0,	0 },
-{"ddivu",   "0,x,y",	0xe81f, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
+{"ddivu",   ".,x,y",	0xe81f, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
 {"ddivu",   "z,v,y",	0, (int) M_DDIVU_3,	INSN_MACRO,		0,		I3,	0,	0 },
-{"div",	    "0,x,y",	0xe81a, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
+{"div",	    ".,x,y",	0xe81a, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
 {"div",     "z,v,y",	0, (int) M_DIV_3,	INSN_MACRO,		0,		I1,	0,	0 },
-{"divu",    "0,x,y",	0xe81b, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
+{"divu",    ".,x,y",	0xe81b, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
 {"divu",    "z,v,y",	0, (int) M_DIVU_3,	INSN_MACRO,		0,		I1,	0,	0 },
 {"dmul",    "z,v,y",	0, (int) M_DMUL,	INSN_MACRO, 		0,		I3,	0,	0 },
 {"dmult",   "x,y",	0xe81c, 0xf81f,		RD_1|RD_2|WR_HI|WR_LO,	SH,		I3,	0,	0 },
 {"dmultu",  "x,y",	0xe81d, 0xf81f,		RD_1|RD_2|WR_HI|WR_LO,	SH,		I3,	0,	0 },
-{"drem",    "0,x,y",	0xe81e, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
+{"drem",    ".,x,y",	0xe81e, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
 {"drem",    "z,v,y",	0, (int) M_DREM_3,	INSN_MACRO,		0,		I3,	0,	0 },
-{"dremu",   "0,x,y",	0xe81f, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
+{"dremu",   ".,x,y",	0xe81f, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I3,	0,	0 },
 {"dremu",   "z,v,y",	0, (int) M_DREMU_3,	INSN_MACRO,		0,		I3,	0,	0 },
 {"dsllv",   "y,x",	0xe814, 0xf81f,		MOD_1|RD_2,		SH,		I3,	0,	0 },
 {"dsll",    "x,w,[",	0x3001, 0xf803,		WR_1|RD_2, 		0,		I3,	0,	0 },
@@ -315,9 +316,9 @@ const struct mips_opcode mips16_opcodes[] =
 {"neg",	    "x,w",	0xe80b, 0xf81f,		WR_1|RD_2,		SH,		I1,	0,	0 },
 {"not",	    "x,w",	0xe80f, 0xf81f,		WR_1|RD_2,		SH,		I1,	0,	0 },
 {"or",	    "x,y",	0xe80d, 0xf81f,		MOD_1|RD_2,		SH,		I1,	0,	0 },
-{"rem",	    "0,x,y",	0xe81a, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
+{"rem",	    ".,x,y",	0xe81a, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
 {"rem",     "z,v,y",	0, (int) M_REM_3,	INSN_MACRO,		0,		I1,	0,	0 },
-{"remu",    "0,x,y",	0xe81b, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
+{"remu",    ".,x,y",	0xe81b, 0xf81f,		RD_2|RD_3|WR_HI|WR_LO,	SH,		I1,	0,	0 },
 {"remu",    "z,v,y",	0, (int) M_REMU_3,	INSN_MACRO,		0,		I1,	0,	0 },
 {"sb",	    "y,5(x)",	0xc000, 0xf800,		RD_1|RD_3,		0,		I1,	0,	0 },
 {"sd",	    "y,D(x)",	0x7800, 0xf800,		RD_1|RD_3, 		0,		I3,	0,	0 },
