@@ -1,5 +1,10 @@
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/binutils-all/mips/mips16-extend-insn.d: Update for
+	ASMACRO support.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/binutils-all/mips/mips16-extend-insn.d: New test.
 	* testsuite/binutils-all/mips/mips16-extend-insn.s: New test
 	source.
