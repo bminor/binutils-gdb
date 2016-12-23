@@ -1,5 +1,9 @@
 2016-12-23  Tristan Gingold  <gingold@adacore.com>
 
+	* configure: Regenerate.
+
+2016-12-23  Tristan Gingold  <gingold@adacore.com>
+
 	* po/opcodes.pot: Regenerate.
 
 2016-12-21  Andrew Waterman  <andrew@sifive.com>
