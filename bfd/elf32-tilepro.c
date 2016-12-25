@@ -2062,7 +2062,7 @@ tilepro_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   struct tilepro_elf_link_hash_table *htab;
   struct tilepro_elf_link_hash_entry * eh;
   struct tilepro_elf_dyn_relocs *p;
-  asection *s;
+  asection *s, *srel;
 
   htab = tilepro_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -2164,13 +2164,23 @@ tilepro_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rel.bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->elf.srelbss->size += TILEPRO_ELF_RELA_BYTES;
+      srel->size += TILEPRO_ELF_RELA_BYTES;
       h->needs_copy = 1;
     }
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->elf.sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
@@ -2565,7 +2575,8 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
-	  || s == htab->elf.sdynbss)
+	  || s == htab->elf.sdynbss
+	  || s == htab->elf.sdynrelro)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -3797,14 +3808,15 @@ tilepro_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbols needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      s = htab->elf.srelbss;
-      BFD_ASSERT (s != NULL);
-
       rela.r_offset = (h->root.u.def.value
 		       + h->root.u.def.section->output_section->vma
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_TILEPRO_COPY);
       rela.r_addend = 0;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
       tilepro_elf_append_rela_32 (output_bfd, s, &rela);
     }
 
@@ -4045,6 +4057,7 @@ tilepro_additional_program_headers (bfd *abfd,
 #define elf_backend_plt_alignment 6
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size GOT_ENTRY_SIZE
+#define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
 #define elf_backend_default_execstack 0
 

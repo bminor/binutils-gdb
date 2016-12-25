@@ -429,6 +429,19 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
       htab->sdynbss = s;
 
+      if (bed->want_dynrelro)
+	{
+	  /* Similarly, but for symbols that were originally in read-only
+	     sections.  */
+	  s = bfd_make_section_anyway_with_flags (abfd, ".data.rel.ro",
+						  (SEC_ALLOC | SEC_READONLY
+						   | SEC_HAS_CONTENTS
+						   | SEC_LINKER_CREATED));
+	  if (s == NULL)
+	    return FALSE;
+	  htab->sdynrelro = s;
+	}
+
       /* The .rel[a].bss section holds copy relocs.  This section is not
 	 normally needed.  We need to create it here, though, so that the
 	 linker will map it to an output section.  We can't just create it
@@ -450,6 +463,19 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
 	  htab->srelbss = s;
+
+	  if (bed->want_dynrelro)
+	    {
+	      s = (bfd_make_section_anyway_with_flags
+		   (abfd, (bed->rela_plts_and_copies_p
+			   ? ".rela.data.rel.ro" : ".rel.data.rel.ro"),
+		    flags | SEC_READONLY));
+	      if (s == NULL
+		  || ! bfd_set_section_alignment (abfd, s,
+						  bed->s->log_file_align))
+		return FALSE;
+	      htab->sreldynrelro = s;
+	    }
 	}
     }
 

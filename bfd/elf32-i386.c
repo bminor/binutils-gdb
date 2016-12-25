@@ -2424,7 +2424,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h)
 {
   struct elf_i386_link_hash_table *htab;
-  asection *s;
+  asection *s, *srel;
   struct elf_i386_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
@@ -2584,13 +2584,21 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_386_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->elf.srelbss->size += sizeof (Elf32_External_Rel);
+      srel->size += sizeof (Elf32_External_Rel);
       h->needs_copy = 1;
     }
-
-  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -3405,7 +3413,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	       || s == htab->elf.igotplt
 	       || s == htab->plt_got
 	       || s == htab->plt_eh_frame
-	       || s == htab->elf.sdynbss)
+	       || s == htab->elf.sdynbss
+	       || s == htab->elf.sdynrelro)
 	{
 	  /* Strip these too.  */
 	}
@@ -5564,20 +5573,26 @@ do_glob_dat:
   if (h->needs_copy)
     {
       Elf_Internal_Rela rel;
+      asection *s;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->elf.srelbss == NULL)
+	  || htab->elf.srelbss == NULL
+	  || htab->elf.sreldynrelro == NULL)
 	abort ();
 
       rel.r_offset = (h->root.u.def.value
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_386_COPY);
-      elf_append_rel (output_bfd, htab->elf.srelbss, &rel);
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
+      elf_append_rel (output_bfd, s, &rel);
     }
 
   return TRUE;
@@ -6028,6 +6043,7 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_extern_protected_data 1
 #define elf_backend_caches_rawsize	1
+#define elf_backend_want_dynrelro	1
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel

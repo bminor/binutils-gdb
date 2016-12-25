@@ -9129,6 +9129,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   bfd *dynobj;
   struct mips_elf_link_hash_entry *hmips;
   struct mips_elf_link_hash_table *htab;
+  asection *s, *srel;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -9371,10 +9372,20 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->root.sdynrelro;
+      srel = htab->root.sreldynrelro;
+    }
+  else
+    {
+      s = htab->root.sdynbss;
+      srel = htab->root.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       if (htab->is_vxworks)
-	htab->root.srelbss->size += sizeof (Elf32_External_Rela);
+	srel->size += sizeof (Elf32_External_Rela);
       else
 	mips_elf_allocate_dynamic_relocations (dynobj, info, 1);
       h->needs_copy = 1;
@@ -9384,7 +9395,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      dynamic will now refer to the local copy instead.  */
   hmips->possibly_dynamic_relocs = 0;
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->root.sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* This function is called after all the input files have been read,
@@ -9906,7 +9917,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	       && s != htab->root.sgot
 	       && s != htab->root.sgotplt
 	       && s != htab->sstubs
-	       && s != htab->root.sdynbss)
+	       && s != htab->root.sdynbss
+	       && s != htab->root.sdynrelro)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -11296,6 +11308,8 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
   if (h->needs_copy)
     {
       Elf_Internal_Rela rel;
+      asection *srel;
+      bfd_byte *loc;
 
       BFD_ASSERT (h->dynindx != -1);
 
@@ -11304,11 +11318,13 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 		      + h->root.u.def.value);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_COPY);
       rel.r_addend = 0;
-      bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 htab->root.srelbss->contents
-				 + (htab->root.srelbss->reloc_count
-				    * sizeof (Elf32_External_Rela)));
-      ++htab->root.srelbss->reloc_count;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	srel = htab->root.sreldynrelro;
+      else
+	srel = htab->root.srelbss;
+      loc = srel->contents + srel->reloc_count * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
+      ++srel->reloc_count;
     }
 
   /* If this is a mips16/microMIPS symbol, force the value to be even.  */

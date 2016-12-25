@@ -5806,6 +5806,8 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   if (ppc_elf_hash_entry (h)->has_sda_refs)
     s = htab->dynsbss;
+  else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    s = htab->elf.sdynrelro;
   else
     s = htab->elf.sdynbss;
   BFD_ASSERT (s != NULL);
@@ -5820,6 +5822,8 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	srel = htab->relsbss;
+      else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	srel = htab->elf.sreldynrelro;
       else
 	srel = htab->elf.srelbss;
       BFD_ASSERT (srel != NULL);
@@ -6636,6 +6640,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->elf.sgotplt
 	       || s == htab->sbss
 	       || s == htab->elf.sdynbss
+	       || s == htab->elf.sdynrelro
 	       || s == htab->dynsbss)
 	{
 	  /* Strip these too.  */
@@ -10356,6 +10361,8 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	s = htab->relsbss;
+      else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;
       BFD_ASSERT (s != NULL);
@@ -10893,6 +10900,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #endif
 
 #define elf_backend_plt_not_loaded	1
+#define elf_backend_want_dynrelro	1
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
 #define elf_backend_rela_normal		1
