@@ -451,8 +451,6 @@ struct mips_elf_link_hash_table
 
   /* Shortcuts to some dynamic sections, or NULL if they are not
      being used.  */
-  asection *srelbss;
-  asection *sdynbss;
   asection *srelplt2;
   asection *sstubs;
 
@@ -7893,16 +7891,6 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (!_bfd_elf_create_dynamic_sections (abfd, info))
     return FALSE;
 
-  /* Cache the sections created above.  */
-  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
-  if (htab->is_vxworks)
-    htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
-  if (!htab->sdynbss
-      || (htab->is_vxworks && !htab->srelbss && !bfd_link_pic (info))
-      || !htab->root.srelplt
-      || !htab->root.splt)
-    abort ();
-
   /* Do the usual VxWorks handling.  */
   if (htab->is_vxworks
       && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
@@ -9386,7 +9374,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       if (htab->is_vxworks)
-	htab->srelbss->size += sizeof (Elf32_External_Rela);
+	htab->root.srelbss->size += sizeof (Elf32_External_Rela);
       else
 	mips_elf_allocate_dynamic_relocations (dynobj, info, 1);
       h->needs_copy = 1;
@@ -9396,7 +9384,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      dynamic will now refer to the local copy instead.  */
   hmips->possibly_dynamic_relocs = 0;
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, htab->root.sdynbss);
 }
 
 /* This function is called after all the input files have been read,
@@ -9918,7 +9906,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	       && s != htab->root.sgot
 	       && s != htab->root.sgotplt
 	       && s != htab->sstubs
-	       && s != htab->sdynbss)
+	       && s != htab->root.sdynbss)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -11317,10 +11305,10 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_COPY);
       rel.r_addend = 0;
       bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 htab->srelbss->contents
-				 + (htab->srelbss->reloc_count
+				 htab->root.srelbss->contents
+				 + (htab->root.srelbss->reloc_count
 				    * sizeof (Elf32_External_Rela)));
-      ++htab->srelbss->reloc_count;
+      ++htab->root.srelbss->reloc_count;
     }
 
   /* If this is a mips16/microMIPS symbol, force the value to be even.  */

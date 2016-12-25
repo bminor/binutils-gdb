@@ -754,10 +754,6 @@ struct tilepro_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* Small local sym to section mapping cache.  */
   struct sym_cache sym_cache;
 };
@@ -1295,26 +1291,10 @@ static bfd_boolean
 tilepro_elf_create_dynamic_sections (bfd *dynobj,
 				     struct bfd_link_info *info)
 {
-  struct tilepro_elf_link_hash_table *htab;
-
-  htab = tilepro_elf_hash_table (info);
-  BFD_ASSERT (htab != NULL);
-
   if (!tilepro_elf_create_got_section (dynobj, info))
     return FALSE;
 
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
-  return TRUE;
+  return _bfd_elf_create_dynamic_sections (dynobj, info);
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -2186,11 +2166,11 @@ tilepro_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      .rel.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += TILEPRO_ELF_RELA_BYTES;
+      htab->elf.srelbss->size += TILEPRO_ELF_RELA_BYTES;
       h->needs_copy = 1;
     }
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, htab->elf.sdynbss);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
@@ -2585,7 +2565,7 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
-	  || s == htab->sdynbss)
+	  || s == htab->elf.sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -3817,7 +3797,7 @@ tilepro_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbols needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      s = htab->srelbss;
+      s = htab->elf.srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value

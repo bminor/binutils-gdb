@@ -1,3 +1,58 @@
+2016-12-26  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_link_hash_table): Add sdynbss and srelbss.
+	* elflink.c (_bfd_elf_create_dynamic_sections): Set them.  Create
+	.rel.bss/.rela.bss for executables, both PIE and non-PIE.
+	* elf32-arc.c (struct elf_arc_link_hash_table): Delete srelbss.
+	Use ELF hash table var throughout.
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Delete sdynbss
+	and srelbss.  Use ELF hash table vars throughout.
+	* elf32-hppa.c (struct elf32_hppa_link_hash_table): Likewise.
+	* elf32-i386.c (struct elf_i386_link_hash_table): Likewise.
+	* elf32-metag.c (struct elf_metag_link_hash_table): Likewise.
+	* elf32-microblaze.c (struct elf32_mb_link_hash_table): Likewise.
+	* elf32-nios2.c (struct elf32_nios2_link_hash_table): Likewise.
+	* elf32-or1k.c (struct elf_or1k_link_hash_table): Likewise.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Likewise.
+	* elf32-s390.c (struct elf_s390_link_hash_table): Likewise.
+	* elf32-tic6x.c (struct elf32_tic6x_link_hash_table): Likewise.
+	* elf32-tilepro.c (struct tilepro_elf_link_hash_table): Likewise.
+	* elf64-ppc.c (struct ppc_link_hash_table): Likewise.
+	* elf64-s390.c (struct elf_s390_link_hash_table): Likewise.
+	* elf64-x86-64.c (struct elf_x86_64_link_hash_table): Likewise.
+	* elfnn-aarch64.c (struct elf_aarch64_link_hash_table): Likewise.
+	* elfnn-riscv.c (struct riscv_elf_link_hash_table): Likewise.
+	* elfxx-mips.c (struct mips_elf_link_hash_table): Likewise.
+	* elfxx-sparc.h (struct _bfd_sparc_elf_link_hash_table): Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c (struct tilegx_elf_link_hash_table): Likewise.
+
+	* elf32-arc.c (arc_elf_create_dynamic_sections): Delete.
+	(elf_backend_create_dynamic_sections): Use base ELF version.
+	* elf32-microblaze.c (microblaze_elf_create_dynamic_sections): Delete.
+	(elf_backend_create_dynamic_sections): Use base ELF version.
+	* elf32-or1k.c (or1k_elf_create_dynamic_sections): Delete.
+	(elf_backend_create_dynamic_sections): Use base ELF version.
+	* elf32-s390.c (elf_s390_create_dynamic_sections): Delete.
+	(elf_backend_create_dynamic_sections): Use base ELF version.
+	* elf64-ppc.c (ppc64_elf_create_dynamic_sections): Delete.
+	(elf_backend_create_dynamic_sections): Use base ELF version.
+	* elf64-s390.c (elf_s390_create_dynamic_sections): Delete.
+	(elf_backend_create_dynamic_sections): Use base ELF version.
+
+	* elf32-tilepro.c (tilepro_elf_create_dynamic_sections): Remove
+	extraneous tests.
+	* elfnn-aarch64.c (elfNN_aarch64_create_dynamic_sections): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_create_dynamic_sections): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_create_dynamic_sections): Likewise.
+
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Don't create
+	".rel.bss" for executables.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Don't create
+	".rela.bss" for executables.
+	* elf32-nios2.c (nios2_elf32_create_dynamic_sections): Don't
+	ignore return status from _bfd_elf_create_dynamic_sections.
+
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* bfd/elfxx-mips.c (_bfd_mips_post_process_headers): Revert

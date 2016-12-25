@@ -93,7 +93,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_grok_prstatus	      ppc64_elf_grok_prstatus
 #define elf_backend_grok_psinfo		      ppc64_elf_grok_psinfo
 #define elf_backend_write_core_note	      ppc64_elf_write_core_note
-#define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
 #define elf_backend_check_directives	      ppc64_elf_before_check_relocs
@@ -4053,8 +4053,6 @@ struct ppc_link_hash_table
   struct ppc_link_hash_entry *dot_syms;
 
   /* Shortcuts to get to dynamic linker sections.  */
-  asection *dynbss;
-  asection *relbss;
   asection *glink;
   asection *sfpr;
   asection *brlt;
@@ -4635,31 +4633,6 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   ppc64_elf_tdata (abfd)->got = got;
   ppc64_elf_tdata (abfd)->relgot = relgot;
-  return TRUE;
-}
-
-/* Create the dynamic sections, and set up shortcuts.  */
-
-static bfd_boolean
-ppc64_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
-{
-  struct ppc_link_hash_table *htab;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab = ppc_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  htab->dynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->relbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.sgot || !htab->elf.splt || !htab->elf.srelplt || !htab->dynbss
-      || (!bfd_link_pic (info) && !htab->relbss))
-    abort ();
-
   return TRUE;
 }
 
@@ -7394,11 +7367,11 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      .rela.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->relbss->size += sizeof (Elf64_External_Rela);
+      htab->elf.srelbss->size += sizeof (Elf64_External_Rela);
       h->needs_copy = 1;
     }
 
-  s = htab->dynbss;
+  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -10201,7 +10174,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->elf.splt
 	       || s == htab->elf.iplt
 	       || s == htab->glink
-	       || s == htab->dynbss)
+	       || s == htab->elf.sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -15452,7 +15425,7 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->relbss == NULL)
+	  || htab->elf.srelbss == NULL)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
@@ -15460,8 +15433,8 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_COPY);
       rela.r_addend = 0;
-      loc = htab->relbss->contents;
-      loc += htab->relbss->reloc_count++ * sizeof (Elf64_External_Rela);
+      loc = htab->elf.srelbss->contents;
+      loc += htab->elf.srelbss->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 

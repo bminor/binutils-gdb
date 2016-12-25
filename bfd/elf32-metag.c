@@ -842,10 +842,6 @@ struct elf_metag_link_hash_table
   asection **input_list;
   Elf_Internal_Sym **all_local_syms;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* Small local sym cache.  */
   struct sym_cache sym_cache;
 
@@ -2069,9 +2065,6 @@ elf_metag_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   htab->etab.hgot = eh;
 
-  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
-  htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
-
   return TRUE;
 }
 
@@ -2573,11 +2566,11 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
      runtime process image.  */
   if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0 && eh->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      htab->etab.srelbss->size += sizeof (Elf32_External_Rela);
       eh->needs_copy = 1;
     }
 
-  s = htab->sdynbss;
+  s = htab->etab.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, eh, s);
 }
@@ -2940,7 +2933,7 @@ elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->etab.splt
 	  || s == htab->etab.sgot
 	  || s == htab->etab.sgotplt
-	  || s == htab->sdynbss)
+	  || s == htab->etab.sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -3222,7 +3215,7 @@ elf_metag_finish_dynamic_symbol (bfd *output_bfd,
 		 || eh->root.type == bfd_link_hash_defweak)))
 	abort ();
 
-      s = htab->srelbss;
+      s = htab->etab.srelbss;
 
       rel.r_offset = (eh->root.u.def.value
 		      + eh->root.u.def.section->output_offset

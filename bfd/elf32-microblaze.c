@@ -730,10 +730,6 @@ struct elf32_mb_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* Small local sym to section mapping cache.  */
   struct sym_cache sym_sec;
 
@@ -2503,32 +2499,6 @@ microblaze_elf_check_relocs (bfd * abfd,
   return TRUE;
 }
 
-static bfd_boolean
-microblaze_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
-{
-  struct elf32_mb_link_hash_table *htab;
-
-  htab = elf32_mb_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  if (!htab->elf.sgot && !_bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
-  return TRUE;
-}
-
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
@@ -2692,7 +2662,7 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   BFD_ASSERT (dynobj != NULL);
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      htab->elf.srelbss->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
 
@@ -2702,7 +2672,7 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (power_of_two > 3)
     power_of_two = 3;
 
-  sdynbss = htab->sdynbss;
+  sdynbss = htab->elf.sdynbss;
   /* Apply the required alignment.  */
   sdynbss->size = BFD_ALIGN (sdynbss->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (dynobj, sdynbss))
@@ -3473,7 +3443,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define elf_backend_dtrel_excludes_plt		1
 
 #define elf_backend_adjust_dynamic_symbol       microblaze_elf_adjust_dynamic_symbol
-#define elf_backend_create_dynamic_sections     microblaze_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections     _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections     microblaze_elf_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol       microblaze_elf_finish_dynamic_symbol
 #define elf_backend_size_dynamic_sections       microblaze_elf_size_dynamic_sections

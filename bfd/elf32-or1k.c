@@ -615,10 +615,6 @@ struct elf_or1k_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* Small local sym to section mapping cache.  */
   struct sym_cache sym_sec;
 };
@@ -2102,7 +2098,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (htab == NULL)
     return FALSE;
 
-  s = htab->sdynbss;
+  s = htab->root.sdynbss;
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_OR1K_COPY reloc to tell the dynamic linker
@@ -2113,7 +2109,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       asection *srel;
 
-      srel = htab->srelbss;
+      srel = htab->root.srelbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
@@ -2476,7 +2472,7 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->root.splt
           || s == htab->root.sgot
           || s == htab->root.sgotplt
-          || s == htab->sdynbss)
+          || s == htab->root.sdynbss)
         {
           /* Strip this section if we don't need it; see the
              comment below.  */
@@ -2571,34 +2567,6 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     }
 
 #undef add_dynamic_entry
-  return TRUE;
-}
-
-/* Create dynamic sections when linking against a dynamic object.  */
-
-static bfd_boolean
-or1k_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
-{
-  struct elf_or1k_link_hash_table *htab;
-
-  htab = or1k_elf_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  if (!htab->root.sgot && !_bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_section_by_name (dynobj, ".rela.bss");
-
-  if (!htab->root.splt || !htab->root.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
   return TRUE;
 }
 
@@ -2777,7 +2745,7 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
 #define bfd_elf32_bfd_link_hash_table_create    or1k_elf_link_hash_table_create
 #define elf_backend_copy_indirect_symbol        or1k_elf_copy_indirect_symbol
-#define elf_backend_create_dynamic_sections     or1k_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections     _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections     or1k_elf_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections       or1k_elf_size_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol       or1k_elf_adjust_dynamic_symbol

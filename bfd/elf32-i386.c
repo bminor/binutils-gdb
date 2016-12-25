@@ -848,8 +848,6 @@ struct elf_i386_link_hash_table
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *interp;
-  asection *sdynbss;
-  asection *srelbss;
   asection *plt_eh_frame;
   asection *plt_got;
 
@@ -1082,29 +1080,6 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       s->size = sizeof ELF_DYNAMIC_INTERPRETER;
       s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
       htab->interp = s;
-    }
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!htab->sdynbss)
-    abort ();
-
-  if (bfd_link_executable (info))
-    {
-      /* Always allow copy relocs for building executables.  */
-      asection *s = bfd_get_linker_section (dynobj, ".rel.bss");
-      if (s == NULL)
-	{
-	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
-	  s = bfd_make_section_anyway_with_flags (dynobj,
-						  ".rel.bss",
-						  (bed->dynamic_sec_flags
-						   | SEC_READONLY));
-	  if (s == NULL
-	      || ! bfd_set_section_alignment (dynobj, s,
-					      bed->s->log_file_align))
-	    return FALSE;
-	}
-      htab->srelbss = s;
     }
 
   if (get_elf_i386_backend_data (dynobj)->is_vxworks
@@ -2611,11 +2586,11 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
      runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rel);
+      htab->elf.srelbss->size += sizeof (Elf32_External_Rel);
       h->needs_copy = 1;
     }
 
-  s = htab->sdynbss;
+  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -3430,7 +3405,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	       || s == htab->elf.igotplt
 	       || s == htab->plt_got
 	       || s == htab->plt_eh_frame
-	       || s == htab->sdynbss)
+	       || s == htab->elf.sdynbss)
 	{
 	  /* Strip these too.  */
 	}
@@ -5595,14 +5570,14 @@ do_glob_dat:
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || htab->elf.srelbss == NULL)
 	abort ();
 
       rel.r_offset = (h->root.u.def.value
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_386_COPY);
-      elf_append_rel (output_bfd, htab->srelbss, &rel);
+      elf_append_rel (output_bfd, htab->elf.srelbss, &rel);
     }
 
   return TRUE;

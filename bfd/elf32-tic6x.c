@@ -43,10 +43,6 @@ struct elf32_tic6x_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* C6X specific command line arguments.  */
   struct elf32_tic6x_params params;
 
@@ -1660,14 +1656,6 @@ elf32_tic6x_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       || ! bfd_set_section_alignment (dynobj, htab->elf.splt, 5))
     return FALSE;
 
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
   return TRUE;
 }
 
@@ -1878,7 +1866,7 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || htab->elf.srelbss == NULL)
 	abort ();
 
       rel.r_offset = (h->root.u.def.value
@@ -1887,7 +1875,7 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
       rel.r_info = ELF32_R_INFO (h->dynindx, R_C6000_COPY);
       rel.r_addend = 0;
 
-      elf32_tic6x_install_rela (output_bfd, htab->srelbss, &rel);
+      elf32_tic6x_install_rela (output_bfd, htab->elf.srelbss, &rel);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
@@ -2160,11 +2148,11 @@ elf32_tic6x_adjust_dynamic_symbol (struct bfd_link_info *info,
      runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      htab->elf.srelbss->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
 
-  s = htab->sdynbss;
+  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -3388,7 +3376,7 @@ elf32_tic6x_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       else if (s == htab->elf.splt
 	       || s == htab->elf.sgot
 	       || s == htab->elf.sgotplt
-	       || s == htab->sdynbss)
+	       || s == htab->elf.sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */

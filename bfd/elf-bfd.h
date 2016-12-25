@@ -595,6 +595,8 @@ struct elf_link_hash_table
   asection *srelgot;
   asection *splt;
   asection *srelplt;
+  asection *sdynbss;
+  asection *srelbss;
   asection *igotplt;
   asection *iplt;
   asection *irelplt;

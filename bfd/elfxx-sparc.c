@@ -1206,10 +1206,6 @@ _bfd_sparc_elf_create_dynamic_sections (bfd *dynobj,
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
   if (htab->is_vxworks)
     {
       if (!elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
@@ -1230,8 +1226,8 @@ _bfd_sparc_elf_create_dynamic_sections (bfd *dynobj,
 	}
     }
 
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
+  if (!htab->elf.splt || !htab->elf.srelplt || !htab->elf.sdynbss
+      || (!bfd_link_pic (info) && !htab->elf.srelbss))
     abort ();
 
   return TRUE;
@@ -2205,11 +2201,11 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      .rel.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += SPARC_ELF_RELA_BYTES (htab);
+      htab->elf.srelbss->size += SPARC_ELF_RELA_BYTES (htab);
       h->needs_copy = 1;
     }
 
-  s = htab->sdynbss;
+  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -2689,7 +2685,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
-	  || s == htab->sdynbss
+	  || s == htab->elf.sdynbss
 	  || s == htab->elf.iplt
 	  || s == htab->elf.sgotplt)
 	{

@@ -3158,10 +3158,6 @@ struct elf32_arm_link_hash_table
   /* How many R_ARM_TLS_DESC relocations were generated so far.  */
   bfd_vma num_tls_desc;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* The (unloaded but important) VxWorks .rela.plt.unloaded section.  */
   asection *srelplt2;
 
@@ -3648,11 +3644,6 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj,
-					    RELOC_SECTION (htab, ".bss"));
-
   if (htab->vxworks_p)
     {
       if (!elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
@@ -3694,8 +3685,8 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 
   if (!htab->root.splt
       || !htab->root.srelplt
-      || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
+      || !htab->root.sdynbss
+      || (!bfd_link_pic (info) && !htab->root.srelbss))
     abort ();
 
   return TRUE;
@@ -15372,7 +15363,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-  s = bfd_get_linker_section (dynobj, ".dynbss");
+  s = globals->root.sdynbss;
   BFD_ASSERT (s != NULL);
 
   /* If allowed, we must generate a R_ARM_COPY reloc to tell the dynamic
@@ -16100,7 +16091,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	       && s != htab->root.sgotplt
 	       && s != htab->root.iplt
 	       && s != htab->root.igotplt
-	       && s != htab->sdynbss)
+	       && s != htab->root.sdynbss)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -16310,7 +16301,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak));
 
-      s = htab->srelbss;
+      s = htab->root.srelbss;
       BFD_ASSERT (s != NULL);
 
       rel.r_addend = 0;

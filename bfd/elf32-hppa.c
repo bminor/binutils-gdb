@@ -274,10 +274,6 @@ struct elf32_hppa_link_hash_table
   asection **input_list;
   Elf_Internal_Sym **all_local_syms;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* Used during a final link to store the base of the text and data
      segments so that we can perform SEGREL relocations.  */
   bfd_vma text_segment_base;
@@ -997,9 +993,6 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   /* Call the generic code to do most of the work.  */
   if (! _bfd_elf_create_dynamic_sections (abfd, info))
     return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
-  htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
 
   /* hppa-linux needs _GLOBAL_OFFSET_TABLE_ to be visible from the main
      application, because __canonicalize_funcptr_for_compare needs it.  */
@@ -1908,11 +1901,11 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
      runtime process image.  */
   if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0 && eh->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      htab->etab.srelbss->size += sizeof (Elf32_External_Rela);
       eh->needs_copy = 1;
     }
 
-  sec = htab->sdynbss;
+  sec = htab->etab.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, eh, sec);
 }
@@ -2381,7 +2374,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	}
       else if (sec == htab->etab.sgot
-	       || sec == htab->sdynbss)
+	       || sec == htab->etab.sdynbss)
 	;
       else if (CONST_STRNEQ (bfd_get_section_name (dynobj, sec), ".rela"))
 	{
@@ -4434,7 +4427,7 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 		 || eh->root.type == bfd_link_hash_defweak)))
 	abort ();
 
-      sec = htab->srelbss;
+      sec = htab->etab.srelbss;
 
       rela.r_offset = (eh->root.u.def.value
 		      + eh->root.u.def.section->output_offset
