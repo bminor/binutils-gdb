@@ -1,3 +1,7 @@
+2016-12-26  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elf.sc: Don't use $BSS_NAME in .dynbss.
+
 2016-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

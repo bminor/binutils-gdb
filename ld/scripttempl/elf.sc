@@ -620,7 +620,7 @@ cat <<EOF
   ${BSS_PLT+${PLT}}
   .${BSS_NAME}          ${RELOCATING-0} :
   {
-   *(.dyn${BSS_NAME})
+   ${RELOCATING+*(.dynbss)}
    *(.${BSS_NAME}${RELOCATING+ .${BSS_NAME}.* .gnu.linkonce.b.*})
    *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
