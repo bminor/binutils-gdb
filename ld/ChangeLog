@@ -1,5 +1,18 @@
 2016-12-26  Alan Modra  <amodra@gmail.com>
 
+	PR ld/20995
+	* testsuite/ld-arm/farcall-mixed-app-v5.d: Update to suit changed
+	stub hash table traversal caused by section id increment.  Accept
+	the previous output too.
+	* testsuite/ld-arm/farcall-mixed-app.d: Likewise.
+	* testsuite/ld-arm/farcall-mixed-lib-v4t.d: Likewise.
+	* testsuite/ld-arm/farcall-mixed-lib.d: Likewise.
+	* testsuite/ld-elf/pr20995a.s, * testsuite/ld-elf/pr20995b.s,
+	* testsuite/ld-elf/pr20995.r: New test.
+	* testsuite/ld-elf/elf.exp: Run it.
+
+2016-12-26  Alan Modra  <amodra@gmail.com>
+
 	* scripttempl/elf.sc: Don't use $BSS_NAME in .dynbss.
 
 2016-12-23  Tristan Gingold  <gingold@adacore.com>

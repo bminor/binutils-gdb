@@ -108,6 +108,9 @@
 #ifndef elf_backend_want_dynbss
 #define elf_backend_want_dynbss 1
 #endif
+#ifndef elf_backend_want_dynrelro
+#define elf_backend_want_dynrelro 0
+#endif
 #ifndef elf_backend_want_p_paddr_set_to_zero
 #define elf_backend_want_p_paddr_set_to_zero 0
 #endif
@@ -855,6 +858,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_can_refcount,
   elf_backend_want_got_sym,
   elf_backend_want_dynbss,
+  elf_backend_want_dynrelro,
   elf_backend_want_p_paddr_set_to_zero,
   elf_backend_default_execstack,
   elf_backend_caches_rawsize,

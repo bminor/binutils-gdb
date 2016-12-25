@@ -2557,9 +2557,8 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   struct elf32_mb_link_hash_table *htab;
   struct elf32_mb_link_hash_entry * eh;
   struct elf32_mb_dyn_relocs *p;
-  asection *sdynbss, *s;
+  asection *s, *srel;
   unsigned int power_of_two;
-  bfd *dynobj;
 
   htab = elf32_mb_hash_table (info);
   if (htab == NULL)
@@ -2658,11 +2657,19 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_MICROBLAZE_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
      runtime process image.  */
-  dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      htab->elf.srelbss->size += sizeof (Elf32_External_Rela);
+      srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
 
@@ -2672,21 +2679,20 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (power_of_two > 3)
     power_of_two = 3;
 
-  sdynbss = htab->elf.sdynbss;
   /* Apply the required alignment.  */
-  sdynbss->size = BFD_ALIGN (sdynbss->size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (dynobj, sdynbss))
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
+  if (power_of_two > s->alignment_power)
     {
-      if (! bfd_set_section_alignment (dynobj, sdynbss, power_of_two))
+      if (!bfd_set_section_alignment (s->owner, s, power_of_two))
 	return FALSE;
     }
 
   /* Define the symbol as being at this point in the section.  */
-  h->root.u.def.section = sdynbss;
-  h->root.u.def.value = sdynbss->size;
+  h->root.u.def.section = s;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  sdynbss->size += h->size;
+  s->size += h->size;
   return TRUE;
 }
 
@@ -3050,7 +3056,9 @@ microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
         }
       else if (s != htab->elf.splt
 	       && s != htab->elf.sgot
-	       && s != htab->elf.sgotplt)
+	       && s != htab->elf.sgotplt
+	       && s != htab->elf.sdynbss
+	       && s != htab->elf.sdynrelro)
         {
           /* It's not one of our sections, so don't allocate space.  */
           continue;
@@ -3256,14 +3264,15 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      s = bfd_get_linker_section (htab->elf.dynobj, ".rela.bss");
-      BFD_ASSERT (s != NULL);
-
       rela.r_offset = (h->root.u.def.value
                        + h->root.u.def.section->output_section->vma
                        + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_MICROBLAZE_COPY);
       rela.r_addend = 0;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
       loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
@@ -3439,6 +3448,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define elf_backend_want_got_plt    		1
 #define elf_backend_plt_readonly    		1
 #define elf_backend_got_header_size 		12
+#define elf_backend_want_dynrelro		1
 #define elf_backend_rela_normal     		1
 #define elf_backend_dtrel_excludes_plt		1
 

@@ -2470,7 +2470,7 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
   struct elf_metag_link_hash_table *htab;
   struct elf_metag_link_hash_entry *hh;
   struct elf_metag_dyn_reloc_entry *hdh_p;
-  asection *s;
+  asection *s, *srel;
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
@@ -2564,13 +2564,21 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->etab.sdynrelro;
+      srel = htab->etab.sreldynrelro;
+    }
+  else
+    {
+      s = htab->etab.sdynbss;
+      srel = htab->etab.srelbss;
+    }
   if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0 && eh->size != 0)
     {
-      htab->etab.srelbss->size += sizeof (Elf32_External_Rela);
+      srel->size += sizeof (Elf32_External_Rela);
       eh->needs_copy = 1;
     }
-
-  s = htab->etab.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, eh, s);
 }
@@ -2933,7 +2941,8 @@ elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->etab.splt
 	  || s == htab->etab.sgot
 	  || s == htab->etab.sgotplt
-	  || s == htab->etab.sdynbss)
+	  || s == htab->etab.sdynbss
+	  || s == htab->etab.sdynrelro)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -3215,13 +3224,15 @@ elf_metag_finish_dynamic_symbol (bfd *output_bfd,
 		 || eh->root.type == bfd_link_hash_defweak)))
 	abort ();
 
-      s = htab->etab.srelbss;
-
       rel.r_offset = (eh->root.u.def.value
 		      + eh->root.u.def.section->output_offset
 		      + eh->root.u.def.section->output_section->vma);
       rel.r_addend = 0;
       rel.r_info = ELF32_R_INFO (eh->dynindx, R_METAG_COPY);
+      if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->etab.sreldynrelro;
+      else
+	s = htab->etab.srelbss;
       loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
     }
@@ -4286,6 +4297,7 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_want_plt_sym		0
 #define elf_backend_plt_readonly		1
 #define elf_backend_dtrel_excludes_plt		1
+#define elf_backend_want_dynrelro		1
 
 #define bfd_elf32_bfd_reloc_type_lookup	metag_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	metag_reloc_name_lookup

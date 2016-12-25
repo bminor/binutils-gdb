@@ -2086,7 +2086,7 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   struct _bfd_sparc_elf_link_hash_table *htab;
   struct _bfd_sparc_elf_link_hash_entry * eh;
   struct _bfd_sparc_elf_dyn_relocs *p;
-  asection *s;
+  asection *s, *srel;
 
   htab = _bfd_sparc_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -2199,13 +2199,21 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rel.bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->elf.srelbss->size += SPARC_ELF_RELA_BYTES (htab);
+      srel->size += SPARC_ELF_RELA_BYTES (htab);
       h->needs_copy = 1;
     }
-
-  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -2686,6 +2694,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sdynbss
+	  || s == htab->elf.sdynrelro
 	  || s == htab->elf.iplt
 	  || s == htab->elf.sgotplt)
 	{
@@ -4527,15 +4536,15 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbols needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      s = bfd_get_linker_section (h->root.u.def.section->owner,
-				  ".rela.bss");
-      BFD_ASSERT (s != NULL);
-
       rela.r_offset = (h->root.u.def.value
 		       + h->root.u.def.section->output_section->vma
 		       + h->root.u.def.section->output_offset);
       rela.r_info = SPARC_ELF_R_INFO (htab, NULL, h->dynindx, R_SPARC_COPY);
       rela.r_addend = 0;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
       sparc_elf_append_rela (output_bfd, s, &rela);
     }
 

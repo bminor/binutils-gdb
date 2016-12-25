@@ -2828,7 +2828,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
 				  struct elf_link_hash_entry *h)
 {
   struct elf_x86_64_link_hash_table *htab;
-  asection *s;
+  asection *s, *srel;
   struct elf_x86_64_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
@@ -2986,15 +2986,23 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       const struct elf_backend_data *bed;
       bed = get_elf_backend_data (info->output_bfd);
-      htab->elf.srelbss->size += bed->s->sizeof_rela;
+      srel->size += bed->s->sizeof_rela;
       h->needs_copy = 1;
     }
-
-  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -3811,7 +3819,8 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  || s == htab->plt_bnd
 	  || s == htab->plt_got
 	  || s == htab->plt_eh_frame
-	  || s == htab->elf.sdynbss)
+	  || s == htab->elf.sdynbss
+	  || s == htab->elf.sdynrelro)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -6024,13 +6033,15 @@ do_glob_dat:
   if (h->needs_copy)
     {
       Elf_Internal_Rela rela;
+      asection *s;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->elf.srelbss == NULL)
+	  || htab->elf.srelbss == NULL
+	  || htab->elf.sreldynrelro == NULL)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
@@ -6038,7 +6049,11 @@ do_glob_dat:
 		       + h->root.u.def.section->output_offset);
       rela.r_info = htab->r_info (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      elf_append_rela (output_bfd, htab->elf.srelbss, &rela);
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
+      elf_append_rela (output_bfd, s, &rela);
     }
 
   return TRUE;
@@ -6719,6 +6734,7 @@ static const struct bfd_elf_special_section
 #define elf_backend_extern_protected_data   1
 #define elf_backend_caches_rawsize	    1
 #define elf_backend_dtrel_excludes_plt	    1
+#define elf_backend_want_dynrelro	    1
 
 #define elf_info_to_howto		    elf_x86_64_info_to_howto
 

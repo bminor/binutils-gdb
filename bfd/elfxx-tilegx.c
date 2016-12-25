@@ -2327,7 +2327,7 @@ tilegx_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   struct tilegx_elf_link_hash_entry * eh;
   struct tilegx_elf_dyn_relocs *p;
   bfd *dynobj;
-  asection *s;
+  asection *s, *srel;
 
   htab = tilegx_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -2431,13 +2431,23 @@ tilegx_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rel.bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->elf.srelbss->size += TILEGX_ELF_RELA_BYTES (htab);
+      srel->size += TILEGX_ELF_RELA_BYTES (htab);
       h->needs_copy = 1;
     }
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->elf.sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
@@ -2826,7 +2836,8 @@ tilegx_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
-	  || s == htab->elf.sdynbss)
+	  || s == htab->elf.sdynbss
+	  || s == htab->elf.sdynrelro)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -4187,7 +4198,10 @@ tilegx_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbols needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      s = htab->elf.srelbss;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value
