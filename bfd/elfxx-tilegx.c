@@ -855,10 +855,6 @@ struct tilegx_elf_link_hash_table
   void (*put_word) (bfd *, bfd_vma, void *);
   const char *dynamic_interpreter;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* Whether LE transition has been disabled for some of the
      sections.  */
   bfd_boolean disable_le_transition;
@@ -1500,26 +1496,10 @@ bfd_boolean
 tilegx_elf_create_dynamic_sections (bfd *dynobj,
 				    struct bfd_link_info *info)
 {
-  struct tilegx_elf_link_hash_table *htab;
-
-  htab = tilegx_elf_hash_table (info);
-  BFD_ASSERT (htab != NULL);
-
   if (!tilegx_elf_create_got_section (dynobj, info))
     return FALSE;
 
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
-  return TRUE;
+  return _bfd_elf_create_dynamic_sections (dynobj, info);
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -2453,11 +2433,11 @@ tilegx_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      .rel.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += TILEGX_ELF_RELA_BYTES (htab);
+      htab->elf.srelbss->size += TILEGX_ELF_RELA_BYTES (htab);
       h->needs_copy = 1;
     }
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, htab->elf.sdynbss);
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
@@ -2846,7 +2826,7 @@ tilegx_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
-	  || s == htab->sdynbss)
+	  || s == htab->elf.sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -4207,7 +4187,7 @@ tilegx_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbols needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      s = htab->srelbss;
+      s = htab->elf.srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value

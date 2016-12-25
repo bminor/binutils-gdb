@@ -738,8 +738,6 @@ struct elf_s390_link_hash_table
   struct elf_link_hash_table elf;
 
   /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
   asection *irelifunc;
 
   union
@@ -816,33 +814,6 @@ elf_s390_link_hash_table_create (bfd *abfd)
     }
 
   return &ret->elf.root;
-}
-
-/* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
-   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
-   hash table.  */
-
-static bfd_boolean
-elf_s390_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
-{
-  struct elf_s390_link_hash_table *htab;
-
-  htab = elf_s390_hash_table (info);
-  if (!htab->elf.sgot && !_bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
-  return TRUE;
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -1788,11 +1759,11 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
      runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      htab->elf.srelbss->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
 
-  s = htab->sdynbss;
+  s = htab->elf.sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -2185,7 +2156,7 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
-	  || s == htab->sdynbss
+	  || s == htab->elf.sdynbss
 	  || s == htab->elf.iplt
 	  || s == htab->elf.igotplt
 	  || s == htab->irelifunc)
@@ -3836,7 +3807,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || htab->elf.srelbss == NULL)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
@@ -3844,8 +3815,8 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_390_COPY);
       rela.r_addend = 0;
-      loc = htab->srelbss->contents;
-      loc += htab->srelbss->reloc_count++ * sizeof (Elf32_External_Rela);
+      loc = htab->elf.srelbss->contents;
+      loc += htab->elf.srelbss->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
@@ -4197,7 +4168,7 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_s390_check_relocs
 #define elf_backend_copy_indirect_symbol      elf_s390_copy_indirect_symbol
-#define elf_backend_create_dynamic_sections   elf_s390_create_dynamic_sections
+#define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections   elf_s390_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol     elf_s390_finish_dynamic_symbol
 #define elf_backend_gc_mark_hook	      elf_s390_gc_mark_hook

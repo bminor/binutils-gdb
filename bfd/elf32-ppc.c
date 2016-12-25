@@ -3276,8 +3276,6 @@ struct ppc_elf_link_hash_table
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *glink;
-  asection *dynbss;
-  asection *relbss;
   asection *dynsbss;
   asection *relsbss;
   elf_linker_section_t sdata[2];
@@ -3556,7 +3554,6 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       && !ppc_elf_create_glink (abfd, info))
     return FALSE;
 
-  htab->dynbss = bfd_get_linker_section (abfd, ".dynbss");
   s = bfd_make_section_anyway_with_flags (abfd, ".dynsbss",
 					  SEC_ALLOC | SEC_LINKER_CREATED);
   htab->dynsbss = s;
@@ -3565,7 +3562,6 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   if (! bfd_link_pic (info))
     {
-      htab->relbss = bfd_get_linker_section (abfd, ".rela.bss");
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
 	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
       s = bfd_make_section_anyway_with_flags (abfd, ".rela.sbss", flags);
@@ -5811,7 +5807,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ppc_elf_hash_entry (h)->has_sda_refs)
     s = htab->dynsbss;
   else
-    s = htab->dynbss;
+    s = htab->elf.sdynbss;
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_PPC_COPY reloc to tell the dynamic linker to
@@ -5825,7 +5821,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	srel = htab->relsbss;
       else
-	srel = htab->relbss;
+	srel = htab->elf.srelbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
@@ -6639,7 +6635,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->glink_eh_frame
 	       || s == htab->elf.sgotplt
 	       || s == htab->sbss
-	       || s == htab->dynbss
+	       || s == htab->elf.sdynbss
 	       || s == htab->dynsbss)
 	{
 	  /* Strip these too.  */
@@ -10361,7 +10357,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	s = htab->relsbss;
       else
-	s = htab->relbss;
+	s = htab->elf.srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = SYM_VAL (h);

@@ -427,6 +427,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 					      (SEC_ALLOC | SEC_LINKER_CREATED));
       if (s == NULL)
 	return FALSE;
+      htab->sdynbss = s;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
 	 normally needed.  We need to create it here, though, so that the
@@ -439,7 +440,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 be needed, we can discard it later.  We will never need this
 	 section when generating a shared object, since they do not use
 	 copy relocs.  */
-      if (! bfd_link_pic (info))
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_make_section_anyway_with_flags (abfd,
 						  (bed->rela_plts_and_copies_p
@@ -448,6 +449,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  if (s == NULL
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
+	  htab->srelbss = s;
 	}
     }
 

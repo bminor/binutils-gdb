@@ -1820,8 +1820,6 @@ struct elf32_nios2_link_hash_table
     Elf_Internal_Sym **all_local_syms;
 
     /* Short-cuts to get to dynamic linker sections.  */
-    asection *sdynbss;
-    asection *srelbss;
     asection *sbss;
 
     /* GOT pointer symbol _gp_got.  */
@@ -4602,26 +4600,14 @@ nios2_elf32_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->root.sgot && !create_got_section (dynobj, info))
     return FALSE;
 
-  _bfd_elf_create_dynamic_sections (dynobj, info);
+  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
+    return FALSE;
 
   /* In order for the two loads in a shared object .PLTresolve to share the
      same %hiadj, the start of the PLT (as well as the GOT) must be aligned
      to a 16-byte boundary.  This is because the addresses for these loads
      include the -(.plt+4) PIC correction.  */
-  if (!bfd_set_section_alignment (dynobj, htab->root.splt, 4))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!htab->sdynbss)
-    return FALSE;
-  if (!bfd_link_pic (info))
-    {
-      htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-      if (!htab->srelbss)
-	return FALSE;
-    }
-
-  return TRUE;
+  return bfd_set_section_alignment (dynobj, htab->root.splt, 4);
 }
 
 /* Implement elf_backend_copy_indirect_symbol:
@@ -5289,7 +5275,7 @@ nios2_elf32_finish_dynamic_symbol (bfd *output_bfd,
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak));
 
-      s = htab->srelbss;
+      s = htab->root.srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value
@@ -5537,7 +5523,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-  s = htab->sdynbss;
+  s = htab->root.sdynbss;
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_NIOS2_COPY reloc to tell the dynamic linker to
@@ -5548,7 +5534,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       asection *srel;
 
-      srel = htab->srelbss;
+      srel = htab->root.srelbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
