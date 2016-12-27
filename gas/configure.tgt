@@ -396,6 +396,8 @@ case ${generic_target} in
   ppc-*-kaos*)				fmt=elf ;;
   ppc-*-lynxos*)			fmt=elf em=lynx ;;
 
+  pru-*-*)				fmt=elf ;;
+
   riscv*-*-*)			fmt=elf endian=little em=linux ;;
 
   s390-*-linux-*)			fmt=elf em=linux ;;

@@ -493,6 +493,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-msolaris}|@b{-mno-solaris}]
    [@b{-nops=@var{count}}]
 @end ifset
+@ifset PRU
+
+@emph{Target PRU options:}
+   [@b{-link-relax}]
+   [@b{-mnolink-relax}]
+   [@b{-mno-warn-regname-label}]
+@end ifset
 @ifset RL78
 
 @emph{Target RL78 options:}
@@ -1230,6 +1237,24 @@ Generate ``big endian'' format output.
 Generate ``little endian'' format output.
 
 @end table
+@end ifset
+
+@ifset PRU
+
+@ifclear man
+@xref{PRU Options}, for the options available when @value{AS} is configured
+for a PRU processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+PRU processor.
+@c man end
+@c man begin INCLUDE
+@include c-pru.texi
+@c ended inside the included file
+@end ifset
 @end ifset
 
 @ifset M68HC11
@@ -7596,6 +7621,9 @@ subject, see the hardware manufacturer's manual.
 @ifset PPC
 * PPC-Dependent::               PowerPC Dependent Features
 @end ifset
+@ifset PRU
+* PRU-Dependent::               PRU Dependent Features
+@end ifset
 @ifset RL78
 * RL78-Dependent::              RL78 Dependent Features
 @end ifset
@@ -7823,6 +7851,10 @@ family.
 
 @ifset PPC
 @include c-ppc.texi
+@end ifset
+
+@ifset PRU
+@include c-pru.texi
 @end ifset
 
 @ifset RL78

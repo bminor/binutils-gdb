@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Texas Instruments PRU processor.
+
 Changes in 2.28:
 
 * Add support for the RISC-V architecture.

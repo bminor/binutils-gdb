@@ -62,6 +62,7 @@
 @set PDP11
 @set PJ
 @set PPC
+@set PRU
 @set RL78
 @set RISCV
 @set RX
