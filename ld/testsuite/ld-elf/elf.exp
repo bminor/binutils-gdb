@@ -134,12 +134,24 @@ if { [check_shared_lib_support] } then {
 	    "-shared" "" ""
 	    {pr20995b.s} {} "pr20995.so"}
     }
+    setup_xfail "tic6x-*-*"
+    run_ld_link_tests {
+	{"Build pr20995-2.so"
+	    "-shared -z relro" "" ""
+	    {pr20995c.s} {{readelf {-l --wide} pr20995-2so.r}} "pr20995-2.so"}
+    }
     # These targets don't copy dynamic variables into .bss.
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
     run_ld_link_tests {
 	{"pr20995"
 	    "" "tmpdir/pr20995.so" ""
 	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995"}
+    }
+    setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
+    run_ld_link_tests {
+	{"pr20995-2"
+	    "" "tmpdir/pr20995-2.so" ""
+	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"}
     }
 }
 

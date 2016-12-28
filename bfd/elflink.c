@@ -3819,6 +3819,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       const char *soname = NULL;
       char *audit = NULL;
       struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+      const Elf_Internal_Phdr *phdr;
       int ret;
 
       /* ld --just-symbols and dynamic objects don't mix very well.
@@ -3967,6 +3968,21 @@ error_free_dyn:
 	    ;
 	  *pn = rpath;
 	}
+
+      /* If we have a PT_GNU_RELRO program header, mark as read-only
+	 all sections contained fully therein.  This makes relro
+	 shared library sections appear as they will at run-time.  */
+      phdr = elf_tdata (abfd)->phdr + elf_elfheader (abfd)->e_phnum;
+      while (--phdr >= elf_tdata (abfd)->phdr)
+	if (phdr->p_type == PT_GNU_RELRO)
+	  {
+	    for (s = abfd->sections; s != NULL; s = s->next)
+	      if ((s->flags & SEC_ALLOC) != 0
+		  && s->vma >= phdr->p_vaddr
+		  && s->vma + s->size <= phdr->p_vaddr + phdr->p_memsz)
+		s->flags |= SEC_READONLY;
+	    break;
+	  }
 
       /* We do not want to include any of the sections in a dynamic
 	 object in the output file.  We hack by simply clobbering the
