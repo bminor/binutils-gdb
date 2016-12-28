@@ -604,8 +604,6 @@ LTLIBOBJS
 LIBOBJS
 BFD_MACHINES
 archdefs
-BFDLIB
-BFDHDIR
 SHARED_DEPENDENCIES
 SHARED_LIBADD
 SHARED_LDFLAGS
@@ -11153,7 +11151,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11156 "configure"
+#line 11154 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11259,7 +11257,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11262 "configure"
+#line 11260 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12587,100 +12585,6 @@ fi
 
 
 # target-specific stuff:
-
-# Check if `bfd_mips_elf_get_abiflags' is present in BFD, needed by
-# `mips-dis.c'.  Avoid using AC_CHECK_LIB as it uses a cache variable
-# which could hold the wrong value if we are rerun due to the
-# `../bfd/libbfd.la' dependency for `config.status', so use a handcoded
-# sequence which is equivalent but does not use the cache.
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the bfd header in the build tree" >&5
-$as_echo_n "checking for the bfd header in the build tree... " >&6; }
-dirlist=".. ../../ ../../../ ../../../../ ../../../../../ ../../../../../../ ../../../../../../.. ../../../../../../../.. ../../../../../../../../.. ../../../../../../../../../.."
-if test "${ac_cv_c_bfdh+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-
-for i in $dirlist; do
-    if test -f "$i/bfd/bfd.h" ; then
-	ac_cv_c_bfdh=`(cd $i/bfd; ${PWDCMD-pwd})`
-	break
-    fi
-done
-
-fi
-
-if test x"${ac_cv_c_bfdh}" != x; then
-    BFDHDIR="-I${ac_cv_c_bfdh}"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${ac_cv_c_bfdh}" >&5
-$as_echo "${ac_cv_c_bfdh}" >&6; }
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
-$as_echo "none" >&6; }
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the bfd library in the build tree" >&5
-$as_echo_n "checking for the bfd library in the build tree... " >&6; }
-if test "${ac_cv_c_bfdlib+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-
-for i in $dirlist; do
-    if test -f "$i/bfd/Makefile" ; then
-	ac_cv_c_bfdlib=`(cd $i/bfd; ${PWDCMD-pwd})`
-    fi
-done
-
-fi
-
-if test x"${ac_cv_c_bfdlib}" != x; then
-    BFDLIB="-L${ac_cv_c_bfdlib} -L${ac_cv_c_bfdlib}/.libs"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${ac_cv_c_bfdlib}" >&5
-$as_echo "${ac_cv_c_bfdlib}" >&6; }
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
-$as_echo "none" >&6; }
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for bfd_mips_elf_get_abiflags in -lbfd" >&5
-$as_echo_n "checking for bfd_mips_elf_get_abiflags in -lbfd... " >&6; }
-opcodes_save_LIBS=$LIBS
-LIBS="$BFDLIB -lbfd ../libiberty/libiberty.a `test -e ../bfd/libbfd.la && . ../bfd/libbfd.la; echo $dependency_libs`"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bfd_mips_elf_get_abiflags ();
-int
-main ()
-{
-return bfd_mips_elf_get_abiflags ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  opcodes_lib_bfd_bfd_mips_elf_get_abiflags=yes
-else
-  opcodes_lib_bfd_bfd_mips_elf_get_abiflags=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$opcodes_save_LIBS
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $opcodes_lib_bfd_bfd_mips_elf_get_abiflags" >&5
-$as_echo "$opcodes_lib_bfd_bfd_mips_elf_get_abiflags" >&6; }
-if test x"$opcodes_lib_bfd_bfd_mips_elf_get_abiflags" = xyes; then
-
-$as_echo "#define HAVE_BFD_MIPS_ELF_GET_ABIFLAGS 1" >>confdefs.h
-
-fi
 
 # Canonicalize the secondary target names.
 if test -n "$enable_targets" ; then

@@ -300,9 +300,8 @@ ALL_MACHINES = $(TARGET_LIBOPCODES_CFILES:.c=.lo)
 
 OFILES = @BFD_MACHINES@
 
-# development.sh is used to determine -Werror default, libbfd.la is needed
-# for function availability checks.
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh ../bfd/libbfd.la
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 
 AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
 
@@ -609,6 +608,19 @@ $(srcdir)/z8k-opc.h: @MAINT@ z8kgen$(EXEEXT_FOR_BUILD)
 	./z8kgen$(EXEEXT_FOR_BUILD) -a > $@
 
 z8k-dis.lo: $(srcdir)/z8k-opc.h
+
+MIPS_DEFS=`case \`cat ../bfd/ofiles\` in *elfxx-mips*) echo "-DHAVE_BFD_MIPS_ELF_GET_ABIFLAGS=1";; esac`
+mips-dis.lo: mips-dis.c
+if am__fastdepCC
+	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(MIPS_DEFS) $<
+	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+else
+if AMDEP
+	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+endif
+	$(LTCOMPILE) -c -o $@ $(MIPS_DEFS) $<
+endif
 
 sh-dis.lo: sh-dis.c
 if am__fastdepCC
