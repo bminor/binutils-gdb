@@ -1,3 +1,7 @@
+2017-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-elf/eh-frame-hdr.d: Update expected results.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20995
