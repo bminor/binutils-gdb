@@ -1,7 +1,7 @@
 2016-12-27  Cary Coutant  <ccoutant@gmail.com>
 
 	PR ld/20995
-	* copy-relocs.cc (Copy_relocs::make_copy_reloc): Use .dynbss for
+	* copy-relocs.cc (Copy_relocs::make_copy_reloc): Use .data.rel.ro for
 	read-only data when linking with -z relro.
 	* copy-relocs.h (Copy_relocs::dynrelro_): New data member.
 	* testsuite/Makefile.am (copy_test_relro): New test case.
