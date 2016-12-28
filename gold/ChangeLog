@@ -1,3 +1,8 @@
+2016-12-28  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/20996
+	* object.cc (build_compressed_section_map): Add explicit instantiations.
+
 2016-12-27  Cary Coutant  <ccoutant@gmail.com>
 
 	PR ld/20995

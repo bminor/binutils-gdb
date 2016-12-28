@@ -3457,4 +3457,36 @@ Xindex::read_symtab_xindex<64, true>(Object*, unsigned int,
 				     const unsigned char*);
 #endif
 
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Compressed_section_map*
+build_compressed_section_map<32, false>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Compressed_section_map*
+build_compressed_section_map<32, true>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Compressed_section_map*
+build_compressed_section_map<64, false>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Compressed_section_map*
+build_compressed_section_map<64, true>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
 } // End namespace gold.
