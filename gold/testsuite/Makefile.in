@@ -205,7 +205,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = weak_undef_nonpic_test
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = alt/weak_undef_lib_nonpic.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = weak_alias_test weak_plt \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test copy_test_relro
 @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = copy_test_protected.sh
 @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_20 = copy_test_protected.err
 @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_21 = copy_test_protected.err
@@ -1085,7 +1085,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test_relro$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_15 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
@@ -1298,6 +1299,11 @@ constructor_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 copy_test_OBJECTS = $(am_copy_test_OBJECTS)
 copy_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(copy_test_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_copy_test_relro_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test_relro.$(OBJEXT)
+copy_test_relro_OBJECTS = $(am_copy_test_relro_OBJECTS)
+copy_test_relro_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(copy_test_relro_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_discard_locals_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.$(OBJEXT)
 discard_locals_test_OBJECTS = $(am_discard_locals_test_OBJECTS)
@@ -2357,10 +2363,11 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(binary_test_SOURCES) $(binary_unittest_SOURCES) \
 	$(common_test_1_SOURCES) $(common_test_2_SOURCES) \
 	$(constructor_static_test_SOURCES) $(constructor_test_SOURCES) \
-	$(copy_test_SOURCES) $(discard_locals_test_SOURCES) \
-	$(dynamic_list_2_SOURCES) eh_test.c \
-	$(ehdr_start_test_1_SOURCES) $(ehdr_start_test_2_SOURCES) \
-	$(ehdr_start_test_3_SOURCES) $(ehdr_start_test_5_SOURCES) \
+	$(copy_test_SOURCES) $(copy_test_relro_SOURCES) \
+	$(discard_locals_test_SOURCES) $(dynamic_list_2_SOURCES) \
+	eh_test.c $(ehdr_start_test_1_SOURCES) \
+	$(ehdr_start_test_2_SOURCES) $(ehdr_start_test_3_SOURCES) \
+	$(ehdr_start_test_5_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -3051,6 +3058,10 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_DEPENDENCIES = gcctestdir/ld copy_test_1.so copy_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_LDADD = copy_test_1.so copy_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_SOURCES = copy_test_relro.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_DEPENDENCIES = gcctestdir/ld copy_test_relro_1.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-z,relro
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_LDADD = copy_test_relro_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_DEPENDENCIES = gcctestdir/ld tls_test_c.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDFLAGS = -Bgcctestdir/
@@ -3468,6 +3479,9 @@ constructor_test$(EXEEXT): $(constructor_test_OBJECTS) $(constructor_test_DEPEND
 copy_test$(EXEEXT): $(copy_test_OBJECTS) $(copy_test_DEPENDENCIES) $(EXTRA_copy_test_DEPENDENCIES) 
 	@rm -f copy_test$(EXEEXT)
 	$(copy_test_LINK) $(copy_test_OBJECTS) $(copy_test_LDADD) $(LIBS)
+copy_test_relro$(EXEEXT): $(copy_test_relro_OBJECTS) $(copy_test_relro_DEPENDENCIES) $(EXTRA_copy_test_relro_DEPENDENCIES) 
+	@rm -f copy_test_relro$(EXEEXT)
+	$(copy_test_relro_LINK) $(copy_test_relro_OBJECTS) $(copy_test_relro_LDADD) $(LIBS)
 discard_locals_test$(EXEEXT): $(discard_locals_test_OBJECTS) $(discard_locals_test_DEPENDENCIES) $(EXTRA_discard_locals_test_DEPENDENCIES) 
 	@rm -f discard_locals_test$(EXEEXT)
 	$(discard_locals_test_LINK) $(discard_locals_test_OBJECTS) $(discard_locals_test_LDADD) $(LIBS)
@@ -4343,6 +4357,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy_test_relro.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discard_locals_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynamic_list_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh_test.Po@am__quote@
@@ -5396,6 +5411,8 @@ weak_plt.log: weak_plt$(EXEEXT)
 	@p='weak_plt$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 copy_test.log: copy_test$(EXEEXT)
 	@p='copy_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+copy_test_relro.log: copy_test_relro$(EXEEXT)
+	@p='copy_test_relro$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 tls_test.log: tls_test$(EXEEXT)
 	@p='tls_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 tls_pic_test.log: tls_pic_test$(EXEEXT)
@@ -6115,6 +6132,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_1_pic.o: copy_test_relro_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_1.so: gcctestdir/ld copy_test_relro_1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro copy_test_relro_1_pic.o
 @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_protected.err: copy_test_protected.o copy_test_2.so gcctestdir/ld
 @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o copy_test_protected copy_test_protected.o copy_test_2.so -Wl,-R,. "2>$@"
 @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o copy_test_protected copy_test_protected.o copy_test_2.so -Wl,-R,. 2>$@; \

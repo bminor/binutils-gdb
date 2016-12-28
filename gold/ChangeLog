@@ -1,3 +1,14 @@
+2016-12-27  Cary Coutant  <ccoutant@gmail.com>
+
+	PR ld/20995
+	* copy-relocs.cc (Copy_relocs::make_copy_reloc): Use .dynbss for
+	read-only data when linking with -z relro.
+	* copy-relocs.h (Copy_relocs::dynrelro_): New data member.
+	* testsuite/Makefile.am (copy_test_relro): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/copy_test_relro.cc: New source file.
+	* testsuite/copy_test_relro_1.cc: New source file.
+
 2016-12-23  Cary Coutant  <ccoutant@gmail.com>
 
 	* NEWS: Add new features in 1.14.

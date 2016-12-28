@@ -858,6 +858,16 @@ copy_test_2_pic.o: copy_test_2.cc
 copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
 
+check_PROGRAMS += copy_test_relro
+copy_test_relro_SOURCES = copy_test_relro.cc
+copy_test_relro_DEPENDENCIES = gcctestdir/ld copy_test_relro_1.so
+copy_test_relro_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-z,relro
+copy_test_relro_LDADD = copy_test_relro_1.so
+copy_test_relro_1_pic.o: copy_test_relro_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+copy_test_relro_1.so: gcctestdir/ld copy_test_relro_1_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro copy_test_relro_1_pic.o
+
 if !DEFAULT_TARGET_POWERPC
 check_SCRIPTS += copy_test_protected.sh
 check_DATA += copy_test_protected.err
