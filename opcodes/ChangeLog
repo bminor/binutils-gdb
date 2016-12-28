@@ -1,3 +1,14 @@
+2016-12-28  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Revert 2016-12-23.
+	* Makefile.am: Likewise.
+	(MIPS_DEFS): Define.
+	(mips-dis.lo): Add rule.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips16-opc.c (decode_mips16_operand): Add `0', `1', `2', `3',

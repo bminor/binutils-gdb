@@ -210,25 +210,6 @@ AC_SUBST(SHARED_DEPENDENCIES)
 
 # target-specific stuff:
 
-# Check if `bfd_mips_elf_get_abiflags' is present in BFD, needed by
-# `mips-dis.c'.  Avoid using AC_CHECK_LIB as it uses a cache variable
-# which could hold the wrong value if we are rerun due to the
-# `../bfd/libbfd.la' dependency for `config.status', so use a handcoded
-# sequence which is equivalent but does not use the cache.
-CYG_AC_PATH_BFD
-AC_MSG_CHECKING([for bfd_mips_elf_get_abiflags in -lbfd])
-opcodes_save_LIBS=$LIBS
-LIBS="$BFDLIB -lbfd ../libiberty/libiberty.a `test -e ../bfd/libbfd.la && . ../bfd/libbfd.la; echo $dependency_libs`"
-AC_LINK_IFELSE([AC_LANG_CALL([], [bfd_mips_elf_get_abiflags])],
-               [opcodes_lib_bfd_bfd_mips_elf_get_abiflags=yes],
-               [opcodes_lib_bfd_bfd_mips_elf_get_abiflags=no])
-LIBS=$opcodes_save_LIBS
-AC_MSG_RESULT([$opcodes_lib_bfd_bfd_mips_elf_get_abiflags])
-if test x"$opcodes_lib_bfd_bfd_mips_elf_get_abiflags" = xyes; then
-  AC_DEFINE([HAVE_BFD_MIPS_ELF_GET_ABIFLAGS], [1],
-    [Define to 1 if you have the `bfd_mips_elf_get_abiflags' function.])
-fi
-
 # Canonicalize the secondary target names.
 if test -n "$enable_targets" ; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`

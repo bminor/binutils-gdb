@@ -11,9 +11,6 @@
    language is requested. */
 #undef ENABLE_NLS
 
-/* Define to 1 if you have the `bfd_mips_elf_get_abiflags' function. */
-#undef HAVE_BFD_MIPS_ELF_GET_ABIFLAGS
-
 /* Define to 1 if you have the declaration of `basename', and to 0 if you
    don't. */
 #undef HAVE_DECL_BASENAME
