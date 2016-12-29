@@ -3606,7 +3606,8 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	&& edir->elf.dynamic_adjusted))
     edir->elf.non_got_ref |= eind->elf.non_got_ref;
 
-  edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
+  if (edir->elf.versioned != versioned_hidden)
+    edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
   edir->elf.ref_regular |= eind->elf.ref_regular;
   edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
   edir->elf.needs_plt |= eind->elf.needs_plt;

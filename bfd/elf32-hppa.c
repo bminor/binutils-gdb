@@ -1056,19 +1056,20 @@ elf32_hppa_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      eh_dir->ref_dynamic |= eh_ind->ref_dynamic;
+      if (eh_dir->versioned != versioned_hidden)
+	eh_dir->ref_dynamic |= eh_ind->ref_dynamic;
       eh_dir->ref_regular |= eh_ind->ref_regular;
       eh_dir->ref_regular_nonweak |= eh_ind->ref_regular_nonweak;
       eh_dir->needs_plt |= eh_ind->needs_plt;
     }
   else
     {
-      if (eh_ind->root.type == bfd_link_hash_indirect
-          && eh_dir->got.refcount <= 0)
-        {
-          hh_dir->tls_type = hh_ind->tls_type;
-          hh_ind->tls_type = GOT_UNKNOWN;
-        }
+      if (eh_ind->root.type == bfd_link_hash_indirect)
+	{
+	  hh_dir->plabel |= hh_ind->plabel;
+	  hh_dir->tls_type |= hh_ind->tls_type;
+	  hh_ind->tls_type = GOT_UNKNOWN;
+	}
 
       _bfd_elf_link_hash_copy_indirect (info, eh_dir, eh_ind);
     }
