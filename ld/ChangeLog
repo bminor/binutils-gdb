@@ -1,3 +1,7 @@
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* testsuite/ld-arc/tls_ie-01.d: Changed expected result.
+
 2017-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Pass

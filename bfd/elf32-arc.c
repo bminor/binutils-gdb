@@ -1187,7 +1187,6 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 #define TLS_REL (bfd_signed_vma) \
   ((elf_hash_table (info))->tls_sec->output_section->vma)
 #define TLS_TBSS (8)
-#define TCB_SIZE (8)
 
 #define none (0)
 
