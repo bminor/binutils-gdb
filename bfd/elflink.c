@@ -7102,18 +7102,15 @@ _bfd_elf_link_hash_copy_indirect (struct bfd_link_info *info,
   struct elf_link_hash_table *htab;
 
   /* Copy down any references that we may have already seen to the
-     symbol which just became indirect if DIR isn't a hidden versioned
-     symbol.  */
+     symbol which just became indirect.  */
 
   if (dir->versioned != versioned_hidden)
-    {
-      dir->ref_dynamic |= ind->ref_dynamic;
-      dir->ref_regular |= ind->ref_regular;
-      dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
-      dir->non_got_ref |= ind->non_got_ref;
-      dir->needs_plt |= ind->needs_plt;
-      dir->pointer_equality_needed |= ind->pointer_equality_needed;
-    }
+    dir->ref_dynamic |= ind->ref_dynamic;
+  dir->ref_regular |= ind->ref_regular;
+  dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
+  dir->non_got_ref |= ind->non_got_ref;
+  dir->needs_plt |= ind->needs_plt;
+  dir->pointer_equality_needed |= ind->pointer_equality_needed;
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;

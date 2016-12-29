@@ -1,3 +1,21 @@
+2016-12-29  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_link_hash_copy_indirect): Only omit
+	copying one flag, ref_dynamic, when versioned_hidden.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Use same
+	logic for copying weakdef flags.  Copy plabel flag and merge
+	tls_type.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Use same logic
+	for copying weakdef flags.
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Likewise.
+	* elf32-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf32-sh.c (sh_elf_copy_indirect_symbol): Likewise.
+	* elf64-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
+	* elf64-x86-64.c (elf_x86_64_copy_indirect_symbol): Likewise.
+	Simplify.
+
 2016-12-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20995

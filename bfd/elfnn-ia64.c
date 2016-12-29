@@ -1274,7 +1274,8 @@ elfNN_ia64_hash_copy_indirect (struct bfd_link_info *info,
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->root.ref_dynamic |= ind->root.ref_dynamic;
+  if (dir->root.versioned != versioned_hidden)
+    dir->root.ref_dynamic |= ind->root.ref_dynamic;
   dir->root.ref_regular |= ind->root.ref_regular;
   dir->root.ref_regular_nonweak |= ind->root.ref_regular_nonweak;
   dir->root.needs_plt |= ind->root.needs_plt;

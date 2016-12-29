@@ -4713,22 +4713,20 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   if (eind->oh != NULL)
     edir->oh = ppc_follow_link (eind->oh);
 
-  if (edir->elf.versioned != versioned_hidden)
-    {
-      /* If called to transfer flags for a weakdef during processing
-	 of elf_adjust_dynamic_symbol, don't copy NON_GOT_REF.
-	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      if (!(ELIMINATE_COPY_RELOCS
-	    && eind->elf.root.type != bfd_link_hash_indirect
-	    && edir->elf.dynamic_adjusted))
-	edir->elf.non_got_ref |= eind->elf.non_got_ref;
+  /* If called to transfer flags for a weakdef during processing
+     of elf_adjust_dynamic_symbol, don't copy NON_GOT_REF.
+     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+  if (!(ELIMINATE_COPY_RELOCS
+	&& eind->elf.root.type != bfd_link_hash_indirect
+	&& edir->elf.dynamic_adjusted))
+    edir->elf.non_got_ref |= eind->elf.non_got_ref;
 
-      edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
-      edir->elf.ref_regular |= eind->elf.ref_regular;
-      edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
-      edir->elf.needs_plt |= eind->elf.needs_plt;
-      edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
-    }
+  if (edir->elf.versioned != versioned_hidden)
+    edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
+  edir->elf.ref_regular |= eind->elf.ref_regular;
+  edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
+  edir->elf.needs_plt |= eind->elf.needs_plt;
+  edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
 
   /* If we were called to copy over info for a weak sym, don't copy
      dyn_relocs, plt/got info, or dynindx.  We used to copy dyn_relocs

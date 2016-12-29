@@ -1164,14 +1164,9 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_x86_64_link_hash_entry *) dir;
   eind = (struct elf_x86_64_link_hash_entry *) ind;
 
-  if (!edir->has_bnd_reloc)
-    edir->has_bnd_reloc = eind->has_bnd_reloc;
-
-  if (!edir->has_got_reloc)
-    edir->has_got_reloc = eind->has_got_reloc;
-
-  if (!edir->has_non_got_reloc)
-    edir->has_non_got_reloc = eind->has_non_got_reloc;
+  edir->has_bnd_reloc |= eind->has_bnd_reloc;
+  edir->has_got_reloc |= eind->has_got_reloc;
+  edir->has_non_got_reloc |= eind->has_non_got_reloc;
 
   if (eind->dyn_relocs != NULL)
     {
@@ -1218,7 +1213,8 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      dir->ref_dynamic |= ind->ref_dynamic;
+      if (dir->versioned != versioned_hidden)
+	dir->ref_dynamic |= ind->ref_dynamic;
       dir->ref_regular |= ind->ref_regular;
       dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
       dir->needs_plt |= ind->needs_plt;
