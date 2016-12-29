@@ -1,3 +1,11 @@
+2016-12-29  Yao Qi  <yao.qi@linaro.org>
+
+	* avr-dis.c: Include "bfd_stdint.h"
+	(avrdis_opcode): Change return type to int, add argument
+	insn.  Set *INSN on success.
+	(print_insn_avr): Check return value of avrdis_opcode, and
+	return -1 on error.
+
 2016-12-28  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Revert 2016-12-23.
