@@ -1,3 +1,10 @@
+2017-01-09  Palmer Dabbelt <palmer@dabbelt.com>
+	    Kito Cheng <kito.cheng@gmail.com>
+
+	* emulparams/elf32lriscv-defs.sh (INITIAL_READONLY_SECTIONS):
+	Removed.
+	(SDATA_START_SYMBOLS): Likewise.
+
 2017-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: New Swedish translation.
