@@ -1,3 +1,7 @@
+2016-12-31  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* testsuite/lib/ld-lib.exp (run_dump_test): Pass -- to send_log.
+
 2016-12-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20995

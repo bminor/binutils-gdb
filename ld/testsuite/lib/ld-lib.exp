@@ -857,7 +857,7 @@ proc run_dump_test { name {extra_options {}} } {
 	remote_file build delete "ld.tmp"
 
 	if { [lindex $cmdret 0] != 0 || ![string match "" $comp_output] } then {
-	    send_log "$comp_output\n"
+	    send_log -- "$comp_output\n"
 	    verbose "$comp_output" 3
 
 	    set exitstat "succeeded"
@@ -880,7 +880,7 @@ proc run_dump_test { name {extra_options {}} } {
 
 	    if { [lindex $cmdret 0] != 0 \
 		  || ![string match "" $comp_output] } {
-		send_log "$comp_output\n"
+		send_log -- "$comp_output\n"
 		verbose "$comp_output" 3
 
 		set exitstat "succeeded"
@@ -996,7 +996,7 @@ proc run_dump_test { name {extra_options {}} } {
             } else {
                 verbose -log "$exitstat with: <$comp_output>, no expected output"
             }
-	    send_log "$comp_output\n"
+	    send_log -- "$comp_output\n"
 	    verbose "$comp_output" 3
 
 	    if { (($check_ld(source) == "") == ($comp_output == "")) \
