@@ -11,6 +11,13 @@
 	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.d: Ditto.
 	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.s: Ditto.
 
+2017-01-09  Palmer Dabbelt <palmer@dabbelt.com>
+	    Kito Cheng <kito.cheng@gmail.com>
+
+	* emulparams/elf32lriscv-defs.sh (INITIAL_READONLY_SECTIONS):
+	Removed.
+	(SDATA_START_SYMBOLS): Likewise.
+
 2017-01-09  Andrew Waterman <andrew@sifive.com>
 
 	* config/tc-riscv.c (relaxed_branch_length): Use the long
