@@ -189,6 +189,7 @@ or1k*|or1knd*)	 targ_archs=bfd_or1k_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
 pj*)		 targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*)	 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+pru*)		 targ_archs=bfd_pru_arch ;;
 riscv*)		 targ_archs=bfd_riscv_arch ;;
 rs6000)		 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 s390*)		 targ_archs=bfd_s390_arch ;;
@@ -1434,6 +1435,11 @@ case "${targ}" in
   powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
     targ_defvec=powerpc_pe_le_vec
     targ_selvecs="powerpc_pei_le_vec powerpc_pei_vec powerpc_pe_le_vec powerpc_pe_vec"
+    ;;
+
+  pru-*-*)
+    targ_defvec=pru_elf32_vec
+    targ_underscore=yes
     ;;
 
 #ifdef BFD64

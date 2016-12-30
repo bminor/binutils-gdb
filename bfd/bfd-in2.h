@@ -2370,6 +2370,8 @@ enum bfd_architecture
 #define bfd_mach_nios2r2       2
   bfd_arch_visium,     /* Visium */
 #define bfd_mach_visium        1
+  bfd_arch_pru,        /* PRU */
+#define bfd_mach_pru   0
   bfd_arch_last
   };
 
@@ -5561,6 +5563,41 @@ a matching LO8XG part.  */
   BFD_RELOC_NIOS2_R2_L5I4X1,
   BFD_RELOC_NIOS2_R2_T1X1I6,
   BFD_RELOC_NIOS2_R2_T1X1I6_2,
+
+/* PRU LDI 16-bit unsigned data-memory relocation.  */
+  BFD_RELOC_PRU_U16,
+
+/* PRU LDI 16-bit unsigned instruction-memory relocation.  */
+  BFD_RELOC_PRU_U16_PMEMIMM,
+
+/* PRU relocation for two consecutive LDI load instructions that load a
+32 bit value into a register. If the higher bits are all zero, then
+the second instruction may be relaxed.  */
+  BFD_RELOC_PRU_LDI32,
+
+/* PRU QBBx 10-bit signed PC-relative relocation.  */
+  BFD_RELOC_PRU_S10_PCREL,
+
+/* PRU 8-bit unsigned relocation used for the LOOP instruction.  */
+  BFD_RELOC_PRU_U8_PCREL,
+
+/* PRU Program Memory relocations.  Used to convert from byte addressing to
+32-bit word addressing.  */
+  BFD_RELOC_PRU_32_PMEM,
+  BFD_RELOC_PRU_16_PMEM,
+
+/* PRU relocations to mark the difference of two local symbols.
+These are only needed to support linker relaxation and can be ignored
+when not relaxing.  The field is set to the value of the difference
+assuming no relaxation.  The relocation encodes the position of the
+second symbol so the linker can determine whether to adjust the field
+value. The PMEM variants encode the word difference, instead of byte
+difference between symbols.  */
+  BFD_RELOC_PRU_GNU_DIFF8,
+  BFD_RELOC_PRU_GNU_DIFF16,
+  BFD_RELOC_PRU_GNU_DIFF32,
+  BFD_RELOC_PRU_GNU_DIFF16_PMEM,
+  BFD_RELOC_PRU_GNU_DIFF32_PMEM,
 
 /* IQ2000 Relocations.  */
   BFD_RELOC_IQ2000_OFFSET_16,
