@@ -684,6 +684,7 @@ powerpc-*-aix*)		targ_emul=aixppc ;;
 powerpc-*-beos*)	targ_emul=aixppc ;;
 powerpc-*-windiss*)	targ_emul=elf32ppcwindiss ;;
 powerpc-*-lynxos*)	targ_emul=ppclynx ;;
+pru*-*-*)		targ_emul=pruelf ;;
 riscv32*-*-*)		targ_emul=elf32lriscv
 			targ_extra_emuls="elf64lriscv"
 			targ_extra_libpath=$targ_extra_emuls ;;
