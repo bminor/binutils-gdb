@@ -73,6 +73,7 @@
 #define ARCH_pdp11
 #define ARCH_pj
 #define ARCH_powerpc
+#define ARCH_pru
 #define ARCH_rs6000
 #define ARCH_rl78
 #define ARCH_rx
@@ -375,10 +376,14 @@ disassembler (bfd *abfd)
 	disassemble = print_insn_little_powerpc;
       break;
 #endif
+#ifdef ARCH_pru
+    case bfd_arch_pru:
+      disassemble = print_insn_pru;
+      break;
+#endif
 #ifdef ARCH_riscv
     case bfd_arch_riscv:
       disassemble = print_insn_riscv;
-      break;
 #endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:

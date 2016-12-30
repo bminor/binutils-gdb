@@ -1,3 +1,13 @@
+2016-12-31  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* Makefile.am: Add PRU source files.
+	* configure.ac: Add PRU target.
+	* disassemble.c (disassembler): Register PRU arch.
+	* pru-dis.c: New file.
+	* pru-opc.c: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2016-12-29  Yao Qi  <yao.qi@linaro.org>
 
 	* avr-dis.c: Include "bfd_stdint.h"
