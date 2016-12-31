@@ -1,3 +1,8 @@
+2016-12-31  Alan Modra  <amodra@gmail.com>
+
+	* disassemble.c (disassembler): Add break accidentally removed
+	by PRU patch.
+
 2016-12-31  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* Makefile.am: Add PRU source files.

@@ -384,6 +384,7 @@ disassembler (bfd *abfd)
 #ifdef ARCH_riscv
     case bfd_arch_riscv:
       disassemble = print_insn_riscv;
+      break;
 #endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:
