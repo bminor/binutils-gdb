@@ -1,3 +1,7 @@
+2016-12-31  Alan Modra  <amodra@gmail.com>
+
+	* elfn32-mips.c (elf_backend_want_dynrelro): Define.
+
 2016-12-31  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* archures.c: Add bfd_arch_pru.
