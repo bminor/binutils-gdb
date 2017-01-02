@@ -2927,6 +2927,33 @@ gdopoff (struct bfd_link_info *info, bfd_vma address)
   return address - got_base;
 }
 
+/* Return whether H is local and its ADDRESS is within 4G of
+   _GLOBAL_OFFSET_TABLE_ and thus the offset may be calculated by a
+   sethi, xor sequence.  */
+
+static bfd_boolean
+gdop_relative_offset_ok (struct bfd_link_info *info,
+			 struct elf_link_hash_entry *h,
+			 bfd_vma address ATTRIBUTE_UNUSED)
+{
+  if (!SYMBOL_REFERENCES_LOCAL (info, h))
+    return FALSE;
+  /* If H is undefined, ADDRESS will be zero.  We can't allow a
+     relative offset to "zero" when producing PIEs or shared libs.
+     Note that to get here with an undefined symbol it must also be
+     hidden or internal visibility.  */
+  if (bfd_link_pic (info)
+      && h != NULL
+      && (h->root.type == bfd_link_hash_undefweak
+	  || h->root.type == bfd_link_hash_undefined))
+    return FALSE;
+#ifdef BFD64
+  return gdopoff (info, address) + ((bfd_vma) 1 << 32) < (bfd_vma) 2 << 32;
+#else
+  return TRUE;
+#endif
+}
+
 /* Relocate a SPARC ELF section.  */
 
 bfd_boolean
@@ -3168,7 +3195,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	{
 	case R_SPARC_GOTDATA_OP_HIX22:
 	case R_SPARC_GOTDATA_OP_LOX10:
-	  if (SYMBOL_REFERENCES_LOCAL (info, h))
+	  if (gdop_relative_offset_ok (info, h, relocation))
 	    {
 	      r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
 			? R_SPARC_GOTDATA_HIX22
@@ -3178,7 +3205,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_SPARC_GOTDATA_OP:
-	  if (SYMBOL_REFERENCES_LOCAL (info, h))
+	  if (gdop_relative_offset_ok (info, h, relocation))
 	    {
 	      bfd_vma insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
