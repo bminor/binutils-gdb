@@ -1117,6 +1117,7 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 	  if (asec->name && strcmp (asec->name, ".text") == 0)
 	    {
 	      hdr->sh_info = indx;
+	      hdr->sh_flags |= SHF_INFO_LINK;
 	      break;
 	    }
 	}
