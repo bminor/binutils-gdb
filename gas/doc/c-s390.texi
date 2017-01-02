@@ -14,11 +14,11 @@
 @cindex s390 support
 
 The s390 version of @code{@value{AS}} supports two architectures modes
-and ten chip levels. The architecture modes are the Enterprise System
+and eleven chip levels. The architecture modes are the Enterprise System
 Architecture (ESA) and the newer z/Architecture mode. The chip levels
 are g5 (or arch3), g6, z900 (or arch5), z990 (or arch6), z9-109, z9-ec
-(or arch7), z10 (or arch8), z196 (or arch9), zEC12 (or arch10), and
-z13 (or arch11).
+(or arch7), z10 (or arch8), z196 (or arch9), zEC12 (or arch10), z13
+(or arch11), and arch12.
 
 @menu
 * s390 Options::                Command-line Options.

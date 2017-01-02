@@ -42,14 +42,17 @@ enum s390_opcode_cpu_val
     S390_OPCODE_Z196,
     S390_OPCODE_ZEC12,
     S390_OPCODE_Z13,
+    S390_OPCODE_ARCH12,
     S390_OPCODE_MAXCPU
   };
 
 /* Instruction specific flags.  */
 #define S390_INSTR_FLAG_OPTPARM 0x1
+
 #define S390_INSTR_FLAG_HTM 0x2
 #define S390_INSTR_FLAG_VX 0x4
-#define S390_INSTR_FLAG_FACILITY_MASK 0x6
+#define S390_INSTR_FLAG_VX2 0x8
+#define S390_INSTR_FLAG_FACILITY_MASK 0xe
 
 /* The opcode table is an array of struct s390_opcode.  */
 
