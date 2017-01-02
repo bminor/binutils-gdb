@@ -2,8 +2,7 @@
 
 # plugin_test_start_lib.sh -- a test case for the plugin API.
 
-# Copyright 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Free Software
-# Foundation, Inc.
+# Copyright (C) 2008-2017 Free Software Foundation, Inc.
 # Written by Evgenii Stepanov <eugenis@google.com>.
 
 # This file is part of gold.
