@@ -22,8 +22,10 @@
 
 #
 
-# This test can only be run if ld generates native executables.
-if ![isnative] then {return}
+# Check to see if the C compiler works
+if { [which $CC] == 0 } {
+    return
+}
 
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
@@ -544,7 +546,7 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
 	set script_arg "$script $srcdir/$subdir/$mapfile"
     }
 
-    if {![ld_simple_link $ld $tmpdir/$libname.so "$shared $tmpdir/$libname.o $other_lib $script_arg $ldargs"]}     {
+    if {![ld_link $ld $tmpdir/$libname.so "$shared $tmpdir/$libname.o $other_lib $script_arg $ldargs"]}     {
 	fail "$test"
 	return
     }
@@ -635,7 +637,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
 	set script_arg "-Wl,$script $srcdir/$subdir/$mapfile"
     }
 
-    if {![ld_simple_link $CC $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
+    if {![ld_link $CC $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
 	pass "$test"
 	return
     }
@@ -733,7 +735,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
 	set solibname_lib $tmpdir/$solibname
     }
 
-    if {![ld_simple_link $CC $tmpdir/$execname "$flags $tmpdir/$execname.o $solibname_lib"]}     {
+    if {![ld_link $CC $tmpdir/$execname "$flags $tmpdir/$execname.o $solibname_lib"]}     {
 	fail "$test"
 	return
     }

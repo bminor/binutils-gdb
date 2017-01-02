@@ -88,13 +88,6 @@ TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 POD2MAN = pod2man --center="GNU Development Tools" \
 	--release="binutils-$(VERSION)" --section=1
 
-#stuff for self hosting (can be overridden in config file).
-HOSTING_CRT0 = @HOSTING_CRT0@
-HOSTING_SCRT0 = @HOSTING_SCRT0@
-HOSTING_LIBS = @HOSTING_LIBS@
-HOSTING_SLIBS = @HOSTING_SLIBS@
-HOSTING_EMU = -m $(EMUL)
-
 # Setup the testing framework, if you have one
 EXPECT = expect
 RUNTEST = runtest
@@ -2117,60 +2110,6 @@ check-DEJAGNU: site.exp
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
-
-# Rules for testing by relinking ld itself.
-# A similar test is in the testsuite.  This target is for ease of use
-# when porting ld.
-
-ld-partial.@OBJEXT@: ld-new$(EXEEXT)
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld-partial.@OBJEXT@ -r $(OFILES)
-ld1$(EXEEXT): ld-partial.@OBJEXT@
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1$(EXEEXT) $(HOSTING_CRT0) ld-partial.@OBJEXT@ $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-ld1-full$(EXEEXT): ld-new
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1-full$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-ld2$(EXEEXT): ld1$(EXEEXT)
-	./ld1$(EXEEXT) $(HOSTING_EMU) -o ld2$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-ld3$(EXEEXT): ld2$(EXEEXT)
-	./ld2$(EXEEXT) $(HOSTING_EMU) -o ld3$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-bootstrap: ld3$(EXEEXT)
-	cmp ld2$(EXEEXT) ld3$(EXEEXT)
-
-.PHONY: bootstrap
-
-# A test program for C++ constructors and destructors.
-# This test is now in the testsuite.
-#
-#cdtest: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
-#	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
-#	  cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ $(HOSTING_LIBS)
-#
-#cdtest.out: cdtest
-#	./cdtest > cdtest.tmp
-#	mv cdtest.tmp cdtest.out
-#
-#cdtest-ur.@OBJEXT@: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
-#	./ld.new $(HOSTING_EMU) -o cdtest-ur.@OBJEXT@ -Ur cdtest-main.@OBJEXT@ \
-#	  cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@
-#
-#cdtest-ur: cdtest-ur.@OBJEXT@
-#	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.@OBJEXT@ \
-#	  $(HOSTING_LIBS)
-#
-#cdtest-ur.out: cdtest-ur
-#	./cdtest-ur > cdtest-ur.tmp
-#	mv cdtest-ur.tmp cdtest-ur.out
-#
-#check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
-#	diff $(srcdir)/cdtest.exp cdtest.out
-#	diff $(srcdir)/cdtest.exp cdtest-ur.out
-#
-#.PHONY: check-cdtest
-
-# END OF CHECK TARGETS
 
 #
 # Build a dummy plugin using libtool.

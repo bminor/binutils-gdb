@@ -1,5 +1,118 @@
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (bootstrap): Delete rule.
+	(ld-partial, ld1, ld1-full, ld2, ld3): Likewise.
+	(HOSTING_CRT0, HOSTING_SCRT0): Don't define.
+	(HOSTING_LIBS, HOSTING_SLIBS, HOSTING_EMU): Likewise.
+	* configure.ac (HOSTING_CRT0, HOSTING_SCRT0): Don't define.
+	(HOSTING_LIBS, HOSTING_SLIBS): Likewise.
+	* configure.host (HOSTING_CRT0, HOSTING_LIBS): Don't define.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* testsuite/config/default.exp (get_link_files): Delete.
+	(HOSTING_CRT0, HOSTING_SCRT0, HOSTING_LIBS, HOSTING_SLIBS): Don't
+	define.
+	(ld_simple_link): Delete.
+	* testsuite/lib/ld-lib.exp (default_ld_link): Delete
+	(default_ld_simple_link): Rename to default_ld_link.
+	(ld_simple_link_defsyms): Rename to ld_link_defsyms.
+	(run_ld_link_tests): Use ld_link, not ld_simple_link.
+	(run_cc_link_tests): Likewise.
+	(run_ld_link_exec_tests): Use $CC or $CXX to link, not $ld.
+	Don't run exe when not native, and return unsupported.
+	* testsuite/ld-bootstrap/bootstrap.exp: Create gccld1 etc. dirs.
+	Link ld1 etc. using $CC.
+	* testsuite/ld-cdtest/cdtest.exp: Link cdtest using $CC.
+	* testsuite/ld-checks/checks.exp: Use ld_link, not ld_simple_link.
+	* testsuite/ld-cygwin/exe-export.exp: Likewise.
+	* testsuite/ld-elf/binutils.exp: Likewise.
+	* testsuite/ld-elf/eh-group.exp: Likewise.
+	* testsuite/ld-elf/exclude.exp: Likewise.
+	* testsuite/ld-elf/frame.exp: Likewise.
+	* testsuite/ld-elf/sec-to-seg.exp: Likewise.
+	* testsuite/ld-elf/tls_common.exp: Likewise.
+	* testsuite/ld-elfcomm/elfcomm.exp: Likewise.
+	* testsuite/ld-fastcall/fastcall.exp: Likewise.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-ifunc/binutils.exp: Likewise.
+	* testsuite/ld-mep/mep.exp: Likewise.
+	* testsuite/ld-mips-elf/mips-elf-flags.exp: Likewise.
+	* testsuite/ld-mn10300/mn10300.exp: Likewise.
+	* testsuite/ld-nios2/nios2.exp: Likewise.
+	* testsuite/ld-pe/pe-compile.exp: Likewise.
+	* testsuite/ld-pe/pe-run.exp: Likewise.
+	* testsuite/ld-pe/pe-run2.exp: Likewise.
+	* testsuite/ld-plugin/plugin.exp: Likewise.
+	* testsuite/ld-scripts/align.exp: Likewise.
+	* testsuite/ld-scripts/alignof.exp: Likewise.
+	* testsuite/ld-scripts/assert.exp: Likewise.
+	* testsuite/ld-scripts/defined.exp: Likewise.
+	* testsuite/ld-scripts/extern.exp: Likewise.
+	* testsuite/ld-scripts/log2.exp: Likewise.
+	* testsuite/ld-scripts/map-address.exp: Likewise.
+	* testsuite/ld-scripts/phdrs.exp: Likewise.
+	* testsuite/ld-scripts/phdrs2.exp: Likewise.
+	* testsuite/ld-scripts/script.exp: Likewise.
+	* testsuite/ld-scripts/section-flags.exp: Likewise.
+	* testsuite/ld-scripts/sizeof.exp: Likewise.
+	* testsuite/ld-scripts/sysroot-prefix.exp: Likewise.
+	* testsuite/ld-scripts/weak.exp: Likewise.
+	* testsuite/ld-selective/selective.exp: Likewise.
+	* testsuite/ld-sh/sh.exp: Likewise.
+	* testsuite/ld-sh/sh64/relax.exp: Likewise.
+	* testsuite/ld-sh/sh64/relfail.exp: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/ld-tic6x/tic6x.exp: Likewise.
+	* testsuite/ld-undefined/weak-undef.exp: Likewise.
+	* testsuite/ld-versados/versados.exp: Likewise.
+	* testsuite/ld-x86-64/dwarfreloc.exp: Likewise.
+	* testsuite/ld-xtensa/coalesce.exp: Likewise.
+	* testsuite/ld-xtensa/diff_overflow.exp: Likewise.
+	* testsuite/ld-xtensa/lcall.exp: Likewise.
+	* testsuite/ld-elf/audit.exp: Run non-native too.
+	* testsuite/ld-elf/compress.exp: Likewise.  Replace ld options with
+	gcc -Wl, options.
+	* testsuite/ld-elf/dwarf.exp: Run non-native too.  Use ld_link,
+	not ld_simple_link.  Add -Wl,--no-as-needed to some tests.
+	* testsuite/ld-elf/elf.exp: Run non-native too.  Formatting.
+	* testsuite/ld-elf/indirect.exp: Run non-native too.  Add
+	-Wl,--no-as-needed to most tests.
+	* testsuite/ld-elf/shared.exp: Run non-native too.  Use braces
+	to simplify quoting.  Set run_tests using [list] rather than
+	brace assignment to expand $extralibs.  Add -Wl,--no-as-needed
+	to many test.  Prefix ld options with -Wl,.
+	(mix_pic_and_non_pic): Don't run exe if not native.
+	* testsuite/ld-elf/wrap.exp: Run non-native too.  Add
+	-Wl,--no-as-needed and prefix ld options with -Wl,.
+	* testsuite/ld-elfvers/vers.exp: Run non-native too.  Use ld_link,
+	not ld_simple_link.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	(visibility_test): Don't run exe if not native.
+	* testsuite/ld-elfweak/elfweak.exp: Run non-native too.  Use ld_link,
+	not ld_simple_link.
+	(build_exec): Don't run exe if not native.
+	* testsuite/ld-ifunc/ifunc.exp: Run non-native too.  Use ld_link,
+	not ld_simple_link.  Link using $CC.  Add -Wl,--no-as-needed
+	to some tests and prefix ld options with -Wl,.  Expect GNU
+	for hppa-linux even when no ifuncs.  Delete cleanup.
+	* testsuite/ld-pie/pie.exp: Run non-native too.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-shared/shared.exp: Likewise.  Use ld_link,
+	not ld_simple_link.
+	(shared_test): Don't run exe if not native.
+	* testsuite/ld-size/size.exp: Run non-native too.  Add
+	-Wl,--no-as-needed to some tests.  Prefix ld options with -Wl,.
+	* testsuite/ld-unique/unique.exp: Run non-native too.  Use ld_link,
+	not ld_simple_link.  Link using $CC.  Add -Wl,--no-as-needed
+	to some tests and prefix ld options with -Wl,.  Expect GNU
+	for hppa-linux even when no unique syms.  Delete cleanup.
+	* testsuite/ld-x86-64/tls.exp: Add -Wl,--no-as-needed to some
+	tests and prefix ld options with -Wl,.
+	* testsuite/ld-x86-64/x86-64.exp: Use ld_link, not ld_simple_link.
+	Add -Wl,--no-as-needed to some tests.  Prefix ld options with -Wl,.
+
+2017-01-02  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf32metag.sh (COMMONPAGESIZE): Define.
 
 2017-01-02  Alan Modra  <amodra@gmail.com>

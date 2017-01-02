@@ -97,8 +97,8 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"TLS GD/LD -> IE transition without PLT" \
-	"tmpdir/tls-main1.o tmpdir/tls-gd1.o tmpdir/tls-ld1.o \
-	 tmpdir/libtls-1a.so -R tmpdir" \
+	"-Wl,--no-as-needed,-R,tmpdir tmpdir/tls-main1.o \
+	 tmpdir/tls-gd1.o tmpdir/tls-ld1.o tmpdir/libtls-1a.so" \
 	"" \
 	{ dummy.s } \
 	"tls-1d" \
@@ -106,8 +106,8 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"TLS without PLT (1)" \
-	"tmpdir/tls-main1.o \
-	 tmpdir/libtls-1a.so tmpdir/libtls-1b.so -R tmpdir" \
+	"-Wl,--no-as-needed,-R,tmpdir tmpdir/tls-main1.o \
+	 tmpdir/libtls-1a.so tmpdir/libtls-1b.so" \
 	"" \
 	{ dummy.s } \
 	"tls-1e" \
@@ -115,8 +115,8 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"TLS without PLT (2)" \
-	"tmpdir/tls-main1.o tmpdir/tls-def1.o \
-	 tmpdir/libtls-1b.so -R tmpdir" \
+	"-Wl,--no-as-needed,-R,tmpdir tmpdir/tls-main1.o \
+	 tmpdir/tls-def1.o tmpdir/libtls-1b.so" \
 	"" \
 	{ dummy.s } \
 	"tls-1f" \

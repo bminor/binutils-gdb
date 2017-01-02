@@ -41,15 +41,6 @@ if {!(([istarget "i?86-*-*"]
     return
 }
 
-# We need a native system.  FIXME: Strictly speaking this
-# is not true, we just need to know how to create a fully
-# linked executable, including the C and Z libraries, using
-# the linker that is under test.
-if ![isnative] {
-    verbose "IFUNC tests not run - not a native toolchain"
-    return
-}
-
 # We need a working compiler.  (Strictly speaking this is
 # not true, we could use target specific assembler files).
 if { [which $CC] == 0 } {
@@ -200,7 +191,7 @@ if { $fails != 0 } {
     return
 }
 
-if ![ld_simple_link $ld "tmpdir/libshared_ifunc.so" "-shared tmpdir/shared_ifunc.o"] {
+if ![ld_link $ld "tmpdir/libshared_ifunc.so" "-shared tmpdir/shared_ifunc.o"] {
     fail "Could not create a shared library containing an IFUNC symbol"
     set fails [expr $fails + 1]
 }
@@ -213,27 +204,27 @@ if { $fails != 0 } {
     return
 }
 
-if ![default_ld_link $ld "tmpdir/dynamic_prog" "-Ltmpdir tmpdir/shared_prog.o -Bdynamic -lshared_ifunc -rpath ./tmpdir"] {
+if ![ld_link $CC "tmpdir/dynamic_prog" "-Wl,--no-as-needed,-rpath=./tmpdir,-Bdynamic -Ltmpdir tmpdir/shared_prog.o -lshared_ifunc"] {
     fail "Could not link a dynamic executable"
     set fails [expr $fails + 1]
 }
-if ![default_ld_link $ld "tmpdir/local_prog" "-Ltmpdir tmpdir/static_prog.o -lifunc"] {
+if ![ld_link $CC "tmpdir/local_prog" "-Wl,--no-as-needed,-rpath=./tmpdir -Ltmpdir tmpdir/static_prog.o -lifunc"] {
     fail "Could not link a dynamic executable using local ifunc"
     set fails [expr $fails + 1]
 }
-if ![default_ld_link $ld "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
+if ![ld_link $CC "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
     fail "Could not link a static executable"
     set fails [expr $fails + 1]
 }
-if ![ld_simple_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
+if ![ld_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
     fail "Could not link a non-ifunc using static executable"
     set fails [expr $fails + 1]
 }
-if ![default_ld_link $ld "tmpdir/test-1" "tmpdir/test-1.o tmpdir/libshared_ifunc.so"] {
+if ![ld_link $CC "tmpdir/test-1" "-Wl,--no-as-needed,-rpath=./tmpdir tmpdir/test-1.o tmpdir/libshared_ifunc.so"] {
     fail "Could not link test-1"
     set fails [expr $fails + 1]
 }
-if ![ld_simple_link $ld "tmpdir/libtest-2.so" "-shared tmpdir/test-2.o"] {
+if ![ld_link $ld "tmpdir/libtest-2.so" "-shared tmpdir/test-2.o"] {
     fail "Could not link libtest-2.so"
     set fails [expr $fails + 1]
 }
@@ -251,6 +242,11 @@ if { $fails == 0 } {
 # ifunc should have an OSABI field of GNU.  The linked non-ifunc using
 # executable should have an OSABI field of NONE (aka System V).
 
+case $target_triplet in {
+    { hppa*-*-linux* } { set expected_none {UNIX - GNU} }
+    default { set expected_none {UNIX - System V} }
+}
+
 if {! [check_osabi tmpdir/libshared_ifunc.so {UNIX - GNU}]} {
     fail "Shared libraries containing ifunc does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
@@ -263,12 +259,12 @@ if {! [check_osabi tmpdir/static_prog {UNIX - GNU}]} {
     fail "Static ifunc-using executable does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
-if {! [check_osabi tmpdir/dynamic_prog {UNIX - System V}]} {
-    fail "Dynamic ifunc-using executable does not have an OS/ABI field of System V"
+if {! [check_osabi tmpdir/dynamic_prog $expected_none]} {
+    fail "Dynamic ifunc-using executable does not have an OS/ABI field of $expected_none"
     set fails [expr $fails + 1]
 }
-if {! [check_osabi tmpdir/static_nonifunc_prog {UNIX - System V}]} {
-    fail "Static non-ifunc-using executable does not have an OS/ABI field of System V"
+if {! [check_osabi tmpdir/static_nonifunc_prog $expected_none]} {
+    fail "Static non-ifunc-using executable does not have an OS/ABI field of $expected_none"
     set fails [expr $fails + 1]
 }
 
@@ -333,21 +329,6 @@ if {[contains_ifunc_reloc tmpdir/static_nonifunc_prog] == 1} {
 
 if { $fails == 0 } {
   pass "Checking ifunc binaries"
-}
-
-# Clean up, unless we are being verbose, in which case we leave the files available.
-if { $verbose < 1 } {
-    remote_file host delete "tmpdir/shared_prog.o"
-    remote_file host delete "tmpdir/static_prog.o"
-    remote_file host delete "tmpdir/shared_ifunc.o"
-    remote_file host delete "tmpdir/static_ifunc.o"
-    remote_file host delete "tmpdir/static_noifunc.o"
-    remote_file host delete "tmpdir/libshared_ifunc.so"
-    remote_file host delete "tmpdir/libifunc.a"
-    remote_file host delete "tmpdir/dynamic_prog"
-    remote_file host delete "tmpdir/local_prog"
-    remote_file host delete "tmpdir/static_prog"
-    remote_file host delete "tmpdir/static_nonifunc_prog"
 }
 
 run_cc_link_tests [list \
@@ -433,7 +414,7 @@ run_cc_link_tests [list \
 run_ld_link_exec_tests [list \
     [list \
 	"Run pr16467" \
-	"tmpdir/pr16467c.o tmpdir/libpr16467b.so tmpdir/libpr16467a.so" \
+	"-Wl,--no-as-needed tmpdir/pr16467c.o tmpdir/libpr16467b.so tmpdir/libpr16467a.so" \
 	"" \
 	{ dummy.c } \
 	"pr16467" \
@@ -442,7 +423,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run ifunc-main" \
-	"tmpdir/libifunc-lib.so" \
+	"-Wl,--no-as-needed tmpdir/libifunc-lib.so" \
 	"" \
 	{ ifunc-main.c } \
 	"ifunc-main" \
@@ -450,7 +431,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run ifunc-main with -fpic" \
-	"tmpdir/libifunc-lib.so" \
+	"-Wl,--no-as-needed tmpdir/libifunc-lib.so" \
 	"" \
 	{ ifunc-main.c } \
 	"ifunc-main" \
@@ -510,7 +491,7 @@ run_cc_link_tests [list \
 run_ld_link_exec_tests [list \
     [list \
 	"Run pr18808" \
-	"tmpdir/pr18808a.o tmpdir/libpr18808.so" \
+	"-Wl,--no-as-needed tmpdir/pr18808a.o tmpdir/libpr18808.so" \
 	"" \
 	{ dummy.c } \
 	"pr18808" \
@@ -518,7 +499,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run pr18841 with libpr18841b.so" \
-	"tmpdir/pr18841a.o tmpdir/libpr18841b.so" \
+	"-Wl,--no-as-needed tmpdir/pr18841a.o tmpdir/libpr18841b.so" \
 	"" \
 	{ dummy.c } \
 	"pr18841b" \
@@ -526,7 +507,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run pr18841 with libpr18841c.so" \
-	"--as-needed tmpdir/pr18841a.o tmpdir/libpr18841c.so" \
+	"-Wl,--as-needed tmpdir/pr18841a.o tmpdir/libpr18841c.so" \
 	"" \
 	{ dummy.c } \
 	"pr18841c" \

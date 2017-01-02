@@ -40,7 +40,7 @@ proc sec_to_seg_test { testname scriptname same_seg } {
     global exec_output
     global READELF
     
-    if {! [ld_simple_link $ld tmpdir/sec-to-seg "-T $srcdir/$subdir/$scriptname tmpdir/sec-to-seg1.o tmpdir/sec-to-seg2.o"] } then {
+    if {! [ld_link $ld tmpdir/sec-to-seg "-T $srcdir/$subdir/$scriptname tmpdir/sec-to-seg1.o tmpdir/sec-to-seg2.o"] } then {
 	fail $testname
 	return 0
     }

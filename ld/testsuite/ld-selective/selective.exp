@@ -151,7 +151,7 @@ foreach testitem $seltests {
 	set objfile "$objfile --defsym _.d2=0"
     }
 
-    if ![ld_simple_link $ld $ldfile "$ldflags [join $ldargs] $objfile"] {
+    if ![ld_link $ld $ldfile "$ldflags [join $ldargs] $objfile"] {
 	fail $testname
 	continue
     }

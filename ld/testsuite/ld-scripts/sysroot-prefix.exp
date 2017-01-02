@@ -141,7 +141,7 @@ proc single_sysroot_prefix_test { type xtestname finalscript ldopt errstr } {
     close $ofd
     verbose -log "script: $finalscript"
 
-    set res [ld_simple_link $ld tmpdir/output "$ldopt tmpdir/main.o -Ltmpdir -lsysroottest"]
+    set res [ld_link $ld tmpdir/output "$ldopt tmpdir/main.o -Ltmpdir -lsysroottest"]
     set ld_output "$exec_output"
     set expect_success [expr [string length $errstr] == 0]
 

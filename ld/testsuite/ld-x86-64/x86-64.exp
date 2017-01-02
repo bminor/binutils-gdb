@@ -247,7 +247,7 @@ global ld
 
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
-if { ![ld_simple_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
+if { ![ld_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
     if [string match "*i386* architecture of input file `tmpdir/${test}b.o' is incompatible with i386:x86-64* output*" $link_output] {
 	pass "$test_name"
     } {
@@ -257,7 +257,7 @@ if { ![ld_simple_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}
 
 set test_name "Mixed x86_64 and i386 input test 2"
 set test mixed2
-if { ![ld_simple_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
+if { ![ld_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
     if [string match "*i386* architecture of input file `tmpdir/${test}b.o' is incompatible with i386:x86-64* output*" $link_output] {
 	pass "$test_name"
     } {
@@ -538,7 +538,7 @@ proc undefined_weak {cflags ldflags} {
     }
 
     if { [ regexp "\-fPIE" $cflags]
-	 && ![ regexp "\-z nodynamic-undefined-weak" $ldflags] } {
+	 && ![ regexp "nodynamic-undefined-weak" $ldflags] } {
 	set weak_symbol "Weak defined"
     } else {
 	set weak_symbol "Weak undefined"
@@ -568,7 +568,7 @@ proc undefined_weak {cflags ldflags} {
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run pr19704" \
-	    "$ldflags tmpdir/libpr19704.so -R tmpdir" \
+	    "-Wl,--no-as-needed,-R,tmpdir $ldflags tmpdir/libpr19704.so" \
 	    "" \
 	    { pr19704a.c } \
 	    "pr19704" \
@@ -833,8 +833,8 @@ if { [isnative] && [which $CC] != 0 } {
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run plt-main" \
-	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-	     tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+	    "-Wl,--no-as-needed tmpdir/plt-main1.o tmpdir/plt-main2.o \
+	     tmpdir/plt-main3.o tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
 	    "" \
 	    { plt-main5.c } \
 	    "plt-main" \
@@ -842,8 +842,8 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run plt-main with PIE" \
-	    "tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-	     tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie" \
+	    "-Wl,--no-as-needed -pie tmpdir/plt-main1.o tmpdir/plt-main2.o \
+	     tmpdir/plt-main3.o tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
 	    "" \
 	    { plt-main5.c } \
 	    "plt-main-pie" \
@@ -852,7 +852,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run copyreloc-main with PIE without -fPIE" \
-	    "--as-needed tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
+	    "-Wl,--as-needed -pie tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so" \
 	    "" \
 	    { dummy.s } \
 	    "copyreloc-main" \
@@ -860,7 +860,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr17689 with PIE without -fPIE" \
-	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie" \
+	    "-Wl,--no-as-needed -pie tmpdir/pr17689b.o tmpdir/pr17689.so" \
 	    "" \
 	    { dummy.s } \
 	    "pr17689" \
@@ -868,7 +868,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr17689 with PIE -z now without -fPIE" \
-	    "--as-needed tmpdir/pr17689b.o tmpdir/pr17689.so -pie -z now" \
+	    "-Wl,--as-needed,-z,now -pie tmpdir/pr17689b.o tmpdir/pr17689.so" \
 	    "" \
 	    { dummy.s } \
 	    "pr17689now" \
@@ -876,7 +876,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr18900" \
-	    "tmpdir/pr18900.o tmpdir/pr18900.so" \
+	    "-Wl,--no-as-needed tmpdir/pr18900.o tmpdir/pr18900.so" \
 	    "" \
 	    { dummy.s } \
 	    "pr18900" \
@@ -884,7 +884,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr19031" \
-	    "tmpdir/pr19031.so" \
+	    "-Wl,--no-as-needed tmpdir/pr19031.so" \
 	    "" \
 	    { pr19031b.S pr19031c.c } \
 	    "pr19031" \
@@ -892,7 +892,7 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run gotpcrel1" \
-	    "tmpdir/gotpcrel1d.so" \
+	    "-Wl,--no-as-needed tmpdir/gotpcrel1d.so" \
 	    "" \
 	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
 	    "gotpcrel1" \
@@ -930,7 +930,7 @@ if { [isnative] && [which $CC] != 0 } {
 	run_ld_link_exec_tests [list \
 	    [list \
 		"Run pr19784a" \
-		"tmpdir/pr19784a.o tmpdir/libpr19784a.so" \
+		"-Wl,--no-as-needed tmpdir/pr19784a.o tmpdir/libpr19784a.so" \
 		"" \
 		{ dummy.s } \
 		"pr19784a" \
@@ -938,7 +938,7 @@ if { [isnative] && [which $CC] != 0 } {
 	    ] \
 	    [list \
 		"Run pr19784b" \
-		"--as-needed tmpdir/pr19784a.o tmpdir/libpr19784b.so" \
+		"-Wl,--as-needed tmpdir/pr19784a.o tmpdir/libpr19784b.so" \
 		"" \
 		{ dummy.s } \
 		"pr19784b" \
@@ -974,8 +974,9 @@ if { [isnative] && [which $CC] != 0 } {
 	run_ld_link_exec_tests [list \
 	    [list \
 		"Run plt-main with -z bndplt" \
-		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt" \
+		"-Wl,--no-as-needed,-z,bndplt tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
 		"" \
 		{ plt-main5.c } \
 		"plt-main-bnd" \
@@ -983,8 +984,9 @@ if { [isnative] && [which $CC] != 0 } {
 	    ] \
 	    [list \
 		"Run plt-main with PIE and -z bndplt" \
-		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie" \
+		"-Wl,--no-as-needed,-z,bndplt -pie tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
 		"" \
 		{ plt-main5.c } \
 		"plt-main-pie-bnd" \
@@ -993,7 +995,7 @@ if { [isnative] && [which $CC] != 0 } {
 	    ] \
 	    [list \
 		"Run pr20800" \
-		"-pie -z now" \
+		"-Wl,-z,now -pie" \
 		"" \
 		{ pr20800a.S pr20800b.S } \
 		"pr20800" \
@@ -1005,8 +1007,8 @@ if { [isnative] && [which $CC] != 0 } {
     undefined_weak "" ""
     undefined_weak "-fPIE" ""
     undefined_weak "-fPIE" "-pie"
-    undefined_weak "-fPIE" "-z nodynamic-undefined-weak"
-    undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
+    undefined_weak "-fPIE" "-Wl,-z,nodynamic-undefined-weak"
+    undefined_weak "-fPIE" "-pie -Wl,-z,nodynamic-undefined-weak"
 }
 
 if { ![istarget "x86_64-*-linux*"]} {
