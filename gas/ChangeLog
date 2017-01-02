@@ -1,3 +1,9 @@
+2017-01-03  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* config/tc-pru.c (md_number_to_chars): Fix parameter to be
+	valueT, as declared in tc.h.
+	(md_apply_fix): Fix to work on 32-bit hosts.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

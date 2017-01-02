@@ -175,7 +175,7 @@ md_chars_to_number (char *buf, int n)
    into the series of bytes that represent the number
    on the target machine.  */
 void
-md_number_to_chars (char *buf, uint64_t val, int n)
+md_number_to_chars (char *buf, valueT val, int n)
 {
   gas_assert (n == 1 || n == 2 || n == 4 || n == 8);
   number_to_chars_littleendian (buf, val, n);
@@ -808,20 +808,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	  /* Fix up the instruction.  Non-contiguous bitfields need
 	     special handling.  */
-	  if (fixP->fx_r_type == BFD_RELOC_PRU_S10_PCREL)
-	    SET_BROFF_URAW (insn, fixup);
-	  else if (fixP->fx_r_type == BFD_RELOC_PRU_LDI32)
+	  if (fixP->fx_r_type == BFD_RELOC_PRU_LDI32)
 	    {
 	      /* As the only 64-bit "insn", LDI32 needs special handling. */
 	      uint32_t insn1 = insn & 0xffffffff;
 	      uint32_t insn2 = insn >> 32;
 	      SET_INSN_FIELD (IMM16, insn1, fixup & 0xffff);
 	      SET_INSN_FIELD (IMM16, insn2, fixup >> 16);
-	      insn = insn1 | ((uint64_t)insn2 << 32);
+
+	      md_number_to_chars (buf, insn1, 4);
+	      md_number_to_chars (buf + 4, insn2, 4);
 	    }
 	  else
-	    insn = (insn & ~howto->dst_mask) | (fixup << howto->bitpos);
-	  md_number_to_chars (buf, insn, fixP->fx_size);
+	    {
+	      if (fixP->fx_r_type == BFD_RELOC_PRU_S10_PCREL)
+		SET_BROFF_URAW (insn, fixup);
+	      else
+		insn = (insn & ~howto->dst_mask) | (fixup << howto->bitpos);
+	      md_number_to_chars (buf, insn, fixP->fx_size);
+	    }
 	}
 
       fixP->fx_done = 1;
