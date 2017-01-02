@@ -1,5 +1,12 @@
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
+	PR ld/20989
+	* elfxx-sparc.c (gdop_relative_offset_ok): New function.
+	(_bfd_sparc_elf_relocate_section): Use it to validate GOT
+	indirect to GOT pointer relative code edit.
+
+2017-01-02  Alan Modra  <amodra@gmail.com>
+
 	Update year range in copyright notice of all files.
 
 For older changes see ChangeLog-2016
