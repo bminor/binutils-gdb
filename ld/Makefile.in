@@ -753,6 +753,7 @@ ALL_EMULATION_SOURCES = \
 	eppcmacos.c \
 	eppcnw.c \
 	eppcpe.c \
+	epruelf.c \
 	eriscix.c \
 	escore3_elf.c \
 	escore7_elf.c \
@@ -1424,6 +1425,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eppcmacos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eppcnw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eppcpe.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epruelf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eriscix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/escore3_elf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/escore7_elf.Po@am__quote@
@@ -3270,10 +3272,8 @@ eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/ppcpe.sc ${GEN_DEPENDS}
 
 epruelf.c: $(srcdir)/emulparams/pruelf.sh \
-  $(srcdir)/emultempl/elf32.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/pru.sc \
   $(srcdir)/emultempl/pruelf.em ${GEN_DEPENDS}
-	${GENSCRIPTS} pruelf "$(tdir_pruelf)"
 
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

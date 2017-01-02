@@ -1,3 +1,9 @@
+2017-01-03  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add epruelf.c.
+	(epruelf.c): Remove unneeded dependencies.
+	* Makefile.in: Regenerate
+
 2017-01-03  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/shared.exp: Add -rpath-link and -no-as-needed

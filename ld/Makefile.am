@@ -384,6 +384,7 @@ ALL_EMULATION_SOURCES = \
 	eppcmacos.c \
 	eppcnw.c \
 	eppcpe.c \
+	epruelf.c \
 	eriscix.c \
 	escore3_elf.c \
 	escore7_elf.c \
@@ -1708,10 +1709,8 @@ eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/ppcpe.sc ${GEN_DEPENDS}
 
 epruelf.c: $(srcdir)/emulparams/pruelf.sh \
-  $(srcdir)/emultempl/elf32.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/pru.sc \
   $(srcdir)/emultempl/pruelf.em ${GEN_DEPENDS}
-	${GENSCRIPTS} pruelf "$(tdir_pruelf)"
 
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
