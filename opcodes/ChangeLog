@@ -1,5 +1,34 @@
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
+	* epiphany-desc.h: Regenerate.
+	* epiphany-opc.h: Regenerate.
+	* fr30-desc.h: Regenerate.
+	* fr30-opc.h: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-opc.h: Regenerate.
+	* ip2k-desc.h: Regenerate.
+	* ip2k-opc.h: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* iq2000-opc.h: Regenerate.
+	* lm32-desc.h: Regenerate.
+	* lm32-opc.h: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32c-opc.h: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-opc.h: Regenerate.
+	* mt-desc.h: Regenerate.
+	* mt-opc.h: Regenerate.
+	* or1k-desc.h: Regenerate.
+	* or1k-opc.h: Regenerate.
+	* xc16x-desc.h: Regenerate.
+	* xc16x-opc.h: Regenerate.
+	* xstormy16-desc.h: Regenerate.
+	* xstormy16-opc.h: Regenerate.
+
+2017-01-02  Alan Modra  <amodra@gmail.com>
+
 	Update year range in copyright notice of all files.
 
 For older changes see ChangeLog-2016
