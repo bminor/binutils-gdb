@@ -1,5 +1,9 @@
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf32metag.sh (COMMONPAGESIZE): Define.
+
+2017-01-02  Alan Modra  <amodra@gmail.com>
+
 	PR ld/21000
 	* emulparams/hppalinux.sh (DATA_ADDR, SHLIB_DATA_ADDR): Don't define.
 	(DATA_SEGMENT_ALIGN, DATA_SEGMENT_END, DATA_SEGMENT_RELRO_END): Define.
