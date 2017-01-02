@@ -18,6 +18,11 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+# Check to see if the C compiler works
+if { [which $CC] == 0 } {
+    return
+}
+
 # These tests require plugin and LTO.
 if { ![check_plugin_api_available]
      || ![check_lto_available] } {

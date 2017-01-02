@@ -25,6 +25,11 @@ if { ![istarget *-*-linux*]
     return
 }
 
+# Check to see if the C compiler works
+if { [which $CC] == 0 } {
+    return
+}
+
 # Check if -pie is supported or not.
 send_log "$CC -fpie -pie $srcdir/$subdir/pie.c -o tmpdir/pie"
 catch "exec $CC -fpie -pie $srcdir/$subdir/pie.c -o tmpdir/pie" exec_output

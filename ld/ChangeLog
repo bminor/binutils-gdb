@@ -1,3 +1,9 @@
+2017-01-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/elf.exp: Check that $CC exists before C tests.
+	* testsuite/ld-pie/pie.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (bootstrap): Delete rule.
