@@ -1,5 +1,13 @@
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
+	PR ld/21000
+	* emulparams/hppalinux.sh (DATA_ADDR, SHLIB_DATA_ADDR): Don't define.
+	(DATA_SEGMENT_ALIGN, DATA_SEGMENT_END, DATA_SEGMENT_RELRO_END): Define.
+	* scripttempl/elf.sc: Don't define the above if DATA_SEGMENT_ALIGN
+	is already defined.
+
+2017-01-02  Alan Modra  <amodra@gmail.com>
+
 	Update year range in copyright notice of all files.
 
 For older changes see ChangeLog-2016
