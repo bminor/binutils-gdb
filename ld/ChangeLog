@@ -1,5 +1,12 @@
 2017-01-03  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/shared.exp: Add -rpath-link and -no-as-needed
+	to various tests.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+	* testsuite/ld-elfvers/vers.exp (vers19): Fix -rpath-link option.
+
+2017-01-03  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/elf.exp: Check that $CC exists before C tests.
 	* testsuite/ld-pie/pie.exp: Likewise.
 	* testsuite/ld-plugin/lto.exp: Likewise.

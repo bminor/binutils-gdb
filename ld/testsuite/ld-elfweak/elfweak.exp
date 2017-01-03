@@ -479,8 +479,8 @@ build_exec "ELF weak data first common" foo "main1.o bar1a.o foo1b.o" "" strongd
 build_exec "ELF weak data last common" foo "foo1b.o main1.o bar1a.o" "" strongdata "" strongcomm.sym
 build_exec "ELF weak data first DSO" foo "main1.o libbar1a.so libfoo1a.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
 build_exec "ELF weak data last DSO" foo "libfoo1a.so main1.o libbar1a.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
-build_exec "ELF weak data first DSO common" foo "main1.o libbar1a.so libfoo1b.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
-build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o libbar1a.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
+build_exec "ELF weak data first DSO common" foo "main1.o libbar1a.so libfoo1b.so" "-Wl,--no-as-needed,-rpath,.,-rpath-link,." weakdata weakdata.dsym ""
+build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o libbar1a.so" "-Wl,--no-as-needed,-rpath,.,-rpath-link,." weakdata weakdata.dsym ""
 
 if ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/size_foo.c $tmpdir/size_foo.o] {
     unresolved "ELF weak (size)"

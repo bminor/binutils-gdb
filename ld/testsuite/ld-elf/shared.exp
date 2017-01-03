@@ -190,16 +190,16 @@ set build_tests {
    "-r -nostdlib" "-fPIC"
    {needed1c.c} {} "libneeded1pic.o"}
   {"Build needed1a.so with --add-needed"
-   "-shared tmpdir/libneeded1pic.o -Wl,--add-needed,-rpath=tmpdir,-z,defs -Ltmpdir -lneeded1a" ""
+   "-shared tmpdir/libneeded1pic.o -Wl,--no-as-needed,--add-needed,-rpath=tmpdir,-rpath-link=tmpdir,-z,defs -Ltmpdir -lneeded1a" ""
    {dummy.c} {} "needed1a.so"}
   {"Build needed1b.so with --copy-dt-needed-entries"
-   "-shared tmpdir/libneeded1pic.o -Wl,--copy-dt-needed-entries,-rpath=tmpdir,-z,defs -Ltmpdir -lneeded1a" ""
+   "-shared tmpdir/libneeded1pic.o -Wl,--no-as-needed,--copy-dt-needed-entries,-rpath=tmpdir,-rpath-link=tmpdir,-z,defs -Ltmpdir -lneeded1a" ""
    {dummy.c} {} "needed1b.so"}
   {"Build needed1a.so with --no-add-needed"
-   "-shared tmpdir/libneeded1pic.o -Wl,--no-add-needed -Ltmpdir -lneeded1a" ""
+   "-shared tmpdir/libneeded1pic.o -Wl,--no-as-needed,--no-add-needed -Ltmpdir -lneeded1a" ""
    {dummy.c} {} "needed1c.so"}
   {"Build needed1b.so with --no-copy-dt-needed-entries"
-   "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries -Ltmpdir -lneeded1a" ""
+   "-shared tmpdir/libneeded1pic.o -Wl,--no-as-needed,--no-copy-dt-needed-entries -Ltmpdir -lneeded1a" ""
    {dummy.c} {} "needed1d.so"}
   {"Build librel.so"
    "-shared" "-fPIC"
@@ -247,7 +247,7 @@ set build_tests {
    "" "-fPIC"
    {pr16496b.c} {} "libpr16496b.a"}
   {"Build libpr16496b.so"
-   "-shared tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
+   "-shared -Wl,--no-as-needed tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
    {dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
   {"Build libpr16452a.so"
    "-shared -Wl,-soname,libpr16452a.so,--version-script=pr16452.map" "-fPIC"
@@ -256,10 +256,10 @@ set build_tests {
    "-shared -Wl,-soname,libpr16452b.so,--no-as-needed tmpdir/libpr16452a.so" "-fPIC"
    {dummy.c} {} "libpr16452b.so"}
   {"Build pr16452"
-   "tmpdir/libpr16452b.so -Wl,-rpath=tmpdir" ""
+   "-Wl,--no-as-needed,-rpath=tmpdir,-rpath-link=tmpdir tmpdir/libpr16452b.so" ""
    {pr16452b.c} {{objdump {-p} pr16452.od}} "pr16452"}
   {"Build pr16457"
-   "tmpdir/libpr16452b.so -Wl,-rpath=tmpdir" ""
+   "-Wl,--no-as-needed,-rpath=tmpdir,-rpath-link=tmpdir tmpdir/libpr16452b.so" ""
    {pr16452b.c} {{objdump {-p} pr16457.od}} "pr16457"}
   {"Build libpr18458a.so"
    "-shared -Wl,-z,now" "-fPIC"
@@ -412,10 +412,10 @@ set run_tests [list \
      "-Wl,--as-needed tmpdir/libpr14862-1.o tmpdir/libpr14862.so" "" \
      {dummy.c} "pr14862" "pr14862.out" ] \
     [list "Link with --add-needed" \
-     "tmpdir/libneeded1c.o -Wl,--no-as-needed,--add-needed,-rpath=tmpdir -Ltmpdir -lneeded1a" "" \
+     "tmpdir/libneeded1c.o -Wl,--no-as-needed,--add-needed,-rpath=tmpdir,-rpath-link=tmpdir -Ltmpdir -lneeded1a" "" \
      {dummy.c} "needed1a" "needed1.out" ] \
     [list "Link with --copy-dt-needed-entries" \
-     "tmpdir/libneeded1c.o -Wl,--no-as-needed,--copy-dt-needed-entries,-rpath=tmpdir -Ltmpdir -lneeded1a" "" \
+     "tmpdir/libneeded1c.o -Wl,--no-as-needed,--copy-dt-needed-entries,-rpath=tmpdir,-rpath-link=tmpdir -Ltmpdir -lneeded1a" "" \
      {dummy.c} "needed1b" "needed1.out" ] \
     [list "Run relmain" \
      "-Wl,--no-as-needed,-rpath=tmpdir -Ltmpdir -lrel" "" \
