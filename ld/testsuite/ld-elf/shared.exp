@@ -25,6 +25,12 @@ if ![is_elf_format] {
     return
 }
 
+# Skip targets where -shared is not supported
+
+if ![check_shared_lib_support] {
+    return
+}
+
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {
     return

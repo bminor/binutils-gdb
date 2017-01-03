@@ -41,6 +41,12 @@ if {!(([istarget "i?86-*-*"]
     return
 }
 
+# Skip targets where -shared is not supported
+
+if ![check_shared_lib_support] {
+    return
+}
+
 # We need a working compiler.  (Strictly speaking this is
 # not true, we could use target specific assembler files).
 if { [which $CC] == 0 } {

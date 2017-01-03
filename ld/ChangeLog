@@ -1,3 +1,13 @@
+2017-01-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/audit.exp: Check for shared lib support.
+	* testsuite/ld-elf/compress.exp: Likewise.
+	* testsuite/ld-elf/dwarf.exp: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-elf/wrap.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Check $CXX exists.
+
 2017-01-03  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Do not

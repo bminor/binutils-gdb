@@ -18,8 +18,8 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# Check to see if the C compiler works
-if { [which $CC] == 0 } {
+# Check to see if the C and C++ compilers work
+if { [which $CC] == 0 || [which $CXX] == 0 } {
     return
 }
 
