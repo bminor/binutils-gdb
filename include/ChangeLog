@@ -1,3 +1,7 @@
+2017-01-03  Kito Cheng  <kito.cheng@gmail.com>
+
+	* opcode/riscv-opc.h: Add support for the "q" ISA extension.
+
 2017-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.def: Sync with mainline gcc sources

@@ -1,3 +1,9 @@
+2017-01-03  Kito Cheng  <kito.cheng@gmail.com>
+
+	* riscv-opc.c (riscv-opcodes): Add support for the "q" ISA
+	extension.
+	* riscv-opcodes/all-opcodes: Likewise.
+
 2017-01-03  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
 
 	* riscv-dis.c (print_insn_args): Add fall through comment.
