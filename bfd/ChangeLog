@@ -1,3 +1,8 @@
+2017-01-04  James Clarke  <jrtc27@jrtc27.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_opt_call): Don't set tsec_free
+	if relocs are cached.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20989
