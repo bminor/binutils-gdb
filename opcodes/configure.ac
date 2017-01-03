@@ -76,7 +76,7 @@ AC_EXEEXT
 
 # host-specific stuff:
 
-ALL_LINGUAS="fr sv tr es da de id pt_BR ro nl fi vi ga zh_CN it uk"
+ALL_LINGUAS="fr sv tr es da de id pt_BR ro nl fi vi ga zh_CN it uk sr"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 
