@@ -1,3 +1,9 @@
+2017-01-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Do not
+	allow test to continue after compilation errors.
+	(run_cc_link_tests): Likewise.
+
 2017-01-03  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add epruelf.c.

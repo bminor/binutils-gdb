@@ -1414,10 +1414,18 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    # incorrect section attributes and the assembler will warn
 	    # them.
 	    if { [ string match "c++" $lang ] } {
-		ld_compile "$CXX -c $CXXFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CXX -c $CXXFLAGS $cflags"
 	    } else {
-		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CC -c $CFLAGS $cflags"
 	    }
+	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
+		set failed 1
+		break
+	    }
+	}
+	if { $failed != 0 } {
+	    unresolved $testname
+	    continue
 	}
 
 	if { [ string match "c++" $lang ] } {
@@ -1549,10 +1557,18 @@ proc run_cc_link_tests { ldtests } {
 	    # incorrect section attributes and the assembler will warn
 	    # them.
 	    if { [ string match "c++" $lang ] } {
-		ld_compile "$CXX -c $CXXFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CXX -c $CXXFLAGS $cflags"
 	    } else {
-		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CC -c $CFLAGS $cflags"
 	    }
+	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
+		set failed 1
+		break
+	    }
+	}
+	if { $failed != 0 } {
+	    unresolved $testname
+	    continue
 	}
 
 	# Clear error and warning counts.
