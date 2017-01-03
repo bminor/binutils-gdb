@@ -2353,6 +2353,7 @@ microblaze_elf_check_relocs (bfd * abfd,
         dogottls:
           sec->has_tls_reloc = 1;
 	  /* Fall through.  */
+        case R_MICROBLAZE_GOTOFF_64:
         case R_MICROBLAZE_GOT_64:
           if (htab->elf.sgot == NULL)
             {

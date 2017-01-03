@@ -1,3 +1,9 @@
+2017-01-03  Rich Felker  <bugdal@aerifal.cx>
+
+	PR ld/21017
+	* elf32-microblaze.c (microblaze_elf_check_relocs): Add an entry
+	for R_MICROBLAZE_GOTOFF_64.
+
 2017-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* mach-o.c (bfd_mach_o_lookup_uuid_command): Fix compile time
