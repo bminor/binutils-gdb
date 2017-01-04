@@ -1908,23 +1908,11 @@ write_pieced_value (struct value *to, struct value *from)
   const gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (to);
-  struct frame_info *frame;
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));
-
-  /* VALUE_FRAME_ID is used instead of VALUE_NEXT_FRAME_ID here
-     because FRAME is passed to get_frame_register_bytes() and
-     put_frame_register_bytes(), both of which do their own "->next"
-     operations.  */
-  frame = frame_find_by_id (VALUE_FRAME_ID (to));
-  if (frame == NULL)
-    {
-      mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
-      return;
-    }
 
   contents = value_contents (from);
   bits_to_skip = 8 * value_offset (to);
@@ -1988,6 +1976,7 @@ write_pieced_value (struct value *to, struct value *from)
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
+	    struct frame_info *frame = frame_find_by_id (c->frame_id);
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
 	    int reg_offset = dest_offset;
