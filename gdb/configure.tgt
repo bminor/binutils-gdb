@@ -369,6 +369,11 @@ mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	gdb_target_obs="mips-tdep.o mips-nbsd-tdep.o solib-svr4.o nbsd-tdep.o"
 	gdb_sim=../sim/mips/libsim.a
 	;;
+mips*-*-freebsd*)
+	# Target: MIPS running FreeBSD
+	gdb_target_obs="mips-tdep.o mips-fbsd-tdep.o solib-svr4.o fbsd-tdep.o"
+	gdb_sim=../sim/mips/libsim.a
+	;;
 mips64*-*-openbsd*)
 	# Target: OpenBSD/mips64
 	gdb_target_obs="mips-tdep.o mips64-obsd-tdep.o obsd-tdep.o solib-svr4.o"

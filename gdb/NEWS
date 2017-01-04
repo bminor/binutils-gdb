@@ -50,6 +50,7 @@
 * New targets
 
 Synopsys ARC			arc*-*-elf32
+FreeBSD/mips			mips*-*-freebsd
 
 *** Changes in GDB 7.12
 

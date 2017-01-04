@@ -817,6 +817,7 @@ ALL_TARGET_OBS = \
 	mep-tdep.o \
 	microblaze-linux-tdep.o \
 	microblaze-tdep.o \
+	mips-fbsd-tdep.o \
 	mips-linux-tdep.o \
 	mips-nbsd-tdep.o \
 	mips-sde-tdep.o \
@@ -2540,6 +2541,7 @@ ALLDEPFILES = \
 	microblaze-linux-tdep.c \
 	microblaze-tdep.c \
 	mingw-hdep.c \
+	mips-fbsd-tdep.c \
 	mips-linux-nat.c \
 	mips-linux-tdep.c \
 	mips-nbsd-nat.c \
