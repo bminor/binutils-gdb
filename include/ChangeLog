@@ -1,3 +1,8 @@
+2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_RCPC): Define.
+	(AARCH64_ARCH_V8_3): Update.
+
 2017-01-03  Kito Cheng  <kito.cheng@gmail.com>
 
 	* opcode/riscv-opc.h: Add support for the "q" ISA extension.

@@ -53,6 +53,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_RAS	0x04000000	/* RAS Extensions.  */
 #define AARCH64_FEATURE_PROFILE	0x08000000	/* Statistical Profiling.  */
 #define AARCH64_FEATURE_SVE	0x10000000	/* SVE instructions.  */
+#define AARCH64_FEATURE_RCPC	0x20000000	/* RCPC instructions.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -70,7 +71,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_F16	\
 						 | AARCH64_FEATURE_RAS)
 #define AARCH64_ARCH_V8_3	AARCH64_FEATURE (AARCH64_ARCH_V8_2,	\
-						 AARCH64_FEATURE_V8_3)
+						 AARCH64_FEATURE_V8_3	\
+						 | AARCH64_FEATURE_RCPC)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */

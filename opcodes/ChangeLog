@@ -1,3 +1,8 @@
+2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* aarch64-tbl.h (RCPC, RCPC_INSN): Define.
+	(aarch64_opcode_table): Use RCPC_INSN.
+
 2017-01-03  Kito Cheng  <kito.cheng@gmail.com>
 
 	* riscv-opc.c (riscv-opcodes): Add support for the "q" ISA

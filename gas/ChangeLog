@@ -1,3 +1,13 @@
+2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add rcpc.
+	* doc/c-aarch64.texi (AArch64 Extensions): Document rcpc.
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.d: Rename to ...
+	* testsuite/gas/aarch64/ldst-rcpc.d: This.
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.s: Rename to ...
+	* testsuite/gas/aarch64/ldst-rcpc.s: This.
+	* testsuite/gas/aarch64/ldst-rcpc-armv8_2.d: New test.
+
 2017-01-04  Norm Jacobs  <norm.jacobs@oracle.com>
 
 	PR gas/20992
