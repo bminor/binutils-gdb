@@ -182,9 +182,6 @@ extern const char* ldlex_filename (void);
 /* In lexsup.c.  */
 extern int lex_input (void);
 extern void lex_unput (int);
-#ifndef yywrap
-extern int yywrap (void);
-#endif
 extern void parse_args (unsigned, char **);
 
 #endif

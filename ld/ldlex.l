@@ -1,4 +1,4 @@
-%option nounput
+%option nounput noyywrap
 
 %{
 
@@ -86,10 +86,6 @@ static void lex_warn_invalid (char *where, char *what);
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
 
-/* Some versions of flex want this.  */
-#ifndef yywrap
-int yywrap (void) { return 1; }
-#endif
 %}
 
 %a 4000

@@ -1,3 +1,9 @@
+2017-01-04  Dilan Palauzov  <dilyan.palauzov@aegee.org>
+
+	PR 20958
+	* syslex.l (option): Add noyywrap
+	(yywrap): Delete.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
