@@ -1,3 +1,8 @@
+2017-01-04  Norm Jacobs  <norm.jacobs@oracle.com>
+
+	PR gas/20992
+	* configure.tgt: Treat sparcv9 as sparc64.
+
 2017-01-03  Kito Cheng  <kito.cheng@gmail.com>
 
 	* config/tc-riscv.c (riscv_set_arch): Whitelist the "q" ISA

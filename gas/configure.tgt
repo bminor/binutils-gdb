@@ -102,7 +102,7 @@ case ${cpu} in
   sh64*)		cpu_type=sh64 endian=big ;;
   sh*le)		cpu_type=sh endian=little ;;
   sh*)			cpu_type=sh endian=big ;;
-  sparc64*)		cpu_type=sparc arch=v9-64 ;;
+  sparc64* | sparcv9*)	cpu_type=sparc arch=v9-64 ;;
   sparc86x*)		cpu_type=sparc arch=sparc86x  ;;
   sparclet*)		cpu_type=sparc arch=sparclet ;;
   sparclite*)		cpu_type=sparc arch=sparclite ;;
