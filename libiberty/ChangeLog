@@ -1,3 +1,7 @@
+2017-01-04  Alan Modra  <amodra@gmail.com>
+
+	Sync with gcc.
+
 2016-12-12  Nathan Sidwell  <nathan@acm.org>
 
 	PR c++/78252
@@ -10,7 +14,7 @@
 	is_lambda_arg.
 	<DEMANGLE_COMPONENT_LAMBDA>: Increment is_lambda_arg around arg
 	printing.
-	* testsuite/demangle-expected: Add lambda auto mangling cases. 
+	* testsuite/demangle-expected: Add lambda auto mangling cases.
 
 2016-12-08  Alan Modra  <amodra@gmail.com>
 
