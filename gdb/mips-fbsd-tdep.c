@@ -555,6 +555,6 @@ void _initialize_mips_fbsd_tdep (void);
 void
 _initialize_mips_fbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_FREEBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_FREEBSD,
 			  mips_fbsd_init_abi);
 }

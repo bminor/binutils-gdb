@@ -1,5 +1,10 @@
 2017-01-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* mips-fbsd-tdep.c (_initialize_mips_fbsd_tdep): Use
+	GDB_OSABI_FREEBSD instead of GDB_OSABI_FREEBSD_ELF.
+
+2017-01-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* Makefile.in (ALLDEPFILES): Add mips-fbsd-nat.c.
 	* NEWS: Mention new FreeBSD/mips native configuration.
 	* config/mips/fbsd.mh: New file.
