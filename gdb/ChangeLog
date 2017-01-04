@@ -1,5 +1,13 @@
 2017-01-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* Makefile.in (ALLDEPFILES): Add mips-fbsd-nat.c.
+	* NEWS: Mention new FreeBSD/mips native configuration.
+	* config/mips/fbsd.mh: New file.
+	* configure.host: Add mips*-*-freebsd*.
+	* mips-fbsd-nat.c: New file.
+
+2017-01-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* Makefile.in (ALL_TARGET_OBS): Add mips-fbsd-tdep.o.
 	(ALLDEPFILES): Add mips-fbsd-tdep.c.
 	* NEWS: Mention new FreeBSD/mips target.

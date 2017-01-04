@@ -47,6 +47,11 @@
      end
    end
 
+* New native configurations
+
+FreeBSD/mips			mips*-*-freebsd
+
+
 * New targets
 
 Synopsys ARC			arc*-*-elf32
