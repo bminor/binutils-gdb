@@ -1,3 +1,13 @@
+2017-01-04  Jiong Wang  <jiong.wang@arm.com>
+
+	* dwarf2.def: Sync with mainline gcc sources.
+
+	2017-01-04  Richard Earnshaw  <rearnsha@arm.com>
+		    Jiong Wang  <jiong.wang@arm.com>
+
+	* dwarf2.def (DW_OP_AARCH64_operation): Reserve the number 0xea.
+	(DW_CFA_GNU_window_save): Comments the multiplexing on AArch64.
+
 2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_RCPC): Define.
