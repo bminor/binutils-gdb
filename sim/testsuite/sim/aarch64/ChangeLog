@@ -1,3 +1,11 @@
+2017-01-04  Jim Wilson  <jim.wilson@linaro.org>
+
+	* fcsel.s: New.
+	* fcvtz.s: New.
+	* fminnm.s: New.
+	* mls.s: New.
+	* mul.s: New.
+
 2016-12-21  Jim Wilson  <jim.wilson@linaro.org>
 
 	* fcmp.s: New.

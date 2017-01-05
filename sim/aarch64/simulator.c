@@ -3221,7 +3221,8 @@ do_vec_MOV_immediate (sim_cpu *cpu)
     case 0x8: /* 16-bit, no shift.  */
       for (i = 0; i < (full ? 8 : 4); i++)
 	aarch64_set_vec_u16 (cpu, vd, i, val);
-      /* Fall through.  */
+      break;
+
     case 0xd: /* 32-bit, mask shift by 16.  */
       val <<= 8;
       val |= 0xFF;
@@ -3724,15 +3725,15 @@ do_vec_mul (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      DO_VEC_WIDENING_MUL (full ? 16 : 8, uint16_t, u8, u16);
+      DO_VEC_WIDENING_MUL (full ? 16 : 8, uint8_t, u8, u8);
       return;
 
     case 1:
-      DO_VEC_WIDENING_MUL (full ? 8 : 4, uint32_t, u16, u32);
+      DO_VEC_WIDENING_MUL (full ? 8 : 4, uint16_t, u16, u16);
       return;
 
     case 2:
-      DO_VEC_WIDENING_MUL (full ? 4 : 2, uint64_t, u32, u64);
+      DO_VEC_WIDENING_MUL (full ? 4 : 2, uint32_t, u32, u32);
       return;
 
     case 3:
@@ -3831,13 +3832,13 @@ do_vec_MLA (sim_cpu *cpu)
 static float
 fmaxnm (float a, float b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a > b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -3845,13 +3846,13 @@ fmaxnm (float a, float b)
 static float
 fminnm (float a, float b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a < b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -3859,13 +3860,13 @@ fminnm (float a, float b)
 static double
 dmaxnm (double a, double b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a > b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -3873,13 +3874,13 @@ dmaxnm (double a, double b)
 static double
 dminnm (double a, double b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a < b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -6346,25 +6347,25 @@ do_vec_MLS (sim_cpu *cpu)
     case 0:
       for (i = 0; i < (full ? 16 : 8); i++)
 	aarch64_set_vec_u8 (cpu, vd, i,
-			    (aarch64_get_vec_u8 (cpu, vn, i)
-			     * aarch64_get_vec_u8 (cpu, vm, i))
-			    - aarch64_get_vec_u8 (cpu, vd, i));
+			    aarch64_get_vec_u8 (cpu, vd, i)
+			    - (aarch64_get_vec_u8 (cpu, vn, i)
+			       * aarch64_get_vec_u8 (cpu, vm, i)));
       return;
 
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
 	aarch64_set_vec_u16 (cpu, vd, i,
-			     (aarch64_get_vec_u16 (cpu, vn, i)
-			      * aarch64_get_vec_u16 (cpu, vm, i))
-			     - aarch64_get_vec_u16 (cpu, vd, i));
+			     aarch64_get_vec_u16 (cpu, vd, i)
+			     - (aarch64_get_vec_u16 (cpu, vn, i)
+				* aarch64_get_vec_u16 (cpu, vm, i)));
       return;
 
     case 2:
       for (i = 0; i < (full ? 4 : 2); i++)
 	aarch64_set_vec_u32 (cpu, vd, i,
-			     (aarch64_get_vec_u32 (cpu, vn, i)
-			      * aarch64_get_vec_u32 (cpu, vm, i))
-			     - aarch64_get_vec_u32 (cpu, vd, i));
+			     aarch64_get_vec_u32 (cpu, vd, i)
+			     - (aarch64_get_vec_u32 (cpu, vn, i)
+				* aarch64_get_vec_u32 (cpu, vm, i)));
       return;
 
     default:
@@ -7463,9 +7464,11 @@ dexSimpleFPCondSelect (sim_cpu *cpu)
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
-    aarch64_set_FP_double (cpu, sd, set ? sn : sm);
+    aarch64_set_FP_double (cpu, sd, (set ? aarch64_get_FP_double (cpu, sn)
+				     : aarch64_get_FP_double (cpu, sm)));
   else
-    aarch64_set_FP_float (cpu, sd, set ? sn : sm);
+    aarch64_set_FP_float (cpu, sd, (set ? aarch64_get_FP_float (cpu, sn)
+				    : aarch64_get_FP_float (cpu, sm)));
 }
 
 /* Store 32 bit unscaled signed 9 bit.  */
@@ -8117,6 +8120,17 @@ static const float  FLOAT_LONG_MIN  = (float)  LONG_MIN;
 static const double DOUBLE_LONG_MAX = (double) LONG_MAX;
 static const double DOUBLE_LONG_MIN = (double) LONG_MIN;
 
+#define UINT_MIN 0
+#define ULONG_MIN 0
+static const float  FLOAT_UINT_MAX   = (float)  UINT_MAX;
+static const float  FLOAT_UINT_MIN   = (float)  UINT_MIN;
+static const double DOUBLE_UINT_MAX  = (double) UINT_MAX;
+static const double DOUBLE_UINT_MIN  = (double) UINT_MIN;
+static const float  FLOAT_ULONG_MAX  = (float)  ULONG_MAX;
+static const float  FLOAT_ULONG_MIN  = (float)  ULONG_MIN;
+static const double DOUBLE_ULONG_MAX = (double) ULONG_MAX;
+static const double DOUBLE_ULONG_MIN = (double) ULONG_MIN;
+
 /* Check for FP exception conditions:
      NaN raises IO
      Infinity raises IO
@@ -8262,7 +8276,7 @@ do_fcvtzu (sim_cpu *cpu)
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
 	  if (value != (1UL << 63))
-	    RAISE_EXCEPTIONS (d, value, DOUBLE, LONG);
+	    RAISE_EXCEPTIONS (d, value, DOUBLE, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
 	}
@@ -8273,7 +8287,7 @@ do_fcvtzu (sim_cpu *cpu)
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
 	  if (value != (1UL << 63))
-	    RAISE_EXCEPTIONS (f, value, FLOAT, LONG);
+	    RAISE_EXCEPTIONS (f, value, FLOAT, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
 	}
@@ -8290,7 +8304,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  value = (uint32_t) d;
 	  /* Do not raise an exception if we have reached UINT_MAX.  */
 	  if (value != (1UL << 31))
-	    RAISE_EXCEPTIONS (d, value, DOUBLE, INT);
+	    RAISE_EXCEPTIONS (d, value, DOUBLE, UINT);
 	}
       else
 	{
@@ -8299,7 +8313,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  value = (uint32_t) f;
 	  /* Do not raise an exception if we have reached UINT_MAX.  */
 	  if (value != (1UL << 31))
-	    RAISE_EXCEPTIONS (f, value, FLOAT, INT);
+	    RAISE_EXCEPTIONS (f, value, FLOAT, UINT);
 	}
 
       aarch64_set_reg_u64 (cpu, rd, NO_SP, value);

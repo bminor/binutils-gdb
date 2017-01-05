@@ -1,3 +1,22 @@
+2017-01-04  Jim Wilson  <jim.wilson@linaro.org>
+
+	* cpustate.c: Include math.h.
+	(aarch64_set_FP_float): Use signbit to check for signed zero.
+	(aarch64_set_FP_double): Likewise.
+	* simulator.c (do_vec_MOV_immediate, case 0x8): Add missing break.
+	(do_vec_mul): In all DO_VEC_WIDENING_MUL calls, make second and fourth
+	args same size as third arg.
+	(fmaxnm): Use isnan instead of fpclassify.
+	(fminnm, dmaxnm, dminnm): Likewise.
+	(do_vec_MLS): Reverse order of subtraction operands.
+	(dexSimpleFPCondSelect): Call aarch64_get_FP_double or
+	aarch64_get_FP_float to get source register contents.
+	(UINT_MIN, ULONG_MIN, FLOAT_UINT_MAX, FLOAT_UINT_MIN,
+	DOUBLE_UINT_MAX, DOUBLE_UINT_MIN, FLOAT_ULONG_MAX, FLOAT_ULONG_MIN,
+	DOUBLE_ULONG_MAX, DOUBLE_ULONG_MIN): New.
+	(do_fcvtzu): Use ULONG instead of LONG, and UINT instead of INT in
+	raise_exception calls.
+
 2016-12-21  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (set_flags_for_float_compare): Add code to handle Inf.
