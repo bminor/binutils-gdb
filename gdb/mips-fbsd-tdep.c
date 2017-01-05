@@ -332,8 +332,8 @@ mips_fbsd_sigframe_init (const struct tramp_frame *self,
 			   regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + O32_UCONTEXT_HI);
 
-  if (target_read_memory (ucontext_addr + O32_UCONTEXT_FPUSED, buf, 4) == 0 &&
-      extract_unsigned_integer (buf, 4, byte_order) != 0)
+  if (target_read_memory (ucontext_addr + O32_UCONTEXT_FPUSED, buf, 4) == 0
+      && extract_unsigned_integer (buf, 4, byte_order) != 0)
     {
       for (regnum = 0, addr = ucontext_addr + O32_UCONTEXT_FPREGS;
 	   regnum < 32; regnum++, addr += O32_UCONTEXT_REG_SIZE)
@@ -424,8 +424,8 @@ mips64_fbsd_sigframe_init (const struct tramp_frame *self,
 			   regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + N64_UCONTEXT_HI);
 
-  if (target_read_memory (ucontext_addr + N64_UCONTEXT_FPUSED, buf, 4) == 0 &&
-      extract_unsigned_integer (buf, 4, byte_order) != 0)
+  if (target_read_memory (ucontext_addr + N64_UCONTEXT_FPUSED, buf, 4) == 0
+      && extract_unsigned_integer (buf, 4, byte_order) != 0)
     {
       for (regnum = 0, addr = ucontext_addr + N64_UCONTEXT_FPREGS;
 	   regnum < 32; regnum++, addr += N64_UCONTEXT_REG_SIZE)

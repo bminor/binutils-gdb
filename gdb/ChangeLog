@@ -1,3 +1,9 @@
+2017-01-05  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-fbsd-tdep.c (mips_fbsd_sigframe_init): Move && to
+	new line.
+	(mips64_fbsd_sigframe_init): Likewise.
+
 2017-01-04  John Baldwin  <jhb@FreeBSD.org>
 
 	* mips-fbsd-tdep.c (_initialize_mips_fbsd_tdep): Use
