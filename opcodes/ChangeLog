@@ -1,3 +1,11 @@
+2017-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 20946
+	* frv-desc.c (lookup_mach_via_bfd_name): Return NULL if the name
+	could not be matched.
+	(frv_cgen_cpu_open): Allow for lookup_mach_via_bfd_name returning
+	NULL.
+
 2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* aarch64-tbl.h (RCPC, RCPC_INSN): Define.
