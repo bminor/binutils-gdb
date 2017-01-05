@@ -2701,6 +2701,18 @@ elf_s390_relocate_section (bfd *output_bfd,
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
+	  if (h != NULL
+	      && bfd_link_pie (info)
+	      && !h->def_regular)
+	    {
+	      _bfd_error_handler (_("%B: `%s' non-PLT reloc for symbol defined "
+				    "in shared library and accessed "
+				    "from executable "
+				    "(rebuild file with -fPIC ?)"),
+				  input_bfd, h->root.root.string);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 	  /* The target of these relocs are instruction operands
 	     residing in read-only sections.  We cannot emit a runtime
 	     reloc for it.  */
