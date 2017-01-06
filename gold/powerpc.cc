@@ -1816,10 +1816,8 @@ Powerpc_relobj<size, big_endian>::scan_opd_relocs(
 {
   if (size == 64)
     {
-      typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-	Reltype;
-      const int reloc_size
-	= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+      typedef typename elfcpp::Rela<size, big_endian> Reltype;
+      const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
       const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
       Address expected_off = 0;
       bool regular = true;
@@ -3493,8 +3491,7 @@ class Output_data_brlt_powerpc : public Output_section_data_build
     os->set_section_offsets_need_adjustment();
     if (this->rel_ != NULL)
       {
-	unsigned int reloc_size
-	  = Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+	const unsigned int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
 	this->rel_->reset_address_and_file_offset();
 	this->rel_->set_current_data_size(num_branches * reloc_size);
 	this->rel_->finalize_data_size();
@@ -5780,9 +5777,11 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
       if (!is_ifunc)
-	target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			    r_type, elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			    reloc.get_r_addend());
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
+			      r_type, r_sym, reloc.get_r_addend());
+	}
       break;
 
     case elfcpp::R_PPC64_REL64:
@@ -6043,9 +6042,9 @@ Target_powerpc<size, big_endian>::Scan::global(
   bool pushed_ifunc = false;
   if (is_ifunc && this->reloc_needs_plt_for_ifunc(target, object, r_type, true))
     {
+      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
       target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			  r_type, elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			  reloc.get_r_addend());
+			  r_type, r_sym, reloc.get_r_addend());
       target->make_plt_entry(symtab, layout, gsym);
       pushed_ifunc = true;
     }
@@ -6135,9 +6134,9 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      }
 	    if (!is_ifunc || (!pushed_ifunc && need_ifunc_plt))
 	      {
+		unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 		target->push_branch(ppc_object, data_shndx,
-				    reloc.get_r_offset(), r_type,
-				    elfcpp::elf_r_sym<size>(reloc.get_r_info()),
+				    reloc.get_r_offset(), r_type, r_sym,
 				    reloc.get_r_addend());
 		target->make_plt_entry(symtab, layout, gsym);
 	      }
@@ -6192,10 +6191,9 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL24:
       if (!is_ifunc)
 	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			      r_type,
-			      elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			      reloc.get_r_addend());
+			      r_type, r_sym, reloc.get_r_addend());
 	  if (gsym->needs_plt_entry()
 	      || (!gsym->final_value_is_known()
 		  && (gsym->is_undefined()
@@ -6233,9 +6231,11 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
       if (!is_ifunc)
-	target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			    r_type, elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			    reloc.get_r_addend());
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
+			      r_type, r_sym, reloc.get_r_addend());
+	}
       break;
 
     case elfcpp::R_POWERPC_REL16:
@@ -7036,7 +7036,8 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   // descriptor, use the function descriptor code entry address
   Powerpc_relobj<size, big_endian>* symobj = object;
   if (gsym != NULL
-      && gsym->source() != Symbol::FROM_OBJECT)
+      && (gsym->source() != Symbol::FROM_OBJECT
+	  || gsym->object()->is_dynamic()))
     return true;
   if (gsym != NULL)
     symobj = static_cast<Powerpc_relobj<size, big_endian>*>(gsym->object());
@@ -7107,8 +7108,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
   typedef Powerpc_relocate_functions<size, big_endian> Reloc;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
-  typedef typename Reloc_types<elfcpp::SHT_RELA,
-			       size, big_endian>::Reloc Reltype;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
   // Offset from start of insn to d-field reloc.
   const int d_offset = big_endian ? 2 : 0;
 
@@ -7182,7 +7182,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	}
       else
 	{
-	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
 	  value = object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
 	}
@@ -7284,7 +7283,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	      gold_assert(object->local_has_got_offset(r_sym, got_type));
 	      value = object->local_got_offset(r_sym, got_type);
 	    }
@@ -7384,7 +7382,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	}
       else
 	{
-	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_DTPREL));
 	  value = object->local_got_offset(r_sym, GOT_TYPE_DTPREL);
 	}
@@ -7407,7 +7404,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	      gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_TPREL));
 	      value = object->local_got_offset(r_sym, GOT_TYPE_TPREL);
 	    }
@@ -7806,8 +7802,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      && gsym != NULL
 	      && strcmp(gsym->name(), ".TOC.") == 0)
 	    {
-	      const int reloc_size
-		= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+	      const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
 	      Reltype prev_rela(preloc - reloc_size);
 	      if ((prev_rela.get_r_info()
 		   == elfcpp::elf_r_info<size>(r_sym,
@@ -8289,10 +8284,8 @@ template<int size, bool big_endian>
 class Powerpc_scan_relocatable_reloc
 {
 public:
-  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-      Reltype;
-  static const int reloc_size =
-      Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
+  static const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
   static const int sh_type = elfcpp::SHT_RELA;
 
   // Return the symbol referred to by the relocation.
@@ -8432,12 +8425,9 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 {
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-    Reltype;
-  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc_write
-    Reltype_write;
-  const int reloc_size
-    = Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
+  typedef typename elfcpp::Rela_write<size, big_endian> Reltype_write;
+  const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
   // Offset from start of insn to d-field reloc.
   const int d_offset = big_endian ? 2 : 0;
 
