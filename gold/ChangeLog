@@ -1,3 +1,12 @@
+2017-01-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc: Use shorter equivalent elfcpp typedef for
+	Reltype and reloc_size throughout.
+	(Target_powerpc::symval_for_branch): Exclude dynamic symbols.
+	(Target_powerpc::Scan::local): Use local var r_sym.
+	(Target_powerpc::Scan::global: Likewise.
+	(Target_powerpc::Relocate::relocate): Delete shadowing r_sym.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
