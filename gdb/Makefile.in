@@ -1296,7 +1296,6 @@ HFILES_NO_SRCDIR = \
 	gdb_expat.h \
 	gdb_obstack.h \
 	gdb_proc_service.h \
-	gdb_ptrace.h \
 	gdb_regex.h \
 	gdb_select.h \
 	gdb-stabs.h \
@@ -1519,6 +1518,7 @@ HFILES_NO_SRCDIR = \
 	nat/aarch64-linux.h \
 	nat/aarch64-linux-hw-point.h \
 	nat/amd64-linux-siginfo.h \
+	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
 	nat/linux-btrace.h \
 	nat/linux-namespaces.h \

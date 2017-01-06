@@ -1,3 +1,8 @@
+2017-01-06  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Replace gdb_ptrace.h
+	with nat/gdb_ptrace.h.
+
 2017-01-05  Yao Qi  <yao.qi@linaro.org>
 
 	* mips-fbsd-tdep.c (mips_fbsd_sigframe_init): Move && to
