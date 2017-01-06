@@ -22,6 +22,7 @@
 
 #include "run-time-clock.h"
 #include <chrono>
+#include "mi-cmds.h"  /* For enum print_values.  */
 
 /* MI parser */
 
