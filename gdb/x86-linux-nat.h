@@ -20,6 +20,8 @@
 #ifndef X86_LINUX_NAT_H
 #define X86_LINUX_NAT_H 1
 
+#include "gdb_proc_service.h"  /* For ps_err_e.  */
+
 
 
 /* Helper for ps_get_thread_area.  Sets BASE_ADDR to a pointer to
