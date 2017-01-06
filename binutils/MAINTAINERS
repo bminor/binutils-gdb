@@ -61,7 +61,6 @@ responsibility among the other maintainers.
   AARCH64	   Marcus Shawcroft <marcus.shawcroft@arm.com>
   ARM		   Nick Clifton <nickc@redhat.com>
   ARM		   Richard Earnshaw <rearnsha@arm.com>
-  ARM		   Paul Brook <paul@codesourcery.com>
   ARM		   Ramana Radhakrishnan <ramana.radhakrishnan@arm.com>
   AVR		   Denis Chertykov <chertykov@gmail.com>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
@@ -157,6 +156,7 @@ These folks have acted as maintainers in the past, but have now
 moved on to other things.  Our thanks for all their hard work
 goes with them.
 
+  Paul Brook
   Mark Mitchell
 
       --------- CGEN Maintainers -------------

@@ -1,3 +1,7 @@
+2017-01-06  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Move Paul Brook to the Past Maintainers section.
+
 2017-01-04  Dilan Palauzov  <dilyan.palauzov@aegee.org>
 
 	PR 20958
