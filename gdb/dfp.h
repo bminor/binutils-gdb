@@ -25,6 +25,9 @@
 #ifndef DFP_H
 #define DFP_H
 
+#include "doublest.h"    /* For DOUBLEST.  */
+#include "expression.h"  /* For enum exp_opcode.  */
+
 /* When using decimal128, this is the maximum string length + 1
  * (value comes from libdecnumber's DECIMAL128_String constant).  */
 #define MAX_DECIMAL_STRING  43
