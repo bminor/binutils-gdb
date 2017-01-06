@@ -1,5 +1,9 @@
 2017-01-06  Yao Qi  <yao.qi@linaro.org>
 
+	* ser-base.h: Include serial.h.
+
+2017-01-06  Yao Qi  <yao.qi@linaro.org>
+
 	* ppc-linux-tdep.h: Include ppc-tdep.h.
 
 2017-01-06  Yao Qi  <yao.qi@linaro.org>
