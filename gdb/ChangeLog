@@ -1,5 +1,9 @@
 2017-01-06  Yao Qi  <yao.qi@linaro.org>
 
+	* nat/aarch64-linux-hw-point.h: Include break-common.h.
+
+2017-01-06  Yao Qi  <yao.qi@linaro.org>
+
 	* mi/mi-parse.h: Include mi-cmds.h.
 
 2017-01-06  Yao Qi  <yao.qi@linaro.org>
