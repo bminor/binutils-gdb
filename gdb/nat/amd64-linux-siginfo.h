@@ -20,6 +20,8 @@
 #ifndef AMD64_LINUX_SIGINFO_H
 #define AMD64_LINUX_SIGINFO_H 1
 
+#include <signal.h>  /* For siginfo_t.  */
+
 /* When GDB is built as a 64-bit application on Linux, the
    PTRACE_GETSIGINFO data is always presented in 64-bit layout.  Since
    debugging a 32-bit inferior with a 64-bit GDB should look the same
