@@ -321,15 +321,12 @@ UnaryExpression:
 
 CastExpression:
 	CAST_KEYWORD '(' TypeExp ')' UnaryExpression
-		{ write_exp_elt_opcode (pstate, UNOP_CAST);
-		  write_exp_elt_type (pstate, $3);
-		  write_exp_elt_opcode (pstate, UNOP_CAST); }
+		{ write_exp_elt_opcode (pstate, UNOP_CAST_TYPE); }
 	/* C style cast is illegal D, but is still recognised in
 	   the grammar, so we keep this around for convenience.  */
 |	'(' TypeExp ')' UnaryExpression
-		{ write_exp_elt_opcode (pstate, UNOP_CAST);
-		  write_exp_elt_type (pstate, $2);
-		  write_exp_elt_opcode (pstate, UNOP_CAST); }
+		{ write_exp_elt_opcode (pstate, UNOP_CAST_TYPE); }
+
 ;
 
 PowExpression:

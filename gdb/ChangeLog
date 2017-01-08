@@ -1,3 +1,7 @@
+2017-01-08  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (CastExpression): Emit UNOP_CAST_TYPE.
+
 2017-01-06  Yao Qi  <yao.qi@linaro.org>
 
 	* x86-linux-nat.h: Include gdb_proc_service.h.

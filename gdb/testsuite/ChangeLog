@@ -1,3 +1,7 @@
+2017-01-08  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/debug-expr.exp: New file.
+
 2016-12-23  Luis Machado  <lgustavo@codesourcery.com>
 
 	Fix test names for the following files:
