@@ -3421,6 +3421,9 @@ Target_powerpc<size, big_endian>::make_plt_section(Symbol_table* symtab,
 				       ? ORDER_SMALL_DATA
 				       : ORDER_SMALL_BSS),
 				      false);
+
+      Output_section* rela_plt_os = plt_rel->output_section();
+      rela_plt_os->set_info_section(this->plt_->output_section());
     }
 }
 

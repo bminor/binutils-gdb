@@ -1,6 +1,10 @@
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2017-01-09  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::make_plt_section): Point sh_info of
+	".rela.plt" at ".plt".
+
 	2017-01-07  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc: Use shorter equivalent elfcpp typedef for
 	Reltype and reloc_size throughout.
