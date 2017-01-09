@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Free Software Foundation, Inc.
+# Copyright 2014-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -159,12 +159,11 @@ gdb_test "print foovar.private_var" "85" \
 
 ## Simple inheritance
 CompileExpression::new "var"
-CompileExpression::add_exp "class Baz: public Foo {public: int z = 12;}; Baz bazvar; bazvar.z = 24; var = bazvar.z" 24
+CompileExpression::test "class Baz: public Foo {public: int z = 12;}; Baz bazvar; bazvar.z = 24; var = bazvar.z" 24 -explicit
 ## Multiple inheritance
-CompileExpression::add_exp "class MI: public Base, public Base2 {int pure_virt () {return 42;}}; MI MIVar; var = MIVar.pure_virt();" 42
-CompileExpression::add_exp "class MI: public Base, public Base2 {int pure_virt () {return Base::return_value() + 42;}}; MI MIVar; var =  MIVar.pure_virt();" 43
-CompileExpression::add_exp "class Base3 {public: int z = 99;}; class MI: public Base, public Base3 {int pure_virt () {return Base3::z + 42;}}; MI MIVar; var = MIVar.pure_virt();" 141
-CompileExpression::run_tests "code"
+CompileExpression::test "class MI: public Base, public Base2 {int pure_virt () {return 42;}}; MI MIVar; var = MIVar.pure_virt();" 42 -explicit
+CompileExpression::test "class MI: public Base, public Base2 {int pure_virt () {return Base::return_value() + 42;}}; MI MIVar; var =  MIVar.pure_virt();" 43 -explicit
+CompileExpression::test "class Base3 {public: int z = 99;}; class MI: public Base, public Base3 {int pure_virt () {return Base3::z + 42;}}; MI MIVar; var = MIVar.pure_virt();" 141 -explicit
 
 gdb_test "p localvar" " = 50" "expect localvar 50"
 
