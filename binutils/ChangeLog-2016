@@ -321,6 +321,9 @@
 
 2016-08-19  Nick Clifton  <nickc@redhat.com>
 
+	* readelf.c (process_section_headers): Sanity check section headers.
+	(process_symbol_table): Don't warn on solaris binaries with local
+	symbols past symtab sh_info.
 	* testsuite/binutils-all/readelf.s: Adjust expected ordering of
 	sections.
 	* testsuite/binutils-all/readelf.s-64: Likewise.
