@@ -1,3 +1,9 @@
+2017-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: New Swedish translation.
+	* configure.ac (ALL_LINGUAS): Add sv.
+	* configure: Regenerate.
+
 2017-01-09  Andrew Waterman <andrew@sifive.com>
 
 	* config/tc-riscv.c (relaxed_branch_length): Use the long
