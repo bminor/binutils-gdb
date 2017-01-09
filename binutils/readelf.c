@@ -6092,8 +6092,8 @@ process_section_headers (FILE * file)
 		  && (streq (SECTION_NAME (section), ".rel.dyn")
 		      || streq (SECTION_NAME (section), ".rela.dyn")))
 		/* The .rel.dyn and .rela.dyn sections have an sh_info field
-		   of zero.  No idea why.  I would have expected the index
-		   of the .plt section.  */
+		   of zero.  The relocations in these sections may apply
+		   to many different sections.  */
 		   ;
 	      else
 		warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
