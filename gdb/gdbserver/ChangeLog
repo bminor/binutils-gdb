@@ -1,3 +1,10 @@
+2017-01-09  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-aarch32-low.c (arm_breakpoint_kind_from_pc): Use
+	target_read_memory.
+	* linux-arm-low.c (get_next_pcs_read_memory_unsigned_integer): Likewise.
+	(get_next_pcs_syscall_next_pc): Likewise.
+
 2016-12-23  Luis Machado  <lgustavo@codesourcery.com>
 
 	* win32-i386-low.c: Fix incorrect reference to a couple source files.
