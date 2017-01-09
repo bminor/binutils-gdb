@@ -1,3 +1,8 @@
+2017-01-09  Andrew Waterman <andrew@sifive.com>
+
+	* config/tc-riscv.c (relaxed_branch_length): Use the long
+	sequence when the target is a weak symbol.
+
 2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-aarch64.c (aarch64_features): Add rcpc.
