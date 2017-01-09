@@ -1,5 +1,14 @@
 2017-01-10  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ver_test_8.sh: Accept .TOC. in lieu of
+	_GLOBAL_OFFSET_TABLE_.  Allow zero count.
+	* testsuite/copy_test_relro_1.cc (c, q): New vars.
+	* testsuite/copy_test_relro.cc: Rewrite to test read-only
+	status of variables directly.  Reference new vars in
+	read-only data.
+
+2017-01-10  Alan Modra  <amodra@gmail.com>
+
 	* options.h: Add --secure-plt option.
 	* powerpc.cc (Target_powerpc::Scan::local): Detect and error
 	on -fPIC -mbss-plt code.

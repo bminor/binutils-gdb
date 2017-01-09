@@ -22,15 +22,26 @@
 
 #include <cassert>
 #include <stdint.h>
-
-extern char* _etext;
-extern char* __data_start;
-extern char* _edata;
-extern char* _end;
+#include <signal.h>
+#include <setjmp.h>
 
 extern int* const p;
 extern const int b[];
+extern const int* const q;
+extern const int c;
 int a = 123;
+
+extern const int* const cp __attribute__ ((section (".rodata"))) = &c;
+extern const int* const* const qp __attribute__ ((section (".rodata"))) = &q;
+
+volatile int segfaults = 0;
+sigjmp_buf jmp;
+
+void segv(int)
+{
+  ++segfaults;
+  siglongjmp(jmp, 1);
+}
 
 int main()
 {
@@ -39,7 +50,27 @@ int main()
   assert(b[1] == 200);
   assert(b[2] == 300);
   assert(b[3] == 400);
-  assert(reinterpret_cast<const void*>(&p) < reinterpret_cast<void*>(&__data_start));
-  assert(reinterpret_cast<const void*>(b) < reinterpret_cast<void*>(&__data_start));
+  assert(c == 500);
+
+  struct sigaction act;
+  act.sa_handler = segv;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
+  sigaction(SIGSEGV, &act, 0);
+
+  assert(segfaults == 0);
+  if (sigsetjmp(jmp, 1) == 0)
+    *const_cast<const int **>(&p) = &c;
+  assert(segfaults == 1);
+  if (sigsetjmp(jmp, 1) == 0)
+    *const_cast<int *>(b) = 99;
+  assert(segfaults == 2);
+  if (sigsetjmp(jmp, 1) == 0)
+    *const_cast<int *>(cp) = c - 1;
+  assert(segfaults == 3);
+  if (sigsetjmp(jmp, 1) == 0)
+    *const_cast<int **>(qp) = &a;
+  assert(segfaults == 4);
+
   return 0;
 }

@@ -24,3 +24,7 @@ extern int a;
 extern int* const p = &a;
 
 extern const int b[] = { 100, 200, 300, 400 };
+
+extern const int c = 500;
+
+extern const int* const q = &c;
