@@ -1,3 +1,11 @@
+2017-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (display_file): Add new parameter 'last_file'.  If
+	last_file is true, do not call bfd_close at the end of the
+	function.
+	(main): Set the value of the last_file parameter when calling
+	display_file.
+
 2017-01-09  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_section_headers): Correct .rel.dyn/.rela.dyn

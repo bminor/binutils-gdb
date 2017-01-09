@@ -3616,7 +3616,7 @@ display_any_bfd (bfd *file, int level)
 }
 
 static void
-display_file (char *filename, char *target)
+display_file (char *filename, char *target, bfd_boolean last_file)
 {
   bfd *file;
 
@@ -3635,7 +3635,18 @@ display_file (char *filename, char *target)
 
   display_any_bfd (file, 0);
 
-  bfd_close (file);
+  /* This is an optimization to improve the speed of objdump, especially when
+     dumping a file with lots of associated debug informatiom.  Calling
+     bfd_close on such a file can take a non-trivial amount of time as there
+     are lots of lists to walk and buffers to free.  This is only really
+     necessary however if we are about to load another file and we need the
+     memory back.  Otherwise, if we are about to exit, then we can save (a lot
+     of) time by only doing a quick close, and allowing the OS to reclaim the
+     memory for us.  */
+  if (! last_file)
+    bfd_close (file);
+  else
+    bfd_close_all_done (file);
 }
 
 int
@@ -3913,10 +3924,13 @@ main (int argc, char **argv)
   else
     {
       if (optind == argc)
-	display_file ("a.out", target);
+	display_file ("a.out", target, TRUE);
       else
 	for (; optind < argc;)
-	  display_file (argv[optind++], target);
+	  {
+	    display_file (argv[optind], target, optind == argc - 1);
+	    optind++;
+	  }
     }
 
   free_only_list ();

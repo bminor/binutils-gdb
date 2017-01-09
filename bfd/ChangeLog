@@ -1,5 +1,12 @@
 2017-01-09  Nick Clifton  <nickc@redhat.com>
 
+	* dwarf2.c (lookup_address_in_function_table): Return early if
+	there are no functions in the given comp unit, or if the high
+	address of the last function in the comp unit is less than the
+	desired address.
+
+2017-01-09  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21013
 	* coffgen.c (_bfd_coff_get_external_symbols): Generate an error
 	message if there are too many symbols to load.
