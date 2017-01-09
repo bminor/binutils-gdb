@@ -44,12 +44,12 @@ gdb_continue_to_breakpoint "testing location"
 
 # Reminder, "var" is an integer; all these types get converted to `int'.
 CompileExpression::new "var"
-CompileExpression::test "anon_e" 3
+CompileExpression::test "anon_e" {(3|GHI)}
 CompileExpression::test "anon_u.aa" {97( 'a')?}
 CompileExpression::test "anon_s.len" 11
 CompileExpression::test "a.u.b" 0
 CompileExpression::test "a.s.len" 5
-CompileExpression::test "a.e" 10
+CompileExpression::test "a.e" {(10|A::AA)}
 CompileExpression::test "(*anon_s.ptr == 'a')" (1|true)
 CompileExpression::test "(*a.s.ptr != 'h')" (0|false)
-CompileExpression::test "A::BB" 11
+CompileExpression::test "A::BB" {(11|A::BB)}

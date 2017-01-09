@@ -451,6 +451,7 @@ struct cplus_add_code_header
     case COMPILE_I_PRINT_VALUE_SCOPE:
       fputs_unfiltered (
 			"#include <cstring>\n"
+			"#include <bits/move.h>\n"
 			"void "
 			GCC_FE_WRAPPER_FUNCTION
 			" (struct "
@@ -486,15 +487,16 @@ struct cplus_add_input
       {
       case COMPILE_I_PRINT_ADDRESS_SCOPE:
       case COMPILE_I_PRINT_VALUE_SCOPE:
-	fprintf_unfiltered (buf,
-			    "auto " COMPILE_I_EXPR_VAL " = %s;\n"
-			    "decltype (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
-			    "std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s"
-			    COMPILE_I_EXPR_VAL ",\n"
-			    "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
-			    ,input, input,
-			    (type == COMPILE_I_PRINT_ADDRESS_SCOPE
-			     ? "&" : ""));
+	fprintf_unfiltered
+	  (buf,
+	   "auto " COMPILE_I_EXPR_VAL " = %s;\n"
+	   "decltype (" COMPILE_I_EXPR_VAL ") *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+	   "std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s ("
+	   COMPILE_I_EXPR_VAL "),\n"
+	   "sizeof (" COMPILE_I_EXPR_VAL "));\n"
+	   ,input,
+	   (type == COMPILE_I_PRINT_ADDRESS_SCOPE
+	    ? "std::__addressof" : ""));
 	break;
 
       default:

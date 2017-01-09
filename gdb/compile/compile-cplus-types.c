@@ -583,14 +583,11 @@ ccp_convert_typedef (compile_cplus_instance *instance,
   if (scope.nested_type () != GCC_TYPE_NONE)
     return scope.nested_type ();
 
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   char *name = NULL;
+  struct cleanup *cleanups = make_cleanup (free_current_contents, &name);
 
   if (TYPE_NAME (type) != NULL)
-    {
-      name = cp_func_name (TYPE_NAME (type));
-      make_cleanup (xfree, name);
-    }
+    name = cp_func_name (TYPE_NAME (type));
 
   /* Make sure the scope for this type has been pushed.  */
   instance->enter_scope (scope);
@@ -1300,26 +1297,12 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 {
   const char *filename = NULL;  /* !!keiths: FIXME  */
   unsigned short line = 0;
+  char *name = NULL;
+  struct cleanup *back_to = make_cleanup (free_current_contents, &name);
 
   /* Get the decl name of this type.  */
-  std::string name;
   if (TYPE_NAME (type) != NULL)
-    {
-      char *str = decl_name (TYPE_NAME (type));
-
-      name = str;
-      xfree (str);
-    }
-  else
-    {
-      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-	{
-	  name = (TYPE_DECLARED_CLASS (type) ? "anonymous class"
-		  : "anonymous struct");
-	}
-      else
-	name = "anonymous union";
-    }
+      name = decl_name (TYPE_NAME (type));
 
   /* First things first: If this type has any templates in it, make sure
      that we collect default arguments and get those types defined BEFORE
@@ -1328,7 +1311,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 
   /* If this is a new template class, make sure the generic has been seen
      and defined.  */
-  instance->maybe_define_new_class_template (type, name.c_str ());
+  instance->maybe_define_new_class_template (type, name);
   instance->emit_class_template_decls ();
 
   /* Create a new scope for TYPE.  */
@@ -1356,7 +1339,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
     {
       const char *what = TYPE_DECLARED_CLASS (type) ? "struct" : "class";
 
-      resuld = instance->new_decl (what, name.c_str (),
+      resuld = instance->new_decl (what, name,
 				   GCC_CP_SYMBOL_CLASS | nested_access
 				   | (TYPE_DECLARED_CLASS (type)
 				      ? GCC_CP_FLAG_CLASS_NOFLAG
@@ -1366,7 +1349,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-      resuld = instance->new_decl ("union", name.c_str (),
+      resuld = instance->new_decl ("union", name,
 				   GCC_CP_SYMBOL_UNION | nested_access,
 				   0, NULL, 0, filename, line);
     }
@@ -1403,7 +1386,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 	    }
 	}
 
-      result = instance->start_class_definition (name.c_str (), resuld, &bases,
+      result = instance->start_class_definition (name, resuld, &bases,
 						 filename, line);
       xfree (bases.flags);
       xfree (bases.elements);
@@ -1412,7 +1395,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
       result
-	= instance->start_class_definition (name.c_str (), resuld, NULL,
+	= instance->start_class_definition (name, resuld, NULL,
 					    filename, line);
     }
 
@@ -1428,10 +1411,11 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   ccp_convert_struct_or_union_members (instance, type, result);
 
   /* All finished.  */
-  instance->finish_record_or_union (name.c_str (), TYPE_LENGTH (type));
+  instance->finish_record_or_union (name, TYPE_LENGTH (type));
 
   /* Pop all scopes.  */
   instance->leave_scope ();
+  do_cleanups (back_to);
   return result;
 }
 
@@ -1445,10 +1429,8 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
 {
   int i;
   gcc_type int_type;
-  char *name = NULL;
   const char *filename = NULL;
   unsigned short line = 0;
-  struct cleanup *cleanups;
   /* !!keiths: This does not appear to work. GCC complains about
      being unable to convert enum values from '(MyEnum)0' to 'int'.  */
   int scoped_enum_p = /*TYPE_DECLARED_CLASS (type) ? TRUE :*/ FALSE;
@@ -1463,16 +1445,11 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
       return scope.nested_type ();
     }
 
-  /* Create an empty cleanup chain.  */
-  cleanups = make_cleanup (null_cleanup, NULL);
+  char *name = NULL;
+  struct cleanup *cleanups = make_cleanup (free_current_contents, &name);
 
   if (TYPE_NAME (type) != NULL)
-    {
-      name = cp_func_name (TYPE_NAME (type));
-      make_cleanup (xfree, name);
-    }
-  else
-    name = "anonymous enum";
+    name = cp_func_name (TYPE_NAME (type));
 
   /* Push all scopes.  */
   instance->enter_scope (scope);

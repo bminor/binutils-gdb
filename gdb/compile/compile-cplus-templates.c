@@ -635,7 +635,7 @@ void
 compile_cplus_instance::maybe_define_new_class_template
   (struct type *type, const char *decl_name)
 {
-  if (TYPE_N_TEMPLATE_ARGUMENTS (type) == 0)
+  if (TYPE_N_TEMPLATE_ARGUMENTS (type) == 0 || decl_name == NULL)
     return;
 
   std::string generic (compute_class_template_generic (decl_name, type));

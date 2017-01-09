@@ -46,9 +46,9 @@ CompileExpression::new "var"
 CompileExpression::test "a.public_" 1
 CompileExpression::test "a.protected_" {(21|N::AB)}
 CompileExpression::test "a.private_" 3
-CompileExpression::test "A::s_public_" 10
+CompileExpression::test "A::s_public_" {(10|E_A)}
 CompileExpression::test "A::s_protected_" {(20|N::AA)}
-CompileExpression::test "A::s_private_" 12
+CompileExpression::test "A::s_private_" {(12|E_C)}
 CompileExpression::test "A::ATYPE i = 10; var = i;" 10 -explicit
 CompileExpression::test "get_values (a)" 85
 CompileExpression::test "myenum me = E_B; var = me;" 11 -explicit
