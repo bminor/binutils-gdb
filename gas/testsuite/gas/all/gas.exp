@@ -393,6 +393,7 @@ run_dump_test sleb128-5
 if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
     run_dump_test sleb128-7
 }
+run_dump_test sleb128-8
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
 # .space is different on hppa*-hpux.

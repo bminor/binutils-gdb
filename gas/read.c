@@ -5344,13 +5344,21 @@ emit_leb128_expr (expressionS *exp, int sign)
   else if (op == O_big)
     {
       /* O_big is a different sort of constant.  */
-
+      int nbr_digits = exp->X_add_number;
       unsigned int size;
       char *p;
 
-      size = output_big_leb128 (NULL, generic_bignum, exp->X_add_number, sign);
+      /* If the leading littenum is 0xffff, prepend a 0 to avoid confusion with
+	 a signed number.  Unary operators like - or ~ always extend the
+	 bignum to its largest size.  */
+      if (exp->X_unsigned
+	  && nbr_digits < SIZE_OF_LARGE_NUMBER
+	  && generic_bignum[nbr_digits - 1] == LITTLENUM_MASK)
+	generic_bignum[nbr_digits++] = 0;
+
+      size = output_big_leb128 (NULL, generic_bignum, nbr_digits, sign);
       p = frag_more (size);
-      if (output_big_leb128 (p, generic_bignum, exp->X_add_number, sign) > size)
+      if (output_big_leb128 (p, generic_bignum, nbr_digits, sign) > size)
 	abort ();
     }
   else
