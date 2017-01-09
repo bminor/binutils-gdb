@@ -2958,12 +2958,10 @@ do_vec_UZP (sim_cpu *cpu)
   uint64_t val_n1 = aarch64_get_vec_u64 (cpu, vn, 0);
   uint64_t val_n2 = aarch64_get_vec_u64 (cpu, vn, 1);
 
-  uint64_t val1 = 0;
-  uint64_t val2 = 0;
+  uint64_t val1;
+  uint64_t val2;
 
-  uint64_t input1 = upper ? val_n1 : val_m1;
-  uint64_t input2 = upper ? val_n2 : val_m2;
-  unsigned i;
+  uint64_t input2 = full ? val_n2 : val_m1;
 
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 21, 0);
@@ -2971,32 +2969,68 @@ do_vec_UZP (sim_cpu *cpu)
   NYI_assert (13, 10, 6);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  switch (INSTR (23, 23))
+  switch (INSTR (23, 22))
     {
     case 0:
-      for (i = 0; i < 8; i++)
+      val1 = (val_n1 >> (upper * 8)) & 0xFFULL;
+      val1 |= (val_n1 >> ((upper * 8) + 8)) & 0xFF00ULL;
+      val1 |= (val_n1 >> ((upper * 8) + 16)) & 0xFF0000ULL;
+      val1 |= (val_n1 >> ((upper * 8) + 24)) & 0xFF000000ULL;
+
+      val1 |= (input2 << (32 - (upper * 8))) & 0xFF00000000ULL;
+      val1 |= (input2 << (24 - (upper * 8))) & 0xFF0000000000ULL;
+      val1 |= (input2 << (16 - (upper * 8))) & 0xFF000000000000ULL;
+      val1 |= (input2 << (8 - (upper * 8))) & 0xFF00000000000000ULL;
+
+      if (full)
 	{
-	  val1 |= (input1 >> (i * 8)) & (0xFFULL << (i * 8));
-	  val2 |= (input2 >> (i * 8)) & (0xFFULL << (i * 8));
+	  val2 = (val_m1 >> (upper * 8)) & 0xFFULL;
+	  val2 |= (val_m1 >> ((upper * 8) + 8)) & 0xFF00ULL;
+	  val2 |= (val_m1 >> ((upper * 8) + 16)) & 0xFF0000ULL;
+	  val2 |= (val_m1 >> ((upper * 8) + 24)) & 0xFF000000ULL;
+
+	  val2 |= (val_m2 << (32 - (upper * 8))) & 0xFF00000000ULL;
+	  val2 |= (val_m2 << (24 - (upper * 8))) & 0xFF0000000000ULL;
+	  val2 |= (val_m2 << (16 - (upper * 8))) & 0xFF000000000000ULL;
+	  val2 |= (val_m2 << (8 - (upper * 8))) & 0xFF00000000000000ULL;
 	}
       break;
 
     case 1:
-      for (i = 0; i < 4; i++)
+      val1 = (val_n1 >> (upper * 16)) & 0xFFFFULL;
+      val1 |= (val_n1 >> ((upper * 16) + 16)) & 0xFFFF0000ULL;
+
+      val1 |= (input2 << (32 - (upper * 16))) & 0xFFFF00000000ULL;;
+      val1 |= (input2 << (16 - (upper * 16))) & 0xFFFF000000000000ULL;
+
+      if (full)
 	{
-	  val1 |= (input1 >> (i * 16)) & (0xFFFFULL << (i * 16));
-	  val2 |= (input2 >> (i * 16)) & (0xFFFFULL << (i * 16));
+	  val2 = (val_m1 >> (upper * 16)) & 0xFFFFULL;
+	  val2 |= (val_m1 >> ((upper * 16) + 16)) & 0xFFFF0000ULL;
+
+	  val2 |= (val_m2 << (32 - (upper * 16))) & 0xFFFF00000000ULL;
+	  val2 |= (val_m2 << (16 - (upper * 16))) & 0xFFFF000000000000ULL;
 	}
       break;
 
     case 2:
-      val1 = ((input1 & 0xFFFFFFFF) | ((input1 >> 32) & 0xFFFFFFFF00000000ULL));
-      val2 = ((input2 & 0xFFFFFFFF) | ((input2 >> 32) & 0xFFFFFFFF00000000ULL));
+      val1 = (val_n1 >> (upper * 32)) & 0xFFFFFFFF;
+      val1 |= (input2 << (32 - (upper * 32))) & 0xFFFFFFFF00000000ULL;
+
+      if (full)
+	{
+	  val2 = (val_m1 >> (upper * 32)) & 0xFFFFFFFF;
+	  val2 |= (val_m2 << (32 - (upper * 32))) & 0xFFFFFFFF00000000ULL;
+	}
+      break;
 
     case 3:
-      val1 = input1;
-      val2 = input2;
-	   break;
+      if (! full)
+	HALT_UNALLOC;
+
+      val1 = upper ? val_n2 : val_n1;
+      val2 = upper ? val_m2 : val_m1;
+      break;
     }
 
   aarch64_set_vec_u64 (cpu, vd, 0, val1);

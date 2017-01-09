@@ -1,3 +1,7 @@
+2017-01-09  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (do_vec_UZP): Rewrite.
+
 2017-01-04  Jim Wilson  <jim.wilson@linaro.org>
 
 	* cpustate.c: Include math.h.
