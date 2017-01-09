@@ -354,6 +354,7 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
 
   if (fragp->fr_symbol != NULL
       && S_IS_DEFINED (fragp->fr_symbol)
+      && !S_IS_WEAK (fragp->fr_symbol)
       && sec == S_GET_SEGMENT (fragp->fr_symbol))
     {
       offsetT val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;

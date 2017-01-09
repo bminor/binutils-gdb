@@ -11,6 +11,40 @@
 	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.d: Ditto.
 	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.s: Ditto.
 
+2017-01-09  Andrew Waterman <andrew@sifive.com>
+
+	* config/tc-riscv.c (relaxed_branch_length): Use the long
+	sequence when the target is a weak symbol.
+
+2017-01-04  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add rcpc.
+	* doc/c-aarch64.texi (AArch64 Extensions): Document rcpc.
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.d: Rename to ...
+	* testsuite/gas/aarch64/ldst-rcpc.d: This.
+	* testsuite/gas/aarch64/ldst-exclusive-armv8_3.s: Rename to ...
+	* testsuite/gas/aarch64/ldst-rcpc.s: This.
+	* testsuite/gas/aarch64/ldst-rcpc-armv8_2.d: New test.
+
+2017-01-04  Norm Jacobs  <norm.jacobs@oracle.com>
+
+	PR gas/20992
+	* configure.tgt: Treat sparcv9 as sparc64.
+
+2017-01-03  Kito Cheng  <kito.cheng@gmail.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Whitelist the "q" ISA
+	extension.
+	(riscv_after_parse_args): Set FLOAT_ABI_QUAD when the Q ISA is
+	enabled and no other ABI is specified.
+
+2017-01-03  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* config/tc-pru.c (md_number_to_chars): Fix parameter to be
+	valueT, as declared in tc.h.
+	(md_apply_fix): Fix to work on 32-bit hosts.
+>>>>>>> 0115611... RISC-V/GAS: Correct branch relaxation for weak symbols.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
