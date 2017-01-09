@@ -1,3 +1,9 @@
+2017-01-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21013
+	* coffgen.c (_bfd_coff_get_external_symbols): Generate an error
+	message if there are too many symbols to load.
+
 2017-01-04  James Clarke  <jrtc27@jrtc27.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_opt_call): Don't set tsec_free
