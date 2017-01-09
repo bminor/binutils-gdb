@@ -5972,6 +5972,30 @@ Target_powerpc<size, big_endian>::Scan::local(
       break;
     }
 
+  if (size == 32)
+    {
+      switch (r_type)
+	{
+	case elfcpp::R_POWERPC_REL32:
+	  if (ppc_object->got2_shndx() != 0
+	      && parameters->options().output_is_position_independent())
+	    {
+	      unsigned int shndx = lsym.get_st_shndx();
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	      bool is_ordinary;
+	      shndx = ppc_object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+	      if (is_ordinary && shndx == ppc_object->got2_shndx()
+		  && (ppc_object->section_flags(data_shndx)
+		      & elfcpp::SHF_EXECINSTR) != 0)
+		gold_error(_("%s: unsupported -mbss-plt code"),
+			   ppc_object->name().c_str());
+	    }
+	  break;
+	default:
+	  break;
+	}
+    }
+
   switch (r_type)
     {
     case elfcpp::R_POWERPC_GOT_TLSLD16:
@@ -6471,6 +6495,20 @@ Target_powerpc<size, big_endian>::Scan::global(
     default:
       unsupported_reloc_global(object, r_type, gsym);
       break;
+    }
+
+  if (size == 32)
+    {
+      switch (r_type)
+	{
+	case elfcpp::R_PPC_LOCAL24PC:
+	  if (strcmp(gsym->name(), "_GLOBAL_OFFSET_TABLE_") == 0)
+	    gold_error(_("%s: unsupported -mbss-plt code"),
+		       ppc_object->name().c_str());
+	  break;
+	default:
+	  break;
+	}
     }
 
   switch (r_type)

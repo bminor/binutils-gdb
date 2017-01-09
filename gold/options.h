@@ -1203,6 +1203,9 @@ class General_options
   DEFINE_special(section_start, options::TWO_DASHES, '\0',
 		 N_("Set address of section"), N_("SECTION=ADDRESS"));
 
+  DEFINE_bool(secure_plt, options::TWO_DASHES , '\0', true,
+	      N_("(PowerPC only) Use new-style PLT"), NULL);
+
   DEFINE_optional_string(sort_common, options::TWO_DASHES, '\0', NULL,
 			 N_("Sort common symbols by alignment"),
 			 N_("[={ascending,descending}]"));
