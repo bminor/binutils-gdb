@@ -1,5 +1,14 @@
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
 
+	* cli/cli-decode.c (find_command_name_length): Make it extern.
+	* cli/cli-decode.h (find_command_name_length): Declare.
+	* cli/cli-script.c (command_name_equals, line_first_arg):
+	New functions.
+	(process_next_line): Use cli-decode to parse command names.
+	(build_command_line): Make args a constant pointer.
+
+2017-02-08  Jerome Guitton  <guitton@adacore.com>
+	
 	* cli-decode.c (lookup_cmd_1, lookup_cmd_composition):
 	Remove case-insensitive search.
 

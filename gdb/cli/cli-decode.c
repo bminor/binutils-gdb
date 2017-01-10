@@ -1255,7 +1255,9 @@ find_cmd (const char *command, int len, struct cmd_list_element *clist,
   return found;
 }
 
-static int
+/* Return the length of command name in TEXT.  */
+
+int
 find_command_name_length (const char *text)
 {
   const char *p = text;
