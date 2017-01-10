@@ -1,3 +1,9 @@
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Pass -Wl,-R,tmpdir and
+	-Wl,--as-needed to $CC.
+	* testsuite/ld-i386/tls.exp: Likewise.
+
 2017-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
