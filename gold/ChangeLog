@@ -1,3 +1,13 @@
+2017-01-10  Cary Coutant  <ccoutant@gmail.com>
+
+	* aarch64.cc (AArch64_relobj::do_relocate_sections): Call
+	Sized_relobj_file::relocate_section_range().
+	* arm.cc (Arm_relobj::do_relocate_sections): Likewise.
+	* object.h (Sized_relobj_file::relocate_section_range): New method.
+	* reloc.cc (Sized_relobj_file::do_relocate_sections): Move
+	implementation...
+	(Sized_relobj_file::relocate_section_range): ...to new method.
+
 2017-01-10  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ver_test_8.sh: Accept .TOC. in lieu of
