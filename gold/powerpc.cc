@@ -92,8 +92,9 @@ public:
   Powerpc_relobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
-      special_(0), has_small_toc_reloc_(false), opd_valid_(false),
-      opd_ent_(), access_from_map_(), has14_(), stub_table_index_(),
+      special_(0), relatoc_(0), toc_(0), no_toc_opt_(),
+      has_small_toc_reloc_(false), opd_valid_(false), opd_ent_(),
+      access_from_map_(), has14_(), stub_table_index_(),
       e_flags_(ehdr.get_e_flags()), st_other_()
   {
     this->set_abiversion(0);
@@ -105,6 +106,52 @@ public:
   // Read the symbols then set up st_other vector.
   void
   do_read_symbols(Read_symbols_data*);
+
+  // Arrange to always relocate .toc first.
+  virtual void
+  do_relocate_sections(
+      const Symbol_table* symtab, const Layout* layout,
+      const unsigned char* pshdrs, Output_file* of,
+      typename Sized_relobj_file<size, big_endian>::Views* pviews);
+
+  // The .toc section index.
+  unsigned int
+  toc_shndx() const
+  {
+    return this->toc_;
+  }
+
+  // Mark .toc entry at OFF as not optimizable.
+  void
+  set_no_toc_opt(Address off)
+  {
+    if (this->no_toc_opt_.empty())
+      this->no_toc_opt_.resize(this->section_size(this->toc_shndx())
+			       / (size / 8));
+    off /= size / 8;
+    if (off < this->no_toc_opt_.size())
+      this->no_toc_opt_[off] = true;
+  }
+
+  // Mark the entire .toc as not optimizable.
+  void
+  set_no_toc_opt()
+  {
+    this->no_toc_opt_.resize(1);
+    this->no_toc_opt_[0] = true;
+  }
+
+  // Return true if code using the .toc entry at OFF should not be edited.
+  bool
+  no_toc_opt(Address off) const
+  {
+    if (this->no_toc_opt_.empty())
+      return false;
+    off /= size / 8;
+    if (off >= this->no_toc_opt_.size())
+      return true;
+    return this->no_toc_opt_[off];
+  }
 
   // The .got2 section shndx.
   unsigned int
@@ -187,6 +234,12 @@ public:
   scan_opd_relocs(size_t reloc_count,
 		  const unsigned char* prelocs,
 		  const unsigned char* plocal_syms);
+
+  // Returns true if a code sequence loading a TOC entry can be
+  // converted into code calculating a TOC pointer relative offset.
+  bool
+  make_toc_relative(Target_powerpc<size, big_endian>* target,
+		    Address* value);
 
   // Perform the Sized_relobj_file method, then set up opd info from
   // .opd relocs.
@@ -346,6 +399,14 @@ private:
   // For 32-bit the .got2 section shdnx, for 64-bit the .opd section shndx.
   unsigned int special_;
 
+  // For 64-bit the .rela.toc and .toc section shdnx.
+  unsigned int relatoc_;
+  unsigned int toc_;
+
+  // For 64-bit, an array with one entry per 64-bit word in the .toc
+  // section, set if accesses using that word cannot be optimised.
+  std::vector<bool> no_toc_opt_;
+
   // For 64-bit, whether this object uses small model relocs to access
   // the toc.
   bool has_small_toc_reloc_;
@@ -497,6 +558,23 @@ private:
   elfcpp::Elf_Word e_flags_;
 };
 
+// Powerpc_copy_relocs class.  Needed to peek at dynamic relocs the
+// base class will emit.
+
+template<int sh_type, int size, bool big_endian>
+class Powerpc_copy_relocs : public Copy_relocs<sh_type, size, big_endian>
+{
+ public:
+  Powerpc_copy_relocs()
+    : Copy_relocs<sh_type, size, big_endian>(elfcpp::R_POWERPC_COPY)
+  { }
+
+  // Emit any saved relocations which turn out to be needed.  This is
+  // called after all the relocs have been scanned.
+  void
+  emit(Output_data_reloc<sh_type, true, size, big_endian>*);
+};
+
 template<int size, bool big_endian>
 class Target_powerpc : public Sized_target<size, big_endian>
 {
@@ -513,7 +591,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   Target_powerpc()
     : Sized_target<size, big_endian>(&powerpc_info),
       got_(NULL), plt_(NULL), iplt_(NULL), brlt_section_(NULL),
-      glink_(NULL), rela_dyn_(NULL), copy_relocs_(elfcpp::R_POWERPC_COPY),
+      glink_(NULL), rela_dyn_(NULL), copy_relocs_(),
       tlsld_got_offset_(-1U),
       stub_tables_(), branch_lookup_table_(), branch_info_(),
       plt_thread_safe_(false), relax_failed_(false), relax_fail_count_(0),
@@ -1314,7 +1392,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // The dynamic reloc section.
   Reloc_section* rela_dyn_;
   // Relocs saved to avoid a COPY reloc.
-  Copy_relocs<elfcpp::SHT_RELA, size, big_endian> copy_relocs_;
+  Powerpc_copy_relocs<elfcpp::SHT_RELA, size, big_endian> copy_relocs_;
   // Offset of the GOT entry for local dynamic __tls_get_addr calls.
   unsigned int tlsld_got_offset_;
 
@@ -1772,8 +1850,8 @@ Powerpc_relobj<size, big_endian>::set_abiversion(int ver)
     }
 }
 
-// Stash away the index of .got2 or .opd in a relocatable object, if
-// such a section exists.
+// Stash away the index of .got2, .opd, .rela.toc, and .toc in a
+// relocatable object, if such sections exists.
 
 template<int size, bool big_endian>
 bool
@@ -1800,6 +1878,18 @@ Powerpc_relobj<size, big_endian>::do_find_special_sections(
 	  else if (this->abiversion() > 1)
 	    gold_error(_("%s: .opd invalid in abiv%d"),
 		       this->name().c_str(), this->abiversion());
+	}
+    }
+  if (size == 64)
+    {
+      s = this->template find_shdr<size, big_endian>(pshdrs, ".rela.toc",
+						     names, names_size, NULL);
+      if (s != NULL)
+	{
+	  unsigned int ndx = (s - pshdrs) / elfcpp::Elf_sizes<size>::shdr_size;
+	  this->relatoc_ = ndx;
+	  typename elfcpp::Shdr<size, big_endian> shdr(s);
+	  this->toc_ = this->adjust_shndx(shdr.get_sh_info());
 	}
     }
   return Sized_relobj_file<size, big_endian>::do_find_special_sections(sd);
@@ -1881,6 +1971,54 @@ Powerpc_relobj<size, big_endian>::scan_opd_relocs(
 	}
     }
 }
+
+// Returns true if a code sequence loading the TOC entry at VALUE
+// relative to the TOC pointer can be converted into code calculating
+// a TOC pointer relative offset.
+// If so, the TOC pointer relative offset is stored to VALUE.
+
+template<int size, bool big_endian>
+bool
+Powerpc_relobj<size, big_endian>::make_toc_relative(
+    Target_powerpc<size, big_endian>* target,
+    Address* value)
+{
+  if (size != 64)
+    return false;
+
+  // Convert VALUE back to an address by adding got_base (see below),
+  // then to an offset in the TOC by subtracting the TOC output
+  // section address and the TOC output offset.  Since this TOC output
+  // section and the got output section are one and the same, we can
+  // omit adding and subtracting the output section address.
+  Address off = (*value + this->toc_base_offset()
+		 - this->output_section_offset(this->toc_shndx()));
+  // Is this offset in the TOC?  -mcmodel=medium code may be using
+  // TOC relative access to variables outside the TOC.  Those of
+  // course can't be optimized.  We also don't try to optimize code
+  // that is using a different object's TOC.
+  if (off >= this->section_size(this->toc_shndx()))
+    return false;
+
+  if (this->no_toc_opt(off))
+    return false;
+
+  section_size_type vlen;
+  unsigned char* view = this->get_output_view(this->toc_shndx(), &vlen);
+  Address addr = elfcpp::Swap<size, big_endian>::readval(view + off);
+  // The TOC pointer
+  Address got_base = (target->got_section()->output_section()->address()
+		      + this->toc_base_offset());
+  addr -= got_base;
+  if (addr + 0x80008000 >= (uint64_t) 1 << 32)
+    return false;
+
+  *value = addr;
+  return true;
+}
+
+// Perform the Sized_relobj_file method, then set up opd info from
+// .opd relocs.
 
 template<int size, bool big_endian>
 void
@@ -2075,6 +2213,31 @@ Powerpc_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 	  // have a non-zero third word in the OPD entry.
 	}
     }
+}
+
+// Relocate sections.
+
+template<int size, bool big_endian>
+void
+Powerpc_relobj<size, big_endian>::do_relocate_sections(
+    const Symbol_table* symtab, const Layout* layout,
+    const unsigned char* pshdrs, Output_file* of,
+    typename Sized_relobj_file<size, big_endian>::Views* pviews)
+{
+  unsigned int start = 1;
+  if (size == 64
+      && this->relatoc_ != 0
+      && !parameters->options().relocatable())
+    {
+      // Relocate .toc first.
+      this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+				   this->relatoc_, this->relatoc_);
+      this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+				   1, this->relatoc_ - 1);
+      start = this->relatoc_ + 1;
+    }
+  this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+			       start, this->shnum() - 1);
 }
 
 // Set up some symbols.
@@ -5617,6 +5780,45 @@ Target_powerpc<size, big_endian>::Scan::reloc_needs_plt_for_ifunc(
   return false;
 }
 
+// Return TRUE iff INSN is one we expect on a _LO variety toc/got
+// reloc.
+
+static bool
+ok_lo_toc_insn(uint32_t insn, unsigned int r_type)
+{
+  return ((insn & (0x3f << 26)) == 12u << 26 /* addic */
+	  || (insn & (0x3f << 26)) == 14u << 26 /* addi */
+	  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
+	  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
+	  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
+	  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
+	  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
+	  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
+	  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
+	  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
+	  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
+	  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
+	  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
+	  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
+	  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
+	  || (insn & (0x3f << 26)) == 56u << 26 /* lq,lfq */
+	  || ((insn & (0x3f << 26)) == 57u << 26 /* lxsd,lxssp,lfdp */
+	      /* Exclude lfqu by testing reloc.  If relocs are ever
+		 defined for the reduced D field in psq_lu then those
+		 will need testing too.  */
+	      && r_type != elfcpp::R_PPC64_TOC16_LO
+	      && r_type != elfcpp::R_POWERPC_GOT16_LO)
+	  || ((insn & (0x3f << 26)) == 58u << 26 /* ld,lwa */
+	      && (insn & 1) == 0)
+	  || (insn & (0x3f << 26)) == 60u << 26 /* stfq */
+	  || ((insn & (0x3f << 26)) == 61u << 26 /* lxv,stx{v,sd,ssp},stfdp */
+	      /* Exclude stfqu.  psq_stu as above for psq_lu.  */
+	      && r_type != elfcpp::R_PPC64_TOC16_LO
+	      && r_type != elfcpp::R_POWERPC_GOT16_LO)
+	  || ((insn & (0x3f << 26)) == 62u << 26 /* std,stq */
+	      && (insn & 1) == 0));
+}
+
 // Scan a relocation for a local symbol.
 
 template<int size, bool big_endian>
@@ -5972,6 +6174,126 @@ Target_powerpc<size, big_endian>::Scan::local(
       break;
     }
 
+  if (size == 64
+      && parameters->options().toc_optimize())
+    {
+      if (data_shndx == ppc_object->toc_shndx())
+	{
+	  bool ok = true;
+	  if (r_type != elfcpp::R_PPC64_ADDR64
+	      || (is_ifunc && target->abiversion() < 2))
+	    ok = false;
+	  else if (parameters->options().output_is_position_independent())
+	    {
+	      if (is_ifunc)
+		ok = false;
+	      else
+		{
+		  unsigned int shndx = lsym.get_st_shndx();
+		  if (shndx >= elfcpp::SHN_LORESERVE
+		      && shndx != elfcpp::SHN_XINDEX)
+		    ok = false;
+		}
+	    }
+	  if (!ok)
+	    ppc_object->set_no_toc_opt(reloc.get_r_offset());
+	}
+
+      enum {no_check, check_lo, check_ha} insn_check;
+      switch (r_type)
+	{
+	default:
+	  insn_check = no_check;
+	  break;
+
+	case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
+	case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
+	case elfcpp::R_POWERPC_GOT_TPREL16_HA:
+	case elfcpp::R_POWERPC_GOT_DTPREL16_HA:
+	case elfcpp::R_POWERPC_GOT16_HA:
+	case elfcpp::R_PPC64_TOC16_HA:
+	  insn_check = check_ha;
+	  break;
+
+	case elfcpp::R_POWERPC_GOT_TLSLD16_LO:
+	case elfcpp::R_POWERPC_GOT_TLSGD16_LO:
+	case elfcpp::R_POWERPC_GOT_TPREL16_LO:
+	case elfcpp::R_POWERPC_GOT_DTPREL16_LO:
+	case elfcpp::R_POWERPC_GOT16_LO:
+	case elfcpp::R_PPC64_GOT16_LO_DS:
+	case elfcpp::R_PPC64_TOC16_LO:
+	case elfcpp::R_PPC64_TOC16_LO_DS:
+	  insn_check = check_lo;
+	  break;
+	}
+
+      section_size_type slen;
+      const unsigned char* view = NULL;
+      if (insn_check != no_check)
+	{
+	  view = ppc_object->section_contents(data_shndx, &slen, false);
+	  section_size_type off =
+	    convert_to_section_size_type(reloc.get_r_offset()) & -4;
+	  if (off < slen)
+	    {
+	      uint32_t insn = elfcpp::Swap<32, big_endian>::readval(view + off);
+	      if (insn_check == check_lo
+		  ? !ok_lo_toc_insn(insn, r_type)
+		  : ((insn & ((0x3f << 26) | 0x1f << 16))
+		     != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
+		{
+		  ppc_object->set_no_toc_opt();
+		  gold_warning(_("%s: toc optimization is not supported "
+				 "for %#08x instruction"),
+			       ppc_object->name().c_str(), insn);
+		}
+	    }
+	}
+
+      switch (r_type)
+	{
+	default:
+	  break;
+	case elfcpp::R_PPC64_TOC16:
+	case elfcpp::R_PPC64_TOC16_LO:
+	case elfcpp::R_PPC64_TOC16_HI:
+	case elfcpp::R_PPC64_TOC16_HA:
+	case elfcpp::R_PPC64_TOC16_DS:
+	case elfcpp::R_PPC64_TOC16_LO_DS:
+	  unsigned int shndx = lsym.get_st_shndx();
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	  bool is_ordinary;
+	  shndx = ppc_object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+	  if (is_ordinary && shndx == ppc_object->toc_shndx())
+	    {
+	      Address dst_off = lsym.get_st_value() + reloc.get_r_offset();
+	      if (dst_off < ppc_object->section_size(shndx))
+		{
+		  bool ok = false;
+		  if (r_type == elfcpp::R_PPC64_TOC16_HA)
+		    ok = true;
+		  else if (r_type == elfcpp::R_PPC64_TOC16_LO_DS)
+		    {
+		      // Need to check that the insn is a ld
+		      if (!view)
+			view = ppc_object->section_contents(data_shndx,
+							    &slen,
+							    false);
+		      section_size_type off =
+			(convert_to_section_size_type(reloc.get_r_offset())
+			 + (big_endian ? -2 : 3));
+		      if (off < slen
+			  && (view[off] & (0x3f << 2)) == 58u << 2)
+			ok = true;
+		    }
+		  if (!ok)
+		    ppc_object->set_no_toc_opt(dst_off);
+		}
+	    }
+	  break;
+	}
+    }
+
   if (size == 32)
     {
       switch (r_type)
@@ -6209,6 +6531,11 @@ Target_powerpc<size, big_endian>::Scan::global(
 				     object, data_shndx,
 				     reloc.get_r_offset(),
 				     reloc.get_r_addend());
+
+		if (size == 64
+		    && parameters->options().toc_optimize()
+		    && data_shndx == ppc_object->toc_shndx())
+		  ppc_object->set_no_toc_opt(reloc.get_r_offset());
 	      }
 	  }
       }
@@ -6495,6 +6822,122 @@ Target_powerpc<size, big_endian>::Scan::global(
     default:
       unsupported_reloc_global(object, r_type, gsym);
       break;
+    }
+
+  if (size == 64
+      && parameters->options().toc_optimize())
+    {
+      if (data_shndx == ppc_object->toc_shndx())
+	{
+	  bool ok = true;
+	  if (r_type != elfcpp::R_PPC64_ADDR64
+	      || (is_ifunc && target->abiversion() < 2))
+	    ok = false;
+	  else if (parameters->options().output_is_position_independent()
+		   && (is_ifunc || gsym->is_absolute() || gsym->is_undefined()))
+	    ok = false;
+	  if (!ok)
+	    ppc_object->set_no_toc_opt(reloc.get_r_offset());
+	}
+
+      enum {no_check, check_lo, check_ha} insn_check;
+      switch (r_type)
+	{
+	default:
+	  insn_check = no_check;
+	  break;
+
+	case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
+	case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
+	case elfcpp::R_POWERPC_GOT_TPREL16_HA:
+	case elfcpp::R_POWERPC_GOT_DTPREL16_HA:
+	case elfcpp::R_POWERPC_GOT16_HA:
+	case elfcpp::R_PPC64_TOC16_HA:
+	  insn_check = check_ha;
+	  break;
+
+	case elfcpp::R_POWERPC_GOT_TLSLD16_LO:
+	case elfcpp::R_POWERPC_GOT_TLSGD16_LO:
+	case elfcpp::R_POWERPC_GOT_TPREL16_LO:
+	case elfcpp::R_POWERPC_GOT_DTPREL16_LO:
+	case elfcpp::R_POWERPC_GOT16_LO:
+	case elfcpp::R_PPC64_GOT16_LO_DS:
+	case elfcpp::R_PPC64_TOC16_LO:
+	case elfcpp::R_PPC64_TOC16_LO_DS:
+	  insn_check = check_lo;
+	  break;
+	}
+
+      section_size_type slen;
+      const unsigned char* view = NULL;
+      if (insn_check != no_check)
+	{
+	  view = ppc_object->section_contents(data_shndx, &slen, false);
+	  section_size_type off =
+	    convert_to_section_size_type(reloc.get_r_offset()) & -4;
+	  if (off < slen)
+	    {
+	      uint32_t insn = elfcpp::Swap<32, big_endian>::readval(view + off);
+	      if (insn_check == check_lo
+		  ? !ok_lo_toc_insn(insn, r_type)
+		  : ((insn & ((0x3f << 26) | 0x1f << 16))
+		     != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
+		{
+		  ppc_object->set_no_toc_opt();
+		  gold_warning(_("%s: toc optimization is not supported "
+				 "for %#08x instruction"),
+			       ppc_object->name().c_str(), insn);
+		}
+	    }
+	}
+
+      switch (r_type)
+	{
+	default:
+	  break;
+	case elfcpp::R_PPC64_TOC16:
+	case elfcpp::R_PPC64_TOC16_LO:
+	case elfcpp::R_PPC64_TOC16_HI:
+	case elfcpp::R_PPC64_TOC16_HA:
+	case elfcpp::R_PPC64_TOC16_DS:
+	case elfcpp::R_PPC64_TOC16_LO_DS:
+	  if (gsym->source() == Symbol::FROM_OBJECT
+	      && !gsym->object()->is_dynamic())
+	    {
+	      Powerpc_relobj<size, big_endian>* sym_object
+		= static_cast<Powerpc_relobj<size, big_endian>*>(gsym->object());
+	      bool is_ordinary;
+	      unsigned int shndx = gsym->shndx(&is_ordinary);
+	      if (shndx == sym_object->toc_shndx())
+		{
+		  Sized_symbol<size>* sym = symtab->get_sized_symbol<size>(gsym);
+		  Address dst_off = sym->value() + reloc.get_r_offset();
+		  if (dst_off < sym_object->section_size(shndx))
+		    {
+		      bool ok = false;
+		      if (r_type == elfcpp::R_PPC64_TOC16_HA)
+			ok = true;
+		      else if (r_type == elfcpp::R_PPC64_TOC16_LO_DS)
+			{
+			  // Need to check that the insn is a ld
+			  if (!view)
+			    view = ppc_object->section_contents(data_shndx,
+								&slen,
+								false);
+			  section_size_type off =
+			    (convert_to_section_size_type(reloc.get_r_offset())
+			     + (big_endian ? -2 : 3));
+			  if (off < slen
+			      && (view[off] & (0x3f << 2)) == (58u << 2))
+			    ok = true;
+			}
+		      if (!ok)
+			sym_object->set_no_toc_opt(dst_off);
+		    }
+		}
+	    }
+	  break;
+	}
     }
 
   if (size == 32)
@@ -7031,31 +7474,40 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
     this->copy_relocs_.emit(this->rela_dyn_section(layout));
 }
 
-// Return TRUE iff INSN is one we expect on a _LO variety toc/got
-// reloc.
+// Emit any saved relocs, and mark toc entries using any of these
+// relocs as not optimizable.
 
-static bool
-ok_lo_toc_insn(uint32_t insn)
+template<int sh_type, int size, bool big_endian>
+void
+Powerpc_copy_relocs<sh_type, size, big_endian>::emit(
+    Output_data_reloc<sh_type, true, size, big_endian>* reloc_section)
 {
-  return ((insn & (0x3f << 26)) == 14u << 26 /* addi */
-	  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
-	  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
-	  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
-	  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
-	  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
-	  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
-	  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
-	  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
-	  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
-	  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
-	  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
-	  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
-	  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
-	  || ((insn & (0x3f << 26)) == 58u << 26 /* lwa,ld,lmd */
-	      && (insn & 3) != 1)
-	  || ((insn & (0x3f << 26)) == 62u << 26 /* std, stmd */
-	      && ((insn & 3) == 0 || (insn & 3) == 3))
-	  || (insn & (0x3f << 26)) == 12u << 26 /* addic */);
+  if (size == 64
+      && parameters->options().toc_optimize())
+    {
+      for (typename Copy_relocs<sh_type, size, big_endian>::
+	     Copy_reloc_entries::iterator p = this->entries_.begin();
+	   p != this->entries_.end();
+	   ++p)
+	{
+	  typename Copy_relocs<sh_type, size, big_endian>::Copy_reloc_entry&
+	    entry = *p;
+
+	  // If the symbol is no longer defined in a dynamic object,
+	  // then we emitted a COPY relocation.  If it is still
+	  // dynamic then we'll need dynamic relocations and thus
+	  // can't optimize toc entries.
+	  if (entry.sym_->is_from_dynobj())
+	    {
+	      Powerpc_relobj<size, big_endian>* ppc_object
+		= static_cast<Powerpc_relobj<size, big_endian>*>(entry.relobj_);
+	      if (entry.shndx_ == ppc_object->toc_shndx())
+		ppc_object->set_no_toc_opt(entry.address_);
+	    }
+	}
+    }
+
+  Copy_relocs<sh_type, size, big_endian>::emit(reloc_section);
 }
 
 // Return the value to use for a branch relocation.
@@ -7716,14 +8168,24 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
   if (size == 64)
     {
-      // Multi-instruction sequences that access the TOC can be
-      // optimized, eg. addis ra,r2,0; addi rb,ra,x;
-      // to             nop;           addi rb,r2,x;
       switch (r_type)
 	{
 	default:
 	  break;
 
+	  // Multi-instruction sequences that access the GOT/TOC can
+	  // be optimized, eg.
+	  //     addis ra,r2,x@got@ha; ld rb,x@got@l(ra);
+	  // to  addis ra,r2,x@toc@ha; addi rb,ra,x@toc@l;
+	  // and
+	  //     addis ra,r2,0; addi rb,ra,x@toc@l;
+	  // to  nop;           addi rb,r2,x@toc;
+	  // FIXME: the @got sequence shown above is not yet
+	  // optimized.  Note that gcc as of 2017-01-07 doesn't use
+	  // the ELF @got relocs except for TLS, instead using the
+	  // PowerOpen variant of a compiler managed GOT (called TOC).
+	  // The PowerOpen TOC sequence equivalent to the first
+	  // example is optimized.
 	case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
 	case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
 	case elfcpp::R_POWERPC_GOT_TPREL16_HA:
@@ -7734,12 +8196,15 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
-	      if ((insn & ((0x3f << 26) | 0x1f << 16))
-		  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
-		gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-				       _("toc optimization is not supported "
-					 "for %#08x instruction"), insn);
-	      else if (value + 0x8000 < 0x10000)
+	      if (r_type == elfcpp::R_PPC64_TOC16_HA
+		  && object->make_toc_relative(target, &value))
+		{
+		  gold_assert((insn & ((0x3f << 26) | 0x1f << 16))
+			      == ((15u << 26) | (2 << 16)));
+		}
+	      if (((insn & ((0x3f << 26) | 0x1f << 16))
+		   == ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
+		  && value + 0x8000 < 0x10000)
 		{
 		  elfcpp::Swap<32, big_endian>::writeval(iview, nop);
 		  return true;
@@ -7759,11 +8224,17 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
-	      if (!ok_lo_toc_insn(insn))
-		gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-				       _("toc optimization is not supported "
-					 "for %#08x instruction"), insn);
-	      else if (value + 0x8000 < 0x10000)
+	      bool changed = false;
+	      if (r_type == elfcpp::R_PPC64_TOC16_LO_DS
+		  && object->make_toc_relative(target, &value))
+		{
+		  gold_assert ((insn & (0x3f << 26)) == 58u << 26 /* ld */);
+		  insn ^= (14u << 26) ^ (58u << 26);
+		  r_type = elfcpp::R_PPC64_TOC16_LO;
+		  changed = true;
+		}
+	      if (ok_lo_toc_insn(insn, r_type)
+		  && value + 0x8000 < 0x10000)
 		{
 		  if ((insn & (0x3f << 26)) == 12u << 26 /* addic */)
 		    {
@@ -7776,8 +8247,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		      insn &= ~(0x1f << 16);
 		      insn |= 2 << 16;
 		    }
-		  elfcpp::Swap<32, big_endian>::writeval(iview, insn);
+		  changed = true;
 		}
+	      if (changed)
+		elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	    }
 	  break;
 

@@ -1,6 +1,25 @@
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2017-01-11  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (class Powerpc_copy_relocs): New.
+	(Powerpc_copy_relocs::emit): New function.
+	(Powerpc_relobj::relatoc_, toc_, no_toc_opt_): New variables.
+	(Powerpc_relobj::toc_shndx, set_no_toc_opt, no_toc_opt): New inlines.
+	(Powerpc_relobj::do_relocate_sections): New function.
+	(Powerpc_relobj::make_toc_relative): Likewise.
+	(Powerpc_relobj::do_find_special_sections): Stash away .rela.toc
+	and .toc too.
+	(ok_lo_toc_insn): Move earlier, and handle more insns.
+	(Target_powerpc::Scan::local): If optimizing toc accesses, set
+	no_toc_opt for entries we can't edit.  Check insn validity.
+	Emit "toc optimization is not supported" warning, downgraded
+	from error.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Edit TOC indirect code
+	to TOC relative.  Don't emit "toc optimization is not supported"
+	error here.
+
 	2017-01-10  Cary Coutant  <ccoutant@gmail.com>
 	* aarch64.cc (AArch64_relobj::do_relocate_sections): Call
 	Sized_relobj_file::relocate_section_range().
