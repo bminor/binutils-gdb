@@ -2044,9 +2044,9 @@ AArch64_relobj<size, big_endian>::do_relocate_sections(
     const unsigned char* pshdrs, Output_file* of,
     typename Sized_relobj_file<size, big_endian>::Views* pviews)
 {
-  // Call parent to relocate sections.
-  Sized_relobj_file<size, big_endian>::do_relocate_sections(symtab, layout,
-							    pshdrs, of, pviews);
+  // Relocate the section data.
+  this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+			       1, this->shnum() - 1);
 
   // We do not generate stubs if doing a relocatable link.
   if (parameters->options().relocatable())

@@ -2562,6 +2562,13 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 		       const unsigned char* pshdrs, Output_file* of,
 		       Views* pviews);
 
+  // Relocate section data for a range of sections.
+  void
+  relocate_section_range(const Symbol_table* symtab, const Layout* layout,
+			 const unsigned char* pshdrs, Output_file* of,
+			 Views* pviews, unsigned int start_shndx,
+			 unsigned int end_shndx);
+
   // Adjust this local symbol value.  Return false if the symbol
   // should be discarded from the output file.
   virtual bool
