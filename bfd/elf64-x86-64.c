@@ -1172,7 +1172,8 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       htab->plt_eh_frame
 	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame", flags);
       if (htab->plt_eh_frame == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
+	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame,
+					 ABI_64_P (dynobj) ? 3 : 2))
 	return FALSE;
     }
 
@@ -2796,7 +2797,7 @@ do_size:
 	      if (htab->plt_got_eh_frame == NULL
 		  || !bfd_set_section_alignment (htab->elf.dynobj,
 						 htab->plt_got_eh_frame,
-						 3))
+						 ABI_64_P (htab->elf.dynobj) ? 3 : 2))
 		goto error_return;
 	    }
 	}

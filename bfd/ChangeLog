@@ -1,5 +1,13 @@
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Align .eh_frame section
+	to 4 bytes.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Align
+	.eh_frame section to 4 bytes for x32.
+	(elf_x86_64_check_relocs): Likewise.
+
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20830
 	* elf32-i386.c (elf_i386_eh_frame_plt_got): New.
 	(PLT_GOT_FDE_LENGTH): Likewise.

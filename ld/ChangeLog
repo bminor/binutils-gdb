@@ -1,5 +1,9 @@
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/pr20830b.d: Updated.
+
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* emulparams/elf32_x86_64.sh (TINY_READONLY_SECTION): New.
 	* testsuite/ld-x86-64/pr20830.d: Renamed to ...
 	* testsuite/ld-x86-64/pr20830a.d: This.  Updated.

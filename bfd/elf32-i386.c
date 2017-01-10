@@ -2395,7 +2395,7 @@ do_size:
 	      if (htab->plt_got_eh_frame == NULL
 		  || !bfd_set_section_alignment (htab->elf.dynobj,
 						 htab->plt_got_eh_frame,
-						 3))
+						 2))
 		goto error_return;
 	    }
 	}
