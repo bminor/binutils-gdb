@@ -1,3 +1,29 @@
+2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pr20830b.d: Updated.
+
+	2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (TINY_READONLY_SECTION): New.
+	* testsuite/ld-x86-64/pr20830.d: Renamed to ...
+	* testsuite/ld-x86-64/pr20830a.d: This.  Updated.
+	* testsuite/ld-x86-64/pr20830b.d: New file.
+	* testsuite/ld-x86-64/x86-64.exp: Rename pr20830 to pr20830a.
+	Run pr20830b.
+
+	2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20830
+	* testsuite/ld-i386/i386.exp: Run pr20830.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr20830.d: New file.
+	* testsuite/ld-i386/pr20830.s: Likewise.
+	* testsuite/ld-x86-64/pr20830.d: Likewise.
+	* testsuite/ld-x86-64/pr20830.s: Likewise.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

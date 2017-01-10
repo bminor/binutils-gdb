@@ -659,6 +659,33 @@ static const bfd_byte elf_x86_64_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+/* .eh_frame covering the .plt.got section.  */
+
+static const bfd_byte elf_x86_64_eh_frame_plt_got[] =
+{
+#define PLT_GOT_FDE_LENGTH		20
+  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
+  0, 0, 0, 0,			/* CIE ID */
+  1,				/* CIE version */
+  'z', 'R', 0,			/* Augmentation string */
+  1,				/* Code alignment factor */
+  0x78,				/* Data alignment factor */
+  16,				/* Return address column */
+  1,				/* Augmentation size */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+  DW_CFA_def_cfa, 7, 8,		/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
+  DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
+  DW_CFA_nop, DW_CFA_nop,
+
+  PLT_GOT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
+  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
+  0, 0, 0, 0,			/* the start of .plt.got goes here */
+  0, 0, 0, 0,			/* .plt.got size goes here */
+  0,				/* Augmentation size */
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop,
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+};
+
 /* Architecture-specific backend data for x86-64.  */
 
 struct elf_x86_64_backend_data
@@ -693,6 +720,10 @@ struct elf_x86_64_backend_data
   /* .eh_frame covering the .plt section.  */
   const bfd_byte *eh_frame_plt;
   unsigned int eh_frame_plt_size;
+
+  /* .eh_frame covering the .plt.got section.  */
+  const bfd_byte *eh_frame_plt_got;
+  unsigned int eh_frame_plt_got_size;
 };
 
 #define get_elf_x86_64_arch_data(bed) \
@@ -721,6 +752,8 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
     6,                                  /* plt_lazy_offset */
     elf_x86_64_eh_frame_plt,            /* eh_frame_plt */
     sizeof (elf_x86_64_eh_frame_plt),   /* eh_frame_plt_size */
+    elf_x86_64_eh_frame_plt_got,        /* eh_frame_plt_got */
+    sizeof (elf_x86_64_eh_frame_plt_got), /* eh_frame_plt_got_size */
   };
 
 static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
@@ -739,6 +772,9 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
     0,                                  /* plt_lazy_offset */
     elf_x86_64_eh_frame_plt,            /* eh_frame_plt */
     sizeof (elf_x86_64_eh_frame_plt),   /* eh_frame_plt_size */
+    /* FIXME: Needs .eh_frame coverage.  */
+    NULL,                               /* eh_frame_plt_got */
+    0,                                  /* eh_frame_plt_got_size */
   };
 
 #define	elf_backend_arch_data	&elf_x86_64_arch_bed
@@ -865,6 +901,7 @@ struct elf_x86_64_link_hash_table
   asection *plt_eh_frame;
   asection *plt_bnd;
   asection *plt_got;
+  asection *plt_got_eh_frame;
 
   union
   {
@@ -1135,7 +1172,8 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       htab->plt_eh_frame
 	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame", flags);
       if (htab->plt_eh_frame == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
+	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame,
+					 ABI_64_P (dynobj) ? 3 : 2))
 	return FALSE;
     }
 
@@ -2744,6 +2782,24 @@ do_size:
 					     htab->plt_got,
 					     plt_got_align))
 	    goto error_return;
+
+	  if (!info->no_ld_generated_unwind_info
+	      && htab->plt_got_eh_frame == NULL
+	      && get_elf_x86_64_backend_data (abfd)->eh_frame_plt_got != NULL)
+	    {
+	      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+				| SEC_HAS_CONTENTS | SEC_IN_MEMORY
+				| SEC_LINKER_CREATED);
+	      htab->plt_got_eh_frame
+		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_got_eh_frame == NULL
+		  || !bfd_set_section_alignment (htab->elf.dynobj,
+						 htab->plt_got_eh_frame,
+						 ABI_64_P (htab->elf.dynobj) ? 3 : 2))
+		goto error_return;
+	    }
 	}
 
       if ((r_type == R_X86_64_GOTPCREL
@@ -3788,15 +3844,28 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	htab->elf.sgotplt->size = 0;
     }
 
-  if (htab->plt_eh_frame != NULL
-      && htab->elf.splt != NULL
-      && htab->elf.splt->size != 0
-      && !bfd_is_abs_section (htab->elf.splt->output_section)
-      && _bfd_elf_eh_frame_present (info))
+  if (_bfd_elf_eh_frame_present (info))
     {
-      const struct elf_x86_64_backend_data *arch_data
-	= get_elf_x86_64_arch_data (bed);
-      htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
+      if (htab->plt_eh_frame != NULL
+	  && htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && !bfd_is_abs_section (htab->elf.splt->output_section))
+	{
+	  const struct elf_x86_64_backend_data *arch_data
+	    = get_elf_x86_64_arch_data (bed);
+	  htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
+	}
+
+      if (htab->plt_got_eh_frame != NULL
+	  && htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && !bfd_is_abs_section (htab->plt_got->output_section))
+	{
+	  const struct elf_x86_64_backend_data *arch_data
+	    = get_elf_x86_64_arch_data (bed);
+	  htab->plt_got_eh_frame->size
+	    = arch_data->eh_frame_plt_got_size;
+	}
     }
 
   /* We now have determined the sizes of the various dynamic sections.
@@ -3815,6 +3884,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  || s == htab->plt_bnd
 	  || s == htab->plt_got
 	  || s == htab->plt_eh_frame
+	  || s == htab->plt_got_eh_frame
 	  || s == htab->elf.sdynbss
 	  || s == htab->elf.sdynrelro)
 	{
@@ -3876,6 +3946,20 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	      arch_data->eh_frame_plt, htab->plt_eh_frame->size);
       bfd_put_32 (dynobj, htab->elf.splt->size,
 		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
+    }
+
+  if (htab->plt_got_eh_frame != NULL
+      && htab->plt_got_eh_frame->contents != NULL)
+    {
+      const struct elf_x86_64_backend_data *arch_data
+	= get_elf_x86_64_arch_data (bed);
+
+      memcpy (htab->plt_got_eh_frame->contents,
+	      arch_data->eh_frame_plt_got,
+	      htab->plt_got_eh_frame->size);
+      bfd_put_32 (dynobj, htab->plt_got->size,
+		  (htab->plt_got_eh_frame->contents
+		   + PLT_FDE_LEN_OFFSET));
     }
 
   if (htab->elf.dynamic_sections_created)
@@ -6343,6 +6427,33 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
+  /* Adjust .eh_frame for .plt.got section.  */
+  if (htab->plt_got_eh_frame != NULL
+      && htab->plt_got_eh_frame->contents != NULL)
+    {
+      if (htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && (htab->plt_got->flags & SEC_EXCLUDE) == 0
+	  && htab->plt_got->output_section != NULL
+	  && htab->plt_got_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->plt_got->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_got_eh_frame->output_section->vma
+				   + htab->plt_got_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_got_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_got_eh_frame,
+						 htab->plt_got_eh_frame->contents))
+	    return FALSE;
+	}
+    }
+
   if (htab->elf.sgot && htab->elf.sgot->size > 0)
     elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize
       = GOT_ENTRY_SIZE;
@@ -7007,6 +7118,8 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
     32,                                      /* plt_lazy_offset */
     elf_x86_64_nacl_eh_frame_plt,            /* eh_frame_plt */
     sizeof (elf_x86_64_nacl_eh_frame_plt),   /* eh_frame_plt_size */
+    NULL,                                    /* eh_frame_plt_got */
+    0,                                       /* eh_frame_plt_got_size */
   };
 
 #undef	elf_backend_arch_data
