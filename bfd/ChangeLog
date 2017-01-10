@@ -1,5 +1,36 @@
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/20830
+	* elf32-i386.c (elf_i386_eh_frame_plt_got): New.
+	(PLT_GOT_FDE_LENGTH): Likewise.
+	(elf_i386_plt_layout): Add eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_i386_plt): Updated.
+	(elf_i386_link_hash_table): Add plt_got_eh_frame.
+	(elf_i386_check_relocs): Create .eh_frame section for .plt.got.
+	(elf_i386_size_dynamic_sections): Allocate and initialize
+	.eh_frame section for .plt.got.
+	(elf_i386_finish_dynamic_sections): Adjust .eh_frame section for
+	.plt.got.
+	(elf_i386_nacl_plt): Add FIXME for eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	* elf64-x86-64.c (elf_x86_64_eh_frame_plt_got): New.
+	(PLT_GOT_FDE_LENGTH): Likewise.
+	(elf_x86_64_backend_data): Add eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_x86_64_arch_bed): Updated.
+	(elf_x86_64_bnd_arch_bed): Add FIXME for eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_x86_64_nacl_arch_bed): Likewise.
+	(elf_x86_64_link_hash_table): Add plt_got_eh_frame.
+	(elf_x86_64_check_relocs): Create .eh_frame section for .plt.got.
+	(elf_x86_64_size_dynamic_sections): Allocate and initialize
+	.eh_frame section for .plt.got.
+	(elf_x86_64_finish_dynamic_sections): Adjust .eh_frame section
+	for .plt.got.
+
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Set
 	plt_eh_frame->size to eh_frame_plt_size and use eh_frame_plt.
 

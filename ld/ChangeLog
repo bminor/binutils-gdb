@@ -1,5 +1,15 @@
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/20830
+	* testsuite/ld-i386/i386.exp: Run pr20830.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr20830.d: New file.
+	* testsuite/ld-i386/pr20830.s: Likewise.
+	* testsuite/ld-x86-64/pr20830.d: Likewise.
+	* testsuite/ld-x86-64/pr20830.s: Likewise.
+
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/i386.exp: Pass -Wl,-R,tmpdir and
 	-Wl,--as-needed to $CC.
 	* testsuite/ld-i386/tls.exp: Likewise.
