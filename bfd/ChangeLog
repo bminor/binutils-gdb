@@ -1,3 +1,8 @@
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Set
+	plt_eh_frame->size to eh_frame_plt_size and use eh_frame_plt.
+
 2017-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c (lookup_address_in_function_table): Return early if
