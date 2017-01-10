@@ -3385,7 +3385,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       && htab->elf.splt->size != 0
       && !bfd_is_abs_section (htab->elf.splt->output_section)
       && _bfd_elf_eh_frame_present (info))
-    htab->plt_eh_frame->size = sizeof (elf_i386_eh_frame_plt);
+    htab->plt_eh_frame->size
+      = get_elf_i386_backend_data (output_bfd)->plt->eh_frame_plt_size;
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -3468,8 +3469,9 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   if (htab->plt_eh_frame != NULL
       && htab->plt_eh_frame->contents != NULL)
     {
-      memcpy (htab->plt_eh_frame->contents, elf_i386_eh_frame_plt,
-	      sizeof (elf_i386_eh_frame_plt));
+      memcpy (htab->plt_eh_frame->contents,
+	      get_elf_i386_backend_data (output_bfd)->plt->eh_frame_plt,
+	      htab->plt_eh_frame->size);
       bfd_put_32 (dynobj, htab->elf.splt->size,
 		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
     }

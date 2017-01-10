@@ -1,3 +1,11 @@
+2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Set
+	plt_eh_frame->size to eh_frame_plt_size and use eh_frame_plt.
+
 2017-01-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20876
