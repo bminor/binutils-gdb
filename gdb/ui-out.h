@@ -121,7 +121,7 @@ class ui_out
   void flush ();
 
   /* Redirect the output of a ui_out object temporarily.  */
-  int redirect (ui_file *outstream);
+  void redirect (ui_file *outstream);
 
   ui_out_flags test_flags (ui_out_flags mask);
 
@@ -163,7 +163,7 @@ class ui_out
     ATTRIBUTE_PRINTF (2,0) = 0;
   virtual void do_wrap_hint (const char *identstring) = 0;
   virtual void do_flush () = 0;
-  virtual int do_redirect (struct ui_file * outstream) = 0;
+  virtual void do_redirect (struct ui_file *outstream) = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */

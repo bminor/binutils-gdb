@@ -218,8 +218,7 @@ do_ui_out_redirect_pop (void *arg)
 {
   struct ui_out *uiout = (struct ui_out *) arg;
 
-  if (uiout->redirect (NULL) < 0)
-    warning (_("Cannot restore redirection of the current output protocol"));
+  uiout->redirect (NULL);
 }
 
 /* Return a new cleanup that pops the last redirection by ui_out_redirect

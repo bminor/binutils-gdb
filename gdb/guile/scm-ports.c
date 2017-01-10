@@ -531,10 +531,8 @@ ioscm_with_output_to_port_worker (SCM port, SCM thunk, enum oport oport,
     gdb_stderr = port_file;
   else
     {
-      if (current_uiout->redirect (port_file) < 0)
-	warning (_("Current output protocol does not support redirection"));
-      else
-	make_cleanup_ui_out_redirect_pop (current_uiout);
+      current_uiout->redirect (port_file);
+      make_cleanup_ui_out_redirect_pop (current_uiout);
 
       gdb_stdout = port_file;
     }

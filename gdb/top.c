@@ -706,10 +706,8 @@ execute_command_to_string (char *p, int from_tty)
 
   make_cleanup_ui_file_delete (str_file);
 
-  if (current_uiout->redirect (str_file) < 0)
-    warning (_("Current output protocol does not support redirection"));
-  else
-    make_cleanup_ui_out_redirect_pop (current_uiout);
+  current_uiout->redirect (str_file);
+  make_cleanup_ui_out_redirect_pop (current_uiout);
 
   scoped_restore save_stdout
     = make_scoped_restore (&gdb_stdout, str_file);

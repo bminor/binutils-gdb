@@ -619,10 +619,10 @@ ui_out::flush ()
   do_flush ();
 }
 
-int
+void
 ui_out::redirect (ui_file *outstream)
 {
-  return do_redirect (outstream);
+  do_redirect (outstream);
 }
 
 /* Test the flags against the mask given.  */

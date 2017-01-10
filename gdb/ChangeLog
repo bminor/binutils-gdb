@@ -1,5 +1,21 @@
 2017-01-10  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* cli-out.c (cli_ui_out::do_redirect): Change return type to
+	void.
+	* cli-out.h (cli_ui_out::do_redirect): Likewise.
+	* mi/mi-out.c (mi_ui_out::do_redirect): Likewise.
+	* mi/mi-out.h (mi_ui_out::do_redirect): Likewise.
+	* ui-out.c (ui_out::redirect): Likewise.
+	* ui-out.h (ui_out::redirect, ui_out::do_redirect): Likewise.
+	* cli/cli-logging.c (set_logging_redirect): Update call site of
+	ui_out::redirect.
+	(handle_redirections): Likewise.
+	* scm-ports.c (ioscm_with_output_to_port_worker): Likewise.
+	* top.c (execute_command_to_string): Likewise.
+	* utils.c (do_ui_out_redirect_pop): Likewise.
+
+2017-01-10  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* stack.c (_initialize_stack): Update "frame" command help message.
 
 2017-01-08  Iain Buclaw  <ibuclaw@gdcproject.org>

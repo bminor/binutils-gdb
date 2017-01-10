@@ -130,13 +130,11 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
 
   /* There is a former output pushed on the ui_out_redirect stack.  We
      want to replace it by OUTPUT so we must pop the former value
-     first.  We should either do both the pop and push or to do
-     neither of it.  At least do not try to push OUTPUT if the pop
-     already failed.  */
+     first.  Ideally, we should either do both the pop and push or do
+     neither of them.  */
 
-  if (uiout->redirect (NULL) < 0
-      || uiout->redirect (output) < 0)
-    warning (_("Current output protocol does not support redirection"));
+  uiout->redirect (NULL);
+  uiout->redirect (output);
 
   do_cleanups (cleanups);
 }
@@ -246,10 +244,7 @@ handle_redirections (int from_tty)
 
   /* Don't do the redirect for MI, it confuses MI's ui-out scheme.  */
   if (!current_uiout->is_mi_like_p ())
-    {
-      if (current_uiout->redirect (output) < 0)
-	warning (_("Current output protocol does not support redirection"));
-    }
+    current_uiout->redirect (output);
 }
 
 static void

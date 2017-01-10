@@ -170,15 +170,13 @@ mi_ui_out::do_flush ()
   gdb_flush (m_streams.back ());
 }
 
-int
+void
 mi_ui_out::do_redirect (ui_file *outstream)
 {
   if (outstream != NULL)
     m_streams.push_back (outstream);
   else
     m_streams.pop_back ();
-
-  return 0;
 }
 
 void
