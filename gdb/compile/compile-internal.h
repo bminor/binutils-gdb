@@ -1,5 +1,5 @@
 /* Header file for GDB compile command and supporting functions.
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public:
   {
   }
 
-  // Returns the GCC options to be passed during compilation.
+  /* Returns the GCC options to be passed during compilation.  */
 
   const std::string &gcc_target_options () const
   {
@@ -64,7 +64,7 @@ public:
 
   void insert_type (struct type *type, gcc_type gcc_type);
 
-  // Associate SYMBOL with some error text.
+  /* Associate SYMBOL with some error text.  */
 
   void insert_symbol_error (const struct symbol *sym, std::string text);
 
@@ -76,20 +76,20 @@ public:
   /* These currently just forward to the underlying ops
      vtable.  */
 
-  // Set the plug-in print callback.
+  /* Set the plug-in print callback.  */
 
   void set_print_callback (void (*print_function) (void *, const char *),
 			   void *datum);
 
-  // Return the plug-in's front-end version.
+  /* Return the plug-in's front-end version.  */
 
   unsigned int version () const;
 
-  // Set the plug-in's verbosity level.
+  /* Set the plug-in's verbosity level.  */
 
   void set_verbose (int level);
 
-  // Set the plug-in driver program.
+  /* Set the plug-in driver program.  */
 
   void set_driver_filename (const char *filename);
 
@@ -98,48 +98,48 @@ public:
 
   void set_triplet_regexp (const char *regexp);
 
-  // Set compilation arguments.
+  /* Set compilation arguments.  */
 
   char *set_arguments (int argc, char **argv);
 
-  // !!keiths: YUCK!
+  /* !!keiths: YUCK!  */
 
   char *set_arguments (const char *regexp, int argc, char **argv);
 
-  // Set the filename of the program to compile.
+  /* Set the filename of the program to compile.  */
 
   void set_source_file (const char *filename);
 
-  // Compile the previously specified source file to FILENAME.
+  /* Compile the previously specified source file to FILENAME.  */
 
   bool compile (const char *filename);
 
-  // Same as above, but for earlier protocol versions.
+  /* Same as above, but for earlier protocol versions.  */
 
   bool compile (const char *filename, int verbose_level);
 
-  // Set the scope type for this compile.
+  /* Set the scope type for this compile.  */
 
   void set_scope (enum compile_i_scope_types scope)
   {
     m_scope = scope;
   }
 
-  // Return the scope type.
+  /* Return the scope type.  */
 
   enum compile_i_scope_types scope () const
   {
     return m_scope;
   }
 
-  // Set the block to be used for symbol searches.
+  /* Set the block to be used for symbol searches.  */
 
   void set_block (const struct block *block)
   {
     m_block = block;
   }
 
-  // Return the search block.
+  /* Return the search block.  */
 
   const struct block *block () const
   {
@@ -157,27 +157,27 @@ protected:
   typedef std::unordered_map<const struct symbol *, std::string>
     symbol_err_map_t;
 
-  // The GCC front end.
+  /* The GCC front end.  */
   struct gcc_base_context *m_gcc_fe;
 
-  // The "scope" of this compilation.
+  /* The "scope" of this compilation.  */
   enum compile_i_scope_types m_scope;
 
-  // The block in which an expression is being parsed.
+  /* The block in which an expression is being parsed.  */
   const struct block *m_block;
 
   /* Specify "-std=gnu11", "-std=gnu++11" or similar.  These options are put
      after CU's DW_AT_producer compilation options to override them.  */
   std::string m_gcc_target_options;
 
-  // Map from gdb types to gcc types.
+  /* Map from gdb types to gcc types.  */
   type_map_t m_type_map;
 
-  // Map from gdb symbols to gcc error messages to emit.
+  /* Map from gdb symbols to gcc error messages to emit.  */
   symbol_err_map_t m_symbol_err_map;
 };
 
-// Define header and footers for different scopes.
+/* Define the headers and footers for different scopes.  */
 
 /* A simple scope just declares a function named "_gdb_expr", takes no
    arguments and returns no value.  */
@@ -190,7 +190,7 @@ protected:
 #define COMPILE_I_EXPR_VAL "__gdb_expr_val"
 #define COMPILE_I_EXPR_PTR_TYPE "__gdb_expr_ptr_type"
 
-// A "type" to indicate a NULL type.
+/* A "type" to indicate a NULL type.  */
 
 const gcc_type GCC_TYPE_NONE = (gcc_type) -1;
 

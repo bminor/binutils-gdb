@@ -1,6 +1,6 @@
 /* Convert types from GDB to GCC
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,7 +32,8 @@
 #include "block.h"
 #include "gdbcmd.h"
 #include "c-lang.h"
-#include "compile-c.h" 		// for c_get_range_decl_name et al
+#include "compile-c.h" 		/* Included for c_get_range_decl_name
+				   et al.  */
 
 #include <algorithm>
 
@@ -62,7 +63,7 @@ static int debug_compile_cplus_scopes = 0;
 static gcc_type ccp_convert_func (compile_cplus_instance *instance,
 				  struct type *type, int strip_artificial);
 
-// See description in compile-cplus.h.
+/* See description in compile-cplus.h.  */
 
 char *
 compile::decl_name (const char *natural)
@@ -97,7 +98,7 @@ compile::decl_name (const char *natural)
   return name;
 }
 
-// See description in compile-cplus.h.
+/* See description in compile-cplus.h.  */
 
 int
 compile::is_varargs_p (const struct type *type)
@@ -209,19 +210,19 @@ ccp_type_name_to_scope (const char *type_name, const struct block *block)
 
   while (1)
     {
-      // Create a string token of the first component of TYPE_NAME.
+      /* Create a string token of the first component of TYPE_NAME.  */
       int len = cp_find_first_component (p);
       std::string s (p, len);
 
-      // Advance past the last token.
+      /* Advance past the last token.  */
       p += len;
 
-      // Look up the symbol and decide when to stop.
+      /* Look up the symbol and decide when to stop.  */
       if (!lookup_name.empty ())
 	lookup_name += "::";
       lookup_name += s;
 
-      // Lookup the resulting name.
+      /* Look up the resulting name.  */
       struct block_symbol bsymbol
 	= lookup_symbol (lookup_name.c_str (), block, VAR_DOMAIN, NULL);
 
@@ -314,7 +315,7 @@ compile::operator!= (const compile_scope &lhs, const compile_scope &rhs)
   return false;
 }
 
-// See description in compile-cplus.h.
+/* See description in compile-cplus.h.  */
 
 void
 compile_cplus_instance::enter_scope (compile_scope &new_scope)
@@ -323,7 +324,7 @@ compile_cplus_instance::enter_scope (compile_scope &new_scope)
 
   new_scope.m_pushed = must_push;
 
-  // Save the new scope.
+  /* Save the new scope.  */
   m_scopes.push_back (new_scope);
 
   if (must_push)
@@ -331,7 +332,7 @@ compile_cplus_instance::enter_scope (compile_scope &new_scope)
       if (debug_compile_cplus_scopes)
 	printf_unfiltered ("entering new scope %p\n", new_scope);
 
-      // Push the global namespace.
+      /* Push the global namespace. */
       push_namespace ("");
 
       /* Push all other namespaces.  Note that we do not push the last
@@ -358,12 +359,13 @@ compile_cplus_instance::enter_scope (compile_scope &new_scope)
     }
 }
 
-// See description in compile-cplus.h.
+/* See description in compile-cplus.h.  */
 
 void
 compile_cplus_instance::leave_scope ()
 {
-  // Get the current scope and remove it from the internal list of scopes.
+  /* Get the current scope and remove it from the internal list of
+     scopes.  */
   compile_scope current = m_scopes.back ();
 
   m_scopes.pop_back ();
@@ -382,7 +384,7 @@ compile_cplus_instance::leave_scope ()
 	  this->pop_namespace (comp.name.c_str ());
 	});
 
-      // Pop global namespace.
+      /* Pop global namespace.  */
       pop_namespace ("");
     }
   else
@@ -392,7 +394,7 @@ compile_cplus_instance::leave_scope ()
     }
 }
 
-// See description in compile-cplus.h.
+/*See description in compile-cplus.h.  */
 
 compile_scope
 compile_cplus_instance::new_scope (const char *type_name, struct type *type)
@@ -432,7 +434,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
     {
       if (TYPE_NAME (type) == NULL)
 	{
-	  // Anonymous type
+	  /* Anonymous type  */
 
 	  /* We don't have a qualified name for this to look up, but
 	     we need a scope.  We have to assume, then, that it is the same
@@ -460,12 +462,12 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	}
     }
 
-  // There had better be at least one component in the scope!
+  /* Ensure least one component in the scope.  */
   gdb_assert (scope.size () > 0);
   return scope;
 }
 
-// !!keiths: not RVALUE REFERENCES!
+/* !!keiths: not RVALUE REFERENCES!  */
 
 gcc_type
 compile::convert_reference_base (compile_cplus_instance *instance,
@@ -487,7 +489,7 @@ ccp_convert_reference (compile_cplus_instance *instance,
   return convert_reference_base (instance, target);
 }
 
-// See description in compile-cplus.h.
+/* See description in compile-cplus.h.  */
 
 gcc_type
 compile::convert_pointer_base (compile_cplus_instance *instance,
@@ -590,19 +592,20 @@ ccp_convert_typedef (compile_cplus_instance *instance,
       make_cleanup (xfree, name);
     }
 
-  // Make sure the scope for this type has been pushed.
+  /* Make sure the scope for this type has been pushed.  */
   instance->enter_scope (scope);
 
-  // Convert the typedef's real type.
+  /* Convert the typedef's real type.  */
   gcc_type typedef_type = instance->convert_type (check_typedef (type));
 
   instance->new_decl ("typedef", name,
 		      GCC_CP_SYMBOL_TYPEDEF | nested_access,
 		      typedef_type,
-		      0, 0, // !!keiths: Wow. More of this!
+		      0, 0,
+		      /* !!keiths: Wow. More of this!  */
 		      NULL, 0);
 
-  // Done with this scope.
+  /* Completed this scope.  */
   instance->leave_scope ();
   do_cleanups (cleanups);
   return typedef_type;
@@ -680,10 +683,6 @@ ccp_convert_struct_or_union_members (compile_cplus_instance *instance,
 				    (GCC_CP_SYMBOL_VARIABLE
 				     | get_field_access_flag (type, i)),
 				    field_type, NULL, physaddr,
-				    // FIXME: do we have
-				    // location info for
-				    // static data members?
-				    // -lxo
 				    NULL, 0);
 	      }
 	      break;
@@ -764,12 +763,13 @@ ccp_convert_method (compile_cplus_instance *instance,
     quals |= GCC_CP_QUALIFIER_VOLATILE;
   if (TYPE_RESTRICT (method_type))
     quals |= GCC_CP_QUALIFIER_RESTRICT;
-  rquals = GCC_CP_REF_QUAL_NONE; // !!keiths FIXME
+  rquals = GCC_CP_REF_QUAL_NONE;
+  /* !!keiths FIXME  */
   result = instance->build_method_type (class_type, func_type, quals, rquals);
   return result;
 }
 
-// Convert a member or method pointer represented by TYPE.
+/* Convert a member or method pointer represented by TYPE.  */
 
 static gcc_type
 ccp_convert_memberptr (compile_cplus_instance *instance, struct type *type)
@@ -1150,7 +1150,7 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	  struct block_symbol sym;
 	  const char *filename;
 	  unsigned int line;
-	  const char *kind; //debug
+	  const char *kind;
 	  gcc_cp_symbol_kind_flags sym_kind = GCC_CP_SYMBOL_FUNCTION;
 	  const char *name;
 	  char *special_name;
@@ -1301,7 +1301,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   const char *filename = NULL;  /* !!keiths: FIXME  */
   unsigned short line = 0;
 
-  // Get the decl name of this type.
+  /* Get the decl name of this type.  */
   std::string name;
   if (TYPE_NAME (type) != NULL)
     {
@@ -1331,7 +1331,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   instance->maybe_define_new_class_template (type, name.c_str ());
   instance->emit_class_template_decls ();
 
-  // Create a new scope for TYPE.
+  /* Create a new scope for TYPE.  */
   compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
 
   if (scope.nested_type () != GCC_TYPE_NONE)
@@ -1341,7 +1341,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
       return scope.nested_type ();
     }
 
-  // Push all scopes.
+  /* Push all scopes.  */
   instance->enter_scope (scope);
 
   /* First we create the resulting type and enter it into our hash
@@ -1427,12 +1427,10 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
   /* Add members.  */
   ccp_convert_struct_or_union_members (instance, type, result);
 
-  /* FIXME: add friend declarations.  -lxo  */
-
   /* All finished.  */
   instance->finish_record_or_union (name.c_str (), TYPE_LENGTH (type));
 
-  // Pop all scopes.
+  /* Pop all scopes.  */
   instance->leave_scope ();
   return result;
 }
@@ -1455,7 +1453,7 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
      being unable to convert enum values from '(MyEnum)0' to 'int'.  */
   int scoped_enum_p = /*TYPE_DECLARED_CLASS (type) ? TRUE :*/ FALSE;
 
-  // Create a new scope for this type.
+  /* Create a new scope for this type.  */
   compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
 
   if (scope.nested_type () != GCC_TYPE_NONE)
@@ -1465,7 +1463,7 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
       return scope.nested_type ();
     }
 
-  // Create an empty cleanup chain.
+  /* Create an empty cleanup chain.  */
   cleanups = make_cleanup (null_cleanup, NULL);
 
   if (TYPE_NAME (type) != NULL)
@@ -1476,7 +1474,7 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
   else
     name = "anonymous enum";
 
-  // Push all scopes.
+  /* Push all scopes.  */
   instance->enter_scope (scope);
 
   int_type = instance->int_type (TYPE_UNSIGNED (type),
@@ -1506,7 +1504,7 @@ ccp_convert_enum (compile_cplus_instance *instance, struct type *type,
 
   instance->finish_enum_type (result);
 
-  // Pop all scopes.
+  /* Pop all scopes.  */
   instance->leave_scope ();
   do_cleanups (cleanups);
   return result;
@@ -1595,7 +1593,7 @@ ccp_convert_bool (compile_cplus_instance *instance, struct type *type)
   return instance->bool_type ();
 }
 
-// See description in compile-cplus.h.
+/* See description in compile-cplus.h.  */
 
 gcc_type
 compile::convert_qualified_base (compile_cplus_instance *instance,
@@ -1663,18 +1661,18 @@ ccp_convert_namespace (compile_cplus_instance *instance,
   else
     name = "";
 
-  // Push scope.
+  /* Push scope.  */
   instance->enter_scope (scope);
 
-  // Convert this namespace.
+  /* Convert this namespace.  */
   instance->push_namespace (name);
   instance->pop_namespace (name);
 
-  // Pop scope.
+  /* Pop scope.  */
   instance->leave_scope ();
   do_cleanups (cleanups);
 
-  // Namespaces are non-cacheable "types."
+  /* Namespaces are non-cacheable types.  */
   return DONT_CACHE_TYPE;
 }
 
@@ -1782,30 +1780,11 @@ compile_cplus_instance::convert_type (struct type *type,
 
 
 
-// See compile-cplus.h.
+/* See compile-cplus.h.  */
 
 compile_cplus_instance::compile_cplus_instance (struct gcc_cp_context *gcc_fe)
   : compile_instance (&gcc_fe->base,
-		      "-std=gnu++11"
-		      /* We don't need this any more,
-			 the user expression function
-			 is regarded as a friend of
-			 every class, so that GDB users
-			 get to access private and
-			 protected members.
-
-			 " -fno-access-control"
-
-		      */
-		      /* Otherwise the .o file may need
-			 "_Unwind_Resume" and
-			 "__gcc_personality_v0".
-
-			 ??? Why would that be a
-			 problem? -lxo
-
-			 " -fno-exceptions"
-		      */),
+		      "-std=gnu++11"),
   m_context (gcc_fe),
   m_function_template_defns (new function_template_defn_map_t ()),
   m_class_template_defns (new class_template_defn_map_t ())
@@ -1817,9 +1796,9 @@ compile_cplus_instance::compile_cplus_instance (struct gcc_cp_context *gcc_fe)
 				 this);
 }
 
-// Plug-in forwards
+/* Plug-in forwards.  */
 
-// A result printer for plug-in calls that return a boolean result.
+/* A result printer for plug-in calls that return a boolean result.  */
 
 static void
 ccp_output_result (int result)
@@ -1827,7 +1806,8 @@ ccp_output_result (int result)
   printf_unfiltered ("%s\n", result ? "true" : "false");
 }
 
-// A result printer for plug-in calls that return a gcc_type or gcc_decl.
+/* A result printer for plug-in calls that return a gcc_type or
+   gcc_decl.  */
 
 static void
 ccp_output_result (gcc_type result)
@@ -1864,7 +1844,7 @@ ccp_output_result (gcc_type result)
     return result;							\
   };
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 bool
 compile_cplus_instance::build_constant (gcc_type type, const char *name,
@@ -1877,7 +1857,7 @@ compile_cplus_instance::build_constant (gcc_type type, const char *name,
   return forward ("\"%s\"", name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_decl
 compile_cplus_instance::specialize_function_template
@@ -1887,7 +1867,7 @@ compile_cplus_instance::specialize_function_template
   function_template_defn *defn
     = find_function_template_defn (concrete);
 
-  // A generic should already have been defined.
+  /* A generic should already have been defined at this point.  */
   gdb_assert (defn != NULL);
 
   struct gcc_cp_template_args targs;
@@ -1909,7 +1889,7 @@ compile_cplus_instance::specialize_function_template
   return result;
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_decl
 compile_cplus_instance::specialize_class_template (struct type *concrete,
@@ -1919,7 +1899,7 @@ compile_cplus_instance::specialize_class_template (struct type *concrete,
   class_template_defn *defn
     = find_class_template_defn (concrete);
 
-  // A generic should have already been defined.
+  /* A generic should have already been defined at this point.  */
   gdb_assert (defn != NULL);
 
   struct gcc_cp_template_args targs;
@@ -1944,7 +1924,7 @@ compile_cplus_instance::specialize_class_template (struct type *concrete,
   return result;
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_decl
 compile_cplus_instance::new_decl (const char *decl_type,
@@ -1962,7 +1942,7 @@ compile_cplus_instance::new_decl (const char *decl_type,
 		  substitution_name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 bool
 compile_cplus_instance::push_namespace (const char *name)
@@ -1972,7 +1952,7 @@ compile_cplus_instance::push_namespace (const char *name)
   return forward ("\"%s\"", name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 bool
 compile_cplus_instance::pop_namespace (const char *opt_name)
@@ -1982,7 +1962,7 @@ compile_cplus_instance::pop_namespace (const char *opt_name)
   return forward ("\"%s\"", opt_name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::error (const char *message)
@@ -1992,7 +1972,8 @@ compile_cplus_instance::error (const char *message)
   return forward ("%s", message);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
+
 
 gcc_type
 compile_cplus_instance::build_reference_type (gcc_type base_type,
@@ -2003,7 +1984,7 @@ compile_cplus_instance::build_reference_type (gcc_type base_type,
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_pointer_type (gcc_type base_type)
@@ -2013,7 +1994,7 @@ compile_cplus_instance::build_pointer_type (gcc_type base_type)
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_vla_array_type (gcc_type element_type,
@@ -2024,7 +2005,7 @@ compile_cplus_instance::build_vla_array_type (gcc_type element_type,
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_vector_type (gcc_type element_type,
@@ -2035,7 +2016,7 @@ compile_cplus_instance::build_vector_type (gcc_type element_type,
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_array_type (gcc_type element_type,
@@ -2046,7 +2027,7 @@ compile_cplus_instance::build_array_type (gcc_type element_type,
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_decl
 compile_cplus_instance::new_field (const char *field_name, gcc_type field_type,
@@ -2059,7 +2040,7 @@ compile_cplus_instance::new_field (const char *field_name, gcc_type field_type,
   return forward ("%s %lld", field_name, field_type);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_method_type (gcc_type class_type,
@@ -2072,7 +2053,7 @@ compile_cplus_instance::build_method_type (gcc_type class_type,
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::start_class_definition
@@ -2086,7 +2067,7 @@ compile_cplus_instance::start_class_definition
   return forward ("%s", name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 bool
 compile_cplus_instance::finish_record_or_union (const char *name,
@@ -2097,7 +2078,7 @@ compile_cplus_instance::finish_record_or_union (const char *name,
   return forward ("%s (%ld)", name, size_in_bytes);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::int_type (bool is_unsigned, unsigned long size_in_bytes,
@@ -2108,7 +2089,7 @@ compile_cplus_instance::int_type (bool is_unsigned, unsigned long size_in_bytes,
   return forward ("%d %ld %s", is_unsigned, size_in_bytes, builtin_name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::start_new_enum_type (const char *name,
@@ -2123,7 +2104,7 @@ compile_cplus_instance::start_new_enum_type (const char *name,
   return forward ("%s", name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_decl
 compile_cplus_instance::build_add_enum_constant (gcc_type enum_type,
@@ -2135,7 +2116,7 @@ compile_cplus_instance::build_add_enum_constant (gcc_type enum_type,
   return forward ("%s = %ld", name, value);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 bool
 compile_cplus_instance::finish_enum_type (gcc_type enum_type)
@@ -2145,7 +2126,7 @@ compile_cplus_instance::finish_enum_type (gcc_type enum_type)
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_function_type
@@ -2158,7 +2139,7 @@ compile_cplus_instance::build_function_type
   return forward ("%lld %d", return_type, is_varargs);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::char_type ()
@@ -2168,7 +2149,7 @@ compile_cplus_instance::char_type ()
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::float_type (unsigned long size_in_bytes,
@@ -2179,7 +2160,7 @@ compile_cplus_instance::float_type (unsigned long size_in_bytes,
   return forward  ("%ld %s", size_in_bytes, builtin_name);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::void_type ()
@@ -2189,7 +2170,7 @@ compile_cplus_instance::void_type ()
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::bool_type ()
@@ -2199,7 +2180,7 @@ compile_cplus_instance::bool_type ()
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_qualified_type (gcc_type unqualified_type,
@@ -2210,7 +2191,7 @@ compile_cplus_instance::build_qualified_type (gcc_type unqualified_type,
   return forward ("");
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_complex_type (gcc_type element_type)
@@ -2220,7 +2201,7 @@ compile_cplus_instance::build_complex_type (gcc_type element_type)
   return forward ("%lld", element_type);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_expr
 compile_cplus_instance::literal_expr (gcc_type type, unsigned long value)
@@ -2230,7 +2211,7 @@ compile_cplus_instance::literal_expr (gcc_type type, unsigned long value)
   return forward ("%lld %ld", type, value);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::new_template_typename_parm (const char *id, bool pack_p,
@@ -2245,7 +2226,7 @@ compile_cplus_instance::new_template_typename_parm (const char *id, bool pack_p,
 		  filename, line_number);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_decl
 compile_cplus_instance::new_template_value_parm (gcc_type type, const char *id,
@@ -2260,7 +2241,7 @@ compile_cplus_instance::new_template_value_parm (gcc_type type, const char *id,
 		  filename, line_number);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 bool
 compile_cplus_instance::start_new_template_decl (const char *generic)
@@ -2270,7 +2251,7 @@ compile_cplus_instance::start_new_template_decl (const char *generic)
   return forward ("for generic %s\n", generic);
 }
 
-// See description in gcc-cp-fe.def.
+/* See description in gcc-cp-fe.def.  */
 
 gcc_type
 compile_cplus_instance::build_pointer_to_member_type (gcc_type class_type,

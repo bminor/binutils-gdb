@@ -1,5 +1,5 @@
 /* Header file for GDB compile C++ language support.
-   Copyright (C) 2016 Free Software Foundation, Inc.
+   Copyright (C) 2016, 2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 struct type;
 struct block;
 
-// enum-flags wrapper
+/* enum-flags wrapper  */
 DEF_ENUM_FLAGS_TYPE (enum gcc_cp_qualifiers, gcc_cp_qualifiers_flags);
 DEF_ENUM_FLAGS_TYPE (enum gcc_cp_ref_qualifiers, gcc_cp_ref_qualifiers_flags);
 DEF_ENUM_FLAGS_TYPE (enum gcc_cp_symbol_kind, gcc_cp_symbol_kind_flags);
@@ -42,14 +42,14 @@ namespace compile
 
   struct scope_component
   {
-    // The unqualified name of this scope.
+    /* The unqualified name of this scope.  */
     std::string name;
 
-    // The block symbol for this type/scope.
+    /* The block symbol for this type/scope.  */
     struct block_symbol bsymbol;
   };
 
-  // Comparison operators for scope_components.
+  /* Comparison operators for scope_components.  */
 
   bool operator== (const scope_component &lhs, const scope_component &rhs);
   bool operator!= (const scope_component &lhs, const scope_component &rhs);
@@ -102,12 +102,13 @@ namespace compile
     bool m_pushed;
   };
 
-  // Comparison operators for compile_scopes.
+  /* Comparison operators for compile_scopes.  */
 
   bool operator== (const compile_scope &lhs, const compile_scope &rhs);
   bool operator!= (const compile_scope &lhs, const compile_scope &rhs);
 
-  // A subclass of compile_instance that is specific to the C++ front end.
+  /* A subclass of compile_instance that is specific to the C++ front
+     end.  */
 
   class compile_cplus_instance
     : public compile_instance
@@ -141,11 +142,13 @@ namespace compile
 
     class_template_defn *find_class_template_defn (struct type *type);
 
-    // Emit any new function template definitions to the compiler plug-in.
+    /* Emit any new function template definitions to the compiler
+       plug-in.  */
 
     void emit_function_template_decls ();
 
-    // Emit any new class template definitions to the compiler plug-in.
+    /* Emit any new class template definitions to the compiler
+       plug-in.  */
 
     void emit_class_template_decls ();
 
@@ -171,16 +174,16 @@ namespace compile
 
     compile_scope new_scope (const char *type_name, struct type *type);
 
-    // Enter the given NEW_SCOPE.
+    /* Enter the given NEW_SCOPE.  */
 
     void enter_scope (compile_scope &scope);
 
-    // Leave the current scope.
+    /* Leave the current scope.  */
 
     void leave_scope ();
 
-    // !!keiths: YUCK!
-    // Plug-in forwards
+    /* !!keiths: YUCK!
+       Plug-in forwards  */
 
     gcc_type bool_type ();
 
@@ -224,7 +227,7 @@ namespace compile
 
     bool finish_enum_type (gcc_type enum_type);
 
-    // NAME for debugging
+    /* NAME for debugging  */
     bool finish_record_or_union (const char *name, unsigned long size_in_bytes);
 
     gcc_type float_type (unsigned long size_in_bytes, const char *builtin_name);
@@ -234,7 +237,7 @@ namespace compile
 
     gcc_expr literal_expr (gcc_type type, unsigned long value);
 
-    // DECL_DESC for debugging only
+    /* DECL_DESC for debugging only  */
     gcc_decl new_decl (const char *decl_desc, const char *name,
 		       enum gcc_cp_symbol_kind sym_kind,
 		       gcc_type sym_type, const char *substitution_name,
@@ -255,7 +258,7 @@ namespace compile
 				      const char *filename,
 				      unsigned int line_number);
 
-    // NAME is for debugging only
+    /* NAME is for debugging only  */
     bool pop_namespace (const char *name);
 
     bool push_namespace (const char *name);
@@ -269,7 +272,7 @@ namespace compile
 					   const char *filename,
 					   unsigned int line_number);
 
-    // NAME only for debugging
+    /* NAME only for debugging  */
     gcc_type start_class_definition (const char *name, gcc_decl typedecl,
 				     const struct gcc_vbase_array *base_classes,
 				     const char *filename,
@@ -281,7 +284,7 @@ namespace compile
 				  const char *filename,
 				  unsigned int line_number);
 
-    // GENERIC only for debugging
+    /* GENERIC only for debugging  */
     bool start_new_template_decl (const char *generic);
 
     gcc_type void_type ();
@@ -289,22 +292,22 @@ namespace compile
 
   private:
 
-    // Enumerate the template arguments of template DEFN into DEST.
+    /* Enumerate the template arguments of template DEFN into DEST.  */
 
     void enumerate_template_arguments
       (struct gcc_cp_template_args *dest, const template_defn *defn,
        const struct template_argument_info *arg_info);
 
-    // The C++ compile plug-in context.
+    /* The C++ compile plug-in context.  */
     struct gcc_cp_context *m_context;
 
-    // A cache of function template definitions.
+    /* A cache of function template definitions.  */
     std::unique_ptr<function_template_defn_map_t> m_function_template_defns;
 
-    // A cache of class template definitions.
+    /* A cache of class template definitions.  */
     std::unique_ptr<class_template_defn_map_t> m_class_template_defns;
 
-    // A list of scopes we are processing.
+    /* A list of scopes we are processing.  */
     std::vector<compile_scope> m_scopes;
   };
 
@@ -314,18 +317,20 @@ namespace compile
 
   char *decl_name (const char *natural);
 
-  // Add the qualifiers given by QUALS to BASE.
+  /* Add the qualifiers given by QUALS to BASE.  */
 
   gcc_type convert_qualified_base (compile_cplus_instance *instance,
 				   gcc_type base,
 				   gcc_cp_qualifiers_flags quals);
 
-  // Convert TARGET into a pointer type in the given compiler INSTANCE.
+  /* Convert TARGET into a pointer type in the given compiler
+     INSTANCE.  */
 
   gcc_type convert_pointer_base (compile_cplus_instance *instance,
 				 gcc_type target);
 
-  // Convert BASE into a reference type in the given compile INSTANCE.
+  /* Convert BASE into a reference type in the given compile
+     INSTANCE.  */
 
   gcc_type convert_reference_base (compile_cplus_instance *instance,
 				   gcc_type base);
@@ -374,4 +379,4 @@ extern gcc_cp_symbol_address_function gcc_cplus_symbol_address;
 extern gcc_cp_enter_leave_user_expr_scope_function gcc_cplus_enter_scope;
 extern gcc_cp_enter_leave_user_expr_scope_function gcc_cplus_leave_scope;
 
-#endif // GDB_COMPILE_CPLUS_H
+#endif /* GDB_COMPILE_CPLUS_H  */

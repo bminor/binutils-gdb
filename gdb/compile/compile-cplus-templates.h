@@ -1,6 +1,6 @@
 /* Template support for compile.
 
-   Copyright (C) 2016 Free Software Foundation, Inc.
+   Copyright (C) 2016, 2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,7 +37,7 @@ namespace compile
   class class_template_defn;
   class compile_cplus_instance;
 
-  // Types used for tracking template definitions.
+  /* Types used for tracking template definitions.  */
   typedef std::unique_ptr<function_template_defn> function_template_defn_up;
   typedef std::unique_ptr<class_template_defn> class_template_defn_up;
   typedef std::pair<std::string, function_template_defn_up>
@@ -49,13 +49,13 @@ namespace compile
   typedef std::unordered_map<std::string, class_template_defn_up>
     class_template_defn_map_t;
 
-  // A base class holding data common to all template definitions.
+  /* A base class holding data common to all template definitions.  */
 
   class template_defn
   {
   public:
 
-    // Return the declaration name of this definition.
+    /* Return the declaration name of this definition.  */
 
     const char *
     decl_name () const
@@ -63,7 +63,7 @@ namespace compile
       return m_decl_name.c_str ();
     }
 
-    // Return the compiler plug-in's decl for this definition.
+    /* Return the compiler plug-in's decl for this definition.  */
 
     gcc_decl
     decl () const
@@ -71,7 +71,7 @@ namespace compile
       return m_decl;
     }
 
-    // Set the compiler plug-in's decl for this definition.
+    /* Set the compiler plug-in's decl for this definition.  */
 
     void
     set_decl (gcc_decl decl)
@@ -79,7 +79,7 @@ namespace compile
       m_decl = decl;
     }
 
-    // Return the generic string for this template definition.
+    /* Return the generic string for this template definition.  */
 
     const std::string
     generic (void) const
@@ -96,7 +96,7 @@ namespace compile
       return m_abstract_types[idx];
     }
 
-    // Set the IDX'th template parameter's abstract type.
+    /* Set the IDX'th template parameter's abstract type.  */
 
     void
     set_parameter_abstract_type (unsigned int idx, gcc_type type)
@@ -104,7 +104,7 @@ namespace compile
       m_abstract_types[idx] = type;
     }
 
-    // Has this template already been defined in the compiler plug-in?
+    /* Has this template already been defined in the compiler plug-in?  */
 
     bool
     defined (void) const
@@ -112,7 +112,7 @@ namespace compile
       return m_defined;
     }
 
-    // Mark this definition as defined in the compiler plug-in.
+    /* Mark this definition as defined in the compiler plug-in.  */
 
     void
     set_defined (bool val)
@@ -129,7 +129,7 @@ namespace compile
       return m_default_arguments[arg_num];
     }
 
-    // Record the value of the ARG_NUM'th template parameter.
+    /* Record the value of the ARG_NUM'th template parameter.  */
 
     void
     set_default_argument (unsigned int arg_num, struct symbol *value)
@@ -157,19 +157,20 @@ namespace compile
 
   private:
 
-    // The declaration name of the template, excluding any parameters.
+    /* The declaration name of the template, excluding any
+       parameters.  */
     std::string m_decl_name;
 
-    // A string representation of the generic template definition.
+    /* A string representation of the generic template definition.  */
     std::string m_generic;
 
-    // The abstract template parameter types.
+    /* The abstract template parameter types.  */
     std::vector<gcc_type> m_abstract_types;
 
-    // The decl associated with this template definition.
+    /* The decl associated with this template definition.  */
     gcc_decl m_decl;
 
-    // A list of default values for the parameters of this template.
+    /* A list of default values for the parameters of this template.  */
     std::vector<struct symbol *> m_default_arguments;
 
     /* Has this template already been defined?  This is a necessary evil
@@ -177,7 +178,7 @@ namespace compile
     bool m_defined;
   };
 
-  // A function template definition.
+  /* A function template definition.  */
 
   class function_template_defn
     : public template_defn
@@ -199,14 +200,14 @@ namespace compile
 			    const struct template_symbol *tsymbol,
 			    struct type *parent_type, int fidx, int midx);
 
-    // Return the demangle information for this template.
+    /* Return the demangle information for this template.  */
 
     const parsed_demangle_info *demangle_info (void) const
     {
       return &m_demangle_info;
     }
 
-    // Return the concrete instance used to define this template.
+    /* Return the concrete instance used to define this template.  */
 
     const struct template_symbol *template_symbol (void) const
     {
@@ -248,7 +249,7 @@ namespace compile
 
     const struct template_symbol *m_tsymbol;
 
-    // The parent type or NULL if this does not represent a method.
+    /* The parent type or NULL if this does not represent a method.  */
 
     struct type *m_parent_type;
 
@@ -258,18 +259,18 @@ namespace compile
     int m_fidx;
     int m_midx;
 
-    // Demangle tree for the template defining this generic.
+    /* Demangle tree for the template defining this generic.  */
     parsed_demangle_info m_demangle_info;
   };
 
-  // A class template definition.
+  /* A class template definition.  */
 
   class class_template_defn
     : public template_defn
   {
   public:
 
-    // A unary function to delete map items.
+    /* A unary function to delete map items.  */
 
     static void destroy (class_template_map_item_t p);
 
@@ -284,7 +285,8 @@ namespace compile
     {
     }
 
-    // Return concrete instance that this template definition was based on.
+    /* Return concrete instance that this template definition was
+       based on.  */
 
     struct type *type (void) const
     {
@@ -313,4 +315,4 @@ namespace compile
   void scan_type_for_function_templates (compile_cplus_instance *instance,
 					 struct type *type);
 };
-#endif // COMPILE_CPLUS_TEMPLATES_H
+#endif /* COMPILE_CPLUS_TEMPLATES_H  */

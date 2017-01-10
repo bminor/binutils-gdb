@@ -1,6 +1,6 @@
 /* Convert symbols from GDB to GCC
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,13 +33,13 @@
 #include "dwarf2loc.h"
 #include "cp-support.h"
 #include "gdbcmd.h"
-#include "compile-c.h" // !!keiths FIXME for c_get_range_decl_name
+#include "compile-c.h" /* !!keiths FIXME for c_get_range_decl_name  */
 
 
 
 using namespace compile;
 
-// See description in compile-internal.h.
+/* See description in compile-internal.h.  */
 
 int debug_compile_oracle = 0;
 
@@ -78,7 +78,7 @@ convert_one_symbol (compile_cplus_instance *instance,
       std::string name;
       char *symbol_name = NULL;
 
-      // Add a null cleanup for templates.  !!keiths: remove!
+      /* Add a null cleanup for templates.  !!keiths: remove!  */
       struct cleanup *back_to
 	= make_cleanup (free_current_contents, &symbol_name);
 
@@ -275,7 +275,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 				  symbol_name, addr, filename, line);
 	    }
 
-	  // Pop scope for non-local symbols.
+	  /* Pop scope for non-local symbols.  */
 	  if (!is_local)
 	    instance->leave_scope ();
 	}
@@ -389,10 +389,10 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
 
   sym_type = instance->convert_type (type);
   instance->push_namespace ("");
-  // FIXME: push (and, after the call, pop) any other namespaces, if
-  // any, and drop the above when defining a class member.  drop any
-  // namespace and class names from before the symbol name, and any
-  // function signatures from after it.  -lxo
+  /* FIXME: push (and, after the call, pop) any other namespaces, if
+     any, and drop the above when defining a class member.  drop any
+     namespace and class names from before the symbol name, and any
+     function signatures from after it.  -lxo  */
   /* !!keiths: I don't see how we could do this.  We have NO debug
      information for the symbol.  While we have access to the demangled
      name, we still don't know what A::B::C::D::E::F means without debug

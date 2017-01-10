@@ -1,5 +1,5 @@
 /* Header file for GDB compile C-language support.
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ class compile_c_instance
 
   gcc_type convert_type (struct type *type);
 
-  // Plug-in forwards
+  /* Plug-in forwards  */
 
   unsigned int c_version () const;
 
@@ -140,7 +140,7 @@ class compile_c_instance
 
 private:
 
-  // The GCC C context.
+  /* The GCC C context.  */
   struct gcc_c_context *m_context;
 };
 
@@ -173,4 +173,4 @@ extern char *c_get_range_decl_name (const struct dynamic_prop *prop);
 
 extern char *c_symbol_substitution_name (struct symbol *sym);
 
-#endif // GDB_COMPILE_C_H
+#endif /* GDB_COMPILE_C_H  */

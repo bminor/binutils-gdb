@@ -1,6 +1,6 @@
 /* General Compile and inject code
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -578,7 +578,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   get_args (compiler, gdbarch, &argc, &argv);
   make_cleanup_freeargv (argv);
 
-  // !!keiths: This should be hidden at this level!
+  /* !!keiths: This should be hidden at this level!  */
   if (compiler->version ()>= GCC_FE_VERSION_1)
     error_message = compiler->set_arguments (argc, argv);
   else
@@ -708,7 +708,7 @@ compile_register_name_demangle (struct gdbarch *gdbarch,
   error (_("Cannot find gdbarch register \"%s\"."), regname);
 }
 
-// See description in compile-internal.h.
+/* See description in compile-internal.h.  */
 
 void
 compile_instance::insert_type (struct type *type, gcc_type gcc_type)
@@ -727,7 +727,7 @@ compile_instance::insert_type (struct type *type, gcc_type gcc_type)
     m_type_map.insert (std::make_pair (type, gcc_type));
 }
 
-// See description in compile-internal.h.
+/* See description in compile-internal.h.  */
 
 void
 compile_instance::insert_symbol_error (const struct symbol *sym,
@@ -739,7 +739,7 @@ compile_instance::insert_symbol_error (const struct symbol *sym,
     m_symbol_err_map.insert (std::make_pair (sym, text));
 }
 
-// See description in compile-internal.h.
+/* See description in compile-internal.h.  */
 
 void
 compile_instance::error_symbol_once (const struct symbol *sym)
@@ -753,11 +753,11 @@ compile_instance::error_symbol_once (const struct symbol *sym)
   ::error (_("%s"), message.c_str ());
 }
 
-// Forwards to the plug-in.
+/* Forwards to the plug-in.  */
 
 #define FORWARD(OP,...) (m_gcc_fe->ops->OP (m_gcc_fe, ##__VA_ARGS__))
 
-// Set the plug-in print callback.
+/* Set the plug-in print callback.  */
 
 void
 compile_instance::set_print_callback
@@ -766,7 +766,7 @@ compile_instance::set_print_callback
   FORWARD (set_print_callback, print_function, datum);
 }
 
-// Return the plug-in's front-end version.
+/* Return the plug-in's front-end version.  */
 
 unsigned int
 compile_instance::version () const
@@ -774,7 +774,7 @@ compile_instance::version () const
   return m_gcc_fe->ops->version;
 }
 
-// Set the plug-in's verbosity level.
+/* Set the plug-in's verbosity level.  */
 
 void
 compile_instance::set_verbose (int level)
@@ -782,26 +782,26 @@ compile_instance::set_verbose (int level)
   FORWARD (set_verbose, level);
 }
 
-// Set the plug-in driver program.
+/* Set the plug-in driver program.  */
 
 void
 compile_instance::set_driver_filename (const char *filename)
 {
-  // !!keiths: Possible leak???
+  /* !!keiths: Possible leak???  */
   FORWARD (set_driver_filename, filename);
 }
 
-// Set the regular expression used to match the configury triplet
-// prefix to the compiler.
+/* Set the regular expression used to match the configury triplet
+   prefix to the compiler.  */
 
 void
 compile_instance::set_triplet_regexp (const char *regexp)
 {
-  // !!keiths: Leak?
+  /* !!keiths: Leak?  */
   FORWARD (set_triplet_regexp, regexp);
 }
 
-// Set compilation arguments.
+/* Set compilation arguments.  */
 
 char *
 compile_instance::set_arguments (int argc, char **argv)
@@ -809,7 +809,7 @@ compile_instance::set_arguments (int argc, char **argv)
   return FORWARD (set_arguments, argc, argv);
 }
 
-// !!keiths: YUCK!
+/* !!keiths: YUCK!  */
 
 char *
 compile_instance::set_arguments (const char *regexp, int argc, char **argv)
@@ -817,7 +817,7 @@ compile_instance::set_arguments (const char *regexp, int argc, char **argv)
   return FORWARD (set_arguments_v0, regexp, argc, argv);
 }
 
-// Set the filename of the program to compile.
+/* Set the filename of the program to compile.  */
 
 void
 compile_instance::set_source_file (const char *filename)
@@ -825,7 +825,7 @@ compile_instance::set_source_file (const char *filename)
   FORWARD (set_source_file, filename);
 }
 
-// Compile the previously specified source file to FILENAME.
+/* Compile the previously specified source file to FILENAME.  */
 
 bool
 compile_instance::compile (const char *filename)
@@ -833,7 +833,7 @@ compile_instance::compile (const char *filename)
   return FORWARD (compile, filename);
 }
 
-// Like above, but for an earlier compile protocol.
+/* As above, but for an earlier compile protocol.  */
 
 bool
 compile_instance::compile (const char *filename, int verbose_level)
