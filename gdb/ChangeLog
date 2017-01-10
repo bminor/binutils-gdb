@@ -1,3 +1,7 @@
+2017-01-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stack.c (_initialize_stack): Update "frame" command help message.
+
 2017-01-08  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* d-exp.y (CastExpression): Emit UNOP_CAST_TYPE.

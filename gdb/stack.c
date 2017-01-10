@@ -2629,9 +2629,7 @@ This is useful in command scripts."));
 Select and print a stack frame.\nWith no argument, \
 print the selected stack frame.  (See also \"info frame\").\n\
 An argument specifies the frame to select.\n\
-It can be a stack frame number or the address of the frame.\n\
-With argument, nothing is printed if input is coming from\n\
-a command file or a user-defined command."));
+It can be a stack frame number or the address of the frame.\n"));
 
   add_com_alias ("f", "frame", class_stack, 1);
 
