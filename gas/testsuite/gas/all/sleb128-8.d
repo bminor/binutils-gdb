@@ -4,4 +4,4 @@
 .*: .*
 
 Contents of section (\.data|\$DATA\$):
- 0000 ffffffff ffff3f .*
+ 0000 ffffffff ffff3f.*

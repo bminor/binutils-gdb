@@ -4,6 +4,11 @@
 
 2017-01-10  Tristan Gingold  <gingold@adacore.com>
 
+	* testsuite/gas/all/sleb128-8.d: Adjust test.
+	* testsuite/gas/all/gas.exp (test_cond): Likewise.
+
+2017-01-10  Tristan Gingold  <gingold@adacore.com>
+
 	* read.c (emit_leb128_expr): Extended unsigned big number for
 	sleb128.
 	* testsuite/gas/all/gas.exp (test_cond): Add sleb128-8 test.
