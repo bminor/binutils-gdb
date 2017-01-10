@@ -1,6 +1,6 @@
 /* C/C++ language support for compilation.
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -117,7 +117,7 @@ get_compile_context (const char *fe_libcc, const char *fe_context,
   return new INSTTYPE (context);
 }
 
-// A C-language implementation of get_compile_context.
+/* A C-language implementation of get_compile_context.  */
 
 struct compile_instance *
 c_get_compile_context (void)
@@ -129,7 +129,7 @@ c_get_compile_context (void)
      GCC_FE_VERSION_0, GCC_C_FE_VERSION_0);
 }
 
-// A C++-language implementation of get_compile_context.
+/* A C++-language implementation of get_compile_context.  */
 
 struct compile_instance *
 cplus_get_compile_context (void)
@@ -281,7 +281,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
   fputs_unfiltered ("};\n\n", stream);
 }
 
-// C-language policy to emit a push user expression pragma into BUF.
+/* C-language policy to emit a push user expression pragma into BUF.  */
 
 struct c_push_user_expression
 {
@@ -298,7 +298,7 @@ struct pop_user_expression_nop
 {
   void pop_user_expression (struct ui_file *buf)
   {
-    // Nothing to do.
+    /* Nothing to do.  */
   }
 };
 
@@ -405,7 +405,8 @@ struct c_add_input
   }
 };
 
-// C++-language policy to emit a push user expression pragma into BUF.
+/* C++-language policy to emit a push user expression pragma into
+   BUF.  */
 
 struct cplus_push_user_expression
 {
@@ -415,7 +416,7 @@ struct cplus_push_user_expression
   }
 };
 
-// C++-language policy to emit a pop user expression pragma into BUF.
+/* C++-language policy to emit a pop user expression pragma into BUF.  */
 
 struct cplus_pop_user_expression
 {
@@ -643,14 +644,15 @@ public:
 
 private:
 
-  // The compile instance to be used for compilation and type-conversion.
+  /* The compile instance to be used for compilation and
+     type-conversion.  */
   CompileInstanceType *m_instance;
 
-  // The architecture to be used.
+  /* The architecture to be used.  */
   struct gdbarch *m_arch;
 };
 
-// Types used for C and C++ program computations.
+/* The types used for C and C++ program computations.  */
 
 typedef compile_program<compile_c_instance, c_push_user_expression,
 			pop_user_expression_nop, c_add_code_header,
@@ -662,7 +664,7 @@ typedef compile_program<compile::compile_cplus_instance,
 			cplus_add_code_header, c_add_code_footer,
 			cplus_add_input> cplus_compile_program;
 
-// The la_compute_program method for C.
+/* The la_compute_program method for C.  */
 
 char *
 c_compute_program (struct compile_instance *inst,
@@ -677,7 +679,7 @@ c_compute_program (struct compile_instance *inst,
   return program.compute (input, expr_block, expr_pc);
 }
 
-// The la_compute_program method for C++.
+/* The la_compute_program method for C++.  */
 
 char *
 cplus_compute_program (struct compile_instance *inst,
