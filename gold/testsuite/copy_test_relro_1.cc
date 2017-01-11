@@ -21,10 +21,16 @@
 // MA 02110-1301, USA.
 
 extern int a;
-extern int* const p = &a;
 
-extern const int b[] = { 100, 200, 300, 400 };
+extern int* const p;
+extern const int b[];
+extern const int c;
+extern const int* const q;
 
-extern const int c = 500;
+int* const p = &a;
 
-extern const int* const q = &c;
+const int b[] = { 100, 200, 300, 400 };
+
+const int c = 500;
+
+const int* const q = &c;

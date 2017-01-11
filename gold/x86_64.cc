@@ -478,29 +478,29 @@ class Output_data_plt_x86_64_bnd : public Output_data_plt_x86_64<64>
 
   virtual void
   do_fill_first_plt_entry(unsigned char* pov,
-			  typename elfcpp::Elf_types<64>::Elf_Addr got_addr,
-			  typename elfcpp::Elf_types<64>::Elf_Addr plt_addr);
+			  elfcpp::Elf_types<64>::Elf_Addr got_addr,
+			  elfcpp::Elf_types<64>::Elf_Addr plt_addr);
 
   virtual unsigned int
   do_fill_plt_entry(unsigned char* pov,
-		    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-		    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
+		    elfcpp::Elf_types<64>::Elf_Addr got_address,
+		    elfcpp::Elf_types<64>::Elf_Addr plt_address,
 		    unsigned int got_offset,
 		    unsigned int plt_offset,
 		    unsigned int plt_index);
 
   virtual void
   do_fill_tlsdesc_entry(unsigned char* pov,
-			typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-			typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
-			typename elfcpp::Elf_types<64>::Elf_Addr got_base,
+			elfcpp::Elf_types<64>::Elf_Addr got_address,
+			elfcpp::Elf_types<64>::Elf_Addr plt_address,
+			elfcpp::Elf_types<64>::Elf_Addr got_base,
 			unsigned int tlsdesc_got_offset,
 			unsigned int plt_offset);
 
   void
   fill_aplt_entry(unsigned char* pov,
-		  typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-		  typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
+		  elfcpp::Elf_types<64>::Elf_Addr got_address,
+		  elfcpp::Elf_types<64>::Elf_Addr plt_address,
 		  unsigned int got_offset,
 		  unsigned int plt_offset,
 		  unsigned int plt_index);
