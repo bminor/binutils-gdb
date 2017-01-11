@@ -1,3 +1,11 @@
+2017-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21039
+	* testsuite/script_test_13.sh: Adjust patterns to work for i386.
+	* testsuite/script_test_15a.sh: Likewise.
+	* testsuite/script_test_15b.sh: Likewise.
+	* testsuite/script_test_15c.sh: Likewise.
+
 2017-01-11  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (class Powerpc_copy_relocs): New.
