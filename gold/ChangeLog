@@ -1,5 +1,16 @@
 2017-01-11  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/21040
+	* x86_64.cc (Output_data_plt_x86_64_bnd::do_fill_first_plt_entry):
+	Remove unnecessary 'typename' keyword.
+	(Output_data_plt_x86_64_bnd::do_fill_plt_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::do_fill_tlsdesc_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::fill_aplt_entry): Likewise.
+	* testsuite/copy_test_relro_1.cc (p, b, c, q): Add separate extern
+	declarations.
+
+2017-01-11  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/21039
 	* testsuite/script_test_13.sh: Adjust patterns to work for i386.
 	* testsuite/script_test_15a.sh: Likewise.
