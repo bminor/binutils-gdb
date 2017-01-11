@@ -1,3 +1,12 @@
+2017-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21038
+	* testsuite/ld-x86-64/pr21038a.d: New file.
+	* testsuite/ld-x86-64/pr21038a.s: Likewise.
+	* testsuite/ld-x86-64/pr21038b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr21038a and pr21038b.
+
 2017-01-11  Jeremy Soller  <jackpot51@gmail.com>
 
 	* configure.tgt: Add entries for x86-redox and x86_64-redox.

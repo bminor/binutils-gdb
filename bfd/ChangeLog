@@ -1,3 +1,12 @@
+2017-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21038
+	* elf64-x86-64.c (elf_x86_64_eh_frame_bnd_plt): New.
+	(elf_x86_64_bnd_arch_bed): Use elf_x86_64_eh_frame_bnd_plt and
+	elf_x86_64_eh_frame_plt_got.
+	(elf_x86_64_size_dynamic_sections): Get unwind info from
+	elf_x86_64_bnd_arch_bed for the BND PLT.
+
 2017-01-11  Jeremy Soller  <jackpot51@gmail.com>
 
 	* config.bfd: Add entries for i686-redox and x86_64-redox.

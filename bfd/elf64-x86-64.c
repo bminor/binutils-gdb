@@ -659,6 +659,41 @@ static const bfd_byte elf_x86_64_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+/* .eh_frame covering the BND .plt section.  */
+
+static const bfd_byte elf_x86_64_eh_frame_bnd_plt[] =
+{
+  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
+  0, 0, 0, 0,			/* CIE ID */
+  1,				/* CIE version */
+  'z', 'R', 0,			/* Augmentation string */
+  1,				/* Code alignment factor */
+  0x78,				/* Data alignment factor */
+  16,				/* Return address column */
+  1,				/* Augmentation size */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+  DW_CFA_def_cfa, 7, 8,		/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
+  DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
+  DW_CFA_nop, DW_CFA_nop,
+
+  PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
+  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
+  0, 0, 0, 0,			/* R_X86_64_PC32 .plt goes here */
+  0, 0, 0, 0,			/* .plt size goes here */
+  0,				/* Augmentation size */
+  DW_CFA_def_cfa_offset, 16,	/* DW_CFA_def_cfa_offset: 16 */
+  DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
+  DW_CFA_def_cfa_offset, 24,	/* DW_CFA_def_cfa_offset: 24 */
+  DW_CFA_advance_loc + 10,	/* DW_CFA_advance_loc: 10 to __PLT__+16 */
+  DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
+  11,				/* Block length */
+  DW_OP_breg7, 8,		/* DW_OP_breg7 (rsp): 8 */
+  DW_OP_breg16, 0,		/* DW_OP_breg16 (rip): 0 */
+  DW_OP_lit15, DW_OP_and, DW_OP_lit5, DW_OP_ge,
+  DW_OP_lit3, DW_OP_shl, DW_OP_plus,
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+};
+
 /* .eh_frame covering the .plt.got section.  */
 
 static const bfd_byte elf_x86_64_eh_frame_plt_got[] =
@@ -770,11 +805,10 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
     1+6,                                /* plt_got_insn_size */
     11,                                 /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
-    elf_x86_64_eh_frame_plt,            /* eh_frame_plt */
-    sizeof (elf_x86_64_eh_frame_plt),   /* eh_frame_plt_size */
-    /* FIXME: Needs .eh_frame coverage.  */
-    NULL,                               /* eh_frame_plt_got */
-    0,                                  /* eh_frame_plt_got_size */
+    elf_x86_64_eh_frame_bnd_plt,        /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_bnd_plt), /* eh_frame_plt_size */
+    elf_x86_64_eh_frame_plt_got,        /* eh_frame_plt_got */
+    sizeof (elf_x86_64_eh_frame_plt_got), /* eh_frame_plt_got_size */
   };
 
 #define	elf_backend_arch_data	&elf_x86_64_arch_bed
@@ -3851,6 +3885,8 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  && htab->elf.splt->size != 0
 	  && !bfd_is_abs_section (htab->elf.splt->output_section))
 	{
+	  /* Unwind info for the BND PLT and the normal PLT have the
+	     same time.  */
 	  const struct elf_x86_64_backend_data *arch_data
 	    = get_elf_x86_64_arch_data (bed);
 	  htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
@@ -3939,8 +3975,12 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   if (htab->plt_eh_frame != NULL
       && htab->plt_eh_frame->contents != NULL)
     {
+      /* Unwind info for the BND PLT and the normal PLT have the same
+	 size, but different contents.  */
       const struct elf_x86_64_backend_data *arch_data
-	= get_elf_x86_64_arch_data (bed);
+	= (htab->plt_bnd != NULL
+	   ? &elf_x86_64_bnd_arch_bed
+	   : get_elf_x86_64_arch_data (bed));
 
       memcpy (htab->plt_eh_frame->contents,
 	      arch_data->eh_frame_plt, htab->plt_eh_frame->size);
@@ -3951,6 +3991,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   if (htab->plt_got_eh_frame != NULL
       && htab->plt_got_eh_frame->contents != NULL)
     {
+      /* Unwind info for .plt.bnd and .plt.got sections are identical.  */
       const struct elf_x86_64_backend_data *arch_data
 	= get_elf_x86_64_arch_data (bed);
 
