@@ -1,3 +1,7 @@
+2017-01-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-decode.c (lookup_cmd_1): Fix typo in comment.
+
 2017-01-10  Tom Tromey  <tom@tromey.com>
 
 	* python/py-type.c (typy_legacy_template_argument): Update.
