@@ -1,5 +1,27 @@
 2017-02-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-cmd.c (cmdpy_destroyer): Use gdbpy_ref.
+	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Use
+	gdbpy_ref.
+	* python/py-type.c (field_new): Use gdbpy_ref.
+	* python/py-symtab.c (symtab_and_line_to_sal_object): Use
+	gdbpy_ref.
+	* python/py-progspace.c (pspy_new): Use gdbpy_ref.
+	(py_free_pspace): Likewise.
+	(pspace_to_pspace_object): Likewise.
+	* python/py-objfile.c (objfpy_new): Use gdbpy_ref.
+	(py_free_objfile): Likewise.
+	(objfile_to_objfile_object): Likewise.
+	* python/py-inferior.c (delete_thread_object): Use
+	gdbpy_ref.
+	(infpy_read_memory): Likewise.
+	(py_free_inferior): Likewise.
+	* python/py-evtregistry.c (create_eventregistry_object): Use
+	gdbpy_ref.
+	* python/py-event.c (create_event_object): Use gdbpy_ref.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-ref.h (gdbpy_ref_policy): Now a template.
 	(gdbpy_ref): Now a template; allow subclasses of PyObject to be
 	used.

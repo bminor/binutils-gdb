@@ -24,6 +24,7 @@
 #include "language.h"
 #include "build-id.h"
 #include "symtab.h"
+#include "py-ref.h"
 
 typedef struct
 {
@@ -227,18 +228,15 @@ objfpy_initialize (objfile_object *self)
 static PyObject *
 objfpy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 {
-  objfile_object *self = (objfile_object *) type->tp_alloc (type, 0);
+  gdbpy_ref<objfile_object> self ((objfile_object *) type->tp_alloc (type, 0));
 
-  if (self)
+  if (self != NULL)
     {
-      if (!objfpy_initialize (self))
-	{
-	  Py_DECREF (self);
-	  return NULL;
-	}
+      if (!objfpy_initialize (self.get ()))
+	return NULL;
     }
 
-  return (PyObject *) self;
+  return (PyObject *) self.release ();
 }
 
 PyObject *
@@ -612,11 +610,9 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
 static void
 py_free_objfile (struct objfile *objfile, void *datum)
 {
-  objfile_object *object = (objfile_object *) datum;
-
   gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
+  gdbpy_ref<objfile_object> object ((objfile_object *) datum);
   object->objfile = NULL;
-  Py_DECREF ((PyObject *) object);
 }
 
 /* Return a borrowed reference to the Python object of type Objfile
@@ -627,26 +623,22 @@ py_free_objfile (struct objfile *objfile, void *datum)
 PyObject *
 objfile_to_objfile_object (struct objfile *objfile)
 {
-  objfile_object *object;
-
-  object = (objfile_object *) objfile_data (objfile, objfpy_objfile_data_key);
-  if (!object)
+  gdbpy_ref<objfile_object> object
+    ((objfile_object *) objfile_data (objfile, objfpy_objfile_data_key));
+  if (object == NULL)
     {
-      object = PyObject_New (objfile_object, &objfile_object_type);
-      if (object)
+      object.reset (PyObject_New (objfile_object, &objfile_object_type));
+      if (object != NULL)
 	{
-	  if (!objfpy_initialize (object))
-	    {
-	      Py_DECREF (object);
-	      return NULL;
-	    }
+	  if (!objfpy_initialize (object.get ()))
+	    return NULL;
 
 	  object->objfile = objfile;
-	  set_objfile_data (objfile, objfpy_objfile_data_key, object);
+	  set_objfile_data (objfile, objfpy_objfile_data_key, object.get ());
 	}
     }
 
-  return (PyObject *) object;
+  return (PyObject *) object.release ();
 }
 
 int

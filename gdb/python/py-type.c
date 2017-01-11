@@ -130,18 +130,16 @@ field_dealloc (PyObject *obj)
 static PyObject *
 field_new (void)
 {
-  field_object *result = PyObject_New (field_object, &field_object_type);
+  gdbpy_ref<field_object> result (PyObject_New (field_object,
+						&field_object_type));
 
-  if (result)
+  if (result != NULL)
     {
       result->dict = PyDict_New ();
       if (!result->dict)
-	{
-	  Py_DECREF (result);
-	  result = NULL;
-	}
+	return NULL;
     }
-  return (PyObject *) result;
+  return (PyObject *) result.release ();
 }
 
 

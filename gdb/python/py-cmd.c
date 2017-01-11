@@ -95,14 +95,11 @@ cmdpy_dont_repeat (PyObject *self, PyObject *args)
 static void
 cmdpy_destroyer (struct cmd_list_element *self, void *context)
 {
-  cmdpy_object *cmd;
-
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Release our hold on the command object.  */
-  cmd = (cmdpy_object *) context;
+  gdbpy_ref<cmdpy_object> cmd ((cmdpy_object *) context);
   cmd->command = NULL;
-  Py_DECREF (cmd);
 
   /* We allocated the name, doc string, and perhaps the prefix
      name.  */
