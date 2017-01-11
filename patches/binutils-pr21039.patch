@@ -1,0 +1,65 @@
+From 626d44a5b6a041bf295571d56e0b97661314cf87 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 11 Jan 2017 11:21:05 -0800
+Subject: [PATCH 2/2] Gold: Update tests for Linux/i386
+
+Linux/i386 is 32 bits with REL.
+
+	PR gold/21039
+	* testsuite/script_test_13.sh: Allow REL and RELA.
+	* testsuite/script_test_15a.sh: Support 32 bits.
+	* testsuite/script_test_15b.sh: Likewise.
+	* testsuite/script_test_15c.sh: Likewise.
+---
+ gold/testsuite/script_test_13.sh  | 2 +-
+ gold/testsuite/script_test_15a.sh | 2 +-
+ gold/testsuite/script_test_15b.sh | 2 +-
+ gold/testsuite/script_test_15c.sh | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/gold/testsuite/script_test_13.sh b/gold/testsuite/script_test_13.sh
+index 6f57888..a3ae29b 100755
+--- a/gold/testsuite/script_test_13.sh
++++ b/gold/testsuite/script_test_13.sh
+@@ -38,4 +38,4 @@ check()
+     fi
+ }
+ 
+-check "script_test_13.stdout" "\\.rela\\.dyn[[:space:]]\\+RELA[[:space:]]\\+0\\+10000\\b"
++check "script_test_13.stdout" "\\.rela\\?\\.dyn[[:space:]]\\+RELA\\?[[:space:]]\\+0\\+10000\\b"
+diff --git a/gold/testsuite/script_test_15a.sh b/gold/testsuite/script_test_15a.sh
+index dd038e8..b13bca3 100755
+--- a/gold/testsuite/script_test_15a.sh
++++ b/gold/testsuite/script_test_15a.sh
+@@ -37,5 +37,5 @@ check()
+     fi
+ }
+ 
+-check script_test_15a.stdout "LOAD.*0x000... 0x001... RW"
++check script_test_15a.stdout "LOAD.*0x0\\+... 0x0\\+1... RW"
+ check script_test_15a.stdout "01.*\\.data .*\\.data.extra .*\\.bss"
+diff --git a/gold/testsuite/script_test_15b.sh b/gold/testsuite/script_test_15b.sh
+index a902caf..0466f49 100755
+--- a/gold/testsuite/script_test_15b.sh
++++ b/gold/testsuite/script_test_15b.sh
+@@ -38,5 +38,5 @@ check()
+     fi
+ }
+ 
+-check script_test_15b.stdout "LOAD.*0x001... 0x001... RW"
++check script_test_15a.stdout "LOAD.*0x0\\+... 0x0\\+1... RW"
+ check script_test_15b.stdout "01.*\\.bss .*\\.data .*\\.data.extra"
+diff --git a/gold/testsuite/script_test_15c.sh b/gold/testsuite/script_test_15c.sh
+index 3f7d581..9f5fda1 100755
+--- a/gold/testsuite/script_test_15c.sh
++++ b/gold/testsuite/script_test_15c.sh
+@@ -38,5 +38,5 @@ check()
+     fi
+ }
+ 
+-check script_test_15c.stdout "LOAD.*0x000... 0x001... RW"
++check script_test_15a.stdout "LOAD.*0x0\\+... 0x0\\+1... RW"
+ check script_test_15c.stdout "01.*\\.data .*\\.data.extra .*\\.bss"
+-- 
+2.7.4
+

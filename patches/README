@@ -19,6 +19,8 @@ patches="
 	binutils-lto-mixed.patch
 	binutils-pr12639.patch
 	binutils-secondary.patch
+	binutils-pr21039.patch
+	binutils-pr21040.patch
 "
 
 for p in $patches
