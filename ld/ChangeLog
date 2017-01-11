@@ -1,3 +1,7 @@
+2017-01-11  Jeremy Soller  <jackpot51@gmail.com>
+
+	* configure.tgt: Add entries for x86-redox and x86_64-redox.
+
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/pr20830b.d: Updated.

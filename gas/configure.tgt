@@ -251,6 +251,7 @@ case ${generic_target} in
       x86_64*-linux-gnux32)		arch=x86_64:32 ;;
     esac ;;
   i386-*-lynxos*)			fmt=elf em=lynx ;;
+  i386-*-redox*)			fmt=elf ;;
   i386-*-sysv[45]*)			fmt=elf ;;
   i386-*-solaris*)			fmt=elf em=solaris ;;
   i386-*-freebsdaout*)			fmt=aout em=386bsd ;;

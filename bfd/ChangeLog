@@ -1,3 +1,7 @@
+2017-01-11  Jeremy Soller  <jackpot51@gmail.com>
+
+	* config.bfd: Add entries for i686-redox and x86_64-redox.
+
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Align .eh_frame section
