@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -199,41 +199,9 @@ proc big_or_little_endian {} {
     return $flags
 }
 
-# Link a program using ld.
+# Link a program using ld
 #
 proc default_ld_link { ld target objects } {
-    global HOSTING_EMU
-    global HOSTING_CRT0
-    global HOSTING_SCRT0
-    global HOSTING_LIBS
-    global HOSTING_SLIBS
-    global LIBS
-    global host_triplet
-    global link_output
-    global exec_output
-
-    if { [ string match "* -pie *" $objects ] } {
-	set objs "$HOSTING_SCRT0 $objects"
-	set libs "$LIBS $HOSTING_SLIBS"
-    } else {
-	set objs "$HOSTING_CRT0 $objects"
-	set libs "$LIBS $HOSTING_LIBS"
-    }
-
-    if [is_endian_output_format $objects] then {
-	set flags [big_or_little_endian]
-    } else {
-	set flags ""
-    }
-
-    remote_file host delete $target
-
-    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU $flags -o $target $objs $libs"]
-}
-
-# Link a program using ld, without including any libraries.
-#
-proc default_ld_simple_link { ld target objects } {
     global host_triplet
     global exec_output
 
@@ -409,7 +377,7 @@ proc default_ld_nm { nm nmflags object } {
 
 # Define various symbols needed when not linking against all
 # target libs.
-proc ld_simple_link_defsyms {} {
+proc ld_link_defsyms {} {
 
     set flags "--defsym __stack_chk_fail=0"
 
@@ -857,7 +825,7 @@ proc run_dump_test { name {extra_options {}} } {
 	remote_file build delete "ld.tmp"
 
 	if { [lindex $cmdret 0] != 0 || ![string match "" $comp_output] } then {
-	    send_log "$comp_output\n"
+	    send_log -- "$comp_output\n"
 	    verbose "$comp_output" 3
 
 	    set exitstat "succeeded"
@@ -880,7 +848,7 @@ proc run_dump_test { name {extra_options {}} } {
 
 	    if { [lindex $cmdret 0] != 0 \
 		  || ![string match "" $comp_output] } {
-		send_log "$comp_output\n"
+		send_log -- "$comp_output\n"
 		verbose "$comp_output" 3
 
 		set exitstat "succeeded"
@@ -996,7 +964,7 @@ proc run_dump_test { name {extra_options {}} } {
             } else {
                 verbose -log "$exitstat with: <$comp_output>, no expected output"
             }
-	    send_log "$comp_output\n"
+	    send_log -- "$comp_output\n"
 	    verbose "$comp_output" 3
 
 	    if { (($check_ld(source) == "") == ($comp_output == "")) \
@@ -1269,7 +1237,7 @@ proc run_ld_link_tests { ldtests args } {
 	    if { ![ar_simple_create $ar $ld_options $binfile "$objfiles $ld_after"] } {
 		set failed 1
 	    }
-	} elseif { ![ld_simple_link $ld $binfile "$ld_extra_opt -L$srcdir/$subdir $ld_options $objfiles $ld_after"] } {
+	} elseif { ![ld_link $ld $binfile "$ld_extra_opt -L$srcdir/$subdir $ld_options $objfiles $ld_after"] } {
 	    set maybe_failed 1
 	    set ld_output "$exec_output"
 	}
@@ -1446,26 +1414,26 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    # incorrect section attributes and the assembler will warn
 	    # them.
 	    if { [ string match "c++" $lang ] } {
-		ld_compile "$CXX -c $CXXFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CXX -c $CXXFLAGS $cflags"
 	    } else {
-		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CC -c $CFLAGS $cflags"
+	    }
+	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
+		set failed 1
+		break
 	    }
 	}
+	if { $failed != 0 } {
+	    unresolved $testname
+	    continue
+	}
 
-	# We have to use $CC to build PIE and shared library.
-	if { [ string match "c" $lang ] } {
-	    set link_proc ld_simple_link
-	    set link_cmd $CC
-	} elseif { [ string match "c++" $lang ] } {
-	    set link_proc ld_simple_link
+	if { [ string match "c++" $lang ] } {
+	    set link_proc ld_link
 	    set link_cmd $CXX
-	} elseif { [ string match "-shared" $ld_options ] \
-		   || [ string match "-pie" $ld_options ] } {
-	    set link_proc ld_simple_link
-	    set link_cmd $CC
 	} else {
 	    set link_proc ld_link
-	    set link_cmd $ld
+	    set link_cmd $CC
 	}
 
 	if { $binfile eq "tmpdir/" } {
@@ -1486,7 +1454,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    }
 	}
 
-	if { $failed == 0 } {
+	if { $failed == 0 && [isnative] } {
 	    send_log "Running: $binfile > $binfile.out\n"
 	    verbose "Running: $binfile > $binfile.out"
 	    catch "exec $binfile > $binfile.out" exec_output
@@ -1511,6 +1479,8 @@ proc run_ld_link_exec_tests { ldtests args } {
 
 	if { $failed != 0 } {
 	    fail $testname
+	} elseif ![isnative] {
+	    unsupported $testname
 	} else {
 	    set errcnt 0
 	    pass $testname
@@ -1587,10 +1557,18 @@ proc run_cc_link_tests { ldtests } {
 	    # incorrect section attributes and the assembler will warn
 	    # them.
 	    if { [ string match "c++" $lang ] } {
-		ld_compile "$CXX -c $CXXFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CXX -c $CXXFLAGS $cflags"
 	    } else {
-		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+		set cmd "$CC -c $CFLAGS $cflags"
 	    }
+	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
+		set failed 1
+		break
+	    }
+	}
+	if { $failed != 0 } {
+	    unresolved $testname
+	    continue
 	}
 
 	# Clear error and warning counts.
@@ -1609,7 +1587,7 @@ proc run_cc_link_tests { ldtests } {
 		set failed 1
 	    }
 	} else {
-	    if { ![ld_simple_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"] } {
+	    if { ![ld_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"] } {
 		set failed 1
 	    }
 
@@ -1705,6 +1683,7 @@ proc check_gc_sections_available { } {
 	    || [istarget dlx-*-*]
 	    || [istarget i960-*-*]
 	    || [istarget pj*-*-*]
+	    || [istarget pru*-*-*]
 	    || [istarget alpha-*-*]
 	    || [istarget hppa*64-*-*]
 	    || [istarget i370-*-*]
@@ -1777,6 +1756,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget nds32*-*-*]
 	 && ![istarget or1k*-*-*]
 	 && ![istarget pj-*-*]
+	 && ![istarget pru-*-*]
 	 && ![istarget rl78-*-*]
 	 && ![istarget rx-*-*]
 	 && ![istarget spu-*-*]

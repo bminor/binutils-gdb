@@ -1,5 +1,5 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -3687,6 +3687,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
 #define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)
+#define elf_backend_want_dynrelro	1
 
 /* MIPS n32 ELF can use a mixture of REL and RELA, but some Relocations
    work better/work only in RELA, so we default to this.  */

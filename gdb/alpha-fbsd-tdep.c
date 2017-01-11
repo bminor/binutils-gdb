@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/alpha.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -127,6 +127,6 @@ void _initialize_alphafbsd_tdep (void);
 void
 _initialize_alphafbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_FREEBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_FREEBSD,
                           alphafbsd_init_abi);
 }

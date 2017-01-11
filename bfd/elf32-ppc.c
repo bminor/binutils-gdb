@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3276,8 +3276,6 @@ struct ppc_elf_link_hash_table
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *glink;
-  asection *dynbss;
-  asection *relbss;
   asection *dynsbss;
   asection *relsbss;
   elf_linker_section_t sdata[2];
@@ -3556,7 +3554,6 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       && !ppc_elf_create_glink (abfd, info))
     return FALSE;
 
-  htab->dynbss = bfd_get_linker_section (abfd, ".dynbss");
   s = bfd_make_section_anyway_with_flags (abfd, ".dynsbss",
 					  SEC_ALLOC | SEC_LINKER_CREATED);
   htab->dynsbss = s;
@@ -3565,7 +3562,6 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   if (! bfd_link_pic (info))
     {
-      htab->relbss = bfd_get_linker_section (abfd, ".rela.bss");
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
 	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
       s = bfd_make_section_anyway_with_flags (abfd, ".rela.sbss", flags);
@@ -3610,7 +3606,8 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	&& edir->elf.dynamic_adjusted))
     edir->elf.non_got_ref |= eind->elf.non_got_ref;
 
-  edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
+  if (edir->elf.versioned != versioned_hidden)
+    edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
   edir->elf.ref_regular |= eind->elf.ref_regular;
   edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
   edir->elf.needs_plt |= eind->elf.needs_plt;
@@ -5810,8 +5807,10 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   if (ppc_elf_hash_entry (h)->has_sda_refs)
     s = htab->dynsbss;
+  else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    s = htab->elf.sdynrelro;
   else
-    s = htab->dynbss;
+    s = htab->elf.sdynbss;
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_PPC_COPY reloc to tell the dynamic linker to
@@ -5824,8 +5823,10 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	srel = htab->relsbss;
+      else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	srel = htab->elf.sreldynrelro;
       else
-	srel = htab->relbss;
+	srel = htab->elf.srelbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
@@ -6639,7 +6640,8 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	       || s == htab->glink_eh_frame
 	       || s == htab->elf.sgotplt
 	       || s == htab->sbss
-	       || s == htab->dynbss
+	       || s == htab->elf.sdynbss
+	       || s == htab->elf.sdynrelro
 	       || s == htab->dynsbss)
 	{
 	  /* Strip these too.  */
@@ -10360,8 +10362,10 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       if (ppc_elf_hash_entry (h)->has_sda_refs)
 	s = htab->relsbss;
+      else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
       else
-	s = htab->relbss;
+	s = htab->elf.srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = SYM_VAL (h);
@@ -10897,6 +10901,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #endif
 
 #define elf_backend_plt_not_loaded	1
+#define elf_backend_want_dynrelro	1
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
 #define elf_backend_rela_normal		1

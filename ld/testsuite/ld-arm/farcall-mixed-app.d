@@ -52,8 +52,8 @@ Disassembly of section .far_arm:
 .* <app_func>:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	push	{fp, ip, lr, pc}
- .*:	eb000006 	bl	.* <__lib_func1_veneer>
- .*:	eb000007 	bl	.* <__lib_func2_veneer>
+ .*:	eb00000(6|8) 	bl	.* <__lib_func1_veneer>
+ .*:	eb00000(7|5) 	bl	.* <__lib_func2_veneer>
  .*:	e89d6800 	ldm	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
  .*:	e1a00000 	nop			; \(mov r0, r0\)
@@ -63,12 +63,12 @@ Disassembly of section .far_arm:
  .*:	e12fff1e 	bx	lr
 #...
 
-.* <__lib_func1_veneer>:
- .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__lib_func1_veneer\+0x4>
- .*:	000081ec 	.word	0x000081ec
-.* <__lib_func2_veneer>:
- .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__lib_func2_veneer\+0x4>
- .*:	000081e0 	.word	0x000081e0
+.* <__lib_func(1|2)_veneer>:
+ .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__lib_func(1|2)_veneer\+0x4>
+ .*:	000081e(c|0) 	.word	0x000081e(c|0)
+.* <__lib_func(2|1)_veneer>:
+ .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__lib_func(2|1)_veneer\+0x4>
+ .*:	000081e(0|c) 	.word	0x000081e(0|c)
 
 Disassembly of section .far_thumb:
 

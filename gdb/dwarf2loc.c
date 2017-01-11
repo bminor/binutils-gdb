@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
@@ -41,6 +41,7 @@
 #include "selftest.h"
 #include <algorithm>
 #include <vector>
+#include <unordered_set>
 
 extern int dwarf_always_disassemble;
 
@@ -789,33 +790,23 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
 static void
 func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 {
-  struct obstack addr_obstack;
-  struct cleanup *old_chain;
   CORE_ADDR addr;
-
-  /* Track here CORE_ADDRs which were already visited.  */
-  htab_t addr_hash;
 
   /* The verification is completely unordered.  Track here function addresses
      which still need to be iterated.  */
-  VEC (CORE_ADDR) *todo = NULL;
+  std::vector<CORE_ADDR> todo;
 
-  obstack_init (&addr_obstack);
-  old_chain = make_cleanup_obstack_free (&addr_obstack);   
-  addr_hash = htab_create_alloc_ex (64, core_addr_hash, core_addr_eq, NULL,
-				    &addr_obstack, hashtab_obstack_allocate,
-				    NULL);
-  make_cleanup_htab_delete (addr_hash);
+  /* Track here CORE_ADDRs which were already visited.  */
+  std::unordered_set<CORE_ADDR> addr_hash;
 
-  make_cleanup (VEC_cleanup (CORE_ADDR), &todo);
-
-  VEC_safe_push (CORE_ADDR, todo, verify_addr);
-  while (!VEC_empty (CORE_ADDR, todo))
+  todo.push_back (verify_addr);
+  while (!todo.empty ())
     {
       struct symbol *func_sym;
       struct call_site *call_site;
 
-      addr = VEC_pop (CORE_ADDR, todo);
+      addr = todo.back ();
+      todo.pop_back ();
 
       func_sym = func_addr_to_tail_call_list (gdbarch, addr);
 
@@ -823,7 +814,6 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 	   call_site; call_site = call_site->tail_call_next)
 	{
 	  CORE_ADDR target_addr;
-	  void **slot;
 
 	  /* CALLER_FRAME with registers is not available for tail-call jumped
 	     frames.  */
@@ -843,17 +833,10 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 			   paddress (gdbarch, verify_addr));
 	    }
 
-	  slot = htab_find_slot (addr_hash, &target_addr, INSERT);
-	  if (*slot == NULL)
-	    {
-	      *slot = obstack_copy (&addr_obstack, &target_addr,
-				    sizeof (target_addr));
-	      VEC_safe_push (CORE_ADDR, todo, target_addr);
-	    }
+	  if (addr_hash.insert (target_addr).second)
+	    todo.push_back (target_addr);
 	}
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Print user readable form of CALL_SITE->PC to gdb_stdlog.  Used only for
@@ -871,12 +854,6 @@ tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
 
 }
 
-/* vec.h needs single word type name, typedef it.  */
-typedef struct call_site *call_sitep;
-
-/* Define VEC (call_sitep) functions.  */
-DEF_VEC_P (call_sitep);
-
 /* Intersect RESULTP with CHAIN to keep RESULTP unambiguous, keep in RESULTP
    only top callers and bottom callees which are present in both.  GDBARCH is
    used only for ENTRY_VALUES_DEBUG.  RESULTP is NULL after return if there are
@@ -885,26 +862,27 @@ DEF_VEC_P (call_sitep);
    responsible for xfree of any RESULTP data.  */
 
 static void
-chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
-		 VEC (call_sitep) *chain)
+chain_candidate (struct gdbarch *gdbarch,
+		 gdb::unique_xmalloc_ptr<struct call_site_chain> *resultp,
+		 std::vector<struct call_site *> *chain)
 {
-  struct call_site_chain *result = *resultp;
-  long length = VEC_length (call_sitep, chain);
+  long length = chain->size ();
   int callers, callees, idx;
 
-  if (result == NULL)
+  if (*resultp == NULL)
     {
       /* Create the initial chain containing all the passed PCs.  */
 
-      result = ((struct call_site_chain *)
-		xmalloc (sizeof (*result)
-			 + sizeof (*result->call_site) * (length - 1)));
+      struct call_site_chain *result
+	= ((struct call_site_chain *)
+	   xmalloc (sizeof (*result)
+		    + sizeof (*result->call_site) * (length - 1)));
       result->length = length;
       result->callers = result->callees = length;
-      if (!VEC_empty (call_sitep, chain))
-	memcpy (result->call_site, VEC_address (call_sitep, chain),
+      if (!chain->empty ())
+	memcpy (result->call_site, chain->data (),
 		sizeof (*result->call_site) * length);
-      *resultp = result;
+      resultp->reset (result);
 
       if (entry_values_debug)
 	{
@@ -921,58 +899,58 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
     {
       fprintf_unfiltered (gdb_stdlog, "tailcall: compare:");
       for (idx = 0; idx < length; idx++)
-	tailcall_dump (gdbarch, VEC_index (call_sitep, chain, idx));
+	tailcall_dump (gdbarch, chain->at (idx));
       fputc_unfiltered ('\n', gdb_stdlog);
     }
 
   /* Intersect callers.  */
 
-  callers = std::min ((long) result->callers, length);
+  callers = std::min ((long) (*resultp)->callers, length);
   for (idx = 0; idx < callers; idx++)
-    if (result->call_site[idx] != VEC_index (call_sitep, chain, idx))
+    if ((*resultp)->call_site[idx] != chain->at (idx))
       {
-	result->callers = idx;
+	(*resultp)->callers = idx;
 	break;
       }
 
   /* Intersect callees.  */
 
-  callees = std::min ((long) result->callees, length);
+  callees = std::min ((long) (*resultp)->callees, length);
   for (idx = 0; idx < callees; idx++)
-    if (result->call_site[result->length - 1 - idx]
-	!= VEC_index (call_sitep, chain, length - 1 - idx))
+    if ((*resultp)->call_site[(*resultp)->length - 1 - idx]
+	!= chain->at (length - 1 - idx))
       {
-	result->callees = idx;
+	(*resultp)->callees = idx;
 	break;
       }
 
   if (entry_values_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "tailcall: reduced:");
-      for (idx = 0; idx < result->callers; idx++)
-	tailcall_dump (gdbarch, result->call_site[idx]);
+      for (idx = 0; idx < (*resultp)->callers; idx++)
+	tailcall_dump (gdbarch, (*resultp)->call_site[idx]);
       fputs_unfiltered (" |", gdb_stdlog);
-      for (idx = 0; idx < result->callees; idx++)
-	tailcall_dump (gdbarch, result->call_site[result->length
-						  - result->callees + idx]);
+      for (idx = 0; idx < (*resultp)->callees; idx++)
+	tailcall_dump (gdbarch,
+		       (*resultp)->call_site[(*resultp)->length
+					     - (*resultp)->callees + idx]);
       fputc_unfiltered ('\n', gdb_stdlog);
     }
 
-  if (result->callers == 0 && result->callees == 0)
+  if ((*resultp)->callers == 0 && (*resultp)->callees == 0)
     {
       /* There are no common callers or callees.  It could be also a direct
 	 call (which has length 0) with ambiguous possibility of an indirect
 	 call - CALLERS == CALLEES == 0 is valid during the first allocation
 	 but any subsequence processing of such entry means ambiguity.  */
-      xfree (result);
-      *resultp = NULL;
+      resultp->reset (NULL);
       return;
     }
 
   /* See call_site_find_chain_1 why there is no way to reach the bottom callee
      PC again.  In such case there must be two different code paths to reach
      it.  CALLERS + CALLEES equal to LENGTH in the case of self tail-call.  */
-  gdb_assert (result->callers + result->callees <= result->length);
+  gdb_assert ((*resultp)->callers + (*resultp)->callees <= (*resultp)->length);
 }
 
 /* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the
@@ -987,19 +965,14 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 			CORE_ADDR callee_pc)
 {
   CORE_ADDR save_callee_pc = callee_pc;
-  struct obstack addr_obstack;
-  struct cleanup *back_to_retval, *back_to_workdata;
-  struct call_site_chain *retval = NULL;
+  gdb::unique_xmalloc_ptr<struct call_site_chain> retval;
   struct call_site *call_site;
-
-  /* Mark CALL_SITEs so we do not visit the same ones twice.  */
-  htab_t addr_hash;
 
   /* CHAIN contains only the intermediate CALL_SITEs.  Neither CALLER_PC's
      call_site nor any possible call_site at CALLEE_PC's function is there.
      Any CALL_SITE in CHAIN will be iterated to its siblings - via
      TAIL_CALL_NEXT.  This is inappropriate for CALLER_PC's call_site.  */
-  VEC (call_sitep) *chain = NULL;
+  std::vector<struct call_site *> chain;
 
   /* We are not interested in the specific PC inside the callee function.  */
   callee_pc = get_pc_function_start (callee_pc);
@@ -1007,16 +980,8 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
     throw_error (NO_ENTRY_VALUE_ERROR, _("Unable to find function for PC %s"),
 		 paddress (gdbarch, save_callee_pc));
 
-  back_to_retval = make_cleanup (free_current_contents, &retval);
-
-  obstack_init (&addr_obstack);
-  back_to_workdata = make_cleanup_obstack_free (&addr_obstack);   
-  addr_hash = htab_create_alloc_ex (64, core_addr_hash, core_addr_eq, NULL,
-				    &addr_obstack, hashtab_obstack_allocate,
-				    NULL);
-  make_cleanup_htab_delete (addr_hash);
-
-  make_cleanup (VEC_cleanup (call_sitep), &chain);
+  /* Mark CALL_SITEs so we do not visit the same ones twice.  */
+  std::unordered_set<CORE_ADDR> addr_hash;
 
   /* Do not push CALL_SITE to CHAIN.  Push there only the first tail call site
      at the target's function.  All the possible tail call sites in the
@@ -1035,7 +1000,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
       if (target_func_addr == callee_pc)
 	{
-	  chain_candidate (gdbarch, &retval, chain);
+	  chain_candidate (gdbarch, &retval, &chain);
 	  if (retval == NULL)
 	    break;
 
@@ -1057,15 +1022,11 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
 	  if (target_call_site)
 	    {
-	      void **slot;
-
-	      slot = htab_find_slot (addr_hash, &target_call_site->pc, INSERT);
-	      if (*slot == NULL)
+	      if (addr_hash.insert (target_call_site->pc).second)
 		{
 		  /* Successfully entered TARGET_CALL_SITE.  */
 
-		  *slot = &target_call_site->pc;
-		  VEC_safe_push (call_sitep, chain, target_call_site);
+		  chain.push_back (target_call_site);
 		  break;
 		}
 	    }
@@ -1075,13 +1036,13 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 	     sibling etc.  */
 
 	  target_call_site = NULL;
-	  while (!VEC_empty (call_sitep, chain))
+	  while (!chain.empty ())
 	    {
-	      call_site = VEC_pop (call_sitep, chain);
+	      call_site = chain.back ();
+	      chain.pop_back ();
 
-	      gdb_assert (htab_find_slot (addr_hash, &call_site->pc,
-					  NO_INSERT) != NULL);
-	      htab_remove_elt (addr_hash, &call_site->pc);
+	      size_t removed = addr_hash.erase (call_site->pc);
+	      gdb_assert (removed == 1);
 
 	      target_call_site = call_site->tail_call_next;
 	      if (target_call_site)
@@ -1090,10 +1051,10 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 	}
       while (target_call_site);
 
-      if (VEC_empty (call_sitep, chain))
+      if (chain.empty ())
 	call_site = NULL;
       else
-	call_site = VEC_last (call_sitep, chain);
+	call_site = chain.back ();
     }
 
   if (retval == NULL)
@@ -1114,9 +1075,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 		   paddress (gdbarch, callee_pc));
     }
 
-  do_cleanups (back_to_workdata);
-  discard_cleanups (back_to_retval);
-  return retval;
+  return retval.release ();
 }
 
 /* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the
@@ -1908,23 +1867,11 @@ write_pieced_value (struct value *to, struct value *from)
   const gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (to);
-  struct frame_info *frame;
   size_t type_len;
   size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));
-
-  /* VALUE_FRAME_ID is used instead of VALUE_NEXT_FRAME_ID here
-     because FRAME is passed to get_frame_register_bytes() and
-     put_frame_register_bytes(), both of which do their own "->next"
-     operations.  */
-  frame = frame_find_by_id (VALUE_FRAME_ID (to));
-  if (frame == NULL)
-    {
-      mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
-      return;
-    }
 
   contents = value_contents (from);
   bits_to_skip = 8 * value_offset (to);
@@ -1988,6 +1935,7 @@ write_pieced_value (struct value *to, struct value *from)
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
+	    struct frame_info *frame = frame_find_by_id (c->frame_id);
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
 	    int reg_offset = dest_offset;
@@ -2324,7 +2272,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 			       LONGEST byte_offset)
 {
   struct value *retval;
-  struct cleanup *value_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
 
   if (byte_offset < 0)
@@ -2338,7 +2285,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   ctx.per_cu = per_cu;
   ctx.obj_address = 0;
 
-  value_chain = make_cleanup_value_free_to_mark (value_mark ());
+  scoped_value_mark free_values;
 
   ctx.gdbarch = get_objfile_arch (objfile);
   ctx.addr_size = dwarf2_per_cu_addr_size (per_cu);
@@ -2353,7 +2300,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
-	  do_cleanups (value_chain);
+	  free_values.free_to_mark ();
 	  retval = allocate_value (type);
 	  mark_value_bytes_unavailable (retval, 0, TYPE_LENGTH (type));
 	  return retval;
@@ -2362,7 +2309,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	{
 	  if (entry_values_debug)
 	    exception_print (gdb_stdout, ex);
-	  do_cleanups (value_chain);
+	  free_values.free_to_mark ();
 	  return allocate_optimized_out_value (type);
 	}
       else
@@ -2385,7 +2332,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 				  ctx.addr_size, frame);
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
-      do_cleanups (value_chain);
+      free_values.free_to_mark ();
       retval = allocate_computed_value (type, &pieced_value_funcs, c);
       set_value_offset (retval, byte_offset);
     }
@@ -2402,7 +2349,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 	    if (byte_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
-	    do_cleanups (value_chain);
+	    free_values.free_to_mark ();
 	    retval = value_from_register (type, gdb_regnum, frame);
 	    if (value_optimized_out (retval))
 	      {
@@ -2414,7 +2361,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 		   inspecting a register ($pc, $sp, etc.), return a
 		   generic optimized out value instead, so that we show
 		   <optimized out> instead of <not saved>.  */
-		do_cleanups (value_chain);
 		tmp = allocate_value (type);
 		value_contents_copy (tmp, 0, retval, 0, TYPE_LENGTH (type));
 		retval = tmp;
@@ -2448,7 +2394,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	      }
 	    address = value_as_address (value_from_pointer (ptr_type, address));
 
-	    do_cleanups (value_chain);
+	    free_values.free_to_mark ();
 	    retval = value_at_lazy (type, address + byte_offset);
 	    if (in_stack_memory)
 	      set_value_stack (retval, 1);
@@ -2461,6 +2407,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    gdb_byte *contents;
 	    const gdb_byte *val_bytes;
 	    size_t n = TYPE_LENGTH (value_type (value));
+	    struct cleanup *cleanup;
 
 	    if (byte_offset + TYPE_LENGTH (type) > n)
 	      invalid_synthetic_pointer ();
@@ -2473,8 +2420,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	       to the mark, but we still need the value contents
 	       below.  */
 	    value_incref (value);
-	    do_cleanups (value_chain);
-	    make_cleanup_value_free (value);
+	    free_values.free_to_mark ();
+	    cleanup = make_cleanup_value_free (value);
 
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
@@ -2487,6 +2434,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 		n = TYPE_LENGTH (type);
 	      }
 	    memcpy (contents, val_bytes, n);
+
+	    do_cleanups (cleanup);
 	  }
 	  break;
 
@@ -2499,7 +2448,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    if (byte_offset + TYPE_LENGTH (type) > n)
 	      invalid_synthetic_pointer ();
 
-	    do_cleanups (value_chain);
+	    free_values.free_to_mark ();
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
 
@@ -2519,7 +2468,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
-	  do_cleanups (value_chain);
+	  free_values.free_to_mark ();
 	  retval = allocate_optimized_out_value (type);
 	  break;
 
@@ -2534,8 +2483,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     }
 
   set_value_initialized (retval, ctx.initialized);
-
-  do_cleanups (value_chain);
 
   return retval;
 }
@@ -2564,7 +2511,6 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   CORE_ADDR *valp)
 {
   struct objfile *objfile;
-  struct cleanup *cleanup;
 
   if (dlbaton == NULL || dlbaton->size == 0)
     return 0;
@@ -2843,16 +2789,14 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 				       struct dwarf2_per_cu_data *per_cu)
 {
   int in_reg;
-  struct cleanup *old_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
+
+  scoped_value_mark free_values;
 
   symbol_needs_eval_context ctx;
 
   ctx.needs = SYMBOL_NEEDS_NONE;
   ctx.per_cu = per_cu;
-
-  old_chain = make_cleanup_value_free_to_mark (value_mark ());
-
   ctx.gdbarch = get_objfile_arch (objfile);
   ctx.addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx.ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
@@ -2872,8 +2816,6 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
         if (ctx.pieces[i].location == DWARF_VALUE_REGISTER)
           in_reg = 1;
     }
-
-  do_cleanups (old_chain);
 
   if (in_reg)
     ctx.needs = SYMBOL_NEEDS_FRAME;

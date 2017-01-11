@@ -1,5 +1,5 @@
 /* MIPS-specific support for ELF
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -451,8 +451,6 @@ struct mips_elf_link_hash_table
 
   /* Shortcuts to some dynamic sections, or NULL if they are not
      being used.  */
-  asection *srelbss;
-  asection *sdynbss;
   asection *srelplt2;
   asection *sstubs;
 
@@ -5920,7 +5918,6 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	    value = mips_elf_high (addend + gp - p - 1);
 	  else
 	    value = mips_elf_high (addend + gp - p);
-	  overflowed_p = mips_elf_overflow_p (value, 16);
 	}
       break;
 
@@ -7894,16 +7891,6 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (!_bfd_elf_create_dynamic_sections (abfd, info))
     return FALSE;
 
-  /* Cache the sections created above.  */
-  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
-  if (htab->is_vxworks)
-    htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
-  if (!htab->sdynbss
-      || (htab->is_vxworks && !htab->srelbss && !bfd_link_pic (info))
-      || !htab->root.srelplt
-      || !htab->root.splt)
-    abort ();
-
   /* Do the usual VxWorks handling.  */
   if (htab->is_vxworks
       && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
@@ -9142,6 +9129,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   bfd *dynobj;
   struct mips_elf_link_hash_entry *hmips;
   struct mips_elf_link_hash_table *htab;
+  asection *s, *srel;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -9384,10 +9372,20 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->root.sdynrelro;
+      srel = htab->root.sreldynrelro;
+    }
+  else
+    {
+      s = htab->root.sdynbss;
+      srel = htab->root.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       if (htab->is_vxworks)
-	htab->srelbss->size += sizeof (Elf32_External_Rela);
+	srel->size += sizeof (Elf32_External_Rela);
       else
 	mips_elf_allocate_dynamic_relocations (dynobj, info, 1);
       h->needs_copy = 1;
@@ -9397,7 +9395,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      dynamic will now refer to the local copy instead.  */
   hmips->possibly_dynamic_relocs = 0;
 
-  return _bfd_elf_adjust_dynamic_copy (info, h, htab->sdynbss);
+  return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
 /* This function is called after all the input files have been read,
@@ -9919,7 +9917,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	       && s != htab->root.sgot
 	       && s != htab->root.sgotplt
 	       && s != htab->sstubs
-	       && s != htab->sdynbss)
+	       && s != htab->root.sdynbss
+	       && s != htab->root.sdynrelro)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -11309,6 +11308,8 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
   if (h->needs_copy)
     {
       Elf_Internal_Rela rel;
+      asection *srel;
+      bfd_byte *loc;
 
       BFD_ASSERT (h->dynindx != -1);
 
@@ -11317,11 +11318,13 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 		      + h->root.u.def.value);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_COPY);
       rel.r_addend = 0;
-      bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 htab->srelbss->contents
-				 + (htab->srelbss->reloc_count
-				    * sizeof (Elf32_External_Rela)));
-      ++htab->srelbss->reloc_count;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	srel = htab->root.sreldynrelro;
+      else
+	srel = htab->root.srelbss;
+      loc = srel->contents + srel->reloc_count * sizeof (Elf32_External_Rela);
+      bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
+      ++srel->reloc_count;
     }
 
   /* If this is a mips16/microMIPS symbol, force the value to be even.  */
@@ -16328,6 +16331,16 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
+/* Return the ABI flags associated with ABFD if available.  */
+
+Elf_Internal_ABIFlags_v0 *
+bfd_mips_elf_get_abiflags (bfd *abfd)
+{
+  struct mips_elf_obj_tdata *tdata = mips_elf_tdata (abfd);
+
+  return tdata->abiflags_valid ? &tdata->abiflags : NULL;
+}
+
 void
 _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
 {
@@ -16349,9 +16362,6 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
   if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64
       || mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64A)
     i_ehdrp->e_ident[EI_ABIVERSION] = 3;
-
-  if (elf_stack_flags (abfd) && !(elf_stack_flags (abfd) & PF_X))
-    i_ehdrp->e_ident[EI_ABIVERSION] = 5;
 }
 
 int

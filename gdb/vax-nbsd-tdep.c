@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/vax.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,6 +41,6 @@ void _initialize_vaxnbsd_tdep (void);
 void
 _initialize_vaxnbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_vax, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_vax, 0, GDB_OSABI_NETBSD,
 			  vaxnbsd_elf_init_abi);
 }

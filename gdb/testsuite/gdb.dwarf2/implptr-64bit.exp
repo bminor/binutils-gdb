@@ -1,4 +1,4 @@
-# Copyright 2011-2016 Free Software Foundation, Inc.
+# Copyright 2011-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ proc test { dwarf_version offset_size addr_size ref_addr_size two_cu } {
 
     set name "d${dwarf_version}o${offset_size}a${addr_size}r${ref_addr_size}t${two_cu}"
     set executable ${testfile}-${name}
-    if [prepare_for_testing ${testfile}.exp $executable "${srcfile} ${mainfile}" $opts] {
+    if [prepare_for_testing "failed to prepare" $executable "${srcfile} ${mainfile}" $opts] {
 	return -1
     }
 

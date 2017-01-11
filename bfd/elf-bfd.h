@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -467,6 +467,7 @@ enum elf_target_id
   OR1K_ELF_DATA,
   PPC32_ELF_DATA,
   PPC64_ELF_DATA,
+  PRU_ELF_DATA,
   S390_ELF_DATA,
   SH_ELF_DATA,
   SPARC_ELF_DATA,
@@ -595,6 +596,10 @@ struct elf_link_hash_table
   asection *srelgot;
   asection *splt;
   asection *srelplt;
+  asection *sdynbss;
+  asection *srelbss;
+  asection *sdynrelro;
+  asection *sreldynrelro;
   asection *igotplt;
   asection *iplt;
   asection *irelplt;
@@ -1449,6 +1454,7 @@ struct elf_backend_data
   unsigned can_refcount : 1;
   unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
+  unsigned want_dynrelro : 1;
 
   /* Targets which do not support physical addressing often require
      that the p_paddr field in the section header to be set to zero.

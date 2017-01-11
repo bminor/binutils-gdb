@@ -1,6 +1,6 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright (C) 1997-2016 Free Software Foundation, Inc.
+   Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -166,17 +166,17 @@ char *trace_notes = NULL;
 char *trace_stop_notes = NULL;
 
 /* ======= Important command functions: ======= */
-static void trace_actions_command (char *, int);
-static void trace_start_command (char *, int);
-static void trace_stop_command (char *, int);
-static void trace_status_command (char *, int);
-static void trace_find_command (char *, int);
-static void trace_find_pc_command (char *, int);
-static void trace_find_tracepoint_command (char *, int);
-static void trace_find_line_command (char *, int);
-static void trace_find_range_command (char *, int);
-static void trace_find_outside_command (char *, int);
-static void trace_dump_command (char *, int);
+static void actions_command (char *, int);
+static void tstart_command (char *, int);
+static void tstop_command (char *, int);
+static void tstatus_command (char *, int);
+static void tfind_command (char *, int);
+static void tfind_pc_command (char *, int);
+static void tfind_tracepoint_command (char *, int);
+static void tfind_line_command (char *, int);
+static void tfind_range_command (char *, int);
+static void tfind_outside_command (char *, int);
+static void tdump_command (char *, int);
 
 /* support routines */
 
@@ -486,7 +486,7 @@ tvariables_info_1 (void)
   struct cleanup *back_to;
   struct ui_out *uiout = current_uiout;
 
-  if (VEC_length (tsv_s, tvariables) == 0 && !ui_out_is_mi_like_p (uiout))
+  if (VEC_length (tsv_s, tvariables) == 0 && !uiout->is_mi_like_p ())
     {
       printf_filtered (_("No trace state variables.\n"));
       return;
@@ -499,11 +499,11 @@ tvariables_info_1 (void)
 
   back_to = make_cleanup_ui_out_table_begin_end (uiout, 3,
                                                  count, "trace-variables");
-  ui_out_table_header (uiout, 15, ui_left, "name", "Name");
-  ui_out_table_header (uiout, 11, ui_left, "initial", "Initial");
-  ui_out_table_header (uiout, 11, ui_left, "current", "Current");
+  uiout->table_header (15, ui_left, "name", "Name");
+  uiout->table_header (11, ui_left, "initial", "Initial");
+  uiout->table_header (11, ui_left, "current", "Current");
 
-  ui_out_table_body (uiout);
+  uiout->table_body ();
 
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     {
@@ -515,12 +515,12 @@ tvariables_info_1 (void)
 
       name = concat ("$", tsv->name, (char *) NULL);
       make_cleanup (xfree, name);
-      ui_out_field_string (uiout, "name", name);
-      ui_out_field_string (uiout, "initial", plongest (tsv->initial_value));
+      uiout->field_string ("name", name);
+      uiout->field_string ("initial", plongest (tsv->initial_value));
 
       if (tsv->value_known)
         c = plongest (tsv->value);
-      else if (ui_out_is_mi_like_p (uiout))
+      else if (uiout->is_mi_like_p ())
         /* For MI, we prefer not to use magic string constants, but rather
            omit the field completely.  The difference between unknown and
            undefined does not seem important enough to represent.  */
@@ -532,8 +532,8 @@ tvariables_info_1 (void)
 	/* It is not meaningful to ask about the value.  */
         c = "<undefined>";
       if (c)
-        ui_out_field_string (uiout, "current", c);
-      ui_out_text (uiout, "\n");
+        uiout->field_string ("current", c);
+      uiout->text ("\n");
 
       do_cleanups (back_to2);
     }
@@ -645,7 +645,7 @@ decode_agent_options (const char *exp, int *trace_string)
 
 /* Enter a list of actions for a tracepoint.  */
 static void
-trace_actions_command (char *args, int from_tty)
+actions_command (char *args, int from_tty)
 {
   struct tracepoint *t;
   struct command_line *l;
@@ -1780,7 +1780,7 @@ start_tracing (char *notes)
    anybody else messing with the target.  */
 
 static void
-trace_start_command (char *args, int from_tty)
+tstart_command (char *args, int from_tty)
 {
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
@@ -1800,7 +1800,7 @@ trace_start_command (char *args, int from_tty)
    of the trace run's status.  */
 
 static void
-trace_stop_command (char *args, int from_tty)
+tstop_command (char *args, int from_tty)
 {
   if (!current_trace_status ()->running)
     error (_("Trace is not running."));
@@ -1857,7 +1857,7 @@ stop_tracing (char *note)
 
 /* tstatus command */
 static void
-trace_status_command (char *args, int from_tty)
+tstatus_command (char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
   int status, ix;
@@ -1892,7 +1892,7 @@ trace_status_command (char *args, int from_tty)
 	case trace_never_run:
 	  printf_filtered (_("No trace has been run on the target.\n"));
 	  break;
-	case tstop_command:
+	case trace_stop_command:
 	  if (ts->stop_desc)
 	    printf_filtered (_("Trace stopped by a tstop command (%s).\n"),
 			     ts->stop_desc);
@@ -2030,23 +2030,23 @@ trace_status_mi (int on_stop)
 
   if (status == -1 && ts->filename == NULL)
     {
-      ui_out_field_string (uiout, "supported", "0");
+      uiout->field_string ("supported", "0");
       return;
     }
 
   if (ts->filename != NULL)
-    ui_out_field_string (uiout, "supported", "file");
+    uiout->field_string ("supported", "file");
   else if (!on_stop)
-    ui_out_field_string (uiout, "supported", "1");
+    uiout->field_string ("supported", "1");
 
   if (ts->filename != NULL)
-    ui_out_field_string (uiout, "trace-file", ts->filename);
+    uiout->field_string ("trace-file", ts->filename);
 
   gdb_assert (ts->running_known);
 
   if (ts->running)
     {
-      ui_out_field_string (uiout, "running", "1");
+      uiout->field_string ("running", "1");
 
       /* Unlike CLI, do not show the state of 'disconnected-tracing' variable.
 	 Given that the frontend gets the status either on -trace-stop, or from
@@ -2063,13 +2063,13 @@ trace_status_mi (int on_stop)
       int stopping_tracepoint = -1;
 
       if (!on_stop)
-	ui_out_field_string (uiout, "running", "0");
+	uiout->field_string ("running", "0");
 
       if (ts->stop_reason != trace_stop_reason_unknown)
 	{
 	  switch (ts->stop_reason)
 	    {
-	    case tstop_command:
+	    case trace_stop_command:
 	      stop_reason = "request";
 	      break;
 	    case trace_buffer_full:
@@ -2090,31 +2090,31 @@ trace_status_mi (int on_stop)
 	  
 	  if (stop_reason)
 	    {
-	      ui_out_field_string (uiout, "stop-reason", stop_reason);
+	      uiout->field_string ("stop-reason", stop_reason);
 	      if (stopping_tracepoint != -1)
-		ui_out_field_int (uiout, "stopping-tracepoint",
+		uiout->field_int ("stopping-tracepoint",
 				  stopping_tracepoint);
 	      if (ts->stop_reason == tracepoint_error)
-		ui_out_field_string (uiout, "error-description",
+		uiout->field_string ("error-description",
 				     ts->stop_desc);
 	    }
 	}
     }
 
   if (ts->traceframe_count != -1)
-    ui_out_field_int (uiout, "frames", ts->traceframe_count);
+    uiout->field_int ("frames", ts->traceframe_count);
   if (ts->traceframes_created != -1)
-    ui_out_field_int (uiout, "frames-created", ts->traceframes_created);
+    uiout->field_int ("frames-created", ts->traceframes_created);
   if (ts->buffer_size != -1)
-    ui_out_field_int (uiout, "buffer-size", ts->buffer_size);
+    uiout->field_int ("buffer-size", ts->buffer_size);
   if (ts->buffer_free != -1)
-    ui_out_field_int (uiout, "buffer-free", ts->buffer_free);
+    uiout->field_int ("buffer-free", ts->buffer_free);
 
-  ui_out_field_int (uiout, "disconnected",  ts->disconnected_tracing);
-  ui_out_field_int (uiout, "circular",  ts->circular_buffer);
+  uiout->field_int ("disconnected",  ts->disconnected_tracing);
+  uiout->field_int ("circular",  ts->circular_buffer);
 
-  ui_out_field_string (uiout, "user-name", ts->user_name);
-  ui_out_field_string (uiout, "notes", ts->notes);
+  uiout->field_string ("user-name", ts->user_name);
+  uiout->field_string ("notes", ts->notes);
 
   {
     char buf[100];
@@ -2122,11 +2122,11 @@ trace_status_mi (int on_stop)
     xsnprintf (buf, sizeof buf, "%ld.%06ld",
 	       (long int) (ts->start_time / 1000000),
 	       (long int) (ts->start_time % 1000000));
-    ui_out_field_string (uiout, "start-time", buf);
+    uiout->field_string ("start-time", buf);
     xsnprintf (buf, sizeof buf, "%ld.%06ld",
 	       (long int) (ts->stop_time / 1000000),
 	       (long int) (ts->stop_time % 1000000));
-    ui_out_field_string (uiout, "stop-time", buf);
+    uiout->field_string ("stop-time", buf);
   }
 }
 
@@ -2246,7 +2246,7 @@ tfind_1 (enum trace_find_type type, int num,
 #if 0 /* dubious now?  */
 	  /* The following will not recurse, since it's
 	     special-cased.  */
-	  trace_find_command ("-1", from_tty);
+	  tfind_command ("-1", from_tty);
 #endif
 	}
     }
@@ -2272,11 +2272,11 @@ tfind_1 (enum trace_find_type type, int num,
     {
       /* Use different branches for MI and CLI to make CLI messages
 	 i18n-eable.  */
-      if (ui_out_is_mi_like_p (uiout))
+      if (uiout->is_mi_like_p ())
 	{
-	  ui_out_field_string (uiout, "found", "1");
-	  ui_out_field_int (uiout, "tracepoint", tracepoint_number);
-	  ui_out_field_int (uiout, "traceframe", traceframe_number);
+	  uiout->field_string ("found", "1");
+	  uiout->field_int ("tracepoint", tracepoint_number);
+	  uiout->field_int ("traceframe", traceframe_number);
 	}
       else
 	{
@@ -2286,8 +2286,8 @@ tfind_1 (enum trace_find_type type, int num,
     }
   else
     {
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "found", "0");
+      if (uiout->is_mi_like_p ())
+	uiout->field_string ("found", "0");
       else if (type == tfind_number && num == -1)
 	printf_unfiltered (_("No longer looking at any trace frame\n"));
       else /* This case may never occur, check.  */
@@ -2344,7 +2344,7 @@ check_trace_running (struct trace_status *status)
 
 /* tfind command */
 static void
-trace_find_command (char *args, int from_tty)
+tfind_command (char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
@@ -2380,21 +2380,21 @@ trace_find_command (char *args, int from_tty)
 
 /* tfind end */
 static void
-trace_find_end_command (char *args, int from_tty)
+tfind_end_command (char *args, int from_tty)
 {
-  trace_find_command ("-1", from_tty);
+  tfind_command ("-1", from_tty);
 }
 
 /* tfind start */
 static void
-trace_find_start_command (char *args, int from_tty)
+tfind_start_command (char *args, int from_tty)
 {
-  trace_find_command ("0", from_tty);
+  tfind_command ("0", from_tty);
 }
 
 /* tfind pc command */
 static void
-trace_find_pc_command (char *args, int from_tty)
+tfind_pc_command (char *args, int from_tty)
 {
   CORE_ADDR pc;
 
@@ -2410,7 +2410,7 @@ trace_find_pc_command (char *args, int from_tty)
 
 /* tfind tracepoint command */
 static void
-trace_find_tracepoint_command (char *args, int from_tty)
+tfind_tracepoint_command (char *args, int from_tty)
 {
   int tdp;
   struct tracepoint *tp;
@@ -2446,7 +2446,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
    corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void
-trace_find_line_command (char *args, int from_tty)
+tfind_line_command (char *args, int from_tty)
 {
   static CORE_ADDR start_pc, end_pc;
   struct symtabs_and_lines sals;
@@ -2511,7 +2511,7 @@ trace_find_line_command (char *args, int from_tty)
 
 /* tfind range command */
 static void
-trace_find_range_command (char *args, int from_tty)
+tfind_range_command (char *args, int from_tty)
 {
   static CORE_ADDR start, stop;
   char *tmp;
@@ -2542,7 +2542,7 @@ trace_find_range_command (char *args, int from_tty)
 
 /* tfind outside command */
 static void
-trace_find_outside_command (char *args, int from_tty)
+tfind_outside_command (char *args, int from_tty)
 {
   CORE_ADDR start, stop;
   char *tmp;
@@ -2928,7 +2928,7 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
 /* The tdump command.  */
 
 static void
-trace_dump_command (char *args, int from_tty)
+tdump_command (char *args, int from_tty)
 {
   int stepping_frame = 0;
   struct bp_location *loc;
@@ -3492,7 +3492,7 @@ Status line: '%s'\n"), p, line);
 	  ts->stop_reason = tracepoint_passcount;
 	  ts->stopping_tracepoint = val;
 	}
-      else if (strncmp (p, stop_reason_names[tstop_command], p1 - p) == 0)
+      else if (strncmp (p, stop_reason_names[trace_stop_command], p1 - p) == 0)
 	{
 	  p2 = strchr (++p1, ':');
 	  if (!p2 || p2 > p3)
@@ -3510,7 +3510,7 @@ Status line: '%s'\n"), p, line);
 	    ts->stop_desc = xstrdup ("");
 
 	  p = unpack_varlen_hex (++p2, &val);
-	  ts->stop_reason = tstop_command;
+	  ts->stop_reason = trace_stop_command;
 	}
       else if (strncmp (p, stop_reason_names[trace_disconnected], p1 - p) == 0)
 	{
@@ -3857,13 +3857,13 @@ print_one_static_tracepoint_marker (int count,
 
   /* A counter field to help readability.  This is not a stable
      identifier!  */
-  ui_out_field_int (uiout, "count", count);
+  uiout->field_int ("count", count);
 
-  ui_out_field_string (uiout, "marker-id", marker->str_id);
+  uiout->field_string ("marker-id", marker->str_id);
 
-  ui_out_field_fmt (uiout, "enabled", "%c",
+  uiout->field_fmt ("enabled", "%c",
 		    !VEC_empty (breakpoint_p, tracepoints) ? 'y' : 'n');
-  ui_out_spaces (uiout, 2);
+  uiout->spaces (2);
 
   strcpy (wrap_indent, "                                   ");
 
@@ -3874,49 +3874,49 @@ print_one_static_tracepoint_marker (int count,
 
   strcpy (extra_field_indent, "         ");
 
-  ui_out_field_core_addr (uiout, "addr", marker->gdbarch, marker->address);
+  uiout->field_core_addr ("addr", marker->gdbarch, marker->address);
 
   sal = find_pc_line (marker->address, 0);
   sym = find_pc_sect_function (marker->address, NULL);
   if (sym)
     {
-      ui_out_text (uiout, "in ");
-      ui_out_field_string (uiout, "func",
+      uiout->text ("in ");
+      uiout->field_string ("func",
 			   SYMBOL_PRINT_NAME (sym));
-      ui_out_wrap_hint (uiout, wrap_indent);
-      ui_out_text (uiout, " at ");
+      uiout->wrap_hint (wrap_indent);
+      uiout->text (" at ");
     }
   else
-    ui_out_field_skip (uiout, "func");
+    uiout->field_skip ("func");
 
   if (sal.symtab != NULL)
     {
-      ui_out_field_string (uiout, "file",
+      uiout->field_string ("file",
 			   symtab_to_filename_for_display (sal.symtab));
-      ui_out_text (uiout, ":");
+      uiout->text (":");
 
-      if (ui_out_is_mi_like_p (uiout))
+      if (uiout->is_mi_like_p ())
 	{
 	  const char *fullname = symtab_to_fullname (sal.symtab);
 
-	  ui_out_field_string (uiout, "fullname", fullname);
+	  uiout->field_string ("fullname", fullname);
 	}
       else
-	ui_out_field_skip (uiout, "fullname");
+	uiout->field_skip ("fullname");
 
-      ui_out_field_int (uiout, "line", sal.line);
+      uiout->field_int ("line", sal.line);
     }
   else
     {
-      ui_out_field_skip (uiout, "fullname");
-      ui_out_field_skip (uiout, "line");
+      uiout->field_skip ("fullname");
+      uiout->field_skip ("line");
     }
 
-  ui_out_text (uiout, "\n");
-  ui_out_text (uiout, extra_field_indent);
-  ui_out_text (uiout, _("Data: \""));
-  ui_out_field_string (uiout, "extra-data", marker->extra);
-  ui_out_text (uiout, "\"\n");
+  uiout->text ("\n");
+  uiout->text (extra_field_indent);
+  uiout->text (_("Data: \""));
+  uiout->field_string ("extra-data", marker->extra);
+  uiout->text ("\"\n");
 
   if (!VEC_empty (breakpoint_p, tracepoints))
     {
@@ -3927,23 +3927,23 @@ print_one_static_tracepoint_marker (int count,
       cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout,
 							   "tracepoints-at");
 
-      ui_out_text (uiout, extra_field_indent);
-      ui_out_text (uiout, _("Probed by static tracepoints: "));
+      uiout->text (extra_field_indent);
+      uiout->text (_("Probed by static tracepoints: "));
       for (ix = 0; VEC_iterate(breakpoint_p, tracepoints, ix, b); ix++)
 	{
 	  if (ix > 0)
-	    ui_out_text (uiout, ", ");
-	  ui_out_text (uiout, "#");
-	  ui_out_field_int (uiout, "tracepoint-id", b->number);
+	    uiout->text (", ");
+	  uiout->text ("#");
+	  uiout->field_int ("tracepoint-id", b->number);
 	}
 
       do_cleanups (cleanup_chain);
 
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_int (uiout, "number-of-tracepoints",
+      if (uiout->is_mi_like_p ())
+	uiout->field_int ("number-of-tracepoints",
 			  VEC_length(breakpoint_p, tracepoints));
       else
-	ui_out_text (uiout, "\n");
+	uiout->text ("\n");
     }
   VEC_free (breakpoint_p, tracepoints);
 
@@ -3969,18 +3969,18 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
     = make_cleanup_ui_out_table_begin_end (uiout, 5, -1,
 					   "StaticTracepointMarkersTable");
 
-  ui_out_table_header (uiout, 7, ui_left, "counter", "Cnt");
+  uiout->table_header (7, ui_left, "counter", "Cnt");
 
-  ui_out_table_header (uiout, 40, ui_left, "marker-id", "ID");
+  uiout->table_header (40, ui_left, "marker-id", "ID");
 
-  ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");
+  uiout->table_header (3, ui_left, "enabled", "Enb");
   if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
-    ui_out_table_header (uiout, 10, ui_left, "addr", "Address");
+    uiout->table_header (10, ui_left, "addr", "Address");
   else
-    ui_out_table_header (uiout, 18, ui_left, "addr", "Address");
-  ui_out_table_header (uiout, 40, ui_noalign, "what", "What");
+    uiout->table_header (18, ui_left, "addr", "Address");
+  uiout->table_header (40, ui_noalign, "what", "What");
 
-  ui_out_table_body (uiout);
+  uiout->table_body ();
 
   markers = target_static_tracepoint_markers_by_strid (NULL);
   make_cleanup (VEC_cleanup (static_tracepoint_marker_p), &markers);
@@ -4245,7 +4245,7 @@ _initialize_tracepoint (void)
 	   _("Tracing of program execution without stopping the program."),
 	   &cmdlist);
 
-  add_com ("tdump", class_trace, trace_dump_command,
+  add_com ("tdump", class_trace, tdump_command,
 	   _("Print everything collected at the current tracepoint."));
 
   c = add_com ("tvariable", class_trace, trace_variable_command,_("\
@@ -4270,58 +4270,58 @@ Status of trace state variables and their values.\n\
 List target static tracepoints markers.\n\
 "));
 
-  add_prefix_cmd ("tfind", class_trace, trace_find_command, _("\
+  add_prefix_cmd ("tfind", class_trace, tfind_command, _("\
 Select a trace frame;\n\
 No argument means forward by one frame; '-' means backward by one frame."),
 		  &tfindlist, "tfind ", 1, &cmdlist);
 
-  add_cmd ("outside", class_trace, trace_find_outside_command, _("\
+  add_cmd ("outside", class_trace, tfind_outside_command, _("\
 Select a trace frame whose PC is outside the given range (exclusive).\n\
 Usage: tfind outside addr1, addr2"),
 	   &tfindlist);
 
-  add_cmd ("range", class_trace, trace_find_range_command, _("\
+  add_cmd ("range", class_trace, tfind_range_command, _("\
 Select a trace frame whose PC is in the given range (inclusive).\n\
 Usage: tfind range addr1,addr2"),
 	   &tfindlist);
 
-  add_cmd ("line", class_trace, trace_find_line_command, _("\
+  add_cmd ("line", class_trace, tfind_line_command, _("\
 Select a trace frame by source line.\n\
 Argument can be a line number (with optional source file),\n\
 a function name, or '*' followed by an address.\n\
 Default argument is 'the next source line that was traced'."),
 	   &tfindlist);
 
-  add_cmd ("tracepoint", class_trace, trace_find_tracepoint_command, _("\
+  add_cmd ("tracepoint", class_trace, tfind_tracepoint_command, _("\
 Select a trace frame by tracepoint number.\n\
 Default is the tracepoint for the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("pc", class_trace, trace_find_pc_command, _("\
+  add_cmd ("pc", class_trace, tfind_pc_command, _("\
 Select a trace frame by PC.\n\
 Default is the current PC, or the PC of the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("end", class_trace, trace_find_end_command, _("\
+  add_cmd ("end", class_trace, tfind_end_command, _("\
 De-select any trace frame and resume 'live' debugging."),
 	   &tfindlist);
 
   add_alias_cmd ("none", "end", class_trace, 0, &tfindlist);
 
-  add_cmd ("start", class_trace, trace_find_start_command,
+  add_cmd ("start", class_trace, tfind_start_command,
 	   _("Select the first trace frame in the trace buffer."),
 	   &tfindlist);
 
-  add_com ("tstatus", class_trace, trace_status_command,
+  add_com ("tstatus", class_trace, tstatus_command,
 	   _("Display the status of the current trace data collection."));
 
-  add_com ("tstop", class_trace, trace_stop_command, _("\
+  add_com ("tstop", class_trace, tstop_command, _("\
 Stop trace data collection.\n\
 Usage: tstop [ <notes> ... ]\n\
 Any arguments supplied are recorded with the trace as a stop reason and\n\
 reported by tstatus (if the target supports trace notes)."));
 
-  add_com ("tstart", class_trace, trace_start_command, _("\
+  add_com ("tstart", class_trace, tstart_command, _("\
 Start trace data collection.\n\
 Usage: tstart [ <notes> ... ]\n\
 Any arguments supplied are recorded with the trace as a note and\n\
@@ -4362,7 +4362,7 @@ Accepts a comma-separated list of (one or more) expressions.\n\
 The result of each evaluation will be discarded.\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
-  add_com ("actions", class_trace, trace_actions_command, _("\
+  add_com ("actions", class_trace, actions_command, _("\
 Specify the actions to be taken at a tracepoint.\n\
 Tracepoint actions may include collecting of specified data,\n\
 single-stepping, or enabling/disabling other tracepoints,\n\

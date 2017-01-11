@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/amd64.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -315,5 +315,5 @@ void
 _initialize_amd64fbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_FREEBSD_ELF, amd64fbsd_init_abi);
+			  GDB_OSABI_FREEBSD, amd64fbsd_init_abi);
 }

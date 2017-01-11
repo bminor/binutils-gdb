@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -651,8 +651,6 @@ struct elf_s390_link_hash_table
   struct elf_link_hash_table elf;
 
   /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
   asection *irelifunc;
 
   union {
@@ -730,37 +728,6 @@ elf_s390_link_hash_table_create (bfd *abfd)
   return &ret->elf.root;
 }
 
-/* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
-   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
-   hash table.  */
-
-static bfd_boolean
-elf_s390_create_dynamic_sections (bfd *dynobj,
-				  struct bfd_link_info *info)
-{
-  struct elf_s390_link_hash_table *htab;
-
-  htab = elf_s390_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  if (!htab->elf.sgot && !_bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
-  return TRUE;
-}
-
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
@@ -818,7 +785,8 @@ elf_s390_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      dir->ref_dynamic |= ind->ref_dynamic;
+      if (dir->versioned != versioned_hidden)
+	dir->ref_dynamic |= ind->ref_dynamic;
       dir->ref_regular |= ind->ref_regular;
       dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
       dir->needs_plt |= ind->needs_plt;
@@ -1574,7 +1542,7 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h)
 {
   struct elf_s390_link_hash_table *htab;
-  asection *s;
+  asection *s, *srel;
 
   /* STT_GNU_IFUNC symbol must go through PLT. */
   if (s390_is_ifunc_symbol_p (h))
@@ -1726,13 +1694,21 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_390_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf64_External_Rela);
+      srel->size += sizeof (Elf64_External_Rela);
       h->needs_copy = 1;
     }
-
-  s = htab->sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -2131,7 +2107,8 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
-	  || s == htab->sdynbss
+	  || s == htab->elf.sdynbss
+	  || s == htab->elf.sdynrelro
 	  || s == htab->elf.iplt
 	  || s == htab->elf.igotplt
 	  || s == htab->irelifunc)
@@ -2724,6 +2701,18 @@ elf_s390_relocate_section (bfd *output_bfd,
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
+	  if (h != NULL
+	      && bfd_link_pie (info)
+	      && !h->def_regular)
+	    {
+	      _bfd_error_handler (_("%B: `%s' non-PLT reloc for symbol defined "
+				    "in shared library and accessed "
+				    "from executable "
+				    "(rebuild file with -fPIC ?)"),
+				  input_bfd, h->root.root.string);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 	  /* The target of these relocs are instruction operands
 	     residing in read-only sections.  We cannot emit a runtime
 	     reloc for it.  */
@@ -3618,6 +3607,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
   if (h->needs_copy)
     {
       Elf_Internal_Rela rela;
+      asection *s;
       bfd_byte *loc;
 
       /* This symbols needs a copy reloc.  Set it up.  */
@@ -3625,7 +3615,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || htab->elf.srelbss == NULL)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
@@ -3633,8 +3623,11 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_390_COPY);
       rela.r_addend = 0;
-      loc = htab->srelbss->contents;
-      loc += htab->srelbss->reloc_count++ * sizeof (Elf64_External_Rela);
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
+      loc = s->contents + s->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
@@ -4012,6 +4005,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	24
+#define elf_backend_want_dynrelro	1
 #define elf_backend_rela_normal		1
 
 #define elf_info_to_howto		elf_s390_info_to_howto
@@ -4025,7 +4019,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_s390_check_relocs
 #define elf_backend_copy_indirect_symbol      elf_s390_copy_indirect_symbol
-#define elf_backend_create_dynamic_sections   elf_s390_create_dynamic_sections
+#define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections   elf_s390_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol     elf_s390_finish_dynamic_symbol
 #define elf_backend_gc_mark_hook	      elf_s390_gc_mark_hook

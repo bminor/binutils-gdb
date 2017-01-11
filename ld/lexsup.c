@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -334,6 +334,9 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"no-print-gc-sections", no_argument, NULL, OPTION_NO_PRINT_GC_SECTIONS},
     '\0', NULL, N_("Do not list removed unused sections"),
+    TWO_DASHES },
+  { {"gc-keep-exported", no_argument, NULL, OPTION_GC_KEEP_EXPORTED},
+    '\0', NULL, N_("Keep exported symbols when removing unused sections"),
     TWO_DASHES },
   { {"hash-size=<NUMBER>", required_argument, NULL, OPTION_HASH_SIZE},
     '\0', NULL, N_("Set default hash table size close to <NUMBER>"),
@@ -860,6 +863,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_PRINT_GC_SECTIONS:
 	  link_info.print_gc_sections = TRUE;
+	  break;
+	case OPTION_GC_KEEP_EXPORTED:
+	  link_info.gc_keep_exported = TRUE;
 	  break;
 	case OPTION_HELP:
 	  help ();

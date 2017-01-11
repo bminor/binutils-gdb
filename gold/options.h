@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1072,6 +1072,10 @@ class General_options
   DEFINE_uint(optimize, options::EXACTLY_ONE_DASH, 'O', 0,
 	      N_("Optimize output file size"), N_("LEVEL"));
 
+  DEFINE_enum(orphan_handling, options::TWO_DASHES, '\0', "place",
+	      N_("Orphan section handling"), N_("[place,discard,warn,error]"),
+	      {"place", "discard", "warn", "error"});
+
   // p
 
   DEFINE_bool(p, options::ONE_DASH, 'p', false,
@@ -1132,6 +1136,11 @@ class General_options
   DEFINE_string(print_symbol_counts, options::TWO_DASHES, '\0', NULL,
 		N_("Print symbols defined and used for each input"),
 		N_("FILENAME"));
+
+  DEFINE_special(push_state, options::TWO_DASHES, '\0',
+		 N_("Save the state of flags related to input files"), NULL);
+  DEFINE_special(pop_state, options::TWO_DASHES, '\0',
+		 N_("Restore the state of flags related to input files"), NULL);
 
   // q
 
@@ -1194,6 +1203,9 @@ class General_options
   DEFINE_special(section_start, options::TWO_DASHES, '\0',
 		 N_("Set address of section"), N_("SECTION=ADDRESS"));
 
+  DEFINE_bool(secure_plt, options::TWO_DASHES , '\0', true,
+	      N_("(PowerPC only) Use new-style PLT"), NULL);
+
   DEFINE_optional_string(sort_common, options::TWO_DASHES, '\0', NULL,
 			 N_("Sort common symbols by alignment"),
 			 N_("[={ascending,descending}]"));
@@ -1211,9 +1223,12 @@ class General_options
   DEFINE_int(stub_group_size, options::TWO_DASHES , '\0', 1,
 	     N_("(ARM, PowerPC only) The maximum distance from instructions "
 		"in a group of sections to their stubs. Negative values mean "
-		"stubs are always after (PowerPC before) the group. 1 means "
-		"use default size"),
+		"stubs are always after the group. 1 means use default size"),
 	     N_("SIZE"));
+
+  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', false,
+	      N_("(PowerPC only) Allow a group of stubs to serve multiple "
+		 "output sections"), NULL);
 
   DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
 	      N_("Stack size when -fsplit-stack function calls non-split"),
@@ -1391,6 +1406,9 @@ class General_options
 
   // The -z options.
 
+  DEFINE_bool(bndplt, options::DASH_Z, '\0', false,
+	      N_("(x86-64 only) Generate a BND PLT for Intel MPX"),
+	      N_("Generate a regular PLT"));
   DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
 	      N_("Sort dynamic relocs"),
 	      N_("Do not sort dynamic relocs"));
@@ -1516,6 +1534,10 @@ class General_options
   static Object_format
   string_to_object_format(const char* arg);
 
+  // Convert an Object_format to string.
+  static const char*
+  object_format_to_string(Object_format);
+
   // Note: these functions are not very fast.
   Object_format format_enum() const;
   Object_format oformat_enum() const;
@@ -1609,6 +1631,10 @@ class General_options
   incremental_disposition() const
   { return this->incremental_disposition_; }
 
+  void
+  set_incremental_disposition(Incremental_disposition disp)
+  { this->incremental_disposition_ = disp; }
+
   // The disposition to use for startup files (those that precede the
   // first --incremental-changed, etc. option).
   Incremental_disposition
@@ -1668,6 +1694,22 @@ class General_options
   discard_sec_merge() const
   { return this->discard_locals_ == DISCARD_SEC_MERGE; }
 
+  enum Orphan_handling
+  {
+    // Place orphan sections normally (default).
+    ORPHAN_PLACE,
+    // Discard all orphan sections.
+    ORPHAN_DISCARD,
+    // Warn when placing orphan sections.
+    ORPHAN_WARN,
+    // Issue error for orphan sections.
+    ORPHAN_ERROR
+  };
+
+  Orphan_handling
+  orphan_handling_enum() const
+  { return this->orphan_handling_enum_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1723,6 +1765,10 @@ class General_options
   set_static(bool value)
   { static_ = value; }
 
+  void
+  set_orphan_handling_enum(Orphan_handling value)
+  { this->orphan_handling_enum_ = value; }
+
   // These are called by finalize() to set up the search-path correctly.
   void
   add_to_library_path_with_sysroot(const std::string& arg)
@@ -1739,6 +1785,9 @@ class General_options
   // Add a plugin option.
   void
   add_plugin_option(const char* opt);
+
+  void
+  copy_from_posdep_options(const Position_dependent_options&);
 
   // Whether we printed version information.
   bool printed_version_;
@@ -1783,6 +1832,10 @@ class General_options
   Endianness endianness_;
   // What local symbols to discard.
   Discard_locals discard_locals_;
+  // Stack of saved options for --push-state/--pop-state.
+  std::vector<Position_dependent_options*> options_stack_;
+  // Orphan handling option, decoded to an enum value.
+  Orphan_handling orphan_handling_enum_;
 };
 
 // The position-dependent options.  We use this to store the state of
@@ -1813,7 +1866,8 @@ class Position_dependent_options
 			     = Position_dependent_options::default_options_)
   { copy_from_options(options); }
 
-  void copy_from_options(const General_options& options)
+  void
+  copy_from_options(const General_options& options)
   {
     this->set_as_needed(options.as_needed());
     this->set_Bdynamic(options.Bdynamic());

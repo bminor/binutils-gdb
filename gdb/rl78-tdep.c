@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RL78 for GDB, the GNU debugger.
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -261,6 +261,30 @@ struct rl78_prologue
   int reg_offset[RL78_NUM_TOTAL_REGS];
 };
 
+/* Construct type for PSW register.  */
+
+static struct type *
+rl78_psw_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->rl78_psw_type == NULL)
+    {
+      tdep->rl78_psw_type = arch_flags_type (gdbarch,
+					     "builtin_type_rl78_psw", 1);
+      append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
+      append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
+      append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
+      append_flags_type_flag (tdep->rl78_psw_type, 3, "RBS0");
+      append_flags_type_flag (tdep->rl78_psw_type, 4, "AC");
+      append_flags_type_flag (tdep->rl78_psw_type, 5, "RBS1");
+      append_flags_type_flag (tdep->rl78_psw_type, 6, "Z");
+      append_flags_type_flag (tdep->rl78_psw_type, 7, "IE");
+    }
+
+  return tdep->rl78_psw_type;
+}
+
 /* Implement the "register_type" gdbarch method.  */
 
 static struct type *
@@ -273,7 +297,7 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
   else if (reg_nr == RL78_RAW_PC_REGNUM)
     return tdep->rl78_uint32;
   else if (reg_nr == RL78_PSW_REGNUM)
-    return (tdep->rl78_psw_type);
+    return rl78_psw_type (gdbarch);
   else if (reg_nr <= RL78_MEM_REGNUM
            || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM)
 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
@@ -1405,16 +1429,6 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     = arch_pointer_type (gdbarch, 16, "rl78_data_addr_t", tdep->rl78_void);
   tdep->rl78_code_pointer
     = arch_pointer_type (gdbarch, 32, "rl78_code_addr_t", tdep->rl78_void);
-
-  tdep->rl78_psw_type = arch_flags_type (gdbarch, "builtin_type_rl78_psw", 1);
-  append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
-  append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
-  append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
-  append_flags_type_flag (tdep->rl78_psw_type, 3, "RBS0");
-  append_flags_type_flag (tdep->rl78_psw_type, 4, "AC");
-  append_flags_type_flag (tdep->rl78_psw_type, 5, "RBS1");
-  append_flags_type_flag (tdep->rl78_psw_type, 6, "Z");
-  append_flags_type_flag (tdep->rl78_psw_type, 7, "IE");
 
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, RL78_NUM_REGS);

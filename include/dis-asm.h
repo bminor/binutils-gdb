@@ -1,6 +1,6 @@
 /* Interface between the opcode library and its callers.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -289,6 +289,7 @@ extern int print_insn_ns32k		(bfd_vma, disassemble_info *);
 extern int print_insn_or1k		(bfd_vma, disassemble_info *);
 extern int print_insn_pdp11		(bfd_vma, disassemble_info *);
 extern int print_insn_pj		(bfd_vma, disassemble_info *);
+extern int print_insn_pru		(bfd_vma, disassemble_info *);
 extern int print_insn_rs6000		(bfd_vma, disassemble_info *);
 extern int print_insn_s390		(bfd_vma, disassemble_info *);
 extern int print_insn_sh		(bfd_vma, disassemble_info *);

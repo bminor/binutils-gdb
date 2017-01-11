@@ -16,7 +16,7 @@
 @SET_MAKE@
 
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -473,6 +473,7 @@ TARGET_CPU_CFILES = \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-pru.c \
 	config/tc-riscv.c \
 	config/tc-rl78.c \
 	config/tc-rx.c \
@@ -547,6 +548,7 @@ TARGET_CPU_HFILES = \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-pru.h \
 	config/tc-riscv.h \
 	config/tc-rl78.h \
 	config/tc-rx.h \
@@ -906,6 +908,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-pdp11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-pj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-ppc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-pru.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-riscv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-rl78.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-rx.Po@am__quote@
@@ -1626,6 +1629,20 @@ tc-ppc.obj: config/tc-ppc.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-ppc.c' object='tc-ppc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-ppc.obj `if test -f 'config/tc-ppc.c'; then $(CYGPATH_W) 'config/tc-ppc.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-ppc.c'; fi`
+
+tc-pru.o: config/tc-pru.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-pru.o -MD -MP -MF $(DEPDIR)/tc-pru.Tpo -c -o tc-pru.o `test -f 'config/tc-pru.c' || echo '$(srcdir)/'`config/tc-pru.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-pru.Tpo $(DEPDIR)/tc-pru.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-pru.c' object='tc-pru.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-pru.o `test -f 'config/tc-pru.c' || echo '$(srcdir)/'`config/tc-pru.c
+
+tc-pru.obj: config/tc-pru.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-pru.obj -MD -MP -MF $(DEPDIR)/tc-pru.Tpo -c -o tc-pru.obj `if test -f 'config/tc-pru.c'; then $(CYGPATH_W) 'config/tc-pru.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-pru.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-pru.Tpo $(DEPDIR)/tc-pru.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-pru.c' object='tc-pru.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-pru.obj `if test -f 'config/tc-pru.c'; then $(CYGPATH_W) 'config/tc-pru.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-pru.c'; fi`
 
 tc-riscv.o: config/tc-riscv.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-riscv.o -MD -MP -MF $(DEPDIR)/tc-riscv.Tpo -c -o tc-riscv.o `test -f 'config/tc-riscv.c' || echo '$(srcdir)/'`config/tc-riscv.c

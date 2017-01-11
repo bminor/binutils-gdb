@@ -1,5 +1,5 @@
 # Test handling of weak undefined symbols
-#   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -29,7 +29,7 @@ if { ![is_elf_format] && ![is_pecoff_format] } then {
 	    tmpdir/weak-undef.o]} then {
     # It's OK if .weak doesn't work on this target.
     unresolved $testname
-} elseif {![ld_simple_link $ld tmpdir/weak-undef \
+} elseif {![ld_link $ld tmpdir/weak-undef \
 		"tmpdir/weak-undef.o -T $srcdir/$subdir/weak-undef.t"]} then {
     # Weak symbols are broken for non-i386 PE targets.
     if {! [istarget i?86-*-*]} {
@@ -71,7 +71,7 @@ if { $asflags == "" || ![is_elf_format] || ![check_shared_lib_support]} then {
 } elseif {![ld_assemble $as "$asflags $srcdir/$subdir/weak-fundef.s" \
 		tmpdir/weak-fundef.o]} then {
     fail $testname
-} elseif {![ld_simple_link $ld tmpdir/weak-fundef.so \
+} elseif {![ld_link $ld tmpdir/weak-fundef.so \
 	    "--shared tmpdir/weak-fundef.o"]} then {
     fail $testname
 } elseif {![is_remote host] && [which $nm] == 0} then {
@@ -92,7 +92,7 @@ if { $asflags == "" || ![is_elf_format] || ![check_shared_lib_support]} then {
     # When linking a dynamic executable, weak undefined symbols become dynamic.
     set testname "weak undefined function symbols in dynamic exe"
 
-    if {![ld_simple_link $ld tmpdir/weak-fundef \
+    if {![ld_link $ld tmpdir/weak-fundef \
 	  "--no-as-needed tmpdir/weak-fundef.o tmpdir/weak-fundef.so"]} then {
 	fail $testname
     } else {

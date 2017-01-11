@@ -1,6 +1,6 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -876,8 +876,7 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
       && objfile->separate_debug_objfile == NULL
       && objfile->separate_debug_objfile_backlink == NULL)
     {
-      bfd *abfd = find_separate_debug_file_in_section (objfile);
-      struct cleanup *cleanup = make_cleanup_bfd_unref (abfd);
+      gdb_bfd_ref_ptr abfd (find_separate_debug_file_in_section (objfile));
 
       if (abfd != NULL)
 	{
@@ -885,11 +884,9 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 	     virtual section-as-bfd like the bfd filename containing the
 	     section.  Therefore use also non-canonical name form for the same
 	     file containing the section.  */
-	  symbol_file_add_separate (abfd, objfile->original_name, add_flags,
-				    objfile);
+	  symbol_file_add_separate (abfd.get (), objfile->original_name,
+				    add_flags, objfile);
 	}
-
-      do_cleanups (cleanup);
     }
   if ((add_flags & SYMFILE_NO_READ) == 0)
     require_partial_symbols (objfile, 0);
@@ -1287,13 +1284,10 @@ struct objfile *
 symbol_file_add (const char *name, symfile_add_flags add_flags,
 		 struct section_addr_info *addrs, objfile_flags flags)
 {
-  bfd *bfd = symfile_bfd_open (name);
-  struct cleanup *cleanup = make_cleanup_bfd_unref (bfd);
-  struct objfile *objf;
+  gdb_bfd_ref_ptr bfd (symfile_bfd_open (name));
 
-  objf = symbol_file_add_from_bfd (bfd, name, add_flags, addrs, flags, NULL);
-  do_cleanups (cleanup);
-  return objf;
+  return symbol_file_add_from_bfd (bfd.get (), name, add_flags, addrs,
+				   flags, NULL);
 }
 
 /* Call symbol_file_add() with default values and update whatever is
@@ -1354,7 +1348,6 @@ separate_debug_file_exists (const char *name, unsigned long crc,
 {
   unsigned long file_crc;
   int file_crc_p;
-  bfd *abfd;
   struct stat parent_stat, abfd_stat;
   int verified_as_different;
 
@@ -1367,9 +1360,9 @@ separate_debug_file_exists (const char *name, unsigned long crc,
   if (filename_cmp (name, objfile_name (parent_objfile)) == 0)
     return 0;
 
-  abfd = gdb_bfd_open (name, gnutarget, -1);
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name, gnutarget, -1));
 
-  if (!abfd)
+  if (abfd == NULL)
     return 0;
 
   /* Verify symlinks were not the cause of filename_cmp name difference above.
@@ -1383,24 +1376,19 @@ separate_debug_file_exists (const char *name, unsigned long crc,
      numbers will never set st_ino to zero, this is merely an
      optimization, so we do not need to worry about false negatives.  */
 
-  if (bfd_stat (abfd, &abfd_stat) == 0
+  if (bfd_stat (abfd.get (), &abfd_stat) == 0
       && abfd_stat.st_ino != 0
       && bfd_stat (parent_objfile->obfd, &parent_stat) == 0)
     {
       if (abfd_stat.st_dev == parent_stat.st_dev
 	  && abfd_stat.st_ino == parent_stat.st_ino)
-	{
-	  gdb_bfd_unref (abfd);
-	  return 0;
-	}
+	return 0;
       verified_as_different = 1;
     }
   else
     verified_as_different = 0;
 
-  file_crc_p = gdb_bfd_crc (abfd, &file_crc);
-
-  gdb_bfd_unref (abfd);
+  file_crc_p = gdb_bfd_crc (abfd.get (), &file_crc);
 
   if (!file_crc_p)
     return 0;
@@ -1721,10 +1709,9 @@ set_initial_language (void)
    includes a newly malloc'd` copy of NAME (tilde-expanded and made
    absolute).  In case of trouble, error() is called.  */
 
-bfd *
+gdb_bfd_ref_ptr
 symfile_bfd_open (const char *name)
 {
-  bfd *sym_bfd;
   int desc = -1;
   struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
@@ -1760,20 +1747,17 @@ symfile_bfd_open (const char *name)
       name = absolute_name;
     }
 
-  sym_bfd = gdb_bfd_open (name, gnutarget, desc);
-  if (!sym_bfd)
+  gdb_bfd_ref_ptr sym_bfd (gdb_bfd_open (name, gnutarget, desc));
+  if (sym_bfd == NULL)
     error (_("`%s': can't open to read symbols: %s."), name,
 	   bfd_errmsg (bfd_get_error ()));
 
-  if (!gdb_bfd_has_target_filename (sym_bfd))
-    bfd_set_cacheable (sym_bfd, 1);
+  if (!gdb_bfd_has_target_filename (sym_bfd.get ()))
+    bfd_set_cacheable (sym_bfd.get (), 1);
 
-  if (!bfd_check_format (sym_bfd, bfd_object))
-    {
-      make_cleanup_bfd_unref (sym_bfd);
-      error (_("`%s': can't read symbols: %s."), name,
-	     bfd_errmsg (bfd_get_error ()));
-    }
+  if (!bfd_check_format (sym_bfd.get (), bfd_object))
+    error (_("`%s': can't read symbols: %s."), name,
+	   bfd_errmsg (bfd_get_error ()));
 
   do_cleanups (back_to);
 
@@ -1962,9 +1946,10 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     {
       /* The write is just starting.  Let the user know we've started
 	 this section.  */
-      ui_out_message (current_uiout, "Loading section %s, size %s lma %s\n",
-		      args->section_name, hex_string (args->section_size),
-		      paddress (target_gdbarch (), args->lma));
+      current_uiout->message ("Loading section %s, size %s lma %s\n",
+			      args->section_name,
+			      hex_string (args->section_size),
+			      paddress (target_gdbarch (), args->lma));
       return;
     }
 
@@ -2073,7 +2058,6 @@ static void print_transfer_performance (struct ui_file *stream,
 void
 generic_load (const char *args, int from_tty)
 {
-  bfd *loadfile_bfd;
   char *filename;
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   struct load_section_data cbdata;
@@ -2114,25 +2098,23 @@ generic_load (const char *args, int from_tty)
     }
 
   /* Open the file for loading.  */
-  loadfile_bfd = gdb_bfd_open (filename, gnutarget, -1);
+  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename, gnutarget, -1));
   if (loadfile_bfd == NULL)
     {
       perror_with_name (filename);
       return;
     }
 
-  make_cleanup_bfd_unref (loadfile_bfd);
-
-  if (!bfd_check_format (loadfile_bfd, bfd_object))
+  if (!bfd_check_format (loadfile_bfd.get (), bfd_object))
     {
       error (_("\"%s\" is not an object file: %s"), filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
-  bfd_map_over_sections (loadfile_bfd, add_section_size_callback,
+  bfd_map_over_sections (loadfile_bfd.get (), add_section_size_callback,
 			 (void *) &total_progress.total_size);
 
-  bfd_map_over_sections (loadfile_bfd, load_section_callback, &cbdata);
+  bfd_map_over_sections (loadfile_bfd.get (), load_section_callback, &cbdata);
 
   using namespace std::chrono;
 
@@ -2144,13 +2126,13 @@ generic_load (const char *args, int from_tty)
 
   steady_clock::time_point end_time = steady_clock::now ();
 
-  entry = bfd_get_start_address (loadfile_bfd);
+  entry = bfd_get_start_address (loadfile_bfd.get ());
   entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
-  ui_out_text (uiout, "Start address ");
-  ui_out_field_fmt (uiout, "address", "%s", paddress (target_gdbarch (), entry));
-  ui_out_text (uiout, ", load size ");
-  ui_out_field_fmt (uiout, "load-size", "%lu", total_progress.data_count);
-  ui_out_text (uiout, "\n");
+  uiout->text ("Start address ");
+  uiout->field_fmt ("address", "%s", paddress (target_gdbarch (), entry));
+  uiout->text (", load size ");
+  uiout->field_fmt ("load-size", "%lu", total_progress.data_count);
+  uiout->text ("\n");
   regcache_write_pc (get_current_regcache (), entry);
 
   /* Reset breakpoints, now that we have changed the load image.  For
@@ -2187,39 +2169,39 @@ print_transfer_performance (struct ui_file *stream,
 
   milliseconds ms = duration_cast<milliseconds> (time);
 
-  ui_out_text (uiout, "Transfer rate: ");
+  uiout->text ("Transfer rate: ");
   if (ms.count () > 0)
     {
       unsigned long rate = ((ULONGEST) data_count * 1000) / ms.count ();
 
-      if (ui_out_is_mi_like_p (uiout))
+      if (uiout->is_mi_like_p ())
 	{
-	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate * 8);
-	  ui_out_text (uiout, " bits/sec");
+	  uiout->field_fmt ("transfer-rate", "%lu", rate * 8);
+	  uiout->text (" bits/sec");
 	}
       else if (rate < 1024)
 	{
-	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate);
-	  ui_out_text (uiout, " bytes/sec");
+	  uiout->field_fmt ("transfer-rate", "%lu", rate);
+	  uiout->text (" bytes/sec");
 	}
       else
 	{
-	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate / 1024);
-	  ui_out_text (uiout, " KB/sec");
+	  uiout->field_fmt ("transfer-rate", "%lu", rate / 1024);
+	  uiout->text (" KB/sec");
 	}
     }
   else
     {
-      ui_out_field_fmt (uiout, "transferred-bits", "%lu", (data_count * 8));
-      ui_out_text (uiout, " bits in <1 sec");
+      uiout->field_fmt ("transferred-bits", "%lu", (data_count * 8));
+      uiout->text (" bits in <1 sec");
     }
   if (write_count > 0)
     {
-      ui_out_text (uiout, ", ");
-      ui_out_field_fmt (uiout, "write-rate", "%lu", data_count / write_count);
-      ui_out_text (uiout, " bytes/write");
+      uiout->text (", ");
+      uiout->field_fmt ("write-rate", "%lu", data_count / write_count);
+      uiout->text (" bytes/write");
     }
-  ui_out_text (uiout, ".\n");
+  uiout->text (".\n");
 }
 
 /* This function allows the addition of incrementally linked object files.
@@ -2568,22 +2550,16 @@ reread_symbols (void)
 
 	  /* Clean up any state BFD has sitting around.  */
 	  {
-	    struct bfd *obfd = objfile->obfd;
+	    gdb_bfd_ref_ptr obfd (objfile->obfd);
 	    char *obfd_filename;
 
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
 	       the filename remains live.  */
-	    objfile->obfd = gdb_bfd_open (obfd_filename, gnutarget, -1);
+	    gdb_bfd_ref_ptr temp (gdb_bfd_open (obfd_filename, gnutarget, -1));
+	    objfile->obfd = temp.release ();
 	    if (objfile->obfd == NULL)
-	      {
-		/* We have to make a cleanup and error here, rather
-		   than erroring later, because once we unref OBFD,
-		   OBFD_FILENAME will be freed.  */
-		make_cleanup_bfd_unref (obfd);
-		error (_("Can't open %s to read symbols."), obfd_filename);
-	      }
-	    gdb_bfd_unref (obfd);
+	      error (_("Can't open %s to read symbols."), obfd_filename);
 	  }
 
 	  original_name = xstrdup (objfile->original_name);

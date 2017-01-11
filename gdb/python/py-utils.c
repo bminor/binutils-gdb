@@ -1,6 +1,6 @@
 /* General utility routines for GDB/Python.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,49 +21,7 @@
 #include "charset.h"
 #include "value.h"
 #include "python-internal.h"
-
-
-/* This is a cleanup function which decrements the refcount on a
-   Python object.  */
-
-static void
-py_decref (void *p)
-{
-  PyObject *py = (PyObject *) p;
-
-  Py_DECREF (py);
-}
-
-/* Return a new cleanup which will decrement the Python object's
-   refcount when run.  */
-
-struct cleanup *
-make_cleanup_py_decref (PyObject *py)
-{
-  return make_cleanup (py_decref, (void *) py);
-}
-
-/* This is a cleanup function which decrements the refcount on a
-   Python object.  This function accounts appropriately for NULL
-   references.  */
-
-static void
-py_xdecref (void *p)
-{
-  PyObject *py = (PyObject *) p;
-
-  Py_XDECREF (py);
-}
-
-/* Return a new cleanup which will decrement the Python object's
-   refcount when run.  Account for and operate on NULL references
-   correctly.  */
-
-struct cleanup *
-make_cleanup_py_xdecref (PyObject *py)
-{
-  return make_cleanup (py_xdecref, py);
-}
+#include "py-ref.h"
 
 /* Converts a Python 8-bit string to a unicode string object.  Assumes the
    8-bit string is in the host charset.  If an error occurs during conversion,
@@ -111,20 +69,17 @@ static gdb::unique_xmalloc_ptr<char>
 unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
 {
   gdb::unique_xmalloc_ptr<char> result;
-  PyObject *string;
 
   /* Translate string to named charset.  */
-  string = PyUnicode_AsEncodedString (unicode_str, charset, NULL);
+  gdbpy_ref string (PyUnicode_AsEncodedString (unicode_str, charset, NULL));
   if (string == NULL)
     return NULL;
 
 #ifdef IS_PY3K
-  result.reset (xstrdup (PyBytes_AsString (string)));
+  result.reset (xstrdup (PyBytes_AsString (string.get ())));
 #else
-  result.reset (xstrdup (PyString_AsString (string)));
+  result.reset (xstrdup (PyString_AsString (string.get ())));
 #endif
-
-  Py_DECREF (string);
 
   return result;
 }
@@ -168,15 +123,11 @@ unicode_to_target_python_string (PyObject *unicode_str)
 gdb::unique_xmalloc_ptr<char>
 python_string_to_target_string (PyObject *obj)
 {
-  PyObject *str;
-
-  str = python_string_to_unicode (obj);
+  gdbpy_ref str (python_string_to_unicode (obj));
   if (str == NULL)
     return NULL;
 
-  gdb::unique_xmalloc_ptr<char> result (unicode_to_target_string (str));
-  Py_DECREF (str);
-  return result;
+  return unicode_to_target_string (str.get ());
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in the
@@ -187,16 +138,11 @@ python_string_to_target_string (PyObject *obj)
 PyObject *
 python_string_to_target_python_string (PyObject *obj)
 {
-  PyObject *str;
-  PyObject *result;
-
-  str = python_string_to_unicode (obj);
+  gdbpy_ref str (python_string_to_unicode (obj));
   if (str == NULL)
     return NULL;
 
-  result = unicode_to_target_python_string (str);
-  Py_DECREF (str);
-  return result;
+  return unicode_to_target_python_string (str.get ());
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in
@@ -205,16 +151,11 @@ python_string_to_target_python_string (PyObject *obj)
 gdb::unique_xmalloc_ptr<char>
 python_string_to_host_string (PyObject *obj)
 {
-  PyObject *str;
-
-  str = python_string_to_unicode (obj);
+  gdbpy_ref str (python_string_to_unicode (obj));
   if (str == NULL)
     return NULL;
 
-  gdb::unique_xmalloc_ptr<char>
-    result (unicode_to_encoded_string (str, host_charset ()));
-  Py_DECREF (str);
-  return result;
+  return unicode_to_encoded_string (str.get (), host_charset ());
 }
 
 /* Convert a host string to a python string.  */
@@ -244,19 +185,18 @@ gdbpy_is_string (PyObject *obj)
 gdb::unique_xmalloc_ptr<char>
 gdbpy_obj_to_string (PyObject *obj)
 {
-  PyObject *str_obj = PyObject_Str (obj);
+  gdbpy_ref str_obj (PyObject_Str (obj));
 
   if (str_obj != NULL)
     {
       gdb::unique_xmalloc_ptr<char> msg;
 
 #ifdef IS_PY3K
-      msg = python_string_to_host_string (str_obj);
+      msg = python_string_to_host_string (str_obj.get ());
 #else
-      msg.reset (xstrdup (PyString_AsString (str_obj)));
+      msg.reset (xstrdup (PyString_AsString (str_obj.get ())));
 #endif
 
-      Py_DECREF (str_obj);
       return msg;
     }
 
@@ -329,14 +269,13 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
     }
   else
     {
-      PyObject *num = PyNumber_Long (obj);
+      gdbpy_ref num (PyNumber_Long (obj));
       gdb_py_ulongest val;
 
       if (num == NULL)
 	return -1;
 
-      val = gdb_py_long_as_ulongest (num);
-      Py_XDECREF (num);
+      val = gdb_py_long_as_ulongest (num.get ());
       if (PyErr_Occurred ())
 	return -1;
 

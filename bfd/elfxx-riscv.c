@@ -1,5 +1,5 @@
 /* RISC-V-specific support for ELF.
-   Copyright 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on TILE-Gx and MIPS targets.
@@ -63,7 +63,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_32",			/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 0xffffffff,			/* dst_mask */
+	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 64 bit relocation.  */
@@ -93,7 +93,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_RELATIVE",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 0xffffffff,			/* dst_mask */
+	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_COPY,			/* type */
@@ -106,8 +106,8 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_COPY",		/* name */
 	 FALSE,				/* partial_inplace */
-	 0x0,         			/* src_mask */
-	 0x0,		        	/* dst_mask */
+	 0,         			/* src_mask */
+	 0,		        	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_JUMP_SLOT,		/* type */
@@ -120,8 +120,8 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_JUMP_SLOT",		/* name */
 	 FALSE,				/* partial_inplace */
-	 0x0,         			/* src_mask */
-	 0x0,		        	/* dst_mask */
+	 0,         			/* src_mask */
+	 0,		        	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* Dynamic TLS relocations.  */
@@ -135,7 +135,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPMOD32",	/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -149,7 +149,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPMOD64",	/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -163,7 +163,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPREL32",	/* name */
 	 TRUE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -177,7 +177,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_DTPREL64",	/* name */
 	 TRUE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -191,7 +191,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_TPREL32",		/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -205,7 +205,7 @@ static reloc_howto_type howto_table[] =
 	 bfd_elf_generic_reloc, 	/* special_function */
 	 "R_RISCV_TLS_TPREL64",		/* name */
 	 FALSE,				/* partial_inplace */
-	 MINUS_ONE,			/* src_mask */
+	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
@@ -238,9 +238,6 @@ static reloc_howto_type howto_table[] =
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
-					/* This needs complex overflow
-					   detection, because the upper 36
-					   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_JAL",			/* name */
 	 FALSE,				/* partial_inplace */
@@ -264,7 +261,7 @@ static reloc_howto_type howto_table[] =
 					/* dst_mask */
 	 TRUE),				/* pcrel_offset */
 
-  /* 32-bit PC-relative function call (AUIPC/JALR).  */
+  /* Like R_RISCV_CALL, but not locally binding.  */
   HOWTO (R_RISCV_CALL_PLT,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -460,7 +457,7 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
-  /* TLS LE thread pointer usage.  */
+  /* TLS LE thread pointer usage.  May be relaxed.  */
   HOWTO (R_RISCV_TPREL_ADD,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -665,9 +662,6 @@ static reloc_howto_type howto_table[] =
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
-					/* This needs complex overflow
-					   detection, because the upper 36
-					   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RVC_JUMP",		/* name */
 	 FALSE,				/* partial_inplace */
@@ -690,7 +684,7 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_RVC_IMM (-1U),		/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
-  /* High 12 bits of 32-bit load or add.  */
+  /* GP-relative load.  */
   HOWTO (R_RISCV_GPREL_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -705,7 +699,7 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
-  /* High 12 bits of 32-bit store.  */
+  /* GP-relative store.  */
   HOWTO (R_RISCV_GPREL_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
@@ -718,6 +712,126 @@ static reloc_howto_type howto_table[] =
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* TP-relative TLS LE load.  */
+  HOWTO (R_RISCV_TPREL_I,		/* type */
+	 0,				/* rightshift */
+	 2,				/* size */
+	 32,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TPREL_I",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* TP-relative TLS LE store.  */
+  HOWTO (R_RISCV_TPREL_S,		/* type */
+	 0,				/* rightshift */
+	 2,				/* size */
+	 32,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TPREL_S",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* The paired relocation may be relaxed.  */
+  HOWTO (R_RISCV_RELAX,			/* type */
+	 0,				/* rightshift */
+	 3,				/* size */
+	 0,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_RELAX",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* 6-bit in-place addition, for local label subtraction.  */
+  HOWTO (R_RISCV_SUB6,			/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 8,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_SUB6",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0x3f,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* 6-bit in-place setting, for local label subtraction.  */
+  HOWTO (R_RISCV_SET6,			/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 8,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_SET6",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0x3f,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* 8-bit in-place setting, for local label subtraction.  */
+  HOWTO (R_RISCV_SET8,			/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 8,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_SET8",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 MINUS_ONE,			/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* 16-bit in-place setting, for local label subtraction.  */
+  HOWTO (R_RISCV_SET16,			/* type */
+	 0,				/* rightshift */
+	 1,				/* size */
+	 16,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_SET16",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 MINUS_ONE,			/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* 32-bit in-place setting, for local label subtraction.  */
+  HOWTO (R_RISCV_SET32,			/* type */
+	 0,				/* rightshift */
+	 2,				/* size */
+	 32,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_SET32",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 MINUS_ONE,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 };
 
@@ -772,6 +886,14 @@ static const struct elf_reloc_map riscv_reloc_map[] =
   { BFD_RELOC_RISCV_RVC_LUI, R_RISCV_RVC_LUI },
   { BFD_RELOC_RISCV_GPREL_I, R_RISCV_GPREL_I },
   { BFD_RELOC_RISCV_GPREL_S, R_RISCV_GPREL_S },
+  { BFD_RELOC_RISCV_TPREL_I, R_RISCV_TPREL_I },
+  { BFD_RELOC_RISCV_TPREL_S, R_RISCV_TPREL_S },
+  { BFD_RELOC_RISCV_RELAX, R_RISCV_RELAX },
+  { BFD_RELOC_RISCV_SUB6, R_RISCV_SUB6 },
+  { BFD_RELOC_RISCV_SET6, R_RISCV_SET6 },
+  { BFD_RELOC_RISCV_SET8, R_RISCV_SET8 },
+  { BFD_RELOC_RISCV_SET16, R_RISCV_SET16 },
+  { BFD_RELOC_RISCV_SET32, R_RISCV_SET32 },
 };
 
 /* Given a BFD reloc type, return a howto structure.  */

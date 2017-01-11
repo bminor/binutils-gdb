@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1274,7 +1274,8 @@ elfNN_ia64_hash_copy_indirect (struct bfd_link_info *info,
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->root.ref_dynamic |= ind->root.ref_dynamic;
+  if (dir->root.versioned != versioned_hidden)
+    dir->root.ref_dynamic |= ind->root.ref_dynamic;
   dir->root.ref_regular |= ind->root.ref_regular;
   dir->root.ref_regular_nonweak |= ind->root.ref_regular_nonweak;
   dir->root.needs_plt |= ind->root.needs_plt;

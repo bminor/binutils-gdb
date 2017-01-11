@@ -1,6 +1,6 @@
 /* Python interface to lazy strings.
 
-   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+   Copyright (C) 2010-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -180,14 +180,13 @@ gdbpy_is_lazy_string (PyObject *result)
 }
 
 /* Extract the parameters from the lazy string object STRING.
-   ENCODING will either be set to NULL, or will be allocated with
-   xmalloc, in which case the callers is responsible for freeing
-   it.  */
+   ENCODING may be set to NULL, if no encoding is found.  */
 
 void
 gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
 			   struct type **str_type,
-			   long *length, char **encoding)
+			   long *length,
+			   gdb::unique_xmalloc_ptr<char> *encoding)
 {
   lazy_string_object *lazy;
 
@@ -198,7 +197,7 @@ gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
   *addr = lazy->address;
   *str_type = lazy->type;
   *length = lazy->length;
-  *encoding = lazy->encoding ? xstrdup (lazy->encoding) : NULL;
+  encoding->reset (lazy->encoding ? xstrdup (lazy->encoding) : NULL);
 }
 
 

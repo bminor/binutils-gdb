@@ -1,6 +1,6 @@
 /* Gdb/Python header for private use by Python module.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -498,11 +498,42 @@ int gdbpy_initialize_xmethods (void)
 int gdbpy_initialize_unwind (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
-struct cleanup *make_cleanup_py_decref (PyObject *py);
-struct cleanup *make_cleanup_py_xdecref (PyObject *py);
+/* Called before entering the Python interpreter to install the
+   current language and architecture to be used for Python values.
+   Also set the active extension language for GDB so that SIGINT's
+   are directed our way, and if necessary install the right SIGINT
+   handler.  */
+class gdbpy_enter
+{
+ public:
 
-struct cleanup *ensure_python_env (struct gdbarch *gdbarch,
-				   const struct language_defn *language);
+  gdbpy_enter (struct gdbarch *gdbarch, const struct language_defn *language);
+
+  ~gdbpy_enter ();
+
+  gdbpy_enter (const gdbpy_enter &) = delete;
+  gdbpy_enter &operator= (const gdbpy_enter &) = delete;
+
+ private:
+
+  struct active_ext_lang_state *m_previous_active;
+  PyGILState_STATE m_state;
+  struct gdbarch *m_gdbarch;
+  const struct language_defn *m_language;
+  PyObject *m_error_type, *m_error_value, *m_error_traceback;
+};
+
+/* Like gdbpy_enter, but takes a varobj.  This is a subclass just to
+   make constructor delegation a little nicer.  */
+class gdbpy_enter_varobj : public gdbpy_enter
+{
+ public:
+
+  /* This is defined in varobj.c, where it can access varobj
+     internals.  */
+  gdbpy_enter_varobj (const struct varobj *var);
+
+};
 
 extern struct gdbarch *python_gdbarch;
 extern const struct language_defn *python_language;
@@ -546,7 +577,8 @@ gdb::unique_xmalloc_ptr<char> gdbpy_exception_to_string (PyObject *ptype,
 int gdbpy_is_lazy_string (PyObject *result);
 void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
 				struct type **str_type,
-				long *length, char **encoding);
+				long *length,
+				gdb::unique_xmalloc_ptr<char> *encoding);
 
 int gdbpy_is_value_object (PyObject *obj);
 

@@ -1,4 +1,4 @@
-# Copyright 2016 Free Software Foundation, Inc.
+# Copyright 2016-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,13 +36,13 @@ standard_testfile
 # Multiple inferiors are needed, therefore only native gdb and extended
 # gdbserver modes are supported.
 if [use_gdb_stub] {
-    untested ${testfile}.exp
+    untested "using gdb stub"
     return
 }
 
 set compile_options "debug pthreads"
 if {[build_executable $testfile.exp $testfile ${srcfile} ${compile_options}] == -1} {
-    untested "failed to compile $testfile"
+    untested "failed to compile"
     return -1
 }
 
@@ -396,7 +396,7 @@ proc_with_prefix test_setup { mode } {
     mi_gdb_load $binfile
 
     if { [mi_runto main] < 0 } {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -409,7 +409,7 @@ proc_with_prefix test_setup { mode } {
 	# Add the second inferior now.  While this is not mandatory, it allows
 	# us to assume that per-inferior thread numbering will be used,
 	# simplifying test_continue_to_start a bit (Thread 1.2 and not Thread 2).
-	gdb_test "add-inferior" "Added inferior 2" "Add inferior 2"
+	gdb_test "add-inferior" "Added inferior 2" "add inferior 2"
 
 	# Prepare the first inferior for the test.
 	test_continue_to_start $mode 1

@@ -58,5 +58,5 @@ Raw dump of debug contents of section \.debug_line:
   \[0x.*\]  Special opcode 35: advance Address by 2 to 0x23 and Line by 2 to 39
   \[0x.*\]  Special opcode 120: advance Address by 8 to 0x2b and Line by 3 to 42
   \[0x.*\]  Special opcode 35: advance Address by 2 to 0x2d and Line by 2 to 44
-  \[0x.*\]  Advance PC by 23 to 0x44
+  \[0x.*\]  Advance PC by 35 to 0x50
   \[0x.*\]  Extended opcode 1: End of Sequence

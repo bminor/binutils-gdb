@@ -1,5 +1,5 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2017 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -5733,7 +5733,8 @@ sh_elf_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      dir->ref_dynamic |= ind->ref_dynamic;
+      if (dir->versioned != versioned_hidden)
+	dir->ref_dynamic |= ind->ref_dynamic;
       dir->ref_regular |= ind->ref_regular;
       dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
       dir->needs_plt |= ind->needs_plt;

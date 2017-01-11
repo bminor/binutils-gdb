@@ -1,6 +1,6 @@
 /* AArch64 assembler/disassembler support.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GNU Binutils.
@@ -53,6 +53,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_RAS	0x04000000	/* RAS Extensions.  */
 #define AARCH64_FEATURE_PROFILE	0x08000000	/* Statistical Profiling.  */
 #define AARCH64_FEATURE_SVE	0x10000000	/* SVE instructions.  */
+#define AARCH64_FEATURE_RCPC	0x20000000	/* RCPC instructions.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -70,7 +71,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_F16	\
 						 | AARCH64_FEATURE_RAS)
 #define AARCH64_ARCH_V8_3	AARCH64_FEATURE (AARCH64_ARCH_V8_2,	\
-						 AARCH64_FEATURE_V8_3)
+						 AARCH64_FEATURE_V8_3	\
+						 | AARCH64_FEATURE_RCPC)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
@@ -113,7 +115,6 @@ enum aarch64_operand_class
   AARCH64_OPND_CLASS_SIMD_ELEMENT,
   AARCH64_OPND_CLASS_SISD_REG,
   AARCH64_OPND_CLASS_SIMD_REGLIST,
-  AARCH64_OPND_CLASS_CP_REG,
   AARCH64_OPND_CLASS_SVE_REG,
   AARCH64_OPND_CLASS_PRED_REG,
   AARCH64_OPND_CLASS_ADDRESS,
@@ -170,8 +171,8 @@ enum aarch64_opnd
 			   structure to all lanes.  */
   AARCH64_OPND_LEt,	/* AdvSIMD Vector Element list.  */
 
-  AARCH64_OPND_Cn,	/* Co-processor register in CRn field.  */
-  AARCH64_OPND_Cm,	/* Co-processor register in CRm field.  */
+  AARCH64_OPND_CRn,	/* Co-processor register in CRn field.  */
+  AARCH64_OPND_CRm,	/* Co-processor register in CRm field.  */
 
   AARCH64_OPND_IDX,	/* AdvSIMD EXT index operand.  */
   AARCH64_OPND_IMM_VLSL,/* Immediate for shifting vector registers left.  */
@@ -394,6 +395,7 @@ enum aarch64_opnd_qualifier
   AARCH64_OPND_QLF_P_M,
 
   /* Constraint on value.  */
+  AARCH64_OPND_QLF_CR,		/* CRn, CRm. */
   AARCH64_OPND_QLF_imm_0_7,
   AARCH64_OPND_QLF_imm_0_15,
   AARCH64_OPND_QLF_imm_0_31,

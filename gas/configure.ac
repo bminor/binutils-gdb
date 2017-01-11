@@ -3,7 +3,7 @@ dnl
 dnl And be careful when changing it!  If you must add tests with square
 dnl brackets, be sure changequote invocations surround it.
 dnl
-dnl   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -796,7 +796,7 @@ AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}",    [Target OS.])
 AC_PROG_YACC
 AM_PROG_LEX
 
-ALL_LINGUAS="fr tr es rw id ru fi ja zh_CN"
+ALL_LINGUAS="fr tr es rw id ru fi ja zh_CN sv"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

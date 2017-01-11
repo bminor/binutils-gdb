@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/i386.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -373,7 +373,7 @@ i386fbsd_collect_uthread (const struct regcache *regcache,
 }
 
 static void
-i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -403,18 +403,10 @@ i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FreeBSD provides a user-level threads implementation.  */
   bsd_uthread_set_supply_uthread (gdbarch, i386fbsd_supply_uthread);
   bsd_uthread_set_collect_uthread (gdbarch, i386fbsd_collect_uthread);
-}
 
-static void
-i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  /* It's almost identical to FreeBSD a.out.  */
-  i386fbsdaout_init_abi (info, gdbarch);
-
-  /* Except that it uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 
-  /* FreeBSD ELF uses SVR4-style shared libraries.  */
+  /* FreeBSD uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
@@ -491,8 +483,6 @@ void _initialize_i386fbsd_tdep (void);
 void
 _initialize_i386fbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD_AOUT,
-			  i386fbsdaout_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD,
 			  i386fbsd4_init_abi);
 }

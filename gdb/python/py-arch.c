@@ -1,6 +1,6 @@
 /* Python interface to architecture
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "arch-utils.h"
 #include "disasm.h"
 #include "python-internal.h"
+#include "py-ref.h"
 
 typedef struct arch_object_type_object {
   PyObject_HEAD
@@ -120,7 +121,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
   CORE_ADDR pc;
   gdb_py_ulongest start_temp;
   long count = 0, i;
-  PyObject *result_list, *end_obj = NULL, *count_obj = NULL;
+  PyObject *end_obj = NULL, *count_obj = NULL;
   struct gdbarch *gdbarch = NULL;
 
   ARCHPY_REQUIRE_VALID (self, gdbarch);
@@ -149,8 +150,6 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 #endif
       else
         {
-          Py_DECREF (end_obj);
-          Py_XDECREF (count_obj);
           PyErr_SetString (PyExc_TypeError,
                            _("Argument 'end_pc' should be a (long) integer."));
 
@@ -159,8 +158,6 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
       if (end < start)
         {
-          Py_DECREF (end_obj);
-          Py_XDECREF (count_obj);
           PyErr_SetString (PyExc_ValueError,
                            _("Argument 'end_pc' should be greater than or "
                              "equal to the argument 'start_pc'."));
@@ -173,8 +170,6 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       count = PyInt_AsLong (count_obj);
       if (PyErr_Occurred () || count < 0)
         {
-          Py_DECREF (count_obj);
-          Py_XDECREF (end_obj);
           PyErr_SetString (PyExc_TypeError,
                            _("Argument 'count' should be an non-negative "
                              "integer."));
@@ -183,7 +178,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
         }
     }
 
-  result_list = PyList_New (0);
+  gdbpy_ref result_list (PyList_New (0));
   if (result_list == NULL)
     return NULL;
 
@@ -199,19 +194,16 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
     {
       int insn_len = 0;
       struct ui_file *memfile = mem_fileopen ();
-      PyObject *insn_dict = PyDict_New ();
+      gdbpy_ref insn_dict (PyDict_New ());
 
       if (insn_dict == NULL)
         {
-          Py_DECREF (result_list);
           ui_file_delete (memfile);
 
           return NULL;
         }
-      if (PyList_Append (result_list, insn_dict))
+      if (PyList_Append (result_list.get (), insn_dict.get ()))
         {
-          Py_DECREF (result_list);
-          Py_DECREF (insn_dict);
           ui_file_delete (memfile);
 
           return NULL;  /* PyList_Append Sets the exception.  */
@@ -223,7 +215,6 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
         }
       CATCH (except, RETURN_MASK_ALL)
         {
-          Py_DECREF (result_list);
           ui_file_delete (memfile);
 
 	  gdbpy_convert_exception (except);
@@ -233,17 +224,15 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
       std::string as = ui_file_as_string (memfile);
 
-      if (PyDict_SetItemString (insn_dict, "addr",
+      if (PyDict_SetItemString (insn_dict.get (), "addr",
                                 gdb_py_long_from_ulongest (pc))
-          || PyDict_SetItemString (insn_dict, "asm",
+          || PyDict_SetItemString (insn_dict.get (), "asm",
                                    PyString_FromString (!as.empty ()
 							? as.c_str ()
 							: "<unknown>"))
-          || PyDict_SetItemString (insn_dict, "length",
+          || PyDict_SetItemString (insn_dict.get (), "length",
                                    PyInt_FromLong (insn_len)))
         {
-          Py_DECREF (result_list);
-
           ui_file_delete (memfile);
 
           return NULL;
@@ -254,7 +243,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       ui_file_delete (memfile);
     }
 
-  return result_list;
+  return result_list.release ();
 }
 
 /* Initializes the Architecture class in the gdb module.  */

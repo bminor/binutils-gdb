@@ -2,7 +2,6 @@
 #ld: -Tflags1.ld
 #objcopy_linked_file: --set-section-flags .post_text_reserve=contents,alloc,load,readonly,code
 #readelf: -S --wide
-#notarget: rx-*-*
 
 #...
 Section Headers:

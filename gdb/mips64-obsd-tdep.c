@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/mips64.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -165,6 +165,6 @@ void _initialize_mips64obsd_tdep (void);
 void
 _initialize_mips64obsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_OPENBSD,
 			  mips64obsd_init_abi);
 }

@@ -1,5 +1,5 @@
 /* MI Command Set - file commands.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -49,15 +49,13 @@ mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
     error (_("-file-list-exec-source-file: No symtab"));
 
   /* Print to the user the line, filename and fullname.  */
-  ui_out_field_int (uiout, "line", st.line);
-  ui_out_field_string (uiout, "file",
-		       symtab_to_filename_for_display (st.symtab));
+  uiout->field_int ("line", st.line);
+  uiout->field_string ("file", symtab_to_filename_for_display (st.symtab));
 
-  ui_out_field_string (uiout, "fullname", symtab_to_fullname (st.symtab));
+  uiout->field_string ("fullname", symtab_to_fullname (st.symtab));
 
-  ui_out_field_int (uiout, "macro-info",
-		    COMPUNIT_MACRO_TABLE
-		      (SYMTAB_COMPUNIT (st.symtab)) != NULL);
+  uiout->field_int ("macro-info",
+		    COMPUNIT_MACRO_TABLE (SYMTAB_COMPUNIT (st.symtab)) != NULL);
 }
 
 /* A callback for map_partial_symbol_filenames.  */
@@ -68,14 +66,14 @@ print_partial_file_name (const char *filename, const char *fullname,
 {
   struct ui_out *uiout = current_uiout;
 
-  ui_out_begin (uiout, ui_out_type_tuple, NULL);
+  uiout->begin (ui_out_type_tuple, NULL);
 
-  ui_out_field_string (uiout, "file", filename);
+  uiout->field_string ("file", filename);
 
   if (fullname)
-    ui_out_field_string (uiout, "fullname", fullname);
+    uiout->field_string ("fullname", fullname);
 
-  ui_out_end (uiout, ui_out_type_tuple);
+  uiout->end (ui_out_type_tuple);
 }
 
 void
@@ -90,21 +88,21 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
     error (_("-file-list-exec-source-files: Usage: No args"));
 
   /* Print the table header.  */
-  ui_out_begin (uiout, ui_out_type_list, "files");
+  uiout->begin (ui_out_type_list, "files");
 
   /* Look at all of the file symtabs.  */
   ALL_FILETABS (objfile, cu, s)
   {
-    ui_out_begin (uiout, ui_out_type_tuple, NULL);
+    uiout->begin (ui_out_type_tuple, NULL);
 
-    ui_out_field_string (uiout, "file", symtab_to_filename_for_display (s));
-    ui_out_field_string (uiout, "fullname", symtab_to_fullname (s));
+    uiout->field_string ("file", symtab_to_filename_for_display (s));
+    uiout->field_string ("fullname", symtab_to_fullname (s));
 
-    ui_out_end (uiout, ui_out_type_tuple);
+    uiout->end (ui_out_type_tuple);
   }
 
   map_symbol_filenames (print_partial_file_name, NULL,
 			1 /*need_fullname*/);
 
-  ui_out_end (uiout, ui_out_type_list);
+  uiout->end (ui_out_type_list);
 }

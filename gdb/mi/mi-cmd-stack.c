@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -202,7 +202,7 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
        i++, fi = get_prev_frame (fi))
     QUIT;
 
-  ui_out_field_int (current_uiout, "depth", i);
+  current_uiout->field_int ("depth", i);
 }
 
 /* Print a list of the locals for the current frame.  With argument of
@@ -391,7 +391,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
 
 	  QUIT;
 	  cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
-	  ui_out_field_int (uiout, "level", i);
+	  uiout->field_int ("level", i);
 	  list_args_or_locals (arguments, print_values, fi, skip_unavailable);
 	  do_cleanups (cleanup_frame);
 	}
@@ -520,16 +520,16 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   fputs_filtered (SYMBOL_PRINT_NAME (arg->sym), stb);
   if (arg->entry_kind == print_entry_values_only)
     fputs_filtered ("@entry", stb);
-  ui_out_field_stream (uiout, "name", stb);
+  uiout->field_stream ("name", stb);
 
   if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
-    ui_out_field_int (uiout, "arg", 1);
+    uiout->field_int ("arg", 1);
 
   if (values == PRINT_SIMPLE_VALUES)
     {
       check_typedef (arg->sym->type);
       type_print (arg->sym->type, "", stb, -1);
-      ui_out_field_stream (uiout, "type", stb);
+      uiout->field_stream ("type", stb);
     }
 
   if (arg->val || arg->error)
@@ -558,7 +558,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
       if (error_message != NULL)
 	fprintf_filtered (stb, _("<error reading variable: %s>"),
 			  error_message);
-      ui_out_field_stream (uiout, "value", stb);
+      uiout->field_stream ("value", stb);
     }
 
   do_cleanups (old_chain);

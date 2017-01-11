@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2016 Free Software Foundation, Inc.
+# Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -1078,5 +1078,8 @@ endif
 
 # Dependencies.
 -include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
+
+# Disable implicit make rules.
+include $(srcdir)/../disable-implicit-rules.mk
 
 # This is the end of "Makefile.in".

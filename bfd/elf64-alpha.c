@@ -1,5 +1,5 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2017 Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3215,7 +3215,9 @@ elf64_alpha_relax_opt_call (struct alpha_relax_info *info, bfd_vma symval)
 	  if (tsec_relocs == NULL)
 	    return 0;
 	  tsec_relend = tsec_relocs + info->tsec->reloc_count;
-	  tsec_free = (info->link_info->keep_memory ? NULL : tsec_relocs);
+	  tsec_free = (elf_section_data (info->tsec)->relocs == tsec_relocs
+		       ? NULL
+		       : tsec_relocs);
 	}
 
       /* Recover the symbol's offset within the section.  */

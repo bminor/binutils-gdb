@@ -1,5 +1,5 @@
 # Expect script for .eh_frame entries to a removed section.
-#   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -65,7 +65,7 @@ set build_tests_ld [list			\
 run_ld_link_tests $build_tests_ld
 
 set testname "Link eh-group.o to eh-group"
-if [ld_simple_link $ld "tmpdir/eh-group" "-e _start tmpdir/eh-group.o"] {
+if [ld_link $ld "tmpdir/eh-group" "-e _start tmpdir/eh-group.o"] {
     pass $testname
 } else {
     fail $testname

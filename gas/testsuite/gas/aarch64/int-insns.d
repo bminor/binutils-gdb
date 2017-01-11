@@ -1,5 +1,5 @@
 #objdump: -dr
-#as: -march=armv8-a
+#as: -march=armv8-a -mabi=lp64
 
 .*:     file format .*
 

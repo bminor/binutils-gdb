@@ -1,5 +1,5 @@
 /* tc-riscv.h -- header file for tc-riscv.c.
-   Copyright 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -48,8 +48,18 @@ extern int riscv_relax_frag (asection *, struct frag *, long);
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
-/* FIXME: it is unclear if this is used, or if it is even correct.  */
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2)
+extern bfd_boolean riscv_frag_align_code (int);
+#define md_do_align(N, FILL, LEN, MAX, LABEL)				\
+  if ((N) != 0 && !(FILL) && !need_pass_2 && subseg_text_p (now_seg))	\
+    {									\
+      if (riscv_frag_align_code (N))					\
+	goto LABEL;							\
+    }
+
+extern void riscv_handle_align (fragS *);
+#define HANDLE_ALIGN riscv_handle_align
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE 7
 
 /* The ISA of the target may change based on command-line arguments.  */
 #define TARGET_FORMAT riscv_target_format()
@@ -60,6 +70,9 @@ extern void riscv_after_parse_args (void);
 
 #define md_parse_long_option(arg) riscv_parse_long_option (arg)
 extern int riscv_parse_long_option (const char *);
+
+#define md_pre_output_hook riscv_pre_output_hook()
+extern void riscv_pre_output_hook (void);
 
 /* Let the linker resolve all the relocs due to relaxation.  */
 #define tc_fix_adjustable(fixp) 0
@@ -91,9 +104,10 @@ extern void riscv_cfi_frame_initial_instructions (void);
 #define tc_regname_to_dw2regnum tc_riscv_regname_to_dw2regnum
 extern int tc_riscv_regname_to_dw2regnum (char *);
 
-extern unsigned xlen;
 #define DWARF2_DEFAULT_RETURN_COLUMN X_RA
-#define DWARF2_CIE_DATA_ALIGNMENT (-(int) (xlen / 8))
+
+/* Even on RV64, use 4-byte alignment, as F registers may be only 32 bits.  */
+#define DWARF2_CIE_DATA_ALIGNMENT -4
 
 #define elf_tc_final_processing riscv_elf_final_processing
 extern void riscv_elf_final_processing (void);

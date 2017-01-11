@@ -1,6 +1,6 @@
 # gas target specific configuration file.  This is a -*- sh -*- file.
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ case ${cpu} in
   sh64*)		cpu_type=sh64 endian=big ;;
   sh*le)		cpu_type=sh endian=little ;;
   sh*)			cpu_type=sh endian=big ;;
-  sparc64*)		cpu_type=sparc arch=v9-64 ;;
+  sparc64* | sparcv9*)	cpu_type=sparc arch=v9-64 ;;
   sparc86x*)		cpu_type=sparc arch=sparc86x  ;;
   sparclet*)		cpu_type=sparc arch=sparclet ;;
   sparclite*)		cpu_type=sparc arch=sparclite ;;
@@ -123,6 +123,7 @@ generic_target=${cpu_type}-$vendor-$os
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${generic_target} in
   aarch64*-*-elf | aarch64*-*-rtems*)	fmt=elf;;
+  aarch64*-*-fuchsia*)			fmt=elf;;
   aarch64*-*-linux*)			fmt=elf em=linux ;;
 
   alpha-*-*vms*)			fmt=evax ;;
@@ -161,6 +162,7 @@ case ${generic_target} in
 					fmt=coff em=wince-pe ;;
   arm-*-pe)				fmt=coff em=pe ;;
   arm-*-riscix*)			fmt=aout em=riscix ;;
+  arm-*-fuchsia*)			fmt=elf ;;
 
   avr-*-*)				fmt=elf bfd_gas=yes ;;
 
@@ -221,6 +223,7 @@ case ${generic_target} in
   i386-*-coff)				fmt=coff ;;
   i386-*-elfiamcu)			fmt=elf arch=iamcu ;;
   i386-*-elf*)				fmt=elf ;;
+  i386-*-fuchsia*)			fmt=elf ;;
   i386-*-kaos*)				fmt=elf ;;
   i386-*-bsd*)				fmt=aout em=386bsd ;;
   i386-*-nacl*)				fmt=elf em=nacl
@@ -248,6 +251,7 @@ case ${generic_target} in
       x86_64*-linux-gnux32)		arch=x86_64:32 ;;
     esac ;;
   i386-*-lynxos*)			fmt=elf em=lynx ;;
+  i386-*-redox*)			fmt=elf ;;
   i386-*-sysv[45]*)			fmt=elf ;;
   i386-*-solaris*)			fmt=elf em=solaris ;;
   i386-*-freebsdaout*)			fmt=aout em=386bsd ;;
@@ -392,6 +396,8 @@ case ${generic_target} in
   ppc-*-nto*)				fmt=elf ;;
   ppc-*-kaos*)				fmt=elf ;;
   ppc-*-lynxos*)			fmt=elf em=lynx ;;
+
+  pru-*-*)				fmt=elf ;;
 
   riscv*-*-*)			fmt=elf endian=little em=linux ;;
 

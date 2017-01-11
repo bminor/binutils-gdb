@@ -1,5 +1,5 @@
 /* RISC-V disassembler
-   Copyright 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -255,6 +255,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 
 	case 'o':
 	  maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l));
+	  /* Fall through.  */
 	case 'j':
 	  if (((l & MASK_ADDI) == MATCH_ADDI && rs1 != 0)
 	      || (l & MASK_JALR) == MATCH_JALR)
@@ -406,8 +407,12 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
     {
       int xlen = 0;
 
-      /* The incoming section might not always be complete.  */
-      if (info->section != NULL)
+      /* If XLEN is not known, get its value from the ELF class.  */
+      if (info->mach == bfd_mach_riscv64)
+	xlen = 64;
+      else if (info->mach == bfd_mach_riscv32)
+	xlen = 32;
+      else if (info->section != NULL)
 	{
 	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
 	  xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;

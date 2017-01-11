@@ -1,6 +1,6 @@
 /* Handle Darwin shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -427,7 +427,7 @@ darwin_in_dynsym_resolve_code (CORE_ADDR pc)
    counting properly.  This will either return NULL, or return a new
    reference to a BFD.  */
 
-static bfd *
+static gdb_bfd_ref_ptr
 gdb_bfd_mach_o_fat_extract (bfd *abfd, bfd_format format,
 			    const bfd_arch_info_type *arch)
 {
@@ -441,7 +441,7 @@ gdb_bfd_mach_o_fat_extract (bfd *abfd, bfd_format format,
   else
     gdb_bfd_mark_parent (result, abfd);
 
-  return result;
+  return gdb_bfd_ref_ptr (result);
 }
 
 /* Extract dyld_all_image_addr when the process was just created, assuming the
@@ -452,8 +452,6 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
 {
   char *interp_name;
   CORE_ADDR load_addr = 0;
-  bfd *dyld_bfd = NULL;
-  struct cleanup *cleanup;
 
   /* This method doesn't work with an attached process.  */
   if (current_inferior ()->attach_flag)
@@ -464,42 +462,30 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
   if (!interp_name)
     return;
 
-  cleanup = make_cleanup (null_cleanup, NULL);
-
   /* Create a bfd for the interpreter.  */
-  dyld_bfd = gdb_bfd_open (interp_name, gnutarget, -1);
-  if (dyld_bfd)
+  gdb_bfd_ref_ptr dyld_bfd (gdb_bfd_open (interp_name, gnutarget, -1));
+  if (dyld_bfd != NULL)
     {
-      bfd *sub;
-
-      make_cleanup_bfd_unref (dyld_bfd);
-      sub = gdb_bfd_mach_o_fat_extract
-	(dyld_bfd, bfd_object, gdbarch_bfd_arch_info (target_gdbarch ()));
-      if (sub)
-	{
-	  dyld_bfd = sub;
-	  make_cleanup_bfd_unref (sub);
-	}
+      gdb_bfd_ref_ptr sub
+	(gdb_bfd_mach_o_fat_extract (dyld_bfd.get (), bfd_object,
+				     gdbarch_bfd_arch_info (target_gdbarch ())));
+      if (sub != NULL)
+	dyld_bfd = sub;
       else
-	dyld_bfd = NULL;
+	dyld_bfd.release ();
     }
-  if (!dyld_bfd)
-    {
-      do_cleanups (cleanup);
-      return;
-    }
+  if (dyld_bfd == NULL)
+    return;
 
   /* We find the dynamic linker's base address by examining
      the current pc (which should point at the entry point for the
      dynamic linker) and subtracting the offset of the entry point.  */
   load_addr = (regcache_read_pc (get_current_regcache ())
-               - bfd_get_start_address (dyld_bfd));
+               - bfd_get_start_address (dyld_bfd.get ()));
 
   /* Now try to set a breakpoint in the dynamic linker.  */
   info->all_image_addr =
-    lookup_symbol_from_bfd (dyld_bfd, "_dyld_all_image_infos");
-
-  do_cleanups (cleanup);
+    lookup_symbol_from_bfd (dyld_bfd.get (), "_dyld_all_image_infos");
 
   if (info->all_image_addr == 0)
     return;
@@ -634,13 +620,11 @@ darwin_lookup_lib_symbol (struct objfile *objfile,
   return (struct block_symbol) {NULL, NULL};
 }
 
-static bfd *
+static gdb_bfd_ref_ptr
 darwin_bfd_open (char *pathname)
 {
   char *found_pathname;
   int found_file;
-  bfd *abfd;
-  bfd *res;
 
   /* Search for shared library file.  */
   found_pathname = solib_find (pathname, &found_file);
@@ -648,24 +632,21 @@ darwin_bfd_open (char *pathname)
     perror_with_name (pathname);
 
   /* Open bfd for shared library.  */
-  abfd = solib_bfd_fopen (found_pathname, found_file);
+  gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname, found_file));
 
-  res = gdb_bfd_mach_o_fat_extract (abfd, bfd_object,
-				    gdbarch_bfd_arch_info (target_gdbarch ()));
-  if (!res)
-    {
-      make_cleanup_bfd_unref (abfd);
-      error (_("`%s': not a shared-library: %s"),
-	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
-    }
+  gdb_bfd_ref_ptr res
+    (gdb_bfd_mach_o_fat_extract (abfd.get (), bfd_object,
+				 gdbarch_bfd_arch_info (target_gdbarch ())));
+  if (res == NULL)
+    error (_("`%s': not a shared-library: %s"),
+	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));
 
   /* The current filename for fat-binary BFDs is a name generated
      by BFD, usually a string containing the name of the architecture.
      Reset its value to the actual filename.  */
-  xfree (bfd_get_filename (res));
+  xfree (bfd_get_filename (res.get ()));
   res->filename = xstrdup (pathname);
 
-  gdb_bfd_unref (abfd);
   return res;
 }
 

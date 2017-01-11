@@ -1,6 +1,6 @@
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -1045,3 +1045,7 @@ extern bfd_boolean v850_elf_create_sections
 
 extern bfd_boolean v850_elf_set_note
   (bfd *, unsigned int, unsigned int);
+
+/* MIPS ABI flags data access.  For the disassembler.  */
+struct elf_internal_abiflags_v0;
+extern struct elf_internal_abiflags_v0 *bfd_mips_elf_get_abiflags (bfd *);

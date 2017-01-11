@@ -1,6 +1,6 @@
 /* Everything about signal catchpoints, for GDB.
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -253,14 +253,14 @@ signal_catchpoint_print_one (struct breakpoint *b,
      not line up too nicely with the headers, but the effect
      is relatively readable).  */
   if (opts.addressprint)
-    ui_out_field_skip (uiout, "addr");
+    uiout->field_skip ("addr");
   annotate_field (5);
 
   if (c->signals_to_be_caught
       && VEC_length (gdb_signal_type, c->signals_to_be_caught) > 1)
-    ui_out_text (uiout, "signals \"");
+    uiout->text ("signals \"");
   else
-    ui_out_text (uiout, "signal \"");
+    uiout->text ("signal \"");
 
   if (c->signals_to_be_caught)
     {
@@ -278,15 +278,15 @@ signal_catchpoint_print_one (struct breakpoint *b,
 	    text += " ";
 	  text += name;
         }
-      ui_out_field_string (uiout, "what", text.c_str ());
+      uiout->field_string ("what", text.c_str ());
     }
   else
-    ui_out_field_string (uiout, "what",
+    uiout->field_string ("what",
 			 c->catch_all ? "<any signal>" : "<standard signals>");
-  ui_out_text (uiout, "\" ");
+  uiout->text ("\" ");
 
-  if (ui_out_is_mi_like_p (uiout))
-    ui_out_field_string (uiout, "catch-type", "signal");
+  if (uiout->is_mi_like_p ())
+    uiout->field_string ("catch-type", "signal");
 }
 
 /* Implement the "print_mention" breakpoint_ops method for signal

@@ -1,5 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -245,6 +245,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 4
+#define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
 
 #define elf_backend_add_symbol_hook		elf32_sparc_add_symbol_hook

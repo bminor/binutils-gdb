@@ -2,7 +2,7 @@
 
 %{/* deflex.l - Lexer for .def files */
 
-/* Copyright (C) 1995-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -63,7 +63,7 @@ int linenumber;
 [0-9][x0-9A-Fa-f]* { yylval.number = strtol (yytext,0,0);
 		return NUMBER; }
 
-(@)?[A-Za-z$:\-\_?][A-Za-z0-9/$:\<\>\-\_@?]* {
+(@)?[A-Za-z$:\-\_?][A-Za-z0-9/$:\<\>\-\_@?+]* {
 		yylval.id =  xstrdup (yytext);
 		return ID;
 		}

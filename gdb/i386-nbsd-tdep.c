@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/i386.
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -322,6 +322,6 @@ extern initialize_file_ftype _initialize_i386nbsd_tdep;
 void
 _initialize_i386nbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD,
 			  i386nbsdelf_init_abi);
 }

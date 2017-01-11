@@ -1,5 +1,5 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
 
    Contributor: Claudiu Zissulescu <claziss@synopsys.com>
 
@@ -426,6 +426,19 @@ static struct hash_control *arc_aux_hash;
 /* The hash table of address types.  */
 static struct hash_control *arc_addrtype_hash;
 
+#define ARC_CPU_TYPE_A6xx(NAME,EXTRA)			\
+  { #NAME, ARC_OPCODE_ARC600, bfd_mach_arc_arc600,	\
+      E_ARC_MACH_ARC600, EXTRA}
+#define ARC_CPU_TYPE_A7xx(NAME,EXTRA)			\
+  { #NAME, ARC_OPCODE_ARC700,  bfd_mach_arc_arc700,	\
+      E_ARC_MACH_ARC700, EXTRA}
+#define ARC_CPU_TYPE_AV2EM(NAME,EXTRA)			\
+  { #NAME,  ARC_OPCODE_ARCv2EM, bfd_mach_arc_arcv2,	\
+      EF_ARC_CPU_ARCV2EM, EXTRA}
+#define ARC_CPU_TYPE_AV2HS(NAME,EXTRA)			\
+  { #NAME,  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,	\
+      EF_ARC_CPU_ARCV2HS, EXTRA}
+
 /* A table of CPU names and opcode sets.  */
 static const struct cpu_type
 {
@@ -437,16 +450,31 @@ static const struct cpu_type
 }
   cpu_types[] =
 {
-  { "arc600", ARC_OPCODE_ARC600,  bfd_mach_arc_arc600,
-    E_ARC_MACH_ARC600,  0x00},
-  { "arc700", ARC_OPCODE_ARC700,  bfd_mach_arc_arc700,
-    E_ARC_MACH_ARC700,  0x00},
-  { "nps400", ARC_OPCODE_ARC700 , bfd_mach_arc_arc700,
-    E_ARC_MACH_ARC700,  ARC_NPS400},
-  { "arcem",  ARC_OPCODE_ARCv2EM, bfd_mach_arc_arcv2,
-    EF_ARC_CPU_ARCV2EM, 0x00},
-  { "archs",  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,
-    EF_ARC_CPU_ARCV2HS, ARC_CD},
+  ARC_CPU_TYPE_A7xx (arc700, 0x00),
+  ARC_CPU_TYPE_A7xx (nps400, ARC_NPS400),
+
+  ARC_CPU_TYPE_AV2EM (arcem,	  0x00),
+  ARC_CPU_TYPE_AV2EM (em,	  0x00),
+  ARC_CPU_TYPE_AV2EM (em4,	  ARC_CD),
+  ARC_CPU_TYPE_AV2EM (em4_dmips,  ARC_CD),
+  ARC_CPU_TYPE_AV2EM (em4_fpus,	  ARC_CD),
+  ARC_CPU_TYPE_AV2EM (em4_fpuda,  ARC_CD | ARC_FPUDA),
+  ARC_CPU_TYPE_AV2EM (quarkse_em, ARC_CD | ARC_SPFP | ARC_DPFP),
+
+  ARC_CPU_TYPE_AV2HS (archs,	  ARC_CD),
+  ARC_CPU_TYPE_AV2HS (hs,	  ARC_CD),
+  ARC_CPU_TYPE_AV2HS (hs34,	  ARC_CD),
+  ARC_CPU_TYPE_AV2HS (hs38,	  ARC_CD),
+  ARC_CPU_TYPE_AV2HS (hs38_linux, ARC_CD),
+
+  ARC_CPU_TYPE_A6xx (arc600, 0x00),
+  ARC_CPU_TYPE_A6xx (arc600_norm,     0x00),
+  ARC_CPU_TYPE_A6xx (arc600_mul64,    0x00),
+  ARC_CPU_TYPE_A6xx (arc600_mul32x16, 0x00),
+  ARC_CPU_TYPE_A6xx (arc601,	      0x00),
+  ARC_CPU_TYPE_A6xx (arc601_norm,     0x00),
+  ARC_CPU_TYPE_A6xx (arc601_mul64,    0x00),
+  ARC_CPU_TYPE_A6xx (arc601_mul32x16, 0x00),
   { 0, 0, 0, 0, 0 }
 };
 
@@ -468,6 +496,9 @@ static const struct feature_type
   { ARC_DPFP, ARC_OPCODE_ARCFPX, "double-precision FPX" },
   { ARC_FPUDA, ARC_OPCODE_ARCv2EM, "double assist FP" }
 };
+
+/* Command line given features.  */
+static unsigned cl_features = 0;
 
 /* Used by the arc_reloc_op table.  Order is important.  */
 #define O_gotoff  O_md1     /* @gotoff relocation.  */
@@ -855,7 +886,7 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
 	  /* Initialise static global data about selected machine type.  */
 	  selected_cpu.flags = cpu_types[i].flags;
 	  selected_cpu.name = cpu_types[i].name;
-	  selected_cpu.features |= cpu_types[i].features;
+	  selected_cpu.features = cpu_types[i].features | cl_features;
 	  selected_cpu.mach = cpu_types[i].mach;
 	  cpu_flags = cpu_types[i].eflags;
           break;
@@ -978,6 +1009,7 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&cpu);
 
+  cpu_name = cpu;
   if ((!strcmp ("ARC600", cpu))
       || (!strcmp ("ARC601", cpu))
       || (!strcmp ("A6", cpu)))
@@ -991,13 +1023,8 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
     cpu_name = "archs";
   else if (!strcmp ("NPS400", cpu))
     cpu_name = "nps400";
-  else
-    cpu_name = NULL;
 
-  if (cpu_name != NULL)
-    arc_select_cpu (cpu_name, MACH_SELECTION_FROM_CPU_DIRECTIVE);
-  else
-    as_fatal (_("invalid architecture `%s' in .cpu directive"), cpu);
+  arc_select_cpu (cpu_name, MACH_SELECTION_FROM_CPU_DIRECTIVE);
 
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, selected_cpu.mach))
     as_fatal (_("could not set architecture and machine"));
@@ -3354,6 +3381,7 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_CD:
       selected_cpu.features |= ARC_CD;
+      cl_features |= ARC_CD;
       arc_check_feature ();
       break;
 
@@ -3363,21 +3391,25 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_NPS400:
       selected_cpu.features |= ARC_NPS400;
+      cl_features |= ARC_NPS400;
       arc_check_feature ();
       break;
 
     case OPTION_SPFP:
       selected_cpu.features |= ARC_SPFP;
+      cl_features |= ARC_SPFP;
       arc_check_feature ();
       break;
 
     case OPTION_DPFP:
       selected_cpu.features |= ARC_DPFP;
+      cl_features |= ARC_DPFP;
       arc_check_feature ();
       break;
 
     case OPTION_FPUDA:
       selected_cpu.features |= ARC_FPUDA;
+      cl_features |= ARC_FPUDA;
       arc_check_feature ();
       break;
 
@@ -3411,22 +3443,53 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
   return 1;
 }
 
+/* Display the list of cpu names for use in the help text.  */
+
+static void
+arc_show_cpu_list (FILE *stream)
+{
+  int i, offset;
+  static const char *space_buf = "                          ";
+
+  fprintf (stream, "%s", space_buf);
+  offset = strlen (space_buf);
+  for (i = 0; cpu_types[i].name != NULL; ++i)
+    {
+      bfd_boolean last = (cpu_types[i + 1].name == NULL);
+
+      /* If displaying the new cpu name string, and the ', ' (for all
+         but the last one) will take us past a target width of 80
+         characters, then it's time for a new line.  */
+      if (offset + strlen (cpu_types[i].name) + (last ? 0 : 2) > 80)
+        {
+          fprintf (stream, "\n%s", space_buf);
+          offset = strlen (space_buf);
+        }
+
+      fprintf (stream, "%s%s", cpu_types[i].name, (last ? "\n" : ", "));
+      offset += strlen (cpu_types [i].name) + (last ? 0 : 2);
+    }
+}
+
 void
 md_show_usage (FILE *stream)
 {
   fprintf (stream, _("ARC-specific assembler options:\n"));
 
-  fprintf (stream, "  -mcpu=<cpu name>\t  assemble for CPU <cpu name> "
-           "(default: %s)\n", TARGET_WITH_CPU);
-  fprintf (stream, "  -mcpu=nps400\t\t  same as -mcpu=arc700 -mnps400\n");
+  fprintf (stream, "  -mcpu=<cpu name>\t  (default: %s), assemble for"
+           " CPU <cpu name>, one of:\n", TARGET_WITH_CPU);
+  arc_show_cpu_list (stream);
+  fprintf (stream, "\n");
   fprintf (stream, "  -mA6/-mARC600/-mARC601  same as -mcpu=arc600\n");
   fprintf (stream, "  -mA7/-mARC700\t\t  same as -mcpu=arc700\n");
   fprintf (stream, "  -mEM\t\t\t  same as -mcpu=arcem\n");
   fprintf (stream, "  -mHS\t\t\t  same as -mcpu=archs\n");
 
   fprintf (stream, "  -mnps400\t\t  enable NPS-400 extended instructions\n");
-  fprintf (stream, "  -mspfp\t\t  enable single-precision floating point instructions\n");
-  fprintf (stream, "  -mdpfp\t\t  enable double-precision floating point instructions\n");
+  fprintf (stream, "  -mspfp\t\t  enable single-precision floating point"
+	   " instructions\n");
+  fprintf (stream, "  -mdpfp\t\t  enable double-precision floating point"
+	   " instructions\n");
   fprintf (stream, "  -mfpuda\t\t  enable double-precision assist floating "
                    "point\n\t\t\t  instructions for ARC EM\n");
 
@@ -4482,7 +4545,7 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
   create_extinst_section (&einsn);
 }
 
-static void
+static bfd_boolean
 tokenize_extregister (extRegister_t *ereg, int opertype)
 {
   char *name;
@@ -4507,20 +4570,23 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 
   if (*input_line_pointer != ',')
     {
-      as_bad (_("expected comma after register name"));
+      as_bad (_("expected comma after name"));
       ignore_rest_of_line ();
       free (name);
-      return;
+      return FALSE;
     }
   input_line_pointer++;
   number = get_absolute_expression ();
 
-  if (number < 0)
+  if ((number < 0)
+      && (opertype != EXT_AUX_REGISTER))
     {
-      as_bad (_("negative operand number %d"), number);
+      as_bad (_("%s second argument cannot be a negative number %d"),
+	      isCore_p ? "extCoreRegister's" : "extCondCode's",
+	      number);
       ignore_rest_of_line ();
       free (name);
-      return;
+      return FALSE;
     }
 
   if (isReg_p)
@@ -4533,7 +4599,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("expected comma after register number"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
 
       input_line_pointer++;
@@ -4554,7 +4620,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("invalid mode"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
       else
 	{
@@ -4572,7 +4638,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("expected comma after register mode"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
 
       input_line_pointer++;
@@ -4587,7 +4653,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("shortcut designator invalid"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return;
+	  return FALSE;
 	}
       else
 	{
@@ -4599,6 +4665,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
   ereg->name = name;
   ereg->number = number;
   ereg->imode  = imode;
+  return TRUE;
 }
 
 /* Create an extension register/condition description in the arc
@@ -4674,7 +4741,8 @@ arc_extcorereg (int opertype)
   struct arc_flag_operand *ccode;
 
   memset (&ereg, 0, sizeof (ereg));
-  tokenize_extregister (&ereg, opertype);
+  if (!tokenize_extregister (&ereg, opertype))
+    return;
 
   switch (opertype)
     {

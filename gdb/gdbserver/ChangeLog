@@ -1,3 +1,19 @@
+2017-01-09  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-aarch32-low.c (arm_breakpoint_kind_from_pc): Use
+	target_read_memory.
+	* linux-arm-low.c (get_next_pcs_read_memory_unsigned_integer): Likewise.
+	(get_next_pcs_syscall_next_pc): Likewise.
+
+2016-12-23  Luis Machado  <lgustavo@codesourcery.com>
+
+	* win32-i386-low.c: Fix incorrect reference to a couple source files.
+	* nto-x86-low.c: Likewise.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Include disable-implicit-rules.mk.
+
 2016-11-23  Pedro Alves  <palves@redhat.com>
 
 	* debug.c: Include <chrono> instead of "gdb_sys_time.h".

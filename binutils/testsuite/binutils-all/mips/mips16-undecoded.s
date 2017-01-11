@@ -1,5 +1,5 @@
 	.text
-	.set	mips3
+	.module	mips3
 	.set	mips16
 	.globl	foo
 	.ent	foo

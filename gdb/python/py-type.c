@@ -1,6 +1,6 @@
 /* Python interface to types.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "language.h"
 #include "vec.h"
 #include "typeprint.h"
+#include "py-ref.h"
 
 typedef struct pyty_type_object
 {
@@ -168,18 +169,16 @@ typy_get_code (PyObject *self, void *closure)
 static PyObject *
 convert_field (struct type *type, int field)
 {
-  PyObject *result = field_new ();
-  PyObject *arg;
+  gdbpy_ref result (field_new ());
 
-  if (!result)
+  if (result == NULL)
     return NULL;
 
-  arg = type_to_type_object (type);
+  gdbpy_ref arg (type_to_type_object (type));
   if (arg == NULL)
-    goto fail;
-  if (PyObject_SetAttrString (result, "parent_type", arg) < 0)
-    goto failarg;
-  Py_DECREF (arg);
+    return NULL;
+  if (PyObject_SetAttrString (result.get (), "parent_type", arg.get ()) < 0)
+    return NULL;
 
   if (!field_is_static (&TYPE_FIELD (type, field)))
     {
@@ -187,88 +186,79 @@ convert_field (struct type *type, int field)
 
       if (TYPE_CODE (type) == TYPE_CODE_ENUM)
 	{
-	  arg = gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type, field));
+	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type,
+								   field)));
 	  attrstring = "enumval";
 	}
       else
 	{
-	  arg = gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type, field));
+	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type,
+								  field)));
 	  attrstring = "bitpos";
 	}
 
-      if (!arg)
-	goto fail;
+      if (arg == NULL)
+	return NULL;
 
       /* At least python-2.4 had the second parameter non-const.  */
-      if (PyObject_SetAttrString (result, (char *) attrstring, arg) < 0)
-	goto failarg;
-      Py_DECREF (arg);
+      if (PyObject_SetAttrString (result.get (), (char *) attrstring,
+				  arg.get ()) < 0)
+	return NULL;
     }
 
-  arg = NULL;
+  arg.reset (NULL);
   if (TYPE_FIELD_NAME (type, field))
     {
       const char *field_name = TYPE_FIELD_NAME (type, field);
 
       if (field_name[0] != '\0')
 	{
-	  arg = PyString_FromString (TYPE_FIELD_NAME (type, field));
+	  arg.reset (PyString_FromString (TYPE_FIELD_NAME (type, field)));
 	  if (arg == NULL)
-	    goto fail;
+	    return NULL;
 	}
     }
   if (arg == NULL)
     {
-      arg = Py_None;
-      Py_INCREF (arg);
+      arg.reset (Py_None);
+      Py_INCREF (arg.get ());
     }
-  if (PyObject_SetAttrString (result, "name", arg) < 0)
-    goto failarg;
-  Py_DECREF (arg);
+  if (PyObject_SetAttrString (result.get (), "name", arg.get ()) < 0)
+    return NULL;
 
-  arg = TYPE_FIELD_ARTIFICIAL (type, field) ? Py_True : Py_False;
-  Py_INCREF (arg);
-  if (PyObject_SetAttrString (result, "artificial", arg) < 0)
-    goto failarg;
-  Py_DECREF (arg);
+  arg.reset (TYPE_FIELD_ARTIFICIAL (type, field) ? Py_True : Py_False);
+  Py_INCREF (arg.get ());
+  if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
+    return NULL;
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-    arg = field < TYPE_N_BASECLASSES (type) ? Py_True : Py_False;
+    arg.reset (field < TYPE_N_BASECLASSES (type) ? Py_True : Py_False);
   else
-    arg = Py_False;
-  Py_INCREF (arg);
-  if (PyObject_SetAttrString (result, "is_base_class", arg) < 0)
-    goto failarg;
-  Py_DECREF (arg);
+    arg.reset (Py_False);
+  Py_INCREF (arg.get ());
+  if (PyObject_SetAttrString (result.get (), "is_base_class", arg.get ()) < 0)
+    return NULL;
 
-  arg = PyLong_FromLong (TYPE_FIELD_BITSIZE (type, field));
-  if (!arg)
-    goto fail;
-  if (PyObject_SetAttrString (result, "bitsize", arg) < 0)
-    goto failarg;
-  Py_DECREF (arg);
+  arg.reset (PyLong_FromLong (TYPE_FIELD_BITSIZE (type, field)));
+  if (arg == NULL)
+    return NULL;
+  if (PyObject_SetAttrString (result.get (), "bitsize", arg.get ()) < 0)
+    return NULL;
 
   /* A field can have a NULL type in some situations.  */
   if (TYPE_FIELD_TYPE (type, field) == NULL)
     {
-      arg = Py_None;
-      Py_INCREF (arg);
+      arg.reset (Py_None);
+      Py_INCREF (arg.get ());
     }
   else
-    arg = type_to_type_object (TYPE_FIELD_TYPE (type, field));
-  if (!arg)
-    goto fail;
-  if (PyObject_SetAttrString (result, "type", arg) < 0)
-    goto failarg;
-  Py_DECREF (arg);
+    arg.reset (type_to_type_object (TYPE_FIELD_TYPE (type, field)));
+  if (arg == NULL)
+    return NULL;
+  if (PyObject_SetAttrString (result.get (), "type", arg.get ()) < 0)
+    return NULL;
 
-  return result;
-
- failarg:
-  Py_DECREF (arg);
- fail:
-  Py_DECREF (result);
-  return NULL;
+  return result.release ();
 }
 
 /* Helper function to return the name of a field, as a gdb.Field object.
@@ -298,39 +288,29 @@ field_name (struct type *type, int field)
 static PyObject *
 make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
 {
-  PyObject *item = NULL, *key = NULL, *value = NULL;
-
   switch (kind)
     {
     case iter_items:
-      key = field_name (type, i);
-      if (key == NULL)
-	goto fail;
-      value = convert_field (type, i);
-      if (value == NULL)
-	goto fail;
-      item = PyTuple_New (2);
-      if (item == NULL)
-	goto fail;
-      PyTuple_SET_ITEM (item, 0, key);
-      PyTuple_SET_ITEM (item, 1, value);
-      break;
+      {
+	gdbpy_ref key (field_name (type, i));
+	if (key == NULL)
+	  return NULL;
+	gdbpy_ref value (convert_field (type, i));
+	if (value == NULL)
+	  return NULL;
+	gdbpy_ref item (PyTuple_New (2));
+	if (item == NULL)
+	  return NULL;
+	PyTuple_SET_ITEM (item.get (), 0, key.release ());
+	PyTuple_SET_ITEM (item.get (), 1, value.release ());
+	return item.release ();
+      }
     case iter_keys:
-      item = field_name (type, i);
-      break;
+      return field_name (type, i);
     case iter_values:
-      item =  convert_field (type, i);
-      break;
-    default:
-      gdb_assert_not_reached ("invalid gdbpy_iter_kind");
+      return convert_field (type, i);
     }
-  return item;
-
- fail:
-  Py_XDECREF (key);
-  Py_XDECREF (value);
-  Py_XDECREF (item);
-  return NULL;
+  gdb_assert_not_reached ("invalid gdbpy_iter_kind");
 }
 
 /* Return a sequence of all field names, fields, or (name, field) pairs.
@@ -389,7 +369,6 @@ static PyObject *
 typy_fields (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
-  PyObject *r, *rl;
 
   if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
     return typy_fields_items (self, iter_values);
@@ -397,14 +376,11 @@ typy_fields (PyObject *self, PyObject *args)
   /* Array type.  Handle this as a special case because the common
      machinery wants struct or union or enum types.  Build a list of
      one entry which is the range for the array.  */
-  r = convert_field (type, 0);
+  gdbpy_ref r (convert_field (type, 0));
   if (r == NULL)
     return NULL;
 
-  rl = Py_BuildValue ("[O]", r);
-  Py_DECREF (r);
-
-  return rl;
+  return Py_BuildValue ("[O]", r.get ());
 }
 
 /* Return a sequence of all field names.  Each field is a gdb.Field object.  */
@@ -601,8 +577,6 @@ static PyObject *
 typy_range (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
-  PyObject *result;
-  PyObject *low_bound = NULL, *high_bound = NULL;
   /* Initialize these to appease GCC warnings.  */
   LONGEST low = 0, high = 0;
 
@@ -628,35 +602,22 @@ typy_range (PyObject *self, PyObject *args)
       break;
     }
 
-  low_bound = PyLong_FromLong (low);
-  if (!low_bound)
-    goto failarg;
+  gdbpy_ref low_bound (PyLong_FromLong (low));
+  if (low_bound == NULL)
+    return NULL;
 
-  high_bound = PyLong_FromLong (high);
-  if (!high_bound)
-    goto failarg;
+  gdbpy_ref high_bound (PyLong_FromLong (high));
+  if (high_bound == NULL)
+    return NULL;
 
-  result = PyTuple_New (2);
-  if (!result)
-    goto failarg;
+  gdbpy_ref result (PyTuple_New (2));
+  if (result == NULL)
+    return NULL;
 
-  if (PyTuple_SetItem (result, 0, low_bound) != 0)
-    {
-      Py_DECREF (result);
-      goto failarg;
-    }
-  if (PyTuple_SetItem (result, 1, high_bound) != 0)
-    {
-      Py_DECREF (high_bound);
-      Py_DECREF (result);
-      return NULL;
-    }
-  return result;
-
- failarg:
-  Py_XDECREF (high_bound);
-  Py_XDECREF (low_bound);
-  return NULL;
+  if (PyTuple_SetItem (result.get (), 0, low_bound.release ()) != 0
+      || PyTuple_SetItem (result.get (), 1, high_bound.release ()) != 0)
+    return NULL;
+  return result.release ();
 }
 
 /* Return a Type object which represents a reference to SELF.  */
@@ -871,7 +832,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 {
   int i;
   struct demangle_component *demangled;
-  struct demangle_parse_info *info = NULL;
+  std::unique_ptr<demangle_parse_info> info;
   const char *err;
   struct type *argtype;
   struct cleanup *cleanup;
@@ -899,7 +860,6 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
       return NULL;
     }
   demangled = info->tree;
-  cleanup = make_cleanup_cp_demangled_name_parse_free (info);
 
   /* Strip off component names.  */
   while (demangled->type == DEMANGLE_COMPONENT_QUAL_NAME
@@ -908,7 +868,6 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 
   if (demangled->type != DEMANGLE_COMPONENT_TEMPLATE)
     {
-      do_cleanups (cleanup);
       PyErr_SetString (PyExc_RuntimeError, _("Type is not a template."));
       return NULL;
     }
@@ -921,14 +880,12 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 
   if (! demangled)
     {
-      do_cleanups (cleanup);
       PyErr_Format (PyExc_RuntimeError, _("No argument %d in template."),
 		    argno);
       return NULL;
     }
 
   argtype = typy_lookup_type (demangled->u.s_binary.left, block);
-  do_cleanups (cleanup);
   if (! argtype)
     return NULL;
 
@@ -1087,14 +1044,13 @@ save_objfile_types (struct objfile *objfile, void *datum)
 {
   type_object *obj = (type_object *) datum;
   htab_t copied_types;
-  struct cleanup *cleanup;
 
   if (!gdb_python_initialized)
     return;
 
   /* This prevents another thread from freeing the objects we're
      operating on.  */
-  cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
 
   copied_types = create_copied_types_hash (objfile);
 
@@ -1113,8 +1069,6 @@ save_objfile_types (struct objfile *objfile, void *datum)
     }
 
   htab_delete (copied_types);
-
-  do_cleanups (cleanup);
 }
 
 static void

@@ -1,6 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -151,18 +151,6 @@ make_cleanup_freeargv (char **arg)
   return make_cleanup (do_freeargv, arg);
 }
 
-static void
-do_bfd_close_cleanup (void *arg)
-{
-  gdb_bfd_unref ((bfd *) arg);
-}
-
-struct cleanup *
-make_cleanup_bfd_unref (bfd *abfd)
-{
-  return make_cleanup (do_bfd_close_cleanup, abfd);
-}
-
 /* Helper function which does the work for make_cleanup_fclose.  */
 
 static void
@@ -218,8 +206,7 @@ do_ui_out_redirect_pop (void *arg)
 {
   struct ui_out *uiout = (struct ui_out *) arg;
 
-  if (ui_out_redirect (uiout, NULL) < 0)
-    warning (_("Cannot restore redirection of the current output protocol"));
+  uiout->redirect (NULL);
 }
 
 /* Return a new cleanup that pops the last redirection by ui_out_redirect
@@ -297,24 +284,6 @@ struct cleanup *
 make_cleanup_unpush_target (struct target_ops *ops)
 {
   return make_cleanup (do_unpush_target, ops);
-}
-
-/* Helper for make_cleanup_htab_delete compile time checking the types.  */
-
-static void
-do_htab_delete_cleanup (void *htab_voidp)
-{
-  htab_t htab = (htab_t) htab_voidp;
-
-  htab_delete (htab);
-}
-
-/* Return a new cleanup that deletes HTAB.  */
-
-struct cleanup *
-make_cleanup_htab_delete (htab_t htab)
-{
-  return make_cleanup (do_htab_delete_cleanup, htab);
 }
 
 /* Helper for make_cleanup_value_free_to_mark.  */
@@ -2034,7 +2003,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       || batch_flag
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
-      || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
+      || interp_ui_out (top_level_interpreter ())->is_mi_like_p ())
     {
       fputs_unfiltered (linebuffer, stream);
       return;

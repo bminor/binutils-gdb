@@ -1,6 +1,6 @@
 /* simulator.c -- Interface for the AArch64 simulator.
 
-   Copyright (C) 2015-2016 Free Software Foundation, Inc.
+   Copyright (C) 2015-2017 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -1659,54 +1659,33 @@ set_flags_for_add32 (sim_cpu *cpu, int32_t value1, int32_t value2)
   aarch64_set_CPSR (cpu, flags);
 }
 
+#define NEG(a) (((a) & signbit) == signbit)
+#define POS(a) (((a) & signbit) == 0)
+
 static void
 set_flags_for_add64 (sim_cpu *cpu, uint64_t value1, uint64_t value2)
 {
-  int64_t   sval1 = value1;
-  int64_t   sval2 = value2;
-  uint64_t  result = value1 + value2;
-  int64_t   sresult = sval1 + sval2;
-  uint32_t  flags = 0;
+  uint64_t result = value1 + value2;
+  uint32_t flags = 0;
+  uint64_t signbit = 1ULL << 63;
 
   if (result == 0)
     flags |= Z;
 
-  if (result & (1ULL << 63))
+  if (NEG (result))
     flags |= N;
 
-  if (sval1 < 0)
-    {
-      if (sval2 < 0)
-	{
-	  /* Negative plus a negative.  Overflow happens if
-	     the result is greater than either of the operands.  */
-	  if (sresult > sval1 || sresult > sval2)
-	    flags |= V;
-	}
-      /* else Negative plus a positive.  Overflow cannot happen.  */
-    }
-  else /* value1 is +ve.  */
-    {
-      if (sval2 < 0)
-	{
-	  /* Overflow can only occur if we computed "0 - MININT".  */
-	  if (sval1 == 0 && sval2 == (1LL << 63))
-	    flags |= V;
-	}
-      else
-	{
-	  /* Postive plus positive - overflow has happened if the
-	     result is smaller than either of the operands.  */
-	  if (result < value1 || result < value2)
-	    flags |= V | C;
-	}
-    }
+  if (   (NEG (value1) && NEG (value2))
+      || (NEG (value1) && POS (result))
+      || (NEG (value2) && POS (result)))
+    flags |= C;
+
+  if (   (NEG (value1) && NEG (value2) && POS (result))
+      || (POS (value1) && POS (value2) && NEG (result)))
+    flags |= V;
 
   aarch64_set_CPSR (cpu, flags);
 }
-
-#define NEG(a) (((a) & signbit) == signbit)
-#define POS(a) (((a) & signbit) == 0)
 
 static void
 set_flags_for_sub32 (sim_cpu *cpu, uint32_t value1, uint32_t value2)
@@ -2979,12 +2958,10 @@ do_vec_UZP (sim_cpu *cpu)
   uint64_t val_n1 = aarch64_get_vec_u64 (cpu, vn, 0);
   uint64_t val_n2 = aarch64_get_vec_u64 (cpu, vn, 1);
 
-  uint64_t val1 = 0;
-  uint64_t val2 = 0;
+  uint64_t val1;
+  uint64_t val2;
 
-  uint64_t input1 = upper ? val_n1 : val_m1;
-  uint64_t input2 = upper ? val_n2 : val_m2;
-  unsigned i;
+  uint64_t input2 = full ? val_n2 : val_m1;
 
   NYI_assert (29, 24, 0x0E);
   NYI_assert (21, 21, 0);
@@ -2992,32 +2969,68 @@ do_vec_UZP (sim_cpu *cpu)
   NYI_assert (13, 10, 6);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  switch (INSTR (23, 23))
+  switch (INSTR (23, 22))
     {
     case 0:
-      for (i = 0; i < 8; i++)
+      val1 = (val_n1 >> (upper * 8)) & 0xFFULL;
+      val1 |= (val_n1 >> ((upper * 8) + 8)) & 0xFF00ULL;
+      val1 |= (val_n1 >> ((upper * 8) + 16)) & 0xFF0000ULL;
+      val1 |= (val_n1 >> ((upper * 8) + 24)) & 0xFF000000ULL;
+
+      val1 |= (input2 << (32 - (upper * 8))) & 0xFF00000000ULL;
+      val1 |= (input2 << (24 - (upper * 8))) & 0xFF0000000000ULL;
+      val1 |= (input2 << (16 - (upper * 8))) & 0xFF000000000000ULL;
+      val1 |= (input2 << (8 - (upper * 8))) & 0xFF00000000000000ULL;
+
+      if (full)
 	{
-	  val1 |= (input1 >> (i * 8)) & (0xFFULL << (i * 8));
-	  val2 |= (input2 >> (i * 8)) & (0xFFULL << (i * 8));
+	  val2 = (val_m1 >> (upper * 8)) & 0xFFULL;
+	  val2 |= (val_m1 >> ((upper * 8) + 8)) & 0xFF00ULL;
+	  val2 |= (val_m1 >> ((upper * 8) + 16)) & 0xFF0000ULL;
+	  val2 |= (val_m1 >> ((upper * 8) + 24)) & 0xFF000000ULL;
+
+	  val2 |= (val_m2 << (32 - (upper * 8))) & 0xFF00000000ULL;
+	  val2 |= (val_m2 << (24 - (upper * 8))) & 0xFF0000000000ULL;
+	  val2 |= (val_m2 << (16 - (upper * 8))) & 0xFF000000000000ULL;
+	  val2 |= (val_m2 << (8 - (upper * 8))) & 0xFF00000000000000ULL;
 	}
       break;
 
     case 1:
-      for (i = 0; i < 4; i++)
+      val1 = (val_n1 >> (upper * 16)) & 0xFFFFULL;
+      val1 |= (val_n1 >> ((upper * 16) + 16)) & 0xFFFF0000ULL;
+
+      val1 |= (input2 << (32 - (upper * 16))) & 0xFFFF00000000ULL;;
+      val1 |= (input2 << (16 - (upper * 16))) & 0xFFFF000000000000ULL;
+
+      if (full)
 	{
-	  val1 |= (input1 >> (i * 16)) & (0xFFFFULL << (i * 16));
-	  val2 |= (input2 >> (i * 16)) & (0xFFFFULL << (i * 16));
+	  val2 = (val_m1 >> (upper * 16)) & 0xFFFFULL;
+	  val2 |= (val_m1 >> ((upper * 16) + 16)) & 0xFFFF0000ULL;
+
+	  val2 |= (val_m2 << (32 - (upper * 16))) & 0xFFFF00000000ULL;
+	  val2 |= (val_m2 << (16 - (upper * 16))) & 0xFFFF000000000000ULL;
 	}
       break;
 
     case 2:
-      val1 = ((input1 & 0xFFFFFFFF) | ((input1 >> 32) & 0xFFFFFFFF00000000ULL));
-      val2 = ((input2 & 0xFFFFFFFF) | ((input2 >> 32) & 0xFFFFFFFF00000000ULL));
+      val1 = (val_n1 >> (upper * 32)) & 0xFFFFFFFF;
+      val1 |= (input2 << (32 - (upper * 32))) & 0xFFFFFFFF00000000ULL;
+
+      if (full)
+	{
+	  val2 = (val_m1 >> (upper * 32)) & 0xFFFFFFFF;
+	  val2 |= (val_m2 << (32 - (upper * 32))) & 0xFFFFFFFF00000000ULL;
+	}
+      break;
 
     case 3:
-      val1 = input1;
-      val2 = input2;
-	   break;
+      if (! full)
+	HALT_UNALLOC;
+
+      val1 = upper ? val_n2 : val_n1;
+      val2 = upper ? val_m2 : val_m1;
+      break;
     }
 
   aarch64_set_vec_u64 (cpu, vd, 0, val1);
@@ -3242,7 +3255,8 @@ do_vec_MOV_immediate (sim_cpu *cpu)
     case 0x8: /* 16-bit, no shift.  */
       for (i = 0; i < (full ? 8 : 4); i++)
 	aarch64_set_vec_u16 (cpu, vd, i, val);
-      /* Fall through.  */
+      break;
+
     case 0xd: /* 32-bit, mask shift by 16.  */
       val <<= 8;
       val |= 0xFF;
@@ -3745,15 +3759,15 @@ do_vec_mul (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      DO_VEC_WIDENING_MUL (full ? 16 : 8, uint16_t, u8, u16);
+      DO_VEC_WIDENING_MUL (full ? 16 : 8, uint8_t, u8, u8);
       return;
 
     case 1:
-      DO_VEC_WIDENING_MUL (full ? 8 : 4, uint32_t, u16, u32);
+      DO_VEC_WIDENING_MUL (full ? 8 : 4, uint16_t, u16, u16);
       return;
 
     case 2:
-      DO_VEC_WIDENING_MUL (full ? 4 : 2, uint64_t, u32, u64);
+      DO_VEC_WIDENING_MUL (full ? 4 : 2, uint32_t, u32, u32);
       return;
 
     case 3:
@@ -3852,13 +3866,13 @@ do_vec_MLA (sim_cpu *cpu)
 static float
 fmaxnm (float a, float b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a > b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -3866,13 +3880,13 @@ fmaxnm (float a, float b)
 static float
 fminnm (float a, float b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a < b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -3880,13 +3894,13 @@ fminnm (float a, float b)
 static double
 dmaxnm (double a, double b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a > b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -3894,13 +3908,13 @@ dmaxnm (double a, double b)
 static double
 dminnm (double a, double b)
 {
-  if (fpclassify (a) == FP_NORMAL)
+  if (! isnan (a))
     {
-      if (fpclassify (b) == FP_NORMAL)
+      if (! isnan (b))
 	return a < b ? a : b;
       return a;
     }
-  else if (fpclassify (b) == FP_NORMAL)
+  else if (! isnan (b))
     return b;
   return a;
 }
@@ -6367,25 +6381,25 @@ do_vec_MLS (sim_cpu *cpu)
     case 0:
       for (i = 0; i < (full ? 16 : 8); i++)
 	aarch64_set_vec_u8 (cpu, vd, i,
-			    (aarch64_get_vec_u8 (cpu, vn, i)
-			     * aarch64_get_vec_u8 (cpu, vm, i))
-			    - aarch64_get_vec_u8 (cpu, vd, i));
+			    aarch64_get_vec_u8 (cpu, vd, i)
+			    - (aarch64_get_vec_u8 (cpu, vn, i)
+			       * aarch64_get_vec_u8 (cpu, vm, i)));
       return;
 
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
 	aarch64_set_vec_u16 (cpu, vd, i,
-			     (aarch64_get_vec_u16 (cpu, vn, i)
-			      * aarch64_get_vec_u16 (cpu, vm, i))
-			     - aarch64_get_vec_u16 (cpu, vd, i));
+			     aarch64_get_vec_u16 (cpu, vd, i)
+			     - (aarch64_get_vec_u16 (cpu, vn, i)
+				* aarch64_get_vec_u16 (cpu, vm, i)));
       return;
 
     case 2:
       for (i = 0; i < (full ? 4 : 2); i++)
 	aarch64_set_vec_u32 (cpu, vd, i,
-			     (aarch64_get_vec_u32 (cpu, vn, i)
-			      * aarch64_get_vec_u32 (cpu, vm, i))
-			     - aarch64_get_vec_u32 (cpu, vd, i));
+			     aarch64_get_vec_u32 (cpu, vd, i)
+			     - (aarch64_get_vec_u32 (cpu, vn, i)
+				* aarch64_get_vec_u32 (cpu, vm, i)));
       return;
 
     default:
@@ -7484,9 +7498,11 @@ dexSimpleFPCondSelect (sim_cpu *cpu)
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
-    aarch64_set_FP_double (cpu, sd, set ? sn : sm);
+    aarch64_set_FP_double (cpu, sd, (set ? aarch64_get_FP_double (cpu, sn)
+				     : aarch64_get_FP_double (cpu, sm)));
   else
-    aarch64_set_FP_float (cpu, sd, set ? sn : sm);
+    aarch64_set_FP_float (cpu, sd, (set ? aarch64_get_FP_float (cpu, sn)
+				    : aarch64_get_FP_float (cpu, sm)));
 }
 
 /* Store 32 bit unscaled signed 9 bit.  */
@@ -7497,8 +7513,8 @@ fsturs (sim_cpu *cpu, int32_t offset)
   unsigned int st = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_set_mem_u32 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
-		       aarch64_get_vec_u32 (cpu, rn, 0));
+  aarch64_set_mem_u32 (cpu, aarch64_get_reg_u64 (cpu, rn, 1) + offset,
+		       aarch64_get_vec_u32 (cpu, st, 0));
 }
 
 /* Store 64 bit unscaled signed 9 bit.  */
@@ -7509,8 +7525,8 @@ fsturd (sim_cpu *cpu, int32_t offset)
   unsigned int st = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_set_mem_u64 (cpu, aarch64_get_reg_u64 (cpu, st, 1) + offset,
-		       aarch64_get_vec_u64 (cpu, rn, 0));
+  aarch64_set_mem_u64 (cpu, aarch64_get_reg_u64 (cpu, rn, 1) + offset,
+		       aarch64_get_vec_u64 (cpu, st, 0));
 }
 
 /* Store 128 bit unscaled signed 9 bit.  */
@@ -7522,9 +7538,9 @@ fsturq (sim_cpu *cpu, int32_t offset)
   FRegister a;
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_get_FP_long_double (cpu, rn, & a);
+  aarch64_get_FP_long_double (cpu, st, & a);
   aarch64_set_mem_long_double (cpu,
-			       aarch64_get_reg_u64 (cpu, st, 1)
+			       aarch64_get_reg_u64 (cpu, rn, 1)
 			       + offset, a);
 }
 
@@ -8138,6 +8154,17 @@ static const float  FLOAT_LONG_MIN  = (float)  LONG_MIN;
 static const double DOUBLE_LONG_MAX = (double) LONG_MAX;
 static const double DOUBLE_LONG_MIN = (double) LONG_MIN;
 
+#define UINT_MIN 0
+#define ULONG_MIN 0
+static const float  FLOAT_UINT_MAX   = (float)  UINT_MAX;
+static const float  FLOAT_UINT_MIN   = (float)  UINT_MIN;
+static const double DOUBLE_UINT_MAX  = (double) UINT_MAX;
+static const double DOUBLE_UINT_MIN  = (double) UINT_MIN;
+static const float  FLOAT_ULONG_MAX  = (float)  ULONG_MAX;
+static const float  FLOAT_ULONG_MIN  = (float)  ULONG_MIN;
+static const double DOUBLE_ULONG_MAX = (double) ULONG_MAX;
+static const double DOUBLE_ULONG_MIN = (double) ULONG_MIN;
+
 /* Check for FP exception conditions:
      NaN raises IO
      Infinity raises IO
@@ -8283,7 +8310,7 @@ do_fcvtzu (sim_cpu *cpu)
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
 	  if (value != (1UL << 63))
-	    RAISE_EXCEPTIONS (d, value, DOUBLE, LONG);
+	    RAISE_EXCEPTIONS (d, value, DOUBLE, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
 	}
@@ -8294,7 +8321,7 @@ do_fcvtzu (sim_cpu *cpu)
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
 	  if (value != (1UL << 63))
-	    RAISE_EXCEPTIONS (f, value, FLOAT, LONG);
+	    RAISE_EXCEPTIONS (f, value, FLOAT, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
 	}
@@ -8311,7 +8338,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  value = (uint32_t) d;
 	  /* Do not raise an exception if we have reached UINT_MAX.  */
 	  if (value != (1UL << 31))
-	    RAISE_EXCEPTIONS (d, value, DOUBLE, INT);
+	    RAISE_EXCEPTIONS (d, value, DOUBLE, UINT);
 	}
       else
 	{
@@ -8320,7 +8347,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  value = (uint32_t) f;
 	  /* Do not raise an exception if we have reached UINT_MAX.  */
 	  if (value != (1UL << 31))
-	    RAISE_EXCEPTIONS (f, value, FLOAT, INT);
+	    RAISE_EXCEPTIONS (f, value, FLOAT, UINT);
 	}
 
       aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
@@ -8489,8 +8516,22 @@ set_flags_for_float_compare (sim_cpu *cpu, float fvalue1, float fvalue2)
 {
   uint32_t flags;
 
+  /* FIXME: Add exception raising.  */
   if (isnan (fvalue1) || isnan (fvalue2))
     flags = C|V;
+  else if (isinf (fvalue1) && isinf (fvalue2))
+    {
+      /* Subtracting two infinities may give a NaN.  We only need to compare
+	 the signs, which we can get from isinf.  */
+      int result = isinf (fvalue1) - isinf (fvalue2);
+
+      if (result == 0)
+	flags = Z|C;
+      else if (result < 0)
+	flags = N;
+      else /* (result > 0).  */
+	flags = C;
+    }
   else
     {
       float result = fvalue1 - fvalue2;
@@ -8561,8 +8602,22 @@ set_flags_for_double_compare (sim_cpu *cpu, double dval1, double dval2)
 {
   uint32_t flags;
 
+  /* FIXME: Add exception raising.  */
   if (isnan (dval1) || isnan (dval2))
     flags = C|V;
+  else if (isinf (dval1) && isinf (dval2))
+    {
+      /* Subtracting two infinities may give a NaN.  We only need to compare
+	 the signs, which we can get from isinf.  */
+      int result = isinf (dval1) - isinf (dval2);
+
+      if (result == 0)
+	flags = Z|C;
+      else if (result < 0)
+	flags = N;
+      else /* (result > 0).  */
+	flags = C;
+    }
   else
     {
       double result = dval1 - dval2;
@@ -13353,7 +13408,7 @@ tbnz (sim_cpu *cpu, uint32_t  pos, int32_t offset)
   unsigned rt = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (aarch64_get_reg_u64 (cpu, rt, NO_SP) & (1 << pos))
+  if (aarch64_get_reg_u64 (cpu, rt, NO_SP) & (((uint64_t) 1) << pos))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
 
@@ -13364,7 +13419,7 @@ tbz (sim_cpu *cpu, uint32_t  pos, int32_t offset)
   unsigned rt = INSTR (4, 0);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (!(aarch64_get_reg_u64 (cpu, rt, NO_SP) & (1 << pos)))
+  if (!(aarch64_get_reg_u64 (cpu, rt, NO_SP) & (((uint64_t) 1) << pos)))
     aarch64_set_next_PC_by_offset (cpu, offset);
 }
 
@@ -13407,7 +13462,7 @@ dexTestBranchImmediate (sim_cpu *cpu)
      instr[18,5]  = simm14 : signed offset counted in words
      instr[4,0]   = uimm5  */
 
-  uint32_t pos = ((INSTR (31, 31) << 4) | INSTR (23, 19));
+  uint32_t pos = ((INSTR (31, 31) << 5) | INSTR (23, 19));
   int32_t offset = simm32 (aarch64_get_instr (cpu), 18, 5) << 2;
 
   NYI_assert (30, 25, 0x1b);

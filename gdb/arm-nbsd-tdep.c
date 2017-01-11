@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/arm.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -71,17 +71,6 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
 }
   
 static void
-arm_netbsd_aout_init_abi (struct gdbarch_info info, 
-			  struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  arm_netbsd_init_abi_common (info, gdbarch);
-  if (tdep->fp_model == ARM_FLOAT_AUTO)
-    tdep->fp_model = ARM_FLOAT_SOFT_FPA;
-}
-
-static void
 arm_netbsd_elf_init_abi (struct gdbarch_info info,
 			 struct gdbarch *gdbarch)
 {
@@ -96,26 +85,12 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
-static enum gdb_osabi
-arm_netbsd_aout_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "a.out-arm-netbsd") == 0)
-    return GDB_OSABI_NETBSD_AOUT;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_arm_netbsd_tdep;
 
 void
 _initialize_arm_netbsd_tdep (void)
 {
-  gdbarch_register_osabi_sniffer (bfd_arch_arm, bfd_target_aout_flavour,
-				  arm_netbsd_aout_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NETBSD_AOUT,
-                          arm_netbsd_aout_init_abi);
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NETBSD,
                           arm_netbsd_elf_init_abi);
 }

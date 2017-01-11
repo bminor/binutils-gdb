@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -648,6 +648,32 @@ static const bfd_byte elf_i386_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+/* .eh_frame covering the .plt.got section.  */
+
+static const bfd_byte elf_i386_eh_frame_plt_got[] =
+{
+#define PLT_GOT_FDE_LENGTH		16
+  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
+  0, 0, 0, 0,			/* CIE ID */
+  1,				/* CIE version */
+  'z', 'R', 0,			/* Augmentation string */
+  1,				/* Code alignment factor */
+  0x7c,				/* Data alignment factor */
+  8,				/* Return address column */
+  1,				/* Augmentation size */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+  DW_CFA_def_cfa, 4, 4,		/* DW_CFA_def_cfa: r4 (esp) ofs 4 */
+  DW_CFA_offset + 8, 1,		/* DW_CFA_offset: r8 (eip) at cfa-4 */
+  DW_CFA_nop, DW_CFA_nop,
+
+  PLT_GOT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
+  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
+  0, 0, 0, 0,			/* the start of .plt.got goes here */
+  0, 0, 0, 0,			/* .plt.got size goes here */
+  0,				/* Augmentation size */
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+};
+
 struct elf_i386_plt_layout
 {
   /* The first entry in an absolute procedure linkage table looks like this.  */
@@ -679,6 +705,10 @@ struct elf_i386_plt_layout
   /* .eh_frame covering the .plt section.  */
   const bfd_byte *eh_frame_plt;
   unsigned int eh_frame_plt_size;
+
+  /* .eh_frame covering the .plt.got section.  */
+  const bfd_byte *eh_frame_plt_got;
+  unsigned int eh_frame_plt_got_size;
 };
 
 #define GET_PLT_ENTRY_SIZE(abfd) \
@@ -701,6 +731,8 @@ static const struct elf_i386_plt_layout elf_i386_plt =
     elf_i386_pic_plt_entry,             /* pic_plt_entry */
     elf_i386_eh_frame_plt,              /* eh_frame_plt */
     sizeof (elf_i386_eh_frame_plt),     /* eh_frame_plt_size */
+    elf_i386_eh_frame_plt_got,          /* eh_frame_plt_got */
+    sizeof (elf_i386_eh_frame_plt_got), /* eh_frame_plt_got_size */
   };
 
 
@@ -848,10 +880,9 @@ struct elf_i386_link_hash_table
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *interp;
-  asection *sdynbss;
-  asection *srelbss;
   asection *plt_eh_frame;
   asection *plt_got;
+  asection *plt_got_eh_frame;
 
   union
   {
@@ -1084,29 +1115,6 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       htab->interp = s;
     }
 
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!htab->sdynbss)
-    abort ();
-
-  if (bfd_link_executable (info))
-    {
-      /* Always allow copy relocs for building executables.  */
-      asection *s = bfd_get_linker_section (dynobj, ".rel.bss");
-      if (s == NULL)
-	{
-	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
-	  s = bfd_make_section_anyway_with_flags (dynobj,
-						  ".rel.bss",
-						  (bed->dynamic_sec_flags
-						   | SEC_READONLY));
-	  if (s == NULL
-	      || ! bfd_set_section_alignment (dynobj, s,
-					      bed->s->log_file_align))
-	    return FALSE;
-	}
-      htab->srelbss = s;
-    }
-
   if (get_elf_i386_backend_data (dynobj)->is_vxworks
       && !elf_vxworks_create_dynamic_sections (dynobj, info,
 					       &htab->srelplt2))
@@ -1193,7 +1201,8 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      dir->ref_dynamic |= ind->ref_dynamic;
+      if (dir->versioned != versioned_hidden)
+	dir->ref_dynamic |= ind->ref_dynamic;
       dir->ref_regular |= ind->ref_regular;
       dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
       dir->needs_plt |= ind->needs_plt;
@@ -2371,6 +2380,24 @@ do_size:
 					     htab->plt_got,
 					     plt_got_align))
 	    goto error_return;
+
+	  if (!info->no_ld_generated_unwind_info
+	      && htab->plt_got_eh_frame == NULL
+	      && get_elf_i386_backend_data (abfd)->plt->eh_frame_plt_got != NULL)
+	    {
+	      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+				| SEC_HAS_CONTENTS | SEC_IN_MEMORY
+				| SEC_LINKER_CREATED);
+	      htab->plt_got_eh_frame
+		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_got_eh_frame == NULL
+		  || !bfd_set_section_alignment (htab->elf.dynobj,
+						 htab->plt_got_eh_frame,
+						 2))
+		goto error_return;
+	    }
 	}
 
       if (r_type == R_386_GOT32X
@@ -2449,7 +2476,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h)
 {
   struct elf_i386_link_hash_table *htab;
-  asection *s;
+  asection *s, *srel;
   struct elf_i386_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
@@ -2609,13 +2636,21 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_386_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rel);
+      srel->size += sizeof (Elf32_External_Rel);
       h->needs_copy = 1;
     }
-
-  s = htab->sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -3395,13 +3430,22 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	htab->elf.sgotplt->size = 0;
     }
 
+  if (_bfd_elf_eh_frame_present (info))
+    {
+      if (htab->plt_eh_frame != NULL
+	  && htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && !bfd_is_abs_section (htab->elf.splt->output_section))
+	htab->plt_eh_frame->size
+	  = get_elf_i386_backend_data (output_bfd)->plt->eh_frame_plt_size;
 
-  if (htab->plt_eh_frame != NULL
-      && htab->elf.splt != NULL
-      && htab->elf.splt->size != 0
-      && !bfd_is_abs_section (htab->elf.splt->output_section)
-      && _bfd_elf_eh_frame_present (info))
-    htab->plt_eh_frame->size = sizeof (elf_i386_eh_frame_plt);
+      if (htab->plt_got_eh_frame != NULL
+	  && htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && !bfd_is_abs_section (htab->plt_got->output_section))
+	htab->plt_got_eh_frame->size
+	  = get_elf_i386_backend_data (output_bfd)->plt->eh_frame_plt_got_size;
+    }
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -3430,7 +3474,9 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	       || s == htab->elf.igotplt
 	       || s == htab->plt_got
 	       || s == htab->plt_eh_frame
-	       || s == htab->sdynbss)
+	       || s == htab->plt_got_eh_frame
+	       || s == htab->elf.sdynbss
+	       || s == htab->elf.sdynrelro)
 	{
 	  /* Strip these too.  */
 	}
@@ -3483,10 +3529,22 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   if (htab->plt_eh_frame != NULL
       && htab->plt_eh_frame->contents != NULL)
     {
-      memcpy (htab->plt_eh_frame->contents, elf_i386_eh_frame_plt,
-	      sizeof (elf_i386_eh_frame_plt));
+      memcpy (htab->plt_eh_frame->contents,
+	      get_elf_i386_backend_data (output_bfd)->plt->eh_frame_plt,
+	      htab->plt_eh_frame->size);
       bfd_put_32 (dynobj, htab->elf.splt->size,
 		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
+    }
+
+  if (htab->plt_got_eh_frame != NULL
+      && htab->plt_got_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_got_eh_frame->contents,
+	      get_elf_i386_backend_data (output_bfd)->plt->eh_frame_plt_got,
+	      htab->plt_got_eh_frame->size);
+      bfd_put_32 (dynobj, htab->plt_got->size,
+		  (htab->plt_got_eh_frame->contents
+		   + PLT_FDE_LEN_OFFSET));
     }
 
   if (htab->elf.dynamic_sections_created)
@@ -5589,20 +5647,26 @@ do_glob_dat:
   if (h->needs_copy)
     {
       Elf_Internal_Rela rel;
+      asection *s;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || htab->elf.srelbss == NULL
+	  || htab->elf.sreldynrelro == NULL)
 	abort ();
 
       rel.r_offset = (h->root.u.def.value
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_386_COPY);
-      elf_append_rel (output_bfd, htab->srelbss, &rel);
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
+      elf_append_rel (output_bfd, s, &rel);
     }
 
   return TRUE;
@@ -5892,6 +5956,33 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
+  /* Adjust .eh_frame for .plt.got section.  */
+  if (htab->plt_got_eh_frame != NULL
+      && htab->plt_got_eh_frame->contents != NULL)
+    {
+      if (htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && (htab->plt_got->flags & SEC_EXCLUDE) == 0
+	  && htab->plt_got->output_section != NULL
+	  && htab->plt_got_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->plt_got->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_got_eh_frame->output_section->vma
+				   + htab->plt_got_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_got_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_got_eh_frame,
+						 htab->plt_got_eh_frame->contents))
+	    return FALSE;
+	}
+    }
+
   if (htab->elf.sgot && htab->elf.sgot->size > 0)
     elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize = 4;
 
@@ -6053,6 +6144,7 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_extern_protected_data 1
 #define elf_backend_caches_rawsize	1
+#define elf_backend_want_dynrelro	1
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel
@@ -6434,6 +6526,8 @@ static const struct elf_i386_plt_layout elf_i386_nacl_plt =
     elf_i386_nacl_pic_plt_entry,	/* pic_plt_entry */
     elf_i386_nacl_eh_frame_plt,		/* eh_frame_plt */
     sizeof (elf_i386_nacl_eh_frame_plt),/* eh_frame_plt_size */
+    NULL,				/* eh_frame_plt_got */
+    0,					/* eh_frame_plt_got_size */
   };
 
 static const struct elf_i386_backend_data elf_i386_nacl_arch_bed =

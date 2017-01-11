@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARM
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -116,6 +116,7 @@ struct opcode16
    %<bitfield>G         print as an iWMMXt general purpose or control register
    %<bitfield>D		print as a NEON D register
    %<bitfield>Q		print as a NEON Q register
+   %<bitfield>V		print as a NEON D or Q register
    %<bitfield>E		print a quarter-float immediate value
 
    %y<code>		print a single precision VFP reg.
@@ -882,6 +883,28 @@ static const struct opcode32 coprocessor_opcodes[] =
     0xfc400000, 0xfff00000,
     "mcrr2%c\t%8-11d, %4-7d, %12-15R, %16-19R, cr%0-3d"},
 
+  /* ARMv8.3 AdvSIMD instructions in the space of coprocessor 8.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfc800800, 0xfeb00f10, "vcadd%c.f16\t%12-15,22V, %16-19,7V, %0-3,5V, #%24?29%24'70"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfc900800, 0xfeb00f10, "vcadd%c.f32\t%12-15,22V, %16-19,7V, %0-3,5V, #%24?29%24'70"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfc200800, 0xff300f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3,5V, #%23'90"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfd200800, 0xff300f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3,5V, #%23?21%23?780"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfc300800, 0xff300f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5V, #%23'90"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfd300800, 0xff300f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5V, #%23?21%23?780"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfe000800, 0xfea00f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3D[%5?10], #%20'90"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfe200800, 0xfea00f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3D[%5?10], #%20?21%23?780"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfe800800, 0xfea00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20'90"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0xfea00800, 0xfea00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20?21%23?780"},
+
   /* V5 coprocessor instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
     0xfc100000, 0xfe100000, "ldc2%22'l%c\t%8-11d, cr%12-15d, %A"},
@@ -970,6 +993,10 @@ static const struct opcode32 coprocessor_opcodes[] =
     0x0eb109c0, 0x0fbf0fd0, "vsqrt%c.f16\t%y1, %y0"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
     0x0e300940, 0x0fb00f50, "vsub%c.f16\t%y1, %y2, %y0"},
+
+  /* ARMv8.3 javascript conversion instruction.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
+    0x0eb90bc0, 0x0fbf0fd0, "vjcvt%c.s32.f64\t%y1, %z0"},
 
   {ARM_FEATURE_CORE_LOW (0), 0, 0, 0}
 };
@@ -3669,10 +3696,15 @@ print_insn_coprocessor (bfd_vma pc,
 			  }
 			func (stream, "%s", arm_regnames[value]);
 			break;
+		      case 'V':
+			if (given & (1 << 6))
+			  goto Q;
+			/* FALLTHROUGH */
 		      case 'D':
 			func (stream, "d%ld", value);
 			break;
 		      case 'Q':
+		      Q:
 			if (value & 1)
 			  func (stream, "<illegal reg q%ld.5>", value >> 1);
 			else
@@ -5727,7 +5759,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      if (off || !U)
 			{
 			  func (stream, ", #%c%u", U ? '+' : '-', off * 4);
-			  value_in_comment = off * 4 * U ? 1 : -1;
+			  value_in_comment = (off && U) ? 1 : -1;
 			}
 		      func (stream, "]");
 		      if (W)
@@ -5739,7 +5771,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      if (W)
 			{
 			  func (stream, "#%c%u", U ? '+' : '-', off * 4);
-			  value_in_comment = off * 4 * U ? 1 : -1;
+			  value_in_comment = (off && U) ? 1 : -1;
 			}
 		      else
 			{

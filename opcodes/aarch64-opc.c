@@ -1,5 +1,5 @@
 /* aarch64-opc.c -- AArch64 opcode support.
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -711,6 +711,7 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
      First 3 fields:
      Lower bound, higher bound, unused.  */
 
+  {0, 15, 0, "CR",       OQK_VALUE_IN_RANGE},
   {0,  7, 0, "imm_0_7" , OQK_VALUE_IN_RANGE},
   {0, 15, 0, "imm_0_15", OQK_VALUE_IN_RANGE},
   {0, 31, 0, "imm_0_31", OQK_VALUE_IN_RANGE},
@@ -2418,16 +2419,6 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	}
       break;
 
-    case AARCH64_OPND_CLASS_CP_REG:
-      /* Cn or Cm: 4-bit opcode field named for historical reasons.
-	 valid range: C0 - C15.  */
-      if (opnd->reg.regno > 15)
-	{
-	  set_regno_out_of_range_error (mismatch_detail, idx, 0, 15);
-	  return 0;
-	}
-      break;
-
     case AARCH64_OPND_CLASS_SYSTEM:
       switch (type)
 	{
@@ -3187,9 +3178,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		opnd->reglane.index);
       break;
 
-    case AARCH64_OPND_Cn:
-    case AARCH64_OPND_Cm:
-      snprintf (buf, size, "C%d", opnd->reg.regno);
+    case AARCH64_OPND_CRn:
+    case AARCH64_OPND_CRm:
+      snprintf (buf, size, "C%" PRIi64, opnd->imm.value);
       break;
 
     case AARCH64_OPND_IDX:

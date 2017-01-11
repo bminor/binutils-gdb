@@ -1,6 +1,6 @@
 // script_test_2.cc -- linker script test 2 for gold  -*- C++ -*-
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
+// Copyright (C) 2008-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -42,21 +42,19 @@ int
 main(int, char**)
 {
   assert(reinterpret_cast<uintptr_t>(start_test_area) == 0x20000001);
-  assert(reinterpret_cast<uintptr_t>(start_test_area_1) == 0x20000010);
+  assert(reinterpret_cast<uintptr_t>(start_test_area_1) == 0x20000020);
 
-  // We should see the string from script_test_2b.o next.  The
-  // subalign should move it up to 0x20000020.
-  for (int i = 0; i < 16; ++i)
-    assert(start_test_area_1[i] == 0);
-  assert(strcmp(start_test_area_1 + 16, "test bb") == 0);
+  assert(strcmp(start_test_area_1, "test bb") == 0);
 
   // Next the string from script_test_2a.o, after the subalign.
-  for (int i = 16 + 7; i < 48; ++i)
+  for (int i = 7; i < 32; ++i)
     assert(start_test_area_1[i] == 0);
-  assert(strcmp(start_test_area_1 + 48, "test aa") == 0);
+  assert(strcmp(start_test_area_1 + 32, "test aa") == 0);
 
-  // Move four bytes forward to start_data.
-  assert(reinterpret_cast<uintptr_t>(start_test_area_1 + 48 + 8 + 4)
+  // Skip to start_data at relative offset 60.
+  for (int i = 32 + 7; i < 60; ++i)
+    assert(start_test_area_1[i] == 0);
+  assert(reinterpret_cast<uintptr_t>(start_test_area_1 + 60)
 	 == reinterpret_cast<uintptr_t>(start_data));
   assert(memcmp(start_data, "\1\2\0\4\0\0\0\010\0\0\0\0\0\0\0", 15) == 0
 	 || memcmp(start_data, "\1\0\2\0\0\0\4\0\0\0\0\0\0\0\010", 15) == 0);

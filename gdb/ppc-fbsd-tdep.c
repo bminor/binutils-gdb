@@ -1,6 +1,6 @@
 /* Target-dependent code for PowerPC systems running FreeBSD.
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -343,11 +343,10 @@ void _initialize_ppcfbsd_tdep (void);
 void
 _initialize_ppcfbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_FREEBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_FREEBSD,
 			  ppcfbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc64,
-			  GDB_OSABI_FREEBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc64, GDB_OSABI_FREEBSD,
 			  ppcfbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_FREEBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_FREEBSD,
 			  ppcfbsd_init_abi);
 }

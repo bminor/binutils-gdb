@@ -1,6 +1,6 @@
 // elfcpp.h -- main header file for elfcpp    -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
@@ -268,6 +268,7 @@ enum EM
   EM_UNICORE = 110,
   EM_ALTERA_NIOS2 = 113,
   EM_CRX = 114,
+  EM_TI_PRU = 144,
   EM_AARCH64 = 183,
   EM_TILEGX = 191,
   // The Morph MT.

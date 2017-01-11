@@ -1,5 +1,5 @@
 /* DWARF 2 support.
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -2336,9 +2336,15 @@ lookup_address_in_function_table (struct comp_unit *unit,
   bfd_size_type low, high, mid, first;
   struct arange *arange;
 
+  if (number_of_functions == 0)
+    return FALSE;
+
   if (!build_lookup_funcinfo_table (unit))
     return FALSE;
 
+  if (unit->lookup_funcinfo_table[number_of_functions - 1].high_addr < addr)
+    return FALSE;
+  
   /* Find the first function in the lookup table which may contain the
      specified address.  */
   low = 0;

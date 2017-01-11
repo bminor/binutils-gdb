@@ -1,6 +1,6 @@
 /* YACC parser for C++ names, for GDB.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    Parts of the lexer are based on c-exp.y from GDB.
 
@@ -1999,29 +1999,19 @@ cp_comp_to_string (struct demangle_component *result, int estimated_len)
 			       &err);
 }
 
-/* A convenience function to allocate and initialize a new struct
-   demangled_parse_info.  */
+/* Constructor for demangle_parse_info.  */
 
-struct demangle_parse_info *
-cp_new_demangle_parse_info (void)
+demangle_parse_info::demangle_parse_info ()
+: info (NULL),
+  tree (NULL)
 {
-  struct demangle_parse_info *info;
-
-  info = XNEW (struct demangle_parse_info);
-  info->info = NULL;
-  info->tree = NULL;
-  obstack_init (&info->obstack);
-
-  return info;
+  obstack_init (&obstack);
 }
 
-/* Free any memory associated with the given PARSE_INFO.  */
+/* Destructor for demangle_parse_info.  */
 
-void
-cp_demangled_name_parse_free (struct demangle_parse_info *parse_info)
+demangle_parse_info::~demangle_parse_info ()
 {
-  struct demangle_info *info = parse_info->info;
-
   /* Free any allocated chunks of memory for the parse.  */
   while (info != NULL)
     {
@@ -2032,15 +2022,11 @@ cp_demangled_name_parse_free (struct demangle_parse_info *parse_info)
     }
 
   /* Free any memory allocated during typedef replacement.  */
-  obstack_free (&parse_info->obstack, NULL);
-
-  /* Free the parser info.  */
-  free (parse_info);
+  obstack_free (&obstack, NULL);
 }
 
 /* Merge the two parse trees given by DEST and SRC.  The parse tree
    in SRC is attached to DEST at the node represented by TARGET.
-   SRC is then freed.
 
    NOTE 1: Since there is no API to merge obstacks, this function does
    even attempt to try it.  Fortunately, we do not (yet?) need this ability.
@@ -2067,9 +2053,6 @@ cp_merge_demangle_parse_infos (struct demangle_parse_info *dest,
   /* Clear the (pointer to) SRC's parse data so that it is not freed when
      cp_demangled_parse_info_free is called.  */
   src->info = NULL;
-
-  /* Free SRC.  */
-  cp_demangled_name_parse_free (src);
 }
 
 /* Convert a demangled name to a demangle_component tree.  On success,
@@ -2078,11 +2061,10 @@ cp_merge_demangle_parse_infos (struct demangle_parse_info *dest,
    returned, and an error message will be set in *ERRMSG (which does
    not need to be freed).  */
 
-struct demangle_parse_info *
+struct std::unique_ptr<demangle_parse_info>
 cp_demangled_name_to_comp (const char *demangled_name, const char **errmsg)
 {
   static char errbuf[60];
-  struct demangle_parse_info *result;
 
   prev_lexptr = lexptr = demangled_name;
   error_lexptr = NULL;
@@ -2090,7 +2072,7 @@ cp_demangled_name_to_comp (const char *demangled_name, const char **errmsg)
 
   demangle_info = allocate_info ();
 
-  result = cp_new_demangle_parse_info ();
+  std::unique_ptr<demangle_parse_info> result (new demangle_parse_info);
   result->info = demangle_info;
 
   if (yyparse ())
@@ -2102,7 +2084,6 @@ cp_demangled_name_to_comp (const char *demangled_name, const char **errmsg)
 	  strcat (errbuf, "'");
 	  *errmsg = errbuf;
 	}
-      cp_demangled_name_parse_free (result);
       return NULL;
     }
 

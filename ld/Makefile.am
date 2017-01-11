@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -88,13 +88,6 @@ TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 POD2MAN = pod2man --center="GNU Development Tools" \
 	--release="binutils-$(VERSION)" --section=1
 
-#stuff for self hosting (can be overridden in config file).
-HOSTING_CRT0 = @HOSTING_CRT0@
-HOSTING_SCRT0 = @HOSTING_SCRT0@
-HOSTING_LIBS = @HOSTING_LIBS@
-HOSTING_SLIBS = @HOSTING_SLIBS@
-HOSTING_EMU = -m $(EMUL)
-
 # Setup the testing framework, if you have one
 EXPECT = expect
 RUNTEST = runtest
@@ -171,6 +164,7 @@ ALL_EMULATION_SOURCES = \
 	earcelf.c \
 	earcelf_prof.c \
 	earclinux.c \
+	earclinux_nps.c \
 	earclinux_prof.c \
 	earm_epoc_pe.c \
 	earm_wince_pe.c \
@@ -179,6 +173,7 @@ ALL_EMULATION_SOURCES = \
 	earmcoff.c \
 	earmelf.c \
 	earmelf_fbsd.c \
+	earmelf_fuchsia.c \
 	earmelf_linux.c \
 	earmelf_linux_eabi.c \
 	earmelf_nacl.c \
@@ -187,6 +182,7 @@ ALL_EMULATION_SOURCES = \
 	earmelf_vxworks.c \
 	earmelfb.c \
 	earmelfb_fbsd.c \
+	earmelfb_fuchsia.c \
 	earmelfb_linux.c \
 	earmelfb_linux_eabi.c \
 	earmelfb_nacl.c \
@@ -389,6 +385,7 @@ ALL_EMULATION_SOURCES = \
 	eppcmacos.c \
 	eppcnw.c \
 	eppcpe.c \
+	epruelf.c \
 	eriscix.c \
 	escore3_elf.c \
 	escore7_elf.c \
@@ -735,6 +732,11 @@ earclinux.c: $(srcdir)/emulparams/arclinux.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
   $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
 
+earclinux_nps.c: $(srcdir)/emulparams/arclinux_nps.sh \
+  $(srcdir)/emulparams/arc-nps.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
+  $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
+
 earclinux_prof.c: $(srcdir)/emulparams/arclinux_prof.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
   $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
@@ -760,6 +762,10 @@ earmelf.c: $(srcdir)/emulparams/armelf.sh \
 
 earmelf_fbsd.c: $(srcdir)/emulparams/armelf_fbsd.sh \
   $(srcdir)/emulparams/armelf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+earmelf_fuchsia.c: $(srcdir)/emulparams/armelf_fuchsia.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -800,6 +806,10 @@ earmelfb.c: $(srcdir)/emulparams/armelfb.sh $(srcdir)/emulparams/armelf.sh \
 
 earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
   $(srcdir)/emulparams/armelf_fbsd.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+earmelf_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -1704,6 +1714,10 @@ eppcnw.c:	$(srcdir)/emulparams/ppcnw.sh \
 eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/ppcpe.sc ${GEN_DEPENDS}
 
+epruelf.c: $(srcdir)/emulparams/pruelf.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/pru.sc \
+  $(srcdir)/emultempl/pruelf.em ${GEN_DEPENDS}
+
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
@@ -2101,60 +2115,6 @@ check-DEJAGNU: site.exp
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
-
-# Rules for testing by relinking ld itself.
-# A similar test is in the testsuite.  This target is for ease of use
-# when porting ld.
-
-ld-partial.@OBJEXT@: ld-new$(EXEEXT)
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld-partial.@OBJEXT@ -r $(OFILES)
-ld1$(EXEEXT): ld-partial.@OBJEXT@
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1$(EXEEXT) $(HOSTING_CRT0) ld-partial.@OBJEXT@ $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-ld1-full$(EXEEXT): ld-new
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1-full$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-ld2$(EXEEXT): ld1$(EXEEXT)
-	./ld1$(EXEEXT) $(HOSTING_EMU) -o ld2$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-ld3$(EXEEXT): ld2$(EXEEXT)
-	./ld2$(EXEEXT) $(HOSTING_EMU) -o ld3$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
-
-bootstrap: ld3$(EXEEXT)
-	cmp ld2$(EXEEXT) ld3$(EXEEXT)
-
-.PHONY: bootstrap
-
-# A test program for C++ constructors and destructors.
-# This test is now in the testsuite.
-#
-#cdtest: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
-#	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
-#	  cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ $(HOSTING_LIBS)
-#
-#cdtest.out: cdtest
-#	./cdtest > cdtest.tmp
-#	mv cdtest.tmp cdtest.out
-#
-#cdtest-ur.@OBJEXT@: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
-#	./ld.new $(HOSTING_EMU) -o cdtest-ur.@OBJEXT@ -Ur cdtest-main.@OBJEXT@ \
-#	  cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@
-#
-#cdtest-ur: cdtest-ur.@OBJEXT@
-#	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.@OBJEXT@ \
-#	  $(HOSTING_LIBS)
-#
-#cdtest-ur.out: cdtest-ur
-#	./cdtest-ur > cdtest-ur.tmp
-#	mv cdtest-ur.tmp cdtest-ur.out
-#
-#check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
-#	diff $(srcdir)/cdtest.exp cdtest.out
-#	diff $(srcdir)/cdtest.exp cdtest-ur.out
-#
-#.PHONY: check-cdtest
-
-# END OF CHECK TARGETS
 
 #
 # Build a dummy plugin using libtool.

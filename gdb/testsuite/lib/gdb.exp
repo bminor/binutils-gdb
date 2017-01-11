@@ -1,4 +1,4 @@
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -523,7 +523,7 @@ proc runto { function args } {
 	}
 	-re "The target does not support running in non-stop mode.\r\n$gdb_prompt $" {
 	    if { $print_fail } {
-		unsupported "Non-stop mode not supported"
+		unsupported "non-stop mode not supported"
 	    }
 	    return 0
 	}
@@ -3150,7 +3150,7 @@ gdb_caching_proc target_is_gdbserver {
     global gdb_prompt
 
     set is_gdbserver -1
-    set test "Probing for GDBserver"
+    set test "probing for GDBserver"
 
     gdb_test_multiple "monitor help" $test {
 	-re "The following monitor commands are supported.*Quit GDBserver.*$gdb_prompt $" {
@@ -3602,7 +3602,7 @@ proc gdb_compile_pthreads {source dest type options} {
         }
     }
     if {!$built_binfile} {
-	unsupported "Couldn't compile [file tail $source]: ${why_msg}"
+	unsupported "couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
 }
@@ -3731,7 +3731,7 @@ proc gdb_compile_shlib_pthreads {sources dest options} {
         }
     }
     if {!$built_binfile} {
-        unsupported "Couldn't compile $sources: ${why_msg}"
+        unsupported "couldn't compile $sources: ${why_msg}"
         return -1
     }
 }
@@ -3771,7 +3771,7 @@ proc gdb_compile_objc {source dest type options} {
         }
     }
     if {!$built_binfile} {
-        unsupported "Couldn't compile [file tail $source]: ${why_msg}"
+        unsupported "couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
 }

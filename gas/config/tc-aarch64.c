@@ -1,6 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -266,7 +266,6 @@ struct reloc_entry
   BASIC_REG_TYPE(FP_S)	/* s[0-31] */	\
   BASIC_REG_TYPE(FP_D)	/* d[0-31] */	\
   BASIC_REG_TYPE(FP_Q)	/* q[0-31] */	\
-  BASIC_REG_TYPE(CN)	/* c[0-7]  */	\
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
   BASIC_REG_TYPE(ZN)	/* z[0-31] */	\
   BASIC_REG_TYPE(PN)	/* p[0-15] */	\
@@ -406,9 +405,6 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
     case REG_TYPE_FP_Q:
       msg = N_("128-bit SIMD scalar or floating-point quad precision "
 	       "register expected");
-      break;
-    case REG_TYPE_CN:
-      msg = N_("C0 - C15 expected");
       break;
     case REG_TYPE_R_Z_BHSDQ_V:
     case REG_TYPE_R_Z_BHSDQ_VZP:
@@ -5520,16 +5516,23 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
-	case AARCH64_OPND_Cn:
-	case AARCH64_OPND_Cm:
-	  po_reg_or_fail (REG_TYPE_CN);
-	  if (val > 15)
+	case AARCH64_OPND_CRn:
+	case AARCH64_OPND_CRm:
 	    {
-	      set_fatal_syntax_error (_(get_reg_expected_msg (REG_TYPE_CN)));
-	      goto failure;
+	      char prefix = *(str++);
+	      if (prefix != 'c' && prefix != 'C')
+		goto failure;
+
+	      po_imm_nc_or_fail ();
+	      if (val > 15)
+		{
+		  set_fatal_syntax_error (_(N_ ("C0 - C15 expected")));
+		  goto failure;
+		}
+	      info->qualifier = AARCH64_OPND_QLF_CR;
+	      info->imm.value = val;
+	      break;
 	    }
-	  inst.base.operands[i].reg.regno = val;
-	  break;
 
 	case AARCH64_OPND_SHLL_IMM:
 	case AARCH64_OPND_IMM_VLSR:
@@ -6779,9 +6782,6 @@ static const reg_entry reg_names[] = {
 
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
-
-  /* Coprocessor register numbers.  */
-  REGSET (c, CN), REGSET (C, CN),
 
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
@@ -8438,6 +8438,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_FP
 					 | AARCH64_FEATURE_SIMD, 0)},
+  {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
+			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

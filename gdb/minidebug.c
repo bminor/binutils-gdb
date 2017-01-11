@@ -1,6 +1,6 @@
 /* Read MiniDebugInfo data from an objfile.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -256,11 +256,11 @@ lzma_stat (struct bfd *abfd,
    If we find one we create a iovec based bfd that decompresses the
    object data on demand.  If we don't find one, return NULL.  */
 
-bfd *
+gdb_bfd_ref_ptr
 find_separate_debug_file_in_section (struct objfile *objfile)
 {
   asection *section;
-  bfd *abfd;
+  gdb_bfd_ref_ptr abfd;
 
   if (objfile->obfd == NULL)
     return NULL;
@@ -275,16 +275,14 @@ find_separate_debug_file_in_section (struct objfile *objfile)
   if (abfd == NULL)
     return NULL;
 
-  if (!bfd_check_format (abfd, bfd_object))
+  if (!bfd_check_format (abfd.get (), bfd_object))
     {
       warning (_("Cannot parse .gnu_debugdata section; not a BFD object"));
-      gdb_bfd_unref (abfd);
       return NULL;
     }
 #else
   warning (_("Cannot parse .gnu_debugdata section; LZMA support was "
 	     "disabled at compile time"));
-  abfd = NULL;
 #endif /* !HAVE_LIBLZMA */
 
   return abfd;

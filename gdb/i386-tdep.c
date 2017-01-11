@@ -1,6 +1,6 @@
 /* Intel 386 target-dependent stuff.
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -8810,22 +8810,22 @@ i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
 
   if (bounds_in_map == 1)
     {
-      ui_out_text (uiout, "Null bounds on map:");
-      ui_out_text (uiout, " pointer value = ");
-      ui_out_field_core_addr (uiout, "pointer-value", gdbarch, bt_entry[2]);
-      ui_out_text (uiout, ".");
-      ui_out_text (uiout, "\n");
+      uiout->text ("Null bounds on map:");
+      uiout->text (" pointer value = ");
+      uiout->field_core_addr ("pointer-value", gdbarch, bt_entry[2]);
+      uiout->text (".");
+      uiout->text ("\n");
     }
   else
     {
-      ui_out_text (uiout, "{lbound = ");
-      ui_out_field_core_addr (uiout, "lower-bound", gdbarch, bt_entry[0]);
-      ui_out_text (uiout, ", ubound = ");
+      uiout->text ("{lbound = ");
+      uiout->field_core_addr ("lower-bound", gdbarch, bt_entry[0]);
+      uiout->text (", ubound = ");
 
       /* The upper bound is stored in 1's complement.  */
-      ui_out_field_core_addr (uiout, "upper-bound", gdbarch, ~bt_entry[1]);
-      ui_out_text (uiout, "}: pointer value = ");
-      ui_out_field_core_addr (uiout, "pointer-value", gdbarch, bt_entry[2]);
+      uiout->field_core_addr ("upper-bound", gdbarch, ~bt_entry[1]);
+      uiout->text ("}: pointer value = ");
+      uiout->field_core_addr ("pointer-value", gdbarch, bt_entry[2]);
 
       if (gdbarch_ptr_bit (gdbarch) == 64)
 	size = ( (~(int64_t) bt_entry[1]) - (int64_t) bt_entry[0]);
@@ -8837,12 +8837,12 @@ i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
 	 one to the size.  */
 
       size = (size > -1 ? size + 1 : size);
-      ui_out_text (uiout, ", size = ");
-      ui_out_field_fmt (uiout, "size", "%s", plongest (size));
+      uiout->text (", size = ");
+      uiout->field_fmt ("size", "%s", plongest (size));
 
-      ui_out_text (uiout, ", metadata = ");
-      ui_out_field_core_addr (uiout, "metadata", gdbarch, bt_entry[3]);
-      ui_out_text (uiout, "\n");
+      uiout->text (", metadata = ");
+      uiout->field_core_addr ("metadata", gdbarch, bt_entry[3]);
+      uiout->text ("\n");
     }
 }
 

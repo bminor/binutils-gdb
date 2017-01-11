@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -427,6 +427,20 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 					      (SEC_ALLOC | SEC_LINKER_CREATED));
       if (s == NULL)
 	return FALSE;
+      htab->sdynbss = s;
+
+      if (bed->want_dynrelro)
+	{
+	  /* Similarly, but for symbols that were originally in read-only
+	     sections.  */
+	  s = bfd_make_section_anyway_with_flags (abfd, ".data.rel.ro",
+						  (SEC_ALLOC | SEC_READONLY
+						   | SEC_HAS_CONTENTS
+						   | SEC_LINKER_CREATED));
+	  if (s == NULL)
+	    return FALSE;
+	  htab->sdynrelro = s;
+	}
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
 	 normally needed.  We need to create it here, though, so that the
@@ -439,7 +453,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 be needed, we can discard it later.  We will never need this
 	 section when generating a shared object, since they do not use
 	 copy relocs.  */
-      if (! bfd_link_pic (info))
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_make_section_anyway_with_flags (abfd,
 						  (bed->rela_plts_and_copies_p
@@ -448,6 +462,20 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  if (s == NULL
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
+	  htab->srelbss = s;
+
+	  if (bed->want_dynrelro)
+	    {
+	      s = (bfd_make_section_anyway_with_flags
+		   (abfd, (bed->rela_plts_and_copies_p
+			   ? ".rela.data.rel.ro" : ".rel.data.rel.ro"),
+		    flags | SEC_READONLY));
+	      if (s == NULL
+		  || ! bfd_set_section_alignment (abfd, s,
+						  bed->s->log_file_align))
+		return FALSE;
+	      htab->sreldynrelro = s;
+	    }
 	}
     }
 
@@ -577,6 +605,9 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if (h == NULL)
     return provide;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->versioned == unknown)
     {
       /* Set versioned if symbol version is unknown.  */
@@ -624,9 +655,9 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
       hv->root.u.i.link = (struct bfd_link_hash_entry *) h;
       (*bed->elf_backend_copy_indirect_symbol) (info, h, hv);
       break;
-    case bfd_link_hash_warning:
-      abort ();
-      break;
+    default:
+      BFD_FAIL ();
+      return FALSE;
     }
 
   /* If this symbol is being provided by the linker script, and it is
@@ -3788,6 +3819,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       const char *soname = NULL;
       char *audit = NULL;
       struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+      const Elf_Internal_Phdr *phdr;
       int ret;
 
       /* ld --just-symbols and dynamic objects don't mix very well.
@@ -3936,6 +3968,21 @@ error_free_dyn:
 	    ;
 	  *pn = rpath;
 	}
+
+      /* If we have a PT_GNU_RELRO program header, mark as read-only
+	 all sections contained fully therein.  This makes relro
+	 shared library sections appear as they will at run-time.  */
+      phdr = elf_tdata (abfd)->phdr + elf_elfheader (abfd)->e_phnum;
+      while (--phdr >= elf_tdata (abfd)->phdr)
+	if (phdr->p_type == PT_GNU_RELRO)
+	  {
+	    for (s = abfd->sections; s != NULL; s = s->next)
+	      if ((s->flags & SEC_ALLOC) != 0
+		  && s->vma >= phdr->p_vaddr
+		  && s->vma + s->size <= phdr->p_vaddr + phdr->p_memsz)
+		s->flags |= SEC_READONLY;
+	    break;
+	  }
 
       /* We do not want to include any of the sections in a dynamic
 	 object in the output file.  We hack by simply clobbering the
@@ -7055,18 +7102,15 @@ _bfd_elf_link_hash_copy_indirect (struct bfd_link_info *info,
   struct elf_link_hash_table *htab;
 
   /* Copy down any references that we may have already seen to the
-     symbol which just became indirect if DIR isn't a hidden versioned
-     symbol.  */
+     symbol which just became indirect.  */
 
   if (dir->versioned != versioned_hidden)
-    {
-      dir->ref_dynamic |= ind->ref_dynamic;
-      dir->ref_regular |= ind->ref_regular;
-      dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
-      dir->non_got_ref |= ind->non_got_ref;
-      dir->needs_plt |= ind->needs_plt;
-      dir->pointer_equality_needed |= ind->pointer_equality_needed;
-    }
+    dir->ref_dynamic |= ind->ref_dynamic;
+  dir->ref_regular |= ind->ref_regular;
+  dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
+  dir->non_got_ref |= ind->non_got_ref;
+  dir->needs_plt |= ind->needs_plt;
+  dir->pointer_equality_needed |= ind->pointer_equality_needed;
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
@@ -11342,7 +11386,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      asection *sec;
 
 	      sec = p->u.indirect.section;
-	      esdi = elf_section_data (sec);
 
 	      /* Mark all sections which are to be included in the
 		 link.  This will normally be every section.  We need
@@ -11353,37 +11396,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (sec->flags & SEC_MERGE)
 		merged = TRUE;
 
-	      if (esdo->this_hdr.sh_type == SHT_REL
-		  || esdo->this_hdr.sh_type == SHT_RELA)
-		/* Some backends use reloc_count in relocation sections
-		   to count particular types of relocs.  Of course,
-		   reloc sections themselves can't have relocations.  */
-		reloc_count = 0;
-	      else if (emit_relocs)
-		{
-		  reloc_count = sec->reloc_count;
-		  if (bed->elf_backend_count_additional_relocs)
-		    {
-		      int c;
-		      c = (*bed->elf_backend_count_additional_relocs) (sec);
-		      additional_reloc_count += c;
-		    }
-		}
-	      else if (bed->elf_backend_count_relocs)
-		reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
-
 	      if (sec->rawsize > max_contents_size)
 		max_contents_size = sec->rawsize;
 	      if (sec->size > max_contents_size)
 		max_contents_size = sec->size;
 
-	      /* We are interested in just local symbols, not all
-		 symbols.  */
 	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour
 		  && (sec->owner->flags & DYNAMIC) == 0)
 		{
 		  size_t sym_count;
 
+		  /* We are interested in just local symbols, not all
+		     symbols.  */
 		  if (elf_bad_symtab (sec->owner))
 		    sym_count = (elf_tdata (sec->owner)->symtab_hdr.sh_size
 				 / bed->s->sizeof_sym);
@@ -11396,6 +11420,27 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  if (sym_count > max_sym_shndx_count
 		      && elf_symtab_shndx_list (sec->owner) != NULL)
 		    max_sym_shndx_count = sym_count;
+
+		  if (esdo->this_hdr.sh_type == SHT_REL
+		      || esdo->this_hdr.sh_type == SHT_RELA)
+		    /* Some backends use reloc_count in relocation sections
+		       to count particular types of relocs.  Of course,
+		       reloc sections themselves can't have relocations.  */
+		    ;
+		  else if (emit_relocs)
+		    {
+		      reloc_count = sec->reloc_count;
+		      if (bed->elf_backend_count_additional_relocs)
+			{
+			  int c;
+			  c = (*bed->elf_backend_count_additional_relocs) (sec);
+			  additional_reloc_count += c;
+			}
+		    }
+		  else if (bed->elf_backend_count_relocs)
+		    reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
+
+		  esdi = elf_section_data (sec);
 
 		  if ((sec->flags & SEC_RELOC) != 0)
 		    {
@@ -13047,6 +13092,7 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
 	      && (!bfd_link_executable (info)
+		  || info->gc_keep_exported
 		  || info->export_dynamic
 		  || (h->dynamic
 		      && d != NULL
@@ -13166,7 +13212,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Mark dynamically referenced symbols.  */
-  if (htab->dynamic_sections_created)
+  if (htab->dynamic_sections_created || info->gc_keep_exported)
     elf_link_hash_traverse (htab, bed->gc_mark_dynamic_ref, info);
 
   /* Grovel through relocs to find out who stays ...  */

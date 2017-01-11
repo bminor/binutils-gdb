@@ -1,4 +1,4 @@
-#   Copyright 1988-2016 Free Software Foundation, Inc.
+#   Copyright 1988-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 standard_testfile
 
-if { [prepare_for_testing commands.exp commands run.c {debug additional_flags=-DFAKEARGV}] } {
+if { [prepare_for_testing "failed to prepare" commands run.c {debug additional_flags=-DFAKEARGV}] } {
     return -1
 }
 
@@ -352,6 +352,137 @@ proc_with_prefix user_defined_command_test {} {
 	"display user-defined empty command"
 }
 
+# Test that "eval" in a user-defined command expands $argc/$argN.
+
+proc_with_prefix user_defined_command_args_eval {} {
+    global gdb_prompt
+
+    gdb_test_multiple "define command_args_eval" \
+	"define command_args_eval" {
+	    -re "End with"  {
+		pass "define"
+	    }
+	}
+
+    # Make a command that constructs references to $argc and $argN via
+    # eval.
+    gdb_test \
+	[multi_line \
+	     {eval "printf \"argc = %%d,\", $arg%c", 'c'} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", $arg%d", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {end}] \
+	"" \
+	"enter commands"
+
+    gdb_test "command_args_eval 1 2 3" "argc = 3, 1 2 3" "execute command"
+}
+
+# Test that the $argc/$argN variables are pushed on/popped from the
+# args stack correctly when a user-defined command calls another
+# user-defined command (or in this case, recurses).
+
+proc_with_prefix user_defined_command_args_stack_test {} {
+    global gdb_prompt
+
+    gdb_test_multiple "define args_stack_command" \
+	"define args_stack_command" {
+	    -re "End with"  {
+		pass "define"
+	    }
+	}
+
+    # Make a command that refers to $argc/$argN before and after
+    # recursing.  Also, vary the number of arguments passed to each
+    # recursion point.
+    gdb_test \
+	[multi_line \
+	     {printf "before, argc = %d,", $argc} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", $arg%d", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {} \
+	     {} \
+	     {if $argc == 3} \
+	     {  args_stack_command 21 22} \
+	     {end} \
+	     {if $argc == 2} \
+	     {  args_stack_command 11} \
+	     {end} \
+	     {} \
+	     {} \
+	     {printf "after, argc = %d,", $argc} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", $arg%d", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {end}] \
+	"" \
+	"enter commands"
+
+    set expected \
+	[multi_line \
+	     "before, argc = 3, 31 32 33" \
+	     "before, argc = 2, 21 22" \
+	     "before, argc = 1, 11" \
+	     "after, argc = 1, 11" \
+	     "after, argc = 2, 21 22" \
+	     "after, argc = 3, 31 32 33"]
+    gdb_test "args_stack_command 31 32 33" $expected "execute command"
+}
+
+# Test a simple user defined command with many arguments.  GDB <= 7.12
+# used to have a hard coded limit of 10 arguments.
+
+proc_with_prefix user_defined_command_manyargs_test {} {
+    global gdb_prompt
+
+    set test "define command"
+    gdb_test_multiple "define manyargs" $test {
+	-re "End with"  {
+	    pass $test
+	}
+    }
+
+    # Define a function that doubles its arguments.
+    gdb_test \
+	[multi_line \
+	     {printf "nargs=%d:", $argc} \
+	     {set $i = 0} \
+	     {while $i < $argc} \
+	     {  eval "printf \" %%d\", 2 * $arg%d\n", $i} \
+	     {  set $i = $i + 1} \
+	     {end} \
+	     {printf "\n"} \
+	     {end}] \
+	"" \
+	"enter commands"
+
+    # Some random number of arguments, as long as higher than 10.
+    set nargs 100
+
+    set cmd "manyargs"
+    for {set i 1} {$i <= $nargs} {incr i} {
+	append cmd " $i"
+    }
+
+    set expected "nargs=$nargs:"
+    for {set i 1} {$i <= $nargs} {incr i} {
+	append expected " " [expr 2 * $i]
+    }
+
+    gdb_test $cmd $expected "execute command"
+}
+
 proc_with_prefix watchpoint_command_test {} {
     global gdb_prompt
 
@@ -476,14 +607,14 @@ proc_with_prefix deprecated_command_test {} {
     gdb_test "p 5" \
 	    "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" \
 	    "p deprecated warning, with replacement"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away /1/"
+    gdb_test "p 5" ".\[0-9\]* = 5.*" "deprecated warning goes away /1/"
 
     gdb_test_no_output "maintenance deprecate p \"new_p\"" "maintenance deprecate p \"new_p\" /2/"
     gdb_test_no_output "maintenance deprecate print \"new_print\"" 
     gdb_test "p 5" \
 	    "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" \
 	    "both alias and command are deprecated"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away /2/"
+    gdb_test "p 5" ".\[0-9\]* = 5.*" "deprecated warning goes away /2/"
 
     gdb_test_no_output "maintenance deprecate set remote memory-read-packet-size \"srm\" " \
 	    "deprecate long command /1/"
@@ -882,6 +1013,9 @@ if_while_breakpoint_command_test
 infrun_breakpoint_command_test
 breakpoint_command_test
 user_defined_command_test
+user_defined_command_args_eval
+user_defined_command_args_stack_test
+user_defined_command_manyargs_test
 watchpoint_command_test
 test_command_prompt_position
 deprecated_command_test

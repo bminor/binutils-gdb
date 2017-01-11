@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/alpha.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 
@@ -34,9 +34,6 @@
 #include "target.h"
 
 /* Core file support.  */
-
-/* Even though NetBSD/alpha used ELF since day one, it used the
-   traditional a.out-style core dump format before NetBSD 1.6.  */
 
 /* Sizeof `struct reg' in <machine/reg.h>.  */
 #define ALPHANBSD_SIZEOF_GREGS	(32 * 8)
@@ -279,26 +276,15 @@ alphanbsd_init_abi (struct gdbarch_info info,
 }
 
 
-static enum gdb_osabi
-alphanbsd_core_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_ELF;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_alphanbsd_tdep (void);
 
 void
 _initialize_alphanbsd_tdep (void)
 {
-  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_alpha, bfd_target_unknown_flavour,
-                                  alphanbsd_core_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD_ELF,
+  /* Even though NetBSD/alpha used ELF since day one, it used the
+     traditional a.out-style core dump format before NetBSD 1.6, but
+     we don't support those.  */
+  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD,
                           alphanbsd_init_abi);
 }

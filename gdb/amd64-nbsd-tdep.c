@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/amd64.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -129,5 +129,5 @@ _initialize_amd64nbsd_tdep (void)
   gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_NETBSD_ELF, amd64nbsd_init_abi);
+			  GDB_OSABI_NETBSD, amd64nbsd_init_abi);
 }

@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/i386.
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -134,40 +134,6 @@ static int i386obsd_r_reg_offset[] =
   15 * 4			/* %gs */
 };
 
-static void
-i386obsd_aout_supply_regset (const struct regset *regset,
-			     struct regcache *regcache, int regnum,
-			     const void *regs, size_t len)
-{
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const gdb_byte *gregs = (const gdb_byte *) regs;
-
-  gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE);
-
-  i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  i387_supply_fsave (regcache, regnum, gregs + tdep->sizeof_gregset);
-}
-
-static const struct regset i386obsd_aout_gregset =
-  {
-    NULL, i386obsd_aout_supply_regset, NULL
-  };
-
-static void
-i386obsd_aout_iterate_over_regset_sections (struct gdbarch *gdbarch,
-					    iterate_over_regset_sections_cb *cb,
-					    void *cb_data,
-					    const struct regcache *regcache)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* OpenBSD a.out core dumps don't use seperate register sets for the
-     general-purpose and floating-point registers.  */
-
-  cb (".reg", tdep->sizeof_gregset + I387_SIZEOF_FSAVE,
-      &i386obsd_aout_gregset, NULL, cb_data);
-}
 
 
 /* Sigtramp routine location for OpenBSD 3.1 and earlier releases.  */
@@ -445,6 +411,7 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Obviously OpenBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
   obsd_init_abi (info, gdbarch);
+  i386_elf_init_abi (info, gdbarch);
 
   /* OpenBSD has a different `struct reg'.  */
   tdep->gregset_reg_offset = i386obsd_r_reg_offset;
@@ -470,30 +437,6 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Unwind kernel trap frames correctly.  */
   frame_unwind_prepend_unwinder (gdbarch, &i386obsd_trapframe_unwind);
-}
-
-/* OpenBSD a.out.  */
-
-static void
-i386obsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  i386obsd_init_abi (info, gdbarch);
-
-  /* OpenBSD a.out has a single register set.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, i386obsd_aout_iterate_over_regset_sections);
-}
-
-/* OpenBSD ELF.  */
-
-static void
-i386obsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  /* It's still OpenBSD.  */
-  i386obsd_init_abi (info, gdbarch);
-
-  /* But ELF-based.  */
-  i386_elf_init_abi (info, gdbarch);
 
   /* OpenBSD ELF uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
@@ -507,14 +450,6 @@ void _initialize_i386obsd_tdep (void);
 void
 _initialize_i386obsd_tdep (void)
 {
-  /* FIXME: kettenis/20021020: Since OpenBSD/i386 binaries are
-     indistingushable from NetBSD/i386 a.out binaries, building a GDB
-     that should support both these targets will probably not work as
-     expected.  */
-#define GDB_OSABI_OPENBSD_AOUT GDB_OSABI_NETBSD_AOUT
-
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD_AOUT,
-			  i386obsd_aout_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD_ELF,
-			  i386obsd_elf_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD,
+			  i386obsd_init_abi);
 }

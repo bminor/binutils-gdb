@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling windows child processes, for GDB.
 
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -669,32 +669,27 @@ windows_make_so (const char *name, LPVOID load_addr)
   p = strchr (so->so_name, '\0') - (sizeof ("/cygwin1.dll") - 1);
   if (p >= so->so_name && strcasecmp (p, "/cygwin1.dll") == 0)
     {
-      bfd *abfd;
       asection *text = NULL;
       CORE_ADDR text_vma;
 
-      abfd = gdb_bfd_open (so->so_name, "pei-i386", -1);
+      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->so_name, "pei-i386", -1));
 
-      if (!abfd)
+      if (abfd == NULL)
 	return so;
 
-      if (bfd_check_format (abfd, bfd_object))
-	text = bfd_get_section_by_name (abfd, ".text");
+      if (bfd_check_format (abfd.get (), bfd_object))
+	text = bfd_get_section_by_name (abfd.get (), ".text");
 
       if (!text)
-	{
-	  gdb_bfd_unref (abfd);
-	  return so;
-	}
+	return so;
 
       /* The symbols in a dll are offset by 0x1000, which is the
 	 offset from 0 of the first byte in an image - because of the
 	 file header and the section alignment.  */
       cygwin_load_start = (CORE_ADDR) (uintptr_t) ((char *)
 						   load_addr + 0x1000);
-      cygwin_load_end = cygwin_load_start + bfd_section_size (abfd, text);
-
-      gdb_bfd_unref (abfd);
+      cygwin_load_end = cygwin_load_start + bfd_section_size (abfd.get (),
+							      text);
     }
 #endif
 

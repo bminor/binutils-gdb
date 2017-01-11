@@ -1,5 +1,5 @@
 /* GDB variable objects API.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -319,8 +319,6 @@ extern void varobj_enable_pretty_printing (void);
 extern int varobj_has_more (const struct varobj *var, int to);
 
 extern int varobj_is_dynamic_p (const struct varobj *var);
-
-extern struct cleanup *varobj_ensure_python_env (const struct varobj *var);
 
 extern int varobj_default_value_is_changeable_p (const struct varobj *var);
 extern int varobj_value_is_changeable_p (const struct varobj *var);

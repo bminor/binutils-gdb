@@ -1,5 +1,5 @@
 /* aarch64-asm.c -- AArch64 assembler support.
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -125,28 +125,28 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
     {
       /* index for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
          or SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>].  */
-      unsigned index = info->reglane.index;
+      unsigned reglane_index = info->reglane.index;
 
       if (inst->opcode->op == OP_FCMLA_ELEM)
 	/* Complex operand takes two elements.  */
-	index *= 2;
+	reglane_index *= 2;
 
       switch (info->qualifier)
 	{
 	case AARCH64_OPND_QLF_S_H:
 	  /* H:L:M */
-	  assert (index < 8);
-	  insert_fields (code, index, 0, 3, FLD_M, FLD_L, FLD_H);
+	  assert (reglane_index < 8);
+	  insert_fields (code, reglane_index, 0, 3, FLD_M, FLD_L, FLD_H);
 	  break;
 	case AARCH64_OPND_QLF_S_S:
 	  /* H:L */
-	  assert (index < 4);
-	  insert_fields (code, index, 0, 2, FLD_L, FLD_H);
+	  assert (reglane_index < 4);
+	  insert_fields (code, reglane_index, 0, 2, FLD_L, FLD_H);
 	  break;
 	case AARCH64_OPND_QLF_S_D:
 	  /* H */
-	  assert (index < 2);
-	  insert_field (FLD_H, code, index, 0);
+	  assert (reglane_index < 2);
+	  insert_field (FLD_H, code, reglane_index, 0);
 	  break;
 	default:
 	  assert (0);

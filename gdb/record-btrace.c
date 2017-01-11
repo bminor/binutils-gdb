@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2017 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -535,15 +535,15 @@ btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
 #endif /* defined (HAVE_LIBIPT)  */
     }
 
-  ui_out_text (uiout, _("["));
+  uiout->text (_("["));
   if (is_error)
     {
-      ui_out_text (uiout, _("decode error ("));
-      ui_out_field_int (uiout, "errcode", errcode);
-      ui_out_text (uiout, _("): "));
+      uiout->text (_("decode error ("));
+      uiout->field_int ("errcode", errcode);
+      uiout->text (_("): "));
     }
-  ui_out_text (uiout, errstr);
-  ui_out_text (uiout, _("]\n"));
+  uiout->text (errstr);
+  uiout->text (_("]\n"));
 }
 
 /* Print an unsigned int.  */
@@ -551,7 +551,7 @@ btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
 static void
 ui_out_field_uint (struct ui_out *uiout, const char *fld, unsigned int val)
 {
-  ui_out_field_fmt (uiout, fld, "%u", val);
+  uiout->field_fmt (fld, "%u", val);
 }
 
 /* A range of source lines.  */
@@ -968,7 +968,7 @@ btrace_call_history_insn_range (struct ui_out *uiout,
   end = begin + size - 1;
 
   ui_out_field_uint (uiout, "insn begin", begin);
-  ui_out_text (uiout, ",");
+  uiout->text (",");
   ui_out_field_uint (uiout, "insn end", end);
 }
 
@@ -1026,21 +1026,21 @@ btrace_call_history_src_line (struct ui_out *uiout,
   if (sym == NULL)
     return;
 
-  ui_out_field_string (uiout, "file",
+  uiout->field_string ("file",
 		       symtab_to_filename_for_display (symbol_symtab (sym)));
 
   btrace_compute_src_line_range (bfun, &begin, &end);
   if (end < begin)
     return;
 
-  ui_out_text (uiout, ":");
-  ui_out_field_int (uiout, "min line", begin);
+  uiout->text (":");
+  uiout->field_int ("min line", begin);
 
   if (end == begin)
     return;
 
-  ui_out_text (uiout, ",");
-  ui_out_field_int (uiout, "max line", end);
+  uiout->text (",");
+  uiout->field_int ("max line", end);
 }
 
 /* Get the name of a branch trace function.  */
@@ -1092,7 +1092,7 @@ btrace_call_history (struct ui_out *uiout,
 
       /* Print the function index.  */
       ui_out_field_uint (uiout, "index", bfun->number);
-      ui_out_text (uiout, "\t");
+      uiout->text ("\t");
 
       /* Indicate gaps in the trace.  */
       if (bfun->errcode != 0)
@@ -1114,29 +1114,29 @@ btrace_call_history (struct ui_out *uiout,
 	  int level = bfun->level + btinfo->level, i;
 
 	  for (i = 0; i < level; ++i)
-	    ui_out_text (uiout, "  ");
+	    uiout->text ("  ");
 	}
 
       if (sym != NULL)
-	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (sym));
+	uiout->field_string ("function", SYMBOL_PRINT_NAME (sym));
       else if (msym != NULL)
-	ui_out_field_string (uiout, "function", MSYMBOL_PRINT_NAME (msym));
-      else if (!ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "function", "??");
+	uiout->field_string ("function", MSYMBOL_PRINT_NAME (msym));
+      else if (!uiout->is_mi_like_p ())
+	uiout->field_string ("function", "??");
 
       if ((flags & RECORD_PRINT_INSN_RANGE) != 0)
 	{
-	  ui_out_text (uiout, _("\tinst "));
+	  uiout->text (_("\tinst "));
 	  btrace_call_history_insn_range (uiout, bfun);
 	}
 
       if ((flags & RECORD_PRINT_SRC_LINE) != 0)
 	{
-	  ui_out_text (uiout, _("\tat "));
+	  uiout->text (_("\tat "));
 	  btrace_call_history_src_line (uiout, bfun);
 	}
 
-      ui_out_text (uiout, "\n");
+      uiout->text ("\n");
     }
 }
 

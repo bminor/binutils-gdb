@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/hppa
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -213,6 +213,6 @@ extern initialize_file_ftype _initialize_hppanbsd_tdep;
 void
 _initialize_hppanbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_NETBSD,
 			  hppanbsd_init_abi);
 }

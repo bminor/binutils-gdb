@@ -1,4 +1,4 @@
-#   Copyright 1997-2016 Free Software Foundation, Inc.
+#   Copyright 1997-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ set compile_options debug
 
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable $compile_options] != "" } {
-    untested "could not compile test program ${binfile2}"
+    untested "failed to compile secondary testcase"
     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $compile_options] != "" } {
-    untested "could not compile test program ${binfile}"
+    untested "failed to compile main testcase"
     return -1
 }
 
@@ -47,7 +47,7 @@ proc do_exec_sysroot_test {} {
     # Start the program running, and stop at main.
     #
     if ![runto_main] then {
-	fail "Couldn't run ${testfile}"
+	fail "couldn't run ${testfile}"
 	return
     }
 

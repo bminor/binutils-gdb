@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -706,10 +706,8 @@ execute_command_to_string (char *p, int from_tty)
 
   make_cleanup_ui_file_delete (str_file);
 
-  if (ui_out_redirect (current_uiout, str_file) < 0)
-    warning (_("Current output protocol does not support redirection"));
-  else
-    make_cleanup_ui_out_redirect_pop (current_uiout);
+  current_uiout->redirect (str_file);
+  make_cleanup_ui_out_redirect_pop (current_uiout);
 
   scoped_restore save_stdout
     = make_scoped_restore (&gdb_stdout, str_file);
@@ -757,13 +755,10 @@ dont_repeat (void)
 /* Prevent dont_repeat from working, and return a cleanup that
    restores the previous state.  */
 
-struct cleanup *
+scoped_restore_tmpl<int>
 prevent_dont_repeat (void)
 {
-  struct cleanup *result = make_cleanup_restore_integer (&suppress_dont_repeat);
-
-  suppress_dont_repeat = 1;
-  return result;
+  return make_scoped_restore (&suppress_dont_repeat, 1);
 }
 
 
@@ -1341,7 +1336,7 @@ print_gdb_version (struct ui_file *stream)
   /* Second line is a copyright notice.  */
 
   fprintf_filtered (stream,
-		    "Copyright (C) 2016 Free Software Foundation, Inc.\n");
+		    "Copyright (C) 2017 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on

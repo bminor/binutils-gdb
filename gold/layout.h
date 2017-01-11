@@ -1,6 +1,6 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1067,7 +1067,7 @@ class Layout
   // Create the output sections for the symbol table.
   void
   create_symtab_sections(const Input_objects*, Symbol_table*,
-			 unsigned int, off_t*);
+			 unsigned int, off_t*, unsigned int);
 
   // Create the .shstrtab section.
   Output_section*
@@ -1082,6 +1082,7 @@ class Layout
   create_dynamic_symtab(const Input_objects*, Symbol_table*,
 			Output_section** pdynstr,
 			unsigned int* plocal_dynamic_count,
+			unsigned int* pforced_local_dynamic_count,
 			std::vector<Symbol*>* pdynamic_symbols,
 			Versions* versions);
 
@@ -1149,7 +1150,7 @@ class Layout
   choose_output_section(const Relobj* relobj, const char* name,
 			elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
 			bool is_input_section, Output_section_order order,
-			bool is_relro);
+			bool is_relro, bool is_reloc, bool match_input_spec);
 
   // Create a new Output_section.
   Output_section*

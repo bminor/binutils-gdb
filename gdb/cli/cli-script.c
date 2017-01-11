@@ -1,6 +1,6 @@
 /* GDB CLI command scripting.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,8 @@
 #include "interps.h"
 #include "compile/compile.h"
 
+#include <vector>
+
 /* Prototypes for local functions.  */
 
 static enum command_control_type
@@ -40,10 +42,6 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 				struct command_line *current_cmd,
 				void (*validator)(char *, void *),
 				void *closure);
-
-static std::string insert_args (const char *line);
-
-static struct cleanup * setup_user_args (char *p);
 
 static char *read_next_line (void);
 
@@ -56,24 +54,68 @@ static int command_nest_depth = 1;
 /* This is to prevent certain commands being printed twice.  */
 static int suppress_next_print_command_trace = 0;
 
+/* A non-owning slice of a string.  */
+
+struct string_view
+{
+  string_view (const char *str_, size_t len_)
+    : str (str_), len (len_)
+  {}
+
+  const char *str;
+  size_t len;
+};
+
 /* Structure for arguments to user defined functions.  */
-#define MAXUSERARGS 10
-struct user_args
+
+class user_args
+{
+public:
+  /* Save the command line and store the locations of arguments passed
+     to the user defined function.  */
+  explicit user_args (const char *line);
+
+  /* Insert the stored user defined arguments into the $arg arguments
+     found in LINE.  */
+  std::string insert_args (const char *line) const;
+
+private:
+  /* Disable copy/assignment.  (Since the elements of A point inside
+     COMMAND, copying would need to reconstruct the A vector in the
+     new copy.)  */
+  user_args (const user_args &) =delete;
+  user_args &operator= (const user_args &) =delete;
+
+  /* It is necessary to store a copy of the command line to ensure
+     that the arguments are not overwritten before they are used.  */
+  std::string m_command_line;
+
+  /* The arguments.  Each element points inside M_COMMAND_LINE.  */
+  std::vector<string_view> m_args;
+};
+
+/* The stack of arguments passed to user defined functions.  We need a
+   stack because user-defined functions can call other user-defined
+   functions.  */
+static std::vector<std::unique_ptr<user_args>> user_args_stack;
+
+/* An RAII-base class used to push/pop args on the user args
+   stack.  */
+struct scoped_user_args_level
+{
+  /* Parse the command line and push the arguments in the user args
+     stack.  */
+  explicit scoped_user_args_level (const char *line)
   {
-    struct user_args *next;
-    /* It is necessary to store a malloced copy of the command line to
-       ensure that the arguments are not overwritten before they are
-       used.  */
-    char *command;
-    struct
-      {
-	char *arg;
-	int len;
-      }
-    a[MAXUSERARGS];
-    int count;
+    user_args_stack.emplace_back (new user_args (line));
   }
- *user_args;
+
+  /* Pop the current user arguments from the stack.  */
+  ~scoped_user_args_level ()
+  {
+    user_args_stack.pop_back ();
+  }
+};
 
 
 /* Return non-zero if TYPE is a multi-line command (i.e., is terminated
@@ -159,13 +201,13 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
   while (list)
     {
       if (depth)
-	ui_out_spaces (uiout, 2 * depth);
+	uiout->spaces (2 * depth);
 
       /* A simple command, print it and continue.  */
       if (list->control_type == simple_control)
 	{
-	  ui_out_field_string (uiout, NULL, list->line);
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, list->line);
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -174,8 +216,8 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
          and continue. */
       if (list->control_type == continue_control)
 	{
-	  ui_out_field_string (uiout, NULL, "loop_continue");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "loop_continue");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -184,8 +226,8 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	 continue.  */
       if (list->control_type == break_control)
 	{
-	  ui_out_field_string (uiout, NULL, "loop_break");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "loop_break");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -199,15 +241,15 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	     token.  See comment in process_next_line for explanation.
 	     Here, take care not print 'while-stepping' twice.  */
 	  if (list->control_type == while_control)
-	    ui_out_field_fmt (uiout, NULL, "while %s", list->line);
+	    uiout->field_fmt (NULL, "while %s", list->line);
 	  else
-	    ui_out_field_string (uiout, NULL, list->line);
-	  ui_out_text (uiout, "\n");
+	    uiout->field_string (NULL, list->line);
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -216,8 +258,8 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	 continueing.  */
       if (list->control_type == if_control)
 	{
-	  ui_out_field_fmt (uiout, NULL, "if %s", list->line);
-	  ui_out_text (uiout, "\n");
+	  uiout->field_fmt (NULL, "if %s", list->line);
+	  uiout->text ("\n");
 	  /* The true arm.  */
 	  print_command_lines (uiout, list->body_list[0], depth + 1);
 
@@ -225,16 +267,16 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	  if (list->body_count == 2)
 	    {
 	      if (depth)
-		ui_out_spaces (uiout, 2 * depth);
-	      ui_out_field_string (uiout, NULL, "else");
-	      ui_out_text (uiout, "\n");
+		uiout->spaces (2 * depth);
+	      uiout->field_string (NULL, "else");
+	      uiout->text ("\n");
 	      print_command_lines (uiout, list->body_list[1], depth + 1);
 	    }
 
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -244,55 +286,55 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
       if (list->control_type == commands_control)
 	{
 	  if (*(list->line))
-	    ui_out_field_fmt (uiout, NULL, "commands %s", list->line);
+	    uiout->field_fmt (NULL, "commands %s", list->line);
 	  else
-	    ui_out_field_string (uiout, NULL, "commands");
-	  ui_out_text (uiout, "\n");
+	    uiout->field_string (NULL, "commands");
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
 
       if (list->control_type == python_control)
 	{
-	  ui_out_field_string (uiout, NULL, "python");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "python");
+	  uiout->text ("\n");
 	  /* Don't indent python code at all.  */
 	  print_command_lines (uiout, *list->body_list, 0);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
 
       if (list->control_type == compile_control)
 	{
-	  ui_out_field_string (uiout, NULL, "compile expression");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "compile expression");
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, 0);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
 
       if (list->control_type == guile_control)
 	{
-	  ui_out_field_string (uiout, NULL, "guile");
-	  ui_out_text (uiout, "\n");
+	  uiout->field_string (NULL, "guile");
+	  uiout->text ("\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
-	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_field_string (uiout, NULL, "end");
-	  ui_out_text (uiout, "\n");
+	    uiout->spaces (2 * depth);
+	  uiout->field_string (NULL, "end");
+	  uiout->text ("\n");
 	  list = list->next;
 	  continue;
 	}
@@ -364,12 +406,12 @@ execute_user_command (struct cmd_list_element *c, char *args)
     /* Null command */
     return;
 
-  old_chain = setup_user_args (args);
+  scoped_user_args_level push_user_args (args);
 
   if (++user_call_depth > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));
 
-  make_cleanup (do_restore_user_call_depth, &user_call_depth);
+  old_chain = make_cleanup (do_restore_user_call_depth, &user_call_depth);
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
@@ -455,7 +497,7 @@ execute_control_command (struct command_line *cmd)
     case simple_control:
       {
 	/* A simple command, execute it and return.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	execute_command (&new_line[0], 0);
 	ret = cmd->control_type;
 	break;
@@ -486,7 +528,7 @@ execute_control_command (struct command_line *cmd)
 	print_command_trace (buffer);
 
 	/* Parse the loop control expression for the while statement.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	expression_up expr = parse_expression (new_line.c_str ());
 
 	ret = simple_control;
@@ -551,7 +593,7 @@ execute_control_command (struct command_line *cmd)
 	print_command_trace (buffer);
 
 	/* Parse the conditional for the if statement.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	expression_up expr = parse_expression (new_line.c_str ());
 
 	current = NULL;
@@ -591,7 +633,7 @@ execute_control_command (struct command_line *cmd)
       {
 	/* Breakpoint commands list, record the commands in the
 	   breakpoint's command list and return.  */
-	std::string new_line = insert_args (cmd->line);
+	std::string new_line = insert_user_defined_cmd_args (cmd->line);
 	ret = commands_from_control_command (new_line.c_str (), cmd);
 	break;
       }
@@ -670,54 +712,25 @@ if_command (char *arg, int from_tty)
   free_command_lines (&command);
 }
 
-/* Cleanup */
-static void
-arg_cleanup (void *ignore)
+/* Bind the incoming arguments for a user defined command to $arg0,
+   $arg1 ... $argN.  */
+
+user_args::user_args (const char *command_line)
 {
-  struct user_args *oargs = user_args;
+  const char *p;
 
-  if (!user_args)
-    internal_error (__FILE__, __LINE__,
-		    _("arg_cleanup called with no user args.\n"));
+  if (command_line == NULL)
+    return;
 
-  user_args = user_args->next;
-  xfree (oargs->command);
-  xfree (oargs);
-}
-
-/* Bind the incomming arguments for a user defined command to
-   $arg0, $arg1 ... $argMAXUSERARGS.  */
-
-static struct cleanup *
-setup_user_args (char *p)
-{
-  struct user_args *args;
-  struct cleanup *old_chain;
-  unsigned int arg_count = 0;
-
-  args = XNEW (struct user_args);
-  memset (args, 0, sizeof (struct user_args));
-
-  args->next = user_args;
-  user_args = args;
-
-  old_chain = make_cleanup (arg_cleanup, 0/*ignored*/);
-
-  if (p == NULL)
-    return old_chain;
-
-  user_args->command = p = xstrdup (p);
+  m_command_line = command_line;
+  p = m_command_line.c_str ();
 
   while (*p)
     {
-      char *start_arg;
+      const char *start_arg;
       int squote = 0;
       int dquote = 0;
       int bsquote = 0;
-
-      if (arg_count >= MAXUSERARGS)
-	error (_("user defined function may only have %d arguments."),
-	       MAXUSERARGS);
 
       /* Strip whitespace.  */
       while (*p == ' ' || *p == '\t')
@@ -725,7 +738,6 @@ setup_user_args (char *p)
 
       /* P now points to an argument.  */
       start_arg = p;
-      user_args->a[arg_count].arg = p;
 
       /* Get to the end of this argument.  */
       while (*p)
@@ -759,11 +771,8 @@ setup_user_args (char *p)
 	    }
 	}
 
-      user_args->a[arg_count].len = p - start_arg;
-      arg_count++;
-      user_args->count++;
+      m_args.emplace_back (start_arg, p - start_arg);
     }
-  return old_chain;
 }
 
 /* Given character string P, return a point to the first argument
@@ -782,48 +791,55 @@ locate_arg (const char *p)
   return NULL;
 }
 
-/* Insert the user defined arguments stored in user_arg into the $arg
-   arguments found in line.  */
+/* See cli-script.h.  */
 
-static std::string
-insert_args (const char *line)
+std::string
+insert_user_defined_cmd_args (const char *line)
 {
-  /* If we are not in a user-defined function, treat $argc, $arg0, et
+  /* If we are not in a user-defined command, treat $argc, $arg0, et
      cetera as normal convenience variables.  */
-  if (user_args == NULL)
+  if (user_args_stack.empty ())
     return line;
 
+  const std::unique_ptr<user_args> &args = user_args_stack.back ();
+  return args->insert_args (line);
+}
+
+/* Insert the user defined arguments stored in user_args into the $arg
+   arguments found in line.  */
+
+std::string
+user_args::insert_args (const char *line) const
+{
   std::string new_line;
   const char *p;
 
   while ((p = locate_arg (line)))
     {
-      int i, len;
-
       new_line.append (line, p - line);
 
       if (p[4] == 'c')
 	{
-	  gdb_assert (user_args->count >= 0 && user_args->count <= 10);
-	  if (user_args->count == 10)
-	    {
-	      new_line += '1';
-	      new_line += '0';
-	    }
-	  else
-	    new_line += user_args->count + '0';
+	  new_line += std::to_string (m_args.size ());
+	  line = p + 5;
 	}
       else
 	{
-	  i = p[4] - '0';
-	  if (i >= user_args->count)
-	    error (_("Missing argument %d in user function."), i);
+	  char *tmp;
+	  unsigned long i;
 
-	  len = user_args->a[i].len;
-	  if (len > 0)
-	    new_line.append (user_args->a[i].arg, len);
+	  errno = 0;
+	  i = strtoul (p + 4, &tmp, 10);
+	  if ((i == 0 && tmp == p + 4) || errno != 0)
+	    line = p + 4;
+	  else if (i >= m_args.size ())
+	    error (_("Missing argument %ld in user function."), i);
+	  else
+	    {
+	      new_line.append (m_args[i].str, m_args[i].len);
+	      line = tmp;
+	    }
 	}
-      line = p + 5;
     }
   /* Don't forget the tail.  */
   new_line.append (line);

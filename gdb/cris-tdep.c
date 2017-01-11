@@ -1,6 +1,6 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
@@ -3792,10 +3792,7 @@ static int
 cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
 {
   int (*print_insn) (bfd_vma addr, struct disassemble_info *info);
-  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
-     disassembler, even when there is no BFD.  Does something like
-     "gdb; target remote; disassmeble *0x123" work?  */
-  gdb_assert (exec_bfd != NULL);
+
   print_insn = cris_get_disassembler (exec_bfd);
   gdb_assert (print_insn != NULL);
   return print_insn (addr, info);

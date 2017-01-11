@@ -369,6 +369,11 @@ mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	gdb_target_obs="mips-tdep.o mips-nbsd-tdep.o solib-svr4.o nbsd-tdep.o"
 	gdb_sim=../sim/mips/libsim.a
 	;;
+mips*-*-freebsd*)
+	# Target: MIPS running FreeBSD
+	gdb_target_obs="mips-tdep.o mips-fbsd-tdep.o solib-svr4.o fbsd-tdep.o"
+	gdb_sim=../sim/mips/libsim.a
+	;;
 mips64*-*-openbsd*)
 	# Target: OpenBSD/mips64
 	gdb_target_obs="mips-tdep.o mips64-obsd-tdep.o obsd-tdep.o solib-svr4.o"
@@ -643,11 +648,11 @@ v850*-*-elf | v850*-*-rtems*)
 
 vax-*-netbsd* | vax-*-knetbsd*-gnu)
 	# Target: NetBSD/vax
-	gdb_target_obs="vax-tdep.o vax-nbsd-tdep.o solib-svr4.o"
+	gdb_target_obs="vax-tdep.o solib-svr4.o"
 	;;
 vax-*-openbsd*)
 	# Target: OpenBSD/vax
-	gdb_target_obs="vax-tdep.o vax-obsd-tdep.o"
+	gdb_target_obs="vax-tdep.o"
 	;;
 vax-*-*)
 	# Target: VAX
@@ -720,12 +725,12 @@ esac
 
 case "${targ}" in
 *-*-freebsd* | *-*-kfreebsd*-gnu)
-		gdb_osabi=GDB_OSABI_FREEBSD_ELF ;;
+		gdb_osabi=GDB_OSABI_FREEBSD ;;
 *-*-linux* | *-*-uclinux*)
 		gdb_osabi=GDB_OSABI_LINUX ;;
 *-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;
 m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
-*-*-openbsd*)	gdb_osabi=GDB_OSABI_OPENBSD_ELF ;;
+*-*-openbsd*)	gdb_osabi=GDB_OSABI_OPENBSD ;;
 *-*-solaris*)	gdb_osabi=GDB_OSABI_SOLARIS ;;
 *-*-*-gnu*)	;; # prevent non-GNU kernels to match the Hurd rule below
 *-*-gnu*)	gdb_osabi=GDB_OSABI_HURD ;;

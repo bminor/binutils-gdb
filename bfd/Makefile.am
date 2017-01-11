@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -147,6 +147,7 @@ ALL_MACHINES = \
 	cpu-pj.lo \
 	cpu-plugin.lo \
 	cpu-powerpc.lo \
+	cpu-pru.lo \
 	cpu-rs6000.lo \
 	cpu-riscv.lo \
 	cpu-rl78.lo \
@@ -235,6 +236,7 @@ ALL_MACHINES_CFILES = \
 	cpu-pj.c \
 	cpu-plugin.c \
 	cpu-powerpc.c \
+	cpu-pru.c \
 	cpu-rs6000.c \
 	cpu-riscv.c \
 	cpu-rl78.c \
@@ -365,6 +367,7 @@ BFD32_BACKENDS = \
 	elf32-or1k.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
+	elf32-pru.lo \
 	elf32-rl78.lo \
 	elf32-rx.lo \
 	elf32-s390.lo \
@@ -557,6 +560,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-or1k.c \
 	elf32-pj.c \
 	elf32-ppc.c \
+	elf32-pru.c \
 	elf32-rl78.c \
 	elf32-rx.c \
 	elf32-s390.c \

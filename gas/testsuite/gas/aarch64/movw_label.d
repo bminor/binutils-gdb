@@ -5,18 +5,18 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	f2800002 	movk	x2, #0x0
-			0: R_AARCH64_MOVW_UABS_G0_NC	x3.22
+			0: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	x3.22
    4:	f2800002 	movk	x2, #0x0
-			4: R_AARCH64_MOVW_UABS_G0_NC	x8
+			4: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	x8
    8:	f2800002 	movk	x2, #0x0
-			8: R_AARCH64_MOVW_UABS_G0_NC	w3
+			8: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	w3
    c:	f2800002 	movk	x2, #0x0
-			c: R_AARCH64_MOVW_UABS_G0_NC	w8.22
+			c: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	w8.22
   10:	f2800002 	movk	x2, #0x0
-			10: R_AARCH64_MOVW_UABS_G0_NC	sp
+			10: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	sp
   14:	f2800002 	movk	x2, #0x0
-			14: R_AARCH64_MOVW_UABS_G0_NC	wzr
+			14: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	wzr
   18:	f2800002 	movk	x2, #0x0
-			18: R_AARCH64_MOVW_UABS_G0_NC	xzr
+			18: R_AARCH64_(P32_|)MOVW_UABS_G0_NC	xzr

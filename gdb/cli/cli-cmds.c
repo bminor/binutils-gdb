@@ -1,6 +1,6 @@
 /* GDB CLI commands.
 
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -254,7 +254,7 @@ complete_command (char *arg, int from_tty)
     {
       /* Only print this for non-mi frontends.  An MI frontend may not
 	 be able to handle this.  */
-      if (!ui_out_is_mi_like_p (current_uiout))
+      if (!current_uiout->is_mi_like_p ())
 	{
 	  printf_unfiltered (_("max-completions is zero,"
 			       " completion is disabled.\n"));

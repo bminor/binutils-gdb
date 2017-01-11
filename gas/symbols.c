@@ -1,5 +1,5 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1429,7 +1429,16 @@ resolve_symbol_value (symbolS *symp)
 	    case O_gt:	left = left >  right ? ~ (offsetT) 0 : 0; break;
 	    case O_logical_and:	left = left && right; break;
 	    case O_logical_or:	left = left || right; break;
-	    default:		abort ();
+
+	    case O_illegal:
+	    case O_absent:
+	    case O_constant:
+	      /* See PR 20895 for a reproducer.  */
+	      as_bad (_("Invalid operation on symbol"));
+	      goto exit_dont_set_value;
+	      
+	    default:
+	      abort ();
 	    }
 
 	  final_val += symp->sy_frag->fr_address + left;

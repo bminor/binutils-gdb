@@ -1,6 +1,6 @@
 /* Low level interface to i386 running the GNU Hurd.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,16 +17,20 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Mach/Hurd headers are not yet ready for C++ compilation.  */
+extern "C"
+{
+#include <mach.h>
+#include <mach_error.h>
+#include <mach/message.h>
+#include <mach/exception.h>
+}
+
 #include "defs.h"
 #include "x86-nat.h"
 #include "inferior.h"
 #include "floatformat.h"
 #include "regcache.h"
-
-#include <mach.h>
-#include <mach_error.h>
-#include <mach/message.h>
-#include <mach/exception.h>
 
 #include "i386-tdep.h"
 
@@ -58,7 +62,7 @@ fetch_fpregs (struct regcache *regcache, struct proc *thread)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
-  error_t err;
+  kern_return_t err;
 
   err = thread_get_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, &count);
@@ -148,7 +152,7 @@ store_fpregs (const struct regcache *regcache, struct proc *thread, int regno)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
-  error_t err;
+  kern_return_t err;
 
   err = thread_get_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, &count);
@@ -279,7 +283,7 @@ static void
 i386_gnu_dr_get (struct i386_debug_state *regs, struct proc *thread)
 {
   mach_msg_type_number_t count = i386_DEBUG_STATE_COUNT;
-  error_t err;
+  kern_return_t err;
 
   err = thread_get_state (thread->port, i386_DEBUG_STATE,
 			  (thread_state_t) regs, &count);
@@ -293,7 +297,7 @@ i386_gnu_dr_get (struct i386_debug_state *regs, struct proc *thread)
 static void
 i386_gnu_dr_set (const struct i386_debug_state *regs, struct proc *thread)
 {
-  error_t err;
+  kern_return_t err;
 
   err = thread_set_state (thread->port, i386_DEBUG_STATE,
 			  (thread_state_t) regs, i386_DEBUG_STATE_COUNT);
@@ -307,7 +311,7 @@ i386_gnu_dr_set (const struct i386_debug_state *regs, struct proc *thread)
 static void
 i386_gnu_dr_set_control_one (struct proc *thread, void *arg)
 {
-  unsigned long *control = arg;
+  unsigned long *control = (unsigned long *) arg;
   struct i386_debug_state regs;
 
   i386_gnu_dr_get (&regs, thread);
@@ -337,7 +341,7 @@ struct reg_addr
 static void
 i386_gnu_dr_set_addr_one (struct proc *thread, void *arg)
 {
-  struct reg_addr *reg_addr = arg;
+  struct reg_addr *reg_addr = (struct reg_addr *) arg;
   struct i386_debug_state regs;
 
   i386_gnu_dr_get (&regs, thread);

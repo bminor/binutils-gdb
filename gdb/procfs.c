@@ -1,6 +1,6 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
@@ -3413,26 +3413,24 @@ dbx_link_addr (bfd *abfd)
 static int
 insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
 {
-  bfd *abfd;
   long storage_needed;
   CORE_ADDR sym_addr;
 
-  abfd = gdb_bfd_fdopenr ("unamed", 0, fd);
+  gdb_bfd_ref_ptr abfd (gdb_bfd_fdopenr ("unamed", 0, fd));
   if (abfd == NULL)
     {
       warning (_("Failed to create a bfd: %s."), bfd_errmsg (bfd_get_error ()));
       return 0;
     }
 
-  if (!bfd_check_format (abfd, bfd_object))
+  if (!bfd_check_format (abfd.get (), bfd_object))
     {
       /* Not the correct format, so we can not possibly find the dbx_link
 	 symbol in it.	*/
-      gdb_bfd_unref (abfd);
       return 0;
     }
 
-  sym_addr = dbx_link_addr (abfd);
+  sym_addr = dbx_link_addr (abfd.get ());
   if (sym_addr != 0)
     {
       struct breakpoint *dbx_link_bpt;
@@ -3444,14 +3442,11 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
       if (dbx_link_bpt == NULL)
 	{
 	  warning (_("Failed to insert dbx_link breakpoint."));
-	  gdb_bfd_unref (abfd);
 	  return 0;
 	}
-      gdb_bfd_unref (abfd);
       return 1;
     }
 
-  gdb_bfd_unref (abfd);
   return 0;
 }
 

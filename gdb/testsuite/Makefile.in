@@ -1,5 +1,5 @@
 # Makefile for regression testing the GNU debugger.
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2017 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -372,3 +372,6 @@ read1.so: lib/read1.c
 # Build the read1 machinery.
 .PHONY: read1
 read1: read1.so expect-read1
+
+# Disable implicit make rules.
+include $(srcdir)/../disable-implicit-rules.mk

@@ -1,6 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1576,12 +1576,14 @@ deprecated_value_internalvar_hack (struct value *value)
 struct frame_id *
 deprecated_value_next_frame_id_hack (struct value *value)
 {
+  gdb_assert (value->lval == lval_register);
   return &value->location.reg.next_frame_id;
 }
 
 int *
 deprecated_value_regnum_hack (struct value *value)
 {
+  gdb_assert (value->lval == lval_register);
   return &value->location.reg.regnum;
 }
 

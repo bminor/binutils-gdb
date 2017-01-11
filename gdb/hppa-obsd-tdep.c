@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/hppa
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -166,30 +166,12 @@ hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-/* OpenBSD uses uses the traditional NetBSD core file format, even for
-   ports that use ELF.  */
-#define GDB_OSABI_NETBSD_CORE GDB_OSABI_OPENBSD_ELF
-
-static enum gdb_osabi
-hppaobsd_core_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_CORE;
-
-  return GDB_OSABI_UNKNOWN;
-}
-
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_hppabsd_tdep (void);
 
 void
 _initialize_hppabsd_tdep (void)
 {
-  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_hppa, bfd_target_unknown_flavour,
-				  hppaobsd_core_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_OPENBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_OPENBSD,
 			  hppaobsd_init_abi);
 }

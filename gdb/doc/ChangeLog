@@ -1,3 +1,29 @@
+2017-01-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Contributors): Add SRI International and University
+	of Cambridge for FreeBSD/mips.
+
+2016-12-22  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Symbols): Update docs for symbol printing maintenance
+	commands.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (User-defined Commands): Limit on number of
+	arguments passed to user-defined commands removed; update.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR cli/20559
+	* gdb.texinfo (Define): Add example of using "eval" to process a
+	variable number of arguments.
+	(Output) <eval>: Add anchor.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Likewise.
+
 2016-11-18  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Add missing comma after

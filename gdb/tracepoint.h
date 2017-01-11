@@ -1,5 +1,5 @@
 /* Data structures associated with tracepoints in GDB.
-   Copyright (C) 1997-2016 Free Software Foundation, Inc.
+   Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,7 +77,7 @@ enum trace_stop_reason
   {
     trace_stop_reason_unknown,
     trace_never_run,
-    tstop_command,
+    trace_stop_command,
     trace_buffer_full,
     trace_disconnected,
     tracepoint_passcount,

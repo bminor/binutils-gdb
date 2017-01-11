@@ -1,6 +1,6 @@
 /* Xilinx MicroBlaze-specific support for 32-bit ELF
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -729,10 +729,6 @@ struct elf32_mb_link_hash_entry
 struct elf32_mb_link_hash_table
 {
   struct elf_link_hash_table elf;
-
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
 
   /* Small local sym to section mapping cache.  */
   struct sym_cache sym_sec;
@@ -2357,6 +2353,7 @@ microblaze_elf_check_relocs (bfd * abfd,
         dogottls:
           sec->has_tls_reloc = 1;
 	  /* Fall through.  */
+        case R_MICROBLAZE_GOTOFF_64:
         case R_MICROBLAZE_GOT_64:
           if (htab->elf.sgot == NULL)
             {
@@ -2503,32 +2500,6 @@ microblaze_elf_check_relocs (bfd * abfd,
   return TRUE;
 }
 
-static bfd_boolean
-microblaze_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
-{
-  struct elf32_mb_link_hash_table *htab;
-
-  htab = elf32_mb_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  if (!htab->elf.sgot && !_bfd_elf_create_got_section (dynobj, info))
-    return FALSE;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-
-  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
-    abort ();
-
-  return TRUE;
-}
-
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
@@ -2587,9 +2558,8 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   struct elf32_mb_link_hash_table *htab;
   struct elf32_mb_link_hash_entry * eh;
   struct elf32_mb_dyn_relocs *p;
-  asection *sdynbss, *s;
+  asection *s, *srel;
   unsigned int power_of_two;
-  bfd *dynobj;
 
   htab = elf32_mb_hash_table (info);
   if (htab == NULL)
@@ -2688,11 +2658,19 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_MICROBLAZE_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
      runtime process image.  */
-  dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
 
@@ -2702,21 +2680,20 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (power_of_two > 3)
     power_of_two = 3;
 
-  sdynbss = htab->sdynbss;
   /* Apply the required alignment.  */
-  sdynbss->size = BFD_ALIGN (sdynbss->size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (dynobj, sdynbss))
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
+  if (power_of_two > s->alignment_power)
     {
-      if (! bfd_set_section_alignment (dynobj, sdynbss, power_of_two))
+      if (!bfd_set_section_alignment (s->owner, s, power_of_two))
 	return FALSE;
     }
 
   /* Define the symbol as being at this point in the section.  */
-  h->root.u.def.section = sdynbss;
-  h->root.u.def.value = sdynbss->size;
+  h->root.u.def.section = s;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  sdynbss->size += h->size;
+  s->size += h->size;
   return TRUE;
 }
 
@@ -3080,7 +3057,9 @@ microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
         }
       else if (s != htab->elf.splt
 	       && s != htab->elf.sgot
-	       && s != htab->elf.sgotplt)
+	       && s != htab->elf.sgotplt
+	       && s != htab->elf.sdynbss
+	       && s != htab->elf.sdynrelro)
         {
           /* It's not one of our sections, so don't allocate space.  */
           continue;
@@ -3286,14 +3265,15 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      s = bfd_get_linker_section (htab->elf.dynobj, ".rela.bss");
-      BFD_ASSERT (s != NULL);
-
       rela.r_offset = (h->root.u.def.value
                        + h->root.u.def.section->output_section->vma
                        + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_MICROBLAZE_COPY);
       rela.r_addend = 0;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
       loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
@@ -3469,11 +3449,12 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define elf_backend_want_got_plt    		1
 #define elf_backend_plt_readonly    		1
 #define elf_backend_got_header_size 		12
+#define elf_backend_want_dynrelro		1
 #define elf_backend_rela_normal     		1
 #define elf_backend_dtrel_excludes_plt		1
 
 #define elf_backend_adjust_dynamic_symbol       microblaze_elf_adjust_dynamic_symbol
-#define elf_backend_create_dynamic_sections     microblaze_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections     _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections     microblaze_elf_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol       microblaze_elf_finish_dynamic_symbol
 #define elf_backend_size_dynamic_sections       microblaze_elf_size_dynamic_sections

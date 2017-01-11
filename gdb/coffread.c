@@ -1,5 +1,5 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2017 Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
    This file is part of GDB.
@@ -742,10 +742,10 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
       if (debugfile)
 	{
-	  bfd *abfd = symfile_bfd_open (debugfile);
+	  gdb_bfd_ref_ptr abfd (symfile_bfd_open (debugfile));
 
-	  make_cleanup_bfd_unref (abfd);
-	  symbol_file_add_separate (abfd, debugfile, symfile_flags, objfile);
+	  symbol_file_add_separate (abfd.get (), debugfile, symfile_flags,
+				    objfile);
 	}
     }
 

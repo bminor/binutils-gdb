@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -2111,7 +2111,7 @@ mips_lookup_ase (const char *name)
 static inline unsigned int
 micromips_insn_length (const struct mips_opcode *mo)
 {
-  return (mo->mask >> 16) == 0 ? 2 : 4;
+  return mips_opcode_32bit_p (mo) ? 4 : 2;
 }
 
 /* Return the length of MIPS16 instruction OPCODE.  */
@@ -3217,7 +3217,7 @@ is_opcode_valid (const struct mips_opcode *mo)
   int fp_s, fp_d;
   unsigned int i;
 
-  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+  if (ISA_HAS_64BIT_REGS (isa))
     for (i = 0; i < ARRAY_SIZE (mips_ases); i++)
       if ((ase & mips_ases[i].flags) == mips_ases[i].flags)
 	ase |= mips_ases[i].flags64;
@@ -3258,7 +3258,8 @@ is_opcode_valid_16 (const struct mips_opcode *mo)
 }
 
 /* Return TRUE if the size of the microMIPS opcode MO matches one
-   explicitly requested.  Always TRUE in the standard MIPS mode.  */
+   explicitly requested.  Always TRUE in the standard MIPS mode.
+   Use is_size_valid_16 for MIPS16 opcodes.  */
 
 static bfd_boolean
 is_size_valid (const struct mips_opcode *mo)
@@ -3278,6 +3279,23 @@ is_size_valid (const struct mips_opcode *mo)
   if (mo->pinfo == INSN_MACRO)
     return FALSE;
   return forced_insn_length == micromips_insn_length (mo);
+}
+
+/* Return TRUE if the size of the MIPS16 opcode MO matches one
+   explicitly requested.  */
+
+static bfd_boolean
+is_size_valid_16 (const struct mips_opcode *mo)
+{
+  if (!forced_insn_length)
+    return TRUE;
+  if (mo->pinfo == INSN_MACRO)
+    return FALSE;
+  if (forced_insn_length == 2 && mips_opcode_32bit_p (mo))
+    return FALSE;
+  if (forced_insn_length == 4 && (mo->pinfo2 & INSN2_SHORT_ONLY))
+    return FALSE;
+  return TRUE;
 }
 
 /* Return TRUE if the microMIPS opcode MO is valid for the delay slot
@@ -3356,7 +3374,7 @@ validate_mips_insn (const struct mips_opcode *opcode,
 
       default:
 	if (!decode_operand)
-	  operand = decode_mips16_operand (*s, FALSE);
+	  operand = decode_mips16_operand (*s, mips_opcode_32bit_p (opcode));
 	else
 	  operand = decode_operand (s);
 	if (!operand && opcode->pinfo != INSN_MACRO)
@@ -3414,18 +3432,9 @@ static int
 validate_mips16_insn (const struct mips_opcode *opcode,
 		      struct mips_operand_array *operands)
 {
-  if (opcode->args[0] == 'a' || opcode->args[0] == 'i')
-    {
-      /* In this case OPCODE defines the first 16 bits in a 32-bit jump
-	 instruction.  Use TMP to describe the full instruction.  */
-      struct mips_opcode tmp;
+  unsigned long insn_bits = mips_opcode_32bit_p (opcode) ? 0xffffffff : 0xffff;
 
-      tmp = *opcode;
-      tmp.match <<= 16;
-      tmp.mask <<= 16;
-      return validate_mips_insn (&tmp, 0xffffffff, 0, operands);
-    }
-  return validate_mips_insn (opcode, 0xffff, 0, operands);
+  return validate_mips_insn (opcode, insn_bits, 0, operands);
 }
 
 /* The microMIPS version of validate_mips_insn.  */
@@ -7357,8 +7366,22 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
   else if (mips_opts.mips16 && *reloc_type > BFD_RELOC_UNUSED)
     {
+      bfd_boolean require_unextended;
+      bfd_boolean require_extended;
       symbolS *symbol;
       offsetT offset;
+
+      if (forced_insn_length != 0)
+	{
+	  require_unextended = forced_insn_length == 2;
+	  require_extended = forced_insn_length == 4;
+	}
+      else
+	{
+	  require_unextended = (mips_opts.noautoextend
+				&& !mips_opcode_32bit_p (ip->insn_mo));
+	  require_extended = 0;
+	}
 
       /* We need to set up a variant frag.  */
       gas_assert (address_expr != NULL);
@@ -7378,7 +7401,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       add_relaxed_insn (ip, 4, 0,
 			RELAX_MIPS16_ENCODE
 			(*reloc_type - BFD_RELOC_UNUSED,
-			 forced_insn_length == 2, forced_insn_length == 4,
+			 require_unextended, require_extended,
 			 delayed_branch_p (&history[0]),
 			 history[0].mips16_absolute_jump_p),
 			symbol, offset);
@@ -8039,8 +8062,16 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
   const char *args;
   const struct mips_operand *operand;
   const struct mips_operand *ext_operand;
+  int required_insn_length;
   struct mips_arg_info arg;
   int relax_char;
+
+  if (forced_insn_length)
+    required_insn_length = forced_insn_length;
+  else if (mips_opts.noautoextend && !mips_opcode_32bit_p (opcode))
+    required_insn_length = 2;
+  else
+    required_insn_length = 0;
 
   create_insn (insn, opcode);
   imm_expr.X_op = O_absent;
@@ -8097,16 +8128,19 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 				       &value))
 	    {
 	      mips16_immed (NULL, 0, relax_char, *offset_reloc, value,
-			    forced_insn_length, &insn->insn_opcode);
+			    required_insn_length, &insn->insn_opcode);
 	      offset_expr.X_op = O_absent;
 	      *offset_reloc = BFD_RELOC_UNUSED;
 	    }
 	  else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
 	    {
-	      if (forced_insn_length == 2)
+	      if (required_insn_length == 2)
 		set_insn_error (0, _("invalid unextended operand value"));
-	      forced_insn_length = 4;
-	      insn->insn_opcode |= MIPS16_EXTEND;
+	      else
+		{
+		  forced_insn_length = 4;
+		  insn->insn_opcode |= MIPS16_EXTEND;
+		}
 	    }
 	  else if (relax_char)
 	    *offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
@@ -8150,22 +8184,14 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	case 'a':
 	case 'i':
 	  *offset_reloc = BFD_RELOC_MIPS16_JMP;
-	  insn->insn_opcode <<= 16;
 	  break;
 	}
 
-      operand = decode_mips16_operand (c, FALSE);
+      operand = decode_mips16_operand (c, mips_opcode_32bit_p (opcode));
       if (!operand)
 	abort ();
 
-      /* '6' is a special case.  It is used for BREAK and SDBBP,
-	 whose operands are only meaningful to the software that decodes
-	 them.  This means that there is no architectural reason why
-	 they cannot be prefixed by EXTEND, but in practice,
-	 exception handlers will only look at the instruction
-	 itself.  We therefore allow '6' to be extended when
-	 disassembling but not when assembling.  */
-      if (operand->type != OP_PCREL && c != '6')
+      if (operand->type != OP_PCREL)
 	{
 	  ext_operand = decode_mips16_operand (c, TRUE);
 	  if (operand != ext_operand)
@@ -8315,11 +8341,13 @@ match_mips16_insns (struct mips_cl_insn *insn, const struct mips_opcode *first,
 {
   const struct mips_opcode *opcode;
   bfd_boolean seen_valid_for_isa;
+  bfd_boolean seen_valid_for_size;
 
   /* Search for a match, ignoring alternatives that don't satisfy the
      current ISA.  There are no separate entries for extended forms so
      we deal with forced_length later.  */
   seen_valid_for_isa = FALSE;
+  seen_valid_for_size = FALSE;
   opcode = first;
   do
     {
@@ -8327,8 +8355,12 @@ match_mips16_insns (struct mips_cl_insn *insn, const struct mips_opcode *first,
       if (is_opcode_valid_16 (opcode))
 	{
 	  seen_valid_for_isa = TRUE;
-	  if (match_mips16_insn (insn, opcode, tokens))
-	    return TRUE;
+	  if (is_size_valid_16 (opcode))
+	    {
+	      seen_valid_for_size = TRUE;
+	      if (match_mips16_insn (insn, opcode, tokens))
+		return TRUE;
+	    }
 	}
       ++opcode;
     }
@@ -8340,6 +8372,19 @@ match_mips16_insns (struct mips_cl_insn *insn, const struct mips_opcode *first,
   if (!seen_valid_for_isa)
     {
       match_invalid_for_isa ();
+      return TRUE;
+    }
+
+  /* Handle the case where we didn't try to match an instruction because
+     all the alternatives were of the wrong size.  */
+  if (!seen_valid_for_size)
+    {
+      if (forced_insn_length == 2)
+	set_insn_error
+	  (0, _("unrecognized unextended version of MIPS16 opcode"));
+      else
+	set_insn_error
+	  (0, _("unrecognized extended version of MIPS16 opcode"));
       return TRUE;
     }
 
@@ -8716,16 +8761,15 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	case ')':
 	  break;
 
-	case '0':
+	case '.':
 	case 'S':
 	case 'P':
 	case 'R':
 	  break;
 
 	case '<':
-	case '>':
-	case '4':
 	case '5':
+	case 'F':
 	case 'H':
 	case 'W':
 	case 'D':
@@ -13490,7 +13534,7 @@ mips16_macro (struct mips_cl_insn *ip)
       s = "mfhi";
     do_div3:
       start_noreorder ();
-      macro_build (NULL, dbl ? "ddiv" : "div", "0,x,y", op[1], op[2]);
+      macro_build (NULL, dbl ? "ddiv" : "div", ".,x,y", op[1], op[2]);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bnez", "x,p", op[2]);
       macro_build (NULL, "break", "6", 7);
@@ -13520,7 +13564,7 @@ mips16_macro (struct mips_cl_insn *ip)
       s2 = "mfhi";
     do_divu3:
       start_noreorder ();
-      macro_build (NULL, s, "0,x,y", op[1], op[2]);
+      macro_build (NULL, s, ".,x,y", op[1], op[2]);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bnez", "x,p", op[2]);
       macro_build (NULL, "break", "6", 7);
@@ -13542,7 +13586,7 @@ mips16_macro (struct mips_cl_insn *ip)
     case M_SUBU_I:
     do_subu:
       imm_expr.X_add_number = -imm_expr.X_add_number;
-      macro_build (&imm_expr, dbl ? "daddiu" : "addiu", "y,x,4", op[0], op[1]);
+      macro_build (&imm_expr, dbl ? "daddiu" : "addiu", "y,x,F", op[0], op[1]);
       break;
 
     case M_SUBU_I_2:
@@ -13811,13 +13855,14 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
   char *end, *s, c;
   struct mips_opcode *first;
   struct mips_operand_token *tokens;
-
-  forced_insn_length = 0;
+  unsigned int l;
 
   for (s = str; ISLOWER (*s); ++s)
     ;
   end = s;
   c = *end;
+
+  l = 0;
   switch (c)
     {
     case '\0':
@@ -13828,26 +13873,27 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
       break;
 
     case '.':
-      if (s[1] == 't' && s[2] == ' ')
+      s++;
+      if (*s == 't')
 	{
-	  forced_insn_length = 2;
-	  s += 3;
-	  break;
+	  l = 2;
+	  s++;
 	}
-      else if (s[1] == 'e' && s[2] == ' ')
+      else if (*s == 'e')
 	{
-	  forced_insn_length = 4;
-	  s += 3;
-	  break;
+	  l = 4;
+	  s++;
 	}
+      if (*s == '\0')
+	break;
+      else if (*s++ == ' ')
+	break;
       /* Fall through.  */
     default:
       set_insn_error (0, _("unrecognized opcode"));
       return;
     }
-
-  if (mips_opts.noautoextend && !forced_insn_length)
-    forced_insn_length = 2;
+  forced_insn_length = l;
 
   *end = 0;
   first = (struct mips_opcode *) hash_find (mips16_op_hash, str);
@@ -13977,7 +14023,7 @@ mips16_immed (const char *file, unsigned int line, int type,
 		      _("operand value out of range for instruction"));
     }
   uval = ((unsigned int) val >> operand->shift) - operand->bias;
-  if (length == 2)
+  if (length == 2 || operand->root.lsb != 0)
     *insn = mips_insert_operand (&operand->root, *insn, uval);
   else
     *insn |= mips16_immed_extend (uval, operand->root.size);
@@ -18370,10 +18416,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 			    _("unsupported relocation"));
 	      break;
 	    }
-	  if (reloc != BFD_RELOC_NONE)
+	  if (reloc == BFD_RELOC_NONE)
+	    ;
+	  else if (ext)
 	    {
-	      gas_assert (ext);
-
 	      exp.X_op = O_symbol;
 	      exp.X_add_symbol = fragp->fr_symbol;
 	      exp.X_add_number = fragp->fr_offset;
@@ -18388,6 +18434,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		 in 2 octets.  */
 	      fixp->fx_no_overflow = 1;
 	    }
+	  else
+	    as_bad_where (fragp->fr_file, fragp->fr_line,
+			  _("invalid unextended operand value"));
 	}
       else
 	mips16_immed (fragp->fr_file, fragp->fr_line, type,

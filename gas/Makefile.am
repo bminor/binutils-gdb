@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -177,6 +177,7 @@ TARGET_CPU_CFILES = \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-pru.c \
 	config/tc-riscv.c \
 	config/tc-rl78.c \
 	config/tc-rx.c \
@@ -251,6 +252,7 @@ TARGET_CPU_HFILES = \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-pru.h \
 	config/tc-riscv.h \
 	config/tc-rl78.h \
 	config/tc-rx.h \

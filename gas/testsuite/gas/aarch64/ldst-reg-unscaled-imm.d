@@ -4,7 +4,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	3c1003e7 	stur	b7, \[sp, #-256\]
    4:	3c1553e7 	stur	b7, \[sp, #-171\]
    8:	3c0003e7 	stur	b7, \[sp\]

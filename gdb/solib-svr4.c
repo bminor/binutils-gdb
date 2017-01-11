@@ -1,6 +1,6 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2355,7 +2355,6 @@ enable_break (struct svr4_info *info, int from_tty)
       int load_addr_found = 0;
       int loader_found_in_list = 0;
       struct so_list *so;
-      bfd *tmp_bfd = NULL;
       struct target_ops *tmp_bfd_target;
 
       sym_addr = 0;
@@ -2369,6 +2368,7 @@ enable_break (struct svr4_info *info, int from_tty)
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
 
+      gdb_bfd_ref_ptr tmp_bfd;
       TRY
         {
 	  tmp_bfd = solib_bfd_open (interp_name);
@@ -2382,11 +2382,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	goto bkpt_at_symbol;
 
       /* Now convert the TMP_BFD into a target.  That way target, as
-         well as BFD operations can be used.  */
-      tmp_bfd_target = target_bfd_reopen (tmp_bfd);
-      /* target_bfd_reopen acquired its own reference, so we can
-         release ours now.  */
-      gdb_bfd_unref (tmp_bfd);
+         well as BFD operations can be used.  target_bfd_reopen
+         acquires its own reference.  */
+      tmp_bfd_target = target_bfd_reopen (tmp_bfd.get ());
 
       /* On a running target, we can get the dynamic linker's base
          address from the shared library table.  */
@@ -2397,7 +2395,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
-	      load_addr = lm_addr_check (so, tmp_bfd);
+	      load_addr = lm_addr_check (so, tmp_bfd.get ());
 	      break;
 	    }
 	  so = so->next;
@@ -2418,7 +2416,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
 	      {
 		CORE_ADDR space_size = (CORE_ADDR) 1 << addr_bit;
-		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd,
+		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd.get (),
 							      tmp_bfd_target);
 
 		gdb_assert (load_addr < space_size);
@@ -2447,7 +2445,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
 
 	  load_addr = (regcache_read_pc (regcache)
-		       - exec_entry_point (tmp_bfd, tmp_bfd_target));
+		       - exec_entry_point (tmp_bfd.get (), tmp_bfd_target));
 	}
 
       if (!loader_found_in_list)
@@ -2460,29 +2458,30 @@ enable_break (struct svr4_info *info, int from_tty)
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */
-      interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
+      interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
 	  info->interp_text_sect_low =
-	    bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
+	    bfd_section_vma (tmp_bfd.get (), interp_sect) + load_addr;
 	  info->interp_text_sect_high =
 	    info->interp_text_sect_low
-	    + bfd_section_size (tmp_bfd, interp_sect);
+	    + bfd_section_size (tmp_bfd.get (), interp_sect);
 	}
-      interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
+      interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".plt");
       if (interp_sect)
 	{
 	  info->interp_plt_sect_low =
-	    bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
+	    bfd_section_vma (tmp_bfd.get (), interp_sect) + load_addr;
 	  info->interp_plt_sect_high =
 	    info->interp_plt_sect_low
-	    + bfd_section_size (tmp_bfd, interp_sect);
+	    + bfd_section_size (tmp_bfd.get (), interp_sect);
 	}
 
       /* Now try to set a breakpoint in the dynamic linker.  */
       for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  sym_addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name_and_sec_flags,
+	  sym_addr = gdb_bfd_lookup_symbol (tmp_bfd.get (),
+					    cmp_name_and_sec_flags,
 					    *bkpt_namep);
 	  if (sym_addr != 0)
 	    break;

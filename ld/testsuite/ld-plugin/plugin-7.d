@@ -29,6 +29,6 @@ hook called: claim_file tmpdir/text.o \[@0/.* not claimed
 #...
 hook called: all symbols read.
 tmpdir/main.o: In function `main':
-.*main.c.*: undefined reference to `func'
+.*main.c.*: undefined reference to `\.?func'
 hook called: cleanup.
 #...

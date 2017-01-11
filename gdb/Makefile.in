@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2016 Free Software Foundation, Inc.
+# Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -817,6 +817,7 @@ ALL_TARGET_OBS = \
 	mep-tdep.o \
 	microblaze-linux-tdep.o \
 	microblaze-tdep.o \
+	mips-fbsd-tdep.o \
 	mips-linux-tdep.o \
 	mips-nbsd-tdep.o \
 	mips-sde-tdep.o \
@@ -873,7 +874,6 @@ ALL_TARGET_OBS = \
 	tilegx-tdep.o \
 	v850-tdep.o \
 	vax-nbsd-tdep.o \
-	vax-obsd-tdep.o \
 	vax-tdep.o \
 	windows-tdep.o \
 	xcoffread.o \
@@ -1296,7 +1296,6 @@ HFILES_NO_SRCDIR = \
 	gdb_expat.h \
 	gdb_obstack.h \
 	gdb_proc_service.h \
-	gdb_ptrace.h \
 	gdb_regex.h \
 	gdb_select.h \
 	gdb-stabs.h \
@@ -1519,6 +1518,7 @@ HFILES_NO_SRCDIR = \
 	nat/aarch64-linux.h \
 	nat/aarch64-linux-hw-point.h \
 	nat/amd64-linux-siginfo.h \
+	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
 	nat/linux-btrace.h \
 	nat/linux-namespaces.h \
@@ -2541,6 +2541,8 @@ ALLDEPFILES = \
 	microblaze-linux-tdep.c \
 	microblaze-tdep.c \
 	mingw-hdep.c \
+	mips-fbsd-nat.c \
+	mips-fbsd-tdep.c \
 	mips-linux-nat.c \
 	mips-linux-tdep.c \
 	mips-nbsd-nat.c \
@@ -2908,5 +2910,8 @@ endif
 
 # Dependencies.
 -include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
+
+# Disable implicit make rules.
+include $(srcdir)/disable-implicit-rules.mk
 
 ### end of the gdb Makefile.in.

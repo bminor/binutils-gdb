@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD, architecture-independent.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -334,7 +334,7 @@ fbsd_get_syscall_number (struct gdbarch *gdbarch,
   internal_error (__FILE__, __LINE__, _("fbsd_get_sycall_number called"));
 }
 
-/* To be called from GDB_OSABI_FREEBSD_ELF handlers. */
+/* To be called from GDB_OSABI_FREEBSD handlers. */
 
 void
 fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

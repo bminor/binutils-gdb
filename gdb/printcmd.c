@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,6 +45,7 @@
 #include "charset.h"
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
+#include "cli/cli-script.h"
 #include "format.h"
 #include "source.h"
 
@@ -2722,6 +2723,8 @@ eval_command (char *arg, int from_tty)
   ui_printf (arg, ui_out);
 
   std::string expanded = ui_file_as_string (ui_out);
+
+  expanded = insert_user_defined_cmd_args (expanded.c_str ());
 
   execute_command (&expanded[0], from_tty);
 

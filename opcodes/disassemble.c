@@ -1,5 +1,5 @@
 /* Select disassembly routine for specified architecture.
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -73,6 +73,7 @@
 #define ARCH_pdp11
 #define ARCH_pj
 #define ARCH_powerpc
+#define ARCH_pru
 #define ARCH_rs6000
 #define ARCH_rl78
 #define ARCH_rx
@@ -373,6 +374,11 @@ disassembler (bfd *abfd)
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_little_powerpc;
+      break;
+#endif
+#ifdef ARCH_pru
+    case bfd_arch_pru:
+      disassemble = print_insn_pru;
       break;
 #endif
 #ifdef ARCH_riscv

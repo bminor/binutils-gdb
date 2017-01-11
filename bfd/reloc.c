@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -5124,6 +5124,24 @@ ENUMX
   BFD_RELOC_RISCV_GPREL_I
 ENUMX
   BFD_RELOC_RISCV_GPREL_S
+ENUMX
+  BFD_RELOC_RISCV_TPREL_I
+ENUMX
+  BFD_RELOC_RISCV_TPREL_S
+ENUMX
+  BFD_RELOC_RISCV_RELAX
+ENUMX
+  BFD_RELOC_RISCV_CFA
+ENUMX
+  BFD_RELOC_RISCV_SUB6
+ENUMX
+  BFD_RELOC_RISCV_SET6
+ENUMX
+  BFD_RELOC_RISCV_SET8
+ENUMX
+  BFD_RELOC_RISCV_SET16
+ENUMX
+  BFD_RELOC_RISCV_SET32
 ENUMDOC
   RISC-V relocations.
 
@@ -6497,6 +6515,54 @@ ENUMX
   BFD_RELOC_NIOS2_R2_T1X1I6_2
 ENUMDOC
   Relocations used by the Altera Nios II core.
+
+ENUM
+  BFD_RELOC_PRU_U16
+ENUMDOC
+  PRU LDI 16-bit unsigned data-memory relocation.
+ENUM
+  BFD_RELOC_PRU_U16_PMEMIMM
+ENUMDOC
+  PRU LDI 16-bit unsigned instruction-memory relocation.
+ENUM
+  BFD_RELOC_PRU_LDI32
+ENUMDOC
+  PRU relocation for two consecutive LDI load instructions that load a
+  32 bit value into a register. If the higher bits are all zero, then
+  the second instruction may be relaxed.
+ENUM
+  BFD_RELOC_PRU_S10_PCREL
+ENUMDOC
+  PRU QBBx 10-bit signed PC-relative relocation.
+ENUM
+  BFD_RELOC_PRU_U8_PCREL
+ENUMDOC
+  PRU 8-bit unsigned relocation used for the LOOP instruction.
+ENUM
+  BFD_RELOC_PRU_32_PMEM
+ENUMX
+  BFD_RELOC_PRU_16_PMEM
+ENUMDOC
+  PRU Program Memory relocations.  Used to convert from byte addressing to
+  32-bit word addressing.
+ENUM
+  BFD_RELOC_PRU_GNU_DIFF8
+ENUMX
+  BFD_RELOC_PRU_GNU_DIFF16
+ENUMX
+  BFD_RELOC_PRU_GNU_DIFF32
+ENUMX
+  BFD_RELOC_PRU_GNU_DIFF16_PMEM
+ENUMX
+  BFD_RELOC_PRU_GNU_DIFF32_PMEM
+ENUMDOC
+  PRU relocations to mark the difference of two local symbols.
+  These are only needed to support linker relaxation and can be ignored
+  when not relaxing.  The field is set to the value of the difference
+  assuming no relaxation.  The relocation encodes the position of the
+  second symbol so the linker can determine whether to adjust the field
+  value. The PMEM variants encode the word difference, instead of byte
+  difference between symbols.
 
 ENUM
   BFD_RELOC_IQ2000_OFFSET_16

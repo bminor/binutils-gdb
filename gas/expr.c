@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1371,7 +1371,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
   /* It is more 'efficient' to clean up the expressionS when they are
      created.  Doing it here saves lines of code.  */
   clean_up_expression (expressionP);
-  SKIP_WHITESPACE ();		/* -> 1st char after operand.  */
+  SKIP_ALL_WHITESPACE ();		/* -> 1st char after operand.  */
   know (*input_line_pointer != ' ');
 
   /* The PA port needs this information.  */

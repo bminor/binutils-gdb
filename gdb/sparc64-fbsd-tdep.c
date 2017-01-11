@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/sparc64.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -248,5 +248,5 @@ void
 _initialize_sparc64fbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
-			  GDB_OSABI_FREEBSD_ELF, sparc64fbsd_init_abi);
+			  GDB_OSABI_FREEBSD, sparc64fbsd_init_abi);
 }

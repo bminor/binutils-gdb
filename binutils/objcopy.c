@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -3551,7 +3551,10 @@ mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
      special bfd section symbols, then mark it with BSF_KEEP.  */
   for (i = 0; i < relcount; i++)
     {
-      if (*relpp[i]->sym_ptr_ptr != bfd_com_section_ptr->symbol
+      /* See PRs 20923 and 20930 for reproducers for the NULL tests.  */
+      if (relpp[i]->sym_ptr_ptr != NULL
+	  && * relpp[i]->sym_ptr_ptr != NULL
+	  && *relpp[i]->sym_ptr_ptr != bfd_com_section_ptr->symbol
 	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section_ptr->symbol
 	  && *relpp[i]->sym_ptr_ptr != bfd_und_section_ptr->symbol)
 	(*relpp[i]->sym_ptr_ptr)->flags |= BSF_KEEP;

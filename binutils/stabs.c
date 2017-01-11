@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2017 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -2702,7 +2702,7 @@ parse_stab_members (void *dhandle, struct stab_handle *info,
 	      ++*pp;
 	      voffset &= 0x7fffffff;
 
-	      if (**pp == ';' || *pp == '\0')
+	      if (**pp == ';' || **pp == '\0')
 		{
 		  /* Must be g++ version 1.  */
 		  context = DEBUG_TYPE_NULL;

@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
@@ -234,6 +234,8 @@ static const arm_feature_set arm_ext_ras =
 /* FP16 instructions.  */
 static const arm_feature_set arm_ext_fp16 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
+static const arm_feature_set arm_ext_v8_3 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
@@ -6533,6 +6535,8 @@ enum operand_parse_code
   OP_EXPi,	/* same, with optional immediate prefix */
   OP_EXPr,	/* same, with optional relocation suffix */
   OP_HALF,	/* 0 .. 65535 or low/high reloc.  */
+  OP_IROT1,	/* VCADD rotate immediate: 90, 270.  */
+  OP_IROT2,	/* VCMLA rotate immediate: 0, 90, 180, 270.  */
 
   OP_CPSF,	/* CPS flags */
   OP_ENDI,	/* Endianness specifier */
@@ -7432,14 +7436,14 @@ encode_arm_shift (int i)
   /* register-shifted register.  */
   if (inst.operands[i].immisreg)
     {
-      int index;
-      for (index = 0; index <= i; ++index)
+      int op_index;
+      for (op_index = 0; op_index <= i; ++op_index)
 	{
 	  /* Check the operand only when it's presented.  In pre-UAL syntax,
 	     if the destination register is the same as the first operand, two
 	     register form of the instruction can be used.  */
-	  if (inst.operands[index].present && inst.operands[index].isreg
-	      && inst.operands[index].reg == REG_PC)
+	  if (inst.operands[op_index].present && inst.operands[op_index].isreg
+	      && inst.operands[op_index].reg == REG_PC)
 	    as_warn (UNPRED_REG ("r15"));
 	}
 
@@ -13346,6 +13350,8 @@ NEON_ENC_TAB
   X(3, (D, Q, S), MIXED),		\
   X(4, (D, D, D, I), DOUBLE),		\
   X(4, (Q, Q, Q, I), QUAD),		\
+  X(4, (D, D, S, I), DOUBLE),		\
+  X(4, (Q, Q, S, I), QUAD),		\
   X(2, (F, F), SINGLE),			\
   X(3, (F, F, F), SINGLE),		\
   X(2, (F, I), SINGLE),			\
@@ -17259,6 +17265,80 @@ do_vrintm (void)
   do_vrint_1 (neon_cvt_mode_m);
 }
 
+static unsigned
+neon_scalar_for_vcmla (unsigned opnd, unsigned elsize)
+{
+  unsigned regno = NEON_SCALAR_REG (opnd);
+  unsigned elno = NEON_SCALAR_INDEX (opnd);
+
+  if (elsize == 16 && elno < 2 && regno < 16)
+    return regno | (elno << 4);
+  else if (elsize == 32 && elno == 0)
+    return regno;
+
+  first_error (_("scalar out of range"));
+  return 0;
+}
+
+static void
+do_vcmla (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
+	      _(BAD_FPU));
+  constraint (inst.reloc.exp.X_op != O_constant, _("expression too complex"));
+  unsigned rot = inst.reloc.exp.X_add_number;
+  constraint (rot != 0 && rot != 90 && rot != 180 && rot != 270,
+	      _("immediate out of range"));
+  rot /= 90;
+  if (inst.operands[2].isscalar)
+    {
+      enum neon_shape rs = neon_select_shape (NS_DDSI, NS_QQSI, NS_NULL);
+      unsigned size = neon_check_type (3, rs, N_EQK, N_EQK,
+				       N_KEY | N_F16 | N_F32).size;
+      unsigned m = neon_scalar_for_vcmla (inst.operands[2].reg, size);
+      inst.is_neon = 1;
+      inst.instruction = 0xfe000800;
+      inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+      inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
+      inst.instruction |= HI1 (inst.operands[1].reg) << 7;
+      inst.instruction |= LOW4 (m);
+      inst.instruction |= HI1 (m) << 5;
+      inst.instruction |= neon_quad (rs) << 6;
+      inst.instruction |= rot << 20;
+      inst.instruction |= (size == 32) << 23;
+    }
+  else
+    {
+      enum neon_shape rs = neon_select_shape (NS_DDDI, NS_QQQI, NS_NULL);
+      unsigned size = neon_check_type (3, rs, N_EQK, N_EQK,
+				       N_KEY | N_F16 | N_F32).size;
+      neon_three_same (neon_quad (rs), 0, -1);
+      inst.instruction &= 0x00ffffff; /* Undo neon_dp_fixup.  */
+      inst.instruction |= 0xfc200800;
+      inst.instruction |= rot << 23;
+      inst.instruction |= (size == 32) << 20;
+    }
+}
+
+static void
+do_vcadd (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
+	      _(BAD_FPU));
+  constraint (inst.reloc.exp.X_op != O_constant, _("expression too complex"));
+  unsigned rot = inst.reloc.exp.X_add_number;
+  constraint (rot != 90 && rot != 270, _("immediate out of range"));
+  enum neon_shape rs = neon_select_shape (NS_DDDI, NS_QQQI, NS_NULL);
+  unsigned size = neon_check_type (3, rs, N_EQK, N_EQK,
+				   N_KEY | N_F16 | N_F32).size;
+  neon_three_same (neon_quad (rs), 0, -1);
+  inst.instruction &= 0x00ffffff; /* Undo neon_dp_fixup.  */
+  inst.instruction |= 0xfc800800;
+  inst.instruction |= (rot == 270) << 24;
+  inst.instruction |= (size == 32) << 20;
+}
+
 /* Crypto v1 instructions.  */
 static void
 do_crypto_2op_1 (unsigned elttype, int op)
@@ -17438,6 +17518,16 @@ static void
 do_crc32cw (void)
 {
   do_crc32_1 (1, 2);
+}
+
+static void
+do_vjcvt (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+	      _(BAD_FPU));
+  neon_check_type (2, NS_FD, N_S32, N_F64);
+  do_vfp_sp_dp_cvt ();
+  do_vfp_cond_or_thumb ();
 }
 
 
@@ -19781,6 +19871,14 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_ras
  TUE ("esb", 320f010, f3af8010, 0, (), noargs,  noargs),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & arm_ext_v8_3
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8_3
+ NCE (vjcvt, eb90bc0, 2, (RVS, RVD), vjcvt),
+ NUF (vcmla, 0, 4, (RNDQ, RNDQ, RNDQ_RNSC, EXPi), vcmla),
+ NUF (vcadd, 0, 4, (RNDQ, RNDQ, RNDQ, EXPi), vcadd),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
@@ -25573,6 +25671,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv8-a",	ARM_ARCH_V8A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.1-a",	ARM_ARCH_V8_1A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.2-a",	ARM_ARCH_V8_2A,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8.3-a",	ARM_ARCH_V8_3A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("xscale",	ARM_ARCH_XSCALE, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	ARM_ARCH_IWMMXT, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP),

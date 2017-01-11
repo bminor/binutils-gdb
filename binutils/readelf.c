@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -137,6 +137,7 @@
 #include "elf/pj.h"
 #include "elf/ppc.h"
 #include "elf/ppc64.h"
+#include "elf/pru.h"
 #include "elf/rl78.h"
 #include "elf/rx.h"
 #include "elf/s390.h"
@@ -776,6 +777,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_OR1K:
     case EM_PPC64:
     case EM_PPC:
+    case EM_TI_PRU:
     case EM_RISCV:
     case EM_RL78:
     case EM_RX:
@@ -1482,6 +1484,10 @@ dump_relocations (FILE * file,
 
 	case EM_ALTERA_NIOS2:
 	  rtype = elf_nios2_reloc_type (type);
+	  break;
+
+	case EM_TI_PRU:
+	  rtype = elf_pru_reloc_type (type);
 	  break;
 	}
 
@@ -2370,6 +2376,7 @@ get_machine_name (unsigned e_machine)
     case EM_CSR_KALIMBA:	return "CSR Kalimba architecture family";
     case EM_Z80:		return "Zilog Z80";
     case EM_AMDGPU:		return "AMD GPU architecture";
+    case EM_TI_PRU:		return "TI PRU I/O processor";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -3317,8 +3324,25 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_RISCV:
 	  if (e_flags & EF_RISCV_RVC)
 	    strcat (buf, ", RVC");
-	  if (e_flags & EF_RISCV_SOFT_FLOAT)
-	    strcat (buf, ", soft-float ABI");
+
+	  switch (e_flags & EF_RISCV_FLOAT_ABI)
+	    {
+	    case EF_RISCV_FLOAT_ABI_SOFT:
+	      strcat (buf, ", soft-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_SINGLE:
+	      strcat (buf, ", single-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_DOUBLE:
+	      strcat (buf, ", double-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_QUAD:
+	      strcat (buf, ", quad-float ABI");
+	      break;
+	    }
 	  break;
 
 	case EM_SH:
@@ -4900,7 +4924,7 @@ process_program_headers (FILE * file)
 		      (segment->p_flags & PF_R ? 'R' : ' '),
 		      (segment->p_flags & PF_W ? 'W' : ' '),
 		      (segment->p_flags & PF_X ? 'E' : ' '));
-	      print_vma (segment->p_align, HEX);
+	      print_vma (segment->p_align, PREFIX_HEX);
 	    }
 
 	  putc ('\n', stdout);
@@ -6068,8 +6092,8 @@ process_section_headers (FILE * file)
 		  && (streq (SECTION_NAME (section), ".rel.dyn")
 		      || streq (SECTION_NAME (section), ".rela.dyn")))
 		/* The .rel.dyn and .rela.dyn sections have an sh_info field
-		   of zero.  No idea why.  I would have expected the index
-		   of the .plt section.  */
+		   of zero.  The relocations in these sections may apply
+		   to many different sections.  */
 		   ;
 	      else
 		warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
@@ -11731,7 +11755,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_960:
       return reloc_type == 2; /* R_960_32.  */
     case EM_AARCH64:
-      return reloc_type == 258; /* R_AARCH64_ABS32 */
+      return (reloc_type == 258
+	      || reloc_type == 1); /* R_AARCH64_ABS32 || R_AARCH64_P32_ABS32 */
     case EM_ADAPTEVA_EPIPHANY:
       return reloc_type == 3;
     case EM_ALPHA:
@@ -11834,6 +11859,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_PPC64_ADDR32.  */
     case EM_PPC:
       return reloc_type == 1; /* R_PPC_ADDR32.  */
+    case EM_TI_PRU:
+      return reloc_type == 11; /* R_PRU_BFD_RELOC_32.  */
     case EM_RISCV:
       return reloc_type == 1; /* R_RISCV_32.  */
     case EM_RL78:
@@ -12116,6 +12143,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 9; /* R_NIOS_16.  */
     case EM_OR1K:
       return reloc_type == 2; /* R_OR1K_16.  */
+    case EM_TI_PRU:
+      return reloc_type == 8; /* R_PRU_BFD_RELOC_16.  */
     case EM_TI_C6000:
       return reloc_type == 2; /* R_C6000_ABS16.  */
     case EM_VISIUM:
@@ -12192,6 +12221,11 @@ is_none_reloc (unsigned int reloc_type)
 	      || reloc_type == 205  /* R_NDS32_DIFF16.  */
 	      || reloc_type == 206  /* R_NDS32_DIFF32.  */
 	      || reloc_type == 207  /* R_NDS32_ULEB128.  */);
+    case EM_TI_PRU:
+      return (reloc_type == 0       /* R_PRU_NONE.  */
+	      || reloc_type == 65   /* R_PRU_DIFF8.  */
+	      || reloc_type == 66   /* R_PRU_DIFF16.  */
+	      || reloc_type == 67   /* R_PRU_DIFF32.  */);
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return (reloc_type == 0      /* R_XTENSA_NONE.  */

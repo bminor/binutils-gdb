@@ -1,6 +1,6 @@
 /* Implementation of the GDB variable objects API.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #if HAVE_PYTHON
 #include "python/python.h"
 #include "python/python-internal.h"
+#include "python/py-ref.h"
 #else
 typedef int PyObject;
 #endif
@@ -225,14 +226,13 @@ is_root_p (const struct varobj *var)
 }
 
 #ifdef HAVE_PYTHON
-/* Helper function to install a Python environment suitable for
-   use during operations on VAR.  */
-struct cleanup *
-varobj_ensure_python_env (const struct varobj *var)
+
+/* See python-internal.h.  */
+gdbpy_enter_varobj::gdbpy_enter_varobj (const struct varobj *var)
+: gdbpy_enter (var->root->exp->gdbarch, var->root->exp->language_defn)
 {
-  return ensure_python_env (var->root->exp->gdbarch,
-			    var->root->exp->language_defn);
 }
+
 #endif
 
 /* Return the full FRAME which corresponds to the given CORE_ADDR
@@ -563,17 +563,13 @@ varobj_get_display_hint (const struct varobj *var)
   gdb::unique_xmalloc_ptr<char> result;
 
 #if HAVE_PYTHON
-  struct cleanup *back_to;
-
   if (!gdb_python_initialized)
     return NULL;
 
-  back_to = varobj_ensure_python_env (var);
+  gdbpy_enter_varobj enter_py (var);
 
   if (var->dynamic->pretty_printer != NULL)
     result = gdbpy_get_display_hint (var->dynamic->pretty_printer);
-
-  do_cleanups (back_to);
 #endif
 
   return result;
@@ -695,17 +691,13 @@ install_dynamic_child (struct varobj *var,
 static int
 dynamic_varobj_has_child_method (const struct varobj *var)
 {
-  struct cleanup *back_to;
   PyObject *printer = var->dynamic->pretty_printer;
-  int result;
 
   if (!gdb_python_initialized)
     return 0;
 
-  back_to = varobj_ensure_python_env (var);
-  result = PyObject_HasAttr (printer, gdbpy_children_cst);
-  do_cleanups (back_to);
-  return result;
+  gdbpy_enter_varobj enter_py (var);
+  return PyObject_HasAttr (printer, gdbpy_children_cst);
 }
 #endif
 
@@ -1213,16 +1205,12 @@ install_new_value_visualizer (struct varobj *var)
 
   if (var->dynamic->constructor != Py_None && var->value != NULL)
     {
-      struct cleanup *cleanup;
-
-      cleanup = varobj_ensure_python_env (var);
+      gdbpy_enter_varobj enter_py (var);
 
       if (var->dynamic->constructor == NULL)
 	install_default_visualizer (var);
       else
 	construct_visualizer (var, var->dynamic->constructor);
-
-      do_cleanups (cleanup);
     }
 #else
   /* Do nothing.  */
@@ -1482,35 +1470,31 @@ void
 varobj_set_visualizer (struct varobj *var, const char *visualizer)
 {
 #if HAVE_PYTHON
-  PyObject *mainmod, *globals, *constructor;
-  struct cleanup *back_to;
+  PyObject *mainmod;
 
   if (!gdb_python_initialized)
     return;
 
-  back_to = varobj_ensure_python_env (var);
+  gdbpy_enter_varobj enter_py (var);
 
   mainmod = PyImport_AddModule ("__main__");
-  globals = PyModule_GetDict (mainmod);
-  Py_INCREF (globals);
-  make_cleanup_py_decref (globals);
+  gdbpy_ref globals (PyModule_GetDict (mainmod));
+  Py_INCREF (globals.get ());
 
-  constructor = PyRun_String (visualizer, Py_eval_input, globals, globals);
+  gdbpy_ref constructor (PyRun_String (visualizer, Py_eval_input,
+				       globals.get (), globals.get ()));
 
-  if (! constructor)
+  if (constructor == NULL)
     {
       gdbpy_print_stack ();
       error (_("Could not evaluate visualizer expression: %s"), visualizer);
     }
 
-  construct_visualizer (var, constructor);
-  Py_XDECREF (constructor);
+  construct_visualizer (var, constructor.get ());
 
   /* If there are any children now, wipe them.  */
   varobj_delete (var, 1 /* children only */);
   var->num_children = -1;
-
-  do_cleanups (back_to);
 #else
   error (_("Python support required"));
 #endif
@@ -2099,11 +2083,10 @@ free_variable (struct varobj *var)
 #if HAVE_PYTHON
   if (var->dynamic->pretty_printer != NULL)
     {
-      struct cleanup *cleanup = varobj_ensure_python_env (var);
+      gdbpy_enter_varobj enter_py (var);
 
       Py_XDECREF (var->dynamic->constructor);
       Py_XDECREF (var->dynamic->pretty_printer);
-      do_cleanups (cleanup);
     }
 #endif
 
@@ -2422,7 +2405,7 @@ varobj_value_get_print_value (struct value *value,
   struct value_print_options opts;
   struct type *type = NULL;
   long len = 0;
-  char *encoding = NULL;
+  gdb::unique_xmalloc_ptr<char> encoding;
   /* Initialize it just to avoid a GCC false warning.  */
   CORE_ADDR str_addr = 0;
   int string_print = 0;
@@ -2440,7 +2423,7 @@ varobj_value_get_print_value (struct value *value,
     {
       PyObject *value_formatter =  var->dynamic->pretty_printer;
 
-      varobj_ensure_python_env (var);
+      gdbpy_enter_varobj enter_py (var);
 
       if (value_formatter)
 	{
@@ -2455,25 +2438,21 @@ varobj_value_get_print_value (struct value *value,
 	  if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
 	    {
 	      struct value *replacement;
-	      PyObject *output = NULL;
 
-	      output = apply_varobj_pretty_printer (value_formatter,
-						    &replacement,
-						    stb);
+	      gdbpy_ref output (apply_varobj_pretty_printer (value_formatter,
+							     &replacement,
+							     stb));
 
 	      /* If we have string like output ...  */
-	      if (output)
+	      if (output != NULL)
 		{
-		  make_cleanup_py_decref (output);
-
 		  /* If this is a lazy string, extract it.  For lazy
 		     strings we always print as a string, so set
 		     string_print.  */
-		  if (gdbpy_is_lazy_string (output))
+		  if (gdbpy_is_lazy_string (output.get ()))
 		    {
-		      gdbpy_extract_lazy_string (output, &str_addr, &type,
-						 &len, &encoding);
-		      make_cleanup (free_current_contents, &encoding);
+		      gdbpy_extract_lazy_string (output.get (), &str_addr,
+						 &type, &len, &encoding);
 		      string_print = 1;
 		    }
 		  else
@@ -2485,7 +2464,7 @@ varobj_value_get_print_value (struct value *value,
 			 string as a value.  */
 
 		      gdb::unique_xmalloc_ptr<char> s
-			= python_string_to_target_string (output);
+			= python_string_to_target_string (output.get ());
 
 		      if (s)
 			{
@@ -2529,11 +2508,11 @@ varobj_value_get_print_value (struct value *value,
   /* If the THEVALUE has contents, it is a regular string.  */
   if (!thevalue.empty ())
     LA_PRINT_STRING (stb, type, (gdb_byte *) thevalue.c_str (),
-		     len, encoding, 0, &opts);
+		     len, encoding.get (), 0, &opts);
   else if (string_print)
     /* Otherwise, if string_print is set, and it is not a regular
        string, it is a lazy string.  */
-    val_print_string (type, encoding, str_addr, len, stb, &opts);
+    val_print_string (type, encoding.get (), str_addr, len, stb, &opts);
   else
     /* All other cases.  */
     common_val_print (value, stb, 0, &opts, current_language);

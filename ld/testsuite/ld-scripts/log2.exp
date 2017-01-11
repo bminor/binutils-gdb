@@ -1,6 +1,6 @@
 # Test LOG2() expression in linker script language.
 # By Clemens Lang
-#   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2013-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -26,7 +26,7 @@ if {![ld_assemble $as $srcdir/$subdir/log2.s tmpdir/log2.o]} {
 	return
 }
 
-if {![ld_simple_link $ld tmpdir/log2 "-T $srcdir/$subdir/log2.t tmpdir/log2.o"]} {
+if {![ld_link $ld tmpdir/log2 "-T $srcdir/$subdir/log2.t tmpdir/log2.o"]} {
 	fail $testname
 } else {
 	pass $testname

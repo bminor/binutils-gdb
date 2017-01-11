@@ -1,6 +1,6 @@
 # Test DIFF* relocation signedness and overflow checking
 # By Max Filippov, Cadence Design Systems, Inc.
-#   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -36,7 +36,7 @@ if ![ld_assemble $as "--text-section-literals $srcdir/$subdir/diff_overflow2.s" 
 
 set object "tmpdir/diff_overflow"
 
-if ![ld_simple_link $ld $object "tmpdir/diff_overflow1.o tmpdir/diff_overflow2.o"] {
+if ![ld_link $ld $object "tmpdir/diff_overflow1.o tmpdir/diff_overflow2.o"] {
     verbose -log "failure in ld"
     fail $testname
     return

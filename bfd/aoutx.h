@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1955,6 +1955,7 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
 
   PUT_WORD (abfd, g->address, natptr->r_address);
 
+  BFD_ASSERT (g->howto != NULL);
   r_length = g->howto->size ;	/* Size as a power of two.  */
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
   /* XXX This relies on relocs coming from a.out files.  */
@@ -2393,16 +2394,39 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	MY_swap_ext_reloc_out (abfd, *generic,
-			       (struct reloc_ext_external *) natptr);
+	{
+	  /* PR 20921: If the howto field has not been initialised then skip
+	     this reloc.
+	     PR 20929: Similarly for the symbol field.  */
+	  if ((*generic)->howto == NULL
+	      || (*generic)->sym_ptr_ptr == NULL)
+	    {
+	      bfd_set_error (bfd_error_invalid_operation);
+	      _bfd_error_handler (_("\
+%B: attempt to write out unknown reloc type"), abfd);
+	      return FALSE;
+	    }
+	  MY_swap_ext_reloc_out (abfd, *generic,
+				 (struct reloc_ext_external *) natptr);
+	}
     }
   else
     {
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	MY_swap_std_reloc_out (abfd, *generic,
-			       (struct reloc_std_external *) natptr);
+	{
+	  if ((*generic)->howto == NULL
+	      || (*generic)->sym_ptr_ptr == NULL)
+	    {
+	      bfd_set_error (bfd_error_invalid_operation);
+	      _bfd_error_handler (_("\
+%B: attempt to write out unknown reloc type"), abfd);
+	      return FALSE;
+	    }
+	  MY_swap_std_reloc_out (abfd, *generic,
+				 (struct reloc_std_external *) natptr);
+	}
     }
 
   if (bfd_bwrite ((void *) native, natsize, abfd) != natsize)
@@ -2666,7 +2690,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   char *buf;
 
   *filename_ptr = abfd->filename;
-  *functionname_ptr = 0;
+  *functionname_ptr = NULL;
   *line_ptr = 0;
   if (disriminator_ptr)
     *disriminator_ptr = 0;
@@ -2811,9 +2835,17 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 	*filename_ptr = main_file_name;
       else
 	{
-	  sprintf (buf, "%s%s", directory_name, main_file_name);
-	  *filename_ptr = buf;
-	  buf += filelen + 1;
+	  if (buf == NULL)
+	    /* PR binutils/20891: In a corrupt input file both
+	       main_file_name and directory_name can be empty...  */
+	    * filename_ptr = NULL;
+	  else
+	    {
+	      snprintf (buf, filelen + 1, "%s%s", directory_name,
+			main_file_name);
+	      *filename_ptr = buf;
+	      buf += filelen + 1;
+	    }
 	}
     }
 
@@ -2822,6 +2854,12 @@ NAME (aout, find_nearest_line) (bfd *abfd,
       const char *function = func->name;
       char *colon;
 
+      if (buf == NULL)
+	{
+	  /* PR binutils/20892: In a corrupt input file func can be empty.  */
+	  * functionname_ptr = NULL;
+	  return TRUE;
+	}
       /* The caller expects a symbol name.  We actually have a
 	 function name, without the leading underscore.  Put the
 	 underscore back in, so that the caller gets a symbol name.  */
@@ -3017,10 +3055,9 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	continue;
 
       /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
-      if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
+      if (GET_WORD (abfd, p->e_strx) >= obj_aout_external_string_size (abfd))
 	return FALSE;
       name = strings + GET_WORD (abfd, p->e_strx);
-      
       value = GET_WORD (abfd, p->e_value);
       flags = BSF_GLOBAL;
       string = NULL;
@@ -3076,10 +3113,12 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	case N_INDR | N_EXT:
 	  /* An indirect symbol.  The next symbol is the symbol
 	     which this one really is.  */
-	  BFD_ASSERT (p + 1 < pend);
+	  /* See PR 20925 for a reproducer.  */
+	  if (p + 1 >= pend)
+	    return FALSE;
 	  ++p;
 	  /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
-	  if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
+	  if (GET_WORD (abfd, p->e_strx) >= obj_aout_external_string_size (abfd))
 	    return FALSE;
 	  string = strings + GET_WORD (abfd, p->e_strx);
 	  section = bfd_ind_section_ptr;
@@ -3115,7 +3154,7 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  ++p;
 	  string = name;
 	  /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
-	  if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
+	  if (GET_WORD (abfd, p->e_strx) >= obj_aout_external_string_size (abfd))
 	    return FALSE;
 	  name = strings + GET_WORD (abfd, p->e_strx);
 	  section = bfd_und_section_ptr;

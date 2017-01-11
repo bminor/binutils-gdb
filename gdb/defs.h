@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -574,15 +574,11 @@ enum gdb_osabi
   GDB_OSABI_HURD,
   GDB_OSABI_SOLARIS,
   GDB_OSABI_LINUX,
-  GDB_OSABI_FREEBSD_AOUT,
-  GDB_OSABI_FREEBSD_ELF,
-  GDB_OSABI_NETBSD_AOUT,
-  GDB_OSABI_NETBSD_ELF,
-  GDB_OSABI_OPENBSD_ELF,
+  GDB_OSABI_FREEBSD,
+  GDB_OSABI_NETBSD,
+  GDB_OSABI_OPENBSD,
   GDB_OSABI_WINCE,
   GDB_OSABI_GO32,
-  GDB_OSABI_HPUX_ELF,
-  GDB_OSABI_HPUX_SOM,
   GDB_OSABI_QNXNTO,
   GDB_OSABI_CYGWIN,
   GDB_OSABI_AIX,

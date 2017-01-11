@@ -1,5 +1,5 @@
 /* tc-riscv.c -- RISC-V assembler
-   Copyright 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -28,6 +28,7 @@
 #include "itbl-ops.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "struc-symbol.h"
 
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
@@ -60,9 +61,10 @@ struct riscv_cl_insn
 
 static const char default_arch[] = DEFAULT_ARCH;
 
-unsigned xlen = 0; /* width of an x-register */
+static unsigned xlen = 0; /* width of an x-register */
+static unsigned abi_xlen = 0; /* width of a pointer in the ABI */
 
-#define LOAD_ADDRESS_INSN (xlen == 64 ? "ld" : "lw")
+#define LOAD_ADDRESS_INSN (abi_xlen == 64 ? "ld" : "lw")
 #define ADD32_INSN (xlen == 64 ? "addiw" : "addi")
 
 static unsigned elf_flags = 0;
@@ -73,12 +75,14 @@ struct riscv_set_options
 {
   int pic; /* Generate position-independent code.  */
   int rvc; /* Generate RVC code.  */
+  int relax; /* Emit relocs the linker is allowed to relax.  */
 };
 
 static struct riscv_set_options riscv_opts =
 {
   0,	/* pic */
   0,	/* rvc */
+  1,	/* relax */
 };
 
 static void
@@ -126,56 +130,49 @@ riscv_add_subset (const char *subset)
   riscv_subsets = s;
 }
 
-/* Set which ISA and extensions are available.  Formally, ISA strings must
-   begin with RV32 or RV64, but we allow the prefix to be omitted.
+/* Set which ISA and extensions are available.  */
 
-   FIXME: Version numbers are not supported yet.  */
 static void
-riscv_set_arch (const char *p)
+riscv_set_arch (const char *s)
 {
-  const char *all_subsets = "IMAFDC";
+  const char *all_subsets = "imafdc";
   const char *extension = NULL;
-  int rvc = 0;
-  int i;
+  const char *p = s;
 
-  if (strncasecmp (p, "RV32", 4) == 0)
+  if (strncmp (p, "rv32", 4) == 0)
     {
       xlen = 32;
       p += 4;
     }
-  else if (strncasecmp (p, "RV64", 4) == 0)
+  else if (strncmp (p, "rv64", 4) == 0)
     {
       xlen = 64;
       p += 4;
     }
-  else if (strncasecmp (p, "RV", 2) == 0)
-    p += 2;
+  else
+    as_fatal ("-march=%s: ISA string must begin with rv32 or rv64", s);
 
-  switch (TOUPPER(*p))
+  switch (*p)
     {
-      case 'I':
+      case 'i':
 	break;
 
-      case 'G':
+      case 'g':
 	p++;
-	/* Fall through.  */
-
-      case '\0':
-	for (i = 0; all_subsets[i] != '\0'; i++)
+	for ( ; *all_subsets != 'c'; all_subsets++)
 	  {
-	    const char subset[] = {all_subsets[i], '\0'};
+	    const char subset[] = {*all_subsets, '\0'};
 	    riscv_add_subset (subset);
 	  }
 	break;
 
       default:
-	as_fatal ("`I' must be the first ISA subset name specified (got %c)",
-		  *p);
+	as_fatal ("-march=%s: first ISA subset must be `i' or `g'", s);
     }
 
   while (*p)
     {
-      if (TOUPPER(*p) == 'X')
+      if (*p == 'x')
 	{
 	  char *subset = xstrdup (p), *q = subset;
 
@@ -184,8 +181,8 @@ riscv_set_arch (const char *p)
 	  *q = '\0';
 
 	  if (extension)
-	    as_fatal ("only one eXtension is supported (found %s and %s)",
-		      extension, subset);
+	    as_fatal ("-march=%s: only one non-standard extension is supported"
+		      " (found `%s' and `%s')", s, extension, subset);
 	  extension = subset;
 	  riscv_add_subset (subset);
 	  p += strlen (subset);
@@ -197,24 +194,17 @@ riscv_set_arch (const char *p)
 	{
 	  const char subset[] = {*p, 0};
 	  riscv_add_subset (subset);
-	  if (TOUPPER(*p) == 'C')
-	    rvc = 1;
 	  all_subsets++;
 	  p++;
 	}
+      else if (*p == 'q')
+	{
+	  const char subset[] = {*p, 0};
+	  riscv_add_subset (subset);
+	  p++;
+	}
       else
-	as_fatal ("unsupported ISA subset %c", *p);
-    }
-
-  if (rvc)
-    {
-      /* Override -m[no-]rvc setting if C was explicitly listed.  */
-      riscv_set_rvc (TRUE);
-    }
-  else
-    {
-      /* Add RVC anyway.  -m[no-]rvc toggles its availability.  */
-      riscv_add_subset ("C");
+	as_fatal ("-march=%s: unsupported ISA subset `%c'", s, *p);
     }
 }
 
@@ -370,6 +360,7 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
 
   if (fragp->fr_symbol != NULL
       && S_IS_DEFINED (fragp->fr_symbol)
+      && !S_IS_WEAK (fragp->fr_symbol)
       && sec == S_GET_SEGMENT (fragp->fr_symbol))
     {
       offsetT val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
@@ -511,29 +502,29 @@ validate_riscv_insn (const struct riscv_opcode *opc)
       case 'C': /* RVC */
 	switch (c = *p++)
 	  {
-	  case 'a': used_bits |= ENCODE_RVC_J_IMM(-1U); break;
+	  case 'a': used_bits |= ENCODE_RVC_J_IMM (-1U); break;
 	  case 'c': break; /* RS1, constrained to equal sp */
 	  case 'i': used_bits |= ENCODE_RVC_SIMM3(-1U); break;
-	  case 'j': used_bits |= ENCODE_RVC_IMM(-1U); break;
-	  case 'k': used_bits |= ENCODE_RVC_LW_IMM(-1U); break;
-	  case 'l': used_bits |= ENCODE_RVC_LD_IMM(-1U); break;
-	  case 'm': used_bits |= ENCODE_RVC_LWSP_IMM(-1U); break;
-	  case 'n': used_bits |= ENCODE_RVC_LDSP_IMM(-1U); break;
-	  case 'p': used_bits |= ENCODE_RVC_B_IMM(-1U); break;
+	  case 'j': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case 'k': used_bits |= ENCODE_RVC_LW_IMM (-1U); break;
+	  case 'l': used_bits |= ENCODE_RVC_LD_IMM (-1U); break;
+	  case 'm': used_bits |= ENCODE_RVC_LWSP_IMM (-1U); break;
+	  case 'n': used_bits |= ENCODE_RVC_LDSP_IMM (-1U); break;
+	  case 'p': used_bits |= ENCODE_RVC_B_IMM (-1U); break;
 	  case 's': USE_BITS (OP_MASK_CRS1S, OP_SH_CRS1S); break;
 	  case 't': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
-	  case 'u': used_bits |= ENCODE_RVC_IMM(-1U); break;
-	  case 'v': used_bits |= ENCODE_RVC_IMM(-1U); break;
+	  case 'u': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case 'v': used_bits |= ENCODE_RVC_IMM (-1U); break;
 	  case 'w': break; /* RS1S, constrained to equal RD */
 	  case 'x': break; /* RS2S, constrained to equal RD */
-	  case 'K': used_bits |= ENCODE_RVC_ADDI4SPN_IMM(-1U); break;
-	  case 'L': used_bits |= ENCODE_RVC_ADDI16SP_IMM(-1U); break;
-	  case 'M': used_bits |= ENCODE_RVC_SWSP_IMM(-1U); break;
-	  case 'N': used_bits |= ENCODE_RVC_SDSP_IMM(-1U); break;
+	  case 'K': used_bits |= ENCODE_RVC_ADDI4SPN_IMM (-1U); break;
+	  case 'L': used_bits |= ENCODE_RVC_ADDI16SP_IMM (-1U); break;
+	  case 'M': used_bits |= ENCODE_RVC_SWSP_IMM (-1U); break;
+	  case 'N': used_bits |= ENCODE_RVC_SDSP_IMM (-1U); break;
 	  case 'U': break; /* RS1, constrained to equal RD */
 	  case 'V': USE_BITS (OP_MASK_CRS2, OP_SH_CRS2); break;
-	  case '<': used_bits |= ENCODE_RVC_IMM(-1U); break;
-	  case '>': used_bits |= ENCODE_RVC_IMM(-1U); break;
+	  case '<': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case '>': used_bits |= ENCODE_RVC_IMM (-1U); break;
 	  case 'T': USE_BITS (OP_MASK_CRS2, OP_SH_CRS2); break;
 	  case 'D': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
 	  default:
@@ -563,11 +554,11 @@ validate_riscv_insn (const struct riscv_opcode *opc)
       case 'P':	USE_BITS (OP_MASK_PRED,		OP_SH_PRED); break;
       case 'Q':	USE_BITS (OP_MASK_SUCC,		OP_SH_SUCC); break;
       case 'o':
-      case 'j': used_bits |= ENCODE_ITYPE_IMM(-1U); break;
-      case 'a':	used_bits |= ENCODE_UJTYPE_IMM(-1U); break;
-      case 'p':	used_bits |= ENCODE_SBTYPE_IMM(-1U); break;
-      case 'q':	used_bits |= ENCODE_STYPE_IMM(-1U); break;
-      case 'u':	used_bits |= ENCODE_UTYPE_IMM(-1U); break;
+      case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
+      case 'a':	used_bits |= ENCODE_UJTYPE_IMM (-1U); break;
+      case 'p':	used_bits |= ENCODE_SBTYPE_IMM (-1U); break;
+      case 'q':	used_bits |= ENCODE_STYPE_IMM (-1U); break;
+      case 'u':	used_bits |= ENCODE_UTYPE_IMM (-1U); break;
       case '[': break;
       case ']': break;
       case '0': break;
@@ -601,8 +592,9 @@ void
 md_begin (void)
 {
   int i = 0;
+  unsigned long mach = xlen == 64 ? bfd_mach_riscv64 : bfd_mach_riscv32;
 
-  if (! bfd_set_arch_mach (stdoutput, bfd_arch_riscv, 0))
+  if (! bfd_set_arch_mach (stdoutput, bfd_arch_riscv, mach))
     as_warn (_("Could not set architecture and machine"));
 
   op_hash = hash_new ();
@@ -647,6 +639,28 @@ md_begin (void)
   record_alignment (text_section, riscv_opts.rvc ? 1 : 2);
 }
 
+static insn_t
+riscv_apply_const_reloc (bfd_reloc_code_real_type reloc_type, bfd_vma value)
+{
+  switch (reloc_type)
+    {
+    case BFD_RELOC_32:
+      return value;
+
+    case BFD_RELOC_RISCV_HI20:
+      return ENCODE_UTYPE_IMM (RISCV_CONST_HIGH_PART (value));
+
+    case BFD_RELOC_RISCV_LO12_S:
+      return ENCODE_STYPE_IMM (value);
+
+    case BFD_RELOC_RISCV_LO12_I:
+      return ENCODE_ITYPE_IMM (value);
+
+    default:
+      abort ();
+    }
+}
+
 /* Output an instruction.  IP is the instruction information.
    ADDRESS_EXPR is an operand of the instruction to be used with
    RELOC_TYPE.  */
@@ -661,7 +675,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
     {
       reloc_howto_type *howto;
 
-      gas_assert(address_expr);
+      gas_assert (address_expr);
       if (reloc_type == BFD_RELOC_12_PCREL
 	  || reloc_type == BFD_RELOC_RISCV_JMP)
 	{
@@ -674,44 +688,20 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 			    address_expr->X_add_number);
 	  return;
 	}
-      else if (address_expr->X_op == O_constant)
+      else
 	{
-	  switch (reloc_type)
-	    {
-	    case BFD_RELOC_32:
-	      ip->insn_opcode |= address_expr->X_add_number;
-	      goto append;
+	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
+	  if (howto == NULL)
+	    as_bad (_("Unsupported RISC-V relocation number %d"), reloc_type);
 
-	    case BFD_RELOC_RISCV_HI20:
-	      {
-		insn_t imm = RISCV_CONST_HIGH_PART (address_expr->X_add_number);
-		ip->insn_opcode |= ENCODE_UTYPE_IMM (imm);
-		goto append;
-	      }
+	  ip->fixp = fix_new_exp (ip->frag, ip->where,
+				  bfd_get_reloc_size (howto),
+				  address_expr, FALSE, reloc_type);
 
-	    case BFD_RELOC_RISCV_LO12_S:
-	      ip->insn_opcode |= ENCODE_STYPE_IMM (address_expr->X_add_number);
-	      goto append;
-
-	    case BFD_RELOC_RISCV_LO12_I:
-	      ip->insn_opcode |= ENCODE_ITYPE_IMM (address_expr->X_add_number);
-	      goto append;
-
-	    default:
-	      break;
-	    }
+	  ip->fixp->fx_tcbit = riscv_opts.relax;
 	}
-
-	howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
-	if (howto == NULL)
-	  as_bad (_("Unsupported RISC-V relocation number %d"), reloc_type);
-
-	ip->fixp = fix_new_exp (ip->frag, ip->where,
-				bfd_get_reloc_size (howto),
-				address_expr, FALSE, reloc_type);
     }
 
-append:
   add_fixed_insn (ip);
   install_insn (ip);
 }
@@ -814,7 +804,7 @@ static symbolS *
 make_internal_label (void)
 {
   return (symbolS *) local_symbol_make (FAKE_LABEL_NAME, now_seg,
-					(valueT) frag_now_fix(), frag_now);
+					(valueT) frag_now_fix (), frag_now);
 }
 
 /* Load an entry from the GOT.  */
@@ -874,14 +864,14 @@ load_const (int reg, expressionS *ep)
       return;
     }
 
-  if (xlen > 32 && !IS_SEXT_32BIT_NUM(ep->X_add_number))
+  if (xlen > 32 && !IS_SEXT_32BIT_NUM (ep->X_add_number))
     {
       /* Reduce to a signed 32-bit constant using SLLI and ADDI.  */
       while (((upper.X_add_number >> shift) & 1) == 0)
 	shift++;
 
       upper.X_add_number = (int64_t) upper.X_add_number >> shift;
-      load_const(reg, &upper);
+      load_const (reg, &upper);
 
       macro_build (NULL, "slli", "d,s,>", reg, reg, shift);
       if (lower.X_add_number != 0)
@@ -1084,7 +1074,8 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc,
 
 	/* Check whether the output BFD supports this relocation.
 	   If not, issue an error and fall back on something safe.  */
-	if (!bfd_reloc_type_lookup (stdoutput, percent_op->reloc))
+	if (*reloc != BFD_RELOC_UNUSED
+	    && !bfd_reloc_type_lookup (stdoutput, *reloc))
 	  {
 	    as_bad ("relocation %s isn't supported by the current ABI",
 		    percent_op->str);
@@ -1469,8 +1460,8 @@ rvc_lui:
 		  my_getExpression (imm_expr, s);
 		  check_absolute_expr (ip, imm_expr);
 		  if ((unsigned long) imm_expr->X_add_number > 0xfff)
-		    as_warn(_("Improper CSR address (%lu)"),
-			    (unsigned long) imm_expr->X_add_number);
+		    as_warn (_("Improper CSR address (%lu)"),
+			     (unsigned long) imm_expr->X_add_number);
 		  INSERT_OPERAND (CSR, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
@@ -1712,72 +1703,46 @@ const char *md_shortopts = "O::g::G:";
 
 enum options
 {
-  OPTION_M32 = OPTION_MD_BASE,
-  OPTION_M64,
-  OPTION_MARCH,
+  OPTION_MARCH = OPTION_MD_BASE,
   OPTION_PIC,
   OPTION_NO_PIC,
-  OPTION_MSOFT_FLOAT,
-  OPTION_MHARD_FLOAT,
-  OPTION_MRVC,
-  OPTION_MNO_RVC,
+  OPTION_MABI,
   OPTION_END_OF_ENUM
 };
 
 struct option md_longopts[] =
 {
-  {"m32", no_argument, NULL, OPTION_M32},
-  {"m64", no_argument, NULL, OPTION_M64},
   {"march", required_argument, NULL, OPTION_MARCH},
   {"fPIC", no_argument, NULL, OPTION_PIC},
   {"fpic", no_argument, NULL, OPTION_PIC},
   {"fno-pic", no_argument, NULL, OPTION_NO_PIC},
-  {"mrvc", no_argument, NULL, OPTION_MRVC},
-  {"mno-rvc", no_argument, NULL, OPTION_MNO_RVC},
-  {"msoft-float", no_argument, NULL, OPTION_MSOFT_FLOAT},
-  {"mhard-float", no_argument, NULL, OPTION_MHARD_FLOAT},
+  {"mabi", required_argument, NULL, OPTION_MABI},
 
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
-enum float_mode
-{
-  FLOAT_MODE_DEFAULT,
-  FLOAT_MODE_SOFT,
-  FLOAT_MODE_HARD
+enum float_abi {
+  FLOAT_ABI_DEFAULT = -1,
+  FLOAT_ABI_SOFT,
+  FLOAT_ABI_SINGLE,
+  FLOAT_ABI_DOUBLE,
+  FLOAT_ABI_QUAD
 };
-static enum float_mode float_mode = FLOAT_MODE_DEFAULT;
+static enum float_abi float_abi = FLOAT_ABI_DEFAULT;
+
+static void
+riscv_set_abi (unsigned new_xlen, enum float_abi new_float_abi)
+{
+  abi_xlen = new_xlen;
+  float_abi = new_float_abi;
+}
 
 int
 md_parse_option (int c, const char *arg)
 {
   switch (c)
     {
-    case OPTION_MRVC:
-      riscv_set_rvc (TRUE);
-      break;
-
-    case OPTION_MNO_RVC:
-      riscv_set_rvc (FALSE);
-      break;
-
-    case OPTION_MSOFT_FLOAT:
-      float_mode = FLOAT_MODE_SOFT;
-      break;
-
-    case OPTION_MHARD_FLOAT:
-      float_mode = FLOAT_MODE_HARD;
-      break;
-
-    case OPTION_M32:
-      xlen = 32;
-      break;
-
-    case OPTION_M64:
-      xlen = 64;
-      break;
-
     case OPTION_MARCH:
       riscv_set_arch (arg);
       break;
@@ -1790,6 +1755,27 @@ md_parse_option (int c, const char *arg)
       riscv_opts.pic = TRUE;
       break;
 
+    case OPTION_MABI:
+      if (strcmp (arg, "ilp32") == 0)
+	riscv_set_abi (32, FLOAT_ABI_SOFT);
+      else if (strcmp (arg, "ilp32f") == 0)
+	riscv_set_abi (32, FLOAT_ABI_SINGLE);
+      else if (strcmp (arg, "ilp32d") == 0)
+	riscv_set_abi (32, FLOAT_ABI_DOUBLE);
+      else if (strcmp (arg, "ilp32q") == 0)
+	riscv_set_abi (32, FLOAT_ABI_QUAD);
+      else if (strcmp (arg, "lp64") == 0)
+	riscv_set_abi (64, FLOAT_ABI_SOFT);
+      else if (strcmp (arg, "lp64f") == 0)
+	riscv_set_abi (64, FLOAT_ABI_SINGLE);
+      else if (strcmp (arg, "lp64d") == 0)
+	riscv_set_abi (64, FLOAT_ABI_DOUBLE);
+      else if (strcmp (arg, "lp64q") == 0)
+	riscv_set_abi (64, FLOAT_ABI_QUAD);
+      else
+	return 0;
+      break;
+
     default:
       return 0;
     }
@@ -1800,9 +1786,6 @@ md_parse_option (int c, const char *arg)
 void
 riscv_after_parse_args (void)
 {
-  if (riscv_subsets == NULL)
-    riscv_set_arch ("RVIMAFD");
-
   if (xlen == 0)
     {
       if (strcmp (default_arch, "riscv32") == 0)
@@ -1812,6 +1795,42 @@ riscv_after_parse_args (void)
       else
 	as_bad ("unknown default architecture `%s'", default_arch);
     }
+
+  if (riscv_subsets == NULL)
+    riscv_set_arch (xlen == 64 ? "rv64g" : "rv32g");
+
+  /* Add the RVC extension, regardless of -march, to support .option rvc.  */
+  if (riscv_subset_supports ("c"))
+    riscv_set_rvc (TRUE);
+  else
+    riscv_add_subset ("c");
+
+  /* Infer ABI from ISA if not specified on command line.  */
+  if (abi_xlen == 0)
+    abi_xlen = xlen;
+  else if (abi_xlen > xlen)
+    as_bad ("can't have %d-bit ABI on %d-bit ISA", abi_xlen, xlen);
+  else if (abi_xlen < xlen)
+    as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
+
+  if (float_abi == FLOAT_ABI_DEFAULT)
+    {
+      struct riscv_subset *subset;
+
+      /* Assume soft-float unless D extension is present.  */
+      float_abi = FLOAT_ABI_SOFT;
+
+      for (subset = riscv_subsets; subset != NULL; subset = subset->next)
+	{
+	  if (strcasecmp (subset->name, "D") == 0)
+	    float_abi = FLOAT_ABI_DOUBLE;
+	  if (strcasecmp (subset->name, "Q") == 0)
+	    float_abi = FLOAT_ABI_QUAD;
+	}
+    }
+
+  /* Insert float_abi into the EF_RISCV_FLOAT_ABI field of elf_flags.  */
+  elf_flags |= float_abi * (EF_RISCV_FLOAT_ABI & ~(EF_RISCV_FLOAT_ABI << 1));
 }
 
 long
@@ -1825,45 +1844,62 @@ md_pcrel_from (fixS *fixP)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
+  unsigned int subtype;
   bfd_byte *buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
+  bfd_boolean relaxable = FALSE;
 
   /* Remember value for tc_gen_reloc.  */
   fixP->fx_addnumber = *valP;
 
   switch (fixP->fx_r_type)
     {
-    case BFD_RELOC_RISCV_TLS_GOT_HI20:
-    case BFD_RELOC_RISCV_TLS_GD_HI20:
-    case BFD_RELOC_RISCV_TLS_DTPREL32:
-    case BFD_RELOC_RISCV_TLS_DTPREL64:
-    case BFD_RELOC_RISCV_TPREL_HI20:
-    case BFD_RELOC_RISCV_TPREL_LO12_I:
-    case BFD_RELOC_RISCV_TPREL_LO12_S:
-    case BFD_RELOC_RISCV_TPREL_ADD:
-      S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      /* Fall through.  */
-
-    case BFD_RELOC_RISCV_GOT_HI20:
-    case BFD_RELOC_RISCV_PCREL_HI20:
     case BFD_RELOC_RISCV_HI20:
     case BFD_RELOC_RISCV_LO12_I:
     case BFD_RELOC_RISCV_LO12_S:
+      bfd_putl32 (riscv_apply_const_reloc (fixP->fx_r_type, *valP)
+		  | bfd_getl32 (buf), buf);
+      if (fixP->fx_addsy == NULL)
+	fixP->fx_done = TRUE;
+      relaxable = TRUE;
+      break;
+
+    case BFD_RELOC_RISCV_GOT_HI20:
+    case BFD_RELOC_RISCV_PCREL_HI20:
     case BFD_RELOC_RISCV_ADD8:
     case BFD_RELOC_RISCV_ADD16:
     case BFD_RELOC_RISCV_ADD32:
     case BFD_RELOC_RISCV_ADD64:
+    case BFD_RELOC_RISCV_SUB6:
     case BFD_RELOC_RISCV_SUB8:
     case BFD_RELOC_RISCV_SUB16:
     case BFD_RELOC_RISCV_SUB32:
     case BFD_RELOC_RISCV_SUB64:
-      gas_assert (fixP->fx_addsy != NULL);
-      /* Nothing needed to do.  The value comes from the reloc entry.  */
+    case BFD_RELOC_RISCV_RELAX:
+      break;
+
+    case BFD_RELOC_RISCV_TPREL_HI20:
+    case BFD_RELOC_RISCV_TPREL_LO12_I:
+    case BFD_RELOC_RISCV_TPREL_LO12_S:
+    case BFD_RELOC_RISCV_TPREL_ADD:
+      relaxable = TRUE;
+      /* Fall through.  */
+
+    case BFD_RELOC_RISCV_TLS_GOT_HI20:
+    case BFD_RELOC_RISCV_TLS_GD_HI20:
+    case BFD_RELOC_RISCV_TLS_DTPREL32:
+    case BFD_RELOC_RISCV_TLS_DTPREL64:
+      if (fixP->fx_addsy != NULL)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      else
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("TLS relocation against a constant"));
       break;
 
     case BFD_RELOC_64:
     case BFD_RELOC_32:
     case BFD_RELOC_16:
     case BFD_RELOC_8:
+    case BFD_RELOC_RISCV_CFA:
       if (fixP->fx_addsy && fixP->fx_subsy)
 	{
 	  fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
@@ -1892,6 +1928,49 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    case BFD_RELOC_8:
 	      fixP->fx_r_type = BFD_RELOC_RISCV_ADD8;
 	      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB8;
+	      break;
+
+	    case BFD_RELOC_RISCV_CFA:
+	      /* Load the byte to get the subtype.  */
+	      subtype = bfd_get_8 (NULL, &fixP->fx_frag->fr_literal[fixP->fx_where]);
+	      switch (subtype)
+		{
+		case DW_CFA_advance_loc1:
+		  fixP->fx_where++;
+		  fixP->fx_next->fx_where++;
+		  fixP->fx_r_type = BFD_RELOC_RISCV_SET8;
+		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB8;
+		  break;
+
+		case DW_CFA_advance_loc2:
+		  fixP->fx_size = 2;
+		  fixP->fx_where++;
+		  fixP->fx_next->fx_size = 2;
+		  fixP->fx_next->fx_where++;
+		  fixP->fx_r_type = BFD_RELOC_RISCV_SET16;
+		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB16;
+		  break;
+
+		case DW_CFA_advance_loc4:
+		  fixP->fx_size = 4;
+		  fixP->fx_where++;
+		  fixP->fx_next->fx_size = 4;
+		  fixP->fx_next->fx_where++;
+		  fixP->fx_r_type = BFD_RELOC_RISCV_SET32;
+		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB32;
+		  break;
+
+		default:
+		  if (subtype < 0x80 && (subtype & 0x40))
+		    {
+		      /* DW_CFA_advance_loc */
+		      fixP->fx_r_type = BFD_RELOC_RISCV_SET6;
+		      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB6;
+		    }
+		  else
+		    as_fatal (_("internal error: bad CFA value #%d"), subtype);
+		  break;
+		}
 	      break;
 
 	    default:
@@ -1953,10 +2032,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       break;
 
-    case BFD_RELOC_RISCV_PCREL_LO12_S:
-    case BFD_RELOC_RISCV_PCREL_LO12_I:
     case BFD_RELOC_RISCV_CALL:
     case BFD_RELOC_RISCV_CALL_PLT:
+      relaxable = TRUE;
+      break;
+
+    case BFD_RELOC_RISCV_PCREL_LO12_S:
+    case BFD_RELOC_RISCV_PCREL_LO12_I:
     case BFD_RELOC_RISCV_ALIGN:
       break;
 
@@ -1965,7 +2047,57 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type) != NULL)
 	as_fatal (_("internal error: bad relocation #%d"), fixP->fx_r_type);
     }
+
+  if (fixP->fx_subsy != NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line,
+		  _("unsupported symbol subtraction"));
+
+  /* Add an R_RISCV_RELAX reloc if the reloc is relaxable.  */
+  if (relaxable && fixP->fx_tcbit && fixP->fx_addsy != NULL)
+    {
+      fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
+      fixP->fx_next->fx_addsy = fixP->fx_next->fx_subsy = NULL;
+      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_RELAX;
+    }
 }
+
+/* Because the value of .cfi_remember_state may changed after relaxation,
+   we insert a fix to relocate it again in link-time.  */
+
+void
+riscv_pre_output_hook (void)
+{
+  const frchainS *frch;
+  const asection *s;
+
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frch = seg_info (s)->frchainP; frch; frch = frch->frch_next)
+      {
+	const fragS *frag;
+
+	for (frag = frch->frch_root; frag; frag = frag->fr_next)
+	  {
+	    if (frag->fr_type == rs_cfa)
+	      {
+		fragS *loc4_frag;
+		expressionS exp;
+
+		symbolS *add_symbol = frag->fr_symbol->sy_value.X_add_symbol;
+		symbolS *op_symbol = frag->fr_symbol->sy_value.X_op_symbol;
+
+		exp.X_op = O_subtract;
+		exp.X_add_symbol = add_symbol;
+		exp.X_add_number = 0;
+		exp.X_op_symbol = op_symbol;
+
+		loc4_frag = (fragS *) frag->fr_opcode;
+		fix_new_exp (loc4_frag, (int) frag->fr_offset, 1, &exp, 0,
+			     BFD_RELOC_RISCV_CFA);
+	      }
+	  }
+      }
+}
+
 
 /* This structure is used to hold a stack of .option values.  */
 
@@ -1997,10 +2129,10 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     riscv_opts.pic = TRUE;
   else if (strcmp (name, "nopic") == 0)
     riscv_opts.pic = FALSE;
-  else if (strcmp (name, "soft-float") == 0)
-    float_mode = FLOAT_MODE_SOFT;
-  else if (strcmp (name, "hard-float") == 0)
-    float_mode = FLOAT_MODE_HARD;
+  else if (strcmp (name, "relax") == 0)
+    riscv_opts.relax = TRUE;
+  else if (strcmp (name, "norelax") == 0)
+    riscv_opts.relax = FALSE;
   else if (strcmp (name, "push") == 0)
     {
       struct riscv_option_stack *s;
@@ -2071,63 +2203,92 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Align to a given power of two.  */
-
 static void
-s_align (int bytes_p)
+riscv_make_nops (char *buf, bfd_vma bytes)
 {
-  int fill_value = 0, fill_value_specified = 0;
-  int min_text_alignment = riscv_opts.rvc ? 2 : 4;
-  int alignment = get_absolute_expression(), bytes;
+  bfd_vma i = 0;
 
-  if (bytes_p)
+  /* RISC-V instructions cannot begin or end on odd addresses, so this case
+     means we are not within a valid instruction sequence.  It is thus safe
+     to use a zero byte, even though that is not a valid instruction.  */
+  if (bytes % 2 == 1)
+    buf[i++] = 0;
+
+  /* Use at most one 2-byte NOP.  */
+  if ((bytes - i) % 4 == 2)
     {
-      bytes = alignment;
-      if (bytes < 1 || (bytes & (bytes-1)) != 0)
-	as_bad (_("alignment not a power of 2: %d"), bytes);
-      for (alignment = 0; bytes > 1; bytes >>= 1)
-	alignment++;
+      md_number_to_chars (buf + i, RVC_NOP, 2);
+      i += 2;
     }
 
-  bytes = 1 << alignment;
+  /* Fill the remainder with 4-byte NOPs.  */
+  for ( ; i < bytes; i += 4)
+    md_number_to_chars (buf + i, RISCV_NOP, 4);
+}
 
-  if (alignment < 0 || alignment > 31)
-    as_bad (_("unsatisfiable alignment: %d"), alignment);
+/* Called from md_do_align.  Used to create an alignment frag in a
+   code section by emitting a worst-case NOP sequence that the linker
+   will later relax to the correct number of NOPs.  We can't compute
+   the correct alignment now because of other linker relaxations.  */
 
-  if (*input_line_pointer == ',')
+bfd_boolean
+riscv_frag_align_code (int n)
+{
+  bfd_vma bytes = (bfd_vma) 1 << n;
+  bfd_vma min_text_alignment_order = riscv_opts.rvc ? 1 : 2;
+  bfd_vma min_text_alignment = (bfd_vma) 1 << min_text_alignment_order;
+
+  /* First, get back to minimal alignment.  */
+  frag_align_code (min_text_alignment_order, 0);
+
+  /* When not relaxing, riscv_handle_align handles code alignment.  */
+  if (!riscv_opts.relax)
+    return FALSE;
+
+  if (bytes > min_text_alignment)
     {
-      ++input_line_pointer;
-      fill_value = get_absolute_expression ();
-      fill_value_specified = 1;
-    }
-
-  if (!fill_value_specified
-      && subseg_text_p (now_seg)
-      && bytes > min_text_alignment)
-    {
-      /* Emit the worst-case NOP string.  The linker will delete any
-	 unnecessary NOPs.  This allows us to support code alignment
-	 in spite of linker relaxations.  */
-      bfd_vma i, worst_case_bytes = bytes - min_text_alignment;
+      bfd_vma worst_case_bytes = bytes - min_text_alignment;
       char *nops = frag_more (worst_case_bytes);
-      for (i = 0; i < worst_case_bytes - 2; i += 4)
-	md_number_to_chars (nops + i, RISCV_NOP, 4);
-      if (i < worst_case_bytes)
-	md_number_to_chars (nops + i, RVC_NOP, 2);
-
       expressionS ex;
+
       ex.X_op = O_constant;
       ex.X_add_number = worst_case_bytes;
+
+      riscv_make_nops (nops, worst_case_bytes);
 
       fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
 		   &ex, FALSE, BFD_RELOC_RISCV_ALIGN);
     }
-  else if (alignment)
-    frag_align (alignment, fill_value, 0);
 
-  record_alignment (now_seg, alignment);
+  return TRUE;
+}
 
-  demand_empty_rest_of_line ();
+/* Implement HANDLE_ALIGN.  */
+
+void
+riscv_handle_align (fragS *fragP)
+{
+  switch (fragP->fr_type)
+    {
+    case rs_align_code:
+      /* When relaxing, riscv_frag_align_code handles code alignment.  */
+      if (!riscv_opts.relax)
+	{
+	  bfd_signed_vma count = fragP->fr_next->fr_address
+				 - fragP->fr_address - fragP->fr_fix;
+
+	  if (count <= 0)
+	    break;
+
+	  count &= MAX_MEM_FOR_RS_ALIGN_CODE;
+	  riscv_make_nops (fragP->fr_literal + fragP->fr_fix, count);
+	  fragP->fr_var = count;
+	}
+      break;
+
+    default:
+      break;
+    }
 }
 
 int
@@ -2242,7 +2403,7 @@ md_convert_frag_branch (fragS *fragp)
 	    goto done;
 
 	  default:
-	    abort();
+	    abort ();
 	}
     }
 
@@ -2341,24 +2502,7 @@ tc_riscv_regname_to_dw2regnum (char *regname)
 void
 riscv_elf_final_processing (void)
 {
-  enum float_mode elf_float_mode = float_mode;
-
   elf_elfheader (stdoutput)->e_flags |= elf_flags;
-
-  if (elf_float_mode == FLOAT_MODE_DEFAULT)
-    {
-      struct riscv_subset *subset;
-
-      /* Assume soft-float unless D extension is present.  */
-      elf_float_mode = FLOAT_MODE_SOFT;
-
-      for (subset = riscv_subsets; subset != NULL; subset = subset->next)
-	if (strcasecmp (subset->name, "D") == 0)
-	  elf_float_mode = FLOAT_MODE_HARD;
-    }
-
-  if (elf_float_mode == FLOAT_MODE_SOFT)
-    elf_elfheader (stdoutput)->e_flags |= EF_RISCV_SOFT_FLOAT;
 }
 
 /* Parse the .sleb128 and .uleb128 pseudos.  Only allow constant expressions,
@@ -2391,9 +2535,6 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"dtprelword", s_dtprel, 4},
   {"dtpreldword", s_dtprel, 8},
   {"bss", s_bss, 0},
-  {"align", s_align, 0},
-  {"p2align", s_align, 0},
-  {"balign", s_align, 1},
   {"uleb128", s_riscv_leb128, 0},
   {"sleb128", s_riscv_leb128, 1},
 

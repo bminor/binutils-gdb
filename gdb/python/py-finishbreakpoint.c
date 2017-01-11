@@ -1,6 +1,6 @@
 /* Python interface to finish breakpoints
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,7 @@
 #include "inferior.h"
 #include "block.h"
 #include "location.h"
+#include "py-ref.h"
 
 /* Function that is called when a Python finish bp is found out of scope.  */
 static char * const outofscope_func = "out_of_scope";
@@ -337,12 +338,10 @@ bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
   if (bpfinish_obj->py_bp.bp->enable_state == bp_enabled
       && PyObject_HasAttrString (py_obj, outofscope_func))
     {
-      PyObject *meth_result;
-
-      meth_result = PyObject_CallMethod (py_obj, outofscope_func, NULL);
+      gdbpy_ref meth_result (PyObject_CallMethod (py_obj, outofscope_func,
+						  NULL));
       if (meth_result == NULL)
 	gdbpy_print_stack ();
-      Py_XDECREF (meth_result);
     }
 
   delete_breakpoint (bpfinish_obj->py_bp.bp);
@@ -392,13 +391,10 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b, void *args)
 static void
 bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 {
-  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
-                                               current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb,
                             bs == NULL ? NULL : bs->breakpoint_at);
-
-  do_cleanups (cleanup);
 }
 
 /* Attached to `exit' notifications, triggers all the necessary out of
@@ -407,12 +403,9 @@ bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 static void
 bpfinishpy_handle_exit (struct inferior *inf)
 {
-  struct cleanup *cleanup = ensure_python_env (target_gdbarch (),
-                                               current_language);
+  gdbpy_enter enter_py (target_gdbarch (), current_language);
 
   iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb, NULL);
-
-  do_cleanups (cleanup);
 }
 
 /* Initialize the Python finish breakpoint code.  */

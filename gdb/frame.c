@@ -1,6 +1,6 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1107,7 +1107,10 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   *unavailablep = !value_entirely_available (value);
   *lvalp = VALUE_LVAL (value);
   *addrp = value_address (value);
-  *realnump = VALUE_REGNUM (value);
+  if (*lvalp == lval_register)
+    *realnump = VALUE_REGNUM (value);
+  else
+    *realnump = -1;
 
   if (bufferp)
     {

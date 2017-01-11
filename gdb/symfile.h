@@ -1,6 +1,6 @@
 /* Definitions for reading symbol files into GDB.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 #include "probe.h"
 #include "symfile-add-flags.h"
 #include "objfile-flags.h"
+#include "gdb_bfd.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -499,7 +500,7 @@ extern void set_initial_language (void);
 
 extern void find_lowest_section (bfd *, asection *, void *);
 
-extern bfd *symfile_bfd_open (const char *);
+extern gdb_bfd_ref_ptr symfile_bfd_open (const char *);
 
 extern int get_section_index (struct objfile *, char *);
 
@@ -646,6 +647,6 @@ extern void elfmdebug_build_psymtabs (struct objfile *,
 
 /* From minidebug.c.  */
 
-extern bfd *find_separate_debug_file_in_section (struct objfile *);
+extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);
 
 #endif /* !defined(SYMFILE_H) */

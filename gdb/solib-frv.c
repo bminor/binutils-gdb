@@ -1,5 +1,5 @@
 /* Handle FR-V (FDPIC) shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -532,7 +532,6 @@ enable_break2 (void)
     {
       unsigned int interp_sect_size;
       char *buf;
-      bfd *tmp_bfd = NULL;
       int status;
       CORE_ADDR addr, interp_loadmap_addr;
       gdb_byte addr_buf[FRV_PTR_SIZE];
@@ -554,6 +553,7 @@ enable_break2 (void)
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
 
+      gdb_bfd_ref_ptr tmp_bfd;
       TRY
         {
           tmp_bfd = solib_bfd_open (buf);
@@ -575,7 +575,6 @@ enable_break2 (void)
 	{
 	  warning (_("Unable to determine dynamic linker loadmap address."));
 	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
@@ -590,41 +589,41 @@ enable_break2 (void)
 	  warning (_("Unable to load dynamic linker loadmap at address %s."),
 	           hex_string_custom (interp_loadmap_addr, 8));
 	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */
-      interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
+      interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
 	  interp_text_sect_low
-	    = bfd_section_vma (tmp_bfd, interp_sect);
+	    = bfd_section_vma (tmp_bfd.get (), interp_sect);
 	  interp_text_sect_low
 	    += displacement_from_map (ldm, interp_text_sect_low);
 	  interp_text_sect_high
-	    = interp_text_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	    = interp_text_sect_low + bfd_section_size (tmp_bfd.get (),
+						       interp_sect);
 	}
-      interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
+      interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".plt");
       if (interp_sect)
 	{
 	  interp_plt_sect_low =
-	    bfd_section_vma (tmp_bfd, interp_sect);
+	    bfd_section_vma (tmp_bfd.get (), interp_sect);
 	  interp_plt_sect_low
 	    += displacement_from_map (ldm, interp_plt_sect_low);
 	  interp_plt_sect_high =
-	    interp_plt_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	    interp_plt_sect_low + bfd_section_size (tmp_bfd.get (),
+						    interp_sect);
 	}
 
-      addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name, "_dl_debug_addr");
+      addr = gdb_bfd_lookup_symbol (tmp_bfd.get (), cmp_name, "_dl_debug_addr");
 
       if (addr == 0)
 	{
 	  warning (_("Could not find symbol _dl_debug_addr "
 		     "in dynamic linker"));
 	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
@@ -675,7 +674,6 @@ enable_break2 (void)
 		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
@@ -687,15 +685,11 @@ enable_break2 (void)
 		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
-      /* We're done with the temporary bfd.  */
-      gdb_bfd_unref (tmp_bfd);
-
-      /* We're also done with the loadmap.  */
+      /* We're done with the loadmap.  */
       xfree (ldm);
 
       /* Remove all the solib event breakpoints.  Their addresses

@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -4674,7 +4674,8 @@ size_input_section
 
   if (i->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
     i->output_offset = i->vma - o->vma;
-  else if ((i->flags & SEC_EXCLUDE) != 0)
+  else if (((i->flags & SEC_EXCLUDE) != 0)
+	   || output_section_statement->ignored)
     i->output_offset = dot - o->vma;
   else
     {

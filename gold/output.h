@@ -1,6 +1,6 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -4741,6 +4741,7 @@ class Output_segment
   first_section_load_address() const
   {
     const Output_section* os = this->first_section();
+    gold_assert(os != NULL);
     return os->has_load_address() ? os->load_address() : os->address();
   }
 
@@ -4851,8 +4852,8 @@ class Output_segment
   // Set the section addresses in an Output_data_list.
   uint64_t
   set_section_list_addresses(Layout*, bool reset, Output_data_list*,
-			     uint64_t addr, off_t* poff, unsigned int* pshndx,
-			     bool* in_tls);
+			     uint64_t addr, off_t* poff, off_t* fpoff,
+			     unsigned int* pshndx, bool* in_tls);
 
   // Return the number of Output_sections in an Output_data_list.
   unsigned int

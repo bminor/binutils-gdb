@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -273,10 +273,6 @@ struct elf32_hppa_link_hash_table
   unsigned int top_index;
   asection **input_list;
   Elf_Internal_Sym **all_local_syms;
-
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
 
   /* Used during a final link to store the base of the text and data
      segments so that we can perform SEGREL relocations.  */
@@ -998,9 +994,6 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_elf_create_dynamic_sections (abfd, info))
     return FALSE;
 
-  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
-  htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
-
   /* hppa-linux needs _GLOBAL_OFFSET_TABLE_ to be visible from the main
      application, because __canonicalize_funcptr_for_compare needs it.  */
   eh = elf_hash_table (info)->hgot;
@@ -1063,19 +1056,20 @@ elf32_hppa_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      eh_dir->ref_dynamic |= eh_ind->ref_dynamic;
+      if (eh_dir->versioned != versioned_hidden)
+	eh_dir->ref_dynamic |= eh_ind->ref_dynamic;
       eh_dir->ref_regular |= eh_ind->ref_regular;
       eh_dir->ref_regular_nonweak |= eh_ind->ref_regular_nonweak;
       eh_dir->needs_plt |= eh_ind->needs_plt;
     }
   else
     {
-      if (eh_ind->root.type == bfd_link_hash_indirect
-          && eh_dir->got.refcount <= 0)
-        {
-          hh_dir->tls_type = hh_ind->tls_type;
-          hh_ind->tls_type = GOT_UNKNOWN;
-        }
+      if (eh_ind->root.type == bfd_link_hash_indirect)
+	{
+	  hh_dir->plabel |= hh_ind->plabel;
+	  hh_dir->tls_type |= hh_ind->tls_type;
+	  hh_ind->tls_type = GOT_UNKNOWN;
+	}
 
       _bfd_elf_link_hash_copy_indirect (info, eh_dir, eh_ind);
     }
@@ -1800,7 +1794,7 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 				  struct elf_link_hash_entry *eh)
 {
   struct elf32_hppa_link_hash_table *htab;
-  asection *sec;
+  asection *sec, *srel;
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later.  */
@@ -1906,15 +1900,38 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      sec = htab->etab.sdynrelro;
+      srel = htab->etab.sreldynrelro;
+    }
+  else
+    {
+      sec = htab->etab.sdynbss;
+      srel = htab->etab.srelbss;
+    }
   if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0 && eh->size != 0)
     {
-      htab->srelbss->size += sizeof (Elf32_External_Rela);
+      srel->size += sizeof (Elf32_External_Rela);
       eh->needs_copy = 1;
     }
 
-  sec = htab->sdynbss;
-
   return _bfd_elf_adjust_dynamic_copy (info, eh, sec);
+}
+
+/* Make an undefined weak symbol dynamic.  */
+
+static bfd_boolean
+ensure_undef_weak_dynamic (struct bfd_link_info *info,
+			   struct elf_link_hash_entry *eh)
+{
+  if (eh->dynindx == -1
+      && !eh->forced_local
+      && eh->type != STT_PARISC_MILLI
+      && eh->root.type == bfd_link_hash_undefweak
+      && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT)
+    return bfd_elf_link_record_dynamic_symbol (info, eh);
+  return TRUE;
 }
 
 /* Allocate space in the .plt for entries that won't have relocations.
@@ -1940,15 +1957,8 @@ allocate_plt_static (struct elf_link_hash_entry *eh, void *inf)
   if (htab->etab.dynamic_sections_created
       && eh->plt.refcount > 0)
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (eh->dynindx == -1
-	  && !eh->forced_local
-	  && eh->type != STT_PARISC_MILLI)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-	    return FALSE;
-	}
+      if (!ensure_undef_weak_dynamic (info, eh))
+	return FALSE;
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), eh))
 	{
@@ -2022,15 +2032,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
   if (eh->got.refcount > 0)
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (eh->dynindx == -1
-	  && !eh->forced_local
-	  && eh->type != STT_PARISC_MILLI)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-	    return FALSE;
-	}
+      if (!ensure_undef_weak_dynamic (info, eh))
+	return FALSE;
 
       sec = htab->etab.sgot;
       eh->got.offset = sec->size;
@@ -2090,14 +2093,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	  if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
 	    hh->dyn_relocs = NULL;
 
-	  /* Make sure undefined weak symbols are output as a dynamic
-	     symbol in PIEs.  */
-	  else if (eh->dynindx == -1
-		   && !eh->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-		return FALSE;
-	    }
+	  else if (!ensure_undef_weak_dynamic (info, eh))
+	    return FALSE;
 	}
     }
   else
@@ -2114,15 +2111,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 		   && (eh->root.type == bfd_link_hash_undefweak
 		       || eh->root.type == bfd_link_hash_undefined))))
 	{
-	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (eh->dynindx == -1
-	      && !eh->forced_local
-	      && eh->type != STT_PARISC_MILLI)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-		return FALSE;
-	    }
+	  if (!ensure_undef_weak_dynamic (info, eh))
+	    return FALSE;
 
 	  /* If that succeeded, we know we'll be keeping all the
 	     relocs.  */
@@ -2381,7 +2371,8 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	}
       else if (sec == htab->etab.sgot
-	       || sec == htab->sdynbss)
+	       || sec == htab->etab.sdynbss
+	       || sec == htab->etab.sdynrelro)
 	;
       else if (CONST_STRNEQ (bfd_get_section_name (dynobj, sec), ".rela"))
 	{
@@ -4434,13 +4425,15 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 		 || eh->root.type == bfd_link_hash_defweak)))
 	abort ();
 
-      sec = htab->srelbss;
-
       rela.r_offset = (eh->root.u.def.value
 		      + eh->root.u.def.section->output_offset
 		      + eh->root.u.def.section->output_section->vma);
       rela.r_addend = 0;
       rela.r_info = ELF32_R_INFO (eh->dynindx, R_PARISC_COPY);
+      if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+	sec = htab->etab.sreldynrelro;
+      else
+	sec = htab->etab.srelbss;
       loc = sec->contents + sec->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
@@ -4648,6 +4641,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_plt_readonly	     0
 #define elf_backend_want_plt_sym	     0
 #define elf_backend_got_header_size	     8
+#define elf_backend_want_dynrelro	     1
 #define elf_backend_rela_normal		     1
 #define elf_backend_dtrel_excludes_plt	     1
 
