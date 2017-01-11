@@ -659,6 +659,41 @@ static const bfd_byte elf_x86_64_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+/* .eh_frame covering the BND .plt section.  */
+
+static const bfd_byte elf_x86_64_eh_frame_bnd_plt[] =
+{
+  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
+  0, 0, 0, 0,			/* CIE ID */
+  1,				/* CIE version */
+  'z', 'R', 0,			/* Augmentation string */
+  1,				/* Code alignment factor */
+  0x78,				/* Data alignment factor */
+  16,				/* Return address column */
+  1,				/* Augmentation size */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+  DW_CFA_def_cfa, 7, 8,		/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
+  DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
+  DW_CFA_nop, DW_CFA_nop,
+
+  PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
+  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
+  0, 0, 0, 0,			/* R_X86_64_PC32 .plt goes here */
+  0, 0, 0, 0,			/* .plt size goes here */
+  0,				/* Augmentation size */
+  DW_CFA_def_cfa_offset, 16,	/* DW_CFA_def_cfa_offset: 16 */
+  DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
+  DW_CFA_def_cfa_offset, 24,	/* DW_CFA_def_cfa_offset: 24 */
+  DW_CFA_advance_loc + 10,	/* DW_CFA_advance_loc: 10 to __PLT__+16 */
+  DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
+  11,				/* Block length */
+  DW_OP_breg7, 8,		/* DW_OP_breg7 (rsp): 8 */
+  DW_OP_breg16, 0,		/* DW_OP_breg16 (rip): 0 */
+  DW_OP_lit15, DW_OP_and, DW_OP_lit5, DW_OP_ge,
+  DW_OP_lit3, DW_OP_shl, DW_OP_plus,
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+};
+
 /* .eh_frame covering the .plt.got section.  */
 
 static const bfd_byte elf_x86_64_eh_frame_plt_got[] =
@@ -770,11 +805,10 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
     1+6,                                /* plt_got_insn_size */
     11,                                 /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
-    elf_x86_64_eh_frame_plt,            /* eh_frame_plt */
-    sizeof (elf_x86_64_eh_frame_plt),   /* eh_frame_plt_size */
-    /* FIXME: Needs .eh_frame coverage.  */
-    NULL,                               /* eh_frame_plt_got */
-    0,                                  /* eh_frame_plt_got_size */
+    elf_x86_64_eh_frame_bnd_plt,        /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_bnd_plt), /* eh_frame_plt_size */
+    elf_x86_64_eh_frame_plt_got,        /* eh_frame_plt_got */
+    sizeof (elf_x86_64_eh_frame_plt_got), /* eh_frame_plt_got_size */
   };
 
 #define	elf_backend_arch_data	&elf_x86_64_arch_bed
@@ -900,6 +934,7 @@ struct elf_x86_64_link_hash_table
   asection *interp;
   asection *plt_eh_frame;
   asection *plt_bnd;
+  asection *plt_bnd_eh_frame;
   asection *plt_got;
   asection *plt_got_eh_frame;
 
@@ -2309,23 +2344,21 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* MPX PLT is supported only if elf_x86_64_arch_bed
 		 is used in 64-bit mode.  */
 	      if (ABI_64_P (abfd)
-		      && info->bndplt
-		      && (get_elf_x86_64_backend_data (abfd)
-			  == &elf_x86_64_arch_bed))
+		  && info->bndplt
+		  && (get_elf_x86_64_backend_data (abfd)
+		      == &elf_x86_64_arch_bed))
 		{
 		  elf_x86_64_hash_entry (h)->has_bnd_reloc = 1;
 
 		  /* Create the second PLT for Intel MPX support.  */
 		  if (htab->plt_bnd == NULL)
 		    {
-		      unsigned int plt_bnd_align;
 		      const struct elf_backend_data *bed;
 
 		      bed = get_elf_backend_data (info->output_bfd);
 		      BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
 				  && (sizeof (elf_x86_64_bnd_plt2_entry)
 				      == sizeof (elf_x86_64_legacy_plt2_entry)));
-		      plt_bnd_align = 3;
 
 		      if (htab->elf.dynobj == NULL)
 			htab->elf.dynobj = abfd;
@@ -2340,7 +2373,24 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      if (htab->plt_bnd == NULL
 			  || !bfd_set_section_alignment (htab->elf.dynobj,
 							 htab->plt_bnd,
-							 plt_bnd_align))
+							 3))
+			goto error_return;
+		    }
+
+		  if (!info->no_ld_generated_unwind_info
+		      && htab->plt_bnd_eh_frame == NULL)
+		    {
+		      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+					| SEC_HAS_CONTENTS | SEC_IN_MEMORY
+					| SEC_LINKER_CREATED);
+		      htab->plt_bnd_eh_frame
+			= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+							      ".eh_frame",
+							      flags);
+		      if (htab->plt_bnd_eh_frame == NULL
+			  || !bfd_set_section_alignment (htab->elf.dynobj,
+							 htab->plt_bnd_eh_frame,
+							 3))
 			goto error_return;
 		    }
 		}
@@ -3653,6 +3703,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   bfd_boolean relocs;
   bfd *ibfd;
   const struct elf_backend_data *bed;
+  const struct elf_x86_64_backend_data *arch_data;
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
@@ -3844,28 +3895,31 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	htab->elf.sgotplt->size = 0;
     }
 
+  arch_data = (htab->plt_bnd != NULL
+	       ? &elf_x86_64_bnd_arch_bed
+	       : get_elf_x86_64_arch_data (bed));
+
   if (_bfd_elf_eh_frame_present (info))
     {
       if (htab->plt_eh_frame != NULL
 	  && htab->elf.splt != NULL
 	  && htab->elf.splt->size != 0
 	  && !bfd_is_abs_section (htab->elf.splt->output_section))
-	{
-	  const struct elf_x86_64_backend_data *arch_data
-	    = get_elf_x86_64_arch_data (bed);
-	  htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
-	}
+	htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
 
       if (htab->plt_got_eh_frame != NULL
 	  && htab->plt_got != NULL
 	  && htab->plt_got->size != 0
 	  && !bfd_is_abs_section (htab->plt_got->output_section))
-	{
-	  const struct elf_x86_64_backend_data *arch_data
-	    = get_elf_x86_64_arch_data (bed);
-	  htab->plt_got_eh_frame->size
-	    = arch_data->eh_frame_plt_got_size;
-	}
+	htab->plt_got_eh_frame->size = arch_data->eh_frame_plt_got_size;
+
+      /* Unwind info for .plt.bnd and .plt.got sections are
+	 identical.  */
+      if (htab->plt_bnd_eh_frame != NULL
+	  && htab->plt_bnd != NULL
+	  && htab->plt_bnd->size != 0
+	  && !bfd_is_abs_section (htab->plt_bnd->output_section))
+	htab->plt_bnd_eh_frame->size = arch_data->eh_frame_plt_got_size;
     }
 
   /* We now have determined the sizes of the various dynamic sections.
@@ -3885,6 +3939,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  || s == htab->plt_got
 	  || s == htab->plt_eh_frame
 	  || s == htab->plt_got_eh_frame
+	  || s == htab->plt_bnd_eh_frame
 	  || s == htab->elf.sdynbss
 	  || s == htab->elf.sdynrelro)
 	{
@@ -3939,9 +3994,6 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   if (htab->plt_eh_frame != NULL
       && htab->plt_eh_frame->contents != NULL)
     {
-      const struct elf_x86_64_backend_data *arch_data
-	= get_elf_x86_64_arch_data (bed);
-
       memcpy (htab->plt_eh_frame->contents,
 	      arch_data->eh_frame_plt, htab->plt_eh_frame->size);
       bfd_put_32 (dynobj, htab->elf.splt->size,
@@ -3951,14 +4003,22 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   if (htab->plt_got_eh_frame != NULL
       && htab->plt_got_eh_frame->contents != NULL)
     {
-      const struct elf_x86_64_backend_data *arch_data
-	= get_elf_x86_64_arch_data (bed);
-
       memcpy (htab->plt_got_eh_frame->contents,
 	      arch_data->eh_frame_plt_got,
 	      htab->plt_got_eh_frame->size);
       bfd_put_32 (dynobj, htab->plt_got->size,
 		  (htab->plt_got_eh_frame->contents
+		   + PLT_FDE_LEN_OFFSET));
+    }
+
+  if (htab->plt_bnd_eh_frame != NULL
+      && htab->plt_bnd_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_bnd_eh_frame->contents,
+	      arch_data->eh_frame_plt_got,
+	      htab->plt_bnd_eh_frame->size);
+      bfd_put_32 (dynobj, htab->plt_bnd->size,
+		  (htab->plt_bnd_eh_frame->contents
 		   + PLT_FDE_LEN_OFFSET));
     }
 
@@ -6450,6 +6510,33 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
 						 htab->plt_got_eh_frame,
 						 htab->plt_got_eh_frame->contents))
+	    return FALSE;
+	}
+    }
+
+  /* Adjust .eh_frame for .plt.bnd section.  */
+  if (htab->plt_bnd_eh_frame != NULL
+      && htab->plt_bnd_eh_frame->contents != NULL)
+    {
+      if (htab->plt_bnd != NULL
+	  && htab->plt_bnd->size != 0
+	  && (htab->plt_bnd->flags & SEC_EXCLUDE) == 0
+	  && htab->plt_bnd->output_section != NULL
+	  && htab->plt_bnd_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->plt_bnd->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_bnd_eh_frame->output_section->vma
+				   + htab->plt_bnd_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_bnd_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+      if (htab->plt_bnd_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_bnd_eh_frame,
+						 htab->plt_bnd_eh_frame->contents))
 	    return FALSE;
 	}
     }
