@@ -31,6 +31,7 @@
 #include "mi/mi-cmds.h"
 #include "python-internal.h"
 #include "py-ref.h"
+#include "common/gdb_optional.h"
 
 enum mi_print_types
 {
@@ -365,7 +366,7 @@ py_print_single_arg (struct ui_out *out,
 
   TRY
     {
-      struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+      gdb::optional<ui_out_emit_tuple> maybe_tuple;
 
       /*  MI has varying rules for tuples, but generally if there is only
       one element in each item in the list, do not start a tuple.  The
@@ -376,7 +377,7 @@ py_print_single_arg (struct ui_out *out,
       if (out->is_mi_like_p ())
 	{
 	  if (print_args_field || args_type != NO_VALUES)
-	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
+	    maybe_tuple.emplace (out, nullptr);
 	}
 
       annotate_arg_begin ();
@@ -421,10 +422,7 @@ py_print_single_arg (struct ui_out *out,
       if (args_type == MI_PRINT_SIMPLE_VALUES && val != NULL)
 	{
 	  if (py_print_type (out, val) == EXT_LANG_BT_ERROR)
-	    {
-	      retval = EXT_LANG_BT_ERROR;
-	      do_cleanups (cleanups);
-	    }
+	    retval = EXT_LANG_BT_ERROR;
 	}
 
       if (retval != EXT_LANG_BT_ERROR)
@@ -454,8 +452,6 @@ py_print_single_arg (struct ui_out *out,
 		    retval = EXT_LANG_BT_ERROR;
 		}
 	    }
-
-	  do_cleanups (cleanups);
 	}
     }
   CATCH (except, RETURN_MASK_ERROR)
@@ -695,35 +691,24 @@ enumerate_locals (PyObject *iter,
       struct symbol *sym;
       struct block *sym_block;
       int local_indent = 8 + (8 * indent);
-      struct cleanup *locals_cleanups;
+      gdb::optional<ui_out_emit_tuple> tuple;
 
       gdbpy_ref item (PyIter_Next (iter));
       if (item == NULL)
 	break;
 
-      locals_cleanups = make_cleanup (null_cleanup, NULL);
-
       success = extract_sym (item.get (), &sym_name, &sym, &sym_block,
 			     &language);
       if (success == EXT_LANG_BT_ERROR)
-	{
-	  do_cleanups (locals_cleanups);
-	  goto error;
-	}
+	return EXT_LANG_BT_ERROR;
 
       success = extract_value (item.get (), &val);
       if (success == EXT_LANG_BT_ERROR)
-	{
-	  do_cleanups (locals_cleanups);
-	  goto error;
-	}
+	return EXT_LANG_BT_ERROR;
 
       if (sym != NULL && out->is_mi_like_p ()
 	  && ! mi_should_print (sym, MI_PRINT_LOCALS))
-	{
-	  do_cleanups (locals_cleanups);
-	  continue;
-	}
+	continue;
 
       /* If the object did not provide a value, read it.  */
       if (val == NULL)
@@ -735,8 +720,7 @@ enumerate_locals (PyObject *iter,
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      gdbpy_convert_exception (except);
-	      do_cleanups (locals_cleanups);
-	      goto error;
+	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
 	}
@@ -747,7 +731,7 @@ enumerate_locals (PyObject *iter,
       if (out->is_mi_like_p ())
 	{
 	  if (print_args_field || args_type != NO_VALUES)
-	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
+	    tuple.emplace (out, nullptr);
 	}
       TRY
 	{
@@ -765,18 +749,14 @@ enumerate_locals (PyObject *iter,
       CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
-	  do_cleanups (locals_cleanups);
-	  goto error;
+	  return EXT_LANG_BT_ERROR;
 	}
       END_CATCH
 
       if (args_type == MI_PRINT_SIMPLE_VALUES)
 	{
 	  if (py_print_type (out, val) == EXT_LANG_BT_ERROR)
-	    {
-	      do_cleanups (locals_cleanups);
-	      goto error;
-	    }
+	    return EXT_LANG_BT_ERROR;
 	}
 
       /* CLI always prints values for locals.  MI uses the
@@ -787,10 +767,7 @@ enumerate_locals (PyObject *iter,
 
 	  if (py_print_value (out, val, &opts, val_indent, args_type,
 			      language) == EXT_LANG_BT_ERROR)
-	    {
-	      do_cleanups (locals_cleanups);
-	      goto error;
-	    }
+	    return EXT_LANG_BT_ERROR;
 	}
       else
 	{
@@ -798,14 +775,9 @@ enumerate_locals (PyObject *iter,
 	    {
 	      if (py_print_value (out, val, &opts, 0, args_type,
 				  language) == EXT_LANG_BT_ERROR)
-		{
-		  do_cleanups (locals_cleanups);
-		  goto error;
-		}
+		return EXT_LANG_BT_ERROR;
 	    }
 	}
-
-      do_cleanups (locals_cleanups);
 
       TRY
 	{
@@ -814,7 +786,7 @@ enumerate_locals (PyObject *iter,
       CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
-	  goto error;
+	  return EXT_LANG_BT_ERROR;
 	}
       END_CATCH
     }
@@ -822,7 +794,6 @@ enumerate_locals (PyObject *iter,
   if (!PyErr_Occurred ())
     return EXT_LANG_BT_OK;
 
- error:
   return EXT_LANG_BT_ERROR;
 }
 
@@ -835,8 +806,6 @@ py_mi_print_variables (PyObject *filter, struct ui_out *out,
 		       enum ext_lang_frame_args args_type,
 		       struct frame_info *frame)
 {
-  struct cleanup *old_chain;
-
   gdbpy_ref args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
     return EXT_LANG_BT_ERROR;
@@ -845,24 +814,19 @@ py_mi_print_variables (PyObject *filter, struct ui_out *out,
   if (locals_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
-  old_chain = make_cleanup_ui_out_list_begin_end (out, "variables");
+  ui_out_emit_list list_emitter (out, "variables");
 
-  if (args_iter != Py_None)
-    if (enumerate_args (args_iter.get (), out, args_type, 1, frame)
-	== EXT_LANG_BT_ERROR)
-      goto error;
+  if (args_iter != Py_None
+      && (enumerate_args (args_iter.get (), out, args_type, 1, frame)
+	  == EXT_LANG_BT_ERROR))
+    return EXT_LANG_BT_ERROR;
 
-  if (locals_iter != Py_None)
-    if (enumerate_locals (locals_iter.get (), out, 1, args_type, 1, frame)
-	== EXT_LANG_BT_ERROR)
-      goto error;
+  if (locals_iter != Py_None
+      && (enumerate_locals (locals_iter.get (), out, 1, args_type, 1, frame)
+	  == EXT_LANG_BT_ERROR))
+    return EXT_LANG_BT_ERROR;
 
-  do_cleanups (old_chain);
   return EXT_LANG_BT_OK;
-
- error:
-  do_cleanups (old_chain);
-  return EXT_LANG_BT_ERROR;
 }
 
 /* Helper function for printing locals.  This function largely just
@@ -876,25 +840,18 @@ py_print_locals (PyObject *filter,
 		 int indent,
 		 struct frame_info *frame)
 {
-  struct cleanup *old_chain;
-
   gdbpy_ref locals_iter (get_py_iter_from_func (filter, "frame_locals"));
   if (locals_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
-  old_chain = make_cleanup_ui_out_list_begin_end (out, "locals");
+  ui_out_emit_list list_emitter (out, "locals");
 
-  if (locals_iter != Py_None)
-    if (enumerate_locals (locals_iter.get (), out, indent, args_type,
-			  0, frame) == EXT_LANG_BT_ERROR)
-      goto locals_error;
+  if (locals_iter != Py_None
+      && (enumerate_locals (locals_iter.get (), out, indent, args_type,
+			    0, frame) == EXT_LANG_BT_ERROR))
+    return EXT_LANG_BT_ERROR;
 
-  do_cleanups (old_chain);
   return EXT_LANG_BT_OK;
-
- locals_error:
-  do_cleanups (old_chain);
-  return EXT_LANG_BT_ERROR;
 }
 
 /* Helper function for printing frame arguments.  This function
@@ -908,13 +865,11 @@ py_print_args (PyObject *filter,
 	       enum ext_lang_frame_args args_type,
 	       struct frame_info *frame)
 {
-  struct cleanup *old_chain;
-
   gdbpy_ref args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
-  old_chain = make_cleanup_ui_out_list_begin_end (out, "args");
+  ui_out_emit_list list_emitter (out, "args");
 
   TRY
     {
@@ -925,14 +880,14 @@ py_print_args (PyObject *filter,
   CATCH (except, RETURN_MASK_ALL)
     {
       gdbpy_convert_exception (except);
-      goto args_error;
+      return EXT_LANG_BT_ERROR;
     }
   END_CATCH
 
-  if (args_iter != Py_None)
-    if (enumerate_args (args_iter.get (), out, args_type, 0, frame)
-	== EXT_LANG_BT_ERROR)
-      goto args_error;
+  if (args_iter != Py_None
+      && (enumerate_args (args_iter.get (), out, args_type, 0, frame)
+	  == EXT_LANG_BT_ERROR))
+    return EXT_LANG_BT_ERROR;
 
   TRY
     {
@@ -942,16 +897,11 @@ py_print_args (PyObject *filter,
   CATCH (except, RETURN_MASK_ALL)
     {
       gdbpy_convert_exception (except);
-      goto args_error;
+      return EXT_LANG_BT_ERROR;
     }
   END_CATCH
 
-  do_cleanups (old_chain);
   return EXT_LANG_BT_OK;
-
- args_error:
-  do_cleanups (old_chain);
-  return EXT_LANG_BT_ERROR;
 }
 
 /*  Print a single frame to the designated output stream, detecting
@@ -978,7 +928,6 @@ py_print_frame (PyObject *filter, int flags,
   CORE_ADDR address = 0;
   struct gdbarch *gdbarch = NULL;
   struct frame_info *frame = NULL;
-  struct cleanup *cleanup_stack;
   struct value_print_options opts;
   int print_level, print_frame_info, print_args, print_locals;
   gdb::unique_xmalloc_ptr<char> function_to_free;
@@ -1022,12 +971,12 @@ py_print_frame (PyObject *filter, int flags,
       return EXT_LANG_BT_COMPLETED;
     }
 
-  cleanup_stack = make_cleanup (null_cleanup, NULL);
+  gdb::optional<ui_out_emit_tuple> tuple;
 
   /* -stack-list-locals does not require a
      wrapping frame attribute.  */
   if (print_frame_info || (print_args && ! print_locals))
-    make_cleanup_ui_out_tuple_begin_end (out, "frame");
+    tuple.emplace (out, "frame");
 
   if (print_frame_info)
     {
@@ -1042,7 +991,6 @@ py_print_frame (PyObject *filter, int flags,
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      gdbpy_convert_exception (except);
-	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
@@ -1055,18 +1003,12 @@ py_print_frame (PyObject *filter, int flags,
 	  gdbpy_ref paddr (PyObject_CallMethod (filter, "address", NULL));
 
 	  if (paddr == NULL)
-	    {
-	      do_cleanups (cleanup_stack);
-	      return EXT_LANG_BT_ERROR;
-	    }
+	    return EXT_LANG_BT_ERROR;
 
 	  if (paddr != Py_None)
 	    {
 	      if (get_addr_from_python (paddr.get (), &address) < 0)
-		{
-		  do_cleanups (cleanup_stack);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 
 	      has_addr = 1;
 	    }
@@ -1105,7 +1047,6 @@ py_print_frame (PyObject *filter, int flags,
       CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
-	  do_cleanups (cleanup_stack);
 	  return EXT_LANG_BT_ERROR;
 	}
       END_CATCH
@@ -1127,7 +1068,6 @@ py_print_frame (PyObject *filter, int flags,
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      gdbpy_convert_exception (except);
-	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
@@ -1140,20 +1080,14 @@ py_print_frame (PyObject *filter, int flags,
 	  const char *function = NULL;
 
 	  if (py_func == NULL)
-	    {
-	      do_cleanups (cleanup_stack);
-	      return EXT_LANG_BT_ERROR;
-	    }
+	    return EXT_LANG_BT_ERROR;
 
 	  if (gdbpy_is_string (py_func.get ()))
 	    {
 	      function_to_free = python_string_to_host_string (py_func.get ());
 
 	      if (function_to_free == NULL)
-		{
-		  do_cleanups (cleanup_stack);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 
 	      function = function_to_free.get ();
 	    }
@@ -1163,10 +1097,7 @@ py_print_frame (PyObject *filter, int flags,
 	      struct bound_minimal_symbol msymbol;
 
 	      if (get_addr_from_python (py_func.get (), &addr) < 0)
-		{
-		  do_cleanups (cleanup_stack);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 
 	      msymbol = lookup_minimal_symbol_by_pc (addr);
 	      if (msymbol.minsym != NULL)
@@ -1177,7 +1108,6 @@ py_print_frame (PyObject *filter, int flags,
 	      PyErr_SetString (PyExc_RuntimeError,
 			       _("FrameDecorator.function: expecting a " \
 				 "String, integer or None."));
-	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
 
@@ -1192,7 +1122,6 @@ py_print_frame (PyObject *filter, int flags,
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      gdbpy_convert_exception (except);
-	      do_cleanups (cleanup_stack);
 	      return EXT_LANG_BT_ERROR;
 	    }
 	  END_CATCH
@@ -1205,10 +1134,7 @@ py_print_frame (PyObject *filter, int flags,
   if (print_args)
     {
       if (py_print_args (filter, out, args_type, frame) == EXT_LANG_BT_ERROR)
-	{
-	  do_cleanups (cleanup_stack);
-	  return EXT_LANG_BT_ERROR;
-	}
+	return EXT_LANG_BT_ERROR;
     }
 
   /* File name/source/line number information.  */
@@ -1221,7 +1147,6 @@ py_print_frame (PyObject *filter, int flags,
       CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
-	  do_cleanups (cleanup_stack);
 	  return EXT_LANG_BT_ERROR;
 	}
       END_CATCH
@@ -1231,10 +1156,7 @@ py_print_frame (PyObject *filter, int flags,
 	  gdbpy_ref py_fn (PyObject_CallMethod (filter, "filename", NULL));
 
 	  if (py_fn == NULL)
-	    {
-	      do_cleanups (cleanup_stack);
-	      return EXT_LANG_BT_ERROR;
-	    }
+	    return EXT_LANG_BT_ERROR;
 
 	  if (py_fn != Py_None)
 	    {
@@ -1242,10 +1164,7 @@ py_print_frame (PyObject *filter, int flags,
 		filename (python_string_to_host_string (py_fn.get ()));
 
 	      if (filename == NULL)
-		{
-		  do_cleanups (cleanup_stack);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 
 	      TRY
 		{
@@ -1258,7 +1177,6 @@ py_print_frame (PyObject *filter, int flags,
 	      CATCH (except, RETURN_MASK_ERROR)
 		{
 		  gdbpy_convert_exception (except);
-		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
 		}
 	      END_CATCH
@@ -1271,19 +1189,13 @@ py_print_frame (PyObject *filter, int flags,
 	  int line;
 
 	  if (py_line == NULL)
-	    {
-	      do_cleanups (cleanup_stack);
-	      return EXT_LANG_BT_ERROR;
-	    }
+	    return EXT_LANG_BT_ERROR;
 
 	  if (py_line != Py_None)
 	    {
 	      line = PyLong_AsLong (py_line.get ());
 	      if (PyErr_Occurred ())
-		{
-		  do_cleanups (cleanup_stack);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 
 	      TRY
 		{
@@ -1294,7 +1206,6 @@ py_print_frame (PyObject *filter, int flags,
 	      CATCH (except, RETURN_MASK_ERROR)
 		{
 		  gdbpy_convert_exception (except);
-		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
 		}
 	      END_CATCH
@@ -1314,7 +1225,6 @@ py_print_frame (PyObject *filter, int flags,
       CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
-	  do_cleanups (cleanup_stack);
 	  return EXT_LANG_BT_ERROR;
 	}
       END_CATCH
@@ -1324,26 +1234,20 @@ py_print_frame (PyObject *filter, int flags,
     {
       if (py_print_locals (filter, out, args_type, indent,
 			   frame) == EXT_LANG_BT_ERROR)
-	{
-	  do_cleanups (cleanup_stack);
-	  return EXT_LANG_BT_ERROR;
-	}
+	return EXT_LANG_BT_ERROR;
     }
 
   {
     /* Finally recursively print elided frames, if any.  */
     gdbpy_ref elided (get_py_iter_from_func (filter, "elided"));
     if (elided == NULL)
-      {
-	do_cleanups (cleanup_stack);
-	return EXT_LANG_BT_ERROR;
-      }
+      return EXT_LANG_BT_ERROR;
 
     if (elided != Py_None)
       {
 	PyObject *item;
 
-	make_cleanup_ui_out_list_begin_end (out, "children");
+	ui_out_emit_list inner_list_emiter (out, "children");
 
 	if (! out->is_mi_like_p ())
 	  indent++;
@@ -1358,20 +1262,13 @@ py_print_frame (PyObject *filter, int flags,
 							      levels_printed);
 
 	    if (success == EXT_LANG_BT_ERROR)
-	      {
-		do_cleanups (cleanup_stack);
-		return EXT_LANG_BT_ERROR;
-	      }
+	      return EXT_LANG_BT_ERROR;
 	  }
 	if (item == NULL && PyErr_Occurred ())
-	  {
-	    do_cleanups (cleanup_stack);
-	    return EXT_LANG_BT_ERROR;
-	  }
+	  return EXT_LANG_BT_ERROR;
       }
   }
 
-  do_cleanups (cleanup_stack);
   return EXT_LANG_BT_COMPLETED;
 }
 

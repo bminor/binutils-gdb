@@ -1,3 +1,16 @@
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* ui-out.h (ui_out_emit_type): New class.
+	(ui_out_emit_tuple, ui_out_emit_list): New typedefs.
+	* python/py-framefilter.c (py_print_single_arg): Use gdb::optional
+	and ui_out_emit_tuple.
+	(enumerate_locals): Likewise.
+	(py_mi_print_variables, py_print_locals, py_print_args): Use
+	ui_out_emit_list.
+	(py_print_frame): Use gdb::optional, ui_out_emit_tuple,
+	ui_out_emit_list.
+	* common/gdb_optional.h: New file.
+
 2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
 
 	* MAINTAINERS (Write After Approval): Update my e-mail address.
