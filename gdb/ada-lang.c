@@ -1,6 +1,6 @@
 /* Ada language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2568,9 +2568,8 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   gdb_byte *unpacked;
   const int is_scalar = is_scalar_type (type);
   const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
-  gdb_byte *staging = NULL;
+  std::unique_ptr<gdb_byte[]> staging;
   int staging_len = 0;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   type = ada_check_typedef (type);
 
@@ -2589,14 +2588,13 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	 we do, is unpack the data into a byte-aligned buffer, and then
 	 use that buffer as our object's value for resolving the type.  */
       staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-      staging = (gdb_byte *) malloc (staging_len);
-      make_cleanup (xfree, staging);
+      staging.reset (new gdb_byte[staging_len]);
 
       ada_unpack_from_contents (src, bit_offset, bit_size,
-			        staging, staging_len,
+			        staging.get (), staging_len,
 				is_big_endian, has_negatives (type),
 				is_scalar);
-      type = resolve_dynamic_type (type, staging, 0);
+      type = resolve_dynamic_type (type, staging.get (), 0);
       if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 	{
 	  /* This happens when the length of the object is dynamic,
@@ -2656,7 +2654,6 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (bit_size == 0)
     {
       memset (unpacked, 0, TYPE_LENGTH (type));
-      do_cleanups (old_chain);
       return v;
     }
 
@@ -2665,14 +2662,13 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       /* Small short-cut: If we've unpacked the data into a buffer
 	 of the same size as TYPE's length, then we can reuse that,
 	 instead of doing the unpacking again.  */
-      memcpy (unpacked, staging, staging_len);
+      memcpy (unpacked, staging.get (), staging_len);
     }
   else
     ada_unpack_from_contents (src, bit_offset, bit_size,
 			      unpacked, TYPE_LENGTH (type),
 			      is_big_endian, has_negatives (type), is_scalar);
 
-  do_cleanups (old_chain);
   return v;
 }
 
@@ -4454,17 +4450,10 @@ ada_read_renaming_var_value (struct symbol *renaming_sym,
 			     const struct block *block)
 {
   const char *sym_name;
-  struct expression *expr;
-  struct value *value;
-  struct cleanup *old_chain = NULL;
 
   sym_name = SYMBOL_LINKAGE_NAME (renaming_sym);
-  expr = parse_exp_1 (&sym_name, 0, block, 0);
-  old_chain = make_cleanup (free_current_contents, &expr);
-  value = evaluate_expression (expr);
-
-  do_cleanups (old_chain);
-  return value;
+  expression_up expr = parse_exp_1 (&sym_name, 0, block, 0);
+  return evaluate_expression (expr.get ());
 }
 
 
@@ -4484,8 +4473,8 @@ ensure_lval (struct value *val)
       const CORE_ADDR addr =
         value_as_long (value_allocate_space_in_inferior (len));
 
-      set_value_address (val, addr);
       VALUE_LVAL (val) = lval_memory;
+      set_value_address (val, addr);
       write_memory (addr, value_contents (val), len);
     }
 
@@ -5878,28 +5867,21 @@ ada_iterate_over_symbols (const struct block *block,
 }
 
 /* If NAME is the name of an entity, return a string that should
-   be used to look that entity up in Ada units.  This string should
-   be deallocated after use using xfree.
+   be used to look that entity up in Ada units.
 
    NAME can have any form that the "break" or "print" commands might
    recognize.  In other words, it does not have to be the "natural"
    name, or the "encoded" name.  */
 
-char *
+std::string
 ada_name_for_lookup (const char *name)
 {
-  char *canon;
   int nlen = strlen (name);
 
   if (name[0] == '<' && name[nlen - 1] == '>')
-    {
-      canon = (char *) xmalloc (nlen - 1);
-      memcpy (canon, name + 1, nlen - 2);
-      canon[nlen - 2] = '\0';
-    }
+    return std::string (name + 1, nlen - 2);
   else
-    canon = xstrdup (ada_encode (ada_fold_name (name)));
-  return canon;
+    return ada_encode (ada_fold_name (name));
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
@@ -7615,36 +7597,21 @@ ada_value_struct_elt (struct value *arg, char *name, int no_err)
 	     "a value that is not a record."));
 }
 
-/* Return a string representation of type TYPE.  Caller must free
-   result.  */
+/* Return a string representation of type TYPE.  */
 
-static char *
+static std::string
 type_as_string (struct type *type)
 {
   struct ui_file *tmp_stream = mem_fileopen ();
   struct cleanup *old_chain;
-  char *str;
 
   tmp_stream = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (tmp_stream);
 
   type_print (type, "", tmp_stream, -1);
-  str = ui_file_xstrdup (tmp_stream, NULL);
+  std::string str = ui_file_as_string (tmp_stream);
 
   do_cleanups (old_chain);
-  return str;
-}
-
-/* Return a string representation of type TYPE, and install a cleanup
-   that releases it.  */
-
-static char *
-type_as_string_and_cleanup (struct type *type)
-{
-  char *str;
-
-  str = type_as_string (type);
-  make_cleanup (xfree, str);
   return str;
 }
 
@@ -7688,15 +7655,11 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
       || (TYPE_CODE (type) != TYPE_CODE_STRUCT
           && TYPE_CODE (type) != TYPE_CODE_UNION))
     {
-      const char *type_str;
-
       if (noerr)
         return NULL;
 
-      type_str = (type != NULL
-		  ? type_as_string_and_cleanup (type)
-		  : _("(null)"));
-      error (_("Type %s is not a structure or union type"), type_str);
+      error (_("Type %s is not a structure or union type"),
+	     type != NULL ? type_as_string (type).c_str () : _("(null)"));
     }
 
   type = to_static_fixed_type (type);
@@ -7769,7 +7732,7 @@ BadName:
       const char *name_str = name != NULL ? name : _("<null>");
 
       error (_("Type %s has no component named %s"),
-	     type_as_string_and_cleanup (type), name_str);
+	     type_as_string (type).c_str (), name_str);
     }
 
   return NULL;
@@ -12308,7 +12271,7 @@ struct ada_catchpoint_location
   /* The condition that checks whether the exception that was raised
      is the specific exception the user specified on catchpoint
      creation.  */
-  struct expression *excep_cond_expr;
+  expression_up excep_cond_expr;
 };
 
 /* Implement the DTOR method in the bp_location_ops structure for all
@@ -12319,7 +12282,7 @@ ada_catchpoint_location_dtor (struct bp_location *bl)
 {
   struct ada_catchpoint_location *al = (struct ada_catchpoint_location *) bl;
 
-  xfree (al->excep_cond_expr);
+  al->excep_cond_expr.reset ();
 }
 
 /* The vtable to be used in Ada catchpoint locations.  */
@@ -12371,7 +12334,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
     {
       struct ada_catchpoint_location *ada_loc
 	= (struct ada_catchpoint_location *) bl;
-      struct expression *exp = NULL;
+      expression_up exp;
 
       if (!bl->shlib_disabled)
 	{
@@ -12381,25 +12344,19 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 	  TRY
 	    {
 	      exp = parse_exp_1 (&s, bl->address,
-				 block_for_pc (bl->address), 0);
+				 block_for_pc (bl->address),
+				 0);
 	    }
 	  CATCH (e, RETURN_MASK_ERROR)
 	    {
 	      warning (_("failed to reevaluate internal exception condition "
 			 "for catchpoint %d: %s"),
 		       c->base.number, e.message);
-	      /* There is a bug in GCC on sparc-solaris when building with
-		 optimization which causes EXP to change unexpectedly
-		 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=56982).
-		 The problem should be fixed starting with GCC 4.9.
-		 In the meantime, work around it by forcing EXP back
-		 to NULL.  */
-	      exp = NULL;
 	    }
 	  END_CATCH
 	}
 
-      ada_loc->excep_cond_expr = exp;
+      ada_loc->excep_cond_expr = std::move (exp);
     }
 
   do_cleanups (old_chain);
@@ -12427,7 +12384,7 @@ allocate_location_exception (enum ada_exception_catchpoint_kind ex,
 {
   struct ada_catchpoint_location *loc;
 
-  loc = XNEW (struct ada_catchpoint_location);
+  loc = new ada_catchpoint_location ();
   init_bp_location (&loc->base, &ada_catchpoint_location_ops, self);
   loc->excep_cond_expr = NULL;
   return &loc->base;
@@ -12479,7 +12436,7 @@ should_stop_exception (const struct bp_location *bl)
       struct value *mark;
 
       mark = value_mark ();
-      stop = value_true (evaluate_expression (ada_loc->excep_cond_expr));
+      stop = value_true (evaluate_expression (ada_loc->excep_cond_expr.get ()));
       value_free_to_mark (mark);
     }
   CATCH (ex, RETURN_MASK_ALL)
@@ -12512,18 +12469,17 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 
   annotate_catchpoint (b->number);
 
-  if (ui_out_is_mi_like_p (uiout))
+  if (uiout->is_mi_like_p ())
     {
-      ui_out_field_string (uiout, "reason",
+      uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
 
-  ui_out_text (uiout,
-               b->disposition == disp_del ? "\nTemporary catchpoint "
-	                                  : "\nCatchpoint ");
-  ui_out_field_int (uiout, "bkptno", b->number);
-  ui_out_text (uiout, ", ");
+  uiout->text (b->disposition == disp_del
+	       ? "\nTemporary catchpoint " : "\nCatchpoint ");
+  uiout->field_int ("bkptno", b->number);
+  uiout->text (", ");
 
   /* ada_exception_name_addr relies on the selected frame being the
      current frame.  Need to do this here because this function may be
@@ -12562,8 +12518,8 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	     hit.  We used ui_out_text to make sure that this extra
 	     info does not pollute the exception name in the MI case.  */
 	  if (ex == ada_catch_exception_unhandled)
-	    ui_out_text (uiout, "unhandled ");
-	  ui_out_field_string (uiout, "exception-name", exception_name);
+	    uiout->text ("unhandled ");
+	  uiout->field_string ("exception-name", exception_name);
 	}
 	break;
       case ada_catch_assert:
@@ -12572,10 +12528,10 @@ print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 	   that his program just hit an assertion-failure catchpoint.
 	   We used ui_out_text because this info does not belong in
 	   the MI output.  */
-	ui_out_text (uiout, "failed assertion");
+	uiout->text ("failed assertion");
 	break;
     }
-  ui_out_text (uiout, " at ");
+  uiout->text (" at ");
   ada_find_printable_frame (get_current_frame ());
 
   return PRINT_SRC_AND_LOC;
@@ -12596,7 +12552,7 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
   if (opts.addressprint)
     {
       annotate_field (4);
-      ui_out_field_core_addr (uiout, "addr", b->loc->gdbarch, b->loc->address);
+      uiout->field_core_addr ("addr", b->loc->gdbarch, b->loc->address);
     }
 
   annotate_field (5);
@@ -12608,20 +12564,20 @@ print_one_exception (enum ada_exception_catchpoint_kind ex,
           {
             char *msg = xstrprintf (_("`%s' Ada exception"), c->excep_string);
 
-            ui_out_field_string (uiout, "what", msg);
+            uiout->field_string ("what", msg);
             xfree (msg);
           }
         else
-          ui_out_field_string (uiout, "what", "all Ada exceptions");
+          uiout->field_string ("what", "all Ada exceptions");
         
         break;
 
       case ada_catch_exception_unhandled:
-        ui_out_field_string (uiout, "what", "unhandled Ada exceptions");
+        uiout->field_string ("what", "unhandled Ada exceptions");
         break;
       
       case ada_catch_assert:
-        ui_out_field_string (uiout, "what", "failed Ada assertions");
+        uiout->field_string ("what", "failed Ada assertions");
         break;
 
       default:
@@ -12640,10 +12596,10 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct ui_out *uiout = current_uiout;
 
-  ui_out_text (uiout, b->disposition == disp_del ? _("Temporary catchpoint ")
+  uiout->text (b->disposition == disp_del ? _("Temporary catchpoint ")
                                                  : _("Catchpoint "));
-  ui_out_field_int (uiout, "bkptno", b->number);
-  ui_out_text (uiout, ": ");
+  uiout->field_int ("bkptno", b->number);
+  uiout->text (": ");
 
   switch (ex)
     {
@@ -12653,19 +12609,19 @@ print_mention_exception (enum ada_exception_catchpoint_kind ex,
 	    char *info = xstrprintf (_("`%s' Ada exception"), c->excep_string);
 	    struct cleanup *old_chain = make_cleanup (xfree, info);
 
-	    ui_out_text (uiout, info);
+	    uiout->text (info);
 	    do_cleanups (old_chain);
 	  }
         else
-          ui_out_text (uiout, _("all Ada exceptions"));
+          uiout->text (_("all Ada exceptions"));
         break;
 
       case ada_catch_exception_unhandled:
-        ui_out_text (uiout, _("unhandled Ada exceptions"));
+        uiout->text (_("unhandled Ada exceptions"));
         break;
       
       case ada_catch_assert:
-        ui_out_text (uiout, _("failed Ada assertions"));
+        uiout->text (_("failed Ada assertions"));
         break;
 
       default:
@@ -13143,7 +13099,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   struct symtab_and_line sal
     = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);
 
-  c = XNEW (struct ada_catchpoint);
+  c = new ada_catchpoint ();
   init_ada_exception_breakpoint (&c->base, gdbarch, sal, addr_string,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;

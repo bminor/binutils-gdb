@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -550,13 +550,27 @@ typedef const gdb_byte * (gdbarch_breakpoint_from_pc_ftype) (struct gdbarch *gdb
 extern const gdb_byte * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
 
-/* Return the adjusted address and kind to use for Z0/Z1 packets.
-   KIND is usually the memory length of the breakpoint, but may have a
-   different target-specific meaning. */
+/* Return the breakpoint kind for this target based on *PCPTR. */
 
-typedef void (gdbarch_remote_breakpoint_from_pc_ftype) (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *kindptr);
-extern void gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *kindptr);
-extern void set_gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_remote_breakpoint_from_pc_ftype *remote_breakpoint_from_pc);
+typedef int (gdbarch_breakpoint_kind_from_pc_ftype) (struct gdbarch *gdbarch, CORE_ADDR *pcptr);
+extern int gdbarch_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr);
+extern void set_gdbarch_breakpoint_kind_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_kind_from_pc_ftype *breakpoint_kind_from_pc);
+
+/* Return the software breakpoint from KIND.  KIND can have target
+   specific meaning like the Z0 kind parameter.
+   SIZE is set to the software breakpoint's length in memory. */
+
+typedef const gdb_byte * (gdbarch_sw_breakpoint_from_kind_ftype) (struct gdbarch *gdbarch, int kind, int *size);
+extern const gdb_byte * gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size);
+extern void set_gdbarch_sw_breakpoint_from_kind (struct gdbarch *gdbarch, gdbarch_sw_breakpoint_from_kind_ftype *sw_breakpoint_from_kind);
+
+/* Return the breakpoint kind for this target based on the current
+   processor state (e.g. the current instruction mode on ARM) and the
+   *PCPTR.  In default, it is gdbarch->breakpoint_kind_from_pc. */
+
+typedef int (gdbarch_breakpoint_kind_from_current_state_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR *pcptr);
+extern int gdbarch_breakpoint_kind_from_current_state (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR *pcptr);
+extern void set_gdbarch_breakpoint_kind_from_current_state (struct gdbarch *gdbarch, gdbarch_breakpoint_kind_from_current_state_ftype *breakpoint_kind_from_current_state);
 
 extern int gdbarch_adjust_breakpoint_address_p (struct gdbarch *gdbarch);
 
@@ -663,18 +677,19 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
    FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
    target can single step.  If not, then implement single step using breakpoints.
   
-   A return value of 1 means that the software_single_step breakpoints
-   were inserted; 0 means they were not.  Multiple breakpoints may be
-   inserted for some instructions such as conditional branch.  However,
-   each implementation must always evaluate the condition and only put
-   the breakpoint at the branch destination if the condition is true, so
-   that we ensure forward progress when stepping past a conditional
-   branch to self. */
+   Return a vector of addresses on which the software single step
+   breakpoints should be inserted.  NULL means software single step is
+   not used.
+   Multiple breakpoints may be inserted for some instructions such as
+   conditional branch.  However, each implementation must always evaluate
+   the condition and only put the breakpoint at the branch destination if
+   the condition is true, so that we ensure forward progress when stepping
+   past a conditional branch to self. */
 
 extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_software_single_step_ftype) (struct frame_info *frame);
-extern int gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame);
+typedef VEC (CORE_ADDR) * (gdbarch_software_single_step_ftype) (struct regcache *regcache);
+extern VEC (CORE_ADDR) * gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache);
 extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
 
 /* Return non-zero if the processor is executing a delay slot and a

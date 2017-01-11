@@ -1,6 +1,6 @@
 dnl Common configure.ac fragment
 dnl
-dnl   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ AC_EGREP_CPP([^[0-4]$],[__GNUC__],,GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Wstack-usa
 WARN_WRITE_STRINGS=""
 AC_EGREP_CPP([^[0-3]$],[__GNUC__],,WARN_WRITE_STRINGS="-Wwrite-strings")
 
-# Verify CC_FOR_BUILD to be compatible with waring flags
+# Verify CC_FOR_BUILD to be compatible with warning flags
 
 # Add -Wshadow if the compiler is a sufficiently recent version of GCC.
 AC_EGREP_CPP_FOR_BUILD([^[0-3]$],[__GNUC__],,GCC_WARN_CFLAGS_FOR_BUILD="$GCC_WARN_CFLAGS_FOR_BUILD -Wshadow")

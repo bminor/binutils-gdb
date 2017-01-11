@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-# Copyright (C) 2002-2016 Free Software Foundation, Inc.
+# Copyright (C) 2002-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -592,7 +592,6 @@ gld${EMULATION_NAME}_finish (void)
   if (msg != NULL)
     free (msg);
 
-  ppc64_elf_restore_symbols (&link_info);
   finish_default ();
 }
 

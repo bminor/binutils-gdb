@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Free Software Foundation, Inc.
+# Copyright (C) 2016-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,12 +40,17 @@ class TestUnwinder(Unwinder):
     def inc_count (cls):
         cls.count += 1
 
+    test = 'check_undefined_symbol'
+
+    @classmethod
+    def set_test (cls, test) :
+       cls.test = test
+
     def __init__(self):
         Unwinder.__init__(self, "test unwinder")
         self.recurse_level = 0
 
     def __call__(self, pending_frame):
-
 
         if self.recurse_level > 0:
             gdb.write("TestUnwinder: Recursion detected - returning early.\n")
@@ -54,11 +59,25 @@ class TestUnwinder(Unwinder):
         self.recurse_level += 1
         TestUnwinder.inc_count()
 
-        try:
-            val = gdb.parse_and_eval("undefined_symbol")
+        if TestUnwinder.test == 'check_user_reg_pc' :
 
-        except Exception as arg:
-            pass
+            pc = pending_frame.read_register('pc')
+            pc_as_int = int(pc.cast(gdb.lookup_type('int')))
+            # gdb.write("In unwinder: pc=%x\n" % pc_as_int)
+
+        elif TestUnwinder.test == 'check_pae_pc' :
+
+            pc = gdb.parse_and_eval('$pc')
+            pc_as_int = int(pc.cast(gdb.lookup_type('int')))
+            # gdb.write("In unwinder: pc=%x\n" % pc_as_int)
+
+        elif TestUnwinder.test == 'check_undefined_symbol' :
+
+            try:
+                val = gdb.parse_and_eval("undefined_symbol")
+
+            except Exception as arg:
+                pass
 
         self.recurse_level -= 1
 

@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling windows child processes, for GDB.
 
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -409,7 +409,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
   return th;
 }
 
-/* Clear out any old thread list and reintialize it to a
+/* Clear out any old thread list and reinitialize it to a
    pristine state.  */
 static void
 windows_init_thread_list (void)

@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -62,6 +62,10 @@
 
 #ifdef TC_NIOS2
 #include "elf/nios2.h"
+#endif
+
+#ifdef TC_PRU
+#include "elf/pru.h"
 #endif
 
 static void obj_elf_line (int);

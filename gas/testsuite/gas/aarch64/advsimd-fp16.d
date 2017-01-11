@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    [0-9a-f]+:	4e63c441 	fmaxnm	v1.2d, v2.2d, v3.2d
    [0-9a-f]+:	0e23c441 	fmaxnm	v1.2s, v2.2s, v3.2s
    [0-9a-f]+:	4e23c441 	fmaxnm	v1.4s, v2.4s, v3.4s

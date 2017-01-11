@@ -1,5 +1,5 @@
 # Expect script for tests for >64k sections
-#   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -170,7 +170,8 @@ if { ![istarget "d10v-*-*"]
      && ![istarget "avr-*-*"]
      && ![istarget "msp*-*-*"]
      && ![istarget "fr30-*-*"] 
-     && ![istarget "iq2000-*-*"] } {
+     && ![istarget "iq2000-*-*"]
+     && ![istarget "pru-*-*"] } {
     foreach sfile $sfiles { puts $ofd "#source: $sfile" }
     if { [istarget spu*-*-*] } {
 	puts $ofd "#ld: --local-store 0:0"

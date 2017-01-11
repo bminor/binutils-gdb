@@ -480,8 +480,8 @@ struct cplus_add_code_header
 
 struct cplus_add_input
 {
-  void add_input (enum compile_i_scope_types type,
-			   const char *input, struct ui_file *buf)
+  void add_input (enum compile_i_scope_types type, const char *input,
+		  struct ui_file *buf)
   {
     switch (type)
       {
@@ -554,8 +554,8 @@ public:
      Returns the text of the program to compile.  This must be free'd by
      the caller.  */
 
-  char *compute (const char *input, const struct block *expr_block,
-		 CORE_ADDR expr_pc)
+  std::string compute (const char *input, const struct block *expr_block,
+		       CORE_ADDR expr_pc)
   {
     struct ui_file *var_stream = NULL;
     struct ui_file *buf = mem_fileopen ();
@@ -639,7 +639,7 @@ public:
       pop_user_expression (buf);
 
     add_code_footer (m_instance->scope (), buf);
-    char *code = ui_file_xstrdup (buf, NULL);
+    std::string code = ui_file_as_string (buf);
     do_cleanups (cleanup);
     return code;
   }
@@ -668,7 +668,7 @@ typedef compile_program<compile::compile_cplus_instance,
 
 /* The la_compute_program method for C.  */
 
-char *
+std::string
 c_compute_program (struct compile_instance *inst,
 		   const char *input,
 		   struct gdbarch *gdbarch,
@@ -683,7 +683,7 @@ c_compute_program (struct compile_instance *inst,
 
 /* The la_compute_program method for C++.  */
 
-char *
+std::string
 cplus_compute_program (struct compile_instance *inst,
 		       const char *input,
 		       struct gdbarch *gdbarch,

@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -398,7 +398,7 @@ static struct exp_mod_s exp_mod[] =
   {"hhi8",   BFD_RELOC_AVR_MS8_LDI,    BFD_RELOC_AVR_MS8_LDI_NEG,    0},
 };
 
-/* A union used to store indicies into the exp_mod[] array
+/* A union used to store indices into the exp_mod[] array
    in a hash table which expects void * data types.  */
 typedef union
 {

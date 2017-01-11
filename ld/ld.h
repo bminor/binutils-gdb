@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -185,7 +185,7 @@ typedef struct
   /* Name of runtime interpreter to invoke.  */
   char *interpreter;
 
-  /* Name to give runtime libary from the -soname argument.  */
+  /* Name to give runtime library from the -soname argument.  */
   char *soname;
 
   /* Runtime library search path from the -rpath argument.  */

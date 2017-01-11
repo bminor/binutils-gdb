@@ -1,6 +1,6 @@
 /* TUI display source/assembly window.
 
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -604,8 +604,11 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
   char *src_line_buf;
   int i, line_width, max_lines;
 
-  max_lines = win_info->generic.height;	/* Less the highlight box.  */
-  line_width = win_info->generic.width - 1;
+  /* The window width/height includes the highlight box.  Determine actual
+     content dimensions, including string null-terminators.  */
+  max_lines = win_info->generic.height - 2;
+  line_width = win_info->generic.width - 2 + 1;
+
   /*
    * Allocate the buffer for the source lines.  Do this only once
    * since they will be re-used for all source displays.  The only
@@ -615,23 +618,8 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
     {
       src_line_buf = (char *) 
 	xmalloc ((max_lines * line_width) * sizeof (char));
-      if (src_line_buf == (char *) NULL)
-	{
-	  fputs_unfiltered ("Unable to Allocate Memory for "
-			    "Source or Disassembly Display.\n",
-			    gdb_stderr);
-	  return TUI_FAILURE;
-	}
       /* Allocate the content list.  */
       win_info->generic.content = tui_alloc_content (max_lines, SRC_WIN);
-      if (win_info->generic.content == NULL)
-	{
-	  xfree (src_line_buf);
-	  fputs_unfiltered ("Unable to Allocate Memory for "
-			    "Source or Disassembly Display.\n",
-			    gdb_stderr);
-	  return TUI_FAILURE;
-	}
       for (i = 0; i < max_lines; i++)
 	win_info->generic.content[i]->which_element.source.line
 	  = src_line_buf + (line_width * i);

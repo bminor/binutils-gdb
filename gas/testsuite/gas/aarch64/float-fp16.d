@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    [0-9a-f]+:	1e200400 	fccmp	s0, s0, #0x0, eq  // eq = none
    [0-9a-f]+:	1ee00400 	fccmp	h0, h0, #0x0, eq  // eq = none
    [0-9a-f]+:	1e22d420 	fccmp	s1, s2, #0x0, le

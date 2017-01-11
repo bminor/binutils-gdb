@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -128,7 +128,7 @@
     should run in parallel with addresses vector (FirstThunk), i.e. that they
     should have same number of elements and terminated with zero. We violate
     this, since FirstThunk points directly into machine code. But in practice,
-    OS loader implemented the sane way: it goes thru OriginalFirstThunk and
+    OS loader implemented the sane way: it goes through OriginalFirstThunk and
     puts addresses to FirstThunk, not something else. It once again should be
     noted that dll and symbol name structures are reused across fixup entries
     and should be there anyway to support standard import stuff, so sustained
@@ -2266,6 +2266,8 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
     }
   else
     {
+      int ord;
+
       /* { short, asciz }  */
       if (exp->its_name)
 	len = 2 + strlen (exp->its_name) + 1;
@@ -2277,8 +2279,13 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
       d6 = xmalloc (len);
       id6->contents = d6;
       memset (d6, 0, len);
-      d6[0] = exp->hint & 0xff;
-      d6[1] = exp->hint >> 8;
+
+      /* PR 20880:  Use exp->hint as a backup, just in case exp->ordinal
+	 contains an invalid value (-1).  */
+      ord = (exp->ordinal >= 0) ? exp->ordinal : exp->hint;
+      d6[0] = ord;
+      d6[1] = ord >> 8;
+
       if (exp->its_name)
 	strcpy ((char*) d6 + 2, exp->its_name);
       else

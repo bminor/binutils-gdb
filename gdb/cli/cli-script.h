@@ -1,5 +1,5 @@
 /* Header file for GDB CLI command implementation library.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -52,6 +52,12 @@ extern struct cleanup *
 /* Exported to gdb/infrun.c */
 
 extern void execute_user_command (struct cmd_list_element *c, char *args);
+
+/* If we're in a user-defined command, replace any $argc/$argN
+   reference found in LINE with the arguments that were passed to the
+   command.  Otherwise, treat $argc/$argN as normal convenience
+   variables.  */
+extern std::string insert_user_defined_cmd_args (const char *line);
 
 /* Exported to top.c */
 

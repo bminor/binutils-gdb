@@ -1,6 +1,6 @@
 /* Renesas M32C target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -990,16 +990,9 @@ make_regs (struct gdbarch *arch)
 
 
 /* Breakpoints.  */
+constexpr gdb_byte m32c_break_insn[] = { 0x00 };	/* brk */
 
-static const unsigned char *
-m32c_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static unsigned char break_insn[] = { 0x00 };	/* brk */
-
-  *len = sizeof (break_insn);
-  return break_insn;
-}
-
+typedef BP_MANIPULATION (m32c_break_insn) m32c_breakpoint;
 
 
 /* Prologue analysis.  */
@@ -2652,7 +2645,8 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_m32c);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, m32c_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, m32c_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, m32c_breakpoint::bp_from_kind);
 
   /* Prologue analysis and unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

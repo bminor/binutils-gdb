@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -368,7 +368,7 @@ main (int argc, char **argv)
 	  while ((n = fread (buf, 1, ld_bufsz - 1, saved_script_handle)) > 0)
 	    {
 	      buf[n] = 0;
-	      info_msg (buf);
+	      info_msg ("%s", buf);
 	    }
 	  rewind (saved_script_handle);
 	  free (buf);

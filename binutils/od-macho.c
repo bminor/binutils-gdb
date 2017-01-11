@@ -1,5 +1,5 @@
 /* od-macho.c -- dump information about an Mach-O object file.
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
    Written by Tristan Gingold, Adacore.
 
    This file is part of GNU Binutils.
@@ -259,7 +259,7 @@ bfd_mach_o_print_flags (const bfd_mach_o_xlat_name *table,
     printf ("-");
 }
 
-/* Print a bfd_uint64_t, using a platform independant style.  */
+/* Print a bfd_uint64_t, using a platform independent style.  */
 
 static void
 printf_uint64 (bfd_uint64_t v)

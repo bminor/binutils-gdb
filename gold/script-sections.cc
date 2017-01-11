@@ -1,6 +1,6 @@
 // script-sections.cc -- linker script SECTIONS for gold
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
+// Copyright (C) 2008-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -313,6 +313,10 @@ class Orphan_section_placement
   bool
   find_place(Output_section*, Elements_iterator** pwhere);
 
+  // Update PLACE_LAST_ALLOC.
+  void
+  update_last_alloc(Elements_iterator where);
+
   // Return the iterator being used for sections at the very end of
   // the linker script.
   Elements_iterator
@@ -329,6 +333,7 @@ class Orphan_section_placement
     PLACE_TLS,
     PLACE_TLS_BSS,
     PLACE_BSS,
+    PLACE_LAST_ALLOC,
     PLACE_REL,
     PLACE_INTERP,
     PLACE_NONALLOC,
@@ -368,6 +373,7 @@ Orphan_section_placement::Orphan_section_placement()
   this->initialize_place(PLACE_TLS, NULL);
   this->initialize_place(PLACE_TLS_BSS, NULL);
   this->initialize_place(PLACE_BSS, ".bss");
+  this->initialize_place(PLACE_LAST_ALLOC, NULL);
   this->initialize_place(PLACE_REL, NULL);
   this->initialize_place(PLACE_INTERP, ".interp");
   this->initialize_place(PLACE_NONALLOC, NULL);
@@ -395,6 +401,15 @@ Orphan_section_placement::output_section_init(const std::string& name,
 {
   bool first_init = this->first_init_;
   this->first_init_ = false;
+
+  // Remember the last allocated section. Any orphan bss sections
+  // will be placed after it.
+  if (os != NULL
+      && (os->flags() & elfcpp::SHF_ALLOC) != 0)
+    {
+      this->places_[PLACE_LAST_ALLOC].location = location;
+      this->places_[PLACE_LAST_ALLOC].have_location = true;
+    }
 
   for (int i = 0; i < PLACE_MAX; ++i)
     {
@@ -508,8 +523,13 @@ Orphan_section_placement::find_place(Output_section* os,
 	case PLACE_RODATA:
 	  follow = PLACE_TEXT;
 	  break;
+	case PLACE_DATA:
+	  follow = PLACE_RODATA;
+	  if (!this->places_[PLACE_RODATA].have_location)
+	    follow = PLACE_TEXT;
+	  break;
 	case PLACE_BSS:
-	  follow = PLACE_DATA;
+	  follow = PLACE_LAST_ALLOC;
 	  break;
 	case PLACE_REL:
 	  follow = PLACE_TEXT;
@@ -544,6 +564,20 @@ Orphan_section_placement::find_place(Output_section* os,
   this->places_[index].have_location = true;
 
   return ret;
+}
+
+// Update PLACE_LAST_ALLOC.
+void
+Orphan_section_placement::update_last_alloc(Elements_iterator elem)
+{
+  Elements_iterator prev = elem;
+  --prev;
+  if (this->places_[PLACE_LAST_ALLOC].have_location
+      && this->places_[PLACE_LAST_ALLOC].location == prev)
+    {
+      this->places_[PLACE_LAST_ALLOC].have_location = true;
+      this->places_[PLACE_LAST_ALLOC].location = elem;
+    }
 }
 
 // Return the iterator being used for sections at the very end of the
@@ -598,7 +632,7 @@ class Sections_element
   // Output_section_definition.
   virtual const char*
   output_section_name(const char*, const char*, Output_section***,
-		      Script_sections::Section_type*, bool*)
+		      Script_sections::Section_type*, bool*, bool)
   { return NULL; }
 
   // Initialize OSP with an output section.
@@ -1751,16 +1785,16 @@ Output_section_element_input::set_section_addresses(
 	   p != matching_sections[i].end();
 	   ++p)
 	{
-	  // Override the original address alignment if SUBALIGN is specified
-	  // and is greater than the original alignment.  We need to make a
-	  // copy of the input section to modify the alignment.
+	  // Override the original address alignment if SUBALIGN is specified.
+	  // We need to make a copy of the input section to modify the
+	  // alignment.
 	  Output_section::Input_section sis(p->input_section());
 
 	  uint64_t this_subalign = sis.addralign();
 	  if (!sis.is_input_section())
 	    sis.output_section_data()->finalize_data_size();
 	  uint64_t data_size = sis.data_size();
-	  if (this_subalign < subalign)
+	  if (subalign > 0)
 	    {
 	      this_subalign = subalign;
 	      sis.set_addralign(subalign);
@@ -1969,7 +2003,7 @@ class Output_section_definition : public Sections_element
   const char*
   output_section_name(const char* file_name, const char* section_name,
 		      Output_section***, Script_sections::Section_type*,
-		      bool*);
+		      bool*, bool);
 
   // Initialize OSP with an output section.
   void
@@ -2255,8 +2289,20 @@ Output_section_definition::output_section_name(
     const char* section_name,
     Output_section*** slot,
     Script_sections::Section_type* psection_type,
-    bool* keep)
+    bool* keep,
+    bool match_input_spec)
 {
+  // If the section is a linker-created output section, just look for a match
+  // on the output section name.
+  if (!match_input_spec && this->name_ != "/DISCARD/")
+    {
+      if (this->name_ != section_name)
+	return NULL;
+      *slot = &this->output_section_;
+      *psection_type = this->section_type();
+      return this->name_.c_str();
+    }
+
   // Ask each element whether it matches NAME.
   for (Output_section_elements::const_iterator p = this->elements_.begin();
        p != this->elements_.end();
@@ -2463,6 +2509,35 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 	this->output_section_->set_addralign(align);
     }
 
+  uint64_t subalign;
+  if (this->subalign_ == NULL)
+    subalign = 0;
+  else
+    {
+      Output_section* subalign_section;
+      subalign = this->subalign_->eval_with_dot(symtab, layout, true,
+						*dot_value, NULL,
+						&subalign_section, NULL,
+						false);
+      if (subalign_section != NULL)
+	gold_warning(_("subalign of section %s is not absolute"),
+		     this->name_.c_str());
+
+      // Reserve a value of 0 to mean there is no SUBALIGN property.
+      if (subalign == 0)
+	subalign = 1;
+
+      // The external alignment of the output section must be at least
+      // as large as that of the input sections.  If there is no
+      // explicit ALIGN property, we set the output section alignment
+      // to match the input section alignment.
+      if (align < subalign || this->align_ == NULL)
+	{
+	  align = subalign;
+	  this->output_section_->set_addralign(align);
+	}
+    }
+
   address = align_address(address, align);
 
   uint64_t start_address = address;
@@ -2546,21 +2621,6 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     }
 
   this->evaluated_load_address_ = laddr;
-
-  uint64_t subalign;
-  if (this->subalign_ == NULL)
-    subalign = 0;
-  else
-    {
-      Output_section* subalign_section;
-      subalign = this->subalign_->eval_with_dot(symtab, layout, true,
-						*dot_value, NULL,
-						&subalign_section, NULL,
-						false);
-      if (subalign_section != NULL)
-	gold_warning(_("subalign of section %s is not absolute"),
-		     this->name_.c_str());
-    }
 
   std::string fill;
   if (this->fill_ != NULL)
@@ -3509,7 +3569,8 @@ Script_sections::output_section_name(
     const char* section_name,
     Output_section*** output_section_slot,
     Script_sections::Section_type* psection_type,
-    bool* keep)
+    bool* keep,
+    bool is_input_section)
 {
   for (Sections_elements::const_iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
@@ -3517,7 +3578,8 @@ Script_sections::output_section_name(
     {
       const char* ret = (*p)->output_section_name(file_name, section_name,
 						  output_section_slot,
-						  psection_type, keep);
+						  psection_type, keep,
+						  is_input_section);
 
       if (ret != NULL)
 	{
@@ -3533,12 +3595,37 @@ Script_sections::output_section_name(
 	}
     }
 
-  // If we couldn't find a mapping for the name, the output section
-  // gets the name of the input section.
-
+  // We have an orphan section.
   *output_section_slot = NULL;
   *psection_type = Script_sections::ST_NONE;
+  *keep = false;
 
+  General_options::Orphan_handling orphan_handling =
+      parameters->options().orphan_handling_enum();
+  if (orphan_handling == General_options::ORPHAN_DISCARD)
+    return NULL;
+  if (orphan_handling == General_options::ORPHAN_ERROR)
+    {
+      if (file_name == NULL)
+	gold_error(_("unplaced orphan section '%s'"), section_name);
+      else
+	gold_error(_("unplaced orphan section '%s' from '%s'"),
+		   section_name, file_name);
+      return NULL;
+    }
+  if (orphan_handling == General_options::ORPHAN_WARN)
+    {
+      if (file_name == NULL)
+	gold_warning(_("orphan section '%s' is being placed in section '%s'"),
+		     section_name, section_name);
+      else
+	gold_warning(_("orphan section '%s' from '%s' is being placed "
+		       "in section '%s'"),
+		     section_name, file_name, section_name);
+    }
+
+  // If we couldn't find a mapping for the name, the output section
+  // gets the name of the input section.
   return section_name;
 }
 
@@ -3591,6 +3678,9 @@ Script_sections::place_orphan(Output_section* os)
       Sections_elements::iterator last = osp->last_place();
       *where = this->sections_elements_->insert(last, orphan);
     }
+
+  if ((os->flags() & elfcpp::SHF_ALLOC) != 0)
+    osp->update_last_alloc(*where);
 }
 
 // Set the addresses of all the output sections.  Walk through all the
@@ -3900,10 +3990,10 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
   Output_segment* first_seg = NULL;
   Output_segment* current_seg = NULL;
   bool is_current_seg_readonly = true;
-  Layout::Section_list::iterator plast = sections.end();
   uint64_t last_vma = 0;
   uint64_t last_lma = 0;
   uint64_t last_size = 0;
+  bool in_bss = false;
   for (Layout::Section_list::iterator p = sections.begin();
        p != sections.end();
        ++p)
@@ -3930,7 +4020,7 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
 	  // skipping a page.
 	  need_new_segment = true;
 	}
-      else if (is_bss_section(*plast) && !is_bss_section(*p))
+      else if (in_bss && !is_bss_section(*p))
 	{
 	  // A non-BSS section can not follow a BSS section in the
 	  // same segment.
@@ -3962,6 +4052,7 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
 	  if (first_seg == NULL)
 	    first_seg = current_seg;
 	  is_current_seg_readonly = true;
+	  in_bss = false;
 	}
 
       current_seg->add_output_section_to_load(layout, *p, seg_flags);
@@ -3969,7 +4060,9 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
       if (((*p)->flags() & elfcpp::SHF_WRITE) != 0)
 	is_current_seg_readonly = false;
 
-      plast = p;
+      if (is_bss_section(*p) && size > 0)
+        in_bss = true;
+
       last_vma = vma;
       last_lma = lma;
       last_size = size;

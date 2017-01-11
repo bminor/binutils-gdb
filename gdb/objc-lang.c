@@ -1,6 +1,6 @@
 /* Objective-C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
    Written by Michael Snyder.
@@ -1194,14 +1194,11 @@ print_object_command (char *args, int from_tty)
 "The 'print-object' command requires an argument (an Objective-C object)");
 
   {
-    struct expression *expr = parse_expression (args);
-    struct cleanup *old_chain = 
-      make_cleanup (free_current_contents, &expr);
+    expression_up expr = parse_expression (args);
     int pc = 0;
 
     object = evaluate_subexp (builtin_type (expr->gdbarch)->builtin_data_ptr,
-			      expr, &pc, EVAL_NORMAL);
-    do_cleanups (old_chain);
+			      expr.get (), &pc, EVAL_NORMAL);
   }
 
   /* Validate the address for sanity.  */

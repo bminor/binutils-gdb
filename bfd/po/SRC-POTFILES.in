@@ -119,6 +119,8 @@ cpu-pdp11.c
 cpu-pj.c
 cpu-plugin.c
 cpu-powerpc.c
+cpu-pru.c
+cpu-riscv.c
 cpu-rl78.c
 cpu-rs6000.c
 cpu-rx.c
@@ -211,6 +213,7 @@ elf32-nios2.c
 elf32-or1k.c
 elf32-pj.c
 elf32-ppc.c
+elf32-pru.c
 elf32-rl78.c
 elf32-rx.c
 elf32-s390.c
@@ -254,6 +257,7 @@ elfn32-mips.c
 elfxx-aarch64.c
 elfxx-ia64.c
 elfxx-mips.c
+elfxx-riscv.c
 elfxx-sparc.c
 elfxx-tilegx.c
 epoc-pe-arm.c

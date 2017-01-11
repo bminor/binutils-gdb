@@ -1,6 +1,6 @@
 /* TUI support I/O functions.
 
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -23,6 +23,7 @@
 #define TUI_IO_H
 
 struct ui_out;
+class cli_ui_out;
 
 /* Print the string in the curses command window.  */
 extern void tui_puts (const char *);
@@ -45,7 +46,7 @@ extern void tui_redisplay_readline (void);
 extern char *tui_expand_tabs (const char *, int);
 
 extern struct ui_out *tui_out;
-extern struct ui_out *tui_old_uiout;
+extern cli_ui_out *tui_old_uiout;
 
 extern int key_is_start_sequence (int ch);
 extern int key_is_end_sequence (int ch);

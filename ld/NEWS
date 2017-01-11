@@ -1,6 +1,14 @@
 -*- text -*-
 
+* Add support for the Texas Instruments PRU processor.
+
 Changes in 2.28:
+
+* The EXCLUDE_FILE linker script construct can now be applied outside of the
+  section list in order for the exclusions to apply over all input sections in
+  the list.
+
+* Add support for the RISC-V architecture.
 
 * The command line option --no-eh-frame-hdr can now be used in ELF based
   linkers to disable the automatic generation of .eh_frame_hdr sections.
@@ -657,7 +665,7 @@ Changes in version 2.1:
   other utilities should work on Risc/Ultrix and Irix.
 
 
-Copyright (C) 2012-2016 Free Software Foundation, Inc.
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

@@ -1,5 +1,5 @@
 /* tc-tic54x.c -- Assembly code for the Texas Instruments TMS320C54X
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of GAS, the GNU Assembler.
@@ -1670,7 +1670,7 @@ tic54x_align_words (int arg)
   s_align_bytes (count << 1);
 }
 
-/* Initialize multiple-bit fields withing a single word of memory.  */
+/* Initialize multiple-bit fields within a single word of memory.  */
 
 static void
 tic54x_field (int ignore ATTRIBUTE_UNUSED)

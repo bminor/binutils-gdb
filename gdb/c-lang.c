@@ -1,6 +1,6 @@
 /* C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -359,14 +359,11 @@ c_get_string (struct value *value, gdb_byte **buffer,
 
  error:
   {
-    char *type_str;
-
-    type_str = type_to_string (type);
-    if (type_str)
+    std::string type_str = type_to_string (type);
+    if (!type_str.empty ())
       {
-	make_cleanup (xfree, type_str);
 	error (_("Trying to read string with inappropriate type `%s'."),
-	       type_str);
+	       type_str.c_str ());
       }
     else
       error (_("Trying to read string with inappropriate type."));

@@ -1,6 +1,6 @@
 // plugin.h -- plugin manager for gold      -*- C++ -*-
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
+// Copyright (C) 2008-2017 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -378,7 +378,7 @@ class Plugin_manager
   Mapfile* mapfile_;
   Task_token* this_blocker_;
 
-  // An extra directory to seach for the libraries passed by
+  // An extra directory to search for the libraries passed by
   // add_input_library.
   std::string extra_search_path_;
   Lock* lock_;

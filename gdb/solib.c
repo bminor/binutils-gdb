@@ -1,6 +1,6 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -152,7 +152,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 */
 
 static char *
-solib_find_1 (char *in_pathname, int *fd, int is_solib)
+solib_find_1 (const char *in_pathname, int *fd, int is_solib)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   int found_file = -1;
@@ -383,7 +383,7 @@ solib_find_1 (char *in_pathname, int *fd, int is_solib)
    file handle for the main executable.  */
 
 char *
-exec_file_find (char *in_pathname, int *fd)
+exec_file_find (const char *in_pathname, int *fd)
 {
   char *result;
   const char *fskind = effective_target_file_system_kind ();
@@ -434,7 +434,7 @@ exec_file_find (char *in_pathname, int *fd)
    above.  */
 
 char *
-solib_find (char *in_pathname, int *fd)
+solib_find (const char *in_pathname, int *fd)
 {
   const char *solib_symbols_extension
     = gdbarch_solib_symbols_extension (target_gdbarch ());
@@ -443,7 +443,7 @@ solib_find (char *in_pathname, int *fd)
      extension.  */
   if (solib_symbols_extension != NULL)
     {
-      char *p = in_pathname + strlen (in_pathname);
+      const char *p = in_pathname + strlen (in_pathname);
 
       while (p > in_pathname && *p != '.')
 	p--;
@@ -1110,13 +1110,12 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 					 "SharedLibraryTable");
 
   /* The "- 1" is because ui_out adds one space between columns.  */
-  ui_out_table_header (uiout, addr_width - 1, ui_left, "from", "From");
-  ui_out_table_header (uiout, addr_width - 1, ui_left, "to", "To");
-  ui_out_table_header (uiout, 12 - 1, ui_left, "syms-read", "Syms Read");
-  ui_out_table_header (uiout, 0, ui_noalign,
-		       "name", "Shared Object Library");
+  uiout->table_header (addr_width - 1, ui_left, "from", "From");
+  uiout->table_header (addr_width - 1, ui_left, "to", "To");
+  uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
+  uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
 
-  ui_out_table_body (uiout);
+  uiout->table_body ();
 
   for (so = so_list_head; so; so = so->next)
     {
@@ -1131,29 +1130,28 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 
       if (so->addr_high != 0)
 	{
-	  ui_out_field_core_addr (uiout, "from", gdbarch, so->addr_low);
-	  ui_out_field_core_addr (uiout, "to", gdbarch, so->addr_high);
+	  uiout->field_core_addr ("from", gdbarch, so->addr_low);
+	  uiout->field_core_addr ("to", gdbarch, so->addr_high);
 	}
       else
 	{
-	  ui_out_field_skip (uiout, "from");
-	  ui_out_field_skip (uiout, "to");
+	  uiout->field_skip ("from");
+	  uiout->field_skip ("to");
 	}
 
-      if (! ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ()))
+      if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
 	  && so->symbols_loaded
 	  && !objfile_has_symbols (so->objfile))
 	{
 	  so_missing_debug_info = 1;
-	  ui_out_field_string (uiout, "syms-read", "Yes (*)");
+	  uiout->field_string ("syms-read", "Yes (*)");
 	}
       else
-	ui_out_field_string (uiout, "syms-read", 
-			     so->symbols_loaded ? "Yes" : "No");
+	uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
 
-      ui_out_field_string (uiout, "name", so->so_name);
+      uiout->field_string ("name", so->so_name);
 
-      ui_out_text (uiout, "\n");
+      uiout->text ("\n");
 
       do_cleanups (lib_cleanup);
     }
@@ -1163,17 +1161,14 @@ info_sharedlibrary_command (char *pattern, int from_tty)
   if (nr_libs == 0)
     {
       if (pattern)
-	ui_out_message (uiout, 0,
-			_("No shared libraries matched.\n"));
+	uiout->message (_("No shared libraries matched.\n"));
       else
-	ui_out_message (uiout, 0,
-			_("No shared libraries loaded at this time.\n"));
+	uiout->message (_("No shared libraries loaded at this time.\n"));
     }
   else
     {
       if (so_missing_debug_info)
-	ui_out_message (uiout, 0,
-			_("(*): Shared library is missing "
+	uiout->message (_("(*): Shared library is missing "
 			  "debugging information.\n"));
     }
 }
@@ -1240,29 +1235,7 @@ clear_solib (void)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
-  /* This function is expected to handle ELF shared libraries.  It is
-     also used on Solaris, which can run either ELF or a.out binaries
-     (for compatibility with SunOS 4), both of which can use shared
-     libraries.  So we don't know whether we have an ELF executable or
-     an a.out executable until the user chooses an executable file.
-
-     ELF shared libraries don't get mapped into the address space
-     until after the program starts, so we'd better not try to insert
-     breakpoints in them immediately.  We have to wait until the
-     dynamic linker has loaded them; we'll hit a bp_shlib_event
-     breakpoint (look for calls to create_solib_event_breakpoint) when
-     it's ready.
-
-     SunOS shared libraries seem to be different --- they're present
-     as soon as the process begins execution, so there's no need to
-     put off inserting breakpoints.  There's also nowhere to put a
-     bp_shlib_event breakpoint, so if we put it off, we'll never get
-     around to it.
-
-     So: disable breakpoints only if we're using ELF shared libs.  */
-  if (exec_bfd != NULL
-      && bfd_get_flavour (exec_bfd) != bfd_target_aout_flavour)
-    disable_breakpoints_in_shlibs ();
+  disable_breakpoints_in_shlibs ();
 
   while (so_list_head)
     {

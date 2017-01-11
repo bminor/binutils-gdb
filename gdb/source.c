@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1365,7 +1365,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   /* If printing of source lines is disabled, just print file and line
      number.  */
-  if (ui_out_test_flags (uiout, ui_source_list))
+  if (uiout->test_flags (ui_source_list))
     {
       /* Only prints "No such file or directory" once.  */
       if ((s != last_source_visited) || (!last_source_error))
@@ -1401,19 +1401,16 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	}
       else
 	{
-	  ui_out_field_int (uiout, "line", line);
-	  ui_out_text (uiout, "\tin ");
+	  uiout->field_int ("line", line);
+	  uiout->text ("\tin ");
 
 	  /* CLI expects only the "file" field.  TUI expects only the
 	     "fullname" field (and TUI does break if "file" is printed).
 	     MI expects both fields.  ui_source_list is set only for CLI,
 	     not for TUI.  */
-	  if (ui_out_is_mi_like_p (uiout)
-	      || ui_out_test_flags (uiout, ui_source_list))
-	    ui_out_field_string (uiout, "file",
-				 symtab_to_filename_for_display (s));
-	  if (ui_out_is_mi_like_p (uiout)
-	      || !ui_out_test_flags (uiout, ui_source_list))
+	  if (uiout->is_mi_like_p () || uiout->test_flags (ui_source_list))
+	    uiout->field_string ("file", symtab_to_filename_for_display (s));
+	  if (uiout->is_mi_like_p () || !uiout->test_flags (ui_source_list))
  	    {
 	      const char *s_fullname = symtab_to_fullname (s);
 	      char *local_fullname;
@@ -1424,10 +1421,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      local_fullname = (char *) alloca (strlen (s_fullname) + 1);
 	      strcpy (local_fullname, s_fullname);
 
-	      ui_out_field_string (uiout, "fullname", local_fullname);
+	      uiout->field_string ("fullname", local_fullname);
  	    }
 
-	  ui_out_text (uiout, "\n");
+	  uiout->text ("\n");
 	}
 
       return;
@@ -1465,20 +1462,20 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       last_line_listed = current_source_line;
       if (flags & PRINT_SOURCE_LINES_FILENAME)
         {
-          ui_out_text (uiout, symtab_to_filename_for_display (s));
-          ui_out_text (uiout, ":");
+          uiout->text (symtab_to_filename_for_display (s));
+          uiout->text (":");
         }
       xsnprintf (buf, sizeof (buf), "%d\t", current_source_line++);
-      ui_out_text (uiout, buf);
+      uiout->text (buf);
       do
 	{
 	  if (c < 040 && c != '\t' && c != '\n' && c != '\r')
 	    {
 	      xsnprintf (buf, sizeof (buf), "^%c", c + 0100);
-	      ui_out_text (uiout, buf);
+	      uiout->text (buf);
 	    }
 	  else if (c == 0177)
-	    ui_out_text (uiout, "^?");
+	    uiout->text ("^?");
 	  else if (c == '\r')
 	    {
 	      /* Skip a \r character, but only before a \n.  */
@@ -1492,7 +1489,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  else
 	    {
 	      xsnprintf (buf, sizeof (buf), "%c", c);
-	      ui_out_text (uiout, buf);
+	      uiout->text (buf);
 	    }
 	}
       while (c != '\n' && (c = fgetc (stream)) >= 0);

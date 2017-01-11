@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -303,20 +303,6 @@ extern void symbol_file_command (char *, int);
 /* * Remote targets may wish to use this as their load function.  */
 extern void generic_load (const char *name, int from_tty);
 
-/* * Report on STREAM the performance of memory transfer operation,
-   such as 'load'.
-   @param DATA_COUNT is the number of bytes transferred.
-   @param WRITE_COUNT is the number of separate write operations, or 0,
-   if that information is not available.
-   @param START_TIME is the time at which an operation was started.
-   @param END_TIME is the time at which an operation ended.  */
-struct timeval;
-extern void print_transfer_performance (struct ui_file *stream,
-					unsigned long data_count,
-					unsigned long write_count,
-					const struct timeval *start_time,
-					const struct timeval *end_time);
-
 /* From top.c */
 
 typedef void initialize_file_ftype (void);
@@ -588,15 +574,11 @@ enum gdb_osabi
   GDB_OSABI_HURD,
   GDB_OSABI_SOLARIS,
   GDB_OSABI_LINUX,
-  GDB_OSABI_FREEBSD_AOUT,
-  GDB_OSABI_FREEBSD_ELF,
-  GDB_OSABI_NETBSD_AOUT,
-  GDB_OSABI_NETBSD_ELF,
-  GDB_OSABI_OPENBSD_ELF,
+  GDB_OSABI_FREEBSD,
+  GDB_OSABI_NETBSD,
+  GDB_OSABI_OPENBSD,
   GDB_OSABI_WINCE,
   GDB_OSABI_GO32,
-  GDB_OSABI_HPUX_ELF,
-  GDB_OSABI_HPUX_SOM,
   GDB_OSABI_QNXNTO,
   GDB_OSABI_CYGWIN,
   GDB_OSABI_AIX,

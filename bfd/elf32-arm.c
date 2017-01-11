@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -3158,10 +3158,6 @@ struct elf32_arm_link_hash_table
   /* How many R_ARM_TLS_DESC relocations were generated so far.  */
   bfd_vma num_tls_desc;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
   /* The (unloaded but important) VxWorks .rela.plt.unloaded section.  */
   asection *srelplt2;
 
@@ -3245,12 +3241,13 @@ ctz (unsigned int mask)
 }
 
 static inline int
-popcount (unsigned int mask)
+elf32_arm_popcount (unsigned int mask)
 {
 #if GCC_VERSION >= 3004
   return __builtin_popcount (mask);
 #else
-  unsigned int i, sum = 0;
+  unsigned int i;
+  int sum = 0;
 
   for (i = 0; i < 8 * sizeof (mask); i++)
     {
@@ -3647,11 +3644,6 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!bfd_link_pic (info))
-    htab->srelbss = bfd_get_linker_section (dynobj,
-					    RELOC_SECTION (htab, ".bss"));
-
   if (htab->vxworks_p)
     {
       if (!elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
@@ -3693,8 +3685,8 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 
   if (!htab->root.splt
       || !htab->root.srelplt
-      || !htab->sdynbss
-      || (!bfd_link_pic (info) && !htab->srelbss))
+      || !htab->root.sdynbss
+      || (!bfd_link_pic (info) && !htab->root.srelbss))
     abort ();
 
   return TRUE;
@@ -8496,7 +8488,7 @@ stm32l4xx_need_create_replacing_stub (const insn32 insn,
   /* The field encoding the register list is the same for both LDMIA
      and LDMDB encodings.  */
   if (is_thumb2_ldmia (insn) || is_thumb2_ldmdb (insn))
-    nb_words = popcount (insn & 0x0000ffff);
+    nb_words = elf32_arm_popcount (insn & 0x0000ffff);
   else if (is_thumb2_vldm (insn))
    nb_words = (insn & 0xff);
 
@@ -10147,7 +10139,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  else if (h != NULL
 		   && h->dynindx != -1
 		   && (!bfd_link_pic (info)
-		       || !SYMBOLIC_BIND (info, h)
+		       || !(bfd_link_pie (info)
+			    || SYMBOLIC_BIND (info, h))
 		       || !h->def_regular))
 	    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	  else
@@ -15271,7 +15264,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
 				 struct elf_link_hash_entry * h)
 {
   bfd * dynobj;
-  asection * s;
+  asection *s, *srel;
   struct elf32_arm_link_hash_entry * eh;
   struct elf32_arm_link_hash_table *globals;
 
@@ -15370,20 +15363,24 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-  s = bfd_get_linker_section (dynobj, ".dynbss");
-  BFD_ASSERT (s != NULL);
-
   /* If allowed, we must generate a R_ARM_COPY reloc to tell the dynamic
      linker to copy the initial value out of the dynamic object and into
      the runtime process image.  We need to remember the offset into the
      .rel(a).bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = globals->root.sdynrelro;
+      srel = globals->root.sreldynrelro;
+    }
+  else
+    {
+      s = globals->root.sdynbss;
+      srel = globals->root.srelbss;
+    }
   if (info->nocopyreloc == 0
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
       && h->size != 0)
     {
-      asection *srel;
-
-      srel = bfd_get_linker_section (dynobj, RELOC_SECTION (globals, ".bss"));
       elf32_arm_allocate_dynrelocs (info, srel, 1);
       h->needs_copy = 1;
     }
@@ -16098,7 +16095,8 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	       && s != htab->root.sgotplt
 	       && s != htab->root.iplt
 	       && s != htab->root.igotplt
-	       && s != htab->sdynbss)
+	       && s != htab->root.sdynbss
+	       && s != htab->root.sdynrelro)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -16308,14 +16306,15 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak));
 
-      s = htab->srelbss;
-      BFD_ASSERT (s != NULL);
-
       rel.r_addend = 0;
       rel.r_offset = (h->root.u.def.value
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_COPY);
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->root.sreldynrelro;
+      else
+	s = htab->root.srelbss;
       elf32_arm_add_dynreloc (output_bfd, info, s, &rel);
     }
 
@@ -16489,35 +16488,15 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
 	    case DT_RELSZ:
 	    case DT_RELASZ:
-	      if (!htab->symbian_p)
-		{
-		  /* My reading of the SVR4 ABI indicates that the
-		     procedure linkage table relocs (DT_JMPREL) should be
-		     included in the overall relocs (DT_REL).  This is
-		     what Solaris does.  However, UnixWare can not handle
-		     that case.  Therefore, we override the DT_RELSZ entry
-		     here to make it not include the JMPREL relocs.  Since
-		     the linker script arranges for .rel(a).plt to follow all
-		     other relocation sections, we don't have to worry
-		     about changing the DT_REL entry.  */
-		  s = htab->root.srelplt;
-		  if (s != NULL)
-		    dyn.d_un.d_val -= s->size;
-		  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-		  break;
-		}
-	      /* Fall through.  */
-
 	    case DT_REL:
 	    case DT_RELA:
 	      /* In the BPABI, the DT_REL tag must point at the file
 		 offset, not the VMA, of the first relocation
 		 section.  So, we use code similar to that in
 		 elflink.c, but do not check for SHF_ALLOC on the
-		 relcoation section, since relocations sections are
-		 never allocated under the BPABI.  The comments above
-		 about Unixware notwithstanding, we include all of the
-		 relocations here.  */
+		 relocation section, since relocation sections are
+		 never allocated under the BPABI.  PLT relocs are also
+		 included.  */
 	      if (htab->symbian_p)
 		{
 		  unsigned int i;
@@ -17922,7 +17901,7 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
   int insn_all_registers = initial_insn & 0x0000ffff;
   int insn_low_registers, insn_high_registers;
   int usable_register_mask;
-  int nb_registers = popcount (insn_all_registers);
+  int nb_registers = elf32_arm_popcount (insn_all_registers);
   int restore_pc = (insn_all_registers & (1 << 15)) ? 1 : 0;
   int restore_rn = (insn_all_registers & (1 << rn)) ? 1 : 0;
   bfd_byte *current_stub_contents = base_stub_contents;
@@ -17966,7 +17945,7 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
   BFD_ASSERT (!wback || !restore_rn);
 
   /* - nb_registers > 8.  */
-  BFD_ASSERT (popcount (insn_all_registers) > 8);
+  BFD_ASSERT (elf32_arm_popcount (insn_all_registers) > 8);
 
   /* At this point, LDMxx initial insn loads between 9 and 14 registers.  */
 
@@ -18068,7 +18047,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
   int usable_register_mask;
   int restore_pc = (insn_all_registers & (1 << 15)) ? 1 : 0;
   int restore_rn = (insn_all_registers & (1 << rn)) ? 1 : 0;
-  int nb_registers = popcount (insn_all_registers);
+  int nb_registers = elf32_arm_popcount (insn_all_registers);
   bfd_byte *current_stub_contents = base_stub_contents;
 
   BFD_ASSERT (is_thumb2_ldmdb (initial_insn));
@@ -18109,7 +18088,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
   BFD_ASSERT (!wback || !restore_rn);
 
   /* - nb_registers > 8.  */
-  BFD_ASSERT (popcount (insn_all_registers) > 8);
+  BFD_ASSERT (elf32_arm_popcount (insn_all_registers) > 8);
 
   /* At this point, LDMxx initial insn loads between 9 and 14 registers.  */
 
@@ -19416,9 +19395,11 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_plt_readonly       1
 #define elf_backend_want_got_plt       1
 #define elf_backend_want_plt_sym       0
+#define elf_backend_want_dynrelro      1
 #define elf_backend_may_use_rel_p      1
 #define elf_backend_may_use_rela_p     0
 #define elf_backend_default_use_rela_p 0
+#define elf_backend_dtrel_excludes_plt 1
 
 #define elf_backend_got_header_size	12
 #define elf_backend_extern_protected_data 1
@@ -19980,6 +19961,8 @@ elf32_arm_symbian_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_default_use_rela_p	0
 #undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
+#undef  elf_backend_dtrel_excludes_plt
+#define elf_backend_dtrel_excludes_plt	0
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x8000
 

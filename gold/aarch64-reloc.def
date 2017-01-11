@@ -1,6 +1,6 @@
 // aarch64-reloc.def -- AArch64 relocation definitions.
 
-// Copyright (C) 2014-2016 Free Software Foundation, Inc.
+// Copyright (C) 2014-2017 Free Software Foundation, Inc.
 // Written by Han Shen <shenhan@google.com> and Jing Yu <jingyu@google.com>.
 
 // This file is part of gold.
@@ -118,5 +118,5 @@ ARD(TLSDESC_CALL                 , STATIC ,  CFLOW     ,    Y,  -1,    0,0      
 
 // Note -
 // A - Checking X, (L,U), if L == 0 && U == 0, no check. Otherwise, L!=0,
-//     check that -2^L<=X<2^U. Also an extra alignment check could be embeded
+//     check that -2^L<=X<2^U. Also an extra alignment check could be embedded
 //     into U.

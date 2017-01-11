@@ -1,7 +1,7 @@
 # Test SIZEOF in a linker script.
 # By Ian Lance Taylor, Cygnus Support
 # Based on a bug report from anders.blomdell@control.lth.se.
-#   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -27,7 +27,7 @@ if ![ld_assemble $as $srcdir/$subdir/sizeof.s tmpdir/sizeof.o] {
     return
 }
 
-if ![ld_simple_link $ld tmpdir/sizeof "-T $srcdir/$subdir/sizeof.t tmpdir/sizeof.o"] {
+if ![ld_link $ld tmpdir/sizeof "-T $srcdir/$subdir/sizeof.t tmpdir/sizeof.o"] {
     fail $testname
     return
 }

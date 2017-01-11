@@ -1,5 +1,5 @@
 /* MI Command Set - MI Command Parser.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -20,15 +20,18 @@
 #ifndef MI_PARSE_H
 #define MI_PARSE_H
 
-#include "gdb_sys_time.h"
+#include "run-time-clock.h"
+#include <chrono>
+#include "mi-cmds.h"  /* For enum print_values.  */
 
 /* MI parser */
 
 /* Timestamps for current command and last asynchronous command.  */
-struct mi_timestamp {
-  struct timeval wallclock;
-  struct timeval utime;
-  struct timeval stime;
+struct mi_timestamp
+{
+  std::chrono::steady_clock::time_point wallclock;
+  user_cpu_time_clock::time_point utime;
+  system_cpu_time_clock::time_point stime;
 };
 
 enum mi_command_type

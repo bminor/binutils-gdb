@@ -1,6 +1,6 @@
 /* Dump-to-file commands, for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -236,7 +236,7 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 
   /* FIXME: Should use read_memory_partial() and a magic blocking
      value.  */
-  gdb::unique_ptr<gdb_byte[]> buf (new gdb_byte[count]);
+  std::unique_ptr<gdb_byte[]> buf (new gdb_byte[count]);
   read_memory (lo, buf.get (), count);
   
   /* Have everything.  Open/write the data.  */
@@ -550,7 +550,7 @@ restore_binary_file (const char *filename, struct callback_data *data)
     perror_with_name (filename);
 
   /* Now allocate a buffer and read the file contents.  */
-  gdb::unique_ptr<gdb_byte[]> buf (new gdb_byte[len]);
+  std::unique_ptr<gdb_byte[]> buf (new gdb_byte[len]);
   if (fread (buf.get (), 1, len, file) != len)
     perror_with_name (filename);
 

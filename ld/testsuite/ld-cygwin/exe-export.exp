@@ -1,5 +1,5 @@
 # Expect script for export table in executables tests
-#   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -63,7 +63,7 @@ proc run_dlltool { lib_file def_file } {
 }
 
 # ld_special_link
-#       A copy of ld_simple_link (from ld-lib.exp) with extra
+#       A copy of ld_link (from ld-lib.exp) with extra
 #       code to strip warnings about creating libraries.
 #
 proc ld_special_link { ld target objects } {

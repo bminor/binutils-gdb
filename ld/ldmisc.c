@@ -1,5 +1,5 @@
 /* ldmisc.c
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
    This file is part of the GNU Binutils.
@@ -425,7 +425,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		  ++fmt;
 		  break;
 		}
-	      /* Fall thru */
+	      /* Fallthru */
 
 	    default:
 	      fprintf (fp, "%%%c", fmt[-1]);

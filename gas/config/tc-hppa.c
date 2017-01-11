@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1440,7 +1440,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  /* Facilitate hand-crafted unwind info.  */
 	  if (strcmp (section->name, UNWIND_SECTION_NAME) == 0)
 	    code = R_PARISC_SEGREL32;
-	  /* Fall thru */
+	  /* Fallthru */
 
 	default:
 	  reloc->addend = fixp->fx_offset;

@@ -1,6 +1,6 @@
 // powerpc.cc -- powerpc target support for gold.
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
+// Copyright (C) 2008-2017 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>
 //        and David Edelsohn <edelsohn@gnu.org>
 
@@ -70,6 +70,10 @@ class Target_powerpc;
 
 struct Stub_table_owner
 {
+  Stub_table_owner()
+    : output_section(NULL), owner(NULL)
+  { }
+
   Output_section* output_section;
   const Output_section::Input_section* owner;
 };
@@ -275,7 +279,7 @@ public:
   set_stub_table(unsigned int shndx, unsigned int stub_index)
   {
     if (shndx >= this->stub_table_index_.size())
-      this->stub_table_index_.resize(shndx + 1);
+      this->stub_table_index_.resize(shndx + 1, -1);
     this->stub_table_index_[shndx] = stub_index;
   }
 
@@ -288,8 +292,8 @@ public:
 	  = static_cast<Target_powerpc<size, big_endian>*>(
 	      parameters->sized_target<size, big_endian>());
 	unsigned int indx = this->stub_table_index_[shndx];
-	gold_assert(indx < target->stub_tables().size());
-	return target->stub_tables()[indx];
+	if (indx < target->stub_tables().size())
+	  return target->stub_tables()[indx];
       }
     return NULL;
   }
@@ -1812,10 +1816,8 @@ Powerpc_relobj<size, big_endian>::scan_opd_relocs(
 {
   if (size == 64)
     {
-      typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-	Reltype;
-      const int reloc_size
-	= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+      typedef typename elfcpp::Rela<size, big_endian> Reltype;
+      const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
       const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
       Address expected_off = 0;
       bool regular = true;
@@ -2435,13 +2437,13 @@ class Stub_control
  public:
   // Determine the stub group size.  The group size is the absolute
   // value of the parameter --stub-group-size.  If --stub-group-size
-  // is passed a negative value, we restrict stubs to be always before
+  // is passed a negative value, we restrict stubs to be always after
   // the stubbed branches.
-  Stub_control(int32_t size, bool no_size_errors)
-    : state_(NO_GROUP), stub_group_size_(abs(size)),
-      stubs_always_before_branch_(size < 0),
-      suppress_size_errors_(no_size_errors), group_size_(0),
-      group_end_addr_(0), owner_(NULL), output_section_(NULL)
+  Stub_control(int32_t size, bool no_size_errors, bool multi_os)
+    : stub_group_size_(abs(size)), stubs_always_after_branch_(size < 0),
+      suppress_size_errors_(no_size_errors), multi_os_(multi_os),
+      state_(NO_GROUP), group_size_(0), group_start_addr_(0),
+      owner_(NULL), output_section_(NULL)
   {
   }
 
@@ -2471,20 +2473,25 @@ class Stub_control
  private:
   typedef enum
   {
+    // Initial state.
     NO_GROUP,
+    // Adding group sections before the stubs.
     FINDING_STUB_SECTION,
+    // Adding group sections after the stubs.
     HAS_STUB_SECTION
   } State;
 
-  State state_;
   uint32_t stub_group_size_;
-  bool stubs_always_before_branch_;
+  bool stubs_always_after_branch_;
   bool suppress_size_errors_;
+  // True if a stub group can serve multiple output sections.
+  bool multi_os_;
+  State state_;
   // Current max size of group.  Starts at stub_group_size_ but is
   // reduced to stub_group_size_/1024 on seeing a section with
   // external conditional branches.
   uint32_t group_size_;
-  uint64_t group_end_addr_;
+  uint64_t group_start_addr_;
   // owner_ and output_section_ specify the section to which stubs are
   // attached.  The stubs are placed at the end of this section.
   const Output_section::Input_section* owner_;
@@ -2492,8 +2499,8 @@ class Stub_control
 };
 
 // Return true iff input section can be handled by current stub
-// group.  Sections are presented to this function in reverse order,
-// so the first section is the tail of the group.
+// group.  Sections are presented to this function in order,
+// so the first section is the head of the group.
 
 bool
 Stub_control::can_add_to_stub_group(Output_section* o,
@@ -2514,6 +2521,7 @@ Stub_control::can_add_to_stub_group(Output_section* o,
       this_size = i->data_size();
     }
 
+  uint64_t end_addr = start_addr + this_size;
   uint32_t group_size = this->stub_group_size_;
   if (has14)
     this->group_size_ = group_size = group_size >> 10;
@@ -2528,66 +2536,63 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 	     i->relobj()->name().c_str(),
 	     i->relobj()->section_name(i->shndx()).c_str(),
 	     (long long) this_size,
-	     (long long) this->group_end_addr_ - start_addr);
+	     (this->state_ == NO_GROUP
+	      ? this_size
+	      : (long long) end_addr - this->group_start_addr_));
 
-  uint64_t end_addr = start_addr + this_size;
-  if (this->state_ == HAS_STUB_SECTION)
+  if (this->state_ == NO_GROUP)
     {
-      // Can we add this section, which is before the stubs, to the
+      // Only here on very first use of Stub_control
+      this->owner_ = i;
+      this->output_section_ = o;
+      this->state_ = FINDING_STUB_SECTION;
+      this->group_size_ = group_size;
+      this->group_start_addr_ = start_addr;
+      return true;
+    }
+  else if (!this->multi_os_ && this->output_section_ != o)
+    ;
+  else if (this->state_ == HAS_STUB_SECTION)
+    {
+      // Can we add this section, which is after the stubs, to the
       // group?
-      if (this->group_end_addr_ - start_addr <= this->group_size_)
+      if (end_addr - this->group_start_addr_ <= this->group_size_)
 	return true;
     }
-  else
+  else if (this->state_ == FINDING_STUB_SECTION)
     {
-      // Stubs are added at the end of "owner_".
-      // The current section can always be the stub owner, except when
-      // whole_sec is true and the current section isn't the last of
-      // the pasted sections.  (This restriction for the whole_sec
-      // case is just to simplify the corner case mentioned in
-      // group_sections.)
-      // Note that "owner_" itself is not necessarily part of the
-      // group of sections served by these stubs!
-      if (!whole_sec || this->output_section_ != o)
+      if ((whole_sec && this->output_section_ == o)
+	  || end_addr - this->group_start_addr_ <= this->group_size_)
 	{
+	  // Stubs are added at the end of "owner_".
 	  this->owner_ = i;
 	  this->output_section_ = o;
-	}
-
-      if (this->state_ == FINDING_STUB_SECTION)
-	{
-	  if (this->group_end_addr_ - start_addr <= this->group_size_)
-	    return true;
-	  // The group after the stubs has reached maximum size.
-	  // Now see about adding sections before the stubs to the
-	  // group.  If the current section has a 14-bit branch and
-	  // the group after the stubs exceeds group_size_ (because
-	  // they didn't have 14-bit branches), don't add sections
-	  // before the stubs:  The size of stubs for such a large
-	  // group may exceed the reach of a 14-bit branch.
-	  if (!this->stubs_always_before_branch_
-	      && this_size <= this->group_size_
-	      && this->group_end_addr_ - end_addr <= this->group_size_)
-	    {
-	      gold_debug(DEBUG_TARGET, "adding before stubs");
-	      this->state_ = HAS_STUB_SECTION;
-	      this->group_end_addr_ = end_addr;
-	      return true;
-	    }
-	}
-      else if (this->state_ == NO_GROUP)
-	{
-	  // Only here on very first use of Stub_control
-	  this->state_ = FINDING_STUB_SECTION;
-	  this->group_size_ = group_size;
-	  this->group_end_addr_ = end_addr;
 	  return true;
 	}
-      else
-	gold_unreachable();
+      // The group before the stubs has reached maximum size.
+      // Now see about adding sections after the stubs to the
+      // group.  If the current section has a 14-bit branch and
+      // the group before the stubs exceeds group_size_ (because
+      // they didn't have 14-bit branches), don't add sections
+      // after the stubs:  The size of stubs for such a large
+      // group may exceed the reach of a 14-bit branch.
+      if (!this->stubs_always_after_branch_
+	  && this_size <= this->group_size_
+	  && start_addr - this->group_start_addr_ <= this->group_size_)
+	{
+	  gold_debug(DEBUG_TARGET, "adding after stubs");
+	  this->state_ = HAS_STUB_SECTION;
+	  this->group_start_addr_ = start_addr;
+	  return true;
+	}
     }
+  else
+    gold_unreachable();
 
-  gold_debug(DEBUG_TARGET, "nope, didn't fit\n");
+  gold_debug(DEBUG_TARGET,
+	     !this->multi_os_ && this->output_section_ != o
+	     ? "nope, new output section\n"
+	     : "nope, didn't fit\n");
 
   // The section fails to fit in the current group.  Set up a few
   // things for the next group.  owner_ and output_section_ will be
@@ -2595,7 +2600,7 @@ Stub_control::can_add_to_stub_group(Output_section* o,
   // group.
   this->state_ = FINDING_STUB_SECTION;
   this->group_size_ = group_size;
-  this->group_end_addr_ = end_addr;
+  this->group_start_addr_ = start_addr;
   return false;
 }
 
@@ -2607,7 +2612,8 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
 						 const Task*,
 						 bool no_size_errors)
 {
-  Stub_control stub_control(this->stub_group_size_, no_size_errors);
+  Stub_control stub_control(this->stub_group_size_, no_size_errors,
+			    parameters->options().stub_group_multi());
 
   // Group input sections and insert stub table
   Stub_table_owner* table_owner = NULL;
@@ -2615,14 +2621,14 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
   Layout::Section_list section_list;
   layout->get_executable_sections(&section_list);
   std::stable_sort(section_list.begin(), section_list.end(), Sort_sections());
-  for (Layout::Section_list::reverse_iterator o = section_list.rbegin();
-       o != section_list.rend();
+  for (Layout::Section_list::iterator o = section_list.begin();
+       o != section_list.end();
        ++o)
     {
       typedef Output_section::Input_section_list Input_section_list;
-      for (Input_section_list::const_reverse_iterator i
-	     = (*o)->input_sections().rbegin();
-	   i != (*o)->input_sections().rend();
+      for (Input_section_list::const_iterator i
+	     = (*o)->input_sections().begin();
+	   i != (*o)->input_sections().end();
 	   ++i)
 	{
 	  if (i->is_input_section()
@@ -2649,26 +2655,8 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
     }
   if (table_owner != NULL)
     {
-      const Output_section::Input_section* i = stub_control.owner();
-
-      if (tables.size() >= 2 && tables[tables.size() - 2]->owner == i)
-	{
-	  // Corner case.  A new stub group was made for the first
-	  // section (last one looked at here) for some reason, but
-	  // the first section is already being used as the owner for
-	  // a stub table for following sections.  Force it into that
-	  // stub group.
-	  tables.pop_back();
-	  delete table_owner;
-	  Powerpc_relobj<size, big_endian>* ppcobj = static_cast
-	    <Powerpc_relobj<size, big_endian>*>(i->relobj());
-	  ppcobj->set_stub_table(i->shndx(), tables.size() - 1);
-	}
-      else
-	{
-	  table_owner->output_section = stub_control.output_section();
-	  table_owner->owner = i;
-	}
+      table_owner->output_section = stub_control.output_section();
+      table_owner->owner = stub_control.owner();;
     }
   for (typename std::vector<Stub_table_owner*>::iterator t = tables.begin();
        t != tables.end();
@@ -2720,6 +2708,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
   Target_powerpc<size, big_endian>* target =
     static_cast<Target_powerpc<size, big_endian>*>(
       parameters->sized_target<size, big_endian>());
+  bool ok = true;
+
   if (gsym != NULL
       ? gsym->use_plt_offset(Scan::get_reference_flags(this->r_type_, target))
       : this->object_->local_has_plt_offset(this->r_sym_))
@@ -2745,13 +2735,13 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	    from += (this->object_->output_section(this->shndx_)->address()
 		     + this->offset_);
 	  if (gsym != NULL)
-	    return stub_table->add_plt_call_entry(from,
-						  this->object_, gsym,
-						  this->r_type_, this->addend_);
+	    ok = stub_table->add_plt_call_entry(from,
+						this->object_, gsym,
+						this->r_type_, this->addend_);
 	  else
-	    return stub_table->add_plt_call_entry(from,
-						  this->object_, this->r_sym_,
-						  this->r_type_, this->addend_);
+	    ok = stub_table->add_plt_call_entry(from,
+						this->object_, this->r_sym_,
+						this->r_type_, this->addend_);
 	}
     }
   else
@@ -2799,6 +2789,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	  const Symbol_value<size>* psymval
 	    = this->object_->local_symbol(this->r_sym_);
 	  Symbol_value<size> symval;
+	  if (psymval->is_section_symbol())
+	    symval.set_is_section_symbol();
 	  typedef Sized_relobj_file<size, big_endian> ObjType;
 	  typename ObjType::Compute_final_local_value_status status
 	    = this->object_->compute_final_local_value(this->r_sym_, psymval,
@@ -2836,12 +2828,22 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 			   && gsym != NULL
 			   && gsym->source() == Symbol::IN_OUTPUT_DATA
 			   && gsym->output_data() == target->savres_section());
-	  return stub_table->add_long_branch_entry(this->object_,
-						   this->r_type_,
-						   from, to, save_res);
+	  ok = stub_table->add_long_branch_entry(this->object_,
+						 this->r_type_,
+						 from, to, save_res);
 	}
     }
-  return true;
+  if (!ok)
+    gold_debug(DEBUG_TARGET,
+	       "branch at %s:%s+%#lx\n"
+	       "can't reach stub attached to %s:%s",
+	       this->object_->name().c_str(),
+	       this->object_->section_name(this->shndx_).c_str(),
+	       (unsigned long) this->offset_,
+	       stub_table->relobj()->name().c_str(),
+	       stub_table->relobj()->section_name(stub_table->shndx()).c_str());
+
+  return ok;
 }
 
 // Relaxation hook.  This is where we do stub generation.
@@ -3419,6 +3421,9 @@ Target_powerpc<size, big_endian>::make_plt_section(Symbol_table* symtab,
 				       ? ORDER_SMALL_DATA
 				       : ORDER_SMALL_BSS),
 				      false);
+
+      Output_section* rela_plt_os = plt_rel->output_section();
+      rela_plt_os->set_info_section(this->plt_->output_section());
     }
 }
 
@@ -3489,8 +3494,7 @@ class Output_data_brlt_powerpc : public Output_section_data_build
     os->set_section_offsets_need_adjustment();
     if (this->rel_ != NULL)
       {
-	unsigned int reloc_size
-	  = Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+	const unsigned int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
 	this->rel_->reset_address_and_file_offset();
 	this->rel_->set_current_data_size(num_branches * reloc_size);
 	this->rel_->finalize_data_size();
@@ -5776,9 +5780,11 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
       if (!is_ifunc)
-	target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			    r_type, elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			    reloc.get_r_addend());
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
+			      r_type, r_sym, reloc.get_r_addend());
+	}
       break;
 
     case elfcpp::R_PPC64_REL64:
@@ -5966,6 +5972,30 @@ Target_powerpc<size, big_endian>::Scan::local(
       break;
     }
 
+  if (size == 32)
+    {
+      switch (r_type)
+	{
+	case elfcpp::R_POWERPC_REL32:
+	  if (ppc_object->got2_shndx() != 0
+	      && parameters->options().output_is_position_independent())
+	    {
+	      unsigned int shndx = lsym.get_st_shndx();
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	      bool is_ordinary;
+	      shndx = ppc_object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+	      if (is_ordinary && shndx == ppc_object->got2_shndx()
+		  && (ppc_object->section_flags(data_shndx)
+		      & elfcpp::SHF_EXECINSTR) != 0)
+		gold_error(_("%s: unsupported -mbss-plt code"),
+			   ppc_object->name().c_str());
+	    }
+	  break;
+	default:
+	  break;
+	}
+    }
+
   switch (r_type)
     {
     case elfcpp::R_POWERPC_GOT_TLSLD16:
@@ -6039,9 +6069,9 @@ Target_powerpc<size, big_endian>::Scan::global(
   bool pushed_ifunc = false;
   if (is_ifunc && this->reloc_needs_plt_for_ifunc(target, object, r_type, true))
     {
+      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
       target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			  r_type, elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			  reloc.get_r_addend());
+			  r_type, r_sym, reloc.get_r_addend());
       target->make_plt_entry(symtab, layout, gsym);
       pushed_ifunc = true;
     }
@@ -6131,9 +6161,9 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      }
 	    if (!is_ifunc || (!pushed_ifunc && need_ifunc_plt))
 	      {
+		unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 		target->push_branch(ppc_object, data_shndx,
-				    reloc.get_r_offset(), r_type,
-				    elfcpp::elf_r_sym<size>(reloc.get_r_info()),
+				    reloc.get_r_offset(), r_type, r_sym,
 				    reloc.get_r_addend());
 		target->make_plt_entry(symtab, layout, gsym);
 	      }
@@ -6188,10 +6218,9 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL24:
       if (!is_ifunc)
 	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			      r_type,
-			      elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			      reloc.get_r_addend());
+			      r_type, r_sym, reloc.get_r_addend());
 	  if (gsym->needs_plt_entry()
 	      || (!gsym->final_value_is_known()
 		  && (gsym->is_undefined()
@@ -6229,9 +6258,11 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
       if (!is_ifunc)
-	target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
-			    r_type, elfcpp::elf_r_sym<size>(reloc.get_r_info()),
-			    reloc.get_r_addend());
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
+			      r_type, r_sym, reloc.get_r_addend());
+	}
       break;
 
     case elfcpp::R_POWERPC_REL16:
@@ -6464,6 +6495,20 @@ Target_powerpc<size, big_endian>::Scan::global(
     default:
       unsupported_reloc_global(object, r_type, gsym);
       break;
+    }
+
+  if (size == 32)
+    {
+      switch (r_type)
+	{
+	case elfcpp::R_PPC_LOCAL24PC:
+	  if (strcmp(gsym->name(), "_GLOBAL_OFFSET_TABLE_") == 0)
+	    gold_error(_("%s: unsupported -mbss-plt code"),
+		       ppc_object->name().c_str());
+	  break;
+	default:
+	  break;
+	}
     }
 
   switch (r_type)
@@ -7032,7 +7077,8 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   // descriptor, use the function descriptor code entry address
   Powerpc_relobj<size, big_endian>* symobj = object;
   if (gsym != NULL
-      && gsym->source() != Symbol::FROM_OBJECT)
+      && (gsym->source() != Symbol::FROM_OBJECT
+	  || gsym->object()->is_dynamic()))
     return true;
   if (gsym != NULL)
     symobj = static_cast<Powerpc_relobj<size, big_endian>*>(gsym->object());
@@ -7103,8 +7149,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
   typedef Powerpc_relocate_functions<size, big_endian> Reloc;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
-  typedef typename Reloc_types<elfcpp::SHT_RELA,
-			       size, big_endian>::Reloc Reltype;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
   // Offset from start of insn to d-field reloc.
   const int d_offset = big_endian ? 2 : 0;
 
@@ -7178,7 +7223,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	}
       else
 	{
-	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
 	  value = object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
 	}
@@ -7280,7 +7324,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	      gold_assert(object->local_has_got_offset(r_sym, got_type));
 	      value = object->local_got_offset(r_sym, got_type);
 	    }
@@ -7380,7 +7423,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	}
       else
 	{
-	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_DTPREL));
 	  value = object->local_got_offset(r_sym, GOT_TYPE_DTPREL);
 	}
@@ -7403,7 +7445,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	      gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_TPREL));
 	      value = object->local_got_offset(r_sym, GOT_TYPE_TPREL);
 	    }
@@ -7802,8 +7843,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      && gsym != NULL
 	      && strcmp(gsym->name(), ".TOC.") == 0)
 	    {
-	      const int reloc_size
-		= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+	      const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
 	      Reltype prev_rela(preloc - reloc_size);
 	      if ((prev_rela.get_r_info()
 		   == elfcpp::elf_r_info<size>(r_sym,
@@ -8285,10 +8325,8 @@ template<int size, bool big_endian>
 class Powerpc_scan_relocatable_reloc
 {
 public:
-  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-      Reltype;
-  static const int reloc_size =
-      Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
+  static const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
   static const int sh_type = elfcpp::SHT_RELA;
 
   // Return the symbol referred to by the relocation.
@@ -8428,12 +8466,9 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 {
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-    Reltype;
-  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc_write
-    Reltype_write;
-  const int reloc_size
-    = Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+  typedef typename elfcpp::Rela<size, big_endian> Reltype;
+  typedef typename elfcpp::Rela_write<size, big_endian> Reltype_write;
+  const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
   // Offset from start of insn to d-field reloc.
   const int d_offset = big_endian ? 2 : 0;
 

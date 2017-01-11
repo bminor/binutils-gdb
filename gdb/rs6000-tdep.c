@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -967,18 +967,11 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-static const unsigned char *
-rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
-			   int *bp_size)
-{
-  static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
-  static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
-  *bp_size = 4;
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    return big_breakpoint;
-  else
-    return little_breakpoint;
-}
+constexpr gdb_byte big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
+constexpr gdb_byte little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
+
+typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
+  rs6000_breakpoint;
 
 /* Instruction masks for displaced stepping.  */
 #define BRANCH_MASK 0xfc000000
@@ -1150,13 +1143,12 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
    is found, attempt to step through it.  A breakpoint is placed at the end of 
    the sequence.  */
 
-int 
-ppc_deal_with_atomic_sequence (struct frame_info *frame)
+VEC (CORE_ADDR) *
+ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
@@ -1166,11 +1158,12 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
   if ((insn & LWARX_MASK) != LWARX_INSTRUCTION
       && (insn & LWARX_MASK) != LDARX_INSTRUCTION)
-    return 0;
+    return NULL;
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -1208,7 +1201,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   /* Assume that the atomic sequence ends with a stwcx/stdcx instruction.  */
   if ((insn & STWCX_MASK) != STWCX_INSTRUCTION
       && (insn & STWCX_MASK) != STDCX_INSTRUCTION)
-    return 0;
+    return NULL;
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
@@ -1224,11 +1217,10 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
-  /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
 
-  return 1;
+  return next_pcs;
 }
 
 
@@ -6486,7 +6478,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_main_prologue (gdbarch, rs6000_skip_main_prologue);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
+
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       rs6000_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       rs6000_breakpoint::bp_from_kind);
 
   /* The value of symbols of type N_SO and N_FUN maybe null when
      it shouldn't be.  */
@@ -6534,8 +6530,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.osabi)
     {
     case GDB_OSABI_LINUX:
-    case GDB_OSABI_NETBSD_AOUT:
-    case GDB_OSABI_NETBSD_ELF:
+    case GDB_OSABI_NETBSD:
     case GDB_OSABI_UNKNOWN:
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
       frame_unwind_append_unwinder (gdbarch, &rs6000_epilogue_frame_unwind);

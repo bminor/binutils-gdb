@@ -1,4 +1,4 @@
-@c Copyright (C) 2009-2016 Free Software Foundation, Inc.
+@c Copyright (C) 2009-2017 Free Software Foundation, Inc.
 @c Contributed by ARM Ltd.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -61,6 +61,7 @@ on the target processor.  The following processor names are recognized:
 @code{cortex-a72},
 @code{cortex-a73},
 @code{exynos-m1},
+@code{falkor},
 @code{qdf24xx},
 @code{thunderx},
 @code{vulcan},
@@ -86,7 +87,7 @@ This option specifies the target architecture.  The assembler will
 issue an error message if an attempt is made to assemble an
 instruction which will not execute on the target architecture.  The
 following architecture names are recognized: @code{armv8-a},
-@code{armv8.1-a} and @code{armv8.2-a}.
+@code{armv8.1-a}, @code{armv8.2-a} and @code{armv8.3-a}.
 
 If both @option{-mcpu} and @option{-march} are specified, the
 assembler will use the setting for @option{-mcpu}.  If neither are

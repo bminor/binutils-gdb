@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -604,13 +604,9 @@ hppa_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-static const unsigned char *
-hppa_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static const unsigned char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
-  (*len) = sizeof (breakpoint);
-  return breakpoint;
-}
+constexpr gdb_byte hppa_break_insn[] = {0x00, 0x01, 0x00, 0x04};
+
+typedef BP_MANIPULATION (hppa_break_insn) hppa_breakpoint;
 
 /* Return the name of a register.  */
 
@@ -2458,21 +2454,6 @@ hppa_stub_frame_unwind_cache (struct frame_info *this_frame,
 
   info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
-  if (gdbarch_osabi (gdbarch) == GDB_OSABI_HPUX_SOM)
-    {
-      /* HPUX uses export stubs in function calls; the export stub clobbers
-         the return value of the caller, and, later restores it from the
-	 stack.  */
-      u = find_unwind_entry (get_frame_pc (this_frame));
-
-      if (u && u->stub_unwind.stub_type == EXPORT)
-	{
-          info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = info->base - 24;
-
-	  return info;
-	}
-    }
-
   /* By default we assume that stubs do not change the rp.  */
   info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].realreg = HPPA_RP_REGNUM;
 
@@ -3066,14 +3047,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  
-  /* Try to determine the ABI of the object we are loading.  */
-  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
-    {
-      /* If it's a SOM file, assume it's HP/UX SOM.  */
-      if (bfd_get_flavour (info.abfd) == bfd_target_som_flavour)
-	info.osabi = GDB_OSABI_HPUX_SOM;
-    }
 
   /* find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -3186,7 +3159,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
       
-  set_gdbarch_breakpoint_from_pc (gdbarch, hppa_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, hppa_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, hppa_breakpoint::bp_from_kind);
   set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
 
   /* Frame unwind methods.  */

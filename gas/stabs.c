@@ -1,5 +1,5 @@
 /* Generic stabs parsing for gas.
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -597,7 +597,7 @@ stabs_generate_asm_lineno (void)
   /* Don't emit sequences of stabs for the same line.  */
   if (prev_file == NULL)
     {
-      /* First time thru.  */
+      /* First time through.  */
       prev_file = xstrdup (file);
       prev_lineno = lineno;
     }

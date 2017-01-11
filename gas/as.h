@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -533,7 +533,7 @@ int generic_force_reloc (struct fix *);
 
 #include "expr.h"		/* Before targ-*.h */
 
-/* This one starts the chain of target dependant headers.  */
+/* This one starts the chain of target dependent headers.  */
 #include "targ-env.h"
 
 #ifdef OBJ_MAYBE_ELF

@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -38,7 +38,7 @@ static int notlsopt = 0;
 /* Choose the correct place for .got.  */
 static int old_got = 0;
 
-static struct ppc_elf_params params = { PLT_UNSET, -1, 0, 0, 0, 0, 0, 0 };
+static struct ppc_elf_params params = { PLT_UNSET, -1, 0, 0, 0, 0, 0, 0, 0 };
 
 static void
 ppc_after_open_output (void)
@@ -249,6 +249,7 @@ PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
 #define OPTION_PPC476_WORKAROUND	(OPTION_NO_STUBSYMS + 1)
 #define OPTION_NO_PPC476_WORKAROUND	(OPTION_PPC476_WORKAROUND + 1)
 #define OPTION_NO_PICFIXUP		(OPTION_NO_PPC476_WORKAROUND + 1)
+#define OPTION_VLE_RELOC_FIXUP		(OPTION_NO_PICFIXUP + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
@@ -266,6 +267,7 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "ppc476-workaround", optional_argument, NULL, OPTION_PPC476_WORKAROUND },
   { "no-ppc476-workaround", no_argument, NULL, OPTION_NO_PPC476_WORKAROUND },
   { "no-pic-fixup", no_argument, NULL, OPTION_NO_PICFIXUP },
+  { "vle-reloc-fixup", no_argument, NULL, OPTION_VLE_RELOC_FIXUP },
 '
 
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
@@ -284,7 +286,8 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'\
   --ppc476-workaround [=pagesize]\n\
                               Avoid a cache bug on ppc476.\n\
   --no-ppc476-workaround      Disable workaround.\n\
-  --no-pic-fixup              Don'\''t edit non-pic to pic.\n"
+  --no-pic-fixup              Don'\''t edit non-pic to pic.\n\
+  --vle-reloc-fixup           Correct old object file 16A/16D relocation.\n"
 		   ));
 '
 
@@ -341,6 +344,10 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_PICFIXUP:
       params.pic_fixup = -1;
+      break;
+
+    case OPTION_VLE_RELOC_FIXUP:
+      params.vle_reloc_fixup = 1;
       break;
 '
 

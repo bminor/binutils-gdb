@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -1107,6 +1107,9 @@ struct partial_die_info
     unsigned int has_specification : 1;
     unsigned int has_pc_info : 1;
     unsigned int may_be_inlined : 1;
+
+    /* This DIE has been marked DW_AT_main_subprogram.  */
+    unsigned int main_subprogram : 1;
 
     /* Flag set if the SCOPE field of this structure has been
        computed.  */
@@ -6949,6 +6952,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       &objfile->static_psymbols,
 			       addr, cu->language, objfile);
 	}
+
+      if (pdi->main_subprogram && actual_name != NULL)
+	set_objfile_main_name (objfile, actual_name, cu->language);
       break;
     case DW_TAG_constant:
       {
@@ -8519,7 +8525,6 @@ dwarf2_compute_name (const char *name,
 	  long length;
 	  const char *prefix;
 	  struct ui_file *buf;
-	  char *intermediate_name;
 	  const char *canonical_name = NULL;
 
 	  prefix = determine_prefix (die, cu);
@@ -8688,26 +8693,24 @@ dwarf2_compute_name (const char *name,
 		}
 	    }
 
-	  intermediate_name = ui_file_xstrdup (buf, &length);
+	  std::string intermediate_name = ui_file_as_string (buf);
 	  ui_file_delete (buf);
 
 	  if (cu->language == language_cplus)
 	    canonical_name
-	      = dwarf2_canonicalize_name (intermediate_name, cu,
+	      = dwarf2_canonicalize_name (intermediate_name.c_str (), cu,
 					  &objfile->per_bfd->storage_obstack);
 
 	  /* If we only computed INTERMEDIATE_NAME, or if
 	     INTERMEDIATE_NAME is already canonical, then we need to
 	     copy it to the appropriate obstack.  */
-	  if (canonical_name == NULL || canonical_name == intermediate_name)
+	  if (canonical_name == NULL || canonical_name == intermediate_name.c_str ())
 	    name = ((const char *)
 		    obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				   intermediate_name,
-				   strlen (intermediate_name)));
+				   intermediate_name.c_str (),
+				   intermediate_name.length ()));
 	  else
 	    name = canonical_name;
-
-	  xfree (intermediate_name);
 	}
     }
 
@@ -12843,6 +12846,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 				 - bit_offset - FIELD_BITSIZE (*fp)));
 	    }
 	}
+      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+      if (attr != NULL)
+	SET_FIELD_BITPOS (*fp, (FIELD_BITPOS (*fp)
+				+ dwarf2_get_attr_constant_value (attr, 0)));
 
       /* Get name of field.  */
       fieldname = dwarf2_name (die, cu);
@@ -16416,19 +16423,18 @@ read_partial_die (const struct die_reader_specs *reader,
 	     to describe functions' calling conventions.
 
 	     However, because it's a necessary piece of information in
-	     Fortran, and because DW_CC_program is the only piece of debugging
-	     information whose definition refers to a 'main program' at all,
-	     several compilers have begun marking Fortran main programs with
-	     DW_CC_program --- even when those functions use the standard
-	     calling conventions.
+	     Fortran, and before DWARF 4 DW_CC_program was the only
+	     piece of debugging information whose definition refers to
+	     a 'main program' at all, several compilers marked Fortran
+	     main programs with DW_CC_program --- even when those
+	     functions use the standard calling conventions.
 
-	     So until DWARF specifies a way to provide this information and
-	     compilers pick up the new representation, we'll support this
-	     practice.  */
+	     Although DWARF now specifies a way to provide this
+	     information, we support this practice for backward
+	     compatibility.  */
 	  if (DW_UNSND (&attr) == DW_CC_program
-	      && cu->language == language_fortran
-	      && part_die->name != NULL)
-	    set_objfile_main_name (objfile, part_die->name, language_fortran);
+	      && cu->language == language_fortran)
+	    part_die->main_subprogram = 1;
 	  break;
 	case DW_AT_inline:
 	  if (DW_UNSND (&attr) == DW_INL_inlined
@@ -16443,6 +16449,10 @@ read_partial_die (const struct die_reader_specs *reader,
 	      part_die->is_dwz = (attr.form == DW_FORM_GNU_ref_alt
 				  || cu->per_cu->is_dwz);
 	    }
+	  break;
+
+	case DW_AT_main_subprogram:
+	  part_die->main_subprogram = DW_UNSND (&attr);
 	  break;
 
 	default:
@@ -19992,14 +20002,14 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
 {
   if (name && cu->language == language_cplus)
     {
-      char *canon_name = cp_canonicalize_string (name);
+      std::string canon_name = cp_canonicalize_string (name);
 
-      if (canon_name != NULL)
+      if (!canon_name.empty ())
 	{
-	  if (strcmp (canon_name, name) != 0)
-	    name = (const char *) obstack_copy0 (obstack, canon_name,
-						 strlen (canon_name));
-	  xfree (canon_name);
+	  if (canon_name != name)
+	    name = (const char *) obstack_copy0 (obstack,
+						 canon_name.c_str (),
+						 canon_name.length ());
 	}
     }
 

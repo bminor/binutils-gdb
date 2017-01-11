@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 #
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2017 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ if { [skip_tsx_tests] } { return -1 }
 
 # compile and run to main
 standard_testfile .c x86-tsx.S
-if [prepare_for_testing tsx.exp $testfile "$srcfile $srcfile2" {debug}] {
+if [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" {debug}] {
     return -1
 }
 if ![runto_main] {

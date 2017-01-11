@@ -1,6 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -65,6 +65,12 @@ extern void regcache_raw_write_signed (struct regcache *regcache,
 				       int regnum, LONGEST val);
 extern void regcache_raw_write_unsigned (struct regcache *regcache,
 					 int regnum, ULONGEST val);
+
+/* Return the register's value in signed or throw if it's not
+   available.  */
+
+extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
+					int regnum);
 
 /* Set a raw register's value in the regcache's buffer.  Unlike
    regcache_raw_write, this is not write-through.  The intention is

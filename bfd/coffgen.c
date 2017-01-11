@@ -1,5 +1,5 @@
 /* Support for the generic parts of COFF, for BFD.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1643,7 +1643,12 @@ _bfd_coff_get_external_symbols (bfd *abfd)
 
   syms = bfd_malloc (size);
   if (syms == NULL)
-    return FALSE;
+    {
+      /* PR 21013: Provide an error message when the alloc fails.  */
+      _bfd_error_handler (_("%B: Not enough memory to allocate space for %lu symbols"),
+			  abfd, size);
+      return FALSE;
+    }
 
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
       || bfd_bread (syms, size, abfd) != size)

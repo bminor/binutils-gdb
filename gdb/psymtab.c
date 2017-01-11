@@ -1,6 +1,6 @@
 /* Partial symbol tables.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,10 +35,6 @@
 #include "language.h"
 #include "cp-support.h"
 #include "gdbcmd.h"
-
-#ifndef DEV_TTY
-#define DEV_TTY "/dev/tty"
-#endif
 
 struct psymbol_bcache
 {
@@ -1935,8 +1931,9 @@ dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
 {
   struct dump_psymtab_addrmap_data addrmap_dump_data;
 
-  if (psymtab == NULL
-      || psymtab->psymtabs_addrmap_supported)
+  if ((psymtab == NULL
+       || psymtab->psymtabs_addrmap_supported)
+      && objfile->psymtabs_addrmap != NULL)
     {
       addrmap_dump_data.objfile = objfile;
       addrmap_dump_data.psymtab = psymtab;
@@ -1953,64 +1950,162 @@ static void
 maintenance_print_psymbols (char *args, int from_tty)
 {
   char **argv;
-  struct ui_file *outfile;
+  struct ui_file *outfile = gdb_stdout;
   struct cleanup *cleanups;
-  char *symname = NULL;
-  char *filename = DEV_TTY;
+  char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
   struct objfile *objfile;
   struct partial_symtab *ps;
+  int i, outfile_idx, found;
+  CORE_ADDR pc = 0;
+  struct obj_section *section = NULL;
 
   dont_repeat ();
 
-  if (args == NULL)
-    {
-      error (_("\
-print-psymbols takes an output file name and optional symbol file name"));
-    }
   argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
 
-  if (argv[0] != NULL)
+  for (i = 0; argv[i] != NULL; ++i)
     {
-      filename = argv[0];
-      /* If a second arg is supplied, it is a source file name to match on.  */
-      if (argv[1] != NULL)
+      if (strcmp (argv[i], "-pc") == 0)
 	{
-	  symname = argv[1];
+	  if (argv[i + 1] == NULL)
+	    error (_("Missing pc value"));
+	  address_arg = argv[++i];
 	}
+      else if (strcmp (argv[i], "-source") == 0)
+	{
+	  if (argv[i + 1] == NULL)
+	    error (_("Missing source file"));
+	  source_arg = argv[++i];
+	}
+      else if (strcmp (argv[i], "-objfile") == 0)
+	{
+	  if (argv[i + 1] == NULL)
+	    error (_("Missing objfile name"));
+	  objfile_arg = argv[++i];
+	}
+      else if (strcmp (argv[i], "--") == 0)
+	{
+	  /* End of options.  */
+	  ++i;
+	  break;
+	}
+      else if (argv[i][0] == '-')
+	{
+	  /* Future proofing: Don't allow OUTFILE to begin with "-".  */
+	  error (_("Unknown option: %s"), argv[i]);
+	}
+      else
+	break;
+    }
+  outfile_idx = i;
+
+  if (address_arg != NULL && source_arg != NULL)
+    error (_("Must specify at most one of -pc and -source"));
+
+  if (argv[outfile_idx] != NULL)
+    {
+      char *outfile_name;
+
+      if (argv[outfile_idx + 1] != NULL)
+	error (_("Junk at end of command"));
+      outfile_name = tilde_expand (argv[outfile_idx]);
+      make_cleanup (xfree, outfile_name);
+      outfile = gdb_fopen (outfile_name, FOPEN_WT);
+      if (outfile == NULL)
+	perror_with_name (outfile_name);
+      make_cleanup_ui_file_delete (outfile);
     }
 
-  filename = tilde_expand (filename);
-  make_cleanup (xfree, filename);
+  if (address_arg != NULL)
+    {
+      pc = parse_and_eval_address (address_arg);
+      /* If we fail to find a section, that's ok, try the lookup anyway.  */
+      section = find_pc_section (pc);
+    }
 
-  outfile = gdb_fopen (filename, FOPEN_WT);
-  if (outfile == NULL)
-    perror_with_name (filename);
-  make_cleanup_ui_file_delete (outfile);
-
+  found = 0;
   ALL_OBJFILES (objfile)
-  {
-    fprintf_filtered (outfile, "\nPartial symtabs for objfile %s\n",
-		      objfile_name (objfile));
-
-    ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
     {
+      int printed_objfile_header = 0;
+      int print_for_objfile = 1;
+
       QUIT;
-      if (symname == NULL || filename_cmp (symname, ps->filename) == 0)
+      if (objfile_arg != NULL)
+	print_for_objfile
+	  = compare_filenames_for_search (objfile_name (objfile),
+					  objfile_arg);
+      if (!print_for_objfile)
+	continue;
+
+      if (address_arg != NULL)
 	{
-	  dump_psymtab (objfile, ps, outfile);
-	  dump_psymtab_addrmap (objfile, ps, outfile);
+	  struct bound_minimal_symbol msymbol = { NULL, NULL };
+
+	  /* We don't assume each pc has a unique objfile (this is for
+	     debugging).  */
+	  ps = find_pc_sect_psymtab (objfile, pc, section, msymbol);
+	  if (ps != NULL)
+	    {
+	      if (!printed_objfile_header)
+		{
+		  fprintf_filtered (outfile,
+				    "\nPartial symtabs for objfile %s\n",
+				    objfile_name (objfile));
+		  printed_objfile_header = 1;
+		}
+	      dump_psymtab (objfile, ps, outfile);
+	      dump_psymtab_addrmap (objfile, ps, outfile);
+	      found = 1;
+	    }
+	}
+      else
+	{
+	  ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
+	    {
+	      int print_for_source = 0;
+
+	      QUIT;
+	      if (source_arg != NULL)
+		{
+		  print_for_source
+		    = compare_filenames_for_search (ps->filename, source_arg);
+		  found = 1;
+		}
+	      if (source_arg == NULL
+		  || print_for_source)
+		{
+		  if (!printed_objfile_header)
+		    {
+		      fprintf_filtered (outfile,
+					"\nPartial symtabs for objfile %s\n",
+					objfile_name (objfile));
+		      printed_objfile_header = 1;
+		    }
+		  dump_psymtab (objfile, ps, outfile);
+		  dump_psymtab_addrmap (objfile, ps, outfile);
+		}
+	    }
+	}
+
+      /* If we're printing all the objfile's symbols dump the full addrmap.  */
+
+      if (address_arg == NULL
+	  && source_arg == NULL
+	  && objfile->psymtabs_addrmap != NULL)
+	{
+	  fprintf_filtered (outfile, "\n");
+	  dump_psymtab_addrmap (objfile, NULL, outfile);
 	}
     }
 
-    /* If we're printing all symbols dump the full addrmap.  */
-
-    if (symname == NULL)
-      {
-	fprintf_filtered (outfile, "\n");
-	dump_psymtab_addrmap (objfile, NULL, outfile);
-      }
-  }
+  if (!found)
+    {
+      if (address_arg != NULL)
+	error (_("No partial symtab for address: %s"), address_arg);
+      if (source_arg != NULL)
+	error (_("No partial symtab for source file: %s"), source_arg);
+    }
 
   do_cleanups (cleanups);
 }
@@ -2222,8 +2317,13 @@ _initialize_psymtab (void)
 {
   add_cmd ("psymbols", class_maintenance, maintenance_print_psymbols, _("\
 Print dump of current partial symbol definitions.\n\
-Entries in the partial symbol table are dumped to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's partial symbols."),
+Usage: mt print psymbols [-objfile objfile] [-pc address] [--] [outfile]\n\
+       mt print psymbols [-objfile objfile] [-source source] [--] [outfile]\n\
+Entries in the partial symbol table are dumped to file OUTFILE,\n\
+or the terminal if OUTFILE is unspecified.\n\
+If ADDRESS is provided, dump only the file for that address.\n\
+If SOURCE is provided, dump only that file's symbols.\n\
+If OBJFILE is provided, dump only that file's minimal symbols."),
 	   &maintenanceprintlist);
 
   add_cmd ("psymtabs", class_maintenance, maintenance_info_psymtabs, _("\

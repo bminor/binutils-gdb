@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -514,6 +514,14 @@ integer_constant (int radix, expressionS *expressionP)
   /* PR 19910: Look for, and ignore, a U suffix to the number.  */
   if (tc_allow_U_suffix && (c == 'U' || c == 'u'))
     c = * input_line_pointer++;
+
+#ifndef tc_allow_L_suffix
+#define tc_allow_L_suffix 1
+#endif
+  /* PR 20732: Look for, and ignore, a L or LL suffix to the number.  */
+  if (tc_allow_L_suffix)
+    while (c == 'L' || c == 'l')
+      c = * input_line_pointer++;
 
   if (small)
     {
@@ -1363,7 +1371,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
   /* It is more 'efficient' to clean up the expressionS when they are
      created.  Doing it here saves lines of code.  */
   clean_up_expression (expressionP);
-  SKIP_WHITESPACE ();		/* -> 1st char after operand.  */
+  SKIP_ALL_WHITESPACE ();		/* -> 1st char after operand.  */
   know (*input_line_pointer != ' ');
 
   /* The PA port needs this information.  */

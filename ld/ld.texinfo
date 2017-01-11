@@ -1,6 +1,6 @@
 \input texinfo
 @setfilename ld.info
-@c Copyright (C) 1991-2016 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2017 Free Software Foundation, Inc.
 @syncodeindex ky cp
 @c man begin INCLUDE
 @include configdoc.texi
@@ -55,7 +55,7 @@ This file documents the @sc{gnu} linker LD
 @end ifset
 version @value{VERSION}.
 
-Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2017 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -92,7 +92,7 @@ section entitled ``GNU Free Documentation License''.
 
 @vskip 0pt plus 1filll
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2017 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -1558,6 +1558,18 @@ default behaviour (of not listing the sections that are removed) can
 be restored by specifying @samp{--no-print-gc-sections} on the command
 line.
 
+@kindex --gc-keep-exported
+@cindex garbage collection
+@item --gc-keep-exported
+When @samp{--gc-sections} is enabled, this option prevents garbage
+collection of unused input sections that contain global symbols having
+default or protected visibility.  This option is intended to be used for
+executables where unreferenced sections would otherwise be garbage
+collected regardless of the external visibility of contained symbols.
+Note that this option has no effect when linking shared objects since
+it is already the default behaviour.  This option is only supported for
+ELF format targets.
+
 @kindex --print-output-format
 @cindex output format
 @item --print-output-format
@@ -1864,6 +1876,16 @@ specifies the first set of directories to search.  The
 @option{-rpath-link} option may specify a sequence of directory names
 either by specifying a list of names separated by colons, or by
 appearing multiple times.
+
+The tokens @var{$ORIGIN} and @var{$LIB} can appear in these search
+directories.  They will be replaced by the full path to the directory
+containing the program or shared object in the case of @var{$ORIGIN}
+and either @samp{lib} - for 32-bit binaries - or @samp{lib64} - for
+64-bit binaries - in the case of @var{$LIB}.
+
+The alternative form of these tokens - @var{$@{ORIGIN@}} and
+@var{$@{LIB@}} can also be used.  The token @var{$PLATFORM} is not
+supported.
 
 This option should be used with caution as it overrides the search path
 that may have been hard compiled into a shared library. In such a case it
@@ -2319,17 +2341,28 @@ hash tables.  The default is @code{sysv}.
 @itemx --compress-debug-sections=zlib
 @itemx --compress-debug-sections=zlib-gnu
 @itemx --compress-debug-sections=zlib-gabi
-On ELF platforms , these options control how DWARF debug sections are
-compressed using zlib.  @option{--compress-debug-sections=none} doesn't
-compress DWARF debug sections.
-@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
-sections and rename debug section names to begin with @samp{.zdebug}
-instead of @samp{.debug}.  @option{--compress-debug-sections=zlib}
-and @option{--compress-debug-sections=zlib-gabi}
-compress DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
-The default behaviour varies depending upon the target involved and
-the configure options used to build the toolchain.  The default can be
-determined by examing the output from the linker's @option{--help} option.
+On ELF platforms, these options control how DWARF debug sections are
+compressed using zlib.
+
+@option{--compress-debug-sections=none} doesn't compress DWARF debug
+sections.  @option{--compress-debug-sections=zlib-gnu} compresses
+DWARF debug sections and renames them to begin with @samp{.zdebug}
+instead of @samp{.debug}.  @option{--compress-debug-sections=zlib-gabi}
+also compresses DWARF debug sections, but rather than renaming them it
+sets the SHF_COMPRESSED flag in the sections' headers.
+
+The @option{--compress-debug-sections=zlib} option is an alias for
+@option{--compress-debug-sections=zlib-gabi}.
+
+Note that this option overrides any compression in input debug
+sections, so if a binary is linked with @option{--compress-debug-sections=none}
+for example, then any compressed debug sections in input files will be
+uncompressed before they are copied into the output binary.
+
+The default compression behaviour varies depending upon the target
+involved and the configure options used to build the toolchain.  The
+default can be determined by examining the output from the linker's
+@option{--help} option.
 
 @kindex --reduce-memory-overheads
 @item --reduce-memory-overheads
@@ -4192,14 +4225,24 @@ include all input @samp{.text} sections, you would write:
 @end smallexample
 @noindent
 Here the @samp{*} is a wildcard which matches any file name.  To exclude a list
+@cindex EXCLUDE_FILE
 of files from matching the file name wildcard, EXCLUDE_FILE may be used to
 match all files except the ones specified in the EXCLUDE_FILE list.  For
 example:
 @smallexample
+EXCLUDE_FILE (*crtend.o *otherfile.o) *(.ctors)
+@end smallexample
+@noindent
+will cause all .ctors sections from all files except @file{crtend.o}
+and @file{otherfile.o} to be included.  The EXCLUDE_FILE can also be
+placed inside the section list, for example:
+@smallexample
 *(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors)
 @end smallexample
-will cause all .ctors sections from all files except @file{crtend.o} and
-@file{otherfile.o} to be included.
+@noindent
+The result of this is identically to the previous example.  Supporting
+two syntaxes for EXCLUDE_FILE is useful if the section list contains
+more than one section, as described below.
 
 There are two ways to include more than one section:
 @smallexample
@@ -4214,8 +4257,9 @@ they are found in the linker input.  In the second example, all
 @samp{.text} input sections will appear first, followed by all
 @samp{.rdata} input sections.
 
-When using EXCLUDE_FILE with more than one section, the exclusion only
-applies to the section immediately following, for example:
+When using EXCLUDE_FILE with more than one section, if the exclusion
+is within the section list then the exclusion only applies to the
+immediately following section, for example:
 @smallexample
 *(EXCLUDE_FILE (*somefile.o) .text .rdata)
 @end smallexample
@@ -4224,9 +4268,16 @@ will cause all @samp{.text} sections from all files except
 @file{somefile.o} to be included, while all @samp{.rdata} sections
 from all files, including @file{somefile.o}, will be included.  To
 exclude the @samp{.rdata} sections from @file{somefile.o} the example
-should be modified to:
+could be modified to:
 @smallexample
 *(EXCLUDE_FILE (*somefile.o) .text EXCLUDE_FILE (*somefile.o) .rdata)
+@end smallexample
+@noindent
+Alternatively, placing the EXCLUDE_FILE outside of the section list,
+before the input file selection, will cause the exclusion to apply for
+all sections.  Thus the previous example can be rewritten as:
+@smallexample
+EXCLUDE_FILE (*somefile.o) *(.text .rdata)
 @end smallexample
 
 You can specify a file name to include sections from a particular file.
@@ -5319,6 +5370,9 @@ ABI.
 
 @item @code{PT_PHDR} (6)
 Indicates a segment where the program headers may be found.
+
+@item @code{PT_TLS} (7)
+Indicates a segment containing thread local storage.
 
 @item @var{expression}
 An expression giving the numeric type of the program header.  This may

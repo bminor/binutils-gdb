@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -5641,9 +5641,9 @@ bfd_mach_o_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
 static bfd_mach_o_uuid_command *
 bfd_mach_o_lookup_uuid_command (bfd *abfd)
 {
-  bfd_mach_o_load_command *uuid_cmd;
+  bfd_mach_o_load_command *uuid_cmd = NULL;
   int ncmd = bfd_mach_o_lookup_command (abfd, BFD_MACH_O_LC_UUID, &uuid_cmd);
-  if (ncmd != 1)
+  if (ncmd != 1 || uuid_cmd == NULL)
     return FALSE;
   return &uuid_cmd->command.uuid;
 }

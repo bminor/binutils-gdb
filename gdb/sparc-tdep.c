@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -641,15 +641,9 @@ sparc32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    encode a breakpoint instruction, store the length of the string in
    *LEN and optionally adjust *PC to point to the correct memory
    location for inserting the breakpoint.  */
-   
-static const gdb_byte *
-sparc_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static const gdb_byte break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
+constexpr gdb_byte sparc_break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
 
-  *len = sizeof (break_insn);
-  return break_insn;
-}
+typedef BP_MANIPULATION (sparc_break_insn) sparc_breakpoint;
 
 
 /* Allocate and initialize a frame cache.  */
@@ -1507,7 +1501,7 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
    software single-step mechanism.  */
 
 static CORE_ADDR
-sparc_analyze_control_transfer (struct frame_info *frame,
+sparc_analyze_control_transfer (struct regcache *regcache,
 				CORE_ADDR pc, CORE_ADDR *npc)
 {
   unsigned long insn = sparc_fetch_instruction (pc);
@@ -1558,8 +1552,11 @@ sparc_analyze_control_transfer (struct frame_info *frame,
     }
   else if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3a)
     {
+      struct frame_info *frame = get_current_frame ();
+
       /* Trap instruction (TRAP).  */
-      return gdbarch_tdep (get_frame_arch (frame))->step_trap (frame, insn);
+      return gdbarch_tdep (get_regcache_arch (regcache))->step_trap (frame,
+								     insn);
     }
 
   /* FIXME: Handle DONE and RETRY instructions.  */
@@ -1605,26 +1602,26 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-static int
-sparc_software_single_step (struct frame_info *frame)
+static VEC (CORE_ADDR) *
+sparc_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *arch = get_frame_arch (frame);
+  struct gdbarch *arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
-  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
+  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  pc = get_frame_register_unsigned (frame, tdep->pc_regnum);
-  orig_npc = npc = get_frame_register_unsigned (frame, tdep->npc_regnum);
+  pc = regcache_raw_get_unsigned (regcache, tdep->pc_regnum);
+  orig_npc = npc = regcache_raw_get_unsigned (regcache, tdep->npc_regnum);
 
   /* Analyze the instruction at PC.  */
-  nnpc = sparc_analyze_control_transfer (frame, pc, &npc);
+  nnpc = sparc_analyze_control_transfer (regcache, pc, &npc);
   if (npc != 0)
-    insert_single_step_breakpoint (arch, aspace, npc);
+    VEC_safe_push (CORE_ADDR, next_pcs, npc);
 
   if (nnpc != 0)
-    insert_single_step_breakpoint (arch, aspace, nnpc);
+    VEC_safe_push (CORE_ADDR, next_pcs, nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going
@@ -1632,7 +1629,7 @@ sparc_software_single_step (struct frame_info *frame)
   gdb_assert (npc != 0 || nnpc != 0 || orig_npc == 0);
   gdb_assert (nnpc != npc || orig_npc == 0);
 
-  return 1;
+  return next_pcs;
 }
 
 static void
@@ -1709,7 +1706,10 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       sparc_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       sparc_breakpoint::bp_from_kind);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 

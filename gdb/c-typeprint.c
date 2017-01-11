@@ -1,5 +1,5 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,15 +60,14 @@ print_name_maybe_canonical (const char *name,
 			    const struct type_print_options *flags,
 			    struct ui_file *stream)
 {
-  char *s = NULL;
+  std::string s;
 
   if (!flags->raw)
     s = cp_canonicalize_string_full (name,
 				     find_typedef_for_canonicalize,
 				     (void *) flags);
 
-  fputs_filtered (s ? s : name, stream);
-  xfree (s);
+  fputs_filtered (!s.empty () ? s.c_str () : name, stream);
 }
 
 

@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -91,7 +91,7 @@ m32r_memory_insert_breakpoint (struct gdbarch *gdbarch,
     return val;			/* return error */
 
   memcpy (bp_tgt->shadow_contents, contents_cache, 4);
-  bp_tgt->placed_size = bp_tgt->shadow_len = 4;
+  bp_tgt->shadow_len = 4;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -165,9 +165,21 @@ m32r_memory_remove_breakpoint (struct gdbarch *gdbarch,
   return val;
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
+static int
+m32r_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  if ((*pcptr & 3) == 0)
+    return 4;
+  else
+    return 2;
+}
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
+
 static const gdb_byte *
-m32r_breakpoint_from_pc (struct gdbarch *gdbarch,
-			 CORE_ADDR *pcptr, int *lenptr)
+m32r_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
   static gdb_byte be_bp_entry[] = {
     0x10, 0xf1, 0x70, 0x00
@@ -175,39 +187,20 @@ m32r_breakpoint_from_pc (struct gdbarch *gdbarch,
   static gdb_byte le_bp_entry[] = {
     0x00, 0x70, 0xf1, 0x10
   };	/* dpt -> nop */
-  gdb_byte *bp;
+
+  *size = kind;
 
   /* Determine appropriate breakpoint.  */
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    {
-      if ((*pcptr & 3) == 0)
-	{
-	  bp = be_bp_entry;
-	  *lenptr = 4;
-	}
-      else
-	{
-	  bp = be_bp_entry;
-	  *lenptr = 2;
-	}
-    }
+    return be_bp_entry;
   else
     {
-      if ((*pcptr & 3) == 0)
-	{
-	  bp = le_bp_entry;
-	  *lenptr = 4;
-	}
+      if (kind == 4)
+	return le_bp_entry;
       else
-	{
-	  bp = le_bp_entry + 2;
-	  *lenptr = 2;
-	}
+	return le_bp_entry + 2;
     }
-
-  return bp;
 }
-
 
 char *m32r_register_names[] = {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -929,7 +922,8 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, m32r_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, m32r_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, m32r_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, m32r_sw_breakpoint_from_kind);
   set_gdbarch_memory_insert_breakpoint (gdbarch,
 					m32r_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch,

@@ -1,6 +1,6 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -119,9 +119,19 @@ class Target
   { return this->pti_->dynamic_linker; }
 
   // Return the default address to use for the text segment.
+  // If a -z max-page-size argument has set the ABI page size
+  // to a value larger than the default starting address,
+  // bump the starting address up to the page size, to avoid
+  // misaligning the text segment in the file.
   uint64_t
   default_text_segment_address() const
-  { return this->pti_->default_text_segment_address; }
+  {
+    uint64_t addr = this->pti_->default_text_segment_address;
+    uint64_t pagesize = this->abi_pagesize();
+    if (addr < pagesize)
+      addr = pagesize;
+    return addr;
+  }
 
   // Return the ABI specified page size.
   uint64_t

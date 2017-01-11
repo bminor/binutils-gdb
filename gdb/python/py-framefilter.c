@@ -1,6 +1,6 @@
 /* Python frame filters
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,8 +52,9 @@ enum mi_print_types
    appropriate Python exception set, and EXT_LANG_BT_OK on success.  */
 
 static enum ext_lang_bt_status
-extract_sym (PyObject *obj, char **name, struct symbol **sym,
-	     struct block **sym_block, const struct language_defn **language)
+extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
+	     struct symbol **sym, struct block **sym_block,
+	     const struct language_defn **language)
 {
   PyObject *result = PyObject_CallMethod (obj, "symbol", NULL);
 
@@ -101,7 +102,7 @@ extract_sym (PyObject *obj, char **name, struct symbol **sym,
 
       /* Duplicate the symbol name, so the caller has consistency
 	 in garbage collection.  */
-      *name = xstrdup (SYMBOL_PRINT_NAME (*sym));
+      name->reset (xstrdup (SYMBOL_PRINT_NAME (*sym)));
 
       /* If a symbol is specified attempt to determine the language
 	 from the symbol.  If mode is not "auto", then the language
@@ -218,7 +219,7 @@ py_print_type (struct ui_out *out, struct value *val)
       cleanup = make_cleanup_ui_file_delete (stb);
       check_typedef (value_type (val));
       type_print (value_type (val), "", stb, -1);
-      ui_out_field_stream (out, "type", stb);
+      out->field_stream ("type", stb);
       do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
@@ -289,7 +290,7 @@ py_print_value (struct ui_out *out, struct value *val,
 	  stb = mem_fileopen ();
 	  cleanup = make_cleanup_ui_file_delete (stb);
 	  common_val_print (val, stb, indent, opts, language);
-	  ui_out_field_stream (out, "value", stb);
+	  out->field_stream ("value", stb);
 	  do_cleanups (cleanup);
 	}
       CATCH (except, RETURN_MASK_ALL)
@@ -387,7 +388,7 @@ py_print_single_arg (struct ui_out *out,
       if the value is a frame argument.  This is denoted in this
       function with PRINT_ARGS_FIELD which is flag from the caller to
       emit the ARGS field.  */
-      if (ui_out_is_mi_like_p (out))
+      if (out->is_mi_like_p ())
 	{
 	  if (print_args_field || args_type != NO_VALUES)
 	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
@@ -419,19 +420,19 @@ py_print_single_arg (struct ui_out *out,
 	    {
 	      fputs_filtered ("@entry", stb);
 	    }
-	  ui_out_field_stream (out, "name", stb);
+	  out->field_stream ("name", stb);
 	}
       else
 	/* Otherwise, just output the name.  */
-	ui_out_field_string (out, "name", sym_name);
+	out->field_string ("name", sym_name);
 
       annotate_arg_name_end ();
 
-      if (! ui_out_is_mi_like_p (out))
-	ui_out_text (out, "=");
+      if (! out->is_mi_like_p ())
+	out->text ("=");
 
       if (print_args_field)
-	ui_out_field_int (out, "arg", 1);
+	out->field_int ("arg", 1);
 
       /* For MI print the type, but only for simple values.  This seems
 	 weird, but this is how MI choose to format the various output
@@ -452,8 +453,8 @@ py_print_single_arg (struct ui_out *out,
 
 	  /* If the output is to the CLI, and the user option "set print
 	     frame-arguments" is set to none, just output "...".  */
-	  if (! ui_out_is_mi_like_p (out) && args_type == NO_VALUES)
-	    ui_out_field_string (out, "value", "...");
+	  if (! out->is_mi_like_p () && args_type == NO_VALUES)
+	    out->field_string ("value", "...");
 	  else
 	    {
 	      /* Otherwise, print the value for both MI and the CLI, except
@@ -463,7 +464,7 @@ py_print_single_arg (struct ui_out *out,
 		  if (val == NULL)
 		    {
 		      gdb_assert (fa != NULL && fa->error != NULL);
-		      ui_out_field_fmt (out, "value",
+		      out->field_fmt ("value",
 					_("<error reading variable: %s>"),
 					fa->error);
 		    }
@@ -538,7 +539,7 @@ enumerate_args (PyObject *iter,
   while (item)
     {
       const struct language_defn *language;
-      char *sym_name;
+      gdb::unique_xmalloc_ptr<char> sym_name;
       struct symbol *sym;
       struct block *sym_block;
       struct value *val;
@@ -554,7 +555,6 @@ enumerate_args (PyObject *iter,
       success = extract_value (item, &val);
       if (success == EXT_LANG_BT_ERROR)
 	{
-	  xfree (sym_name);
 	  Py_DECREF (item);
 	  goto error;
 	}
@@ -562,12 +562,9 @@ enumerate_args (PyObject *iter,
       Py_DECREF (item);
       item = NULL;
 
-      if (sym && ui_out_is_mi_like_p (out)
+      if (sym && out->is_mi_like_p ()
 	  && ! mi_should_print (sym, MI_PRINT_ARGS))
-	{
-	  xfree (sym_name);
-	  continue;
-	}
+	continue;
 
       /* If the object did not provide a value, read it using
 	 read_frame_args and account for entry values, if any.  */
@@ -581,7 +578,6 @@ enumerate_args (PyObject *iter,
 	    {
 	      PyErr_SetString (PyExc_RuntimeError,
 			       _("No symbol or value provided."));
-	      xfree (sym_name);
 	      goto error;
 	    }
 
@@ -591,7 +587,6 @@ enumerate_args (PyObject *iter,
 	    }
 	  CATCH (except, RETURN_MASK_ALL)
 	    {
-	      xfree (sym_name);
 	      gdbpy_convert_exception (except);
 	      goto error;
 	    }
@@ -611,7 +606,6 @@ enumerate_args (PyObject *iter,
 		{
 		  xfree (arg.error);
 		  xfree (entryarg.error);
-		  xfree (sym_name);
 		  goto error;
 		}
 	    }
@@ -622,14 +616,13 @@ enumerate_args (PyObject *iter,
 		{
 		  TRY
 		    {
-		      ui_out_text (out, ", ");
-		      ui_out_wrap_hint (out, "    ");
+		      out->text (", ");
+		      out->wrap_hint ("    ");
 		    }
 		  CATCH (except, RETURN_MASK_ALL)
 		    {
 		      xfree (arg.error);
 		      xfree (entryarg.error);
-		      xfree (sym_name);
 		      gdbpy_convert_exception (except);
 		      goto error;
 		    }
@@ -642,7 +635,6 @@ enumerate_args (PyObject *iter,
 		{
 		      xfree (arg.error);
 		      xfree (entryarg.error);
-		      xfree (sym_name);
 		      goto error;
 		}
 	    }
@@ -655,17 +647,12 @@ enumerate_args (PyObject *iter,
 	  /* If the object has provided a value, we just print that.  */
 	  if (val != NULL)
 	    {
-	      if (py_print_single_arg (out, sym_name, NULL, val, &opts,
+	      if (py_print_single_arg (out, sym_name.get (), NULL, val, &opts,
 				       args_type, print_args_field,
 				       language) == EXT_LANG_BT_ERROR)
-		{
-		  xfree (sym_name);
-		  goto error;
-		}
+		goto error;
 	    }
 	}
-
-      xfree (sym_name);
 
       /* Collect the next item from the iterator.  If
 	 this is the last item, do not print the
@@ -675,7 +662,7 @@ enumerate_args (PyObject *iter,
 	{
 	  TRY
 	    {
-	      ui_out_text (out, ", ");
+	      out->text (", ");
 	    }
 	  CATCH (except, RETURN_MASK_ALL)
 	    {
@@ -736,7 +723,7 @@ enumerate_locals (PyObject *iter,
   while ((item = PyIter_Next (iter)))
     {
       const struct language_defn *language;
-      char *sym_name;
+      gdb::unique_xmalloc_ptr<char> sym_name;
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
       struct symbol *sym;
@@ -753,8 +740,6 @@ enumerate_locals (PyObject *iter,
 	  goto error;
 	}
 
-      make_cleanup (xfree, sym_name);
-
       success = extract_value (item, &val);
       if (success == EXT_LANG_BT_ERROR)
 	{
@@ -762,7 +747,7 @@ enumerate_locals (PyObject *iter,
 	  goto error;
 	}
 
-      if (sym != NULL && ui_out_is_mi_like_p (out)
+      if (sym != NULL && out->is_mi_like_p ()
 	  && ! mi_should_print (sym, MI_PRINT_LOCALS))
 	{
 	  do_cleanups (locals_cleanups);
@@ -788,23 +773,23 @@ enumerate_locals (PyObject *iter,
       /* With PRINT_NO_VALUES, MI does not emit a tuple normally as
 	 each output contains only one field.  The exception is
 	 -stack-list-variables, which always provides a tuple.  */
-      if (ui_out_is_mi_like_p (out))
+      if (out->is_mi_like_p ())
 	{
 	  if (print_args_field || args_type != NO_VALUES)
 	    make_cleanup_ui_out_tuple_begin_end (out, NULL);
 	}
       TRY
 	{
-	  if (! ui_out_is_mi_like_p (out))
+	  if (! out->is_mi_like_p ())
 	    {
 	      /* If the output is not MI we indent locals.  */
-	      ui_out_spaces (out, local_indent);
+	      out->spaces (local_indent);
 	    }
 
-	  ui_out_field_string (out, "name", sym_name);
+	  out->field_string ("name", sym_name.get ());
 
-	  if (! ui_out_is_mi_like_p (out))
-	    ui_out_text (out, " = ");
+	  if (! out->is_mi_like_p ())
+	    out->text (" = ");
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -825,7 +810,7 @@ enumerate_locals (PyObject *iter,
 
       /* CLI always prints values for locals.  MI uses the
 	 simple/no/all system.  */
-      if (! ui_out_is_mi_like_p (out))
+      if (! out->is_mi_like_p ())
 	{
 	  int val_indent = (indent + 1) * 4;
 
@@ -853,7 +838,7 @@ enumerate_locals (PyObject *iter,
 
       TRY
 	{
-	  ui_out_text (out, "\n");
+	  out->text ("\n");
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -970,8 +955,8 @@ py_print_args (PyObject *filter,
   TRY
     {
       annotate_frame_args ();
-      if (! ui_out_is_mi_like_p (out))
-	ui_out_text (out, " (");
+      if (! out->is_mi_like_p ())
+	out->text (" (");
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -987,8 +972,8 @@ py_print_args (PyObject *filter,
 
   TRY
     {
-      if (! ui_out_is_mi_like_p (out))
-	ui_out_text (out, ")");
+      if (! out->is_mi_like_p ())
+	out->text (")");
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1033,6 +1018,7 @@ py_print_frame (PyObject *filter, int flags,
   struct value_print_options opts;
   PyObject *py_inf_frame;
   int print_level, print_frame_info, print_args, print_locals;
+  gdb::unique_xmalloc_ptr<char> function_to_free;
 
   /* Extract print settings from FLAGS.  */
   print_level = (flags & PRINT_LEVEL) ? 1 : 0;
@@ -1091,7 +1077,7 @@ py_print_frame (PyObject *filter, int flags,
 	{
 	  TRY
 	    {
-	      ui_out_spaces (out, indent*4);
+	      out->spaces (indent * 4);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -1116,7 +1102,13 @@ py_print_frame (PyObject *filter, int flags,
 
 	  if (paddr != Py_None)
 	    {
-	      address = PyLong_AsLong (paddr);
+	      if (get_addr_from_python (paddr, &address) < 0)
+		{
+		  Py_DECREF (paddr);
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+
 	      has_addr = 1;
 	    }
 	  Py_DECREF (paddr);
@@ -1141,14 +1133,14 @@ py_print_frame (PyObject *filter, int flags,
 	     architecture from the eliding frame.  If that is the case, do
 	     not print 'level', but print spaces.  */
 	  if (*slot == frame)
-	    ui_out_field_skip (out, "level");
+	    out->field_skip ("level");
 	  else
 	    {
 	      *slot = frame;
 	      annotate_frame_begin (print_level ? level : 0,
 				    gdbarch, address);
-	      ui_out_text (out, "#");
-	      ui_out_field_fmt_int (out, 2, ui_left, "level",
+	      out->text ("#");
+	      out->field_fmt_int (2, ui_left, "level",
 				    level);
 	    }
 	}
@@ -1170,9 +1162,9 @@ py_print_frame (PyObject *filter, int flags,
 	  TRY
 	    {
 	      annotate_frame_address ();
-	      ui_out_field_core_addr (out, "addr", gdbarch, address);
+	      out->field_core_addr ("addr", gdbarch, address);
 	      annotate_frame_address_end ();
-	      ui_out_text (out, " in ");
+	      out->text (" in ");
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -1199,24 +1191,22 @@ py_print_frame (PyObject *filter, int flags,
 
 	  if (gdbpy_is_string (py_func))
 	    {
-	      char *function_to_free;
+	      function_to_free = python_string_to_host_string (py_func);
 
-	      function = function_to_free =
-		python_string_to_host_string (py_func);
-
-	      if (function == NULL)
+	      if (function_to_free == NULL)
 		{
 		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
 		}
-	      make_cleanup (xfree, function_to_free);
+
+	      function = function_to_free.get ();
 	    }
 	  else if (PyLong_Check (py_func))
 	    {
-	      CORE_ADDR addr = PyLong_AsUnsignedLongLong (py_func);
+	      CORE_ADDR addr;
 	      struct bound_minimal_symbol msymbol;
 
-	      if (PyErr_Occurred ())
+	      if (get_addr_from_python (py_func, &addr) < 0)
 		{
 		  do_cleanups (cleanup_stack);
 		  return EXT_LANG_BT_ERROR;
@@ -1239,9 +1229,9 @@ py_print_frame (PyObject *filter, int flags,
 	    {
 	      annotate_frame_function_name ();
 	      if (function == NULL)
-		ui_out_field_skip (out, "func");
+		out->field_skip ("func");
 	      else
-		ui_out_field_string (out, "func", function);
+		out->field_string ("func", function);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -1296,7 +1286,8 @@ py_print_frame (PyObject *filter, int flags,
 
 	  if (py_fn != Py_None)
 	    {
-	      char *filename = python_string_to_host_string (py_fn);
+	      gdb::unique_xmalloc_ptr<char>
+		filename (python_string_to_host_string (py_fn));
 
 	      if (filename == NULL)
 		{
@@ -1304,13 +1295,12 @@ py_print_frame (PyObject *filter, int flags,
 		  return EXT_LANG_BT_ERROR;
 		}
 
-	      make_cleanup (xfree, filename);
 	      TRY
 		{
-		  ui_out_wrap_hint (out, "   ");
-		  ui_out_text (out, " at ");
+		  out->wrap_hint ("   ");
+		  out->text (" at ");
 		  annotate_frame_source_file ();
-		  ui_out_field_string (out, "file", filename);
+		  out->field_string ("file", filename.get ());
 		  annotate_frame_source_file_end ();
 		}
 	      CATCH (except, RETURN_MASK_ERROR)
@@ -1340,11 +1330,17 @@ py_print_frame (PyObject *filter, int flags,
 	  if (py_line != Py_None)
 	    {
 	      line = PyLong_AsLong (py_line);
+	      if (PyErr_Occurred ())
+		{
+		  do_cleanups (cleanup_stack);
+		  return EXT_LANG_BT_ERROR;
+		}
+
 	      TRY
 		{
-		  ui_out_text (out, ":");
+		  out->text (":");
 		  annotate_frame_source_line ();
-		  ui_out_field_int (out, "line", line);
+		  out->field_int ("line", line);
 		}
 	      CATCH (except, RETURN_MASK_ERROR)
 		{
@@ -1360,12 +1356,12 @@ py_print_frame (PyObject *filter, int flags,
 
   /* For MI we need to deal with the "children" list population of
      elided frames, so if MI output detected do not send newline.  */
-  if (! ui_out_is_mi_like_p (out))
+  if (! out->is_mi_like_p ())
     {
       TRY
 	{
 	  annotate_frame_end ();
-	  ui_out_text (out, "\n");
+	  out->text ("\n");
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -1405,7 +1401,7 @@ py_print_frame (PyObject *filter, int flags,
 
 	make_cleanup_ui_out_list_begin_end (out, "children");
 
-	if (! ui_out_is_mi_like_p (out))
+	if (! out->is_mi_like_p ())
 	  indent++;
 
 	while ((item = PyIter_Next (elided)))

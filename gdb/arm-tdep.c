@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on ARM systems.
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -143,13 +143,6 @@ static const char *const arm_mode_strings[] =
 
 static const char *arm_fallback_mode_string = "auto";
 static const char *arm_force_mode_string = "auto";
-
-/* Internal override of the execution mode.  -1 means no override,
-   0 means override to ARM mode, 1 means override to Thumb mode.
-   The effect is the same as if arm_force_mode has been set by the
-   user (except the internal override has precedence over a user's
-   arm_force_mode override).  */
-static int arm_override_mode = -1;
 
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
@@ -423,10 +416,6 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   if (IS_THUMB_ADDR (memaddr))
     return 1;
 
-  /* Respect internal mode override if active.  */
-  if (arm_override_mode != -1)
-    return arm_override_mode;
-
   /* If the user wants to override the symbol table, let him.  */
   if (strcmp (arm_force_mode_string, "arm") == 0)
     return 0;
@@ -581,9 +570,9 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 	 implementation (this is hand-written ARM assembler in glibc).  */
 
       if (!is_thumb
-	  && read_memory_unsigned_integer (pc, 4, byte_order_for_code)
+	  && read_code_unsigned_integer (pc, 4, byte_order_for_code)
 	     == 0xe3e00a0f /* mov r0, #0xffff0fff */
-	  && read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code)
+	  && read_code_unsigned_integer (pc + 4, 4, byte_order_for_code)
 	     == 0xe240f01f) /* sub pc, r0, #31 */
 	return 1;
     }
@@ -670,7 +659,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
     {
       unsigned short insn;
 
-      insn = read_memory_unsigned_integer (start, 2, byte_order_for_code);
+      insn = read_code_unsigned_integer (start, 2, byte_order_for_code);
 
       if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
 	{
@@ -801,8 +790,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  unsigned short inst2;
 
-	  inst2 = read_memory_unsigned_integer (start + 2, 2,
-						byte_order_for_code);
+	  inst2 = read_code_unsigned_integer (start + 2, 2,
+					      byte_order_for_code);
 
 	  if ((insn & 0xf800) == 0xf000 && (inst2 & 0xe800) == 0xe800)
 	    {
@@ -1145,7 +1134,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
   if (is_thumb)
     {
       unsigned short insn1
-	= read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+	= read_code_unsigned_integer (pc, 2, byte_order_for_code);
 
       if ((insn1 & 0xf800) == 0x4800) /* ldr Rd, #immed */
 	{
@@ -1158,14 +1147,14 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
       else if ((insn1 & 0xfbf0) == 0xf240) /* movw Rd, #const */
 	{
 	  unsigned short insn2
-	    = read_memory_unsigned_integer (pc + 2, 2, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 2, 2, byte_order_for_code);
 
 	  low = EXTRACT_MOVW_MOVT_IMM_T (insn1, insn2);
 
 	  insn1
-	    = read_memory_unsigned_integer (pc + 4, 2, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 4, 2, byte_order_for_code);
 	  insn2
-	    = read_memory_unsigned_integer (pc + 6, 2, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 6, 2, byte_order_for_code);
 
 	  /* movt Rd, #const */
 	  if ((insn1 & 0xfbc0) == 0xf2c0)
@@ -1180,7 +1169,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
   else
     {
       unsigned int insn
-	= read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+	= read_code_unsigned_integer (pc, 4, byte_order_for_code);
 
       if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, [PC, #immed] */
 	{
@@ -1196,7 +1185,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
 	  low = EXTRACT_MOVW_MOVT_IMM_A (insn);
 
 	  insn
-	    = read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code);
+	    = read_code_unsigned_integer (pc + 4, 4, byte_order_for_code);
 
 	  if ((insn & 0x0ff00000) == 0x03400000) /* movt Rd, #const */
 	    {
@@ -1268,7 +1257,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
     {
       unsigned int destreg;
       unsigned short insn
-	= read_memory_unsigned_integer (pc + offset, 2, byte_order_for_code);
+	= read_code_unsigned_integer (pc + offset, 2, byte_order_for_code);
 
       /* Step 2: ldr Rd, [Rn, #immed], encoding T1.  */
       if ((insn & 0xf800) != 0x6800)
@@ -1277,8 +1266,8 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 	return pc;
       destreg = bits (insn, 0, 2);
 
-      insn = read_memory_unsigned_integer (pc + offset + 2, 2,
-					   byte_order_for_code);
+      insn = read_code_unsigned_integer (pc + offset + 2, 2,
+					 byte_order_for_code);
       /* Step 3: str Rd, [Rn, #immed], encoding T1.  */
       if ((insn & 0xf800) != 0x6000)
 	return pc;
@@ -1289,7 +1278,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
     {
       unsigned int destreg;
       unsigned int insn
-	= read_memory_unsigned_integer (pc + offset, 4, byte_order_for_code);
+	= read_code_unsigned_integer (pc + offset, 4, byte_order_for_code);
 
       /* Step 2: ldr Rd, [Rn, #immed], encoding A1.  */
       if ((insn & 0x0e500000) != 0x04100000)
@@ -1298,7 +1287,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 	return pc;
       destreg = bits (insn, 12, 15);
       /* Step 3: str Rd, [Rn, #immed], encoding A1.  */
-      insn = read_memory_unsigned_integer (pc + offset + 4,
+      insn = read_code_unsigned_integer (pc + offset + 4,
 					   4, byte_order_for_code);
       if ((insn & 0x0e500000) != 0x04000000)
 	return pc;
@@ -1522,7 +1511,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
        current_pc += 4)
     {
       unsigned int insn
-	= read_memory_unsigned_integer (current_pc, 4, byte_order_for_code);
+	= read_code_unsigned_integer (current_pc, 4, byte_order_for_code);
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
@@ -1818,10 +1807,11 @@ arm_scan_prologue (struct frame_info *this_frame,
 	 the callee (or at the present moment if this is the innermost frame).
 	 The value stored there should be the address of the stmfd + 8.  */
       CORE_ADDR frame_loc;
-      LONGEST return_value;
+      ULONGEST return_value;
 
       frame_loc = get_frame_register_unsigned (this_frame, ARM_FP_REGNUM);
-      if (!safe_read_memory_integer (frame_loc, 4, byte_order, &return_value))
+      if (!safe_read_memory_unsigned_integer (frame_loc, 4, byte_order,
+					      &return_value))
         return;
       else
         {
@@ -2670,19 +2660,19 @@ arm_exidx_unwind_sniffer (const struct frame_unwind *self,
 	 ensure this, so that e.g. pthread cancellation works.  */
       if (arm_frame_is_thumb (this_frame))
 	{
-	  LONGEST insn;
+	  ULONGEST insn;
 
-	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 2, 2,
-					byte_order_for_code, &insn)
+	  if (safe_read_memory_unsigned_integer (get_frame_pc (this_frame) - 2,
+						 2, byte_order_for_code, &insn)
 	      && (insn & 0xff00) == 0xdf00 /* svc */)
 	    exc_valid = 1;
 	}
       else
 	{
-	  LONGEST insn;
+	  ULONGEST insn;
 
-	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 4, 4,
-					byte_order_for_code, &insn)
+	  if (safe_read_memory_unsigned_integer (get_frame_pc (this_frame) - 4,
+						 4, byte_order_for_code, &insn)
 	      && (insn & 0x0f000000) == 0x0f000000 /* svc */)
 	    exc_valid = 1;
 	}
@@ -4246,23 +4236,6 @@ convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
 			       &d, dbl);
 }
 
-/* Like insert_single_step_breakpoint, but make sure we use a breakpoint
-   of the appropriate mode (as encoded in the PC value), even if this
-   differs from what would be expected according to the symbol tables.  */
-
-void
-arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
-				   struct address_space *aspace,
-				   CORE_ADDR pc)
-{
-  scoped_restore save_override_mode
-    = make_scoped_restore (&arm_override_mode,
-			   (int) IS_THUMB_ADDR (pc));
-  pc = gdbarch_addr_bits_remove (gdbarch, pc);
-
-  insert_single_step_breakpoint (gdbarch, aspace, pc);
-}
-
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
    the buffer to be NEW_LEN bytes ending at ENDADDR.  Return
    NULL if an error occurs.  BUF is freed.  */
@@ -4277,7 +4250,7 @@ extend_buffer_earlier (gdb_byte *buf, CORE_ADDR endaddr,
   new_buf = (gdb_byte *) xmalloc (new_len);
   memcpy (new_buf + bytes_to_read, buf, old_len);
   xfree (buf);
-  if (target_read_memory (endaddr - new_len, new_buf, bytes_to_read) != 0)
+  if (target_read_code (endaddr - new_len, new_buf, bytes_to_read) != 0)
     {
       xfree (new_buf);
       return NULL;
@@ -4341,7 +4314,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
     return bpaddr;
 
   buf = (gdb_byte *) xmalloc (buf_len);
-  if (target_read_memory (bpaddr - buf_len, buf, buf_len) != 0)
+  if (target_read_code (bpaddr - buf_len, buf, buf_len) != 0)
     return bpaddr;
   any = 0;
   for (i = 0; i < buf_len; i += 2)
@@ -6314,12 +6287,10 @@ arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
    single-step support.  We find the target of the coming instructions
    and breakpoint them.  */
 
-int
-arm_software_single_step (struct frame_info *frame)
+VEC (CORE_ADDR) *
+arm_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct address_space *aspace = get_regcache_aspace (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
   CORE_ADDR pc;
   int i;
@@ -6336,11 +6307,14 @@ arm_software_single_step (struct frame_info *frame)
   next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
+    {
+      pc = gdbarch_addr_bits_remove (gdbarch, pc);
+      VEC_replace (CORE_ADDR, next_pcs, i, pc);
+    }
 
-  do_cleanups (old_chain);
+  discard_cleanups (old_chain);
 
-  return 1;
+  return next_pcs;
 }
 
 /* Cleanup/copy SVC (SWI) instructions.  These two functions are overridden
@@ -7843,16 +7817,10 @@ static const gdb_byte arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
 static const gdb_byte arm_default_thumb_le_breakpoint[] = THUMB_LE_BREAKPOINT;
 static const gdb_byte arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
 
-/* Determine the type and size of breakpoint to insert at PCPTR.  Uses
-   the program counter value to determine whether a 16-bit or 32-bit
-   breakpoint should be used.  It returns a pointer to a string of
-   bytes that encode a breakpoint instruction, stores the length of
-   the string to *lenptr, and adjusts the program counter (if
-   necessary) to point to the actual memory location where the
-   breakpoint should be inserted.  */
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
 
-static const unsigned char *
-arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
+static int
+arm_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
@@ -7866,38 +7834,98 @@ arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
       if (tdep->thumb2_breakpoint != NULL)
 	{
 	  gdb_byte buf[2];
+
 	  if (target_read_memory (*pcptr, buf, 2) == 0)
 	    {
 	      unsigned short inst1;
+
 	      inst1 = extract_unsigned_integer (buf, 2, byte_order_for_code);
 	      if (thumb_insn_size (inst1) == 4)
-		{
-		  *lenptr = tdep->thumb2_breakpoint_size;
-		  return tdep->thumb2_breakpoint;
-		}
+		return ARM_BP_KIND_THUMB2;
 	    }
 	}
 
-      *lenptr = tdep->thumb_breakpoint_size;
-      return tdep->thumb_breakpoint;
+      return ARM_BP_KIND_THUMB;
     }
   else
+    return ARM_BP_KIND_ARM;
+
+}
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
+
+static const gdb_byte *
+arm_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  switch (kind)
     {
-      *lenptr = tdep->arm_breakpoint_size;
+    case ARM_BP_KIND_ARM:
+      *size = tdep->arm_breakpoint_size;
       return tdep->arm_breakpoint;
+    case ARM_BP_KIND_THUMB:
+      *size = tdep->thumb_breakpoint_size;
+      return tdep->thumb_breakpoint;
+    case ARM_BP_KIND_THUMB2:
+      *size = tdep->thumb2_breakpoint_size;
+      return tdep->thumb2_breakpoint;
+    default:
+      gdb_assert_not_reached ("unexpected arm breakpoint kind");
     }
 }
 
-static void
-arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			       int *kindptr)
-{
-  arm_breakpoint_from_pc (gdbarch, pcptr, kindptr);
+/* Implement the breakpoint_kind_from_current_state gdbarch method.  */
 
-  if (arm_pc_is_thumb (gdbarch, *pcptr) && *kindptr == 4)
-    /* The documented magic value for a 32-bit Thumb-2 breakpoint, so
-       that this is not confused with a 32-bit ARM breakpoint.  */
-    *kindptr = ARM_BP_KIND_THUMB2;
+static int
+arm_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
+					struct regcache *regcache,
+					CORE_ADDR *pcptr)
+{
+  gdb_byte buf[4];
+
+  /* Check the memory pointed by PC is readable.  */
+  if (target_read_memory (regcache_read_pc (regcache), buf, 4) == 0)
+    {
+      struct arm_get_next_pcs next_pcs_ctx;
+      CORE_ADDR pc;
+      int i;
+      VEC (CORE_ADDR) *next_pcs = NULL;
+      struct cleanup *old_chain
+	= make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+
+      arm_get_next_pcs_ctor (&next_pcs_ctx,
+			     &arm_get_next_pcs_ops,
+			     gdbarch_byte_order (gdbarch),
+			     gdbarch_byte_order_for_code (gdbarch),
+			     0,
+			     regcache);
+
+      next_pcs = arm_get_next_pcs (&next_pcs_ctx);
+
+      /* If MEMADDR is the next instruction of current pc, do the
+	 software single step computation, and get the thumb mode by
+	 the destination address.  */
+      for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
+	{
+	  if (UNMAKE_THUMB_ADDR (pc) == *pcptr)
+	    {
+	      do_cleanups (old_chain);
+
+	      if (IS_THUMB_ADDR (pc))
+		{
+		  *pcptr = MAKE_THUMB_ADDR (*pcptr);
+		  return arm_breakpoint_kind_from_pc (gdbarch, pcptr);
+		}
+	      else
+		return ARM_BP_KIND_ARM;
+	    }
+	}
+
+      do_cleanups (old_chain);
+    }
+
+  return arm_breakpoint_kind_from_pc (gdbarch, pcptr);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state a
@@ -8962,11 +8990,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       switch (bfd_get_flavour (info.abfd))
 	{
-	case bfd_target_aout_flavour:
-	  /* Assume it's an old APCS-style ABI.  */
-	  arm_abi = ARM_ABI_APCS;
-	  break;
-
 	case bfd_target_coff_flavour:
 	  /* Assume it's an old APCS-style ABI.  */
 	  /* XXX WinCE?  */
@@ -9407,9 +9430,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Breakpoint manipulation.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
-  set_gdbarch_remote_breakpoint_from_pc (gdbarch,
-					 arm_remote_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, arm_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, arm_sw_breakpoint_from_kind);
+  set_gdbarch_breakpoint_kind_from_current_state (gdbarch,
+						  arm_breakpoint_kind_from_current_state);
 
   /* Information about registers, etc.  */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
@@ -9555,7 +9579,7 @@ _initialize_arm_tdep (void)
   const char *setdesc;
   const char *const *regnames;
   int i;
-  static char *helptext;
+  static std::string helptext;
   char regdesc[1024], *rdptr = regdesc;
   size_t rest = sizeof (regdesc);
 
@@ -9626,14 +9650,14 @@ _initialize_arm_tdep (void)
 		      _("The valid values are:\n"),
 		      regdesc,
 		      _("The default is \"std\"."));
-  helptext = ui_file_xstrdup (stb, NULL);
+  helptext = ui_file_as_string (stb);
   ui_file_delete (stb);
 
   add_setshow_enum_cmd("disassembler", no_class,
 		       valid_disassembly_styles, &disassembly_style,
 		       _("Set the disassembly style."),
 		       _("Show the disassembly style."),
-		       helptext,
+		       helptext.c_str (),
 		       set_disassembly_style_sfunc,
 		       NULL, /* FIXME: i18n: The disassembly style is
 				\"%s\".  */

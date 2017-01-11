@@ -1,5 +1,5 @@
 # Test address printed by --print-map
-# Copyright (C) 2002-2016 Free Software Foundation, Inc.
+# Copyright (C) 2002-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -26,7 +26,7 @@ if {![ld_assemble $as $srcdir/$subdir/sizeof.s tmpdir/map-address.o]} {
     return
 }
 
-if {![ld_simple_link $ld tmpdir/map-address \
+if {![ld_link $ld tmpdir/map-address \
 	 "-T $srcdir/$subdir/map-address.t \
 	  tmpdir/map-address.o \
 	  -Map tmpdir/map-address.map"]} {

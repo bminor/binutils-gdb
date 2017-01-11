@@ -1,6 +1,6 @@
 /* UI_FILE - a generic STDIO like output stream.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -354,6 +354,28 @@ ui_file_xstrdup (struct ui_file *file, long *length)
   if (length != NULL)
     *length = acc.length;
   return acc.buffer;
+}
+
+/* ui_file utility function for converting a ``struct ui_file'' into a
+   std:string.  */
+
+static void
+do_ui_file_as_string (void *context, const char *buffer, long length)
+{
+  std::string *str = (std::string *) context;
+
+  *str = std::string (buffer, length);
+}
+
+/* See ui-file.h.  */
+
+std::string
+ui_file_as_string (struct ui_file *file)
+{
+  std::string str;
+
+  ui_file_put (file, do_ui_file_as_string, &str);
+  return str;
 }
 
 static void

@@ -63,6 +63,7 @@ _gl_cxx_ ## func ## l (long double l)                               \
   return func (l);                                                  \
 }
 # define _GL_MATH_CXX_REAL_FLOATING_DECL_2(func) \
+_GL_BEGIN_NAMESPACE                                                 \
 inline int                                                          \
 func (float f)                                                      \
 {                                                                   \
@@ -77,7 +78,8 @@ inline int                                                          \
 func (long double l)                                                \
 {                                                                   \
   return _gl_cxx_ ## func ## l (l);                                 \
-}
+}                                                                   \
+_GL_END_NAMESPACE
 #endif
 
 /* Helper macros to define a portability warning for the
@@ -983,7 +985,7 @@ _GL_CXXALIAS_RPL (frexp, double, (double x, int *expptr));
 # else
 _GL_CXXALIAS_SYS (frexp, double, (double x, int *expptr));
 # endif
-_GL_CXXALIASWARN (frexp);
+_GL_CXXALIASWARN1 (frexp, double, (double x, int *expptr));
 #elif defined GNULIB_POSIXCHECK
 # undef frexp
 /* Assume frexp is always declared.  */
@@ -2044,7 +2046,7 @@ _GL_EXTERN_C int gl_isfinitel (long double x);
     gl_isfinitef (x))
 # endif
 # ifdef __cplusplus
-#  ifdef isfinite
+#  if defined isfinite || defined GNULIB_NAMESPACE
 _GL_MATH_CXX_REAL_FLOATING_DECL_1 (isfinite)
 #   undef isfinite
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isfinite)
@@ -2071,7 +2073,7 @@ _GL_EXTERN_C int gl_isinfl (long double x);
     gl_isinff (x))
 # endif
 # ifdef __cplusplus
-#  ifdef isinf
+#  if defined isinf || defined GNULIB_NAMESPACE
 _GL_MATH_CXX_REAL_FLOATING_DECL_1 (isinf)
 #   undef isinf
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isinf)
@@ -2189,7 +2191,7 @@ _GL_EXTERN_C int rpl_isnanl (long double x) _GL_ATTRIBUTE_CONST;
     __builtin_isnanf ((float)(x)))
 # endif
 # ifdef __cplusplus
-#  ifdef isnan
+#  if defined isnan || defined GNULIB_NAMESPACE
 _GL_MATH_CXX_REAL_FLOATING_DECL_1 (isnan)
 #   undef isnan
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isnan)
@@ -2264,7 +2266,7 @@ _GL_EXTERN_C int gl_signbitl (long double arg);
     gl_signbitf (x))
 # endif
 # ifdef __cplusplus
-#  ifdef signbit
+#  if defined signbit || defined GNULIB_NAMESPACE
 _GL_MATH_CXX_REAL_FLOATING_DECL_1 (signbit)
 #   undef signbit
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (signbit)

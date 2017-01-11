@@ -1,6 +1,6 @@
 # Linker script for PE.
 #
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2014-2017 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -65,7 +65,7 @@ else
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -96,12 +96,12 @@ SECTIONS
 			LONG (-1);*(.ctors); *(.ctor); *(SORT(.ctors.*));  LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
 			LONG (-1); *(.dtors); *(.dtor); *(SORT(.dtors.*));  LONG (0); }
-    ${RELOCATING+ *(.fini)}
+    ${RELOCATING+ KEEP (*(.fini))}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+PROVIDE (etext = .);}
     ${RELOCATING+PROVIDE (_etext = .);}
-    ${RELOCATING+ *(.gcc_except_table)}
+    ${RELOCATING+ KEEP (*(.gcc_except_table))}
   }
 
   /* The Cygwin32 library uses a section to avoid copying certain data
@@ -141,7 +141,7 @@ SECTIONS
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP(*(.pdata))
+    KEEP(*(.pdata*))
   }
 
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :

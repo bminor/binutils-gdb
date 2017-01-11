@@ -4,7 +4,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	3c274be7 	str	b7, \[sp, w7, uxtw\]
    4:	3c275be7 	str	b7, \[sp, w7, uxtw #0\]
    8:	7c274be7 	str	h7, \[sp, w7, uxtw\]

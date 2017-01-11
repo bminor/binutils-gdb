@@ -1,6 +1,6 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -7579,18 +7579,31 @@ process_g_packet (struct regcache *regcache)
      the 'p' packet must be used.  */
   if (buf_len < 2 * rsa->sizeof_g_packet)
     {
-      rsa->sizeof_g_packet = buf_len / 2;
+      long sizeof_g_packet = buf_len / 2;
 
       for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
 	{
+	  long offset = rsa->regs[i].offset;
+	  long reg_size = register_size (gdbarch, i);
+
 	  if (rsa->regs[i].pnum == -1)
 	    continue;
 
-	  if (rsa->regs[i].offset >= rsa->sizeof_g_packet)
+	  if (offset >= sizeof_g_packet)
 	    rsa->regs[i].in_g_packet = 0;
+	  else if (offset + reg_size > sizeof_g_packet)
+	    error (_("Truncated register %d in remote 'g' packet"), i);
 	  else
 	    rsa->regs[i].in_g_packet = 1;
 	}
+
+      /* Looks valid enough, we can assume this is the correct length
+         for a 'g' packet.  It's important not to adjust
+         rsa->sizeof_g_packet if we have truncated registers otherwise
+         this "if" won't be run the next time the method is called
+         with a packet of the same size and one of the internal errors
+         below will trigger instead.  */
+      rsa->sizeof_g_packet = sizeof_g_packet;
     }
 
   regs = (char *) alloca (rsa->sizeof_g_packet);
@@ -7620,10 +7633,11 @@ process_g_packet (struct regcache *regcache)
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
+      long reg_size = register_size (gdbarch, i);
 
       if (r->in_g_packet)
 	{
-	  if (r->offset * 2 >= strlen (rs->buf))
+	  if ((r->offset + reg_size) * 2 > strlen (rs->buf))
 	    /* This shouldn't happen - we adjusted in_g_packet above.  */
 	    internal_error (__FILE__, __LINE__,
 			    _("unexpected end of 'g' packet reply"));
@@ -8636,23 +8650,20 @@ remote_send (char **buf,
     error (_("Remote failure reply: %s"), *buf);
 }
 
-/* Return a pointer to an xmalloc'ed string representing an escaped
-   version of BUF, of len N.  E.g. \n is converted to \\n, \t to \\t,
-   etc.  The caller is responsible for releasing the returned
-   memory.  */
+/* Return a string representing an escaped version of BUF, of len N.
+   E.g. \n is converted to \\n, \t to \\t, etc.  */
 
-static char *
+static std::string
 escape_buffer (const char *buf, int n)
 {
   struct cleanup *old_chain;
   struct ui_file *stb;
-  char *str;
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
   fputstrn_unfiltered (buf, n, '\\', stb);
-  str = ui_file_xstrdup (stb, NULL);
+  std::string str = ui_file_as_string (stb);
   do_cleanups (old_chain);
   return str;
 }
@@ -8736,15 +8747,12 @@ putpkt_binary (const char *buf, int cnt)
 
       if (remote_debug)
 	{
-	  struct cleanup *old_chain;
-	  char *str;
-
 	  *p = '\0';
-	  str = escape_buffer (buf2, p - buf2);
-	  old_chain = make_cleanup (xfree, str);
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str);
+
+	  std::string str = escape_buffer (buf2, p - buf2);
+
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str.c_str ());
 	  gdb_flush (gdb_stdlog);
-	  do_cleanups (old_chain);
 	}
       remote_serial_write (buf2, p - buf2);
 
@@ -8822,15 +8830,11 @@ putpkt_binary (const char *buf, int cnt)
 		  {
 		    if (remote_debug)
 		      {
-			struct cleanup *old_chain;
-			char *str;
+			std::string str = escape_buffer (rs->buf, val);
 
-			str = escape_buffer (rs->buf, val);
-			old_chain = make_cleanup (xfree, str);
 			fprintf_unfiltered (gdb_stdlog,
 					    "  Notification received: %s\n",
-					    str);
-			do_cleanups (old_chain);
+					    str.c_str ());
 		      }
 		    handle_notification (rs->notif_state, rs->buf);
 		    /* We're in sync now, rewait for the ack.  */
@@ -8996,16 +9000,12 @@ read_frame (char **buf_p,
 
 	    if (remote_debug)
 	      {
-		struct cleanup *old_chain;
-		char *str;
+		std::string str = escape_buffer (buf, bc);
 
-		str = escape_buffer (buf, bc);
-		old_chain = make_cleanup (xfree, str);
 		fprintf_unfiltered (gdb_stdlog,
 				    "Bad checksum, sentsum=0x%x, "
 				    "csum=0x%x, buf=%s\n",
-				    pktcsum, csum, str);
-		do_cleanups (old_chain);
+				    pktcsum, csum, str.c_str ());
 	      }
 	    /* Number of characters in buffer ignoring trailing
                NULL.  */
@@ -9179,13 +9179,9 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	{
 	  if (remote_debug)
 	    {
-	     struct cleanup *old_chain;
-	     char *str;
+	      std::string str = escape_buffer (*buf, val);
 
-	     str = escape_buffer (*buf, val);
-	     old_chain = make_cleanup (xfree, str);
-	     fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str);
-	     do_cleanups (old_chain);
+	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str.c_str ());
 	    }
 
 	  /* Skip the ack char if we're in no-ack mode.  */
@@ -9204,15 +9200,11 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 
 	  if (remote_debug)
 	    {
-	      struct cleanup *old_chain;
-	      char *str;
+	      std::string str = escape_buffer (*buf, val);
 
-	      str = escape_buffer (*buf, val);
-	      old_chain = make_cleanup (xfree, str);
 	      fprintf_unfiltered (gdb_stdlog,
 				  "  Notification received: %s\n",
-				  str);
-	      do_cleanups (old_chain);
+				  str.c_str ());
 	    }
 	  if (is_notif != NULL)
 	    *is_notif = 1;
@@ -9631,10 +9623,7 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt, char *buf,
 				  char *buf_end)
 {
-  struct agent_expr *aexpr = NULL;
-  int i, ix;
-
-  if (VEC_empty (agent_expr_p, bp_tgt->conditions))
+  if (bp_tgt->conditions.empty ())
     return 0;
 
   buf += strlen (buf);
@@ -9642,13 +9631,13 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
   buf++;
 
   /* Send conditions to the target and free the vector.  */
-  for (ix = 0;
-       VEC_iterate (agent_expr_p, bp_tgt->conditions, ix, aexpr);
-       ix++)
+  for (int ix = 0; ix < bp_tgt->conditions.size (); ix++)
     {
+      struct agent_expr *aexpr = bp_tgt->conditions[ix];
+
       xsnprintf (buf, buf_end - buf, "X%x,", aexpr->len);
       buf += strlen (buf);
-      for (i = 0; i < aexpr->len; ++i)
+      for (int i = 0; i < aexpr->len; ++i)
 	buf = pack_hex_byte (buf, aexpr->buf[i]);
       *buf = '\0';
     }
@@ -9659,10 +9648,7 @@ static void
 remote_add_target_side_commands (struct gdbarch *gdbarch,
 				 struct bp_target_info *bp_tgt, char *buf)
 {
-  struct agent_expr *aexpr = NULL;
-  int i, ix;
-
-  if (VEC_empty (agent_expr_p, bp_tgt->tcommands))
+  if (bp_tgt->tcommands.empty ())
     return;
 
   buf += strlen (buf);
@@ -9672,13 +9658,13 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
 
   /* Concatenate all the agent expressions that are commands into the
      cmds parameter.  */
-  for (ix = 0;
-       VEC_iterate (agent_expr_p, bp_tgt->tcommands, ix, aexpr);
-       ix++)
+  for (int ix = 0; ix < bp_tgt->tcommands.size (); ix++)
     {
+      struct agent_expr *aexpr = bp_tgt->tcommands[ix];
+
       sprintf (buf, "X%x,", aexpr->len);
       buf += strlen (buf);
-      for (i = 0; i < aexpr->len; ++i)
+      for (int i = 0; i < aexpr->len; ++i)
 	buf = pack_hex_byte (buf, aexpr->buf[i]);
       *buf = '\0';
     }
@@ -9710,8 +9696,6 @@ remote_insert_breakpoint (struct target_ops *ops,
       if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
 	set_general_process ();
 
-      gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
-
       rs = get_remote_state ();
       p = rs->buf;
       endbuf = rs->buf + get_remote_packet_size ();
@@ -9721,7 +9705,7 @@ remote_insert_breakpoint (struct target_ops *ops,
       *(p++) = ',';
       addr = (ULONGEST) remote_address_masked (addr);
       p += hexnumstr (p, addr);
-      xsnprintf (p, endbuf - p, ",%d", bpsize);
+      xsnprintf (p, endbuf - p, ",%d", bp_tgt->kind);
 
       if (remote_supports_cond_breakpoints (ops))
 	remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
@@ -9737,8 +9721,6 @@ remote_insert_breakpoint (struct target_ops *ops,
 	case PACKET_ERROR:
 	  return -1;
 	case PACKET_OK:
-	  bp_tgt->placed_address = addr;
-	  bp_tgt->placed_size = bpsize;
 	  return 0;
 	case PACKET_UNKNOWN:
 	  break;
@@ -9747,7 +9729,7 @@ remote_insert_breakpoint (struct target_ops *ops,
 
   /* If this breakpoint has target-side commands but this stub doesn't
      support Z0 packets, throw error.  */
-  if (!VEC_empty (agent_expr_p, bp_tgt->tcommands))
+  if (!bp_tgt->tcommands.empty ())
     throw_error (NOT_SUPPORTED_ERROR, _("\
 Target doesn't support breakpoints that have target side commands."));
 
@@ -9779,7 +9761,7 @@ remote_remove_breakpoint (struct target_ops *ops,
 
       addr = (ULONGEST) remote_address_masked (bp_tgt->placed_address);
       p += hexnumstr (p, addr);
-      xsnprintf (p, endbuf - p, ",%d", bp_tgt->placed_size);
+      xsnprintf (p, endbuf - p, ",%d", bp_tgt->kind);
 
       putpkt (rs->buf);
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -10015,12 +9997,6 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   struct remote_state *rs;
   char *p, *endbuf;
   char *message;
-  int bpsize;
-
-  /* The length field should be set to the size of a breakpoint
-     instruction, even though we aren't inserting one ourselves.  */
-
-  gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
   if (packet_support (PACKET_Z1) == PACKET_DISABLE)
     return -1;
@@ -10040,7 +10016,7 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 
   addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  xsnprintf (p, endbuf - p, ",%x", bpsize);
+  xsnprintf (p, endbuf - p, ",%x", bp_tgt->kind);
 
   if (remote_supports_cond_breakpoints (self))
     remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
@@ -10064,8 +10040,6 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
     case PACKET_UNKNOWN:
       return -1;
     case PACKET_OK:
-      bp_tgt->placed_address = addr;
-      bp_tgt->placed_size = bpsize;
       return 0;
     }
   internal_error (__FILE__, __LINE__,
@@ -10096,7 +10070,7 @@ remote_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 
   addr = remote_address_masked (bp_tgt->placed_address);
   p += hexnumstr (p, (ULONGEST) addr);
-  xsnprintf (p, endbuf  - p, ",%x", bp_tgt->placed_size);
+  xsnprintf (p, endbuf  - p, ",%x", bp_tgt->kind);
 
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -12280,8 +12254,6 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
   char **stepping_actions;
   int ndx;
   struct cleanup *old_chain = NULL;
-  struct agent_expr *aexpr;
-  struct cleanup *aexpr_chain = NULL;
   char *pkt;
   struct breakpoint *b = loc->owner;
   struct tracepoint *t = (struct tracepoint *) b;
@@ -12352,15 +12324,13 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	 capabilities at definition time.  */
       if (remote_supports_cond_tracepoints ())
 	{
-	  aexpr = gen_eval_for_expr (tpaddr, loc->cond);
-	  aexpr_chain = make_cleanup_free_agent_expr (aexpr);
+	  agent_expr_up aexpr = gen_eval_for_expr (tpaddr, loc->cond.get ());
 	  xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":X%x,",
 		     aexpr->len);
 	  pkt = buf + strlen (buf);
 	  for (ndx = 0; ndx < aexpr->len; ++ndx)
 	    pkt = pack_hex_byte (pkt, aexpr->buf[ndx]);
 	  *pkt = '\0';
-	  do_cleanups (aexpr_chain);
 	}
       else
 	warning (_("Target does not support conditional tracepoints, "
@@ -13815,8 +13785,8 @@ show_remote_cmd (char *args, int from_tty)
 	struct cleanup *option_chain
 	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
 
-	ui_out_field_string (uiout, "name", list->name);
-	ui_out_text (uiout, ":  ");
+	uiout->field_string ("name", list->name);
+	uiout->text (":  ");
 	if (list->type == show_cmd)
 	  do_show_command (NULL, from_tty, list);
 	else

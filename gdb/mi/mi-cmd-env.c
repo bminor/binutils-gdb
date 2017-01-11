@@ -1,5 +1,5 @@
 /* MI Command Set - environment commands.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc.
 
@@ -84,7 +84,7 @@ mi_cmd_env_pwd (char *command, char **argv, int argc)
     error (_("-environment-pwd: error finding name of working directory: %s"),
            safe_strerror (errno));
     
-  ui_out_field_string (uiout, "cwd", gdb_dirbuf);
+  uiout->field_string ("cwd", gdb_dirbuf);
 }
 
 /* Change working directory.  */
@@ -181,7 +181,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
   set_in_environ (current_inferior ()->environment, path_var_name, exec_path);
   xfree (exec_path);
   env = get_in_environ (current_inferior ()->environment, path_var_name);
-  ui_out_field_string (uiout, "path", env);
+  uiout->field_string ("path", env);
 }
 
 /* Add zero or more directories to the front of the source path.  */
@@ -241,7 +241,7 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
   for (i = argc - 1; i >= 0; --i)
     env_mod_path (argv[i], &source_path);
 
-  ui_out_field_string (uiout, "source-path", source_path);
+  uiout->field_string ("source-path", source_path);
   forget_cached_source_info ();
 }
 
@@ -264,8 +264,7 @@ mi_cmd_inferior_tty_show (char *command, char **argv, int argc)
     error (_("-inferior-tty-show: Usage: No args"));
 
   if (inferior_io_terminal)
-    ui_out_field_string (current_uiout,
-			 "inferior_tty_terminal", inferior_io_terminal);
+    current_uiout->field_string ("inferior_tty_terminal", inferior_io_terminal);
 }
 
 void 

@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright (C) 1988-2016 Free Software Foundation, Inc.
+@c Copyright (C) 1988-2017 Free Software Foundation, Inc.
 @c
 @c %**start of header
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -50,7 +50,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1988-2016 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2017 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -120,7 +120,7 @@ This is the @value{EDITION} Edition, for @value{GDBN}
 @end ifset
 Version @value{GDBVN}.
 
-Copyright (C) 1988-2016 Free Software Foundation, Inc.
+Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
 This edition of the GDB manual is dedicated to the memory of Fred
 Fish.  Fred was a long-standing contributor to GDB and to Free
@@ -540,6 +540,11 @@ Steve Tjiang, John Newlin, and Scott Foehner.
 
 Michael Eager and staff of Xilinx, Inc., contributed support for the
 Xilinx MicroBlaze architecture.
+
+Initial support for the FreeBSD/mips target and native configuration
+was developed by SRI International and the University of Cambridge
+Computer Laboratory under DARPA/AFRL contract FA8750-10-C-0237
+("CTSRD"), as part of the DARPA CRASH research programme.
 
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
@@ -17243,21 +17248,32 @@ entered from the keyboard causes symbol information to be loaded.
 @cindex partial symbol dump
 @kindex maint print msymbols
 @cindex minimal symbol dump
-@item maint print symbols @var{filename}
-@itemx maint print psymbols @var{filename}
-@itemx maint print msymbols @var{filename}
-Write a dump of debugging symbol data into the file @var{filename}.
-These commands are used to debug the @value{GDBN} symbol-reading code.  Only
-symbols with debugging data are included.  If you use @samp{maint print
-symbols}, @value{GDBN} includes all the symbols for which it has already
-collected full details: that is, @var{filename} reflects symbols for
-only those files whose symbols @value{GDBN} has read.  You can use the
-command @code{info sources} to find out which files these are.  If you
-use @samp{maint print psymbols} instead, the dump shows information about
-symbols that @value{GDBN} only knows partially---that is, symbols defined in
-files that @value{GDBN} has skimmed, but not yet read completely.  Finally,
-@samp{maint print msymbols} dumps just the minimal symbol information
-required for each object file from which @value{GDBN} has read some symbols.
+@item maint print symbols @r{[}-pc @var{address}@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print symbols @r{[}-objfile @var{objfile}@r{]} @r{[}-source @var{source}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print psymbols @r{[}-objfile @var{objfile}@r{]} @r{[}-pc @var{address}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print psymbols @r{[}-objfile @var{objfile}@r{]} @r{[}-source @var{source}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+@itemx maint print msymbols @r{[}-objfile @var{objfile}@r{]} @r{[}--@r{]} @r{[}@var{filename}@r{]}
+Write a dump of debugging symbol data into the file @var{filename} or
+the terminal if @var{filename} is unspecified.
+If @code{-objfile @var{objfile}} is specified, only dump symbols for
+that objfile.
+If @code{-pc @var{address}} is specified, only dump symbols for the file
+with code at that address.  Note that @var{address} may be a symbol like
+@code{main}.
+If @code{-source @var{source}} is specified, only dump symbols for that
+source file.
+
+These commands are used to debug the @value{GDBN} symbol-reading code.
+These commands do not modify internal @value{GDBN} state, therefore
+@samp{maint print symbols} will only print symbols for already expanded symbol
+tables.
+You can use the command @code{info sources} to find out which files these are.
+If you use @samp{maint print psymbols} instead, the dump shows information
+about symbols that @value{GDBN} only knows partially---that is, symbols
+defined in files that @value{GDBN} has skimmed, but not yet read completely.
+Finally, @samp{maint print msymbols} just dumps ``minimal symbols'', e.g.,
+``ELF symbols''.
+
 @xref{Files, ,Commands to Specify Files}, for a discussion of how
 @value{GDBN} reads symbols (in the description of @code{symbol-file}).
 
@@ -24081,9 +24097,9 @@ files.
 @cindex arguments, to user-defined commands
 A @dfn{user-defined command} is a sequence of @value{GDBN} commands to
 which you assign a new name as a command.  This is done with the
-@code{define} command.  User commands may accept up to 10 arguments
+@code{define} command.  User commands may accept an unlimited number of arguments
 separated by whitespace.  Arguments are accessed within the user command
-via @code{$arg0@dots{}$arg9}.  A trivial example:
+via @code{$arg0@dots{}$argN}.  A trivial example:
 
 @smallexample
 define adder
@@ -24107,7 +24123,7 @@ functions calls.
 @cindex argument count in user-defined commands
 @cindex how many arguments (user-defined commands)
 In addition, @code{$argc} may be used to find out how many arguments have
-been passed.  This expands to a number in the range 0@dots{}10.
+been passed.
 
 @smallexample
 define adder
@@ -24117,6 +24133,21 @@ define adder
   if $argc == 3
     print $arg0 + $arg1 + $arg2
   end
+end
+@end smallexample
+
+Combining with the @code{eval} command (@pxref{eval}) makes it easier
+to process a variable number of arguments:
+
+@smallexample
+define adder
+  set $i = 0
+  set $sum = 0
+  while $i < $argc
+    eval "set $sum = $sum + $arg%d", $i
+    set $i = $i + 1
+  end
+  print $sum
 end
 @end smallexample
 
@@ -24550,6 +24581,7 @@ Here's an example of printing DFP types using the above conversion letters:
 printf "D32: %Hf - D64: %Df - D128: %DDf\n",1.2345df,1.2E10dd,1.2E1dl
 @end smallexample
 
+@anchor{eval}
 @kindex eval
 @item eval @var{template}, @var{expressions}@dots{}
 Convert the values of one or more @var{expressions} under the control of
@@ -26592,7 +26624,7 @@ group corresponding to the affected inferior.
 
 The @var{method} field indicates the method used to record execution.  If the
 method in use supports multiple recording formats, @var{format} will be present
-and contain the currently used format.  @xref{Process Record and Replay}
+and contain the currently used format.  @xref{Process Record and Replay},
 for existing method and format values.
 
 @item =cmd-param-changed,param=@var{param},value=@var{value}

@@ -1,5 +1,5 @@
 /* GDB self-testing.
-   Copyright (C) 2016 Free Software Foundation, Inc.
+   Copyright (C) 2016-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,8 +50,7 @@ run_self_tests (void)
       CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  ++failed;
-	  exception_fprintf (gdb_stderr, ex,
-			     _("Self test threw exception"));
+	  exception_fprintf (gdb_stderr, ex, _("Self test failed: "));
 	}
       END_CATCH
     }

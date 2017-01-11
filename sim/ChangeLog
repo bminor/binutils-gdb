@@ -1,3 +1,8 @@
+2016-12-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* MAINTAINERS (Maintainers for particular sims): Add myself as
+	a MIPS maintainer.
+
 2016-02-03  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* MAINTAINERS (Past sim maintainers): Add Thiemo Seufer.

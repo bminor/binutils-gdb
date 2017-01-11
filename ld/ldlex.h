@@ -1,5 +1,5 @@
 /* ldlex.h -
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -101,6 +101,7 @@ enum option_values
   OPTION_NO_GC_SECTIONS,
   OPTION_PRINT_GC_SECTIONS,
   OPTION_NO_PRINT_GC_SECTIONS,
+  OPTION_GC_KEEP_EXPORTED,
   OPTION_HASH_SIZE,
   OPTION_CHECK_SECTIONS,
   OPTION_NO_CHECK_SECTIONS,
@@ -181,9 +182,6 @@ extern const char* ldlex_filename (void);
 /* In lexsup.c.  */
 extern int lex_input (void);
 extern void lex_unput (int);
-#ifndef yywrap
-extern int yywrap (void);
-#endif
 extern void parse_args (unsigned, char **);
 
 #endif

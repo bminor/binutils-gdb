@@ -1,6 +1,6 @@
 /* Routines for handling XML generic OS data provided by target.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -315,7 +315,7 @@ info_osdata_command (char *type, int from_tty)
 	 for a column named "Title", and only include it with MI
 	 output; this column's normal use is for titles for interface
 	 elements like menus, and it clutters up CLI output.  */
-      if (!type && !ui_out_is_mi_like_p (uiout))
+      if (!type && !uiout->is_mi_like_p ())
 	{
 	  struct osdata_column *col;
 	  int ix;
@@ -361,12 +361,12 @@ info_osdata_command (char *type, int from_tty)
 	    continue;
 
 	  snprintf (col_name, 32, "col%d", ix);
-	  ui_out_table_header (uiout, 10, ui_left,
+	  uiout->table_header (10, ui_left,
 			       col_name, col->name);
         }
     }
 
-  ui_out_table_body (uiout);
+  uiout->table_body ();
 
   if (nrows != 0)
     {
@@ -395,12 +395,12 @@ info_osdata_command (char *type, int from_tty)
 	       continue;
 
 	     snprintf (col_name, 32, "col%d", ix_cols);
-	     ui_out_field_string (uiout, col_name, col->value);
+	     uiout->field_string (col_name, col->value);
 	   }
 	 
          do_cleanups (old_chain);
 
-         ui_out_text (uiout, "\n");
+         uiout->text ("\n");
        }
     }
 

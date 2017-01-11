@@ -1,5 +1,5 @@
 /* tc-pdp11.c - pdp11-specific -
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1286,7 +1286,7 @@ md_show_usage (FILE *stream)
 {
   fprintf (stream, "\
 \n\
-PDP-11 instruction set extentions:\n\
+PDP-11 instruction set extensions:\n\
 \n\
 -m(no-)cis		allow (disallow) commersial instruction set\n\
 -m(no-)csm		allow (disallow) CSM instruction\n\

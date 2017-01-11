@@ -18,7 +18,7 @@ esac
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
-/* Copyright (C) 2006-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2017 Free Software Foundation, Inc.
    Written by Kai Tietz, OneVision Software GmbH&CoKg.
 
    This file is part of the GNU Binutils.
@@ -1197,7 +1197,7 @@ pep_find_data_imports (void)
 	      undef->type = bfd_link_hash_defweak;
 	      /* We replace original name with __imp_ prefixed, this
 		 1) may trash memory 2) leads to duplicate symbol generation.
-		 Still, IMHO it's better than having name poluted.  */
+		 Still, IMHO it's better than having name polluted.  */
 	      undef->root.string = sym->root.string;
 	      undef->u.def.value = sym->u.def.value;
 	      undef->u.def.section = sym->u.def.section;

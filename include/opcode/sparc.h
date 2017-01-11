@@ -1,5 +1,5 @@
 /* Definitions for opcode table for the sparc.
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler, GDB, the GNU debugger, and
    the GNU Binutils.
@@ -80,6 +80,10 @@ typedef struct sparc_opcode_arch
      (SPARC_OPCODE_ARCH_MASK (..._V6) | SPARC_OPCODE_ARCH_MASK (..._V7)).
      These are short's because sparc_opcode.architecture is.  */
   short supported;
+  /* Bitmaps describing the set of hardware capabilities implemented
+     by the opcode arch.  */
+  int hwcaps;
+  int hwcaps2;
 } sparc_opcode_arch;
 
 extern const struct sparc_opcode_arch sparc_opcode_archs[];

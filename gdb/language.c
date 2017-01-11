@@ -1,6 +1,6 @@
 /* Multiple source language support for GDB.
 
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -539,7 +539,6 @@ add_language (const struct language_defn *lang)
   /* For the "set language" command.  */
   static const char **language_names = NULL;
   /* For the "help set language" command.  */
-  char *language_set_doc = NULL;
 
   int i;
   struct ui_file *tmp_stream;
@@ -610,19 +609,17 @@ add_language (const struct language_defn *lang)
 			  languages[i]->la_name + 1);
     }
 
-  language_set_doc = ui_file_xstrdup (tmp_stream, NULL);
+  std::string language_set_doc = ui_file_as_string (tmp_stream);
   ui_file_delete (tmp_stream);
 
   add_setshow_enum_cmd ("language", class_support,
 			(const char **) language_names,
 			&language,
-			language_set_doc,
+			language_set_doc.c_str (),
 			_("Show the current source language."),
 			NULL, set_language_command,
 			show_language_command,
 			&setlist, &showlist);
-
-  xfree (language_set_doc);
 }
 
 /* Iterate through all registered languages looking for and calling
@@ -792,10 +789,10 @@ unk_lang_print_type (struct type *type, const char *varstring,
 }
 
 static void
-unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
+unk_lang_val_print (struct type *type,
 		    int embedded_offset, CORE_ADDR address,
 		    struct ui_file *stream, int recurse,
-		    const struct value *val,
+		    struct value *val,
 		    const struct value_print_options *options)
 {
   error (_("internal error - unimplemented "

@@ -1,5 +1,5 @@
 /* Altera Nios II assembler.
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -206,7 +206,7 @@ static segT nios2_current_align_seg;
 static int nios2_auto_align_on = 1;
 
 /* The last seen label in the current section.  This is used to auto-align
-   labels preceeding instructions.  */
+   labels preceding instructions.  */
 static symbolS *nios2_last_label;
 
 /* If we saw a 16-bit CDX instruction, we can align on 2-byte boundaries

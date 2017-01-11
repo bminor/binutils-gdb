@@ -1,6 +1,6 @@
 /* Everything about catch/throw catchpoints, for GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -162,7 +162,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
 {
   struct exception_catchpoint *self
     = (struct exception_catchpoint *) bs->breakpoint_at;
-  char *type_name = NULL;
+  std::string type_name;
 
   bkpt_breakpoint_ops.check_status (bs);
   if (bs->stop == 0)
@@ -174,17 +174,14 @@ check_status_exception_catchpoint (struct bpstats *bs)
   TRY
     {
       struct value *typeinfo_arg;
-      char *canon;
+      std::string canon;
 
       fetch_probe_arguments (NULL, &typeinfo_arg);
       type_name = cplus_typename_from_type_info (typeinfo_arg);
 
-      canon = cp_canonicalize_string (type_name);
-      if (canon != NULL)
-	{
-	  xfree (type_name);
-	  type_name = canon;
-	}
+      canon = cp_canonicalize_string (type_name.c_str ());
+      if (!canon.empty ())
+	std::swap (type_name, canon);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -192,12 +189,10 @@ check_status_exception_catchpoint (struct bpstats *bs)
     }
   END_CATCH
 
-  if (type_name != NULL)
+  if (!type_name.empty ())
     {
-      if (regexec (self->pattern, type_name, 0, NULL, 0) != 0)
+      if (regexec (self->pattern, type_name.c_str (), 0, NULL, 0) != 0)
 	bs->stop = 0;
-
-      xfree (type_name);
     }
 }
 
@@ -266,21 +261,19 @@ print_it_exception_catchpoint (bpstat bs)
   maybe_print_thread_hit_breakpoint (uiout);
 
   bp_temp = b->disposition == disp_del;
-  ui_out_text (uiout, 
-	       bp_temp ? "Temporary catchpoint "
+  uiout->text (bp_temp ? "Temporary catchpoint "
 		       : "Catchpoint ");
-  if (!ui_out_is_mi_like_p (uiout))
-    ui_out_field_int (uiout, "bkptno", b->number);
-  ui_out_text (uiout,
-	       (kind == EX_EVENT_THROW ? " (exception thrown), "
+  if (!uiout->is_mi_like_p ())
+    uiout->field_int ("bkptno", b->number);
+  uiout->text ((kind == EX_EVENT_THROW ? " (exception thrown), "
 		: (kind == EX_EVENT_CATCH ? " (exception caught), "
 		   : " (exception rethrown), ")));
-  if (ui_out_is_mi_like_p (uiout))
+  if (uiout->is_mi_like_p ())
     {
-      ui_out_field_string (uiout, "reason", 
+      uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
-      ui_out_field_int (uiout, "bkptno", b->number);
+      uiout->field_string ("disp", bpdisp_text (b->disposition));
+      uiout->field_int ("bkptno", b->number);
     }
   return PRINT_SRC_AND_LOC;
 }
@@ -298,9 +291,9 @@ print_one_exception_catchpoint (struct breakpoint *b,
     {
       annotate_field (4);
       if (b->loc == NULL || b->loc->shlib_disabled)
-	ui_out_field_string (uiout, "addr", "<PENDING>");
+	uiout->field_string ("addr", "<PENDING>");
       else
-	ui_out_field_core_addr (uiout, "addr",
+	uiout->field_core_addr ("addr",
 				b->loc->gdbarch, b->loc->address);
     }
   annotate_field (5);
@@ -310,21 +303,21 @@ print_one_exception_catchpoint (struct breakpoint *b,
   switch (kind)
     {
     case EX_EVENT_THROW:
-      ui_out_field_string (uiout, "what", "exception throw");
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "catch-type", "throw");
+      uiout->field_string ("what", "exception throw");
+      if (uiout->is_mi_like_p ())
+	uiout->field_string ("catch-type", "throw");
       break;
 
     case EX_EVENT_RETHROW:
-      ui_out_field_string (uiout, "what", "exception rethrow");
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "catch-type", "rethrow");
+      uiout->field_string ("what", "exception rethrow");
+      if (uiout->is_mi_like_p ())
+	uiout->field_string ("catch-type", "rethrow");
       break;
 
     case EX_EVENT_CATCH:
-      ui_out_field_string (uiout, "what", "exception catch");
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "catch-type", "catch");
+      uiout->field_string ("what", "exception catch");
+      if (uiout->is_mi_like_p ())
+	uiout->field_string ("catch-type", "catch");
       break;
     }
 }
@@ -340,9 +333,9 @@ print_one_detail_exception_catchpoint (const struct breakpoint *b,
 
   if (cp->exception_rx != NULL)
     {
-      ui_out_text (uiout, _("\tmatching: "));
-      ui_out_field_string (uiout, "regexp", cp->exception_rx);
-      ui_out_text (uiout, "\n");
+      uiout->text (_("\tmatching: "));
+      uiout->field_string ("regexp", cp->exception_rx);
+      uiout->text ("\n");
     }
 }
 
@@ -354,10 +347,10 @@ print_mention_exception_catchpoint (struct breakpoint *b)
   enum exception_event_kind kind = classify_exception_breakpoint (b);
 
   bp_temp = b->disposition == disp_del;
-  ui_out_text (uiout, bp_temp ? _("Temporary catchpoint ")
+  uiout->text (bp_temp ? _("Temporary catchpoint ")
 			      : _("Catchpoint "));
-  ui_out_field_int (uiout, "bkptno", b->number);
-  ui_out_text (uiout, (kind == EX_EVENT_THROW ? _(" (throw)")
+  uiout->field_int ("bkptno", b->number);
+  uiout->text ((kind == EX_EVENT_THROW ? _(" (throw)")
 		       : (kind == EX_EVENT_CATCH ? _(" (catch)")
 			  : _(" (rethrow)"))));
 }
@@ -393,8 +386,6 @@ static void
 handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  struct exception_catchpoint *cp;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   regex_t *pattern = NULL;
 
   if (except_rx != NULL)
@@ -406,8 +397,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			   _("invalid type-matching regexp"));
     }
 
-  cp = XCNEW (struct exception_catchpoint);
-  make_cleanup (xfree, cp);
+  std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
 
   init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);
@@ -421,7 +411,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
   re_set_exception_catchpoint (&cp->base);
 
   install_breakpoint (0, &cp->base, 1);
-  discard_cleanups (cleanup);
+  cp.release ();
 }
 
 /* Look for an "if" token in *STRING.  The "if" token must be preceded

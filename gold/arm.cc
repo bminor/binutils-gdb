@@ -1,6 +1,6 @@
 // arm.cc -- arm target support for gold.
 
-// Copyright (C) 2009-2016 Free Software Foundation, Inc.
+// Copyright (C) 2009-2017 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com> based on the i386 code
 // by Ian Lance Taylor <iant@google.com>.
 // This file also contains borrowed and adapted code from
@@ -2132,32 +2132,7 @@ class Target_arm : public Sized_target<32, big_endian>
       target1_reloc_(elfcpp::R_ARM_ABS32),
       // This can be any reloc type but usually is R_ARM_GOT_PREL.
       target2_reloc_(elfcpp::R_ARM_GOT_PREL)
-  {
-    if (parameters->options().user_set_target1_rel())
-      {
-	// FIXME: This is not strictly compatible with ld, which allows both
-	// --target1-abs and --target-rel to be given.
-	if (parameters->options().user_set_target1_abs())
-	  gold_error(_("Cannot use both --target1-abs and --target1-rel."));
-	else
-	  this->target1_reloc_ = elfcpp::R_ARM_REL32;
-      }
-    // We don't need to handle --target1-abs because target1_reloc_ is set
-    // to elfcpp::R_ARM_ABS32 in the member initializer list.
-
-    if (parameters->options().user_set_target2())
-      {
-	const char* target2 = parameters->options().target2();
-	if (strcmp(target2, "rel") == 0)
-	  this->target2_reloc_ = elfcpp::R_ARM_REL32;
-	else if (strcmp(target2, "abs") == 0)
-	  this->target2_reloc_ = elfcpp::R_ARM_ABS32;
-	else if (strcmp(target2, "got-rel") == 0)
-	  this->target2_reloc_ = elfcpp::R_ARM_GOT_PREL;
-	else
-	  gold_unreachable();
-      }
-  }
+  { }
 
   // Whether we force PCI branch veneers.
   bool
@@ -2571,6 +2546,30 @@ class Target_arm : public Sized_target<32, big_endian>
     // as the default.
     gold_assert(arm_reloc_property_table == NULL);
     arm_reloc_property_table = new Arm_reloc_property_table();
+    if (parameters->options().user_set_target1_rel())
+      {
+	// FIXME: This is not strictly compatible with ld, which allows both
+	// --target1-abs and --target-rel to be given.
+	if (parameters->options().user_set_target1_abs())
+	  gold_error(_("Cannot use both --target1-abs and --target1-rel."));
+	else
+	  this->target1_reloc_ = elfcpp::R_ARM_REL32;
+      }
+    // We don't need to handle --target1-abs because target1_reloc_ is set
+    // to elfcpp::R_ARM_ABS32 in the member initializer list.
+
+    if (parameters->options().user_set_target2())
+      {
+	const char* target2 = parameters->options().target2();
+	if (strcmp(target2, "rel") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_REL32;
+	else if (strcmp(target2, "abs") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_ABS32;
+	else if (strcmp(target2, "got-rel") == 0)
+	  this->target2_reloc_ = elfcpp::R_ARM_GOT_PREL;
+	else
+	  gold_unreachable();
+      }
   }
 
   // Virtual function which is set to return true by a target if
@@ -3425,7 +3424,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	     const Symbol_value<32>* psymval, Arm_address address,
 	     Arm_address thumb_bit);
 
-  // R_ARM_THM_JUMP6: S + A – P
+  // R_ARM_THM_JUMP6: S + A - P
   static inline typename This::Status
   thm_jump6(unsigned char* view,
 	    const Sized_relobj_file<32, big_endian>* object,
@@ -3436,7 +3435,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
-    // bit[9]:bit[7:3]:’0’ (mask: 0x02f8)
+    // bit[9]:bit[7:3]:'0' (mask: 0x02f8)
     Reltype addend = (((val & 0x0200) >> 3) | ((val & 0x00f8) >> 2));
     Reltype x = (psymval->value(object, addend) - address);
     val = (val & 0xfd07) | ((x  & 0x0040) << 3) | ((val & 0x003e) << 2);
@@ -3447,7 +3446,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    : This::STATUS_OKAY);
   }
 
-  // R_ARM_THM_JUMP8: S + A – P
+  // R_ARM_THM_JUMP8: S + A - P
   static inline typename This::Status
   thm_jump8(unsigned char* view,
 	    const Sized_relobj_file<32, big_endian>* object,
@@ -3467,7 +3466,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    : This::STATUS_OKAY);
   }
 
-  // R_ARM_THM_JUMP11: S + A – P
+  // R_ARM_THM_JUMP11: S + A - P
   static inline typename This::Status
   thm_jump11(unsigned char* view,
 	    const Sized_relobj_file<32, big_endian>* object,
@@ -6588,9 +6587,9 @@ Arm_relobj<big_endian>::do_relocate_sections(
     Output_file* of,
     typename Sized_relobj_file<32, big_endian>::Views* pviews)
 {
-  // Call parent to relocate sections.
-  Sized_relobj_file<32, big_endian>::do_relocate_sections(symtab, layout,
-							  pshdrs, of, pviews);
+  // Relocate the section data.
+  this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+			       1, this->shnum() - 1);
 
   // We do not generate stubs if doing a relocatable link.
   if (parameters->options().relocatable())
@@ -11215,7 +11214,7 @@ Target_arm<big_endian>::attributes_accept_div(int arch, int profile,
     {
     case 0:
       // Integer divide allowed if instruction contained in
-      // archetecture.
+      // architecture.
       if (arch == elfcpp::TAG_CPU_ARCH_V7 && (profile == 'R' || profile == 'M'))
         return true;
       else if (arch >= elfcpp::TAG_CPU_ARCH_V7E_M)
@@ -12144,6 +12143,8 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
 	  if (!is_defined_in_discarded_section)
 	    {
 	      typedef Sized_relobj_file<32, big_endian> ObjType;
+	      if (psymval->is_section_symbol())
+		symval.set_is_section_symbol();
 	      typename ObjType::Compute_final_local_value_status status =
 		arm_object->compute_final_local_value(r_sym, psymval, &symval,
 						      relinfo->symtab);

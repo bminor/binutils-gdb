@@ -1,8 +1,8 @@
-%option nounput
+%option nounput noyywrap
 
 %{
 
-/* Copyright (C) 1991-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
    This file is part of the GNU Binutils.
@@ -86,10 +86,6 @@ static void lex_warn_invalid (char *where, char *what);
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
 
-/* Some versions of flex want this.  */
-#ifndef yywrap
-int yywrap (void) { return 1; }
-#endif
 %}
 
 %a 4000
@@ -415,9 +411,15 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <EXPRESSION,BOTH,SCRIPT,VERS_NODE,INPUTLIST>"\""[^\"]*"\"" {
 					/* No matter the state, quotes
-					   give what's inside */
+					   give what's inside.  */
+					bfd_size_type len;
 					yylval.name = xstrdup (yytext + 1);
-					yylval.name[yyleng - 2] = 0;
+					/* PR ld/20906.  A corrupt input file
+					   can contain bogus strings.  */
+					len = strlen (yylval.name);
+					if (len > yyleng - 2)
+					  len = yyleng - 2;
+					yylval.name[len] = 0;
 					return NAME;
 				}
 <BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}

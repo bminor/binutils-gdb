@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
    XGATE and S12X added by James Murray (jsm@jsm-net.demon.co.uk)
 
@@ -555,7 +555,7 @@ md_parse_option (int c, const char *arg)
 	current_architecture = cpu6812 | cpu6812s | cpu9s12x;
      else if ((strcasecmp (arg, "m9s12xg") == 0)
           || (strcasecmp (arg, "xgate") == 0))
-	/* xgate for backwards compatability */
+	/* xgate for backwards compatibility */
 	current_architecture = cpuxgate;
       else
 	as_bad (_("Option `%s' is not recognized."), arg);

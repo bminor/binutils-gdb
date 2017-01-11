@@ -7,7 +7,7 @@
         .thumb_func
         .global _start
 _start:
-        @ All LDM treatments for word acces <= 8 go through the same
+        @ All LDM treatments for word access <= 8 go through the same
         @ replication code, but decoding may vary
         ldm.w  r9, {r1-r8}
         ldm.w  r9!, {r1-r8}
@@ -15,7 +15,7 @@ _start:
         ldmdb.w r9!, {r1-r8}
         pop {r1-r8}
 
-        @ All VLDM treatments for word acces <= 8 go through the same
+        @ All VLDM treatments for word access <= 8 go through the same
         @ replication code, but decoding may vary
         vldm r9, {s1-s8}
         vldm r6!, {s9-s16}

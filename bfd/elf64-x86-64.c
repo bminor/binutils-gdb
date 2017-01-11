@@ -1,5 +1,5 @@
 /* X86-64 specific support for ELF
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -862,8 +862,6 @@ struct elf_x86_64_link_hash_table
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *interp;
-  asection *sdynbss;
-  asection *srelbss;
   asection *plt_eh_frame;
   asection *plt_bnd;
   asection *plt_got;
@@ -1127,29 +1125,6 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       htab->interp = s;
     }
 
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!htab->sdynbss)
-    abort ();
-
-  if (bfd_link_executable (info))
-    {
-      /* Always allow copy relocs for building executables.  */
-      asection *s = bfd_get_linker_section (dynobj, ".rela.bss");
-      if (s == NULL)
-	{
-	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
-	  s = bfd_make_section_anyway_with_flags (dynobj,
-						  ".rela.bss",
-						  (bed->dynamic_sec_flags
-						   | SEC_READONLY));
-	  if (s == NULL
-	      || ! bfd_set_section_alignment (dynobj, s,
-					      bed->s->log_file_align))
-	    return FALSE;
-	}
-      htab->srelbss = s;
-    }
-
   if (!info->no_ld_generated_unwind_info
       && htab->plt_eh_frame == NULL
       && htab->elf.splt != NULL)
@@ -1189,14 +1164,9 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_x86_64_link_hash_entry *) dir;
   eind = (struct elf_x86_64_link_hash_entry *) ind;
 
-  if (!edir->has_bnd_reloc)
-    edir->has_bnd_reloc = eind->has_bnd_reloc;
-
-  if (!edir->has_got_reloc)
-    edir->has_got_reloc = eind->has_got_reloc;
-
-  if (!edir->has_non_got_reloc)
-    edir->has_non_got_reloc = eind->has_non_got_reloc;
+  edir->has_bnd_reloc |= eind->has_bnd_reloc;
+  edir->has_got_reloc |= eind->has_got_reloc;
+  edir->has_non_got_reloc |= eind->has_non_got_reloc;
 
   if (eind->dyn_relocs != NULL)
     {
@@ -1243,7 +1213,8 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
       /* If called to transfer flags for a weakdef during processing
 	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
 	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      dir->ref_dynamic |= ind->ref_dynamic;
+      if (dir->versioned != versioned_hidden)
+	dir->ref_dynamic |= ind->ref_dynamic;
       dir->ref_regular |= ind->ref_regular;
       dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
       dir->needs_plt |= ind->needs_plt;
@@ -2853,7 +2824,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
 				  struct elf_link_hash_entry *h)
 {
   struct elf_x86_64_link_hash_table *htab;
-  asection *s;
+  asection *s, *srel;
   struct elf_x86_64_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
@@ -3011,15 +2982,23 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
      runtime process image.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->elf.sdynrelro;
+      srel = htab->elf.sreldynrelro;
+    }
+  else
+    {
+      s = htab->elf.sdynbss;
+      srel = htab->elf.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       const struct elf_backend_data *bed;
       bed = get_elf_backend_data (info->output_bfd);
-      htab->srelbss->size += bed->s->sizeof_rela;
+      srel->size += bed->s->sizeof_rela;
       h->needs_copy = 1;
     }
-
-  s = htab->sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
@@ -3836,7 +3815,8 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  || s == htab->plt_bnd
 	  || s == htab->plt_got
 	  || s == htab->plt_eh_frame
-	  || s == htab->sdynbss)
+	  || s == htab->elf.sdynbss
+	  || s == htab->elf.sdynrelro)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -4693,10 +4673,17 @@ do_ifunc_pointer:
 	     symbols it's the symbol itself relative to GOT.  */
 	  if (h != NULL
 	      /* See PLT32 handling.  */
-	      && h->plt.offset != (bfd_vma) -1
+	      && (h->plt.offset != (bfd_vma) -1
+		  || eh->plt_got.offset != (bfd_vma) -1)
 	      && htab->elf.splt != NULL)
 	    {
-	      if (htab->plt_bnd != NULL)
+	      if (eh->plt_got.offset != (bfd_vma) -1)
+		{
+		  /* Use the GOT PLT.  */
+		  resolved_plt = htab->plt_got;
+		  plt_offset = eh->plt_got.offset;
+		}
+	      else if (htab->plt_bnd != NULL)
 		{
 		  resolved_plt = htab->plt_bnd;
 		  plt_offset = eh->plt_bnd.offset;
@@ -6042,13 +6029,15 @@ do_glob_dat:
   if (h->needs_copy)
     {
       Elf_Internal_Rela rela;
+      asection *s;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || htab->elf.srelbss == NULL
+	  || htab->elf.sreldynrelro == NULL)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
@@ -6056,7 +6045,11 @@ do_glob_dat:
 		       + h->root.u.def.section->output_offset);
       rela.r_info = htab->r_info (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      elf_append_rela (output_bfd, htab->srelbss, &rela);
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->elf.sreldynrelro;
+      else
+	s = htab->elf.srelbss;
+      elf_append_rela (output_bfd, s, &rela);
     }
 
   return TRUE;
@@ -6205,21 +6198,6 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_PLTRELSZ:
 	      s = htab->elf.srelplt->output_section;
 	      dyn.d_un.d_val = s->size;
-	      break;
-
-	    case DT_RELASZ:
-	      /* The procedure linkage table relocs (DT_JMPREL) should
-		 not be included in the overall relocs (DT_RELA).
-		 Therefore, we override the DT_RELASZ entry here to
-		 make it not include the JMPREL relocs.  Since the
-		 linker script arranges for .rela.plt to follow all
-		 other relocation sections, we don't have to worry
-		 about changing the DT_RELA entry.  */
-	      if (htab->elf.srelplt != NULL)
-		{
-		  s = htab->elf.srelplt->output_section;
-		  dyn.d_un.d_val -= s->size;
-		}
 	      break;
 
 	    case DT_TLSDESC_PLT:
@@ -6751,6 +6729,8 @@ static const struct bfd_elf_special_section
 #define elf_backend_plt_alignment           4
 #define elf_backend_extern_protected_data   1
 #define elf_backend_caches_rawsize	    1
+#define elf_backend_dtrel_excludes_plt	    1
+#define elf_backend_want_dynrelro	    1
 
 #define elf_info_to_howto		    elf_x86_64_info_to_howto
 

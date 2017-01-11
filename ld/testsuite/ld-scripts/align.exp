@@ -1,6 +1,6 @@
 # Test ALIGN in a linker script.
 # By Nathan Sidwell, CodeSourcery LLC
-#   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -38,7 +38,7 @@ if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
-if ![ld_simple_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir/align.o"] {
+if ![ld_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir/align.o"] {
     fail $testname
 } else {
     pass $testname

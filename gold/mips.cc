@@ -1,6 +1,6 @@
 // mips.cc -- mips target support for gold.
 
-// Copyright (C) 2011-2016 Free Software Foundation, Inc.
+// Copyright (C) 2011-2017 Free Software Foundation, Inc.
 // Written by Sasa Stankovic <sasa.stankovic@imgtec.com>
 //        and Aleksandar Simeonov <aleksandar.simeonov@rt-rk.com>.
 // This file contains borrowed and adapted code from bfd/elfxx-mips.c.
@@ -9742,7 +9742,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
     d_val = elfcpp::RHF_NOTPOT;
     odyn->add_constant(elfcpp::DT_MIPS_FLAGS, d_val);
 
-    // Save layout for using when emiting custom dynamic tags.
+    // Save layout for using when emitting custom dynamic tags.
     this->layout_ = layout;
 
     // This member holds the base address of the segment.

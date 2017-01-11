@@ -1,6 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -266,7 +266,6 @@ struct reloc_entry
   BASIC_REG_TYPE(FP_S)	/* s[0-31] */	\
   BASIC_REG_TYPE(FP_D)	/* d[0-31] */	\
   BASIC_REG_TYPE(FP_Q)	/* q[0-31] */	\
-  BASIC_REG_TYPE(CN)	/* c[0-7]  */	\
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
   BASIC_REG_TYPE(ZN)	/* z[0-31] */	\
   BASIC_REG_TYPE(PN)	/* p[0-15] */	\
@@ -406,9 +405,6 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
     case REG_TYPE_FP_Q:
       msg = N_("128-bit SIMD scalar or floating-point quad precision "
 	       "register expected");
-      break;
-    case REG_TYPE_CN:
-      msg = N_("C0 - C15 expected");
       break;
     case REG_TYPE_R_Z_BHSDQ_V:
     case REG_TYPE_R_Z_BHSDQ_VZP:
@@ -647,7 +643,7 @@ first_error (const char *error)
     set_syntax_error (error);
 }
 
-/* Similiar to first_error, but this function accepts formatted error
+/* Similar to first_error, but this function accepts formatted error
    message.  */
 static void
 first_error_fmt (const char *format, ...)
@@ -4983,6 +4979,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_Rd_SP:
     case AARCH64_OPND_Rn_SP:
+    case AARCH64_OPND_Rm_SP:
     case AARCH64_OPND_Fd:
     case AARCH64_OPND_Fn:
     case AARCH64_OPND_Fm:
@@ -5314,6 +5311,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rd_SP:
 	case AARCH64_OPND_Rn_SP:
 	case AARCH64_OPND_SVE_Rn_SP:
+	case AARCH64_OPND_Rm_SP:
 	  po_int_reg_or_fail (REG_TYPE_R_SP);
 	  break;
 
@@ -5518,16 +5516,23 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
-	case AARCH64_OPND_Cn:
-	case AARCH64_OPND_Cm:
-	  po_reg_or_fail (REG_TYPE_CN);
-	  if (val > 15)
+	case AARCH64_OPND_CRn:
+	case AARCH64_OPND_CRm:
 	    {
-	      set_fatal_syntax_error (_(get_reg_expected_msg (REG_TYPE_CN)));
-	      goto failure;
+	      char prefix = *(str++);
+	      if (prefix != 'c' && prefix != 'C')
+		goto failure;
+
+	      po_imm_nc_or_fail ();
+	      if (val > 15)
+		{
+		  set_fatal_syntax_error (_(N_ ("C0 - C15 expected")));
+		  goto failure;
+		}
+	      info->qualifier = AARCH64_OPND_QLF_CR;
+	      info->imm.value = val;
+	      break;
 	    }
-	  inst.base.operands[i].reg.regno = val;
-	  break;
 
 	case AARCH64_OPND_SHLL_IMM:
 	case AARCH64_OPND_IMM_VLSR:
@@ -5559,6 +5564,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_UIMM7:
 	case AARCH64_OPND_SVE_UIMM8:
 	case AARCH64_OPND_SVE_UIMM8_53:
+	case AARCH64_OPND_IMM_ROT1:
+	case AARCH64_OPND_IMM_ROT2:
+	case AARCH64_OPND_IMM_ROT3:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
 	  break;
@@ -6007,6 +6015,25 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      || (!info->addr.preind && !info->addr.postind)
 	      || (operands[i] == AARCH64_OPND_ADDR_SIMM9_2
 		  && info->addr.writeback))
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  if (inst.reloc.type != BFD_RELOC_UNUSED)
+	    {
+	      set_syntax_error (_("relocation not allowed"));
+	      goto failure;
+	    }
+	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
+					      /* addr_off_p */ 1,
+					      /* need_libopcodes_p */ 1,
+					      /* skip_p */ 0);
+	  break;
+
+	case AARCH64_OPND_ADDR_SIMM10:
+	  po_misc_or_fail (parse_address (&str, info));
+	  if (info->addr.pcrel || info->addr.offset.is_reg
+	      || !info->addr.preind || info->addr.postind)
 	    {
 	      set_syntax_error (_("invalid addressing mode"));
 	      goto failure;
@@ -6479,6 +6506,7 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
     {
     case ldst_pos:
     case ldst_imm9:
+    case ldst_imm10:
     case ldst_unscaled:
     case ldst_unpriv:
       /* Loading/storing the base register is unpredictable if writeback.  */
@@ -6754,9 +6782,6 @@ static const reg_entry reg_names[] = {
 
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
-
-  /* Coprocessor register numbers.  */
-  REGSET (c, CN), REGSET (C, CN),
 
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
@@ -7348,6 +7373,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
+    case AARCH64_OPND_ADDR_SIMM10:
     case AARCH64_OPND_ADDR_UIMM12:
       /* Immediate offset in an address.  */
       insn = get_aarch64_insn (buf);
@@ -8337,6 +8363,9 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
+  {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8,
+			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+   "Qualcomm Falkor"},
   {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Qualcomm QDF24XX"},
@@ -8371,6 +8400,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8-a", AARCH64_ARCH_V8},
   {"armv8.1-a", AARCH64_ARCH_V8_1},
   {"armv8.2-a", AARCH64_ARCH_V8_2},
+  {"armv8.3-a", AARCH64_ARCH_V8_3},
   {NULL, AARCH64_ARCH_NONE}
 };
 
@@ -8386,13 +8416,13 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0),
 			AARCH64_ARCH_NONE},
   {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0),
-			AARCH64_ARCH_NONE},
+			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
   {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0),
 			AARCH64_ARCH_NONE},
   {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0),
 			AARCH64_ARCH_NONE},
   {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0),
-			AARCH64_ARCH_NONE},
+			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
   {"pan",		AARCH64_FEATURE (AARCH64_FEATURE_PAN, 0),
 			AARCH64_ARCH_NONE},
   {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0),
@@ -8408,6 +8438,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_FP
 					 | AARCH64_FEATURE_SIMD, 0)},
+  {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
+			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

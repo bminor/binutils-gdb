@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2016 Free Software Foundation, Inc.
+# Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ proc build_inferior {exefile lang} {
 
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object "debug $lang"] != ""
 	 || [gdb_compile "${objfile}" "${exefile}" executable "debug $lang"] != "" } {
-	untested "Couldn't compile ${srcfile} in $lang mode"
+	untested "failed to compile in $lang mode"
 	return -1
     }
     return 0
@@ -290,7 +290,7 @@ proc test_value_after_death {} {
     gdb_test "kill" "" "kill the inferior" \
 	"Kill the program being debugged. .y or n. $" \
 	"y"
-    gdb_test "file" "" "Discard the symbols" \
+    gdb_test "file" "" "discard the symbols" \
 	"Discard symbol table from.*y or n. $" \
 	"y"
 
@@ -320,7 +320,7 @@ proc test_subscript_regression {exefile lang} {
     clean_restart ${exefile}
 
     if ![gdb_guile_runto_main ] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -450,7 +450,7 @@ test_value_hash
 # The following tests require execution.
 
 if ![gdb_guile_runto_main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 

@@ -1,3 +1,22 @@
+2016-12-31  Alan Modra  <amodra@gmail.com>
+
+	* config.sub: Import from upstream.
+
+2016-12-08  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2016-12-02  Josh Conner  <joshconner@google.com>
+
+	* configure.ac: Add fuchsia to targets that use ELF.
+	* configure: Regenerated.
+
+2016-11-07  Doug Evans  <dje@google.com>
+
+	* config.sub: Sync with upstream version 2016-11-03.
+	git://git.sv.gnu.org/config.git
+	* config.guess: Sync with upstream version 2016-10-02.
+
 2016-09-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* .gitignore: Add archives and make stamps.

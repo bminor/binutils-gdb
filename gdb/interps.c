@@ -1,6 +1,6 @@
 /* Manages interpreters for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
 
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
@@ -205,7 +205,7 @@ interp_set (struct interp *interp, int top_level)
 
   if (old_interp != NULL)
     {
-      ui_out_flush (current_uiout);
+      current_uiout->flush ();
       if (old_interp->procs->suspend_proc
 	  && !old_interp->procs->suspend_proc (old_interp->data))
 	{
@@ -263,7 +263,7 @@ interp_set (struct interp *interp, int top_level)
     {
       xsnprintf (buffer, sizeof (buffer),
 		 "Switching to interpreter \"%.24s\".\n", interp->name);
-      ui_out_text (current_uiout, buffer);
+      current_uiout->text (buffer);
     }
 
   return 1;

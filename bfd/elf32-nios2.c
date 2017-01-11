@@ -1,5 +1,5 @@
 /* 32-bit ELF support for Nios II.
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -1820,8 +1820,6 @@ struct elf32_nios2_link_hash_table
     Elf_Internal_Sym **all_local_syms;
 
     /* Short-cuts to get to dynamic linker sections.  */
-    asection *sdynbss;
-    asection *srelbss;
     asection *sbss;
 
     /* GOT pointer symbol _gp_got.  */
@@ -4602,26 +4600,14 @@ nios2_elf32_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->root.sgot && !create_got_section (dynobj, info))
     return FALSE;
 
-  _bfd_elf_create_dynamic_sections (dynobj, info);
+  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
+    return FALSE;
 
   /* In order for the two loads in a shared object .PLTresolve to share the
      same %hiadj, the start of the PLT (as well as the GOT) must be aligned
      to a 16-byte boundary.  This is because the addresses for these loads
      include the -(.plt+4) PIC correction.  */
-  if (!bfd_set_section_alignment (dynobj, htab->root.splt, 4))
-    return FALSE;
-
-  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!htab->sdynbss)
-    return FALSE;
-  if (!bfd_link_pic (info))
-    {
-      htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
-      if (!htab->srelbss)
-	return FALSE;
-    }
-
-  return TRUE;
+  return bfd_set_section_alignment (dynobj, htab->root.splt, 4);
 }
 
 /* Implement elf_backend_copy_indirect_symbol:
@@ -5289,14 +5275,16 @@ nios2_elf32_finish_dynamic_symbol (bfd *output_bfd,
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak));
 
-      s = htab->srelbss;
-      BFD_ASSERT (s != NULL);
-
       rela.r_offset = (h->root.u.def.value
 		       + h->root.u.def.section->output_section->vma
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_NIOS2_COPY);
       rela.r_addend = 0;
+      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+	s = htab->root.sreldynrelro;
+      else
+	s = htab->root.srelbss;
+      BFD_ASSERT (s != NULL);
       loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
@@ -5363,20 +5351,6 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_PLTRELSZ:
 	      s = htab->root.srelplt;
 	      dyn.d_un.d_val = s->size;
-	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	      break;
-
-	    case DT_RELASZ:
-	      /* The procedure linkage table relocs (DT_JMPREL) should
-		 not be included in the overall relocs (DT_RELA).
-		 Therefore, we override the DT_RELASZ entry here to
-		 make it not include the JMPREL relocs.  Since the
-		 linker script arranges for .rela.plt to follow all
-		 other relocation sections, we don't have to worry
-		 about changing the DT_RELA entry.  */
-	      s = htab->root.srelplt;
-	      if (s != NULL)
-		dyn.d_un.d_val -= s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
@@ -5469,7 +5443,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
 {
   struct elf32_nios2_link_hash_table *htab;
   bfd *dynobj;
-  asection *s;
+  asection *s, *srel;
   unsigned align2;
 
   htab = elf32_nios2_hash_table (info);
@@ -5551,19 +5525,22 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-  s = htab->sdynbss;
-  BFD_ASSERT (s != NULL);
-
   /* We must generate a R_NIOS2_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rela.bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+    {
+      s = htab->root.sdynrelro;
+      srel = htab->root.sreldynrelro;
+    }
+  else
+    {
+      s = htab->root.sdynbss;
+      srel = htab->root.srelbss;
+    }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      asection *srel;
-
-      srel = htab->srelbss;
-      BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
@@ -6003,7 +5980,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
-      if (strcmp (name, ".plt") == 0)
+      if (s == htab->root.splt)
 	{
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
@@ -6026,9 +6003,14 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (CONST_STRNEQ (name, ".got"))
-	got = s->size != 0;
-      else if (strcmp (name, ".dynbss") != 0)
+      else if (s == htab->root.sgot
+	       || s == htab->root.sgotplt)
+	{
+	  if (s->size != 0)
+	    got = TRUE;
+	}
+      else if (s != htab->root.sdynbss
+	       && s != htab->root.sdynrelro)
 	/* It's not one of our sections, so don't allocate space.  */
 	continue;
 
@@ -6277,7 +6259,9 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define elf_backend_can_refcount	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_got_plt	1
+#define elf_backend_want_dynrelro	1
 #define elf_backend_rela_normal		1
+#define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_relocate_section	  nios2_elf32_relocate_section
 #define elf_backend_section_flags	  nios2_elf32_section_flags

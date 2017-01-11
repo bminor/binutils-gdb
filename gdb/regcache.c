@@ -1,6 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -740,6 +740,19 @@ regcache_raw_write_unsigned (struct regcache *regcache, int regnum,
   store_unsigned_integer (buf, regcache->descr->sizeof_register[regnum],
 			  gdbarch_byte_order (regcache->descr->gdbarch), val);
   regcache_raw_write (regcache, regnum, buf);
+}
+
+LONGEST
+regcache_raw_get_signed (struct regcache *regcache, int regnum)
+{
+  LONGEST value;
+  enum register_status status;
+
+  status = regcache_raw_read_signed (regcache, regnum, &value);
+  if (status == REG_UNAVAILABLE)
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("Register %d is not available"), regnum);
+  return value;
 }
 
 enum register_status

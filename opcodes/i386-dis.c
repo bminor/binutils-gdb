@@ -1,5 +1,5 @@
 /* Print i386 instructions for GDB, the GNU debugger.
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -252,7 +252,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ed { OP_E, d_mode }
 #define Edq { OP_E, dq_mode }
 #define Edqw { OP_E, dqw_mode }
-#define EdqwS { OP_E, dqw_swap_mode }
 #define Edqb { OP_E, dqb_mode }
 #define Edb { OP_E, db_mode }
 #define Edw { OP_E, dw_mode }
@@ -556,7 +555,6 @@ enum
   dq_mode,
   /* registers like dq_mode, memory like w_mode.  */
   dqw_mode,
-  dqw_swap_mode,
   bnd_mode,
   /* 4- or 6-byte pointer operand */
   f_mode,
@@ -706,7 +704,7 @@ enum
 {
   REG_80 = 0,
   REG_81,
-  REG_82,
+  REG_83,
   REG_8F,
   REG_C0,
   REG_C1,
@@ -1548,6 +1546,8 @@ enum
   PREFIX_EVEX_0F384D,
   PREFIX_EVEX_0F384E,
   PREFIX_EVEX_0F384F,
+  PREFIX_EVEX_0F3852,
+  PREFIX_EVEX_0F3853,
   PREFIX_EVEX_0F3858,
   PREFIX_EVEX_0F3859,
   PREFIX_EVEX_0F385A,
@@ -1692,6 +1692,7 @@ enum
   X86_64_63,
   X86_64_6D,
   X86_64_6F,
+  X86_64_82,
   X86_64_9A,
   X86_64_C4,
   X86_64_C5,
@@ -1710,8 +1711,7 @@ enum
 enum
 {
   THREE_BYTE_0F38 = 0,
-  THREE_BYTE_0F3A,
-  THREE_BYTE_0F7A
+  THREE_BYTE_0F3A
 };
 
 enum
@@ -2660,8 +2660,8 @@ static const struct dis386 dis386[] = {
   /* 80 */
   { REG_TABLE (REG_80) },
   { REG_TABLE (REG_81) },
-  { Bad_Opcode },
-  { REG_TABLE (REG_82) },
+  { X86_64_TABLE (X86_64_82) },
+  { REG_TABLE (REG_83) },
   { "testB",		{ Eb, Gb }, 0 },
   { "testS",		{ Ev, Gv }, 0 },
   { "xchgB",		{ Ebh2, Gb }, 0 },
@@ -2942,7 +2942,7 @@ static const struct dis386 dis386_twobyte[] = {
   /* 78 */
   { PREFIX_TABLE (PREFIX_0F78) },
   { PREFIX_TABLE (PREFIX_0F79) },
-  { THREE_BYTE_TABLE (THREE_BYTE_0F7A) },
+  { Bad_Opcode },
   { Bad_Opcode },
   { PREFIX_TABLE (PREFIX_0F7C) },
   { PREFIX_TABLE (PREFIX_0F7D) },
@@ -3398,7 +3398,7 @@ static const struct dis386 reg_table[][8] = {
     { "xorQ",	{ Evh1, Iv }, 0 },
     { "cmpQ",	{ Ev, Iv }, 0 },
   },
-  /* REG_82 */
+  /* REG_83 */
   {
     { "addQ",	{ Evh1, sIb }, 0 },
     { "orQ",	{ Evh1, sIb }, 0 },
@@ -6885,6 +6885,12 @@ static const struct dis386 x86_64_table[][2] = {
     { "outs{G|}", { indirDXr, Xz }, 0 },
   },
 
+  /* X86_64_82 */
+  {
+    /* Opcode 0x82 is an alias of of opcode 0x80 in 32-bit mode.  */
+    { REG_TABLE (REG_80) },
+  },
+
   /* X86_64_9A */
   {
     { "Jcall{T|}", { Ap }, 0 },
@@ -7506,298 +7512,6 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_0F3ADF) },
-    /* e0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* e8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* f0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* f8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-  },
-
-  /* THREE_BYTE_0F7A */
-  {
-    /* 00 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 08 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 10 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 18 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 20 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 28 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 30 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 38 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 40 */
-    { Bad_Opcode },
-    { "phaddbw",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phaddbd",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phaddbq",	{ XM, EXq }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "phaddwd",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phaddwq",	{ XM, EXq }, PREFIX_OPCODE },
-    /* 48 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "phadddq",	{ XM, EXq }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 50 */
-    { Bad_Opcode },
-    { "phaddubw",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phaddubd",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phaddubq",	{ XM, EXq }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "phadduwd",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phadduwq",	{ XM, EXq }, PREFIX_OPCODE },
-    /* 58 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "phaddudq",	{ XM, EXq }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 60 */
-    { Bad_Opcode },
-    { "phsubbw",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phsubbd",	{ XM, EXq }, PREFIX_OPCODE },
-    { "phsubbq",	{ XM, EXq }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 68 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 70 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 78 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 80 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 88 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 90 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* 98 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* a0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* a8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* b0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* b8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* c0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* c8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* d0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    /* d8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
     /* e0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -12956,11 +12670,15 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	rex |= REX_W;
 
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
-      if (address_mode != mode_64bit
-	  && vex.register_specifier > 0x7)
+      if (address_mode != mode_64bit)
 	{
-	  dp = &bad_opcode;
-	  return dp;
+	  /* In 16/32-bit mode REX_B is silently ignored.  */
+	  rex &= ~REX_B;
+	  if (vex.register_specifier > 0x7)
+	    {
+	      dp = &bad_opcode;
+	      return dp;
+	    }
 	}
 
       vex.length = (*codep & 0x4) ? 256 : 128;
@@ -13821,15 +13539,15 @@ static const unsigned char float_mem_mode[] = {
 #define ST { OP_ST, 0 }
 #define STi { OP_STi, 0 }
 
-#define FGRPd9_2 NULL, { { NULL, 0 } }, 0
-#define FGRPd9_4 NULL, { { NULL, 1 } }, 0
-#define FGRPd9_5 NULL, { { NULL, 2 } }, 0
-#define FGRPd9_6 NULL, { { NULL, 3 } }, 0
-#define FGRPd9_7 NULL, { { NULL, 4 } }, 0
-#define FGRPda_5 NULL, { { NULL, 5 } }, 0
-#define FGRPdb_4 NULL, { { NULL, 6 } }, 0
-#define FGRPde_3 NULL, { { NULL, 7 } }, 0
-#define FGRPdf_4 NULL, { { NULL, 8 } }, 0
+#define FGRPd9_2 NULL, { { NULL, 1 } }, 0
+#define FGRPd9_4 NULL, { { NULL, 2 } }, 0
+#define FGRPd9_5 NULL, { { NULL, 3 } }, 0
+#define FGRPd9_6 NULL, { { NULL, 4 } }, 0
+#define FGRPd9_7 NULL, { { NULL, 5 } }, 0
+#define FGRPda_5 NULL, { { NULL, 6 } }, 0
+#define FGRPdb_4 NULL, { { NULL, 7 } }, 0
+#define FGRPde_3 NULL, { { NULL, 8 } }, 0
+#define FGRPdf_4 NULL, { { NULL, 9 } }, 0
 
 static const struct dis386 float_reg[][8] = {
   /* d8 */
@@ -13923,48 +13641,53 @@ static const struct dis386 float_reg[][8] = {
 };
 
 static char *fgrps[][8] = {
-  /* d9_2  0 */
+  /* Bad opcode 0 */
+  {
+    "(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
+  },
+
+  /* d9_2  1 */
   {
     "fnop","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 
-  /* d9_4  1 */
+  /* d9_4  2 */
   {
     "fchs","fabs","(bad)","(bad)","ftst","fxam","(bad)","(bad)",
   },
 
-  /* d9_5  2 */
+  /* d9_5  3 */
   {
     "fld1","fldl2t","fldl2e","fldpi","fldlg2","fldln2","fldz","(bad)",
   },
 
-  /* d9_6  3 */
+  /* d9_6  4 */
   {
     "f2xm1","fyl2x","fptan","fpatan","fxtract","fprem1","fdecstp","fincstp",
   },
 
-  /* d9_7  4 */
+  /* d9_7  5 */
   {
     "fprem","fyl2xp1","fsqrt","fsincos","frndint","fscale","fsin","fcos",
   },
 
-  /* da_5  5 */
+  /* da_5  6 */
   {
     "(bad)","fucompp","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 
-  /* db_4  6 */
+  /* db_4  7 */
   {
     "fNeni(8087 only)","fNdisi(8087 only)","fNclex","fNinit",
     "fNsetpm(287 only)","frstpm(287 only)","(bad)","(bad)",
   },
 
-  /* de_3  7 */
+  /* de_3  8 */
   {
     "(bad)","fcompp","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 
-  /* df_4  8 */
+  /* df_4  9 */
   {
     "fNstsw","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
@@ -14831,7 +14554,6 @@ intel_operand_size (int bytemode, int sizeflag)
     case w_mode:
     case dw_mode:
     case dqw_mode:
-    case dqw_swap_mode:
       oappend ("WORD PTR ");
       break;
     case indir_v_mode:
@@ -15186,8 +14908,7 @@ OP_E_register (int bytemode, int sizeflag)
 
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == b_swap_mode
-	  || bytemode == v_swap_mode
-	  || bytemode == dqw_swap_mode))
+	  || bytemode == v_swap_mode))
     swap_operand ();
 
   switch (bytemode)
@@ -15239,7 +14960,6 @@ OP_E_register (int bytemode, int sizeflag)
     case dqb_mode:
     case dqd_mode:
     case dqw_mode:
-    case dqw_swap_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	names = names64;
@@ -15295,7 +15015,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	case dqw_mode:
 	case dw_mode:
-	case dqw_swap_mode:
 	  shift = 1;
 	  break;
 	case dqb_mode:
@@ -15769,7 +15488,6 @@ OP_G (int bytemode, int sizeflag)
     case dqb_mode:
     case dqd_mode:
     case dqw_mode:
-    case dqw_swap_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	oappend (names64[modrm.reg + add]);
@@ -16624,7 +16342,6 @@ OP_EX (int bytemode, int sizeflag)
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == x_swap_mode
 	  || bytemode == d_swap_mode
-	  || bytemode == dqw_swap_mode
 	  || bytemode == d_scalar_swap_mode
 	  || bytemode == q_swap_mode
 	  || bytemode == q_scalar_swap_mode))
@@ -17258,7 +16975,8 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  names = names_mask;
 	  break;
 	default:
-	  abort ();
+	  /* See PR binutils/20893 for a reproducer.  */
+	  oappend ("(bad)");
 	  return;
 	}
       break;

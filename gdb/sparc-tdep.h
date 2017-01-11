@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -246,8 +246,8 @@ extern const struct sparc_gregmap sparc32nbsd_gregmap;
 extern CORE_ADDR sparcnbsd_step_trap (struct frame_info *frame,
 				      unsigned long insn);
 
-extern void sparc32nbsd_elf_init_abi (struct gdbarch_info info,
-				      struct gdbarch *gdbarch);
+extern void sparc32nbsd_init_abi (struct gdbarch_info info,
+				  struct gdbarch *gdbarch);
 
 extern struct trad_frame_saved_reg *
   sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame);

@@ -1,5 +1,5 @@
 # Expect script for ld-i386 tests
-#   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -472,7 +472,7 @@ proc undefined_weak {cflags ldflags} {
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run pr19704" \
-	    "$ldflags tmpdir/libpr19704.so -R tmpdir" \
+	    "$ldflags tmpdir/libpr19704.so -Wl,-R,tmpdir" \
 	    "" \
 	    { pr19704a.c } \
 	    "pr19704" \
@@ -757,7 +757,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Run copyreloc-main with PIE and GOTOFF" \
-	    "--as-needed tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
+	    "-Wl,--as-needed tmpdir/copyreloc-main.o tmpdir/copyreloc-lib.so -pie" \
 	    "" \
 	    { dummy.s } \
 	    "copyreloc-main" \

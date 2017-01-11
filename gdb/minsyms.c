@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -158,22 +158,20 @@ lookup_minimal_symbol (const char *name, const char *sfile,
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
   unsigned int dem_hash = msymbol_hash_iw (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  int needtofreename = 0;
-  const char *modified_name;
+  const char *modified_name = name;
 
   if (sfile != NULL)
     sfile = lbasename (sfile);
 
   /* For C++, canonicalize the input name.  */
-  modified_name = name;
+  std::string modified_name_storage;
   if (current_language->la_language == language_cplus)
     {
-      char *cname = cp_canonicalize_string (name);
-
-      if (cname)
+      std::string cname = cp_canonicalize_string (name);
+      if (!cname.empty ())
 	{
-	  modified_name = cname;
-	  needtofreename = 1;
+	  std::swap (modified_name_storage, cname);
+	  modified_name = modified_name_storage.c_str ();
 	}
     }
 
@@ -271,9 +269,6 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	    }
 	}
     }
-
-  if (needtofreename)
-    xfree ((void *) modified_name);
 
   /* External symbols are best.  */
   if (found_symbol.minsym != NULL)

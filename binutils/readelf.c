@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -124,6 +124,7 @@
 #include "elf/metag.h"
 #include "elf/microblaze.h"
 #include "elf/mips.h"
+#include "elf/riscv.h"
 #include "elf/mmix.h"
 #include "elf/mn10200.h"
 #include "elf/mn10300.h"
@@ -136,6 +137,7 @@
 #include "elf/pj.h"
 #include "elf/ppc.h"
 #include "elf/ppc64.h"
+#include "elf/pru.h"
 #include "elf/rl78.h"
 #include "elf/rx.h"
 #include "elf/s390.h"
@@ -775,6 +777,8 @@ guess_is_rela (unsigned int e_machine)
     case EM_OR1K:
     case EM_PPC64:
     case EM_PPC:
+    case EM_TI_PRU:
+    case EM_RISCV:
     case EM_RL78:
     case EM_RX:
     case EM_S390:
@@ -1314,6 +1318,10 @@ dump_relocations (FILE * file,
 	  rtype = elf_mips_reloc_type (type);
 	  break;
 
+	case EM_RISCV:
+	  rtype = elf_riscv_reloc_type (type);
+	  break;
+
 	case EM_ALPHA:
 	  rtype = elf_alpha_reloc_type (type);
 	  break;
@@ -1476,6 +1484,10 @@ dump_relocations (FILE * file,
 
 	case EM_ALTERA_NIOS2:
 	  rtype = elf_nios2_reloc_type (type);
+	  break;
+
+	case EM_TI_PRU:
+	  rtype = elf_pru_reloc_type (type);
 	  break;
 	}
 
@@ -2327,6 +2339,7 @@ get_machine_name (unsigned e_machine)
     case EM_CR16:
     case EM_MICROBLAZE:
     case EM_MICROBLAZE_OLD:	return "Xilinx MicroBlaze";
+    case EM_RISCV:		return "RISC-V";
     case EM_RL78:		return "Renesas RL78";
     case EM_RX:			return "Renesas RX";
     case EM_METAG:		return "Imagination Technologies Meta processor architecture";
@@ -2363,7 +2376,7 @@ get_machine_name (unsigned e_machine)
     case EM_CSR_KALIMBA:	return "CSR Kalimba architecture family";
     case EM_Z80:		return "Zilog Z80";
     case EM_AMDGPU:		return "AMD GPU architecture";
-    case EM_RISCV:		return "RISC-V";
+    case EM_TI_PRU:		return "TI PRU I/O processor";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -3308,6 +3321,30 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  decode_NDS32_machine_flags (e_flags, buf, sizeof buf);
 	  break;
 
+	case EM_RISCV:
+	  if (e_flags & EF_RISCV_RVC)
+	    strcat (buf, ", RVC");
+
+	  switch (e_flags & EF_RISCV_FLOAT_ABI)
+	    {
+	    case EF_RISCV_FLOAT_ABI_SOFT:
+	      strcat (buf, ", soft-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_SINGLE:
+	      strcat (buf, ", single-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_DOUBLE:
+	      strcat (buf, ", double-float ABI");
+	      break;
+
+	    case EF_RISCV_FLOAT_ABI_QUAD:
+	      strcat (buf, ", quad-float ABI");
+	      break;
+	    }
+	  break;
+
 	case EM_SH:
 	  switch ((e_flags & EF_SH_MACH_MASK))
 	    {
@@ -3784,7 +3821,7 @@ get_segment_type (unsigned long p_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOPROC+%lx", p_type - PT_LOPROC);
+	  sprintf (buff, "LOPROC+%#lx", p_type - PT_LOPROC);
 	}
       else if ((p_type >= PT_LOOS) && (p_type <= PT_HIOS))
 	{
@@ -3809,7 +3846,7 @@ get_segment_type (unsigned long p_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOOS+%lx", p_type - PT_LOOS);
+	  sprintf (buff, "LOOS+%#lx", p_type - PT_LOOS);
 	}
       else
 	snprintf (buff, sizeof (buff), _("<unknown>: %lx"), p_type);
@@ -4757,6 +4794,7 @@ process_program_headers (FILE * file)
 {
   Elf_Internal_Phdr * segment;
   unsigned int i;
+  Elf_Internal_Phdr * previous_load = NULL;
 
   if (elf_header.e_phnum == 0)
     {
@@ -4886,15 +4924,45 @@ process_program_headers (FILE * file)
 		      (segment->p_flags & PF_R ? 'R' : ' '),
 		      (segment->p_flags & PF_W ? 'W' : ' '),
 		      (segment->p_flags & PF_X ? 'E' : ' '));
-	      print_vma (segment->p_align, HEX);
+	      print_vma (segment->p_align, PREFIX_HEX);
 	    }
-	}
 
-      if (do_segments)
-	putc ('\n', stdout);
+	  putc ('\n', stdout);
+	}
 
       switch (segment->p_type)
 	{
+	case PT_LOAD:
+#if 0 /* Do not warn about out of order PT_LOAD segments.  Although officially
+	 required by the ELF standard, several programs, including the Linux
+	 kernel, make use of non-ordered segments.  */
+	  if (previous_load
+	      && previous_load->p_vaddr > segment->p_vaddr)
+	    error (_("LOAD segments must be sorted in order of increasing VirtAddr\n"));
+#endif
+	  if (segment->p_memsz < segment->p_filesz)
+	    error (_("the segment's file size is larger than its memory size\n"));
+	  previous_load = segment;
+	  break;
+
+	case PT_PHDR:
+	  /* PR 20815 - Verify that the program header is loaded into memory.  */
+	  if (i > 0 && previous_load != NULL)
+	    error (_("the PHDR segment must occur before any LOAD segment\n"));
+	  if (elf_header.e_machine != EM_PARISC)
+	    {
+	      unsigned int j;
+
+	      for (j = 1; j < elf_header.e_phnum; j++)
+		if (program_headers[j].p_vaddr <= segment->p_vaddr
+		    && (program_headers[j].p_vaddr + program_headers[j].p_memsz)
+		    >= (segment->p_vaddr + segment->p_filesz))
+		  break;
+	      if (j == elf_header.e_phnum)
+		error (_("the PHDR segment is not covered by a LOAD segment\n"));
+	    }
+	  break;
+
 	case PT_DYNAMIC:
 	  if (dynamic_addr)
 	    error (_("more than one dynamic segment\n"));
@@ -5965,7 +6033,7 @@ process_section_headers (FILE * file)
 	case SHT_REL:
 	case SHT_RELA:
 	  if (section->sh_link < 1
-	      || section->sh_link > elf_header.e_shnum
+	      || section->sh_link >= elf_header.e_shnum
 	      || (section_headers[section->sh_link].sh_type != SHT_SYMTAB
 		  && section_headers[section->sh_link].sh_type != SHT_DYNSYM))
 	    warn (_("[%2u]: Link field (%u) should index a symtab section.\n"),
@@ -5979,7 +6047,7 @@ process_section_headers (FILE * file)
 	case SHT_GNU_verdef:
 	case SHT_GNU_LIBLIST:
 	  if (section->sh_link < 1
-	      || section->sh_link > elf_header.e_shnum
+	      || section->sh_link >= elf_header.e_shnum
 	      || section_headers[section->sh_link].sh_type != SHT_STRTAB)
 	    warn (_("[%2u]: Link field (%u) should index a string section.\n"),
 		  i, section->sh_link);
@@ -6012,7 +6080,7 @@ process_section_headers (FILE * file)
 	case SHT_REL:
 	case SHT_RELA:
 	  if (section->sh_info < 1
-	      || section->sh_info > elf_header.e_shnum
+	      || section->sh_info >= elf_header.e_shnum
 	      || (section_headers[section->sh_info].sh_type != SHT_PROGBITS
 		  && section_headers[section->sh_info].sh_type != SHT_NOBITS
 		  && section_headers[section->sh_info].sh_type != SHT_NOTE
@@ -6024,8 +6092,8 @@ process_section_headers (FILE * file)
 		  && (streq (SECTION_NAME (section), ".rel.dyn")
 		      || streq (SECTION_NAME (section), ".rela.dyn")))
 		/* The .rel.dyn and .rela.dyn sections have an sh_info field
-		   of zero.  No idea why.  I would have expected the index
-		   of the .plt section.  */
+		   of zero.  The relocations in these sections may apply
+		   to many different sections.  */
 		   ;
 	      else
 		warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
@@ -6055,11 +6123,13 @@ process_section_headers (FILE * file)
 	  if (section->sh_type == SHT_NOBITS)
 	    /* NOBITS section headers with non-zero sh_info fields can be
 	       created when a binary is stripped of everything but its debug
-	       information.  The stripped sections have their headers preserved but their types set to SHT_NOBITS.  so do not check this type of section.  */
+	       information.  The stripped sections have their headers
+	       preserved but their types set to SHT_NOBITS.  So do not check
+	       this type of section.  */
 	    ;
 	  else if (section->sh_flags & SHF_INFO_LINK)
 	    {
-	      if (section->sh_info < 1 || section->sh_info > elf_header.e_shnum)
+	      if (section->sh_info < 1 || section->sh_info >= elf_header.e_shnum)
 		warn (_("[%2u]: Expected link to another section in info field"), i);
 	    }
 	  else if (section->sh_type < SHT_LOOS && section->sh_info != 0)
@@ -9924,7 +9994,7 @@ process_version_sections (FILE * file)
 		int j;
 		int isum;
 
-		/* Check for very large indicies.  */
+		/* Check for very large indices.  */
 		if (idx > (size_t) (endbuf - (char *) edefs))
 		  break;
 
@@ -11685,7 +11755,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_960:
       return reloc_type == 2; /* R_960_32.  */
     case EM_AARCH64:
-      return reloc_type == 258; /* R_AARCH64_ABS32 */
+      return (reloc_type == 258
+	      || reloc_type == 1); /* R_AARCH64_ABS32 || R_AARCH64_P32_ABS32 */
     case EM_ADAPTEVA_EPIPHANY:
       return reloc_type == 3;
     case EM_ALPHA:
@@ -11788,6 +11859,10 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_PPC64_ADDR32.  */
     case EM_PPC:
       return reloc_type == 1; /* R_PPC_ADDR32.  */
+    case EM_TI_PRU:
+      return reloc_type == 11; /* R_PRU_BFD_RELOC_32.  */
+    case EM_RISCV:
+      return reloc_type == 1; /* R_RISCV_32.  */
     case EM_RL78:
       return reloc_type == 1; /* R_RL78_DIR32.  */
     case EM_RX:
@@ -11941,6 +12016,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:
       return reloc_type == 38; /* R_PPC64_ADDR64.  */
+    case EM_RISCV:
+      return reloc_type == 2; /* R_RISCV_64.  */
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
@@ -12066,6 +12143,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 9; /* R_NIOS_16.  */
     case EM_OR1K:
       return reloc_type == 2; /* R_OR1K_16.  */
+    case EM_TI_PRU:
+      return reloc_type == 8; /* R_PRU_BFD_RELOC_16.  */
     case EM_TI_C6000:
       return reloc_type == 2; /* R_C6000_ABS16.  */
     case EM_VISIUM:
@@ -12112,6 +12191,7 @@ is_none_reloc (unsigned int reloc_type)
     case EM_PARISC:  /* R_PARISC_NONE.  */
     case EM_PPC64:   /* R_PPC64_NONE.  */
     case EM_PPC:     /* R_PPC_NONE.  */
+    case EM_RISCV:   /* R_RISCV_NONE.  */
     case EM_S390:    /* R_390_NONE.  */
     case EM_S390_OLD:
     case EM_SH:      /* R_SH_NONE.  */
@@ -12141,6 +12221,11 @@ is_none_reloc (unsigned int reloc_type)
 	      || reloc_type == 205  /* R_NDS32_DIFF16.  */
 	      || reloc_type == 206  /* R_NDS32_DIFF32.  */
 	      || reloc_type == 207  /* R_NDS32_ULEB128.  */);
+    case EM_TI_PRU:
+      return (reloc_type == 0       /* R_PRU_NONE.  */
+	      || reloc_type == 65   /* R_PRU_DIFF8.  */
+	      || reloc_type == 66   /* R_PRU_DIFF16.  */
+	      || reloc_type == 67   /* R_PRU_DIFF32.  */);
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return (reloc_type == 0      /* R_XTENSA_NONE.  */

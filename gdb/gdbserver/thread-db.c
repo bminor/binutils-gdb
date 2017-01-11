@@ -1,5 +1,5 @@
 /* Thread management interface, for the remote server for GDB.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -590,8 +590,7 @@ try_thread_db_load (const char *library)
 	  const char *const libpath = dladdr_to_soname (td_init);
 
 	  if (libpath != NULL)
-	    fprintf (stderr, "Host %s resolved to: %s.\n",
-		     library, libpath);
+	    debug_printf ("Host %s resolved to: %s.\n", library, libpath);
 	}
     }
 #endif

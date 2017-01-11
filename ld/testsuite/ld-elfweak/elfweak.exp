@@ -1,5 +1,5 @@
 # Expect script for ld-weak tests
-#   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -22,8 +22,10 @@
 #	     Eric Youngdale (eric@andante.jic.com)
 #
 
-# This test can only be run if ld generates native executables.
-if ![isnative] then {return}
+# Check to see if the C compiler works
+if { [which $CC] == 0 } {
+    return
+}
 
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
@@ -82,9 +84,9 @@ proc objdump_symstuff { objdump object expectfile } {
 
     if ![info exists SOBJDUMP_FLAGS] { set SOBJDUMP_FLAGS "" }
 
-    verbose -log "$objdump $SOBJDUMP_FLAGS $object | grep foo$  > $tmpdir/objdump.out"
-
-    catch "exec $objdump $SOBJDUMP_FLAGS $object | grep foo$  > $tmpdir/objdump.out" exec_output
+    set cmd "$objdump $SOBJDUMP_FLAGS $object | sed -n {s/^\\(\[0-9a-f\]* *\\)\\(\[gw\]\\)\\( *\\)\\(\[FO\]\\)/\\1\\2\\4\\3/;/foo$/p} > $tmpdir/objdump.out"
+    verbose -log $cmd
+    catch "exec $cmd" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 
@@ -123,7 +125,8 @@ proc objdump_symstuff { objdump object expectfile } {
 	close $file_a
 
 	while { [gets $file_b line] != $eof } {
-	    if [regexp "^#.*$" $line] then {
+	    if [regexp {\.text.* \.[^ ]*$} $line] then {
+		# Discard defined powerpc64 dot-symbols
 		continue
 	    } else {
 		lappend list_b $line
@@ -177,9 +180,9 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 
     if ![info exists DOBJDUMP_FLAGS] { set DOBJDUMP_FLAGS "" }
 
-    verbose -log "$objdump $DOBJDUMP_FLAGS $object | grep foo$ > $tmpdir/objdump.out"
-
-    catch "exec $objdump $DOBJDUMP_FLAGS $object | grep foo$ > $tmpdir/objdump.out" exec_output
+    set cmd "$objdump $DOBJDUMP_FLAGS $object | grep foo$ > $tmpdir/objdump.out"
+    verbose -log $cmd
+    catch "exec $cmd" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 
@@ -218,7 +221,8 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 	close $file_a
 
 	while { [gets $file_b line] != $eof } {
-	    if [regexp "^#.*$" $line] then {
+	    if [regexp {\.text.* \.[^ ]*$} $line] then {
+		# Discard defined powerpc64 dot-symbols
 		continue
 	    } else {
 		lappend list_b $line
@@ -288,7 +292,7 @@ proc build_lib {test libname objs dynsymexp} {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_simple_link $CC $tmpdir/$libname.so "$shared $files"]} {
+    if {![ld_link $CC $tmpdir/$libname.so "$shared $files"]} {
 	fail $test
 	return
     }
@@ -314,7 +318,7 @@ proc build_exec { test execname objs flags dat dynsymexp symexp} {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_simple_link $CC $tmpdir/$execname "$flags $files"]} {
+    if {![ld_link $CC $tmpdir/$execname "$flags $files"]} {
 	fail "$test"
 	return
     }
@@ -333,6 +337,10 @@ proc build_exec { test execname objs flags dat dynsymexp symexp} {
 	}
     }
 
+    if ![isnative] {
+	unsupported $test
+	return
+    }
     # Run the resulting program
     send_log "$tmpdir/$execname >$tmpdir/$execname.out\n"
     verbose "$tmpdir/$execname >$tmpdir/$execname.out"
@@ -400,7 +408,7 @@ if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c $tmpdir/main.o] {
     return
 }
 
-if {![ld_simple_link $CC $tmpdir/libbar.so "$shared $tmpdir/bar.o"]} {
+if {![ld_link $CC $tmpdir/libbar.so "$shared $tmpdir/bar.o"]} {
     fail "ELF weak"
     return
 }
@@ -435,17 +443,17 @@ if ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o] 
     return
 }
 
-if {![ld_simple_link $CC $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]} {
+if {![ld_link $CC $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]} {
     fail "ELF weak"
     return
 }
 
-if {![ld_simple_link $CC $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]} {
+if {![ld_link $CC $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]} {
     fail "ELF weak"
     return
 }
 
-if {![ld_simple_link $CC $tmpdir/libbar1a.so "$shared $tmpdir/bar1a.o $tmpdir/libfoo1a.so"]} {
+if {![ld_link $CC $tmpdir/libbar1a.so "$shared $tmpdir/bar1a.o $tmpdir/libfoo1a.so"]} {
     fail "ELF weak"
     return
 }
@@ -471,8 +479,8 @@ build_exec "ELF weak data first common" foo "main1.o bar1a.o foo1b.o" "" strongd
 build_exec "ELF weak data last common" foo "foo1b.o main1.o bar1a.o" "" strongdata "" strongcomm.sym
 build_exec "ELF weak data first DSO" foo "main1.o libbar1a.so libfoo1a.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
 build_exec "ELF weak data last DSO" foo "libfoo1a.so main1.o libbar1a.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
-build_exec "ELF weak data first DSO common" foo "main1.o libbar1a.so libfoo1b.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
-build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o libbar1a.so" "-Wl,-rpath,.,--no-as-needed" weakdata weakdata.dsym ""
+build_exec "ELF weak data first DSO common" foo "main1.o libbar1a.so libfoo1b.so" "-Wl,--no-as-needed,-rpath,.,-rpath-link,." weakdata weakdata.dsym ""
+build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o libbar1a.so" "-Wl,--no-as-needed,-rpath,.,-rpath-link,." weakdata weakdata.dsym ""
 
 if ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/size_foo.c $tmpdir/size_foo.o] {
     unresolved "ELF weak (size)"

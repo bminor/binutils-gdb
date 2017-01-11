@@ -1,4 +1,4 @@
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,6 +116,10 @@ if ![info exists env(EXEEXT)] {
 set octal "\[0-7\]+"
 
 set inferior_exited_re "(\\\[Inferior \[0-9\]+ \\(.*\\) exited)"
+
+# A regular expression that matches a value history number.
+# E.g., $1, $2, etc.
+set valnum_re "\\\$$decimal"
 
 ### Only procedures should come after this point.
 
@@ -519,7 +523,7 @@ proc runto { function args } {
 	}
 	-re "The target does not support running in non-stop mode.\r\n$gdb_prompt $" {
 	    if { $print_fail } {
-		unsupported "Non-stop mode not supported"
+		unsupported "non-stop mode not supported"
 	    }
 	    return 0
 	}
@@ -1918,6 +1922,14 @@ proc foreach_with_prefix {var list body} {
     }
 }
 
+# Like TCL's native proc, but defines a procedure that wraps its body
+# within 'with_test_prefix "$proc_name" { ... }'.
+proc proc_with_prefix {name arguments body} {
+    # Define the advertised proc.
+    proc $name $arguments [list with_test_prefix $name $body]
+}
+
+
 # Run BODY in the context of the caller.  After BODY is run, the variables
 # listed in VARS will be reset to the values they had before BODY was run.
 #
@@ -3138,7 +3150,7 @@ gdb_caching_proc target_is_gdbserver {
     global gdb_prompt
 
     set is_gdbserver -1
-    set test "Probing for GDBserver"
+    set test "probing for GDBserver"
 
     gdb_test_multiple "monitor help" $test {
 	-re "The following monitor commands are supported.*Quit GDBserver.*$gdb_prompt $" {
@@ -3590,7 +3602,7 @@ proc gdb_compile_pthreads {source dest type options} {
         }
     }
     if {!$built_binfile} {
-	unsupported "Couldn't compile [file tail $source]: ${why_msg}"
+	unsupported "couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
 }
@@ -3719,7 +3731,7 @@ proc gdb_compile_shlib_pthreads {sources dest options} {
         }
     }
     if {!$built_binfile} {
-        unsupported "Couldn't compile $sources: ${why_msg}"
+        unsupported "couldn't compile $sources: ${why_msg}"
         return -1
     }
 }
@@ -3759,7 +3771,7 @@ proc gdb_compile_objc {source dest type options} {
         }
     }
     if {!$built_binfile} {
-        unsupported "Couldn't compile [file tail $source]: ${why_msg}"
+        unsupported "couldn't compile [file tail $source]: ${why_msg}"
         return -1
     }
 }
@@ -5996,6 +6008,15 @@ proc capture_command_output { command prefix } {
 proc multi_line { args } {
     return [join $args "\r\n"]
 }
+
+# Similar to the above, but while multi_line is meant to be used to
+# match GDB output, this one is meant to be used to build strings to
+# send as GDB input.
+
+proc multi_line_input { args } {
+    return [join $args "\n"]
+}
+
 
 # Always load compatibility stuff.
 load_lib future.exp

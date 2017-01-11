@@ -1,6 +1,6 @@
 // icf.cc -- Identical Code Folding.
 //
-// Copyright (C) 2009-2016 Free Software Foundation, Inc.
+// Copyright (C) 2009-2017 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -545,7 +545,7 @@ get_section_contents(bool first_iteration,
     {
       buffer.append("Contents = ");
       buffer.append(reinterpret_cast<const char*>(contents), plen);
-      // Store the section contents that dont change to avoid recomputing
+      // Store the section contents that don't change to avoid recomputing
       // during the next call to this function.
       (*section_contents)[section_num] = buffer;
     }
@@ -670,7 +670,7 @@ match_sections(unsigned int iteration_num,
 	      // Check section alignment here.
 	      // The section with the larger alignment requirement
 	      // should be kept.  We assume alignment can only be 
-	      // zero or postive integral powers of two.
+	      // zero or positive integral powers of two.
 	      uint64_t align_i = section_addraligns[i];
 	      uint64_t align_kept = section_addraligns[kept_section];
 	      if (align_i <= align_kept)

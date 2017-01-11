@@ -1,5 +1,5 @@
 /* ARC-specific support for 32-bit ELF
-   Copyright (C) 1994-2016 Free Software Foundation, Inc.
+   Copyright (C) 1994-2017 Free Software Foundation, Inc.
    Contributed by Cupertino Miranda (cmiranda@synopsys.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -314,9 +314,6 @@ struct elf_arc_link_hash_entry
 struct elf_arc_link_hash_table
 {
   struct elf_link_hash_table elf;
-
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *srelbss;
 };
 
 static struct bfd_hash_entry *
@@ -374,8 +371,6 @@ arc_elf_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->srelbss = NULL;
 
   ret->elf.init_got_refcount.refcount = 0;
   ret->elf.init_got_refcount.glist = NULL;
@@ -1567,45 +1562,6 @@ elf_arc_relocate_section (bfd *		          output_bfd,
     (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
   == ARC_ELF_DATA ? ((struct elf_arc_link_hash_table *) ((p)->hash)) : NULL)
 
-/* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
-   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
-   hash table.  */
-
-static bfd_boolean
-arc_elf_create_dynamic_sections (bfd *dynobj,
-				    struct bfd_link_info *info)
-{
-  struct elf_arc_link_hash_table *htab;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab = elf_arc_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  if (bfd_link_executable (info))
-    {
-      /* Always allow copy relocs for building executables.  */
-      asection *s = bfd_get_linker_section (dynobj, ".rela.bss");
-      if (s == NULL)
-	{
-	  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
-	  s = bfd_make_section_anyway_with_flags (dynobj,
-						  ".rela.bss",
-						  (bed->dynamic_sec_flags
-						   | SEC_READONLY));
-	  if (s == NULL
-	      || ! bfd_set_section_alignment (dynobj, s,
-					      bed->s->log_file_align))
-	    return FALSE;
-	}
-      htab->srelbss = s;
-    }
-
-  return TRUE;
-}
-
 static struct dynamic_sections
 arc_create_dynamic_sections (bfd * abfd, struct bfd_link_info *info)
 {
@@ -2105,8 +2061,8 @@ elf_arc_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       struct elf_arc_link_hash_table *arc_htab = elf_arc_hash_table (info);
 
-      BFD_ASSERT (arc_htab->srelbss != NULL);
-      arc_htab->srelbss->size += sizeof (Elf32_External_Rela);
+      BFD_ASSERT (arc_htab->elf.srelbss != NULL);
+      arc_htab->elf.srelbss->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
     }
 
@@ -2161,16 +2117,16 @@ elf_arc_finish_dynamic_symbol (bfd * output_bfd,
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || arc_htab->srelbss == NULL)
+	  || arc_htab->elf.srelbss == NULL)
 	abort ();
 
       bfd_vma rel_offset = (h->root.u.def.value
 			    + h->root.u.def.section->output_section->vma
 			    + h->root.u.def.section->output_offset);
 
-      bfd_byte * loc = arc_htab->srelbss->contents
-	+ (arc_htab->srelbss->reloc_count * sizeof (Elf32_External_Rela));
-      arc_htab->srelbss->reloc_count++;
+      bfd_byte * loc = arc_htab->elf.srelbss->contents
+	+ (arc_htab->elf.srelbss->reloc_count * sizeof (Elf32_External_Rela));
+      arc_htab->elf.srelbss->reloc_count++;
 
       Elf_Internal_Rela rel;
       rel.r_addend = 0;
@@ -2240,7 +2196,6 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 	      GET_SYMBOL_OR_SECTION (DT_PLTGOT, NULL, ".plt")
 	      GET_SYMBOL_OR_SECTION (DT_JMPREL, NULL, ".rela.plt")
 	      GET_SYMBOL_OR_SECTION (DT_PLTRELSZ, NULL, ".rela.plt")
-	      GET_SYMBOL_OR_SECTION (DT_RELASZ, NULL, ".rela.plt")
 	      GET_SYMBOL_OR_SECTION (DT_VERSYM, NULL, ".gnu.version")
 	      GET_SYMBOL_OR_SECTION (DT_VERDEF, NULL, ".gnu.version_d")
 	      GET_SYMBOL_OR_SECTION (DT_VERNEED, NULL, ".gnu.version_r")
@@ -2287,12 +2242,6 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 
 		  case DT_PLTRELSZ:
 		    internal_dyn.d_un.d_val = s->size;
-		    do_it = TRUE;
-		    break;
-
-		  case DT_RELASZ:
-		    if (s != NULL)
-		      internal_dyn.d_un.d_val -= s->size;
 		    do_it = TRUE;
 		    break;
 
@@ -2370,7 +2319,7 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
 
       /* Set the contents of the .interp section to the
 	 interpreter.  */
-      if (!bfd_link_pic (info))
+      if (!bfd_link_pic (info) && !info->nointerp)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -2611,7 +2560,7 @@ elf32_arc_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
 #define elf_backend_relocate_section	     elf_arc_relocate_section
 #define elf_backend_check_relocs	     elf_arc_check_relocs
-#define elf_backend_create_dynamic_sections  arc_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections  _bfd_elf_create_dynamic_sections
 
 #define elf_backend_reloc_type_class		elf32_arc_reloc_type_class
 
@@ -2628,6 +2577,7 @@ elf32_arc_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_rela_plts_and_copies_p 1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
+#define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_may_use_rel_p	0
 #define elf_backend_may_use_rela_p	1

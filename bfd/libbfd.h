@@ -6,7 +6,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -378,16 +378,18 @@ extern bfd_boolean _bfd_archive_bsd44_construct_extended_name_table
 
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get VMS style
    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_vms_lib).  Some of them
-   are irrelevant and never called, so defined as NULL.  */
+   are irrelevant.  */
 
 extern bfd_boolean _bfd_vms_lib_write_archive_contents (bfd *arch);
-#define _bfd_vms_lib_slurp_armap NULL
-#define _bfd_vms_lib_slurp_extended_name_table NULL
-#define _bfd_vms_lib_construct_extended_name_table NULL
-#define _bfd_vms_lib_truncate_arname NULL
-#define _bfd_vms_lib_write_armap NULL
-#define _bfd_vms_lib_read_ar_hdr NULL
-#define _bfd_vms_lib_write_ar_hdr NULL
+#define _bfd_vms_lib_slurp_armap _bfd_noarchive_slurp_armap
+#define _bfd_vms_lib_slurp_extended_name_table \
+  _bfd_noarchive_slurp_extended_name_table
+#define _bfd_vms_lib_construct_extended_name_table \
+  _bfd_noarchive_construct_extended_name_table
+#define _bfd_vms_lib_truncate_arname _bfd_noarchive_truncate_arname
+#define _bfd_vms_lib_write_armap _bfd_noarchive_write_armap
+#define _bfd_vms_lib_read_ar_hdr _bfd_noarchive_read_ar_hdr
+#define _bfd_vms_lib_write_ar_hdr _bfd_noarchive_write_ar_hdr
 extern bfd *_bfd_vms_lib_openr_next_archived_file (bfd *, bfd *);
 extern bfd *_bfd_vms_lib_get_elt_at_index (bfd *, symindex);
 extern int _bfd_vms_lib_generic_stat_arch_elt (bfd *, struct stat *);
@@ -614,12 +616,6 @@ extern void _bfd_generic_link_hash_table_free
 
 /* Generic add symbol routine.  */
 extern bfd_boolean _bfd_generic_link_add_symbols
-  (bfd *, struct bfd_link_info *);
-
-/* Generic add symbol routine.  This version is used by targets for
-   which the linker must collect constructors and destructors by name,
-   as the collect2 program does.  */
-extern bfd_boolean _bfd_generic_link_add_symbols_collect
   (bfd *, struct bfd_link_info *);
 
 /* Generic archive add symbol routine.  */
@@ -2166,6 +2162,53 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_AVR_LDS_STS_16",
   "BFD_RELOC_AVR_PORT6",
   "BFD_RELOC_AVR_PORT5",
+  "BFD_RELOC_RISCV_HI20",
+  "BFD_RELOC_RISCV_PCREL_HI20",
+  "BFD_RELOC_RISCV_PCREL_LO12_I",
+  "BFD_RELOC_RISCV_PCREL_LO12_S",
+  "BFD_RELOC_RISCV_LO12_I",
+  "BFD_RELOC_RISCV_LO12_S",
+  "BFD_RELOC_RISCV_GPREL12_I",
+  "BFD_RELOC_RISCV_GPREL12_S",
+  "BFD_RELOC_RISCV_TPREL_HI20",
+  "BFD_RELOC_RISCV_TPREL_LO12_I",
+  "BFD_RELOC_RISCV_TPREL_LO12_S",
+  "BFD_RELOC_RISCV_TPREL_ADD",
+  "BFD_RELOC_RISCV_CALL",
+  "BFD_RELOC_RISCV_CALL_PLT",
+  "BFD_RELOC_RISCV_ADD8",
+  "BFD_RELOC_RISCV_ADD16",
+  "BFD_RELOC_RISCV_ADD32",
+  "BFD_RELOC_RISCV_ADD64",
+  "BFD_RELOC_RISCV_SUB8",
+  "BFD_RELOC_RISCV_SUB16",
+  "BFD_RELOC_RISCV_SUB32",
+  "BFD_RELOC_RISCV_SUB64",
+  "BFD_RELOC_RISCV_GOT_HI20",
+  "BFD_RELOC_RISCV_TLS_GOT_HI20",
+  "BFD_RELOC_RISCV_TLS_GD_HI20",
+  "BFD_RELOC_RISCV_JMP",
+  "BFD_RELOC_RISCV_TLS_DTPMOD32",
+  "BFD_RELOC_RISCV_TLS_DTPREL32",
+  "BFD_RELOC_RISCV_TLS_DTPMOD64",
+  "BFD_RELOC_RISCV_TLS_DTPREL64",
+  "BFD_RELOC_RISCV_TLS_TPREL32",
+  "BFD_RELOC_RISCV_TLS_TPREL64",
+  "BFD_RELOC_RISCV_ALIGN",
+  "BFD_RELOC_RISCV_RVC_BRANCH",
+  "BFD_RELOC_RISCV_RVC_JUMP",
+  "BFD_RELOC_RISCV_RVC_LUI",
+  "BFD_RELOC_RISCV_GPREL_I",
+  "BFD_RELOC_RISCV_GPREL_S",
+  "BFD_RELOC_RISCV_TPREL_I",
+  "BFD_RELOC_RISCV_TPREL_S",
+  "BFD_RELOC_RISCV_RELAX",
+  "BFD_RELOC_RISCV_CFA",
+  "BFD_RELOC_RISCV_SUB6",
+  "BFD_RELOC_RISCV_SET6",
+  "BFD_RELOC_RISCV_SET8",
+  "BFD_RELOC_RISCV_SET16",
+  "BFD_RELOC_RISCV_SET32",
   "BFD_RELOC_RL78_NEG8",
   "BFD_RELOC_RL78_NEG16",
   "BFD_RELOC_RL78_NEG24",
@@ -2698,6 +2741,18 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_NIOS2_R2_L5I4X1",
   "BFD_RELOC_NIOS2_R2_T1X1I6",
   "BFD_RELOC_NIOS2_R2_T1X1I6_2",
+  "BFD_RELOC_PRU_U16",
+  "BFD_RELOC_PRU_U16_PMEMIMM",
+  "BFD_RELOC_PRU_LDI32",
+  "BFD_RELOC_PRU_S10_PCREL",
+  "BFD_RELOC_PRU_U8_PCREL",
+  "BFD_RELOC_PRU_32_PMEM",
+  "BFD_RELOC_PRU_16_PMEM",
+  "BFD_RELOC_PRU_GNU_DIFF8",
+  "BFD_RELOC_PRU_GNU_DIFF16",
+  "BFD_RELOC_PRU_GNU_DIFF32",
+  "BFD_RELOC_PRU_GNU_DIFF16_PMEM",
+  "BFD_RELOC_PRU_GNU_DIFF32_PMEM",
   "BFD_RELOC_IQ2000_OFFSET_16",
   "BFD_RELOC_IQ2000_OFFSET_21",
   "BFD_RELOC_IQ2000_UHI16",

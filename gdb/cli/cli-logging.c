@@ -1,6 +1,6 @@
 /* Command-line output logging for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -130,13 +130,11 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
 
   /* There is a former output pushed on the ui_out_redirect stack.  We
      want to replace it by OUTPUT so we must pop the former value
-     first.  We should either do both the pop and push or to do
-     neither of it.  At least do not try to push OUTPUT if the pop
-     already failed.  */
+     first.  Ideally, we should either do both the pop and push or do
+     neither of them.  */
 
-  if (ui_out_redirect (uiout, NULL) < 0
-      || ui_out_redirect (uiout, output) < 0)
-    warning (_("Current output protocol does not support redirection"));
+  uiout->redirect (NULL);
+  uiout->redirect (output);
 
   do_cleanups (cleanups);
 }
@@ -178,8 +176,8 @@ pop_output_files (void)
   saved_output.targerr = NULL;
 
   /* Stay consistent with handle_redirections.  */
-  if (!ui_out_is_mi_like_p (current_uiout))
-    ui_out_redirect (current_uiout, NULL);
+  if (!current_uiout->is_mi_like_p ())
+    current_uiout->redirect (NULL);
 }
 
 /* This is a helper for the `set logging' command.  */
@@ -245,11 +243,8 @@ handle_redirections (int from_tty)
     }
 
   /* Don't do the redirect for MI, it confuses MI's ui-out scheme.  */
-  if (!ui_out_is_mi_like_p (current_uiout))
-    {
-      if (ui_out_redirect (current_uiout, output) < 0)
-	warning (_("Current output protocol does not support redirection"));
-    }
+  if (!current_uiout->is_mi_like_p ())
+    current_uiout->redirect (output);
 }
 
 static void

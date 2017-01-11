@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
 [^:]+:	d503221f 	esb
 [^:]+:	d503221f 	esb
 [^:]+:	d5385305 	mrs	x5, erridr_el1

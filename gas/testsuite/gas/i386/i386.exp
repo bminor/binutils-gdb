@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2016 Free Software Foundation, Inc.
+# Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -261,6 +261,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "fma4"
     run_dump_test "lwp"
     run_dump_test "xop"
+    run_dump_test "xop32reg"
     run_dump_test "bmi"
     run_dump_test "bmi-intel"
     run_dump_test "tbm"
@@ -357,6 +358,16 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "avx512vbmi-intel"
     run_dump_test "avx512vbmi_vl"
     run_dump_test "avx512vbmi_vl-intel"
+    run_dump_test "avx512_4fmaps"
+    run_dump_test "avx512_4fmaps-intel"
+    run_dump_test "avx512_4fmaps_vl"
+    run_dump_test "avx512_4fmaps_vl-intel"
+    run_list_test "avx512_4fmaps-warn"
+    run_list_test "avx512_4fmaps_vl-warn"
+    run_dump_test "avx512_4vnniw"
+    run_dump_test "avx512_4vnniw-intel"
+    run_dump_test "avx512_4vnniw_vl"
+    run_dump_test "avx512_4vnniw_vl-intel"
     run_dump_test "clzero"
     run_dump_test "disassem"
     run_dump_test "mwaitx-bdver4"
@@ -368,6 +379,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "ptwrite-intel"
     run_list_test "avx512vl-1" "-al"
     run_list_test "avx512vl-2" "-al"
+    run_dump_test "fpu-bad"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -759,6 +771,16 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-avx512vbmi-intel"
     run_dump_test "x86-64-avx512vbmi_vl"
     run_dump_test "x86-64-avx512vbmi_vl-intel"
+    run_dump_test "x86-64-avx512_4fmaps"
+    run_dump_test "x86-64-avx512_4fmaps-intel"
+    run_dump_test "x86-64-avx512_4fmaps_vl"
+    run_dump_test "x86-64-avx512_4fmaps_vl-intel"
+    run_list_test "x86-64-avx512_4fmaps-warn"
+    run_list_test "x86-64-avx512_4fmaps_vl-warn"
+    run_dump_test "x86-64-avx512_4vnniw"
+    run_dump_test "x86-64-avx512_4vnniw-intel"
+    run_dump_test "x86-64-avx512_4vnniw_vl"
+    run_dump_test "x86-64-avx512_4vnniw_vl-intel"
     run_dump_test "x86-64-clzero"
     run_dump_test "x86-64-mwaitx-bdver4"
     run_list_test "x86-64-mwaitx-reg"

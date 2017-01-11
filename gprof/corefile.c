@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -847,7 +847,7 @@ core_create_line_syms (void)
      The old way called symtab_finalize before the is_static pass,
      causing a problem since symtab_finalize uses is_static as part of
      its address conflict resolution algorithm.  Since global symbols
-     were prefered over static symbols, and all line symbols were
+     were preferred over static symbols, and all line symbols were
      global at that point, static function names that conflicted with
      their own line numbers (static, but labeled as global) were
      rejected in favor of the line num.

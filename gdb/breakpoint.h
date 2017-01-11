@@ -1,5 +1,5 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +26,7 @@
 #include "command.h"
 #include "break-common.h"
 #include "probe.h"
+#include <vector>
 
 struct value;
 struct block;
@@ -260,21 +261,17 @@ struct bp_target_info
   /* The length of the data cached in SHADOW_CONTENTS.  */
   int shadow_len;
 
-  /* The size of the placed breakpoint, according to
-     gdbarch_breakpoint_from_pc, when the breakpoint was inserted.
-     This is generally the same as SHADOW_LEN, unless we did not need
-     to read from the target to implement the memory breakpoint
-     (e.g. if a remote stub handled the details).  We may still need
-     the size to remove the breakpoint safely.  */
-  int placed_size;
+  /* The breakpoint's kind.  It is used in 'kind' parameter in Z
+     packets.  */
+  int kind;
 
-  /* Vector of conditions the target should evaluate if it supports target-side
-     breakpoint conditions.  */
-  VEC(agent_expr_p) *conditions;
+  /* Conditions the target should evaluate if it supports target-side
+     breakpoint conditions.  These are non-owning pointers.  */
+  std::vector<agent_expr *> conditions;
 
-  /* Vector of commands the target should evaluate if it supports
-     target-side breakpoint commands.  */
-  VEC(agent_expr_p) *tcommands;
+  /* Commands the target should evaluate if it supports target-side
+     breakpoint commands.  These are non-owning pointers.  */
+  std::vector<agent_expr *> tcommands;
 
   /* Flag that is true if the breakpoint should be left in place even
      when GDB is not connected.  */
@@ -343,12 +340,12 @@ struct bp_location
      different for different locations.  Only valid for real
      breakpoints; a watchpoint's conditional expression is stored in
      the owner breakpoint object.  */
-  struct expression *cond;
+  expression_up cond;
 
   /* Conditional expression in agent expression
      bytecode form.  This is used for stub-side breakpoint
      condition evaluation.  */
-  struct agent_expr *cond_bytecode;
+  agent_expr_up cond_bytecode;
 
   /* Signals that the condition has changed since the last time
      we updated the global location list.  This means the condition
@@ -365,7 +362,7 @@ struct bp_location
 
   enum condition_status condition_changed;
 
-  struct agent_expr *cmd_bytecode;
+  agent_expr_up cmd_bytecode;
 
   /* Signals that breakpoint conditions and/or commands need to be
      re-synched with the target.  This has no use other than
@@ -798,12 +795,12 @@ struct watchpoint
   char *exp_string_reparse;
 
   /* The expression we are watching, or NULL if not a watchpoint.  */
-  struct expression *exp;
+  expression_up exp;
   /* The largest block within which it is valid, or NULL if it is
      valid anywhere (e.g. consists just of global symbols).  */
   const struct block *exp_valid_block;
   /* The conditional expression if any.  */
-  struct expression *cond_exp;
+  expression_up cond_exp;
   /* The largest block within which it is valid, or NULL if it is
      valid anywhere (e.g. consists just of global symbols).  */
   const struct block *cond_exp_valid_block;
@@ -1456,7 +1453,7 @@ extern void enable_breakpoints_after_startup (void);
    after they've already read the commands into a struct
    command_line.  */
 extern enum command_control_type commands_from_control_command
-  (char *arg, struct command_line *cmd);
+  (const char *arg, struct command_line *cmd);
 
 extern void clear_breakpoint_hit_counts (void);
 
@@ -1534,6 +1531,12 @@ extern void delete_command (char *arg, int from_tty);
 extern void insert_single_step_breakpoint (struct gdbarch *,
 					   struct address_space *, 
 					   CORE_ADDR);
+
+/* Insert all software single step breakpoints for the current frame.
+   Return true if any software single step breakpoints are inserted,
+   otherwise, return false.  */
+extern int insert_single_step_breakpoints (struct gdbarch *);
+
 /* Check if any hardware watchpoints have triggered, according to the
    target.  */
 int watchpoints_triggered (struct target_waitstatus *);

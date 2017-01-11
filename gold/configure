@@ -3266,7 +3266,7 @@ fi
 
 sysroot_relocatable=0
 if test -n "$sysroot"; then
-  case "sysroot" in
+  case "$sysroot" in
     "${prefix}" | "${prefix}/"* | \
     "${exec_prefix}" | "${exec_prefix}/"* | \
     '${prefix}' | '${prefix}/'*| \
@@ -6774,7 +6774,7 @@ fi
 rm -f conftest*
 
 
-# Verify CC_FOR_BUILD to be compatible with waring flags
+# Verify CC_FOR_BUILD to be compatible with warning flags
 
 # Add -Wshadow if the compiler is a sufficiently recent version of GCC.
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext

@@ -1,6 +1,6 @@
 /* DWARF 2 Expression Evaluator.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dan@dberlin.org>.
 
@@ -179,10 +179,9 @@ struct dwarf_expr_context
 
   /* Return the base type given by the indicated DIE.  This can throw
      an exception if the DIE is invalid or does not represent a base
-     type.  If can also be NULL in the special case where the
-     callbacks are not performing evaluation, and thus it is
-     meaningful to substitute a stub type of the correct size.  */
-  virtual struct type *impl_get_base_type (cu_offset die)
+     type.  SIZE is non-zero if this function should verify that the
+     resulting type has the correct size.  */
+  virtual struct type *get_base_type (cu_offset die, int size)
   {
     /* Anything will do.  */
     return builtin_type (this->gdbarch)->builtin_int;
@@ -210,7 +209,6 @@ private:
   void push (struct value *value, int in_stack_memory);
   int stack_empty_p () const;
   void add_piece (ULONGEST size, ULONGEST offset);
-  struct type *get_base_type (cu_offset die, int size);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();
 };

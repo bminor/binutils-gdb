@@ -1,6 +1,6 @@
 # config.bfd
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,6 +53,73 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
+ i[3-7]86-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu* | i[3-7]86-*-knetbsd*-gnu | \
+ mips*-*-irix5* | mips*-*-irix6*)
+    # Not obsolete
+    ;;
+ *-*-netware* | \
+ arm-epoc-pe* | \
+ arm*-*-aout | \
+ arm*-*-coff | \
+ h8300*-*-coff | \
+ h8500*-*-coff | \
+ i[3-7]86-*-sco3.2v5*coff | \
+ i[3-7]86-*-sysv4* | i[3-7]86-*-unixware* | \
+ i[3-7]86-*-sco3.2v5* | \
+ i[3-7]86-*-dgux* | i[3-7]86-*-sysv5* | \
+ i[3-7]86-*-chorus* | \
+ i[3-7]86-*-sysv* | i[3-7]86-*-isc* | i[3-7]86-*-sco* | i[3-7]86-*-coff | \
+ i[3-7]86-*-aix* | \
+ i[3-7]86-sequent-bsd* | \
+ i[3-7]86-*-freebsdaout* | i[3-7]86-*-freebsd[12].* | \
+ i[3-7]86-*-freebsd[12] | \
+ i[3-7]86-*-netbsdaout* | i[3-7]86-*-netbsd* | \
+ i[3-7]86-*-openbsd[0-2].* | i[3-7]86-*-openbsd3.[0-3] | \
+ i[3-7]86-*-netware* | \
+ i[3-7]86-*-linux*aout* | \
+ i[3-7]86-*-mach* | i[3-7]86-*-osf1mk* | \
+ i[3-7]86-*-os9k | \
+ i[3-7]86-none-* | \
+ i[3-7]86-*-aout* | i[3-7]86*-*-vsta* | \
+ i860-*-* | \
+ i960-*-* | \
+ m68*-motorola-sysv* | m68*-hp-bsd* | m68*-*-aout* | \
+ m68*-*-coff* | m68*-*-sysv* | \
+ m68*-*-hpux* | \
+ m68*-*-linux*aout* | \
+ m68*-hp*-netbsd* | \
+ m68*-*-netbsdaout* | \
+ m68*-*-sunos* | m68*-*-os68k* | m68*-*-vxworks* | m68*-netx-* | \
+ m68*-*-bsd* | m68*-*-vsta* | \
+ m68*-ericsson-* | \
+ m68*-*-psos* | \
+ m88*-*-* | \
+ mips*-big-* | \
+ mips*-dec-* | mips*el-*-ecoff* | \
+ mips*-*-ecoff* | \
+ mips*-sgi-* | mips*-*-bsd* | \
+ mips*-*-lnews* | \
+ mips*-*-sysv* | mips*-*-riscos* | \
+ ns32k-*-* | \
+ sh*-*-symbianelf* | \
+ sh-*-rtemscoff* | \
+ sparclet-*-aout* | \
+ sparc86x-*-aout* | \
+ sparc*-*-chorus* | \
+ sparc-*-linux*aout* | \
+ sparc-*-netbsdaout* | \
+ sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1] | \
+ sparc-*-netware* | \
+ sparc64-*-aout* | \
+ sparc*-*-coff* | \
+ tahoe-*-* | \
+ vax-*-bsd* | vax-*-ultrix* | \
+ we32k-*-* | \
+ w65-*-* | \
+ *-*-ieee* | \
+ *-adobe-* | \
+ *-sony-* | \
+ *-tandem-* | \
  i370-* | \
  sh5*-*-* | sh64*-*-* | \
  null)
@@ -122,6 +189,8 @@ or1k*|or1knd*)	 targ_archs=bfd_or1k_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
 pj*)		 targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*)	 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+pru*)		 targ_archs=bfd_pru_arch ;;
+riscv*)		 targ_archs=bfd_riscv_arch ;;
 rs6000)		 targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 s390*)		 targ_archs=bfd_s390_arch ;;
 sh*)		 targ_archs=bfd_sh_arch ;;
@@ -188,6 +257,11 @@ case "${targ}" in
     want64=true
     ;;
   aarch64-*-freebsd*)
+    targ_defvec=aarch64_elf64_le_vec
+    targ_selvecs="aarch64_elf64_be_vec arm_elf32_le_vec arm_elf32_be_vec"
+    want64=true
+    ;;
+  aarch64-*-fuchsia*)
     targ_defvec=aarch64_elf64_le_vec
     targ_selvecs="aarch64_elf64_be_vec arm_elf32_le_vec arm_elf32_be_vec"
     want64=true
@@ -290,6 +364,10 @@ case "${targ}" in
     targ_defvec=arm_mach_o_vec
     targ_selvecs="mach_o_le_vec mach_o_be_vec mach_o_fat_vec"
     targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
+    ;;
+  arm-*-fuchsia*)
+    targ_defvec=arm_elf32_le_vec
+    targ_selvecs="arm_elf32_be_vec"
     ;;
   arm-*-nacl*)
     targ_defvec=arm_elf32_nacl_le_vec
@@ -698,7 +776,7 @@ case "${targ}" in
     targ_selvecs="i386_elf32_vec iamcu_elf32_vec l1om_elf64_vec k1om_elf64_vec"
     want64=true
     ;;
-  x86_64-*-elf* | x86_64-*-rtems*)
+  x86_64-*-elf* | x86_64-*-rtems* | x86_64-*-fuchsia)
     targ_defvec=x86_64_elf64_vec
     targ_selvecs="i386_elf32_vec iamcu_elf32_vec x86_64_elf32_vec l1om_elf64_vec k1om_elf64_vec"
     want64=true
@@ -1358,6 +1436,25 @@ case "${targ}" in
     targ_defvec=powerpc_pe_le_vec
     targ_selvecs="powerpc_pei_le_vec powerpc_pei_vec powerpc_pe_le_vec powerpc_pe_vec"
     ;;
+
+  pru-*-*)
+    targ_defvec=pru_elf32_vec
+    targ_underscore=yes
+    ;;
+
+#ifdef BFD64
+  riscv32-*-*)
+    targ_defvec=riscv_elf32_vec
+    targ_selvecs="riscv_elf32_vec"
+    want64=true
+    ;;
+
+  riscv64-*-*)
+    targ_defvec=riscv_elf64_vec
+    targ_selvecs="riscv_elf32_vec riscv_elf64_vec"
+    want64=true
+    ;;
+#endif
 
   rl78-*-elf)
     targ_defvec=rl78_elf32_vec

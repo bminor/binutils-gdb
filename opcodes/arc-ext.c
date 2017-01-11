@@ -1,5 +1,5 @@
 /* ARC target-dependent stuff.  Extension structure access functions
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    This file is part of libopcodes.
 
@@ -280,7 +280,7 @@ ExtReadWrite_image (enum ExtReadWrite val)
 /* Get the name of an extension instruction.  */
 
 const extInstruction_t *
-arcExtMap_insn (int opcode, int insn)
+arcExtMap_insn (int opcode, unsigned long long insn)
 {
   /* Here the following tasks need to be done.  First of all, the
      opcode stored in the Extension Map is the real opcode.  However,
