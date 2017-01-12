@@ -1,5 +1,9 @@
 2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-nat.c (linux_nat_can_async_p): Update comment.
+
+2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* serial.c (serial_open): Forget about "pc" and "lpt" serial interface.
 
 2017-01-11  Simon Marchi  <simon.marchi@ericsson.com>
