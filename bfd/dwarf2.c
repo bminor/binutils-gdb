@@ -3921,7 +3921,11 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   msec = find_debug_info (debug_bfd, debug_sections, NULL);
   if (msec == NULL && abfd == debug_bfd)
     {
-      char * debug_filename = bfd_follow_gnu_debuglink (abfd, DEBUGDIR);
+      char * debug_filename;
+
+      debug_filename = bfd_follow_build_id_debuglink (abfd, DEBUGDIR);
+      if (debug_filename == NULL)
+	debug_filename = bfd_follow_gnu_debuglink (abfd, DEBUGDIR);
 
       if (debug_filename == NULL)
 	/* No dwarf2 info, and no gnu_debuglink to follow.

@@ -1121,6 +1121,8 @@ struct bfd_section *bfd_create_gnu_debuglink_section
 bfd_boolean bfd_fill_in_gnu_debuglink_section
    (bfd *abfd, struct bfd_section *sect, const char *filename);
 
+char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
+
 /* Extracted from libbfd.c.  */
 
 /* Byte swapping macros for user section data.  */
