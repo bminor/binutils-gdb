@@ -6333,3 +6333,47 @@ find_end_of_line (char *s, int mri_string)
 {
   return _find_end_of_line (s, mri_string, 0, 0);
 }
+
+static char *saved_ilp = NULL;
+static char *saved_limit;
+
+/* Use BUF as a temporary input pointer for calling other functions in this
+   file.  BUF must be a C string, so that its end can be found by strlen.
+   Also sets the buffer_limit variable (local to this file) so that buffer
+   overruns should not occur.  Saves the current input line pointer so that
+   it can be restored by calling restore_ilp().
+
+   Does not support recursion.
+
+   FIXME: This function is currently only used by stabs.c but that
+   should be extended to other files in the gas source directory.  */
+
+void
+temp_ilp (char *buf)
+{
+  gas_assert (saved_ilp == NULL);
+  gas_assert (buf != NULL);
+
+  saved_ilp = input_line_pointer;
+  saved_limit = buffer_limit;
+  /* Prevent the assert in restore_ilp from triggering if
+     the input_line_pointer has not yet been initialised.  */
+  if (saved_ilp == NULL)
+    saved_limit = saved_ilp = (char *) "";
+
+  input_line_pointer = buf;
+  buffer_limit = buf + strlen (buf);
+}
+
+/* Restore a saved input line pointer.  */
+
+void
+restore_ilp (void)
+{
+  gas_assert (saved_ilp != NULL);
+
+  input_line_pointer = saved_ilp;
+  buffer_limit = saved_limit;
+
+  saved_ilp = NULL;
+}

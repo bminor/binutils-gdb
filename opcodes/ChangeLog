@@ -1,3 +1,26 @@
+2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F3855, EVEX_W_0F3855_P_2.
+	* i386-dis-evex.h (evex_table): Updated.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_VPOPCNTDQ_FLAGS,
+	CPU_ANY_AVX512_VPOPCNTDQ_FLAGS. Update CPU_ANY_AVX512F_FLAGS.
+	(cpu_flags): Add CpuAVX512_VPOPCNTDQ.
+	* i386-opc.h (enum): (AVX512_VPOPCNTDQ): New.
+	(i386_cpu_flags): Add cpuavx512_vpopcntdq.
+	* i386-opc.tbl: Add Intel AVX512_VPOPCNTDQ instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Ditto.
+
+2017-01-12  Yao Qi  <yao.qi@linaro.org>
+
+	* msp430-dis.c (msp430_singleoperand): Return -1 if
+	msp430dis_opcode_signed returns false.
+	(msp430_doubleoperand): Likewise.
+	(msp430_branchinstr): Return -1 if
+	msp430dis_opcode_unsigned returns false.
+	(msp430x_calla_instr): Likewise.
+	(print_insn_msp430): Likewise.
+
 2017-01-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 20946

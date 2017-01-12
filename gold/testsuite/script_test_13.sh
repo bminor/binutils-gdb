@@ -38,4 +38,4 @@ check()
     fi
 }
 
-check "script_test_13.stdout" "\\.rela\\.dyn[[:space:]]\\+RELA[[:space:]]\\+0\\+10000\\b"
+check "script_test_13.stdout" "\.rela\?\.dyn[[:space:]]\+RELA\?[[:space:]]\+0\+10000\b"

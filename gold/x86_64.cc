@@ -478,29 +478,29 @@ class Output_data_plt_x86_64_bnd : public Output_data_plt_x86_64<64>
 
   virtual void
   do_fill_first_plt_entry(unsigned char* pov,
-			  typename elfcpp::Elf_types<64>::Elf_Addr got_addr,
-			  typename elfcpp::Elf_types<64>::Elf_Addr plt_addr);
+			  elfcpp::Elf_types<64>::Elf_Addr got_addr,
+			  elfcpp::Elf_types<64>::Elf_Addr plt_addr);
 
   virtual unsigned int
   do_fill_plt_entry(unsigned char* pov,
-		    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-		    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
+		    elfcpp::Elf_types<64>::Elf_Addr got_address,
+		    elfcpp::Elf_types<64>::Elf_Addr plt_address,
 		    unsigned int got_offset,
 		    unsigned int plt_offset,
 		    unsigned int plt_index);
 
   virtual void
   do_fill_tlsdesc_entry(unsigned char* pov,
-			typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-			typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
-			typename elfcpp::Elf_types<64>::Elf_Addr got_base,
+			elfcpp::Elf_types<64>::Elf_Addr got_address,
+			elfcpp::Elf_types<64>::Elf_Addr plt_address,
+			elfcpp::Elf_types<64>::Elf_Addr got_base,
 			unsigned int tlsdesc_got_offset,
 			unsigned int plt_offset);
 
   void
   fill_aplt_entry(unsigned char* pov,
-		  typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-		  typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
+		  elfcpp::Elf_types<64>::Elf_Addr got_address,
+		  elfcpp::Elf_types<64>::Elf_Addr plt_address,
 		  unsigned int got_offset,
 		  unsigned int plt_offset,
 		  unsigned int plt_index);
@@ -1870,8 +1870,8 @@ Output_data_plt_x86_64_bnd::first_plt_entry[plt_entry_size] =
 void
 Output_data_plt_x86_64_bnd::do_fill_first_plt_entry(
     unsigned char* pov,
-    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-    typename elfcpp::Elf_types<64>::Elf_Addr plt_address)
+    elfcpp::Elf_types<64>::Elf_Addr got_address,
+    elfcpp::Elf_types<64>::Elf_Addr plt_address)
 {
   memcpy(pov, first_plt_entry, plt_entry_size);
   // We do a jmp relative to the PC at the end of this instruction.
@@ -1910,8 +1910,8 @@ Output_data_plt_x86_64_bnd::aplt_entry[aplt_entry_size] =
 unsigned int
 Output_data_plt_x86_64_bnd::do_fill_plt_entry(
     unsigned char* pov,
-    typename elfcpp::Elf_types<64>::Elf_Addr,
-    typename elfcpp::Elf_types<64>::Elf_Addr,
+    elfcpp::Elf_types<64>::Elf_Addr,
+    elfcpp::Elf_types<64>::Elf_Addr,
     unsigned int,
     unsigned int plt_offset,
     unsigned int plt_index)
@@ -1925,8 +1925,8 @@ Output_data_plt_x86_64_bnd::do_fill_plt_entry(
 void
 Output_data_plt_x86_64_bnd::fill_aplt_entry(
     unsigned char* pov,
-    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
+    elfcpp::Elf_types<64>::Elf_Addr got_address,
+    elfcpp::Elf_types<64>::Elf_Addr plt_address,
     unsigned int got_offset,
     unsigned int plt_offset,
     unsigned int plt_index)
@@ -1959,9 +1959,9 @@ Output_data_plt_x86_64_bnd::tlsdesc_plt_entry[plt_entry_size] =
 void
 Output_data_plt_x86_64_bnd::do_fill_tlsdesc_entry(
     unsigned char* pov,
-    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
-    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
-    typename elfcpp::Elf_types<64>::Elf_Addr got_base,
+    elfcpp::Elf_types<64>::Elf_Addr got_address,
+    elfcpp::Elf_types<64>::Elf_Addr plt_address,
+    elfcpp::Elf_types<64>::Elf_Addr got_base,
     unsigned int tlsdesc_got_offset,
     unsigned int plt_offset)
 {
@@ -2161,13 +2161,13 @@ Output_data_plt_x86_64_bnd::do_write(Output_file* of)
   unsigned char* pov = oview;
 
   // The base address of the .plt section.
-  typename elfcpp::Elf_types<64>::Elf_Addr plt_address = this->address();
+  elfcpp::Elf_types<64>::Elf_Addr plt_address = this->address();
   // The base address of the .got section.
-  typename elfcpp::Elf_types<64>::Elf_Addr got_base = got->address();
+  elfcpp::Elf_types<64>::Elf_Addr got_base = got->address();
   // The base address of the PLT portion of the .got section,
   // which is where the GOT pointer will point, and where the
   // three reserved GOT entries are located.
-  typename elfcpp::Elf_types<64>::Elf_Addr got_address = got_plt->address();
+  elfcpp::Elf_types<64>::Elf_Addr got_address = got_plt->address();
 
   this->fill_first_plt_entry(pov, got_address, plt_address);
   pov += plt_entry_size;

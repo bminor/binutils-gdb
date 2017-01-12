@@ -40,6 +40,15 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
+0+58 0000000000000014 0000005c FDE cie=00000000 pc=0000000000000240..0000000000000248
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+
 
 Disassembly of section .plt:
 
