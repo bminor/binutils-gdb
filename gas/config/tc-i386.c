@@ -966,6 +966,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_4FMAPS_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512_4vnniw"), PROCESSOR_UNKNOWN,
     CPU_AVX512_4VNNIW_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx512_vpopcntdq"), PROCESSOR_UNKNOWN,
+    CPU_AVX512_VPOPCNTDQ_FLAGS, 0 },
   { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
     CPU_CLZERO_FLAGS, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
@@ -1005,6 +1007,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512vbmi"), CPU_ANY_AVX512VBMI_FLAGS },
   { STRING_COMMA_LEN ("noavx512_4fmaps"), CPU_ANY_AVX512_4FMAPS_FLAGS },
   { STRING_COMMA_LEN ("noavx512_4vnniw"), CPU_ANY_AVX512_4VNNIW_FLAGS },
+  { STRING_COMMA_LEN ("noavx512_vpopcntdq"), CPU_ANY_AVX512_VPOPCNTDQ_FLAGS },
 };
 
 #ifdef I386COFF
