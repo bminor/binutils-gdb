@@ -209,11 +209,7 @@ serial_open (const char *name)
   const struct serial_ops *ops;
   const char *open_name = name;
 
-  if (strcmp (name, "pc") == 0)
-    ops = serial_interface_lookup ("pc");
-  else if (startswith (name, "lpt"))
-    ops = serial_interface_lookup ("parallel");
-  else if (startswith (name, "|"))
+  if (startswith (name, "|"))
     {
       ops = serial_interface_lookup ("pipe");
       /* Discard ``|'' and any space before the command itself.  */

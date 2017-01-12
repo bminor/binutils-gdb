@@ -1,3 +1,7 @@
+2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* serial.c (serial_open): Forget about "pc" and "lpt" serial interface.
+
 2017-01-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-decode.c (lookup_cmd_1): Fix typo in comment.
