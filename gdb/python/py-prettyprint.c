@@ -190,21 +190,22 @@ find_pretty_printer (PyObject *value)
 static PyObject *
 pretty_print_one_value (PyObject *printer, struct value **out_value)
 {
-  PyObject *result = NULL;
+  gdbpy_ref<> result;
 
   *out_value = NULL;
   TRY
     {
-      result = PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst, NULL);
-      if (result)
+      result.reset (PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst,
+						NULL));
+      if (result != NULL)
 	{
-	  if (! gdbpy_is_string (result) && ! gdbpy_is_lazy_string (result)
+	  if (! gdbpy_is_string (result.get ())
+	      && ! gdbpy_is_lazy_string (result.get ())
 	      && result != Py_None)
 	    {
-	      *out_value = convert_value_from_python (result);
+	      *out_value = convert_value_from_python (result.get ());
 	      if (PyErr_Occurred ())
 		*out_value = NULL;
-	      Py_DECREF (result);
 	      result = NULL;
 	    }
 	}
@@ -214,7 +215,7 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
     }
   END_CATCH
 
-  return result;
+  return result.release ();
 }
 
 /* Return the display hint for the object printer, PRINTER.  Return

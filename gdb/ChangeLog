@@ -1,5 +1,10 @@
 2017-02-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-prettyprint.c (pretty_print_one_value): Use
+	gdbpy_ref.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-cmd.c (cmdpy_destroyer): Use gdbpy_ref.
 	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Use
 	gdbpy_ref.
