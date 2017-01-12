@@ -1,3 +1,16 @@
+2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_vpopcntdq.
+	(cpu_noarch): Add noavx512_vpopcntdq.
+	* doc/c-i386.texi: Document avx512_vpopcntdq, noavx512_vpopcntdq.
+	* testsuite/gas/i386/i386.exp: Run AVX512_VPOPCNTDQ tests.
+	* testsuite/gas/i386/avx512_vpopcntdqd-intel.d: New file.
+	* testsuite/gas/i386/avx512_vpopcntdqd.d: Ditto.
+	* testsuite/gas/i386/avx512_vpopcntdqd.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512_vpopcntdqd.s: Ditto.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

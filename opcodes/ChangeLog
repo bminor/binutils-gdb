@@ -1,3 +1,16 @@
+2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F3855, EVEX_W_0F3855_P_2.
+	* i386-dis-evex.h (evex_table): Updated.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_VPOPCNTDQ_FLAGS,
+	CPU_ANY_AVX512_VPOPCNTDQ_FLAGS. Update CPU_ANY_AVX512F_FLAGS.
+	(cpu_flags): Add CpuAVX512_VPOPCNTDQ.
+	* i386-opc.h (enum): (AVX512_VPOPCNTDQ): New.
+	(i386_cpu_flags): Add cpuavx512_vpopcntdq.
+	* i386-opc.tbl: Add Intel AVX512_VPOPCNTDQ instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Ditto.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
