@@ -1,32 +1,16 @@
-From c84bdc4656ef1cde76db0b35d875874b8e293bee Mon Sep 17 00:00:00 2001
+From 95206d45b64c1fcd8c46737b56a0b4518f3107cb Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Wed, 11 Jan 2017 10:56:19 -0800
-Subject: [PATCH 1/2] Gold: Fix build and test with GCC 4.2
+Subject: [PATCH] Gold: Fix build with GCC 4.2
 
-GCC 4.2 doesn't like typename outside of template, warn 0x80008000 as
-64-bit constant as well as
-
-extern int* const p = &a;
+GCC 4.2 warns 0x80008000 as 64-bit constant.
 
 	PR gold/21040
 	* powerpc.cc (Powerpc_relobj<size, big_endian>::make_toc_relative):
 	Cast 0x80008000 to uint64_t.
-	* x86_64.ccx86_64.cc
-	(Output_data_plt_x86_64_bnd::do_fill_first_plt_entry): Remove
-	typename.
-	(Output_data_plt_x86_64_bnd::do_fill_plt_entry): Likewise.
-	(Output_data_plt_x86_64_bnd::tlsdesc_plt_entry): Likewise.
-	(Output_data_plt_x86_64_bnd::fill_aplt_entry): Likewise.
-	(Output_data_plt_x86_64_bnd::do_write): Likewise.
-	* testsuite/Makefile.am (copy_test_relro_1_pic.o): Compile with
-	-Wno-error.
-	* testsuite/Makefile.in: Regeneated.
 ---
- gold/powerpc.cc            |  2 +-
- gold/testsuite/Makefile.am |  2 +-
- gold/testsuite/Makefile.in |  2 +-
- gold/x86_64.cc             | 42 +++++++++++++++++++++---------------------
- 4 files changed, 24 insertions(+), 24 deletions(-)
+ gold/powerpc.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gold/powerpc.cc b/gold/powerpc.cc
 index 3e4e08b..a67c336 100644
@@ -41,138 +25,6 @@ index 3e4e08b..a67c336 100644
      return false;
  
    *value = addr;
-diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
-index d9480ab..7d9e500 100644
---- a/gold/testsuite/Makefile.am
-+++ b/gold/testsuite/Makefile.am
-@@ -864,7 +864,7 @@ copy_test_relro_DEPENDENCIES = gcctestdir/ld copy_test_relro_1.so
- copy_test_relro_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-z,relro
- copy_test_relro_LDADD = copy_test_relro_1.so
- copy_test_relro_1_pic.o: copy_test_relro_1.cc
--	$(CXXCOMPILE) -c -fpic -o $@ $<
-+	$(CXXCOMPILE) -c -fpic -Wno-error -o $@ $<
- copy_test_relro_1.so: gcctestdir/ld copy_test_relro_1_pic.o
- 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro copy_test_relro_1_pic.o
- 
-diff --git a/gold/testsuite/Makefile.in b/gold/testsuite/Makefile.in
-index 2c67bf5..7dc8866 100644
---- a/gold/testsuite/Makefile.in
-+++ b/gold/testsuite/Makefile.in
-@@ -6133,7 +6133,7 @@ uninstall-am:
- @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
- @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
- @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_1_pic.o: copy_test_relro_1.cc
--@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -Wno-error -o $@ $<
- @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_1.so: gcctestdir/ld copy_test_relro_1_pic.o
- @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro copy_test_relro_1_pic.o
- @DEFAULT_TARGET_POWERPC_FALSE@@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_protected.err: copy_test_protected.o copy_test_2.so gcctestdir/ld
-diff --git a/gold/x86_64.cc b/gold/x86_64.cc
-index 4116429..ffa8761 100644
---- a/gold/x86_64.cc
-+++ b/gold/x86_64.cc
-@@ -478,29 +478,29 @@ class Output_data_plt_x86_64_bnd : public Output_data_plt_x86_64<64>
- 
-   virtual void
-   do_fill_first_plt_entry(unsigned char* pov,
--			  typename elfcpp::Elf_types<64>::Elf_Addr got_addr,
--			  typename elfcpp::Elf_types<64>::Elf_Addr plt_addr);
-+			  elfcpp::Elf_types<64>::Elf_Addr got_addr,
-+			  elfcpp::Elf_types<64>::Elf_Addr plt_addr);
- 
-   virtual unsigned int
-   do_fill_plt_entry(unsigned char* pov,
--		    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
--		    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
-+		    elfcpp::Elf_types<64>::Elf_Addr got_address,
-+		    elfcpp::Elf_types<64>::Elf_Addr plt_address,
- 		    unsigned int got_offset,
- 		    unsigned int plt_offset,
- 		    unsigned int plt_index);
- 
-   virtual void
-   do_fill_tlsdesc_entry(unsigned char* pov,
--			typename elfcpp::Elf_types<64>::Elf_Addr got_address,
--			typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
--			typename elfcpp::Elf_types<64>::Elf_Addr got_base,
-+			elfcpp::Elf_types<64>::Elf_Addr got_address,
-+			elfcpp::Elf_types<64>::Elf_Addr plt_address,
-+			elfcpp::Elf_types<64>::Elf_Addr got_base,
- 			unsigned int tlsdesc_got_offset,
- 			unsigned int plt_offset);
- 
-   void
-   fill_aplt_entry(unsigned char* pov,
--		  typename elfcpp::Elf_types<64>::Elf_Addr got_address,
--		  typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
-+		  elfcpp::Elf_types<64>::Elf_Addr got_address,
-+		  elfcpp::Elf_types<64>::Elf_Addr plt_address,
- 		  unsigned int got_offset,
- 		  unsigned int plt_offset,
- 		  unsigned int plt_index);
-@@ -1870,8 +1870,8 @@ Output_data_plt_x86_64_bnd::first_plt_entry[plt_entry_size] =
- void
- Output_data_plt_x86_64_bnd::do_fill_first_plt_entry(
-     unsigned char* pov,
--    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
--    typename elfcpp::Elf_types<64>::Elf_Addr plt_address)
-+    elfcpp::Elf_types<64>::Elf_Addr got_address,
-+    elfcpp::Elf_types<64>::Elf_Addr plt_address)
- {
-   memcpy(pov, first_plt_entry, plt_entry_size);
-   // We do a jmp relative to the PC at the end of this instruction.
-@@ -1910,8 +1910,8 @@ Output_data_plt_x86_64_bnd::aplt_entry[aplt_entry_size] =
- unsigned int
- Output_data_plt_x86_64_bnd::do_fill_plt_entry(
-     unsigned char* pov,
--    typename elfcpp::Elf_types<64>::Elf_Addr,
--    typename elfcpp::Elf_types<64>::Elf_Addr,
-+    elfcpp::Elf_types<64>::Elf_Addr,
-+    elfcpp::Elf_types<64>::Elf_Addr,
-     unsigned int,
-     unsigned int plt_offset,
-     unsigned int plt_index)
-@@ -1925,8 +1925,8 @@ Output_data_plt_x86_64_bnd::do_fill_plt_entry(
- void
- Output_data_plt_x86_64_bnd::fill_aplt_entry(
-     unsigned char* pov,
--    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
--    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
-+    elfcpp::Elf_types<64>::Elf_Addr got_address,
-+    elfcpp::Elf_types<64>::Elf_Addr plt_address,
-     unsigned int got_offset,
-     unsigned int plt_offset,
-     unsigned int plt_index)
-@@ -1959,9 +1959,9 @@ Output_data_plt_x86_64_bnd::tlsdesc_plt_entry[plt_entry_size] =
- void
- Output_data_plt_x86_64_bnd::do_fill_tlsdesc_entry(
-     unsigned char* pov,
--    typename elfcpp::Elf_types<64>::Elf_Addr got_address,
--    typename elfcpp::Elf_types<64>::Elf_Addr plt_address,
--    typename elfcpp::Elf_types<64>::Elf_Addr got_base,
-+    elfcpp::Elf_types<64>::Elf_Addr got_address,
-+    elfcpp::Elf_types<64>::Elf_Addr plt_address,
-+    elfcpp::Elf_types<64>::Elf_Addr got_base,
-     unsigned int tlsdesc_got_offset,
-     unsigned int plt_offset)
- {
-@@ -2161,13 +2161,13 @@ Output_data_plt_x86_64_bnd::do_write(Output_file* of)
-   unsigned char* pov = oview;
- 
-   // The base address of the .plt section.
--  typename elfcpp::Elf_types<64>::Elf_Addr plt_address = this->address();
-+  elfcpp::Elf_types<64>::Elf_Addr plt_address = this->address();
-   // The base address of the .got section.
--  typename elfcpp::Elf_types<64>::Elf_Addr got_base = got->address();
-+  elfcpp::Elf_types<64>::Elf_Addr got_base = got->address();
-   // The base address of the PLT portion of the .got section,
-   // which is where the GOT pointer will point, and where the
-   // three reserved GOT entries are located.
--  typename elfcpp::Elf_types<64>::Elf_Addr got_address = got_plt->address();
-+  elfcpp::Elf_types<64>::Elf_Addr got_address = got_plt->address();
- 
-   this->fill_first_plt_entry(pov, got_address, plt_address);
-   pov += plt_entry_size;
 -- 
-2.7.4
+2.9.3
 
