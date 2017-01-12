@@ -1,3 +1,15 @@
+2017-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21038
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add
+	plt_bnd_eh_frame.
+	(elf_x86_64_check_relocs): Create .eh_frame section for the
+	.plt.bnd section.
+	(elf_x86_64_size_dynamic_sections): Allocate and initialize
+	.eh_frame section for the .plt.bnd section.
+	(elf_x86_64_finish_dynamic_sections): Adjust .eh_frame section
+	for the .plt.bnd section.
+
 2017-01-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20876

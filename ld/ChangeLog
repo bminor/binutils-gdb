@@ -1,3 +1,11 @@
+2017-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21038
+	* testsuite/ld-x86-64/pr21038b.d: Updated.
+	* testsuite/ld-x86-64/pr21038c.d: New file.
+	* testsuite/ld-x86-64/pr21038c.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr21038c.
+
 2017-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21038
