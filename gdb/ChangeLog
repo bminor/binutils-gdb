@@ -1,5 +1,13 @@
 2017-02-10  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (do_start_initialization): New function, from
+	_initialize_python.
+	(_initialize_python): Call do_start_initialization.
+	* python/py-linetable.c (ltpy_iternext): Use explicit returns, not
+	goto.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-prettyprint.c (pretty_print_one_value): Use
 	gdbpy_ref.
 

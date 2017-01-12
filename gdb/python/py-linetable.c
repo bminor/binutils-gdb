@@ -407,7 +407,10 @@ ltpy_iternext (PyObject *self)
   LTPY_REQUIRE_VALID (iter_obj->source, symtab);
 
   if (iter_obj->current_index >= SYMTAB_LINETABLE (symtab)->nitems)
-    goto stop_iteration;
+    {
+      PyErr_SetNone (PyExc_StopIteration);
+      return NULL;
+    }
 
   item = &(SYMTAB_LINETABLE (symtab)->item[iter_obj->current_index]);
 
@@ -419,7 +422,10 @@ ltpy_iternext (PyObject *self)
 
       /* Exit if the internal value is the last item in the line table.  */
       if (iter_obj->current_index >= SYMTAB_LINETABLE (symtab)->nitems)
-	goto stop_iteration;
+	{
+	  PyErr_SetNone (PyExc_StopIteration);
+	  return NULL;
+	}
       item = &(SYMTAB_LINETABLE (symtab)->item[iter_obj->current_index]);
     }
 
@@ -427,10 +433,6 @@ ltpy_iternext (PyObject *self)
   iter_obj->current_index++;
 
   return obj;
-
- stop_iteration:
-  PyErr_SetNone (PyExc_StopIteration);
-  return NULL;
 }
 
 /* Implementation of gdb.LineTableIterator.is_valid (self) -> Boolean.
