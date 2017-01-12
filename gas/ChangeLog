@@ -1,3 +1,16 @@
+2017-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (temp_ilp): New function.  Installs a temporary input
+	line pointer.
+	(restore_ilp): New function.  Restores the original input line
+	pointer.
+	* read.h (temp_ilp): Prototype.
+	(restore_ilp): Prototype.
+	* stabs.c (dot_func_p): Use bfd_boolean type.
+	(generate_asm_file): Use temp_ilp and restore_ilp.
+	(stabs_generate_asm_lineno): Likewise.
+	(stabs_generate_asm_endfunc): Likewise.
+
 2017-01-11  Jeremy Soller  <jackpot51@gmail.com>
 
 	* configure.tgt: Add entry for i386-redox.
