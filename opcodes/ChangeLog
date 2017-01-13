@@ -1,5 +1,12 @@
 2017-01-13  Yao Qi  <yao.qi@linaro.org>
 
+	* m68k-dis.c (match_insn_m68k): Extend comments.  Return -1
+	if FETCH_DATA returns 0.
+	(m68k_scan_mask): Likewise.
+	(print_insn_m68k): Update code to handle -1 return value.
+
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
 	* m68k-dis.c (enum print_insn_arg_error): New.
 	(NEXTBYTE): Replace -3 with
 	PRINT_INSN_ARG_MEMORY_ERROR.

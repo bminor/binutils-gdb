@@ -1331,7 +1331,8 @@ print_insn_arg (const char *d,
 }
 
 /* Try to match the current instruction to best and if so, return the
-   number of bytes consumed from the instruction stream, else zero.  */
+   number of bytes consumed from the instruction stream, else zero.
+   Return -1 on memory error.  */
 
 static int
 match_insn_m68k (bfd_vma memaddr,
@@ -1415,12 +1416,14 @@ match_insn_m68k (bfd_vma memaddr,
 	 this because we know exactly what the second word is, and we
 	 aren't going to print anything based on it.  */
       p = buffer + 6;
-      FETCH_DATA (info, p);
+      if (!FETCH_DATA (info, p))
+	return -1;
       buffer[2] = buffer[4];
       buffer[3] = buffer[5];
     }
 
-  FETCH_DATA (info, p);
+  if (!FETCH_DATA (info, p))
+    return -1;
 
   save_p = p;
   info->print_address_func = dummy_print_address;
@@ -1439,7 +1442,7 @@ match_insn_m68k (bfd_vma memaddr,
 	{
 	  info->fprintf_func = save_printer;
 	  info->print_address_func = save_print_address;
-	  return 0;
+	  return eaten == PRINT_INSN_ARG_MEMORY_ERROR ? -1 : 0;
 	}
       else
 	{
@@ -1481,7 +1484,8 @@ match_insn_m68k (bfd_vma memaddr,
 /* Try to interpret the instruction at address MEMADDR as one that
    can execute on a processor with the features given by ARCH_MASK.
    If successful, print the instruction to INFO->STREAM and return
-   its length in bytes.  Return 0 otherwise.  */
+   its length in bytes.  Return 0 otherwise.  Return -1 on memory
+   error.  */
 
 static int
 m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
@@ -1523,7 +1527,8 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	*opc_pointer[(m68k_opcodes[i].opcode >> 28) & 15]++ = &m68k_opcodes[i];
     }
 
-  FETCH_DATA (info, buffer + 2);
+  if (!FETCH_DATA (info, buffer + 2))
+    return -1;
   major_opcode = (buffer[0] >> 4) & 15;
 
   for (i = 0; i < numopcodes[major_opcode]; i++)
@@ -1628,7 +1633,7 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
       /* First try printing an m680x0 instruction.  Try printing a Coldfire
 	 one if that fails.  */
       val = m68k_scan_mask (memaddr, info, m68k_mask);
-      if (val == 0)
+      if (val <= 0)
 	val = m68k_scan_mask (memaddr, info, mcf_mask);
     }
   else
