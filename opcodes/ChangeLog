@@ -1,3 +1,19 @@
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* m68k-dis.c (enum print_insn_arg_error): New.
+	(NEXTBYTE): Replace -3 with
+	PRINT_INSN_ARG_MEMORY_ERROR.
+	(NEXTULONG): Likewise.
+	(NEXTSINGLE): Likewise.
+	(NEXTDOUBLE): Likewise.
+	(NEXTDOUBLE): Likewise.
+	(NEXTPACKED): Likewise.
+	(FETCH_ARG): Likewise.
+	(FETCH_DATA): Update comments.
+	(print_insn_arg): Update comments. Replace magic numbers with
+	enum.
+	(match_insn_m68k): Likewise.
+
 2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-dis.c (enum): Add PREFIX_EVEX_0F3855, EVEX_W_0F3855_P_2.
