@@ -1,6 +1,11 @@
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+	PR gold/21040
+	* powerpc.cc (Powerpc_relobj<size, big_endian>::make_toc_relative):
+	Cast 0x80008000 to uint64_t.
+
 	2017-01-11  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (class Powerpc_copy_relocs): New.
 	(Powerpc_copy_relocs::emit): New function.

@@ -2010,7 +2010,7 @@ Powerpc_relobj<size, big_endian>::make_toc_relative(
   Address got_base = (target->got_section()->output_section()->address()
 		      + this->toc_base_offset());
   addr -= got_base;
-  if (addr + 0x80008000 >= (uint64_t) 1 << 32)
+  if (addr + (uint64_t) 0x80008000 >= (uint64_t) 1 << 32)
     return false;
 
   *value = addr;
