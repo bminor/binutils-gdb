@@ -1988,8 +1988,8 @@ CHECK_HEADERS = $(HFILES_NO_SRCDIR)
 check-headers:
 	@echo Checking headers.
 	for i in $(CHECK_HEADERS) ; do \
-		$(CC) -x c -c -fsyntax-only $(INTERNAL_CFLAGS) \
-			-include defs.h $(srcdir)/$$i ; \
+		$(CXX) $(CXX_DIALECT) -x c++-header -c -fsyntax-only \
+		$(INTERNAL_CFLAGS) -include defs.h $(srcdir)/$$i ; \
 	done
 .PHONY: check-headers
 

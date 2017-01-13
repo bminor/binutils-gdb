@@ -1,3 +1,8 @@
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (checker-headers): Use CXX and CXX_DIALET instead
+	of CC.  Pass "-x c++-header" instead of "-x c".
+
 2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (remote_can_async_p): Update comment.
