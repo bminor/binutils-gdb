@@ -273,6 +273,86 @@ if { ![is_elf_format] } then {
     }
 }
 
+proc test_build_id_debuglink {} {
+    global srcdir
+    global subdir
+    global env
+    global CC_FOR_TARGET
+    global STRIP
+    global OBJCOPY
+    global OBJDUMP
+    global CFLAGS_FOR_TARGET
+    
+    set test "build-id-debuglink"
+    if {![info exists CC_FOR_TARGET]} {
+	set CC_FOR_TARGET $env(CC)
+    }
+    if { $CC_FOR_TARGET == "" } {
+	unsupported $test
+	return
+    }
+
+    # Use a fixed build-id.
+    set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01"
+
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog exectuable debug] != "" } {
+	fail "$test (build)"
+	return
+    }
+
+    # FIXME: Do we need to restore CFLAGS_FOR_TARGET to its old value ?
+
+    if { [binutils_run $STRIP "--strip-debug --remove-section=.comment tmpdir/testprog -o tmpdir/testprog.strip"] != "" } {
+	fail "$test (strip debug info)"
+	return
+    }
+
+    if { [binutils_run $OBJCOPY "--only-keep-debug tmpdir/testprog tmpdir/testprog.debug"] != "" } {
+	fail "$test (create separate debug info file)"
+	return
+    }
+
+    set got [remote_exec host "mkdir -p .build-id/12" ]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$test (make debug directory)"
+	return
+    }
+
+    set got [remote_exec host "cp tmpdir/testprog.debug .build-id/12/345678abcdef01.debug"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$test (copy debug info into debug directory)"
+	return
+    }
+    
+    set got [remote_exec host "$OBJDUMP -Sl tmpdir/testprog.strip" "" "/dev/null" "tmpdir/testprog.strip.dump"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$test (post strip dump)"
+	return
+    }
+
+    set src2 tmpdir/testprog.strip.dump
+    verbose " grep -e testprog.c ${src2}"
+    set status [remote_exec build grep "-e testprog.c ${src2}"]
+    set exec_output [lindex $status 1]
+    set exec_output [prune_warnings $exec_output]
+    if [string match "" $exec_output] then {
+	send_log "$exec_output\n"
+	verbose "$exec_output" 1
+	fail "$test (grepping for source file name in disassembly output)"
+    } else {
+	pass "$test"
+	# Cleanup...
+	set got [remote_exec host "rm .build-id/12/345678abcdef01.debug"]
+	set got [remote_exec host "rmdir -p .build-id/12" ]
+	set got [remote_exec host "rm tmpdir/testprog.strip.dump"]
+	set got [remote_exec host "rm tmpdir/testprog.debug"]
+	set got [remote_exec host "rm tmpdir/testprog.strip"]
+    }
+}
+
+if {[isnative] && [is_elf_format]} then {
+    test_build_id_debuglink
+}
 
 # Options which are not tested: -a -d -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.

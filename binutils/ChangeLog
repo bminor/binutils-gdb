@@ -1,3 +1,11 @@
+2017-01-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20876
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/objdump.exp (test_build_id_debuglink):
+	New proc to test the location of separate debug info files using
+	the build-id method.
+
 2017-01-09  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_section_headers): Correct .rel.dyn/.rela.dyn
