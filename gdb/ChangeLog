@@ -1,5 +1,12 @@
 2017-01-13  Yao Qi  <yao.qi@linaro.org>
 
+	* remote.c (REMOTE_DEBUG_MAX_CHAR): New macro.
+	(putpkt_binary): Print only REMOTE_DEBUG_MAX_CHAR chars in debug
+	output.
+	(getpkt_or_notif_sane_1): Likewise.
+
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (checker-headers): Use CXX and CXX_DIALET instead
 	of CC.  Pass "-x c++-header" instead of "-x c".
 

@@ -283,6 +283,11 @@ typedef unsigned char threadref[OPAQUETHREADBYTES];
 
 #define MAXTHREADLISTRESULTS 32
 
+/* The max number of chars in debug output.  The rest of chars are
+   omitted.  */
+
+#define REMOTE_DEBUG_MAX_CHAR 512
+
 /* Data for the vFile:pread readahead cache.  */
 
 struct readahead_cache
@@ -8749,9 +8754,21 @@ putpkt_binary (const char *buf, int cnt)
 	{
 	  *p = '\0';
 
-	  std::string str = escape_buffer (buf2, p - buf2);
+	  int len = (int) (p - buf2);
 
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str.c_str ());
+	  std::string str
+	    = escape_buffer (buf2, std::min (len, REMOTE_DEBUG_MAX_CHAR));
+
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s", str.c_str ());
+
+	  if (str.length () > REMOTE_DEBUG_MAX_CHAR)
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "[%zu bytes omitted]",
+				  str.length () - REMOTE_DEBUG_MAX_CHAR);
+	    }
+
+	  fprintf_unfiltered (gdb_stdlog, "...");
+
 	  gdb_flush (gdb_stdlog);
 	}
       remote_serial_write (buf2, p - buf2);
@@ -9179,9 +9196,20 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	{
 	  if (remote_debug)
 	    {
-	      std::string str = escape_buffer (*buf, val);
+	      std::string str
+		= escape_buffer (*buf,
+				 std::min (val, REMOTE_DEBUG_MAX_CHAR));
 
-	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str.c_str ());
+	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s",
+				  str.c_str ());
+
+	      if (str.length () >  REMOTE_DEBUG_MAX_CHAR)
+		{
+		  fprintf_unfiltered (gdb_stdlog, "[%zu bytes omitted]",
+				      str.length () - REMOTE_DEBUG_MAX_CHAR);
+		}
+
+	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
 
 	  /* Skip the ack char if we're in no-ack mode.  */
