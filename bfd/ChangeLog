@@ -1,3 +1,10 @@
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* elflink.c (bfd_elf_record_link_assignment): Clear any
+	`forced_local' marking for DSO symbols that are not being
+	provided.
+
 2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
