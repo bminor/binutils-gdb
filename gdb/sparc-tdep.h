@@ -20,6 +20,12 @@
 #ifndef SPARC_TDEP_H
 #define SPARC_TDEP_H 1
 
+#define SPARC_CORE_REGISTERS                      \
+  "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7", \
+  "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7", \
+  "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", \
+  "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7"
+
 struct frame_info;
 struct gdbarch;
 struct regcache;
@@ -85,7 +91,7 @@ struct gdbarch_tdep
 
 enum sparc_regnum
 {
-  SPARC_G0_REGNUM,		/* %g0 */
+  SPARC_G0_REGNUM = 0,		/* %g0 */
   SPARC_G1_REGNUM,
   SPARC_G2_REGNUM,
   SPARC_G3_REGNUM,
@@ -140,9 +146,12 @@ enum sparc32_regnum
   SPARC32_NPC_REGNUM,		/* %npc */
   SPARC32_FSR_REGNUM,		/* %fsr */
   SPARC32_CSR_REGNUM,		/* %csr */
+};
 
-  /* Pseudo registers.  */
-  SPARC32_D0_REGNUM,		/* %d0 */
+/* Pseudo registers.  */
+enum sparc32_pseudo_regnum
+{
+  SPARC32_D0_REGNUM = 0,	/* %d0 */
   SPARC32_D30_REGNUM		/* %d30 */
   = SPARC32_D0_REGNUM + 15
 };

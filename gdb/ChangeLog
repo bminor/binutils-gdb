@@ -1,3 +1,28 @@
+2017-01-16  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	Split real and pseudo registers.
+	* sparc-tdep.h (SPARC_CORE_REGISTERS): New macro.
+	(sparc32_pseudo_regnum): New enum.
+	* sparc64-tdep.h (sparc64_pseudo_regnum): New enum.
+	* sparc-tdep.c (SPARC32_FPU_REGISTERS): New macro.
+	(SPARC32_CP0_REGISTERS): New macro.
+	(sparc32_pseudo_register_name): New function.
+	(sparc32_register_name): Use sparc32_pseudo_register_name.
+	(sparc32_pseudo_register_type): New function.
+	(sparc32_register_type): Use sparc32_pseudo_register_type.
+	(sparc32_pseudo_register_read, sparc32_pseudo_register_write): Handle
+	pseudo register numbers.
+	* sparc64-tdep.c SPARC64_FPU_REGISTERS): New macro.
+	(SPARC64_CP0_REGISTERS): New macro.
+	(sparc64_pseudo_register_name): New function.
+	(sparc64_register_name): Use sparc64_pseudo_register_name.
+	(sparc64_pseudo_register_type): New function.
+	(sparc64_register_type): Use sparc64_pseudo_register_type.
+	(sparc64_pseudo_register_read, sparc64_pseudo_register_write): Handle
+	pseudo register numbers.
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields,
+	sparc64_store_arguments): Handle pseudo register numbers.
+
 2017-01-13  Yao Qi  <yao.qi@linaro.org>
 
 	* remote.c (REMOTE_DEBUG_MAX_CHAR): New macro.
