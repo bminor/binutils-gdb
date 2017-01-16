@@ -1,3 +1,7 @@
+2017-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .avx512_vpopcntdq.
