@@ -1,0 +1,19 @@
+SECTIONS
+{
+  .data :
+  {
+    _fdata = .;
+    *(.data)
+    _edata = .;
+  }
+  .dynamic : { *(.dynamic) }
+  .hash : { *(.hash) }
+  .dynsym : { *(.dynsym) }
+  .dynstr : { *(.dynstr) }
+  .shstrtab : { *(.shstrtab) }
+  .symtab : { *(.symtab) }
+  .strtab : { *(.strtab) }
+  .got.plt : { *(.got.plt) }
+  .got : { *(.got) }
+  /DISCARD/ : { *(*) }
+}

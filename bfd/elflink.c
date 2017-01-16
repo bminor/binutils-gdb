@@ -671,12 +671,17 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   /* If this symbol is not being provided by the linker script, and it is
      currently defined by a dynamic object, but not by a regular object,
-     then clear out any version information because the symbol will not be
-     associated with the dynamic object any more.  */
+     then undo any forced local marking that may have been set by input
+     section garbage collection and clear out any version information
+     because the symbol will not be associated with the dynamic object
+     any more.  */
   if (!provide
       && h->def_dynamic
       && !h->def_regular)
-    h->verinfo.verdef = NULL;
+    {
+      h->forced_local = 0;
+      h->verinfo.verdef = NULL;
+    }
 
   h->def_regular = 1;
 
