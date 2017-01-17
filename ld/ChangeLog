@@ -1,3 +1,14 @@
+2017-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldlang.c (lang_leave_output_section_statement): Move lma_region
+	logic to...
+	(lang_propagate_lma_regions): ...this new function.
+	(lang_process): Call new function.
+	* testsuite/ld-elf/orphan-9.d: New file.
+	* testsuite/ld-elf/orphan-9.ld: New file.
+	* testsuite/ld-elf/orphan-9.s: New file.
+	* NEWS: Mention change in behaviour.
+
 2017-03-07  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (open_input_bfds): Check that lang_assignment_statement

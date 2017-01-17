@@ -6844,6 +6844,27 @@ lang_check_relocs (void)
     }
 }
 
+/* Look through all output sections looking for places where we can
+   propagate forward the lma region.  */
+
+static void
+lang_propagate_lma_regions (void)
+{
+  lang_output_section_statement_type *os;
+
+  for (os = &lang_output_section_statement.head->output_section_statement;
+       os != NULL;
+       os = os->next)
+    {
+      if (os->prev != NULL
+	  && os->lma_region == NULL
+	  && os->load_base == NULL
+	  && os->addr_tree == NULL
+	  && os->region == os->prev->region)
+	os->lma_region = os->prev->lma_region;
+    }
+}
+
 void
 lang_process (void)
 {
@@ -7021,6 +7042,9 @@ lang_process (void)
 	    found->flags &= ~SEC_READONLY;
 	}
     }
+
+  /* Copy forward lma regions for output sections in same lma region.  */
+  lang_propagate_lma_regions ();
 
   /* Do anything special before sizing sections.  This is where ELF
      and other back-ends size dynamic sections.  */
@@ -7301,16 +7325,6 @@ lang_leave_output_section_statement (fill_type *fill, const char *memspec,
 		    memspec, lma_memspec,
 		    current_section->load_base != NULL,
 		    current_section->addr_tree != NULL);
-
-  /* If this section has no load region or base, but uses the same
-     region as the previous section, then propagate the previous
-     section's load region.  */
-
-  if (current_section->lma_region == NULL
-      && current_section->load_base == NULL
-      && current_section->addr_tree == NULL
-      && current_section->region == current_section->prev->region)
-    current_section->lma_region = current_section->prev->lma_region;
 
   current_section->fill = fill;
   current_section->phdrs = phdrs;
