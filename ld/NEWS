@@ -8,6 +8,9 @@
 * Improve assignment of LMAs to orphan sections in some edge cases where a
   mixture of both AT>LMA_REGION and AT(LMA) are used.
 
+* Orphan sections placed after an empty section that has an AT(LMA) will now
+  take an load memory address starting from LMA.
+
 Changes in 2.28:
 
 * The EXCLUDE_FILE linker script construct can now be applied outside of the

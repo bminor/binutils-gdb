@@ -1,5 +1,14 @@
 2017-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ldlang.c (lang_size_sections_1): Shortcut loop only after
+	tracking changes to the default regions LMA.
+	* testsuite/ld-elf/orphan-9.ld: Extend header comment.
+	* testsuite/ld-elf/orphan-10.d: New file.
+	* testsuite/ld-elf/orphan-10.s: New file.
+	* NEWS: Mention change in behaviour.
+
+2017-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ldlang.c (lang_leave_output_section_statement): Move lma_region
 	logic to...
 	(lang_propagate_lma_regions): ...this new function.

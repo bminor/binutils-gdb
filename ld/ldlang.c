@@ -5197,9 +5197,6 @@ lang_size_sections_1
 	      }
 	    os->processed_lma = TRUE;
 
-	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
-	      break;
-
 	    /* Keep track of normal sections using the default
 	       lma region.  We use this to set the lma for
 	       following sections.  Overlays or other linker
@@ -5207,7 +5204,13 @@ lang_size_sections_1
 	       default lma == vma is incorrect.
 	       To avoid warnings about dot moving backwards when using
 	       -Ttext, don't start tracking sections until we find one
-	       of non-zero size or with lma set differently to vma.  */
+	       of non-zero size or with lma set differently to vma.
+	       Do this tracking before we short-cut the loop so that we
+	       track changes for the case where the section size is zero,
+	       but the lma is set differently to the vma.  This is
+	       important, if an orphan section is placed after an
+	       otherwise empty output section that has an explicit lma
+	       set, we want that lma reflected in the orphans lma.  */
 	    if (!IGNORE_SECTION (os->bfd_section)
 		&& (os->bfd_section->size != 0
 		    || (r->last_os == NULL
@@ -5218,6 +5221,9 @@ lang_size_sections_1
 		&& os->lma_region == NULL
 		&& !bfd_link_relocatable (&link_info))
 	      r->last_os = s;
+
+	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
+	      break;
 
 	    /* .tbss sections effectively have zero size.  */
 	    if (!IS_TBSS (os->bfd_section)

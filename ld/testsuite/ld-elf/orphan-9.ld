@@ -1,8 +1,12 @@
-/* This linker script is used for orphan-9 test.
+/* This linker script is used for orphan-9 and orphan-10 test.
 
-   We have a single byte in .data, and an orphan .data.1
+   orphan-9: We have a single byte in .data, and an orphan .data.1
    section.  We are checking that the .data.1 orphan is assigned an
-   LMA after .data rather than picking up the lma region of .rodata.  */
+   LMA after .data rather than picking up the lma region of .rodata.
+
+   orphan-10: In this case we have nothing in .data and an orphan
+   .data.1, we are checking that .data.1 is assigned an LMA after
+   .data, rather than defaulting to take LMA == VMA.  */
 
 MEMORY
 {
