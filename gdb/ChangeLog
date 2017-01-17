@@ -1,3 +1,8 @@
+2017-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.c: Only include <sys/procfs.h> if
+	HAVE_SYS_PROCFS_H is defined.
+
 2017-01-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* remote.c (struct cached_reg): Change data into a pointer.
