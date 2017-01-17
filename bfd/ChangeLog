@@ -1,3 +1,7 @@
+2017-01-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elfnn-riscv.c (riscv_elf_object_p): New function.
+
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/21334
