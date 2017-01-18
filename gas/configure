@@ -13899,6 +13899,17 @@ _ACEOF
 fi
 done
 
+for ac_func in strsignal
+do :
+  ac_fn_c_check_func "$LINENO" "strsignal" "ac_cv_func_strsignal"
+if test "x$ac_cv_func_strsignal" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRSIGNAL 1
+_ACEOF
+
+fi
+done
+
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LC_MESSAGES" >&5
