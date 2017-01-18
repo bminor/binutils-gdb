@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: gas 2.26.51\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-11-04 15:27+1030\n"
-"PO-Revision-Date: 2017-01-16 00:39+0100\n"
+"PO-Revision-Date: 2017-01-17 03:27+0100\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -12406,7 +12406,7 @@ msgstr "Kan inte använda POPM för att återställa SR-registret"
 #: config/tc-msp430.c:2424 config/tc-msp430.c:2486 config/tc-msp430.c:2545
 #, c-format
 msgid "repeat count cannot be used with %s"
-msgstr "repetitionsräknare kan inte användas med %s"
+msgstr "repetitionsantal kan inte användas med %s"
 
 #: config/tc-msp430.c:2446
 #, c-format
@@ -15447,20 +15447,20 @@ msgstr ""
 
 #: config/tc-sparc.c:4039 config/tc-sparc.c:4189
 msgid "negative alignment"
-msgstr ""
+msgstr "negativ justering"
 
 #: config/tc-sparc.c:4049 config/tc-sparc.c:4211 read.c:1486 read.c:2485
 msgid "alignment not a power of 2"
-msgstr ""
+msgstr "justering inte en tvåpotens"
 
 #: config/tc-sparc.c:4102
 #, c-format
 msgid "Ignoring attempt to re-define symbol %s"
-msgstr ""
+msgstr "Hoppar över försök att omdefiniera symbol %s"
 
 #: config/tc-sparc.c:4126 config/tc-v850.c:281
 msgid "Expected comma after symbol-name"
-msgstr ""
+msgstr "Förväntade komma efter symbolnamn"
 
 #: config/tc-sparc.c:4136
 #, c-format
@@ -15469,12 +15469,12 @@ msgstr ""
 
 #: config/tc-sparc.c:4169
 msgid "Expected comma after common length"
-msgstr ""
+msgstr "Förväntade komma efter allmän längd"
 
 #: config/tc-sparc.c:4183
 #, c-format
 msgid "alignment too large; assuming %ld"
-msgstr ""
+msgstr "justering för stor; antar %ld"
 
 #: config/tc-sparc.c:4326
 msgid "Unknown segment type"
@@ -16182,11 +16182,11 @@ msgstr ""
 
 #: config/tc-tic54x.c:1299
 msgid ".space/.bes repeat count is negative, ignored"
-msgstr ""
+msgstr ".space/.bes repetitionsantal är negativt, överhoppat"
 
 #: config/tc-tic54x.c:1304
 msgid ".space/.bes repeat count is zero, ignored"
-msgstr ""
+msgstr ".space/.bes repetitionsantal är noll, överhoppat"
 
 #: config/tc-tic54x.c:1381
 msgid "Missing size argument"
@@ -18286,29 +18286,29 @@ msgstr ""
 
 #: config/tc-xtensa.c:10179
 msgid "multiple literals in expansion"
-msgstr ""
+msgstr "flera literaler i expansion"
 
 #: config/tc-xtensa.c:10183
 msgid "no registered fragment for literal"
-msgstr ""
+msgstr "inget registrerat fragment för literal"
 
 #: config/tc-xtensa.c:10185
 msgid "number of literal tokens != 1"
-msgstr ""
+msgstr "antal literalsymboler != 1"
 
 #: config/tc-xtensa.c:10314 config/tc-xtensa.c:10320
 #, c-format
 msgid "unresolved loop target symbol: %s"
-msgstr ""
+msgstr "oupplöst målsymbol för loop: %s"
 
 #: config/tc-xtensa.c:10426
 #, c-format
 msgid "invalid expression evaluation type %d"
-msgstr ""
+msgstr "ogiltigt beräkningstyp för uttryck %d"
 
 #: config/tc-xtensa.c:10443
 msgid "loop too long for LOOP instruction"
-msgstr ""
+msgstr "loop för lång för LOOP-instruktion"
 
 #: config/tc-xtensa.c:10712
 #, c-format
@@ -18325,16 +18325,16 @@ msgstr ""
 
 #: config/tc-xtensa.c:11895
 msgid "invalid symbolic operand"
-msgstr ""
+msgstr "ogiltig symbolisk operand"
 
 #: config/tc-xtensa.c:11956
 msgid "operand number mismatch"
-msgstr ""
+msgstr "operandnummer stämmer inte"
 
 #: config/tc-xtensa.c:11960
 #, c-format
 msgid "cannot encode opcode \"%s\" in the given format \"%s\""
-msgstr ""
+msgstr "kan inte koda opkod ”%s” i det givna formatet ”%s”"
 
 #: config/tc-xtensa.c:11985
 #, c-format
@@ -18343,23 +18343,23 @@ msgstr ""
 
 #: config/tc-xtensa.c:12062
 msgid "invalid opcode"
-msgstr ""
+msgstr "ogiltig opkod"
 
 #: config/tc-xtensa.c:12068
 msgid "too few operands"
-msgstr ""
+msgstr "för få operander"
 
 #: config/tc-xtensa.c:12118
 msgid "multiple writes to the same register"
-msgstr ""
+msgstr "multipla skrivningar till samma register"
 
 #: config/tc-xtensa.c:12232 config/tc-xtensa.c:12238
 msgid "out of memory"
-msgstr ""
+msgstr "slut på minne"
 
 #: config/tc-xtensa.c:12327
 msgid "TLS relocation not allowed in FLIX bundle"
-msgstr ""
+msgstr "TLS-omlokalisering inte tillåtet i FLIX-bunt"
 
 #. Instructions that generate TLS relocations should always be
 #. relaxed in the front-end.  If "record_fixup" is set, then this
@@ -18367,150 +18367,150 @@ msgstr ""
 #. the unexpected behavior as an error.
 #: config/tc-xtensa.c:12333
 msgid "unexpected TLS relocation"
-msgstr ""
+msgstr "oväntad TLS-omlokalisering"
 
 #: config/tc-xtensa.c:12377
 msgid "symbolic operand not allowed"
-msgstr ""
+msgstr "symbolisk operand inte tillåten"
 
 #: config/tc-xtensa.c:12414
 msgid "cannot decode instruction format"
-msgstr ""
+msgstr "kan inte avkoda instruktionsformat"
 
 #: config/tc-xtensa.c:12558
 msgid "ignoring extra '-rename-section' delimiter ':'"
-msgstr ""
+msgstr "hoppar över extra ”-rename-section”-avgränsare ”:”"
 
 #: config/tc-xtensa.c:12563
 #, c-format
 msgid "ignoring invalid '-rename-section' specification: '%s'"
-msgstr ""
+msgstr "hoppar över ogiltig ”-rename-section”-specifikation: ”%s”"
 
 #: config/tc-xtensa.c:12574
 #, c-format
 msgid "section %s renamed multiple times"
-msgstr ""
+msgstr "sektion %s har bytt namn flera gånger"
 
 #: config/tc-xtensa.c:12576
 #, c-format
 msgid "multiple sections remapped to output section %s"
-msgstr ""
+msgstr "multipla sektioner ommappade till utdatasektion %s"
 
 #: config/tc-z80.c:325
 msgid "-- unterminated string"
-msgstr ""
+msgstr "-- oterminerad sträng"
 
 #: config/tc-z80.c:390
 msgid "floating point numbers are not implemented"
-msgstr ""
+msgstr "flyttal är inte implementerade"
 
 #: config/tc-z80.c:515 config/tc-z80.c:521
 msgid "mismatched parentheses"
-msgstr ""
+msgstr "parenteser stämmer inte"
 
 #: config/tc-z80.c:558
 msgid "bad expression syntax"
-msgstr ""
+msgstr "felaktig uttryckssyntax"
 
 #: config/tc-z80.c:716
 msgid "cannot make a relative jump to an absolute location"
-msgstr ""
+msgstr "kan inte göra ett relativt hopp till en absolut adress"
 
 #: config/tc-z80.c:728 config/tc-z80.c:1994
 msgid "overflow"
-msgstr ""
+msgstr "överspill"
 
 #: config/tc-z80.c:1099 config/tc-z80.c:1142 config/tc-z80.c:1186
 #: config/tc-z80.c:1254 config/tc-z80.c:1306 config/tc-z80.c:1360
 #: config/tc-z80.c:1629
 msgid "bad instruction syntax"
-msgstr ""
+msgstr "felaktig instruktionssyntax"
 
 #: config/tc-z80.c:1232
 msgid "condition code invalid for jr"
-msgstr ""
+msgstr "villkorskod ogiltig för jr"
 
 #: config/tc-z80.c:1738
 msgid "parentheses ignored"
-msgstr ""
+msgstr "parenteser överhoppade"
 
 #: config/tc-z80.c:1943 read.c:3670
 #, c-format
 msgid "junk at end of line, first unrecognized character is `%c'"
-msgstr ""
+msgstr "skräp vid filslut, första okända tecken är ”%c”"
 
 #: config/tc-z80.c:1969 config/tc-z8k.c:1459 config/tc-z8k.c:1522
 msgid "relative jump out of range"
-msgstr ""
+msgstr "relativt hopp utanför intervall"
 
 #: config/tc-z80.c:1986
 msgid "index offset  out of range"
-msgstr ""
+msgstr "indexavstånd utanför intervall"
 
 #: config/tc-z80.c:2028 config/tc-z8k.c:1530
 #, c-format
 msgid "md_apply_fix: unknown r_type 0x%x\n"
-msgstr ""
+msgstr "md_apply_fix: okänd r_type 0x%x\n"
 
 #: config/tc-z8k.c:281
 #, c-format
 msgid "register rr%d out of range"
-msgstr ""
+msgstr "register rr%d utanför intervall"
 
 #: config/tc-z8k.c:283
 #, c-format
 msgid "register rr%d does not exist"
-msgstr ""
+msgstr "register rr%d existerar inte"
 
 #: config/tc-z8k.c:295
 #, c-format
 msgid "register rh%d out of range"
-msgstr ""
+msgstr "register rh%d utanför intervall"
 
 #: config/tc-z8k.c:307
 #, c-format
 msgid "register rl%d out of range"
-msgstr ""
+msgstr "register rl%d utanför intervall"
 
 #: config/tc-z8k.c:320
 #, c-format
 msgid "register rq%d out of range"
-msgstr ""
+msgstr "register rq%d utanför intervall"
 
 #: config/tc-z8k.c:322
 #, c-format
 msgid "register rq%d does not exist"
-msgstr ""
+msgstr "register rq%d existerar inte"
 
 #: config/tc-z8k.c:334
 #, c-format
 msgid "register r%d out of range"
-msgstr ""
+msgstr "register r%d utanför intervall"
 
 #: config/tc-z8k.c:375
 #, c-format
 msgid "expected %c"
-msgstr ""
+msgstr "förväntade %c"
 
 #: config/tc-z8k.c:390
 #, c-format
 msgid "register is wrong size for a word %s"
-msgstr ""
+msgstr "register har fel storlek för ett ord %s"
 
 #: config/tc-z8k.c:404
 #, c-format
 msgid "register is wrong size for address %s"
-msgstr ""
+msgstr "register har fel storlek för adress %s"
 
 #: config/tc-z8k.c:538
 #, c-format
 msgid "unknown interrupt %s"
-msgstr ""
+msgstr "okänt avbrott %s"
 
 #. No interrupt type specified, opcode won't do anything.
 #: config/tc-z8k.c:561
 msgid "opcode has no effect"
-msgstr ""
+msgstr "opkod har ingen effekt"
 
 #: config/tc-z8k.c:672
 msgid "Missing ) in ra(rb)"
@@ -18528,7 +18528,7 @@ msgstr "ogiltig flagga ”%s”"
 
 #: config/tc-z8k.c:918 config/tc-z8k.c:924
 msgid "invalid indirect register size"
-msgstr ""
+msgstr "ogiltig indirekt registerstorlek"
 
 #: config/tc-z8k.c:941 config/tc-z8k.c:1089 config/tc-z8k.c:1094
 msgid "invalid control register name"
@@ -18536,11 +18536,11 @@ msgstr "ogiltigt namn för kontrollregister"
 
 #: config/tc-z8k.c:1078
 msgid "immediate must be 1 or 2"
-msgstr ""
+msgstr "omedelbar måste vara 1 eller 2"
 
 #: config/tc-z8k.c:1081
 msgid "immediate 1 or 2 expected"
-msgstr ""
+msgstr "omedelbar 1 eller 2 förväntad"
 
 #: config/tc-z8k.c:1112
 msgid "can't use R0 here"
@@ -18572,112 +18572,112 @@ msgstr ""
 #: config/tc-z8k.c:1348
 #, c-format
 msgid "call to md_convert_frag\n"
-msgstr ""
+msgstr "anrop till md_convert_frag\n"
 
 #: config/tc-z8k.c:1455 config/tc-z8k.c:1495 config/tc-z8k.c:1518
 msgid "cannot branch to odd address"
-msgstr ""
+msgstr "kan inte grena till udda adress"
 
 #: config/tc-z8k.c:1477
 msgid "relative address out of range"
-msgstr ""
+msgstr "relativ adress utanför intervall"
 
 #: config/tc-z8k.c:1498
 msgid "relative call out of range"
-msgstr ""
+msgstr "relativt anrop utanför intervall"
 
 #: config/tc-z8k.c:1542
 #, c-format
 msgid "call to md_estimate_size_before_relax\n"
-msgstr ""
+msgstr "anrop till md_estimate_size_before_relax\n"
 
 #: config/xtensa-relax.c:1555
 #, c-format
 msgid "invalid configuration option '%s' in transition rule '%s'"
-msgstr ""
+msgstr "ogiltig konfigurationsflagga ”%s” i övergångsregel ”%s”"
 
 #: config/xtensa-relax.c:1680
 #, c-format
 msgid "opcode '%s': no bound opname '%s' for precondition in '%s'"
-msgstr ""
+msgstr "opkod ”%s”: inget bundet opnamn ”%s” för förvillkor i ”%s”"
 
 #: config/xtensa-relax.c:1690
 #, c-format
 msgid "opcode '%s': no bound opname '%s' for precondition in %s"
-msgstr ""
+msgstr "opkod ”%s”: inget bundet opnamn ”%s” för förvillkor i %s"
 
 #: config/xtensa-relax.c:1697
 #, c-format
 msgid "opcode '%s': precondition only contains constants in '%s'"
-msgstr ""
+msgstr "opkod ”%s”: förvillkor innehåller endast konstanter i ”%s”"
 
 #: config/xtensa-relax.c:1744
 msgid "expected one operand for generated literal"
-msgstr ""
+msgstr "förväntade en operand för genererad literal"
 
 #: config/xtensa-relax.c:1751
 msgid "expected 0 operands for generated label"
-msgstr ""
+msgstr "förväntade 0 operander för genererad etikett"
 
 #: config/xtensa-relax.c:1764
 #, c-format
 msgid "invalid opcode '%s' in transition rule '%s'"
-msgstr ""
+msgstr "ogiltig opkod ”%s” i övergångsregel ”%s”"
 
 #: config/xtensa-relax.c:1772
 #, c-format
 msgid "opcode '%s': replacement does not have %d ops"
-msgstr ""
+msgstr "opkod ”%s”: ersättning har inte %d operationer"
 
 #: config/xtensa-relax.c:1786
 #, c-format
 msgid "opcode '%s': cannot find literal definition"
-msgstr ""
+msgstr "opkod ”%s”: kan inte hitta literaldefinition"
 
 #: config/xtensa-relax.c:1802 config/xtensa-relax.c:1832
 #, c-format
 msgid "opcode %s: unidentified operand '%s' in '%s'"
-msgstr ""
+msgstr "opkod %s: oidentifierad operand ”%s” i ”%s”"
 
 #: config/xtensa-relax.c:1827
 #, c-format
 msgid "unknown user-defined function %s"
-msgstr ""
+msgstr "okänd användardefinierad funktion %s"
 
 #: config/xtensa-relax.c:1838
 #, c-format
 msgid "opcode %s: could not parse operand '%s' in '%s'"
-msgstr ""
+msgstr "opkod %s: kunde inte tolka operand ”%s” i ”%s”"
 
 #: config/xtensa-relax.c:1879
 #, c-format
 msgid "could not parse INSN_PATTERN '%s'"
-msgstr ""
+msgstr "kunde inte tolka INSN_PATTERN ”%s”"
 
 #: config/xtensa-relax.c:1883
 #, c-format
 msgid "could not parse INSN_REPL '%s'"
-msgstr ""
+msgstr "kunde inte tolka INSN_REPL ”%s”"
 
 #: config/xtensa-relax.c:1894
 #, c-format
 msgid "could not build transition for %s => %s"
-msgstr ""
+msgstr "kunde inte bygga övergång för %s => %s"
 
 #: depend.c:194
 #, c-format
 msgid "can't open `%s' for writing"
-msgstr ""
+msgstr "kan inte öppna ”%s” för skrivning"
 
 #: depend.c:206
 #, c-format
 msgid "can't close `%s'"
-msgstr ""
+msgstr "kan inte stänga ”%s”"
 
 #: dw2gencfi.c:198 read.c:2386
 #, c-format
 msgid "bfd_set_section_flags: %s"
-msgstr ""
+msgstr "bfd_set_section_flags: %s"
 
 #: dw2gencfi.c:456
 #, c-format
@@ -18690,11 +18690,11 @@ msgstr ""
 
 #: dw2gencfi.c:588
 msgid "missing separator"
-msgstr ""
+msgstr "saknar avgränsare"
 
 #: dw2gencfi.c:638
 msgid "bad register expression"
-msgstr ""
+msgstr "felaktigt registeruttryck"
 
 #: dw2gencfi.c:659 dw2gencfi.c:782 dw2gencfi.c:820 dw2gencfi.c:890
 #: dw2gencfi.c:962
@@ -18743,29 +18743,29 @@ msgstr ""
 
 #: dw2gencfi.c:2008
 msgid "CFI is not supported for this target"
-msgstr ""
+msgstr "CFI stöds inte för detta mål"
 
 #: dwarf2dbg.c:592 dwarf2dbg.c:627
 msgid "file number less than one"
-msgstr ""
+msgstr "filnummer mindre än ett"
 
 #: dwarf2dbg.c:602
 #, c-format
 msgid "file number %ld already allocated"
-msgstr ""
+msgstr "filnummer %ld redan allokerat"
 
 #: dwarf2dbg.c:632 dwarf2dbg.c:1434
 #, c-format
 msgid "unassigned file number %ld"
-msgstr ""
+msgstr "otilldelat filnummer %ld"
 
 #: dwarf2dbg.c:701
 msgid "is_stmt value not 0 or 1"
-msgstr ""
+msgstr "is_stmt value inte 0 eller 1"
 
 #: dwarf2dbg.c:713
 msgid "isa number less than zero"
-msgstr ""
+msgstr "isa nummer mindre än noll"
 
 #: dwarf2dbg.c:725
 msgid "discriminator less than zero"
@@ -18783,26 +18783,26 @@ msgstr ""
 #: ecoff.c:1559
 #, c-format
 msgid "string too big (%lu bytes)"
-msgstr ""
+msgstr "sträng för stor (%lu byte)"
 
 #: ecoff.c:1585
 #, c-format
 msgid "inserting \"%s\" into string hash table: %s"
-msgstr ""
+msgstr "infogar ”%s” i stränghashtabell: %s"
 
 #: ecoff.c:1616 ecoff.c:1809 ecoff.c:1832 ecoff.c:1863 ecoff.c:2016
 #: ecoff.c:2127
 msgid "no current file pointer"
-msgstr ""
+msgstr "ingen aktuell filpekare"
 
 #: ecoff.c:1703
 msgid "too many st_End's"
-msgstr ""
+msgstr "för många st_End"
 
 #: ecoff.c:2041
 #, c-format
 msgid "inserting \"%s\" into tag hash table: %s"
-msgstr ""
+msgstr "infogar ”%s” i tagghashtabell: %s"
 
 #: ecoff.c:2202
 msgid "fake .file after real one"
@@ -18810,67 +18810,67 @@ msgstr ""
 
 #: ecoff.c:2292
 msgid "filename goes over one page boundary"
-msgstr ""
+msgstr "filnamn spänner över en sidgräns"
 
 #: ecoff.c:2425
 msgid ".begin directive without a preceding .file directive"
-msgstr ""
+msgstr ".begin-direktiv utan ett föregående .file-direktiv"
 
 #: ecoff.c:2432
 msgid ".begin directive without a preceding .ent directive"
-msgstr ""
+msgstr ".begin-direktiv utan ett föregående .ent-direktiv"
 
 #: ecoff.c:2463
 msgid ".bend directive without a preceding .file directive"
-msgstr ""
+msgstr ".bend-direktiv utan ett föregående .file-direktiv"
 
 #: ecoff.c:2470
 msgid ".bend directive without a preceding .ent directive"
-msgstr ""
+msgstr ".bend-direktiv utan ett föregående .ent-direktiv"
 
 #: ecoff.c:2483
 msgid ".bend directive names unknown symbol"
-msgstr ""
+msgstr ".bend-direktiv namnger okänd symbol"
 
 #: ecoff.c:2526
 msgid ".def pseudo-op used inside of .def/.endef; ignored"
-msgstr ""
+msgstr ".def pseuod-op använd inuti .def/.endef; överhoppad"
 
 #: ecoff.c:2528
 msgid "empty symbol name in .def; ignored"
-msgstr ""
+msgstr "tomt symbolnamn i .def; överhoppat"
 
 #: ecoff.c:2565
 msgid ".dim pseudo-op used outside of .def/.endef; ignored"
-msgstr ""
+msgstr ".dim pseuod-op använd utanför .def/.endef; överhoppad"
 
 #: ecoff.c:2580
 msgid "badly formed .dim directive"
-msgstr ""
+msgstr "felaktig utformat .dim-direktiv"
 
 #: ecoff.c:2593
 msgid "too many .dim entries"
-msgstr ""
+msgstr "för många .dim-poster"
 
 #: ecoff.c:2613
 msgid ".scl pseudo-op used outside of .def/.endef; ignored"
-msgstr ""
+msgstr ".scl pseuod-op använd utanför .def/.endef; överhoppad"
 
 #: ecoff.c:2638
 msgid ".size pseudo-op used outside of .def/.endef; ignored"
-msgstr ""
+msgstr ".size pseudo-op använd utanför .def/.endef; överhoppad"
 
 #: ecoff.c:2653
 msgid "badly formed .size directive"
-msgstr ""
+msgstr "felaktigt utformat .size-direktiv"
 
 #: ecoff.c:2666
 msgid "too many .size entries"
-msgstr ""
+msgstr "för många .size-poster"
 
 #: ecoff.c:2688
 msgid ".type pseudo-op used outside of .def/.endef; ignored"
-msgstr ""
+msgstr ".type pseudo-op använd utanför .def/.endef; överhoppad"
 
 #. FIXME: We could handle this by setting the continued bit.
 #. There would still be a limit: the .type argument can not
@@ -18878,71 +18878,71 @@ msgstr ""
 #: ecoff.c:2706
 #, c-format
 msgid "the type of %s is too complex; it will be simplified"
-msgstr ""
+msgstr "typen för %s är för komplex; den kommer att förenklas"
 
 #: ecoff.c:2717
 msgid "Unrecognized .type argument"
-msgstr ""
+msgstr "Okänd .type-argument"
 
 #: ecoff.c:2755
 msgid ".tag pseudo-op used outside of .def/.endef; ignored"
-msgstr ""
+msgstr ".tag pseuod-op använd utanför .def/.endef; överhoppad"
 
 #: ecoff.c:2780
 msgid ".val pseudo-op used outside of .def/.endef; ignored"
-msgstr ""
+msgstr ".val pseuod-op använd utanför .def/.endef; överhoppad"
 
 #: ecoff.c:2788
 msgid ".val expression is too complex"
-msgstr ""
+msgstr ".val-uttryck för komplext"
 
 #: ecoff.c:2818
 msgid ".endef pseudo-op used before .def; ignored"
-msgstr ""
+msgstr ".endef pseuod-op använd före .def; överhoppad"
 
 #: ecoff.c:2844 ecoff.c:2925
 msgid "bad COFF debugging information"
-msgstr ""
+msgstr "felaktig COFF-felsökningsinformation"
 
 #: ecoff.c:2893
 #, c-format
 msgid "no tag specified for %s"
-msgstr ""
+msgstr "ingen tagg angiven för %s"
 
 #: ecoff.c:2995
 msgid ".end directive without a preceding .file directive"
-msgstr ""
+msgstr ".end-direktiv utan ett föregående .file-direktiv"
 
 #: ecoff.c:3024
 msgid ".end directive names unknown symbol"
-msgstr ""
+msgstr ".end-direktiv namnger okänd symbol"
 
 #: ecoff.c:3051
 msgid "second .ent directive found before .end directive"
-msgstr ""
+msgstr "andra .ent-direktiv funnet innan .end-direktiv"
 
 #: ecoff.c:3123
 msgid "no way to handle .file within .ent/.end section"
-msgstr ""
+msgstr "inget sätt att hantera .file inom .ent/.end-sektion"
 
 #: ecoff.c:3240
 msgid ".loc before .file"
-msgstr ""
+msgstr ".loc före .file"
 
 #: ecoff.c:3443
 #, c-format
 msgid ".stab%c is not supported"
-msgstr ""
+msgstr ".stab%c stöds inte"
 
 #: ecoff.c:3453
 #, c-format
 msgid ".stab%c: ignoring non-zero other field"
-msgstr ""
+msgstr ".stab%c: hoppar över annat fält som är icke-noll"
 
 #: ecoff.c:3487
 #, c-format
 msgid "line number (%d) for .stab%c directive cannot fit in index field (20 bits)"
-msgstr ""
+msgstr "radnummer (%d) för .stab%c-direktiv får inte plats i indexfält (20 bitar)"
 
 #: ecoff.c:3523
 #, c-format
@@ -18951,40 +18951,40 @@ msgstr "felaktigt .stab%c-direktiv, felaktigt tecken"
 
 #: ecoff.c:3982 ecoff.c:4171 ecoff.c:4196
 msgid ".begin/.bend in different segments"
-msgstr ""
+msgstr ".begin/.bend i olika segment"
 
 #: ecoff.c:4692
 msgid "missing .end or .bend at end of file"
-msgstr ""
+msgstr "saknar .end eller .bend vid filslut"
 
 #: ecoff.c:5177
 msgid "GP prologue size exceeds field size, using 0 instead"
-msgstr ""
+msgstr "GP-prologstorlek överstiger fältstorlek, använder 0 istället"
 
 #: expr.c:84 read.c:3735
 msgid "bignum invalid"
-msgstr ""
+msgstr "bignum ogiltigt"
 
 #: expr.c:86 read.c:3737 read.c:4235 read.c:5140
 msgid "floating point number invalid"
-msgstr ""
+msgstr "flyttal ogiltigt"
 
 #: expr.c:209
 msgid "bad floating-point constant: exponent overflow"
-msgstr ""
+msgstr "felaktig flyttalskonstant; exponentöverspill"
 
 #: expr.c:213
 #, c-format
 msgid "bad floating-point constant: unknown error code=%d"
-msgstr ""
+msgstr "felaktig flyttalskonstant; okänd felkod=%d"
 
 #: expr.c:392
 msgid "a bignum with underscores may not have more than 8 hex digits in any word"
-msgstr ""
+msgstr "bignum med understreck får inte har mer än 8 hexsiffror i något ord"
 
 #: expr.c:415
 msgid "a bignum with underscores must have exactly 4 words"
-msgstr ""
+msgstr "bignum med understreck måste ha exakt fyra ord"
 
 #. Either not seen or not defined.
 #. @@ Should print out the original string instead of
@@ -18992,59 +18992,59 @@ msgstr ""
 #: expr.c:538
 #, c-format
 msgid "backward ref to unknown label \"%d:\""
-msgstr ""
+msgstr "bakåtreferens till okänd etikett ”%d:”"
 
 #: expr.c:656
 msgid "character constant too large"
-msgstr ""
+msgstr "teckenkonstant för stor"
 
 #: expr.c:903
 #, c-format
 msgid "expr.c(operand): bad atof_generic return val %d"
-msgstr ""
+msgstr "expr.c(operand): felaktigt atof_generic returvärde %d"
 
 #: expr.c:966
 #, c-format
 msgid "missing '%c'"
-msgstr ""
+msgstr "saknar ”%c”"
 
 #: expr.c:977 read.c:4622
 msgid "EBCDIC constants are not supported"
-msgstr ""
+msgstr "EBCDIC-konstanter stöds inte"
 
 #: expr.c:1103
 #, c-format
 msgid "Unary operator %c ignored because bad operand follows"
-msgstr ""
+msgstr "Unär operator %c överhoppad efter som en felaktig operand följer"
 
 #: expr.c:1149 expr.c:1174
 msgid "syntax error in .startof. or .sizeof."
-msgstr ""
+msgstr "syntaxfel i .startof. eller .sizeof."
 
 #: expr.c:1255 expr.c:1616
 #, c-format
 msgid "invalid use of operator \"%s\""
-msgstr ""
+msgstr "ogiltig användning av operator ”%s”"
 
 #: expr.c:1800
 msgid "missing operand; zero assumed"
-msgstr ""
+msgstr "saknar operand; noll antaget"
 
 #: expr.c:1839
 msgid "left operand is a bignum; integer 0 assumed"
-msgstr ""
+msgstr "vänster operand är ett bignum; heltalet 0 antaget"
 
 #: expr.c:1841
 msgid "left operand is a float; integer 0 assumed"
-msgstr ""
+msgstr "vänster operand är ett flyttal; heltalet 0 antaget"
 
 #: expr.c:1850
 msgid "right operand is a bignum; integer 0 assumed"
-msgstr ""
+msgstr "höger operand är ett bignum; heltalet 0 antaget"
 
 #: expr.c:1852
 msgid "right operand is a float; integer 0 assumed"
-msgstr ""
+msgstr "höger operand är ett flyttal; heltalet 0 antaget"
 
 #: expr.c:1923 symbols.c:1386
 msgid "division by zero"
@@ -19108,12 +19108,12 @@ msgstr "makro nästlade för djupt"
 
 #: input-scrub.c:379 input-scrub.c:403
 msgid "partial line at end of file ignored"
-msgstr ""
+msgstr "partiell rad vid filslut överhoppad"
 
 #: itbl-ops.c:331
 #, c-format
 msgid "Unable to allocate memory for new instructions\n"
-msgstr ""
+msgstr "Kan inte allokera minne för nya instruktioner\n"
 
 #: listing.c:255 messages.c:154 messages.c:156 messages.c:159
 msgid "Warning: "
@@ -19202,9 +19202,10 @@ msgstr ""
 msgid "can't open %s: %s"
 msgstr "kan inte öppna %s: %s"
 
+# sebras: no form?
 #: listing.c:1510
 msgid "strange paper height, set to no form"
-msgstr ""
+msgstr "underlig pappershöjd, inställd till ingen form"
 
 #: listing.c:1574
 msgid "new line in title"
@@ -19244,7 +19245,7 @@ msgstr "Reserverat ord ”%s” använt som parameter i makro ”%s”"
 #: macro.c:670
 #, c-format
 msgid "unexpected end of file in macro `%s' definition"
-msgstr ""
+msgstr "oväntat filslut i makro ”%s”-definition"
 
 #: macro.c:682
 #, c-format
@@ -19299,7 +19300,7 @@ msgstr "för många positionella argument"
 #: macro.c:1186
 #, c-format
 msgid "Missing value for required parameter `%s' of macro `%s'"
-msgstr ""
+msgstr "Saknar värde för nödvändig parameter ”%s” för makro ”%s”"
 
 #: macro.c:1305
 #, c-format
@@ -19308,16 +19309,16 @@ msgstr ""
 
 #: macro.c:1324
 msgid "unexpected end of file in irp or irpc"
-msgstr ""
+msgstr "oväntat filslut i irp eller irpc"
 
 #: macro.c:1332
 msgid "missing model parameter"
-msgstr ""
+msgstr "saknar modellparameter"
 
 #: messages.c:80
 #, c-format
 msgid "Assembler messages:\n"
-msgstr ""
+msgstr "Assemblermeddelanden:\n"
 
 #: messages.c:278
 #, c-format
@@ -19332,12 +19333,12 @@ msgstr "Internt fel!\n"
 #: messages.c:298
 #, c-format
 msgid "Assertion failure in %s at %s line %d.\n"
-msgstr ""
+msgstr "Försäkran i %s vid %s rad %d misslyckades.\n"
 
 #: messages.c:301
 #, c-format
 msgid "Assertion failure at %s line %d.\n"
-msgstr ""
+msgstr "Försäkran vid %s rad %d misslyckades.\n"
 
 #: messages.c:302 messages.c:319
 #, c-format
@@ -19347,12 +19348,12 @@ msgstr "Rapportera denna bugg.\n"
 #: messages.c:314
 #, c-format
 msgid "Internal error, aborting at %s line %d in %s\n"
-msgstr ""
+msgstr "Internt fel, avbryter vid %s rad %d i %s\n"
 
 #: messages.c:317
 #, c-format
 msgid "Internal error, aborting at %s line %d\n"
-msgstr ""
+msgstr "Internet fel, avbryter vid %s rad %d\n"
 
 #: messages.c:366
 #, c-format
@@ -19388,7 +19389,7 @@ msgstr "kan inte skapa %s: %s"
 #: read.c:519
 #, c-format
 msgid "error constructing %s pseudo-op table: %s"
-msgstr ""
+msgstr "fel vid konstruktion av %s-pseudo-op-tabell: %s"
 
 #: read.c:700
 msgid "cannot change section or subsection inside .bundle_lock"
@@ -19513,25 +19514,25 @@ msgstr ""
 
 #: read.c:2459
 msgid "expected alignment after size"
-msgstr ""
+msgstr "förväntad justering efter storlek"
 
 #: read.c:2677
 #, c-format
 msgid "attempt to redefine pseudo-op `%s' ignored"
-msgstr ""
+msgstr "försök att omdefiniera pseudo-op ”%s” överhoppad"
 
 #: read.c:2696
 msgid "ignoring macro exit outside a macro definition."
-msgstr ""
+msgstr "hoppar över makroavslut utanför en makrodefinition."
 
 #: read.c:2750
 #, c-format
 msgid "invalid segment \"%s\""
-msgstr ""
+msgstr "ogiltigt segment ”%s”"
 
 #: read.c:2758
 msgid "only constant offsets supported in absolute section"
-msgstr ""
+msgstr "endast konstanta avstånd stöds i absolutsektion"
 
 #: read.c:2797
 msgid "MRI style ORG pseudo-op not supported"
@@ -19540,21 +19541,21 @@ msgstr ""
 #: read.c:2950
 #, c-format
 msgid "unrecognized section type `%s'"
-msgstr ""
+msgstr "okänd sektionstyp ”%s”"
 
 #: read.c:2964
 msgid "absolute sections are not supported"
-msgstr ""
+msgstr "absoluta sektioner stöds inte"
 
 #: read.c:2979
 #, c-format
 msgid "unrecognized section command `%s'"
-msgstr ""
+msgstr "okänt sektionskommando ”%s”"
 
 #: read.c:3043
 #, c-format
 msgid ".end%c encountered without preceding %s"
-msgstr ""
+msgstr ".end%c påträffat utan föregående %s"
 
 #: read.c:3073 read.c:3103
 #, c-format
@@ -19563,23 +19564,23 @@ msgstr "%s utan %s"
 
 #: read.c:3334
 msgid "unsupported variable size or fill value"
-msgstr ""
+msgstr "variabelstorlek eller fyllnadsvärde stöds inte"
 
 #: read.c:3362
 msgid ".space repeat count is zero, ignored"
-msgstr ""
+msgstr ".space repetitionsantal är noll, överhoppat"
 
 #: read.c:3364
 msgid ".space repeat count is negative, ignored"
-msgstr ""
+msgstr ".space repetitionsantal är negativt, överhoppat"
 
 #: read.c:3393
 msgid "space allocation too complex in absolute section"
-msgstr ""
+msgstr "utrymmesallokering för komplex i absolutsektion"
 
 #: read.c:3399
 msgid "space allocation too complex in common section"
-msgstr ""
+msgstr "utrymmesallokering för komplex i allmän sektion"
 
 #: read.c:3490 read.c:4868
 #, c-format
@@ -19603,7 +19604,7 @@ msgstr ""
 
 #: read.c:3937
 msgid "unexpected `\"' in expression"
-msgstr ""
+msgstr "oväntat ”\"” i uttryck"
 
 #: read.c:3949
 msgid "rva without symbol"
@@ -19611,7 +19612,7 @@ msgstr "rva utan symbol"
 
 #: read.c:4009
 msgid "missing or bad offset expression"
-msgstr ""
+msgstr "saknar eller felaktig avståndsuttryck"
 
 #: read.c:4030
 msgid "missing reloc type"
@@ -19627,44 +19628,45 @@ msgstr "felaktigt omlokaliseringsuttryck"
 
 #: read.c:4191
 msgid "attempt to store value in absolute section"
-msgstr ""
+msgstr "försök att lagra värde i absolutsektion"
 
 #: read.c:4229 read.c:5134
 msgid "zero assumed for missing expression"
-msgstr ""
+msgstr "noll antaget för saknat uttryck"
 
 #: read.c:4327
 #, c-format
 msgid "value 0x%llx truncated to 0x%llx"
-msgstr ""
+msgstr "värde 0x%llx trunkerat till 0x%llx"
 
 #: read.c:4330
 msgid "value 0x%I64x truncated to 0x%I64x"
-msgstr ""
+msgstr "värde 0x%I64x trunkerat till 0x%I64x"
 
 #: read.c:4334
 #, c-format
 msgid "value 0x%lx truncated to 0x%lx"
-msgstr ""
+msgstr "värde 0x%lx trunkerat till 0x%lx"
 
 #: read.c:4361
 #, c-format
 msgid "bignum truncated to %d bytes"
-msgstr ""
+msgstr "bignum trunkerat till %d byte"
 
 #: read.c:4437
 #, c-format
 msgid "%s relocations do not fit in %u bytes\n"
-msgstr ""
+msgstr "%s-omlokaliseringar får inte plats i %u byte\n"
 
 #: read.c:4695 read.c:4890
 msgid "unresolvable or nonpositive repeat count; using 1"
 msgstr ""
 
+# sebras: type type?
 #: read.c:4744
 #, c-format
 msgid "unknown floating type type '%c'"
-msgstr ""
+msgstr "okänd flyttalstyp ”%c”"
 
 #: read.c:4766
 msgid "floating point constant too large"
@@ -19681,11 +19683,11 @@ msgstr "förväntade <nn>"
 #. To be compatible with BSD 4.2 as: give the luser a linefeed!!
 #: read.c:5383 read.c:5469
 msgid "unterminated string; newline inserted"
-msgstr ""
+msgstr "oterminerad sträng; nyrad infogat"
 
 #: read.c:5477
 msgid "bad escaped character in string"
-msgstr ""
+msgstr "felaktigt kontrollsekvenstecken i sträng"
 
 #: read.c:5502
 msgid "expected address expression"
@@ -19711,7 +19713,7 @@ msgstr "saknar sträng"
 #: read.c:5686
 #, c-format
 msgid ".incbin count zero, ignoring `%s'"
-msgstr ""
+msgstr ".incbin antal noll, hoppar över ”%s”"
 
 #: read.c:5712
 #, c-format
@@ -19721,12 +19723,12 @@ msgstr "fil hittades inte: %s"
 #: read.c:5726
 #, c-format
 msgid "seek to end of .incbin file failed `%s'"
-msgstr ""
+msgstr "sökning till slutet av .incbin-fil misslyckades ”%s”"
 
 #: read.c:5737
 #, c-format
 msgid "skip (%ld) or count (%ld) invalid for file size (%ld)"
-msgstr ""
+msgstr "överhoppning (%ld) eller antal (%ld) ogiltigt för filstorlek (%ld)"
 
 #: read.c:5744
 #, c-format
@@ -19785,7 +19787,7 @@ msgstr ""
 #: stabs.c:214 stabs.c:222 stabs.c:230 stabs.c:249
 #, c-format
 msgid ".stab%c: missing comma"
-msgstr ""
+msgstr ".stab%c: saknar komma"
 
 #. This could happen for example with a source file with a huge
 #. number of lines.  The only cure is to use a different debug
@@ -19793,7 +19795,7 @@ msgstr ""
 #: stabs.c:242
 #, c-format
 msgid ".stab%c: description field '%x' too big, try a different debug format"
-msgstr ""
+msgstr ".stab%c: beskrivningsfält ”%x” för stort, prova ett annat felsökningsformat"
 
 #: stabs.c:423
 msgid "comma missing in .xstabs"
@@ -19881,25 +19883,25 @@ msgstr ""
 #: write.c:166
 #, c-format
 msgid "field fx_size too small to hold %d"
-msgstr ""
+msgstr "fält fx_size för litet för att hålla %d"
 
 #: write.c:452
 #, c-format
 msgid "attempt to .org/.space backwards? (%ld)"
-msgstr ""
+msgstr "försök att .org/.space bakåt? (%ld)"
 
 #: write.c:689
 msgid "invalid offset expression"
-msgstr ""
+msgstr "ogiltigt avståndsuttryck"
 
 #: write.c:711
 msgid "invalid reloc expression"
-msgstr ""
+msgstr "ogiltigt omlokaliseringsuttryck"
 
 #: write.c:1096
 #, c-format
 msgid "value of %s too large for field of %d bytes at %s"
-msgstr ""
+msgstr "värde för %s för stort för fält om %d byte vid %s"
 
 #: write.c:1108
 #, c-format
@@ -19917,7 +19919,7 @@ msgstr "omlokalisering utanför intervall"
 #: write.c:1165
 #, c-format
 msgid "%s:%u: bad return from bfd_install_relocation: %x"
-msgstr ""
+msgstr "%s:%u felaktigt returvärde från bfd_install_relocation: %x"
 
 #: write.c:1188
 msgid "reloc not within (fixed part of) section"
@@ -19925,16 +19927,16 @@ msgstr "omlokalisering inte inom (fix del av) sektion"
 
 #: write.c:1258
 msgid "internal error: fixup not contained within frag"
-msgstr ""
+msgstr "internt fel: uppfixning inte begränsad inom frag"
 
 #: write.c:1376 write.c:1506
 msgid "can't extend frag"
-msgstr ""
+msgstr "kan inte utöka frag"
 
 #: write.c:1430
 #, c-format
 msgid "can't extend frag %u chars"
-msgstr ""
+msgstr "kan inte över frag %u tecken"
 
 #: write.c:1568 write.c:1589
 #, c-format
