@@ -1,3 +1,7 @@
+2017-01-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): Fix vcmla mask and disassembly.
+
 2017-01-13  Yao Qi  <yao.qi@linaro.org>
 
 	* m68k-dis.c (match_insn_m68k): Extend comments.  Return -1
