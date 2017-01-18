@@ -1,3 +1,9 @@
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR gas/20649
+	* testsuite/ld-mips-elf/mips-elf.exp: Add PIC comdat GOT16/LO16
+	relocation pairing link test.
+
 2017-01-17  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* testsuite/ld-unique/unique.exp: Filter shared lib cases in

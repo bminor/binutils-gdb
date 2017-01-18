@@ -1353,7 +1353,7 @@ static void s_mips_stab (int);
 static void s_mips_weakext (int);
 static void s_mips_file (int);
 static void s_mips_loc (int);
-static bfd_boolean pic_need_relax (symbolS *, asection *);
+static bfd_boolean pic_need_relax (symbolS *);
 static int relaxed_branch_length (fragS *, asection *, int);
 static int relaxed_micromips_16bit_branch_length (fragS *, asection *, int);
 static int relaxed_micromips_32bit_branch_length (fragS *, asection *, int);
@@ -4266,6 +4266,8 @@ mips_move_text_labels (void)
 {
   mips_move_labels (seg_info (now_seg)->label_list, TRUE);
 }
+
+/* Duplicate the test for LINK_ONCE sections as in `adjust_reloc_syms'.  */
 
 static bfd_boolean
 s_is_linkonce (symbolS *sym, segT from_seg)
@@ -14895,7 +14897,7 @@ mips_frob_file (void)
 	 constants; we'll report an error for those later.  */
       if (got16_reloc_p (l->fixp->fx_r_type)
 	  && !(l->fixp->fx_addsy
-	       && pic_need_relax (l->fixp->fx_addsy, l->seg)))
+	       && pic_need_relax (l->fixp->fx_addsy)))
 	continue;
 
       /* Check quickly whether the next fixup happens to be a matching %lo.  */
@@ -17115,7 +17117,7 @@ nopic_need_relax (symbolS *sym, int before_relaxing)
 /* Return true if the given symbol should be considered local for SVR4 PIC.  */
 
 static bfd_boolean
-pic_need_relax (symbolS *sym, asection *segtype)
+pic_need_relax (symbolS *sym)
 {
   asection *symsec;
 
@@ -17140,7 +17142,6 @@ pic_need_relax (symbolS *sym, asection *segtype)
   return (!bfd_is_und_section (symsec)
 	  && !bfd_is_abs_section (symsec)
 	  && !bfd_is_com_section (symsec)
-	  && !s_is_linkonce (sym, segtype)
 	  /* A global or weak symbol is treated as external.  */
 	  && (!S_IS_WEAK (sym) && !S_IS_EXTERNAL (sym)));
 }
@@ -17579,7 +17580,7 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
   if (mips_pic == NO_PIC)
     change = nopic_need_relax (fragp->fr_symbol, 0);
   else if (mips_pic == SVR4_PIC)
-    change = pic_need_relax (fragp->fr_symbol, segtype);
+    change = pic_need_relax (fragp->fr_symbol);
   else if (mips_pic == VXWORKS_PIC)
     /* For vxworks, GOT16 relocations never have a corresponding LO16.  */
     change = 0;
