@@ -1,3 +1,15 @@
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR gas/20649
+	* config/tc-mips.c (pic_need_relax): Don't check for linkonce
+	symbols, remove the `segtype' parameter.
+	(mips_frob_file, md_estimate_size_before_relax): Adjust
+	accordingly.
+	(s_is_linkonce): Add an explanatory comment.
+	* testsuite/gas/mips/comdat-reloc.d: New test.
+	* testsuite/gas/mips/comdat-reloc.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
 
 	PR 21059
