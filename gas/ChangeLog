@@ -1,3 +1,9 @@
+2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
+
+	PR 21059
+	* config/bfin-lex.l: Support processing with flex 2.6.3.
+	* itbl-lex.l: Likewise.
+
 2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .avx512_vpopcntdq.

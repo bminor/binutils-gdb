@@ -1,3 +1,8 @@
+2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
+
+	PR 21059
+	* ldlex.l: Support processing with flex 2.6.3.
+
 2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master

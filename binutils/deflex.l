@@ -1,4 +1,4 @@
-%option noinput nounput
+%option noinput nounput noyywrap
 
 %{/* deflex.l - Lexer for .def files */
 
@@ -91,7 +91,3 @@ int linenumber;
 "@"	 	{ return '@';}
 ","		{ return ',';}
 %%
-#ifndef yywrap
-/* Needed for lex, though not flex. */
-int yywrap(void) { return 1; }
-#endif
