@@ -1,5 +1,12 @@
 2017-01-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* remote.c (struct cached_reg): Change data into a pointer.
+	* (stop_reply_dtr): Free data pointers before deleting vector.
+	(process_stop_reply): Likewise.
+	(remote_parse_stop_reply): Allocate space for data
+
+2017-01-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* amd64-tdep.c (amd64_pseudo_register_read_value): remove
 	MAX_REGISTER_SIZE.
 	(amd64_pseudo_register_read_value): Likewise.
