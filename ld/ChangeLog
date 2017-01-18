@@ -1,5 +1,11 @@
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
+	PR ld/20995
+	* testsuite/ld-elf/elf.exp: Set GAS flags correctly for the
+	`mips*-*-*' target and `pr20995' and `pr20995-2' tests.
+
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
 	PR ld/20828
 	* testsuite/ld-elf/pr20828-1.sd: New test.
 	* testsuite/ld-elf/pr20828-2a.sd: New test.
