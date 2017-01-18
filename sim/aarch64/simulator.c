@@ -3445,28 +3445,25 @@ do_vec_ADDV (sim_cpu *cpu)
     case 0:
       for (i = 0; i < (full ? 16 : 8); i++)
 	val += aarch64_get_vec_u8 (cpu, vm, i);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, val);
+      aarch64_set_vec_u64 (cpu, rd, 0, val);
       return;
 
     case 1:
       for (i = 0; i < (full ? 8 : 4); i++)
 	val += aarch64_get_vec_u16 (cpu, vm, i);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, val);
+      aarch64_set_vec_u64 (cpu, rd, 0, val);
       return;
 
     case 2:
-      for (i = 0; i < (full ? 4 : 2); i++)
+      if (! full)
+	HALT_UNALLOC;
+      for (i = 0; i < 4; i++)
 	val += aarch64_get_vec_u32 (cpu, vm, i);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, val);
+      aarch64_set_vec_u64 (cpu, rd, 0, val);
       return;
 
     case 3:
-      if (! full)
-	HALT_UNALLOC;
-      val = aarch64_get_vec_u64 (cpu, vm, 0);
-      val += aarch64_get_vec_u64 (cpu, vm, 1);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, val);
-      return;
+      HALT_UNALLOC;
     }
 }
 
@@ -4206,33 +4203,21 @@ do_vec_XTN (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      if (bias)
-	for (i = 0; i < 8; i++)
-	  aarch64_set_vec_u8 (cpu, vd, i + 8,
-			      aarch64_get_vec_u16 (cpu, vs, i) >> 8);
-      else
-	for (i = 0; i < 8; i++)
-	  aarch64_set_vec_u8 (cpu, vd, i, aarch64_get_vec_u16 (cpu, vs, i));
+      for (i = 0; i < 8; i++)
+	aarch64_set_vec_u8 (cpu, vd, i + (bias * 8),
+			    aarch64_get_vec_u16 (cpu, vs, i));
       return;
 
     case 1:
-      if (bias)
-	for (i = 0; i < 4; i++)
-	  aarch64_set_vec_u16 (cpu, vd, i + 4,
-			       aarch64_get_vec_u32 (cpu, vs, i) >> 16);
-      else
-	for (i = 0; i < 4; i++)
-	  aarch64_set_vec_u16 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vs, i));
+      for (i = 0; i < 4; i++)
+	aarch64_set_vec_u16 (cpu, vd, i + (bias * 4),
+			     aarch64_get_vec_u32 (cpu, vs, i));
       return;
 
     case 2:
-      if (bias)
-	for (i = 0; i < 2; i++)
-	  aarch64_set_vec_u32 (cpu, vd, i + 4,
-			       aarch64_get_vec_u64 (cpu, vs, i) >> 32);
-      else
-	for (i = 0; i < 2; i++)
-	  aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u64 (cpu, vs, i));
+      for (i = 0; i < 2; i++)
+	aarch64_set_vec_u32 (cpu, vd, i + (bias * 2),
+			     aarch64_get_vec_u64 (cpu, vs, i));
       return;
     }
 }
