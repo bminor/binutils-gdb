@@ -1,3 +1,12 @@
+2017-01-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* amd64-tdep.c (amd64_pseudo_register_read_value): remove
+	MAX_REGISTER_SIZE.
+	(amd64_pseudo_register_read_value): Likewise.
+	* remote.c (fetch_register_using_p): Remove MAX_REGISTER_SIZE.
+	(store_register_using_P): Likewise.
+	* regcache.c (regcache_xfer_part): Likewise.
+
 2017-01-16  Ivo Raisr  <ivo.raisr@oracle.com>
 
 	Split real and pseudo registers.

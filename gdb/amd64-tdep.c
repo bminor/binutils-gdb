@@ -353,7 +353,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 				  struct regcache *regcache,
 				  int regnum)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte *raw_buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum register_status status;
   struct value *result_value;
@@ -414,7 +414,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int regnum, const gdb_byte *buf)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte *raw_buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (i386_byte_regnum_p (gdbarch, regnum))

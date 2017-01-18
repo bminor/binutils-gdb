@@ -7467,9 +7467,10 @@ remote_wait (struct target_ops *ops,
 static int
 fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
   char *buf, *p;
-  char regp[MAX_REGISTER_SIZE];
+  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
   int i;
 
   if (packet_support (PACKET_p) == PACKET_DISABLE)
@@ -7774,7 +7775,7 @@ store_register_using_P (const struct regcache *regcache,
   struct remote_state *rs = get_remote_state ();
   /* Try storing a single register.  */
   char *buf = rs->buf;
-  gdb_byte regp[MAX_REGISTER_SIZE];
+  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
   char *p;
 
   if (packet_support (PACKET_P) == PACKET_DISABLE)
