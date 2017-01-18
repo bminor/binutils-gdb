@@ -1,3 +1,11 @@
+2017-01-17  Dmitry Timoshkov  <dmitry@baikal.ru>
+
+	* resbin.c: Optional dialog control data immediately follows
+	the control description without alignment.
+	* testsuite/binutils-all/windres/controldata.rc: New test.
+	source.
+	* testsuite/binutils-all/windres/controldata.rsd: New test.
+
 2017-01-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/20876
