@@ -1,3 +1,9 @@
+2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
+
+	PR 21059
+	* arlex.l: Support processing with flex 2.6.3.
+	* deflex.l: Likewise.
+
 2017-01-17  Dmitry Timoshkov  <dmitry@baikal.ru>
 
 	* resbin.c: Optional dialog control data immediately follows
