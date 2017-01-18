@@ -1,3 +1,45 @@
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR gas/20649
+	* config/tc-mips.c (pic_need_relax): Don't check for linkonce
+	symbols, remove the `segtype' parameter.
+	(mips_frob_file, md_estimate_size_before_relax): Adjust
+	accordingly.
+	(s_is_linkonce): Add an explanatory comment.
+	* testsuite/gas/mips/comdat-reloc.d: New test.
+	* testsuite/gas/mips/comdat-reloc.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-01-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/gas/arm/armv8_3-a-simd.s: Add vcmla tests.
+	* testsuite/gas/arm/armv8_3-a-simd.d: Update.
+
+2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
+
+	PR 21059
+	* config/bfin-lex.l: Support processing with flex 2.6.3.
+	* itbl-lex.l: Likewise.
+
+2017-01-18  Nathan Sidwell  <nathan@acm.org>
+
+	* as.h (gas_assert): Use abort.
+	(as_assert): Remove.
+	(signal_init): Declare.
+	* as.c (main): Call signal_init.
+	* messages.c: #include <signal.h>
+	(as_assert): Delete.
+	(as_abort): Allow NULL FILE.
+	(signal_crash): New.
+	(signal_init): Register fatal signal handlers.
+	* configure.ac: Check for strsignal.
+	* config.in: Rebuilt.
+	* configure: Rebuilt.
+
+2017-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .avx512_vpopcntdq.

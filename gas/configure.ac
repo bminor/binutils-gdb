@@ -826,6 +826,7 @@ AC_C_INLINE
 # VMS doesn't have unlink.
 AC_CHECK_FUNCS(unlink remove, break)
 AC_CHECK_FUNCS(sbrk setlocale)
+AC_CHECK_FUNCS(strsignal)
 
 AM_LC_MESSAGES
 

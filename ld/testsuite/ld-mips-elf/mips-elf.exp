@@ -573,6 +573,13 @@ if { $has_newabi } {
 }
 
 run_dump_test "reloc-local-overflow" [list [list ld $abi_ldflags(o32)]]
+run_ld_link_tests [list \
+    [list \
+	"MIPS link ELF o32 PIC comdat GOT16/LO16 relocation pairing" \
+	"$abi_ldflags(o32) -e bar" "" "$abi_asflags(o32) -mno-pdr" \
+	"../../../gas/testsuite/gas/mips/comdat-reloc.s" \
+	{} \
+	"comdat-reloc"]]
 
 if {$has_newabi && $linux_gnu} {
     run_dump_test "eh-frame1-n32"

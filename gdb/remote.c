@@ -283,6 +283,11 @@ typedef unsigned char threadref[OPAQUETHREADBYTES];
 
 #define MAXTHREADLISTRESULTS 32
 
+/* The max number of chars in debug output.  The rest of chars are
+   omitted.  */
+
+#define REMOTE_DEBUG_MAX_CHAR 512
+
 /* Data for the vFile:pread readahead cache.  */
 
 struct readahead_cache
@@ -6306,7 +6311,7 @@ remote_console_output (char *msg)
 typedef struct cached_reg
 {
   int num;
-  gdb_byte data[MAX_REGISTER_SIZE];
+  gdb_byte *data;
 } cached_reg_t;
 
 DEF_VEC_O(cached_reg_t);
@@ -6402,6 +6407,13 @@ static void
 stop_reply_dtr (struct notif_event *event)
 {
   struct stop_reply *r = (struct stop_reply *) event;
+  cached_reg_t *reg;
+  int ix;
+
+  for (ix = 0;
+       VEC_iterate (cached_reg_t, r->regcache, ix, reg);
+       ix++)
+    xfree (reg->data);
 
   VEC_free (cached_reg_t, r->regcache);
 }
@@ -6974,6 +6986,7 @@ Packet: '%s'\n"),
 		{
 		  struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
 		  cached_reg_t cached_reg;
+		  struct gdbarch *gdbarch = target_gdbarch ();
 
 		  if (reg == NULL)
 		    error (_("Remote sent bad register number %s: %s\n\
@@ -6981,14 +6994,14 @@ Packet: '%s'\n"),
 			   hex_string (pnum), p, buf);
 
 		  cached_reg.num = reg->regnum;
+		  cached_reg.data = (gdb_byte *)
+		    xmalloc (register_size (gdbarch, reg->regnum));
 
 		  p = p1 + 1;
 		  fieldsize = hex2bin (p, cached_reg.data,
-				       register_size (target_gdbarch (),
-						      reg->regnum));
+				       register_size (gdbarch, reg->regnum));
 		  p += 2 * fieldsize;
-		  if (fieldsize < register_size (target_gdbarch (),
-						 reg->regnum))
+		  if (fieldsize < register_size (gdbarch, reg->regnum))
 		    warning (_("Remote reply is too short: %s"), buf);
 
 		  VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
@@ -7209,9 +7222,13 @@ process_stop_reply (struct stop_reply *stop_reply,
 	  int ix;
 
 	  for (ix = 0;
-	       VEC_iterate(cached_reg_t, stop_reply->regcache, ix, reg);
+	       VEC_iterate (cached_reg_t, stop_reply->regcache, ix, reg);
 	       ix++)
+	  {
 	    regcache_raw_supply (regcache, reg->num, reg->data);
+	    xfree (reg->data);
+	  }
+
 	  VEC_free (cached_reg_t, stop_reply->regcache);
 	}
 
@@ -7462,9 +7479,10 @@ remote_wait (struct target_ops *ops,
 static int
 fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
   char *buf, *p;
-  char regp[MAX_REGISTER_SIZE];
+  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
   int i;
 
   if (packet_support (PACKET_p) == PACKET_DISABLE)
@@ -7769,7 +7787,7 @@ store_register_using_P (const struct regcache *regcache,
   struct remote_state *rs = get_remote_state ();
   /* Try storing a single register.  */
   char *buf = rs->buf;
-  gdb_byte regp[MAX_REGISTER_SIZE];
+  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
   char *p;
 
   if (packet_support (PACKET_P) == PACKET_DISABLE)
@@ -8749,9 +8767,21 @@ putpkt_binary (const char *buf, int cnt)
 	{
 	  *p = '\0';
 
-	  std::string str = escape_buffer (buf2, p - buf2);
+	  int len = (int) (p - buf2);
 
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str.c_str ());
+	  std::string str
+	    = escape_buffer (buf2, std::min (len, REMOTE_DEBUG_MAX_CHAR));
+
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s", str.c_str ());
+
+	  if (str.length () > REMOTE_DEBUG_MAX_CHAR)
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "[%zu bytes omitted]",
+				  str.length () - REMOTE_DEBUG_MAX_CHAR);
+	    }
+
+	  fprintf_unfiltered (gdb_stdlog, "...");
+
 	  gdb_flush (gdb_stdlog);
 	}
       remote_serial_write (buf2, p - buf2);
@@ -9179,9 +9209,20 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	{
 	  if (remote_debug)
 	    {
-	      std::string str = escape_buffer (*buf, val);
+	      std::string str
+		= escape_buffer (*buf,
+				 std::min (val, REMOTE_DEBUG_MAX_CHAR));
 
-	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str.c_str ());
+	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s",
+				  str.c_str ());
+
+	      if (str.length () >  REMOTE_DEBUG_MAX_CHAR)
+		{
+		  fprintf_unfiltered (gdb_stdlog, "[%zu bytes omitted]",
+				      str.length () - REMOTE_DEBUG_MAX_CHAR);
+		}
+
+	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
 
 	  /* Skip the ack char if we're in no-ack mode.  */

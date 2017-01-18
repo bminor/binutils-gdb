@@ -1,3 +1,56 @@
+2017-01-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote.c (struct cached_reg): Change data into a pointer.
+	* (stop_reply_dtr): Free data pointers before deleting vector.
+	(process_stop_reply): Likewise.
+	(remote_parse_stop_reply): Allocate space for data
+
+2017-01-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* amd64-tdep.c (amd64_pseudo_register_read_value): remove
+	MAX_REGISTER_SIZE.
+	(amd64_pseudo_register_read_value): Likewise.
+	* remote.c (fetch_register_using_p): Remove MAX_REGISTER_SIZE.
+	(store_register_using_P): Likewise.
+	* regcache.c (regcache_xfer_part): Likewise.
+
+2017-01-16  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	Split real and pseudo registers.
+	* sparc-tdep.h (SPARC_CORE_REGISTERS): New macro.
+	(sparc32_pseudo_regnum): New enum.
+	* sparc64-tdep.h (sparc64_pseudo_regnum): New enum.
+	* sparc-tdep.c (SPARC32_FPU_REGISTERS): New macro.
+	(SPARC32_CP0_REGISTERS): New macro.
+	(sparc32_pseudo_register_name): New function.
+	(sparc32_register_name): Use sparc32_pseudo_register_name.
+	(sparc32_pseudo_register_type): New function.
+	(sparc32_register_type): Use sparc32_pseudo_register_type.
+	(sparc32_pseudo_register_read, sparc32_pseudo_register_write): Handle
+	pseudo register numbers.
+	* sparc64-tdep.c SPARC64_FPU_REGISTERS): New macro.
+	(SPARC64_CP0_REGISTERS): New macro.
+	(sparc64_pseudo_register_name): New function.
+	(sparc64_register_name): Use sparc64_pseudo_register_name.
+	(sparc64_pseudo_register_type): New function.
+	(sparc64_register_type): Use sparc64_pseudo_register_type.
+	(sparc64_pseudo_register_read, sparc64_pseudo_register_write): Handle
+	pseudo register numbers.
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields,
+	sparc64_store_arguments): Handle pseudo register numbers.
+
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (REMOTE_DEBUG_MAX_CHAR): New macro.
+	(putpkt_binary): Print only REMOTE_DEBUG_MAX_CHAR chars in debug
+	output.
+	(getpkt_or_notif_sane_1): Likewise.
+
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (checker-headers): Use CXX and CXX_DIALET instead
+	of CC.  Pass "-x c++-header" instead of "-x c".
+
 2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (remote_can_async_p): Update comment.

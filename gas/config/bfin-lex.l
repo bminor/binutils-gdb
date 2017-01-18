@@ -1,3 +1,5 @@
+%option noyywrap
+
 /* bfin-lex.l  ADI Blackfin lexer
    Copyright (C) 2005-2017 Free Software Foundation, Inc.
 
@@ -545,12 +547,3 @@ set_start_state (void)
 {
   BEGIN KEYWORD;
 }
-
-
-#ifndef yywrap
-int
-yywrap ()
-{
-  return 1;
-}
-#endif

@@ -56,9 +56,12 @@ enum sparc64_regnum
   SPARC64_FSR_REGNUM,		/* %fsr */
   SPARC64_FPRS_REGNUM,		/* %fprs */
   SPARC64_Y_REGNUM,		/* %y */
+};
 
-  /* Pseudo registers.  */
-  SPARC64_CWP_REGNUM,		/* %cwp */
+/* Pseudo registers.  */
+enum sparc64_pseudo_regnum
+{
+  SPARC64_CWP_REGNUM = 0,	/* %cwp */
   SPARC64_PSTATE_REGNUM,	/* %pstate */
   SPARC64_ASI_REGNUM,		/* %asi */
   SPARC64_CCR_REGNUM,		/* %ccr */

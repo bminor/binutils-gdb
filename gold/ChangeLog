@@ -1,3 +1,13 @@
+2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/21040
+	* powerpc.cc (Powerpc_relobj<size, big_endian>::make_toc_relative):
+	Cast 0x80008000 to uint64_t.
+
+2017-01-12  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.cc (Sized_relobj_file): Fix byte counts for calls to memmem.
+
 2017-01-11  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/21040

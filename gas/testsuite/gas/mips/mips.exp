@@ -1168,6 +1168,8 @@ if { [istarget mips*-*-vxworks*] } {
     }
     run_list_test_arches "elf-rel30" "-32" [mips_arch_list_all]
 
+    run_dump_test "comdat-reloc"
+
     run_dump_test "${tmips}mips${el}16-e"
     run_dump_test "${tmips}mips${el}16-f"
 

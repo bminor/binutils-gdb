@@ -296,20 +296,19 @@ sparc_structure_or_union_p (const struct type *type)
 }
 
 /* Register information.  */
+#define SPARC32_FPU_REGISTERS                             \
+  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",         \
+  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",   \
+  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", \
+  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31"
+#define SPARC32_CP0_REGISTERS \
+  "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr"
 
 static const char *sparc32_register_names[] =
 {
-  "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-  "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-  "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-  "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-
-  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
-  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-
-  "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr"
+  SPARC_CORE_REGISTERS,
+  SPARC32_FPU_REGISTERS,
+  SPARC32_CP0_REGISTERS
 };
 
 /* Total number of registers.  */
@@ -327,18 +326,30 @@ static const char *sparc32_pseudo_register_names[] =
 /* Total number of pseudo registers.  */
 #define SPARC32_NUM_PSEUDO_REGS ARRAY_SIZE (sparc32_pseudo_register_names)
 
+/* Return the name of pseudo register REGNUM.  */
+
+static const char *
+sparc32_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  regnum -= gdbarch_num_regs (gdbarch);
+
+  if (regnum < SPARC32_NUM_PSEUDO_REGS)
+    return sparc32_pseudo_register_names[regnum];
+
+  internal_error (__FILE__, __LINE__,
+                  _("sparc32_pseudo_register_name: bad register number %d"),
+                  regnum);
+}
+
 /* Return the name of register REGNUM.  */
 
 static const char *
 sparc32_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= 0 && regnum < SPARC32_NUM_REGS)
+  if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     return sparc32_register_names[regnum];
 
-  if (regnum < SPARC32_NUM_REGS + SPARC32_NUM_PSEUDO_REGS)
-    return sparc32_pseudo_register_names[regnum - SPARC32_NUM_REGS];
-
-  return NULL;
+  return sparc32_pseudo_register_name (gdbarch, regnum);
 }
 
 /* Construct types for ISA-specific registers.  */
@@ -399,6 +410,22 @@ sparc_fsr_type (struct gdbarch *gdbarch)
 }
 
 /* Return the GDB type object for the "standard" data type of data in
+   pseudo register REGNUM.  */
+
+static struct type *
+sparc32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
+{
+  regnum -= gdbarch_num_regs (gdbarch);
+
+  if (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM)
+    return builtin_type (gdbarch)->builtin_double;
+
+  internal_error (__FILE__, __LINE__,
+                  _("sparc32_pseudo_register_type: bad register number %d"),
+                  regnum);
+}
+
+/* Return the GDB type object for the "standard" data type of data in
    register REGNUM.  */
 
 static struct type *
@@ -406,9 +433,6 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
     return builtin_type (gdbarch)->builtin_float;
-
-  if (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM)
-    return builtin_type (gdbarch)->builtin_double;
 
   if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
@@ -422,6 +446,9 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC32_FSR_REGNUM)
     return sparc_fsr_type (gdbarch);
 
+  if (regnum >= gdbarch_num_regs (gdbarch))
+    return sparc32_pseudo_register_type (gdbarch, regnum);
+
   return builtin_type (gdbarch)->builtin_int32;
 }
 
@@ -432,6 +459,7 @@ sparc32_pseudo_register_read (struct gdbarch *gdbarch,
 {
   enum register_status status;
 
+  regnum -= gdbarch_num_regs (gdbarch);
   gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
 
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
@@ -446,6 +474,7 @@ sparc32_pseudo_register_write (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
 			       int regnum, const gdb_byte *buf)
 {
+  regnum -= gdbarch_num_regs (gdbarch);
   gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
 
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);

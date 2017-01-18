@@ -1,3 +1,29 @@
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828-1.sd: New test.
+	* testsuite/ld-elf/pr20828-2a.sd: New test.
+	* testsuite/ld-elf/pr20828-2b.sd: New test.
+	* testsuite/ld-elf/pr20828.ld: New test linker script.
+	* testsuite/ld-elf/pr20828.ver: New test version script.
+	* testsuite/ld-elf/pr20828.s: New test source.
+	* testsuite/ld-elf/shared.exp: Run the new test.
+
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR gas/20649
+	* testsuite/ld-mips-elf/mips-elf.exp: Add PIC comdat GOT16/LO16
+	relocation pairing link test.
+
+2017-01-17  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* testsuite/ld-unique/unique.exp: Filter shared lib cases in
+	uniqeue.exp, as not all targets have such support.
+
+2017-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2017-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21038

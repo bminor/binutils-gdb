@@ -31,6 +31,53 @@ if ![check_shared_lib_support] {
     return
 }
 
+# This target requires extra GAS options when building code for shared
+# libraries.
+set AFLAGS_PIC ""
+if [istarget "tic6x-*-*"] {
+    append AFLAGS_PIC " -mpic -mpid=near"
+}
+# This target requires a non-default emulation for successful shared
+# library/executable builds.
+set LFLAGS ""
+if [istarget "tic6x-*-*"] {
+    append LFLAGS " -melf32_tic6x_le"
+}
+
+# PR ld/20828 check for correct dynamic symbol table entries where:
+# - symbols have been defined with a linker script,
+# - the same symbols have been seen in shared library used in the link,
+# - the shared library symbols have been swept in section garbage collection.
+# Verify that the symbols are global rather than local and that a version
+# script adjusts them accordingly.
+if { [check_gc_sections_available] } {
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC\
+	      (auxiliary shared library)" \
+	     "$LFLAGS -shared --gc-sections -T pr20828.ld" "" "$AFLAGS_PIC" \
+	     {pr20828.s} \
+	     {{readelf --dyn-syms pr20828-1.sd}} \
+	     "libpr20828.so"] \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC (plain)" \
+	     "$LFLAGS -shared --gc-sections -T pr20828.ld" \
+	     "tmpdir/libpr20828.so" "$AFLAGS_PIC" \
+	     {pr20828.s} \
+	     {{readelf --dyn-syms pr20828-1.sd}} \
+	     "pr20828-1.so"] \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC (version script)" \
+	     "$LFLAGS -shared --gc-sections -T pr20828.ld\
+	      --version-script=pr20828.ver" \
+	     "tmpdir/libpr20828.so" \
+	     "$AFLAGS_PIC" \
+	     {pr20828.s} \
+	     {{readelf --dyn-syms pr20828-2a.sd} \
+	      {readelf --dyn-syms pr20828-2b.sd}} \
+	     "pr20828-2.so"]]
+}
+
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {
     return
