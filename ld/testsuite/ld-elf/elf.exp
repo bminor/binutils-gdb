@@ -83,6 +83,13 @@ if { ![istarget hppa64*-hpux*] } {
 
 # Only run these tests on targets that support creating shared libraries.
 if { [check_shared_lib_support] } then {
+    # This target requires extra GAS options when building non-PIC code
+    # for linking with shared libraries.
+    set AFLAGS_NONPIC ""
+    if [istarget "mips*-*-*"] {
+	append AFLAGS_NONPIC " -call_nonpic"
+    }
+
     # Run a test to check linking a shared library with a broken linker
     # script that accidentally marks dynamic sections as notes.  The
     # resulting executable is not expected to work, but the linker
@@ -142,17 +149,17 @@ if { [check_shared_lib_support] } then {
     }
     # These targets don't copy dynamic variables into .bss.
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
-    run_ld_link_tests {
-	{"pr20995"
-	    "" "tmpdir/pr20995.so" ""
-	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995"}
-    }
+    run_ld_link_tests [list \
+	[list \
+	    "pr20995" \
+	    "" "tmpdir/pr20995.so" "$AFLAGS_NONPIC" \
+	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995"]]
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
-    run_ld_link_tests {
-	{"pr20995-2"
-	    "" "tmpdir/pr20995-2.so" ""
-	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"}
-    }
+    run_ld_link_tests [list \
+	[list \
+	    "pr20995-2" \
+	    "" "tmpdir/pr20995-2.so" "$AFLAGS_NONPIC" \
+	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"]]
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
