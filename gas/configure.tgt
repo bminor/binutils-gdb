@@ -399,7 +399,7 @@ case ${generic_target} in
 
   pru-*-*)				fmt=elf ;;
 
-  riscv*-*-*)			fmt=elf endian=little em=linux ;;
+  riscv*-*-*)				fmt=elf endian=little ;;
 
   s390-*-linux-*)			fmt=elf em=linux ;;
   s390-*-tpf*)				fmt=elf ;;
