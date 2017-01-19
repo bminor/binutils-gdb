@@ -37,6 +37,10 @@
 	* testsuite/gas/mips/mips.exp: Fold corresponding list tests
 	into the new tests.
 
+2017-01-24  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (riscv*-*-*): Remove em=linux.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR gas/20649
