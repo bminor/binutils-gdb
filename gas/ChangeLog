@@ -1,3 +1,8 @@
+2017-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-i386.c (parse_operands): Check for operand overflow
+	before setting the unspecified bit.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR gas/20649
