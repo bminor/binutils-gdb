@@ -1,3 +1,8 @@
+2017-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* aarch64.cc (Stub_template_repertoire): Change ST_E_835769_INSNS
+        from a pointer to an array.
+
 2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/21040
