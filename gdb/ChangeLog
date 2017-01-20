@@ -1,3 +1,16 @@
+2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* NEWS (New commands): Mention flash-erase.
+	(New MI commands): Mention target-flash-erase.
+	* mi/mi-cmds.c (mi_cmd_target_flash_erase): Add target-flash-erase MI
+	command.
+	* mi/mi-cmds.h (mi_cmd_target_flash_erase): New declaration.
+	* mi/mi-main.c (mi_cmd_target_flash_erase): New function.
+	* target.c (flash_erase_command): New function.
+	(initialize_targets): Add new flash-erase command.
+	* target.h (flash_erase_command): New declaration.
+
 2017-01-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* nat/linux-ptrace.c: Only include <sys/procfs.h> if

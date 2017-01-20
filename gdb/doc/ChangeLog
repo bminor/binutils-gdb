@@ -1,3 +1,9 @@
+2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (-target-flash-erase): New MI command description.
+	(flash-erase): New CLI command description.
+
 2017-01-04  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.texinfo (Contributors): Add SRI International and University

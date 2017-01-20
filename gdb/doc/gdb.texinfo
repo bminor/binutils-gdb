@@ -19622,6 +19622,16 @@ load programs into flash memory.
 @code{load} does not repeat if you press @key{RET} again after using it.
 @end table
 
+@table @code
+
+@kindex flash-erase
+@item flash-erase
+@anchor{flash-erase}
+
+Erases all known flash memory regions on the target.
+
+@end table
+
 @node Byte Order
 @section Choosing Target Byte Order
 
@@ -31859,6 +31869,28 @@ No equivalent.
 @subsubheading Example
 N.A.
 
+@subheading The @code{-target-flash-erase} Command
+@findex -target-flash-erase
+
+@subsubheading Synopsis
+
+@smallexample
+ -target-flash-erase
+@end smallexample
+
+Erases all known flash memory regions on the target.
+
+The corresponding @value{GDBN} command is @samp{flash-erase}.
+
+The output is a list of flash regions that have been erased, with starting
+addresses and memory region sizes.
+
+@smallexample
+(gdb)
+-target-flash-erase
+^done,erased-regions=@{address="0x0",size="0x40000"@}
+(gdb)
+@end smallexample
 
 @subheading The @code{-target-select} Command
 @findex -target-select
