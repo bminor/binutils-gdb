@@ -1,3 +1,8 @@
+2017-01-20  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.python/python.exp: Check line number against what GDB thinks
+	the line number is for func1.
+
 2017-01-08  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/debug-expr.exp: New file.
