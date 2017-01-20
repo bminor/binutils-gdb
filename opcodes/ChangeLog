@@ -1,3 +1,7 @@
+2017-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/ga.po: Updated Irish translation.
+
 2017-01-18  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): Fix vcmla mask and disassembly.
