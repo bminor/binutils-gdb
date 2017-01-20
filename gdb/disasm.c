@@ -126,12 +126,25 @@ dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
   return target_read_code (memaddr, myaddr, len);
 }
 
-/* Like memory_error with slightly different parameters.  */
+/* Like memory_error with slightly different parameters, but it longjmp
+   out of the opcodes callback.  */
 static void
 dis_asm_memory_error (int err, bfd_vma memaddr,
-		      struct disassemble_info *info)
+		      struct disassemble_info *info) GDB_NOEXCEPT
 {
-  memory_error (TARGET_XFER_E_IO, memaddr);
+  struct gdb_exception exception = exception_none;
+
+  TRY
+    {
+      memory_error (TARGET_XFER_E_IO, memaddr);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception = ex;
+    }
+  END_CATCH
+
+  throw_exception_sjlj (exception);
 }
 
 /* Like print_address with slightly different parameters.  */
@@ -141,6 +154,45 @@ dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
   struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
 
   print_address (gdbarch, addr, (struct ui_file *) info->stream);
+}
+
+/* Wrapper of gdbarch_print_insn, save its return value in *LEN if no
+   exception is thrown out of gdbarch_print_insn.  */
+
+static struct gdb_exception
+disasm_print_insn_noexcept (struct gdbarch *gdbarch, bfd_vma vma,
+			    struct disassemble_info *info,
+			    int *len) GDB_NOEXCEPT
+{
+  struct gdb_exception gdb_expt = exception_none;
+
+  TRY_SJLJ
+    {
+      *len = gdbarch_print_insn (gdbarch, vma, info);
+    }
+  CATCH_SJLJ (ex, RETURN_MASK_ALL)
+    {
+      gdb_expt = ex;
+    }
+  END_CATCH_SJLJ
+
+  return gdb_expt;
+}
+
+int
+disasm_print_insn (struct gdbarch *gdbarch, bfd_vma vma,
+		   struct disassemble_info *info)
+{
+  int len;
+
+  struct gdb_exception gdb_expt
+    = disasm_print_insn_noexcept (gdbarch, vma, info, &len);
+
+  /* Rethrow using the normal EH mechanism.  */
+  if (gdb_expt.reason < 0)
+    throw_exception (gdb_expt);
+
+  return len;
 }
 
 static int
@@ -253,7 +305,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
       struct cleanup *cleanups =
 	make_cleanup_ui_file_delete (opcode_stream);
 
-      size = gdbarch_print_insn (gdbarch, pc, di);
+      size = disasm_print_insn (gdbarch, pc, di);
       end_pc = pc + size;
 
       for (;pc < end_pc; ++pc)
@@ -272,7 +324,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
       do_cleanups (cleanups);
     }
   else
-    size = gdbarch_print_insn (gdbarch, pc, di);
+    size = disasm_print_insn (gdbarch, pc, di);
 
   ui_out_field_stream (uiout, "inst", stb);
   ui_file_rewind (stb);
@@ -833,7 +885,7 @@ gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
   int length;
 
   di = gdb_disassemble_info (gdbarch, stream);
-  length = gdbarch_print_insn (gdbarch, memaddr, &di);
+  length = disasm_print_insn (gdbarch, memaddr, &di);
   if (branch_delay_insns)
     {
       if (di.insn_info_valid)
@@ -914,5 +966,5 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
 
   gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
 
-  return gdbarch_print_insn (gdbarch, addr, &di);
+  return disasm_print_insn (gdbarch, addr, &di);
 }

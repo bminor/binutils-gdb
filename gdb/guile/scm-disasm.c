@@ -123,18 +123,6 @@ gdbscm_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
   return status != NULL ? -1 : 0;
 }
 
-/* disassemble_info.memory_error_func for gdbscm_print_insn_from_port.
-   Technically speaking, we don't need our own memory_error_func,
-   but to not provide one would leave a subtle dependency in the code.
-   This function exists to keep a clear boundary.  */
-
-static void
-gdbscm_disasm_memory_error (int status, bfd_vma memaddr,
-			    struct disassemble_info *info)
-{
-  memory_error (TARGET_XFER_E_IO, memaddr);
-}
-
 /* disassemble_info.print_address_func for gdbscm_print_insn_from_port.
    Since we need to use our own application_data value, we need to supply
    this routine as well.  */
@@ -174,10 +162,9 @@ gdbscm_print_insn_from_port (struct gdbarch *gdbarch,
   data.offset = offset;
   di.application_data = &data;
   di.read_memory_func = gdbscm_disasm_read_memory;
-  di.memory_error_func = gdbscm_disasm_memory_error;
   di.print_address_func = gdbscm_disasm_print_address;
 
-  length = gdbarch_print_insn (gdbarch, memaddr, &di);
+  length = disasm_print_insn (gdbarch, memaddr, &di);
 
   if (branch_delay_insns)
     {

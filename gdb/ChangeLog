@@ -1,3 +1,20 @@
+2017-01-20  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/20939
+	* disasm.c (dis_asm_memory_error): Catch the error and rethrow
+	it as a SJ/LJ exception.  Add GDB_NOEXCEPT.
+	(disasm_print_insn_noexcept): New function.
+	(disasm_print_insn): New function.
+	(gdb_pretty_print_insn): Call disasm_print_insn instead of
+	gdbarch_print_insn.
+	(gdb_print_insn): Likewise.
+	(gdb_buffered_insn_length): Likewise.
+	* event-top.c (GDB_NOEXCEPT): Move it to ...
+	* exceptions.h (GDB_NOEXCEPT): ... here.
+	* guile/scm-disasm.c (gdbscm_disasm_memory_error): Remove.
+	(gdbscm_print_insn_from_port): Don't set di.memory_errro_func.
+	Call disasm_print_insn rather than gdbarch_print_insn.
+
 2017-01-12  Tom Tromey  <tom@tromey.com>
 
 	* python/py-framefilter.c (py_print_frame): Use

@@ -83,4 +83,10 @@ extern int gdb_buffered_insn_length (struct gdbarch *gdbarch,
 				     const gdb_byte *insn, int max_len,
 				     CORE_ADDR memaddr);
 
+/* Print the instruction at address VMA.   Returns the length of the
+   instruction in bytes.  */
+
+extern int disasm_print_insn (struct gdbarch *gdbarch, bfd_vma vma,
+			      struct disassemble_info *info);
+
 #endif

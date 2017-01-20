@@ -73,14 +73,6 @@ static void async_stop_sig (gdb_client_data);
 #endif
 static void async_sigterm_handler (gdb_client_data arg);
 
-#ifndef __cplusplus
-# define GDB_NOEXCEPT
-#elif __cplusplus < 201103L
-# define GDB_NOEXCEPT throw ()
-#else
-# define GDB_NOEXCEPT noexcept
-#endif
-
 /* Instead of invoking (and waiting for) readline to read the command
    line and pass it back for processing, we use readline's alternate
    interface, via callback functions, so that the event loop can react
