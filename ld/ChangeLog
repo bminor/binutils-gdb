@@ -1,3 +1,10 @@
+2017-01-20  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64elflinktests): New tests.
+	* testsuite/ld-aarch64/func-in-so.s: New test source file.
+	* testsuite/ld-aarch64/func-sym-hash-opt.s: Likewise.
+	* testsuite/ld-aarch64/func-sym-hash-opt.d: New expected test result.
+
 2017-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/ld-elf/eh-frame-hdr.d: Update expected results.

@@ -323,6 +323,11 @@ set aarch64elflinktests {
     {} "copy-reloc-so.so"}
   {"ld-aarch64/exe with copy relocation" "-e0 tmpdir/copy-reloc-so.so" "" ""
     {copy-reloc-exe.s} {{objdump -R copy-reloc.d}} "copy-reloc"}
+  {"ld-aarch64/so with global func" "-shared" "" "" {func-in-so.s}
+    {} "func-in-so.so"}
+  {"ld-aarch64/func sym hash opt for exe"
+   "-e0 --hash-style=gnu tmpdir/func-in-so.so" "" ""
+    {func-sym-hash-opt.s} {{readelf --dyn-sym func-sym-hash-opt.d}} "hash-opt"}
 }
 
 run_ld_link_tests $aarch64elflinktests

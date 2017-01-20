@@ -1,3 +1,8 @@
+2017-01-20  Jiong Wang <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elf_aarch64_hash_symbol): New function.
+	(elf_backend_hash_symbol): Define.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828
