@@ -1,5 +1,10 @@
 2017-01-20  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.python/py-xmethods.exp: Fix test names starting with lowercase
+	and add untested calls.
+
+2017-01-20  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.python/python.exp: Check line number against what GDB thinks
 	the line number is for func1.
 
