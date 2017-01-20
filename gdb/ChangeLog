@@ -1,3 +1,8 @@
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdbthread.h (can_access_registers_ptid): New.
+	* thread.c (can_access_registers_ptid): New.
+
 2017-02-01  Pedro Alves  <palves@redhat.com>
 
 	* i386-tdep.c (i386_fast_tracepoint_valid_at): Use gdb_insn_length.
