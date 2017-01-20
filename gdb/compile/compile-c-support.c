@@ -490,13 +490,13 @@ struct cplus_add_input
 	fprintf_unfiltered
 	  (buf,
 	   "auto " COMPILE_I_EXPR_VAL " = %s;\n"
-	   "decltype (" COMPILE_I_EXPR_VAL ") *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+	   "decltype ( %s ) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
 	   "std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s ("
 	   COMPILE_I_EXPR_VAL "),\n"
-	   "sizeof (" COMPILE_I_EXPR_VAL "));\n"
-	   ,input,
+	   "sizeof (decltype(%s)));\n"
+	   ,input, input,
 	   (type == COMPILE_I_PRINT_ADDRESS_SCOPE
-	    ? "std::__addressof" : ""));
+	    ? "std::__addressof" : ""), input);
 	break;
 
       default:

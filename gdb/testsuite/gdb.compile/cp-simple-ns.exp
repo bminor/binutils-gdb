@@ -1,4 +1,4 @@
-# Copyright 2015, 2016 Free Software Foundation, Inc.
+# Copyright 2015, 2016, 2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
 gdb_continue_to_breakpoint "testing location"
 
 CompileExpression::new "var"
-CompileExpression::test "N1::N2::N3::N4::n4static;" 400
-CompileExpression::test "N1::N2::N3::N4::S4::s4static;" 40
-CompileExpression::test "s.s4int_;" 4
-CompileExpression::test "N1::N2::N3::N4::S4::get_svar ();" 40
-CompileExpression::test "s.get_var ();" 4
+CompileExpression::test "N1::N2::N3::N4::n4static" 400
+CompileExpression::test "N1::N2::N3::N4::S4::s4static" 40
+CompileExpression::test "s.s4int_" 4
+CompileExpression::test "N1::N2::N3::N4::S4::get_svar ()" 40
+CompileExpression::test "s.get_var ()" 4

@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,20 +43,20 @@ gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
 gdb_continue_to_breakpoint "testing location"
 
 CompileExpression::new "var"
-CompileExpression::test "a->get_var ();" 21
-CompileExpression::test "a->get_var (static_cast<unsigned long> (1));" 100
-CompileExpression::test "a->get_var (static_cast<int> (1));" 101
-CompileExpression::test "a->get_var (static_cast<float> (1));" 102
-CompileExpression::test "a->get_var (static_cast<void *> (a));" 103
-CompileExpression::test "a->get_var (*a);" 104
-CompileExpression::test "a->get_var (*ac);" 105
-CompileExpression::test "a->get_var1 (1);" 42
-CompileExpression::test "a->get_var2 (1, 2);" 88
-CompileExpression::test "A::get_1 (1);" 2
-CompileExpression::test "A::get_2 (1, 2);" 5
-CompileExpression::test "A::get_1 (a->get_var ());" 22
-CompileExpression::test "a->get_var1 (a->get_var () - 16);" 672
-CompileExpression::test "a->get_var2 (a->get_var (), A::get_1 (2));" 336
+CompileExpression::test "a->get_var ()" 21
+CompileExpression::test "a->get_var (static_cast<unsigned long> (1))" 100
+CompileExpression::test "a->get_var (static_cast<int> (1))" 101
+CompileExpression::test "a->get_var (static_cast<float> (1))" 102
+CompileExpression::test "a->get_var (static_cast<void *> (a))" 103
+CompileExpression::test "a->get_var (*a)" 104
+CompileExpression::test "a->get_var (*ac)" 105
+CompileExpression::test "a->get_var1 (1)" 42
+CompileExpression::test "a->get_var2 (1, 2)" 88
+CompileExpression::test "A::get_1 (1)" 2
+CompileExpression::test "A::get_2 (1, 2)" 5
+CompileExpression::test "A::get_1 (a->get_var ())" 22
+CompileExpression::test "a->get_var1 (a->get_var () - 16)" 672
+CompileExpression::test "a->get_var2 (a->get_var (), A::get_1 (2))" 336
 CompileExpression::test "get_value ()" 200
 CompileExpression::test "get_value (a)" 21
 CompileExpression::test "get_value (get_value ())" 200
