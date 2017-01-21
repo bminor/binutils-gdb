@@ -1,5 +1,10 @@
 2017-01-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.12.1.DATE-git.
+	* PROBLEMS: Likewise.
+
+2017-01-21  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.12.1 released.
 
 2017-01-21  Joel Brobecker  <brobecker@adacore.com>
