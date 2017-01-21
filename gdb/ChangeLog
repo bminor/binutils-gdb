@@ -1,5 +1,11 @@
 2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* python/py-function.c (fnpy_call): Reorder declarations to have
+	the gdbpy_enter object declared first.
+	* python/py-xmethods.c (gdbpy_get_xmethod_arg_types): Likewise.
+
+2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
+
 	PR python/21068
 	* python/python-internal.h (PyMem_RawMalloc): Define for
 	Python < 3.4.

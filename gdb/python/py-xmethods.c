@@ -308,6 +308,9 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
 			     struct xmethod_worker *worker,
 			     int *nargs, struct type ***arg_types)
 {
+  /* The gdbpy_enter object needs to be placed first, so that it's the last to
+     be destroyed.  */
+  gdbpy_enter enter_py (get_current_arch (), current_language);
   struct gdbpy_worker_data *worker_data
     = (struct gdbpy_worker_data *) worker->data;
   PyObject *py_worker = worker_data->worker;
@@ -318,8 +321,6 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
   /* Set nargs to -1 so that any premature return from this function returns
      an invalid/unusable number of arg types.  */
   *nargs = -1;
-
-  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   gdbpy_ref get_arg_types_method
     (PyObject_GetAttrString (py_worker, get_arg_types_method_name));
