@@ -1,3 +1,7 @@
+2017-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.12.1 released.
+
 2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/py-function.c (fnpy_call): Reorder declarations to have
