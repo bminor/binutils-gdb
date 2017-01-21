@@ -1,3 +1,10 @@
+2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/python-internal.h (PyMem_RawMalloc): Define for
+	Python < 3.4.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Use
+	PyMem_RawMalloc instead of PyMem_Malloc.
+
 2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
 	    Luis Machado  <lgustavo@codesourcery.com>
 
