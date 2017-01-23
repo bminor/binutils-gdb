@@ -1,3 +1,9 @@
+2017-01-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Append
+	board_cflags as gcc is used as linker driver.
+	* testsuite/ld-unique/unique.exp: Likewise
+
 2017-01-20  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64elflinktests): New tests.

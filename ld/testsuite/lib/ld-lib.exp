@@ -1381,6 +1381,17 @@ proc run_ld_link_exec_tests { ldtests args } {
     global CXXFLAGS
     global errcnt
     global exec_output
+    global board_cflags
+
+    # When using GCC as the linker driver, we need to specify board cflags when
+    # linking because cflags may contain linker options.  For example when
+    # linker options are included in GCC spec files then we need the -specs
+    # option.
+    if [board_info [target_info name] exists cflags] {
+        set board_cflags " [board_info [target_info name] cflags]"
+    } else {
+	set board_cflags ""
+    }
 
     foreach testitem $ldtests {
 	foreach target $args {
@@ -1440,7 +1451,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    # compile only
 	    pass $testname
 	    continue;
-	} elseif ![$link_proc $link_cmd $binfile "-L$srcdir/$subdir $ld_options $objfiles"] {
+	} elseif ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles"] {
 	    set failed 1
 	}
 
