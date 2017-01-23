@@ -1,3 +1,7 @@
+2017-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2017-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-i386.c (parse_operands): Check for operand overflow
