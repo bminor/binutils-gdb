@@ -2182,7 +2182,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# Default to --enable-multilib
+if test -n "${with_target_subdir}"; then
+  # Default to --enable-multilib
 # Check whether --enable-multilib was given.
 if test "${enable_multilib+set}" = set; then :
   enableval=$enable_multilib; case "$enableval" in
@@ -2219,6 +2220,7 @@ fi
 
 ac_config_commands="$ac_config_commands default-1"
 
+fi
 
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
