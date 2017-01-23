@@ -13,6 +13,7 @@ SECTIONS
   .shstrtab : { *(.shstrtab) }
   .symtab : { *(.symtab) }
   .strtab : { *(.strtab) }
+  .plt : { *(.plt) }
   .got.plt : { *(.got.plt) }
   .got : { *(.got) }
   /DISCARD/ : { *(*) }
