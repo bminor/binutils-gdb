@@ -671,17 +671,15 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   /* If this symbol is not being provided by the linker script, and it is
      currently defined by a dynamic object, but not by a regular object,
-     then undo any forced local marking that may have been set by input
-     section garbage collection and clear out any version information
-     because the symbol will not be associated with the dynamic object
-     any more.  */
+     then clear out any version information because the symbol will not be
+     associated with the dynamic object any more.  */
   if (!provide
       && h->def_dynamic
       && !h->def_regular)
-    {
-      h->forced_local = 0;
-      h->verinfo.verdef = NULL;
-    }
+    h->verinfo.verdef = NULL;
+
+  /* Make sure this symbol is not garbage collected.  */
+  h->mark = 1;
 
   h->def_regular = 1;
 
@@ -5876,6 +5874,38 @@ bfd_elf_stack_segment_size (bfd *output_bfd,
   return TRUE;
 }
 
+/* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
+
+struct elf_gc_sweep_symbol_info
+{
+  struct bfd_link_info *info;
+  void (*hide_symbol) (struct bfd_link_info *, struct elf_link_hash_entry *,
+		       bfd_boolean);
+};
+
+static bfd_boolean
+elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
+{
+  if (!h->mark
+      && (((h->root.type == bfd_link_hash_defined
+	    || h->root.type == bfd_link_hash_defweak)
+	   && !((h->def_regular || ELF_COMMON_DEF_P (h))
+		&& h->root.u.def.section->gc_mark))
+	  || h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak))
+    {
+      struct elf_gc_sweep_symbol_info *inf;
+
+      inf = (struct elf_gc_sweep_symbol_info *) data;
+      (*inf->hide_symbol) (inf->info, h, TRUE);
+      h->def_regular = 0;
+      h->ref_regular = 0;
+      h->ref_regular_nonweak = 0;
+    }
+
+  return TRUE;
+}
+
 /* Set up the sizes and contents of the ELF dynamic sections.  This is
    called by the ELF linker emulation before_allocation routine.  We
    must set the sizes of the sections before the linker sets the
@@ -5905,6 +5935,22 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
     return TRUE;
 
   bed = get_elf_backend_data (output_bfd);
+
+  if (info->gc_sections && bed->can_gc_sections)
+    {
+      struct elf_gc_sweep_symbol_info sweep_info;
+      unsigned long section_sym_count;
+
+      /* Remove the symbols that were in the swept sections from the
+	 dynamic symbol table.  GCFIXME: Anyone know how to get them
+	 out of the static symbol table as well?  */
+      sweep_info.info = info;
+      sweep_info.hide_symbol = bed->elf_backend_hide_symbol;
+      elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
+			      &sweep_info);
+
+      _bfd_elf_link_renumber_dynsyms (output_bfd, info, &section_sym_count);
+    }
 
   /* Any syms created from now on start with -1 in
      got.refcount/offset and plt.refcount/offset.  */
@@ -12853,38 +12899,6 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
   return TRUE;
 }
 
-/* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
-
-struct elf_gc_sweep_symbol_info
-{
-  struct bfd_link_info *info;
-  void (*hide_symbol) (struct bfd_link_info *, struct elf_link_hash_entry *,
-		       bfd_boolean);
-};
-
-static bfd_boolean
-elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
-{
-  if (!h->mark
-      && (((h->root.type == bfd_link_hash_defined
-	    || h->root.type == bfd_link_hash_defweak)
-	   && !((h->def_regular || ELF_COMMON_DEF_P (h))
-		&& h->root.u.def.section->gc_mark))
-	  || h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak))
-    {
-      struct elf_gc_sweep_symbol_info *inf;
-
-      inf = (struct elf_gc_sweep_symbol_info *) data;
-      (*inf->hide_symbol) (inf->info, h, TRUE);
-      h->def_regular = 0;
-      h->ref_regular = 0;
-      h->ref_regular_nonweak = 0;
-    }
-
-  return TRUE;
-}
-
 /* The sweep phase of garbage collection.  Remove all garbage sections.  */
 
 typedef bfd_boolean (*gc_sweep_hook_fn)
@@ -12896,8 +12910,6 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
   bfd *sub;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   gc_sweep_hook_fn gc_sweep_hook = bed->gc_sweep_hook;
-  unsigned long section_sym_count;
-  struct elf_gc_sweep_symbol_info sweep_info;
 
   for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
@@ -12963,15 +12975,6 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  /* Remove the symbols that were in the swept sections from the dynamic
-     symbol table.  GCFIXME: Anyone know how to get them out of the
-     static symbol table as well?  */
-  sweep_info.info = info;
-  sweep_info.hide_symbol = bed->elf_backend_hide_symbol;
-  elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
-			  &sweep_info);
-
-  _bfd_elf_link_renumber_dynsyms (abfd, info, &section_sym_count);
   return TRUE;
 }
 
