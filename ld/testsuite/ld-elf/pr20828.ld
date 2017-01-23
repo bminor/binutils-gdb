@@ -2,9 +2,9 @@ SECTIONS
 {
   .data :
   {
-    _fdata = .;
+    fdata = .;
     *(.data)
-    _edata = .;
+    edata = .;
   }
   .dynamic : { *(.dynamic) }
   .hash : { *(.hash) }
