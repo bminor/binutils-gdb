@@ -4876,7 +4876,7 @@ CFA address.
 
 @subsection @code{.cfi_adjust_cfa_offset @var{offset}}
 Same as @code{.cfi_def_cfa_offset} but @var{offset} is a relative
-value that is added/substracted from the previous offset.
+value that is added/subtracted from the previous offset.
 
 @subsection @code{.cfi_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
@@ -5178,7 +5178,7 @@ The syntax for @code{equ} on the HPPA is
 @ifset Z80
 The syntax for @code{equ} on the Z80 is
 @samp{@var{symbol} equ @var{expression}}.
-On the Z80 it is an eror if @var{symbol} is already defined,
+On the Z80 it is an error if @var{symbol} is already defined,
 but the symbol is not protected from later redefinition.
 Compare @ref{Equiv}.
 @end ifset
@@ -6495,8 +6495,8 @@ exception_code
 
 The two @code{exception_code} invocations above would create the
 @code{.text.exception} and @code{.init.exception} sections respectively.
-This is useful e.g. to discriminate between anciliary sections that are
-tied to setup code to be discarded after use from anciliary sections that
+This is useful e.g. to discriminate between ancillary sections that are
+tied to setup code to be discarded after use from ancillary sections that
 need to stay resident without having to define multiple @code{exception_code}
 macros just for that purpose.
 
@@ -7126,7 +7126,7 @@ Mark the symbol as being a data object.
 
 @item STT_TLS
 @itemx tls_object
-Mark the symbol as being a thead-local data object.
+Mark the symbol as being a thread-local data object.
 
 @item STT_COMMON
 @itemx common

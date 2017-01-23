@@ -188,7 +188,7 @@ architectures),
 @code{simd} (Advanced SIMD Extensions for v8-A architecture, implies @code{fp}),
 @code{virt} (Virtualization Extensions for v7-A architecture, implies
 @code{idiv}),
-@code{pan} (Priviliged Access Never Extensions for v8-A architecture),
+@code{pan} (Privileged Access Never Extensions for v8-A architecture),
 @code{ras} (Reliability, Availability and Serviceability extensions
 for v8-A architecture),
 @code{rdma} (ARMv8.1 Advanced SIMD extensions for v8-A architecture, implies
@@ -935,7 +935,7 @@ between Arm and Thumb instructions and should be used even if
 interworking is not going to be performed.  The presence of this
 directive also implies @code{.thumb}
 
-This directive is not neccessary when generating EABI objects.  On these
+This directive is not necessary when generating EABI objects.  On these
 targets the encoding is implicit when generating Thumb code.
 
 @cindex @code{.thumb_set} directive, ARM
@@ -970,7 +970,7 @@ should only be done if it is really necessary.
 
 @cindex @code{.unwind_raw} directive, ARM
 @item .unwind_raw @var{offset}, @var{byte1}, @dots{}
-Insert one of more arbitary unwind opcode bytes, which are known to adjust
+Insert one of more arbitrary unwind opcode bytes, which are known to adjust
 the stack pointer by @var{offset} bytes.
 
 For example @code{.unwind_raw 4, 0xb1, 0x01} is equivalent to

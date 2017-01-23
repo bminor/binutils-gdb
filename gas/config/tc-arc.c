@@ -1195,7 +1195,7 @@ tokenize_arguments (char *str,
 
 	relocationsym:
 
-	  /* A relocation opernad has the following form
+	  /* A relocation operand has the following form
 	     @identifier@relocation_type.  The identifier is already
 	     in tok!  */
 	  if (tok->X_op != O_symbol)
@@ -1612,7 +1612,7 @@ allocate_tok (expressionS *tok, int ntok, int cidx)
     return 0; /* No space left.  */
 
   if (cidx > ntok)
-    return 0; /* Incorect args.  */
+    return 0; /* Incorrect args.  */
 
   memcpy (&tok[ntok+1], &tok[ntok], sizeof (*tok));
 
@@ -1938,7 +1938,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      if (val < min || val > max)
 			goto match_failed;
 
-		      /* Check alignmets.  */
+		      /* Check alignments.  */
 		      if ((operand->flags & ARC_OPERAND_ALIGNED32)
 			  && (val & 0x03))
 			goto match_failed;
@@ -2341,7 +2341,7 @@ find_special_case (const char *opname,
   return entry;
 }
 
-/* Given an opcode name, pre-tockenized set of argumenst and the
+/* Given an opcode name, pre-tokenized set of arguments and the
    opcode flags, take it all the way through emission.  */
 
 static void
@@ -2412,7 +2412,7 @@ md_assemble (char *str)
   opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123468");
   opname = xmemdup0 (str, opnamelen);
 
-  /* Signalize we are assmbling the instructions.  */
+  /* Signalize we are assembling the instructions.  */
   assembling_insn = TRUE;
 
   /* Tokenize the flags.  */
@@ -2725,7 +2725,7 @@ md_pcrel_from_section (fixS *fixP,
   return base;
 }
 
-/* Given a BFD relocation find the coresponding operand.  */
+/* Given a BFD relocation find the corresponding operand.  */
 
 static const struct arc_operand *
 find_operand_for_reloc (extended_bfd_reloc_code_real_type reloc)
@@ -2902,7 +2902,7 @@ md_apply_fix (fixS *fixP,
 	case BFD_RELOC_ARC_32_ME:
 	  /* This is a pc-relative value in a LIMM.  Adjust it to the
 	     address of the instruction not to the address of the
-	     LIMM.  Note: it is not anylonger valid this afirmation as
+	     LIMM.  Note: it is not any longer valid this affirmation as
 	     the linker consider ARC_PC32 a fixup to entire 64 bit
 	     insn.  */
 	  fixP->fx_offset += fixP->fx_frag->fr_address;
@@ -2971,7 +2971,7 @@ md_apply_fix (fixS *fixP,
       return;
     }
 
-  /* Addjust the value if we have a constant.  */
+  /* Adjust the value if we have a constant.  */
   value += fx_offset;
 
   /* For hosts with longs bigger than 32-bits make sure that the top
@@ -3892,7 +3892,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	    case O_plt:
 	      if (opcode->insn_class == JUMP)
 		as_bad_where (frag_now->fr_file, frag_now->fr_line,
-			      _("Unable to use @plt relocatio for insn %s"),
+			      _("Unable to use @plt relocation for insn %s"),
 			      opcode->name);
 	      needGOTSymbol = TRUE;
 	      reloc = find_reloc ("plt", opcode->name,
@@ -4679,7 +4679,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
    [2]: Value.
    [3]+ Name.
 
-   For auxilirary registers:
+   For auxiliary registers:
    [2..5]: Value.
    [6]+ Name
 

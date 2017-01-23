@@ -21,7 +21,7 @@
 @node RISC-V-Opts
 @section Options
 
-The following table lists all availiable RISC-V specific options
+The following table lists all available RISC-V specific options
 
 @c man begin OPTIONS
 @table @gcctabopt

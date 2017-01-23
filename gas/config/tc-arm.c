@@ -2710,7 +2710,7 @@ mapping_state (enum mstate state)
 
 	Some Thumb instructions are alignment-sensitive modulo 4 bytes,
 	but themselves require 2-byte alignment; this applies to some
-	PC- relative forms.  However, these cases will invovle implicit
+	PC- relative forms.  However, these cases will involve implicit
 	literal pool generation or an explicit .align >=2, both of
 	which will cause the section to me marked with sufficient
 	alignment.  Thus, we don't handle those cases here.  */
@@ -3380,7 +3380,7 @@ tc_start_label_without_colon (void)
 }
 
 /* Can't use symbol_new here, so have to create a symbol and then at
-   a later date assign it a value. Thats what these functions do.  */
+   a later date assign it a value. That's what these functions do.  */
 
 static void
 symbol_locate (symbolS *    symbolP,
@@ -6548,7 +6548,7 @@ enum operand_parse_code
   OP_APSR_RR,   /* ARM register or "APSR_nzcv".  */
 
   OP_RRnpc_I0,	/* ARM register or literal 0 */
-  OP_RR_EXr,	/* ARM register or expression with opt. reloc suff. */
+  OP_RR_EXr,	/* ARM register or expression with opt. reloc stuff. */
   OP_RR_EXi,	/* ARM register or expression with imm prefix */
   OP_RF_IF,	/* FPA register or immediate */
   OP_RIWR_RIWC, /* iWMMXt R or C reg */
@@ -9058,9 +9058,9 @@ do_mov16 (void)
 
   top = (inst.instruction & 0x00400000) != 0;
   constraint (top && inst.reloc.type == BFD_RELOC_ARM_MOVW,
-	      _(":lower16: not allowed this instruction"));
+	      _(":lower16: not allowed in this instruction"));
   constraint (!top && inst.reloc.type == BFD_RELOC_ARM_MOVT,
-	      _(":upper16: not allowed instruction"));
+	      _(":upper16: not allowed in this instruction"));
   inst.instruction |= inst.operands[0].reg << 12;
   if (inst.reloc.type == BFD_RELOC_UNUSED)
     {
@@ -10486,7 +10486,7 @@ do_t_add_sub_w (void)
 }
 
 /* Parse an add or subtract instruction.  We get here with inst.instruction
-   equalling any of THUMB_OPCODE_add, adds, sub, or subs.  */
+   equaling any of THUMB_OPCODE_add, adds, sub, or subs.  */
 
 static void
 do_t_add_sub (void)
@@ -12115,12 +12115,12 @@ do_t_mov16 (void)
   top = (inst.instruction & 0x00800000) != 0;
   if (inst.reloc.type == BFD_RELOC_ARM_MOVW)
     {
-      constraint (top, _(":lower16: not allowed this instruction"));
+      constraint (top, _(":lower16: not allowed in this instruction"));
       inst.reloc.type = BFD_RELOC_ARM_THUMB_MOVW;
     }
   else if (inst.reloc.type == BFD_RELOC_ARM_MOVT)
     {
-      constraint (!top, _(":upper16: not allowed this instruction"));
+      constraint (!top, _(":upper16: not allowed in this instruction"));
       inst.reloc.type = BFD_RELOC_ARM_THUMB_MOVT;
     }
 
@@ -18007,7 +18007,7 @@ now_it_add_mask (int cond)
      set_it_insn_type_last ()           ditto
      in_it_block ()                     ditto
      it_fsm_post_encode ()              from md_assemble ()
-     force_automatic_it_block_close ()  from label habdling functions
+     force_automatic_it_block_close ()  from label handling functions
 
    Rationale:
      1) md_assemble () calls it_fsm_pre_encode () before calling tencode (),
@@ -21858,7 +21858,7 @@ arm_frag_align_code (int n, int max)
    Note - despite the name this initialisation is not done when the frag
    is created, but only when its type is assigned.  A frag can be created
    and used a long time before its type is set, so beware of assuming that
-   this initialisationis performed first.  */
+   this initialisation is performed first.  */
 
 #ifndef OBJ_ELF
 void
@@ -25777,7 +25777,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"softvfp+vfp",	FPU_ARCH_VFP_V2},
   {"vfp",		FPU_ARCH_VFP_V2},
   {"vfp9",		FPU_ARCH_VFP_V2},
-  {"vfp3",              FPU_ARCH_VFP_V3}, /* For backwards compatbility.  */
+  {"vfp3",              FPU_ARCH_VFP_V3}, /* For backwards compatibility.  */
   {"vfp10",		FPU_ARCH_VFP_V2},
   {"vfp10-r0",		FPU_ARCH_VFP_V1},
   {"vfpxd",		FPU_ARCH_VFP_V1xD},

@@ -317,7 +317,7 @@ take precedent.
 @cindex @samp{-mnaked-reg} option, i386
 @cindex @samp{-mnaked-reg} option, x86-64
 @item -mnaked-reg
-This opetion specifies that registers don't require a @samp{%} prefix.
+This option specifies that registers don't require a @samp{%} prefix.
 The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 
 @cindex @samp{-madd-bnd-prefix} option, i386

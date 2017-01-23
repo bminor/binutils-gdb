@@ -7025,7 +7025,7 @@ pa_procend (int unused ATTRIBUTE_UNUSED)
 
 #ifdef OBJ_ELF
   /* ELF needs to mark the end of each function so that it can compute
-     the size of the function (apparently its needed in the symbol table).  */
+     the size of the function (apparently it's needed in the symbol table).  */
   hppa_elf_mark_end_of_function ();
 #endif
 

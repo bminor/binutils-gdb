@@ -72,19 +72,19 @@ struct mcu_type_s
 static struct mcu_type_s mcu_types[] =
 {
   {"avr1",       AVR_ISA_AVR1,    bfd_mach_avr1},
-/* TODO: insruction set for avr2 architecture should be AVR_ISA_AVR2,
+/* TODO: instruction set for avr2 architecture should be AVR_ISA_AVR2,
  but set to AVR_ISA_AVR25 for some following version
  of GCC (from 4.3) for backward compatibility.  */
   {"avr2",       AVR_ISA_AVR25,   bfd_mach_avr2},
   {"avr25",      AVR_ISA_AVR25,   bfd_mach_avr25},
-/* TODO: insruction set for avr3 architecture should be AVR_ISA_AVR3,
+/* TODO: instruction set for avr3 architecture should be AVR_ISA_AVR3,
  but set to AVR_ISA_AVR3_ALL for some following version
  of GCC (from 4.3) for backward compatibility.  */
   {"avr3",       AVR_ISA_AVR3_ALL, bfd_mach_avr3},
   {"avr31",      AVR_ISA_AVR31,   bfd_mach_avr31},
   {"avr35",      AVR_ISA_AVR35,   bfd_mach_avr35},
   {"avr4",       AVR_ISA_AVR4,    bfd_mach_avr4},
-/* TODO: insruction set for avr5 architecture should be AVR_ISA_AVR5,
+/* TODO: instruction set for avr5 architecture should be AVR_ISA_AVR5,
  but set to AVR_ISA_AVR51 for some following version
  of GCC (from 4.3) for backward compatibility.  */
   {"avr5",       AVR_ISA_AVR51,   bfd_mach_avr5},
@@ -1673,7 +1673,7 @@ md_assemble (char *str)
 	 specifications with same mnemonic who's ISA bits matches.
 
          This requires include/opcode/avr.h to have the instructions with
-         same mnenomic to be specified in sequence.  */
+         same mnemonic to be specified in sequence.  */
 
       while ((opcode->isa & avr_mcu->isa) != opcode->isa)
         {
@@ -1819,7 +1819,7 @@ avr_cons_fix_new (fragS *frag,
     }
 
   if (bad)
-    as_bad (_("illegal %srelocation size: %d"), pexp_mod_data->error, nbytes);
+    as_bad (_("illegal %s relocation size: %d"), pexp_mod_data->error, nbytes);
 }
 
 static bfd_boolean
@@ -1843,7 +1843,7 @@ tc_cfi_frame_initial_instructions (void)
   cfi_add_CFA_def_cfa (32, return_size);
 
   /* Note that AVR consistently uses post-decrement, which means that things
-     do not line up the same way as for targers that use pre-decrement.  */
+     do not line up the same way as for targets that use pre-decrement.  */
   cfi_add_CFA_offset (DWARF2_DEFAULT_RETURN_COLUMN, 1-return_size);
 }
 
