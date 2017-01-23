@@ -1,3 +1,14 @@
+2017-01-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828-1.sd: Remove test.
+	* testsuite/ld-elf/pr20828-a.sd: New test.
+	* testsuite/ld-elf/pr20828-2a.sd: Rename test to...
+	* testsuite/ld-elf/pr20828-b.sd: ... this.
+	* testsuite/ld-elf/pr20828-2b.sd: Rename test to...
+	* testsuite/ld-elf/pr20828-c.sd: ... this.
+	* testsuite/ld-elf/shared.exp: Adjust accordingly.
+
 2017-01-23  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Append
