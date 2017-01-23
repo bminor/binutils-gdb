@@ -186,15 +186,10 @@ type_code_to_string (enum type_code code)
   return s[code + 1];
 }
 
-/* Convert TYPENAME into a vector of namespace and top-most/super
-   composite scopes.
+/* See description in compile-cplus.h.  */
 
-   For example, for the input "Namespace::classB::classInner", the
-   resultant vector will contain the tokens "Namespace" and
-   "classB".  */
-
-static compile_scope
-ccp_type_name_to_scope (const char *type_name, const struct block *block)
+compile_scope
+compile::type_name_to_scope (const char *type_name, const struct block *block)
 {
   compile_scope scope;
 
@@ -402,7 +397,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
   /* Break the type name into components.  If TYPE was defined in some
      superclass, we do not process TYPE but process the enclosing type
      instead.  */
-  compile_scope scope = ccp_type_name_to_scope (type_name, block ());
+  compile_scope scope = type_name_to_scope (type_name, block ());
 
   if (!scope.empty ())
     {

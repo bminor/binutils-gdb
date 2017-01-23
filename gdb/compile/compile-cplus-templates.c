@@ -307,7 +307,7 @@ compute_class_template_generic (std::string name, struct type *type)
   struct ui_file *stream = mem_fileopen ();
   struct cleanup *back_to = make_cleanup_ui_file_delete (stream);
 
-  /* Format: class|struct|union NAME<parameters>  */
+  /* Format: class|struct|union namespaces::NAME<parameters>  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       if (TYPE_DECLARED_CLASS (type))
@@ -320,6 +320,22 @@ compute_class_template_generic (std::string name, struct type *type)
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
       fputs_unfiltered ("union ", stream);
     }
+
+  /* Print all namespaces.  Note that we do not push the last
+     scope_component -- that's the actual type we are defining.  */
+
+  compile::compile_scope scope = type_name_to_scope (TYPE_NAME (type), NULL);
+  std::for_each (scope.begin (), scope.end () - 1, [&] (const auto &comp)
+     {
+       gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))
+		   == TYPE_CODE_NAMESPACE);
+
+       if (comp.name != CP_ANONYMOUS_NAMESPACE_STR)
+	 {
+	   fputs_unfiltered (comp.name.c_str (), stream);
+	   fputs_unfiltered ("::", stream);
+	 }
+     });
 
   fputs_unfiltered (name.c_str (), stream);
   fputc_unfiltered ('<', stream);
@@ -645,8 +661,7 @@ compile_cplus_instance::maybe_define_new_class_template
   if (pos == m_class_template_defns->end ())
     {
       /* Insert the new template definition into the cache.  */
-      defn
-	= new class_template_defn (decl_name, generic, type);
+      defn = new class_template_defn (decl_name, generic, type);
       m_class_template_defns->insert (std::make_pair (generic, defn));
     }
   else
@@ -1337,7 +1352,7 @@ class class_template_definer
 
     /* Create/push new scope.  */
     compile_scope scope
-      = m_instance->new_scope (defn->decl_name (), defn->type ());
+      = m_instance->new_scope (TYPE_NAME (defn->type ()), defn->type ());
 
     if (scope.nested_type () != GCC_TYPE_NONE)
       {

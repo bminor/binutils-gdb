@@ -107,6 +107,16 @@ namespace compile
   bool operator== (const compile_scope &lhs, const compile_scope &rhs);
   bool operator!= (const compile_scope &lhs, const compile_scope &rhs);
 
+  /* Convert TYPENAME into a vector of namespace and top-most/super
+     composite scopes.
+
+     For example, for the input "Namespace::classB::classInner", the
+     resultant vector will contain the tokens "Namespace" and
+     "classB".  */
+
+  compile_scope type_name_to_scope (const char *type_name,
+				    const struct block *block);
+
   /* A subclass of compile_instance that is specific to the C++ front
      end.  */
 
