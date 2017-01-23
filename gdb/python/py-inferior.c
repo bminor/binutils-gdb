@@ -251,7 +251,6 @@ find_thread_object (ptid_t ptid)
 {
   int pid;
   struct threadlist_entry *thread;
-  thread_object *found = NULL;
 
   pid = ptid_get_pid (ptid);
   if (pid == 0)
@@ -264,13 +263,7 @@ find_thread_object (ptid_t ptid)
   for (thread = ((inferior_object *)(inf_obj.get ()))->threads; thread;
        thread = thread->next)
     if (ptid_equal (thread->thread_obj->thread->ptid, ptid))
-      {
-	found = thread->thread_obj;
-	break;
-      }
-
-  if (found)
-    return found;
+      return thread->thread_obj;
 
   return NULL;
 }

@@ -1,3 +1,8 @@
+2017-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/py-inferior.c (find_thread_object): Return directly
+	from the loop.  Remove "found" variable.
+
 2017-01-21  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.12.1 released.
