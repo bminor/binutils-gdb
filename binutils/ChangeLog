@@ -1,6 +1,8 @@
 2017-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Bernd to Past Maintainers section.
+	(SCORE): Remove Mei Ligang as maintainer.  Add to Past Maintaienrs
+	section.
 
 2017-01-23  Bernd Schmidt  <bschmidt@redhat.com>
 
