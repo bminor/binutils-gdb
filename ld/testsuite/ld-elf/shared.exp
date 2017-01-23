@@ -58,14 +58,16 @@ if { [check_gc_sections_available] } {
 	      (auxiliary shared library)" \
 	     "$LFLAGS -shared --gc-sections -T pr20828.ld" "" "$AFLAGS_PIC" \
 	     {pr20828.s} \
-	     {{readelf --dyn-syms pr20828-1.sd}} \
+	     {{readelf --dyn-syms pr20828-a.sd} \
+	      {readelf --dyn-syms pr20828-b.sd}} \
 	     "libpr20828.so"] \
 	[list \
 	    "PR ld/20828 dynamic symbols with section GC (plain)" \
 	     "$LFLAGS -shared --gc-sections -T pr20828.ld" \
 	     "tmpdir/libpr20828.so" "$AFLAGS_PIC" \
 	     {pr20828.s} \
-	     {{readelf --dyn-syms pr20828-1.sd}} \
+	     {{readelf --dyn-syms pr20828-a.sd} \
+	      {readelf --dyn-syms pr20828-b.sd}} \
 	     "pr20828-1.so"] \
 	[list \
 	    "PR ld/20828 dynamic symbols with section GC (version script)" \
@@ -74,8 +76,8 @@ if { [check_gc_sections_available] } {
 	     "tmpdir/libpr20828.so" \
 	     "$AFLAGS_PIC" \
 	     {pr20828.s} \
-	     {{readelf --dyn-syms pr20828-2a.sd} \
-	      {readelf --dyn-syms pr20828-2b.sd}} \
+	     {{readelf --dyn-syms pr20828-b.sd} \
+	      {readelf --dyn-syms pr20828-c.sd}} \
 	     "pr20828-2.so"]]
 }
 
