@@ -76,7 +76,8 @@ elf_solaris2_before_allocation (void)
 
   /* Only do this if emitting a shared object and versioning is in place. */
   if (bfd_link_dll (&link_info)
-      && (link_info.version_info != NULL
+      && ((link_info.version_info != NULL
+	   && link_info.version_info->name[0] != '\0')
 	  || link_info.create_default_symver))
     {
       struct bfd_elf_version_expr *globals = NULL, *locals = NULL;

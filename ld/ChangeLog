@@ -1,3 +1,9 @@
+2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* emultempl/solaris2.em (elf_solaris2_before_allocation): Do not
+	add implicit version nodes if an anonymous version tag is being
+	used.
+
 2017-01-24  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-plugin/lto.exp (lto_link_elf_tests): Move "Compile 7",
