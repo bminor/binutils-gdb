@@ -1,6 +1,11 @@
 2017-01-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828
+	* testsuite/ld-elf/pr20828.ld: Add `.plt'.
+
+2017-01-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
 	* testsuite/ld-elf/pr20828.ld: Rename `_fdata' and `_edata' to
 	`fdata' and `edata' respectively.
 	* testsuite/ld-elf/pr20828.ver: Adjust accordingly.
