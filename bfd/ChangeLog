@@ -1,3 +1,29 @@
+2017-01-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Merge two cases
+	where dynamic relocs are preferable.  Allow ifunc too.
+	(ensure_undefweak_dynamic): New function.
+	(allocate_dynrelocs): Use it here.  Move plt handling last and
+	don't make symbols dynamic, simplifying loop.  Only make undef
+	weak symbols with GOT entries dynamic.  Correct condition
+	for GOT relocs.  Handle dynamic relocs on ifuncs.  Correct
+	comments.  Remove goto.
+	(ppc_elf_relocate_section): Correct test for using dynamic
+	symbol on GOT relocs.  Rearrange test for emitting GOT relocs
+	to suit.  Set up explicit tls_index entries and implicit GOT
+	tls_index entries resolvable at link time for
+	__tls_get_addr_opt.  Simplify test to clear mem for prelink.
+	* elf64-ppc.c (allocate_got): Correct condition for GOT relocs.
+	(ensure_undefweak_dynamic): New function.
+	(allocate_dynrelocs): Use it here.  Only make undef weak symbols
+	with GOT entries dynamic.  Remove unnecessary test of
+	WILL_CALL_FINISH_DYNAMIC_SYMBOL in PLT handling.
+	(ppc64_elf_relocate_section): Correct test for using dynamic
+	symbol on GOT relocs.  Rearrange test for emitting GOT relocs
+	to suit.  Set up explicit tls_index entries and implicit GOT
+	tls_index entries resolvable at link time for __tls_get_addr_opt.
+	Simplify expression to clear mem for prelink.
+
 2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
 
 	* elfnn-aarch64.c: Fix relaxations for ILP32 mode.

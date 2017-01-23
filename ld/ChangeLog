@@ -1,3 +1,10 @@
+2017-01-24  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsexe.r: Update for fewer dynamic relocs
+	and symbols.
+	* testsuite/ld-powerpc/tlsexe.d: Likewise.
+	* testsuite/ld-powerpc/tlsexe.g: Likewise.
+
 2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp: Run new tests.
