@@ -1,3 +1,7 @@
+2017-01-23  Bernd Schmidt  <bschmidt@redhat.com>
+
+	* MAINTAINERS (BFIN): Remove myself as Blackfin maintainer.
+
 2017-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* objdump.c (dump_section_header): Extract max section name length
