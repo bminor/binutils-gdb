@@ -1,3 +1,7 @@
+2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
+
+	* elfnn-aarch64.c: Fix relaxations for ILP32 mode.
+
 2017-01-20  Jiong Wang <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elf_aarch64_hash_symbol): New function.

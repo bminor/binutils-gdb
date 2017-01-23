@@ -1,3 +1,19 @@
+2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new tests.
+	* testsuite/ld-aarch64/tls-desc-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-all-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-gd-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-gdesc-le-2-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-gdesc-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-ie-le-2-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-ie-le-3-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-ie-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-desc-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-desc-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-gd-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-gd-le-ilp32.d: New test.
+
 2017-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/ga.po: Updated Irish translation.
