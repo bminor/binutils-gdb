@@ -1,3 +1,11 @@
+2017-01-23  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	PR gold/21054
+	* mips.cc (Mips_got_info::record_global_got_symbol): Don't add symbol
+	to the dynamic symbol table if it is forced to local visibility.
+	(Target_mips::do_finalize_sections): Don't add __RLD_MAP symbol to the
+	dynamic symbol table if it is forced to local visibility.
+
 2017-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* aarch64.cc (Stub_template_repertoire): Change ST_E_835769_INSNS

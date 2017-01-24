@@ -5627,7 +5627,7 @@ Mips_got_info<size, big_endian>::record_global_got_symbol(
     mips_sym->set_got_not_only_for_calls();
 
   // A global symbol in the GOT must also be in the dynamic symbol table.
-  if (!mips_sym->needs_dynsym_entry())
+  if (!mips_sym->needs_dynsym_entry() && !mips_sym->is_forced_local())
     {
       switch (mips_sym->visibility())
         {
@@ -9781,7 +9781,8 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                             elfcpp::STV_DEFAULT, 0,
                                             false, false);
 
-        rld_map->set_needs_dynsym_entry();
+        if (!rld_map->is_forced_local())
+          rld_map->set_needs_dynsym_entry();
 
         if (!parameters->options().pie())
           // This member holds the absolute address of the debug pointer.
