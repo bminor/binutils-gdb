@@ -1,3 +1,7 @@
+2017-01-24  Alan Hayward  alan.hayward@arm.com
+
+	* elf/common.h (NT_ARM_SVE): Define.
+
 2017-01-04  Jiong Wang  <jiong.wang@arm.com>
 
 	* dwarf2.def: Sync with mainline gcc sources.
