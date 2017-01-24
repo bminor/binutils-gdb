@@ -2858,7 +2858,7 @@ has returned.  (The exit code could be unavailable if, for example,
 @value{GDBN} detaches from the inferior.) If the exit code is unavailable,
 the attribute does not exist.
 @end defvar
-@defvar ExitedEvent inferior
+@defvar ExitedEvent.inferior
 A reference to the inferior which triggered the @code{exited} event.
 @end defvar
 

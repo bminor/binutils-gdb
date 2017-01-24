@@ -1,3 +1,7 @@
+2017-01-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Events In Python): Fix typo.
+
 2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
 	    Luis Machado  <lgustavo@codesourcery.com>
 
