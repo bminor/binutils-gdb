@@ -1,3 +1,12 @@
+2017-01-24  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-plugin/lto.exp (lto_link_elf_tests): Move "Compile 7",
+	"Compile 8a", "Compile 8b"...
+	(lto_compile_elf_tests): ...to here.  Always run these tests.
+	(lto_run_elf_tests): Move "LTO 7"...
+	(lto_run_elf_shared_tests): ...to here.  Restrict these tests on
+	environment where share library is supported.
+
 2017-01-24  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsexe.r: Update for fewer dynamic relocs

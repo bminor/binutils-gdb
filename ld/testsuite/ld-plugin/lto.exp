@@ -219,20 +219,23 @@ if { [at_least_gcc_version 4 7] } {
     ]]
 }
 
-# Generate input files for complex LTO tests for ELF.
-set lto_link_elf_tests [list \
+set lto_compile_elf_tests [list \
   [list "Compile 7" \
    "" "-flto -O2" \
    {lto-7a.c lto-7b.c lto-7c.c} {} ""] \
-  [list "Build liblto-7.so" \
-   "-shared" "-O2 -fpic" \
-   {lto-7d.c} {} "liblto-7.so" "c"] \
   [list "Compile 8a" \
    "" "-O2" \
    {lto-8a.c} {} ""] \
   [list "Compile 8b" \
    "" "-flto -O2" \
    {lto-8b.c} {} ""] \
+]
+
+# Generate input files for complex LTO tests for ELF.
+set lto_link_elf_tests [list \
+  [list "Build liblto-7.so" \
+   "-shared" "-O2 -fpic" \
+   {lto-7d.c} {} "liblto-7.so" "c"] \
   [list "Build liblto-17a.so" \
    "-shared -O2 -fpic -flto -fuse-linker-plugin" "-O2 -fpic -flto" \
    {lto-17a.c} {{"nm" {} "lto-17a.d"}} "liblto-17a.so" "c"] \
@@ -377,11 +380,15 @@ if { [at_least_gcc_version 4 7] } {
     ]]
 }
 
-# LTO run-time tests for ELF
-set lto_run_elf_tests [list \
+# LTO run-time tests for ELF which require shared library support.
+set lto_run_elf_shared_tests [list \
   [list "LTO 7" \
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-7b.o tmpdir/lto-7c.o tmpdir/lto-7a.o -Wl,--no-as-needed tmpdir/liblto-7.so" "" \
    {dummy.c} "lto-7.exe" "lto-7.out" "" "c"] \
+]
+
+# LTO run-time tests for ELF
+set lto_run_elf_tests [list \
   [list "LTO 8" \
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-8b.o tmpdir/lto-8a.o" "" \
    {dummy.c} "lto-8.exe" "lto-8.out" "" "c"] \
@@ -391,6 +398,10 @@ set lto_run_elf_tests [list \
 ]
 
 run_cc_link_tests $lto_link_tests
+
+# These compilation tests generate intermediate object files which will be used
+# by some elf tests besides shared libs tests.  So, always compile them.
+run_cc_link_tests $lto_compile_elf_tests
 
 # Restrict these to ELF targets that support shared libs and PIC.
 if { [is_elf_format] && [check_lto_shared_available] } {
@@ -485,6 +496,10 @@ run_ld_link_exec_tests $lto_run_tests
 
 if { [is_elf_format] } {
     run_ld_link_exec_tests $lto_run_elf_tests
+}
+
+if { [is_elf_format] && [check_lto_shared_available] } {
+    run_ld_link_exec_tests $lto_run_elf_shared_tests
 }
 
 proc pr20103 {cflags libs} {
