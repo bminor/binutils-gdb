@@ -2475,7 +2475,7 @@ class Mips_output_data_plt : public Output_section_data
   add_entry(Mips_symbol<size>* gsym, unsigned int r_type);
 
   // Return the .rel.plt section data.
-  const Reloc_section*
+  Reloc_section*
   rel_plt() const
   { return this->rel_; }
 
@@ -8521,6 +8521,10 @@ Target_mips<size, big_endian>::make_plt_entry(Symbol_table* symtab,
                                       (elfcpp::SHF_ALLOC
                                        | elfcpp::SHF_EXECINSTR),
                                       this->plt_, ORDER_PLT, false);
+
+      // Make the sh_info field of .rel.plt point to .plt.
+      Output_section* rel_plt_os = this->plt_->rel_plt()->output_section();
+      rel_plt_os->set_info_section(this->plt_->output_section());
     }
 
   this->plt_->add_entry(gsym, r_type);
