@@ -1,5 +1,12 @@
 2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
+	* config.bfd (powerpcle-*-rtems*): Do not mark as removed.
+	(arm-*-rtems*): Move to (arm*-*-eabi*).
+	(i[3-7]86-*-rtems*): Move to (i[3-7]86-*-elf*).
+	(m68-*-rtems*): Move to (m68*-*-elf*).
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
 	* config.bfd (*-*-rtemscoff*): Mark as removed.
 
 2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>

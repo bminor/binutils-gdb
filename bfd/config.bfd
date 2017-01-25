@@ -144,7 +144,6 @@ case $targ in
  m68*-bull-sysv* | \
  maxq-*-coff | \
  mips*el-*-rtems* | \
- powerpcle-*-rtems* | \
  sparc*-*-rtemsaout* | \
  sparc-*-lynxos* | \
  vax-*-vms* | \
@@ -434,10 +433,6 @@ case "${targ}" in
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec
     ;;
-  arm-*-rtems*)
-    targ_defvec=arm_elf32_le_vec
-    targ_selvecs=arm_elf32_be_vec
-    ;;
   armeb-*-elf | arm*b-*-freebsd* | arm*b-*-linux-* | armeb-*-eabi*)
     targ_defvec=arm_elf32_be_vec
     targ_selvecs=arm_elf32_le_vec
@@ -448,7 +443,7 @@ case "${targ}" in
     ;;
   arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
-  arm*-*-eabi* )
+  arm*-*-eabi* | arm-*-rtems*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs=arm_elf32_be_vec
     ;;
@@ -629,7 +624,7 @@ case "${targ}" in
     ;;
   i[3-7]86-*-sysv4* | i[3-7]86-*-unixware* | \
   i[3-7]86-*-elf* | i[3-7]86-*-sco3.2v5* | \
-  i[3-7]86-*-dgux* | i[3-7]86-*-sysv5*)
+  i[3-7]86-*-dgux* | i[3-7]86-*-sysv5* | i[3-7]86-*-rtems*)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec i386_coff_vec"
     ;;
@@ -674,10 +669,6 @@ case "${targ}" in
   i[3-7]86-*-sysv* | i[3-7]86-*-isc* | i[3-7]86-*-sco* | i[3-7]86-*-coff | \
   i[3-7]86-*-aix*)
     targ_defvec=i386_coff_vec
-    ;;
-  i[3-7]86-*-rtems*)
-    targ_defvec=i386_elf32_vec
-    targ_selvecs="iamcu_elf32_vec i386_coff_vec i386_aout_vec"
     ;;
   i[3-7]86-*-darwin* | i[3-7]86-*-macos10* | i[3-7]86-*-rhapsody*)
     targ_defvec=i386_mach_o_vec
@@ -976,13 +967,9 @@ case "${targ}" in
     targ_selvecs="core_cisco_be_vec ieee_vec"
     targ_underscore=yes
     ;;
-  m68*-*-elf* | m68*-*-sysv4* | m68*-*-uclinux*)
+  m68*-*-elf* | m68*-*-sysv4* | m68*-*-rtems* | m68*-*-uclinux*)
     targ_defvec=m68k_elf32_vec
     targ_selvecs="m68k_coff_vec ieee_vec"
-    ;;
-  m68*-*-rtems*)
-    targ_defvec=m68k_elf32_vec
-    targ_selvecs="m68k_coff_vec m68k_versados_vec ieee_vec aout0_be_vec"
     ;;
   m68*-*-coff* | m68*-*-sysv*)
     targ_defvec=m68k_coff_vec
