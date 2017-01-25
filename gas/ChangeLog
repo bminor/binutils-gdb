@@ -1,5 +1,22 @@
 2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
+	* configure.tgt (aarch64*-*-rtems*): Remove.
+	(bfin-*-rtems*): Likewise.
+	(h8300-*-rtems*): Likewise.
+	(i386-*-rtems*): Likewise.
+	(m32c-*-rtems*): Likewise.
+	(m32r-*-rtems*): Likewise.
+	(m68k-*-rtems*): Likewise.
+	(mips-*-rtems*): Likewise.
+	(nios2-*-rtems*): Likewise.
+	(ppc-*-rtems*): Likewise.
+	(sh-*-rtems*): Likewise.
+	(sparc64-*-rtems*): Likewise.
+	(sparc-*-rtems*): Likewise.
+	(*-*-rtems*) Use ELF format.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
 	* configure.tgt (arm-*-rtems*): Move to (arm-*-eabi*).
 
 2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
