@@ -1,3 +1,7 @@
+2017-01-24  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+        * pru-opc.c: Remove vague reference to a future GDB port.
+
 2017-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/ga.po: Updated Irish translation.

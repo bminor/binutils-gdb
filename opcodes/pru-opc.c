@@ -85,8 +85,7 @@ const int pru_num_regs = PRU_NUM_REGS;
 
 #undef PRU_NUM_REGS
 
-/* This is the opcode table used by the PRU GNU as, disassembler
-   and soon GDB.  */
+/* This is the opcode table used by the PRU GNU as and disassembler.  */
 const struct pru_opcode pru_opcodes[] =
 {
   /* { name, args,
