@@ -133,6 +133,7 @@ esac
 
 case $targ in
  *-go32-rtems* | \
+ *-*-rtemsaout* | \
  *-*-rtemscoff* | \
  a29k-* | \
  arm-*-oabi | \
@@ -144,7 +145,6 @@ case $targ in
  m68*-bull-sysv* | \
  maxq-*-coff | \
  mips*el-*-rtems* | \
- sparc*-*-rtemsaout* | \
  sparc-*-lynxos* | \
  vax-*-vms* | \
  null)
