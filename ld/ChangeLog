@@ -1,3 +1,10 @@
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (h8300-*-rtemscoff*): Remove.
+	(i960-*-rtems*): Likewise.
+	(m68*-*-rtemscoff*): Likewise.
+	(sh-*-rtemscoff*): Likewise.
+
 2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* emultempl/solaris2.em (elf_solaris2_before_allocation): Do not

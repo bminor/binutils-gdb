@@ -102,7 +102,6 @@ case $targ in
  mips*-*-sysv* | mips*-*-riscos* | \
  ns32k-*-* | \
  sh*-*-symbianelf* | \
- sh-*-rtemscoff* | \
  sparclet-*-aout* | \
  sparc86x-*-aout* | \
  sparc*-*-chorus* | \
@@ -134,13 +133,12 @@ esac
 
 case $targ in
  *-go32-rtems* | \
+ *-*-rtemscoff* | \
  a29k-* | \
  arm-*-oabi | \
  hppa*-*-rtems* | \
  i960-*-rtems* | \
- i[3-7]86*-*-rtemscoff* | \
  m68*-*-lynxos* | \
- m68*-*-rtemscoff* | \
  m68*-apollo-* | \
  m68*-apple-aux* | \
  m68*-bull-sysv* | \
@@ -484,7 +482,7 @@ case "${targ}" in
     targ_defvec=tic30_coff_vec
     ;;
 
-  c4x-*-*coff* | tic4x-*-*coff* | tic4x-*-rtems*)
+  c4x-*-*coff* | tic4x-*-*coff*)
     targ_defvec=tic4x_coff1_vec
     targ_selvecs="tic4x_coff1_beh_vec tic4x_coff2_vec tic4x_coff2_beh_vec tic4x_coff0_vec tic4x_coff0_beh_vec"
     targ_underscore=yes
@@ -560,11 +558,6 @@ case "${targ}" in
 
   moxie-*-moxiebox*)
     targ_defvec=moxie_elf32_le_vec
-    ;;
-
-  h8300*-*-rtemscoff*)
-    targ_defvec=h8300_coff_vec
-    targ_underscore=yes
     ;;
 
   h8300*-*-elf | h8300*-*-rtems*)
@@ -1598,12 +1591,6 @@ case "${targ}" in
     want64=true
     ;;
 #endif
-
-  sh-*-rtemscoff*)
-    targ_defvec=sh_coff_vec
-    targ_selvecs="sh_coff_vec sh_coff_le_vec sh_coff_small_vec sh_coff_small_le_vec"
-    targ_underscore=yes
-    ;;
 
 #ifdef BFD64
   sh-*-elf* | sh[1234]*-elf* | sh-*-rtems* | sh-*-kaos*)

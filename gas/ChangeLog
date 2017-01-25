@@ -1,3 +1,7 @@
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (sh-*-rtemscoff*): Remove.
+
 2017-01-24  Sebastian Huber <sebastian.huber@embedded-brains.de>
 
 	* configure.tgt (riscv*-*-*): Remove em=linux.

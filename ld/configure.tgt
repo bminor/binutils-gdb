@@ -208,7 +208,7 @@ moxie-*-moxiebox*)	targ_emul=moxiebox
 			;;
 moxie-*-*)		targ_emul=elf32moxie
 			;;
-h8300-*-hms* | h8300-*-coff* | h8300-*-rtemscoff*)
+h8300-*-hms* | h8300-*-coff*)
 			targ_emul=h8300; targ_extra_emuls="h8300h h8300s h8300hn h8300sn h8300sx h8300sxn" ;;
 h8300-*-elf* | h8300-*-rtems*)
 			targ_emul=h8300elf;
@@ -404,7 +404,6 @@ i960-wrs-vxworks5*)	targ_emul=gld960coff ;;
 i960-wrs-vxworks*)	targ_emul=gld960 ;;
 i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
-i960-*-rtems*)		targ_emul=gld960coff ;;
 i960-*-elf*)		targ_emul=elf32_i960
 			;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
@@ -463,7 +462,6 @@ m68*-*-netbsdaout* | m68*-*-netbsd*)
 			targ_emul=m68knbsd
 			targ_extra_emuls="m68kelfnbsd m68k4knbsd" ;;
 m68*-*-psos*)		targ_emul=m68kpsos ;;
-m68*-*-rtemscoff*)	targ_emul=m68kcoff ;;
 m68*-*-rtems*)		targ_emul=m68kelf
 			;;
 m8*-*-*)		targ_emul=m88kbcs
@@ -741,7 +739,6 @@ sh*-*-symbianelf*)	targ_emul=shlsymbian ;;
 shle*-*-elf* | sh[1234]*le*-*-elf | shle*-*-kaos*)
 			targ_emul=shlelf
 			targ_extra_emuls="shelf shl sh"	;;
-sh-*-rtemscoff*)	targ_emul=sh; targ_extra_emuls=shl ;;
 sh-*-elf* | sh[1234]*-*-elf | sh-*-rtems* | sh-*-kaos*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl" ;;

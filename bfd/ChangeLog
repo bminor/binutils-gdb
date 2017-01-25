@@ -1,3 +1,7 @@
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (*-*-rtemscoff*): Mark as removed.
+
 2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828
