@@ -840,6 +840,7 @@ namespace eval Dwarf {
     proc _location {body} {
 	variable _constants
 	variable _cu_label
+	variable _cu_version
 	variable _cu_addr_size
 	variable _cu_offset_size
 
@@ -913,7 +914,11 @@ namespace eval Dwarf {
 
 		    # Here label is a section offset.
 		    set label [lindex $line 1]
-		    _op .${_cu_offset_size}byte $label
+		    if { $_cu_version == 2 } {
+			_op .${_cu_addr_size}byte $label
+		    } else {
+			_op .${_cu_offset_size}byte $label
+		    }
 		    _op .sleb128 [lindex $line 2]
 		}
 

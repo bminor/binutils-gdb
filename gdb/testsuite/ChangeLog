@@ -1,3 +1,8 @@
+2017-01-25  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/dwarf.exp (Dwarf::_location): Handle
+	DW_OP_GNU_implicit_pointer with proper size.
+
 2017-01-20  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.python/py-xmethods.exp: Fix test names starting with lowercase
