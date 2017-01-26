@@ -29,5 +29,3 @@ proc delete_memory_regions {} {
        -re "$gdb_prompt $" { }
     }
 }
-
-
