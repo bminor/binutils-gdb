@@ -4022,31 +4022,14 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* No matching architecture was found.  Create a new one.  */
   tdep = XNEW (struct gdbarch_tdep);
+  info.byte_order = BFD_ENDIAN_LITTLE;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->cris_version = usr_cmd_cris_version;
   tdep->cris_mode = usr_cmd_cris_mode;
   tdep->cris_dwarf2_cfi = usr_cmd_cris_dwarf2_cfi;
 
-  /* INIT shall ensure that the INFO.BYTE_ORDER is non-zero.  */
-  switch (info.byte_order)
-    {
-    case BFD_ENDIAN_LITTLE:
-      /* Ok.  */
-      break;
-
-    case BFD_ENDIAN_BIG:
-      /* Cris is always little endian, but the user could have forced
-	 big endian with "set endian".  */
-      return 0;
-
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("cris_gdbarch_init: unknown byte order in info"));
-    }
-
   set_gdbarch_return_value (gdbarch, cris_return_value);
-
   set_gdbarch_sp_regnum (gdbarch, 14);
   
   /* Length of ordinary registers used in push_word and a few other

@@ -1,3 +1,8 @@
+2017-01-26  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* cris-tdep.c (cris_gdbarch_init): Remove check for
+	info.byte_order and force it to BFD_ENDIAN_LITTLE.
+
 2017-01-26  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* corelow.c (get_core_register_section): Check for regset
