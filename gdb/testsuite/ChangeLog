@@ -1,3 +1,20 @@
+2017-01-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-bad-printers.exp: Load python file using "source".
+	* gdb.python/py-events.exp: Likewise.
+	* gdb.python/py-evsignal.exp: Likewise.
+	* gdb.python/py-evthreads.exp: Likewise.
+	* gdb.python/py-frame-args.exp: Likewise.
+	* gdb.python/py-framefilter-invalidarg.exp: Likewise.
+	* gdb.python/py-framefilter-mi.exp: Likewise.
+	* gdb.python/py-framefilter.exp: Likewise.
+	* gdb.python/py-mi.exp: Likewise.
+	* gdb.python/py-pp-maint.exp: Likewise.
+	* gdb.python/py-pp-registration.exp: Likewise.
+	* gdb.python/py-prettyprint.exp: Likewise.
+	(run_lang_tests): Likewise.
+	* gdb.python/py-typeprint.exp: Likewise.
+
 2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
 
 	* lib/memory.exp: New file.
