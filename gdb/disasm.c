@@ -838,28 +838,13 @@ gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
   return length;
 }
 
-static void
-do_ui_file_delete (void *arg)
-{
-  ui_file_delete ((struct ui_file *) arg);
-}
-
 /* Return the length in bytes of the instruction at address MEMADDR in
    debugged memory.  */
 
 int
 gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  static struct ui_file *null_stream = NULL;
-
-  /* Dummy file descriptor for the disassembler.  */
-  if (!null_stream)
-    {
-      null_stream = ui_file_new ();
-      make_final_cleanup (do_ui_file_delete, null_stream);
-    }
-
-  return gdb_print_insn (gdbarch, addr, null_stream, NULL);
+  return gdb_print_insn (gdbarch, addr, null_stream (), NULL);
 }
 
 /* fprintf-function for gdb_buffered_insn_length.  This function is a

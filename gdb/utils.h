@@ -189,6 +189,9 @@ extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
 
+/* Return a null stream.  */
+extern struct ui_file *null_stream (void);
+
 /* Set the screen dimensions to WIDTH and HEIGHT.  */
 
 extern void set_screen_width_and_height (int width, int height);

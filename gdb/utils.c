@@ -199,6 +199,21 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
   return make_cleanup (do_ui_file_delete, arg);
 }
 
+struct ui_file *
+null_stream (void)
+{
+  /* A simple implementation of singleton pattern.  */
+  static struct ui_file *stream = NULL;
+
+  if (stream == NULL)
+    {
+      stream = ui_file_new ();
+      /* Delete it on gdb exit.  */
+      make_final_cleanup (do_ui_file_delete, stream);
+    }
+  return stream;
+}
+
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
 static void

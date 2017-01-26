@@ -1,3 +1,10 @@
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* disasm.c (do_ui_file_delete): Delete.
+	(gdb_insn_length): Move code creating stream to ...
+	* utils.c (null_stream): ... here.  New function.
+	* utils.h (null_stream): Declare.
+
 2017-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* python/py-inferior.c (find_thread_object): Return directly
