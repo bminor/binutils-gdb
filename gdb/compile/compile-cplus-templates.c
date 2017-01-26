@@ -708,7 +708,7 @@ get_template_argument_value (compile_cplus_instance *instance,
     {
       /* !!keiths: More (incomplete) fun.  */
     case LOC_CONST:
-      value = instance->literal_expr (type, SYMBOL_VALUE (arg));
+      value = instance->build_literal_expr (type, SYMBOL_VALUE (arg));
       break;
 
     case LOC_COMPUTED:
@@ -728,7 +728,7 @@ get_template_argument_value (compile_cplus_instance *instance,
 	/* !!keiths: This is a hack, but I don't want to write
 	   yet another linkage name translation function.  At least
 	   not just yet.  */
-	value = instance->literal_expr (type, value_address (val));
+	value = instance->build_literal_expr (type, value_address (val));
       }
       break;
 
@@ -772,7 +772,7 @@ define_template_parameters_generic
 	      }
 
 	    gcc_type abstract_type
-	      = instance->new_template_typename_parm (id, is_pack,
+	      = instance->build_type_template_parameter (id, is_pack,
 			default_type, filename, line);
 	    defn->set_parameter_abstract_type (i, abstract_type);
 	  }
@@ -795,8 +795,8 @@ define_template_parameters_generic
 						 defn->default_argument (i));
 	      }
 
-	    instance->new_template_value_parm (abstract_type, id,
-					       default_value, filename, line);
+	    instance->build_value_template_parameter (abstract_type, id,
+						      default_value, filename, line);
 	  }
 	  break;
 
@@ -1109,7 +1109,7 @@ class function_template_definer
 
     /* Start the new template declaration.  */
     m_instance->enter_scope (scope);
-    m_instance->start_new_template_decl (defn->generic ().c_str ());
+    m_instance->start_template_decl (defn->generic ().c_str ());
 
     /* Get the parameters' generic kinds and types.  */
     define_template_parameters_generic (m_instance, defn,
@@ -1280,10 +1280,10 @@ class function_template_definer
 
     /* Finally, define the new generic template declaration.  */
     gcc_decl decl
-      = m_instance->new_decl ("function template", name, sym_kind,
-			      func_type, 0, 0,
-			      symbol_symtab (&(tsym->base))->filename,
-			      SYMBOL_LINE (&(tsym->base)));
+      = m_instance->build_decl ("function template", name, sym_kind,
+				func_type, 0, 0,
+				symbol_symtab (&(tsym->base))->filename,
+				SYMBOL_LINE (&(tsym->base)));
     defn->set_decl (decl);
 
     m_instance->leave_scope ();
@@ -1350,7 +1350,7 @@ class class_template_definer
     m_instance->enter_scope (scope);
 
     /* Start a new template list for this template.  */
-    m_instance->start_new_template_decl (defn->generic ().c_str ());
+    m_instance->start_template_decl (defn->generic ().c_str ());
 
     /* Get the parameters' generic kinds and types.  */
     define_template_parameters_generic (m_instance, defn, arg_info,
@@ -1365,11 +1365,11 @@ class class_template_definer
     if (TYPE_CODE (defn->type ()) == TYPE_CODE_STRUCT)
       {
 	gcc_decl decl
-	  = m_instance->new_decl ("class template", defn->decl_name (),
-				  GCC_CP_SYMBOL_CLASS /* | nested_access? */
-				  | (TYPE_DECLARED_CLASS (defn->type ())
-				     ? GCC_CP_FLAG_CLASS_NOFLAG
-				     : GCC_CP_FLAG_CLASS_IS_STRUCT),
+	  = m_instance->build_decl ("class template", defn->decl_name (),
+				    GCC_CP_SYMBOL_CLASS /* | nested_access? */
+				    | (TYPE_DECLARED_CLASS (defn->type ())
+				       ? GCC_CP_FLAG_CLASS_NOFLAG
+				       : GCC_CP_FLAG_CLASS_IS_STRUCT),
 				  0, NULL, 0, /*filename*/ NULL, /*line*/ 0);
 
 	defn->set_decl (decl);
@@ -1378,9 +1378,9 @@ class class_template_definer
       {
 	gdb_assert (TYPE_CODE (defn->type ()) == TYPE_CODE_UNION);
 	gcc_decl decl
-	  = m_instance->new_decl ("union template", defn->decl_name (),
-				  GCC_CP_SYMBOL_UNION /* | nested_access? */,
-				  0, NULL, 0, /*fileanme*/NULL, /*line*/0);
+	  = m_instance->build_decl ("union template", defn->decl_name (),
+				    GCC_CP_SYMBOL_UNION /* | nested_access? */,
+				    0, NULL, 0, /*fileanme*/NULL, /*line*/0);
 
 	defn->set_decl (decl);
       }

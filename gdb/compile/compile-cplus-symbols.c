@@ -266,13 +266,13 @@ convert_one_symbol (compile_cplus_instance *instance,
 	      struct template_symbol *tsymbol
 		= (struct template_symbol *) sym.symbol;
 
-	      instance->specialize_function_template (tsymbol, addr,
-						      filename, line);
+	      instance->build_function_template_specialization (tsymbol, addr,
+								filename, line);
 	    }
 	  else
 	    {
-	      instance->new_decl ("variable", name.c_str (), kind, sym_type,
-				  symbol_name, addr, filename, line);
+	      instance->build_decl ("variable", name.c_str (), kind, sym_type,
+				    symbol_name, addr, filename, line);
 	    }
 
 	  /* Pop scope for non-local symbols.  */
@@ -397,9 +397,9 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
      information for the symbol.  While we have access to the demangled
      name, we still don't know what A::B::C::D::E::F means without debug
      info, no?  */
-  instance->new_decl ("minsym", MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
-		      NULL, addr, NULL, 0);
-  instance->pop_namespace ("");
+  instance->build_decl ("minsym", MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
+			NULL, addr, NULL, 0);
+  instance->pop_binding_level ("");
 }
 
 /* Do a regular expression search of the symbol table for any symbol
@@ -471,7 +471,6 @@ gcc_cplus_convert_symbol (void *datum,
 {
   compile_cplus_instance *instance
     = (compile_cplus_instance *) datum;
-  domain_enum domain;
   int found = 0;
   struct search_multiple_result search_result;
   struct cleanup *cleanups;
@@ -479,14 +478,9 @@ gcc_cplus_convert_symbol (void *datum,
 
   switch (request)
     {
-    case GCC_CP_ORACLE_SYMBOL:
-      domain = VAR_DOMAIN;
-      break;
-    case GCC_CP_ORACLE_TAG:
-      domain = STRUCT_DOMAIN;
-      break;
-    case GCC_CP_ORACLE_LABEL:
-      domain = LABEL_DOMAIN;
+    case GCC_CP_ORACLE_IDENTIFIER:
+      /* FIXME: This used to be separate SYMBOL and TAG.  Check for
+	 simplification opportunities below.  -lxo  */
       break;
     default:
       gdb_assert_not_reached ("Unrecognized oracle request.");
@@ -496,8 +490,7 @@ gcc_cplus_convert_symbol (void *datum,
      is to simply emit a gcc error.  */
   if (debug_compile_oracle)
     {
-      printf ("got oracle request for \"%s\" in domain %s\n", identifier,
-	      domain_name (domain));
+      printf ("got oracle request for \"%s\"\n", identifier);
     }
 
   memset (&search_result, 0, sizeof (search_result));
@@ -522,11 +515,11 @@ gcc_cplus_convert_symbol (void *datum,
 
 	 4. Finally, if all else fails, fall back to minsyms.  */
 
-      if (domain == VAR_DOMAIN)
+      if (1)
 	{
 	  search_result = search_symbols_multiple (identifier,
 						   current_language,
-						   domain, NULL, NULL);
+						   VAR_DOMAIN, NULL, NULL);
 	  if (!VEC_empty (block_symbol_d, search_result.symbols))
 	    {
 	      struct block_symbol *elt;
@@ -539,7 +532,7 @@ gcc_cplus_convert_symbol (void *datum,
 		   VEC_iterate (block_symbol_d, search_result.symbols, ix, elt);
 		   ++ix)
 		{
-		  convert_symbol_sym (instance, identifier, *elt, domain);
+		  convert_symbol_sym (instance, identifier, *elt, VAR_DOMAIN);
 		}
 	      found = 1;
 	    }
@@ -549,10 +542,22 @@ gcc_cplus_convert_symbol (void *datum,
 	{
 	  struct block_symbol sym;
 
-	  sym = lookup_symbol (identifier, instance->block (), domain, NULL);
+	  sym = lookup_symbol (identifier, instance->block (), VAR_DOMAIN, NULL);
 	  if (sym.symbol != NULL)
 	    {
-	      convert_symbol_sym (instance, identifier, sym, domain);
+	      convert_symbol_sym (instance, identifier, sym, VAR_DOMAIN);
+	      found = 1;
+	    }
+	}
+
+      if (1)
+	{
+	  struct block_symbol sym;
+
+	  sym = lookup_symbol (identifier, instance->block (), STRUCT_DOMAIN, NULL);
+	  if (sym.symbol != NULL)
+	    {
+	      convert_symbol_sym (instance, identifier, sym, STRUCT_DOMAIN);
 	      found = 1;
 	    }
 	}
@@ -560,7 +565,8 @@ gcc_cplus_convert_symbol (void *datum,
       if (!found)
 	{
 	  /* Try a regexp search of the program's symbols.  */
-	  found = regexp_search_symbols (instance, identifier, domain);
+	  found = regexp_search_symbols (instance, identifier, VAR_DOMAIN)
+	    + regexp_search_symbols (instance, identifier, STRUCT_DOMAIN);
 
 	  /* One last attempt: fall back to minsyms.  */
 	  if (!found && !VEC_empty (bound_minimal_symbol_d,

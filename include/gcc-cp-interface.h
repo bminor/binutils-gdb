@@ -1,6 +1,6 @@
 /* Interface between GCC C++ FE and GDB
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    This file is part of GCC.
 
@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-16
+  GCC_CP_FE_VERSION_0 = 0xffffffff-17
 };
 
 /* Qualifiers.  */
@@ -72,8 +72,6 @@ typedef unsigned long long gcc_utempl;
    for function arguments.  */
 
 typedef unsigned long long gcc_expr;
-
-/* FIXME: do we need to support argument packs?  */
 
 typedef enum
   { GCC_CP_TPARG_VALUE, GCC_CP_TPARG_CLASS,
@@ -134,14 +132,14 @@ enum gcc_cp_symbol_kind
 
   GCC_CP_SYMBOL_LABEL,
 
-  /* A class, forward declared in new_decl (to be later defined in
+  /* A class, forward declared in build_decl (to be later defined in
      start_class_definition), or, in a template parameter list scope,
      a declaration of a template class, closing the parameter
      list.  */
 
   GCC_CP_SYMBOL_CLASS,
 
-  /* A union, forward declared in new_decl (to be later defined in
+  /* A union, forward declared in build_decl (to be later defined in
      start_class_definition).  */
 
   GCC_CP_SYMBOL_UNION,
@@ -197,12 +195,10 @@ enum gcc_cp_symbol_kind
      operators.  */
   GCC_CP_FLAG_SPECIAL_FUNCTION = GCC_CP_FLAG_BASE,
 
-  /* We intentionally cannot express inline, constexpr, friend or
-     virtual override for functions.  We can't inline or
-     constexpr-replace without a source-level body.  Since we disable
-     access control, friend is meaningless.  The override keyword is
-     only meaningless within the definition of the containing
-     class.  */
+  /* We intentionally cannot express inline, constexpr, or virtual
+     override for functions.  We can't inline or constexpr-replace
+     without a source-level body.  The override keyword is only
+     meaningful within the definition of the containing class.  */
 
   /* This indicates a "virtual" member function, explicitly or
      implicitly (due to a virtual function with the same name and
@@ -296,8 +292,8 @@ enum gcc_cp_symbol_kind
 			       - GCC_CP_FLAG_BASE),
 
 
-  /* Flags to be used when introducing a class with
-     start_new_class_type, or a class template with new_decl.  */
+  /* Flags to be used when introducing a class or a class template
+     with build_decl.  */
 
   /* This indicates an enum type without any flags.  */
   GCC_CP_FLAG_CLASS_NOFLAG = 0,
@@ -364,20 +360,12 @@ struct gcc_vbase_array
 
 enum gcc_cp_oracle_request
 {
-  /* An ordinary symbol -- a variable, function, typedef, or enum
-     constant.  All namespace-scoped symbols with the requested name
-     should be defined in response to this request.  */
+  /* An identifier in namespace scope -- type, variable, function,
+     namespace, template.  All namespace-scoped symbols with the
+     requested name, in any namespace (including the global
+     namespace), should be defined in response to this request.  */
 
-  GCC_CP_ORACLE_SYMBOL,
-
-  /* A struct, union, or enum tag.  All members of the tagged type
-     should be defined in response to this request.  */
-
-  GCC_CP_ORACLE_TAG,
-
-  /* A label.  */
-
-  GCC_CP_ORACLE_LABEL
+  GCC_CP_ORACLE_IDENTIFIER
 };
 
 /* The type of the function called by GCC to ask GDB for a symbol's
