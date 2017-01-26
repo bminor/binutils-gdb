@@ -1,3 +1,9 @@
+2017-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure.tgt (arc*-*-linux*): Change the default linker
+	emulation based on --with-cpu selection.
+	* NEWS: Mention new configuration option.
+
 2017-02-06  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-elf/compress.exp: Don't print to stdout for all
