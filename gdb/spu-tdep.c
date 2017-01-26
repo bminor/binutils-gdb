@@ -33,6 +33,7 @@
 #include "value.h"
 #include "inferior.h"
 #include "dis-asm.h"
+#include "disasm.h"
 #include "objfiles.h"
 #include "language.h"
 #include "regcache.h"
@@ -1693,18 +1694,19 @@ spu_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 
 /* Disassembler.  */
 
-struct spu_dis_asm_data
+struct spu_dis_asm_info : disassemble_info
 {
-  struct gdbarch *gdbarch;
   int id;
 };
 
 static void
 spu_dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
-  struct spu_dis_asm_data *data
-    = (struct spu_dis_asm_data *) info->application_data;
-  print_address (data->gdbarch, SPUADDR (data->id, addr),
+  struct spu_dis_asm_info *data = (struct spu_dis_asm_info *) info;
+  gdb_disassembler *di
+    = static_cast<gdb_disassembler *>(info->application_data);
+
+  print_address (di->arch (), SPUADDR (data->id, addr),
 		 (struct ui_file *) info->stream);
 }
 
@@ -1714,12 +1716,10 @@ gdb_print_insn_spu (bfd_vma memaddr, struct disassemble_info *info)
   /* The opcodes disassembler does 18-bit address arithmetic.  Make
      sure the SPU ID encoded in the high bits is added back when we
      call print_address.  */
-  struct disassemble_info spu_info = *info;
-  struct spu_dis_asm_data data;
-  data.gdbarch = (struct gdbarch *) info->application_data;
-  data.id = SPUADDR_SPU (memaddr);
+  struct spu_dis_asm_info spu_info;
 
-  spu_info.application_data = &data;
+  memcpy (&spu_info, info, sizeof (*info));
+  spu_info.id = SPUADDR_SPU (memaddr);
   spu_info.print_address_func = spu_dis_asm_print_address;
   return print_insn_spu (memaddr, &spu_info);
 }

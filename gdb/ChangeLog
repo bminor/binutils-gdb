@@ -1,3 +1,42 @@
+2017-01-26  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c: Include "disasm.h".
+	(gdb_print_insn_arm): Update code to get gdbarch.
+	* disasm.c (dis_asm_read_memory): Change it to
+	gdb_disassembler::dis_asm_read_memory.
+	(dis_asm_memory_error): Likewise.
+	(dis_asm_print_address): Likewise.
+	(gdb_pretty_print_insn): Change it to
+	gdb_disassembler::pretty_print_insn.
+	(dump_insns): Add one argument gdb_disassemlber.  All
+	callers updated.
+	(do_mixed_source_and_assembly_deprecated): Likewise.
+	(do_mixed_source_and_assembly): Likewise.
+	(do_assembly_only): Likewise.
+	(gdb_disassembler::gdb_disassembler): New.
+	(gdb_disassembler::print_insn): New.
+	* disasm.h (class gdb_disassembler): New.
+	(gdb_pretty_print_insn): Remove declaration.
+	(gdb_disassemble_info): Likewise.
+	* guile/scm-disasm.c (class gdbscm_disassembler): New.
+	(gdbscm_disasm_read_memory_worker): Update.
+	(gdbscm_disasm_read_memory): Update.
+	(gdbscm_disasm_memory_error): Remove.
+	(gdbscm_disasm_print_address): Remove.
+	(gdbscm_disassembler::gdbscm_disassembler): New.
+	(gdbscm_print_insn_from_port): Update.
+	* mips-tdep.c: Include disasm.h.
+	(gdb_print_insn_mips): Update code to get gdbarch.
+	* record-btrace.c (btrace_insn_history): Update.
+	* spu-tdep.c: Include disasm.h.
+	(struct spu_dis_asm_data): Remove.
+	(struct spu_dis_asm_info): New.
+	(spu_dis_asm_print_address): Use spu_dis_asm_info to get
+	SPU id.
+	(gdb_print_insn_spu): Cast disassemble_info to
+	spu_dis_asm_info.
+
 2017-01-26  Yao Qi  <yao.qi@linaro.org>
 
 	* disasm.c (do_ui_file_delete): Delete.
