@@ -66,6 +66,7 @@ private:
   /* Stores data required for disassembling instructions in
      opcodes.  */
   struct disassemble_info m_di;
+  CORE_ADDR m_err_memaddr;
 
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,

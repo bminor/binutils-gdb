@@ -1,3 +1,8 @@
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/all-architectures.exp.in (do_arch_tests): Test
+	disassemble on address 0.
+
 2017-01-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 	    Yao Qi  <yao.qi@linaro.org>
 

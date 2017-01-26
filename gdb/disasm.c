@@ -135,7 +135,10 @@ void
 gdb_disassembler::dis_asm_memory_error (int err, bfd_vma memaddr,
 					struct disassemble_info *info)
 {
-  memory_error (TARGET_XFER_E_IO, memaddr);
+  gdb_disassembler *self
+    = static_cast<gdb_disassembler *>(info->application_data);
+
+  self->m_err_memaddr = memaddr;
 }
 
 /* Wrapper of print_address.  */
@@ -765,7 +768,8 @@ fprintf_disasm (void *stream, const char *format, ...)
 gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 				    struct ui_file *file,
 				    di_read_memory_ftype read_memory_func)
-  : m_gdbarch (gdbarch)
+  : m_gdbarch (gdbarch),
+    m_err_memaddr (0)
 {
   init_disassemble_info (&m_di, file, fprintf_disasm);
   m_di.flavour = bfd_target_unknown_flavour;
@@ -792,7 +796,12 @@ int
 gdb_disassembler::print_insn (CORE_ADDR memaddr,
 			      int *branch_delay_insns)
 {
+  m_err_memaddr = 0;
+
   int length = gdbarch_print_insn (arch (), memaddr, &m_di);
+
+  if (length < 0)
+    memory_error (TARGET_XFER_E_IO, m_err_memaddr);
 
   if (branch_delay_insns != NULL)
     {

@@ -1,4 +1,14 @@
 2017-01-26  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20939
+	* disasm.c (gdb_disassembler::dis_asm_memory_error): Don't
+	call memory_error, save memaddr instead.
+	(gdb_disassembler::print_insn): If gdbarch_print_insn returns
+	negative, cal memory_error.
+	* disasm.h (gdb_disassembler) <m_err_memaddr>: New field.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
 
 	* disasm-selftests.c (memory_error_test): New function.
 	(_initialize_disasm_selftests): Register memory_error_test.
