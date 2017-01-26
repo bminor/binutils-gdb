@@ -470,13 +470,17 @@ GCC_METHOD2 (gcc_type, build_pointer_to_member_type,
 	     gcc_type,			   /* Argument CLASS_TYPE.  */
 	     gcc_type) 			   /* Argument MEMBER_TYPE.  */
 
-/* Start a template parameter list, so that subsequent
-   build_type_template_parameter and build_value_template_parameter
-   calls create template parameters in the list.  The list is closed
-   by a build_decl call with GCC_CP_SYMBOL_FUNCTION or
-   GCC_CP_SYMBOL_CLASS, that, when the scope is a template parameter
-   list, closes the parameter list and declares a template function or
-   a template class with the parameter list.  */
+/* Start a template parameter list scope and enters it, so that
+   subsequent build_type_template_parameter and
+   build_value_template_parameter calls create template parameters in
+   the list.  The list is closed by a build_decl call with
+   GCC_CP_SYMBOL_FUNCTION or GCC_CP_SYMBOL_CLASS, that, when the scope
+   is a template parameter list, declares a template function or a
+   template class with the then-closed parameter list.  The scope in
+   which the new declaration is to be introduced by new_decl must be
+   entered before calling start_new_template_decl, and new_decl
+   returns to that scope, from the template parameter list scope,
+   before introducing the declaration.  */
 
 GCC_METHOD0 (int /* bool */, start_template_decl)
 
