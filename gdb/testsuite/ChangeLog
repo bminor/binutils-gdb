@@ -1,3 +1,15 @@
+2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.reverse/insn-reverse.c: Move arm and aarch64 code to their own
+	files.
+	(initialize): New function conditionally defined.
+	(testcases): Move within conditional block.
+	(main): Call initialize.
+	* gdb.reverse/insn-reverse-aarch64.c: New file, based on aarch64 bits
+	of gdb.reverse/insn-reverse.c.
+	* gdb.reverse/insn-reverse-arm.c: New file, based on arm bits of
+	gdb.reverse/insn-reverse.c.
+
 2017-01-26  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/all-architectures.exp.in (do_arch_tests): Test
