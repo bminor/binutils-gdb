@@ -1,5 +1,14 @@
 2017-01-26  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (SFILES): Add disasm-selftests.c and
+	selftest-arch.c.
+	(COMMON_OBS): Add disasm-selftests.o and selftest-arch.o.
+	* disasm-selftests.c: New file.
+	* selftest-arch.c: New file.
+	* selftest-arch.h: New file.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
 	* mep-tdep.c (mep_gdb_print_insn): Set info->arch
 	to bfd_arch_mep.  Don't return 0 if section is not
 	found.  Call print_insn_mep.
