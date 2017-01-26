@@ -1,5 +1,10 @@
 2017-01-26  Yao Qi  <yao.qi@linaro.org>
 
+	* disasm-selftests.c (memory_error_test): New function.
+	(_initialize_disasm_selftests): Register memory_error_test.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (SFILES): Add disasm-selftests.c and
 	selftest-arch.c.
 	(COMMON_OBS): Add disasm-selftests.o and selftest-arch.o.

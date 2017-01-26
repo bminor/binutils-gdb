@@ -164,6 +164,47 @@ print_one_insn_test (struct gdbarch *gdbarch)
   SELF_CHECK (di.print_insn (0) == len);
 }
 
+/* Test disassembly on memory error.  */
+
+static void
+memory_error_test (struct gdbarch *gdbarch)
+{
+  class gdb_disassembler_test : public gdb_disassembler
+  {
+  public:
+    gdb_disassembler_test (struct gdbarch *gdbarch)
+      : gdb_disassembler (gdbarch, null_stream (),
+			  gdb_disassembler_test::read_memory)
+    {
+    }
+
+    static int read_memory (bfd_vma memaddr, gdb_byte *myaddr,
+			    unsigned int len,
+			    struct disassemble_info *info)
+    {
+      /* Always return an error.  */
+      return -1;
+    }
+  };
+
+  gdb_disassembler_test di (gdbarch);
+  bool saw_memory_error = false;
+
+  TRY
+    {
+      di.print_insn (0);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error == MEMORY_ERROR)
+	saw_memory_error = true;
+    }
+  END_CATCH
+
+  /* Expect MEMORY_ERROR.  */
+  SELF_CHECK (saw_memory_error);
+}
+
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
@@ -175,5 +216,6 @@ _initialize_disasm_selftests (void)
 {
 #if GDB_SELF_TEST
   register_self_test_foreach_arch (selftests::print_one_insn_test);
+  register_self_test_foreach_arch (selftests::memory_error_test);
 #endif
 }
