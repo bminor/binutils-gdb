@@ -25,6 +25,9 @@ if ![runto main] {
     return -1
 }
 
+# Delete all target-supplied memory regions.
+delete_memory_regions
+
 delete_breakpoints
 
 # Probe for hardware stepping.

@@ -28,6 +28,7 @@ if {$tool == ""} {
 load_lib libgloss.exp
 load_lib cache.exp
 load_lib gdb-utils.exp
+load_lib memory.exp
 
 global GDB
 
