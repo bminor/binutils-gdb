@@ -1,5 +1,10 @@
 2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/non-stop.exp: Add '-ex "set non-stop on"' to
+	GDBFLAGS.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/buffer-size.exp: Add unsupported/untested message if
 	the test is skipped.
 	* gdb.btrace/data.exp: Likewise.
