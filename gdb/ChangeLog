@@ -1,3 +1,9 @@
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* mep-tdep.c (mep_gdb_print_insn): Set info->arch
+	to bfd_arch_mep.  Don't return 0 if section is not
+	found.  Call print_insn_mep.
+
 2017-01-26  Pedro Alves  <palves@redhat.com>
 	    Yao Qi  <yao.qi@linaro.org>
 
