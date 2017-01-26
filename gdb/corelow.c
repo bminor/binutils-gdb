@@ -515,6 +515,8 @@ get_core_register_section (struct regcache *regcache,
   struct bfd_section *section;
   bfd_size_type size;
   char *contents;
+  bool variable_size_section = (regset != NULL
+				&& regset->flags & REGSET_VARIABLE_SIZE);
 
   xfree (section_name);
 
@@ -539,7 +541,7 @@ get_core_register_section (struct regcache *regcache,
       warning (_("Section `%s' in core file too small."), section_name);
       return;
     }
-  if (size != min_size && !(regset->flags & REGSET_VARIABLE_SIZE))
+  if (size != min_size && !variable_size_section)
     {
       warning (_("Unexpected size of section `%s' in core file."),
 	       section_name);
