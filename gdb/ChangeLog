@@ -1,3 +1,8 @@
+2017-02-08  Jerome Guitton  <guitton@adacore.com>
+
+	* cli-decode.c (lookup_cmd_1, lookup_cmd_composition):
+	Remove case-insensitive search.
+
 2017-02-07  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-tdep.c (sparc32_gdbarch_init): Do not place a + operator
