@@ -1,3 +1,10 @@
+2017-01-27  Alexis Deruell  <alexis.deruelle@gmail.com>
+
+	PR 21056
+	* tic6x-dis.c (print_insn_tic6x): Correct displaying of parallel
+	instructions when the previous fetch packet ends with a 32-bit
+	instruction.
+
 2017-01-24  Dimitar Dimitrov  <dimitar@dinux.eu>
 
         * pru-opc.c: Remove vague reference to a future GDB port.

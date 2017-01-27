@@ -1,3 +1,9 @@
+2017-01-27  Alexis Deruell  <alexis.deruelle@gmail.com>
+
+	PR 21056
+	* testsuite/gas/tic6x/insns16-parallel.s: New test case.
+	* testsuite/gas/tic6x/insns16-parallel.d: New test driver.
+
 2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* configure.tgt (aarch64*-*-rtems*): Remove.

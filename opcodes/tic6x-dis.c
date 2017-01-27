@@ -510,8 +510,17 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 
 	      prev_header_based
 		= tic6x_check_fetch_packet_header (fp_prev, &prev_header, info);
-	      if (prev_header_based && prev_header.word_compact[6])
-		p_bit = prev_header.p_bits[13];
+	      if (prev_header_based)
+		{
+		  if (prev_header.word_compact[6])
+		    p_bit = prev_header.p_bits[13];
+		  else
+		    {
+		      unsigned int prev_opcode = tic6x_extract_32 (fp_prev + 24,
+								   info);
+		      p_bit = (prev_opcode & 0x1) ? TRUE : FALSE;
+		    }
+		}
 	      else
 		{
 		  unsigned int prev_opcode = tic6x_extract_32 (fp_prev + 28,
