@@ -1,3 +1,8 @@
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Simplify logic
+	that checks validity of a register number.
+
 2017-01-27  Kees Cook  <keescook@google.com>
 
 	* gdb/arm-linux-nat.c (arm_linux_fetch_inferior_registers): Call

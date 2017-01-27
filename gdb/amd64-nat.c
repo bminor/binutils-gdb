@@ -65,10 +65,10 @@ amd64_native_gregset_reg_offset (struct gdbarch *gdbarch, int regnum)
   if (num_regs > gdbarch_num_regs (gdbarch))
     num_regs = gdbarch_num_regs (gdbarch);
 
-  if (regnum < num_regs && regnum < gdbarch_num_regs (gdbarch))
-    return reg_offset[regnum];
+  if (regnum >= num_regs)
+    return -1;
 
-  return -1;
+  return reg_offset[regnum];
 }
 
 /* Return whether the native general-purpose register set supplies
