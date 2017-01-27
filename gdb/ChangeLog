@@ -1,3 +1,10 @@
+2017-01-27  Kees Cook  <keescook@google.com>
+
+	* gdb/arm-linux-nat.c (arm_linux_fetch_inferior_registers): Call
+	fetch_fpregs if target has fpa registers.
+	(arm_linux_store_inferior_registers): Call store_fpregs if target
+	has fpa registers.
+
 2017-01-26  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* cris-tdep.c (cris_gdbarch_init): Remove check for
