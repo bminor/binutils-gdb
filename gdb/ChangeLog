@@ -1,5 +1,10 @@
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* amd64-linux-tdep.h (AMD64_LINUX_ORIG_RAX_REGNUM):
+	Set to AMD64_NUM_REGS.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* amd64-nat.c (amd64_native_gregset_reg_offset): Simplify logic
 	that checks validity of a register number.
 
