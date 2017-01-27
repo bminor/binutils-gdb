@@ -1,3 +1,7 @@
+2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* lib/memory.exp: Remove spurious empty newlines.
+
 2017-01-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/py-bad-printers.exp: Load python file using "source".
