@@ -1,3 +1,8 @@
+2017-01-27  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-elf/elf.exp ("pr20995-2", "Build pr20995-2.so"): XFAIL on
+	arm*-*-eabi*.
+
 2017-01-27  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
 	    Nick Clifton  <nickc@redhat.com>
 

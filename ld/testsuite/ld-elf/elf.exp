@@ -142,6 +142,10 @@ if { [check_shared_lib_support] } then {
 	    {pr20995b.s} {} "pr20995.so"}
     }
     setup_xfail "tic6x-*-*"
+    # xfail on arm*-*-eabi*.  The list can be enlarged to those targets that
+    # don't support GNU_RELRO.  For more details, please see discussions at:
+    #   https://sourceware.org/ml/binutils/2017-01/msg00441.html
+    setup_xfail "arm*-*-eabi*"
     run_ld_link_tests {
 	{"Build pr20995-2.so"
 	    "-shared -z relro" "" ""
@@ -154,7 +158,9 @@ if { [check_shared_lib_support] } then {
 	    "pr20995" \
 	    "" "tmpdir/pr20995.so" "$AFLAGS_NONPIC" \
 	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995"]]
-    setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
+    # xfail on arm*-*-eabi* is particularly because of no support of GNU_RELRO.
+    # Please see the link above for details.
+    setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*" "arm*-*-eabi*"
     run_ld_link_tests [list \
 	[list \
 	    "pr20995-2" \
