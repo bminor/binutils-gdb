@@ -54,7 +54,7 @@
 #include "features/i386/i386-avx.c"
 #include "features/i386/i386-mpx.c"
 #include "features/i386/i386-avx-mpx.c"
-#include "features/i386/i386-avx512.c"
+#include "features/i386/i386-avx-mpx-avx512.c"
 #include "features/i386/i386-mmx.c"
 
 #include "ax.h"
@@ -4555,11 +4555,11 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   ymm_avx512_regnum_p = i386_ymm_avx512_regnum_p (gdbarch, regnum);
   zmm_regnum_p = i386_zmm_regnum_p (gdbarch, regnum);
 
-  avx512_p = ((tdep->xcr0 & X86_XSTATE_AVX512_MASK)
-	      == X86_XSTATE_AVX512_MASK);
-  avx_p = ((tdep->xcr0 & X86_XSTATE_AVX512_MASK)
+  avx512_p = ((tdep->xcr0 & X86_XSTATE_AVX_AVX512_MASK)
+	      == X86_XSTATE_AVX_AVX512_MASK);
+  avx_p = ((tdep->xcr0 & X86_XSTATE_AVX_AVX512_MASK)
 	   == X86_XSTATE_AVX_MASK) && !avx512_p;
-  sse_p = ((tdep->xcr0 & X86_XSTATE_AVX512_MASK)
+  sse_p = ((tdep->xcr0 & X86_XSTATE_AVX_AVX512_MASK)
 	   == X86_XSTATE_SSE_MASK) && !avx512_p && ! avx_p;
 
   if (group == vector_reggroup)
@@ -8232,7 +8232,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
       if (!feature_avx)
 	return 0;
 
-      tdep->xcr0 = X86_XSTATE_MPX_AVX512_MASK;
+      tdep->xcr0 = X86_XSTATE_AVX_MPX_AVX512_MASK;
 
       /* It may have been set by OSABI initialization function.  */
       if (tdep->k0_regnum < 0)
@@ -8707,9 +8707,9 @@ i386_target_description (uint64_t xcr0)
 {
   switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
-    case X86_XSTATE_MPX_AVX512_MASK:
-    case X86_XSTATE_AVX512_MASK:
-      return tdesc_i386_avx512;
+    case X86_XSTATE_AVX_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX_AVX512_MASK:
+      return tdesc_i386_avx_mpx_avx512;
     case X86_XSTATE_AVX_MPX_MASK:
       return tdesc_i386_avx_mpx;
     case X86_XSTATE_MPX_MASK:
@@ -9051,7 +9051,7 @@ Show Intel Memory Protection Extensions specific variables."),
   initialize_tdesc_i386_avx ();
   initialize_tdesc_i386_mpx ();
   initialize_tdesc_i386_avx_mpx ();
-  initialize_tdesc_i386_avx512 ();
+  initialize_tdesc_i386_avx_mpx_avx512 ();
 
   /* Tell remote stub that we support XML target description.  */
   register_remote_support_xml ("i386");

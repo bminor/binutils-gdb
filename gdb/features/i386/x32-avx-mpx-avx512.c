@@ -1,20 +1,20 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
-  Original: amd64-avx512.xml */
+  Original: x32-avx-mpx-avx512.xml */
 
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_amd64_avx512;
+struct target_desc *tdesc_x32_avx_mpx_avx512;
 static void
-initialize_tdesc_amd64_avx512 (void)
+initialize_tdesc_x32_avx_mpx_avx512 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
   struct tdesc_type *field_type;
   struct tdesc_type *type;
 
-  set_tdesc_architecture (result, bfd_scan_arch ("i386:x86-64"));
+  set_tdesc_architecture (result, bfd_scan_arch ("i386:x64-32"));
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core");
   type = tdesc_create_flags (feature, "i386_eflags", 4);
@@ -42,8 +42,8 @@ initialize_tdesc_amd64_avx512 (void)
   tdesc_create_reg (feature, "rdx", 3, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "rsi", 4, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "rdi", 5, 1, NULL, 64, "int64");
-  tdesc_create_reg (feature, "rbp", 6, 1, NULL, 64, "data_ptr");
-  tdesc_create_reg (feature, "rsp", 7, 1, NULL, 64, "data_ptr");
+  tdesc_create_reg (feature, "rbp", 6, 1, NULL, 64, "int64");
+  tdesc_create_reg (feature, "rsp", 7, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "r8", 8, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "r9", 9, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "r10", 10, 1, NULL, 64, "int64");
@@ -52,7 +52,7 @@ initialize_tdesc_amd64_avx512 (void)
   tdesc_create_reg (feature, "r13", 13, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "r14", 14, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "r15", 15, 1, NULL, 64, "int64");
-  tdesc_create_reg (feature, "rip", 16, 1, NULL, 64, "code_ptr");
+  tdesc_create_reg (feature, "rip", 16, 1, NULL, 64, "uint64");
   tdesc_create_reg (feature, "eflags", 17, 1, NULL, 32, "i386_eflags");
   tdesc_create_reg (feature, "cs", 18, 1, NULL, 32, "int32");
   tdesc_create_reg (feature, "ss", 19, 1, NULL, 32, "int32");
@@ -313,5 +313,5 @@ initialize_tdesc_amd64_avx512 (void)
   tdesc_create_reg (feature, "zmm30h", 149, 1, NULL, 256, "v2ui128");
   tdesc_create_reg (feature, "zmm31h", 150, 1, NULL, 256, "v2ui128");
 
-  tdesc_amd64_avx512 = result;
+  tdesc_x32_avx_mpx_avx512 = result;
 }

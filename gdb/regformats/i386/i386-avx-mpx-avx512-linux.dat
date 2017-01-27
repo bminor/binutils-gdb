@@ -1,7 +1,7 @@
 # THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
-# Generated from: i386/i386-avx512.xml
-name:i386_avx512
-xmltarget:i386-avx512.xml
+# Generated from: i386/i386-avx-mpx-avx512-linux.xml
+name:i386_avx_mpx_avx512_linux
+xmltarget:i386-avx-mpx-avx512-linux.xml
 expedite:ebp,esp,eip
 32:eax
 32:ecx
@@ -44,6 +44,7 @@ expedite:ebp,esp,eip
 128:xmm6
 128:xmm7
 32:mxcsr
+32:orig_eax
 128:ymm0h
 128:ymm1h
 128:ymm2h

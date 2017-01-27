@@ -50,7 +50,7 @@
 #include "features/i386/i386-mpx-linux.c"
 #include "features/i386/i386-avx-mpx-linux.c"
 #include "features/i386/i386-avx-linux.c"
-#include "features/i386/i386-avx512-linux.c"
+#include "features/i386/i386-avx-mpx-avx512-linux.c"
 
 /* Return non-zero, when the register is in the corresponding register
    group.  Put the LINUX_ORIG_EAX register in the system group.  */
@@ -688,9 +688,9 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 
   switch ((xcr0 & X86_XSTATE_ALL_MASK))
     {
-    case X86_XSTATE_MPX_AVX512_MASK:
-    case X86_XSTATE_AVX512_MASK:
-      return tdesc_i386_avx512_linux;
+    case X86_XSTATE_AVX_MPX_AVX512_MASK:
+    case X86_XSTATE_AVX_AVX512_MASK:
+      return tdesc_i386_avx_mpx_avx512_linux;
     case X86_XSTATE_MPX_MASK:
       return tdesc_i386_mpx_linux;
     case X86_XSTATE_AVX_MPX_MASK:
@@ -1086,5 +1086,5 @@ _initialize_i386_linux_tdep (void)
   initialize_tdesc_i386_avx_linux ();
   initialize_tdesc_i386_mpx_linux ();
   initialize_tdesc_i386_avx_mpx_linux ();
-  initialize_tdesc_i386_avx512_linux ();
+  initialize_tdesc_i386_avx_mpx_avx512_linux ();
 }

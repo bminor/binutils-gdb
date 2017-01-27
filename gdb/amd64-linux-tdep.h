@@ -36,11 +36,11 @@ extern struct target_desc *tdesc_amd64_linux;
 extern struct target_desc *tdesc_amd64_avx_linux;
 extern struct target_desc *tdesc_amd64_mpx_linux;
 extern struct target_desc *tdesc_amd64_avx_mpx_linux;
-extern struct target_desc *tdesc_amd64_avx512_linux;
+extern struct target_desc *tdesc_amd64_avx_mpx_avx512_linux;
 
 extern struct target_desc *tdesc_x32_linux;
 extern struct target_desc *tdesc_x32_avx_linux;
-extern struct target_desc *tdesc_x32_avx512_linux;
+extern struct target_desc *tdesc_x32_avx_mpx_avx512_linux;
 
 /* Enum that defines the syscall identifiers for amd64 linux.
    Used for process record/replay, these will be translated into

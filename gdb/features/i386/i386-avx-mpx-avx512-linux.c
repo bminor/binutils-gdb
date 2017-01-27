@@ -1,13 +1,13 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
-  Original: i386-avx512-linux.xml */
+  Original: i386-avx-mpx-avx512-linux.xml */
 
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_i386_avx512_linux;
+struct target_desc *tdesc_i386_avx_mpx_avx512_linux;
 static void
-initialize_tdesc_i386_avx512_linux (void)
+initialize_tdesc_i386_avx_mpx_avx512_linux (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
@@ -204,5 +204,5 @@ initialize_tdesc_i386_avx512_linux (void)
   tdesc_create_reg (feature, "zmm6h", 70, 1, NULL, 256, "v2ui128");
   tdesc_create_reg (feature, "zmm7h", 71, 1, NULL, 256, "v2ui128");
 
-  tdesc_i386_avx512_linux = result;
+  tdesc_i386_avx_mpx_avx512_linux = result;
 }

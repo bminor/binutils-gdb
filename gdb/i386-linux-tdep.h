@@ -48,7 +48,7 @@ extern struct target_desc *tdesc_i386_mmx_linux;
 extern struct target_desc *tdesc_i386_avx_linux;
 extern struct target_desc *tdesc_i386_mpx_linux;
 extern struct target_desc *tdesc_i386_avx_mpx_linux;
-extern struct target_desc *tdesc_i386_avx512_linux;
+extern struct target_desc *tdesc_i386_avx_mpx_avx512_linux;
 
 /* Format of XSAVE extended state is:
  	struct

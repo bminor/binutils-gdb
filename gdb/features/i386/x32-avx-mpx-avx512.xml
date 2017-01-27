@@ -5,7 +5,7 @@
      are permitted in any medium without royalty provided the copyright
      notice and this notice are preserved.  -->
 
-<!-- X32 with AVX512 -->
+<!-- X32 with AVX, MPX, AVX512 -->
 
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>

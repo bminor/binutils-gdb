@@ -1,13 +1,13 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
-  Original: amd64-avx512-linux.xml */
+  Original: amd64-avx-mpx-avx512-linux.xml */
 
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_amd64_avx512_linux;
+struct target_desc *tdesc_amd64_avx_mpx_avx512_linux;
 static void
-initialize_tdesc_amd64_avx512_linux (void)
+initialize_tdesc_amd64_avx_mpx_avx512_linux (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
@@ -322,5 +322,5 @@ initialize_tdesc_amd64_avx512_linux (void)
   tdesc_create_reg (feature, "zmm30h", 152, 1, NULL, 256, "v2ui128");
   tdesc_create_reg (feature, "zmm31h", 153, 1, NULL, 256, "v2ui128");
 
-  tdesc_amd64_avx512_linux = result;
+  tdesc_amd64_avx_mpx_avx512_linux = result;
 }
