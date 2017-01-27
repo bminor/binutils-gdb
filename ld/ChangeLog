@@ -1,3 +1,9 @@
+2017-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: New Serbian translation.
+	* configure.ac (ALL_LINGUAS): Add sr.
+	* configure: Regenerate.
+
 2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* configure.tgt (arm-*-rtems*): Move to (arm*-*-eabi*).
