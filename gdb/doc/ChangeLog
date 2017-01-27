@@ -1,3 +1,8 @@
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (i386 Features): Add system segment registers
+	as feature.
+
 2017-01-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python.texi (Events In Python): Fix typo.

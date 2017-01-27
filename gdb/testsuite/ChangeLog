@@ -1,3 +1,8 @@
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/amd64-gs_base.c: New file.
+	* gdb.arch/amd64-gs_base.exp: New file.
+
 2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
 
 	* lib/memory.exp: Remove spurious empty newlines.

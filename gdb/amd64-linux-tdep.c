@@ -103,6 +103,9 @@ int amd64_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+
+  /* End of hardware registers */
+  21 * 8, 22 * 8,		      /* fs_base and gs_base.  */
   15 * 8			      /* "orig_rax" */
 };
 
@@ -284,7 +287,9 @@ static int
 amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				 struct reggroup *group)
 { 
-  if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM)
+  if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM
+      || regnum == AMD64_FSBASE_REGNUM
+      || regnum == AMD64_GSBASE_REGNUM)
     return (group == system_reggroup
             || group == save_reggroup
             || group == restore_reggroup);

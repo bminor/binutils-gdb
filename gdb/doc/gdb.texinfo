@@ -41180,6 +41180,9 @@ Memory Protection Extension (MPX).  It should describe the following registers:
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
 describe a single register, @samp{orig_eax}.
 
+The @samp{org.gnu.gdb.i386.segments} feature is optional.  It should
+describe two system registers: @samp{fs_base} and @samp{gs_base}.
+
 The @samp{org.gnu.gdb.i386.avx512} feature is optional and requires the
 @samp{org.gnu.gdb.i386.avx} feature.  It should
 describe additional @sc{xmm} registers:

@@ -1,4 +1,54 @@
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+	    Richard Henderson  <rth@redhat.com>
+
+	* amd64-linux-nat.c (PTRACE_ARCH_PRCTL): New define.
+	(amd64_linux_fetch_inferior_registers): Add case to fetch FS_BASE
+	GS_BASE for older kernels.
+	(amd64_linux_store_inferior_registers): Add case to store FS_BASE
+	GS_BASE for older kernels.
+	* amd64-linux-tdep.c (amd64_linux_gregset_reg_offset): Add FS_BASE
+	and GS_BASE to the offset table.
+	(amd64_linux_register_reggroup_p): Add FS_BASE and GS_BASE to the
+	system register group.
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Implements case
+	for older kernels.
+	* amd64-tdep.c (amd64_init_abi): Add segment registers for the
+	amd64 ABI.
+	* amd64-tdep.h (amd64_regnum): Add AMD64_FSBASE_REGNUM and
+	AMD64_GSBASE_REGNUM.
+	(AMD64_NUM_REGS): Set to AMD64_GSBASE_REGNUM + 1.
+	* features/Makefile (amd64-linux.dat, amd64-avx-linux.dat)
+	(amd64-mpx-linux.dat, amd64-avx512-linux.dat, x32-linux.dat)
+	(x32-avx-linux.dat, x32-avx512-linux.dat): Add
+	i386/64bit-segments.xml in those rules.
+	* features/i386/64bit-segments.xml: New file.
+	* features/i386/amd64-avx-mpx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx512-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-mpx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/x32-avx512-linux.xml: Add 64bit-segments.xml.
+	* features/i386/x32-avx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-linux.c: Regenerated.
+	* features/i386/amd64-avx-mpx-linux.c: Regenerated.
+	* features/i386/amd64-avx-mpx.c: Regenerated.
+	* features/i386/amd64-avx512-linux.c: Regenerated.
+	* features/i386/amd64-linux.c: Regenerated.
+	* features/i386/amd64-mpx-linux.c: Regenerated.
+	* features/i386/i386-avx-mpx-linux.c: Regenerated.
+	* features/i386/i386-avx-mpx.c: Regenerated.
+	* features/i386/x32-avx-linux.c: Regenerated.
+	* features/i386/x32-avx512-linux.c: Regenerated.
+	* regformats/i386/amd64-avx-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx512-linux.dat: Regenerated.
+	* regformats/i386/amd64-linux.dat: Regenerated.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerated.
+	* regformats/i386/x32-avx-linux.dat: Regenerated.
+	* regformats/i386/x32-avx512-linux.dat: Regenerated.
+	* regformats/i386/x32-linux.dat: Regenerated.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* amd64-linux-tdep.h (AMD64_LINUX_ORIG_RAX_REGNUM):
 	Set to AMD64_NUM_REGS.

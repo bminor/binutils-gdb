@@ -259,7 +259,7 @@ $(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
 			       i386/32bit-linux.xml
 $(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml
 $(outdir)/i386/amd64-linux.dat: i386/64bit-core.xml i386/64bit-sse.xml \
-			        i386/64bit-linux.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/i386-avx.dat: i386/32bit-core.xml i386/32bit-avx.xml
 $(outdir)/i386/i386-avx-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
 			       i386/32bit-linux.xml
@@ -279,11 +279,11 @@ $(outdir)/i386/i386-mmx.dat: i386/32bit-core.xml
 $(outdir)/i386/i386-mmx-linux.dat: i386/32bit-core.xml i386/32bit-linux.xml
 $(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml
 $(outdir)/i386/amd64-avx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-				    i386/64bit-linux.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-linux.xml i386/64bit-mpx.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-avx-mpx-linux.dat: i386/64bit-core.xml \
-			       i386/64bit-linux.xml i386/64bit-mpx.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-mpx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml
 $(outdir)/i386/amd64-avx-mpx.dat: i386/64bit-core.xml \
@@ -292,17 +292,18 @@ $(outdir)/i386/amd64-avx512.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml i386/64bit-avx512.xml
 $(outdir)/i386/amd64-avx512-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml i386/64bit-avx512.xml \
-			       i386/64bit-linux.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/x32.dat: i386/x32-core.xml i386/64bit-sse.xml
 $(outdir)/i386/x32-linux.dat: i386/x32-core.xml i386/64bit-sse.xml \
-			      i386/64bit-linux.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/x32-avx.dat: i386/x32-core.xml i386/64bit-avx.xml
 $(outdir)/i386/x32-avx-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
-				  i386/64bit-linux.xml
+			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/x32-avx512.dat: i386/x32-core.xml i386/64bit-avx.xml \
 			       i386/64bit-mpx.xml i386/64bit-avx512.xml
 $(outdir)/i386/x32-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
-			       i386/64bit-mpx.xml i386/64bit-avx512.xml i386/64bit-linux.xml
+			       i386/64bit-mpx.xml i386/64bit-avx512.xml \
+			       i386/64bit-linux.xml i386/64bit-segments.xml
 
 # 'all' doesn't build the C files, so don't delete them in 'clean'
 # either.
