@@ -1,5 +1,8 @@
 2017-01-27  Hans-Peter Nilsson  <hp@axis.com>
 
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Remove now unused
+	local variable dynobj.
+
 	PR ld/20995
 	* elf32-cris.c (elf_cris_size_dynamic_sections): Handle sdynrelro.
 	(elf_cris_adjust_dynamic_symbol): Place variables copied into the

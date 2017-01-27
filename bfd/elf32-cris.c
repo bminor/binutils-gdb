@@ -2057,7 +2057,6 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
 				Elf_Internal_Sym *sym)
 {
   struct elf_cris_link_hash_table * htab;
-  bfd *dynobj;
 
   /* Where in the plt entry to put values.  */
   int plt_off1 = 2, plt_off2 = 10, plt_off3 = 16;
@@ -2088,8 +2087,6 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
       plt_entry = elf_cris_plt_entry_v32;
       plt_pic_entry = elf_cris_pic_plt_entry_v32;
     }
-
-  dynobj = htab->root.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
