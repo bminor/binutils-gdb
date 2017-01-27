@@ -1,3 +1,12 @@
+2017-01-27  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 20343
+	* doc/binutils.texi (ar): Extend documentation of the --plugin
+	option.  Include a description of where the plugins should be
+	located.
+	(nm): Likewise.
+
 2017-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Bernd to Past Maintainers section.
