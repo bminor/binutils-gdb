@@ -3,7 +3,7 @@
 	PR binutils/19935
 	Fix long-standing buglet and fallout from now-default initfini-array.
 	* emulparams/criself.sh (USER_LABEL_PREFIX): Define.
-	(OTHER_READONLY_SECTIONS, ENTRY): Delete now-redundant defines.
+	(OTHER_END_SYMBOLS, ENTRY): Delete now-redundant defines.
 
 2017-01-27  Jiong Wang  <jiong.wang@arm.com>
 
