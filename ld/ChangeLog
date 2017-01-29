@@ -1,3 +1,9 @@
+2017-01-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	Fix long-standing buglet and fallout from now-default initfini-array.
+	* emulparams/criself.sh (USER_LABEL_PREFIX): Define.
+	(OTHER_READONLY_SECTIONS, ENTRY): Delete now-redunant defines.
+
 2017-01-27  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-elf/elf.exp ("pr20995-2", "Build pr20995-2.so"): XFAIL on
