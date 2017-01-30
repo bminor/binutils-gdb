@@ -1,3 +1,17 @@
+2020-10-07  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-linux-tdep.h: New file.
+	* arc-linux-tdep.c (arc_linux_core_reg_offsets,
+	arc_linux_supply_gregset, arc_linux_supply_v2_regset,
+	arc_linux_collect_gregset, arc_linux_collect_v2_regset,
+	arc_linux_gregset, arc_linux_v2_regset,
+	arc_linux_iterate_over_regset_sections,
+	arc_linux_core_read_description): Implement.
+	(arc_linux_init_osabi): Set iterate_over_regset_sections.
+	* arc-tdep.h (ARC_OFFSET_NO_REGISTER): Declare.
+	(arc_gdbarch_features_create): Add.
+	* arc-tdep.c (arc_gdbarch_features_create): Not static anymore.
+
 2020-10-07  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arch/arc.h: Rename "arc_gdbarch_features" to

@@ -1883,10 +1883,9 @@ mach_type_to_arc_isa (const unsigned long mach)
     }
 }
 
-/* Common construction code for ARC_ARCH_FEATURES struct.  If there
-   is no ABFD, then a FEATURE with default values is returned.  */
+/* See arc-tdep.h.  */
 
-static arc_arch_features
+arc_arch_features
 arc_arch_features_create (const bfd *abfd, const unsigned long mach)
 {
   /* Use 4 as a fallback value.  */
