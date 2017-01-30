@@ -1,3 +1,14 @@
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/branch-local-2.d: New test.
+	* testsuite/gas/mips/branch-local-3.d: New test.
+	* testsuite/gas/mips/branch-local-n32-2.d: New test.
+	* testsuite/gas/mips/branch-local-n32-3.d: New test.
+	* testsuite/gas/mips/branch-local-n64-2.d: New test.
+	* testsuite/gas/mips/branch-local-n64-3.d: New test.
+	* testsuite/gas/mips/mips.exp: Fold corresponding list tests
+	into the new tests.
+
 2017-01-27  Alexis Deruell  <alexis.deruelle@gmail.com>
 
 	PR 21056
