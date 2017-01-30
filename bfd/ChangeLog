@@ -1,3 +1,17 @@
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.h (_bfd_mips_elf_insn32): Rename prototype to...
+	(_bfd_mips_elf_linker_flags): ... this.  Add another parameter.
+	* elfxx-mips.c (mips_elf_link_hash_table): Add
+	`ignore_branch_isa' member.
+	(mips_elf_perform_relocation): Do not treat an ISA mode mismatch
+	in branch relocation calculation as an error if
+	`ignore_branch_isa' has been set.
+	(_bfd_mips_elf_insn32): Rename to...
+	(_bfd_mips_elf_linker_flags): ... this.  Rename the `on'
+	parameter to `insn32' and add an `ignore_branch_isa' parameter.
+	Handle the new parameter.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828

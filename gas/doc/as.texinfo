@@ -416,6 +416,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips32r3}] [@b{-mips32r5}] [@b{-mips32r6}] [@b{-mips64}] [@b{-mips64r2}]
    [@b{-mips64r3}] [@b{-mips64r5}] [@b{-mips64r6}]
    [@b{-construct-floats}] [@b{-no-construct-floats}]
+   [@b{-mignore-branch-isa}] [@b{-mno-ignore-branch-isa}]
    [@b{-mnan=@var{encoding}}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
    [@b{-mips16}] [@b{-no-mips16}]
@@ -1520,6 +1521,17 @@ selected, allowing construction of these floating point constants.
 The @samp{--relax-branch} option enables the relaxation of out-of-range
 branches.  By default @samp{--no-relax-branch} is selected, causing any
 out-of-range branches to produce an error.
+
+@item -mignore-branch-isa
+@itemx -mno-ignore-branch-isa
+Ignore branch checks for invalid transitions between ISA modes.  The
+semantics of branches does not provide for an ISA mode switch, so in
+most cases the ISA mode a branch has been encoded for has to be the
+same as the ISA mode of the branch's target label.  Therefore GAS has
+checks implemented that verify in branch assembly that the two ISA
+modes match.  @samp{-mignore-branch-isa} disables these checks.  By
+default @samp{-mno-ignore-branch-isa} is selected, causing any invalid
+branch requiring a transition between ISA modes to produce an error.
 
 @item -mnan=@var{encoding}
 Select between the IEEE 754-2008 (@option{-mnan=2008}) or the legacy

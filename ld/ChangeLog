@@ -1,3 +1,33 @@
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* emultempl/mipself.em (ignore_branch_isa): New variable.
+	(mips_create_output_section_statements): Rename
+	`_bfd_mips_elf_insn32' called to `_bfd_mips_elf_linker_flags',
+	add `ignore_branch_isa' argument.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA enum values.
+	(PARSE_AND_LIST_LONGOPTS): Add "ignore-branch-isa" and
+	"no-ignore-branch-isa" options.
+	(PARSE_AND_LIST_OPTIONS): Add `--ignore-branch-isa' and
+	`--no-ignore-branch-isa'.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA.
+
+	* ld.texinfo (Options specific to MIPS targets): Add
+	`--ignore-branch-isa' and `--no-ignore-branch-isa' options.
+	(ld and the MIPS family): Likewise.
+
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n64.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-r6-1: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-mips16: New
+	test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-micromips: New
+	test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* emultempl/solaris2.em (elf_solaris2_before_allocation): Do not
