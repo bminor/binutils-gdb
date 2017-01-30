@@ -1,3 +1,7 @@
+2017-02-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_new_switch): Preserve up link and flags.
+
 2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* symfile (_initialize_symfile): Add usage text to the load command's

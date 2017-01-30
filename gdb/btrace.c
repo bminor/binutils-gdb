@@ -448,9 +448,11 @@ ftrace_new_switch (struct btrace_function *prev,
 {
   struct btrace_function *bfun;
 
-  /* This is an unexplained function switch.  The call stack will likely
-     be wrong at this point.  */
+  /* This is an unexplained function switch.  We can't really be sure about the
+     call stack, yet the best I can think of right now is to preserve it.  */
   bfun = ftrace_new_function (prev, mfun, fun);
+  bfun->up = prev->up;
+  bfun->flags = prev->flags;
 
   ftrace_debug (bfun, "new switch");
 
