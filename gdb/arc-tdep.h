@@ -85,7 +85,9 @@ enum arc_regnum
     ARC_LP_END_REGNUM,
     /* Branch target address.  */
     ARC_BTA_REGNUM,
-    ARC_LAST_AUX_REGNUM = ARC_BTA_REGNUM,
+    /* Exception return address.  */
+    ARC_ERET_REGNUM,
+    ARC_LAST_AUX_REGNUM = ARC_ERET_REGNUM,
     ARC_LAST_REGNUM = ARC_LAST_AUX_REGNUM,
 
     /* Additional ABI constants.  */
@@ -104,6 +106,9 @@ enum arc_regnum
 #define ARC_STATUS32_L_MASK (1 << 12)
 /* STATUS32 register: current instruction is a delay slot.  */
 #define ARC_STATUS32_DE_MASK (1 << 6)
+
+/* Special value for register offset arrays.  */
+#define ARC_OFFSET_NO_REGISTER (-1)
 
 #define arc_print(fmt, args...) fprintf_unfiltered (gdb_stdlog, fmt, ##args)
 
@@ -181,5 +186,10 @@ CORE_ADDR arc_insn_get_branch_target (const struct arc_instruction &insn);
    instruction length with LIMM".  */
 
 CORE_ADDR arc_insn_get_linear_next_pc (const struct arc_instruction &insn);
+
+/* Create an arc_arch_features instance from the provided data.  */
+
+arc_arch_features arc_arch_features_create (const bfd *abfd,
+					    const unsigned long mach);
 
 #endif /* ARC_TDEP_H */
