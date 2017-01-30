@@ -41,7 +41,7 @@ struct gcc_cp_context;
 
 enum gcc_cp_api_version
 {
-  GCC_CP_FE_VERSION_0 = 0xffffffff-17
+  GCC_CP_FE_VERSION_0 = 0
 };
 
 /* Qualifiers.  */
