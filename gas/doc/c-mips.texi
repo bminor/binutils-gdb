@@ -472,6 +472,37 @@ Also no MIPS16 branches are ever relaxed.
 By default @samp{--no-relax-branch} is selected, causing any out-of-range
 branches to produce an error.
 
+@item -mignore-branch-isa
+@itemx -mno-ignore-branch-isa
+Ignore branch checks for invalid transitions between ISA modes.
+
+The semantics of branches does not provide for an ISA mode switch, so in
+most cases the ISA mode a branch has been encoded for has to be the same
+as the ISA mode of the branch's target label.  If the ISA modes do not
+match, then such a branch, if taken, will cause the ISA mode to remain
+unchanged and instructions that follow will be executed in the wrong ISA
+mode causing the program to misbehave or crash.
+
+In the case of the @code{BAL} instruction it may be possible to relax
+it to an equivalent @code{JALX} instruction so that the ISA mode is
+switched at the run time as required.  For other branches no relaxation
+is possible and therefore GAS has checks implemented that verify in
+branch assembly that the two ISA modes match, and report an error
+otherwise so that the problem with code can be diagnosed at the assembly
+time rather than at the run time.
+
+However some assembly code, including generated code produced by some
+versions of GCC, may incorrectly include branches to data labels, which
+appear to require a mode switch but are either dead or immediately
+followed by valid instructions encoded for the same ISA the branch has
+been encoded for.  While not strictly correct at the source level such
+code will execute as intended, so to help with these cases
+@samp{-mignore-branch-isa} is supported which disables ISA mode checks
+for branches.
+
+By default @samp{-mno-ignore-branch-isa} is selected, causing any invalid
+branch requiring a transition between ISA modes to produce an error.
+
 @cindex @option{-mnan=} command line option, MIPS
 @item -mnan=@var{encoding}
 This option indicates whether the source code uses the IEEE 2008

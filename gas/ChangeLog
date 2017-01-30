@@ -1,5 +1,33 @@
 2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (mips_ignore_branch_isa): New variable.
+	(options): Add OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA enum values.
+	(md_longopts): Add "mignore-branch-isa" and
+	"mno-ignore-branch-isa" options.
+	(md_parse_option): Handle OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA.
+	(fix_bad_cross_mode_branch_p): Return FALSE if
+	`mips_ignore_branch_isa' has been set.
+	(md_show_usage): Add `-mignore-branch-isa' and
+	`-mno-ignore-branch-isa'.
+
+	* doc/as.texinfo (Target MIPS options): Add
+	`-mignore-branch-isa' and `-mno-ignore-branch-isa' options.
+	(-mignore-branch-isa, -mno-ignore-branch-isa): New options.
+	* doc/c-mips.texi (MIPS Options): Add `-mignore-branch-isa' and
+	`-mno-ignore-branch-isa' options.
+
+	* testsuite/gas/mips/branch-local-ignore-2.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-3.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n32-2.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n32-3.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n64-2.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n64-3.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/branch-local-2.d: New test.
 	* testsuite/gas/mips/branch-local-3.d: New test.
 	* testsuite/gas/mips/branch-local-n32-2.d: New test.

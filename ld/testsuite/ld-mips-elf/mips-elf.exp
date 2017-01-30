@@ -216,17 +216,20 @@ run_dump_test "jalx-local" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "bal-jalx-addend" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "bal-jalx-local" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "bal-jalx-pic" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "bal-jalx-pic-ignore" [list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "jalx-addend-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "jalx-local-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "bal-jalx-addend-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "bal-jalx-local-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "bal-jalx-pic-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "bal-jalx-pic-ignore-n32" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "jalx-addend-n64" [list [list ld $abi_ldflags(n64)]]
     run_dump_test "jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
     run_dump_test "bal-jalx-addend-n64" [list [list ld $abi_ldflags(n64)]]
     run_dump_test "bal-jalx-local-n64" [list [list ld $abi_ldflags(n64)]]
     run_dump_test "bal-jalx-pic-n64" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "bal-jalx-pic-ignore-n64" [list [list ld $abi_ldflags(n64)]]
 }
 
 run_dump_test "unaligned-jalx-0" [list [list ld $abi_ldflags(o32)]]
@@ -262,13 +265,21 @@ run_dump_test "unaligned-branch" [list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "unaligned-branch-2" \
 					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-ignore-2" \
+					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-branch-r6-1" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-ignore-r6-1" \
 					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-branch-r6-2" \
 					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-branch-mips16" \
 					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-ignore-mips16" \
+					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-branch-micromips" \
+					[list [list ld $abi_ldflags(n32)]]
+    run_dump_test "unaligned-branch-ignore-micromips" \
 					[list [list ld $abi_ldflags(n32)]]
     run_dump_test "unaligned-jump" \
 					[list [list ld $abi_ldflags(n32)]]

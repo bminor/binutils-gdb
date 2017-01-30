@@ -3001,7 +3001,8 @@ Info entry for @file{ld}.
 @c man begin OPTIONS
 
 The following options are supported to control microMIPS instruction
-generation when linking for MIPS targets.
+generation and branch relocation checks for ISA mode transitions when
+linking for MIPS targets.
 
 @table @gcctabopt
 
@@ -3015,6 +3016,20 @@ or in relaxation.  If @samp{--insn32} is used, then the linker only uses
 32-bit instruction encodings.  By default or if @samp{--no-insn32} is
 used, all instruction encodings are used, including 16-bit ones where
 possible.
+
+@kindex --ignore-branch-isa
+@item --ignore-branch-isa
+@kindex --no-ignore-branch-isa
+@itemx --no-ignore-branch-isa
+These options control branch relocation checks for invalid ISA mode
+transitions.  If @samp{--ignore-branch-isa} is used, then the linker
+accepts any branch relocations and any ISA mode transition required
+is lost in relocation calculation, except for some cases of @code{BAL}
+instructions which meet relaxation conditions and are converted to
+equivalent @code{JALX} instructions as the associated relocation is
+calculated.  By default or if @samp{--no-ignore-branch-isa} is used
+a check is made causing the loss of an ISA mode transition to produce
+an error.
 
 @end table
 
@@ -7061,6 +7076,19 @@ in the PLT or lazy binding stubs, or in relaxation.  If @samp{--insn32} is
 used, then the linker only uses 32-bit instruction encodings.  By default
 or if @samp{--no-insn32} is used, all instruction encodings are used,
 including 16-bit ones where possible.
+
+@cindex MIPS branch relocation check control
+@kindex --ignore-branch-isa
+@kindex --no-ignore-branch-isa
+The @samp{--ignore-branch-isa} and @samp{--no-ignore-branch-isa} options
+control branch relocation checks for invalid ISA mode transitions.  If
+@samp{--ignore-branch-isa} is used, then the linker accepts any branch
+relocations and any ISA mode transition required is lost in relocation
+calculation, except for some cases of @code{BAL} instructions which meet
+relaxation conditions and are converted to equivalent @code{JALX}
+instructions as the associated relocation is calculated.  By default
+or if @samp{--no-ignore-branch-isa} is used a check is made causing
+the loss of an ISA mode transition to produce an error.
 
 @ifclear GENERIC
 @lowersections
