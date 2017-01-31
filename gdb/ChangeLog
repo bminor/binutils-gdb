@@ -1,5 +1,10 @@
 2017-01-31  Pedro Alves  <palves@redhat.com>
 
+	* stack.c (print_frame_args): Remove local mem_fileopen stream,
+	not used.
+
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
 	* varobj.c (varobj_value_get_print_value): Remove xstrdup call.
 
 2017-01-31  Pedro Alves  <palves@redhat.com>
