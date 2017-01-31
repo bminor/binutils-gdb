@@ -1,3 +1,8 @@
+2017-02-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-unique/unique.exp (Could not link a dynamic executable):
+	Append $board_cflags to link commands.
+
 2017-02-01  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
 
 	* testsuite/ld-scripts/print-memory-usage-1.l: Relax
