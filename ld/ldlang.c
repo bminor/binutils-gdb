@@ -2035,14 +2035,11 @@ static void
 lang_print_asneeded (void)
 {
   struct asneeded_minfo *m;
-  char buf[100];
 
   if (asneeded_list_head == NULL)
     return;
 
-  sprintf (buf, _("\nAs-needed library included "
-		  "to satisfy reference by file (symbol)\n\n"));
-  minfo ("%s", buf);
+  minfo (_("\nAs-needed library included to satisfy reference by file (symbol)\n\n"));
 
   for (m = asneeded_list_head; m != NULL; m = m->next)
     {
