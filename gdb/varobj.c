@@ -2432,7 +2432,7 @@ varobj_value_get_print_value (struct value *value,
 	  if (dynamic_varobj_has_child_method (var))
 	    {
 	      do_cleanups (old_chain);
-	      return xstrdup ("{...}");
+	      return "{...}";
 	    }
 
 	  if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
