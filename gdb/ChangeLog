@@ -1,5 +1,10 @@
 2017-01-31  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-interp.c (mi_breakpoint_created, mi_breakpoint_modified):
+	Fix typos.
+
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
 	* stack.c (print_frame_args): Remove local mem_fileopen stream,
 	not used.
 

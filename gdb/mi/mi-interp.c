@@ -900,7 +900,7 @@ mi_breakpoint_created (struct breakpoint *b)
       /* We want the output from gdb_breakpoint_query to go to
 	 mi->event_channel.  One approach would be to just call
 	 gdb_breakpoint_query, and then use mi_out_put to send the current
-	 content of mi_outout into mi->event_channel.  However, that will
+	 content of mi_uiout into mi->event_channel.  However, that will
 	 break if anything is output to mi_uiout prior to calling the
 	 breakpoint_created notifications.  So, we use
 	 ui_out_redirect.  */
@@ -979,7 +979,7 @@ mi_breakpoint_modified (struct breakpoint *b)
       /* We want the output from gdb_breakpoint_query to go to
 	 mi->event_channel.  One approach would be to just call
 	 gdb_breakpoint_query, and then use mi_out_put to send the current
-	 content of mi_outout into mi->event_channel.  However, that will
+	 content of mi_uiout into mi->event_channel.  However, that will
 	 break if anything is output to mi_uiout prior to calling the
 	 breakpoint_created notifications.  So, we use
 	 ui_out_redirect.  */
