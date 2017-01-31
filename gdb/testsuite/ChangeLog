@@ -1,5 +1,9 @@
 2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* lib/gdb.exp (gdb_skip_xml_tests): Error if GDB is running.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/enable.exp: Call gdb_exit before
 	skip_gdbserver_tests.
 
