@@ -1,3 +1,10 @@
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
+	* common/scoped_restore.h
+	(scoped_restore_tmpl::scoped_restore_tmpl): Template on T2, and
+	change the value's parameter type to T2.
+	(make_scoped_restore): Likewise.
+
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 	    Richard Henderson  <rth@redhat.com>
 
