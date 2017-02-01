@@ -2120,3 +2120,38 @@ proc istarget { target } {
     }
     return [istarget_ld $target]
 }
+
+# Return true if libdl is supported.
+
+proc check_libdl_available { } {
+    global libdl_available_saved
+    global CC
+
+    if {![info exists libdl_available_saved]} {
+        if { [which $CC] == 0 } {
+	    set libdl_available_saved 0
+	    return 0
+	}
+
+	set basename "tmpdir/dl_avail_test[pid]"
+	set src ${basename}.c
+	set output ${basename}.out
+	set f [open $src "w"]
+	# Sample test file.
+	puts $f "#include <dlfcn.h>"
+	puts $f "int main (void)"
+	puts $f "{"
+	puts $f "  dlopen (\"dummy.so\", RTLD_NOW);"
+	puts $f "  return 0; "
+	puts $f "}"
+	close $f
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
+	set libdl_available_saved [run_host_cmd_yesno "$CC" "$src -o $output -ldl"]
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+    }
+    return $libdl_available_saved
+}

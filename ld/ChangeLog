@@ -1,3 +1,12 @@
+2017-02-02  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/lib/ld-lib.exp (check_libdl_available): New function.
+	* testsuite/ld-elf/shared.exp (run_tests): Split tests which require
+	dlopen support into "dlopen_run_tests".  These tests include dl1*main
+	and dl6*main.
+	(dlopen_run_tests): New and only run it when check_libdl_available
+	returns true.  XFAIL on *-*-netbsdelf*.
+
 2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/vxworks-forced-local-1.d: Correct the
