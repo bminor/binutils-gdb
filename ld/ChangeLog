@@ -1,3 +1,8 @@
+2017-02-01  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
+	* testsuite/ld-scripts/print-memory-usage-1.l: Relax
+	check for digit in second decimal place.
+
 2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828
