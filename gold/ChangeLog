@@ -1,3 +1,10 @@
+2017-01-31  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21090
+	* x86_64.cc (Target_x86_64::can_convert_mov_to_lea): Add check
+	for predefined symbol.
+	(Target_x86_64::Relocate::relocate): Fix formatting.
+
 2017-01-23  Rahul Chaudhry  <rahulchaudhry@google.com>
 
         * testsuite/icf_safe_so_test.sh: Use "set -e".
