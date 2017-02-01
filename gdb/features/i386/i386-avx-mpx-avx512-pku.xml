@@ -5,7 +5,7 @@
      are permitted in any medium without royalty provided the copyright
      notice and this notice are preserved.  -->
 
-<!-- I386 with AVX, MPX, AVX512 -->
+<!-- I386 with AVX, MPX, AVX512, PKEYS -->
 
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
@@ -15,4 +15,5 @@
   <xi:include href="32bit-avx.xml"/>
   <xi:include href="32bit-mpx.xml"/>
   <xi:include href="32bit-avx512.xml"/>
+  <xi:include href="32bit-pkeys.xml"/>
 </target>

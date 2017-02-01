@@ -264,8 +264,8 @@ get_ipa_tdesc (int idx)
       return tdesc_i386_avx_mpx_linux;
     case X86_TDESC_AVX_AVX512:
       return tdesc_i386_avx_avx512_linux;
-    case X86_TDESC_AVX_MPX_AVX512:
-      return tdesc_i386_avx_mpx_avx512_linux;
+    case X86_TDESC_AVX_MPX_AVX512_PKU:
+      return tdesc_i386_avx_mpx_avx512_pku_linux;
     default:
       internal_error (__FILE__, __LINE__,
 		      "unknown ipa tdesc index: %d", idx);
@@ -296,7 +296,7 @@ initialize_low_tracepoint (void)
   init_registers_i386_avx_linux ();
   init_registers_i386_mpx_linux ();
   init_registers_i386_avx_avx512_linux ();
-  init_registers_i386_avx_mpx_avx512_linux ();
+  init_registers_i386_avx_mpx_avx512_pku_linux ();
 
   initialize_fast_tracepoint_trampoline_buffer ();
 }

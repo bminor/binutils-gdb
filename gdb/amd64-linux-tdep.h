@@ -26,7 +26,7 @@
 /* Register number for the "orig_rax" register.  If this register
    contains a value >= 0 it is interpreted as the system call number
    that the kernel is supposed to restart.  */
-#define AMD64_LINUX_ORIG_RAX_REGNUM AMD64_NUM_REGS
+#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_GSBASE_REGNUM + 1)
 
 /* Total number of registers for GNU/Linux.  */
 #define AMD64_LINUX_NUM_REGS (AMD64_LINUX_ORIG_RAX_REGNUM + 1)
@@ -37,7 +37,7 @@ extern struct target_desc *tdesc_amd64_avx_linux;
 extern struct target_desc *tdesc_amd64_mpx_linux;
 extern struct target_desc *tdesc_amd64_avx_mpx_linux;
 extern struct target_desc *tdesc_amd64_avx_avx512_linux;
-extern struct target_desc *tdesc_amd64_avx_mpx_avx512_linux;
+extern struct target_desc *tdesc_amd64_avx_mpx_avx512_pku_linux;
 
 extern struct target_desc *tdesc_x32_linux;
 extern struct target_desc *tdesc_x32_avx_linux;

@@ -41226,6 +41226,10 @@ describe the additional @sc{zmm} registers:
 @samp{zmm16h} through @samp{zmm31h}, only valid for amd64.
 @end itemize
 
+The @samp{org.gnu.gdb.i386.pkeys} feature is optional.  It should
+describe a single register, @samp{pkru}.  It is a 32-bit register
+valid for i386 and amd64.
+
 @node MicroBlaze Features
 @subsection MicroBlaze Features
 @cindex target descriptions, MicroBlaze features

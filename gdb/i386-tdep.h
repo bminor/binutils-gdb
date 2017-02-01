@@ -189,6 +189,15 @@ struct gdbarch_tdep
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
   const char **ymm_avx512_register_names;
 
+  /* Number of PKEYS registers.  */
+  int num_pkeys_regs;
+
+  /* Register number for PKRU register.  */
+  int pkru_regnum;
+
+  /* PKEYS register names.  */
+  const char **pkeys_register_names;
+
   /* Target description.  */
   const struct target_desc *tdesc;
 
@@ -284,7 +293,8 @@ enum i386_regnum
   I386_K0_REGNUM,		/* %k0 */
   I386_K7_REGNUM = I386_K0_REGNUM + 7,
   I386_ZMM0H_REGNUM,		/* %zmm0h */
-  I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7
+  I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7,
+  I386_PKRU_REGNUM
 };
 
 /* Register numbers of RECORD_REGMAP.  */
@@ -324,6 +334,7 @@ enum record_i386_regnum
 #define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
 #define I386_MPX_NUM_REGS	(I386_BNDSTATUS_REGNUM + 1)
 #define I386_AVX512_NUM_REGS	(I386_ZMM7H_REGNUM + 1)
+#define I386_PKEYS_NUM_REGS	(I386_PKRU_REGNUM + 1)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	64
@@ -345,6 +356,7 @@ extern int i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_k_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_zmm_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_zmmh_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern bool i386_pkru_regnum_p (struct gdbarch *gdbarch, int regnum);
 
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);

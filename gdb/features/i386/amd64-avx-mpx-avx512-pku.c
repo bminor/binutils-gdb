@@ -1,13 +1,13 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
-  Original: amd64-avx-mpx-avx512-linux.xml */
+  Original: amd64-avx-mpx-avx512-pku.xml */
 
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_amd64_avx_mpx_avx512_linux;
+struct target_desc *tdesc_amd64_avx_mpx_avx512_pku;
 static void
-initialize_tdesc_amd64_avx_mpx_avx512_linux (void)
+initialize_tdesc_amd64_avx_mpx_avx512_pku (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
@@ -15,8 +15,6 @@ initialize_tdesc_amd64_avx_mpx_avx512_linux (void)
   struct tdesc_type *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("i386:x86-64"));
-
-  set_tdesc_osabi (result, osabi_from_tdesc_string ("GNU/Linux"));
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core");
   type = tdesc_create_flags (feature, "i386_eflags", 4);
@@ -148,30 +146,23 @@ initialize_tdesc_amd64_avx_mpx_avx512_linux (void)
   tdesc_create_reg (feature, "xmm15", 55, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "mxcsr", 56, 1, "vector", 32, "i386_mxcsr");
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.linux");
-  tdesc_create_reg (feature, "orig_rax", 57, 1, NULL, 64, "int");
-
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.segments");
-  tdesc_create_reg (feature, "fs_base", 58, 1, NULL, 64, "int");
-  tdesc_create_reg (feature, "gs_base", 59, 1, NULL, 64, "int");
-
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx");
-  tdesc_create_reg (feature, "ymm0h", 60, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm1h", 61, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm2h", 62, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm3h", 63, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm4h", 64, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm5h", 65, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm6h", 66, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm7h", 67, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm8h", 68, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm9h", 69, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm10h", 70, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm11h", 71, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm12h", 72, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm13h", 73, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm14h", 74, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm15h", 75, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm0h", 57, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm1h", 58, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm2h", 59, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm3h", 60, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm4h", 61, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm5h", 62, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm6h", 63, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm7h", 64, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm8h", 65, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm9h", 66, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm10h", 67, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm11h", 68, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm12h", 69, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm13h", 70, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm14h", 71, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm15h", 72, 1, NULL, 128, "uint128");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.mpx");
   type = tdesc_create_struct (feature, "br128");
@@ -204,12 +195,12 @@ initialize_tdesc_amd64_avx_mpx_avx512_linux (void)
   field_type = tdesc_named_type (feature, "_bndcfgu");
   tdesc_add_field (type, "config", field_type);
 
-  tdesc_create_reg (feature, "bnd0raw", 76, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd1raw", 77, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd2raw", 78, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd3raw", 79, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bndcfgu", 80, 1, NULL, 64, "cfgu");
-  tdesc_create_reg (feature, "bndstatus", 81, 1, NULL, 64, "status");
+  tdesc_create_reg (feature, "bnd0raw", 73, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd1raw", 74, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd2raw", 75, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd3raw", 76, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bndcfgu", 77, 1, NULL, 64, "cfgu");
+  tdesc_create_reg (feature, "bndstatus", 78, 1, NULL, 64, "status");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx512");
   field_type = tdesc_named_type (feature, "ieee_single");
@@ -249,78 +240,81 @@ initialize_tdesc_amd64_avx_mpx_avx512_linux (void)
   field_type = tdesc_named_type (feature, "uint128");
   tdesc_create_vector (feature, "v2ui128", field_type, 2);
 
-  tdesc_create_reg (feature, "xmm16", 82, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm17", 83, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm18", 84, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm19", 85, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm20", 86, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm21", 87, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm22", 88, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm23", 89, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm24", 90, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm25", 91, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm26", 92, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm27", 93, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm28", 94, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm29", 95, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm30", 96, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "xmm31", 97, 1, NULL, 128, "vec128");
-  tdesc_create_reg (feature, "ymm16h", 98, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm17h", 99, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm18h", 100, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm19h", 101, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm20h", 102, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm21h", 103, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm22h", 104, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm23h", 105, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm24h", 106, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm25h", 107, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm26h", 108, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm27h", 109, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm28h", 110, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm29h", 111, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm30h", 112, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm31h", 113, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "k0", 114, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k1", 115, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k2", 116, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k3", 117, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k4", 118, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k5", 119, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k6", 120, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "k7", 121, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "zmm0h", 122, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm1h", 123, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm2h", 124, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm3h", 125, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm4h", 126, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm5h", 127, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm6h", 128, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm7h", 129, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm8h", 130, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm9h", 131, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm10h", 132, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm11h", 133, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm12h", 134, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm13h", 135, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm14h", 136, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm15h", 137, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm16h", 138, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm17h", 139, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm18h", 140, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm19h", 141, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm20h", 142, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm21h", 143, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm22h", 144, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm23h", 145, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm24h", 146, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm25h", 147, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm26h", 148, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm27h", 149, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm28h", 150, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm29h", 151, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm30h", 152, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm31h", 153, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "xmm16", 79, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm17", 80, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm18", 81, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm19", 82, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm20", 83, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm21", 84, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm22", 85, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm23", 86, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm24", 87, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm25", 88, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm26", 89, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm27", 90, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm28", 91, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm29", 92, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm30", 93, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "xmm31", 94, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "ymm16h", 95, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm17h", 96, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm18h", 97, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm19h", 98, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm20h", 99, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm21h", 100, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm22h", 101, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm23h", 102, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm24h", 103, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm25h", 104, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm26h", 105, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm27h", 106, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm28h", 107, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm29h", 108, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm30h", 109, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm31h", 110, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "k0", 111, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k1", 112, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k2", 113, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k3", 114, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k4", 115, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k5", 116, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k6", 117, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "k7", 118, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "zmm0h", 119, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm1h", 120, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm2h", 121, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm3h", 122, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm4h", 123, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm5h", 124, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm6h", 125, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm7h", 126, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm8h", 127, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm9h", 128, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm10h", 129, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm11h", 130, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm12h", 131, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm13h", 132, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm14h", 133, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm15h", 134, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm16h", 135, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm17h", 136, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm18h", 137, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm19h", 138, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm20h", 139, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm21h", 140, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm22h", 141, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm23h", 142, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm24h", 143, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm25h", 144, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm26h", 145, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm27h", 146, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm28h", 147, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm29h", 148, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm30h", 149, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm31h", 150, 1, NULL, 256, "v2ui128");
 
-  tdesc_amd64_avx_mpx_avx512_linux = result;
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.pkeys");
+  tdesc_create_reg (feature, "pkru", 151, 1, NULL, 32, "uint32");
+
+  tdesc_amd64_avx_mpx_avx512_pku = result;
 }

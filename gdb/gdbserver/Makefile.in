@@ -446,12 +446,12 @@ clean:
 	rm -f i386-mpx.c i386-mpx-linux.c
 	rm -f i386-avx-mpx.c i386-avx-mpx-linux.c
 	rm -f i386-avx-avx512.c i386-avx-avx512-linux.c
-	rm -f i386-avx-mpx-avx512.c i386-avx-mpx-avx512-linux.c
+	rm -f i386-avx-mpx-avx512-pku.c i386-avx-mpx-avx512-pku-linux.c
 	rm -f amd64-avx.c amd64-avx-linux.c
 	rm -f amd64-mpx.c amd64-mpx-linux.c
 	rm -f amd64-avx-mpx.c amd64-avx-mpx-linux.c
 	rm -f amd64-avx-avx512.c amd64-avx-avx512-linux.c
-	rm -f amd64-avx-mpx-avx512.c amd64-avx-mpx-avx512-linux.c
+	rm -f amd64-avx-mpx-avx512-pku.c amd64-avx-mpx-avx512-pku-linux.c
 	rm -f i386-mmx.c i386-mmx-linux.c
 	rm -f x32.c x32-linux.c
 	rm -f x32-avx.c x32-avx-linux.c
@@ -582,7 +582,7 @@ i386-avx-mpx-linux-ipa.o: i386-avx-mpx-linux.c
 i386-avx-avx512-linux-ipa.o: i386-avx-avx512-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-i386-avx-mpx-avx512-linux-ipa.o: i386-avx-mpx-avx512-linux.c
+i386-avx-mpx-avx512-pku-linux-ipa.o: i386-avx-mpx-avx512-pku-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 linux-i386-ipa.o: linux-i386-ipa.c
@@ -606,7 +606,7 @@ amd64-avx-mpx-linux-ipa.o: amd64-avx-mpx-linux.c
 amd64-avx-avx512-linux-ipa.o: amd64-avx-avx512-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-amd64-avx-mpx-avx512-linux-ipa.o: amd64-avx-mpx-avx512-linux.c
+amd64-avx-mpx-avx512-pku-linux-ipa.o: amd64-avx-mpx-avx512-pku-linux.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 linux-aarch64-ipa.o: linux-aarch64-ipa.c
@@ -906,14 +906,14 @@ i386-avx-avx512.c : $(srcdir)/../regformats/i386/i386-avx-avx512.dat $(regdat_sh
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-avx512.dat i386-avx-avx512.c
 i386-avx-avx512-linux.c : $(srcdir)/../regformats/i386/i386-avx-avx512-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-avx512-linux.dat i386-avx-avx512-linux.c
-i386-avx-mpx-avx512.c : $(srcdir)/../regformats/i386/i386-avx-mpx-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-avx512.dat i386-avx-mpx-avx512.c
-i386-avx-mpx-avx512-linux.c : $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-linux.dat i386-avx-mpx-avx512-linux.c
 i386-mpx.c : $(srcdir)/../regformats/i386/i386-mpx.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mpx.dat i386-mpx.c
 i386-mpx-linux.c : $(srcdir)/../regformats/i386/i386-mpx-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mpx-linux.dat i386-mpx-linux.c
+i386-avx-mpx-avx512-pku.c : $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku.dat i386-avx-mpx-avx512-pku.c
+i386-avx-mpx-avx512-pku-linux.c : $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku-linux.dat i386-avx-mpx-avx512-pku-linux.c
 i386-avx-mpx.c : $(srcdir)/../regformats/i386/i386-avx-mpx.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx.dat i386-avx-mpx.c
 i386-avx-mpx-linux.c : $(srcdir)/../regformats/i386/i386-avx-mpx-linux.dat $(regdat_sh)
@@ -1028,14 +1028,14 @@ amd64-avx-avx512.c : $(srcdir)/../regformats/i386/amd64-avx-avx512.dat $(regdat_
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-avx512.dat amd64-avx-avx512.c
 amd64-avx-avx512-linux.c : $(srcdir)/../regformats/i386/amd64-avx-avx512-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-avx512-linux.dat amd64-avx-avx512-linux.c
-amd64-avx-mpx-avx512.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512.dat amd64-avx-mpx-avx512.c
-amd64-avx-mpx-avx512-linux.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-linux.dat amd64-avx-mpx-avx512-linux.c
 amd64-mpx.c : $(srcdir)/../regformats/i386/amd64-mpx.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-mpx.dat amd64-mpx.c
 amd64-mpx-linux.c : $(srcdir)/../regformats/i386/amd64-mpx-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-mpx-linux.dat amd64-mpx-linux.c
+amd64-avx-mpx-avx512-pku.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku.dat amd64-avx-mpx-avx512-pku.c
+amd64-avx-mpx-avx512-pku-linux.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat amd64-avx-mpx-avx512-pku-linux.c
 amd64-avx-mpx.c : $(srcdir)/../regformats/i386/amd64-avx-mpx.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx.dat amd64-avx-mpx.c
 amd64-avx-mpx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-linux.dat $(regdat_sh)
