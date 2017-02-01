@@ -1,3 +1,10 @@
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/tls-multi-got-1-1.s: Place `tlsvar_ld'
+	in `.tdata' section.
+	* testsuite/ld-mips-elf/tls-multi-got-1.got: Adjust accordingly.
+	* testsuite/ld-mips-elf/tls-multi-got-1.r: Likewise.
+
 2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* emultempl/mipself.em (ignore_branch_isa): New variable.
