@@ -8110,7 +8110,6 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
 			       char **msg)
 {
   int len, jumplen;
-  static struct ui_file *gdb_null = NULL;
 
   /*  Ask the target for the minimum instruction length supported.  */
   jumplen = target_get_min_fast_tracepoint_insn_len ();
@@ -8133,12 +8132,8 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
       jumplen = (register_size (gdbarch, 0) == 8) ? 5 : 4;
     }
 
-  /* Dummy file descriptor for the disassembler.  */
-  if (!gdb_null)
-    gdb_null = ui_file_new ();
-
   /* Check for fit.  */
-  len = gdb_print_insn (gdbarch, addr, gdb_null, NULL);
+  len = gdb_insn_length (gdbarch, addr);
 
   if (len < jumplen)
     {

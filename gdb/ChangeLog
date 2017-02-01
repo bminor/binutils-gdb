@@ -1,3 +1,7 @@
+2017-02-01  Pedro Alves  <palves@redhat.com>
+
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): Use gdb_insn_length.
+
 2017-01-31  Pedro Alves  <palves@redhat.com>
 
 	* mi/mi-interp.c (mi_breakpoint_created, mi_breakpoint_modified):
