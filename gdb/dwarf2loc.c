@@ -2442,28 +2442,15 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_LITERAL:
 	  {
 	    bfd_byte *contents;
-	    const bfd_byte *ldata;
-	    size_t n = ctx.len;
+	    size_t n = TYPE_LENGTH (type);
 
-	    if (byte_offset + TYPE_LENGTH (type) > n)
+	    if (byte_offset + n > ctx.len)
 	      invalid_synthetic_pointer ();
 
 	    free_values.free_to_mark ();
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
-
-	    ldata = ctx.data + byte_offset;
-	    n -= byte_offset;
-
-	    if (n > TYPE_LENGTH (type))
-	      {
-		struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
-
-		if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
-		  ldata += n - TYPE_LENGTH (type);
-		n = TYPE_LENGTH (type);
-	      }
-	    memcpy (contents, ldata, n);
+	    memcpy (contents, ctx.data + byte_offset, n);
 	  }
 	  break;
 
