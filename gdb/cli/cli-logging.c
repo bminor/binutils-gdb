@@ -47,11 +47,17 @@ show_logging_filename (struct ui_file *file, int from_tty,
 static int logging_overwrite;
 
 static void
-set_logging_overwrite (char *args, int from_tty, struct cmd_list_element *c)
+maybe_warn_already_logging ()
 {
   if (saved_filename)
     warning (_("Currently logging to %s.  Turn the logging off and on to "
 	       "make the new setting effective."), saved_filename);
+}
+
+static void
+set_logging_overwrite (char *args, int from_tty, struct cmd_list_element *c)
+{
+  maybe_warn_already_logging ();
 }
 
 static void
@@ -67,70 +73,10 @@ show_logging_overwrite (struct ui_file *file, int from_tty,
 /* Value as configured by the user.  */
 static int logging_redirect;
 
-/* The on-disk file in use if logging is currently active together
-   with redirection turned off (and therefore using tee_file_new).
-   For active logging with redirection the on-disk file is directly in
-   GDB_STDOUT and this variable is NULL.  */
-static struct ui_file *logging_no_redirect_file;
-
 static void
 set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
 {
-  ui_file_up destroy_old_stdout;
-  struct ui_file *output, *new_logging_no_redirect_file;
-  struct ui_out *uiout = current_uiout;
-
-  if (saved_filename == NULL
-      || (logging_redirect != 0 && logging_no_redirect_file == NULL)
-      || (logging_redirect == 0 && logging_no_redirect_file != NULL))
-    return;
-
-  if (logging_redirect != 0)
-    {
-      gdb_assert (logging_no_redirect_file != NULL);
-
-      /* ui_out_redirect still has not been called for next
-	 gdb_stdout.  */
-      destroy_old_stdout.reset (gdb_stdout);
-
-      output = logging_no_redirect_file;
-      new_logging_no_redirect_file = NULL;
-
-      if (from_tty)
-	fprintf_unfiltered (saved_output.out, "Redirecting output to %s.\n",
-			    logging_filename);
-    }
-  else
-    {
-      gdb_assert (logging_no_redirect_file == NULL);
-      output = new tee_file (saved_output.out, 0, gdb_stdout, 0);
-      new_logging_no_redirect_file = gdb_stdout;
-
-      if (from_tty)
-	fprintf_unfiltered (saved_output.out, "Copying output to %s.\n",
-			    logging_filename);
-    }
-
-  /* Give the current interpreter a chance to do anything special that
-     it might need for logging, such as updating other channels.  */
-  if (current_interp_set_logging (1, output, NULL) == 0)
-    {
-      gdb_stdout = output;
-      gdb_stdlog = output;
-      gdb_stderr = output;
-      gdb_stdtarg = output;
-      gdb_stdtargerr = output;
-    }
-
-  logging_no_redirect_file = new_logging_no_redirect_file;
-
-  /* There is a former output pushed on the ui_out_redirect stack.  We
-     want to replace it by OUTPUT so we must pop the former value
-     first.  Ideally, we should either do both the pop and push or do
-     neither of them.  */
-
-  uiout->redirect (NULL);
-  uiout->redirect (output);
+  maybe_warn_already_logging ();
 }
 
 static void
@@ -144,12 +90,6 @@ show_logging_redirect (struct ui_file *file, int from_tty,
 static void
 pop_output_files (void)
 {
-  if (logging_no_redirect_file)
-    {
-      delete logging_no_redirect_file;
-      logging_no_redirect_file = NULL;
-    }
-
   if (current_interp_set_logging (0, NULL, NULL) == 0)
     {
       /* Only delete one of the files -- they are all set to the same
@@ -204,7 +144,6 @@ handle_redirections (int from_tty)
     }
   else
     {
-      gdb_assert (logging_no_redirect_file == NULL);
       output = std::move (log);
 
       if (from_tty)
@@ -231,7 +170,7 @@ handle_redirections (int from_tty)
     }
 
   output.release ();
-  logging_no_redirect_file = no_redirect_file.release ();
+  no_redirect_file.release ();
 
   /* Don't do the redirect for MI, it confuses MI's ui-out scheme.  */
   if (!current_uiout->is_mi_like_p ())
@@ -290,20 +229,10 @@ show_logging_command (char *args, int from_tty)
   else
     printf_unfiltered (_("Logs will be appended to the log file.\n"));
 
-  if (saved_filename)
-    {
-      if (logging_redirect)
-	printf_unfiltered (_("Output is being sent only to the log file.\n"));
-      else
-	printf_unfiltered (_("Output is being logged and displayed.\n"));
-    }
+  if (logging_redirect)
+    printf_unfiltered (_("Output will be sent only to the log file.\n"));
   else
-    {
-      if (logging_redirect)
-	printf_unfiltered (_("Output will be sent only to the log file.\n"));
-      else
-	printf_unfiltered (_("Output will be logged and displayed.\n"));
-    }
+    printf_unfiltered (_("Output will be logged and displayed.\n"));
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

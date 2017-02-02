@@ -1,5 +1,17 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-logging.c (maybe_warn_already_logging): New factored out
+	from ...
+	(set_logging_overwrite): ... here.
+	(logging_no_redirect_file): Delete.
+	(set_logging_redirect): Don't handle redirection on the fly.
+	Instead warn that "logging off" / "logging on" is necessary.
+	(pop_output_files): Delete references to logging_no_redirect_file.
+	(show_logging_command): Always speak in terms of what will happen
+	once logging is reenabled.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* disasm.h (gdb_pretty_print_disassembler): Tweak intro comment.
 
 2017-02-02  Pedro Alves  <palves@redhat.com>
