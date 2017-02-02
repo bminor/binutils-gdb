@@ -302,7 +302,7 @@ static const struct interp_procs tui_interp_procs = {
   tui_suspend,
   tui_exec,
   tui_ui_out,
-  NULL,
+  cli_set_logging,
   cli_interpreter_pre_command_loop,
   cli_interpreter_supports_command_editing,
 };

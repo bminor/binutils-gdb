@@ -1,5 +1,26 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-interp.c (struct saved_output_files, saved_output):
+	Moved from cli/cli-logging.c.
+	(cli_set_logging): New function.
+	(cli_interp_procs): Install cli_set_logging.
+	* cli/cli-interp.h (make_logging_output, cli_set_logging):
+	Declare.
+	* cli/cli-logging.c (struct saved_output_files, saved_output):
+	Moved to cli/cli-interp.c.
+	(pop_output_files): Don't save outputs here.
+	(make_logging_output): New function.
+	(handle_redirections): Don't build tee nor save previous outputs
+	here.
+	* interps.c (current_interp_set_logging): Change prototype.
+	Assume there's always a set_logging_proc method installed.
+	* interps.h (interp_set_logging_ftype): Change prototype.
+	(current_interp_set_logging): Change prototype and adjust comment.
+	* mi/mi-interp.c (mi_set_logging): Change protototype.  Adjust to
+	use make_logging_output.
+	* tui/tui-interp.c (tui_interp_procs): Install cli_set_logging.
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-logging.c (maybe_warn_already_logging): New factored out
 	from ...
 	(set_logging_overwrite): ... here.

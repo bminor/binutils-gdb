@@ -22,17 +22,6 @@
 #include "ui-out.h"
 #include "interps.h"
 
-/* These hold the pushed copies of the gdb output files.
-   If NULL then nothing has yet been pushed.  */
-struct saved_output_files
-{
-  struct ui_file *out;
-  struct ui_file *err;
-  struct ui_file *log;
-  struct ui_file *targ;
-  struct ui_file *targerr;
-};
-static struct saved_output_files saved_output;
 static char *saved_filename;
 
 static char *logging_filename;
@@ -90,37 +79,35 @@ show_logging_redirect (struct ui_file *file, int from_tty,
 static void
 pop_output_files (void)
 {
-  if (current_interp_set_logging (0, NULL, NULL) == 0)
-    {
-      /* Only delete one of the files -- they are all set to the same
-	 value.  */
-      delete gdb_stdout;
-
-      gdb_stdout = saved_output.out;
-      gdb_stderr = saved_output.err;
-      gdb_stdlog = saved_output.log;
-      gdb_stdtarg = saved_output.targ;
-      gdb_stdtargerr = saved_output.targerr;
-    }
-
-  saved_output.out = NULL;
-  saved_output.err = NULL;
-  saved_output.log = NULL;
-  saved_output.targ = NULL;
-  saved_output.targerr = NULL;
+  current_interp_set_logging (NULL, false);
 
   /* Stay consistent with handle_redirections.  */
   if (!current_uiout->is_mi_like_p ())
     current_uiout->redirect (NULL);
 }
 
+/* See cli-interp.h.  */
+
+ui_file *
+make_logging_output (ui_file *curr_output, ui_file_up logfile,
+		     bool logging_redirect)
+{
+  if (logging_redirect)
+    return logfile.release ();
+  else
+    {
+      /* Note that the "tee" takes ownership of the log file.  */
+      ui_file *out = new tee_file (curr_output, false,
+				   logfile.get (), true);
+      logfile.release ();
+      return out;
+    }
+}
+
 /* This is a helper for the `set logging' command.  */
 static void
 handle_redirections (int from_tty)
 {
-  ui_file_up output;
-  ui_file_up no_redirect_file;
-
   if (saved_filename != NULL)
     {
       fprintf_unfiltered (gdb_stdout, "Already logging to %s.\n",
@@ -133,46 +120,27 @@ handle_redirections (int from_tty)
     perror_with_name (_("set logging"));
 
   /* Redirects everything to gdb_stdout while this is running.  */
-  if (!logging_redirect)
+  if (from_tty)
     {
-      no_redirect_file = std::move (log);
-      output.reset (new tee_file (gdb_stdout, 0, no_redirect_file.get (), 0));
-
-      if (from_tty)
+      if (!logging_redirect)
 	fprintf_unfiltered (gdb_stdout, "Copying output to %s.\n",
 			    logging_filename);
-    }
-  else
-    {
-      output = std::move (log);
-
-      if (from_tty)
+      else
 	fprintf_unfiltered (gdb_stdout, "Redirecting output to %s.\n",
 			    logging_filename);
     }
 
   saved_filename = xstrdup (logging_filename);
-  saved_output.out = gdb_stdout;
-  saved_output.err = gdb_stderr;
-  saved_output.log = gdb_stdlog;
-  saved_output.targ = gdb_stdtarg;
-  saved_output.targerr = gdb_stdtargerr;
 
   /* Let the interpreter do anything it needs.  */
-  if (current_interp_set_logging (1, output.get (),
-				  no_redirect_file.get ()) == 0)
-    {
-      gdb_stdout = output.get ();
-      gdb_stdlog = output.get ();
-      gdb_stderr = output.get ();
-      gdb_stdtarg = output.get ();
-      gdb_stdtargerr = output.get ();
-    }
+  current_interp_set_logging (std::move (log), logging_redirect);
 
-  output.release ();
-  no_redirect_file.release ();
-
-  /* Don't do the redirect for MI, it confuses MI's ui-out scheme.  */
+  /* Redirect the current ui-out object's output to the log.  Use
+     gdb_stdout, not log, since the interpreter may have created a tee
+     that wraps the log.  Don't do the redirect for MI, it confuses
+     MI's ui-out scheme.  Note that we may get here with MI as current
+     interpreter, but with the current ui_out as a CLI ui_out, with
+     '-interpreter-exec console "set logging on"'.  */
   if (!current_uiout->is_mi_like_p ())
     current_uiout->redirect (gdb_stdout);
 }

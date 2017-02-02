@@ -49,9 +49,9 @@ typedef struct gdb_exception (interp_exec_ftype) (void *data,
 typedef void (interp_pre_command_loop_ftype) (struct interp *self);
 typedef struct ui_out *(interp_ui_out_ftype) (struct interp *self);
 
-typedef int (interp_set_logging_ftype) (struct interp *self, int start_log,
-					struct ui_file *out,
-					struct ui_file *logfile);
+typedef void (interp_set_logging_ftype) (struct interp *self,
+					 ui_file_up logfile,
+					 bool logging_redirect);
 
 typedef int (interp_supports_command_editing_ftype) (struct interp *self);
 
@@ -109,13 +109,15 @@ extern int current_interp_named_p (const char *name);
 
 /* Call this function to give the current interpreter an opportunity
    to do any special handling of streams when logging is enabled or
-   disabled.  START_LOG is 1 when logging is starting, 0 when it ends,
-   and OUT is the stream for the log file; it will be NULL when
-   logging is ending.  LOGFILE is non-NULL if the output streams
-   are to be tees, with the log file as one of the outputs.  */
-
-extern int current_interp_set_logging (int start_log, struct ui_file *out,
-				       struct ui_file *logfile);
+   disabled.  LOGFILE is the stream for the log file when logging is
+   starting and is NULL when logging is ending.  LOGGING_REDIRECT is
+   the value of the "set logging redirect" setting.  If true, the
+   interpreter should configure the output streams to send output only
+   to the logfile.  If false, the interpreter should configure the
+   output streams to send output to both the current output stream
+   (i.e., the terminal) and the log file.  */
+extern void current_interp_set_logging (ui_file_up logfile,
+					bool logging_redirect);
 
 /* Returns opaque data associated with the top-level interpreter.  */
 extern void *top_level_interpreter_data (void);

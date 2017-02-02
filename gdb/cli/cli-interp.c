@@ -373,6 +373,63 @@ cli_ui_out (struct interp *self)
   return cli->cli_uiout;
 }
 
+/* These hold the pushed copies of the gdb output files.
+   If NULL then nothing has yet been pushed.  */
+struct saved_output_files
+{
+  ui_file *out;
+  ui_file *err;
+  ui_file *log;
+  ui_file *targ;
+  ui_file *targerr;
+};
+static saved_output_files saved_output;
+
+/* See cli-interp.h.  */
+
+void
+cli_set_logging (struct interp *interp,
+		 ui_file_up logfile, bool logging_redirect)
+{
+  if (logfile != NULL)
+    {
+      saved_output.out = gdb_stdout;
+      saved_output.err = gdb_stderr;
+      saved_output.log = gdb_stdlog;
+      saved_output.targ = gdb_stdtarg;
+      saved_output.targerr = gdb_stdtargerr;
+
+      /* A raw pointer since ownership is transferred to
+	 gdb_stdout.  */
+      ui_file *output = make_logging_output (gdb_stdout,
+					     std::move (logfile),
+					     logging_redirect);
+      gdb_stdout = output;
+      gdb_stdlog = output;
+      gdb_stderr = output;
+      gdb_stdtarg = output;
+      gdb_stdtargerr = output;
+    }
+  else
+    {
+      /* Only delete one of the files -- they are all set to the same
+	 value.  */
+      delete gdb_stdout;
+
+      gdb_stdout = saved_output.out;
+      gdb_stderr = saved_output.err;
+      gdb_stdlog = saved_output.log;
+      gdb_stdtarg = saved_output.targ;
+      gdb_stdtargerr = saved_output.targerr;
+
+      saved_output.out = NULL;
+      saved_output.err = NULL;
+      saved_output.log = NULL;
+      saved_output.targ = NULL;
+      saved_output.targerr = NULL;
+    }
+}
+
 /* The CLI interpreter's vtable.  */
 
 static const struct interp_procs cli_interp_procs = {
@@ -381,7 +438,7 @@ static const struct interp_procs cli_interp_procs = {
   cli_interpreter_suspend,	/* suspend_proc */
   cli_interpreter_exec,		/* exec_proc */
   cli_ui_out,			/* ui_out_proc */
-  NULL,                       	/* set_logging_proc */
+  cli_set_logging,		/* set_logging_proc */
   cli_interpreter_pre_command_loop, /* pre_command_loop_proc */
   cli_interpreter_supports_command_editing, /* supports_command_editing_proc */
 };

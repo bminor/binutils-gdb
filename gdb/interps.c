@@ -346,18 +346,15 @@ interp_ui_out (struct interp *interp)
   return interp->procs->ui_out_proc (interp);
 }
 
-int
-current_interp_set_logging (int start_log, struct ui_file *out,
-			    struct ui_file *logfile)
+void
+current_interp_set_logging (ui_file_up logfile,
+			    bool logging_redirect)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *interp = ui_interp->current_interpreter;
 
-  if (interp == NULL
-      || interp->procs->set_logging_proc == NULL)
-    return 0;
-
-  return interp->procs->set_logging_proc (interp, start_log, out, logfile);
+  return interp->procs->set_logging_proc (interp, std::move (logfile),
+					  logging_redirect);
 }
 
 /* Temporarily overrides the current interpreter.  */
