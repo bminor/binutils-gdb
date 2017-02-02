@@ -1351,6 +1351,7 @@ behaviour in the shell.
 @end ifset
 
 @ifset MIPS
+@c man begin OPTIONS
 The following options are available when @value{AS} is configured for
 a MIPS processor.
 
@@ -1593,6 +1594,7 @@ break exception.
 When this option is used, @command{@value{AS}} will issue a warning every
 time it generates a nop instruction from a macro.
 @end table
+@c man end
 @end ifset
 
 @ifset MCORE
