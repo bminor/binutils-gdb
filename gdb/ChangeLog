@@ -1,5 +1,10 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* disasm-selftests.c (print_one_insn_test): Move the "verbose"
+	field out of gdb_disassembler_test and make it static.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* mi/mi-common.h (struct mi_interp): Delete the mi2_interp,
 	mi1_interp and mi_interp fields.
 
