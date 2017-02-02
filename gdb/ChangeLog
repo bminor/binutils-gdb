@@ -1,5 +1,9 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* disasm.h (gdb_pretty_print_disassembler): Tweak intro comment.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* disasm.c (gdb_pretty_print_insn): Rename to ...
 	(gdb_pretty_print_disassembler::pretty_print_insn): ... this.
 	Remove gdbarch parameter.  Adapt to clear the object's buffers

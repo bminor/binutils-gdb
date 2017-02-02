@@ -97,7 +97,7 @@ extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 extern int gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 			   struct ui_file *stream, int *branch_delay_insns);
 
-/* Class used to pretty-print an instruction.  */
+/* Class used to pretty-print instructions.  */
 
 class gdb_pretty_print_disassembler
 {
