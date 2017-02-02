@@ -1,5 +1,10 @@
 2017-02-13  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_sort_hash_table): Use `htab' throughout
+	to access the hash table.
+
+2017-02-13  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_sort_hash_table): Move assertion on
 	non-NULL `htab' to the beginning.
 

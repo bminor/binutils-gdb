@@ -3835,7 +3835,7 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  if (elf_hash_table (info)->dynsymcount == 0)
+  if (htab->root.dynsymcount == 0)
     return TRUE;
 
   g = htab->got_info;
@@ -3845,20 +3845,16 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   hsd.low = NULL;
   hsd.max_unref_got_dynindx
     = hsd.min_got_dynindx
-    = (elf_hash_table (info)->dynsymcount - g->reloc_only_gotno);
+    = (htab->root.dynsymcount - g->reloc_only_gotno);
   hsd.max_non_got_dynindx = count_section_dynsyms (abfd, info) + 1;
-  mips_elf_link_hash_traverse (((struct mips_elf_link_hash_table *)
-				elf_hash_table (info)),
-			       mips_elf_sort_hash_table_f,
-			       &hsd);
+  mips_elf_link_hash_traverse (htab, mips_elf_sort_hash_table_f, &hsd);
 
   /* There should have been enough room in the symbol table to
      accommodate both the GOT and non-GOT symbols.  */
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
   BFD_ASSERT ((unsigned long) hsd.max_unref_got_dynindx
-	      == elf_hash_table (info)->dynsymcount);
-  BFD_ASSERT (elf_hash_table (info)->dynsymcount - hsd.min_got_dynindx
-	      == g->global_gotno);
+	      == htab->root.dynsymcount);
+  BFD_ASSERT (htab->root.dynsymcount - hsd.min_got_dynindx == g->global_gotno);
 
   /* Now we know which dynamic symbol has the lowest dynamic symbol
      table index in the GOT.  */
