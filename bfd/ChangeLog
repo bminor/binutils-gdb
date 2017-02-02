@@ -1,5 +1,14 @@
 2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_hash_sort_data): Add
+	`max_local_dynindx'.
+	(mips_elf_sort_hash_table): Handle it.
+	(mips_elf_sort_hash_table_f) <GGA_NONE>: For forced local
+	symbols bump up `max_local_dynindx' rather than
+	`max_non_got_dynindx'.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_hash_sort_data): Convert the
 	`min_got_dynindx', `max_unref_got_dynindx' and
 	`max_non_got_dynindx' members to the `bfd_size_type' data type.
