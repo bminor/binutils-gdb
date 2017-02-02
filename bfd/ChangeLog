@@ -1,5 +1,12 @@
 2017-02-13  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_hash_sort_data): Convert the
+	`min_got_dynindx', `max_unref_got_dynindx' and
+	`max_non_got_dynindx' members to the `bfd_size_type' data type.
+	(mips_elf_sort_hash_table): Adjust accordingly.
+
+2017-02-13  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_sort_hash_table): Use `htab' throughout
 	to access the hash table.
 
