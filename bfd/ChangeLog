@@ -1,3 +1,7 @@
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_gc_sweep): Wrap overlong line.
+
 2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.h (_bfd_mips_elf_insn32): Rename prototype to...
