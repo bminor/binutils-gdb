@@ -408,7 +408,7 @@ extern void error_no_arg (const char *) ATTRIBUTE_NORETURN;
 
 extern void dont_repeat (void);
 
-extern struct cleanup *prevent_dont_repeat (void);
+extern scoped_restore_tmpl<int> prevent_dont_repeat (void);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or

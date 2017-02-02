@@ -353,7 +353,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 				  struct regcache *regcache,
 				  int regnum)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte *raw_buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum register_status status;
   struct value *result_value;
@@ -414,7 +414,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int regnum, const gdb_byte *buf)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte *raw_buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (i386_byte_regnum_p (gdbarch, regnum))
@@ -3045,6 +3045,19 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       tdep->mpx_register_names = amd64_mpx_names;
       tdep->bndcfgu_regnum = AMD64_BNDCFGU_REGNUM;
       tdep->bnd0r_regnum = AMD64_BND0R_REGNUM;
+    }
+
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.segments") != NULL)
+    {
+      const struct tdesc_feature *feature =
+	  tdesc_find_feature (tdesc, "org.gnu.gdb.i386.segments");
+      struct tdesc_arch_data *tdesc_data_segments =
+	  (struct tdesc_arch_data *) info.tdep_info;
+
+      tdesc_numbered_register (feature, tdesc_data_segments,
+		       AMD64_FSBASE_REGNUM, "fs_base");
+      tdesc_numbered_register (feature, tdesc_data_segments,
+		       AMD64_GSBASE_REGNUM, "gs_base");
     }
 
   tdep->num_byte_regs = 20;

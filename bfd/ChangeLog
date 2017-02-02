@@ -1,3 +1,192 @@
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.h (_bfd_mips_elf_insn32): Rename prototype to...
+	(_bfd_mips_elf_linker_flags): ... this.  Add another parameter.
+	* elfxx-mips.c (mips_elf_link_hash_table): Add
+	`ignore_branch_isa' member.
+	(mips_elf_perform_relocation): Do not treat an ISA mode mismatch
+	in branch relocation calculation as an error if
+	`ignore_branch_isa' has been set.
+	(_bfd_mips_elf_insn32): Rename to...
+	(_bfd_mips_elf_linker_flags): ... this.  Rename the `on'
+	parameter to `insn32' and add an `ignore_branch_isa' parameter.
+	Handle the new parameter.
+
+2017-01-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Remove now unused
+	local variable dynobj.
+
+	PR ld/20995
+	* elf32-cris.c (elf_cris_size_dynamic_sections): Handle sdynrelro.
+	(elf_cris_adjust_dynamic_symbol): Place variables copied into the
+	executable from read-only sections into sdynrelro.
+	(elf_cris_finish_dynamic_symbol): Select sreldynrelro for
+	dynamic relocs in sdynrelro.
+	(elf_backend_want_dynrelro): Define.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (*-*-rtemsaout*): Mark as removed.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (powerpcle-*-rtems*): Do not mark as removed.
+	(arm-*-rtems*): Move to (arm*-*-eabi*).
+	(i[3-7]86-*-rtems*): Move to (i[3-7]86-*-elf*).
+	(m68-*-rtems*): Move to (m68*-*-elf*).
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (*-*-rtemscoff*): Mark as removed.
+
+2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* elflink.c (bfd_elf_record_link_assignment): Revert last
+	change and don't ever clear `forced_local'.  Set `mark'
+	unconditionally.
+	(elf_gc_sweep_symbol_info, elf_gc_sweep_symbol): Reorder within
+	file.
+	(elf_gc_sweep): Move the call to `elf_gc_sweep_symbol'...
+	(bfd_elf_size_dynamic_sections): ... here.
+	* elf32-ppc.c (ppc_elf_tls_setup): Don't clear `forced_local'
+	and set `mark' instead in `__tls_get_addr_opt' processing.
+	* elf64-ppc.c (ppc64_elf_tls_setup): Likewise.
+
+2017-01-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Merge two cases
+	where dynamic relocs are preferable.  Allow ifunc too.
+	(ensure_undefweak_dynamic): New function.
+	(allocate_dynrelocs): Use it here.  Move plt handling last and
+	don't make symbols dynamic, simplifying loop.  Only make undef
+	weak symbols with GOT entries dynamic.  Correct condition
+	for GOT relocs.  Handle dynamic relocs on ifuncs.  Correct
+	comments.  Remove goto.
+	(ppc_elf_relocate_section): Correct test for using dynamic
+	symbol on GOT relocs.  Rearrange test for emitting GOT relocs
+	to suit.  Set up explicit tls_index entries and implicit GOT
+	tls_index entries resolvable at link time for
+	__tls_get_addr_opt.  Simplify test to clear mem for prelink.
+	* elf64-ppc.c (allocate_got): Correct condition for GOT relocs.
+	(ensure_undefweak_dynamic): New function.
+	(allocate_dynrelocs): Use it here.  Only make undef weak symbols
+	with GOT entries dynamic.  Remove unnecessary test of
+	WILL_CALL_FINISH_DYNAMIC_SYMBOL in PLT handling.
+	(ppc64_elf_relocate_section): Correct test for using dynamic
+	symbol on GOT relocs.  Rearrange test for emitting GOT relocs
+	to suit.  Set up explicit tls_index entries and implicit GOT
+	tls_index entries resolvable at link time for __tls_get_addr_opt.
+	Simplify expression to clear mem for prelink.
+
+2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
+
+	* elfnn-aarch64.c: Fix relaxations for ILP32 mode.
+
+2017-01-20  Jiong Wang <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elf_aarch64_hash_symbol): New function.
+	(elf_backend_hash_symbol): Define.
+
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* elflink.c (bfd_elf_record_link_assignment): Clear any
+	`forced_local' marking for DSO symbols that are not being
+	provided.
+
+2017-01-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elfnn-riscv.c (riscv_elf_object_p): New function.
+
+2017-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21038
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add
+	plt_bnd_eh_frame.
+	(elf_x86_64_check_relocs): Create .eh_frame section for the
+	.plt.bnd section.
+	(elf_x86_64_size_dynamic_sections): Allocate and initialize
+	.eh_frame section for the .plt.bnd section.
+	(elf_x86_64_finish_dynamic_sections): Adjust .eh_frame section
+	for the .plt.bnd section.
+
+2017-01-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20876
+	* opncls.c (find_separate_debug_file): Add include_dirs
+	parameter.  Only include the directory part of the bfd's filename
+	in search paths if include_dirs is true.  Add a couple of extra
+	locations for looking for debug files.
+	( bfd_follow_gnu_debuglink): Update invocation of
+	find_separate_debug_file.
+	(bfd_follow_gnu_debugaltlink): Likewise.
+	(get_build_id): New function: Finds the build-id of the given bfd.
+	(get_build_id_name): New function: Computes the name of the
+	separate debug info file for a bfd, based upon its build-id.
+	(check_build_id_file): New function: Checks to see if a separate
+	debug info file exists at the given location, and that its
+	build-id matches that of the original bfd.
+	(bfd_follow_build_id_debuglink): New function: Finds a separate
+	debug info file for a given bfd by using the build-id method.
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Try using the build-id
+	method of locating a separate debug info file before using the
+	debuglink method.
+	* bfd-in2.h: Regenerate.
+
+2017-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21038
+	* elf64-x86-64.c (elf_x86_64_eh_frame_bnd_plt): New.
+	(elf_x86_64_bnd_arch_bed): Use elf_x86_64_eh_frame_bnd_plt and
+	elf_x86_64_eh_frame_plt_got.
+	(elf_x86_64_size_dynamic_sections): Get unwind info from
+	elf_x86_64_bnd_arch_bed for the BND PLT.
+
+2017-01-11  Jeremy Soller  <jackpot51@gmail.com>
+
+	* config.bfd: Add entries for i686-redox and x86_64-redox.
+
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Align .eh_frame section
+	to 4 bytes.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Align
+	.eh_frame section to 4 bytes for x32.
+	(elf_x86_64_check_relocs): Likewise.
+
+2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20830
+	* elf32-i386.c (elf_i386_eh_frame_plt_got): New.
+	(PLT_GOT_FDE_LENGTH): Likewise.
+	(elf_i386_plt_layout): Add eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_i386_plt): Updated.
+	(elf_i386_link_hash_table): Add plt_got_eh_frame.
+	(elf_i386_check_relocs): Create .eh_frame section for .plt.got.
+	(elf_i386_size_dynamic_sections): Allocate and initialize
+	.eh_frame section for .plt.got.
+	(elf_i386_finish_dynamic_sections): Adjust .eh_frame section for
+	.plt.got.
+	(elf_i386_nacl_plt): Add FIXME for eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	* elf64-x86-64.c (elf_x86_64_eh_frame_plt_got): New.
+	(PLT_GOT_FDE_LENGTH): Likewise.
+	(elf_x86_64_backend_data): Add eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_x86_64_arch_bed): Updated.
+	(elf_x86_64_bnd_arch_bed): Add FIXME for eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_x86_64_nacl_arch_bed): Likewise.
+	(elf_x86_64_link_hash_table): Add plt_got_eh_frame.
+	(elf_x86_64_check_relocs): Create .eh_frame section for .plt.got.
+	(elf_x86_64_size_dynamic_sections): Allocate and initialize
+	.eh_frame section for .plt.got.
+	(elf_x86_64_finish_dynamic_sections): Adjust .eh_frame section
+	for .plt.got.
+
 2017-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Set

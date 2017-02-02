@@ -988,7 +988,8 @@ regcache_xfer_part (struct regcache *regcache, int regnum,
 				   const gdb_byte *buf))
 {
   struct regcache_descr *descr = regcache->descr;
-  gdb_byte reg[MAX_REGISTER_SIZE];
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  gdb_byte *reg = (gdb_byte *) alloca (register_size (gdbarch, regnum));
 
   gdb_assert (offset >= 0 && offset <= descr->sizeof_register[regnum]);
   gdb_assert (len >= 0 && offset + len <= descr->sizeof_register[regnum]);

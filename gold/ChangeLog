@@ -1,3 +1,88 @@
+2017-01-23  Rahul Chaudhry  <rahulchaudhry@google.com>
+
+        * testsuite/icf_safe_so_test.sh: Use "set -e".
+        * testsuite/icf_safe_test.sh: Likewise.
+        * testsuite/icf_test.sh: Likewise.
+
+2017-01-23  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_output_data_plt::rel_plt): Remove const from return
+	type.
+	(Target_mips::make_plt_entry): Make the sh_info field of .rel.plt
+	point to .plt.
+
+2017-01-23  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	PR gold/21054
+	* mips.cc (Mips_got_info::record_global_got_symbol): Don't add symbol
+	to the dynamic symbol table if it is forced to local visibility.
+	(Target_mips::do_finalize_sections): Don't add __RLD_MAP symbol to the
+	dynamic symbol table if it is forced to local visibility.
+
+2017-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* aarch64.cc (Stub_template_repertoire): Change ST_E_835769_INSNS
+        from a pointer to an array.
+
+2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/21040
+	* powerpc.cc (Powerpc_relobj<size, big_endian>::make_toc_relative):
+	Cast 0x80008000 to uint64_t.
+
+2017-01-12  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.cc (Sized_relobj_file): Fix byte counts for calls to memmem.
+
+2017-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21040
+	* x86_64.cc (Output_data_plt_x86_64_bnd::do_fill_first_plt_entry):
+	Remove unnecessary 'typename' keyword.
+	(Output_data_plt_x86_64_bnd::do_fill_plt_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::fill_aplt_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::do_fill_tlsdesc_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::do_write): Likewise.
+
+2017-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21040
+	* x86_64.cc (Output_data_plt_x86_64_bnd::do_fill_first_plt_entry):
+	Remove unnecessary 'typename' keyword.
+	(Output_data_plt_x86_64_bnd::do_fill_plt_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::do_fill_tlsdesc_entry): Likewise.
+	(Output_data_plt_x86_64_bnd::fill_aplt_entry): Likewise.
+	* testsuite/copy_test_relro_1.cc (p, b, c, q): Add separate extern
+	declarations.
+
+2017-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/21039
+	* testsuite/script_test_13.sh: Adjust patterns to work for i386.
+	* testsuite/script_test_15a.sh: Likewise.
+	* testsuite/script_test_15b.sh: Likewise.
+	* testsuite/script_test_15c.sh: Likewise.
+
+2017-01-11  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (class Powerpc_copy_relocs): New.
+	(Powerpc_copy_relocs::emit): New function.
+	(Powerpc_relobj::relatoc_, toc_, no_toc_opt_): New variables.
+	(Powerpc_relobj::toc_shndx, set_no_toc_opt, no_toc_opt): New inlines.
+	(Powerpc_relobj::do_relocate_sections): New function.
+	(Powerpc_relobj::make_toc_relative): Likewise.
+	(Powerpc_relobj::do_find_special_sections): Stash away .rela.toc
+	and .toc too.
+	(ok_lo_toc_insn): Move earlier, and handle more insns.
+	(Target_powerpc::Scan::local): If optimizing toc accesses, set
+	no_toc_opt for entries we can't edit.  Check insn validity.
+	Emit "toc optimization is not supported" warning, downgraded
+	from error.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Edit TOC indirect code
+	to TOC relative.  Don't emit "toc optimization is not supported"
+	error here.
+
 2017-01-10  Cary Coutant  <ccoutant@gmail.com>
 
 	* aarch64.cc (AArch64_relobj::do_relocate_sections): Call

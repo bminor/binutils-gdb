@@ -1,3 +1,786 @@
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+	    Richard Henderson  <rth@redhat.com>
+
+	* amd64-linux-nat.c (PTRACE_ARCH_PRCTL): New define.
+	(amd64_linux_fetch_inferior_registers): Add case to fetch FS_BASE
+	GS_BASE for older kernels.
+	(amd64_linux_store_inferior_registers): Add case to store FS_BASE
+	GS_BASE for older kernels.
+	* amd64-linux-tdep.c (amd64_linux_gregset_reg_offset): Add FS_BASE
+	and GS_BASE to the offset table.
+	(amd64_linux_register_reggroup_p): Add FS_BASE and GS_BASE to the
+	system register group.
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Implements case
+	for older kernels.
+	* amd64-tdep.c (amd64_init_abi): Add segment registers for the
+	amd64 ABI.
+	* amd64-tdep.h (amd64_regnum): Add AMD64_FSBASE_REGNUM and
+	AMD64_GSBASE_REGNUM.
+	(AMD64_NUM_REGS): Set to AMD64_GSBASE_REGNUM + 1.
+	* features/Makefile (amd64-linux.dat, amd64-avx-linux.dat)
+	(amd64-mpx-linux.dat, amd64-avx512-linux.dat, x32-linux.dat)
+	(x32-avx-linux.dat, x32-avx512-linux.dat): Add
+	i386/64bit-segments.xml in those rules.
+	* features/i386/64bit-segments.xml: New file.
+	* features/i386/amd64-avx-mpx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx512-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-mpx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/x32-avx512-linux.xml: Add 64bit-segments.xml.
+	* features/i386/x32-avx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-linux.c: Regenerated.
+	* features/i386/amd64-avx-mpx-linux.c: Regenerated.
+	* features/i386/amd64-avx-mpx.c: Regenerated.
+	* features/i386/amd64-avx512-linux.c: Regenerated.
+	* features/i386/amd64-linux.c: Regenerated.
+	* features/i386/amd64-mpx-linux.c: Regenerated.
+	* features/i386/i386-avx-mpx-linux.c: Regenerated.
+	* features/i386/i386-avx-mpx.c: Regenerated.
+	* features/i386/x32-avx-linux.c: Regenerated.
+	* features/i386/x32-avx512-linux.c: Regenerated.
+	* regformats/i386/amd64-avx-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx512-linux.dat: Regenerated.
+	* regformats/i386/amd64-linux.dat: Regenerated.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerated.
+	* regformats/i386/x32-avx-linux.dat: Regenerated.
+	* regformats/i386/x32-avx512-linux.dat: Regenerated.
+	* regformats/i386/x32-linux.dat: Regenerated.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-tdep.h (AMD64_LINUX_ORIG_RAX_REGNUM):
+	Set to AMD64_NUM_REGS.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Simplify logic
+	that checks validity of a register number.
+
+2017-01-27  Kees Cook  <keescook@google.com>
+
+	* gdb/arm-linux-nat.c (arm_linux_fetch_inferior_registers): Call
+	fetch_fpregs if target has fpa registers.
+	(arm_linux_store_inferior_registers): Call store_fpregs if target
+	has fpa registers.
+
+2017-01-26  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* cris-tdep.c (cris_gdbarch_init): Remove check for
+	info.byte_order and force it to BFD_ENDIAN_LITTLE.
+
+2017-01-26  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* corelow.c (get_core_register_section): Check for regset
+	existence before checking for REGSET_VARIABLE_SIZE.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20939
+	* disasm.c (gdb_disassembler::dis_asm_memory_error): Don't
+	call memory_error, save memaddr instead.
+	(gdb_disassembler::print_insn): If gdbarch_print_insn returns
+	negative, cal memory_error.
+	* disasm.h (gdb_disassembler) <m_err_memaddr>: New field.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* disasm-selftests.c (memory_error_test): New function.
+	(_initialize_disasm_selftests): Register memory_error_test.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (SFILES): Add disasm-selftests.c and
+	selftest-arch.c.
+	(COMMON_OBS): Add disasm-selftests.o and selftest-arch.o.
+	* disasm-selftests.c: New file.
+	* selftest-arch.c: New file.
+	* selftest-arch.h: New file.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* mep-tdep.c (mep_gdb_print_insn): Set info->arch
+	to bfd_arch_mep.  Don't return 0 if section is not
+	found.  Call print_insn_mep.
+
+2017-01-26  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c: Include "disasm.h".
+	(gdb_print_insn_arm): Update code to get gdbarch.
+	* disasm.c (dis_asm_read_memory): Change it to
+	gdb_disassembler::dis_asm_read_memory.
+	(dis_asm_memory_error): Likewise.
+	(dis_asm_print_address): Likewise.
+	(gdb_pretty_print_insn): Change it to
+	gdb_disassembler::pretty_print_insn.
+	(dump_insns): Add one argument gdb_disassemlber.  All
+	callers updated.
+	(do_mixed_source_and_assembly_deprecated): Likewise.
+	(do_mixed_source_and_assembly): Likewise.
+	(do_assembly_only): Likewise.
+	(gdb_disassembler::gdb_disassembler): New.
+	(gdb_disassembler::print_insn): New.
+	* disasm.h (class gdb_disassembler): New.
+	(gdb_pretty_print_insn): Remove declaration.
+	(gdb_disassemble_info): Likewise.
+	* guile/scm-disasm.c (class gdbscm_disassembler): New.
+	(gdbscm_disasm_read_memory_worker): Update.
+	(gdbscm_disasm_read_memory): Update.
+	(gdbscm_disasm_memory_error): Remove.
+	(gdbscm_disasm_print_address): Remove.
+	(gdbscm_disassembler::gdbscm_disassembler): New.
+	(gdbscm_print_insn_from_port): Update.
+	* mips-tdep.c: Include disasm.h.
+	(gdb_print_insn_mips): Update code to get gdbarch.
+	* record-btrace.c (btrace_insn_history): Update.
+	* spu-tdep.c: Include disasm.h.
+	(struct spu_dis_asm_data): Remove.
+	(struct spu_dis_asm_info): New.
+	(spu_dis_asm_print_address): Use spu_dis_asm_info to get
+	SPU id.
+	(gdb_print_insn_spu): Cast disassemble_info to
+	spu_dis_asm_info.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* disasm.c (do_ui_file_delete): Delete.
+	(gdb_insn_length): Move code creating stream to ...
+	* utils.c (null_stream): ... here.  New function.
+	* utils.h (null_stream): Declare.
+
+2017-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/py-inferior.c (find_thread_object): Return directly
+	from the loop.  Remove "found" variable.
+
+2017-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.12.1 released.
+
+2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-function.c (fnpy_call): Reorder declarations to have
+	the gdbpy_enter object declared first.
+	* python/py-xmethods.c (gdbpy_get_xmethod_arg_types): Likewise.
+
+2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR python/21068
+	* python/python-internal.h (PyMem_RawMalloc): Define for
+	Python < 3.4.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Use
+	PyMem_RawMalloc instead of PyMem_Malloc.
+
+2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* NEWS (New commands): Mention flash-erase.
+	(New MI commands): Mention target-flash-erase.
+	* mi/mi-cmds.c (mi_cmd_target_flash_erase): Add target-flash-erase MI
+	command.
+	* mi/mi-cmds.h (mi_cmd_target_flash_erase): New declaration.
+	* mi/mi-main.c (mi_cmd_target_flash_erase): New function.
+	* target.c (flash_erase_command): New function.
+	(initialize_targets): Add new flash-erase command.
+	* target.h (flash_erase_command): New declaration.
+
+2017-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.c: Only include <sys/procfs.h> if
+	HAVE_SYS_PROCFS_H is defined.
+
+2017-01-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote.c (struct cached_reg): Change data into a pointer.
+	* (stop_reply_dtr): Free data pointers before deleting vector.
+	(process_stop_reply): Likewise.
+	(remote_parse_stop_reply): Allocate space for data
+
+2017-01-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* amd64-tdep.c (amd64_pseudo_register_read_value): remove
+	MAX_REGISTER_SIZE.
+	(amd64_pseudo_register_read_value): Likewise.
+	* remote.c (fetch_register_using_p): Remove MAX_REGISTER_SIZE.
+	(store_register_using_P): Likewise.
+	* regcache.c (regcache_xfer_part): Likewise.
+
+2017-01-16  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	Split real and pseudo registers.
+	* sparc-tdep.h (SPARC_CORE_REGISTERS): New macro.
+	(sparc32_pseudo_regnum): New enum.
+	* sparc64-tdep.h (sparc64_pseudo_regnum): New enum.
+	* sparc-tdep.c (SPARC32_FPU_REGISTERS): New macro.
+	(SPARC32_CP0_REGISTERS): New macro.
+	(sparc32_pseudo_register_name): New function.
+	(sparc32_register_name): Use sparc32_pseudo_register_name.
+	(sparc32_pseudo_register_type): New function.
+	(sparc32_register_type): Use sparc32_pseudo_register_type.
+	(sparc32_pseudo_register_read, sparc32_pseudo_register_write): Handle
+	pseudo register numbers.
+	* sparc64-tdep.c SPARC64_FPU_REGISTERS): New macro.
+	(SPARC64_CP0_REGISTERS): New macro.
+	(sparc64_pseudo_register_name): New function.
+	(sparc64_register_name): Use sparc64_pseudo_register_name.
+	(sparc64_pseudo_register_type): New function.
+	(sparc64_register_type): Use sparc64_pseudo_register_type.
+	(sparc64_pseudo_register_read, sparc64_pseudo_register_write): Handle
+	pseudo register numbers.
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields,
+	sparc64_store_arguments): Handle pseudo register numbers.
+
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (REMOTE_DEBUG_MAX_CHAR): New macro.
+	(putpkt_binary): Print only REMOTE_DEBUG_MAX_CHAR chars in debug
+	output.
+	(getpkt_or_notif_sane_1): Likewise.
+
+2017-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (checker-headers): Use CXX and CXX_DIALET instead
+	of CC.  Pass "-x c++-header" instead of "-x c".
+
+2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_can_async_p): Update comment.
+
+2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-nat.c (linux_nat_can_async_p): Update comment.
+
+2017-01-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* serial.c (serial_open): Forget about "pc" and "lpt" serial interface.
+
+2017-01-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-decode.c (lookup_cmd_1): Fix typo in comment.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-type.c (typy_legacy_template_argument): Update.
+	* cp-support.h (struct demangle_parse_info) (demangle_parse_info,
+	~demangle_parse_info): Declare new members.
+	(cp_demangled_name_to_comp): Return unique_ptr.
+	(cp_demangled_name_parse_free)
+	(make_cleanup_cp_demangled_name_parse_free)
+	(cp_new_demangle_parse_info): Remove.
+	* cp-support.c (do_demangled_name_parse_free_cleanup)
+	(make_cleanup_cp_demangled_name_parse_free): Remove.
+	(inspect_type, cp_canonicalize_string_full)
+	(cp_canonicalize_string): Update.
+	(mangled_name_to_comp): Change return type.
+	(cp_class_name_from_physname, method_name_from_physname)
+	(cp_func_name, cp_remove_params): Update.
+	* cp-name-parser.y (demangle_parse_info): New constructor, from
+	cp_new_demangle_parse_info.
+	(~demangle_parse_info): New destructor, from
+	cp_demangled_name_parse_free.
+	(cp_merge_demangle_parse_infos): Update.
+	(cp_demangled_name_to_comp): Change return type.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* top.c (prevent_dont_repeat): Change return type.
+	* python/python.c (execute_gdb_command): Use std::string.
+	Update.
+	* guile/guile.c (gdbscm_execute_gdb_command): Update.
+	* command.h (prevent_dont_repeat): Change return type.
+	* breakpoint.c (bpstat_do_actions_1): Update.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* value.h (scoped_value_mark::~scoped_value_mark): Call
+	free_to_mark.
+	(scoped_value_mark::free_to_mark): New method.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use
+	scoped_value_mark.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (valpy_dereference, valpy_referenced_value)
+	(valpy_reference_value, valpy_const_value, valpy_get_address)
+	(valpy_get_dynamic_type, valpy_lazy_string, valpy_do_cast)
+	(valpy_getitem, valpy_call, valpy_binop_throw, valpy_negative)
+	(valpy_absolute, valpy_richcompare_throw): Use scoped_value_mark.
+	* dwarf2loc.c (dwarf2_loc_desc_get_symbol_read_needs): Use
+	scoped_value_mark.
+	* dwarf2-frame.c (execute_stack_op): Use scoped_value_mark.
+	* value.h (scoped_value_mark): New class.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs): Use psymtab_discarder.
+	* psympriv.h (make_cleanup_discard_psymtabs): Don't declare.
+	* psymtab.c (discard_psymtabs_upto): Remove.
+	(make_cleanup_discard_psymtabs): Remove.
+	(struct psymtab_state): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* record-full.c (record_full_save_cleanups): Remove.
+	(record_full_save): Use gdb::unlinker.
+	* gcore.c (do_bfd_delete_cleanup): Remove.
+	(gcore_command): Use gdb::unlinker, unique_xmalloc_ptr.  Remove
+	cleanups.
+	* dwarf2read.c (unlink_if_set): Remove.
+	(write_psymtabs_to_index): Use gdb::unlinker.
+	* common/gdb_unlinker.h: New file.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* windows-tdep.c (windows_xfer_shared_library): Update.
+	* windows-nat.c (windows_make_so): Update.
+	* utils.h (make_cleanup_bfd_unref): Remove.
+	* utils.c (do_bfd_close_cleanup, make_cleanup_bfd_unref): Remove.
+	* symfile.h (symfile_bfd_open)
+	(find_separate_debug_file_in_section): Return gdb_bfd_ref_ptr.
+	* symfile.c (read_symbols, symbol_file_add)
+	(separate_debug_file_exists): Update.
+	(symfile_bfd_open): Return gdb_bfd_ref_ptr.
+	(generic_load, reread_symbols): Update.
+	* symfile-mem.c (symbol_file_add_from_memory): Update.
+	* spu-linux-nat.c (spu_bfd_open): Return gdb_bfd_ref_ptr.
+	(spu_symbol_file_add_from_memory): Update.
+	* solist.h (struct target_so_ops) <bfd_open>: Return
+	gdb_bfd_ref_ptr.
+	(solib_bfd_fopen, solib_bfd_open): Return gdb_bfd_ref_ptr.
+	* solib.c (solib_bfd_fopen, solib_bfd_open): Return
+	gdb_bfd_ref_ptr.
+	(solib_map_sections, reload_shared_libraries_1): Update.
+	* solib-svr4.c (enable_break): Update.
+	* solib-spu.c (spu_bfd_fopen): Return gdb_bfd_ref_ptr.
+	* solib-frv.c (enable_break2): Update.
+	* solib-dsbt.c (enable_break): Update.
+	* solib-darwin.c (gdb_bfd_mach_o_fat_extract): Return
+	gdb_bfd_ref_ptr.
+	(darwin_solib_get_all_image_info_addr_at_init): Update.
+	(darwin_bfd_open): Return gdb_bfd_ref_ptr.
+	* solib-aix.c (solib_aix_bfd_open): Return gdb_bfd_ref_ptr.
+	* record-full.c (record_full_save): Update.
+	* python/py-objfile.c (objfpy_add_separate_debug_file): Update.
+	* procfs.c (insert_dbx_link_bpt_in_file): Update.
+	* minidebug.c (find_separate_debug_file_in_section): Return
+	gdb_bfd_ref_ptr.
+	* machoread.c (macho_add_oso_symfile): Change abfd to
+	gdb_bfd_ref_ptr.
+	(macho_symfile_read_all_oso): Update.
+	(macho_check_dsym): Return gdb_bfd_ref_ptr.
+	(macho_symfile_read): Update.
+	* jit.c (bfd_open_from_target_memory): Return gdb_bfd_ref_ptr.
+	(jit_bfd_try_read_symtab): Update.
+	* gdb_bfd.h (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
+	(gdb_bfd_openw, gdb_bfd_openr_iovec)
+	(gdb_bfd_openr_next_archived_file, gdb_bfd_fdopenr): Return
+	gdb_bfd_ref_ptr.
+	(gdb_bfd_ref_policy): New struct.
+	(gdb_bfd_ref_ptr): New typedef.
+	* gdb_bfd.c (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
+	(gdb_bfd_openw, gdb_bfd_openr_iovec)
+	(gdb_bfd_openr_next_archived_file, gdb_bfd_fdopenr): Return
+	gdb_bfd_ref_ptr.
+	* gcore.h (create_gcore_bfd): Return gdb_bfd_ref_ptr.
+	* gcore.c (create_gcore_bfd): Return gdb_bfd_ref_ptr.
+	(gcore_command): Update.
+	* exec.c (exec_file_attach): Update.
+	* elfread.c (elf_symfile_read): Update.
+	* dwarf2read.c (dwarf2_get_dwz_file): Update.
+	(try_open_dwop_file, open_dwo_file): Return gdb_bfd_ref_ptr.
+	(open_and_init_dwo_file): Update.
+	(open_dwp_file): Return gdb_bfd_ref_ptr.
+	(open_and_init_dwp_file): Update.
+	* corelow.c (core_open): Update.
+	* compile/compile-object-load.c (compile_object_load): Update.
+	* common/gdb_ref_ptr.h (ref_ptr::operator->): New operator.
+	* coffread.c (coff_symfile_read): Update.
+	* cli/cli-dump.c (bfd_openr_or_error, bfd_openw_or_error): Return
+	gdb_bfd_ref_ptr.  Rename.
+	(dump_bfd_file, restore_command): Update.
+	* build-id.h (build_id_to_debug_bfd): Return gdb_bfd_ref_ptr.
+	* build-id.c (build_id_to_debug_bfd): Return gdb_bfd_ref_ptr.
+	(find_separate_debug_file_by_buildid): Update.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* common/gdb_ref_ptr.h: New file.
+	* python/py-ref.h (struct gdbpy_ref_policy): New.
+	(gdbpy_ref): Now a typedef.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_htab_delete): Don't declare.
+	* utils.c (do_htab_delete_cleanup, make_cleanup_htab_delete):
+	Remove.
+	* linespec.c (decode_compound_collector): Add constructor,
+	destructor.
+	(lookup_prefix_sym): Remove cleanup.
+	(symtab_collector): Add constructor, destructor.
+	(collect_symtabs_from_filename): Remove cleanup.
+	* disasm.c (do_mixed_source_and_assembly): Use htab_up.
+	* compile/compile-c-symbols.c (generate_c_for_variable_locations):
+	Use htab_up.
+	* gnu-v3-abi.c (gnuv3_print_vtable): Use htab_up.
+	* dwarf2read.c (dw2_expand_symtabs_matching)
+	(dw2_map_symbol_filenames, dwarf_decode_macros)
+	(write_psymtabs_to_index): Use htab_up.
+	* dwarf2loc.c (func_verify_no_selftailcall)
+	(call_site_find_chain_1, func_verify_no_selftailcall)
+	(chain_candidate, call_site_find_chain_1): Use std::unordered_set,
+	std::vector, gdb::unique_xmalloc_ptr.
+	(call_sitep): Remove typedef.
+	(dwarf2_locexpr_baton_eval): Remove unused variable.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python-internal.h (make_cleanup_py_decref)
+	(make_cleanup_py_xdecref): Don't declare.
+	* python/py-utils.c (py_decref, make_cleanup_py_decref)
+	(py_xdecref, make_cleanup_py_xdecref): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (py_mi_print_variables): Use gdbpy_ref.
+	(py_print_locals, enumerate_locals, py_print_args): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (enumerate_args): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-utils.c (unicode_to_encoded_string)
+	(python_string_to_target_string)
+	(python_string_to_target_python_string)
+	(python_string_to_host_string, gdbpy_obj_to_string)
+	(get_addr_from_python): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-unwind.c (pyuw_object_attribute_to_pointer): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (eval_python_command, gdbpy_decode_line)
+	(gdbpy_run_events, gdbpy_start_type_printers)
+	(gdbpy_apply_type_printers): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-param.c (get_doc_string, compute_enum_values): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-inferior.c (find_thread_object, build_inferior_list):
+	Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (py_print_frame): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-finishbreakpoint.c (bpfinishpy_out_of_scope): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-cmd.c (cmdpy_completer_helper): Use gdbpy_ref.  Remove
+	extra incref.
+	(cmdpy_completer_handle_brkchars, cmdpy_completer, cmdpy_init):
+	Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-breakpoint.c (gdbpy_breakpoint_cond_says_stop): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-arch.c (archpy_disassemble): Use gdbpy_ref.  Don't
+	decref results of PyArg_ParseTupleAndKeywords.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (python_run_simple_file): Use
+	unique_xmalloc_ptr, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-prettyprint.c (print_stack_unless_memory_error)
+	(print_string_repr, print_children): Use gdbpy_ref.
+	(dummy_python_frame): New class.
+	(dummy_python_frame::dummy_python_frame): Rename from
+	push_dummy_python_frame.
+	(py_restore_tstate): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (py_print_frame): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (ensure_python_env, restore_python_env):
+	Remove.
+	* python/python-internal.h (ensure_python_env): Don't declare.
+	* varobj.h (varobj_ensure_python_env): Don't declare.
+	* varobj.c (varobj_ensure_python_env): Remove.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* varobj.c (varobj_value_get_print_value): Use
+	gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-prettyprint.c (print_string_repr, print_children):
+	Update.
+	* python/py-lazy-string.c (gdbpy_extract_lazy_string): Change type
+	of "encoding".
+	* varobj.c (varobj_value_get_print_value): Update.
+	* python/python-internal.h (gdbpy_extract_lazy_string): Update.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* varobj.c (varobj_get_display_hint)
+	(dynamic_varobj_has_child_method, install_new_value_visualizer)
+	(varobj_set_visualizer, free_variable): Use
+	gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (python_command): Use gdbpy_enter, gdbpy_ref.
+	(do_finish_initialization): New function.  Use gdbpy_ref.
+	(gdbpy_finish_initialization): Use gdbpy_enter.  Call
+	do_finish_initialization.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-param.c (get_set_value, get_show_value): Use
+	gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-function.c (fnpy_call): Use gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-cmd.c (cmdpy_function): Use gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-varobj.c (py_varobj_iter_dtor, py_varobj_iter_next):
+	Use gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* varobj.c (gdbpy_enter_varobj): New constructor.
+	* python/python-internal.h (gdbpy_enter_varobj): New class.
+	* python/py-varobj.c (py_varobj_get_iterator): Use
+	gdbpy_enter_varobj.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type): Use
+	gdbpy_enter, gdbpy_ref, unique_xmalloc_ptr.
+	(gdbpy_invoke_xmethod): Use gdbpy_ref, gdbpy_enter.
+	(gdbpy_get_xmethod_arg_types): Use gdbpy_ref,
+	unique_xmalloc_ptr.
+	(gdbpy_get_xmethod_arg_types): Use gdbpy_ref, gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-xmethods.c (invoke_match_method): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-xmethods.c (gdbpy_get_matching_xmethod_workers): use
+	gdbpy_enter, gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (python_interactive_command): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_before_prompt_hook): Use gdbpy_enter,
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Use
+	gdbpy_enter, gdbpy_ref, unique_xmalloc_ptr.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (htab_deleter): New struct.
+	(htab_up): New typedef.
+	* python/py-framefilter.c (gdbpy_apply_frame_filter): Use
+	gdbpy_enter, gdbpy_ref, htab_up.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-unwind.c (pending_frame_invalidate): Remove.
+	(pyuw_sniffer): Use gdbpy_enter and gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-xmethods.c (gdbpy_free_xmethod_worker_data)
+	(gdbpy_clone_xmethod_worker_data): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-type.c (save_objfile_types): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_eval_from_control_command)
+	(gdbpy_source_script, gdbpy_run_events)
+	(gdbpy_source_objfile_script, gdbpy_execute_objfile_script)
+	(gdbpy_free_type_printers, gdbpy_finish_initialization): Use
+	gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-progspace.c (py_free_pspace): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-objfile.c (py_free_objfile): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-inferior.c (python_on_normal_stop, python_on_resume)
+	(python_on_inferior_call_pre, python_on_inferior_call_post)
+	(python_on_memory_change, python_on_register_change)
+	(python_inferior_exit, python_new_objfile, add_thread_object)
+	(delete_thread_object, py_free_inferior): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-finishbreakpoint.c (bpfinishpy_handle_stop)
+	(bpfinishpy_handle_exit): Use gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-cmd.c (cmdpy_destroyer)
+	(cmdpy_completer_handle_brkchars, cmdpy_completer): Use
+	gdbpy_enter.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-breakpoint.c (gdbpy_breakpoint_cond_says_stop): Use
+	gdbpy_enter.
+	(gdbpy_breakpoint_has_cond): Likewise.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_enter): New constructor.
+	(~gdbpy_enter): New destructor.
+	(restore_python_env, ensure_python_env): Rewrite.
+	* python/python-internal.h (gdbpy_enter): New class.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-symbol.c (gdbpy_lookup_symbol): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (value_has_field, get_field_flag)
+	(get_field_type, valpy_getitem, convert_value_from_python): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_progspaces, gdbpy_objfiles): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-prettyprint.c (search_pp_list)
+	(find_pretty_printer_from_objfiles)
+	(find_pretty_printer_from_progspace)
+	(find_pretty_printer_from_gdb, find_pretty_printer)
+	(gdbpy_get_display_hint, gdbpy_get_varobj_pretty_printer): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-param.c (call_doc_function): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-linetable.c (build_line_table_tuple_from_pcs)
+	(ltpy_get_all_source_lines): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-framefilter.c (extract_sym, extract_value)
+	(get_py_iter_from_func, bootstrap_python_frame_filters): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-breakpoint.c (gdbpy_breakpoints): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-inferior.c (gdbpy_inferiors): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-function.c (convert_values_to_python, fnpy_init): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-cmd.c (gdbpy_string_to_argv): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-type.c (convert_field, make_fielditem, typy_fields)
+	(typy_range): Use gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-threadevent.c (create_thread_event_object): Use
+	gdbpy_ref.
+	* python/py-stopevent.c (create_stop_event_object): Simplify.
+	(emit_stop_event): Use gdbpy_ref.
+	* python/py-signalevent.c (create_signal_event_object): Use
+	gdbpy_ref.
+	* python/py-newobjfileevent.c (create_new_objfile_event_object)
+	(emit_new_objfile_event, create_clear_objfiles_event_object)
+	(emit_clear_objfiles_event): Use gdbpy_ref.
+	* python/py-infevents.c (create_inferior_call_event_object)
+	(create_register_changed_event_object)
+	(create_memory_changed_event_object, emit_inferior_call_event)
+	(emit_memory_changed_event, emit_register_changed_event): Use
+	gdbpy_ref.
+	* python/py-exitedevent.c (create_exited_event_object)
+	(emit_exited_event): Use gdbpy_ref.
+	* python/py-event.h (evpy_emit_event): Remove
+	CPYCHECKER_STEALS_REFERENCE_TO_ARG annotation.
+	* python/py-event.c (evpy_emit_event): Use gdbpy_ref.
+	* python/py-continueevent.c (emit_continue_event): Use
+	gdbpy_ref.
+	* python/py-breakpoint.c (gdbpy_breakpoint_created)
+	(gdbpy_breakpoint_deleted, gdbpy_breakpoint_modified): Use
+	gdbpy_ref.
+	* python/py-bpevent.c (create_breakpoint_event_object): Use
+	gdbpy_ref.
+
+2017-01-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-ref.h: New file.
+
 2017-01-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli-out.c (cli_ui_out::do_redirect): Change return type to

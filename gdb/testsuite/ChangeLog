@@ -1,3 +1,80 @@
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/amd64-gs_base.c: New file.
+	* gdb.arch/amd64-gs_base.exp: New file.
+
+2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* lib/memory.exp: Remove spurious empty newlines.
+
+2017-01-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-bad-printers.exp: Load python file using "source".
+	* gdb.python/py-events.exp: Likewise.
+	* gdb.python/py-evsignal.exp: Likewise.
+	* gdb.python/py-evthreads.exp: Likewise.
+	* gdb.python/py-frame-args.exp: Likewise.
+	* gdb.python/py-framefilter-invalidarg.exp: Likewise.
+	* gdb.python/py-framefilter-mi.exp: Likewise.
+	* gdb.python/py-framefilter.exp: Likewise.
+	* gdb.python/py-mi.exp: Likewise.
+	* gdb.python/py-pp-maint.exp: Likewise.
+	* gdb.python/py-pp-registration.exp: Likewise.
+	* gdb.python/py-prettyprint.exp: Likewise.
+	(run_lang_tests): Likewise.
+	* gdb.python/py-typeprint.exp: Likewise.
+
+2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* lib/memory.exp: New file.
+	* lib/gdb.exp: Load memory.exp.
+	* gdb.base/memattr.exp (delete_memory): Move proc to
+	lib/memory.exp and rename to delete_memory_regions.
+	Replace delete_memory with delete_memory_regions.
+	Cleanup memory regions before tests.
+	* gdb.base/breakpoint-in-ro-region.exp: Cleanup memory regions
+	before tests.
+
+2017-01-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.reverse/insn-reverse.c: Move arm and aarch64 code to their own
+	files.
+	(initialize): New function conditionally defined.
+	(testcases): Move within conditional block.
+	(main): Call initialize.
+	* gdb.reverse/insn-reverse-aarch64.c: New file, based on aarch64 bits
+	of gdb.reverse/insn-reverse.c.
+	* gdb.reverse/insn-reverse-arm.c: New file, based on arm bits of
+	gdb.reverse/insn-reverse.c.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/all-architectures.exp.in (do_arch_tests): Test
+	disassemble on address 0.
+
+2017-01-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.dwarf2/implptr-64bit.exp: Use dwarf assembler.
+	* gdb.dwarf2/implptr-64bit.S: Remove.
+	* lib/dwarf.exp (Dwarf): Handle character "%".  Evaluate some
+	variables in caller's context.  Add DW_OP_implicit_value.
+
+2017-01-25  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/dwarf.exp (Dwarf::_location): Handle
+	DW_OP_GNU_implicit_pointer with proper size.
+
+2017-01-20  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.python/py-xmethods.exp: Fix test names starting with lowercase
+	and add untested calls.
+
+2017-01-20  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.python/python.exp: Check line number against what GDB thinks
+	the line number is for func1.
+
 2017-01-08  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/debug-expr.exp: New file.

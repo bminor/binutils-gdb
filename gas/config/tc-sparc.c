@@ -1130,7 +1130,7 @@ md_begin (void)
 	p->pop = &pop_table[i];
       }
 
-    /* Last entry is the centinel.  */
+    /* Last entry is the sentinel.  */
     perc_table[entry].type = perc_entry_none;
 
     qsort (perc_table, sizeof (perc_table) / sizeof (perc_table[0]),
@@ -3222,7 +3222,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		}
 
 	      as_bad (_("Architecture mismatch on \"%s %s\"."), str, argsStart);
-	      as_tsktsk (_(" (Requires %s; requested architecture is %s.)"),
+	      as_tsktsk (_("(Requires %s; requested architecture is %s.)"),
 			 required_archs,
 			 sparc_opcode_archs[max_architecture].name);
 	      return special_case;

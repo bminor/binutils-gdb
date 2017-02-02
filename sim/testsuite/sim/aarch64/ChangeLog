@@ -1,3 +1,12 @@
+2017-01-23  Jim Wilson  <jim.wilson@linaro.org>
+
+	* cmtst.s: New.
+
+2017-01-17  Jim Wilson  <jim.wilson@linaro.org>
+
+	* addv.s: New.
+	* xtn.s: New.
+
 2017-01-09  Jim Wilson  <jim.wilson@linaro.org>
 
 	* uzp.s: New.

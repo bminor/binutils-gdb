@@ -196,6 +196,8 @@ enum
   CpuAVX512_4FMAPS,
   /* Intel AVX-512 4VNNIW Instructions support required.  */
   CpuAVX512_4VNNIW,
+  /* Intel AVX-512 VPOPCNTDQ Instructions support required.  */
+  CpuAVX512_VPOPCNTDQ,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -321,6 +323,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512vbmi:1;
       unsigned int cpuavx512_4fmaps:1;
       unsigned int cpuavx512_4vnniw:1;
+      unsigned int cpuavx512_vpopcntdq:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;

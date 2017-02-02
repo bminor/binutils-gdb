@@ -148,7 +148,7 @@ static segT pru_current_align_seg;
 static int pru_auto_align_on = 1;
 
 /* The last seen label in the current section.  This is used to auto-align
-   labels preceeding instructions.  */
+   labels preceding instructions.  */
 static symbolS *pru_last_label;
 
 

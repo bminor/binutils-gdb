@@ -445,9 +445,9 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      bfd *abfd = symfile_bfd_open (file_name);
+      gdb_bfd_ref_ptr abfd (symfile_bfd_open (file_name));
 
-      symbol_file_add_separate (abfd, file_name, 0, obj->objfile);
+      symbol_file_add_separate (abfd.get (), file_name, 0, obj->objfile);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -612,13 +612,11 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
 static void
 py_free_objfile (struct objfile *objfile, void *datum)
 {
-  struct cleanup *cleanup;
   objfile_object *object = (objfile_object *) datum;
 
-  cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
   object->objfile = NULL;
   Py_DECREF ((PyObject *) object);
-  do_cleanups (cleanup);
 }
 
 /* Return a borrowed reference to the Python object of type Objfile

@@ -61,6 +61,17 @@ FreeBSD/mips			mips*-*-freebsd
 Synopsys ARC			arc*-*-elf32
 FreeBSD/mips			mips*-*-freebsd
 
+* New commands
+
+flash-erase
+  Erases all the flash memory regions reported by the target.
+
+* New MI commands
+
+-target-flash-erase
+  Erases all the flash memory regions reported by the target.  This is
+  equivalent to the CLI command flash-erase.
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.

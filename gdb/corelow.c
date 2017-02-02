@@ -275,7 +275,6 @@ core_open (const char *arg, int from_tty)
   int siggy;
   struct cleanup *old_chain;
   char *temp;
-  bfd *temp_bfd;
   int scratch_chan;
   int flags;
   char *filename;
@@ -310,20 +309,19 @@ core_open (const char *arg, int from_tty)
   if (scratch_chan < 0)
     perror_with_name (filename);
 
-  temp_bfd = gdb_bfd_fopen (filename, gnutarget, 
-			    write_files ? FOPEN_RUB : FOPEN_RB,
-			    scratch_chan);
+  gdb_bfd_ref_ptr temp_bfd (gdb_bfd_fopen (filename, gnutarget,
+					   write_files ? FOPEN_RUB : FOPEN_RB,
+					   scratch_chan));
   if (temp_bfd == NULL)
     perror_with_name (filename);
 
-  if (!bfd_check_format (temp_bfd, bfd_core)
-      && !gdb_check_format (temp_bfd))
+  if (!bfd_check_format (temp_bfd.get (), bfd_core)
+      && !gdb_check_format (temp_bfd.get ()))
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one
          thing, on error it does not free all the storage associated
          with the bfd).  */
-      make_cleanup_bfd_unref (temp_bfd);
       error (_("\"%s\" is not a core dump: %s"),
 	     filename, bfd_errmsg (bfd_get_error ()));
     }
@@ -333,7 +331,7 @@ core_open (const char *arg, int from_tty)
 
   do_cleanups (old_chain);
   unpush_target (&core_ops);
-  core_bfd = temp_bfd;
+  core_bfd = temp_bfd.release ();
   old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
 
   core_gdbarch = gdbarch_from_bfd (core_bfd);
@@ -517,6 +515,8 @@ get_core_register_section (struct regcache *regcache,
   struct bfd_section *section;
   bfd_size_type size;
   char *contents;
+  bool variable_size_section = (regset != NULL
+				&& regset->flags & REGSET_VARIABLE_SIZE);
 
   xfree (section_name);
 
@@ -541,7 +541,7 @@ get_core_register_section (struct regcache *regcache,
       warning (_("Section `%s' in core file too small."), section_name);
       return;
     }
-  if (size != min_size && !(regset->flags & REGSET_VARIABLE_SIZE))
+  if (size != min_size && !variable_size_section)
     {
       warning (_("Unexpected size of section `%s' in core file."),
 	       section_name);

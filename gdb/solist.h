@@ -22,6 +22,7 @@
 #define SO_NAME_MAX_PATH_SIZE 512	/* FIXME: Should be dynamic */
 /* For domain_enum domain.  */
 #include "symtab.h"
+#include "gdb_bfd.h"
 
 /* Forward declaration for target specific link map information.  This
    struct is opaque to all but the target specific file.  */
@@ -121,7 +122,7 @@ struct target_so_ops
     int (*in_dynsym_resolve_code) (CORE_ADDR pc);
 
     /* Find and open shared library binary file.  */
-    bfd *(*bfd_open) (char *pathname);
+    gdb_bfd_ref_ptr (*bfd_open) (char *pathname);
 
     /* Optional extra hook for finding and opening a solib.
        If TEMP_PATHNAME is non-NULL: If the file is successfully opened a
@@ -178,10 +179,10 @@ extern char *exec_file_find (const char *in_pathname, int *fd);
 extern char *solib_find (const char *in_pathname, int *fd);
 
 /* Open BFD for shared library file.  */
-extern bfd *solib_bfd_fopen (char *pathname, int fd);
+extern gdb_bfd_ref_ptr solib_bfd_fopen (char *pathname, int fd);
 
 /* Find solib binary file and open it.  */
-extern bfd *solib_bfd_open (char *in_pathname);
+extern gdb_bfd_ref_ptr solib_bfd_open (char *in_pathname);
 
 /* FIXME: gdbarch needs to control this variable.  */
 extern struct target_so_ops *current_target_so_ops;

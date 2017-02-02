@@ -93,24 +93,6 @@ copy_string_to_obstack (struct obstack *obstack, const char *string,
   return (char *) obstack_copy (obstack, string, *len);
 }
 
-/* A cleanup wrapper for cp_demangled_name_parse_free.  */
-
-static void
-do_demangled_name_parse_free_cleanup (void *data)
-{
-  struct demangle_parse_info *info = (struct demangle_parse_info *) data;
-
-  cp_demangled_name_parse_free (info);
-}
-
-/* Create a cleanup for C++ name parsing.  */
-
-struct cleanup *
-make_cleanup_cp_demangled_name_parse_free (struct demangle_parse_info *info)
-{
-  return make_cleanup (do_demangled_name_parse_free_cleanup, info);
-}
-
 /* Return 1 if STRING is clearly already in canonical form.  This
    function is conservative; things which it does not recognize are
    assumed to be non-canonical, and the parser will sort them out
@@ -207,7 +189,7 @@ inspect_type (struct demangle_parse_info *info,
 	  long len;
 	  int is_anon;
 	  struct type *type;
-	  struct demangle_parse_info *i;
+	  std::unique_ptr<demangle_parse_info> i;
 	  struct ui_file *buf;
 
 	  /* Get the real type of the typedef.  */
@@ -270,7 +252,7 @@ inspect_type (struct demangle_parse_info *info,
 	  if (i != NULL)
 	    {
 	      /* Merge the two trees.  */
-	      cp_merge_demangle_parse_infos (info, ret_comp, i);
+	      cp_merge_demangle_parse_infos (info, ret_comp, i.get ());
 
 	      /* Replace any newly introduced typedefs -- but not
 		 if the type is anonymous (that would lead to infinite
@@ -538,21 +520,18 @@ cp_canonicalize_string_full (const char *string,
 {
   std::string ret;
   unsigned int estimated_len;
-  struct demangle_parse_info *info;
+  std::unique_ptr<demangle_parse_info> info;
 
   estimated_len = strlen (string) * 2;
   info = cp_demangled_name_to_comp (string, NULL);
   if (info != NULL)
     {
       /* Replace all the typedefs in the tree.  */
-      replace_typedefs (info, info->tree, finder, data);
+      replace_typedefs (info.get (), info->tree, finder, data);
 
       /* Convert the tree back into a string.  */
       ret = cp_comp_to_string (info->tree, estimated_len);
       gdb_assert (!ret.empty ());
-
-      /* Free the parse information.  */
-      cp_demangled_name_parse_free (info);
 
       /* Finally, compare the original string with the computed
 	 name, returning NULL if they are the same.  */
@@ -579,7 +558,7 @@ cp_canonicalize_string_no_typedefs (const char *string)
 std::string
 cp_canonicalize_string (const char *string)
 {
-  struct demangle_parse_info *info;
+  std::unique_ptr<demangle_parse_info> info;
   unsigned int estimated_len;
 
   if (cp_already_canonical (string))
@@ -591,7 +570,6 @@ cp_canonicalize_string (const char *string)
 
   estimated_len = strlen (string) * 2;
   std::string ret = cp_comp_to_string (info->tree, estimated_len);
-  cp_demangled_name_parse_free (info);
 
   if (ret.empty ())
     {
@@ -606,69 +584,27 @@ cp_canonicalize_string (const char *string)
   return ret;
 }
 
-// See description in cp-support.h.
-
-parsed_demangle_info::parsed_demangle_info (const char *mangled_name,
-					    int options)
-  : m_mangled_name (mangled_name), m_options (options)
-{
-  m_info = cp_mangled_name_to_comp (mangled_name, options,
-				    &m_memory, &m_name_storage);
-}
-
-parsed_demangle_info::parsed_demangle_info (const parsed_demangle_info &o)
-  : parsed_demangle_info (o.m_mangled_name.c_str (), o.m_options)
-{
-}
-
-// See description in cp-support.h.
-
-parsed_demangle_info::~parsed_demangle_info ()
-{
-  if (m_info != NULL)
-    cp_demangled_name_parse_free (m_info);
-  xfree (m_memory);
-  xfree (m_name_storage);
-}
-
-// See description in cp-support.h.
-
-const struct demangle_component *
-parsed_demangle_info::tree (void) const
-{
-  return m_info->tree;
-}
-
-// See description in cp-support.h.
-
-const struct demangle_parse_info *
-parsed_demangle_info::info (void) const
-{
-  return m_info;
-}
-
 /* See description in cp-support.h.  */
 
-struct demangle_parse_info *
-cp_mangled_name_to_comp (const char *mangled_name, int options,
-			 void **memory, char **demangled_p)
+std::unique_ptr<demangle_parse_info>
+cp_mangled_name_to_comp (const char *mangled_name, int options)
 {
   char *demangled_name;
-  struct demangle_parse_info *info;
 
   /* If it looks like a v3 mangled name, then try to go directly
      to trees.  */
   if (mangled_name[0] == '_' && mangled_name[1] == 'Z')
     {
       struct demangle_component *ret;
+      void *memory;
 
       ret = cplus_demangle_v3_components (mangled_name,
-					  options, memory);
+					  options, &memory);
       if (ret)
 	{
-	  info = cp_new_demangle_parse_info ();
+	  std::unique_ptr<demangle_parse_info> info (new demangle_parse_info);
 	  info->tree = ret;
-	  *demangled_p = NULL;
+	  info->memory = memory;
 	  return info;
 	}
     }
@@ -681,7 +617,8 @@ cp_mangled_name_to_comp (const char *mangled_name, int options,
   
   /* If we could demangle the name, parse it to build the component
      tree.  */
-  info = cp_demangled_name_to_comp (demangled_name, NULL);
+  std::unique_ptr<demangle_parse_info> info
+    = cp_demangled_name_to_comp (demangled_name, NULL);
 
   if (info == NULL)
     {
@@ -689,7 +626,8 @@ cp_mangled_name_to_comp (const char *mangled_name, int options,
       return NULL;
     }
 
-  *demangled_p = demangled_name;
+  long len;
+  copy_string_to_obstack (&info->obstack, demangled_name, &len);
   return info;
 }
 
@@ -698,14 +636,12 @@ cp_mangled_name_to_comp (const char *mangled_name, int options,
 char *
 cp_class_name_from_physname (const char *physname)
 {
-  void *storage = NULL;
-  char *demangled_name = NULL, *ret;
+  char *ret;
   struct demangle_component *ret_comp, *prev_comp, *cur_comp;
-  struct demangle_parse_info *info;
+  std::unique_ptr<demangle_parse_info> info;
   int done;
 
-  info = cp_mangled_name_to_comp (physname, DMGL_ANSI,
-				  &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (physname, DMGL_ANSI);
   if (info == NULL)
     return NULL;
 
@@ -778,9 +714,6 @@ cp_class_name_from_physname (const char *physname)
       ret = cp_comp_to_string (ret_comp, 10);
     }
 
-  xfree (storage);
-  xfree (demangled_name);
-  cp_demangled_name_parse_free (info);
   return ret;
 }
 
@@ -848,13 +781,11 @@ unqualified_name_from_comp (struct demangle_component *comp)
 char *
 method_name_from_physname (const char *physname)
 {
-  void *storage = NULL;
-  char *demangled_name = NULL, *ret;
+  char *ret;
   struct demangle_component *ret_comp;
-  struct demangle_parse_info *info;
+  std::unique_ptr<demangle_parse_info> info;
 
-  info = cp_mangled_name_to_comp (physname, DMGL_ANSI,
-				  &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (physname, DMGL_ANSI);
   if (info == NULL)
     return NULL;
 
@@ -866,9 +797,6 @@ method_name_from_physname (const char *physname)
        estimate.  */
     ret = cp_comp_to_string (ret_comp, 10);
 
-  xfree (storage);
-  xfree (demangled_name);
-  cp_demangled_name_parse_free (info);
   return ret;
 }
 
@@ -883,7 +811,7 @@ cp_func_name (const char *full_name)
 {
   char *ret;
   struct demangle_component *ret_comp;
-  struct demangle_parse_info *info;
+  std::unique_ptr<demangle_parse_info> info;
 
   info = cp_demangled_name_to_comp (full_name, NULL);
   if (!info)
@@ -895,7 +823,6 @@ cp_func_name (const char *full_name)
   if (ret_comp != NULL)
     ret = cp_comp_to_string (ret_comp, 10);
 
-  cp_demangled_name_parse_free (info);
   return ret;
 }
 
@@ -904,15 +831,14 @@ cp_func_name (const char *full_name)
 char *
 cp_strip_template_parameters (const char *linkage_or_phys_name)
 {
-  /* !!keiths: This is by far the best way to do this, but there is
-     one really big problem... The code below resets the the top-level
-     node to below the (first) DEMANGLE_COMPONENT_TEMPLATE node in the tree.
+  /* This is by far the best way to do this, but there is one really big
+     problem... The code below resets the the top-level node to below the
+     (first) DEMANGLE_COMPONENT_TEMPLATE node in the tree.
 
      Normally that works, however, there is a special case (of course!)
      where this fails: conversion operators.  Those *require* the template
      parameter to deduce the name of the operator.  As a result, the code
-     below will not work on conversion operators at all (and maybe others,
-     I haven't checked).  */
+     below will not work on conversion operators at all (and maybe others).  */
 #if 0
   struct demangle_component *ret_comp;
   struct demangle_parse_info *info;
@@ -998,11 +924,10 @@ cp_strip_template_parameters (const char *linkage_or_phys_name)
   xfree (str);
   return ret;
 #else
-  char *demangled_name = NULL;
   char *stripped = NULL;
   const char *name;
 
-  demangled_name = gdb_demangle (linkage_or_phys_name, DMGL_ANSI);
+  char *demangled_name = gdb_demangle (linkage_or_phys_name, DMGL_ANSI);
   if (demangled_name != NULL)
     name = demangled_name;
   else
@@ -1046,7 +971,7 @@ cp_remove_params (const char *demangled_name)
 {
   int done = 0;
   struct demangle_component *ret_comp;
-  struct demangle_parse_info *info;
+  std::unique_ptr<demangle_parse_info> info;
   char *ret = NULL;
 
   if (demangled_name == NULL)
@@ -1079,7 +1004,6 @@ cp_remove_params (const char *demangled_name)
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     ret = cp_comp_to_string (d_left (ret_comp), 10);
 
-  cp_demangled_name_parse_free (info);
   return ret;
 }
 
@@ -1854,14 +1778,10 @@ void
 cp_decode_template_type_indices (struct template_symbol *tsymbol,
 				 const struct demangle_parse_info *opt_info)
 {
-  struct demangle_parse_info *allocd_info;
   const struct demangle_parse_info *info;
-  char *demangled = NULL;
-  void *storage = NULL;
   int idx;
   struct demangle_component *ret_comp;
   struct objfile *objfile;
-  struct cleanup *back_to;
 
   /* Only do this once.  */
   if (tsymbol->template_argument_indices != NULL)
@@ -1885,24 +1805,18 @@ cp_decode_template_type_indices (struct template_symbol *tsymbol,
   for (idx = 0; idx < TYPE_NFIELDS (SYMBOL_TYPE (&tsymbol->base)); ++idx)
     tsymbol->template_argument_indices[idx] = -1;
 
-  back_to = make_cleanup (null_cleanup, NULL);
+  std::unique_ptr<demangle_parse_info> dpi;
+
   if (opt_info != NULL)
     info = opt_info;
   else
     {
-      allocd_info = cp_mangled_name_to_comp (tsymbol->linkage_name,
-					     DMGL_ANSI | DMGL_PARAMS,
-					     &storage, &demangled);
-      info = allocd_info;
-      if (info == NULL)
-	{
-	  do_cleanups (back_to);
-	  return;
-	}
+      dpi = cp_mangled_name_to_comp (tsymbol->linkage_name,
+				     DMGL_ANSI | DMGL_PARAMS);
+      if (dpi == NULL)
+	return;
 
-      make_cleanup_cp_demangled_name_parse_free (allocd_info);
-      make_cleanup (xfree, storage);
-      make_cleanup (xfree, demangled);
+      info = dpi.get ();
     }
 
   /* !!keiths will certainly require extensive testing/revision.  */
@@ -2028,8 +1942,6 @@ cp_decode_template_type_indices (struct template_symbol *tsymbol,
 	    }
 	}
     }
-
-  do_cleanups (back_to);
 }
 
 void

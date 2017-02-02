@@ -294,7 +294,7 @@ target_is_430xv2 (void)
       ? BFD_RELOC_MSP430_16_BYTE : BFD_RELOC_MSP430_16))
 
 /* Generate a 16-bit pc-relative relocation.
-   For the 430X we generate a relocation without linkwer range checking.
+   For the 430X we generate a relocation without linker range checking.
    For the 430 we generate a relocation without assembler range checking
    if we are handling an immediate value or a byte-width instruction.  */
 #undef  CHECK_RELOC_MSP430_PCREL
@@ -1878,7 +1878,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	  else
 	    {
 	      as_bad (_
-		      ("unknown expression in operand %s. use #llo() #lhi() #hlo() #hhi() "),
+		      ("unknown expression in operand %s.  Use #llo(), #lhi(), #hlo() or #hhi()"),
 		      l);
 	      return 1;
 	    }
@@ -2538,7 +2538,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
      instruction that does not support it.  Look for an alternative extended
      instruction that has the same name without the period.  Eg: "add.a"
      becomes "adda".  Although this not an officially supported way of
-     specifing instruction aliases other MSP430 assemblers allow it.  So we
+     specifying instruction aliases other MSP430 assemblers allow it.  So we
      support it for compatibility purposes.  */
   if (addr_op && opcode->fmt >= 0)
     {
@@ -3092,7 +3092,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    parse_exp (l1 + 1, &(op1.exp));
 	    if (op1.exp.X_op != O_constant)
 	      {
-		as_bad (_("expected constant expression for first argument of %s"),
+		as_bad (_("expected constant expression as first argument of %s"),
 			opcode->name);
 		break;
 	      }
@@ -3163,7 +3163,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    parse_exp (l1 + 1, &(op1.exp));
 	    if (op1.exp.X_op != O_constant)
 	      {
-		as_bad (_("expected constant expression for first argument of %s"),
+		as_bad (_("expected constant expression as first argument of %s"),
 			opcode->name);
 		break;
 	      }
@@ -3372,7 +3372,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  break;
 
 	default:
-	  as_bad (_("Illegal emulated instruction "));
+	  as_bad (_("Illegal emulated instruction"));
 	  break;
 	}
       break;
@@ -3743,7 +3743,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	      if (x > 512 || x < -511)
 		{
-		  as_bad (_("Wrong displacement  %d"), x << 1);
+		  as_bad (_("Wrong displacement %d"), x << 1);
 		  break;
 		}
 
@@ -3902,7 +3902,7 @@ md_assemble (char * str)
 
   if (!cmd[0])
     {
-      as_bad (_("can't find opcode "));
+      as_bad (_("can't find opcode"));
       return;
     }
 
@@ -4225,7 +4225,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	 because there can be multiple incarnations of the same label, with
 	 exactly the same name, in any given section and the linker will have
 	 no way to identify the correct one.  Instead we just have to hope
-	 that no relaxtion will occur between the local label and the other
+	 that no relaxation will occur between the local label and the other
 	 symbol in the expression.
 
 	 Similarly we have to compute differences between symbols in the .eh_frame
@@ -4345,7 +4345,7 @@ md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED,
     }
   else if (fragP->fr_symbol)
     {
-      /* Its got a segment, but its not ours.   Even if fr_symbol is in
+      /* It's got a segment, but it's not ours.   Even if fr_symbol is in
 	 an absolute segment, we don't know a displacement until we link
 	 object files. So it will always be long. This also applies to
 	 labels in a subsegment of current. Liker may relax it to short
@@ -4506,7 +4506,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
       break;
 
     default:
-      as_fatal (_("internal inconsistency problem in %s:  %lx"),
+      as_fatal (_("internal inconsistency problem in %s: %lx"),
 		__FUNCTION__, (long) fragP->fr_subtype);
       break;
     }

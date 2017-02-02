@@ -784,8 +784,14 @@ Stub_template_repertoire<big_endian>::Stub_template_repertoire()
       0x14000000,    /* b <label> */
     };
 
-  // ST_E_835769 has the same stub template as ST_E_843419.
-  const static Insntype* ST_E_835769_INSNS = ST_E_843419_INSNS;
+  // ST_E_835769 has the same stub template as ST_E_843419
+  // but we reproduce the array here so that the sizeof
+  // expressions in install_insn_template will work.
+  const static Insntype ST_E_835769_INSNS[] =
+    {
+      0x00000000,    /* Placeholder for erratum insn. */
+      0x14000000,    /* b <label> */
+    };
 
 #define install_insn_template(T) \
   const static Stub_template<big_endian> template_##T = {  \

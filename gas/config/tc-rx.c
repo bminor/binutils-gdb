@@ -342,7 +342,7 @@ rx_include (int ignore)
      3. Try any directories specified by the -I command line
         option(s).
 
-     4 .Try a directory specifed by the INC100 environment variable.  */
+     4 .Try a directory specified by the INC100 environment variable.  */
 
   if (IS_ABSOLUTE_PATH (f))
     try = fopen (path = f, FOPEN_RT);
@@ -1486,7 +1486,7 @@ rx_frag_fix_value (fragS *    fragP,
 /* Estimate how big the opcode is after this relax pass.  The return
    value is the difference between fr_fix and the actual size.  We
    compute the total size in rx_relax_frag and store it in fr_subtype,
-   sowe only need to subtract fx_fix and return it.  */
+   so we only need to subtract fx_fix and return it.  */
 
 int
 md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED, segT segment ATTRIBUTE_UNUSED)

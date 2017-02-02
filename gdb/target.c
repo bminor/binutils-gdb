@@ -3943,6 +3943,52 @@ do_monitor_command (char *cmd,
   target_rcmd (cmd, gdb_stdtarg);
 }
 
+/* Erases all the memory regions marked as flash.  CMD and FROM_TTY are
+   ignored.  */
+
+void
+flash_erase_command (char *cmd, int from_tty)
+{
+  /* Used to communicate termination of flash operations to the target.  */
+  bool found_flash_region = false;
+  struct mem_region *m;
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  VEC(mem_region_s) *mem_regions = target_memory_map ();
+
+  /* Iterate over all memory regions.  */
+  for (int i = 0; VEC_iterate (mem_region_s, mem_regions, i, m); i++)
+    {
+      /* Fetch the memory attribute.  */
+      struct mem_attrib *attrib = &m->attrib;
+
+      /* Is this a flash memory region?  */
+      if (attrib->mode == MEM_FLASH)
+        {
+          found_flash_region = true;
+          target_flash_erase (m->lo, m->hi - m->lo);
+
+	  struct cleanup *cleanup_tuple
+	      = make_cleanup_ui_out_tuple_begin_end (current_uiout,
+						     "erased-regions");
+
+          current_uiout->message (_("Erasing flash memory region at address "));
+          current_uiout->field_fmt ("address", "%s", paddress (gdbarch,
+								 m->lo));
+          current_uiout->message (", size = ");
+          current_uiout->field_fmt ("size", "%s", hex_string (m->hi - m->lo));
+          current_uiout->message ("\n");
+          do_cleanups (cleanup_tuple);
+        }
+    }
+
+  /* Did we do any flash operations?  If so, we need to finalize them.  */
+  if (found_flash_region)
+    target_flash_done ();
+  else
+    current_uiout->message (_("No flash memory regions found.\n"));
+}
+
 /* Print the name of each layers of our target stack.  */
 
 static void
@@ -4232,6 +4278,9 @@ When this permission is on, GDB may interrupt/stop the target's execution.\n\
 Otherwise, any attempt to interrupt or stop will be ignored."),
 			   set_target_permissions, NULL,
 			   &setlist, &showlist);
+
+  add_com ("flash-erase", no_class, flash_erase_command,
+           _("Erase all flash memory regions."));
 
   add_setshow_boolean_cmd ("auto-connect-native-target", class_support,
 			   &auto_connect_native_target, _("\

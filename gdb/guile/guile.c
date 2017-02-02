@@ -332,7 +332,7 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
       inner_cleanups = make_cleanup_restore_integer (&current_ui->async);
       current_ui->async = 0;
 
-      prevent_dont_repeat ();
+      scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
 	to_string_res = execute_command_to_string (command, from_tty);
       else

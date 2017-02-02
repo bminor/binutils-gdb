@@ -80,14 +80,14 @@ static void print_function_template_arglist
 /* See description in compile-cplus-templates.h.  */
 
 function_template_defn::function_template_defn
-  (std::string generic, parsed_demangle_info info,
+  (std::string generic, std::unique_ptr<demangle_parse_info> info,
    const struct template_symbol *tsymbol, struct type *parent_type,
    int fidx, int midx)
   : template_defn (compile::decl_name (tsymbol->search_name), generic,
 		   tsymbol->template_arguments->n_arguments),
     m_tsymbol (tsymbol), m_parent_type (parent_type),
     m_fidx (fidx), m_midx (midx),
-    m_demangle_info (info)
+    m_demangle_info (std::move (info))
 {
 }
 
@@ -176,15 +176,15 @@ function_template_decl (const struct template_symbol *tsymbol,
 
 static std::string
 compute_function_template_generic (struct template_symbol *tsymbol,
-				   const parsed_demangle_info &info)
+				   const demangle_parse_info *info)
 {
-  gdb_assert (info.tree () != NULL);
+  gdb_assert (info->tree != NULL);
 
   /* Ensure template arguments have been decoded.  */
-  cp_decode_template_type_indices (tsymbol, info.info ());
+  cp_decode_template_type_indices (tsymbol, info);
 
   /* Output the template generic.  */
-  char *generic_c = function_template_decl (tsymbol, info.info ());
+  char *generic_c = function_template_decl (tsymbol, info);
   std::string generic (generic_c);
   xfree (generic_c);
   return generic;
@@ -205,9 +205,11 @@ compile_cplus_instance::maybe_define_new_function_template
       if (tsym->linkage_name == NULL)
 	return;
 
-      parsed_demangle_info info (tsym->linkage_name, DMGL_ANSI | DMGL_PARAMS);
+      std::unique_ptr<demangle_parse_info> info
+	= cp_mangled_name_to_comp (tsym->linkage_name, DMGL_ANSI | DMGL_PARAMS);
 
-      std::string generic (compute_function_template_generic (tsym, info));
+      std::string generic
+	= compute_function_template_generic (tsym, info.get ());
       function_template_defn_map_t::iterator pos
 	= m_function_template_defns->find (generic);
 
@@ -217,10 +219,9 @@ compile_cplus_instance::maybe_define_new_function_template
 	{
 	  /* Create the new template definition and insert it into
 	     the cache.  */
-	  defn = new function_template_defn (generic, info, tsym, parent_type,
-					     f_idx, m_idx);
-	  m_function_template_defns->insert
-	    (std::make_pair (generic, function_template_defn_up (defn)));
+	  defn = new function_template_defn (generic, std::move (info), tsym,
+					     parent_type, f_idx, m_idx);
+	  m_function_template_defns->insert (std::make_pair (generic, defn));
 	}
       else
 	{
@@ -267,7 +268,7 @@ compile::define_templates (compile_cplus_instance *instance,
   for (i = 0; VEC_iterate (block_symbol_d, symbols, i, elt); ++i)
     instance->maybe_define_new_function_template (elt->symbol, NULL, -1, -1);
 
-  /* !!keiths: From here on out, we MUST have all types declared or defined,
+  /* From here on out, we MUST have all types declared or defined,
      otherwise GCC will give us "definition of TYPE in template parameter
      list."  */
   /* Create any new template definitions we encountered.  */
@@ -281,22 +282,19 @@ function_template_defn *
 compile_cplus_instance::find_function_template_defn
   (struct template_symbol *tsym)
 {
-  /* Some times the template has no no linkage name from the compiler.
-     There's not much we can do in this case.  */
   if (tsym->linkage_name == NULL)
     return NULL;
 
-  parsed_demangle_info info (tsym->linkage_name, DMGL_ANSI | DMGL_PARAMS);
-  std::string generic (compute_function_template_generic (tsym, info));
+  std::unique_ptr<demangle_parse_info> info
+    = cp_mangled_name_to_comp (tsym->linkage_name, DMGL_ANSI | DMGL_PARAMS);
+
+  std::string generic = compute_function_template_generic (tsym, info.get ());
   function_template_defn_map_t::iterator pos
     = m_function_template_defns->find (generic);
-  if (pos != m_function_template_defns->end ())
-    {
-      /* A template generic for this was already defined.  */
-      return pos->second.get ();
-    }
 
-  /* No generic for this template was found.  */
+  if (pos != m_function_template_defns->end ())
+    return pos->second.get ();
+
   return NULL;
 }
 
@@ -1118,9 +1116,9 @@ class function_template_definer
 					SYMBOL_LINE (&tsym->base));
 
     /* Find the function node describing this template function.  */
-    gdb_assert (defn->demangle_info ()->tree ()->type
+    gdb_assert (defn->demangle_info ()->tree->type
 		== DEMANGLE_COMPONENT_TYPED_NAME);
-    struct demangle_component *comp = d_right (defn->demangle_info ()->tree ());
+    struct demangle_component *comp = d_right (defn->demangle_info ()->tree);
 
     gdb_assert (comp->type == DEMANGLE_COMPONENT_FUNCTION_TYPE);
 
@@ -1146,7 +1144,7 @@ class function_template_definer
 	   so we need to use the CONVERSION node in the left/name sub-tree
 	   of the demangle tree.  */
 
-	comp = d_left (defn->demangle_info ()->tree ());
+	comp = d_left (defn->demangle_info ()->tree);
 	while (!done)
 	  {
 	    switch (comp->type)
@@ -1191,7 +1189,7 @@ class function_template_definer
     int artificials = 0;
 
     /* d_right (info->tree) is FUNCTION_TYPE (assert above).  */
-    comp = d_right (d_right (defn->demangle_info ()->tree ()));
+    comp = d_right (d_right (defn->demangle_info ()->tree));
     gdb_assert (comp != NULL && comp->type == DEMANGLE_COMPONENT_ARGLIST);
 
     for (int i = 0; i < TYPE_NFIELDS (templ_type); ++i)
@@ -1444,8 +1442,9 @@ print_template_defn_command (char *arg, int from_tty)
 
   cp_decode_template_type_indices (tsymbol, NULL);
 
-  parsed_demangle_info info (arg, DMGL_ANSI | DMGL_PARAMS);
-  char *str = function_template_decl (tsymbol, info.info ());
+  std::unique_ptr<demangle_parse_info> info
+    = cp_mangled_name_to_comp (arg, DMGL_ANSI | DMGL_PARAMS);
+  char *str = function_template_decl (tsymbol, info.get ());
 
   make_cleanup (xfree, str);
   fprintf_filtered (gdb_stdout, "%s\n", str);

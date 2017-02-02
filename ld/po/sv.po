@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ld 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2017-01-10 02:20+0100\n"
+"PO-Revision-Date: 2017-01-14 01:05+0100\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -41,7 +41,7 @@ msgstr "%P: varning: ”--thumb-entry %s” åsidosätter ”-e %s”\n"
 
 #: emultempl/armcoff.em:197 emultempl/pe.em:1832
 msgid "%P: warning: cannot find thumb start symbol %s\n"
-msgstr "%P: varning: kan inte hitta tumstartsymbol %s\n"
+msgstr "%P: varning: kan inte hitta Thumb-startsymbol %s\n"
 
 #: emultempl/pe.em:425
 #, c-format
@@ -140,12 +140,12 @@ msgstr "  --[no-]leading-underscore          Ställ in uttryckligt understrecksp
 msgid "  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"
 msgstr ""
 "  --thumb-entry=<symbol>             Ställ in ingångspunkten till att\n"
-"                                       vara tummen <symbol>\n"
+"                                       vara Thumb-<symbol>\n"
 
 #: emultempl/pe.em:442
 #, c-format
 msgid "  --insert-timestamp                 Use a real timestamp rather than zero.\n"
-msgstr "  --insert-timestamp                 Använd en riktigt tidsstämpel istället för noll.\n"
+msgstr "  --insert-timestamp                 Använd en riktig tidsstämpel istället för noll.\n"
 
 #: emultempl/pe.em:443
 #, c-format
@@ -318,7 +318,7 @@ msgid ""
 "  --large-address-aware              Executable supports virtual addresses\n"
 "                                       greater than 2 gigabytes\n"
 msgstr ""
-"  --large-address-aware              Exekverbar fil har stöd för virtuella adresse\n"
+"  --large-address-aware              Exekverbar fil har stöd för virtuella adresser\n"
 "                                       större än 2 gigabyte\n"
 
 #: emultempl/pe.em:480
@@ -336,7 +336,7 @@ msgid ""
 "  --enable-long-section-names        Use long COFF section names even in\n"
 "                                       executable image files\n"
 msgstr ""
-"  --enable-long-section-names        Använd långa COFF sektionsnamn även i\n"
+"  --enable-long-section-names        Använd långa COFF-sektionsnamn även i\n"
 "                                       exekverbara avbildningsfiler\n"
 
 #: emultempl/pe.em:484
@@ -345,7 +345,7 @@ msgid ""
 "  --disable-long-section-names       Never use long COFF section names, even\n"
 "                                       in object files\n"
 msgstr ""
-"  --disable-long-section-names       Använd aldrig långa COFF sektionsnamn, inte\n"
+"  --disable-long-section-names       Använd aldrig långa COFF-sektionsnamn, inte\n"
 "                                       ens i objektfiler\n"
 
 #: emultempl/pe.em:486
@@ -354,7 +354,7 @@ msgid ""
 "  --dynamicbase\t\t\t Image base address may be relocated using\n"
 "\t\t\t\t       address space layout randomization (ASLR)\n"
 msgstr ""
-"  --dynamicbase\t\t\t Avbildnings bildbadadress kan omlokaliseras via\n"
+"  --dynamicbase\t\t\t Bildbasadress kan omlokaliseras via\n"
 "\t\t\t\t       layoutrandomisering av adressrymd (ASLR)\n"
 
 #: emultempl/pe.em:488
@@ -379,7 +379,7 @@ msgid ""
 "\t\t\t\t       be called in this image\n"
 msgstr ""
 "  --no-seh\t\t\t Bild använder inte SEH. Ingen SE-hanterare får\n"
-"\t\t\t\t       anropas i denna bilden\n"
+"\t\t\t\t       anropas i denna bild\n"
 
 #: emultempl/pe.em:493
 #, c-format
@@ -453,7 +453,7 @@ msgid ""
 "This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"
 msgstr ""
 "%P: varning: autoimportering har aktiverats utan att --enable-auto-import angavs på kommandoraden.\n"
-"Detta bör fungera om det inte involverar konstanta datastrukturer som refererar  till symboler från autoimporterade DLL:er.\n"
+"Detta bör fungera om det inte involverar konstanta datastrukturer som refererar till symboler från autoimporterade DLL:er.\n"
 
 #: emultempl/pe.em:1176 emultempl/pe.em:1383 emultempl/pe.em:1590 ldcref.c:503
 #: ldcref.c:601 ldmain.c:1183 ldmisc.c:300 pe-dll.c:710 pe-dll.c:1276
@@ -518,7 +518,7 @@ msgstr "Inga symboler\n"
 
 #: ldcref.c:545
 msgid "%P: symbol `%T' missing from main hash table\n"
-msgstr "%P: symbolen ”%T” saknas från hastabellen\n"
+msgstr "%P: symbolen ”%T” saknas från hashtabellen\n"
 
 #: ldcref.c:663 ldcref.c:670 ldmain.c:1217 ldmain.c:1224
 msgid "%B%F: could not read relocs: %E\n"
@@ -613,7 +613,7 @@ msgstr "%F%S: odefinierade sektionen ”%s” refererades till i uttryck\n"
 #: ldexp.c:756 ldexp.c:771
 #, c-format
 msgid "%F%S: undefined MEMORY region `%s' referenced in expression\n"
-msgstr "%F%S: odefinierade MINNES-region ”%s” refererades till i uttryck\n"
+msgstr "%F%S: odefinierad MINNES-region ”%s” refererades till i uttryck\n"
 
 #: ldexp.c:783
 #, c-format
@@ -722,11 +722,11 @@ msgstr "%F%P:%S: fel: alias för standard minnesområde\n"
 
 #: ldlang.c:1340
 msgid "%F%P:%S: error: redefinition of memory region alias `%s'\n"
-msgstr "%P%F: %S: fel: omdefinition av alias för minnesområde ”%s”\n"
+msgstr "%F%P: %S: fel: omdefinition av alias för minnesområde ”%s”\n"
 
 #: ldlang.c:1347
 msgid "%F%P:%S: error: memory region `%s' for alias `%s' does not exist\n"
-msgstr "%P%F:%S: fel: minnesområde ”%s” för alias ”%s” existerar inte\n"
+msgstr "%F%P:%S: fel: minnesområde ”%s” för alias ”%s” existerar inte\n"
 
 #: ldlang.c:1406 ldlang.c:1445
 msgid "%P%F: failed creating section `%s': %E\n"
@@ -821,7 +821,7 @@ msgstr "%F%B: fel då symboler lades till: %E\n"
 
 #: ldlang.c:3124
 msgid "%P: warning: could not find any targets that match endianness requirement\n"
-msgstr "%P: varning: kunde inte hitta några mål som matchar kravet på endianess\n"
+msgstr "%P: varning: kunde inte hitta några mål som matchar kravet på byteordning\n"
 
 #: ldlang.c:3138
 msgid "%P%F: target %s not found\n"
@@ -950,7 +950,7 @@ msgstr "%P: varning: kan inte hitta ingångssymbolen %s; ställer inte in starta
 
 #: ldlang.c:5916
 msgid "%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"
-msgstr "%P%F: Omlokaliseringsbar länkning med omlänkningar från formatet %s (%B) till formatet %s (%B) stöds inte\n"
+msgstr "%P%F: Omlokaliseringsbar länkning med omlokaliseringar från formatet %s (%B) till formatet %s (%B) stöds inte\n"
 
 #: ldlang.c:5926
 msgid "%P%X: %s architecture of input file `%B' is incompatible with %s output\n"
@@ -962,7 +962,7 @@ msgstr "%P%X: misslyckades med att slå samman målspecifik data från fil %B\n"
 
 #: ldlang.c:6019
 msgid "%P%F: Could not define common symbol `%T': %E\n"
-msgstr "%B%F: Kunde inte definiera generell symbol ”%T”: %E\n"
+msgstr "%P%F: Kunde inte definiera generell symbol ”%T”: %E\n"
 
 #: ldlang.c:6031
 msgid ""
@@ -1006,7 +1006,7 @@ msgstr "%X%P:%S: sektionen har både en inläsningsadress och ett minnesinläsni
 
 #: ldlang.c:7162
 msgid "%X%P:%S: PHDRS and FILEHDR are not supported when prior PT_LOAD headers lack them\n"
-msgstr "%X%P:%S: PHDRS och FILEHDR stöds inte när  föregående PT_LOAD-huvuden saknar dem\n"
+msgstr "%X%P:%S: PHDRS och FILEHDR stöds inte när föregående PT_LOAD-huvuden saknar dem\n"
 
 #: ldlang.c:7235
 msgid "%F%P: no sections assigned to phdrs\n"
@@ -1018,7 +1018,7 @@ msgstr "%F%P: bfd_record_phdr misslyckades: %E\n"
 
 #: ldlang.c:7293
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
-msgstr "%X%P: sektionen ”%s” är tilldelad till ickexisterande phvd ”%s”\n"
+msgstr "%X%P: sektionen ”%s” är tilldelad till icke-existerande phdr ”%s”\n"
 
 #: ldlang.c:7705
 msgid "%X%P: unknown language `%s' in version information\n"
@@ -1050,7 +1050,7 @@ msgstr "%X%P: okänd funktion ”%s”\n"
 
 #: ldmain.c:246
 msgid "%X%P: can't set BFD default target to `%s': %E\n"
-msgstr "%X%P: kan inte ställa in BSD-standardmålet till ”%s”: %E\n"
+msgstr "%X%P: kan inte ställa in BFD-standardmålet till ”%s”: %E\n"
 
 #: ldmain.c:336
 msgid "built in linker script"
@@ -1086,7 +1086,7 @@ msgstr "%F%B: avslutande stängning misslyckades: %E\n"
 
 #: ldmain.c:472
 msgid "%X%P: unable to open for source of copy `%s'\n"
-msgstr "%X%P: kan inte öppna för källkoden till kopian ”%s”\n"
+msgstr "%X%P: kan inte öppna för källan till kopian ”%s”\n"
 
 #: ldmain.c:475
 msgid "%X%P: unable to open for destination of copy `%s'\n"
@@ -1146,7 +1146,7 @@ msgstr ""
 
 #: ldmain.c:951
 msgid "%X%C: multiple definition of `%T'\n"
-msgstr "%X%C: flera defintioner av ”%T”\n"
+msgstr "%X%C: flera definitioner av ”%T”\n"
 
 #: ldmain.c:954
 msgid "%D: first defined here\n"
@@ -1732,7 +1732,7 @@ msgstr "Lista inte borttagna oanvända sektioner"
 
 #: lexsup.c:327
 msgid "Set default hash table size close to <NUMBER>"
-msgstr "Ställ in standardstorlek för hastabell nära <NUMMER>"
+msgstr "Ställ in standardstorlek för hashtabell nära <NUMMER>"
 
 #: lexsup.c:330
 msgid "Print option help"
@@ -1792,7 +1792,7 @@ msgstr "Varna inte om opassande indatafiler"
 
 #: lexsup.c:366
 msgid "Don't warn on finding an incompatible library"
-msgstr "Varna in om ett inkompatibelt bibliotek hittas"
+msgstr "Varna inte om ett inkompatibelt bibliotek hittas"
 
 #: lexsup.c:369
 msgid "Turn off --whole-archive"
@@ -1860,7 +1860,7 @@ msgstr "[=ascending|descending]"
 
 #: lexsup.c:412
 msgid "Sort common symbols by alignment [in specified order]"
-msgstr "Sortera generella symboler efter justering [i angiven ordning]"
+msgstr "Sortera gemensamma symboler efter justering [i angiven ordning]"
 
 #: lexsup.c:417
 msgid "name|alignment"
@@ -1974,7 +1974,7 @@ msgstr ""
 
 #: lexsup.c:470
 msgid "Add data symbols to dynamic list"
-msgstr "Lägg till datasymboler till dynamisklista"
+msgstr "Lägg till datasymboler till dynamisk lista"
 
 #: lexsup.c:472
 msgid "Use C++ operator new/delete dynamic list"
@@ -2066,7 +2066,7 @@ msgstr "%P%F: okänd --unresolved-symbols-flagga %s\n"
 
 #: lexsup.c:968
 msgid "%P%F: bad -plugin-opt option\n"
-msgstr "%P%F: felaktig -plugin-opt-flagga\n"
+msgstr "%P%F: okänd -plugin-opt-flagga\n"
 
 #. This can happen if the user put "-rpath,a" on the command
 #. line.  (Or something similar.  The comma is important).
@@ -2110,7 +2110,7 @@ msgstr "justering"
 
 #: lexsup.c:1130
 msgid "%P%F: invalid section sorting option: %s\n"
-msgstr "%P%F: ogiltigt alternativ för sektionssorting: %s\n"
+msgstr "%P%F: ogiltigt alternativ för sektionssortering: %s\n"
 
 #: lexsup.c:1164
 msgid "%P%F: invalid argument to option \"--section-start\"\n"
@@ -2152,7 +2152,7 @@ msgstr "Användning: %s [flaggor] fil…\n"
 #: lexsup.c:1613
 #, c-format
 msgid "Options:\n"
-msgstr "Alternativ:\n"
+msgstr "Flaggor:\n"
 
 #: lexsup.c:1691
 #, c-format
@@ -2186,7 +2186,7 @@ msgstr "%s: emuleringsspecifika flaggor:\n"
 msgid "Report bugs to %s\n"
 msgstr ""
 "Rapportera fel till %s\n"
-"Rapportera fel i översättningen till sv@li.org\n"
+"Rapportera fel i översättningen till tp-sv@listor.tp-sv.se\n"
 
 #: mri.c:294
 msgid "%P%F: unknown format type %s\n"
@@ -2316,7 +2316,7 @@ msgstr "%P%F: %s: instick rapporterade fel vid anspråk på fil\n"
 
 #: plugin.c:936
 msgid "%P: %s: error in plugin cleanup: %d (ignored)\n"
-msgstr "%P: %s fel vid insticksuppstädning: %d (över hoppat)\n"
+msgstr "%P: %s fel vid insticksuppstädning: %d (överhoppat)\n"
 
 #~ msgid "  --support-old-code   Support interworking with old code\n"
 #~ msgstr "  --support-old-code   Stöd interaktion med gammal kod\n"

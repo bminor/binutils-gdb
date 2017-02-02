@@ -1266,13 +1266,12 @@ mep_pseudo_register_write (struct gdbarch *gdbarch,
 
 /* Disassembly.  */
 
-/* The mep disassembler needs to know about the section in order to
-   work correctly.  */
 static int
 mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
 {
   struct obj_section * s = find_pc_section (pc);
 
+  info->arch = bfd_arch_mep;
   if (s)
     {
       /* The libopcodes disassembly code uses the section to find the
@@ -1280,12 +1279,9 @@ mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
          the me_module index, and the me_module index to select the
          right instructions to print.  */
       info->section = s->the_bfd_section;
-      info->arch = bfd_arch_mep;
-	
-      return print_insn_mep (pc, info);
     }
-  
-  return 0;
+
+  return print_insn_mep (pc, info);
 }
 
 

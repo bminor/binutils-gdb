@@ -238,6 +238,12 @@
 /* Define to 1 if `struct stat' is a member of `st_blocks'. */
 #undef HAVE_STRUCT_STAT_ST_BLOCKS
 
+/* Define to 1 if `struct user_regs_struct' is a member of `fs_base'. */
+#undef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+
+/* Define to 1 if `struct user_regs_struct' is a member of `gs_base'. */
+#undef HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE
+
 /* Define to 1 if the target supports __sync_*_compare_and_swap */
 #undef HAVE_SYNC_BUILTINS
 

@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "python-internal.h"
 #include "objfiles.h"
+#include "py-ref.h"
 
 typedef struct sympy_symbol_object {
   PyObject_HEAD
@@ -374,7 +375,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
   const char *name;
   static char *keywords[] = { "name", "block", "domain", NULL };
   struct symbol *symbol = NULL;
-  PyObject *block_obj = NULL, *ret_tuple, *sym_obj, *bool_obj;
+  PyObject *block_obj = NULL, *sym_obj, *bool_obj;
   const struct block *block = NULL;
 
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O!i", keywords, &name,
@@ -410,31 +411,28 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
   END_CATCH
 
-  ret_tuple = PyTuple_New (2);
-  if (!ret_tuple)
+  gdbpy_ref ret_tuple (PyTuple_New (2));
+  if (ret_tuple == NULL)
     return NULL;
 
   if (symbol)
     {
       sym_obj = symbol_to_symbol_object (symbol);
       if (!sym_obj)
-	{
-	  Py_DECREF (ret_tuple);
-	  return NULL;
-	}
+	return NULL;
     }
   else
     {
       sym_obj = Py_None;
       Py_INCREF (Py_None);
     }
-  PyTuple_SET_ITEM (ret_tuple, 0, sym_obj);
+  PyTuple_SET_ITEM (ret_tuple.get (), 0, sym_obj);
 
   bool_obj = (is_a_field_of_this.type != NULL) ? Py_True : Py_False;
   Py_INCREF (bool_obj);
-  PyTuple_SET_ITEM (ret_tuple, 1, bool_obj);
+  PyTuple_SET_ITEM (ret_tuple.get (), 1, bool_obj);
 
-  return ret_tuple;
+  return ret_tuple.release ();
 }
 
 /* Implementation of

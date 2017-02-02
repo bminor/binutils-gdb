@@ -553,6 +553,12 @@ mi_cmd_target_detach (char *command, char **argv, int argc)
 }
 
 void
+mi_cmd_target_flash_erase (char *command, char **argv, int argc)
+{
+  flash_erase_command (NULL, 0);
+}
+
+void
 mi_cmd_thread_select (char *command, char **argv, int argc)
 {
   enum gdb_rc rc;

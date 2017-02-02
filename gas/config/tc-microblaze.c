@@ -626,7 +626,7 @@ struct imm_type {
 	int otype;       /* Offset Type */
 };
 
-/* These are NOT in assending order of type, GOTOFF is ahead to make
+/* These are NOT in ascending order of type, GOTOFF is ahead to make
    sure @GOTOFF does not get matched with @GOT  */
 static struct imm_type imm_types[] = {
 	{ "NONE", IMM_NONE , 0 },
@@ -2428,7 +2428,7 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
           code = fixp->fx_r_type;
           as_bad (_("Can not do %d byte %srelocation"),
                   fixp->fx_size,
-                  fixp->fx_pcrel ? _("pc-relative") : "");
+                  fixp->fx_pcrel ? _("pc-relative ") : "");
         }
       break;
     }

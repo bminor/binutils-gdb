@@ -1,3 +1,15 @@
+2017-01-23  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (do_vec_compare): Add case 0x23 for CMTST.
+
+2017-01-17  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (do_vec_ADDV): Call aarch64_set_vec_u64 instead of
+	aarch64_set_reg_u64.  In case 2, call HALT_UNALLOC if not full.  In
+	case 3, call HALT_UNALLOC unconditionally.
+	(do_vec_XTN): Delete shifts.  In case 2, change index from i + 4 to
+	i + 2.  Delete if on bias, change index to i + bias * X.
+
 2017-01-09  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (do_vec_UZP): Rewrite.

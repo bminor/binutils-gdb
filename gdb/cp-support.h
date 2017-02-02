@@ -52,31 +52,22 @@ struct using_direct;
 
 struct demangle_parse_info
 {
+  demangle_parse_info ();
+
+  ~demangle_parse_info ();
+
   /* The memory used during the parse.  */
   struct demangle_info *info;
 
   /* The result of the parse.  */
   struct demangle_component *tree;
 
-  /* Any temporary memory used during typedef replacement.  */
+  /* Any temporary memory used, e.g., during typedef replacement
+     or demangling a name.  */
   struct obstack obstack;
-};
 
-class parsed_demangle_info
-{
- public:
-  parsed_demangle_info (const char *mangled_name, int options);
-  parsed_demangle_info (const parsed_demangle_info &o);
-  ~parsed_demangle_info ();
-  const struct demangle_component *tree (void) const;
-  const struct demangle_parse_info *info (void) const;
-
- private:
-  std::string m_mangled_name;
-  int m_options;
-  void *m_memory;
-  char *m_name_storage;
-  struct demangle_parse_info *m_info;
+  /* The memory used for demangling a name prior to parsing.  */
+  void *memory;
 };
 
 /* Functions from cp-support.c.  */
@@ -158,18 +149,14 @@ struct type *cp_find_type_baseclass_by_name (struct type *parent_type,
 
 /* Functions from cp-name-parser.y.  */
 
-extern struct demangle_parse_info *cp_demangled_name_to_comp
+extern std::unique_ptr<demangle_parse_info> cp_demangled_name_to_comp
      (const char *demangled_name, const char **errmsg);
 
-/* Convert a mangled name to a demangle_component tree.  *MEMORY is
-   set to the block of used memory that should be freed when finished
-   with the tree.  DEMANGLED_P is set to the char * that should be
-   freed when finished with the tree, or NULL if none was needed.
-   OPTIONS will be passed to the demangler.  */
+/* Convert a mangled name to a demangle_component tree.  OPTIONS will be
+   passed to the demangler.  */
 
-struct demangle_parse_info *
-cp_mangled_name_to_comp (const char *mangled_name, int options,
-			 void **memory, char **demangled_p);
+extern std::unique_ptr<demangle_parse_info>
+  cp_mangled_name_to_comp (const char *mangled_name, int options);
 
 /* Convenience macros to move through the demangle tree.  */
 
@@ -179,14 +166,9 @@ cp_mangled_name_to_comp (const char *mangled_name, int options,
 extern char *cp_comp_to_string (struct demangle_component *result,
 				int estimated_len);
 
-extern void cp_demangled_name_parse_free (struct demangle_parse_info *);
-extern struct cleanup *make_cleanup_cp_demangled_name_parse_free
-     (struct demangle_parse_info *);
 extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
 					   struct demangle_component *,
 					   struct demangle_parse_info *);
-
-extern struct demangle_parse_info *cp_new_demangle_parse_info (void);
 
 /* The list of "maint cplus" commands.  */
 

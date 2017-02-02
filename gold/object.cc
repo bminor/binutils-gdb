@@ -816,9 +816,9 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
   return (this->has_eh_frame_
 	  || (!parameters->options().relocatable()
 	      && parameters->options().gdb_index()
-	      && (memmem(names, sd->section_names_size, "debug_info", 12) == 0
-		  || memmem(names, sd->section_names_size, "debug_types",
-			    13) == 0)));
+	      && (memmem(names, sd->section_names_size, "debug_info", 11) == 0
+		  || memmem(names, sd->section_names_size,
+			    "debug_types", 12) == 0)));
 }
 
 // Read the sections and symbols from an object file.

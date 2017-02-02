@@ -744,10 +744,10 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
       if (debugfile)
 	{
-	  bfd *abfd = symfile_bfd_open (debugfile);
+	  gdb_bfd_ref_ptr abfd (symfile_bfd_open (debugfile));
 
-	  make_cleanup_bfd_unref (abfd);
-	  symbol_file_add_separate (abfd, debugfile, symfile_flags, objfile);
+	  symbol_file_add_separate (abfd.get (), debugfile, symfile_flags,
+				    objfile);
 	}
     }
 

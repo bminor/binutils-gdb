@@ -196,15 +196,16 @@ namespace compile
        If this definition is not a method template, PARENT_TYPE is NULL
        and FIDX/MIDX are both -1.  */
 
-    function_template_defn (std::string generic, parsed_demangle_info info,
+    function_template_defn (std::string generic,
+			    std::unique_ptr<demangle_parse_info> info,
 			    const struct template_symbol *tsymbol,
 			    struct type *parent_type, int fidx, int midx);
 
     /* Return the demangle information for this template.  */
 
-    const parsed_demangle_info *demangle_info (void) const
+    const demangle_parse_info *demangle_info (void) const
     {
-      return &m_demangle_info;
+      return m_demangle_info.get ();
     }
 
     /* Return the concrete instance used to define this template.  */
@@ -260,7 +261,7 @@ namespace compile
     int m_midx;
 
     /* Demangle tree for the template defining this generic.  */
-    parsed_demangle_info m_demangle_info;
+    std::unique_ptr<demangle_parse_info> m_demangle_info;
   };
 
   /* A class template definition.  */

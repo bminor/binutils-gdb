@@ -943,6 +943,11 @@ static bfd_boolean mips_fix_cn63xxp1;
    efficient expansion.  */
 
 static int mips_relax_branch;
+
+/* TRUE if checks are suppressed for invalid branches between ISA modes.
+   Needed for broken assembly produced by some GCC versions and some
+   sloppy code out there, where branches to data labels are present.  */
+static bfd_boolean mips_ignore_branch_isa;
 
 /* The expansion of many macros depends on the type of symbol that
    they refer to.  For example, when generating position-dependent code,
@@ -1353,7 +1358,7 @@ static void s_mips_stab (int);
 static void s_mips_weakext (int);
 static void s_mips_file (int);
 static void s_mips_loc (int);
-static bfd_boolean pic_need_relax (symbolS *, asection *);
+static bfd_boolean pic_need_relax (symbolS *);
 static int relaxed_branch_length (fragS *, asection *, int);
 static int relaxed_micromips_16bit_branch_length (fragS *, asection *, int);
 static int relaxed_micromips_32bit_branch_length (fragS *, asection *, int);
@@ -1465,6 +1470,8 @@ enum options
     OPTION_GP64,
     OPTION_RELAX_BRANCH,
     OPTION_NO_RELAX_BRANCH,
+    OPTION_IGNORE_BRANCH_ISA,
+    OPTION_NO_IGNORE_BRANCH_ISA,
     OPTION_INSN32,
     OPTION_NO_INSN32,
     OPTION_MSHARED,
@@ -1591,6 +1598,8 @@ struct option md_longopts[] =
   {"mgp64", no_argument, NULL, OPTION_GP64},
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
+  {"mignore-branch-isa", no_argument, NULL, OPTION_IGNORE_BRANCH_ISA},
+  {"mno-ignore-branch-isa", no_argument, NULL, OPTION_NO_IGNORE_BRANCH_ISA},
   {"minsn32", no_argument, NULL, OPTION_INSN32},
   {"mno-insn32", no_argument, NULL, OPTION_NO_INSN32},
   {"mshared", no_argument, NULL, OPTION_MSHARED},
@@ -4267,6 +4276,8 @@ mips_move_text_labels (void)
   mips_move_labels (seg_info (now_seg)->label_list, TRUE);
 }
 
+/* Duplicate the test for LINK_ONCE sections as in `adjust_reloc_syms'.  */
+
 static bfd_boolean
 s_is_linkonce (symbolS *sym, segT from_seg)
 {
@@ -5029,7 +5040,7 @@ match_int_operand (struct mips_arg_info *arg,
 	return FALSE;
 
       if (offset_reloc[0] != BFD_RELOC_UNUSED)
-	/* Relocation operators were used.  Accept the arguent and
+	/* Relocation operators were used.  Accept the argument and
 	   leave the relocation value in offset_expr and offset_relocs
 	   for the caller to process.  */
 	return TRUE;
@@ -8606,7 +8617,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
     {
       /* Search until we get a match for NAME.  It is assumed here that
 	 macros will never generate MDMX, MIPS-3D, or MT instructions.
-	 We try to match an instruction that fulfils the branch delay
+	 We try to match an instruction that fulfills the branch delay
 	 slot instruction length requirement (if any) of the previous
 	 instruction.  While doing this we record the first instruction
 	 seen that matches all the other conditions and use it anyway
@@ -9512,7 +9523,7 @@ move_register (int dest, int source)
    LOCAL is the sum of a symbol and a 16-bit or 32-bit displacement.
    The two alternatives are:
 
-   Global symbol		Local sybmol
+   Global symbol		Local symbol
    -------------		------------
    lw DEST,%got(SYMBOL)		lw DEST,%got(SYMBOL + OFFSET)
    ...				...
@@ -14497,6 +14508,14 @@ md_parse_option (int c, const char *arg)
       mips_relax_branch = 0;
       break;
 
+    case OPTION_IGNORE_BRANCH_ISA:
+      mips_ignore_branch_isa = TRUE;
+      break;
+
+    case OPTION_NO_IGNORE_BRANCH_ISA:
+      mips_ignore_branch_isa = FALSE;
+      break;
+
     case OPTION_INSN32:
       file_mips_opts.insn32 = TRUE;
       break;
@@ -14895,7 +14914,7 @@ mips_frob_file (void)
 	 constants; we'll report an error for those later.  */
       if (got16_reloc_p (l->fixp->fx_r_type)
 	  && !(l->fixp->fx_addsy
-	       && pic_need_relax (l->fixp->fx_addsy, l->seg)))
+	       && pic_need_relax (l->fixp->fx_addsy)))
 	continue;
 
       /* Check quickly whether the next fixup happens to be a matching %lo.  */
@@ -15130,6 +15149,9 @@ fix_bad_cross_mode_branch_p (fixS *fixP)
   valueT val;
   int other;
   char *buf;
+
+  if (mips_ignore_branch_isa)
+    return FALSE;
 
   if (!fixP->fx_addsy || S_FORCE_RELOC (fixP->fx_addsy, TRUE))
     return FALSE;
@@ -17115,7 +17137,7 @@ nopic_need_relax (symbolS *sym, int before_relaxing)
 /* Return true if the given symbol should be considered local for SVR4 PIC.  */
 
 static bfd_boolean
-pic_need_relax (symbolS *sym, asection *segtype)
+pic_need_relax (symbolS *sym)
 {
   asection *symsec;
 
@@ -17140,7 +17162,6 @@ pic_need_relax (symbolS *sym, asection *segtype)
   return (!bfd_is_und_section (symsec)
 	  && !bfd_is_abs_section (symsec)
 	  && !bfd_is_com_section (symsec)
-	  && !s_is_linkonce (sym, segtype)
 	  /* A global or weak symbol is treated as external.  */
 	  && (!S_IS_WEAK (sym) && !S_IS_EXTERNAL (sym)));
 }
@@ -17579,7 +17600,7 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
   if (mips_pic == NO_PIC)
     change = nopic_need_relax (fragp->fr_symbol, 0);
   else if (mips_pic == SVR4_PIC)
-    change = pic_need_relax (fragp->fr_symbol, segtype);
+    change = pic_need_relax (fragp->fr_symbol);
   else if (mips_pic == VXWORKS_PIC)
     /* For vxworks, GOT16 relocations never have a corresponding LO16.  */
     change = 0;
@@ -17617,11 +17638,11 @@ mips_fix_adjustable (fixS *fixp)
      is then identified by the section offset rather than by the symbol.
 
      However, if we're generating REL LO16 relocations, the offset is split
-     between the LO16 and parterning high part relocation.  The linker will
+     between the LO16 and partnering high part relocation.  The linker will
      need to recalculate the complete offset in order to correctly identify
      the merge data.
 
-     The linker has traditionally not looked for the parterning high part
+     The linker has traditionally not looked for the partnering high part
      relocation, and has thus allowed orphaned R_MIPS_LO16 relocations to be
      placed anywhere.  Rather than break backwards compatibility by changing
      this, it seems better not to force the issue, and instead keep the
@@ -19661,6 +19682,8 @@ MIPS options:\n\
 -mdouble-float		allow 32-bit and 64-bit floating-point operations\n\
 --[no-]construct-floats	[dis]allow floating point values to be constructed\n\
 --[no-]relax-branch	[dis]allow out-of-range branches to be relaxed\n\
+-mignore-branch-isa	accept invalid branches requiring an ISA mode switch\n\
+-mno-ignore-branch-isa	reject invalid branches requiring an ISA mode switch\n\
 -mnan=ENCODING		select an IEEE 754 NaN encoding convention, either of:\n"));
 
   first = 1;

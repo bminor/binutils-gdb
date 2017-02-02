@@ -323,7 +323,6 @@ pspy_set_type_printers (PyObject *o, PyObject *value, void *ignore)
 static void
 py_free_pspace (struct program_space *pspace, void *datum)
 {
-  struct cleanup *cleanup;
   pspace_object *object = (pspace_object *) datum;
   /* This is a fiction, but we're in a nasty spot: The pspace is in the
      process of being deleted, we can't rely on anything in it.  Plus
@@ -336,10 +335,9 @@ py_free_pspace (struct program_space *pspace, void *datum)
      being deleted.  */
   struct gdbarch *arch = target_gdbarch ();
 
-  cleanup = ensure_python_env (arch, current_language);
+  gdbpy_enter enter_py (arch, current_language);
   object->pspace = NULL;
   Py_DECREF ((PyObject *) object);
-  do_cleanups (cleanup);
 }
 
 /* Return a borrowed reference to the Python object of type Pspace

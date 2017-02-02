@@ -897,13 +897,13 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
     0xfd300800, 0xff300f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5V, #%23?21%23?780"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
-    0xfe000800, 0xfea00f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3D[%5?10], #%20'90"},
+    0xfe000800, 0xffa00f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3D[%5?10], #%20'90"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
-    0xfe200800, 0xfea00f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3D[%5?10], #%20?21%23?780"},
+    0xfe200800, 0xffa00f10, "vcmla%c.f16\t%12-15,22V, %16-19,7V, %0-3D[%5?10], #%20?21%20?780"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
-    0xfe800800, 0xfea00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20'90"},
+    0xfe800800, 0xffa00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20'90"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
-    0xfea00800, 0xfea00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20?21%23?780"},
+    0xfea00800, 0xffa00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20?21%20?780"},
 
   /* V5 coprocessor instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),

@@ -1,4 +1,4 @@
-%option noinput nounput
+%option noinput nounput noyywrap
 
 %{
 /* arlex.l - Strange script language lexer */
@@ -88,7 +88,3 @@ int linenumber;
 "\n"	 	 { linenumber ++; return NEWLINE; }
 
 %%
-#ifndef yywrap
-/* Needed for lex, though not flex. */
-int yywrap(void) { return 1; }
-#endif

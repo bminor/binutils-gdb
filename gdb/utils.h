@@ -81,8 +81,6 @@ extern struct cleanup *(make_cleanup_free_section_addr_info
 
 extern struct cleanup *make_cleanup_fclose (FILE *file);
 
-extern struct cleanup *make_cleanup_bfd_unref (bfd *abfd);
-
 struct obstack;
 extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
 
@@ -100,7 +98,17 @@ extern struct cleanup *make_cleanup_free_so (struct so_list *so);
 
 extern struct cleanup *make_cleanup_restore_current_language (void);
 
-extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
+/* A deleter for a hash table.  */
+struct htab_deleter
+{
+  void operator() (htab *ptr) const
+  {
+    htab_delete (ptr);
+  }
+};
+
+/* A unique_ptr wrapper for htab_t.  */
+typedef std::unique_ptr<htab, htab_deleter> htab_up;
 
 struct parser_state;
 extern struct cleanup *make_cleanup_clear_parser_state
@@ -180,6 +188,9 @@ extern struct ui_file **current_ui_gdb_stdlog_ptr (void);
 extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
+
+/* Return a null stream.  */
+extern struct ui_file *null_stream (void);
 
 /* Set the screen dimensions to WIDTH and HEIGHT.  */
 

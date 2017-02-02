@@ -163,6 +163,13 @@ AC_CHECK_DECLS([strerror, perror, vasprintf, vsnprintf])
 
 AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
 
+# See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
+# Older amd64 Linux's don't have the fs_base and gs_base members of
+# `struct user_regs_struct'.
+AC_CHECK_MEMBERS([struct user_regs_struct.fs_base, struct user_regs_struct.gs_base],
+		 [], [], [#include <sys/user.h>])
+
+
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>

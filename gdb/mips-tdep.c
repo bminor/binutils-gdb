@@ -44,6 +44,7 @@
 #include "symcat.h"
 #include "sim-regno.h"
 #include "dis-asm.h"
+#include "disasm.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "trad-frame.h"
@@ -6982,7 +6983,9 @@ reinit_frame_cache_sfunc (char *args, int from_tty,
 static int
 gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 {
-  struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
+  gdb_disassembler *di
+    = static_cast<gdb_disassembler *>(info->application_data);
+  struct gdbarch *gdbarch = di->arch ();
 
   /* FIXME: cagney/2003-06-26: Is this even necessary?  The
      disassembler needs to be able to locally determine the ISA, and

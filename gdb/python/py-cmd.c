@@ -27,6 +27,7 @@
 #include "cli/cli-decode.h"
 #include "completer.h"
 #include "language.h"
+#include "py-ref.h"
 
 /* Struct representing built-in completion types.  */
 struct cmdpy_completer
@@ -95,9 +96,8 @@ static void
 cmdpy_destroyer (struct cmd_list_element *self, void *context)
 {
   cmdpy_object *cmd;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Release our hold on the command object.  */
   cmd = (cmdpy_object *) context;
@@ -109,8 +109,6 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
   xfree ((char *) self->name);
   xfree ((char *) self->doc);
   xfree ((char *) self->prefixname);
-
-  do_cleanups (cleanup);
 }
 
 /* Called by gdb to invoke the command.  */
@@ -119,10 +117,8 @@ static void
 cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 {
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
-  PyObject *argobj, *ttyobj, *result;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   if (! obj)
     error (_("Invalid invocation of Python command object."));
@@ -131,7 +127,6 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
       if (obj->command->prefixname)
 	{
 	  /* A prefix command does not need an invoke method.  */
-	  do_cleanups (cleanup);
 	  return;
 	}
       error (_("Python command object missing 'invoke' method."));
@@ -139,21 +134,21 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 
   if (! args)
     args = "";
-  argobj = PyUnicode_Decode (args, strlen (args), host_charset (), NULL);
-  if (! argobj)
+  gdbpy_ref argobj (PyUnicode_Decode (args, strlen (args), host_charset (),
+				      NULL));
+  if (argobj == NULL)
     {
       gdbpy_print_stack ();
       error (_("Could not convert arguments to Python string."));
     }
 
-  ttyobj = from_tty ? Py_True : Py_False;
-  Py_INCREF (ttyobj);
-  result = PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst, argobj,
-				       ttyobj, NULL);
-  Py_DECREF (argobj);
-  Py_DECREF (ttyobj);
+  gdbpy_ref ttyobj (from_tty ? Py_True : Py_False);
+  Py_INCREF (ttyobj.get ());
+  gdbpy_ref result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
+						argobj.get (), ttyobj.get (),
+						NULL));
 
-  if (! result)
+  if (result == NULL)
     {
       PyObject *ptype, *pvalue, *ptraceback;
 
@@ -201,9 +196,6 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	  error ("%s", msg.get ());
 	}
     }
-
-  Py_DECREF (result);
-  do_cleanups (cleanup);
 }
 
 /* Helper function for the Python command completers (both "pure"
@@ -240,8 +232,6 @@ cmdpy_completer_helper (struct cmd_list_element *command,
 			const char *text, const char *word)
 {
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
-  PyObject *textobj, *wordobj;
-  PyObject *resultobj;
 
   if (obj == NULL)
     error (_("Invalid invocation of Python command object."));
@@ -251,29 +241,26 @@ cmdpy_completer_helper (struct cmd_list_element *command,
       return NULL;
     }
 
-  textobj = PyUnicode_Decode (text, strlen (text), host_charset (), NULL);
+  gdbpy_ref textobj (PyUnicode_Decode (text, strlen (text), host_charset (),
+				       NULL));
   if (textobj == NULL)
     error (_("Could not convert argument to Python string."));
-  wordobj = PyUnicode_Decode (word, strlen (word), host_charset (), NULL);
+  gdbpy_ref wordobj (PyUnicode_Decode (word, strlen (word), host_charset (),
+				       NULL));
   if (wordobj == NULL)
-    {
-      Py_DECREF (textobj);
-      error (_("Could not convert argument to Python string."));
-    }
+    error (_("Could not convert argument to Python string."));
 
-  resultobj = PyObject_CallMethodObjArgs ((PyObject *) obj, complete_cst,
-					  textobj, wordobj, NULL);
-  Py_DECREF (textobj);
-  Py_DECREF (wordobj);
-  if (!resultobj)
+  gdbpy_ref resultobj (PyObject_CallMethodObjArgs ((PyObject *) obj,
+						   complete_cst,
+						   textobj.get (),
+						   wordobj.get (), NULL));
+  if (resultobj == NULL)
     {
       /* Just swallow errors here.  */
       PyErr_Clear ();
     }
 
-  Py_XINCREF (resultobj);
-
-  return resultobj;
+  return resultobj.release ();
 }
 
 /* Python function called to determine the break characters of a
@@ -285,27 +272,24 @@ static void
 cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 				 const char *text, const char *word)
 {
-  PyObject *resultobj = NULL;
-  struct cleanup *cleanup;
-
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Calling our helper to obtain the PyObject of the Python
      function.  */
-  resultobj = cmdpy_completer_helper (command, text, word);
+  gdbpy_ref resultobj (cmdpy_completer_helper (command, text, word));
 
   /* Check if there was an error.  */
   if (resultobj == NULL)
-    goto done;
+    return;
 
-  if (PyInt_Check (resultobj))
+  if (PyInt_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  We are only
 	 interested in this kind of return.  */
       long value;
 
-      if (!gdb_py_int_as_long (resultobj, &value))
+      if (!gdb_py_int_as_long (resultobj.get (), &value))
 	{
 	  /* Ignore.  */
 	  PyErr_Clear ();
@@ -319,11 +303,6 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 	    (completers[value].completer);
 	}
     }
-
- done:
-
-  Py_XDECREF (resultobj);
-  do_cleanups (cleanup);
 }
 
 /* Called by gdb for command completion.  */
@@ -332,30 +311,28 @@ static VEC (char_ptr) *
 cmdpy_completer (struct cmd_list_element *command,
 		 const char *text, const char *word)
 {
-  PyObject *resultobj = NULL;
   VEC (char_ptr) *result = NULL;
-  struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Calling our helper to obtain the PyObject of the Python
      function.  */
-  resultobj = cmdpy_completer_helper (command, text, word);
+  gdbpy_ref resultobj (cmdpy_completer_helper (command, text, word));
 
   /* If the result object of calling the Python function is NULL, it
      means that there was an error.  In this case, just give up and
      return NULL.  */
   if (resultobj == NULL)
-    goto done;
+    return NULL;
 
   result = NULL;
-  if (PyInt_Check (resultobj))
+  if (PyInt_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
       long value;
 
-      if (! gdb_py_int_as_long (resultobj, &value))
+      if (! gdb_py_int_as_long (resultobj.get (), &value))
 	{
 	  /* Ignore.  */
 	  PyErr_Clear ();
@@ -365,24 +342,24 @@ cmdpy_completer (struct cmd_list_element *command,
     }
   else
     {
-      PyObject *iter = PyObject_GetIter (resultobj);
-      PyObject *elt;
+      gdbpy_ref iter (PyObject_GetIter (resultobj.get ()));
 
       if (iter == NULL)
-	goto done;
+	return NULL;
 
-      while ((elt = PyIter_Next (iter)) != NULL)
+      while (true)
 	{
+	  gdbpy_ref elt (PyIter_Next (iter.get ()));
+	  if (elt == NULL)
+	    break;
 
-	  if (! gdbpy_is_string (elt))
+	  if (! gdbpy_is_string (elt.get ()))
 	    {
 	      /* Skip problem elements.  */
-	      Py_DECREF (elt);
 	      continue;
 	    }
 	  gdb::unique_xmalloc_ptr<char>
-	    item (python_string_to_host_string (elt));
-	  Py_DECREF (elt);
+	    item (python_string_to_host_string (elt.get ()));
 	  if (item == NULL)
 	    {
 	      /* Skip problem elements.  */
@@ -392,18 +369,11 @@ cmdpy_completer (struct cmd_list_element *command,
 	  VEC_safe_push (char_ptr, result, item.release ());
 	}
 
-      Py_DECREF (iter);
-
       /* If we got some results, ignore problems.  Otherwise, report
 	 the problem.  */
       if (result != NULL && PyErr_Occurred ())
 	PyErr_Clear ();
     }
-
- done:
-
-  Py_XDECREF (resultobj);
-  do_cleanups (cleanup);
 
   return result;
 }
@@ -599,21 +569,18 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     }
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
-      PyObject *ds_obj = PyObject_GetAttr (self, gdbpy_doc_cst);
+      gdbpy_ref ds_obj (PyObject_GetAttr (self, gdbpy_doc_cst));
 
-      if (ds_obj && gdbpy_is_string (ds_obj))
+      if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
-	  docstring = python_string_to_host_string (ds_obj).release ();
+	  docstring = python_string_to_host_string (ds_obj.get ()).release ();
 	  if (docstring == NULL)
 	    {
 	      xfree (cmd_name);
 	      xfree (pfx_name);
-	      Py_DECREF (ds_obj);
 	      return -1;
 	    }
 	}
-
-      Py_XDECREF (ds_obj);
     }
   if (! docstring)
     docstring = xstrdup (_("This command is not documented."));
@@ -784,13 +751,12 @@ PyTypeObject cmdpy_object_type =
 PyObject *
 gdbpy_string_to_argv (PyObject *self, PyObject *args)
 {
-  PyObject *py_argv;
   const char *input;
 
   if (!PyArg_ParseTuple (args, "s", &input))
     return NULL;
 
-  py_argv = PyList_New (0);
+  gdbpy_ref py_argv (PyList_New (0));
   if (py_argv == NULL)
     return NULL;
 
@@ -805,21 +771,18 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
       for (i = 0; c_argv[i] != NULL; ++i)
 	{
-	  PyObject *argp = PyString_FromString (c_argv[i]);
+	  gdbpy_ref argp (PyString_FromString (c_argv[i]));
 
 	  if (argp == NULL
-	      || PyList_Append (py_argv, argp) < 0)
+	      || PyList_Append (py_argv.get (), argp.get ()) < 0)
 	    {
-	      Py_XDECREF (argp);
-	      Py_DECREF (py_argv);
 	      freeargv (c_argv);
 	      return NULL;
 	    }
-	  Py_DECREF (argp);
 	}
 
       freeargv (c_argv);
     }
 
-  return py_argv;
+  return py_argv.release ();
 }

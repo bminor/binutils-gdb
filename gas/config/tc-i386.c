@@ -555,7 +555,7 @@ static int allow_pseudo_reg = 0;
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
 
-/* 1 if the assembler should add BND prefix for all control-tranferring
+/* 1 if the assembler should add BND prefix for all control-transferring
    instructions supporting it, even if this prefix wasn't specified
    explicitly.  */
 static int add_bnd_prefix = 0;
@@ -966,6 +966,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_4FMAPS_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512_4vnniw"), PROCESSOR_UNKNOWN,
     CPU_AVX512_4VNNIW_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx512_vpopcntdq"), PROCESSOR_UNKNOWN,
+    CPU_AVX512_VPOPCNTDQ_FLAGS, 0 },
   { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
     CPU_CLZERO_FLAGS, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
@@ -1005,6 +1007,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512vbmi"), CPU_ANY_AVX512VBMI_FLAGS },
   { STRING_COMMA_LEN ("noavx512_4fmaps"), CPU_ANY_AVX512_4FMAPS_FLAGS },
   { STRING_COMMA_LEN ("noavx512_4vnniw"), CPU_ANY_AVX512_4VNNIW_FLAGS },
+  { STRING_COMMA_LEN ("noavx512_vpopcntdq"), CPU_ANY_AVX512_VPOPCNTDQ_FLAGS },
 };
 
 #ifdef I386COFF
@@ -2460,7 +2463,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
       if (*string == '.' && j >= ARRAY_SIZE (cpu_arch))
 	{
-	  /* Disable an ISA entension.  */
+	  /* Disable an ISA extension.  */
 	  for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
 	    if (strcmp (string + 1, cpu_noarch [j].name) == 0)
 	      {
@@ -3137,7 +3140,7 @@ build_vex_prefix (const insn_template *t)
   else
     register_specifier = 0xf;
 
-  /* Use 2-byte VEX prefix by swappping destination and source
+  /* Use 2-byte VEX prefix by swapping destination and source
      operand.  */
   if (!i.swap_operand
       && i.operands == i.reg_operands
@@ -4133,13 +4136,13 @@ parse_operands (char *l, const char *mnemonic)
 	{			/* Yes, we've read in another operand.  */
 	  unsigned int operand_ok;
 	  this_operand = i.operands++;
-	  i.types[this_operand].bitfield.unspecified = 1;
 	  if (i.operands > MAX_OPERANDS)
 	    {
 	      as_bad (_("spurious operands; (%d operands/instruction max)"),
 		      MAX_OPERANDS);
 	      return NULL;
 	    }
+	  i.types[this_operand].bitfield.unspecified = 1;
 	  /* Now parse operand adding info to 'i' as we go along.  */
 	  END_STRING_AND_SAVE (l);
 
@@ -4953,7 +4956,7 @@ match_template (char mnem_suffix)
 	    continue;
 	  break;
 	case 2:
-	  /* xchg %eax, %eax is a special case. It is an aliase for nop
+	  /* xchg %eax, %eax is a special case. It is an alias for nop
 	     only in 32bit mode and we can use opcode 0x90.  In 64bit
 	     mode, we can't use 0x90 for xchg %eax, %eax since it should
 	     zero-extend %eax to %rax.  */
@@ -6206,7 +6209,7 @@ build_modrm_byte (void)
 
           if (i.tm.opcode_modifier.immext)
             {
-              /* When ImmExt is set, the immdiate byte is the last
+              /* When ImmExt is set, the immediate byte is the last
                  operand.  */
               imm_slot = i.operands - 1;
               source--;
@@ -9162,7 +9165,7 @@ elf_symbol_resolved_in_segment_p (symbolS *fr_symbol, offsetT fr_var)
       {
       case BFD_RELOC_386_PLT32:
       case BFD_RELOC_X86_64_PLT32:
-	/* Symbol with PLT relocatin may be preempted. */
+	/* Symbol with PLT relocation may be preempted. */
 	return 0;
       default:
 	abort ();
@@ -10054,7 +10057,7 @@ md_parse_option (int c, const char *arg)
 	      else if (*cpu_arch [j].name == '.'
 		       && strcmp (arch, cpu_arch [j].name + 1) == 0)
 		{
-		  /* ISA entension.  */
+		  /* ISA extension.  */
 		  i386_cpu_flags flags;
 
 		  flags = cpu_flags_or (cpu_arch_flags,
@@ -10081,7 +10084,7 @@ md_parse_option (int c, const char *arg)
 
 	  if (j >= ARRAY_SIZE (cpu_arch))
 	    {
-	      /* Disable an ISA entension.  */
+	      /* Disable an ISA extension.  */
 	      for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
 		if (strcmp (arch, cpu_noarch [j].name) == 0)
 		  {

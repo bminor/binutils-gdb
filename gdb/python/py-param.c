@@ -27,6 +27,7 @@
 #include "completer.h"
 #include "language.h"
 #include "arch-utils.h"
+#include "py-ref.h"
 
 /* Parameter constants and their values.  */
 struct parm_constant
@@ -306,15 +307,14 @@ get_doc_string (PyObject *object, PyObject *attr)
 
   if (PyObject_HasAttr (object, attr))
     {
-      PyObject *ds_obj = PyObject_GetAttr (object, attr);
+      gdbpy_ref ds_obj (PyObject_GetAttr (object, attr));
 
-      if (ds_obj && gdbpy_is_string (ds_obj))
+      if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
-	  result = python_string_to_host_string (ds_obj);
+	  result = python_string_to_host_string (ds_obj.get ());
 	  if (result == NULL)
 	    gdbpy_print_stack ();
 	}
-      Py_XDECREF (ds_obj);
     }
   if (! result)
     result.reset (xstrdup (_("This command is not documented.")));
@@ -329,15 +329,14 @@ static gdb::unique_xmalloc_ptr<char>
 call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
 {
   gdb::unique_xmalloc_ptr<char> data;
-  PyObject *result = PyObject_CallMethodObjArgs (obj, method, arg, NULL);
+  gdbpy_ref result (PyObject_CallMethodObjArgs (obj, method, arg, NULL));
 
-  if (! result)
+  if (result == NULL)
     return NULL;
 
-  if (gdbpy_is_string (result))
+  if (gdbpy_is_string (result.get ()))
     {
-      data = python_string_to_host_string (result);
-      Py_DECREF (result);
+      data = python_string_to_host_string (result.get ());
       if (! data)
 	return NULL;
     }
@@ -345,7 +344,6 @@ call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Parameter must return a string value."));
-      Py_DECREF (result);
       return NULL;
     }
 
@@ -364,18 +362,24 @@ get_set_value (char *args, int from_tty,
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);
   gdb::unique_xmalloc_ptr<char> set_doc_string;
-  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
-					       current_language);
-  PyObject *set_doc_func = PyString_FromString ("get_set_string");
 
-  if (! set_doc_func)
-    goto error;
+  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_ref set_doc_func (PyString_FromString ("get_set_string"));
 
-  if (PyObject_HasAttr (obj, set_doc_func))
+  if (set_doc_func == NULL)
     {
-      set_doc_string = call_doc_function (obj, set_doc_func, NULL);
+      gdbpy_print_stack ();
+      return;
+    }
+
+  if (PyObject_HasAttr (obj, set_doc_func.get ()))
+    {
+      set_doc_string = call_doc_function (obj, set_doc_func.get (), NULL);
       if (! set_doc_string)
-	goto error;
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
     }
   else
     {
@@ -386,16 +390,6 @@ get_set_value (char *args, int from_tty,
     }
 
   fprintf_filtered (gdb_stdout, "%s\n", set_doc_string.get ());
-
-  Py_XDECREF (set_doc_func);
-  do_cleanups (cleanup);
-  return;
-
- error:
-  Py_XDECREF (set_doc_func);
-  gdbpy_print_stack ();
-  do_cleanups (cleanup);
-  return;
 }
 
 /* A callback function that is registered against the respective
@@ -411,24 +405,33 @@ get_show_value (struct ui_file *file, int from_tty,
 {
   PyObject *obj = (PyObject *) get_cmd_context (c);
   gdb::unique_xmalloc_ptr<char> show_doc_string;
-  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
-					       current_language);
-  PyObject *show_doc_func = PyString_FromString ("get_show_string");
 
-  if (! show_doc_func)
-    goto error;
+  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_ref show_doc_func (PyString_FromString ("get_show_string"));
 
-  if (PyObject_HasAttr (obj, show_doc_func))
+  if (show_doc_func == NULL)
     {
-      PyObject *val_obj = PyString_FromString (value);
+      gdbpy_print_stack ();
+      return;
+    }
 
-      if (! val_obj)
-	goto error;
+  if (PyObject_HasAttr (obj, show_doc_func.get ()))
+    {
+      gdbpy_ref val_obj (PyString_FromString (value));
 
-      show_doc_string = call_doc_function (obj, show_doc_func, val_obj);
-      Py_DECREF (val_obj);
+      if (val_obj == NULL)
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
+
+      show_doc_string = call_doc_function (obj, show_doc_func.get (),
+					   val_obj.get ());
       if (! show_doc_string)
-	goto error;
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
 
       fprintf_filtered (file, "%s\n", show_doc_string.get ());
     }
@@ -440,16 +443,6 @@ get_show_value (struct ui_file *file, int from_tty,
       show_doc_string  = get_doc_string (obj, show_doc_cst);
       fprintf_filtered (file, "%s %s\n", show_doc_string.get (), value);
     }
-
-  Py_XDECREF (show_doc_func);
-  do_cleanups (cleanup);
-  return;
-
- error:
-  Py_XDECREF (show_doc_func);
-  gdbpy_print_stack ();
-  do_cleanups (cleanup);
-  return;
 }
 
 
@@ -593,23 +586,22 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
 
   for (i = 0; i < size; ++i)
     {
-      PyObject *item = PySequence_GetItem (enum_values, i);
+      gdbpy_ref item (PySequence_GetItem (enum_values, i));
 
-      if (! item)
+      if (item == NULL)
 	{
 	  do_cleanups (back_to);
 	  return 0;
 	}
-      if (! gdbpy_is_string (item))
+      if (! gdbpy_is_string (item.get ()))
 	{
-	  Py_DECREF (item);
 	  do_cleanups (back_to);
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("The enumeration item not a string."));
 	  return 0;
 	}
-      self->enumeration[i] = python_string_to_host_string (item).release ();
-      Py_DECREF (item);
+      self->enumeration[i]
+	= python_string_to_host_string (item.get ()).release ();
       if (self->enumeration[i] == NULL)
 	{
 	  do_cleanups (back_to);

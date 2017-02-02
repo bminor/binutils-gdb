@@ -438,11 +438,11 @@ free_only_list (void)
 
 
 static void
-dump_section_header (bfd *abfd, asection *section,
-		     void *ignored ATTRIBUTE_UNUSED)
+dump_section_header (bfd *abfd, asection *section, void *data)
 {
   char *comma = "";
   unsigned int opb = bfd_octets_per_byte (abfd);
+  int longest_section_name = *((int *) data);
 
   /* Ignore linker created section.  See elfNN_ia64_object_p in
      bfd/elfxx-ia64.c.  */
@@ -453,7 +453,7 @@ dump_section_header (bfd *abfd, asection *section,
   if (! process_section_p (section))
     return;
 
-  printf ("%3d %-13s %08lx  ", section->index,
+  printf ("%3d %-*s %08lx  ", section->index, longest_section_name,
 	  bfd_get_section_name (abfd, section),
 	  (unsigned long) bfd_section_size (abfd, section) / opb);
   bfd_printf_vma (abfd, bfd_get_section_vma (abfd, section));
@@ -536,26 +536,64 @@ dump_section_header (bfd *abfd, asection *section,
 #undef PF
 }
 
+/* Called on each SECTION in ABFD, update the int variable pointed to by
+   DATA which contains the string length of the longest section name.  */
+
+static void
+find_longest_section_name (bfd *abfd, asection *section, void *data)
+{
+  int *longest_so_far = (int *) data;
+  const char *name;
+  int len;
+
+  /* Ignore linker created section.  */
+  if (section->flags & SEC_LINKER_CREATED)
+    return;
+
+  /* Skip sections that we are ignoring.  */
+  if (! process_section_p (section))
+    return;
+
+  name = bfd_get_section_name (abfd, section);
+  len = (int) strlen (name);
+  if (len > *longest_so_far)
+    *longest_so_far = len;
+}
+
 static void
 dump_headers (bfd *abfd)
 {
-  printf (_("Sections:\n"));
+  /* The default width of 13 is just an arbitrary choice.  */
+  int max_section_name_length = 13;
+  int bfd_vma_width;
 
 #ifndef BFD64
-  printf (_("Idx Name          Size      VMA       LMA       File off  Algn"));
+  bfd_vma_width = 10;
 #else
   /* With BFD64, non-ELF returns -1 and wants always 64 bit addresses.  */
   if (bfd_get_arch_size (abfd) == 32)
-    printf (_("Idx Name          Size      VMA       LMA       File off  Algn"));
+    bfd_vma_width = 10;
   else
-    printf (_("Idx Name          Size      VMA               LMA               File off  Algn"));
+    bfd_vma_width = 18;
 #endif
+
+  printf (_("Sections:\n"));
+
+  if (wide_output)
+    bfd_map_over_sections (abfd, find_longest_section_name,
+                           &max_section_name_length);
+
+  printf (_("Idx %-*s Size      %-*s%-*sFile off  Algn"),
+	  max_section_name_length, "Name",
+	  bfd_vma_width, "VMA",
+	  bfd_vma_width, "LMA");
 
   if (wide_output)
     printf (_("  Flags"));
   printf ("\n");
 
-  bfd_map_over_sections (abfd, dump_section_header, NULL);
+  bfd_map_over_sections (abfd, dump_section_header,
+                         &max_section_name_length);
 }
 
 static asymbol **

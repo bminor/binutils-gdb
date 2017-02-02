@@ -320,8 +320,6 @@ extern int varobj_has_more (const struct varobj *var, int to);
 
 extern int varobj_is_dynamic_p (const struct varobj *var);
 
-extern struct cleanup *varobj_ensure_python_env (const struct varobj *var);
-
 extern int varobj_default_value_is_changeable_p (const struct varobj *var);
 extern int varobj_value_is_changeable_p (const struct varobj *var);
 

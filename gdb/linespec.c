@@ -2866,6 +2866,18 @@ struct decode_compound_collector
   /* A hash table of all symbols we found.  We use this to avoid
      adding any symbol more than once.  */
   htab_t unique_syms;
+
+  decode_compound_collector ()
+  : symbols (NULL),
+    unique_syms (NULL)
+  {
+  }
+
+  ~decode_compound_collector ()
+  {
+    if (unique_syms != NULL)
+      htab_delete (unique_syms);
+  }
 };
 
 /* A callback for iterate_over_symbols that is used by
@@ -2918,7 +2930,6 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
   collector.unique_syms = htab_create_alloc (1, htab_hash_pointer,
 					     htab_eq_pointer, NULL,
 					     xcalloc, xfree);
-  cleanup = make_cleanup_htab_delete (collector.unique_syms);
 
   for (ix = 0; VEC_iterate (symtab_ptr, file_symtabs, ix, elt); ++ix)
     {
@@ -2944,7 +2955,6 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
 	}
     }
 
-  do_cleanups (cleanup);
   discard_cleanups (outer);
   return collector.symbols;
 }
@@ -3275,6 +3285,18 @@ struct symtab_collector
 
   /* This is used to ensure the symtabs are unique.  */
   htab_t symtab_table;
+
+  symtab_collector ()
+  : symtabs (NULL),
+    symtab_table (NULL)
+  {
+  }
+
+  ~symtab_collector ()
+  {
+    if (symtab_table != NULL)
+      htab_delete (symtab_table);
+  }
 };
 
 /* Callback for iterate_over_symtabs.  */
@@ -3310,7 +3332,6 @@ collect_symtabs_from_filename (const char *file,
   collector.symtabs = NULL;
   collector.symtab_table = htab_create (1, htab_hash_pointer, htab_eq_pointer,
 					NULL);
-  cleanups = make_cleanup_htab_delete (collector.symtab_table);
 
   /* Find that file's data.  */
   if (search_pspace == NULL)
@@ -3330,7 +3351,6 @@ collect_symtabs_from_filename (const char *file,
       iterate_over_symtabs (file, add_symtabs_to_list, &collector);
     }
 
-  do_cleanups (cleanups);
   return collector.symtabs;
 }
 

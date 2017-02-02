@@ -1,3 +1,52 @@
+2017-01-27  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 20343
+	* doc/binutils.texi (ar): Extend documentation of the --plugin
+	option.  Include a description of where the plugins should be
+	located.
+	(nm): Likewise.
+
+2017-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add Bernd to Past Maintainers section.
+	(SCORE): Remove Mei Ligang as maintainer.  Add to Past Maintainers
+	section.
+
+2017-01-23  Bernd Schmidt  <bschmidt@redhat.com>
+
+	* MAINTAINERS (BFIN): Remove myself as Blackfin maintainer.
+
+2017-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objdump.c (dump_section_header): Extract max section name length
+	from data parameter, use this when formatting output.
+	(find_longest_section_name): New function.
+	(dump_headers): Calculate longest section name when in wide mode,
+	reformat to unify printing of header line.
+
+2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
+
+	PR 21059
+	* arlex.l: Support processing with flex 2.6.3.
+	* deflex.l: Likewise.
+
+2017-01-17  Dmitry Timoshkov  <dmitry@baikal.ru>
+
+	* resbin.c: Optional dialog control data immediately follows
+	the control description without alignment.
+	* testsuite/binutils-all/windres/controldata.rc: New test.
+	source.
+	* testsuite/binutils-all/windres/controldata.rsd: New test.
+
+2017-01-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/20876
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/objdump.exp (test_build_id_debuglink):
+	New proc to test the location of separate debug info files using
+	the build-id method.
+
 2017-01-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 21034

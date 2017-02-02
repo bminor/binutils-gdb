@@ -27,6 +27,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "dis-asm.h"		/* For register styles.  */
+#include "disasm.h"
 #include "regcache.h"
 #include "reggroups.h"
 #include "doublest.h"
@@ -7739,7 +7740,9 @@ arm_displaced_step_fixup (struct gdbarch *gdbarch,
 static int
 gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 {
-  struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
+  gdb_disassembler *di
+    = static_cast<gdb_disassembler *>(info->application_data);
+  struct gdbarch *gdbarch = di->arch ();
 
   if (arm_pc_is_thumb (gdbarch, memaddr))
     {

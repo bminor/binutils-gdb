@@ -714,6 +714,38 @@ extern struct value *value_mark (void);
 
 extern void value_free_to_mark (const struct value *mark);
 
+/* A helper class that uses value_mark at construction time and calls
+   value_free_to_mark in the destructor.  This is used to clear out
+   temporary values created during the lifetime of this object.  */
+class scoped_value_mark
+{
+ public:
+
+  scoped_value_mark ()
+    : m_value (value_mark ())
+  {
+  }
+
+  ~scoped_value_mark ()
+  {
+    free_to_mark ();
+  }
+
+  /* Free the values currently on the value stack.  */
+  void free_to_mark ()
+  {
+    if (m_value != NULL)
+      {
+	value_free_to_mark (m_value);
+	m_value = NULL;
+      }
+  }
+
+ private:
+
+  const struct value *m_value;
+};
+
 extern struct value *value_cstring (const char *ptr, ssize_t len,
 				    struct type *char_type);
 extern struct value *value_string (const char *ptr, ssize_t len,

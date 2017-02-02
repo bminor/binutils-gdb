@@ -1,3 +1,5 @@
+%option noyywrap
+
 /* itbl-lex.l
    Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
@@ -102,11 +104,3 @@ HEX	[0-9A-Fa-f]
     return yytext[0];
   }
 %%
-
-#ifndef yywrap
-int
-yywrap ()
-  {
-    return 1;
-  }
-#endif

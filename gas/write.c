@@ -18,7 +18,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-/* This thing should be set up to do byteordering correctly.  But...  */
+/* This thing should be set up to do byte ordering correctly.  But...  */
 
 #include "as.h"
 #include "subsegs.h"
