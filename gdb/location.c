@@ -227,59 +227,52 @@ static char *
 explicit_to_string_internal (int as_linespec,
 			     const struct explicit_location *explicit_loc)
 {
-  struct ui_file *buf;
-  char space, *result;
   int need_space = 0;
-  struct cleanup *cleanup;
-
-  space = as_linespec ? ':' : ' ';
-  buf = mem_fileopen ();
-  cleanup = make_cleanup_ui_file_delete (buf);
+  char space = as_linespec ? ':' : ' ';
+  string_file buf;
 
   if (explicit_loc->source_filename != NULL)
     {
       if (!as_linespec)
-	fputs_unfiltered ("-source ", buf);
-      fputs_unfiltered (explicit_loc->source_filename, buf);
+	buf.puts ("-source ");
+      buf.puts (explicit_loc->source_filename);
       need_space = 1;
     }
 
   if (explicit_loc->function_name != NULL)
     {
       if (need_space)
-	fputc_unfiltered (space, buf);
+	buf.putc (space);
       if (!as_linespec)
-	fputs_unfiltered ("-function ", buf);
-      fputs_unfiltered (explicit_loc->function_name, buf);
+	buf.puts ("-function ");
+      buf.puts (explicit_loc->function_name);
       need_space = 1;
     }
 
   if (explicit_loc->label_name != NULL)
     {
       if (need_space)
-	fputc_unfiltered (space, buf);
+	buf.putc (space);
       if (!as_linespec)
-	fputs_unfiltered ("-label ", buf);
-      fputs_unfiltered (explicit_loc->label_name, buf);
+	buf.puts ("-label ");
+      buf.puts (explicit_loc->label_name);
       need_space = 1;
     }
 
   if (explicit_loc->line_offset.sign != LINE_OFFSET_UNKNOWN)
     {
       if (need_space)
-	fputc_unfiltered (space, buf);
+	buf.putc (space);
       if (!as_linespec)
-	fputs_unfiltered ("-line ", buf);
-      fprintf_filtered (buf, "%s%d",
-			(explicit_loc->line_offset.sign == LINE_OFFSET_NONE ? ""
-			 : (explicit_loc->line_offset.sign
-			    == LINE_OFFSET_PLUS ? "+" : "-")),
-			explicit_loc->line_offset.offset);
+	buf.puts ("-line ");
+      buf.printf ("%s%d",
+		  (explicit_loc->line_offset.sign == LINE_OFFSET_NONE ? ""
+		   : (explicit_loc->line_offset.sign
+		      == LINE_OFFSET_PLUS ? "+" : "-")),
+		  explicit_loc->line_offset.offset);
     }
 
-  result = ui_file_xstrdup (buf, NULL);
-  do_cleanups (cleanup);
-  return result;
+  return xstrdup (buf.c_str ());
 }
 
 /* See description in location.h.  */

@@ -125,7 +125,6 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   int i;
   struct disr_info ret;
   struct type *disr_type;
-  struct ui_file *temp_file;
   struct value_print_options opts;
   struct cleanup *cleanup;
   const char *name_segment;
@@ -229,17 +228,16 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   if (strcmp (TYPE_FIELD_NAME (disr_type, 0), "RUST$ENUM$DISR") != 0)
     error (_("Rust debug format has changed"));
 
-  temp_file = mem_fileopen ();
-  cleanup = make_cleanup_ui_file_delete (temp_file);
+  string_file temp_file;
   /* The first value of the first field (or any field)
      is the discriminant value.  */
   c_val_print (TYPE_FIELD_TYPE (disr_type, 0),
 	       (embedded_offset + TYPE_FIELD_BITPOS (type, 0) / 8
 		+ TYPE_FIELD_BITPOS (disr_type, 0) / 8),
-	       address, temp_file,
+	       address, &temp_file,
 	       0, val, &opts);
 
-  ret.name = ui_file_as_string (temp_file);
+  ret.name = std::move (temp_file.string ());
   name_segment = rust_last_path_segment (ret.name.c_str ());
   if (name_segment != NULL)
     {
@@ -271,7 +269,6 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
 	     TYPE_TAG_NAME (type), ret.name.c_str ());
     }
 
-  do_cleanups (cleanup);
   return ret;
 }
 

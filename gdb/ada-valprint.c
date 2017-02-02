@@ -298,12 +298,11 @@ static void
 ada_print_floating (const gdb_byte *valaddr, struct type *type,
 		    struct ui_file *stream)
 {
-  struct ui_file *tmp_stream = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_stream);
+  string_file tmp_stream;
 
-  print_floating (valaddr, type, tmp_stream);
+  print_floating (valaddr, type, &tmp_stream);
 
-  std::string s = ui_file_as_string (tmp_stream);
+  std::string &s = tmp_stream.string ();
   size_t skip_count = 0;
 
   /* Modify for Ada rules.  */
@@ -342,8 +341,6 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
     }
   else
     fprintf_filtered (stream, "%s", &s[skip_count]);
-
-  do_cleanups (cleanups);
 }
 
 void

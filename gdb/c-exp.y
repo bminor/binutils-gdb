@@ -1555,13 +1555,11 @@ oper:	OPERATOR NEW
 	|	OPERATOR OBJC_LBRAC ']'
 			{ $$ = operator_stoken ("[]"); }
 	|	OPERATOR conversion_type_id
-			{ struct ui_file *buf = mem_fileopen ();
+			{ string_file buf;
 
-			  c_print_type ($2, NULL, buf, -1, 0,
+			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
-			  std::string name = ui_file_as_string (buf);
-			  ui_file_delete (buf);
-			  $$ = operator_stoken (name.c_str ());
+			  $$ = operator_stoken (buf.c_str ());
 			}
 	;
 

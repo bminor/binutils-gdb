@@ -1875,17 +1875,13 @@ cat <<EOF
 static void
 verify_gdbarch (struct gdbarch *gdbarch)
 {
-  struct ui_file *log;
-  struct cleanup *cleanups;
-  long length;
+  string_file log;
 
-  log = mem_fileopen ();
-  cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
   if (gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
-    fprintf_unfiltered (log, "\n\tbyte-order");
+    log.puts ("\n\tbyte-order");
   if (gdbarch->bfd_arch_info == NULL)
-    fprintf_unfiltered (log, "\n\tbfd_arch_info");
+    log.puts ("\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level.  */
 EOF
 function_list | while do_read
@@ -1914,21 +1910,19 @@ do
 	elif [ -n "${invalid_p}" ]
 	then
 	    printf "  if (${invalid_p})\n"
-	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
+	    printf "    log.puts (\"\\\\n\\\\t${function}\");\n"
 	elif [ -n "${predefault}" ]
 	then
 	    printf "  if (gdbarch->${function} == ${predefault})\n"
-	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
+	    printf "    log.puts (\"\\\\n\\\\t${function}\");\n"
 	fi
     fi
 done
 cat <<EOF
-  std::string buf = ui_file_as_string (log);
-  if (!buf.empty ())
+  if (!log.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
-                    buf.c_str ());
-  do_cleanups (cleanups);
+                    log.c_str ());
 }
 EOF
 

@@ -192,7 +192,6 @@ inspect_type (struct demangle_parse_info *info,
 	  int is_anon;
 	  struct type *type;
 	  std::unique_ptr<demangle_parse_info> i;
-	  struct ui_file *buf;
 
 	  /* Get the real type of the typedef.  */
 	  type = check_typedef (otype);
@@ -228,23 +227,21 @@ inspect_type (struct demangle_parse_info *info,
 		type = last;
 	    }
 
-	  buf = mem_fileopen ();
+	  string_file buf;
 	  TRY
-	  {
-	    type_print (type, "", buf, -1);
-	  }
-
+	    {
+	      type_print (type, "", &buf, -1);
+	    }
 	  /* If type_print threw an exception, there is little point
 	     in continuing, so just bow out gracefully.  */
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
-	      ui_file_delete (buf);
 	      return 0;
 	    }
 	  END_CATCH
 
-	  name = ui_file_obsavestring (buf, &info->obstack, &len);
-	  ui_file_delete (buf);
+	  len = buf.size ();
+	  name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
 
 	  /* Turn the result into a new tree.  Note that this
 	     tree will contain pointers into NAME, so NAME cannot
@@ -301,7 +298,7 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 {
   long len;
   char *name;
-  struct ui_file *buf = mem_fileopen ();
+  string_file buf;
   struct demangle_component *comp = ret_comp;
 
   /* Walk each node of the qualified name, reconstructing the name of
@@ -315,9 +312,9 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	{
 	  struct demangle_component newobj;
 
-	  ui_file_write (buf, d_left (comp)->u.s_name.s,
-			 d_left (comp)->u.s_name.len);
-	  name = ui_file_obsavestring (buf, &info->obstack, &len);
+	  buf.write (d_left (comp)->u.s_name.s, d_left (comp)->u.s_name.len);
+	  len = buf.size ();
+	  name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
 	  newobj.type = DEMANGLE_COMPONENT_NAME;
 	  newobj.u.s_name.s = name;
 	  newobj.u.s_name.len = len;
@@ -330,12 +327,11 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 		 string and replace the top DEMANGLE_COMPONENT_QUAL_NAME
 		 node.  */
 
-	      ui_file_rewind (buf);
+	      buf.clear ();
 	      n = cp_comp_to_string (&newobj, 100);
 	      if (n == NULL)
 		{
 		  /* If something went astray, abort typedef substitutions.  */
-		  ui_file_delete (buf);
 		  return;
 		}
 
@@ -360,14 +356,13 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	  if (name == NULL)
 	    {
 	      /* If something went astray, abort typedef substitutions.  */
-	      ui_file_delete (buf);
 	      return;
 	    }
-	  fputs_unfiltered (name, buf);
+	  buf.puts (name);
 	  xfree (name);
 	}
 
-      ui_file_write (buf, "::", 2);
+      buf.write ("::", 2);
       comp = d_right (comp);
     }
 
@@ -377,8 +372,9 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 
   if (comp->type == DEMANGLE_COMPONENT_NAME)
     {
-      ui_file_write (buf, comp->u.s_name.s, comp->u.s_name.len);
-      name = ui_file_obsavestring (buf, &info->obstack, &len);
+      buf.write (comp->u.s_name.s, comp->u.s_name.len);
+      len = buf.size ();
+      name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
 
       /* Replace the top (DEMANGLE_COMPONENT_QUAL_NAME) node
 	 with a DEMANGLE_COMPONENT_NAME node containing the whole
@@ -390,8 +386,6 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
     }
   else
     replace_typedefs (info, comp, finder, data);
-
-  ui_file_delete (buf);
 }
 
 

@@ -135,7 +135,7 @@ extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
 
 extern unsigned char *generate_c_for_variable_locations
      (struct compile_c_instance *compiler,
-      struct ui_file *stream,
+      string_file &stream,
       struct gdbarch *gdbarch,
       const struct block *block,
       CORE_ADDR pc);

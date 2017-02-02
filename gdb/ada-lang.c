@@ -7602,17 +7602,11 @@ ada_value_struct_elt (struct value *arg, char *name, int no_err)
 static std::string
 type_as_string (struct type *type)
 {
-  struct ui_file *tmp_stream = mem_fileopen ();
-  struct cleanup *old_chain;
+  string_file tmp_stream;
 
-  tmp_stream = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (tmp_stream);
+  type_print (type, "", &tmp_stream, -1);
 
-  type_print (type, "", tmp_stream, -1);
-  std::string str = ui_file_as_string (tmp_stream);
-
-  do_cleanups (old_chain);
-  return str;
+  return std::move (tmp_stream.string ());
 }
 
 /* Given a type TYPE, look up the type of the component of type named NAME.

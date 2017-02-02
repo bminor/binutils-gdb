@@ -1,5 +1,296 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (type_as_string): Use string_file.
+	* ada-valprint.c (ada_print_floating): Use string_file.
+	* ada-varobj.c (ada_varobj_scalar_image)
+	(ada_varobj_get_value_image): Use string_file.
+	* aix-thread.c (aix_thread_extra_thread_info): Use string_file.
+	* arm-tdep.c (_initialize_arm_tdep): Use string_printf.
+	* breakpoint.c (update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, reattach_breakpoints)
+	(print_breakpoint_location, print_one_detail_ranged_breakpoint)
+	(print_it_watchpoint): Use string_file.
+	(save_breakpoints): Use stdio_file.
+	* c-exp.y (oper): Use string_file.
+	* cli/cli-logging.c (set_logging_redirect): Use ui_file_up and
+	tee_file.
+	(pop_output_files): Use delete.
+	(handle_redirections): Use stdio_file and tee_file.
+	* cli/cli-setshow.c (do_show_command): Use string_file.
+	* compile/compile-c-support.c (c_compute_program): Use
+	string_file.
+	* compile/compile-c-symbols.c (generate_vla_size): Take a
+	'string_file &' instead of a 'ui_file *'.
+	(generate_c_for_for_one_variable): Take a 'string_file &' instead
+	of a 'ui_file *'.  Use string_file.
+	(generate_c_for_variable_locations): Take a 'string_file &'
+	instead of a 'ui_file *'.
+	* compile/compile-internal.h (generate_c_for_for_one_variable):
+	Take a 'string_file &' instead of a 'ui_file *'.
+	* compile/compile-loc2c.c (push, pushf, unary, binary)
+	(print_label, pushf_register_address, pushf_register)
+	(do_compile_dwarf_expr_to_c): Take a 'string_file &' instead of a
+	'ui_file *'.  Adjust.
+	* compile/compile.c (compile_to_object): Use string_file.
+	* compile/compile.h (compile_dwarf_expr_to_c)
+	(compile_dwarf_bounds_to_c): Take a 'string_file &' instead of a
+	'ui_file *'.
+	* cp-support.c (inspect_type): Use string_file and obstack_copy0.
+	(replace_typedefs_qualified_name): Use string_file and
+	obstack_copy0.
+	* disasm.c (gdb_pretty_print_insn): Use string_file.
+	(gdb_disassembly): Adjust reference the null_stream global.
+	(do_ui_file_delete): Delete.
+	(gdb_insn_length): Use null_stream.
+	* dummy-frame.c (maintenance_print_dummy_frames): Use stdio_file.
+	* dwarf2loc.c (dwarf2_compile_property_to_c)
+	(locexpr_generate_c_location, loclist_generate_c_location): Take a
+	'string_file &' instead of a 'ui_file *'.
+	* dwarf2loc.h (dwarf2_compile_property_to_c): Likewise.
+	* dwarf2read.c (do_ui_file_peek_last): Delete.
+	(dwarf2_compute_name): Use string_file.
+	* event-top.c (gdb_setup_readline): Use stdio_file.
+	* gdbarch.sh (verify_gdbarch): Use string_file.
+	* gdbtypes.c (safe_parse_type): Use null_stream.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Use
+	string_file.
+	* guile/scm-disasm.c (gdbscm_print_insn_from_port): Take a
+	'string_file *' instead of a 'ui_file *'.
+	(gdbscm_arch_disassemble): Use string_file.
+	* guile/scm-frame.c (frscm_print_frame_smob): Use string_file.
+	* guile/scm-ports.c (class ioscm_file_port): Now a class that
+	inherits from ui_file.
+	(ioscm_file_port_delete, ioscm_file_port_rewind)
+	(ioscm_file_port_put): Delete.
+	(ioscm_file_port_write): Rename to ...
+	(ioscm_file_port::write): ... this.  Remove file_port_magic
+	checks.
+	(ioscm_file_port_new): Delete.
+	(ioscm_with_output_to_port_worker): Use ioscm_file_port and
+	ui_file_up.
+	* guile/scm-type.c (tyscm_type_name): Use string_file.
+	* guile/scm-value.c (vlscm_print_value_smob, gdbscm_value_print):
+	Use string_file.
+	* infcmd.c (print_return_value_1): Use string_file.
+	* infrun.c (print_target_wait_results): Use string_file.
+	* language.c (add_language): Use string_file.
+	* location.c (explicit_to_string_internal): Use string_file.
+	* main.c (captured_main_1): Use null_file.
+	* maint.c (maintenance_print_architecture): Use stdio_file.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Use string_file.
+	* mi/mi-common.h (struct mi_interp) <out, err, log, targ,
+	event_channel>: Change type to mi_console_file pointer.
+	* mi/mi-console.c (mi_console_file_fputs, mi_console_file_flush)
+	(mi_console_file_delete): Delete.
+	(struct mi_console_file): Delete.
+	(mi_console_file_magic): Delete.
+	(mi_console_file_new): Delete.
+	(mi_console_file::mi_console_file): New.
+	(mi_console_file_delete): Delete.
+	(mi_console_file_fputs): Delete.
+	(mi_console_file::write): New.
+	(mi_console_raw_packet): Delete.
+	(mi_console_file::flush): New.
+	(mi_console_file_flush): Delete.
+	(mi_console_set_raw): Rename to ...
+	(mi_console_file::set_raw): ... this.
+	* mi/mi-console.h (class mi_console_file): New class.
+	(mi_console_file_new, mi_console_set_raw): Delete.
+	* mi/mi-interp.c (mi_interpreter_init): Use mi_console_file.
+	(mi_set_logging): Use delete and tee_file.  Adjust.
+	* mi/mi-main.c (output_register): Use string_file.
+	(mi_cmd_data_evaluate_expression): Use string_file.
+	(mi_cmd_data_read_memory): Use string_file.
+	(mi_cmd_execute, print_variable_or_computed): Use string_file.
+	* mi/mi-out.c (mi_ui_out::main_stream): New.
+	(mi_ui_out::rewind): Use main_stream and
+	string_file.
+	(mi_ui_out::put): Use main_stream and string_file.
+	(mi_ui_out::mi_ui_out): Remove 'stream' parameter.
+	Allocate a 'string_file' instead.
+	(mi_out_new): Don't allocate a mem_fileopen stream here.
+	* mi/mi-out.h (mi_ui_out::mi_ui_out): Remove 'stream' parameter.
+	(mi_ui_out::main_stream): Declare method.
+	* printcmd.c (eval_command): Use string_file.
+	* psymtab.c (maintenance_print_psymbols): Use stdio_file.
+	* python/py-arch.c (archpy_disassemble): Use string_file.
+	* python/py-breakpoint.c (bppy_get_commands): Use string_file.
+	* python/py-frame.c (frapy_str): Use string_file.
+	* python/py-framefilter.c (py_print_type, py_print_single_arg):
+	Use string_file.
+	* python/py-type.c (typy_str): Use string_file.
+	* python/py-unwind.c (unwind_infopy_str): Use string_file.
+	* python/py-value.c (valpy_str): Use string_file.
+	* record-btrace.c (btrace_insn_history): Use string_file.
+	* regcache.c (regcache_print): Use stdio_file.
+	* reggroups.c (maintenance_print_reggroups): Use stdio_file.
+	* remote.c (escape_buffer): Use string_file.
+	* rust-lang.c (rust_get_disr_info): Use string_file.
+	* serial.c (serial_open_ops_1): Use stdio_file.
+	(do_serial_close): Use delete.
+	* stack.c (print_frame_arg): Use string_file.
+	(print_frame_args): Remove local mem_fileopen stream, not used.
+	(print_frame): Use string_file.
+	* symmisc.c (maintenance_print_symbols): Use stdio_file.
+	* symtab.h (struct symbol_computed_ops) <generate_c_location>:
+	Take a 'string_file *' instead of a 'ui_file *'.
+	* top.c (new_ui): Use stdio_file and stderr_file.
+	(free_ui): Use delete.
+	(execute_command_to_string): Use string_file.
+	(quit_confirm): Use string_file.
+	* tracepoint.c (collection_list::append_exp): Use string_file.
+	* tui/tui-disasm.c (tui_disassemble): Use string_file.
+	* tui/tui-file.c: Don't include "ui-file.h".
+	(enum streamtype, struct tui_stream): Delete.
+	(tui_file_new, tui_file_delete, tui_fileopen, tui_sfileopen)
+	(tui_file_isatty, tui_file_rewind, tui_file_put): Delete.
+	(tui_file::tui_file): New method.
+	(tui_file_fputs): Delete.
+	(tui_file_get_strbuf): Delete.
+	(tui_file::puts): New method.
+	(tui_file_adjust_strbuf): Delete.
+	(tui_file_flush): Delete.
+	(tui_file::flush): New method.
+	* tui/tui-file.h: Tweak intro comment.
+	Include ui-file.h.
+	(tui_fileopen, tui_sfileopen, tui_file_get_strbuf)
+	(tui_file_adjust_strbuf): Delete declarations.
+	(class tui_file): New class.
+	* tui/tui-io.c (tui_initialize_io): Use tui_file.
+	* tui/tui-regs.c (tui_restore_gdbout): Use delete.
+	(tui_register_format): Use string_stream.
+	* tui/tui-stack.c (tui_make_status_line): Use string_file.
+	(tui_get_function_from_frame): Use string_file.
+	* typeprint.c (type_to_string): Use string_file.
+	* ui-file.c (struct ui_file, ui_file_magic, ui_file_new): Delete.
+	(null_stream): New global.
+	(ui_file_delete): Delete.
+	(ui_file::ui_file): New.
+	(null_file_isatty): Delete.
+	(ui_file::~ui_file): New.
+	(null_file_rewind): Delete.
+	(ui_file::printf): New.
+	(null_file_put): Delete.
+	(null_file_flush): Delete.
+	(ui_file::putstr): New.
+	(null_file_write): Delete.
+	(ui_file::putstrn): New.
+	(null_file_read): Delete.
+	(ui_file::putc): New.
+	(null_file_fputs): Delete.
+	(null_file_write_async_safe): Delete.
+	(ui_file::vprintf): New.
+	(null_file_delete): Delete.
+	(null_file::write): New.
+	(null_file_fseek): Delete.
+	(null_file::puts): New.
+	(ui_file_data): Delete.
+	(null_file::write_async_safe): New.
+	(gdb_flush, ui_file_isatty): Adjust.
+	(ui_file_put, ui_file_rewind): Delete.
+	(ui_file_write): Adjust.
+	(ui_file_write_for_put): Delete.
+	(ui_file_write_async_safe, ui_file_read): Adjust.
+	(ui_file_fseek): Delete.
+	(fputs_unfiltered): Adjust.
+	(set_ui_file_flush, set_ui_file_isatty, set_ui_file_rewind)
+	(set_ui_file_put, set_ui_file_write, set_ui_file_write_async_safe)
+	(set_ui_file_read, set_ui_file_fputs, set_ui_file_fseek)
+	(set_ui_file_data): Delete.
+	(string_file::~string_file, string_file::write)
+	(struct accumulated_ui_file, do_ui_file_xstrdup, ui_file_xstrdup)
+	(do_ui_file_as_string, ui_file_as_string): Delete.
+	(do_ui_file_obsavestring, ui_file_obsavestring): Delete.
+	(struct mem_file): Delete.
+	(mem_file_new): Delete.
+	(stdio_file::stdio_file): New.
+	(mem_file_delete): Delete.
+	(stdio_file::stdio_file): New.
+	(mem_fileopen): Delete.
+	(stdio_file::~stdio_file): New.
+	(mem_file_rewind): Delete.
+	(stdio_file::set_stream): New.
+	(mem_file_put): Delete.
+	(stdio_file::open): New.
+	(mem_file_write): Delete.
+	(stdio_file_magic, struct stdio_file): Delete.
+	(stdio_file_new, stdio_file_delete, stdio_file_flush): Delete.
+	(stdio_file::flush): New.
+	(stdio_file_read): Rename to ...
+	(stdio_file::read): ... this.  Adjust.
+	(stdio_file_write): Rename to ...
+	(stdio_file::write): ... this.  Adjust.
+	(stdio_file_write_async_safe): Rename to ...
+	(stdio_file::write_async_safe) ... this.  Adjust.
+	(stdio_file_fputs): Rename to ...
+	(stdio_file::puts) ... this.  Adjust.
+	(stdio_file_isatty): Delete.
+	(stdio_file_fseek): Delete.
+	(stdio_file::isatty): New.
+	(stderr_file_write): Rename to ...
+	(stderr_file::write) ... this.  Adjust.
+	(stderr_file_fputs): Rename to ...
+	(stderr_file::puts) ... this.  Adjust.
+	(stderr_fileopen, stdio_fileopen, gdb_fopen): Delete.
+	(stderr_file::stderr_file): New.
+	(tee_file_magic): Delete.
+	(struct tee_file): Delete.
+	(tee_file::tee_file): New.
+	(tee_file_new): Delete.
+	(tee_file::~tee_file): New.
+	(tee_file_delete): Delete.
+	(tee_file_flush): Rename to ...
+	(tee_file::flush): ... this.  Adjust.
+	(tee_file_write): Rename to ...
+	(tee_file::write): ... this.  Adjust.
+	(tee_file::write_async_safe): New.
+	(tee_file_fputs): Rename to ...
+	(tee_file::puts): ... this.  Adjust.
+	(tee_file_isatty): Rename to ...
+	(tee_file::isatty): ... this.  Adjust.
+	* ui-file.h (struct obstack, struct ui_file): Don't
+	forward-declare.
+	(ui_file_new, ui_file_flush_ftype, set_ui_file_flush)
+	(ui_file_write_ftype)
+	(set_ui_file_write, ui_file_fputs_ftype, set_ui_file_fputs)
+	(ui_file_write_async_safe_ftype, set_ui_file_write_async_safe)
+	(ui_file_read_ftype, set_ui_file_read, ui_file_isatty_ftype)
+	(set_ui_file_isatty, ui_file_rewind_ftype, set_ui_file_rewind)
+	(ui_file_put_method_ftype, ui_file_put_ftype, set_ui_file_put)
+	(ui_file_delete_ftype, set_ui_file_data, ui_file_fseek_ftype)
+	(set_ui_file_fseek): Delete.
+	(ui_file_data, ui_file_delete, ui_file_rewind)
+	(struct ui_file): New.
+	(ui_file_up): New.
+	(class null_file): New.
+	(null_stream): Declare.
+	(ui_file_write_for_put, ui_file_put): Delete.
+	(ui_file_xstrdup, ui_file_as_string, ui_file_obsavestring):
+	Delete.
+	(ui_file_fseek, mem_fileopen, stdio_fileopen, stderr_fileopen)
+	(gdb_fopen, tee_file_new): Delete.
+	(struct string_file): New.
+	(struct stdio_file): New.
+	(stdio_file_up): New.
+	(struct stderr_file): New.
+	(class tee_file): New.
+	* ui-out.c (ui_out::field_stream): Take a 'string_file &' instead
+	of a 'ui_file *'.  Adjust.
+	* ui-out.h (class ui_out) <field_stream>: Likewise.
+	* utils.c (do_ui_file_delete, make_cleanup_ui_file_delete)
+	(null_stream): Delete.
+	(error_stream): Take a 'string_file &' instead of a 'ui_file *'.
+	Adjust.
+	* utils.h (struct ui_file): Delete forward declaration..
+	(make_cleanup_ui_file_delete, null_stream): Delete declarations.
+	(error_stream): Take a 'string_file &' instead of a
+	'ui_file *'.
+	* varobj.c (varobj_value_get_print_value): Use string_file.
+	* xtensa-tdep.c (xtensa_verify_config): Use string_file.
+	* gdbarch.c: Regenerate.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* disasm.c (gdb_disassembler::pretty_print_insn): Rename to...
 	(gdb_pretty_print_insn): ... this.  Now a free function.  Add back
 	a 'gdbarch' parameter.  Allocate a mem_fileopen stream here.

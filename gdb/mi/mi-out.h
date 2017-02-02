@@ -30,7 +30,7 @@ class mi_ui_out : public ui_out
 {
 public:
 
-  explicit mi_ui_out (int mi_version, ui_file *stream);
+  explicit mi_ui_out (int mi_version);
   virtual ~mi_ui_out ();
 
   /* MI-specific */
@@ -77,6 +77,11 @@ private:
   void field_separator ();
   void open (const char *name, ui_out_type type);
   void close (ui_out_type type);
+
+  /* Convenience method that returns the MI out's string stream cast
+     to its appropriate type.  Assumes/asserts that output was not
+     redirected.  */
+  string_file *main_stream ();
 
   bool m_suppress_field_separator;
   bool m_suppress_output;

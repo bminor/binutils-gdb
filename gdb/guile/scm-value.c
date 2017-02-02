@@ -157,15 +157,10 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
 
   TRY
     {
-      struct ui_file *stb = mem_fileopen ();
-      struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
+      string_file stb;
 
-      common_val_print (v_smob->value, stb, 0, &opts, current_language);
-
-      std::string s = ui_file_as_string (stb);
-      scm_puts (s.c_str (), port);
-
-      do_cleanups (old_chain);
+      common_val_print (v_smob->value, &stb, 0, &opts, current_language);
+      scm_puts (stb.c_str (), port);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1277,21 +1272,15 @@ gdbscm_value_print (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
   struct value_print_options opts;
-  std::string s;
-  SCM result;
 
   get_user_print_options (&opts);
   opts.deref_ref = 0;
 
+  string_file stb;
+
   TRY
     {
-      struct ui_file *stb = mem_fileopen ();
-      struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
-
-      common_val_print (value, stb, 0, &opts, current_language);
-      s = ui_file_as_string (stb);
-
-      do_cleanups (old_chain);
+      common_val_print (value, &stb, 0, &opts, current_language);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1304,10 +1293,8 @@ gdbscm_value_print (SCM self)
      IWBN to use scm_take_locale_string here, but we'd have to temporarily
      override the default port conversion handler because contrary to
      documentation it doesn't necessarily free the input string.  */
-  result = scm_from_stringn (s.c_str (), s.size (), host_charset (),
-			     SCM_FAILED_CONVERSION_QUESTION_MARK);
-
-  return result;
+  return scm_from_stringn (stb.c_str (), stb.size (), host_charset (),
+			   SCM_FAILED_CONVERSION_QUESTION_MARK);
 }
 
 /* (parse-and-eval string) -> <gdb:value>

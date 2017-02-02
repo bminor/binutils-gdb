@@ -539,9 +539,6 @@ add_language (const struct language_defn *lang)
   static const char **language_names = NULL;
   /* For the "help set language" command.  */
 
-  int i;
-  struct ui_file *tmp_stream;
-
   if (lang->la_magic != LANG_MAGIC)
     {
       fprintf_unfiltered (gdb_stderr,
@@ -569,9 +566,9 @@ add_language (const struct language_defn *lang)
   language_names = XRESIZEVEC (const char *, language_names,
 			       languages_size + 1);
 
-  for (i = 0; i < languages_size; ++i)
+  for (int i = 0; i < languages_size; ++i)
     language_names[i] = languages[i]->la_name;
-  language_names[i] = NULL;
+  language_names[languages_size] = NULL;
 
   /* Add the filename extensions.  */
   if (lang->la_filename_extensions != NULL)
@@ -584,37 +581,32 @@ add_language (const struct language_defn *lang)
     }
 
   /* Build the "help set language" docs.  */
-  tmp_stream = mem_fileopen ();
+  string_file doc;
 
-  fprintf_unfiltered (tmp_stream,
-		      _("Set the current source language.\n"
-			"The currently understood settings are:\n\nlocal or "
-			"auto    Automatic setting based on source file\n"));
+  doc.printf (_("Set the current source language.\n"
+		"The currently understood settings are:\n\nlocal or "
+		"auto    Automatic setting based on source file\n"));
 
-  for (i = 0; i < languages_size; ++i)
+  for (int i = 0; i < languages_size; ++i)
     {
       /* Already dealt with these above.  */
       if (languages[i]->la_language == language_unknown
 	  || languages[i]->la_language == language_auto)
 	continue;
 
-      /* FIXME: i18n: for now assume that the human-readable name
-	 is just a capitalization of the internal name.  */
-      fprintf_unfiltered (tmp_stream, "%-16s Use the %c%s language\n",
-			  languages[i]->la_name,
-			  /* Capitalize first letter of language
-			     name.  */
-			  toupper (languages[i]->la_name[0]),
-			  languages[i]->la_name + 1);
+      /* FIXME: i18n: for now assume that the human-readable name is
+	 just a capitalization of the internal name.  */
+      doc.printf ("%-16s Use the %c%s language\n",
+		  languages[i]->la_name,
+		  /* Capitalize first letter of language name.  */
+		  toupper (languages[i]->la_name[0]),
+		  languages[i]->la_name + 1);
     }
-
-  std::string language_set_doc = ui_file_as_string (tmp_stream);
-  ui_file_delete (tmp_stream);
 
   add_setshow_enum_cmd ("language", class_support,
 			(const char **) language_names,
 			&language,
-			language_set_doc.c_str (),
+			doc.c_str (),
 			_("Show the current source language."),
 			NULL, set_language_command,
 			show_language_command,

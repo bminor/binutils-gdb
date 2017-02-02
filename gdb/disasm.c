@@ -248,8 +248,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
   if (name != NULL)
     xfree (name);
 
-  struct ui_file *stb = mem_fileopen ();
-  make_cleanup_ui_file_delete (stb);
+  string_file stb;
 
   if (flags & DISASSEMBLY_RAW_INSN)
     {
@@ -260,28 +259,23 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 
       /* Build the opcodes using a temporary stream so we can
 	 write them out in a single go for the MI.  */
-      struct ui_file *opcode_stream = mem_fileopen ();
-      struct cleanup *cleanups =
-	make_cleanup_ui_file_delete (opcode_stream);
+      string_file opcode_stream;
 
-      size = gdb_print_insn (gdbarch, pc, stb, NULL);
+      size = gdb_print_insn (gdbarch, pc, &stb, NULL);
       end_pc = pc + size;
 
       for (;pc < end_pc; ++pc)
 	{
 	  read_code (pc, &data, 1);
-	  fprintf_filtered (opcode_stream, "%s%02x",
-			    spacer, (unsigned) data);
+	  opcode_stream.printf ("%s%02x", spacer, (unsigned) data);
 	  spacer = " ";
 	}
 
       uiout->field_stream ("opcodes", opcode_stream);
       uiout->text ("\t");
-
-      do_cleanups (cleanups);
     }
   else
-    size = gdb_print_insn (gdbarch, pc, stb, NULL);
+    size = gdb_print_insn (gdbarch, pc, &stb, NULL);
 
   uiout->field_stream ("inst", stb);
   do_cleanups (ui_out_chain);
@@ -856,7 +850,7 @@ gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 int
 gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  return gdb_print_insn (gdbarch, addr, null_stream (), NULL);
+  return gdb_print_insn (gdbarch, addr, &null_stream, NULL);
 }
 
 /* fprintf-function for gdb_buffered_insn_length.  This function is a

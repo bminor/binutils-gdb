@@ -333,15 +333,12 @@ c_compute_program (struct compile_instance *inst,
 		   const struct block *expr_block,
 		   CORE_ADDR expr_pc)
 {
-  struct ui_file *buf, *var_stream = NULL;
-  std::string code;
-  struct cleanup *cleanup;
   struct compile_c_instance *context = (struct compile_c_instance *) inst;
 
-  buf = mem_fileopen ();
-  cleanup = make_cleanup_ui_file_delete (buf);
+  string_file buf;
+  string_file var_stream;
 
-  write_macro_definitions (expr_block, expr_pc, buf);
+  write_macro_definitions (expr_block, expr_pc, &buf);
 
   /* Do not generate local variable information for "raw"
      compilations.  In this case we aren't emitting our own function
@@ -355,21 +352,17 @@ c_compute_program (struct compile_instance *inst,
 	 before generating the function header, so we can define the
 	 register struct before the function body.  This requires a
 	 temporary stream.  */
-      var_stream = mem_fileopen ();
-      make_cleanup_ui_file_delete (var_stream);
       registers_used = generate_c_for_variable_locations (context,
 							  var_stream, gdbarch,
 							  expr_block, expr_pc);
       make_cleanup (xfree, registers_used);
 
-      fputs_unfiltered ("typedef unsigned int"
-			" __attribute__ ((__mode__(__pointer__)))"
-			" __gdb_uintptr;\n",
-			buf);
-      fputs_unfiltered ("typedef int"
-			" __attribute__ ((__mode__(__pointer__)))"
-			" __gdb_intptr;\n",
-			buf);
+      buf.puts ("typedef unsigned int"
+		" __attribute__ ((__mode__(__pointer__)))"
+		" __gdb_uintptr;\n");
+      buf.puts ("typedef int"
+		" __attribute__ ((__mode__(__pointer__)))"
+		" __gdb_intptr;\n");
 
       /* Iterate all log2 sizes in bytes supported by c_get_mode_for_size.  */
       for (i = 0; i < 4; ++i)
@@ -377,24 +370,23 @@ c_compute_program (struct compile_instance *inst,
 	  const char *mode = c_get_mode_for_size (1 << i);
 
 	  gdb_assert (mode != NULL);
-	  fprintf_unfiltered (buf,
-			      "typedef int"
-			      " __attribute__ ((__mode__(__%s__)))"
-			      " __gdb_int_%s;\n",
-			      mode, mode);
+	  buf.printf ("typedef int"
+		      " __attribute__ ((__mode__(__%s__)))"
+		      " __gdb_int_%s;\n",
+		      mode, mode);
 	}
 
-      generate_register_struct (buf, gdbarch, registers_used);
+      generate_register_struct (&buf, gdbarch, registers_used);
     }
 
-  add_code_header (inst->scope, buf);
+  add_code_header (inst->scope, &buf);
 
   if (inst->scope == COMPILE_I_SIMPLE_SCOPE
       || inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
       || inst->scope == COMPILE_I_PRINT_VALUE_SCOPE)
     {
-      ui_file_put (var_stream, ui_file_write_for_put, buf);
-      fputs_unfiltered ("#pragma GCC user_expression\n", buf);
+      buf.write (var_stream.c_str (), var_stream.size ());
+      buf.puts ("#pragma GCC user_expression\n");
     }
 
   /* The user expression has to be in its own scope, so that "extern"
@@ -402,15 +394,15 @@ c_compute_program (struct compile_instance *inst,
      declaration is in the same scope as the declaration provided by
      gdb.  */
   if (inst->scope != COMPILE_I_RAW_SCOPE)
-    fputs_unfiltered ("{\n", buf);
+    buf.puts ("{\n");
 
-  fputs_unfiltered ("#line 1 \"gdb command line\"\n", buf);
+  buf.puts ("#line 1 \"gdb command line\"\n");
 
   switch (inst->scope)
     {
     case COMPILE_I_PRINT_ADDRESS_SCOPE:
     case COMPILE_I_PRINT_VALUE_SCOPE:
-      fprintf_unfiltered (buf,
+      buf.printf (
 "__auto_type " COMPILE_I_EXPR_VAL " = %s;\n"
 "typeof (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
 "memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL ",\n"
@@ -420,22 +412,20 @@ c_compute_program (struct compile_instance *inst,
 			   ? "&" : ""));
       break;
     default:
-      fputs_unfiltered (input, buf);
+      buf.puts (input);
       break;
     }
 
-  fputs_unfiltered ("\n", buf);
+  buf.puts ("\n");
 
   /* For larger user expressions the automatic semicolons may be
      confusing.  */
   if (strchr (input, '\n') == NULL)
-    fputs_unfiltered (";\n", buf);
+    buf.puts (";\n");
 
   if (inst->scope != COMPILE_I_RAW_SCOPE)
-    fputs_unfiltered ("}\n", buf);
+    buf.puts ("}\n");
 
-  add_code_footer (inst->scope, buf);
-  code = ui_file_as_string (buf);
-  do_cleanups (cleanup);
-  return code;
+  add_code_footer (inst->scope, &buf);
+  return std::move (buf.string ());
 }

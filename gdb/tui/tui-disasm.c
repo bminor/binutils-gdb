@@ -54,10 +54,7 @@ static CORE_ADDR
 tui_disassemble (struct gdbarch *gdbarch, struct tui_asm_line *asm_lines,
 		 CORE_ADDR pc, int count)
 {
-  struct ui_file *gdb_dis_out;
-
-  /* Now init the ui_file structure.  */
-  gdb_dis_out = tui_sfileopen (256);
+  string_file gdb_dis_out;
 
   /* Now construct each line.  */
   for (; count > 0; count--, asm_lines++)
@@ -67,20 +64,19 @@ tui_disassemble (struct gdbarch *gdbarch, struct tui_asm_line *asm_lines,
       if (asm_lines->insn)
         xfree (asm_lines->insn);
       
-      print_address (gdbarch, pc, gdb_dis_out);
+      print_address (gdbarch, pc, &gdb_dis_out);
       asm_lines->addr = pc;
-      asm_lines->addr_string = xstrdup (tui_file_get_strbuf (gdb_dis_out));
+      asm_lines->addr_string = xstrdup (gdb_dis_out.c_str ());
 
-      ui_file_rewind (gdb_dis_out);
+      gdb_dis_out.clear ();
 
-      pc = pc + gdb_print_insn (gdbarch, pc, gdb_dis_out, NULL);
+      pc = pc + gdb_print_insn (gdbarch, pc, &gdb_dis_out, NULL);
 
-      asm_lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
+      asm_lines->insn = xstrdup (gdb_dis_out.c_str ());
 
       /* Reset the buffer to empty.  */
-      ui_file_rewind (gdb_dis_out);
+      gdb_dis_out.clear ();
     }
-  ui_file_delete (gdb_dis_out);
   return pc;
 }
 

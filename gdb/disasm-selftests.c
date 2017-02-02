@@ -113,7 +113,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
 				    const gdb_byte *insn,
 				    size_t len)
       : gdb_disassembler (gdbarch,
-			  (verbose ? gdb_stdout : null_stream ()),
+			  (verbose ? gdb_stdout : &null_stream),
 			  gdb_disassembler_test::read_memory),
 	m_insn (insn), m_len (len)
     {
@@ -173,7 +173,7 @@ memory_error_test (struct gdbarch *gdbarch)
   {
   public:
     gdb_disassembler_test (struct gdbarch *gdbarch)
-      : gdb_disassembler (gdbarch, null_stream (),
+      : gdb_disassembler (gdbarch, &null_stream,
 			  gdb_disassembler_test::read_memory)
     {
     }

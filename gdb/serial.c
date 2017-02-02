@@ -251,9 +251,12 @@ serial_open_ops_1 (const struct serial_ops *ops, const char *open_name)
 
   if (serial_logfile != NULL)
     {
-      serial_logfp = gdb_fopen (serial_logfile, "w");
-      if (serial_logfp == NULL)
+      stdio_file_up file (new stdio_file ());
+
+      if (!file->open (serial_logfile, "w"))
 	perror_with_name (serial_logfile);
+
+      serial_logfp = file.release ();
     }
 
   return scb;
@@ -315,7 +318,7 @@ do_serial_close (struct serial *scb, int really_close)
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr?  */
-      ui_file_delete (serial_logfp);
+      delete serial_logfp;
       serial_logfp = NULL;
     }
 

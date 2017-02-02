@@ -568,13 +568,10 @@ void
 do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *old_chain;
-  struct ui_file *stb;
 
   gdb_assert (c->type == show_cmd);
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  string_file stb;
 
   /* Possibly call the pre hook.  */
   if (c->pre_show_hook)
@@ -584,29 +581,29 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
     {
     case var_string:
       if (*(char **) c->var)
-	fputstr_filtered (*(char **) c->var, '"', stb);
+	stb.putstr (*(char **) c->var, '"');
       break;
     case var_string_noescape:
     case var_optional_filename:
     case var_filename:
     case var_enum:
       if (*(char **) c->var)
-	fputs_filtered (*(char **) c->var, stb);
+	stb.puts (*(char **) c->var);
       break;
     case var_boolean:
-      fputs_filtered (*(int *) c->var ? "on" : "off", stb);
+      stb.puts (*(int *) c->var ? "on" : "off");
       break;
     case var_auto_boolean:
       switch (*(enum auto_boolean*) c->var)
 	{
 	case AUTO_BOOLEAN_TRUE:
-	  fputs_filtered ("on", stb);
+	  stb.puts ("on");
 	  break;
 	case AUTO_BOOLEAN_FALSE:
-	  fputs_filtered ("off", stb);
+	  stb.puts ("off");
 	  break;
 	case AUTO_BOOLEAN_AUTO:
-	  fputs_filtered ("auto", stb);
+	  stb.puts ("auto");
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
@@ -619,24 +616,24 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
     case var_zuinteger:
       if (c->var_type == var_uinteger
 	  && *(unsigned int *) c->var == UINT_MAX)
-	fputs_filtered ("unlimited", stb);
+	stb.puts ("unlimited");
       else
-	fprintf_filtered (stb, "%u", *(unsigned int *) c->var);
+	stb.printf ("%u", *(unsigned int *) c->var);
       break;
     case var_integer:
     case var_zinteger:
       if (c->var_type == var_integer
 	  && *(int *) c->var == INT_MAX)
-	fputs_filtered ("unlimited", stb);
+	stb.puts ("unlimited");
       else
-	fprintf_filtered (stb, "%d", *(int *) c->var);
+	stb.printf ("%d", *(int *) c->var);
       break;
     case var_zuinteger_unlimited:
       {
 	if (*(int *) c->var == -1)
-	  fputs_filtered ("unlimited", stb);
+	  stb.puts ("unlimited");
 	else
-	  fprintf_filtered (stb, "%d", *(int *) c->var);
+	  stb.printf ("%d", *(int *) c->var);
       }
       break;
     default:
@@ -653,14 +650,11 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
     uiout->field_stream ("value", stb);
   else
     {
-      std::string value = ui_file_as_string (stb);
-
       if (c->show_value_func != NULL)
-	c->show_value_func (gdb_stdout, from_tty, c, value.c_str ());
+	c->show_value_func (gdb_stdout, from_tty, c, stb.c_str ());
       else
-	deprecated_show_value_hack (gdb_stdout, from_tty, c, value.c_str ());
+	deprecated_show_value_hack (gdb_stdout, from_tty, c, stb.c_str ());
     }
-  do_cleanups (old_chain);
 
   c->func (c, NULL, from_tty);
 }

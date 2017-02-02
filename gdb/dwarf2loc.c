@@ -2632,7 +2632,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 /* See dwarf2loc.h.  */
 
 void
-dwarf2_compile_property_to_c (struct ui_file *stream,
+dwarf2_compile_property_to_c (string_file &stream,
 			      const char *result_name,
 			      struct gdbarch *gdbarch,
 			      unsigned char *registers_used,
@@ -4348,7 +4348,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 /* symbol_computed_ops 'generate_c_location' method.  */
 
 static void
-locexpr_generate_c_location (struct symbol *sym, struct ui_file *stream,
+locexpr_generate_c_location (struct symbol *sym, string_file &stream,
 			     struct gdbarch *gdbarch,
 			     unsigned char *registers_used,
 			     CORE_ADDR pc, const char *result_name)
@@ -4558,7 +4558,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 /* symbol_computed_ops 'generate_c_location' method.  */
 
 static void
-loclist_generate_c_location (struct symbol *sym, struct ui_file *stream,
+loclist_generate_c_location (struct symbol *sym, string_file &stream,
 			     struct gdbarch *gdbarch,
 			     unsigned char *registers_used,
 			     CORE_ADDR pc, const char *result_name)

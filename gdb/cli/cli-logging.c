@@ -76,7 +76,7 @@ static struct ui_file *logging_no_redirect_file;
 static void
 set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
 {
-  struct cleanup *cleanups;
+  ui_file_up destroy_old_stdout;
   struct ui_file *output, *new_logging_no_redirect_file;
   struct ui_out *uiout = current_uiout;
 
@@ -85,15 +85,13 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
       || (logging_redirect == 0 && logging_no_redirect_file != NULL))
     return;
 
-  cleanups = make_cleanup (null_cleanup, NULL);
-
   if (logging_redirect != 0)
     {
       gdb_assert (logging_no_redirect_file != NULL);
 
       /* ui_out_redirect still has not been called for next
 	 gdb_stdout.  */
-      make_cleanup_ui_file_delete (gdb_stdout);
+      destroy_old_stdout.reset (gdb_stdout);
 
       output = logging_no_redirect_file;
       new_logging_no_redirect_file = NULL;
@@ -105,9 +103,7 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
   else
     {
       gdb_assert (logging_no_redirect_file == NULL);
-      output = tee_file_new (saved_output.out, 0, gdb_stdout, 0);
-      if (output == NULL)
-	perror_with_name (_("set logging"));
+      output = new tee_file (saved_output.out, 0, gdb_stdout, 0);
       new_logging_no_redirect_file = gdb_stdout;
 
       if (from_tty)
@@ -135,8 +131,6 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
 
   uiout->redirect (NULL);
   uiout->redirect (output);
-
-  do_cleanups (cleanups);
 }
 
 static void
@@ -152,7 +146,7 @@ pop_output_files (void)
 {
   if (logging_no_redirect_file)
     {
-      ui_file_delete (logging_no_redirect_file);
+      delete logging_no_redirect_file;
       logging_no_redirect_file = NULL;
     }
 
@@ -160,7 +154,7 @@ pop_output_files (void)
     {
       /* Only delete one of the files -- they are all set to the same
 	 value.  */
-      ui_file_delete (gdb_stdout);
+      delete gdb_stdout;
 
       gdb_stdout = saved_output.out;
       gdb_stderr = saved_output.err;
@@ -184,9 +178,8 @@ pop_output_files (void)
 static void
 handle_redirections (int from_tty)
 {
-  struct cleanup *cleanups;
-  struct ui_file *output;
-  struct ui_file *no_redirect_file = NULL;
+  ui_file_up output;
+  ui_file_up no_redirect_file;
 
   if (saved_filename != NULL)
     {
@@ -195,35 +188,29 @@ handle_redirections (int from_tty)
       return;
     }
 
-  output = gdb_fopen (logging_filename, logging_overwrite ? "w" : "a");
-  if (output == NULL)
+  stdio_file_up log (new stdio_file ());
+  if (!log->open (logging_filename, logging_overwrite ? "w" : "a"))
     perror_with_name (_("set logging"));
-  cleanups = make_cleanup_ui_file_delete (output);
 
   /* Redirects everything to gdb_stdout while this is running.  */
   if (!logging_redirect)
     {
-      no_redirect_file = output;
+      no_redirect_file = std::move (log);
+      output.reset (new tee_file (gdb_stdout, 0, no_redirect_file.get (), 0));
 
-      output = tee_file_new (gdb_stdout, 0, no_redirect_file, 0);
-      if (output == NULL)
-	perror_with_name (_("set logging"));
-      make_cleanup_ui_file_delete (output);
       if (from_tty)
 	fprintf_unfiltered (gdb_stdout, "Copying output to %s.\n",
 			    logging_filename);
-      logging_no_redirect_file = no_redirect_file;
     }
   else
     {
       gdb_assert (logging_no_redirect_file == NULL);
+      output = std::move (log);
 
       if (from_tty)
 	fprintf_unfiltered (gdb_stdout, "Redirecting output to %s.\n",
 			    logging_filename);
     }
-
-  discard_cleanups (cleanups);
 
   saved_filename = xstrdup (logging_filename);
   saved_output.out = gdb_stdout;
@@ -233,18 +220,22 @@ handle_redirections (int from_tty)
   saved_output.targerr = gdb_stdtargerr;
 
   /* Let the interpreter do anything it needs.  */
-  if (current_interp_set_logging (1, output, no_redirect_file) == 0)
+  if (current_interp_set_logging (1, output.get (),
+				  no_redirect_file.get ()) == 0)
     {
-      gdb_stdout = output;
-      gdb_stdlog = output;
-      gdb_stderr = output;
-      gdb_stdtarg = output;
-      gdb_stdtargerr = output;
+      gdb_stdout = output.get ();
+      gdb_stdlog = output.get ();
+      gdb_stderr = output.get ();
+      gdb_stdtarg = output.get ();
+      gdb_stdtargerr = output.get ();
     }
+
+  output.release ();
+  logging_no_redirect_file = no_redirect_file.release ();
 
   /* Don't do the redirect for MI, it confuses MI's ui-out scheme.  */
   if (!current_uiout->is_mi_like_p ())
-    current_uiout->redirect (output);
+    current_uiout->redirect (gdb_stdout);
 }
 
 static void

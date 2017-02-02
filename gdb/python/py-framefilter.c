@@ -208,15 +208,11 @@ py_print_type (struct ui_out *out, struct value *val)
 
   TRY
     {
-      struct ui_file *stb;
-      struct cleanup *cleanup;
-
-      stb = mem_fileopen ();
-      cleanup = make_cleanup_ui_file_delete (stb);
       check_typedef (value_type (val));
-      type_print (value_type (val), "", stb, -1);
+
+      string_file stb;
+      type_print (value_type (val), "", &stb, -1);
       out->field_stream ("type", stb);
-      do_cleanups (cleanup);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -280,14 +276,10 @@ py_print_value (struct ui_out *out, struct value *val,
     {
       TRY
 	{
-	  struct ui_file *stb;
-	  struct cleanup *cleanup;
+	  string_file stb;
 
-	  stb = mem_fileopen ();
-	  cleanup = make_cleanup_ui_file_delete (stb);
-	  common_val_print (val, stb, indent, opts, language);
+	  common_val_print (val, &stb, indent, opts, language);
 	  out->field_stream ("value", stb);
-	  do_cleanups (cleanup);
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
@@ -393,26 +385,22 @@ py_print_single_arg (struct ui_out *out,
 	 entry value options.  */
       if (fa != NULL)
 	{
-	  struct ui_file *stb;
+	  string_file stb;
 
-	  stb = mem_fileopen ();
-	  make_cleanup_ui_file_delete (stb);
-	  fprintf_symbol_filtered (stb, SYMBOL_PRINT_NAME (fa->sym),
+	  fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (fa->sym),
 				   SYMBOL_LANGUAGE (fa->sym),
 				   DMGL_PARAMS | DMGL_ANSI);
 	  if (fa->entry_kind == print_entry_values_compact)
 	    {
-	      fputs_filtered ("=", stb);
+	      stb.puts ("=");
 
-	      fprintf_symbol_filtered (stb, SYMBOL_PRINT_NAME (fa->sym),
+	      fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (fa->sym),
 				       SYMBOL_LANGUAGE (fa->sym),
 				       DMGL_PARAMS | DMGL_ANSI);
 	    }
 	  if (fa->entry_kind == print_entry_values_only
 	      || fa->entry_kind == print_entry_values_compact)
-	    {
-	      fputs_filtered ("@entry", stb);
-	    }
+	    stb.puts ("@entry");
 	  out->field_stream ("name", stb);
 	}
       else

@@ -3061,14 +3061,13 @@ update_inserted_breakpoint_locations (void)
   int hw_breakpoint_error = 0;
   int hw_bp_details_reported = 0;
 
-  struct ui_file *tmp_error_stream = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_error_stream);
+  string_file tmp_error_stream;
 
   /* Explicitly mark the warning -- this will only be printed if
      there was an error.  */
-  fprintf_unfiltered (tmp_error_stream, "Warning:\n");
+  tmp_error_stream.puts ("Warning:\n");
 
-  save_current_space_and_thread ();
+  struct cleanup *cleanups = save_current_space_and_thread ();
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
     {
@@ -3093,7 +3092,7 @@ update_inserted_breakpoint_locations (void)
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
-      val = insert_bp_location (bl, tmp_error_stream, &disabled_breaks,
+      val = insert_bp_location (bl, &tmp_error_stream, &disabled_breaks,
 				    &hw_breakpoint_error, &hw_bp_details_reported);
       if (val)
 	error_flag = val;
@@ -3121,14 +3120,13 @@ insert_breakpoint_locations (void)
   int hw_breakpoint_error = 0;
   int hw_bp_error_explained_already = 0;
 
-  struct ui_file *tmp_error_stream = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_error_stream);
-  
+  string_file tmp_error_stream;
+
   /* Explicitly mark the warning -- this will only be printed if
      there was an error.  */
-  fprintf_unfiltered (tmp_error_stream, "Warning:\n");
+  tmp_error_stream.puts ("Warning:\n");
 
-  save_current_space_and_thread ();
+  struct cleanup *cleanups = save_current_space_and_thread ();
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
     {
@@ -3152,7 +3150,7 @@ insert_breakpoint_locations (void)
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
-      val = insert_bp_location (bl, tmp_error_stream, &disabled_breaks,
+      val = insert_bp_location (bl, &tmp_error_stream, &disabled_breaks,
 				    &hw_breakpoint_error, &hw_bp_error_explained_already);
       if (val)
 	error_flag = val;
@@ -3187,9 +3185,9 @@ insert_breakpoint_locations (void)
 	      remove_breakpoint (loc);
 
 	  hw_breakpoint_error = 1;
-	  fprintf_unfiltered (tmp_error_stream,
-			      "Could not insert hardware watchpoint %d.\n", 
-			      bpt->number);
+	  tmp_error_stream.printf ("Could not insert "
+				   "hardware watchpoint %d.\n",
+				   bpt->number);
 	  error_flag = -1;
 	}
     }
@@ -3200,8 +3198,7 @@ insert_breakpoint_locations (void)
          message about possibly exhausted resources.  */
       if (hw_breakpoint_error && !hw_bp_error_explained_already)
 	{
-	  fprintf_unfiltered (tmp_error_stream, 
-			      "Could not insert hardware breakpoints:\n\
+	  tmp_error_stream.printf ("Could not insert hardware breakpoints:\n\
 You may have requested too many hardware breakpoints/watchpoints.\n");
 	}
       target_terminal_ours_for_output ();
@@ -3283,7 +3280,6 @@ reattach_breakpoints (int pid)
   struct cleanup *old_chain;
   struct bp_location *bl, **blp_tmp;
   int val;
-  struct ui_file *tmp_error_stream;
   int dummy1 = 0, dummy2 = 0, dummy3 = 0;
   struct inferior *inf;
   struct thread_info *tp;
@@ -3297,8 +3293,7 @@ reattach_breakpoints (int pid)
 
   inferior_ptid = tp->ptid;
 
-  tmp_error_stream = mem_fileopen ();
-  make_cleanup_ui_file_delete (tmp_error_stream);
+  string_file tmp_error_stream;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
   {
@@ -3308,7 +3303,7 @@ reattach_breakpoints (int pid)
     if (bl->inserted)
       {
 	bl->inserted = 0;
-	val = insert_bp_location (bl, tmp_error_stream, &dummy1, &dummy2, &dummy3);
+	val = insert_bp_location (bl, &tmp_error_stream, &dummy1, &dummy2, &dummy3);
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);
@@ -6179,14 +6174,11 @@ print_breakpoint_location (struct breakpoint *b,
     }
   else if (loc)
     {
-      struct ui_file *stb = mem_fileopen ();
-      struct cleanup *stb_chain = make_cleanup_ui_file_delete (stb);
+      string_file stb;
 
-      print_address_symbolic (loc->gdbarch, loc->address, stb,
+      print_address_symbolic (loc->gdbarch, loc->address, &stb,
 			      demangle, "");
       uiout->field_stream ("at", stb);
-
-      do_cleanups (stb_chain);
     }
   else
     {
@@ -10293,8 +10285,7 @@ print_one_detail_ranged_breakpoint (const struct breakpoint *b,
 {
   CORE_ADDR address_start, address_end;
   struct bp_location *bl = b->loc;
-  struct ui_file *stb = mem_fileopen ();
-  struct cleanup *cleanup = make_cleanup_ui_file_delete (stb);
+  string_file stb;
 
   gdb_assert (bl);
 
@@ -10302,13 +10293,11 @@ print_one_detail_ranged_breakpoint (const struct breakpoint *b,
   address_end = address_start + bl->length - 1;
 
   uiout->text ("\taddress range: ");
-  fprintf_unfiltered (stb, "[%s, %s]",
-		      print_core_address (bl->gdbarch, address_start),
-		      print_core_address (bl->gdbarch, address_end));
+  stb.printf ("[%s, %s]",
+	      print_core_address (bl->gdbarch, address_start),
+	      print_core_address (bl->gdbarch, address_end));
   uiout->field_stream ("addr", stb);
   uiout->text ("\n");
-
-  do_cleanups (cleanup);
 }
 
 /* Implement the "print_mention" breakpoint_ops method for
@@ -10740,7 +10729,6 @@ print_it_watchpoint (bpstat bs)
 {
   struct cleanup *old_chain;
   struct breakpoint *b;
-  struct ui_file *stb;
   enum print_stop_action result;
   struct watchpoint *w;
   struct ui_out *uiout = current_uiout;
@@ -10750,11 +10738,12 @@ print_it_watchpoint (bpstat bs)
   b = bs->breakpoint_at;
   w = (struct watchpoint *) b;
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  old_chain = make_cleanup (null_cleanup, NULL);
 
   annotate_watchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
+
+  string_file stb;
 
   switch (b->type)
     {
@@ -10766,10 +10755,10 @@ print_it_watchpoint (bpstat bs)
       mention (b);
       make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       uiout->text ("\nOld value = ");
-      watchpoint_value_print (bs->old_val, stb);
+      watchpoint_value_print (bs->old_val, &stb);
       uiout->field_stream ("old", stb);
       uiout->text ("\nNew value = ");
-      watchpoint_value_print (w->val, stb);
+      watchpoint_value_print (w->val, &stb);
       uiout->field_stream ("new", stb);
       uiout->text ("\n");
       /* More than one watchpoint may have been triggered.  */
@@ -10783,7 +10772,7 @@ print_it_watchpoint (bpstat bs)
       mention (b);
       make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       uiout->text ("\nValue = ");
-      watchpoint_value_print (w->val, stb);
+      watchpoint_value_print (w->val, &stb);
       uiout->field_stream ("value", stb);
       uiout->text ("\n");
       result = PRINT_UNKNOWN;
@@ -10799,7 +10788,7 @@ print_it_watchpoint (bpstat bs)
 	  mention (b);
 	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  uiout->text ("\nOld value = ");
-	  watchpoint_value_print (bs->old_val, stb);
+	  watchpoint_value_print (bs->old_val, &stb);
 	  uiout->field_stream ("old", stb);
 	  uiout->text ("\nNew value = ");
 	}
@@ -10813,7 +10802,7 @@ print_it_watchpoint (bpstat bs)
 	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  uiout->text ("\nValue = ");
 	}
-      watchpoint_value_print (w->val, stb);
+      watchpoint_value_print (w->val, &stb);
       uiout->field_stream ("new", stb);
       uiout->text ("\n");
       result = PRINT_UNKNOWN;
@@ -15669,7 +15658,6 @@ save_breakpoints (char *filename, int from_tty,
   struct breakpoint *tp;
   int any = 0;
   struct cleanup *cleanup;
-  struct ui_file *fp;
   int extra_trace_bits = 0;
 
   if (filename == 0 || *filename == 0)
@@ -15705,14 +15693,15 @@ save_breakpoints (char *filename, int from_tty,
 
   filename = tilde_expand (filename);
   cleanup = make_cleanup (xfree, filename);
-  fp = gdb_fopen (filename, "w");
-  if (!fp)
+
+  stdio_file fp;
+
+  if (!fp.open (filename, "w"))
     error (_("Unable to open file '%s' for saving (%s)"),
 	   filename, safe_strerror (errno));
-  make_cleanup_ui_file_delete (fp);
 
   if (extra_trace_bits)
-    save_trace_state_variables (fp);
+    save_trace_state_variables (&fp);
 
   ALL_BREAKPOINTS (tp)
   {
@@ -15724,23 +15713,23 @@ save_breakpoints (char *filename, int from_tty,
     if (filter && !filter (tp))
       continue;
 
-    tp->ops->print_recreate (tp, fp);
+    tp->ops->print_recreate (tp, &fp);
 
     /* Note, we can't rely on tp->number for anything, as we can't
        assume the recreated breakpoint numbers will match.  Use $bpnum
        instead.  */
 
     if (tp->cond_string)
-      fprintf_unfiltered (fp, "  condition $bpnum %s\n", tp->cond_string);
+      fp.printf ("  condition $bpnum %s\n", tp->cond_string);
 
     if (tp->ignore_count)
-      fprintf_unfiltered (fp, "  ignore $bpnum %d\n", tp->ignore_count);
+      fp.printf ("  ignore $bpnum %d\n", tp->ignore_count);
 
     if (tp->type != bp_dprintf && tp->commands)
       {
-	fprintf_unfiltered (fp, "  commands\n");
+	fp.puts ("  commands\n");
 	
-	current_uiout->redirect (fp);
+	current_uiout->redirect (&fp);
 	TRY
 	  {
 	    print_command_lines (current_uiout, tp->commands->commands, 2);
@@ -15753,11 +15742,11 @@ save_breakpoints (char *filename, int from_tty,
 	END_CATCH
 
 	current_uiout->redirect (NULL);
-	fprintf_unfiltered (fp, "  end\n");
+	fp.puts ("  end\n");
       }
 
     if (tp->enable_state == bp_disabled)
-      fprintf_unfiltered (fp, "disable $bpnum\n");
+      fp.puts ("disable $bpnum\n");
 
     /* If this is a multi-location breakpoint, check if the locations
        should be individually disabled.  Watchpoint locations are
@@ -15769,12 +15758,12 @@ save_breakpoints (char *filename, int from_tty,
 
 	for (loc = tp->loc; loc != NULL; loc = loc->next, n++)
 	  if (!loc->enabled)
-	    fprintf_unfiltered (fp, "disable $bpnum.%d\n", n);
+	    fp.printf ("disable $bpnum.%d\n", n);
       }
   }
 
   if (extra_trace_bits && *default_collect)
-    fprintf_unfiltered (fp, "set default-collect %s\n", default_collect);
+    fp.printf ("set default-collect %s\n", default_collect);
 
   if (from_tty)
     printf_filtered (_("Saved to file '%s'.\n"), filename);

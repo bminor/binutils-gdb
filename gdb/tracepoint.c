@@ -1304,12 +1304,11 @@ collection_list::stringify ()
 void
 collection_list::append_exp (struct expression *exp)
 {
-  struct ui_file *tmp_stream = mem_fileopen ();
+  string_file tmp_stream;
 
-  print_expression (exp, tmp_stream);
+  print_expression (exp, &tmp_stream);
 
-  m_computed.push_back (ui_file_as_string (tmp_stream));
-  ui_file_delete (tmp_stream);
+  m_computed.push_back (std::move (tmp_stream.string ()));
 }
 
 void

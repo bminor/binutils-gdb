@@ -2400,8 +2400,6 @@ varobj_value_get_print_value (struct value *value,
 			      enum varobj_display_formats format,
 			      const struct varobj *var)
 {
-  struct ui_file *stb;
-  struct cleanup *old_chain;
   struct value_print_options opts;
   struct type *type = NULL;
   long len = 0;
@@ -2413,9 +2411,7 @@ varobj_value_get_print_value (struct value *value,
   if (value == NULL)
     return std::string ();
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
-
+  string_file stb;
   std::string thevalue;
 
 #if HAVE_PYTHON
@@ -2430,10 +2426,7 @@ varobj_value_get_print_value (struct value *value,
 	  /* First check to see if we have any children at all.  If so,
 	     we simply return {...}.  */
 	  if (dynamic_varobj_has_child_method (var))
-	    {
-	      do_cleanups (old_chain);
-	      return "{...}";
-	    }
+	    return "{...}";
 
 	  if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
 	    {
@@ -2441,7 +2434,7 @@ varobj_value_get_print_value (struct value *value,
 
 	      gdbpy_ref output (apply_varobj_pretty_printer (value_formatter,
 							     &replacement,
-							     stb));
+							     &stb));
 
 	      /* If we have string like output ...  */
 	      if (output != NULL)
@@ -2484,10 +2477,7 @@ varobj_value_get_print_value (struct value *value,
 			  type = builtin_type (gdbarch)->builtin_char;
 
 			  if (!string_print)
-			    {
-			      do_cleanups (old_chain);
-			      return thevalue;
-			    }
+			    return thevalue;
 			}
 		      else
 			gdbpy_print_stack ();
@@ -2507,20 +2497,17 @@ varobj_value_get_print_value (struct value *value,
 
   /* If the THEVALUE has contents, it is a regular string.  */
   if (!thevalue.empty ())
-    LA_PRINT_STRING (stb, type, (gdb_byte *) thevalue.c_str (),
+    LA_PRINT_STRING (&stb, type, (gdb_byte *) thevalue.c_str (),
 		     len, encoding.get (), 0, &opts);
   else if (string_print)
     /* Otherwise, if string_print is set, and it is not a regular
        string, it is a lazy string.  */
-    val_print_string (type, encoding.get (), str_addr, len, stb, &opts);
+    val_print_string (type, encoding.get (), str_addr, len, &stb, &opts);
   else
     /* All other cases.  */
-    common_val_print (value, stb, 0, &opts, current_language);
+    common_val_print (value, &stb, 0, &opts, current_language);
 
-  thevalue = ui_file_as_string (stb);
-
-  do_cleanups (old_chain);
-  return thevalue;
+  return std::move (stb.string ());
 }
 
 int

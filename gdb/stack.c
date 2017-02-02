@@ -225,11 +225,9 @@ print_frame_arg (const struct frame_arg *arg)
 {
   struct ui_out *uiout = current_uiout;
   struct cleanup *old_chain;
-  struct ui_file *stb;
   const char *error_message = NULL;
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  string_file stb;
 
   gdb_assert (!arg->val || !arg->error);
   gdb_assert (arg->entry_kind == print_entry_values_no
@@ -239,22 +237,22 @@ print_frame_arg (const struct frame_arg *arg)
 
   annotate_arg_begin ();
 
-  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-  fprintf_symbol_filtered (stb, SYMBOL_PRINT_NAME (arg->sym),
+  old_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (arg->sym),
 			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
   if (arg->entry_kind == print_entry_values_compact)
     {
       /* It is OK to provide invalid MI-like stream as with
 	 PRINT_ENTRY_VALUE_COMPACT we never use MI.  */
-      fputs_filtered ("=", stb);
+      stb.puts ("=");
 
-      fprintf_symbol_filtered (stb, SYMBOL_PRINT_NAME (arg->sym),
+      fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (arg->sym),
 			       SYMBOL_LANGUAGE (arg->sym),
 			       DMGL_PARAMS | DMGL_ANSI);
     }
   if (arg->entry_kind == print_entry_values_only
       || arg->entry_kind == print_entry_values_compact)
-    fputs_filtered ("@entry", stb);
+    stb.puts ("@entry");
   uiout->field_stream ("name", stb);
   annotate_arg_name_end ();
   uiout->text ("=");
@@ -294,7 +292,7 @@ print_frame_arg (const struct frame_arg *arg)
 	      /* True in "summary" mode, false otherwise.  */
 	      opts.summary = !strcmp (print_frame_arguments, "scalars");
 
-	      common_val_print (arg->val, stb, 2, &opts, language);
+	      common_val_print (arg->val, &stb, 2, &opts, language);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
@@ -303,8 +301,7 @@ print_frame_arg (const struct frame_arg *arg)
 	  END_CATCH
 	}
       if (error_message != NULL)
-	fprintf_filtered (stb, _("<error reading variable: %s>"),
-			  error_message);
+	stb.printf (_("<error reading variable: %s>"), error_message);
     }
 
   uiout->field_stream ("value", stb);
@@ -1158,7 +1155,6 @@ print_frame (struct frame_info *frame, int print_level,
   struct ui_out *uiout = current_uiout;
   char *funname = NULL;
   enum language funlang = language_unknown;
-  struct ui_file *stb;
   struct cleanup *old_chain, *list_chain;
   struct value_print_options opts;
   struct symbol *func;
@@ -1167,11 +1163,9 @@ print_frame (struct frame_info *frame, int print_level,
 
   pc_p = get_frame_pc_if_available (frame, &pc);
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
 
   find_frame_funname (frame, &funname, &funlang, &func);
-  make_cleanup (xfree, funname);
+  old_chain = make_cleanup (xfree, funname);
 
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			gdbarch, pc);
@@ -1199,7 +1193,9 @@ print_frame (struct frame_info *frame, int print_level,
 	uiout->text (" in ");
       }
   annotate_frame_function_name ();
-  fprintf_symbol_filtered (stb, funname ? funname : "??",
+
+  string_file stb;
+  fprintf_symbol_filtered (&stb, funname ? funname : "??",
 			   funlang, DMGL_ANSI);
   uiout->field_stream ("func", stb);
   uiout->wrap_hint ("   ");

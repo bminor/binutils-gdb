@@ -66,9 +66,6 @@ char **gdb_buildargv (const char *);
 
 extern struct cleanup *make_cleanup_freeargv (char **);
 
-struct ui_file;
-extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
-
 struct ui_out;
 extern struct cleanup *
   make_cleanup_ui_out_redirect_pop (struct ui_out *uiout);
@@ -189,9 +186,6 @@ extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
 
-/* Return a null stream.  */
-extern struct ui_file *null_stream (void);
-
 /* Set the screen dimensions to WIDTH and HEIGHT.  */
 
 extern void set_screen_width_and_height (int width, int height);
@@ -306,7 +300,7 @@ extern void (*deprecated_error_begin_hook) (void);
 
 extern char *warning_pre_print;
 
-extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
+extern void error_stream (const string_file &) ATTRIBUTE_NORETURN;
 
 extern void demangler_vwarning (const char *file, int line,
 			       const char *, va_list ap)
