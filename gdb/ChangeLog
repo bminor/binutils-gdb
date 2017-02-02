@@ -1,3 +1,11 @@
+2017-02-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* disasm.h (gdb_disassembly): Remove file_string parameter.
+	* disasm.c (gdb_disassembly): Likewise.
+	* cli/cli-cmds.c (print_disassembly): Adapt.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Likewise.
+	* stack.c (do_gdb_disassembly): Likewise.
+
 2017-02-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): For

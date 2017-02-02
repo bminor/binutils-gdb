@@ -815,7 +815,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-		 char *file_string, int flags, int how_many,
+		 int flags, int how_many,
 		 CORE_ADDR low, CORE_ADDR high)
 {
   struct ui_file *stb = mem_fileopen ();

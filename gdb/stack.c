@@ -770,7 +770,7 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 
   TRY
     {
-      gdb_disassembly (gdbarch, current_uiout, 0,
+      gdb_disassembly (gdbarch, current_uiout,
 		       DISASSEMBLY_RAW_INSN, how_many,
 		       low, high);
     }

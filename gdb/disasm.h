@@ -92,7 +92,7 @@ struct disasm_insn
 };
 
 extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-			     char *file_string, int flags, int how_many,
+			     int flags, int how_many,
 			     CORE_ADDR low, CORE_ADDR high);
 
 /* Print the instruction at address MEMADDR in debugged memory,
