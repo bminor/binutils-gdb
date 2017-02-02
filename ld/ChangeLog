@@ -1,5 +1,9 @@
 2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-cris/tls-err-20x.d: Fix a typo, s/n/\n/.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* ld/testsuite/lib/ld-lib.exp (run_dump_test): Fix a typo,
 	s/regexp/regex/.
 
