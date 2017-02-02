@@ -3832,11 +3832,11 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   struct mips_elf_hash_sort_data hsd;
   struct mips_got_info *g;
 
-  if (elf_hash_table (info)->dynsymcount == 0)
-    return TRUE;
-
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
+
+  if (elf_hash_table (info)->dynsymcount == 0)
+    return TRUE;
 
   g = htab->got_info;
   if (g == NULL)
