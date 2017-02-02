@@ -1,3 +1,8 @@
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix): Compute the correct offsets
+	for CFA relocations.
+
 2017-03-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21202
