@@ -1837,6 +1837,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   unsigned int subtype;
   bfd_byte *buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
   bfd_boolean relaxable = FALSE;
+  offsetT loc;
 
   /* Remember value for tc_gen_reloc.  */
   fixP->fx_addnumber = *valP;
@@ -1922,30 +1923,31 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	    case BFD_RELOC_RISCV_CFA:
 	      /* Load the byte to get the subtype.  */
-	      subtype = bfd_get_8 (NULL, &fixP->fx_frag->fr_literal[fixP->fx_where]);
+	      subtype = bfd_get_8 (NULL, &((fragS *) (fixP->fx_frag->fr_opcode))->fr_literal[fixP->fx_where]);
+	      loc = fixP->fx_frag->fr_fix - (subtype & 7);
 	      switch (subtype)
 		{
 		case DW_CFA_advance_loc1:
-		  fixP->fx_where++;
-		  fixP->fx_next->fx_where++;
+		  fixP->fx_where = loc + 1;
+		  fixP->fx_next->fx_where = loc + 1;
 		  fixP->fx_r_type = BFD_RELOC_RISCV_SET8;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB8;
 		  break;
 
 		case DW_CFA_advance_loc2:
 		  fixP->fx_size = 2;
-		  fixP->fx_where++;
 		  fixP->fx_next->fx_size = 2;
-		  fixP->fx_next->fx_where++;
+		  fixP->fx_where = loc + 1;
+		  fixP->fx_next->fx_where = loc + 1;
 		  fixP->fx_r_type = BFD_RELOC_RISCV_SET16;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB16;
 		  break;
 
 		case DW_CFA_advance_loc4:
 		  fixP->fx_size = 4;
-		  fixP->fx_where++;
 		  fixP->fx_next->fx_size = 4;
-		  fixP->fx_next->fx_where++;
+		  fixP->fx_where = loc;
+		  fixP->fx_next->fx_where = loc;
 		  fixP->fx_r_type = BFD_RELOC_RISCV_SET32;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB32;
 		  break;
@@ -2069,7 +2071,6 @@ riscv_pre_output_hook (void)
 	  {
 	    if (frag->fr_type == rs_cfa)
 	      {
-		fragS *loc4_frag;
 		expressionS exp;
 
 		symbolS *add_symbol = frag->fr_symbol->sy_value.X_add_symbol;
@@ -2080,8 +2081,7 @@ riscv_pre_output_hook (void)
 		exp.X_add_number = 0;
 		exp.X_op_symbol = op_symbol;
 
-		loc4_frag = (fragS *) frag->fr_opcode;
-		fix_new_exp (loc4_frag, (int) frag->fr_offset, 1, &exp, 0,
+		fix_new_exp (frag, (int) frag->fr_offset, 1, &exp, 0,
 			     BFD_RELOC_RISCV_CFA);
 	      }
 	  }
