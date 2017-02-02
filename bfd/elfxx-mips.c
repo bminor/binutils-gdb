@@ -310,14 +310,14 @@ struct mips_elf_hash_sort_data
   struct elf_link_hash_entry *low;
   /* The least dynamic symbol table index corresponding to a non-TLS
      symbol with a GOT entry.  */
-  long min_got_dynindx;
+  bfd_size_type min_got_dynindx;
   /* The greatest dynamic symbol table index corresponding to a symbol
      with a GOT entry that is not referenced (e.g., a dynamic symbol
      with dynamic relocations pointing to it from non-primary GOTs).  */
-  long max_unref_got_dynindx;
+  bfd_size_type max_unref_got_dynindx;
   /* The greatest dynamic symbol table index not corresponding to a
      symbol without a GOT entry.  */
-  long max_non_got_dynindx;
+  bfd_size_type max_non_got_dynindx;
 };
 
 /* We make up to two PLT entries if needed, one for standard MIPS code
@@ -3852,8 +3852,7 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   /* There should have been enough room in the symbol table to
      accommodate both the GOT and non-GOT symbols.  */
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
-  BFD_ASSERT ((unsigned long) hsd.max_unref_got_dynindx
-	      == htab->root.dynsymcount);
+  BFD_ASSERT (hsd.max_unref_got_dynindx == htab->root.dynsymcount);
   BFD_ASSERT (htab->root.dynsymcount - hsd.min_got_dynindx == g->global_gotno);
 
   /* Now we know which dynamic symbol has the lowest dynamic symbol
