@@ -1,3 +1,20 @@
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* disasm.c (gdb_disassembler::pretty_print_insn): Rename to...
+	(gdb_pretty_print_insn): ... this.  Now a free function.  Add back
+	a 'gdbarch' parameter.  Allocate a mem_fileopen stream here.
+	Adjust to call gdb_print_insn instead of
+	gdb_disassembler::print_insn.
+	(dump_insns, do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly, do_assembly_only): Add back a
+	'gdbarch' parameter.  Remove gdb_disassembler parameter.
+	(gdb_disassembly): Don't allocate a gdb_disassembler here.
+	* disasm.h (gdb_disassembler::pretty_print_insn): Delete
+	declaration.
+	(gdb_pretty_print_insn): Re-add declaration.
+	* record-btrace.c (btrace_insn_history): Don't allocate a
+	gdb_disassembler here.  Adjust to call gdb_pretty_print_insn.
+
 2017-02-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* disasm.h (gdb_disassembly): Remove file_string parameter.

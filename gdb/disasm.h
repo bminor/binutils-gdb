@@ -44,11 +44,6 @@ public:
 
   int print_insn (CORE_ADDR memaddr, int *branch_delay_insns = NULL);
 
-  /* Prints the instruction INSN into UIOUT and returns the length of
-     the printed instruction in bytes.  */
-  int pretty_print_insn (struct ui_out *uiout,
-			 const struct disasm_insn *insn, int flags);
-
   /* Return the gdbarch of gdb_disassembler.  */
   struct gdbarch *arch ()
   { return m_gdbarch; }
@@ -101,6 +96,12 @@ extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 
 extern int gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 			   struct ui_file *stream, int *branch_delay_insns);
+
+/* Prints the instruction INSN into UIOUT and returns the length of
+   the printed instruction in bytes.  */
+
+extern int gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
+				  const struct disasm_insn *insn, int flags);
 
 /* Return the length in bytes of the instruction at address MEMADDR in
    debugged memory.  */
