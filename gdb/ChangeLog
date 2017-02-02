@@ -1,5 +1,10 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-common.h (struct mi_interp): Delete the mi2_interp,
+	mi1_interp and mi_interp fields.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c (struct saved_output_files, saved_output):
 	Moved from cli/cli-logging.c.
 	(cli_set_logging): New function.

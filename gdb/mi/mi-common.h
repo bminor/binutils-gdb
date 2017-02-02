@@ -71,11 +71,6 @@ struct mi_interp
 
   /* MI's CLI builder (wraps OUT).  */
   struct ui_out *cli_uiout;
-
-  /* This is the interpreter for the mi... */
-  struct interp *mi2_interp;
-  struct interp *mi1_interp;
-  struct interp *mi_interp;
 };
 
 #endif
