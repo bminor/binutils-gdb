@@ -1,3 +1,8 @@
+2017-02-06  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-elf/compress.exp: Don't print to stdout for all
+	"readelf -w".
+
 2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-cris/tls-err-20x.d: Fix a typo, s/n/\n/.
