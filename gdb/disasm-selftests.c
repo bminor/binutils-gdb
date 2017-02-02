@@ -102,12 +102,11 @@ print_one_insn_test (struct gdbarch *gdbarch)
   /* Test gdb_disassembler for a given gdbarch by reading data from a
      pre-allocated buffer.  If you want to see the disassembled
      instruction printed to gdb_stdout, set verbose to true.  */
+  static const bool verbose = false;
 
   class gdb_disassembler_test : public gdb_disassembler
   {
   public:
-
-    const bool verbose = false;
 
     explicit gdb_disassembler_test (struct gdbarch *gdbarch,
 				    const gdb_byte *insn,
