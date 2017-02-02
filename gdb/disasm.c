@@ -182,9 +182,9 @@ compare_lines (const void *mle1p, const void *mle2p)
 /* See disasm.h.  */
 
 int
-gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
-		       const struct disasm_insn *insn,
-		       int flags)
+gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
+						  const struct disasm_insn *insn,
+						  int flags)
 {
   /* parts of the symbolic representation of the address */
   int unmapped;
@@ -195,6 +195,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
   char *filename = NULL;
   char *name = NULL;
   CORE_ADDR pc;
+  struct gdbarch *gdbarch = arch ();
 
   ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
   pc = insn->addr;
@@ -248,7 +249,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
   if (name != NULL)
     xfree (name);
 
-  string_file stb;
+  m_insn_stb.clear ();
 
   if (flags & DISASSEMBLY_RAW_INSN)
     {
@@ -259,25 +260,25 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 
       /* Build the opcodes using a temporary stream so we can
 	 write them out in a single go for the MI.  */
-      string_file opcode_stream;
+      m_opcode_stb.clear ();
 
-      size = gdb_print_insn (gdbarch, pc, &stb, NULL);
+      size = m_di.print_insn (pc);
       end_pc = pc + size;
 
       for (;pc < end_pc; ++pc)
 	{
 	  read_code (pc, &data, 1);
-	  opcode_stream.printf ("%s%02x", spacer, (unsigned) data);
+	  m_opcode_stb.printf ("%s%02x", spacer, (unsigned) data);
 	  spacer = " ";
 	}
 
-      uiout->field_stream ("opcodes", opcode_stream);
+      uiout->field_stream ("opcodes", m_opcode_stb);
       uiout->text ("\t");
     }
   else
-    size = gdb_print_insn (gdbarch, pc, &stb, NULL);
+    size = m_di.print_insn (pc);
 
-  uiout->field_stream ("inst", stb);
+  uiout->field_stream ("inst", m_insn_stb);
   do_cleanups (ui_out_chain);
   uiout->text ("\n");
 
@@ -295,11 +296,13 @@ dump_insns (struct gdbarch *gdbarch,
   memset (&insn, 0, sizeof (insn));
   insn.addr = low;
 
+  gdb_pretty_print_disassembler disasm (gdbarch);
+
   while (insn.addr < high && (how_many < 0 || num_displayed < how_many))
     {
       int size;
 
-      size = gdb_pretty_print_insn (gdbarch, uiout, &insn, flags);
+      size = disasm.pretty_print_insn (uiout, &insn, flags);
       if (size <= 0)
 	break;
 

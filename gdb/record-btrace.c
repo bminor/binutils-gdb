@@ -719,6 +719,8 @@ btrace_insn_history (struct ui_out *uiout,
      instructions corresponding to that line.  */
   ui_item_chain = NULL;
 
+  gdb_pretty_print_disassembler disasm (gdbarch);
+
   for (it = *begin; btrace_insn_cmp (&it, end) != 0; btrace_insn_next (&it, 1))
     {
       const struct btrace_insn *insn;
@@ -772,7 +774,7 @@ btrace_insn_history (struct ui_out *uiout,
 	  if ((insn->flags & BTRACE_INSN_FLAG_SPECULATIVE) != 0)
 	    dinsn.is_speculative = 1;
 
-	  gdb_pretty_print_insn (gdbarch, uiout, &dinsn, flags);
+	  disasm.pretty_print_insn (uiout, &dinsn, flags);
 	}
     }
 

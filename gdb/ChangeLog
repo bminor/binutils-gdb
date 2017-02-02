@@ -1,5 +1,18 @@
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
+	* disasm.c (gdb_pretty_print_insn): Rename to ...
+	(gdb_pretty_print_disassembler::pretty_print_insn): ... this.
+	Remove gdbarch parameter.  Adapt to clear the object's buffers
+	instead of allocating new buffers, and to print using the object's
+	gdb_disassembler instead of calling gdb_print_insn.
+	(dump_insns): Use gdb_pretty_print_disassembler.
+	* disasm.h (gdb_pretty_print_insn): Delete declaration.
+	(gdb_pretty_print_disassembler): New class.
+	* record-btrace.c (btrace_insn_history): Use
+	gdb_pretty_print_disassembler.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (type_as_string): Use string_file.
 	* ada-valprint.c (ada_print_floating): Use string_file.
 	* ada-varobj.c (ada_varobj_scalar_image)

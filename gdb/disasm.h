@@ -97,11 +97,34 @@ extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 extern int gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 			   struct ui_file *stream, int *branch_delay_insns);
 
-/* Prints the instruction INSN into UIOUT and returns the length of
-   the printed instruction in bytes.  */
+/* Class used to pretty-print an instruction.  */
 
-extern int gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
-				  const struct disasm_insn *insn, int flags);
+class gdb_pretty_print_disassembler
+{
+public:
+  explicit gdb_pretty_print_disassembler (struct gdbarch *gdbarch)
+    : m_di (gdbarch, &m_insn_stb)
+  {}
+
+  /* Prints the instruction INSN into UIOUT and returns the length of
+     the printed instruction in bytes.  */
+  int pretty_print_insn (struct ui_out *uiout, const struct disasm_insn *insn,
+			 int flags);
+
+private:
+  /* Returns the architecture used for disassembling.  */
+  struct gdbarch *arch () { return m_di.arch (); }
+
+  /* The disassembler used for instruction printing.  */
+  gdb_disassembler m_di;
+
+  /* The buffer used to build the instruction string.  The
+     disassembler is initialized with this stream.  */
+  string_file m_insn_stb;
+
+  /* The buffer used to build the raw opcodes string.  */
+  string_file m_opcode_stb;
+};
 
 /* Return the length in bytes of the instruction at address MEMADDR in
    debugged memory.  */
