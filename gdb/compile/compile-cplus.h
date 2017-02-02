@@ -230,7 +230,8 @@ namespace compile
     /* NAME for debugging  */
     bool finish_class_type (const char *name, unsigned long size_in_bytes);
 
-    gcc_type get_float_type (unsigned long size_in_bytes, const char *builtin_name);
+    gcc_type get_float_type (unsigned long size_in_bytes,
+			     const char *builtin_name);
 
     gcc_type get_int_type (bool is_unsigned, unsigned long size_in_bytes,
 		       const char *builtin_name);
@@ -267,10 +268,9 @@ namespace compile
 						  const char *filename,
 						  unsigned int line_number);
 
-    gcc_decl build_function_template_specialization (struct template_symbol *concrete,
-						     gcc_address address,
-						     const char *filename,
-						     unsigned int line_number);
+    gcc_decl build_function_template_specialization
+      (struct template_symbol *concrete, gcc_address address,
+       const char *filename, unsigned int line_number);
 
     /* NAME only for debugging  */
     gcc_type start_class_type (const char *name, gcc_decl typedecl,

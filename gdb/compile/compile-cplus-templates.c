@@ -796,7 +796,8 @@ define_template_parameters_generic
 	      }
 
 	    instance->build_value_template_parameter (abstract_type, id,
-						      default_value, filename, line);
+						      default_value,
+						      filename, line);
 	  }
 	  break;
 

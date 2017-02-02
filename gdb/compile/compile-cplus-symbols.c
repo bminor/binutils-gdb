@@ -540,9 +540,9 @@ gcc_cplus_convert_symbol (void *datum,
 
       if (!found)
 	{
-	  struct block_symbol sym;
+	  struct block_symbol sym
+	    = lookup_symbol (identifier, instance->block (), VAR_DOMAIN, NULL);
 
-	  sym = lookup_symbol (identifier, instance->block (), VAR_DOMAIN, NULL);
 	  if (sym.symbol != NULL)
 	    {
 	      convert_symbol_sym (instance, identifier, sym, VAR_DOMAIN);
@@ -552,9 +552,10 @@ gcc_cplus_convert_symbol (void *datum,
 
       if (1)
 	{
-	  struct block_symbol sym;
+	  struct block_symbol sym
+	    = lookup_symbol (identifier, instance->block (), STRUCT_DOMAIN,
+			     NULL);
 
-	  sym = lookup_symbol (identifier, instance->block (), STRUCT_DOMAIN, NULL);
 	  if (sym.symbol != NULL)
 	    {
 	      convert_symbol_sym (instance, identifier, sym, STRUCT_DOMAIN);

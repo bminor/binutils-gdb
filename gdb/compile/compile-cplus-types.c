@@ -1193,14 +1193,14 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 		    = ccp_convert_method (instance, type,
 					  TYPE_FN_FIELD_TYPE (methods, j));
 
-		  instance->build_decl("pure virtual method", name,
-				       (sym_kind
-					| get_method_access_flag (type, i, j)
-					| GCC_CP_FLAG_VIRTUAL_FUNCTION
-					| GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
-				       method_type, NULL, 0,
-				       NULL /* FIXME: filename  */,
-				       0 /* FIXME: line number  */);
+		  instance->build_decl ("pure virtual method", name,
+					(sym_kind
+					 | get_method_access_flag (type, i, j)
+					 | GCC_CP_FLAG_VIRTUAL_FUNCTION
+					 | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
+					method_type, NULL, 0,
+					NULL /* FIXME: filename  */,
+					0 /* FIXME: line number  */);
 		  do_cleanups (back_to);
 		  continue;
 		}
@@ -1230,7 +1230,8 @@ ccp_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	      struct template_symbol *tsymbol
 		= (struct template_symbol *) sym.symbol;
 
-	      instance->build_function_template_specialization (tsymbol, address,
+	      instance->build_function_template_specialization (tsymbol,
+								address,
 								filename, line);
 	      do_cleanups (back_to);
 	      continue;
@@ -1334,7 +1335,10 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 		      it go once we separate declaration from
 		      definition (see below).  -lxo */
   if (TYPE_N_TEMPLATE_ARGUMENTS (type))
-    resuld = instance->build_class_template_specialization (type, filename, line);
+    {
+      resuld = instance->build_class_template_specialization (type,
+							      filename, line);
+    }
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       const char *what = TYPE_DECLARED_CLASS (type) ? "struct" : "class";
@@ -1395,8 +1399,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
       result
-	= instance->start_class_type (name, resuld, NULL,
-				      filename, line);
+	= instance->start_class_type (name, resuld, NULL, filename, line);
     }
 
   instance->insert_type (type, result);
@@ -1858,8 +1861,8 @@ compile_cplus_instance::build_function_template_specialization
   make_cleanup (xfree, targs.elements);
   enumerate_template_arguments (&targs, defn, concrete->template_arguments);
 
-  DECLARE_FORWARD (build_function_template_specialization, defn->decl (), &targs,
-		   address, filename, line_number);
+  DECLARE_FORWARD (build_function_template_specialization, defn->decl (),
+		   &targs, address, filename, line_number);
 
   gcc_decl result = forward ("%s", SYMBOL_NATURAL_NAME (&concrete->base));
   do_cleanups (back_to);
@@ -1869,9 +1872,8 @@ compile_cplus_instance::build_function_template_specialization
 /* See description in gcc-cp-fe.def.  */
 
 gcc_decl
-compile_cplus_instance::build_class_template_specialization (struct type *concrete,
-							     const char *filename,
-							     unsigned int line_number)
+compile_cplus_instance::build_class_template_specialization
+  (struct type *concrete, const char *filename, unsigned int line_number)
 {
   class_template_defn *defn
     = find_class_template_defn (concrete);
@@ -2007,9 +2009,11 @@ compile_cplus_instance::build_array_type (gcc_type element_type,
 /* See description in gcc-cp-fe.def.  */
 
 gcc_decl
-compile_cplus_instance::build_field (const char *field_name, gcc_type field_type,
+compile_cplus_instance::build_field (const char *field_name,
+				     gcc_type field_type,
 				     enum gcc_cp_symbol_kind field_flags,
-				     unsigned long bitsize, unsigned long bitpos)
+				     unsigned long bitsize,
+				     unsigned long bitpos)
 {
   DECLARE_FORWARD (build_field, field_name, field_type, field_flags,
 		   bitsize, bitpos);
@@ -2058,7 +2062,8 @@ compile_cplus_instance::finish_class_type (const char *name,
 /* See description in gcc-cp-fe.def.  */
 
 gcc_type
-compile_cplus_instance::get_int_type (bool is_unsigned, unsigned long size_in_bytes,
+compile_cplus_instance::get_int_type (bool is_unsigned,
+				      unsigned long size_in_bytes,
 				      const char *builtin_name)
 {
   DECLARE_FORWARD (get_int_type, is_unsigned, size_in_bytes, builtin_name);
@@ -2191,7 +2196,8 @@ compile_cplus_instance::build_literal_expr (gcc_type type, unsigned long value)
 /* See description in gcc-cp-fe.def.  */
 
 gcc_type
-compile_cplus_instance::build_type_template_parameter (const char *id, bool pack_p,
+compile_cplus_instance::build_type_template_parameter (const char *id,
+						       bool pack_p,
 						       gcc_type default_type,
 						       const char *filename,
 						       unsigned int line_number)
@@ -2206,10 +2212,9 @@ compile_cplus_instance::build_type_template_parameter (const char *id, bool pack
 /* See description in gcc-cp-fe.def.  */
 
 gcc_decl
-compile_cplus_instance::build_value_template_parameter (gcc_type type, const char *id,
-							gcc_expr default_value,
-							const char *filename,
-							unsigned int line_number)
+compile_cplus_instance::build_value_template_parameter
+  (gcc_type type, const char *id, gcc_expr default_value,
+   const char *filename, unsigned int line_number)
 {
   DECLARE_FORWARD (build_value_template_parameter, type, id,
 		   default_value, filename, line_number);
