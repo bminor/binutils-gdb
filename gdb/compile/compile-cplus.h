@@ -185,10 +185,10 @@ namespace compile
     /* !!keiths: YUCK!
        Plug-in forwards  */
 
-    gcc_type bool_type ();
+    gcc_type get_bool_type ();
 
-    gcc_decl build_add_enum_constant (gcc_type enum_type, const char *name,
-				      unsigned long value);
+    gcc_decl build_enum_constant (gcc_type enum_type, const char *name,
+				  unsigned long value);
 
     gcc_type build_array_type (gcc_type element_type, int num_elements);
 
@@ -221,73 +221,73 @@ namespace compile
 
     gcc_type build_vector_type (gcc_type element_type, int num_elements);
 
-    gcc_type char_type ();
+    gcc_type get_char_type ();
 
     gcc_type error (const char *message);
 
     bool finish_enum_type (gcc_type enum_type);
 
     /* NAME for debugging  */
-    bool finish_record_or_union (const char *name, unsigned long size_in_bytes);
+    bool finish_class_type (const char *name, unsigned long size_in_bytes);
 
-    gcc_type float_type (unsigned long size_in_bytes, const char *builtin_name);
+    gcc_type get_float_type (unsigned long size_in_bytes,
+			     const char *builtin_name);
 
-    gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes,
+    gcc_type get_int_type (bool is_unsigned, unsigned long size_in_bytes,
 		       const char *builtin_name);
 
-    gcc_expr literal_expr (gcc_type type, unsigned long value);
+    gcc_expr build_literal_expr (gcc_type type, unsigned long value);
 
     /* DECL_DESC for debugging only  */
-    gcc_decl new_decl (const char *decl_desc, const char *name,
-		       enum gcc_cp_symbol_kind sym_kind,
-		       gcc_type sym_type, const char *substitution_name,
-		       gcc_address address,
-		       const char *filename, unsigned int line_number);
+    gcc_decl build_decl (const char *decl_desc, const char *name,
+			 enum gcc_cp_symbol_kind sym_kind,
+			 gcc_type sym_type, const char *substitution_name,
+			 gcc_address address,
+			 const char *filename, unsigned int line_number);
 
-    gcc_decl new_field (const char *field_name, gcc_type field_type,
-			enum gcc_cp_symbol_kind field_flags,
-			unsigned long bitsize, unsigned long bitpos);
+    gcc_decl build_field (const char *field_name, gcc_type field_type,
+			  enum gcc_cp_symbol_kind field_flags,
+			  unsigned long bitsize, unsigned long bitpos);
 
-    gcc_type new_template_typename_parm (const char *id, bool pack_p,
-					 gcc_type default_type,
-					 const char *filename,
-					 unsigned int line_number);
+    gcc_type build_type_template_parameter (const char *id, bool pack_p,
+					    gcc_type default_type,
+					    const char *filename,
+					    unsigned int line_number);
 
-    gcc_decl new_template_value_parm (gcc_type type, const char *id,
-				      gcc_expr default_value,
-				      const char *filename,
-				      unsigned int line_number);
+    gcc_decl build_value_template_parameter (gcc_type type, const char *id,
+					     gcc_expr default_value,
+					     const char *filename,
+					     unsigned int line_number);
 
     /* NAME is for debugging only  */
-    bool pop_namespace (const char *name);
+    bool pop_binding_level (const char *name);
 
     bool push_namespace (const char *name);
 
-    gcc_decl specialize_class_template (struct type *concrete,
-					const char *filename,
-					unsigned int line_number);
+    gcc_decl build_class_template_specialization (struct type *concrete,
+						  const char *filename,
+						  unsigned int line_number);
 
-    gcc_decl specialize_function_template (struct template_symbol *concrete,
-					   gcc_address address,
-					   const char *filename,
-					   unsigned int line_number);
+    gcc_decl build_function_template_specialization
+      (struct template_symbol *concrete, gcc_address address,
+       const char *filename, unsigned int line_number);
 
     /* NAME only for debugging  */
-    gcc_type start_class_definition (const char *name, gcc_decl typedecl,
-				     const struct gcc_vbase_array *base_classes,
-				     const char *filename,
-				     unsigned int line_number);
+    gcc_type start_class_type (const char *name, gcc_decl typedecl,
+			       const struct gcc_vbase_array *base_classes,
+			       const char *filename,
+			       unsigned int line_number);
 
-    gcc_type start_new_enum_type (const char *name,
-				  gcc_type underlying_int_type,
-				  enum gcc_cp_symbol_kind flags,
-				  const char *filename,
-				  unsigned int line_number);
+    gcc_type start_enum_type (const char *name,
+			      gcc_type underlying_int_type,
+			      enum gcc_cp_symbol_kind flags,
+			      const char *filename,
+			      unsigned int line_number);
 
     /* GENERIC only for debugging  */
-    bool start_new_template_decl (const char *generic);
+    bool start_template_decl (const char *generic);
 
-    gcc_type void_type ();
+    gcc_type get_void_type ();
 
 
   private:
