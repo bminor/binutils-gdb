@@ -956,7 +956,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    set exitstat "succeeded"
 	    if { $cmdret != 0 } { set exitstat "failed" }
 
-            if { $check_ld(source) == "regexp" } {
+            if { $check_ld(source) == "regex" } {
                 verbose -log "$exitstat with: <$comp_output>, expected: <$check_ld(regex)>"
             } elseif { $check_ld(source) == "file" } {
                 verbose -log "$exitstat with: <$comp_output>, expected in file $check_ld(file)"

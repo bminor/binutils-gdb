@@ -1,3 +1,8 @@
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ld/testsuite/lib/ld-lib.exp (run_dump_test): Fix a typo,
+	s/regexp/regex/.
+
 2017-02-02  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/lib/ld-lib.exp (check_libdl_available): New function.
