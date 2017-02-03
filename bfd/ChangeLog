@@ -1,3 +1,16 @@
+2017-02-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Remove now unused
+	local variable dynobj.
+
+	PR ld/20995
+	* elf32-cris.c (elf_cris_size_dynamic_sections): Handle sdynrelro.
+	(elf_cris_adjust_dynamic_symbol): Place variables copied into the
+	executable from read-only sections into sdynrelro.
+	(elf_cris_finish_dynamic_symbol): Select sreldynrelro for
+	dynamic relocs in sdynrelro.
+	(elf_backend_want_dynrelro): Define.
+
 2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.h (_bfd_mips_elf_insn32): Rename prototype to...
