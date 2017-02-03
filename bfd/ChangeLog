@@ -1,3 +1,8 @@
+2017-02-03  Alan Modra  <amodra@gmail.com>
+
+	* elf-hppa.h (elf_hppa_fake_sections): Set SHF_INFO_LINK for
+	.PARISC.unwind section.
+
 2017-02-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Remove now unused
