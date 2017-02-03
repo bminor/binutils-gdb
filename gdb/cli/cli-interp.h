@@ -18,7 +18,20 @@
 #ifndef CLI_INTERP_H
 #define CLI_INTERP_H 1
 
-struct interp;
+#include "interps.h"
+
+/* A console-like interpreter.  Implements functionality common to the
+   CLI and the TUI.  */
+class cli_interp_base : public interp
+{
+public:
+  explicit cli_interp_base (const char *name);
+  virtual ~cli_interp_base () = 0;
+
+  void set_logging (ui_file_up logfile, bool logging_redirect) override;
+  void pre_command_loop () override;
+  bool supports_command_editing () override;
+};
 
 /* Make the output ui_file to use when logging is enabled.
    CURR_OUTPUT is the stream where output is currently being sent to

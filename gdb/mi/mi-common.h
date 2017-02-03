@@ -19,6 +19,8 @@
 #ifndef MI_COMMON_H
 #define MI_COMMON_H
 
+#include "interps.h"
+
 struct mi_console_file;
 
 /* Represents the reason why GDB is sending an asynchronous command to
@@ -50,8 +52,23 @@ enum async_reply_reason
 
 const char *async_reason_lookup (enum async_reply_reason reason);
 
-struct mi_interp
+/* An MI interpreter.  */
+
+class mi_interp final : public interp
 {
+public:
+  mi_interp (const char *name)
+    : interp (name)
+  {}
+
+  void init (bool top_level) override;
+  void resume () override;
+  void suspend () override;
+  gdb_exception exec (const char *command_str) override;
+  ui_out *interp_ui_out () override;
+  void set_logging (ui_file_up logfile, bool logging_redirect) override;
+  void pre_command_loop () override;
+
   /* MI's output channels */
   mi_console_file *out;
   mi_console_file *err;

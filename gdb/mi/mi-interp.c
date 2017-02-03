@@ -108,14 +108,14 @@ static struct mi_interp *
 as_mi_interp (struct interp *interp)
 {
   if (interp_ui_out (interp)->is_mi_like_p ())
-    return (struct mi_interp *) interp_data (interp);
+    return (struct mi_interp *) interp;
   return NULL;
 }
 
-static void *
-mi_interpreter_init (struct interp *interp, int top_level)
+void
+mi_interp::init (bool top_level)
 {
-  struct mi_interp *mi = XNEW (struct mi_interp);
+  mi_interp *mi = this;
   const char *name;
   int mi_version;
 
@@ -132,7 +132,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
   mi->targ = new mi_console_file (mi->raw_stdout, "@", '"');
   mi->event_channel = new mi_console_file (mi->raw_stdout, "=", 0);
 
-  name = interp_name (interp);
+  name = interp_name (this);
   /* INTERP_MI selects the most recent released version.  "mi2" was
      released as part of GDB 6.0.  */
   if (strcmp (name, INTERP_MI) == 0)
@@ -157,14 +157,12 @@ mi_interpreter_init (struct interp *interp, int top_level)
 	 up-front.  */
       iterate_over_inferiors (report_initial_inferior, mi);
     }
-
-  return mi;
 }
 
-static int
-mi_interpreter_resume (void *data)
+void
+mi_interp::resume ()
 {
-  struct mi_interp *mi = (struct mi_interp *) data;
+  struct mi_interp *mi = this;
   struct ui *ui = current_ui;
 
   /* As per hack note in mi_interpreter_init, swap in the output
@@ -188,19 +186,16 @@ mi_interpreter_resume (void *data)
   clear_interpreter_hooks ();
 
   deprecated_show_load_progress = mi_load_progress;
-
-  return 1;
 }
 
-static int
-mi_interpreter_suspend (void *data)
+void
+mi_interp::suspend ()
 {
   gdb_disable_readline ();
-  return 1;
 }
 
-static struct gdb_exception
-mi_interpreter_exec (void *data, const char *command)
+gdb_exception
+mi_interp::exec (const char *command)
 {
   mi_execute_command_wrapper (command);
   return exception_none;
@@ -327,10 +322,10 @@ mi_execute_command_input_handler (char *cmd)
     display_mi_prompt (mi);
 }
 
-static void
-mi_interpreter_pre_command_loop (struct interp *self)
+void
+mi_interp::pre_command_loop ()
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (self);
+  struct mi_interp *mi = this;
 
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format.  */
@@ -658,7 +653,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
      using cli interpreter, be sure to use MI uiout for output,
      not the current one.  */
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
-  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
 
   if (print_frame)
     {
@@ -1362,24 +1357,19 @@ report_initial_inferior (struct inferior *inf, void *closure)
   return 0;
 }
 
-static struct ui_out *
-mi_ui_out (struct interp *interp)
+ui_out *
+mi_interp::interp_ui_out ()
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (interp);
-
-  return mi->mi_uiout;
+  return this->mi_uiout;
 }
 
 /* Do MI-specific logging actions; save raw_stdout, and change all
    the consoles to use the supplied ui-file(s).  */
 
-static void
-mi_set_logging (struct interp *interp,
-	        ui_file_up logfile, bool logging_redirect)
+void
+mi_interp::set_logging (ui_file_up logfile, bool logging_redirect)
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (interp);
-
-  gdb_assert (mi != NULL);
+  struct mi_interp *mi = this;
 
   if (logfile != NULL)
     {
@@ -1403,25 +1393,12 @@ mi_set_logging (struct interp *interp,
   mi->event_channel->set_raw (mi->raw_stdout);
 }
 
-/* The MI interpreter's vtable.  */
-
-static const struct interp_procs mi_interp_procs =
-{
-  mi_interpreter_init,		/* init_proc */
-  mi_interpreter_resume,	/* resume_proc */
-  mi_interpreter_suspend,	/* suspend_proc */
-  mi_interpreter_exec,		/* exec_proc */
-  mi_ui_out, 			/* ui_out_proc */
-  mi_set_logging,		/* set_logging_proc */
-  mi_interpreter_pre_command_loop /* pre_command_loop_proc */
-};
-
 /* Factory for MI interpreters.  */
 
 static struct interp *
 mi_interp_factory (const char *name)
 {
-  return interp_new (name, &mi_interp_procs, NULL);
+  return new mi_interp (name);
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

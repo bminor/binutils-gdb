@@ -34,20 +34,32 @@
 #include "observer.h"
 #include "gdbthread.h"
 
-static struct ui_out *tui_ui_out (struct interp *self);
-
 /* Set to 1 when the TUI mode must be activated when we first start
    gdb.  */
 static int tui_start_enabled = 0;
 
+class tui_interp final : public cli_interp_base
+{
+public:
+  explicit tui_interp (const char *name)
+    : cli_interp_base (name)
+  {}
+
+  void init (bool top_level) override;
+  void resume () override;
+  void suspend () override;
+  gdb_exception exec (const char *command_str) override;
+  ui_out *interp_ui_out () override;
+};
+
 /* Returns the INTERP if the INTERP is a TUI, and returns NULL
    otherwise.  */
 
-static struct interp *
+static tui_interp *
 as_tui_interp (struct interp *interp)
 {
   if (strcmp (interp_name (interp), INTERP_TUI) == 0)
-    return interp;
+    return (tui_interp *) interp;
   return NULL;
 }
 
@@ -84,7 +96,7 @@ tui_on_normal_stop (struct bpstats *bs, int print_frame)
 
       thread = inferior_thread ();
       if (should_print_stop_to_console (interp, thread))
-	print_stop_event (tui_ui_out (tui));
+	print_stop_event (tui->interp_ui_out ());
     }
 }
 
@@ -100,7 +112,7 @@ tui_on_signal_received (enum gdb_signal siggnal)
       if (tui == NULL)
 	continue;
 
-      print_signal_received_reason (tui_ui_out (tui), siggnal);
+      print_signal_received_reason (tui->interp_ui_out (), siggnal);
     }
 }
 
@@ -116,7 +128,7 @@ tui_on_end_stepping_range (void)
       if (tui == NULL)
 	continue;
 
-      print_end_stepping_range_reason (tui_ui_out (tui));
+      print_end_stepping_range_reason (tui->interp_ui_out ());
     }
 }
 
@@ -132,7 +144,7 @@ tui_on_signal_exited (enum gdb_signal siggnal)
       if (tui == NULL)
 	continue;
 
-      print_signal_exited_reason (tui_ui_out (tui), siggnal);
+      print_signal_exited_reason (tui->interp_ui_out (), siggnal);
     }
 }
 
@@ -148,7 +160,7 @@ tui_on_exited (int exitstatus)
       if (tui == NULL)
 	continue;
 
-      print_exited_reason (tui_ui_out (tui), exitstatus);
+      print_exited_reason (tui->interp_ui_out (), exitstatus);
     }
 }
 
@@ -164,7 +176,7 @@ tui_on_no_history (void)
       if (tui == NULL)
 	continue;
 
-      print_no_history_reason (tui_ui_out (tui));
+      print_no_history_reason (tui->interp_ui_out ());
     }
 }
 
@@ -215,19 +227,19 @@ tui_on_user_selected_context_changed (user_selected_what selection)
 	continue;
 
       if (selection & USER_SELECTED_INFERIOR)
-	print_selected_inferior (tui_ui_out (tui));
+	print_selected_inferior (tui->interp_ui_out ());
 
       if (tp != NULL
 	  && ((selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME))))
-	print_selected_thread_frame (tui_ui_out (tui), selection);
+	print_selected_thread_frame (tui->interp_ui_out (), selection);
 
     }
 }
 
 /* These implement the TUI interpreter.  */
 
-static void *
-tui_init (struct interp *self, int top_level)
+void
+tui_interp::init (bool top_level)
 {
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
@@ -238,12 +250,10 @@ tui_init (struct interp *self, int top_level)
   tui_initialize_win ();
   if (ui_file_isatty (gdb_stdout))
     tui_initialize_readline ();
-
-  return NULL;
 }
 
-static int
-tui_resume (void *data)
+void
+tui_interp::resume ()
 {
   struct ui *ui = current_ui;
   struct ui_file *stream;
@@ -268,19 +278,17 @@ tui_resume (void *data)
 
   if (tui_start_enabled)
     tui_enable ();
-  return 1;
 }
 
-static int
-tui_suspend (void *data)
+void
+tui_interp::suspend ()
 {
   tui_start_enabled = tui_active;
   tui_disable ();
-  return 1;
 }
 
-static struct ui_out *
-tui_ui_out (struct interp *self)
+ui_out *
+tui_interp::interp_ui_out ()
 {
   if (tui_active)
     return tui_out;
@@ -288,31 +296,19 @@ tui_ui_out (struct interp *self)
     return tui_old_uiout;
 }
 
-static struct gdb_exception
-tui_exec (void *data, const char *command_str)
+gdb_exception
+tui_interp::exec (const char *command_str)
 {
   internal_error (__FILE__, __LINE__, _("tui_exec called"));
 }
 
-/* The TUI interpreter's vtable.  */
-
-static const struct interp_procs tui_interp_procs = {
-  tui_init,
-  tui_resume,
-  tui_suspend,
-  tui_exec,
-  tui_ui_out,
-  cli_set_logging,
-  cli_interpreter_pre_command_loop,
-  cli_interpreter_supports_command_editing,
-};
 
 /* Factory for TUI interpreters.  */
 
 static struct interp *
 tui_interp_factory (const char *name)
 {
-  return interp_new (name, &tui_interp_procs, NULL);
+  return new tui_interp (name);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

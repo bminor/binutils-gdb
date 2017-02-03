@@ -147,8 +147,7 @@ static void print_diff (struct ui_file *file, struct mi_timestamp *start,
 void
 mi_cmd_gdb_exit (char *command, char **argv, int argc)
 {
-  struct mi_interp *mi
-    = (struct mi_interp *) interp_data (current_interpreter ());
+  struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
   /* We have to print everything right here because we never return.  */
   if (current_token)
@@ -1974,7 +1973,7 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
 static void
 captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (command_interp ());
+  struct mi_interp *mi = (struct mi_interp *) command_interp ();
   struct cleanup *cleanup;
 
   if (do_timings)
@@ -2066,8 +2065,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 static void
 mi_print_exception (const char *token, struct gdb_exception exception)
 {
-  struct mi_interp *mi
-    = (struct mi_interp *) interp_data (current_interpreter ());
+  struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
   fputs_unfiltered (token, mi->raw_stdout);
   fputs_unfiltered ("^error,msg=\"", mi->raw_stdout);
@@ -2190,8 +2188,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	     again.  */
 	  && !command_notifies_uscc_observer (command))
 	{
-	  struct mi_interp *mi
-	    = (struct mi_interp *) top_level_interpreter_data ();
+	  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
 	  int report_change = 0;
 
 	  if (command->thread == -1)
@@ -2378,8 +2375,7 @@ mi_load_progress (const char *section_name,
   int new_section;
   struct ui_out *saved_uiout;
   struct ui_out *uiout;
-  struct mi_interp *mi
-    = (struct mi_interp *) interp_data (current_interpreter ());
+  struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
   /* This function is called through deprecated_show_load_progress
      which means uiout may not be correct.  Fix it for the duration

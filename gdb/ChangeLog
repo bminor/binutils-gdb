@@ -1,3 +1,113 @@
+2017-02-03  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_interp_base::cli_interp_base)
+	(cli_interp_base::~cli_interp_base): New.
+	(cli_interp): New struct.
+	(as_cli_interp): Cast the interp itself to cli_interp.
+	(cli_interpreter_pre_command_loop): Rename to ...
+	(cli_interp_base::pre_command_loop): ... this.  Remove 'self'
+	parameter.
+	(cli_interpreter_init): Rename to ...
+	(cli_interp::init): ... this.  Remove 'self' parameter.  Use
+	boolean.  Make extern.
+	(cli_interpreter_resume): Rename to ...
+	(cli_interp::resume): ... this.  Remove 'data' parameter.  Make
+	extern.
+	(cli_interpreter_suspend): Rename to ...
+	(cli_interp::suspend): ... this.  Remove 'data' parameter.  Make
+	extern.
+	(cli_interpreter_exec): Rename to ...
+	(cli_interp::exec): ... this.  Remove 'data' parameter.  Make
+	extern.
+	(cli_interpreter_supports_command_editing): Rename to ...
+	(cli_interp_base::supports_command_editing): ... this.  Remove
+	'interp' parameter.  Make extern.
+	(cli_ui_out): Rename to ...
+	(cli_interp::interp_ui_out): ... this.  Remove 'interp' parameter.
+	Make extern.
+	(cli_set_logging): Rename to ...
+	(cli_interp_base::set_logging): ... this.  Remove 'interp'
+	parameter.  Make extern.
+	(cli_interp_procs): Delete.
+	(cli_interp_factory): Adjust to use "new".
+	* cli/cli-interp.h: Include "interps.h".
+	(struct cli_interp_base): New struct.
+	* interps.c (struct interp): Delete.  Fields moved to interps.h.
+	(interp_new): Delete.
+	(interp::interp, interp::~interp): New.
+	(interp_set): Use bool, and return void.  Assume the interpreter
+	has suspend, init and resume methods, and that the all return
+	void.
+	(set_top_level_interpreter): interp_set returns void.
+	(interp_ui_out): Adapt.
+	(current_interp_set_logging): Adapt.
+	(interp_data): Delete.
+	(interp_pre_command_loop, interp_supports_command_editing): Adapt.
+	(interp_exec): Adapt.
+	(top_level_interpreter_data): Delete.
+	* interps.h (interp_init_ftype, interp_resume_ftype)
+	(interp_suspend_ftype, interp_exec_ftype)
+	(interp_pre_command_loop_ftype, interp_ui_out_ftype): Delete.
+	(class interp): New.
+	(interp_new): Delete.
+	(interp_set): Now returns void.  Use bool.
+	(interp_data, top_level_interpreter_data): Delete.
+	* mi/mi-common.h: Include interps.h.
+	(class mi_interp): Inherit from interp.  Define a ctor.  Declare
+	init, resume, suspect, exec, interp_ui_out, set_logging and
+	pre_command_loop methods.
+	* mi/mi-interp.c (as_mi_interp): Cast the interp itself.
+	(mi_interpreter_init): Rename to ...
+	(mi_interp::init): ... this.  Remove the 'interp' parameter, use
+	bool, return void and make extern.  Adjust.
+	(mi_interpreter_resume): ... Rename to ...
+	(mi_interp::resume): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(mi_interpreter_suspend): ... Rename to ...
+	(mi_interp::suspend): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(mi_interpreter_exec): ... Rename to ...
+	(mi_interp::exec): ... this.  Remove the 'data' parameter and make
+	extern.  Adjust.
+	(mi_interpreter_pre_command_loop): ... Rename to ...
+	(mi_interp::pre_command_loop): ... this.  Remove the 'self'
+	parameter and make extern.
+	(mi_on_normal_stop_1): Adjust.
+	(mi_ui_out): Rename to ...
+	(mi_interp::interp_ui_out): ... this.  Remove the 'interp'
+	parameter and make extern.  Adjust.
+	(mi_set_logging): Rename to ...
+	(mi_interp::set_logging): ... this.  Remove the 'interp'
+	parameter and make extern.  Adjust.
+	(mi_interp_procs): Delete.
+	(mi_interp_factory): Adjust to use 'new'.
+	* mi/mi-main.c (mi_cmd_gdb_exit, captured_mi_execute_command)
+	(mi_print_exception, mi_execute_command, mi_load_progress):
+	Adjust.
+	* tui/tui-interp.c (tui_interp): New class.
+	(as_tui_interp): Return a tui_interp pointer.
+	(tui_on_normal_stop, tui_on_signal_received)
+	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history, tui_on_user_selected_context_changed): Adjust
+	to use interp::interp_ui_out.
+	(tui_init): Rename to ...
+	(tui_interp::init): ... this.  Remove the 'self' parameter, use
+	bool, return void and make extern.  Adjust.
+	(tui_resume): Rename to ...
+	(tui_interp::resume): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(tui_suspend): Rename to ...
+	(tui_interp::suspend): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(tui_ui_out): Rename to ...
+	(tui_interp::interp_ui_out): ... this.  Remove the 'self'
+	parameter, and make extern.  Adjust.
+	(tui_exec): Rename to ...
+	(tui_interp::exec): ... this.  Remove the 'data' parameter and
+	make extern.
+	(tui_interp_procs): Delete.
+	(tui_interp_factory): Use "new".
+
 2017-02-02  Tom Tromey  <tom@tromey.com>
 
 	* rust-exp.y (ends_raw_string, space_then_number)
