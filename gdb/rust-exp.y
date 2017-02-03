@@ -941,16 +941,15 @@ rust_concat3 (const char *s1, const char *s2, const char *s3)
 static const struct rust_op *
 crate_name (const struct rust_op *name)
 {
-  char *crate = rust_crate_for_block (expression_context_block);
+  std::string crate = rust_crate_for_block (expression_context_block);
   struct stoken result;
 
   gdb_assert (name->opcode == OP_VAR_VALUE);
 
-  if (crate == NULL)
+  if (crate.empty ())
     error (_("Could not find crate for current location"));
-  result = make_stoken (obconcat (&work_obstack, "::", crate, "::",
+  result = make_stoken (obconcat (&work_obstack, "::", crate.c_str (), "::",
 				  name->left.sval.ptr, (char *) NULL));
-  xfree (crate);
 
   return ast_path (result, name->right.params);
 }

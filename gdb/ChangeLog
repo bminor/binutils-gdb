@@ -1,3 +1,11 @@
+2017-02-02  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.h (rust_crate_for_block): Update.
+	* rust-lang.c (rust_crate_for_block): Return std::string.
+	(rust_get_disr_info): Use std:;string, not
+	gdb::unique_xmalloc_ptr.
+	* rust-exp.y (crate_name): Update.
+
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
 	* disasm-selftests.c (print_one_insn_test): Move the "verbose"

@@ -51,19 +51,17 @@ rust_last_path_segment (const char * path)
   return result + 1;
 }
 
-/* Find the Rust crate for BLOCK.  If no crate can be found, returns
-   NULL.  Otherwise, returns a newly allocated string that the caller
-   is responsible for freeing.  */
+/* See rust-lang.h.  */
 
-char *
+std::string
 rust_crate_for_block (const struct block *block)
 {
   const char *scope = block_scope (block);
 
   if (scope[0] == '\0')
-    return NULL;
+    return std::string ();
 
-  return xstrndup (scope, cp_find_first_component (scope));
+  return std::string (scope, cp_find_first_component (scope));
 }
 
 /* Information about the discriminant/variant of an enum */
@@ -157,8 +155,8 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
       /* Optimized enums have only one field.  */
       member_type = TYPE_FIELD_TYPE (type, 0);
 
-      gdb::unique_xmalloc_ptr<char> name (xstrdup (TYPE_FIELD_NAME (type, 0)));
-      tail = name.get () + strlen (RUST_ENUM_PREFIX);
+      std::string name (TYPE_FIELD_NAME (type, 0));
+      tail = &name[0] + strlen (RUST_ENUM_PREFIX);
 
       /* The location of the value that doubles as a discriminant is
          stored in the name of the field, as
