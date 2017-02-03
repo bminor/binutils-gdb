@@ -1,3 +1,8 @@
+2017-02-03  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relobj::make_toc_relative): Don't crash
+	when no .toc section exists.
+
 2017-01-31  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/21090
