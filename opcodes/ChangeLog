@@ -1,3 +1,11 @@
+2017-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 21096
+	* aarch64-opc.c (print_register_list): Ensure that the register
+	list index will fir into the tb buffer.
+	(print_register_offset_address): Likewise.
+	* tic6x-dis.c (print_insn_tic6x): Increase size of func_unit_buf.
+
 2017-01-27  Alexis Deruell  <alexis.deruelle@gmail.com>
 
 	PR 21056
