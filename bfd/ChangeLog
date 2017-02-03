@@ -1,5 +1,10 @@
 2017-02-03  Alan Modra  <amodra@gmail.com>
 
+	* elf32-hppa.c (ensure_undef_weak_dynamic): New function.
+	(allocate_plt_static, allocate_dynrelocs): Use it.
+
+2017-02-03  Alan Modra  <amodra@gmail.com>
+
 	* elf-hppa.h (elf_hppa_fake_sections): Set SHF_INFO_LINK for
 	.PARISC.unwind section.
 

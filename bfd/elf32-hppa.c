@@ -1919,6 +1919,21 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (info, eh, sec);
 }
 
+/* Make an undefined weak symbol dynamic.  */
+
+static bfd_boolean
+ensure_undef_weak_dynamic (struct bfd_link_info *info,
+			   struct elf_link_hash_entry *eh)
+{
+  if (eh->dynindx == -1
+      && !eh->forced_local
+      && eh->type != STT_PARISC_MILLI
+      && eh->root.type == bfd_link_hash_undefweak
+      && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT)
+    return bfd_elf_link_record_dynamic_symbol (info, eh);
+  return TRUE;
+}
+
 /* Allocate space in the .plt for entries that won't have relocations.
    ie. plabel entries.  */
 
@@ -1942,15 +1957,8 @@ allocate_plt_static (struct elf_link_hash_entry *eh, void *inf)
   if (htab->etab.dynamic_sections_created
       && eh->plt.refcount > 0)
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (eh->dynindx == -1
-	  && !eh->forced_local
-	  && eh->type != STT_PARISC_MILLI)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-	    return FALSE;
-	}
+      if (!ensure_undef_weak_dynamic (info, eh))
+	return FALSE;
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), eh))
 	{
@@ -2024,15 +2032,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
   if (eh->got.refcount > 0)
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (eh->dynindx == -1
-	  && !eh->forced_local
-	  && eh->type != STT_PARISC_MILLI)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-	    return FALSE;
-	}
+      if (!ensure_undef_weak_dynamic (info, eh))
+	return FALSE;
 
       sec = htab->etab.sgot;
       eh->got.offset = sec->size;
@@ -2092,14 +2093,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	  if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
 	    hh->dyn_relocs = NULL;
 
-	  /* Make sure undefined weak symbols are output as a dynamic
-	     symbol in PIEs.  */
-	  else if (eh->dynindx == -1
-		   && !eh->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-		return FALSE;
-	    }
+	  else if (!ensure_undef_weak_dynamic (info, eh))
+	    return FALSE;
 	}
     }
   else
@@ -2116,15 +2111,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 		   && (eh->root.type == bfd_link_hash_undefweak
 		       || eh->root.type == bfd_link_hash_undefined))))
 	{
-	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (eh->dynindx == -1
-	      && !eh->forced_local
-	      && eh->type != STT_PARISC_MILLI)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, eh))
-		return FALSE;
-	    }
+	  if (!ensure_undef_weak_dynamic (info, eh))
+	    return FALSE;
 
 	  /* If that succeeded, we know we'll be keeping all the
 	     relocs.  */
