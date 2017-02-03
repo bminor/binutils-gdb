@@ -1,6 +1,10 @@
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2017-02-03  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Powerpc_relobj::make_toc_relative): Don't crash
+	when no .toc section exists.
+
 	2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 	PR gold/21040
 	* powerpc.cc (Powerpc_relobj<size, big_endian>::make_toc_relative):
