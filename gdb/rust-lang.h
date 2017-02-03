@@ -30,10 +30,10 @@ extern int rust_parse (struct parser_state *);
 extern void rustyyerror (char *);
 
 /* Return true if TYPE is a tuple type; otherwise false.  */
-extern int rust_tuple_type_p (struct type *type);
+extern bool rust_tuple_type_p (struct type *type);
 
 /* Return true if TYPE is a tuple struct type; otherwise false.  */
-extern int rust_tuple_struct_type_p (struct type *type);
+extern bool rust_tuple_struct_type_p (struct type *type);
 
 /* Given a block, find the name of the block's crate. Returns an empty
    stringif no crate name can be found.  */

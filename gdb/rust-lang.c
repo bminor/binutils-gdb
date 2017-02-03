@@ -272,7 +272,7 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
 
 /* See rust-lang.h.  */
 
-int
+bool
 rust_tuple_type_p (struct type *type)
 {
   /* The current implementation is a bit of a hack, but there's
@@ -287,7 +287,7 @@ rust_tuple_type_p (struct type *type)
 /* Return true if all non-static fields of a structlike type are in a
    sequence like __0, __1, __2.  OFFSET lets us skip fields.  */
 
-static int
+static bool
 rust_underscore_fields (struct type *type, int offset)
 {
   int i, field_number;
@@ -295,7 +295,7 @@ rust_underscore_fields (struct type *type, int offset)
   field_number = 0;
 
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
-    return 0;
+    return false;
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
       if (!field_is_static (&TYPE_FIELD (type, i)))
@@ -308,17 +308,17 @@ rust_underscore_fields (struct type *type, int offset)
 
 	      xsnprintf (buf, sizeof (buf), "__%d", field_number);
 	      if (strcmp (buf, TYPE_FIELD_NAME (type, i)) != 0)
-		return 0;
+		return false;
 	      field_number++;
 	    }
 	}
     }
-  return 1;
+  return true;
 }
 
 /* See rust-lang.h.  */
 
-int
+bool
 rust_tuple_struct_type_p (struct type *type)
 {
   /* This is just an approximation until DWARF can represent Rust more
@@ -329,7 +329,7 @@ rust_tuple_struct_type_p (struct type *type)
 
 /* Return true if a variant TYPE is a tuple variant, false otherwise.  */
 
-static int
+static bool
 rust_tuple_variant_type_p (struct type *type)
 {
   /* First field is discriminant */
@@ -338,7 +338,7 @@ rust_tuple_variant_type_p (struct type *type)
 
 /* Return true if TYPE is a slice type, otherwise false.  */
 
-static int
+static bool
 rust_slice_type_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -348,7 +348,7 @@ rust_slice_type_p (struct type *type)
 
 /* Return true if TYPE is a range type, otherwise false.  */
 
-static int
+static bool
 rust_range_type_p (struct type *type)
 {
   int i;
@@ -357,22 +357,22 @@ rust_range_type_p (struct type *type)
       || TYPE_NFIELDS (type) > 2
       || TYPE_TAG_NAME (type) == NULL
       || strstr (TYPE_TAG_NAME (type), "::Range") == NULL)
-    return 0;
+    return false;
 
   if (TYPE_NFIELDS (type) == 0)
-    return 1;
+    return true;
 
   i = 0;
   if (strcmp (TYPE_FIELD_NAME (type, 0), "start") == 0)
     {
       if (TYPE_NFIELDS (type) == 1)
-	return 1;
+	return true;
       i = 1;
     }
   else if (TYPE_NFIELDS (type) == 2)
     {
       /* First field had to be "start".  */
-      return 0;
+      return false;
     }
 
   return strcmp (TYPE_FIELD_NAME (type, i), "end") == 0;
@@ -380,7 +380,7 @@ rust_range_type_p (struct type *type)
 
 /* Return true if TYPE seems to be the type "u8", otherwise false.  */
 
-static int
+static bool
 rust_u8_type_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_INT
@@ -390,7 +390,7 @@ rust_u8_type_p (struct type *type)
 
 /* Return true if TYPE is a Rust character type.  */
 
-static int
+static bool
 rust_chartype_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_CHAR
@@ -479,8 +479,8 @@ val_print_struct (struct type *type, int embedded_offset,
 {
   int i;
   int first_field;
-  int is_tuple = rust_tuple_type_p (type);
-  int is_tuple_struct = !is_tuple && rust_tuple_struct_type_p (type);
+  bool is_tuple = rust_tuple_type_p (type);
+  bool is_tuple_struct = !is_tuple && rust_tuple_struct_type_p (type);
   struct value_print_options opts;
 
   if (!is_tuple)
@@ -763,7 +763,8 @@ rust_print_struct_def (struct type *type, const char *varstring,
 		       struct ui_file *stream, int show, int level,
 		       const struct type_print_options *flags)
 {
-  int is_tuple_struct, i;
+  bool is_tuple_struct;
+  int i;
 
   /* Print a tuple type simply.  */
   if (rust_tuple_type_p (type))
@@ -988,7 +989,7 @@ rust_print_type (struct type *type, const char *varstring,
 	    if (TYPE_NFIELDS (variant_type) > skip_to)
 	      {
 		int first = 1;
-		int is_tuple = rust_tuple_variant_type_p (variant_type);
+		bool is_tuple = rust_tuple_variant_type_p (variant_type);
 		int j;
 
 		fputs_filtered (is_tuple ? "(" : "{", stream);

@@ -1197,7 +1197,7 @@ starts_raw_string (const char *str)
 /* Return true if STR looks like the end of a raw string that had N
    hashes at the start.  */
 
-static int
+static bool
 ends_raw_string (const char *str, int n)
 {
   int i;
@@ -1205,8 +1205,8 @@ ends_raw_string (const char *str, int n)
   gdb_assert (str[0] == '"');
   for (i = 0; i < n; ++i)
     if (str[i + 1] != '#')
-      return 0;
-  return 1;
+      return false;
+  return true;
 }
 
 /* Lex a string constant.  */
@@ -1283,7 +1283,7 @@ lex_string (void)
 
 /* Return true if STRING starts with whitespace followed by a digit.  */
 
-static int
+static bool
 space_then_number (const char *string)
 {
   const char *p = string;
@@ -1291,14 +1291,14 @@ space_then_number (const char *string)
   while (p[0] == ' ' || p[0] == '\t')
     ++p;
   if (p == string)
-    return 0;
+    return false;
 
   return *p >= '0' && *p <= '9';
 }
 
 /* Return true if C can start an identifier.  */
 
-static int
+static bool
 rust_identifier_start_p (char c)
 {
   return ((c >= 'a' && c <= 'z')

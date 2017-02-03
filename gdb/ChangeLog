@@ -1,5 +1,18 @@
 2017-02-02  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (ends_raw_string, space_then_number)
+	(rust_identifier_start_p): Return bool.
+	* rust-lang.c (rust_tuple_type_p, rust_underscore_fields)
+	(rust_tuple_struct_type_p, rust_tuple_variant_type_p)
+	(rust_slice_type_p, rust_range_type_p, rust_u8_type_p)
+	(rust_chartype_p): Return bool.
+	(val_print_struct, rust_print_struct_def, rust_print_type):
+	Update.
+	* rust-lang.h (rust_tuple_type_p, rust_tuple_struct_type_p):
+	Return bool.
+
+2017-02-02  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c: Reindent.
 
 2017-02-02  Tom Tromey  <tom@tromey.com>
