@@ -1,5 +1,9 @@
 2017-02-02  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c: Reindent.
+
+2017-02-02  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.h (rust_crate_for_block): Update.
 	* rust-lang.c (rust_crate_for_block): Return std::string.
 	(rust_get_disr_info): Use std:;string, not

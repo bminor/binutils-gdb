@@ -100,7 +100,7 @@ rust_union_is_untagged (struct type *type)
   if (TYPE_NFIELDS (type) == 0)
     return false;
   /* If the first field is named, but the name has the rust enum prefix,
-      it is an enum.  */
+     it is an enum.  */
   if (strncmp (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX,
 	       strlen (RUST_ENUM_PREFIX)) == 0)
     return false;
@@ -514,8 +514,8 @@ val_print_struct (struct type *type, int embedded_offset,
 
       if (options->prettyformat)
         {
-    fputs_filtered ("\n", stream);
-    print_spaces_filtered (2 + 2 * recurse, stream);
+	  fputs_filtered ("\n", stream);
+	  print_spaces_filtered (2 + 2 * recurse, stream);
         }
       else if (!first_field)
         fputs_filtered (" ", stream);
@@ -524,15 +524,15 @@ val_print_struct (struct type *type, int embedded_offset,
 
       if (!is_tuple && !is_tuple_struct)
         {
-    fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-    fputs_filtered (": ", stream);
+	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_filtered (": ", stream);
         }
 
       val_print (TYPE_FIELD_TYPE (type, i),
-           embedded_offset + TYPE_FIELD_BITPOS (type, i) / 8,
-           address,
-           stream, recurse + 1, val, &opts,
-           current_language);
+		 embedded_offset + TYPE_FIELD_BITPOS (type, i) / 8,
+		 address,
+		 stream, recurse + 1, val, &opts,
+		 current_language);
     }
 
   if (options->prettyformat)
@@ -659,17 +659,17 @@ rust_val_print (struct type *type, int embedded_offset,
 	struct disr_info disr;
 	struct value_print_options opts;
 
-  /* Untagged unions are printed as if they are structs.
-     Since the field bit positions overlap in the debuginfo,
-     the code for printing a union is same as that for a struct,
-     the only difference is that the input type will have overlapping
-     fields.  */
-  if (rust_union_is_untagged (type))
-    {
-      val_print_struct (type, embedded_offset, address, stream,
-			  recurse, val, options);
-      break;
-    }
+	/* Untagged unions are printed as if they are structs.
+	   Since the field bit positions overlap in the debuginfo,
+	   the code for printing a union is same as that for a struct,
+	   the only difference is that the input type will have overlapping
+	   fields.  */
+	if (rust_union_is_untagged (type))
+	  {
+	    val_print_struct (type, embedded_offset, address, stream,
+			      recurse, val, options);
+	    break;
+	  }
 
 	opts = *options;
 	opts.deref_ref = 0;
@@ -760,62 +760,62 @@ rust_print_type (struct type *type, const char *varstring,
 /* Print a struct or union typedef.  */
 static void
 rust_print_struct_def (struct type *type, const char *varstring,
-		                   struct ui_file *stream, int show, int level,
-		                   const struct type_print_options *flags)
+		       struct ui_file *stream, int show, int level,
+		       const struct type_print_options *flags)
 {
-	int is_tuple_struct, i;
+  int is_tuple_struct, i;
 
-	/* Print a tuple type simply.  */
-	if (rust_tuple_type_p (type))
-	  {
-	    fputs_filtered (TYPE_TAG_NAME (type), stream);
-	    return;
-	  }
+  /* Print a tuple type simply.  */
+  if (rust_tuple_type_p (type))
+    {
+      fputs_filtered (TYPE_TAG_NAME (type), stream);
+      return;
+    }
 
-	/* If we see a base class, delegate to C.  */
-	if (TYPE_N_BASECLASSES (type) > 0)
-	  c_print_type (type, varstring, stream, show, level, flags);
+  /* If we see a base class, delegate to C.  */
+  if (TYPE_N_BASECLASSES (type) > 0)
+    c_print_type (type, varstring, stream, show, level, flags);
 
   /* This code path is also used by unions.  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-	  fputs_filtered ("struct ", stream);
+    fputs_filtered ("struct ", stream);
   else
-	  fputs_filtered ("union ", stream);
+    fputs_filtered ("union ", stream);
 
-	if (TYPE_TAG_NAME (type) != NULL)
-	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+  if (TYPE_TAG_NAME (type) != NULL)
+    fputs_filtered (TYPE_TAG_NAME (type), stream);
 
-	is_tuple_struct = rust_tuple_struct_type_p (type);
+  is_tuple_struct = rust_tuple_struct_type_p (type);
 
-	if (TYPE_NFIELDS (type) == 0 && !rust_tuple_type_p (type))
-	  return;
-	fputs_filtered (is_tuple_struct ? " (\n" : " {\n", stream);
+  if (TYPE_NFIELDS (type) == 0 && !rust_tuple_type_p (type))
+    return;
+  fputs_filtered (is_tuple_struct ? " (\n" : " {\n", stream);
 
-	for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	  {
-	    const char *name;
+  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      const char *name;
 
-	    QUIT;
-	    if (field_is_static (&TYPE_FIELD (type, i)))
-	      continue;
+      QUIT;
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	continue;
 
-	    /* We'd like to print "pub" here as needed, but rustc
-	       doesn't emit the debuginfo, and our types don't have
-	       cplus_struct_type attached.  */
+      /* We'd like to print "pub" here as needed, but rustc
+	 doesn't emit the debuginfo, and our types don't have
+	 cplus_struct_type attached.  */
 
-	    /* For a tuple struct we print the type but nothing
-	       else.  */
-	    print_spaces_filtered (level + 2, stream);
-	    if (!is_tuple_struct)
-	      fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
+      /* For a tuple struct we print the type but nothing
+	 else.  */
+      print_spaces_filtered (level + 2, stream);
+      if (!is_tuple_struct)
+	fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
 
-	    rust_print_type (TYPE_FIELD_TYPE (type, i), NULL,
-			     stream, show - 1, level + 2,
-			     flags);
-	    fputs_filtered (",\n", stream);
-	  }
+      rust_print_type (TYPE_FIELD_TYPE (type, i), NULL,
+		       stream, show - 1, level + 2,
+		       flags);
+      fputs_filtered (",\n", stream);
+    }
 
-	fprintfi_filtered (level, stream, is_tuple_struct ? ")" : "}");
+  fprintfi_filtered (level, stream, is_tuple_struct ? ")" : "}");
 }
 
 /* la_print_typedef implementation for Rust.  */
@@ -906,7 +906,7 @@ rust_print_type (struct type *type, const char *varstring,
       break;
 
     case TYPE_CODE_STRUCT:
-    	rust_print_struct_def (type, varstring, stream, show, level, flags);
+      rust_print_struct_def (type, varstring, stream, show, level, flags);
       break;
 
     case TYPE_CODE_ENUM:
@@ -947,15 +947,15 @@ rust_print_type (struct type *type, const char *varstring,
 	/* Skip the discriminant field.  */
 	int skip_to = 1;
 
-  /* Unions and structs have the same syntax in Rust,
-     the only difference is that structs are declared with `struct`
-     and union with `union`. This difference is handled in the struct
-     printer.  */
-  if (rust_union_is_untagged (type))
-    {
-      rust_print_struct_def (type, varstring, stream, show, level, flags);
-      break;
-    }
+	/* Unions and structs have the same syntax in Rust,
+	   the only difference is that structs are declared with `struct`
+	   and union with `union`. This difference is handled in the struct
+	   printer.  */
+	if (rust_union_is_untagged (type))
+	  {
+	    rust_print_struct_def (type, varstring, stream, show, level, flags);
+	    break;
+	  }
 
 	fputs_filtered ("enum ", stream);
 	if (TYPE_TAG_NAME (type) != NULL)
