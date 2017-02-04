@@ -1,3 +1,8 @@
+2017-02-03  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21097:
+	* gdb.rust/simple.exp: Add new tests.
+
 2017-02-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.mi/mi-logging.exp: Add "redirect while already logging"

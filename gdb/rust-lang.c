@@ -977,6 +977,8 @@ rust_print_type (struct type *type, const char *varstring,
 		skip_to = 0;
 	      }
 	  }
+	else if (TYPE_NFIELDS (type) == 1)
+	  skip_to = 0;
 
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
 	  {
@@ -989,7 +991,9 @@ rust_print_type (struct type *type, const char *varstring,
 	    if (TYPE_NFIELDS (variant_type) > skip_to)
 	      {
 		int first = 1;
-		bool is_tuple = rust_tuple_variant_type_p (variant_type);
+		bool is_tuple = (TYPE_NFIELDS (type) == 1
+				 ? rust_tuple_struct_type_p (variant_type)
+				 : rust_tuple_variant_type_p (variant_type));
 		int j;
 
 		fputs_filtered (is_tuple ? "(" : "{", stream);

@@ -1,3 +1,9 @@
+2017-02-03  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21097:
+	* rust-lang.c (rust_print_type) <TYPE_CODE_UNION>: Handle enums
+	with a single member.
+
 2017-02-03  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-interp.c (cli_interp_base::cli_interp_base)
