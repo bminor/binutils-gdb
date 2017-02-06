@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.12
 
+* GDB now supports recording and replaying rdrand and rdseed Intel 64
+  instructions.
+
 * Building GDB and GDBserver now requires a C++11 compiler.
 
   For example, GCC 4.8 or later.

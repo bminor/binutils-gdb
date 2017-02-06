@@ -1,3 +1,9 @@
+2017-02-06  Luis Machado  <lgustavo@codesourcery.com>
+
+	* NEWS: Mention support for record/replay of Intel 64 rdrand and
+	rdseed instructions.
+	i386-tdep.c (i386_process_record): Handle Intel 64 rdrand and rseed.
+
 2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
 
 	PR tdep/20936

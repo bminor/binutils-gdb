@@ -24,6 +24,8 @@ typedef void (*testcase_ftype) (void);
 #include "insn-reverse-aarch64.c"
 #elif (defined __arm__)
 #include "insn-reverse-arm.c"
+#elif (defined __x86_64__) || (defined __i386__)
+#include "insn-reverse-x86.c"
 #else
 /* We get here if the current architecture being tested doesn't have any
    record/replay instruction decoding tests implemented.  */

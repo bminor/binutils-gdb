@@ -5501,14 +5501,36 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-    case 0x0fc7:    /* cmpxchg8b */
+    case 0x0fc7:    /* cmpxchg8b / rdrand / rdseed */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.mod == 3)
 	{
-	  ir.addr -= 2;
-	  opcode = opcode << 8 | ir.modrm;
-	  goto no_support;
+	  /* rdrand and rdseed use the 3 bits of the REG field of ModR/M as
+	     an extended opcode.  rdrand has bits 110 (/6) and rdseed
+	     has bits 111 (/7).  */
+	  if (ir.reg == 6 || ir.reg == 7)
+	    {
+	      /* The storage register is described by the 3 R/M bits, but the
+		 REX.B prefix may be used to give access to registers
+		 R8~R15.  In this case ir.rex_b + R/M will give us the register
+		 in the range R8~R15.
+
+		 REX.W may also be used to access 64-bit registers, but we
+		 already record entire registers and not just partial bits
+		 of them.  */
+	      I386_RECORD_FULL_ARCH_LIST_ADD_REG (ir.rex_b + ir.rm);
+	      /* These instructions also set conditional bits.  */
+	      I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+	      break;
+	    }
+	  else
+	    {
+	      /* We don't handle this particular instruction yet.  */
+	      ir.addr -= 2;
+	      opcode = opcode << 8 | ir.modrm;
+	      goto no_support;
+	    }
 	}
       I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
