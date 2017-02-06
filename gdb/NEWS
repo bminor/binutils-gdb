@@ -47,6 +47,8 @@
      end
    end
 
+* Target descriptions can now describe registers for sparc32 and sparc64.
+
 * New native configurations
 
 FreeBSD/mips			mips*-*-freebsd

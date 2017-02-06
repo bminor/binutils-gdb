@@ -1,3 +1,25 @@
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	Provide and use sparc32 and sparc64 target description XML files.
+	* features/sparc/sparc32-cp0.xml, features/sparc/sparc32-cpu.xml,
+	features/sparc/sparc32-fpu.xml: New files for sparc 32-bit.
+	* features/sparc/sparc64-cp0.xml, features/sparc/sparc64-cpu.xml,
+	features/sparc/sparc64-fpu.xml: New files for sparc 64-bit.
+	* features/sparc/sparc32-solaris.xml: New file.
+	* features/sparc/sparc64-solaris.xml: New file.
+	* features/sparc/sparc32-solaris.c: Generated.
+	* features/sparc/sparc64-solaris.c: Generated.
+	* sparc-tdep.h: Account for differences in target descriptions.
+	* sparc-tdep.c (sparc32_register_name): Use target provided registers.
+	(sparc32_register_type): Use target provided registers.
+	(validate_tdesc_registers): New function.
+	(sparc32_gdbarch_init): Use tdesc_has_registers.
+	Set pseudoregister functions.
+	* sparc64-tdep.c (sparc64_register_name): Use target provided registers.
+	(sparc64_register_type): Use target provided registers.
+	(sparc64_init_abi): Set pseudoregister functions.
+
 2017-02-03  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21097:

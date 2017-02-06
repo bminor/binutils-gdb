@@ -33,6 +33,7 @@
 #include "osabi.h"
 #include "regcache.h"
 #include "target.h"
+#include "target-descriptions.h"
 #include "value.h"
 
 #include "sparc-tdep.h"
@@ -304,6 +305,10 @@ sparc_structure_or_union_p (const struct type *type)
 #define SPARC32_CP0_REGISTERS \
   "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr"
 
+static const char *sparc_core_register_names[] = { SPARC_CORE_REGISTERS };
+static const char *sparc32_fpu_register_names[] = { SPARC32_FPU_REGISTERS };
+static const char *sparc32_cp0_register_names[] = { SPARC32_CP0_REGISTERS };
+
 static const char *sparc32_register_names[] =
 {
   SPARC_CORE_REGISTERS,
@@ -346,6 +351,9 @@ sparc32_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 static const char *
 sparc32_register_name (struct gdbarch *gdbarch, int regnum)
 {
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_name (gdbarch, regnum);
+
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     return sparc32_register_names[regnum];
 
@@ -431,6 +439,9 @@ sparc32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 static struct type *
 sparc32_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_type (gdbarch, regnum);
+
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
     return builtin_type (gdbarch)->builtin_float;
 
@@ -1686,11 +1697,36 @@ sparc_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 
+static int
+validate_tdesc_registers (const struct target_desc *tdesc,
+                          struct tdesc_arch_data *tdesc_data,
+                          const char *feature_name,
+                          const char *register_names[],
+                          unsigned int registers_num,
+                          unsigned int reg_start)
+{
+  int valid_p = 1;
+  const struct tdesc_feature *feature;
+
+  feature = tdesc_find_feature (tdesc, feature_name);
+  if (feature == NULL)
+    return 0;
+
+  for (unsigned int i = 0; i < registers_num; i++)
+    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+                                        reg_start + i,
+                                        register_names[i]);
+
+  return valid_p;
+}
+
 static struct gdbarch *
 sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
+  const struct target_desc *tdesc = info.target_desc;
   struct gdbarch *gdbarch;
+  int valid_p = 1;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -1704,6 +1740,10 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pc_regnum = SPARC32_PC_REGNUM;
   tdep->npc_regnum = SPARC32_NPC_REGNUM;
   tdep->step_trap = sparc_step_trap;
+  tdep->fpu_register_names = sparc32_fpu_register_names;
+  tdep->fpu_registers_num = ARRAY_SIZE (sparc32_fpu_register_names);
+  tdep->cp0_register_names = sparc32_cp0_register_names;
+  tdep->cp0_registers_num = ARRAY_SIZE (sparc32_cp0_register_names);
 
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, floatformats_sparc_quad);
@@ -1712,6 +1752,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, sparc32_register_name);
   set_gdbarch_register_type (gdbarch, sparc32_register_type);
   set_gdbarch_num_pseudo_regs (gdbarch, SPARC32_NUM_PSEUDO_REGS);
+  set_tdesc_pseudo_register_name (gdbarch, sparc32_pseudo_register_name);
+  set_tdesc_pseudo_register_type (gdbarch, sparc32_pseudo_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, sparc32_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, sparc32_pseudo_register_write);
 
@@ -1762,6 +1804,39 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   frame_unwind_append_unwinder (gdbarch, &sparc32_frame_unwind);
+
+  if (tdesc_has_registers (tdesc))
+    {
+      struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
+
+      /* Validate that the descriptor provides the mandatory registers
+         and allocate their numbers. */
+      valid_p &= validate_tdesc_registers (tdesc, tdesc_data,
+                                           "org.gnu.gdb.sparc.cpu",
+                                           sparc_core_register_names,
+                                           ARRAY_SIZE (sparc_core_register_names),
+                                           SPARC_G0_REGNUM);
+      valid_p &= validate_tdesc_registers (tdesc, tdesc_data,
+                                           "org.gnu.gdb.sparc.fpu",
+                                           tdep->fpu_register_names,
+                                           tdep->fpu_registers_num,
+                                           SPARC_F0_REGNUM);
+      valid_p &= validate_tdesc_registers (tdesc, tdesc_data,
+                                           "org.gnu.gdb.sparc.cp0",
+                                           tdep->cp0_register_names,
+                                           tdep->cp0_registers_num,
+                                           SPARC_F0_REGNUM + 
+                                           tdep->fpu_registers_num);
+      if (!valid_p)
+        {
+          tdesc_data_cleanup (tdesc_data);
+          return NULL;
+        }
+
+      /* Target description may have changed. */
+      info.tdep_info = tdesc_data;
+      tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+    }
 
   /* If we have register sets, enable the generic core file support.  */
   if (tdep->gregset)

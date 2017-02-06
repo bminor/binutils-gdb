@@ -1,3 +1,9 @@
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	* gdb.texinfo: (Standard Target Features): Document SPARC features.
+	(Sparc Features): New node.
+
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.texinfo (i386 Features): Add system segment registers

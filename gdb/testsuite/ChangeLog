@@ -1,3 +1,8 @@
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	* gdb.xml/tdesc-regs.exp: Provide sparc core registers for the tests.
+
 2017-02-03  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21097:

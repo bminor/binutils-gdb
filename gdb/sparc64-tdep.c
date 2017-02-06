@@ -31,6 +31,7 @@
 #include "objfiles.h"
 #include "osabi.h"
 #include "regcache.h"
+#include "target-descriptions.h"
 #include "target.h"
 #include "value.h"
 
@@ -241,6 +242,9 @@ sparc64_fprs_type (struct gdbarch *gdbarch)
   "fprs",                                                                 \
   "y"
 
+static const char *sparc64_fpu_register_names[] = { SPARC64_FPU_REGISTERS };
+static const char *sparc64_cp0_register_names[] = { SPARC64_CP0_REGISTERS };
+
 static const char *sparc64_register_names[] =
 {
   SPARC_CORE_REGISTERS,
@@ -290,6 +294,9 @@ sparc64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 static const char *
 sparc64_register_name (struct gdbarch *gdbarch, int regnum)
 {
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_name (gdbarch, regnum);
+
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     return sparc64_register_names[regnum];
 
@@ -328,6 +335,9 @@ sparc64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 static struct type *
 sparc64_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_type (gdbarch, regnum);
+
   /* Raw registers.  */
   if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
@@ -1222,6 +1232,10 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->pc_regnum = SPARC64_PC_REGNUM;
   tdep->npc_regnum = SPARC64_NPC_REGNUM;
+  tdep->fpu_register_names = sparc64_fpu_register_names;
+  tdep->fpu_registers_num = ARRAY_SIZE (sparc64_fpu_register_names);
+  tdep->cp0_register_names = sparc64_cp0_register_names;
+  tdep->cp0_registers_num = ARRAY_SIZE (sparc64_cp0_register_names);
 
   /* This is what all the fuss is about.  */
   set_gdbarch_long_bit (gdbarch, 64);
@@ -1232,6 +1246,8 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_name (gdbarch, sparc64_register_name);
   set_gdbarch_register_type (gdbarch, sparc64_register_type);
   set_gdbarch_num_pseudo_regs (gdbarch, SPARC64_NUM_PSEUDO_REGS);
+  set_tdesc_pseudo_register_name (gdbarch, sparc64_pseudo_register_name);
+  set_tdesc_pseudo_register_type (gdbarch, sparc64_pseudo_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, sparc64_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, sparc64_pseudo_register_write);
 

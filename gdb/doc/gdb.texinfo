@@ -41030,6 +41030,7 @@ registers using the capitalization used in the description.
 * Nios II Features::
 * PowerPC Features::
 * S/390 and System z Features::
+* Sparc Features::
 * TIC6x Features::
 @end menu
 
@@ -41380,6 +41381,48 @@ through @samp{f15} to present the 128-bit wide vector registers
 @samp{v0} through @samp{v15}.  In addition, this feature should
 contain the 128-bit wide vector registers @samp{v16} through
 @samp{v31}.
+
+@node Sparc Features
+@subsection Sparc Features
+@cindex target descriptions, sparc32 features
+@cindex target descriptions, sparc64 features
+The @samp{org.gnu.gdb.sparc.cpu} feature is required for sparc32/sparc64
+targets.  It should describe the following registers:
+
+@itemize @minus
+@item
+@samp{g0} through @samp{g7}
+@item
+@samp{o0} through @samp{o7}
+@item
+@samp{l0} through @samp{l7}
+@item
+@samp{i0} through @samp{i7}
+@end itemize
+
+They may be 32-bit or 64-bit depending on the target.
+
+Also the @samp{org.gnu.gdb.sparc.fpu} feature is required for sparc32/sparc64
+targets.  It should describe the following registers:
+
+@itemize @minus
+@item
+@samp{f0} through @samp{f31}
+@item
+@samp{f32} through @samp{f62} for sparc64
+@end itemize
+
+The @samp{org.gnu.gdb.sparc.cp0} feature is required for sparc32/sparc64
+targets.  It should describe the following registers:
+
+@itemize @minus
+@item
+@samp{y}, @samp{psr}, @samp{wim}, @samp{tbr}, @samp{pc}, @samp{npc},
+@samp{fsr}, and @samp{csr} for sparc32
+@item
+@samp{pc}, @samp{npc}, @samp{state}, @samp{fsr}, @samp{fprs}, and @samp{y}
+for sparc64
+@end itemize
 
 @node TIC6x Features
 @subsection TMS320C6x Features
