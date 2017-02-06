@@ -51,6 +51,33 @@ struct arc_operand_iterator
   const unsigned char *opidx;
 };
 
+/* A private data used by ARC decoder.  */
+struct arc_disassemble_info
+{
+  /* The current disassembled arc opcode.  */
+  const struct arc_opcode *opcode;
+
+  /* Instruction length w/o limm field.  */
+  unsigned insn_len;
+
+  /* TRUE if we have limm.  */
+  bfd_boolean limm_p;
+
+  /* LIMM value, if exists.  */
+  unsigned limm;
+
+  /* Condition code, if exists.  */
+  unsigned condition_code;
+
+  /* Writeback mode.  */
+  unsigned writeback_mode;
+
+  /* Number of operands.  */
+  unsigned operands_count;
+
+  struct arc_insn_operand operands[MAX_INSN_ARGS];
+};
+
 /* Globals variables.  */
 
 static const char * const regnames[64] =
@@ -107,6 +134,20 @@ static linkclass decodelist = NULL;
 #define OPCODE_32BIT_INSN(word)	(BITS ((word), 27, 31))
 
 /* Functions implementation.  */
+
+/* Initialize private data.  */
+static bfd_boolean
+init_arc_disasm_info (struct disassemble_info *info)
+{
+  struct arc_disassemble_info *arc_infop
+    = calloc (sizeof (*arc_infop), 1);
+
+  if (arc_infop == NULL)
+    return FALSE;
+
+  info->private_data = arc_infop;
+  return TRUE;
+}
 
 /* Add a new element to the decode list.  */
 
@@ -280,6 +321,10 @@ find_format_from_table (struct disassemble_info *info,
 		continue;
 	    }
 
+	  /* Check for the implicit flags.  */
+	  if (cl_flags->flag_class & F_CLASS_IMPLICIT)
+	    continue;
+
 	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	    {
 	      const struct arc_flag_operand *flg_operand =
@@ -367,6 +412,7 @@ find_format (bfd_vma                       memaddr,
   bfd_boolean needs_limm;
   const extInstruction_t *einsn, *i;
   unsigned limm = 0;
+  struct arc_disassemble_info *arc_infop = info->private_data;
 
   /* First, try the extension instructions.  */
   if (*insn_len == 4)
@@ -422,6 +468,12 @@ An error occured while generating the extension instruction operations");
     }
 
   *opcode_result = opcode;
+
+  /* Update private data.  */
+  arc_infop->opcode = opcode;
+  arc_infop->limm = (needs_limm) ? limm : 0;
+  arc_infop->limm_p = needs_limm;
+
   return TRUE;
 }
 
@@ -432,6 +484,7 @@ print_flags (const struct arc_opcode *opcode,
 {
   const unsigned char *flgidx;
   unsigned int value;
+  struct arc_disassemble_info *arc_infop = info->private_data;
 
   /* Now extract and print the flags.  */
   for (flgidx = opcode->flags; *flgidx; flgidx++)
@@ -458,6 +511,18 @@ print_flags (const struct arc_opcode *opcode,
 	{
 	  const struct arc_flag_operand *flg_operand =
 	    &arc_flag_operands[*flgopridx];
+
+	  /* Implicit flags are only used for the insn decoder.  */
+	  if (cl_flags->flag_class & F_CLASS_IMPLICIT)
+	    {
+	      if (cl_flags->flag_class & F_CLASS_COND)
+		arc_infop->condition_code = flg_operand->code;
+	      else if (cl_flags->flag_class & F_CLASS_WB)
+		arc_infop->writeback_mode = flg_operand->code;
+	      else if (cl_flags->flag_class & F_CLASS_ZZ)
+		info->data_size = flg_operand->code;
+	      continue;
+	    }
 
 	  if (!flg_operand->favail)
 	    continue;
@@ -496,7 +561,12 @@ print_flags (const struct arc_opcode *opcode,
 		    info->insn_type = dis_condjsr;
 		  else if (info->insn_type == dis_branch)
 		    info->insn_type = dis_condbranch;
+		  arc_infop->condition_code = flg_operand->code;
 		}
+
+	      /* Check for the write back modes.  */
+	      if (cl_flags->flag_class & F_CLASS_WB)
+		arc_infop->writeback_mode = flg_operand->code;
 
 	      (*info->fprintf_func) (info->stream, "%s", flg_operand->name);
 	    }
@@ -733,7 +803,15 @@ arc_opcode_to_insn_type (const struct arc_opcode *opcode)
   switch (opcode->insn_class)
     {
     case BRANCH:
+    case BBIT0:
+    case BBIT1:
+    case BI:
+    case BIH:
+    case BRCC:
+    case EI:
+    case JLI:
     case JUMP:
+    case LOOP:
       if (!strncmp (opcode->name, "bl", 2)
 	  || !strncmp (opcode->name, "jl", 2))
 	{
@@ -753,7 +831,13 @@ arc_opcode_to_insn_type (const struct arc_opcode *opcode)
     case LOAD:
     case STORE:
     case MEMORY:
+    case ENTER:
+    case PUSH:
+    case POP:
       insn_type = dis_dref;
+      break;
+    case LEAVE:
+      insn_type = dis_branch;
       break;
     default:
       insn_type = dis_nonbranch;
@@ -783,6 +867,7 @@ print_insn_arc (bfd_vma memaddr,
   int value;
   struct arc_operand_iterator iter;
   Elf_Internal_Ehdr *header = NULL;
+  struct arc_disassemble_info *arc_infop;
 
   if (info->disassembler_options)
     {
@@ -791,6 +876,9 @@ print_insn_arc (bfd_vma memaddr,
       /* Avoid repeated parsing of the options.  */
       info->disassembler_options = NULL;
     }
+
+  if (info->private_data == NULL && !init_arc_disasm_info (info))
+    return -1;
 
   memset (&iter, 0, sizeof (iter));
   highbyte  = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
@@ -813,7 +901,7 @@ print_insn_arc (bfd_vma memaddr,
     default:
       isa_mask = ARC_OPCODE_ARCv2EM;
       /* TODO: Perhaps remove defitinion of header since it is only used at
-         this location.  */
+	 this location.  */
       if (header != NULL
 	  && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
 	{
@@ -899,6 +987,8 @@ print_insn_arc (bfd_vma memaddr,
 
   insn_len = arc_insn_length (buffer[highbyte], buffer[lowbyte], info);
   pr_debug ("instruction length = %d bytes\n", insn_len);
+  arc_infop = info->private_data;
+  arc_infop->insn_len = insn_len;
 
   switch (insn_len)
     {
@@ -957,7 +1047,7 @@ print_insn_arc (bfd_vma memaddr,
   /* Set some defaults for the insn info.  */
   info->insn_info_valid    = 1;
   info->branch_delay_insns = 0;
-  info->data_size	   = 0;
+  info->data_size	   = 4;
   info->insn_type	   = dis_nonbranch;
   info->target		   = 0;
   info->target2		   = 0;
@@ -1016,6 +1106,7 @@ print_insn_arc (bfd_vma memaddr,
 
   need_comma = FALSE;
   open_braket = FALSE;
+  arc_infop->operands_count = 0;
 
   /* Now extract and print the operands.  */
   operand = NULL;
@@ -1034,14 +1125,14 @@ print_insn_arc (bfd_vma memaddr,
 
       if ((operand->flags & ARC_OPERAND_IGNORE)
 	  && (operand->flags & ARC_OPERAND_IR)
-          && value == -1)
+	  && value == -1)
 	continue;
 
       if (operand->flags & ARC_OPERAND_COLON)
-        {
-          (*info->fprintf_func) (info->stream, ":");
-          continue;
-        }
+	{
+	  (*info->fprintf_func) (info->stream, ":");
+	  continue;
+	}
 
       if (need_comma)
 	(*info->fprintf_func) (info->stream, ",");
@@ -1106,12 +1197,12 @@ print_insn_arc (bfd_vma memaddr,
 	    (*info->fprintf_func) (info->stream, "%d", value);
 	}
       else if (operand->flags & ARC_OPERAND_ADDRTYPE)
-        {
-          const char *addrtype = get_addrtype (value);
-          (*info->fprintf_func) (info->stream, "%s", addrtype);
-          /* A colon follow an address type.  */
-          need_comma = FALSE;
-        }
+	{
+	  const char *addrtype = get_addrtype (value);
+	  (*info->fprintf_func) (info->stream, "%s", addrtype);
+	  /* A colon follow an address type.  */
+	  need_comma = FALSE;
+	}
       else
 	{
 	  if (operand->flags & ARC_OPERAND_TRUNCATE
@@ -1129,6 +1220,24 @@ print_insn_arc (bfd_vma memaddr,
 		(*info->fprintf_func) (info->stream, "%#x", value);
 	    }
 	}
+
+      if (operand->flags & ARC_OPERAND_LIMM)
+	{
+	  arc_infop->operands[arc_infop->operands_count].kind
+	    = ARC_OPERAND_KIND_LIMM;
+	  /* It is not important to have exactly the LIMM indicator
+	     here.  */
+	  arc_infop->operands[arc_infop->operands_count].value = 63;
+	}
+      else
+	{
+	  arc_infop->operands[arc_infop->operands_count].value = value;
+	  arc_infop->operands[arc_infop->operands_count].kind
+	    = (operand->flags & ARC_OPERAND_IR
+	       ? ARC_OPERAND_KIND_REG
+	       : ARC_OPERAND_KIND_SHIMM);
+	}
+      arc_infop->operands_count ++;
     }
 
   return insn_len;
@@ -1150,30 +1259,6 @@ arc_get_disassembler (bfd *abfd)
     }
 
   return print_insn_arc;
-}
-
-/* Disassemble ARC instructions.  Used by debugger.  */
-
-struct arcDisState
-arcAnalyzeInstr (bfd_vma memaddr,
-		 struct disassemble_info *info)
-{
-  struct arcDisState ret;
-  memset (&ret, 0, sizeof (struct arcDisState));
-
-  ret.instructionLen = print_insn_arc (memaddr, info);
-
-#if 0
-  ret.words[0] = insn[0];
-  ret.words[1] = insn[1];
-  ret._this = &ret;
-  ret.coreRegName = _coreRegName;
-  ret.auxRegName = _auxRegName;
-  ret.condCodeName = _condCodeName;
-  ret.instName = _instName;
-#endif
-
-  return ret;
 }
 
 void
@@ -1199,6 +1284,58 @@ with -M switch (multiple options should be separated by commas):\n"));
   fpud            Recognize double precision FPU instructions.\n"));
 }
 
+void arc_insn_decode (bfd_vma addr,
+		      struct disassemble_info *info,
+		      disassembler_ftype disasm_func,
+		      struct arc_instruction *insn)
+{
+  const struct arc_opcode *opcode;
+  struct arc_disassemble_info *arc_infop;
+
+  /* Ensure that insn would be in the reset state.  */
+  memset (insn, 0, sizeof (struct arc_instruction));
+
+  /* There was an error when disassembling, for example memory read error.  */
+  if (disasm_func (addr, info) < 0)
+    {
+      insn->valid = FALSE;
+      return;
+    }
+
+  assert (info->private_data != NULL);
+  arc_infop = info->private_data;
+
+  insn->length  = arc_infop->insn_len;;
+  insn->address = addr;
+
+  /* Quick exit if memory at this address is not an instruction.  */
+  if (info->insn_type == dis_noninsn)
+    {
+      insn->valid = FALSE;
+      return;
+    }
+
+  insn->valid = TRUE;
+
+  opcode = (const struct arc_opcode *) arc_infop->opcode;
+  insn->insn_class = opcode->insn_class;
+  insn->limm_value = arc_infop->limm;
+  insn->limm_p     = arc_infop->limm_p;
+
+  insn->is_control_flow = (info->insn_type == dis_branch
+			   || info->insn_type == dis_condbranch
+			   || info->insn_type == dis_jsr
+			   || info->insn_type == dis_condjsr);
+
+  insn->has_delay_slot = info->branch_delay_insns;
+  insn->writeback_mode
+    = (enum arc_ldst_writeback_mode) arc_infop->writeback_mode;
+  insn->data_size_mode = info->data_size;
+  insn->condition_code = arc_infop->condition_code;
+  memcpy (insn->operands, arc_infop->operands,
+	  sizeof (struct arc_insn_operand) * MAX_INSN_ARGS);
+  insn->operands_count = arc_infop->operands_count;
+}
 
 /* Local variables:
    eval: (c-set-style "gnu")

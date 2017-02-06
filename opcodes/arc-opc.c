@@ -1290,9 +1290,11 @@ const struct arc_flag_operand arc_flag_operands[] =
   { "h", 2, 2, 7, 1 },
 #define F_H17    (F_H7 + 1)
   { "h", 2, 2, 17, 1 },
+#define F_SIZED  (F_H17 + 1)
+  { "dd", 8, 0, 0, 0 },  /* Fake.  */
 
   /* Fake Flags.  */
-#define F_NE   (F_H17 + 1)
+#define F_NE   (F_SIZED + 1)
   { "ne", 0, 0, 0, 1 },
 
   /* ARC NPS400 Support: See comment near head of file.  */
@@ -1398,7 +1400,52 @@ const struct arc_flag_class arc_flag_classes[] =
 #define C_EMPTY     0
   { F_CLASS_NONE, { F_NULL } },
 
-#define C_CC	    (C_EMPTY + 1)
+#define C_CC_EQ     (C_EMPTY + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_EQUAL, F_NULL} },
+
+#define C_CC_GE     (C_CC_EQ + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_GE, F_NULL} },
+
+#define C_CC_GT     (C_CC_GE + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_GT, F_NULL} },
+
+#define C_CC_HI     (C_CC_GT + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_HI, F_NULL} },
+
+#define C_CC_HS     (C_CC_HI + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_NOTCARRY, F_NULL} },
+
+#define C_CC_LE     (C_CC_HS + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_LE, F_NULL} },
+
+#define C_CC_LO     (C_CC_LE + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_CARRY, F_NULL} },
+
+#define C_CC_LS     (C_CC_LO + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_LS, F_NULL} },
+
+#define C_CC_LT     (C_CC_LS + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_LT, F_NULL} },
+
+#define C_CC_NE     (C_CC_LT + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_COND, {F_NOTEQUAL, F_NULL} },
+
+#define C_AA_AB     (C_CC_NE + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_WB, {F_AB3, F_NULL} },
+
+#define C_AA_AW     (C_AA_AB + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_WB, {F_AW3, F_NULL} },
+
+#define C_ZZ_D      (C_AA_AW + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_ZZ, {F_SIZED, F_NULL} },
+
+#define C_ZZ_H      (C_ZZ_D + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_ZZ, {F_H1, F_NULL} },
+
+#define C_ZZ_B      (C_ZZ_H + 1)
+  {F_CLASS_IMPLICIT | F_CLASS_ZZ, {F_SIZEB1, F_NULL} },
+
+#define C_CC	    (C_ZZ_B + 1)
   { F_CLASS_OPTIONAL | F_CLASS_EXTEND | F_CLASS_COND,
     { F_ALWAYS, F_RA, F_EQUAL, F_ZERO, F_NOTEQUAL,
       F_NOTZERO, F_POZITIVE, F_PL, F_NEGATIVE, F_MINUS,
@@ -1409,13 +1456,13 @@ const struct arc_flag_class arc_flag_classes[] =
 
 #define C_AA_ADDR3  (C_CC + 1)
 #define C_AA27	    (C_CC + 1)
-  { F_CLASS_OPTIONAL, { F_A3, F_AW3, F_AB3, F_AS3, F_NULL } },
+  { F_CLASS_OPTIONAL | F_CLASS_WB, { F_A3, F_AW3, F_AB3, F_AS3, F_NULL } },
 #define C_AA_ADDR9  (C_AA_ADDR3 + 1)
 #define C_AA21	     (C_AA_ADDR3 + 1)
-  { F_CLASS_OPTIONAL, { F_A9, F_AW9, F_AB9, F_AS9, F_NULL } },
+  { F_CLASS_OPTIONAL | F_CLASS_WB, { F_A9, F_AW9, F_AB9, F_AS9, F_NULL } },
 #define C_AA_ADDR22 (C_AA_ADDR9 + 1)
 #define C_AA8	   (C_AA_ADDR9 + 1)
-  { F_CLASS_OPTIONAL, { F_A22, F_AW22, F_AB22, F_AS22, F_NULL } },
+  { F_CLASS_OPTIONAL | F_CLASS_WB, { F_A22, F_AW22, F_AB22, F_AS22, F_NULL } },
 
 #define C_F	    (C_AA_ADDR22 + 1)
   { F_CLASS_OPTIONAL, { F_FLAG, F_NULL } },
