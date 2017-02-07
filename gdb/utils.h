@@ -132,8 +132,13 @@ extern char *gdb_abspath (const char *);
 extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 				 int flags);
 
-extern void substitute_path_component (char **stringp, const char *from,
-				       const char *to);
+/* Substitute all occurences of string FROM by string TO in STR.  FROM
+   needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be
+   located at the start or end of STR).  */
+
+extern void substitute_path_component (std::string &str,
+				       const std::string &from,
+				       const std::string &to);
 
 char *ldirname (const char *filename);
 
