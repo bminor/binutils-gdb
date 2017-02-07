@@ -1508,12 +1508,15 @@ proc run_ld_link_exec_tests { ldtests args } {
 #  4:action and options.
 #  5:name of output file
 #  6:language (optional)
-#  7:linker warnings (optional)
 #
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
 # nm: Apply nm options on result.  Compare with regex (last arg).
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
+# warning: Check linker output against regex (last arg).
+# error: Like 'warning' but checking output in error case.
+# warning_output: Check linker output against regex in a file (last arg).
+# error_output: Like 'warning_output' but checking output in error case.
 #
 proc run_cc_link_tests { ldtests } {
     global nm
@@ -1544,10 +1547,11 @@ proc run_cc_link_tests { ldtests } {
 	set actions [lindex $testitem 4]
 	set binfile tmpdir/[lindex $testitem 5]
 	set lang [lindex $testitem 6]
-	set warnings [lindex $testitem 7]
 	set objfiles {}
 	set is_unresolved 0
 	set failed 0
+	set check_ld(terminal) 0
+	set check_ld(source) ""
 
 	#verbose -log "testname  is $testname"
 	#verbose -log "ldflags   is $ldflags"
@@ -1556,7 +1560,37 @@ proc run_cc_link_tests { ldtests } {
 	#verbose -log "actions   is $actions"
 	#verbose -log "binfile   is $binfile"
 	#verbose -log "lang      is $lang"
-	#verbose -log "warnings  is $warnings"
+
+	foreach actionlist $actions {
+	    set action [lindex $actionlist 0]
+	    set progopts [lindex $actionlist 1]
+
+	    # Find actions related to error/warning processing.
+	    switch -- $action {
+	        error
+	        {
+	            set check_ld(source) "regexp"
+	            set check_ld(regexp) $progopts
+	            set check_ld(terminal) 1
+	        }
+	        warning
+	        {
+	            set check_ld(source) "regexp"
+	            set check_ld(regexp) $progopts
+	        }
+	        error_output
+	        {
+	            set check_ld(source) "file"
+	            set check_ld(file) $progopts
+	            set check_ld(terminal) 1
+	        }
+	        warning_output
+	        {
+	            set check_ld(source) "file"
+	            set check_ld(file) $progopts
+	        }
+	    }
+	}
 
 	# Compile each file in the test.
 	foreach src_file $src_files {
@@ -1598,18 +1632,35 @@ proc run_cc_link_tests { ldtests } {
 		set failed 1
 	    }
 	} else {
-	    if { ![ld_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"] } {
-		set failed 1
-	    }
+	    ld_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"
+	    set ld_output "$exec_output"
 
-	    # Check if exec_output is expected.
-	    if { $warnings != "" } then {
-		verbose -log "returned with: <$exec_output>, expected: <$warnings>"
-		if { [regexp $warnings $exec_output] } then {
-		    set failed 0
-		} else {
+	    if { $check_ld(source) == "regexp" } then {
+		# Match output against regexp argument.
+		verbose -log "returned with: <$ld_output>, expected: <$check_ld(regexp)>"
+		if { ![regexp $check_ld(regexp) $ld_output] } then {
 		    set failed 1
 		}
+	    } elseif { $check_ld(source) == "file" } then {
+		# Match output against patterns in a file.
+		set_file_contents "tmpdir/ld.messages" "$ld_output"
+		verbose "ld.messages has '[file_contents tmpdir/ld.messages]'"
+		if { [regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$check_ld(file)"] } then {
+		    verbose "output is $ld_output" 2
+		    set failed 1
+		}
+	    }
+
+	    if { $check_ld(source) != "" } then {
+                if { $ld_output == "" } then {
+                    verbose -log "Linker was expected to give error or warning"
+                    set failed 1
+                }
+	    } else {
+                if { $ld_output != "" } then {
+                    verbose -log "Unexpected linker warning or error"
+                    set failed 1
+                }
 	    }
 	}
 
@@ -1629,6 +1680,10 @@ proc run_cc_link_tests { ldtests } {
 		        { set dump_prog $nm }
 		    readelf
 		        { set dump_prog $READELF }
+		    error {}
+		    warning {}
+		    error_output {}
+		    warning_output {}
 		    default
 			{
 			    perror "Unrecognized action $action"

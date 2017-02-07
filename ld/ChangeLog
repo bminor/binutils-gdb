@@ -1,3 +1,12 @@
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Add warning,
+	error, warning_output, and error_output actions.  Remove separate
+	warnings parameter.
+	* testsuite/ld-elf/shared.exp (build_tests): Updated to use
+	'warning' action.
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Likewise.
+
 2017-02-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/check-ptr-eq.c (check_ptr_eq): Change params

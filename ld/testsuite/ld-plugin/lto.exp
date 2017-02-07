@@ -154,7 +154,8 @@ set lto_link_tests [list \
    {pr12760b.c} {} "libpr12760.a"] \
   [list "PR ld/12760" \
    "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12760a.o -Wl,--start-group tmpdir/libpr12760.a -Wl,--end-group" "" \
-   {dummy.c} {} "pr12760.exe" "c" "pr12760a.c:6: warning: Bad \\.?bar"] \
+   {dummy.c} {{warning "pr12760a.c:6: warning: Bad \\.?bar"}} \
+   "pr12760.exe" "c"] \
   [list "Build libpr13183.a" \
    "-T" "-flto -O2 $lto_fat" \
    {pr13183a.c} {} "libpr13183.a"] \
@@ -205,7 +206,8 @@ set lto_link_tests [list \
    {pr20267b.c} {} "libpr20267b.a"] \
   [list "Build pr20321" \
    "-flto -Wl,-plugin,$plug_so" "-flto" \
-   {pr20321.c} {} "pr20321" "c" ".*: duplicated plugin"] \
+   {pr20321.c} {{warning ".*: duplicated plugin"}} \
+   "pr20321" "c"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {
