@@ -1,3 +1,11 @@
+2017-02-06  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Fix sparc64 dynamic relocation processing to use the dynamic
+        symbol count.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Use 'dynamic'
+	to determine if bfd_get_symcount() or bfd_get_dynamic_symcount()
+	should be used.
+
 2017-02-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 21096
