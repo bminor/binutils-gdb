@@ -39,12 +39,6 @@
 
 extern void _initialize_typeprint (void);
 
-static void ptype_command (char *, int);
-
-static void whatis_command (char *, int);
-
-static void whatis_exp (char *, int);
-
 const struct type_print_options type_print_raw_options =
 {
   1,				/* raw */
@@ -389,7 +383,7 @@ type_to_string (struct type *type)
 /* Print type of EXP, or last thing in value history if EXP == NULL.
    show is passed to type_print.  */
 
-static void
+void
 whatis_exp (char *exp, int show)
 {
   struct value *val;

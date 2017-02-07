@@ -1093,6 +1093,7 @@ SFILES = \
 	jit.c \
 	language.c \
 	linespec.c \
+	lk-cmds.c \
 	lk-lists.c \
 	lk-low.c \
 	lk-modules.c \
@@ -1343,6 +1344,7 @@ HFILES_NO_SRCDIR = \
 	linux-nat.h \
 	linux-record.h \
 	linux-tdep.h \
+	lk-cmds.h \
 	lk-lists.h \
 	lk-low.h \
 	lk-modules.h \
@@ -1706,6 +1708,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	jit.o \
 	language.o \
 	linespec.o \
+	lk-cmds.o \
 	lk-lists.o \
 	lk-modules.o \
 	location.o \
@@ -2540,6 +2543,7 @@ ALLDEPFILES = \
 	linux-fork.c \
 	linux-record.c \
 	linux-tdep.c \
+	lk-cmds.c \
 	lk-lists.c \
 	lk-low.c \
 	lk-modules.c \
