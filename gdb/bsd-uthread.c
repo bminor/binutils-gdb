@@ -45,10 +45,10 @@ static struct gdbarch_data *bsd_uthread_data;
 struct bsd_uthread_ops
 {
   /* Supply registers for an inactive thread to a register cache.  */
-  void (*supply_uthread)(struct regcache *, int, CORE_ADDR);
+  bsd_uthread_supply_register_ftype supply_uthread;
 
   /* Collect registers for an inactive thread from a register cache.  */
-  void (*collect_uthread)(const struct regcache *, int, CORE_ADDR);
+  bsd_uthread_collect_register_ftype collect_uthread;
 };
 
 static void *
@@ -60,32 +60,28 @@ bsd_uthread_init (struct obstack *obstack)
   return ops;
 }
 
-/* Set the function that supplies registers from an inactive thread
-   for architecture GDBARCH to SUPPLY_UTHREAD.  */
+/* See bsd-uthread.h.  */
 
 void
 bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
-				void (*supply_uthread) (struct regcache *,
-							int, CORE_ADDR))
+				bsd_uthread_supply_register_ftype func)
 {
   struct bsd_uthread_ops *ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
 
-  ops->supply_uthread = supply_uthread;
+  ops->supply_uthread = func;
 }
 
-/* Set the function that collects registers for an inactive thread for
-   architecture GDBARCH to SUPPLY_UTHREAD.  */
+/* See bsd-uthread.h.  */
 
 void
 bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
-			 void (*collect_uthread) (const struct regcache *,
-						  int, CORE_ADDR))
+				 bsd_uthread_collect_register_ftype func)
 {
   struct bsd_uthread_ops *ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
 
-  ops->collect_uthread = collect_uthread;
+  ops->collect_uthread = func;
 }
 
 /* Magic number to help recognize a valid thread structure.  */

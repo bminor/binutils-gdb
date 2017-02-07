@@ -20,19 +20,22 @@
 #ifndef BSD_UTHREAD_H
 #define BSD_UTHREAD_H 1
 
-/* Set the function that supplies registers for an inactive thread for
-   architecture GDBARCH to SUPPLY_UTHREAD.  */
+typedef void (*bsd_uthread_supply_register_ftype) (struct regcache *, int,
+						   CORE_ADDR);
+typedef void (*bsd_uthread_collect_register_ftype) (const struct regcache *,
+						    int, CORE_ADDR);
 
-extern void bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
-				    void (*supply_uthread) (struct regcache *,
-							    int, CORE_ADDR));
+/* Set the function that supplies registers for an inactive thread for
+   architecture GDBARCH to FUNC.  */
+
+extern void bsd_uthread_set_supply_uthread
+  (struct gdbarch *gdbarch, bsd_uthread_supply_register_ftype func);
 
 
 /* Set the function that collects registers for an inactive thread for
-   architecture GDBARCH to SUPPLY_UTHREAD.  */
+   architecture GDBARCH to FUNC.  */
 
-extern void bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
-			     void (*collect_uthread) (const struct regcache *,
-						      int, CORE_ADDR));
+extern void bsd_uthread_set_collect_uthread
+  (struct gdbarch *gdbarch, bsd_uthread_collect_register_ftype func);
 
 #endif /* bsd-uthread.h */
