@@ -3179,6 +3179,52 @@ substitute_path_component (std::string &str, const std::string &from,
     }
 }
 
+/* Approximate length of final path.  Helper for concat_path.  */
+
+static inline unsigned long
+approx_path_length (std::initializer_list<std::string> args,
+		   std::string dir_separator)
+{
+  size_t length = 0;
+
+  for (const std::string &arg: args)
+      length += arg.length () + dir_separator.length ();
+
+  return length;
+}
+
+/* See utils.h.  */
+
+std::string
+_concat_path (std::initializer_list<std::string> args,
+	      std::string dir_separator)
+{
+  std::string dst;
+  dst.reserve (approx_path_length (args, dir_separator));
+
+  for (const std::string &arg : args)
+    {
+      if (arg.empty ())
+	continue;
+
+      if (startswith (arg.c_str (), dir_separator.c_str ())
+	  && endswith (dst.c_str (), dir_separator.c_str ()))
+	dst.erase (dst.length () - dir_separator.length (),
+		   dir_separator.length ());
+
+      else if (!dst.empty ()
+	       && !startswith (arg.c_str (), dir_separator.c_str ())
+	       && !endswith (dst.c_str (), dir_separator.c_str ())
+	       && dst != TARGET_SYSROOT_PREFIX)
+	dst += dir_separator;
+
+      dst += arg;
+    }
+
+  dst.shrink_to_fit ();
+  return dst;
+}
+
 #ifdef HAVE_WAITPID
 
 #ifdef SIGALRM

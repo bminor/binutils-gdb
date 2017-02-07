@@ -83,6 +83,17 @@ startswith (const char *string, const char *pattern)
   return strncmp (string, pattern, strlen (pattern)) == 0;
 }
 
+/* Return non-zero if the end of STRING matches PATTERN, zero
+   otherwise.  */
+
+static inline int
+endswith (const char *string, const char *pattern)
+{
+  return (strlen (string) > strlen (pattern)
+	  && strncmp (string + strlen (string) - strlen (pattern), pattern,
+		      strlen (pattern)) == 0);
+}
+
 ULONGEST strtoulst (const char *num, const char **trailer, int base);
 
 /* Skip leading whitespace characters in INP, returning an updated
