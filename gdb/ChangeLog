@@ -1,3 +1,8 @@
+2017-02-07  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc32_gdbarch_init): Do not place a + operator
+	at the end of the line.  Avoids an ARI warning.
+
 2017-02-06  Luis Machado  <lgustavo@codesourcery.com>
 
 	* NEWS: Mention support for record/replay of Intel 64 rdrand and

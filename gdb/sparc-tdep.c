@@ -1825,8 +1825,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                            "org.gnu.gdb.sparc.cp0",
                                            tdep->cp0_register_names,
                                            tdep->cp0_registers_num,
-                                           SPARC_F0_REGNUM + 
-                                           tdep->fpu_registers_num);
+                                           SPARC_F0_REGNUM
+                                           + tdep->fpu_registers_num);
       if (!valid_p)
         {
           tdesc_data_cleanup (tdesc_data);
