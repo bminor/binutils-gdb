@@ -31,6 +31,7 @@
 #include "bsd-uthread.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
+#include "inferior.h"
 
 /* Support for signal handlers.  */
 
@@ -226,11 +227,13 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 static void
-amd64fbsd_supply_uthread (struct regcache *regcache,
+amd64fbsd_supply_uthread (struct regcache *regcache, ptid_t ptid,
 			  int regnum, CORE_ADDR addr)
 {
   gdb_byte buf[8];
   int i;
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -243,14 +246,18 @@ amd64fbsd_supply_uthread (struct regcache *regcache,
 	  regcache_raw_supply (regcache, i, buf);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 
 static void
-amd64fbsd_collect_uthread (const struct regcache *regcache,
+amd64fbsd_collect_uthread (const struct regcache *regcache, ptid_t ptid,
 			   int regnum, CORE_ADDR addr)
 {
   gdb_byte buf[8];
   int i;
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -263,6 +270,8 @@ amd64fbsd_collect_uthread (const struct regcache *regcache,
 	  write_memory (addr + amd64fbsd_jmp_buf_reg_offset[i], buf, 8);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 
 static void

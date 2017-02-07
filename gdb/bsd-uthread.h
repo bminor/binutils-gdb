@@ -20,10 +20,10 @@
 #ifndef BSD_UTHREAD_H
 #define BSD_UTHREAD_H 1
 
-typedef void (*bsd_uthread_supply_register_ftype) (struct regcache *, int,
-						   CORE_ADDR);
+typedef void (*bsd_uthread_supply_register_ftype) (struct regcache *, ptid_t,
+						   int, CORE_ADDR);
 typedef void (*bsd_uthread_collect_register_ftype) (const struct regcache *,
-						    int, CORE_ADDR);
+						    ptid_t ptid, int, CORE_ADDR);
 
 /* Set the function that supplies registers for an inactive thread for
    architecture GDBARCH to FUNC.  */

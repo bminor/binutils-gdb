@@ -34,6 +34,7 @@
 #include "i387-tdep.h"
 #include "solib-svr4.h"
 #include "bsd-uthread.h"
+#include "inferior.h"
 
 /* Support for signal handlers.  */
 
@@ -217,7 +218,7 @@ static int amd64obsd_uthread_reg_offset[] =
 #define AMD64OBSD_UTHREAD_RSP_OFFSET	400
 
 static void
-amd64obsd_supply_uthread (struct regcache *regcache,
+amd64obsd_supply_uthread (struct regcache *regcache, ptid_t ptid,
 			  int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -226,6 +227,8 @@ amd64obsd_supply_uthread (struct regcache *regcache,
   CORE_ADDR sp = 0;
   gdb_byte buf[8];
   int i;
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -258,10 +261,12 @@ amd64obsd_supply_uthread (struct regcache *regcache,
 	  regcache_raw_supply (regcache, i, buf);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 
 static void
-amd64obsd_collect_uthread (const struct regcache *regcache,
+amd64obsd_collect_uthread (const struct regcache *regcache, ptid_t ptid,
 			   int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -270,6 +275,8 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
   CORE_ADDR sp = 0;
   gdb_byte buf[8];
   int i;
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -306,6 +313,8 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
 	  write_memory (sp + amd64obsd_uthread_reg_offset[i], buf, 8);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 /* Kernel debugging support.  */
 

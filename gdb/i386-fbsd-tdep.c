@@ -31,6 +31,7 @@
 #include "bsd-uthread.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
+#include "inferior.h"
 
 /* Support for signal handlers.  */
 
@@ -333,11 +334,13 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 static void
-i386fbsd_supply_uthread (struct regcache *regcache,
+i386fbsd_supply_uthread (struct regcache *regcache, ptid_t ptid,
 			 int regnum, CORE_ADDR addr)
 {
   gdb_byte buf[4];
   int i;
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -350,14 +353,18 @@ i386fbsd_supply_uthread (struct regcache *regcache,
 	  regcache_raw_supply (regcache, i, buf);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 
 static void
-i386fbsd_collect_uthread (const struct regcache *regcache,
+i386fbsd_collect_uthread (const struct regcache *regcache, ptid_t ptid,
 			  int regnum, CORE_ADDR addr)
 {
   gdb_byte buf[4];
   int i;
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -370,6 +377,8 @@ i386fbsd_collect_uthread (const struct regcache *regcache,
 	  write_memory (addr + i386fbsd_jmp_buf_reg_offset[i], buf, 4);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 
 static void

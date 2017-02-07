@@ -31,6 +31,7 @@
 #include "sparc-tdep.h"
 #include "solib-svr4.h"
 #include "bsd-uthread.h"
+#include "inferior.h"
 
 /* Signal trampolines.  */
 
@@ -150,13 +151,15 @@ static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind =
 #define SPARC32OBSD_UTHREAD_PC_OFFSET	132
 
 static void
-sparc32obsd_supply_uthread (struct regcache *regcache,
+sparc32obsd_supply_uthread (struct regcache *regcache, ptid_t ptid,
 			    int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fp, fp_addr = addr + SPARC32OBSD_UTHREAD_FP_OFFSET;
   gdb_byte buf[4];
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -192,16 +195,20 @@ sparc32obsd_supply_uthread (struct regcache *regcache,
     }
 
   sparc_supply_rwindow (regcache, fp, regnum);
+
+  do_cleanups (cleanup);
 }
 
 static void
-sparc32obsd_collect_uthread(const struct regcache *regcache,
+sparc32obsd_collect_uthread(const struct regcache *regcache, ptid_t ptid,
 			    int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp;
   gdb_byte buf[4];
+  struct cleanup *cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
 
   gdb_assert (regnum >= -1);
 
@@ -228,6 +235,8 @@ sparc32obsd_collect_uthread(const struct regcache *regcache,
   regcache_raw_collect (regcache, SPARC_SP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4, byte_order);
   sparc_collect_rwindow (regcache, sp, regnum);
+
+  do_cleanups (cleanup);
 }
 
 

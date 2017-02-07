@@ -286,7 +286,8 @@ bsd_uthread_fetch_registers (struct target_ops *ops,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
-  CORE_ADDR addr = ptid_get_tid (inferior_ptid);
+  ptid_t ptid = inferior_ptid;
+  CORE_ADDR addr = ptid_get_tid (ptid);
   struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR active_addr;
 
@@ -302,7 +303,7 @@ bsd_uthread_fetch_registers (struct target_ops *ops,
   if (addr != 0 && addr != active_addr)
     {
       bsd_uthread_check_magic (addr);
-      uthread_ops->supply_uthread (regcache, regnum,
+      uthread_ops->supply_uthread (regcache, ptid, regnum,
 				   addr + bsd_uthread_thread_ctx_offset);
     }
 }
@@ -315,14 +316,15 @@ bsd_uthread_store_registers (struct target_ops *ops,
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   struct target_ops *beneath = find_target_beneath (ops);
-  CORE_ADDR addr = ptid_get_tid (inferior_ptid);
+  ptid_t ptid = inferior_ptid;
+  CORE_ADDR addr = ptid_get_tid (ptid);
   CORE_ADDR active_addr;
 
   active_addr = bsd_uthread_read_memory_address (bsd_uthread_thread_run_addr);
   if (addr != 0 && addr != active_addr)
     {
       bsd_uthread_check_magic (addr);
-      uthread_ops->collect_uthread (regcache, regnum,
+      uthread_ops->collect_uthread (regcache, ptid, regnum,
 				    addr + bsd_uthread_thread_ctx_offset);
     }
   else
