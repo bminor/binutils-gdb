@@ -5554,7 +5554,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 table entry for a non-ifunc local symbol.  */
 	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%P: %H: %s reloc against local symbol\n"),
+		(_("%H: %s reloc against local symbol\n"),
 		 abfd, sec, rel->r_offset,
 		 ppc64_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -5602,7 +5602,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
 		ppc_howto_init ();
 	      /* xgettext:c-format */
-	      info->callbacks->einfo (_("%P: %H: %s reloc unsupported "
+	      info->callbacks->einfo (_("%H: %s reloc unsupported "
 					"in shared libraries and PIEs.\n"),
 				      abfd, sec, rel->r_offset,
 				      ppc64_elf_howto_table[r_type]->name);
@@ -9234,7 +9234,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			  sprintf (str, "%#08x", insn);
 			  info->callbacks->einfo
 			    /* xgettext:c-format */
-			    (_("%P: %H: toc optimization is not supported for"
+			    (_("%H: toc optimization is not supported for"
 			       " %s instruction.\n"),
 			     ibfd, sec, rel->r_offset & ~3, str);
 			}
@@ -9463,7 +9463,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			    ppc_howto_init ();
 			  info->callbacks->einfo
 			    /* xgettext:c-format */
-			    (_("%P: %H: %s references "
+			    (_("%H: %s references "
 			       "optimized away TOC entry\n"),
 			     ibfd, sec, rel->r_offset,
 			     ppc64_elf_howto_table[r_type]->name);
@@ -13572,9 +13572,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    info->callbacks->einfo
 	      (!IS_PPC64_TLS_RELOC (r_type)
 	       /* xgettext:c-format */
-	       ? _("%P: %H: %s used with TLS symbol `%T'\n")
+	       ? _("%H: %s used with TLS symbol `%T'\n")
 	       /* xgettext:c-format */
-	       : _("%P: %H: %s used with non-TLS symbol `%T'\n"),
+	       : _("%H: %s used with non-TLS symbol `%T'\n"),
 	       input_bfd, input_section, rel->r_offset,
 	       ppc64_elf_howto_table[r_type]->name,
 	       sym_name);
@@ -14204,13 +14204,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
-		      (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
+		      (_("%H: call to `%T' lacks nop, can't restore toc; "
 			 "recompile with -fPIC\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 		  else
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
-		      (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
+		      (_("%H: call to `%T' lacks nop, can't restore toc; "
 			 "(-mcmodel=small toc adjust stub)\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 
@@ -14887,7 +14887,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			{
 			  info->callbacks->einfo
 			    /* xgettext:c-format */
-			    (_("%P: %H: %s for indirect "
+			    (_("%H: %s for indirect "
 			       "function `%T' unsupported\n"),
 			     input_bfd, input_section, rel->r_offset,
 			     ppc64_elf_howto_table[r_type]->name,
@@ -15174,7 +15174,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      relocation ^= relocation & mask;
 	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%P: %H: error: %s not a multiple of %u\n"),
+		(_("%H: error: %s not a multiple of %u\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 howto->name,
 		 mask + 1);
@@ -15196,7 +15196,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	{
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%P: %H: unresolvable %s against `%T'\n"),
+	    (_("%H: unresolvable %s against `%T'\n"),
 	     input_bfd, input_section, rel->r_offset,
 	     howto->name,
 	     h->elf.root.root.string);
@@ -15293,7 +15293,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%P: %H: %s against `%T': error %d\n"),
+		(_("%H: %s against `%T': error %d\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 reloc_name, sym_name, (int) r);
 	      ret = FALSE;
