@@ -1545,6 +1545,14 @@ typedef int (gdbarch_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarc
 extern int gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size);
 
+/* Initiate architecture dependent private data for the linux-kernel target. */
+
+extern int gdbarch_lk_init_private_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_lk_init_private_ftype) (struct gdbarch *gdbarch);
+extern void gdbarch_lk_init_private (struct gdbarch *gdbarch);
+extern void set_gdbarch_lk_init_private (struct gdbarch *gdbarch, gdbarch_lk_init_private_ftype *lk_init_private);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

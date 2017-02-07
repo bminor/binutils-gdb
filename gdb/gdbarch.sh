@@ -1163,6 +1163,10 @@ m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
 # each address in memory.
 m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
 
+# Initialize architecture dependent private data for the linux-kernel
+# target.
+M:void:lk_init_private:void:
+
 EOF
 }
 

@@ -339,6 +339,7 @@ struct gdbarch
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
   gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
+  gdbarch_lk_init_private_ftype *lk_init_private;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -1123,6 +1124,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: iterate_over_regset_sections = <%s>\n",
                       host_address_to_string (gdbarch->iterate_over_regset_sections));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_lk_init_private_p() = %d\n",
+                      gdbarch_lk_init_private_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: lk_init_private = <%s>\n",
+                      host_address_to_string (gdbarch->lk_init_private));
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_bit = %s\n",
                       plongest (gdbarch->long_bit));
@@ -4954,6 +4961,30 @@ set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
                                           gdbarch_addressable_memory_unit_size_ftype addressable_memory_unit_size)
 {
   gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
+}
+
+int
+gdbarch_lk_init_private_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->lk_init_private != NULL;
+}
+
+void
+gdbarch_lk_init_private (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->lk_init_private != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_lk_init_private called\n");
+  gdbarch->lk_init_private (gdbarch);
+}
+
+void
+set_gdbarch_lk_init_private (struct gdbarch *gdbarch,
+                             gdbarch_lk_init_private_ftype lk_init_private)
+{
+  gdbarch->lk_init_private = lk_init_private;
 }
 
 
