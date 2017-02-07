@@ -280,8 +280,8 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		 The arguments are a BFD, a section, and an offset.  */
 	      {
 		static bfd *last_bfd;
-		static char *last_file = NULL;
-		static char *last_function = NULL;
+		static char *last_file;
+		static char *last_function;
 		bfd *abfd;
 		asection *section;
 		bfd_vma offset;

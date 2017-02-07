@@ -1,3 +1,7 @@
+2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ldmisc.c (vfinfo) <'H'>: Remove static NULL initializers.
+
 2017-02-15  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* testsuite/ld-scripts/sysroot-prefix.exp
