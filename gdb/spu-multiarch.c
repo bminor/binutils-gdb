@@ -140,8 +140,8 @@ spu_region_ok_for_hw_watchpoint (struct target_ops *self,
 
 /* Override the to_fetch_registers routine.  */
 static void
-spu_fetch_registers (struct target_ops *ops,
-		     struct regcache *regcache, int regno)
+spu_fetch_registers (struct target_ops *ops, struct regcache *regcache,
+		     ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -152,12 +152,12 @@ spu_fetch_registers (struct target_ops *ops,
   /* This version applies only if we're currently in spu_run.  */
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     {
-      ops_beneath->to_fetch_registers (ops_beneath, regcache, regno);
+      ops_beneath->to_fetch_registers (ops_beneath, regcache, ptid, regno);
       return;
     }
 
   /* We must be stopped on a spu_run system call.  */
-  if (!parse_spufs_run (inferior_ptid, &spufs_fd, &spufs_addr))
+  if (!parse_spufs_run (ptid, &spufs_fd, &spufs_addr))
     return;
 
   /* The ID register holds the spufs file handle.  */

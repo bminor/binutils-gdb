@@ -796,7 +796,7 @@ record_full_core_open_1 (const char *name, int from_tty)
   int i;
 
   /* Get record_full_core_regbuf.  */
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (regcache, inferior_ptid, -1);
   record_full_core_regbuf = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE * regnum);
   for (i = 0; i < regnum; i ++)
     regcache_raw_collect (regcache, i,
@@ -2045,7 +2045,7 @@ record_full_core_kill (struct target_ops *ops)
 static void
 record_full_core_fetch_registers (struct target_ops *ops,
 				  struct regcache *regcache,
-				  int regno)
+				  ptid_t ptid, int regno)
 {
   if (regno < 0)
     {

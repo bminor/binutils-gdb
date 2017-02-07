@@ -1691,12 +1691,8 @@ linux_corefile_thread (struct thread_info *info,
   LONGEST siginfo_size = 0;
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
-
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = info->ptid;
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (regcache, info->ptid, -1);
   siginfo_data = linux_get_siginfo_data (args->gdbarch, &siginfo_size);
-  do_cleanups (old_chain);
 
   old_chain = make_cleanup (xfree, siginfo_data);
 

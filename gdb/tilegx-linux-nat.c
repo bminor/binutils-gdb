@@ -123,14 +123,15 @@ fill_fpregset (const struct regcache *regcache,
 
 static void
 fetch_inferior_registers (struct target_ops *ops,
-			  struct regcache *regcache, int regnum)
+			  struct regcache *regcache,
+			  ptid_t ptid, int regnum)
 {
   elf_gregset_t regs;
   int tid;
 
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+    tid = ptid_get_pid (ptid);
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (PTRACE_TYPE_ARG3) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));

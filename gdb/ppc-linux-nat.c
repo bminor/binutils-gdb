@@ -807,14 +807,15 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
    point registers depending upon the value of regno.  */
 static void
 ppc_linux_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+				    struct regcache *regcache,
+				    ptid_t ptid, int regno)
 {
   /* Overload thread id onto process id.  */
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (ptid);
 
   /* No thread id, just use process id.  */
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+    tid = ptid_get_pid (ptid);
 
   if (regno == -1)
     fetch_ppc_registers (regcache, tid);

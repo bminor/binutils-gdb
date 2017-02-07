@@ -159,7 +159,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 /* Fetch register REGNO from the inferior.  */
 
 static void
-fetch_register (struct regcache *regcache, int regno)
+fetch_register (struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
@@ -172,7 +172,7 @@ fetch_register (struct regcache *regcache, int regno)
 
   /* Floating-point registers.  */
   if (isfloat)
-    rs6000_ptrace32 (PT_READ_FPR, ptid_get_pid (inferior_ptid), addr, nr, 0);
+    rs6000_ptrace32 (PT_READ_FPR, ptid_get_pid (ptid), addr, nr, 0);
 
   /* Bogus register number.  */
   else if (nr < 0)
@@ -188,14 +188,14 @@ fetch_register (struct regcache *regcache, int regno)
   else
     {
       if (!ARCH64 ())
-	*addr = rs6000_ptrace32 (PT_READ_GPR, ptid_get_pid (inferior_ptid),
+	*addr = rs6000_ptrace32 (PT_READ_GPR, ptid_get_pid (ptid),
 				 (int *) nr, 0, 0);
       else
 	{
 	  /* PT_READ_GPR requires the buffer parameter to point to long long,
 	     even if the register is really only 32 bits.  */
 	  long long buf;
-	  rs6000_ptrace64 (PT_READ_GPR, ptid_get_pid (inferior_ptid),
+	  rs6000_ptrace64 (PT_READ_GPR, ptid_get_pid (ptid),
 			   nr, 0, &buf);
 	  if (register_size (gdbarch, regno) == 8)
 	    memcpy (addr, &buf, 8);
@@ -281,11 +281,12 @@ store_register (struct regcache *regcache, int regno)
 
 static void
 rs6000_fetch_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno)
+				 struct regcache *regcache,
+				 ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno != -1)
-    fetch_register (regcache, regno);
+    fetch_register (regcache, ptid, regno);
 
   else
     {
@@ -296,25 +297,25 @@ rs6000_fetch_inferior_registers (struct target_ops *ops,
            regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
-	  fetch_register (regcache, regno);
+	  fetch_register (regcache, ptid, regno);
 	}
 
       /* Read general purpose floating point registers.  */
       if (tdep->ppc_fp0_regnum >= 0)
         for (regno = 0; regno < ppc_num_fprs; regno++)
-          fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
+          fetch_register (regcache, ptid, tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
-      fetch_register (regcache, gdbarch_pc_regnum (gdbarch));
-      fetch_register (regcache, tdep->ppc_ps_regnum);
-      fetch_register (regcache, tdep->ppc_cr_regnum);
-      fetch_register (regcache, tdep->ppc_lr_regnum);
-      fetch_register (regcache, tdep->ppc_ctr_regnum);
-      fetch_register (regcache, tdep->ppc_xer_regnum);
+      fetch_register (regcache, ptid, gdbarch_pc_regnum (gdbarch));
+      fetch_register (regcache, ptid, tdep->ppc_ps_regnum);
+      fetch_register (regcache, ptid, tdep->ppc_cr_regnum);
+      fetch_register (regcache, ptid, tdep->ppc_lr_regnum);
+      fetch_register (regcache, ptid, tdep->ppc_ctr_regnum);
+      fetch_register (regcache, ptid, tdep->ppc_xer_regnum);
       if (tdep->ppc_fpscr_regnum >= 0)
-        fetch_register (regcache, tdep->ppc_fpscr_regnum);
+        fetch_register (regcache, ptid, tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
-	fetch_register (regcache, tdep->ppc_mq_regnum);
+	fetch_register (regcache, ptid, tdep->ppc_mq_regnum);
     }
 }
 

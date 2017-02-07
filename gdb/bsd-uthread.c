@@ -280,19 +280,18 @@ bsd_uthread_mourn_inferior (struct target_ops *ops)
 }
 
 static void
-bsd_uthread_fetch_registers (struct target_ops *ops,
-			     struct regcache *regcache, int regnum)
+bsd_uthread_fetch_registers (struct target_ops *ops, struct regcache *regcache,
+			     ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
-  ptid_t ptid = inferior_ptid;
   CORE_ADDR addr = ptid_get_tid (ptid);
   struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR active_addr;
 
   /* Always fetch the appropriate registers from the layer beneath.  */
-  beneath->to_fetch_registers (beneath, regcache, regnum);
+  beneath->to_fetch_registers (beneath, regcache, ptid, regnum);
 
   /* FIXME: That might have gotten us more than we asked for.  Make
      sure we overwrite all relevant registers with values from the

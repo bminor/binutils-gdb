@@ -659,7 +659,7 @@ regcache_raw_update (struct regcache *regcache, int regnum)
       struct cleanup *old_chain = save_inferior_ptid ();
 
       inferior_ptid = regcache->ptid;
-      target_fetch_registers (regcache, regnum);
+      target_fetch_registers (regcache, inferior_ptid, regnum);
       do_cleanups (old_chain);
 
       /* A number of targets can't access the whole set of raw

@@ -1420,12 +1420,13 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
 
 static void
 record_btrace_fetch_registers (struct target_ops *ops,
-			       struct regcache *regcache, int regno)
+			       struct regcache *regcache,
+			       ptid_t ptid, int regno)
 {
   struct btrace_insn_iterator *replay;
   struct thread_info *tp;
 
-  tp = find_thread_ptid (inferior_ptid);
+  tp = find_thread_ptid (ptid);
   gdb_assert (tp != NULL);
 
   replay = tp->btrace.replay;
@@ -1453,7 +1454,7 @@ record_btrace_fetch_registers (struct target_ops *ops,
     {
       struct target_ops *t = ops->beneath;
 
-      t->to_fetch_registers (t, regcache, regno);
+      t->to_fetch_registers (t, regcache, ptid, regno);
     }
 }
 

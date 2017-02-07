@@ -25,8 +25,6 @@
 #include "ravenscar-thread.h"
 #include "sparc-ravenscar-thread.h"
 
-static void sparc_ravenscar_fetch_registers (struct regcache *regcache,
-                                             int regnum);
 static void sparc_ravenscar_store_registers (struct regcache *regcache,
                                              int regnum);
 static void sparc_ravenscar_prepare_to_store (struct regcache *regcache);
@@ -101,7 +99,8 @@ register_in_thread_descriptor_p (int regnum)
    thread.  */
 
 static void
-sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
+sparc_ravenscar_fetch_registers (struct regcache *regcache, ptid_t ptid,
+				 int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const int sp_regnum = gdbarch_sp_regnum (gdbarch);
@@ -112,7 +111,7 @@ sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
   ULONGEST stack_address;
 
   /* The tid is the thread_id field, which is a pointer to the thread.  */
-  thread_descriptor_address = (CORE_ADDR) ptid_get_tid (inferior_ptid);
+  thread_descriptor_address = (CORE_ADDR) ptid_get_tid (ptid);
 
   /* Read the saved SP in the context buffer.  */
   current_address = thread_descriptor_address

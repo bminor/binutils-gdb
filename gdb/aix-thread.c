@@ -1298,21 +1298,22 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 }
 
 /* Fetch register REGNO if != -1 or all registers otherwise in the
-   thread/process specified by inferior_ptid.  */
+   thread/process specified by PTID.  */
 
 static void
 aix_thread_fetch_registers (struct target_ops *ops,
-                            struct regcache *regcache, int regno)
+                            struct regcache *regcache,
+			    ptid_t ptid, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  if (!PD_TID (inferior_ptid))
-    beneath->to_fetch_registers (beneath, regcache, regno);
+  if (!PD_TID (ptid))
+    beneath->to_fetch_registers (beneath, regcache, ptid, regno);
   else
     {
-      thread = find_thread_ptid (inferior_ptid);
+      thread = find_thread_ptid (ptid);
       tid = thread->priv->tid;
 
       if (tid == PTHDB_INVALID_TID)
@@ -1652,7 +1653,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 }
 
 /* Store gdb's current view of the register set into the
-   thread/process specified by inferior_ptid.  */
+   thread/process specified by PTID.  */
 
 static void
 aix_thread_store_registers (struct target_ops *ops,

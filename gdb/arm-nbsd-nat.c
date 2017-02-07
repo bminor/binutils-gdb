@@ -72,12 +72,12 @@ arm_supply_fparegset (struct regcache *regcache, struct fpreg *fparegset)
 }
 
 static void
-fetch_register (struct regcache *regcache, int regno)
+fetch_register (struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct reg inferior_registers;
   int ret;
 
-  ret = ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+  ret = ptrace (PT_GETREGS, ptid_get_pid (ptid),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -124,13 +124,13 @@ fetch_register (struct regcache *regcache, int regno)
 }
 
 static void
-fetch_regs (struct regcache *regcache)
+fetch_regs (struct regcache *regcache, ptid_t ptid)
 {
   struct reg inferior_registers;
   int ret;
   int regno;
 
-  ret = ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+  ret = ptrace (PT_GETREGS, ptid_get_pid (ptid),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -143,12 +143,12 @@ fetch_regs (struct regcache *regcache)
 }
 
 static void
-fetch_fp_register (struct regcache *regcache, int regno)
+fetch_fp_register (struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct fpreg inferior_fp_registers;
   int ret;
 
-  ret = ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+  ret = ptrace (PT_GETFPREGS, ptid_get_pid (ptid),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
@@ -172,13 +172,13 @@ fetch_fp_register (struct regcache *regcache, int regno)
 }
 
 static void
-fetch_fp_regs (struct regcache *regcache)
+fetch_fp_regs (struct regcache *regcache, ptid_t ptid)
 {
   struct fpreg inferior_fp_registers;
   int ret;
   int regno;
 
-  ret = ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+  ret = ptrace (PT_GETFPREGS, ptid_get_pid (ptid),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
@@ -192,19 +192,20 @@ fetch_fp_regs (struct regcache *regcache)
 
 static void
 armnbsd_fetch_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regno)
+			 struct regcache *regcache,
+			 ptid_t ptid, int regno)
 {
   if (regno >= 0)
     {
       if (regno < ARM_F0_REGNUM || regno > ARM_FPS_REGNUM)
-	fetch_register (regcache, regno);
+	fetch_register (regcache, ptid, regno);
       else
-	fetch_fp_register (regcache, regno);
+	fetch_fp_register (regcache, ptid, regno);
     }
   else
     {
-      fetch_regs (regcache);
-      fetch_fp_regs (regcache);
+      fetch_regs (regcache, ptid);
+      fetch_fp_regs (regcache, ptid);
     }
 }
 

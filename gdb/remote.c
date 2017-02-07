@@ -7704,14 +7704,14 @@ set_remote_traceframe (void)
 }
 
 static void
-remote_fetch_registers (struct target_ops *ops,
-			struct regcache *regcache, int regnum)
+remote_fetch_registers (struct target_ops *ops, struct regcache *regcache,
+			ptid_t ptid, int regnum)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
+  set_general_thread (ptid);
 
   if (regnum >= 0)
     {

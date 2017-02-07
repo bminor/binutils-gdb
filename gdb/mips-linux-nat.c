@@ -54,7 +54,7 @@ static int have_ptrace_regsets = 1;
    PTRACE_PEEKUSER and PTRACE_POKEUSER.  */
 
 static void (*super_fetch_registers) (struct target_ops *,
-				      struct regcache *, int);
+				      struct regcache *, ptid_t, int);
 static void (*super_store_registers) (struct target_ops *,
 				      struct regcache *, int);
 
@@ -214,7 +214,8 @@ fill_fpregset (const struct regcache *regcache,
 
 static void
 mips64_linux_regsets_fetch_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regno)
+				      struct regcache *regcache,
+				      ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int is_fp, is_dsp;
@@ -244,9 +245,9 @@ mips64_linux_regsets_fetch_registers (struct target_ops *ops,
   else
     is_dsp = 0;
 
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+    tid = ptid_get_pid (ptid);
 
   if (regno == -1 || (!is_fp && !is_dsp))
     {
@@ -286,14 +287,15 @@ mips64_linux_regsets_fetch_registers (struct target_ops *ops,
     }
 
   if (is_dsp)
-    super_fetch_registers (ops, regcache, regno);
+    super_fetch_registers (ops, regcache, ptid, regno);
   else if (regno == -1 && have_dsp)
     {
       for (regi = mips_regnum (gdbarch)->dspacc;
 	   regi < mips_regnum (gdbarch)->dspacc + 6;
 	   regi++)
-	super_fetch_registers (ops, regcache, regi);
-      super_fetch_registers (ops, regcache, mips_regnum (gdbarch)->dspctl);
+	super_fetch_registers (ops, regcache, ptid, regi);
+      super_fetch_registers (ops, regcache, ptid,
+			     mips_regnum (gdbarch)->dspctl);
     }
 }
 
@@ -381,16 +383,17 @@ mips64_linux_regsets_store_registers (struct target_ops *ops,
 
 static void
 mips64_linux_fetch_registers (struct target_ops *ops,
-			      struct regcache *regcache, int regnum)
+			      struct regcache *regcache,
+			      ptid_t ptid, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)
-    mips64_linux_regsets_fetch_registers (ops, regcache, regnum);
+    mips64_linux_regsets_fetch_registers (ops, regcache, ptid, regnum);
 
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_fetch_registers (ops, regcache, regnum);
+    super_fetch_registers (ops, regcache, ptid, regnum);
 }
 
 /* Store REGNO (or all registers if REGNO == -1) to the target

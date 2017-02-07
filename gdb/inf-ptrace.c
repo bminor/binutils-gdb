@@ -706,7 +706,7 @@ static CORE_ADDR (*inf_ptrace_register_u_offset)(struct gdbarch *, int, int);
 /* Fetch register REGNUM from the inferior.  */
 
 static void
-inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
+inf_ptrace_fetch_register (struct regcache *regcache, ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
@@ -725,9 +725,9 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 
   /* Cater for systems like GNU/Linux, that implement threads as
      separate processes.  */
-  pid = ptid_get_lwp (inferior_ptid);
+  pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+    pid = ptid_get_pid (ptid);
 
   size = register_size (gdbarch, regnum);
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
@@ -752,16 +752,16 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
    for all registers.  */
 
 static void
-inf_ptrace_fetch_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+inf_ptrace_fetch_registers (struct target_ops *ops, struct regcache *regcache,
+			    ptid_t ptid, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
 	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
 	 regnum++)
-      inf_ptrace_fetch_register (regcache, regnum);
+      inf_ptrace_fetch_register (regcache, ptid, regnum);
   else
-    inf_ptrace_fetch_register (regcache, regnum);
+    inf_ptrace_fetch_register (regcache, ptid, regnum);
 }
 
 /* Store register REGNUM into the inferior.  */

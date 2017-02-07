@@ -152,7 +152,7 @@ aarch64_get_debug_reg_state (pid_t pid)
    from the current thread.  */
 
 static void
-fetch_gregs_from_thread (struct regcache *regcache)
+fetch_gregs_from_thread (struct regcache *regcache, ptid_t ptid)
 {
   int ret, tid;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -163,7 +163,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
 
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -233,7 +233,7 @@ store_gregs_to_thread (const struct regcache *regcache)
    from the current thread.  */
 
 static void
-fetch_fpregs_from_thread (struct regcache *regcache)
+fetch_fpregs_from_thread (struct regcache *regcache, ptid_t ptid)
 {
   int ret, tid;
   elf_fpregset_t regs;
@@ -244,7 +244,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
 
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   iovec.iov_base = &regs;
 
@@ -347,17 +347,17 @@ store_fpregs_to_thread (const struct regcache *regcache)
 static void
 aarch64_linux_fetch_inferior_registers (struct target_ops *ops,
 					struct regcache *regcache,
-					int regno)
+					ptid_t ptid, int regno)
 {
   if (regno == -1)
     {
-      fetch_gregs_from_thread (regcache);
-      fetch_fpregs_from_thread (regcache);
+      fetch_gregs_from_thread (regcache, ptid);
+      fetch_fpregs_from_thread (regcache, ptid);
     }
   else if (regno < AARCH64_V0_REGNUM)
-    fetch_gregs_from_thread (regcache);
+    fetch_gregs_from_thread (regcache, ptid);
   else
-    fetch_fpregs_from_thread (regcache);
+    fetch_fpregs_from_thread (regcache, ptid);
 }
 
 /* Implement the "to_store_register" target_ops method.  */

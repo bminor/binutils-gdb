@@ -848,8 +848,8 @@ traceframe_find_block_type (char type_wanted, int pos)
    requested register from it.  */
 
 static void
-tfile_fetch_registers (struct target_ops *ops,
-		       struct regcache *regcache, int regno)
+tfile_fetch_registers (struct target_ops *ops, struct regcache *regcache,
+		       ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int offset, regn, regsize, dummy;

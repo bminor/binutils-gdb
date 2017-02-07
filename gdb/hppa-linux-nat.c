@@ -210,7 +210,7 @@ static const int greg_map[] =
 /* Fetch one register.  */
 
 static void
-fetch_register (struct regcache *regcache, int regno)
+fetch_register (struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
@@ -223,9 +223,9 @@ fetch_register (struct regcache *regcache, int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (ptid); /* Not a threaded program.  */
 
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid, hppa_linux_register_addr (regno, 0), 0);
@@ -269,18 +269,19 @@ store_register (const struct regcache *regcache, int regno)
 
 static void
 hppa_linux_fetch_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+				     struct regcache *regcache,
+				     ptid_t ptid, int regno)
 {
   if (-1 == regno)
     {
       for (regno = 0;
 	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
 	   regno++)
-        fetch_register (regcache, regno);
+        fetch_register (regcache, ptid, regno);
     }
   else 
     {
-      fetch_register (regcache, regno);
+      fetch_register (regcache, ptid, regno);
     }
 }
 

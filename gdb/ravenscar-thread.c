@@ -57,8 +57,6 @@ static ptid_t ravenscar_running_thread (void);
 static char *ravenscar_extra_thread_info (struct target_ops *self,
 					  struct thread_info *tp);
 static int ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid);
-static void ravenscar_fetch_registers (struct target_ops *ops,
-                                       struct regcache *regcache, int regnum);
 static void ravenscar_store_registers (struct target_ops *ops,
                                        struct regcache *regcache, int regnum);
 static void ravenscar_prepare_to_store (struct target_ops *self,
@@ -264,22 +262,22 @@ ravenscar_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 static void
-ravenscar_fetch_registers (struct target_ops *ops,
-                           struct regcache *regcache, int regnum)
+ravenscar_fetch_registers (struct target_ops *ops, struct regcache *regcache,
+			   ptid_t ptid, int regnum)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 
   if (!ravenscar_runtime_initialized ()
-      || ptid_equal (inferior_ptid, base_magic_null_ptid)
-      || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
-    beneath->to_fetch_registers (beneath, regcache, regnum);
+      || ptid_equal (ptid, base_magic_null_ptid)
+      || ptid_equal (ptid, ravenscar_running_thread ()))
+    beneath->to_fetch_registers (beneath, regcache, ptid, regnum);
   else
     {
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->to_fetch_registers (regcache, regnum);
+      arch_ops->to_fetch_registers (regcache, ptid, regnum);
     }
 }
 

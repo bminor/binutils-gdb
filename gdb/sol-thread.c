@@ -452,7 +452,8 @@ sol_thread_wait (struct target_ops *ops,
 
 static void
 sol_thread_fetch_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+			    struct regcache *regcache,
+			    ptid_t ptid, int regnum)
 {
   thread_t thread;
   td_thrhandle_t thandle;
@@ -463,15 +464,15 @@ sol_thread_fetch_registers (struct target_ops *ops,
   gdb_fpregset_t *fpregset_p = &fpregset;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  if (!ptid_tid_p (inferior_ptid))
+  if (!ptid_tid_p (ptid))
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
-      beneath->to_fetch_registers (beneath, regcache, regnum);
+      beneath->to_fetch_registers (beneath, regcache, ptid, regnum);
       return;
     }
 
-  /* Solaris thread: convert INFERIOR_PTID into a td_thrhandle_t.  */
-  thread = ptid_get_tid (inferior_ptid);
+  /* Solaris thread: convert PTID into a td_thrhandle_t.  */
+  thread = ptid_get_tid (ptid);
   if (thread == 0)
     error (_("sol_thread_fetch_registers: thread == 0"));
 

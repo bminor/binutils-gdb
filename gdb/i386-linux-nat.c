@@ -92,7 +92,7 @@ int have_ptrace_getfpxregs =
 /* Fetch one register.  */
 
 static void
-fetch_register (struct regcache *regcache, int regno)
+fetch_register (struct regcache *regcache, ptid_t ptid, int regno)
 {
   int tid;
   int val;
@@ -105,9 +105,9 @@ fetch_register (struct regcache *regcache, int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (ptid); /* Not a threaded program.  */
 
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid,
@@ -453,7 +453,8 @@ store_fpxregs (const struct regcache *regcache, int tid, int regno)
 
 static void
 i386_linux_fetch_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+				     struct regcache *regcache,
+				     ptid_t ptid, int regno)
 {
   int tid;
 
@@ -465,15 +466,15 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
 
       for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	if (regno == -1 || regno == i)
-	  fetch_register (regcache, i);
+	  fetch_register (regcache, ptid, i);
 
       return;
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (ptid); /* Not a threaded program.  */
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -486,7 +487,7 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
       /* The call above might reset `have_ptrace_getregs'.  */
       if (!have_ptrace_getregs)
 	{
-	  i386_linux_fetch_inferior_registers (ops, regcache, regno);
+	  i386_linux_fetch_inferior_registers (ops, regcache, ptid, regno);
 	  return;
 	}
 

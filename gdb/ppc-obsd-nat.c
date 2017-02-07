@@ -72,11 +72,12 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 
 static void
 ppcobsd_fetch_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regnum)
+			 struct regcache *regcache,
+			 ptid_t ptid, int regnum)
 {
   struct reg regs;
 
-  if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_GETREGS, ptid_get_pid (ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
@@ -93,7 +94,7 @@ ppcobsd_fetch_registers (struct target_ops *ops,
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 

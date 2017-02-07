@@ -135,7 +135,8 @@ sparc32_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 
 void
 sparc_fetch_inferior_registers (struct target_ops *ops,
-				struct regcache *regcache, int regnum)
+				struct regcache *regcache,
+				ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int pid;
@@ -153,9 +154,9 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
      These functions should instead be paramaterized with an explicit
      object (struct regcache, struct thread_info?) into which the LWPs
      registers can be written.  */
-  pid = ptid_get_lwp (inferior_ptid);
+  pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+    pid = ptid_get_pid (ptid);
 
   if (regnum == SPARC_G0_REGNUM)
     {

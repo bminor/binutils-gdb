@@ -1190,7 +1190,8 @@ ctf_files_info (struct target_ops *t)
 
 static void
 ctf_fetch_registers (struct target_ops *ops,
-		     struct regcache *regcache, int regno)
+		     struct regcache *regcache,
+		     ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct bt_ctf_event *event = NULL;

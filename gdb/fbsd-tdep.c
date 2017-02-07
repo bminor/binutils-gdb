@@ -193,15 +193,11 @@ static void
 fbsd_corefile_thread (struct thread_info *info,
 		      struct fbsd_corefile_thread_data *args)
 {
-  struct cleanup *old_chain;
   struct regcache *regcache;
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = info->ptid;
-  target_fetch_registers (regcache, -1);
-  do_cleanups (old_chain);
+  target_fetch_registers (regcache, info->ptid, -1);
 
   args->note_data = fbsd_collect_thread_registers
     (regcache, info->ptid, args->obfd, args->note_data,

@@ -185,7 +185,8 @@ bsd_kvm_fetch_pcb (struct regcache *regcache, struct pcb *paddr)
 
 static void
 bsd_kvm_fetch_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regnum)
+			 struct regcache *regcache,
+			 ptid_t ptid, int regnum)
 {
   struct nlist nl[2];
 

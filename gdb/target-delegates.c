@@ -159,28 +159,30 @@ debug_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2
 }
 
 static void
-delegate_fetch_registers (struct target_ops *self, struct regcache *arg1, int arg2)
+delegate_fetch_registers (struct target_ops *self, struct regcache *arg1, ptid_t arg2, int arg3)
 {
   self = self->beneath;
-  self->to_fetch_registers (self, arg1, arg2);
+  self->to_fetch_registers (self, arg1, arg2, arg3);
 }
 
 static void
-tdefault_fetch_registers (struct target_ops *self, struct regcache *arg1, int arg2)
+tdefault_fetch_registers (struct target_ops *self, struct regcache *arg1, ptid_t arg2, int arg3)
 {
 }
 
 static void
-debug_fetch_registers (struct target_ops *self, struct regcache *arg1, int arg2)
+debug_fetch_registers (struct target_ops *self, struct regcache *arg1, ptid_t arg2, int arg3)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_fetch_registers (...)\n", debug_target.to_shortname);
-  debug_target.to_fetch_registers (&debug_target, arg1, arg2);
+  debug_target.to_fetch_registers (&debug_target, arg1, arg2, arg3);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_fetch_registers (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_regcache_p (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  target_debug_print_ptid_t (arg2);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_int (arg3);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

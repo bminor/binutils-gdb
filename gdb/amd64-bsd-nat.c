@@ -40,7 +40,8 @@
 
 static void
 amd64bsd_fetch_inferior_registers (struct target_ops *ops,
-				   struct regcache *regcache, int regnum)
+				   struct regcache *regcache,
+				   ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -48,7 +49,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, get_ptrace_pid (inferior_ptid),
+      if (ptrace (PT_GETREGS, get_ptrace_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
@@ -66,7 +67,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
       if (x86bsd_xsave_len != 0)
 	{
 	  xstateregs = alloca (x86bsd_xsave_len);
-	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (inferior_ptid),
+	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (ptid),
 		      (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
 	    perror_with_name (_("Couldn't get extended state status"));
 
@@ -75,7 +76,7 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
 	}
 #endif
 
-      if (ptrace (PT_GETFPREGS, get_ptrace_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, get_ptrace_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
@@ -88,7 +89,8 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 amd64bsd_store_inferior_registers (struct target_ops *ops,
-				   struct regcache *regcache, int regnum)
+				   struct regcache *regcache,
+				   ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -96,13 +98,13 @@ amd64bsd_store_inferior_registers (struct target_ops *ops,
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, get_ptrace_pid (inferior_ptid),
+      if (ptrace (PT_GETREGS, get_ptrace_pid (ptid),
                   (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
       amd64_collect_native_gregset (regcache, &regs, regnum);
 
-      if (ptrace (PT_SETREGS, get_ptrace_pid (inferior_ptid),
+      if (ptrace (PT_SETREGS, get_ptrace_pid (ptid),
 	          (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't write registers"));
 
@@ -119,26 +121,26 @@ amd64bsd_store_inferior_registers (struct target_ops *ops,
       if (x86bsd_xsave_len != 0)
 	{
 	  xstateregs = alloca (x86bsd_xsave_len);
-	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (inferior_ptid),
+	  if (ptrace (PT_GETXSTATE, get_ptrace_pid (ptid),
 		      (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
 	    perror_with_name (_("Couldn't get extended state status"));
 
 	  amd64_collect_xsave (regcache, regnum, xstateregs, 0);
 
-	  if (ptrace (PT_SETXSTATE, get_ptrace_pid (inferior_ptid),
+	  if (ptrace (PT_SETXSTATE, get_ptrace_pid (ptid),
 		      (PTRACE_TYPE_ARG3) xstateregs, x86bsd_xsave_len) == -1)
 	    perror_with_name (_("Couldn't write extended state status"));
 	  return;
 	}
 #endif
 
-      if (ptrace (PT_GETFPREGS, get_ptrace_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, get_ptrace_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       amd64_collect_fxsave (regcache, regnum, &fpregs);
 
-      if (ptrace (PT_SETFPREGS, get_ptrace_pid (inferior_ptid),
+      if (ptrace (PT_SETFPREGS, get_ptrace_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't write floating point status"));
     }

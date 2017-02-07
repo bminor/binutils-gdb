@@ -72,7 +72,8 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 
 static void
 inf_child_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+				    struct regcache *regcache,
+				    ptid_t ptid, int regnum)
 {
   if (regnum == -1)
     {

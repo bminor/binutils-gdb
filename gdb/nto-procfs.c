@@ -857,7 +857,8 @@ procfs_wait (struct target_ops *ops,
    and update gdb's idea of their current values.  */
 static void
 procfs_fetch_registers (struct target_ops *ops,
-			struct regcache *regcache, int regno)
+			struct regcache *regcache,
+			ptid_t ptid, int regno)
 {
   union
   {
@@ -868,7 +869,7 @@ procfs_fetch_registers (struct target_ops *ops,
   reg;
   int regsize;
 
-  procfs_set_thread (inferior_ptid);
+  procfs_set_thread (ptid);
   if (devctl (ctl_fd, DCMD_PROC_GETGREG, &reg, sizeof (reg), &regsize) == EOK)
     nto_supply_gregset (regcache, (char *) &reg.greg);
   if (devctl (ctl_fd, DCMD_PROC_GETFPREG, &reg, sizeof (reg), &regsize)
@@ -1338,7 +1339,8 @@ get_regset (int regset, char *buf, int bufsize, int *regsize)
 
 static void
 procfs_store_registers (struct target_ops *ops,
-			struct regcache *regcache, int regno)
+			struct regcache *regcache,
+			ptid_t ptid, int regno)
 {
   union
   {
@@ -1351,9 +1353,9 @@ procfs_store_registers (struct target_ops *ops,
   int len, regset, regsize, dev_set, err;
   char *data;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (ptid_equal (ptid, null_ptid))
     return;
-  procfs_set_thread (inferior_ptid);
+  procfs_set_thread (ptid);
 
   if (regno == -1)
     {

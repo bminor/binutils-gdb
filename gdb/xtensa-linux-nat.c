@@ -168,13 +168,13 @@ supply_fpregset (struct regcache *regcache,
   return;
 }
 
-/* Fetch greg-register(s) from process/thread TID
-   and store value(s) in GDB's register array.  */
+/* Fetch greg-register(s) from process/thread PTID
+   and store value(s) in REGCACHE.  */
 
 static void
-fetch_gregs (struct regcache *regcache, int regnum)
+fetch_gregs (struct regcache *regcache, ptid_t ptid, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (ptid);
   gdb_gregset_t regs;
   int areg;
   
@@ -219,9 +219,9 @@ static int xtreg_high;
    interface provides special requests for this.  */
 
 static void
-fetch_xtregs (struct regcache *regcache, int regnum)
+fetch_xtregs (struct regcache *regcache, ptid_t ptid, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (ptid);
   const xtensa_regtable_t *ptr;
   char xtregs [XTENSA_ELF_XTREG_SIZE];
 
@@ -255,17 +255,18 @@ store_xtregs (struct regcache *regcache, int regnum)
 
 static void
 xtensa_linux_fetch_inferior_registers (struct target_ops *ops,
-				       struct regcache *regcache, int regnum)
+				       struct regcache *regcache,
+				       ptid_t ptid, int regnum)
 {
   if (regnum == -1)
     {
-      fetch_gregs (regcache, regnum);
-      fetch_xtregs (regcache, regnum);
+      fetch_gregs (regcache, ptid, regnum);
+      fetch_xtregs (regcache, ptid, regnum);
     }
   else if ((regnum < xtreg_lo) || (regnum > xtreg_high))
-    fetch_gregs (regcache, regnum);
+    fetch_gregs (regcache, ptid, regnum);
   else
-    fetch_xtregs (regcache, regnum);
+    fetch_xtregs (regcache, ptid, regnum);
 }
 
 static void

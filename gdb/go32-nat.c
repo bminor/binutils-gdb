@@ -507,7 +507,8 @@ fetch_register (struct regcache *regcache, int regno)
 
 static void
 go32_fetch_registers (struct target_ops *ops,
-		      struct regcache *regcache, int regno)
+		      struct regcache *regcache,
+		      ptid_t ptid, int regno)
 {
   if (regno >= 0)
     fetch_register (regcache, regno);
@@ -538,7 +539,8 @@ store_register (const struct regcache *regcache, int regno)
 
 static void
 go32_store_registers (struct target_ops *ops,
-		      struct regcache *regcache, int regno)
+		      struct regcache *regcache,
+		      ptid_t ptid, int regno)
 {
   unsigned r;
 

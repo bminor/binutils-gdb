@@ -426,16 +426,18 @@ one2one_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 
 static void
 gdbsim_fetch_register (struct target_ops *ops,
-		       struct regcache *regcache, int regno)
+		       struct regcache *regcache,
+		       ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct inferior *inf = find_inferior_ptid (ptid);
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
+    = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
   if (regno == -1)
     {
       for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
-	gdbsim_fetch_register (ops, regcache, regno);
+	gdbsim_fetch_register (ops, regcache, ptid, regno);
       return;
     }
 

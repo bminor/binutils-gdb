@@ -451,7 +451,7 @@ core_open (const char *arg, int from_tty)
     }
 
   /* Fetch all registers from core file.  */
-  target_fetch_registers (get_current_regcache (), -1);
+  target_fetch_registers (get_current_regcache (), inferior_ptid, -1);
 
   /* Now, set up the frame cache, and print the top of stack.  */
   reinit_frame_cache ();
@@ -605,8 +605,8 @@ get_core_registers_cb (const char *sect_name, int size,
 /* We just get all the registers, so we don't use regno.  */
 
 static void
-get_core_registers (struct target_ops *ops,
-		    struct regcache *regcache, int regno)
+get_core_registers (struct target_ops *ops, struct regcache *regcache,
+		    ptid_t ptid, int regno)
 {
   int i;
   struct gdbarch *gdbarch;
