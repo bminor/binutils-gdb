@@ -27,6 +27,8 @@ extern struct target_ops *linux_kernel_ops;
 /* Copy constants defined in Linux kernel.  */
 #define LK_TASK_COMM_LEN 16
 #define LK_BITS_PER_BYTE 8
+#define LK_MODULE_NAME_LEN 56
+#define LK_UTS_NAME_LEN 64
 
 /* Definitions used in linux kernel target.  */
 #define LK_CPU_INVAL -1U
@@ -203,6 +205,19 @@ typedef void (*lk_hook_get_registers) (CORE_ADDR task,
 				       struct regcache *regcache,
 				       int regnum);
 
+/* Hook to check if address ADDR is a kernel virtual address.
+   NOTE: This hook is called in the context of target beneath.  */
+typedef int (*lk_hook_is_kvaddr) (CORE_ADDR addr);
+
+/* Hook to translate virtual adress ADDR to a pysical address using page
+   table located at PGD.
+   NOTE: This hook is called in the context of target beneath.  */
+typedef CORE_ADDR (*lk_hook_vtop) (CORE_ADDR addr, CORE_ADDR pgd);
+
+/* Hook to get the offset between a modules base and the start of its
+   .text section.  */
+typedef CORE_ADDR (*lk_hook_get_module_text_offset) (CORE_ADDR mod);
+
 /* Hook to return the per_cpu_offset of cpu CPU.  Only architectures that
    do not use the __per_cpu_offset array to determin the offset have to
    supply this hook.  */
@@ -216,6 +231,15 @@ struct lk_private_hooks
 {
   /* required */
   lk_hook_get_registers get_registers;
+
+  /* required */
+  lk_hook_is_kvaddr is_kvaddr;
+
+  /* required */
+  lk_hook_vtop vtop;
+
+  /* reqired */
+  lk_hook_get_module_text_offset get_module_text_offset;
 
   /* optional, required if __per_cpu_offset array is not used to determine
      offset.  */

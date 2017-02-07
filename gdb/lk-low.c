@@ -29,6 +29,7 @@
 #include "inferior.h"
 #include "lk-lists.h"
 #include "lk-low.h"
+#include "lk-modules.h"
 #include "objfiles.h"
 #include "observer.h"
 #include "solib.h"
@@ -563,6 +564,46 @@ lk_thread_name (struct target_ops *target, struct thread_info *ti)
   return buf;
 }
 
+/* Translate a kernel virtual address ADDR to a physical address.  */
+
+CORE_ADDR
+lk_kvtop (CORE_ADDR addr)
+{
+  CORE_ADDR pgd = lk_read_addr (LK_ADDR (init_mm)
+				+ LK_OFFSET (mm_struct, pgd));
+  return LK_HOOK->vtop (pgd, addr);
+}
+
+/* Restore current_target to TARGET.  */
+static void
+restore_current_target (void *target)
+{
+  current_target.beneath = (struct target_ops *) target;
+}
+
+/* Function for targets to_xfer_partial hook.  */
+
+enum target_xfer_status
+lk_xfer_partial (struct target_ops *ops, enum target_object object,
+		 const char *annex, gdb_byte *readbuf,
+		 const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
+		 ULONGEST *xfered_len)
+{
+  enum target_xfer_status ret_val;
+  struct cleanup *old_chain = make_cleanup (restore_current_target, ops);
+
+  current_target.beneath = ops->beneath;
+
+  if (LK_HOOK->is_kvaddr (offset))
+    offset = lk_kvtop (offset);
+
+  ret_val =  ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					    readbuf, writebuf, offset, len,
+					    xfered_len);
+  do_cleanups (old_chain);
+  return ret_val;
+}
+
 /* Functions to initialize and free target_ops and its private data.  As well
    as functions for targets to_open/close/detach hooks.  */
 
@@ -598,6 +639,9 @@ lk_init_private ()
 /* Initialize architecture independent private data.  Must be called
    _after_ symbol tables were initialized.  */
 
+/* FIXME: throw error more fine-grained.  */
+/* FIXME: make independent of compile options.  */
+
 static void
 lk_init_private_data ()
 {
@@ -618,10 +662,61 @@ lk_init_private_data ()
 
   LK_DECLARE_FIELD (cpumask, bits);
 
+  LK_DECLARE_FIELD (mm_struct, pgd);
+
+  LK_DECLARE_FIELD (pgd_t, pgd);
+
+  LK_DECLARE_FIELD (module, list);
+  LK_DECLARE_FIELD (module, name);
+  LK_DECLARE_FIELD (module, source_list);
+  LK_DECLARE_FIELD (module, arch);
+  LK_DECLARE_FIELD (module, init);
+  LK_DECLARE_FIELD (module, percpu);
+  LK_DECLARE_FIELD (module, percpu_size);
+
+  /* Module offset moved to new struct module_layout with linux 4.5.
+     It must be checked in code which of this fields exist.  */
+  if (LK_DECLARE_FIELD_SILENT (module_layout, base)) /* linux 4.5+ */
+    {
+      LK_DECLARE_FIELD (module, init_layout);
+      LK_DECLARE_FIELD (module, core_layout);
+
+      LK_DECLARE_FIELD (module_layout, size);
+      LK_DECLARE_FIELD (module_layout, text_size);
+      LK_DECLARE_FIELD (module_layout, ro_size);
+    }
+  else if (LK_DECLARE_FIELD_SILENT (module, module_core)) /* linux -4.4 */
+    {
+      LK_DECLARE_FIELD (module, init_size);
+      LK_DECLARE_FIELD (module, core_size);
+
+      LK_DECLARE_FIELD (module, core_text_size);
+      LK_DECLARE_FIELD (module, core_ro_size);
+    }
+  else
+    {
+      error (_("Could not find module base.  Aborting."));
+    }
+
+  LK_DECLARE_FIELD (module_use, source_list);
+  LK_DECLARE_FIELD (module_use, source);
+
+  LK_DECLARE_FIELD (uts_namespace, name);
+
+  LK_DECLARE_STRUCT_ALIAS (new_utsname, utsname);
+  LK_DECLARE_STRUCT_ALIAS (old_utsname, utsname);
+  LK_DECLARE_STRUCT_ALIAS (oldold_utsname, utsname);
+  if (LK_STRUCT (utsname) == NULL)
+    error (_("Could not find struct utsname.  Aborting."));
+  LK_DECLARE_FIELD (utsname, version);
+  LK_DECLARE_FIELD (utsname, release);
+
   LK_DECLARE_ADDR (init_task);
   LK_DECLARE_ADDR (runqueues);
   LK_DECLARE_ADDR (__per_cpu_offset);
   LK_DECLARE_ADDR (init_mm);
+  LK_DECLARE_ADDR (modules);
+  LK_DECLARE_ADDR (init_uts_ns);
 
   LK_DECLARE_ADDR_ALIAS (__cpu_online_mask, cpu_online_mask);	/* linux 4.5+ */
   LK_DECLARE_ADDR_ALIAS (cpu_online_bits, cpu_online_mask);	/* linux -4.4 */
@@ -720,12 +815,17 @@ lk_try_push_target ()
   gdbarch_lk_init_private (gdbarch);
   /* Check for required arch hooks.  */
   gdb_assert (LK_HOOK->get_registers);
+  gdb_assert (LK_HOOK->is_kvaddr);
+  gdb_assert (LK_HOOK->vtop);
+  gdb_assert (LK_HOOK->get_module_text_offset);
 
   lk_init_ptid_map ();
   lk_update_thread_list (linux_kernel_ops);
 
   if (!target_is_pushed (linux_kernel_ops))
     push_target (linux_kernel_ops);
+
+  set_solib_ops (gdbarch, lk_modules_so_ops);
 }
 
 /* Function for targets to_open hook.  */
@@ -838,6 +938,7 @@ init_linux_kernel_ops (void)
   t->to_update_thread_list = lk_update_thread_list;
   t->to_pid_to_str = lk_pid_to_str;
   t->to_thread_name = lk_thread_name;
+  t->to_xfer_partial = lk_xfer_partial;
 
   t->to_stratum = thread_stratum;
   t->to_magic = OPS_MAGIC;

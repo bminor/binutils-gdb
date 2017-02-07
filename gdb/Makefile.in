@@ -1095,6 +1095,7 @@ SFILES = \
 	linespec.c \
 	lk-lists.c \
 	lk-low.c \
+	lk-modules.c \
 	location.c \
 	m2-exp.y \
 	m2-lang.c \
@@ -1344,6 +1345,7 @@ HFILES_NO_SRCDIR = \
 	linux-tdep.h \
 	lk-lists.h \
 	lk-low.h \
+	lk-modules.h \
 	location.h \
 	m2-lang.h \
 	m32r-tdep.h \
@@ -1705,6 +1707,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	language.o \
 	linespec.o \
 	lk-lists.o \
+	lk-modules.o \
 	location.o \
 	m2-lang.o \
 	m2-typeprint.o \
@@ -2539,6 +2542,7 @@ ALLDEPFILES = \
 	linux-tdep.c \
 	lk-lists.c \
 	lk-low.c \
+	lk-modules.c \
 	lm32-tdep.c \
 	m32r-linux-nat.c \
 	m32r-linux-tdep.c \
