@@ -1,5 +1,38 @@
 2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* ldmisc.c (vfinfo): Don't print the function name again either
+	if no source file name has been found both now and previously.
+	* testsuite/ld-cris/tls-err-20x.d: Adjust accordingly.
+	* testsuite/ld-mips-elf/mode-change-error-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-mips16.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-micromips.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-r6-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-3.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Likewise.
+	* testsuite/ld-powerpc/tocopt.out: Likewise.
+	* testsuite/ld-powerpc/tocopt7.out: Likewise.
+
+2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* ldmisc.c (vfinfo) <'H'>: Remove static NULL initializers.
 
 2017-02-15  Igor Kudrin  <ikudrin@accesssoftek.com>

@@ -331,9 +331,9 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 			   (eg emacs) to correctly locate multiple
 			   errors in the same source file.  */
 			if (last_bfd == NULL
-			    || last_file == NULL
 			    || last_function == NULL
 			    || last_bfd != abfd
+			    || (last_file == NULL) != (filename == NULL)
 			    || (filename != NULL
 				&& filename_cmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
