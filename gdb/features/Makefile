@@ -76,6 +76,7 @@ WHICH = aarch64 \
 	s390-linux32v2 s390-linux64v2 s390x-linux64v2 \
 	s390-te-linux64 s390x-te-linux64 s390-vx-linux64 s390x-vx-linux64 \
 	s390-tevx-linux64 s390x-tevx-linux64 \
+	s390x-cr-linux64 s390x-vxcr-linux64 \
 	tic6x-c64xp tic6x-c64x tic6x-c62x \
 	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux
 
@@ -109,6 +110,8 @@ s390x-linux64v2-expedite = r14,r15,pswa
 s390x-te-linux64-expedite = r14,r15,pswa
 s390x-vx-linux64-expedite = r14,r15,pswa
 s390x-tevx-linux64-expedite = r14,r15,pswa
+s390x-cr-linux64-expedite = r14,r15,pswa
+s390x-vxcr-linux64-expedite = r14,r15,pswa
 tic6x-c64xp-expedite = A15,PC
 tic6x-c64x-expedite = A15,PC
 tic6x-c62x-expedite = A15,PC
@@ -214,14 +217,16 @@ XMLTOC = \
 	s390-linux64v1.xml \
 	s390-linux64v2.xml \
 	s390-te-linux64.xml \
+	s390-vx-linux64.xml \
+	s390-tevx-linux64.xml \
 	s390x-linux64.xml \
 	s390x-linux64v1.xml \
 	s390x-linux64v2.xml \
 	s390x-te-linux64.xml \
-	s390-tevx-linux64.xml \
-	s390-vx-linux64.xml \
-	s390x-tevx-linux64.xml \
 	s390x-vx-linux64.xml \
+	s390x-cr-linux64.xml \
+	s390x-tevx-linux64.xml \
+	s390x-vxcr-linux64.xml \
 	tic6x-c62x-linux.xml \
 	tic6x-c62x.xml \
 	tic6x-c64x-linux.xml \
