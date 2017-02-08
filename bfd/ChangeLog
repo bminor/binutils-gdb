@@ -1,3 +1,8 @@
+2017-02-13  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (riscv_global_pointer_value): Change _gp to
+	__global_pointer$.
+
 2017-02-13  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_hash_sort_data): Add
