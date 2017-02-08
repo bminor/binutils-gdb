@@ -625,6 +625,10 @@ extern void thread_cancel_execution_command (struct thread_info *thr);
    executing).  */
 extern void validate_registers_access (void);
 
+/* Check whether it makes sense to access a register of PTID at this point.
+   Returns true if registers may be accessed; false otherwise.  */
+extern bool can_access_registers_ptid (ptid_t ptid);
+
 /* Returns whether to show which thread hit the breakpoint, received a
    signal, etc. and ended up causing a user-visible stop.  This is
    true iff we ever detected multiple threads.  */

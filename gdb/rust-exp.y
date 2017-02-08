@@ -941,16 +941,15 @@ rust_concat3 (const char *s1, const char *s2, const char *s3)
 static const struct rust_op *
 crate_name (const struct rust_op *name)
 {
-  char *crate = rust_crate_for_block (expression_context_block);
+  std::string crate = rust_crate_for_block (expression_context_block);
   struct stoken result;
 
   gdb_assert (name->opcode == OP_VAR_VALUE);
 
-  if (crate == NULL)
+  if (crate.empty ())
     error (_("Could not find crate for current location"));
-  result = make_stoken (obconcat (&work_obstack, "::", crate, "::",
+  result = make_stoken (obconcat (&work_obstack, "::", crate.c_str (), "::",
 				  name->left.sval.ptr, (char *) NULL));
-  xfree (crate);
 
   return ast_path (result, name->right.params);
 }
@@ -1198,7 +1197,7 @@ starts_raw_string (const char *str)
 /* Return true if STR looks like the end of a raw string that had N
    hashes at the start.  */
 
-static int
+static bool
 ends_raw_string (const char *str, int n)
 {
   int i;
@@ -1206,8 +1205,8 @@ ends_raw_string (const char *str, int n)
   gdb_assert (str[0] == '"');
   for (i = 0; i < n; ++i)
     if (str[i + 1] != '#')
-      return 0;
-  return 1;
+      return false;
+  return true;
 }
 
 /* Lex a string constant.  */
@@ -1284,7 +1283,7 @@ lex_string (void)
 
 /* Return true if STRING starts with whitespace followed by a digit.  */
 
-static int
+static bool
 space_then_number (const char *string)
 {
   const char *p = string;
@@ -1292,14 +1291,14 @@ space_then_number (const char *string)
   while (p[0] == ' ' || p[0] == '\t')
     ++p;
   if (p == string)
-    return 0;
+    return false;
 
   return *p >= '0' && *p <= '9';
 }
 
 /* Return true if C can start an identifier.  */
 
-static int
+static bool
 rust_identifier_start_p (char c)
 {
   return ((c >= 'a' && c <= 'z')

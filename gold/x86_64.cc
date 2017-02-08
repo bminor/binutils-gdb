@@ -1046,8 +1046,11 @@ class Target_x86_64 : public Sized_target<size, false>
       return false;
     // We cannot convert references to IFUNC symbols, or to symbols that
     // are not local to the current module.
+    // We can't do predefined symbols because they may become undefined
+    // (e.g., __ehdr_start when the headers aren't mapped to a segment).
     if (gsym->type() == elfcpp::STT_GNU_IFUNC
-        || gsym->is_undefined ()
+        || gsym->is_undefined()
+        || gsym->is_predefined()
         || gsym->is_from_dynobj()
         || gsym->is_preemptible())
       return false;
@@ -4244,12 +4247,14 @@ Target_x86_64<size>::Relocate::relocate(
 	  if (gsym != NULL)
 	    {
 	      gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
-	      got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - target->got_size();
+	      got_offset = (gsym->got_offset(GOT_TYPE_STANDARD)
+			    - target->got_size());
 	    }
 	  else
 	    {
 	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
-	      gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+	      gold_assert(object->local_has_got_offset(r_sym,
+						       GOT_TYPE_STANDARD));
 	      got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
 			    - target->got_size());
 	    }

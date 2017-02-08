@@ -1,3 +1,57 @@
+2017-02-06  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-elf/compress.exp: Don't print to stdout for all
+	"readelf -w".
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-cris/tls-err-20x.d: Fix a typo, s/n/\n/.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ld/testsuite/lib/ld-lib.exp (run_dump_test): Fix a typo,
+	s/regexp/regex/.
+
+2017-02-02  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/lib/ld-lib.exp (check_libdl_available): New function.
+	* testsuite/ld-elf/shared.exp (run_tests): Split tests which require
+	dlopen support into "dlopen_run_tests".  These tests include dl1*main
+	and dl6*main.
+	(dlopen_run_tests): New and only run it when check_libdl_available
+	returns true.  XFAIL on *-*-netbsdelf*.
+
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/vxworks-forced-local-1.d: Correct the
+	presentation of relocation addends.
+	* testsuite/ld-mips-elf/vxworks1-lib.rd: Likewise.
+	* testsuite/ld-mips-elf/vxworks1.dd: Likewise.
+	* testsuite/ld-mips-elf/vxworks1.rd: Likewise.
+
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/tls-multi-got-1-1.s: Place `tlsvar_ld'
+	in `.tdata' section.
+	* testsuite/ld-mips-elf/tls-multi-got-1.got: Adjust accordingly.
+	* testsuite/ld-mips-elf/tls-multi-got-1.r: Likewise.
+
+2017-02-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-unique/unique.exp (Could not link a dynamic executable):
+	Append $board_cflags to link commands.
+
+2017-02-01  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
+	* testsuite/ld-scripts/print-memory-usage-1.l: Relax
+	check for digit in second decimal place.
+
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/shared.exp: Correct PR ld/20828 test
+	indentation.
+
 2017-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c (add_archive_element): Eliminate string buffer.

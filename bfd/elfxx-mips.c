@@ -310,14 +310,17 @@ struct mips_elf_hash_sort_data
   struct elf_link_hash_entry *low;
   /* The least dynamic symbol table index corresponding to a non-TLS
      symbol with a GOT entry.  */
-  long min_got_dynindx;
+  bfd_size_type min_got_dynindx;
   /* The greatest dynamic symbol table index corresponding to a symbol
      with a GOT entry that is not referenced (e.g., a dynamic symbol
      with dynamic relocations pointing to it from non-primary GOTs).  */
-  long max_unref_got_dynindx;
-  /* The greatest dynamic symbol table index not corresponding to a
+  bfd_size_type max_unref_got_dynindx;
+  /* The greatest dynamic symbol table index corresponding to a local
+     symbol.  */
+  bfd_size_type max_local_dynindx;
+  /* The greatest dynamic symbol table index corresponding to an external
      symbol without a GOT entry.  */
-  long max_non_got_dynindx;
+  bfd_size_type max_non_got_dynindx;
 };
 
 /* We make up to two PLT entries if needed, one for standard MIPS code
@@ -3832,11 +3835,11 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   struct mips_elf_hash_sort_data hsd;
   struct mips_got_info *g;
 
-  if (elf_hash_table (info)->dynsymcount == 0)
-    return TRUE;
-
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
+
+  if (htab->root.dynsymcount == 0)
+    return TRUE;
 
   g = htab->got_info;
   if (g == NULL)
@@ -3845,20 +3848,19 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   hsd.low = NULL;
   hsd.max_unref_got_dynindx
     = hsd.min_got_dynindx
-    = (elf_hash_table (info)->dynsymcount - g->reloc_only_gotno);
-  hsd.max_non_got_dynindx = count_section_dynsyms (abfd, info) + 1;
-  mips_elf_link_hash_traverse (((struct mips_elf_link_hash_table *)
-				elf_hash_table (info)),
-			       mips_elf_sort_hash_table_f,
-			       &hsd);
+    = (htab->root.dynsymcount - g->reloc_only_gotno);
+  /* Add 1 to local symbol indices to account for the mandatory NULL entry
+     at the head of the table; see `_bfd_elf_link_renumber_dynsyms'.  */
+  hsd.max_local_dynindx = count_section_dynsyms (abfd, info) + 1;
+  hsd.max_non_got_dynindx = htab->root.local_dynsymcount + 1;
+  mips_elf_link_hash_traverse (htab, mips_elf_sort_hash_table_f, &hsd);
 
   /* There should have been enough room in the symbol table to
      accommodate both the GOT and non-GOT symbols.  */
+  BFD_ASSERT (hsd.max_local_dynindx <= htab->root.local_dynsymcount + 1);
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
-  BFD_ASSERT ((unsigned long) hsd.max_unref_got_dynindx
-	      == elf_hash_table (info)->dynsymcount);
-  BFD_ASSERT (elf_hash_table (info)->dynsymcount - hsd.min_got_dynindx
-	      == g->global_gotno);
+  BFD_ASSERT (hsd.max_unref_got_dynindx == htab->root.dynsymcount);
+  BFD_ASSERT (htab->root.dynsymcount - hsd.min_got_dynindx == g->global_gotno);
 
   /* Now we know which dynamic symbol has the lowest dynamic symbol
      table index in the GOT.  */
@@ -3884,7 +3886,10 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
   switch (h->global_got_area)
     {
     case GGA_NONE:
-      h->root.dynindx = hsd->max_non_got_dynindx++;
+      if (h->root.forced_local)
+	h->root.dynindx = hsd->max_local_dynindx++;
+      else
+	h->root.dynindx = hsd->max_non_got_dynindx++;
       break;
 
     case GGA_NORMAL:

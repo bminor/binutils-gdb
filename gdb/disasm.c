@@ -182,9 +182,9 @@ compare_lines (const void *mle1p, const void *mle2p)
 /* See disasm.h.  */
 
 int
-gdb_disassembler::pretty_print_insn (struct ui_out *uiout,
-				     const struct disasm_insn *insn,
-				     int flags)
+gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
+						  const struct disasm_insn *insn,
+						  int flags)
 {
   /* parts of the symbolic representation of the address */
   int unmapped;
@@ -195,7 +195,6 @@ gdb_disassembler::pretty_print_insn (struct ui_out *uiout,
   char *filename = NULL;
   char *name = NULL;
   CORE_ADDR pc;
-  struct ui_file *stb = stream ();
   struct gdbarch *gdbarch = arch ();
 
   ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
@@ -250,7 +249,8 @@ gdb_disassembler::pretty_print_insn (struct ui_out *uiout,
   if (name != NULL)
     xfree (name);
 
-  ui_file_rewind (stb);
+  m_insn_stb.clear ();
+
   if (flags & DISASSEMBLY_RAW_INSN)
     {
       CORE_ADDR end_pc;
@@ -260,33 +260,25 @@ gdb_disassembler::pretty_print_insn (struct ui_out *uiout,
 
       /* Build the opcodes using a temporary stream so we can
 	 write them out in a single go for the MI.  */
-      struct ui_file *opcode_stream = mem_fileopen ();
-      struct cleanup *cleanups =
-	make_cleanup_ui_file_delete (opcode_stream);
+      m_opcode_stb.clear ();
 
-      size = print_insn (pc);
+      size = m_di.print_insn (pc);
       end_pc = pc + size;
 
       for (;pc < end_pc; ++pc)
 	{
-	  err = m_di.read_memory_func (pc, &data, 1, &m_di);
-	  if (err != 0)
-	    m_di.memory_error_func (err, pc, &m_di);
-	  fprintf_filtered (opcode_stream, "%s%02x",
-			    spacer, (unsigned) data);
+	  read_code (pc, &data, 1);
+	  m_opcode_stb.printf ("%s%02x", spacer, (unsigned) data);
 	  spacer = " ";
 	}
 
-      uiout->field_stream ("opcodes", opcode_stream);
+      uiout->field_stream ("opcodes", m_opcode_stb);
       uiout->text ("\t");
-
-      do_cleanups (cleanups);
     }
   else
-    size = print_insn (pc);
+    size = m_di.print_insn (pc);
 
-  uiout->field_stream ("inst", stb);
-  ui_file_rewind (stb);
+  uiout->field_stream ("inst", m_insn_stb);
   do_cleanups (ui_out_chain);
   uiout->text ("\n");
 
@@ -294,10 +286,9 @@ gdb_disassembler::pretty_print_insn (struct ui_out *uiout,
 }
 
 static int
-dump_insns (struct ui_out *uiout, gdb_disassembler *di,
-	    CORE_ADDR low, CORE_ADDR high,
-	    int how_many, int flags,
-	    CORE_ADDR *end_pc)
+dump_insns (struct gdbarch *gdbarch,
+	    struct ui_out *uiout, CORE_ADDR low, CORE_ADDR high,
+	    int how_many, int flags, CORE_ADDR *end_pc)
 {
   struct disasm_insn insn;
   int num_displayed = 0;
@@ -305,11 +296,13 @@ dump_insns (struct ui_out *uiout, gdb_disassembler *di,
   memset (&insn, 0, sizeof (insn));
   insn.addr = low;
 
+  gdb_pretty_print_disassembler disasm (gdbarch);
+
   while (insn.addr < high && (how_many < 0 || num_displayed < how_many))
     {
       int size;
 
-      size = di->pretty_print_insn (uiout, &insn, flags);
+      size = disasm.pretty_print_insn (uiout, &insn, flags);
       if (size <= 0)
 	break;
 
@@ -335,8 +328,8 @@ dump_insns (struct ui_out *uiout, gdb_disassembler *di,
 
 static void
 do_mixed_source_and_assembly_deprecated
-  (struct ui_out *uiout,
-   gdb_disassembler *di, struct symtab *symtab,
+  (struct gdbarch *gdbarch, struct ui_out *uiout,
+   struct symtab *symtab,
    CORE_ADDR low, CORE_ADDR high,
    int how_many, int flags)
 {
@@ -471,7 +464,7 @@ do_mixed_source_and_assembly_deprecated
 	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
 	}
 
-      num_displayed += dump_insns (uiout, di,
+      num_displayed += dump_insns (gdbarch, uiout,
 				   mle[i].start_pc, mle[i].end_pc,
 				   how_many, flags, NULL);
 
@@ -499,7 +492,6 @@ do_mixed_source_and_assembly_deprecated
 static void
 do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 			      struct ui_out *uiout,
-			      gdb_disassembler *di,
 			      struct symtab *main_symtab,
 			      CORE_ADDR low, CORE_ADDR high,
 			      int how_many, int flags)
@@ -721,7 +713,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 	end_pc = std::min (sal.end, high);
       else
 	end_pc = pc + 1;
-      num_displayed += dump_insns (uiout, di, pc, end_pc,
+      num_displayed += dump_insns (gdbarch, uiout, pc, end_pc,
 				   how_many, flags, &end_pc);
       pc = end_pc;
 
@@ -736,8 +728,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 }
 
 static void
-do_assembly_only (struct ui_out *uiout,
-		  gdb_disassembler *di,
+do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  CORE_ADDR low, CORE_ADDR high,
 		  int how_many, int flags)
 {
@@ -745,7 +736,7 @@ do_assembly_only (struct ui_out *uiout,
 
   ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
-  dump_insns (uiout, di, low, high, how_many, flags, NULL);
+  dump_insns (gdbarch, uiout, low, high, how_many, flags, NULL);
 
   do_cleanups (ui_out_chain);
 }
@@ -815,12 +806,9 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-		 char *file_string, int flags, int how_many,
+		 int flags, int how_many,
 		 CORE_ADDR low, CORE_ADDR high)
 {
-  struct ui_file *stb = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (stb);
-  gdb_disassembler di (gdbarch, stb);
   struct symtab *symtab;
   int nlines = -1;
 
@@ -832,17 +820,16 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 
   if (!(flags & (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
       || nlines <= 0)
-    do_assembly_only (uiout, &di, low, high, how_many, flags);
+    do_assembly_only (gdbarch, uiout, low, high, how_many, flags);
 
   else if (flags & DISASSEMBLY_SOURCE)
-    do_mixed_source_and_assembly (gdbarch, uiout, &di, symtab, low, high,
+    do_mixed_source_and_assembly (gdbarch, uiout, symtab, low, high,
 				  how_many, flags);
 
   else if (flags & DISASSEMBLY_SOURCE_DEPRECATED)
-    do_mixed_source_and_assembly_deprecated (uiout, &di, symtab,
+    do_mixed_source_and_assembly_deprecated (gdbarch, uiout, symtab,
 					     low, high, how_many, flags);
 
-  do_cleanups (cleanups);
   gdb_flush (gdb_stdout);
 }
 
@@ -866,7 +853,7 @@ gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 int
 gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  return gdb_print_insn (gdbarch, addr, null_stream (), NULL);
+  return gdb_print_insn (gdbarch, addr, &null_stream, NULL);
 }
 
 /* fprintf-function for gdb_buffered_insn_length.  This function is a

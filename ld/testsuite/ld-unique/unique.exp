@@ -197,7 +197,7 @@ if {![ld_link $ld "tmpdir/libunique_shared.so" "-shared tmpdir/unique_shared.o"]
 }
 
 # Create executable NOT containing unique symbol linked against library.
-if {![ld_link $CC "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
+if {![ld_link "$CC $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
     fail "Could not link a dynamic executable"
     set fails [expr $fails + 1]
 }

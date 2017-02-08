@@ -8674,16 +8674,10 @@ remote_send (char **buf,
 static std::string
 escape_buffer (const char *buf, int n)
 {
-  struct cleanup *old_chain;
-  struct ui_file *stb;
+  string_file stb;
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
-
-  fputstrn_unfiltered (buf, n, '\\', stb);
-  std::string str = ui_file_as_string (stb);
-  do_cleanups (old_chain);
-  return str;
+  stb.putstrn (buf, n, '\\');
+  return std::move (stb.string ());
 }
 
 /* Display a null-terminated packet on stdout, for debugging, using C

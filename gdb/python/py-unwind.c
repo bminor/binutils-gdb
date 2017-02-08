@@ -198,12 +198,11 @@ pyuw_object_attribute_to_pointer (PyObject *pyo, const char *attr_name,
 static PyObject *
 unwind_infopy_str (PyObject *self)
 {
-  struct ui_file *strfile = mem_fileopen ();
   unwind_info_object *unwind_info = (unwind_info_object *) self;
-  PyObject *result;
+  string_file stb;
 
-  fprintf_unfiltered (strfile, "Frame ID: ");
-  fprint_frame_id (strfile, unwind_info->frame_id);
+  stb.puts ("Frame ID: ");
+  fprint_frame_id (&stb, unwind_info->frame_id);
   {
     char *sep = "";
     int i;
@@ -211,18 +210,18 @@ unwind_infopy_str (PyObject *self)
     saved_reg *reg;
 
     get_user_print_options (&opts);
-    fprintf_unfiltered (strfile, "\nSaved registers: (");
+    stb.printf ("\nSaved registers: (");
     for (i = 0; VEC_iterate (saved_reg, unwind_info->saved_regs, i, reg); i++)
       {
         struct value *value = value_object_to_value (reg->value);
 
-        fprintf_unfiltered (strfile, "%s(%d, ", sep, reg->number);
+        stb.printf ("%s(%d, ", sep, reg->number);
         if (value != NULL)
           {
             TRY
               {
-                value_print (value, strfile, &opts);
-                fprintf_unfiltered (strfile, ")");
+                value_print (value, &stb, &opts);
+                stb.puts (")");
               }
             CATCH (except, RETURN_MASK_ALL)
               {
@@ -231,16 +230,13 @@ unwind_infopy_str (PyObject *self)
             END_CATCH
           }
         else
-          fprintf_unfiltered (strfile, "<BAD>)");
+          stb.puts ("<BAD>)");
         sep = ", ";
       }
-    fprintf_unfiltered (strfile, ")");
+    stb.puts (")");
   }
 
-  std::string s = ui_file_as_string (strfile);
-  result = PyString_FromString (s.c_str ());
-  ui_file_delete (strfile);
-  return result;
+  return PyString_FromString (stb.c_str ());
 }
 
 /* Create UnwindInfo instance for given PendingFrame and frame ID.

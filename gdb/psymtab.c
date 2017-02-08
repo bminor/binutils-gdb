@@ -1965,6 +1965,8 @@ maintenance_print_psymbols (char *args, int from_tty)
   if (address_arg != NULL && source_arg != NULL)
     error (_("Must specify at most one of -pc and -source"));
 
+  stdio_file arg_outfile;
+
   if (argv[outfile_idx] != NULL)
     {
       char *outfile_name;
@@ -1973,10 +1975,9 @@ maintenance_print_psymbols (char *args, int from_tty)
 	error (_("Junk at end of command"));
       outfile_name = tilde_expand (argv[outfile_idx]);
       make_cleanup (xfree, outfile_name);
-      outfile = gdb_fopen (outfile_name, FOPEN_WT);
-      if (outfile == NULL)
+      if (!arg_outfile.open (outfile_name, FOPEN_WT))
 	perror_with_name (outfile_name);
-      make_cleanup_ui_file_delete (outfile);
+      outfile = &arg_outfile;
     }
 
   if (address_arg != NULL)
@@ -2011,9 +2012,8 @@ maintenance_print_psymbols (char *args, int from_tty)
 	    {
 	      if (!printed_objfile_header)
 		{
-		  fprintf_filtered (outfile,
-				    "\nPartial symtabs for objfile %s\n",
-				    objfile_name (objfile));
+		  outfile->printf ("\nPartial symtabs for objfile %s\n",
+				  objfile_name (objfile));
 		  printed_objfile_header = 1;
 		}
 	      dump_psymtab (objfile, ps, outfile);
@@ -2039,9 +2039,8 @@ maintenance_print_psymbols (char *args, int from_tty)
 		{
 		  if (!printed_objfile_header)
 		    {
-		      fprintf_filtered (outfile,
-					"\nPartial symtabs for objfile %s\n",
-					objfile_name (objfile));
+		      outfile->printf ("\nPartial symtabs for objfile %s\n",
+				       objfile_name (objfile));
 		      printed_objfile_header = 1;
 		    }
 		  dump_psymtab (objfile, ps, outfile);
@@ -2056,7 +2055,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 	  && source_arg == NULL
 	  && objfile->psymtabs_addrmap != NULL)
 	{
-	  fprintf_filtered (outfile, "\n");
+	  outfile->puts ("\n");
 	  dump_psymtab_addrmap (objfile, NULL, outfile);
 	}
     }

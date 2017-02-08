@@ -316,7 +316,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
       const char *parallel;
       const char *cond = "";
       const char *func_unit;
-      char func_unit_buf[7];
+      char func_unit_buf[8];
       unsigned int func_unit_side = 0;
       unsigned int func_unit_data_side = 0;
       unsigned int func_unit_cross = 0;
@@ -703,8 +703,9 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 	  if (opc->flags & TIC6X_FLAG_INSN16_BSIDE && func_unit_side == 1)
 	      func_unit_cross = 1;
 
-	  snprintf (func_unit_buf, 7, " .%c%u%s%s", func_unit_char,
-		    func_unit_side, (func_unit_cross ? "X" : ""), data_str);
+	  snprintf (func_unit_buf, sizeof func_unit_buf, " .%c%u%s%s",
+		    func_unit_char, func_unit_side,
+		    (func_unit_cross ? "X" : ""), data_str);
 	  func_unit = func_unit_buf;
 	}
 

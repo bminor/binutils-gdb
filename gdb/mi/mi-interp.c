@@ -108,14 +108,14 @@ static struct mi_interp *
 as_mi_interp (struct interp *interp)
 {
   if (interp_ui_out (interp)->is_mi_like_p ())
-    return (struct mi_interp *) interp_data (interp);
+    return (struct mi_interp *) interp;
   return NULL;
 }
 
-static void *
-mi_interpreter_init (struct interp *interp, int top_level)
+void
+mi_interp::init (bool top_level)
 {
-  struct mi_interp *mi = XNEW (struct mi_interp);
+  mi_interp *mi = this;
   const char *name;
   int mi_version;
 
@@ -126,13 +126,13 @@ mi_interpreter_init (struct interp *interp, int top_level)
 
   /* Create MI console channels, each with a different prefix so they
      can be distinguished.  */
-  mi->out = mi_console_file_new (mi->raw_stdout, "~", '"');
-  mi->err = mi_console_file_new (mi->raw_stdout, "&", '"');
+  mi->out = new mi_console_file (mi->raw_stdout, "~", '"');
+  mi->err = new mi_console_file (mi->raw_stdout, "&", '"');
   mi->log = mi->err;
-  mi->targ = mi_console_file_new (mi->raw_stdout, "@", '"');
-  mi->event_channel = mi_console_file_new (mi->raw_stdout, "=", 0);
+  mi->targ = new mi_console_file (mi->raw_stdout, "@", '"');
+  mi->event_channel = new mi_console_file (mi->raw_stdout, "=", 0);
 
-  name = interp_name (interp);
+  name = interp_name (this);
   /* INTERP_MI selects the most recent released version.  "mi2" was
      released as part of GDB 6.0.  */
   if (strcmp (name, INTERP_MI) == 0)
@@ -157,14 +157,12 @@ mi_interpreter_init (struct interp *interp, int top_level)
 	 up-front.  */
       iterate_over_inferiors (report_initial_inferior, mi);
     }
-
-  return mi;
 }
 
-static int
-mi_interpreter_resume (void *data)
+void
+mi_interp::resume ()
 {
-  struct mi_interp *mi = (struct mi_interp *) data;
+  struct mi_interp *mi = this;
   struct ui *ui = current_ui;
 
   /* As per hack note in mi_interpreter_init, swap in the output
@@ -188,19 +186,16 @@ mi_interpreter_resume (void *data)
   clear_interpreter_hooks ();
 
   deprecated_show_load_progress = mi_load_progress;
-
-  return 1;
 }
 
-static int
-mi_interpreter_suspend (void *data)
+void
+mi_interp::suspend ()
 {
   gdb_disable_readline ();
-  return 1;
 }
 
-static struct gdb_exception
-mi_interpreter_exec (void *data, const char *command)
+gdb_exception
+mi_interp::exec (const char *command)
 {
   mi_execute_command_wrapper (command);
   return exception_none;
@@ -327,10 +322,10 @@ mi_execute_command_input_handler (char *cmd)
     display_mi_prompt (mi);
 }
 
-static void
-mi_interpreter_pre_command_loop (struct interp *self)
+void
+mi_interp::pre_command_loop ()
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (self);
+  struct mi_interp *mi = this;
 
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format.  */
@@ -658,7 +653,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
      using cli interpreter, be sure to use MI uiout for output,
      not the current one.  */
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
-  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
 
   if (print_frame)
     {
@@ -900,7 +895,7 @@ mi_breakpoint_created (struct breakpoint *b)
       /* We want the output from gdb_breakpoint_query to go to
 	 mi->event_channel.  One approach would be to just call
 	 gdb_breakpoint_query, and then use mi_out_put to send the current
-	 content of mi_outout into mi->event_channel.  However, that will
+	 content of mi_uiout into mi->event_channel.  However, that will
 	 break if anything is output to mi_uiout prior to calling the
 	 breakpoint_created notifications.  So, we use
 	 ui_out_redirect.  */
@@ -979,7 +974,7 @@ mi_breakpoint_modified (struct breakpoint *b)
       /* We want the output from gdb_breakpoint_query to go to
 	 mi->event_channel.  One approach would be to just call
 	 gdb_breakpoint_query, and then use mi_out_put to send the current
-	 content of mi_outout into mi->event_channel.  However, that will
+	 content of mi_uiout into mi->event_channel.  However, that will
 	 break if anything is output to mi_uiout prior to calling the
 	 breakpoint_created notifications.  So, we use
 	 ui_out_redirect.  */
@@ -1362,76 +1357,48 @@ report_initial_inferior (struct inferior *inf, void *closure)
   return 0;
 }
 
-static struct ui_out *
-mi_ui_out (struct interp *interp)
+ui_out *
+mi_interp::interp_ui_out ()
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (interp);
-
-  return mi->mi_uiout;
+  return this->mi_uiout;
 }
 
 /* Do MI-specific logging actions; save raw_stdout, and change all
    the consoles to use the supplied ui-file(s).  */
 
-static int
-mi_set_logging (struct interp *interp, int start_log,
-		struct ui_file *out, struct ui_file *logfile)
+void
+mi_interp::set_logging (ui_file_up logfile, bool logging_redirect)
 {
-  struct mi_interp *mi = (struct mi_interp *) interp_data (interp);
+  struct mi_interp *mi = this;
 
-  if (!mi)
-    return 0;
-
-  if (start_log)
+  if (logfile != NULL)
     {
-      /* The tee created already is based on gdb_stdout, which for MI
-	 is a console and so we end up in an infinite loop of console
-	 writing to ui_file writing to console etc.  So discard the
-	 existing tee (it hasn't been used yet, and MI won't ever use
-	 it), and create one based on raw_stdout instead.  */
-      if (logfile)
-	{
-	  ui_file_delete (out);
-	  out = tee_file_new (mi->raw_stdout, 0, logfile, 0);
-	}
-
       mi->saved_raw_stdout = mi->raw_stdout;
-      mi->raw_stdout = out;
+      mi->raw_stdout = make_logging_output (mi->raw_stdout,
+					    std::move (logfile),
+					    logging_redirect);
+
     }
   else
     {
+      delete mi->raw_stdout;
       mi->raw_stdout = mi->saved_raw_stdout;
       mi->saved_raw_stdout = NULL;
     }
   
-  mi_console_set_raw (mi->out, mi->raw_stdout);
-  mi_console_set_raw (mi->err, mi->raw_stdout);
-  mi_console_set_raw (mi->log, mi->raw_stdout);
-  mi_console_set_raw (mi->targ, mi->raw_stdout);
-  mi_console_set_raw (mi->event_channel, mi->raw_stdout);
-
-  return 1;
+  mi->out->set_raw (mi->raw_stdout);
+  mi->err->set_raw (mi->raw_stdout);
+  mi->log->set_raw (mi->raw_stdout);
+  mi->targ->set_raw (mi->raw_stdout);
+  mi->event_channel->set_raw (mi->raw_stdout);
 }
-
-/* The MI interpreter's vtable.  */
-
-static const struct interp_procs mi_interp_procs =
-{
-  mi_interpreter_init,		/* init_proc */
-  mi_interpreter_resume,	/* resume_proc */
-  mi_interpreter_suspend,	/* suspend_proc */
-  mi_interpreter_exec,		/* exec_proc */
-  mi_ui_out, 			/* ui_out_proc */
-  mi_set_logging,		/* set_logging_proc */
-  mi_interpreter_pre_command_loop /* pre_command_loop_proc */
-};
 
 /* Factory for MI interpreters.  */
 
 static struct interp *
 mi_interp_factory (const char *name)
 {
-  return interp_new (name, &mi_interp_procs, NULL);
+  return new mi_interp (name);
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

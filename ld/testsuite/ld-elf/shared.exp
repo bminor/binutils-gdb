@@ -54,30 +54,30 @@ if { [check_gc_sections_available] } {
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/20828 dynamic symbols with section GC\
-	      (auxiliary shared library)" \
-	     "$LFLAGS -shared --gc-sections -T pr20828.ld" "" "$AFLAGS_PIC" \
-	     {pr20828.s} \
-	     {{readelf --dyn-syms pr20828-a.sd} \
-	      {readelf --dyn-syms pr20828-b.sd}} \
-	     "libpr20828.so"] \
+	     (auxiliary shared library)" \
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld" "" "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-a.sd} \
+	     {readelf --dyn-syms pr20828-b.sd}} \
+	    "libpr20828.so"] \
 	[list \
 	    "PR ld/20828 dynamic symbols with section GC (plain)" \
-	     "$LFLAGS -shared --gc-sections -T pr20828.ld" \
-	     "tmpdir/libpr20828.so" "$AFLAGS_PIC" \
-	     {pr20828.s} \
-	     {{readelf --dyn-syms pr20828-a.sd} \
-	      {readelf --dyn-syms pr20828-b.sd}} \
-	     "pr20828-1.so"] \
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld" \
+	    "tmpdir/libpr20828.so" "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-a.sd} \
+	     {readelf --dyn-syms pr20828-b.sd}} \
+	    "pr20828-1.so"] \
 	[list \
 	    "PR ld/20828 dynamic symbols with section GC (version script)" \
-	     "$LFLAGS -shared --gc-sections -T pr20828.ld\
-	      --version-script=pr20828.ver" \
-	     "tmpdir/libpr20828.so" \
-	     "$AFLAGS_PIC" \
-	     {pr20828.s} \
-	     {{readelf --dyn-syms pr20828-b.sd} \
-	      {readelf --dyn-syms pr20828-c.sd}} \
-	     "pr20828-2.so"]]
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld\
+	     --version-script=pr20828.ver" \
+	    "tmpdir/libpr20828.so" \
+	    "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-b.sd} \
+	     {readelf --dyn-syms pr20828-c.sd}} \
+	    "pr20828-2.so"]]
 }
 
 # Check to see if the C compiler works
@@ -373,12 +373,6 @@ set run_tests [list \
     [list "Run hidden libbar.so with versioned libfoo.so" \
      "-Wl,--no-as-needed tmpdir/libbarhfoov.so tmpdir/libfoov.so" "" \
      {main.c} "hidden" "hidden.out" ] \
-    [list "Run dl1a with --dynamic-list=dl1.list and dlopen on libdl1.so" \
-     "-Wl,--no-as-needed,--dynamic-list=dl1.list $extralibs" "" \
-     {dl1main.c} "dl1a" "dl1.out" ] \
-    [list "Run dl1b with --dynamic-list-data and dlopen on libdl1.so" \
-     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
-     {dl1main.c} "dl1b" "dl1.out" ] \
     [list "Run with libdl2a.so" \
      "-Wl,--no-as-needed tmpdir/libdl2a.so" "" \
      {dl2main.c} "dl2a" "dl2a.out" ] \
@@ -406,39 +400,6 @@ set run_tests [list \
     [list "Run with libdl4f.so" \
      "-Wl,--no-as-needed tmpdir/libdl4f.so" "" \
      {dl4main.c} "dl4f" "dl4a.out" ] \
-    [list "Run dl6a1 with --dynamic-list-data and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
-     {dl6amain.c} "dl6a1" "dl6a.out" ] \
-    [list "Run dl6a2 with -Bsymbolic-functions and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,-Bsymbolic-functions $extralibs" "" \
-     {dl6amain.c} "dl6a2" "dl6b.out" ] \
-    [list "Run dl6a3 with -Bsymbolic and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,-Bsymbolic $extralibs" "" \
-     {dl6amain.c} "dl6a3" "dl6b.out" ] \
-    [list "Run dl6a4 with -Bsymbolic --dynamic-list-data and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,-Bsymbolic,--dynamic-list-data $extralibs" "" \
-     {dl6amain.c} "dl6a4" "dl6a.out" ] \
-    [list "Run dl6a5 with -Bsymbolic-functions --dynamic-list-cpp-new and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,-Bsymbolic-functions,--dynamic-list-cpp-new $extralibs" "" \
-     {dl6amain.c} "dl6a5" "dl6b.out" ] \
-    [list "Run dl6a6 with --dynamic-list-cpp-new -Bsymbolic-functions and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,--dynamic-list-cpp-new,-Bsymbolic-functions $extralibs" "" \
-     {dl6amain.c} "dl6a6" "dl6b.out" ] \
-    [list "Run dl6a7 with --dynamic-list-data -Bsymbolic and dlopen on libdl6a.so" \
-     "-Wl,--no-as-needed,--dynamic-list-data,-Bsymbolic $extralibs" "" \
-     {dl6amain.c} "dl6a7" "dl6a.out" ] \
-    [list "Run dl6b1 with --dynamic-list-data and dlopen on libdl6b.so" \
-     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
-     {dl6bmain.c} "dl6b1" "dl6a.out" ] \
-    [list "Run dl6b2 with dlopen on libdl6b.so" \
-     "-Wl,--no-as-needed $extralibs" "" \
-     {dl6bmain.c} "dl6b2" "dl6b.out" ] \
-    [list "Run dl6c1 with --dynamic-list-data and dlopen on libdl6c.so" \
-     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
-     {dl6cmain.c} "dl6c1" "dl6b.out" ] \
-    [list "Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so" \
-     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
-     {dl6dmain.c} "dl6d1" "dl6b.out" ] \
     [list "Run with libdata1.so" \
      "-Wl,--no-as-needed tmpdir/libdata1.so" "" \
      {dynbss1.c} "dynbss1" "pass.out" ] \
@@ -485,6 +446,56 @@ set run_tests [list \
 
 # NetBSD ELF systems do not currently support the .*_array sections.
 run_ld_link_exec_tests $run_tests "*-*-netbsdelf*"
+
+# These tests require dlopen support.
+set dlopen_run_tests [list \
+    [list "Run dl1a with --dynamic-list=dl1.list and dlopen on libdl1.so" \
+     "-Wl,--no-as-needed,--dynamic-list=dl1.list $extralibs" "" \
+     {dl1main.c} "dl1a" "dl1.out" ] \
+    [list "Run dl1b with --dynamic-list-data and dlopen on libdl1.so" \
+     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
+     {dl1main.c} "dl1b" "dl1.out" ] \
+    [list "Run dl6a1 with --dynamic-list-data and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
+     {dl6amain.c} "dl6a1" "dl6a.out" ] \
+    [list "Run dl6a2 with -Bsymbolic-functions and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,-Bsymbolic-functions $extralibs" "" \
+     {dl6amain.c} "dl6a2" "dl6b.out" ] \
+    [list "Run dl6a3 with -Bsymbolic and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,-Bsymbolic $extralibs" "" \
+     {dl6amain.c} "dl6a3" "dl6b.out" ] \
+    [list "Run dl6a4 with -Bsymbolic --dynamic-list-data and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,-Bsymbolic,--dynamic-list-data $extralibs" "" \
+     {dl6amain.c} "dl6a4" "dl6a.out" ] \
+    [list "Run dl6a5 with -Bsymbolic-functions --dynamic-list-cpp-new and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,-Bsymbolic-functions,--dynamic-list-cpp-new $extralibs" "" \
+     {dl6amain.c} "dl6a5" "dl6b.out" ] \
+    [list "Run dl6a6 with --dynamic-list-cpp-new -Bsymbolic-functions and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,--dynamic-list-cpp-new,-Bsymbolic-functions $extralibs" "" \
+     {dl6amain.c} "dl6a6" "dl6b.out" ] \
+    [list "Run dl6a7 with --dynamic-list-data -Bsymbolic and dlopen on libdl6a.so" \
+     "-Wl,--no-as-needed,--dynamic-list-data,-Bsymbolic $extralibs" "" \
+     {dl6amain.c} "dl6a7" "dl6a.out" ] \
+    [list "Run dl6b1 with --dynamic-list-data and dlopen on libdl6b.so" \
+     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
+     {dl6bmain.c} "dl6b1" "dl6a.out" ] \
+    [list "Run dl6b2 with dlopen on libdl6b.so" \
+     "-Wl,--no-as-needed $extralibs" "" \
+     {dl6bmain.c} "dl6b2" "dl6b.out" ] \
+    [list "Run dl6c1 with --dynamic-list-data and dlopen on libdl6c.so" \
+     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
+     {dl6cmain.c} "dl6c1" "dl6b.out" ] \
+    [list "Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so" \
+     "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
+     {dl6dmain.c} "dl6d1" "dl6b.out" ] \
+]
+
+# Only run them when libdl is available.
+if [check_libdl_available] {
+  # XFAIL on NetBSD ELF systems as they do not currently support the .*_array
+  # sections.
+  run_ld_link_exec_tests $dlopen_run_tests "*-*-netbsdelf*"
+}
 
 # Check --no-add-needed and --no-copy-dt-needed-entries
 set testname "--no-add-needed"

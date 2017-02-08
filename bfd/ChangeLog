@@ -1,3 +1,55 @@
+2017-02-07  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_finish_dynamic_sections): Only write PLT
+	entry size if PLT header is written.
+
+2017-02-06  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Fix sparc64 dynamic relocation processing to use the dynamic
+        symbol count.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Use 'dynamic'
+	to determine if bfd_get_symcount() or bfd_get_dynamic_symcount()
+	should be used.
+
+2017-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 21096
+	* coffcode.h (coff_write_object_contents): Enlarge size of
+	s_name_buf in order to avoid compile time warning about possible
+	integer truncation.
+	* elf32-nds32.c (nds32_elf_ex9_import_table): Mask off lower
+	32-bits of insn value before printing into buffer.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_hash_sort_data): Add
+	`max_local_dynindx'.
+	(mips_elf_sort_hash_table): Handle it.
+	(mips_elf_sort_hash_table_f) <GGA_NONE>: For forced local
+	symbols bump up `max_local_dynindx' rather than
+	`max_non_got_dynindx'.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_hash_sort_data): Convert the
+	`min_got_dynindx', `max_unref_got_dynindx' and
+	`max_non_got_dynindx' members to the `bfd_size_type' data type.
+	(mips_elf_sort_hash_table): Adjust accordingly.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_sort_hash_table): Use `htab' throughout
+	to access the hash table.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_sort_hash_table): Move assertion on
+	non-NULL `htab' to the beginning.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_gc_sweep): Wrap overlong line.
+
 2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.h (_bfd_mips_elf_insn32): Rename prototype to...

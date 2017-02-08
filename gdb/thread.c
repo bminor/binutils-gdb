@@ -1141,6 +1141,26 @@ validate_registers_access (void)
     error (_("Selected thread is running."));
 }
 
+/* See gdbthread.h.  */
+
+bool
+can_access_registers_ptid (ptid_t ptid)
+{
+  /* No thread, no registers.  */
+  if (ptid_equal (ptid, null_ptid))
+    return false;
+
+  /* Don't try to read from a dead thread.  */
+  if (is_exited (ptid))
+    return false;
+
+  /* ... or from a spinning thread.  FIXME: see validate_registers_access.  */
+  if (is_executing (ptid))
+    return false;
+
+  return true;
+}
+
 int
 pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread)
 {

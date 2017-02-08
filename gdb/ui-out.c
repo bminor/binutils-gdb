@@ -529,15 +529,13 @@ ui_out::field_core_addr (const char *fldname, struct gdbarch *gdbarch,
 }
 
 void
-ui_out::field_stream (const char *fldname, ui_file *stream)
+ui_out::field_stream (const char *fldname, string_file &stream)
 {
-  std::string buffer = ui_file_as_string (stream);
-
-  if (!buffer.empty ())
-    field_string (fldname, buffer.c_str ());
+  if (!stream.empty ())
+    field_string (fldname, stream.c_str ());
   else
     field_skip (fldname);
-  ui_file_rewind (stream);
+  stream.clear ();
 }
 
 /* Used to omit a field.  */

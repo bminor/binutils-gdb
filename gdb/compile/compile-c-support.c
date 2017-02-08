@@ -557,9 +557,8 @@ public:
   std::string compute (const char *input, const struct block *expr_block,
 		       CORE_ADDR expr_pc)
   {
-    struct ui_file *var_stream = NULL;
-    struct ui_file *buf = mem_fileopen ();
-    struct cleanup *cleanup = make_cleanup_ui_file_delete (buf);
+    string_file var_stream;
+    string_file buf;
 
     /* Do not generate local variable information for "raw"
        compilations.  In this case we aren't emitting our own function
@@ -570,21 +569,17 @@ public:
 	   before generating the function header, so we can define the
 	   register struct before the function body.  This requires a
 	   temporary stream.  */
-	var_stream = mem_fileopen ();
-	make_cleanup_ui_file_delete (var_stream);
 	unsigned char *registers_used
 	  = generate_c_for_variable_locations (m_instance, var_stream, m_arch,
 					       expr_block, expr_pc);
 	make_cleanup (xfree, registers_used);
 
-	fputs_unfiltered ("typedef unsigned int"
-			  " __attribute__ ((__mode__(__pointer__)))"
-			  " __gdb_uintptr;\n",
-			  buf);
-	fputs_unfiltered ("typedef int"
-			  " __attribute__ ((__mode__(__pointer__)))"
-			  " __gdb_intptr;\n",
-			  buf);
+	buf.puts ("typedef unsigned int"
+		  " __attribute__ ((__mode__(__pointer__)))"
+		  " __gdb_uintptr;\n");
+	buf.puts ("typedef int"
+		  " __attribute__ ((__mode__(__pointer__)))"
+		  " __gdb_intptr;\n");
 
 	/* Iterate all log2 sizes in bytes supported by c_get_mode_for_size.  */
 	for (int i = 0; i < 4; ++i)
@@ -592,56 +587,53 @@ public:
 	    const char *mode = c_get_mode_for_size (1 << i);
 
 	    gdb_assert (mode != NULL);
-	    fprintf_unfiltered (buf,
-				"typedef int"
-				" __attribute__ ((__mode__(__%s__)))"
-				" __gdb_int_%s;\n",
-				mode, mode);
+	    buf.printf ("typedef int"
+			" __attribute__ ((__mode__(__%s__)))"
+			" __gdb_int_%s;\n",
+			mode, mode);
 	  }
 
-	generate_register_struct (buf, m_arch, registers_used);
+	generate_register_struct (&buf, m_arch, registers_used);
       }
 
-    add_code_header (m_instance->scope (), buf);
+    add_code_header (m_instance->scope (), &buf);
 
     if (m_instance->scope () == COMPILE_I_SIMPLE_SCOPE
 	|| m_instance->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
 	|| m_instance->scope () == COMPILE_I_PRINT_VALUE_SCOPE)
       {
-	ui_file_put (var_stream, ui_file_write_for_put, buf);
-	push_user_expression (buf);
+	buf.write (var_stream.c_str (), var_stream.size ());
+	push_user_expression (&buf);
       }
 
-    write_macro_definitions (expr_block, expr_pc, buf);
+    write_macro_definitions (expr_block, expr_pc, &buf);
 
     /* The user expression has to be in its own scope, so that "extern"
        works properly.  Otherwise gcc thinks that the "extern"
        declaration is in the same scope as the declaration provided by
        gdb.  */
     if (m_instance->scope () != COMPILE_I_RAW_SCOPE)
-      fputs_unfiltered ("{\n", buf);
+      buf.puts ("{\n");
 
-    fputs_unfiltered ("#line 1 \"gdb command line\"\n", buf);
+    buf.puts ("#line 1 \"gdb command line\"\n");
 
-    add_input (m_instance->scope (), input, buf);
+    add_input (m_instance->scope (), input, &buf);
 
     /* For larger user expressions the automatic semicolons may be
        confusing.  */
     if (strchr (input, '\n') == NULL)
-      fputs_unfiltered (";\n", buf);
+      buf.puts (";\n");
 
     if (m_instance->scope () != COMPILE_I_RAW_SCOPE)
-      fputs_unfiltered ("}\n", buf);
+      buf.puts ("}\n");
 
     if (m_instance->scope () == COMPILE_I_SIMPLE_SCOPE
 	|| m_instance->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
 	|| m_instance->scope () == COMPILE_I_PRINT_VALUE_SCOPE)
-      pop_user_expression (buf);
+      pop_user_expression (&buf);
 
-    add_code_footer (m_instance->scope (), buf);
-    std::string code = ui_file_as_string (buf);
-    do_cleanups (cleanup);
-    return code;
+    add_code_footer (m_instance->scope (), &buf);
+    return std::move (buf.string ());
   }
 
 private:

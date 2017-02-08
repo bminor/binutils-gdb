@@ -12944,7 +12944,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 
 	  if (info->print_gc_sections && o->size != 0)
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("Removing unused section '%s' in file '%B'"), sub, o->name);
+	    _bfd_error_handler (_("Removing unused section '%s' in file '%B'"),
+				sub, o->name);
 
 	  /* But we also have to update some of the relocation
 	     info we collected before.  */

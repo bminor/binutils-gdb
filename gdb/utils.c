@@ -187,33 +187,6 @@ make_cleanup_obstack_free (struct obstack *obstack)
   return make_cleanup (do_obstack_free, obstack);
 }
 
-static void
-do_ui_file_delete (void *arg)
-{
-  ui_file_delete ((struct ui_file *) arg);
-}
-
-struct cleanup *
-make_cleanup_ui_file_delete (struct ui_file *arg)
-{
-  return make_cleanup (do_ui_file_delete, arg);
-}
-
-struct ui_file *
-null_stream (void)
-{
-  /* A simple implementation of singleton pattern.  */
-  static struct ui_file *stream = NULL;
-
-  if (stream == NULL)
-    {
-      stream = ui_file_new ();
-      /* Delete it on gdb exit.  */
-      make_final_cleanup (do_ui_file_delete, stream);
-    }
-  return stream;
-}
-
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
 static void
@@ -460,11 +433,9 @@ verror (const char *string, va_list args)
 }
 
 void
-error_stream (struct ui_file *stream)
+error_stream (const string_file &stream)
 {
-  std::string message = ui_file_as_string (stream);
-
-  error (("%s"), message.c_str ());
+  error (("%s"), stream.c_str ());
 }
 
 /* Emit a message and abort.  */

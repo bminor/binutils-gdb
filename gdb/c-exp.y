@@ -1555,19 +1555,21 @@ oper:	OPERATOR NEW
 	|	OPERATOR OBJC_LBRAC ']'
 			{ $$ = operator_stoken ("[]"); }
 	|	OPERATOR conversion_type_id
-			{ struct ui_file *buf = mem_fileopen ();
+			{ string_file buf;
 
-			  c_print_type ($2, NULL, buf, -1, 0,
+			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
-			  std::string name = " " + ui_file_as_string (buf);
-			  ui_file_delete (buf);
 
 			  /* This also needs canonicalization.  */
-			  std::string canon
-			    = cp_canonicalize_string (name.c_str ());
-			  if (!canon.empty ())
-			    name = " " + canon;
-			  $$ = operator_stoken (name.c_str ());
+			  const char *name = buf.c_str ();
+			  std::string canon = cp_canonicalize_string (name);
+			  if (canon.empty ())
+			    canon = name;
+
+			  /* We need a space between "operator" and the
+			     canonicalized type name. */
+			  canon.insert (0, " ");
+			  $$ = operator_stoken (canon.c_str ());
 			}
 	;
 

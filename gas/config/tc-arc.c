@@ -1671,6 +1671,10 @@ parse_opcode_flags (const struct arc_opcode *opcode,
       int cl_matches = 0;
       struct arc_flags *pflag = NULL;
 
+      /* Check if opcode has implicit flag classes.  */
+      if (cl_flags->flag_class & F_CLASS_IMPLICIT)
+	continue;
+
       /* Check for extension conditional codes.  */
       if (ext_condcode.arc_ext_condcode
           && cl_flags->flag_class & F_CLASS_EXTEND)

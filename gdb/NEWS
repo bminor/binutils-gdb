@@ -7,6 +7,9 @@ set|show compile-gcc
 
 *** Changes since GDB 7.12
 
+* GDB now supports recording and replaying rdrand and rdseed Intel 64
+  instructions.
+
 * Building GDB and GDBserver now requires a C++11 compiler.
 
   For example, GCC 4.8 or later.
@@ -50,6 +53,8 @@ set|show compile-gcc
        set $i = $i + 1
      end
    end
+
+* Target descriptions can now describe registers for sparc32 and sparc64.
 
 * New native configurations
 

@@ -15,8 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if { [skip_btrace_tests] } { return -1 }
-if { [skip_shlib_tests]  } { return -1 }
+if { [skip_btrace_tests] } {
+    unsupported "target does not support record-btrace"
+    return -1
+}
+
+if { [skip_shlib_tests]  } {
+    unsupported "target does not support shared library tests"
+    return -1
+}
 
 standard_testfile
 
@@ -26,7 +33,7 @@ set binfile_lib [standard_output_file $basename_lib.so]
 
 if { [gdb_compile_shlib $srcfile_lib $binfile_lib \
 	  [list additional_flags=-fPIC]] != "" } {
-    untested "failed to compile shared library"
+    untested "failed to prepare shlib"
     return -1
 }
 
@@ -36,7 +43,8 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 }
 
 if ![runto_main] {
-    return 0
+    untested "failed to run to main"
+    return -1
 }
 
 # Trace the test function

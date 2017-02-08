@@ -146,7 +146,7 @@ gdbscm_disassembler::gdbscm_disassembler (struct gdbarch *gdbarch,
 static int
 gdbscm_print_insn_from_port (struct gdbarch *gdbarch,
 			     SCM port, ULONGEST offset, CORE_ADDR memaddr,
-			     struct ui_file *stream, int *branch_delay_insns)
+			     string_file *stream, int *branch_delay_insns)
 {
   gdbscm_disassembler di (gdbarch, stream, port, offset);
 
@@ -245,33 +245,29 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
   for (pc = start, i = 0; pc <= end && i < count; )
     {
       int insn_len = 0;
-      struct ui_file *memfile = mem_fileopen ();
-      struct cleanup *cleanups = make_cleanup_ui_file_delete (memfile);
+      string_file buf;
 
       TRY
 	{
 	  if (using_port)
 	    {
 	      insn_len = gdbscm_print_insn_from_port (gdbarch, port, offset,
-						      pc, memfile, NULL);
+						      pc, &buf, NULL);
 	    }
 	  else
-	    insn_len = gdb_print_insn (gdbarch, pc, memfile, NULL);
+	    insn_len = gdb_print_insn (gdbarch, pc, &buf, NULL);
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
-	  GDBSCM_HANDLE_GDB_EXCEPTION_WITH_CLEANUPS (except, cleanups);
+	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
 	}
       END_CATCH
 
-      std::string as = ui_file_as_string (memfile);
-
-      result = scm_cons (dascm_make_insn (pc, as.c_str (), insn_len),
+      result = scm_cons (dascm_make_insn (pc, buf.c_str (), insn_len),
 			 result);
 
       pc += insn_len;
       i++;
-      do_cleanups (cleanups);
     }
 
   return scm_reverse_x (result, SCM_EOL);

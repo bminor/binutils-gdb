@@ -978,8 +978,6 @@ gdbscm_breakpoint_commands (SCM self)
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct breakpoint *bp;
   long length;
-  struct ui_file *string_file;
-  struct cleanup *chain;
   SCM result;
 
   bp = bp_smob->bp;
@@ -987,10 +985,9 @@ gdbscm_breakpoint_commands (SCM self)
   if (bp->commands == NULL)
     return SCM_BOOL_F;
 
-  string_file = mem_fileopen ();
-  chain = make_cleanup_ui_file_delete (string_file);
+  string_file buf;
 
-  current_uiout->redirect (string_file);
+  current_uiout->redirect (&buf);
   TRY
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
@@ -998,15 +995,12 @@ gdbscm_breakpoint_commands (SCM self)
   current_uiout->redirect (NULL);
   CATCH (except, RETURN_MASK_ALL)
     {
-      do_cleanups (chain);
       gdbscm_throw_gdb_exception (except);
     }
   END_CATCH
 
-  std::string cmdstr = ui_file_as_string (string_file);
-  result = gdbscm_scm_from_c_string (cmdstr.c_str ());
+  result = gdbscm_scm_from_c_string (buf.c_str ());
 
-  do_cleanups (chain);
   return result;
 }
 

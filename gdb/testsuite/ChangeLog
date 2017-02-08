@@ -1,3 +1,84 @@
+2017-02-08  Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.base/define.exp: Add test for command abbreviations
+	in define.
+
+2017-02-06  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.reverse/insn-reverse.c: Include insn-reverse-x86.c.
+	* gdb.reverse/insn-reverse-x86.c: New file.
+
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	* gdb.xml/tdesc-regs.exp: Provide sparc core registers for the tests.
+
+2017-02-03  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21097:
+	* gdb.rust/simple.exp: Add new tests.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-logging.exp: Add "redirect while already logging"
+	tests.
+
+2017-02-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/dw2-op-stack-value.exp: Adjust expected result of
+	taking a 2-byte value out of a 4-byte DWARF implicit value on
+	big-endian targets.
+	* gdb.dwarf2/nonvar-access.exp: Add more comments to existing
+	logic.  Add test cases for DW_OP_implicit.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* lib/gdb.exp (gdb_skip_xml_tests): Error if GDB is running.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable.exp: Call gdb_exit before
+	skip_gdbserver_tests.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/non-stop.exp: Add '-ex "set non-stop on"' to
+	GDBFLAGS.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/buffer-size.exp: Add unsupported/untested message if
+	the test is skipped.
+	* gdb.btrace/data.exp: Likewise.
+	* gdb.btrace/delta.exp: Likewise.
+	* gdb.btrace/dlopen.exp: Likewise.
+	* gdb.btrace/enable-running.exp: Likewise.
+	* gdb.btrace/enable.exp: Likewise.
+	* gdb.btrace/exception.exp: Likewise.
+	* gdb.btrace/function_call_history.exp: Likewise.
+	* gdb.btrace/gcore.exp: Likewise.
+	* gdb.btrace/instruction_history.exp: Likewise.
+	* gdb.btrace/multi-thread-step.exp: Likewise.
+	* gdb.btrace/nohist.exp: Likewise.
+	* gdb.btrace/non-stop.exp: Likewise.
+	* gdb.btrace/reconnect.exp: Likewise.
+	* gdb.btrace/record_goto-step.exp: Likewise.
+	* gdb.btrace/record_goto.exp: Likewise.
+	* gdb.btrace/rn-dl-bind.exp: Likewise.
+	* gdb.btrace/segv.exp: Likewise.
+	* gdb.btrace/step.exp: Likewise.
+	* gdb.btrace/stepi.exp: Likewise.
+	* gdb.btrace/tailcall-only.exp: Likewise.
+	* gdb.btrace/tailcall.exp: Likewise.
+	* gdb.btrace/tsx.exp: Likewise.
+	* gdb.btrace/unknown_functions.exp: Likewise.
+	* gdb.btrace/vdso.exp: Likewise.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable-running.c: New.
+	* gdb.btrace/enable-running.exp: New.
+
 2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.arch/amd64-gs_base.c: New file.

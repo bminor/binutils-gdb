@@ -2460,7 +2460,7 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 
   /* Suppress error messages.  */
   saved_gdb_stderr = gdb_stderr;
-  gdb_stderr = ui_file_new ();
+  gdb_stderr = &null_stream;
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
   TRY
@@ -2474,7 +2474,6 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
   END_CATCH
 
   /* Stop suppressing error messages.  */
-  ui_file_delete (gdb_stderr);
   gdb_stderr = saved_gdb_stderr;
 
   return type;

@@ -3063,45 +3063,38 @@ xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 static void
 xtensa_verify_config (struct gdbarch *gdbarch)
 {
-  struct ui_file *log;
-  struct cleanup *cleanups;
-  struct gdbarch_tdep *tdep;
-
-  tdep = gdbarch_tdep (gdbarch);
-  log = mem_fileopen ();
-  cleanups = make_cleanup_ui_file_delete (log);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  string_file log;
 
   /* Verify that we got a reasonable number of AREGS.  */
   if ((tdep->num_aregs & -tdep->num_aregs) != tdep->num_aregs)
-    fprintf_unfiltered (log, _("\
+    log.printf (_("\
 \n\tnum_aregs: Number of AR registers (%d) is not a power of two!"),
-			tdep->num_aregs);
+		tdep->num_aregs);
 
   /* Verify that certain registers exist.  */
 
   if (tdep->pc_regnum == -1)
-    fprintf_unfiltered (log, _("\n\tpc_regnum: No PC register"));
+    log.printf (_("\n\tpc_regnum: No PC register"));
   if (tdep->isa_use_exceptions && tdep->ps_regnum == -1)
-    fprintf_unfiltered (log, _("\n\tps_regnum: No PS register"));
+    log.printf (_("\n\tps_regnum: No PS register"));
 
   if (tdep->isa_use_windowed_registers)
     {
       if (tdep->wb_regnum == -1)
-	fprintf_unfiltered (log, _("\n\twb_regnum: No WB register"));
+	log.printf (_("\n\twb_regnum: No WB register"));
       if (tdep->ws_regnum == -1)
-	fprintf_unfiltered (log, _("\n\tws_regnum: No WS register"));
+	log.printf (_("\n\tws_regnum: No WS register"));
       if (tdep->ar_base == -1)
-	fprintf_unfiltered (log, _("\n\tar_base: No AR registers"));
+	log.printf (_("\n\tar_base: No AR registers"));
     }
 
   if (tdep->a0_base == -1)
-    fprintf_unfiltered (log, _("\n\ta0_base: No Ax registers"));
+    log.printf (_("\n\ta0_base: No Ax registers"));
 
-  std::string buf = ui_file_as_string (log);
-  if (!buf.empty ())
+  if (!log.empty ())
     internal_error (__FILE__, __LINE__,
-		    _("the following are invalid: %s"), buf.c_str ());
-  do_cleanups (cleanups);
+		    _("the following are invalid: %s"), log.c_str ());
 }
 
 

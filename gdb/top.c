@@ -272,9 +272,9 @@ new_ui (FILE *instream, FILE *outstream, FILE *errstream)
 
   ui->input_interactive_p = ISATTY (ui->instream);
 
-  ui->m_gdb_stdin = stdio_fileopen (ui->instream);
-  ui->m_gdb_stdout = stdio_fileopen (ui->outstream);
-  ui->m_gdb_stderr = stderr_fileopen (ui->errstream);
+  ui->m_gdb_stdin = new stdio_file (ui->instream);
+  ui->m_gdb_stdout = new stdio_file (ui->outstream);
+  ui->m_gdb_stderr = new stderr_file (ui->errstream);
   ui->m_gdb_stdlog = ui->m_gdb_stderr;
 
   ui->prompt_state = PROMPT_NEEDED;
@@ -296,9 +296,9 @@ new_ui (FILE *instream, FILE *outstream, FILE *errstream)
 static void
 free_ui (struct ui *ui)
 {
-  ui_file_delete (ui->m_gdb_stdin);
-  ui_file_delete (ui->m_gdb_stdout);
-  ui_file_delete (ui->m_gdb_stderr);
+  delete ui->m_gdb_stdin;
+  delete ui->m_gdb_stdout;
+  delete ui->m_gdb_stderr;
 
   xfree (ui);
 }
@@ -693,7 +693,6 @@ execute_command (char *p, int from_tty)
 std::string
 execute_command_to_string (char *p, int from_tty)
 {
-  struct ui_file *str_file;
   struct cleanup *cleanup;
 
   /* GDB_STDOUT should be better already restored during these
@@ -702,31 +701,27 @@ execute_command_to_string (char *p, int from_tty)
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  str_file = mem_fileopen ();
+  string_file str_file;
 
-  make_cleanup_ui_file_delete (str_file);
-
-  current_uiout->redirect (str_file);
+  current_uiout->redirect (&str_file);
   make_cleanup_ui_out_redirect_pop (current_uiout);
 
   scoped_restore save_stdout
-    = make_scoped_restore (&gdb_stdout, str_file);
+    = make_scoped_restore (&gdb_stdout, &str_file);
   scoped_restore save_stderr
-    = make_scoped_restore (&gdb_stderr, str_file);
+    = make_scoped_restore (&gdb_stderr, &str_file);
   scoped_restore save_stdlog
-    = make_scoped_restore (&gdb_stdlog, str_file);
+    = make_scoped_restore (&gdb_stdlog, &str_file);
   scoped_restore save_stdtarg
-    = make_scoped_restore (&gdb_stdtarg, str_file);
+    = make_scoped_restore (&gdb_stdtarg, &str_file);
   scoped_restore save_stdtargerr
-    = make_scoped_restore (&gdb_stdtargerr, str_file);
+    = make_scoped_restore (&gdb_stdtargerr, &str_file);
 
   execute_command (p, from_tty);
 
-  std::string retval = ui_file_as_string (str_file);
-
   do_cleanups (cleanup);
 
-  return retval;
+  return std::move (str_file.string ());
 }
 
 
@@ -1569,26 +1564,18 @@ print_inferior_quit_action (struct inferior *inf, void *arg)
 int
 quit_confirm (void)
 {
-  struct ui_file *stb;
-  struct cleanup *old_chain;
-
   /* Don't even ask if we're only debugging a core file inferior.  */
   if (!have_live_inferiors ())
     return 1;
 
   /* Build the query string as a single string.  */
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  string_file stb;
 
-  fprintf_filtered (stb, _("A debugging session is active.\n\n"));
-  iterate_over_inferiors (print_inferior_quit_action, stb);
-  fprintf_filtered (stb, _("\nQuit anyway? "));
+  stb.puts (_("A debugging session is active.\n\n"));
+  iterate_over_inferiors (print_inferior_quit_action, &stb);
+  stb.puts (_("\nQuit anyway? "));
 
-  std::string str = ui_file_as_string (stb);
-
-  do_cleanups (old_chain);
-
-  return query ("%s", str.c_str ());
+  return query ("%s", stb.c_str ());
 }
 
 /* Prepare to exit GDB cleanly by undoing any changes made to the

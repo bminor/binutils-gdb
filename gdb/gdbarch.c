@@ -497,17 +497,13 @@ gdbarch_free (struct gdbarch *arch)
 static void
 verify_gdbarch (struct gdbarch *gdbarch)
 {
-  struct ui_file *log;
-  struct cleanup *cleanups;
-  long length;
+  string_file log;
 
-  log = mem_fileopen ();
-  cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
   if (gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
-    fprintf_unfiltered (log, "\n\tbyte-order");
+    log.puts ("\n\tbyte-order");
   if (gdbarch->bfd_arch_info == NULL)
-    fprintf_unfiltered (log, "\n\tbfd_arch_info");
+    log.puts ("\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level.  */
   /* Skip verify of bits_big_endian, invalid_p == 0 */
   /* Skip verify of short_bit, invalid_p == 0 */
@@ -542,7 +538,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of pseudo_register_read_value, has predicate.  */
   /* Skip verify of pseudo_register_write, has predicate.  */
   if (gdbarch->num_regs == -1)
-    fprintf_unfiltered (log, "\n\tnum_regs");
+    log.puts ("\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   /* Skip verify of ax_pseudo_register_collect, has predicate.  */
   /* Skip verify of ax_pseudo_register_push_stack, has predicate.  */
@@ -556,7 +552,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   if (gdbarch->register_name == 0)
-    fprintf_unfiltered (log, "\n\tregister_name");
+    log.puts ("\n\tregister_name");
   /* Skip verify of register_type, has predicate.  */
   /* Skip verify of dummy_id, has predicate.  */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
@@ -579,14 +575,14 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of return_value, has predicate.  */
   /* Skip verify of return_in_first_hidden_param_p, invalid_p == 0 */
   if (gdbarch->skip_prologue == 0)
-    fprintf_unfiltered (log, "\n\tskip_prologue");
+    log.puts ("\n\tskip_prologue");
   /* Skip verify of skip_main_prologue, has predicate.  */
   /* Skip verify of skip_entrypoint, has predicate.  */
   if (gdbarch->inner_than == 0)
-    fprintf_unfiltered (log, "\n\tinner_than");
+    log.puts ("\n\tinner_than");
   /* Skip verify of breakpoint_from_pc, invalid_p == 0 */
   if (gdbarch->breakpoint_kind_from_pc == 0)
-    fprintf_unfiltered (log, "\n\tbreakpoint_kind_from_pc");
+    log.puts ("\n\tbreakpoint_kind_from_pc");
   /* Skip verify of sw_breakpoint_from_kind, invalid_p == 0 */
   /* Skip verify of breakpoint_kind_from_current_state, invalid_p == 0 */
   /* Skip verify of adjust_breakpoint_address, has predicate.  */
@@ -607,7 +603,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of software_single_step, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
   if (gdbarch->print_insn == 0)
-    fprintf_unfiltered (log, "\n\tprint_insn");
+    log.puts ("\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
@@ -641,9 +637,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0 */
   /* Skip verify of displaced_step_fixup, has predicate.  */
   if ((! gdbarch->displaced_step_free_closure) != (! gdbarch->displaced_step_copy_insn))
-    fprintf_unfiltered (log, "\n\tdisplaced_step_free_closure");
+    log.puts ("\n\tdisplaced_step_free_closure");
   if ((! gdbarch->displaced_step_location) != (! gdbarch->displaced_step_copy_insn))
-    fprintf_unfiltered (log, "\n\tdisplaced_step_location");
+    log.puts ("\n\tdisplaced_step_location");
   /* Skip verify of relocate_instruction, has predicate.  */
   /* Skip verify of overlay_update, has predicate.  */
   /* Skip verify of core_read_description, has predicate.  */
@@ -696,12 +692,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
-  std::string buf = ui_file_as_string (log);
-  if (!buf.empty ())
+  if (!log.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
-                    buf.c_str ());
-  do_cleanups (cleanups);
+                    log.c_str ());
 }
 
 

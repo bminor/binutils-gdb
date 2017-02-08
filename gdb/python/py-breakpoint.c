@@ -485,19 +485,16 @@ bppy_get_commands (PyObject *self, void *closure)
   gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
   struct breakpoint *bp = self_bp->bp;
   long length;
-  struct ui_file *string_file;
   PyObject *result;
-  struct cleanup *chain;
 
   BPPY_REQUIRE_VALID (self_bp);
 
   if (! self_bp->bp->commands)
     Py_RETURN_NONE;
 
-  string_file = mem_fileopen ();
-  chain = make_cleanup_ui_file_delete (string_file);
+  string_file stb;
 
-  current_uiout->redirect (string_file);
+  current_uiout->redirect (&stb);
   TRY
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
@@ -505,17 +502,13 @@ bppy_get_commands (PyObject *self, void *closure)
   CATCH (except, RETURN_MASK_ALL)
     {
       current_uiout->redirect (NULL);
-      do_cleanups (chain);
       gdbpy_convert_exception (except);
       return NULL;
     }
   END_CATCH
 
   current_uiout->redirect (NULL);
-  std::string cmdstr = ui_file_as_string (string_file);
-  result = host_string_to_python_string (cmdstr.c_str ());
-  do_cleanups (chain);
-  return result;
+  return host_string_to_python_string (stb.c_str ());
 }
 
 /* Python function to get the breakpoint type.  */

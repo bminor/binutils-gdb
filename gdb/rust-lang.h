@@ -30,15 +30,14 @@ extern int rust_parse (struct parser_state *);
 extern void rustyyerror (char *);
 
 /* Return true if TYPE is a tuple type; otherwise false.  */
-extern int rust_tuple_type_p (struct type *type);
+extern bool rust_tuple_type_p (struct type *type);
 
 /* Return true if TYPE is a tuple struct type; otherwise false.  */
-extern int rust_tuple_struct_type_p (struct type *type);
+extern bool rust_tuple_struct_type_p (struct type *type);
 
-/* Given a block, find the name of the block's crate.  The name must
-   be freed by the caller.  Returns NULL if no crate name can be
-   found.  */
-extern char *rust_crate_for_block (const struct block *block);
+/* Given a block, find the name of the block's crate. Returns an empty
+   stringif no crate name can be found.  */
+extern std::string rust_crate_for_block (const struct block *block);
 
 /* Create a new slice type.  NAME is the name of the type.  ELT_TYPE
    is the type of the elements of the slice.  USIZE_TYPE is the Rust

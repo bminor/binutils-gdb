@@ -79,14 +79,10 @@ ada_varobj_decode_var (struct value **value_ptr, struct type **type_ptr)
 static std::string
 ada_varobj_scalar_image (struct type *type, LONGEST val)
 {
-  struct ui_file *buf = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (buf);
+  string_file buf;
 
-  ada_print_scalar (type, val, buf);
-  std::string result = ui_file_as_string (buf);
-  do_cleanups (cleanups);
-
-  return result;
+  ada_print_scalar (type, val, &buf);
+  return std::move (buf.string ());
 }
 
 /* Assuming that the (PARENT_VALUE, PARENT_TYPE) pair designates
@@ -808,17 +804,10 @@ static std::string
 ada_varobj_get_value_image (struct value *value,
 			    struct value_print_options *opts)
 {
-  struct ui_file *buffer;
-  struct cleanup *old_chain;
+  string_file buffer;
 
-  buffer = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (buffer);
-
-  common_val_print (value, buffer, 0, opts, current_language);
-  std::string result = ui_file_as_string (buffer);
-
-  do_cleanups (old_chain);
-  return result;
+  common_val_print (value, &buffer, 0, opts, current_language);
+  return std::move (buffer.string ());
 }
 
 /* Assuming that the (VALUE, TYPE) pair designates an array varobj,

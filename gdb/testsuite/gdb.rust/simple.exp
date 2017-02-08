@@ -110,6 +110,18 @@ gdb_test "print univariant.a" " = 1"
 gdb_test "print univariant_anon" " = simple::UnivariantAnon::Foo\\(1\\)"
 gdb_test "print univariant_anon.0" " = 1"
 
+gdb_test_sequence "ptype simple::Univariant" "" {
+    "type = enum simple::Univariant \\{"
+    "  Foo\\{a: u8\\},"
+    "\\}"
+}
+
+gdb_test_sequence "ptype simple::UnivariantAnon" "" {
+    "type = enum simple::UnivariantAnon \\{"
+    "  Foo\\(u8\\),"
+    "\\}"
+}
+
 gdb_test_sequence "ptype simple::ByeBob" "" {
     " = struct simple::ByeBob \\("
     "  i32,"

@@ -9576,13 +9576,11 @@ extern initialize_file_ftype _initialize_arm_tdep; /* -Wmissing-prototypes */
 void
 _initialize_arm_tdep (void)
 {
-  struct ui_file *stb;
   long length;
   const char *setname;
   const char *setdesc;
   const char *const *regnames;
   int i;
-  static std::string helptext;
   char regdesc[1024], *rdptr = regdesc;
   size_t rest = sizeof (regdesc);
 
@@ -9648,13 +9646,10 @@ _initialize_arm_tdep (void)
   valid_disassembly_styles[num_disassembly_options] = NULL;
 
   /* Create the help text.  */
-  stb = mem_fileopen ();
-  fprintf_unfiltered (stb, "%s%s%s",
-		      _("The valid values are:\n"),
-		      regdesc,
-		      _("The default is \"std\"."));
-  helptext = ui_file_as_string (stb);
-  ui_file_delete (stb);
+  std::string helptext = string_printf ("%s%s%s",
+					_("The valid values are:\n"),
+					regdesc,
+					_("The default is \"std\"."));
 
   add_setshow_enum_cmd("disassembler", no_class,
 		       valid_disassembly_styles, &disassembly_style,

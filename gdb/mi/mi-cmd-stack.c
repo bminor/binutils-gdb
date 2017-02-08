@@ -488,7 +488,6 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 {
   struct cleanup *old_chain;
   struct ui_out *uiout = current_uiout;
-  struct ui_file *stb;
 
   gdb_assert (!arg->val || !arg->error);
   gdb_assert ((values == PRINT_NO_VALUES && arg->val == NULL
@@ -511,15 +510,16 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 					 TYPE_LENGTH (value_type (arg->val))))))
     return;
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  old_chain = make_cleanup (null_cleanup, NULL);
 
   if (values != PRINT_NO_VALUES || what == all)
     make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-  fputs_filtered (SYMBOL_PRINT_NAME (arg->sym), stb);
+  string_file stb;
+
+  stb.puts (SYMBOL_PRINT_NAME (arg->sym));
   if (arg->entry_kind == print_entry_values_only)
-    fputs_filtered ("@entry", stb);
+    stb.puts ("@entry");
   uiout->field_stream ("name", stb);
 
   if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
@@ -528,7 +528,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   if (values == PRINT_SIMPLE_VALUES)
     {
       check_typedef (arg->sym->type);
-      type_print (arg->sym->type, "", stb, -1);
+      type_print (arg->sym->type, "", &stb, -1);
       uiout->field_stream ("type", stb);
     }
 
@@ -546,7 +546,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 
 	      get_no_prettyformat_print_options (&opts);
 	      opts.deref_ref = 1;
-	      common_val_print (arg->val, stb, 0, &opts,
+	      common_val_print (arg->val, &stb, 0, &opts,
 				language_def (SYMBOL_LANGUAGE (arg->sym)));
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
@@ -556,8 +556,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	  END_CATCH
 	}
       if (error_message != NULL)
-	fprintf_filtered (stb, _("<error reading variable: %s>"),
-			  error_message);
+	stb.printf (_("<error reading variable: %s>"), error_message);
       uiout->field_stream ("value", stb);
     }
 

@@ -253,4 +253,6 @@ extern const char * const auto_boolean_enums[];
 
 extern int cli_user_command_p (struct cmd_list_element *);
 
+extern int find_command_name_length (const char *);
+
 #endif /* !defined (CLI_DECODE_H) */

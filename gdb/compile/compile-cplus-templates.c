@@ -63,7 +63,7 @@ typedef enum template_parameter_type_modifier template_parameter_modifier;
 /* Forward declarations.  */
 
 static void print_template_parameter_list
-  (struct ui_file *stream, const struct template_argument_info *arg_info);
+  (const struct template_argument_info *arg_info, struct ui_file *stream);
 
 static void print_template_type (const struct demangle_component *comp,
 				 const struct template_symbol *tsymbol,
@@ -100,27 +100,17 @@ function_template_defn::function_template_defn
    generic template parameters instead of any instanced type.
 
    For example, both "void foo<int> (int)" and "void foo<A> (A)" will
-   return "T foo<typename T>(T)".
+   return "T foo<typename T>(T)".  */
 
-   The return result should be freed.  */
-
-static char *
+static std::string
 function_template_decl (const struct template_symbol *tsymbol,
 			const struct demangle_parse_info *info)
 {
-  struct demangle_component *ret_comp;
-  struct ui_file *stream;
-  long length;
-  struct cleanup *back_to;
-  struct block_symbol symbol;
-  char *str = NULL;
-
   gdb_assert (info != NULL);
 
-  stream  = mem_fileopen ();
-  back_to = make_cleanup_ui_file_delete (stream);
+  string_file stream;
+  struct demangle_component *ret_comp = info->tree;
 
-  ret_comp = info->tree;
   if (ret_comp != NULL)
     {
       if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
@@ -134,41 +124,36 @@ function_template_decl (const struct template_symbol *tsymbol,
 	      struct type *return_type
 		= TYPE_TARGET_TYPE (SYMBOL_TYPE (&tsymbol->base));
 
-	      c_print_type (return_type, "", stream, -1, 0,
+	      c_print_type (return_type, "", &stream, -1, 0,
 			    &type_print_raw_options);
 	    }
 	  else
-	    print_template_type (d_left (ret_comp), tsymbol, stream);
-	  fputc_unfiltered (' ', stream);
+	    print_template_type (d_left (ret_comp), tsymbol, &stream);
+	  stream.putc (' ');
 	}
 
       /* Print the name of the template.  */
       if (tsymbol->conversion_operator_index != -1)
-	print_conversion_node (info->tree, tsymbol, stream);
+	print_conversion_node (info->tree, tsymbol, &stream);
       else
 	{
-	  fputs_unfiltered (tsymbol->search_name, stream);
-	  if (tsymbol->search_name[strlen (tsymbol->search_name) - 1]
-	      == '<')
-	    fputc_unfiltered (' ', stream);
+	  stream.puts (tsymbol->search_name);
+	  if (tsymbol->search_name[strlen (tsymbol->search_name) - 1] == '<')
+	    stream.putc (' ');
 	}
 
       /* Print out template (generic) arguments.  */
-      fputc_unfiltered ('<', stream);
-      print_template_parameter_list (stream, tsymbol->template_arguments);
-      fputc_unfiltered ('>', stream);
+      stream.putc ('<');
+      print_template_parameter_list (tsymbol->template_arguments, &stream);
+      stream.putc ('>');
 
       /* Print out function arguments.  */
-      fputc_unfiltered ('(', stream);
-      print_function_template_arglist (ret_comp, tsymbol, stream);
-      fputc_unfiltered (')', stream);
+      stream.putc ('(');
+      print_function_template_arglist (ret_comp, tsymbol, &stream);
+      stream.putc (')');
     }
 
-  /* !!keiths: Convert this to use ui_file_string when that becomes
-     available.  */
-  str = ui_file_xstrdup (stream, &length);
-  do_cleanups (back_to);
-  return str;
+  return std::move (stream.string ());
 }
 
 /* Compute the generic used by the given function template
@@ -184,10 +169,7 @@ compute_function_template_generic (struct template_symbol *tsymbol,
   cp_decode_template_type_indices (tsymbol, info);
 
   /* Output the template generic.  */
-  char *generic_c = function_template_decl (tsymbol, info);
-  std::string generic (generic_c);
-  xfree (generic_c);
-  return generic;
+  return function_template_decl (tsymbol, info);
 }
 
 /* See description in compile-cplus.h.  */
@@ -304,21 +286,20 @@ compile_cplus_instance::find_function_template_defn
 static std::string
 compute_class_template_generic (std::string name, struct type *type)
 {
-  struct ui_file *stream = mem_fileopen ();
-  struct cleanup *back_to = make_cleanup_ui_file_delete (stream);
+  string_file stream;
 
   /* Format: class|struct|union namespaces::NAME<parameters>  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       if (TYPE_DECLARED_CLASS (type))
-	fputs_unfiltered ("class ", stream);
+	stream.puts ("class ");
       else
-	fputs_unfiltered ("struct ", stream);
+	stream.puts ("struct ");
     }
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-      fputs_unfiltered ("union ", stream);
+      stream.puts ("union ");
     }
 
   /* Print all namespaces.  Note that we do not push the last
@@ -331,24 +312,14 @@ compute_class_template_generic (std::string name, struct type *type)
 		   == TYPE_CODE_NAMESPACE);
 
        if (comp.name != CP_ANONYMOUS_NAMESPACE_STR)
-	 {
-	   fputs_unfiltered (comp.name.c_str (), stream);
-	   fputs_unfiltered ("::", stream);
-	 }
+	 stream.printf ("%s::", comp.name.c_str ());
      });
 
-  fputs_unfiltered (name.c_str (), stream);
-  fputc_unfiltered ('<', stream);
-  print_template_parameter_list (stream, TYPE_TEMPLATE_ARGUMENT_INFO (type));
-  fputc_unfiltered ('>', stream);
+  stream.printf ("%s<", name.c_str ());
+  print_template_parameter_list (TYPE_TEMPLATE_ARGUMENT_INFO (type), &stream);
+  stream.putc ('>');
 
-  long length;
-  char *generic = ui_file_xstrdup (stream, &length);
-
-  make_cleanup (xfree, generic);
-  std::string string_generic (generic);
-  do_cleanups (back_to);
-  return string_generic;
+  return std::move (stream.string ());
 }
 
 /* See description in compile-cplus-templates.h.  */
@@ -521,8 +492,8 @@ print_template_type (const struct demangle_component *comp,
 /* Print the template parameter list of a type/symbol to STREAM.  */
 
 static void
-print_template_parameter_list (struct ui_file *stream,
-			       const struct template_argument_info *arg_info)
+print_template_parameter_list (const struct template_argument_info *arg_info,
+			       struct ui_file *stream)
 {
   for (int i = 0; i < arg_info->n_arguments; ++i)
     {
@@ -1460,10 +1431,9 @@ print_template_defn_command (char *arg, int from_tty)
 
   std::unique_ptr<demangle_parse_info> info
     = cp_mangled_name_to_comp (arg, DMGL_ANSI | DMGL_PARAMS);
-  char *str = function_template_decl (tsymbol, info.get ());
+  std::string str = function_template_decl (tsymbol, info.get ());
 
-  make_cleanup (xfree, str);
-  fprintf_filtered (gdb_stdout, "%s\n", str);
+  fprintf_filtered (gdb_stdout, "%s\n", str.c_str ());
   do_cleanups (back_to);
 }
 

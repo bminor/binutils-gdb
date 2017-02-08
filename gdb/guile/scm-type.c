@@ -107,18 +107,10 @@ tyscm_type_name (struct type *type)
 {
   TRY
     {
-      struct cleanup *old_chain;
-      struct ui_file *stb;
+      string_file stb;
 
-      stb = mem_fileopen ();
-      old_chain = make_cleanup_ui_file_delete (stb);
-
-      LA_PRINT_TYPE (type, "", stb, -1, 0, &type_print_raw_options);
-
-      std::string name = ui_file_as_string (stb);
-      do_cleanups (old_chain);
-
-      return name;
+      LA_PRINT_TYPE (type, "", &stb, -1, 0, &type_print_raw_options);
+      return std::move (stb.string ());
     }
   CATCH (except, RETURN_MASK_ALL)
     {

@@ -2865,7 +2865,8 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
 
   /* Prepare the index if any.  */
   if (opnd->reglist.has_index)
-    snprintf (tb, 8, "[%" PRIi64 "]", opnd->reglist.index);
+    /* PR 21096: The %100 is to silence a warning about possible truncation.  */
+    snprintf (tb, 8, "[%" PRIi64 "]", (opnd->reglist.index % 100));
   else
     tb[0] = '\0';
 
@@ -2965,7 +2966,8 @@ print_register_offset_address (char *buf, size_t size,
     {
       if (print_amount_p)
 	snprintf (tb, sizeof (tb), ", %s #%" PRIi64, shift_name,
-		  opnd->shifter.amount);
+  /* PR 21096: The %100 is to silence a warning about possible truncation.  */
+		  (opnd->shifter.amount % 100));
       else
 	snprintf (tb, sizeof (tb), ", %s", shift_name);
     }

@@ -150,8 +150,8 @@ private:
    register is needed to compute a local variable.  */
 
 extern unsigned char *generate_c_for_variable_locations
-     (struct compile_instance *compiler,
-      struct ui_file *stream,
+     (compile_instance *compiler,
+      string_file &stream,
       struct gdbarch *gdbarch,
       const struct block *block,
       CORE_ADDR pc);
