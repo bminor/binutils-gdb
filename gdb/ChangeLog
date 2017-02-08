@@ -1,3 +1,13 @@
+2017-02-08  Pedro Alves  <palves@redhat.com>
+
+	* interps.c (interp::interp): Remove reference to quiet_p.
+	(interp_set): Make static.  Remove dead "Switching to" output
+	code.
+	(interp_quiet_p, interp_set_quiet): Delete.
+	(interpreter_exec_cmd): Don't set the interpreter quiet.
+	* interps.h (interp_quiet_p): Make static.
+	(class interp) <quiet_p>: Remove field
+
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
 
 	* cli/cli-decode.c (find_command_name_length): Make it extern.

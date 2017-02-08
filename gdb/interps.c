@@ -82,7 +82,6 @@ static struct interp *interp_lookup_existing (struct ui *ui,
 interp::interp (const char *name)
 {
   this->name = xstrdup (name);
-  this->quiet_p = false;
   this->inited = false;
 }
 
@@ -156,13 +155,11 @@ interp_add (struct ui *ui, struct interp *interp)
    events such as target stops and new thread creation, even if they
    are caused by CLI commands.  */
 
-void
+static void
 interp_set (struct interp *interp, bool top_level)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *old_interp = ui_interp->current_interpreter;
-  int first_time = 0;
-  char buffer[64];
 
   /* If we already have an interpreter, then trying to
      set top level interpreter is kinda pointless.  */
@@ -173,10 +170,6 @@ interp_set (struct interp *interp, bool top_level)
     {
       current_uiout->flush ();
       old_interp->suspend ();
-    }
-  else
-    {
-      first_time = 1;
     }
 
   ui_interp->current_interpreter = interp;
@@ -207,13 +200,6 @@ interp_set (struct interp *interp, bool top_level)
   clear_interpreter_hooks ();
 
   interp->resume ();
-
-  if (!first_time && !interp_quiet_p (interp))
-    {
-      xsnprintf (buffer, sizeof (buffer),
-		 "Switching to interpreter \"%.24s\".\n", interp->name);
-      current_uiout->text (buffer);
-    }
 }
 
 /* Look up the interpreter for NAME.  If no such interpreter exists,
@@ -375,26 +361,6 @@ interp_supports_command_editing (struct interp *interp)
   return interp->supports_command_editing ();
 }
 
-int
-interp_quiet_p (struct interp *interp)
-{
-  struct ui_interp_info *ui_interp = get_current_interp_info ();
-
-  if (interp != NULL)
-    return interp->quiet_p;
-  else
-    return ui_interp->current_interpreter->quiet_p;
-}
-
-static int
-interp_set_quiet (struct interp *interp, int quiet)
-{
-  int old_val = interp->quiet_p;
-
-  interp->quiet_p = quiet;
-  return old_val;
-}
-
 /* interp_exec - This executes COMMAND_STR in the current 
    interpreter.  */
 
@@ -445,7 +411,6 @@ interpreter_exec_cmd (char *args, int from_tty)
   char **trule = NULL;
   unsigned int nrules;
   unsigned int i;
-  int old_quiet, use_quiet;
   struct cleanup *cleanup;
 
   if (args == NULL)
@@ -467,10 +432,6 @@ interpreter_exec_cmd (char *args, int from_tty)
   if (interp_to_use == NULL)
     error (_("Could not find interpreter \"%s\"."), prules[0]);
 
-  /* Temporarily set interpreters quiet.  */
-  old_quiet = interp_set_quiet (old_interp, 1);
-  use_quiet = interp_set_quiet (interp_to_use, 1);
-
   interp_set (interp_to_use, false);
 
   for (i = 1; i < nrules; i++)
@@ -480,15 +441,11 @@ interpreter_exec_cmd (char *args, int from_tty)
       if (e.reason < 0)
 	{
 	  interp_set (old_interp, 0);
-	  interp_set_quiet (interp_to_use, use_quiet);
-	  interp_set_quiet (old_interp, old_quiet);
 	  error (_("error in command: \"%s\"."), prules[i]);
 	}
     }
 
   interp_set (old_interp, 0);
-  interp_set_quiet (interp_to_use, use_quiet);
-  interp_set_quiet (old_interp, old_quiet);
 
   do_cleanups (cleanup);
 }

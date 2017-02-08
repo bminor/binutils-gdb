@@ -39,7 +39,6 @@ extern int interp_resume (struct interp *interp);
 extern int interp_suspend (struct interp *interp);
 extern struct gdb_exception interp_exec (struct interp *interp,
 					 const char *command);
-extern int interp_quiet_p (struct interp *interp);
 
 class interp
 {
@@ -86,12 +85,9 @@ public:
 
   /* Has the init method been run?  */
   bool inited;
-
-  bool quiet_p;
 };
 
 extern void interp_add (struct ui *ui, struct interp *interp);
-extern void interp_set (struct interp *interp, bool top_level);
 
 /* Look up the interpreter for NAME, creating one if none exists yet.
    If NAME is not a interpreter type previously registered with
