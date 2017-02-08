@@ -36,7 +36,6 @@
 #include <signal.h>
 #include "gdb_setjmp.h"
 #include "safe-ctype.h"
-#include "linespec.h"		/* for find_toplevel_char_r  */
 
 /* Functions related to demangled name parsing.  */
 
@@ -831,99 +830,9 @@ cp_func_name (const char *full_name)
 char *
 cp_strip_template_parameters (const char *linkage_or_phys_name)
 {
-  /* This is by far the best way to do this, but there is one really big
-     problem... The code below resets the the top-level node to below the
-     (first) DEMANGLE_COMPONENT_TEMPLATE node in the tree.
-
-     Normally that works, however, there is a special case (of course!)
-     where this fails: conversion operators.  Those *require* the template
-     parameter to deduce the name of the operator.  As a result, the code
-     below will not work on conversion operators at all (and maybe others).  */
-#if 0
-  struct demangle_component *ret_comp;
-  struct demangle_parse_info *info;
-  void *storage = NULL;
-  char *ret, *str = NULL, *demangled_name = NULL;
-
-  info = cp_mangled_name_to_comp (linkage_or_phys_name, DMGL_ANSI,
-				  &storage, &demangled_name);
-
-  if (info == NULL)
-    {
-      info = cp_demangled_name_to_comp (linkage_or_phys_name, NULL);
-      if (info == NULL)
-	{
-	  char *p;
-
-	  /* Special case: cp_demangled_name_to_comp doesn't like
-	     template specializations, templatename<>.  Adjust for that
-	     here until libiberty is fixed.  */
-	  str = xstrdup (linkage_or_phys_name);
-	  p = strstr (str, "<>");
-	  if (p == NULL)
-	    return NULL;
-
-	  *p = '\0';
-	  info = cp_demangled_name_to_comp (str, NULL);
-	  if (info == NULL)
-	    {
-	      xfree (str);
-	      return NULL;
-	    }
-	}
-    }
-
-  ret_comp = info->tree;
-  ret = NULL;
-  if (ret_comp != NULL)
-    {
-      int done = 0;
-
-      while (!done)
-	{
-	  switch (ret_comp->type)
-	    {
-	    case DEMANGLE_COMPONENT_QUAL_NAME:
-	    case DEMANGLE_COMPONENT_LOCAL_NAME:
-	      ret_comp = d_right (ret_comp);
-	      break;
-	    case DEMANGLE_COMPONENT_TYPED_NAME:
-	    case DEMANGLE_COMPONENT_CONST:
-	    case DEMANGLE_COMPONENT_RESTRICT:
-	    case DEMANGLE_COMPONENT_VOLATILE:
-	    case DEMANGLE_COMPONENT_CONST_THIS:
-	    case DEMANGLE_COMPONENT_RESTRICT_THIS:
-	    case DEMANGLE_COMPONENT_VOLATILE_THIS:
-	    case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
-	      ret_comp = d_left (ret_comp);
-	      break;
-	    case DEMANGLE_COMPONENT_TEMPLATE:
-	      ret_comp = d_left (ret_comp);
-	      if (ret_comp->type == DEMANGLE_COMPONENT_QUAL_NAME
-		  && d_right (ret_comp)->type == DEMANGLE_COMPONENT_CONVERSION)
-		{
-		  /* Remove the template parameter, replacing this
-		     node with a NAME node.  */
-		  /* !!keiths: Can't be done without modifications to
-		     libiberty *or* reimplementing the entire libiberty
-		     printer (d_print_comp_inner).  */
-		  /* !!keiths: Is there any other option???  */
-		}
-	      /* fall through */
-	    default:
-	      done = 1;
-	      break;
-	    }
-	}
-    }
-
-  ret = cp_comp_to_string (ret_comp, 10);
-  cp_demangled_name_parse_free (info);
-  xfree (storage);
-  xfree (demangled_name);
-  xfree (str);
-  return ret;
-#else
+  /* We do not turn the linkage name into demangle components since we cannot
+     walk the tree in any usable way when dealing with conversion operators.
+     Instead we use a heuristic approach that works for all cases.  */
   char *stripped = NULL;
   const char *name;
 
@@ -934,8 +843,7 @@ cp_strip_template_parameters (const char *linkage_or_phys_name)
     name = linkage_or_phys_name;
 
   /* Only attempt to strip this if it looks like a template.  */
-  if (strchr (name, '<') != NULL
-      && strchr (name, '>') != NULL)
+  if (strchr (name, '<') != NULL && strchr (name, '>') != NULL)
     {
       const char *p;
       size_t len = strlen (name) - 1;
@@ -957,9 +865,7 @@ cp_strip_template_parameters (const char *linkage_or_phys_name)
     }
 
   xfree (demangled_name);
-  //printf ("stripped = \"%s\"\n", stripped);
   return stripped;
-#endif
 }
 
 /* DEMANGLED_NAME is the name of a function, including parameters and

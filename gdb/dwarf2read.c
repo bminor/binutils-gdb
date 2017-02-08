@@ -11704,8 +11704,6 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Attach template arguments to function.  */
   if (! VEC_empty (symbolp, template_args))
     {
-      const char *linkage_name;
-
       gdb_assert (templ_func != NULL);
 
       templ_func->template_arguments
@@ -11737,7 +11735,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       /* Determine whether the template's return and argument types were
 	 specified using template parameters.  */
-      linkage_name = dw2_linkage_name (die, cu);
+      const char *linkage_name = dw2_linkage_name (die, cu);
       templ_func->linkage_name = linkage_name;
       if (linkage_name != NULL)
 	{
@@ -12938,9 +12936,11 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
     accessibility = dwarf2_default_access_attribute (die, cu);
   switch (accessibility)
     {
+#if 1
     case DW_ACCESS_public:
       fp->is_public = 1;
       break;
+#endif
     case DW_ACCESS_private:
       fp->is_private = 1;
       break;

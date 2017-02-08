@@ -3422,6 +3422,98 @@ strip_leading_path_elements (const char *path, int n)
   return p;
 }
 
+/* See description in utils.h.  */
+
+const char *
+find_toplevel_char (const char *s, char c)
+{
+  int quoted = 0;		/* zero if we're not in quotes;
+				   '"' if we're in a double-quoted string;
+				   '\'' if we're in a single-quoted string.  */
+  int depth = 0;		/* Number of unclosed parens we've seen.  */
+  const char *scan;
+
+  for (scan = s; *scan; scan++)
+    {
+      if (quoted)
+	{
+	  if (*scan == quoted)
+	    quoted = 0;
+	  else if (*scan == '\\' && *(scan + 1))
+	    scan++;
+	}
+      else if (*scan == c && ! quoted && depth == 0)
+	return scan;
+      else if (*scan == '"' || *scan == '\'')
+	quoted = *scan;
+      else if (*scan == '(' || *scan == '<')
+	depth++;
+      else if ((*scan == ')' || *scan == '>') && depth > 0)
+	depth--;
+    }
+
+  return 0;
+}
+
+/* See description in utils.h.  */
+
+const char *
+find_toplevel_char_r (const char *s, size_t len, char c)
+{
+  int quoted = 0;
+  int depth = 0;
+  const char *scan;
+
+  for (scan = s + len; scan >= s; --scan)
+    {
+      if (quoted)
+	{
+	  if (*scan == quoted)
+	    quoted = 0;
+	}
+      else if (*scan == ')' || *scan == '>')
+	++depth;
+      else if ((*scan == '(' || *scan == '<') && depth > 0)
+	--depth;
+
+      if (*scan == c && !quoted && depth == 0)
+	return scan;
+      else if ((*scan == '"' || *scan == '\'')
+	       && scan > s && *(scan - 1) != '\\')
+	quoted = *scan;
+    }
+
+  return NULL;
+}
+
+/* See description in utils.h.  */
+
+const char *
+find_toplevel_string (const char *haystack, const char *needle)
+{
+  const char *s = haystack;
+
+  do
+    {
+      s = find_toplevel_char (s, *needle);
+
+      if (s != NULL)
+	{
+	  /* Found first char in HAYSTACK;  check rest of string.  */
+	  if (startswith (s, needle))
+	    return s;
+
+	  /* Didn't find it; loop over HAYSTACK, looking for the next
+	     instance of the first character of NEEDLE.  */
+	  ++s;
+	}
+    }
+  while (s != NULL && *s != '\0');
+
+  /* NEEDLE was not found in HAYSTACK.  */
+  return NULL;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_utils;
 

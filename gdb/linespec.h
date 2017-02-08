@@ -175,25 +175,6 @@ extern const char *get_gdb_linespec_parser_quote_characters (void);
 
 extern int is_ada_operator (const char *string);
 
-/* Find an instance of the character C in the string S that is outside
-   of all parenthesis pairs, single-quoted strings, and double-quoted
-   strings.  Also, ignore the char within a template name, like a ','
-   within foo<int, int>.  */
-
-extern const char *find_toplevel_char (const char *s, char c);
-
-/* Like find_toplevel_char but searches S backwards, starting LEN characters
-   into S.  */
-
-extern const char *find_toplevel_char_r (const char *s, size_t len, char c);
-
-/* The string equivalent of find_toplevel_char.  Returns a pointer
-   to the location of NEEDLE in HAYSTACK, ignoring any occurrences
-   inside "()" and "<>".  Returns NULL if NEEDLE was not found.  */
-
-const char *find_toplevel_string (const char *haystack,
-				  const char *needle);
-
 /* Find the end of the (first) linespec pointed to by *STRINGP.
    STRINGP will be advanced to this point.  */
 
