@@ -1,3 +1,8 @@
+2017-02-13  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Change
+	_gp to __global_pointer$
+
 2017-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure.tgt (arc*-*-linux*): Change the default linker
