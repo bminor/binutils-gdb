@@ -178,13 +178,6 @@ extern struct cmd_list_element *maint_cplus_cmd_list;
 
 char *gdb_demangle (const char *name, int options);
 
-/* Find the fn_field for the method with symbol METHOD_SYMBOL in its
-   parent class.  If XTOR_ONLY is non-zero, any symbols not representing a
-   constructor or destructor will return NULL.   */
-
-extern struct fn_field *cp_find_method_field (struct symbol *method_symbol,
-					      int xtor_only);
-
 /* Decode template information for TSYMBOL.  This function determines whether
    the template's return and argument types are concrete types or template
    parameters.  The symbol's obstack is used to allocate any needed memory.

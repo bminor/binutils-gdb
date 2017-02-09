@@ -15,7 +15,7 @@
 
 # (Very) simple inheritance tests.
 
-load_lib compiler-support.exp
+load_lib compile-support.exp
 
 standard_testfile .cc
 

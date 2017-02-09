@@ -729,16 +729,15 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 static unsigned int
 cplus_compute_string_hash (const char *string0)
 {
-  const char *p, *last_scope;
-
   /* If '<' doesn't appear at all in STRING), there is no way we could
      be dealing with a template name.  */
   if (find_toplevel_char (string0, '<') == NULL)
     return default_compute_string_hash (string0);
 
   /* Locate the last qualified component of STRING0.  */
-  p = find_toplevel_string (string0, "::");
-  last_scope = NULL;
+  const char *p = find_toplevel_string (string0, "::");
+  const char *last_scope = NULL;
+
   while (p != NULL)
     {
       last_scope = p;
@@ -758,7 +757,7 @@ cplus_compute_string_hash (const char *string0)
      and not be a template at all.  */
   if ((p - last_scope) > 8 && strncmp (p - 8, "operator", 8) == 0)
     {
-      /* Skip <,=  */
+      /* Skip <,=.  */
       while (strchr ("<=", *p) != NULL)
 	++p;
 
@@ -770,19 +769,13 @@ cplus_compute_string_hash (const char *string0)
      a template function itself.  */
   if (p == NULL)
     return default_compute_string_hash (string0);
-  else
-    {
-      unsigned int hash;
-      char *copy = ASTRDUP (string0);
 
-      copy[p - string0] = '\0';
+  char *copy = ASTRDUP (string0);
 
-      /* It *is a template, compute the hash based only until P.  */
-      hash = default_compute_string_hash (copy);
-      /* !!keiths: Probably should snarf dict_hash/minsym_hash_iw
-	 and do this by length.  What about cp_entire_prefix_len?  */
-      return hash;
-    }
+  copy[p - string0] = '\0';
+
+  /* It is a template, compute the hash based only until P.  */
+  return default_compute_string_hash (copy);
 }
 
 

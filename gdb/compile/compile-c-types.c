@@ -23,10 +23,12 @@
 #include "compile-internal.h"
 #include "compile-c.h"
 
+using namespace compile;
+
 /* Convert a pointer type to its gcc representation.  */
 
 static gcc_type
-convert_pointer (struct compile_c_instance *context, struct type *type)
+convert_pointer (compile_c_instance *context, struct type *type)
 {
   gcc_type target = context->convert_type (TYPE_TARGET_TYPE (type));
 
@@ -36,7 +38,7 @@ convert_pointer (struct compile_c_instance *context, struct type *type)
 /* Convert an array type to its gcc representation.  */
 
 static gcc_type
-convert_array (struct compile_c_instance *context, struct type *type)
+convert_array (compile_c_instance *context, struct type *type)
 {
   gcc_type element_type;
   struct type *range = TYPE_INDEX_TYPE (type);
@@ -86,7 +88,7 @@ convert_array (struct compile_c_instance *context, struct type *type)
 /* Convert a struct or union type to its gcc representation.  */
 
 static gcc_type
-convert_struct_or_union (struct compile_c_instance *context, struct type *type)
+convert_struct_or_union (compile_c_instance *context, struct type *type)
 {
   int i;
   gcc_type result;
@@ -122,7 +124,7 @@ convert_struct_or_union (struct compile_c_instance *context, struct type *type)
 /* Convert an enum type to its gcc representation.  */
 
 static gcc_type
-convert_enum (struct compile_c_instance *context, struct type *type)
+convert_enum (compile_c_instance *context, struct type *type)
 {
   gcc_type int_type, result;
   int i;
@@ -148,7 +150,7 @@ convert_enum (struct compile_c_instance *context, struct type *type)
 /* Convert a function type to its gcc representation.  */
 
 static gcc_type
-convert_func (struct compile_c_instance *context, struct type *type)
+convert_func (compile_c_instance *context, struct type *type)
 {
   int i;
   gcc_type result, return_type;
@@ -173,7 +175,7 @@ convert_func (struct compile_c_instance *context, struct type *type)
 /* Convert an integer type to its gcc representation.  */
 
 static gcc_type
-convert_int (struct compile_c_instance *context, struct type *type)
+convert_int (compile_c_instance *context, struct type *type)
 {
   if (context->c_version () >= GCC_C_FE_VERSION_1)
     {
@@ -192,7 +194,7 @@ convert_int (struct compile_c_instance *context, struct type *type)
 /* Convert a floating-point type to its gcc representation.  */
 
 static gcc_type
-convert_float (struct compile_c_instance *context, struct type *type)
+convert_float (compile_c_instance *context, struct type *type)
 {
   if (context->c_version () >= GCC_C_FE_VERSION_1)
     return context->float_type (TYPE_LENGTH (type), TYPE_NAME (type));
@@ -203,7 +205,7 @@ convert_float (struct compile_c_instance *context, struct type *type)
 /* Convert the 'void' type to its gcc representation.  */
 
 static gcc_type
-convert_void (struct compile_c_instance *context, struct type *type)
+convert_void (compile_c_instance *context, struct type *type)
 {
   return context->void_type ();
 }
@@ -211,7 +213,7 @@ convert_void (struct compile_c_instance *context, struct type *type)
 /* Convert a boolean type to its gcc representation.  */
 
 static gcc_type
-convert_bool (struct compile_c_instance *context, struct type *type)
+convert_bool (compile_c_instance *context, struct type *type)
 {
   return context->bool_type ();
 }
@@ -219,7 +221,7 @@ convert_bool (struct compile_c_instance *context, struct type *type)
 /* Convert a qualified type to its gcc representation.  */
 
 static gcc_type
-convert_qualified (struct compile_c_instance *context, struct type *type)
+convert_qualified (compile_c_instance *context, struct type *type)
 {
   struct type *unqual = make_unqualified_type (type);
   gcc_type unqual_converted;
@@ -240,7 +242,7 @@ convert_qualified (struct compile_c_instance *context, struct type *type)
 /* Convert a complex type to its gcc representation.  */
 
 static gcc_type
-convert_complex (struct compile_c_instance *context, struct type *type)
+convert_complex (compile_c_instance *context, struct type *type)
 {
   gcc_type base = context->convert_type (TYPE_TARGET_TYPE (type));
 
@@ -253,7 +255,7 @@ convert_complex (struct compile_c_instance *context, struct type *type)
    returns the gcc type.  */
 
 static gcc_type
-convert_type_basic (struct compile_c_instance *context, struct type *type)
+convert_type_basic (compile_c_instance *context, struct type *type)
 {
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
@@ -298,6 +300,15 @@ convert_type_basic (struct compile_c_instance *context, struct type *type)
 
   return context->error (_("cannot convert gdb type to gcc type"));
 }
+
+/* Default compile flags for C.  */
+
+const char *compile_c_instance::m_default_cflags = "-std=gnu11"
+  /* Otherwise the .o file may need
+     "_Unwind_Resume" and
+     "__gcc_personality_v0".  */
+  " -fno-exceptions"
+  " -Wno-implicit-function-declaration";
 
 gcc_type
 compile_c_instance::convert_type (struct type *type)

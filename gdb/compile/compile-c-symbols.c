@@ -33,6 +33,8 @@
 
 
 
+using namespace compile;
+
 /* See description in compile-c.h.  */
 
 char *
@@ -49,7 +51,7 @@ c_symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (struct compile_c_instance *context,
+convert_one_symbol (compile_c_instance *context,
 		    struct block_symbol sym,
 		    int is_global,
 		    int is_local)
@@ -209,7 +211,7 @@ convert_one_symbol (struct compile_c_instance *context,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
+convert_symbol_sym (compile_c_instance *context, const char *identifier,
 		    struct block_symbol sym, domain_enum domain)
 {
   const struct block *static_block;
@@ -259,7 +261,7 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (struct compile_c_instance *context,
+convert_symbol_bmsym (compile_c_instance *context,
 		      struct bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
@@ -323,7 +325,7 @@ gcc_convert_symbol (void *datum,
 		    enum gcc_c_oracle_request request,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) datum;
+  compile_c_instance *context = static_cast<compile_c_instance *> (datum);
   domain_enum domain;
   int found = 0;
 
@@ -386,7 +388,7 @@ gcc_address
 gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) datum;
+  compile_c_instance *context = static_cast<compile_c_instance *> (datum);
   gcc_address result = 0;
   int found = 0;
 

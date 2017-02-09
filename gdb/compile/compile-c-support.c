@@ -95,7 +95,7 @@ load_libcompile (const char *fe_libcc, const char *fe_context)
 
 template <typename INSTTYPE, typename FUNCTYPE, typename CTXTYPE,
 	  typename BASE_VERSION_TYPE, typename API_VERSION_TYPE>
-struct compile_instance *
+compile::compile_instance *
 get_compile_context (const char *fe_libcc, const char *fe_context,
 		     BASE_VERSION_TYPE base_version,
 		     API_VERSION_TYPE api_version)
@@ -119,9 +119,11 @@ get_compile_context (const char *fe_libcc, const char *fe_context,
 
 /* A C-language implementation of get_compile_context.  */
 
-struct compile_instance *
+compile::compile_instance *
 c_get_compile_context (void)
 {
+  using namespace compile;
+
   return get_compile_context
     <compile_c_instance, gcc_c_fe_context_function, gcc_c_context,
     gcc_base_api_version, gcc_c_api_version>
@@ -131,7 +133,7 @@ c_get_compile_context (void)
 
 /* A C++-language implementation of get_compile_context.  */
 
-struct compile_instance *
+compile::compile_instance *
 cplus_get_compile_context (void)
 {
   using namespace compile;
@@ -199,7 +201,6 @@ write_macro_definitions (const struct block *block, CORE_ADDR pc,
     macro_for_each_in_scope (scope->file, scope->line, print_one_macro, file);
 }
 
-
 /* Generate a structure holding all the registers used by the function
    we're generating.  */
 
@@ -207,13 +208,14 @@ static void
 generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 			  const unsigned char *registers_used)
 {
+  int i;
   int seen = 0;
 
   fputs_unfiltered ("struct " COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG " {\n",
 		    stream);
 
   if (registers_used != NULL)
-    for (int i = 0; i < gdbarch_num_regs (gdbarch); ++i)
+    for (i = 0; i < gdbarch_num_regs (gdbarch); ++i)
       {
 	if (registers_used[i])
 	  {
@@ -648,7 +650,7 @@ private:
 
 /* The types used for C and C++ program computations.  */
 
-typedef compile_program<compile_c_instance, c_push_user_expression,
+typedef compile_program<compile::compile_c_instance, c_push_user_expression,
 			pop_user_expression_nop, c_add_code_header,
 			c_add_code_footer,
 			c_add_input> c_compile_program;
@@ -661,12 +663,14 @@ typedef compile_program<compile::compile_cplus_instance,
 /* The la_compute_program method for C.  */
 
 std::string
-c_compute_program (struct compile_instance *inst,
+c_compute_program (compile::compile_instance *inst,
 		   const char *input,
 		   struct gdbarch *gdbarch,
 		   const struct block *expr_block,
 		   CORE_ADDR expr_pc)
 {
+  using namespace compile;
+
   compile_c_instance *c_inst = static_cast<compile_c_instance *> (inst);
   c_compile_program program (c_inst, gdbarch);
 
@@ -676,7 +680,7 @@ c_compute_program (struct compile_instance *inst,
 /* The la_compute_program method for C++.  */
 
 std::string
-cplus_compute_program (struct compile_instance *inst,
+cplus_compute_program (compile::compile_instance *inst,
 		       const char *input,
 		       struct gdbarch *gdbarch,
 		       const struct block *expr_block,

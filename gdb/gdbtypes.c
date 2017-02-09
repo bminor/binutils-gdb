@@ -1702,8 +1702,7 @@ set_type_vptr_fieldno (struct type *type, int fieldno)
 {
   type = check_typedef (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION
-	      || TYPE_CODE (type) == TYPE_CODE_NAMESPACE /* !!keiths */);
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
   if (!HAVE_CPLUS_STRUCT (type))
     ALLOCATE_CPLUS_STRUCT_TYPE (type);
   TYPE_RAW_CPLUS_SPECIFIC (type)->vptr_fieldno = fieldno;

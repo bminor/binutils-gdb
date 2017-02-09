@@ -1356,7 +1356,7 @@ gnuv3_is_constructor_name (const char *mangled_name)
   switch (libiberty_kind)
     {
     case 0:
-      kind = (enum ctor_kinds) 0;
+      kind = not_ctor;
       break;
     case gnu_v3_complete_object_ctor:
       kind = complete_object_ctor;
@@ -1393,7 +1393,7 @@ gnuv3_is_destructor_name (const char *mangled_name)
   switch (libiberty_kind)
   {
   case 0:
-    kind = (enum dtor_kinds) 0;
+    kind = not_dtor;
     break;
   case gnu_v3_deleting_dtor:
     kind = deleting_dtor;

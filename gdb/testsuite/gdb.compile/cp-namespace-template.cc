@@ -136,4 +136,3 @@ main (void)
     + A::stempmethod ()
     + A::stempmethod (0); // break here
 }
-

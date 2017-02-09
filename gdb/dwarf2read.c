@@ -6918,7 +6918,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     {
     case DW_TAG_subprogram:
       addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
-      if (pdi->is_external || cu->language == language_ada || cu->language == language_cplus)
+      if (pdi->is_external || cu->language == language_ada
+	  || cu->language == language_cplus)
 	{
           /* brobecker/2007-12-26: Normally, only "external" DIEs are part
              of the global scope.  But in Ada, we want to be able to access
@@ -8842,10 +8843,10 @@ add_xtor_field (struct type *parent_type,
 	  methods[idx] = new_fn_field (name_die, name_cu, type_die, type_cu,
 				       parent_type, name, idx, i);
 
-	  /* If this is an aliased xtor, mark it as a duplicate so that
+	  /* If this is an aliased xtor, mark it as an alias so that
 	     it will be ignored during symbol searches and type printing.  */
 	  if (name_die != type_die)
-	    TYPE_FN_FIELD_DUPLICATE (methods, idx) = 1;
+	    TYPE_FN_FIELD_ALIAS (methods, idx) = 1;
 
 	  return;
 	}
@@ -8915,17 +8916,17 @@ read_imported_decl (struct die_info *die, struct dwarf2_cu *cu)
 	      if (linkage_name != NULL)
 		{
 		  enum ctor_kinds ctor_kind;
-		  enum dtor_kinds dtor_kind = (enum dtor_kinds) 0;
+		  enum dtor_kinds dtor_kind = not_dtor;
 
 		  ctor_kind = is_constructor_name (linkage_name);
-		  if (ctor_kind == 0)
+		  if (ctor_kind == not_ctor)
 		    dtor_kind = is_destructor_name (linkage_name);
 
 		  /* GCC outputs imported_declaration for C1 constructors
 		     and D1 destructors which alias to the C4/D4/unified
 		     ctor/dtor listed in the parent class's DIE tree.
 		     Deal with those here.  */
-		  if (ctor_kind !=  0 || dtor_kind != 0)
+		  if (ctor_kind !=  not_ctor || dtor_kind != not_dtor)
 		    {
 		      struct die_info *imported_die, *spec_die, *parent_die;
 		      struct die_info *type_die;
@@ -11448,17 +11449,17 @@ possibly_add_new_xtor_method (const char *name, struct die_info *die,
 			      struct dwarf2_cu *cu)
 {
   const char *linkage_name = dw2_linkage_name (die, cu);
-  enum ctor_kinds ctor_kind;
 
   if (linkage_name == NULL || cu->language != language_cplus)
     return;
 
-  ctor_kind = is_constructor_name (linkage_name);
-  if (ctor_kind == 0)
+  enum ctor_kinds ctor_kind = is_constructor_name (linkage_name);
+
+  if (ctor_kind == not_ctor)
     {
       enum dtor_kinds dtor_kind = is_destructor_name (linkage_name);
 
-      if (dtor_kind == 0)
+      if (dtor_kind == not_dtor)
 	return;
     }
 
@@ -12905,8 +12906,7 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
 	      || die->tag == DW_TAG_class_type
 	      || die->tag == DW_TAG_structure_type
 	      || die->tag == DW_TAG_union_type
-	      || die->tag == DW_TAG_enumeration_type
-	      /*|| die->tag == DW_TAG_namespace*/);
+	      || die->tag == DW_TAG_enumeration_type);
 
   fp = &new_field->field;
 
@@ -12922,11 +12922,9 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
     accessibility = dwarf2_default_access_attribute (die, cu);
   switch (accessibility)
     {
-#if 1
     case DW_ACCESS_public:
       fp->is_public = 1;
       break;
-#endif
     case DW_ACCESS_private:
       fp->is_private = 1;
       break;
@@ -13063,13 +13061,13 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
   const char *fieldname;
   const char *type_name;
   int len;
-  const char *linkage_name;
 
   /* If there is a linkage name, use it to determine if this DIE represents
      a constructor.  */
-  linkage_name = dw2_linkage_name (die, cu);
+  const char *linkage_name = dw2_linkage_name (die, cu);
+
   if (linkage_name != NULL)
-    return is_constructor_name (linkage_name) != 0;
+    return is_constructor_name (linkage_name) != not_ctor;
 
   /* Many older versions of GCC do not output DW_AT_linkage_name for
      constructors.  In that case, fallback to a heuristic test.  */
@@ -13097,14 +13095,12 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
 static int
 dwarf2_is_destructor (struct die_info *die, struct dwarf2_cu *cu)
 {
-  const char *fieldname;
-  const char *linkage_name;
-
   /* If there is a linkage name, use it to determine if this DIE represents
      a destructor.  */
-  linkage_name = dw2_linkage_name (die, cu);
+  const char *linkage_name = dw2_linkage_name (die, cu);
+
   if (linkage_name != NULL)
-    return is_destructor_name (linkage_name) != 0;
+    return is_destructor_name (linkage_name) != not_dtor;
 
   if (die->parent == NULL)
     return 0;
@@ -13114,7 +13110,8 @@ dwarf2_is_destructor (struct die_info *die, struct dwarf2_cu *cu)
       && die->parent->tag != DW_TAG_class_type)
     return 0;
 
-  fieldname = dwarf2_name (die, cu);
+  const char *fieldname = dwarf2_name (die, cu);
+
   return (fieldname != NULL && *fieldname == '~');
 }
 
@@ -13217,15 +13214,12 @@ new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
   fnfield.is_constructor = dwarf2_is_constructor (name_die, type_cu);
   if (fnfield.is_constructor)
     {
-      const char *linkage_name;
+      const char *linkage_name = dw2_linkage_name (name_die, name_cu);
 
-      linkage_name = dw2_linkage_name (name_die, name_cu);
-      if (linkage_name == NULL)
-	fnfield.cdtor_type.ctor_kind = unknown_ctor;
-      else
+      if (linkage_name != NULL)
 	{
 	  fnfield.cdtor_type.ctor_kind = is_constructor_name (linkage_name);
-	  gdb_assert (fnfield.cdtor_type.ctor_kind != 0);
+	  gdb_assert (fnfield.cdtor_type.ctor_kind != not_ctor);
 	}
     }
   else
@@ -13233,18 +13227,12 @@ new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
       fnfield.is_destructor = dwarf2_is_destructor (name_die, name_cu);
       if (fnfield.is_destructor)
 	{
-	  const char *linkage_name;
+	  const char *linkage_name = dw2_linkage_name (name_die, name_cu);
 
-	  /* The linkage name can be NULL coming from objfiles created by the
-	     GCC compile plug-in.  This special case should be handled by
-	     dwarf2_add_member_fn.  */
-	  linkage_name = dw2_linkage_name (name_die, name_cu);
-	  if (linkage_name == NULL)
-	    fnfield.cdtor_type.dtor_kind = unknown_dtor;
-	  else
+	  if (linkage_name != NULL)
 	    {
 	      fnfield.cdtor_type.dtor_kind = is_destructor_name (linkage_name);
-	      gdb_assert (fnfield.cdtor_type.dtor_kind != 0);
+	      gdb_assert (fnfield.cdtor_type.dtor_kind != not_dtor);
 	    }
 	}
     }
@@ -14584,7 +14572,6 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-#if 1
   if (die->child != NULL)
     {
       struct die_info *child_die = die->child;
@@ -14595,11 +14582,6 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	  child_die = sibling_die (child_die);
 	}
     }
-#else
-  /* !!keiths: HACK!  This works around GDB not being able to
-     define the contents of a namespace.  */
-  process_structure_scope (die, cu);
-#endif
 }
 
 /* Read a Fortran module as type.  This DIE can be only a declaration used for
@@ -19651,9 +19633,8 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (child->tag == DW_TAG_subprogram)
 	{
-	  const char *linkage_name;
+	  const char *linkage_name = dw2_linkage_name (child, cu);
 
-	  linkage_name = dw2_linkage_name (child, cu);
 	  if (linkage_name != NULL)
 	    {
 	      char *actual_name

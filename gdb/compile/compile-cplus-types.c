@@ -888,7 +888,7 @@ compile::maybe_canonicalize_special_function
 	      *ignore = true;
 	      return field_name; /* C?  */
 
-	    case unknown_ctor:
+	    case not_ctor:
 #if DEBUG_XTOR
 	      printf ("unknown_ctr -- ignored\n");
 #endif
@@ -944,9 +944,9 @@ compile::maybe_canonicalize_special_function
 	      *ignore = true;
 	      return field_name; /* D?  */
 
-	    case unknown_dtor:
+	    case not_dtor:
 #if DEBUG_XTOR
-	      printf ("unknown_dtor -- ignored\n");
+	      printf ("not_dtor -- ignored\n");
 #endif
 	      *ignore = true;
 	      return field_name; /* unknown  */
@@ -1755,14 +1755,17 @@ compile_cplus_instance::convert_type (struct type *type,
 
 
 
+/* Default compile flags for C++.  */
+
+const char *compile_cplus_instance::m_default_cflags = "-std=gnu++11";
+
 /* See compile-cplus.h.  */
 
 compile_cplus_instance::compile_cplus_instance (struct gcc_cp_context *gcc_fe)
-  : compile_instance (&gcc_fe->base,
-		      "-std=gnu++11"),
-  m_context (gcc_fe),
-  m_function_template_defns (new function_template_defn_map_t ()),
-  m_class_template_defns (new class_template_defn_map_t ())
+  : compile_instance (&gcc_fe->base, m_default_cflags),
+    m_context (gcc_fe),
+    m_function_template_defns (new function_template_defn_map_t ()),
+    m_class_template_defns (new class_template_defn_map_t ())
 {
   gcc_fe->cp_ops->set_callbacks (gcc_fe, gcc_cplus_convert_symbol,
 				 gcc_cplus_symbol_address,

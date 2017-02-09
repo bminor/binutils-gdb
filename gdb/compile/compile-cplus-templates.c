@@ -178,7 +178,7 @@ void
 compile_cplus_instance::maybe_define_new_function_template
   (const struct symbol *sym, struct type *parent_type, int f_idx,
    int m_idx)
-    
+
 {
   if (sym != NULL && SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym))
     {

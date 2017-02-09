@@ -1689,8 +1689,8 @@ cp_decode_template_type_indices (struct template_symbol *tsymbol,
 
   if (tsymbol->linkage_name == NULL)
     {
-      /* !!keiths: I can't even issue a good error message!  */
-      warning (_("Template symbol has no linkage name."));
+      warning (_("Template symbol \"%s\" has no linkage name."),
+	       SYMBOL_NATURAL_NAME (&tsymbol->base));
       return;
     }
 
@@ -1718,8 +1718,6 @@ cp_decode_template_type_indices (struct template_symbol *tsymbol,
 
       info = dpi.get ();
     }
-
-  /* !!keiths will certainly require extensive testing/revision.  */
 
   /* Determine the return type index.  */
   ret_comp = info->tree;

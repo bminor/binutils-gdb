@@ -56,4 +56,3 @@ main (void)
 
   return a.get ();
 }
-

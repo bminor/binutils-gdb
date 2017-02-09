@@ -30,118 +30,118 @@ extern gcc_c_oracle_function gcc_convert_symbol;
 
 extern gcc_c_symbol_address_function gcc_symbol_address;
 
-/* A subclass of compile_instance that is specific to the C front
-   end.  */
-
-class compile_c_instance
-  : public compile_instance
+namespace compile
 {
- public:
 
-  compile_c_instance (struct gcc_base_context *base, const char *options)
-    : compile_instance (base, options)
+  /* A subclass of compile_instance that is specific to the C front
+     end.  */
+
+  class compile_c_instance
+    : public compile_instance
+  {
+  public:
+
+    compile_c_instance (struct gcc_base_context *base, const char *options)
+      : compile_instance (base, options)
     {
     }
 
-  explicit compile_c_instance (struct gcc_c_context *gcc_c)
-    : compile_instance (&gcc_c->base,
-			"-std=gnu11"
-			/* Otherwise the .o file may need
-			   "_Unwind_Resume" and
-			   "__gcc_personality_v0".  */
-			" -fno-exceptions"
-			" -Wno-implicit-function-declaration"),
-      m_context (gcc_c)
-  {
-    m_context->c_ops->set_callbacks (m_context, gcc_convert_symbol,
-				     gcc_symbol_address, this);
-  }
+    explicit compile_c_instance (struct gcc_c_context *gcc_c)
+      : compile_instance (&gcc_c->base, m_default_cflags), m_context (gcc_c)
+    {
+      m_context->c_ops->set_callbacks (m_context, gcc_convert_symbol,
+				       gcc_symbol_address, this);
+    }
 
-  ~compile_c_instance ()
+    ~compile_c_instance ()
     {
       m_gcc_fe->ops->destroy (m_gcc_fe);
     }
 
-  /* Convert a gdb type, TYPE, to a GCC type.
+    /* Convert a gdb type, TYPE, to a GCC type.
 
-     The new GCC type is returned.  */
+       The new GCC type is returned.  */
 
-  gcc_type convert_type (struct type *type);
+    gcc_type convert_type (struct type *type);
 
-  /* Plug-in forwards  */
+    /* Plug-in forwards  */
 
-  unsigned int c_version () const;
+    unsigned int c_version () const;
 
-  bool tagbind (const char *name, gcc_type tagged_type, const char *filename,
-		unsigned int line_number);
+    bool tagbind (const char *name, gcc_type tagged_type, const char *filename,
+		  unsigned int line_number);
 
-  bool build_constant (gcc_type type, const char *name, unsigned long value,
-		       const char *filename, unsigned int line_number);
+    bool build_constant (gcc_type type, const char *name, unsigned long value,
+			 const char *filename, unsigned int line_number);
 
-  gcc_decl build_decl (const char *name, enum gcc_c_symbol_kind sym_kind,
-		       gcc_type sym_type, const char *substitution_name,
-		       gcc_address address, const char *filename,
-		       unsigned int line_number);
+    gcc_decl build_decl (const char *name, enum gcc_c_symbol_kind sym_kind,
+			 gcc_type sym_type, const char *substitution_name,
+			 gcc_address address, const char *filename,
+			 unsigned int line_number);
 
-  bool bind (gcc_decl decl, bool is_global);
+    bool bind (gcc_decl decl, bool is_global);
 
-  gcc_type error (const char *message);
+    gcc_type error (const char *message);
 
-  gcc_type build_pointer_type (gcc_type base_type);
+    gcc_type build_pointer_type (gcc_type base_type);
 
-  gcc_type build_vla_array_type (gcc_type element_type,
-				 const char *upper_bound_name);
+    gcc_type build_vla_array_type (gcc_type element_type,
+				   const char *upper_bound_name);
 
-  gcc_type build_vector_type (gcc_type element_type, int num_elements);
+    gcc_type build_vector_type (gcc_type element_type, int num_elements);
 
-  gcc_type build_array_type (gcc_type element_type, int num_elements);
+    gcc_type build_array_type (gcc_type element_type, int num_elements);
 
-  gcc_type build_record_type ();
+    gcc_type build_record_type ();
 
-  gcc_type build_union_type ();
+    gcc_type build_union_type ();
 
-  bool build_add_field (gcc_type record_or_union_type, const char *field_name,
-			gcc_type field_type, unsigned long bitsize,
-			unsigned long bitpos);
+    bool build_add_field (gcc_type record_or_union_type, const char *field_name,
+			  gcc_type field_type, unsigned long bitsize,
+			  unsigned long bitpos);
 
-  bool finish_record_or_union (gcc_type record_or_union_type,
-			       unsigned long size_in_bytes);
+    bool finish_record_or_union (gcc_type record_or_union_type,
+				 unsigned long size_in_bytes);
 
-  gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes,
-		     const char *builtin_name);
+    gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes,
+		       const char *builtin_name);
 
-  gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes);
+    gcc_type int_type (bool is_unsigned, unsigned long size_in_bytes);
 
-  gcc_type build_enum_type (gcc_type underlying_int_type);
+    gcc_type build_enum_type (gcc_type underlying_int_type);
 
-  bool build_add_enum_constant (gcc_type enum_type, const char *name,
-				unsigned long value);
+    bool build_add_enum_constant (gcc_type enum_type, const char *name,
+				  unsigned long value);
 
-  bool finish_enum_type (gcc_type enum_type);
+    bool finish_enum_type (gcc_type enum_type);
 
-  gcc_type build_function_type (gcc_type return_value,
-				const struct gcc_type_array *argument_types,
-				bool is_varargs);
+    gcc_type build_function_type (gcc_type return_value,
+				  const struct gcc_type_array *argument_types,
+				  bool is_varargs);
 
-  gcc_type char_type ();
+    gcc_type char_type ();
 
-  gcc_type float_type (unsigned long size_in_bytes, const char *builtin_name);
+    gcc_type float_type (unsigned long size_in_bytes, const char *builtin_name);
 
-  gcc_type float_type (unsigned long size_in_bytes);
+    gcc_type float_type (unsigned long size_in_bytes);
 
-  gcc_type void_type ();
+    gcc_type void_type ();
 
-  gcc_type bool_type ();
+    gcc_type bool_type ();
 
-  gcc_type build_qualified_type (gcc_type unqualified_type,
-				 enum gcc_qualifiers qualifiers);
+    gcc_type build_qualified_type (gcc_type unqualified_type,
+				   enum gcc_qualifiers qualifiers);
 
-  gcc_type build_complex_type (gcc_type element_type);
+    gcc_type build_complex_type (gcc_type element_type);
 
-private:
+  private:
 
-  /* The GCC C context.  */
-  struct gcc_c_context *m_context;
+    /* Default compiler flags for C.  */
+    static const char *m_default_cflags;
+
+    /* The GCC C context.  */
+    struct gcc_c_context *m_context;
+  };
 };
 
 /* Emit code to compute the address for all the local variables in
@@ -150,7 +150,7 @@ private:
    register is needed to compute a local variable.  */
 
 extern unsigned char *generate_c_for_variable_locations
-     (compile_instance *compiler,
+     (compile::compile_instance *compiler,
       string_file &stream,
       struct gdbarch *gdbarch,
       const struct block *block,

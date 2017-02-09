@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "gcc-c-interface.h"
-#include "compile-internal.h"
 
 #include <string>
 #include <unordered_map>
@@ -34,147 +33,150 @@ extern int debug_compile_oracle;
 
 struct block;
 
-/* An object of this type holds state associated with a given
-   compilation job.  */
-
-class compile_instance
+namespace compile
 {
-public:
+  /* An object of this type holds state associated with a given
+     compilation job.  */
 
-  compile_instance (struct gcc_base_context *gcc_fe, const char *options)
-    : m_gcc_fe (gcc_fe), m_gcc_target_options (options)
+  class compile_instance
   {
-  }
+  public:
 
-  virtual ~compile_instance ()
-  {
-  }
+    compile_instance (struct gcc_base_context *gcc_fe, const char *options)
+      : m_gcc_fe (gcc_fe), m_gcc_target_options (options)
+    {
+    }
 
-  /* Returns the GCC options to be passed during compilation.  */
+    virtual ~compile_instance ()
+    {
+    }
 
-  const std::string &gcc_target_options () const
-  {
-    return m_gcc_target_options;
-  }
+    /* Returns the GCC options to be passed during compilation.  */
 
-  /* Insert GCC_TYPE into the type cache for TYPE.
+    const std::string &gcc_target_options () const
+    {
+      return m_gcc_target_options;
+    }
 
-     It is ok for a given type to be inserted more than once, provided that
-     the exact same association is made each time.  */
+    /* Insert GCC_TYPE into the type cache for TYPE.
 
-  void insert_type (struct type *type, gcc_type gcc_type);
+       It is ok for a given type to be inserted more than once, provided that
+       the exact same association is made each time.  */
 
-  /* Associate SYMBOL with some error text.  */
+    void insert_type (struct type *type, gcc_type gcc_type);
 
-  void insert_symbol_error (const struct symbol *sym, std::string text);
+    /* Associate SYMBOL with some error text.  */
 
-  /* Emit the error message corresponding to SYM, if one exists, and
-     arrange for it not to be emitted again.  */
+    void insert_symbol_error (const struct symbol *sym, std::string text);
 
-  void error_symbol_once (const struct symbol *sym);
+    /* Emit the error message corresponding to SYM, if one exists, and
+       arrange for it not to be emitted again.  */
 
-  /* These currently just forward to the underlying ops
-     vtable.  */
+    void error_symbol_once (const struct symbol *sym);
 
-  /* Set the plug-in print callback.  */
+    /* These currently just forward to the underlying ops
+       vtable.  */
 
-  void set_print_callback (void (*print_function) (void *, const char *),
-			   void *datum);
+    /* Set the plug-in print callback.  */
 
-  /* Return the plug-in's front-end version.  */
+    void set_print_callback (void (*print_function) (void *, const char *),
+			     void *datum);
 
-  unsigned int version () const;
+    /* Return the plug-in's front-end version.  */
 
-  /* Set the plug-in's verbosity level.  */
+    unsigned int version () const;
 
-  void set_verbose (int level);
+    /* Set the plug-in's verbosity level.  */
 
-  /* Set the plug-in driver program.  */
+    void set_verbose (int level);
 
-  void set_driver_filename (const char *filename);
+    /* Set the plug-in driver program.  */
 
-  /* Set the regular expression used to match the configury triplet
-     prefix to the compiler.  */
+    void set_driver_filename (const char *filename);
 
-  void set_triplet_regexp (const char *regexp);
+    /* Set the regular expression used to match the configury triplet
+       prefix to the compiler.  */
 
-  /* Set compilation arguments.  */
+    void set_triplet_regexp (const char *regexp);
 
-  char *set_arguments (int argc, char **argv);
+    /* Set compilation arguments.  */
 
-  /* !!keiths: YUCK!  */
+    char *set_arguments (int argc, char **argv);
 
-  char *set_arguments (const char *regexp, int argc, char **argv);
+    /* As above for protocol version 0.  */
 
-  /* Set the filename of the program to compile.  */
+    char *set_arguments (const char *regexp, int argc, char **argv);
 
-  void set_source_file (const char *filename);
+    /* Set the filename of the program to compile.  */
 
-  /* Compile the previously specified source file to FILENAME.  */
+    void set_source_file (const char *filename);
 
-  bool compile (const char *filename);
+    /* Compile the previously specified source file to FILENAME.  */
 
-  /* Same as above, but for earlier protocol versions.  */
+    bool compile (const char *filename);
 
-  bool compile (const char *filename, int verbose_level);
+    /* Same as above, but for earlier protocol versions.  */
 
-  /* Set the scope type for this compile.  */
+    bool compile (const char *filename, int verbose_level);
 
-  void set_scope (enum compile_i_scope_types scope)
-  {
-    m_scope = scope;
-  }
+    /* Set the scope type for this compile.  */
 
-  /* Return the scope type.  */
+    void set_scope (enum compile_i_scope_types scope)
+    {
+      m_scope = scope;
+    }
 
-  enum compile_i_scope_types scope () const
-  {
-    return m_scope;
-  }
+    /* Return the scope type.  */
 
-  /* Set the block to be used for symbol searches.  */
+    enum compile_i_scope_types scope () const
+    {
+      return m_scope;
+    }
 
-  void set_block (const struct block *block)
-  {
-    m_block = block;
-  }
+    /* Set the block to be used for symbol searches.  */
 
-  /* Return the search block.  */
+    void set_block (const struct block *block)
+    {
+      m_block = block;
+    }
 
-  const struct block *block () const
-  {
-    return m_block;
-  }
+    /* Return the search block.  */
 
-protected:
+    const struct block *block () const
+    {
+      return m_block;
+    }
 
-  /* Map types used by the compile instance for caching type conversions.
-     and error tracking.  */
+  protected:
 
-  typedef std::pair<struct type *, gcc_type> type_map_item_t;
-  typedef std::unordered_map<struct type *, gcc_type> type_map_t;
-  typedef std::pair<const struct symbol *, std::string> symbol_err_map_item_t;
-  typedef std::unordered_map<const struct symbol *, std::string>
+    /* Map types used by the compile instance for caching type conversions.
+       and error tracking.  */
+
+    typedef std::pair<struct type *, gcc_type> type_map_item_t;
+    typedef std::unordered_map<struct type *, gcc_type> type_map_t;
+    typedef std::pair<const struct symbol *, std::string> symbol_err_map_item_t;
+    typedef std::unordered_map<const struct symbol *, std::string>
     symbol_err_map_t;
 
-  /* The GCC front end.  */
-  struct gcc_base_context *m_gcc_fe;
+    /* The GCC front end.  */
+    struct gcc_base_context *m_gcc_fe;
 
-  /* The "scope" of this compilation.  */
-  enum compile_i_scope_types m_scope;
+    /* The "scope" of this compilation.  */
+    enum compile_i_scope_types m_scope;
 
-  /* The block in which an expression is being parsed.  */
-  const struct block *m_block;
+    /* The block in which an expression is being parsed.  */
+    const struct block *m_block;
 
-  /* Specify "-std=gnu11", "-std=gnu++11" or similar.  These options are put
-     after CU's DW_AT_producer compilation options to override them.  */
-  std::string m_gcc_target_options;
+    /* Specify "-std=gnu11", "-std=gnu++11" or similar.  These options are put
+       after CU's DW_AT_producer compilation options to override them.  */
+    std::string m_gcc_target_options;
 
-  /* Map from gdb types to gcc types.  */
-  type_map_t m_type_map;
+    /* Map from gdb types to gcc types.  */
+    type_map_t m_type_map;
 
-  /* Map from gdb symbols to gcc error messages to emit.  */
-  symbol_err_map_t m_symbol_err_map;
+    /* Map from gdb symbols to gcc error messages to emit.  */
+    symbol_err_map_t m_symbol_err_map;
+  };
 };
 
 /* Define the headers and footers for different scopes.  */

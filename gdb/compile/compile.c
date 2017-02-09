@@ -420,8 +420,8 @@ filter_args (int *argcp, char **argv)
    generated above.  */
 
 static void
-get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
-	  int *argcp, char ***argvp)
+get_args (const compile::compile_instance *compiler,
+	  struct gdbarch *gdbarch, int *argcp, char ***argvp)
 {
   const char *cs_producer_options;
   int argc_compiler;
@@ -455,7 +455,8 @@ get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
 static void
 cleanup_compile_instance (void *arg)
 {
-  struct compile_instance *inst = (struct compile_instance *) arg;
+  compile::compile_instance *inst
+    = static_cast<compile::compile_instance *> (arg);
 
   delete inst;
 }
@@ -487,7 +488,7 @@ static compile_file_names
 compile_to_object (struct command_line *cmd, const char *cmd_string,
 		   enum compile_i_scope_types scope)
 {
-  struct compile_instance *compiler;
+  compile::compile_instance *compiler;
   struct cleanup *cleanup, *inner_cleanup;
   const struct block *expr_block;
   CORE_ADDR trash_pc, expr_pc;
@@ -574,7 +575,6 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   get_args (compiler, gdbarch, &argc, &argv);
   make_cleanup_freeargv (argv);
 
-  /* !!keiths: This should be hidden at this level!  */
   if (compiler->version ()>= GCC_FE_VERSION_1)
     error_message = compiler->set_arguments (argc, argv);
   else
@@ -698,7 +698,7 @@ compile_register_name_demangle (struct gdbarch *gdbarch,
 /* See description in compile-internal.h.  */
 
 void
-compile_instance::insert_type (struct type *type, gcc_type gcc_type)
+compile::compile_instance::insert_type (struct type *type, gcc_type gcc_type)
 {
   type_map_t::iterator pos = m_type_map.find (type);
 
@@ -717,8 +717,8 @@ compile_instance::insert_type (struct type *type, gcc_type gcc_type)
 /* See description in compile-internal.h.  */
 
 void
-compile_instance::insert_symbol_error (const struct symbol *sym,
-				       std::string text)
+compile::compile_instance::insert_symbol_error (const struct symbol *sym,
+						std::string text)
 {
   symbol_err_map_t::iterator pos = m_symbol_err_map.find (sym);
 
@@ -729,7 +729,7 @@ compile_instance::insert_symbol_error (const struct symbol *sym,
 /* See description in compile-internal.h.  */
 
 void
-compile_instance::error_symbol_once (const struct symbol *sym)
+compile::compile_instance::error_symbol_once (const struct symbol *sym)
 {
   symbol_err_map_t::iterator pos = m_symbol_err_map.find (sym);
   if (pos == m_symbol_err_map.end () || pos->second.length () == 0)
@@ -747,7 +747,7 @@ compile_instance::error_symbol_once (const struct symbol *sym)
 /* Set the plug-in print callback.  */
 
 void
-compile_instance::set_print_callback
+compile::compile_instance::set_print_callback
   (void (*print_function) (void *, const char *), void *datum)
 {
   FORWARD (set_print_callback, print_function, datum);
@@ -756,7 +756,7 @@ compile_instance::set_print_callback
 /* Return the plug-in's front-end version.  */
 
 unsigned int
-compile_instance::version () const
+compile::compile_instance::version () const
 {
   return m_gcc_fe->ops->version;
 }
@@ -764,7 +764,7 @@ compile_instance::version () const
 /* Set the plug-in's verbosity level.  */
 
 void
-compile_instance::set_verbose (int level)
+compile::compile_instance::set_verbose (int level)
 {
   FORWARD (set_verbose, level);
 }
@@ -772,9 +772,8 @@ compile_instance::set_verbose (int level)
 /* Set the plug-in driver program.  */
 
 void
-compile_instance::set_driver_filename (const char *filename)
+compile::compile_instance::set_driver_filename (const char *filename)
 {
-  /* !!keiths: Possible leak???  */
   FORWARD (set_driver_filename, filename);
 }
 
@@ -782,24 +781,24 @@ compile_instance::set_driver_filename (const char *filename)
    prefix to the compiler.  */
 
 void
-compile_instance::set_triplet_regexp (const char *regexp)
+compile::compile_instance::set_triplet_regexp (const char *regexp)
 {
-  /* !!keiths: Leak?  */
   FORWARD (set_triplet_regexp, regexp);
 }
 
 /* Set compilation arguments.  */
 
 char *
-compile_instance::set_arguments (int argc, char **argv)
+compile::compile_instance::set_arguments (int argc, char **argv)
 {
   return FORWARD (set_arguments, argc, argv);
 }
 
-/* !!keiths: YUCK!  */
+/* As above, for protocol version 0.  */
 
 char *
-compile_instance::set_arguments (const char *regexp, int argc, char **argv)
+compile::compile_instance::set_arguments (const char *regexp, int argc, char
+					  **argv)
 {
   return FORWARD (set_arguments_v0, regexp, argc, argv);
 }
@@ -807,7 +806,7 @@ compile_instance::set_arguments (const char *regexp, int argc, char **argv)
 /* Set the filename of the program to compile.  */
 
 void
-compile_instance::set_source_file (const char *filename)
+compile::compile_instance::set_source_file (const char *filename)
 {
   FORWARD (set_source_file, filename);
 }
@@ -815,7 +814,7 @@ compile_instance::set_source_file (const char *filename)
 /* Compile the previously specified source file to FILENAME.  */
 
 bool
-compile_instance::compile (const char *filename)
+compile::compile_instance::compile (const char *filename)
 {
   return FORWARD (compile, filename);
 }
@@ -823,7 +822,7 @@ compile_instance::compile (const char *filename)
 /* As above, but for an earlier compile protocol.  */
 
 bool
-compile_instance::compile (const char *filename, int verbose_level)
+compile::compile_instance::compile (const char *filename, int verbose_level)
 {
   return FORWARD (compile_v0, filename, verbose_level);
 }

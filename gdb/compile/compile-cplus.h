@@ -192,8 +192,7 @@ namespace compile
 
     void leave_scope ();
 
-    /* !!keiths: YUCK!
-       Plug-in forwards  */
+    /* Plug-in forwards  */
 
     gcc_type get_bool_type ();
 
@@ -237,7 +236,8 @@ namespace compile
 
     bool finish_enum_type (gcc_type enum_type);
 
-    /* NAME for debugging  */
+    /* NAME is for debugging only.  */
+
     bool finish_class_type (const char *name, unsigned long size_in_bytes);
 
     gcc_type get_float_type (unsigned long size_in_bytes,
@@ -248,7 +248,8 @@ namespace compile
 
     gcc_expr build_literal_expr (gcc_type type, unsigned long value);
 
-    /* DECL_DESC for debugging only  */
+    /* DECL_DESC is for debugging only.  */
+
     gcc_decl build_decl (const char *decl_desc, const char *name,
 			 enum gcc_cp_symbol_kind sym_kind,
 			 gcc_type sym_type, const char *substitution_name,
@@ -269,7 +270,8 @@ namespace compile
 					     const char *filename,
 					     unsigned int line_number);
 
-    /* NAME is for debugging only  */
+    /* NAME is for debugging only.  */
+
     bool pop_binding_level (const char *name);
 
     bool push_namespace (const char *name);
@@ -282,7 +284,8 @@ namespace compile
       (struct template_symbol *concrete, gcc_address address,
        const char *filename, unsigned int line_number);
 
-    /* NAME only for debugging  */
+    /* NAME is for debugging only.  */
+
     gcc_type start_class_type (const char *name, gcc_decl typedecl,
 			       const struct gcc_vbase_array *base_classes,
 			       const char *filename,
@@ -294,13 +297,17 @@ namespace compile
 			      const char *filename,
 			      unsigned int line_number);
 
-    /* GENERIC only for debugging  */
+    /* GENERIC is for debugging only.  */
+
     bool start_template_decl (const char *generic);
 
     gcc_type get_void_type ();
 
 
   private:
+
+    /* Default compiler flags for C++.  */
+    static const char *m_default_cflags;
 
     /* Enumerate the template arguments of template DEFN into DEST.  */
 

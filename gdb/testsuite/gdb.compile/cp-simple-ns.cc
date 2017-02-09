@@ -35,4 +35,3 @@ main (void)
   var += s.s4int_; /* break here */
   return S4::get_svar () - 10 * s.get_var ();
 }
-

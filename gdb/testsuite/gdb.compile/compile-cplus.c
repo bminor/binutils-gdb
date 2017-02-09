@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2014-2016 Free Software Foundation, Inc.
+   Copyright 2014-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -163,10 +163,10 @@ struct VirtualBase : virtual VirtualOnly
 };
 
 struct VirtualBase2 : VirtualBase {};
- 
+
 VirtualBase::VirtualBase (void)
 {
-  z = 24; 
+  z = 24;
 }
 
 VirtualBase::~VirtualBase (void)
@@ -178,7 +178,7 @@ class Foo
 {
   int var;
   static const int public_static_var = 12;
-  
+
  private:
   int private_var = 0;
   int private_method (void);

@@ -24,7 +24,6 @@
 #include "gdb_vecs.h"
 #include "gdbtypes.h"
 #include "common/enum-flags.h"
-#include "cp-abi.h"  /* !!keiths; YUCK!  Need enum template_argument_kinds!  */
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -1704,9 +1703,14 @@ void initialize_objfile_symbol (struct symbol *);
 
 struct template_symbol *allocate_template_symbol (struct objfile *);
 
+/* Result of a multi-symbol search.  */
+
 struct search_multiple_result
 {
+  /* Matching debug symbols.  */
   VEC (block_symbol_d) *symbols;
+
+  /* Matching non-debug symbols.  */
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 };
 
@@ -1723,12 +1727,10 @@ extern struct search_multiple_result
 
 /* Free the result of search_symbols_multiple.  */
 
-extern void
-  free_search_multiple_result (struct search_multiple_result *);
+extern void free_search_multiple_result (struct search_multiple_result *);
 
 /* A cleanup function for the return result of search_symbols_multiple.  */
 
-extern void
-  search_multiple_result_cleanup (void *);
+extern void search_multiple_result_cleanup (void *);
 
 #endif /* !defined(SYMTAB_H) */
