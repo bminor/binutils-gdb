@@ -1,3 +1,7 @@
+2017-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* interps.c (current_interp_set_logging): Remove "return".
+
 2017-02-09  Gary Benson  <gbenson@redhat.com>
 
 	* symtab.c (add_symtab_completions): Prevent NULL pointer
