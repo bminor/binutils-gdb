@@ -833,7 +833,6 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
   std::unique_ptr<demangle_parse_info> info;
   const char *err;
   struct type *argtype;
-  struct cleanup *cleanup;
 
   if (TYPE_NAME (type) == NULL)
     {

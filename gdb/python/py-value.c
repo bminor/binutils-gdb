@@ -1330,7 +1330,6 @@ valpy_richcompare_throw (PyObject *self, PyObject *other, int op)
   int result;
   struct value *value_other;
   struct value *value_self;
-  struct cleanup *cleanup;
 
   scoped_value_mark free_values;
 
