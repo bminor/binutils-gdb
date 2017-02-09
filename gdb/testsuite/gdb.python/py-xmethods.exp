@@ -106,8 +106,8 @@ gdb_test "p a1.geta()" "From Python <A_geta>.*5" "after: a1.geta()"
 gdb_test "p ++a1" "From Python <plus_plus_A>.*6" "after: ++a1"
 gdb_test "p a1.getarrayind(5)" "From Python <A_getarrayind>.*5" \
   "after: a1.getarrayind(5)"
-gdb_test "P a1\[6\]" ".*int &.*6" "after a1\[\]"
-gdb_test "P b1\[7\]" ".*const int &.*7" "after b1\[\]"
+gdb_test "p a1\[6\]" ".*int &.*6" "after a1\[\]"
+gdb_test "p b1\[7\]" ".*const int &.*7" "after b1\[\]"
 # Note the following test.  Xmethods on dynamc types are not looked up
 # currently.  Hence, even though a_ptr points to a B object, the xmethod
 # defined for A objects is invoked.
