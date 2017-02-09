@@ -177,7 +177,7 @@ pyuw_object_attribute_to_pointer (PyObject *pyo, const char *attr_name,
 
   if (PyObject_HasAttrString (pyo, attr_name))
     {
-      gdbpy_ref pyo_value (PyObject_GetAttrString (pyo, attr_name));
+      gdbpy_ref<> pyo_value (PyObject_GetAttrString (pyo, attr_name));
 
       if (pyo_value != NULL && pyo_value != Py_None)
         {
@@ -515,7 +515,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   /* Create PendingFrame instance to pass to sniffers.  */
   pending_frame_object *pfo = PyObject_New (pending_frame_object,
 					    &pending_frame_object_type);
-  gdbpy_ref pyo_pending_frame ((PyObject *) pfo);
+  gdbpy_ref<> pyo_pending_frame ((PyObject *) pfo);
   if (pyo_pending_frame == NULL)
     {
       gdbpy_print_stack ();
@@ -535,15 +535,15 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
       gdbpy_print_stack ();
       return 0;
     }
-  gdbpy_ref pyo_execute (PyObject_GetAttrString (gdb_python_module,
-						 "execute_unwinders"));
+  gdbpy_ref<> pyo_execute (PyObject_GetAttrString (gdb_python_module,
+						   "execute_unwinders"));
   if (pyo_execute == NULL)
     {
       gdbpy_print_stack ();
       return 0;
     }
 
-  gdbpy_ref pyo_unwind_info
+  gdbpy_ref<> pyo_unwind_info
     (PyObject_CallFunctionObjArgs (pyo_execute.get (),
 				   pyo_pending_frame.get (), NULL));
   if (pyo_unwind_info == NULL)

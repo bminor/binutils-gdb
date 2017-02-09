@@ -273,7 +273,7 @@ eval_python_command (const char *command)
   d = PyModule_GetDict (m);
   if (d == NULL)
     return -1;
-  gdbpy_ref v (PyRun_StringFlags (command, Py_single_input, d, d, NULL));
+  gdbpy_ref<> v (PyRun_StringFlags (command, Py_single_input, d, d, NULL));
   if (v == NULL)
     return -1;
 
@@ -351,7 +351,7 @@ python_run_simple_file (FILE *file, const char *filename)
   /* Because we have a string for a filename, and are using Python to
      open the file, we need to expand any tilde in the path first.  */
   gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-  gdbpy_ref python_file (PyFile_FromString (full_path.get (), "r"));
+  gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), "r"));
   if (python_file == NULL)
     {
       gdbpy_print_stack ();
@@ -669,8 +669,8 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct symtab_and_line sal;
   char *arg = NULL;
   struct cleanup *cleanups;
-  gdbpy_ref result;
-  gdbpy_ref unparsed;
+  gdbpy_ref<> result;
+  gdbpy_ref<> unparsed;
   struct event_location *location = NULL;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
@@ -745,7 +745,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
       Py_INCREF (Py_None);
     }
 
-  gdbpy_ref return_result (PyTuple_New (2));
+  gdbpy_ref<> return_result (PyTuple_New (2));
   if (return_result == NULL)
     {
       do_cleanups (cleanups);
@@ -897,7 +897,7 @@ gdbpy_run_events (int error, gdb_client_data client_data)
 	gdbpy_event_list_end = &gdbpy_event_list;
 
       /* Ignore errors.  */
-      gdbpy_ref call_result (PyObject_CallObject (item->event, NULL));
+      gdbpy_ref<> call_result (PyObject_CallObject (item->event, NULL));
       if (call_result == NULL)
 	PyErr_Clear ();
 
@@ -972,8 +972,8 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
   if (gdb_python_module
       && PyObject_HasAttrString (gdb_python_module, "prompt_hook"))
     {
-      gdbpy_ref hook (PyObject_GetAttrString (gdb_python_module,
-					      "prompt_hook"));
+      gdbpy_ref<> hook (PyObject_GetAttrString (gdb_python_module,
+						"prompt_hook"));
       if (hook == NULL)
 	{
 	  gdbpy_print_stack ();
@@ -982,16 +982,16 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
 
       if (PyCallable_Check (hook.get ()))
 	{
-	  gdbpy_ref current_prompt (PyString_FromString (current_gdb_prompt));
+	  gdbpy_ref<> current_prompt (PyString_FromString (current_gdb_prompt));
 	  if (current_prompt == NULL)
 	    {
 	      gdbpy_print_stack ();
 	      return EXT_LANG_RC_ERROR;
 	    }
 
-	  gdbpy_ref result (PyObject_CallFunctionObjArgs (hook.get (),
-							  current_prompt.get (),
-							  NULL));
+	  gdbpy_ref<> result
+	    (PyObject_CallFunctionObjArgs (hook.get (), current_prompt.get (),
+					   NULL));
 	  if (result == NULL)
 	    {
 	      gdbpy_print_stack ();
@@ -1206,7 +1206,7 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 {
   struct program_space *ps;
 
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -1296,7 +1296,7 @@ gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
 {
   struct objfile *objf;
 
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -1327,15 +1327,15 @@ gdbpy_start_type_printers (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  gdbpy_ref type_module (PyImport_ImportModule ("gdb.types"));
+  gdbpy_ref<> type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
     {
       gdbpy_print_stack ();
       return;
     }
 
-  gdbpy_ref func (PyObject_GetAttrString (type_module.get (),
-					  "get_type_recognizers"));
+  gdbpy_ref<> func (PyObject_GetAttrString (type_module.get (),
+					    "get_type_recognizers"));
   if (func == NULL)
     {
       gdbpy_print_stack ();
@@ -1372,31 +1372,32 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  gdbpy_ref type_obj (type_to_type_object (type));
+  gdbpy_ref<> type_obj (type_to_type_object (type));
   if (type_obj == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref type_module (PyImport_ImportModule ("gdb.types"));
+  gdbpy_ref<> type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref func (PyObject_GetAttrString (type_module.get (),
-					  "apply_type_recognizers"));
+  gdbpy_ref<> func (PyObject_GetAttrString (type_module.get (),
+					    "apply_type_recognizers"));
   if (func == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref result_obj (PyObject_CallFunctionObjArgs (func.get (), printers_obj,
-						      type_obj.get (),
-						      (char *) NULL));
+  gdbpy_ref<> result_obj (PyObject_CallFunctionObjArgs (func.get (),
+							printers_obj,
+							type_obj.get (),
+							(char *) NULL));
   if (result_obj == NULL)
     {
       gdbpy_print_stack ();
@@ -1798,7 +1799,7 @@ do_finish_initialization (const struct extension_language_defn *extlang)
     }
   if (sys_path && PyList_Check (sys_path))
     {
-      gdbpy_ref pythondir (PyString_FromString (gdb_pythondir.c_str ()));
+      gdbpy_ref<> pythondir (PyString_FromString (gdb_pythondir.c_str ()));
       if (pythondir == NULL || PyList_Insert (sys_path, 0, pythondir.get ()))
 	return false;
     }

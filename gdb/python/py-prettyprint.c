@@ -60,7 +60,7 @@ search_pp_list (PyObject *list, PyObject *value)
       /* Skip if disabled.  */
       if (PyObject_HasAttr (function, gdbpy_enabled_cst))
 	{
-	  gdbpy_ref attr (PyObject_GetAttr (function, gdbpy_enabled_cst));
+	  gdbpy_ref<> attr (PyObject_GetAttr (function, gdbpy_enabled_cst));
 	  int cmp;
 
 	  if (attr == NULL)
@@ -73,7 +73,8 @@ search_pp_list (PyObject *list, PyObject *value)
 	    continue;
 	}
 
-      gdbpy_ref printer (PyObject_CallFunctionObjArgs (function, value, NULL));
+      gdbpy_ref<> printer (PyObject_CallFunctionObjArgs (function, value,
+							 NULL));
       if (printer == NULL)
 	return NULL;
       else if (printer != Py_None)
@@ -104,8 +105,8 @@ find_pretty_printer_from_objfiles (PyObject *value)
 	continue;
       }
 
-    gdbpy_ref pp_list (objfpy_get_printers (objf, NULL));
-    gdbpy_ref function (search_pp_list (pp_list.get (), value));
+    gdbpy_ref<> pp_list (objfpy_get_printers (objf, NULL));
+    gdbpy_ref<> function (search_pp_list (pp_list.get (), value));
 
     /* If there is an error in any objfile list, abort the search and exit.  */
     if (function == NULL)
@@ -131,7 +132,7 @@ find_pretty_printer_from_progspace (PyObject *value)
 
   if (!obj)
     return NULL;
-  gdbpy_ref pp_list (pspy_get_printers (obj, NULL));
+  gdbpy_ref<> pp_list (pspy_get_printers (obj, NULL));
   return search_pp_list (pp_list.get (), value);
 }
 
@@ -148,8 +149,8 @@ find_pretty_printer_from_gdb (PyObject *value)
   if (gdb_python_module == NULL
       || ! PyObject_HasAttrString (gdb_python_module, "pretty_printers"))
     Py_RETURN_NONE;
-  gdbpy_ref pp_list (PyObject_GetAttrString (gdb_python_module,
-					     "pretty_printers"));
+  gdbpy_ref<> pp_list (PyObject_GetAttrString (gdb_python_module,
+					       "pretty_printers"));
   if (pp_list == NULL || ! PyList_Check (pp_list.get ()))
     Py_RETURN_NONE;
 
@@ -165,7 +166,7 @@ find_pretty_printer (PyObject *value)
 {
   /* Look at the pretty-printer list for each objfile
      in the current program-space.  */
-  gdbpy_ref function (find_pretty_printer_from_objfiles (value));
+  gdbpy_ref<> function (find_pretty_printer_from_objfiles (value));
   if (function == NULL || function != Py_None)
     return function.release ();
 
@@ -228,8 +229,8 @@ gdbpy_get_display_hint (PyObject *printer)
   if (! PyObject_HasAttr (printer, gdbpy_display_hint_cst))
     return NULL;
 
-  gdbpy_ref hint (PyObject_CallMethodObjArgs (printer, gdbpy_display_hint_cst,
-					      NULL));
+  gdbpy_ref<> hint (PyObject_CallMethodObjArgs (printer, gdbpy_display_hint_cst,
+						NULL));
   if (hint != NULL)
     {
       if (gdbpy_is_string (hint.get ()))
@@ -256,9 +257,9 @@ print_stack_unless_memory_error (struct ui_file *stream)
 
       PyErr_Fetch (&type, &value, &trace);
 
-      gdbpy_ref type_ref (type);
-      gdbpy_ref value_ref (value);
-      gdbpy_ref trace_ref (trace);
+      gdbpy_ref<> type_ref (type);
+      gdbpy_ref<> value_ref (value);
+      gdbpy_ref<> trace_ref (trace);
 
       gdb::unique_xmalloc_ptr<char>
 	msg (gdbpy_exception_to_string (type, value));
@@ -286,7 +287,7 @@ print_string_repr (PyObject *printer, const char *hint,
   struct value *replacement = NULL;
   enum string_repr_result result = string_repr_ok;
 
-  gdbpy_ref py_str (pretty_print_one_value (printer, &replacement));
+  gdbpy_ref<> py_str (pretty_print_one_value (printer, &replacement));
   if (py_str != NULL)
     {
       if (py_str == Py_None)
@@ -308,7 +309,7 @@ print_string_repr (PyObject *printer, const char *hint,
 	}
       else
 	{
-	  gdbpy_ref string
+	  gdbpy_ref<> string
 	    (python_string_to_target_python_string (py_str.get ()));
 	  if (string != NULL)
 	    {
@@ -379,7 +380,7 @@ class dummy_python_frame
 
   bool m_valid;
   PyFrameObject *m_saved_frame;
-  gdbpy_ref m_frame;
+  gdbpy_ref<> m_frame;
   PyThreadState *m_tstate;
 };
 
@@ -391,11 +392,11 @@ dummy_python_frame::dummy_python_frame ()
   PyCodeObject *code;
   PyFrameObject *frame;
 
-  gdbpy_ref empty_string (PyString_FromString (""));
+  gdbpy_ref<> empty_string (PyString_FromString (""));
   if (empty_string == NULL)
     return;
 
-  gdbpy_ref null_tuple (PyTuple_New (0));
+  gdbpy_ref<> null_tuple (PyTuple_New (0));
   if (null_tuple == NULL)
     return;
 
@@ -418,9 +419,9 @@ dummy_python_frame::dummy_python_frame ()
 		     );
   if (code == NULL)
     return;
-  gdbpy_ref code_holder ((PyObject *) code);
+  gdbpy_ref<> code_holder ((PyObject *) code);
 
-  gdbpy_ref globals (PyDict_New ());
+  gdbpy_ref<> globals (PyDict_New ());
   if (globals == NULL)
     return;
 
@@ -457,15 +458,15 @@ print_children (PyObject *printer, const char *hint,
   is_map = hint && ! strcmp (hint, "map");
   is_array = hint && ! strcmp (hint, "array");
 
-  gdbpy_ref children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-						  NULL));
+  gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
+						    NULL));
   if (children == NULL)
     {
       print_stack_unless_memory_error (stream);
       return;
     }
 
-  gdbpy_ref iter (PyObject_GetIter (children.get ()));
+  gdbpy_ref<> iter (PyObject_GetIter (children.get ()));
   if (iter == NULL)
     {
       print_stack_unless_memory_error (stream);
@@ -502,7 +503,7 @@ print_children (PyObject *printer, const char *hint,
       PyObject *py_v;
       const char *name;
 
-      gdbpy_ref item (PyIter_Next (iter.get ()));
+      gdbpy_ref<> item (PyIter_Next (iter.get ()));
       if (item == NULL)
 	{
 	  if (PyErr_Occurred ())
@@ -674,7 +675,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   /* Instantiate the printer.  */
   value = value_from_component (val, type, embedded_offset);
 
-  gdbpy_ref val_obj (value_to_value_object (value));
+  gdbpy_ref<> val_obj (value_to_value_object (value));
   if (val_obj == NULL)
     {
       print_stack_unless_memory_error (stream);
@@ -682,7 +683,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
     }
 
   /* Find the constructor.  */
-  gdbpy_ref printer (find_pretty_printer (val_obj.get ()));
+  gdbpy_ref<> printer (find_pretty_printer (val_obj.get ()));
   if (printer == NULL)
     {
       print_stack_unless_memory_error (stream);
@@ -750,7 +751,7 @@ gdbpy_get_varobj_pretty_printer (struct value *value)
     }
   END_CATCH
 
-  gdbpy_ref val_obj (value_to_value_object (value));
+  gdbpy_ref<> val_obj (value_to_value_object (value));
   if (val_obj == NULL)
     return NULL;
 

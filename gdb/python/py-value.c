@@ -566,7 +566,7 @@ value_has_field (struct value *v, PyObject *field)
 {
   struct type *parent_type, *val_type;
   enum type_code type_code;
-  gdbpy_ref type_object (PyObject_GetAttrString (field, "parent_type"));
+  gdbpy_ref<> type_object (PyObject_GetAttrString (field, "parent_type"));
   int has_field = 0;
 
   if (type_object == NULL)
@@ -612,7 +612,7 @@ value_has_field (struct value *v, PyObject *field)
 static int
 get_field_flag (PyObject *field, const char *flag_name)
 {
-  gdbpy_ref flag_object (PyObject_GetAttrString (field, flag_name));
+  gdbpy_ref<> flag_object (PyObject_GetAttrString (field, flag_name));
 
   if (flag_object == NULL)
     return -1;
@@ -626,7 +626,7 @@ get_field_flag (PyObject *field, const char *flag_name)
 static struct type *
 get_field_type (PyObject *field)
 {
-  gdbpy_ref ftype_obj (PyObject_GetAttrString (field, "type"));
+  gdbpy_ref<> ftype_obj (PyObject_GetAttrString (field, "type"));
   struct type *ftype;
 
   if (ftype_obj == NULL)
@@ -687,7 +687,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 	}
       else
 	{
-	  gdbpy_ref name_obj (PyObject_GetAttrString (key, "name"));
+	  gdbpy_ref<> name_obj (PyObject_GetAttrString (key, "name"));
 
 	  if (name_obj == NULL)
 	    return NULL;
@@ -708,7 +708,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 
 		  return NULL;
 		}
-	      gdbpy_ref bitpos_obj (PyObject_GetAttrString (key, "bitpos"));
+	      gdbpy_ref<> bitpos_obj (PyObject_GetAttrString (key, "bitpos"));
 	      if (bitpos_obj == NULL)
 		return NULL;
 	      if (!gdb_py_int_as_long (bitpos_obj.get (), &bitpos))
@@ -1576,7 +1576,7 @@ convert_value_from_python (PyObject *obj)
 		  PyObject *etype, *evalue, *etraceback;
 
 		  PyErr_Fetch (&etype, &evalue, &etraceback);
-		  gdbpy_ref zero (PyInt_FromLong (0));
+		  gdbpy_ref<> zero (PyInt_FromLong (0));
 
 		  /* Check whether obj is positive.  */
 		  if (PyObject_RichCompareBool (obj, zero.get (), Py_GT) > 0)

@@ -758,7 +758,7 @@ gdbpy_breakpoints (PyObject *self, PyObject *args)
   if (bppy_live == 0)
     return PyTuple_New (0);
 
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -798,7 +798,7 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
 
   if (PyObject_HasAttrString (py_bp, stop_func))
     {
-      gdbpy_ref result (PyObject_CallMethod (py_bp, stop_func, NULL));
+      gdbpy_ref<> result (PyObject_CallMethod (py_bp, stop_func, NULL));
 
       stop = 1;
       if (result != NULL)

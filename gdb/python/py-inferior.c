@@ -256,7 +256,7 @@ find_thread_object (ptid_t ptid)
   if (pid == 0)
     return NULL;
 
-  gdbpy_ref inf_obj (find_inferior_object (pid));
+  gdbpy_ref<> inf_obj (find_inferior_object (pid));
   if (inf_obj == NULL)
     return NULL;
 
@@ -405,7 +405,7 @@ static int
 build_inferior_list (struct inferior *inf, void *arg)
 {
   PyObject *list = (PyObject *) arg;
-  gdbpy_ref inferior (inferior_to_inferior_object (inf));
+  gdbpy_ref<> inferior (inferior_to_inferior_object (inf));
 
   if (inferior  == NULL)
     return 0;
@@ -418,7 +418,7 @@ build_inferior_list (struct inferior *inf, void *arg)
 PyObject *
 gdbpy_inferiors (PyObject *unused, PyObject *unused2)
 {
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 

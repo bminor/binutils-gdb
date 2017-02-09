@@ -169,12 +169,12 @@ typy_get_code (PyObject *self, void *closure)
 static PyObject *
 convert_field (struct type *type, int field)
 {
-  gdbpy_ref result (field_new ());
+  gdbpy_ref<> result (field_new ());
 
   if (result == NULL)
     return NULL;
 
-  gdbpy_ref arg (type_to_type_object (type));
+  gdbpy_ref<> arg (type_to_type_object (type));
   if (arg == NULL)
     return NULL;
   if (PyObject_SetAttrString (result.get (), "parent_type", arg.get ()) < 0)
@@ -292,13 +292,13 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
     {
     case iter_items:
       {
-	gdbpy_ref key (field_name (type, i));
+	gdbpy_ref<> key (field_name (type, i));
 	if (key == NULL)
 	  return NULL;
-	gdbpy_ref value (convert_field (type, i));
+	gdbpy_ref<> value (convert_field (type, i));
 	if (value == NULL)
 	  return NULL;
-	gdbpy_ref item (PyTuple_New (2));
+	gdbpy_ref<> item (PyTuple_New (2));
 	if (item == NULL)
 	  return NULL;
 	PyTuple_SET_ITEM (item.get (), 0, key.release ());
@@ -376,7 +376,7 @@ typy_fields (PyObject *self, PyObject *args)
   /* Array type.  Handle this as a special case because the common
      machinery wants struct or union or enum types.  Build a list of
      one entry which is the range for the array.  */
-  gdbpy_ref r (convert_field (type, 0));
+  gdbpy_ref<> r (convert_field (type, 0));
   if (r == NULL)
     return NULL;
 
@@ -602,15 +602,15 @@ typy_range (PyObject *self, PyObject *args)
       break;
     }
 
-  gdbpy_ref low_bound (PyLong_FromLong (low));
+  gdbpy_ref<> low_bound (PyLong_FromLong (low));
   if (low_bound == NULL)
     return NULL;
 
-  gdbpy_ref high_bound (PyLong_FromLong (high));
+  gdbpy_ref<> high_bound (PyLong_FromLong (high));
   if (high_bound == NULL)
     return NULL;
 
-  gdbpy_ref result (PyTuple_New (2));
+  gdbpy_ref<> result (PyTuple_New (2));
   if (result == NULL)
     return NULL;
 

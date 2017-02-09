@@ -178,7 +178,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
         }
     }
 
-  gdbpy_ref result_list (PyList_New (0));
+  gdbpy_ref<> result_list (PyList_New (0));
   if (result_list == NULL)
     return NULL;
 
@@ -193,7 +193,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
        || (end_obj == NULL && count_obj == NULL && pc == start);)
     {
       int insn_len = 0;
-      gdbpy_ref insn_dict (PyDict_New ());
+      gdbpy_ref<> insn_dict (PyDict_New ());
 
       if (insn_dict == NULL)
 	return NULL;

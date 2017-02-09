@@ -1478,11 +1478,11 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
   gdbpy_enter_varobj enter_py (var);
 
   mainmod = PyImport_AddModule ("__main__");
-  gdbpy_ref globals (PyModule_GetDict (mainmod));
+  gdbpy_ref<> globals (PyModule_GetDict (mainmod));
   Py_INCREF (globals.get ());
 
-  gdbpy_ref constructor (PyRun_String (visualizer, Py_eval_input,
-				       globals.get (), globals.get ()));
+  gdbpy_ref<> constructor (PyRun_String (visualizer, Py_eval_input,
+					 globals.get (), globals.get ()));
 
   if (constructor == NULL)
     {
@@ -2432,9 +2432,9 @@ varobj_value_get_print_value (struct value *value,
 	    {
 	      struct value *replacement;
 
-	      gdbpy_ref output (apply_varobj_pretty_printer (value_formatter,
-							     &replacement,
-							     &stb));
+	      gdbpy_ref<> output (apply_varobj_pretty_printer (value_formatter,
+							       &replacement,
+							       &stb));
 
 	      /* If we have string like output ...  */
 	      if (output != NULL)

@@ -58,7 +58,7 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
 	     struct symbol **sym, struct block **sym_block,
 	     const struct language_defn **language)
 {
-  gdbpy_ref result (PyObject_CallMethod (obj, "symbol", NULL));
+  gdbpy_ref<> result (PyObject_CallMethod (obj, "symbol", NULL));
 
   if (result == NULL)
     return EXT_LANG_BT_ERROR;
@@ -129,7 +129,7 @@ extract_value (PyObject *obj, struct value **value)
 {
   if (PyObject_HasAttrString (obj, "value"))
     {
-      gdbpy_ref vresult (PyObject_CallMethod (obj, "value", NULL));
+      gdbpy_ref<> vresult (PyObject_CallMethod (obj, "value", NULL));
 
       if (vresult == NULL)
 	return EXT_LANG_BT_ERROR;
@@ -305,7 +305,7 @@ get_py_iter_from_func (PyObject *filter, char *func)
 {
   if (PyObject_HasAttrString (filter, func))
     {
-      gdbpy_ref result (PyObject_CallMethod (filter, func, NULL));
+      gdbpy_ref<> result (PyObject_CallMethod (filter, func, NULL));
 
       if (result != NULL)
 	{
@@ -508,7 +508,7 @@ enumerate_args (PyObject *iter,
       commas in the argument output is correct.  At the end of the
       loop block collect another item from the iterator, and, if it is
       not null emit a comma.  */
-  gdbpy_ref item (PyIter_Next (iter));
+  gdbpy_ref<> item (PyIter_Next (iter));
   if (item == NULL && PyErr_Occurred ())
     return EXT_LANG_BT_ERROR;
 
@@ -693,7 +693,7 @@ enumerate_locals (PyObject *iter,
       int local_indent = 8 + (8 * indent);
       gdb::optional<ui_out_emit_tuple> tuple;
 
-      gdbpy_ref item (PyIter_Next (iter));
+      gdbpy_ref<> item (PyIter_Next (iter));
       if (item == NULL)
 	break;
 
@@ -806,11 +806,11 @@ py_mi_print_variables (PyObject *filter, struct ui_out *out,
 		       enum ext_lang_frame_args args_type,
 		       struct frame_info *frame)
 {
-  gdbpy_ref args_iter (get_py_iter_from_func (filter, "frame_args"));
+  gdbpy_ref<> args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
-  gdbpy_ref locals_iter (get_py_iter_from_func (filter, "frame_locals"));
+  gdbpy_ref<> locals_iter (get_py_iter_from_func (filter, "frame_locals"));
   if (locals_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
@@ -840,7 +840,7 @@ py_print_locals (PyObject *filter,
 		 int indent,
 		 struct frame_info *frame)
 {
-  gdbpy_ref locals_iter (get_py_iter_from_func (filter, "frame_locals"));
+  gdbpy_ref<> locals_iter (get_py_iter_from_func (filter, "frame_locals"));
   if (locals_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
@@ -865,7 +865,7 @@ py_print_args (PyObject *filter,
 	       enum ext_lang_frame_args args_type,
 	       struct frame_info *frame)
 {
-  gdbpy_ref args_iter (get_py_iter_from_func (filter, "frame_args"));
+  gdbpy_ref<> args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
     return EXT_LANG_BT_ERROR;
 
@@ -943,7 +943,8 @@ py_print_frame (PyObject *filter, int flags,
   /* Get the underlying frame.  This is needed to determine GDB
   architecture, and also, in the cases of frame variables/arguments to
   read them if they returned filter object requires us to do so.  */
-  gdbpy_ref py_inf_frame (PyObject_CallMethod (filter, "inferior_frame", NULL));
+  gdbpy_ref<> py_inf_frame (PyObject_CallMethod (filter, "inferior_frame",
+						 NULL));
   if (py_inf_frame == NULL)
     return EXT_LANG_BT_ERROR;
 
@@ -1000,7 +1001,7 @@ py_print_frame (PyObject *filter, int flags,
 	 address printing.  */
       if (PyObject_HasAttrString (filter, "address"))
 	{
-	  gdbpy_ref paddr (PyObject_CallMethod (filter, "address", NULL));
+	  gdbpy_ref<> paddr (PyObject_CallMethod (filter, "address", NULL));
 
 	  if (paddr == NULL)
 	    return EXT_LANG_BT_ERROR;
@@ -1076,7 +1077,7 @@ py_print_frame (PyObject *filter, int flags,
       /* Print frame function name.  */
       if (PyObject_HasAttrString (filter, "function"))
 	{
-	  gdbpy_ref py_func (PyObject_CallMethod (filter, "function", NULL));
+	  gdbpy_ref<> py_func (PyObject_CallMethod (filter, "function", NULL));
 	  const char *function = NULL;
 
 	  if (py_func == NULL)
@@ -1153,7 +1154,7 @@ py_print_frame (PyObject *filter, int flags,
 
       if (PyObject_HasAttrString (filter, "filename"))
 	{
-	  gdbpy_ref py_fn (PyObject_CallMethod (filter, "filename", NULL));
+	  gdbpy_ref<> py_fn (PyObject_CallMethod (filter, "filename", NULL));
 
 	  if (py_fn == NULL)
 	    return EXT_LANG_BT_ERROR;
@@ -1185,7 +1186,7 @@ py_print_frame (PyObject *filter, int flags,
 
       if (PyObject_HasAttrString (filter, "line"))
 	{
-	  gdbpy_ref py_line (PyObject_CallMethod (filter, "line", NULL));
+	  gdbpy_ref<> py_line (PyObject_CallMethod (filter, "line", NULL));
 	  int line;
 
 	  if (py_line == NULL)
@@ -1239,7 +1240,7 @@ py_print_frame (PyObject *filter, int flags,
 
   {
     /* Finally recursively print elided frames, if any.  */
-    gdbpy_ref elided (get_py_iter_from_func (filter, "elided"));
+    gdbpy_ref<> elided (get_py_iter_from_func (filter, "elided"));
     if (elided == NULL)
       return EXT_LANG_BT_ERROR;
 
@@ -1254,7 +1255,7 @@ py_print_frame (PyObject *filter, int flags,
 
 	while ((item = PyIter_Next (elided.get ())))
 	  {
-	    gdbpy_ref item_ref (item);
+	    gdbpy_ref<> item_ref (item);
 
 	    enum ext_lang_bt_status success = py_print_frame (item, flags,
 							      args_type, out,
@@ -1279,32 +1280,32 @@ static PyObject *
 bootstrap_python_frame_filters (struct frame_info *frame,
 				int frame_low, int frame_high)
 {
-  gdbpy_ref frame_obj (frame_info_to_frame_object (frame));
+  gdbpy_ref<> frame_obj (frame_info_to_frame_object (frame));
   if (frame_obj == NULL)
     return NULL;
 
-  gdbpy_ref module (PyImport_ImportModule ("gdb.frames"));
+  gdbpy_ref<> module (PyImport_ImportModule ("gdb.frames"));
   if (module == NULL)
     return NULL;
 
-  gdbpy_ref sort_func (PyObject_GetAttrString (module.get (),
-					       "execute_frame_filters"));
+  gdbpy_ref<> sort_func (PyObject_GetAttrString (module.get (),
+						 "execute_frame_filters"));
   if (sort_func == NULL)
     return NULL;
 
-  gdbpy_ref py_frame_low (PyInt_FromLong (frame_low));
+  gdbpy_ref<> py_frame_low (PyInt_FromLong (frame_low));
   if (py_frame_low == NULL)
     return NULL;
 
-  gdbpy_ref py_frame_high (PyInt_FromLong (frame_high));
+  gdbpy_ref<> py_frame_high (PyInt_FromLong (frame_high));
   if (py_frame_high == NULL)
     return NULL;
 
-  gdbpy_ref iterable (PyObject_CallFunctionObjArgs (sort_func.get (),
-						    frame_obj.get (),
-						    py_frame_low.get (),
-						    py_frame_high.get (),
-						    NULL));
+  gdbpy_ref<> iterable (PyObject_CallFunctionObjArgs (sort_func.get (),
+						      frame_obj.get (),
+						      py_frame_low.get (),
+						      py_frame_high.get (),
+						      NULL));
   if (iterable == NULL)
     return NULL;
 
@@ -1354,8 +1355,8 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (gdbarch, current_language);
 
-  gdbpy_ref iterable (bootstrap_python_frame_filters (frame, frame_low,
-						      frame_high));
+  gdbpy_ref<> iterable (bootstrap_python_frame_filters (frame, frame_low,
+							frame_high));
 
   if (iterable == NULL)
     {
@@ -1389,7 +1390,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 
   while (true)
     {
-      gdbpy_ref item (PyIter_Next (iterable.get ()));
+      gdbpy_ref<> item (PyIter_Next (iterable.get ()));
 
       if (item == NULL)
 	{

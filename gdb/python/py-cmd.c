@@ -134,19 +134,19 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 
   if (! args)
     args = "";
-  gdbpy_ref argobj (PyUnicode_Decode (args, strlen (args), host_charset (),
-				      NULL));
+  gdbpy_ref<> argobj (PyUnicode_Decode (args, strlen (args), host_charset (),
+					NULL));
   if (argobj == NULL)
     {
       gdbpy_print_stack ();
       error (_("Could not convert arguments to Python string."));
     }
 
-  gdbpy_ref ttyobj (from_tty ? Py_True : Py_False);
+  gdbpy_ref<> ttyobj (from_tty ? Py_True : Py_False);
   Py_INCREF (ttyobj.get ());
-  gdbpy_ref result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
-						argobj.get (), ttyobj.get (),
-						NULL));
+  gdbpy_ref<> result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
+						  argobj.get (), ttyobj.get (),
+						  NULL));
 
   if (result == NULL)
     {
@@ -241,19 +241,19 @@ cmdpy_completer_helper (struct cmd_list_element *command,
       return NULL;
     }
 
-  gdbpy_ref textobj (PyUnicode_Decode (text, strlen (text), host_charset (),
-				       NULL));
+  gdbpy_ref<> textobj (PyUnicode_Decode (text, strlen (text), host_charset (),
+					 NULL));
   if (textobj == NULL)
     error (_("Could not convert argument to Python string."));
-  gdbpy_ref wordobj (PyUnicode_Decode (word, strlen (word), host_charset (),
-				       NULL));
+  gdbpy_ref<> wordobj (PyUnicode_Decode (word, strlen (word), host_charset (),
+					 NULL));
   if (wordobj == NULL)
     error (_("Could not convert argument to Python string."));
 
-  gdbpy_ref resultobj (PyObject_CallMethodObjArgs ((PyObject *) obj,
-						   complete_cst,
-						   textobj.get (),
-						   wordobj.get (), NULL));
+  gdbpy_ref<> resultobj (PyObject_CallMethodObjArgs ((PyObject *) obj,
+						     complete_cst,
+						     textobj.get (),
+						     wordobj.get (), NULL));
   if (resultobj == NULL)
     {
       /* Just swallow errors here.  */
@@ -276,7 +276,7 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 
   /* Calling our helper to obtain the PyObject of the Python
      function.  */
-  gdbpy_ref resultobj (cmdpy_completer_helper (command, text, word));
+  gdbpy_ref<> resultobj (cmdpy_completer_helper (command, text, word));
 
   /* Check if there was an error.  */
   if (resultobj == NULL)
@@ -317,7 +317,7 @@ cmdpy_completer (struct cmd_list_element *command,
 
   /* Calling our helper to obtain the PyObject of the Python
      function.  */
-  gdbpy_ref resultobj (cmdpy_completer_helper (command, text, word));
+  gdbpy_ref<> resultobj (cmdpy_completer_helper (command, text, word));
 
   /* If the result object of calling the Python function is NULL, it
      means that there was an error.  In this case, just give up and
@@ -342,14 +342,14 @@ cmdpy_completer (struct cmd_list_element *command,
     }
   else
     {
-      gdbpy_ref iter (PyObject_GetIter (resultobj.get ()));
+      gdbpy_ref<> iter (PyObject_GetIter (resultobj.get ()));
 
       if (iter == NULL)
 	return NULL;
 
       while (true)
 	{
-	  gdbpy_ref elt (PyIter_Next (iter.get ()));
+	  gdbpy_ref<> elt (PyIter_Next (iter.get ()));
 	  if (elt == NULL)
 	    break;
 
@@ -569,7 +569,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     }
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
-      gdbpy_ref ds_obj (PyObject_GetAttr (self, gdbpy_doc_cst));
+      gdbpy_ref<> ds_obj (PyObject_GetAttr (self, gdbpy_doc_cst));
 
       if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
@@ -756,7 +756,7 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "s", &input))
     return NULL;
 
-  gdbpy_ref py_argv (PyList_New (0));
+  gdbpy_ref<> py_argv (PyList_New (0));
   if (py_argv == NULL)
     return NULL;
 
@@ -771,7 +771,7 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
       for (i = 0; c_argv[i] != NULL; ++i)
 	{
-	  gdbpy_ref argp (PyString_FromString (c_argv[i]));
+	  gdbpy_ref<> argp (PyString_FromString (c_argv[i]));
 
 	  if (argp == NULL
 	      || PyList_Append (py_argv.get (), argp.get ()) < 0)

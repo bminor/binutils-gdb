@@ -307,7 +307,7 @@ get_doc_string (PyObject *object, PyObject *attr)
 
   if (PyObject_HasAttr (object, attr))
     {
-      gdbpy_ref ds_obj (PyObject_GetAttr (object, attr));
+      gdbpy_ref<> ds_obj (PyObject_GetAttr (object, attr));
 
       if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
@@ -329,7 +329,7 @@ static gdb::unique_xmalloc_ptr<char>
 call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
 {
   gdb::unique_xmalloc_ptr<char> data;
-  gdbpy_ref result (PyObject_CallMethodObjArgs (obj, method, arg, NULL));
+  gdbpy_ref<> result (PyObject_CallMethodObjArgs (obj, method, arg, NULL));
 
   if (result == NULL)
     return NULL;
@@ -364,7 +364,7 @@ get_set_value (char *args, int from_tty,
   gdb::unique_xmalloc_ptr<char> set_doc_string;
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
-  gdbpy_ref set_doc_func (PyString_FromString ("get_set_string"));
+  gdbpy_ref<> set_doc_func (PyString_FromString ("get_set_string"));
 
   if (set_doc_func == NULL)
     {
@@ -407,7 +407,7 @@ get_show_value (struct ui_file *file, int from_tty,
   gdb::unique_xmalloc_ptr<char> show_doc_string;
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
-  gdbpy_ref show_doc_func (PyString_FromString ("get_show_string"));
+  gdbpy_ref<> show_doc_func (PyString_FromString ("get_show_string"));
 
   if (show_doc_func == NULL)
     {
@@ -417,7 +417,7 @@ get_show_value (struct ui_file *file, int from_tty,
 
   if (PyObject_HasAttr (obj, show_doc_func.get ()))
     {
-      gdbpy_ref val_obj (PyString_FromString (value));
+      gdbpy_ref<> val_obj (PyString_FromString (value));
 
       if (val_obj == NULL)
 	{
@@ -586,7 +586,7 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
 
   for (i = 0; i < size; ++i)
     {
-      gdbpy_ref item (PySequence_GetItem (enum_values, i));
+      gdbpy_ref<> item (PySequence_GetItem (enum_values, i));
 
       if (item == NULL)
 	{

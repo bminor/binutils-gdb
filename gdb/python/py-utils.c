@@ -71,7 +71,7 @@ unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
   gdb::unique_xmalloc_ptr<char> result;
 
   /* Translate string to named charset.  */
-  gdbpy_ref string (PyUnicode_AsEncodedString (unicode_str, charset, NULL));
+  gdbpy_ref<> string (PyUnicode_AsEncodedString (unicode_str, charset, NULL));
   if (string == NULL)
     return NULL;
 
@@ -123,7 +123,7 @@ unicode_to_target_python_string (PyObject *unicode_str)
 gdb::unique_xmalloc_ptr<char>
 python_string_to_target_string (PyObject *obj)
 {
-  gdbpy_ref str (python_string_to_unicode (obj));
+  gdbpy_ref<> str (python_string_to_unicode (obj));
   if (str == NULL)
     return NULL;
 
@@ -138,7 +138,7 @@ python_string_to_target_string (PyObject *obj)
 PyObject *
 python_string_to_target_python_string (PyObject *obj)
 {
-  gdbpy_ref str (python_string_to_unicode (obj));
+  gdbpy_ref<> str (python_string_to_unicode (obj));
   if (str == NULL)
     return NULL;
 
@@ -151,7 +151,7 @@ python_string_to_target_python_string (PyObject *obj)
 gdb::unique_xmalloc_ptr<char>
 python_string_to_host_string (PyObject *obj)
 {
-  gdbpy_ref str (python_string_to_unicode (obj));
+  gdbpy_ref<> str (python_string_to_unicode (obj));
   if (str == NULL)
     return NULL;
 
@@ -185,7 +185,7 @@ gdbpy_is_string (PyObject *obj)
 gdb::unique_xmalloc_ptr<char>
 gdbpy_obj_to_string (PyObject *obj)
 {
-  gdbpy_ref str_obj (PyObject_Str (obj));
+  gdbpy_ref<> str_obj (PyObject_Str (obj));
 
   if (str_obj != NULL)
     {
@@ -269,7 +269,7 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
     }
   else
     {
-      gdbpy_ref num (PyNumber_Long (obj));
+      gdbpy_ref<> num (PyNumber_Long (obj));
       gdb_py_ulongest val;
 
       if (num == NULL)

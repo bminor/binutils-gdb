@@ -1,5 +1,23 @@
 2017-02-10  Tom Tromey  <tom@tromey.com>
 
+	* python/py-ref.h (gdbpy_ref_policy): Now a template.
+	(gdbpy_ref): Now a template; allow subclasses of PyObject to be
+	used.
+	* python/py-arch.c, python/py-bpevent.c, python/py-breakpoint.c,
+	python/py-cmd.c, python/py-continueevent.c, python/py-event.c,
+	python/py-exitedevent.c, python/py-finishbreakpoint.c,
+	python/py-framefilter.c, python/py-function.c,
+	python/py-inferior.c, python/py-infevents.c,
+	python/py-linetable.c, python/py-newobjfileevent.c,
+	python/py-param.c, python/py-prettyprint.c, python/py-ref.h,
+	python/py-signalevent.c, python/py-stopevent.c,
+	python/py-symbol.c, python/py-threadevent.c, python/py-type.c,
+	python/py-unwind.c, python/py-utils.c, python/py-value.c,
+	python/py-varobj.c, python/py-xmethods.c, python/python.c,
+	varobj.c: Change gdbpy_ref to gdbpy_ref<>.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
 	* ui-out.h (ui_out_emit_type): New class.
 	(ui_out_emit_tuple, ui_out_emit_list): New typedefs.
 	* python/py-framefilter.c (py_print_single_arg): Use gdb::optional
