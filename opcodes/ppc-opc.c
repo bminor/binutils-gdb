@@ -441,7 +441,7 @@ const struct powerpc_operand powerpc_operands[] =
 #define L2OPT L32OPT + 1
   { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-  /* The LEV field in a POWER SVC form instruction.  */
+  /* The LEV field in a POWER SVC / POWER9 SCV form instruction.  */
 #define SVC_LEV L2OPT + 1
   { 0x7f, 5, NULL, NULL, 0 },
 
@@ -4142,6 +4142,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"bcla",	B(16,1,1),	B_MASK,	     COM,	PPCVLE,		{BO, BI, BDA}},
 
 {"svc",		SC(17,0,0),	SC_MASK,     POWER,	PPCVLE,		{SVC_LEV, FL1, FL2}},
+{"scv",		SC(17,0,1),	SC_MASK,     POWER9,	PPCVLE,		{SVC_LEV}},
 {"svcl",	SC(17,0,1),	SC_MASK,     POWER,	PPCVLE,		{SVC_LEV, FL1, FL2}},
 {"sc",		SC(17,1,0),	SC_MASK,     PPC,	PPCVLE,		{LEV}},
 {"svca",	SC(17,1,0),	SC_MASK,     PWRCOM,	PPCVLE,		{SV}},
@@ -4391,6 +4392,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"rfi",		XL(19,50),	0xffffffff,  COM,	PPCVLE,		{0}},
 {"rfci",	XL(19,51), 0xffffffff, PPC403|BOOKE|PPCE300|PPCA2|PPC476, PPCVLE, {0}},
 
+{"rfscv",	XL(19,82),	0xffffffff,  POWER9,	PPCVLE,		{0}},
 {"rfsvc",	XL(19,82),	0xffffffff,  POWER,	PPCVLE,		{0}},
 
 {"rfgi",	XL(19,102),   0xffffffff, E500MC|PPCA2,	PPCVLE,		{0}},

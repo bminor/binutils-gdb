@@ -1,3 +1,7 @@
+2017-02-10  Nicholas Piggin  <npiggin@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes) <scv, rfscv>: New mnemonics.
+
 2017-01-12  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-dis.c (enum): Add PREFIX_EVEX_0F3855, EVEX_W_0F3855_P_2.
