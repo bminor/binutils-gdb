@@ -73,7 +73,7 @@ proc do_execution_tests {con1 con1_name con2 con2_name} {
 
 # The test proper.
 
-proc do_test {} {
+proc_with_prefix do_test {} {
     global srcfile testfile
     global gdb_prompt
     global gdb_spawn_id
@@ -145,7 +145,7 @@ proc do_test {} {
 
 # Test missing / invalid arguments.
 
-proc do_test_invalid_args {} {
+proc_with_prefix do_test_invalid_args {} {
     global testfile
 
     clean_restart $testfile
@@ -169,5 +169,5 @@ proc do_test_invalid_args {} {
     }
 }
 
-with_test_prefix "do_test" do_test
-with_test_prefix "do_test_invalid_args" do_test_invalid_args
+do_test
+do_test_invalid_args

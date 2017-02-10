@@ -1,3 +1,8 @@
+2017-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/new-ui.exp (do_test, do_test_invalid_args): Use
+	proc_with_prefix.
+
 2017-02-10  Tom Tromey  <tom@tromey.com>
 
 	* gdb.python/py-xmethods.exp: Use "p" command, not "P".
