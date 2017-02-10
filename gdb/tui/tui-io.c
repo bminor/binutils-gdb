@@ -528,8 +528,8 @@ tui_initialize_io (void)
 #endif
 
   /* Create tui output streams.  */
-  tui_stdout = tui_fileopen (stdout);
-  tui_stderr = tui_fileopen (stderr);
+  tui_stdout = new tui_file (stdout);
+  tui_stderr = new tui_file (stderr);
   tui_out = tui_out_new (tui_stdout);
 
   /* Create the default UI.  */

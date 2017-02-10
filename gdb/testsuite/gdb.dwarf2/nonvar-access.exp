@@ -31,13 +31,22 @@ Dwarf::assemble $asm_file {
 	compile_unit {
 	    {DW_AT_name main.c}
 	} {
-	    declare_labels int_type_label short_type_label
-	    declare_labels struct_s_label struct_t_label
+	    declare_labels int_type_label char_type_label \
+		struct_s_label struct_t_label array_a9_label \
+		char_ptr_label implicit_a_label
 
 	    int_type_label: base_type {
 		{name "int"}
 		{encoding @DW_ATE_signed}
 		{byte_size 4 DW_FORM_sdata}
+	    }
+	    char_type_label: base_type {
+		{name "char"}
+		{encoding @DW_ATE_unsigned}
+		{byte_size 1 DW_FORM_sdata}
+	    }
+	    char_ptr_label: pointer_type {
+		{type :$char_type_label}
 	    }
 
 	    struct_s_label: structure_type {
@@ -76,20 +85,32 @@ Dwarf::assemble $asm_file {
 		}
 	    }
 
+	    array_a9_label: array_type {
+		{type :$char_type_label}
+	    } {
+		subrange_type {
+		    {type :$int_type_label}
+		    {upper_bound 8 DW_FORM_udata}
+		}
+	    }
+
 	    DW_TAG_subprogram {
 		{name main}
 		{DW_AT_external 1 flag}
 		{low_pc [gdb_target_symbol main] DW_FORM_addr}
 		{high_pc [gdb_target_symbol main]+0x10000 DW_FORM_addr}
 	    } {
+		# Simple variable without location.
 		DW_TAG_variable {
 		    {name undef_int}
 		    {type :$int_type_label}
 		}
+		# Struct variable without location.
 		DW_TAG_variable {
 		    {name undef_s}
 		    {type :$struct_s_label}
 		}
+		# Composite location: byte-aligned pieces.
 		DW_TAG_variable {
 		    {name def_s}
 		    {type :$struct_s_label}
@@ -102,6 +123,7 @@ Dwarf::assemble $asm_file {
 			bit_piece 24 0
 		    } SPECIAL_expr}
 		}
+		# Composite location: non-byte-aligned pieces.
 		DW_TAG_variable {
 		    {name def_t}
 		    {type :$struct_t_label}
@@ -112,6 +134,32 @@ Dwarf::assemble $asm_file {
 			const1s -1
 			stack_value
 			bit_piece 23 0
+		    } SPECIAL_expr}
+		}
+		# Implicit location: immediate value.
+		DW_TAG_variable {
+		    {name def_implicit_s}
+		    {type :$struct_s_label}
+		    {location {
+			implicit_value 0x12 0x34 0x56 0x78
+		    } SPECIAL_expr}
+		}
+		# Implicit location: immediate value for whole array, with
+		# excess bytes.
+		implicit_a_label: DW_TAG_variable {
+		    {name def_implicit_a}
+		    {type :$array_a9_label}
+		    {location {
+			implicit_value 0x1 0x12 0x23 0x34 0x45 \
+			    0x56 0x67 0x78 0x89 0x9a 0xab
+		    } SPECIAL_expr}
+		}
+		# Implicit pointer into immediate value.
+		DW_TAG_variable {
+		    {name implicit_a_ptr}
+		    {type :$char_ptr_label}
+		    {location {
+			GNU_implicit_pointer $implicit_a_label 5
 		    } SPECIAL_expr}
 		}
 	    }
@@ -128,7 +176,33 @@ if ![runto_main] {
     return -1
 }
 
+# Determine endianness.
+set endian "little"
+gdb_test_multiple "show endian" "determine endianness" {
+    -re ".* (big|little) endian.*$gdb_prompt $" {
+	set endian $expect_out(1,string)
+	pass "endianness: $endian"
+    }
+}
+
+# Byte-aligned objects with simple location descriptions.
+switch $endian { big {set val 0x345678} little {set val 0x785634} }
+gdb_test "print/x def_implicit_s" " = \\{a = 0x12, b = $val\\}"
+gdb_test "print/x def_implicit_s.b" " = $val"
+gdb_test "print/x def_implicit_a" \
+    " = \\{0x1, 0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89\\}"
+gdb_test "print/x def_implicit_a\[5\]" " = 0x56"
+gdb_test "print/x *(char (*)\[5\]) implicit_a_ptr" \
+    " = \\{0x56, 0x67, 0x78, 0x89, 0x9a\\}"
+
+# Byte-aligned fields, pieced together from DWARF stack values.
 gdb_test "print def_s" " = \\{a = 0, b = -1\\}"
+
+# Non-byte-aligned fields, pieced together from DWARF stack values.
 gdb_test "print def_t" " = \\{a = 0, b = -1\\}"
+
+# Simple variable without location.
 gdb_test "print undef_int" " = <optimized out>"
+
+# Member of a structure without location.
 gdb_test "print undef_s.a" " = <optimized out>"

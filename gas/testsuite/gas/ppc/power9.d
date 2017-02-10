@@ -391,4 +391,7 @@ Disassembly of section \.text:
 .*:	(ff d7 04 8e|8e 04 d7 ff) 	mffscrni f30,0
 .*:	(ff d7 1c 8e|8e 1c d7 ff) 	mffscrni f30,3
 .*:	(ff f8 04 8e|8e 04 f8 ff) 	mffsl   f31
+.*:	(01 00 00 44|44 00 00 01) 	scv     0
+.*:	(e1 0f 00 44|44 00 0f e1) 	scv     127
+.*:	(a4 00 00 4c|4c 00 00 a4) 	rfscv
 #pass

@@ -1,3 +1,201 @@
+2017-02-10  Nicholas Piggin  <npiggin@gmail.com>
+
+	* testsuite/gas/ppc/power9.d <scv, rfscv>: New tests.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* doc/as.texinfo (Overview): Select MIPS options for man page
+	inclusion.
+
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_ignore_branch_isa): New variable.
+	(options): Add OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA enum values.
+	(md_longopts): Add "mignore-branch-isa" and
+	"mno-ignore-branch-isa" options.
+	(md_parse_option): Handle OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA.
+	(fix_bad_cross_mode_branch_p): Return FALSE if
+	`mips_ignore_branch_isa' has been set.
+	(md_show_usage): Add `-mignore-branch-isa' and
+	`-mno-ignore-branch-isa'.
+
+	* doc/as.texinfo (Target MIPS options): Add
+	`-mignore-branch-isa' and `-mno-ignore-branch-isa' options.
+	(-mignore-branch-isa, -mno-ignore-branch-isa): New options.
+	* doc/c-mips.texi (MIPS Options): Add `-mignore-branch-isa' and
+	`-mno-ignore-branch-isa' options.
+
+	* testsuite/gas/mips/branch-local-ignore-2.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-3.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n32-2.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n32-3.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n64-2.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n64-3.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/branch-local-2.d: New test.
+	* testsuite/gas/mips/branch-local-3.d: New test.
+	* testsuite/gas/mips/branch-local-n32-2.d: New test.
+	* testsuite/gas/mips/branch-local-n32-3.d: New test.
+	* testsuite/gas/mips/branch-local-n64-2.d: New test.
+	* testsuite/gas/mips/branch-local-n64-3.d: New test.
+	* testsuite/gas/mips/mips.exp: Fold corresponding list tests
+	into the new tests.
+
+2017-01-27  Alexis Deruell  <alexis.deruelle@gmail.com>
+
+	PR 21056
+	* testsuite/gas/tic6x/insns16-parallel.s: New test case.
+	* testsuite/gas/tic6x/insns16-parallel.d: New test driver.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (aarch64*-*-rtems*): Remove.
+	(bfin-*-rtems*): Likewise.
+	(h8300-*-rtems*): Likewise.
+	(i386-*-rtems*): Likewise.
+	(m32c-*-rtems*): Likewise.
+	(m32r-*-rtems*): Likewise.
+	(m68k-*-rtems*): Likewise.
+	(mips-*-rtems*): Likewise.
+	(nios2-*-rtems*): Likewise.
+	(ppc-*-rtems*): Likewise.
+	(sh-*-rtems*): Likewise.
+	(sparc64-*-rtems*): Likewise.
+	(sparc-*-rtems*): Likewise.
+	(*-*-rtems*) Use ELF format.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (arm-*-rtems*): Move to (arm-*-eabi*).
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (sh-*-rtemscoff*): Remove.
+
+2017-01-24  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (riscv*-*-*): Remove em=linux.
+
+2017-01-23  Sebastian Rasmussen  <sebras@gmail.com>
+
+	PR gas/21072
+	* asintl.h: Fix spelling mistakes and typos.
+	* atof-generic.c: Likewise.
+	* bit_fix.h: Likewise.
+	* config/atof-ieee.c: Likewise.
+	* config/bfin-defs.h: Likewise.
+	* config/bfin-parse.y: Likewise.
+	* config/obj-coff-seh.h: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-evax.c: Likewise.
+	* config/obj-macho.c: Likewise.
+	* config/rx-parse.y: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-epiphany.c: Likewise.
+	* config/tc-frv.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386-intel.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-mep.h: Likewise.
+	* config/tc-metag.c: Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-msp430.h: Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/tc-nds32.h: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-nios2.h: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-pru.c: Likewise.
+	* config/tc-rx.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-visium.c: Likewise.
+	* config/tc-xgate.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* config/te-vms.c: Likewise.
+	* config/xtensa-relax.c: Likewise.
+	* doc/as.texinfo: Likewise.
+	* doc/c-arm.texi: Likewise.
+	* doc/c-hppa.texi: Likewise.
+	* doc/c-i370.texi: Likewise.
+	* doc/c-i386.texi: Likewise.
+	* doc/c-m32r.texi: Likewise.
+	* doc/c-m68k.texi: Likewise.
+	* doc/c-mmix.texi: Likewise.
+	* doc/c-msp430.texi: Likewise.
+	* doc/c-nds32.texi: Likewise.
+	* doc/c-ns32k.texi: Likewise.
+	* doc/c-riscv.texi: Likewise.
+	* doc/c-rx.texi: Likewise.
+	* doc/c-s390.texi: Likewise.
+	* doc/c-tic6x.texi: Likewise.
+	* doc/c-tilegx.texi: Likewise.
+	* doc/c-tilepro.texi: Likewise.
+	* doc/c-v850.texi: Likewise.
+	* doc/c-xgate.texi: Likewise.
+	* doc/c-xtensa.texi: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* ecoff.c: Likewise.
+	* itbl-ops.c: Likewise.
+	* listing.c: Likewise.
+	* macro.c: Likewise.
+	* po/gas.pot: Likewise.
+	* read.c: Likewise.
+	* struc-symbol.h: Likewise.
+	* symbols.h: Likewise.
+	* testsuite/gas/arc/relocs-errors.err: Likewise.
+	* write.c: Likewise.
+
+2017-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2017-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-i386.c (parse_operands): Check for operand overflow
+	before setting the unspecified bit.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR gas/20649

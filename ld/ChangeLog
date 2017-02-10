@@ -1,3 +1,234 @@
+2017-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure.tgt (arc*-*-linux*): Change the default linker
+	emulation based on --with-cpu selection.
+	* NEWS: Mention new configuration option.
+
+2017-02-06  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-elf/compress.exp: Don't print to stdout for all
+	"readelf -w".
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-cris/tls-err-20x.d: Fix a typo, s/n/\n/.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ld/testsuite/lib/ld-lib.exp (run_dump_test): Fix a typo,
+	s/regexp/regex/.
+
+2017-02-02  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/lib/ld-lib.exp (check_libdl_available): New function.
+	* testsuite/ld-elf/shared.exp (run_tests): Split tests which require
+	dlopen support into "dlopen_run_tests".  These tests include dl1*main
+	and dl6*main.
+	(dlopen_run_tests): New and only run it when check_libdl_available
+	returns true.  XFAIL on *-*-netbsdelf*.
+
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/vxworks-forced-local-1.d: Correct the
+	presentation of relocation addends.
+	* testsuite/ld-mips-elf/vxworks1-lib.rd: Likewise.
+	* testsuite/ld-mips-elf/vxworks1.dd: Likewise.
+	* testsuite/ld-mips-elf/vxworks1.rd: Likewise.
+
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/tls-multi-got-1-1.s: Place `tlsvar_ld'
+	in `.tdata' section.
+	* testsuite/ld-mips-elf/tls-multi-got-1.got: Adjust accordingly.
+	* testsuite/ld-mips-elf/tls-multi-got-1.r: Likewise.
+
+2017-02-01  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-unique/unique.exp (Could not link a dynamic executable):
+	Append $board_cflags to link commands.
+
+2017-02-01  Senthil Kumar Selvaraj  <senthilkumar.selvaraj@microchip.com>
+
+	* testsuite/ld-scripts/print-memory-usage-1.l: Relax
+	check for digit in second decimal place.
+
+2017-02-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/shared.exp: Correct PR ld/20828 test
+	indentation.
+
+2017-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* ldmain.c (add_archive_element): Eliminate string buffer.
+	* ldlang.c (lang_print_asneeded): Likewise.
+
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* emultempl/mipself.em (ignore_branch_isa): New variable.
+	(mips_create_output_section_statements): Rename
+	`_bfd_mips_elf_insn32' called to `_bfd_mips_elf_linker_flags',
+	add `ignore_branch_isa' argument.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA enum values.
+	(PARSE_AND_LIST_LONGOPTS): Add "ignore-branch-isa" and
+	"no-ignore-branch-isa" options.
+	(PARSE_AND_LIST_OPTIONS): Add `--ignore-branch-isa' and
+	`--no-ignore-branch-isa'.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_IGNORE_BRANCH_ISA and
+	OPTION_NO_IGNORE_BRANCH_ISA.
+
+	* ld.texinfo (Options specific to MIPS targets): Add
+	`--ignore-branch-isa' and `--no-ignore-branch-isa' options.
+	(ld and the MIPS family): Likewise.
+
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n64.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-2.d: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-r6-1: New test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-mips16: New
+	test.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-micromips: New
+	test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-01-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR binutils/19935
+	Fix long-standing buglet and fallout from now-default initfini-array.
+	* emulparams/criself.sh (USER_LABEL_PREFIX): Define.
+	(OTHER_END_SYMBOLS, ENTRY): Delete now-redundant defines.
+
+2017-01-27  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-elf/elf.exp ("pr20995-2", "Build pr20995-2.so"): XFAIL on
+	arm*-*-eabi*.
+
+2017-01-27  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 20343
+	* ld.texinfo (Options): Extend documentation of the --plugin
+	option.  Include a description of where the plugins should be
+	located.
+
+2017-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: New Serbian translation.
+	* configure.ac (ALL_LINGUAS): Add sr.
+	* configure: Regenerate.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (arm-*-rtems*): Move to (arm*-*-eabi*).
+	(bfin-*-rtems*): Move to (bfin*-*-elf*).
+	(i[3-7]86-*-rtems*): Move to (i[3-7]86*-*-elf*).
+	(m68*-*-rtems*): Move to (m68*-*-elf*).
+	(mips*-*-rtems*): Move to (mips*-*-elf*).
+	(or1k*-*-rtems*): Move to (or1k*-*-elf*).
+	(powerpc*-*-rtems*): Move to (powerpc*-*-elf*).
+	(sparc*-*-rtems*): Move to (sparc*-*-elf*).
+	(sparc64*-*-rtems*): Move to (sparc64*-*-elf*).
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (h8300-*-rtemscoff*): Remove.
+	(i960-*-rtems*): Likewise.
+	(m68*-*-rtemscoff*): Likewise.
+	(sh-*-rtemscoff*): Likewise.
+
+2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* emultempl/solaris2.em (elf_solaris2_before_allocation): Do not
+	add implicit version nodes if an anonymous version tag is being
+	used.
+
+2017-01-24  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-plugin/lto.exp (lto_link_elf_tests): Move "Compile 7",
+	"Compile 8a", "Compile 8b"...
+	(lto_compile_elf_tests): ...to here.  Always run these tests.
+	(lto_run_elf_tests): Move "LTO 7"...
+	(lto_run_elf_shared_tests): ...to here.  Restrict these tests on
+	environment where share library is supported.
+
+2017-01-24  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsexe.r: Update for fewer dynamic relocs
+	and symbols.
+	* testsuite/ld-powerpc/tlsexe.d: Likewise.
+	* testsuite/ld-powerpc/tlsexe.g: Likewise.
+
+2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new tests.
+	* testsuite/ld-aarch64/tls-desc-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-all-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-gd-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-gdesc-le-2-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-gdesc-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-ie-le-2-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-ie-le-3-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-relax-ie-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-desc-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-desc-le-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-gd-ie-ilp32.d: New test.
+	* testsuite/ld-aarch64/tls-tiny-gd-le-ilp32.d: New test.
+
+2017-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/ga.po: Updated Irish translation.
+
+2017-01-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828.ld: Add `.plt'.
+
+2017-01-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828.ld: Rename `_fdata' and `_edata' to
+	`fdata' and `edata' respectively.
+	* testsuite/ld-elf/pr20828.ver: Adjust accordingly.
+	* testsuite/ld-elf/pr20828-a.sd: Likewise.
+	* testsuite/ld-elf/pr20828-b.sd: Likewise.
+	* testsuite/ld-elf/pr20828-c.sd: Likewise.
+
+2017-01-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828-1.sd: Remove test.
+	* testsuite/ld-elf/pr20828-a.sd: New test.
+	* testsuite/ld-elf/pr20828-2a.sd: Rename test to...
+	* testsuite/ld-elf/pr20828-b.sd: ... this.
+	* testsuite/ld-elf/pr20828-2b.sd: Rename test to...
+	* testsuite/ld-elf/pr20828-c.sd: ... this.
+	* testsuite/ld-elf/shared.exp: Adjust accordingly.
+
+2017-01-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Append
+	board_cflags as gcc is used as linker driver.
+	* testsuite/ld-unique/unique.exp: Likewise
+
+2017-01-20  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp (aarch64elflinktests): New tests.
+	* testsuite/ld-aarch64/func-in-so.s: New test source file.
+	* testsuite/ld-aarch64/func-sym-hash-opt.s: Likewise.
+	* testsuite/ld-aarch64/func-sym-hash-opt.d: New expected test result.
+
+2017-01-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-elf/eh-frame-hdr.d: Update expected results.
+
+2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20995
+	* testsuite/ld-elf/elf.exp: Set GAS flags correctly for the
+	`mips*-*-*' target and `pr20995' and `pr20995-2' tests.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828

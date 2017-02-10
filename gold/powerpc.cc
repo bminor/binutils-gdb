@@ -1986,6 +1986,12 @@ Powerpc_relobj<size, big_endian>::make_toc_relative(
   if (size != 64)
     return false;
 
+  // With -mcmodel=medium code it is quite possible to have
+  // toc-relative relocs referring to objects outside the TOC.
+  // Don't try to look at a non-existent TOC.
+  if (this->toc_shndx() == 0)
+    return false;
+
   // Convert VALUE back to an address by adding got_base (see below),
   // then to an offset in the TOC by subtracting the TOC output
   // section address and the TOC output offset.  Since this TOC output

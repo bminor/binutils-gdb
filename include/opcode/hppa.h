@@ -4,7 +4,7 @@
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
 
-   This file is part of GAS, the GNU Assembler, and GDB, the GNU disassembler.
+   This file is part of the GNU opcodes library.
 
    GAS/GDB is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

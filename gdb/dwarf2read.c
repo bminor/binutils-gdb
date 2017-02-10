@@ -8409,17 +8409,6 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Retrieve the last character from a mem_file.  */
-
-static void
-do_ui_file_peek_last (void *object, const char *buffer, long length)
-{
-  char *last_char_p = (char *) object;
-
-  if (length > 0)
-    *last_char_p = buffer[length - 1];
-}
-
 /* Compute the fully qualified name of DIE in CU.  If PHYSNAME is nonzero,
    compute the physname for the object, which include a method's:
    - formal parameters (C++),
@@ -8478,21 +8467,21 @@ dwarf2_compute_name (const char *name,
 	{
 	  long length;
 	  const char *prefix;
-	  struct ui_file *buf;
 	  const char *canonical_name = NULL;
 
+	  string_file buf;
+
 	  prefix = determine_prefix (die, cu);
-	  buf = mem_fileopen ();
 	  if (*prefix != '\0')
 	    {
 	      char *prefixed_name = typename_concat (NULL, prefix, name,
 						     physname, cu);
 
-	      fputs_unfiltered (prefixed_name, buf);
+	      buf.puts (prefixed_name);
 	      xfree (prefixed_name);
 	    }
 	  else
-	    fputs_unfiltered (name, buf);
+	    buf.puts (name);
 
 	  /* Template parameters may be specified in the DIE's DW_AT_name, or
 	     as children with DW_TAG_template_type_param or
@@ -8537,25 +8526,25 @@ dwarf2_compute_name (const char *name,
 
 		  if (first)
 		    {
-		      fputs_unfiltered ("<", buf);
+		      buf.puts ("<");
 		      first = 0;
 		    }
 		  else
-		    fputs_unfiltered (", ", buf);
+		    buf.puts (", ");
 
 		  attr = dwarf2_attr (child, DW_AT_type, cu);
 		  if (attr == NULL)
 		    {
 		      complaint (&symfile_complaints,
 				 _("template parameter missing DW_AT_type"));
-		      fputs_unfiltered ("UNKNOWN_TYPE", buf);
+		      buf.puts ("UNKNOWN_TYPE");
 		      continue;
 		    }
 		  type = die_type (child, cu);
 
 		  if (child->tag == DW_TAG_template_type_param)
 		    {
-		      c_print_type (type, "", buf, -1, 0, &type_print_raw_options);
+		      c_print_type (type, "", &buf, -1, 0, &type_print_raw_options);
 		      continue;
 		    }
 
@@ -8565,7 +8554,7 @@ dwarf2_compute_name (const char *name,
 		      complaint (&symfile_complaints,
 				 _("template parameter missing "
 				   "DW_AT_const_value"));
-		      fputs_unfiltered ("UNKNOWN_VALUE", buf);
+		      buf.puts ("UNKNOWN_VALUE");
 		      continue;
 		    }
 
@@ -8576,7 +8565,7 @@ dwarf2_compute_name (const char *name,
 		  if (TYPE_NOSIGN (type))
 		    /* GDB prints characters as NUMBER 'CHAR'.  If that's
 		       changed, this can use value_print instead.  */
-		    c_printchar (value, type, buf);
+		    c_printchar (value, type, &buf);
 		  else
 		    {
 		      struct value_print_options opts;
@@ -8599,7 +8588,7 @@ dwarf2_compute_name (const char *name,
 			 the radix.  */
 		      get_formatted_print_options (&opts, 'd');
 		      opts.raw = 1;
-		      value_print (v, buf, &opts);
+		      value_print (v, &buf, &opts);
 		      release_value (v);
 		      value_free (v);
 		    }
@@ -8611,12 +8600,10 @@ dwarf2_compute_name (const char *name,
 		{
 		  /* Close the argument list, with a space if necessary
 		     (nested templates).  */
-		  char last_char = '\0';
-		  ui_file_put (buf, do_ui_file_peek_last, &last_char);
-		  if (last_char == '>')
-		    fputs_unfiltered (" >", buf);
+		  if (!buf.empty () && buf.string ().back () == '>')
+		    buf.puts (" >");
 		  else
-		    fputs_unfiltered (">", buf);
+		    buf.puts (">");
 		}
 	    }
 
@@ -8628,7 +8615,7 @@ dwarf2_compute_name (const char *name,
 	    {
 	      struct type *type = read_type_die (die, cu);
 
-	      c_type_print_args (type, buf, 1, cu->language,
+	      c_type_print_args (type, &buf, 1, cu->language,
 				 &type_print_raw_options);
 
 	      if (cu->language == language_cplus)
@@ -8643,12 +8630,11 @@ dwarf2_compute_name (const char *name,
 		      && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_PTR
 		      && TYPE_CONST (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type,
 									0))))
-		    fputs_unfiltered (" const", buf);
+		    buf.puts (" const");
 		}
 	    }
 
-	  std::string intermediate_name = ui_file_as_string (buf);
-	  ui_file_delete (buf);
+	  const std::string &intermediate_name = buf.string ();
 
 	  if (cu->language == language_cplus)
 	    canonical_name

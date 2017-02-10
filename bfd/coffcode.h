@@ -3755,7 +3755,9 @@ coff_write_object_contents (bfd * abfd)
 		 NUL-terminated.  We use a temporary buffer so that we can still
 		 sprintf all eight chars without splatting a terminating NUL
 		 over the first byte of the following member (s_paddr).  */
-	      char s_name_buf[SCNNMLEN + 1];
+	      /* PR 21096: The +20 is to stop a bogus warning from gcc7 about
+		 a possible buffer overflow.  */
+	      char s_name_buf[SCNNMLEN + 1 + 20];
 
 	      /* An inherent limitation of the /nnnnnnn notation used to indicate
 		 the offset of the long name in the string table is that we
@@ -3770,9 +3772,10 @@ coff_write_object_contents (bfd * abfd)
 		  return FALSE;
 		}
 
-	      /* snprintf not strictly necessary now we've verified the value
-		 has less than eight ASCII digits, but never mind.  */
-	      snprintf (s_name_buf, SCNNMLEN + 1, "/%lu", (unsigned long) string_size);
+	      /* We do not need to use snprintf here as we have already verfied
+		 that string_size is not too big, plus we have an overlarge
+		 buffer, just in case.  */
+	      sprintf (s_name_buf, "/%lu", (unsigned long) string_size);
 	      /* Then strncpy takes care of any padding for us.  */
 	      strncpy (section.s_name, s_name_buf, SCNNMLEN);
 	      string_size += len + 1;

@@ -143,7 +143,7 @@ multi_line_command_p (enum command_control_type type)
    control commands (if/while).  */
 
 static struct command_line *
-build_command_line (enum command_control_type type, char *args)
+build_command_line (enum command_control_type type, const char *args)
 {
   struct command_line *cmd;
 
@@ -904,6 +904,27 @@ read_next_line (void)
   return command_line_input (prompt_ptr, from_tty, "commands");
 }
 
+/* Return true if CMD's name is NAME.  */
+
+static bool
+command_name_equals (struct cmd_list_element *cmd, const char *name)
+{
+  return (cmd != NULL
+	  && cmd != CMD_LIST_AMBIGUOUS
+	  && strcmp (cmd->name, name) == 0);
+}
+
+/* Given an input line P, skip the command and return a pointer to the
+   first argument.  */
+
+static const char *
+line_first_arg (const char *p)
+{
+  const char *first_arg = p + find_command_name_length (p);
+
+  return skip_spaces_const (first_arg); 
+}
+
 /* Process one input line.  If the command is an "end", return such an
    indication to the caller.  If PARSE_COMMANDS is true, strip leading
    whitespace (trailing whitespace is always stripped) in the line,
@@ -938,9 +959,14 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
      We also permit whitespace before end and after.  */
   if (p_end - p_start == 3 && startswith (p_start, "end"))
     return end_command;
-  
+
   if (parse_commands)
     {
+      /* Resolve command abbreviations (e.g. 'ws' for 'while-stepping').  */
+      const char *cmd_name = p;
+      struct cmd_list_element *cmd
+	= lookup_cmd_1 (&cmd_name, cmdlist, NULL, 1);
+
       /* If commands are parsed, we skip initial spaces.  Otherwise,
 	 which is the case for Python commands and documentation
 	 (see the 'document' command), spaces are preserved.  */
@@ -958,9 +984,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 
       /* Check for while, if, break, continue, etc and build a new
 	 command line structure for them.  */
-      if ((p_end - p >= 14 && startswith (p, "while-stepping"))
-	  || (p_end - p >= 8 && startswith (p, "stepping"))
-	  || (p_end - p >= 2 && startswith (p, "ws")))
+      if (command_name_equals (cmd, "while-stepping"))
 	{
 	  /* Because validate_actionline and encode_action lookup
 	     command's line as command, we need the line to
@@ -975,40 +999,25 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	     not.  */
 	  *command = build_command_line (while_stepping_control, p);
 	}
-      else if (p_end - p > 5 && startswith (p, "while"))
+      else if (command_name_equals (cmd, "while"))
 	{
-	  char *first_arg;
-
-	  first_arg = p + 5;
-	  while (first_arg < p_end && isspace (*first_arg))
-	    first_arg++;
-	  *command = build_command_line (while_control, first_arg);
+	  *command = build_command_line (while_control, line_first_arg (p));
 	}
-      else if (p_end - p > 2 && startswith (p, "if"))
+      else if (command_name_equals (cmd, "if"))
 	{
-	  char *first_arg;
-
-	  first_arg = p + 2;
-	  while (first_arg < p_end && isspace (*first_arg))
-	    first_arg++;
-	  *command = build_command_line (if_control, first_arg);
+	  *command = build_command_line (if_control, line_first_arg (p));
 	}
-      else if (p_end - p >= 8 && startswith (p, "commands"))
+      else if (command_name_equals (cmd, "commands"))
 	{
-	  char *first_arg;
-
-	  first_arg = p + 8;
-	  while (first_arg < p_end && isspace (*first_arg))
-	    first_arg++;
-	  *command = build_command_line (commands_control, first_arg);
+	  *command = build_command_line (commands_control, line_first_arg (p));
 	}
-      else if (p_end - p == 6 && startswith (p, "python"))
+      else if (command_name_equals (cmd, "python"))
 	{
 	  /* Note that we ignore the inline "python command" form
 	     here.  */
 	  *command = build_command_line (python_control, "");
 	}
-      else if (p_end - p == 6 && startswith (p, "compile"))
+      else if (command_name_equals (cmd, "compile"))
 	{
 	  /* Note that we ignore the inline "compile command" form
 	     here.  */
@@ -1016,7 +1025,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	  (*command)->control_u.compile.scope = COMPILE_I_INVALID_SCOPE;
 	}
 
-      else if (p_end - p == 5 && startswith (p, "guile"))
+      else if (command_name_equals (cmd, "guile"))
 	{
 	  /* Note that we ignore the inline "guile command" form here.  */
 	  *command = build_command_line (guile_control, "");

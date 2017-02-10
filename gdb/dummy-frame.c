@@ -409,14 +409,11 @@ maintenance_print_dummy_frames (char *args, int from_tty)
     fprint_dummy_frames (gdb_stdout);
   else
     {
-      struct cleanup *cleanups;
-      struct ui_file *file = gdb_fopen (args, "w");
+      stdio_file file;
 
-      if (file == NULL)
+      if (!file.open (args, "w"))
 	perror_with_name (_("maintenance print dummy-frames"));
-      cleanups = make_cleanup_ui_file_delete (file);
-      fprint_dummy_frames (file);    
-      do_cleanups (cleanups);
+      fprint_dummy_frames (&file);
     }
 }
 

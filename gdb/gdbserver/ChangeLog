@@ -1,3 +1,10 @@
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* configure.ac: Check if the fs_base and gs_base members of
+	`struct user_regs_struct' exist.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
 2017-01-09  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-aarch32-low.c (arm_breakpoint_kind_from_pc): Use

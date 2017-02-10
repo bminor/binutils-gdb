@@ -82,6 +82,20 @@ if [regexp "1001\\^done\[\r\n\]+$mi_log_prompt.*1002\\^running\[\r\n\]+\\*runnin
     fail "redirect log file contents"
 }
 
+# Now try enabling a redirect while GDB is already logging.  This used
+# to crash GDB.
+with_test_prefix "redirect while already logging" {
+    mi_gdb_test "-gdb-set logging redirect off" ".*" \
+	"logging redirect off"
+    mi_gdb_test "-gdb-set logging on" ".*" \
+	"logging on"
+    mi_gdb_test "-gdb-set logging redirect on" \
+	".*warning: Currently logging .*Turn the logging off and on to make the new setting effective.*" \
+	"logging redirect on"
+    mi_gdb_test "-gdb-set logging off" ".*" \
+	"logging off"
+}
+
 mi_gdb_exit
 
 remote_file host delete $milogfile

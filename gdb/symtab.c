@@ -5163,6 +5163,9 @@ add_symtab_completions (struct compunit_symtab *cust,
   struct block_iterator iter;
   int i;
 
+  if (cust == NULL)
+    return;
+
   for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
     {
       QUIT;

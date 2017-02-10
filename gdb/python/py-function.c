@@ -59,14 +59,13 @@ static struct value *
 fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 	   void *cookie, int argc, struct value **argv)
 {
-  struct value *value = NULL;
-  /* 'result' must be set to NULL, this initially indicates whether
-     the function was called, or not.  */
-  gdbpy_ref result;
-
+  /* The gdbpy_enter object needs to be placed first, so that it's the last to
+     be destroyed.  */
   gdbpy_enter enter_py (gdbarch, language);
-
+  struct value *value;
+  gdbpy_ref result;
   gdbpy_ref args (convert_values_to_python (argc, argv));
+
   /* convert_values_to_python can return NULL on error.  If we
      encounter this, do not call the function, but allow the Python ->
      error code conversion below to deal with the Python exception.

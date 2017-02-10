@@ -172,6 +172,13 @@ typedef unsigned long gdb_py_ulongest;
 typedef long Py_hash_t;
 #endif
 
+/* PyMem_RawMalloc appeared in Python 3.4.  For earlier versions, we can just
+   fall back to PyMem_Malloc.  */
+
+#if PY_VERSION_HEX < 0x03040000
+#define PyMem_RawMalloc PyMem_Malloc
+#endif
+
 /* Python 2.6 did not wrap Py_DECREF in 'do {...} while (0)', leading
    to 'suggest explicit braces to avoid ambiguous ‘else’' gcc errors.
    Wrap it ourselves, so that callers don't need to care.  */

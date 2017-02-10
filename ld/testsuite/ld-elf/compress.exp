@@ -171,7 +171,7 @@ if { [regexp_diff tmpdir/$test.out $srcdir/$subdir/$test.rt] } then {
 set test_name "Link with zlib compressed debug output"
 set test normal
 send_log "$READELF -w tmpdir/$test > tmpdir/$test.out\n"
-set got [remote_exec host "$READELF -w tmpdir/$test" "" "/dev/null" "tmpdir/$test.out"]
+set got [remote_exec host [concat sh -c [list "$READELF -w tmpdir/$test > tmpdir/$test.out"]] "" "/dev/null"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
     send_log "$got\n"
     unresolved "$test_name"
@@ -180,7 +180,7 @@ if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 set test_name "Link with zlib compressed debug output"
 set test zlibnormal
 send_log "$READELF -w tmpdir/$test | sed -e \"s/.zdebug_/.debug_/\" > tmpdir/$test.out\n"
-set got [remote_exec host "$READELF -w tmpdir/$test | sed -e \"s/.zdebug_/.debug_/\"" "" "/dev/null" "tmpdir/$test.out"]
+set got [remote_exec host [concat sh -c [list "$READELF -w tmpdir/$test | sed -e \"s/.zdebug_/.debug_/\" > tmpdir/$test.out"]] "" "/dev/null"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
     send_log "$got\n"
     unresolved "$test_name"
@@ -206,7 +206,7 @@ if { [regexp_diff tmpdir/$test.out $srcdir/$subdir/$test.rS] } then {
 set test_name "Link with zlib-gnu compressed debug output"
 set test gnunormal
 send_log "$READELF -w tmpdir/$test | sed -e \"s/.zdebug_/.debug_/\" > tmpdir/$test.out\n"
-set got [remote_exec host "$READELF -w tmpdir/$test | sed -e \"s/.zdebug_/.debug_/\"" "" "/dev/null" "tmpdir/$test.out"]
+set got [remote_exec host [concat sh -c [list "$READELF -w tmpdir/$test | sed -e \"s/.zdebug_/.debug_/\" > tmpdir/$test.out"]] "" "/dev/null"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
     send_log "$got\n"
     unresolved "$test_name"
@@ -232,7 +232,7 @@ if { [regexp_diff tmpdir/$test.out $srcdir/$subdir/$test.rS] } then {
 set test gabinormal
 set test_name "Link with zlib-gabi compressed debug output"
 send_log "$READELF -w tmpdir/$test > tmpdir/$test.out\n"
-set got [remote_exec host "$READELF -w tmpdir/$test" "" "/dev/null" "tmpdir/$test.out"]
+set got [remote_exec host [concat sh -c [list "$READELF -w tmpdir/$test > tmpdir/$test.out"]] "" "/dev/null"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
     send_log "$got\n"
     unresolved "$test_name"

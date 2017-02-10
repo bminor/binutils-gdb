@@ -674,7 +674,7 @@ struct symbol_computed_ops
      The generated C code must assign the location to a local
      variable; this variable's name is RESULT_NAME.  */
 
-  void (*generate_c_location) (struct symbol *symbol, struct ui_file *stream,
+  void (*generate_c_location) (struct symbol *symbol, string_file &stream,
 			       struct gdbarch *gdbarch,
 			       unsigned char *registers_used,
 			       CORE_ADDR pc, const char *result_name);

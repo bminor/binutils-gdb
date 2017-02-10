@@ -2,9 +2,9 @@ SECTIONS
 {
   .data :
   {
-    _fdata = .;
+    fdata = .;
     *(.data)
-    _edata = .;
+    edata = .;
   }
   .dynamic : { *(.dynamic) }
   .hash : { *(.hash) }
@@ -13,6 +13,7 @@ SECTIONS
   .shstrtab : { *(.shstrtab) }
   .symtab : { *(.symtab) }
   .strtab : { *(.strtab) }
+  .plt : { *(.plt) }
   .got.plt : { *(.got.plt) }
   .got : { *(.got) }
   /DISCARD/ : { *(*) }

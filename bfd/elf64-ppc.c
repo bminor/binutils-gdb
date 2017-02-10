@@ -8324,7 +8324,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		  tga_fd->root.type = bfd_link_hash_indirect;
 		  tga_fd->root.u.i.link = &opt_fd->root;
 		  ppc64_elf_copy_indirect_symbol (info, opt_fd, tga_fd);
-		  opt_fd->forced_local = 0;
+		  opt_fd->mark = 1;
 		  if (opt_fd->dynindx != -1)
 		    {
 		      /* Use __tls_get_addr_opt in dynamic relocations.  */
@@ -8341,7 +8341,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		      tga->root.type = bfd_link_hash_indirect;
 		      tga->root.u.i.link = &opt->root;
 		      ppc64_elf_copy_indirect_symbol (info, opt, tga);
-		      opt->forced_local = 0;
+		      opt->mark = 1;
 		      _bfd_elf_link_hash_hide_symbol (info, opt,
 						      tga->forced_local);
 		      htab->tls_get_addr = (struct ppc_link_hash_entry *) opt;
@@ -9597,7 +9597,6 @@ allocate_got (struct elf_link_hash_entry *h,
 	      struct got_entry *gent)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
-  bfd_boolean dyn;
   struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
   int entsize = (gent->tls_type & eh->tls_mask & (TLS_GD | TLS_LD)
 		 ? 16 : 8);
@@ -9608,14 +9607,15 @@ allocate_got (struct elf_link_hash_entry *h,
   gent->got.offset = got->size;
   got->size += entsize;
 
-  dyn = htab->elf.dynamic_sections_created;
   if (h->type == STT_GNU_IFUNC)
     {
       htab->elf.irelplt->size += rentsize;
       htab->got_reli_size += rentsize;
     }
   else if ((bfd_link_pic (info)
-	    || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	    || (htab->elf.dynamic_sections_created
+		&& h->dynindx != -1
+		&& !SYMBOL_REFERENCES_LOCAL (info, h)))
 	   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak))
     {
@@ -9642,6 +9642,23 @@ merge_got_entries (struct got_entry **pent)
 	    ent2->is_indirect = TRUE;
 	    ent2->got.ent = ent;
 	  }
+}
+
+/* If H is undefined weak, make it dynamic if that makes sense.  */
+
+static bfd_boolean
+ensure_undefweak_dynamic (struct bfd_link_info *info,
+			  struct elf_link_hash_entry *h)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+
+  if (htab->dynamic_sections_created
+      && h->root.type == bfd_link_hash_undefweak
+      && h->dynindx == -1
+      && !h->forced_local
+      && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+    return bfd_elf_link_record_dynamic_symbol (info, h);
+  return TRUE;
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
@@ -9716,16 +9733,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     if (!gent->is_indirect)
       {
 	/* Make sure this symbol is output as a dynamic symbol.
-	   Undefined weak syms won't yet be marked as dynamic,
-	   nor will all TLS symbols.  */
-	if (h->dynindx == -1
-	    && !h->forced_local
-	    && h->type != STT_GNU_IFUNC
-	    && htab->elf.dynamic_sections_created)
-	  {
-	    if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	      return FALSE;
-	  }
+	   Undefined weak syms won't yet be marked as dynamic.  */
+	if (!ensure_undefweak_dynamic (info, h))
+	  return FALSE;
 
 	if (!is_ppc64_elf (gent->owner))
 	  abort ();
@@ -9779,12 +9789,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	      /* Make sure this symbol is output as a dynamic symbol.
 		 Undefined weak syms won't yet be marked as dynamic.  */
-	      else if (h->dynindx == -1
-		       && !h->forced_local)
-		{
-		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		    return FALSE;
-		}
+	      else if (!ensure_undefweak_dynamic (info, h))
+		return FALSE;
 	    }
 	}
       else if (h->type == STT_GNU_IFUNC)
@@ -9815,20 +9821,18 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* For the non-pic case, discard space for relocs against
 	     symbols which turn out to need copy relocs or are not
 	     dynamic.  */
+	  if (!h->non_got_ref
+	      && !h->def_regular)
+	    {
+	      /* Make sure this symbol is output as a dynamic symbol.
+		 Undefined weak syms won't yet be marked as dynamic.  */
+	      if (!ensure_undefweak_dynamic (info, h))
+		return FALSE;
 
-	  /* First make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (h->root.type == bfd_link_hash_undefweak
-	      && !h->non_got_ref
-	      && !h->def_regular
-	      && h->dynindx == -1
-	      && !h->forced_local
-	      && !bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
-
-	  if (h->non_got_ref
-	      || h->def_regular
-	      || h->dynindx == -1)
+	      if (h->dynindx == -1)
+		eh->dyn_relocs = NULL;
+	    }
+	  else
 	    eh->dyn_relocs = NULL;
 	}
 
@@ -9843,8 +9847,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     }
 
   if ((htab->elf.dynamic_sections_created
-       && h->dynindx != -1
-       && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
+       && h->dynindx != -1)
       || h->type == STT_GNU_IFUNC)
     {
       struct plt_entry *pent;
@@ -14405,14 +14408,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      ent = ppc64_tlsld_got (input_bfd);
 	    else
 	      {
-
 		if (h != NULL)
 		  {
-		    bfd_boolean dyn = htab->elf.dynamic_sections_created;
-		    if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info),
-							  &h->elf)
-			|| (bfd_link_pic (info)
-			    && SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
+		    if (!htab->elf.dynamic_sections_created
+			|| h->elf.dynindx == -1
+			|| SYMBOL_REFERENCES_LOCAL (info, &h->elf)
+			|| (ELF_ST_VISIBILITY (h->elf.other) != STV_DEFAULT
+			    && h->elf.root.type == bfd_link_hash_undefweak))
 		      /* This is actually a static link, or it is a
 			 -Bsymbolic link and the symbol is defined
 			 locally, or the symbol was forced to be local
@@ -14420,7 +14422,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      ;
 		    else
 		      {
-			BFD_ASSERT (h->elf.dynindx != -1);
 			indx = h->elf.dynindx;
 			unresolved_reloc = FALSE;
 		      }
@@ -14470,12 +14471,14 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC);
 		if (ifunc)
 		  relgot = htab->elf.irelplt;
-		else if ((bfd_link_pic (info) || indx != 0)
-			 && (h == NULL
-			     || (tls_type == (TLS_TLS | TLS_LD)
-				 && !h->elf.def_dynamic)
-			     || ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
-			     || h->elf.root.type != bfd_link_hash_undefweak))
+		else if (indx != 0
+			 || (bfd_link_pic (info)
+			     && (h == NULL
+				 || (ELF_ST_VISIBILITY (h->elf.other)
+				     == STV_DEFAULT)
+				 || h->elf.root.type != bfd_link_hash_undefweak
+				 || (tls_type == (TLS_TLS | TLS_LD)
+				     && !h->elf.def_dynamic))))
 		  relgot = ppc64_elf_tdata (ent->owner)->relgot;
 		if (relgot != NULL)
 		  {
@@ -14541,28 +14544,34 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   emitting a reloc.  */
 		else
 		  {
+		    int tlsopt
+		      = (htab->params->tls_get_addr_opt
+			 && htab->tls_get_addr_fd != NULL
+			 && htab->tls_get_addr_fd->elf.plt.plist != NULL);
+
 		    relocation += addend;
-		    if (tls_type == (TLS_TLS | TLS_LD))
-		      relocation = 1;
-		    else if (tls_type != 0)
+		    if (tls_type != 0)
 		      {
 			if (htab->elf.tls_sec == NULL)
 			  relocation = 0;
 			else
 			  {
-			    relocation -= htab->elf.tls_sec->vma + DTP_OFFSET;
-			    if (tls_type == (TLS_TLS | TLS_TPREL))
+			    if (tls_type & TLS_LD)
+			      relocation = 0;
+			    else
+			      relocation -= htab->elf.tls_sec->vma + DTP_OFFSET;
+			    if ((tls_type & TLS_TPREL)
+				|| (tlsopt && !(tls_type & TLS_DTPREL)))
 			      relocation += DTP_OFFSET - TP_OFFSET;
 			  }
 
-			if (tls_type == (TLS_TLS | TLS_GD))
+			if (tls_type & (TLS_GD | TLS_LD))
 			  {
 			    bfd_put_64 (output_bfd, relocation,
 					got->contents + off + 8);
-			    relocation = 1;
+			    relocation = !tlsopt;
 			  }
 		      }
-
 		    bfd_put_64 (output_bfd, relocation,
 				got->contents + off);
 		  }
@@ -14957,10 +14966,34 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    addend = outrel.r_addend;
 		  /* Adjust pc_relative relocs to have zero in *r_offset.  */
 		  else if (ppc64_elf_howto_table[r_type]->pc_relative)
-		    addend = (input_section->output_section->vma
-			      + input_section->output_offset
-			      + rel->r_offset);
+		    addend = outrel.r_offset;
 		}
+	    }
+	  else if (r_type == R_PPC64_DTPMOD64
+		   && htab->params->tls_get_addr_opt
+		   && htab->tls_get_addr_fd != NULL
+		   && htab->tls_get_addr_fd->elf.plt.plist != NULL)
+	    {
+	      /* Set up for __tls_get_addr_opt stub, when this entry
+		 does not have dynamic relocs.  */
+	      relocation = 0;
+	      /* Set up the next word for local dynamic.  If it turns
+		 out to be global dynamic, the reloc will overwrite
+		 this value.  */
+	      if (rel->r_offset + 16 <= input_section->size)
+		bfd_put_64 (input_bfd, DTP_OFFSET - TP_OFFSET,
+			    contents + rel->r_offset + 8);
+	    }
+	  else if (r_type == R_PPC64_DTPREL64
+		   && htab->params->tls_get_addr_opt
+		   && htab->tls_get_addr_fd != NULL
+		   && htab->tls_get_addr_fd->elf.plt.plist != NULL
+		   && rel > relocs
+		   && rel[-1].r_info == ELF64_R_INFO (r_symndx, R_PPC64_DTPMOD64)
+		   && rel[-1].r_offset + 8 == rel->r_offset)
+	    {
+	      /* __tls_get_addr_opt stub value.  */
+	      addend += DTP_OFFSET - TP_OFFSET;
 	    }
 	  break;
 

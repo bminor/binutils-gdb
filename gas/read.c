@@ -19,7 +19,7 @@
    02110-1301, USA.  */
 
 /* If your chars aren't 8 bits, you will change this a bit (eg. to 0xFF).
-   But then, GNU isn't spozed to run on your machine anyway.
+   But then, GNU isn't supposed to run on your machine anyway.
    (RMS is so shortsighted sometimes.)  */
 #define MASK_CHAR ((int)(unsigned char) -1)
 
@@ -3141,7 +3141,7 @@ do_repeat (int count, const char *start, const char *end)
 }
 
 /* Like do_repeat except that any text matching EXPANDER in the
-   block is replaced by the itteration count.  */
+   block is replaced by the iteration count.  */
 
 void
 do_repeat_with_expander (int count,

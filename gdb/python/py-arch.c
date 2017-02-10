@@ -193,54 +193,38 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
        || (end_obj == NULL && count_obj == NULL && pc == start);)
     {
       int insn_len = 0;
-      struct ui_file *memfile = mem_fileopen ();
       gdbpy_ref insn_dict (PyDict_New ());
 
       if (insn_dict == NULL)
-        {
-          ui_file_delete (memfile);
-
-          return NULL;
-        }
+	return NULL;
       if (PyList_Append (result_list.get (), insn_dict.get ()))
-        {
-          ui_file_delete (memfile);
+	return NULL;  /* PyList_Append Sets the exception.  */
 
-          return NULL;  /* PyList_Append Sets the exception.  */
-        }
+      string_file stb;
 
       TRY
         {
-          insn_len = gdb_print_insn (gdbarch, pc, memfile, NULL);
+          insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
         }
       CATCH (except, RETURN_MASK_ALL)
         {
-          ui_file_delete (memfile);
-
 	  gdbpy_convert_exception (except);
 	  return NULL;
         }
       END_CATCH
 
-      std::string as = ui_file_as_string (memfile);
-
       if (PyDict_SetItemString (insn_dict.get (), "addr",
                                 gdb_py_long_from_ulongest (pc))
           || PyDict_SetItemString (insn_dict.get (), "asm",
-                                   PyString_FromString (!as.empty ()
-							? as.c_str ()
+                                   PyString_FromString (!stb.empty ()
+							? stb.c_str ()
 							: "<unknown>"))
           || PyDict_SetItemString (insn_dict.get (), "length",
                                    PyInt_FromLong (insn_len)))
-        {
-          ui_file_delete (memfile);
-
-          return NULL;
-        }
+	return NULL;
 
       pc += insn_len;
       i++;
-      ui_file_delete (memfile);
     }
 
   return result_list.release ();

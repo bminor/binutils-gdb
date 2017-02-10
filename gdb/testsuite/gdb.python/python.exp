@@ -246,7 +246,21 @@ if { [is_remote host] } {
     set python_1_c [string_to_regexp "gdb.python/python-1.c"]
 }
 gdb_test "python print (symtab\[1\]\[0\].symtab)" ".*${python_1_c}" "test decode_line func1 filename"
-gdb_test "python print (symtab\[1\]\[0\].line)" "19" "test decode_line func1 line number"
+
+# Set a default value for func1_lineno in case we fail to fetch the line number
+# below.
+set func1_lineno "noline"
+
+# Fetch the line GDB thinks func1 starts at.  This may change depending
+# on the architecture and on how GDB handles the prologue of the function.
+gdb_test_multiple "info line func1" "info line func1" {
+    -re "Line ($decimal) of .* starts at address $hex <func1> and ends at $hex <func1\\+$decimal>\.\[\r\n\]+$gdb_prompt $" {
+	# Fetch the line number.
+	set func1_lineno $expect_out(1,string)
+    }
+}
+
+gdb_test "python print (symtab\[1\]\[0\].line)" "$func1_lineno" "test decode_line func1 line number"
 gdb_py_test_silent_cmd {python symtab = gdb.decode_line ("func1,func2")} \
     "test decode_line func1,func2" 1
 gdb_test {python print (symtab[0])} ",func2" "stop at comma in linespec"

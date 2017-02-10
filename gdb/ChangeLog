@@ -1,3 +1,825 @@
+2017-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* interps.c (current_interp_set_logging): Remove "return".
+
+2017-02-09  Gary Benson  <gbenson@redhat.com>
+
+	* symtab.c (add_symtab_completions): Prevent NULL pointer
+	dereference.
+
+2017-02-08  Pedro Alves  <palves@redhat.com>
+
+	* interps.c (interp::interp): Remove reference to quiet_p.
+	(interp_set): Make static.  Remove dead "Switching to" output
+	code.
+	(interp_quiet_p, interp_set_quiet): Delete.
+	(interpreter_exec_cmd): Don't set the interpreter quiet.
+	* interps.h (interp_quiet_p): Make static.
+	(class interp) <quiet_p>: Remove field
+
+2017-02-08  Jerome Guitton  <guitton@adacore.com>
+
+	* cli/cli-decode.c (find_command_name_length): Make it extern.
+	* cli/cli-decode.h (find_command_name_length): Declare.
+	* cli/cli-script.c (command_name_equals, line_first_arg):
+	New functions.
+	(process_next_line): Use cli-decode to parse command names.
+	(build_command_line): Make args a constant pointer.
+
+2017-02-08  Jerome Guitton  <guitton@adacore.com>
+	
+	* cli-decode.c (lookup_cmd_1, lookup_cmd_composition):
+	Remove case-insensitive search.
+
+2017-02-07  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc32_gdbarch_init): Do not place a + operator
+	at the end of the line.  Avoids an ARI warning.
+
+2017-02-06  Luis Machado  <lgustavo@codesourcery.com>
+
+	* NEWS: Mention support for record/replay of Intel 64 rdrand and
+	rdseed instructions.
+	i386-tdep.c (i386_process_record): Handle Intel 64 rdrand and rseed.
+
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	Provide and use sparc32 and sparc64 target description XML files.
+	* features/sparc/sparc32-cp0.xml, features/sparc/sparc32-cpu.xml,
+	features/sparc/sparc32-fpu.xml: New files for sparc 32-bit.
+	* features/sparc/sparc64-cp0.xml, features/sparc/sparc64-cpu.xml,
+	features/sparc/sparc64-fpu.xml: New files for sparc 64-bit.
+	* features/sparc/sparc32-solaris.xml: New file.
+	* features/sparc/sparc64-solaris.xml: New file.
+	* features/sparc/sparc32-solaris.c: Generated.
+	* features/sparc/sparc64-solaris.c: Generated.
+	* sparc-tdep.h: Account for differences in target descriptions.
+	* sparc-tdep.c (sparc32_register_name): Use target provided registers.
+	(sparc32_register_type): Use target provided registers.
+	(validate_tdesc_registers): New function.
+	(sparc32_gdbarch_init): Use tdesc_has_registers.
+	Set pseudoregister functions.
+	* sparc64-tdep.c (sparc64_register_name): Use target provided registers.
+	(sparc64_register_type): Use target provided registers.
+	(sparc64_init_abi): Set pseudoregister functions.
+
+2017-02-03  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21097:
+	* rust-lang.c (rust_print_type) <TYPE_CODE_UNION>: Handle enums
+	with a single member.
+
+2017-02-03  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_interp_base::cli_interp_base)
+	(cli_interp_base::~cli_interp_base): New.
+	(cli_interp): New struct.
+	(as_cli_interp): Cast the interp itself to cli_interp.
+	(cli_interpreter_pre_command_loop): Rename to ...
+	(cli_interp_base::pre_command_loop): ... this.  Remove 'self'
+	parameter.
+	(cli_interpreter_init): Rename to ...
+	(cli_interp::init): ... this.  Remove 'self' parameter.  Use
+	boolean.  Make extern.
+	(cli_interpreter_resume): Rename to ...
+	(cli_interp::resume): ... this.  Remove 'data' parameter.  Make
+	extern.
+	(cli_interpreter_suspend): Rename to ...
+	(cli_interp::suspend): ... this.  Remove 'data' parameter.  Make
+	extern.
+	(cli_interpreter_exec): Rename to ...
+	(cli_interp::exec): ... this.  Remove 'data' parameter.  Make
+	extern.
+	(cli_interpreter_supports_command_editing): Rename to ...
+	(cli_interp_base::supports_command_editing): ... this.  Remove
+	'interp' parameter.  Make extern.
+	(cli_ui_out): Rename to ...
+	(cli_interp::interp_ui_out): ... this.  Remove 'interp' parameter.
+	Make extern.
+	(cli_set_logging): Rename to ...
+	(cli_interp_base::set_logging): ... this.  Remove 'interp'
+	parameter.  Make extern.
+	(cli_interp_procs): Delete.
+	(cli_interp_factory): Adjust to use "new".
+	* cli/cli-interp.h: Include "interps.h".
+	(struct cli_interp_base): New struct.
+	* interps.c (struct interp): Delete.  Fields moved to interps.h.
+	(interp_new): Delete.
+	(interp::interp, interp::~interp): New.
+	(interp_set): Use bool, and return void.  Assume the interpreter
+	has suspend, init and resume methods, and that the all return
+	void.
+	(set_top_level_interpreter): interp_set returns void.
+	(interp_ui_out): Adapt.
+	(current_interp_set_logging): Adapt.
+	(interp_data): Delete.
+	(interp_pre_command_loop, interp_supports_command_editing): Adapt.
+	(interp_exec): Adapt.
+	(top_level_interpreter_data): Delete.
+	* interps.h (interp_init_ftype, interp_resume_ftype)
+	(interp_suspend_ftype, interp_exec_ftype)
+	(interp_pre_command_loop_ftype, interp_ui_out_ftype): Delete.
+	(class interp): New.
+	(interp_new): Delete.
+	(interp_set): Now returns void.  Use bool.
+	(interp_data, top_level_interpreter_data): Delete.
+	* mi/mi-common.h: Include interps.h.
+	(class mi_interp): Inherit from interp.  Define a ctor.  Declare
+	init, resume, suspect, exec, interp_ui_out, set_logging and
+	pre_command_loop methods.
+	* mi/mi-interp.c (as_mi_interp): Cast the interp itself.
+	(mi_interpreter_init): Rename to ...
+	(mi_interp::init): ... this.  Remove the 'interp' parameter, use
+	bool, return void and make extern.  Adjust.
+	(mi_interpreter_resume): ... Rename to ...
+	(mi_interp::resume): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(mi_interpreter_suspend): ... Rename to ...
+	(mi_interp::suspend): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(mi_interpreter_exec): ... Rename to ...
+	(mi_interp::exec): ... this.  Remove the 'data' parameter and make
+	extern.  Adjust.
+	(mi_interpreter_pre_command_loop): ... Rename to ...
+	(mi_interp::pre_command_loop): ... this.  Remove the 'self'
+	parameter and make extern.
+	(mi_on_normal_stop_1): Adjust.
+	(mi_ui_out): Rename to ...
+	(mi_interp::interp_ui_out): ... this.  Remove the 'interp'
+	parameter and make extern.  Adjust.
+	(mi_set_logging): Rename to ...
+	(mi_interp::set_logging): ... this.  Remove the 'interp'
+	parameter and make extern.  Adjust.
+	(mi_interp_procs): Delete.
+	(mi_interp_factory): Adjust to use 'new'.
+	* mi/mi-main.c (mi_cmd_gdb_exit, captured_mi_execute_command)
+	(mi_print_exception, mi_execute_command, mi_load_progress):
+	Adjust.
+	* tui/tui-interp.c (tui_interp): New class.
+	(as_tui_interp): Return a tui_interp pointer.
+	(tui_on_normal_stop, tui_on_signal_received)
+	(tui_on_end_stepping_range, tui_on_signal_exited, tui_on_exited)
+	(tui_on_no_history, tui_on_user_selected_context_changed): Adjust
+	to use interp::interp_ui_out.
+	(tui_init): Rename to ...
+	(tui_interp::init): ... this.  Remove the 'self' parameter, use
+	bool, return void and make extern.  Adjust.
+	(tui_resume): Rename to ...
+	(tui_interp::resume): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(tui_suspend): Rename to ...
+	(tui_interp::suspend): ... this.  Remove the 'data' parameter,
+	return void and make extern.  Adjust.
+	(tui_ui_out): Rename to ...
+	(tui_interp::interp_ui_out): ... this.  Remove the 'self'
+	parameter, and make extern.  Adjust.
+	(tui_exec): Rename to ...
+	(tui_interp::exec): ... this.  Remove the 'data' parameter and
+	make extern.
+	(tui_interp_procs): Delete.
+	(tui_interp_factory): Use "new".
+
+2017-02-02  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y (ends_raw_string, space_then_number)
+	(rust_identifier_start_p): Return bool.
+	* rust-lang.c (rust_tuple_type_p, rust_underscore_fields)
+	(rust_tuple_struct_type_p, rust_tuple_variant_type_p)
+	(rust_slice_type_p, rust_range_type_p, rust_u8_type_p)
+	(rust_chartype_p): Return bool.
+	(val_print_struct, rust_print_struct_def, rust_print_type):
+	Update.
+	* rust-lang.h (rust_tuple_type_p, rust_tuple_struct_type_p):
+	Return bool.
+
+2017-02-02  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c: Reindent.
+
+2017-02-02  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.h (rust_crate_for_block): Update.
+	* rust-lang.c (rust_crate_for_block): Return std::string.
+	(rust_get_disr_info): Use std:;string, not
+	gdb::unique_xmalloc_ptr.
+	* rust-exp.y (crate_name): Update.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* disasm-selftests.c (print_one_insn_test): Move the "verbose"
+	field out of gdb_disassembler_test and make it static.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-common.h (struct mi_interp): Delete the mi2_interp,
+	mi1_interp and mi_interp fields.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (struct saved_output_files, saved_output):
+	Moved from cli/cli-logging.c.
+	(cli_set_logging): New function.
+	(cli_interp_procs): Install cli_set_logging.
+	* cli/cli-interp.h (make_logging_output, cli_set_logging):
+	Declare.
+	* cli/cli-logging.c (struct saved_output_files, saved_output):
+	Moved to cli/cli-interp.c.
+	(pop_output_files): Don't save outputs here.
+	(make_logging_output): New function.
+	(handle_redirections): Don't build tee nor save previous outputs
+	here.
+	* interps.c (current_interp_set_logging): Change prototype.
+	Assume there's always a set_logging_proc method installed.
+	* interps.h (interp_set_logging_ftype): Change prototype.
+	(current_interp_set_logging): Change prototype and adjust comment.
+	* mi/mi-interp.c (mi_set_logging): Change protototype.  Adjust to
+	use make_logging_output.
+	* tui/tui-interp.c (tui_interp_procs): Install cli_set_logging.
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-logging.c (maybe_warn_already_logging): New factored out
+	from ...
+	(set_logging_overwrite): ... here.
+	(logging_no_redirect_file): Delete.
+	(set_logging_redirect): Don't handle redirection on the fly.
+	Instead warn that "logging off" / "logging on" is necessary.
+	(pop_output_files): Delete references to logging_no_redirect_file.
+	(show_logging_command): Always speak in terms of what will happen
+	once logging is reenabled.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* disasm.h (gdb_pretty_print_disassembler): Tweak intro comment.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* disasm.c (gdb_pretty_print_insn): Rename to ...
+	(gdb_pretty_print_disassembler::pretty_print_insn): ... this.
+	Remove gdbarch parameter.  Adapt to clear the object's buffers
+	instead of allocating new buffers, and to print using the object's
+	gdb_disassembler instead of calling gdb_print_insn.
+	(dump_insns): Use gdb_pretty_print_disassembler.
+	* disasm.h (gdb_pretty_print_insn): Delete declaration.
+	(gdb_pretty_print_disassembler): New class.
+	* record-btrace.c (btrace_insn_history): Use
+	gdb_pretty_print_disassembler.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (type_as_string): Use string_file.
+	* ada-valprint.c (ada_print_floating): Use string_file.
+	* ada-varobj.c (ada_varobj_scalar_image)
+	(ada_varobj_get_value_image): Use string_file.
+	* aix-thread.c (aix_thread_extra_thread_info): Use string_file.
+	* arm-tdep.c (_initialize_arm_tdep): Use string_printf.
+	* breakpoint.c (update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, reattach_breakpoints)
+	(print_breakpoint_location, print_one_detail_ranged_breakpoint)
+	(print_it_watchpoint): Use string_file.
+	(save_breakpoints): Use stdio_file.
+	* c-exp.y (oper): Use string_file.
+	* cli/cli-logging.c (set_logging_redirect): Use ui_file_up and
+	tee_file.
+	(pop_output_files): Use delete.
+	(handle_redirections): Use stdio_file and tee_file.
+	* cli/cli-setshow.c (do_show_command): Use string_file.
+	* compile/compile-c-support.c (c_compute_program): Use
+	string_file.
+	* compile/compile-c-symbols.c (generate_vla_size): Take a
+	'string_file &' instead of a 'ui_file *'.
+	(generate_c_for_for_one_variable): Take a 'string_file &' instead
+	of a 'ui_file *'.  Use string_file.
+	(generate_c_for_variable_locations): Take a 'string_file &'
+	instead of a 'ui_file *'.
+	* compile/compile-internal.h (generate_c_for_for_one_variable):
+	Take a 'string_file &' instead of a 'ui_file *'.
+	* compile/compile-loc2c.c (push, pushf, unary, binary)
+	(print_label, pushf_register_address, pushf_register)
+	(do_compile_dwarf_expr_to_c): Take a 'string_file &' instead of a
+	'ui_file *'.  Adjust.
+	* compile/compile.c (compile_to_object): Use string_file.
+	* compile/compile.h (compile_dwarf_expr_to_c)
+	(compile_dwarf_bounds_to_c): Take a 'string_file &' instead of a
+	'ui_file *'.
+	* cp-support.c (inspect_type): Use string_file and obstack_copy0.
+	(replace_typedefs_qualified_name): Use string_file and
+	obstack_copy0.
+	* disasm.c (gdb_pretty_print_insn): Use string_file.
+	(gdb_disassembly): Adjust reference the null_stream global.
+	(do_ui_file_delete): Delete.
+	(gdb_insn_length): Use null_stream.
+	* dummy-frame.c (maintenance_print_dummy_frames): Use stdio_file.
+	* dwarf2loc.c (dwarf2_compile_property_to_c)
+	(locexpr_generate_c_location, loclist_generate_c_location): Take a
+	'string_file &' instead of a 'ui_file *'.
+	* dwarf2loc.h (dwarf2_compile_property_to_c): Likewise.
+	* dwarf2read.c (do_ui_file_peek_last): Delete.
+	(dwarf2_compute_name): Use string_file.
+	* event-top.c (gdb_setup_readline): Use stdio_file.
+	* gdbarch.sh (verify_gdbarch): Use string_file.
+	* gdbtypes.c (safe_parse_type): Use null_stream.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Use
+	string_file.
+	* guile/scm-disasm.c (gdbscm_print_insn_from_port): Take a
+	'string_file *' instead of a 'ui_file *'.
+	(gdbscm_arch_disassemble): Use string_file.
+	* guile/scm-frame.c (frscm_print_frame_smob): Use string_file.
+	* guile/scm-ports.c (class ioscm_file_port): Now a class that
+	inherits from ui_file.
+	(ioscm_file_port_delete, ioscm_file_port_rewind)
+	(ioscm_file_port_put): Delete.
+	(ioscm_file_port_write): Rename to ...
+	(ioscm_file_port::write): ... this.  Remove file_port_magic
+	checks.
+	(ioscm_file_port_new): Delete.
+	(ioscm_with_output_to_port_worker): Use ioscm_file_port and
+	ui_file_up.
+	* guile/scm-type.c (tyscm_type_name): Use string_file.
+	* guile/scm-value.c (vlscm_print_value_smob, gdbscm_value_print):
+	Use string_file.
+	* infcmd.c (print_return_value_1): Use string_file.
+	* infrun.c (print_target_wait_results): Use string_file.
+	* language.c (add_language): Use string_file.
+	* location.c (explicit_to_string_internal): Use string_file.
+	* main.c (captured_main_1): Use null_file.
+	* maint.c (maintenance_print_architecture): Use stdio_file.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Use string_file.
+	* mi/mi-common.h (struct mi_interp) <out, err, log, targ,
+	event_channel>: Change type to mi_console_file pointer.
+	* mi/mi-console.c (mi_console_file_fputs, mi_console_file_flush)
+	(mi_console_file_delete): Delete.
+	(struct mi_console_file): Delete.
+	(mi_console_file_magic): Delete.
+	(mi_console_file_new): Delete.
+	(mi_console_file::mi_console_file): New.
+	(mi_console_file_delete): Delete.
+	(mi_console_file_fputs): Delete.
+	(mi_console_file::write): New.
+	(mi_console_raw_packet): Delete.
+	(mi_console_file::flush): New.
+	(mi_console_file_flush): Delete.
+	(mi_console_set_raw): Rename to ...
+	(mi_console_file::set_raw): ... this.
+	* mi/mi-console.h (class mi_console_file): New class.
+	(mi_console_file_new, mi_console_set_raw): Delete.
+	* mi/mi-interp.c (mi_interpreter_init): Use mi_console_file.
+	(mi_set_logging): Use delete and tee_file.  Adjust.
+	* mi/mi-main.c (output_register): Use string_file.
+	(mi_cmd_data_evaluate_expression): Use string_file.
+	(mi_cmd_data_read_memory): Use string_file.
+	(mi_cmd_execute, print_variable_or_computed): Use string_file.
+	* mi/mi-out.c (mi_ui_out::main_stream): New.
+	(mi_ui_out::rewind): Use main_stream and
+	string_file.
+	(mi_ui_out::put): Use main_stream and string_file.
+	(mi_ui_out::mi_ui_out): Remove 'stream' parameter.
+	Allocate a 'string_file' instead.
+	(mi_out_new): Don't allocate a mem_fileopen stream here.
+	* mi/mi-out.h (mi_ui_out::mi_ui_out): Remove 'stream' parameter.
+	(mi_ui_out::main_stream): Declare method.
+	* printcmd.c (eval_command): Use string_file.
+	* psymtab.c (maintenance_print_psymbols): Use stdio_file.
+	* python/py-arch.c (archpy_disassemble): Use string_file.
+	* python/py-breakpoint.c (bppy_get_commands): Use string_file.
+	* python/py-frame.c (frapy_str): Use string_file.
+	* python/py-framefilter.c (py_print_type, py_print_single_arg):
+	Use string_file.
+	* python/py-type.c (typy_str): Use string_file.
+	* python/py-unwind.c (unwind_infopy_str): Use string_file.
+	* python/py-value.c (valpy_str): Use string_file.
+	* record-btrace.c (btrace_insn_history): Use string_file.
+	* regcache.c (regcache_print): Use stdio_file.
+	* reggroups.c (maintenance_print_reggroups): Use stdio_file.
+	* remote.c (escape_buffer): Use string_file.
+	* rust-lang.c (rust_get_disr_info): Use string_file.
+	* serial.c (serial_open_ops_1): Use stdio_file.
+	(do_serial_close): Use delete.
+	* stack.c (print_frame_arg): Use string_file.
+	(print_frame_args): Remove local mem_fileopen stream, not used.
+	(print_frame): Use string_file.
+	* symmisc.c (maintenance_print_symbols): Use stdio_file.
+	* symtab.h (struct symbol_computed_ops) <generate_c_location>:
+	Take a 'string_file *' instead of a 'ui_file *'.
+	* top.c (new_ui): Use stdio_file and stderr_file.
+	(free_ui): Use delete.
+	(execute_command_to_string): Use string_file.
+	(quit_confirm): Use string_file.
+	* tracepoint.c (collection_list::append_exp): Use string_file.
+	* tui/tui-disasm.c (tui_disassemble): Use string_file.
+	* tui/tui-file.c: Don't include "ui-file.h".
+	(enum streamtype, struct tui_stream): Delete.
+	(tui_file_new, tui_file_delete, tui_fileopen, tui_sfileopen)
+	(tui_file_isatty, tui_file_rewind, tui_file_put): Delete.
+	(tui_file::tui_file): New method.
+	(tui_file_fputs): Delete.
+	(tui_file_get_strbuf): Delete.
+	(tui_file::puts): New method.
+	(tui_file_adjust_strbuf): Delete.
+	(tui_file_flush): Delete.
+	(tui_file::flush): New method.
+	* tui/tui-file.h: Tweak intro comment.
+	Include ui-file.h.
+	(tui_fileopen, tui_sfileopen, tui_file_get_strbuf)
+	(tui_file_adjust_strbuf): Delete declarations.
+	(class tui_file): New class.
+	* tui/tui-io.c (tui_initialize_io): Use tui_file.
+	* tui/tui-regs.c (tui_restore_gdbout): Use delete.
+	(tui_register_format): Use string_stream.
+	* tui/tui-stack.c (tui_make_status_line): Use string_file.
+	(tui_get_function_from_frame): Use string_file.
+	* typeprint.c (type_to_string): Use string_file.
+	* ui-file.c (struct ui_file, ui_file_magic, ui_file_new): Delete.
+	(null_stream): New global.
+	(ui_file_delete): Delete.
+	(ui_file::ui_file): New.
+	(null_file_isatty): Delete.
+	(ui_file::~ui_file): New.
+	(null_file_rewind): Delete.
+	(ui_file::printf): New.
+	(null_file_put): Delete.
+	(null_file_flush): Delete.
+	(ui_file::putstr): New.
+	(null_file_write): Delete.
+	(ui_file::putstrn): New.
+	(null_file_read): Delete.
+	(ui_file::putc): New.
+	(null_file_fputs): Delete.
+	(null_file_write_async_safe): Delete.
+	(ui_file::vprintf): New.
+	(null_file_delete): Delete.
+	(null_file::write): New.
+	(null_file_fseek): Delete.
+	(null_file::puts): New.
+	(ui_file_data): Delete.
+	(null_file::write_async_safe): New.
+	(gdb_flush, ui_file_isatty): Adjust.
+	(ui_file_put, ui_file_rewind): Delete.
+	(ui_file_write): Adjust.
+	(ui_file_write_for_put): Delete.
+	(ui_file_write_async_safe, ui_file_read): Adjust.
+	(ui_file_fseek): Delete.
+	(fputs_unfiltered): Adjust.
+	(set_ui_file_flush, set_ui_file_isatty, set_ui_file_rewind)
+	(set_ui_file_put, set_ui_file_write, set_ui_file_write_async_safe)
+	(set_ui_file_read, set_ui_file_fputs, set_ui_file_fseek)
+	(set_ui_file_data): Delete.
+	(string_file::~string_file, string_file::write)
+	(struct accumulated_ui_file, do_ui_file_xstrdup, ui_file_xstrdup)
+	(do_ui_file_as_string, ui_file_as_string): Delete.
+	(do_ui_file_obsavestring, ui_file_obsavestring): Delete.
+	(struct mem_file): Delete.
+	(mem_file_new): Delete.
+	(stdio_file::stdio_file): New.
+	(mem_file_delete): Delete.
+	(stdio_file::stdio_file): New.
+	(mem_fileopen): Delete.
+	(stdio_file::~stdio_file): New.
+	(mem_file_rewind): Delete.
+	(stdio_file::set_stream): New.
+	(mem_file_put): Delete.
+	(stdio_file::open): New.
+	(mem_file_write): Delete.
+	(stdio_file_magic, struct stdio_file): Delete.
+	(stdio_file_new, stdio_file_delete, stdio_file_flush): Delete.
+	(stdio_file::flush): New.
+	(stdio_file_read): Rename to ...
+	(stdio_file::read): ... this.  Adjust.
+	(stdio_file_write): Rename to ...
+	(stdio_file::write): ... this.  Adjust.
+	(stdio_file_write_async_safe): Rename to ...
+	(stdio_file::write_async_safe) ... this.  Adjust.
+	(stdio_file_fputs): Rename to ...
+	(stdio_file::puts) ... this.  Adjust.
+	(stdio_file_isatty): Delete.
+	(stdio_file_fseek): Delete.
+	(stdio_file::isatty): New.
+	(stderr_file_write): Rename to ...
+	(stderr_file::write) ... this.  Adjust.
+	(stderr_file_fputs): Rename to ...
+	(stderr_file::puts) ... this.  Adjust.
+	(stderr_fileopen, stdio_fileopen, gdb_fopen): Delete.
+	(stderr_file::stderr_file): New.
+	(tee_file_magic): Delete.
+	(struct tee_file): Delete.
+	(tee_file::tee_file): New.
+	(tee_file_new): Delete.
+	(tee_file::~tee_file): New.
+	(tee_file_delete): Delete.
+	(tee_file_flush): Rename to ...
+	(tee_file::flush): ... this.  Adjust.
+	(tee_file_write): Rename to ...
+	(tee_file::write): ... this.  Adjust.
+	(tee_file::write_async_safe): New.
+	(tee_file_fputs): Rename to ...
+	(tee_file::puts): ... this.  Adjust.
+	(tee_file_isatty): Rename to ...
+	(tee_file::isatty): ... this.  Adjust.
+	* ui-file.h (struct obstack, struct ui_file): Don't
+	forward-declare.
+	(ui_file_new, ui_file_flush_ftype, set_ui_file_flush)
+	(ui_file_write_ftype)
+	(set_ui_file_write, ui_file_fputs_ftype, set_ui_file_fputs)
+	(ui_file_write_async_safe_ftype, set_ui_file_write_async_safe)
+	(ui_file_read_ftype, set_ui_file_read, ui_file_isatty_ftype)
+	(set_ui_file_isatty, ui_file_rewind_ftype, set_ui_file_rewind)
+	(ui_file_put_method_ftype, ui_file_put_ftype, set_ui_file_put)
+	(ui_file_delete_ftype, set_ui_file_data, ui_file_fseek_ftype)
+	(set_ui_file_fseek): Delete.
+	(ui_file_data, ui_file_delete, ui_file_rewind)
+	(struct ui_file): New.
+	(ui_file_up): New.
+	(class null_file): New.
+	(null_stream): Declare.
+	(ui_file_write_for_put, ui_file_put): Delete.
+	(ui_file_xstrdup, ui_file_as_string, ui_file_obsavestring):
+	Delete.
+	(ui_file_fseek, mem_fileopen, stdio_fileopen, stderr_fileopen)
+	(gdb_fopen, tee_file_new): Delete.
+	(struct string_file): New.
+	(struct stdio_file): New.
+	(stdio_file_up): New.
+	(struct stderr_file): New.
+	(class tee_file): New.
+	* ui-out.c (ui_out::field_stream): Take a 'string_file &' instead
+	of a 'ui_file *'.  Adjust.
+	* ui-out.h (class ui_out) <field_stream>: Likewise.
+	* utils.c (do_ui_file_delete, make_cleanup_ui_file_delete)
+	(null_stream): Delete.
+	(error_stream): Take a 'string_file &' instead of a 'ui_file *'.
+	Adjust.
+	* utils.h (struct ui_file): Delete forward declaration..
+	(make_cleanup_ui_file_delete, null_stream): Delete declarations.
+	(error_stream): Take a 'string_file &' instead of a
+	'ui_file *'.
+	* varobj.c (varobj_value_get_print_value): Use string_file.
+	* xtensa-tdep.c (xtensa_verify_config): Use string_file.
+	* gdbarch.c: Regenerate.
+
+2017-02-02  Pedro Alves  <palves@redhat.com>
+
+	* disasm.c (gdb_disassembler::pretty_print_insn): Rename to...
+	(gdb_pretty_print_insn): ... this.  Now a free function.  Add back
+	a 'gdbarch' parameter.  Allocate a mem_fileopen stream here.
+	Adjust to call gdb_print_insn instead of
+	gdb_disassembler::print_insn.
+	(dump_insns, do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly, do_assembly_only): Add back a
+	'gdbarch' parameter.  Remove gdb_disassembler parameter.
+	(gdb_disassembly): Don't allocate a gdb_disassembler here.
+	* disasm.h (gdb_disassembler::pretty_print_insn): Delete
+	declaration.
+	(gdb_pretty_print_insn): Re-add declaration.
+	* record-btrace.c (btrace_insn_history): Don't allocate a
+	gdb_disassembler here.  Adjust to call gdb_pretty_print_insn.
+
+2017-02-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* disasm.h (gdb_disassembly): Remove file_string parameter.
+	* disasm.c (gdb_disassembly): Likewise.
+	* cli/cli-cmds.c (print_disassembly): Adapt.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Likewise.
+	* stack.c (do_gdb_disassembly): Likewise.
+
+2017-02-01  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): For
+	DWARF_VALUE_LITERAL, no longer ignore the offset on big-endian
+	targets.  And if the implicit value is longer than needed, extract
+	the first bytes instead of the "least significant" ones.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_enable): Do not call btrace_add_pc for
+	BTRACE_FORMAT_PT or if can_access_registers_ptid returns false.
+	(btrace_fetch): Assert can_access_registers_ptid.
+	* record-btrace.c (require_btrace_thread, record_btrace_info): Call
+	validate_registers_access.
+
+2017-02-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdbthread.h (can_access_registers_ptid): New.
+	* thread.c (can_access_registers_ptid): New.
+
+2017-02-01  Pedro Alves  <palves@redhat.com>
+
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): Use gdb_insn_length.
+
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-interp.c (mi_breakpoint_created, mi_breakpoint_modified):
+	Fix typos.
+
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
+	* stack.c (print_frame_args): Remove local mem_fileopen stream,
+	not used.
+
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
+	* varobj.c (varobj_value_get_print_value): Remove xstrdup call.
+
+2017-01-31  Pedro Alves  <palves@redhat.com>
+
+	* common/scoped_restore.h
+	(scoped_restore_tmpl::scoped_restore_tmpl): Template on T2, and
+	change the value's parameter type to T2.
+	(make_scoped_restore): Likewise.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+	    Richard Henderson  <rth@redhat.com>
+
+	* amd64-linux-nat.c (PTRACE_ARCH_PRCTL): New define.
+	(amd64_linux_fetch_inferior_registers): Add case to fetch FS_BASE
+	GS_BASE for older kernels.
+	(amd64_linux_store_inferior_registers): Add case to store FS_BASE
+	GS_BASE for older kernels.
+	* amd64-linux-tdep.c (amd64_linux_gregset_reg_offset): Add FS_BASE
+	and GS_BASE to the offset table.
+	(amd64_linux_register_reggroup_p): Add FS_BASE and GS_BASE to the
+	system register group.
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Implements case
+	for older kernels.
+	* amd64-tdep.c (amd64_init_abi): Add segment registers for the
+	amd64 ABI.
+	* amd64-tdep.h (amd64_regnum): Add AMD64_FSBASE_REGNUM and
+	AMD64_GSBASE_REGNUM.
+	(AMD64_NUM_REGS): Set to AMD64_GSBASE_REGNUM + 1.
+	* features/Makefile (amd64-linux.dat, amd64-avx-linux.dat)
+	(amd64-mpx-linux.dat, amd64-avx512-linux.dat, x32-linux.dat)
+	(x32-avx-linux.dat, x32-avx512-linux.dat): Add
+	i386/64bit-segments.xml in those rules.
+	* features/i386/64bit-segments.xml: New file.
+	* features/i386/amd64-avx-mpx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx512-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-mpx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/x32-avx512-linux.xml: Add 64bit-segments.xml.
+	* features/i386/x32-avx-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-linux.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-linux.c: Regenerated.
+	* features/i386/amd64-avx-mpx-linux.c: Regenerated.
+	* features/i386/amd64-avx-mpx.c: Regenerated.
+	* features/i386/amd64-avx512-linux.c: Regenerated.
+	* features/i386/amd64-linux.c: Regenerated.
+	* features/i386/amd64-mpx-linux.c: Regenerated.
+	* features/i386/i386-avx-mpx-linux.c: Regenerated.
+	* features/i386/i386-avx-mpx.c: Regenerated.
+	* features/i386/x32-avx-linux.c: Regenerated.
+	* features/i386/x32-avx512-linux.c: Regenerated.
+	* regformats/i386/amd64-avx-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx512-linux.dat: Regenerated.
+	* regformats/i386/amd64-linux.dat: Regenerated.
+	* regformats/i386/amd64-mpx-linux.dat: Regenerated.
+	* regformats/i386/x32-avx-linux.dat: Regenerated.
+	* regformats/i386/x32-avx512-linux.dat: Regenerated.
+	* regformats/i386/x32-linux.dat: Regenerated.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-tdep.h (AMD64_LINUX_ORIG_RAX_REGNUM):
+	Set to AMD64_NUM_REGS.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Simplify logic
+	that checks validity of a register number.
+
+2017-01-27  Kees Cook  <keescook@google.com>
+
+	* gdb/arm-linux-nat.c (arm_linux_fetch_inferior_registers): Call
+	fetch_fpregs if target has fpa registers.
+	(arm_linux_store_inferior_registers): Call store_fpregs if target
+	has fpa registers.
+
+2017-01-26  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* cris-tdep.c (cris_gdbarch_init): Remove check for
+	info.byte_order and force it to BFD_ENDIAN_LITTLE.
+
+2017-01-26  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* corelow.c (get_core_register_section): Check for regset
+	existence before checking for REGSET_VARIABLE_SIZE.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/20939
+	* disasm.c (gdb_disassembler::dis_asm_memory_error): Don't
+	call memory_error, save memaddr instead.
+	(gdb_disassembler::print_insn): If gdbarch_print_insn returns
+	negative, cal memory_error.
+	* disasm.h (gdb_disassembler) <m_err_memaddr>: New field.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* disasm-selftests.c (memory_error_test): New function.
+	(_initialize_disasm_selftests): Register memory_error_test.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (SFILES): Add disasm-selftests.c and
+	selftest-arch.c.
+	(COMMON_OBS): Add disasm-selftests.o and selftest-arch.o.
+	* disasm-selftests.c: New file.
+	* selftest-arch.c: New file.
+	* selftest-arch.h: New file.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* mep-tdep.c (mep_gdb_print_insn): Set info->arch
+	to bfd_arch_mep.  Don't return 0 if section is not
+	found.  Call print_insn_mep.
+
+2017-01-26  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c: Include "disasm.h".
+	(gdb_print_insn_arm): Update code to get gdbarch.
+	* disasm.c (dis_asm_read_memory): Change it to
+	gdb_disassembler::dis_asm_read_memory.
+	(dis_asm_memory_error): Likewise.
+	(dis_asm_print_address): Likewise.
+	(gdb_pretty_print_insn): Change it to
+	gdb_disassembler::pretty_print_insn.
+	(dump_insns): Add one argument gdb_disassemlber.  All
+	callers updated.
+	(do_mixed_source_and_assembly_deprecated): Likewise.
+	(do_mixed_source_and_assembly): Likewise.
+	(do_assembly_only): Likewise.
+	(gdb_disassembler::gdb_disassembler): New.
+	(gdb_disassembler::print_insn): New.
+	* disasm.h (class gdb_disassembler): New.
+	(gdb_pretty_print_insn): Remove declaration.
+	(gdb_disassemble_info): Likewise.
+	* guile/scm-disasm.c (class gdbscm_disassembler): New.
+	(gdbscm_disasm_read_memory_worker): Update.
+	(gdbscm_disasm_read_memory): Update.
+	(gdbscm_disasm_memory_error): Remove.
+	(gdbscm_disasm_print_address): Remove.
+	(gdbscm_disassembler::gdbscm_disassembler): New.
+	(gdbscm_print_insn_from_port): Update.
+	* mips-tdep.c: Include disasm.h.
+	(gdb_print_insn_mips): Update code to get gdbarch.
+	* record-btrace.c (btrace_insn_history): Update.
+	* spu-tdep.c: Include disasm.h.
+	(struct spu_dis_asm_data): Remove.
+	(struct spu_dis_asm_info): New.
+	(spu_dis_asm_print_address): Use spu_dis_asm_info to get
+	SPU id.
+	(gdb_print_insn_spu): Cast disassemble_info to
+	spu_dis_asm_info.
+
+2017-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* disasm.c (do_ui_file_delete): Delete.
+	(gdb_insn_length): Move code creating stream to ...
+	* utils.c (null_stream): ... here.  New function.
+	* utils.h (null_stream): Declare.
+
+2017-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/py-inferior.c (find_thread_object): Return directly
+	from the loop.  Remove "found" variable.
+
+2017-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.12.1 released.
+
+2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-function.c (fnpy_call): Reorder declarations to have
+	the gdbpy_enter object declared first.
+	* python/py-xmethods.c (gdbpy_get_xmethod_arg_types): Likewise.
+
+2017-01-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR python/21068
+	* python/python-internal.h (PyMem_RawMalloc): Define for
+	Python < 3.4.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Use
+	PyMem_RawMalloc instead of PyMem_Malloc.
+
+2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* NEWS (New commands): Mention flash-erase.
+	(New MI commands): Mention target-flash-erase.
+	* mi/mi-cmds.c (mi_cmd_target_flash_erase): Add target-flash-erase MI
+	command.
+	* mi/mi-cmds.h (mi_cmd_target_flash_erase): New declaration.
+	* mi/mi-main.c (mi_cmd_target_flash_erase): New function.
+	* target.c (flash_erase_command): New function.
+	(initialize_targets): Add new flash-erase command.
+	* target.h (flash_erase_command): New declaration.
+
+2017-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* nat/linux-ptrace.c: Only include <sys/procfs.h> if
+	HAVE_SYS_PROCFS_H is defined.
+
 2017-01-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* remote.c (struct cached_reg): Change data into a pointer.

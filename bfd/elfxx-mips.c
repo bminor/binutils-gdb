@@ -310,14 +310,17 @@ struct mips_elf_hash_sort_data
   struct elf_link_hash_entry *low;
   /* The least dynamic symbol table index corresponding to a non-TLS
      symbol with a GOT entry.  */
-  long min_got_dynindx;
+  bfd_size_type min_got_dynindx;
   /* The greatest dynamic symbol table index corresponding to a symbol
      with a GOT entry that is not referenced (e.g., a dynamic symbol
      with dynamic relocations pointing to it from non-primary GOTs).  */
-  long max_unref_got_dynindx;
-  /* The greatest dynamic symbol table index not corresponding to a
+  bfd_size_type max_unref_got_dynindx;
+  /* The greatest dynamic symbol table index corresponding to a local
+     symbol.  */
+  bfd_size_type max_local_dynindx;
+  /* The greatest dynamic symbol table index corresponding to an external
      symbol without a GOT entry.  */
-  long max_non_got_dynindx;
+  bfd_size_type max_non_got_dynindx;
 };
 
 /* We make up to two PLT entries if needed, one for standard MIPS code
@@ -442,6 +445,9 @@ struct mips_elf_link_hash_table
 
   /* True if we can only use 32-bit microMIPS instructions.  */
   bfd_boolean insn32;
+
+  /* True if we suppress checks for invalid branches between ISA modes.  */
+  bfd_boolean ignore_branch_isa;
 
   /* True if we're generating code for VxWorks.  */
   bfd_boolean is_vxworks;
@@ -3829,11 +3835,11 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   struct mips_elf_hash_sort_data hsd;
   struct mips_got_info *g;
 
-  if (elf_hash_table (info)->dynsymcount == 0)
-    return TRUE;
-
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
+
+  if (htab->root.dynsymcount == 0)
+    return TRUE;
 
   g = htab->got_info;
   if (g == NULL)
@@ -3842,20 +3848,19 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   hsd.low = NULL;
   hsd.max_unref_got_dynindx
     = hsd.min_got_dynindx
-    = (elf_hash_table (info)->dynsymcount - g->reloc_only_gotno);
-  hsd.max_non_got_dynindx = count_section_dynsyms (abfd, info) + 1;
-  mips_elf_link_hash_traverse (((struct mips_elf_link_hash_table *)
-				elf_hash_table (info)),
-			       mips_elf_sort_hash_table_f,
-			       &hsd);
+    = (htab->root.dynsymcount - g->reloc_only_gotno);
+  /* Add 1 to local symbol indices to account for the mandatory NULL entry
+     at the head of the table; see `_bfd_elf_link_renumber_dynsyms'.  */
+  hsd.max_local_dynindx = count_section_dynsyms (abfd, info) + 1;
+  hsd.max_non_got_dynindx = htab->root.local_dynsymcount + 1;
+  mips_elf_link_hash_traverse (htab, mips_elf_sort_hash_table_f, &hsd);
 
   /* There should have been enough room in the symbol table to
      accommodate both the GOT and non-GOT symbols.  */
+  BFD_ASSERT (hsd.max_local_dynindx <= htab->root.local_dynsymcount + 1);
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
-  BFD_ASSERT ((unsigned long) hsd.max_unref_got_dynindx
-	      == elf_hash_table (info)->dynsymcount);
-  BFD_ASSERT (elf_hash_table (info)->dynsymcount - hsd.min_got_dynindx
-	      == g->global_gotno);
+  BFD_ASSERT (hsd.max_unref_got_dynindx == htab->root.dynsymcount);
+  BFD_ASSERT (htab->root.dynsymcount - hsd.min_got_dynindx == g->global_gotno);
 
   /* Now we know which dynamic symbol has the lowest dynamic symbol
      table index in the GOT.  */
@@ -3881,7 +3886,10 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
   switch (h->global_got_area)
     {
     case GGA_NONE:
-      h->root.dynindx = hsd->max_non_got_dynindx++;
+      if (h->root.forced_local)
+	h->root.dynindx = hsd->max_local_dynindx++;
+      else
+	h->root.dynindx = hsd->max_non_got_dynindx++;
       break;
 
     case GGA_NORMAL:
@@ -6416,31 +6424,33 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	  value <<= 2;
 	}
 
-      if (bfd_link_pic (info) || !ok)
+      if (ok && !bfd_link_pic (info))
+	{
+	  addr = (input_section->output_section->vma
+		  + input_section->output_offset
+		  + relocation->r_offset
+		  + 4);
+	  dest = addr + (((value & 0x3ffff) ^ 0x20000) - 0x20000);
+
+	  if ((addr >> 28) << 28 != (dest >> 28) << 28)
+	    {
+	      info->callbacks->einfo
+		(_("%X%H: Cannot convert branch between ISA modes "
+		   "to JALX: relocation out of range\n"),
+		 input_bfd, input_section, relocation->r_offset);
+	      return TRUE;
+	    }
+
+	  /* Make this the JALX opcode.  */
+	  x = ((dest >> 2) & 0x3ffffff) | jalx_opcode << 26;
+	}
+      else if (!mips_elf_hash_table (info)->ignore_branch_isa)
 	{
 	  info->callbacks->einfo
 	    (_("%X%H: Unsupported branch between ISA modes\n"),
 	     input_bfd, input_section, relocation->r_offset);
 	  return TRUE;
 	}
-
-      addr = (input_section->output_section->vma
-	      + input_section->output_offset
-	      + relocation->r_offset
-	      + 4);
-      dest = addr + (((value & 0x3ffff) ^ 0x20000) - 0x20000);
-
-      if ((addr >> 28) << 28 != (dest >> 28) << 28)
-	{
-	  info->callbacks->einfo
-	    (_("%X%H: Cannot convert branch between ISA modes "
-	       "to JALX: relocation out of range\n"),
-	     input_bfd, input_section, relocation->r_offset);
-	  return TRUE;
-	}
-
-      /* Make this the JALX opcode.  */
-      x = ((dest >> 2) & 0x3ffffff) | jalx_opcode << 26;
     }
 
   /* Try converting JAL to BAL and J(AL)R to B(AL), if the target is in
@@ -14095,12 +14105,15 @@ _bfd_mips_elf_use_plts_and_copy_relocs (struct bfd_link_info *info)
 }
 
 /* A function that the linker calls to select between all or only
-   32-bit microMIPS instructions.  */
+   32-bit microMIPS instructions, and between making or ignoring
+   branch relocation checks for invalid transitions between ISA modes.  */
 
 void
-_bfd_mips_elf_insn32 (struct bfd_link_info *info, bfd_boolean on)
+_bfd_mips_elf_linker_flags (struct bfd_link_info *info, bfd_boolean insn32,
+			    bfd_boolean ignore_branch_isa)
 {
-  mips_elf_hash_table (info)->insn32 = on;
+  mips_elf_hash_table (info)->insn32 = insn32;
+  mips_elf_hash_table (info)->ignore_branch_isa = ignore_branch_isa;
 }
 
 /* Structure for saying that BFD machine EXTENSION extends BASE.  */

@@ -46,8 +46,7 @@ proc prepare_test { } {
 	return 0
     }
 
-    gdb_test_no_output "python exec (open ('${remote_python_file}').read ())" \
-	"read file"
+    gdb_test_no_output "source ${remote_python_file}" "read file"
 
     gdb_test_no_output "py progspace = gdb.current_progspace()"
     gdb_test_no_output "py my_pretty_printer1 = build_pretty_printer1()"

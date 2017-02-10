@@ -40,6 +40,12 @@
 #include "nat/linux-ptrace.h"
 #include "nat/amd64-linux-siginfo.h"
 
+/* This definition comes from prctl.h.  Kernels older than 2.5.64
+   do not have it.  */
+#ifndef PTRACE_ARCH_PRCTL
+#define PTRACE_ARCH_PRCTL      30
+#endif
+
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout for GNU/Linux
    i386.
@@ -171,6 +177,30 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 
 	  amd64_supply_fxsave (regcache, -1, &fpregs);
 	}
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	unsigned long base;
+
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_FS) < 0)
+	      perror_with_name (_("Couldn't get segment register fs_base"));
+
+	    regcache_raw_supply (regcache, AMD64_FSBASE_REGNUM, &base);
+	  }
+
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_GS) < 0)
+	      perror_with_name (_("Couldn't get segment register gs_base"));
+
+	    regcache_raw_supply (regcache, AMD64_GSBASE_REGNUM, &base);
+	  }
+      }
+#endif
     }
 }
 
@@ -237,6 +267,30 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
 	  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't write floating point status"));
 	}
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	void *base;
+
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    regcache_raw_collect (regcache, AMD64_FSBASE_REGNUM, &base);
+
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_FS) < 0)
+	      perror_with_name (_("Couldn't write segment register fs_base"));
+	  }
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+
+	    regcache_raw_collect (regcache, AMD64_GSBASE_REGNUM, &base);
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_GS) < 0)
+	      perror_with_name (_("Couldn't write segment register gs_base"));
+	  }
+      }
+#endif
     }
 }
 
@@ -265,11 +319,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
     }
   else
     {
-      /* This definition comes from prctl.h, but some kernels may not
-         have it.  */
-#ifndef PTRACE_ARCH_PRCTL
-#define PTRACE_ARCH_PRCTL      30
-#endif
+
       /* FIXME: ezannoni-2003-07-09 see comment above about include
 	 file order.  We could be getting bogus values for these two.  */
       gdb_assert (FS < ELF_NGREG);

@@ -2442,28 +2442,15 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_LITERAL:
 	  {
 	    bfd_byte *contents;
-	    const bfd_byte *ldata;
-	    size_t n = ctx.len;
+	    size_t n = TYPE_LENGTH (type);
 
-	    if (byte_offset + TYPE_LENGTH (type) > n)
+	    if (byte_offset + n > ctx.len)
 	      invalid_synthetic_pointer ();
 
 	    free_values.free_to_mark ();
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
-
-	    ldata = ctx.data + byte_offset;
-	    n -= byte_offset;
-
-	    if (n > TYPE_LENGTH (type))
-	      {
-		struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
-
-		if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
-		  ldata += n - TYPE_LENGTH (type);
-		n = TYPE_LENGTH (type);
-	      }
-	    memcpy (contents, ldata, n);
+	    memcpy (contents, ctx.data + byte_offset, n);
 	  }
 	  break;
 
@@ -2645,7 +2632,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 /* See dwarf2loc.h.  */
 
 void
-dwarf2_compile_property_to_c (struct ui_file *stream,
+dwarf2_compile_property_to_c (string_file &stream,
 			      const char *result_name,
 			      struct gdbarch *gdbarch,
 			      unsigned char *registers_used,
@@ -4361,7 +4348,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 /* symbol_computed_ops 'generate_c_location' method.  */
 
 static void
-locexpr_generate_c_location (struct symbol *sym, struct ui_file *stream,
+locexpr_generate_c_location (struct symbol *sym, string_file &stream,
 			     struct gdbarch *gdbarch,
 			     unsigned char *registers_used,
 			     CORE_ADDR pc, const char *result_name)
@@ -4571,7 +4558,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 /* symbol_computed_ops 'generate_c_location' method.  */
 
 static void
-loclist_generate_c_location (struct symbol *sym, struct ui_file *stream,
+loclist_generate_c_location (struct symbol *sym, string_file &stream,
 			     struct gdbarch *gdbarch,
 			     unsigned char *registers_used,
 			     CORE_ADDR pc, const char *result_name)

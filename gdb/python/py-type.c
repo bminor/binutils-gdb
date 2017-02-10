@@ -967,22 +967,13 @@ typy_template_argument (PyObject *self, PyObject *args)
 static PyObject *
 typy_str (PyObject *self)
 {
-  std::string thetype;
+  string_file thetype;
   PyObject *result;
 
   TRY
     {
-      struct cleanup *old_chain;
-      struct ui_file *stb;
-
-      stb = mem_fileopen ();
-      old_chain = make_cleanup_ui_file_delete (stb);
-
-      LA_PRINT_TYPE (type_object_to_type (self), "", stb, -1, 0,
+      LA_PRINT_TYPE (type_object_to_type (self), "", &thetype, -1, 0,
 		     &type_print_raw_options);
-
-      thetype = ui_file_as_string (stb);
-      do_cleanups (old_chain);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -990,10 +981,8 @@ typy_str (PyObject *self)
     }
   END_CATCH
 
-  result = PyUnicode_Decode (thetype.c_str (), thetype.length (),
-			     host_charset (), NULL);
-
-  return result;
+  return PyUnicode_Decode (thetype.c_str (), thetype.size (),
+			   host_charset (), NULL);
 }
 
 /* Implement the richcompare method.  */

@@ -1498,14 +1498,11 @@ regcache_print (char *args, enum regcache_dump_what what_to_dump)
     regcache_dump (get_current_regcache (), gdb_stdout, what_to_dump);
   else
     {
-      struct cleanup *cleanups;
-      struct ui_file *file = gdb_fopen (args, "w");
+      stdio_file file;
 
-      if (file == NULL)
+      if (!file.open (args, "w"))
 	perror_with_name (_("maintenance print architecture"));
-      cleanups = make_cleanup_ui_file_delete (file);
-      regcache_dump (get_current_regcache (), file, what_to_dump);
-      do_cleanups (cleanups);
+      regcache_dump (get_current_regcache (), &file, what_to_dump);
     }
 }
 

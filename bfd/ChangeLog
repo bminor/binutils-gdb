@@ -1,3 +1,146 @@
+2017-02-07  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_finish_dynamic_sections): Only write PLT
+	entry size if PLT header is written.
+
+2017-02-06  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Fix sparc64 dynamic relocation processing to use the dynamic
+        symbol count.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Use 'dynamic'
+	to determine if bfd_get_symcount() or bfd_get_dynamic_symcount()
+	should be used.
+
+2017-02-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 21096
+	* coffcode.h (coff_write_object_contents): Enlarge size of
+	s_name_buf in order to avoid compile time warning about possible
+	integer truncation.
+	* elf32-nds32.c (nds32_elf_ex9_import_table): Mask off lower
+	32-bits of insn value before printing into buffer.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_hash_sort_data): Add
+	`max_local_dynindx'.
+	(mips_elf_sort_hash_table): Handle it.
+	(mips_elf_sort_hash_table_f) <GGA_NONE>: For forced local
+	symbols bump up `max_local_dynindx' rather than
+	`max_non_got_dynindx'.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_hash_sort_data): Convert the
+	`min_got_dynindx', `max_unref_got_dynindx' and
+	`max_non_got_dynindx' members to the `bfd_size_type' data type.
+	(mips_elf_sort_hash_table): Adjust accordingly.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_sort_hash_table): Use `htab' throughout
+	to access the hash table.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_sort_hash_table): Move assertion on
+	non-NULL `htab' to the beginning.
+
+2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_gc_sweep): Wrap overlong line.
+
+2017-01-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.h (_bfd_mips_elf_insn32): Rename prototype to...
+	(_bfd_mips_elf_linker_flags): ... this.  Add another parameter.
+	* elfxx-mips.c (mips_elf_link_hash_table): Add
+	`ignore_branch_isa' member.
+	(mips_elf_perform_relocation): Do not treat an ISA mode mismatch
+	in branch relocation calculation as an error if
+	`ignore_branch_isa' has been set.
+	(_bfd_mips_elf_insn32): Rename to...
+	(_bfd_mips_elf_linker_flags): ... this.  Rename the `on'
+	parameter to `insn32' and add an `ignore_branch_isa' parameter.
+	Handle the new parameter.
+
+2017-01-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Remove now unused
+	local variable dynobj.
+
+	PR ld/20995
+	* elf32-cris.c (elf_cris_size_dynamic_sections): Handle sdynrelro.
+	(elf_cris_adjust_dynamic_symbol): Place variables copied into the
+	executable from read-only sections into sdynrelro.
+	(elf_cris_finish_dynamic_symbol): Select sreldynrelro for
+	dynamic relocs in sdynrelro.
+	(elf_backend_want_dynrelro): Define.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (*-*-rtemsaout*): Mark as removed.
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (powerpcle-*-rtems*): Do not mark as removed.
+	(arm-*-rtems*): Move to (arm*-*-eabi*).
+	(i[3-7]86-*-rtems*): Move to (i[3-7]86-*-elf*).
+	(m68-*-rtems*): Move to (m68*-*-elf*).
+
+2017-01-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (*-*-rtemscoff*): Mark as removed.
+
+2017-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* elflink.c (bfd_elf_record_link_assignment): Revert last
+	change and don't ever clear `forced_local'.  Set `mark'
+	unconditionally.
+	(elf_gc_sweep_symbol_info, elf_gc_sweep_symbol): Reorder within
+	file.
+	(elf_gc_sweep): Move the call to `elf_gc_sweep_symbol'...
+	(bfd_elf_size_dynamic_sections): ... here.
+	* elf32-ppc.c (ppc_elf_tls_setup): Don't clear `forced_local'
+	and set `mark' instead in `__tls_get_addr_opt' processing.
+	* elf64-ppc.c (ppc64_elf_tls_setup): Likewise.
+
+2017-01-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Merge two cases
+	where dynamic relocs are preferable.  Allow ifunc too.
+	(ensure_undefweak_dynamic): New function.
+	(allocate_dynrelocs): Use it here.  Move plt handling last and
+	don't make symbols dynamic, simplifying loop.  Only make undef
+	weak symbols with GOT entries dynamic.  Correct condition
+	for GOT relocs.  Handle dynamic relocs on ifuncs.  Correct
+	comments.  Remove goto.
+	(ppc_elf_relocate_section): Correct test for using dynamic
+	symbol on GOT relocs.  Rearrange test for emitting GOT relocs
+	to suit.  Set up explicit tls_index entries and implicit GOT
+	tls_index entries resolvable at link time for
+	__tls_get_addr_opt.  Simplify test to clear mem for prelink.
+	* elf64-ppc.c (allocate_got): Correct condition for GOT relocs.
+	(ensure_undefweak_dynamic): New function.
+	(allocate_dynrelocs): Use it here.  Only make undef weak symbols
+	with GOT entries dynamic.  Remove unnecessary test of
+	WILL_CALL_FINISH_DYNAMIC_SYMBOL in PLT handling.
+	(ppc64_elf_relocate_section): Correct test for using dynamic
+	symbol on GOT relocs.  Rearrange test for emitting GOT relocs
+	to suit.  Set up explicit tls_index entries and implicit GOT
+	tls_index entries resolvable at link time for __tls_get_addr_opt.
+	Simplify expression to clear mem for prelink.
+
+2017-01-23  Yury Norov  <ynorov@caviumnetworks.com>
+
+	* elfnn-aarch64.c: Fix relaxations for ILP32 mode.
+
+2017-01-20  Jiong Wang <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elf_aarch64_hash_symbol): New function.
+	(elf_backend_hash_symbol): Define.
+
 2017-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828

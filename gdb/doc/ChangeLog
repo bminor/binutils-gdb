@@ -1,3 +1,24 @@
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	* gdb.texinfo: (Standard Target Features): Document SPARC features.
+	(Sparc Features): New node.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (i386 Features): Add system segment registers
+	as feature.
+
+2017-01-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Events In Python): Fix typo.
+
+2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (-target-flash-erase): New MI command description.
+	(flash-erase): New CLI command description.
+
 2017-01-04  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.texinfo (Contributors): Add SRI International and University

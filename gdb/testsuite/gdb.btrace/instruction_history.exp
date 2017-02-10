@@ -17,15 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# check for btrace support
-if { [skip_btrace_tests] } { return -1 }
+if { [skip_btrace_tests] } {
+    unsupported "target does not support record-btrace"
+    return -1
+}
 
-# compile and run to main
 standard_testfile .c .S
 if [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" {debug}] {
     return -1
 }
+
 if ![runto_main] {
+    untested "failed to run to main"
     return -1
 }
 

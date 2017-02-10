@@ -4742,6 +4742,7 @@ do_vec_compare (sim_cpu *cpu)
 	case 0x0D: /* 0001101 GT */     VEC_CMP  (s, > );
 	case 0x0F: /* 0001111 GE */     VEC_CMP  (s, >= );
 	case 0x22: /* 0100010 GT #0 */  VEC_CMP0 (s, > );
+	case 0x23: /* 0100011 TST */	VEC_CMP  (u, & );
 	case 0x26: /* 0100110 EQ #0 */  VEC_CMP0 (s, == );
 	case 0x2A: /* 0101010 LT #0 */  VEC_CMP0 (s, < );
 	case 0x4D: /* 1001101 HI */     VEC_CMP  (u, > );

@@ -966,7 +966,7 @@ s390_exp_compare (expressionS *exp1, expressionS *exp2)
     }
 }
 
-/* Test for @lit and if its present make an entry in the literal pool and
+/* Test for @lit and if it's present make an entry in the literal pool and
    modify the current expression to be an offset into the literal pool.  */
 static elf_suffix_type
 s390_lit_suffix (char **str_p, expressionS *exp_p, elf_suffix_type suffix)
@@ -1096,7 +1096,7 @@ s390_lit_suffix (char **str_p, expressionS *exp_p, elf_suffix_type suffix)
     }
 
   /* Now change exp_p to the offset into the literal pool.
-     Thats the expression: .L^Ax^By-.L^Ax   */
+     That's the expression: .L^Ax^By-.L^Ax   */
   exp_p->X_add_symbol = lpe->sym;
   exp_p->X_op_symbol = lp_sym;
   exp_p->X_op = O_subtract;
@@ -1466,7 +1466,7 @@ md_gather_operands (char *str,
 	  if (*str != '(')
 	    {
 	      /* Check if parenthesized block can be skipped. If the next
-		 operand is neiter an optional operand nor a base register
+		 operand is neither an optional operand nor a base register
 		 then we have a syntax error.  */
 	      operand = s390_operands + *(++opindex_ptr);
 	      if (!(operand->flags & (S390_OPERAND_INDEX|S390_OPERAND_BASE)))
@@ -1486,7 +1486,7 @@ md_gather_operands (char *str,
 			  operand = s390_operands + *(++opindex_ptr);
 			  if (operand->flags & S390_OPERAND_OPTIONAL)
 			    continue;
-			  as_bad (_("syntax error; expected ,"));
+			  as_bad (_("syntax error; expected ','"));
 			  break;
 			}
 		    }
@@ -1516,7 +1516,7 @@ md_gather_operands (char *str,
 	}
       else if (operand->flags & S390_OPERAND_BASE)
 	{
-	  /* After the base register the parenthesed block ends.  */
+	  /* After the base register the parenthesised block ends.  */
 	  if (*str++ != ')')
 	    as_bad (_("syntax error; missing ')' after base register"));
 	  skip_optional = 0;
@@ -1530,7 +1530,7 @@ md_gather_operands (char *str,
 		      operand = s390_operands + *(++opindex_ptr);
 		      if (operand->flags & S390_OPERAND_OPTIONAL)
 			continue;
-		      as_bad (_("syntax error; expected ,"));
+		      as_bad (_("syntax error; expected ','"));
 		      break;
 		    }
 		}
@@ -1564,7 +1564,7 @@ md_gather_operands (char *str,
 		      operand = s390_operands + *(++opindex_ptr);
 		      if (operand->flags & S390_OPERAND_OPTIONAL)
 			continue;
-		      as_bad (_("syntax error; expected ,"));
+		      as_bad (_("syntax error; expected ','"));
 		      break;
 		    }
 		}

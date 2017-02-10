@@ -494,22 +494,19 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   /* From the provided expression, build a scope to pass to the
      compiler.  */
 
-  std::string input_buf;
+  string_file input_buf;
   const char *input;
 
   if (cmd != NULL)
     {
-      struct ui_file *stream = mem_fileopen ();
       struct command_line *iter;
 
-      make_cleanup_ui_file_delete (stream);
       for (iter = cmd->body_list[0]; iter; iter = iter->next)
 	{
-	  fputs_unfiltered (iter->line, stream);
-	  fputs_unfiltered ("\n", stream);
+	  input_buf.puts (iter->line);
+	  input_buf.puts ("\n");
 	}
 
-      input_buf = ui_file_as_string (stream);
       input = input_buf.c_str ();
     }
   else if (cmd_string != NULL)

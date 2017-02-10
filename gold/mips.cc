@@ -2475,7 +2475,7 @@ class Mips_output_data_plt : public Output_section_data
   add_entry(Mips_symbol<size>* gsym, unsigned int r_type);
 
   // Return the .rel.plt section data.
-  const Reloc_section*
+  Reloc_section*
   rel_plt() const
   { return this->rel_; }
 
@@ -5627,7 +5627,7 @@ Mips_got_info<size, big_endian>::record_global_got_symbol(
     mips_sym->set_got_not_only_for_calls();
 
   // A global symbol in the GOT must also be in the dynamic symbol table.
-  if (!mips_sym->needs_dynsym_entry())
+  if (!mips_sym->needs_dynsym_entry() && !mips_sym->is_forced_local())
     {
       switch (mips_sym->visibility())
         {
@@ -8521,6 +8521,10 @@ Target_mips<size, big_endian>::make_plt_entry(Symbol_table* symtab,
                                       (elfcpp::SHF_ALLOC
                                        | elfcpp::SHF_EXECINSTR),
                                       this->plt_, ORDER_PLT, false);
+
+      // Make the sh_info field of .rel.plt point to .plt.
+      Output_section* rel_plt_os = this->plt_->rel_plt()->output_section();
+      rel_plt_os->set_info_section(this->plt_->output_section());
     }
 
   this->plt_->add_entry(gsym, r_type);
@@ -9781,7 +9785,8 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                             elfcpp::STV_DEFAULT, 0,
                                             false, false);
 
-        rld_map->set_needs_dynsym_entry();
+        if (!rld_map->is_forced_local())
+          rld_map->set_needs_dynsym_entry();
 
         if (!parameters->options().pie())
           // This member holds the absolute address of the debug pointer.

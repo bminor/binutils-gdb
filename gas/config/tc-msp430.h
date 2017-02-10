@@ -130,7 +130,7 @@ extern int msp430_enable_polys;
 #define tc_fix_adjustable(FIX) msp430_fix_adjustable (FIX)
 extern bfd_boolean             msp430_fix_adjustable (struct fix *);
 
-/* Allow hexadeciaml numbers with 'h' suffix.  Note that if the number
+/* Allow hexadecimal numbers with 'h' suffix.  Note that if the number
    starts with a letter it will be interpreted as a symbol name not a
    constant.  Thus "beach" is a symbol not the hex value 0xbeac.  So
    is A5A5h...  */

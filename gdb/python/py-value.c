@@ -867,23 +867,17 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
 static PyObject *
 valpy_str (PyObject *self)
 {
-  std::string s;
-  PyObject *result;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
   opts.deref_ref = 0;
 
+  string_file stb;
+
   TRY
     {
-      struct ui_file *stb = mem_fileopen ();
-      struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
-
-      common_val_print (((value_object *) self)->value, stb, 0,
+      common_val_print (((value_object *) self)->value, &stb, 0,
 			&opts, python_language);
-      s = ui_file_as_string (stb);
-
-      do_cleanups (old_chain);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -891,9 +885,7 @@ valpy_str (PyObject *self)
     }
   END_CATCH
 
-  result = PyUnicode_Decode (s.c_str (), s.length (), host_charset (), NULL);
-
-  return result;
+  return PyUnicode_Decode (stb.c_str (), stb.size (), host_charset (), NULL);
 }
 
 /* Implements gdb.Value.is_optimized_out.  */

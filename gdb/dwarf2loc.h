@@ -151,7 +151,7 @@ int dwarf2_evaluate_property (const struct dynamic_prop *prop,
    evaluated.
    SYM the originating symbol, used for error reporting.  */
 
-void dwarf2_compile_property_to_c (struct ui_file *stream,
+void dwarf2_compile_property_to_c (string_file &stream,
 				   const char *result_name,
 				   struct gdbarch *gdbarch,
 				   unsigned char *registers_used,

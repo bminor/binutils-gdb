@@ -457,6 +457,8 @@ maintenance_print_symbols (char *args, int from_tty)
   if (address_arg != NULL && source_arg != NULL)
     error (_("Must specify at most one of -pc and -source"));
 
+  stdio_file arg_outfile;
+
   if (argv[outfile_idx] != NULL)
     {
       char *outfile_name;
@@ -465,10 +467,9 @@ maintenance_print_symbols (char *args, int from_tty)
 	error (_("Junk at end of command"));
       outfile_name = tilde_expand (argv[outfile_idx]);
       make_cleanup (xfree, outfile_name);
-      outfile = gdb_fopen (outfile_name, FOPEN_WT);
-      if (outfile == NULL)
+      if (!arg_outfile.open (outfile_name, FOPEN_WT))
 	perror_with_name (outfile_name);
-      make_cleanup_ui_file_delete (outfile);
+      outfile = &arg_outfile;
     }
 
   if (address_arg != NULL)
@@ -744,6 +745,8 @@ maintenance_print_msymbols (char *args, int from_tty)
     }
   outfile_idx = i;
 
+  stdio_file arg_outfile;
+
   if (argv[outfile_idx] != NULL)
     {
       char *outfile_name;
@@ -752,10 +755,9 @@ maintenance_print_msymbols (char *args, int from_tty)
 	error (_("Junk at end of command"));
       outfile_name = tilde_expand (argv[outfile_idx]);
       make_cleanup (xfree, outfile_name);
-      outfile = gdb_fopen (outfile_name, FOPEN_WT);
-      if (outfile == NULL)
+      if (!arg_outfile.open (outfile_name, FOPEN_WT))
 	perror_with_name (outfile_name);
-      make_cleanup_ui_file_delete (outfile);
+      outfile = &arg_outfile;
     }
 
   ALL_OBJFILES (objfile)

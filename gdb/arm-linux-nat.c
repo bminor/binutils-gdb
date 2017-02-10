@@ -384,13 +384,14 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
   if (-1 == regno)
     {
       fetch_regs (regcache);
-      fetch_fpregs (regcache);
       if (tdep->have_wmmx_registers)
 	fetch_wmmx_regs (regcache);
       if (tdep->vfp_register_count > 0)
 	fetch_vfp_regs (regcache);
+      if (tdep->have_fpa_registers)
+	fetch_fpregs (regcache);
     }
-  else 
+  else
     {
       if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
 	fetch_regs (regcache);
@@ -420,11 +421,12 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
   if (-1 == regno)
     {
       store_regs (regcache);
-      store_fpregs (regcache);
       if (tdep->have_wmmx_registers)
 	store_wmmx_regs (regcache);
       if (tdep->vfp_register_count > 0)
 	store_vfp_regs (regcache);
+      if (tdep->have_fpa_registers)
+	store_fpregs (regcache);
     }
   else
     {

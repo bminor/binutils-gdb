@@ -956,7 +956,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    set exitstat "succeeded"
 	    if { $cmdret != 0 } { set exitstat "failed" }
 
-            if { $check_ld(source) == "regexp" } {
+            if { $check_ld(source) == "regex" } {
                 verbose -log "$exitstat with: <$comp_output>, expected: <$check_ld(regex)>"
             } elseif { $check_ld(source) == "file" } {
                 verbose -log "$exitstat with: <$comp_output>, expected in file $check_ld(file)"
@@ -1381,6 +1381,17 @@ proc run_ld_link_exec_tests { ldtests args } {
     global CXXFLAGS
     global errcnt
     global exec_output
+    global board_cflags
+
+    # When using GCC as the linker driver, we need to specify board cflags when
+    # linking because cflags may contain linker options.  For example when
+    # linker options are included in GCC spec files then we need the -specs
+    # option.
+    if [board_info [target_info name] exists cflags] {
+        set board_cflags " [board_info [target_info name] cflags]"
+    } else {
+	set board_cflags ""
+    }
 
     foreach testitem $ldtests {
 	foreach target $args {
@@ -1440,7 +1451,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    # compile only
 	    pass $testname
 	    continue;
-	} elseif ![$link_proc $link_cmd $binfile "-L$srcdir/$subdir $ld_options $objfiles"] {
+	} elseif ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles"] {
 	    set failed 1
 	}
 
@@ -2108,4 +2119,39 @@ proc istarget { target } {
 	return [check_as_cfi]
     }
     return [istarget_ld $target]
+}
+
+# Return true if libdl is supported.
+
+proc check_libdl_available { } {
+    global libdl_available_saved
+    global CC
+
+    if {![info exists libdl_available_saved]} {
+        if { [which $CC] == 0 } {
+	    set libdl_available_saved 0
+	    return 0
+	}
+
+	set basename "tmpdir/dl_avail_test[pid]"
+	set src ${basename}.c
+	set output ${basename}.out
+	set f [open $src "w"]
+	# Sample test file.
+	puts $f "#include <dlfcn.h>"
+	puts $f "int main (void)"
+	puts $f "{"
+	puts $f "  dlopen (\"dummy.so\", RTLD_NOW);"
+	puts $f "  return 0; "
+	puts $f "}"
+	close $f
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
+	set libdl_available_saved [run_host_cmd_yesno "$CC" "$src -o $output -ldl"]
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+    }
+    return $libdl_available_saved
 }

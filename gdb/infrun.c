@@ -3438,40 +3438,32 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 			   const struct target_waitstatus *ws)
 {
   char *status_string = target_waitstatus_to_string (ws);
-  struct ui_file *tmp_stream = mem_fileopen ();
+  string_file stb;
 
   /* The text is split over several lines because it was getting too long.
      Call fprintf_unfiltered (gdb_stdlog) once so that the text is still
      output as a unit; we want only one timestamp printed if debug_timestamp
      is set.  */
 
-  fprintf_unfiltered (tmp_stream,
-		      "infrun: target_wait (%d.%ld.%ld",
-		      ptid_get_pid (waiton_ptid),
-		      ptid_get_lwp (waiton_ptid),
-		      ptid_get_tid (waiton_ptid));
+  stb.printf ("infrun: target_wait (%d.%ld.%ld",
+	      ptid_get_pid (waiton_ptid),
+	      ptid_get_lwp (waiton_ptid),
+	      ptid_get_tid (waiton_ptid));
   if (ptid_get_pid (waiton_ptid) != -1)
-    fprintf_unfiltered (tmp_stream,
-			" [%s]", target_pid_to_str (waiton_ptid));
-  fprintf_unfiltered (tmp_stream, ", status) =\n");
-  fprintf_unfiltered (tmp_stream,
-		      "infrun:   %d.%ld.%ld [%s],\n",
-		      ptid_get_pid (result_ptid),
-		      ptid_get_lwp (result_ptid),
-		      ptid_get_tid (result_ptid),
-		      target_pid_to_str (result_ptid));
-  fprintf_unfiltered (tmp_stream,
-		      "infrun:   %s\n",
-		      status_string);
-
-  std::string text = ui_file_as_string (tmp_stream);
+    stb.printf (" [%s]", target_pid_to_str (waiton_ptid));
+  stb.printf (", status) =\n");
+  stb.printf ("infrun:   %d.%ld.%ld [%s],\n",
+	      ptid_get_pid (result_ptid),
+	      ptid_get_lwp (result_ptid),
+	      ptid_get_tid (result_ptid),
+	      target_pid_to_str (result_ptid));
+  stb.printf ("infrun:   %s\n", status_string);
 
   /* This uses %s in part to handle %'s in the text, but also to avoid
      a gcc error: the format attribute requires a string literal.  */
-  fprintf_unfiltered (gdb_stdlog, "%s", text.c_str ());
+  fprintf_unfiltered (gdb_stdlog, "%s", stb.c_str ());
 
   xfree (status_string);
-  ui_file_delete (tmp_stream);
 }
 
 /* Select a thread at random, out of those which are resumed and have

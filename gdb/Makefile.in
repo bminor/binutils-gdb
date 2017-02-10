@@ -1039,6 +1039,7 @@ SFILES = \
 	dfp.c \
 	dictionary.c \
 	disasm.c \
+	disasm-selftests.c \
 	doublest.c \
 	dtrace-probe.c \
 	dummy-frame.c \
@@ -1140,6 +1141,7 @@ SFILES = \
 	rust-exp.y \
 	rust-lang.c \
 	selftest.c \
+	selftest-arch.c \
 	sentinel-frame.c \
 	ser-base.c \
 	ser-event.c \
@@ -1396,6 +1398,7 @@ HFILES_NO_SRCDIR = \
 	rs6000-tdep.h \
 	s390-linux-tdep.h \
 	score-tdep.h \
+	selftest-arch.h \
 	sentinel-frame.h \
 	ser-base.h \
 	ser-event.h \
@@ -1643,6 +1646,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dfp.o \
 	dictionary.o \
 	disasm.o \
+	disasm-selftests.o \
 	doublest.o \
 	dummy-frame.o \
 	dwarf2-frame.o \
@@ -1744,6 +1748,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	run-time-clock.o \
 	rust-lang.o \
 	selftest.o \
+	selftest-arch.o \
 	sentinel-frame.o \
 	ser-event.o \
 	serial.o \

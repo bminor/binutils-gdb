@@ -1472,10 +1472,33 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 
   tp->btrace.target = target_enable_btrace (tp->ptid, conf);
 
-  /* Add an entry for the current PC so we start tracing from where we
-     enabled it.  */
-  if (tp->btrace.target != NULL)
-    btrace_add_pc (tp);
+  /* We're done if we failed to enable tracing.  */
+  if (tp->btrace.target == NULL)
+    return;
+
+  /* We need to undo the enable in case of errors.  */
+  TRY
+    {
+      /* Add an entry for the current PC so we start tracing from where we
+	 enabled it.
+
+	 If we can't access TP's registers, TP is most likely running.  In this
+	 case, we can't really say where tracing was enabled so it should be
+	 safe to simply skip this step.
+
+	 This is not relevant for BTRACE_FORMAT_PT since the trace will already
+	 start at the PC at which tracing was enabled.  */
+      if (conf->format != BTRACE_FORMAT_PT
+	  && can_access_registers_ptid (tp->ptid))
+	btrace_add_pc (tp);
+    }
+  CATCH (exception, RETURN_MASK_ALL)
+    {
+      btrace_disable (tp);
+
+      throw_exception (exception);
+    }
+  END_CATCH
 }
 
 /* See btrace.h.  */
@@ -1708,6 +1731,9 @@ btrace_fetch (struct thread_info *tp)
      current PC, which is the replay PC, not the last PC, as expected.  */
   if (btinfo->replay != NULL)
     return;
+
+  /* We should not be called on running or exited threads.  */
+  gdb_assert (can_access_registers_ptid (tp->ptid));
 
   btrace_data_init (&btrace);
   cleanup = make_cleanup_btrace_data (&btrace);

@@ -1288,7 +1288,7 @@ PowerPC options:\n\
 -mpower8, -mpwr8        generate code for Power8 architecture\n\
 -mpower9, -mpwr9        generate code for Power9 architecture\n\
 -mcell                  generate code for Cell Broadband Engine architecture\n\
--mcom                   generate code Power/PowerPC common instructions\n\
+-mcom                   generate code for Power/PowerPC common instructions\n\
 -many                   generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
 -maltivec               generate code for AltiVec\n\
@@ -4173,7 +4173,7 @@ ppc_lglobl (int ignore ATTRIBUTE_UNUSED)
 
    (In principle, there's no reason why the relocations _have_ to be at
    the beginning.  Anywhere in the csect would do.  However, inserting
-   at the beginning is what the native assmebler does, and it helps to
+   at the beginning is what the native assembler does, and it helps to
    deal with cases where the .ref statements follow the section contents.)
 
    ??? .refs don't work for empty .csects.  However, the native assembler
@@ -5108,7 +5108,7 @@ ppc_ydata (int ignore ATTRIBUTE_UNUSED)
    initial:   .section .reldata "drw3"
 	      d - initialized data
 	      r - readable
-	      w - writeable
+	      w - writable
 	      3 - double word aligned (that would be 8 byte boundary)
 
    commentary:
@@ -5344,13 +5344,13 @@ ppc_pe_comm (int lcomm)
  *
  * Section Protection:
  * 'r' - section is readable
- * 'w' - section is writeable
+ * 'w' - section is writable
  * 'x' - section is executable
  * 's' - section is sharable
  *
  * Section Alignment:
  * '0' - align to byte boundary
- * '1' - align to halfword undary
+ * '1' - align to halfword boundary
  * '2' - align to word boundary
  * '3' - align to doubleword boundary
  * '4' - align to quadword boundary
@@ -5451,7 +5451,7 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 		case 'r': /* section is readable */
 		  flags |= IMAGE_SCN_MEM_READ;
 		  break;
-		case 'w': /* section is writeable */
+		case 'w': /* section is writable */
 		  flags |= IMAGE_SCN_MEM_WRITE;
 		  break;
 		case 'x': /* section is executable */

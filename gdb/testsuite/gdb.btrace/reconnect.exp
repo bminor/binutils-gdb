@@ -19,8 +19,14 @@
 
 load_lib gdbserver-support.exp
 
-if { [skip_btrace_tests] } { return -1 }
-if { [skip_gdbserver_tests] } { return -1 }
+if { [skip_btrace_tests] } {
+    unsupported "target does not support record-btrace"
+    return -1
+}
+if { [skip_gdbserver_tests] } {
+    unsupported "target does not support gdbserver"
+    return -1
+}
 
 standard_testfile
 if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
