@@ -1,5 +1,9 @@
 2017-02-10  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_get_disr_info): Remove unused variable.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
 	* python/py-value.c (valpy_richcompare_throw): Remove unnecessary
 	"cleanup" local.
 	* python/py-type.c (typy_legacy_template_argument): Remove
