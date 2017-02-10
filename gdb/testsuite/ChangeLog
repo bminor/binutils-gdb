@@ -1,3 +1,8 @@
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.arch/arc-decode-insn.S: New file.
+	* gdb.arch/arc-decode-insn.exp: Likewise.
+
 2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
 
 	PR tdep/20928

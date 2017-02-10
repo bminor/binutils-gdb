@@ -32,6 +32,7 @@
 
 /* ARC header files.  */
 #include "opcode/arc.h"
+#include "opcodes/arc-dis.h"
 #include "arc-tdep.h"
 
 /* Standard headers.  */
@@ -115,6 +116,269 @@ static const char *const core_arcompact_register_names[] = {
   "r56", "r57", "r58", "r59",
   "lp_count", "reserved", "limm", "pcl",
 };
+
+/* Returns an unsigned value of OPERAND_NUM in instruction INSN.
+   For relative branch instructions returned value is an offset, not an actual
+   branch target.  */
+
+static ULONGEST
+arc_insn_get_operand_value (const struct arc_instruction &insn,
+			    unsigned int operand_num)
+{
+  switch (insn.operands[operand_num].kind)
+    {
+    case ARC_OPERAND_KIND_LIMM:
+      gdb_assert (insn.limm_p);
+      return insn.limm_value;
+    case ARC_OPERAND_KIND_SHIMM:
+      return insn.operands[operand_num].value;
+    default:
+      /* Value in instruction is a register number.  */
+      struct regcache *regcache = get_current_regcache ();
+      ULONGEST value;
+      regcache_cooked_read_unsigned (regcache,
+				     insn.operands[operand_num].value,
+				     &value);
+      return value;
+    }
+}
+
+/* Like arc_insn_get_operand_value, but returns a signed value.  */
+
+static LONGEST
+arc_insn_get_operand_value_signed (const struct arc_instruction &insn,
+				   unsigned int operand_num)
+{
+  switch (insn.operands[operand_num].kind)
+    {
+    case ARC_OPERAND_KIND_LIMM:
+      gdb_assert (insn.limm_p);
+      /* Convert unsigned raw value to signed one.  This assumes 2's
+	 complement arithmetic, but so is the LONG_MIN value from generic
+	 defs.h and that assumption is true for ARC.  */
+      gdb_static_assert (sizeof (insn.limm_value) == sizeof (int));
+      return (((LONGEST) insn.limm_value) ^ INT_MIN) - INT_MIN;
+    case ARC_OPERAND_KIND_SHIMM:
+      /* Sign conversion has been done by binutils.  */
+      return insn.operands[operand_num].value;
+    default:
+      /* Value in instruction is a register number.  */
+      struct regcache *regcache = get_current_regcache ();
+      LONGEST value;
+      regcache_cooked_read_signed (regcache,
+				   insn.operands[operand_num].value,
+				   &value);
+      return value;
+    }
+}
+
+/* Get register with base address of memory operation.  */
+
+int
+arc_insn_get_memory_base_reg (const struct arc_instruction &insn)
+{
+  /* POP_S and PUSH_S have SP as an implicit argument in a disassembler.  */
+  if (insn.insn_class == PUSH || insn.insn_class == POP)
+    return ARC_SP_REGNUM;
+
+  gdb_assert (insn.insn_class == LOAD || insn.insn_class == STORE);
+
+  /* Other instructions all have at least two operands: operand 0 is data,
+     operand 1 is address.  Operand 2 is offset from address.  However, see
+     comment to arc_instruction.operands - in some cases, third operand may be
+     missing, namely if it is 0.  */
+  gdb_assert (insn.operands_count >= 2);
+  return insn.operands[1].value;
+}
+
+/* Get offset of a memory operation INSN.  */
+
+CORE_ADDR
+arc_insn_get_memory_offset (const struct arc_instruction &insn)
+{
+  /* POP_S and PUSH_S have offset as an implicit argument in a
+     disassembler.  */
+  if (insn.insn_class == POP)
+    return 4;
+  else if (insn.insn_class == PUSH)
+    return -4;
+
+  gdb_assert (insn.insn_class == LOAD || insn.insn_class == STORE);
+
+  /* Other instructions all have at least two operands: operand 0 is data,
+     operand 1 is address.  Operand 2 is offset from address.  However, see
+     comment to arc_instruction.operands - in some cases, third operand may be
+     missing, namely if it is 0.  */
+  if (insn.operands_count < 3)
+    return 0;
+
+  CORE_ADDR value = arc_insn_get_operand_value (insn, 2);
+  /* Handle scaling.  */
+  if (insn.writeback_mode == ARC_WRITEBACK_AS)
+    {
+      /* Byte data size is not valid for AS.  Halfword means shift by 1 bit.
+	 Word and double word means shift by 2 bits.  */
+      gdb_assert (insn.data_size_mode != ARC_SCALING_B);
+      if (insn.data_size_mode == ARC_SCALING_H)
+	value <<= 1;
+      else
+	value <<= 2;
+    }
+  return value;
+}
+
+/* Functions are sorted in the order as they are used in the
+   _initialize_arc_tdep (), which uses the same order as gdbarch.h.  Static
+   functions are defined before the first invocation.  */
+
+CORE_ADDR
+arc_insn_get_branch_target (const struct arc_instruction &insn)
+{
+  gdb_assert (insn.is_control_flow);
+
+  /* BI [c]: PC = nextPC + (c << 2).  */
+  if (insn.insn_class == BI)
+    {
+      ULONGEST reg_value = arc_insn_get_operand_value (insn, 0);
+      return arc_insn_get_linear_next_pc (insn) + (reg_value << 2);
+    }
+  /* BIH [c]: PC = nextPC + (c << 1).  */
+  else if (insn.insn_class == BIH)
+    {
+      ULONGEST reg_value = arc_insn_get_operand_value (insn, 0);
+      return arc_insn_get_linear_next_pc (insn) + (reg_value << 1);
+    }
+  /* JLI and EI.  */
+  /* JLI and EI depend on optional AUX registers.  Not supported right now.  */
+  else if (insn.insn_class == JLI)
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "JLI_S instruction is not supported by the GDB.");
+      return 0;
+    }
+  else if (insn.insn_class == EI)
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "EI_S instruction is not supported by the GDB.");
+      return 0;
+    }
+  /* LEAVE_S: PC = BLINK.  */
+  else if (insn.insn_class == LEAVE)
+    {
+      struct regcache *regcache = get_current_regcache ();
+      ULONGEST value;
+      regcache_cooked_read_unsigned (regcache, ARC_BLINK_REGNUM, &value);
+      return value;
+    }
+  /* BBIT0/1, BRcc: PC = currentPC + operand.  */
+  else if (insn.insn_class == BBIT0 || insn.insn_class == BBIT1
+	   || insn.insn_class == BRCC)
+    {
+      /* Most instructions has branch target as their sole argument.  However
+	 conditional brcc/bbit has it as a third operand.  */
+      CORE_ADDR pcrel_addr = arc_insn_get_operand_value (insn, 2);
+
+      /* Offset is relative to the 4-byte aligned address of the current
+	 instruction, hence last two bits should be truncated.  */
+      return pcrel_addr + align_down (insn.address, 4);
+    }
+  /* B, Bcc, BL, BLcc, LP, LPcc: PC = currentPC + operand.  */
+  else if (insn.insn_class == BRANCH || insn.insn_class == LOOP)
+    {
+      CORE_ADDR pcrel_addr = arc_insn_get_operand_value (insn, 0);
+
+      /* Offset is relative to the 4-byte aligned address of the current
+	 instruction, hence last two bits should be truncated.  */
+      return pcrel_addr + align_down (insn.address, 4);
+    }
+  /* J, Jcc, JL, JLcc: PC = operand.  */
+  else if (insn.insn_class == JUMP)
+    {
+      /* All jumps are single-operand.  */
+      return arc_insn_get_operand_value (insn, 0);
+    }
+
+  /* This is some new and unknown instruction.  */
+  gdb_assert_not_reached ("Unknown branch instruction.");
+}
+
+/* Dump INSN into gdb_stdlog.  */
+
+void
+arc_insn_dump (const struct arc_instruction &insn)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  arc_print ("Dumping arc_instruction at %s\n",
+	     paddress (gdbarch, insn.address));
+  arc_print ("\tlength = %u\n", insn.length);
+
+  if (!insn.valid)
+    {
+      arc_print ("\tThis is not a valid ARC instruction.\n");
+      return;
+    }
+
+  arc_print ("\tlength_with_limm = %u\n", insn.length + (insn.limm_p ? 4 : 0));
+  arc_print ("\tcc = 0x%x\n", insn.condition_code);
+  arc_print ("\tinsn_class = %u\n", insn.insn_class);
+  arc_print ("\tis_control_flow = %i\n", insn.is_control_flow);
+  arc_print ("\thas_delay_slot = %i\n", insn.has_delay_slot);
+
+  CORE_ADDR next_pc = arc_insn_get_linear_next_pc (insn);
+  arc_print ("\tlinear_next_pc = %s\n", paddress (gdbarch, next_pc));
+
+  if (insn.is_control_flow)
+    {
+      CORE_ADDR t = arc_insn_get_branch_target (insn);
+      arc_print ("\tbranch_target = %s\n", paddress (gdbarch, t));
+    }
+
+  arc_print ("\tlimm_p = %i\n", insn.limm_p);
+  if (insn.limm_p)
+    arc_print ("\tlimm_value = 0x%08x\n", insn.limm_value);
+
+  if (insn.insn_class == STORE || insn.insn_class == LOAD
+      || insn.insn_class == PUSH || insn.insn_class == POP)
+    {
+      arc_print ("\twriteback_mode = %u\n", insn.writeback_mode);
+      arc_print ("\tdata_size_mode = %u\n", insn.data_size_mode);
+      arc_print ("\tmemory_base_register = %s\n",
+		 gdbarch_register_name (gdbarch,
+					arc_insn_get_memory_base_reg (insn)));
+      /* get_memory_offset returns an unsigned CORE_ADDR, but treat it as a
+	 LONGEST for a nicer representation.  */
+      arc_print ("\taddr_offset = %s\n",
+		 plongest (arc_insn_get_memory_offset (insn)));
+    }
+
+  arc_print ("\toperands_count = %u\n", insn.operands_count);
+  for (unsigned int i = 0; i < insn.operands_count; ++i)
+    {
+      int is_reg = (insn.operands[i].kind == ARC_OPERAND_KIND_REG);
+
+      arc_print ("\toperand[%u] = {\n", i);
+      arc_print ("\t\tis_reg = %i\n", is_reg);
+      if (is_reg)
+	arc_print ("\t\tregister = %s\n",
+		   gdbarch_register_name (gdbarch, insn.operands[i].value));
+      /* Don't know if this value is signed or not, so print both
+	 representations.  This tends to look quite ugly, especially for big
+	 numbers.  */
+      arc_print ("\t\tunsigned value = %s\n",
+		 pulongest (arc_insn_get_operand_value (insn, i)));
+      arc_print ("\t\tsigned value = %s\n",
+		 plongest (arc_insn_get_operand_value_signed (insn, i)));
+      arc_print ("\t}\n");
+    }
+}
+
+CORE_ADDR
+arc_insn_get_linear_next_pc (const struct arc_instruction &insn)
+{
+  /* In ARC long immediate is always 4 bytes.  */
+  return (insn.address + insn.length + (insn.limm_p ? 4 : 0));
+}
 
 /* Implement the "write_pc" gdbarch method.
 
@@ -649,6 +913,30 @@ arc_frame_base_address (struct frame_info *this_frame, void **prologue_cache)
   return (CORE_ADDR) get_frame_register_unsigned (this_frame, ARC_FP_REGNUM);
 }
 
+/* Copy of gdb_buffered_insn_length_fprintf from disasm.c.  */
+
+static int ATTRIBUTE_PRINTF (2, 3)
+arc_fprintf_disasm (void *stream, const char *format, ...)
+{
+  return 0;
+}
+
+struct disassemble_info
+arc_disassemble_info (struct gdbarch *gdbarch)
+{
+  struct disassemble_info di;
+  init_disassemble_info (&di, &null_stream, arc_fprintf_disasm);
+  di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  di.endian = gdbarch_byte_order (gdbarch);
+  di.read_memory_func = [](bfd_vma memaddr, gdb_byte *myaddr,
+			   unsigned int len, struct disassemble_info *info)
+    {
+      return target_read_code (memaddr, myaddr, len);
+    };
+  return di;
+}
+
 /* Implement the "skip_prologue" gdbarch method.
 
    Skip the prologue for the function at PC.  This is done by checking from
@@ -701,7 +989,7 @@ arc_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    that will not print, or `stream` should be different from standard
    gdb_stdlog.  */
 
-static int
+int
 arc_delayed_print_insn (bfd_vma addr, struct disassemble_info *info)
 {
   int (*print_insn) (bfd_vma, struct disassemble_info *);
@@ -1320,6 +1608,26 @@ maintenance_print_arc_command (char *args, int from_tty)
   cmd_show_list (maintenance_print_arc_list, from_tty, "");
 }
 
+/* This command accepts single argument - address of instruction to
+   disassemble.  */
+
+static void
+dump_arc_instruction_command (char *args, int from_tty)
+{
+  struct value *val;
+  if (args != NULL && strlen (args) > 0)
+    val = evaluate_expression (parse_expression (args).get ());
+  else
+    val = access_value_history (0);
+  record_latest_value (val);
+
+  CORE_ADDR address = value_as_address (val);
+  struct arc_instruction insn;
+  struct disassemble_info di = arc_disassemble_info (target_gdbarch ());
+  arc_insn_decode (address, &di, arc_delayed_print_insn, &insn);
+  arc_insn_dump (insn);
+}
+
 /* Suppress warning from -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_arc_tdep;
 
@@ -1339,6 +1647,11 @@ _initialize_arc_tdep (void)
 		    "internal state."),
 		  &maintenance_print_arc_list, "maintenance print arc ", 0,
 		  &maintenanceprintlist);
+
+  add_cmd ("arc-instruction", class_maintenance,
+	   dump_arc_instruction_command,
+	   _("Dump arc_instruction structure for specified address."),
+	   &maintenance_print_arc_list);
 
   /* Debug internals for ARC GDB.  */
   add_setshow_zinteger_cmd ("arc", class_maintenance,

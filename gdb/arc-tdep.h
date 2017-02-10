@@ -123,4 +123,29 @@ arc_mach_is_arcv2 (struct gdbarch *gdbarch)
   return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arcv2;
 }
 
+/* Function to access ARC disassembler.  Underlying opcodes disassembler will
+   print an instruction into stream specified in the INFO, so if it is
+   undesired, then this stream should be set to some invisible stream, but it
+   can't be set to an actual NULL value - that would cause a crash.  */
+int arc_delayed_print_insn (bfd_vma addr, struct disassemble_info *info);
+
+/* Return properly initialized disassemble_info for ARC disassembler - it will
+   not print disassembled instructions to stderr.  */
+
+struct disassemble_info arc_disassemble_info (struct gdbarch *gdbarch);
+
+/* Get branch/jump target address for the INSN.  Note that this function
+   returns branch target and doesn't evaluate if this branch is taken or not.
+   For the indirect jumps value depends in register state, hence can change.
+   It is an error to call this function for a non-branch instruction.  */
+
+CORE_ADDR arc_insn_get_branch_target (const struct arc_instruction &insn);
+
+/* Get address of next instruction after INSN, assuming linear execution (no
+   taken branches).  If instruction has a delay slot, then returned value will
+   point at the instruction in delay slot.  That is - "address of instruction +
+   instruction length with LIMM".  */
+
+CORE_ADDR arc_insn_get_linear_next_pc (const struct arc_instruction &insn);
+
 #endif /* ARC_TDEP_H */

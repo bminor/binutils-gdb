@@ -101,6 +101,9 @@ show disassembler-options
   The default value is the empty string.  Currently, the only supported
   targets are ARM, PowerPC and S/390.
 
+maint print arc arc-instruction address
+  Print internal disassembler information about instruction at a given address.
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.

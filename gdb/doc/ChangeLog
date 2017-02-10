@@ -1,3 +1,7 @@
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Add "maint print arc arc-instruction".
+
 2017-03-22  Yao Qi  <yao.qi@linaro.org>
 
 	* python.texi (Inferiors In Python): Remove @code from Python.

@@ -22105,6 +22105,10 @@ messages.
 @kindex show debug arc
 Show the level of ARC specific debugging in operation.
 
+@item maint print arc arc-instruction @var{address}
+@kindex maint print arc arc-instruction
+Print internal disassembler information about instruction at a given address.
+
 @end table
 
 @node ARM

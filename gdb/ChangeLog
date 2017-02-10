@@ -1,5 +1,25 @@
 2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* configure.tgt: Add arc-insn.o.
+	* arc-tdep.c (arc_delayed_print_insn): Make non-static.
+	(dump_arc_instruction_command): New function.
+	(arc_fprintf_disasm): Likewise.
+	(arc_disassemble_info): Likewise.
+	(arc_insn_get_operand_value): Likewise.
+	(arc_insn_get_operand_value_signed): Likewise.
+	(arc_insn_get_memory_base_reg): Likewise.
+	(arc_insn_get_memory_offset): Likewise.
+	(arc_insn_get_branch_target): Likewise.
+	(arc_insn_dump): Likewise.
+	(arc_insn_get_linear_next_pc): Likewise.
+	* arc-tdep.h (arc_delayed_print_insn): Add function declaration.
+	(arc_disassemble_info): Likewise.
+	(arc_insn_get_branch_target): Likewise.
+	(arc_insn_get_linear_next_pc): Likewise.
+	* NEWS: Mention new "maint print arc arc-instruction".
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* arc-tdep (maintenance_print_arc_list): New variable.
 	(maintenance_print_arc_command): New function.
 
