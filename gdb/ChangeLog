@@ -1,5 +1,10 @@
 2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* arc-tdep (maintenance_print_arc_list): New variable.
+	(maintenance_print_arc_command): New function.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* arc-tdep.c (core_v2_register_names, core_arcompact_register_names)
 	Add "limm" and "reserved".
 	(arc_cannot_fetch_register, arc_cannot_store_register): Add
