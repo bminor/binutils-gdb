@@ -1,3 +1,11 @@
+2017-06-16  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_disassembler_options): New variable.
+	(arc_gdbarch_init): Set and use it. Use arc_delayed_print_insn instead
+	of default_print_insn.
+	(arc_delayed_print_insn): Set info->section when needed,
+	use default_print_insn to retrieve a disassembler.
+
 2017-06-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21574
