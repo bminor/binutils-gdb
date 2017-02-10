@@ -128,6 +128,18 @@ proc_with_prefix do_test {} {
 	gdb_test "print 2" "^print 2\r\n\\\$2 = 2" "print on extra console"
     }
 
+    # Verify that we get proper queries on the main UI, but that they are
+    # auto-answered on secondary UIs.
+    with_spawn_id $gdb_main_spawn_id {
+	gdb_test "delete" "" "delete all breakpoint on main console" \
+		 "Delete all breakpoints. .y or n. $" "n"
+    }
+    with_spawn_id $extra_spawn_id {
+	gdb_test "delete" \
+		 "Delete all breakpoints. .y or n. .answered Y; input not from terminal." \
+		 "delete all breakpoints on extra console"
+    }
+
     # Run a few execution tests with the main console as the driver
     # console.
     with_test_prefix "main console" {
