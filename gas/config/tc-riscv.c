@@ -1966,6 +1966,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		  if (subtype < 0x80 && (subtype & 0x40))
 		    {
 		      /* DW_CFA_advance_loc */
+		      fixP->fx_frag = (fragS *) fixP->fx_frag->fr_opcode;
+		      fixP->fx_next->fx_frag = fixP->fx_frag;
 		      fixP->fx_r_type = BFD_RELOC_RISCV_SET6;
 		      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB6;
 		    }
