@@ -3588,12 +3588,14 @@ breakpoint you want to change.  Each breakpoint may be @dfn{enabled} or
 enable it again.
 
 @cindex breakpoint ranges
+@cindex breakpoint lists
 @cindex ranges of breakpoints
-Some @value{GDBN} commands accept a range of breakpoints on which to
-operate.  A breakpoint range is either a single breakpoint number, like
-@samp{5}, or two such numbers, in increasing order, separated by a
-hyphen, like @samp{5-7}.  When a breakpoint range is given to a command,
-all breakpoints in that range are operated on.
+@cindex lists of breakpoints
+Some @value{GDBN} commands accept a space-separated list of breakpoints
+on which to operate.  A list element can be either a single breakpoint number,
+like @samp{5}, or a range of such numbers, like @samp{5-7}.
+When a breakpoint list is given to a command, all breakpoints in that list
+are operated on.
 
 @menu
 * Set Breaks::                  Setting breakpoints
@@ -3758,8 +3760,8 @@ optionally be surrounded by spaces.
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
-@item info breakpoints @r{[}@var{n}@dots{}@r{]}
-@itemx info break @r{[}@var{n}@dots{}@r{]}
+@item info breakpoints @r{[}@var{list}@dots{}@r{]}
+@itemx info break @r{[}@var{list}@dots{}@r{]}
 Print a table of all breakpoints, watchpoints, and catchpoints set and
 not deleted.  Optional argument @var{n} means print information only
 about the specified breakpoint(s) (or watchpoint(s) or catchpoint(s)).
@@ -3947,7 +3949,7 @@ breakpoints set by commands like @code{next} and @code{finish}.  For
 breakpoints set with @code{hbreak}, @value{GDBN} will always use hardware
 breakpoints.
 
-You can control this automatic behaviour with the following commands::
+You can control this automatic behaviour with the following commands:
 
 @kindex set breakpoint auto-hw
 @kindex show breakpoint auto-hw
@@ -4142,8 +4144,8 @@ by the program.
 Set a watchpoint that will break when @var{expr} is either read from
 or written into by the program.
 
-@kindex info watchpoints @r{[}@var{n}@dots{}@r{]}
-@item info watchpoints @r{[}@var{n}@dots{}@r{]}
+@kindex info watchpoints @r{[}@var{list}@dots{}@r{]}
+@item info watchpoints @r{[}@var{list}@dots{}@r{]}
 This command prints a list of watchpoints, using the same format as
 @code{info break} (@pxref{Set Breaks}).
 @end table
@@ -4639,9 +4641,9 @@ Delete any breakpoints set at or within the code of the specified
 @cindex delete breakpoints
 @kindex delete
 @kindex d @r{(@code{delete})}
-@item delete @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
+@item delete @r{[}breakpoints@r{]} @r{[}@var{list}@dots{}@r{]}
 Delete the breakpoints, watchpoints, or catchpoints of the breakpoint
-ranges specified as arguments.  If no argument is specified, delete all
+list specified as argument.  If no argument is specified, delete all
 breakpoints (@value{GDBN} asks confirmation, unless you have @code{set
 confirm off}).  You can abbreviate this command as @code{d}.
 @end table
@@ -4691,7 +4693,7 @@ watchpoints, and catchpoints:
 @table @code
 @kindex disable
 @kindex dis @r{(@code{disable})}
-@item disable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
+@item disable @r{[}breakpoints@r{]} @r{[}@var{list}@dots{}@r{]}
 Disable the specified breakpoints---or all breakpoints, if none are
 listed.  A disabled breakpoint has no effect but is not forgotten.  All
 options such as ignore-counts, conditions and commands are remembered in
@@ -4699,15 +4701,15 @@ case the breakpoint is enabled again later.  You may abbreviate
 @code{disable} as @code{dis}.
 
 @kindex enable
-@item enable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
+@item enable @r{[}breakpoints@r{]} @r{[}@var{list}@dots{}@r{]}
 Enable the specified breakpoints (or all defined breakpoints).  They
 become effective once again in stopping your program.
 
-@item enable @r{[}breakpoints@r{]} once @var{range}@dots{}
+@item enable @r{[}breakpoints@r{]} once @var{list}@dots{}
 Enable the specified breakpoints temporarily.  @value{GDBN} disables any
 of these breakpoints immediately after stopping your program.
 
-@item enable @r{[}breakpoints@r{]} count @var{count} @var{range}@dots{}
+@item enable @r{[}breakpoints@r{]} count @var{count} @var{list}@dots{}
 Enable the specified breakpoints temporarily.  @value{GDBN} records
 @var{count} with each of the specified breakpoints, and decrements a
 breakpoint's count when it is hit.  When any count reaches 0,
@@ -4715,7 +4717,7 @@ breakpoint's count when it is hit.  When any count reaches 0,
 count (@pxref{Conditions, ,Break Conditions}), that will be
 decremented to 0 before @var{count} is affected.
 
-@item enable @r{[}breakpoints@r{]} delete @var{range}@dots{}
+@item enable @r{[}breakpoints@r{]} delete @var{list}@dots{}
 Enable the specified breakpoints to work once, then die.  @value{GDBN}
 deletes any of these breakpoints as soon as your program stops there.
 Breakpoints set by the @code{tbreak} command start out in this state.
@@ -4873,7 +4875,7 @@ enable other breakpoints.
 @table @code
 @kindex commands
 @kindex end@r{ (breakpoint commands)}
-@item commands @r{[}@var{range}@dots{}@r{]}
+@item commands @r{[}@var{list}@dots{}@r{]}
 @itemx @dots{} @var{command-list} @dots{}
 @itemx end
 Specify a list of commands for the given breakpoints.  The commands
@@ -4986,6 +4988,7 @@ dynamic printfs immediately.  (If you need individual control over the
 print commands, simply define normal breakpoints with
 explicitly-supplied command lists.)
 
+@table @code
 @item gdb
 @kindex dprintf-style gdb
 Handle the output using the @value{GDBN} @code{printf} command.
@@ -5000,6 +5003,7 @@ Handle the output by calling a function in your program (normally
 Have the remote debugging agent (such as @code{gdbserver}) handle
 the output itself.  This style is only available for agents that
 support running commands on the target.
+@end table
 
 @item set dprintf-function @var{function}
 Set the function to call if the dprintf style is @code{call}.  By

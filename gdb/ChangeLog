@@ -1,3 +1,9 @@
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	PR gdb/21122
+	* breakpoint.c (_initialize_breakpoint): Update the help description
+	of the 'commands' command to indicate that it takes a list argument.
+
 2017-02-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* interps.c (current_interp_set_logging): Remove "return".

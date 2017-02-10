@@ -1,3 +1,8 @@
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	PR gdb/21122
+	* gdb.base/help.exp: Update match pattern for testing 'help commands'.
+
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.base/define.exp: Add test for command abbreviations
