@@ -1,5 +1,9 @@
 2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* gdb.texinfo (Synopsys ARC): Document "set debug arc 2".
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* gdb.texinfo (Synopsys ARC): Add "maint print arc arc-instruction".
 
 2017-03-22  Yao Qi  <yao.qi@linaro.org>

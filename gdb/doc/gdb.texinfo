@@ -22098,8 +22098,7 @@ acceptable commands.
 @item set debug arc
 @kindex set debug arc
 Control the level of ARC specific debug messages.  Use 0 for no messages (the
-default) and 1 for debug messages.  At present higher values offer no further
-messages.
+default), 1 for debug messages, and 2 for even more debug messages.
 
 @item show debug arc
 @kindex show debug arc

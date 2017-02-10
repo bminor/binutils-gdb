@@ -1,5 +1,10 @@
 2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* gdb.arch/arc-analyze-prologue.S: New file.
+	* gdb.arch/arc-analyze-prologue.exp: Likewise.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* gdb.arch/arc-decode-insn.S: New file.
 	* gdb.arch/arc-decode-insn.exp: Likewise.
 

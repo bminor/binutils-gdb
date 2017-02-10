@@ -1,5 +1,16 @@
 2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
 
+	* arc-tdep.c (arc_frame_cache): Add support for prologue analysis.
+	(arc_skip_prologue): Likewise.
+	(arc_make_frame_cache): Likewise.
+	(arc_pv_get_operand): New function.
+	(arc_is_in_prologue): Likewise.
+	(arc_analyze_prologue): Likewise.
+	(arc_print_frame_cache): Likewise.
+	(MAX_PROLOGUE_LENGTH): New constant.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
 	* configure.tgt: Add arc-insn.o.
 	* arc-tdep.c (arc_delayed_print_insn): Make non-static.
 	(dump_arc_instruction_command): New function.
