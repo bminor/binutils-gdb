@@ -24,6 +24,12 @@
 /* Need disassemble_info.  */
 #include "dis-asm.h"
 
+/* To simplify GDB code this enum assumes that internal regnums should be same
+   as architectural register numbers, i.e. PCL regnum is 63.  This allows to
+   use internal GDB regnums as architectural numbers when dealing with
+   instruction encodings, for example when analyzing what are the registers
+   saved in function prologue.  */
+
 enum arc_regnum
   {
     /* Core registers.  */
@@ -49,6 +55,16 @@ enum arc_regnum
     ARC_BLINK_REGNUM,
     /* Zero-delay loop counter.  */
     ARC_LP_COUNT_REGNUM = 60,
+    /* Reserved register number.  There should never be a register with such
+       number, this name is needed only for a sanity check in
+      arc_cannot_(fetch|store)_register.  */
+    ARC_RESERVED_REGNUM,
+    /* Long-immediate value.  This is not a physical register - if instruction
+       has register 62 as an operand, then this operand is a literal value
+       stored in the instruction memory right after the instruction itself.
+       This value is required in this enumeration as an architectural number
+       for instruction analysis.  */
+    ARC_LIMM_REGNUM,
     /* Program counter, aligned to 4-bytes, read-only.  */
     ARC_PCL_REGNUM,
     ARC_LAST_CORE_REGNUM = ARC_PCL_REGNUM,
