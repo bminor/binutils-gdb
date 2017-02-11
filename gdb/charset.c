@@ -794,16 +794,14 @@ find_charset_names (void)
   int err, status;
   int fail = 1;
   int flags;
-  struct gdb_environ *iconv_env;
+  gdb_environ iconv_env = gdb_environ::from_host_environ ();
   char *iconv_program;
 
   /* Older iconvs, e.g. 2.2.2, don't omit the intro text if stdout is
      not a tty.  We need to recognize it and ignore it.  This text is
      subject to translation, so force LANGUAGE=C.  */
-  iconv_env = make_environ ();
-  init_environ (iconv_env);
-  set_in_environ (iconv_env, "LANGUAGE", "C");
-  set_in_environ (iconv_env, "LC_ALL", "C");
+  iconv_env.set ("LANGUAGE", "C");
+  iconv_env.set ("LC_ALL", "C");
 
   child = pex_init (PEX_USE_PIPES, "iconv", NULL);
 
@@ -827,7 +825,7 @@ find_charset_names (void)
   /* Note that we simply ignore errors here.  */
   if (!pex_run_in_environment (child, flags,
 			       args[0], const_cast<char **> (args),
-			       environ_vector (iconv_env),
+			       iconv_env.envp (),
 			       NULL, NULL, &err))
     {
       FILE *in = pex_read_output (child, 0);
@@ -901,7 +899,6 @@ find_charset_names (void)
 
   xfree (iconv_program);
   pex_free (child);
-  free_environ (iconv_env);
 
   if (fail)
     {

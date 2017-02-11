@@ -30,7 +30,6 @@ struct regcache;
 struct ui_out;
 struct terminal_info;
 struct target_desc_info;
-struct gdb_environ;
 struct continuation;
 struct inferior;
 
@@ -42,6 +41,9 @@ struct inferior;
 
 /* For struct frame_id.  */
 #include "frame.h"
+
+/* For gdb_environ.  */
+#include "environ.h"
 
 #include "progspace.h"
 #include "registry.h"
@@ -363,7 +365,7 @@ public:
 
   /* Environment to use for running inferior,
      in format described in environ.h.  */
-  gdb_environ *environment = NULL;
+  gdb_environ environment;
 
   /* True if this child process was attached rather than forked.  */
   bool attach_flag = false;

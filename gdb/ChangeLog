@@ -1,3 +1,48 @@
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	'unittests/environ-selftests.c'.
+	(SUBDIR_UNITTESTS_OBS): Add 'environ-selftests.o'.
+	* charset.c (find_charset_names): Declare object 'iconv_env'.
+	Update code to use 'iconv_env' object.  Remove call to
+	'free_environ'.
+	* common/environ.c: Include <utility>.
+	(make_environ): Delete function.
+	(free_environ): Delete function.
+	(gdb_environ::clear): New function.
+	(gdb_environ::operator=): New function.
+	(gdb_environ::get): Likewise.
+	(environ_vector): Delete function.
+	(set_in_environ): Delete function.
+	(gdb_environ::set): New function.
+	(unset_in_environ): Delete function.
+	(gdb_environ::unset): New function.
+	(gdb_environ::envp): Likewise.
+	* common/environ.h: Include <vector>.
+	(struct gdb_environ): Delete; transform into...
+	(class gdb_environ): ... this class.
+	(free_environ): Delete prototype.
+	(init_environ, get_in_environ, set_in_environ, unset_in_environ,
+	environ_vector): Likewise.
+	* infcmd.c (run_command_1): Update code to call
+	'envp' from 'gdb_environ' class.
+	(environment_info): Update code to call methods from 'gdb_environ'
+	class.
+	(unset_environment_command): Likewise.
+	(path_info): Likewise.
+	(path_command): Likewise.
+	* inferior.c (inferior::~inferior): Delete call to 'free_environ'.
+	(inferior::inferior): Initialize 'environment' using the host's
+	information.
+	* inferior.h: Remove forward declaration of 'struct gdb_environ'.
+	Include "environ.h".
+	(class inferior) <environment>: Change type from 'struct
+	gdb_environ' to 'gdb_environ'.
+	* mi/mi-cmd-env.c (mi_cmd_env_path): Update code to call
+	methods from 'gdb_environ' class.
+	* solib.c (solib_find_1): Likewise
+	* unittests/environ-selftests.c: New file.
+
 2017-06-20  Yao Qi  <yao.qi@linaro.org>
 
 	* features/i386/i386-linux.xml: Exchange the order of including

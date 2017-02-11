@@ -259,7 +259,7 @@ lynx_create_inferior (const char *program,
 
   pid = fork_inferior (program,
 		       str_program_args.c_str (),
-		       environ_vector (get_environ ()), lynx_ptrace_fun,
+		       get_environ ()->envp (), lynx_ptrace_fun,
 		       NULL, NULL, NULL, NULL);
 
   post_fork_inferior (pid, program);
