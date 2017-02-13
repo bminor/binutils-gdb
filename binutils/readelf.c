@@ -13172,9 +13172,12 @@ process_section_contents (FILE * file)
 
   /* Check to see if the user requested a
      dump of a section that does not exist.  */
-  while (i++ < num_dump_sects)
-    if (dump_sects[i])
-      warn (_("Section %d was not dumped because it does not exist!\n"), i);
+  while (i < num_dump_sects)
+    {
+      if (dump_sects[i])
+	warn (_("Section %d was not dumped because it does not exist!\n"), i);
+      i++;
+    }
 }
 
 static void
