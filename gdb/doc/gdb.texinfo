@@ -19600,8 +19600,8 @@ Show the current status of displaying communications between
 
 @table @code
 
-@kindex load @var{filename}
-@item load @var{filename}
+@kindex load @var{filename} @var{offset}
+@item load @var{filename} @var{offset}
 @anchor{load}
 Depending on what remote debugging facilities are configured into
 @value{GDBN}, the @code{load} command may be available.  Where it exists, it
@@ -19619,6 +19619,10 @@ For some object file formats, you can specify the load address when you
 link the program; for other formats, like a.out, the object file format
 specifies a fixed address.
 @c FIXME! This would be a good place for an xref to the GNU linker doc.
+
+It is also possible to tell @value{GDBN} to load the executable file at a
+specific offset described by the optional argument @var{offset}.  When
+@var{offset} is provided, @var{filename} must also be provided.
 
 Depending on the remote side capabilities, @value{GDBN} may be able to
 load programs into flash memory.

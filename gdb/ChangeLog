@@ -1,3 +1,8 @@
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* symfile (_initialize_symfile): Add usage text to the load command's
+	help text.
+
 2017-02-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* utils.c (defaulted_query): Don't query on secondary UIs.
