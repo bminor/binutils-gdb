@@ -1,5 +1,11 @@
 2017-02-13  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21135
+	* readelf.c (dump_section_as_bytes): Handle the case where
+	uncompress_section_contents returns false.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21149
 	* readelf.c (get_compression_header): Add size parameter.  Check
 	size against sizeof compression header before attempting to

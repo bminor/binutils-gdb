@@ -12825,10 +12825,18 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 	  new_size -= 12;
 	}
 
-      if (uncompressed_size
-	  && uncompress_section_contents (& start, uncompressed_size,
-					  & new_size))
-	section_size = new_size;
+      if (uncompressed_size)
+	{
+	  if (uncompress_section_contents (& start, uncompressed_size,
+					   & new_size))
+	    section_size = new_size;
+	  else
+	    {
+	      error (_("Unable to decompress section %s\n"),
+		     printable_section_name (section));
+	      return;
+	    }
+	}
     }
 
   if (relocate)
