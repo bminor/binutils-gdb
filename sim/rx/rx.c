@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include "libiberty.h"
 
 #include "opcode/rx.h"
 #include "cpu.h"
@@ -151,8 +152,8 @@ static const char * optype_names[] = {
   "RbRi"	/* [Rb + scale * Ri] */
 };
 
-#define N_RXO (sizeof(id_names)/sizeof(id_names[0]))
-#define N_RXT (sizeof(optype_names)/sizeof(optype_names[0]))
+#define N_RXO ARRAY_SIZE (id_names)
+#define N_RXT ARRAY_SIZE (optype_names)
 #define N_MAP 90
 
 static unsigned long long benchmark_start_cycle;

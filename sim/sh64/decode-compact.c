@@ -292,7 +292,7 @@ sh64_compact_init_idesc_table (SIM_CPU *cpu)
     init_idesc (cpu, id, t);
 
   /* Now fill in the values for the chosen cpu.  */
-  for (t = sh64_compact_insn_sem, tend = t + sizeof (sh64_compact_insn_sem) / sizeof (*t);
+  for (t = sh64_compact_insn_sem, tend = t + ARRAY_SIZE (sh64_compact_insn_sem);
        t != tend; ++t)
     {
       init_idesc (cpu, & table[t->index], t);
