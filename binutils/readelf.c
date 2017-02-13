@@ -10019,7 +10019,7 @@ process_version_sections (FILE * file)
 			ent.vd_ndx, ent.vd_cnt);
 
 		/* Check for overflow.  */
-		if (ent.vd_aux > (size_t) (endbuf - vstart))
+		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart))
 		  break;
 
 		vstart += ent.vd_aux;
