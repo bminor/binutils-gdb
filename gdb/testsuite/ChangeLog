@@ -1,5 +1,13 @@
 2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.linespec/explicit.c (my_unique_function_name): New function.
+	(main): Call my_unique_function_name.
+	* gdb.linespec/explicit.exp: Use my_unique_function_name to test
+	completion of patterns with a single match.
+	Add missing -re switches to gdb_test_multiple calls.
+
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.arch/i386-biarch-core.exp: Check for i386 arch support and
 	return if core file is not recognized.
 

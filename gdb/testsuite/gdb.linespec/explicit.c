@@ -42,6 +42,19 @@ myfunction (int arg)
   return r;
 }
 
+static int
+my_unique_function_name (int arg)
+{
+  int j = 0;
+
+  /* Just do something random.  We only care about the unique function
+     name.  */
+  if (arg == 50)
+    j = 10;
+
+  return j;
+}
+
 int
 main (void)
 {
@@ -51,6 +64,8 @@ main (void)
      without running forever if something goes wrong.  */
   for (i = 0, j = 0; i < 1000; ++i)
     j += myfunction (0);
+
+  my_unique_function_name (j);
 
   return myfunction2 (j);
 }
