@@ -12691,10 +12691,18 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 	  new_size -= 12;
 	}
 
-      if (uncompressed_size
-	  && uncompress_section_contents (& start,
-					  uncompressed_size, & new_size))
-	num_bytes = new_size;
+      if (uncompressed_size)
+	{
+	  if (uncompress_section_contents (& start,
+					   uncompressed_size, & new_size))
+	    num_bytes = new_size;
+	  else
+	    {
+	      error (_("Unable to decompress section %s\n"),
+		     printable_section_name (section));
+	      return;
+	    }
+	}
     }
 
   /* If the section being dumped has relocations against it the user might
@@ -12986,14 +12994,22 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	  size -= 12;
 	}
 
-      if (uncompressed_size
-	  && uncompress_section_contents (&start, uncompressed_size,
-					  &size))
+      if (uncompressed_size)
 	{
-	  /* Free the compressed buffer, update the section buffer
-	     and the section size if uncompress is successful.  */
-	  free (section->start);
-	  section->start = start;
+	  if (uncompress_section_contents (&start, uncompressed_size,
+					   &size))
+	    {
+	      /* Free the compressed buffer, update the section buffer
+		 and the section size if uncompress is successful.  */
+	      free (section->start);
+	      section->start = start;
+	    }
+	  else
+	    {
+	      error (_("Unable to decompress section %s\n"),
+		     printable_section_name (sec));
+	      return 0;
+	    }
 	}
       section->size = size;
     }
