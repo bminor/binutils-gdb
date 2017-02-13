@@ -11591,6 +11591,7 @@ process_syminfo (FILE * file ATTRIBUTE_UNUSED)
 static bfd_boolean
 target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 				unsigned char *     start,
+				unsigned char *     end,
 				Elf_Internal_Sym *  symtab)
 {
   unsigned int reloc_type = get_reloc_type (reloc->r_info);
@@ -11631,13 +11632,19 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	  handle_sym_diff:
 	    if (saved_sym != NULL)
 	      {
+		int reloc_size = reloc_type == 1 ? 4 : 2;
 		bfd_vma value;
 
 		value = reloc->r_addend
 		  + (symtab[get_reloc_symindex (reloc->r_info)].st_value
 		     - saved_sym->st_value);
 
-		byte_put (start + reloc->r_offset, value, reloc_type == 1 ? 4 : 2);
+		if (start + reloc->r_offset + reloc_size >= end)
+		  /* PR 21137 */
+		  error (_("MSP430 sym diff reloc writes past end of section (%p vs %p)\n"),
+			 start + reloc->r_offset + reloc_size, end);
+		else
+		  byte_put (start + reloc->r_offset, value, reloc_size);
 
 		saved_sym = NULL;
 		return TRUE;
@@ -11668,13 +11675,18 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	  case 2: /* R_MN10300_16 */
 	    if (saved_sym != NULL)
 	      {
+		int reloc_size = reloc_type == 1 ? 4 : 2;
 		bfd_vma value;
 
 		value = reloc->r_addend
 		  + (symtab[get_reloc_symindex (reloc->r_info)].st_value
 		     - saved_sym->st_value);
 
-		byte_put (start + reloc->r_offset, value, reloc_type == 1 ? 4 : 2);
+		if (start + reloc->r_offset + reloc_size >= end)
+		  error (_("MN10300 sym diff reloc writes past end of section (%p vs %p)\n"),
+			 start + reloc->r_offset + reloc_size, end);
+		else
+		  byte_put (start + reloc->r_offset, value, reloc_size);
 
 		saved_sym = NULL;
 		return TRUE;
@@ -11709,12 +11721,20 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	    break;
 
 	  case 0x41: /* R_RL78_ABS32.  */
-	    byte_put (start + reloc->r_offset, value, 4);
+	    if (start + reloc->r_offset + 4 >= end)
+	      error (_("RL78 sym diff reloc writes past end of section (%p vs %p)\n"),
+		     start + reloc->r_offset + 2, end);
+	    else
+	      byte_put (start + reloc->r_offset, value, 4);
 	    value = 0;
 	    return TRUE;
 
 	  case 0x43: /* R_RL78_ABS16.  */
-	    byte_put (start + reloc->r_offset, value, 2);
+	    if (start + reloc->r_offset + 2 >= end)
+	      error (_("RL78 sym diff reloc writes past end of section (%p vs %p)\n"),
+		     start + reloc->r_offset + 2, end);
+	    else
+	      byte_put (start + reloc->r_offset, value, 2);
 	    value = 0;
 	    return TRUE;
 
@@ -12340,7 +12360,7 @@ apply_relocations (void *                     file,
 
 	  reloc_type = get_reloc_type (rp->r_info);
 
-	  if (target_specific_reloc_handling (rp, start, symtab))
+	  if (target_specific_reloc_handling (rp, start, end, symtab))
 	    continue;
 	  else if (is_none_reloc (reloc_type))
 	    continue;
