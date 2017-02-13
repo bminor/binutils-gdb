@@ -1,5 +1,11 @@
 2017-02-13  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21150
+	* nm.c (file_symbol): Add test of string length before testing
+	string characters.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21135
 	* readelf.c (dump_section_as_bytes): Handle the case where
 	uncompress_section_contents returns false.
