@@ -1,5 +1,16 @@
 2017-02-13  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21149
+	* readelf.c (get_compression_header): Add size parameter.  Check
+	size against sizeof compression header before attempting to
+	extract the header.
+	(process_section_headers): Pass size to get_compression_header.
+	(dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+	(load_specific_debug_section): Likewise.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21148
 	* readelf.c (process_version_sections): Include size of auxillary
 	version information when checking for buffer overflow.

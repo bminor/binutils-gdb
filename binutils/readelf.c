@@ -5715,11 +5715,17 @@ get_elf_section_flags (bfd_vma sh_flags)
 }
 
 static unsigned int
-get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf)
+get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf, bfd_size_type size)
 {
   if (is_32bit_elf)
     {
       Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) buf;
+
+      if (size < sizeof (* echdr))
+	{
+	  error (_("Compressed section is too small even for a compression header\n"));
+	  return 0;
+	}
 
       chdr->ch_type = BYTE_GET (echdr->ch_type);
       chdr->ch_size = BYTE_GET (echdr->ch_size);
@@ -5729,6 +5735,12 @@ get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf)
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) buf;
+
+      if (size < sizeof (* echdr))
+	{
+	  error (_("Compressed section is too small even for a compression header\n"));
+	  return 0;
+	}
 
       chdr->ch_type = BYTE_GET (echdr->ch_type);
       chdr->ch_size = BYTE_GET (echdr->ch_size);
@@ -6311,7 +6323,7 @@ process_section_headers (FILE * file)
 		{
 		  Elf_Internal_Chdr chdr;
 
-		  (void) get_compression_header (&chdr, buf);
+		  (void) get_compression_header (&chdr, buf, sizeof (buf));
 
 		  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
 		    printf ("       ZLIB, ");
@@ -12643,7 +12655,8 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 	{
 	  Elf_Internal_Chdr chdr;
 	  unsigned int compression_header_size
-	    = get_compression_header (& chdr, (unsigned char *) start);
+	    = get_compression_header (& chdr, (unsigned char *) start,
+				      num_bytes);
 
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
@@ -12777,7 +12790,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 	{
 	  Elf_Internal_Chdr chdr;
 	  unsigned int compression_header_size
-	    = get_compression_header (& chdr, start);
+	    = get_compression_header (& chdr, start, section_size);
 
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
@@ -12930,7 +12943,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	      return 0;
 	    }
 
-	  compression_header_size = get_compression_header (&chdr, start);
+	  compression_header_size = get_compression_header (&chdr, start, size);
 
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
