@@ -1,3 +1,8 @@
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.arch/i386-biarch-core.exp: Check for i386 arch support and
+	return if core file is not recognized.
+
 2017-02-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/new-ui.exp (do_test): Test queries behavior on main
