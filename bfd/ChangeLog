@@ -1,3 +1,9 @@
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21151
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Check for an invalid
+	unit length field.
+
 2017-02-07  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_finish_dynamic_sections): Only write PLT

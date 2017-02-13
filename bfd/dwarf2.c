@@ -4294,6 +4294,10 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	{
 	  bfd_byte * new_ptr;
 
+	  /* PR 21151  */
+	  if (stash->info_ptr + length > stash->info_ptr_end)
+	    return FALSE;
+
 	  each = parse_comp_unit (stash, length, info_ptr_unit,
 				  offset_size);
 	  if (!each)
