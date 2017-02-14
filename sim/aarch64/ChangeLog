@@ -1,5 +1,7 @@
 2017-02-14  Jim Wilson  <jim.wilson@linaro.org>
 
+	* simulator.c (do_vec_MLA): Rewrite switch body.
+
 	* simulator.c (do_vec_bit): Change loop limits from 16 and 8 to 4 and
 	2.  Move test_false if inside loop.  Fix logic for computing result
 	stored to vd.

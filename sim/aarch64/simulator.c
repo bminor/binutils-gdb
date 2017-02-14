@@ -3799,63 +3799,30 @@ do_vec_MLA (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      {
-	uint16_t a[16], b[16];
-
-	for (i = 0; i < (full ? 16 : 8); i++)
-	  {
-	    a[i] = aarch64_get_vec_u8 (cpu, vn, i);
-	    b[i] = aarch64_get_vec_u8 (cpu, vm, i);
-	  }
-	
-	for (i = 0; i < (full ? 16 : 8); i++)
-	  {
-	    uint16_t v = aarch64_get_vec_u8 (cpu, vd, i);
-
-	    aarch64_set_vec_u16 (cpu, vd, i, v + (a[i] * b[i]));
-	  }
-      }
+      for (i = 0; i < (full ? 16 : 8); i++)
+	aarch64_set_vec_u8 (cpu, vd, i,
+			    aarch64_get_vec_u8 (cpu, vd, i)
+			    + (aarch64_get_vec_u8 (cpu, vn, i)
+			       * aarch64_get_vec_u8 (cpu, vm, i)));
       return;
 
     case 1:
-      {
-	uint32_t a[8], b[8];
-
-	for (i = 0; i < (full ? 8 : 4); i++)
-	  {
-	    a[i] = aarch64_get_vec_u16 (cpu, vn, i);
-	    b[i] = aarch64_get_vec_u16 (cpu, vm, i);
-	  }
-	
-	for (i = 0; i < (full ? 8 : 4); i++)
-	  {
-	    uint32_t v = aarch64_get_vec_u16 (cpu, vd, i);
-
-	    aarch64_set_vec_u32 (cpu, vd, i, v + (a[i] * b[i]));
-	  }
-      }
+      for (i = 0; i < (full ? 8 : 4); i++)
+	aarch64_set_vec_u16 (cpu, vd, i,
+			     aarch64_get_vec_u16 (cpu, vd, i)
+			     + (aarch64_get_vec_u16 (cpu, vn, i)
+				* aarch64_get_vec_u16 (cpu, vm, i)));
       return;
 
     case 2:
-      {
-	uint64_t a[4], b[4];
-
-	for (i = 0; i < (full ? 4 : 2); i++)
-	  {
-	    a[i] = aarch64_get_vec_u32 (cpu, vn, i);
-	    b[i] = aarch64_get_vec_u32 (cpu, vm, i);
-	  }
-	
-	for (i = 0; i < (full ? 4 : 2); i++)
-	  {
-	    uint64_t v = aarch64_get_vec_u32 (cpu, vd, i);
-
-	    aarch64_set_vec_u64 (cpu, vd, i, v + (a[i] * b[i]));
-	  }
-      }
+      for (i = 0; i < (full ? 4 : 2); i++)
+	aarch64_set_vec_u32 (cpu, vd, i,
+			     aarch64_get_vec_u32 (cpu, vd, i)
+			     + (aarch64_get_vec_u32 (cpu, vn, i)
+				* aarch64_get_vec_u32 (cpu, vm, i)));
       return;
 
-    case 3:
+    default:
       HALT_UNALLOC;
     }
 }

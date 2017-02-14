@@ -1,5 +1,7 @@
 2017-02-14  Jim Wilson  <jim.wilson@linaro.org>
 
+	* mla.s: New.
+
 	* bit.s: New.
 
 	* ldn_single.s: New.
