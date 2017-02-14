@@ -1,3 +1,8 @@
+2017-02-14  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Add sfence.vma instruction and
+	pseudoinstructions.
+
 2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-tbl.h (OP_SVE_HMH, OP_SVE_VMU_HSD, OP_SVE_VMVU_HSD)
