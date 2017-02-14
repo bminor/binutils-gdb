@@ -4085,17 +4085,17 @@ do_vec_bit (sim_cpu *cpu)
   NYI_assert (15, 10, 0x07);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (test_false)
+  for (i = 0; i < (full ? 4 : 2); i++)
     {
-      for (i = 0; i < (full ? 16 : 8); i++)
-	if (aarch64_get_vec_u32 (cpu, vn, i) == 0)
-	  aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vm, i));
-    }
-  else
-    {
-      for (i = 0; i < (full ? 16 : 8); i++)
-	if (aarch64_get_vec_u32 (cpu, vn, i) != 0)
-	  aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vm, i));
+      uint32_t vd_val = aarch64_get_vec_u32 (cpu, vd, i);
+      uint32_t vn_val = aarch64_get_vec_u32 (cpu, vn, i);
+      uint32_t vm_val = aarch64_get_vec_u32 (cpu, vm, i);
+      if (test_false)
+	aarch64_set_vec_u32 (cpu, vd, i,
+			     (vd_val & vm_val) | (vn_val & ~vm_val));
+      else
+	aarch64_set_vec_u32 (cpu, vd, i,
+			     (vd_val & ~vm_val) | (vn_val & vm_val));
     }
 }
 
