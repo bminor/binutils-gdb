@@ -79,7 +79,8 @@ static void
 inf_ptrace_me (void)
 {
   /* "Trace me, Dr. Memory!"  */
-  ptrace (PT_TRACE_ME, 0, (PTRACE_TYPE_ARG3)0, 0);
+  if (ptrace (PT_TRACE_ME, 0, (PTRACE_TYPE_ARG3) 0, 0) < 0)
+    trace_start_error_with_name ("ptrace");
 }
 
 /* Start a new inferior Unix child process.  EXEC_FILE is the file to

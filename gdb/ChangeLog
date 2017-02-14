@@ -1,3 +1,16 @@
+2017-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16188
+	* darwin-nat.c (darwin_ptrace_me): Check if calls to system
+	calls succeeded.
+	* fork-child.c (trace_start_error): New function.
+	(trace_start_error_with_name): Likewise.
+	* gnu-nat.c (gnu_ptrace_me): Check if call to PTRACE succeeded.
+	* inf-ptrace.c (inf_ptrace_me): Likewise.
+	* inferior.h (trace_start_error): New prototype.
+	(trace_start_error_with_name): Likewise.
+
 2017-02-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21164

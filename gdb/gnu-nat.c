@@ -2126,7 +2126,7 @@ gnu_ptrace_me (void)
   struct inf *inf = cur_inf ();
   inf_debug (inf, "tracing self");
   if (ptrace (PTRACE_TRACEME) != 0)
-    error (_("ptrace (PTRACE_TRACEME) failed!"));
+    trace_start_error_with_name ("ptrace");
 }
 
 static void

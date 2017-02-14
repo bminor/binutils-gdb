@@ -1729,22 +1729,28 @@ darwin_ptrace_me (void)
   char c;
 
   /* Close write end point.  */
-  close (ptrace_fds[1]);
+  if (close (ptrace_fds[1]) < 0)
+    trace_start_error_with_name ("close");
 
   /* Wait until gdb is ready.  */
   res = read (ptrace_fds[0], &c, 1);
   if (res != 0)
-    error (_("unable to read from pipe, read returned: %d"), res);
-  close (ptrace_fds[0]);
+    trace_start_error (_("unable to read from pipe, read returned: %d"), res);
+
+  if (close (ptrace_fds[0]) < 0)
+    trace_start_error_with_name ("close");
 
   /* Get rid of privileges.  */
-  setegid (getgid ());
+  if (setegid (getgid ()) < 0)
+    trace_start_error_with_name ("setegid");
 
   /* Set TRACEME.  */
-  PTRACE (PT_TRACE_ME, 0, 0, 0);
+  if (PTRACE (PT_TRACE_ME, 0, 0, 0) < 0)
+    trace_start_error_with_name ("PTRACE");
 
   /* Redirect signals to exception port.  */
-  PTRACE (PT_SIGEXC, 0, 0, 0);
+  if (PTRACE (PT_SIGEXC, 0, 0, 0) < 0)
+    trace_start_error_with_name ("PTRACE");
 }
 
 /* Dummy function to be sure fork_inferior uses fork(2) and not vfork(2).  */
