@@ -1,5 +1,15 @@
 2017-02-16  Alan Modra  <amodra@gmail.com>
 
+	PR 21000
+	* elf-bfd.h (struct elf_backend_data): Add no_page_alias.
+	* elfxx-target.h (elf_backend_no_page_alias): Define.
+	(elfNN_bed): Init new field.
+	* elf.c (assign_file_positions_for_load_sections): If no_page_alias
+	ensure PT_LOAD segment starts on a new page.
+	* elf32-hppa.c (elf_backend_no_page_alias): Define.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
 	PR 21132
 	* elf32-hppa.c (allocate_plt_static): Allocate space for relocs
 	if pic.
