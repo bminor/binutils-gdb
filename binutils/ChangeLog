@@ -1,5 +1,12 @@
 2017-02-14  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21157
+	* stabs.c (parse_stab_enum_type): Check for corrupt NAME:VALUE
+	pairs.
+	(parse_number): Exit early if passed an empty string.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21155
 	* readelf.c (IN_RANGE): New macro.  Tests for an address + offset
 	being within a given range.
