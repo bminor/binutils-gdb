@@ -6413,11 +6413,12 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_HIDDEN
 	      && (!bfd_link_executable (info)
+		  || info->gc_keep_exported
 		  || info->export_dynamic
 		  || (eh->elf.dynamic
 		      && d != NULL
 		      && (*d->match) (&d->head, NULL, eh->elf.root.root.string)))
-	      && (strchr (eh->elf.root.root.string, ELF_VER_CHR) != NULL
+	      && (eh->elf.versioned >= versioned
 		  || !bfd_hide_sym_by_version (info->version_info,
 					       eh->elf.root.root.string)))))
     {
