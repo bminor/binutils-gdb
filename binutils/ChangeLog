@@ -1,5 +1,11 @@
 2017-02-14  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21158
+	* rddbg.c (read_symbol_stabs_debugging_info): Check for a null or
+	empty symbol name.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21157
 	* stabs.c (parse_stab_enum_type): Check for corrupt NAME:VALUE
 	pairs.
