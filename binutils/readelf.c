@@ -11596,6 +11596,9 @@ process_syminfo (FILE * file ATTRIBUTE_UNUSED)
   return 1;
 }
 
+#define IN_RANGE(START,END,ADDR,OFF)		\
+  (((ADDR) >= (START)) && ((ADDR) + (OFF) < (END)))
+
 /* Check to see if the given reloc needs to be handled in a target specific
    manner.  If so then process the reloc and return TRUE otherwise return
    FALSE.
@@ -11678,12 +11681,12 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 		    value = reloc->r_addend + (symtab[sym_index].st_value
 					       - saved_sym->st_value);
 
-		    if (start + reloc->r_offset + reloc_size >= end)
-		      /* PR 21137 */
-		      error (_("MSP430 sym diff reloc writes past end of section (%p vs %p)\n"),
-			     start + reloc->r_offset + reloc_size, end);
-		    else
+		    if (IN_RANGE (start, end, start + reloc->r_offset, reloc_size))
 		      byte_put (start + reloc->r_offset, value, reloc_size);
+		    else
+		      /* PR 21137 */
+		      error (_("MSP430 sym diff reloc contains invalid offset: 0x%lx\n"),
+			     (long) reloc->r_offset);
 		  }
 
 		saved_sym = NULL;
@@ -11737,11 +11740,11 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 		    value = reloc->r_addend + (symtab[sym_index].st_value
 					       - saved_sym->st_value);
 
-		    if (start + reloc->r_offset + reloc_size >= end)
-		      error (_("MN10300 sym diff reloc writes past end of section (%p vs %p)\n"),
-			     start + reloc->r_offset + reloc_size, end);
-		    else
+		    if (IN_RANGE (start, end, start + reloc->r_offset, reloc_size))
 		      byte_put (start + reloc->r_offset, value, reloc_size);
+		    else
+		      error (_("MN10300 sym diff reloc contains invalid offset: 0x%lx\n"),
+			     (long) reloc->r_offset);
 		  }
 
 		saved_sym = NULL;
@@ -11789,20 +11792,20 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	    break;
 
 	  case 0x41: /* R_RL78_ABS32.  */
-	    if (start + reloc->r_offset + 4 >= end)
-	      error (_("RL78 sym diff reloc writes past end of section (%p vs %p)\n"),
-		     start + reloc->r_offset + 2, end);
-	    else
+	    if (IN_RANGE (start, end, start + reloc->r_offset, 4))
 	      byte_put (start + reloc->r_offset, value, 4);
+	    else
+	      error (_("RL78 sym diff reloc contains invalid offset: 0x%lx\n"),
+		     (long) reloc->r_offset);
 	    value = 0;
 	    return TRUE;
 
 	  case 0x43: /* R_RL78_ABS16.  */
-	    if (start + reloc->r_offset + 2 >= end)
-	      error (_("RL78 sym diff reloc writes past end of section (%p vs %p)\n"),
-		     start + reloc->r_offset + 2, end);
-	    else
+	    if (IN_RANGE (start, end, start + reloc->r_offset, 2))
 	      byte_put (start + reloc->r_offset, value, 2);
+	    else
+	      error (_("RL78 sym diff reloc contains invalid offset: 0x%lx\n"),
+		     (long) reloc->r_offset);
 	    value = 0;
 	    return TRUE;
 
