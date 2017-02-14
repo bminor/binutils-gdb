@@ -1460,6 +1460,10 @@ struct elf_backend_data
      This field indicates whether this behavior is required.  */
   unsigned want_p_paddr_set_to_zero : 1;
 
+  /* Target has broken hardware and/or kernel that requires pages not
+     to be mapped twice with different permissions.  */
+  unsigned no_page_alias : 1;
+
   /* True if an object file lacking a .note.GNU-stack section
      should be assumed to be requesting exec stack.  At least one
      other file in the link needs to have a .note.GNU-stack section
