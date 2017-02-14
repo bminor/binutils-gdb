@@ -1,3 +1,7 @@
+2017-02-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/implptrpiece.exp: Fix check for big-endian targets.
+
 2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.linespec/explicit.c (my_unique_function_name): New function.
