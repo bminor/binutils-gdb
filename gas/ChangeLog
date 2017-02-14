@@ -1,3 +1,9 @@
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/cell.s: Correct invalid registers.
+	* testsuite/gas/ppc/vle-simple-1.s: Likewise.
+	* testsuite/gas/ppc/vle-simple-2.s: Likewise.
+
 2017-02-13  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (parse_ifimm_zero): Make prefix optional in unified
