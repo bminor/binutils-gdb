@@ -1,3 +1,9 @@
+2017-02-14  Andrew Waterman  <andrew@sifive.com>
+
+	* opcode/riscv-opc.h (MATCH_SFENCE_VMA): New define.
+	(MASK_SFENCE_VMA): Likewise.
+	(sfence_vma): Declare instruction.
+
 2017-02-14  Alan Modra  <amodra@gmail.com>
 
 	PR 21118
