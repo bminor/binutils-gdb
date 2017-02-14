@@ -1,3 +1,9 @@
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/cell.s: Correct invalid registers.
+	* testsuite/gas/ppc/vle-simple-1.s: Likewise.
+	* testsuite/gas/ppc/vle-simple-2.s: Likewise.
+
 2017-02-10  Nicholas Piggin  <npiggin@gmail.com>
 
 	* testsuite/gas/ppc/power9.d <scv, rfscv>: New tests.
