@@ -1,3 +1,9 @@
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* ppc-opc.c (powerpc_operands): Flag SPR, SPRG and TBR entries
+	with PPC_OPERAND_SPR.  Flag PSQ and PSQM with PPC_OPERAND_GQR.
+
 2017-02-11  Stafford Horne  <shorne@gmail.com>
 	    Alan Modra  <amodra@gmail.com>
 

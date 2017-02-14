@@ -667,7 +667,7 @@ const struct powerpc_operand powerpc_operands[] =
 #define PMR SPR
 #define TMR SPR
 #define SPR_MASK (0x3ff << 11)
-  { 0x3ff, 11, insert_spr, extract_spr, 0 },
+  { 0x3ff, 11, insert_spr, extract_spr, PPC_OPERAND_SPR },
 
   /* The BAT index number in an XFX form m[ft]ibat[lu] instruction.  */
 #define SPRBAT SPR + 1
@@ -676,7 +676,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The SPRG register number in an XFX form m[ft]sprg instruction.  */
 #define SPRG SPRBAT + 1
-  { 0x1f, 16, insert_sprg, extract_sprg, 0 },
+  { 0x1f, 16, insert_sprg, extract_sprg, PPC_OPERAND_SPR },
 
   /* The SR field in an X form instruction.  */
 #define SR SPRG + 1
@@ -704,7 +704,7 @@ const struct powerpc_operand powerpc_operands[] =
      field, but it is optional.  */
 #define TBR SV + 1
   { 0x3ff, 11, insert_tbr, extract_tbr,
-    PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+    PPC_OPERAND_SPR | PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
   /* If the TBR operand is ommitted, use the value 268.  */
   { -1, 268, NULL, NULL, 0},
 
@@ -806,11 +806,11 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* IDX bits for quantization in the pair singles instructions.  */
 #define PSQ PSWM + 1
-  {  0x7, 12, 0, 0, 0 },
+  {  0x7, 12, 0, 0, PPC_OPERAND_GQR },
 
   /* IDX bits for quantization in the pair singles x-type instructions.  */
 #define PSQM PSQ + 1
-  {  0x7, 7, 0, 0, 0 },
+  {  0x7, 7, 0, 0, PPC_OPERAND_GQR },
 
   /* Smaller D field for quantization in the pair singles instructions.  */
 #define PSD PSQM + 1

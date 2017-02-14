@@ -1,5 +1,21 @@
 2017-02-14  Alan Modra  <amodra@gmail.com>
 
+	PR 21118
+	* NEWS: Mention powerpc register checks.
+	* config/tc-ppc.c (struct pd_reg): Make value a short.  Add flags.
+	(pre_defined_registers): Delete fpscr and pmr entries.  Set
+	register type in flags.
+	(cr_names): Set type in flags.
+	(reg_name_search): Return pointer to struct pd_reg rather than value.
+	(register_name): Adjust to suit.  Set X_md from flags.
+	(ppc_parse_name): Likewise.
+	(ppc_optimize_expr): New function.
+	(md_assemble): Verify expresion reg flags match operand.
+	* config/tc-ppc.h (md_optimize_expr): Define.
+	(ppc_optimize_expr): Declare.
+
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/cell.s: Correct invalid registers.
 	* testsuite/gas/ppc/vle-simple-1.s: Likewise.
 	* testsuite/gas/ppc/vle-simple-2.s: Likewise.

@@ -1,3 +1,9 @@
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* opcode/ppc.h (PPC_OPERAND_*): Reassign values, regs first.
+	(PPC_OPERAND_SPR, PPC_OPERAND_GQR): Define.
+
 2017-01-24  Dimitar Dimitrov  <dimitar@dinux.eu>
 
         * opcode/hppa.h: Clarify that file is part of GNU opcodes.

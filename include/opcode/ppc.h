@@ -301,86 +301,70 @@ extern const unsigned int num_powerpc_operands;
      goes in the insn.  */
 #define PPC_OPSHIFT_INV (-1U << 31)
 
-/* Values defined for the flags field of a struct powerpc_operand.  */
+/* Values defined for the flags field of a struct powerpc_operand.
+   Keep the register bits low:  They need to fit in an unsigned short.  */
+
+/* This operand names a register.  The disassembler uses this to print
+   register names with a leading 'r'.  */
+#define PPC_OPERAND_GPR (0x1)
+
+/* Like PPC_OPERAND_GPR, but don't print a leading 'r' for r0.  */
+#define PPC_OPERAND_GPR_0 (0x2)
+
+/* This operand names a floating point register.  The disassembler
+   prints these with a leading 'f'.  */
+#define PPC_OPERAND_FPR (0x4)
+
+/* This operand names a vector unit register.  The disassembler
+   prints these with a leading 'v'.  */
+#define PPC_OPERAND_VR (0x8)
+
+/* This operand names a vector-scalar unit register.  The disassembler
+   prints these with a leading 'vs'.  */
+#define PPC_OPERAND_VSR (0x10)
+
+/* This operand may use the symbolic names for the CR fields (even
+   without -mregnames), which are
+       lt  0	gt  1	eq  2	so  3	un  3
+       cr0 0	cr1 1	cr2 2	cr3 3
+       cr4 4	cr5 5	cr6 6	cr7 7
+   These may be combined arithmetically, as in cr2*4+gt.  These are
+   only supported on the PowerPC, not the POWER.  */
+#define PPC_OPERAND_CR_BIT (0x20)
+
+/* This is a CR FIELD that does not use symbolic names (unless
+   -mregnames is in effect).  */
+#define PPC_OPERAND_CR_REG (0x40)
+
+/* This operand names a special purpose register.  */
+#define PPC_OPERAND_SPR (0x80)
+
+/* This operand names a paired-single graphics quantization register.  */
+#define PPC_OPERAND_GQR (0x100)
+
+/* This operand is a relative branch displacement.  The disassembler
+   prints these symbolically if possible.  */
+#define PPC_OPERAND_RELATIVE (0x200)
+
+/* This operand is an absolute branch address.  The disassembler
+   prints these symbolically if possible.  */
+#define PPC_OPERAND_ABSOLUTE (0x400)
 
 /* This operand takes signed values.  */
-#define PPC_OPERAND_SIGNED (0x1)
+#define PPC_OPERAND_SIGNED (0x800)
 
 /* This operand takes signed values, but also accepts a full positive
    range of values when running in 32 bit mode.  That is, if bits is
    16, it takes any value from -0x8000 to 0xffff.  In 64 bit mode,
    this flag is ignored.  */
-#define PPC_OPERAND_SIGNOPT (0x2)
-
-/* This operand does not actually exist in the assembler input.  This
-   is used to support extended mnemonics such as mr, for which two
-   operands fields are identical.  The assembler should call the
-   insert function with any op value.  The disassembler should call
-   the extract function, ignore the return value, and check the value
-   placed in the valid argument.  */
-#define PPC_OPERAND_FAKE (0x4)
+#define PPC_OPERAND_SIGNOPT (0x1000)
 
 /* The next operand should be wrapped in parentheses rather than
    separated from this one by a comma.  This is used for the load and
    store instructions which want their operands to look like
        reg,displacement(reg)
    */
-#define PPC_OPERAND_PARENS (0x8)
-
-/* This operand may use the symbolic names for the CR fields, which
-   are
-       lt  0	gt  1	eq  2	so  3	un  3
-       cr0 0	cr1 1	cr2 2	cr3 3
-       cr4 4	cr5 5	cr6 6	cr7 7
-   These may be combined arithmetically, as in cr2*4+gt.  These are
-   only supported on the PowerPC, not the POWER.  */
-#define PPC_OPERAND_CR_BIT (0x10)
-
-/* This operand names a register.  The disassembler uses this to print
-   register names with a leading 'r'.  */
-#define PPC_OPERAND_GPR (0x20)
-
-/* Like PPC_OPERAND_GPR, but don't print a leading 'r' for r0.  */
-#define PPC_OPERAND_GPR_0 (0x40)
-
-/* This operand names a floating point register.  The disassembler
-   prints these with a leading 'f'.  */
-#define PPC_OPERAND_FPR (0x80)
-
-/* This operand is a relative branch displacement.  The disassembler
-   prints these symbolically if possible.  */
-#define PPC_OPERAND_RELATIVE (0x100)
-
-/* This operand is an absolute branch address.  The disassembler
-   prints these symbolically if possible.  */
-#define PPC_OPERAND_ABSOLUTE (0x200)
-
-/* This operand is optional, and is zero if omitted.  This is used for
-   example, in the optional BF field in the comparison instructions.  The
-   assembler must count the number of operands remaining on the line,
-   and the number of operands remaining for the opcode, and decide
-   whether this operand is present or not.  The disassembler should
-   print this operand out only if it is not zero.  */
-#define PPC_OPERAND_OPTIONAL (0x400)
-
-/* This flag is only used with PPC_OPERAND_OPTIONAL.  If this operand
-   is omitted, then for the next operand use this operand value plus
-   1, ignoring the next operand field for the opcode.  This wretched
-   hack is needed because the Power rotate instructions can take
-   either 4 or 5 operands.  The disassembler should print this operand
-   out regardless of the PPC_OPERAND_OPTIONAL field.  */
-#define PPC_OPERAND_NEXT (0x800)
-
-/* This operand should be regarded as a negative number for the
-   purposes of overflow checking (i.e., the normal most negative
-   number is disallowed and one more than the normal most positive
-   number is allowed).  This flag will only be set for a signed
-   operand.  */
-#define PPC_OPERAND_NEGATIVE (0x1000)
-
-/* This operand names a vector unit register.  The disassembler
-   prints these with a leading 'v'.  */
-#define PPC_OPERAND_VR (0x2000)
+#define PPC_OPERAND_PARENS (0x2000)
 
 /* This operand is for the DS field in a DS form instruction.  */
 #define PPC_OPERAND_DS (0x4000)
@@ -388,29 +372,53 @@ extern const unsigned int num_powerpc_operands;
 /* This operand is for the DQ field in a DQ form instruction.  */
 #define PPC_OPERAND_DQ (0x8000)
 
+/* This operand should be regarded as a negative number for the
+   purposes of overflow checking (i.e., the normal most negative
+   number is disallowed and one more than the normal most positive
+   number is allowed).  This flag will only be set for a signed
+   operand.  */
+#define PPC_OPERAND_NEGATIVE (0x10000)
+
 /* Valid range of operand is 0..n rather than 0..n-1.  */
-#define PPC_OPERAND_PLUS1 (0x10000)
+#define PPC_OPERAND_PLUS1 (0x20000)
 
-/* Xilinx APU and FSL related operands */
-#define PPC_OPERAND_FSL (0x20000)
-#define PPC_OPERAND_FCR (0x40000)
-#define PPC_OPERAND_UDI (0x80000)
+/* This operand does not actually exist in the assembler input.  This
+   is used to support extended mnemonics such as mr, for which two
+   operands fields are identical.  The assembler should call the
+   insert function with any op value.  The disassembler should call
+   the extract function, ignore the return value, and check the value
+   placed in the valid argument.  */
+#define PPC_OPERAND_FAKE (0x40000)
 
-/* This operand names a vector-scalar unit register.  The disassembler
-   prints these with a leading 'vs'.  */
-#define PPC_OPERAND_VSR (0x100000)
+/* This operand is optional, and is zero if omitted.  This is used for
+   example, in the optional BF field in the comparison instructions.  The
+   assembler must count the number of operands remaining on the line,
+   and the number of operands remaining for the opcode, and decide
+   whether this operand is present or not.  The disassembler should
+   print this operand out only if it is not zero.  */
+#define PPC_OPERAND_OPTIONAL (0x80000)
 
-/* This is a CR FIELD that does not use symbolic names.  */
-#define PPC_OPERAND_CR_REG (0x200000)
+/* This flag is only used with PPC_OPERAND_OPTIONAL.  If this operand
+   is omitted, then for the next operand use this operand value plus
+   1, ignoring the next operand field for the opcode.  This wretched
+   hack is needed because the Power rotate instructions can take
+   either 4 or 5 operands.  The disassembler should print this operand
+   out regardless of the PPC_OPERAND_OPTIONAL field.  */
+#define PPC_OPERAND_NEXT (0x100000)
 
 /* This flag is only used with PPC_OPERAND_OPTIONAL.  If this operand
    is omitted, then the value it should use for the operand is stored
    in the SHIFT field of the immediatly following operand field.  */
-#define PPC_OPERAND_OPTIONAL_VALUE (0x400000)
+#define PPC_OPERAND_OPTIONAL_VALUE (0x200000)
 
 /* This flag is only used with PPC_OPERAND_OPTIONAL.  The operand is
    only optional when generating 32-bit code.  */
-#define PPC_OPERAND_OPTIONAL32 (0x800000)
+#define PPC_OPERAND_OPTIONAL32 (0x400000)
+
+/* Xilinx APU and FSL related operands */
+#define PPC_OPERAND_FSL (0x800000)
+#define PPC_OPERAND_FCR (0x1000000)
+#define PPC_OPERAND_UDI (0x2000000)
 
 /* The POWER and PowerPC assemblers use a few macros.  We keep them
    with the operands table for simplicity.  The macro table is an
