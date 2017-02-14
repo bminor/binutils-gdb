@@ -12706,6 +12706,8 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 	      return;
 	    }
 	}
+      else
+	start = real_start;
     }
 
   /* If the section being dumped has relocations against it the user might
@@ -12840,14 +12842,19 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 	{
 	  if (uncompress_section_contents (& start, uncompressed_size,
 					   & new_size))
-	    section_size = new_size;
+	    {
+	      section_size = new_size;
+	    }
 	  else
 	    {
 	      error (_("Unable to decompress section %s\n"),
 		     printable_section_name (section));
+	      /* FIXME: Print the section anyway ?  */
 	      return;
 	    }
 	}
+      else
+	start = real_start;
     }
 
   if (relocate)
@@ -13014,6 +13021,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	      return 0;
 	    }
 	}
+
       section->size = size;
     }
 

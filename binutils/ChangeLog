@@ -1,5 +1,12 @@
 2017-02-14  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21159
+	* readelf.c (dump_section_as_strings): Reset the start address if
+	no decompression is perfromed.
+	(dump_section_as_bytes): Likewise.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21158
 	* rddbg.c (read_symbol_stabs_debugging_info): Check for a null or
 	empty symbol name.
