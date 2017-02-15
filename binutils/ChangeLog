@@ -1,3 +1,8 @@
+2017-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: (MIPS, MN10300): Move Eric Christopher to Past
+	Maintainers section.
+
 2017-02-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21159
