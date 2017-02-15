@@ -1,3 +1,9 @@
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21168
+	* elf32-i386.c (elf_i386_relocate_section): Allow
+	"lea foo@GOT, %reg" in PIC.
+
 2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* bfd/elfxx-mips.c (_bfd_mips_post_process_headers): Revert
