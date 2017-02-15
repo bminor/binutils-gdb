@@ -1,5 +1,11 @@
 2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21168
+	* elf32-i386.c (elf_i386_relocate_section): Allow
+	"lea foo@GOT, %reg" in PIC.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20244
 	* elf32-i386.c (elf_i386_relocate_section): Properly get IFUNC
 	symbol name when reporting R_386_GOT32/R_386_GOT32X relocation

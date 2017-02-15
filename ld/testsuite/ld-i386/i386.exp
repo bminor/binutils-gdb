@@ -835,6 +835,20 @@ if { [isnative]
 	    "-fPIC -O2 -g" \
 	    { ifunc-1a.c ifunc-1b.S ifunc-1c.S ifunc-1d.S } \
 	] \
+	[list \
+	    "Build pr21168a.o" \
+	    "" \
+	    "" \
+	    { pr21168a.c } \
+	] \
+	[list \
+	    "Build pr21168.so" \
+	    "-shared" \
+	    "" \
+	    { pr21168b.S } \
+	    "" \
+	    "pr21168.so" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -854,6 +868,14 @@ if { [isnative]
 	    "" \
 	    { dummy.c } \
 	    "ifunc-1b" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr21168" \
+	    "tmpdir/pr21168a.o tmpdir/pr21168.so" \
+	    "" \
+	    { dummy.c } \
+	    "pr21168" \
 	    "pass.out" \
 	] \
     ]

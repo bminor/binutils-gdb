@@ -1,5 +1,12 @@
 2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21168
+	* testsuite/ld-i386/i386.exp: Run pr21168.
+	* testsuite/ld-i386/pr21168a.c: New file.
+	* testsuite/ld-i386/pr21168b.S: Likewise.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20244
 	* testsuite/ld-i386/i386.exp: Run pr20244-4a, pr20244-4b and
 	pr20244-4c.
