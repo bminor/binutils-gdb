@@ -1,3 +1,11 @@
+2017-02-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21164
+	* psymtab.c (maintenance_print_psymbols): Verify if 'argv' is not
+	NULL before using it.
+	* symmisc.c (maintenance_print_symbols): Likewise.
+	(maintenance_print_msymbols): Likewise.
+
 2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* NEWS: Add record Python bindings entry.
