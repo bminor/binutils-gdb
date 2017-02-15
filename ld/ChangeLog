@@ -1,3 +1,9 @@
+2017-02-15  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* testsuite/ld-scripts/sysroot-prefix.exp
+	(get_base_dir_for_scripts): New function.
+	(run_sysroot_prefix_test): Use get_base_dir_for_scripts.
+
 2017-02-13  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Change
