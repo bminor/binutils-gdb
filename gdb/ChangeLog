@@ -1,3 +1,82 @@
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* NEWS: Add record Python bindings entry.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-record-btrace.o,
+	py-record-full.o.
+	(SUBDIR_PYTHON_SRCS): Add py-record-btrace.c, py-record-full.c.
+	* python/py-record-btrace.c, python/py-record-btrace.h,
+	python/py-record-full.c, python/py-record-full.h: New file.
+	* python/py-record.c: Add include for py-record-btrace.h and
+	py-record-full.h.
+	(recpy_method, recpy_format, recpy_goto, recpy_replay_position,
+	recpy_instruction_history, recpy_function_call_history, recpy_begin,
+	recpy_end): Use functions from py-record-btrace.c and py-record-full.c.
+	* python/python-internal.h (PyInt_FromSsize_t, PyInt_AsSsize_t):
+	New definition.
+	(gdbpy_initialize_btrace): New export.
+	* python/python.c (_initialize_python): Add gdbpy_initialize_btrace.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python/py-record.o.
+	(SUBDIR_PYTHON_SRCS): Add python/py-record.c.
+	* python/py-record.c: New file.
+	* python/python-internal.h (gdbpy_start_recording,
+	gdbpy_current_recording, gdpy_stop_recording,
+	gdbpy_initialize_record): New export.
+	* python/python.c (_initialize_python): Add gdbpy_initialize_record.
+	(python_GdbMethods): Add gdbpy_start_recording,
+	gdbpy_current_recording and gdbpy_stop_recording.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* record-btrace.c (record_btrace_record_method): New function.
+	(init_record_btrace_ops): Initialize to_record_method.
+	* record-full.c (record_full_record_method): New function.
+	(init_record_full_ops, init_record_full_core_ops): Add
+	record_full_record_method.
+	* record.h (enum record_method): New enum.
+	* target-debug.h (target_debug_print_enum_record_method: New define.
+	* target-delegates.c: Regenerate.
+	* target.c (target_record_method): New function.
+	* target.h: Include record.h.
+	(struct target_ops) <to_record_method>: New field.
+	(target_record_method): New export.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* record.h (record_start, record_stop): New export.
+	* record.c (record_start, record_stop): New function.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch): Copy function call segments pointer
+	into a vector.
+	(btrace_clear): Clear the vector.
+	(btrace_find_insn_by_number): Use binary search to find the correct
+	function call segment.
+	* btrace.h (brace_fun_p): New typedef.
+	(struct btrace_thread_info) <functions>: New field.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* record-btrace.c (btrace_ui_out_decode_error): Move most of it ...
+	* btrace.c (btrace_decode_error): ... here.  New function.
+	* btrace.h (btrace_decode_error): New export.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_call_num_insn, btrace_insn_get_error): New function.
+	(ftrace_new_function, btrace_insn_number, btrace_insn_cmp,
+	btrace_find_insn_by_number): Remove special case for gaps.
+	* btrace.h (btrace_insn_get_error): New export.
+	(btrace_insn_number, btrace_find_insn_by_number): Adjust comment.
+	* record-btrace.c (btrace_insn_history): Print number for gaps.
+	(record_btrace_info, record_btrace_goto): Handle gaps.
+
 2017-02-14  Tom Tromey  <tom@tromey.com>
 
 	PR python/13598:
