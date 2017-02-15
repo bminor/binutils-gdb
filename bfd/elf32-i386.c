@@ -4355,7 +4355,7 @@ r_386_got32:
 		  const char *name;
 
 disallow_got32:
-		  if (h == NULL)
+		  if (h == NULL || h->root.root.string == NULL)
 		    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
 					     NULL);
 		  else

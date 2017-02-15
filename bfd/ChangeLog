@@ -1,3 +1,11 @@
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): Properly get IFUNC
+	symbol name when reporting R_386_GOT32/R_386_GOT32X relocation
+	error against local IFUNC symbol without a base register for
+	PIC.
+
 2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Use `%H:' rather than

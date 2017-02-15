@@ -1,3 +1,13 @@
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* testsuite/ld-i386/i386.exp: Run pr20244-4a, pr20244-4b and
+	pr20244-4c.
+	* testsuite/ld-i386/pr20244-4.s: New file.
+	* testsuite/ld-i386/pr20244-4a.d: Likewise.
+	* testsuite/ld-i386/pr20244-4b.d: Likewise.
+	* testsuite/ld-i386/pr20244-4c.d: Likewise.
+
 2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* ldmisc.c (vfinfo): Don't print the function name again either
