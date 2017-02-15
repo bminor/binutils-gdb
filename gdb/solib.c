@@ -1567,14 +1567,25 @@ gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
 	   entry.  */
 	if (ptr)
 	  {
+#if 0
 	    struct type *ptr_type;
+#else
+	    enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+#endif
 	    gdb_byte ptr_buf[8];
 	    CORE_ADDR ptr_addr_1;
 
+#if 0
 	    ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+#endif
 	    ptr_addr_1 = dyn_addr + (buf - bufstart) + arch_size / 8;
 	    if (target_read_memory (ptr_addr_1, ptr_buf, arch_size / 8) == 0)
+#if 0
 	      dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
+#else
+	      dyn_ptr = extract_unsigned_integer (ptr_buf, arch_size / 8,
+						  byte_order);
+#endif
 	    *ptr = dyn_ptr;
 	    if (ptr_addr)
 	      *ptr_addr = dyn_addr + (buf - bufstart);
