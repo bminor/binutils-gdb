@@ -12334,7 +12334,6 @@ Target_mips<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_MIPS_COPY:
     case elfcpp::R_MIPS_JUMP_SLOT:
     default:
-      gold_unreachable();
       // Not expected.  We will give an error later.
       return 0;
     }

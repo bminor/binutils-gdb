@@ -1,16 +1,21 @@
 2017-02-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
+	* mips.cc (Target_mips::Scan::get_reference_flags): Remove
+	gold_unreachable from default case.
+
+2017-02-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
 	PR gold/21111
-        * mips.cc (Mips_relocate_functions::relhigher): New method.
-        (Mips_relocate_functions::relhighest): Likewise.
-        (mips_get_size_for_reloc): Add support for relocs: R_MIPS_HIGHER and
-        R_MIPS_HIGHEST.
-        (Target_mips::Scan::local): Add support for relocs: R_MIPS_HIGHER,
-        R_MIPS_HIGHEST, R_MICROMIPS_HIGHER and R_MICROMIPS_HIGHEST.
-        (Target_mips::Scan::global): Likewise.
-        (Target_mips::Scan::get_reference_flags): Likewise.
-        (Target_mips::Relocate::relocate): Call static methods for resolving
-        HIGHER and HIGHEST relocations.
+	* mips.cc (Mips_relocate_functions::relhigher): New method.
+	(Mips_relocate_functions::relhighest): Likewise.
+	(mips_get_size_for_reloc): Add support for relocs: R_MIPS_HIGHER and
+	R_MIPS_HIGHEST.
+	(Target_mips::Scan::local): Add support for relocs: R_MIPS_HIGHER,
+	R_MIPS_HIGHEST, R_MICROMIPS_HIGHER and R_MICROMIPS_HIGHEST.
+	(Target_mips::Scan::global): Likewise.
+	(Target_mips::Scan::get_reference_flags): Likewise.
+	(Target_mips::Relocate::relocate): Call static methods for resolving
+	HIGHER and HIGHEST relocations.
 
 2017-02-03  Rahul Chaudhry  <rahulchaudhry@google.com>
 
