@@ -1,5 +1,26 @@
 2017-12-01  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/21090
+	* incremental.cc (Sized_relobj_incr::do_relocate): Fix comment.
+	* options.cc (General_options::finalize): Disallow -pie with
+	incremental linking.
+	* x86_64.cc (Target_x86_64::Scan::local): Don't do mov-to-lea
+	or callq-to-direct optimizations for incremental links.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate): Likewise.
+	* testsuite/Makefile.am (incremental_test): Force -no-pie.
+	(incremental_test_2): Likewise.
+	(incremental_test_3): Likewise.
+	(incremental_test_4): Likewise.
+	(incremental_test_5): Likewise.
+	(incremental_test_6): Likewise.
+	(incremental_copy_test): Likewise.
+	(incremental_common_test_1): Likewise.
+	(incremental_comdat_test_1):  Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
+2017-12-01  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/21841
 	* testsuite/debug_msg.sh: Adjust expected line numbers.
 	* testsuite/odr_violation2.cc (DummyFunction): New function.
