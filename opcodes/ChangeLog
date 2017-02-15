@@ -1,3 +1,8 @@
+2017-02-15  Vineet Gupta <vgupta@synopsys.com>
+
+	* arc-regs.h: Distinguish some of the registers different on
+	ARC700 and HS38 cpus.
+
 2017-02-14  Alan Modra  <amodra@gmail.com>
 
 	PR 21118
