@@ -1,3 +1,19 @@
+2017-02-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-opc.c (UIMM6_20R): Define.
+	(SIMM12_20): Use above.
+	(SIMM12_20R): Define.
+	(SIMM3_5_S): Use above.
+	(UIMM7_A32_11R_S): Define.
+	(UIMM7_9_S): Use above.
+	(UIMM3_13R_S): Define.
+	(SIMM11_A32_7_S): Use above.
+	(SIMM9_8R): Define.
+	(UIMM10_A32_8_S): Use above.
+	(UIMM8_8R_S): Define.
+	(W6): Use above.
+	(arc_relax_opcodes): Use all above defines.
+
 2017-02-15  Vineet Gupta <vgupta@synopsys.com>
 
 	* arc-regs.h: Distinguish some of the registers different on
