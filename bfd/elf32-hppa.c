@@ -1976,6 +1976,8 @@ allocate_plt_static (struct elf_link_hash_entry *eh, void *inf)
 	  sec = htab->etab.splt;
 	  eh->plt.offset = sec->size;
 	  sec->size += PLT_ENTRY_SIZE;
+	  if (bfd_link_pic (info))
+	    htab->etab.srelplt->size += sizeof (Elf32_External_Rela);
 	}
       else
 	{
