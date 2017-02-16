@@ -1,3 +1,9 @@
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	PR 21132
+	* elf32-hppa.c (allocate_plt_static): Allocate space for relocs
+	if pic.
+
 2017-02-16  Jiong Wang <jiong.wang@arm.com>
 
 	* bfd.c (BFD_FLAGS_SAVED): Add BFD_LINKER_CREATED.
