@@ -59,7 +59,7 @@ py_varobj_iter_next (struct varobj_iter *self)
 
   gdbpy_enter_varobj enter_py (self->var);
 
-  gdbpy_ref item (PyIter_Next (t->iter));
+  gdbpy_ref<> item (PyIter_Next (t->iter));
 
   if (item == NULL)
     {
@@ -170,8 +170,8 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer)
   if (!PyObject_HasAttr (printer, gdbpy_children_cst))
     return NULL;
 
-  gdbpy_ref children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-						  NULL));
+  gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
+						    NULL));
   if (children == NULL)
     {
       gdbpy_print_stack ();

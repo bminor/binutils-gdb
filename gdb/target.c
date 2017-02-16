@@ -3789,6 +3789,14 @@ target_delete_record (void)
 
 /* See target.h.  */
 
+enum record_method
+target_record_method (ptid_t ptid)
+{
+  return current_target.to_record_method (&current_target, ptid);
+}
+
+/* See target.h.  */
+
 int
 target_record_is_replaying (ptid_t ptid)
 {

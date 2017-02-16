@@ -1,3 +1,78 @@
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Perform symbol lookup
+	before trying to fine matching file and line information.
+
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add orig_bfd member.
+	(_bfd_dwarf2_slurp_debug_info): If stashed debug information does
+	not match current bfd, then reload debug information.  Record bfd
+	we're loading debug info for in the stash.  If we have debug
+	informatin in the cache then perform section placement before
+	returning.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	PR 21000
+	* elf-bfd.h (struct elf_backend_data): Add no_page_alias.
+	* elfxx-target.h (elf_backend_no_page_alias): Define.
+	(elfNN_bed): Init new field.
+	* elf.c (assign_file_positions_for_load_sections): If no_page_alias
+	ensure PT_LOAD segment starts on a new page.
+	* elf32-hppa.c (elf_backend_no_page_alias): Define.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	PR 21132
+	* elf32-hppa.c (allocate_plt_static): Allocate space for relocs
+	if pic.
+
+2017-02-16  Jiong Wang <jiong.wang@arm.com>
+
+	* bfd.c (BFD_FLAGS_SAVED): Add BFD_LINKER_CREATED.
+	* bfd-in2.h: Regenerated.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21168
+	* elf32-i386.c (elf_i386_relocate_section): Allow
+	"lea foo@GOT, %reg" in PIC.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* elf32-i386.c (elf_i386_relocate_section): Properly get IFUNC
+	symbol name when reporting R_386_GOT32/R_386_GOT32X relocation
+	error against local IFUNC symbol without a base register for
+	PIC.
+
+2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Use `%H:' rather than
+	`%P: %H:' with `info->callbacks->einfo'.
+	(ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_edit_toc): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Support
+	--gc-keep-exported, and test versioned field of sym rather than
+	looking for @ in name.
+
+2017-02-13  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (riscv_global_pointer_value): Change _gp to
+	__global_pointer$.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21151
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Check for an invalid
+	unit length field.
+
 2017-02-07  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_finish_dynamic_sections): Only write PLT

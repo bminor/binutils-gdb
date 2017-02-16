@@ -24,6 +24,7 @@
 #include "python-internal.h"
 #include "objfiles.h"
 #include "block.h"
+#include "py-ref.h"
 
 typedef struct stpy_symtab_object {
   PyObject_HEAD
@@ -436,19 +437,14 @@ symtab_to_symtab_object (struct symtab *symtab)
 PyObject *
 symtab_and_line_to_sal_object (struct symtab_and_line sal)
 {
-  sal_object *sal_obj;
-
-  sal_obj = PyObject_New (sal_object, &sal_object_type);
-  if (sal_obj)
+  gdbpy_ref<sal_object> sal_obj (PyObject_New (sal_object, &sal_object_type));
+  if (sal_obj != NULL)
     {
-      if (set_sal (sal_obj, sal) < 0)
-	{
-	  Py_DECREF (sal_obj);
-	  return NULL;
-	}
+      if (set_sal (sal_obj.get (), sal) < 0)
+	return NULL;
     }
 
-  return (PyObject *) sal_obj;
+  return (PyObject *) sal_obj.release ();
 }
 
 /* Return struct symtab_and_line reference that is wrapped by this

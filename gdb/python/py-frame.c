@@ -28,6 +28,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "user-regs.h"
+#include "py-ref.h"
 
 typedef struct {
   PyObject_HEAD
@@ -359,9 +360,8 @@ frapy_function (PyObject *self, PyObject *args)
 PyObject *
 frame_info_to_frame_object (struct frame_info *frame)
 {
-  frame_object *frame_obj;
-
-  frame_obj = PyObject_New (frame_object, &frame_object_type);
+  gdbpy_ref<frame_object> frame_obj (PyObject_New (frame_object,
+						   &frame_object_type));
   if (frame_obj == NULL)
     return NULL;
 
@@ -387,13 +387,12 @@ frame_info_to_frame_object (struct frame_info *frame)
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      Py_DECREF (frame_obj);
       gdbpy_convert_exception (except);
       return NULL;
     }
   END_CATCH
 
-  return (PyObject *) frame_obj;
+  return (PyObject *) frame_obj.release ();
 }
 
 /* Implementation of gdb.Frame.older (self) -> gdb.Frame.

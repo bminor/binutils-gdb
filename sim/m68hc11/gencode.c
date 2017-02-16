@@ -24,9 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <errno.h>
 
 #include "ansidecl.h"
+#include "libiberty.h"
 #include "opcode/m68hc11.h"
-
-#define TABLE_SIZE(X)	    (sizeof(X) / sizeof(X[0]))
 
 /* Combination of CCR flags.  */
 #define M6811_ZC_BIT	M6811_Z_BIT|M6811_C_BIT
@@ -1812,7 +1811,7 @@ find_opcode_pattern (const struct m6811_opcode_def *opcode)
     {
       pattern = opcode->name;
     }
-  for (i = 0; i < TABLE_SIZE(m6811_opcode_patterns); i++)
+  for (i = 0; i < ARRAY_SIZE (m6811_opcode_patterns); i++)
     {
       if (strcmp (m6811_opcode_patterns[i].name, pattern) == 0)
 	{
@@ -2036,13 +2035,13 @@ gen_interpreter (FILE *fp)
 {
   int col = 0;
 
-  prepare_table (m6811_page1_opcodes, TABLE_SIZE (m6811_page1_opcodes));
-  prepare_table (m6811_page2_opcodes, TABLE_SIZE (m6811_page2_opcodes));
-  prepare_table (m6811_page3_opcodes, TABLE_SIZE (m6811_page3_opcodes));
-  prepare_table (m6811_page4_opcodes, TABLE_SIZE (m6811_page4_opcodes));
+  prepare_table (m6811_page1_opcodes, ARRAY_SIZE (m6811_page1_opcodes));
+  prepare_table (m6811_page2_opcodes, ARRAY_SIZE (m6811_page2_opcodes));
+  prepare_table (m6811_page3_opcodes, ARRAY_SIZE (m6811_page3_opcodes));
+  prepare_table (m6811_page4_opcodes, ARRAY_SIZE (m6811_page4_opcodes));
 
-  prepare_table (m6812_page1_opcodes, TABLE_SIZE (m6812_page1_opcodes));
-  prepare_table (m6812_page2_opcodes, TABLE_SIZE (m6812_page2_opcodes));
+  prepare_table (m6812_page1_opcodes, ARRAY_SIZE (m6812_page1_opcodes));
+  prepare_table (m6812_page2_opcodes, ARRAY_SIZE (m6812_page2_opcodes));
 
   /* Generate header of interpretor.  */
   print (fp, col, "/* File generated automatically by gencode. */\n");
@@ -2051,25 +2050,25 @@ gen_interpreter (FILE *fp)
   if (cpu_type & cpu6811)
     {
       gen_cycle_table (fp, "cycles_page1", m6811_page1_opcodes,
-		       TABLE_SIZE (m6811_page1_opcodes));
+		       ARRAY_SIZE (m6811_page1_opcodes));
       gen_cycle_table (fp, "cycles_page2", m6811_page2_opcodes,
-		       TABLE_SIZE (m6811_page2_opcodes));
+		       ARRAY_SIZE (m6811_page2_opcodes));
       gen_cycle_table (fp, "cycles_page3", m6811_page3_opcodes,
-		       TABLE_SIZE (m6811_page3_opcodes));
+		       ARRAY_SIZE (m6811_page3_opcodes));
       gen_cycle_table (fp, "cycles_page4", m6811_page4_opcodes,
-		       TABLE_SIZE (m6811_page4_opcodes));
+		       ARRAY_SIZE (m6811_page4_opcodes));
 
       gen_function_entry (fp, "static void\ncpu_page3_interp", 0);
       gen_interpreter_for_table (fp, indent_level,
 				 m6811_page3_opcodes,
-				 TABLE_SIZE(m6811_page3_opcodes),
+				 ARRAY_SIZE (m6811_page3_opcodes),
 				 "cycles_page3");
       gen_function_close (fp);
   
       gen_function_entry (fp, "static void\ncpu_page4_interp", 0);
       gen_interpreter_for_table (fp, indent_level,
 				 m6811_page4_opcodes,
-				 TABLE_SIZE(m6811_page4_opcodes),
+				 ARRAY_SIZE (m6811_page4_opcodes),
 				 "cycles_page4");
       gen_function_close (fp);
 
@@ -2078,7 +2077,7 @@ gen_interpreter (FILE *fp)
                           USE_SRC8 | USE_DST8);
       gen_interpreter_for_table (fp, indent_level,
 				 m6811_page2_opcodes,
-				 TABLE_SIZE(m6811_page2_opcodes),
+				 ARRAY_SIZE (m6811_page2_opcodes),
 				 "cycles_page2");
       gen_function_close (fp);
 
@@ -2087,22 +2086,22 @@ gen_interpreter (FILE *fp)
                           USE_SRC8 | USE_DST8);
 
       gen_interpreter_for_table (fp, indent_level, m6811_page1_opcodes,
-				 TABLE_SIZE(m6811_page1_opcodes),
+				 ARRAY_SIZE (m6811_page1_opcodes),
 				 "cycles_page1");
       gen_function_close (fp);
     }
   else
     {
       gen_cycle_table (fp, "cycles_page1", m6812_page1_opcodes,
-		       TABLE_SIZE (m6812_page1_opcodes));
+		       ARRAY_SIZE (m6812_page1_opcodes));
       gen_cycle_table (fp, "cycles_page2", m6812_page2_opcodes,
-		       TABLE_SIZE (m6812_page2_opcodes));
+		       ARRAY_SIZE (m6812_page2_opcodes));
 
       gen_function_entry (fp, "static void\ncpu_page2_interp",
                           USE_SRC8 | USE_DST8);
       gen_interpreter_for_table (fp, indent_level,
 				 m6812_page2_opcodes,
-				 TABLE_SIZE(m6812_page2_opcodes),
+				 ARRAY_SIZE (m6812_page2_opcodes),
 				 "cycles_page2");
       gen_function_close (fp);
 
@@ -2111,7 +2110,7 @@ gen_interpreter (FILE *fp)
                           USE_SRC8 | USE_DST8);
 
       gen_interpreter_for_table (fp, indent_level, m6812_page1_opcodes,
-				 TABLE_SIZE(m6812_page1_opcodes),
+				 ARRAY_SIZE (m6812_page1_opcodes),
 				 "cycles_page1");
       gen_function_close (fp);
     }

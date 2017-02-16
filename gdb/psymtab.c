@@ -1926,7 +1926,7 @@ maintenance_print_psymbols (char *args, int from_tty)
   argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
 
-  for (i = 0; argv[i] != NULL; ++i)
+  for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
       if (strcmp (argv[i], "-pc") == 0)
 	{
@@ -1967,7 +1967,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   stdio_file arg_outfile;
 
-  if (argv[outfile_idx] != NULL)
+  if (argv != NULL && argv[outfile_idx] != NULL)
     {
       char *outfile_name;
 

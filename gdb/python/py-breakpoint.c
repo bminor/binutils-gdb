@@ -758,7 +758,7 @@ gdbpy_breakpoints (PyObject *self, PyObject *args)
   if (bppy_live == 0)
     return PyTuple_New (0);
 
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -798,7 +798,7 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
 
   if (PyObject_HasAttrString (py_bp, stop_func))
     {
-      gdbpy_ref result (PyObject_CallMethod (py_bp, stop_func, NULL));
+      gdbpy_ref<> result (PyObject_CallMethod (py_bp, stop_func, NULL));
 
       stop = 1;
       if (result != NULL)
@@ -911,25 +911,23 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
   int num = b->number;
   PyGILState_STATE state;
   struct breakpoint *bp = NULL;
-  gdbpy_breakpoint_object *bp_obj;
 
   state = PyGILState_Ensure ();
   bp = get_breakpoint (num);
   if (bp)
     {
-      bp_obj = bp->py_bp_object;
-      if (bp_obj)
+      gdbpy_ref<gdbpy_breakpoint_object> bp_obj (bp->py_bp_object);
+      if (bp_obj != NULL)
 	{
 	  if (!evregpy_no_listeners_p (gdb_py_events.breakpoint_deleted))
 	    {
-	      if (evpy_emit_event ((PyObject *) bp_obj,
+	      if (evpy_emit_event ((PyObject *) bp_obj.get (),
 				   gdb_py_events.breakpoint_deleted) < 0)
 		gdbpy_print_stack ();
 	    }
 
 	  bp_obj->bp = NULL;
 	  --bppy_live;
-	  Py_DECREF (bp_obj);
 	}
     }
   PyGILState_Release (state);

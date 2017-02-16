@@ -4298,7 +4298,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		     table entry for a non-ifunc local symbol.  */
 		  info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%P: %H: %s reloc against local symbol\n"),
+		    (_("%H: %s reloc against local symbol\n"),
 		     abfd, sec, rel->r_offset,
 		     ppc_elf_howto_table[r_type]->name);
 		  bfd_set_error (bfd_error_bad_value);
@@ -8221,7 +8221,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  off = (p - contents) - (rel->r_offset - d_offset);
 		  if (off > 0x1fffffc || (off & 3) != 0)
 		    info->callbacks->einfo
-		      (_("%P: %H: fixup branch overflow\n"),
+		      (_("%H: fixup branch overflow\n"),
 		       input_bfd, input_section, rel->r_offset);
 
 		  bfd_put_32 (input_bfd, B | off,
@@ -8261,7 +8261,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		info->callbacks->einfo
 		  /* xgettext:c-format */
-		  (_("%P: %H: error: %s with unexpected instruction %x\n"),
+		  (_("%H: error: %s with unexpected instruction %x\n"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_HA", insn);
 	    }
@@ -8296,7 +8296,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		info->callbacks->einfo
 		  /* xgettext:c-format */
-		  (_("%P: %H: error: %s with unexpected instruction %x\n"),
+		  (_("%H: error: %s with unexpected instruction %x\n"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_LO", insn);
 	    }
@@ -8352,7 +8352,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		     into .got2).  */
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
-		      (_("%X%P: %H: unsupported bss-plt -fPIC ifunc %s\n"),
+		      (_("%X%H: unsupported bss-plt -fPIC ifunc %s\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 		}
 	      if (h == NULL && (ent->plt.offset & 1) == 0)
@@ -8690,7 +8690,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    if (addend != 0)
 	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%P: %H: non-zero addend on %s reloc against `%s'\n"),
+		(_("%H: non-zero addend on %s reloc against `%s'\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 howto->name,
 		 sym_name);
@@ -8722,7 +8722,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		 -fPIC code, so the linker won't know whether r30 is
 		 _GLOBAL_OFFSET_TABLE_ or pointing into a .got2 section.  */
 	      /* xgettext:c-format */
-	      info->callbacks->einfo (_("%X%P: %H: @local call to ifunc %s\n"),
+	      info->callbacks->einfo (_("%X%H: @local call to ifunc %s\n"),
 				      input_bfd, input_section, rel->r_offset,
 				      h->root.root.string);
 	    }
@@ -8912,7 +8912,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     indirection function to resolve the reloc.  */
 			  info->callbacks->einfo
 			    /* xgettext:c-format */
-			    (_("%P: %H: relocation %s for indirect "
+			    (_("%H: relocation %s for indirect "
 			       "function %s unsupported\n"),
 			     input_bfd, input_section, rel->r_offset,
 			     howto->name,
@@ -9609,7 +9609,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		relocation ^= lobit;
 		info->callbacks->einfo
 		  /* xgettext:c-format */
-		  (_("%P: %H: error: %s against `%s' not a multiple of %u\n"),
+		  (_("%H: error: %s against `%s' not a multiple of %u\n"),
 		   input_bfd, input_section, rel->r_offset,
 		   howto->name, sym_name, mask + 1);
 		bfd_set_error (bfd_error_bad_value);
@@ -9638,7 +9638,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	{
 	  info->callbacks->einfo
 	    /* xgettext:c-format */
-	    (_("%P: %H: unresolvable %s relocation against symbol `%s'\n"),
+	    (_("%H: unresolvable %s relocation against symbol `%s'\n"),
 	     input_bfd, input_section, rel->r_offset,
 	     howto->name,
 	     sym_name);
@@ -9719,7 +9719,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    {
 	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%P: %H: %s reloc against `%s': error %d\n"),
+		(_("%H: %s reloc against `%s': error %d\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 howto->name, sym_name, (int) r);
 	      ret = FALSE;

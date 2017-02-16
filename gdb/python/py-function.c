@@ -38,14 +38,14 @@ static PyObject *
 convert_values_to_python (int argc, struct value **argv)
 {
   int i;
-  gdbpy_ref result (PyTuple_New (argc));
+  gdbpy_ref<> result (PyTuple_New (argc));
 
   if (result == NULL)
     return NULL;
 
   for (i = 0; i < argc; ++i)
     {
-      gdbpy_ref elt (value_to_value_object (argv[i]));
+      gdbpy_ref<> elt (value_to_value_object (argv[i]));
       if (elt == NULL)
 	return NULL;
       PyTuple_SetItem (result.get (), i, elt.release ());
@@ -63,8 +63,8 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
      be destroyed.  */
   gdbpy_enter enter_py (gdbarch, language);
   struct value *value;
-  gdbpy_ref result;
-  gdbpy_ref args (convert_values_to_python (argc, argv));
+  gdbpy_ref<> result;
+  gdbpy_ref<> args (convert_values_to_python (argc, argv));
 
   /* convert_values_to_python can return NULL on error.  If we
      encounter this, do not call the function, but allow the Python ->
@@ -74,8 +74,8 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 
   if (args != NULL)
     {
-      gdbpy_ref callable (PyObject_GetAttrString ((PyObject *) cookie,
-						  "invoke"));
+      gdbpy_ref<> callable (PyObject_GetAttrString ((PyObject *) cookie,
+						    "invoke"));
       if (callable == NULL)
 	error (_("No method named 'invoke' in object."));
 
@@ -159,7 +159,7 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
   if (PyObject_HasAttrString (self, "__doc__"))
     {
-      gdbpy_ref ds_obj (PyObject_GetAttrString (self, "__doc__"));
+      gdbpy_ref<> ds_obj (PyObject_GetAttrString (self, "__doc__"));
       if (ds_obj != NULL)
 	{
 	  if (gdbpy_is_string (ds_obj.get ()))

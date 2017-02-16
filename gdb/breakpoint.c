@@ -16165,8 +16165,10 @@ Set ignore-count of breakpoint number N to COUNT.\n\
 Usage is `ignore N COUNT'."));
 
   add_com ("commands", class_breakpoint, commands_command, _("\
-Set commands to be executed when a breakpoint is hit.\n\
-Give breakpoint number as argument after \"commands\".\n\
+Set commands to be executed when the given breakpoints are hit.\n\
+Give a space-separated breakpoint list as argument after \"commands\".\n\
+A list element can be a breakpoint number (e.g. `5') or a range of numbers\n\
+(e.g. `5-7').\n\
 With no argument, the targeted breakpoint is the last one set.\n\
 The commands themselves follow starting on the next line.\n\
 Type a line containing \"end\" to indicate the end of them.\n\

@@ -1,3 +1,199 @@
+2017-02-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21164
+	* psymtab.c (maintenance_print_psymbols): Verify if 'argv' is not
+	NULL before using it.
+	* symmisc.c (maintenance_print_symbols): Likewise.
+	(maintenance_print_msymbols): Likewise.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* NEWS: Add record Python bindings entry.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-record-btrace.o,
+	py-record-full.o.
+	(SUBDIR_PYTHON_SRCS): Add py-record-btrace.c, py-record-full.c.
+	* python/py-record-btrace.c, python/py-record-btrace.h,
+	python/py-record-full.c, python/py-record-full.h: New file.
+	* python/py-record.c: Add include for py-record-btrace.h and
+	py-record-full.h.
+	(recpy_method, recpy_format, recpy_goto, recpy_replay_position,
+	recpy_instruction_history, recpy_function_call_history, recpy_begin,
+	recpy_end): Use functions from py-record-btrace.c and py-record-full.c.
+	* python/python-internal.h (PyInt_FromSsize_t, PyInt_AsSsize_t):
+	New definition.
+	(gdbpy_initialize_btrace): New export.
+	* python/python.c (_initialize_python): Add gdbpy_initialize_btrace.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python/py-record.o.
+	(SUBDIR_PYTHON_SRCS): Add python/py-record.c.
+	* python/py-record.c: New file.
+	* python/python-internal.h (gdbpy_start_recording,
+	gdbpy_current_recording, gdpy_stop_recording,
+	gdbpy_initialize_record): New export.
+	* python/python.c (_initialize_python): Add gdbpy_initialize_record.
+	(python_GdbMethods): Add gdbpy_start_recording,
+	gdbpy_current_recording and gdbpy_stop_recording.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* record-btrace.c (record_btrace_record_method): New function.
+	(init_record_btrace_ops): Initialize to_record_method.
+	* record-full.c (record_full_record_method): New function.
+	(init_record_full_ops, init_record_full_core_ops): Add
+	record_full_record_method.
+	* record.h (enum record_method): New enum.
+	* target-debug.h (target_debug_print_enum_record_method: New define.
+	* target-delegates.c: Regenerate.
+	* target.c (target_record_method): New function.
+	* target.h: Include record.h.
+	(struct target_ops) <to_record_method>: New field.
+	(target_record_method): New export.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* record.h (record_start, record_stop): New export.
+	* record.c (record_start, record_stop): New function.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch): Copy function call segments pointer
+	into a vector.
+	(btrace_clear): Clear the vector.
+	(btrace_find_insn_by_number): Use binary search to find the correct
+	function call segment.
+	* btrace.h (brace_fun_p): New typedef.
+	(struct btrace_thread_info) <functions>: New field.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* record-btrace.c (btrace_ui_out_decode_error): Move most of it ...
+	* btrace.c (btrace_decode_error): ... here.  New function.
+	* btrace.h (btrace_decode_error): New export.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_call_num_insn, btrace_insn_get_error): New function.
+	(ftrace_new_function, btrace_insn_number, btrace_insn_cmp,
+	btrace_find_insn_by_number): Remove special case for gaps.
+	* btrace.h (btrace_insn_get_error): New export.
+	(btrace_insn_number, btrace_find_insn_by_number): Adjust comment.
+	* record-btrace.c (btrace_insn_history): Print number for gaps.
+	(record_btrace_info, record_btrace_goto): Handle gaps.
+
+2017-02-14  Tom Tromey  <tom@tromey.com>
+
+	PR python/13598:
+	* python/python.c (gdbpy_before_prompt_hook): Emit before_prompt
+	event.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add
+	before_prompt registry.
+	* python/py-events.h (events_object) <before_prompt>: New field.
+
+2017-02-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_new_switch): Preserve up link and flags.
+
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* symfile (_initialize_symfile): Add usage text to the load command's
+	help text.
+
+2017-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* utils.c (defaulted_query): Don't query on secondary UIs.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_get_disr_info): Remove unused variable.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-value.c (valpy_richcompare_throw): Remove unnecessary
+	"cleanup" local.
+	* python/py-type.c (typy_legacy_template_argument): Remove
+	unnecessary "cleanup" local.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (do_start_initialization): New function, from
+	_initialize_python.
+	(_initialize_python): Call do_start_initialization.
+	* python/py-linetable.c (ltpy_iternext): Use explicit returns, not
+	goto.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-prettyprint.c (pretty_print_one_value): Use
+	gdbpy_ref.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-cmd.c (cmdpy_destroyer): Use gdbpy_ref.
+	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Use
+	gdbpy_ref.
+	* python/py-type.c (field_new): Use gdbpy_ref.
+	* python/py-symtab.c (symtab_and_line_to_sal_object): Use
+	gdbpy_ref.
+	* python/py-progspace.c (pspy_new): Use gdbpy_ref.
+	(py_free_pspace): Likewise.
+	(pspace_to_pspace_object): Likewise.
+	* python/py-objfile.c (objfpy_new): Use gdbpy_ref.
+	(py_free_objfile): Likewise.
+	(objfile_to_objfile_object): Likewise.
+	* python/py-inferior.c (delete_thread_object): Use
+	gdbpy_ref.
+	(infpy_read_memory): Likewise.
+	(py_free_inferior): Likewise.
+	* python/py-evtregistry.c (create_eventregistry_object): Use
+	gdbpy_ref.
+	* python/py-event.c (create_event_object): Use gdbpy_ref.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* python/py-ref.h (gdbpy_ref_policy): Now a template.
+	(gdbpy_ref): Now a template; allow subclasses of PyObject to be
+	used.
+	* python/py-arch.c, python/py-bpevent.c, python/py-breakpoint.c,
+	python/py-cmd.c, python/py-continueevent.c, python/py-event.c,
+	python/py-exitedevent.c, python/py-finishbreakpoint.c,
+	python/py-framefilter.c, python/py-function.c,
+	python/py-inferior.c, python/py-infevents.c,
+	python/py-linetable.c, python/py-newobjfileevent.c,
+	python/py-param.c, python/py-prettyprint.c, python/py-ref.h,
+	python/py-signalevent.c, python/py-stopevent.c,
+	python/py-symbol.c, python/py-threadevent.c, python/py-type.c,
+	python/py-unwind.c, python/py-utils.c, python/py-value.c,
+	python/py-varobj.c, python/py-xmethods.c, python/python.c,
+	varobj.c: Change gdbpy_ref to gdbpy_ref<>.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* ui-out.h (ui_out_emit_type): New class.
+	(ui_out_emit_tuple, ui_out_emit_list): New typedefs.
+	* python/py-framefilter.c (py_print_single_arg): Use gdb::optional
+	and ui_out_emit_tuple.
+	(enumerate_locals): Likewise.
+	(py_mi_print_variables, py_print_locals, py_print_args): Use
+	ui_out_emit_list.
+	(py_print_frame): Use gdb::optional, ui_out_emit_tuple,
+	ui_out_emit_list.
+	* common/gdb_optional.h: New file.
+
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	* MAINTAINERS (Write After Approval): Update my e-mail address.
+
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	PR gdb/21122
+	* breakpoint.c (_initialize_breakpoint): Update the help description
+	of the 'commands' command to indicate that it takes a list argument.
+
 2017-02-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* interps.c (current_interp_set_logging): Remove "return".

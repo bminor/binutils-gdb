@@ -2773,7 +2773,7 @@ insert_operand (unsigned long long insn,
 				   val, min, max, file, line);
     }
 
-  pr_debug ("insert field: %ld <= %ld <= %ld in 0x%08llx\n",
+  pr_debug ("insert field: %ld <= %lld <= %ld in 0x%08llx\n",
 	    min, val, max, insn);
 
   if ((operand->flags & ARC_OPERAND_ALIGNED32)
@@ -3910,12 +3910,22 @@ assemble_insn (const struct arc_opcode *opcode,
 	      reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
 	      break;
 	    case O_pcl:
-	      reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
-	      if (arc_opcode_len (opcode) == 2
-		  || opcode->insn_class == JUMP)
-		as_bad_where (frag_now->fr_file, frag_now->fr_line,
-			      _("Unable to use @pcl relocation for insn %s"),
-			      opcode->name);
+	      if (operand->flags & ARC_OPERAND_LIMM)
+		{
+		  reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
+		  if (arc_opcode_len (opcode) == 2
+		      || opcode->insn_class == JUMP)
+		    as_bad_where (frag_now->fr_file, frag_now->fr_line,
+				  _("Unable to use @pcl relocation for insn %s"),
+				  opcode->name);
+		}
+	      else
+		{
+		  /* This is a relaxed operand which initially was
+		     limm, choose whatever we have defined in the
+		     opcode as reloc.  */
+		  reloc = operand->default_reloc;
+		}
 	      break;
 	    case O_sda:
 	      reloc = find_reloc ("sda", opcode->name,
@@ -3975,7 +3985,15 @@ assemble_insn (const struct arc_opcode *opcode,
 	  fixup = &insn->fixups[insn->nfixups++];
 	  fixup->exp = *t;
 	  fixup->reloc = reloc;
-	  pcrel = (operand->flags & ARC_OPERAND_PCREL) ? 1 : 0;
+	  if ((int) reloc < 0)
+	    pcrel = (operand->flags & ARC_OPERAND_PCREL) ? 1 : 0;
+	  else
+	    {
+	      reloc_howto_type *reloc_howto =
+		bfd_reloc_type_lookup (stdoutput,
+				       (bfd_reloc_code_real_type) fixup->reloc);
+	      pcrel = reloc_howto->pc_relative;
+	    }
 	  fixup->pcrel = pcrel;
 	  fixup->islong = (operand->flags & ARC_OPERAND_LIMM) ?
 	    TRUE : FALSE;
@@ -4234,10 +4252,15 @@ arc_frob_label (symbolS * sym)
 int
 arc_pcrel_adjust (fragS *fragP)
 {
+  pr_debug ("arc_pcrel_adjust: address=%ld, fix=%ld, PCrel %s\n",
+	    fragP->fr_address, fragP->fr_fix,
+	    fragP->tc_frag_data.pcrel ? "Y" : "N");
+
   if (!fragP->tc_frag_data.pcrel)
     return fragP->fr_address + fragP->fr_fix;
 
-  return 0;
+  /* Take into account the PCL rounding.  */
+  return (fragP->fr_address + fragP->fr_fix) & 0x03;
 }
 
 /* Initialize the DWARF-2 unwind information for this procedure.  */

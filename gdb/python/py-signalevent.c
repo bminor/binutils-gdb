@@ -27,7 +27,7 @@ PyObject *
 create_signal_event_object (enum gdb_signal stop_signal)
 {
   const char *signal_name;
-  gdbpy_ref signal_event_obj
+  gdbpy_ref<> signal_event_obj
     (create_stop_event_object (&signal_event_object_type));
 
   if (signal_event_obj == NULL)
@@ -35,7 +35,7 @@ create_signal_event_object (enum gdb_signal stop_signal)
 
   signal_name = gdb_signal_to_name (stop_signal);
 
-  gdbpy_ref signal_name_obj (PyString_FromString (signal_name));
+  gdbpy_ref<> signal_name_obj (PyString_FromString (signal_name));
   if (signal_name_obj == NULL)
     return NULL;
   if (evpy_add_attribute (signal_event_obj.get (),

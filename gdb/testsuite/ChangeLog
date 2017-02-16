@@ -1,3 +1,59 @@
+2017-02-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21164
+	* gdb.base/maint.exp: Add testcases for when the commands do
+	not have arguments.
+
+2017-02-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/chained-calls.exp: Use p instead of P.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.python/py-record-btrace.c, gdb.python/py-record-btrace.exp,
+	gdb.python/py-record-full.c, gdb.python/py-record-full.exp: New file.
+
+2017-02-14  Tom Tromey  <tom@tromey.com>
+
+	PR python/13598:
+	* gdb.python/py-events.exp: Add before_prompt event tests.
+
+2017-02-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/implptrpiece.exp: Fix check for big-endian targets.
+
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.linespec/explicit.c (my_unique_function_name): New function.
+	(main): Call my_unique_function_name.
+	* gdb.linespec/explicit.exp: Use my_unique_function_name to test
+	completion of patterns with a single match.
+	Add missing -re switches to gdb_test_multiple calls.
+
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.arch/i386-biarch-core.exp: Check for i386 arch support and
+	return if core file is not recognized.
+
+2017-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/new-ui.exp (do_test): Test queries behavior on main
+	and extra UIs.
+
+2017-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/new-ui.exp (do_test, do_test_invalid_args): Use
+	proc_with_prefix.
+
+2017-02-10  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-xmethods.exp: Use "p" command, not "P".
+
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	PR gdb/21122
+	* gdb.base/help.exp: Update match pattern for testing 'help commands'.
+
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.base/define.exp: Add test for command abbreviations

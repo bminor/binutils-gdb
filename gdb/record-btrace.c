@@ -443,28 +443,12 @@ record_btrace_info (struct target_ops *self)
       calls = btrace_call_number (&call);
 
       btrace_insn_end (&insn, btinfo);
-
       insns = btrace_insn_number (&insn);
-      if (insns != 0)
-	{
-	  /* The last instruction does not really belong to the trace.  */
-	  insns -= 1;
-	}
-      else
-	{
-	  unsigned int steps;
 
-	  /* Skip gaps at the end.  */
-	  do
-	    {
-	      steps = btrace_insn_prev (&insn, 1);
-	      if (steps == 0)
-		break;
-
-	      insns = btrace_insn_number (&insn);
-	    }
-	  while (insns == 0);
-	}
+      /* If the last instruction is not a gap, it is the current instruction
+	 that is not actually part of the record.  */
+      if (btrace_insn_get (&insn) != NULL)
+	insns -= 1;
 
       gaps = btinfo->ngaps;
     }
@@ -484,63 +468,11 @@ static void
 btrace_ui_out_decode_error (struct ui_out *uiout, int errcode,
 			    enum btrace_format format)
 {
-  const char *errstr;
-  int is_error;
-
-  errstr = _("unknown");
-  is_error = 1;
-
-  switch (format)
-    {
-    default:
-      break;
-
-    case BTRACE_FORMAT_BTS:
-      switch (errcode)
-	{
-	default:
-	  break;
-
-	case BDE_BTS_OVERFLOW:
-	  errstr = _("instruction overflow");
-	  break;
-
-	case BDE_BTS_INSN_SIZE:
-	  errstr = _("unknown instruction");
-	  break;
-	}
-      break;
-
-#if defined (HAVE_LIBIPT)
-    case BTRACE_FORMAT_PT:
-      switch (errcode)
-	{
-	case BDE_PT_USER_QUIT:
-	  is_error = 0;
-	  errstr = _("trace decode cancelled");
-	  break;
-
-	case BDE_PT_DISABLED:
-	  is_error = 0;
-	  errstr = _("disabled");
-	  break;
-
-	case BDE_PT_OVERFLOW:
-	  is_error = 0;
-	  errstr = _("overflow");
-	  break;
-
-	default:
-	  if (errcode < 0)
-	    errstr = pt_errstr (pt_errcode (errcode));
-	  break;
-	}
-      break;
-#endif /* defined (HAVE_LIBIPT)  */
-    }
+  const char *errstr = btrace_decode_error (format, errcode);
 
   uiout->text (_("["));
-  if (is_error)
+  /* ERRCODE > 0 indicates notifications on BTRACE_FORMAT_PT.  */
+  if (!(format == BTRACE_FORMAT_PT && errcode > 0))
     {
       uiout->text (_("decode error ("));
       uiout->field_int ("errcode", errcode);
@@ -737,7 +669,11 @@ btrace_insn_history (struct ui_out *uiout,
 	  /* We have trace so we must have a configuration.  */
 	  gdb_assert (conf != NULL);
 
-	  btrace_ui_out_decode_error (uiout, it.function->errcode,
+	  uiout->field_fmt ("insn-number", "%u",
+			    btrace_insn_number (&it));
+	  uiout->text ("\t");
+
+	  btrace_ui_out_decode_error (uiout, btrace_insn_get_error (&it),
 				      conf->format);
 	}
       else
@@ -1320,6 +1256,23 @@ record_btrace_call_history_from (struct target_ops *self,
     }
 
   record_btrace_call_history_range (self, begin, end, flags);
+}
+
+/* The to_record_method method of target record-btrace.  */
+
+static enum record_method
+record_btrace_record_method (struct target_ops *self, ptid_t ptid)
+{
+  const struct btrace_config *config;
+  struct thread_info * const tp = find_thread_ptid (ptid);
+
+  if (tp == NULL)
+    error (_("No thread."));
+
+  if (tp->btrace.target == NULL)
+    return RECORD_METHOD_NONE;
+
+  return RECORD_METHOD_BTRACE;
 }
 
 /* The to_record_is_replaying method of target record-btrace.  */
@@ -2828,7 +2781,9 @@ record_btrace_goto (struct target_ops *self, ULONGEST insn)
   tp = require_btrace_thread ();
 
   found = btrace_find_insn_by_number (&it, &tp->btrace, number);
-  if (found == 0)
+
+  /* Check if the instruction could not be found or is a gap.  */
+  if (found == 0 || btrace_insn_get (&it) == NULL)
     error (_("No such instruction."));
 
   record_btrace_set_replay (tp, &it);
@@ -2895,6 +2850,7 @@ init_record_btrace_ops (void)
   ops->to_call_history = record_btrace_call_history;
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
+  ops->to_record_method = record_btrace_record_method;
   ops->to_record_is_replaying = record_btrace_is_replaying;
   ops->to_record_will_replay = record_btrace_will_replay;
   ops->to_record_stop_replaying = record_btrace_stop_replaying_all;

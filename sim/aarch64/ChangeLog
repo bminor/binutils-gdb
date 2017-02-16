@@ -1,3 +1,21 @@
+2017-02-14  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (do_vec_MLA): Rewrite switch body.
+
+	* simulator.c (do_vec_bit): Change loop limits from 16 and 8 to 4 and
+	2.  Move test_false if inside loop.  Fix logic for computing result
+	stored to vd.
+
+	* simulator.c: (LDn_STn_SINGLE_LANE_AND_SIZE): New.
+	(do_vec_LDn_single, do_vec_STn_single): New.
+	(do_vec_LDnR): Add and set new nregs var.  Replace switch on nregs with
+	loop over nregs using new var n.  Add n times size to address in loop.
+	Add n to vd in loop.
+	(do_vec_load_store): Add comment for instruction bit 24.  New var
+	single to hold instruction bit 24.  Add new code to use single.  Move
+	ldnr support inside single if statements.  Fix ldnr register counts
+	inside post if statement.  Change HALT_NYI calls to HALT_UNALLOC.
+
 2017-01-23  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (do_vec_compare): Add case 0x23 for CMTST.

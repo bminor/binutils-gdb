@@ -411,7 +411,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
   END_CATCH
 
-  gdbpy_ref ret_tuple (PyTuple_New (2));
+  gdbpy_ref<> ret_tuple (PyTuple_New (2));
   if (ret_tuple == NULL)
     return NULL;
 

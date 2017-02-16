@@ -103,8 +103,10 @@ set build_tests {
    {begin.c end.c} {} "libbar.so"}
   {"Build warn libbar.so"
    "-shared" "-fPIC"
-   {beginwarn.c end.c} {{readelf {-S --wide} libbarw.rd}} "libbarw.so"
-   "c" {^.*\): warning: function foo is deprecated$} }
+  {beginwarn.c end.c}
+  {{readelf {-S --wide} libbarw.rd}
+   {warning "^.*beginwarn.c:7: warning: function foo is deprecated$"}}
+  "libbarw.so" "c"}
   {"Build hidden libbar.so"
    "-shared" "-fPIC"
    {begin.c endhidden.c} {} "libbarh.so"}
@@ -348,7 +350,7 @@ set run_tests [list \
     [list "Run warn with versioned libfoo.so" \
      "-Wl,--no-as-needed tmpdir/beginwarn.o tmpdir/libfoov.so" "" \
      {main.c} "warn" "warn.out" \
-     "" "c" {^.*\): warning: function foo is deprecated$} ] \
+     "" "c" {^.*beginwarn.c:7: warning: function foo is deprecated$} ] \
     [list "Run protected with versioned libfoo.so" \
      "-Wl,--no-as-needed tmpdir/begin.o tmpdir/libfoov.so tmpdir/endprotected.o" "" \
      {main.c} "protected" "normal.out" ] \

@@ -561,6 +561,13 @@ gdb_expect {
 
 #set timeout $oldtimeout
 
+# Test that the commands work without an argument.  For this test, we
+# don't need an inferior loaded/running.  See PR gdb/21164.
+gdb_exit
+gdb_start
+gdb_test_no_output "maint print symbols"
+gdb_test_no_output "maint print msymbols"
+gdb_test_no_output "maint print psymbols"
 
 gdb_exit
 return 0

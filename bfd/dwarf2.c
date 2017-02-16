@@ -100,6 +100,12 @@ struct dwarf2_debug
   /* Pointer to the end of the .debug_info section memory buffer.  */
   bfd_byte *info_ptr_end;
 
+  /* Pointer to the original bfd for which debug was loaded.  This is what
+     we use to compare and so check that the cached debug data is still
+     valid - it saves having to possibly dereference the gnu_debuglink each
+     time.  */
+  bfd *orig_bfd;
+
   /* Pointer to the bfd, section and address of the beginning of the
      section.  The bfd might be different than expected because of
      gnu_debuglink sections.  */
@@ -3897,8 +3903,20 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 
   if (stash != NULL)
     {
-      if (section_vma_same (abfd, stash))
-	return TRUE;
+      if (stash->orig_bfd == abfd
+          && section_vma_same (abfd, stash))
+        {
+          /* Check that we did previously find some debug information
+             before attempting to make use of it.  */
+          if (stash->bfd_ptr != NULL)
+            {
+              if (do_place && !place_sections (abfd, stash))
+                return FALSE;
+              return TRUE;
+            }
+
+          return FALSE;
+        }
       _bfd_dwarf2_cleanup_debug_info (abfd, pinfo);
       memset (stash, 0, amt);
     }
@@ -3908,6 +3926,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
       if (! stash)
 	return FALSE;
     }
+  stash->orig_bfd = abfd;
   stash->debug_sections = debug_sections;
   stash->syms = symbols;
   if (!save_section_vma (abfd, stash))
@@ -4136,6 +4155,38 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     {
       BFD_ASSERT (section != NULL && functionname_ptr != NULL);
       addr = offset;
+
+      /* If we have no SYMBOL but the section we're looking at is not a
+         code section, then take a look through the list of symbols to see
+         if we have a symbol at the address we're looking for.  If we do
+         then use this to look up line information.  This will allow us to
+         give file and line results for data symbols.  We exclude code
+         symbols here, if we look up a function symbol and then look up the
+         line information we'll actually return the line number for the
+         opening '{' rather than the function definition line.  This is
+         because looking up by symbol uses the line table, in which the
+         first line for a function is usually the opening '{', while
+         looking up the function by section + offset uses the
+         DW_AT_decl_line from the function DW_TAG_subprogram for the line,
+         which will be the line of the function name.  */
+      if ((section->flags & SEC_CODE) == 0)
+	{
+	  asymbol **tmp;
+
+	  for (tmp = symbols; (*tmp) != NULL; ++tmp)
+	    if ((*tmp)->the_bfd == abfd
+		&& (*tmp)->section == section
+		&& (*tmp)->value == offset
+		&& ((*tmp)->flags & BSF_SECTION_SYM) == 0)
+	      {
+		symbol = *tmp;
+		do_line = TRUE;
+                /* For local symbols, keep going in the hope we find a
+                   global.  */
+                if ((symbol->flags & BSF_GLOBAL) != 0)
+                  break;
+	      }
+	}
     }
 
   if (section->output_section)
@@ -4293,6 +4344,10 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       if (length > 0)
 	{
 	  bfd_byte * new_ptr;
+
+	  /* PR 21151  */
+	  if (stash->info_ptr + length > stash->info_ptr_end)
+	    return FALSE;
 
 	  each = parse_comp_unit (stash, length, info_ptr_unit,
 				  offset_size);

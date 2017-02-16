@@ -3799,63 +3799,30 @@ do_vec_MLA (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      {
-	uint16_t a[16], b[16];
-
-	for (i = 0; i < (full ? 16 : 8); i++)
-	  {
-	    a[i] = aarch64_get_vec_u8 (cpu, vn, i);
-	    b[i] = aarch64_get_vec_u8 (cpu, vm, i);
-	  }
-	
-	for (i = 0; i < (full ? 16 : 8); i++)
-	  {
-	    uint16_t v = aarch64_get_vec_u8 (cpu, vd, i);
-
-	    aarch64_set_vec_u16 (cpu, vd, i, v + (a[i] * b[i]));
-	  }
-      }
+      for (i = 0; i < (full ? 16 : 8); i++)
+	aarch64_set_vec_u8 (cpu, vd, i,
+			    aarch64_get_vec_u8 (cpu, vd, i)
+			    + (aarch64_get_vec_u8 (cpu, vn, i)
+			       * aarch64_get_vec_u8 (cpu, vm, i)));
       return;
 
     case 1:
-      {
-	uint32_t a[8], b[8];
-
-	for (i = 0; i < (full ? 8 : 4); i++)
-	  {
-	    a[i] = aarch64_get_vec_u16 (cpu, vn, i);
-	    b[i] = aarch64_get_vec_u16 (cpu, vm, i);
-	  }
-	
-	for (i = 0; i < (full ? 8 : 4); i++)
-	  {
-	    uint32_t v = aarch64_get_vec_u16 (cpu, vd, i);
-
-	    aarch64_set_vec_u32 (cpu, vd, i, v + (a[i] * b[i]));
-	  }
-      }
+      for (i = 0; i < (full ? 8 : 4); i++)
+	aarch64_set_vec_u16 (cpu, vd, i,
+			     aarch64_get_vec_u16 (cpu, vd, i)
+			     + (aarch64_get_vec_u16 (cpu, vn, i)
+				* aarch64_get_vec_u16 (cpu, vm, i)));
       return;
 
     case 2:
-      {
-	uint64_t a[4], b[4];
-
-	for (i = 0; i < (full ? 4 : 2); i++)
-	  {
-	    a[i] = aarch64_get_vec_u32 (cpu, vn, i);
-	    b[i] = aarch64_get_vec_u32 (cpu, vm, i);
-	  }
-	
-	for (i = 0; i < (full ? 4 : 2); i++)
-	  {
-	    uint64_t v = aarch64_get_vec_u32 (cpu, vd, i);
-
-	    aarch64_set_vec_u64 (cpu, vd, i, v + (a[i] * b[i]));
-	  }
-      }
+      for (i = 0; i < (full ? 4 : 2); i++)
+	aarch64_set_vec_u32 (cpu, vd, i,
+			     aarch64_get_vec_u32 (cpu, vd, i)
+			     + (aarch64_get_vec_u32 (cpu, vn, i)
+				* aarch64_get_vec_u32 (cpu, vm, i)));
       return;
 
-    case 3:
+    default:
       HALT_UNALLOC;
     }
 }
@@ -4085,17 +4052,17 @@ do_vec_bit (sim_cpu *cpu)
   NYI_assert (15, 10, 0x07);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (test_false)
+  for (i = 0; i < (full ? 4 : 2); i++)
     {
-      for (i = 0; i < (full ? 16 : 8); i++)
-	if (aarch64_get_vec_u32 (cpu, vn, i) == 0)
-	  aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vm, i));
-    }
-  else
-    {
-      for (i = 0; i < (full ? 16 : 8); i++)
-	if (aarch64_get_vec_u32 (cpu, vn, i) != 0)
-	  aarch64_set_vec_u32 (cpu, vd, i, aarch64_get_vec_u32 (cpu, vm, i));
+      uint32_t vd_val = aarch64_get_vec_u32 (cpu, vd, i);
+      uint32_t vn_val = aarch64_get_vec_u32 (cpu, vn, i);
+      uint32_t vm_val = aarch64_get_vec_u32 (cpu, vm, i);
+      if (test_false)
+	aarch64_set_vec_u32 (cpu, vd, i,
+			     (vd_val & vm_val) | (vn_val & ~vm_val));
+      else
+	aarch64_set_vec_u32 (cpu, vd, i,
+			     (vd_val & ~vm_val) | (vn_val & vm_val));
     }
 }
 
@@ -11560,6 +11527,178 @@ ST1_4 (sim_cpu *cpu, uint64_t address)
   vec_store (cpu, address, 4);
 }
 
+#define LDn_STn_SINGLE_LANE_AND_SIZE()				\
+  do								\
+    {								\
+      switch (INSTR (15, 14))					\
+	{							\
+	case 0:							\
+	  lane = (full << 3) | (s << 2) | size;			\
+	  size = 0;						\
+	  break;						\
+								\
+	case 1:							\
+	  if ((size & 1) == 1)					\
+	    HALT_UNALLOC;					\
+	  lane = (full << 2) | (s << 1) | (size >> 1);		\
+	  size = 1;						\
+	  break;						\
+								\
+	case 2:							\
+	  if ((size & 2) == 2)					\
+	    HALT_UNALLOC;					\
+								\
+	  if ((size & 1) == 0)					\
+	    {							\
+	      lane = (full << 1) | s;				\
+	      size = 2;						\
+	    }							\
+	  else							\
+	    {							\
+	      if (s)						\
+		HALT_UNALLOC;					\
+	      lane = full;					\
+	      size = 3;						\
+	    }							\
+	  break;						\
+								\
+	default:						\
+	  HALT_UNALLOC;						\
+	}							\
+    }								\
+  while (0)
+
+/* Load single structure into one lane of N registers.  */
+static void
+do_vec_LDn_single (sim_cpu *cpu, uint64_t address)
+{
+  /* instr[31]    = 0
+     instr[30]    = element selector 0=>half, 1=>all elements
+     instr[29,24] = 00 1101
+     instr[23]    = 0=>simple, 1=>post
+     instr[22]    = 1
+     instr[21]    = width: LD1-or-LD3 (0) / LD2-or-LD4 (1)
+     instr[20,16] = 0 0000 (simple), Vinc (reg-post-inc, no SP),
+                      11111 (immediate post inc)
+     instr[15,13] = opcode
+     instr[12]    = S, used for lane number
+     instr[11,10] = size, also used for lane number
+     instr[9,5]   = address
+     instr[4,0]   = Vd  */
+
+  unsigned full = INSTR (30, 30);
+  unsigned vd = INSTR (4, 0);
+  unsigned size = INSTR (11, 10);
+  unsigned s = INSTR (12, 12);
+  int nregs = ((INSTR (13, 13) << 1) | INSTR (21, 21)) + 1;
+  int lane = 0;
+  int i;
+
+  NYI_assert (29, 24, 0x0D);
+  NYI_assert (22, 22, 1);
+
+  /* Compute the lane number first (using size), and then compute size.  */
+  LDn_STn_SINGLE_LANE_AND_SIZE ();
+
+  for (i = 0; i < nregs; i++)
+    switch (size)
+      {
+      case 0:
+	{
+	  uint8_t val = aarch64_get_mem_u8 (cpu, address + i);
+	  aarch64_set_vec_u8 (cpu, vd + i, lane, val);
+	  break;
+	}
+
+      case 1:
+	{
+	  uint16_t val = aarch64_get_mem_u16 (cpu, address + (i * 2));
+	  aarch64_set_vec_u16 (cpu, vd + i, lane, val);
+	  break;
+	}
+
+      case 2:
+	{
+	  uint32_t val = aarch64_get_mem_u32 (cpu, address + (i * 4));
+	  aarch64_set_vec_u32 (cpu, vd + i, lane, val);
+	  break;
+	}
+
+      case 3:
+	{
+	  uint64_t val = aarch64_get_mem_u64 (cpu, address + (i * 8));
+	  aarch64_set_vec_u64 (cpu, vd + i, lane, val);
+	  break;
+	}
+      }
+}
+
+/* Store single structure from one lane from N registers.  */
+static void
+do_vec_STn_single (sim_cpu *cpu, uint64_t address)
+{
+  /* instr[31]    = 0
+     instr[30]    = element selector 0=>half, 1=>all elements
+     instr[29,24] = 00 1101
+     instr[23]    = 0=>simple, 1=>post
+     instr[22]    = 0
+     instr[21]    = width: LD1-or-LD3 (0) / LD2-or-LD4 (1)
+     instr[20,16] = 0 0000 (simple), Vinc (reg-post-inc, no SP),
+                      11111 (immediate post inc)
+     instr[15,13] = opcode
+     instr[12]    = S, used for lane number
+     instr[11,10] = size, also used for lane number
+     instr[9,5]   = address
+     instr[4,0]   = Vd  */
+
+  unsigned full = INSTR (30, 30);
+  unsigned vd = INSTR (4, 0);
+  unsigned size = INSTR (11, 10);
+  unsigned s = INSTR (12, 12);
+  int nregs = ((INSTR (13, 13) << 1) | INSTR (21, 21)) + 1;
+  int lane = 0;
+  int i;
+
+  NYI_assert (29, 24, 0x0D);
+  NYI_assert (22, 22, 0);
+
+  /* Compute the lane number first (using size), and then compute size.  */
+  LDn_STn_SINGLE_LANE_AND_SIZE ();
+
+  for (i = 0; i < nregs; i++)
+    switch (size)
+      {
+      case 0:
+	{
+	  uint8_t val = aarch64_get_vec_u8 (cpu, vd + i, lane);
+	  aarch64_set_mem_u8 (cpu, address + i, val);
+	  break;
+	}
+
+      case 1:
+	{
+	  uint16_t val = aarch64_get_vec_u16 (cpu, vd + i, lane);
+	  aarch64_set_mem_u16 (cpu, address + (i * 2), val);
+	  break;
+	}
+
+      case 2:
+	{
+	  uint32_t val = aarch64_get_vec_u32 (cpu, vd + i, lane);
+	  aarch64_set_mem_u32 (cpu, address + (i * 4), val);
+	  break;
+	}
+
+      case 3:
+	{
+	  uint64_t val = aarch64_get_vec_u64 (cpu, vd + i, lane);
+	  aarch64_set_mem_u64 (cpu, address + (i * 8), val);
+	  break;
+	}
+      }
+}
+
+/* Load single structure into all lanes of N registers.  */
 static void
 do_vec_LDnR (sim_cpu *cpu, uint64_t address)
 {
@@ -11582,262 +11721,52 @@ do_vec_LDnR (sim_cpu *cpu, uint64_t address)
   unsigned full = INSTR (30, 30);
   unsigned vd = INSTR (4, 0);
   unsigned size = INSTR (11, 10);
-  int i;
+  int nregs = ((INSTR (13, 13) << 1) | INSTR (21, 21)) + 1;
+  int i, n;
 
   NYI_assert (29, 24, 0x0D);
   NYI_assert (22, 22, 1);
   NYI_assert (15, 14, 3);
   NYI_assert (12, 12, 0);
 
-  switch ((INSTR (13, 13) << 1) | INSTR (21, 21))
-    {
-    case 0: /* LD1R.  */
-      switch (size)
+  for (n = 0; n < nregs; n++)
+    switch (size)
+      {
+      case 0:
 	{
-	case 0:
-	  {
-	    uint8_t val = aarch64_get_mem_u8 (cpu, address);
-	    for (i = 0; i < (full ? 16 : 8); i++)
-	      aarch64_set_vec_u8 (cpu, vd, i, val);
-	    break;
-	  }
-
-	case 1:
-	  {
-	    uint16_t val = aarch64_get_mem_u16 (cpu, address);
-	    for (i = 0; i < (full ? 8 : 4); i++)
-	      aarch64_set_vec_u16 (cpu, vd, i, val);
-	    break;
-	  }
-
-	case 2:
-	  {
-	    uint32_t val = aarch64_get_mem_u32 (cpu, address);
-	    for (i = 0; i < (full ? 4 : 2); i++)
-	      aarch64_set_vec_u32 (cpu, vd, i, val);
-	    break;
-	  }
-
-	case 3:
-	  {
-	    uint64_t val = aarch64_get_mem_u64 (cpu, address);
-	    for (i = 0; i < (full ? 2 : 1); i++)
-	      aarch64_set_vec_u64 (cpu, vd, i, val);
-	    break;
-	  }
-
-	default:
-	  HALT_UNALLOC;
+	  uint8_t val = aarch64_get_mem_u8 (cpu, address + n);
+	  for (i = 0; i < (full ? 16 : 8); i++)
+	    aarch64_set_vec_u8 (cpu, vd + n, i, val);
+	  break;
 	}
-      break;
 
-    case 1: /* LD2R.  */
-      switch (size)
+      case 1:
 	{
-	case 0:
-	  {
-	    uint8_t val1 = aarch64_get_mem_u8 (cpu, address);
-	    uint8_t val2 = aarch64_get_mem_u8 (cpu, address + 1);
-
-	    for (i = 0; i < (full ? 16 : 8); i++)
-	      {
-		aarch64_set_vec_u8 (cpu, vd, 0, val1);
-		aarch64_set_vec_u8 (cpu, vd + 1, 0, val2);
-	      }
-	    break;
-	  }
-
-	case 1:
-	  {
-	    uint16_t val1 = aarch64_get_mem_u16 (cpu, address);
-	    uint16_t val2 = aarch64_get_mem_u16 (cpu, address + 2);
-
-	    for (i = 0; i < (full ? 8 : 4); i++)
-	      {
-		aarch64_set_vec_u16 (cpu, vd, 0, val1);
-		aarch64_set_vec_u16 (cpu, vd + 1, 0, val2);
-	      }
-	    break;
-	  }
-
-	case 2:
-	  {
-	    uint32_t val1 = aarch64_get_mem_u32 (cpu, address);
-	    uint32_t val2 = aarch64_get_mem_u32 (cpu, address + 4);
-
-	    for (i = 0; i < (full ? 4 : 2); i++)
-	      {
-		aarch64_set_vec_u32 (cpu, vd, 0, val1);
-		aarch64_set_vec_u32 (cpu, vd + 1, 0, val2);
-	      }
-	    break;
-	  }
-
-	case 3:
-	  {
-	    uint64_t val1 = aarch64_get_mem_u64 (cpu, address);
-	    uint64_t val2 = aarch64_get_mem_u64 (cpu, address + 8);
-
-	    for (i = 0; i < (full ? 2 : 1); i++)
-	      {
-		aarch64_set_vec_u64 (cpu, vd, 0, val1);
-		aarch64_set_vec_u64 (cpu, vd + 1, 0, val2);
-	      }
-	    break;
-	  }
-
-	default:
-	  HALT_UNALLOC;
+	  uint16_t val = aarch64_get_mem_u16 (cpu, address + (n * 2));
+	  for (i = 0; i < (full ? 8 : 4); i++)
+	    aarch64_set_vec_u16 (cpu, vd + n, i, val);
+	  break;
 	}
-      break;
 
-    case 2: /* LD3R.  */
-      switch (size)
+      case 2:
 	{
-	case 0:
-	  {
-	    uint8_t val1 = aarch64_get_mem_u8 (cpu, address);
-	    uint8_t val2 = aarch64_get_mem_u8 (cpu, address + 1);
-	    uint8_t val3 = aarch64_get_mem_u8 (cpu, address + 2);
-
-	    for (i = 0; i < (full ? 16 : 8); i++)
-	      {
-		aarch64_set_vec_u8 (cpu, vd, 0, val1);
-		aarch64_set_vec_u8 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u8 (cpu, vd + 2, 0, val3);
-	      }
-	  }
+	  uint32_t val = aarch64_get_mem_u32 (cpu, address + (n * 4));
+	  for (i = 0; i < (full ? 4 : 2); i++)
+	    aarch64_set_vec_u32 (cpu, vd + n, i, val);
 	  break;
-
-	case 1:
-	  {
-	    uint32_t val1 = aarch64_get_mem_u16 (cpu, address);
-	    uint32_t val2 = aarch64_get_mem_u16 (cpu, address + 2);
-	    uint32_t val3 = aarch64_get_mem_u16 (cpu, address + 4);
-
-	    for (i = 0; i < (full ? 8 : 4); i++)
-	      {
-		aarch64_set_vec_u16 (cpu, vd, 0, val1);
-		aarch64_set_vec_u16 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u16 (cpu, vd + 2, 0, val3);
-	      }
-	  }
-	  break;
-
-	case 2:
-	  {
-	    uint32_t val1 = aarch64_get_mem_u32 (cpu, address);
-	    uint32_t val2 = aarch64_get_mem_u32 (cpu, address + 4);
-	    uint32_t val3 = aarch64_get_mem_u32 (cpu, address + 8);
-
-	    for (i = 0; i < (full ? 4 : 2); i++)
-	      {
-		aarch64_set_vec_u32 (cpu, vd, 0, val1);
-		aarch64_set_vec_u32 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u32 (cpu, vd + 2, 0, val3);
-	      }
-	  }
-	  break;
-
-	case 3:
-	  {
-	    uint64_t val1 = aarch64_get_mem_u64 (cpu, address);
-	    uint64_t val2 = aarch64_get_mem_u64 (cpu, address + 8);
-	    uint64_t val3 = aarch64_get_mem_u64 (cpu, address + 16);
-
-	    for (i = 0; i < (full ? 2 : 1); i++)
-	      {
-		aarch64_set_vec_u64 (cpu, vd, 0, val1);
-		aarch64_set_vec_u64 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u64 (cpu, vd + 2, 0, val3);
-	      }
-	  }
-	  break;
-
-	default:
-	  HALT_UNALLOC;
 	}
-      break;
 
-    case 3: /* LD4R.  */
-      switch (size)
+      case 3:
 	{
-	case 0:
-	  {
-	    uint8_t val1 = aarch64_get_mem_u8 (cpu, address);
-	    uint8_t val2 = aarch64_get_mem_u8 (cpu, address + 1);
-	    uint8_t val3 = aarch64_get_mem_u8 (cpu, address + 2);
-	    uint8_t val4 = aarch64_get_mem_u8 (cpu, address + 3);
-
-	    for (i = 0; i < (full ? 16 : 8); i++)
-	      {
-		aarch64_set_vec_u8 (cpu, vd, 0, val1);
-		aarch64_set_vec_u8 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u8 (cpu, vd + 2, 0, val3);
-		aarch64_set_vec_u8 (cpu, vd + 3, 0, val4);
-	      }
-	  }
+	  uint64_t val = aarch64_get_mem_u64 (cpu, address + (n * 8));
+	  for (i = 0; i < (full ? 2 : 1); i++)
+	    aarch64_set_vec_u64 (cpu, vd + n, i, val);
 	  break;
-
-	case 1:
-	  {
-	    uint32_t val1 = aarch64_get_mem_u16 (cpu, address);
-	    uint32_t val2 = aarch64_get_mem_u16 (cpu, address + 2);
-	    uint32_t val3 = aarch64_get_mem_u16 (cpu, address + 4);
-	    uint32_t val4 = aarch64_get_mem_u16 (cpu, address + 6);
-
-	    for (i = 0; i < (full ? 8 : 4); i++)
-	      {
-		aarch64_set_vec_u16 (cpu, vd, 0, val1);
-		aarch64_set_vec_u16 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u16 (cpu, vd + 2, 0, val3);
-		aarch64_set_vec_u16 (cpu, vd + 3, 0, val4);
-	      }
-	  }
-	  break;
-
-	case 2:
-	  {
-	    uint32_t val1 = aarch64_get_mem_u32 (cpu, address);
-	    uint32_t val2 = aarch64_get_mem_u32 (cpu, address + 4);
-	    uint32_t val3 = aarch64_get_mem_u32 (cpu, address + 8);
-	    uint32_t val4 = aarch64_get_mem_u32 (cpu, address + 12);
-
-	    for (i = 0; i < (full ? 4 : 2); i++)
-	      {
-		aarch64_set_vec_u32 (cpu, vd, 0, val1);
-		aarch64_set_vec_u32 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u32 (cpu, vd + 2, 0, val3);
-		aarch64_set_vec_u32 (cpu, vd + 3, 0, val4);
-	      }
-	  }
-	  break;
-
-	case 3:
-	  {
-	    uint64_t val1 = aarch64_get_mem_u64 (cpu, address);
-	    uint64_t val2 = aarch64_get_mem_u64 (cpu, address + 8);
-	    uint64_t val3 = aarch64_get_mem_u64 (cpu, address + 16);
-	    uint64_t val4 = aarch64_get_mem_u64 (cpu, address + 24);
-
-	    for (i = 0; i < (full ? 2 : 1); i++)
-	      {
-		aarch64_set_vec_u64 (cpu, vd, 0, val1);
-		aarch64_set_vec_u64 (cpu, vd + 1, 0, val2);
-		aarch64_set_vec_u64 (cpu, vd + 2, 0, val3);
-		aarch64_set_vec_u64 (cpu, vd + 3, 0, val4);
-	      }
-	  }
-	  break;
-
-	default:
-	  HALT_UNALLOC;
 	}
-      break;
 
-    default:
-      HALT_UNALLOC;
-    }
+      default:
+	HALT_UNALLOC;
+      }
 }
 
 static void
@@ -11848,7 +11777,7 @@ do_vec_load_store (sim_cpu *cpu)
      instr[31]    = 0
      instr[30]    = element selector 0=>half, 1=>all elements
      instr[29,25] = 00110
-     instr[24]    = ?
+     instr[24]    = 0=>multiple struct, 1=>single struct
      instr[23]    = 0=>simple, 1=>post
      instr[22]    = 0=>store, 1=>load
      instr[21]    = 0 (LDn) / small(0)-large(1) selector (LDnR)
@@ -11876,6 +11805,7 @@ do_vec_load_store (sim_cpu *cpu)
      instr[9,5]   = Vn, can be SP
      instr[4,0]   = Vd  */
 
+  int single;
   int post;
   int load;
   unsigned vn;
@@ -11885,14 +11815,15 @@ do_vec_load_store (sim_cpu *cpu)
   if (INSTR (31, 31) != 0 || INSTR (29, 25) != 0x06)
     HALT_NYI;
 
-  type = INSTR (15, 12);
-  if (type != 0xE && type != 0xE && INSTR (21, 21) != 0)
-    HALT_NYI;
-
+  single = INSTR (24, 24);
   post = INSTR (23, 23);
   load = INSTR (22, 22);
+  type = INSTR (15, 12);
   vn = INSTR (9, 5);
   address = aarch64_get_reg_u64 (cpu, vn, SP_OK);
+
+  if (! single && INSTR (21, 21) != 0)
+    HALT_UNALLOC;
 
   if (post)
     {
@@ -11902,48 +11833,77 @@ do_vec_load_store (sim_cpu *cpu)
 	{
 	  unsigned sizeof_operation;
 
-	  switch (type)
+	  if (single)
 	    {
-	    case 0: sizeof_operation = 32; break;
-	    case 4: sizeof_operation = 24; break;
-	    case 8: sizeof_operation = 16; break;
-
-	    case 0xC:
-	      sizeof_operation = INSTR (21, 21) ? 2 : 1;
-	      sizeof_operation <<= INSTR (11, 10);
-	      break;
-
-	    case 0xE:
-	      sizeof_operation = INSTR (21, 21) ? 8 : 4;
-	      sizeof_operation <<= INSTR (11, 10);
-	      break;
-
-	    case 7:
-	      /* One register, immediate offset variant.  */
-	      sizeof_operation = 8;
-	      break;
-
-	    case 10:
-	      /* Two registers, immediate offset variant.  */
-	      sizeof_operation = 16;
-	      break;
-
-	    case 6:
-	      /* Three registers, immediate offset variant.  */
-	      sizeof_operation = 24;
-	      break;
-
-	    case 2:
-	      /* Four registers, immediate offset variant.  */
-	      sizeof_operation = 32;
-	      break;
-
-	    default:
-	      HALT_UNALLOC;
+	      if ((type >= 0) && (type <= 11))
+		{
+		  int nregs = ((INSTR (13, 13) << 1) | INSTR (21, 21)) + 1;
+		  switch (INSTR (15, 14))
+		    {
+		    case 0:
+		      sizeof_operation = nregs * 1;
+		      break;
+		    case 1:
+		      sizeof_operation = nregs * 2;
+		      break;
+		    case 2:
+		      if (INSTR (10, 10) == 0)
+			sizeof_operation = nregs * 4;
+		      else
+			sizeof_operation = nregs * 8;
+		      break;
+		    default:
+		      HALT_UNALLOC;
+		    }
+		}
+	      else if (type == 0xC)
+		{
+		  sizeof_operation = INSTR (21, 21) ? 2 : 1;
+		  sizeof_operation <<= INSTR (11, 10);
+		}
+	      else if (type == 0xE)
+		{
+		  sizeof_operation = INSTR (21, 21) ? 4 : 3;
+		  sizeof_operation <<= INSTR (11, 10);
+		}
+	      else
+		HALT_UNALLOC;
 	    }
+	  else
+	    {
+	      switch (type)
+		{
+		case 0: sizeof_operation = 32; break;
+		case 4: sizeof_operation = 24; break;
+		case 8: sizeof_operation = 16; break;
 
-	  if (INSTR (30, 30))
-	    sizeof_operation *= 2;
+		case 7:
+		  /* One register, immediate offset variant.  */
+		  sizeof_operation = 8;
+		  break;
+
+		case 10:
+		  /* Two registers, immediate offset variant.  */
+		  sizeof_operation = 16;
+		  break;
+
+		case 6:
+		  /* Three registers, immediate offset variant.  */
+		  sizeof_operation = 24;
+		  break;
+
+		case 2:
+		  /* Four registers, immediate offset variant.  */
+		  sizeof_operation = 32;
+		  break;
+
+		default:
+		  HALT_UNALLOC;
+		}
+
+	      if (INSTR (30, 30))
+		sizeof_operation *= 2;
+	    }
 
 	  aarch64_set_reg_u64 (cpu, vn, SP_OK, address + sizeof_operation);
 	}
@@ -11954,6 +11914,29 @@ do_vec_load_store (sim_cpu *cpu)
   else
     {
       NYI_assert (20, 16, 0);
+    }
+
+  if (single)
+    {
+      if (load)
+	{
+	  if ((type >= 0) && (type <= 11))
+	    do_vec_LDn_single (cpu, address);
+	  else if ((type == 0xC) || (type == 0xE))
+	    do_vec_LDnR (cpu, address);
+	  else
+	    HALT_UNALLOC;
+	  return;
+	}
+
+      /* Stores.  */
+      if ((type >= 0) && (type <= 11))
+	{
+	  do_vec_STn_single (cpu, address);
+	  return;
+	}
+
+      HALT_UNALLOC;
     }
 
   if (load)
@@ -11968,11 +11951,8 @@ do_vec_load_store (sim_cpu *cpu)
 	case 10: LD1_2 (cpu, address); return;
 	case 7:  LD1_1 (cpu, address); return;
 
-	case 0xE:
-	case 0xC: do_vec_LDnR (cpu, address); return;
-
 	default:
-	  HALT_NYI;
+	  HALT_UNALLOC;
 	}
     }
 
@@ -11987,7 +11967,7 @@ do_vec_load_store (sim_cpu *cpu)
     case 10: ST1_2 (cpu, address); return;
     case 7:  ST1_1 (cpu, address); return;
     default:
-      HALT_NYI;
+      HALT_UNALLOC;
     }
 }
 

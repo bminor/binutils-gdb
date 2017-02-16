@@ -72,6 +72,7 @@ struct inferior;
 #include "vec.h"
 #include "gdb_signals.h"
 #include "btrace.h"
+#include "record.h"
 #include "command.h"
 
 #include "break-common.h" /* For enum target_hw_bp_type.  */
@@ -1148,6 +1149,10 @@ struct target_ops
     const struct btrace_config *(*to_btrace_conf) (struct target_ops *self,
 						   const struct btrace_target_info *)
       TARGET_DEFAULT_RETURN (NULL);
+
+    /* Current recording method.  */
+    enum record_method (*to_record_method) (struct target_ops *, ptid_t ptid)
+      TARGET_DEFAULT_RETURN (RECORD_METHOD_NONE);
 
     /* Stop trace recording.  */
     void (*to_stop_recording) (struct target_ops *)
@@ -2494,6 +2499,9 @@ extern int target_supports_delete_record (void);
 
 /* See to_delete_record in struct target_ops.  */
 extern void target_delete_record (void);
+
+/* See to_record_method.  */
+extern enum record_method target_record_method (ptid_t ptid);
 
 /* See to_record_is_replaying in struct target_ops.  */
 extern int target_record_is_replaying (ptid_t ptid);

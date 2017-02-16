@@ -132,14 +132,14 @@ build_line_table_tuple_from_pcs (int line, VEC (CORE_ADDR) *vec)
   if (vec_len < 1)
     Py_RETURN_NONE;
 
-  gdbpy_ref tuple (PyTuple_New (vec_len));
+  gdbpy_ref<> tuple (PyTuple_New (vec_len));
 
   if (tuple == NULL)
     return NULL;
 
   for (i = 0; VEC_iterate (CORE_ADDR, vec, i, pc); ++i)
     {
-      gdbpy_ref obj (build_linetable_entry (line, pc));
+      gdbpy_ref<> obj (build_linetable_entry (line, pc));
 
       if (obj == NULL)
 	return NULL;
@@ -238,7 +238,7 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  gdbpy_ref source_dict (PyDict_New ());
+  gdbpy_ref<> source_dict (PyDict_New ());
   if (source_dict == NULL)
     return NULL;
 
@@ -250,7 +250,7 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
 	 include in the source set. */
       if (item->line > 0)
 	{
-	  gdbpy_ref line (gdb_py_object_from_longest (item->line));
+	  gdbpy_ref<> line (gdb_py_object_from_longest (item->line));
 
 	  if (line == NULL)
 	    return NULL;
@@ -407,7 +407,10 @@ ltpy_iternext (PyObject *self)
   LTPY_REQUIRE_VALID (iter_obj->source, symtab);
 
   if (iter_obj->current_index >= SYMTAB_LINETABLE (symtab)->nitems)
-    goto stop_iteration;
+    {
+      PyErr_SetNone (PyExc_StopIteration);
+      return NULL;
+    }
 
   item = &(SYMTAB_LINETABLE (symtab)->item[iter_obj->current_index]);
 
@@ -419,7 +422,10 @@ ltpy_iternext (PyObject *self)
 
       /* Exit if the internal value is the last item in the line table.  */
       if (iter_obj->current_index >= SYMTAB_LINETABLE (symtab)->nitems)
-	goto stop_iteration;
+	{
+	  PyErr_SetNone (PyExc_StopIteration);
+	  return NULL;
+	}
       item = &(SYMTAB_LINETABLE (symtab)->item[iter_obj->current_index]);
     }
 
@@ -427,10 +433,6 @@ ltpy_iternext (PyObject *self)
   iter_obj->current_index++;
 
   return obj;
-
- stop_iteration:
-  PyErr_SetNone (PyExc_StopIteration);
-  return NULL;
 }
 
 /* Implementation of gdb.LineTableIterator.is_valid (self) -> Boolean.

@@ -1,3 +1,12 @@
+2017-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* gencode.c: Include libiberty.h.
+	(TABLE_SIZE): Delete.
+	(find_opcode_pattern): Change TABLE_SIZE to ARRAY_SIZE.
+	(gen_interpreter): Likewise.
+	* interrupts.c (TableSize): Delete.
+	(interrupts_update_pending): Change TableSize to ARRAY_SIZE.
+
 2016-08-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (inline): Delete define.

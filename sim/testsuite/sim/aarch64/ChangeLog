@@ -1,3 +1,13 @@
+2017-02-14  Jim Wilson  <jim.wilson@linaro.org>
+
+	* mla.s: New.
+
+	* bit.s: New.
+
+	* ldn_single.s: New.
+	* ldnr.s: New.
+	* stn_single.s: New.
+
 2017-01-23  Jim Wilson  <jim.wilson@linaro.org>
 
 	* cmtst.s: New.

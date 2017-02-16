@@ -36,8 +36,8 @@ create_stop_event_object (PyTypeObject *py_type)
 int
 emit_stop_event (struct bpstats *bs, enum gdb_signal stop_signal)
 {
-  gdbpy_ref stop_event_obj;
-  gdbpy_ref list;
+  gdbpy_ref<> stop_event_obj;
+  gdbpy_ref<> list;
   PyObject *first_bp = NULL;
   struct bpstats *current_bs;
 

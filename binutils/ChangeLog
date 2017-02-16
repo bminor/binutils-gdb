@@ -1,3 +1,89 @@
+2017-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: (MIPS, MN10300): Move Eric Christopher to Past
+	Maintainers section.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21159
+	* readelf.c (dump_section_as_strings): Reset the start address if
+	no decompression is perfromed.
+	(dump_section_as_bytes): Likewise.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21158
+	* rddbg.c (read_symbol_stabs_debugging_info): Check for a null or
+	empty symbol name.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21157
+	* stabs.c (parse_stab_enum_type): Check for corrupt NAME:VALUE
+	pairs.
+	(parse_number): Exit early if passed an empty string.
+
+2017-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21155
+	* readelf.c (IN_RANGE): New macro.  Tests for an address + offset
+	being within a given range.
+	(target_specific_reloc_handling): Use macro to test for underflow
+	as well as overflow of reloc offset.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21150
+	* nm.c (file_symbol): Add test of string length before testing
+	string characters.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21135
+	* readelf.c (dump_section_as_bytes): Handle the case where
+	uncompress_section_contents returns false.
+	(dump_section_as_bytes, load_specific_debug_section): Likewise.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21149
+	* readelf.c (get_compression_header): Add size parameter.  Check
+	size against sizeof compression header before attempting to
+	extract the header.
+	(process_section_headers): Pass size to get_compression_header.
+	(dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+	(load_specific_debug_section): Likewise.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21148
+	* readelf.c (process_version_sections): Include size of auxillary
+	version information when checking for buffer overflow.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21147
+	* readelf.c (process_section_contents): Fix off by one error
+	reporting un-dumped sections.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21139
+	* readelf.c (target_specific_reloc_handling): Add num_syms
+	parameter.  Check for symbol table overflow before accessing
+	symbol value.  If reloc pointer is NULL, discard all saved state.
+	(apply_relocations): Pass num_syms to target_specific_reloc_handling.
+	Call target_specific_reloc_handling with a NULL reloc pointer
+	after processing all of the relocs.
+
+2017-02-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21137
+	* readelf.c (target_specific_reloc_handling): Add end parameter.
+	Check for buffer overflow before writing relocated values.
+	(apply_relocations): Pass end to target_specific_reloc_handling.
+
 2017-01-27  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
 	    Nick Clifton  <nickc@redhat.com>
 

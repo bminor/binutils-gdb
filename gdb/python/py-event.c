@@ -30,21 +30,15 @@ evpy_dealloc (PyObject *self)
 PyObject *
 create_event_object (PyTypeObject *py_type)
 {
-  event_object *event_obj;
-
-  event_obj = PyObject_New (event_object, py_type);
-  if (!event_obj)
-    goto fail;
+  gdbpy_ref<event_object> event_obj (PyObject_New (event_object, py_type));
+  if (event_obj == NULL)
+    return NULL;
 
   event_obj->dict = PyDict_New ();
   if (!event_obj->dict)
-    goto fail;
+    return NULL;
 
-  return (PyObject*) event_obj;
-
- fail:
-  Py_XDECREF (event_obj);
-  return NULL;
+  return (PyObject*) event_obj.release ();
 }
 
 /* Add the attribute ATTR to the event object EVENT.  In
@@ -95,7 +89,7 @@ evpy_emit_event (PyObject *event,
      notifying listeners to avoid skipping callbacks
      in the case of a callback being disconnected during
      a notification.  */
-  gdbpy_ref callback_list_copy (PySequence_List (registry->callbacks));
+  gdbpy_ref<> callback_list_copy (PySequence_List (registry->callbacks));
   if (callback_list_copy == NULL)
     return -1;
 
@@ -106,7 +100,8 @@ evpy_emit_event (PyObject *event,
       if (func == NULL)
 	return -1;
 
-      gdbpy_ref func_result (PyObject_CallFunctionObjArgs (func, event, NULL));
+      gdbpy_ref<> func_result (PyObject_CallFunctionObjArgs (func, event,
+							     NULL));
 
       if (func_result == NULL)
 	{

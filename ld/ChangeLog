@@ -1,3 +1,111 @@
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-elf/shared.exp: Update expected results.
+	* testsuite/ld-elf/dwarf2.err: Likewise
+
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/ld-elf/dwarf.exp (build_tests): Add new tests.
+	* testsuite/ld-elf/dwarf2.err: New file.
+	* testsuite/ld-elf/dwarf2a.c: New file.
+	* testsuite/ld-elf/dwarf2b.c: New file.
+	* testsuite/ld-elf/dwarf3.c: New file.
+	* testsuite/ld-elf/dwarf3.err: New file.
+
+2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Add warning,
+	error, warning_output, and error_output actions.  Remove separate
+	warnings parameter.
+	* testsuite/ld-elf/shared.exp (build_tests): Updated to use
+	'warning' action.
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Likewise.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/check-ptr-eq.c (check_ptr_eq): Change params
+	from void pointers to function pointers.
+	* testsuite/ld-elf/pr18718.c: Update to suit.
+	* testsuite/ld-elf/pr18720a.c: Update to suit.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	PR 21000
+	* testsuite/ld-elf/loadaddr1.d: Adjust for hppa file offsets.
+	* testsuite/ld-elf/loadaddr2.d: Likewise.
+	* testsuite/ld-elf/loadaddr3a.d: Likewise.
+	* testsuite/ld-scripts/rgn-at5.d: Likewise.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/vxworks1-lib.s: Correct addi to addic.
+	* testsuite/ld-powerpc/vxworks1-lib.dd: Adjust to suit.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21168
+	* testsuite/ld-i386/i386.exp: Run pr21168.
+	* testsuite/ld-i386/pr21168a.c: New file.
+	* testsuite/ld-i386/pr21168b.S: Likewise.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20244
+	* testsuite/ld-i386/i386.exp: Run pr20244-4a, pr20244-4b and
+	pr20244-4c.
+	* testsuite/ld-i386/pr20244-4.s: New file.
+	* testsuite/ld-i386/pr20244-4a.d: Likewise.
+	* testsuite/ld-i386/pr20244-4b.d: Likewise.
+	* testsuite/ld-i386/pr20244-4c.d: Likewise.
+
+2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ldmisc.c (vfinfo): Don't print the function name again either
+	if no source file name has been found both now and previously.
+	* testsuite/ld-cris/tls-err-20x.d: Adjust accordingly.
+	* testsuite/ld-mips-elf/mode-change-error-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-mips16.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-micromips.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-r6-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-3.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Likewise.
+	* testsuite/ld-powerpc/tocopt.out: Likewise.
+	* testsuite/ld-powerpc/tocopt7.out: Likewise.
+
+2017-02-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ldmisc.c (vfinfo) <'H'>: Remove static NULL initializers.
+
+2017-02-15  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* testsuite/ld-scripts/sysroot-prefix.exp
+	(get_base_dir_for_scripts): New function.
+	(run_sysroot_prefix_test): Use get_base_dir_for_scripts.
+
+2017-02-13  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* emulparams/elf32lriscv-defs.sh (SDATA_START_SYMBOLS): Change
+	_gp to __global_pointer$
+
 2017-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure.tgt (arc*-*-linux*): Change the default linker

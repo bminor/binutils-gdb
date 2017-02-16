@@ -1,0 +1,4 @@
+.*/dwarf3\.o: In function `main':
+.*dwarf3.c:\(\.text.*\+0x[0-9a-f]+\): undefined reference to `bar'
+.*dwarf3.c:\(\.text.*\+0x[0-9a-f]+\): undefined reference to `bar'
+#...
