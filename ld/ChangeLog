@@ -1,3 +1,8 @@
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/vxworks1-lib.s: Correct addi to addic.
+	* testsuite/ld-powerpc/vxworks1-lib.dd: Adjust to suit.
+
 2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21168
