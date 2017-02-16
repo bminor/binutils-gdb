@@ -1,5 +1,12 @@
 2017-02-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/check-ptr-eq.c (check_ptr_eq): Change params
+	from void pointers to function pointers.
+	* testsuite/ld-elf/pr18718.c: Update to suit.
+	* testsuite/ld-elf/pr18720a.c: Update to suit.
+
+2017-02-16  Alan Modra  <amodra@gmail.com>
+
 	PR 21000
 	* testsuite/ld-elf/loadaddr1.d: Adjust for hppa file offsets.
 	* testsuite/ld-elf/loadaddr2.d: Likewise.

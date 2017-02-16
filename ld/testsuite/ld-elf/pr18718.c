@@ -2,7 +2,7 @@
 #include <bfd_stdint.h>
 
 extern void foo (void);
-extern void check_ptr_eq (void *, void *);
+extern void check_ptr_eq (void (*) (void), void (*) (void));
 
 void
 new_foo (void)
