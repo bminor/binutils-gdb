@@ -183,6 +183,7 @@ if { $fails == 0 } {
 
 # Check the empty object file.
 if {! [check_osabi tmpdir/unique_empty.o {UNIX - System V}]} {
+    setup_xfail hppa*-*-*
     fail "Object NOT containing unique does not have an OS/ABI field of System V"
     set fails [expr $fails + 1]
 }
@@ -239,6 +240,7 @@ if { $fails == 0 } {
 
 # Check the empty executable linked against unique shared library.
 if {! [check_osabi tmpdir/unique_shared_prog {UNIX - System V}]} {
+    setup_xfail hppa*-*-*
     fail "Executable NOT containing unique does not have an OS/ABI field of System V"
     set fails [expr $fails + 1]
 }
