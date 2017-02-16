@@ -1422,7 +1422,7 @@ static symint_t add_aux_sym_tir (type_info_t *t,
 				 thash_t **hash_tbl);
 static tag_t *get_tag (const char *tag, localsym_t *sym, bt_t basic_type);
 static void add_unknown_tag (tag_t *ptag);
-static void add_procedure (char *func);
+static void add_procedure (char *func, int aent);
 static void add_file (const char *file_name, int indx, int fake);
 #ifdef ECOFF_DEBUG
 static char *sc_to_string (sc_t storage_class);
@@ -2109,10 +2109,11 @@ add_unknown_tag (tag_t *ptag /* pointer to tag information */)
 }
 
 /* Add a procedure to the current file's list of procedures, and record
-   this is the current procedure.  */
+   this is the current procedure.  If AENT, then only set the requested
+   symbol's function type.  */
 
 static void
-add_procedure (char *func /* func name */)
+add_procedure (char *func /* func name */, int aent)
 {
   varray_t *vp;
   proc_t *new_proc_ptr;
@@ -2122,6 +2123,13 @@ add_procedure (char *func /* func name */)
   if (debug)
     fputc ('\n', stderr);
 #endif
+
+  /* Set the BSF_FUNCTION flag for the symbol.  */
+  sym = symbol_find_or_make (func);
+  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
+
+  if (aent)
+    return;
 
   if (cur_file_ptr == (efdr_t *) NULL)
     as_fatal (_("no current file pointer"));
@@ -2142,10 +2150,6 @@ add_procedure (char *func /* func name */)
   new_proc_ptr->pdr.iline = -1;
   new_proc_ptr->pdr.lnLow = -1;
   new_proc_ptr->pdr.lnHigh = -1;
-
-  /* Set the BSF_FUNCTION flag for the symbol.  */
-  sym = symbol_find_or_make (func);
-  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 
   /* Push the start of the function.  */
   new_proc_ptr->sym = add_ecoff_symbol ((const char *) NULL, st_Proc, sc_Text,
@@ -3030,7 +3034,7 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
 /* Parse .ent directives.  */
 
 void
-ecoff_directive_ent (int ignore ATTRIBUTE_UNUSED)
+ecoff_directive_ent (int aent)
 {
   char *name;
   char name_end;
@@ -3038,7 +3042,7 @@ ecoff_directive_ent (int ignore ATTRIBUTE_UNUSED)
   if (cur_file_ptr == (efdr_t *) NULL)
     add_file ((const char *) NULL, 0, 1);
 
-  if (cur_proc_ptr != (proc_t *) NULL)
+  if (!aent && cur_proc_ptr != (proc_t *) NULL)
     {
       as_warn (_("second .ent directive found before .end directive"));
       demand_empty_rest_of_line ();
@@ -3049,13 +3053,13 @@ ecoff_directive_ent (int ignore ATTRIBUTE_UNUSED)
 
   if (name == input_line_pointer)
     {
-      as_warn (_(".ent directive has no name"));
+      as_warn (_("%s directive has no name"), aent ? ".aent" : ".ent");
       (void) restore_line_pointer (name_end);
       demand_empty_rest_of_line ();
       return;
     }
 
-  add_procedure (name);
+  add_procedure (name, aent);
 
   (void) restore_line_pointer (name_end);
 

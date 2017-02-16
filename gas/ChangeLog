@@ -1,3 +1,13 @@
+2017-02-17  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ecoff.c (ecoff_directive_ent, add_procedure): Handle `.aent'.
+	* config/obj-ecoff.c (obj_pseudo_table): Add "aent" entry.
+	* config/obj-elf.c (ecoff_debug_pseudo_table): Likewise.
+	* testsuite/gas/mips/aent-2.d: New test.
+	* testsuite/gas/mips/aent-mdebug.d: New test.
+	* testsuite/gas/mips/aent-mdebug-2.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-02-15  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* testsuite/gas/aarch64/sve-sysreg.s,
