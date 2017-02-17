@@ -1,5 +1,10 @@
 2017-02-17  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/dwarf2.err: Accept other errors between the
+	multiple definition errors.
+
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/dwarf2.err: Add missing newline at end.
 	* testsuite/ld-elf/dwarf3.err: Likewise.  Allow match without filename.
 
