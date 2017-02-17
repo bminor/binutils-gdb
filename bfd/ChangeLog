@@ -1,5 +1,18 @@
 2017-02-17  Pedro Alves  <palves@redhat.com>
 
+	* archive.c (bsd_write_armap): Rename to ...
+	(_bfd_bsd_write_armap): ... this.
+	(coff_write_armap): Rename to ...
+	(_bfd_coff_write_armap): ... this.
+	* libbfd-in.h (bsd_write_armap): Rename to ...
+	(_bfd_bsd_write_armap): ... this.
+	(coff_write_armap): Rename to ...
+	(_bfd_coff_write_armap): ... this.
+	* aout-target.h, aout-tic30.c: Adjust all users.
+	* libbfd.h: Regenerate.
+
+2017-02-17  Pedro Alves  <palves@redhat.com>
+
 	* bfd-in.h (bfd_read, bfd_write): Adjust to rename.
 	(warn_deprecated): Rename to ...
 	(_bfd_warn_deprecated): ... this.

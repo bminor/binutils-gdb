@@ -212,11 +212,11 @@ void bfd_bsd_truncate_arname
 void bfd_gnu_truncate_arname
   (bfd *abfd, const char *filename, char *hdr);
 
-bfd_boolean bsd_write_armap
+bfd_boolean _bfd_bsd_write_armap
   (bfd *arch, unsigned int elength, struct orl *map, unsigned int orl_count,
    int stridx);
 
-bfd_boolean coff_write_armap
+bfd_boolean _bfd_coff_write_armap
   (bfd *arch, unsigned int elength, struct orl *map, unsigned int orl_count,
    int stridx);
 
@@ -326,7 +326,7 @@ extern int _bfd_nocore_core_file_pid
 extern bfd_boolean _bfd_archive_bsd_construct_extended_name_table
   (bfd *, char **, bfd_size_type *, const char **);
 #define _bfd_archive_bsd_truncate_arname bfd_bsd_truncate_arname
-#define _bfd_archive_bsd_write_armap bsd_write_armap
+#define _bfd_archive_bsd_write_armap _bfd_bsd_write_armap
 #define _bfd_archive_bsd_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_bsd_write_ar_hdr _bfd_generic_write_ar_hdr
 #define _bfd_archive_bsd_openr_next_archived_file \
@@ -346,7 +346,7 @@ extern bfd_boolean _bfd_archive_bsd_update_armap_timestamp
 extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
   (bfd *, char **, bfd_size_type *, const char **);
 #define _bfd_archive_coff_truncate_arname bfd_dont_truncate_arname
-#define _bfd_archive_coff_write_armap coff_write_armap
+#define _bfd_archive_coff_write_armap _bfd_coff_write_armap
 #define _bfd_archive_coff_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_coff_write_ar_hdr _bfd_generic_write_ar_hdr
 #define _bfd_archive_coff_openr_next_archived_file \
@@ -365,7 +365,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
 extern bfd_boolean _bfd_archive_bsd44_construct_extended_name_table
   (bfd *, char **, bfd_size_type *, const char **);
 #define _bfd_archive_bsd44_truncate_arname bfd_bsd_truncate_arname
-#define _bfd_archive_bsd44_write_armap bsd_write_armap
+#define _bfd_archive_bsd44_write_armap _bfd_bsd_write_armap
 #define _bfd_archive_bsd44_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_bsd44_write_ar_hdr _bfd_bsd44_write_ar_hdr
 #define _bfd_archive_bsd44_openr_next_archived_file \
