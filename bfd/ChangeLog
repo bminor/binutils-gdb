@@ -1,5 +1,13 @@
 2017-02-17  Pedro Alves  <palves@redhat.com>
 
+	* srec.c (Chunk): Rename to ...
+	(_bfd_srec_len): ... this.
+	(S3Forced): Rename to ...
+	(_bfd_srec_forceS3): ... this.
+	* objcopy.c: Adjust all references.
+
+2017-02-17  Pedro Alves  <palves@redhat.com>
+
 	* archive.c (bsd_write_armap): Rename to ...
 	(_bfd_bsd_write_armap): ... this.
 	(coff_write_armap): Rename to ...

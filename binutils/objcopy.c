@@ -491,14 +491,14 @@ extern char *program_name;
    -1 means if we should use argv[0] to decide.  */
 extern int is_strip;
 
-/* The maximum length of an S record.  This variable is declared in srec.c
+/* The maximum length of an S record.  This variable is defined in srec.c
    and can be modified by the --srec-len parameter.  */
-extern unsigned int Chunk;
+extern unsigned int _bfd_srec_len;
 
 /* Restrict the generation of Srecords to type S3 only.
-   This variable is declare in bfd/srec.c and can be toggled
+   This variable is defined in bfd/srec.c and can be toggled
    on by the --srec-forceS3 command line switch.  */
-extern bfd_boolean S3Forced;
+extern bfd_boolean _bfd_srec_forceS3;
 
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
@@ -4509,11 +4509,11 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_SREC_LEN:
-	  Chunk = parse_vma (optarg, "--srec-len");
+	  _bfd_srec_len = parse_vma (optarg, "--srec-len");
 	  break;
 
 	case OPTION_SREC_FORCES3:
-	  S3Forced = TRUE;
+	  _bfd_srec_forceS3 = TRUE;
 	  break;
 
 	case OPTION_STRIP_SYMBOLS:
