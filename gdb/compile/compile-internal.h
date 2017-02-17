@@ -27,6 +27,10 @@
 
 extern int compile_debug;
 
+/* Flag to enable internal debugging for oracle requests.  */
+
+extern int debug_compile_oracle;
+
 struct block;
 
 namespace compile

@@ -1,0 +1,67 @@
+# Copyright 2016-2017 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Namespace-qualified template tests.
+
+load_lib compile-support.exp
+
+standard_testfile .cc
+
+if {[skip_cplus_tests]} {
+    untested "skipping C++ tests"
+    return
+}
+
+if {[prepare_for_testing $testfile $testfile $srcfile \
+	 {debug nowarnings c++}]} {
+    return -1
+}
+
+if {![runto_main]} {
+    return -1
+}
+
+if {[skip_compile_feature_tests]} {
+    untested \
+	"compile command not supported (could not find libcc1 shared library?)"
+    return -1
+}
+
+gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
+gdb_continue_to_breakpoint "testing location"
+
+CompileExpression::new "var"
+CompileExpression::test "N1::N2::mytemplate<int, 1> ()" -1
+CompileExpression::test "N1::N2::mytemplate<int, 1> (1)" 2
+CompileExpression::test "N1::N2::mytemplate<0> ()" 0
+CompileExpression::test "N1::N2::mytemplate ()" 100
+CompileExpression::test "a.tempmethod ()" {(20|{value = 20})} \
+    -print {xfail *-*-* gcc/debug/49348} \
+    -value {xfail *-*-* gcc/debug/49348}
+CompileExpression::test "a.tempmethod<N1::N2::A> ()" {(20|{value = 20})}
+CompileExpression::test "a.tempmethod<int> ()" -20
+CompileExpression::test "o + 3" {(-33|{v_ = 33})}
+CompileExpression::test "cddd.get1 ()" {(-30|{v_ = 30})}
+CompileExpression::test "cddd.get2 ()" 107
+CompileExpression::test "cddd.get3 ()" 3
+CompileExpression::test "cdd.get1 ()" 100
+CompileExpression::test "cdd.get2 ()" 107
+CompileExpression::test "cdd.get3 ()" 3
+CompileExpression::test "cd.get1 ()" 101
+CompileExpression::test "cd.get2 ()" {107( 'k')?}
+CompileExpression::test "cd.get3 ()" 3
+CompileExpression::test "c.get1 ()" 102
+CompileExpression::test "c.get2 ()" {107( 'k')?}
+CompileExpression::test "c.get3 ()" 12

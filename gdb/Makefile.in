@@ -354,6 +354,10 @@ SUBDIR_GCC_COMPILE_OBS = \
 	compile-c-support.o \
 	compile-c-symbols.o \
 	compile-c-types.o \
+	compile-cplus-support.o \
+	compile-cplus-symbols.o \
+	compile-cplus-templates.o \
+	compile-cplus-types.o \
 	compile-loc2c.o \
 	compile-object-load.o \
 	compile-object-run.o
@@ -363,6 +367,10 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-c-support.c \
 	compile/compile-c-symbols.c \
 	compile/compile-c-types.c \
+	compile/compile-cplus-support.c \
+	compile/compile-cplus-symbols.c \
+	compile/compile-cplus-templates.c \
+	compile/compile-cplus-types.c \
 	compile/compile-loc2c.c \
 	compile/compile-object-load.c \
 	compile/compile-object-load.h \

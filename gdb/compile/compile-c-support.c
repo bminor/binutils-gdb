@@ -1,4 +1,4 @@
-/* C language support for compilation.
+/* C/C++ language support for compilation.
 
    Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "compile-internal.h"
 #include "compile-c.h"
+#include "compile-cplus.h"
 #include "compile.h"
 #include "gdb-dlfcn.h"
 #include "c-lang.h"
@@ -128,6 +129,20 @@ c_get_compile_context (void)
     gcc_base_api_version, gcc_c_api_version>
     (STRINGIFY (GCC_C_FE_LIBCC), STRINGIFY (GCC_C_FE_CONTEXT),
      GCC_FE_VERSION_0, GCC_C_FE_VERSION_0);
+}
+
+/* A C++-language implementation of get_compile_context.  */
+
+compile::compile_instance *
+cplus_get_compile_context (void)
+{
+  using namespace compile;
+
+  return get_compile_context
+    <compile_cplus_instance, gcc_cp_fe_context_function, gcc_cp_context,
+     gcc_base_api_version, gcc_cp_api_version>
+    (STRINGIFY (GCC_CP_FE_LIBCC), STRINGIFY (GCC_CP_FE_CONTEXT),
+     GCC_FE_VERSION_0, GCC_CP_FE_VERSION_0);
 }
 
 
@@ -392,6 +407,108 @@ struct c_add_input
   }
 };
 
+/* C++-language policy to emit a push user expression pragma into
+   BUF.  */
+
+struct cplus_push_user_expression
+{
+  void push_user_expression (struct ui_file *buf)
+  {
+    fputs_unfiltered ("#pragma GCC push_user_expression\n", buf);
+  }
+};
+
+/* C++-language policy to emit a pop user expression pragma into BUF.  */
+
+struct cplus_pop_user_expression
+{
+  void pop_user_expression (struct ui_file *buf)
+  {
+    fputs_unfiltered ("#pragma GCC pop_user_expression\n", buf);
+  }
+};
+
+/* C++-language policy to construct a code header for a block of code.
+   Takes a scope TYPE argument which selects the correct header to
+   insert into BUF.  */
+
+struct cplus_add_code_header
+{
+  void add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
+  {
+  switch (type)
+    {
+    case COMPILE_I_SIMPLE_SCOPE:
+      fputs_unfiltered ("void "
+			GCC_FE_WRAPPER_FUNCTION
+			" (struct "
+			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			" *"
+			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			") {\n",
+			buf);
+      break;
+
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      fputs_unfiltered (
+			"#include <cstring>\n"
+			"#include <bits/move.h>\n"
+			"void "
+			GCC_FE_WRAPPER_FUNCTION
+			" (struct "
+			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			" *"
+			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			", "
+			COMPILE_I_PRINT_OUT_ARG_TYPE
+			" "
+			COMPILE_I_PRINT_OUT_ARG
+			") {\n",
+			buf);
+      break;
+
+    case COMPILE_I_RAW_SCOPE:
+      break;
+
+    default:
+      gdb_assert_not_reached (_("Unknown compiler scope reached."));
+    }
+  }
+};
+
+/* C++-language policy to emit the user code snippet INPUT into BUF based on
+   the scope TYPE.  */
+
+struct cplus_add_input
+{
+  void add_input (enum compile_i_scope_types type, const char *input,
+		  struct ui_file *buf)
+  {
+    switch (type)
+      {
+      case COMPILE_I_PRINT_ADDRESS_SCOPE:
+      case COMPILE_I_PRINT_VALUE_SCOPE:
+	fprintf_unfiltered
+	  (buf,
+	   "auto " COMPILE_I_EXPR_VAL " = %s;\n"
+	   "decltype ( %s ) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+	   "std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s ("
+	   COMPILE_I_EXPR_VAL "),\n"
+	   "sizeof (decltype(%s)));\n"
+	   ,input, input,
+	   (type == COMPILE_I_PRINT_ADDRESS_SCOPE
+	    ? "std::__addressof" : ""), input);
+	break;
+
+      default:
+	fputs_unfiltered (input, buf);
+	break;
+      }
+    fputs_unfiltered ("\n", buf);
+  }
+};
+
 /* A host class representing a compile program.
 
    CompileInstanceType is the type of the compile_instance for the
@@ -531,12 +648,17 @@ private:
   struct gdbarch *m_arch;
 };
 
-/* Type used for C program computations.  */
+/* The types used for C and C++ program computations.  */
 
 typedef compile_program<compile::compile_c_instance, c_push_user_expression,
 			pop_user_expression_nop, c_add_code_header,
 			c_add_code_footer,
 			c_add_input> c_compile_program;
+
+typedef compile_program<compile::compile_cplus_instance,
+			cplus_push_user_expression, cplus_pop_user_expression,
+			cplus_add_code_header, c_add_code_footer,
+			cplus_add_input> cplus_compile_program;
 
 /* The la_compute_program method for C.  */
 
@@ -551,6 +673,24 @@ c_compute_program (compile::compile_instance *inst,
 
   compile_c_instance *c_inst = static_cast<compile_c_instance *> (inst);
   c_compile_program program (c_inst, gdbarch);
+
+  return program.compute (input, expr_block, expr_pc);
+}
+
+/* The la_compute_program method for C++.  */
+
+std::string
+cplus_compute_program (compile::compile_instance *inst,
+		       const char *input,
+		       struct gdbarch *gdbarch,
+		       const struct block *expr_block,
+		       CORE_ADDR expr_pc)
+{
+  using namespace compile;
+
+  compile_cplus_instance *cplus_inst
+    = static_cast<compile_cplus_instance *> (inst);
+  cplus_compile_program program (cplus_inst, gdbarch);
 
   return program.compute (input, expr_block, expr_pc);
 }

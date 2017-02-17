@@ -460,7 +460,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       if (function != NULL
 	  && (BLOCK_SUPERBLOCK (function_block)
 	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
-	  && (strcmp (SYMBOL_LINKAGE_NAME (function), GCC_FE_WRAPPER_FUNCTION)
+	  && (strcmp_iw (SYMBOL_LINKAGE_NAME (function), GCC_FE_WRAPPER_FUNCTION)
 	      == 0))
 	break;
     }
@@ -742,6 +742,8 @@ compile_object_load (const compile_file_names &file_names,
 	      ? mst_unknown : MSYMBOL_TYPE (bmsym.minsym))
 	{
 	case mst_text:
+	case mst_bss:
+	case mst_data:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,

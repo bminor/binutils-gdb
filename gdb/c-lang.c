@@ -1068,8 +1068,8 @@ const struct language_defn cplus_language_defn =
   iterate_over_symbols,
   cplus_compute_string_hash,
   &cplus_varobj_ops,
-  NULL,
-  NULL,
+  cplus_get_compile_context,
+  cplus_compute_program,
   LANG_MAGIC
 };
 
