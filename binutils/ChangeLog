@@ -1,3 +1,8 @@
+2017-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_section_type_name): Add decoding of GNU section
+	types.
+
 2017-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: (MIPS, MN10300): Move Eric Christopher to Past

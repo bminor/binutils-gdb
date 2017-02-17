@@ -4136,7 +4136,18 @@ get_section_type_name (unsigned int sh_type)
 	      if (elf_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
 		result = get_solaris_section_type (sh_type);
 	      else
-		result = NULL;
+		{
+		  switch (sh_type)
+		    {
+		    case SHT_GNU_INCREMENTAL_INPUTS: result = "GNU_INCREMENTAL_INPUTS"; break;
+		    case SHT_GNU_ATTRIBUTES: result = "GNU_ATTRIBUTES"; break;
+		    case SHT_GNU_HASH: result = "GNU_HASH"; break;
+		    case SHT_GNU_LIBLIST: result = "GNU_LIBLIST"; break;
+		    default:
+		      result = NULL;
+		      break;
+		    }
+		}
 	      break;
 	    }
 
