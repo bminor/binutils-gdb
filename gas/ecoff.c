@@ -3025,6 +3025,10 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
 					 frag_now),
 			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   cur_proc_ptr = (proc_t *) NULL;
 
   (void) restore_line_pointer (name_end);

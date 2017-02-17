@@ -1794,6 +1794,10 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "isa-override-1" "" [mips_arch_list_matching mips1]
     run_list_test_arches "isa-override-2" "-32" [mips_arch_list_matching mips1]
 
+    run_dump_test "debug-label-end-1"
+    run_dump_test "debug-label-end-2"
+    run_dump_test "debug-label-end-3"
+
     run_dump_test_arches "r6"		[mips_arch_list_matching mips32r6]
     if $has_newabi {
 	run_dump_test_arches "r6-n32"	[mips_arch_list_matching mips64r6]
