@@ -1,5 +1,11 @@
 2017-02-17  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21156
+	* readelf.c (find_section_in_set): Test for invalid section
+	indicies.
+
+2017-02-17  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (get_section_type_name): Add decoding of GNU section
 	types.
 

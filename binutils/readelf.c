@@ -676,8 +676,14 @@ find_section_in_set (const char * name, unsigned int * set)
   if (set != NULL)
     {
       while ((i = *set++) > 0)
-	if (streq (SECTION_NAME (section_headers + i), name))
-	  return section_headers + i;
+	{
+	  /* See PR 21156 for a reproducer.  */
+	  if (i >= elf_header.e_shnum)
+	    continue; /* FIXME: Should we issue an error message ?  */
+
+	  if (streq (SECTION_NAME (section_headers + i), name))
+	    return section_headers + i;
+	}
     }
 
   return find_section (name);
