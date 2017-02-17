@@ -1,3 +1,9 @@
+2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_target::remote_parse_stop_reply): Avoid using
+	'PATH_MAX'.
+
 2019-02-14  David Michael  <fedora.dm0@gmail.com>
 	    Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@codesourcery.com>
