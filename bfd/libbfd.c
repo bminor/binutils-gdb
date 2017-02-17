@@ -927,10 +927,10 @@ bfd_generic_is_local_label_name (bfd *abfd, const char *name)
    old routines.  */
 
 void
-warn_deprecated (const char *what,
-		 const char *file,
-		 int line,
-		 const char *func)
+_bfd_warn_deprecated (const char *what,
+		      const char *file,
+		      int line,
+		      const char *func)
 {
   /* Poor man's tracking of functions we've already warned about.  */
   static size_t mask = 0;

@@ -1,5 +1,14 @@
 2017-02-17  Pedro Alves  <palves@redhat.com>
 
+	* bfd-in.h (bfd_read, bfd_write): Adjust to rename.
+	(warn_deprecated): Rename to ...
+	(_bfd_warn_deprecated): ... this.
+	* libbfd.c (warn_deprecated): Rename to ...
+	(_bfd_warn_deprecated): ... this.
+	* bfd-in2.h: Regenerate.
+
+2017-02-17  Pedro Alves  <palves@redhat.com>
+
 	* bfdio.c (real_ftell): Rename to ...
 	(_bfd_real_ftell): ... this.
 	(real_fseek): Rename to ...
