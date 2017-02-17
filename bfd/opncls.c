@@ -219,7 +219,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
     nbfd->iostream = fdopen (fd, mode);
   else
 #endif
-    nbfd->iostream = real_fopen (filename, mode);
+    nbfd->iostream = _bfd_real_fopen (filename, mode);
   if (nbfd->iostream == NULL)
     {
       bfd_set_error (bfd_error_system_call);
@@ -1288,7 +1288,7 @@ separate_debug_file_exists (const char *name, const unsigned long crc)
 
   BFD_ASSERT (name);
 
-  f = real_fopen (name, FOPEN_RB);
+  f = _bfd_real_fopen (name, FOPEN_RB);
   if (f == NULL)
     return FALSE;
 
@@ -1321,7 +1321,7 @@ separate_alt_debug_file_exists (const char *name,
 
   BFD_ASSERT (name);
 
-  f = real_fopen (name, FOPEN_RB);
+  f = _bfd_real_fopen (name, FOPEN_RB);
   if (f == NULL)
     return FALSE;
 
@@ -1704,7 +1704,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
      .gnu_debuglink section, we insist upon the user providing us with a
      correct-for-section-creation-time path, but this need not conform to
      the gdb location algorithm.  */
-  handle = real_fopen (filename, FOPEN_RB);
+  handle = _bfd_real_fopen (filename, FOPEN_RB);
   if (handle == NULL)
     {
       bfd_set_error (bfd_error_system_call);

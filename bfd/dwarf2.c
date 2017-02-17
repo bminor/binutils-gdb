@@ -906,7 +906,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 
   abbrev_ptr = stash->dwarf_abbrev_buffer + offset;
   abbrev_end = stash->dwarf_abbrev_buffer + stash->dwarf_abbrev_size;
-  abbrev_number = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+  abbrev_number = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					 FALSE, abbrev_end);
   abbrev_ptr += bytes_read;
 
   /* Loop until we reach an abbrev number of 0.  */

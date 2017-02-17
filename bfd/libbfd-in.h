@@ -782,9 +782,9 @@ extern void _bfd_abort
 
 /* Manipulate a system FILE but using BFD's "file_ptr", rather than
    the system "off_t" or "off64_t", as the offset.  */
-extern file_ptr real_ftell (FILE *file);
-extern int real_fseek (FILE *file, file_ptr offset, int whence);
-extern FILE *real_fopen (const char *filename, const char *modes);
+extern file_ptr _bfd_real_ftell (FILE *file);
+extern int _bfd_real_fseek (FILE *file, file_ptr offset, int whence);
+extern FILE *_bfd_real_fopen (const char *filename, const char *modes);
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
