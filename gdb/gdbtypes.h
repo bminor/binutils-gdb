@@ -915,6 +915,26 @@ struct decl_field
   unsigned int dummy : 13;
 };
 
+/* * Template function/type argument information.  */
+
+struct template_argument_info
+{
+    /* * Number of template arguments.  */
+  unsigned short n_arguments;
+
+  /* * The template arguments.  This is an array with n_arguments elements.  */
+  struct symbol **arguments;
+
+  /* * Default values.  An array with n_arguments elements.  Note that this
+     array only describes this particular instance!  It will not describe
+     default values for /all/ template instances (unless this instance uses
+     all the defaults).  This is a DWARF limitation.  */
+    struct symbol **default_arguments;
+
+    /* * The kinds of arguments.  An array with n_arguments elements.  */
+    enum template_argument_kinds *argument_kinds;
+};
+
 /* * C++ language-specific information for TYPE_CODE_STRUCT and
    TYPE_CODE_UNION nodes.  */
 
@@ -948,9 +968,10 @@ struct cplus_struct_type
 
     short nfn_fields;
 
-    /* * Number of template arguments.  */
+    /* * Template arguments, if any, or NULL if this type does not represent a
+       templated type.  */
 
-    unsigned short n_template_arguments;
+    struct template_argument_info *template_arguments;
 
     /* * One if this struct is a dynamic class, as defined by the
        Itanium C++ ABI: if it requires a virtual table pointer,
@@ -1022,12 +1043,6 @@ struct cplus_struct_type
     struct decl_field *nested_types;
 
     unsigned nested_types_count;
-
-    /* * The template arguments.  This is an array with
-       N_TEMPLATE_ARGUMENTS elements.  This is NULL for non-template
-       classes.  */
-
-    struct symbol **template_arguments;
   };
 
 /* * Struct used to store conversion rankings.  */
@@ -1425,12 +1440,24 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELDLIST_NAME(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].name
 #define TYPE_FN_FIELDLIST_LENGTH(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].length
 
-#define TYPE_N_TEMPLATE_ARGUMENTS(thistype) \
-  TYPE_CPLUS_SPECIFIC (thistype)->n_template_arguments
-#define TYPE_TEMPLATE_ARGUMENTS(thistype) \
+#define TYPE_TEMPLATE_ARGUMENT_INFO(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->template_arguments
+#define TYPE_N_TEMPLATE_ARGUMENTS(thistype) \
+  (TYPE_TEMPLATE_ARGUMENT_INFO (thistype) == NULL ? 0 \
+   : TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->n_arguments)
+#define TYPE_TEMPLATE_ARGUMENTS(thistype) \
+  (TYPE_TEMPLATE_ARGUMENT_INFO (thistype) == NULL ? NULL \
+   : TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->arguments)
 #define TYPE_TEMPLATE_ARGUMENT(thistype, n) \
-  TYPE_CPLUS_SPECIFIC (thistype)->template_arguments[n]
+  TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->arguments[n]
+#define TYPE_TEMPLATE_ARGUMENT_KINDS(thistype) \
+  TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->argument_kinds
+#define TYPE_TEMPLATE_ARGUMENT_KIND(thistype, n) \
+  TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->argument_kinds[n]
+#define TYPE_TEMPLATE_DEFAULT_ARGUMENTS(thistype) \
+  TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->default_arguments
+#define TYPE_TEMPLATE_DEFAULT_ARGUMENT(thistype, n) \
+  TYPE_TEMPLATE_ARGUMENT_INFO (thistype)->default_arguments[n]
 
 #define TYPE_FN_FIELD(thisfn, n) (thisfn)[n]
 #define TYPE_FN_FIELD_PHYSNAME(thisfn, n) (thisfn)[n].physname

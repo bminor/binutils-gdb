@@ -2006,7 +2006,8 @@ cp_comp_to_string (struct demangle_component *result, int estimated_len)
 
 demangle_parse_info::demangle_parse_info ()
 : info (NULL),
-  tree (NULL)
+  tree (NULL),
+  memory (NULL)
 {
   obstack_init (&obstack);
 }
@@ -2026,6 +2027,9 @@ demangle_parse_info::~demangle_parse_info ()
 
   /* Free any memory allocated during typedef replacement.  */
   obstack_free (&obstack, NULL);
+
+  /* Free any memory used for demangling.  */
+  free (memory);
 }
 
 /* Merge the two parse trees given by DEST and SRC.  The parse tree

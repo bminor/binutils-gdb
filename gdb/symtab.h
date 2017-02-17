@@ -907,12 +907,28 @@ struct template_symbol
   /* Search name of the template (it's name sans parameters).  */
   char *search_name;
 
-  /* The number of template arguments.  */
-  int n_template_arguments;
+  /* Information on template arguments.  */
+  struct template_argument_info *template_arguments;
 
-  /* The template arguments.  This is an array with
-     N_TEMPLATE_ARGUMENTS elements.  */
-  struct symbol **template_arguments;
+  /* The template's linkage name.  */
+  const char *linkage_name;
+
+  /* The template argument substitutions below are populated lazily to speed
+     up initial symbol reading.  This is done by parsing the symbol's
+     linkage name.  */
+
+  /* If the return type was specified as a template parameter, this will
+     hold the index of the template parameter used;  -1 otherwise.  */
+  long template_return_index;
+
+  /* Index into template_arguments describing the function's arguments
+     or -1 if the argument is not a template parameter.  There are
+     TYPE_NFIELDS entries.  */
+  long *template_argument_indices;
+
+  /* If this symbol is a conversion operator, this records which template
+     parameter is used for the conversion; -1 otherwise.  */
+  long conversion_operator_index;
 };
 
 

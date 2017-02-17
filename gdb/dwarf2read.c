@@ -78,6 +78,9 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
+typedef enum template_argument_kinds template_argument_kinds_t;
+DEF_VEC_I (template_argument_kinds_t);
+
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
@@ -11574,6 +11577,34 @@ possibly_add_new_xtor_method (const char *name, struct die_info *die,
     }
 }
 
+/* Return the type of the template parameter given by TAG.  */
+
+static enum template_argument_kinds
+dw2_template_param_kind (enum dwarf_tag tag)
+{
+  enum template_argument_kinds kind;
+
+  switch (tag)
+    {
+    case DW_TAG_template_type_param:
+      kind = type_parameter;
+      break;
+    case DW_TAG_template_value_param:
+      kind = value_parameter;
+      break;
+    case DW_TAG_GNU_template_template_param:
+      kind = template_parameter;
+      break;
+    case DW_TAG_GNU_template_parameter_pack:
+      kind = variadic_parameter;
+      break;
+    default:
+      gdb_assert_not_reached ("unexpected template parameter tag");
+    }
+
+  return kind;
+}
+
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -11589,7 +11620,10 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct block *block;
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
   VEC (symbolp) *template_args = NULL;
+  VEC (template_argument_kinds_t) *template_args_kinds = NULL;
+  VEC (symbolp) *template_arg_defaults = NULL;
   struct template_symbol *templ_func = NULL;
+  struct type *type;
 
   if (inlined_func)
     {
@@ -11648,9 +11682,9 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  type = read_type_die (die, cu);
   newobj = push_context (0, lowpc);
-  newobj->name = new_symbol_full (die, read_type_die (die, cu), cu,
-			       (struct symbol *) templ_func);
+  newobj->name = new_symbol_full (die, type, cu, (struct symbol *) templ_func);
 
   /* If there is a location expression for DW_AT_frame_base, record
      it.  */
@@ -11681,7 +11715,17 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
 	      if (arg != NULL)
-		VEC_safe_push (symbolp, template_args, arg);
+		{
+		  VEC_safe_push (symbolp, template_args, arg);
+		  VEC_safe_push (template_argument_kinds_t,
+				 template_args_kinds,
+				 dw2_template_param_kind (child_die->tag));
+		  if (dwarf2_flag_true_p (child_die,
+					  DW_AT_default_value, cu))
+		    VEC_safe_push (symbolp, template_arg_defaults, arg);
+		  else
+		    VEC_safe_push (symbolp, template_arg_defaults, NULL);
+		}
 	    }
 	  else
 	    process_die (child_die, cu);
@@ -11740,15 +11784,37 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       gdb_assert (templ_func != NULL);
 
-      templ_func->n_template_arguments = VEC_length (symbolp, template_args);
       templ_func->template_arguments
+	= XOBNEW (&objfile->objfile_obstack, struct template_argument_info);
+      templ_func->template_arguments->n_arguments = VEC_length (symbolp, template_args);
+      templ_func->template_arguments->arguments
         = XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
-		     templ_func->n_template_arguments);
-      memcpy (templ_func->template_arguments,
+		     templ_func->template_arguments->n_arguments);
+      memcpy (templ_func->template_arguments->arguments,
 	      VEC_address (symbolp, template_args),
-	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
+	      (templ_func->template_arguments->n_arguments * sizeof (struct symbol *)));
+      templ_func->template_arguments->argument_kinds
+	= XOBNEWVEC (&objfile->objfile_obstack, enum template_argument_kinds,
+		     templ_func->template_arguments->n_arguments);
+      memcpy (templ_func->template_arguments->argument_kinds,
+	      VEC_address (template_argument_kinds_t, template_args_kinds),
+	      (templ_func->template_arguments->n_arguments
+	       * sizeof (enum template_argument_kinds)));
+      templ_func->template_arguments->default_arguments
+	= XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
+		     templ_func->template_arguments->n_arguments);
+      memcpy (templ_func->template_arguments->default_arguments,
+	      VEC_address (symbolp, template_arg_defaults),
+	      (templ_func->template_arguments->n_arguments * sizeof (struct symbol *)));
+
       VEC_free (symbolp, template_args);
+      VEC_free (template_argument_kinds_t, template_args_kinds);
+      VEC_free (symbolp, template_arg_defaults);
+
+      /* Determine whether the template's return and argument types were
+	 specified using template parameters.  */
       const char *linkage_name = dw2_linkage_name (die, cu);
+      templ_func->linkage_name = linkage_name;
       if (linkage_name != NULL)
 	{
 	  char *str;
@@ -13835,6 +13901,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct field_info fi;
       VEC (symbolp) *template_args = NULL;
+      VEC (template_argument_kinds_t) *template_args_kinds = NULL;
+      VEC (symbolp) *template_arg_defaults = NULL;
       struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
       memset (&fi, 0, sizeof (struct field_info));
@@ -13884,7 +13952,17 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
 	      if (arg != NULL)
-		VEC_safe_push (symbolp, template_args, arg);
+		{
+		  VEC_safe_push (symbolp, template_args, arg);
+		  VEC_safe_push (template_argument_kinds_t,
+				 template_args_kinds,
+				 dw2_template_param_kind (child_die->tag));
+		  if (dwarf2_flag_true_p (child_die,
+					  DW_AT_default_value, cu))
+		    VEC_safe_push (symbolp, template_arg_defaults, arg);
+		  else
+		    VEC_safe_push (symbolp, template_arg_defaults, NULL);
+		}
 	    }
 
 	  child_die = sibling_die (child_die);
@@ -13894,17 +13972,36 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       if (! VEC_empty (symbolp, template_args))
 	{
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
-	  TYPE_N_TEMPLATE_ARGUMENTS (type)
+	  TYPE_TEMPLATE_ARGUMENT_INFO (type)
+	    = XOBNEW (&objfile->objfile_obstack, struct template_argument_info);
+	  TYPE_TEMPLATE_ARGUMENT_INFO (type)->n_arguments
 	    = VEC_length (symbolp, template_args);
-	  TYPE_TEMPLATE_ARGUMENTS (type)
+	  TYPE_TEMPLATE_ARGUMENT_INFO (type)->arguments
 	    = XOBNEWVEC (&objfile->objfile_obstack,
 			 struct symbol *,
 			 TYPE_N_TEMPLATE_ARGUMENTS (type));
-	  memcpy (TYPE_TEMPLATE_ARGUMENTS (type),
+	  memcpy (TYPE_TEMPLATE_ARGUMENT_INFO (type)->arguments,
 		  VEC_address (symbolp, template_args),
 		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
 		   * sizeof (struct symbol *)));
+	  TYPE_TEMPLATE_ARGUMENT_KINDS (type)
+	    = XOBNEWVEC (&objfile->objfile_obstack,
+			 enum template_argument_kinds,
+			 TYPE_N_TEMPLATE_ARGUMENTS (type));
+	  memcpy (TYPE_TEMPLATE_ARGUMENT_KINDS (type),
+		  VEC_address (template_argument_kinds_t, template_args_kinds),
+		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
+		   * sizeof (enum template_argument_kinds)));
+	  TYPE_TEMPLATE_DEFAULT_ARGUMENTS (type)
+	    = XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
+			 TYPE_N_TEMPLATE_ARGUMENTS (type));
+	  memcpy (TYPE_TEMPLATE_DEFAULT_ARGUMENTS (type),
+		  VEC_address (symbolp, template_arg_defaults),
+		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
+		   * sizeof (struct symbol *)));
 	  VEC_free (symbolp, template_args);
+	  VEC_free (template_argument_kinds_t, template_args_kinds);
+	  VEC_free (symbolp, template_arg_defaults);
 	}
 
       /* Attach fields and member functions to the type.  */

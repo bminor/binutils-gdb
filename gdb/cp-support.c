@@ -37,9 +37,6 @@
 #include "gdb_setjmp.h"
 #include "safe-ctype.h"
 
-#define d_left(dc) (dc)->u.s_binary.left
-#define d_right(dc) (dc)->u.s_binary.right
-
 /* Functions related to demangled name parsing.  */
 
 static unsigned int cp_find_first_component_aux (const char *name,
@@ -580,15 +577,10 @@ cp_canonicalize_string (const char *string)
   return ret;
 }
 
-/* Convert a mangled name to a demangle_component tree.  *MEMORY is
-   set to the block of used memory that should be freed when finished
-   with the tree.  DEMANGLED_P is set to the char * that should be
-   freed when finished with the tree, or NULL if none was needed.
-   OPTIONS will be passed to the demangler.  */
+/* See description in cp-support.h.  */
 
-static std::unique_ptr<demangle_parse_info>
-mangled_name_to_comp (const char *mangled_name, int options,
-		      void **memory, char **demangled_p)
+std::unique_ptr<demangle_parse_info>
+cp_mangled_name_to_comp (const char *mangled_name, int options)
 {
   char *demangled_name;
 
@@ -597,14 +589,15 @@ mangled_name_to_comp (const char *mangled_name, int options,
   if (mangled_name[0] == '_' && mangled_name[1] == 'Z')
     {
       struct demangle_component *ret;
+      void *memory;
 
       ret = cplus_demangle_v3_components (mangled_name,
-					  options, memory);
+					  options, &memory);
       if (ret)
 	{
 	  std::unique_ptr<demangle_parse_info> info (new demangle_parse_info);
 	  info->tree = ret;
-	  *demangled_p = NULL;
+	  info->memory = memory;
 	  return info;
 	}
     }
@@ -626,7 +619,8 @@ mangled_name_to_comp (const char *mangled_name, int options,
       return NULL;
     }
 
-  *demangled_p = demangled_name;
+  long len;
+  copy_string_to_obstack (&info->obstack, demangled_name, &len);
   return info;
 }
 
@@ -635,14 +629,12 @@ mangled_name_to_comp (const char *mangled_name, int options,
 char *
 cp_class_name_from_physname (const char *physname)
 {
-  void *storage = NULL;
-  char *demangled_name = NULL, *ret;
+  char *ret;
   struct demangle_component *ret_comp, *prev_comp, *cur_comp;
   std::unique_ptr<demangle_parse_info> info;
   int done;
 
-  info = mangled_name_to_comp (physname, DMGL_ANSI,
-			       &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (physname, DMGL_ANSI);
   if (info == NULL)
     return NULL;
 
@@ -715,8 +707,6 @@ cp_class_name_from_physname (const char *physname)
       ret = cp_comp_to_string (ret_comp, 10);
     }
 
-  xfree (storage);
-  xfree (demangled_name);
   return ret;
 }
 
@@ -784,13 +774,11 @@ unqualified_name_from_comp (struct demangle_component *comp)
 char *
 method_name_from_physname (const char *physname)
 {
-  void *storage = NULL;
-  char *demangled_name = NULL, *ret;
+  char *ret;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
 
-  info = mangled_name_to_comp (physname, DMGL_ANSI,
-			       &storage, &demangled_name);
+  info = cp_mangled_name_to_comp (physname, DMGL_ANSI);
   if (info == NULL)
     return NULL;
 
@@ -802,8 +790,6 @@ method_name_from_physname (const char *physname)
        estimate.  */
     ret = cp_comp_to_string (ret_comp, 10);
 
-  xfree (storage);
-  xfree (demangled_name);
   return ret;
 }
 
@@ -1684,6 +1670,176 @@ info_vtbl_command (char *arg, int from_tty)
 
   value = parse_and_eval (arg);
   cplus_print_vtable (value);
+}
+
+/* See description in cp-support.h.  */
+
+void
+cp_decode_template_type_indices (struct template_symbol *tsymbol,
+				 const struct demangle_parse_info *opt_info)
+{
+  const struct demangle_parse_info *info;
+  int idx;
+  struct demangle_component *ret_comp;
+  struct objfile *objfile;
+
+  /* Only do this once.  */
+  if (tsymbol->template_argument_indices != NULL)
+    return;
+
+  if (tsymbol->linkage_name == NULL)
+    {
+      warning (_("Template symbol \"%s\" has no linkage name."),
+	       SYMBOL_NATURAL_NAME (&tsymbol->base));
+      return;
+    }
+
+  /* Initialize values to be returned to caller.  */
+  gdb_assert (SYMBOL_OBJFILE_OWNED (&tsymbol->base));
+  objfile = symbol_objfile (&tsymbol->base);
+  tsymbol->template_return_index = -1;
+  tsymbol->template_argument_indices
+    = XOBNEWVEC (&objfile->objfile_obstack, long,
+		 TYPE_NFIELDS (SYMBOL_TYPE (&tsymbol->base)));
+
+  for (idx = 0; idx < TYPE_NFIELDS (SYMBOL_TYPE (&tsymbol->base)); ++idx)
+    tsymbol->template_argument_indices[idx] = -1;
+
+  std::unique_ptr<demangle_parse_info> dpi;
+
+  if (opt_info != NULL)
+    info = opt_info;
+  else
+    {
+      dpi = cp_mangled_name_to_comp (tsymbol->linkage_name,
+				     DMGL_ANSI | DMGL_PARAMS);
+      if (dpi == NULL)
+	return;
+
+      info = dpi.get ();
+    }
+
+  /* Determine the return type index.  */
+  ret_comp = info->tree;
+  if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
+    {
+      if (d_left (ret_comp)->type == DEMANGLE_COMPONENT_TEMPLATE
+	  && d_right (ret_comp)->type == DEMANGLE_COMPONENT_FUNCTION_TYPE)
+	{
+	  int done = 0;
+	  struct demangle_component *func_comp = d_right (ret_comp);
+
+	  /* Move to looking at the return type node.  */
+	  ret_comp = d_left (func_comp);
+	  if (ret_comp != NULL)
+	    {
+	      while (!done)
+		{
+		  switch (ret_comp->type)
+		    {
+		    case DEMANGLE_COMPONENT_CONST:
+		    case DEMANGLE_COMPONENT_RESTRICT:
+		    case DEMANGLE_COMPONENT_VOLATILE:
+		    case DEMANGLE_COMPONENT_POINTER:
+		    case DEMANGLE_COMPONENT_REFERENCE:
+		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+		      ret_comp = d_left (ret_comp);
+		      break;
+
+		      /*TYPED_NAME et al? */
+
+		    case DEMANGLE_COMPONENT_TEMPLATE_PARAM:
+		      /* The return type was based on a template parameter.
+			 Return the index of that parameter.  */
+		      tsymbol->template_return_index
+			= ret_comp->u.s_number.number;
+		      done = 1;
+		      break;
+
+		    default:
+		      done = 1;
+		      break;
+		    }
+		}
+	    }
+	  else
+	    {
+	      /* The function had no marked return type.  Check if it is
+		 a conversion operator and record the template parameter
+		 index for that.  */
+
+	      ret_comp = d_left (info->tree);
+	      while (!done)
+		{
+		  switch (ret_comp->type)
+		    {
+		    case DEMANGLE_COMPONENT_TEMPLATE:
+		    case DEMANGLE_COMPONENT_CONVERSION:
+		    case DEMANGLE_COMPONENT_CONST:
+		    case DEMANGLE_COMPONENT_RESTRICT:
+		    case DEMANGLE_COMPONENT_VOLATILE:
+		    case DEMANGLE_COMPONENT_POINTER:
+		    case DEMANGLE_COMPONENT_REFERENCE:
+		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+		      ret_comp = d_left (ret_comp);
+		      break;
+
+		    case DEMANGLE_COMPONENT_QUAL_NAME:
+		      ret_comp = d_right (ret_comp);
+		      break;
+
+		    case DEMANGLE_COMPONENT_TEMPLATE_PARAM:
+		      tsymbol->conversion_operator_index
+			= ret_comp->u.s_number.number;
+		      done = 1;
+		      break;
+
+		    default:
+		      done = 1;
+		      break;
+		    }
+		}
+	    }
+
+	  /* Determine the same information for the function arguments.  */
+	  ret_comp = d_right (func_comp);
+	  idx = 0;
+	  while (ret_comp != NULL
+		 && ret_comp->type == DEMANGLE_COMPONENT_ARGLIST)
+	    {
+	      struct demangle_component *comp;
+
+	      comp = d_left (ret_comp);
+	      if (comp == NULL)
+		break;
+	      done = 0;
+	      while (!done)
+		{
+		  switch (comp->type)
+		    {
+		    case DEMANGLE_COMPONENT_CONST:
+		    case DEMANGLE_COMPONENT_RESTRICT:
+		    case DEMANGLE_COMPONENT_VOLATILE:
+		    case DEMANGLE_COMPONENT_POINTER:
+		    case DEMANGLE_COMPONENT_REFERENCE:
+		    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+		      comp = d_left (comp);
+		      break;
+		    default:
+		      done = 1;
+		      break;
+		    }
+		}
+
+	      if (comp->type == DEMANGLE_COMPONENT_TEMPLATE_PARAM)
+		tsymbol->template_argument_indices[idx]
+		  = comp->u.s_number.number;
+	      ++idx;
+
+	      ret_comp = d_right (ret_comp);
+	    }
+	}
+    }
 }
 
 void
