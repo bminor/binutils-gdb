@@ -3433,7 +3433,6 @@ do_vec_ADDV (sim_cpu *cpu)
   unsigned vm = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
   unsigned i;
-  uint64_t val = 0;
   int      full = INSTR (30, 30);
 
   NYI_assert (29, 24, 0x0E);
@@ -3443,24 +3442,33 @@ do_vec_ADDV (sim_cpu *cpu)
   switch (INSTR (23, 22))
     {
     case 0:
-      for (i = 0; i < (full ? 16 : 8); i++)
-	val += aarch64_get_vec_u8 (cpu, vm, i);
-      aarch64_set_vec_u64 (cpu, rd, 0, val);
-      return;
+      {
+	uint8_t val = 0;
+	for (i = 0; i < (full ? 16 : 8); i++)
+	  val += aarch64_get_vec_u8 (cpu, vm, i);
+	aarch64_set_vec_u64 (cpu, rd, 0, val);
+	return;
+      }
 
     case 1:
-      for (i = 0; i < (full ? 8 : 4); i++)
-	val += aarch64_get_vec_u16 (cpu, vm, i);
-      aarch64_set_vec_u64 (cpu, rd, 0, val);
-      return;
+      {
+	uint16_t val = 0;
+	for (i = 0; i < (full ? 8 : 4); i++)
+	  val += aarch64_get_vec_u16 (cpu, vm, i);
+	aarch64_set_vec_u64 (cpu, rd, 0, val);
+	return;
+      }
 
     case 2:
-      if (! full)
-	HALT_UNALLOC;
-      for (i = 0; i < 4; i++)
-	val += aarch64_get_vec_u32 (cpu, vm, i);
-      aarch64_set_vec_u64 (cpu, rd, 0, val);
-      return;
+      {
+	uint32_t val = 0;
+	if (! full)
+	  HALT_UNALLOC;
+	for (i = 0; i < 4; i++)
+	  val += aarch64_get_vec_u32 (cpu, vm, i);
+	aarch64_set_vec_u64 (cpu, rd, 0, val);
+	return;
+      }
 
     case 3:
       HALT_UNALLOC;
@@ -5694,7 +5702,7 @@ do_vec_xtl (sim_cpu *cpu)
 	  NYI_assert (19, 19, 1);
 
 	  shift = INSTR (18, 16);
-	  bias *= 3;
+	  bias *= 4;
 	  for (i = 0; i < 8; i++)
 	    v[i] = aarch64_get_vec_s8 (cpu, vs, i + bias) << shift;
 	  for (i = 0; i < 8; i++)
@@ -5730,7 +5738,7 @@ do_vec_xtl (sim_cpu *cpu)
 	  NYI_assert (19, 19, 1);
 
 	  shift = INSTR (18, 16);
-	  bias *= 3;
+	  bias *= 4;
 	  for (i = 0; i < 8; i++)
 	    v[i] = aarch64_get_vec_u8 (cpu, vs, i + bias) << shift;
 	  for (i = 0; i < 8; i++)

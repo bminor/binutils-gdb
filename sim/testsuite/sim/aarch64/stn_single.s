@@ -63,7 +63,7 @@ output:
 	mov x6, v5.d[0]
 	cmp x5, #136
 	bne .Lfailure
-	cmp x6, #264
+	cmp x6, #8
 	bne .Lfailure
 
 	mov x2, x1
@@ -114,7 +114,7 @@ output:
 	bne .Lfailure
 	cmp x6, #232
 	bne .Lfailure
-	cmp x7, #296
+	cmp x7, #40
 	bne .Lfailure
 
 	pass

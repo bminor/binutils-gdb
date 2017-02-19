@@ -1,3 +1,9 @@
+2017-02-19  Jim Wilson  <jim.wilson@linaro.org>
+
+	* bit.s: Change cmp immediates to account for addv bug fix.
+	* cmtst.s, ldn_single.s, stn_single.s: Likewise.
+	* xtl.s: New.
+
 2017-02-14  Jim Wilson  <jim.wilson@linaro.org>
 
 	* mla.s: New.
