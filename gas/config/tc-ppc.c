@@ -974,7 +974,7 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
   /* Accept reg +/- constant.  */
   if (left->X_op == O_register
       && !((op == O_add || op == O_subtract) && right->X_op == O_constant))
-    as_bad (_("invalid register expression"));
+    as_warn (_("invalid register expression"));
 
   /* Accept constant + reg.  */
   if (right->X_op == O_register)
@@ -982,7 +982,7 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
       if (op == O_add && left->X_op == O_constant)
 	left->X_md = right->X_md;
       else
-	as_bad (_("invalid register expression"));
+	as_warn (_("invalid register expression"));
     }
 
   return 0;
@@ -2976,7 +2976,7 @@ md_assemble (char *str)
 	      && !((ex.X_md & PPC_OPERAND_GPR) != 0
 		   && ex.X_add_number != 0
 		   && (operand->flags & PPC_OPERAND_GPR_0) != 0))
-	    as_bad (_("invalid register expression"));
+	    as_warn (_("invalid register expression"));
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number & 0xff,
 				     ppc_cpu, (char *) NULL, 0);
 	}

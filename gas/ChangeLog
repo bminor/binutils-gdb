@@ -1,3 +1,10 @@
+2017-02-20  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* NEWS: Revise powerpc register check.
+	* config/tc-ppc.c (ppc_optimize_expr, md_assemble): Make "invalid
+	register expression" a warning.
+
 2017-02-17  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* ecoff.c (ecoff_directive_ent, add_procedure): Handle `.aent'.
