@@ -1,3 +1,32 @@
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
+	PR 20199
+	* emulparams/elf32m32c.sh: Define STACK_ADDR and STACK_SENTINEL
+	rather than using OTHER_SECTIONS.
+	* emulparams/elf32mt.sh: Likewise.
+	* emulparams/elf32rx.sh: Likewise.
+	* emulparams/elf32rl78.sh: Likewise.  Use OTHER_SYMBOLS to
+	define __rl78_abs__.
+	* emulparams/shelf.sh: Define STACK_ADDR and STACK_SENTINEL
+	rather than using OTHER_SECTIONS.
+	* emulparams/shelf32.sh: Likewise.  Use OTHER_SECTIONS for .cranges.
+	* emulparams/shelf64.sh: Unset OTHER_SECTIONS.
+	* emulparams/shelf_nbsd.sh: Unset STACK_ADDR not OTHER_SECTIONS.
+	* emulparams/shelf_uclinux.sh: Likewise.
+	* emulparams/shlsymbian.sh: Unset STACK_ADDR.  Use OTHER_SYMBOLS
+	to define _stack, not OTHER_SECTIONS.
+	* scripttempl/elf.sc: Move STACK, TINY_DATA_SECTION, and
+	TINY_BSS_SECTION before debug sections.  Add STACK_SENTINEL.
+	* scripttempl/arclinux.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* scripttempl/armbpabi.sc: Move STACK before debug sections.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfarc.sc: Delete STACK.
+	* scripttempl/epiphany_4x4.sc: Delete STACK.  Move TINY_DATA_SECTION,
+	TINY_BSS_SECTION, and .stack before debug sections.
+
 2017-02-17  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/20825
