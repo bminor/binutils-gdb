@@ -11873,14 +11873,13 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.
-   Return 1 if the attributes are present and valid, otherwise, return 0.
-   If RANGES_PST is not NULL we should setup `objfile->psymtabs_addrmap'.  */
+/* Call CALLBACK from DW_AT_ranges attribute value OFFSET.
+   Return 1 if the attributes are present and valid, otherwise, return 0.  */
 
 static int
-dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
-		    CORE_ADDR *high_return, struct dwarf2_cu *cu,
-		    struct partial_symtab *ranges_pst)
+dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
+		       std::function<void (CORE_ADDR range_beginning,
+					   CORE_ADDR range_end)> callback)
 {
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -11893,9 +11892,6 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
   int found_base;
   unsigned int dummy;
   const gdb_byte *buffer;
-  int low_set;
-  CORE_ADDR low = 0;
-  CORE_ADDR high = 0;
   CORE_ADDR baseaddr;
 
   found_base = cu->base_known;
@@ -11910,8 +11906,6 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
       return 0;
     }
   buffer = dwarf2_per_objfile->ranges.buffer + offset;
-
-  low_set = 0;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -11977,6 +11971,33 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	  continue;
 	}
 
+      callback (range_beginning, range_end);
+    }
+
+  return 1;
+}
+
+/* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.
+   Return 1 if the attributes are present and valid, otherwise, return 0.
+   If RANGES_PST is not NULL we should setup `objfile->psymtabs_addrmap'.  */
+
+static int
+dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
+		    CORE_ADDR *high_return, struct dwarf2_cu *cu,
+		    struct partial_symtab *ranges_pst)
+{
+  struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
+				       SECT_OFF_TEXT (objfile));
+  int low_set = 0;
+  CORE_ADDR low = 0;
+  CORE_ADDR high = 0;
+  int retval;
+
+  retval = dwarf2_ranges_process (offset, cu,
+    [&] (CORE_ADDR range_beginning, CORE_ADDR range_end)
+    {
       if (ranges_pst != NULL)
 	{
 	  CORE_ADDR lowpc;
@@ -12007,7 +12028,9 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	  if (range_end > high)
 	    high = range_end;
 	}
-    }
+    });
+  if (!retval)
+    return 0;
 
   if (! low_set)
     /* If the first entry is an end-of-list marker, the range
@@ -12259,79 +12282,13 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
       CORE_ADDR base = cu->base_address;
       int base_known = cu->base_known;
 
-      dwarf2_read_section (objfile, &dwarf2_per_objfile->ranges);
-      if (offset >= dwarf2_per_objfile->ranges.size)
-        {
-          complaint (&symfile_complaints,
-                     _("Offset %lu out of bounds for DW_AT_ranges attribute"),
-                     offset);
-          return;
-        }
-      buffer = dwarf2_per_objfile->ranges.buffer + offset;
-
-      for (;;)
-        {
-          unsigned int bytes_read;
-          CORE_ADDR start, end;
-
-          start = read_address (obfd, buffer, cu, &bytes_read);
-          buffer += bytes_read;
-          end = read_address (obfd, buffer, cu, &bytes_read);
-          buffer += bytes_read;
-
-          /* Did we find the end of the range list?  */
-          if (start == 0 && end == 0)
-            break;
-
-          /* Did we find a base address selection entry?  */
-          else if ((start & base_select_mask) == base_select_mask)
-            {
-              base = end;
-              base_known = 1;
-            }
-
-          /* We found an ordinary address range.  */
-          else
-            {
-              if (!base_known)
-                {
-                  complaint (&symfile_complaints,
-			     _("Invalid .debug_ranges data "
-			       "(no base address)"));
-                  return;
-                }
-
-	      if (start > end)
-		{
-		  /* Inverted range entries are invalid.  */
-		  complaint (&symfile_complaints,
-			     _("Invalid .debug_ranges data "
-			       "(inverted range)"));
-		  return;
-		}
-
-	      /* Empty range entries have no effect.  */
-	      if (start == end)
-		continue;
-
-	      start += base + baseaddr;
-	      end += base + baseaddr;
-
-	      /* A not-uncommon case of bad debug info.
-		 Don't pollute the addrmap with bad data.  */
-	      if (start == 0 && !dwarf2_per_objfile->has_section_at_zero)
-		{
-		  complaint (&symfile_complaints,
-			     _(".debug_ranges entry has start address of zero"
-			       " [in module %s]"), objfile_name (objfile));
-		  continue;
-		}
-
-	      start = gdbarch_adjust_dwarf2_addr (gdbarch, start);
-	      end = gdbarch_adjust_dwarf2_addr (gdbarch, end);
-              record_block_range (block, start, end - 1);
-            }
-        }
+      dwarf2_ranges_process (offset, cu,
+	[&] (CORE_ADDR start, CORE_ADDR end)
+	{
+	  start = gdbarch_adjust_dwarf2_addr (gdbarch, start);
+	  end = gdbarch_adjust_dwarf2_addr (gdbarch, end);
+	  record_block_range (block, start, end - 1);
+	});
     }
 }
 
