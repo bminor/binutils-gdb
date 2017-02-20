@@ -1,5 +1,9 @@
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (abbrev_table_read_table): Read the data only once.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (dwarf2_ranges_process): New function from
 	dwarf2_ranges_read.
 	(dwarf2_ranges_read, dwarf2_record_block_ranges): Use

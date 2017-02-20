@@ -15339,12 +15339,16 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
       abbrev_ptr += 1;
 
       /* now read in declarations */
-      abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-      abbrev_ptr += bytes_read;
-      abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-      abbrev_ptr += bytes_read;
-      while (abbrev_name)
+      for (;;)
 	{
+	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
+	  abbrev_ptr += bytes_read;
+	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
+	  abbrev_ptr += bytes_read;
+
+	  if (abbrev_name == 0)
+	    break;
+
 	  if (cur_abbrev->num_attrs == allocated_attrs)
 	    {
 	      allocated_attrs += ATTR_ALLOC_CHUNK;
@@ -15354,12 +15358,9 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
 
 	  cur_attrs[cur_abbrev->num_attrs].name
 	    = (enum dwarf_attribute) abbrev_name;
-	  cur_attrs[cur_abbrev->num_attrs++].form
+	  cur_attrs[cur_abbrev->num_attrs].form
 	    = (enum dwarf_form) abbrev_form;
-	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-	  abbrev_ptr += bytes_read;
-	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-	  abbrev_ptr += bytes_read;
+	  ++cur_abbrev->num_attrs;
 	}
 
       cur_abbrev->attrs =
