@@ -1,6 +1,6 @@
 2017-02-17  Alan Modra  <amodra@gmail.com>
 
-	PR 20199
+	PR 21099
 	* emulparams/elf32m32c.sh: Define STACK_ADDR and STACK_SENTINEL
 	rather than using OTHER_SECTIONS.
 	* emulparams/elf32mt.sh: Likewise.
