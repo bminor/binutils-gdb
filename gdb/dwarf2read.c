@@ -222,10 +222,13 @@ struct dwarf2_per_objfile
   struct dwarf2_section_info abbrev;
   struct dwarf2_section_info line;
   struct dwarf2_section_info loc;
+  struct dwarf2_section_info loclists;
   struct dwarf2_section_info macinfo;
   struct dwarf2_section_info macro;
   struct dwarf2_section_info str;
+  struct dwarf2_section_info line_str;
   struct dwarf2_section_info ranges;
+  struct dwarf2_section_info rnglists;
   struct dwarf2_section_info addr;
   struct dwarf2_section_info frame;
   struct dwarf2_section_info eh_frame;
@@ -333,10 +336,13 @@ static const struct dwarf2_debug_sections dwarf2_elf_names =
   { ".debug_abbrev", ".zdebug_abbrev" },
   { ".debug_line", ".zdebug_line" },
   { ".debug_loc", ".zdebug_loc" },
+  { ".debug_loclists", ".zdebug_loclists" },
   { ".debug_macinfo", ".zdebug_macinfo" },
   { ".debug_macro", ".zdebug_macro" },
   { ".debug_str", ".zdebug_str" },
+  { ".debug_line_str", ".zdebug_line_str" },
   { ".debug_ranges", ".zdebug_ranges" },
+  { ".debug_rnglists", ".zdebug_rnglists" },
   { ".debug_types", ".zdebug_types" },
   { ".debug_addr", ".zdebug_addr" },
   { ".debug_frame", ".zdebug_frame" },
@@ -353,6 +359,7 @@ static const struct dwop_section_names
   struct dwarf2_section_names info_dwo;
   struct dwarf2_section_names line_dwo;
   struct dwarf2_section_names loc_dwo;
+  struct dwarf2_section_names loclists_dwo;
   struct dwarf2_section_names macinfo_dwo;
   struct dwarf2_section_names macro_dwo;
   struct dwarf2_section_names str_dwo;
@@ -367,6 +374,7 @@ dwop_section_names =
   { ".debug_info.dwo", ".zdebug_info.dwo" },
   { ".debug_line.dwo", ".zdebug_line.dwo" },
   { ".debug_loc.dwo", ".zdebug_loc.dwo" },
+  { ".debug_loclists.dwo", ".zdebug_loclists.dwo" },
   { ".debug_macinfo.dwo", ".zdebug_macinfo.dwo" },
   { ".debug_macro.dwo", ".zdebug_macro.dwo" },
   { ".debug_str.dwo", ".zdebug_str.dwo" },
@@ -394,6 +402,8 @@ struct comp_unit_head
   /* Size of the length field; either 4 or 12.  */
   unsigned int initial_length_size;
 
+  enum dwarf_unit_type unit_type;
+
   /* Offset to the first byte of this compilation unit header in the
      .debug_info section, for resolving relative reference dies.  */
   sect_offset offset;
@@ -401,6 +411,13 @@ struct comp_unit_head
   /* Offset to first die in this cu from the start of the cu.
      This will be the first byte following the compilation unit header.  */
   cu_offset first_die_offset;
+
+  /* 64-bit signature of this type unit - it is valid only for
+     UNIT_TYPE DW_UT_type.  */
+  ULONGEST signature;
+
+  /* For types, offset in the type's DIE of the type defined by this TU.  */
+  cu_offset type_offset_in_tu;
 };
 
 /* Type used for delaying computation of method physnames.
@@ -571,6 +588,9 @@ struct dwarf2_per_cu_data
      not the DWO file.  */
   sect_offset offset;
   unsigned int length;
+
+  /* DWARF standard version this data has been read from (such as 4 or 5).  */
+  short dwarf_version;
 
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
@@ -756,6 +776,7 @@ struct dwo_sections
   struct dwarf2_section_info abbrev;
   struct dwarf2_section_info line;
   struct dwarf2_section_info loc;
+  struct dwarf2_section_info loclists;
   struct dwarf2_section_info macinfo;
   struct dwarf2_section_info macro;
   struct dwarf2_section_info str;
@@ -1188,6 +1209,9 @@ struct attr_abbrev
   {
     ENUM_BITFIELD(dwarf_attribute) name : 16;
     ENUM_BITFIELD(dwarf_form) form : 16;
+
+    /* It is valid only if FORM is DW_FORM_implicit_const.  */
+    LONGEST implicit_const;
   };
 
 /* Size of abbrev_table.abbrev_hash_table.  */
@@ -1507,9 +1531,11 @@ static const char *read_indirect_string (bfd *, const gdb_byte *,
 					 const struct comp_unit_head *,
 					 unsigned int *);
 
-static const char *read_indirect_string_from_dwz (struct dwz_file *, LONGEST);
+static const char *read_indirect_line_string (bfd *, const gdb_byte *,
+					      const struct comp_unit_head *,
+					      unsigned int *);
 
-static ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
+static const char *read_indirect_string_from_dwz (struct dwz_file *, LONGEST);
 
 static LONGEST read_signed_leb128 (bfd *, const gdb_byte *, unsigned int *);
 
@@ -1865,11 +1891,14 @@ static void find_file_and_directory (struct die_info *die,
 static char *file_full_name (int file, struct line_header *lh,
 			     const char *comp_dir);
 
+/* Expected enum dwarf_unit_type for read_comp_unit_head.  */
+enum class rcuh_kind { COMPILE, TYPE };
+
 static const gdb_byte *read_and_check_comp_unit_head
   (struct comp_unit_head *header,
    struct dwarf2_section_info *section,
    struct dwarf2_section_info *abbrev_section, const gdb_byte *info_ptr,
-   int is_debug_types_section);
+   rcuh_kind section_kind);
 
 static void init_cutu_and_read_dies
   (struct dwarf2_per_cu_data *this_cu, struct abbrev_table *abbrev_table,
@@ -2224,6 +2253,11 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
       dwarf2_per_objfile->loc.s.section = sectp;
       dwarf2_per_objfile->loc.size = bfd_get_section_size (sectp);
     }
+  else if (section_is_p (sectp->name, &names->loclists))
+    {
+      dwarf2_per_objfile->loclists.s.section = sectp;
+      dwarf2_per_objfile->loclists.size = bfd_get_section_size (sectp);
+    }
   else if (section_is_p (sectp->name, &names->macinfo))
     {
       dwarf2_per_objfile->macinfo.s.section = sectp;
@@ -2238,6 +2272,11 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     {
       dwarf2_per_objfile->str.s.section = sectp;
       dwarf2_per_objfile->str.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &names->line_str))
+    {
+      dwarf2_per_objfile->line_str.s.section = sectp;
+      dwarf2_per_objfile->line_str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->addr))
     {
@@ -2258,6 +2297,11 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     {
       dwarf2_per_objfile->ranges.s.section = sectp;
       dwarf2_per_objfile->ranges.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &names->rnglists))
+    {
+      dwarf2_per_objfile->rnglists.s.section = sectp;
+      dwarf2_per_objfile->rnglists.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types))
     {
@@ -4333,15 +4377,20 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 /* Read in the comp unit header information from the debug_info at info_ptr.
+   Use rcuh_kind::COMPILE as the default type if not known by the caller.
    NOTE: This leaves members offset, first_die_offset to be filled in
    by the caller.  */
 
 static const gdb_byte *
 read_comp_unit_head (struct comp_unit_head *cu_header,
-		     const gdb_byte *info_ptr, bfd *abfd)
+		     const gdb_byte *info_ptr,
+		     struct dwarf2_section_info *section,
+		     rcuh_kind section_kind)
 {
   int signed_addr;
   unsigned int bytes_read;
+  const char *filename = get_section_file_name (section);
+  bfd *abfd = get_section_bfd_owner (section);
 
   cu_header->length = read_initial_length (abfd, info_ptr, &bytes_read);
   cu_header->initial_length_size = bytes_read;
@@ -4349,16 +4398,73 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   info_ptr += bytes_read;
   cu_header->version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
+  if (cu_header->version < 5)
+    switch (section_kind)
+      {
+      case rcuh_kind::COMPILE:
+	cu_header->unit_type = DW_UT_compile;
+	break;
+      case rcuh_kind::TYPE:
+	cu_header->unit_type = DW_UT_type;
+	break;
+      default:
+	internal_error (__FILE__, __LINE__,
+			_("read_comp_unit_head: invalid section_kind"));
+      }
+  else
+    {
+      cu_header->unit_type = static_cast<enum dwarf_unit_type>
+						 (read_1_byte (abfd, info_ptr));
+      info_ptr += 1;
+      switch (cu_header->unit_type)
+	{
+	case DW_UT_compile:
+	  if (section_kind != rcuh_kind::COMPILE)
+	    error (_("Dwarf Error: wrong unit_type in compilation unit header "
+		   "(is DW_UT_compile, should be DW_UT_type) [in module %s]"),
+		   filename);
+	  break;
+	case DW_UT_type:
+	  section_kind = rcuh_kind::TYPE;
+	  break;
+	default:
+	  error (_("Dwarf Error: wrong unit_type in compilation unit header "
+		 "(is %d, should be %d or %d) [in module %s]"),
+		 cu_header->unit_type, DW_UT_compile, DW_UT_type, filename);
+	}
+
+      cu_header->addr_size = read_1_byte (abfd, info_ptr);
+      info_ptr += 1;
+    }
   cu_header->abbrev_offset.sect_off = read_offset (abfd, info_ptr, cu_header,
 					     &bytes_read);
   info_ptr += bytes_read;
-  cu_header->addr_size = read_1_byte (abfd, info_ptr);
-  info_ptr += 1;
+  if (cu_header->version < 5)
+    {
+      cu_header->addr_size = read_1_byte (abfd, info_ptr);
+      info_ptr += 1;
+    }
   signed_addr = bfd_get_sign_extend_vma (abfd);
   if (signed_addr < 0)
     internal_error (__FILE__, __LINE__,
 		    _("read_comp_unit_head: dwarf from non elf file"));
   cu_header->signed_addr_p = signed_addr;
+
+  if (section_kind == rcuh_kind::TYPE)
+    {
+      LONGEST type_offset;
+
+      cu_header->signature = read_8_bytes (abfd, info_ptr);
+      info_ptr += 8;
+
+      type_offset = read_offset (abfd, info_ptr, cu_header, &bytes_read);
+      info_ptr += bytes_read;
+      cu_header->type_offset_in_tu.cu_off = type_offset;
+      if (cu_header->type_offset_in_tu.cu_off != type_offset)
+	error (_("Dwarf Error: Too big type_offset in compilation unit "
+	       "header (is %s) [in module %s]"), plongest (type_offset),
+	       filename);
+    }
 
   return info_ptr;
 }
@@ -4390,9 +4496,9 @@ error_check_comp_unit_head (struct comp_unit_head *header,
 {
   const char *filename = get_section_file_name (section);
 
-  if (header->version != 2 && header->version != 3 && header->version != 4)
+  if (header->version < 2 || header->version > 5)
     error (_("Dwarf Error: wrong version in compilation unit header "
-	   "(is %d, should be 2, 3, or 4) [in module %s]"), header->version,
+	   "(is %d, should be 2, 3, 4 or 5) [in module %s]"), header->version,
 	   filename);
 
   if (header->abbrev_offset.sect_off
@@ -4421,54 +4527,14 @@ read_and_check_comp_unit_head (struct comp_unit_head *header,
 			       struct dwarf2_section_info *section,
 			       struct dwarf2_section_info *abbrev_section,
 			       const gdb_byte *info_ptr,
-			       int is_debug_types_section)
+			       rcuh_kind section_kind)
 {
   const gdb_byte *beg_of_comp_unit = info_ptr;
   bfd *abfd = get_section_bfd_owner (section);
 
   header->offset.sect_off = beg_of_comp_unit - section->buffer;
 
-  info_ptr = read_comp_unit_head (header, info_ptr, abfd);
-
-  /* If we're reading a type unit, skip over the signature and
-     type_offset fields.  */
-  if (is_debug_types_section)
-    info_ptr += 8 /*signature*/ + header->offset_size;
-
-  header->first_die_offset.cu_off = info_ptr - beg_of_comp_unit;
-
-  error_check_comp_unit_head (header, section, abbrev_section);
-
-  return info_ptr;
-}
-
-/* Read in the types comp unit header information from .debug_types entry at
-   types_ptr.  The result is a pointer to one past the end of the header.  */
-
-static const gdb_byte *
-read_and_check_type_unit_head (struct comp_unit_head *header,
-			       struct dwarf2_section_info *section,
-			       struct dwarf2_section_info *abbrev_section,
-			       const gdb_byte *info_ptr,
-			       ULONGEST *signature,
-			       cu_offset *type_offset_in_tu)
-{
-  const gdb_byte *beg_of_comp_unit = info_ptr;
-  bfd *abfd = get_section_bfd_owner (section);
-
-  header->offset.sect_off = beg_of_comp_unit - section->buffer;
-
-  info_ptr = read_comp_unit_head (header, info_ptr, abfd);
-
-  /* If we're reading a type unit, skip over the signature and
-     type_offset fields.  */
-  if (signature != NULL)
-    *signature = read_8_bytes (abfd, info_ptr);
-  info_ptr += 8;
-  if (type_offset_in_tu != NULL)
-    type_offset_in_tu->cu_off = read_offset_1 (abfd, info_ptr,
-					       header->offset_size);
-  info_ptr += header->offset_size;
+  info_ptr = read_comp_unit_head (header, info_ptr, section, section_kind);
 
   header->first_die_offset.cu_off = info_ptr - beg_of_comp_unit;
 
@@ -4487,12 +4553,22 @@ read_abbrev_offset (struct dwarf2_section_info *section,
   const gdb_byte *info_ptr;
   unsigned int initial_length_size, offset_size;
   sect_offset abbrev_offset;
+  uint16_t version;
 
   dwarf2_read_section (dwarf2_per_objfile->objfile, section);
   info_ptr = section->buffer + offset.sect_off;
   read_initial_length (abfd, info_ptr, &initial_length_size);
   offset_size = initial_length_size == 4 ? 4 : 8;
-  info_ptr += initial_length_size + 2 /*version*/;
+  info_ptr += initial_length_size;
+
+  version = read_2_bytes (abfd, info_ptr);
+  info_ptr += 2;
+  if (version >= 5)
+    {
+      /* Skip unit type and address size.  */
+      info_ptr += 2;
+    }
+
   abbrev_offset.sect_off = read_offset_1 (abfd, info_ptr, offset_size);
   return abbrev_offset;
 }
@@ -4606,11 +4682,13 @@ add_signatured_type_cu_to_table (void **slot, void *datum)
 }
 
 /* A helper for create_debug_types_hash_table.  Read types from SECTION
-   and fill them into TYPES_HTAB.  */
+   and fill them into TYPES_HTAB.  It will process only type units,
+   therefore DW_UT_type.  */
 
 static void
 create_debug_type_hash_table (struct dwo_file *dwo_file,
-			      dwarf2_section_info *section, htab_t &types_htab)
+			      dwarf2_section_info *section, htab_t &types_htab,
+			      rcuh_kind section_kind)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *abbrev_section;
@@ -4622,8 +4700,8 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
 		    : &dwarf2_per_objfile->abbrev);
 
   if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "Reading .debug_types%s for %s:\n",
-			dwo_file ? ".dwo" : "",
+    fprintf_unfiltered (gdb_stdlog, "Reading %s for %s:\n",
+			get_section_name (section),
 			get_section_file_name (abbrev_section));
 
   dwarf2_read_section (objfile, section);
@@ -4644,8 +4722,6 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
   while (info_ptr < end_ptr)
     {
       sect_offset offset;
-      cu_offset type_offset_in_tu;
-      ULONGEST signature;
       struct signatured_type *sig_type;
       struct dwo_unit *dwo_tu;
       void **slot;
@@ -4658,15 +4734,15 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
       /* We need to read the type's signature in order to build the hash
 	 table, but we don't need anything else just yet.  */
 
-      ptr = read_and_check_type_unit_head (&header, section,
-					   abbrev_section, ptr,
-					   &signature, &type_offset_in_tu);
+      ptr = read_and_check_comp_unit_head (&header, section,
+					   abbrev_section, ptr, section_kind);
 
       length = get_cu_length (&header);
 
       /* Skip dummy type units.  */
       if (ptr >= info_ptr + length
-	  || peek_abbrev_code (abfd, ptr) == 0)
+	  || peek_abbrev_code (abfd, ptr) == 0
+	  || header.unit_type != DW_UT_type)
 	{
 	  info_ptr += length;
 	  continue;
@@ -4686,8 +4762,8 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
 	  dwo_tu = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 				   struct dwo_unit);
 	  dwo_tu->dwo_file = dwo_file;
-	  dwo_tu->signature = signature;
-	  dwo_tu->type_offset_in_tu = type_offset_in_tu;
+	  dwo_tu->signature = header.signature;
+	  dwo_tu->type_offset_in_tu = header.type_offset_in_tu;
 	  dwo_tu->section = section;
 	  dwo_tu->offset = offset;
 	  dwo_tu->length = length;
@@ -4699,8 +4775,8 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
 	  dwo_tu = NULL;
 	  sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 				     struct signatured_type);
-	  sig_type->signature = signature;
-	  sig_type->type_offset_in_tu = type_offset_in_tu;
+	  sig_type->signature = header.signature;
+	  sig_type->type_offset_in_tu = header.type_offset_in_tu;
 	  sig_type->per_cu.objfile = objfile;
 	  sig_type->per_cu.is_debug_types = 1;
 	  sig_type->per_cu.section = section;
@@ -4735,14 +4811,14 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
 		     _("debug type entry at offset 0x%x is duplicate to"
 		       " the entry at offset 0x%x, signature %s"),
 		     offset.sect_off, dup_offset.sect_off,
-		     hex_string (signature));
+		     hex_string (header.signature));
 	}
       *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
       if (dwarf_read_debug > 1)
 	fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature %s\n",
 			    offset.sect_off,
-			    hex_string (signature));
+			    hex_string (header.signature));
 
       info_ptr += length;
     }
@@ -4771,7 +4847,8 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
   for (ix = 0;
        VEC_iterate (dwarf2_section_info_def, types, ix, section);
        ++ix)
-    create_debug_type_hash_table (dwo_file, section, types_htab);
+    create_debug_type_hash_table (dwo_file, section, types_htab,
+				  rcuh_kind::TYPE);
 }
 
 /* Create the hash table of all entries in the .debug_types section,
@@ -4785,6 +4862,8 @@ create_all_type_units (struct objfile *objfile)
   htab_t types_htab = NULL;
   struct signatured_type **iter;
 
+  create_debug_type_hash_table (NULL, &dwarf2_per_objfile->info, types_htab,
+				rcuh_kind::COMPILE);
   create_debug_types_hash_table (NULL, dwarf2_per_objfile->types, types_htab);
   if (types_htab == NULL)
     {
@@ -5165,22 +5244,18 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 
   if (this_cu->is_debug_types)
     {
-      ULONGEST header_signature;
-      cu_offset type_offset_in_tu;
       struct signatured_type *sig_type = (struct signatured_type *) this_cu;
 
-      info_ptr = read_and_check_type_unit_head (&cu->header, section,
+      info_ptr = read_and_check_comp_unit_head (&cu->header, section,
 						dwo_abbrev_section,
-						info_ptr,
-						&header_signature,
-						&type_offset_in_tu);
+						info_ptr, rcuh_kind::TYPE);
       /* This is not an assert because it can be caused by bad debug info.  */
-      if (sig_type->signature != header_signature)
+      if (sig_type->signature != cu->header.signature)
 	{
 	  error (_("Dwarf Error: signature mismatch %s vs %s while reading"
 		   " TU at offset 0x%x [in module %s]"),
 		 hex_string (sig_type->signature),
-		 hex_string (header_signature),
+		 hex_string (cu->header.signature),
 		 dwo_unit->offset.sect_off,
 		 bfd_get_filename (abfd));
 	}
@@ -5188,7 +5263,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       /* For DWOs coming from DWP files, we don't know the CU length
 	 nor the type's offset in the TU until now.  */
       dwo_unit->length = get_cu_length (&cu->header);
-      dwo_unit->type_offset_in_tu = type_offset_in_tu;
+      dwo_unit->type_offset_in_tu = cu->header.type_offset_in_tu;
 
       /* Establish the type offset that can be used to lookup the type.
 	 For DWO files, we don't know it until now.  */
@@ -5199,7 +5274,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
     {
       info_ptr = read_and_check_comp_unit_head (&cu->header, section,
 						dwo_abbrev_section,
-						info_ptr, 0);
+						info_ptr, rcuh_kind::COMPILE);
       gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 until now.  */
@@ -5518,20 +5593,16 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
     {
       if (this_cu->is_debug_types)
 	{
-	  ULONGEST signature;
-	  cu_offset type_offset_in_tu;
-
-	  info_ptr = read_and_check_type_unit_head (&cu->header, section,
+	  info_ptr = read_and_check_comp_unit_head (&cu->header, section,
 						    abbrev_section, info_ptr,
-						    &signature,
-						    &type_offset_in_tu);
+						    rcuh_kind::TYPE);
 
 	  /* Since per_cu is the first member of struct signatured_type,
 	     we can go from a pointer to one to a pointer to the other.  */
 	  sig_type = (struct signatured_type *) this_cu;
-	  gdb_assert (sig_type->signature == signature);
+	  gdb_assert (sig_type->signature == cu->header.signature);
 	  gdb_assert (sig_type->type_offset_in_tu.cu_off
-		      == type_offset_in_tu.cu_off);
+		      == cu->header.type_offset_in_tu.cu_off);
 	  gdb_assert (this_cu->offset.sect_off == cu->header.offset.sect_off);
 
 	  /* LENGTH has not been set yet for type units if we're
@@ -5541,15 +5612,19 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section.sect_off =
 	    this_cu->offset.sect_off + sig_type->type_offset_in_tu.cu_off;
+
+	  this_cu->dwarf_version = cu->header.version;
 	}
       else
 	{
 	  info_ptr = read_and_check_comp_unit_head (&cu->header, section,
 						    abbrev_section,
-						    info_ptr, 0);
+						    info_ptr,
+						    rcuh_kind::COMPILE);
 
 	  gdb_assert (this_cu->offset.sect_off == cu->header.offset.sect_off);
 	  gdb_assert (this_cu->length == get_cu_length (&cu->header));
+	  this_cu->dwarf_version = cu->header.version;
 	}
     }
 
@@ -5711,7 +5786,9 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   begin_info_ptr = info_ptr = section->buffer + this_cu->offset.sect_off;
   info_ptr = read_and_check_comp_unit_head (&cu.header, section,
 					    abbrev_section, info_ptr,
-					    this_cu->is_debug_types);
+					    (this_cu->is_debug_types
+					     ? rcuh_kind::TYPE
+					     : rcuh_kind::COMPILE));
 
   this_cu->length = get_cu_length (&cu.header);
 
@@ -7322,6 +7399,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	  info_ptr += 1;
 	  break;
 	case DW_FORM_flag_present:
+	case DW_FORM_implicit_const:
 	  break;
 	case DW_FORM_data2:
 	case DW_FORM_ref2:
@@ -11873,13 +11951,189 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Call CALLBACK from DW_AT_ranges attribute value OFFSET.
+/* Call CALLBACK from DW_AT_ranges attribute value OFFSET
+   reading .debug_rnglists.
+   Callback's type should be:
+    void (CORE_ADDR range_beginning, CORE_ADDR range_end)
+   Return true if the attributes are present and valid, otherwise,
+   return false.  */
+
+template <typename Callback>
+static bool
+dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
+			 Callback &&callback)
+{
+  struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct comp_unit_head *cu_header = &cu->header;
+  bfd *obfd = objfile->obfd;
+  unsigned int addr_size = cu_header->addr_size;
+  CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
+  /* Base address selection entry.  */
+  CORE_ADDR base;
+  int found_base;
+  unsigned int dummy;
+  const gdb_byte *buffer;
+  CORE_ADDR low = 0;
+  CORE_ADDR high = 0;
+  CORE_ADDR baseaddr;
+  bool overflow = false;
+
+  found_base = cu->base_known;
+  base = cu->base_address;
+
+  dwarf2_read_section (objfile, &dwarf2_per_objfile->rnglists);
+  if (offset >= dwarf2_per_objfile->rnglists.size)
+    {
+      complaint (&symfile_complaints,
+		 _("Offset %d out of bounds for DW_AT_ranges attribute"),
+		 offset);
+      return false;
+    }
+  buffer = dwarf2_per_objfile->rnglists.buffer + offset;
+
+  baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+
+  while (1)
+    {
+      CORE_ADDR range_beginning, range_end;
+      const gdb_byte *buf_end = (dwarf2_per_objfile->rnglists.buffer
+				 + dwarf2_per_objfile->rnglists.size);
+      unsigned int bytes_read;
+
+      if (buffer == buf_end)
+	{
+	  overflow = true;
+	  break;
+	}
+      const auto rlet = static_cast<enum dwarf_range_list_entry>(*buffer++);
+      switch (rlet)
+	{
+	case DW_RLE_end_of_list:
+	  break;
+	case DW_RLE_base_address:
+	  if (buffer + cu->header.addr_size > buf_end)
+	    {
+	      overflow = true;
+	      break;
+	    }
+	  base = read_address (obfd, buffer, cu, &bytes_read);
+	  found_base = 1;
+	  buffer += bytes_read;
+	  break;
+	case DW_RLE_start_length:
+	  if (buffer + cu->header.addr_size > buf_end)
+	    {
+	      overflow = true;
+	      break;
+	    }
+	  range_beginning = read_address (obfd, buffer, cu, &bytes_read);
+	  buffer += bytes_read;
+	  range_end = (range_beginning
+		       + read_unsigned_leb128 (obfd, buffer, &bytes_read));
+	  buffer += bytes_read;
+	  if (buffer > buf_end)
+	    {
+	      overflow = true;
+	      break;
+	    }
+	  break;
+	case DW_RLE_offset_pair:
+	  range_beginning = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+	  buffer += bytes_read;
+	  if (buffer > buf_end)
+	    {
+	      overflow = true;
+	      break;
+	    }
+	  range_end = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+	  buffer += bytes_read;
+	  if (buffer > buf_end)
+	    {
+	      overflow = true;
+	      break;
+	    }
+	  break;
+	case DW_RLE_start_end:
+	  if (buffer + 2 * cu->header.addr_size > buf_end)
+	    {
+	      overflow = true;
+	      break;
+	    }
+	  range_beginning = read_address (obfd, buffer, cu, &bytes_read);
+	  buffer += bytes_read;
+	  range_end = read_address (obfd, buffer, cu, &bytes_read);
+	  buffer += bytes_read;
+	  break;
+	default:
+	  complaint (&symfile_complaints,
+		     _("Invalid .debug_rnglists data (no base address)"));
+	  return false;
+	}
+      if (rlet == DW_RLE_end_of_list || overflow)
+	break;
+      if (rlet == DW_RLE_base_address)
+	continue;
+
+      if (!found_base)
+	{
+	  /* We have no valid base address for the ranges
+	     data.  */
+	  complaint (&symfile_complaints,
+		     _("Invalid .debug_rnglists data (no base address)"));
+	  return false;
+	}
+
+      if (range_beginning > range_end)
+	{
+	  /* Inverted range entries are invalid.  */
+	  complaint (&symfile_complaints,
+		     _("Invalid .debug_rnglists data (inverted range)"));
+	  return false;
+	}
+
+      /* Empty range entries have no effect.  */
+      if (range_beginning == range_end)
+	continue;
+
+      range_beginning += base;
+      range_end += base;
+
+      /* A not-uncommon case of bad debug info.
+	 Don't pollute the addrmap with bad data.  */
+      if (range_beginning + baseaddr == 0
+	  && !dwarf2_per_objfile->has_section_at_zero)
+	{
+	  complaint (&symfile_complaints,
+		     _(".debug_rnglists entry has start address of zero"
+		       " [in module %s]"), objfile_name (objfile));
+	  continue;
+	}
+
+      callback (range_beginning, range_end);
+    }
+
+  if (overflow)
+    {
+      complaint (&symfile_complaints,
+		 _("Offset %d is not terminated "
+		   "for DW_AT_ranges attribute"),
+		 offset);
+      return false;
+    }
+
+  return true;
+}
+
+/* Call CALLBACK from DW_AT_ranges attribute value OFFSET reading .debug_ranges.
+   Callback's type should be:
+    void (CORE_ADDR range_beginning, CORE_ADDR range_end)
    Return 1 if the attributes are present and valid, otherwise, return 0.  */
 
+template <typename Callback>
 static int
 dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
-		       std::function<void (CORE_ADDR range_beginning,
-					   CORE_ADDR range_end)> callback)
+		       Callback &&callback)
 {
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -11893,6 +12147,9 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
   unsigned int dummy;
   const gdb_byte *buffer;
   CORE_ADDR baseaddr;
+
+  if (cu_header->version >= 5)
+    return dwarf2_rnglists_process (offset, cu, callback);
 
   found_base = cu->base_known;
   base = cu->base_address;
@@ -15341,10 +15598,23 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
       /* now read in declarations */
       for (;;)
 	{
+	  LONGEST implicit_const;
+
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
 	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
+	  if (abbrev_form == DW_FORM_implicit_const)
+	    {
+	      implicit_const = read_signed_leb128 (abfd, abbrev_ptr,
+						   &bytes_read);
+	      abbrev_ptr += bytes_read;
+	    }
+	  else
+	    {
+	      /* Initialize it due to a false compiler warning.  */
+	      implicit_const = -1;
+	    }
 
 	  if (abbrev_name == 0)
 	    break;
@@ -15360,6 +15630,7 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
 	    = (enum dwarf_attribute) abbrev_name;
 	  cur_attrs[cur_abbrev->num_attrs].form
 	    = (enum dwarf_form) abbrev_form;
+	  cur_attrs[cur_abbrev->num_attrs].implicit_const = implicit_const;
 	  ++cur_abbrev->num_attrs;
 	}
 
@@ -16194,7 +16465,7 @@ fixup_partial_die (struct partial_die_info *part_die,
 static const gdb_byte *
 read_attribute_value (const struct die_reader_specs *reader,
 		      struct attribute *attr, unsigned form,
-		      const gdb_byte *info_ptr)
+		      LONGEST implicit_const, const gdb_byte *info_ptr)
 {
   struct dwarf2_cu *cu = reader->cu;
   struct objfile *objfile = cu->objfile;
@@ -16266,6 +16537,16 @@ read_attribute_value (const struct die_reader_specs *reader,
 	{
 	  DW_STRING (attr) = read_indirect_string (abfd, info_ptr, cu_header,
 						   &bytes_read);
+	  DW_STRING_IS_CANONICAL (attr) = 0;
+	  info_ptr += bytes_read;
+	  break;
+	}
+      /* FALLTHROUGH */
+    case DW_FORM_line_strp:
+      if (!cu->per_cu->is_dwz)
+	{
+	  DW_STRING (attr) = read_indirect_line_string (abfd, info_ptr,
+							cu_header, &bytes_read);
 	  DW_STRING_IS_CANONICAL (attr) = 0;
 	  info_ptr += bytes_read;
 	  break;
@@ -16350,7 +16631,16 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_indirect:
       form = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
-      info_ptr = read_attribute_value (reader, attr, form, info_ptr);
+      if (form == DW_FORM_implicit_const)
+	{
+	  implicit_const = read_signed_leb128 (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	}
+      info_ptr = read_attribute_value (reader, attr, form, implicit_const,
+				       info_ptr);
+      break;
+    case DW_FORM_implicit_const:
+      DW_SND (attr) = implicit_const;
       break;
     case DW_FORM_GNU_addr_index:
       if (reader->dwo_file == NULL)
@@ -16420,7 +16710,8 @@ read_attribute (const struct die_reader_specs *reader,
 		const gdb_byte *info_ptr)
 {
   attr->name = abbrev->name;
-  return read_attribute_value (reader, attr, abbrev->form, info_ptr);
+  return read_attribute_value (reader, attr, abbrev->form,
+			       abbrev->implicit_const, info_ptr);
 }
 
 /* Read dwarf information from a buffer.  */
@@ -16673,21 +16964,47 @@ read_direct_string (bfd *abfd, const gdb_byte *buf,
   return (const char *) buf;
 }
 
+/* Return pointer to string at section SECT offset STR_OFFSET with error
+   reporting strings FORM_NAME and SECT_NAME.  */
+
+static const char *
+read_indirect_string_at_offset_from (bfd *abfd, LONGEST str_offset,
+				     struct dwarf2_section_info *sect,
+				     const char *form_name,
+				     const char *sect_name)
+{
+  dwarf2_read_section (dwarf2_per_objfile->objfile, sect);
+  if (sect->buffer == NULL)
+    error (_("%s used without %s section [in module %s]"),
+	   form_name, sect_name, bfd_get_filename (abfd));
+  if (str_offset >= sect->size)
+    error (_("%s pointing outside of %s section [in module %s]"),
+	   form_name, sect_name, bfd_get_filename (abfd));
+  gdb_assert (HOST_CHAR_BIT == 8);
+  if (sect->buffer[str_offset] == '\0')
+    return NULL;
+  return (const char *) (sect->buffer + str_offset);
+}
+
+/* Return pointer to string at .debug_str offset STR_OFFSET.  */
+
 static const char *
 read_indirect_string_at_offset (bfd *abfd, LONGEST str_offset)
 {
-  dwarf2_read_section (dwarf2_per_objfile->objfile, &dwarf2_per_objfile->str);
-  if (dwarf2_per_objfile->str.buffer == NULL)
-    error (_("DW_FORM_strp used without .debug_str section [in module %s]"),
-	   bfd_get_filename (abfd));
-  if (str_offset >= dwarf2_per_objfile->str.size)
-    error (_("DW_FORM_strp pointing outside of "
-	     ".debug_str section [in module %s]"),
-	   bfd_get_filename (abfd));
-  gdb_assert (HOST_CHAR_BIT == 8);
-  if (dwarf2_per_objfile->str.buffer[str_offset] == '\0')
-    return NULL;
-  return (const char *) (dwarf2_per_objfile->str.buffer + str_offset);
+  return read_indirect_string_at_offset_from (abfd, str_offset,
+					      &dwarf2_per_objfile->str,
+					      "DW_FORM_strp", ".debug_str");
+}
+
+/* Return pointer to string at .debug_line_str offset STR_OFFSET.  */
+
+static const char *
+read_indirect_line_string_at_offset (bfd *abfd, LONGEST str_offset)
+{
+  return read_indirect_string_at_offset_from (abfd, str_offset,
+					      &dwarf2_per_objfile->line_str,
+					      "DW_FORM_line_strp",
+					      ".debug_line_str");
 }
 
 /* Read a string at offset STR_OFFSET in the .debug_str section from
@@ -16714,6 +17031,10 @@ read_indirect_string_from_dwz (struct dwz_file *dwz, LONGEST str_offset)
   return (const char *) (dwz->str.buffer + str_offset);
 }
 
+/* Return pointer to string at .debug_str offset as read from BUF.
+   BUF is assumed to be in a compilation unit described by CU_HEADER.
+   Return *BYTES_READ_PTR count of bytes read from BUF.  */
+
 static const char *
 read_indirect_string (bfd *abfd, const gdb_byte *buf,
 		      const struct comp_unit_head *cu_header,
@@ -16724,9 +17045,23 @@ read_indirect_string (bfd *abfd, const gdb_byte *buf,
   return read_indirect_string_at_offset (abfd, str_offset);
 }
 
-static ULONGEST
+/* Return pointer to string at .debug_line_str offset as read from BUF.
+   BUF is assumed to be in a compilation unit described by CU_HEADER.
+   Return *BYTES_READ_PTR count of bytes read from BUF.  */
+
+static const char *
+read_indirect_line_string (bfd *abfd, const gdb_byte *buf,
+			   const struct comp_unit_head *cu_header,
+			   unsigned int *bytes_read_ptr)
+{
+  LONGEST str_offset = read_offset (abfd, buf, cu_header, bytes_read_ptr);
+
+  return read_indirect_line_string_at_offset (abfd, str_offset);
+}
+
+ULONGEST
 read_unsigned_leb128 (bfd *abfd, const gdb_byte *buf,
-		      unsigned int *bytes_read_ptr)
+			  unsigned int *bytes_read_ptr)
 {
   ULONGEST result;
   unsigned int num_read;
@@ -17086,8 +17421,8 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
 
   if (attr != NULL)
     {
-      if (attr->form == DW_FORM_strp || attr->form == DW_FORM_string
-	  || attr->form == DW_FORM_GNU_strp_alt)
+      if (attr->form == DW_FORM_strp || attr->form == DW_FORM_line_strp
+	  || attr->form == DW_FORM_string || attr->form == DW_FORM_GNU_strp_alt)
 	str = DW_STRING (attr);
       else
         complaint (&symfile_complaints,
@@ -17264,6 +17599,141 @@ get_debug_line_section (struct dwarf2_cu *cu)
   return section;
 }
 
+/* Forwarding function for read_formatted_entries.  */
+
+static void
+add_include_dir_stub (struct line_header *lh, const char *name,
+		      unsigned int dir_index, unsigned int mod_time,
+		      unsigned int length)
+{
+  add_include_dir (lh, name);
+}
+
+/* Read directory or file name entry format, starting with byte of
+   format count entries, ULEB128 pairs of entry formats, ULEB128 of
+   entries count and the entries themselves in the described entry
+   format.  */
+
+static void
+read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
+			struct line_header *lh,
+			const struct comp_unit_head *cu_header,
+			void (*callback) (struct line_header *lh,
+					  const char *name,
+					  unsigned int dir_index,
+					  unsigned int mod_time,
+					  unsigned int length))
+{
+  gdb_byte format_count, formati;
+  ULONGEST data_count, datai;
+  const gdb_byte *buf = *bufp;
+  const gdb_byte *format_header_data;
+  int i;
+  unsigned int bytes_read;
+
+  format_count = read_1_byte (abfd, buf);
+  buf += 1;
+  format_header_data = buf;
+  for (formati = 0; formati < format_count; formati++)
+    {
+      read_unsigned_leb128 (abfd, buf, &bytes_read);
+      buf += bytes_read;
+      read_unsigned_leb128 (abfd, buf, &bytes_read);
+      buf += bytes_read;
+    }
+
+  data_count = read_unsigned_leb128 (abfd, buf, &bytes_read);
+  buf += bytes_read;
+  for (datai = 0; datai < data_count; datai++)
+    {
+      const gdb_byte *format = format_header_data;
+      struct file_entry fe;
+
+      memset (&fe, 0, sizeof (fe));
+
+      for (formati = 0; formati < format_count; formati++)
+	{
+	  ULONGEST content_type, form;
+	  const char *string_trash;
+	  const char **stringp = &string_trash;
+	  unsigned int uint_trash, *uintp = &uint_trash;
+
+	  content_type = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  format += bytes_read;
+	  switch (content_type)
+	    {
+	    case DW_LNCT_path:
+	      stringp = &fe.name;
+	      break;
+	    case DW_LNCT_directory_index:
+	      uintp = &fe.dir_index;
+	      break;
+	    case DW_LNCT_timestamp:
+	      uintp = &fe.mod_time;
+	      break;
+	    case DW_LNCT_size:
+	      uintp = &fe.length;
+	      break;
+	    case DW_LNCT_MD5:
+	      break;
+	    default:
+	      complaint (&symfile_complaints,
+			 _("Unknown format content type %s"),
+			 pulongest (content_type));
+	    }
+
+	  form = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  format += bytes_read;
+	  switch (form)
+	    {
+	    case DW_FORM_string:
+	      *stringp = read_direct_string (abfd, buf, &bytes_read);
+	      buf += bytes_read;
+	      break;
+
+	    case DW_FORM_line_strp:
+	      *stringp = read_indirect_line_string (abfd, buf, cu_header, &bytes_read);
+	      buf += bytes_read;
+	      break;
+
+	    case DW_FORM_data1:
+	      *uintp = read_1_byte (abfd, buf);
+	      buf += 1;
+	      break;
+
+	    case DW_FORM_data2:
+	      *uintp = read_2_bytes (abfd, buf);
+	      buf += 2;
+	      break;
+
+	    case DW_FORM_data4:
+	      *uintp = read_4_bytes (abfd, buf);
+	      buf += 4;
+	      break;
+
+	    case DW_FORM_data8:
+	      *uintp = read_8_bytes (abfd, buf);
+	      buf += 8;
+	      break;
+
+	    case DW_FORM_udata:
+	      *uintp = read_unsigned_leb128 (abfd, buf, &bytes_read);
+	      buf += bytes_read;
+	      break;
+
+	    case DW_FORM_block:
+	      /* It is valid only for DW_LNCT_timestamp which is ignored by
+		 current GDB.  */
+	      break;
+	    }
+	}
+
+      callback (lh, fe.name, fe.dir_index, fe.mod_time, fe.length);
+    }
+
+  *bufp = buf;
+}
+
 /* Read the statement program header starting at OFFSET in
    .debug_line, or .debug_line.dwo.  Return a pointer
    to a struct line_header, allocated using xmalloc.
@@ -17333,13 +17803,32 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   lh->statement_program_end = line_ptr + lh->total_length;
   lh->version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
-  if (lh->version > 4)
+  if (lh->version > 5)
     {
       /* This is a version we don't understand.  The format could have
 	 changed in ways we don't handle properly so just punt.  */
       complaint (&symfile_complaints,
 		 _("unsupported version in .debug_line section"));
       return NULL;
+    }
+  if (lh->version >= 5)
+    {
+      gdb_byte segment_selector_size;
+
+      /* Skip address size.  */
+      read_1_byte (abfd, line_ptr);
+      line_ptr += 1;
+
+      segment_selector_size = read_1_byte (abfd, line_ptr);
+      line_ptr += 1;
+      if (segment_selector_size != 0)
+	{
+	  complaint (&symfile_complaints,
+		     _("unsupported segment selector size %u "
+		       "in .debug_line section"),
+		     segment_selector_size);
+	  return NULL;
+	}
     }
   lh->header_length = read_offset_1 (abfd, line_ptr, offset_size);
   line_ptr += offset_size;
@@ -17378,30 +17867,42 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       line_ptr += 1;
     }
 
-  /* Read directory table.  */
-  while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+  if (lh->version >= 5)
     {
-      line_ptr += bytes_read;
-      add_include_dir (lh, cur_dir);
-    }
-  line_ptr += bytes_read;
+      /* Read directory table.  */
+      read_formatted_entries (abfd, &line_ptr, lh, &cu->header,
+			      add_include_dir_stub);
 
-  /* Read file name table.  */
-  while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+      /* Read file name table.  */
+      read_formatted_entries (abfd, &line_ptr, lh, &cu->header, add_file_name);
+    }
+  else
     {
-      unsigned int dir_index, mod_time, length;
-
-      line_ptr += bytes_read;
-      dir_index = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-      line_ptr += bytes_read;
-      mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-      line_ptr += bytes_read;
-      length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      /* Read directory table.  */
+      while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+	{
+	  line_ptr += bytes_read;
+	  add_include_dir (lh, cur_dir);
+	}
       line_ptr += bytes_read;
 
-      add_file_name (lh, cur_file, dir_index, mod_time, length);
+      /* Read file name table.  */
+      while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+	{
+	  unsigned int dir_index, mod_time, length;
+
+	  line_ptr += bytes_read;
+	  dir_index = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  line_ptr += bytes_read;
+	  mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  line_ptr += bytes_read;
+	  length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  line_ptr += bytes_read;
+
+	  add_file_name (lh, cur_file, dir_index, mod_time, length);
+	}
+      line_ptr += bytes_read;
     }
-  line_ptr += bytes_read;
   lh->statement_program_start = line_ptr;
 
   if (line_ptr > (section->buffer + section->size))
@@ -19754,6 +20255,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
+	case DW_FORM_line_strp:
 	case DW_FORM_GNU_str_index:
 	case DW_FORM_GNU_strp_alt:
 	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
@@ -21781,8 +22283,13 @@ static struct dwarf2_section_info *
 cu_debug_loc_section (struct dwarf2_cu *cu)
 {
   if (cu->dwo_unit)
-    return &cu->dwo_unit->dwo_file->sections.loc;
-  return &dwarf2_per_objfile->loc;
+    {
+      struct dwo_sections *sections = &cu->dwo_unit->dwo_file->sections;
+      
+      return cu->header.version >= 5 ? &sections->loclists : &sections->loc;
+    }
+  return (cu->header.version >= 5 ? &dwarf2_per_objfile->loclists
+				  : &dwarf2_per_objfile->loc);
 }
 
 /* A helper function that fills in a dwarf2_loclist_baton.  */
@@ -21900,7 +22407,8 @@ per_cu_header_read_in (struct comp_unit_head *cu_headerp,
   info_ptr = per_cu->section->buffer + per_cu->offset.sect_off;
 
   memset (cu_headerp, 0, sizeof (*cu_headerp));
-  read_comp_unit_head (cu_headerp, info_ptr, per_cu->objfile->obfd);
+  read_comp_unit_head (cu_headerp, info_ptr, per_cu->section,
+		       rcuh_kind::COMPILE);
 
   return cu_headerp;
 }
@@ -21958,6 +22466,14 @@ dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *per_cu)
   struct objfile *objfile = per_cu->objfile;
 
   return ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+}
+
+/* Return DWARF version number of PER_CU.  */
+
+short
+dwarf2_version (struct dwarf2_per_cu_data *per_cu)
+{
+  return per_cu->dwarf_version;
 }
 
 /* Locate the .debug_info compilation unit from CU's objfile which contains

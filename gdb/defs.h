@@ -648,6 +648,10 @@ extern void store_typed_address (gdb_byte *buf, struct type *type,
 
 extern int watchdog;
 
+/* From dwarf2read.c */
+
+ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
+
 /* Hooks for alternate command interfaces.  */
 
 /* * The name of the interpreter if specified on the command line.  */

@@ -143,6 +143,57 @@ decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
   return DEBUG_LOC_START_END;
 }
 
+/* Decode the addresses in .debug_loclists entry.
+   A pointer to the next byte to examine is returned in *NEW_PTR.
+   The encoded low,high addresses are return in *LOW,*HIGH.
+   The result indicates the kind of entry found.  */
+
+static enum debug_loc_kind
+decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
+				 const gdb_byte *loc_ptr,
+				 const gdb_byte *buf_end,
+				 const gdb_byte **new_ptr,
+				 CORE_ADDR *low, CORE_ADDR *high,
+				 enum bfd_endian byte_order,
+				 unsigned int addr_size,
+				 int signed_addr_p)
+{
+  uint64_t u64;
+
+  if (loc_ptr == buf_end)
+    return DEBUG_LOC_BUFFER_OVERFLOW;
+
+  switch (*loc_ptr++)
+    {
+    case DW_LLE_end_of_list:
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_END_OF_LIST;
+    case DW_LLE_base_address:
+      if (loc_ptr + addr_size > buf_end)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      if (signed_addr_p)
+	*high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	*high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      loc_ptr += addr_size;
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_BASE_ADDRESS;
+    case DW_LLE_offset_pair:
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
+      if (loc_ptr == NULL)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *low = u64;
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
+      if (loc_ptr == NULL)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high = u64;
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_START_END;
+    default:
+      return DEBUG_LOC_INVALID_ENTRY;
+    }
+}
+
 /* Decode the addresses in .debug_loc.dwo entry.
    A pointer to the next byte to examine is returned in *NEW_PTR.
    The encoded low,high addresses are return in *LOW,*HIGH.
@@ -163,10 +214,10 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
 
   switch (*loc_ptr++)
     {
-    case DEBUG_LOC_END_OF_LIST:
+    case DW_LLE_GNU_end_of_list_entry:
       *new_ptr = loc_ptr;
       return DEBUG_LOC_END_OF_LIST;
-    case DEBUG_LOC_BASE_ADDRESS:
+    case DW_LLE_GNU_base_address_selection_entry:
       *low = 0;
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
       if (loc_ptr == NULL)
@@ -174,7 +225,7 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
       *high = dwarf2_read_addr_index (per_cu, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_BASE_ADDRESS;
-    case DEBUG_LOC_START_END:
+    case DW_LLE_GNU_start_end_entry:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
@@ -185,7 +236,7 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
       *high = dwarf2_read_addr_index (per_cu, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_START_END;
-    case DEBUG_LOC_START_LENGTH:
+    case DW_LLE_GNU_start_length_entry:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
@@ -237,11 +288,17 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
-      else
+      else if (dwarf2_version (baton->per_cu) < 5)
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
 					   byte_order, addr_size,
 					   signed_addr_p);
+      else
+	kind = decode_debug_loclists_addresses (baton->per_cu,
+						loc_ptr, buf_end, &new_ptr,
+						&low, &high, byte_order,
+						addr_size, signed_addr_p);
+
       loc_ptr = new_ptr;
       switch (kind)
 	{
@@ -277,8 +334,18 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  high += base_address;
 	}
 
-      length = extract_unsigned_integer (loc_ptr, 2, byte_order);
-      loc_ptr += 2;
+      if (dwarf2_version (baton->per_cu) < 5)
+	{
+	  length = extract_unsigned_integer (loc_ptr, 2, byte_order);
+	  loc_ptr += 2;
+	}
+      else
+	{
+	  unsigned int bytes_read;
+
+	  length = read_unsigned_leb128 (NULL, loc_ptr, &bytes_read);
+	  loc_ptr += bytes_read;
+	}
 
       if (low == high && pc == low)
 	{

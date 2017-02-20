@@ -1,5 +1,71 @@
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* defs.h (read_unsigned_leb128): New declaration.
+	* dwarf2loc.c (decode_debug_loclists_addresses): New function.
+	(decode_debug_loc_dwo_addresses): Update DEBUG_LOC_* to DW_LLE_*.
+	(dwarf2_find_location_expression): Call also
+	decode_debug_loclists_addresses.  Handle DWARF-5 ULEB128 length.
+	* dwarf2loc.h (dwarf2_version): New declaration.
+	* dwarf2read.c (struct dwarf2_per_objfile): Add loclists, line_str,
+	rnglists.
+	(dwarf2_elf_names): Add .debug_loclists, .debug_line_str,
+	.debug_rnglists.
+	(struct dwop_section_names): Add loclists_dwo.
+	(dwop_section_names): Add .debug_loclists.dwo.
+	(struct comp_unit_head): Add unit_type, signature, type_offset_in_tu.
+	(struct dwarf2_per_cu_data): Add dwarf_version.
+	(struct dwo_sections): Add loclists.
+	(struct attr_abbrev): Add implicit_const.
+	(read_indirect_line_string): New declaration.
+	(read_unsigned_leb128): Delete declaration.
+	(rcuh_kind): New definition.
+	(read_and_check_comp_unit_head): Change parameter
+	is_debug_types_section to section_kind.
+	(dwarf2_locate_sections): Handle loclists, line_str and rnglists.
+	(read_comp_unit_head): Change parameter abfd to section, add parameter
+	section_kind.  Handle DWARF-5.
+	(error_check_comp_unit_head): Accept also DWARF version 5.
+	(read_and_check_comp_unit_head): Change parameter
+	is_debug_types_section to section_kind.
+	(read_and_check_type_unit_head): Delete function.
+	(read_abbrev_offset): Handle DWARF-5.
+	(create_debug_type_hash_table): Add parameter section_kind.  Process
+	only DW_UT_type.  Use signature and type_offset_in_tu from struct
+	comp_unit_head.
+	(create_debug_types_hash_table): Update create_debug_type_hash_table
+	caller.
+	(create_all_type_units): Call create_debug_type_hash_table.
+	(read_cutu_die_from_dwo, init_cutu_and_read_dies): Change
+	read_and_check_type_unit_head caller to read_and_check_comp_unit_head
+	caller.
+	(skip_one_die): Handle DW_FORM_implicit_const.
+	(dwarf2_rnglists_process): New function.
+	(dwarf2_ranges_process): Call dwarf2_rnglists_process for DWARF-5.
+	(abbrev_table_read_table): Handle DW_FORM_implicit_const.
+	(read_attribute_value): Handle DW_FORM_implicit_const,
+	DW_FORM_line_strp.
+	(read_attribute): Handle DW_FORM_implicit_const.
+	(read_indirect_string_at_offset_from): New function from
+	read_indirect_string_at_offset.
+	(read_indirect_string_at_offset): Call
+	read_indirect_string_at_offset_from.
+	(read_indirect_line_string_at_offset): New function.
+	(read_indirect_string): New function comment.
+	(read_indirect_line_string): New function.
+	(read_unsigned_leb128): Make it global.
+	(dwarf2_string_attr): Handle DWARF-5.
+	(add_include_dir_stub, read_formatted_entries): New functions.
+	(dwarf_decode_line_header, dump_die_shallow, cu_debug_loc_section):
+	Handle DWARF-5.
+	(per_cu_header_read_in): Update read_comp_unit_head caller.
+	(dwarf2_version): New function.
+	* symfile.h (struct dwarf2_debug_sections): Add loclists, line_str and
+	rnglists.
+	* xcoffread.c (dwarf2_xcoff_names): Update struct dwarf2_debug_sections
+	fields.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (abbrev_table_read_table): Read the data only once.
 
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
