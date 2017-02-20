@@ -60,6 +60,9 @@
 
 * Target descriptions can now describe registers for sparc32 and sparc64.
 
+* GDB now supports DWARF version 5 (debug information format).
+  Its .debug_names index is not yet supported.
+
 * New native configurations
 
 FreeBSD/mips			mips*-*-freebsd
