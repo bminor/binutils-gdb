@@ -1,3 +1,13 @@
+2017-02-20  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21156
+	* dwarf.c (cu_tu_indexes_read): Move into...
+	(load_cu_tu_indexes): ... here.  Change the variable into
+	tri-state.  Change the function into boolean, returning
+	false if the indicies could not be loaded.
+	(find_cu_tu_set): Return NULL if the indicies could not be
+	loaded.
+
 2017-02-17  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21156

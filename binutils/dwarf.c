@@ -76,7 +76,6 @@ int dwarf_check = 0;
    as a zero-terminated list of section indexes comprising one set of debug
    sections from a .dwo file.  */
 
-static int cu_tu_indexes_read = 0;
 static unsigned int *shndx_pool = NULL;
 static unsigned int shndx_pool_size = 0;
 static unsigned int shndx_pool_used = 0;
@@ -99,7 +98,7 @@ static int tu_count = 0;
 static struct cu_tu_set *cu_sets = NULL;
 static struct cu_tu_set *tu_sets = NULL;
 
-static void load_cu_tu_indexes (void *file);
+static bfd_boolean load_cu_tu_indexes (void *);
 
 /* Values for do_debug_lines.  */
 #define FLAG_DEBUG_LINES_RAW	 1
@@ -2715,7 +2714,7 @@ load_debug_info (void * file)
     return num_debug_info_entries;
 
   /* If this is a DWARF package file, load the CU and TU indexes.  */
-  load_cu_tu_indexes (file);
+  (void) load_cu_tu_indexes (file);
 
   if (load_debug_section (info, file)
       && process_debug_info (&debug_displays [info].section, file, abbrev, 1, 0))
@@ -7378,21 +7377,27 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
    section sets that we can use to associate a .debug_info.dwo section
    with its associated .debug_abbrev.dwo section in a .dwp file.  */
 
-static void
+static bfd_boolean
 load_cu_tu_indexes (void *file)
 {
+  static int cu_tu_indexes_read = -1; /* Tri-state variable.  */
+
   /* If we have already loaded (or tried to load) the CU and TU indexes
      then do not bother to repeat the task.  */
-  if (cu_tu_indexes_read)
-    return;
+  if (cu_tu_indexes_read == -1)
+    {
+      cu_tu_indexes_read = TRUE;
+  
+      if (load_debug_section (dwp_cu_index, file))
+	if (! process_cu_tu_index (&debug_displays [dwp_cu_index].section, 0))
+	  cu_tu_indexes_read = FALSE;
 
-  if (load_debug_section (dwp_cu_index, file))
-    process_cu_tu_index (&debug_displays [dwp_cu_index].section, 0);
+      if (load_debug_section (dwp_tu_index, file))
+	if (! process_cu_tu_index (&debug_displays [dwp_tu_index].section, 0))
+	  cu_tu_indexes_read = FALSE;
+    }
 
-  if (load_debug_section (dwp_tu_index, file))
-    process_cu_tu_index (&debug_displays [dwp_tu_index].section, 0);
-
-  cu_tu_indexes_read = 1;
+  return (bfd_boolean) cu_tu_indexes_read;
 }
 
 /* Find the set of sections that includes section SHNDX.  */
@@ -7402,7 +7407,8 @@ find_cu_tu_set (void *file, unsigned int shndx)
 {
   unsigned int i;
 
-  load_cu_tu_indexes (file);
+  if (! load_cu_tu_indexes (file))
+    return NULL;
 
   /* Find SHNDX in the shndx pool.  */
   for (i = 0; i < shndx_pool_used; i++)
