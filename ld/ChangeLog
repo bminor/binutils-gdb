@@ -1,5 +1,11 @@
 2017-02-17  Alan Modra  <amodra@gmail.com>
 
+	PR 15041
+	* scripttempl/pe.sc: Don't combine sections for ld -r.
+	* scripttempl/pep.sc: Likewise.
+
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
 	PR 21099
 	* emulparams/elf32m32c.sh: Define STACK_ADDR and STACK_SENTINEL
 	rather than using OTHER_SECTIONS.
