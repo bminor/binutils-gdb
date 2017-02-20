@@ -7414,6 +7414,9 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	case DW_FORM_ref_sig8:
 	  info_ptr += 8;
 	  break;
+	case DW_FORM_data16:
+	  info_ptr += 16;
+	  break;
 	case DW_FORM_string:
 	  read_direct_string (abfd, info_ptr, &bytes_read);
 	  info_ptr += bytes_read;
@@ -16554,6 +16557,13 @@ read_attribute_value (const struct die_reader_specs *reader,
       DW_UNSND (attr) = read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
+    case DW_FORM_data16:
+      blk = dwarf_alloc_block (cu);
+      blk->size = 16;
+      blk->data = read_n_bytes (abfd, info_ptr, 16);
+      info_ptr += 16;
+      DW_BLOCK (attr) = blk;
+      break;
     case DW_FORM_sec_offset:
       DW_UNSND (attr) = read_offset (abfd, info_ptr, &cu->header, &bytes_read);
       info_ptr += bytes_read;
@@ -19297,6 +19307,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
     case DW_FORM_block4:
     case DW_FORM_block:
     case DW_FORM_exprloc:
+    case DW_FORM_data16:
       blk = DW_BLOCK (attr);
       if (TYPE_LENGTH (type) != blk->size)
 	dwarf2_const_value_length_mismatch_complaint (name, blk->size,
@@ -20251,6 +20262,9 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, "expression: size %s",
 			      pulongest (DW_BLOCK (&die->attrs[i])->size));
 	  break;
+	case DW_FORM_data16:
+	  fprintf_unfiltered (f, "constant of 16 bytes");
+	  break;
 	case DW_FORM_ref_addr:
 	  fprintf_unfiltered (f, "ref address: ");
 	  fputs_filtered (hex_string (DW_UNSND (&die->attrs[i])), f);
@@ -20412,6 +20426,7 @@ dwarf2_get_attr_constant_value (const struct attribute *attr, int default_value)
     return DW_UNSND (attr);
   else
     {
+      /* For DW_FORM_data16 see attr_form_is_constant.  */
       complaint (&symfile_complaints,
 		 _("Attribute value is not a constant (%s)"),
                  dwarf_form_name (attr->form));
@@ -20695,6 +20710,7 @@ dwarf2_fetch_constant_bytes (sect_offset offset,
     case DW_FORM_block4:
     case DW_FORM_block:
     case DW_FORM_exprloc:
+    case DW_FORM_data16:
       result = DW_BLOCK (attr)->data;
       *len = DW_BLOCK (attr)->size;
       break;
@@ -21603,6 +21619,10 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
       bytes += 8;
       break;
 
+    case DW_FORM_data16:
+      bytes += 16;
+      break;
+
     case DW_FORM_string:
       read_direct_string (abfd, bytes, &bytes_read);
       bytes += bytes_read;
@@ -22266,7 +22286,10 @@ attr_form_is_section_offset (const struct attribute *attr)
    (lineptr, loclistptr, macptr or rangelistptr).  The DWARF spec says
    that, if an attribute's can be either a constant or one of the
    section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
-   taken as section offsets, not constants.  */
+   taken as section offsets, not constants.
+
+   DW_FORM_data16 is not considered as dwarf2_get_attr_constant_value
+   cannot handle that.  */
 
 static int
 attr_form_is_constant (const struct attribute *attr)

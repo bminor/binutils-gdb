@@ -1,5 +1,11 @@
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.dwarf2/formdata16.c: New file.
+	* gdb.dwarf2/formdata16.exp: New file.
+	* lib/dwarf.exp (Dwarf): Add DW_FORM_data16.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.arch/amd64-entry-value-param-dwarf5.S: New file.
 	* gdb.arch/amd64-entry-value-param-dwarf5.c: New file.
 	* gdb.arch/amd64-entry-value-param-dwarf5.exp: New file.

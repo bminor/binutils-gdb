@@ -1,5 +1,12 @@
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (skip_one_die, read_attribute_value)
+	(dwarf2_const_value_attr, dump_die_shallow)
+	(dwarf2_get_attr_constant_value, dwarf2_fetch_constant_bytes)
+	(skip_form_bytes, attr_form_is_constant): Handle DW_FORM_data16.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (read_file_scope): Rename DW_MACRO_GNU_*.
 	(dwarf_parse_macro_header): Accept DWARF version 5.
 	(dwarf_decode_macro_bytes, dwarf_decode_macros): Rename DW_MACRO_GNU_*.
