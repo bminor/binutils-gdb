@@ -9312,12 +9312,14 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
      refers to information in the line number info statement program
      header, so we can only read it if we've read the header
      successfully.  */
-  attr = dwarf2_attr (die, DW_AT_GNU_macros, cu);
+  attr = dwarf2_attr (die, DW_AT_macros, cu);
+  if (attr == NULL)
+    attr = dwarf2_attr (die, DW_AT_GNU_macros, cu);
   if (attr && cu->line_header)
     {
       if (dwarf2_attr (die, DW_AT_macro_info, cu))
 	complaint (&symfile_complaints,
-		   _("CU refers to both DW_AT_GNU_macros and DW_AT_macro_info"));
+		   _("CU refers to both DW_AT_macros and DW_AT_macro_info"));
 
       dwarf_decode_macros (cu, DW_UNSND (attr), 1);
     }
@@ -21714,7 +21716,7 @@ dwarf_parse_macro_header (const gdb_byte **opcode_definitions,
       unsigned int version, flags;
 
       version = read_2_bytes (abfd, mac_ptr);
-      if (version != 4)
+      if (version != 4 && version != 5)
 	{
 	  complaint (&symfile_complaints,
 		     _("unrecognized version `%d' in .debug_macro section"),
@@ -21757,7 +21759,7 @@ dwarf_parse_macro_header (const gdb_byte **opcode_definitions,
 }
 
 /* A helper for dwarf_decode_macros that handles the GNU extensions,
-   including DW_MACRO_GNU_transparent_include.  */
+   including DW_MACRO_import.  */
 
 static void
 dwarf_decode_macro_bytes (bfd *abfd,
@@ -21812,12 +21814,12 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	case 0:
 	  break;
 
-        case DW_MACRO_GNU_define:
-        case DW_MACRO_GNU_undef:
-	case DW_MACRO_GNU_define_indirect:
-	case DW_MACRO_GNU_undef_indirect:
-	case DW_MACRO_GNU_define_indirect_alt:
-	case DW_MACRO_GNU_undef_indirect_alt:
+        case DW_MACRO_define:
+        case DW_MACRO_undef:
+	case DW_MACRO_define_strp:
+	case DW_MACRO_undef_strp:
+	case DW_MACRO_define_sup:
+	case DW_MACRO_undef_sup:
           {
             unsigned int bytes_read;
             int line;
@@ -21827,8 +21829,8 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	    line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
 
-	    if (macinfo_type == DW_MACRO_GNU_define
-		|| macinfo_type == DW_MACRO_GNU_undef)
+	    if (macinfo_type == DW_MACRO_define
+		|| macinfo_type == DW_MACRO_undef)
 	      {
 		body = read_direct_string (abfd, mac_ptr, &bytes_read);
 		mac_ptr += bytes_read;
@@ -21840,8 +21842,8 @@ dwarf_decode_macro_bytes (bfd *abfd,
 		str_offset = read_offset_1 (abfd, mac_ptr, offset_size);
 		mac_ptr += offset_size;
 
-		if (macinfo_type == DW_MACRO_GNU_define_indirect_alt
-		    || macinfo_type == DW_MACRO_GNU_undef_indirect_alt
+		if (macinfo_type == DW_MACRO_define_sup
+		    || macinfo_type == DW_MACRO_undef_sup
 		    || section_is_dwz)
 		  {
 		    struct dwz_file *dwz = dwarf2_get_dwz_file ();
@@ -21852,9 +21854,9 @@ dwarf_decode_macro_bytes (bfd *abfd,
 		  body = read_indirect_string_at_offset (abfd, str_offset);
 	      }
 
-	    is_define = (macinfo_type == DW_MACRO_GNU_define
-			 || macinfo_type == DW_MACRO_GNU_define_indirect
-			 || macinfo_type == DW_MACRO_GNU_define_indirect_alt);
+	    is_define = (macinfo_type == DW_MACRO_define
+			 || macinfo_type == DW_MACRO_define_strp
+			 || macinfo_type == DW_MACRO_define_sup);
             if (! current_file)
 	      {
 		/* DWARF violation as no main source is present.  */
@@ -21877,15 +21879,15 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	      parse_macro_definition (current_file, line, body);
 	    else
 	      {
-		gdb_assert (macinfo_type == DW_MACRO_GNU_undef
-			    || macinfo_type == DW_MACRO_GNU_undef_indirect
-			    || macinfo_type == DW_MACRO_GNU_undef_indirect_alt);
+		gdb_assert (macinfo_type == DW_MACRO_undef
+			    || macinfo_type == DW_MACRO_undef_strp
+			    || macinfo_type == DW_MACRO_undef_sup);
 		macro_undef (current_file, line, body);
 	      }
           }
           break;
 
-        case DW_MACRO_GNU_start_file:
+        case DW_MACRO_start_file:
           {
             unsigned int bytes_read;
             int line, file;
@@ -21905,7 +21907,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
 
 	    if (at_commandline)
 	      {
-		/* This DW_MACRO_GNU_start_file was executed in the
+		/* This DW_MACRO_start_file was executed in the
 		   pass one.  */
 		at_commandline = 0;
 	      }
@@ -21914,7 +21916,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
           }
           break;
 
-        case DW_MACRO_GNU_end_file:
+        case DW_MACRO_end_file:
           if (! current_file)
 	    complaint (&symfile_complaints,
 		       _("macro debug info has an unmatched "
@@ -21953,8 +21955,8 @@ dwarf_decode_macro_bytes (bfd *abfd,
             }
           break;
 
-	case DW_MACRO_GNU_transparent_include:
-	case DW_MACRO_GNU_transparent_include_alt:
+	case DW_MACRO_import:
+	case DW_MACRO_import_sup:
 	  {
 	    LONGEST offset;
 	    void **slot;
@@ -21967,7 +21969,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
 	    offset = read_offset_1 (abfd, mac_ptr, offset_size);
 	    mac_ptr += offset_size;
 
-	    if (macinfo_type == DW_MACRO_GNU_transparent_include_alt)
+	    if (macinfo_type == DW_MACRO_import_sup)
 	      {
 		struct dwz_file *dwz = dwarf2_get_dwz_file ();
 
@@ -21987,7 +21989,7 @@ dwarf_decode_macro_bytes (bfd *abfd,
 		/* This has actually happened; see
 		   http://sourceware.org/bugzilla/show_bug.cgi?id=13568.  */
 		complaint (&symfile_complaints,
-			   _("recursive DW_MACRO_GNU_transparent_include in "
+			   _("recursive DW_MACRO_import in "
 			     ".debug_macro section"));
 	      }
 	    else
@@ -22129,8 +22131,8 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
         case 0:
 	  break;
 
-	case DW_MACRO_GNU_define:
-	case DW_MACRO_GNU_undef:
+	case DW_MACRO_define:
+	case DW_MACRO_undef:
 	  /* Only skip the data by MAC_PTR.  */
 	  {
 	    unsigned int bytes_read;
@@ -22142,7 +22144,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	  }
 	  break;
 
-	case DW_MACRO_GNU_start_file:
+	case DW_MACRO_start_file:
 	  {
 	    unsigned int bytes_read;
 	    int line, file;
@@ -22156,14 +22158,14 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	  }
 	  break;
 
-	case DW_MACRO_GNU_end_file:
+	case DW_MACRO_end_file:
 	  /* No data to skip by MAC_PTR.  */
 	  break;
 
-	case DW_MACRO_GNU_define_indirect:
-	case DW_MACRO_GNU_undef_indirect:
-	case DW_MACRO_GNU_define_indirect_alt:
-	case DW_MACRO_GNU_undef_indirect_alt:
+	case DW_MACRO_define_strp:
+	case DW_MACRO_undef_strp:
+	case DW_MACRO_define_sup:
+	case DW_MACRO_undef_sup:
 	  {
 	    unsigned int bytes_read;
 
@@ -22173,10 +22175,10 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	  }
 	  break;
 
-	case DW_MACRO_GNU_transparent_include:
-	case DW_MACRO_GNU_transparent_include_alt:
+	case DW_MACRO_import:
+	case DW_MACRO_import_sup:
 	  /* Note that, according to the spec, a transparent include
-	     chain cannot call DW_MACRO_GNU_start_file.  So, we can just
+	     chain cannot call DW_MACRO_start_file.  So, we can just
 	     skip this opcode.  */
 	  mac_ptr += offset_size;
 	  break;
