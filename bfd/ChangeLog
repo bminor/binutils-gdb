@@ -1,3 +1,9 @@
+2017-02-20  Alan Modra  <amodra@gmail.com>
+
+	PR 21181
+	* elflink.c (bfd_elf_final_link): Make DT_REL/DT_RELA zero
+	if DT_RELSZ/DT_RELASZ is zero.
+
 2017-02-16  Alan Modra  <amodra@gmail.com>
 
 	PR 21000

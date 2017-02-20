@@ -12063,6 +12063,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  Elf_Internal_Dyn dyn;
 	  const char *name;
 	  unsigned int type;
+	  bfd_size_type sh_size;
+	  bfd_vma sh_addr;
 
 	  bed->s->swap_dyn_in (dynobj, dyncon, &dyn);
 
@@ -12196,8 +12198,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		type = SHT_REL;
 	      else
 		type = SHT_RELA;
-	      dyn.d_un.d_val = 0;
-	      dyn.d_un.d_ptr = 0;
+	      sh_size = 0;
+	      sh_addr = 0;
 	      for (i = 1; i < elf_numsections (abfd); i++)
 		{
 		  Elf_Internal_Shdr *hdr;
@@ -12206,28 +12208,42 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  if (hdr->sh_type == type
 		      && (hdr->sh_flags & SHF_ALLOC) != 0)
 		    {
-		      if (dyn.d_tag == DT_RELSZ || dyn.d_tag == DT_RELASZ)
-			dyn.d_un.d_val += hdr->sh_size;
-		      else
-			{
-			  if (dyn.d_un.d_ptr == 0
-			      || hdr->sh_addr < dyn.d_un.d_ptr)
-			    dyn.d_un.d_ptr = hdr->sh_addr;
-			}
+		      sh_size += hdr->sh_size;
+		      if (sh_addr == 0
+			  || sh_addr > hdr->sh_addr)
+			sh_addr = hdr->sh_addr;
 		    }
 		}
+
 	      if (bed->dtrel_excludes_plt && htab->srelplt != NULL)
 		{
 		  /* Don't count procedure linkage table relocs in the
 		     overall reloc count.  */
-		  if (dyn.d_tag == DT_RELSZ || dyn.d_tag == DT_RELASZ)
-		    dyn.d_un.d_val -= htab->srelplt->size;
+		  sh_size -= htab->srelplt->size;
+		  if (sh_size == 0)
+		    /* If the size is zero, make the address zero too.
+		       This is to avoid a glibc bug.  If the backend
+		       emits DT_RELA/DT_RELASZ even when DT_RELASZ is
+		       zero, then we'll put DT_RELA at the end of
+		       DT_JMPREL.  glibc will interpret the end of
+		       DT_RELA matching the end of DT_JMPREL as the
+		       case where DT_RELA includes DT_JMPREL, and for
+		       LD_BIND_NOW will decide that processing DT_RELA
+		       will process the PLT relocs too.  Net result:
+		       No PLT relocs applied.  */
+		    sh_addr = 0;
+
 		  /* If .rela.plt is the first .rela section, exclude
 		     it from DT_RELA.  */
-		  else if (dyn.d_un.d_ptr == (htab->srelplt->output_section->vma
-					      + htab->srelplt->output_offset))
-		    dyn.d_un.d_ptr += htab->srelplt->size;
+		  else if (sh_addr == (htab->srelplt->output_section->vma
+				       + htab->srelplt->output_offset))
+		    sh_addr += htab->srelplt->size;
 		}
+
+	      if (dyn.d_tag == DT_RELSZ || dyn.d_tag == DT_RELASZ)
+		dyn.d_un.d_val = sh_size;
+	      else
+		dyn.d_un.d_ptr = sh_addr;
 	      break;
 	    }
 	  bed->s->swap_dyn_out (dynobj, &dyn, dyncon);
