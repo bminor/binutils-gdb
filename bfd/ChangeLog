@@ -1,3 +1,8 @@
+2017-02-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Only emit
+	DT_RELA, DT_RELASZ, and DT_RELAENT when DT_RELASZ is non-zero.
+
 2017-02-20  Alan Modra  <amodra@gmail.com>
 
 	PR 21181
