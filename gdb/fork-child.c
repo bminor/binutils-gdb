@@ -109,6 +109,31 @@ escape_bang_in_quoted_argument (const char *shell_file)
   return 0;
 }
 
+/* See inferior.h.  */
+
+void
+trace_start_error (const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  fprintf_unfiltered (gdb_stderr, "Could not trace the inferior "
+		                  "process.\nError: ");
+  vfprintf_unfiltered (gdb_stderr, fmt, ap);
+  va_end (ap);
+
+  gdb_flush (gdb_stderr);
+  _exit (0177);
+}
+
+/* See inferior.h.  */
+
+void
+trace_start_error_with_name (const char *string)
+{
+  trace_start_error ("%s: %s", string, safe_strerror (errno));
+}
+
 /* Start an inferior Unix child process and sets inferior_ptid to its
    pid.  EXEC_FILE is the file to run.  ALLARGS is a string containing
    the arguments to the program.  ENV is the environment vector to

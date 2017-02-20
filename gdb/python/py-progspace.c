@@ -24,6 +24,7 @@
 #include "objfiles.h"
 #include "language.h"
 #include "arch-utils.h"
+#include "py-ref.h"
 
 typedef struct
 {
@@ -128,18 +129,15 @@ pspy_initialize (pspace_object *self)
 static PyObject *
 pspy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 {
-  pspace_object *self = (pspace_object *) type->tp_alloc (type, 0);
+  gdbpy_ref<pspace_object> self ((pspace_object *) type->tp_alloc (type, 0));
 
-  if (self)
+  if (self != NULL)
     {
-      if (!pspy_initialize (self))
-	{
-	  Py_DECREF (self);
-	  return NULL;
-	}
+      if (!pspy_initialize (self.get ()))
+	return NULL;
     }
 
-  return (PyObject *) self;
+  return (PyObject *) self.release ();
 }
 
 PyObject *
@@ -323,7 +321,6 @@ pspy_set_type_printers (PyObject *o, PyObject *value, void *ignore)
 static void
 py_free_pspace (struct program_space *pspace, void *datum)
 {
-  pspace_object *object = (pspace_object *) datum;
   /* This is a fiction, but we're in a nasty spot: The pspace is in the
      process of being deleted, we can't rely on anything in it.  Plus
      this is one time when the current program space and current inferior
@@ -336,8 +333,8 @@ py_free_pspace (struct program_space *pspace, void *datum)
   struct gdbarch *arch = target_gdbarch ();
 
   gdbpy_enter enter_py (arch, current_language);
+  gdbpy_ref<pspace_object> object ((pspace_object *) datum);
   object->pspace = NULL;
-  Py_DECREF ((PyObject *) object);
 }
 
 /* Return a borrowed reference to the Python object of type Pspace
@@ -348,26 +345,22 @@ py_free_pspace (struct program_space *pspace, void *datum)
 PyObject *
 pspace_to_pspace_object (struct program_space *pspace)
 {
-  pspace_object *object;
-
-  object = (pspace_object *) program_space_data (pspace, pspy_pspace_data_key);
-  if (!object)
+  gdbpy_ref<pspace_object> object
+    ((pspace_object *) program_space_data (pspace, pspy_pspace_data_key));
+  if (object == NULL)
     {
-      object = PyObject_New (pspace_object, &pspace_object_type);
-      if (object)
+      object.reset (PyObject_New (pspace_object, &pspace_object_type));
+      if (object != NULL)
 	{
-	  if (!pspy_initialize (object))
-	    {
-	      Py_DECREF (object);
-	      return NULL;
-	    }
+	  if (!pspy_initialize (object.get ()))
+	    return NULL;
 
 	  object->pspace = pspace;
-	  set_program_space_data (pspace, pspy_pspace_data_key, object);
+	  set_program_space_data (pspace, pspy_pspace_data_key, object.get ());
 	}
     }
 
-  return (PyObject *) object;
+  return (PyObject *) object.release ();
 }
 
 int

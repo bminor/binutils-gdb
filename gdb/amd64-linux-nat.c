@@ -73,6 +73,7 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  -1,				  /* PKEYS register PKRU  */
   ORIG_RAX * 8			  /* "orig_eax"  */
 };
 

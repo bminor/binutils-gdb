@@ -39,6 +39,24 @@ if {$ld_sysroot == "/"} {
     set with_sysroot 3
 }
 
+# The linker on Windows expects Windows style paths.
+# MSYS2 runtime converts paths in the command line automatically.
+# However, for our test linker scripts, we have to prepare
+# the correct paths manually.
+proc get_base_dir_for_scripts {} {
+    global base_dir
+    global get_base_dir_for_scripts_saved
+
+    if { ![info exists get_base_dir_for_scripts_saved] } {
+	set get_base_dir_for_scripts_saved $base_dir
+	if { ([ishost *-*-cygwin] || [ishost *-*-mingw*] )
+	     && ![catch "exec cygpath -m $base_dir" base_dir_converted] } {
+	    set get_base_dir_for_scripts_saved $base_dir_converted
+	}
+    }
+    return $get_base_dir_for_scripts_saved
+}
+
 # Entries in the array-tables:
 # 0: Testtype; an inclusive bitmask indicating that the test should run on a
 # build configured for: 1: non-sysroot, 2: sysroot != "/", 4: sysroot == "/".
@@ -160,7 +178,7 @@ proc run_sysroot_prefix_test { type name templ p ldopt errstr } {
     set qlist { { "quoted" "\"" } { "unquoted" {} } }
 
     regsub -all "@p@" $templ $p templ
-    regsub -all "@cwd@" $templ "$base_dir/tmpdir" templ
+    regsub -all "@cwd@" $templ "[get_base_dir_for_scripts]/tmpdir" templ
     regsub -all "@cwd@" $ldopt "$base_dir/tmpdir" ldopt
     regsub -all "@cwd@" $name "<CWD>" name
 

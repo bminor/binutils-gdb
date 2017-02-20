@@ -14,6 +14,7 @@ Mike Frysinger			vapier@gentoo.org
 	Maintainers for particular sims:
 
 aarch64	        Nick Clifton <nickc@redhat.com>
+aarch64	        Jim Wilson <jim.wilson@linaro.org>
 arm	        Nick Clifton <nickc@redhat.com>
 bfin		Mike Frysinger <vapier@gentoo.org>
 cr16	        M R Swami Reddy <MR.Swami.Reddy@nsc.com>

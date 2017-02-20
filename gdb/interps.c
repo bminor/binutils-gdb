@@ -285,7 +285,7 @@ current_interp_set_logging (ui_file_up logfile,
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *interp = ui_interp->current_interpreter;
 
-  return interp->set_logging (std::move (logfile), logging_redirect);
+  interp->set_logging (std::move (logfile), logging_redirect);
 }
 
 /* Temporarily overrides the current interpreter.  */

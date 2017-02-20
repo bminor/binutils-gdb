@@ -164,7 +164,7 @@ struct dwarf_expr_context
   /* Return the PC for the frame.  */
   virtual CORE_ADDR get_frame_pc ()
   {
-    error (_("%s is invalid in this context"), "DW_OP_GNU_implicit_pointer");
+    error (_("%s is invalid in this context"), "DW_OP_implicit_pointer");
   }
 
   /* Return the thread-local storage address for
@@ -187,10 +187,10 @@ struct dwarf_expr_context
     return builtin_type (this->gdbarch)->builtin_int;
   }
 
-  /* Push on DWARF stack an entry evaluated for DW_TAG_GNU_call_site's
+  /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
      parameter matching KIND and KIND_U at the caller of specified BATON.
-     If DEREF_SIZE is not -1 then use DW_AT_GNU_call_site_data_value instead of
-     DW_AT_GNU_call_site_value.  */
+     If DEREF_SIZE is not -1 then use DW_AT_call_data_value instead of
+     DW_AT_call_value.  */
   virtual void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
 					   union call_site_parameter_u kind_u,
 					   int deref_size) = 0;
@@ -248,7 +248,7 @@ struct dwarf_expr_piece
     /* Used for DWARF_VALUE_IMPLICIT_POINTER.  */
     struct
     {
-      /* The referent DIE from DW_OP_GNU_implicit_pointer.  */
+      /* The referent DIE from DW_OP_implicit_pointer.  */
       sect_offset die;
       /* The byte offset into the resulting data.  */
       LONGEST offset;

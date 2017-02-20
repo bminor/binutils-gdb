@@ -1,3 +1,101 @@
+2017-02-20  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* NEWS: Revise powerpc register check.
+	* config/tc-ppc.c (ppc_optimize_expr, md_assemble): Make "invalid
+	register expression" a warning.
+
+2017-02-17  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ecoff.c (ecoff_directive_ent, add_procedure): Handle `.aent'.
+	* config/obj-ecoff.c (obj_pseudo_table): Add "aent" entry.
+	* config/obj-elf.c (ecoff_debug_pseudo_table): Likewise.
+	* testsuite/gas/mips/aent-2.d: New test.
+	* testsuite/gas/mips/aent-mdebug.d: New test.
+	* testsuite/gas/mips/aent-mdebug-2.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-02-15  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* testsuite/gas/aarch64/sve-sysreg.s,
+	testsuite/gas/aarch64/sve-sysreg.d,
+	testsuite/gas/aarch64/sve-sysreg-invalid.d,
+	testsuite/gas/aarch64/sve-sysreg-invalid.l: New tests.
+
+2017-02-15  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* doc/c-aarch64.texi: Fix sve entry.
+
+2017-02-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (md_convert_frag): Remove @pcl relocation
+	information from input expression.
+	(assemble_insn): Make sure pcrel is correctly set.
+	(arc_pcrel_adjust): Compensate for PCL rounding.
+	* testsuite/gas/arc/relax-add01.d: New file.
+	* testsuite/gas/arc/relax-add01.s: Likewise.
+	* testsuite/gas/arc/relax-add02.d: Likewise.
+	* testsuite/gas/arc/relax-add02.s: Likewise.
+	* testsuite/gas/arc/relax-add03.d: Likewise.
+	* testsuite/gas/arc/relax-add03.s: Likewise.
+	* testsuite/gas/arc/relax-add04.d: Likewise.
+	* testsuite/gas/arc/relax-add04.s: Likewise.
+	* testsuite/gas/arc/relax-ld01.d: Likewise.
+	* testsuite/gas/arc/relax-ld01.s: Likewise.
+	* testsuite/gas/arc/relax-ld02.d: Likewise.
+	* testsuite/gas/arc/relax-ld02.s: Likewise.
+	* testsuite/gas/arc/relax-mov01.d: Likewise.
+	* testsuite/gas/arc/relax-mov01.s: Likewise.
+	* testsuite/gas/arc/relax-mov02.d: Likewise.
+	* testsuite/gas/arc/relax-mov02.s: Likewise.
+	* testsuite/gas/arc/relax-mpy01.d: Likewise.
+	* testsuite/gas/arc/relax-mpy01.s: Likewise.
+	* testsuite/gas/arc/relax-sub01.d: Likewise.
+	* testsuite/gas/arc/relax-sub01.s: Likewise.
+	* testsuite/gas/arc/relax-sub02.d: Likewise.
+	* testsuite/gas/arc/relax-sub02.s: Likewise.
+	* testsuite/gas/arc/relax-sub03.d: Likewise.
+	* testsuite/gas/arc/relax-sub03.s: Likewise.
+	* testsuite/gas/arc/relax-sub04.d: Likewise.
+	* testsuite/gas/arc/relax-sub04.s: Likewise.
+
+2017-02-09  Vineet Gupta <vgupta@synopsys.com>
+
+	* testsuite/gas/arc/st.d: Update for 0xe having a name now
+
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	PR 21118
+	* NEWS: Mention powerpc register checks.
+	* config/tc-ppc.c (struct pd_reg): Make value a short.  Add flags.
+	(pre_defined_registers): Delete fpscr and pmr entries.  Set
+	register type in flags.
+	(cr_names): Set type in flags.
+	(reg_name_search): Return pointer to struct pd_reg rather than value.
+	(register_name): Adjust to suit.  Set X_md from flags.
+	(ppc_parse_name): Likewise.
+	(ppc_optimize_expr): New function.
+	(md_assemble): Verify expresion reg flags match operand.
+	* config/tc-ppc.h (md_optimize_expr): Define.
+	(ppc_optimize_expr): Declare.
+
+2017-02-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/cell.s: Correct invalid registers.
+	* testsuite/gas/ppc/vle-simple-1.s: Likewise.
+	* testsuite/gas/ppc/vle-simple-2.s: Likewise.
+
+2017-02-13  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (parse_ifimm_zero): Make prefix optional in unified
+	syntax.
+	* testsuite/gas/arm/vcmp-noprefix-imm.d: New file.
+	* testsuite/gas/arm/vcmp-noprefix-imm.s: New file.
+
+2017-02-10  Nicholas Piggin  <npiggin@gmail.com>
+
+	* testsuite/gas/ppc/power9.d <scv, rfscv>: New tests.
+
 2017-02-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* doc/as.texinfo (Overview): Select MIPS options for man page

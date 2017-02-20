@@ -148,6 +148,8 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_enum_btrace_format(X)	\
   target_debug_do_print (plongest (X))
+#define target_debug_print_enum_record_method(X)	\
+  target_debug_do_print (plongest (X))
 #define target_debug_print_const_struct_btrace_config_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_const_struct_btrace_target_info_p(X)	\

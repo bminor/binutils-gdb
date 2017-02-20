@@ -100,6 +100,7 @@ const struct extension_language_defn extension_language_python =
 #include "interps.h"
 #include "event-top.h"
 #include "py-ref.h"
+#include "py-event.h"
 
 /* True if Python has been successfully initialized, false
    otherwise.  */
@@ -273,7 +274,7 @@ eval_python_command (const char *command)
   d = PyModule_GetDict (m);
   if (d == NULL)
     return -1;
-  gdbpy_ref v (PyRun_StringFlags (command, Py_single_input, d, d, NULL));
+  gdbpy_ref<> v (PyRun_StringFlags (command, Py_single_input, d, d, NULL));
   if (v == NULL)
     return -1;
 
@@ -351,7 +352,7 @@ python_run_simple_file (FILE *file, const char *filename)
   /* Because we have a string for a filename, and are using Python to
      open the file, we need to expand any tilde in the path first.  */
   gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-  gdbpy_ref python_file (PyFile_FromString (full_path.get (), "r"));
+  gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), "r"));
   if (python_file == NULL)
     {
       gdbpy_print_stack ();
@@ -669,8 +670,8 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct symtab_and_line sal;
   char *arg = NULL;
   struct cleanup *cleanups;
-  gdbpy_ref result;
-  gdbpy_ref unparsed;
+  gdbpy_ref<> result;
+  gdbpy_ref<> unparsed;
   struct event_location *location = NULL;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
@@ -745,7 +746,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
       Py_INCREF (Py_None);
     }
 
-  gdbpy_ref return_result (PyTuple_New (2));
+  gdbpy_ref<> return_result (PyTuple_New (2));
   if (return_result == NULL)
     {
       do_cleanups (cleanups);
@@ -897,7 +898,7 @@ gdbpy_run_events (int error, gdb_client_data client_data)
 	gdbpy_event_list_end = &gdbpy_event_list;
 
       /* Ignore errors.  */
-      gdbpy_ref call_result (PyObject_CallObject (item->event, NULL));
+      gdbpy_ref<> call_result (PyObject_CallObject (item->event, NULL));
       if (call_result == NULL)
 	PyErr_Clear ();
 
@@ -969,11 +970,15 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
+  if (!evregpy_no_listeners_p (gdb_py_events.before_prompt)
+      && evpy_emit_event (NULL, gdb_py_events.before_prompt) < 0)
+    return EXT_LANG_RC_ERROR;
+
   if (gdb_python_module
       && PyObject_HasAttrString (gdb_python_module, "prompt_hook"))
     {
-      gdbpy_ref hook (PyObject_GetAttrString (gdb_python_module,
-					      "prompt_hook"));
+      gdbpy_ref<> hook (PyObject_GetAttrString (gdb_python_module,
+						"prompt_hook"));
       if (hook == NULL)
 	{
 	  gdbpy_print_stack ();
@@ -982,16 +987,16 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
 
       if (PyCallable_Check (hook.get ()))
 	{
-	  gdbpy_ref current_prompt (PyString_FromString (current_gdb_prompt));
+	  gdbpy_ref<> current_prompt (PyString_FromString (current_gdb_prompt));
 	  if (current_prompt == NULL)
 	    {
 	      gdbpy_print_stack ();
 	      return EXT_LANG_RC_ERROR;
 	    }
 
-	  gdbpy_ref result (PyObject_CallFunctionObjArgs (hook.get (),
-							  current_prompt.get (),
-							  NULL));
+	  gdbpy_ref<> result
+	    (PyObject_CallFunctionObjArgs (hook.get (), current_prompt.get (),
+					   NULL));
 	  if (result == NULL)
 	    {
 	      gdbpy_print_stack ();
@@ -1206,7 +1211,7 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 {
   struct program_space *ps;
 
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -1296,7 +1301,7 @@ gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
 {
   struct objfile *objf;
 
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -1327,15 +1332,15 @@ gdbpy_start_type_printers (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  gdbpy_ref type_module (PyImport_ImportModule ("gdb.types"));
+  gdbpy_ref<> type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
     {
       gdbpy_print_stack ();
       return;
     }
 
-  gdbpy_ref func (PyObject_GetAttrString (type_module.get (),
-					  "get_type_recognizers"));
+  gdbpy_ref<> func (PyObject_GetAttrString (type_module.get (),
+					    "get_type_recognizers"));
   if (func == NULL)
     {
       gdbpy_print_stack ();
@@ -1372,31 +1377,32 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  gdbpy_ref type_obj (type_to_type_object (type));
+  gdbpy_ref<> type_obj (type_to_type_object (type));
   if (type_obj == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref type_module (PyImport_ImportModule ("gdb.types"));
+  gdbpy_ref<> type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref func (PyObject_GetAttrString (type_module.get (),
-					  "apply_type_recognizers"));
+  gdbpy_ref<> func (PyObject_GetAttrString (type_module.get (),
+					    "apply_type_recognizers"));
   if (func == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref result_obj (PyObject_CallFunctionObjArgs (func.get (), printers_obj,
-						      type_obj.get (),
-						      (char *) NULL));
+  gdbpy_ref<> result_obj (PyObject_CallFunctionObjArgs (func.get (),
+							printers_obj,
+							type_obj.get (),
+							(char *) NULL));
   if (result_obj == NULL)
     {
       gdbpy_print_stack ();
@@ -1524,8 +1530,10 @@ finalize_python (void *ignore)
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_python;
 
-void
-_initialize_python (void)
+#ifdef HAVE_PYTHON
+
+static bool
+do_start_initialization ()
 {
   char *progname;
 #ifdef IS_PY3K
@@ -1535,6 +1543,168 @@ _initialize_python (void)
   wchar_t *progname_copy;
 #endif
 
+#ifdef WITH_PYTHON_PATH
+  /* Work around problem where python gets confused about where it is,
+     and then can't find its libraries, etc.
+     NOTE: Python assumes the following layout:
+     /foo/bin/python
+     /foo/lib/pythonX.Y/...
+     This must be done before calling Py_Initialize.  */
+  progname = concat (ldirname (python_libdir), SLASH_STRING, "bin",
+		     SLASH_STRING, "python", (char *) NULL);
+#ifdef IS_PY3K
+  oldloc = xstrdup (setlocale (LC_ALL, NULL));
+  setlocale (LC_ALL, "");
+  progsize = strlen (progname);
+  progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
+  if (!progname_copy)
+    {
+      xfree (oldloc);
+      fprintf (stderr, "out of memory\n");
+      return false;
+    }
+  count = mbstowcs (progname_copy, progname, progsize + 1);
+  if (count == (size_t) -1)
+    {
+      xfree (oldloc);
+      fprintf (stderr, "Could not convert python path to string\n");
+      return false;
+    }
+  setlocale (LC_ALL, oldloc);
+  xfree (oldloc);
+
+  /* Note that Py_SetProgramName expects the string it is passed to
+     remain alive for the duration of the program's execution, so
+     it is not freed after this call.  */
+  Py_SetProgramName (progname_copy);
+#else
+  Py_SetProgramName (progname);
+#endif
+#endif
+
+  Py_Initialize ();
+  PyEval_InitThreads ();
+
+#ifdef IS_PY3K
+  gdb_module = PyModule_Create (&python_GdbModuleDef);
+  /* Add _gdb module to the list of known built-in modules.  */
+  _PyImport_FixupBuiltin (gdb_module, "_gdb");
+#else
+  gdb_module = Py_InitModule ("_gdb", python_GdbMethods);
+#endif
+  if (gdb_module == NULL)
+    return false;
+
+  /* The casts to (char*) are for python 2.4.  */
+  if (PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version) < 0
+      || PyModule_AddStringConstant (gdb_module, "HOST_CONFIG",
+				     (char*) host_name) < 0
+      || PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG",
+				     (char*) target_name) < 0)
+    return false;
+
+  /* Add stream constants.  */
+  if (PyModule_AddIntConstant (gdb_module, "STDOUT", 0) < 0
+      || PyModule_AddIntConstant (gdb_module, "STDERR", 1) < 0
+      || PyModule_AddIntConstant (gdb_module, "STDLOG", 2) < 0)
+    return false;
+
+  gdbpy_gdb_error = PyErr_NewException ("gdb.error", PyExc_RuntimeError, NULL);
+  if (gdbpy_gdb_error == NULL
+      || gdb_pymodule_addobject (gdb_module, "error", gdbpy_gdb_error) < 0)
+    return false;
+
+  gdbpy_gdb_memory_error = PyErr_NewException ("gdb.MemoryError",
+					       gdbpy_gdb_error, NULL);
+  if (gdbpy_gdb_memory_error == NULL
+      || gdb_pymodule_addobject (gdb_module, "MemoryError",
+				 gdbpy_gdb_memory_error) < 0)
+    return false;
+
+  gdbpy_gdberror_exc = PyErr_NewException ("gdb.GdbError", NULL, NULL);
+  if (gdbpy_gdberror_exc == NULL
+      || gdb_pymodule_addobject (gdb_module, "GdbError",
+				 gdbpy_gdberror_exc) < 0)
+    return false;
+
+  gdbpy_initialize_gdb_readline ();
+
+  if (gdbpy_initialize_auto_load () < 0
+      || gdbpy_initialize_values () < 0
+      || gdbpy_initialize_frames () < 0
+      || gdbpy_initialize_commands () < 0
+      || gdbpy_initialize_record () < 0
+      || gdbpy_initialize_btrace () < 0
+      || gdbpy_initialize_symbols () < 0
+      || gdbpy_initialize_symtabs () < 0
+      || gdbpy_initialize_blocks () < 0
+      || gdbpy_initialize_functions () < 0
+      || gdbpy_initialize_parameters () < 0
+      || gdbpy_initialize_types () < 0
+      || gdbpy_initialize_pspace () < 0
+      || gdbpy_initialize_objfile () < 0
+      || gdbpy_initialize_breakpoints () < 0
+      || gdbpy_initialize_finishbreakpoints () < 0
+      || gdbpy_initialize_lazy_string () < 0
+      || gdbpy_initialize_linetable () < 0
+      || gdbpy_initialize_thread () < 0
+      || gdbpy_initialize_inferior () < 0
+      || gdbpy_initialize_events () < 0
+      || gdbpy_initialize_eventregistry () < 0
+      || gdbpy_initialize_py_events () < 0
+      || gdbpy_initialize_event () < 0
+      || gdbpy_initialize_stop_event () < 0
+      || gdbpy_initialize_signal_event () < 0
+      || gdbpy_initialize_breakpoint_event () < 0
+      || gdbpy_initialize_continue_event () < 0
+      || gdbpy_initialize_inferior_call_pre_event () < 0
+      || gdbpy_initialize_inferior_call_post_event () < 0
+      || gdbpy_initialize_register_changed_event () < 0
+      || gdbpy_initialize_memory_changed_event () < 0
+      || gdbpy_initialize_exited_event () < 0
+      || gdbpy_initialize_thread_event () < 0
+      || gdbpy_initialize_new_objfile_event ()  < 0
+      || gdbpy_initialize_clear_objfiles_event ()  < 0
+      || gdbpy_initialize_arch () < 0
+      || gdbpy_initialize_xmethods () < 0
+      || gdbpy_initialize_unwind () < 0)
+    return false;
+
+  gdbpy_to_string_cst = PyString_FromString ("to_string");
+  if (gdbpy_to_string_cst == NULL)
+    return false;
+  gdbpy_children_cst = PyString_FromString ("children");
+  if (gdbpy_children_cst == NULL)
+    return false;
+  gdbpy_display_hint_cst = PyString_FromString ("display_hint");
+  if (gdbpy_display_hint_cst == NULL)
+    return false;
+  gdbpy_doc_cst = PyString_FromString ("__doc__");
+  if (gdbpy_doc_cst == NULL)
+    return false;
+  gdbpy_enabled_cst = PyString_FromString ("enabled");
+  if (gdbpy_enabled_cst == NULL)
+    return false;
+  gdbpy_value_cst = PyString_FromString ("value");
+  if (gdbpy_value_cst == NULL)
+    return false;
+
+  /* Release the GIL while gdb runs.  */
+  PyThreadState_Swap (NULL);
+  PyEval_ReleaseLock ();
+
+  make_final_cleanup (finalize_python, NULL);
+
+  /* Only set this when initialization has succeeded.  */
+  gdb_python_initialized = 1;
+  return true;
+}
+
+#endif /* HAVE_PYTHON */
+
+void
+_initialize_python (void)
+{
   add_com ("python-interactive", class_obscure,
 	   python_interactive_command,
 #ifdef HAVE_PYTHON
@@ -1606,164 +1776,8 @@ message == an error message without a stack will be printed."),
 			&user_show_python_list);
 
 #ifdef HAVE_PYTHON
-#ifdef WITH_PYTHON_PATH
-  /* Work around problem where python gets confused about where it is,
-     and then can't find its libraries, etc.
-     NOTE: Python assumes the following layout:
-     /foo/bin/python
-     /foo/lib/pythonX.Y/...
-     This must be done before calling Py_Initialize.  */
-  progname = concat (ldirname (python_libdir), SLASH_STRING, "bin",
-		     SLASH_STRING, "python", (char *) NULL);
-#ifdef IS_PY3K
-  oldloc = xstrdup (setlocale (LC_ALL, NULL));
-  setlocale (LC_ALL, "");
-  progsize = strlen (progname);
-  progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
-  if (!progname_copy)
-    {
-      xfree (oldloc);
-      fprintf (stderr, "out of memory\n");
-      return;
-    }
-  count = mbstowcs (progname_copy, progname, progsize + 1);
-  if (count == (size_t) -1)
-    {
-      xfree (oldloc);
-      fprintf (stderr, "Could not convert python path to string\n");
-      return;
-    }
-  setlocale (LC_ALL, oldloc);
-  xfree (oldloc);
-
-  /* Note that Py_SetProgramName expects the string it is passed to
-     remain alive for the duration of the program's execution, so
-     it is not freed after this call.  */
-  Py_SetProgramName (progname_copy);
-#else
-  Py_SetProgramName (progname);
-#endif
-#endif
-
-  Py_Initialize ();
-  PyEval_InitThreads ();
-
-#ifdef IS_PY3K
-  gdb_module = PyModule_Create (&python_GdbModuleDef);
-  /* Add _gdb module to the list of known built-in modules.  */
-  _PyImport_FixupBuiltin (gdb_module, "_gdb");
-#else
-  gdb_module = Py_InitModule ("_gdb", python_GdbMethods);
-#endif
-  if (gdb_module == NULL)
-    goto fail;
-
-  /* The casts to (char*) are for python 2.4.  */
-  if (PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version) < 0
-      || PyModule_AddStringConstant (gdb_module, "HOST_CONFIG",
-				     (char*) host_name) < 0
-      || PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG",
-				     (char*) target_name) < 0)
-    goto fail;
-
-  /* Add stream constants.  */
-  if (PyModule_AddIntConstant (gdb_module, "STDOUT", 0) < 0
-      || PyModule_AddIntConstant (gdb_module, "STDERR", 1) < 0
-      || PyModule_AddIntConstant (gdb_module, "STDLOG", 2) < 0)
-    goto fail;
-
-  gdbpy_gdb_error = PyErr_NewException ("gdb.error", PyExc_RuntimeError, NULL);
-  if (gdbpy_gdb_error == NULL
-      || gdb_pymodule_addobject (gdb_module, "error", gdbpy_gdb_error) < 0)
-    goto fail;
-
-  gdbpy_gdb_memory_error = PyErr_NewException ("gdb.MemoryError",
-					       gdbpy_gdb_error, NULL);
-  if (gdbpy_gdb_memory_error == NULL
-      || gdb_pymodule_addobject (gdb_module, "MemoryError",
-				 gdbpy_gdb_memory_error) < 0)
-    goto fail;
-
-  gdbpy_gdberror_exc = PyErr_NewException ("gdb.GdbError", NULL, NULL);
-  if (gdbpy_gdberror_exc == NULL
-      || gdb_pymodule_addobject (gdb_module, "GdbError",
-				 gdbpy_gdberror_exc) < 0)
-    goto fail;
-
-  gdbpy_initialize_gdb_readline ();
-
-  if (gdbpy_initialize_auto_load () < 0
-      || gdbpy_initialize_values () < 0
-      || gdbpy_initialize_frames () < 0
-      || gdbpy_initialize_commands () < 0
-      || gdbpy_initialize_symbols () < 0
-      || gdbpy_initialize_symtabs () < 0
-      || gdbpy_initialize_blocks () < 0
-      || gdbpy_initialize_functions () < 0
-      || gdbpy_initialize_parameters () < 0
-      || gdbpy_initialize_types () < 0
-      || gdbpy_initialize_pspace () < 0
-      || gdbpy_initialize_objfile () < 0
-      || gdbpy_initialize_breakpoints () < 0
-      || gdbpy_initialize_finishbreakpoints () < 0
-      || gdbpy_initialize_lazy_string () < 0
-      || gdbpy_initialize_linetable () < 0
-      || gdbpy_initialize_thread () < 0
-      || gdbpy_initialize_inferior () < 0
-      || gdbpy_initialize_events () < 0
-      || gdbpy_initialize_eventregistry () < 0
-      || gdbpy_initialize_py_events () < 0
-      || gdbpy_initialize_event () < 0
-      || gdbpy_initialize_stop_event () < 0
-      || gdbpy_initialize_signal_event () < 0
-      || gdbpy_initialize_breakpoint_event () < 0
-      || gdbpy_initialize_continue_event () < 0
-      || gdbpy_initialize_inferior_call_pre_event () < 0
-      || gdbpy_initialize_inferior_call_post_event () < 0
-      || gdbpy_initialize_register_changed_event () < 0
-      || gdbpy_initialize_memory_changed_event () < 0
-      || gdbpy_initialize_exited_event () < 0
-      || gdbpy_initialize_thread_event () < 0
-      || gdbpy_initialize_new_objfile_event ()  < 0
-      || gdbpy_initialize_clear_objfiles_event ()  < 0
-      || gdbpy_initialize_arch () < 0
-      || gdbpy_initialize_xmethods () < 0
-      || gdbpy_initialize_unwind () < 0)
-    goto fail;
-
-  gdbpy_to_string_cst = PyString_FromString ("to_string");
-  if (gdbpy_to_string_cst == NULL)
-    goto fail;
-  gdbpy_children_cst = PyString_FromString ("children");
-  if (gdbpy_children_cst == NULL)
-    goto fail;
-  gdbpy_display_hint_cst = PyString_FromString ("display_hint");
-  if (gdbpy_display_hint_cst == NULL)
-    goto fail;
-  gdbpy_doc_cst = PyString_FromString ("__doc__");
-  if (gdbpy_doc_cst == NULL)
-    goto fail;
-  gdbpy_enabled_cst = PyString_FromString ("enabled");
-  if (gdbpy_enabled_cst == NULL)
-    goto fail;
-  gdbpy_value_cst = PyString_FromString ("value");
-  if (gdbpy_value_cst == NULL)
-    goto fail;
-
-  /* Release the GIL while gdb runs.  */
-  PyThreadState_Swap (NULL);
-  PyEval_ReleaseLock ();
-
-  make_final_cleanup (finalize_python, NULL);
-
-  gdb_python_initialized = 1;
-  return;
-
- fail:
-  gdbpy_print_stack ();
-  /* Do not set 'gdb_python_initialized'.  */
-  return;
-
+  if (!do_start_initialization () && PyErr_Occurred ())
+    gdbpy_print_stack ();
 #endif /* HAVE_PYTHON */
 }
 
@@ -1798,7 +1812,7 @@ do_finish_initialization (const struct extension_language_defn *extlang)
     }
   if (sys_path && PyList_Check (sys_path))
     {
-      gdbpy_ref pythondir (PyString_FromString (gdb_pythondir.c_str ()));
+      gdbpy_ref<> pythondir (PyString_FromString (gdb_pythondir.c_str ()));
       if (pythondir == NULL || PyList_Insert (sys_path, 0, pythondir.get ()))
 	return false;
     }
@@ -1902,6 +1916,18 @@ Return the selected frame object." },
   { "frame_stop_reason_string", gdbpy_frame_stop_reason_string, METH_VARARGS,
     "stop_reason_string (Integer) -> String.\n\
 Return a string explaining unwind stop reason." },
+
+  { "start_recording", gdbpy_start_recording, METH_VARARGS,
+    "start_recording ([method] [, format]) -> gdb.Record.\n\
+Start recording with the given method.  If no method is given, will fall back\n\
+to the system default method.  If no format is given, will fall back to the\n\
+default format for the given method."},
+  { "current_recording", gdbpy_current_recording, METH_NOARGS,
+    "current_recording () -> gdb.Record.\n\
+Return current recording object." },
+  { "stop_recording", gdbpy_stop_recording, METH_NOARGS,
+    "stop_recording () -> None.\n\
+Stop current recording." },
 
   { "lookup_type", (PyCFunction) gdbpy_lookup_type,
     METH_VARARGS | METH_KEYWORDS,

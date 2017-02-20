@@ -7,6 +7,14 @@ set|show compile-gcc
 
 *** Changes since GDB 7.12
 
+* GDB now supports access to the PKU register on GNU/Linux. The register is
+  added by the Memory Protection Keys for Userspace feature which will be
+  available in future Intel CPUs.
+
+* Python Scripting
+
+  ** New functions to start, stop and access a running btrace recording.
+
 * GDB now supports recording and replaying rdrand and rdseed Intel 64
   instructions.
 
@@ -55,6 +63,9 @@ set|show compile-gcc
    end
 
 * Target descriptions can now describe registers for sparc32 and sparc64.
+
+* GDB now supports DWARF version 5 (debug information format).
+  Its .debug_names index is not yet supported.
 
 * New native configurations
 

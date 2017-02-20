@@ -91,7 +91,6 @@ struct interrupt_def idefs[] = {
 #endif
 };
 
-#define TableSize(X) (sizeof X / sizeof(X[0]))
 #define CYCLES_MAX ((((signed64) 1) << 62) - 1)
 
 enum
@@ -290,7 +289,7 @@ interrupts_update_pending (struct interrupts *interrupts)
   set_mask = 0;
   ioregs = &interrupts->cpu->ios[0];
   
-  for (i = 0; i < TableSize(idefs); i++)
+  for (i = 0; i < ARRAY_SIZE (idefs); i++)
     {
       struct interrupt_def *idef = &idefs[i];
       uint8 data;

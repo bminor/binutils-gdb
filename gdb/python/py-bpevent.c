@@ -30,7 +30,7 @@ extern PyTypeObject breakpoint_event_object_type
 PyObject *
 create_breakpoint_event_object (PyObject *breakpoint_list, PyObject *first_bp)
 {
-  gdbpy_ref breakpoint_event_obj
+  gdbpy_ref<> breakpoint_event_obj
     (create_stop_event_object (&breakpoint_event_object_type));
 
   if (breakpoint_event_obj == NULL)

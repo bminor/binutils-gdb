@@ -256,7 +256,7 @@ find_thread_object (ptid_t ptid)
   if (pid == 0)
     return NULL;
 
-  gdbpy_ref inf_obj (find_inferior_object (pid));
+  gdbpy_ref<> inf_obj (find_inferior_object (pid));
   if (inf_obj == NULL)
     return NULL;
 
@@ -300,7 +300,6 @@ add_thread_object (struct thread_info *tp)
 static void
 delete_thread_object (struct thread_info *tp, int ignore)
 {
-  inferior_object *inf_obj;
   struct threadlist_entry **entry, *tmp;
 
   if (!gdb_python_initialized)
@@ -308,9 +307,9 @@ delete_thread_object (struct thread_info *tp, int ignore)
 
   gdbpy_enter enter_py (python_gdbarch, python_language);
 
-  inf_obj
-    = (inferior_object *) find_inferior_object (ptid_get_pid (tp->ptid));
-  if (!inf_obj)
+  gdbpy_ref<inferior_object> inf_obj
+    ((inferior_object *) find_inferior_object (ptid_get_pid (tp->ptid)));
+  if (inf_obj == NULL)
     return;
 
   /* Find thread entry in its inferior's thread_list.  */
@@ -320,10 +319,7 @@ delete_thread_object (struct thread_info *tp, int ignore)
       break;
 
   if (!*entry)
-    {
-      Py_DECREF (inf_obj);
-      return;
-    }
+    return;
 
   tmp = *entry;
   tmp->thread_obj->thread = NULL;
@@ -332,7 +328,6 @@ delete_thread_object (struct thread_info *tp, int ignore)
   inf_obj->nthreads--;
 
   Py_DECREF (tmp->thread_obj);
-  Py_DECREF (inf_obj);
   xfree (tmp);
 }
 
@@ -405,7 +400,7 @@ static int
 build_inferior_list (struct inferior *inf, void *arg)
 {
   PyObject *list = (PyObject *) arg;
-  gdbpy_ref inferior (inferior_to_inferior_object (inf));
+  gdbpy_ref<> inferior (inferior_to_inferior_object (inf));
 
   if (inferior  == NULL)
     return 0;
@@ -418,7 +413,7 @@ build_inferior_list (struct inferior *inf, void *arg)
 PyObject *
 gdbpy_inferiors (PyObject *unused, PyObject *unused2)
 {
-  gdbpy_ref list (PyList_New (0));
+  gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
@@ -439,7 +434,6 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   CORE_ADDR addr, length;
   gdb_byte *buffer = NULL;
-  membuf_object *membuf_obj;
   PyObject *addr_obj, *length_obj, *result;
   static char *keywords[] = { "address", "length", NULL };
 
@@ -464,7 +458,8 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
     }
   END_CATCH
 
-  membuf_obj = PyObject_New (membuf_object, &membuf_object_type);
+  gdbpy_ref<membuf_object> membuf_obj (PyObject_New (membuf_object,
+						     &membuf_object_type));
   if (membuf_obj == NULL)
     {
       xfree (buffer);
@@ -476,12 +471,11 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   membuf_obj->length = length;
 
 #ifdef IS_PY3K
-  result = PyMemoryView_FromObject ((PyObject *) membuf_obj);
+  result = PyMemoryView_FromObject ((PyObject *) membuf_obj.get ());
 #else
-  result = PyBuffer_FromReadWriteObject ((PyObject *) membuf_obj, 0,
+  result = PyBuffer_FromReadWriteObject ((PyObject *) membuf_obj.get (), 0,
 					 Py_END_OF_BUFFER);
 #endif
-  Py_DECREF (membuf_obj);
 
   return result;
 }
@@ -769,7 +763,7 @@ infpy_dealloc (PyObject *obj)
 static void
 py_free_inferior (struct inferior *inf, void *datum)
 {
-  inferior_object *inf_obj = (inferior_object *) datum;
+  gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
   struct threadlist_entry *th_entry, *th_tmp;
 
   if (!gdb_python_initialized)
@@ -790,8 +784,6 @@ py_free_inferior (struct inferior *inf, void *datum)
     }
 
   inf_obj->nthreads = 0;
-
-  Py_DECREF ((PyObject *) inf_obj);
 }
 
 /* Implementation of gdb.selected_inferior() -> gdb.Inferior.

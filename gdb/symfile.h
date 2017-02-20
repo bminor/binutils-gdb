@@ -600,10 +600,13 @@ struct dwarf2_debug_sections {
   struct dwarf2_section_names abbrev;
   struct dwarf2_section_names line;
   struct dwarf2_section_names loc;
+  struct dwarf2_section_names loclists;
   struct dwarf2_section_names macinfo;
   struct dwarf2_section_names macro;
   struct dwarf2_section_names str;
+  struct dwarf2_section_names line_str;
   struct dwarf2_section_names ranges;
+  struct dwarf2_section_names rnglists;
   struct dwarf2_section_names types;
   struct dwarf2_section_names addr;
   struct dwarf2_section_names frame;

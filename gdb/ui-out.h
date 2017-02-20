@@ -187,4 +187,37 @@ class ui_out
   ui_out_level *current_level () const;
 };
 
+/* This is similar to make_cleanup_ui_out_tuple_begin_end and
+   make_cleanup_ui_out_list_begin_end, but written as an RAII template
+   class.  It takes the ui_out_type as a template parameter.  Normally
+   this is used via the typedefs ui_out_emit_tuple and
+   ui_out_emit_list.  */
+template<ui_out_type Type>
+class ui_out_emit_type
+{
+public:
+
+  ui_out_emit_type (struct ui_out *uiout, const char *id)
+    : m_uiout (uiout)
+  {
+    uiout->begin (Type, id);
+  }
+
+  ~ui_out_emit_type ()
+  {
+    m_uiout->end (Type);
+  }
+
+  ui_out_emit_type (const ui_out_emit_type<Type> &) = delete;
+  ui_out_emit_type<Type> &operator= (const ui_out_emit_type<Type> &)
+      = delete;
+
+private:
+
+  struct ui_out *m_uiout;
+};
+
+typedef ui_out_emit_type<ui_out_type_tuple> ui_out_emit_tuple;
+typedef ui_out_emit_type<ui_out_type_list> ui_out_emit_list;
+
 #endif /* UI_OUT_H */

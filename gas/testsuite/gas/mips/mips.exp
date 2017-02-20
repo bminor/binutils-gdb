@@ -1191,7 +1191,11 @@ if { [istarget mips*-*-vxworks*] } {
 					    !micromips]
     }
 
-    run_dump_test_arches "aent"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "aent"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "aent-2"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "aent-mdebug"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "aent-mdebug-2" \
+					[mips_arch_list_matching mips1]
 
     run_dump_test_arches "loc-swap"	[mips_arch_list_all]
     run_dump_test_arches "loc-swap-dis"	[mips_arch_list_all]

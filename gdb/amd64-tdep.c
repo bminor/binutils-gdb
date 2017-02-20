@@ -46,11 +46,12 @@
 #include "features/i386/amd64-avx.c"
 #include "features/i386/amd64-mpx.c"
 #include "features/i386/amd64-avx-mpx.c"
-#include "features/i386/amd64-avx512.c"
+#include "features/i386/amd64-avx-avx512.c"
+#include "features/i386/amd64-avx-mpx-avx512-pku.c"
 
 #include "features/i386/x32.c"
 #include "features/i386/x32-avx.c"
-#include "features/i386/x32-avx512.c"
+#include "features/i386/x32-avx-avx512.c"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -154,6 +155,10 @@ static const char *amd64_xmm_avx512_names[] = {
     "xmm20",  "xmm21",  "xmm22",  "xmm23",
     "xmm24",  "xmm25",  "xmm26",  "xmm27",
     "xmm28",  "xmm29",  "xmm30",  "xmm31"
+};
+
+static const char *amd64_pkeys_names[] = {
+    "pkru"
 };
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
@@ -3060,6 +3065,13 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 		       AMD64_GSBASE_REGNUM, "gs_base");
     }
 
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.pkeys") != NULL)
+    {
+      tdep->pkeys_register_names = amd64_pkeys_names;
+      tdep->pkru_regnum = AMD64_PKRU_REGNUM;
+      tdep->num_pkeys_regs = 1;
+    }
+
   tdep->num_byte_regs = 20;
   tdep->num_word_regs = 16;
   tdep->num_dword_regs = 16;
@@ -3202,9 +3214,10 @@ amd64_target_description (uint64_t xcr0)
 {
   switch (xcr0 & X86_XSTATE_ALL_MASK)
     {
-    case X86_XSTATE_MPX_AVX512_MASK:
-    case X86_XSTATE_AVX512_MASK:
-      return tdesc_amd64_avx512;
+    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+      return tdesc_amd64_avx_mpx_avx512_pku;
+    case X86_XSTATE_AVX_AVX512_MASK:
+      return tdesc_amd64_avx_avx512;
     case X86_XSTATE_MPX_MASK:
       return tdesc_amd64_mpx;
     case X86_XSTATE_AVX_MPX_MASK:
@@ -3226,11 +3239,12 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64_avx ();
   initialize_tdesc_amd64_mpx ();
   initialize_tdesc_amd64_avx_mpx ();
-  initialize_tdesc_amd64_avx512 ();
+  initialize_tdesc_amd64_avx_avx512 ();
+  initialize_tdesc_amd64_avx_mpx_avx512_pku ();
 
   initialize_tdesc_x32 ();
   initialize_tdesc_x32_avx ();
-  initialize_tdesc_x32_avx512 ();
+  initialize_tdesc_x32_avx_avx512 ();
 }
 
 

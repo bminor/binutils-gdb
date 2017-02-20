@@ -80,8 +80,15 @@ alpha*-*-*vms*)		targ_emul=alphavms
 arc*-*-elf*)		targ_emul=arcelf
 			targ_extra_emuls="arcelf_prof arclinux arclinux_nps arclinux_prof arcv2elf arcv2elfx"
             		;;
-arc*-*-linux*)		targ_emul=arclinux
-			targ_extra_emuls="arclinux_nps arclinux_prof arcelf arcelf_prof arcv2elf arcv2elfx"
+arc*-*-linux*)		case "${with_cpu}" in
+			nps400)	targ_emul=arclinux_nps
+				targ_extra_emuls=arclinux
+				;;
+			*)	targ_emul=arclinux
+				targ_extra_emuls=arclinux_nps
+				;;
+			esac
+			targ_extra_emuls="${targ_extra_emuls} arclinux_prof arcelf arcelf_prof arcv2elf arcv2elfx"
 			;;
 arm-epoc-pe)		targ_emul=arm_epoc_pe ;	targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm*-*-cegcc*)		targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o"

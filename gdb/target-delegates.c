@@ -3579,6 +3579,35 @@ debug_btrace_conf (struct target_ops *self, const struct btrace_target_info *arg
   return result;
 }
 
+static enum record_method
+delegate_record_method (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  return self->to_record_method (self, arg1);
+}
+
+static enum record_method
+tdefault_record_method (struct target_ops *self, ptid_t arg1)
+{
+  return RECORD_METHOD_NONE;
+}
+
+static enum record_method
+debug_record_method (struct target_ops *self, ptid_t arg1)
+{
+  enum record_method result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_method (...)\n", debug_target.to_shortname);
+  result = debug_target.to_record_method (&debug_target, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_method (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_enum_record_method (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
 static void
 delegate_stop_recording (struct target_ops *self)
 {
@@ -4386,6 +4415,8 @@ install_delegators (struct target_ops *ops)
     ops->to_read_btrace = delegate_read_btrace;
   if (ops->to_btrace_conf == NULL)
     ops->to_btrace_conf = delegate_btrace_conf;
+  if (ops->to_record_method == NULL)
+    ops->to_record_method = delegate_record_method;
   if (ops->to_stop_recording == NULL)
     ops->to_stop_recording = delegate_stop_recording;
   if (ops->to_info_record == NULL)
@@ -4565,6 +4596,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_teardown_btrace = tdefault_teardown_btrace;
   ops->to_read_btrace = tdefault_read_btrace;
   ops->to_btrace_conf = tdefault_btrace_conf;
+  ops->to_record_method = tdefault_record_method;
   ops->to_stop_recording = tdefault_stop_recording;
   ops->to_info_record = tdefault_info_record;
   ops->to_save_record = tdefault_save_record;
@@ -4723,6 +4755,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_teardown_btrace = debug_teardown_btrace;
   ops->to_read_btrace = debug_read_btrace;
   ops->to_btrace_conf = debug_btrace_conf;
+  ops->to_record_method = debug_record_method;
   ops->to_stop_recording = debug_stop_recording;
   ops->to_info_record = debug_info_record;
   ops->to_save_record = debug_save_record;

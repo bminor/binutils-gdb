@@ -1,6 +1,6 @@
 /* Python reference-holding class
 
-   Copyright (C) 2016 Free Software Foundation, Inc.
+   Copyright (C) 2016-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,20 +23,23 @@
 #include "common/gdb_ref_ptr.h"
 
 /* A policy class for gdb::ref_ptr for Python reference counting.  */
+template<typename T>
 struct gdbpy_ref_policy
 {
-  static void incref (PyObject *ptr)
+  static void incref (T *ptr)
   {
     Py_INCREF (ptr);
   }
 
-  static void decref (PyObject *ptr)
+  static void decref (T *ptr)
   {
     Py_DECREF (ptr);
   }
 };
 
-/* A gdb::ref_ptr that has been specialized for Python objects.  */
-typedef gdb::ref_ptr<PyObject, gdbpy_ref_policy> gdbpy_ref;
+/* A gdb::ref_ptr that has been specialized for Python objects or
+   their "subclasses".  */
+template<typename T = PyObject> using gdbpy_ref
+  = gdb::ref_ptr<T, gdbpy_ref_policy<T>>;
 
 #endif /* GDB_PYTHON_REF_H */

@@ -1,3 +1,29 @@
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Print Settings, Tail Call Frames): Rename DW_OP_GNU_*,
+	DW_TAG_GNU_* and DW_AT_GNU_*.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recordings In Python): New section.
+
+2017-02-14  Tom Tromey  <tom@tromey.com>
+
+	PR python/13598:
+	* python.texi (Events In Python): Document events.before_prompt.
+
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (Target Commands): Document the optional offset
+	argument for the load command.
+
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	PR gdb/21122
+	* gdb.texinfo (Breakpoints): Reword documentation to speak in terms of
+	space-separated breakpoint lists.  Also add a missing @table command
+	and @cindex for breakpoint lists.
+
 2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
 
 	PR tdep/20936

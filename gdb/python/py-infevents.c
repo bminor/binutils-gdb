@@ -37,7 +37,7 @@ static PyObject *
 create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
 				   CORE_ADDR addr)
 {
-  gdbpy_ref event;
+  gdbpy_ref<> event;
   int failed;
 
   switch (flag)
@@ -52,14 +52,14 @@ create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
       gdb_assert_not_reached ("invalid inferior_call_kind");
     }
 
-  gdbpy_ref ptid_obj (gdbpy_create_ptid_object (ptid));
+  gdbpy_ref<> ptid_obj (gdbpy_create_ptid_object (ptid));
   if (ptid_obj == NULL)
     return NULL;
 
   if (evpy_add_attribute (event.get (), "ptid", ptid_obj.get ()) < 0)
     return NULL;
 
-  gdbpy_ref addr_obj (PyLong_FromLongLong (addr));
+  gdbpy_ref<> addr_obj (PyLong_FromLongLong (addr));
   if (addr_obj == NULL)
     return NULL;
 
@@ -76,18 +76,18 @@ static PyObject *
 create_register_changed_event_object (struct frame_info *frame, 
 				      int regnum)
 {
-  gdbpy_ref event (create_event_object (&register_changed_event_object_type));
+  gdbpy_ref<> event (create_event_object (&register_changed_event_object_type));
   if (event == NULL)
     return NULL;
 
-  gdbpy_ref frame_obj (frame_info_to_frame_object (frame));
+  gdbpy_ref<> frame_obj (frame_info_to_frame_object (frame));
   if (frame_obj == NULL)
     return NULL;
 
   if (evpy_add_attribute (event.get (), "frame", frame_obj.get ()) < 0)
     return NULL;
 
-  gdbpy_ref regnum_obj (PyLong_FromLongLong (regnum));
+  gdbpy_ref<> regnum_obj (PyLong_FromLongLong (regnum));
   if (regnum_obj == NULL)
     return NULL;
 
@@ -103,19 +103,19 @@ create_register_changed_event_object (struct frame_info *frame,
 static PyObject *
 create_memory_changed_event_object (CORE_ADDR addr, ssize_t len)
 {
-  gdbpy_ref event (create_event_object (&memory_changed_event_object_type));
+  gdbpy_ref<> event (create_event_object (&memory_changed_event_object_type));
 
   if (event == NULL)
     return NULL;
 
-  gdbpy_ref addr_obj (PyLong_FromLongLong (addr));
+  gdbpy_ref<> addr_obj (PyLong_FromLongLong (addr));
   if (addr_obj == NULL)
     return NULL;
 
   if (evpy_add_attribute (event.get (), "address", addr_obj.get ()) < 0)
     return NULL;
 
-  gdbpy_ref len_obj (PyLong_FromLong (len));
+  gdbpy_ref<> len_obj (PyLong_FromLong (len));
   if (len_obj == NULL)
     return NULL;
 
@@ -137,7 +137,7 @@ emit_inferior_call_event (inferior_call_kind flag, ptid_t thread,
   if (evregpy_no_listeners_p (gdb_py_events.inferior_call))
     return 0;
 
-  gdbpy_ref event (create_inferior_call_event_object (flag, thread, addr));
+  gdbpy_ref<> event (create_inferior_call_event_object (flag, thread, addr));
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.inferior_call);
   return -1;
@@ -152,7 +152,7 @@ emit_memory_changed_event (CORE_ADDR addr, ssize_t len)
   if (evregpy_no_listeners_p (gdb_py_events.memory_changed))
     return 0;
 
-  gdbpy_ref event (create_memory_changed_event_object (addr, len));
+  gdbpy_ref<> event (create_memory_changed_event_object (addr, len));
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.memory_changed);
   return -1;
@@ -167,7 +167,7 @@ emit_register_changed_event (struct frame_info* frame, int regnum)
   if (evregpy_no_listeners_p (gdb_py_events.register_changed))
     return 0;
 
-  gdbpy_ref event (create_register_changed_event_object (frame, regnum));
+  gdbpy_ref<> event (create_register_changed_event_object (frame, regnum));
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.register_changed);
   return -1;

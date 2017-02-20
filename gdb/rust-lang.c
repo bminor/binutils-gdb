@@ -124,7 +124,6 @@ rust_get_disr_info (struct type *type, const gdb_byte *valaddr,
   struct disr_info ret;
   struct type *disr_type;
   struct value_print_options opts;
-  struct cleanup *cleanup;
   const char *name_segment;
 
   get_no_prettyformat_print_options (&opts);

@@ -101,10 +101,8 @@ responsibility among the other maintainers.
   MEP		   Dave Brolley <brolley@redhat.com>
   METAG            Markos Chandras <markos.chandras@imgtec.com>
   MICROBLAZE	   Michael Eager <eager@eagercon.com>
-  MIPS		   Eric Christopher <echristo@apple.com>
   MIPS		   Maciej W. Rozycki <macro@imgtec.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
-  MN10300	   Eric Christopher <echristo@apple.com>
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
   Moxie		   Anthony Green <green@moxielogic.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
@@ -155,6 +153,7 @@ moved on to other things.  Our thanks for all their hard work
 goes with them.
 
   Paul Brook
+  Eric Christopher
   Mei Ligang
   Mark Mitchell
   Bernd Schmidt

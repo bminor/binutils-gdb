@@ -361,7 +361,7 @@ class dwarf_expr_executor : public dwarf_expr_context
 				   union call_site_parameter_u kind_u,
 				   int deref_size) OVERRIDE
   {
-    invalid ("DW_OP_GNU_entry_value");
+    invalid ("DW_OP_entry_value");
   }
 
   CORE_ADDR get_object_address () OVERRIDE

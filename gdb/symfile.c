@@ -3927,7 +3927,10 @@ that lies within the boundaries of this symbol file in memory."),
   c = add_cmd ("load", class_files, load_command, _("\
 Dynamically load FILE into the running program, and record its symbols\n\
 for access from GDB.\n\
-A load OFFSET may also be given."), &cmdlist);
+An optional load OFFSET may also be given as a literal address.\n\
+When OFFSET is provided, FILE must also be provided.  FILE can be provided\n\
+on its own.\n\
+Usage: load [FILE] [OFFSET]"), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_prefix_cmd ("overlay", class_support, overlay_command,

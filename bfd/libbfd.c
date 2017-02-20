@@ -927,10 +927,10 @@ bfd_generic_is_local_label_name (bfd *abfd, const char *name)
    old routines.  */
 
 void
-warn_deprecated (const char *what,
-		 const char *file,
-		 int line,
-		 const char *func)
+_bfd_warn_deprecated (const char *what,
+		      const char *file,
+		      int line,
+		      const char *func)
 {
   /* Poor man's tracking of functions we've already warned about.  */
   static size_t mask = 0;
@@ -954,9 +954,9 @@ warn_deprecated (const char *what,
 /* Helper function for reading uleb128 encoded data.  */
 
 bfd_vma
-read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
-		      bfd_byte *buf,
-		      unsigned int *bytes_read_ptr)
+_bfd_read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
+			   bfd_byte *buf,
+			   unsigned int *bytes_read_ptr)
 {
   bfd_vma result;
   unsigned int num_read;
@@ -985,11 +985,11 @@ read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
    No bytes will be read at address END or beyond.  */
 
 bfd_vma
-safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
-		  bfd_byte *data,
-		  unsigned int *length_return,
-		  bfd_boolean sign,
-		  const bfd_byte * const end)
+_bfd_safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
+		       bfd_byte *data,
+		       unsigned int *length_return,
+		       bfd_boolean sign,
+		       const bfd_byte * const end)
 {
   bfd_vma result = 0;
   unsigned int num_read = 0;
@@ -1021,9 +1021,9 @@ safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
 /* Helper function for reading sleb128 encoded data.  */
 
 bfd_signed_vma
-read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
-		    bfd_byte *buf,
-		    unsigned int *bytes_read_ptr)
+_bfd_read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
+			 bfd_byte *buf,
+			 unsigned int *bytes_read_ptr)
 {
   bfd_vma result;
   unsigned int shift;

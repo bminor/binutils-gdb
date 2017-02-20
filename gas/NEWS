@@ -1,5 +1,9 @@
 -*- text -*-
 
+* PowerPC gas now checks that the correct register class is used in
+  instructions.  For instance, "addi %f4,%cr3,%r31" warns three times
+  that the registers are invalid.
+
 * Add support for the Texas Instruments PRU processor.
 
 Changes in 2.28:

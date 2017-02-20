@@ -441,7 +441,7 @@ const struct powerpc_operand powerpc_operands[] =
 #define L2OPT L32OPT + 1
   { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-  /* The LEV field in a POWER SVC form instruction.  */
+  /* The LEV field in a POWER SVC / POWER9 SCV form instruction.  */
 #define SVC_LEV L2OPT + 1
   { 0x7f, 5, NULL, NULL, 0 },
 
@@ -667,7 +667,7 @@ const struct powerpc_operand powerpc_operands[] =
 #define PMR SPR
 #define TMR SPR
 #define SPR_MASK (0x3ff << 11)
-  { 0x3ff, 11, insert_spr, extract_spr, 0 },
+  { 0x3ff, 11, insert_spr, extract_spr, PPC_OPERAND_SPR },
 
   /* The BAT index number in an XFX form m[ft]ibat[lu] instruction.  */
 #define SPRBAT SPR + 1
@@ -676,7 +676,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The SPRG register number in an XFX form m[ft]sprg instruction.  */
 #define SPRG SPRBAT + 1
-  { 0x1f, 16, insert_sprg, extract_sprg, 0 },
+  { 0x1f, 16, insert_sprg, extract_sprg, PPC_OPERAND_SPR },
 
   /* The SR field in an X form instruction.  */
 #define SR SPRG + 1
@@ -704,7 +704,7 @@ const struct powerpc_operand powerpc_operands[] =
      field, but it is optional.  */
 #define TBR SV + 1
   { 0x3ff, 11, insert_tbr, extract_tbr,
-    PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
+    PPC_OPERAND_SPR | PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
   /* If the TBR operand is ommitted, use the value 268.  */
   { -1, 268, NULL, NULL, 0},
 
@@ -806,11 +806,11 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* IDX bits for quantization in the pair singles instructions.  */
 #define PSQ PSWM + 1
-  {  0x7, 12, 0, 0, 0 },
+  {  0x7, 12, 0, 0, PPC_OPERAND_GQR },
 
   /* IDX bits for quantization in the pair singles x-type instructions.  */
 #define PSQM PSQ + 1
-  {  0x7, 7, 0, 0, 0 },
+  {  0x7, 7, 0, 0, PPC_OPERAND_GQR },
 
   /* Smaller D field for quantization in the pair singles instructions.  */
 #define PSD PSQM + 1
@@ -4142,6 +4142,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"bcla",	B(16,1,1),	B_MASK,	     COM,	PPCVLE,		{BO, BI, BDA}},
 
 {"svc",		SC(17,0,0),	SC_MASK,     POWER,	PPCVLE,		{SVC_LEV, FL1, FL2}},
+{"scv",		SC(17,0,1),	SC_MASK,     POWER9,	PPCVLE,		{SVC_LEV}},
 {"svcl",	SC(17,0,1),	SC_MASK,     POWER,	PPCVLE,		{SVC_LEV, FL1, FL2}},
 {"sc",		SC(17,1,0),	SC_MASK,     PPC,	PPCVLE,		{LEV}},
 {"svca",	SC(17,1,0),	SC_MASK,     PWRCOM,	PPCVLE,		{SV}},
@@ -4391,6 +4392,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"rfi",		XL(19,50),	0xffffffff,  COM,	PPCVLE,		{0}},
 {"rfci",	XL(19,51), 0xffffffff, PPC403|BOOKE|PPCE300|PPCA2|PPC476, PPCVLE, {0}},
 
+{"rfscv",	XL(19,82),	0xffffffff,  POWER9,	PPCVLE,		{0}},
 {"rfsvc",	XL(19,82),	0xffffffff,  POWER,	PPCVLE,		{0}},
 
 {"rfgi",	XL(19,102),   0xffffffff, E500MC|PPCA2,	PPCVLE,		{0}},
