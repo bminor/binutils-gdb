@@ -120,7 +120,7 @@ trace_start_error (const char *fmt, ...)
   fprintf_unfiltered (gdb_stderr, "Could not trace the inferior "
 		                  "process.\nError: ");
   vfprintf_unfiltered (gdb_stderr, fmt, ap);
-  va_end (args);
+  va_end (ap);
 
   gdb_flush (gdb_stderr);
   _exit (0177);

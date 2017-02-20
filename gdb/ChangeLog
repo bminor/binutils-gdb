@@ -1,4 +1,10 @@
 2017-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/16188
+	* fork-child.c (trace_start_error): Fix thinko.  va_end should
+	refer to 'ap', not 'args'.
+
+2017-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	PR gdb/16188
