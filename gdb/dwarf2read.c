@@ -4605,27 +4605,17 @@ add_signatured_type_cu_to_table (void **slot, void *datum)
   return 1;
 }
 
-/* Create the hash table of all entries in the .debug_types
-   (or .debug_types.dwo) section(s).
-   If reading a DWO file, then DWO_FILE is a pointer to the DWO file object,
-   otherwise it is NULL.
+/* A helper for create_debug_types_hash_table.  Read types from SECTION
+   and fill them into TYPES_HTAB.  */
 
-   The result is a pointer to the hash table or NULL if there are no types.
-
-   Note: This function processes DWO files only, not DWP files.  */
-
-static htab_t
-create_debug_types_hash_table (struct dwo_file *dwo_file,
-			       VEC (dwarf2_section_info_def) *types)
+static void
+create_debug_type_hash_table (struct dwo_file *dwo_file,
+			      dwarf2_section_info *section, htab_t &types_htab)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  htab_t types_htab = NULL;
-  int ix;
-  struct dwarf2_section_info *section;
   struct dwarf2_section_info *abbrev_section;
-
-  if (VEC_empty (dwarf2_section_info_def, types))
-    return NULL;
+  bfd *abfd;
+  const gdb_byte *info_ptr, *end_ptr;
 
   abbrev_section = (dwo_file != NULL
 		    ? &dwo_file->sections.abbrev
@@ -4636,136 +4626,152 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 			dwo_file ? ".dwo" : "",
 			get_section_file_name (abbrev_section));
 
-  for (ix = 0;
-       VEC_iterate (dwarf2_section_info_def, types, ix, section);
-       ++ix)
+  dwarf2_read_section (objfile, section);
+  info_ptr = section->buffer;
+
+  if (info_ptr == NULL)
+    return;
+
+  /* We can't set abfd until now because the section may be empty or
+     not present, in which case the bfd is unknown.  */
+  abfd = get_section_bfd_owner (section);
+
+  /* We don't use init_cutu_and_read_dies_simple, or some such, here
+     because we don't need to read any dies: the signature is in the
+     header.  */
+
+  end_ptr = info_ptr + section->size;
+  while (info_ptr < end_ptr)
     {
-      bfd *abfd;
-      const gdb_byte *info_ptr, *end_ptr;
+      sect_offset offset;
+      cu_offset type_offset_in_tu;
+      ULONGEST signature;
+      struct signatured_type *sig_type;
+      struct dwo_unit *dwo_tu;
+      void **slot;
+      const gdb_byte *ptr = info_ptr;
+      struct comp_unit_head header;
+      unsigned int length;
 
-      dwarf2_read_section (objfile, section);
-      info_ptr = section->buffer;
+      offset.sect_off = ptr - section->buffer;
 
-      if (info_ptr == NULL)
-	continue;
+      /* We need to read the type's signature in order to build the hash
+	 table, but we don't need anything else just yet.  */
 
-      /* We can't set abfd until now because the section may be empty or
-	 not present, in which case the bfd is unknown.  */
-      abfd = get_section_bfd_owner (section);
+      ptr = read_and_check_type_unit_head (&header, section,
+					   abbrev_section, ptr,
+					   &signature, &type_offset_in_tu);
 
-      /* We don't use init_cutu_and_read_dies_simple, or some such, here
-	 because we don't need to read any dies: the signature is in the
-	 header.  */
+      length = get_cu_length (&header);
 
-      end_ptr = info_ptr + section->size;
-      while (info_ptr < end_ptr)
+      /* Skip dummy type units.  */
+      if (ptr >= info_ptr + length
+	  || peek_abbrev_code (abfd, ptr) == 0)
 	{
-	  sect_offset offset;
-	  cu_offset type_offset_in_tu;
-	  ULONGEST signature;
-	  struct signatured_type *sig_type;
-	  struct dwo_unit *dwo_tu;
-	  void **slot;
-	  const gdb_byte *ptr = info_ptr;
-	  struct comp_unit_head header;
-	  unsigned int length;
+	  info_ptr += length;
+	  continue;
+	}
 
-	  offset.sect_off = ptr - section->buffer;
+      if (types_htab == NULL)
+	{
+	  if (dwo_file)
+	    types_htab = allocate_dwo_unit_table (objfile);
+	  else
+	    types_htab = allocate_signatured_type_table (objfile);
+	}
 
-	  /* We need to read the type's signature in order to build the hash
-	     table, but we don't need anything else just yet.  */
+      if (dwo_file)
+	{
+	  sig_type = NULL;
+	  dwo_tu = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				   struct dwo_unit);
+	  dwo_tu->dwo_file = dwo_file;
+	  dwo_tu->signature = signature;
+	  dwo_tu->type_offset_in_tu = type_offset_in_tu;
+	  dwo_tu->section = section;
+	  dwo_tu->offset = offset;
+	  dwo_tu->length = length;
+	}
+      else
+	{
+	  /* N.B.: type_offset is not usable if this type uses a DWO file.
+	     The real type_offset is in the DWO file.  */
+	  dwo_tu = NULL;
+	  sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				     struct signatured_type);
+	  sig_type->signature = signature;
+	  sig_type->type_offset_in_tu = type_offset_in_tu;
+	  sig_type->per_cu.objfile = objfile;
+	  sig_type->per_cu.is_debug_types = 1;
+	  sig_type->per_cu.section = section;
+	  sig_type->per_cu.offset = offset;
+	  sig_type->per_cu.length = length;
+	}
 
-	  ptr = read_and_check_type_unit_head (&header, section,
-					       abbrev_section, ptr,
-					       &signature, &type_offset_in_tu);
-
-	  length = get_cu_length (&header);
-
-	  /* Skip dummy type units.  */
-	  if (ptr >= info_ptr + length
-	      || peek_abbrev_code (abfd, ptr) == 0)
-	    {
-	      info_ptr += length;
-	      continue;
-	    }
-
-	  if (types_htab == NULL)
-	    {
-	      if (dwo_file)
-		types_htab = allocate_dwo_unit_table (objfile);
-	      else
-		types_htab = allocate_signatured_type_table (objfile);
-	    }
+      slot = htab_find_slot (types_htab,
+			     dwo_file ? (void*) dwo_tu : (void *) sig_type,
+			     INSERT);
+      gdb_assert (slot != NULL);
+      if (*slot != NULL)
+	{
+	  sect_offset dup_offset;
 
 	  if (dwo_file)
 	    {
-	      sig_type = NULL;
-	      dwo_tu = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-				       struct dwo_unit);
-	      dwo_tu->dwo_file = dwo_file;
-	      dwo_tu->signature = signature;
-	      dwo_tu->type_offset_in_tu = type_offset_in_tu;
-	      dwo_tu->section = section;
-	      dwo_tu->offset = offset;
-	      dwo_tu->length = length;
+	      const struct dwo_unit *dup_tu
+		= (const struct dwo_unit *) *slot;
+
+	      dup_offset = dup_tu->offset;
 	    }
 	  else
 	    {
-	      /* N.B.: type_offset is not usable if this type uses a DWO file.
-		 The real type_offset is in the DWO file.  */
-	      dwo_tu = NULL;
-	      sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-					 struct signatured_type);
-	      sig_type->signature = signature;
-	      sig_type->type_offset_in_tu = type_offset_in_tu;
-	      sig_type->per_cu.objfile = objfile;
-	      sig_type->per_cu.is_debug_types = 1;
-	      sig_type->per_cu.section = section;
-	      sig_type->per_cu.offset = offset;
-	      sig_type->per_cu.length = length;
+	      const struct signatured_type *dup_tu
+		= (const struct signatured_type *) *slot;
+
+	      dup_offset = dup_tu->per_cu.offset;
 	    }
 
-	  slot = htab_find_slot (types_htab,
-				 dwo_file ? (void*) dwo_tu : (void *) sig_type,
-				 INSERT);
-	  gdb_assert (slot != NULL);
-	  if (*slot != NULL)
-	    {
-	      sect_offset dup_offset;
-
-	      if (dwo_file)
-		{
-		  const struct dwo_unit *dup_tu
-		    = (const struct dwo_unit *) *slot;
-
-		  dup_offset = dup_tu->offset;
-		}
-	      else
-		{
-		  const struct signatured_type *dup_tu
-		    = (const struct signatured_type *) *slot;
-
-		  dup_offset = dup_tu->per_cu.offset;
-		}
-
-	      complaint (&symfile_complaints,
-			 _("debug type entry at offset 0x%x is duplicate to"
-			   " the entry at offset 0x%x, signature %s"),
-			 offset.sect_off, dup_offset.sect_off,
-			 hex_string (signature));
-	    }
-	  *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
-
-	  if (dwarf_read_debug > 1)
-	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature %s\n",
-				offset.sect_off,
-				hex_string (signature));
-
-	  info_ptr += length;
+	  complaint (&symfile_complaints,
+		     _("debug type entry at offset 0x%x is duplicate to"
+		       " the entry at offset 0x%x, signature %s"),
+		     offset.sect_off, dup_offset.sect_off,
+		     hex_string (signature));
 	}
-    }
+      *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
-  return types_htab;
+      if (dwarf_read_debug > 1)
+	fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature %s\n",
+			    offset.sect_off,
+			    hex_string (signature));
+
+      info_ptr += length;
+    }
+}
+
+/* Create the hash table of all entries in the .debug_types
+   (or .debug_types.dwo) section(s).
+   If reading a DWO file, then DWO_FILE is a pointer to the DWO file object,
+   otherwise it is NULL.
+
+   The result is a pointer to the hash table or NULL if there are no types.
+
+   Note: This function processes DWO files only, not DWP files.  */
+
+static void
+create_debug_types_hash_table (struct dwo_file *dwo_file,
+			       VEC (dwarf2_section_info_def) *types,
+			       htab_t &types_htab)
+{
+  int ix;
+  struct dwarf2_section_info *section;
+
+  if (VEC_empty (dwarf2_section_info_def, types))
+    return;
+
+  for (ix = 0;
+       VEC_iterate (dwarf2_section_info_def, types, ix, section);
+       ++ix)
+    create_debug_type_hash_table (dwo_file, section, types_htab);
 }
 
 /* Create the hash table of all entries in the .debug_types section,
@@ -4776,10 +4782,10 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 static int
 create_all_type_units (struct objfile *objfile)
 {
-  htab_t types_htab;
+  htab_t types_htab = NULL;
   struct signatured_type **iter;
 
-  types_htab = create_debug_types_hash_table (NULL, dwarf2_per_objfile->types);
+  create_debug_types_hash_table (NULL, dwarf2_per_objfile->types, types_htab);
   if (types_htab == NULL)
     {
       dwarf2_per_objfile->signatured_types = NULL;
@@ -10615,8 +10621,8 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
 
   dwo_file->cu = create_dwo_cu (dwo_file);
 
-  dwo_file->tus = create_debug_types_hash_table (dwo_file,
-						 dwo_file->sections.types);
+  create_debug_types_hash_table (dwo_file, dwo_file->sections.types,
+				 dwo_file->tus);
 
   discard_cleanups (cleanups);
 

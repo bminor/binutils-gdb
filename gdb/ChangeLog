@@ -1,3 +1,11 @@
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (create_debug_type_hash_table): New function from
+	create_debug_types_hash_table.
+	(create_debug_types_hash_table): Call create_debug_type_hash_table.
+	(create_all_type_units, open_and_init_dwo_file): Update
+	create_debug_types_hash_table callers.
+
 2017-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/16188
