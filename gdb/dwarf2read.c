@@ -8361,6 +8361,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_catch_block:
       read_lexical_block_scope (die, cu);
       break;
+    case DW_TAG_call_site:
     case DW_TAG_GNU_call_site:
       read_call_site_scope (die, cu);
       break;
@@ -11314,11 +11315,12 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
       struct dwarf2_cu *child_origin_cu;
 
       /* We are trying to process concrete instance entries:
-	 DW_TAG_GNU_call_site DIEs indeed have a DW_AT_abstract_origin tag, but
+	 DW_TAG_call_site DIEs indeed have a DW_AT_abstract_origin tag, but
 	 it's not relevant to our analysis here. i.e. detecting DIEs that are
 	 present in the abstract instance but not referenced in the concrete
 	 one.  */
-      if (child_die->tag == DW_TAG_GNU_call_site)
+      if (child_die->tag == DW_TAG_call_site
+          || child_die->tag == DW_TAG_GNU_call_site)
 	continue;
 
       /* For each CHILD_DIE, find the corresponding child of
@@ -11653,7 +11655,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   local_using_directives = newobj->local_using_directives;
 }
 
-/* Read in DW_TAG_GNU_call_site and insert it to CU->call_site_htab.  */
+/* Read in DW_TAG_call_site and insert it to CU->call_site_htab.  */
 
 static void
 read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
@@ -11669,11 +11671,17 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+  attr = dwarf2_attr (die, DW_AT_call_return_pc, cu);
+  if (attr == NULL)
+    {
+      /* This was a pre-DWARF-5 GNU extension alias
+	 for DW_AT_call_return_pc.  */
+      attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+    }
   if (!attr)
     {
       complaint (&symfile_complaints,
-		 _("missing DW_AT_low_pc for DW_TAG_GNU_call_site "
+		 _("missing DW_AT_call_return_pc for DW_TAG_call_site "
 		   "DIE 0x%x [in module %s]"),
 		 die->offset.sect_off, objfile_name (objfile));
       return;
@@ -11690,7 +11698,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (*slot != NULL)
     {
       complaint (&symfile_complaints,
-		 _("Duplicate PC %s for DW_TAG_GNU_call_site "
+		 _("Duplicate PC %s for DW_TAG_call_site "
 		   "DIE 0x%x [in module %s]"),
 		 paddress (gdbarch, pc), die->offset.sect_off,
 		 objfile_name (objfile));
@@ -11703,11 +11711,12 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   for (child_die = die->child; child_die && child_die->tag;
        child_die = sibling_die (child_die))
     {
-      if (child_die->tag != DW_TAG_GNU_call_site_parameter)
+      if (child_die->tag != DW_TAG_call_site_parameter
+          && child_die->tag != DW_TAG_GNU_call_site_parameter)
 	{
 	  complaint (&symfile_complaints,
-		     _("Tag %d is not DW_TAG_GNU_call_site_parameter in "
-		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		     _("Tag %d is not DW_TAG_call_site_parameter in "
+		       "DW_TAG_call_site child DIE 0x%x [in module %s]"),
 		     child_die->tag, child_die->offset.sect_off,
 		     objfile_name (objfile));
 	  continue;
@@ -11725,7 +11734,8 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   memset (call_site, 0, sizeof (*call_site) - sizeof (*call_site->parameter));
   call_site->pc = pc;
 
-  if (dwarf2_flag_true_p (die, DW_AT_GNU_tail_call, cu))
+  if (dwarf2_flag_true_p (die, DW_AT_call_tail_call, cu)
+      || dwarf2_flag_true_p (die, DW_AT_GNU_tail_call, cu))
     {
       struct die_info *func_die;
 
@@ -11735,10 +11745,12 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	   && func_die->tag != DW_TAG_subroutine_type;
 	   func_die = func_die->parent);
 
-      /* DW_AT_GNU_all_call_sites is a superset
-	 of DW_AT_GNU_all_tail_call_sites.  */
+      /* DW_AT_call_all_calls is a superset
+	 of DW_AT_call_all_tail_calls.  */
       if (func_die
+          && !dwarf2_flag_true_p (func_die, DW_AT_call_all_calls, cu)
           && !dwarf2_flag_true_p (func_die, DW_AT_GNU_all_call_sites, cu)
+	  && !dwarf2_flag_true_p (func_die, DW_AT_call_all_tail_calls, cu)
 	  && !dwarf2_flag_true_p (func_die, DW_AT_GNU_all_tail_call_sites, cu))
 	{
 	  /* TYPE_TAIL_CALL_LIST is not interesting in functions where it is
@@ -11766,15 +11778,22 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  else
 	    complaint (&symfile_complaints,
-		       _("Cannot find function owning DW_TAG_GNU_call_site "
+		       _("Cannot find function owning DW_TAG_call_site "
 			 "DIE 0x%x [in module %s]"),
 		       die->offset.sect_off, objfile_name (objfile));
 	}
     }
 
-  attr = dwarf2_attr (die, DW_AT_GNU_call_site_target, cu);
+  attr = dwarf2_attr (die, DW_AT_call_target, cu);
   if (attr == NULL)
-    attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
+    attr = dwarf2_attr (die, DW_AT_GNU_call_site_target, cu);
+  if (attr == NULL)
+    attr = dwarf2_attr (die, DW_AT_call_origin, cu);
+  if (attr == NULL)
+    {
+      /* This was a pre-DWARF-5 GNU extension alias for DW_AT_call_origin.  */
+      attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
+    }
   SET_FIELD_DWARF_BLOCK (call_site->target, NULL);
   if (!attr || (attr_form_is_block (attr) && DW_BLOCK (attr)->size == 0))
     /* Keep NULL DWARF_BLOCK.  */;
@@ -11812,7 +11831,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    target_physname = dwarf2_physname (NULL, target_die, target_cu);
 	  if (target_physname == NULL)
 	    complaint (&symfile_complaints,
-		       _("DW_AT_GNU_call_site_target target DIE has invalid "
+		       _("DW_AT_call_target target DIE has invalid "
 		         "physname, for referencing DIE 0x%x [in module %s]"),
 		       die->offset.sect_off, objfile_name (objfile));
 	  else
@@ -11826,7 +11845,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  if (dwarf2_get_pc_bounds (target_die, &lowpc, NULL, target_cu, NULL)
 	      <= PC_BOUNDS_INVALID)
 	    complaint (&symfile_complaints,
-		       _("DW_AT_GNU_call_site_target target DIE has invalid "
+		       _("DW_AT_call_target target DIE has invalid "
 		         "low pc, for referencing DIE 0x%x [in module %s]"),
 		       die->offset.sect_off, objfile_name (objfile));
 	  else
@@ -11838,7 +11857,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     complaint (&symfile_complaints,
-	       _("DW_TAG_GNU_call_site DW_AT_GNU_call_site_target is neither "
+	       _("DW_TAG_call_site DW_AT_call_target is neither "
 		 "block nor reference, for DIE 0x%x [in module %s]"),
 	       die->offset.sect_off, objfile_name (objfile));
 
@@ -11851,7 +11870,8 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       struct call_site_parameter *parameter;
       struct attribute *loc, *origin;
 
-      if (child_die->tag != DW_TAG_GNU_call_site_parameter)
+      if (child_die->tag != DW_TAG_call_site_parameter
+          && child_die->tag != DW_TAG_GNU_call_site_parameter)
 	{
 	  /* Already printed the complaint above.  */
 	  continue;
@@ -11862,10 +11882,16 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       /* DW_AT_location specifies the register number or DW_AT_abstract_origin
 	 specifies DW_TAG_formal_parameter.  Value of the data assumed for the
-	 register is contained in DW_AT_GNU_call_site_value.  */
+	 register is contained in DW_AT_call_value.  */
 
       loc = dwarf2_attr (child_die, DW_AT_location, cu);
-      origin = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
+      origin = dwarf2_attr (child_die, DW_AT_call_parameter, cu);
+      if (origin == NULL)
+	{
+	  /* This was a pre-DWARF-5 GNU extension alias
+	     for DW_AT_call_parameter.  */
+	  origin = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
+	}
       if (loc == NULL && origin != NULL && attr_form_is_ref (origin))
 	{
 	  sect_offset offset;
@@ -11878,9 +11904,8 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		 binding can be done only inside one CU.  Such referenced DIE
 		 therefore cannot be even moved to DW_TAG_partial_unit.  */
 	      complaint (&symfile_complaints,
-			 _("DW_AT_abstract_origin offset is not in CU for "
-			   "DW_TAG_GNU_call_site child DIE 0x%x "
-			   "[in module %s]"),
+			 _("DW_AT_call_parameter offset is not in CU for "
+			   "DW_TAG_call_site child DIE 0x%x [in module %s]"),
 			 child_die->offset.sect_off, objfile_name (objfile));
 	      continue;
 	    }
@@ -11891,7 +11916,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  complaint (&symfile_complaints,
 		     _("No DW_FORM_block* DW_AT_location for "
-		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		       "DW_TAG_call_site child DIE 0x%x [in module %s]"),
 		     child_die->offset.sect_off, objfile_name (objfile));
 	  continue;
 	}
@@ -11910,19 +11935,21 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      complaint (&symfile_complaints,
 			 _("Only single DW_OP_reg or DW_OP_fbreg is supported "
 			   "for DW_FORM_block* DW_AT_location is supported for "
-			   "DW_TAG_GNU_call_site child DIE 0x%x "
+			   "DW_TAG_call_site child DIE 0x%x "
 			   "[in module %s]"),
 			 child_die->offset.sect_off, objfile_name (objfile));
 	      continue;
 	    }
 	}
 
-      attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_value, cu);
+      attr = dwarf2_attr (child_die, DW_AT_call_value, cu);
+      if (attr == NULL)
+	attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_value, cu);
       if (!attr_form_is_block (attr))
 	{
 	  complaint (&symfile_complaints,
-		     _("No DW_FORM_block* DW_AT_GNU_call_site_value for "
-		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		     _("No DW_FORM_block* DW_AT_call_value for "
+		       "DW_TAG_call_site child DIE 0x%x [in module %s]"),
 		     child_die->offset.sect_off, objfile_name (objfile));
 	  continue;
 	}
@@ -11934,13 +11961,15 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       parameter->data_value_size = 0;
       call_site->parameter_count++;
 
-      attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_data_value, cu);
+      attr = dwarf2_attr (child_die, DW_AT_call_data_value, cu);
+      if (attr == NULL)
+	attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_data_value, cu);
       if (attr)
 	{
 	  if (!attr_form_is_block (attr))
 	    complaint (&symfile_complaints,
-		       _("No DW_FORM_block* DW_AT_GNU_call_site_data_value for "
-			 "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		       _("No DW_FORM_block* DW_AT_call_data_value for "
+			 "DW_TAG_call_site child DIE 0x%x [in module %s]"),
 		       child_die->offset.sect_off, objfile_name (objfile));
 	  else
 	    {

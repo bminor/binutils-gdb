@@ -87,7 +87,7 @@ enum errors {
      means the register was not saved in the frame.  */
   OPTIMIZED_OUT_ERROR,
 
-  /* DW_OP_GNU_entry_value resolving failed.  */
+  /* DW_OP_entry_value resolving failed.  */
   NO_ENTRY_VALUE_ERROR,
 
   /* Target throwing an error has been closed.  Current command should be

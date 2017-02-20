@@ -9857,7 +9857,7 @@ this feature will behave in the @code{default} setting the same way as with the
 @code{no} setting.
 
 This functionality is currently supported only by DWARF 2 debugging format and
-the compiler has to produce @samp{DW_TAG_GNU_call_site} tags.  With
+the compiler has to produce @samp{DW_TAG_call_site} tags.  With
 @value{NGCC}, you need to specify @option{-O -g} during compilation, to get
 this information.
 
@@ -12025,7 +12025,7 @@ some cases @value{GDBN} can determine that @code{C} was tail-called from
 return address set up as if @code{B} called @code{C} normally.
 
 This functionality is currently supported only by DWARF 2 debugging format and
-the compiler has to produce @samp{DW_TAG_GNU_call_site} tags.  With
+the compiler has to produce @samp{DW_TAG_call_site} tags.  With
 @value{NGCC}, you need to specify @option{-O -g} during compilation, to get
 this information.
 
@@ -12078,8 +12078,8 @@ static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
 static void __attribute__((noinline, noclone)) c (void) @{ a (); @}
 int main (void) @{ x (); return 0; @}
 
-Breakpoint 1, DW_OP_GNU_entry_value resolving cannot find
-DW_TAG_GNU_call_site 0x40039a in main
+Breakpoint 1, DW_OP_entry_value resolving cannot find
+DW_TAG_call_site 0x40039a in main
 a () at t.c:3
 3	static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
 (gdb) bt
@@ -12155,7 +12155,7 @@ int main (void) @{ a (5); return 0; @}
 
 (gdb) bt
 #0  c (i=i@@entry=0) at t.c:2
-#1  0x0000000000400428 in a (DW_OP_GNU_entry_value resolving has found
+#1  0x0000000000400428 in a (DW_OP_entry_value resolving has found
 function "a" at 0x400420 can call itself via tail calls
 i=<optimized out>) at t.c:6
 #2  0x000000000040036e in main () at t.c:7

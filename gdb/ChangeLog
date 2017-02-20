@@ -1,5 +1,31 @@
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* block.c (call_site_for_pc): Rename DW_OP_GNU_*, DW_TAG_GNU_* and
+	DW_AT_GNU_*.
+	* common/common-exceptions.h (enum errors): Likewise.
+	* dwarf2-frame.c (class dwarf_expr_executor): Likewise.
+	* dwarf2expr.c (dwarf_block_to_dwarf_reg)
+	(dwarf_expr_context::execute_stack_op): Likewise.
+	* dwarf2expr.h (struct dwarf_expr_context, struct dwarf_expr_piece):
+	Likewise.
+	* dwarf2loc.c (dwarf_evaluate_loc_desc::get_base_type)
+	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value)
+	(show_entry_values_debug, call_site_to_target_addr)
+	(func_addr_to_tail_call_list, func_verify_no_selftailcall)
+	(dwarf_expr_reg_to_entry_parameter, dwarf_entry_parameter_to_value)
+	(entry_data_value_free_closure, value_of_dwarf_reg_entry)
+	(value_of_dwarf_block_entry, indirect_pieced_value)
+	(symbol_needs_eval_context::push_dwarf_reg_entry_value):
+	(disassemble_dwarf_expression): Likewise.
+	* dwarf2read.c (process_die, inherit_abstract_dies)
+	(read_call_site_scope): Likewise.
+	* gdbtypes.h (struct func_type, struct call_site_parameter)
+	(struct call_site): Likewise.
+	* stack.c (read_frame_arg): Likewise.
+	* std-operator.def (OP_VAR_ENTRY_VALUE): Likewise.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* defs.h (read_unsigned_leb128): New declaration.
 	* dwarf2loc.c (decode_debug_loclists_addresses): New function.
 	(decode_debug_loc_dwo_addresses): Update DEBUG_LOC_* to DW_LLE_*.

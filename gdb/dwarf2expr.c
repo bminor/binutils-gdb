@@ -423,7 +423,7 @@ dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
       return *buf - DW_OP_reg0;
     }
 
-  if (*buf == DW_OP_GNU_regval_type)
+  if (*buf == DW_OP_regval_type || *buf == DW_OP_GNU_regval_type)
     {
       buf++;
       buf = gdb_read_uleb128 (buf, buf_end, &dwarf_reg);
@@ -805,12 +805,13 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_stack_value");
 	  goto no_push;
 
+	case DW_OP_implicit_pointer:
 	case DW_OP_GNU_implicit_pointer:
 	  {
 	    int64_t len;
 
 	    if (this->ref_addr_size == -1)
-	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
+	      error (_("DWARF-2 expression error: DW_OP_implicit_pointer "
 		       "is not allowed in frame context"));
 
 	    /* The referred-to DIE of sect_offset kind.  */
@@ -825,7 +826,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    this->location = DWARF_VALUE_IMPLICIT_POINTER;
 	    dwarf_expr_require_composition (op_ptr, op_end,
-					    "DW_OP_GNU_implicit_pointer");
+					    "DW_OP_implicit_pointer");
 	  }
 	  break;
 
@@ -963,6 +964,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_deref:
 	case DW_OP_deref_size:
+	case DW_OP_deref_type:
 	case DW_OP_GNU_deref_type:
 	  {
 	    int addr_size = (op == DW_OP_deref ? this->addr_size : *op_ptr++);
@@ -972,7 +974,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    pop ();
 
-	    if (op == DW_OP_GNU_deref_type)
+	    if (op == DW_OP_deref_type || op == DW_OP_GNU_deref_type)
 	      {
 		cu_offset type_die;
 
@@ -1299,6 +1301,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  }
 	  goto no_push;
 	
+	case DW_OP_entry_value:
 	case DW_OP_GNU_entry_value:
 	  {
 	    uint64_t len;
@@ -1307,7 +1310,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
-	      error (_("DW_OP_GNU_entry_value: too few bytes available."));
+	      error (_("DW_OP_entry_value: too few bytes available."));
 
 	    kind_u.dwarf_reg = dwarf_block_to_dwarf_reg (op_ptr, op_ptr + len);
 	    if (kind_u.dwarf_reg != -1)
@@ -1332,7 +1335,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		goto no_push;
 	      }
 
-	    error (_("DWARF-2 expression error: DW_OP_GNU_entry_value is "
+	    error (_("DWARF-2 expression error: DW_OP_entry_value is "
 		     "supported only for single DW_OP_reg* "
 		     "or for DW_OP_breg*(0)+DW_OP_deref*"));
 	  }
@@ -1350,6 +1353,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  }
 	  goto no_push;
 
+	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
 	  {
 	    cu_offset type_die;
@@ -1368,6 +1372,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  }
 	  break;
 
+	case DW_OP_regval_type:
 	case DW_OP_GNU_regval_type:
 	  {
 	    cu_offset type_die;
@@ -1382,7 +1387,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  }
 	  break;
 
+	case DW_OP_convert:
 	case DW_OP_GNU_convert:
+	case DW_OP_reinterpret:
 	case DW_OP_GNU_reinterpret:
 	  {
 	    cu_offset type_die;
@@ -1399,7 +1406,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    result_val = fetch (0);
 	    pop ();
 
-	    if (op == DW_OP_GNU_convert)
+	    if (op == DW_OP_convert || op == DW_OP_GNU_convert)
 	      result_val = value_cast (type, result_val);
 	    else if (type == value_type (result_val))
 	      {
@@ -1407,7 +1414,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      }
 	    else if (TYPE_LENGTH (type)
 		     != TYPE_LENGTH (value_type (result_val)))
-	      error (_("DW_OP_GNU_reinterpret has wrong size"));
+	      error (_("DW_OP_reinterpret has wrong size"));
 	    else
 	      result_val
 		= value_from_contents (type,
