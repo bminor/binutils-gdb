@@ -1,3 +1,14 @@
+2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (LOAD_AND_RESERVE_MASK): Rename from LWARX_MASK.
+	(STORE_CONDITIONAL_MASK): Rename from STWCX_MASK.
+	(LBARX_INSTRUCTION, LHARX_INSTRUCTION, LQARX_INSTRUCTION,
+	STBCX_INSTRUCTION, STHCX_INSTRUCTION, STQCX_INSTRUCTION): New defines.
+	(IS_LOAD_AND_RESERVE_INSN, IS_STORE_CONDITIONAL_INSN): New macros.
+	(ppc_displaced_step_copy_insn): Use IS_LOAD_AND_RESERVE_INSN.
+	(ppc_deal_with_atomic_sequence): Use IS_LOAD_AND_RESERVE_INSN and
+	IS_STORE_CONDITIONAL_INSN.
+
 2017-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2_rnglists_process: Initialize range_beginning and range_end.
