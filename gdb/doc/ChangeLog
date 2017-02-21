@@ -1,3 +1,9 @@
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Compiling and Injecting Code): Add to subsection
+	"Compiler search for the compile command" descriptions of set
+	compile-gcc and show compile-gcc.
+
 2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
 
 	* gdb.texinfo (Architectures): Add new Sparc64 section to document

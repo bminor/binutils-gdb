@@ -1,5 +1,14 @@
 2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* NEWS (Changes since GDB 8.0): Add set compile-gcc and show
+	compile-gcc.
+	* compile/compile.c (compile_gcc, show_compile_gcc): New.
+	(compile_to_object): Implement compile_gcc.
+	(_initialize_compile): Install "set compile-gcc".  Initialize
+	compile_gcc.
+
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* compile/compile.c (compile_to_object): Conditionally call
 	set_verbose.  Conditionally call compile or compile_v0.
 
