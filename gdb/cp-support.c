@@ -762,6 +762,7 @@ unqualified_name_from_comp (struct demangle_component *comp)
       case DEMANGLE_COMPONENT_DTOR:
       case DEMANGLE_COMPONENT_OPERATOR:
       case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
+      case DEMANGLE_COMPONENT_CONVERSION:
 	done = 1;
 	break;
       default:

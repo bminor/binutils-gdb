@@ -1559,7 +1559,17 @@ oper:	OPERATOR NEW
 
 			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
-			  $$ = operator_stoken (buf.c_str ());
+
+			  /* This also needs canonicalization.  */
+			  const char *name = buf.c_str ();
+			  std::string canon = cp_canonicalize_string (name);
+			  if (canon.empty ())
+			    canon = name;
+
+			  /* We need a space between "operator" and the
+			     canonicalized type name. */
+			  canon.insert (0, " ");
+			  $$ = operator_stoken (canon.c_str ());
 			}
 	;
 
