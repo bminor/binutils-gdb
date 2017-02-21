@@ -531,6 +531,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   get_args (compiler, gdbarch, &argc, &argv);
   make_cleanup_freeargv (argv);
 
+  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+    compiler->fe->ops->set_verbose (compiler->fe, compile_debug);
+
   error_message = compiler->fe->ops->set_arguments (compiler->fe, triplet_rx,
 						    argc, argv);
   if (error_message != NULL)
@@ -567,8 +570,12 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   /* Call the compiler and start the compilation process.  */
   compiler->fe->ops->set_source_file (compiler->fe, fnames.source_file ());
 
-  if (!compiler->fe->ops->compile (compiler->fe, fnames.object_file (),
-				   compile_debug))
+  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+    ok = compiler->fe->ops->compile (compiler->fe, fnames.object_file ());
+  else
+    ok = compiler->fe->ops->compile_v0 (compiler->fe, fnames.object_file (),
+					compile_debug);
+  if (!ok)
     error (_("Compilation failed."));
 
   if (compile_debug)
