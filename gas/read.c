@@ -778,6 +778,8 @@ do_align (unsigned int n, char *fill, unsigned int len, unsigned int max)
   md_flush_pending_output ();
 #endif
 
+  dwarf2_emit_insn (0);
+
 #ifdef md_do_align
   md_do_align (n, fill, len, max, just_record_alignment);
 #endif
@@ -2198,6 +2200,8 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
+  dwarf2_emit_insn (0);
+
 #ifdef md_cons_align
   md_cons_align (1);
 #endif
@@ -2848,6 +2852,8 @@ s_org (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
+  dwarf2_emit_insn (0);
+
   /* The m68k MRI assembler has a different meaning for .org.  It
      means to create an absolute section at a given address.  We can't
      support that--use a linker script instead.  */
@@ -3317,6 +3323,8 @@ s_space (int mult)
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
+
+  dwarf2_emit_insn (0);
 
 #ifdef md_cons_align
   md_cons_align (1);
@@ -3966,6 +3974,8 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
+
+  dwarf2_emit_insn (0);
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -4959,6 +4969,8 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
   md_flush_pending_output ();
 #endif
 
+  dwarf2_emit_insn (0);
+
 #ifdef md_cons_align
   md_cons_align (1);
 #endif
@@ -5382,6 +5394,8 @@ s_leb128 (int sign)
   md_flush_pending_output ();
 #endif
 
+  dwarf2_emit_insn (0);
+
   do
     {
       expression (&exp);
@@ -5450,6 +5464,8 @@ stringer (int bits_appendzero)
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
+
+  dwarf2_emit_insn (0);
 
 #ifdef md_cons_align
   md_cons_align (1);
@@ -5844,6 +5860,8 @@ s_incbin (int x ATTRIBUTE_UNUSED)
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
+
+  dwarf2_emit_insn (0);
 
 #ifdef md_cons_align
   md_cons_align (1);
