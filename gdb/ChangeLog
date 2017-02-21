@@ -1,5 +1,11 @@
 2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Treat all
+	registers above gdbarch_num_regs (gdbarch) as privileged in
+	call0 ABI.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
 	for a single specified register or for all registers in
 	a0_base..a0_base + C0_NREGS range.

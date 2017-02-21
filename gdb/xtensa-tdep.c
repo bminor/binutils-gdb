@@ -578,7 +578,8 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
   /* We have to find out how to deal with priveleged registers.
      Let's treat them as pseudo-registers, but we cannot read/write them.  */
      
-  else if (regnum < gdbarch_tdep (gdbarch)->a0_base)
+  else if (gdbarch_tdep (gdbarch)->call_abi == CallAbiCall0Only
+	   || regnum < gdbarch_tdep (gdbarch)->a0_base)
     {
       buffer[0] = (gdb_byte)0;
       buffer[1] = (gdb_byte)0;
