@@ -10303,11 +10303,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
   htab = ppc_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
-  if (htab->is_vxworks)
-    splt = bfd_get_linker_section (dynobj, ".plt");
-  else
-    splt = NULL;
-
   got = 0;
   if (htab->elf.hgot != NULL)
     got = SYM_VAL (htab->elf.hgot);
@@ -10370,7 +10365,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (htab->got != NULL)
+  if (htab->got != NULL
+      && htab->got->output_section != bfd_abs_section_ptr)
     {
       if (htab->elf.hgot->root.u.def.section == htab->got
 	  || htab->elf.hgot->root.u.def.section == htab->sgotplt)
@@ -10410,7 +10406,12 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     }
 
   /* Fill in the first entry in the VxWorks procedure linkage table.  */
-  if (splt && splt->size > 0)
+  splt = NULL;
+  if (htab->is_vxworks)
+    splt = bfd_get_linker_section (dynobj, ".plt");
+  if (splt != NULL
+      && splt->size != 0
+      && splt->output_section != bfd_abs_section_ptr)
     {
       /* Use the right PLT. */
       const bfd_vma *plt_entry = (bfd_link_pic (info)

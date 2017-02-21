@@ -3608,11 +3608,13 @@ Target_powerpc<size, big_endian>::make_iplt_section(Symbol_table* symtab,
       this->make_plt_section(symtab, layout);
 
       Reloc_section* iplt_rel = new Reloc_section(false);
-      this->rela_dyn_->output_section()->add_output_section_data(iplt_rel);
+      if (this->rela_dyn_->output_section())
+	this->rela_dyn_->output_section()->add_output_section_data(iplt_rel);
       this->iplt_
 	= new Output_data_plt_powerpc<size, big_endian>(this, iplt_rel,
 							"** IPLT");
-      this->plt_->output_section()->add_output_section_data(this->iplt_);
+      if (this->plt_->output_section())
+	this->plt_->output_section()->add_output_section_data(this->iplt_);
     }
 }
 
@@ -3708,14 +3710,16 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
 	{
 	  // When PIC we can't fill in .branch_lt (like .plt it can be
 	  // a bss style section) but must initialise at runtime via
-	  // dynamic relocats.
+	  // dynamic relocations.
 	  this->rela_dyn_section(layout);
 	  brlt_rel = new Reloc_section(false);
-	  this->rela_dyn_->output_section()->add_output_section_data(brlt_rel);
+	  if (this->rela_dyn_->output_section())
+	    this->rela_dyn_->output_section()
+	      ->add_output_section_data(brlt_rel);
 	}
       this->brlt_section_
 	= new Output_data_brlt_powerpc<size, big_endian>(this, brlt_rel);
-      if (this->plt_ && is_pic)
+      if (this->plt_ && is_pic && this->plt_->output_section())
 	this->plt_->output_section()
 	  ->add_output_section_data(this->brlt_section_);
       else
