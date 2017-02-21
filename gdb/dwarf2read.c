@@ -1348,10 +1348,10 @@ struct fnfieldlist
   struct nextfnfield *head;
 };
 
-struct typedef_field_list
+struct decl_field_list
 {
-  struct typedef_field field;
-  struct typedef_field_list *next;
+  struct decl_field field;
+  struct decl_field_list *next;
 };
 
 /* The routines that read and process dies for a C struct or C++ class
@@ -1385,8 +1385,13 @@ struct field_info
 
     /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
        a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
-    struct typedef_field_list *typedef_field_list;
+    struct decl_field_list *typedef_field_list;
     unsigned typedef_field_list_count;
+
+    /* Nested types defined by this class and the number of elements in this
+       list.  */
+    struct decl_field_list *nested_types_list;
+    unsigned nested_types_list_count;
   };
 
 /* One item on the queue of compilation units to read in full symbols
@@ -6988,7 +6993,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     {
     case DW_TAG_subprogram:
       addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
-      if (pdi->is_external || cu->language == language_ada)
+      if (pdi->is_external || cu->language == language_ada
+	  || cu->language == language_cplus)
 	{
           /* brobecker/2007-12-26: Normally, only "external" DIEs are part
              of the global scope.  But in Ada, we want to be able to access
@@ -7241,7 +7247,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
   if (! pdi->has_children)
     return;
 
-  if (cu->language == language_ada)
+  if (cu->language == language_ada || cu->language == language_cplus)
     {
       pdi = pdi->die_child;
       while (pdi != NULL)
@@ -12446,7 +12452,7 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
 
   /* If the language does not allow nested subprograms (either inside
      subprograms or lexical blocks), we're done.  */
-  if (cu->language != language_ada)
+  if (cu->language != language_ada && cu->language != language_cplus)
     return;
 
   /* Check all the children of the given DIE.  If it contains nested
@@ -12897,33 +12903,66 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
 }
 
-/* Add a typedef defined in the scope of the FIP's class.  */
+/* Add a type definition defined in the scope of the FIP's class.  */
 
 static void
-dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
-		    struct dwarf2_cu *cu)
+dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
+		      struct dwarf2_cu *cu)
 {
-  struct typedef_field_list *new_field;
-  struct typedef_field *fp;
+  struct decl_field_list *new_field;
+  struct attribute *attr;
+  struct decl_field *fp;
+  enum dwarf_access_attribute accessibility;
 
   /* Allocate a new field list entry and link it in.  */
-  new_field = XCNEW (struct typedef_field_list);
+  new_field = XCNEW (struct decl_field_list);
   make_cleanup (xfree, new_field);
 
-  gdb_assert (die->tag == DW_TAG_typedef);
+  gdb_assert (die->tag == DW_TAG_typedef
+	      || die->tag == DW_TAG_class_type
+	      || die->tag == DW_TAG_structure_type
+	      || die->tag == DW_TAG_union_type
+	      || die->tag == DW_TAG_enumeration_type);
 
   fp = &new_field->field;
 
-  /* Get name of field.  */
+  /* Get name of field.  NULL is okay here, meaning an anonymous type.  */
   fp->name = dwarf2_name (die, cu);
-  if (fp->name == NULL)
-    return;
-
   fp->type = read_type_die (die, cu);
 
-  new_field->next = fip->typedef_field_list;
-  fip->typedef_field_list = new_field;
-  fip->typedef_field_list_count++;
+  /* Save accessibility.  */
+  attr = dwarf2_attr (die, DW_AT_accessibility, cu);
+  if (attr != NULL)
+    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
+  else
+    accessibility = dwarf2_default_access_attribute (die, cu);
+  switch (accessibility)
+    {
+    case DW_ACCESS_public:
+      fp->is_public = 1;
+      break;
+    case DW_ACCESS_private:
+      fp->is_private = 1;
+      break;
+    case DW_ACCESS_protected:
+      fp->is_protected = 1;
+      break;
+    default:
+      gdb_assert_not_reached ("unexpected accessibility attribute");
+    }
+
+  if (die->tag == DW_TAG_typedef)
+    {
+      new_field->next = fip->typedef_field_list;
+      fip->typedef_field_list = new_field;
+      fip->typedef_field_list_count++;
+    }
+  else
+    {
+      new_field->next = fip->nested_types_list;
+      fip->nested_types_list = new_field;
+      fip->nested_types_list_count++;
+    }
 }
 
 /* Create the vector of fields, and attach it to the type.  */
@@ -13586,8 +13625,13 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      /* C++ base class field.  */
 	      dwarf2_add_field (&fi, child_die, cu);
 	    }
-	  else if (child_die->tag == DW_TAG_typedef)
-	    dwarf2_add_typedef (&fi, child_die, cu);
+	  else if (child_die->tag == DW_TAG_typedef
+		   || child_die->tag == DW_TAG_class_type
+		   || child_die->tag == DW_TAG_structure_type
+		   || child_die->tag == DW_TAG_union_type
+		   || child_die->tag == DW_TAG_enumeration_type
+		   /*|| child_die->tag == DW_TAG_namespace*/)
+	    dwarf2_add_type_defn (&fi, child_die, cu);
 	  else if (child_die->tag == DW_TAG_template_type_param
 		   || child_die->tag == DW_TAG_template_value_param)
 	    {
@@ -13696,18 +13740,42 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_TYPEDEF_FIELD_ARRAY (type)
-	    = ((struct typedef_field *)
+	    = ((struct decl_field *)
 	       TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i));
 	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;
 
 	  /* Reverse the list order to keep the debug info elements order.  */
 	  while (--i >= 0)
 	    {
-	      struct typedef_field *dest, *src;
+	      struct decl_field *dest, *src;
 
 	      dest = &TYPE_TYPEDEF_FIELD (type, i);
 	      src = &fi.typedef_field_list->field;
 	      fi.typedef_field_list = fi.typedef_field_list->next;
+	      *dest = *src;
+	    }
+	}
+
+      /* Copy fi.nested_types_list linked list elements content into the
+	 allocated array TYPE_NESTED_TYPES_ARRAY (type).  */
+      if (fi.nested_types_list != NULL)
+	{
+	  int i = fi.nested_types_list_count;
+
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  TYPE_NESTED_TYPES_ARRAY (type)
+	    = ((struct decl_field *)
+	       TYPE_ALLOC (type, sizeof (struct decl_field) * i));
+	  TYPE_NESTED_TYPES_COUNT (type) = i;
+
+	  /* Reverse the list order to keep the debug info elements order.  */
+	  while (--i >= 0)
+	    {
+	      struct decl_field *dest, *src;
+
+	      dest = &TYPE_NESTED_TYPES_FIELD (type, i);
+	      src = &fi.nested_types_list->field;
+	      fi.nested_types_list = fi.nested_types_list->next;
 	      *dest = *src;
 	    }
 	}
@@ -18958,7 +19026,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	  if ((attr2 && (DW_UNSND (attr2) != 0))
-              || cu->language == language_ada)
+              || cu->language == language_ada || cu->language == language_cplus)
 	    {
               /* Subprograms marked external are stored as a global symbol.
                  Ada subprograms, whether marked external or not, are always
