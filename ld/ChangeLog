@@ -1,3 +1,8 @@
+2017-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-ifunc/pr18808b.c (bar): Fix compile time warning
+	about non-void function returning without a result.
+
 2017-02-17  Alan Modra  <amodra@gmail.com>
 
 	PR 15041
