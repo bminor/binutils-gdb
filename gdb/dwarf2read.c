@@ -1345,6 +1345,11 @@ struct fnfieldlist
 {
   const char *name;
   int length;
+
+  /* Number of additional fnfield slots to allocate for ctor/dtor
+     aliases.  */
+  int addl_fnfields;
+
   struct nextfnfield *head;
 };
 
@@ -1697,7 +1702,7 @@ static struct using_direct **using_directives (enum language);
 
 static void read_import_statement (struct die_info *die, struct dwarf2_cu *);
 
-static int read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu);
+static int read_imported_decl (struct die_info *die, struct dwarf2_cu *cu);
 
 static struct type *read_module_type (struct die_info *die,
 				      struct dwarf2_cu *cu);
@@ -8424,7 +8429,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_imported_declaration:
       cu->processing_has_namespace_info = 1;
-      if (read_namespace_alias (die, cu))
+      if (read_imported_decl (die, cu))
 	break;
       /* The declaration is not a global namespace alias: fall through.  */
     case DW_TAG_imported_module:
@@ -8893,24 +8898,64 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   return retval;
 }
 
-/* Inspect DIE in CU for a namespace alias.  If one exists, record
+/* Add a ctor or dtor method or alias to PARENT_TYPE.
+
+   NAME_DIE/NAME_CU is the DIE/CU that contains the name of this xtor.
+   TYPE_DIE/TYPE_CU is the DIE/CU that contains the method to which the
+   name is aliased and may (both) be NULL to indicate
+   that it is the same as NAME_DIE/CU, i.e., not aliased.  */
+
+static void
+add_xtor_field (struct type *parent_type,
+		struct die_info *name_die, struct dwarf2_cu *name_cu,
+		struct die_info *type_die, struct dwarf2_cu *type_cu,
+		const char *name)
+{
+  int i;
+
+  for (i = 0; i < TYPE_NFN_FIELDS (parent_type); ++i)
+    {
+      struct fn_field *methods = TYPE_FN_FIELDLIST1 (parent_type, i);
+
+      if (streq (TYPE_FN_FIELDLIST_NAME (parent_type, i), name))
+	{
+	  short idx;
+
+	  /* Add a new fnfield.  Memory for this was pre-allocated
+	     when we saw the constructor definition in the parent
+	     type.  See struct fnfieldlist.addl_fnfields.  */
+	  idx = (TYPE_FN_FIELDLIST_LENGTH (parent_type, i))++;
+	  methods[idx] = new_fn_field (name_die, name_cu, type_die, type_cu,
+				       parent_type, name, idx, i);
+
+	  /* If this is an aliased xtor, mark it as an alias so that
+	     it will be ignored during symbol searches and type printing.  */
+	  if (name_die != type_die)
+	    TYPE_FN_FIELD_ALIAS (methods, idx) = 1;
+
+	  return;
+	}
+    }
+}
+
+/* Inspect DIE in CU for a namespace or symbol  alias.  If one exists, record
    a new symbol for it.
 
-   Returns 1 if a namespace alias was recorded, 0 otherwise.  */
+   Returns 1 if an alias was recorded, 0 otherwise.  */
 
 static int
-read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
+read_imported_decl (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
 
-  /* If the die does not have a name, this is not a namespace
-     alias.  */
+  /* If the die does not have a name, this is not an alias.  */
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr != NULL)
     {
       int num;
       struct die_info *d = die;
       struct dwarf2_cu *imported_cu = cu;
+      const char *name = dwarf2_name (die, cu);
 
       /* If the compiler has nested DW_AT_imported_declaration DIEs,
 	 keep inspecting DIEs until we hit the underlying import.  */
@@ -8946,6 +8991,68 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 		 a symbol for it whose type is the aliased namespace.  */
 	      new_symbol (die, type, cu);
 	      return 1;
+	    }
+	  else
+	    {
+	      const char *linkage_name = dw2_linkage_name (die, cu);
+
+	      /* Handle imported (aka "aliased") constructors and
+		 destructors.  */
+	      if (linkage_name != NULL)
+		{
+		  enum ctor_kinds ctor_kind;
+		  enum dtor_kinds dtor_kind = not_dtor;
+
+		  ctor_kind = is_constructor_name (linkage_name);
+		  if (ctor_kind == not_ctor)
+		    dtor_kind = is_destructor_name (linkage_name);
+
+		  /* GCC outputs imported_declaration for C1 constructors
+		     and D1 destructors which alias to the C4/D4/unified
+		     ctor/dtor listed in the parent class's DIE tree.
+		     Deal with those here.  */
+		  if (ctor_kind !=  not_ctor || dtor_kind != not_dtor)
+		    {
+		      struct die_info *imported_die, *spec_die, *parent_die;
+		      struct die_info *type_die;
+		      struct dwarf2_cu *imported_cu, *spec_cu, *parent_cu;
+		      struct dwarf2_cu *type_cu;
+		      struct type *parent_type;
+
+		      /* If there is a specification DIE, use that as the
+			 parent DIE.  */
+		      imported_cu = cu;
+		      imported_die = follow_die_ref (die, attr, &imported_cu);
+		      if (imported_die == NULL)
+			return 0;
+
+		      spec_cu = imported_cu;
+		      spec_die = die_specification (imported_die, &spec_cu);
+		      if (spec_die != NULL)
+			{
+			  parent_die = spec_die->parent;
+			  parent_cu = spec_cu;
+			  type_die = spec_die;
+			  type_cu = spec_cu;
+			}
+		      else
+			{
+			  parent_die = imported_die->parent;
+			  parent_cu = imported_cu;
+			  type_die = imported_die;
+			  type_cu = imported_cu;
+			}
+		      parent_type
+			= get_die_type_at_offset (parent_die->offset,
+						  parent_cu->per_cu);
+		      if (parent_type != NULL)
+			{
+			  add_xtor_field (parent_type, die, cu,
+					  type_die, type_cu, name);
+			  return 1;
+			}
+		    }
+		}
 	    }
 	}
     }
@@ -11422,6 +11529,51 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (cleanups);
 }
 
+/* If DIE represents a constructor or destructor, add an alias
+   to the parent type's fieldlist.  */
+
+static void
+possibly_add_new_xtor_method (const char *name, struct die_info *die,
+			      struct dwarf2_cu *cu)
+{
+  const char *linkage_name = dw2_linkage_name (die, cu);
+
+  if (linkage_name == NULL || cu->language != language_cplus)
+    return;
+
+  enum ctor_kinds ctor_kind = is_constructor_name (linkage_name);
+
+  if (ctor_kind == not_ctor)
+    {
+      enum dtor_kinds dtor_kind = is_destructor_name (linkage_name);
+
+      if (dtor_kind == not_dtor)
+	return;
+    }
+
+  if (dwarf2_attr (die, DW_AT_specification, cu))
+    {
+      struct dwarf2_cu *spec_cu = cu;
+      struct die_info *spec_die = die_specification (die, &spec_cu);
+      const char *spec_linkage_name
+	= dw2_linkage_name (spec_die, spec_cu);
+
+      if (streq (linkage_name, spec_linkage_name))
+	return;
+
+      if (spec_die->parent != NULL)
+	{
+	  int i;
+	  struct type *parent_type;
+
+	  parent_type
+	    = get_die_type_at_offset (spec_die->parent->offset, cu->per_cu);
+
+	  add_xtor_field (parent_type, die, cu, NULL, NULL, name);
+	}
+    }
+}
+
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -11615,6 +11767,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
     }
+
+  possibly_add_new_xtor_method (name, die, cu);
 
   /* In C++, we can have functions nested inside functions (e.g., when
      a function declares a class that has methods).  This means that
@@ -13394,6 +13548,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       flp->name = fieldname;
       flp->length = 0;
       flp->head = NULL;
+      flp->addl_fnfields = 0;
       i = fip->nfnfields++;
     }
 
@@ -13409,6 +13564,19 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Fill in the member function field info.  */
   new_fnfield->fnfield = new_fn_field (die, cu, NULL, NULL, type, fieldname,
 				       flp->length - 1, i);
+  /* Reserve additional fnfields for aliased constructors and destructors.  */
+  if (new_fnfield->fnfield.is_constructor)
+    {
+      /* Reserve two additional fields for C1 and C2 aliases.  */
+      /* [We could do this only when we see the C4/unified ctor,
+	 but it is safest to always do this.]  */
+      flp->addl_fnfields += 2;
+    }
+  else if (new_fnfield->fnfield.is_destructor)
+    {
+      /* Reserve three additional fields for D0, D1, and D2 aliases.  */
+      flp->addl_fnfields += 3;
+    }
 }
 
 /* Create the vector of member function fields, and attach it to the type.  */
@@ -13431,12 +13599,13 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
     {
       struct nextfnfield *nfp = flp->head;
       struct fn_fieldlist *fn_flp = &TYPE_FN_FIELDLIST (type, i);
-      int k;
+      int k, num;
 
       TYPE_FN_FIELDLIST_NAME (type, i) = flp->name;
       TYPE_FN_FIELDLIST_LENGTH (type, i) = flp->length;
+      num = flp->length + flp->addl_fnfields;
       fn_flp->fn_fields = (struct fn_field *)
-	TYPE_ALLOC (type, sizeof (struct fn_field) * flp->length);
+	TYPE_ALLOC (type, sizeof (struct fn_field) * num);
       for (k = flp->length; (k--, nfp); nfp = nfp->next)
 	fn_flp->fn_fields[k] = nfp->fnfield;
     }

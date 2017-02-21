@@ -2017,11 +2017,19 @@ search_struct_method (const char *name, struct value **arg1p,
 	}
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
-	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
+	  int j = 0, k;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 
 	  name_matched = 1;
 	  check_stub_method_group (type, i);
+
+	  /* Count the number of non-aliased/duplicated methods.  */
+	  for (k = 0; k < TYPE_FN_FIELDLIST_LENGTH (type, i); ++k)
+	    {
+	      if (!TYPE_FN_FIELD_ALIAS (f, k))
+		++j;
+	    }
+	  --j;
 	  if (j > 0 && args == 0)
 	    error (_("cannot resolve overloaded method "
 		     "`%s': no arguments supplied"), name);
@@ -3434,13 +3442,14 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      j = -1;
 	      for (ii = 0; ii < len; ++ii)
 		{
-		  /* Skip artificial methods.  This is necessary if,
-		     for example, the user wants to "print
+		  /* Skip artificial and aliased methods.  This is necessary
+		     if, for example, the user wants to "print
 		     subclass::subclass" with only one user-defined
 		     constructor.  There is no ambiguity in this case.
 		     We are careful here to allow artificial methods
 		     if they are the unique result.  */
-		  if (TYPE_FN_FIELD_ARTIFICIAL (f, ii))
+		  if (TYPE_FN_FIELD_ARTIFICIAL (f, ii)
+		      || TYPE_FN_FIELD_ALIAS (f, ii))
 		    {
 		      if (j == -1)
 			j = ii;
@@ -3449,7 +3458,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 		  /* Desired method is ambiguous if more than one
 		     method is defined.  */
-		  if (j != -1 && !TYPE_FN_FIELD_ARTIFICIAL (f, j))
+		  if (j != -1 && !TYPE_FN_FIELD_ARTIFICIAL (f, j)
+		      && !TYPE_FN_FIELD_ALIAS (f, j))
 		    error (_("non-unique member `%s' requires "
 			     "type instantiation"), name);
 

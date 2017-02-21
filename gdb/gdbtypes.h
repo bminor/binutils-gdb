@@ -876,7 +876,7 @@ struct fn_field
   /* * True if this function is aliased to an existing fn_field,
      false otherwise.  These functions should be skipped during symbol
      lookups or type printing.  */
-  unsigned int is_duplicate : 1;
+  unsigned int is_alias : 1;
 
   /* * Unused.  */
 
@@ -1450,6 +1450,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
 #define TYPE_FN_FIELD_CONSTRUCTOR(thisfn, n) ((thisfn)[n].is_constructor)
 #define TYPE_FN_FIELD_DESTRUCTOR(thisfn, n) ((thisfn)[n].is_destructor)
+#define TYPE_FN_FIELD_ALIAS(thisfn, n) ((thisfn)[n].is_alias)
 #define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
