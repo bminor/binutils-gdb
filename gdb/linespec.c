@@ -298,10 +298,12 @@ static int symbol_to_sal (struct symtab_and_line *result,
 			  int funfirstline, struct symbol *sym);
 
 static void add_matching_symbols_to_info (const char *name,
+					  domain_enum domain,
 					  struct collect_info *info,
 					  struct program_space *pspace);
 
 static void add_all_symbol_names_from_pspace (struct collect_info *info,
+					      domain_enum domain,
 					      struct program_space *pspace,
 					      VEC (const_char_ptr) *names);
 
@@ -2726,7 +2728,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
       return values;
     }
 
-  add_all_symbol_names_from_pspace (&info, NULL, symbol_names);
+  add_all_symbol_names_from_pspace (&info, VAR_DOMAIN, NULL, symbol_names);
 
   if (!VEC_empty (block_symbol_d, info.result.symbols)
       || !VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
@@ -2939,6 +2941,7 @@ compare_msymbols (const void *a, const void *b)
 
 static void
 add_all_symbol_names_from_pspace (struct collect_info *info,
+				  domain_enum domain,
 				  struct program_space *pspace,
 				  VEC (const_char_ptr) *names)
 {
@@ -2946,7 +2949,7 @@ add_all_symbol_names_from_pspace (struct collect_info *info,
   const char *iter;
 
   for (ix = 0; VEC_iterate (const_char_ptr, names, ix, iter); ++ix)
-    add_matching_symbols_to_info (iter, info, pspace);
+    add_matching_symbols_to_info (iter, domain, info, pspace);
 }
 
 static void
@@ -3054,7 +3057,8 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	  /* We have a list of candidate symbol names, so now we
 	     iterate over the symbol tables looking for all
 	     matches in this pspace.  */
-	  add_all_symbol_names_from_pspace (&info, pspace, result_names);
+	  add_all_symbol_names_from_pspace (&info, VAR_DOMAIN, pspace,
+					    result_names);
 
 	  VEC_truncate (typep, superclass_vec, 0);
 	  last_result_len = VEC_length (const_char_ptr, result_names);
@@ -3201,10 +3205,13 @@ find_function_symbols (struct linespec_state *state,
   /* Try NAME as an Objective-C selector.  */
   find_imps (name, &symbol_names);
   if (!VEC_empty (const_char_ptr, symbol_names))
-    add_all_symbol_names_from_pspace (&info, state->search_pspace,
+    add_all_symbol_names_from_pspace (&info, VAR_DOMAIN, state->search_pspace,
 				      symbol_names);
   else
-    add_matching_symbols_to_info (name, &info, state->search_pspace);
+    {
+      add_matching_symbols_to_info (name, VAR_DOMAIN, &info,
+				    state->search_pspace);
+    }
 
   do_cleanups (cleanup);
 
@@ -3802,6 +3809,7 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 
 static void
 add_matching_symbols_to_info (const char *name,
+			      domain_enum domain,
 			      struct collect_info *info,
 			      struct program_space *pspace)
 {
@@ -3812,7 +3820,7 @@ add_matching_symbols_to_info (const char *name,
     {
       if (elt == NULL)
 	{
-	  iterate_over_all_matching_symtabs (info->state, name, VAR_DOMAIN,
+	  iterate_over_all_matching_symtabs (info->state, name, domain,
 					     collect_symbols, info,
 					     pspace, 1);
 	  search_minsyms_for_name (info, name, pspace, NULL);
@@ -3825,7 +3833,7 @@ add_matching_symbols_to_info (const char *name,
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  iterate_over_file_blocks (elt, name, VAR_DOMAIN,
+	  iterate_over_file_blocks (elt, name, domain,
 				    collect_symbols, info);
 
 	  /* If no new symbols were found in this iteration and this symtab
