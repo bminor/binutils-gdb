@@ -39,15 +39,24 @@ struct frame_info;
    non-zero.  */
 enum ctor_kinds {
 
+  /* Unrecognized or not a constructor.  */
+  not_ctor = 0,
+
   /* Initialize a complete object, including virtual bases, using
      memory provided by caller.  */
-  complete_object_ctor = 1,
+  complete_object_ctor,
 
   /* Initialize a base object of some larger object.  */
   base_object_ctor,
 
   /* An allocating complete-object constructor.  */
-  complete_object_allocating_ctor
+  complete_object_allocating_ctor,
+
+  /* GCC's "unified" constructor.  */
+  unified_ctor,
+
+  /* Deprecated?  */
+  object_ctor_group
 };
 
 /* Return non-zero iff NAME is the mangled name of a constructor.
@@ -60,9 +69,12 @@ extern enum ctor_kinds is_constructor_name (const char *name);
    non-zero.  */
 enum dtor_kinds {
 
+  /* Unrecognized or not a destructor.  */
+  not_dtor = 0,
+
   /* A destructor which finalizes the entire object, and then calls
      `delete' on its storage.  */
-  deleting_dtor = 1,
+  deleting_dtor,
 
   /* A destructor which finalizes the entire object, but does not call
      `delete'.  */
@@ -70,7 +82,13 @@ enum dtor_kinds {
 
   /* A destructor which finalizes a subobject of some larger
      object.  */
-  base_object_dtor
+  base_object_dtor,
+
+  /* GCC's "unified" destructor.  */
+  unified_dtor,
+
+  /* Deprecated?  */
+  object_dtor_group
 };
   
 /* Return non-zero iff NAME is the mangled name of a destructor.

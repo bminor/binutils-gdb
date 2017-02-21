@@ -13096,6 +13096,15 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
   const char *type_name;
   int len;
 
+  /* If there is a linkage name, use it to determine if this DIE represents
+     a constructor.  */
+  const char *linkage_name = dw2_linkage_name (die, cu);
+
+  if (linkage_name != NULL)
+    return is_constructor_name (linkage_name) != not_ctor;
+
+  /* Many older versions of GCC do not output DW_AT_linkage_name for
+     constructors.  In that case, fallback to a heuristic test.  */
   if (die->parent == NULL)
     return 0;
 
@@ -13112,6 +13121,32 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
   len = strlen (fieldname);
   return (strncmp (fieldname, type_name, len) == 0
 	  && (type_name[len] == '\0' || type_name[len] == '<'));
+}
+
+/* Return true if this member function is a destructor, false
+   otherwise.  */
+
+static int
+dwarf2_is_destructor (struct die_info *die, struct dwarf2_cu *cu)
+{
+  /* If there is a linkage name, use it to determine if this DIE represents
+     a destructor.  */
+  const char *linkage_name = dw2_linkage_name (die, cu);
+
+  if (linkage_name != NULL)
+    return is_destructor_name (linkage_name) != not_dtor;
+
+  if (die->parent == NULL)
+    return 0;
+
+  if (die->parent->tag != DW_TAG_structure_type
+      && die->parent->tag != DW_TAG_union_type
+      && die->parent->tag != DW_TAG_class_type)
+    return 0;
+
+  const char *fieldname = dwarf2_name (die, cu);
+
+  return (fieldname != NULL && *fieldname == '~');
 }
 
 /* Create a new fn_field which may represent an alias to an existing
@@ -13211,6 +13246,30 @@ new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
     fnfield.is_artificial = 1;
 
   fnfield.is_constructor = dwarf2_is_constructor (name_die, type_cu);
+  if (fnfield.is_constructor)
+    {
+      const char *linkage_name = dw2_linkage_name (name_die, name_cu);
+
+      if (linkage_name != NULL)
+	{
+	  fnfield.cdtor_type.ctor_kind = is_constructor_name (linkage_name);
+	  gdb_assert (fnfield.cdtor_type.ctor_kind != not_ctor);
+	}
+    }
+  else
+    {
+      fnfield.is_destructor = dwarf2_is_destructor (name_die, name_cu);
+      if (fnfield.is_destructor)
+	{
+	  const char *linkage_name = dw2_linkage_name (name_die, name_cu);
+
+	  if (linkage_name != NULL)
+	    {
+	      fnfield.cdtor_type.dtor_kind = is_destructor_name (linkage_name);
+	      gdb_assert (fnfield.cdtor_type.dtor_kind != not_dtor);
+	    }
+	}
+    }
 
   /* Get index in virtual function table if it is a virtual member
      function.  For older versions of GCC, this is an offset in the
