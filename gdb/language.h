@@ -35,7 +35,11 @@ struct value_print_options;
 struct type_print_options;
 struct lang_varobj_ops;
 struct parser_state;
-struct compile_instance;
+
+namespace compile
+{
+  class compile_instance;
+};
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -400,7 +404,7 @@ struct language_defn
        instance is owned by its caller and must be deallocated by
        calling its 'destroy' method.  */
 
-    struct compile_instance *(*la_get_compile_instance) (void);
+    compile::compile_instance *(*la_get_compile_instance) (void);
 
     /* This method must be defined if 'la_get_gcc_context' is defined.
        If 'la_get_gcc_context' is not defined, then this method is
@@ -416,7 +420,7 @@ struct language_defn
        parsed.
        EXPR_PC is the PC at which the expression is being parsed.  */
 
-    std::string (*la_compute_program) (struct compile_instance *inst,
+    std::string (*la_compute_program) (compile::compile_instance *inst,
 				       const char *input,
 				       struct gdbarch *gdbarch,
 				       const struct block *expr_block,

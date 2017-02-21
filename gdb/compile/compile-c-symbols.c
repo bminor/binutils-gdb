@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
+#include "compile-c.h"
 #include "symtab.h"
 #include "parser-defs.h"
 #include "block.h"
@@ -32,104 +33,12 @@
 
 
 
-/* Object of this type are stored in the compiler's symbol_err_map.  */
+using namespace compile;
 
-struct symbol_error
-{
-  /* The symbol.  */
+/* See description in compile-c.h.  */
 
-  const struct symbol *sym;
-
-  /* The error message to emit.  This is malloc'd and owned by the
-     hash table.  */
-
-  char *message;
-};
-
-/* Hash function for struct symbol_error.  */
-
-static hashval_t
-hash_symbol_error (const void *a)
-{
-  const struct symbol_error *se = (const struct symbol_error *) a;
-
-  return htab_hash_pointer (se->sym);
-}
-
-/* Equality function for struct symbol_error.  */
-
-static int
-eq_symbol_error (const void *a, const void *b)
-{
-  const struct symbol_error *sea = (const struct symbol_error *) a;
-  const struct symbol_error *seb = (const struct symbol_error *) b;
-
-  return sea->sym == seb->sym;
-}
-
-/* Deletion function for struct symbol_error.  */
-
-static void
-del_symbol_error (void *a)
-{
-  struct symbol_error *se = (struct symbol_error *) a;
-
-  xfree (se->message);
-  xfree (se);
-}
-
-/* Associate SYMBOL with some error text.  */
-
-static void
-insert_symbol_error (htab_t hash, const struct symbol *sym, const char *text)
-{
-  struct symbol_error e;
-  void **slot;
-
-  e.sym = sym;
-  slot = htab_find_slot (hash, &e, INSERT);
-  if (*slot == NULL)
-    {
-      struct symbol_error *e = XNEW (struct symbol_error);
-
-      e->sym = sym;
-      e->message = xstrdup (text);
-      *slot = e;
-    }
-}
-
-/* Emit the error message corresponding to SYM, if one exists, and
-   arrange for it not to be emitted again.  */
-
-static void
-error_symbol_once (struct compile_c_instance *context,
-		   const struct symbol *sym)
-{
-  struct symbol_error search;
-  struct symbol_error *err;
-  char *message;
-
-  if (context->symbol_err_map == NULL)
-    return;
-
-  search.sym = sym;
-  err = (struct symbol_error *) htab_find (context->symbol_err_map, &search);
-  if (err == NULL || err->message == NULL)
-    return;
-
-  message = err->message;
-  err->message = NULL;
-  make_cleanup (xfree, message);
-  error (_("%s"), message);
-}
-
-
-
-/* Compute the name of the pointer representing a local symbol's
-   address.  */
-
-static char *
-symbol_substitution_name (struct symbol *sym)
+char *
+c_symbol_substitution_name (struct symbol *sym)
 {
   return concat ("__", SYMBOL_NATURAL_NAME (sym), "_ptr", (char *) NULL);
 }
@@ -142,7 +51,7 @@ symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (struct compile_c_instance *context,
+convert_one_symbol (compile_c_instance *context,
 		    struct block_symbol sym,
 		    int is_global,
 		    int is_local)
@@ -151,19 +60,18 @@ convert_one_symbol (struct compile_c_instance *context,
   const char *filename = symbol_symtab (sym.symbol)->filename;
   unsigned short line = SYMBOL_LINE (sym.symbol);
 
-  error_symbol_once (context, sym.symbol);
+  context->error_symbol_once (sym.symbol);
 
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = convert_type (context, SYMBOL_TYPE (sym.symbol));
+    sym_type = context->convert_type (SYMBOL_TYPE (sym.symbol));
 
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
-      C_CTX (context)->c_ops->tagbind (C_CTX (context),
-				       SYMBOL_NATURAL_NAME (sym.symbol),
-				       sym_type, filename, line);
+      context->tagbind (SYMBOL_NATURAL_NAME (sym.symbol),
+			sym_type, filename, line);
     }
   else
     {
@@ -196,9 +104,8 @@ convert_one_symbol (struct compile_c_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  C_CTX (context)->c_ops->build_constant
-	    (C_CTX (context),
-	     sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
+	  context->build_constant
+	    (sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
 	     SYMBOL_VALUE (sym.symbol),
 	     filename, line);
 	  return;
@@ -267,7 +174,7 @@ convert_one_symbol (struct compile_c_instance *context,
 	case LOC_LOCAL:
 	substitution:
 	  kind = GCC_C_SYMBOL_VARIABLE;
-	  symbol_name = symbol_substitution_name (sym.symbol);
+	  symbol_name = c_symbol_substitution_name (sym.symbol);
 	  break;
 
 	case LOC_STATIC:
@@ -282,18 +189,17 @@ convert_one_symbol (struct compile_c_instance *context,
 	}
 
       /* Don't emit local variable decls for a raw expression.  */
-      if (context->base.scope != COMPILE_I_RAW_SCOPE
+      if (context->scope () != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  decl = C_CTX (context)->c_ops->build_decl
-	    (C_CTX (context),
-	     SYMBOL_NATURAL_NAME (sym.symbol),
+	  decl = context->build_decl
+	    (SYMBOL_NATURAL_NAME (sym.symbol),
 	     kind,
 	     sym_type,
 	     symbol_name, addr,
 	     filename, line);
 
-	  C_CTX (context)->c_ops->bind (C_CTX (context), decl, is_global);
+	  context->bind (decl, is_global);
 	}
 
       xfree (symbol_name);
@@ -305,7 +211,7 @@ convert_one_symbol (struct compile_c_instance *context,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
+convert_symbol_sym (compile_c_instance *context, const char *identifier,
 		    struct block_symbol sym, domain_enum domain)
 {
   const struct block *static_block;
@@ -355,7 +261,7 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (struct compile_c_instance *context,
+convert_symbol_bmsym (compile_c_instance *context,
 		      struct bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
@@ -405,12 +311,10 @@ convert_symbol_bmsym (struct compile_c_instance *context,
       break;
     }
 
-  sym_type = convert_type (context, type);
-  decl = C_CTX (context)->c_ops->build_decl (C_CTX (context),
-					     MSYMBOL_NATURAL_NAME (msym),
-					     kind, sym_type, NULL, addr,
-					     NULL, 0);
-  C_CTX (context)->c_ops->bind (C_CTX (context), decl, 1 /* is_global */);
+  sym_type = context->convert_type (type);
+  decl = context->build_decl (MSYMBOL_NATURAL_NAME (msym),
+			      kind, sym_type, NULL, addr, NULL, 0);
+  context->bind (decl, true /* is_global */);
 }
 
 /* See compile-internal.h.  */
@@ -421,7 +325,7 @@ gcc_convert_symbol (void *datum,
 		    enum gcc_c_oracle_request request,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) datum;
+  compile_c_instance *context = static_cast<compile_c_instance *> (datum);
   domain_enum domain;
   int found = 0;
 
@@ -446,7 +350,7 @@ gcc_convert_symbol (void *datum,
     {
       struct block_symbol sym;
 
-      sym = lookup_symbol (identifier, context->base.block, domain, NULL);
+      sym = lookup_symbol (identifier, context->block (), domain, NULL);
       if (sym.symbol != NULL)
 	{
 	  convert_symbol_sym (context, identifier, sym, domain);
@@ -467,7 +371,7 @@ gcc_convert_symbol (void *datum,
 
   CATCH (e, RETURN_MASK_ALL)
     {
-      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+      context->error (e.message);
     }
   END_CATCH
 
@@ -484,7 +388,7 @@ gcc_address
 gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) datum;
+  compile_c_instance *context = static_cast<compile_c_instance *> (datum);
   gcc_address result = 0;
   int found = 0;
 
@@ -529,7 +433,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+      context->error (e.message);
     }
   END_CATCH
 
@@ -583,7 +487,7 @@ symbol_seen (htab_t hashtab, struct symbol *sym)
 /* Generate C code to compute the length of a VLA.  */
 
 static void
-generate_vla_size (struct compile_c_instance *compiler,
+generate_vla_size (compile_instance *compiler,
 		   string_file &stream,
 		   struct gdbarch *gdbarch,
 		   unsigned char *registers_used,
@@ -639,7 +543,7 @@ generate_vla_size (struct compile_c_instance *compiler,
 /* Generate C code to compute the address of SYM.  */
 
 static void
-generate_c_for_for_one_variable (struct compile_c_instance *compiler,
+generate_c_for_for_one_variable (compile_instance *compiler,
 				 string_file &stream,
 				 struct gdbarch *gdbarch,
 				 unsigned char *registers_used,
@@ -663,7 +567,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 
       if (SYMBOL_COMPUTED_OPS (sym) != NULL)
 	{
-	  char *generated_name = symbol_substitution_name (sym);
+	  char *generated_name = c_symbol_substitution_name (sym);
 	  struct cleanup *cleanup = make_cleanup (xfree, generated_name);
 	  /* We need to emit to a temporary buffer in case an error
 	     occurs in the middle.  */
@@ -702,22 +606,15 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      if (compiler->symbol_err_map == NULL)
-	compiler->symbol_err_map = htab_create_alloc (10,
-						      hash_symbol_error,
-						      eq_symbol_error,
-						      del_symbol_error,
-						      xcalloc,
-						      xfree);
-      insert_symbol_error (compiler->symbol_err_map, sym, e.message);
+      compiler->insert_symbol_error (sym, e.message);
     }
   END_CATCH
 }
 
-/* See compile-internal.h.  */
+/* See compile-c.h.  */
 
 unsigned char *
-generate_c_for_variable_locations (struct compile_c_instance *compiler,
+generate_c_for_variable_locations (compile_instance *compiler,
 				   string_file &stream,
 				   struct gdbarch *gdbarch,
 				   const struct block *block,
