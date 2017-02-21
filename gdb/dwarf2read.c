@@ -1796,6 +1796,12 @@ static int attr_to_dynamic_prop (const struct attribute *attr,
 				 struct die_info *die, struct dwarf2_cu *cu,
 				 struct dynamic_prop *prop);
 
+static struct fn_field new_fn_field
+  (struct die_info *name_die, struct dwarf2_cu *name_cu,
+   struct die_info *type_die, struct dwarf2_cu *type_cu,
+   struct type *type, const char *fieldname,
+   int fnl_idx, int field_idx);
+
 /* memory allocation interface */
 
 static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
@@ -13051,21 +13057,193 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
 	  && (type_name[len] == '\0' || type_name[len] == '<'));
 }
 
+/* Create a new fn_field which may represent an alias to an existing
+   field (if a constructor or destructor).  TYPE_DIE and TYPE_CU
+   may be NULL, in which case they default to NAME_DIE and NAME_CU,
+   i.e., not an aliased method.  */
+
+static struct fn_field
+new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
+	      struct die_info *type_die, struct dwarf2_cu *type_cu,
+	      struct type *type, const char *fieldname,
+	      int fnl_idx, int field_idx)
+{
+  struct fn_field fnfield;
+  struct objfile *objfile;
+  struct attribute *attr;
+  struct type *this_type;
+  enum dwarf_access_attribute accessibility;
+
+  memset (&fnfield, 0, sizeof (fnfield));
+
+  if (type_die == NULL)
+    type_die = name_die;
+  if (type_cu == NULL)
+    type_cu = name_cu;
+
+  objfile = type_cu->objfile;
+
+  /* Delay processing of the physname until later.  */
+  if (type_cu->language == language_cplus)
+    {
+      add_to_method_list (type, field_idx, fnl_idx, fieldname,
+			  name_die, name_cu);
+    }
+  else
+    {
+      const char *physname = dwarf2_physname (fieldname, name_die, name_cu);
+      fnfield.physname = physname ? physname : "";
+    }
+
+  fnfield.type = alloc_type (objfile);
+  this_type = read_type_die (type_die, type_cu);
+  if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
+    {
+      int nparams = TYPE_NFIELDS (this_type);
+
+      /* TYPE is the domain of this method, and THIS_TYPE is the type
+	   of the method itself (TYPE_CODE_METHOD).  */
+      smash_to_method_type (fnfield.type, type,
+			    TYPE_TARGET_TYPE (this_type),
+			    TYPE_FIELDS (this_type),
+			    TYPE_NFIELDS (this_type),
+			    TYPE_VARARGS (this_type));
+
+      /* Handle static member functions.
+         Dwarf2 has no clean way to discern C++ static and non-static
+         member functions.  G++ helps GDB by marking the first
+         parameter for non-static member functions (which is the this
+         pointer) as artificial.  We obtain this information from
+         read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
+      if (nparams == 0 || TYPE_FIELD_ARTIFICIAL (this_type, 0) == 0)
+	fnfield.voffset = VOFFSET_STATIC;
+    }
+  else
+    complaint (&symfile_complaints, _("member function type missing for '%s'"),
+	       dwarf2_full_name (fieldname, name_die, name_cu));
+
+  /* Get fcontext from DW_AT_containing_type if present.  */
+  if (dwarf2_attr (type_die, DW_AT_containing_type, type_cu) != NULL)
+    fnfield.fcontext = die_containing_type (type_die, type_cu);
+
+  /* dwarf2 doesn't have stubbed physical names, so the setting of is_const and
+     is_volatile is irrelevant, as it is needed by gdb_mangle_name only.  */
+
+  /* Get accessibility.  */
+  attr = dwarf2_attr (type_die, DW_AT_accessibility, type_cu);
+  if (attr)
+    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
+  else
+    accessibility = dwarf2_default_access_attribute (type_die, type_cu);
+  switch (accessibility)
+    {
+    case DW_ACCESS_public:
+      fnfield.is_public = 1;
+      break;
+    case DW_ACCESS_private:
+      fnfield.is_private = 1;
+      break;
+    case DW_ACCESS_protected:
+      fnfield.is_protected = 1;
+      break;
+    }
+
+  /* Check for artificial methods.  */
+  attr = dwarf2_attr (type_die, DW_AT_artificial, type_cu);
+  if (attr && DW_UNSND (attr) != 0)
+    fnfield.is_artificial = 1;
+
+  fnfield.is_constructor = dwarf2_is_constructor (name_die, type_cu);
+
+  /* Get index in virtual function table if it is a virtual member
+     function.  For older versions of GCC, this is an offset in the
+     appropriate virtual table, as specified by DW_AT_containing_type.
+     For everyone else, it is an expression to be evaluated relative
+     to the object address.  */
+
+  attr = dwarf2_attr (type_die, DW_AT_vtable_elem_location, type_cu);
+  if (attr)
+    {
+      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0)
+        {
+	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
+	    {
+	      /* Old-style GCC.  */
+	      fnfield.voffset = decode_locdesc (DW_BLOCK (attr), type_cu) + 2;
+	    }
+	  else if (DW_BLOCK (attr)->data[0] == DW_OP_deref
+		   || (DW_BLOCK (attr)->size > 1
+		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
+		       && DW_BLOCK (attr)->data[1] == type_cu->header.addr_size))
+	    {
+	      fnfield.voffset = decode_locdesc (DW_BLOCK (attr), type_cu);
+	      if ((fnfield.voffset % type_cu->header.addr_size) != 0)
+		dwarf2_complex_location_expr_complaint ();
+	      else
+		fnfield.voffset /= type_cu->header.addr_size;
+	      fnfield.voffset += 2;
+	    }
+	  else
+	    dwarf2_complex_location_expr_complaint ();
+
+	  if (!fnfield.fcontext)
+	    {
+	      /* If there is no `this' field and no DW_AT_containing_type,
+		 we cannot actually find a base class context for the
+		 vtable!  */
+	      if (TYPE_NFIELDS (this_type) == 0
+		  || !TYPE_FIELD_ARTIFICIAL (this_type, 0))
+		{
+		  complaint (&symfile_complaints,
+			     _("cannot determine context for virtual member "
+			       "function \"%s\" (offset %d)"),
+			     fieldname, type_die->offset.sect_off);
+		}
+	      else
+		{
+		  fnfield.fcontext
+		    = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
+		}
+	    }
+	}
+      else if (attr_form_is_section_offset (attr))
+        {
+	  dwarf2_complex_location_expr_complaint ();
+        }
+      else
+        {
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
+						 fieldname);
+        }
+    }
+  else
+    {
+      attr = dwarf2_attr (type_die, DW_AT_virtuality, type_cu);
+      if (attr && DW_UNSND (attr))
+	{
+	  /* GCC does this, as of 2008-08-25; PR debug/37237.  */
+	  complaint (&symfile_complaints,
+		     _("Member function \"%s\" (offset %d) is virtual "
+		       "but the vtable offset is not specified"),
+		     fieldname, type_die->offset.sect_off);
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  TYPE_CPLUS_DYNAMIC (type) = 1;
+	}
+    }
+
+  return fnfield;
+}
+
 /* Add a member function to the proper fieldlist.  */
 
 static void
 dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 		      struct type *type, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
-  struct attribute *attr;
   struct fnfieldlist *flp;
   int i;
-  struct fn_field *fnp;
-  const char *fieldname;
+  const char *fieldname, *linkage_name;
   struct nextfnfield *new_fnfield;
-  struct type *this_type;
-  enum dwarf_access_attribute accessibility;
 
   if (cu->language == language_ada)
     error (_("unexpected member function in Ada type"));
@@ -13113,152 +13291,8 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   flp->length++;
 
   /* Fill in the member function field info.  */
-  fnp = &new_fnfield->fnfield;
-
-  /* Delay processing of the physname until later.  */
-  if (cu->language == language_cplus)
-    {
-      add_to_method_list (type, i, flp->length - 1, fieldname,
-			  die, cu);
-    }
-  else
-    {
-      const char *physname = dwarf2_physname (fieldname, die, cu);
-      fnp->physname = physname ? physname : "";
-    }
-
-  fnp->type = alloc_type (objfile);
-  this_type = read_type_die (die, cu);
-  if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
-    {
-      int nparams = TYPE_NFIELDS (this_type);
-
-      /* TYPE is the domain of this method, and THIS_TYPE is the type
-	   of the method itself (TYPE_CODE_METHOD).  */
-      smash_to_method_type (fnp->type, type,
-			    TYPE_TARGET_TYPE (this_type),
-			    TYPE_FIELDS (this_type),
-			    TYPE_NFIELDS (this_type),
-			    TYPE_VARARGS (this_type));
-
-      /* Handle static member functions.
-         Dwarf2 has no clean way to discern C++ static and non-static
-         member functions.  G++ helps GDB by marking the first
-         parameter for non-static member functions (which is the this
-         pointer) as artificial.  We obtain this information from
-         read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
-      if (nparams == 0 || TYPE_FIELD_ARTIFICIAL (this_type, 0) == 0)
-	fnp->voffset = VOFFSET_STATIC;
-    }
-  else
-    complaint (&symfile_complaints, _("member function type missing for '%s'"),
-	       dwarf2_full_name (fieldname, die, cu));
-
-  /* Get fcontext from DW_AT_containing_type if present.  */
-  if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
-    fnp->fcontext = die_containing_type (die, cu);
-
-  /* dwarf2 doesn't have stubbed physical names, so the setting of is_const and
-     is_volatile is irrelevant, as it is needed by gdb_mangle_name only.  */
-
-  /* Get accessibility.  */
-  attr = dwarf2_attr (die, DW_AT_accessibility, cu);
-  if (attr)
-    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
-  else
-    accessibility = dwarf2_default_access_attribute (die, cu);
-  switch (accessibility)
-    {
-    case DW_ACCESS_private:
-      fnp->is_private = 1;
-      break;
-    case DW_ACCESS_protected:
-      fnp->is_protected = 1;
-      break;
-    }
-
-  /* Check for artificial methods.  */
-  attr = dwarf2_attr (die, DW_AT_artificial, cu);
-  if (attr && DW_UNSND (attr) != 0)
-    fnp->is_artificial = 1;
-
-  fnp->is_constructor = dwarf2_is_constructor (die, cu);
-
-  /* Get index in virtual function table if it is a virtual member
-     function.  For older versions of GCC, this is an offset in the
-     appropriate virtual table, as specified by DW_AT_containing_type.
-     For everyone else, it is an expression to be evaluated relative
-     to the object address.  */
-
-  attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
-  if (attr)
-    {
-      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0)
-        {
-	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
-	    {
-	      /* Old-style GCC.  */
-	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu) + 2;
-	    }
-	  else if (DW_BLOCK (attr)->data[0] == DW_OP_deref
-		   || (DW_BLOCK (attr)->size > 1
-		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
-		       && DW_BLOCK (attr)->data[1] == cu->header.addr_size))
-	    {
-	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu);
-	      if ((fnp->voffset % cu->header.addr_size) != 0)
-		dwarf2_complex_location_expr_complaint ();
-	      else
-		fnp->voffset /= cu->header.addr_size;
-	      fnp->voffset += 2;
-	    }
-	  else
-	    dwarf2_complex_location_expr_complaint ();
-
-	  if (!fnp->fcontext)
-	    {
-	      /* If there is no `this' field and no DW_AT_containing_type,
-		 we cannot actually find a base class context for the
-		 vtable!  */
-	      if (TYPE_NFIELDS (this_type) == 0
-		  || !TYPE_FIELD_ARTIFICIAL (this_type, 0))
-		{
-		  complaint (&symfile_complaints,
-			     _("cannot determine context for virtual member "
-			       "function \"%s\" (offset %d)"),
-			     fieldname, die->offset.sect_off);
-		}
-	      else
-		{
-		  fnp->fcontext
-		    = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
-		}
-	    }
-	}
-      else if (attr_form_is_section_offset (attr))
-        {
-	  dwarf2_complex_location_expr_complaint ();
-        }
-      else
-        {
-	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
-						 fieldname);
-        }
-    }
-  else
-    {
-      attr = dwarf2_attr (die, DW_AT_virtuality, cu);
-      if (attr && DW_UNSND (attr))
-	{
-	  /* GCC does this, as of 2008-08-25; PR debug/37237.  */
-	  complaint (&symfile_complaints,
-		     _("Member function \"%s\" (offset %d) is virtual "
-		       "but the vtable offset is not specified"),
-		     fieldname, die->offset.sect_off);
-	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
-	  TYPE_CPLUS_DYNAMIC (type) = 1;
-	}
-    }
+  new_fnfield->fnfield = new_fn_field (die, cu, NULL, NULL, type, fieldname,
+				       flp->length - 1, i);
 }
 
 /* Create the vector of member function fields, and attach it to the type.  */
