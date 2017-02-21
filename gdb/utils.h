@@ -387,4 +387,22 @@ extern void dump_core (void);
 
 extern char *make_hex_string (const gdb_byte *data, size_t length);
 
+/* Find an instance of the character C in the string S that is outside
+   of all parenthesis pairs, single-quoted strings, and double-quoted
+   strings.  Also, ignore the char within a template name, like a ','
+   within foo<int, int>.  */
+
+extern const char *find_toplevel_char (const char *s, char c);
+
+/* Like find_toplevel_char but searches S backwards, starting LEN characters
+   into S.  */
+
+extern const char *find_toplevel_char_r (const char *s, size_t len, char c);
+
+/* The string equivalent of find_toplevel_char.  Returns a pointer
+   to the location of NEEDLE in HAYSTACK, ignoring any occurrences
+   inside "()" and "<>".  Returns NULL if NEEDLE was not found.  */
+
+const char *find_toplevel_string (const char *haystack, const char *needle);
+
 #endif /* UTILS_H */

@@ -49,7 +49,6 @@ set test "initial condition: run to breakpoint"
 gdb_test_multiple "" $test {
     -re "Breakpoint \[0-9\]+,.*foo<int> \\(i=1\\).*$gdb_prompt $" {
 	pass $test
-	break
     }
 }
 
@@ -130,3 +129,18 @@ gdb_test "continue" \
 gdb_test "continue" \
     ".*Breakpoint.*multi_line_foo<double> \\(i=0\\).*" \
     "run to multi_line_foo breakpoint 2 <double>"
+
+# Test setting breakpoints on template "base" names.
+
+# gdb_breakpoint is avoid in several test because we want to test
+# that multiple locations were set for each breakpoint.
+
+gdb_test "break bar" [string_to_regexp "(5 locations)"]
+gdb_test "break bar<int>" [string_to_regexp "(3 locations)"]
+gdb_test "break bar<char>" [string_to_regexp "(2 locations)"]
+gdb_breakpoint "bar<int>(void)" message
+gdb_breakpoint "bar<char>(char)" message
+gdb_test "break N::bar" [string_to_regexp "(4 locations)"]
+gdb_test "break N::bar<int,10>" [string_to_regexp "(3 locations)"]
+gdb_breakpoint "N::bar<int,10>(void)" message
+gdb_breakpoint "N::bar<int, 0> (void)" message

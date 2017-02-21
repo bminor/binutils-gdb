@@ -394,7 +394,9 @@ coff_start_symtab (struct objfile *objfile, const char *name)
 		 NULL,
   /* The start address is irrelevant, since we set
      last_source_start_addr in coff_end_symtab.  */
-		 0);
+		 0,
+  /* Let buildsym.c deduce the language for this symtab.  */
+		 language_unknown);
   record_debugformat ("COFF");
 }
 

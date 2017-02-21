@@ -657,12 +657,14 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   size_t blockvector_size;
   CORE_ADDR begin, end;
   struct blockvector *bv;
+  enum language language;
 
   actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
 
   cust = allocate_compunit_symtab (objfile, stab->file_name);
   allocate_symtab (cust, stab->file_name);
   add_compunit_symtab_to_objfile (cust);
+  language = compunit_language (cust);
 
   /* JIT compilers compile in memory.  */
   COMPUNIT_DIRNAME (cust) = NULL;
@@ -707,7 +709,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 					   "void");
 
       BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
-                                                   NULL);
+						   language, NULL);
       /* The address range.  */
       BLOCK_START (new_block) = (CORE_ADDR) gdb_block_iter->begin;
       BLOCK_END (new_block) = (CORE_ADDR) gdb_block_iter->end;
@@ -745,7 +747,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 		   ? allocate_global_block (&objfile->objfile_obstack)
 		   : allocate_block (&objfile->objfile_obstack));
       BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
-                                                   NULL);
+						   language, NULL);
       BLOCK_SUPERBLOCK (new_block) = block_iter;
       block_iter = new_block;
 

@@ -23,6 +23,7 @@ struct objfile;
 struct symbol;
 struct addrmap;
 struct compunit_symtab;
+enum language;
 
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
@@ -254,7 +255,8 @@ extern record_line_ftype record_line;
 extern struct compunit_symtab *start_symtab (struct objfile *objfile,
 					     const char *name,
 					     const char *comp_dir,
-					     CORE_ADDR start_addr);
+					     CORE_ADDR start_addr,
+					     enum language language);
 
 extern void restart_symtab (struct compunit_symtab *cust,
 			    const char *name, CORE_ADDR start_addr);

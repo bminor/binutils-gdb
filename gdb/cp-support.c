@@ -833,6 +833,49 @@ cp_func_name (const char *full_name)
   return ret;
 }
 
+/* See description in cp-support.h.  */
+
+char *
+cp_strip_template_parameters (const char *linkage_or_phys_name)
+{
+  /* We do not turn the linkage name into demangle components since we cannot
+     walk the tree in any usable way when dealing with conversion operators.
+     Instead we use a heuristic approach that works for all cases.  */
+  char *stripped = NULL;
+  const char *name;
+
+  char *demangled_name = gdb_demangle (linkage_or_phys_name, DMGL_ANSI);
+  if (demangled_name != NULL)
+    name = demangled_name;
+  else
+    name = linkage_or_phys_name;
+
+  /* Only attempt to strip this if it looks like a template.  */
+  if (strchr (name, '<') != NULL && strchr (name, '>') != NULL)
+    {
+      const char *p;
+      size_t len = strlen (name) - 1;
+
+      /* This is evil, but since we cannot use demangler trees, we have
+	 no choice but to do textual searches.  It is simply easiest to
+	 do this backwards.  */
+
+      /* Since we are searching backwards, we need only find the opening
+	 '<' from the end of the string (at the "top level").  */
+      p = find_toplevel_char_r (name, len, '<');
+      if (p != NULL)
+	{
+	  /* Remove any trailing whitespace.  */
+	  while (p > name && (ISSPACE (*(p - 1))))
+	    --p;
+	  stripped = savestring (name, p - name);
+	}
+    }
+
+  xfree (demangled_name);
+  return stripped;
+}
+
 /* DEMANGLED_NAME is the name of a function, including parameters and
    (optionally) a return type.  Return the name of the function without
    parameters or return type, or NULL if we can not parse the name.  */

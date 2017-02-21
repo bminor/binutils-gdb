@@ -165,6 +165,7 @@ struct dictionary_linear_expandable
 
 struct dictionary
 {
+  const struct language_defn *language;
   const struct dict_vector *vector;
   union
   {
@@ -179,6 +180,7 @@ struct dictionary
 /* Accessor macros.  */
 
 #define DICT_VECTOR(d)			(d)->vector
+#define DICT_LANGUAGE(d)                (d)->language
 
 /* These can be used for DICT_HASHED_EXPANDABLE, too.  */
 
@@ -244,8 +246,6 @@ static struct symbol *iter_match_first_hashed (const struct dictionary *dict,
 static struct symbol *iter_match_next_hashed (const char *name,
 					      symbol_compare_ftype *compare,
 					      struct dict_iterator *iterator);
-
-static unsigned int dict_hash (const char *string);
 
 /* Functions only for DICT_HASHED.  */
 
@@ -354,6 +354,7 @@ static void expand_hashtable (struct dictionary *dict);
 
 struct dictionary *
 dict_create_hashed (struct obstack *obstack,
+		    enum language language,
 		    const struct pending *symbol_list)
 {
   struct dictionary *retval;
@@ -363,6 +364,7 @@ dict_create_hashed (struct obstack *obstack,
 
   retval = XOBNEW (obstack, struct dictionary);
   DICT_VECTOR (retval) = &dict_hashed_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
 
   /* Calculate the number of symbols, and allocate space for them.  */
   for (list_counter = symbol_list;
@@ -397,11 +399,12 @@ dict_create_hashed (struct obstack *obstack,
    it.  */
 
 extern struct dictionary *
-dict_create_hashed_expandable (void)
+dict_create_hashed_expandable (enum language language)
 {
   struct dictionary *retval = XNEW (struct dictionary);
 
   DICT_VECTOR (retval) = &dict_hashed_expandable_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
   DICT_HASHED_NBUCKETS (retval) = DICT_EXPANDABLE_INITIAL_CAPACITY;
   DICT_HASHED_BUCKETS (retval) = XCNEWVEC (struct symbol *,
 					   DICT_EXPANDABLE_INITIAL_CAPACITY);
@@ -417,6 +420,7 @@ dict_create_hashed_expandable (void)
 
 struct dictionary *
 dict_create_linear (struct obstack *obstack,
+		    enum language language,
 		    const struct pending *symbol_list)
 {
   struct dictionary *retval;
@@ -426,6 +430,7 @@ dict_create_linear (struct obstack *obstack,
 
   retval = XOBNEW (obstack, struct dictionary);
   DICT_VECTOR (retval) = &dict_linear_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
 
   /* Calculate the number of symbols, and allocate space for them.  */
   for (list_counter = symbol_list;
@@ -461,11 +466,12 @@ dict_create_linear (struct obstack *obstack,
    it.  */
 
 struct dictionary *
-dict_create_linear_expandable (void)
+dict_create_linear_expandable (enum language language)
 {
   struct dictionary *retval = XNEW (struct dictionary);
 
   DICT_VECTOR (retval) = &dict_linear_expandable_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
   DICT_LINEAR_NSYMS (retval) = 0;
   DICT_LINEAR_EXPANDABLE_CAPACITY (retval) = DICT_EXPANDABLE_INITIAL_CAPACITY;
   DICT_LINEAR_SYMS (retval)
@@ -652,7 +658,8 @@ iter_match_first_hashed (const struct dictionary *dict, const char *name,
 			 symbol_compare_ftype *compare,
 			 struct dict_iterator *iterator)
 {
-  unsigned int hash_index = dict_hash (name) % DICT_HASHED_NBUCKETS (dict);
+  unsigned int hash_index = (DICT_LANGUAGE (dict)->la_compute_string_hash (name)
+			     % DICT_HASHED_NBUCKETS (dict));
   struct symbol *sym;
 
   DICT_ITERATOR_DICT (iterator) = dict;
@@ -665,12 +672,18 @@ iter_match_first_hashed (const struct dictionary *dict, const char *name,
        sym != NULL;
        sym = sym->hash_next)
     {
+      //printf ("compare (%s, %s)\n", name, SYMBOL_SEARCH_NAME (sym));
       /* Warning: the order of arguments to compare matters!  */
       if (compare (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	break;
+      else if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym))
 	{
-	  break;
+	  struct template_symbol *tsym = (struct template_symbol *) sym;
+
+	  if (tsym->search_name != NULL
+	      && compare (tsym->search_name, name) == 0)
+	    break;
 	}
-	
     }
 
   DICT_ITERATOR_CURRENT (iterator) = sym;
@@ -689,6 +702,14 @@ iter_match_next_hashed (const char *name, symbol_compare_ftype *compare,
     {
       if (compare (SYMBOL_SEARCH_NAME (next), name) == 0)
 	break;
+      else if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (next))
+	{
+	  struct template_symbol *tsym = (struct template_symbol *) next;
+
+	  if (tsym->search_name != NULL
+	      && compare (tsym->search_name, name) == 0)
+	    break;
+	}
     }
 
   DICT_ITERATOR_CURRENT (iterator) = next;
@@ -705,8 +726,13 @@ insert_symbol_hashed (struct dictionary *dict,
   unsigned int hash_index;
   struct symbol **buckets = DICT_HASHED_BUCKETS (dict);
 
-  hash_index = 
-    dict_hash (SYMBOL_SEARCH_NAME (sym)) % DICT_HASHED_NBUCKETS (dict);
+  /* We don't want to insert a symbol into a dictionary of a different
+     language.  The two may not use the same hashing algorithm.  */
+  gdb_assert (SYMBOL_LANGUAGE (sym) == DICT_LANGUAGE (dict)->la_language);
+
+  hash_index
+    = (DICT_LANGUAGE (dict)->la_compute_string_hash (SYMBOL_SEARCH_NAME (sym))
+       % DICT_HASHED_NBUCKETS (dict));
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
 }
@@ -784,7 +810,7 @@ expand_hashtable (struct dictionary *dict)
    That is, two identifiers equivalent according to any of those three
    comparison operators hash to the same value.  */
 
-static unsigned int
+unsigned int
 dict_hash (const char *string0)
 {
   /* The Ada-encoded version of a name P1.P2...Pn has either the form
@@ -902,6 +928,17 @@ iter_match_next_linear (const char *name, symbol_compare_ftype *compare,
 	{
 	  retval = sym;
 	  break;
+	}
+      else if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (sym))
+	{
+	  struct template_symbol *tsym = (struct template_symbol *) sym;
+
+	  if (tsym->search_name != NULL
+	      && compare (tsym->search_name, name) == 0)
+	    {
+	      retval = sym;
+	      break;
+	    }
 	}
     }
 
