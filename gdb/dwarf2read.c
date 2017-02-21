@@ -12577,6 +12577,8 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
       dwarf2_ranges_process (offset, cu,
 	[&] (CORE_ADDR start, CORE_ADDR end)
 	{
+	  start += baseaddr;
+	  end += baseaddr;
 	  start = gdbarch_adjust_dwarf2_addr (gdbarch, start);
 	  end = gdbarch_adjust_dwarf2_addr (gdbarch, end);
 	  record_block_range (block, start, end - 1);

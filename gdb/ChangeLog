@@ -1,3 +1,7 @@
+2017-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_record_block_ranges): Add forgotten BASEADDR.
+
 2017-02-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/enum-flags.h (enum_flags::enum_flags): Initialize
