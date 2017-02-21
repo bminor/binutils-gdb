@@ -1,3 +1,9 @@
+2017-02-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::make_iplt_section): Check that
+	output_section exists before attempting add_output_section_data.
+	(Target_powerpc::make_brlt_section): Likewise.
+
 2017-02-03  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj::make_toc_relative): Don't crash
