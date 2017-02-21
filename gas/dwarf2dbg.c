@@ -168,6 +168,11 @@ struct line_entry {
   struct dwarf2_line_info loc;
 };
 
+/* Don't change the offset of next in line_entry.  set_or_check_view
+   calls in dwarf2_gen_line_info_1 depend on it.  */
+static char unused[offsetof(struct line_entry, next) ? -1 : 1]
+ATTRIBUTE_UNUSED;
+
 struct line_subseg {
   struct line_subseg *next;
   subsegT subseg;
@@ -215,7 +220,7 @@ bfd_boolean dwarf2_loc_mark_labels;
 static struct dwarf2_line_info current = {
   1, 1, 0, 0,
   DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0,
-  0
+  0, NULL
 };
 
 /* The size of an address on the target.  */
@@ -283,6 +288,141 @@ get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
   return lss;
 }
 
+/* (Un)reverse the line_entry list starting from H.  */
+
+static struct line_entry *
+reverse_line_entry_list (struct line_entry *h)
+{
+  struct line_entry *p = NULL, *e, *n;
+  for (e = h; e; e = n)
+    {
+      n = e->next;
+      e->next = p;
+      p = e;
+    }
+  return p;
+}
+
+/* Compute the view for E based on the previous entry P.  If we
+   introduce an (undefined) view symbol for P, and H is given (P must
+   be the tail in this case), introduce view symbols for earlier list
+   entries as well, until one of them is constant.
+ */
+
+static void
+set_or_check_view (struct line_entry *e, struct line_entry *p,
+		   struct line_entry *h)
+{
+  expressionS viewx;
+  memset (&viewx, 0, sizeof (viewx));
+  viewx.X_unsigned = 1;
+
+  /* First, compute !(E->label > P->label), to tell whether or not
+     we're to reset the view number.  If we can't resolve it to a
+     constant, keep it symbolic.  */
+  if (!p)
+    {
+      viewx.X_op = O_constant;
+      viewx.X_add_number = 0;
+      viewx.X_add_symbol = NULL;
+      viewx.X_op_symbol = NULL;
+    }
+  else
+    {
+      viewx.X_op = O_gt;
+      viewx.X_add_number = 0;
+      viewx.X_add_symbol = e->label;
+      viewx.X_op_symbol = p->label;
+      resolve_expression (&viewx);
+      if (viewx.X_op == O_constant)
+	viewx.X_add_number = !viewx.X_add_number;
+      else
+	{
+	  viewx.X_add_symbol = make_expr_symbol (&viewx);
+	  viewx.X_add_number = 0;
+	  viewx.X_op_symbol = NULL;
+	  viewx.X_op = O_logical_not;
+	}
+    }
+
+  if (S_IS_DEFINED (e->loc.view) && symbol_constant_p (e->loc.view)
+      && viewx.X_op == O_constant)
+    {
+      expressionS *value = symbol_get_value_expression (e->loc.view);
+      /* We can't compare the view numbers at this point, because in
+	 VIEWX we've only determined whether we're to reset it so
+	 far.  */
+      if (!value->X_add_number != !viewx.X_add_number)
+	as_bad (_("view number mismatch"));
+    }
+
+  if (viewx.X_op != O_constant || viewx.X_add_number)
+    {
+      if (!p->loc.view)
+	{
+	  p->loc.view = symbol_temp_make ();
+	  gas_assert (!S_IS_DEFINED (p->loc.view));
+	}
+
+      expressionS incv;
+      memset (&incv, 0, sizeof (incv));
+      incv.X_unsigned = 1;
+      incv.X_op = O_symbol;
+      incv.X_add_symbol = p->loc.view;
+      incv.X_add_number = 1;
+
+      if (viewx.X_op == O_constant)
+	{
+	  gas_assert (viewx.X_add_number == 1);
+	  viewx = incv;
+	}
+      else
+	{
+	  viewx.X_add_symbol = make_expr_symbol (&viewx);
+	  viewx.X_add_number = 0;
+	  viewx.X_op_symbol = make_expr_symbol (&incv);
+	  viewx.X_op = O_multiply;
+	}
+    }
+
+  if (!S_IS_DEFINED (e->loc.view))
+    {
+      symbol_set_value_expression (e->loc.view, &viewx);
+      S_SET_SEGMENT (e->loc.view, absolute_section);
+      symbol_set_frag (e->loc.view, &zero_address_frag);
+    }
+
+  /* Define and attempt to simplify any earlier views needed to
+     compute E's.  */
+  if (h && p && p->loc.view && !S_IS_DEFINED (p->loc.view))
+    {
+      /* Reverse the list to avoid quadratic behavior going backwards
+	 in a single-linked list.  */
+      struct line_entry *r = reverse_line_entry_list (h);
+      gas_assert (r == p);
+      /* Set or check views until we find a defined or absent view.  */
+      do
+	set_or_check_view (r, r->next, NULL);
+      while (r->next && r->next->loc.view && !S_IS_DEFINED (r->next->loc.view)
+	     && (r = r->next));
+      /* Unreverse the list, so that we can go forward again.  */
+      struct line_entry *h2 = reverse_line_entry_list (p);
+      gas_assert (h2 == h);
+      /* Starting from the last view we just defined, attempt to
+	 simplify the view expressions, until we do so to P.  */
+      do
+	{
+	  gas_assert (S_IS_DEFINED (r->loc.view));
+	  resolve_expression (symbol_get_value_expression (r->loc.view));
+	}
+      while (r != p && (r = r->next));
+
+      /* Now that we've defined and computed all earlier views that might
+	 be needed to compute E's, attempt to simplify it.  */
+      resolve_expression (symbol_get_value_expression (e->loc.view));
+    }
+}
+
 /* Record an entry for LOC occurring at LABEL.  */
 
 static void
@@ -297,6 +437,12 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
   e->loc = *loc;
 
   lss = get_line_subseg (now_seg, now_subseg, TRUE);
+
+  if (loc->view)
+    set_or_check_view (e,
+		       !lss->head ? NULL : (struct line_entry *)lss->ptail,
+		       lss->head);
+
   *lss->ptail = e;
   lss->ptail = &e->next;
 }
@@ -720,6 +866,38 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	      as_bad (_("discriminator less than zero"));
 	      return;
 	    }
+	}
+      else if (strcmp (p, "view") == 0)
+	{
+	  (void) restore_line_pointer (c);
+	  symbolS *sym;
+	  SKIP_WHITESPACE ();
+	  if (ISDIGIT (*input_line_pointer))
+	    {
+	      value = get_absolute_expression ();
+	      if (value != 0)
+		{
+		  as_bad (_("numeric view can only be asserted to zero"));
+		  return;
+		}
+	      sym = symbol_temp_new (absolute_section, value, &zero_address_frag);
+	    }
+	  else
+	    {
+	      char *name = read_symbol_name ();
+	      sym = symbol_find_or_make (name);
+	      if (S_IS_DEFINED (sym))
+		{
+		  if (!S_CAN_BE_REDEFINED (sym))
+		    as_bad (_("symbol `%s' is already defined"), name);
+		  else
+		    sym = symbol_clone (sym, 1);
+		  S_SET_SEGMENT (sym, undefined_section);
+		  S_SET_VALUE (sym, 0);
+		  symbol_set_frag (sym, &zero_address_frag);
+		}
+	    }
+	  current.view = sym;
 	}
       else
 	{
