@@ -399,9 +399,25 @@ filter_args (int *argcp, char **argv)
   *destv = NULL;
 }
 
-/* Produce final vector of GCC compilation options.  First element is target
-   size ("-m64", "-m32" etc.), optionally followed by DW_AT_producer options
-   and then compile-args string GDB variable.  */
+/* Produce final vector of GCC compilation options.
+
+   The first element of the combined argument vector are arguments
+   relating to the target size ("-m64", "-m32" etc.). These are
+   sourced from the inferior's architecture.
+
+   The second element of the combined argument vector are arguments
+   stored in the inferior DW_AT_producer section.  If these are stored
+   in the inferior (there is no guarantee that they are), they are
+   added to the vector.
+
+   The third element of the combined argument vector are argument
+   supplied by the language implementation provided by
+   compile-{lang}-support. These contain language specific arguments.
+
+   The final element of the combined argument vector are arguments
+   supplied by the "set compiler-args" command. These are always
+   appended last so as to override any of the arguments automatically
+   generated above.  */
 
 static void
 get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
