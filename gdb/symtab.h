@@ -1687,4 +1687,34 @@ void initialize_objfile_symbol (struct symbol *);
 
 struct template_symbol *allocate_template_symbol (struct objfile *);
 
+/* Result of a multi-symbol search.  */
+
+struct search_multiple_result
+{
+  /* Matching debug symbols.  */
+  VEC (block_symbol_d) *symbols;
+
+  /* Matching non-debug symbols.  */
+  VEC (bound_minimal_symbol_d) *minimal_symbols;
+};
+
+/* Search for all symbols named NAME in LANGUAGE with DOMAIN, restricting
+   search to FILE_SYMTABS and SEARCH_PSPACE, both of which may be NULL
+   to search all symtabs and program spaces.  */
+
+extern struct search_multiple_result
+  search_symbols_multiple (const char *name,
+			   const struct language_defn *language,
+			   domain_enum domain,
+			   VEC (symtab_ptr) *file_symtabs,
+			   struct program_space *search_pspace);
+
+/* Free the result of search_symbols_multiple.  */
+
+extern void free_search_multiple_result (struct search_multiple_result *);
+
+/* A cleanup function for the return result of search_symbols_multiple.  */
+
+extern void search_multiple_result_cleanup (void *);
+
 #endif /* !defined(SYMTAB_H) */

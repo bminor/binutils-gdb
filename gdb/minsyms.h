@@ -37,6 +37,9 @@ struct bound_minimal_symbol
   struct objfile *objfile;
 };
 
+typedef struct bound_minimal_symbol bound_minimal_symbol_d;
+DEF_VEC_O (bound_minimal_symbol_d);
+
 /* This header declares most of the API for dealing with minimal
    symbols and minimal symbol tables.  A few things are declared
    elsewhere; see below.
