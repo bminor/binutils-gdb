@@ -12030,7 +12030,8 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 
   while (1)
     {
-      CORE_ADDR range_beginning, range_end;
+      /* Initialize it due to a false compiler warning.  */
+      CORE_ADDR range_beginning = 0, range_end = 0;
       const gdb_byte *buf_end = (dwarf2_per_objfile->rnglists.buffer
 				 + dwarf2_per_objfile->rnglists.size);
       unsigned int bytes_read;

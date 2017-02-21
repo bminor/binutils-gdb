@@ -1,3 +1,7 @@
+2017-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2_rnglists_process: Initialize range_beginning and range_end.
+
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (Changes since GDB 7.12): Add DWARF-5.
