@@ -1,3 +1,9 @@
+2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* elflink.c (bfd_elf_size_dynamic_sections): Move symbol version
+	processing ahead of the call to `elf_gc_sweep_symbol'.
+
 2017-02-22  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21193

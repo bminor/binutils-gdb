@@ -50,6 +50,8 @@ if [istarget "tic6x-*-*"] {
 # - the shared library symbols have been swept in section garbage collection.
 # Verify that the symbols are global rather than local and that a version
 # script adjusts them accordingly.
+# Also verify that a version definition supplied by an object rather than
+# a version script and forcibly exported is unaffected by section GC.
 if { [check_gc_sections_available] } {
     run_ld_link_tests [list \
 	[list \
@@ -77,7 +79,41 @@ if { [check_gc_sections_available] } {
 	    {pr20828.s} \
 	    {{readelf --dyn-syms pr20828-b.sd} \
 	     {readelf --dyn-syms pr20828-c.sd}} \
-	    "pr20828-2.so"]]
+	    "pr20828-2.so"] \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC\
+	     (versioned shared library)" \
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld\
+	     --version-script=pr20828-v.ver" \
+	    "" "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-c.sd} \
+	     {readelf --dyn-syms pr20828-d.sd} \
+	     {readelf --dyn-syms pr20828-e.sd}} \
+	    "libpr20828-v.so"] \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC (versioned)" \
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld\
+	     --version-script=pr20828-v.ver" \
+	    "tmpdir/libpr20828-v.so" \
+	    "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-c.sd} \
+	     {readelf --dyn-syms pr20828-d.sd} \
+	     {readelf --dyn-syms pr20828-e.sd}} \
+	    "pr20828-v.so"] \
+	[list \
+	    "PR ld/20828 forcibly exported symbol version without section GC" \
+	    "$LFLAGS -e foo -E -T pr20828-v.ld" "" "" \
+	    {pr20828-v.s} \
+	    {{objdump -p pr20828-v.od}} \
+	    "pr20828-v-1"] \
+	[list \
+	    "PR ld/20828 forcibly exported symbol version with section GC" \
+	    "$LFLAGS -e foo --gc-sections -E -T pr20828-v.ld" "" "" \
+	    {pr20828-v.s} \
+	    {{objdump -p pr20828-v.od}} \
+	    "pr20828-v-2"]]
 }
 
 # Check to see if the C compiler works

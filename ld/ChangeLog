@@ -1,3 +1,15 @@
+2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828-d.sd: New test.
+	* testsuite/ld-elf/pr20828-e.sd: New test.
+	* testsuite/ld-elf/pr20828-v.od: New test.
+	* testsuite/ld-elf/pr20828-v.ver: New test version script.
+	* testsuite/ld-elf/pr20828-v.ld: New test linker script.
+	* testsuite/ld-elf/pr20828.ld: Add `.gnu.version' and
+	`.gnu.version_d'.
+	* testsuite/ld-elf/shared.exp: Run the new tests.
+
 2017-02-21  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-ifunc/pr18808b.c (bar): Fix compile time warning
