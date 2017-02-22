@@ -1,3 +1,9 @@
+2017-02-21  Jan Beulich  <jbeulich@suse.com>
+
+	* expr.c (operand): Handle missing operand to .startof.() and
+	.sizeof.().
+	* testsuite/gas/all/err-sizeof.s: New.
+
 2017-02-20  Alan Modra  <amodra@gmail.com>
 
 	PR 21118
