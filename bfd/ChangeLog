@@ -1,3 +1,10 @@
+2017-02-24  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (GP_NAME): New macro.
+	(riscv_global_pointer_value): Use it.
+	(_bfd_riscv_relax_lui): If symbol and global pointer are in same
+	output section, consider only that section's alignment.
+
 2017-02-23  Alan Modra  <amodra@gmail.com>
 
 	PR 20744
