@@ -1,3 +1,7 @@
+2017-02-22  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/arm/vcmp-noprefix-imm.d: Skip for non-ELF targets.
+
 2017-02-21  Jan Beulich  <jbeulich@suse.com>
 
 	* expr.c (operand): Handle missing operand to .startof.() and
