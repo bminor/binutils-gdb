@@ -24,6 +24,7 @@
 #include "gdb_vecs.h"
 #include "gdbtypes.h"
 #include "common/enum-flags.h"
+#include "common/function-view.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -1607,35 +1608,29 @@ int compare_filenames_for_search (const char *filename,
 int compare_glob_filenames_for_search (const char *filename,
 				       const char *search_name);
 
-int iterate_over_some_symtabs (const char *name,
-			       const char *real_path,
-			       int (*callback) (struct symtab *symtab,
-						void *data),
-			       void *data,
-			       struct compunit_symtab *first,
-			       struct compunit_symtab *after_last);
+bool iterate_over_some_symtabs (const char *name,
+				const char *real_path,
+				struct compunit_symtab *first,
+				struct compunit_symtab *after_last,
+				gdb::function_view<bool (symtab *)> callback);
 
 void iterate_over_symtabs (const char *name,
-			   int (*callback) (struct symtab *symtab,
-					    void *data),
-			   void *data);
+			   gdb::function_view<bool (symtab *)> callback);
+
 
 VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
 					   struct linetable_entry **best_entry);
 
-/* Callback for LA_ITERATE_OVER_SYMBOLS.  The callback will be called
-   once per matching symbol SYM, with DATA being the argument of the
-   same name that was passed to LA_ITERATE_OVER_SYMBOLS.  The callback
-   should return nonzero to indicate that LA_ITERATE_OVER_SYMBOLS
-   should continue iterating, or zero to indicate that the iteration
-   should end.  */
+/* Prototype for callbacks for LA_ITERATE_OVER_SYMBOLS.  The callback
+   is called once per matching symbol SYM.  The callback should return
+   true to indicate that LA_ITERATE_OVER_SYMBOLS should continue
+   iterating, or false to indicate that the iteration should end.  */
 
-typedef int (symbol_found_callback_ftype) (struct symbol *sym, void *data);
+typedef bool (symbol_found_callback_ftype) (symbol *sym);
 
 void iterate_over_symbols (const struct block *block, const char *name,
 			   const domain_enum domain,
-			   symbol_found_callback_ftype *callback,
-			   void *data);
+			   gdb::function_view<symbol_found_callback_ftype> callback);
 
 /* Storage type used by demangle_for_lookup.  demangle_for_lookup
    either returns a const char * pointer that points to either of the

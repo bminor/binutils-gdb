@@ -123,13 +123,12 @@ require_partial_symbols (struct objfile *objfile, int verbose)
 /* Helper function for psym_map_symtabs_matching_filename that
    expands the symtabs and calls the iterator.  */
 
-static int
+static bool
 partial_map_expand_apply (struct objfile *objfile,
 			  const char *name,
 			  const char *real_path,
 			  struct partial_symtab *pst,
-			  int (*callback) (struct symtab *, void *),
-			  void *data)
+			  gdb::function_view<bool (symtab *)> callback)
 {
   struct compunit_symtab *last_made = objfile->compunit_symtabs;
 
@@ -145,20 +144,19 @@ partial_map_expand_apply (struct objfile *objfile,
      all of them.  */
   psymtab_to_symtab (objfile, pst);
 
-  return iterate_over_some_symtabs (name, real_path, callback, data,
-				    objfile->compunit_symtabs, last_made);
+  return iterate_over_some_symtabs (name, real_path, objfile->compunit_symtabs,
+				    last_made, callback);
 }
 
 /*  Psymtab version of map_symtabs_matching_filename.  See its definition in
     the definition of quick_symbol_functions in symfile.h.  */
 
-static int
-psym_map_symtabs_matching_filename (struct objfile *objfile,
-				    const char *name,
-				    const char *real_path,
-				    int (*callback) (struct symtab *,
-						     void *),
-				    void *data)
+static bool
+psym_map_symtabs_matching_filename
+  (struct objfile *objfile,
+   const char *name,
+   const char *real_path,
+   gdb::function_view<bool (symtab *)> callback)
 {
   struct partial_symtab *pst;
   const char *name_basename = lbasename (name);
@@ -177,8 +175,8 @@ psym_map_symtabs_matching_filename (struct objfile *objfile,
     if (compare_filenames_for_search (pst->filename, name))
       {
 	if (partial_map_expand_apply (objfile, name, real_path,
-				      pst, callback, data))
-	  return 1;
+				      pst, callback))
+	  return true;
 	continue;
       }
 
@@ -191,8 +189,8 @@ psym_map_symtabs_matching_filename (struct objfile *objfile,
     if (compare_filenames_for_search (psymtab_to_fullname (pst), name))
       {
 	if (partial_map_expand_apply (objfile, name, real_path,
-				      pst, callback, data))
-	  return 1;
+				      pst, callback))
+	  return true;
 	continue;
       }
 
@@ -205,14 +203,14 @@ psym_map_symtabs_matching_filename (struct objfile *objfile,
 	if (filename_cmp (psymtab_to_fullname (pst), real_path) == 0)
 	  {
 	    if (partial_map_expand_apply (objfile, name, real_path,
-					  pst, callback, data))
-	      return 1;
+					  pst, callback))
+	      return true;
 	    continue;
 	  }
       }
   }
 
-  return 0;
+  return false;
 }
 
 /* Find which partial symtab contains PC and SECTION starting at psymtab PST.
@@ -1291,17 +1289,15 @@ psym_map_matching_symbols (struct objfile *objfile,
     }
 }
 
-/* A helper for psym_expand_symtabs_matching that handles
-   searching included psymtabs.  This returns 1 if a symbol is found,
-   and zero otherwise.  It also updates the 'searched_flag' on the
+/* A helper for psym_expand_symtabs_matching that handles searching
+   included psymtabs.  This returns true if a symbol is found, and
+   false otherwise.  It also updates the 'searched_flag' on the
    various psymtabs that it searches.  */
 
-static int
-recursively_search_psymtabs (struct partial_symtab *ps,
-			     struct objfile *objfile,
-			     enum search_domain kind,
-			     expand_symtabs_symbol_matcher_ftype *sym_matcher,
-			     void *data)
+static bool
+recursively_search_psymtabs
+  (struct partial_symtab *ps, struct objfile *objfile, enum search_domain kind,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> sym_matcher)
 {
   struct partial_symbol **psym;
   struct partial_symbol **bound, **gbound, **sbound;
@@ -1323,11 +1319,11 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 	continue;
 
       r = recursively_search_psymtabs (ps->dependencies[i],
-				       objfile, kind, sym_matcher, data);
+				       objfile, kind, sym_matcher);
       if (r != 0)
 	{
 	  ps->searched_flag = PST_SEARCHED_AND_FOUND;
-	  return 1;
+	  return true;
 	}
     }
 
@@ -1365,7 +1361,7 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 		   && PSYMBOL_CLASS (*psym) == LOC_BLOCK)
 	       || (kind == TYPES_DOMAIN
 		   && PSYMBOL_CLASS (*psym) == LOC_TYPEDEF))
-	      && (*sym_matcher) (SYMBOL_SEARCH_NAME (*psym), data))
+	      && sym_matcher (SYMBOL_SEARCH_NAME (*psym)))
 	    {
 	      /* Found a match, so notify our caller.  */
 	      result = PST_SEARCHED_AND_FOUND;
@@ -1385,11 +1381,10 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 static void
 psym_expand_symtabs_matching
   (struct objfile *objfile,
-   expand_symtabs_file_matcher_ftype *file_matcher,
-   expand_symtabs_symbol_matcher_ftype *symbol_matcher,
-   expand_symtabs_exp_notify_ftype *expansion_notify,
-   enum search_domain kind,
-   void *data)
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind)
 {
   struct partial_symtab *ps;
 
@@ -1413,31 +1408,31 @@ psym_expand_symtabs_matching
 
       if (file_matcher)
 	{
-	  int match;
+	  bool match;
 
 	  if (ps->anonymous)
 	    continue;
 
-	  match = (*file_matcher) (ps->filename, data, 0);
+	  match = file_matcher (ps->filename, false);
 	  if (!match)
 	    {
 	      /* Before we invoke realpath, which can get expensive when many
 		 files are involved, do a quick comparison of the basenames.  */
 	      if (basenames_may_differ
-		  || (*file_matcher) (lbasename (ps->filename), data, 1))
-		match = (*file_matcher) (psymtab_to_fullname (ps), data, 0);
+		  || file_matcher (lbasename (ps->filename), true))
+		match = file_matcher (psymtab_to_fullname (ps), false);
 	    }
 	  if (!match)
 	    continue;
 	}
 
-      if (recursively_search_psymtabs (ps, objfile, kind, symbol_matcher, data))
+      if (recursively_search_psymtabs (ps, objfile, kind, symbol_matcher))
 	{
 	  struct compunit_symtab *symtab =
 	    psymtab_to_symtab (objfile, ps);
 
 	  if (expansion_notify != NULL)
-	    expansion_notify (symtab, data);
+	    expansion_notify (symtab);
 	}
     }
 }

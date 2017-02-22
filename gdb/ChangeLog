@@ -1,5 +1,119 @@
 2017-02-23  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c: Include "common/function-view.h".
+	(ada_iterate_over_symbols): Adjust to use function_view as
+	callback type.
+	(struct add_partial_datum, ada_complete_symbol_matcher): Delete.
+	(ada_make_symbol_completion_list): Use a lambda.
+	(ada_exc_search_name_matches): Delete.
+	(name_matches_regex): New.
+	(ada_add_global_exceptions): Use a lambda and name_matches_regex.
+	* compile/compile-c-support.c: Include "common/function-view.h".
+	(print_one_macro): Change prototype to accept a ui_file pointer.
+	(write_macro_definitions): Use a lambda.
+	* dwarf2read.c: Include "common/function-view.h".
+	(dw2_map_expand_apply, dw2_map_symtabs_matching_filename)
+	(dw2_expand_symtabs_matching): Adjust to use function_view as
+	callback type.
+	* language.h: Include "common/function-view.h".
+	(struct language_defn) <la_iterate_over_symbols>: Adjust to use
+	function_view as callback type.
+	(LA_ITERATE_OVER_SYMBOLS): Remove DATA parameter.
+	* linespec.c: Include "common/function-view.h".
+	(collect_info::add_symbol): New method.
+	(struct symbol_and_data_callback, iterate_inline_only, struct
+	symbol_matcher_data, iterate_name_matcher): Delete.
+	(iterate_over_all_matching_symtabs): Adjust to use function_view
+	as callback type and lambdas.
+	(iterate_over_file_blocks): Adjust to use function_view as
+	callback type.
+	(decode_compound_collector): Now a class with private fields.
+	(decode_compound_collector::release_symbols): New method.
+	(collect_one_symbol): Rename to...
+	(decode_compound_collector::operator()): ... this and adjust.
+	(lookup_prefix_sym): decode_compound_collector construction bits
+	move to decode_compound_collector ctor.  Pass the
+	decode_compound_collector object directly as callback.  Remove
+	cleanups and use decode_compound_collector::release_symbols
+	instead.
+	(symtab_collector): Now a class with private fields.
+	(symtab_collector::release_symtabs): New method.
+	(add_symtabs_to_list): Rename to...
+	(symtab_collector::operator()): ... this and adjust.
+	(collect_symtabs_from_filename): symtab_collector construction
+	bits move to symtab_collector ctor.  Pass the symtab_collector
+	object directly as callback.  Remove cleanups and use
+	symtab_collector::release_symtabs instead.
+	(collect_symbols): Delete.
+	(add_matching_symbols_to_info): Use lambdas.
+	* macrocmd.c (print_macro_callback): Delete.
+	(info_macro_command): Use a lambda.
+	(info_macros_command): Pass print_macro_definition as callable
+	directly.
+	(print_one_macro): Remove 'ignore' parameter.
+	(macro_list_command): Adjust.
+	* macrotab.c (macro_for_each_data::fn): Now a function_view.
+	(macro_for_each_data::user_data): Delete field.
+	(foreach_macro): Adjust to call the function_view.
+	(macro_for_each): Adjust to use function_view as callback type.
+	(foreach_macro_in_scope): Adjust to call the function_view.
+	(macro_for_each_in_scope): Adjust to use function_view as callback
+	type.
+	* macrotab.h: Include "common/function-view.h".
+	(macro_callback_fn): Declare a prototype instead of a pointer.
+	Remove "user_data" parameter.
+	(macro_for_each, macro_for_each_in_scope): Adjust to use
+	function_view as callback type.
+	* psymtab.c (partial_map_expand_apply)
+	(psym_map_symtabs_matching_filename, recursively_search_psymtabs):
+	Adjust to use function_view as callback type and to return bool.
+	(psym_expand_symtabs_matching): Adjust to use function_view as
+	callback types.
+	* symfile-debug.c (debug_qf_map_symtabs_matching_filename): Adjust
+	to use function_view as callback type and to return bool.
+	(debug_qf_expand_symtabs_matching): Adjust to use function_view as
+	callback types.
+	* symfile.c (expand_symtabs_matching): Adjust to use function_view
+	as callback types.
+	* symfile.h: Include "common/function-view.h".
+	(expand_symtabs_file_matcher_ftype)
+	(expand_symtabs_symbol_matcher_ftype)
+	(expand_symtabs_exp_notify_ftype): Remove "data" parameter and
+	return bool.
+	(quick_symbol_functions::map_symtabs_matching_filename)
+	(quick_symbol_functions::expand_symtabs_matching): Adjust to use
+	function_view as callback type and return bool.
+	(expand_symtabs_matching): Adjust to use function_view as callback
+	type.
+	(maintenance_expand_name_matcher)
+	(maintenance_expand_file_matcher): Delete.
+	(maintenance_expand_symtabs): Use lambdas.
+	* symtab.c (iterate_over_some_symtabs): Adjust to use
+	function_view as callback types and return bool.
+	(iterate_over_symtabs): Likewise.  Use unique_xmalloc_ptr instead
+	of a cleanup.
+	(lookup_symtab_callback): Delete.
+	(lookup_symtab): Use a lambda.
+	(iterate_over_symbols): Adjust to use function_view as callback
+	type.
+	(struct search_symbols_data, search_symbols_file_matches)
+	(search_symbols_name_matches): Delete.
+	(search_symbols): Use a pair of lambdas.
+	(struct add_name_data, add_macro_name, symbol_completion_matcher)
+	(symtab_expansion_callback): Delete.
+	(default_make_symbol_completion_list_break_on_1): Use lambdas.
+	* symtab.h: Include "common/function-view.h".
+	(iterate_over_some_symtabs): Adjust to use function_view as
+	callback type and return bool.
+	(iterate_over_symtabs): Adjust to use function_view as callback
+	type.
+	(symbol_found_callback_ftype): Remove 'data' parameter and return
+	bool.
+	(iterate_over_symbols): Adjust to use function_view as callback
+	type.
+
+2017-02-23  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS): New.
 	(%.o) <unittests/%.c>: New pattern.
 	* configure.ac ($development): Add $(SUBDIR_UNITTESTS_OBS) to

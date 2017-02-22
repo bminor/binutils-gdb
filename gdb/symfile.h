@@ -26,6 +26,7 @@
 #include "symfile-add-flags.h"
 #include "objfile-flags.h"
 #include "gdb_bfd.h"
+#include "common/function-view.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -133,20 +134,18 @@ typedef void (symbol_filename_ftype) (const char *filename,
 /* Callback for quick_symbol_functions->expand_symtabs_matching
    to match a file name.  */
 
-typedef int (expand_symtabs_file_matcher_ftype) (const char *filename,
-						 void *data, int basenames);
+typedef bool (expand_symtabs_file_matcher_ftype) (const char *filename,
+						  bool basenames);
 
 /* Callback for quick_symbol_functions->expand_symtabs_matching
    to match a symbol name.  */
 
-typedef int (expand_symtabs_symbol_matcher_ftype) (const char *name,
-						   void *data);
+typedef bool (expand_symtabs_symbol_matcher_ftype) (const char *name);
 
 /* Callback for quick_symbol_functions->expand_symtabs_matching
    to be called after a symtab has been expanded.  */
 
-typedef void (expand_symtabs_exp_notify_ftype) \
-  (struct compunit_symtab *symtab, void *data);
+typedef void (expand_symtabs_exp_notify_ftype) (compunit_symtab *symtab);
 
 /* The "quick" symbol functions exist so that symbol readers can
    avoiding an initial read of all the symbols.  For example, symbol
@@ -189,14 +188,11 @@ struct quick_symbol_functions
 
      If a match is found, the "partial" symbol table is expanded.
      Then, this calls iterate_over_some_symtabs (or equivalent) over
-     all newly-created symbol tables, passing CALLBACK and DATA to it.
+     all newly-created symbol tables, passing CALLBACK to it.
      The result of this call is returned.  */
-  int (*map_symtabs_matching_filename) (struct objfile *objfile,
-					const char *name,
-					const char *real_path,
-					int (*callback) (struct symtab *,
-							 void *),
-					void *data);
+  bool (*map_symtabs_matching_filename)
+    (struct objfile *objfile, const char *name, const char *real_path,
+     gdb::function_view<bool (symtab *)> callback);
 
   /* Check to see if the symbol is defined in a "partial" symbol table
      of OBJFILE.  BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
@@ -272,30 +268,27 @@ struct quick_symbol_functions
   /* Expand all symbol tables in OBJFILE matching some criteria.
 
      FILE_MATCHER is called for each file in OBJFILE.  The file name
-     and the DATA argument are passed to it.  If it returns zero, this
-     file is skipped.  If FILE_MATCHER is NULL such file is not skipped.
-     If BASENAMES is non-zero the function should consider only base name of
-     DATA (passed file name is already only the lbasename part).
+     is passed to it.  If the matcher returns false, the file is
+     skipped.  If FILE_MATCHER is NULL the file is not skipped.  If
+     BASENAMES is true the matcher should consider only file base
+     names (the passed file name is already only the lbasename'd
+     part).
 
-     Otherwise, if KIND does not match this symbol is skipped.
+     Otherwise, if KIND does not match, this symbol is skipped.
 
-     If even KIND matches, then SYMBOL_MATCHER is called for each symbol
-     defined in the file.  The symbol "search" name and DATA are passed
-     to SYMBOL_MATCHER.
+     If even KIND matches, SYMBOL_MATCHER is called for each symbol
+     defined in the file.  The symbol "search" name is passed to
+     SYMBOL_MATCHER.
 
-     If SYMBOL_MATCHER returns zero, then this symbol is skipped.
+     If SYMBOL_MATCHER returns false, then the symbol is skipped.
 
-     Otherwise, this symbol's symbol table is expanded.
-
-     DATA is user data that is passed unmodified to the callback
-     functions.  */
+     Otherwise, the symbol's symbol table is expanded.  */
   void (*expand_symtabs_matching)
     (struct objfile *objfile,
-     expand_symtabs_file_matcher_ftype *file_matcher,
-     expand_symtabs_symbol_matcher_ftype *symbol_matcher,
-     expand_symtabs_exp_notify_ftype *expansion_notify,
-     enum search_domain kind,
-     void *data);
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     enum search_domain kind);
 
   /* Return the comp unit from OBJFILE that contains PC and
      SECTION.  Return NULL if there is no such compunit.  This
@@ -565,10 +558,11 @@ void free_symfile_segment_data (struct symfile_segment_data *data);
 
 extern struct cleanup *increment_reading_symtab (void);
 
-void expand_symtabs_matching (expand_symtabs_file_matcher_ftype *,
-			      expand_symtabs_symbol_matcher_ftype *,
-			      expand_symtabs_exp_notify_ftype *,
-			      enum search_domain kind, void *data);
+void expand_symtabs_matching
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind);
 
 void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 			   int need_fullname);

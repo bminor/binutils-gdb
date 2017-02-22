@@ -70,6 +70,7 @@
 #include "build-id.h"
 #include "namespace.h"
 #include "common/gdb_unlinker.h"
+#include "common/function-view.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -3490,8 +3491,7 @@ static int
 dw2_map_expand_apply (struct objfile *objfile,
 		      struct dwarf2_per_cu_data *per_cu,
 		      const char *name, const char *real_path,
-		      int (*callback) (struct symtab *, void *),
-		      void *data)
+		      gdb::function_view<bool (symtab *)> callback)
 {
   struct compunit_symtab *last_made = objfile->compunit_symtabs;
 
@@ -3503,17 +3503,16 @@ dw2_map_expand_apply (struct objfile *objfile,
      all of them.  */
   dw2_instantiate_symtab (per_cu);
 
-  return iterate_over_some_symtabs (name, real_path, callback, data,
-				    objfile->compunit_symtabs, last_made);
+  return iterate_over_some_symtabs (name, real_path, objfile->compunit_symtabs,
+				    last_made, callback);
 }
 
 /* Implementation of the map_symtabs_matching_filename method.  */
 
-static int
-dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
-				   const char *real_path,
-				   int (*callback) (struct symtab *, void *),
-				   void *data)
+static bool
+dw2_map_symtabs_matching_filename
+  (struct objfile *objfile, const char *name, const char *real_path,
+   gdb::function_view<bool (symtab *)> callback)
 {
   int i;
   const char *name_basename = lbasename (name);
@@ -3545,8 +3544,8 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	  if (compare_filenames_for_search (this_name, name))
 	    {
 	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
-					callback, data))
-		return 1;
+					callback))
+		return true;
 	      continue;
 	    }
 
@@ -3560,8 +3559,8 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	  if (compare_filenames_for_search (this_real_name, name))
 	    {
 	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
-					callback, data))
-		return 1;
+					callback))
+		return true;
 	      continue;
 	    }
 
@@ -3573,15 +3572,15 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 		  && FILENAME_CMP (real_path, this_real_name) == 0)
 		{
 		  if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
-					    callback, data))
-		    return 1;
+					    callback))
+		    return true;
 		  continue;
 		}
 	    }
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Struct used to manage iterating over all CUs looking for a symbol.  */
@@ -3919,11 +3918,10 @@ dw2_map_matching_symbols (struct objfile *objfile,
 static void
 dw2_expand_symtabs_matching
   (struct objfile *objfile,
-   expand_symtabs_file_matcher_ftype *file_matcher,
-   expand_symtabs_symbol_matcher_ftype *symbol_matcher,
-   expand_symtabs_exp_notify_ftype *expansion_notify,
-   enum search_domain kind,
-   void *data)
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind)
 {
   int i;
   offset_type iter;
@@ -3979,7 +3977,7 @@ dw2_expand_symtabs_matching
 	    {
 	      const char *this_real_name;
 
-	      if (file_matcher (file_data->file_names[j], data, 0))
+	      if (file_matcher (file_data->file_names[j], false))
 		{
 		  per_cu->v.quick->mark = 1;
 		  break;
@@ -3989,11 +3987,11 @@ dw2_expand_symtabs_matching
 		 files are involved, do a quick comparison of the basenames.  */
 	      if (!basenames_may_differ
 		  && !file_matcher (lbasename (file_data->file_names[j]),
-				    data, 1))
+				    true))
 		continue;
 
 	      this_real_name = dw2_get_real_path (objfile, file_data, j);
-	      if (file_matcher (this_real_name, data, 0))
+	      if (file_matcher (this_real_name, false))
 		{
 		  per_cu->v.quick->mark = 1;
 		  break;
@@ -4022,7 +4020,7 @@ dw2_expand_symtabs_matching
 
       name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
 
-      if (! (*symbol_matcher) (name, data))
+      if (!symbol_matcher (name))
 	continue;
 
       /* The name was matched, now expand corresponding CUs that were
@@ -4100,8 +4098,7 @@ dw2_expand_symtabs_matching
 		  && symtab_was_null
 		  && per_cu->v.quick->compunit_symtab != NULL)
 		{
-		  expansion_notify (per_cu->v.quick->compunit_symtab,
-				    data);
+		  expansion_notify (per_cu->v.quick->compunit_symtab);
 		}
 	    }
 	}

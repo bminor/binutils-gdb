@@ -382,23 +382,20 @@ compare_glob_filenames_for_search (const char *filename,
    If NAME is not absolute, then REAL_PATH is NULL
    If NAME is absolute, then REAL_PATH is the gdb_realpath form of NAME.
 
-   The return value, NAME, REAL_PATH, CALLBACK, and DATA
-   are identical to the `map_symtabs_matching_filename' method of
-   quick_symbol_functions.
+   The return value, NAME, REAL_PATH and CALLBACK are identical to the
+   `map_symtabs_matching_filename' method of quick_symbol_functions.
 
    FIRST and AFTER_LAST indicate the range of compunit symtabs to search.
    Each symtab within the specified compunit symtab is also searched.
    AFTER_LAST is one past the last compunit symtab to search; NULL means to
    search until the end of the list.  */
 
-int
+bool
 iterate_over_some_symtabs (const char *name,
 			   const char *real_path,
-			   int (*callback) (struct symtab *symtab,
-					    void *data),
-			   void *data,
 			   struct compunit_symtab *first,
-			   struct compunit_symtab *after_last)
+			   struct compunit_symtab *after_last,
+			   gdb::function_view<bool (symtab *)> callback)
 {
   struct compunit_symtab *cust;
   struct symtab *s;
@@ -410,8 +407,8 @@ iterate_over_some_symtabs (const char *name,
 	{
 	  if (compare_filenames_for_search (s->filename, name))
 	    {
-	      if (callback (s, data))
-		return 1;
+	      if (callback (s))
+		return true;
 	      continue;
 	    }
 
@@ -423,8 +420,8 @@ iterate_over_some_symtabs (const char *name,
 
 	  if (compare_filenames_for_search (symtab_to_fullname (s), name))
 	    {
-	      if (callback (s, data))
-		return 1;
+	      if (callback (s))
+		return true;
 	      continue;
 	    }
 
@@ -438,82 +435,59 @@ iterate_over_some_symtabs (const char *name,
 	      gdb_assert (IS_ABSOLUTE_PATH (name));
 	      if (FILENAME_CMP (real_path, fullname) == 0)
 		{
-		  if (callback (s, data))
-		    return 1;
+		  if (callback (s))
+		    return true;
 		  continue;
 		}
 	    }
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Check for a symtab of a specific name; first in symtabs, then in
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
    in the symtab filename will also work.
 
-   Calls CALLBACK with each symtab that is found and with the supplied
-   DATA.  If CALLBACK returns true, the search stops.  */
+   Calls CALLBACK with each symtab that is found.  If CALLBACK returns
+   true, the search stops.  */
 
 void
 iterate_over_symtabs (const char *name,
-		      int (*callback) (struct symtab *symtab,
-				       void *data),
-		      void *data)
+		      gdb::function_view<bool (symtab *)> callback)
 {
   struct objfile *objfile;
-  char *real_path = NULL;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  gdb::unique_xmalloc_ptr<char> real_path;
 
   /* Here we are interested in canonicalizing an absolute path, not
      absolutizing a relative path.  */
   if (IS_ABSOLUTE_PATH (name))
     {
-      real_path = gdb_realpath (name);
-      make_cleanup (xfree, real_path);
-      gdb_assert (IS_ABSOLUTE_PATH (real_path));
+      real_path.reset (gdb_realpath (name));
+      gdb_assert (IS_ABSOLUTE_PATH (real_path.get ()));
     }
 
   ALL_OBJFILES (objfile)
-  {
-    if (iterate_over_some_symtabs (name, real_path, callback, data,
-				   objfile->compunit_symtabs, NULL))
-      {
-	do_cleanups (cleanups);
+    {
+      if (iterate_over_some_symtabs (name, real_path.get (),
+				     objfile->compunit_symtabs, NULL,
+				     callback))
 	return;
-      }
-  }
+    }
 
   /* Same search rules as above apply here, but now we look thru the
      psymtabs.  */
 
   ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf
-	&& objfile->sf->qf->map_symtabs_matching_filename (objfile,
-							   name,
-							   real_path,
-							   callback,
-							   data))
-      {
-	do_cleanups (cleanups);
+    {
+      if (objfile->sf
+	  && objfile->sf->qf->map_symtabs_matching_filename (objfile,
+							     name,
+							     real_path.get (),
+							     callback))
 	return;
-      }
-  }
-
-  do_cleanups (cleanups);
-}
-
-/* The callback function used by lookup_symtab.  */
-
-static int
-lookup_symtab_callback (struct symtab *symtab, void *data)
-{
-  struct symtab **result_ptr = (struct symtab **) data;
-
-  *result_ptr = symtab;
-  return 1;
+    }
 }
 
 /* A wrapper for iterate_over_symtabs that returns the first matching
@@ -524,7 +498,12 @@ lookup_symtab (const char *name)
 {
   struct symtab *result = NULL;
 
-  iterate_over_symtabs (name, lookup_symtab_callback, &result);
+  iterate_over_symtabs (name, [&] (symtab *symtab)
+    {
+      result = symtab;
+      return true;
+    });
+
   return result;
 }
 
@@ -2777,18 +2756,17 @@ basic_lookup_transparent_type (const char *name)
 }
 
 /* Iterate over the symbols named NAME, matching DOMAIN, in BLOCK.
-   
-   For each symbol that matches, CALLBACK is called.  The symbol and
-   DATA are passed to the callback.
-   
-   If CALLBACK returns zero, the iteration ends.  Otherwise, the
+
+   For each symbol that matches, CALLBACK is called.  The symbol is
+   passed to the callback.
+
+   If CALLBACK returns false, the iteration ends.  Otherwise, the
    search continues.  */
 
 void
 iterate_over_symbols (const struct block *block, const char *name,
 		      const domain_enum domain,
-		      symbol_found_callback_ftype *callback,
-		      void *data)
+		      gdb::function_view<symbol_found_callback_ftype> callback)
 {
   struct block_iterator iter;
   struct symbol *sym;
@@ -2798,7 +2776,7 @@ iterate_over_symbols (const struct block *block, const char *name,
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
 	{
-	  if (!callback (sym, data))
+	  if (!callback (sym))
 	    return;
 	}
     }
@@ -4282,39 +4260,6 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
   xfree (symbols);
 }
 
-/* An object of this type is passed as the user_data to the
-   expand_symtabs_matching method.  */
-struct search_symbols_data
-{
-  int nfiles;
-  const char **files;
-
-  /* It is true if PREG contains valid data, false otherwise.  */
-  unsigned preg_p : 1;
-  regex_t preg;
-};
-
-/* A callback for expand_symtabs_matching.  */
-
-static int
-search_symbols_file_matches (const char *filename, void *user_data,
-			     int basenames)
-{
-  struct search_symbols_data *data = (struct search_symbols_data *) user_data;
-
-  return file_matches (filename, data->files, data->nfiles, basenames);
-}
-
-/* A callback for expand_symtabs_matching.  */
-
-static int
-search_symbols_name_matches (const char *symname, void *user_data)
-{
-  struct search_symbols_data *data = (struct search_symbols_data *) user_data;
-
-  return !data->preg_p || regexec (&data->preg, symname, 0, NULL, 0) == 0;
-}
-
 /* Search the symbol table for matches to the regular expression REGEXP,
    returning the results in *MATCHES.
 
@@ -4359,8 +4304,10 @@ search_symbols (const char *regexp, enum search_domain kind,
   enum minimal_symbol_type ourtype4;
   struct symbol_search *found;
   struct symbol_search *tail;
-  struct search_symbols_data datum;
   int nfound;
+  /* This is true if PREG contains valid data, false otherwise.  */
+  bool preg_p;
+  regex_t preg;
 
   /* OLD_CHAIN .. RETVAL_CHAIN is always freed, RETVAL_CHAIN .. current
      CLEANUP_CHAIN is freed only in the case of an error.  */
@@ -4375,7 +4322,7 @@ search_symbols (const char *regexp, enum search_domain kind,
   ourtype4 = types4[kind];
 
   *matches = NULL;
-  datum.preg_p = 0;
+  preg_p = false;
 
   if (regexp != NULL)
     {
@@ -4414,31 +4361,35 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    }
 	}
 
-      errcode = regcomp (&datum.preg, regexp,
+      errcode = regcomp (&preg, regexp,
 			 REG_NOSUB | (case_sensitivity == case_sensitive_off
 				      ? REG_ICASE : 0));
       if (errcode != 0)
 	{
-	  char *err = get_regcomp_error (errcode, &datum.preg);
+	  char *err = get_regcomp_error (errcode, &preg);
 
 	  make_cleanup (xfree, err);
 	  error (_("Invalid regexp (%s): %s"), err, regexp);
 	}
-      datum.preg_p = 1;
-      make_regfree_cleanup (&datum.preg);
+      preg_p = true;
+      make_regfree_cleanup (&preg);
     }
 
   /* Search through the partial symtabs *first* for all symbols
      matching the regexp.  That way we don't have to reproduce all of
      the machinery below.  */
-
-  datum.nfiles = nfiles;
-  datum.files = files;
-  expand_symtabs_matching ((nfiles == 0
-			    ? NULL
-			    : search_symbols_file_matches),
-			   search_symbols_name_matches,
-			   NULL, kind, &datum);
+  expand_symtabs_matching ([&] (const char *filename, bool basenames)
+			   {
+			     return file_matches (filename, files, nfiles,
+						  basenames);
+			   },
+			   [&] (const char *symname)
+			   {
+			     return (!preg_p || regexec (&preg, symname,
+							 0, NULL, 0) == 0);
+			   },
+			   NULL,
+			   kind);
 
   /* Here, we search through the minimal symbol tables for functions
      and variables that match, and force their symbols to be read.
@@ -4470,8 +4421,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!datum.preg_p
-		|| regexec (&datum.preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
+	    if (!preg_p
+		|| regexec (&preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
 			    NULL, 0) == 0)
 	      {
 		/* Note: An important side-effect of these lookup functions
@@ -4514,8 +4465,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 				       files, nfiles, 1))
 		     && file_matches (symtab_to_fullname (real_symtab),
 				      files, nfiles, 0)))
-		&& ((!datum.preg_p
-		     || regexec (&datum.preg, SYMBOL_NATURAL_NAME (sym), 0,
+		&& ((!preg_p
+		     || regexec (&preg, SYMBOL_NATURAL_NAME (sym), 0,
 				 NULL, 0) == 0)
 		    && ((kind == VARIABLES_DOMAIN
 			 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
@@ -4572,8 +4523,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!datum.preg_p
-		|| regexec (&datum.preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
+	    if (!preg_p
+		|| regexec (&preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
 			    NULL, 0) == 0)
 	      {
 		/* For functions we can do a quick check of whether the
@@ -5110,46 +5061,6 @@ completion_list_add_fields (struct symbol *sym, const char *sym_text,
     }
 }
 
-/* Type of the user_data argument passed to add_macro_name,
-   symbol_completion_matcher and symtab_expansion_callback.  */
-
-struct add_name_data
-{
-  /* Arguments required by completion_list_add_name.  */
-  const char *sym_text;
-  int sym_text_len;
-  const char *text;
-  const char *word;
-
-  /* Extra argument required for add_symtab_completions.  */
-  enum type_code code;
-};
-
-/* A callback used with macro_for_each and macro_for_each_in_scope.
-   This adds a macro's name to the current completion list.  */
-
-static void
-add_macro_name (const char *name, const struct macro_definition *ignore,
-		struct macro_source_file *ignore2, int ignore3,
-		void *user_data)
-{
-  struct add_name_data *datum = (struct add_name_data *) user_data;
-
-  completion_list_add_name (name,
-			    datum->sym_text, datum->sym_text_len,
-			    datum->text, datum->word);
-}
-
-/* A callback for expand_symtabs_matching.  */
-
-static int
-symbol_completion_matcher (const char *name, void *user_data)
-{
-  struct add_name_data *datum = (struct add_name_data *) user_data;
-
-  return compare_symbol_name (name, datum->sym_text, datum->sym_text_len);
-}
-
 /* Add matching symbols from SYMTAB to the current completion list.  */
 
 static void
@@ -5182,21 +5093,6 @@ add_symtab_completions (struct compunit_symtab *cust,
     }
 }
 
-/* Callback to add completions to the current list when symbol tables
-   are expanded during completion list generation.  */
-
-static void
-symtab_expansion_callback (struct compunit_symtab *symtab,
-			   void *user_data)
-{
-  struct add_name_data *datum = (struct add_name_data *) user_data;
-
-  add_symtab_completions (symtab,
-			  datum->sym_text, datum->sym_text_len,
-			  datum->text, datum->word,
-			  datum->code);
-}
-
 static void
 default_make_symbol_completion_list_break_on_1 (const char *text,
 						const char *word,
@@ -5218,7 +5114,6 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
   const char *sym_text;
   /* Length of sym_text.  */
   int sym_text_len;
-  struct add_name_data datum;
   struct cleanup *cleanups;
 
   /* Now look for the symbol we are supposed to complete on.  */
@@ -5292,12 +5187,6 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
   completion_tracker = new_completion_tracker ();
   cleanups = make_cleanup_free_completion_tracker (&completion_tracker);
 
-  datum.sym_text = sym_text;
-  datum.sym_text_len = sym_text_len;
-  datum.text = text;
-  datum.word = word;
-  datum.code = code;
-
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore
      anything that isn't a text symbol (everything else will be
@@ -5321,13 +5210,22 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
     add_symtab_completions (cust, sym_text, sym_text_len, text, word,
 			    code);
 
-  /* Look through the partial symtabs for all symbols which begin
-     by matching SYM_TEXT.  Expand all CUs that you find to the list.
-     symtab_expansion_callback is called for each expanded symtab,
-     causing those symtab's completions to be added to the list too.  */
-  expand_symtabs_matching (NULL, symbol_completion_matcher,
-			   symtab_expansion_callback, ALL_DOMAIN,
-			   &datum);
+  /* Look through the partial symtabs for all symbols which begin by
+     matching SYM_TEXT.  Expand all CUs that you find to the list.  */
+  expand_symtabs_matching (NULL,
+			   [&] (const char *name) /* symbol matcher */
+			     {
+			       return compare_symbol_name (name,
+							   sym_text,
+							   sym_text_len);
+			     },
+			   [&] (compunit_symtab *symtab) /* expansion notify */
+			     {
+			       add_symtab_completions (symtab,
+						       sym_text, sym_text_len,
+						       text, word, code);
+			     },
+			   ALL_DOMAIN);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars).  Also catch fields of types defined in
@@ -5385,6 +5283,17 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
     {
       struct macro_scope *scope;
 
+      /* This adds a macro's name to the current completion list.  */
+      auto add_macro_name = [&] (const char *macro_name,
+				 const macro_definition *,
+				 macro_source_file *,
+				 int)
+	{
+	  completion_list_add_name (macro_name,
+				    sym_text, sym_text_len,
+				    text, word);
+	};
+
       /* Add any macros visible in the default scope.  Note that this
 	 may yield the occasional wrong result, because an expression
 	 might be evaluated in a scope other than the default.  For
@@ -5396,12 +5305,12 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       if (scope)
 	{
 	  macro_for_each_in_scope (scope->file, scope->line,
-				   add_macro_name, &datum);
+				   add_macro_name);
 	  xfree (scope);
 	}
 
       /* User-defined macros are always visible.  */
-      macro_for_each (macro_user_macros, add_macro_name, &datum);
+      macro_for_each (macro_user_macros, add_macro_name);
     }
 
   do_cleanups (cleanups);
