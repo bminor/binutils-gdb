@@ -1,3 +1,8 @@
+2017-02-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* testsuite/gas/all/err-sizeof.s: Include cris*-*-* in the list of
+	targets	yielding an error message matching "too complex".
+
 2017-02-22  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/arm/vcmp-noprefix-imm.d: Skip for non-ELF targets.

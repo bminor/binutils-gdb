@@ -16,6 +16,6 @@
 ;# { dg-error "UND" "undefined" { target *-*-* } 5 }
 ;# { dg-error "junk at end" "junk" { target *-*-* } 6 }
 ;# { dg-error "UND" "undefined" { target *-*-* } 6 }
-;# { dg-error "too complex" "too complex" { target powerpc*-*-* } 6 }
+;# { dg-error "too complex" "too complex" { target powerpc*-*-* cris*-*-* } 6 }
 ;# { dg-warning "zero assumed" "missing" { target *-*-* } 9 }
 ;# { dg-warning "zero assumed" "missing" { target *-*-* } 10 }
