@@ -10002,7 +10002,7 @@ process_version_sections (FILE * file)
 
 	    printf (_("  Addr: 0x"));
 	    printf_vma (section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %u (%s)"),
+	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (section->sh_link));
 

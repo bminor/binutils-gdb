@@ -1,3 +1,9 @@
+2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (process_version_sections) <SHT_GNU_verdef>: Print a
+	new line between the heading and the first version definition
+	entry.
+
 2017-02-20  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21156
