@@ -942,7 +942,6 @@ typedef struct xtensa_windowed_frame_cache
 
 #define C0_MAXOPDS  3	/* Maximum number of operands for prologue
 			   analysis.  */
-#define C0_NREGS   16	/* Number of A-registers to track.  */
 #define C0_CLESV   12	/* Callee-saved registers are here and up.  */
 #define C0_SP	    1	/* Register used as SP.  */
 #define C0_FP	   15	/* Register used as FP.  */
