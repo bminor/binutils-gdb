@@ -1607,10 +1607,10 @@ convert_bfc_to_bfm (aarch64_inst *inst)
   /* Insert XZR.  */
   copy_operand_info (inst, 3, 2);
   copy_operand_info (inst, 2, 1);
-  copy_operand_info (inst, 0, 0);
+  copy_operand_info (inst, 1, 0);
   inst->operands[1].reg.regno = 0x1f;
 
-  /* Convert the immedate operand.  */
+  /* Convert the immediate operand.  */
   lsb = inst->operands[2].imm.value;
   width = inst->operands[3].imm.value;
   if (inst->operands[2].qualifier == AARCH64_OPND_QLF_imm_0_31)

@@ -983,12 +983,33 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 
 /* Instruction masks used during single-stepping of atomic
    sequences.  */
-#define LWARX_MASK 0xfc0007fe
+#define LOAD_AND_RESERVE_MASK 0xfc0007fe
 #define LWARX_INSTRUCTION 0x7c000028
 #define LDARX_INSTRUCTION 0x7c0000A8
-#define STWCX_MASK 0xfc0007ff
+#define LBARX_INSTRUCTION 0x7c000068
+#define LHARX_INSTRUCTION 0x7c0000e8
+#define LQARX_INSTRUCTION 0x7c000228
+#define STORE_CONDITIONAL_MASK 0xfc0007ff
 #define STWCX_INSTRUCTION 0x7c00012d
 #define STDCX_INSTRUCTION 0x7c0001ad
+#define STBCX_INSTRUCTION 0x7c00056d
+#define STHCX_INSTRUCTION 0x7c0005ad
+#define STQCX_INSTRUCTION 0x7c00016d
+
+/* Check if insn is one of the Load And Reserve instructions used for atomic
+   sequences.  */
+#define IS_LOAD_AND_RESERVE_INSN(insn)	((insn & LOAD_AND_RESERVE_MASK) == LWARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LDARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LBARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LHARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LQARX_INSTRUCTION)
+/* Check if insn is one of the Store Conditional instructions used for atomic
+   sequences.  */
+#define IS_STORE_CONDITIONAL_INSN(insn)	((insn & STORE_CONDITIONAL_MASK) == STWCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STDCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STBCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STHCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STQCX_INSTRUCTION)
 
 /* We can't displaced step atomic sequences.  Otherwise this is just
    like simple_displaced_step_copy_insn.  */
@@ -1008,9 +1029,8 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   insn = extract_signed_integer (buf, PPC_INSN_SIZE, byte_order);
 
-  /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
-  if ((insn & LWARX_MASK) == LWARX_INSTRUCTION
-      || (insn & LWARX_MASK) == LDARX_INSTRUCTION)
+  /* Assume all atomic sequences start with a Load and Reserve instruction.  */
+  if (IS_LOAD_AND_RESERVE_INSN (insn))
     {
       if (debug_displaced)
 	{
@@ -1138,11 +1158,10 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   return 1;
 }
 
-/* Checks for an atomic sequence of instructions beginning with a LWARX/LDARX
-   instruction and ending with a STWCX/STDCX instruction.  If such a sequence
-   is found, attempt to step through it.  A breakpoint is placed at the end of 
-   the sequence.  */
-
+/* Checks for an atomic sequence of instructions beginning with a
+   Load And Reserve instruction and ending with a Store Conditional
+   instruction.  If such a sequence is found, attempt to step through it.
+   A breakpoint is placed at the end of the sequence.  */
 VEC (CORE_ADDR) *
 ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
@@ -1160,9 +1179,8 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
   VEC (CORE_ADDR) *next_pcs = NULL;
 
-  /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
-  if ((insn & LWARX_MASK) != LWARX_INSTRUCTION
-      && (insn & LWARX_MASK) != LDARX_INSTRUCTION)
+  /* Assume all atomic sequences start with a Load And Reserve instruction.  */
+  if (!IS_LOAD_AND_RESERVE_INSN (insn))
     return NULL;
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
@@ -1193,14 +1211,13 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
 	  last_breakpoint++;
         }
 
-      if ((insn & STWCX_MASK) == STWCX_INSTRUCTION
-          || (insn & STWCX_MASK) == STDCX_INSTRUCTION)
+      if (IS_STORE_CONDITIONAL_INSN (insn))
         break;
     }
 
-  /* Assume that the atomic sequence ends with a stwcx/stdcx instruction.  */
-  if ((insn & STWCX_MASK) != STWCX_INSTRUCTION
-      && (insn & STWCX_MASK) != STDCX_INSTRUCTION)
+  /* Assume that the atomic sequence ends with a Store Conditional
+     instruction.  */
+  if (!IS_STORE_CONDITIONAL_INSN (insn))
     return NULL;
 
   closing_insn = loc;

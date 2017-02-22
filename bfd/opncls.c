@@ -1645,6 +1645,8 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
   if (sect == NULL)
     return NULL;
 
+  /* Compute the size of the section.  Allow for the CRC after the filename,
+     and padding so that it will start on a 4-byte boundary.  */
   debuglink_size = strlen (filename) + 1;
   debuglink_size += 3;
   debuglink_size &= ~3;
@@ -1653,6 +1655,11 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
   if (! bfd_set_section_size (abfd, sect, debuglink_size))
     /* XXX Should we delete the section from the bfd ?  */
     return NULL;
+
+  /* PR 21193: Ensure that the section has 4-byte alignment for the CRC.
+     Note - despite the name of the function being called, we are
+     setting an alignment power, not a byte alignment value.  */
+  bfd_set_section_alignment (abfd, sect, 2);
 
   return sect;
 }

@@ -1,3 +1,21 @@
+2017-02-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21193
+	* opncls.c (bfd_create_gnu_debuglink_section): Give the newly
+	created section 4-byte alignment.
+
+2017-02-22  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Don't segfault
+	on .got or .plt output section being discarded by script.
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Likewise.  Move
+	vxworks splt temp.
+
+2017-02-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Only emit
+	DT_RELA, DT_RELASZ, and DT_RELAENT when DT_RELASZ is non-zero.
+
 2017-02-20  Alan Modra  <amodra@gmail.com>
 
 	PR 21181

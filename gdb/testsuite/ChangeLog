@@ -1,3 +1,16 @@
+2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.arch/ppc64-isa207-atomic-inst.exp: New testcase based on
+	gdb.arch/ppc64-atomic-inst.exp.  Add tests for lbarx/stbcx, lharx/sthcx
+	and lqarx/stqcx.
+	* gdb.arch/ppc64-isa207-atomic-inst.S: New file.
+	* gdb.arch/ppc64-isa207-atomic-inst.c: Likewise.
+
+2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.arch/ppc64-atomic-inst.exp: Fix test names starting with
+	uppercase.
+
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/formdata16.c: New file.
