@@ -496,12 +496,14 @@ dwarf2_where (struct dwarf2_line_info *line)
 {
   if (debug_type == DEBUG_DWARF2)
     {
+      memset (line, 0, sizeof (*line));
       const char *filename = as_where (&line->line);
       line->filenum = get_filenum (filename, 0);
       line->column = 0;
       line->flags = DWARF2_FLAG_IS_STMT;
       line->isa = current.isa;
       line->discriminator = current.discriminator;
+      line->view = NULL;
     }
   else
     *line = current;
