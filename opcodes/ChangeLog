@@ -1,3 +1,8 @@
+2017-02-21  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-asm.c (convert_bfc_to_bfm): Copy operand 0 to operand
+	1 (instead of to itself). Correct typo.
+
 2017-02-14  Andrew Waterman  <andrew@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes): Add sfence.vma instruction and
