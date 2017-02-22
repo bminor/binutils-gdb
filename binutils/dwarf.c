@@ -1420,9 +1420,9 @@ decode_location_expression (unsigned char * data,
 	default:
 	  if (op >= DW_OP_lo_user
 	      && op <= DW_OP_hi_user)
-	    printf (_("(User defined location op)"));
+	    printf (_("(User defined location op 0x%x)"), op);
 	  else
-	    printf (_("(Unknown location op)"));
+	    printf (_("(Unknown location op 0x%x)"), op);
 	  /* No way to tell where the next op is, so just bail.  */
 	  return need_frame_base;
 	}

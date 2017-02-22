@@ -1,3 +1,7 @@
+2017-02-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (decode_location_expression): Display also OP.
+
 2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* readelf.c (process_version_sections) <SHT_GNU_verdef>: Print a
