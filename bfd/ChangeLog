@@ -1,3 +1,9 @@
+2017-02-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21193
+	* opncls.c (bfd_create_gnu_debuglink_section): Give the newly
+	created section 4-byte alignment.
+
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Don't segfault
