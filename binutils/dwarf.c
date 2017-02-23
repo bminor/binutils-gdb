@@ -870,11 +870,11 @@ get_FORM_name (unsigned long form)
 static unsigned char *
 display_block (unsigned char *data,
 	       dwarf_vma length,
-	       const unsigned char * const end)
+	       const unsigned char * const end, char delimiter)
 {
   dwarf_vma maxlen;
 
-  printf (_(" %s byte block: "), dwarf_vmatoa ("u", length));
+  printf (_("%c%s byte block: "), delimiter, dwarf_vmatoa ("u", length));
   if (data > end)
     return (unsigned char *) end;
 
@@ -1267,7 +1267,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_implicit_value");
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
-	  data = display_block (data, uvalue, end);
+	  data = display_block (data, uvalue, end, ' ');
 	  break;
 
 	  /* GNU extensions.  */
@@ -1336,7 +1336,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_GNU_const_type: <0x%s> ",
 		  dwarf_vmatoa ("x", cu_offset + uvalue));
 	  SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
-	  data = display_block (data, uvalue, end);
+	  data = display_block (data, uvalue, end, ' ');
 	  break;
 	case DW_OP_GNU_regval_type:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
@@ -1507,7 +1507,7 @@ read_and_display_attr_value (unsigned long attribute,
 			     debug_info * debug_info_p,
 			     int do_loc,
 			     struct dwarf_section * section,
-			     struct cu_tu_set * this_set)
+			     struct cu_tu_set * this_set, char delimiter)
 {
   dwarf_vma uvalue = 0;
   unsigned char *block_start = NULL;
@@ -1586,12 +1586,12 @@ read_and_display_attr_value (unsigned long attribute,
       form = read_uleb128 (data, & bytes_read, end);
       data += bytes_read;
       if (!do_loc)
-	printf (" %s", get_FORM_name (form));
+	printf ("%c%s", delimiter, get_FORM_name (form));
       return read_and_display_attr_value (attribute, form, data, end,
 					  cu_offset, pointer_size,
 					  offset_size, dwarf_version,
 					  debug_info_p, do_loc,
-					  section, this_set);
+					  section, this_set, delimiter);
     case DW_FORM_GNU_addr_index:
       uvalue = read_uleb128 (data, & bytes_read, end);
       data += bytes_read;
@@ -1602,12 +1602,12 @@ read_and_display_attr_value (unsigned long attribute,
     {
     case DW_FORM_ref_addr:
       if (!do_loc)
-	printf (" <0x%s>", dwarf_vmatoa ("x",uvalue));
+	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x",uvalue));
       break;
 
     case DW_FORM_GNU_ref_alt:
       if (!do_loc)
-	printf (" <alt 0x%s>", dwarf_vmatoa ("x",uvalue));
+	printf ("%c<alt 0x%s>", delimiter, dwarf_vmatoa ("x",uvalue));
       break;
 
     case DW_FORM_ref1:
@@ -1615,14 +1615,14 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_ref4:
     case DW_FORM_ref_udata:
       if (!do_loc)
-	printf (" <0x%s>", dwarf_vmatoa ("x", uvalue + cu_offset));
+	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x", uvalue + cu_offset));
       break;
 
     case DW_FORM_data4:
     case DW_FORM_addr:
     case DW_FORM_sec_offset:
       if (!do_loc)
-	printf (" 0x%s", dwarf_vmatoa ("x", uvalue));
+	printf ("%c0x%s", delimiter, dwarf_vmatoa ("x", uvalue));
       break;
 
     case DW_FORM_flag_present:
@@ -1632,7 +1632,7 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_sdata:
     case DW_FORM_udata:
       if (!do_loc)
-	printf (" %s", dwarf_vmatoa ("d", uvalue));
+	printf ("%c%s", delimiter, dwarf_vmatoa ("d", uvalue));
       break;
 
     case DW_FORM_ref8:
@@ -1647,7 +1647,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  utmp = uvalue;
 	  if (form == DW_FORM_ref8)
 	    add64 (& high_bits, & utmp, cu_offset);
-	  printf (" 0x%s",
+	  printf ("%c0x%s", delimiter,
 		  dwarf_vmatoa64 (high_bits, utmp, buf, sizeof (buf)));
 	}
 
@@ -1665,7 +1665,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_string:
       if (!do_loc)
-	printf (" %.*s", (int) (end - data), data);
+	printf ("%c%.*s", delimiter, (int) (end - data), data);
       data += strnlen ((char *) data, end - data) + 1;
       break;
 
@@ -1692,7 +1692,7 @@ read_and_display_attr_value (unsigned long attribute,
       if (do_loc)
 	data = block_start + uvalue;
       else
-	data = display_block (block_start, uvalue, end);
+	data = display_block (block_start, uvalue, end, delimiter);
       break;
 
     case DW_FORM_block1:
@@ -1713,7 +1713,7 @@ read_and_display_attr_value (unsigned long attribute,
       if (do_loc)
 	data = block_start + uvalue;
       else
-	data = display_block (block_start, uvalue, end);
+	data = display_block (block_start, uvalue, end, delimiter);
       break;
 
     case DW_FORM_block2:
@@ -1734,7 +1734,7 @@ read_and_display_attr_value (unsigned long attribute,
       if (do_loc)
 	data = block_start + uvalue;
       else
-	data = display_block (block_start, uvalue, end);
+	data = display_block (block_start, uvalue, end, delimiter);
       break;
 
     case DW_FORM_block4:
@@ -1758,12 +1758,12 @@ read_and_display_attr_value (unsigned long attribute,
       if (do_loc)
 	data = block_start + uvalue;
       else
-	data = display_block (block_start, uvalue, end);
+	data = display_block (block_start, uvalue, end, delimiter);
       break;
 
     case DW_FORM_strp:
       if (!do_loc)
-	printf (_(" (indirect string, offset: 0x%s): %s"),
+	printf (_("%c(indirect string, offset: 0x%s): %s"), delimiter,
 		dwarf_vmatoa ("x", uvalue),
 		fetch_indirect_string (uvalue));
       break;
@@ -1774,7 +1774,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  const char *suffix = strrchr (section->name, '.');
 	  int dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? 1 : 0;
 
-	  printf (_(" (indexed string: 0x%s): %s"),
+	  printf (_("%c(indexed string: 0x%s): %s"), delimiter,
 		  dwarf_vmatoa ("x", uvalue),
 		  fetch_indexed_string (uvalue, this_set, offset_size, dwo));
 	}
@@ -1782,7 +1782,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_GNU_strp_alt:
       if (!do_loc)
-	printf (_(" (alt indirect string, offset: 0x%s)"),
+	printf (_("%c(alt indirect string, offset: 0x%s)"), delimiter,
 		dwarf_vmatoa ("x", uvalue));
       break;
 
@@ -1797,7 +1797,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  char buf[64];
 
 	  SAFE_BYTE_GET64 (data, &high_bits, &uvalue, end);
-	  printf (" signature: 0x%s",
+	  printf ("%csignature: 0x%s", delimiter,
 		  dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
 	}
       data += 8;
@@ -1805,7 +1805,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_GNU_addr_index:
       if (!do_loc)
-	printf (_(" (addr_index: 0x%s): %s"),
+	printf (_("%c(addr_index: 0x%s): %s"), delimiter,
 		dwarf_vmatoa ("x", uvalue),
 		fetch_indexed_value (uvalue * pointer_size, pointer_size));
       break;
@@ -2232,7 +2232,7 @@ read_and_display_attr (unsigned long attribute,
   data = read_and_display_attr_value (attribute, form, data, end,
 				      cu_offset, pointer_size, offset_size,
 				      dwarf_version, debug_info_p,
-				      do_loc, section, this_set);
+				      do_loc, section, this_set, ' ');
   if (!do_loc)
     printf ("\n");
   return data;
@@ -4331,7 +4331,7 @@ display_debug_macro (struct dwarf_section *section,
 			= read_and_display_attr_value (0, val,
 						       curr, end, 0, 0, offset_size,
 						       version, NULL, 0, NULL,
-						       NULL);
+						       NULL, ' ');
 		      if (n != nargs - 1)
 			printf (",");
 		    }
