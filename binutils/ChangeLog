@@ -1,5 +1,36 @@
 2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf.c (fetch_indirect_line_string): New function.
+	(abbrev_attr): New field implicit_const.
+	(add_abbrev_attr): New parameter implicit_const.
+	(process_abbrev_section): Support DW_FORM_implicit_const.
+	(decode_location_expression): Support DW_OP_entry_value.
+	(read_and_display_attr_value): Add parameter implicit_const.  Support
+	DW_FORM_line_strp and DW_FORM_implicit_const.
+	(read_and_display_attr): Add parameter implicit_const.
+	(process_debug_info): Support line_str and DWARF-5.
+	(read_debug_line_header): Support DWARF-5.
+	(display_formatted_table): New function.
+	(display_debug_lines_raw): New parameter file.  Support DWARF-5.
+	(display_debug_lines_decoded): New parameter fileptr.  Support DWARF-5.
+	(display_debug_lines): Pass file parameter.
+	(display_debug_macro): Update read_and_display_attr_value caller.
+	(display_debug_abbrev): Support DW_FORM_implicit_const.
+	(display_loclists_list): New function.
+	(display_loc_list): Support .debug_loclists.
+	(display_debug_ranges_list): New function from display_debug_ranges.
+	(display_debug_rnglists_list): New function.
+	(display_debug_ranges): Support .debug_rnglists.
+	(debug_displays): Add .debug_line_str, .debug_loclists and
+	.debug_rnglists.
+	* dwarf.h: Include dwarf2.h
+	(DWARF2_Internal_LineInfo): Add li_offset_size.
+	(DWARF2_Internal_CompUnit): Add cu_unit_type.
+	(enum dwarf_section_display_enum): Add line_str.
+	* readelf.c (process_section_headers): Add rnglists and loclists.
+
+2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf.c (display_block): Add parameter delimiter.
 	(decode_location_expression): Update display_block callers.
 	(read_and_display_attr_value): Add parameter delimiter.
