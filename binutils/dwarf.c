@@ -1322,12 +1322,16 @@ decode_location_expression (unsigned char * data,
 	    print_dwarf_vma (addr, pointer_size);
 	  }
 	  break;
+	case DW_OP_implicit_pointer:
 	case DW_OP_GNU_implicit_pointer:
 	  /* XXX: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  if (dwarf_version == -1)
 	    {
-	      printf (_("(DW_OP_GNU_implicit_pointer in frame info)"));
+	      printf (_("(%s in frame info)"),
+		      (op == DW_OP_implicit_pointer
+		       ? "DW_OP_implicit_pointer"
+		       : "DW_OP_GNU_implicit_pointer"));
 	      /* No way to tell where the next op is, so just bail.  */
 	      return need_frame_base;
 	    }
@@ -1339,7 +1343,9 @@ decode_location_expression (unsigned char * data,
 	    {
 	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
 	    }
-	  printf ("DW_OP_GNU_implicit_pointer: <0x%s> %s",
+	  printf ("%s: <0x%s> %s",
+		  (op == DW_OP_implicit_pointer
+		   ? "DW_OP_implicit_pointer" : "DW_OP_GNU_implicit_pointer"),
 		  dwarf_vmatoa ("x", uvalue),
 		  dwarf_vmatoa ("d", read_sleb128 (data,
 						   &bytes_read, end)));
@@ -1363,40 +1369,55 @@ decode_location_expression (unsigned char * data,
 	  if (data > end)
 	    data = end;
 	  break;
+	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
-	  printf ("DW_OP_GNU_const_type: <0x%s> ",
+	  printf ("%s: <0x%s> ",
+		  (op == DW_OP_const_type ? "DW_OP_const_type"
+					  : "DW_OP_GNU_const_type"),
 		  dwarf_vmatoa ("x", cu_offset + uvalue));
 	  SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
 	  data = display_block (data, uvalue, end, ' ');
 	  break;
+	case DW_OP_regval_type:
 	case DW_OP_GNU_regval_type:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
-	  printf ("DW_OP_GNU_regval_type: %s (%s)",
+	  printf ("%s: %s (%s)",
+		  (op == DW_OP_regval_type ? "DW_OP_regval_type"
+					   : "DW_OP_GNU_regval_type"),
 		  dwarf_vmatoa ("u", uvalue), regname (uvalue, 1));
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
 	  printf (" <0x%s>", dwarf_vmatoa ("x", cu_offset + uvalue));
 	  break;
+	case DW_OP_deref_type:
 	case DW_OP_GNU_deref_type:
 	  SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
-	  printf ("DW_OP_GNU_deref_type: %ld", (long) uvalue);
+	  printf ("%s: %ld",
+		  (op == DW_OP_deref_type ? "DW_OP_deref_type"
+					  : "DW_OP_GNU_deref_type"),
+		  (long) uvalue);
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
 	  printf (" <0x%s>", dwarf_vmatoa ("x", cu_offset + uvalue));
 	  break;
+	case DW_OP_convert:
 	case DW_OP_GNU_convert:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
-	  printf ("DW_OP_GNU_convert <0x%s>",
+	  printf ("%s <0x%s>",
+		  (op == DW_OP_convert ? "DW_OP_convert" : "DW_OP_GNU_convert"),
 		  dwarf_vmatoa ("x", uvalue ? cu_offset + uvalue : 0));
 	  break;
+	case DW_OP_reinterpret:
 	case DW_OP_GNU_reinterpret:
 	  uvalue = read_uleb128 (data, &bytes_read, end);
 	  data += bytes_read;
-	  printf ("DW_OP_GNU_reinterpret <0x%s>",
+	  printf ("%s <0x%s>",
+		  (op == DW_OP_reinterpret ? "DW_OP_reinterpret"
+					   : "DW_OP_GNU_reinterpret"),
 		  dwarf_vmatoa ("x", uvalue ? cu_offset + uvalue : 0));
 	  break;
 	case DW_OP_GNU_parameter_ref:
@@ -1884,9 +1905,13 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_segment:
 	case DW_AT_static_link:
 	case DW_AT_use_location:
+	case DW_AT_call_value:
 	case DW_AT_GNU_call_site_value:
+	case DW_AT_call_data_value:
 	case DW_AT_GNU_call_site_data_value:
+	case DW_AT_call_target:
 	case DW_AT_GNU_call_site_target:
+	case DW_AT_call_target_clobbered:
 	case DW_AT_GNU_call_site_target_clobbered:
 	  if ((dwarf_version < 4
 	       && (form == DW_FORM_data4 || form == DW_FORM_data8))
@@ -2160,9 +2185,13 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_segment:
     case DW_AT_static_link:
     case DW_AT_use_location:
+    case DW_AT_call_value:
     case DW_AT_GNU_call_site_value:
+    case DW_AT_call_data_value:
     case DW_AT_GNU_call_site_data_value:
+    case DW_AT_call_target:
     case DW_AT_GNU_call_site_target:
+    case DW_AT_call_target_clobbered:
     case DW_AT_GNU_call_site_target_clobbered:
       if ((dwarf_version < 4
 	   && (form == DW_FORM_data4 || form == DW_FORM_data8))

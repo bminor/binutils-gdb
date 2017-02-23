@@ -1,5 +1,14 @@
 2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf.c (decode_location_expression): Support DW_OP_implicit_pointer,
+	DW_OP_const_type, DW_OP_regval_type, DW_OP_deref_type, DW_OP_convert
+	and DW_OP_reinterpret.
+	(read_and_display_attr_value): Support DW_AT_call_value,
+	DW_AT_call_data_value, DW_AT_call_target and
+	DW_AT_call_target_clobbered.
+
+2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf.c (fetch_indirect_line_string): New function.
 	(abbrev_attr): New field implicit_const.
 	(add_abbrev_attr): New parameter implicit_const.
