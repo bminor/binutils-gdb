@@ -523,6 +523,12 @@ SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
+SUBDIR_UNITTESTS_SRCS = \
+	unittests/function-view-selftests.c
+
+SUBDIR_UNITTESTS_OBS = \
+	function-view-selftests.o
+
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
 # in INCLUDE_DIR.
@@ -1906,6 +1912,10 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/tui/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ${srcdir}/unittests/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

@@ -1,3 +1,13 @@
+2017-02-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS): New.
+	(%.o) <unittests/%.c>: New pattern.
+	* configure.ac ($development): Add $(SUBDIR_UNITTESTS_OBS) to
+	CONFIG_OBS, and $(SUBDIR_UNITTESTS_SRCS) to CONFIG_SRCS.
+	* common/function-view.h: New file.
+	* unittests/function-view-selftests.c: New file.
+	* configure: Regenerate.
+
 2017-02-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* bsd-uthread.c (bsd_uthread_thread_alive): Use ptid instead of
