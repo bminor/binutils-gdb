@@ -1,5 +1,10 @@
 2017-02-23  Yao Qi  <yao.qi@linaro.org>
 
+	* varobj-iter.h (varobj_iter_delete): Call xfree instead of
+	delete.
+
+2017-02-23  Yao Qi  <yao.qi@linaro.org>
+
 	* varobj.c (varobj_clear_saved_item): Use delete instead of
 	xfree.
 	(update_dynamic_varobj_children): Likewise.
