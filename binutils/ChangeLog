@@ -1,5 +1,10 @@
 2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf.c (display_debug_macro): Support DWARF-5.  Rename
+	DW_MACRO_GNU_*.
+
+2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf.c (decode_location_expression): Support DW_OP_implicit_pointer,
 	DW_OP_const_type, DW_OP_regval_type, DW_OP_deref_type, DW_OP_convert
 	and DW_OP_reinterpret.

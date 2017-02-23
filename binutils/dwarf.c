@@ -4543,9 +4543,9 @@ display_debug_macro (struct dwarf_section *section,
       unsigned char **extended_ops = NULL;
 
       SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
-      if (version != 4)
+      if (version != 4 && version != 5)
 	{
-	  error (_("Only GNU extension to DWARF 4 of %s is currently supported.\n"),
+	  error (_("Only GNU extension to DWARF 4 or 5 of %s is currently supported.\n"),
 		 section->name);
 	  return 0;
 	}
@@ -4582,10 +4582,10 @@ display_debug_macro (struct dwarf_section *section,
 		  nargs = read_uleb128 (curr, &bytes_read, end);
 		  curr += bytes_read;
 		  if (nargs == 0)
-		    printf (_("    DW_MACRO_GNU_%02x has no arguments\n"), op);
+		    printf (_("    DW_MACRO_%02x has no arguments\n"), op);
 		  else
 		    {
-		      printf (_("    DW_MACRO_GNU_%02x arguments: "), op);
+		      printf (_("    DW_MACRO_%02x arguments: "), op);
 		      for (n = 0; n < nargs; n++)
 			{
 			  unsigned int form;
@@ -4638,7 +4638,7 @@ display_debug_macro (struct dwarf_section *section,
 
 	  switch (op)
 	    {
-	    case DW_MACRO_GNU_start_file:
+	    case DW_MACRO_start_file:
 	      {
 		unsigned int filenum;
 		unsigned char *file_name = NULL, *dir_name = NULL;
@@ -4649,87 +4649,87 @@ display_debug_macro (struct dwarf_section *section,
 		curr += bytes_read;
 
 		if ((flags & 2) == 0)
-		  error (_("DW_MACRO_GNU_start_file used, but no .debug_line offset provided.\n"));
+		  error (_("DW_MACRO_start_file used, but no .debug_line offset provided.\n"));
 		else
 		  file_name
 		    = get_line_filename_and_dirname (line_offset, filenum,
 						     &dir_name);
 		if (file_name == NULL)
-		  printf (_(" DW_MACRO_GNU_start_file - lineno: %d filenum: %d\n"),
+		  printf (_(" DW_MACRO_start_file - lineno: %d filenum: %d\n"),
 			  lineno, filenum);
 		else
-		  printf (_(" DW_MACRO_GNU_start_file - lineno: %d filenum: %d filename: %s%s%s\n"),
+		  printf (_(" DW_MACRO_start_file - lineno: %d filenum: %d filename: %s%s%s\n"),
 			  lineno, filenum,
 			  dir_name != NULL ? (const char *) dir_name : "",
 			  dir_name != NULL ? "/" : "", file_name);
 	      }
 	      break;
 
-	    case DW_MACRO_GNU_end_file:
-	      printf (_(" DW_MACRO_GNU_end_file\n"));
+	    case DW_MACRO_end_file:
+	      printf (_(" DW_MACRO_end_file\n"));
 	      break;
 
-	    case DW_MACRO_GNU_define:
+	    case DW_MACRO_define:
 	      lineno = read_uleb128 (curr, &bytes_read, end);
 	      curr += bytes_read;
 	      string = curr;
 	      curr += strnlen ((char *) string, end - string) + 1;
-	      printf (_(" DW_MACRO_GNU_define - lineno : %d macro : %s\n"),
+	      printf (_(" DW_MACRO_define - lineno : %d macro : %s\n"),
 		      lineno, string);
 	      break;
 
-	    case DW_MACRO_GNU_undef:
+	    case DW_MACRO_undef:
 	      lineno = read_uleb128 (curr, &bytes_read, end);
 	      curr += bytes_read;
 	      string = curr;
 	      curr += strnlen ((char *) string, end - string) + 1;
-	      printf (_(" DW_MACRO_GNU_undef - lineno : %d macro : %s\n"),
+	      printf (_(" DW_MACRO_undef - lineno : %d macro : %s\n"),
 		      lineno, string);
 	      break;
 
-	    case DW_MACRO_GNU_define_indirect:
+	    case DW_MACRO_define_strp:
 	      lineno = read_uleb128 (curr, &bytes_read, end);
 	      curr += bytes_read;
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
 	      string = fetch_indirect_string (offset);
-	      printf (_(" DW_MACRO_GNU_define_indirect - lineno : %d macro : %s\n"),
+	      printf (_(" DW_MACRO_define_strp - lineno : %d macro : %s\n"),
 		      lineno, string);
 	      break;
 
-	    case DW_MACRO_GNU_undef_indirect:
+	    case DW_MACRO_undef_strp:
 	      lineno = read_uleb128 (curr, &bytes_read, end);
 	      curr += bytes_read;
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
 	      string = fetch_indirect_string (offset);
-	      printf (_(" DW_MACRO_GNU_undef_indirect - lineno : %d macro : %s\n"),
+	      printf (_(" DW_MACRO_undef_strp - lineno : %d macro : %s\n"),
 		      lineno, string);
 	      break;
 
-	    case DW_MACRO_GNU_transparent_include:
+	    case DW_MACRO_import:
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
-	      printf (_(" DW_MACRO_GNU_transparent_include - offset : 0x%lx\n"),
+	      printf (_(" DW_MACRO_import - offset : 0x%lx\n"),
 		      (unsigned long) offset);
 	      break;
 
-	    case DW_MACRO_GNU_define_indirect_alt:
+	    case DW_MACRO_define_sup:
 	      lineno = read_uleb128 (curr, &bytes_read, end);
 	      curr += bytes_read;
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
-	      printf (_(" DW_MACRO_GNU_define_indirect_alt - lineno : %d macro offset : 0x%lx\n"),
+	      printf (_(" DW_MACRO_define_sup - lineno : %d macro offset : 0x%lx\n"),
 		      lineno, (unsigned long) offset);
 	      break;
 
-	    case DW_MACRO_GNU_undef_indirect_alt:
+	    case DW_MACRO_undef_sup:
 	      lineno = read_uleb128 (curr, &bytes_read, end);
 	      curr += bytes_read;
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
-	      printf (_(" DW_MACRO_GNU_undef_indirect_alt - lineno : %d macro offset : 0x%lx\n"),
+	      printf (_(" DW_MACRO_undef_sup - lineno : %d macro offset : 0x%lx\n"),
 		      lineno, (unsigned long) offset);
 	      break;
 
-	    case DW_MACRO_GNU_transparent_include_alt:
+	    case DW_MACRO_import_sup:
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
-	      printf (_(" DW_MACRO_GNU_transparent_include_alt - offset : 0x%lx\n"),
+	      printf (_(" DW_MACRO_import_sup - offset : 0x%lx\n"),
 		      (unsigned long) offset);
 	      break;
 
@@ -4748,10 +4748,10 @@ display_debug_macro (struct dwarf_section *section,
 		  desc += bytes_read;
 		  if (nargs == 0)
 		    {
-		      printf (_(" DW_MACRO_GNU_%02x\n"), op);
+		      printf (_(" DW_MACRO_%02x\n"), op);
 		      break;
 		    }
-		  printf (_(" DW_MACRO_GNU_%02x -"), op);
+		  printf (_(" DW_MACRO_%02x -"), op);
 		  for (n = 0; n < nargs; n++)
 		    {
 		      int val;
