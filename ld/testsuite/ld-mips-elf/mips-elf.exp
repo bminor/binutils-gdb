@@ -999,7 +999,14 @@ foreach { abi } $abis {
 	    "$abi_asflags($abi)" \
 	    [list ../../../gas/testsuite/gas/mips/jalr3.s] \
 	    [list "objdump -d jalr3.dd"] \
-	    "jalr3-${abi}"]]
+	    "jalr3-${abi}"] \
+	[list \
+	    "MIPS JALR reloc unaligned/cross-mode link test ($abi)" \
+	    "$abi_ldflags($abi) -T jalr3.ld" "" \
+	    "$abi_asflags($abi)" \
+	    [list ../../../gas/testsuite/gas/mips/jalr4.s] \
+	    [list "objdump {-d --prefix-addresses --show-raw-insn} jalr4.dd"] \
+	    "jalr4-${abi}"]]
 }
 
 proc build_mips_plt_lib { abi } {

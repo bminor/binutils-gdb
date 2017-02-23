@@ -1182,11 +1182,19 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "jalr2"
     run_dump_test_arches "jalr3"	[mips_arch_list_matching mips1 \
 					    !micromips]
+    run_dump_test_arches "jalr4"	[mips_arch_list_matching mips1 \
+					    !micromips]
     if $has_newabi {
 	run_dump_test_arches "jalr3-n32" \
 					[mips_arch_list_matching mips3 \
 					    !micromips]
+	run_dump_test_arches "jalr4-n32" \
+					[mips_arch_list_matching mips3 \
+					    !micromips]
 	run_dump_test_arches "jalr3-n64" \
+					[mips_arch_list_matching mips3 \
+					    !micromips]
+	run_dump_test_arches "jalr4-n64" \
 					[mips_arch_list_matching mips3 \
 					    !micromips]
     }

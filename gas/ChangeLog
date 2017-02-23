@@ -1,3 +1,11 @@
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/jalr4.d: New test.
+	* testsuite/gas/mips/jalr4-n32.d: New test.
+	* testsuite/gas/mips/jalr4-n64.d: New test.
+	* testsuite/gas/mips/jalr4.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-02-23  Sheldon Lobo <sheldon.lobo@oracle.com>
 
 	Add support for associating SPARC ASIs with an architecture level.

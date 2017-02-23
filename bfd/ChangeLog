@@ -1,3 +1,9 @@
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation) <R_MIPS_JALR>
+	<R_MICROMIPS_JALR>: Discard relocation if `cross_mode_jump_p'
+	or misaligned.
+
 2017-02-23  Alan Modra  <amodra@gmail.com>
 
 	PR 20744

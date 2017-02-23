@@ -6278,7 +6278,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 when the symbol does not resolve locally.  */
       if (h != NULL && !SYMBOL_CALLS_LOCAL (info, &h->root))
 	return bfd_reloc_continue;
+      /* We can't optimize cross-mode jumps either.  */
+      if (*cross_mode_jump_p)
+	return bfd_reloc_continue;
       value = symbol + addend;
+      /* Neither we can non-instruction-aligned targets.  */
+      if (r_type == R_MIPS_JALR ? (value & 3) != 0 : (value & 1) == 0)
+	return bfd_reloc_continue;
       break;
 
     case R_MIPS_PJUMP:
