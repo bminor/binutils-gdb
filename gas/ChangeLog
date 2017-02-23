@@ -1,4 +1,9 @@
-2017-02-21  Jan Beulich  <jbeulich@suse.com>
+2017-02-23  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/all/err-sizeof.s: Don't use sums or differences
+	of symbols as expression.
+
+2017-02-23  Jan Beulich  <jbeulich@suse.com>
 
 	* gas/testsuite/gas/i386/x86-64-mpx-inval-2.d: Add 32- and 16-
  	bit GPR forms of BNDCL, BNDCU, and BNDCN. Add RSP-as-index

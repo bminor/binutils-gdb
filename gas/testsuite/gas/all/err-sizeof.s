@@ -2,8 +2,8 @@
 ;# { dg-do assemble }
 	.long	.sizeof.(a b)		;# { dg-error "Error: syntax error" }
 	.long	.startof.(x y)		;# { dg-error "Error: syntax error" }
-	.long	.sizeof.(a+b)		;# { dg-error "Error: syntax error" }
-	.long	.startof.(x-y)		;# { dg-error "Error: syntax error" }
+	.long	.sizeof.(a+1)		;# { dg-error "Error: syntax error" }
+	.long	.startof.(x-1)		;# { dg-error "Error: syntax error" }
 	.long	.sizeof.("a+b")
 	.long	.startof.("x-y")
 	.long	.sizeof.()		;# { dg-error "Error: expected symbol name" }
@@ -13,9 +13,6 @@
 ;# { dg-error "junk at end" "" { target *-*-* } 3 }
 ;# { dg-error "junk at end" "junk" { target *-*-* } 4 }
 ;# { dg-error "junk at end" "junk" { target *-*-* } 5 }
-;# { dg-error "UND" "undefined" { target *-*-* } 5 }
 ;# { dg-error "junk at end" "junk" { target *-*-* } 6 }
-;# { dg-error "UND" "undefined" { target *-*-* } 6 }
-;# { dg-error "too complex" "too complex" { target powerpc*-*-* cris*-*-* } 6 }
 ;# { dg-warning "zero assumed" "missing" { target *-*-* } 9 }
 ;# { dg-warning "zero assumed" "missing" { target *-*-* } 10 }
