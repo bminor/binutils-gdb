@@ -10026,8 +10026,8 @@ process_version_sections (FILE * file)
 		Elf_Internal_Verdef ent;
 		Elf_External_Verdaux * eaux;
 		Elf_Internal_Verdaux aux;
+		unsigned int isum;
 		int j;
-		int isum;
 
 		/* Check for very large indices.  */
 		if (idx > (size_t) (endbuf - (char *) edefs))
@@ -10143,8 +10143,8 @@ process_version_sections (FILE * file)
 	      {
 		Elf_External_Verneed * entry;
 		Elf_Internal_Verneed ent;
+		unsigned int isum;
 		int j;
-		int isum;
 		char * vstart;
 
 		if (idx > (size_t) (endbuf - (char *) eneed))
