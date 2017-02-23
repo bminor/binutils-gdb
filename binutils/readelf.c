@@ -13281,7 +13281,7 @@ process_mips_fpe_exception (int mask)
    Reads at or beyond END will not be made.  */
 
 static unsigned char *
-display_tag_value (int tag,
+display_tag_value (signed int tag,
 		   unsigned char * p,
 		   const unsigned char * const end)
 {
@@ -13608,12 +13608,12 @@ display_arm_attribute (unsigned char * p,
 
 static unsigned char *
 display_gnu_attribute (unsigned char * p,
-		       unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int, const unsigned char * const),
+		       unsigned char * (* display_proc_gnu_attribute) (unsigned char *, unsigned int, const unsigned char * const),
 		       const unsigned char * const end)
 {
   int tag;
   unsigned int len;
-  int val;
+  unsigned int val;
 
   tag = read_uleb128 (p, &len, end);
   p += len;
@@ -13658,7 +13658,7 @@ display_gnu_attribute (unsigned char * p,
 
 static unsigned char *
 display_power_gnu_attribute (unsigned char * p,
-			     int tag,
+			     unsigned int tag,
 			     const unsigned char * const end)
 {
   unsigned int len;
@@ -13781,7 +13781,7 @@ display_power_gnu_attribute (unsigned char * p,
 
 static unsigned char *
 display_s390_gnu_attribute (unsigned char * p,
-			    int tag,
+			    unsigned int tag,
 			    const unsigned char * const end)
 {
   unsigned int len;
@@ -13815,7 +13815,7 @@ display_s390_gnu_attribute (unsigned char * p,
 }
 
 static void
-display_sparc_hwcaps (int mask)
+display_sparc_hwcaps (unsigned int mask)
 {
   if (mask)
     {
@@ -13860,7 +13860,7 @@ display_sparc_hwcaps (int mask)
 }
 
 static void
-display_sparc_hwcaps2 (int mask)
+display_sparc_hwcaps2 (unsigned int mask)
 {
   if (mask)
     {
@@ -13896,7 +13896,7 @@ display_sparc_hwcaps2 (int mask)
 
 static unsigned char *
 display_sparc_gnu_attribute (unsigned char * p,
-			     int tag,
+			     unsigned int tag,
 			     const unsigned char * const end)
 {
   unsigned int len;
@@ -13962,7 +13962,7 @@ print_mips_fp_abi_value (int val)
 
 static unsigned char *
 display_mips_gnu_attribute (unsigned char * p,
-			    int tag,
+			    unsigned int tag,
 			    const unsigned char * const end)
 {
   if (tag == Tag_GNU_MIPS_ABI_FP)
@@ -14010,7 +14010,7 @@ static unsigned char *
 display_tic6x_attribute (unsigned char * p,
 			 const unsigned char * const end)
 {
-  int tag;
+  unsigned int tag;
   unsigned int len;
   int val;
 
@@ -14255,7 +14255,7 @@ display_tic6x_attribute (unsigned char * p,
 }
 
 static void
-display_raw_attribute (unsigned char * p, unsigned char * end)
+display_raw_attribute (unsigned char * p, unsigned char const * const end)
 {
   unsigned long addr = 0;
   size_t bytes = end - p;
@@ -14304,8 +14304,8 @@ display_msp430x_attribute (unsigned char * p,
 			   const unsigned char * const end)
 {
   unsigned int len;
-  int val;
-  int tag;
+  unsigned int val;
+  unsigned int tag;
 
   tag = read_uleb128 (p, & len, end);
   p += len;
@@ -14390,7 +14390,7 @@ process_attributes (FILE * file,
 		    const char * public_name,
 		    unsigned int proc_type,
 		    unsigned char * (* display_pub_attribute) (unsigned char *, const unsigned char * const),
-		    unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int, const unsigned char * const))
+		    unsigned char * (* display_proc_gnu_attribute) (unsigned char *, unsigned int, const unsigned char * const))
 {
   Elf_Internal_Shdr * sect;
   unsigned i;
@@ -14412,7 +14412,11 @@ process_attributes (FILE * file,
 	continue;
 
       p = contents;
-      if (*p == 'A')
+      /* The first character is the version of the attributes.
+	 Currently only version 1, (aka 'A') is recognised here.  */
+      if (*p != 'A')
+	printf (_("Unknown attributes version '%c'(%d) - expecting 'A'\n"), *p, *p);
+      else
 	{
 	  bfd_vma section_len;
 
@@ -14545,7 +14549,7 @@ process_attributes (FILE * file,
 		    {
 		      while (p < end)
 			p = display_pub_attribute (p, end);
-		      assert (p <= end);
+		      assert (p == end);
 		    }
 		  else if (gnu_section && display_proc_gnu_attribute != NULL)
 		    {
@@ -14553,7 +14557,7 @@ process_attributes (FILE * file,
 			p = display_gnu_attribute (p,
 						   display_proc_gnu_attribute,
 						   end);
-		      assert (p <= end);
+		      assert (p == end);
 		    }
 		  else if (p < end)
 		    {
@@ -14566,54 +14570,10 @@ process_attributes (FILE * file,
 		}
 	    }
 	}
-      else
-	printf (_("Unknown format '%c' (%d)\n"), *p, *p);
 
       free (contents);
     }
   return 1;
-}
-
-static int
-process_arm_specific (FILE * file)
-{
-  return process_attributes (file, "aeabi", SHT_ARM_ATTRIBUTES,
-			     display_arm_attribute, NULL);
-}
-
-static int
-process_power_specific (FILE * file)
-{
-  return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
-			     display_power_gnu_attribute);
-}
-
-static int
-process_s390_specific (FILE * file)
-{
-  return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
-			     display_s390_gnu_attribute);
-}
-
-static int
-process_sparc_specific (FILE * file)
-{
-  return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
-			     display_sparc_gnu_attribute);
-}
-
-static int
-process_tic6x_specific (FILE * file)
-{
-  return process_attributes (file, "c6xabi", SHT_C6000_ATTRIBUTES,
-			     display_tic6x_attribute, NULL);
-}
-
-static int
-process_msp430x_specific (FILE * file)
-{
-  return process_attributes (file, "mspabi", SHT_MSP430_ATTRIBUTES,
-			     display_msp430x_attribute, NULL);
 }
 
 /* DATA points to the contents of a MIPS GOT that starts at VMA PLTGOT.
@@ -16713,6 +16673,29 @@ process_notes (FILE * file)
   return 1;
 }
 
+static unsigned char *
+display_public_gnu_attributes (unsigned char * start,
+			       const unsigned char * const end)
+{
+  printf (_("  Unknown GNU attribute: %s\n"), start);
+
+  start += strnlen ((char *) start, end - start);
+  display_raw_attribute (start, end);
+
+  return (unsigned char *) end;
+}
+
+static unsigned char *
+display_generic_attribute (unsigned char * start,
+			   unsigned int tag,
+			   const unsigned char * const end)
+{
+  if (tag == 0)
+    return (unsigned char *) end;
+
+  return display_tag_value (tag, start, end);
+}
+
 static int
 process_arch_specific (FILE * file)
 {
@@ -16722,36 +16705,48 @@ process_arch_specific (FILE * file)
   switch (elf_header.e_machine)
     {
     case EM_ARM:
-      return process_arm_specific (file);
+      return process_attributes (file, "aeabi", SHT_ARM_ATTRIBUTES,
+				 display_arm_attribute,
+				 display_generic_attribute);
+
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
       return process_mips_specific (file);
-      break;
+
+    case EM_MSP430:
+      return process_attributes (file, "mspabi", SHT_MSP430_ATTRIBUTES,
+				 display_msp430x_attribute,
+				 display_generic_attribute);
+
     case EM_NDS32:
       return process_nds32_specific (file);
-      break;
+
     case EM_PPC:
     case EM_PPC64:
-      return process_power_specific (file);
-      break;
+      return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+				 display_power_gnu_attribute);
+
     case EM_S390:
     case EM_S390_OLD:
-      return process_s390_specific (file);
-      break;
+      return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+				 display_s390_gnu_attribute);
+
     case EM_SPARC:
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
-      return process_sparc_specific (file);
-      break;
+      return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+				 display_sparc_gnu_attribute);
+
     case EM_TI_C6000:
-      return process_tic6x_specific (file);
-      break;
-    case EM_MSP430:
-      return process_msp430x_specific (file);
+      return process_attributes (file, "c6xabi", SHT_C6000_ATTRIBUTES,
+				 display_tic6x_attribute,
+				 display_generic_attribute);
+
     default:
-      break;
+      return process_attributes (file, "gnu", SHT_GNU_ATTRIBUTES,
+				 display_public_gnu_attributes,
+				 display_generic_attribute);
     }
-  return 1;
 }
 
 static int
