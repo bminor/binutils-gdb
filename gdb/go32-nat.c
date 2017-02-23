@@ -938,7 +938,7 @@ go32_terminal_ours (struct target_ops *self)
 static int
 go32_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
-  return !ptid_equal (inferior_ptid, null_ptid);
+  return !ptid_equal (ptid, null_ptid);
 }
 
 static char *

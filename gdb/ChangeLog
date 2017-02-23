@@ -1,3 +1,9 @@
+2017-02-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* bsd-uthread.c (bsd_uthread_thread_alive): Use ptid instead of
+	inferior_ptid.
+	* go32-nat.c (go32_thread_alive): Likewise.
+
 2017-02-23  Yao Qi  <yao.qi@linaro.org>
 
 	* varobj-iter.h (varobj_iter_delete): Call xfree instead of
