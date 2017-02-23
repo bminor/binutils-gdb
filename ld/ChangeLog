@@ -1,5 +1,13 @@
 2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-mips-elf/relax-jalr-n32.d: Remove `--relax'
+	option.
+	* testsuite/ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n64.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n64-shared.d: Likewise.
+
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/jalr4.dd: New test.
 	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
 

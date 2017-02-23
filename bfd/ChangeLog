@@ -1,5 +1,12 @@
 2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.h (_bfd_mips_relax_section): Remove prototype.
+	* elfxx-mips.c (_bfd_mips_relax_section): Remove function.
+	* elf64-mips.c (bfd_elf64_bfd_relax_section): Remove macro.
+	* elfn32-mips.c (bfd_elf32_bfd_relax_section): Likewise.
+
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (mips_elf_calculate_relocation) <R_MIPS_JALR>
 	<R_MICROMIPS_JALR>: Discard relocation if `cross_mode_jump_p'
 	or misaligned.
