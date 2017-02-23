@@ -9994,6 +9994,7 @@ process_version_sections (FILE * file)
 	    Elf_External_Verdef * edefs;
 	    unsigned int idx;
 	    unsigned int cnt;
+	    unsigned int end;
 	    char * endbuf;
 
 	    found = 1;
@@ -10015,7 +10016,10 @@ process_version_sections (FILE * file)
 	      break;
 	    endbuf = (char *) edefs + section->sh_size;
 
-	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
+	    /* PR 17531: file: id:000001,src:000172+005151,op:splice,rep:2.  */
+	    end = (section->sh_info < section->sh_size
+		   ? section->sh_info : section->sh_size);
+	    for (idx = cnt = 0; cnt < end; ++cnt)
 	      {
 		char * vstart;
 		Elf_External_Verdef * edef;
@@ -10094,8 +10098,9 @@ process_version_sections (FILE * file)
 		if (j < ent.vd_cnt)
 		  printf (_("  Version def aux past end of section\n"));
 
-		/* PR 17531: file: id:000001,src:000172+005151,op:splice,rep:2.  */
-		if (idx + ent.vd_next <= idx)
+		/* PR 17531:
+		   file: id:000001,src:000172+005151,op:splice,rep:2.  */
+		if (idx + ent.vd_next < idx)
 		  break;
 
 		idx += ent.vd_next;
