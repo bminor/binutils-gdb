@@ -12771,8 +12771,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vindex = *codep++;
       dp = &vex_table[vex_table_index][vindex];
       end_codep = codep;
-      /* There is no MODRM byte for VEX [82|77].  */
-      if (vindex != 0x77 && vindex != 0x82)
+      /* There is no MODRM byte for VEX0F 77.  */
+      if (vex_table_index != VEX_0F || vindex != 0x77)
 	{
 	  FETCH_DATA (info, codep + 1);
 	  modrm.mod = (*codep >> 6) & 3;
@@ -12814,8 +12814,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vindex = *codep++;
       dp = &vex_table[dp->op[1].bytemode][vindex];
       end_codep = codep;
-      /* There is no MODRM byte for VEX [82|77].  */
-      if (vindex != 0x77 && vindex != 0x82)
+      /* There is no MODRM byte for VEX 77.  */
+      if (vindex != 0x77)
 	{
 	  FETCH_DATA (info, codep + 1);
 	  modrm.mod = (*codep >> 6) & 3;

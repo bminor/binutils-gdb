@@ -1,3 +1,8 @@
+2017-02-23  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (get_valid_dis386): Don't special case VEX opcode
+	82. For 3-byte VEX only special case opcode 77 in VEX_0F space.
+
 2017-02-21  Jan Beulich  <jbeulich@suse.com>
 
 	* aarch64-asm.c (convert_bfc_to_bfm): Copy operand 0 to operand
