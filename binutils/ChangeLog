@@ -1,3 +1,14 @@
+2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (display_loc_list): Use dwarf_vma for offset, base_address
+	and off.
+	(display_loc_list_dwo): Use dwarf_vma for offset.
+	(display_debug_loc): Use dwarf_vma for offset, base_address.
+	(struct range_entry, range_entry_compar): Use dwarf_vma for
+	ranges_offset.
+	(display_debug_ranges): Use dwarf_vma for ranges_offset, offset and
+	base_address.
+
 2017-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (display_tag_value): Use an explicit signed type for

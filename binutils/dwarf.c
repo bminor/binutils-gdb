@@ -4409,8 +4409,8 @@ static void
 display_loc_list (struct dwarf_section *section,
 		  unsigned char **start_ptr,
 		  unsigned int debug_info_entry,
-		  unsigned long offset,
-		  unsigned long base_address,
+		  dwarf_vma offset,
+		  dwarf_vma base_address,
 		  int has_frame_base)
 {
   unsigned char *start = *start_ptr;
@@ -4446,16 +4446,16 @@ display_loc_list (struct dwarf_section *section,
 
   while (1)
     {
-      unsigned long off = offset + (start - *start_ptr);
+      dwarf_vma off = offset + (start - *start_ptr);
 
       if (start + 2 * pointer_size > section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+		(unsigned long) offset);
 	  break;
 	}
 
-      printf ("    %8.8lx ", off);
+      printf ("    %8.8lx ", (unsigned long) off);
 
       SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
       SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
@@ -4490,7 +4490,7 @@ display_loc_list (struct dwarf_section *section,
       if (start + 2 > section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+		(unsigned long) offset);
 	  break;
 	}
 
@@ -4499,7 +4499,7 @@ display_loc_list (struct dwarf_section *section,
       if (start + length > section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+		(unsigned long) offset);
 	  break;
 	}
 
@@ -4550,7 +4550,7 @@ static void
 display_loc_list_dwo (struct dwarf_section *section,
 		      unsigned char **start_ptr,
 		      unsigned int debug_info_entry,
-		      unsigned long offset,
+		      dwarf_vma offset,
 		      int has_frame_base)
 {
   unsigned char *start = *start_ptr;
@@ -4586,12 +4586,12 @@ display_loc_list_dwo (struct dwarf_section *section,
 
   while (1)
     {
-      printf ("    %8.8lx ", offset + (start - *start_ptr));
+      printf ("    %8.8lx ", (unsigned long) (offset + (start - *start_ptr)));
 
       if (start >= section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+		(unsigned long) offset);
 	  break;
 	}
 
@@ -4639,7 +4639,7 @@ display_loc_list_dwo (struct dwarf_section *section,
       if (start + 2 > section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+		(unsigned long) offset);
 	  break;
 	}
 
@@ -4647,7 +4647,7 @@ display_loc_list_dwo (struct dwarf_section *section,
       if (start + length > section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+		(unsigned long) offset);
 	  break;
 	}
 
@@ -4777,8 +4777,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
   seen_first_offset = 0;
   for (i = first; i < num_debug_info_entries; i++)
     {
-      unsigned long offset;
-      unsigned long base_address;
+      dwarf_vma offset;
+      dwarf_vma base_address;
       unsigned int k;
       int has_frame_base;
 
@@ -4822,7 +4822,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  if (offset >= bytes)
 	    {
 	      warn (_("Offset 0x%lx is bigger than .debug_loc section size.\n"),
-		    offset);
+		    (unsigned long) offset);
 	      continue;
 	    }
 
@@ -5153,7 +5153,7 @@ display_debug_str_offsets (struct dwarf_section *section,
 struct range_entry
 {
   /* The debug_information[x].range_lists[y] value.  */
-  unsigned long ranges_offset;
+  dwarf_vma ranges_offset;
 
   /* Original debug_information to find parameters of the data.  */
   debug_info *debug_info_p;
@@ -5166,8 +5166,8 @@ range_entry_compar (const void *ap, const void *bp)
 {
   const struct range_entry *a_re = (const struct range_entry *) ap;
   const struct range_entry *b_re = (const struct range_entry *) bp;
-  const unsigned long a = a_re->ranges_offset;
-  const unsigned long b = b_re->ranges_offset;
+  const dwarf_vma a = a_re->ranges_offset;
+  const dwarf_vma b = b_re->ranges_offset;
 
   return (a > b) - (b > a);
 }
@@ -5231,7 +5231,7 @@ display_debug_ranges (struct dwarf_section *section,
 
   if (dwarf_check != 0 && range_entries[0].ranges_offset != 0)
     warn (_("Range lists in %s section start at 0x%lx\n"),
-	  section->name, range_entries[0].ranges_offset);
+	  section->name, (unsigned long) range_entries[0].ranges_offset);
 
   printf (_("Contents of the %s section:\n\n"), section->name);
   printf (_("    Offset   Begin    End\n"));
@@ -5241,9 +5241,9 @@ display_debug_ranges (struct dwarf_section *section,
       struct range_entry *range_entry = &range_entries[i];
       debug_info *debug_info_p = range_entry->debug_info_p;
       unsigned int pointer_size;
-      unsigned long offset;
+      dwarf_vma offset;
       unsigned char *next;
-      unsigned long base_address;
+      dwarf_vma base_address;
 
       pointer_size = debug_info_p->pointer_size;
       offset = range_entry->ranges_offset;
@@ -5254,7 +5254,7 @@ display_debug_ranges (struct dwarf_section *section,
       if (pointer_size < 2 || pointer_size > 8)
 	{
 	  warn (_("Corrupt pointer size (%d) in debug entry at offset %8.8lx\n"),
-		pointer_size, offset);
+		pointer_size, (unsigned long) offset);
 	  continue;
 	}
 
@@ -5286,7 +5286,7 @@ display_debug_ranges (struct dwarf_section *section,
 	    break;
 	  SAFE_SIGNED_BYTE_GET_AND_INC (end, start, pointer_size, finish);
 
-	  printf ("    %8.8lx ", offset);
+	  printf ("    %8.8lx ", (unsigned long) offset);
 
 	  if (begin == 0 && end == 0)
 	    {
