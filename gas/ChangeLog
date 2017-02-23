@@ -1,3 +1,10 @@
+2017-02-21  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/testsuite/gas/i386/x86-64-mpx-inval-2.d: Add 32- and 16-
+ 	bit GPR forms of BNDCL, BNDCU, and BNDCN. Add RSP-as-index
+	Intel syntax forms of BNDMK, BNDSTX, and BNDLDX.
+	* gas/testsuite/gas/i386/x86-64-mpx-inval-2.l: Adjust.
+
 2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* ecoff.c (ecoff_directive_end) [md_flush_pending_output]: Call
