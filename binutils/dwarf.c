@@ -1729,6 +1729,32 @@ read_and_display_attr_value (unsigned long attribute,
       data += 8;
       break;
 
+    case DW_FORM_data16:
+      if (!do_loc)
+	{
+	  dwarf_vma left_high_bits, left_low_bits;
+	  dwarf_vma right_high_bits, right_low_bits;
+
+	  SAFE_BYTE_GET64 (data, &left_high_bits, &left_low_bits, end);
+	  SAFE_BYTE_GET64 (data + 8, &right_high_bits, &right_low_bits, end);
+	  if (byte_get == byte_get_little_endian)
+	    {
+	      /* Swap them.  */
+	      left_high_bits ^= right_high_bits;
+	      right_high_bits ^= left_high_bits;
+	      left_high_bits ^= right_high_bits;
+	      left_low_bits ^= right_low_bits;
+	      right_low_bits ^= left_low_bits;
+	      left_low_bits ^= right_low_bits;
+	    }
+	  printf (" 0x%08" DWARF_VMA_FMT "x%08" DWARF_VMA_FMT "x"
+		  "%08" DWARF_VMA_FMT "x%08" DWARF_VMA_FMT "x",
+		  left_high_bits, left_low_bits, right_high_bits,
+		  right_low_bits);
+	}
+      data += 16;
+      break;
+
     case DW_FORM_string:
       if (!do_loc)
 	printf ("%c%.*s", delimiter, (int) (end - data), data);

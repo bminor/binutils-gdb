@@ -1,5 +1,9 @@
 2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf.c (read_and_display_attr_value): Support DW_FORM_data16.
+
+2017-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf.c (display_debug_macro): Support DWARF-5.  Rename
 	DW_MACRO_GNU_*.
 
