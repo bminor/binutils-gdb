@@ -1,3 +1,11 @@
+2017-02-23  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.reverse/insn-reverse.x86.c (check_rdrand_support): Renamed to ...
+	(check_supported_features): ... this. Changed return type to void.
+	(supports_rdseed): New static global.
+	(rdseed): Check supports_rdseed.
+	(initialize): Call check_supported_features.
+
 2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.arch/ppc64-isa207-atomic-inst.exp: New testcase based on
