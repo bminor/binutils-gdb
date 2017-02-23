@@ -1,3 +1,10 @@
+2017-02-23  Sheldon Lobo <sheldon.lobo@oracle.com>
+
+	Add support for associating SPARC ASIs with an architecture level.
+	* include/opcode/sparc.h (sparc_asi): New sparc_asi struct.
+	* opcodes/sparc-opc.c (asi_table): Updated asi_table and encoding/
+	decoding of SPARC ASIs.
+
 2017-02-23  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (get_valid_dis386): Don't special case VEX opcode
