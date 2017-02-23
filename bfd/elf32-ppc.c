@@ -1471,7 +1471,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_LO16D",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x1f007ff,		/* dst_mask */
+	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* Bits 16-31 split16a format.  */
@@ -1501,7 +1501,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_HI16D",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x1f007ff,		/* dst_mask */
+	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* Bits 16-31 (High Adjusted) in split16a format.  */
@@ -1531,7 +1531,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_HA16D",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x1f007ff,		/* dst_mask */
+	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* This reloc is like R_PPC_EMB_SDA21 but only applies to e_add16i
@@ -1593,7 +1593,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_SDAREL_LO16D", /* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x1f007ff,		/* dst_mask */
+	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* Bits 16-31 relative to _SDA_BASE_ in split16a format.  */
@@ -1623,7 +1623,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_SDAREL_HI16D", /* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x1f007ff,		/* dst_mask */
+	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* Bits 16-31 (HA) relative to _SDA_BASE split16a format.  */
@@ -1653,7 +1653,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 "R_PPC_VLE_SDAREL_HA16D", /* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x1f007ff,		/* dst_mask */
+	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_PPC_IRELATIVE,	/* type */
@@ -4942,8 +4942,8 @@ ppc_elf_vle_split16 (bfd *input_bfd,
 	}
     }
   top5 = value & 0xf800;
-  top5 = top5 << (split16_format == split16a_type ? 5 : 9);
-  insn &= (split16_format == split16a_type ? ~0x1f07ff : ~0x1f007ff);
+  top5 = top5 << (split16_format == split16a_type ? 5 : 10);
+  insn &= (split16_format == split16a_type ? ~0x1f07ff : ~0x3e007ff);
   insn |= top5;
   insn |= value & 0x7ff;
   bfd_put_32 (input_bfd, insn, loc);
@@ -9388,7 +9388,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  {
 	    bfd_vma value;
 	    const char *name;
-	    //int reg;
 	    struct elf_link_hash_entry *sda = NULL;
 
 	    if (sec == NULL || sec->output_section == NULL)
@@ -9400,16 +9399,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    name = bfd_get_section_name (output_bfd, sec->output_section);
 	    if (strcmp (name, ".sdata") == 0
 		|| strcmp (name, ".sbss") == 0)
-	      {
-		//reg = 13;
-		sda = htab->sdata[0].sym;
-	      }
+	      sda = htab->sdata[0].sym;
 	    else if (strcmp (name, ".sdata2") == 0
 		     || strcmp (name, ".sbss2") == 0)
-	      {
-		//reg = 2;
-		sda = htab->sdata[1].sym;
-	      }
+	      sda = htab->sdata[1].sym;
 	    else
 	      {
 		_bfd_error_handler
@@ -9426,18 +9419,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		goto copy_reloc;
 	      }
 
-	    if (sda != NULL)
+	    if (sda == NULL || !is_static_defined (sda))
 	      {
-		if (!is_static_defined (sda))
-		  {
-		    unresolved_reloc = TRUE;
-		    break;
-		  }
+		unresolved_reloc = TRUE;
+		break;
 	      }
-
-	    value = (sda->root.u.def.section->output_section->vma
-		     + sda->root.u.def.section->output_offset
-		     + addend);
+	    value = relocation + addend - SYM_VAL (sda);
 
 	    if (r_type == R_PPC_VLE_SDAREL_LO16A)
 	      ppc_elf_vle_split16 (input_bfd, input_section, rel->r_offset,

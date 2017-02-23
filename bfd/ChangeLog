@@ -1,3 +1,12 @@
+2017-02-23  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* elf32-ppc.c (ppc_elf_howto_raw): Correct dst_mask on all VLE
+	16D relocations.
+	(ppc_elf_vle_split16): Correct field mask and shift for 16D relocs.
+	(ppc_elf_relocate_section): Correct calculation for VLE SDAREL
+	relocs.
+
 2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828

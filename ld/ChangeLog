@@ -1,3 +1,11 @@
+2017-02-23  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* testsuite/ld-powerpc/vle-reloc-2.s: Use r6 for last insn of
+	each group.
+	* testsuite/ld-powerpc/vle-reloc-2.d: Update for above change
+	and sdarel reloc fix.
+
 2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/20828
