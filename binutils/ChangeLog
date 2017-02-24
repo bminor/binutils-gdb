@@ -1,3 +1,79 @@
+2017-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (show_name, do_dynamic, do_syms, do_dyn_syms,
+	(do_reloc, do_sections, do_section_groups, do_section_details,
+	(do_segments, do_unwind, do_using_dynamic, do_header, do_dump,
+	(do_version, do_histogram, do_debugging, do_arch, do_notes,
+	(do_archive_index, is_32bit_elf, decompress_dumps): Use
+	bfd_boolean type.
+	(parse_args): Treat the do_* variables as booleans.
+	(print_vma): Return an unsigned int.
+	(print_symbol): Change width parameter to signed int.
+	(is_ia64_vms): Change return type to bfd_boolean.
+	(guess_is_rela): Likewise.
+	(slurp_rela_relocs): Likewise.
+	(slurp_rel_relocs): Likewise.
+	(dump_relocations): Likewise.
+	(process_file_header): Likewise.
+	(get_program_headers): Likewise.
+	(process_program_headers): Likewise.
+	(process_section_headers): Likewise.
+	(process_section_groups): Likewise.
+	(dump_ia64_vms_dynamic_fixups): Likewise.
+	(dump_ia64_vms_dynamic_relocs): Likewise.
+	(process_ia64_vms_dynamic_relocs): Likewise.
+	(process_relocs): Likewise.
+	(dump_ia64_unwind): Likewise.
+	(ia64_process_unwind): Likewise.
+	(dump_hppa_unwind): Likewise.
+	(slurp_hppa_unwind_table): Likewise.
+	(hppa_process_unwind): Likewise.
+	(decode_arm_unwind_bytecode): Likewise.
+	(decode_tic6x_unwind_bytecode): Likewise.
+	(decode_arm_unwind): Likewise.
+	(dump_arm_unwind): Likewise.
+	(arm_process_unwind): Likewise.
+	(process_unwind): Likewise.
+	(get_32bit_dynamic_section): Likewise.
+	(get_64bit_dynamic_section): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(process_symbol_table): Likewise.
+	(process_syminfo): Likewise.
+	(apply_relocations): Likewise.
+	(disassemble_section): Likewise.
+	(dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+	(load_specific_debug_section): Likewise.
+	(load_debug_section): Likewise.
+	(display_debug_section): Likewise.
+	(process_section_contents): Likewise.
+	(process_attributes): Likewise.
+	(process_nds32_specific): Likewise.
+	(process_gnu_liblist): Likewise.
+	(print_core_note): Likewise.
+	(print_gnu_note): Likewise.
+	(print_v850_note): Likewise.
+	(process_netbsd_elf_note): Likewise.
+	(print_stapsdt_note): Likewise.
+	(print_ia64_vms_note): Likewise.
+	(process_note): Likewise.
+	(process_notes_at): Likewise.
+	(process_corefile_note_segments): Likewise.
+	(process_v850_notes): Likewise.
+	(process_note_sections): Likewise.
+	(process_notes): Likewise.
+	(process_arch_specific): Likewise.
+	(get_file_header): Likewise.
+	(process_object): Likewise.
+	(process_archive): Likewise.
+	(process_file): Likewise.
+	(section_subset): Make static.
+	(get_mips_reg_size): Return a signed integer.
+	(process_object): Reverse the logic of the return value.
+	(process_archive): Likewise.
+	(process_file): Likewise.
+
 2017-02-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* readelf.c (get_ver_flags): Tidy the formatting of the string
