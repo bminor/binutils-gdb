@@ -1,5 +1,53 @@
 2017-02-24  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* aarch64-tbl.h (OP_SVE_HMH, OP_SVE_VMU_HSD, OP_SVE_VMVU_HSD)
+	(OP_SVE_VMVV_HSD, OP_SVE_VMVVU_HSD, OP_SVE_VM_HSD, OP_SVE_VUVV_HSD)
+	(OP_SVE_VUV_HSD, OP_SVE_VU_HSD, OP_SVE_VVVU_H, OP_SVE_VVVU_S)
+	(OP_SVE_VVVU_HSD, OP_SVE_VVV_D, OP_SVE_VVV_D_H, OP_SVE_VVV_H)
+	(OP_SVE_VVV_HSD, OP_SVE_VVV_S, OP_SVE_VVV_S_B, OP_SVE_VVV_SD_BH)
+	(OP_SVE_VV_BHSDQ, OP_SVE_VV_HSD, OP_SVE_VZVV_HSD, OP_SVE_VZV_HSD)
+	(OP_SVE_V_HSD): New macros.
+	(OP_SVE_VMU_SD, OP_SVE_VMVU_SD, OP_SVE_VM_SD, OP_SVE_VUVV_SD)
+	(OP_SVE_VU_SD, OP_SVE_VVVU_SD, OP_SVE_VVV_SD, OP_SVE_VZVV_SD)
+	(OP_SVE_VZV_SD, OP_SVE_V_SD): Delete.
+	(aarch64_opcode_table): Add new SVE instructions.
+	(aarch64_opcode_table): Use imm_rotate{1,2} instead of imm_rotate
+	for rotation operands.  Add new SVE operands.
+	* aarch64-asm.h (ins_sve_addr_ri_s4): New inserter.
+	(ins_sve_quad_index): Likewise.
+	(ins_imm_rotate): Split into...
+	(ins_imm_rotate1, ins_imm_rotate2): ...these two inserters.
+	* aarch64-asm.c (aarch64_ins_imm_rotate): Split into...
+	(aarch64_ins_imm_rotate1, aarch64_ins_imm_rotate2): ...these two
+	functions.
+	(aarch64_ins_sve_addr_ri_s4): New function.
+	(aarch64_ins_sve_quad_index): Likewise.
+	(do_misc_encoding): Handle "MOV Zn.Q, Qm".
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis.h (ext_sve_addr_ri_s4): New extractor.
+	(ext_sve_quad_index): Likewise.
+	(ext_imm_rotate): Split into...
+	(ext_imm_rotate1, ext_imm_rotate2): ...these two extractors.
+	* aarch64-dis.c (aarch64_ext_imm_rotate): Split into...
+	(aarch64_ext_imm_rotate1, aarch64_ext_imm_rotate2): ...these two
+	functions.
+	(aarch64_ext_sve_addr_ri_s4): New function.
+	(aarch64_ext_sve_quad_index): Likewise.
+	(aarch64_ext_sve_index): Allow quad indices.
+	(do_misc_decoding): Likewise.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc.h (FLD_SVE_i3h, FLD_SVE_rot1, FLD_SVE_rot2): New
+	aarch64_field_kinds.
+	(OPD_F_OD_MASK): Widen by one bit.
+	(OPD_F_NO_ZR): Bump accordingly.
+	(get_operand_field_width): New function.
+	* aarch64-opc.c (fields): Add new SVE fields.
+	(operand_general_constraint_met_p): Handle new SVE operands.
+	(aarch64_print_operand): Likewise.
+	* aarch64-opc-2.c: Regenerate.
+
+2017-02-24  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_simd_v8_3): Replace with...
 	(aarch64_feature_compnum): ...this.
 	(SIMD_V8_3): Replace with...

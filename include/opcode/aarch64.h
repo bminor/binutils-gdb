@@ -247,6 +247,7 @@ enum aarch64_opnd
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 
+  AARCH64_OPND_SVE_ADDR_RI_S4x16,   /* SVE [<Xn|SP>, #<simm4>*16].  */
   AARCH64_OPND_SVE_ADDR_RI_S4xVL,   /* SVE [<Xn|SP>, #<simm4>, MUL VL].  */
   AARCH64_OPND_SVE_ADDR_RI_S4x2xVL, /* SVE [<Xn|SP>, #<simm4>*2, MUL VL].  */
   AARCH64_OPND_SVE_ADDR_RI_S4x3xVL, /* SVE [<Xn|SP>, #<simm4>*3, MUL VL].  */
@@ -298,6 +299,8 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_I1_HALF_ONE,	/* SVE choice between 0.5 and 1.0.  */
   AARCH64_OPND_SVE_I1_HALF_TWO,	/* SVE choice between 0.5 and 2.0.  */
   AARCH64_OPND_SVE_I1_ZERO_ONE,	/* SVE choice between 0.0 and 1.0.  */
+  AARCH64_OPND_SVE_IMM_ROT1,	/* SVE 1-bit rotate operand (90 or 270).  */
+  AARCH64_OPND_SVE_IMM_ROT2,	/* SVE 2-bit rotate operand (N*90).  */
   AARCH64_OPND_SVE_INV_LIMM,	/* SVE inverted logical immediate.  */
   AARCH64_OPND_SVE_LIMM,	/* SVE logical immediate.  */
   AARCH64_OPND_SVE_LIMM_MOV,	/* SVE logical immediate for MOV.  */
@@ -335,6 +338,9 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_Zd,		/* SVE vector register in Zd.  */
   AARCH64_OPND_SVE_Zm_5,	/* SVE vector register in Zm, bits [9,5].  */
   AARCH64_OPND_SVE_Zm_16,	/* SVE vector register in Zm, bits [20,16].  */
+  AARCH64_OPND_SVE_Zm3_INDEX,	/* z0-z7[0-3] in Zm, bits [20,16].  */
+  AARCH64_OPND_SVE_Zm3_22_INDEX, /* z0-z7[0-7] in Zm3_INDEX plus bit 22.  */
+  AARCH64_OPND_SVE_Zm4_INDEX,	/* z0-z15[0-1] in Zm, bits [20,16].  */
   AARCH64_OPND_SVE_Zn,		/* SVE vector register in Zn.  */
   AARCH64_OPND_SVE_Zn_INDEX,	/* Indexed SVE vector register, for DUP.  */
   AARCH64_OPND_SVE_ZnxN,	/* SVE vector register list in Zn.  */
