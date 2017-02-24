@@ -3271,7 +3271,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 				      int regnum,
 				      struct value *result_value)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte raw_buf[I386_MAX_REGISTER_SIZE];
   enum register_status status;
   gdb_byte *buf = value_contents_raw (result_value);
 
@@ -3476,7 +3476,7 @@ void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const gdb_byte *buf)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte raw_buf[I386_MAX_REGISTER_SIZE];
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
@@ -5060,7 +5060,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   uint32_t opcode;
   uint8_t opcode8;
   ULONGEST addr;
-  gdb_byte buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[I386_MAX_REGISTER_SIZE];
   struct i386_record_s ir;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   uint8_t rex_w = -1;

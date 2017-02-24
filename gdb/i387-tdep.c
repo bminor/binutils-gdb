@@ -912,7 +912,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
   ULONGEST clear_bv;
-  static const gdb_byte zero[MAX_REGISTER_SIZE] = { 0 };
+  static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
   enum
     {
       none = 0x0,

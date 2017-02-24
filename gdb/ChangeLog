@@ -1,3 +1,13 @@
+2017-02-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* i386-tdep.c (i386_pseudo_register_read_into_value): Use
+	I386_MAX_REGISTER_SIZE.
+	(i386_pseudo_register_write): Likewise.
+	(i386_process_record): Likewise.
+	* i387-tdep.c (i387_supply_xsave): Likewise.
+	* m68k-linux-nat.c (fetch_register): Use M68K_MAX_REGISTER_SIZE.
+	(store_register): Likewise.
+
 2017-02-23  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c: Include "common/function-view.h".
