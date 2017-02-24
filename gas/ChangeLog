@@ -1,3 +1,12 @@
+2017-02-24  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Test cases for the architecture level aware SPARC ASI work.
+	* gas/testsuite/gas/sparc/sparc.exp: 2 new tests
+	* gas/testsuite/gas/sparc/asi-bump-warn.s: New test
+	* gas/testsuite/gas/sparc/asi-bump-warn.l: Likewise
+	* gas/testsuite/gas/sparc/asi-arch-error.s: Likewise
+	* gas/testsuite/gas/sparc/asi-arch-error.l: Likewise
+
 2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/jalr4.d: New test.
