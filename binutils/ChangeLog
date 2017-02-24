@@ -1,3 +1,10 @@
+2017-02-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/dw5.S: Replace .string with .asciz.
+	Support hpux .comm variant.
+	* testsuite/binutils-all/readelf.exp: Define HPUX when assembling
+	dw5 test for hppa64-hpux.
+
 2017-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (show_name, do_dynamic, do_syms, do_dyn_syms,

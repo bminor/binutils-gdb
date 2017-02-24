@@ -399,8 +399,12 @@ if {![binutils_assemble $srcdir/$subdir/z.s tmpdir/z.o]} then {
 # support .ULEB128 pseudo-ops with non-constant values.
 if ![istarget "riscv*-*-*"] then {
 
+    set hpux ""
+    if [istarget "hppa*64*-*-hpux*"] {
+	set hpux "--defsym HPUX=1"
+    }
     # Assemble the DWARF-5 test file.
-    if {![binutils_assemble $srcdir/$subdir/dw5.S tmpdir/dw5.o]} then {
+    if {![binutils_assemble_flags $srcdir/$subdir/dw5.S tmpdir/dw5.o $hpux]} then {
 	perror "could not assemble dw5 test file"
 	unresolved "readelf - failed to assemble dw5"
 	return

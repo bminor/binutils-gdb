@@ -55,8 +55,13 @@ main:
 	.dc.b 0
 .LFE1:
 	.size	main, .-main
+ .ifdef HPUX
+pvar	.comm	8
+yvar	.comm	4
+ .else
 	.comm	pvar,8,8
 	.comm	yvar,4,4
+ .endif
 	.globl	xvar
 	.data
 	.align 4
@@ -615,65 +620,65 @@ xvar:
 .LELT0:
 	.section	.debug_str,"MS",%progbits,1
 .LASF4:
-	.string	"unsigned int"
+	.asciz	"unsigned int"
 .LASF15:
-	.string	"optopt"
+	.asciz	"optopt"
 .LASF22:
-	.string	"main"
+	.asciz	"main"
 .LASF6:
-	.string	"signed char"
+	.asciz	"signed char"
 .LASF16:
-	.string	"xvar"
+	.asciz	"xvar"
 .LASF5:
-	.string	"long unsigned int"
+	.asciz	"long unsigned int"
 .LASF14:
-	.string	"opterr"
+	.asciz	"opterr"
 .LASF21:
-	.string	"GNU C11 7.0.1 20170218 (experimental) -mtune=generic -march=x86-64 -gdwarf-5 -O2"
+	.asciz	"GNU C11 7.0.1 20170218 (experimental) -mtune=generic -march=x86-64 -gdwarf-5 -O2"
 .LASF2:
-	.string	"unsigned char"
+	.asciz	"unsigned char"
 .LASF10:
-	.string	"char"
+	.asciz	"char"
 .LASF13:
-	.string	"optind"
+	.asciz	"optind"
 .LASF8:
-	.string	"long int"
+	.asciz	"long int"
 .LASF19:
-	.string	"argc"
+	.asciz	"argc"
 .LASF3:
-	.string	"short unsigned int"
+	.asciz	"short unsigned int"
 .LASF17:
-	.string	"yvar"
+	.asciz	"yvar"
 .LASF18:
-	.string	"pvar"
+	.asciz	"pvar"
 .LASF11:
-	.string	"__environ"
+	.asciz	"__environ"
 .LASF23:
-	.string	"func"
+	.asciz	"func"
 .LASF12:
-	.string	"optarg"
+	.asciz	"optarg"
 .LASF7:
-	.string	"short int"
+	.asciz	"short int"
 .LASF24:
-	.string	"alarm"
+	.asciz	"alarm"
 .LASF9:
-	.string	"sizetype"
+	.asciz	"sizetype"
 .LASF20:
-	.string	"argv"
+	.asciz	"argv"
 	.section	.debug_line_str,"MS",%progbits,1
 .LASF1:
-	.string	""
+	.asciz	""
 .LASF25:
-	.string	""
+	.asciz	""
 .LASF29:
-	.string	"getopt.h"
+	.asciz	"getopt.h"
 .LASF28:
-	.string	"unistd.h"
+	.asciz	"unistd.h"
 .LASF0:
-	.string	"main.c"
+	.asciz	"main.c"
 .LASF27:
-	.string	"main.c"
+	.asciz	"main.c"
 .LASF26:
-	.string	"/usr/include"
+	.asciz	"/usr/include"
 	.ident	"GCC: (GNU) 7.0.1 20170218 (experimental)"
 	.section	.note.GNU-stack,"",%progbits
