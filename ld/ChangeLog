@@ -1,3 +1,24 @@
+2017-02-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/elf.exp: Xfail pr20995 tests on hppa64-hpux.
+	Set up HPUX defsym.  Run pr14170 tests and build symbol3 objects,
+	defining HPUX where necessary.  Define HPUX for implib tests.
+	* testsuite/ld-elf/comm-data4.d: Run for hpux.
+	* testsuite/ld-elf/endsym.d: Likewise.
+	* testsuite/ld-elf/linkoncerdiff.d: Likewise.
+	* testsuite/ld-elf/comm-data4.s: Add alternate .comm when HPUX.
+	* testsuite/ld-elf/comm-data5.s: Likewise.
+	* testsuite/ld-elf/endsym.s: Likewise.
+	* testsuite/ld-elf/pr14170c.s: Likewise.
+	* testsuite/ld-elf/symbol3.s: Likewise.
+	* testsuite/ld-elf/implib.s: Likewise.  Don't start directives
+	in first column.
+	* testsuite/ld-elf/linkoncerdiff2.s: Don't use numeric labels.
+	* testsuite/ld-elf/warn3.d: Run for hpux.
+	* testsuite/ld-scripts/rgn-at10.d: Xfail for hpux.
+	* testsuite/ld-scripts/rgn-at11.d: Likewise.
+	* testsuite/ld-scripts/size-2.d: Remove xfail for hpux.
+
 2017-02-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-elf/ver_def.d: New test.
