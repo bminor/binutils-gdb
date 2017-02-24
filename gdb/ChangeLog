@@ -1,5 +1,9 @@
 2017-02-24  Alan Hayward  <alan.hayward@arm.com>
 
+	* stack.c (frame_info): Use frame_unwind_register_value to avoid buf.
+
+2017-02-24  Alan Hayward  <alan.hayward@arm.com>
+
 	* i386-tdep.c (i386_pseudo_register_read_into_value): Use
 	I386_MAX_REGISTER_SIZE.
 	(i386_pseudo_register_write): Likewise.
