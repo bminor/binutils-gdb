@@ -3511,7 +3511,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_F6 */
   {
     { "testA",	{ Eb, Ib }, 0 },
-    { Bad_Opcode },
+    { "testA",	{ Eb, Ib }, 0 },
     { "notA",	{ Ebh1 }, 0 },
     { "negA",	{ Ebh1 }, 0 },
     { "mulA",	{ Eb }, 0 },	/* Don't print the implicit %al register,  */
@@ -3522,7 +3522,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_F7 */
   {
     { "testQ",	{ Ev, Iv }, 0 },
-    { Bad_Opcode },
+    { "testQ",	{ Ev, Iv }, 0 },
     { "notQ",	{ Evh1 }, 0 },
     { "negQ",	{ Evh1 }, 0 },
     { "mulQ",	{ Ev }, 0 },	/* Don't print the implicit register.  */
