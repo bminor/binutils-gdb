@@ -73,6 +73,9 @@
 	(process_object): Reverse the logic of the return value.
 	(process_archive): Likewise.
 	(process_file): Likewise.
+	(process_program_headers): Fix snafu - if the program headers are
+	not available then this is not a cause to fail.
+	(process_corefile_note_segments): Likewise.
 
 2017-02-24  Maciej W. Rozycki  <macro@imgtec.com>
 

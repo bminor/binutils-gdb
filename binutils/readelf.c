@@ -4813,7 +4813,7 @@ process_program_headers (FILE * file)
     }
 
   if (! get_program_headers (file))
-    return FALSE;
+    return TRUE;
 
   if (do_segments)
     {
@@ -16618,7 +16618,8 @@ process_notes_at (FILE *              file,
 	  inote.namedata = temp;
 	}
 
-      res &= process_note (& inote, file, section);
+      if (! process_note (& inote, file, section))
+	res = FALSE;
 
       if (temp != NULL)
 	{
@@ -16640,7 +16641,7 @@ process_corefile_note_segments (FILE * file)
   bfd_boolean res = TRUE;
 
   if (! get_program_headers (file))
-    return FALSE;
+    return TRUE;
 
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
