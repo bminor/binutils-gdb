@@ -1,3 +1,12 @@
+2017-02-24  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_simd_v8_3): Replace with...
+	(aarch64_feature_compnum): ...this.
+	(SIMD_V8_3): Replace with...
+	(COMPNUM): ...this.
+	(CNUM_INSN): New macro.
+	(aarch64_opcode_table): Use it for the complex number instructions.
+
 2017-02-24  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (reg_table): REG_F6/1 and REG_F7/1 decode as TEST.
