@@ -5391,10 +5391,7 @@ static VEC (char_ptr) *
 make_file_symbol_completion_list_1 (const char *text, const char *word,
 				    const char *srcfile)
 {
-  struct symbol *sym;
   struct symtab *s;
-  struct block *b;
-  struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   const char *sym_text;
   /* Length of sym_text.  */
@@ -5464,18 +5461,9 @@ make_file_symbol_completion_list_1 (const char *text, const char *word,
 
   /* Go through this symtab and check the externs and statics for
      symbols which match.  */
-
-  b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), GLOBAL_BLOCK);
-  ALL_BLOCK_SYMBOLS (b, iter, sym)
-    {
-      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-    }
-
-  b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
-  ALL_BLOCK_SYMBOLS (b, iter, sym)
-    {
-      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-    }
+  add_symtab_completions (SYMTAB_COMPUNIT (s),
+			  sym_text, sym_text_len,
+			  text, word, TYPE_CODE_UNDEF);
 
   return (return_val);
 }

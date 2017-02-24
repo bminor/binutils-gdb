@@ -1,3 +1,8 @@
+2017-02-24  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (make_file_symbol_completion_list_1): Use
+	add_symtab_completions.
+
 2017-02-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* stack.c (frame_info): Use frame_unwind_register_value to avoid buf.
