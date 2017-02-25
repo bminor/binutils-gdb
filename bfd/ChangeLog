@@ -1,3 +1,17 @@
+2017-02-25  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arc.c (struct dynamic_sections): Delete.
+	(enum dyn_section_types): Delete.
+	(dyn_section_names): Delete.
+	(arc_create_dynamic_sections): Delete.
+	(elf_arc_finish_dynamic_sections): Don't call the above.  Don't
+	segfault on discarded .rela.plt section.
+	(elf_arc_size_dynamic_sections): Formatting.  Don't call
+	arc_create_dynamic_sections.  Don't allocate memory for sections
+	handled by the generic linker.  Correct code finding relocs in
+	read-only sections.  Set SEC_EXCLUDE on zero size .got,
+	.got.plt, and .dynbss sections.  Do set .interp for pies.
+
 2017-02-24  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (GP_NAME): New macro.
