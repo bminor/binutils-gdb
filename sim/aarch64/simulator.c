@@ -2620,43 +2620,149 @@ do_vec_MOV_whole_vector (sim_cpu *cpu)
 }
 
 static void
-do_vec_MOV_into_scalar (sim_cpu *cpu)
+do_vec_SMOV_into_scalar (sim_cpu *cpu)
 {
   /* instr[31]    = 0
      instr[30]    = word(0)/long(1)
      instr[29,21] = 00 1110 000
-     instr[20,18] = element size and index
-     instr[17,10] = 00 0011 11
+     instr[20,16] = element size and index
+     instr[15,10] = 00 0010 11
      instr[9,5]   = V source
      instr[4,0]   = R dest  */
 
   unsigned vs = INSTR (9, 5);
   unsigned rd = INSTR (4, 0);
+  unsigned imm5 = INSTR (20, 16);
+  unsigned full = INSTR (30, 30);
+  int size, index;
 
   NYI_assert (29, 21, 0x070);
-  NYI_assert (17, 10, 0x0F);
+  NYI_assert (15, 10, 0x0B);
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  switch (INSTR (20, 18))
+
+  if (imm5 & 0x1)
     {
-    case 0x2:
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, aarch64_get_vec_u64 (cpu, vs, 0));
+      size = 0;
+      index = (imm5 >> 1) & 0xF;
+    }
+  else if (imm5 & 0x2)
+    {
+      size = 1;
+      index = (imm5 >> 2) & 0x7;
+    }
+  else if (full && (imm5 & 0x4))
+    {
+      size = 2;
+      index = (imm5 >> 3) & 0x3;
+    }
+  else
+    HALT_UNALLOC;
+
+  switch (size)
+    {
+    case 0:
+      if (full)
+	aarch64_set_reg_s64 (cpu, rd, NO_SP,
+			     aarch64_get_vec_s8 (cpu, vs, index));
+      else
+	aarch64_set_reg_s32 (cpu, rd, NO_SP,
+			     aarch64_get_vec_s8 (cpu, vs, index));
       break;
 
-    case 0x6:
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, aarch64_get_vec_u64 (cpu, vs, 1));
+    case 1:
+      if (full)
+	aarch64_set_reg_s64 (cpu, rd, NO_SP,
+			     aarch64_get_vec_s16 (cpu, vs, index));
+      else
+	aarch64_set_reg_s32 (cpu, rd, NO_SP,
+			     aarch64_get_vec_s16 (cpu, vs, index));
       break;
 
-    case 0x1:
-    case 0x3:
-    case 0x5:
-    case 0x7:
-      aarch64_set_reg_u64 (cpu, rd, NO_SP, aarch64_get_vec_u32
-			   (cpu, vs, INSTR (20, 19)));
+    case 2:
+      aarch64_set_reg_s64 (cpu, rd, NO_SP,
+			   aarch64_get_vec_s32 (cpu, vs, index));
       break;
 
     default:
-      HALT_NYI;
+      HALT_UNALLOC;
+    }
+}
+
+static void
+do_vec_UMOV_into_scalar (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = word(0)/long(1)
+     instr[29,21] = 00 1110 000
+     instr[20,16] = element size and index
+     instr[15,10] = 00 0011 11
+     instr[9,5]   = V source
+     instr[4,0]   = R dest  */
+
+  unsigned vs = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned imm5 = INSTR (20, 16);
+  unsigned full = INSTR (30, 30);
+  int size, index;
+
+  NYI_assert (29, 21, 0x070);
+  NYI_assert (15, 10, 0x0F);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+
+  if (!full)
+    {
+      if (imm5 & 0x1)
+	{
+	  size = 0;
+	  index = (imm5 >> 1) & 0xF;
+	}
+      else if (imm5 & 0x2)
+	{
+	  size = 1;
+	  index = (imm5 >> 2) & 0x7;
+	}
+      else if (imm5 & 0x4)
+	{
+	  size = 2;
+	  index = (imm5 >> 3) & 0x3;
+	}
+      else
+	HALT_UNALLOC;
+    }
+  else if (imm5 & 0x8)
+    {
+      size = 3;
+      index = (imm5 >> 4) & 0x1;
+    }
+  else
+    HALT_UNALLOC;
+
+  switch (size)
+    {
+    case 0:
+      aarch64_set_reg_u32 (cpu, rd, NO_SP,
+			   aarch64_get_vec_u8 (cpu, vs, index));
+      break;
+
+    case 1:
+      aarch64_set_reg_u32 (cpu, rd, NO_SP,
+			   aarch64_get_vec_u16 (cpu, vs, index));
+      break;
+
+    case 2:
+      aarch64_set_reg_u32 (cpu, rd, NO_SP,
+			   aarch64_get_vec_u32 (cpu, vs, index));
+      break;
+
+    case 3:
+      aarch64_set_reg_u64 (cpu, rd, NO_SP,
+			   aarch64_get_vec_u64 (cpu, vs, index));
+      break;
+
+    default:
+      HALT_UNALLOC;
     }
 }
 
@@ -5363,55 +5469,6 @@ do_vec_ADDP (sim_cpu *cpu)
 }
 
 static void
-do_vec_UMOV (sim_cpu *cpu)
-{
-  /* instr[31]    = 0
-     instr[30]    = 32-bit(0)/64-bit(1)
-     instr[29,21] = 00 1110 000
-     insrt[20,16] = size & index
-     instr[15,10] = 0011 11
-     instr[9,5]   = V source
-     instr[4,0]   = R dest.  */
-
-  unsigned vs = INSTR (9, 5);
-  unsigned rd = INSTR (4, 0);
-  unsigned index;
-
-  NYI_assert (29, 21, 0x070);
-  NYI_assert (15, 10, 0x0F);
-
-  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  if (INSTR (16, 16))
-    {
-      /* Byte transfer.  */
-      index = INSTR (20, 17);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP,
-			   aarch64_get_vec_u8 (cpu, vs, index));
-    }
-  else if (INSTR (17, 17))
-    {
-      index = INSTR (20, 18);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP,
-			   aarch64_get_vec_u16 (cpu, vs, index));
-    }
-  else if (INSTR (18, 18))
-    {
-      index = INSTR (20, 19);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP,
-			   aarch64_get_vec_u32 (cpu, vs, index));
-    }
-  else
-    {
-      if (INSTR (30, 30) != 1)
-	HALT_UNALLOC;
-
-      index = INSTR (20, 20);
-      aarch64_set_reg_u64 (cpu, rd, NO_SP,
-			   aarch64_get_vec_u64 (cpu, vs, index));
-    }
-}
-
-static void
 do_vec_FABS (sim_cpu *cpu)
 {
   /* instr[31]    = 0
@@ -5598,15 +5655,8 @@ do_vec_op1 (sim_cpu *cpu)
 	    case 0x01: do_vec_DUP_vector_into_vector (cpu); return;
 	    case 0x03: do_vec_DUP_scalar_into_vector (cpu); return;
 	    case 0x07: do_vec_INS (cpu); return;
-	    case 0x0A: do_vec_TRN (cpu); return;
-
-	    case 0x0F:
-	      if (INSTR (17, 16) == 0)
-		{
-		  do_vec_MOV_into_scalar (cpu);
-		  return;
-		}
-	      break;
+	    case 0x0B: do_vec_SMOV_into_scalar (cpu); return;
+	    case 0x0F: do_vec_UMOV_into_scalar (cpu); return;
 
 	    case 0x00:
 	    case 0x08:
@@ -5617,6 +5667,8 @@ do_vec_op1 (sim_cpu *cpu)
 	    case 0x06:
 	    case 0x16:
 	      do_vec_UZP (cpu); return;
+
+	    case 0x0A: do_vec_TRN (cpu); return;
 
 	    case 0x0E:
 	    case 0x1E:
@@ -5632,7 +5684,6 @@ do_vec_op1 (sim_cpu *cpu)
 	case 0x6: do_vec_UZP (cpu); return;
 	case 0xE: do_vec_ZIP (cpu); return;
 	case 0xA: do_vec_TRN (cpu); return;
-	case 0xF: do_vec_UMOV (cpu); return;
 	default:  HALT_NYI;
 	}
     }

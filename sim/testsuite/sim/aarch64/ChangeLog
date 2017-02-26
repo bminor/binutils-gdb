@@ -1,5 +1,7 @@
 2017-02-25  Jim Wilson  <jim.wilson@linaro.org>
 
+	* sumov.s: New.
+
 	* cnt.s: New.
 
 2017-02-19  Jim Wilson  <jim.wilson@linaro.org>

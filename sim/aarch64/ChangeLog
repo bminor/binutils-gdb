@@ -1,5 +1,13 @@
 2017-02-25  Jim Wilson  <jim.wilson@linaro.org>
 
+	* simulator.c (do_vec_SMOV_into_scalar): New.
+	(do_vec_UMOV_into_scalar): Renamed from do_vec_MOV_into_scalar.
+	Rewritten.
+	(do_vec_UMOV): Merged into do_vec_UMOV_into_scalar and deleted.
+	(do_vec_op1): Move do_vec_TRN call and do_vec_UZP call.  Add
+	do_vec_SMOV_into_scalar call.  Delete do_vec_MOV_into_scalar and
+	do_vec_UMOV calls.  Add do_vec_UMOV_into_scalar call.
+
 	* simulator.c (popcount): New.
 	(do_vec_CNT): New.
 	(do_vec_op1): Add do_vec_CNT call.
