@@ -4728,6 +4728,10 @@ create_debug_type_hash_table (struct dwo_file *dwo_file,
 
       offset.sect_off = ptr - section->buffer;
 
+      /* Initialize it due to a false compiler warning.  */
+      header.signature = -1;
+      header.type_offset_in_tu.cu_off = -1;
+
       /* We need to read the type's signature in order to build the hash
 	 table, but we don't need anything else just yet.  */
 

@@ -1,3 +1,8 @@
+2017-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (create_debug_type_hash_table): Initialize
+	header.signature and header.type_offset_in_tu.
+
 2017-02-24  Pedro Alves  <palves@redhat.com>
 
 	* symtab.c (make_file_symbol_completion_list_1): Use
