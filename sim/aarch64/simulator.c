@@ -4197,6 +4197,56 @@ do_vec_XTN (sim_cpu *cpu)
     }
 }
 
+/* Return the number of bits set in the input value.  */
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+# define popcount __builtin_popcount
+#else
+static int
+popcount (unsigned char x)
+{
+  static const unsigned char popcnt[16] =
+    {
+      0, 1, 1, 2,
+      1, 2, 2, 3,
+      1, 2, 2, 3,
+      2, 3, 3, 4
+    };
+
+  /* Only counts the low 8 bits of the input as that is all we need.  */
+  return popcnt[x % 16] + popcnt[x / 16];
+}
+#endif
+
+static void
+do_vec_CNT (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = half (0)/ full (1)
+     instr[29,24] = 00 1110
+     instr[23,22] = size: byte(00)
+     instr[21,10] = 1000 0001 0110
+     instr[9,5]   = Vs
+     instr[4,0]   = Vd.  */
+
+  unsigned vs = INSTR (9, 5);
+  unsigned vd = INSTR (4, 0);
+  int full = INSTR (30, 30);
+  int size = INSTR (23, 22);
+  int i;
+
+  NYI_assert (29, 24, 0x0E);
+  NYI_assert (21, 10, 0x816);
+
+  if (size != 0)
+    HALT_UNALLOC;
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+
+  for (i = 0; i < (full ? 16 : 8); i++)
+    aarch64_set_vec_u8 (cpu, vd, i,
+			popcount (aarch64_get_vec_u8 (cpu, vs, i)));
+}
+
 static void
 do_vec_maxv (sim_cpu *cpu)
 {
@@ -5605,6 +5655,7 @@ do_vec_op1 (sim_cpu *cpu)
     case 0x08: do_vec_sub_long (cpu); return;
     case 0x0a: do_vec_XTN (cpu); return;
     case 0x11: do_vec_SSHL (cpu); return;
+    case 0x16: do_vec_CNT (cpu); return;
     case 0x19: do_vec_max (cpu); return;
     case 0x1B: do_vec_min (cpu); return;
     case 0x21: do_vec_add (cpu); return;

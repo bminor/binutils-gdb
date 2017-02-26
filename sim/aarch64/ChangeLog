@@ -1,3 +1,9 @@
+2017-02-25  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (popcount): New.
+	(do_vec_CNT): New.
+	(do_vec_op1): Add do_vec_CNT call.
+
 2017-02-19  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (do_vec_ADDV): Mov val declaration inside each case,
