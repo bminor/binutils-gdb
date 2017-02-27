@@ -3668,6 +3668,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "id_aa64mmfr2_el1", CPENC (3, 0, C0, C7, 2), F_ARCHEXT }, /* RO */
   { "id_aa64afr0_el1",  CPENC(3,0,C0,C5,4),	0 }, /* RO */
   { "id_aa64afr1_el1",  CPENC(3,0,C0,C5,5),	0 }, /* RO */
+  { "id_aa64zfr0_el1",  CPENC (3, 0, C0, C4, 4), F_ARCHEXT }, /* RO */
   { "clidr_el1",        CPENC(3,1,C0,C0,1),	0 }, /* RO */
   { "csselr_el1",       CPENC(3,2,C0,C0,0),	0 }, /* RO */
   { "vpidr_el2",        CPENC(3,4,C0,C0,0),	0 },
@@ -3689,6 +3690,11 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "mdcr_el3",         CPENC(3,6,C1,C3,1),	0 },
   { "hstr_el2",         CPENC(3,4,C1,C1,3),	0 },
   { "hacr_el2",         CPENC(3,4,C1,C1,7),	0 },
+  { "zcr_el1",          CPENC (3, 0, C1, C2, 0), F_ARCHEXT },
+  { "zcr_el12",         CPENC (3, 5, C1, C2, 0), F_ARCHEXT },
+  { "zcr_el2",          CPENC (3, 4, C1, C2, 0), F_ARCHEXT },
+  { "zcr_el3",          CPENC (3, 6, C1, C2, 0), F_ARCHEXT },
+  { "zidr_el1",         CPENC (3, 0, C0, C0, 7), F_ARCHEXT },
   { "ttbr0_el1",        CPENC(3,0,C2,C0,0),	0 },
   { "ttbr1_el1",        CPENC(3,0,C2,C0,1),	0 },
   { "ttbr0_el2",        CPENC(3,4,C2,C0,0),	0 },
@@ -4100,6 +4106,16 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 0, C2, C3, 0)
        || reg->value == CPENC (3, 0, C2, C3, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_3))
+    return FALSE;
+
+  /* SVE.  */
+  if ((reg->value == CPENC (3, 0, C0, C4, 4)
+       || reg->value == CPENC (3, 0, C1, C2, 0)
+       || reg->value == CPENC (3, 4, C1, C2, 0)
+       || reg->value == CPENC (3, 6, C1, C2, 0)
+       || reg->value == CPENC (3, 5, C1, C2, 0)
+       || reg->value == CPENC (3, 0, C0, C0, 7))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_SVE))
     return FALSE;
 
   return TRUE;
