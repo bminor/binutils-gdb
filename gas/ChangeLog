@@ -1,3 +1,7 @@
+2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* doc/c-aarch64.texi: Fix sve entry.
+
 2017-02-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* config/tc-aarch64.c (aarch64_features): Add rcpc.
