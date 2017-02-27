@@ -9665,7 +9665,7 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
   buf++;
 
   /* Send conditions to the target.  */
-  for (struct agent_expr *aexpr : bp_tgt->conditions)
+  for (agent_expr *aexpr : bp_tgt->conditions)
     {
       xsnprintf (buf, buf_end - buf, "X%x,", aexpr->len);
       buf += strlen (buf);
