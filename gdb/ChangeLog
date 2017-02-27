@@ -1,3 +1,10 @@
+2017-02-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache_raw_update): New function.
+	(regcache_raw_read): Move code to regcache_raw_update.
+	* regcache.h (regcache_raw_update): New declaration.
+	* remote.c (remote_prepare_to_store): Call regcache_raw_update.
+
 2017-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (create_debug_type_hash_table): Initialize

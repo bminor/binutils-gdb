@@ -50,6 +50,10 @@ extern struct address_space *get_regcache_aspace (const struct regcache *);
 enum register_status regcache_register_status (const struct regcache *regcache,
 					       int regnum);
 
+/* Make certain that the register REGNUM in REGCACHE is up-to-date.  */
+
+void regcache_raw_update (struct regcache *regcache, int regnum);
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache.  The read variants return the status of the register.  */
 
