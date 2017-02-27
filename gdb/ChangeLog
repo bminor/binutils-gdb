@@ -1,3 +1,7 @@
+2017-02-27  Yao Qi  <yao.qi@linaro.org>
+
+	* f-typeprint.c (f_print_type): Check "varstring" is empty first.
+
 2017-02-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* regcache.c (regcache_raw_update): New function.
