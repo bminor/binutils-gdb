@@ -1,3 +1,8 @@
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/addpcis.d: Define ext1 and ext2 at
+	limits of addpcis range.
+
 2017-02-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/jalr4.dd: Adjust for `jalr $0, $25'

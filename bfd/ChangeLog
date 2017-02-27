@@ -1,5 +1,18 @@
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
+	* reloc.c (BFD_RELOC_PPC_16DX_HA): New.
+	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_16DX_HA>): New howto.
+	(ppc64_elf_reloc_type_lookup): Translate new bfd reloc.
+	(ppc64_elf_ha_reloc): Correct overflow test on REL16DX_HA.
+	(ppc64_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_howto_raw <R_PPC_16DX_HA>): New howto.
+	(ppc_elf_reloc_type_lookup): Translate new bfd reloc.
+	(ppc_elf_check_relocs): Handle R_PPC_16DX_HA to pacify gcc.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (_bfd_elf_create_dynamic_sections): Don't make
 	dynamic .data.rel.ro read-only.
 	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Compare section
