@@ -2,13 +2,15 @@
 .*: Error: operand 2 must be an SVE predicate register -- `fmov z1,z2'
 .*: Error: operand mismatch -- `fmov z1,#1\.0'
 .*: Info:    did you mean this\?
-.*: Info:    	fmov z1\.s, #1\.000000000000000000e\+00
+.*: Info:    	fmov z1\.h, #1\.000000000000000000e\+00
 .*: Info:    other valid variant\(s\):
+.*: Info:    	fmov z1\.s, #1\.000000000000000000e\+00
 .*: Info:    	fmov z1\.d, #1\.000000000000000000e\+00
 .*: Error: operand mismatch -- `fmov z1,#0\.0'
 .*: Info:    did you mean this\?
-.*: Info:    	fmov z1\.s, #0\.0
+.*: Info:    	fmov z1\.h, #0\.0
 .*: Info:    other valid variant\(s\):
+.*: Info:    	fmov z1\.s, #0\.0
 .*: Info:    	fmov z1\.d, #0\.0
 .*: Error: missing predication type at operand 2 -- `not z0\.s,p1/'
 .*: Error: missing predication type at operand 2 -- `not z0\.s,p1/,z2\.s'
@@ -144,6 +146,7 @@
 .*: Info:    	mov z0\.h, h0
 .*: Info:    	mov z0\.s, s0
 .*: Info:    	mov z0\.d, d0
+.*: Info:    	mov z0\.q, q0
 .*: Error: operand mismatch -- `mov z0,z1'
 .*: Info:    did you mean this\?
 .*: Info:    	mov z0\.d, z1\.d
@@ -942,3 +945,266 @@
 .*: Error: register element index out of range 0 to 7 at operand 2 -- `dup z0\.d,z1\.d\[-1\]'
 .*: Error: register element index out of range 0 to 7 at operand 2 -- `dup z0\.d,z1\.d\[8\]'
 .*: Error: constant expression required at operand 2 -- `dup z0\.d,z1\.d\[x0\]'
+.*: Error: operand mismatch -- `fabd z0\.b,p0/m,z0\.b,z0\.b'
+.*: Info:    did you mean this\?
+.*: Info:    	fabd z0\.h, p0/m, z0\.h, z0\.h
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fabd z0\.s, p0/m, z0\.s, z0\.s
+.*: Info:    	fabd z0\.d, p0/m, z0\.d, z0\.d
+.*: Error: operand mismatch -- `fabd z0\.q,p0/m,z0\.q,z0\.q'
+.*: Info:    did you mean this\?
+.*: Info:    	fabd z0\.h, p0/m, z0\.h, z0\.h
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fabd z0\.s, p0/m, z0\.s, z0\.s
+.*: Info:    	fabd z0\.d, p0/m, z0\.d, z0\.d
+.*: Error: operand mismatch -- `fcadd z0\.b,p0/m,z0\.b,z0\.b,#90'
+.*: Info:    did you mean this\?
+.*: Info:    	fcadd z0\.h, p0/m, z0\.h, z0\.h, #90
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fcadd z0\.s, p0/m, z0\.s, z0\.s, #90
+.*: Info:    	fcadd z0\.d, p0/m, z0\.d, z0\.d, #90
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#-180'
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#-90'
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#0'
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#89'
+.*: Error: unexpected characters following instruction at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#90\.0'
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#180'
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#360'
+.*: Error: rotate expected to be 90 or 270 at operand 5 -- `fcadd z0\.h,p0/m,z0\.h,z0\.h,#450'
+.*: Error: operand mismatch -- `fcadd z0\.h,p0/z,z0\.h,z0\.h,#90'
+.*: Info:    did you mean this\?
+.*: Info:    	fcadd z0\.h, p0/m, z0\.h, z0\.h, #90
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fcadd z0\.s, p0/m, z0\.s, z0\.s, #90
+.*: Info:    	fcadd z0\.d, p0/m, z0\.d, z0\.d, #90
+.*: Error: operand 3 must be the same register as operand 1 -- `fcadd z0\.h,p0/m,z1\.h,z0\.h,#90'
+.*: Error: operand mismatch -- `fcadd z0\.q,p0/m,z0\.q,z0\.q,#90'
+.*: Info:    did you mean this\?
+.*: Info:    	fcadd z0\.h, p0/m, z0\.h, z0\.h, #90
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fcadd z0\.s, p0/m, z0\.s, z0\.s, #90
+.*: Info:    	fcadd z0\.d, p0/m, z0\.d, z0\.d, #90
+.*: Error: operand mismatch -- `fcmla z0\.b,p0/m,z0\.b,z0\.b,#90'
+.*: Info:    did you mean this\?
+.*: Info:    	fcmla z0\.h, p0/m, z0\.h, z0\.h, #90
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fcmla z0\.s, p0/m, z0\.s, z0\.s, #90
+.*: Info:    	fcmla z0\.d, p0/m, z0\.d, z0\.d, #90
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 5 -- `fcmla z0\.h,p0/m,z0\.h,z0\.h,#-180'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 5 -- `fcmla z0\.h,p0/m,z0\.h,z0\.h,#-90'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 5 -- `fcmla z0\.h,p0/m,z0\.h,z0\.h,#89'
+.*: Error: unexpected characters following instruction at operand 5 -- `fcmla z0\.h,p0/m,z0\.h,z0\.h,#90\.0'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 5 -- `fcmla z0\.h,p0/m,z0\.h,z0\.h,#360'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 5 -- `fcmla z0\.h,p0/m,z0\.h,z0\.h,#450'
+.*: Error: operand mismatch -- `fcmla z0\.h,p0/z,z0\.h,z0\.h,#90'
+.*: Info:    did you mean this\?
+.*: Info:    	fcmla z0\.h, p0/m, z0\.h, z0\.h, #90
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fcmla z0\.s, p0/m, z0\.s, z0\.s, #90
+.*: Info:    	fcmla z0\.d, p0/m, z0\.d, z0\.d, #90
+.*: Error: operand mismatch -- `fcmla z0\.q,p0/m,z0\.q,z0\.q,#90'
+.*: Info:    did you mean this\?
+.*: Info:    	fcmla z0\.h, p0/m, z0\.h, z0\.h, #90
+.*: Info:    other valid variant\(s\):
+.*: Info:    	fcmla z0\.s, p0/m, z0\.s, z0\.s, #90
+.*: Info:    	fcmla z0\.d, p0/m, z0\.d, z0\.d, #90
+.*: Error: operand mismatch -- `fcmla z0\.b,z1\.b,z2\.b\[0\],#0'
+.*: Info:    did you mean this\?
+.*: Info:    	fcmla z0\.h, z1\.h, z2\.h\[0\], #0
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fcmla z0\.h,z1\.h,z2\.h\[-1\],#0'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fcmla z0\.h,z1\.h,z2\.h\[4\],#0'
+.*: Error: z0-z7 expected at operand 3 -- `fcmla z0\.h,z1\.h,z8\.h\[0\],#0'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.h,z1\.h,z2\.h\[0\],#-180'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.h,z1\.h,z2\.h\[0\],#-90'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.h,z1\.h,z2\.h\[0\],#89'
+.*: Error: unexpected characters following instruction at operand 4 -- `fcmla z0\.h,z1\.h,z2\.h\[0\],#90\.0'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.h,z1\.h,z2\.h\[0\],#360'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.h,z1\.h,z2\.h\[0\],#450'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fcmla z0\.s,z1\.s,z2\.s\[-1\],#0'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fcmla z0\.s,z1\.s,z2\.s\[2\],#0'
+.*: Error: z0-z15 expected at operand 3 -- `fcmla z0\.s,z1\.s,z16\.s\[0\],#0'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.s,z1\.s,z2\.s\[0\],#-180'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.s,z1\.s,z2\.s\[0\],#-90'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.s,z1\.s,z2\.s\[0\],#89'
+.*: Error: unexpected characters following instruction at operand 4 -- `fcmla z0\.s,z1\.s,z2\.s\[0\],#90\.0'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.s,z1\.s,z2\.s\[0\],#360'
+.*: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `fcmla z0\.s,z1\.s,z2\.s\[0\],#450'
+.*: Error: operand mismatch -- `fcmla z0\.q,z1\.q,z2\.q\[0\],#0'
+.*: Info:    did you mean this\?
+.*: Info:    	fcmla z0\.h, z1\.h, z2\.h\[0\], #0
+.*: Error: operand mismatch -- `fmla z0\.b,z1\.b,z2\.b\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	fmla z0\.h, z1\.h, z2\.h\[0\]
+.*: Error: register element index out of range 0 to 7 at operand 3 -- `fmla z0\.h,z1\.h,z2\.h\[-1\]'
+.*: Error: register element index out of range 0 to 7 at operand 3 -- `fmla z0\.h,z1\.h,z2\.h\[8\]'
+.*: Error: z0-z7 expected at operand 3 -- `fmla z0\.h,z1\.h,z8\.h\[0\]'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fmla z0\.s,z1\.s,z2\.s\[-1\]'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fmla z0\.s,z1\.s,z2\.s\[4\]'
+.*: Error: z0-z7 expected at operand 3 -- `fmla z0\.s,z1\.s,z8\.s\[0\]'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fmla z0\.d,z1\.d,z2\.d\[-1\]'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fmla z0\.d,z1\.d,z2\.d\[2\]'
+.*: Error: z0-z15 expected at operand 3 -- `fmla z0\.d,z1\.d,z16\.d\[0\]'
+.*: Error: operand mismatch -- `fmla z0\.q,z1\.q,z2\.q\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	fmla z0\.h, z1\.h, z2\.h\[0\]
+.*: Error: operand mismatch -- `fmls z0\.b,z1\.b,z2\.b\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	fmls z0\.h, z1\.h, z2\.h\[0\]
+.*: Error: register element index out of range 0 to 7 at operand 3 -- `fmls z0\.h,z1\.h,z2\.h\[-1\]'
+.*: Error: register element index out of range 0 to 7 at operand 3 -- `fmls z0\.h,z1\.h,z2\.h\[8\]'
+.*: Error: z0-z7 expected at operand 3 -- `fmls z0\.h,z1\.h,z8\.h\[0\]'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fmls z0\.s,z1\.s,z2\.s\[-1\]'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fmls z0\.s,z1\.s,z2\.s\[4\]'
+.*: Error: z0-z7 expected at operand 3 -- `fmls z0\.s,z1\.s,z8\.s\[0\]'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fmls z0\.d,z1\.d,z2\.d\[-1\]'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fmls z0\.d,z1\.d,z2\.d\[2\]'
+.*: Error: z0-z15 expected at operand 3 -- `fmls z0\.d,z1\.d,z16\.d\[0\]'
+.*: Error: operand mismatch -- `fmls z0\.q,z1\.q,z2\.q\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	fmls z0\.h, z1\.h, z2\.h\[0\]
+.*: Error: operand mismatch -- `fmul z0\.b,z1\.b,z2\.b\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	fmul z0\.h, z1\.h, z2\.h\[0\]
+.*: Error: register element index out of range 0 to 7 at operand 3 -- `fmul z0\.h,z1\.h,z2\.h\[-1\]'
+.*: Error: register element index out of range 0 to 7 at operand 3 -- `fmul z0\.h,z1\.h,z2\.h\[8\]'
+.*: Error: z0-z7 expected at operand 3 -- `fmul z0\.h,z1\.h,z8\.h\[0\]'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fmul z0\.s,z1\.s,z2\.s\[-1\]'
+.*: Error: register element index out of range 0 to 3 at operand 3 -- `fmul z0\.s,z1\.s,z2\.s\[4\]'
+.*: Error: z0-z7 expected at operand 3 -- `fmul z0\.s,z1\.s,z8\.s\[0\]'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fmul z0\.d,z1\.d,z2\.d\[-1\]'
+.*: Error: register element index out of range 0 to 1 at operand 3 -- `fmul z0\.d,z1\.d,z2\.d\[2\]'
+.*: Error: z0-z15 expected at operand 3 -- `fmul z0\.d,z1\.d,z16\.d\[0\]'
+.*: Error: operand mismatch -- `fmul z0\.q,z1\.q,z2\.q\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	fmul z0\.h, z1\.h, z2\.h\[0\]
+.*: Error: operand mismatch -- `ld1rqb {z0\.b},p0,\[x0,#0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	ld1rqb {z0\.b}, p0/z, \[x0\]
+.*: Error: operand mismatch -- `ld1rqb {z0\.b},p0/m,\[x0,#0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	ld1rqb {z0\.b}, p0/z, \[x0\]
+.*: Error: p0-p7 expected at operand 2 -- `ld1rqb {z0\.b},p8/z,\[x0,#0\]'
+.*: Error: immediate offset out of range -128 to 112 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-144\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-15\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-14\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-13\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-12\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-11\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-10\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-9\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-8\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-7\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-6\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-5\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-4\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-3\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-2\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#-1\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#1\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#2\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#3\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#4\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#5\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#6\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#7\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#8\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#9\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#10\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#11\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#12\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#13\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#14\]'
+.*: Error: immediate value must be a multiple of 16 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#15\]'
+.*: Error: immediate offset out of range -128 to 112 at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,#128\]'
+.*: Error: operand mismatch -- `ld1rqb {z0\.h},p0/z,\[x0,#0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	ld1rqb {z0\.b}, p0/z, \[x0\]
+.*: Error: operand mismatch -- `ld1rqb {z0\.s},p0/z,\[x0,#0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	ld1rqb {z0\.b}, p0/z, \[x0\]
+.*: Error: operand mismatch -- `ld1rqb {z0\.d},p0/z,\[x0,#0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	ld1rqb {z0\.b}, p0/z, \[x0\]
+.*: Error: operand mismatch -- `ld1rqb {z0\.q},p0/z,\[x0,#0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	ld1rqb {z0\.b}, p0/z, \[x0\]
+.*: Error: index register xzr is not allowed at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,xzr\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,x1,lsl#1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,x1,lsl#2\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqb {z0\.b},p0/z,\[x0,x1,lsl#3\]'
+.*: Error: index register xzr is not allowed at operand 3 -- `ld1rqh {z0\.h},p0/z,\[x0,xzr,lsl#1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqh {z0\.h},p0/z,\[x0,x1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqh {z0\.h},p0/z,\[x0,x1,lsl#2\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqh {z0\.h},p0/z,\[x0,x1,lsl#3\]'
+.*: Error: index register xzr is not allowed at operand 3 -- `ld1rqw {z0\.s},p0/z,\[x0,xzr,lsl#2\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqw {z0\.s},p0/z,\[x0,x1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqw {z0\.s},p0/z,\[x0,x1,lsl#1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqw {z0\.s},p0/z,\[x0,x1,lsl#3\]'
+.*: Error: index register xzr is not allowed at operand 3 -- `ld1rqd {z0\.d},p0/z,\[x0,xzr,lsl#3\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqd {z0\.d},p0/z,\[x0,x1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqd {z0\.d},p0/z,\[x0,x1,lsl#1\]'
+.*: Error: invalid addressing mode at operand 3 -- `ld1rqd {z0\.d},p0/z,\[x0,x1,lsl#2\]'
+.*: Error: operand mismatch -- `sdot z0\.b,z1\.b,z2\.b'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b
+.*: Info:    other valid variant\(s\):
+.*: Info:    	sdot z0\.d, z1\.h, z2\.h
+.*: Error: operand mismatch -- `sdot z0\.h,z1\.h,z2\.h'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.d, z1\.h, z2\.h
+.*: Info:    other valid variant\(s\):
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b
+.*: Error: operand mismatch -- `sdot z0\.s,z1\.s,z2\.s'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b
+.*: Info:    other valid variant\(s\):
+.*: Info:    	sdot z0\.d, z1\.h, z2\.h
+.*: Error: operand mismatch -- `sdot z0\.d,z1\.d,z2\.d'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.d, z1\.h, z2\.h
+.*: Info:    other valid variant\(s\):
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b
+.*: Error: operand mismatch -- `sdot z0\.b,z1\.b,z2\.b\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `sdot z0\.h,z1\.h,z2\.h\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `sdot z0\.s,z1\.s,z2\.s\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `sdot z0\.d,z1\.d,z2\.d\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `udot z0\.b,z1\.b,z2\.b'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.s, z1\.b, z2\.b
+.*: Info:    other valid variant\(s\):
+.*: Info:    	udot z0\.d, z1\.h, z2\.h
+.*: Error: operand mismatch -- `udot z0\.h,z1\.h,z2\.h'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.d, z1\.h, z2\.h
+.*: Info:    other valid variant\(s\):
+.*: Info:    	udot z0\.s, z1\.b, z2\.b
+.*: Error: operand mismatch -- `udot z0\.s,z1\.s,z2\.s'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.s, z1\.b, z2\.b
+.*: Info:    other valid variant\(s\):
+.*: Info:    	udot z0\.d, z1\.h, z2\.h
+.*: Error: operand mismatch -- `udot z0\.d,z1\.d,z2\.d'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.d, z1\.h, z2\.h
+.*: Info:    other valid variant\(s\):
+.*: Info:    	udot z0\.s, z1\.b, z2\.b
+.*: Error: operand mismatch -- `udot z0\.b,z1\.b,z2\.b\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `udot z0\.h,z1\.h,z2\.h\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `udot z0\.s,z1\.s,z2\.s\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
+.*: Error: operand mismatch -- `udot z0\.d,z1\.d,z2\.d\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]

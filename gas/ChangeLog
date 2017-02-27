@@ -1,5 +1,20 @@
 2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* doc/c-aarch64.texi: Document that sve implies fp16, simd and compnum.
+	* config/tc-aarch64.c (parse_vector_type_for_operand): Allow .q
+	to be used with SVE registers.
+	(parse_operands): Handle new SVE operands.
+	(aarch64_features): Make "sve" require F16 rather than FP.  Also
+	require COMPNUM.
+	* testsuite/gas/aarch64/sve.s: Add tests for new instructions.
+	Include compnum tests.
+	* testsuite/gas/aarch64/sve.d: Update accordingly.
+	* testsuite/gas/aarch64/sve-invalid.s: Add tests for new instructions.
+	* testsuite/gas/aarch64/sve-invalid.l: Update accordingly.  Also
+	update expected output for new FMOV and MOV alternatives.
+
+2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* doc/c-aarch64.texi: Add a "compnum" entry.
 	* config/tc-aarch64.c (aarch64_features): Likewise,
 	* testsuite/gas/aarch64/advsimd-compnum.s: New test.

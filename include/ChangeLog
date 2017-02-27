@@ -1,5 +1,12 @@
 2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* opcode/aarch64.h (AARCH64_OPND_SVE_ADDR_RI_S4x16)
+	(AARCH64_OPND_SVE_IMM_ROT1, AARCH64_OPND_SVE_IMM_ROT2)
+	(AARCH64_OPND_SVE_Zm3_INDEX, AARCH64_OPND_SVE_Zm3_22_INDEX)
+	(AARCH64_OPND_SVE_Zm4_INDEX): New aarch64_opnds.
+
+2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_COMPNUM): New macro.
 	(AARCH64_ARCH_V8_3): Include AARCH64_FEATURE_COMPNUM.
 

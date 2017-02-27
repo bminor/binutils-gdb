@@ -837,7 +837,7 @@ elt_size:
       element_size = 64;
       break;
     case 'q':
-      if (width == 1)
+      if (reg_type == REG_TYPE_ZN || width == 1)
 	{
 	  type = NT_q;
 	  element_size = 128;
@@ -5431,6 +5431,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->qualifier = AARCH64_OPND_QLF_S_D;
 	  break;
 
+	case AARCH64_OPND_SVE_Zm3_INDEX:
+	case AARCH64_OPND_SVE_Zm3_22_INDEX:
+	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  reg_type = REG_TYPE_ZN;
 	  goto vector_reg_index;
@@ -5567,6 +5570,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_IMM_ROT1:
 	case AARCH64_OPND_IMM_ROT2:
 	case AARCH64_OPND_IMM_ROT3:
+	case AARCH64_OPND_SVE_IMM_ROT1:
+	case AARCH64_OPND_SVE_IMM_ROT2:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
 	  break;
@@ -6090,6 +6095,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* No qualifier.  */
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
@@ -8436,8 +8442,9 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
 			AARCH64_ARCH_NONE},
   {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP
-					 | AARCH64_FEATURE_SIMD, 0)},
+			AARCH64_FEATURE (AARCH64_FEATURE_F16
+					 | AARCH64_FEATURE_SIMD
+					 | AARCH64_FEATURE_COMPNUM, 0)},
   {"compnum",		AARCH64_FEATURE (AARCH64_FEATURE_COMPNUM, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_F16
 					 | AARCH64_FEATURE_SIMD, 0)},

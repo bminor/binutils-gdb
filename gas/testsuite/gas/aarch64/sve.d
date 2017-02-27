@@ -1,4 +1,4 @@
-#as: -march=armv8-a+sve
+#as: -march=armv8-a+sve -I$srcdir/$subdir
 #objdump: -dr
 
 .* file format .*
@@ -6,6 +6,24 @@
 Disassembly of section .*:
 
 0+ <.*>:
+.*:	2579c000 	fmov	z0\.h, #2\.0+e\+00
+.*:	2579c000 	fmov	z0\.h, #2\.0+e\+00
+.*:	2579c001 	fmov	z1\.h, #2\.0+e\+00
+.*:	2579c001 	fmov	z1\.h, #2\.0+e\+00
+.*:	2579c01f 	fmov	z31\.h, #2\.0+e\+00
+.*:	2579c01f 	fmov	z31\.h, #2\.0+e\+00
+.*:	2579c600 	fmov	z0\.h, #1\.60+e\+01
+.*:	2579c600 	fmov	z0\.h, #1\.60+e\+01
+.*:	2579c900 	fmov	z0\.h, #1\.8750+e-01
+.*:	2579c900 	fmov	z0\.h, #1\.8750+e-01
+.*:	2579cfe0 	fmov	z0\.h, #1\.93750+e\+00
+.*:	2579cfe0 	fmov	z0\.h, #1\.93750+e\+00
+.*:	2579d100 	fmov	z0\.h, #-3\.0+e\+00
+.*:	2579d100 	fmov	z0\.h, #-3\.0+e\+00
+.*:	2579d800 	fmov	z0\.h, #-1\.250+e-01
+.*:	2579d800 	fmov	z0\.h, #-1\.250+e-01
+.*:	2579dfe0 	fmov	z0\.h, #-1\.93750+e\+00
+.*:	2579dfe0 	fmov	z0\.h, #-1\.93750+e\+00
 .*:	25b9c000 	fmov	z0\.s, #2\.0+e\+00
 .*:	25b9c000 	fmov	z0\.s, #2\.0+e\+00
 .*:	25b9c001 	fmov	z1\.s, #2\.0+e\+00
@@ -42,6 +60,28 @@ Disassembly of section .*:
 .*:	25f9d800 	fmov	z0\.d, #-1\.250+e-01
 .*:	25f9dfe0 	fmov	z0\.d, #-1\.93750+e\+00
 .*:	25f9dfe0 	fmov	z0\.d, #-1\.93750+e\+00
+.*:	0550c000 	fmov	z0\.h, p0/m, #2\.0+e\+00
+.*:	0550c000 	fmov	z0\.h, p0/m, #2\.0+e\+00
+.*:	0550c001 	fmov	z1\.h, p0/m, #2\.0+e\+00
+.*:	0550c001 	fmov	z1\.h, p0/m, #2\.0+e\+00
+.*:	0550c01f 	fmov	z31\.h, p0/m, #2\.0+e\+00
+.*:	0550c01f 	fmov	z31\.h, p0/m, #2\.0+e\+00
+.*:	0552c000 	fmov	z0\.h, p2/m, #2\.0+e\+00
+.*:	0552c000 	fmov	z0\.h, p2/m, #2\.0+e\+00
+.*:	055fc000 	fmov	z0\.h, p15/m, #2\.0+e\+00
+.*:	055fc000 	fmov	z0\.h, p15/m, #2\.0+e\+00
+.*:	0550c600 	fmov	z0\.h, p0/m, #1\.60+e\+01
+.*:	0550c600 	fmov	z0\.h, p0/m, #1\.60+e\+01
+.*:	0550c900 	fmov	z0\.h, p0/m, #1\.8750+e-01
+.*:	0550c900 	fmov	z0\.h, p0/m, #1\.8750+e-01
+.*:	0550cfe0 	fmov	z0\.h, p0/m, #1\.93750+e\+00
+.*:	0550cfe0 	fmov	z0\.h, p0/m, #1\.93750+e\+00
+.*:	0550d100 	fmov	z0\.h, p0/m, #-3\.0+e\+00
+.*:	0550d100 	fmov	z0\.h, p0/m, #-3\.0+e\+00
+.*:	0550d800 	fmov	z0\.h, p0/m, #-1\.250+e-01
+.*:	0550d800 	fmov	z0\.h, p0/m, #-1\.250+e-01
+.*:	0550dfe0 	fmov	z0\.h, p0/m, #-1\.93750+e\+00
+.*:	0550dfe0 	fmov	z0\.h, p0/m, #-1\.93750+e\+00
 .*:	0590c000 	fmov	z0\.s, p0/m, #2\.0+e\+00
 .*:	0590c000 	fmov	z0\.s, p0/m, #2\.0+e\+00
 .*:	0590c001 	fmov	z1\.s, p0/m, #2\.0+e\+00
@@ -136,6 +176,16 @@ Disassembly of section .*:
 .*:	05282040 	mov	z0\.d, d2
 .*:	052823e0 	mov	z0\.d, d31
 .*:	052823e0 	mov	z0\.d, d31
+.*:	05302000 	mov	z0\.q, q0
+.*:	05302000 	mov	z0\.q, q0
+.*:	05302001 	mov	z1\.q, q0
+.*:	05302001 	mov	z1\.q, q0
+.*:	0530201f 	mov	z31\.q, q0
+.*:	0530201f 	mov	z31\.q, q0
+.*:	05302040 	mov	z0\.q, q2
+.*:	05302040 	mov	z0\.q, q2
+.*:	053023e0 	mov	z0\.q, q31
+.*:	053023e0 	mov	z0\.q, q31
 .*:	05203800 	mov	z0\.b, w0
 .*:	05203800 	mov	z0\.b, w0
 .*:	05203801 	mov	z1\.b, w0
@@ -314,6 +364,22 @@ Disassembly of section .*:
 .*:	052f23e0 	mov	z0\.b, z31\.b\[7\]
 .*:	05312000 	mov	z0\.b, z0\.b\[8\]
 .*:	05312000 	mov	z0\.b, z0\.b\[8\]
+.*:	05702000 	mov	z0\.q, z0\.q\[1\]
+.*:	05702000 	mov	z0\.q, z0\.q\[1\]
+.*:	05702001 	mov	z1\.q, z0\.q\[1\]
+.*:	05702001 	mov	z1\.q, z0\.q\[1\]
+.*:	0570201f 	mov	z31\.q, z0\.q\[1\]
+.*:	0570201f 	mov	z31\.q, z0\.q\[1\]
+.*:	05702040 	mov	z0\.q, z2\.q\[1\]
+.*:	05702040 	mov	z0\.q, z2\.q\[1\]
+.*:	057023e0 	mov	z0\.q, z31\.q\[1\]
+.*:	057023e0 	mov	z0\.q, z31\.q\[1\]
+.*:	05302000 	mov	z0\.q, q0
+.*:	05302000 	mov	z0\.q, q0
+.*:	05b02000 	mov	z0\.q, z0\.q\[2\]
+.*:	05b02000 	mov	z0\.q, z0\.q\[2\]
+.*:	05f02000 	mov	z0\.q, z0\.q\[3\]
+.*:	05f02000 	mov	z0\.q, z0\.q\[3\]
 .*:	05c000e0 	mov	z0\.s, #0xff
 .*:	05c000e0 	mov	z0\.s, #0xff
 .*:	05c000e0 	mov	z0\.s, #0xff
@@ -7645,6 +7711,22 @@ Disassembly of section .*:
 .*:	052f23e0 	mov	z0\.b, z31\.b\[7\]
 .*:	05312000 	mov	z0\.b, z0\.b\[8\]
 .*:	05312000 	mov	z0\.b, z0\.b\[8\]
+.*:	05702000 	mov	z0\.q, z0\.q\[1\]
+.*:	05702000 	mov	z0\.q, z0\.q\[1\]
+.*:	05702001 	mov	z1\.q, z0\.q\[1\]
+.*:	05702001 	mov	z1\.q, z0\.q\[1\]
+.*:	0570201f 	mov	z31\.q, z0\.q\[1\]
+.*:	0570201f 	mov	z31\.q, z0\.q\[1\]
+.*:	05702040 	mov	z0\.q, z2\.q\[1\]
+.*:	05702040 	mov	z0\.q, z2\.q\[1\]
+.*:	057023e0 	mov	z0\.q, z31\.q\[1\]
+.*:	057023e0 	mov	z0\.q, z31\.q\[1\]
+.*:	05302000 	mov	z0\.q, q0
+.*:	05302000 	mov	z0\.q, q0
+.*:	05b02000 	mov	z0\.q, z0\.q\[2\]
+.*:	05b02000 	mov	z0\.q, z0\.q\[2\]
+.*:	05f02000 	mov	z0\.q, z0\.q\[3\]
+.*:	05f02000 	mov	z0\.q, z0\.q\[3\]
 .*:	2538c000 	mov	z0\.b, #0
 .*:	2538c000 	mov	z0\.b, #0
 .*:	2538c000 	mov	z0\.b, #0
@@ -8092,6 +8174,22 @@ Disassembly of section .*:
 .*:	05300400 	ext	z0\.b, z0\.b, z0\.b, #129
 .*:	053f1c00 	ext	z0\.b, z0\.b, z0\.b, #255
 .*:	053f1c00 	ext	z0\.b, z0\.b, z0\.b, #255
+.*:	65488000 	fabd	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65488000 	fabd	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65488001 	fabd	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65488001 	fabd	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6548801f 	fabd	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6548801f 	fabd	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65488800 	fabd	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65488800 	fabd	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65489c00 	fabd	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65489c00 	fabd	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65488003 	fabd	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65488003 	fabd	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65488080 	fabd	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65488080 	fabd	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654883e0 	fabd	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654883e0 	fabd	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65888000 	fabd	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65888000 	fabd	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65888001 	fabd	z1\.s, p0/m, z1\.s, z0\.s
@@ -8124,6 +8222,20 @@ Disassembly of section .*:
 .*:	65c88080 	fabd	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c883e0 	fabd	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c883e0 	fabd	z0\.d, p0/m, z0\.d, z31\.d
+.*:	045ca000 	fabs	z0\.h, p0/m, z0\.h
+.*:	045ca000 	fabs	z0\.h, p0/m, z0\.h
+.*:	045ca001 	fabs	z1\.h, p0/m, z0\.h
+.*:	045ca001 	fabs	z1\.h, p0/m, z0\.h
+.*:	045ca01f 	fabs	z31\.h, p0/m, z0\.h
+.*:	045ca01f 	fabs	z31\.h, p0/m, z0\.h
+.*:	045ca800 	fabs	z0\.h, p2/m, z0\.h
+.*:	045ca800 	fabs	z0\.h, p2/m, z0\.h
+.*:	045cbc00 	fabs	z0\.h, p7/m, z0\.h
+.*:	045cbc00 	fabs	z0\.h, p7/m, z0\.h
+.*:	045ca060 	fabs	z0\.h, p0/m, z3\.h
+.*:	045ca060 	fabs	z0\.h, p0/m, z3\.h
+.*:	045ca3e0 	fabs	z0\.h, p0/m, z31\.h
+.*:	045ca3e0 	fabs	z0\.h, p0/m, z31\.h
 .*:	049ca000 	fabs	z0\.s, p0/m, z0\.s
 .*:	049ca000 	fabs	z0\.s, p0/m, z0\.s
 .*:	049ca001 	fabs	z1\.s, p0/m, z0\.s
@@ -8152,6 +8264,24 @@ Disassembly of section .*:
 .*:	04dca060 	fabs	z0\.d, p0/m, z3\.d
 .*:	04dca3e0 	fabs	z0\.d, p0/m, z31\.d
 .*:	04dca3e0 	fabs	z0\.d, p0/m, z31\.d
+.*:	6540c010 	facge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540c010 	facge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540c011 	facge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540c011 	facge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540c01f 	facge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540c01f 	facge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540c810 	facge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540c810 	facge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540dc10 	facge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540dc10 	facge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540c070 	facge	p0\.h, p0/z, z3\.h, z0\.h
+.*:	6540c070 	facge	p0\.h, p0/z, z3\.h, z0\.h
+.*:	6540c3f0 	facge	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6540c3f0 	facge	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6544c010 	facge	p0\.h, p0/z, z0\.h, z4\.h
+.*:	6544c010 	facge	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655fc010 	facge	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655fc010 	facge	p0\.h, p0/z, z0\.h, z31\.h
 .*:	6580c010 	facge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580c010 	facge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580c011 	facge	p1\.s, p0/z, z0\.s, z0\.s
@@ -8188,6 +8318,24 @@ Disassembly of section .*:
 .*:	65c4c010 	facge	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65dfc010 	facge	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65dfc010 	facge	p0\.d, p0/z, z0\.d, z31\.d
+.*:	6540e010 	facgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540e010 	facgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540e011 	facgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540e011 	facgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540e01f 	facgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540e01f 	facgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540e810 	facgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540e810 	facgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540fc10 	facgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540fc10 	facgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540e070 	facgt	p0\.h, p0/z, z3\.h, z0\.h
+.*:	6540e070 	facgt	p0\.h, p0/z, z3\.h, z0\.h
+.*:	6540e3f0 	facgt	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6540e3f0 	facgt	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6544e010 	facgt	p0\.h, p0/z, z0\.h, z4\.h
+.*:	6544e010 	facgt	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655fe010 	facgt	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655fe010 	facgt	p0\.h, p0/z, z0\.h, z31\.h
 .*:	6580e010 	facgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580e010 	facgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580e011 	facgt	p1\.s, p0/z, z0\.s, z0\.s
@@ -8224,6 +8372,20 @@ Disassembly of section .*:
 .*:	65c4e010 	facgt	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65dfe010 	facgt	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65dfe010 	facgt	p0\.d, p0/z, z0\.d, z31\.d
+.*:	65400000 	fadd	z0\.h, z0\.h, z0\.h
+.*:	65400000 	fadd	z0\.h, z0\.h, z0\.h
+.*:	65400001 	fadd	z1\.h, z0\.h, z0\.h
+.*:	65400001 	fadd	z1\.h, z0\.h, z0\.h
+.*:	6540001f 	fadd	z31\.h, z0\.h, z0\.h
+.*:	6540001f 	fadd	z31\.h, z0\.h, z0\.h
+.*:	65400040 	fadd	z0\.h, z2\.h, z0\.h
+.*:	65400040 	fadd	z0\.h, z2\.h, z0\.h
+.*:	654003e0 	fadd	z0\.h, z31\.h, z0\.h
+.*:	654003e0 	fadd	z0\.h, z31\.h, z0\.h
+.*:	65430000 	fadd	z0\.h, z0\.h, z3\.h
+.*:	65430000 	fadd	z0\.h, z0\.h, z3\.h
+.*:	655f0000 	fadd	z0\.h, z0\.h, z31\.h
+.*:	655f0000 	fadd	z0\.h, z0\.h, z31\.h
 .*:	65800000 	fadd	z0\.s, z0\.s, z0\.s
 .*:	65800000 	fadd	z0\.s, z0\.s, z0\.s
 .*:	65800001 	fadd	z1\.s, z0\.s, z0\.s
@@ -8252,6 +8414,22 @@ Disassembly of section .*:
 .*:	65c30000 	fadd	z0\.d, z0\.d, z3\.d
 .*:	65df0000 	fadd	z0\.d, z0\.d, z31\.d
 .*:	65df0000 	fadd	z0\.d, z0\.d, z31\.d
+.*:	65408000 	fadd	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65408000 	fadd	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65408001 	fadd	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65408001 	fadd	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6540801f 	fadd	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6540801f 	fadd	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65408800 	fadd	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65408800 	fadd	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65409c00 	fadd	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65409c00 	fadd	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65408003 	fadd	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65408003 	fadd	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65408080 	fadd	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65408080 	fadd	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654083e0 	fadd	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654083e0 	fadd	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65808000 	fadd	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65808000 	fadd	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65808001 	fadd	z1\.s, p0/m, z1\.s, z0\.s
@@ -8284,6 +8462,34 @@ Disassembly of section .*:
 .*:	65c08080 	fadd	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c083e0 	fadd	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c083e0 	fadd	z0\.d, p0/m, z0\.d, z31\.d
+.*:	65588000 	fadd	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65588000 	fadd	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65588000 	fadd	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65588000 	fadd	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65588001 	fadd	z1\.h, p0/m, z1\.h, #0\.5
+.*:	65588001 	fadd	z1\.h, p0/m, z1\.h, #0\.5
+.*:	65588001 	fadd	z1\.h, p0/m, z1\.h, #0\.5
+.*:	65588001 	fadd	z1\.h, p0/m, z1\.h, #0\.5
+.*:	6558801f 	fadd	z31\.h, p0/m, z31\.h, #0\.5
+.*:	6558801f 	fadd	z31\.h, p0/m, z31\.h, #0\.5
+.*:	6558801f 	fadd	z31\.h, p0/m, z31\.h, #0\.5
+.*:	6558801f 	fadd	z31\.h, p0/m, z31\.h, #0\.5
+.*:	65588800 	fadd	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65588800 	fadd	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65588800 	fadd	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65588800 	fadd	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65589c00 	fadd	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65589c00 	fadd	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65589c00 	fadd	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65589c00 	fadd	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65588003 	fadd	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65588003 	fadd	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65588003 	fadd	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65588003 	fadd	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65588020 	fadd	z0\.h, p0/m, z0\.h, #1\.0
+.*:	65588020 	fadd	z0\.h, p0/m, z0\.h, #1\.0
+.*:	65588020 	fadd	z0\.h, p0/m, z0\.h, #1\.0
+.*:	65588020 	fadd	z0\.h, p0/m, z0\.h, #1\.0
 .*:	65988000 	fadd	z0\.s, p0/m, z0\.s, #0\.5
 .*:	65988000 	fadd	z0\.s, p0/m, z0\.s, #0\.5
 .*:	65988000 	fadd	z0\.s, p0/m, z0\.s, #0\.5
@@ -8340,6 +8546,22 @@ Disassembly of section .*:
 .*:	65d88020 	fadd	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65d88020 	fadd	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65d88020 	fadd	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65582000 	fadda	h0, p0, h0, z0\.h
+.*:	65582000 	fadda	h0, p0, h0, z0\.h
+.*:	65582001 	fadda	h1, p0, h1, z0\.h
+.*:	65582001 	fadda	h1, p0, h1, z0\.h
+.*:	6558201f 	fadda	h31, p0, h31, z0\.h
+.*:	6558201f 	fadda	h31, p0, h31, z0\.h
+.*:	65582800 	fadda	h0, p2, h0, z0\.h
+.*:	65582800 	fadda	h0, p2, h0, z0\.h
+.*:	65583c00 	fadda	h0, p7, h0, z0\.h
+.*:	65583c00 	fadda	h0, p7, h0, z0\.h
+.*:	65582003 	fadda	h3, p0, h3, z0\.h
+.*:	65582003 	fadda	h3, p0, h3, z0\.h
+.*:	65582080 	fadda	h0, p0, h0, z4\.h
+.*:	65582080 	fadda	h0, p0, h0, z4\.h
+.*:	655823e0 	fadda	h0, p0, h0, z31\.h
+.*:	655823e0 	fadda	h0, p0, h0, z31\.h
 .*:	65982000 	fadda	s0, p0, s0, z0\.s
 .*:	65982000 	fadda	s0, p0, s0, z0\.s
 .*:	65982001 	fadda	s1, p0, s1, z0\.s
@@ -8372,6 +8594,20 @@ Disassembly of section .*:
 .*:	65d82080 	fadda	d0, p0, d0, z4\.d
 .*:	65d823e0 	fadda	d0, p0, d0, z31\.d
 .*:	65d823e0 	fadda	d0, p0, d0, z31\.d
+.*:	65402000 	faddv	h0, p0, z0\.h
+.*:	65402000 	faddv	h0, p0, z0\.h
+.*:	65402001 	faddv	h1, p0, z0\.h
+.*:	65402001 	faddv	h1, p0, z0\.h
+.*:	6540201f 	faddv	h31, p0, z0\.h
+.*:	6540201f 	faddv	h31, p0, z0\.h
+.*:	65402800 	faddv	h0, p2, z0\.h
+.*:	65402800 	faddv	h0, p2, z0\.h
+.*:	65403c00 	faddv	h0, p7, z0\.h
+.*:	65403c00 	faddv	h0, p7, z0\.h
+.*:	65402060 	faddv	h0, p0, z3\.h
+.*:	65402060 	faddv	h0, p0, z3\.h
+.*:	654023e0 	faddv	h0, p0, z31\.h
+.*:	654023e0 	faddv	h0, p0, z31\.h
 .*:	65802000 	faddv	s0, p0, z0\.s
 .*:	65802000 	faddv	s0, p0, z0\.s
 .*:	65802001 	faddv	s1, p0, z0\.s
@@ -8400,6 +8636,202 @@ Disassembly of section .*:
 .*:	65c02060 	faddv	d0, p0, z3\.d
 .*:	65c023e0 	faddv	d0, p0, z31\.d
 .*:	65c023e0 	faddv	d0, p0, z31\.d
+.*:	64408000 	fcadd	z0\.h, p0/m, z0\.h, z0\.h, #90
+.*:	64408000 	fcadd	z0\.h, p0/m, z0\.h, z0\.h, #90
+.*:	64408001 	fcadd	z1\.h, p0/m, z1\.h, z0\.h, #90
+.*:	64408001 	fcadd	z1\.h, p0/m, z1\.h, z0\.h, #90
+.*:	6440801f 	fcadd	z31\.h, p0/m, z31\.h, z0\.h, #90
+.*:	6440801f 	fcadd	z31\.h, p0/m, z31\.h, z0\.h, #90
+.*:	64408800 	fcadd	z0\.h, p2/m, z0\.h, z0\.h, #90
+.*:	64408800 	fcadd	z0\.h, p2/m, z0\.h, z0\.h, #90
+.*:	64409c00 	fcadd	z0\.h, p7/m, z0\.h, z0\.h, #90
+.*:	64409c00 	fcadd	z0\.h, p7/m, z0\.h, z0\.h, #90
+.*:	64408003 	fcadd	z3\.h, p0/m, z3\.h, z0\.h, #90
+.*:	64408003 	fcadd	z3\.h, p0/m, z3\.h, z0\.h, #90
+.*:	64408080 	fcadd	z0\.h, p0/m, z0\.h, z4\.h, #90
+.*:	64408080 	fcadd	z0\.h, p0/m, z0\.h, z4\.h, #90
+.*:	644083e0 	fcadd	z0\.h, p0/m, z0\.h, z31\.h, #90
+.*:	644083e0 	fcadd	z0\.h, p0/m, z0\.h, z31\.h, #90
+.*:	64418000 	fcadd	z0\.h, p0/m, z0\.h, z0\.h, #270
+.*:	64418000 	fcadd	z0\.h, p0/m, z0\.h, z0\.h, #270
+.*:	64808000 	fcadd	z0\.s, p0/m, z0\.s, z0\.s, #90
+.*:	64808000 	fcadd	z0\.s, p0/m, z0\.s, z0\.s, #90
+.*:	64808001 	fcadd	z1\.s, p0/m, z1\.s, z0\.s, #90
+.*:	64808001 	fcadd	z1\.s, p0/m, z1\.s, z0\.s, #90
+.*:	6480801f 	fcadd	z31\.s, p0/m, z31\.s, z0\.s, #90
+.*:	6480801f 	fcadd	z31\.s, p0/m, z31\.s, z0\.s, #90
+.*:	64808800 	fcadd	z0\.s, p2/m, z0\.s, z0\.s, #90
+.*:	64808800 	fcadd	z0\.s, p2/m, z0\.s, z0\.s, #90
+.*:	64809c00 	fcadd	z0\.s, p7/m, z0\.s, z0\.s, #90
+.*:	64809c00 	fcadd	z0\.s, p7/m, z0\.s, z0\.s, #90
+.*:	64808003 	fcadd	z3\.s, p0/m, z3\.s, z0\.s, #90
+.*:	64808003 	fcadd	z3\.s, p0/m, z3\.s, z0\.s, #90
+.*:	64808080 	fcadd	z0\.s, p0/m, z0\.s, z4\.s, #90
+.*:	64808080 	fcadd	z0\.s, p0/m, z0\.s, z4\.s, #90
+.*:	648083e0 	fcadd	z0\.s, p0/m, z0\.s, z31\.s, #90
+.*:	648083e0 	fcadd	z0\.s, p0/m, z0\.s, z31\.s, #90
+.*:	64818000 	fcadd	z0\.s, p0/m, z0\.s, z0\.s, #270
+.*:	64818000 	fcadd	z0\.s, p0/m, z0\.s, z0\.s, #270
+.*:	64c08000 	fcadd	z0\.d, p0/m, z0\.d, z0\.d, #90
+.*:	64c08000 	fcadd	z0\.d, p0/m, z0\.d, z0\.d, #90
+.*:	64c08001 	fcadd	z1\.d, p0/m, z1\.d, z0\.d, #90
+.*:	64c08001 	fcadd	z1\.d, p0/m, z1\.d, z0\.d, #90
+.*:	64c0801f 	fcadd	z31\.d, p0/m, z31\.d, z0\.d, #90
+.*:	64c0801f 	fcadd	z31\.d, p0/m, z31\.d, z0\.d, #90
+.*:	64c08800 	fcadd	z0\.d, p2/m, z0\.d, z0\.d, #90
+.*:	64c08800 	fcadd	z0\.d, p2/m, z0\.d, z0\.d, #90
+.*:	64c09c00 	fcadd	z0\.d, p7/m, z0\.d, z0\.d, #90
+.*:	64c09c00 	fcadd	z0\.d, p7/m, z0\.d, z0\.d, #90
+.*:	64c08003 	fcadd	z3\.d, p0/m, z3\.d, z0\.d, #90
+.*:	64c08003 	fcadd	z3\.d, p0/m, z3\.d, z0\.d, #90
+.*:	64c08080 	fcadd	z0\.d, p0/m, z0\.d, z4\.d, #90
+.*:	64c08080 	fcadd	z0\.d, p0/m, z0\.d, z4\.d, #90
+.*:	64c083e0 	fcadd	z0\.d, p0/m, z0\.d, z31\.d, #90
+.*:	64c083e0 	fcadd	z0\.d, p0/m, z0\.d, z31\.d, #90
+.*:	64c18000 	fcadd	z0\.d, p0/m, z0\.d, z0\.d, #270
+.*:	64c18000 	fcadd	z0\.d, p0/m, z0\.d, z0\.d, #270
+.*:	64400000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #0
+.*:	64400000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #0
+.*:	64400001 	fcmla	z1\.h, p0/m, z0\.h, z0\.h, #0
+.*:	64400001 	fcmla	z1\.h, p0/m, z0\.h, z0\.h, #0
+.*:	6440001f 	fcmla	z31\.h, p0/m, z0\.h, z0\.h, #0
+.*:	6440001f 	fcmla	z31\.h, p0/m, z0\.h, z0\.h, #0
+.*:	64400800 	fcmla	z0\.h, p2/m, z0\.h, z0\.h, #0
+.*:	64400800 	fcmla	z0\.h, p2/m, z0\.h, z0\.h, #0
+.*:	64401c00 	fcmla	z0\.h, p7/m, z0\.h, z0\.h, #0
+.*:	64401c00 	fcmla	z0\.h, p7/m, z0\.h, z0\.h, #0
+.*:	64400060 	fcmla	z0\.h, p0/m, z3\.h, z0\.h, #0
+.*:	64400060 	fcmla	z0\.h, p0/m, z3\.h, z0\.h, #0
+.*:	644003e0 	fcmla	z0\.h, p0/m, z31\.h, z0\.h, #0
+.*:	644003e0 	fcmla	z0\.h, p0/m, z31\.h, z0\.h, #0
+.*:	64440000 	fcmla	z0\.h, p0/m, z0\.h, z4\.h, #0
+.*:	64440000 	fcmla	z0\.h, p0/m, z0\.h, z4\.h, #0
+.*:	645f0000 	fcmla	z0\.h, p0/m, z0\.h, z31\.h, #0
+.*:	645f0000 	fcmla	z0\.h, p0/m, z0\.h, z31\.h, #0
+.*:	64402000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #90
+.*:	64402000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #90
+.*:	64404000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #180
+.*:	64404000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #180
+.*:	64406000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #270
+.*:	64406000 	fcmla	z0\.h, p0/m, z0\.h, z0\.h, #270
+.*:	64800000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #0
+.*:	64800000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #0
+.*:	64800001 	fcmla	z1\.s, p0/m, z0\.s, z0\.s, #0
+.*:	64800001 	fcmla	z1\.s, p0/m, z0\.s, z0\.s, #0
+.*:	6480001f 	fcmla	z31\.s, p0/m, z0\.s, z0\.s, #0
+.*:	6480001f 	fcmla	z31\.s, p0/m, z0\.s, z0\.s, #0
+.*:	64800800 	fcmla	z0\.s, p2/m, z0\.s, z0\.s, #0
+.*:	64800800 	fcmla	z0\.s, p2/m, z0\.s, z0\.s, #0
+.*:	64801c00 	fcmla	z0\.s, p7/m, z0\.s, z0\.s, #0
+.*:	64801c00 	fcmla	z0\.s, p7/m, z0\.s, z0\.s, #0
+.*:	64800060 	fcmla	z0\.s, p0/m, z3\.s, z0\.s, #0
+.*:	64800060 	fcmla	z0\.s, p0/m, z3\.s, z0\.s, #0
+.*:	648003e0 	fcmla	z0\.s, p0/m, z31\.s, z0\.s, #0
+.*:	648003e0 	fcmla	z0\.s, p0/m, z31\.s, z0\.s, #0
+.*:	64840000 	fcmla	z0\.s, p0/m, z0\.s, z4\.s, #0
+.*:	64840000 	fcmla	z0\.s, p0/m, z0\.s, z4\.s, #0
+.*:	649f0000 	fcmla	z0\.s, p0/m, z0\.s, z31\.s, #0
+.*:	649f0000 	fcmla	z0\.s, p0/m, z0\.s, z31\.s, #0
+.*:	64802000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #90
+.*:	64802000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #90
+.*:	64804000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #180
+.*:	64804000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #180
+.*:	64806000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #270
+.*:	64806000 	fcmla	z0\.s, p0/m, z0\.s, z0\.s, #270
+.*:	64c00000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #0
+.*:	64c00000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #0
+.*:	64c00001 	fcmla	z1\.d, p0/m, z0\.d, z0\.d, #0
+.*:	64c00001 	fcmla	z1\.d, p0/m, z0\.d, z0\.d, #0
+.*:	64c0001f 	fcmla	z31\.d, p0/m, z0\.d, z0\.d, #0
+.*:	64c0001f 	fcmla	z31\.d, p0/m, z0\.d, z0\.d, #0
+.*:	64c00800 	fcmla	z0\.d, p2/m, z0\.d, z0\.d, #0
+.*:	64c00800 	fcmla	z0\.d, p2/m, z0\.d, z0\.d, #0
+.*:	64c01c00 	fcmla	z0\.d, p7/m, z0\.d, z0\.d, #0
+.*:	64c01c00 	fcmla	z0\.d, p7/m, z0\.d, z0\.d, #0
+.*:	64c00060 	fcmla	z0\.d, p0/m, z3\.d, z0\.d, #0
+.*:	64c00060 	fcmla	z0\.d, p0/m, z3\.d, z0\.d, #0
+.*:	64c003e0 	fcmla	z0\.d, p0/m, z31\.d, z0\.d, #0
+.*:	64c003e0 	fcmla	z0\.d, p0/m, z31\.d, z0\.d, #0
+.*:	64c40000 	fcmla	z0\.d, p0/m, z0\.d, z4\.d, #0
+.*:	64c40000 	fcmla	z0\.d, p0/m, z0\.d, z4\.d, #0
+.*:	64df0000 	fcmla	z0\.d, p0/m, z0\.d, z31\.d, #0
+.*:	64df0000 	fcmla	z0\.d, p0/m, z0\.d, z31\.d, #0
+.*:	64c02000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #90
+.*:	64c02000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #90
+.*:	64c04000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #180
+.*:	64c04000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #180
+.*:	64c06000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #270
+.*:	64c06000 	fcmla	z0\.d, p0/m, z0\.d, z0\.d, #270
+.*:	64a01000 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #0
+.*:	64a01000 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #0
+.*:	64a01001 	fcmla	z1\.h, z0\.h, z0\.h\[0\], #0
+.*:	64a01001 	fcmla	z1\.h, z0\.h, z0\.h\[0\], #0
+.*:	64a0101f 	fcmla	z31\.h, z0\.h, z0\.h\[0\], #0
+.*:	64a0101f 	fcmla	z31\.h, z0\.h, z0\.h\[0\], #0
+.*:	64a01040 	fcmla	z0\.h, z2\.h, z0\.h\[0\], #0
+.*:	64a01040 	fcmla	z0\.h, z2\.h, z0\.h\[0\], #0
+.*:	64a013e0 	fcmla	z0\.h, z31\.h, z0\.h\[0\], #0
+.*:	64a013e0 	fcmla	z0\.h, z31\.h, z0\.h\[0\], #0
+.*:	64a31000 	fcmla	z0\.h, z0\.h, z3\.h\[0\], #0
+.*:	64a31000 	fcmla	z0\.h, z0\.h, z3\.h\[0\], #0
+.*:	64a71000 	fcmla	z0\.h, z0\.h, z7\.h\[0\], #0
+.*:	64a71000 	fcmla	z0\.h, z0\.h, z7\.h\[0\], #0
+.*:	64a81000 	fcmla	z0\.h, z0\.h, z0\.h\[1\], #0
+.*:	64a81000 	fcmla	z0\.h, z0\.h, z0\.h\[1\], #0
+.*:	64ad1000 	fcmla	z0\.h, z0\.h, z5\.h\[1\], #0
+.*:	64ad1000 	fcmla	z0\.h, z0\.h, z5\.h\[1\], #0
+.*:	64b01000 	fcmla	z0\.h, z0\.h, z0\.h\[2\], #0
+.*:	64b01000 	fcmla	z0\.h, z0\.h, z0\.h\[2\], #0
+.*:	64b31000 	fcmla	z0\.h, z0\.h, z3\.h\[2\], #0
+.*:	64b31000 	fcmla	z0\.h, z0\.h, z3\.h\[2\], #0
+.*:	64b81000 	fcmla	z0\.h, z0\.h, z0\.h\[3\], #0
+.*:	64b81000 	fcmla	z0\.h, z0\.h, z0\.h\[3\], #0
+.*:	64be1000 	fcmla	z0\.h, z0\.h, z6\.h\[3\], #0
+.*:	64be1000 	fcmla	z0\.h, z0\.h, z6\.h\[3\], #0
+.*:	64a01400 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #90
+.*:	64a01400 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #90
+.*:	64a01800 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #180
+.*:	64a01800 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #180
+.*:	64a01c00 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #270
+.*:	64a01c00 	fcmla	z0\.h, z0\.h, z0\.h\[0\], #270
+.*:	64e01000 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #0
+.*:	64e01000 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #0
+.*:	64e01001 	fcmla	z1\.s, z0\.s, z0\.s\[0\], #0
+.*:	64e01001 	fcmla	z1\.s, z0\.s, z0\.s\[0\], #0
+.*:	64e0101f 	fcmla	z31\.s, z0\.s, z0\.s\[0\], #0
+.*:	64e0101f 	fcmla	z31\.s, z0\.s, z0\.s\[0\], #0
+.*:	64e01040 	fcmla	z0\.s, z2\.s, z0\.s\[0\], #0
+.*:	64e01040 	fcmla	z0\.s, z2\.s, z0\.s\[0\], #0
+.*:	64e013e0 	fcmla	z0\.s, z31\.s, z0\.s\[0\], #0
+.*:	64e013e0 	fcmla	z0\.s, z31\.s, z0\.s\[0\], #0
+.*:	64e31000 	fcmla	z0\.s, z0\.s, z3\.s\[0\], #0
+.*:	64e31000 	fcmla	z0\.s, z0\.s, z3\.s\[0\], #0
+.*:	64ef1000 	fcmla	z0\.s, z0\.s, z15\.s\[0\], #0
+.*:	64ef1000 	fcmla	z0\.s, z0\.s, z15\.s\[0\], #0
+.*:	64f01000 	fcmla	z0\.s, z0\.s, z0\.s\[1\], #0
+.*:	64f01000 	fcmla	z0\.s, z0\.s, z0\.s\[1\], #0
+.*:	64fb1000 	fcmla	z0\.s, z0\.s, z11\.s\[1\], #0
+.*:	64fb1000 	fcmla	z0\.s, z0\.s, z11\.s\[1\], #0
+.*:	64e01400 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #90
+.*:	64e01400 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #90
+.*:	64e01800 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #180
+.*:	64e01800 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #180
+.*:	64e01c00 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #270
+.*:	64e01c00 	fcmla	z0\.s, z0\.s, z0\.s\[0\], #270
+.*:	65522000 	fcmeq	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65522000 	fcmeq	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65522001 	fcmeq	p1\.h, p0/z, z0\.h, #0\.0
+.*:	65522001 	fcmeq	p1\.h, p0/z, z0\.h, #0\.0
+.*:	6552200f 	fcmeq	p15\.h, p0/z, z0\.h, #0\.0
+.*:	6552200f 	fcmeq	p15\.h, p0/z, z0\.h, #0\.0
+.*:	65522800 	fcmeq	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65522800 	fcmeq	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65523c00 	fcmeq	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65523c00 	fcmeq	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65522060 	fcmeq	p0\.h, p0/z, z3\.h, #0\.0
+.*:	65522060 	fcmeq	p0\.h, p0/z, z3\.h, #0\.0
+.*:	655223e0 	fcmeq	p0\.h, p0/z, z31\.h, #0\.0
+.*:	655223e0 	fcmeq	p0\.h, p0/z, z31\.h, #0\.0
 .*:	65922000 	fcmeq	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65922000 	fcmeq	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65922001 	fcmeq	p1\.s, p0/z, z0\.s, #0\.0
@@ -8428,6 +8860,24 @@ Disassembly of section .*:
 .*:	65d22060 	fcmeq	p0\.d, p0/z, z3\.d, #0\.0
 .*:	65d223e0 	fcmeq	p0\.d, p0/z, z31\.d, #0\.0
 .*:	65d223e0 	fcmeq	p0\.d, p0/z, z31\.d, #0\.0
+.*:	65406000 	fcmeq	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65406000 	fcmeq	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65406001 	fcmeq	p1\.h, p0/z, z0\.h, z0\.h
+.*:	65406001 	fcmeq	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540600f 	fcmeq	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540600f 	fcmeq	p15\.h, p0/z, z0\.h, z0\.h
+.*:	65406800 	fcmeq	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65406800 	fcmeq	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65407c00 	fcmeq	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65407c00 	fcmeq	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65406060 	fcmeq	p0\.h, p0/z, z3\.h, z0\.h
+.*:	65406060 	fcmeq	p0\.h, p0/z, z3\.h, z0\.h
+.*:	654063e0 	fcmeq	p0\.h, p0/z, z31\.h, z0\.h
+.*:	654063e0 	fcmeq	p0\.h, p0/z, z31\.h, z0\.h
+.*:	65446000 	fcmeq	p0\.h, p0/z, z0\.h, z4\.h
+.*:	65446000 	fcmeq	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655f6000 	fcmeq	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655f6000 	fcmeq	p0\.h, p0/z, z0\.h, z31\.h
 .*:	65806000 	fcmeq	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65806000 	fcmeq	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65806001 	fcmeq	p1\.s, p0/z, z0\.s, z0\.s
@@ -8464,6 +8914,20 @@ Disassembly of section .*:
 .*:	65c46000 	fcmeq	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65df6000 	fcmeq	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65df6000 	fcmeq	p0\.d, p0/z, z0\.d, z31\.d
+.*:	65502000 	fcmge	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65502000 	fcmge	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65502001 	fcmge	p1\.h, p0/z, z0\.h, #0\.0
+.*:	65502001 	fcmge	p1\.h, p0/z, z0\.h, #0\.0
+.*:	6550200f 	fcmge	p15\.h, p0/z, z0\.h, #0\.0
+.*:	6550200f 	fcmge	p15\.h, p0/z, z0\.h, #0\.0
+.*:	65502800 	fcmge	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65502800 	fcmge	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65503c00 	fcmge	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65503c00 	fcmge	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65502060 	fcmge	p0\.h, p0/z, z3\.h, #0\.0
+.*:	65502060 	fcmge	p0\.h, p0/z, z3\.h, #0\.0
+.*:	655023e0 	fcmge	p0\.h, p0/z, z31\.h, #0\.0
+.*:	655023e0 	fcmge	p0\.h, p0/z, z31\.h, #0\.0
 .*:	65902000 	fcmge	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65902000 	fcmge	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65902001 	fcmge	p1\.s, p0/z, z0\.s, #0\.0
@@ -8492,6 +8956,24 @@ Disassembly of section .*:
 .*:	65d02060 	fcmge	p0\.d, p0/z, z3\.d, #0\.0
 .*:	65d023e0 	fcmge	p0\.d, p0/z, z31\.d, #0\.0
 .*:	65d023e0 	fcmge	p0\.d, p0/z, z31\.d, #0\.0
+.*:	65404000 	fcmge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404000 	fcmge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404001 	fcmge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	65404001 	fcmge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540400f 	fcmge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540400f 	fcmge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	65404800 	fcmge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65404800 	fcmge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65405c00 	fcmge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65405c00 	fcmge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65404060 	fcmge	p0\.h, p0/z, z3\.h, z0\.h
+.*:	65404060 	fcmge	p0\.h, p0/z, z3\.h, z0\.h
+.*:	654043e0 	fcmge	p0\.h, p0/z, z31\.h, z0\.h
+.*:	654043e0 	fcmge	p0\.h, p0/z, z31\.h, z0\.h
+.*:	65444000 	fcmge	p0\.h, p0/z, z0\.h, z4\.h
+.*:	65444000 	fcmge	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655f4000 	fcmge	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655f4000 	fcmge	p0\.h, p0/z, z0\.h, z31\.h
 .*:	65804000 	fcmge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804000 	fcmge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804001 	fcmge	p1\.s, p0/z, z0\.s, z0\.s
@@ -8528,6 +9010,20 @@ Disassembly of section .*:
 .*:	65c44000 	fcmge	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65df4000 	fcmge	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65df4000 	fcmge	p0\.d, p0/z, z0\.d, z31\.d
+.*:	65502010 	fcmgt	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65502010 	fcmgt	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65502011 	fcmgt	p1\.h, p0/z, z0\.h, #0\.0
+.*:	65502011 	fcmgt	p1\.h, p0/z, z0\.h, #0\.0
+.*:	6550201f 	fcmgt	p15\.h, p0/z, z0\.h, #0\.0
+.*:	6550201f 	fcmgt	p15\.h, p0/z, z0\.h, #0\.0
+.*:	65502810 	fcmgt	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65502810 	fcmgt	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65503c10 	fcmgt	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65503c10 	fcmgt	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65502070 	fcmgt	p0\.h, p0/z, z3\.h, #0\.0
+.*:	65502070 	fcmgt	p0\.h, p0/z, z3\.h, #0\.0
+.*:	655023f0 	fcmgt	p0\.h, p0/z, z31\.h, #0\.0
+.*:	655023f0 	fcmgt	p0\.h, p0/z, z31\.h, #0\.0
 .*:	65902010 	fcmgt	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65902010 	fcmgt	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65902011 	fcmgt	p1\.s, p0/z, z0\.s, #0\.0
@@ -8556,6 +9052,24 @@ Disassembly of section .*:
 .*:	65d02070 	fcmgt	p0\.d, p0/z, z3\.d, #0\.0
 .*:	65d023f0 	fcmgt	p0\.d, p0/z, z31\.d, #0\.0
 .*:	65d023f0 	fcmgt	p0\.d, p0/z, z31\.d, #0\.0
+.*:	65404010 	fcmgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404010 	fcmgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404011 	fcmgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	65404011 	fcmgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540401f 	fcmgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540401f 	fcmgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	65404810 	fcmgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65404810 	fcmgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65405c10 	fcmgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65405c10 	fcmgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65404070 	fcmgt	p0\.h, p0/z, z3\.h, z0\.h
+.*:	65404070 	fcmgt	p0\.h, p0/z, z3\.h, z0\.h
+.*:	654043f0 	fcmgt	p0\.h, p0/z, z31\.h, z0\.h
+.*:	654043f0 	fcmgt	p0\.h, p0/z, z31\.h, z0\.h
+.*:	65444010 	fcmgt	p0\.h, p0/z, z0\.h, z4\.h
+.*:	65444010 	fcmgt	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655f4010 	fcmgt	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655f4010 	fcmgt	p0\.h, p0/z, z0\.h, z31\.h
 .*:	65804010 	fcmgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804010 	fcmgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804011 	fcmgt	p1\.s, p0/z, z0\.s, z0\.s
@@ -8592,6 +9106,20 @@ Disassembly of section .*:
 .*:	65c44010 	fcmgt	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65df4010 	fcmgt	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65df4010 	fcmgt	p0\.d, p0/z, z0\.d, z31\.d
+.*:	65512010 	fcmle	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65512010 	fcmle	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65512011 	fcmle	p1\.h, p0/z, z0\.h, #0\.0
+.*:	65512011 	fcmle	p1\.h, p0/z, z0\.h, #0\.0
+.*:	6551201f 	fcmle	p15\.h, p0/z, z0\.h, #0\.0
+.*:	6551201f 	fcmle	p15\.h, p0/z, z0\.h, #0\.0
+.*:	65512810 	fcmle	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65512810 	fcmle	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65513c10 	fcmle	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65513c10 	fcmle	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65512070 	fcmle	p0\.h, p0/z, z3\.h, #0\.0
+.*:	65512070 	fcmle	p0\.h, p0/z, z3\.h, #0\.0
+.*:	655123f0 	fcmle	p0\.h, p0/z, z31\.h, #0\.0
+.*:	655123f0 	fcmle	p0\.h, p0/z, z31\.h, #0\.0
 .*:	65912010 	fcmle	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65912010 	fcmle	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65912011 	fcmle	p1\.s, p0/z, z0\.s, #0\.0
@@ -8620,6 +9148,20 @@ Disassembly of section .*:
 .*:	65d12070 	fcmle	p0\.d, p0/z, z3\.d, #0\.0
 .*:	65d123f0 	fcmle	p0\.d, p0/z, z31\.d, #0\.0
 .*:	65d123f0 	fcmle	p0\.d, p0/z, z31\.d, #0\.0
+.*:	65512000 	fcmlt	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65512000 	fcmlt	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65512001 	fcmlt	p1\.h, p0/z, z0\.h, #0\.0
+.*:	65512001 	fcmlt	p1\.h, p0/z, z0\.h, #0\.0
+.*:	6551200f 	fcmlt	p15\.h, p0/z, z0\.h, #0\.0
+.*:	6551200f 	fcmlt	p15\.h, p0/z, z0\.h, #0\.0
+.*:	65512800 	fcmlt	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65512800 	fcmlt	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65513c00 	fcmlt	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65513c00 	fcmlt	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65512060 	fcmlt	p0\.h, p0/z, z3\.h, #0\.0
+.*:	65512060 	fcmlt	p0\.h, p0/z, z3\.h, #0\.0
+.*:	655123e0 	fcmlt	p0\.h, p0/z, z31\.h, #0\.0
+.*:	655123e0 	fcmlt	p0\.h, p0/z, z31\.h, #0\.0
 .*:	65912000 	fcmlt	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65912000 	fcmlt	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65912001 	fcmlt	p1\.s, p0/z, z0\.s, #0\.0
@@ -8648,6 +9190,20 @@ Disassembly of section .*:
 .*:	65d12060 	fcmlt	p0\.d, p0/z, z3\.d, #0\.0
 .*:	65d123e0 	fcmlt	p0\.d, p0/z, z31\.d, #0\.0
 .*:	65d123e0 	fcmlt	p0\.d, p0/z, z31\.d, #0\.0
+.*:	65532000 	fcmne	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65532000 	fcmne	p0\.h, p0/z, z0\.h, #0\.0
+.*:	65532001 	fcmne	p1\.h, p0/z, z0\.h, #0\.0
+.*:	65532001 	fcmne	p1\.h, p0/z, z0\.h, #0\.0
+.*:	6553200f 	fcmne	p15\.h, p0/z, z0\.h, #0\.0
+.*:	6553200f 	fcmne	p15\.h, p0/z, z0\.h, #0\.0
+.*:	65532800 	fcmne	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65532800 	fcmne	p0\.h, p2/z, z0\.h, #0\.0
+.*:	65533c00 	fcmne	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65533c00 	fcmne	p0\.h, p7/z, z0\.h, #0\.0
+.*:	65532060 	fcmne	p0\.h, p0/z, z3\.h, #0\.0
+.*:	65532060 	fcmne	p0\.h, p0/z, z3\.h, #0\.0
+.*:	655323e0 	fcmne	p0\.h, p0/z, z31\.h, #0\.0
+.*:	655323e0 	fcmne	p0\.h, p0/z, z31\.h, #0\.0
 .*:	65932000 	fcmne	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65932000 	fcmne	p0\.s, p0/z, z0\.s, #0\.0
 .*:	65932001 	fcmne	p1\.s, p0/z, z0\.s, #0\.0
@@ -8676,6 +9232,24 @@ Disassembly of section .*:
 .*:	65d32060 	fcmne	p0\.d, p0/z, z3\.d, #0\.0
 .*:	65d323e0 	fcmne	p0\.d, p0/z, z31\.d, #0\.0
 .*:	65d323e0 	fcmne	p0\.d, p0/z, z31\.d, #0\.0
+.*:	65406010 	fcmne	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65406010 	fcmne	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65406011 	fcmne	p1\.h, p0/z, z0\.h, z0\.h
+.*:	65406011 	fcmne	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540601f 	fcmne	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540601f 	fcmne	p15\.h, p0/z, z0\.h, z0\.h
+.*:	65406810 	fcmne	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65406810 	fcmne	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65407c10 	fcmne	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65407c10 	fcmne	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65406070 	fcmne	p0\.h, p0/z, z3\.h, z0\.h
+.*:	65406070 	fcmne	p0\.h, p0/z, z3\.h, z0\.h
+.*:	654063f0 	fcmne	p0\.h, p0/z, z31\.h, z0\.h
+.*:	654063f0 	fcmne	p0\.h, p0/z, z31\.h, z0\.h
+.*:	65446010 	fcmne	p0\.h, p0/z, z0\.h, z4\.h
+.*:	65446010 	fcmne	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655f6010 	fcmne	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655f6010 	fcmne	p0\.h, p0/z, z0\.h, z31\.h
 .*:	65806010 	fcmne	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65806010 	fcmne	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65806011 	fcmne	p1\.s, p0/z, z0\.s, z0\.s
@@ -8712,6 +9286,24 @@ Disassembly of section .*:
 .*:	65c46010 	fcmne	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65df6010 	fcmne	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65df6010 	fcmne	p0\.d, p0/z, z0\.d, z31\.d
+.*:	6540c000 	fcmuo	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540c000 	fcmuo	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540c001 	fcmuo	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540c001 	fcmuo	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540c00f 	fcmuo	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540c00f 	fcmuo	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540c800 	fcmuo	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540c800 	fcmuo	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540dc00 	fcmuo	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540dc00 	fcmuo	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540c060 	fcmuo	p0\.h, p0/z, z3\.h, z0\.h
+.*:	6540c060 	fcmuo	p0\.h, p0/z, z3\.h, z0\.h
+.*:	6540c3e0 	fcmuo	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6540c3e0 	fcmuo	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6544c000 	fcmuo	p0\.h, p0/z, z0\.h, z4\.h
+.*:	6544c000 	fcmuo	p0\.h, p0/z, z0\.h, z4\.h
+.*:	655fc000 	fcmuo	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655fc000 	fcmuo	p0\.h, p0/z, z0\.h, z31\.h
 .*:	6580c000 	fcmuo	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580c000 	fcmuo	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580c001 	fcmuo	p1\.s, p0/z, z0\.s, z0\.s
@@ -8748,6 +9340,28 @@ Disassembly of section .*:
 .*:	65c4c000 	fcmuo	p0\.d, p0/z, z0\.d, z4\.d
 .*:	65dfc000 	fcmuo	p0\.d, p0/z, z0\.d, z31\.d
 .*:	65dfc000 	fcmuo	p0\.d, p0/z, z0\.d, z31\.d
+.*:	0550c000 	fmov	z0\.h, p0/m, #2\.0+e\+00
+.*:	0550c000 	fmov	z0\.h, p0/m, #2\.0+e\+00
+.*:	0550c001 	fmov	z1\.h, p0/m, #2\.0+e\+00
+.*:	0550c001 	fmov	z1\.h, p0/m, #2\.0+e\+00
+.*:	0550c01f 	fmov	z31\.h, p0/m, #2\.0+e\+00
+.*:	0550c01f 	fmov	z31\.h, p0/m, #2\.0+e\+00
+.*:	0552c000 	fmov	z0\.h, p2/m, #2\.0+e\+00
+.*:	0552c000 	fmov	z0\.h, p2/m, #2\.0+e\+00
+.*:	055fc000 	fmov	z0\.h, p15/m, #2\.0+e\+00
+.*:	055fc000 	fmov	z0\.h, p15/m, #2\.0+e\+00
+.*:	0550c600 	fmov	z0\.h, p0/m, #1\.60+e\+01
+.*:	0550c600 	fmov	z0\.h, p0/m, #1\.60+e\+01
+.*:	0550c900 	fmov	z0\.h, p0/m, #1\.8750+e-01
+.*:	0550c900 	fmov	z0\.h, p0/m, #1\.8750+e-01
+.*:	0550cfe0 	fmov	z0\.h, p0/m, #1\.93750+e\+00
+.*:	0550cfe0 	fmov	z0\.h, p0/m, #1\.93750+e\+00
+.*:	0550d100 	fmov	z0\.h, p0/m, #-3\.0+e\+00
+.*:	0550d100 	fmov	z0\.h, p0/m, #-3\.0+e\+00
+.*:	0550d800 	fmov	z0\.h, p0/m, #-1\.250+e-01
+.*:	0550d800 	fmov	z0\.h, p0/m, #-1\.250+e-01
+.*:	0550dfe0 	fmov	z0\.h, p0/m, #-1\.93750+e\+00
+.*:	0550dfe0 	fmov	z0\.h, p0/m, #-1\.93750+e\+00
 .*:	0590c000 	fmov	z0\.s, p0/m, #2\.0+e\+00
 .*:	0590c000 	fmov	z0\.s, p0/m, #2\.0+e\+00
 .*:	0590c001 	fmov	z1\.s, p0/m, #2\.0+e\+00
@@ -8876,6 +9490,48 @@ Disassembly of section .*:
 .*:	65cba060 	fcvt	z0\.d, p0/m, z3\.s
 .*:	65cba3e0 	fcvt	z0\.d, p0/m, z31\.s
 .*:	65cba3e0 	fcvt	z0\.d, p0/m, z31\.s
+.*:	655aa000 	fcvtzs	z0\.h, p0/m, z0\.h
+.*:	655aa000 	fcvtzs	z0\.h, p0/m, z0\.h
+.*:	655aa001 	fcvtzs	z1\.h, p0/m, z0\.h
+.*:	655aa001 	fcvtzs	z1\.h, p0/m, z0\.h
+.*:	655aa01f 	fcvtzs	z31\.h, p0/m, z0\.h
+.*:	655aa01f 	fcvtzs	z31\.h, p0/m, z0\.h
+.*:	655aa800 	fcvtzs	z0\.h, p2/m, z0\.h
+.*:	655aa800 	fcvtzs	z0\.h, p2/m, z0\.h
+.*:	655abc00 	fcvtzs	z0\.h, p7/m, z0\.h
+.*:	655abc00 	fcvtzs	z0\.h, p7/m, z0\.h
+.*:	655aa060 	fcvtzs	z0\.h, p0/m, z3\.h
+.*:	655aa060 	fcvtzs	z0\.h, p0/m, z3\.h
+.*:	655aa3e0 	fcvtzs	z0\.h, p0/m, z31\.h
+.*:	655aa3e0 	fcvtzs	z0\.h, p0/m, z31\.h
+.*:	655ca000 	fcvtzs	z0\.s, p0/m, z0\.h
+.*:	655ca000 	fcvtzs	z0\.s, p0/m, z0\.h
+.*:	655ca001 	fcvtzs	z1\.s, p0/m, z0\.h
+.*:	655ca001 	fcvtzs	z1\.s, p0/m, z0\.h
+.*:	655ca01f 	fcvtzs	z31\.s, p0/m, z0\.h
+.*:	655ca01f 	fcvtzs	z31\.s, p0/m, z0\.h
+.*:	655ca800 	fcvtzs	z0\.s, p2/m, z0\.h
+.*:	655ca800 	fcvtzs	z0\.s, p2/m, z0\.h
+.*:	655cbc00 	fcvtzs	z0\.s, p7/m, z0\.h
+.*:	655cbc00 	fcvtzs	z0\.s, p7/m, z0\.h
+.*:	655ca060 	fcvtzs	z0\.s, p0/m, z3\.h
+.*:	655ca060 	fcvtzs	z0\.s, p0/m, z3\.h
+.*:	655ca3e0 	fcvtzs	z0\.s, p0/m, z31\.h
+.*:	655ca3e0 	fcvtzs	z0\.s, p0/m, z31\.h
+.*:	655ea000 	fcvtzs	z0\.d, p0/m, z0\.h
+.*:	655ea000 	fcvtzs	z0\.d, p0/m, z0\.h
+.*:	655ea001 	fcvtzs	z1\.d, p0/m, z0\.h
+.*:	655ea001 	fcvtzs	z1\.d, p0/m, z0\.h
+.*:	655ea01f 	fcvtzs	z31\.d, p0/m, z0\.h
+.*:	655ea01f 	fcvtzs	z31\.d, p0/m, z0\.h
+.*:	655ea800 	fcvtzs	z0\.d, p2/m, z0\.h
+.*:	655ea800 	fcvtzs	z0\.d, p2/m, z0\.h
+.*:	655ebc00 	fcvtzs	z0\.d, p7/m, z0\.h
+.*:	655ebc00 	fcvtzs	z0\.d, p7/m, z0\.h
+.*:	655ea060 	fcvtzs	z0\.d, p0/m, z3\.h
+.*:	655ea060 	fcvtzs	z0\.d, p0/m, z3\.h
+.*:	655ea3e0 	fcvtzs	z0\.d, p0/m, z31\.h
+.*:	655ea3e0 	fcvtzs	z0\.d, p0/m, z31\.h
 .*:	659ca000 	fcvtzs	z0\.s, p0/m, z0\.s
 .*:	659ca000 	fcvtzs	z0\.s, p0/m, z0\.s
 .*:	659ca001 	fcvtzs	z1\.s, p0/m, z0\.s
@@ -8932,6 +9588,48 @@ Disassembly of section .*:
 .*:	65dea060 	fcvtzs	z0\.d, p0/m, z3\.d
 .*:	65dea3e0 	fcvtzs	z0\.d, p0/m, z31\.d
 .*:	65dea3e0 	fcvtzs	z0\.d, p0/m, z31\.d
+.*:	655ba000 	fcvtzu	z0\.h, p0/m, z0\.h
+.*:	655ba000 	fcvtzu	z0\.h, p0/m, z0\.h
+.*:	655ba001 	fcvtzu	z1\.h, p0/m, z0\.h
+.*:	655ba001 	fcvtzu	z1\.h, p0/m, z0\.h
+.*:	655ba01f 	fcvtzu	z31\.h, p0/m, z0\.h
+.*:	655ba01f 	fcvtzu	z31\.h, p0/m, z0\.h
+.*:	655ba800 	fcvtzu	z0\.h, p2/m, z0\.h
+.*:	655ba800 	fcvtzu	z0\.h, p2/m, z0\.h
+.*:	655bbc00 	fcvtzu	z0\.h, p7/m, z0\.h
+.*:	655bbc00 	fcvtzu	z0\.h, p7/m, z0\.h
+.*:	655ba060 	fcvtzu	z0\.h, p0/m, z3\.h
+.*:	655ba060 	fcvtzu	z0\.h, p0/m, z3\.h
+.*:	655ba3e0 	fcvtzu	z0\.h, p0/m, z31\.h
+.*:	655ba3e0 	fcvtzu	z0\.h, p0/m, z31\.h
+.*:	655da000 	fcvtzu	z0\.s, p0/m, z0\.h
+.*:	655da000 	fcvtzu	z0\.s, p0/m, z0\.h
+.*:	655da001 	fcvtzu	z1\.s, p0/m, z0\.h
+.*:	655da001 	fcvtzu	z1\.s, p0/m, z0\.h
+.*:	655da01f 	fcvtzu	z31\.s, p0/m, z0\.h
+.*:	655da01f 	fcvtzu	z31\.s, p0/m, z0\.h
+.*:	655da800 	fcvtzu	z0\.s, p2/m, z0\.h
+.*:	655da800 	fcvtzu	z0\.s, p2/m, z0\.h
+.*:	655dbc00 	fcvtzu	z0\.s, p7/m, z0\.h
+.*:	655dbc00 	fcvtzu	z0\.s, p7/m, z0\.h
+.*:	655da060 	fcvtzu	z0\.s, p0/m, z3\.h
+.*:	655da060 	fcvtzu	z0\.s, p0/m, z3\.h
+.*:	655da3e0 	fcvtzu	z0\.s, p0/m, z31\.h
+.*:	655da3e0 	fcvtzu	z0\.s, p0/m, z31\.h
+.*:	655fa000 	fcvtzu	z0\.d, p0/m, z0\.h
+.*:	655fa000 	fcvtzu	z0\.d, p0/m, z0\.h
+.*:	655fa001 	fcvtzu	z1\.d, p0/m, z0\.h
+.*:	655fa001 	fcvtzu	z1\.d, p0/m, z0\.h
+.*:	655fa01f 	fcvtzu	z31\.d, p0/m, z0\.h
+.*:	655fa01f 	fcvtzu	z31\.d, p0/m, z0\.h
+.*:	655fa800 	fcvtzu	z0\.d, p2/m, z0\.h
+.*:	655fa800 	fcvtzu	z0\.d, p2/m, z0\.h
+.*:	655fbc00 	fcvtzu	z0\.d, p7/m, z0\.h
+.*:	655fbc00 	fcvtzu	z0\.d, p7/m, z0\.h
+.*:	655fa060 	fcvtzu	z0\.d, p0/m, z3\.h
+.*:	655fa060 	fcvtzu	z0\.d, p0/m, z3\.h
+.*:	655fa3e0 	fcvtzu	z0\.d, p0/m, z31\.h
+.*:	655fa3e0 	fcvtzu	z0\.d, p0/m, z31\.h
 .*:	659da000 	fcvtzu	z0\.s, p0/m, z0\.s
 .*:	659da000 	fcvtzu	z0\.s, p0/m, z0\.s
 .*:	659da001 	fcvtzu	z1\.s, p0/m, z0\.s
@@ -8988,6 +9686,22 @@ Disassembly of section .*:
 .*:	65dfa060 	fcvtzu	z0\.d, p0/m, z3\.d
 .*:	65dfa3e0 	fcvtzu	z0\.d, p0/m, z31\.d
 .*:	65dfa3e0 	fcvtzu	z0\.d, p0/m, z31\.d
+.*:	654d8000 	fdiv	z0\.h, p0/m, z0\.h, z0\.h
+.*:	654d8000 	fdiv	z0\.h, p0/m, z0\.h, z0\.h
+.*:	654d8001 	fdiv	z1\.h, p0/m, z1\.h, z0\.h
+.*:	654d8001 	fdiv	z1\.h, p0/m, z1\.h, z0\.h
+.*:	654d801f 	fdiv	z31\.h, p0/m, z31\.h, z0\.h
+.*:	654d801f 	fdiv	z31\.h, p0/m, z31\.h, z0\.h
+.*:	654d8800 	fdiv	z0\.h, p2/m, z0\.h, z0\.h
+.*:	654d8800 	fdiv	z0\.h, p2/m, z0\.h, z0\.h
+.*:	654d9c00 	fdiv	z0\.h, p7/m, z0\.h, z0\.h
+.*:	654d9c00 	fdiv	z0\.h, p7/m, z0\.h, z0\.h
+.*:	654d8003 	fdiv	z3\.h, p0/m, z3\.h, z0\.h
+.*:	654d8003 	fdiv	z3\.h, p0/m, z3\.h, z0\.h
+.*:	654d8080 	fdiv	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654d8080 	fdiv	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654d83e0 	fdiv	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654d83e0 	fdiv	z0\.h, p0/m, z0\.h, z31\.h
 .*:	658d8000 	fdiv	z0\.s, p0/m, z0\.s, z0\.s
 .*:	658d8000 	fdiv	z0\.s, p0/m, z0\.s, z0\.s
 .*:	658d8001 	fdiv	z1\.s, p0/m, z1\.s, z0\.s
@@ -9020,6 +9734,22 @@ Disassembly of section .*:
 .*:	65cd8080 	fdiv	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65cd83e0 	fdiv	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65cd83e0 	fdiv	z0\.d, p0/m, z0\.d, z31\.d
+.*:	654c8000 	fdivr	z0\.h, p0/m, z0\.h, z0\.h
+.*:	654c8000 	fdivr	z0\.h, p0/m, z0\.h, z0\.h
+.*:	654c8001 	fdivr	z1\.h, p0/m, z1\.h, z0\.h
+.*:	654c8001 	fdivr	z1\.h, p0/m, z1\.h, z0\.h
+.*:	654c801f 	fdivr	z31\.h, p0/m, z31\.h, z0\.h
+.*:	654c801f 	fdivr	z31\.h, p0/m, z31\.h, z0\.h
+.*:	654c8800 	fdivr	z0\.h, p2/m, z0\.h, z0\.h
+.*:	654c8800 	fdivr	z0\.h, p2/m, z0\.h, z0\.h
+.*:	654c9c00 	fdivr	z0\.h, p7/m, z0\.h, z0\.h
+.*:	654c9c00 	fdivr	z0\.h, p7/m, z0\.h, z0\.h
+.*:	654c8003 	fdivr	z3\.h, p0/m, z3\.h, z0\.h
+.*:	654c8003 	fdivr	z3\.h, p0/m, z3\.h, z0\.h
+.*:	654c8080 	fdivr	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654c8080 	fdivr	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654c83e0 	fdivr	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654c83e0 	fdivr	z0\.h, p0/m, z0\.h, z31\.h
 .*:	658c8000 	fdivr	z0\.s, p0/m, z0\.s, z0\.s
 .*:	658c8000 	fdivr	z0\.s, p0/m, z0\.s, z0\.s
 .*:	658c8001 	fdivr	z1\.s, p0/m, z1\.s, z0\.s
@@ -9052,6 +9782,24 @@ Disassembly of section .*:
 .*:	65cc8080 	fdivr	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65cc83e0 	fdivr	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65cc83e0 	fdivr	z0\.d, p0/m, z0\.d, z31\.d
+.*:	2579c000 	fmov	z0\.h, #2\.0+e\+00
+.*:	2579c000 	fmov	z0\.h, #2\.0+e\+00
+.*:	2579c001 	fmov	z1\.h, #2\.0+e\+00
+.*:	2579c001 	fmov	z1\.h, #2\.0+e\+00
+.*:	2579c01f 	fmov	z31\.h, #2\.0+e\+00
+.*:	2579c01f 	fmov	z31\.h, #2\.0+e\+00
+.*:	2579c600 	fmov	z0\.h, #1\.60+e\+01
+.*:	2579c600 	fmov	z0\.h, #1\.60+e\+01
+.*:	2579c900 	fmov	z0\.h, #1\.8750+e-01
+.*:	2579c900 	fmov	z0\.h, #1\.8750+e-01
+.*:	2579cfe0 	fmov	z0\.h, #1\.93750+e\+00
+.*:	2579cfe0 	fmov	z0\.h, #1\.93750+e\+00
+.*:	2579d100 	fmov	z0\.h, #-3\.0+e\+00
+.*:	2579d100 	fmov	z0\.h, #-3\.0+e\+00
+.*:	2579d800 	fmov	z0\.h, #-1\.250+e-01
+.*:	2579d800 	fmov	z0\.h, #-1\.250+e-01
+.*:	2579dfe0 	fmov	z0\.h, #-1\.93750+e\+00
+.*:	2579dfe0 	fmov	z0\.h, #-1\.93750+e\+00
 .*:	25b9c000 	fmov	z0\.s, #2\.0+e\+00
 .*:	25b9c000 	fmov	z0\.s, #2\.0+e\+00
 .*:	25b9c001 	fmov	z1\.s, #2\.0+e\+00
@@ -9088,6 +9836,16 @@ Disassembly of section .*:
 .*:	25f9d800 	fmov	z0\.d, #-1\.250+e-01
 .*:	25f9dfe0 	fmov	z0\.d, #-1\.93750+e\+00
 .*:	25f9dfe0 	fmov	z0\.d, #-1\.93750+e\+00
+.*:	0460b800 	fexpa	z0\.h, z0\.h
+.*:	0460b800 	fexpa	z0\.h, z0\.h
+.*:	0460b801 	fexpa	z1\.h, z0\.h
+.*:	0460b801 	fexpa	z1\.h, z0\.h
+.*:	0460b81f 	fexpa	z31\.h, z0\.h
+.*:	0460b81f 	fexpa	z31\.h, z0\.h
+.*:	0460b840 	fexpa	z0\.h, z2\.h
+.*:	0460b840 	fexpa	z0\.h, z2\.h
+.*:	0460bbe0 	fexpa	z0\.h, z31\.h
+.*:	0460bbe0 	fexpa	z0\.h, z31\.h
 .*:	04a0b800 	fexpa	z0\.s, z0\.s
 .*:	04a0b800 	fexpa	z0\.s, z0\.s
 .*:	04a0b801 	fexpa	z1\.s, z0\.s
@@ -9108,6 +9866,24 @@ Disassembly of section .*:
 .*:	04e0b840 	fexpa	z0\.d, z2\.d
 .*:	04e0bbe0 	fexpa	z0\.d, z31\.d
 .*:	04e0bbe0 	fexpa	z0\.d, z31\.d
+.*:	65608000 	fmad	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65608000 	fmad	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65608001 	fmad	z1\.h, p0/m, z0\.h, z0\.h
+.*:	65608001 	fmad	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560801f 	fmad	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560801f 	fmad	z31\.h, p0/m, z0\.h, z0\.h
+.*:	65608800 	fmad	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65608800 	fmad	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65609c00 	fmad	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65609c00 	fmad	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65608060 	fmad	z0\.h, p0/m, z3\.h, z0\.h
+.*:	65608060 	fmad	z0\.h, p0/m, z3\.h, z0\.h
+.*:	656083e0 	fmad	z0\.h, p0/m, z31\.h, z0\.h
+.*:	656083e0 	fmad	z0\.h, p0/m, z31\.h, z0\.h
+.*:	65648000 	fmad	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65648000 	fmad	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657f8000 	fmad	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657f8000 	fmad	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a08000 	fmad	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a08000 	fmad	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a08001 	fmad	z1\.s, p0/m, z0\.s, z0\.s
@@ -9144,6 +9920,22 @@ Disassembly of section .*:
 .*:	65e48000 	fmad	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ff8000 	fmad	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ff8000 	fmad	z0\.d, p0/m, z0\.d, z31\.d
+.*:	65468000 	fmax	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65468000 	fmax	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65468001 	fmax	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65468001 	fmax	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6546801f 	fmax	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6546801f 	fmax	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65468800 	fmax	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65468800 	fmax	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65469c00 	fmax	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65469c00 	fmax	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65468003 	fmax	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65468003 	fmax	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65468080 	fmax	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65468080 	fmax	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654683e0 	fmax	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654683e0 	fmax	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65868000 	fmax	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65868000 	fmax	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65868001 	fmax	z1\.s, p0/m, z1\.s, z0\.s
@@ -9176,6 +9968,34 @@ Disassembly of section .*:
 .*:	65c68080 	fmax	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c683e0 	fmax	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c683e0 	fmax	z0\.d, p0/m, z0\.d, z31\.d
+.*:	655e8000 	fmax	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655e8000 	fmax	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655e8000 	fmax	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655e8000 	fmax	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655e8001 	fmax	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655e8001 	fmax	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655e8001 	fmax	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655e8001 	fmax	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655e801f 	fmax	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655e801f 	fmax	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655e801f 	fmax	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655e801f 	fmax	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655e8800 	fmax	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655e8800 	fmax	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655e8800 	fmax	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655e8800 	fmax	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655e9c00 	fmax	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655e9c00 	fmax	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655e9c00 	fmax	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655e9c00 	fmax	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655e8003 	fmax	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655e8003 	fmax	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655e8003 	fmax	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655e8003 	fmax	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655e8020 	fmax	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655e8020 	fmax	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655e8020 	fmax	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655e8020 	fmax	z0\.h, p0/m, z0\.h, #1\.0
 .*:	659e8000 	fmax	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659e8000 	fmax	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659e8000 	fmax	z0\.s, p0/m, z0\.s, #0\.0
@@ -9232,6 +10052,22 @@ Disassembly of section .*:
 .*:	65de8020 	fmax	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65de8020 	fmax	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65de8020 	fmax	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65448000 	fmaxnm	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65448000 	fmaxnm	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65448001 	fmaxnm	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65448001 	fmaxnm	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6544801f 	fmaxnm	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6544801f 	fmaxnm	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65448800 	fmaxnm	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65448800 	fmaxnm	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65449c00 	fmaxnm	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65449c00 	fmaxnm	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65448003 	fmaxnm	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65448003 	fmaxnm	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65448080 	fmaxnm	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65448080 	fmaxnm	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654483e0 	fmaxnm	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654483e0 	fmaxnm	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65848000 	fmaxnm	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65848000 	fmaxnm	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65848001 	fmaxnm	z1\.s, p0/m, z1\.s, z0\.s
@@ -9264,6 +10100,34 @@ Disassembly of section .*:
 .*:	65c48080 	fmaxnm	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c483e0 	fmaxnm	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c483e0 	fmaxnm	z0\.d, p0/m, z0\.d, z31\.d
+.*:	655c8000 	fmaxnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655c8000 	fmaxnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655c8000 	fmaxnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655c8000 	fmaxnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655c8001 	fmaxnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655c8001 	fmaxnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655c8001 	fmaxnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655c8001 	fmaxnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655c801f 	fmaxnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655c801f 	fmaxnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655c801f 	fmaxnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655c801f 	fmaxnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655c8800 	fmaxnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655c8800 	fmaxnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655c8800 	fmaxnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655c8800 	fmaxnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655c9c00 	fmaxnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655c9c00 	fmaxnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655c9c00 	fmaxnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655c9c00 	fmaxnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655c8003 	fmaxnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655c8003 	fmaxnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655c8003 	fmaxnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655c8003 	fmaxnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655c8020 	fmaxnm	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655c8020 	fmaxnm	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655c8020 	fmaxnm	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655c8020 	fmaxnm	z0\.h, p0/m, z0\.h, #1\.0
 .*:	659c8000 	fmaxnm	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659c8000 	fmaxnm	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659c8000 	fmaxnm	z0\.s, p0/m, z0\.s, #0\.0
@@ -9320,6 +10184,20 @@ Disassembly of section .*:
 .*:	65dc8020 	fmaxnm	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65dc8020 	fmaxnm	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65dc8020 	fmaxnm	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65442000 	fmaxnmv	h0, p0, z0\.h
+.*:	65442000 	fmaxnmv	h0, p0, z0\.h
+.*:	65442001 	fmaxnmv	h1, p0, z0\.h
+.*:	65442001 	fmaxnmv	h1, p0, z0\.h
+.*:	6544201f 	fmaxnmv	h31, p0, z0\.h
+.*:	6544201f 	fmaxnmv	h31, p0, z0\.h
+.*:	65442800 	fmaxnmv	h0, p2, z0\.h
+.*:	65442800 	fmaxnmv	h0, p2, z0\.h
+.*:	65443c00 	fmaxnmv	h0, p7, z0\.h
+.*:	65443c00 	fmaxnmv	h0, p7, z0\.h
+.*:	65442060 	fmaxnmv	h0, p0, z3\.h
+.*:	65442060 	fmaxnmv	h0, p0, z3\.h
+.*:	654423e0 	fmaxnmv	h0, p0, z31\.h
+.*:	654423e0 	fmaxnmv	h0, p0, z31\.h
 .*:	65842000 	fmaxnmv	s0, p0, z0\.s
 .*:	65842000 	fmaxnmv	s0, p0, z0\.s
 .*:	65842001 	fmaxnmv	s1, p0, z0\.s
@@ -9348,6 +10226,20 @@ Disassembly of section .*:
 .*:	65c42060 	fmaxnmv	d0, p0, z3\.d
 .*:	65c423e0 	fmaxnmv	d0, p0, z31\.d
 .*:	65c423e0 	fmaxnmv	d0, p0, z31\.d
+.*:	65462000 	fmaxv	h0, p0, z0\.h
+.*:	65462000 	fmaxv	h0, p0, z0\.h
+.*:	65462001 	fmaxv	h1, p0, z0\.h
+.*:	65462001 	fmaxv	h1, p0, z0\.h
+.*:	6546201f 	fmaxv	h31, p0, z0\.h
+.*:	6546201f 	fmaxv	h31, p0, z0\.h
+.*:	65462800 	fmaxv	h0, p2, z0\.h
+.*:	65462800 	fmaxv	h0, p2, z0\.h
+.*:	65463c00 	fmaxv	h0, p7, z0\.h
+.*:	65463c00 	fmaxv	h0, p7, z0\.h
+.*:	65462060 	fmaxv	h0, p0, z3\.h
+.*:	65462060 	fmaxv	h0, p0, z3\.h
+.*:	654623e0 	fmaxv	h0, p0, z31\.h
+.*:	654623e0 	fmaxv	h0, p0, z31\.h
 .*:	65862000 	fmaxv	s0, p0, z0\.s
 .*:	65862000 	fmaxv	s0, p0, z0\.s
 .*:	65862001 	fmaxv	s1, p0, z0\.s
@@ -9376,6 +10268,22 @@ Disassembly of section .*:
 .*:	65c62060 	fmaxv	d0, p0, z3\.d
 .*:	65c623e0 	fmaxv	d0, p0, z31\.d
 .*:	65c623e0 	fmaxv	d0, p0, z31\.d
+.*:	65478000 	fmin	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65478000 	fmin	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65478001 	fmin	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65478001 	fmin	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6547801f 	fmin	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6547801f 	fmin	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65478800 	fmin	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65478800 	fmin	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65479c00 	fmin	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65479c00 	fmin	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65478003 	fmin	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65478003 	fmin	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65478080 	fmin	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65478080 	fmin	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654783e0 	fmin	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654783e0 	fmin	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65878000 	fmin	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65878000 	fmin	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65878001 	fmin	z1\.s, p0/m, z1\.s, z0\.s
@@ -9408,6 +10316,34 @@ Disassembly of section .*:
 .*:	65c78080 	fmin	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c783e0 	fmin	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c783e0 	fmin	z0\.d, p0/m, z0\.d, z31\.d
+.*:	655f8000 	fmin	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655f8000 	fmin	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655f8000 	fmin	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655f8000 	fmin	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655f8001 	fmin	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655f8001 	fmin	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655f8001 	fmin	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655f8001 	fmin	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655f801f 	fmin	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655f801f 	fmin	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655f801f 	fmin	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655f801f 	fmin	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655f8800 	fmin	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655f8800 	fmin	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655f8800 	fmin	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655f8800 	fmin	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655f9c00 	fmin	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655f9c00 	fmin	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655f9c00 	fmin	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655f9c00 	fmin	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655f8003 	fmin	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655f8003 	fmin	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655f8003 	fmin	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655f8003 	fmin	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655f8020 	fmin	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655f8020 	fmin	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655f8020 	fmin	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655f8020 	fmin	z0\.h, p0/m, z0\.h, #1\.0
 .*:	659f8000 	fmin	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659f8000 	fmin	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659f8000 	fmin	z0\.s, p0/m, z0\.s, #0\.0
@@ -9464,6 +10400,22 @@ Disassembly of section .*:
 .*:	65df8020 	fmin	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65df8020 	fmin	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65df8020 	fmin	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65458000 	fminnm	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65458000 	fminnm	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65458001 	fminnm	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65458001 	fminnm	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6545801f 	fminnm	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6545801f 	fminnm	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65458800 	fminnm	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65458800 	fminnm	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65459c00 	fminnm	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65459c00 	fminnm	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65458003 	fminnm	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65458003 	fminnm	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65458080 	fminnm	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65458080 	fminnm	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654583e0 	fminnm	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654583e0 	fminnm	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65858000 	fminnm	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65858000 	fminnm	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65858001 	fminnm	z1\.s, p0/m, z1\.s, z0\.s
@@ -9496,6 +10448,34 @@ Disassembly of section .*:
 .*:	65c58080 	fminnm	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c583e0 	fminnm	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c583e0 	fminnm	z0\.d, p0/m, z0\.d, z31\.d
+.*:	655d8000 	fminnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655d8000 	fminnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655d8000 	fminnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655d8000 	fminnm	z0\.h, p0/m, z0\.h, #0\.0
+.*:	655d8001 	fminnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655d8001 	fminnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655d8001 	fminnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655d8001 	fminnm	z1\.h, p0/m, z1\.h, #0\.0
+.*:	655d801f 	fminnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655d801f 	fminnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655d801f 	fminnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655d801f 	fminnm	z31\.h, p0/m, z31\.h, #0\.0
+.*:	655d8800 	fminnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655d8800 	fminnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655d8800 	fminnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655d8800 	fminnm	z0\.h, p2/m, z0\.h, #0\.0
+.*:	655d9c00 	fminnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655d9c00 	fminnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655d9c00 	fminnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655d9c00 	fminnm	z0\.h, p7/m, z0\.h, #0\.0
+.*:	655d8003 	fminnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655d8003 	fminnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655d8003 	fminnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655d8003 	fminnm	z3\.h, p0/m, z3\.h, #0\.0
+.*:	655d8020 	fminnm	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655d8020 	fminnm	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655d8020 	fminnm	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655d8020 	fminnm	z0\.h, p0/m, z0\.h, #1\.0
 .*:	659d8000 	fminnm	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659d8000 	fminnm	z0\.s, p0/m, z0\.s, #0\.0
 .*:	659d8000 	fminnm	z0\.s, p0/m, z0\.s, #0\.0
@@ -9552,6 +10532,20 @@ Disassembly of section .*:
 .*:	65dd8020 	fminnm	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65dd8020 	fminnm	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65dd8020 	fminnm	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65452000 	fminnmv	h0, p0, z0\.h
+.*:	65452000 	fminnmv	h0, p0, z0\.h
+.*:	65452001 	fminnmv	h1, p0, z0\.h
+.*:	65452001 	fminnmv	h1, p0, z0\.h
+.*:	6545201f 	fminnmv	h31, p0, z0\.h
+.*:	6545201f 	fminnmv	h31, p0, z0\.h
+.*:	65452800 	fminnmv	h0, p2, z0\.h
+.*:	65452800 	fminnmv	h0, p2, z0\.h
+.*:	65453c00 	fminnmv	h0, p7, z0\.h
+.*:	65453c00 	fminnmv	h0, p7, z0\.h
+.*:	65452060 	fminnmv	h0, p0, z3\.h
+.*:	65452060 	fminnmv	h0, p0, z3\.h
+.*:	654523e0 	fminnmv	h0, p0, z31\.h
+.*:	654523e0 	fminnmv	h0, p0, z31\.h
 .*:	65852000 	fminnmv	s0, p0, z0\.s
 .*:	65852000 	fminnmv	s0, p0, z0\.s
 .*:	65852001 	fminnmv	s1, p0, z0\.s
@@ -9580,6 +10574,20 @@ Disassembly of section .*:
 .*:	65c52060 	fminnmv	d0, p0, z3\.d
 .*:	65c523e0 	fminnmv	d0, p0, z31\.d
 .*:	65c523e0 	fminnmv	d0, p0, z31\.d
+.*:	65472000 	fminv	h0, p0, z0\.h
+.*:	65472000 	fminv	h0, p0, z0\.h
+.*:	65472001 	fminv	h1, p0, z0\.h
+.*:	65472001 	fminv	h1, p0, z0\.h
+.*:	6547201f 	fminv	h31, p0, z0\.h
+.*:	6547201f 	fminv	h31, p0, z0\.h
+.*:	65472800 	fminv	h0, p2, z0\.h
+.*:	65472800 	fminv	h0, p2, z0\.h
+.*:	65473c00 	fminv	h0, p7, z0\.h
+.*:	65473c00 	fminv	h0, p7, z0\.h
+.*:	65472060 	fminv	h0, p0, z3\.h
+.*:	65472060 	fminv	h0, p0, z3\.h
+.*:	654723e0 	fminv	h0, p0, z31\.h
+.*:	654723e0 	fminv	h0, p0, z31\.h
 .*:	65872000 	fminv	s0, p0, z0\.s
 .*:	65872000 	fminv	s0, p0, z0\.s
 .*:	65872001 	fminv	s1, p0, z0\.s
@@ -9608,6 +10616,24 @@ Disassembly of section .*:
 .*:	65c72060 	fminv	d0, p0, z3\.d
 .*:	65c723e0 	fminv	d0, p0, z31\.d
 .*:	65c723e0 	fminv	d0, p0, z31\.d
+.*:	65600000 	fmla	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65600000 	fmla	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65600001 	fmla	z1\.h, p0/m, z0\.h, z0\.h
+.*:	65600001 	fmla	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560001f 	fmla	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560001f 	fmla	z31\.h, p0/m, z0\.h, z0\.h
+.*:	65600800 	fmla	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65600800 	fmla	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65601c00 	fmla	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65601c00 	fmla	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65600060 	fmla	z0\.h, p0/m, z3\.h, z0\.h
+.*:	65600060 	fmla	z0\.h, p0/m, z3\.h, z0\.h
+.*:	656003e0 	fmla	z0\.h, p0/m, z31\.h, z0\.h
+.*:	656003e0 	fmla	z0\.h, p0/m, z31\.h, z0\.h
+.*:	65640000 	fmla	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65640000 	fmla	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657f0000 	fmla	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657f0000 	fmla	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a00000 	fmla	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a00000 	fmla	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a00001 	fmla	z1\.s, p0/m, z0\.s, z0\.s
@@ -9644,6 +10670,90 @@ Disassembly of section .*:
 .*:	65e40000 	fmla	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ff0000 	fmla	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ff0000 	fmla	z0\.d, p0/m, z0\.d, z31\.d
+.*:	64200000 	fmla	z0\.h, z0\.h, z0\.h\[0\]
+.*:	64200000 	fmla	z0\.h, z0\.h, z0\.h\[0\]
+.*:	64200001 	fmla	z1\.h, z0\.h, z0\.h\[0\]
+.*:	64200001 	fmla	z1\.h, z0\.h, z0\.h\[0\]
+.*:	6420001f 	fmla	z31\.h, z0\.h, z0\.h\[0\]
+.*:	6420001f 	fmla	z31\.h, z0\.h, z0\.h\[0\]
+.*:	64200040 	fmla	z0\.h, z2\.h, z0\.h\[0\]
+.*:	64200040 	fmla	z0\.h, z2\.h, z0\.h\[0\]
+.*:	642003e0 	fmla	z0\.h, z31\.h, z0\.h\[0\]
+.*:	642003e0 	fmla	z0\.h, z31\.h, z0\.h\[0\]
+.*:	64230000 	fmla	z0\.h, z0\.h, z3\.h\[0\]
+.*:	64230000 	fmla	z0\.h, z0\.h, z3\.h\[0\]
+.*:	64270000 	fmla	z0\.h, z0\.h, z7\.h\[0\]
+.*:	64270000 	fmla	z0\.h, z0\.h, z7\.h\[0\]
+.*:	64280000 	fmla	z0\.h, z0\.h, z0\.h\[1\]
+.*:	64280000 	fmla	z0\.h, z0\.h, z0\.h\[1\]
+.*:	642c0000 	fmla	z0\.h, z0\.h, z4\.h\[1\]
+.*:	642c0000 	fmla	z0\.h, z0\.h, z4\.h\[1\]
+.*:	64630000 	fmla	z0\.h, z0\.h, z3\.h\[4\]
+.*:	64630000 	fmla	z0\.h, z0\.h, z3\.h\[4\]
+.*:	64780000 	fmla	z0\.h, z0\.h, z0\.h\[7\]
+.*:	64780000 	fmla	z0\.h, z0\.h, z0\.h\[7\]
+.*:	647d0000 	fmla	z0\.h, z0\.h, z5\.h\[7\]
+.*:	647d0000 	fmla	z0\.h, z0\.h, z5\.h\[7\]
+.*:	64a00000 	fmla	z0\.s, z0\.s, z0\.s\[0\]
+.*:	64a00000 	fmla	z0\.s, z0\.s, z0\.s\[0\]
+.*:	64a00001 	fmla	z1\.s, z0\.s, z0\.s\[0\]
+.*:	64a00001 	fmla	z1\.s, z0\.s, z0\.s\[0\]
+.*:	64a0001f 	fmla	z31\.s, z0\.s, z0\.s\[0\]
+.*:	64a0001f 	fmla	z31\.s, z0\.s, z0\.s\[0\]
+.*:	64a00040 	fmla	z0\.s, z2\.s, z0\.s\[0\]
+.*:	64a00040 	fmla	z0\.s, z2\.s, z0\.s\[0\]
+.*:	64a003e0 	fmla	z0\.s, z31\.s, z0\.s\[0\]
+.*:	64a003e0 	fmla	z0\.s, z31\.s, z0\.s\[0\]
+.*:	64a30000 	fmla	z0\.s, z0\.s, z3\.s\[0\]
+.*:	64a30000 	fmla	z0\.s, z0\.s, z3\.s\[0\]
+.*:	64a70000 	fmla	z0\.s, z0\.s, z7\.s\[0\]
+.*:	64a70000 	fmla	z0\.s, z0\.s, z7\.s\[0\]
+.*:	64a80000 	fmla	z0\.s, z0\.s, z0\.s\[1\]
+.*:	64a80000 	fmla	z0\.s, z0\.s, z0\.s\[1\]
+.*:	64ac0000 	fmla	z0\.s, z0\.s, z4\.s\[1\]
+.*:	64ac0000 	fmla	z0\.s, z0\.s, z4\.s\[1\]
+.*:	64b30000 	fmla	z0\.s, z0\.s, z3\.s\[2\]
+.*:	64b30000 	fmla	z0\.s, z0\.s, z3\.s\[2\]
+.*:	64b80000 	fmla	z0\.s, z0\.s, z0\.s\[3\]
+.*:	64b80000 	fmla	z0\.s, z0\.s, z0\.s\[3\]
+.*:	64bd0000 	fmla	z0\.s, z0\.s, z5\.s\[3\]
+.*:	64bd0000 	fmla	z0\.s, z0\.s, z5\.s\[3\]
+.*:	64e00000 	fmla	z0\.d, z0\.d, z0\.d\[0\]
+.*:	64e00000 	fmla	z0\.d, z0\.d, z0\.d\[0\]
+.*:	64e00001 	fmla	z1\.d, z0\.d, z0\.d\[0\]
+.*:	64e00001 	fmla	z1\.d, z0\.d, z0\.d\[0\]
+.*:	64e0001f 	fmla	z31\.d, z0\.d, z0\.d\[0\]
+.*:	64e0001f 	fmla	z31\.d, z0\.d, z0\.d\[0\]
+.*:	64e00040 	fmla	z0\.d, z2\.d, z0\.d\[0\]
+.*:	64e00040 	fmla	z0\.d, z2\.d, z0\.d\[0\]
+.*:	64e003e0 	fmla	z0\.d, z31\.d, z0\.d\[0\]
+.*:	64e003e0 	fmla	z0\.d, z31\.d, z0\.d\[0\]
+.*:	64e30000 	fmla	z0\.d, z0\.d, z3\.d\[0\]
+.*:	64e30000 	fmla	z0\.d, z0\.d, z3\.d\[0\]
+.*:	64ef0000 	fmla	z0\.d, z0\.d, z15\.d\[0\]
+.*:	64ef0000 	fmla	z0\.d, z0\.d, z15\.d\[0\]
+.*:	64f00000 	fmla	z0\.d, z0\.d, z0\.d\[1\]
+.*:	64f00000 	fmla	z0\.d, z0\.d, z0\.d\[1\]
+.*:	64fb0000 	fmla	z0\.d, z0\.d, z11\.d\[1\]
+.*:	64fb0000 	fmla	z0\.d, z0\.d, z11\.d\[1\]
+.*:	65602000 	fmls	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65602000 	fmls	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65602001 	fmls	z1\.h, p0/m, z0\.h, z0\.h
+.*:	65602001 	fmls	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560201f 	fmls	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560201f 	fmls	z31\.h, p0/m, z0\.h, z0\.h
+.*:	65602800 	fmls	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65602800 	fmls	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65603c00 	fmls	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65603c00 	fmls	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65602060 	fmls	z0\.h, p0/m, z3\.h, z0\.h
+.*:	65602060 	fmls	z0\.h, p0/m, z3\.h, z0\.h
+.*:	656023e0 	fmls	z0\.h, p0/m, z31\.h, z0\.h
+.*:	656023e0 	fmls	z0\.h, p0/m, z31\.h, z0\.h
+.*:	65642000 	fmls	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65642000 	fmls	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657f2000 	fmls	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657f2000 	fmls	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a02000 	fmls	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a02000 	fmls	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a02001 	fmls	z1\.s, p0/m, z0\.s, z0\.s
@@ -9680,6 +10790,90 @@ Disassembly of section .*:
 .*:	65e42000 	fmls	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ff2000 	fmls	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ff2000 	fmls	z0\.d, p0/m, z0\.d, z31\.d
+.*:	64200400 	fmls	z0\.h, z0\.h, z0\.h\[0\]
+.*:	64200400 	fmls	z0\.h, z0\.h, z0\.h\[0\]
+.*:	64200401 	fmls	z1\.h, z0\.h, z0\.h\[0\]
+.*:	64200401 	fmls	z1\.h, z0\.h, z0\.h\[0\]
+.*:	6420041f 	fmls	z31\.h, z0\.h, z0\.h\[0\]
+.*:	6420041f 	fmls	z31\.h, z0\.h, z0\.h\[0\]
+.*:	64200440 	fmls	z0\.h, z2\.h, z0\.h\[0\]
+.*:	64200440 	fmls	z0\.h, z2\.h, z0\.h\[0\]
+.*:	642007e0 	fmls	z0\.h, z31\.h, z0\.h\[0\]
+.*:	642007e0 	fmls	z0\.h, z31\.h, z0\.h\[0\]
+.*:	64230400 	fmls	z0\.h, z0\.h, z3\.h\[0\]
+.*:	64230400 	fmls	z0\.h, z0\.h, z3\.h\[0\]
+.*:	64270400 	fmls	z0\.h, z0\.h, z7\.h\[0\]
+.*:	64270400 	fmls	z0\.h, z0\.h, z7\.h\[0\]
+.*:	64280400 	fmls	z0\.h, z0\.h, z0\.h\[1\]
+.*:	64280400 	fmls	z0\.h, z0\.h, z0\.h\[1\]
+.*:	642c0400 	fmls	z0\.h, z0\.h, z4\.h\[1\]
+.*:	642c0400 	fmls	z0\.h, z0\.h, z4\.h\[1\]
+.*:	64630400 	fmls	z0\.h, z0\.h, z3\.h\[4\]
+.*:	64630400 	fmls	z0\.h, z0\.h, z3\.h\[4\]
+.*:	64780400 	fmls	z0\.h, z0\.h, z0\.h\[7\]
+.*:	64780400 	fmls	z0\.h, z0\.h, z0\.h\[7\]
+.*:	647d0400 	fmls	z0\.h, z0\.h, z5\.h\[7\]
+.*:	647d0400 	fmls	z0\.h, z0\.h, z5\.h\[7\]
+.*:	64a00400 	fmls	z0\.s, z0\.s, z0\.s\[0\]
+.*:	64a00400 	fmls	z0\.s, z0\.s, z0\.s\[0\]
+.*:	64a00401 	fmls	z1\.s, z0\.s, z0\.s\[0\]
+.*:	64a00401 	fmls	z1\.s, z0\.s, z0\.s\[0\]
+.*:	64a0041f 	fmls	z31\.s, z0\.s, z0\.s\[0\]
+.*:	64a0041f 	fmls	z31\.s, z0\.s, z0\.s\[0\]
+.*:	64a00440 	fmls	z0\.s, z2\.s, z0\.s\[0\]
+.*:	64a00440 	fmls	z0\.s, z2\.s, z0\.s\[0\]
+.*:	64a007e0 	fmls	z0\.s, z31\.s, z0\.s\[0\]
+.*:	64a007e0 	fmls	z0\.s, z31\.s, z0\.s\[0\]
+.*:	64a30400 	fmls	z0\.s, z0\.s, z3\.s\[0\]
+.*:	64a30400 	fmls	z0\.s, z0\.s, z3\.s\[0\]
+.*:	64a70400 	fmls	z0\.s, z0\.s, z7\.s\[0\]
+.*:	64a70400 	fmls	z0\.s, z0\.s, z7\.s\[0\]
+.*:	64a80400 	fmls	z0\.s, z0\.s, z0\.s\[1\]
+.*:	64a80400 	fmls	z0\.s, z0\.s, z0\.s\[1\]
+.*:	64ac0400 	fmls	z0\.s, z0\.s, z4\.s\[1\]
+.*:	64ac0400 	fmls	z0\.s, z0\.s, z4\.s\[1\]
+.*:	64b30400 	fmls	z0\.s, z0\.s, z3\.s\[2\]
+.*:	64b30400 	fmls	z0\.s, z0\.s, z3\.s\[2\]
+.*:	64b80400 	fmls	z0\.s, z0\.s, z0\.s\[3\]
+.*:	64b80400 	fmls	z0\.s, z0\.s, z0\.s\[3\]
+.*:	64bd0400 	fmls	z0\.s, z0\.s, z5\.s\[3\]
+.*:	64bd0400 	fmls	z0\.s, z0\.s, z5\.s\[3\]
+.*:	64e00400 	fmls	z0\.d, z0\.d, z0\.d\[0\]
+.*:	64e00400 	fmls	z0\.d, z0\.d, z0\.d\[0\]
+.*:	64e00401 	fmls	z1\.d, z0\.d, z0\.d\[0\]
+.*:	64e00401 	fmls	z1\.d, z0\.d, z0\.d\[0\]
+.*:	64e0041f 	fmls	z31\.d, z0\.d, z0\.d\[0\]
+.*:	64e0041f 	fmls	z31\.d, z0\.d, z0\.d\[0\]
+.*:	64e00440 	fmls	z0\.d, z2\.d, z0\.d\[0\]
+.*:	64e00440 	fmls	z0\.d, z2\.d, z0\.d\[0\]
+.*:	64e007e0 	fmls	z0\.d, z31\.d, z0\.d\[0\]
+.*:	64e007e0 	fmls	z0\.d, z31\.d, z0\.d\[0\]
+.*:	64e30400 	fmls	z0\.d, z0\.d, z3\.d\[0\]
+.*:	64e30400 	fmls	z0\.d, z0\.d, z3\.d\[0\]
+.*:	64ef0400 	fmls	z0\.d, z0\.d, z15\.d\[0\]
+.*:	64ef0400 	fmls	z0\.d, z0\.d, z15\.d\[0\]
+.*:	64f00400 	fmls	z0\.d, z0\.d, z0\.d\[1\]
+.*:	64f00400 	fmls	z0\.d, z0\.d, z0\.d\[1\]
+.*:	64fb0400 	fmls	z0\.d, z0\.d, z11\.d\[1\]
+.*:	64fb0400 	fmls	z0\.d, z0\.d, z11\.d\[1\]
+.*:	6560a000 	fmsb	z0\.h, p0/m, z0\.h, z0\.h
+.*:	6560a000 	fmsb	z0\.h, p0/m, z0\.h, z0\.h
+.*:	6560a001 	fmsb	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560a001 	fmsb	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560a01f 	fmsb	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560a01f 	fmsb	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560a800 	fmsb	z0\.h, p2/m, z0\.h, z0\.h
+.*:	6560a800 	fmsb	z0\.h, p2/m, z0\.h, z0\.h
+.*:	6560bc00 	fmsb	z0\.h, p7/m, z0\.h, z0\.h
+.*:	6560bc00 	fmsb	z0\.h, p7/m, z0\.h, z0\.h
+.*:	6560a060 	fmsb	z0\.h, p0/m, z3\.h, z0\.h
+.*:	6560a060 	fmsb	z0\.h, p0/m, z3\.h, z0\.h
+.*:	6560a3e0 	fmsb	z0\.h, p0/m, z31\.h, z0\.h
+.*:	6560a3e0 	fmsb	z0\.h, p0/m, z31\.h, z0\.h
+.*:	6564a000 	fmsb	z0\.h, p0/m, z0\.h, z4\.h
+.*:	6564a000 	fmsb	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657fa000 	fmsb	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657fa000 	fmsb	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a0a000 	fmsb	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a0a000 	fmsb	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a0a001 	fmsb	z1\.s, p0/m, z0\.s, z0\.s
@@ -9716,6 +10910,20 @@ Disassembly of section .*:
 .*:	65e4a000 	fmsb	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ffa000 	fmsb	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ffa000 	fmsb	z0\.d, p0/m, z0\.d, z31\.d
+.*:	65400800 	fmul	z0\.h, z0\.h, z0\.h
+.*:	65400800 	fmul	z0\.h, z0\.h, z0\.h
+.*:	65400801 	fmul	z1\.h, z0\.h, z0\.h
+.*:	65400801 	fmul	z1\.h, z0\.h, z0\.h
+.*:	6540081f 	fmul	z31\.h, z0\.h, z0\.h
+.*:	6540081f 	fmul	z31\.h, z0\.h, z0\.h
+.*:	65400840 	fmul	z0\.h, z2\.h, z0\.h
+.*:	65400840 	fmul	z0\.h, z2\.h, z0\.h
+.*:	65400be0 	fmul	z0\.h, z31\.h, z0\.h
+.*:	65400be0 	fmul	z0\.h, z31\.h, z0\.h
+.*:	65430800 	fmul	z0\.h, z0\.h, z3\.h
+.*:	65430800 	fmul	z0\.h, z0\.h, z3\.h
+.*:	655f0800 	fmul	z0\.h, z0\.h, z31\.h
+.*:	655f0800 	fmul	z0\.h, z0\.h, z31\.h
 .*:	65800800 	fmul	z0\.s, z0\.s, z0\.s
 .*:	65800800 	fmul	z0\.s, z0\.s, z0\.s
 .*:	65800801 	fmul	z1\.s, z0\.s, z0\.s
@@ -9744,6 +10952,22 @@ Disassembly of section .*:
 .*:	65c30800 	fmul	z0\.d, z0\.d, z3\.d
 .*:	65df0800 	fmul	z0\.d, z0\.d, z31\.d
 .*:	65df0800 	fmul	z0\.d, z0\.d, z31\.d
+.*:	65428000 	fmul	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65428000 	fmul	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65428001 	fmul	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65428001 	fmul	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6542801f 	fmul	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6542801f 	fmul	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65428800 	fmul	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65428800 	fmul	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65429c00 	fmul	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65429c00 	fmul	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65428003 	fmul	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65428003 	fmul	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65428080 	fmul	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65428080 	fmul	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654283e0 	fmul	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654283e0 	fmul	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65828000 	fmul	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65828000 	fmul	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65828001 	fmul	z1\.s, p0/m, z1\.s, z0\.s
@@ -9776,6 +11000,34 @@ Disassembly of section .*:
 .*:	65c28080 	fmul	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c283e0 	fmul	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c283e0 	fmul	z0\.d, p0/m, z0\.d, z31\.d
+.*:	655a8000 	fmul	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655a8000 	fmul	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655a8000 	fmul	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655a8000 	fmul	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655a8001 	fmul	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655a8001 	fmul	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655a8001 	fmul	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655a8001 	fmul	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655a801f 	fmul	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655a801f 	fmul	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655a801f 	fmul	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655a801f 	fmul	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655a8800 	fmul	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655a8800 	fmul	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655a8800 	fmul	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655a8800 	fmul	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655a9c00 	fmul	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655a9c00 	fmul	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655a9c00 	fmul	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655a9c00 	fmul	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655a8003 	fmul	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655a8003 	fmul	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655a8003 	fmul	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655a8003 	fmul	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655a8020 	fmul	z0\.h, p0/m, z0\.h, #2\.0
+.*:	655a8020 	fmul	z0\.h, p0/m, z0\.h, #2\.0
+.*:	655a8020 	fmul	z0\.h, p0/m, z0\.h, #2\.0
+.*:	655a8020 	fmul	z0\.h, p0/m, z0\.h, #2\.0
 .*:	659a8000 	fmul	z0\.s, p0/m, z0\.s, #0\.5
 .*:	659a8000 	fmul	z0\.s, p0/m, z0\.s, #0\.5
 .*:	659a8000 	fmul	z0\.s, p0/m, z0\.s, #0\.5
@@ -9832,6 +11084,88 @@ Disassembly of section .*:
 .*:	65da8020 	fmul	z0\.d, p0/m, z0\.d, #2\.0
 .*:	65da8020 	fmul	z0\.d, p0/m, z0\.d, #2\.0
 .*:	65da8020 	fmul	z0\.d, p0/m, z0\.d, #2\.0
+.*:	64202000 	fmul	z0\.h, z0\.h, z0\.h\[0\]
+.*:	64202000 	fmul	z0\.h, z0\.h, z0\.h\[0\]
+.*:	64202001 	fmul	z1\.h, z0\.h, z0\.h\[0\]
+.*:	64202001 	fmul	z1\.h, z0\.h, z0\.h\[0\]
+.*:	6420201f 	fmul	z31\.h, z0\.h, z0\.h\[0\]
+.*:	6420201f 	fmul	z31\.h, z0\.h, z0\.h\[0\]
+.*:	64202040 	fmul	z0\.h, z2\.h, z0\.h\[0\]
+.*:	64202040 	fmul	z0\.h, z2\.h, z0\.h\[0\]
+.*:	642023e0 	fmul	z0\.h, z31\.h, z0\.h\[0\]
+.*:	642023e0 	fmul	z0\.h, z31\.h, z0\.h\[0\]
+.*:	64232000 	fmul	z0\.h, z0\.h, z3\.h\[0\]
+.*:	64232000 	fmul	z0\.h, z0\.h, z3\.h\[0\]
+.*:	64272000 	fmul	z0\.h, z0\.h, z7\.h\[0\]
+.*:	64272000 	fmul	z0\.h, z0\.h, z7\.h\[0\]
+.*:	64282000 	fmul	z0\.h, z0\.h, z0\.h\[1\]
+.*:	64282000 	fmul	z0\.h, z0\.h, z0\.h\[1\]
+.*:	642c2000 	fmul	z0\.h, z0\.h, z4\.h\[1\]
+.*:	642c2000 	fmul	z0\.h, z0\.h, z4\.h\[1\]
+.*:	64632000 	fmul	z0\.h, z0\.h, z3\.h\[4\]
+.*:	64632000 	fmul	z0\.h, z0\.h, z3\.h\[4\]
+.*:	64782000 	fmul	z0\.h, z0\.h, z0\.h\[7\]
+.*:	64782000 	fmul	z0\.h, z0\.h, z0\.h\[7\]
+.*:	647d2000 	fmul	z0\.h, z0\.h, z5\.h\[7\]
+.*:	647d2000 	fmul	z0\.h, z0\.h, z5\.h\[7\]
+.*:	64a02000 	fmul	z0\.s, z0\.s, z0\.s\[0\]
+.*:	64a02000 	fmul	z0\.s, z0\.s, z0\.s\[0\]
+.*:	64a02001 	fmul	z1\.s, z0\.s, z0\.s\[0\]
+.*:	64a02001 	fmul	z1\.s, z0\.s, z0\.s\[0\]
+.*:	64a0201f 	fmul	z31\.s, z0\.s, z0\.s\[0\]
+.*:	64a0201f 	fmul	z31\.s, z0\.s, z0\.s\[0\]
+.*:	64a02040 	fmul	z0\.s, z2\.s, z0\.s\[0\]
+.*:	64a02040 	fmul	z0\.s, z2\.s, z0\.s\[0\]
+.*:	64a023e0 	fmul	z0\.s, z31\.s, z0\.s\[0\]
+.*:	64a023e0 	fmul	z0\.s, z31\.s, z0\.s\[0\]
+.*:	64a32000 	fmul	z0\.s, z0\.s, z3\.s\[0\]
+.*:	64a32000 	fmul	z0\.s, z0\.s, z3\.s\[0\]
+.*:	64a72000 	fmul	z0\.s, z0\.s, z7\.s\[0\]
+.*:	64a72000 	fmul	z0\.s, z0\.s, z7\.s\[0\]
+.*:	64a82000 	fmul	z0\.s, z0\.s, z0\.s\[1\]
+.*:	64a82000 	fmul	z0\.s, z0\.s, z0\.s\[1\]
+.*:	64ac2000 	fmul	z0\.s, z0\.s, z4\.s\[1\]
+.*:	64ac2000 	fmul	z0\.s, z0\.s, z4\.s\[1\]
+.*:	64b32000 	fmul	z0\.s, z0\.s, z3\.s\[2\]
+.*:	64b32000 	fmul	z0\.s, z0\.s, z3\.s\[2\]
+.*:	64b82000 	fmul	z0\.s, z0\.s, z0\.s\[3\]
+.*:	64b82000 	fmul	z0\.s, z0\.s, z0\.s\[3\]
+.*:	64bd2000 	fmul	z0\.s, z0\.s, z5\.s\[3\]
+.*:	64bd2000 	fmul	z0\.s, z0\.s, z5\.s\[3\]
+.*:	64e02000 	fmul	z0\.d, z0\.d, z0\.d\[0\]
+.*:	64e02000 	fmul	z0\.d, z0\.d, z0\.d\[0\]
+.*:	64e02001 	fmul	z1\.d, z0\.d, z0\.d\[0\]
+.*:	64e02001 	fmul	z1\.d, z0\.d, z0\.d\[0\]
+.*:	64e0201f 	fmul	z31\.d, z0\.d, z0\.d\[0\]
+.*:	64e0201f 	fmul	z31\.d, z0\.d, z0\.d\[0\]
+.*:	64e02040 	fmul	z0\.d, z2\.d, z0\.d\[0\]
+.*:	64e02040 	fmul	z0\.d, z2\.d, z0\.d\[0\]
+.*:	64e023e0 	fmul	z0\.d, z31\.d, z0\.d\[0\]
+.*:	64e023e0 	fmul	z0\.d, z31\.d, z0\.d\[0\]
+.*:	64e32000 	fmul	z0\.d, z0\.d, z3\.d\[0\]
+.*:	64e32000 	fmul	z0\.d, z0\.d, z3\.d\[0\]
+.*:	64ef2000 	fmul	z0\.d, z0\.d, z15\.d\[0\]
+.*:	64ef2000 	fmul	z0\.d, z0\.d, z15\.d\[0\]
+.*:	64f02000 	fmul	z0\.d, z0\.d, z0\.d\[1\]
+.*:	64f02000 	fmul	z0\.d, z0\.d, z0\.d\[1\]
+.*:	64fb2000 	fmul	z0\.d, z0\.d, z11\.d\[1\]
+.*:	64fb2000 	fmul	z0\.d, z0\.d, z11\.d\[1\]
+.*:	654a8000 	fmulx	z0\.h, p0/m, z0\.h, z0\.h
+.*:	654a8000 	fmulx	z0\.h, p0/m, z0\.h, z0\.h
+.*:	654a8001 	fmulx	z1\.h, p0/m, z1\.h, z0\.h
+.*:	654a8001 	fmulx	z1\.h, p0/m, z1\.h, z0\.h
+.*:	654a801f 	fmulx	z31\.h, p0/m, z31\.h, z0\.h
+.*:	654a801f 	fmulx	z31\.h, p0/m, z31\.h, z0\.h
+.*:	654a8800 	fmulx	z0\.h, p2/m, z0\.h, z0\.h
+.*:	654a8800 	fmulx	z0\.h, p2/m, z0\.h, z0\.h
+.*:	654a9c00 	fmulx	z0\.h, p7/m, z0\.h, z0\.h
+.*:	654a9c00 	fmulx	z0\.h, p7/m, z0\.h, z0\.h
+.*:	654a8003 	fmulx	z3\.h, p0/m, z3\.h, z0\.h
+.*:	654a8003 	fmulx	z3\.h, p0/m, z3\.h, z0\.h
+.*:	654a8080 	fmulx	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654a8080 	fmulx	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654a83e0 	fmulx	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654a83e0 	fmulx	z0\.h, p0/m, z0\.h, z31\.h
 .*:	658a8000 	fmulx	z0\.s, p0/m, z0\.s, z0\.s
 .*:	658a8000 	fmulx	z0\.s, p0/m, z0\.s, z0\.s
 .*:	658a8001 	fmulx	z1\.s, p0/m, z1\.s, z0\.s
@@ -9864,6 +11198,20 @@ Disassembly of section .*:
 .*:	65ca8080 	fmulx	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ca83e0 	fmulx	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ca83e0 	fmulx	z0\.d, p0/m, z0\.d, z31\.d
+.*:	045da000 	fneg	z0\.h, p0/m, z0\.h
+.*:	045da000 	fneg	z0\.h, p0/m, z0\.h
+.*:	045da001 	fneg	z1\.h, p0/m, z0\.h
+.*:	045da001 	fneg	z1\.h, p0/m, z0\.h
+.*:	045da01f 	fneg	z31\.h, p0/m, z0\.h
+.*:	045da01f 	fneg	z31\.h, p0/m, z0\.h
+.*:	045da800 	fneg	z0\.h, p2/m, z0\.h
+.*:	045da800 	fneg	z0\.h, p2/m, z0\.h
+.*:	045dbc00 	fneg	z0\.h, p7/m, z0\.h
+.*:	045dbc00 	fneg	z0\.h, p7/m, z0\.h
+.*:	045da060 	fneg	z0\.h, p0/m, z3\.h
+.*:	045da060 	fneg	z0\.h, p0/m, z3\.h
+.*:	045da3e0 	fneg	z0\.h, p0/m, z31\.h
+.*:	045da3e0 	fneg	z0\.h, p0/m, z31\.h
 .*:	049da000 	fneg	z0\.s, p0/m, z0\.s
 .*:	049da000 	fneg	z0\.s, p0/m, z0\.s
 .*:	049da001 	fneg	z1\.s, p0/m, z0\.s
@@ -9892,6 +11240,24 @@ Disassembly of section .*:
 .*:	04dda060 	fneg	z0\.d, p0/m, z3\.d
 .*:	04dda3e0 	fneg	z0\.d, p0/m, z31\.d
 .*:	04dda3e0 	fneg	z0\.d, p0/m, z31\.d
+.*:	6560c000 	fnmad	z0\.h, p0/m, z0\.h, z0\.h
+.*:	6560c000 	fnmad	z0\.h, p0/m, z0\.h, z0\.h
+.*:	6560c001 	fnmad	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560c001 	fnmad	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560c01f 	fnmad	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560c01f 	fnmad	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560c800 	fnmad	z0\.h, p2/m, z0\.h, z0\.h
+.*:	6560c800 	fnmad	z0\.h, p2/m, z0\.h, z0\.h
+.*:	6560dc00 	fnmad	z0\.h, p7/m, z0\.h, z0\.h
+.*:	6560dc00 	fnmad	z0\.h, p7/m, z0\.h, z0\.h
+.*:	6560c060 	fnmad	z0\.h, p0/m, z3\.h, z0\.h
+.*:	6560c060 	fnmad	z0\.h, p0/m, z3\.h, z0\.h
+.*:	6560c3e0 	fnmad	z0\.h, p0/m, z31\.h, z0\.h
+.*:	6560c3e0 	fnmad	z0\.h, p0/m, z31\.h, z0\.h
+.*:	6564c000 	fnmad	z0\.h, p0/m, z0\.h, z4\.h
+.*:	6564c000 	fnmad	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657fc000 	fnmad	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657fc000 	fnmad	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a0c000 	fnmad	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a0c000 	fnmad	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a0c001 	fnmad	z1\.s, p0/m, z0\.s, z0\.s
@@ -9928,6 +11294,24 @@ Disassembly of section .*:
 .*:	65e4c000 	fnmad	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ffc000 	fnmad	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ffc000 	fnmad	z0\.d, p0/m, z0\.d, z31\.d
+.*:	65604000 	fnmla	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65604000 	fnmla	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65604001 	fnmla	z1\.h, p0/m, z0\.h, z0\.h
+.*:	65604001 	fnmla	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560401f 	fnmla	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560401f 	fnmla	z31\.h, p0/m, z0\.h, z0\.h
+.*:	65604800 	fnmla	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65604800 	fnmla	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65605c00 	fnmla	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65605c00 	fnmla	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65604060 	fnmla	z0\.h, p0/m, z3\.h, z0\.h
+.*:	65604060 	fnmla	z0\.h, p0/m, z3\.h, z0\.h
+.*:	656043e0 	fnmla	z0\.h, p0/m, z31\.h, z0\.h
+.*:	656043e0 	fnmla	z0\.h, p0/m, z31\.h, z0\.h
+.*:	65644000 	fnmla	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65644000 	fnmla	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657f4000 	fnmla	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657f4000 	fnmla	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a04000 	fnmla	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a04000 	fnmla	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a04001 	fnmla	z1\.s, p0/m, z0\.s, z0\.s
@@ -9964,6 +11348,24 @@ Disassembly of section .*:
 .*:	65e44000 	fnmla	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ff4000 	fnmla	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ff4000 	fnmla	z0\.d, p0/m, z0\.d, z31\.d
+.*:	65606000 	fnmls	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65606000 	fnmls	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65606001 	fnmls	z1\.h, p0/m, z0\.h, z0\.h
+.*:	65606001 	fnmls	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560601f 	fnmls	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560601f 	fnmls	z31\.h, p0/m, z0\.h, z0\.h
+.*:	65606800 	fnmls	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65606800 	fnmls	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65607c00 	fnmls	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65607c00 	fnmls	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65606060 	fnmls	z0\.h, p0/m, z3\.h, z0\.h
+.*:	65606060 	fnmls	z0\.h, p0/m, z3\.h, z0\.h
+.*:	656063e0 	fnmls	z0\.h, p0/m, z31\.h, z0\.h
+.*:	656063e0 	fnmls	z0\.h, p0/m, z31\.h, z0\.h
+.*:	65646000 	fnmls	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65646000 	fnmls	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657f6000 	fnmls	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657f6000 	fnmls	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a06000 	fnmls	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a06000 	fnmls	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a06001 	fnmls	z1\.s, p0/m, z0\.s, z0\.s
@@ -10000,6 +11402,24 @@ Disassembly of section .*:
 .*:	65e46000 	fnmls	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ff6000 	fnmls	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ff6000 	fnmls	z0\.d, p0/m, z0\.d, z31\.d
+.*:	6560e000 	fnmsb	z0\.h, p0/m, z0\.h, z0\.h
+.*:	6560e000 	fnmsb	z0\.h, p0/m, z0\.h, z0\.h
+.*:	6560e001 	fnmsb	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560e001 	fnmsb	z1\.h, p0/m, z0\.h, z0\.h
+.*:	6560e01f 	fnmsb	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560e01f 	fnmsb	z31\.h, p0/m, z0\.h, z0\.h
+.*:	6560e800 	fnmsb	z0\.h, p2/m, z0\.h, z0\.h
+.*:	6560e800 	fnmsb	z0\.h, p2/m, z0\.h, z0\.h
+.*:	6560fc00 	fnmsb	z0\.h, p7/m, z0\.h, z0\.h
+.*:	6560fc00 	fnmsb	z0\.h, p7/m, z0\.h, z0\.h
+.*:	6560e060 	fnmsb	z0\.h, p0/m, z3\.h, z0\.h
+.*:	6560e060 	fnmsb	z0\.h, p0/m, z3\.h, z0\.h
+.*:	6560e3e0 	fnmsb	z0\.h, p0/m, z31\.h, z0\.h
+.*:	6560e3e0 	fnmsb	z0\.h, p0/m, z31\.h, z0\.h
+.*:	6564e000 	fnmsb	z0\.h, p0/m, z0\.h, z4\.h
+.*:	6564e000 	fnmsb	z0\.h, p0/m, z0\.h, z4\.h
+.*:	657fe000 	fnmsb	z0\.h, p0/m, z0\.h, z31\.h
+.*:	657fe000 	fnmsb	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65a0e000 	fnmsb	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a0e000 	fnmsb	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65a0e001 	fnmsb	z1\.s, p0/m, z0\.s, z0\.s
@@ -10036,6 +11456,16 @@ Disassembly of section .*:
 .*:	65e4e000 	fnmsb	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65ffe000 	fnmsb	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65ffe000 	fnmsb	z0\.d, p0/m, z0\.d, z31\.d
+.*:	654e3000 	frecpe	z0\.h, z0\.h
+.*:	654e3000 	frecpe	z0\.h, z0\.h
+.*:	654e3001 	frecpe	z1\.h, z0\.h
+.*:	654e3001 	frecpe	z1\.h, z0\.h
+.*:	654e301f 	frecpe	z31\.h, z0\.h
+.*:	654e301f 	frecpe	z31\.h, z0\.h
+.*:	654e3040 	frecpe	z0\.h, z2\.h
+.*:	654e3040 	frecpe	z0\.h, z2\.h
+.*:	654e33e0 	frecpe	z0\.h, z31\.h
+.*:	654e33e0 	frecpe	z0\.h, z31\.h
 .*:	658e3000 	frecpe	z0\.s, z0\.s
 .*:	658e3000 	frecpe	z0\.s, z0\.s
 .*:	658e3001 	frecpe	z1\.s, z0\.s
@@ -10056,6 +11486,20 @@ Disassembly of section .*:
 .*:	65ce3040 	frecpe	z0\.d, z2\.d
 .*:	65ce33e0 	frecpe	z0\.d, z31\.d
 .*:	65ce33e0 	frecpe	z0\.d, z31\.d
+.*:	65401800 	frecps	z0\.h, z0\.h, z0\.h
+.*:	65401800 	frecps	z0\.h, z0\.h, z0\.h
+.*:	65401801 	frecps	z1\.h, z0\.h, z0\.h
+.*:	65401801 	frecps	z1\.h, z0\.h, z0\.h
+.*:	6540181f 	frecps	z31\.h, z0\.h, z0\.h
+.*:	6540181f 	frecps	z31\.h, z0\.h, z0\.h
+.*:	65401840 	frecps	z0\.h, z2\.h, z0\.h
+.*:	65401840 	frecps	z0\.h, z2\.h, z0\.h
+.*:	65401be0 	frecps	z0\.h, z31\.h, z0\.h
+.*:	65401be0 	frecps	z0\.h, z31\.h, z0\.h
+.*:	65431800 	frecps	z0\.h, z0\.h, z3\.h
+.*:	65431800 	frecps	z0\.h, z0\.h, z3\.h
+.*:	655f1800 	frecps	z0\.h, z0\.h, z31\.h
+.*:	655f1800 	frecps	z0\.h, z0\.h, z31\.h
 .*:	65801800 	frecps	z0\.s, z0\.s, z0\.s
 .*:	65801800 	frecps	z0\.s, z0\.s, z0\.s
 .*:	65801801 	frecps	z1\.s, z0\.s, z0\.s
@@ -10084,6 +11528,20 @@ Disassembly of section .*:
 .*:	65c31800 	frecps	z0\.d, z0\.d, z3\.d
 .*:	65df1800 	frecps	z0\.d, z0\.d, z31\.d
 .*:	65df1800 	frecps	z0\.d, z0\.d, z31\.d
+.*:	654ca000 	frecpx	z0\.h, p0/m, z0\.h
+.*:	654ca000 	frecpx	z0\.h, p0/m, z0\.h
+.*:	654ca001 	frecpx	z1\.h, p0/m, z0\.h
+.*:	654ca001 	frecpx	z1\.h, p0/m, z0\.h
+.*:	654ca01f 	frecpx	z31\.h, p0/m, z0\.h
+.*:	654ca01f 	frecpx	z31\.h, p0/m, z0\.h
+.*:	654ca800 	frecpx	z0\.h, p2/m, z0\.h
+.*:	654ca800 	frecpx	z0\.h, p2/m, z0\.h
+.*:	654cbc00 	frecpx	z0\.h, p7/m, z0\.h
+.*:	654cbc00 	frecpx	z0\.h, p7/m, z0\.h
+.*:	654ca060 	frecpx	z0\.h, p0/m, z3\.h
+.*:	654ca060 	frecpx	z0\.h, p0/m, z3\.h
+.*:	654ca3e0 	frecpx	z0\.h, p0/m, z31\.h
+.*:	654ca3e0 	frecpx	z0\.h, p0/m, z31\.h
 .*:	658ca000 	frecpx	z0\.s, p0/m, z0\.s
 .*:	658ca000 	frecpx	z0\.s, p0/m, z0\.s
 .*:	658ca001 	frecpx	z1\.s, p0/m, z0\.s
@@ -10112,6 +11570,20 @@ Disassembly of section .*:
 .*:	65cca060 	frecpx	z0\.d, p0/m, z3\.d
 .*:	65cca3e0 	frecpx	z0\.d, p0/m, z31\.d
 .*:	65cca3e0 	frecpx	z0\.d, p0/m, z31\.d
+.*:	6544a000 	frinta	z0\.h, p0/m, z0\.h
+.*:	6544a000 	frinta	z0\.h, p0/m, z0\.h
+.*:	6544a001 	frinta	z1\.h, p0/m, z0\.h
+.*:	6544a001 	frinta	z1\.h, p0/m, z0\.h
+.*:	6544a01f 	frinta	z31\.h, p0/m, z0\.h
+.*:	6544a01f 	frinta	z31\.h, p0/m, z0\.h
+.*:	6544a800 	frinta	z0\.h, p2/m, z0\.h
+.*:	6544a800 	frinta	z0\.h, p2/m, z0\.h
+.*:	6544bc00 	frinta	z0\.h, p7/m, z0\.h
+.*:	6544bc00 	frinta	z0\.h, p7/m, z0\.h
+.*:	6544a060 	frinta	z0\.h, p0/m, z3\.h
+.*:	6544a060 	frinta	z0\.h, p0/m, z3\.h
+.*:	6544a3e0 	frinta	z0\.h, p0/m, z31\.h
+.*:	6544a3e0 	frinta	z0\.h, p0/m, z31\.h
 .*:	6584a000 	frinta	z0\.s, p0/m, z0\.s
 .*:	6584a000 	frinta	z0\.s, p0/m, z0\.s
 .*:	6584a001 	frinta	z1\.s, p0/m, z0\.s
@@ -10140,6 +11612,20 @@ Disassembly of section .*:
 .*:	65c4a060 	frinta	z0\.d, p0/m, z3\.d
 .*:	65c4a3e0 	frinta	z0\.d, p0/m, z31\.d
 .*:	65c4a3e0 	frinta	z0\.d, p0/m, z31\.d
+.*:	6547a000 	frinti	z0\.h, p0/m, z0\.h
+.*:	6547a000 	frinti	z0\.h, p0/m, z0\.h
+.*:	6547a001 	frinti	z1\.h, p0/m, z0\.h
+.*:	6547a001 	frinti	z1\.h, p0/m, z0\.h
+.*:	6547a01f 	frinti	z31\.h, p0/m, z0\.h
+.*:	6547a01f 	frinti	z31\.h, p0/m, z0\.h
+.*:	6547a800 	frinti	z0\.h, p2/m, z0\.h
+.*:	6547a800 	frinti	z0\.h, p2/m, z0\.h
+.*:	6547bc00 	frinti	z0\.h, p7/m, z0\.h
+.*:	6547bc00 	frinti	z0\.h, p7/m, z0\.h
+.*:	6547a060 	frinti	z0\.h, p0/m, z3\.h
+.*:	6547a060 	frinti	z0\.h, p0/m, z3\.h
+.*:	6547a3e0 	frinti	z0\.h, p0/m, z31\.h
+.*:	6547a3e0 	frinti	z0\.h, p0/m, z31\.h
 .*:	6587a000 	frinti	z0\.s, p0/m, z0\.s
 .*:	6587a000 	frinti	z0\.s, p0/m, z0\.s
 .*:	6587a001 	frinti	z1\.s, p0/m, z0\.s
@@ -10168,6 +11654,20 @@ Disassembly of section .*:
 .*:	65c7a060 	frinti	z0\.d, p0/m, z3\.d
 .*:	65c7a3e0 	frinti	z0\.d, p0/m, z31\.d
 .*:	65c7a3e0 	frinti	z0\.d, p0/m, z31\.d
+.*:	6542a000 	frintm	z0\.h, p0/m, z0\.h
+.*:	6542a000 	frintm	z0\.h, p0/m, z0\.h
+.*:	6542a001 	frintm	z1\.h, p0/m, z0\.h
+.*:	6542a001 	frintm	z1\.h, p0/m, z0\.h
+.*:	6542a01f 	frintm	z31\.h, p0/m, z0\.h
+.*:	6542a01f 	frintm	z31\.h, p0/m, z0\.h
+.*:	6542a800 	frintm	z0\.h, p2/m, z0\.h
+.*:	6542a800 	frintm	z0\.h, p2/m, z0\.h
+.*:	6542bc00 	frintm	z0\.h, p7/m, z0\.h
+.*:	6542bc00 	frintm	z0\.h, p7/m, z0\.h
+.*:	6542a060 	frintm	z0\.h, p0/m, z3\.h
+.*:	6542a060 	frintm	z0\.h, p0/m, z3\.h
+.*:	6542a3e0 	frintm	z0\.h, p0/m, z31\.h
+.*:	6542a3e0 	frintm	z0\.h, p0/m, z31\.h
 .*:	6582a000 	frintm	z0\.s, p0/m, z0\.s
 .*:	6582a000 	frintm	z0\.s, p0/m, z0\.s
 .*:	6582a001 	frintm	z1\.s, p0/m, z0\.s
@@ -10196,6 +11696,20 @@ Disassembly of section .*:
 .*:	65c2a060 	frintm	z0\.d, p0/m, z3\.d
 .*:	65c2a3e0 	frintm	z0\.d, p0/m, z31\.d
 .*:	65c2a3e0 	frintm	z0\.d, p0/m, z31\.d
+.*:	6540a000 	frintn	z0\.h, p0/m, z0\.h
+.*:	6540a000 	frintn	z0\.h, p0/m, z0\.h
+.*:	6540a001 	frintn	z1\.h, p0/m, z0\.h
+.*:	6540a001 	frintn	z1\.h, p0/m, z0\.h
+.*:	6540a01f 	frintn	z31\.h, p0/m, z0\.h
+.*:	6540a01f 	frintn	z31\.h, p0/m, z0\.h
+.*:	6540a800 	frintn	z0\.h, p2/m, z0\.h
+.*:	6540a800 	frintn	z0\.h, p2/m, z0\.h
+.*:	6540bc00 	frintn	z0\.h, p7/m, z0\.h
+.*:	6540bc00 	frintn	z0\.h, p7/m, z0\.h
+.*:	6540a060 	frintn	z0\.h, p0/m, z3\.h
+.*:	6540a060 	frintn	z0\.h, p0/m, z3\.h
+.*:	6540a3e0 	frintn	z0\.h, p0/m, z31\.h
+.*:	6540a3e0 	frintn	z0\.h, p0/m, z31\.h
 .*:	6580a000 	frintn	z0\.s, p0/m, z0\.s
 .*:	6580a000 	frintn	z0\.s, p0/m, z0\.s
 .*:	6580a001 	frintn	z1\.s, p0/m, z0\.s
@@ -10224,6 +11738,20 @@ Disassembly of section .*:
 .*:	65c0a060 	frintn	z0\.d, p0/m, z3\.d
 .*:	65c0a3e0 	frintn	z0\.d, p0/m, z31\.d
 .*:	65c0a3e0 	frintn	z0\.d, p0/m, z31\.d
+.*:	6541a000 	frintp	z0\.h, p0/m, z0\.h
+.*:	6541a000 	frintp	z0\.h, p0/m, z0\.h
+.*:	6541a001 	frintp	z1\.h, p0/m, z0\.h
+.*:	6541a001 	frintp	z1\.h, p0/m, z0\.h
+.*:	6541a01f 	frintp	z31\.h, p0/m, z0\.h
+.*:	6541a01f 	frintp	z31\.h, p0/m, z0\.h
+.*:	6541a800 	frintp	z0\.h, p2/m, z0\.h
+.*:	6541a800 	frintp	z0\.h, p2/m, z0\.h
+.*:	6541bc00 	frintp	z0\.h, p7/m, z0\.h
+.*:	6541bc00 	frintp	z0\.h, p7/m, z0\.h
+.*:	6541a060 	frintp	z0\.h, p0/m, z3\.h
+.*:	6541a060 	frintp	z0\.h, p0/m, z3\.h
+.*:	6541a3e0 	frintp	z0\.h, p0/m, z31\.h
+.*:	6541a3e0 	frintp	z0\.h, p0/m, z31\.h
 .*:	6581a000 	frintp	z0\.s, p0/m, z0\.s
 .*:	6581a000 	frintp	z0\.s, p0/m, z0\.s
 .*:	6581a001 	frintp	z1\.s, p0/m, z0\.s
@@ -10252,6 +11780,20 @@ Disassembly of section .*:
 .*:	65c1a060 	frintp	z0\.d, p0/m, z3\.d
 .*:	65c1a3e0 	frintp	z0\.d, p0/m, z31\.d
 .*:	65c1a3e0 	frintp	z0\.d, p0/m, z31\.d
+.*:	6546a000 	frintx	z0\.h, p0/m, z0\.h
+.*:	6546a000 	frintx	z0\.h, p0/m, z0\.h
+.*:	6546a001 	frintx	z1\.h, p0/m, z0\.h
+.*:	6546a001 	frintx	z1\.h, p0/m, z0\.h
+.*:	6546a01f 	frintx	z31\.h, p0/m, z0\.h
+.*:	6546a01f 	frintx	z31\.h, p0/m, z0\.h
+.*:	6546a800 	frintx	z0\.h, p2/m, z0\.h
+.*:	6546a800 	frintx	z0\.h, p2/m, z0\.h
+.*:	6546bc00 	frintx	z0\.h, p7/m, z0\.h
+.*:	6546bc00 	frintx	z0\.h, p7/m, z0\.h
+.*:	6546a060 	frintx	z0\.h, p0/m, z3\.h
+.*:	6546a060 	frintx	z0\.h, p0/m, z3\.h
+.*:	6546a3e0 	frintx	z0\.h, p0/m, z31\.h
+.*:	6546a3e0 	frintx	z0\.h, p0/m, z31\.h
 .*:	6586a000 	frintx	z0\.s, p0/m, z0\.s
 .*:	6586a000 	frintx	z0\.s, p0/m, z0\.s
 .*:	6586a001 	frintx	z1\.s, p0/m, z0\.s
@@ -10280,6 +11822,20 @@ Disassembly of section .*:
 .*:	65c6a060 	frintx	z0\.d, p0/m, z3\.d
 .*:	65c6a3e0 	frintx	z0\.d, p0/m, z31\.d
 .*:	65c6a3e0 	frintx	z0\.d, p0/m, z31\.d
+.*:	6543a000 	frintz	z0\.h, p0/m, z0\.h
+.*:	6543a000 	frintz	z0\.h, p0/m, z0\.h
+.*:	6543a001 	frintz	z1\.h, p0/m, z0\.h
+.*:	6543a001 	frintz	z1\.h, p0/m, z0\.h
+.*:	6543a01f 	frintz	z31\.h, p0/m, z0\.h
+.*:	6543a01f 	frintz	z31\.h, p0/m, z0\.h
+.*:	6543a800 	frintz	z0\.h, p2/m, z0\.h
+.*:	6543a800 	frintz	z0\.h, p2/m, z0\.h
+.*:	6543bc00 	frintz	z0\.h, p7/m, z0\.h
+.*:	6543bc00 	frintz	z0\.h, p7/m, z0\.h
+.*:	6543a060 	frintz	z0\.h, p0/m, z3\.h
+.*:	6543a060 	frintz	z0\.h, p0/m, z3\.h
+.*:	6543a3e0 	frintz	z0\.h, p0/m, z31\.h
+.*:	6543a3e0 	frintz	z0\.h, p0/m, z31\.h
 .*:	6583a000 	frintz	z0\.s, p0/m, z0\.s
 .*:	6583a000 	frintz	z0\.s, p0/m, z0\.s
 .*:	6583a001 	frintz	z1\.s, p0/m, z0\.s
@@ -10308,6 +11864,16 @@ Disassembly of section .*:
 .*:	65c3a060 	frintz	z0\.d, p0/m, z3\.d
 .*:	65c3a3e0 	frintz	z0\.d, p0/m, z31\.d
 .*:	65c3a3e0 	frintz	z0\.d, p0/m, z31\.d
+.*:	654f3000 	frsqrte	z0\.h, z0\.h
+.*:	654f3000 	frsqrte	z0\.h, z0\.h
+.*:	654f3001 	frsqrte	z1\.h, z0\.h
+.*:	654f3001 	frsqrte	z1\.h, z0\.h
+.*:	654f301f 	frsqrte	z31\.h, z0\.h
+.*:	654f301f 	frsqrte	z31\.h, z0\.h
+.*:	654f3040 	frsqrte	z0\.h, z2\.h
+.*:	654f3040 	frsqrte	z0\.h, z2\.h
+.*:	654f33e0 	frsqrte	z0\.h, z31\.h
+.*:	654f33e0 	frsqrte	z0\.h, z31\.h
 .*:	658f3000 	frsqrte	z0\.s, z0\.s
 .*:	658f3000 	frsqrte	z0\.s, z0\.s
 .*:	658f3001 	frsqrte	z1\.s, z0\.s
@@ -10328,6 +11894,20 @@ Disassembly of section .*:
 .*:	65cf3040 	frsqrte	z0\.d, z2\.d
 .*:	65cf33e0 	frsqrte	z0\.d, z31\.d
 .*:	65cf33e0 	frsqrte	z0\.d, z31\.d
+.*:	65401c00 	frsqrts	z0\.h, z0\.h, z0\.h
+.*:	65401c00 	frsqrts	z0\.h, z0\.h, z0\.h
+.*:	65401c01 	frsqrts	z1\.h, z0\.h, z0\.h
+.*:	65401c01 	frsqrts	z1\.h, z0\.h, z0\.h
+.*:	65401c1f 	frsqrts	z31\.h, z0\.h, z0\.h
+.*:	65401c1f 	frsqrts	z31\.h, z0\.h, z0\.h
+.*:	65401c40 	frsqrts	z0\.h, z2\.h, z0\.h
+.*:	65401c40 	frsqrts	z0\.h, z2\.h, z0\.h
+.*:	65401fe0 	frsqrts	z0\.h, z31\.h, z0\.h
+.*:	65401fe0 	frsqrts	z0\.h, z31\.h, z0\.h
+.*:	65431c00 	frsqrts	z0\.h, z0\.h, z3\.h
+.*:	65431c00 	frsqrts	z0\.h, z0\.h, z3\.h
+.*:	655f1c00 	frsqrts	z0\.h, z0\.h, z31\.h
+.*:	655f1c00 	frsqrts	z0\.h, z0\.h, z31\.h
 .*:	65801c00 	frsqrts	z0\.s, z0\.s, z0\.s
 .*:	65801c00 	frsqrts	z0\.s, z0\.s, z0\.s
 .*:	65801c01 	frsqrts	z1\.s, z0\.s, z0\.s
@@ -10356,6 +11936,22 @@ Disassembly of section .*:
 .*:	65c31c00 	frsqrts	z0\.d, z0\.d, z3\.d
 .*:	65df1c00 	frsqrts	z0\.d, z0\.d, z31\.d
 .*:	65df1c00 	frsqrts	z0\.d, z0\.d, z31\.d
+.*:	65498000 	fscale	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65498000 	fscale	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65498001 	fscale	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65498001 	fscale	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6549801f 	fscale	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6549801f 	fscale	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65498800 	fscale	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65498800 	fscale	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65499c00 	fscale	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65499c00 	fscale	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65498003 	fscale	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65498003 	fscale	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65498080 	fscale	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65498080 	fscale	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654983e0 	fscale	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654983e0 	fscale	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65898000 	fscale	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65898000 	fscale	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65898001 	fscale	z1\.s, p0/m, z1\.s, z0\.s
@@ -10388,6 +11984,20 @@ Disassembly of section .*:
 .*:	65c98080 	fscale	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c983e0 	fscale	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c983e0 	fscale	z0\.d, p0/m, z0\.d, z31\.d
+.*:	654da000 	fsqrt	z0\.h, p0/m, z0\.h
+.*:	654da000 	fsqrt	z0\.h, p0/m, z0\.h
+.*:	654da001 	fsqrt	z1\.h, p0/m, z0\.h
+.*:	654da001 	fsqrt	z1\.h, p0/m, z0\.h
+.*:	654da01f 	fsqrt	z31\.h, p0/m, z0\.h
+.*:	654da01f 	fsqrt	z31\.h, p0/m, z0\.h
+.*:	654da800 	fsqrt	z0\.h, p2/m, z0\.h
+.*:	654da800 	fsqrt	z0\.h, p2/m, z0\.h
+.*:	654dbc00 	fsqrt	z0\.h, p7/m, z0\.h
+.*:	654dbc00 	fsqrt	z0\.h, p7/m, z0\.h
+.*:	654da060 	fsqrt	z0\.h, p0/m, z3\.h
+.*:	654da060 	fsqrt	z0\.h, p0/m, z3\.h
+.*:	654da3e0 	fsqrt	z0\.h, p0/m, z31\.h
+.*:	654da3e0 	fsqrt	z0\.h, p0/m, z31\.h
 .*:	658da000 	fsqrt	z0\.s, p0/m, z0\.s
 .*:	658da000 	fsqrt	z0\.s, p0/m, z0\.s
 .*:	658da001 	fsqrt	z1\.s, p0/m, z0\.s
@@ -10416,6 +12026,20 @@ Disassembly of section .*:
 .*:	65cda060 	fsqrt	z0\.d, p0/m, z3\.d
 .*:	65cda3e0 	fsqrt	z0\.d, p0/m, z31\.d
 .*:	65cda3e0 	fsqrt	z0\.d, p0/m, z31\.d
+.*:	65400400 	fsub	z0\.h, z0\.h, z0\.h
+.*:	65400400 	fsub	z0\.h, z0\.h, z0\.h
+.*:	65400401 	fsub	z1\.h, z0\.h, z0\.h
+.*:	65400401 	fsub	z1\.h, z0\.h, z0\.h
+.*:	6540041f 	fsub	z31\.h, z0\.h, z0\.h
+.*:	6540041f 	fsub	z31\.h, z0\.h, z0\.h
+.*:	65400440 	fsub	z0\.h, z2\.h, z0\.h
+.*:	65400440 	fsub	z0\.h, z2\.h, z0\.h
+.*:	654007e0 	fsub	z0\.h, z31\.h, z0\.h
+.*:	654007e0 	fsub	z0\.h, z31\.h, z0\.h
+.*:	65430400 	fsub	z0\.h, z0\.h, z3\.h
+.*:	65430400 	fsub	z0\.h, z0\.h, z3\.h
+.*:	655f0400 	fsub	z0\.h, z0\.h, z31\.h
+.*:	655f0400 	fsub	z0\.h, z0\.h, z31\.h
 .*:	65800400 	fsub	z0\.s, z0\.s, z0\.s
 .*:	65800400 	fsub	z0\.s, z0\.s, z0\.s
 .*:	65800401 	fsub	z1\.s, z0\.s, z0\.s
@@ -10444,6 +12068,22 @@ Disassembly of section .*:
 .*:	65c30400 	fsub	z0\.d, z0\.d, z3\.d
 .*:	65df0400 	fsub	z0\.d, z0\.d, z31\.d
 .*:	65df0400 	fsub	z0\.d, z0\.d, z31\.d
+.*:	65418000 	fsub	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65418000 	fsub	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65418001 	fsub	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65418001 	fsub	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6541801f 	fsub	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6541801f 	fsub	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65418800 	fsub	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65418800 	fsub	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65419c00 	fsub	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65419c00 	fsub	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65418003 	fsub	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65418003 	fsub	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65418080 	fsub	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65418080 	fsub	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654183e0 	fsub	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654183e0 	fsub	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65818000 	fsub	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65818000 	fsub	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65818001 	fsub	z1\.s, p0/m, z1\.s, z0\.s
@@ -10476,6 +12116,34 @@ Disassembly of section .*:
 .*:	65c18080 	fsub	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c183e0 	fsub	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c183e0 	fsub	z0\.d, p0/m, z0\.d, z31\.d
+.*:	65598000 	fsub	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65598000 	fsub	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65598000 	fsub	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65598000 	fsub	z0\.h, p0/m, z0\.h, #0\.5
+.*:	65598001 	fsub	z1\.h, p0/m, z1\.h, #0\.5
+.*:	65598001 	fsub	z1\.h, p0/m, z1\.h, #0\.5
+.*:	65598001 	fsub	z1\.h, p0/m, z1\.h, #0\.5
+.*:	65598001 	fsub	z1\.h, p0/m, z1\.h, #0\.5
+.*:	6559801f 	fsub	z31\.h, p0/m, z31\.h, #0\.5
+.*:	6559801f 	fsub	z31\.h, p0/m, z31\.h, #0\.5
+.*:	6559801f 	fsub	z31\.h, p0/m, z31\.h, #0\.5
+.*:	6559801f 	fsub	z31\.h, p0/m, z31\.h, #0\.5
+.*:	65598800 	fsub	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65598800 	fsub	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65598800 	fsub	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65598800 	fsub	z0\.h, p2/m, z0\.h, #0\.5
+.*:	65599c00 	fsub	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65599c00 	fsub	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65599c00 	fsub	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65599c00 	fsub	z0\.h, p7/m, z0\.h, #0\.5
+.*:	65598003 	fsub	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65598003 	fsub	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65598003 	fsub	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65598003 	fsub	z3\.h, p0/m, z3\.h, #0\.5
+.*:	65598020 	fsub	z0\.h, p0/m, z0\.h, #1\.0
+.*:	65598020 	fsub	z0\.h, p0/m, z0\.h, #1\.0
+.*:	65598020 	fsub	z0\.h, p0/m, z0\.h, #1\.0
+.*:	65598020 	fsub	z0\.h, p0/m, z0\.h, #1\.0
 .*:	65998000 	fsub	z0\.s, p0/m, z0\.s, #0\.5
 .*:	65998000 	fsub	z0\.s, p0/m, z0\.s, #0\.5
 .*:	65998000 	fsub	z0\.s, p0/m, z0\.s, #0\.5
@@ -10532,6 +12200,22 @@ Disassembly of section .*:
 .*:	65d98020 	fsub	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65d98020 	fsub	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65d98020 	fsub	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65438000 	fsubr	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65438000 	fsubr	z0\.h, p0/m, z0\.h, z0\.h
+.*:	65438001 	fsubr	z1\.h, p0/m, z1\.h, z0\.h
+.*:	65438001 	fsubr	z1\.h, p0/m, z1\.h, z0\.h
+.*:	6543801f 	fsubr	z31\.h, p0/m, z31\.h, z0\.h
+.*:	6543801f 	fsubr	z31\.h, p0/m, z31\.h, z0\.h
+.*:	65438800 	fsubr	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65438800 	fsubr	z0\.h, p2/m, z0\.h, z0\.h
+.*:	65439c00 	fsubr	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65439c00 	fsubr	z0\.h, p7/m, z0\.h, z0\.h
+.*:	65438003 	fsubr	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65438003 	fsubr	z3\.h, p0/m, z3\.h, z0\.h
+.*:	65438080 	fsubr	z0\.h, p0/m, z0\.h, z4\.h
+.*:	65438080 	fsubr	z0\.h, p0/m, z0\.h, z4\.h
+.*:	654383e0 	fsubr	z0\.h, p0/m, z0\.h, z31\.h
+.*:	654383e0 	fsubr	z0\.h, p0/m, z0\.h, z31\.h
 .*:	65838000 	fsubr	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65838000 	fsubr	z0\.s, p0/m, z0\.s, z0\.s
 .*:	65838001 	fsubr	z1\.s, p0/m, z1\.s, z0\.s
@@ -10564,6 +12248,34 @@ Disassembly of section .*:
 .*:	65c38080 	fsubr	z0\.d, p0/m, z0\.d, z4\.d
 .*:	65c383e0 	fsubr	z0\.d, p0/m, z0\.d, z31\.d
 .*:	65c383e0 	fsubr	z0\.d, p0/m, z0\.d, z31\.d
+.*:	655b8000 	fsubr	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655b8000 	fsubr	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655b8000 	fsubr	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655b8000 	fsubr	z0\.h, p0/m, z0\.h, #0\.5
+.*:	655b8001 	fsubr	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655b8001 	fsubr	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655b8001 	fsubr	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655b8001 	fsubr	z1\.h, p0/m, z1\.h, #0\.5
+.*:	655b801f 	fsubr	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655b801f 	fsubr	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655b801f 	fsubr	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655b801f 	fsubr	z31\.h, p0/m, z31\.h, #0\.5
+.*:	655b8800 	fsubr	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655b8800 	fsubr	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655b8800 	fsubr	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655b8800 	fsubr	z0\.h, p2/m, z0\.h, #0\.5
+.*:	655b9c00 	fsubr	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655b9c00 	fsubr	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655b9c00 	fsubr	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655b9c00 	fsubr	z0\.h, p7/m, z0\.h, #0\.5
+.*:	655b8003 	fsubr	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655b8003 	fsubr	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655b8003 	fsubr	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655b8003 	fsubr	z3\.h, p0/m, z3\.h, #0\.5
+.*:	655b8020 	fsubr	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655b8020 	fsubr	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655b8020 	fsubr	z0\.h, p0/m, z0\.h, #1\.0
+.*:	655b8020 	fsubr	z0\.h, p0/m, z0\.h, #1\.0
 .*:	659b8000 	fsubr	z0\.s, p0/m, z0\.s, #0\.5
 .*:	659b8000 	fsubr	z0\.s, p0/m, z0\.s, #0\.5
 .*:	659b8000 	fsubr	z0\.s, p0/m, z0\.s, #0\.5
@@ -10620,6 +12332,26 @@ Disassembly of section .*:
 .*:	65db8020 	fsubr	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65db8020 	fsubr	z0\.d, p0/m, z0\.d, #1\.0
 .*:	65db8020 	fsubr	z0\.d, p0/m, z0\.d, #1\.0
+.*:	65508000 	ftmad	z0\.h, z0\.h, z0\.h, #0
+.*:	65508000 	ftmad	z0\.h, z0\.h, z0\.h, #0
+.*:	65508001 	ftmad	z1\.h, z1\.h, z0\.h, #0
+.*:	65508001 	ftmad	z1\.h, z1\.h, z0\.h, #0
+.*:	6550801f 	ftmad	z31\.h, z31\.h, z0\.h, #0
+.*:	6550801f 	ftmad	z31\.h, z31\.h, z0\.h, #0
+.*:	65508002 	ftmad	z2\.h, z2\.h, z0\.h, #0
+.*:	65508002 	ftmad	z2\.h, z2\.h, z0\.h, #0
+.*:	65508060 	ftmad	z0\.h, z0\.h, z3\.h, #0
+.*:	65508060 	ftmad	z0\.h, z0\.h, z3\.h, #0
+.*:	655083e0 	ftmad	z0\.h, z0\.h, z31\.h, #0
+.*:	655083e0 	ftmad	z0\.h, z0\.h, z31\.h, #0
+.*:	65538000 	ftmad	z0\.h, z0\.h, z0\.h, #3
+.*:	65538000 	ftmad	z0\.h, z0\.h, z0\.h, #3
+.*:	65548000 	ftmad	z0\.h, z0\.h, z0\.h, #4
+.*:	65548000 	ftmad	z0\.h, z0\.h, z0\.h, #4
+.*:	65558000 	ftmad	z0\.h, z0\.h, z0\.h, #5
+.*:	65558000 	ftmad	z0\.h, z0\.h, z0\.h, #5
+.*:	65578000 	ftmad	z0\.h, z0\.h, z0\.h, #7
+.*:	65578000 	ftmad	z0\.h, z0\.h, z0\.h, #7
 .*:	65908000 	ftmad	z0\.s, z0\.s, z0\.s, #0
 .*:	65908000 	ftmad	z0\.s, z0\.s, z0\.s, #0
 .*:	65908001 	ftmad	z1\.s, z1\.s, z0\.s, #0
@@ -10660,6 +12392,20 @@ Disassembly of section .*:
 .*:	65d58000 	ftmad	z0\.d, z0\.d, z0\.d, #5
 .*:	65d78000 	ftmad	z0\.d, z0\.d, z0\.d, #7
 .*:	65d78000 	ftmad	z0\.d, z0\.d, z0\.d, #7
+.*:	65400c00 	ftsmul	z0\.h, z0\.h, z0\.h
+.*:	65400c00 	ftsmul	z0\.h, z0\.h, z0\.h
+.*:	65400c01 	ftsmul	z1\.h, z0\.h, z0\.h
+.*:	65400c01 	ftsmul	z1\.h, z0\.h, z0\.h
+.*:	65400c1f 	ftsmul	z31\.h, z0\.h, z0\.h
+.*:	65400c1f 	ftsmul	z31\.h, z0\.h, z0\.h
+.*:	65400c40 	ftsmul	z0\.h, z2\.h, z0\.h
+.*:	65400c40 	ftsmul	z0\.h, z2\.h, z0\.h
+.*:	65400fe0 	ftsmul	z0\.h, z31\.h, z0\.h
+.*:	65400fe0 	ftsmul	z0\.h, z31\.h, z0\.h
+.*:	65430c00 	ftsmul	z0\.h, z0\.h, z3\.h
+.*:	65430c00 	ftsmul	z0\.h, z0\.h, z3\.h
+.*:	655f0c00 	ftsmul	z0\.h, z0\.h, z31\.h
+.*:	655f0c00 	ftsmul	z0\.h, z0\.h, z31\.h
 .*:	65800c00 	ftsmul	z0\.s, z0\.s, z0\.s
 .*:	65800c00 	ftsmul	z0\.s, z0\.s, z0\.s
 .*:	65800c01 	ftsmul	z1\.s, z0\.s, z0\.s
@@ -10688,6 +12434,20 @@ Disassembly of section .*:
 .*:	65c30c00 	ftsmul	z0\.d, z0\.d, z3\.d
 .*:	65df0c00 	ftsmul	z0\.d, z0\.d, z31\.d
 .*:	65df0c00 	ftsmul	z0\.d, z0\.d, z31\.d
+.*:	0460b000 	ftssel	z0\.h, z0\.h, z0\.h
+.*:	0460b000 	ftssel	z0\.h, z0\.h, z0\.h
+.*:	0460b001 	ftssel	z1\.h, z0\.h, z0\.h
+.*:	0460b001 	ftssel	z1\.h, z0\.h, z0\.h
+.*:	0460b01f 	ftssel	z31\.h, z0\.h, z0\.h
+.*:	0460b01f 	ftssel	z31\.h, z0\.h, z0\.h
+.*:	0460b040 	ftssel	z0\.h, z2\.h, z0\.h
+.*:	0460b040 	ftssel	z0\.h, z2\.h, z0\.h
+.*:	0460b3e0 	ftssel	z0\.h, z31\.h, z0\.h
+.*:	0460b3e0 	ftssel	z0\.h, z31\.h, z0\.h
+.*:	0463b000 	ftssel	z0\.h, z0\.h, z3\.h
+.*:	0463b000 	ftssel	z0\.h, z0\.h, z3\.h
+.*:	047fb000 	ftssel	z0\.h, z0\.h, z31\.h
+.*:	047fb000 	ftssel	z0\.h, z0\.h, z31\.h
 .*:	04a0b000 	ftssel	z0\.s, z0\.s, z0\.s
 .*:	04a0b000 	ftssel	z0\.s, z0\.s, z0\.s
 .*:	04a0b001 	ftssel	z1\.s, z0\.s, z0\.s
@@ -13837,6 +15597,227 @@ Disassembly of section .*:
 .*:	84e18000 	ld1rsw	\{z0\.d\}, p0/z, \[x0, #132\]
 .*:	84ff8000 	ld1rsw	\{z0\.d\}, p0/z, \[x0, #252\]
 .*:	84ff8000 	ld1rsw	\{z0\.d\}, p0/z, \[x0, #252\]
+.*:	a4002000 	ld1rqb	\{z0\.b\}, p0/z, \[x0\]
+.*:	a4002000 	ld1rqb	\{z0\.b\}, p0/z, \[x0\]
+.*:	a4002000 	ld1rqb	\{z0\.b\}, p0/z, \[x0\]
+.*:	a4002000 	ld1rqb	\{z0\.b\}, p0/z, \[x0\]
+.*:	a4002001 	ld1rqb	\{z1\.b\}, p0/z, \[x0\]
+.*:	a4002001 	ld1rqb	\{z1\.b\}, p0/z, \[x0\]
+.*:	a4002001 	ld1rqb	\{z1\.b\}, p0/z, \[x0\]
+.*:	a4002001 	ld1rqb	\{z1\.b\}, p0/z, \[x0\]
+.*:	a400201f 	ld1rqb	\{z31\.b\}, p0/z, \[x0\]
+.*:	a400201f 	ld1rqb	\{z31\.b\}, p0/z, \[x0\]
+.*:	a400201f 	ld1rqb	\{z31\.b\}, p0/z, \[x0\]
+.*:	a400201f 	ld1rqb	\{z31\.b\}, p0/z, \[x0\]
+.*:	a4002800 	ld1rqb	\{z0\.b\}, p2/z, \[x0\]
+.*:	a4002800 	ld1rqb	\{z0\.b\}, p2/z, \[x0\]
+.*:	a4002800 	ld1rqb	\{z0\.b\}, p2/z, \[x0\]
+.*:	a4003c00 	ld1rqb	\{z0\.b\}, p7/z, \[x0\]
+.*:	a4003c00 	ld1rqb	\{z0\.b\}, p7/z, \[x0\]
+.*:	a4003c00 	ld1rqb	\{z0\.b\}, p7/z, \[x0\]
+.*:	a4002060 	ld1rqb	\{z0\.b\}, p0/z, \[x3\]
+.*:	a4002060 	ld1rqb	\{z0\.b\}, p0/z, \[x3\]
+.*:	a4002060 	ld1rqb	\{z0\.b\}, p0/z, \[x3\]
+.*:	a40023e0 	ld1rqb	\{z0\.b\}, p0/z, \[sp\]
+.*:	a40023e0 	ld1rqb	\{z0\.b\}, p0/z, \[sp\]
+.*:	a40023e0 	ld1rqb	\{z0\.b\}, p0/z, \[sp\]
+.*:	a4082000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #-128\]
+.*:	a4082000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #-128\]
+.*:	a40f2000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #-16\]
+.*:	a40f2000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #-16\]
+.*:	a4012000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #16\]
+.*:	a4012000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #16\]
+.*:	a4072000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #112\]
+.*:	a4072000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, #112\]
+.*:	a4000000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x0\]
+.*:	a4000000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x0\]
+.*:	a4000000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x0\]
+.*:	a4000000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x0\]
+.*:	a4000001 	ld1rqb	\{z1\.b\}, p0/z, \[x0, x0\]
+.*:	a4000001 	ld1rqb	\{z1\.b\}, p0/z, \[x0, x0\]
+.*:	a4000001 	ld1rqb	\{z1\.b\}, p0/z, \[x0, x0\]
+.*:	a4000001 	ld1rqb	\{z1\.b\}, p0/z, \[x0, x0\]
+.*:	a400001f 	ld1rqb	\{z31\.b\}, p0/z, \[x0, x0\]
+.*:	a400001f 	ld1rqb	\{z31\.b\}, p0/z, \[x0, x0\]
+.*:	a400001f 	ld1rqb	\{z31\.b\}, p0/z, \[x0, x0\]
+.*:	a400001f 	ld1rqb	\{z31\.b\}, p0/z, \[x0, x0\]
+.*:	a4000800 	ld1rqb	\{z0\.b\}, p2/z, \[x0, x0\]
+.*:	a4000800 	ld1rqb	\{z0\.b\}, p2/z, \[x0, x0\]
+.*:	a4000800 	ld1rqb	\{z0\.b\}, p2/z, \[x0, x0\]
+.*:	a4001c00 	ld1rqb	\{z0\.b\}, p7/z, \[x0, x0\]
+.*:	a4001c00 	ld1rqb	\{z0\.b\}, p7/z, \[x0, x0\]
+.*:	a4001c00 	ld1rqb	\{z0\.b\}, p7/z, \[x0, x0\]
+.*:	a4000060 	ld1rqb	\{z0\.b\}, p0/z, \[x3, x0\]
+.*:	a4000060 	ld1rqb	\{z0\.b\}, p0/z, \[x3, x0\]
+.*:	a4000060 	ld1rqb	\{z0\.b\}, p0/z, \[x3, x0\]
+.*:	a40003e0 	ld1rqb	\{z0\.b\}, p0/z, \[sp, x0\]
+.*:	a40003e0 	ld1rqb	\{z0\.b\}, p0/z, \[sp, x0\]
+.*:	a40003e0 	ld1rqb	\{z0\.b\}, p0/z, \[sp, x0\]
+.*:	a4040000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x4\]
+.*:	a4040000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x4\]
+.*:	a4040000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x4\]
+.*:	a41e0000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x30\]
+.*:	a41e0000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x30\]
+.*:	a41e0000 	ld1rqb	\{z0\.b\}, p0/z, \[x0, x30\]
+.*:	a5802000 	ld1rqd	\{z0\.d\}, p0/z, \[x0\]
+.*:	a5802000 	ld1rqd	\{z0\.d\}, p0/z, \[x0\]
+.*:	a5802000 	ld1rqd	\{z0\.d\}, p0/z, \[x0\]
+.*:	a5802000 	ld1rqd	\{z0\.d\}, p0/z, \[x0\]
+.*:	a5802001 	ld1rqd	\{z1\.d\}, p0/z, \[x0\]
+.*:	a5802001 	ld1rqd	\{z1\.d\}, p0/z, \[x0\]
+.*:	a5802001 	ld1rqd	\{z1\.d\}, p0/z, \[x0\]
+.*:	a5802001 	ld1rqd	\{z1\.d\}, p0/z, \[x0\]
+.*:	a580201f 	ld1rqd	\{z31\.d\}, p0/z, \[x0\]
+.*:	a580201f 	ld1rqd	\{z31\.d\}, p0/z, \[x0\]
+.*:	a580201f 	ld1rqd	\{z31\.d\}, p0/z, \[x0\]
+.*:	a580201f 	ld1rqd	\{z31\.d\}, p0/z, \[x0\]
+.*:	a5802800 	ld1rqd	\{z0\.d\}, p2/z, \[x0\]
+.*:	a5802800 	ld1rqd	\{z0\.d\}, p2/z, \[x0\]
+.*:	a5802800 	ld1rqd	\{z0\.d\}, p2/z, \[x0\]
+.*:	a5803c00 	ld1rqd	\{z0\.d\}, p7/z, \[x0\]
+.*:	a5803c00 	ld1rqd	\{z0\.d\}, p7/z, \[x0\]
+.*:	a5803c00 	ld1rqd	\{z0\.d\}, p7/z, \[x0\]
+.*:	a5802060 	ld1rqd	\{z0\.d\}, p0/z, \[x3\]
+.*:	a5802060 	ld1rqd	\{z0\.d\}, p0/z, \[x3\]
+.*:	a5802060 	ld1rqd	\{z0\.d\}, p0/z, \[x3\]
+.*:	a58023e0 	ld1rqd	\{z0\.d\}, p0/z, \[sp\]
+.*:	a58023e0 	ld1rqd	\{z0\.d\}, p0/z, \[sp\]
+.*:	a58023e0 	ld1rqd	\{z0\.d\}, p0/z, \[sp\]
+.*:	a5882000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #-128\]
+.*:	a5882000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #-128\]
+.*:	a58f2000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #-16\]
+.*:	a58f2000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #-16\]
+.*:	a5812000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #16\]
+.*:	a5812000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #16\]
+.*:	a5872000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #112\]
+.*:	a5872000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, #112\]
+.*:	a5800000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a5800000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a5800000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a5800001 	ld1rqd	\{z1\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a5800001 	ld1rqd	\{z1\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a5800001 	ld1rqd	\{z1\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a580001f 	ld1rqd	\{z31\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a580001f 	ld1rqd	\{z31\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a580001f 	ld1rqd	\{z31\.d\}, p0/z, \[x0, x0, lsl #3\]
+.*:	a5800800 	ld1rqd	\{z0\.d\}, p2/z, \[x0, x0, lsl #3\]
+.*:	a5800800 	ld1rqd	\{z0\.d\}, p2/z, \[x0, x0, lsl #3\]
+.*:	a5801c00 	ld1rqd	\{z0\.d\}, p7/z, \[x0, x0, lsl #3\]
+.*:	a5801c00 	ld1rqd	\{z0\.d\}, p7/z, \[x0, x0, lsl #3\]
+.*:	a5800060 	ld1rqd	\{z0\.d\}, p0/z, \[x3, x0, lsl #3\]
+.*:	a5800060 	ld1rqd	\{z0\.d\}, p0/z, \[x3, x0, lsl #3\]
+.*:	a58003e0 	ld1rqd	\{z0\.d\}, p0/z, \[sp, x0, lsl #3\]
+.*:	a58003e0 	ld1rqd	\{z0\.d\}, p0/z, \[sp, x0, lsl #3\]
+.*:	a5840000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x4, lsl #3\]
+.*:	a5840000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x4, lsl #3\]
+.*:	a59e0000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x30, lsl #3\]
+.*:	a59e0000 	ld1rqd	\{z0\.d\}, p0/z, \[x0, x30, lsl #3\]
+.*:	a4802000 	ld1rqh	\{z0\.h\}, p0/z, \[x0\]
+.*:	a4802000 	ld1rqh	\{z0\.h\}, p0/z, \[x0\]
+.*:	a4802000 	ld1rqh	\{z0\.h\}, p0/z, \[x0\]
+.*:	a4802000 	ld1rqh	\{z0\.h\}, p0/z, \[x0\]
+.*:	a4802001 	ld1rqh	\{z1\.h\}, p0/z, \[x0\]
+.*:	a4802001 	ld1rqh	\{z1\.h\}, p0/z, \[x0\]
+.*:	a4802001 	ld1rqh	\{z1\.h\}, p0/z, \[x0\]
+.*:	a4802001 	ld1rqh	\{z1\.h\}, p0/z, \[x0\]
+.*:	a480201f 	ld1rqh	\{z31\.h\}, p0/z, \[x0\]
+.*:	a480201f 	ld1rqh	\{z31\.h\}, p0/z, \[x0\]
+.*:	a480201f 	ld1rqh	\{z31\.h\}, p0/z, \[x0\]
+.*:	a480201f 	ld1rqh	\{z31\.h\}, p0/z, \[x0\]
+.*:	a4802800 	ld1rqh	\{z0\.h\}, p2/z, \[x0\]
+.*:	a4802800 	ld1rqh	\{z0\.h\}, p2/z, \[x0\]
+.*:	a4802800 	ld1rqh	\{z0\.h\}, p2/z, \[x0\]
+.*:	a4803c00 	ld1rqh	\{z0\.h\}, p7/z, \[x0\]
+.*:	a4803c00 	ld1rqh	\{z0\.h\}, p7/z, \[x0\]
+.*:	a4803c00 	ld1rqh	\{z0\.h\}, p7/z, \[x0\]
+.*:	a4802060 	ld1rqh	\{z0\.h\}, p0/z, \[x3\]
+.*:	a4802060 	ld1rqh	\{z0\.h\}, p0/z, \[x3\]
+.*:	a4802060 	ld1rqh	\{z0\.h\}, p0/z, \[x3\]
+.*:	a48023e0 	ld1rqh	\{z0\.h\}, p0/z, \[sp\]
+.*:	a48023e0 	ld1rqh	\{z0\.h\}, p0/z, \[sp\]
+.*:	a48023e0 	ld1rqh	\{z0\.h\}, p0/z, \[sp\]
+.*:	a4882000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #-128\]
+.*:	a4882000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #-128\]
+.*:	a48f2000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #-16\]
+.*:	a48f2000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #-16\]
+.*:	a4812000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #16\]
+.*:	a4812000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #16\]
+.*:	a4872000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #112\]
+.*:	a4872000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, #112\]
+.*:	a4800000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a4800000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a4800000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a4800001 	ld1rqh	\{z1\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a4800001 	ld1rqh	\{z1\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a4800001 	ld1rqh	\{z1\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a480001f 	ld1rqh	\{z31\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a480001f 	ld1rqh	\{z31\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a480001f 	ld1rqh	\{z31\.h\}, p0/z, \[x0, x0, lsl #1\]
+.*:	a4800800 	ld1rqh	\{z0\.h\}, p2/z, \[x0, x0, lsl #1\]
+.*:	a4800800 	ld1rqh	\{z0\.h\}, p2/z, \[x0, x0, lsl #1\]
+.*:	a4801c00 	ld1rqh	\{z0\.h\}, p7/z, \[x0, x0, lsl #1\]
+.*:	a4801c00 	ld1rqh	\{z0\.h\}, p7/z, \[x0, x0, lsl #1\]
+.*:	a4800060 	ld1rqh	\{z0\.h\}, p0/z, \[x3, x0, lsl #1\]
+.*:	a4800060 	ld1rqh	\{z0\.h\}, p0/z, \[x3, x0, lsl #1\]
+.*:	a48003e0 	ld1rqh	\{z0\.h\}, p0/z, \[sp, x0, lsl #1\]
+.*:	a48003e0 	ld1rqh	\{z0\.h\}, p0/z, \[sp, x0, lsl #1\]
+.*:	a4840000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x4, lsl #1\]
+.*:	a4840000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x4, lsl #1\]
+.*:	a49e0000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x30, lsl #1\]
+.*:	a49e0000 	ld1rqh	\{z0\.h\}, p0/z, \[x0, x30, lsl #1\]
+.*:	a5002000 	ld1rqw	\{z0\.s\}, p0/z, \[x0\]
+.*:	a5002000 	ld1rqw	\{z0\.s\}, p0/z, \[x0\]
+.*:	a5002000 	ld1rqw	\{z0\.s\}, p0/z, \[x0\]
+.*:	a5002000 	ld1rqw	\{z0\.s\}, p0/z, \[x0\]
+.*:	a5002001 	ld1rqw	\{z1\.s\}, p0/z, \[x0\]
+.*:	a5002001 	ld1rqw	\{z1\.s\}, p0/z, \[x0\]
+.*:	a5002001 	ld1rqw	\{z1\.s\}, p0/z, \[x0\]
+.*:	a5002001 	ld1rqw	\{z1\.s\}, p0/z, \[x0\]
+.*:	a500201f 	ld1rqw	\{z31\.s\}, p0/z, \[x0\]
+.*:	a500201f 	ld1rqw	\{z31\.s\}, p0/z, \[x0\]
+.*:	a500201f 	ld1rqw	\{z31\.s\}, p0/z, \[x0\]
+.*:	a500201f 	ld1rqw	\{z31\.s\}, p0/z, \[x0\]
+.*:	a5002800 	ld1rqw	\{z0\.s\}, p2/z, \[x0\]
+.*:	a5002800 	ld1rqw	\{z0\.s\}, p2/z, \[x0\]
+.*:	a5002800 	ld1rqw	\{z0\.s\}, p2/z, \[x0\]
+.*:	a5003c00 	ld1rqw	\{z0\.s\}, p7/z, \[x0\]
+.*:	a5003c00 	ld1rqw	\{z0\.s\}, p7/z, \[x0\]
+.*:	a5003c00 	ld1rqw	\{z0\.s\}, p7/z, \[x0\]
+.*:	a5002060 	ld1rqw	\{z0\.s\}, p0/z, \[x3\]
+.*:	a5002060 	ld1rqw	\{z0\.s\}, p0/z, \[x3\]
+.*:	a5002060 	ld1rqw	\{z0\.s\}, p0/z, \[x3\]
+.*:	a50023e0 	ld1rqw	\{z0\.s\}, p0/z, \[sp\]
+.*:	a50023e0 	ld1rqw	\{z0\.s\}, p0/z, \[sp\]
+.*:	a50023e0 	ld1rqw	\{z0\.s\}, p0/z, \[sp\]
+.*:	a5082000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #-128\]
+.*:	a5082000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #-128\]
+.*:	a50f2000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #-16\]
+.*:	a50f2000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #-16\]
+.*:	a5012000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #16\]
+.*:	a5012000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #16\]
+.*:	a5072000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #112\]
+.*:	a5072000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, #112\]
+.*:	a5000000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a5000000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a5000000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a5000001 	ld1rqw	\{z1\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a5000001 	ld1rqw	\{z1\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a5000001 	ld1rqw	\{z1\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a500001f 	ld1rqw	\{z31\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a500001f 	ld1rqw	\{z31\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a500001f 	ld1rqw	\{z31\.s\}, p0/z, \[x0, x0, lsl #2\]
+.*:	a5000800 	ld1rqw	\{z0\.s\}, p2/z, \[x0, x0, lsl #2\]
+.*:	a5000800 	ld1rqw	\{z0\.s\}, p2/z, \[x0, x0, lsl #2\]
+.*:	a5001c00 	ld1rqw	\{z0\.s\}, p7/z, \[x0, x0, lsl #2\]
+.*:	a5001c00 	ld1rqw	\{z0\.s\}, p7/z, \[x0, x0, lsl #2\]
+.*:	a5000060 	ld1rqw	\{z0\.s\}, p0/z, \[x3, x0, lsl #2\]
+.*:	a5000060 	ld1rqw	\{z0\.s\}, p0/z, \[x3, x0, lsl #2\]
+.*:	a50003e0 	ld1rqw	\{z0\.s\}, p0/z, \[sp, x0, lsl #2\]
+.*:	a50003e0 	ld1rqw	\{z0\.s\}, p0/z, \[sp, x0, lsl #2\]
+.*:	a5040000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x4, lsl #2\]
+.*:	a5040000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x4, lsl #2\]
+.*:	a51e0000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x30, lsl #2\]
+.*:	a51e0000 	ld1rqw	\{z0\.s\}, p0/z, \[x0, x30, lsl #2\]
 .*:	8540c000 	ld1rw	\{z0\.s\}, p0/z, \[x0\]
 .*:	8540c000 	ld1rw	\{z0\.s\}, p0/z, \[x0\]
 .*:	8540c000 	ld1rw	\{z0\.s\}, p0/z, \[x0\]
@@ -25018,6 +26999,34 @@ Disassembly of section .*:
 .*:	04802060 	saddv	d0, p0, z3\.s
 .*:	048023e0 	saddv	d0, p0, z31\.s
 .*:	048023e0 	saddv	d0, p0, z31\.s
+.*:	6552a000 	scvtf	z0\.h, p0/m, z0\.h
+.*:	6552a000 	scvtf	z0\.h, p0/m, z0\.h
+.*:	6552a001 	scvtf	z1\.h, p0/m, z0\.h
+.*:	6552a001 	scvtf	z1\.h, p0/m, z0\.h
+.*:	6552a01f 	scvtf	z31\.h, p0/m, z0\.h
+.*:	6552a01f 	scvtf	z31\.h, p0/m, z0\.h
+.*:	6552a800 	scvtf	z0\.h, p2/m, z0\.h
+.*:	6552a800 	scvtf	z0\.h, p2/m, z0\.h
+.*:	6552bc00 	scvtf	z0\.h, p7/m, z0\.h
+.*:	6552bc00 	scvtf	z0\.h, p7/m, z0\.h
+.*:	6552a060 	scvtf	z0\.h, p0/m, z3\.h
+.*:	6552a060 	scvtf	z0\.h, p0/m, z3\.h
+.*:	6552a3e0 	scvtf	z0\.h, p0/m, z31\.h
+.*:	6552a3e0 	scvtf	z0\.h, p0/m, z31\.h
+.*:	6554a000 	scvtf	z0\.h, p0/m, z0\.s
+.*:	6554a000 	scvtf	z0\.h, p0/m, z0\.s
+.*:	6554a001 	scvtf	z1\.h, p0/m, z0\.s
+.*:	6554a001 	scvtf	z1\.h, p0/m, z0\.s
+.*:	6554a01f 	scvtf	z31\.h, p0/m, z0\.s
+.*:	6554a01f 	scvtf	z31\.h, p0/m, z0\.s
+.*:	6554a800 	scvtf	z0\.h, p2/m, z0\.s
+.*:	6554a800 	scvtf	z0\.h, p2/m, z0\.s
+.*:	6554bc00 	scvtf	z0\.h, p7/m, z0\.s
+.*:	6554bc00 	scvtf	z0\.h, p7/m, z0\.s
+.*:	6554a060 	scvtf	z0\.h, p0/m, z3\.s
+.*:	6554a060 	scvtf	z0\.h, p0/m, z3\.s
+.*:	6554a3e0 	scvtf	z0\.h, p0/m, z31\.s
+.*:	6554a3e0 	scvtf	z0\.h, p0/m, z31\.s
 .*:	6594a000 	scvtf	z0\.s, p0/m, z0\.s
 .*:	6594a000 	scvtf	z0\.s, p0/m, z0\.s
 .*:	6594a001 	scvtf	z1\.s, p0/m, z0\.s
@@ -25046,6 +27055,20 @@ Disassembly of section .*:
 .*:	65d0a060 	scvtf	z0\.d, p0/m, z3\.s
 .*:	65d0a3e0 	scvtf	z0\.d, p0/m, z31\.s
 .*:	65d0a3e0 	scvtf	z0\.d, p0/m, z31\.s
+.*:	6556a000 	scvtf	z0\.h, p0/m, z0\.d
+.*:	6556a000 	scvtf	z0\.h, p0/m, z0\.d
+.*:	6556a001 	scvtf	z1\.h, p0/m, z0\.d
+.*:	6556a001 	scvtf	z1\.h, p0/m, z0\.d
+.*:	6556a01f 	scvtf	z31\.h, p0/m, z0\.d
+.*:	6556a01f 	scvtf	z31\.h, p0/m, z0\.d
+.*:	6556a800 	scvtf	z0\.h, p2/m, z0\.d
+.*:	6556a800 	scvtf	z0\.h, p2/m, z0\.d
+.*:	6556bc00 	scvtf	z0\.h, p7/m, z0\.d
+.*:	6556bc00 	scvtf	z0\.h, p7/m, z0\.d
+.*:	6556a060 	scvtf	z0\.h, p0/m, z3\.d
+.*:	6556a060 	scvtf	z0\.h, p0/m, z3\.d
+.*:	6556a3e0 	scvtf	z0\.h, p0/m, z31\.d
+.*:	6556a3e0 	scvtf	z0\.h, p0/m, z31\.d
 .*:	65d4a000 	scvtf	z0\.s, p0/m, z0\.d
 .*:	65d4a000 	scvtf	z0\.s, p0/m, z0\.d
 .*:	65d4a001 	scvtf	z1\.s, p0/m, z0\.d
@@ -25138,6 +27161,76 @@ Disassembly of section .*:
 .*:	04d60080 	sdivr	z0\.d, p0/m, z0\.d, z4\.d
 .*:	04d603e0 	sdivr	z0\.d, p0/m, z0\.d, z31\.d
 .*:	04d603e0 	sdivr	z0\.d, p0/m, z0\.d, z31\.d
+.*:	44800000 	sdot	z0\.s, z0\.b, z0\.b
+.*:	44800000 	sdot	z0\.s, z0\.b, z0\.b
+.*:	44800001 	sdot	z1\.s, z0\.b, z0\.b
+.*:	44800001 	sdot	z1\.s, z0\.b, z0\.b
+.*:	4480001f 	sdot	z31\.s, z0\.b, z0\.b
+.*:	4480001f 	sdot	z31\.s, z0\.b, z0\.b
+.*:	44800040 	sdot	z0\.s, z2\.b, z0\.b
+.*:	44800040 	sdot	z0\.s, z2\.b, z0\.b
+.*:	448003e0 	sdot	z0\.s, z31\.b, z0\.b
+.*:	448003e0 	sdot	z0\.s, z31\.b, z0\.b
+.*:	44830000 	sdot	z0\.s, z0\.b, z3\.b
+.*:	44830000 	sdot	z0\.s, z0\.b, z3\.b
+.*:	449f0000 	sdot	z0\.s, z0\.b, z31\.b
+.*:	449f0000 	sdot	z0\.s, z0\.b, z31\.b
+.*:	44c00000 	sdot	z0\.d, z0\.h, z0\.h
+.*:	44c00000 	sdot	z0\.d, z0\.h, z0\.h
+.*:	44c00001 	sdot	z1\.d, z0\.h, z0\.h
+.*:	44c00001 	sdot	z1\.d, z0\.h, z0\.h
+.*:	44c0001f 	sdot	z31\.d, z0\.h, z0\.h
+.*:	44c0001f 	sdot	z31\.d, z0\.h, z0\.h
+.*:	44c00040 	sdot	z0\.d, z2\.h, z0\.h
+.*:	44c00040 	sdot	z0\.d, z2\.h, z0\.h
+.*:	44c003e0 	sdot	z0\.d, z31\.h, z0\.h
+.*:	44c003e0 	sdot	z0\.d, z31\.h, z0\.h
+.*:	44c30000 	sdot	z0\.d, z0\.h, z3\.h
+.*:	44c30000 	sdot	z0\.d, z0\.h, z3\.h
+.*:	44df0000 	sdot	z0\.d, z0\.h, z31\.h
+.*:	44df0000 	sdot	z0\.d, z0\.h, z31\.h
+.*:	44a00000 	sdot	z0\.s, z0\.b, z0\.b\[0\]
+.*:	44a00000 	sdot	z0\.s, z0\.b, z0\.b\[0\]
+.*:	44a00001 	sdot	z1\.s, z0\.b, z0\.b\[0\]
+.*:	44a00001 	sdot	z1\.s, z0\.b, z0\.b\[0\]
+.*:	44a0001f 	sdot	z31\.s, z0\.b, z0\.b\[0\]
+.*:	44a0001f 	sdot	z31\.s, z0\.b, z0\.b\[0\]
+.*:	44a00040 	sdot	z0\.s, z2\.b, z0\.b\[0\]
+.*:	44a00040 	sdot	z0\.s, z2\.b, z0\.b\[0\]
+.*:	44a003e0 	sdot	z0\.s, z31\.b, z0\.b\[0\]
+.*:	44a003e0 	sdot	z0\.s, z31\.b, z0\.b\[0\]
+.*:	44a30000 	sdot	z0\.s, z0\.b, z3\.b\[0\]
+.*:	44a30000 	sdot	z0\.s, z0\.b, z3\.b\[0\]
+.*:	44a70000 	sdot	z0\.s, z0\.b, z7\.b\[0\]
+.*:	44a70000 	sdot	z0\.s, z0\.b, z7\.b\[0\]
+.*:	44a80000 	sdot	z0\.s, z0\.b, z0\.b\[1\]
+.*:	44a80000 	sdot	z0\.s, z0\.b, z0\.b\[1\]
+.*:	44ac0000 	sdot	z0\.s, z0\.b, z4\.b\[1\]
+.*:	44ac0000 	sdot	z0\.s, z0\.b, z4\.b\[1\]
+.*:	44b30000 	sdot	z0\.s, z0\.b, z3\.b\[2\]
+.*:	44b30000 	sdot	z0\.s, z0\.b, z3\.b\[2\]
+.*:	44b80000 	sdot	z0\.s, z0\.b, z0\.b\[3\]
+.*:	44b80000 	sdot	z0\.s, z0\.b, z0\.b\[3\]
+.*:	44bd0000 	sdot	z0\.s, z0\.b, z5\.b\[3\]
+.*:	44bd0000 	sdot	z0\.s, z0\.b, z5\.b\[3\]
+.*:	44e00000 	sdot	z0\.d, z0\.h, z0\.h\[0\]
+.*:	44e00000 	sdot	z0\.d, z0\.h, z0\.h\[0\]
+.*:	44e00001 	sdot	z1\.d, z0\.h, z0\.h\[0\]
+.*:	44e00001 	sdot	z1\.d, z0\.h, z0\.h\[0\]
+.*:	44e0001f 	sdot	z31\.d, z0\.h, z0\.h\[0\]
+.*:	44e0001f 	sdot	z31\.d, z0\.h, z0\.h\[0\]
+.*:	44e00040 	sdot	z0\.d, z2\.h, z0\.h\[0\]
+.*:	44e00040 	sdot	z0\.d, z2\.h, z0\.h\[0\]
+.*:	44e003e0 	sdot	z0\.d, z31\.h, z0\.h\[0\]
+.*:	44e003e0 	sdot	z0\.d, z31\.h, z0\.h\[0\]
+.*:	44e30000 	sdot	z0\.d, z0\.h, z3\.h\[0\]
+.*:	44e30000 	sdot	z0\.d, z0\.h, z3\.h\[0\]
+.*:	44ef0000 	sdot	z0\.d, z0\.h, z15\.h\[0\]
+.*:	44ef0000 	sdot	z0\.d, z0\.h, z15\.h\[0\]
+.*:	44f00000 	sdot	z0\.d, z0\.h, z0\.h\[1\]
+.*:	44f00000 	sdot	z0\.d, z0\.h, z0\.h\[1\]
+.*:	44fb0000 	sdot	z0\.d, z0\.h, z11\.h\[1\]
+.*:	44fb0000 	sdot	z0\.d, z0\.h, z11\.h\[1\]
 .*:	0520c000 	mov	z0\.b, p0/m, z0\.b
 .*:	0520c000 	mov	z0\.b, p0/m, z0\.b
 .*:	0520c001 	sel	z1\.b, p0, z0\.b, z0\.b
@@ -32917,6 +35010,34 @@ Disassembly of section .*:
 .*:	04c12060 	uaddv	d0, p0, z3\.d
 .*:	04c123e0 	uaddv	d0, p0, z31\.d
 .*:	04c123e0 	uaddv	d0, p0, z31\.d
+.*:	6553a000 	ucvtf	z0\.h, p0/m, z0\.h
+.*:	6553a000 	ucvtf	z0\.h, p0/m, z0\.h
+.*:	6553a001 	ucvtf	z1\.h, p0/m, z0\.h
+.*:	6553a001 	ucvtf	z1\.h, p0/m, z0\.h
+.*:	6553a01f 	ucvtf	z31\.h, p0/m, z0\.h
+.*:	6553a01f 	ucvtf	z31\.h, p0/m, z0\.h
+.*:	6553a800 	ucvtf	z0\.h, p2/m, z0\.h
+.*:	6553a800 	ucvtf	z0\.h, p2/m, z0\.h
+.*:	6553bc00 	ucvtf	z0\.h, p7/m, z0\.h
+.*:	6553bc00 	ucvtf	z0\.h, p7/m, z0\.h
+.*:	6553a060 	ucvtf	z0\.h, p0/m, z3\.h
+.*:	6553a060 	ucvtf	z0\.h, p0/m, z3\.h
+.*:	6553a3e0 	ucvtf	z0\.h, p0/m, z31\.h
+.*:	6553a3e0 	ucvtf	z0\.h, p0/m, z31\.h
+.*:	6555a000 	ucvtf	z0\.h, p0/m, z0\.s
+.*:	6555a000 	ucvtf	z0\.h, p0/m, z0\.s
+.*:	6555a001 	ucvtf	z1\.h, p0/m, z0\.s
+.*:	6555a001 	ucvtf	z1\.h, p0/m, z0\.s
+.*:	6555a01f 	ucvtf	z31\.h, p0/m, z0\.s
+.*:	6555a01f 	ucvtf	z31\.h, p0/m, z0\.s
+.*:	6555a800 	ucvtf	z0\.h, p2/m, z0\.s
+.*:	6555a800 	ucvtf	z0\.h, p2/m, z0\.s
+.*:	6555bc00 	ucvtf	z0\.h, p7/m, z0\.s
+.*:	6555bc00 	ucvtf	z0\.h, p7/m, z0\.s
+.*:	6555a060 	ucvtf	z0\.h, p0/m, z3\.s
+.*:	6555a060 	ucvtf	z0\.h, p0/m, z3\.s
+.*:	6555a3e0 	ucvtf	z0\.h, p0/m, z31\.s
+.*:	6555a3e0 	ucvtf	z0\.h, p0/m, z31\.s
 .*:	6595a000 	ucvtf	z0\.s, p0/m, z0\.s
 .*:	6595a000 	ucvtf	z0\.s, p0/m, z0\.s
 .*:	6595a001 	ucvtf	z1\.s, p0/m, z0\.s
@@ -32945,6 +35066,20 @@ Disassembly of section .*:
 .*:	65d1a060 	ucvtf	z0\.d, p0/m, z3\.s
 .*:	65d1a3e0 	ucvtf	z0\.d, p0/m, z31\.s
 .*:	65d1a3e0 	ucvtf	z0\.d, p0/m, z31\.s
+.*:	6557a000 	ucvtf	z0\.h, p0/m, z0\.d
+.*:	6557a000 	ucvtf	z0\.h, p0/m, z0\.d
+.*:	6557a001 	ucvtf	z1\.h, p0/m, z0\.d
+.*:	6557a001 	ucvtf	z1\.h, p0/m, z0\.d
+.*:	6557a01f 	ucvtf	z31\.h, p0/m, z0\.d
+.*:	6557a01f 	ucvtf	z31\.h, p0/m, z0\.d
+.*:	6557a800 	ucvtf	z0\.h, p2/m, z0\.d
+.*:	6557a800 	ucvtf	z0\.h, p2/m, z0\.d
+.*:	6557bc00 	ucvtf	z0\.h, p7/m, z0\.d
+.*:	6557bc00 	ucvtf	z0\.h, p7/m, z0\.d
+.*:	6557a060 	ucvtf	z0\.h, p0/m, z3\.d
+.*:	6557a060 	ucvtf	z0\.h, p0/m, z3\.d
+.*:	6557a3e0 	ucvtf	z0\.h, p0/m, z31\.d
+.*:	6557a3e0 	ucvtf	z0\.h, p0/m, z31\.d
 .*:	65d5a000 	ucvtf	z0\.s, p0/m, z0\.d
 .*:	65d5a000 	ucvtf	z0\.s, p0/m, z0\.d
 .*:	65d5a001 	ucvtf	z1\.s, p0/m, z0\.d
@@ -33037,6 +35172,76 @@ Disassembly of section .*:
 .*:	04d70080 	udivr	z0\.d, p0/m, z0\.d, z4\.d
 .*:	04d703e0 	udivr	z0\.d, p0/m, z0\.d, z31\.d
 .*:	04d703e0 	udivr	z0\.d, p0/m, z0\.d, z31\.d
+.*:	44800400 	udot	z0\.s, z0\.b, z0\.b
+.*:	44800400 	udot	z0\.s, z0\.b, z0\.b
+.*:	44800401 	udot	z1\.s, z0\.b, z0\.b
+.*:	44800401 	udot	z1\.s, z0\.b, z0\.b
+.*:	4480041f 	udot	z31\.s, z0\.b, z0\.b
+.*:	4480041f 	udot	z31\.s, z0\.b, z0\.b
+.*:	44800440 	udot	z0\.s, z2\.b, z0\.b
+.*:	44800440 	udot	z0\.s, z2\.b, z0\.b
+.*:	448007e0 	udot	z0\.s, z31\.b, z0\.b
+.*:	448007e0 	udot	z0\.s, z31\.b, z0\.b
+.*:	44830400 	udot	z0\.s, z0\.b, z3\.b
+.*:	44830400 	udot	z0\.s, z0\.b, z3\.b
+.*:	449f0400 	udot	z0\.s, z0\.b, z31\.b
+.*:	449f0400 	udot	z0\.s, z0\.b, z31\.b
+.*:	44c00400 	udot	z0\.d, z0\.h, z0\.h
+.*:	44c00400 	udot	z0\.d, z0\.h, z0\.h
+.*:	44c00401 	udot	z1\.d, z0\.h, z0\.h
+.*:	44c00401 	udot	z1\.d, z0\.h, z0\.h
+.*:	44c0041f 	udot	z31\.d, z0\.h, z0\.h
+.*:	44c0041f 	udot	z31\.d, z0\.h, z0\.h
+.*:	44c00440 	udot	z0\.d, z2\.h, z0\.h
+.*:	44c00440 	udot	z0\.d, z2\.h, z0\.h
+.*:	44c007e0 	udot	z0\.d, z31\.h, z0\.h
+.*:	44c007e0 	udot	z0\.d, z31\.h, z0\.h
+.*:	44c30400 	udot	z0\.d, z0\.h, z3\.h
+.*:	44c30400 	udot	z0\.d, z0\.h, z3\.h
+.*:	44df0400 	udot	z0\.d, z0\.h, z31\.h
+.*:	44df0400 	udot	z0\.d, z0\.h, z31\.h
+.*:	44a00400 	udot	z0\.s, z0\.b, z0\.b\[0\]
+.*:	44a00400 	udot	z0\.s, z0\.b, z0\.b\[0\]
+.*:	44a00401 	udot	z1\.s, z0\.b, z0\.b\[0\]
+.*:	44a00401 	udot	z1\.s, z0\.b, z0\.b\[0\]
+.*:	44a0041f 	udot	z31\.s, z0\.b, z0\.b\[0\]
+.*:	44a0041f 	udot	z31\.s, z0\.b, z0\.b\[0\]
+.*:	44a00440 	udot	z0\.s, z2\.b, z0\.b\[0\]
+.*:	44a00440 	udot	z0\.s, z2\.b, z0\.b\[0\]
+.*:	44a007e0 	udot	z0\.s, z31\.b, z0\.b\[0\]
+.*:	44a007e0 	udot	z0\.s, z31\.b, z0\.b\[0\]
+.*:	44a30400 	udot	z0\.s, z0\.b, z3\.b\[0\]
+.*:	44a30400 	udot	z0\.s, z0\.b, z3\.b\[0\]
+.*:	44a70400 	udot	z0\.s, z0\.b, z7\.b\[0\]
+.*:	44a70400 	udot	z0\.s, z0\.b, z7\.b\[0\]
+.*:	44a80400 	udot	z0\.s, z0\.b, z0\.b\[1\]
+.*:	44a80400 	udot	z0\.s, z0\.b, z0\.b\[1\]
+.*:	44ac0400 	udot	z0\.s, z0\.b, z4\.b\[1\]
+.*:	44ac0400 	udot	z0\.s, z0\.b, z4\.b\[1\]
+.*:	44b30400 	udot	z0\.s, z0\.b, z3\.b\[2\]
+.*:	44b30400 	udot	z0\.s, z0\.b, z3\.b\[2\]
+.*:	44b80400 	udot	z0\.s, z0\.b, z0\.b\[3\]
+.*:	44b80400 	udot	z0\.s, z0\.b, z0\.b\[3\]
+.*:	44bd0400 	udot	z0\.s, z0\.b, z5\.b\[3\]
+.*:	44bd0400 	udot	z0\.s, z0\.b, z5\.b\[3\]
+.*:	44e00400 	udot	z0\.d, z0\.h, z0\.h\[0\]
+.*:	44e00400 	udot	z0\.d, z0\.h, z0\.h\[0\]
+.*:	44e00401 	udot	z1\.d, z0\.h, z0\.h\[0\]
+.*:	44e00401 	udot	z1\.d, z0\.h, z0\.h\[0\]
+.*:	44e0041f 	udot	z31\.d, z0\.h, z0\.h\[0\]
+.*:	44e0041f 	udot	z31\.d, z0\.h, z0\.h\[0\]
+.*:	44e00440 	udot	z0\.d, z2\.h, z0\.h\[0\]
+.*:	44e00440 	udot	z0\.d, z2\.h, z0\.h\[0\]
+.*:	44e007e0 	udot	z0\.d, z31\.h, z0\.h\[0\]
+.*:	44e007e0 	udot	z0\.d, z31\.h, z0\.h\[0\]
+.*:	44e30400 	udot	z0\.d, z0\.h, z3\.h\[0\]
+.*:	44e30400 	udot	z0\.d, z0\.h, z3\.h\[0\]
+.*:	44ef0400 	udot	z0\.d, z0\.h, z15\.h\[0\]
+.*:	44ef0400 	udot	z0\.d, z0\.h, z15\.h\[0\]
+.*:	44f00400 	udot	z0\.d, z0\.h, z0\.h\[1\]
+.*:	44f00400 	udot	z0\.d, z0\.h, z0\.h\[1\]
+.*:	44fb0400 	udot	z0\.d, z0\.h, z11\.h\[1\]
+.*:	44fb0400 	udot	z0\.d, z0\.h, z11\.h\[1\]
 .*:	2529c000 	umax	z0\.b, z0\.b, #0
 .*:	2529c000 	umax	z0\.b, z0\.b, #0
 .*:	2529c001 	umax	z1\.b, z1\.b, #0
@@ -37999,6 +40204,24 @@ Disassembly of section .*:
 .*:	0540bbc0 	eor	z0\.s, z0\.s, #0xfffffeff
 .*:	0543ffc0 	eor	z0\.d, z0\.d, #0xfffffffffffffffe
 .*:	0543ffc0 	eor	z0\.d, z0\.d, #0xfffffffffffffffe
+.*:	6540c010 	facge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540c010 	facge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540c011 	facge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540c011 	facge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540c01f 	facge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540c01f 	facge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540c810 	facge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540c810 	facge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540dc10 	facge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540dc10 	facge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6543c010 	facge	p0\.h, p0/z, z0\.h, z3\.h
+.*:	6543c010 	facge	p0\.h, p0/z, z0\.h, z3\.h
+.*:	655fc010 	facge	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655fc010 	facge	p0\.h, p0/z, z0\.h, z31\.h
+.*:	6540c090 	facge	p0\.h, p0/z, z4\.h, z0\.h
+.*:	6540c090 	facge	p0\.h, p0/z, z4\.h, z0\.h
+.*:	6540c3f0 	facge	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6540c3f0 	facge	p0\.h, p0/z, z31\.h, z0\.h
 .*:	6580c010 	facge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580c010 	facge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580c011 	facge	p1\.s, p0/z, z0\.s, z0\.s
@@ -38035,6 +40258,24 @@ Disassembly of section .*:
 .*:	65c0c090 	facge	p0\.d, p0/z, z4\.d, z0\.d
 .*:	65c0c3f0 	facge	p0\.d, p0/z, z31\.d, z0\.d
 .*:	65c0c3f0 	facge	p0\.d, p0/z, z31\.d, z0\.d
+.*:	6540e010 	facgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540e010 	facgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	6540e011 	facgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540e011 	facgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540e01f 	facgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540e01f 	facgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540e810 	facgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540e810 	facgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	6540fc10 	facgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6540fc10 	facgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	6543e010 	facgt	p0\.h, p0/z, z0\.h, z3\.h
+.*:	6543e010 	facgt	p0\.h, p0/z, z0\.h, z3\.h
+.*:	655fe010 	facgt	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655fe010 	facgt	p0\.h, p0/z, z0\.h, z31\.h
+.*:	6540e090 	facgt	p0\.h, p0/z, z4\.h, z0\.h
+.*:	6540e090 	facgt	p0\.h, p0/z, z4\.h, z0\.h
+.*:	6540e3f0 	facgt	p0\.h, p0/z, z31\.h, z0\.h
+.*:	6540e3f0 	facgt	p0\.h, p0/z, z31\.h, z0\.h
 .*:	6580e010 	facgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580e010 	facgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	6580e011 	facgt	p1\.s, p0/z, z0\.s, z0\.s
@@ -38071,6 +40312,24 @@ Disassembly of section .*:
 .*:	65c0e090 	facgt	p0\.d, p0/z, z4\.d, z0\.d
 .*:	65c0e3f0 	facgt	p0\.d, p0/z, z31\.d, z0\.d
 .*:	65c0e3f0 	facgt	p0\.d, p0/z, z31\.d, z0\.d
+.*:	65404000 	fcmge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404000 	fcmge	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404001 	fcmge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	65404001 	fcmge	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540400f 	fcmge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540400f 	fcmge	p15\.h, p0/z, z0\.h, z0\.h
+.*:	65404800 	fcmge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65404800 	fcmge	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65405c00 	fcmge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65405c00 	fcmge	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65434000 	fcmge	p0\.h, p0/z, z0\.h, z3\.h
+.*:	65434000 	fcmge	p0\.h, p0/z, z0\.h, z3\.h
+.*:	655f4000 	fcmge	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655f4000 	fcmge	p0\.h, p0/z, z0\.h, z31\.h
+.*:	65404080 	fcmge	p0\.h, p0/z, z4\.h, z0\.h
+.*:	65404080 	fcmge	p0\.h, p0/z, z4\.h, z0\.h
+.*:	654043e0 	fcmge	p0\.h, p0/z, z31\.h, z0\.h
+.*:	654043e0 	fcmge	p0\.h, p0/z, z31\.h, z0\.h
 .*:	65804000 	fcmge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804000 	fcmge	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804001 	fcmge	p1\.s, p0/z, z0\.s, z0\.s
@@ -38107,6 +40366,24 @@ Disassembly of section .*:
 .*:	65c04080 	fcmge	p0\.d, p0/z, z4\.d, z0\.d
 .*:	65c043e0 	fcmge	p0\.d, p0/z, z31\.d, z0\.d
 .*:	65c043e0 	fcmge	p0\.d, p0/z, z31\.d, z0\.d
+.*:	65404010 	fcmgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404010 	fcmgt	p0\.h, p0/z, z0\.h, z0\.h
+.*:	65404011 	fcmgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	65404011 	fcmgt	p1\.h, p0/z, z0\.h, z0\.h
+.*:	6540401f 	fcmgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	6540401f 	fcmgt	p15\.h, p0/z, z0\.h, z0\.h
+.*:	65404810 	fcmgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65404810 	fcmgt	p0\.h, p2/z, z0\.h, z0\.h
+.*:	65405c10 	fcmgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65405c10 	fcmgt	p0\.h, p7/z, z0\.h, z0\.h
+.*:	65434010 	fcmgt	p0\.h, p0/z, z0\.h, z3\.h
+.*:	65434010 	fcmgt	p0\.h, p0/z, z0\.h, z3\.h
+.*:	655f4010 	fcmgt	p0\.h, p0/z, z0\.h, z31\.h
+.*:	655f4010 	fcmgt	p0\.h, p0/z, z0\.h, z31\.h
+.*:	65404090 	fcmgt	p0\.h, p0/z, z4\.h, z0\.h
+.*:	65404090 	fcmgt	p0\.h, p0/z, z4\.h, z0\.h
+.*:	654043f0 	fcmgt	p0\.h, p0/z, z31\.h, z0\.h
+.*:	654043f0 	fcmgt	p0\.h, p0/z, z31\.h, z0\.h
 .*:	65804010 	fcmgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804010 	fcmgt	p0\.s, p0/z, z0\.s, z0\.s
 .*:	65804011 	fcmgt	p1\.s, p0/z, z0\.s, z0\.s
@@ -38143,6 +40420,12 @@ Disassembly of section .*:
 .*:	65c04090 	fcmgt	p0\.d, p0/z, z4\.d, z0\.d
 .*:	65c043f0 	fcmgt	p0\.d, p0/z, z31\.d, z0\.d
 .*:	65c043f0 	fcmgt	p0\.d, p0/z, z31\.d, z0\.d
+.*:	2578c000 	mov	z0\.h, #0
+.*:	2578c000 	mov	z0\.h, #0
+.*:	2578c001 	mov	z1\.h, #0
+.*:	2578c001 	mov	z1\.h, #0
+.*:	2578c01f 	mov	z31\.h, #0
+.*:	2578c01f 	mov	z31\.h, #0
 .*:	25b8c000 	mov	z0\.s, #0
 .*:	25b8c000 	mov	z0\.s, #0
 .*:	25b8c001 	mov	z1\.s, #0
@@ -38155,6 +40438,16 @@ Disassembly of section .*:
 .*:	25f8c001 	mov	z1\.d, #0
 .*:	25f8c01f 	mov	z31\.d, #0
 .*:	25f8c01f 	mov	z31\.d, #0
+.*:	05504000 	mov	z0\.h, p0/m, #0
+.*:	05504000 	mov	z0\.h, p0/m, #0
+.*:	05504001 	mov	z1\.h, p0/m, #0
+.*:	05504001 	mov	z1\.h, p0/m, #0
+.*:	0550401f 	mov	z31\.h, p0/m, #0
+.*:	0550401f 	mov	z31\.h, p0/m, #0
+.*:	05524000 	mov	z0\.h, p2/m, #0
+.*:	05524000 	mov	z0\.h, p2/m, #0
+.*:	055f4000 	mov	z0\.h, p15/m, #0
+.*:	055f4000 	mov	z0\.h, p15/m, #0
 .*:	05904000 	mov	z0\.s, p0/m, #0
 .*:	05904000 	mov	z0\.s, p0/m, #0
 .*:	05904001 	mov	z1\.s, p0/m, #0
@@ -38236,3 +40529,36 @@ Disassembly of section .*:
 .*:	0500bbc0 	orr	z0\.s, z0\.s, #0xfffffeff
 .*:	0503ffc0 	orr	z0\.d, z0\.d, #0xfffffffffffffffe
 .*:	0503ffc0 	orr	z0\.d, z0\.d, #0xfffffffffffffffe
+
+.*:	6ec3c441 	fcmla	v1\.2d, v2\.2d, v3\.2d, #0
+.*:	6ec3cc41 	fcmla	v1\.2d, v2\.2d, v3\.2d, #90
+.*:	6ec3d441 	fcmla	v1\.2d, v2\.2d, v3\.2d, #180
+.*:	6ec3dc41 	fcmla	v1\.2d, v2\.2d, v3\.2d, #270
+.*:	2e83cc41 	fcmla	v1\.2s, v2\.2s, v3\.2s, #90
+.*:	6e83cc41 	fcmla	v1\.4s, v2\.4s, v3\.4s, #90
+.*:	2e43cc41 	fcmla	v1\.4h, v2\.4h, v3\.4h, #90
+.*:	6e43cc41 	fcmla	v1\.8h, v2\.8h, v3\.8h, #90
+.*:	6f831041 	fcmla	v1\.4s, v2\.4s, v3\.s\[0\], #0
+.*:	6f833041 	fcmla	v1\.4s, v2\.4s, v3\.s\[0\], #90
+.*:	6f835041 	fcmla	v1\.4s, v2\.4s, v3\.s\[0\], #180
+.*:	6f837041 	fcmla	v1\.4s, v2\.4s, v3\.s\[0\], #270
+.*:	6f833841 	fcmla	v1\.4s, v2\.4s, v3\.s\[1\], #90
+.*:	2f433041 	fcmla	v1\.4h, v2\.4h, v3\.h\[0\], #90
+.*:	2f633041 	fcmla	v1\.4h, v2\.4h, v3\.h\[1\], #90
+.*:	6f433041 	fcmla	v1\.8h, v2\.8h, v3\.h\[0\], #90
+.*:	6f633041 	fcmla	v1\.8h, v2\.8h, v3\.h\[1\], #90
+.*:	6f433841 	fcmla	v1\.8h, v2\.8h, v3\.h\[2\], #90
+.*:	6f633841 	fcmla	v1\.8h, v2\.8h, v3\.h\[3\], #90
+.*:	6ec3e441 	fcadd	v1\.2d, v2\.2d, v3\.2d, #90
+.*:	6ec3f441 	fcadd	v1\.2d, v2\.2d, v3\.2d, #270
+.*:	2e83e441 	fcadd	v1\.2s, v2\.2s, v3\.2s, #90
+.*:	6e83e441 	fcadd	v1\.4s, v2\.4s, v3\.4s, #90
+.*:	2e43e441 	fcadd	v1\.4h, v2\.4h, v3\.4h, #90
+.*:	6e43e441 	fcadd	v1\.8h, v2\.8h, v3\.8h, #90
+.*:	4e63d441 	fadd	v1\.2d, v2\.2d, v3\.2d
+.*:	0e23d441 	fadd	v1\.2s, v2\.2s, v3\.2s
+.*:	4e23d441 	fadd	v1\.4s, v2\.4s, v3\.4s
+.*:	0e401400 	fadd	v0\.4h, v0\.4h, v0\.4h
+.*:	0e431441 	fadd	v1\.4h, v2\.4h, v3\.4h
+.*:	4e401400 	fadd	v0\.8h, v0\.8h, v0\.8h
+.*:	4e431441 	fadd	v1\.8h, v2\.8h, v3\.8h
