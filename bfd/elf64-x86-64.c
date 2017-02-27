@@ -6189,7 +6189,7 @@ do_glob_dat:
 		       + h->root.u.def.section->output_offset);
       rela.r_info = htab->r_info (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;

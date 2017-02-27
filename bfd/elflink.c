@@ -424,7 +424,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
       s = bfd_make_section_anyway_with_flags (abfd, ".dynbss",
-					      (SEC_ALLOC | SEC_LINKER_CREATED));
+					      SEC_ALLOC | SEC_LINKER_CREATED);
       if (s == NULL)
 	return FALSE;
       htab->sdynbss = s;
@@ -432,11 +432,10 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       if (bed->want_dynrelro)
 	{
 	  /* Similarly, but for symbols that were originally in read-only
-	     sections.  */
+	     sections.  This section doesn't really need to have contents,
+	     but make it like other .data.rel.ro sections.  */
 	  s = bfd_make_section_anyway_with_flags (abfd, ".data.rel.ro",
-						  (SEC_ALLOC | SEC_READONLY
-						   | SEC_HAS_CONTENTS
-						   | SEC_LINKER_CREATED));
+						  flags);
 	  if (s == NULL)
 	    return FALSE;
 	  htab->sdynrelro = s;

@@ -4568,7 +4568,7 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = SPARC_ELF_R_INFO (htab, NULL, h->dynindx, R_SPARC_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;

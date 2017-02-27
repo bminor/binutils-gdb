@@ -3827,7 +3827,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_390_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;

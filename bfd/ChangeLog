@@ -1,5 +1,31 @@
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_create_dynamic_sections): Don't make
+	dynamic .data.rel.ro read-only.
+	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Compare section
+	rather than section flags when deciding where copy reloc goes.
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Likewise.
+	* elf32-metag.c (elf_metag_finish_dynamic_symbol): Likewise.
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_symbol): Likewise.
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_symbol): Likewise.
+	* elf32-or1k.c (or1k_elf_finish_dynamic_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_finish_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_finish_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_finish_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Likewise.
+	* elfnn-riscv.c (riscv_elf_finish_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_finish_dynamic_symbol): Likewise.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c (BFD_RELOC_PPC_16DX_HA): New.
 	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_16DX_HA>): New howto.
 	(ppc64_elf_reloc_type_lookup): Translate new bfd reloc.
