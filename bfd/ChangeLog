@@ -1,3 +1,10 @@
+2017-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21180
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_symbol): Avoid
+	generating a seg-fault when encountering a symbol that has been
+	deleted by garbage collection.
+
 2017-02-25  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arc.c (struct dynamic_sections): Delete.

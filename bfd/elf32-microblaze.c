@@ -3234,13 +3234,20 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      || h->dynindx == -1))
         {
           asection *sec = h->root.u.def.section;
+	  bfd_vma value;
+
+	  value = h->root.u.def.value;
+	  if (sec->output_section != NULL)
+	    /* PR 21180: If the output section is NULL, then the symbol is no
+	       longer needed, and in theory the GOT entry is redundant.  But
+	       it is too late to change our minds now...  */
+	    value += sec->output_section->vma + sec->output_offset;
+
           microblaze_elf_output_dynamic_relocation (output_bfd,
                                                     srela, srela->reloc_count++,
                                                     /* symindex= */ 0,
                                                     R_MICROBLAZE_REL, offset,
-                                                    h->root.u.def.value
-                                                    + sec->output_section->vma
-                                                    + sec->output_offset);
+                                                    value);
         }
       else
         {
