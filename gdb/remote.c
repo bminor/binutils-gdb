@@ -9664,11 +9664,9 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
   xsnprintf (buf, buf_end - buf, "%s", ";");
   buf++;
 
-  /* Send conditions to the target and free the vector.  */
-  for (int ix = 0; ix < bp_tgt->conditions.size (); ix++)
+  /* Send conditions to the target.  */
+  for (struct agent_expr *aexpr : bp_tgt->conditions)
     {
-      struct agent_expr *aexpr = bp_tgt->conditions[ix];
-
       xsnprintf (buf, buf_end - buf, "X%x,", aexpr->len);
       buf += strlen (buf);
       for (int i = 0; i < aexpr->len; ++i)
