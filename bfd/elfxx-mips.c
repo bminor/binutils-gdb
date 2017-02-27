@@ -11173,7 +11173,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 		      + h->root.u.def.value);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_COPY);
       rel.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->root.sdynrelro)
 	srel = htab->root.sreldynrelro;
       else
 	srel = htab->root.srelbss;

@@ -2412,7 +2412,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
       rela.r_offset = sec_addr (h->root.u.def.section) + h->root.u.def.value;
       rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;

@@ -16311,7 +16311,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_COPY);
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->root.sdynrelro)
 	s = htab->root.sreldynrelro;
       else
 	s = htab->root.srelbss;

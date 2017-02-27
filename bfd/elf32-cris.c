@@ -2275,7 +2275,7 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak));
 
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->root.sdynrelro)
 	s = htab->root.sreldynrelro;
       else
 	s = htab->root.srelbss;
