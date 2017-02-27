@@ -5011,8 +5011,9 @@ display_loclists_list (struct dwarf_section *section,
   int dwarf_version;
   unsigned int bytes_read;
 
-  dwarf_vma begin;
-  dwarf_vma end;
+  /* Initialize it due to a false compiler warning.  */
+  dwarf_vma begin = -1;
+  dwarf_vma end = -1;
   dwarf_vma length;
   int need_frame_base;
 
@@ -5873,7 +5874,8 @@ display_debug_rnglists_list (unsigned char *start, unsigned char *finish,
     {
       unsigned long off = offset + (start - next);
       enum dwarf_range_list_entry rlet;
-      dwarf_vma begin, length, end;
+      /* Initialize it due to a false compiler warning.  */
+      dwarf_vma begin = -1, length, end = -1;
       unsigned int bytes_read;
 
       if (start + 1 > finish)
