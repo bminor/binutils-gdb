@@ -3090,7 +3090,7 @@ md_assemble (char *str)
 	      /* addpcis.  */
 	      if (opcode->opcode == (19 << 26) + (2 << 1)
 		  && reloc == BFD_RELOC_HI16_S)
-		reloc = BFD_RELOC_PPC_REL16DX_HA;
+		reloc = BFD_RELOC_PPC_16DX_HA;
 
 	      /* If VLE-mode convert LO/HI/HA relocations.  */
       	      if (opcode->flags & PPC_OPCODE_VLE)
@@ -6505,10 +6505,50 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     }
 #endif
 
-  if (fixP->fx_subsy != (symbolS *) NULL)
+  /* We are only able to convert some relocs to pc-relative.  */
+  if (fixP->fx_pcrel)
     {
-      /* We can't actually support subtracting a symbol.  */
-      as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_LO16:
+	  fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
+	  break;
+
+	case BFD_RELOC_HI16:
+	  fixP->fx_r_type = BFD_RELOC_HI16_PCREL;
+	  break;
+
+	case BFD_RELOC_HI16_S:
+	  fixP->fx_r_type = BFD_RELOC_HI16_S_PCREL;
+	  break;
+
+	case BFD_RELOC_64:
+	  fixP->fx_r_type = BFD_RELOC_64_PCREL;
+	  break;
+
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  break;
+
+	case BFD_RELOC_16:
+	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	  break;
+
+	case BFD_RELOC_PPC_16DX_HA:
+	  fixP->fx_r_type = BFD_RELOC_PPC_REL16DX_HA;
+	  break;
+
+	default:
+	  break;
+	}
+    }
+  else if (!fixP->fx_done
+	   && fixP->fx_r_type == BFD_RELOC_PPC_16DX_HA)
+    {
+      /* addpcis is relative to next insn address.  */
+      value -= 4;
+      fixP->fx_r_type = BFD_RELOC_PPC_REL16DX_HA;
+      fixP->fx_pcrel = 1;
     }
 
   operand = NULL;
@@ -6590,6 +6630,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_HI16_S_PCREL:
+    case BFD_RELOC_PPC_16DX_HA:
     case BFD_RELOC_PPC_REL16DX_HA:
 #ifdef OBJ_ELF
       if (REPORT_OVERFLOW_HI && ppc_obj64)
@@ -7015,83 +7056,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	      || fixP->fx_r_type == BFD_RELOC_32_PCREL))
 	as_warn_where (fixP->fx_file, fixP->fx_line,
 		       _("data in executable section"));
-    }
-
-  /* We are only able to convert some relocs to pc-relative.  */
-  if (!fixP->fx_done && fixP->fx_pcrel)
-    {
-      switch (fixP->fx_r_type)
-	{
-	case BFD_RELOC_LO16:
-	  fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
-	  break;
-
-	case BFD_RELOC_HI16:
-	  fixP->fx_r_type = BFD_RELOC_HI16_PCREL;
-	  break;
-
-	case BFD_RELOC_HI16_S:
-	  fixP->fx_r_type = BFD_RELOC_HI16_S_PCREL;
-	  break;
-
-	case BFD_RELOC_64:
-	  fixP->fx_r_type = BFD_RELOC_64_PCREL;
-	  break;
-
-	case BFD_RELOC_32:
-	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
-	  break;
-
-	case BFD_RELOC_16:
-	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
-	  break;
-
-	  /* Some of course are already pc-relative.  */
-	case BFD_RELOC_LO16_PCREL:
-	case BFD_RELOC_HI16_PCREL:
-	case BFD_RELOC_HI16_S_PCREL:
-	case BFD_RELOC_PPC_REL16DX_HA:
-	case BFD_RELOC_64_PCREL:
-	case BFD_RELOC_32_PCREL:
-	case BFD_RELOC_16_PCREL:
-	case BFD_RELOC_PPC_B16:
-	case BFD_RELOC_PPC_B16_BRTAKEN:
-	case BFD_RELOC_PPC_B16_BRNTAKEN:
-	case BFD_RELOC_PPC_B26:
-	case BFD_RELOC_PPC_LOCAL24PC:
-	case BFD_RELOC_24_PLT_PCREL:
-	case BFD_RELOC_32_PLT_PCREL:
-	case BFD_RELOC_64_PLT_PCREL:
-	case BFD_RELOC_PPC_VLE_REL8:
-	case BFD_RELOC_PPC_VLE_REL15:
-	case BFD_RELOC_PPC_VLE_REL24:
-	  break;
-
-	default:
-	  if (fixP->fx_addsy)
-	    {
-	      const char *sfile;
-	      unsigned int sline;
-
-	      /* Use expr_symbol_where to see if this is an
-		 expression symbol.  */
-	      if (expr_symbol_where (fixP->fx_addsy, &sfile, &sline))
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("unresolved expression that must"
-				" be resolved"));
-	      else
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("cannot emit PC relative %s relocation"
-				" against %s"),
-			      bfd_get_reloc_code_name (fixP->fx_r_type),
-			      S_GET_NAME (fixP->fx_addsy));
-	    }
-	  else
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("unable to resolve expression"));
-	  fixP->fx_done = 1;
-	  break;
-	}
     }
 
 #ifdef OBJ_ELF

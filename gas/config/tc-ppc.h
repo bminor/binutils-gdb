@@ -257,6 +257,22 @@ extern void ppc_elf_end (void);
 extern int ppc_force_relocation (struct fix *);
 #endif
 
+#ifdef OBJ_ELF
+/* Don't allow the generic code to convert fixups involving the
+   subtraction of a label in the current section to pc-relative if we
+   don't have the necessary pc-relative relocation.  */
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG)		\
+  (!((FIX)->fx_r_type == BFD_RELOC_LO16			\
+     || (FIX)->fx_r_type == BFD_RELOC_HI16		\
+     || (FIX)->fx_r_type == BFD_RELOC_HI16_S		\
+     || (FIX)->fx_r_type == BFD_RELOC_64		\
+     || (FIX)->fx_r_type == BFD_RELOC_32		\
+     || (FIX)->fx_r_type == BFD_RELOC_16		\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC_16DX_HA))
+#endif
+
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) 0
+
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
 extern long md_pcrel_from_section (struct fix *, segT);

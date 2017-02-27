@@ -2045,6 +2045,21 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0x1fffc1,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
+  /* A split-field reloc for addpcis, non-relative (gas internal use only).  */
+  HOWTO (R_PPC64_16DX_HA,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc64_elf_ha_reloc,	/* special_function */
+	 "R_PPC64_16DX_HA",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x1fffc1,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* Like R_PPC64_ADDR16_HI, but no overflow.  */
   HOWTO (R_PPC64_ADDR16_HIGH,	/* type */
 	 16,			/* rightshift */
@@ -2450,6 +2465,8 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     case BFD_RELOC_HI16_S_PCREL:		r = R_PPC64_REL16_HA;
       break;
+    case BFD_RELOC_PPC_16DX_HA:			r = R_PPC64_16DX_HA;
+      break;
     case BFD_RELOC_PPC_REL16DX_HA:		r = R_PPC64_REL16DX_HA;
       break;
     case BFD_RELOC_PPC64_ENTRY:			r = R_PPC64_ENTRY;
@@ -2512,7 +2529,7 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   enum elf_ppc64_reloc_type r_type;
   long insn;
   bfd_size_type octets;
-  bfd_vma value;
+  bfd_vma value, field;
 
   /* If this is a relocatable link (output_bfd test tells us), just
      call the generic function.  Any adjustment will be done at final
@@ -2538,14 +2555,14 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   value -= (reloc_entry->address
 	    + input_section->output_offset
 	    + input_section->output_section->vma);
-  value = (bfd_signed_vma) value >> 16;
+  field = (bfd_signed_vma) value >> 16;
 
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~0x1fffc1;
-  insn |= (value & 0xffc1) | ((value & 0x3e) << 15);
+  insn |= (field & 0xffc1) | ((field & 0x3e) << 15);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + octets);
-  if (value + 0x8000 > 0xffff)
+  if (value + 0x80000000 > 0xffffffff)
     return bfd_reloc_overflow;
   return bfd_reloc_ok;
 }
@@ -15205,17 +15222,19 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    r = bfd_reloc_outofrange;
 	  else
 	    {
+	      bfd_signed_vma field;
+
 	      relocation += addend;
 	      relocation -= (rel->r_offset
 			     + input_section->output_offset
 			     + input_section->output_section->vma);
-	      relocation = (bfd_signed_vma) relocation >> 16;
+	      field = (bfd_signed_vma) relocation >> 16;
 	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      insn &= ~0x1fffc1;
-	      insn |= (relocation & 0xffc1) | ((relocation & 0x3e) << 15);
+	      insn |= (field & 0xffc1) | ((field & 0x3e) << 15);
 	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 	      r = bfd_reloc_ok;
-	      if (relocation + 0x8000 > 0xffff)
+	      if (relocation + 0x80000000 > 0xffffffff)
 		r = bfd_reloc_overflow;
 	    }
 	}

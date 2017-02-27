@@ -1,3 +1,8 @@
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h (R_PPC64_16DX_HA): New.  Expand fake reloc comment.
+	* elf/ppc.h (R_PPC_16DX_HA): Likewise.
+
 2017-02-22  Andrew Waterman  <andrew@sifive.com>
 
 	* opcode/riscv-opc.h (CSR_SCOUNTEREN): New define.
