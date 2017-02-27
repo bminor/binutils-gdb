@@ -1,3 +1,8 @@
+2017-02-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_RCPC): Define.
+	(AARCH64_ARCH_V8_3): Update.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

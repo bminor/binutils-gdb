@@ -1,3 +1,8 @@
+2017-02-27  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* aarch64-tbl.h (RCPC, RCPC_INSN): Define.
+	(aarch64_opcode_table): Use RCPC_INSN.
+
 2017-02-11  Stafford Horne  <shorne@gmail.com>
 	    Alan Modra  <amodra@gmail.com>
 
