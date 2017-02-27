@@ -2338,7 +2338,7 @@ static sinfo secdata[NSECS] =
   INIT_SEC_DATA (IDATA7, ".idata$7", SEC_HAS_CONTENTS, 2),
   INIT_SEC_DATA (IDATA5, ".idata$5", SEC_HAS_CONTENTS, 2),
   INIT_SEC_DATA (IDATA4, ".idata$4", SEC_HAS_CONTENTS, 2),
-  INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS, 1)
+  INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS, 2)
 };
 
 #else
@@ -2543,6 +2543,18 @@ make_one_lib_file (export_type *exp, int i, int delay)
 #endif
       ptrs[oidx++] = exp_label;
     }
+#ifndef DLLTOOL_PPC
+  else
+    {
+      /* PR 20881: Add __nm_<symbol> for the exported library.
+	 FIXME: Might be needed for PowerPC, but currently unable to test this.  */
+      exp_label = bfd_make_empty_symbol (abfd);
+      exp_label->name = make_imp_label ("__nm_", exp->name);
+      exp_label->section = secdata[IDATA6].sec;
+      exp_label->flags = BSF_GLOBAL;
+      exp_label->value = 0;
+    }
+#endif
 
   /* Generate imp symbols with one underscore for Microsoft
      compatibility, and with two underscores for backward
@@ -2573,6 +2585,12 @@ make_one_lib_file (export_type *exp, int i, int delay)
   if (create_compat_implib)
     ptrs[oidx++] = iname;
   ptrs[oidx++] = iname2;
+#ifndef DLLTOOL_PPC
+  /* PR 20881:
+     According to pe-dll.c __nm_<symbol> should be add after __imp_<symbol>.  */
+  if (exp->data)
+    ptrs[oidx++] = exp_label;
+#endif
 
   iname_lab_pp = ptrs + oidx;
   ptrs[oidx++] = iname_lab;
