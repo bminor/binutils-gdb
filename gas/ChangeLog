@@ -1,5 +1,12 @@
 2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
 
+	* doc/c-aarch64.texi: Add a "compnum" entry.
+	* config/tc-aarch64.c (aarch64_features): Likewise,
+	* testsuite/gas/aarch64/advsimd-compnum.s: New test.
+	* testsuite/gas/aarch64/advsimd-compnum.d: Likewise.
+
+2017-02-27  Richard Sandiford  <richard.sandiford@arm.com>
+
 	* testsuite/gas/aarch64/sve-sysreg.s,
 	testsuite/gas/aarch64/sve-sysreg.d,
 	testsuite/gas/aarch64/sve-sysreg-invalid.d,
