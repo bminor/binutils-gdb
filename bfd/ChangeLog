@@ -1,5 +1,10 @@
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_ha_reloc): Revert last change.
+	(ppc64_elf_relocate_section): Likewise.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
 	PR 20995
 	* elf32-nios2.c (nios2_elf32_relocate_section): Use htab
 	rather than elf32_nios2_hash_table or elf_hash_table.
