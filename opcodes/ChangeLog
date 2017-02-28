@@ -1,3 +1,15 @@
+2017-02-28  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (PCMPESTR_Fixup): New.
+	(VEX_W_0F3A60_P_2, VEX_W_0F3A61_P_2): Delete.
+	(prefix_table): Use PCMPESTR_Fixup.
+	(vex_len_table): Make VPCMPESTR{I,M} entries leaf ones and use
+	PCMPESTR_Fixup.
+	(vex_w_table): Delete VPCMPESTR{I,M} entries.
+	* i386-opc.tbl (pcmpestri, pcmpestrm, vpcmpestri, vpcmpestrm):
+	Split 64-bit and non-64-bit variants.
+	* opcodes/i386-tbl.h: Re-generate.
+
 2017-02-24  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-tbl.h (OP_SVE_HMH, OP_SVE_VMU_HSD, OP_SVE_VMVU_HSD)

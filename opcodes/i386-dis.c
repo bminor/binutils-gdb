@@ -117,6 +117,7 @@ static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
 static void CRC32_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
+static void PCMPESTR_Fixup (int, int);
 static void OP_LWPCB_E (int, int);
 static void OP_LWP_E (int, int);
 static void OP_Vex_2src_1 (int, int);
@@ -2191,8 +2192,6 @@ enum
   VEX_W_0F3A4A_P_2,
   VEX_W_0F3A4B_P_2,
   VEX_W_0F3A4C_P_2,
-  VEX_W_0F3A60_P_2,
-  VEX_W_0F3A61_P_2,
   VEX_W_0F3A62_P_2,
   VEX_W_0F3A63_P_2,
   VEX_W_0F3ADF_P_2,
@@ -4652,14 +4651,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pcmpestrm", { XM, EXx, Ib }, PREFIX_OPCODE },
+    { "pcmpestrm", { XM, { PCMPESTR_Fixup, x_mode }, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F3A61 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pcmpestri", { XM, EXx, Ib }, PREFIX_OPCODE },
+    { "pcmpestri", { XM, { PCMPESTR_Fixup, x_mode }, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F3A62 */
@@ -9998,12 +9997,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A60_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A60_P_2) },
+    { "vpcmpestrm",	{ XM, { PCMPESTR_Fixup, x_mode }, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A61_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A61_P_2) },
+    { "vpcmpestri",	{ XM, { PCMPESTR_Fixup, x_mode }, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A62_P_2 */
@@ -11344,14 +11343,6 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3A4C_P_2 */
     { "vpblendvb",	{ XM, Vex, EXx, XMVexI4 }, 0 },
-  },
-  {
-    /* VEX_W_0F3A60_P_2 */
-    { "vpcmpestrm",	{ XM, EXx, Ib }, 0 },
-  },
-  {
-    /* VEX_W_0F3A61_P_2 */
-    { "vpcmpestri",	{ XM, EXx, Ib }, 0 },
   },
   {
     /* VEX_W_0F3A62_P_2 */
@@ -16895,6 +16886,27 @@ FXSAVE_Fixup (int bytemode, int sizeflag)
       mnemonicendp = p;
     }
   OP_M (bytemode, sizeflag);
+}
+
+static void
+PCMPESTR_Fixup (int bytemode, int sizeflag)
+{
+  /* Add proper suffix to "{,v}pcmpestr{i,m}".  */
+  if (!intel_syntax)
+    {
+      char *p = mnemonicendp;
+
+      USED_REX (REX_W);
+      if (rex & REX_W)
+	*p++ = 'q';
+      else if (sizeflag & SUFFIX_ALWAYS)
+	*p++ = 'l';
+
+      *p = '\0';
+      mnemonicendp = p;
+    }
+
+  OP_EX (bytemode, sizeflag);
 }
 
 /* Display the destination register operand for instructions with
