@@ -1163,6 +1163,10 @@ m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
 # each address in memory.
 m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
 
+# Functions for allowing a target to modify its disassembler options.
+v:char **:disassembler_options:::0:0::0:pstring (*gdbarch->disassembler_options)
+v:const disasm_options_t *:valid_disassembler_options:::0:0::0:host_address_to_string (gdbarch->valid_disassembler_options->name)
+
 EOF
 }
 
@@ -1259,6 +1263,7 @@ cat <<EOF
 #define GDBARCH_H
 
 #include "frame.h"
+#include "dis-asm.h"
 
 struct floatformat;
 struct ui_file;

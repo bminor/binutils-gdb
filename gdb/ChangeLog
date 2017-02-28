@@ -1,3 +1,49 @@
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* NEWS: Mention new set/show disassembler-options commands.
+	* doc/gdb.texinfo: Document new set/show disassembler-options commands.
+	* disasm.c: Include "arch-utils.h", "gdbcmd.h" and "safe-ctype.h".
+	(prospective_options): New static variable.
+	(gdb_disassembler::gdb_disassembler): Initialize
+	m_di.disassembler_options.
+	(gdb_buffered_insn_length_init_dis): Initilize di->disassembler_options.
+	(get_disassembler_options): New function.
+	(set_disassembler_options): Likewise.
+	(set_disassembler_options_sfunc): Likewise.
+	(show_disassembler_options_sfunc): Likewise.
+	(disassembler_options_completer): Likewise.
+	(_initialize_disasm): Likewise.
+	* disasm.h (get_disassembler_options): New prototype.
+	(set_disassembler_options): Likewise.
+	* gdbarch.sh (gdbarch_disassembler_options): New variable.
+	(gdbarch_verify_disassembler_options): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* arm-tdep.c (num_disassembly_options): Delete.
+	(set_disassembly_style): Likewise.
+	(arm_disassembler_options): New static variable.
+	(set_disassembly_style_sfunc): Convert short style name into long
+	option name.  Call set_disassembler_options.
+	(show_disassembly_style_sfunc): New function.
+	(arm_gdbarch_init): Call set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+	(_initialize_arm_tdep): Delete regnames variable and update callers.
+	(arm_disassembler_options): Initialize.
+	(disasm_options): New variable.
+	(num_disassembly_options): Rename from this...
+	(num_disassembly_styles): ...to this.  Compute by scanning through
+	disasm_options.
+	(valid_disassembly_styles): Initialize using disasm_options.
+	Remove calls to parse_arm_disassembler_option, get_arm_regnames and
+	set_arm_regname_option.
+	Pass show_disassembly_style_sfunc to the "disassembler" setshow command.
+	* rs6000-tdep.c (powerpc_disassembler_options): New static variable.
+	(rs6000_gdbarch_init): Call set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+	* s390-tdep.c (s390_disassembler_options): New static variable.
+	(s390_gdbarch_init):all set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+
 2017-02-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (remote_add_target_side_condition): Remove "struct"

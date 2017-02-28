@@ -3728,12 +3728,16 @@ main (int argc, char **argv)
 	  machine = optarg;
 	  break;
 	case 'M':
-	  if (disassembler_options)
-	    /* Ignore potential memory leak for now.  */
-	    disassembler_options = concat (disassembler_options, ",",
-					   optarg, (const char *) NULL);
-	  else
-	    disassembler_options = optarg;
+	  {
+	    char *options;
+	    if (disassembler_options)
+	      /* Ignore potential memory leak for now.  */
+	      options = concat (disassembler_options, ",",
+				optarg, (const char *) NULL);
+	    else
+	      options = optarg;
+	    disassembler_options = remove_whitespace_and_extra_commas (options);
+	  }
 	  break;
 	case 'j':
 	  add_only (optarg);

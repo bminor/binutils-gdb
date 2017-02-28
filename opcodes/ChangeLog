@@ -1,3 +1,46 @@
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* disassemble.c Include "safe-ctype.h".
+	(disassemble_init_for_target): Handle s390 init.
+	(remove_whitespace_and_extra_commas): New function.
+	(disassembler_options_cmp): Likewise.
+	* arm-dis.c: Include "libiberty.h".
+	(NUM_ELEM): Delete.
+	(regnames): Use long disassembler style names.
+	Add force-thumb and no-force-thumb options.
+	(NUM_ARM_REGNAMES): Rename from this...
+	(NUM_ARM_OPTIONS): ...to this.  Use ARRAY_SIZE.
+	(get_arm_regname_num_options): Delete.
+	(set_arm_regname_option): Likewise.
+	(get_arm_regnames): Likewise.
+	(parse_disassembler_options): Likewise.
+	(parse_arm_disassembler_option): Rename from this...
+	(parse_arm_disassembler_options): ...to this.  Make static.
+	Use new FOR_EACH_DISASSEMBLER_OPTION macro to scan over options.
+	(print_insn): Use parse_arm_disassembler_options.
+	(disassembler_options_arm): New function.
+	(print_arm_disassembler_options): Handle updated regnames.
+	* ppc-dis.c: Include "libiberty.h".
+	(ppc_opts): Add "32" and "64" entries.
+	(ppc_parse_cpu): Use ARRAY_SIZE and disassembler_options_cmp.
+	(powerpc_init_dialect): Add break to switch statement.
+	Use new FOR_EACH_DISASSEMBLER_OPTION macro.
+	(disassembler_options_powerpc): New function.
+	(print_ppc_disassembler_options): Use ARRAY_SIZE.
+	Remove printing of "32" and "64".
+	* s390-dis.c: Include "libiberty.h".
+	(init_flag): Remove unneeded variable.
+	(struct s390_options_t): New structure type.
+	(options): New structure.
+	(init_disasm): Rename from this...
+	(disassemble_init_s390): ...to this.  Add initializations for
+	current_arch_mask and option_use_insn_len_bits_p.  Remove init_flag.
+	(print_insn_s390): Delete call to init_disasm.
+	(disassembler_options_s390): New function.
+	(print_s390_disassembler_options): Print using information from
+	struct 'options'.
+	* po/opcodes.pot: Regenerate.
+
 2017-02-28  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (PCMPESTR_Fixup): New.

@@ -1,3 +1,19 @@
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* dis-asm.h (disasm_options_t): New typedef.
+	(parse_arm_disassembler_option): Remove prototype.
+	(set_arm_regname_option): Likewise.
+	(get_arm_regnames): Likewise.
+	(get_arm_regname_num_options): Likewise.
+	(disassemble_init_s390): New prototype.
+	(disassembler_options_powerpc): Likewise.
+	(disassembler_options_arm): Likewise.
+	(disassembler_options_s390): Likewise.
+	(remove_whitespace_and_extra_commas): Likewise.
+	(disassembler_options_cmp): Likewise.
+	(next_disassembler_option): New inline function.
+	(FOR_EACH_DISASSEMBLER_OPTION): New macro.
+
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc64.h (R_PPC64_16DX_HA): New.  Expand fake reloc comment.

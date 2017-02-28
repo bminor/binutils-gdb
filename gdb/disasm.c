@@ -18,18 +18,25 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "target.h"
 #include "value.h"
 #include "ui-out.h"
 #include "disasm.h"
 #include "gdbcore.h"
+#include "gdbcmd.h"
 #include "dis-asm.h"
 #include "source.h"
+#include "safe-ctype.h"
 #include <algorithm>
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
    the same thing: disassemble_command() and the gdbtk variation.  */
+
+/* This variable is used to hold the prospective disassembler_options value
+   which is set by the "set disassembler_options" command.  */
+static char *prospective_options = NULL;
 
 /* This structure is used to store line number information for the
    deprecated /m option.
@@ -780,6 +787,7 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
   m_di.endian = gdbarch_byte_order (gdbarch);
   m_di.endian_code = gdbarch_byte_order_for_code (gdbarch);
   m_di.application_data = this;
+  m_di.disassembler_options = get_disassembler_options (gdbarch);
   disassemble_init_for_target (&m_di);
 }
 
@@ -888,6 +896,7 @@ gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
   di->endian = gdbarch_byte_order (gdbarch);
   di->endian_code = gdbarch_byte_order_for_code (gdbarch);
 
+  di->disassembler_options = get_disassembler_options (gdbarch);
   disassemble_init_for_target (di);
 }
 
@@ -903,4 +912,174 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
   gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
 
   return gdbarch_print_insn (gdbarch, addr, &di);
+}
+
+char *
+get_disassembler_options (struct gdbarch *gdbarch)
+{
+  char **disassembler_options = gdbarch_disassembler_options (gdbarch);
+  if (disassembler_options == NULL)
+    return NULL;
+  return *disassembler_options;
+}
+
+void
+set_disassembler_options (char *prospective_options)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  char **disassembler_options = gdbarch_disassembler_options (gdbarch);
+  const disasm_options_t *valid_options;
+  char *options = remove_whitespace_and_extra_commas (prospective_options);
+  char *opt;
+
+  /* Allow all architectures, even ones that do not support 'set disassembler',
+     to reset their disassembler options to NULL.  */
+  if (options == NULL)
+    {
+      if (disassembler_options != NULL)
+	{
+	  free (*disassembler_options);
+	  *disassembler_options = NULL;
+	}
+      return;
+    }
+
+  valid_options = gdbarch_valid_disassembler_options (gdbarch);
+  if (valid_options  == NULL)
+    {
+      fprintf_filtered (gdb_stdlog, _("\
+'set disassembler-options ...' is not supported on this architecture.\n"));
+      return;
+    }
+
+  /* Verify we have valid disassembler options.  */
+  FOR_EACH_DISASSEMBLER_OPTION (opt, options)
+    {
+      size_t i;
+      for (i = 0; valid_options->name[i] != NULL; i++)
+	if (disassembler_options_cmp (opt, valid_options->name[i]) == 0)
+	  break;
+      if (valid_options->name[i] == NULL)
+	{
+	  fprintf_filtered (gdb_stdlog,
+			    _("Invalid disassembler option value: '%s'.\n"),
+			    opt);
+	  return;
+	}
+    }
+
+  free (*disassembler_options);
+  *disassembler_options = xstrdup (options);
+}
+
+static void
+set_disassembler_options_sfunc (char *args, int from_tty,
+				struct cmd_list_element *c)
+{
+  set_disassembler_options (prospective_options);
+}
+
+static void
+show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c, const char *value)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  const disasm_options_t *valid_options;
+
+  const char *options = get_disassembler_options (gdbarch);
+  if (options == NULL)
+    options = "";
+
+  fprintf_filtered (file, _("The current disassembler options are '%s'\n"),
+		    options);
+
+  valid_options = gdbarch_valid_disassembler_options (gdbarch);
+
+  if (valid_options == NULL)
+    return;
+
+  fprintf_filtered (file, _("\n\
+The following disassembler options are supported for use with the\n\
+'set disassembler-options <option>[,<option>...]' command:\n"));
+
+  if (valid_options->description != NULL)
+    {
+      size_t i, max_len = 0;
+
+      /* Compute the length of the longest option name.  */
+      for (i = 0; valid_options->name[i] != NULL; i++)
+	{
+	  size_t len = strlen (valid_options->name[i]);
+	  if (max_len < len)
+	    max_len = len;
+	}
+
+      for (i = 0, max_len++; valid_options->name[i] != NULL; i++)
+	{
+	  fprintf_filtered (file, "  %s", valid_options->name[i]);
+	  if (valid_options->description[i] != NULL)
+	    fprintf_filtered (file, "%*c %s",
+			      (int)(max_len - strlen (valid_options->name[i])), ' ',
+			      valid_options->description[i]);
+	  fprintf_filtered (file, "\n");
+	}
+    }
+  else
+    {
+      size_t i;
+      fprintf_filtered (file, "  ");
+      for (i = 0; valid_options->name[i] != NULL; i++)
+	{
+	  fprintf_filtered (file, "%s", valid_options->name[i]);
+	  if (valid_options->name[i + 1] != NULL)
+	    fprintf_filtered (file, ", ");
+	  wrap_here ("  ");
+	}
+      fprintf_filtered (file, "\n");
+    }
+}
+
+/* A completion function for "set disassembler".  */
+
+static VEC (char_ptr) *
+disassembler_options_completer (struct cmd_list_element *ignore,
+				const char *text, const char *word)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  const disasm_options_t *opts = gdbarch_valid_disassembler_options (gdbarch);
+
+  if (opts != NULL)
+    {
+      /* Only attempt to complete on the last option text.  */
+      const char *separator = strrchr (text, ',');
+      if (separator != NULL)
+	text = separator + 1;
+      text = skip_spaces_const (text);
+      return complete_on_enum (opts->name, text, word);
+    }
+  return NULL;
+}
+
+
+/* Initialization code.  */
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_disasm;
+
+void
+_initialize_disasm (void)
+{
+  struct cmd_list_element *cmd;
+
+  /* Add the command that controls the disassembler options.  */
+  cmd = add_setshow_string_noescape_cmd ("disassembler-options", no_class,
+					 &prospective_options, _("\
+Set the disassembler options.\n\
+Usage: set disassembler-options <option>[,<option>...]\n\n\
+See: 'show disassembler-options' for valid option values.\n"), _("\
+Show the disassembler options."), NULL,
+					 set_disassembler_options_sfunc,
+					 show_disassembler_options_sfunc,
+					 &setlist, &showlist);
+  set_cmd_completer (cmd, disassembler_options_completer);
 }

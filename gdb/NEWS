@@ -84,6 +84,16 @@ flash-erase
   Erases all the flash memory regions reported by the target.  This is
   equivalent to the CLI command flash-erase.
 
+* New commands
+
+set disassembler-options
+show disassembler-options
+  Controls the passing of target specific information to the disassembler.
+  If it is necessary to specify more than one disassembler option then
+  multiple options can be placed together into a comma separated list.
+  The default value is the empty string.  Currently, the only supported
+  targets are ARM, PowerPC and S/390.
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.

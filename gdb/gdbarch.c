@@ -339,6 +339,8 @@ struct gdbarch
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
   gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
+  char ** disassembler_options;
+  const disasm_options_t * valid_disassembler_options;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -692,6 +694,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
+  /* Skip verify of disassembler_options, invalid_p == 0 */
+  /* Skip verify of valid_disassembler_options, invalid_p == 0 */
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
@@ -874,6 +878,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_function_start_offset = %s\n",
                       core_addr_to_string_nz (gdbarch->deprecated_function_start_offset));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: disassembler_options = %s\n",
+                      pstring (*gdbarch->disassembler_options));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
                       gdbarch_displaced_step_copy_insn_p (gdbarch));
@@ -1420,6 +1427,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: unwind_sp = <%s>\n",
                       host_address_to_string (gdbarch->unwind_sp));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: valid_disassembler_options = %s\n",
+                      host_address_to_string (gdbarch->valid_disassembler_options->name));
   fprintf_unfiltered (file,
                       "gdbarch_dump: value_from_register = <%s>\n",
                       host_address_to_string (gdbarch->value_from_register));
@@ -4954,6 +4964,40 @@ set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
                                           gdbarch_addressable_memory_unit_size_ftype addressable_memory_unit_size)
 {
   gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
+}
+
+char **
+gdbarch_disassembler_options (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of disassembler_options, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_disassembler_options called\n");
+  return gdbarch->disassembler_options;
+}
+
+void
+set_gdbarch_disassembler_options (struct gdbarch *gdbarch,
+                                  char ** disassembler_options)
+{
+  gdbarch->disassembler_options = disassembler_options;
+}
+
+const disasm_options_t *
+gdbarch_valid_disassembler_options (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of valid_disassembler_options, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_valid_disassembler_options called\n");
+  return gdbarch->valid_disassembler_options;
+}
+
+void
+set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch,
+                                        const disasm_options_t * valid_disassembler_options)
+{
+  gdbarch->valid_disassembler_options = valid_disassembler_options;
 }
 
 

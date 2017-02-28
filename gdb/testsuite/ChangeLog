@@ -1,3 +1,30 @@
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp: Delete test.
+	* gdb.arch/powerpc-power.s: Likewise.
+	* gdb.disasm/disassembler-options.exp: New test.
+	* gdb.arch/powerpc-altivec.exp: Likewise.
+	* gdb.arch/powerpc-altivec.s: Likewise.
+	* gdb.arch/powerpc-altivec2.exp: Likewise.
+	* gdb.arch/powerpc-altivec2.s: Likewise.
+	* gdb.arch/powerpc-altivec3.exp: Likewise.
+	* gdb.arch/powerpc-altivec3.s: Likewise.
+	* gdb.arch/powerpc-power7.exp: Likewise.
+	* gdb.arch/powerpc-power7.s: Likewise.
+	* gdb.arch/powerpc-power8.exp: Likewise.
+	* gdb.arch/powerpc-power8.s: Likewise.
+	* gdb.arch/powerpc-power9.exp: Likewise.
+	* gdb.arch/powerpc-power9.s: Likewise.
+	* gdb.arch/powerpc-vsx.exp: Likewise.
+	* gdb.arch/powerpc-vsx.s: Likewise.
+	* gdb.arch/powerpc-vsx2.exp: Likewise.
+	* gdb.arch/powerpc-vsx2.s: Likewise.
+	* gdb.arch/powerpc-vsx3.exp: Likewise.
+	* gdb.arch/powerpc-vsx3.s: Likewise.
+	* gdb.arch/arm-disassembler-options.exp: Likewise.
+	* gdb.arch/powerpc-disassembler-options.exp: Likewise.
+	* gdb.arch/s390-disassembler-options.exp: Likewise.
+
 2017-02-23  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.reverse/insn-reverse.x86.c (check_rdrand_support): Renamed to ...

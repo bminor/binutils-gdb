@@ -8520,6 +8520,27 @@ location of the relocation table.  On some architectures, @value{GDBN}
 might be able to resolve these to actual function names.
 
 @table @code
+@kindex set disassembler-options
+@cindex disassembler options
+@item set disassembler-options @var{option1}[,@var{option2}@dots{}]
+This command controls the passing of target specific information to
+the disassembler.  For a list of valid options, please refer to the
+@code{-M}/@code{--disassembler-options} section of the @samp{objdump}
+manual and/or the output of @kbd{objdump --help}
+(@pxref{objdump,,objdump,binutils.info,The GNU Binary Utilities}).
+The default value is the empty string.
+
+If it is necessary to specify more than one disassembler option, then
+multiple options can be placed together into a comma separated list.
+Currently this command is only supported on targets ARM, PowerPC
+and S/390.
+
+@kindex show disassembler-options
+@item show disassembler-options
+Show the current setting of the disassembler options.
+@end table
+
+@table @code
 @kindex set disassembly-flavor
 @cindex Intel disassembly flavor
 @cindex AT&T disassembly flavor
