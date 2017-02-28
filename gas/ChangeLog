@@ -1,5 +1,9 @@
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-nios2.h (TC_FORCE_RELOCATION_SUB_LOCAL): Define.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (md_assemble): Use BFD_RELOC_PPC_16DX_HA for addpcis.
 	(md_apply_fix): Remove fx_subsy check.  Move code converting to
 	pcrel reloc earlier and handle BFD_RELOC_PPC_16DX_HA.  Remove code

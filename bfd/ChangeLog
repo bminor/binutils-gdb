@@ -1,5 +1,29 @@
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
+	PR 20995
+	* elf32-nios2.c (nios2_elf32_relocate_section): Use htab
+	rather than elf32_nios2_hash_table or elf_hash_table.
+	(create_got_section): Likewise.
+	(nios2_elf32_finish_dynamic_symbol): Likewise.
+	(nios2_elf32_adjust_dynamic_symbol): Likewise.
+	(nios2_elf32_size_dynamic_sections): Likewise.
+	(nios2_elf32_check_relocs): Delete dynobj, sgot, and srelgot
+	vars.  Use htab equivalents directly instead.  Don't create
+	all dynamic sections on needing just the GOT.  Use a goto
+	rather than a fall-through with reloc test.  Ensure
+	htab->dynobj is set when making dynamic sreloc section.
+	(nios2_elf32_finish_dynamic_sections): Delete dynobj, use htab
+	equivalent directly instead.  Don't segfault on looking for
+	.dynamic when dynamic sections have not been created.  Don't
+	segfault on .got.plt being discarded.
+	(nios2_elf32_size_dynamic_sections): Delete plt and got vars.
+	Don't set "relocs" on .rela.plt.  Do handle .sbss.  Delete
+	fixme and another not so relevant comment.
+	(nios2_elf_add_symbol_hook): Delete dynobj var.  If not
+	already set, set hash table dynobj on creating .sbss.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c (BFD_RELOC_PPC_16DX_HA): New.
 	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_16DX_HA>): New howto.
 	(ppc64_elf_reloc_type_lookup): Translate new bfd reloc.

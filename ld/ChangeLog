@@ -1,5 +1,9 @@
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/merge.d: xfail for nios.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/addpcis.d: Define ext1 and ext2 at
 	limits of addpcis range.
 
