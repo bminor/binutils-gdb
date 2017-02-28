@@ -382,3 +382,6 @@ power9:
 	mffscrni    30,0
 	mffscrni    30,3
 	mffsl       31
+	scv         0
+	scv         127
+	rfscv
