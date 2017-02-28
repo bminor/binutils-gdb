@@ -1,3 +1,13 @@
+2017-02-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/jalr4.s: Add `jalr $0, $25' instructions.
+	* testsuite/gas/mips/jalr4.d: Adjust accordingly.  Remove MIPSr6
+	encoding patterns.
+	* testsuite/gas/mips/jalr4-n64.d: Likewise.
+	* testsuite/gas/mips/mipsr6@jalr4.d: New test.
+	* testsuite/gas/mips/mipsr6@jalr4-n32.d: New test.
+	* testsuite/gas/mips/mipsr6@jalr4-n64.d: New test.
+
 2017-02-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/strtab.s: Don't put directives on first

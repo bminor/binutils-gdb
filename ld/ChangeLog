@@ -1,3 +1,10 @@
+2017-02-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/jalr4.dd: Adjust for `jalr $0, $25'
+	instructions.
+	* testsuite/ld-mips-elf/jalr4-r6.dd: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
 2017-02-27   Georg-Johann Lay  <gjl@gcc.gnu.org>
 
 	PR target/20849

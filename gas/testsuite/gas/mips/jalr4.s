@@ -8,13 +8,19 @@ foo:
 	.reloc	1f, R_MIPS_JALR, bar0
 1:	jalr	$25
 	.reloc	1f, R_MIPS_JALR, bar0
+1:	jalr	$0, $25
+	.reloc	1f, R_MIPS_JALR, bar0
 1:	jr	$25
 	.reloc	1f, R_MIPS_JALR, bar1
 1:	jalr	$25
+	.reloc	1f, R_MIPS_JALR, bar1
+1:	jalr	$0, $25
 	.reloc	1f, R_MIPS_JALR, bar1
 1:	jr	$25
 	.reloc	1f, R_MIPS_JALR, bar2
 1:	jalr	$25
+	.reloc	1f, R_MIPS_JALR, bar2
+1:	jalr	$0, $25
 	.reloc	1f, R_MIPS_JALR, bar2
 1:	jr	$25
 	.end	foo

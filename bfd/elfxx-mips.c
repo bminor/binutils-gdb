@@ -6465,13 +6465,13 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       && !cross_mode_jump_p
       && ((JAL_TO_BAL_P (input_bfd)
 	   && r_type == R_MIPS_26
-	   && (x >> 26) == 0x3)		/* jal addr */
+	   && (x >> 26) == 0x3)			/* jal addr */
 	  || (JALR_TO_BAL_P (input_bfd)
 	      && r_type == R_MIPS_JALR
-	      && x == 0x0320f809)	/* jalr t9 */
+	      && x == 0x0320f809)		/* jalr t9 */
 	  || (JR_TO_B_P (input_bfd)
 	      && r_type == R_MIPS_JALR
-	      && x == 0x03200008)))	/* jr t9 */
+	      && (x & ~1) == 0x03200008)))	/* jr t9 / jalr zero, t9 */
     {
       bfd_vma addr;
       bfd_vma dest;
@@ -6488,7 +6488,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       off = dest - addr;
       if (off <= 0x1ffff && off >= -0x20000)
 	{
-	  if (x == 0x03200008)	/* jr t9 */
+	  if ((x & ~1) == 0x03200008)		/* jr t9 / jalr zero, t9 */
 	    x = 0x10000000 | (((bfd_vma) off >> 2) & 0xffff);   /* b addr */
 	  else
 	    x = 0x04110000 | (((bfd_vma) off >> 2) & 0xffff);   /* bal addr */
