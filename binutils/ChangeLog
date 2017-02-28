@@ -4,13 +4,6 @@
 	* dwarf.c (display_loclists_list, display_debug_rnglists_list):
 	Initialize begin and end.
 
-2017-02-27  Rudy Y  <rudyy.id@gmail.com>
-
-	PR 20881
-	* dlltool.c (secdata): Align .idata$6 on 2 byte boundary.
-	(make_one_lib_file): Export a symbol called __nm_<symbol> for use
-	with auto-importing.
-
 2017-02-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/dw5.S: Replace .string with .asciz.
