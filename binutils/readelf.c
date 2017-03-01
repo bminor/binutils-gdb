@@ -15797,6 +15797,10 @@ get_note_type (unsigned e_type)
 	return _("NT_VERSION (version)");
       case NT_ARCH:
 	return _("NT_ARCH (architecture)");
+      case NT_GNU_BUILD_ATTRIBUTE_OPEN:
+	return _("NT_GNU_BUILD_ATTRIBUTE_OPEN");
+      case NT_GNU_BUILD_ATTRIBUTE_FUNC:
+	return _("NT_GNU_BUILD_ATTRIBUTE_FUNC");
       default:
 	break;
       }
@@ -15905,6 +15909,12 @@ get_gnu_elf_note_type (unsigned e_type)
       return _("NT_GNU_BUILD_ID (unique build ID bitstring)");
     case NT_GNU_GOLD_VERSION:
       return _("NT_GNU_GOLD_VERSION (gold version)");
+    case NT_GNU_PROPERTY_TYPE_0:
+      return _("NT_GNU_PROPERTY_TYPE_0");
+    case NT_GNU_BUILD_ATTRIBUTE_OPEN:
+      return _("NT_GNU_BUILD_ATTRIBUTE_OPEN");
+    case NT_GNU_BUILD_ATTRIBUTE_FUNC:
+      return _("NT_GNU_BUILD_ATTRIBUTE_FUNC");
     default:
       {
 	static char buff[64];
@@ -15913,6 +15923,122 @@ get_gnu_elf_note_type (unsigned e_type)
 	return buff;
       }
     }
+}
+
+static void
+decode_x86_isa (unsigned long bitmask)
+{
+  while (bitmask)
+    {
+      unsigned long bit = bitmask & (- bitmask);
+
+      bitmask &= ~ bit;
+      switch (bit)
+	{
+	case GNU_PROPERTY_X86_ISA_1_486: printf ("i486"); break;
+	case GNU_PROPERTY_X86_ISA_1_586: printf ("586"); break;
+	case GNU_PROPERTY_X86_ISA_1_686: printf ("686"); break;
+	case GNU_PROPERTY_X86_ISA_1_SSE: printf ("SSE"); break;
+	case GNU_PROPERTY_X86_ISA_1_SSE2: printf ("SSE2"); break;
+	case GNU_PROPERTY_X86_ISA_1_SSE3: printf ("SSE3"); break;
+	case GNU_PROPERTY_X86_ISA_1_SSSE3: printf ("SSSE3"); break;
+	case GNU_PROPERTY_X86_ISA_1_SSE4_1: printf ("SSE4_1"); break;
+	case GNU_PROPERTY_X86_ISA_1_SSE4_2: printf ("SSE4_2"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX: printf ("AVX"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX2: printf ("AVX2"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512F: printf ("AVX512F"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512CD: printf ("AVX512CD"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512ER: printf ("AVX512ER"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512PF: printf ("AVX512PF"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512VL: printf ("AVX512VL"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512DQ: printf ("AVX512DQ"); break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512BW: printf ("AVX512BW"); break;
+	default: printf (_("<unknown: %lx>"), bit); break;
+	}
+      if (bitmask)
+	printf (", ");
+    }
+}
+
+static void
+print_gnu_property_note (Elf_Internal_Note * pnote)
+{
+  unsigned char * ptr = (unsigned char *) pnote->descdata;
+  unsigned char * ptr_end = ptr + pnote->descsz;
+  unsigned int    size = is_32bit_elf ? 4 : 8;
+
+  printf (_("      Properties: "));
+
+  if (pnote->descsz % size)
+    {
+      printf (_("<corrupt GNU_PROPERTY_TYPE, size = %#lx>\n"), pnote->descsz);
+      return;
+    }
+
+  while (ptr < (ptr_end - (size * 2)))
+    {
+      unsigned long j;
+      unsigned long type = byte_get (ptr, size);
+      unsigned long datasz = byte_get (ptr + size, size);
+
+      ptr += 2 * size;
+
+      switch (type)
+	{
+	case GNU_PROPERTY_STACK_SIZE:
+	  printf (_("stack size: "));
+	  if (datasz != size || (ptr + size  > ptr_end))
+	    printf (_("<corrupt length: %#lx> "), datasz);
+	  else
+	    printf ("%#lx", (unsigned long) byte_get (ptr, size));
+	  break;
+
+	case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
+	  printf ("no copy on protected ");
+	  if (datasz)
+	    printf (_("<corrupt length: %#lx> "), datasz);
+	  break;
+
+	case GNU_PROPERTY_X86_ISA_1_USED:
+	  printf ("x86 ISA used: ");
+	  if (datasz != size  || (ptr + size > ptr_end))
+	    printf (_("<corrupt length: %#lx> "), datasz);
+	  else
+	    decode_x86_isa (byte_get (ptr, size));
+	  break;
+
+	case GNU_PROPERTY_X86_ISA_1_NEEDED:
+	  printf ("x86 ISA needed: ");
+	  if (datasz != size  || (ptr + size > ptr_end))
+	    printf (_("<corrupt length: %#lx> "), datasz);
+	  else
+	    decode_x86_isa (byte_get (ptr, size));
+	  break;
+
+	default:
+	  printf (_("<unknown type %#lx data: "), type);
+	  if (ptr + datasz > ptr_end)
+	    {
+	      printf (_("corrupt datasz: %#lx>\n"), datasz);
+	      break;
+	    }
+	  for (j = 0; j < datasz; ++j)
+	    printf ("%02x ", ptr[j] & 0xff);
+	  printf (">");
+	  break;
+	}
+
+      ptr += ((datasz + (size - 1)) & ~ (size - 1));
+      if (ptr < (ptr_end - (size * 2)))
+	{
+	  if (do_wide)
+	    printf (", ");
+	  else
+	    printf ("\n\t");
+	}
+    }
+
+  printf ("\n");
 }
 
 static bfd_boolean
@@ -16015,6 +16141,10 @@ print_gnu_note (Elf_Internal_Note *pnote)
       }
       break;
 
+    case NT_GNU_PROPERTY_TYPE_0:
+      print_gnu_property_note (pnote);
+      break;
+      
     default:
       /* Handle unrecognised types.  An error message should have already been
 	 created by get_gnu_elf_note_type(), so all that we need to do is to
@@ -16403,15 +16533,283 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
   return TRUE;
 }
 
+static bfd_boolean
+print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
+				       FILE *              file,
+				       Elf_Internal_Shdr * section ATTRIBUTE_UNUSED)
+{
+  static unsigned long global_offset = 0;
+  unsigned long       i;
+  unsigned long       strtab_size = 0;
+  char *              strtab = NULL;
+  Elf_Internal_Sym *  symtab = NULL;
+  unsigned long       nsyms = 0;
+  Elf_Internal_Shdr * symsec = NULL;
+  unsigned int        desc_size = is_32bit_elf ? 4 : 8;
+
+  if (pnote->descsz  == 0)
+    {
+      printf (_("    Applies from offset %#lx\n"), global_offset);
+      return TRUE;
+    }
+
+  if (pnote->descsz != desc_size)
+    {
+      error (_("    <invalid description size: %lx>\n"), pnote->descsz);
+      printf (_("    <invalid descsz>"));
+      return FALSE;
+    }
+
+  /* Load the symbols.  */
+  for (symsec = section_headers;
+       symsec < section_headers + elf_header.e_shnum;
+       symsec ++)
+    {
+      if (symsec->sh_type == SHT_SYMTAB)
+	{
+	  symtab = GET_ELF_SYMBOLS (file, symsec, & nsyms);
+
+	  if (symsec->sh_link < elf_header.e_shnum)
+	    {
+	      Elf_Internal_Shdr * strtab_sec = section_headers + symsec->sh_link;
+
+	      strtab = (char *) get_data (NULL, file, strtab_sec->sh_offset,
+					  1, strtab_sec->sh_size,
+					  _("string table"));
+	      strtab_size = strtab != NULL ? strtab_sec->sh_size : 0;
+	    }
+	}
+    }
+
+  printf (_("    Applies from offset"));
+
+  for (i = 0; i < pnote->descsz; i += desc_size)
+    {
+      Elf_Internal_Sym * sym;
+      unsigned long offset;
+
+      offset = byte_get ((unsigned char *) pnote->descdata + i, desc_size);
+
+      if (i + desc_size == pnote->descsz)
+	printf (_(" %#lx"), offset);
+      else
+	printf (_(" %#lx, "), offset);
+
+      if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN)
+	global_offset = offset;
+
+      if (symtab == NULL || strtab == NULL)
+	continue;
+
+      /* Find a symbol whose value matches offset.  */
+      for (sym = symtab; sym < symtab + nsyms; sym ++)
+	if (sym->st_value == offset)
+	  {
+	    if (sym->st_name < strtab_size)
+	      {
+		if (strtab[sym->st_name] == 0)
+		  continue;
+		if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN)
+		  printf (_(" (file: %s)"), strtab + sym->st_name);
+		else if (ELF_ST_TYPE (sym->st_info) != STT_FUNC)
+		  continue;
+		else
+		  printf (_(" (function: %s)"), strtab + sym->st_name);
+		break;
+	      }
+	  }
+      if (sym == symtab + nsyms)
+	printf (_(" (<symbol name unknown>)"));
+    }
+
+  printf ("\n");
+  return TRUE;
+}
+
+static bfd_boolean
+print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
+{
+  char         name_type;
+  char         name_attribute;
+  char *       expected_types;
+  const char * name = pnote->namedata;
+  const char * text;
+  int          left;
+
+  if (name == NULL || pnote->namesz < 2)
+    {
+      error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
+      print_symbol (-20, _("  <corrupt name field>"));
+      return FALSE;
+    }
+
+  switch ((name_type = * name))
+    {
+    case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
+    case GNU_BUILD_ATTRIBUTE_TYPE_STRING:
+    case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE:
+    case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE:
+      printf ("%c", * name);
+      break;
+    default:
+      error (_("unrecognised attribute type in name field: %d\n"), name_type);
+      print_symbol (-20, _("<unknown name type>"));
+      return FALSE;
+    }
+
+  left = 19;
+  ++ name;
+  text = NULL;
+
+  switch ((name_attribute = * name))
+    {
+    case GNU_BUILD_ATTRIBUTE_VERSION:
+      text = _("<version>");
+      expected_types = "$";
+      ++ name;
+      break;
+    case GNU_BUILD_ATTRIBUTE_STACK_PROT:
+      text = _("<stack prot>");
+      expected_types = "!+";
+      ++ name;
+      break;
+    case GNU_BUILD_ATTRIBUTE_RELRO:
+      text = _("<relro>");
+      expected_types = "!+";
+      ++ name;
+      break;
+    case GNU_BUILD_ATTRIBUTE_STACK_SIZE:
+      text = _("<stack size>");
+      expected_types = "*";
+      ++ name;
+      break;
+    case GNU_BUILD_ATTRIBUTE_TOOL:
+      text = _("<tool>");
+      expected_types = "$";
+      ++ name;
+      break;
+    case GNU_BUILD_ATTRIBUTE_ABI:
+      text = _("<ABI>");
+      expected_types = "$*";
+      ++ name;
+      break;
+    case GNU_BUILD_ATTRIBUTE_PIC:
+      text = _("<PIC>");
+      expected_types = "*";
+      ++ name;
+      break;
+
+    default:
+      if (ISPRINT (* name))
+	{
+	  int len = strnlen (name, pnote->namesz - (name - pnote->namedata)) + 1;
+
+	  if (len > left && ! do_wide)
+	    len = left;
+	  printf ("%.*s ", len, name);
+	  left -= len;
+	  name += len + 1;
+	}
+      else
+	{
+	  error (_("unexpected character in name field\n"));
+	  print_symbol (- left, _("<unknown attribute>"));
+	  return 0;
+	}
+      expected_types = "*$!+";
+      break;
+    }
+
+  if (text)
+    {
+      printf ("%s", text);
+      left -= strlen (text);
+    }
+
+  if (strchr (expected_types, name_type) == NULL)
+    warn (_("attribute does not have the expected type\n"));
+
+  if ((unsigned long)(name - pnote->namedata) > pnote->namesz)
+    {
+      error (_("corrupt name field: namesz: %lu but parsing gets to %ld\n"),
+	     (unsigned long) pnote->namesz,
+	     (long) (name - pnote->namedata));
+      return FALSE;
+    }
+
+  if (left < 1 && ! do_wide)
+    return TRUE;
+
+  switch (name_type)
+    {
+    case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
+      {
+	unsigned int bytes = pnote->namesz - (name - pnote->namedata);
+	unsigned long val = 0;
+	unsigned int shift = 0;
+
+	while (bytes --)
+	  {
+	    val |= ((* name ++) << shift);
+	    shift += 8;
+	  }
+
+	if (name_attribute == GNU_BUILD_ATTRIBUTE_PIC)
+	  {
+	    char * pic_type = NULL;
+
+	    switch (val)
+	      {
+	      case 0: pic_type = "static"; break;
+	      case 1: pic_type = "pic"; break;
+	      case 2: pic_type = "PIC"; break;
+	      case 3: pic_type = "pie"; break;
+	      case 4: pic_type = "PIE"; break;
+	      }
+
+	    if (pic_type != NULL)
+	      {
+		if (do_wide)
+		  left -= printf ("%s", pic_type);
+		else
+		  left -= printf ("%-.*s", left, pic_type);
+		break;
+	      }
+	  }
+
+	if (do_wide)
+	  left -= printf ("0x%lx", val);
+	else
+	  left -= printf ("0x%-.*lx", left, val);
+      }
+      break;
+    case GNU_BUILD_ATTRIBUTE_TYPE_STRING:
+      left -= print_symbol (- left, name);
+      break;
+    case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE:
+      left -= print_symbol (- left, "true");
+      break;
+    case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE:
+      left -= print_symbol (- left, "false");
+      break;
+    }
+
+  if (do_wide && left > 0)
+    printf ("%-*s", left, " ");
+    
+  return TRUE;
+}
+
 /* Note that by the ELF standard, the name field is already null byte
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
 
    If the value of namesz is zero, there is no name present.  */
+
 static bfd_boolean
-process_note (Elf_Internal_Note * pnote,
-	      FILE * file ATTRIBUTE_UNUSED,
-	      Elf_Internal_Shdr * section ATTRIBUTE_UNUSED)
+process_note (Elf_Internal_Note *  pnote,
+	      FILE *               file,
+	      Elf_Internal_Shdr *  section)
 {
   const char * name = pnote->namesz ? pnote->namedata : "(NONE)";
   const char * nt;
@@ -16457,8 +16855,17 @@ process_note (Elf_Internal_Note * pnote,
     nt = get_note_type (pnote->type);
 
   printf ("  ");
-  print_symbol (-20, name);
-  printf (" 0x%08lx\t%s\n", pnote->descsz, nt);
+
+  if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+      || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+    print_gnu_build_attribute_name (pnote);
+  else
+    print_symbol (-20, name);
+
+  if (do_wide)
+    printf (" 0x%08lx\t%s\t", pnote->descsz, nt);
+  else
+    printf (" 0x%08lx\t%s\n", pnote->descsz, nt);
 
   if (const_strneq (pnote->namedata, "IPF/VMS"))
     return print_ia64_vms_note (pnote);
@@ -16468,16 +16875,21 @@ process_note (Elf_Internal_Note * pnote,
     return print_stapsdt_note (pnote);
   else if (const_strneq (pnote->namedata, "CORE"))
     return print_core_note (pnote);
+  else if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	   || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+    return print_gnu_build_attribute_description (pnote, file, section);
 
-  else if (pnote->descsz)
+  if (pnote->descsz)
     {
       unsigned long i;
 
       printf (_("   description data: "));
       for (i = 0; i < pnote->descsz; i++)
 	printf ("%02x ", pnote->descdata[i]);
-      printf ("\n");
     }
+
+  if (do_wide)
+    printf ("\n");
 
   return TRUE;
 }
@@ -16549,7 +16961,8 @@ process_notes_at (FILE *              file,
 	  /* PR 17531: file: 3443835e.  */
 	  if (inote.descdata < (char *) pnotes || inote.descdata > end)
 	    {
-	      warn (_("Corrupt note: name size is too big: %lx\n"), inote.namesz);
+	      warn (_("Corrupt note: name size is too big: (got: %lx, expected no more than: %lx)\n"),
+		    inote.namesz, (long)(end - inote.namedata));
 	      inote.descdata = inote.namedata;
 	      inote.namesz   = 0;
 	    }

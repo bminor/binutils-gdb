@@ -1179,6 +1179,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--compress-debug-sections}]
         [@option{--decompress-debug-sections}]
         [@option{--elf-stt-common=@var{val}}]
+        [@option{--merge-notes}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -1994,6 +1995,10 @@ converted to the @code{STT_COMMON} or @code{STT_OBJECT} type.
 @option{--elf-stt-common=yes} converts common symbol type to
 @code{STT_COMMON}. @option{--elf-stt-common=no} converts common symbol
 type to @code{STT_OBJECT}.
+
+@item --merge-notes
+For ELF files, attempt to reduce the size of any SHT_NOTE type
+sections by removing duplicate notes.
 
 @item -V
 @itemx --version

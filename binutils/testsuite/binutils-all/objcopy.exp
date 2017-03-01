@@ -1053,6 +1053,11 @@ if [is_elf_format] {
     run_dump_test "group-6"
     run_dump_test "copy-1"
     run_dump_test "note-1"
+    if [is_elf64 tmpdir/bintest.o] {
+	run_dump_test "note-2-64"
+    } else {
+	run_dump_test "note-2-32"
+    }
 }
 
 run_dump_test "copy-2"

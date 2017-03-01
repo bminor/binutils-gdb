@@ -1,3 +1,34 @@
+2017-03-01  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_note_type): Add support for GNU_BUILD_NOTEs.
+	(get_gnu_elf_note_type): Add support for GNU_PROPERTY_NOTEs.
+	(decode_x86_isa): New function.
+	(print_gnu_property_note): New function.
+	(print_gnu_note): Handle GNU_PROPERTY_NOTEs.
+	(print_gnu_build_attribute_description): New function.
+	(print_gnu_build_attribute_name): New function.
+	(process_note): Add support for GNU_BUILD_NOTEs.
+	* objcopy.c (--merge-notes): New command line option.
+	(copy_options): Add merge-notes.
+	(copy_usage): Likewise.
+	(is_merge_note_section): New function.
+	(merge_gnu_build_notes): New function.
+	(copy_object): Merge note sections if asked to do so.
+	(skip_section): Add skip_copy parameter.  Add support for skipping
+	merged note sections.
+	(copy_relocations_in_section): Update call to skip_section.
+	(copy_section): Likewise.
+	(copy_main): Add support for merge-notes option.
+	* doc/binutils.texi: Document the new option to objcopy.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/note-2-32.d: New test.  Checks note
+	merging on 32-bit targets.
+	* testsuite/binutils-all/note-2-32.s: New test source file.
+	* testsuite/binutils-all/note-2-64.d: New test.  Like note-2-32.d
+	but for 64-bit targets.
+	* testsuite/binutils-all/note-2-64.s: New test source file.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+
 2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* objdump.c (main): Use remove_whitespace_and_extra_commas.
