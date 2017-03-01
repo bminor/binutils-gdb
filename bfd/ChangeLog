@@ -1,3 +1,9 @@
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-03-02  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (ppc_elf_vle_split16): Correct insn mask typo.
+
 2017-03-02  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.28.0
