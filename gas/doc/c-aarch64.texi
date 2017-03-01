@@ -154,6 +154,8 @@ automatically cause those extensions to be disabled.
 @item @code{ras} @tab ARMv8-A @tab ARMv8.2-A or later
  @tab Enable the Reliability, Availability and Serviceability
  extension.
+@item @code{rcpc} @tab ARMv8.2-A @tab ARMv8.3-A or later
+ @tab Enable the weak release consistency extension.
 @item @code{rdma} @tab ARMv8-A @tab ARMv8.1-A or later
  @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
 @item @code{simd} @tab ARMv8-A @tab ARMv8-A or later
