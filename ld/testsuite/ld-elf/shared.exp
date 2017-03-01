@@ -581,10 +581,10 @@ set build_cxx_tests {
    "-shared -Wl,--dynamic-list-cpp-typeinfo" "-fPIC"
    {dl3.cc} {} "libdl3c.so" "c++"}
   {"Build libdnew1a.so with --Bsymbolic-functions --dynamic-list-cpp-new"
-   "-shared -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" "-fPIC"
+   "-shared -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" "-fPIC -ansi"
    {del.cc new.cc} {} "libnew1a.so" "c++"}
   {"Build libdnew1b.so with --dynamic-list-data --dynamic-list-cpp-new"
-   "-shared -Wl,--dynamic-list-data,--dynamic-list-cpp-new" "-fPIC"
+   "-shared -Wl,--dynamic-list-data,--dynamic-list-cpp-new" "-fPIC -ansi"
    {del.cc new.cc} {} "libnew1b.so" "c++"}
 }
 
@@ -601,10 +601,10 @@ set run_cxx_tests {
      {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
     {"Run with libnew1a.so"
      "-Wl,--no-as-needed tmpdir/libnew1a.so" ""
-     {dl5.cc} "dl5a" "dl5.out" "" "c++"}
+     {dl5.cc} "dl5a" "dl5.out" "-ansi" "c++"}
     {"Run with libnew1b.so"
      "-Wl,--no-as-needed tmpdir/libnew1b.so" ""
-     {dl5.cc} "dl5b" "dl5.out" "" "c++"}
+     {dl5.cc} "dl5b" "dl5.out" "-ansi" "c++"}
 }
 
 run_cc_link_tests $build_cxx_tests

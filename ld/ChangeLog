@@ -1,3 +1,8 @@
+2017-03-02  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp: Pass -ansi when compiling new.cc
+	and dl3.cc.
+
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/merge.d: xfail for nios.
