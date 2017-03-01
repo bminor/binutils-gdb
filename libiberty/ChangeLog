@@ -1,3 +1,31 @@
+2017-01-18  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR PR c++/70182
+	* cp-demangle.c (d_unqualified_name): Handle "on" for
+	operator names.
+	* testsuite/demangle-expected: Add tests.
+
+2017-01-18  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR c++/77489
+	* cp-demangle.c (d_discriminator): Handle discriminator >= 10.
+	* testsuite/demangle-expected: Add tests for discriminator.
+
+2017-01-04  Jakub Jelinek  <jakub@redhat.com>
+
+	Update copyright years.
+
+2017-01-04  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in (configure_deps): Update.
+	* configure: Regenerate.
+
+2016-12-13  Jakub Jelinek  <jakub@redhat.com>
+
+	PR c++/78761
+	* cp-demangle.c (cplus_demangle_type): Demangle Dc as decltype(auto).
+	* testsuite/demangle-expected: Add test for decltype(auto).
+
 2016-12-12  Nathan Sidwell  <nathan@acm.org>
 
 	PR c++/78252
@@ -19,6 +47,18 @@
 2016-12-06  DJ Delorie  <dj@redhat.com>
 
 	* argv.c (expandargv): Check for directories passed as @-files.
+
+2016-11-30  David Malcolm  <dmalcolm@redhat.com>
+
+	PR c/78498
+	* strndup.c (strlen): Delete decl.
+	(strnlen): Add decl.
+	(strndup): Call strnlen rather than strlen.
+	* xstrndup.c (xstrndup): Likewise.
+
+2016-11-29  Nathan Sidwell  <nathan@acm.org>
+
+	* cp-demangle.c (d_print_comp_inner): Fix parameter indentation.
 
 2016-11-03  David Tolnay <dtolnay@gmail.com>
 	    Mark Wielaard  <mark@klomp.org>
@@ -85,10 +125,6 @@
 
 	* cplus-dem.c (ada_demangle): Initialize demangled to NULL and
 	XDELETEVEC demangled when unknown.
-
-2016-10-17  Nick Clifton  <nickc@redhat.com>
-
-	* Sync with gcc.
 
 2016-09-19  Andrew Stubbs  <ams@codesourcery.com>
 
@@ -345,11 +381,7 @@
 	(d_print_mod_list, d_print_mod, d_print_function_type)
 	(is_ctor_or_dtor): Handle DEMANGLE_COMPONENT_TRANSACTION_SAFE.
 
-2015-09-30  Nick Clifton  <nickc@redhat.com>
-
-	Import the following patches from the GCC mainline:
-
-	2015-08-15  Ian Lance Taylor  <iant@google.com>
+2015-08-15  Ian Lance Taylor  <iant@google.com>
 
 	* cp-demangle.c (d_abi_tags): Preserve di->last_name across any
 	ABI tags.
@@ -360,10 +392,6 @@
 	(strtod): Remove declaration.
 	* testsuite/d-demangle-expected: Update float and complex literal
 	tests to check correct hexadecimal demangling.
-
-2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* configure: Regenerated.
 
 2015-07-13  Mikhail Maltsev  <maltsevm@gmail.com>
 
@@ -506,8 +534,8 @@
 	* functions.texi: Regenerate.
 
 2014-12-11  Uros Bizjak  <ubizjak@gmail.com>
-	    Ben Elliston  <bje@au.ibm.com>
-	    Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+            Ben Elliston  <bje@au.ibm.com>
+            Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
 
 	* xvasprintf.c: New file.
 	* vprintf-support.h: Likewise.
@@ -732,7 +760,7 @@
 	(d_ctor_dtor_name): Handle unified ctor/dtor.
 
 2013-11-22  Cary Coutant  <ccoutant@google.com>
-
+    
 	PR other/59195
 	* cp-demangle.c (struct d_info_checkpoint): New struct.
 	(struct d_print_info): Add current_template field.
