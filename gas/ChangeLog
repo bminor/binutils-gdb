@@ -1,5 +1,9 @@
 2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
 
+	* config/tc-riscv.h (HWARD2_USE_FIXED_ADVANCE_PC): New define.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
 	* config/tc-riscv.c (md_apply_fix): Set fx_frag and
 	fx_next->fx_frag for CFA_advance_loc relocations.
 
