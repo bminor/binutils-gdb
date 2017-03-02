@@ -6689,11 +6689,16 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  /* Special segments, such as the PT_PHDR segment, may contain
 	     no sections, but ordinary, loadable segments should contain
 	     something.  They are allowed by the ELF spec however, so only
-	     a warning is produced.  */
-	  if (segment->p_type == PT_LOAD)
+	     a warning is produced.  
+	     There is however the valid use case of embedded systems which
+	     have segments with p_filesz of 0 and a p_memsz > 0 to initialize
+	     flash memory with zeros.  No warning is shown for that case.  */
+	  if (segment->p_type == PT_LOAD
+	      && (segment->p_filesz > 0 || segment->p_memsz == 0))
+	    /* xgettext:c-format */
 	    _bfd_error_handler (_("\
-%B: warning: Empty loadable segment detected, is this intentional ?"),
-				ibfd);
+%B: warning: Empty loadable segment detected at vaddr=0x%.8x, is this intentional ?"),
+				ibfd, segment->p_vaddr);
 
 	  map->count = 0;
 	  *pointer_to_map = map;

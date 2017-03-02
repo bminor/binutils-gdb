@@ -1,3 +1,9 @@
+2017-03-02  Martin Bickel  <binutils@ineranves.de>
+
+	PR ld/21212
+	* elf.c (rewrite_elf_program_header): Do not issue a warning for
+	empty segments which have a non-zero filesz.
+
 2017-03-02  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_vle_split16): Correct insn mask typo.
