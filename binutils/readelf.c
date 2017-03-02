@@ -16585,6 +16585,7 @@ print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
 
   for (i = 0; i < pnote->descsz; i += desc_size)
     {
+      Elf_Internal_Sym * saved_sym = NULL;
       Elf_Internal_Sym * sym;
       unsigned long offset;
 
@@ -16609,8 +16610,19 @@ print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
 	      {
 		if (strtab[sym->st_name] == 0)
 		  continue;
+
 		if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN)
-		  printf (_(" (file: %s)"), strtab + sym->st_name);
+		  {
+		    /* For OPEN attributes we prefer GLOBAL symbols, if there
+		       is one that matches.  But keep a record of a matching
+		       LOCAL symbol, just in case that is all that we can find.  */
+		    if (ELF_ST_BIND (sym->st_info) == STB_LOCAL)
+		      {
+			saved_sym = sym;
+			continue;
+		      }
+		    printf (_(" (file: %s)"), strtab + sym->st_name);
+		  }
 		else if (ELF_ST_TYPE (sym->st_info) != STT_FUNC)
 		  continue;
 		else
@@ -16618,8 +16630,14 @@ print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
 		break;
 	      }
 	  }
+
       if (sym == symtab + nsyms)
-	printf (_(" (<symbol name unknown>)"));
+	{
+	  if (saved_sym)
+	    printf (_(" (file: %s)"), strtab + saved_sym->st_name);
+	  else
+	    printf (_(" (<symbol name unknown>)"));
+	}
     }
 
   printf ("\n");

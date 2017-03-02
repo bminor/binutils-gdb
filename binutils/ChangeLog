@@ -1,3 +1,8 @@
+2017-03-02  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_description): Use global
+	symbols for OPEN attributes if at all possible.
+
 2017-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf.c (debug_displays_assert): New static assertion.
