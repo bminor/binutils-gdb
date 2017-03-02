@@ -1,3 +1,7 @@
+2017-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.h (enum dwarf_section_display_enum): Add loclists and rnglists.
+
 2017-03-01  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_note_type): Add support for GNU_BUILD_NOTEs.
