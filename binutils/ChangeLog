@@ -2,6 +2,8 @@
 
 	* readelf.c (print_gnu_build_attribute_description): Use global
 	symbols for OPEN attributes if at all possible.
+	* objcopy.c (is_merged_note_section): Support build note sections
+	without the SHF_GNU_BUILD_NOTE section flag set.
 
 2017-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

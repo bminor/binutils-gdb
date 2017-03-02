@@ -1217,7 +1217,11 @@ is_merged_note_section (bfd * abfd, asection * sec)
       && elf_section_data (sec)->this_hdr.sh_type == SHT_NOTE
       /* FIXME: We currently only support merging GNU_BUILD_NOTEs.
 	 We should add support for more note types.  */
-      && elf_section_data (sec)->this_hdr.sh_flags & SHF_GNU_BUILD_NOTE)
+      && ((elf_section_data (sec)->this_hdr.sh_flags & SHF_GNU_BUILD_NOTE) != 0
+	  /* Old versions of GAS (prior to 2.27) could not set the section
+	     flags to OS-specific values, so we also accept sections with the
+	     expected name.  */
+	  || (strcmp (sec->name, GNU_BUILD_ATTRS_SECTION_NAME) == 0)))
     return TRUE;
 
   return FALSE;
