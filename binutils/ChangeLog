@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2017-03-02  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2017-01-18  Bernhard Rosenkranzer  <bero@lindev.ch>
 
 	PR 21059

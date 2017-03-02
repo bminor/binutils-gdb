@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2017-03-02  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
