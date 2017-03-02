@@ -1,3 +1,56 @@
+2017-03-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* write.c (relax_segment) <rs_org>: Only bail out if the fixed
+	part of the frag has overrun the location requested.
+
+	* testsuite/gas/all/org-1.d: New test.
+	* testsuite/gas/all/org-2.d: New test.
+	* testsuite/gas/all/org-3.d: New test.
+	* testsuite/gas/all/org-4.d: New test.
+	* testsuite/gas/all/org-5.d: New test.
+	* testsuite/gas/all/org-6.d: New test.
+	* testsuite/gas/all/org-1.l: New stderr output.
+	* testsuite/gas/all/org-2.l: New stderr output.
+	* testsuite/gas/all/org-3.l: New stderr output.
+	* testsuite/gas/all/org-1.s: New test source.
+	* testsuite/gas/all/org-2.s: New test source.
+	* testsuite/gas/all/org-3.s: New test source.
+	* testsuite/gas/all/org-4.s: New test source.
+	* testsuite/gas/all/org-5.s: New test source.
+	* testsuite/gas/all/org-6.s: New test source.
+	* testsuite/gas/all/gas.exp: Run the new tests.
+
+	* testsuite/gas/mips/org-1.d: New test.
+	* testsuite/gas/mips/org-2.d: New test.
+	* testsuite/gas/mips/org-3.d: New test.
+	* testsuite/gas/mips/org-4.d: New test.
+	* testsuite/gas/mips/org-5.d: New test.
+	* testsuite/gas/mips/org-6.d: New test.
+	* testsuite/gas/mips/org-7.d: New test.
+	* testsuite/gas/mips/org-8.d: New test.
+	* testsuite/gas/mips/org-9.d: New test.
+	* testsuite/gas/mips/org-10.d: New test.
+	* testsuite/gas/mips/org-11.d: New test.
+	* testsuite/gas/mips/org-12.d: New test.
+	* testsuite/gas/mips/org-1.l: New stderr output.
+	* testsuite/gas/mips/org-4.l: New stderr output.
+	* testsuite/gas/mips/org-5.l: New stderr output.
+	* testsuite/gas/mips/org-6.l: New stderr output.
+	* testsuite/gas/mips/org-10.l: New stderr output.
+	* testsuite/gas/mips/org-1.s: New test source.
+	* testsuite/gas/mips/org-2.s: New test source.
+	* testsuite/gas/mips/org-3.s: New test source.
+	* testsuite/gas/mips/org-4.s: New test source.
+	* testsuite/gas/mips/org-5.s: New test source.
+	* testsuite/gas/mips/org-6.s: New test source.
+	* testsuite/gas/mips/org-7.s: New test source.
+	* testsuite/gas/mips/org-8.s: New test source.
+	* testsuite/gas/mips/org-9.s: New test source.
+	* testsuite/gas/mips/org-10.s: New test source.
+	* testsuite/gas/mips/org-11.s: New test source.
+	* testsuite/gas/mips/org-12.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-03-01  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* doc/c-aarch64.texi (AArch64 Extensions): Document rcpc.

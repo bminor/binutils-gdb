@@ -1806,6 +1806,19 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "debug-label-end-2"
     run_dump_test "debug-label-end-3"
 
+    run_dump_test "org-1"
+    run_dump_test "org-2"
+    run_dump_test "org-3"
+    run_dump_test "org-4"
+    run_dump_test "org-5"
+    run_dump_test "org-6"
+    run_dump_test "org-7"
+    run_dump_test "org-8"
+    run_dump_test "org-9"
+    run_dump_test "org-10"
+    run_dump_test "org-11"
+    run_dump_test "org-12"
+
     run_dump_test_arches "r6"		[mips_arch_list_matching mips32r6]
     if $has_newabi {
 	run_dump_test_arches "r6-n32"	[mips_arch_list_matching mips64r6]
