@@ -8591,3 +8591,6 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_tu_index",    "",			NULL, NULL, 0, 0, 0, NULL, 0, NULL },
     display_cu_index,       &do_debug_cu_index,	FALSE },
 };
+
+/* A static assertion.  */
+extern int debug_displays_assert[ARRAY_SIZE (debug_displays) == max ? 1 : -1];
