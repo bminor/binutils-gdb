@@ -1,3 +1,8 @@
+2017-11-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-exp.y (write_var_from_sym): Remove parameter
+	"orig_left_context".  Update all callers.
+
 2017-11-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.h (class collection_list) <stringify>: Return

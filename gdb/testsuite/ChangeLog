@@ -1,3 +1,11 @@
+2017-11-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/scoped_watch: New testcase.
+	* gdb.ada/watch_arg.exp: Adjust expected behavior to the behavior
+	which is actually correct.
+	* gdb.ada/mi_interface.exp: Add missing thread-id in expected varobj.
+	* gdb.ada/mi_var_array.exp: Add missing thread-id in expected varobj.
+
 2017-11-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.gdb/complaints.exp (test_initial_complaints)
