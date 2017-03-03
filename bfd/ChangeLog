@@ -2,7 +2,7 @@
 
 	PR ld/21212
 	* elf.c (rewrite_elf_program_header): Do not issue a warning for
-	empty segments which have a non-zero filesz.
+	empty segments which have a zero filesz, but a non-zero memsz.
 
 2017-03-02  Alan Modra  <amodra@gmail.com>
 
