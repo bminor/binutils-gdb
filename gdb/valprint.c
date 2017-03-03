@@ -1201,6 +1201,9 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
        get a fixed representation of our value.  */
     val = ada_to_fixed_value (val);
 
+  if (value_lazy (val))
+    value_fetch_lazy (val);
+
   val_print (value_type (val),
 	     value_embedded_offset (val), value_address (val),
 	     stream, recurse,

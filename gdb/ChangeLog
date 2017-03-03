@@ -1,3 +1,10 @@
+2017-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/21165
+	* ada-valprint.c (ada_val_print_ref): Call value_fetch_lazy if
+	value is lazy.
+	* valprint.c (common_val_print): Likewise.
+
 2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* NEWS: Mention new set/show disassembler-options commands.
