@@ -1,3 +1,9 @@
+2017-03-06  Sam Thursfield  <sam.thursfield@codethink.co.uk>
+
+	* configure.ac (AC_CHECK_DECLS): Add asprintf.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2017-03-02  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (print_gnu_build_attribute_description): Use global
