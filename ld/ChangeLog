@@ -1,3 +1,9 @@
+2017-03-03  Max Bolingbroke  <batterseapower@hotmail.com>
+
+	PR 12969
+	* pe-dll.c (generate_edata): Fail if the input file(s) require too
+	many ordinals.
+
 2017-03-02  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/shared.exp: Pass -ansi when compiling new.cc
