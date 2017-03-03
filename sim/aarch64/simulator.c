@@ -13020,6 +13020,8 @@ mul64hi (uint64_t value1, uint64_t value2)
 
   /* Drop lowest 32 bits of middle cross-product.  */
   result = resultmid1 >> 32;
+  /* Move carry bit to just above middle cross-product highest bit.  */
+  carry = carry << 32;
 
   /* Add top cross-product plus and any carry.  */
   result += xproducthi + carry;
@@ -13042,7 +13044,7 @@ smulh (sim_cpu *cpu)
   int64_t  value2 = aarch64_get_reg_u64 (cpu, rm, NO_SP);
   uint64_t uvalue1;
   uint64_t uvalue2;
-  int64_t  signum = 1;
+  int  negate = 0;
 
   if (ra != R31)
     HALT_UNALLOC;
@@ -13051,7 +13053,7 @@ smulh (sim_cpu *cpu)
      the fix the sign up afterwards.  */
   if (value1 < 0)
     {
-      signum *= -1L;
+      negate = !negate;
       uvalue1 = -value1;
     }
   else
@@ -13061,7 +13063,7 @@ smulh (sim_cpu *cpu)
 
   if (value2 < 0)
     {
-      signum *= -1L;
+      negate = !negate;
       uvalue2 = -value2;
     }
   else
@@ -13070,9 +13072,18 @@ smulh (sim_cpu *cpu)
     }
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+
   uresult = mul64hi (uvalue1, uvalue2);
   result = uresult;
-  result *= signum;
+
+  if (negate)
+    {
+      /* Multiply 128-bit result by -1, which means highpart gets inverted,
+	 and has carry in added only if low part is 0.  */
+      result = ~result;
+      if ((uvalue1 * uvalue2) == 0)
+	result += 1;
+    }
 
   aarch64_set_reg_s64 (cpu, rd, NO_SP, result);
 }

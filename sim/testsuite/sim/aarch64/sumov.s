@@ -34,7 +34,7 @@ input:
 	smov w1, v0.h[4]
 	cmp w0, #0x0201
 	bne .Lfailure
-	cmp w1, #-2315
+	cmp w1, #-3343
 	bne .Lfailure
 
 	smov x0, v0.h[1]
@@ -50,8 +50,9 @@ input:
 	movk x2, #0x0807, lsl #16
 	cmp x0, x2
 	bne .Lfailure
-	mov x3, #0xf6f5
-	movk x3, #0xf8f7, lsl #16
+	mov w3, #0xf6f5
+	movk w3, #0xf8f7, lsl #16
+	sxtw x3, w3
 	cmp x1, x3
 	bne .Lfailure
 
@@ -64,9 +65,10 @@ input:
 
 	umov w0, v0.h[0]
 	umov w1, v0.h[4]
-	cmp w0, #0201
+	cmp w0, #0x0201
 	bne .Lfailure
-	cmp w1, #0xf2f1
+	mov w2, #0xf2f1
+	cmp w1, w2
 	bne .Lfailure
 
 	umov w0, v0.s[0]

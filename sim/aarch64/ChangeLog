@@ -1,3 +1,9 @@
+2017-03-03  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (mul64hi): Shift carry left by 32.
+	(smulh): Change signum to negate.  If negate, invert result, and add
+	carry bit if low part of multiply result is zero.
+
 2017-02-25  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (do_vec_SMOV_into_scalar): New.
