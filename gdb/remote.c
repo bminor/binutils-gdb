@@ -9690,10 +9690,8 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
 
   /* Concatenate all the agent expressions that are commands into the
      cmds parameter.  */
-  for (int ix = 0; ix < bp_tgt->tcommands.size (); ix++)
+  for (agent_expr *aexpr : bp_tgt->tcommands)
     {
-      struct agent_expr *aexpr = bp_tgt->tcommands[ix];
-
       sprintf (buf, "X%x,", aexpr->len);
       buf += strlen (buf);
       for (int i = 0; i < aexpr->len; ++i)

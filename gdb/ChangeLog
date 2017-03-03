@@ -1,3 +1,8 @@
+2017-03-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_commands): Use range-based
+	for loop.
+
 2017-03-03  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/21165
