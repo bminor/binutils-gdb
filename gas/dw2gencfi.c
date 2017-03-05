@@ -157,7 +157,7 @@ out_sleb128 (offsetT value)
   output_leb128 (frag_more (sizeof_leb128 (value, 1)), value, 1);
 }
 
-static offsetT
+static unsigned int
 encoding_size (unsigned char encoding)
 {
   if (encoding == DW_EH_PE_omit)
@@ -183,7 +183,7 @@ encoding_size (unsigned char encoding)
 static void
 emit_expr_encoded (expressionS *exp, int encoding, bfd_boolean emit_encoding)
 {
-  offsetT size = encoding_size (encoding);
+  unsigned int size = encoding_size (encoding);
   bfd_reloc_code_real_type code;
 
   if (encoding == DW_EH_PE_omit)
@@ -197,6 +197,7 @@ emit_expr_encoded (expressionS *exp, int encoding, bfd_boolean emit_encoding)
     {
       reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, code);
       char *p = frag_more (size);
+      gas_assert (size == howto->bitsize / 8);
       md_number_to_chars (p, 0, size);
       fix_new (frag_now, p - frag_now->fr_literal, size, exp->X_add_symbol,
 	       exp->X_add_number, howto->pc_relative, code);
@@ -1934,8 +1935,8 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   expressionS exp;
   offsetT augmentation_size;
   enum dwarf2_format fmt = DWARF2_FORMAT (now_seg);
-  int offset_size;
-  int addr_size;
+  unsigned int offset_size;
+  unsigned int addr_size;
 
   after_size_address = symbol_temp_make ();
   end_address = symbol_temp_make ();
@@ -1973,13 +1974,15 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
     {
       bfd_reloc_code_real_type code
 	= tc_cfi_reloc_for_encoding (cie->fde_encoding);
+      addr_size = DWARF2_FDE_RELOC_SIZE;
       if (code != BFD_RELOC_NONE)
 	{
 	  reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, code);
-	  char *p = frag_more (4);
-	  md_number_to_chars (p, 0, 4);
-	  fix_new (frag_now, p - frag_now->fr_literal, 4, fde->start_address,
-		   0, howto->pc_relative, code);
+	  char *p = frag_more (addr_size);
+	  gas_assert (addr_size == howto->bitsize / 8);
+	  md_number_to_chars (p, 0, addr_size);
+	  fix_new (frag_now, p - frag_now->fr_literal, addr_size,
+		   fde->start_address, 0, howto->pc_relative, code);
 	}
       else
 	{
@@ -1988,19 +1991,18 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
 #if CFI_DIFF_EXPR_OK
 	  exp.X_add_symbol = fde->start_address;
 	  exp.X_op_symbol = symbol_temp_new_now ();
-	  emit_expr (&exp, DWARF2_FDE_RELOC_SIZE);	/* Code offset.  */
+	  emit_expr (&exp, addr_size);	/* Code offset.  */
 #else
 	  exp.X_op = O_symbol;
 	  exp.X_add_symbol = fde->start_address;
 
 #if defined(tc_cfi_emit_pcrel_expr)
-	  tc_cfi_emit_pcrel_expr (&exp, DWARF2_FDE_RELOC_SIZE);	 /* Code offset.  */
+	  tc_cfi_emit_pcrel_expr (&exp, addr_size);	 /* Code offset.  */
 #else
-	  emit_expr (&exp, DWARF2_FDE_RELOC_SIZE);	/* Code offset.  */
+	  emit_expr (&exp, addr_size);	/* Code offset.  */
 #endif
 #endif
 	}
-      addr_size = DWARF2_FDE_RELOC_SIZE;
     }
   else
     {

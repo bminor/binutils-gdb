@@ -1,5 +1,13 @@
 2017-03-06  Alan Modra  <amodra@gmail.com>
 
+	* dw2gencfi.c (encoding_size): Return unsigned int.
+	(emit_expr_encoded): Assert size matches reloc bitsize.
+	(output_fde): Use unsigned for offset_size and addr_size.  Set
+	addr_size earlier and use in place of constant 4 and uses of
+	DWARF2_FDE_RELOC_SIZE.  Assert it matches reloc bitsize.
+
+2017-03-06  Alan Modra  <amodra@gmail.com>
+
 	* dw2gencfi.c: Wrap overlong lines.  Add parens for emacs
 	auto reformat.  Formatting and whitespace fixes.
 
