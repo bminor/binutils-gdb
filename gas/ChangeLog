@@ -1,3 +1,17 @@
+2017-03-05  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (out_debug_abbrev): Use DW_FORM_strp instead of
+	DW_FORM_string for DW_AT_name, DW_AT_comp_dir and DW_AT_producer.
+	(out_debug_info): Accept symbols to name, comp_dir and producer in
+	the .debug_str section and emit those offsets not full strings.
+	(out_debug_str): New function that outputs the strings for name,
+	comp_dir and producer in .debug_str and generates symbols to those
+	strings.
+	(out_debug_line): Create a .debug_str section if necessary and call
+	out_debug_str before calling out_debug_info.
+	* testsuite/gas/aarch64/dwarf.d: Add extra section symbol to expected
+	output.
+
 2017-03-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* write.c (relax_segment) <rs_org>: Only bail out if the fixed
