@@ -1,3 +1,19 @@
+2017-03-05  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct eh_cie_fde): Add u.cie.per_encoding_aligned8.
+	* elf-eh-frame.c (size_of_output_cie_fde): Don't align here.
+	(next_cie_fde_offset): New function.
+	(_bfd_elf_parse_eh_frame): Set u.cie.per_encoding_aligned8.
+	(_bfd_elf_discard_section_eh_frame): Align zero terminator to
+	four bytes.  Align CIEs to four or eight bytes depending on
+	per_encoding_aligned8.  Align FDEs according to their encoding.
+	Pad last FDE to output section alignment.
+	(_bfd_elf_write_section_eh_frame): Adjust to suit.  Remove
+	assertion.
+	* elf64-ppc.c (glink_eh_frame_cie): Delete padding.
+	(ppc64_elf_size_stubs): Pad glink eh_frame as per elf-eh-frame.c.
+	(ppc64_elf_finish_dynamic_sections): Adjust to suit.
+
 2017-03-02  Martin Bickel  <binutils@ineranves.de>
 
 	PR ld/21212

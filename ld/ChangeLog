@@ -1,3 +1,22 @@
+2017-03-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/eh3.d: Adjust for eh_frame alignment change.
+	* testsuite/ld-elf/eh6.d: Likewise.
+	* testsuite/ld-alpha/tlsbin.dd: Likewise.
+	* testsuite/ld-alpha/tlsbin.td: Likewise.
+	* testsuite/ld-alpha/tlsbinr.dd: Likewise.
+	* testsuite/ld-alpha/tlspic.dd: Likewise.
+	* testsuite/ld-alpha/tlspic.rd: Likewise.
+	* testsuite/ld-alpha/tlspic.sd: Likewise.
+	* testsuite/ld-alpha/tlspic.td: Likewise.
+	* testsuite/ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame2-n64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame3.d: Likewise.
+	* testsuite/ld-x86-64/pr20830a.d: Likewise.
+	* testsuite/ld-x86-64/pr21038a.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c.d: Likewise.
+
 2017-03-03  Max Bolingbroke  <batterseapower@hotmail.com>
 
 	PR 12969
