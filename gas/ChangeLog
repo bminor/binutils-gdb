@@ -1,3 +1,8 @@
+2017-03-06  Alan Modra  <amodra@gmail.com>
+
+	* dw2gencfi.c: Wrap overlong lines.  Add parens for emacs
+	auto reformat.  Formatting and whitespace fixes.
+
 2017-03-05  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf2dbg.c (out_debug_abbrev): Use DW_FORM_strp instead of
