@@ -214,16 +214,24 @@ fill_fpregset (const struct regcache *regcache, fpregset_t *regp, int regno)
 			   sizeof (fpregset_t));
 }
 
+/* Find the TID for the inferior thread corresponding to PTID to use with
+   ptrace.  */
+static int
+s390_inferior_tid (ptid_t ptid)
+{
+  /* GNU/Linux LWP ID's are process ID's.  */
+  int tid = ptid_get_lwp (ptid);
+  if (tid == 0)
+    tid = ptid_get_pid (ptid); /* Not a threaded program.  */
+
+  return tid;
+}
+
 /* Find the TID for the current inferior thread to use with ptrace.  */
 static int
 s390_inferior_tid (void)
 {
-  /* GNU/Linux LWP ID's are process ID's.  */
-  int tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
-
-  return tid;
+  return s390_inferior_tid (inferior_ptid);
 }
 
 /* Fetch all general-purpose registers from process/thread TID and
