@@ -94,3 +94,6 @@
 	bndldx bnd1, [rip+base]
 	bndldx bnd3, [eip+base]
 	bndldx bnd3, [rax+rsp]
+
+	# Force a good alignment.
+	.p2align	4,0
