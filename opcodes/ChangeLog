@@ -1,3 +1,15 @@
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-03-06  Alan Modra  <amodra@gmail.com>
+	PR 21124
+	* ppc-opc.c (extract_esync, extract_ls, extract_ral, extract_ram)
+	(extract_raq, extract_ras, extract_rbx): New functions.
+	(powerpc_operands): Use opposite corresponding insert function.
+	(Q_MASK): Define.
+	(powerpc_opcodes): Apply Q_MASK to all quad insns with even
+	register restriction.
+
 2017-03-02  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
