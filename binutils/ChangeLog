@@ -1,3 +1,10 @@
+2017-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Read byte values
+	from the name string as unsigned bytes.
+	(process_notes_at): Use memcpy to copy an unterminated name
+	string.
+
 2017-03-06  Sam Thursfield  <sam.thursfield@codethink.co.uk>
 
 	* configure.ac (AC_CHECK_DECLS): Add asprintf.

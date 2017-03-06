@@ -16768,7 +16768,9 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	while (bytes --)
 	  {
-	    val |= ((* name ++) << shift);
+	    unsigned long byte = (* name ++) & 0xff;
+
+	    val |= byte << shift;
 	    shift += 8;
 	  }
 
@@ -17042,7 +17044,7 @@ process_notes_at (FILE *              file,
 	      break;
 	    }
 
-	  strncpy (temp, inote.namedata, inote.namesz);
+	  memcpy (temp, inote.namedata, inote.namesz);
 	  temp[inote.namesz] = 0;
 
 	  /* warn (_("'%s' NOTE name not properly null terminated\n"), temp);  */
