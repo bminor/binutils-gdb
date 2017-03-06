@@ -1,3 +1,8 @@
+2017-03-14  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* lib/gdb.exp (get_valueof, get_integer_valueof, get_sizeof):
+	  Add optional 'test' parameter.
+
 2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
