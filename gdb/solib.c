@@ -1036,7 +1036,8 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
     }
 
   /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
-  addr_width = 4 + (gdbarch_ptr_bit (gdbarch) / 4);
+  addr_width = 4 + (std::min (gdbarch_ptr_bit (gdbarch),
+			      gdbarch_addr_bit (gdbarch)) / 4);
 
   update_solib_list (from_tty);
 
