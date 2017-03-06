@@ -460,18 +460,15 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
 }
 
 static void
-do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
+do_windows_fetch_inferior_registers (struct regcache *regcache,
+				     windows_thread_info *th, int r)
 {
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   long l;
 
-  if (!current_thread)
-    return;	/* Windows sometimes uses a non-existent thread id in its
-		   events.  */
-
-  if (current_thread->reload_context)
+  if (th->reload_context)
     {
 #ifdef __CYGWIN__
       if (have_saved_context)
@@ -480,14 +477,13 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
 	     cygwin has informed us that we should consider the signal
 	     to have occurred at another location which is stored in
 	     "saved_context.  */
-	  memcpy (&current_thread->context, &saved_context,
+	  memcpy (&th->context, &saved_context,
 		  __COPY_CONTEXT_SIZE);
 	  have_saved_context = 0;
 	}
       else
 #endif
 	{
-	  windows_thread_info *th = current_thread;
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (GetThreadContext (th->h, &th->context));
 	  /* Copy dr values from that thread.
@@ -503,7 +499,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
 	      dr[7] = th->context.Dr7;
 	    }
 	}
-      current_thread->reload_context = 0;
+      th->reload_context = 0;
     }
 
   if (r == I387_FISEG_REGNUM (tdep))
@@ -529,7 +525,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
   else
     {
       for (r = 0; r < gdbarch_num_regs (gdbarch); r++)
-	do_windows_fetch_inferior_registers (regcache, r);
+	do_windows_fetch_inferior_registers (regcache, th, r);
     }
 }
 
@@ -537,25 +533,25 @@ static void
 windows_fetch_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int r)
 {
-  current_thread = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
+  windows_thread_info *th = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
+
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
-  if (current_thread)
-    do_windows_fetch_inferior_registers (regcache, r);
+  if (th != NULL)
+    do_windows_fetch_inferior_registers (regcache, th, r);
 }
 
 static void
-do_windows_store_inferior_registers (const struct regcache *regcache, int r)
+do_windows_store_inferior_registers (const struct regcache *regcache,
+				     windows_thread_info *th, int r)
 {
-  if (!current_thread)
-    /* Windows sometimes uses a non-existent thread id in its events.  */;
-  else if (r >= 0)
+  if (r >= 0)
     regcache_raw_collect (regcache, r,
-			  ((char *) &current_thread->context) + mappings[r]);
+			  ((char *) &th->context) + mappings[r]);
   else
     {
       for (r = 0; r < gdbarch_num_regs (get_regcache_arch (regcache)); r++)
-	do_windows_store_inferior_registers (regcache, r);
+	do_windows_store_inferior_registers (regcache, th, r);
     }
 }
 
@@ -564,11 +560,12 @@ static void
 windows_store_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int r)
 {
-  current_thread = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
+  windows_thread_info *th = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
+
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
-  if (current_thread)
-    do_windows_store_inferior_registers (regcache, r);
+  if (th != NULL)
+    do_windows_store_inferior_registers (regcache, th, r);
 }
 
 /* Encapsulate the information required in a call to
