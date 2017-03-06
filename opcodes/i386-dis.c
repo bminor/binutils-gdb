@@ -723,6 +723,7 @@ enum
   REG_0F01,
   REG_0F0D,
   REG_0F18,
+  REG_0F1E_MOD_3,
   REG_0F71,
   REG_0F72,
   REG_0F73,
@@ -776,6 +777,7 @@ enum
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
+  MOD_0F1E_PREFIX_1,
   MOD_0F24,
   MOD_0F26,
   MOD_0F2B_PREFIX_0,
@@ -814,6 +816,8 @@ enum
   MOD_0FE7_PREFIX_2,
   MOD_0FF0_PREFIX_3,
   MOD_0F382A_PREFIX_2,
+  MOD_0F38F5_PREFIX_2,
+  MOD_0F38F6_PREFIX_0,
   MOD_62_32BIT,
   MOD_C4_32BIT,
   MOD_C5_32BIT,
@@ -933,6 +937,7 @@ enum
   RM_0F01_REG_3,
   RM_0F01_REG_5,
   RM_0F01_REG_7,
+  RM_0F1E_MOD_3_REG_7,
   RM_0FAE_REG_5,
   RM_0FAE_REG_6,
   RM_0FAE_REG_7
@@ -941,12 +946,16 @@ enum
 enum
 {
   PREFIX_90 = 0,
+  PREFIX_MOD_0_0F01_REG_5,
+  PREFIX_MOD_3_0F01_REG_5_RM_1,
+  PREFIX_MOD_3_0F01_REG_5_RM_2,
   PREFIX_0F10,
   PREFIX_0F11,
   PREFIX_0F12,
   PREFIX_0F16,
   PREFIX_0F1A,
   PREFIX_0F1B,
+  PREFIX_0F1E,
   PREFIX_0F2A,
   PREFIX_0F2B,
   PREFIX_0F2C,
@@ -985,6 +994,7 @@ enum
   PREFIX_0FAE_REG_3,
   PREFIX_MOD_0_0FAE_REG_4,
   PREFIX_MOD_3_0FAE_REG_4,
+  PREFIX_MOD_0_0FAE_REG_5,
   PREFIX_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
   PREFIX_0FB8,
@@ -1048,6 +1058,7 @@ enum
   PREFIX_0F38DF,
   PREFIX_0F38F0,
   PREFIX_0F38F1,
+  PREFIX_0F38F5,
   PREFIX_0F38F6,
   PREFIX_0F3A08,
   PREFIX_0F3A09,
@@ -2839,7 +2850,7 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F1B) },
   { "nopQ",		{ Ev }, 0 },
   { "nopQ",		{ Ev }, 0 },
-  { "nopQ",		{ Ev }, 0 },
+  { PREFIX_TABLE (PREFIX_0F1E) },
   { "nopQ",		{ Ev }, 0 },
   /* 20 */
   { "movZ",		{ Rm, Cm }, 0 },
@@ -3589,6 +3600,17 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_6) },
     { MOD_TABLE (MOD_0F18_REG_7) },
   },
+  /* REG_0F1E_MOD_3 */
+  {
+    { "nopQ",		{ Ev }, 0 },
+    { "rdsspK",		{ Rdq }, PREFIX_OPCODE },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { RM_TABLE (RM_0F1E_MOD_3_REG_7) },
+  },
   /* REG_0F71 */
   {
     { Bad_Opcode },
@@ -3758,6 +3780,24 @@ static const struct dis386 prefix_table[][4] = {
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
+  /* PREFIX_MOD_0_0F01_REG_5 */
+  {
+    { Bad_Opcode },
+    { "rstorssp",	{ Mq }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_MOD_3_0F01_REG_5_RM_1 */
+  {
+    { Bad_Opcode },
+    { "incsspK",	{ Skip_MODRM }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_MOD_3_0F01_REG_5_RM_2 */
+  {
+    { Bad_Opcode },
+    { "savessp",	{ Skip_MODRM }, PREFIX_OPCODE },
+  },
+
   /* PREFIX_0F10 */
   {
     { "movups",	{ XM, EXx }, PREFIX_OPCODE },
@@ -3803,6 +3843,14 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F1B_PREFIX_1) },
     { "bndmov", { Ebnd, Gbnd }, 0 },
     { "bndcn",  { Gbnd, Ev_bnd }, 0 },
+  },
+
+  /* PREFIX_0F1E */
+  {
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { MOD_TABLE (MOD_0F1E_PREFIX_1) },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F2A */
@@ -4080,11 +4128,17 @@ static const struct dis386 prefix_table[][4] = {
     { "ptwrite%LQ", { Edq }, 0 },
   },
 
+  /* PREFIX_MOD_0_0FAE_REG_5 */
+  {
+    { "xrstor",		{ FXSAVE }, PREFIX_OPCODE },
+    { "setssbsy",	{ Mq }, PREFIX_OPCODE },
+  },
+
   /* PREFIX_0FAE_REG_6 */
   {
-    { "xsaveopt",      { FXSAVE }, 0 },
-    { Bad_Opcode },
-    { "clwb",	{ Mb }, 0 },
+    { "xsaveopt",	{ FXSAVE }, PREFIX_OPCODE },
+    { "clrssbsy",	{ Mq }, PREFIX_OPCODE },
+    { "clwb",	{ Mb }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0FAE_REG_7 */
@@ -4513,9 +4567,16 @@ static const struct dis386 prefix_table[][4] = {
     { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0F38F6 */
+  /* PREFIX_0F38F5 */
   {
     { Bad_Opcode },
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38F5_PREFIX_2) },
+  },
+
+  /* PREFIX_0F38F6 */
+  {
+    { MOD_TABLE (MOD_0F38F6_PREFIX_0) },
     { "adoxS",	{ Gdq, Edq}, PREFIX_OPCODE },
     { "adcxS",	{ Gdq, Edq}, PREFIX_OPCODE },
     { Bad_Opcode },
@@ -7246,7 +7307,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38F5) },
     { PREFIX_TABLE (PREFIX_0F38F6) },
     { Bad_Opcode },
     /* f8 */
@@ -11406,7 +11467,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F01_REG_5 */
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_MOD_0_0F01_REG_5) },
     { RM_TABLE (RM_0F01_REG_5) },
   },
   {
@@ -11478,6 +11539,11 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_0F1B_PREFIX_1 */
     { "bndmk",		{ Gbnd, Ev_bnd }, 0 },
     { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* MOD_0F1E_PREFIX_1 */
+    { "nopQ",		{ Ev }, 0 },
+    { REG_TABLE (REG_0F1E_MOD_3) },
   },
   {
     /* MOD_0F24 */
@@ -11587,7 +11653,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_5 */
-    { "xrstor",		{ FXSAVE }, 0 },
+    { PREFIX_TABLE (PREFIX_MOD_0_0FAE_REG_5) },
     { RM_TABLE (RM_0FAE_REG_5) },
   },
   {
@@ -11654,6 +11720,14 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F382A_PREFIX_2 */
     { "movntdqa",	{ XM, Mx }, 0 },
+  },
+  {
+    /* MOD_0F38F5_PREFIX_2 */
+    { "wrussK",		{ M, Gdq }, PREFIX_OPCODE },
+  },
+  {
+    /* MOD_0F38F6_PREFIX_0 */
+    { "wrssK",		{ M, Gdq }, PREFIX_OPCODE },
   },
   {
     /* MOD_62_32BIT */
@@ -12157,8 +12231,8 @@ static const struct dis386 rm_table[][8] = {
   {
     /* RM_0F01_REG_5 */
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_MOD_3_0F01_REG_5_RM_1) },
+    { PREFIX_TABLE (PREFIX_MOD_3_0F01_REG_5_RM_2) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -12172,6 +12246,17 @@ static const struct dis386 rm_table[][8] = {
     { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
     { "mwaitx",		{ { OP_Mwaitx,  0 } }, 0  },
     { "clzero",		{ Skip_MODRM }, 0  },
+  },
+  {
+    /* RM_0F1E_MOD_3_REG_7 */
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "endbr64",	{ Skip_MODRM },  PREFIX_OPCODE },
+    { "endbr32",	{ Skip_MODRM },  PREFIX_OPCODE },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   {
     /* RM_0FAE_REG_5 */

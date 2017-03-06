@@ -208,6 +208,8 @@ enum
   CpuRDPID,
   /* PTWRITE instruction required */
   CpuPTWRITE,
+  /* CET instruction support required */
+  CpuCET,
   /* MMX register support required */
   CpuRegMMX,
   /* XMM register support required */
@@ -233,7 +235,9 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
+#if 0
 #define CpuUnused	(CpuMax + 1)
+#endif
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -329,6 +333,7 @@ typedef union i386_cpu_flags
       unsigned int cpuospke:1;
       unsigned int cpurdpid:1;
       unsigned int cpuptwrite:1;
+      unsigned int cpucet:1;
       unsigned int cpuregmmx:1;
       unsigned int cpuregxmm:1;
       unsigned int cpuregymm:1;

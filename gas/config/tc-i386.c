@@ -978,6 +978,8 @@ static const arch_entry cpu_arch[] =
     CPU_RDPID_FLAGS, 0 },
   { STRING_COMMA_LEN (".ptwrite"), PROCESSOR_UNKNOWN,
     CPU_PTWRITE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".cet"), PROCESSOR_UNKNOWN,
+    CPU_CET_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =

@@ -1,3 +1,37 @@
+2017-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (REG_0F1E_MOD_3): New enum.
+	(MOD_0F1E_PREFIX_1): Likewise.
+	(MOD_0F38F5_PREFIX_2): Likewise.
+	(MOD_0F38F6_PREFIX_0): Likewise.
+	(RM_0F1E_MOD_3_REG_7): Likewise.
+	(PREFIX_MOD_0_0F01_REG_5): Likewise.
+	(PREFIX_MOD_3_0F01_REG_5_RM_1): Likewise.
+	(PREFIX_MOD_3_0F01_REG_5_RM_2): Likewise.
+	(PREFIX_0F1E): Likewise.
+	(PREFIX_MOD_0_0FAE_REG_5): Likewise.
+	(PREFIX_0F38F5): Likewise.
+	(dis386_twobyte): Use PREFIX_0F1E.
+	(reg_table): Add REG_0F1E_MOD_3.
+	(prefix_table): Add PREFIX_MOD_0_0F01_REG_5,
+	PREFIX_MOD_3_0F01_REG_5_RM_1, PREFIX_MOD_3_0F01_REG_5_RM_2,
+	PREFIX_0F1E, PREFIX_MOD_0_0FAE_REG_5 and PREFIX_0F38F5.  Update
+	PREFIX_0FAE_REG_6 and PREFIX_0F38F6.
+	(three_byte_table): Use PREFIX_0F38F5.
+	(mod_table): Use PREFIX_MOD_0_0F01_REG_5, PREFIX_MOD_0_0FAE_REG_5.
+	Add MOD_0F1E_PREFIX_1, MOD_0F38F5_PREFIX_2, MOD_0F38F6_PREFIX_0.
+	(rm_table): Add MOD_0F38F5_PREFIX_2, MOD_0F38F6_PREFIX_0,
+	RM_0F1E_MOD_3_REG_7.  Use PREFIX_MOD_3_0F01_REG_5_RM_1 and
+	PREFIX_MOD_3_0F01_REG_5_RM_2.
+	* i386-gen.c (cpu_flag_init): Add CPU_CET_FLAGS.
+	(cpu_flags): Add CpuCET.
+	* i386-opc.h (CpuCET): New enum.
+	(CpuUnused): Commented out.
+	(i386_cpu_flags): Add cpucet.
+	* i386-opc.tbl: Add Intel CET instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2017-03-06  Alan Modra  <amodra@gmail.com>
 
 	PR 21124
