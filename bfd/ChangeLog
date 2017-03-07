@@ -1,5 +1,12 @@
 2017-03-07  Alan Modra  <amodra@gmail.com>
 
+	PR 21224
+	PR 20519
+	* elf64-ppc.c (ppc64_elf_relocate_section): Add missing
+	dyn_relocs check.
+
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
 	Apply from master
 	2017-03-02  Alan Modra  <amodra@gmail.com>
 	* elf32-ppc.c (ppc_elf_vle_split16): Correct insn mask typo.
