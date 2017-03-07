@@ -7340,30 +7340,30 @@ instead of zero.  Using @samp{.zero} in this way would be confusing however.
 
 @ifset ELF
 @node 2byte
+@section @code{.2byte @var{expression} [, @var{expression}]*}
 @cindex @code{2byte} directive
 @cindex two-byte integer
 @cindex integer, 2-byte
-@section @code{.2byte @var{expression} [, @var{expression}]*}
 
 This directive @code{.2byte}, which is available for ELF targets, expects zero
 or more expressions, separated by commas. Each expression is assembled into the
 next two bytes.
 
 @node 4byte
+@section @code{.4byte @var{expression} [, @var{expression}]*}
 @cindex @code{4byte} directive
 @cindex four-byte integer
 @cindex integer, 4-byte
-@section @code{.4byte @var{expression} [, @var{expression}]*}
 
 This directive @code{.4byte}, which is available for ELF targets, expects zero
 or more expressions, separated by commas. Each expression is assembled into the
 next four bytes.
 
 @node 8byte
+@section @code{.8byte @var{expression} [, @var{expression}]*}
 @cindex @code{8byte} directive
 @cindex eight-byte integer
 @cindex integer, 8-byte
-@section @code{.8byte @var{expression} [, @var{expression}]*}
 
 This directive @code{.8byte}, which is available for ELF targets, expects zero
 or more bignums, separated by commas.  For each bignum, it emits
