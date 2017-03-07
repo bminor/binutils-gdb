@@ -84,6 +84,14 @@ pstring (const char *string)
   return string;
 }
 
+static char *
+pstring_ptr (char **string)
+{
+  if (string == NULL || *string == NULL)
+    return "(null)";
+  return *string;
+}
+
 /* Helper function to print a list of strings, represented as "const
    char *const *".  The list is printed comma-separated.  */
 
@@ -880,7 +888,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       core_addr_to_string_nz (gdbarch->deprecated_function_start_offset));
   fprintf_unfiltered (file,
                       "gdbarch_dump: disassembler_options = %s\n",
-                      pstring (*gdbarch->disassembler_options));
+                      pstring_ptr (gdbarch->disassembler_options));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
                       gdbarch_displaced_step_copy_insn_p (gdbarch));
@@ -1429,7 +1437,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       host_address_to_string (gdbarch->unwind_sp));
   fprintf_unfiltered (file,
                       "gdbarch_dump: valid_disassembler_options = %s\n",
-                      host_address_to_string (gdbarch->valid_disassembler_options->name));
+                      host_address_to_string (gdbarch->valid_disassembler_options));
   fprintf_unfiltered (file,
                       "gdbarch_dump: value_from_register = <%s>\n",
                       host_address_to_string (gdbarch->value_from_register));

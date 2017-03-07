@@ -1,5 +1,13 @@
 2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
 
+	* gdbarch.sh (pstring_ptr): New static function.
+	(gdbarch_disassembler_options): Use it.
+	(gdbarch_verify_disassembler_options): Print valid_disassembler_options,
+	not valid_disassembler_option->name.
+	* gdbarch.c: Regenerate.
+
+2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
+
 	* config/powerpc/ppc64-linux.mh (MH_CFLAGS): Delete.
 
 2017-03-07  Pedro Alves  <palves@redhat.com>
