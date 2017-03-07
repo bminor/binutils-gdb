@@ -1,3 +1,8 @@
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (open_input_bfds): Check that lang_assignment_statement
+	is not an assert before referencing defsym.
+
 2017-03-02  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
