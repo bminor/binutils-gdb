@@ -1,9 +1,9 @@
-2017-03-07  Walfred Tedeschi <walfred.tedeschi@intel.com>
+2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* i387-tdep.h (i387_reset_bnd_regs): Add function definition.
 	* i387-tdep.c (i387_reset_bnd_regs): Add function implementation.
 	* i386-tdep.c (i386_push_dummy_call): Call i387_reset_bnd_regs.
-	* amd64-tdep (amd64_push_dummy_call): Call i387_reset_bnd_regs.
+	* amd64-tdep.c (amd64_push_dummy_call): Call i387_reset_bnd_regs.
 
 2017-03-06  Simon Marchi  <simon.marchi@ericsson.com>
 
@@ -649,7 +649,7 @@
 	(build_command_line): Make args a constant pointer.
 
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
-	
+
 	* cli-decode.c (lookup_cmd_1, lookup_cmd_composition):
 	Remove case-insensitive search.
 
@@ -2132,7 +2132,7 @@
 
 2017-01-01  Joel Brobecker  <brobecker@adacore.com>
 
-        Update copyright year range in all GDB files.
+	Update copyright year range in all GDB files.
 
 2017-01-01  Joel Brobecker  <brobecker@adacore.com>
 
