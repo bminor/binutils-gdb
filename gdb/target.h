@@ -471,7 +471,8 @@ struct target_ops
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, ptid_t,
 				int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_store_registers) (struct target_ops *, struct regcache *, int)
+    void (*to_store_registers) (struct target_ops *, struct regcache *, ptid_t,
+			        int)
       TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_prepare_to_store) (struct target_ops *, struct regcache *)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -1391,7 +1392,8 @@ extern void target_fetch_registers (struct regcache *regcache, ptid_t ptid,
    It can store as many registers as it wants to, so target_prepare_to_store
    must have been previously called.  Calls error() if there are problems.  */
 
-extern void target_store_registers (struct regcache *regcache, int regs);
+extern void target_store_registers (struct regcache *regcache, ptid_t ptid,
+				    int regs);
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines

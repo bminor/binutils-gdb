@@ -184,7 +184,7 @@ ppc_ravenscar_generic_prepare_to_store (struct regcache *regcache)
 static void
 ppc_ravenscar_generic_store_registers
   (const struct ravenscar_reg_info *reg_info,
-   struct regcache *regcache, int regnum)
+   struct regcache *regcache, ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int buf_size = register_size (gdbarch, regnum);
@@ -193,7 +193,7 @@ ppc_ravenscar_generic_store_registers
 
   if (register_in_thread_descriptor_p (reg_info, regnum))
     register_address
-      = ptid_get_tid (inferior_ptid) + reg_info->context_offsets [regnum];
+      = ptid_get_tid (ptid) + reg_info->context_offsets [regnum];
   else
     return;
 
@@ -225,9 +225,10 @@ ppc_ravenscar_powerpc_fetch_registers (struct regcache *regcache, ptid_t ptid,
    for most PowerPC targets.  */
 
 static void
-ppc_ravenscar_powerpc_store_registers (struct regcache *regcache, int regnum)
+ppc_ravenscar_powerpc_store_registers (struct regcache *regcache, ptid_t ptid,
+				       int regnum)
 {
-  ppc_ravenscar_generic_store_registers (&ppc_reg_info, regcache, regnum);
+  ppc_ravenscar_generic_store_registers (&ppc_reg_info, regcache, ptid, regnum);
 }
 
 /* The ravenscar_arch_ops vector for most PowerPC targets.  */
@@ -270,9 +271,11 @@ ppc_ravenscar_e500_fetch_registers (struct regcache *regcache, ptid_t ptid,
    for E500 targets.  */
 
 static void
-ppc_ravenscar_e500_store_registers (struct regcache *regcache, int regnum)
+ppc_ravenscar_e500_store_registers (struct regcache *regcache, ptid_t ptid,
+				    int regnum)
 {
-  ppc_ravenscar_generic_store_registers (&e500_reg_info, regcache, regnum);
+  ppc_ravenscar_generic_store_registers (&e500_reg_info, regcache, ptid,
+					 regnum);
 }
 
 /* The ravenscar_arch_ops vector for E500 targets.  */

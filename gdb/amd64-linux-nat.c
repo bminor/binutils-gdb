@@ -212,15 +212,16 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 amd64_linux_store_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regnum)
+				      struct regcache *regcache,
+				      ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (ptid); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {

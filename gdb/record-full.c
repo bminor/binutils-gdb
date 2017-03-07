@@ -1459,7 +1459,7 @@ record_full_registers_change (struct regcache *regcache, int regnum)
 static void
 record_full_store_registers (struct target_ops *ops,
 			     struct regcache *regcache,
-			     int regno)
+			     ptid_t ptid, int regno)
 {
   if (!record_full_gdb_operation_disable)
     {
@@ -1507,7 +1507,7 @@ record_full_store_registers (struct target_ops *ops,
 
       record_full_registers_change (regcache, regno);
     }
-  ops->beneath->to_store_registers (ops->beneath, regcache, regno);
+  ops->beneath->to_store_registers (ops->beneath, regcache, ptid, regno);
 }
 
 /* "to_xfer_partial" method.  Behavior is conditional on
@@ -2074,7 +2074,7 @@ record_full_core_prepare_to_store (struct target_ops *self,
 static void
 record_full_core_store_registers (struct target_ops *ops,
                              struct regcache *regcache,
-                             int regno)
+			     ptid_t ptid, int regno)
 {
   if (record_full_gdb_operation_disable)
     regcache_raw_collect (regcache, regno,

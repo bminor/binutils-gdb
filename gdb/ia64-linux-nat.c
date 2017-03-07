@@ -783,7 +783,8 @@ ia64_linux_fetch_registers (struct target_ops *ops,
 /* Store register REGNUM into the inferior.  */
 
 static void
-ia64_linux_store_register (const struct regcache *regcache, int regnum)
+ia64_linux_store_register (const struct regcache *regcache,
+			   ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
@@ -796,9 +797,9 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
 
   /* Cater for systems like GNU/Linux, that implement threads as
      separate processes.  */
-  pid = ptid_get_lwp (inferior_ptid);
+  pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+    pid = ptid_get_pid (ptid);
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = ia64_register_addr (gdbarch, regnum);
@@ -827,15 +828,16 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
 
 static void
 ia64_linux_store_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+			    struct regcache *regcache,
+			    ptid_t ptid, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
 	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
 	 regnum++)
-      ia64_linux_store_register (regcache, regnum);
+      ia64_linux_store_register (regcache, ptid, regnum);
   else
-    ia64_linux_store_register (regcache, regnum);
+    ia64_linux_store_register (regcache, ptid, regnum);
 }
 
 

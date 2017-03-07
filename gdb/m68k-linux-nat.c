@@ -154,7 +154,7 @@ old_fetch_inferior_registers (struct regcache *regcache, ptid_t ptid, int regno)
 /* Store one register.  */
 
 static void
-store_register (const struct regcache *regcache, int regno)
+store_register (const struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   long regaddr, val;
@@ -163,9 +163,9 @@ store_register (const struct regcache *regcache, int regno)
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
 
   /* Overload thread id onto process id.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* no thread id, just use
+    tid = ptid_get_pid (ptid);	/* no thread id, just use
 					   process id.  */
 
   regaddr = 4 * regmap[regno];
@@ -192,11 +192,12 @@ store_register (const struct regcache *regcache, int regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 static void
-old_store_inferior_registers (const struct regcache *regcache, int regno)
+old_store_inferior_registers (const struct regcache *regcache,
+			      ptid_t ptid, int regno)
 {
   if (regno >= 0)
     {
-      store_register (regcache, regno);
+      store_register (regcache, ptid, regno);
     }
   else
     {
@@ -204,7 +205,7 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
 	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
 	   regno++)
 	{
-	  store_register (regcache, regno);
+	  store_register (regcache, ptid, regno);
 	}
     }
 }
@@ -462,7 +463,8 @@ m68k_linux_fetch_inferior_registers (struct target_ops *ops,
    registers).  */
 static void
 m68k_linux_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+				     struct regcache *regcache,
+				     ptid_t ptid, int regno)
 {
   int tid;
 
@@ -470,14 +472,14 @@ m68k_linux_store_inferior_registers (struct target_ops *ops,
      SETREGS request isn't available.  */
   if (! have_ptrace_getregs)
     {
-      old_store_inferior_registers (regcache, regno);
+      old_store_inferior_registers (regcache, ptid, regno);
       return;
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* Not a threaded program.  */
+    tid = ptid_get_pid (ptid);	/* Not a threaded program.  */
 
   /* Use the PTRACE_SETFPREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that

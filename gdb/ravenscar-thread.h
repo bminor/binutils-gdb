@@ -25,7 +25,7 @@
 struct ravenscar_arch_ops
 {
   void (*to_fetch_registers) (struct regcache *, ptid_t, int);
-  void (*to_store_registers) (struct regcache *, int);
+  void (*to_store_registers) (struct regcache *, ptid_t, int);
   void (*to_prepare_to_store) (struct regcache *);
 };
 

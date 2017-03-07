@@ -3593,12 +3593,12 @@ target_fetch_registers (struct regcache *regcache, ptid_t ptid, int regno)
 }
 
 void
-target_store_registers (struct regcache *regcache, int regno)
+target_store_registers (struct regcache *regcache, ptid_t ptid, int regno)
 {
   if (!may_write_registers)
     error (_("Writing to registers is not allowed (regno %d)"), regno);
 
-  current_target.to_store_registers (&current_target, regcache, regno);
+  current_target.to_store_registers (&current_target, regcache, ptid, regno);
   if (targetdebug)
     {
       debug_print_register ("target_store_registers", regcache, regno);

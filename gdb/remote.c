@@ -7862,13 +7862,14 @@ store_registers_using_G (const struct regcache *regcache)
 
 static void
 remote_store_registers (struct target_ops *ops,
-			struct regcache *regcache, int regnum)
+			struct regcache *regcache,
+			ptid_t ptid, int regnum)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
+  set_general_thread (ptid);
 
   if (regnum >= 0)
     {

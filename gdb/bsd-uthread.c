@@ -309,13 +309,13 @@ bsd_uthread_fetch_registers (struct target_ops *ops, struct regcache *regcache,
 
 static void
 bsd_uthread_store_registers (struct target_ops *ops,
-			     struct regcache *regcache, int regnum)
+			     struct regcache *regcache,
+			     ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   struct target_ops *beneath = find_target_beneath (ops);
-  ptid_t ptid = inferior_ptid;
   CORE_ADDR addr = ptid_get_tid (ptid);
   CORE_ADDR active_addr;
 
@@ -330,7 +330,7 @@ bsd_uthread_store_registers (struct target_ops *ops,
     {
       /* Updating the thread that is currently running; pass the
          request to the layer beneath.  */
-      beneath->to_store_registers (beneath, regcache, regnum);
+      beneath->to_store_registers (beneath, regcache, ptid, regnum);
     }
 }
 

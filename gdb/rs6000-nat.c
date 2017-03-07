@@ -219,7 +219,7 @@ fetch_register (struct regcache *regcache, ptid_t ptid, int regno)
 /* Store register REGNO back into the inferior.  */
 
 static void
-store_register (struct regcache *regcache, int regno)
+store_register (struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
@@ -235,7 +235,7 @@ store_register (struct regcache *regcache, int regno)
 
   /* Floating-point registers.  */
   if (isfloat)
-    rs6000_ptrace32 (PT_WRITE_FPR, ptid_get_pid (inferior_ptid), addr, nr, 0);
+    rs6000_ptrace32 (PT_WRITE_FPR, ptid_get_pid (ptid), addr, nr, 0);
 
   /* Bogus register number.  */
   else if (nr < 0)
@@ -253,7 +253,7 @@ store_register (struct regcache *regcache, int regno)
          the register's value is passed by value, but for 64-bit inferiors,
 	 the address of a buffer containing the value is passed.  */
       if (!ARCH64 ())
-	rs6000_ptrace32 (PT_WRITE_GPR, ptid_get_pid (inferior_ptid),
+	rs6000_ptrace32 (PT_WRITE_GPR, ptid_get_pid (ptid),
 			 (int *) nr, *addr, 0);
       else
 	{
@@ -264,7 +264,7 @@ store_register (struct regcache *regcache, int regno)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
-	  rs6000_ptrace64 (PT_WRITE_GPR, ptid_get_pid (inferior_ptid),
+	  rs6000_ptrace64 (PT_WRITE_GPR, ptid_get_pid (ptid),
 			   nr, 0, &buf);
 	}
     }
@@ -325,11 +325,12 @@ rs6000_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 rs6000_store_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno)
+				 struct regcache *regcache,
+				 ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno != -1)
-    store_register (regcache, regno);
+    store_register (regcache, ptid, regno);
 
   else
     {
@@ -340,25 +341,25 @@ rs6000_store_inferior_registers (struct target_ops *ops,
            regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
-	  store_register (regcache, regno);
+	  store_register (regcache, ptid, regno);
 	}
 
       /* Write floating point registers.  */
       if (tdep->ppc_fp0_regnum >= 0)
         for (regno = 0; regno < ppc_num_fprs; regno++)
-          store_register (regcache, tdep->ppc_fp0_regnum + regno);
+          store_register (regcache, ptid, tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
-      store_register (regcache, gdbarch_pc_regnum (gdbarch));
-      store_register (regcache, tdep->ppc_ps_regnum);
-      store_register (regcache, tdep->ppc_cr_regnum);
-      store_register (regcache, tdep->ppc_lr_regnum);
-      store_register (regcache, tdep->ppc_ctr_regnum);
-      store_register (regcache, tdep->ppc_xer_regnum);
+      store_register (regcache, ptid, gdbarch_pc_regnum (gdbarch));
+      store_register (regcache, ptid, tdep->ppc_ps_regnum);
+      store_register (regcache, ptid, tdep->ppc_cr_regnum);
+      store_register (regcache, ptid, tdep->ppc_lr_regnum);
+      store_register (regcache, ptid, tdep->ppc_ctr_regnum);
+      store_register (regcache, ptid, tdep->ppc_xer_regnum);
       if (tdep->ppc_fpscr_regnum >= 0)
-        store_register (regcache, tdep->ppc_fpscr_regnum);
+        store_register (regcache, ptid, tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
-	store_register (regcache, tdep->ppc_mq_regnum);
+	store_register (regcache, ptid, tdep->ppc_mq_regnum);
     }
 }
 

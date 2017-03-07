@@ -107,13 +107,13 @@ fetch_fpregs (struct regcache *regcache, ptid_t ptid)
    the contents from regcache.  */
 
 static void
-store_fpregs (const struct regcache *regcache)
+store_fpregs (const struct regcache *regcache, ptid_t ptid)
 {
   int ret, regno, tid;
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -188,13 +188,13 @@ fetch_regs (struct regcache *regcache, ptid_t ptid)
 }
 
 static void
-store_regs (const struct regcache *regcache)
+store_regs (const struct regcache *regcache, ptid_t ptid)
 {
   int ret, regno, tid;
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   /* Fetch the general registers.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -262,13 +262,13 @@ fetch_wmmx_regs (struct regcache *regcache, ptid_t ptid)
 }
 
 static void
-store_wmmx_regs (const struct regcache *regcache)
+store_wmmx_regs (const struct regcache *regcache, ptid_t ptid)
 {
   char regbuf[IWMMXT_REGS_SIZE];
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -328,7 +328,7 @@ fetch_vfp_regs (struct regcache *regcache, ptid_t ptid)
 }
 
 static void
-store_vfp_regs (const struct regcache *regcache)
+store_vfp_regs (const struct regcache *regcache, ptid_t ptid)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
@@ -336,7 +336,7 @@ store_vfp_regs (const struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -414,34 +414,35 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 arm_linux_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+				    struct regcache *regcache,
+				    ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (-1 == regno)
     {
-      store_regs (regcache);
+      store_regs (regcache, ptid);
       if (tdep->have_wmmx_registers)
-	store_wmmx_regs (regcache);
+	store_wmmx_regs (regcache, ptid);
       if (tdep->vfp_register_count > 0)
-	store_vfp_regs (regcache);
+	store_vfp_regs (regcache, ptid);
       if (tdep->have_fpa_registers)
-	store_fpregs (regcache);
+	store_fpregs (regcache, ptid);
     }
   else
     {
       if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
-	store_regs (regcache);
+	store_regs (regcache, ptid);
       else if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
-	store_fpregs (regcache);
+	store_fpregs (regcache, ptid);
       else if (tdep->have_wmmx_registers
 	       && regno >= ARM_WR0_REGNUM && regno <= ARM_WCGR7_REGNUM)
-	store_wmmx_regs (regcache);
+	store_wmmx_regs (regcache, ptid);
       else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
 	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
-	store_vfp_regs (regcache);
+	store_vfp_regs (regcache, ptid);
     }
 }
 

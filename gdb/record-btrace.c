@@ -1462,18 +1462,19 @@ record_btrace_fetch_registers (struct target_ops *ops,
 
 static void
 record_btrace_store_registers (struct target_ops *ops,
-			       struct regcache *regcache, int regno)
+			       struct regcache *regcache,
+			       ptid_t ptid, int regno)
 {
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, inferior_ptid))
+      && record_btrace_is_replaying (ops, ptid))
     error (_("Cannot write registers while replaying."));
 
   gdb_assert (may_write_registers != 0);
 
   t = ops->beneath;
-  t->to_store_registers (t, regcache, regno);
+  t->to_store_registers (t, regcache, ptid, regno);
 }
 
 /* The to_prepare_to_store method of target record-btrace.  */

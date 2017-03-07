@@ -240,7 +240,7 @@ fetch_register (struct regcache *regcache, ptid_t ptid, int regno)
 /* Store one register.  */
 
 static void
-store_register (const struct regcache *regcache, int regno)
+store_register (const struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
@@ -250,9 +250,9 @@ store_register (const struct regcache *regcache, int regno)
     return;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (ptid); /* Not a threaded program.  */
 
   errno = 0;
   regcache_raw_collect (regcache, regno, &val);
@@ -291,18 +291,19 @@ hppa_linux_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 hppa_linux_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+				     struct regcache *regcache,
+				     ptid_t ptid, int regno)
 {
   if (-1 == regno)
     {
       for (regno = 0;
 	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
 	   regno++)
-	store_register (regcache, regno);
+	store_register (regcache, regno, ptid);
     }
   else
     {
-      store_register (regcache, regno);
+      store_register (regcache, regno, ptid);
     }
 }
 

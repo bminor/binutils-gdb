@@ -534,7 +534,8 @@ spu_fetch_inferior_registers (struct target_ops *ops,
 /* Override the store_inferior_register routine.  */
 static void
 spu_store_inferior_registers (struct target_ops *ops,
-			      struct regcache *regcache, int regno)
+			      struct regcache *regcache,
+			      ptid_t ptid, int regno)
 {
   int fd;
   ULONGEST addr;

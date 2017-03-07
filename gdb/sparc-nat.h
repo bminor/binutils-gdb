@@ -47,6 +47,6 @@ extern struct target_ops *sparc_target (void);
 extern void sparc_fetch_inferior_registers (struct target_ops *,
 					    struct regcache *, ptid_t, int);
 extern void sparc_store_inferior_registers (struct target_ops *,
-					    struct regcache *, int);
+					    struct regcache *, ptid_t, int);
 
 #endif /* sparc-nat.h */

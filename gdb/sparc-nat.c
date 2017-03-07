@@ -191,16 +191,17 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
 
 void
 sparc_store_inferior_registers (struct target_ops *ops,
-				struct regcache *regcache, int regnum)
+				struct regcache *regcache,
+				ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int pid;
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
      about threaded assumptions.  */
-  pid = ptid_get_lwp (inferior_ptid);
+  pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+    pid = ptid_get_pid (ptid);
 
   if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {

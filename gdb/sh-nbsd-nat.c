@@ -65,13 +65,14 @@ shnbsd_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 shnbsd_store_inferior_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno)
+				 struct regcache *regcache,
+				 ptid_t ptid, int regno)
 {
   if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
     {
       struct reg inferior_registers;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
@@ -79,7 +80,7 @@ shnbsd_store_inferior_registers (struct target_ops *ops,
 				  (char *) &inferior_registers,
 				  SHNBSD_SIZEOF_GREGS);
 
-      if (ptrace (PT_SETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_SETREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
 	perror_with_name (_("Couldn't set registers"));
 

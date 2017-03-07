@@ -187,13 +187,13 @@ fetch_gregs (struct regcache *regcache, ptid_t ptid, int regnum)
   supply_gregset_reg (regcache, &regs, regnum);
 }
 
-/* Store greg-register(s) in GDB's register 
-   array into the process/thread specified by TID.  */
+/* Store greg-register(s) in REGCACHE into the process/thread specified by
+   PTID.  */
 
 static void
-store_gregs (struct regcache *regcache, int regnum)
+store_gregs (struct regcache *regcache, ptid_t ptid, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (ptid);
   gdb_gregset_t regs;
   int areg;
 
@@ -235,9 +235,9 @@ fetch_xtregs (struct regcache *regcache, ptid_t ptid, int regnum)
 }
 
 static void
-store_xtregs (struct regcache *regcache, int regnum)
+store_xtregs (struct regcache *regcache, ptid_t ptid, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (ptid);
   const xtensa_regtable_t *ptr;
   char xtregs [XTENSA_ELF_XTREG_SIZE];
 
@@ -271,17 +271,18 @@ xtensa_linux_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 xtensa_linux_store_inferior_registers (struct target_ops *ops,
-				       struct regcache *regcache, int regnum)
+				       struct regcache *regcache,
+				       ptid_t ptid, int regnum)
 {
   if (regnum == -1)
     {
-      store_gregs (regcache, regnum);
-      store_xtregs (regcache, regnum);
+      store_gregs (regcache, ptid, regnum);
+      store_xtregs (regcache, ptid, regnum);
     }
   else if ((regnum < xtreg_lo) || (regnum > xtreg_high))
-    store_gregs (regcache, regnum);
+    store_gregs (regcache, ptid, regnum);
   else
-    store_xtregs (regcache, regnum);
+    store_xtregs (regcache, ptid, regnum);
 }
 
 /* Called by libthread_db.  */

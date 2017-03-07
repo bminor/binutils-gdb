@@ -559,9 +559,10 @@ do_windows_store_inferior_registers (const struct regcache *regcache,
 /* Store a new register value into the current thread context.  */
 static void
 windows_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int r)
+				  struct regcache *regcache,
+				  ptid_t ptid, int r)
 {
-  windows_thread_info *th = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
+  windows_thread_info *th = thread_rec (ptid_get_tid (ptid), TRUE);
 
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events.  */

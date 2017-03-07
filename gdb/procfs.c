@@ -117,7 +117,7 @@ static void procfs_files_info (struct target_ops *);
 static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, ptid_t, int);
 static void procfs_store_registers (struct target_ops *,
-				    struct regcache *, int);
+				    struct regcache *, ptid_t, int);
 static void procfs_pass_signals (struct target_ops *self,
 				 int, unsigned char *);
 static void procfs_kill_inferior (struct target_ops *ops);
@@ -3265,19 +3265,20 @@ procfs_fetch_registers (struct target_ops *ops,
 
 static void
 procfs_store_registers (struct target_ops *ops,
-			struct regcache *regcache, int regnum)
+			struct regcache *regcache,
+			ptid_t ptid, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
-  int pid = ptid_get_pid (inferior_ptid);
-  int tid = ptid_get_lwp (inferior_ptid);
+  int pid = ptid_get_pid (ptid);
+  int tid = ptid_get_lwp (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   pi = find_procinfo_or_die (pid, tid);
 
   if (pi == NULL)
     error (_("procfs: store_registers: failed to find procinfo for %s"),
-	   target_pid_to_str (inferior_ptid));
+	   target_pid_to_str (ptid));
 
   gregs = proc_get_gregs (pi);
   if (gregs == NULL)

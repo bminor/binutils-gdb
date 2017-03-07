@@ -2290,14 +2290,15 @@ ppc_linux_masked_watch_num_registers (struct target_ops *target,
 
 static void
 ppc_linux_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regno)
+				    struct regcache *regcache,
+				    ptid_t ptid, int regno)
 {
   /* Overload thread id onto process id.  */
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (ptid);
 
   /* No thread id, just use process id.  */
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+    tid = ptid_get_pid (ptid);
 
   if (regno >= 0)
     store_register (regcache, tid, regno);

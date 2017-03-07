@@ -25,8 +25,6 @@
 #include "ravenscar-thread.h"
 #include "sparc-ravenscar-thread.h"
 
-static void sparc_ravenscar_store_registers (struct regcache *regcache,
-                                             int regnum);
 static void sparc_ravenscar_prepare_to_store (struct regcache *regcache);
 
 /* Register offsets from a referenced address (exempli gratia the
@@ -152,7 +150,8 @@ sparc_ravenscar_prepare_to_store (struct regcache *regcache)
    thread.  */
 
 static void
-sparc_ravenscar_store_registers (struct regcache *regcache, int regnum)
+sparc_ravenscar_store_registers (struct regcache *regcache, ptid_t ptid,
+				 int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int buf_size = register_size (gdbarch, regnum);
@@ -160,8 +159,7 @@ sparc_ravenscar_store_registers (struct regcache *regcache, int regnum)
   ULONGEST register_address;
 
   if (register_in_thread_descriptor_p (regnum))
-    register_address =
-      ptid_get_tid (inferior_ptid) + sparc_register_offsets [regnum];
+    register_address = ptid_get_tid (ptid) + sparc_register_offsets [regnum];
   else if (register_on_stack_p (regnum))
     {
       regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM,

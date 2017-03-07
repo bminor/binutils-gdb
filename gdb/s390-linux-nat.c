@@ -420,9 +420,10 @@ s390_linux_fetch_inferior_registers (struct target_ops *ops,
    -1, do this for all registers.  */
 static void
 s390_linux_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regnum)
+				     struct regcache *regcache,
+				     ptid_t ptid, int regnum)
 {
-  int tid = s390_inferior_tid ();
+  int tid = s390_inferior_tid (ptid);
 
   if (regnum == -1 || S390_IS_GREGSET_REGNUM (regnum))
     store_regs (regcache, tid, regnum);

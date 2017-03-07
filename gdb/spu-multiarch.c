@@ -196,7 +196,7 @@ spu_fetch_registers (struct target_ops *ops, struct regcache *regcache,
 /* Override the to_store_registers routine.  */
 static void
 spu_store_registers (struct target_ops *ops,
-		     struct regcache *regcache, int regno)
+		     struct regcache *regcache, ptid_t ptid, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct target_ops *ops_beneath = find_target_beneath (ops);
@@ -206,12 +206,12 @@ spu_store_registers (struct target_ops *ops,
   /* This version applies only if we're currently in spu_run.  */
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     {
-      ops_beneath->to_store_registers (ops_beneath, regcache, regno);
+      ops_beneath->to_store_registers (ops_beneath, regcache, ptid, regno);
       return;
     }
 
   /* We must be stopped on a spu_run system call.  */
-  if (!parse_spufs_run (inferior_ptid, &spufs_fd, &spufs_addr))
+  if (!parse_spufs_run (ptid, &spufs_fd, &spufs_addr))
     return;
 
   /* The NPC register is found in PPC memory at SPUFS_ADDR.  */

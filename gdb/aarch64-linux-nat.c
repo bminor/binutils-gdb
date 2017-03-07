@@ -190,7 +190,7 @@ fetch_gregs_from_thread (struct regcache *regcache, ptid_t ptid)
    values in the GDB's register array.  */
 
 static void
-store_gregs_to_thread (const struct regcache *regcache)
+store_gregs_to_thread (const struct regcache *regcache, ptid_t ptid)
 {
   int ret, tid;
   elf_gregset_t regs;
@@ -200,7 +200,7 @@ store_gregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -281,7 +281,7 @@ fetch_fpregs_from_thread (struct regcache *regcache, ptid_t ptid)
    values in the GDB's register array.  */
 
 static void
-store_fpregs_to_thread (const struct regcache *regcache)
+store_fpregs_to_thread (const struct regcache *regcache, ptid_t ptid)
 {
   int ret, tid;
   elf_fpregset_t regs;
@@ -291,7 +291,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (ptid);
 
   iovec.iov_base = &regs;
 
@@ -365,17 +365,17 @@ aarch64_linux_fetch_inferior_registers (struct target_ops *ops,
 static void
 aarch64_linux_store_inferior_registers (struct target_ops *ops,
 					struct regcache *regcache,
-					int regno)
+					ptid_t ptid, int regno)
 {
   if (regno == -1)
     {
-      store_gregs_to_thread (regcache);
-      store_fpregs_to_thread (regcache);
+      store_gregs_to_thread (regcache, ptid);
+      store_fpregs_to_thread (regcache, ptid);
     }
   else if (regno < AARCH64_V0_REGNUM)
-    store_gregs_to_thread (regcache);
+    store_gregs_to_thread (regcache, ptid);
   else
-    store_fpregs_to_thread (regcache);
+    store_fpregs_to_thread (regcache, ptid);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in

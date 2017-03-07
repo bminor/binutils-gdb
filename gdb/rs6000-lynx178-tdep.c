@@ -24,6 +24,7 @@
 #include "ppc-tdep.h"
 #include "value.h"
 #include "xcoffread.h"
+#include "inferior.h"
 
 /* Implement the "push_dummy_call" gdbarch method.  */
 
@@ -256,7 +257,7 @@ ran_out_of_registers_for_arguments:
      breakpoint.  */
   regcache_raw_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
 
-  target_store_registers (regcache, -1);
+  target_store_registers (regcache, inferior_ptid, -1);
   return sp;
 }
 

@@ -110,7 +110,8 @@ ppcnbsd_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 ppcnbsd_store_inferior_registers (struct target_ops *ops,
-				  struct regcache *regcache, int regnum)
+				  struct regcache *regcache,
+				  ptid_t ptid, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -118,14 +119,14 @@ ppcnbsd_store_inferior_registers (struct target_ops *ops,
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
       ppc_collect_gregset (&ppcnbsd_gregset, regcache,
 			   regnum, &regs, sizeof regs);
 
-      if (ptrace (PT_SETREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_SETREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't write registers"));
     }
@@ -134,14 +135,14 @@ ppcnbsd_store_inferior_registers (struct target_ops *ops,
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
       ppc_collect_fpregset (&ppcnbsd_fpregset, regcache,
 			    regnum, &fpregs, sizeof fpregs);
 
-      if (ptrace (PT_SETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_SETFPREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't set FP registers"));
     }

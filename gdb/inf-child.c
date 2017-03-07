@@ -91,7 +91,8 @@ inf_child_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 inf_child_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+				    struct regcache *regcache,
+				    ptid_t ptid, int regnum)
 {
 }
 

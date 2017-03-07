@@ -957,7 +957,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
   chain_before_invalidate_register
     = make_cleanup_regcache_invalidate (regcache, regnum);
 
-  target_store_registers (regcache, regnum);
+  target_store_registers (regcache, regcache->ptid, regnum);
 
   /* The target did not throw an error so we can discard invalidating the
      register and restore the cleanup chain to what it was.  */

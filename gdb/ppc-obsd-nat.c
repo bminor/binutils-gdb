@@ -109,11 +109,12 @@ ppcobsd_fetch_registers (struct target_ops *ops,
 
 static void
 ppcobsd_store_registers (struct target_ops *ops,
-			 struct regcache *regcache, int regnum)
+			 struct regcache *regcache,
+			 ptid_t ptid, int regnum)
 {
   struct reg regs;
 
-  if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_GETREGS, ptid_get_pid (ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
@@ -124,7 +125,7 @@ ppcobsd_store_registers (struct target_ops *ops,
 			regnum, &regs, sizeof regs);
 #endif
 
-  if (ptrace (PT_SETREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_SETREGS, ptid_get_pid (ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't write registers"));
 
@@ -134,14 +135,14 @@ ppcobsd_store_registers (struct target_ops *ops,
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETFPREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       ppc_collect_fpregset (&ppcobsd_fpregset, regcache,
 			    regnum, &fpregs, sizeof fpregs);
 
-      if (ptrace (PT_SETFPREGS, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_SETFPREGS, ptid_get_pid (ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't write floating point status"));
     }

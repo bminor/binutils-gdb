@@ -37,6 +37,7 @@
 #include "solib.h"
 #include "solib-aix.h"
 #include "xml-utils.h"
+#include "inferior.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -407,7 +408,7 @@ ran_out_of_registers_for_arguments:
   regcache_raw_write_signed (regcache, tdep->ppc_toc_regnum,
 			     solib_aix_get_toc_value (func_addr));
 
-  target_store_registers (regcache, -1);
+  target_store_registers (regcache, inferior_ptid, -1);
   return sp;
 }
 
