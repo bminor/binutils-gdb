@@ -1,5 +1,12 @@
 2017-03-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/tui-layout.c: Rename to ...
+	* gdb.base/tui-disasm-long-lines.c: ... this.
+	* gdb.base/tui-layout.exp: Rename to ...
+	* gdb.base/tui-disasm-long-lines.exp: ... this.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/tui-layout.exp: Add intro comment and fix typo.
 
 2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
