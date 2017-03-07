@@ -1,3 +1,9 @@
+2017-03-07  Tobin C. Harding  <me@tobin.cc>
+	    Alan Modra  <amodra@gmail.com>
+
+	* doc/as.texinfo (2byte, 4byte, 8byte): Document.
+	* doc/c-arm.texi (2byte, 4byte, 8byte): Omit if ELF.
+
 2017-03-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .cet.
