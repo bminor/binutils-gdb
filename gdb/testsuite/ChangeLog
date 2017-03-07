@@ -1,3 +1,7 @@
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.exp: Add intro comment and fix typo.
+
 2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* i386-mpx-call.c: New file.

@@ -13,12 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Test that the logic for displaying the TUI disassembly window
+# handles very long lines.
+
 standard_testfile
 
 set ccopts {debug quiet}
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" \
 	  executable $ccopts] != "" } {
-    # Maybe the compiler can't handle arbitrarily long identfier names.
+    # Maybe the compiler can't handle arbitrarily long identifier names.
     # Try with a shorter version.
     lappend ccopts "additional_flags=-DSHORT_IDENTIFIERS"
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" \
