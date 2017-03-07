@@ -1,3 +1,9 @@
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* config/tc-riscv.c (validate_riscv_insn): Add 'o' RVC immediate
+	encoding format, which can accept 0-valued immediates.
+	(riscv_ip): Likewise.
+
 2017-03-15  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-riscv.c (riscv_pre_output_hook): Fix compile time
