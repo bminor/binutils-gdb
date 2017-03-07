@@ -1,3 +1,10 @@
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
+	PR 21224
+	PR 20519
+	* elf64-ppc.c (ppc64_elf_relocate_section): Add missing
+	dyn_relocs check.
+
 2017-03-05  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct eh_cie_fde): Add u.cie.per_encoding_aligned8.
