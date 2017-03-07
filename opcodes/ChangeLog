@@ -1,5 +1,11 @@
 2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
 
+	* riscv-opc.c (riscv_opcodes> <c.li>: Use the 'o' immediate encoding.
+	<c.andi>: Likewise.
+	<c.addiw> Likewise.
+
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
 	* riscv-opc.c (riscv_opcodes) <c.addi>: Use match_opcode.
 
 2017-03-13  Andrew Waterman  <andrew@sifive.com>
