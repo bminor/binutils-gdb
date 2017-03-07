@@ -1,3 +1,7 @@
+2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/powerpc/ppc64-linux.mh (MH_CFLAGS): Delete.
+
 2017-03-07  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui-regs.c (tui_restore_gdbout): Don't delete gdb_stdout.
