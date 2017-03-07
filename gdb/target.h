@@ -474,7 +474,7 @@ struct target_ops
     void (*to_store_registers) (struct target_ops *, struct regcache *, ptid_t,
 			        int)
       TARGET_DEFAULT_NORETURN (noprocess ());
-    void (*to_prepare_to_store) (struct target_ops *, struct regcache *)
+    void (*to_prepare_to_store) (struct target_ops *, struct regcache *, ptid_t)
       TARGET_DEFAULT_NORETURN (noprocess ());
 
     void (*to_files_info) (struct target_ops *)
@@ -1401,8 +1401,8 @@ extern void target_store_registers (struct regcache *regcache, ptid_t ptid,
    that REGISTERS contains all the registers from the program being
    debugged.  */
 
-#define	target_prepare_to_store(regcache)	\
-     (*current_target.to_prepare_to_store) (&current_target, regcache)
+#define	target_prepare_to_store(regcache, ptid)	\
+     (*current_target.to_prepare_to_store) (&current_target, regcache, ptid)
 
 /* Determine current address space of thread PTID.  */
 

@@ -949,7 +949,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
   chain_before_save_inferior = save_inferior_ptid ();
   inferior_ptid = regcache->ptid;
 
-  target_prepare_to_store (regcache);
+  target_prepare_to_store (regcache, regcache->ptid);
   regcache_raw_set_cached_value (regcache, regnum, buf);
 
   /* Register a cleanup function for invalidating the register after it is

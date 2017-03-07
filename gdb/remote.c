@@ -106,7 +106,8 @@ static int getpkt_or_notif_sane (char **buf, long *sizeof_buf,
 static void remote_files_info (struct target_ops *ignore);
 
 static void remote_prepare_to_store (struct target_ops *self,
-				     struct regcache *regcache);
+				     struct regcache *regcache,
+				     ptid_t ptid);
 
 static void remote_open_1 (const char *, int, struct target_ops *,
 			   int extended_p);
@@ -7755,7 +7756,8 @@ remote_fetch_registers (struct target_ops *ops, struct regcache *regcache,
    first.  */
 
 static void
-remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
+remote_prepare_to_store (struct target_ops *self, struct regcache *regcache,
+			 ptid_t ptid)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;

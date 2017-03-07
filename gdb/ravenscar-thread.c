@@ -58,7 +58,8 @@ static char *ravenscar_extra_thread_info (struct target_ops *self,
 					  struct thread_info *tp);
 static int ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid);
 static void ravenscar_prepare_to_store (struct target_ops *self,
-					struct regcache *regcache);
+					struct regcache *regcache,
+					ptid_t ptid);
 static void ravenscar_resume (struct target_ops *ops, ptid_t ptid, int step,
 			      enum gdb_signal siggnal);
 static void ravenscar_mourn_inferior (struct target_ops *ops);
@@ -302,21 +303,22 @@ ravenscar_store_registers (struct target_ops *ops,
 
 static void
 ravenscar_prepare_to_store (struct target_ops *self,
-			    struct regcache *regcache)
+			    struct regcache *regcache,
+			    ptid_t ptid)
 {
   struct target_ops *beneath = find_target_beneath (self);
 
   if (!ravenscar_runtime_initialized ()
-      || ptid_equal (inferior_ptid, base_magic_null_ptid)
-      || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
-    beneath->to_prepare_to_store (beneath, regcache);
+      || ptid_equal (ptid, base_magic_null_ptid)
+      || ptid_equal (ptid, ravenscar_running_thread ()))
+    beneath->to_prepare_to_store (beneath, regcache, ptid);
   else
     {
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->to_prepare_to_store (regcache);
+      arch_ops->to_prepare_to_store (regcache, ptid);
     }
 }
 

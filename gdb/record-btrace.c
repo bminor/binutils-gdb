@@ -1481,16 +1481,17 @@ record_btrace_store_registers (struct target_ops *ops,
 
 static void
 record_btrace_prepare_to_store (struct target_ops *ops,
-				struct regcache *regcache)
+				struct regcache *regcache,
+				ptid_t ptid)
 {
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, inferior_ptid))
+      && record_btrace_is_replaying (ops, ptid))
     return;
 
   t = ops->beneath;
-  t->to_prepare_to_store (t, regcache);
+  t->to_prepare_to_store (t, regcache, ptid);
 }
 
 /* The branch trace frame cache.  */

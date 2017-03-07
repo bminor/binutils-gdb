@@ -111,7 +111,8 @@ inf_child_post_attach (struct target_ops *self, int pid)
 
 static void
 inf_child_prepare_to_store (struct target_ops *self,
-			    struct regcache *regcache)
+			    struct regcache *regcache,
+			    ptid_t ptid)
 {
 }
 

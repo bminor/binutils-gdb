@@ -216,27 +216,29 @@ debug_store_registers (struct target_ops *self, struct regcache *arg1, ptid_t ar
 }
 
 static void
-delegate_prepare_to_store (struct target_ops *self, struct regcache *arg1)
+delegate_prepare_to_store (struct target_ops *self, struct regcache *arg1, ptid_t arg2)
 {
   self = self->beneath;
-  self->to_prepare_to_store (self, arg1);
+  self->to_prepare_to_store (self, arg1, arg2);
 }
 
 static void
-tdefault_prepare_to_store (struct target_ops *self, struct regcache *arg1)
+tdefault_prepare_to_store (struct target_ops *self, struct regcache *arg1, ptid_t arg2)
 {
   noprocess ();
 }
 
 static void
-debug_prepare_to_store (struct target_ops *self, struct regcache *arg1)
+debug_prepare_to_store (struct target_ops *self, struct regcache *arg1, ptid_t arg2)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_prepare_to_store (...)\n", debug_target.to_shortname);
-  debug_target.to_prepare_to_store (&debug_target, arg1);
+  debug_target.to_prepare_to_store (&debug_target, arg1, arg2);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_prepare_to_store (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_regcache_p (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg2);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

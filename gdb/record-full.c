@@ -2065,7 +2065,8 @@ record_full_core_fetch_registers (struct target_ops *ops,
 
 static void
 record_full_core_prepare_to_store (struct target_ops *self,
-				   struct regcache *regcache)
+				   struct regcache *regcache,
+				   ptid_t ptid)
 {
 }
 

@@ -25,7 +25,8 @@
 #include "ravenscar-thread.h"
 #include "sparc-ravenscar-thread.h"
 
-static void sparc_ravenscar_prepare_to_store (struct regcache *regcache);
+static void sparc_ravenscar_prepare_to_store (struct regcache *regcache,
+					      ptid_t ptid);
 
 /* Register offsets from a referenced address (exempli gratia the
    Thread_Descriptor).  The referenced address depends on the register
@@ -141,7 +142,7 @@ sparc_ravenscar_fetch_registers (struct regcache *regcache, ptid_t ptid,
    thread.  */
 
 static void
-sparc_ravenscar_prepare_to_store (struct regcache *regcache)
+sparc_ravenscar_prepare_to_store (struct regcache *regcache, ptid_t ptid)
 {
   /* Nothing to do.  */
 }

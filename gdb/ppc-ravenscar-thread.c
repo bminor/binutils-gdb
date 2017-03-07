@@ -173,7 +173,7 @@ ppc_ravenscar_generic_fetch_registers
    thread.  */
 
 static void
-ppc_ravenscar_generic_prepare_to_store (struct regcache *regcache)
+ppc_ravenscar_generic_prepare_to_store (struct regcache *regcache, ptid_t ptid)
 {
   /* Nothing to do.  */
 }
