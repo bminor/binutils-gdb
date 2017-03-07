@@ -22552,6 +22552,35 @@ whose bounds are to be changed, @var{lbound} and @var{ubound} are new values
 for lower and upper bounds respectively.
 @end table
 
+When you call an inferior function on an Intel MPX enabled program,
+GDB sets the inferior's bound registers to the init (disabled) state
+before calling the function.  As a consequence, bounds checks for the
+pointer arguments passed to the function will always pass.
+
+This is necessary because when you call an inferior function, the
+program is usually in the middle of the execution of other function.
+Since at that point bound registers are in an arbitrary state, not
+clearing them would lead to random bound violations in the called
+function.
+
+You can still examine the influence of the bound registers on the
+execution of the called function by stopping the execution of the
+called function at its prologue, setting bound registers, and
+continuing the execution.  For example:
+
+@smallexample
+	$ break *upper
+	Breakpoint 2 at 0x4009de: file i386-mpx-call.c, line 47.
+	$ print upper (a, b, c, d, 1)
+	Breakpoint 2, upper (a=0x0, b=0x6e0000005b, c=0x0, d=0x0, len=48)....
+	$ print $bnd0
+	{lbound = 0x0, ubound = ffffffff} : size -1
+@end smallexample
+
+At this last step the value of bnd0 can be changed for investigation of bound
+violations caused along the execution of the call.  In order to know how to
+set the bound registers or bound table for the call consult the ABI.
+
 @node Alpha
 @subsection Alpha
 

@@ -1860,3 +1860,20 @@ i387_return_value (struct gdbarch *gdbarch, struct regcache *regcache)
   regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM (tdep), 0x3fff);
 
 }
+
+/* See i387-tdep.h.  */
+
+void
+i387_reset_bnd_regs (struct gdbarch *gdbarch, struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (I387_BND0R_REGNUM (tdep) > 0)
+    {
+      gdb_byte bnd_buf[16];
+
+      memset (bnd_buf, 0, 16);
+      for (int i = 0; i < I387_NUM_BND_REGS; i++)
+	regcache_raw_write (regcache, I387_BND0R_REGNUM (tdep) + i, bnd_buf);
+    }
+}

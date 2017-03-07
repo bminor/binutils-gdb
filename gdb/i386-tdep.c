@@ -2684,6 +2684,13 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int write_pass;
   int args_space = 0;
 
+  /* BND registers can be in arbitrary values at the moment of the
+     inferior call.  This can cause boundary violations that are not
+     due to a real bug or even desired by the user.  The best to be done
+     is set the BND registers to allow access to the whole memory, INIT
+     state, before pushing the inferior call.   */
+  i387_reset_bnd_regs (gdbarch, regcache);
+
   /* Determine the total space required for arguments and struct
      return address in a first pass (allowing for 16-byte-aligned
      arguments), then push arguments in a second pass.  */

@@ -1,3 +1,10 @@
+2017-03-07  Walfred Tedeschi <walfred.tedeschi@intel.com>
+
+	* i387-tdep.h (i387_reset_bnd_regs): Add function definition.
+	* i387-tdep.c (i387_reset_bnd_regs): Add function implementation.
+	* i386-tdep.c (i386_push_dummy_call): Call i387_reset_bnd_regs.
+	* amd64-tdep (amd64_push_dummy_call): Call i387_reset_bnd_regs.
+
 2017-03-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* xtensa-linux-nat.c (fetch_gregs): Remove const.
