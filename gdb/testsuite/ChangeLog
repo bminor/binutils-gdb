@@ -1,5 +1,10 @@
 2017-03-07  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/tui-layout.c: New file.
+	* gdb.base/tui-layout.exp: New file.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/tui-layout.c: Rename to ...
 	* gdb.base/tui-disasm-long-lines.c: ... this.
 	* gdb.base/tui-layout.exp: Rename to ...
