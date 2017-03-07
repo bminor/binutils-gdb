@@ -1,3 +1,7 @@
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* riscv-opc.c (riscv_opcodes) <c.addi>: Use match_opcode.
+
 2017-03-13  Andrew Waterman  <andrew@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes) <srli/C>: Use match_opcode.
