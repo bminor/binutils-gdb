@@ -2479,6 +2479,8 @@ extract_vleil (unsigned long insn,
 /* An DX form instruction.  */
 #define DX(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1f) << 1))
 #define DX_MASK DX (0x3f, 0x1f)
+/* An DX form instruction with the D bits specified.  */
+#define NODX_MASK (DX_MASK | 0x1fffc1)
 
 /* An EVSEL form instruction.  */
 #define EVSEL(op, xop) (OP (op) | (((unsigned long)(xop)) & 0xff) << 3)
@@ -4191,6 +4193,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mcrf",      XL(19,0), XLBB_MASK|(3<<21)|(3<<16), COM,	PPCNONE,	{BF, BFA}},
 
+{"lnia",      DX(19,2),		NODX_MASK,   POWER9,	PPCNONE,	{RT}},
 {"addpcis",   DX(19,2),		DX_MASK,     POWER9,	PPCNONE,	{RT, DXD}},
 {"subpcis",   DX(19,2),		DX_MASK,     POWER9,	PPCNONE,	{RT, NDXD}},
 
