@@ -1,5 +1,10 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/completion.exp: Move TUI completion tests to ...
+	* gdb.tui/completion.exp: ... this new file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/tui-disasm-long-lines.c,
 	gdb.base/tui-disasm-long-lines.exp, gdb.base/tui-layout.c,
 	gdb.base/tui-layout.exp: Move to ...
