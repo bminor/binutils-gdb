@@ -1,5 +1,10 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	* gdb.arch/i386-pkru.exp (probe PKRU support): Handle detecting
+	PKRU as not supported as a PASS.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/break-fun-addr.exp: Use $testfile1/$testfile2 for test
 	prefix instead of $binfile1/$binfile2.
 	* gdb.btrace/gcore.exp: Use "core" instead of unstable path name

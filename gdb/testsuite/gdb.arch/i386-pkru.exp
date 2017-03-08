@@ -40,6 +40,9 @@ gdb_test_multiple "print have_pkru()" $test {
         pass $test
         set supports_pkru 1
     }
+    -re ".. = 0\r\n$gdb_prompt $" {
+        pass $test
+    }
 }
 
 if { !$supports_pkru } {
