@@ -1,5 +1,11 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	PR 21206
+	* common/gdb_unlinker.h (unlinker::unlinker): Attribute nonnull
+	goes to argument 2, not 1.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	PR cli/21218
 	* top.c (gdb_readline_wrapper): Avoid passing NULL to
 	display_gdb_prompt.
