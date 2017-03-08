@@ -36,14 +36,20 @@ if ![runto_main] {
 set srcfile $srcfile2
 gdb_breakpoint [gdb_get_line_number "break-here"]
 
-gdb_continue_to_breakpoint "break-here" ".* break-here .*"
-gdb_test "p y" " = 2"
-gdb_test "p b" " = 4"
+with_test_prefix "call 1" {
+    gdb_continue_to_breakpoint "break-here" ".* break-here .*"
+    gdb_test "p y" " = 2"
+    gdb_test "p b" " = 4"
+}
 
-gdb_continue_to_breakpoint "break-here" ".* break-here .*"
-gdb_test "p y" " = 4"
-gdb_test "p b" " = 8"
+with_test_prefix "call 2" {
+    gdb_continue_to_breakpoint "break-here" ".* break-here .*"
+    gdb_test "p y" " = 4"
+    gdb_test "p b" " = 8"
+}
 
-gdb_continue_to_breakpoint "break-here" ".* break-here .*"
-gdb_test "p y" " = 10"
-gdb_test "p b" " = 20"
+with_test_prefix "call 3" {
+    gdb_continue_to_breakpoint "break-here" ".* break-here .*"
+    gdb_test "p y" " = 10"
+    gdb_test "p b" " = 20"
+}

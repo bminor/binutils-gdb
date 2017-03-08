@@ -1,5 +1,10 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	* gdb.arch/amd64-entry-value-param-dwarf5.exp: Use with_test_prefix.
+	* gdb.arch/amd64-entry-value-param.exp: Use with_test_prefix.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	* gdb.arch/i386-pkru.exp (probe PKRU support): Handle detecting
 	PKRU as not supported as a PASS.
 
