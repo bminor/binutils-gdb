@@ -1,4 +1,12 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR cli/21218
+	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
+	New proc.
+	(top level): Call it.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
 
 	PR tui/21216
 	* gdb.tui/tui-nl-filtered-output.exp: New file.

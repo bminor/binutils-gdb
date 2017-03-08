@@ -1,5 +1,12 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	PR cli/21218
+	* top.c (gdb_readline_wrapper): Avoid passing NULL to
+	display_gdb_prompt.
+	(command_line_input): Add comment.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	PR tui/21216
 	* tui/tui-file.c (tui_file::write): New.
 	* tui/tui-file.h (tui_file): Override "write".

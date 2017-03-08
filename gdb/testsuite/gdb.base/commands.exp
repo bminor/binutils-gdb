@@ -1003,6 +1003,34 @@ proc_with_prefix redefine_backtrace_test {} {
     gdb_test "bt" "hibob" "execute bt command"
 }
 
+# Test an input line split with a continuation character (backslash)
+# while entering a multi-line command (in a secondary prompt).
+
+proc_with_prefix backslash_in_multi_line_command_test {} {
+    gdb_breakpoint "main"
+
+    gdb_test_multiple "commands" "commands" {
+	-re "End with a line saying just \"end\"\\.\r\n>$" {
+	    pass "commands"
+	}
+    }
+
+    set test "input line split with backslash"
+    send_gdb "print \\\nargc\n"
+    gdb_test_multiple "" $test {
+	-re "^print \\\\\r\nargc\r\n>$" {
+	    pass $test
+	}
+    }
+
+    gdb_test_no_output "end"
+
+    # Input any command, just to be sure the readline state is sane.
+    # In PR 21218, this would trigger the infamous:
+    # readline: readline_callback_read_char() called with no handler!
+    gdb_test "print 1" "" "run command"
+}
+
 gdbvar_simple_if_test
 gdbvar_simple_while_test
 gdbvar_complex_if_while_test
@@ -1027,5 +1055,6 @@ recursive_source_test
 if_commands_test
 error_clears_commands_left
 redefine_hook_test
+backslash_in_multi_line_command_test
 # This one should come last, as it redefines "backtrace".
 redefine_backtrace_test
