@@ -15926,11 +15926,11 @@ get_gnu_elf_note_type (unsigned e_type)
 }
 
 static void
-decode_x86_isa (unsigned long bitmask)
+decode_x86_isa (unsigned int bitmask)
 {
   while (bitmask)
     {
-      unsigned long bit = bitmask & (- bitmask);
+      unsigned int bit = bitmask & (- bitmask);
 
       bitmask &= ~ bit;
       switch (bit)
@@ -15953,7 +15953,7 @@ decode_x86_isa (unsigned long bitmask)
 	case GNU_PROPERTY_X86_ISA_1_AVX512VL: printf ("AVX512VL"); break;
 	case GNU_PROPERTY_X86_ISA_1_AVX512DQ: printf ("AVX512DQ"); break;
 	case GNU_PROPERTY_X86_ISA_1_AVX512BW: printf ("AVX512BW"); break;
-	default: printf (_("<unknown: %lx>"), bit); break;
+	default: printf (_("<unknown: %x>"), bit); break;
 	}
       if (bitmask)
 	printf (", ");
@@ -15969,72 +15969,105 @@ print_gnu_property_note (Elf_Internal_Note * pnote)
 
   printf (_("      Properties: "));
 
-  if (pnote->descsz % size)
+  if (pnote->descsz < 8 || (pnote->descsz % size) != 0)
     {
       printf (_("<corrupt GNU_PROPERTY_TYPE, size = %#lx>\n"), pnote->descsz);
       return;
     }
 
-  while (ptr < (ptr_end - (size * 2)))
+  while (1)
     {
-      unsigned long j;
-      unsigned long type = byte_get (ptr, size);
-      unsigned long datasz = byte_get (ptr + size, size);
+      unsigned int j;
+      unsigned int type = byte_get (ptr, 4);
+      unsigned int datasz = byte_get (ptr + 4, 4);
 
-      ptr += 2 * size;
+      ptr += 8;
 
-      switch (type)
+      if ((ptr + datasz) > ptr_end)
 	{
-	case GNU_PROPERTY_STACK_SIZE:
-	  printf (_("stack size: "));
-	  if (datasz != size || (ptr + size  > ptr_end))
-	    printf (_("<corrupt length: %#lx> "), datasz);
-	  else
-	    printf ("%#lx", (unsigned long) byte_get (ptr, size));
-	  break;
-
-	case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
-	  printf ("no copy on protected ");
-	  if (datasz)
-	    printf (_("<corrupt length: %#lx> "), datasz);
-	  break;
-
-	case GNU_PROPERTY_X86_ISA_1_USED:
-	  printf ("x86 ISA used: ");
-	  if (datasz != size  || (ptr + size > ptr_end))
-	    printf (_("<corrupt length: %#lx> "), datasz);
-	  else
-	    decode_x86_isa (byte_get (ptr, size));
-	  break;
-
-	case GNU_PROPERTY_X86_ISA_1_NEEDED:
-	  printf ("x86 ISA needed: ");
-	  if (datasz != size  || (ptr + size > ptr_end))
-	    printf (_("<corrupt length: %#lx> "), datasz);
-	  else
-	    decode_x86_isa (byte_get (ptr, size));
-	  break;
-
-	default:
-	  printf (_("<unknown type %#lx data: "), type);
-	  if (ptr + datasz > ptr_end)
-	    {
-	      printf (_("corrupt datasz: %#lx>\n"), datasz);
-	      break;
-	    }
-	  for (j = 0; j < datasz; ++j)
-	    printf ("%02x ", ptr[j] & 0xff);
-	  printf (">");
+	  printf (_("<corrupt type (%#x) datasz: %#x>\n"),
+		  type, datasz);
 	  break;
 	}
 
+      if (type >= GNU_PROPERTY_LOPROC && type <= GNU_PROPERTY_HIPROC)
+	{
+	  if (elf_header.e_machine == EM_X86_64
+	      || elf_header.e_machine == EM_IAMCU
+	      || elf_header.e_machine == EM_386)
+	    {
+	      switch (type)
+		{
+		case GNU_PROPERTY_X86_ISA_1_USED:
+		  printf ("x86 ISA used: ");
+		  if (datasz != 4)
+		    printf (_("<corrupt length: %#x> "), datasz);
+		  else
+		    decode_x86_isa (byte_get (ptr, 4));
+		  goto next;
+
+		case GNU_PROPERTY_X86_ISA_1_NEEDED:
+		  printf ("x86 ISA needed: ");
+		  if (datasz != 4)
+		    printf (_("<corrupt length: %#x> "), datasz);
+		  else
+		    decode_x86_isa (byte_get (ptr, 4));
+		  goto next;
+
+		default:
+		  break;
+		}
+	    }
+	}
+      else
+	{
+	  switch (type)
+	    {
+	    case GNU_PROPERTY_STACK_SIZE:
+	      printf (_("stack size: "));
+	      if (datasz != size)
+		printf (_("<corrupt length: %#x> "), datasz);
+	      else
+		printf ("%#lx", (unsigned long) byte_get (ptr, size));
+	      goto next;
+
+	    case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
+	      printf ("no copy on protected ");
+	      if (datasz)
+		printf (_("<corrupt length: %#x> "), datasz);
+	      goto next;
+
+	    default:
+	      break;
+	    }
+	}
+
+      if (type < GNU_PROPERTY_LOPROC)
+	printf (_("<unknown type %#x data: "), type);
+      else if (type < GNU_PROPERTY_LOUSER)
+	printf (_("<procesor-specific type %#x data: "), type);
+      else
+	printf (_("<application-specific type %#x data: "), type);
+      for (j = 0; j < datasz; ++j)
+	printf ("%02x ", ptr[j] & 0xff);
+      printf (">");
+
+next:
       ptr += ((datasz + (size - 1)) & ~ (size - 1));
-      if (ptr < (ptr_end - (size * 2)))
+      if (ptr == ptr_end)
+	break;
+      else
 	{
 	  if (do_wide)
 	    printf (", ");
 	  else
 	    printf ("\n\t");
+	}
+
+      if (ptr > (ptr_end - 8))
+	{
+	  printf (_("<corrupt descsz: %#lx>\n"), pnote->descsz);
+	  break;
 	}
     }
 

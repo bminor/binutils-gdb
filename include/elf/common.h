@@ -695,6 +695,16 @@
 /* Values used in GNU .note.gnu.property notes (NT_GNU_PROPERTY_TYPE_0).  */
 #define GNU_PROPERTY_STACK_SIZE			1
 #define GNU_PROPERTY_NO_COPY_ON_PROTECTED	2
+
+/* Processor-specific semantics, lo */
+#define GNU_PROPERTY_LOPROC  0xc0000000
+/* Processor-specific semantics, hi */
+#define GNU_PROPERTY_HIPROC  0xdfffffff
+/* Application-specific semantics, lo */
+#define GNU_PROPERTY_LOUSER  0xe0000000
+/* Application-specific semantics, hi */
+#define GNU_PROPERTY_HIUSER  0xffffffff
+
 #define GNU_PROPERTY_X86_ISA_1_USED		0xc0000000
 #define GNU_PROPERTY_X86_ISA_1_NEEDED		0xc0000001
 

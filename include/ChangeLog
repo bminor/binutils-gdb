@@ -1,3 +1,11 @@
+2017-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21231
+	* elf/common.h (GNU_PROPERTY_LOPROC): New.
+	(GNU_PROPERTY_HIPROC): Likewise.
+	(GNU_PROPERTY_LOUSER): Likewise.
+	(GNU_PROPERTY_HIUSER): Likewise.
+
 2017-03-01  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (SHF_GNU_BUILD_NOTE): Define.
