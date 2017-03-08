@@ -22574,7 +22574,7 @@ continuing the execution.  For example:
 	$ print upper (a, b, c, d, 1)
 	Breakpoint 2, upper (a=0x0, b=0x6e0000005b, c=0x0, d=0x0, len=48)....
 	$ print $bnd0
-	{lbound = 0x0, ubound = ffffffff} : size -1
+	@{lbound = 0x0, ubound = ffffffff@} : size -1
 @end smallexample
 
 At this last step the value of bnd0 can be changed for investigation of bound

@@ -1,3 +1,8 @@
+2017-03-08  Jiong Wang  <jiong.wang@arm.com>
+
+        * gdb.texinfo (Memory Protection Extensions): Add missing escape
+	character "@".
+
 2017-03-07  Walfred Tedeschi <walfred.tedeschi@intel.com>
 
 	* Memory Protection Extensions: Add information about inferior
