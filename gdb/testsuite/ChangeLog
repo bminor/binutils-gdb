@@ -1,4 +1,13 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-fun-addr.exp: Use $testfile1/$testfile2 for test
+	prefix instead of $binfile1/$binfile2.
+	* gdb.btrace/gcore.exp: Use "core" instead of unstable path name
+	in test message.
+	* gdb.python/py-completion.exp: Use "load python file" as test
+	messages instead of unstable path names.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR cli/21218

@@ -41,4 +41,5 @@ gdb_test "record goto begin" ".*main\.2.*"
 
 # generate a core file - this used to assert
 set corefile [standard_output_file core]
-gdb_test "generate-core-file $corefile" "Saved corefile $corefile"
+gdb_test "generate-core-file $corefile" "Saved corefile $corefile" \
+    "generate-core-file core"
