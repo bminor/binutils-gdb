@@ -1,3 +1,10 @@
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-disasm-long-lines.c,
+	gdb.base/tui-disasm-long-lines.exp, gdb.base/tui-layout.c,
+	gdb.base/tui-layout.exp: Move to ...
+	* gdb.tui/: ... this new directory.
+
 2017-03-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/tui-layout.c: New file.
