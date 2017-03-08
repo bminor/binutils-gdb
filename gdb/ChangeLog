@@ -1,3 +1,15 @@
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR tui/21216
+	* tui/tui-file.c (tui_file::write): New.
+	* tui/tui-file.h (tui_file): Override "write".
+	* tui/tui-io.c (do_tui_putc, update_start_line): New functions,
+	factored out from ...
+	(tui_puts): ... here.
+	(tui_putc): Use them.
+	(tui_write): New function.
+	* tui/tui-io.h (tui_write): Declare.
+
 2017-03-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (SFILES): Replace "environ.c" with

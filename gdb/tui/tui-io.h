@@ -28,6 +28,10 @@ class cli_ui_out;
 /* Print the string in the curses command window.  */
 extern void tui_puts (const char *);
 
+/* Print LENGTH characters from the buffer pointed to by BUF to the
+   curses command window.  */
+extern void tui_write (const char *buf, size_t length);
+
 /* Setup the IO for curses or non-curses mode.  */
 extern void tui_setup_io (int mode);
 
