@@ -1,5 +1,11 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18360
+	* gdb.threads/interrupt-while-step-over.c: New file.
+	* gdb.threads/interrupt-while-step-over.exp: New file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	* gdb.arch/amd64-entry-value-param-dwarf5.exp: Use with_test_prefix.
 	* gdb.arch/amd64-entry-value-param.exp: Use with_test_prefix.
 

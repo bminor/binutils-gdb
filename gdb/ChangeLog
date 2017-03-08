@@ -1,5 +1,28 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18360
+	* infrun.c (start_step_over, do_target_resume, resume)
+	(restart_threads): Assert we're not resuming a thread that is
+	meant to be stopped.
+	(infrun_thread_stop_requested_callback): Delete.
+	(infrun_thread_stop_requested): If the thread is internally
+	stopped, queue a pending stop event and clear the thread's
+	inline-frame state.
+	(handle_stop_requested): New function.
+	(handle_syscall_event, handle_inferior_event_1): Use
+	handle_stop_requested.
+	(handle_stop_requested): New function.
+	(handle_signal_stop): Set the thread's stop_signal here instead of
+	at caller.
+	(finish_step_over): Clear step over info unconditionally.
+	(handle_signal_stop): If the user had interrupted the event
+	thread, consider the stop a random signal.
+	(handle_signal_stop) <signal arrived while stepping over
+	breakpoint>: Don't restart threads here.
+	(stop_waiting): Don't clear step-over info here.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	PR 21206
 	* common/gdb_unlinker.h (unlinker::unlinker): Attribute nonnull
 	goes to argument 2, not 1.
