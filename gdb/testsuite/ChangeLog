@@ -1,5 +1,9 @@
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/step-over-exit.exp: Add explicit test message.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18360
 	* gdb.threads/interrupt-while-step-over.c: New file.
 	* gdb.threads/interrupt-while-step-over.exp: New file.
