@@ -1,3 +1,8 @@
+2017-03-09  Sam Thursfield  <sam.thursfield@codethink.co.uk>
+
+	* rs6000-core.c (CORE_NEW): Simplify macro when
+	AIX_CORE_DUMPX_CORE and BFD64 are true to avoid compile warning.
+
 2017-03-07  Alan Modra  <amodra@gmail.com>
 
 	PR 21224
