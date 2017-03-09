@@ -598,10 +598,30 @@ quadruple word).
 @cindex encoding options, i386
 @cindex encoding options, x86-64
 
-Different encoding options can be specified via optional mnemonic
-suffix.  @samp{.s} suffix swaps 2 register operands in encoding when
-moving from one register to another.  @samp{.d8} or @samp{.d32} suffix
-prefers 8bit or 32bit displacement in encoding.
+Different encoding options can be specified via pseudo prefixes:
+
+@itemize @bullet
+@item
+@samp{@{disp8@}} -- prefer 8-bit displacement.
+
+@item
+@samp{@{disp32@}} -- prefer 32-bit displacement.
+
+@item
+@samp{@{load@}} -- prefer load-form instruction.
+
+@item
+@samp{@{store@}} -- prefer store-form instruction.
+
+@item
+@samp{@{vex2@}} -- prefer 2-byte VEX prefix for VEX instruction.
+
+@item
+@samp{@{vex3@}} -- prefer 3-byte VEX prefix for VEX instruction.
+
+@item
+@samp{@{evex@}} --  encode with EVEX prefix.
+@end itemize
 
 @cindex conversion instructions, i386
 @cindex i386 conversion instructions

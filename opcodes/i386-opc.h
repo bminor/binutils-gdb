@@ -356,9 +356,8 @@ enum
   D = 0,
   /* set if operands can be words or dwords encoded the canonical way */
   W,
-  /* Skip the current insn and use the next insn in i386-opc.tbl to swap
-     operand in encoding.  */
-  S,
+  /* load form instruction. Must be placed before store form.  */
+  Load,
   /* insn has a modrm byte. */
   Modrm,
   /* register is in low 3 bits of opcode */
@@ -598,7 +597,7 @@ typedef struct i386_opcode_modifier
 {
   unsigned int d:1;
   unsigned int w:1;
-  unsigned int s:1;
+  unsigned int load:1;
   unsigned int modrm:1;
   unsigned int shortform:1;
   unsigned int jump:1;

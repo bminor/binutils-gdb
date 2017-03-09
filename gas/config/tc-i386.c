@@ -354,8 +354,13 @@ struct _i386_insn
     /* Compressed disp8*N attribute.  */
     unsigned int memshift;
 
-    /* Swap operand in encoding.  */
-    unsigned int swap_operand;
+    /* Prefer load or store in encoding.  */
+    enum
+      {
+	dir_encoding_default = 0,
+	dir_encoding_load,
+	dir_encoding_store
+      } dir_encoding;
 
     /* Prefer 8bit or 32bit displacement in encoding.  */
     enum
@@ -365,6 +370,15 @@ struct _i386_insn
 	disp_encoding_32bit
       } disp_encoding;
 
+    /* How to encode vector instructions.  */
+    enum
+      {
+	vex_encoding_default = 0,
+	vex_encoding_vex2,
+	vex_encoding_vex3,
+	vex_encoding_evex
+      } vec_encoding;
+
     /* REP prefix.  */
     const char *rep_prefix;
 
@@ -373,9 +387,6 @@ struct _i386_insn
 
     /* Have BND prefix.  */
     const char *bnd_prefix;
-
-    /* Need VREX to support upper 16 registers.  */
-    int need_vrex;
 
     /* Error message.  */
     enum i386_error error;
@@ -403,7 +414,7 @@ static const struct RC_name RC_NamesTable[] =
 
 /* List of chars besides those in app.c:symbol_chars that can start an
    operand.  Used to prevent the scrubber eating vital white-space.  */
-const char extra_symbol_chars[] = "*%-([{"
+const char extra_symbol_chars[] = "*%-([{}"
 #ifdef LEX_AT
 	"@"
 #endif
@@ -2597,6 +2608,9 @@ md_begin (void)
 {
   const char *hash_err;
 
+  /* Support pseudo prefixes like {disp32}.  */
+  lex_type ['{'] = LEX_BEGIN_NAME;
+
   /* Initialize op_hash hash table.  */
   op_hash = hash_new ();
 
@@ -2678,7 +2692,10 @@ md_begin (void)
 	    operand_chars[c] = c;
 	  }
 	else if (c == '{' || c == '}')
-	  operand_chars[c] = c;
+	  {
+	    mnemonic_chars[c] = c;
+	    operand_chars[c] = c;
+	  }
 
 	if (ISALPHA (c) || ISDIGIT (c))
 	  identifier_chars[c] = c;
@@ -3144,10 +3161,11 @@ build_vex_prefix (const insn_template *t)
 
   /* Use 2-byte VEX prefix by swapping destination and source
      operand.  */
-  if (!i.swap_operand
+  if (i.vec_encoding != vex_encoding_vex3
+      && i.dir_encoding == dir_encoding_default
       && i.operands == i.reg_operands
       && i.tm.opcode_modifier.vexopcode == VEX0F
-      && i.tm.opcode_modifier.s
+      && i.tm.opcode_modifier.load
       && i.rex == REX_B)
     {
       unsigned int xchg = i.operands - 1;
@@ -3196,7 +3214,8 @@ build_vex_prefix (const insn_template *t)
     }
 
   /* Use 2-byte VEX prefix if possible.  */
-  if (i.tm.opcode_modifier.vexopcode == VEX0F
+  if (i.vec_encoding != vex_encoding_vex3
+      && i.tm.opcode_modifier.vexopcode == VEX0F
       && i.tm.opcode_modifier.vexw != VEXW1
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
@@ -3905,21 +3924,61 @@ parse_insn (char *line, char *mnemonic)
 		      current_templates->start->name);
 	      return NULL;
 	    }
-	  /* Add prefix, checking for repeated prefixes.  */
-	  switch (add_prefix (current_templates->start->base_opcode))
+	  if (current_templates->start->opcode_length == 0)
 	    {
-	    case PREFIX_EXIST:
-	      return NULL;
-	    case PREFIX_REP:
-	      if (current_templates->start->cpu_flags.bitfield.cpuhle)
-		i.hle_prefix = current_templates->start->name;
-	      else if (current_templates->start->cpu_flags.bitfield.cpumpx)
-		i.bnd_prefix = current_templates->start->name;
-	      else
-		i.rep_prefix = current_templates->start->name;
-	      break;
-	    default:
-	      break;
+	      /* Handle pseudo prefixes.  */
+	      switch (current_templates->start->base_opcode)
+		{
+		case 0x0:
+		  /* {disp8} */
+		  i.disp_encoding = disp_encoding_8bit;
+		  break;
+		case 0x1:
+		  /* {disp32} */
+		  i.disp_encoding = disp_encoding_32bit;
+		  break;
+		case 0x2:
+		  /* {load} */
+		  i.dir_encoding = dir_encoding_load;
+		  break;
+		case 0x3:
+		  /* {store} */
+		  i.dir_encoding = dir_encoding_store;
+		  break;
+		case 0x4:
+		  /* {vex2} */
+		  i.vec_encoding = vex_encoding_vex2;
+		  break;
+		case 0x5:
+		  /* {vex3} */
+		  i.vec_encoding = vex_encoding_vex3;
+		  break;
+		case 0x6:
+		  /* {evex} */
+		  i.vec_encoding = vex_encoding_evex;
+		  break;
+		default:
+		  abort ();
+		}
+	    }
+	  else
+	    {
+	      /* Add prefix, checking for repeated prefixes.  */
+	      switch (add_prefix (current_templates->start->base_opcode))
+		{
+		case PREFIX_EXIST:
+		  return NULL;
+		case PREFIX_REP:
+		  if (current_templates->start->cpu_flags.bitfield.cpuhle)
+		    i.hle_prefix = current_templates->start->name;
+		  else if (current_templates->start->cpu_flags.bitfield.cpumpx)
+		    i.bnd_prefix = current_templates->start->name;
+		  else
+		    i.rep_prefix = current_templates->start->name;
+		  break;
+		default:
+		  break;
+		}
 	    }
 	  /* Skip past PREFIX_SEPARATOR and reset token_start.  */
 	  token_start = ++l;
@@ -3933,7 +3992,7 @@ parse_insn (char *line, char *mnemonic)
       /* Check if we should swap operand or force 32bit displacement in
 	 encoding.  */
       if (mnem_p - 2 == dot_p && dot_p[1] == 's')
-	i.swap_operand = 1;
+	i.dir_encoding = dir_encoding_store;
       else if (mnem_p - 3 == dot_p
 	       && dot_p[1] == 'd'
 	       && dot_p[2] == '8')
@@ -4721,15 +4780,27 @@ check_VecOperands (const insn_template *t)
 static int
 VEX_check_operands (const insn_template *t)
 {
-  /* VREX is only valid with EVEX prefix.  */
-  if (i.need_vrex && !t->opcode_modifier.evex)
+  if (i.vec_encoding == vex_encoding_evex)
     {
-      i.error = invalid_register_operand;
-      return 1;
+      /* This instruction must be encoded with EVEX prefix.  */
+      if (!t->opcode_modifier.evex)
+	{
+	  i.error = unsupported;
+	  return 1;
+	}
+      return 0;
     }
 
   if (!t->opcode_modifier.vex)
-    return 0;
+    {
+      /* This instruction template doesn't have VEX prefix.  */
+      if (i.vec_encoding != vex_encoding_default)
+	{
+	  i.error = unsupported;
+	  return 1;
+	}
+      return 0;
+    }
 
   /* Only check VEX_Imm4, which must be the first operand.  */
   if (t->operand_types[0].bitfield.vec_imm4)
@@ -4967,20 +5038,17 @@ match_template (char mnem_suffix)
 	      && operand_type_equal (&i.types [0], &acc32)
 	      && operand_type_equal (&i.types [1], &acc32))
 	    continue;
-	  if (i.swap_operand)
-	    {
-	      /* If we swap operand in encoding, we either match
-		 the next one or reverse direction of operands.  */
-	      if (t->opcode_modifier.s)
-		continue;
-	      else if (t->opcode_modifier.d)
-		goto check_reverse;
-	    }
+	  /* If we want store form, we reverse direction of operands.  */
+	  if (i.dir_encoding == dir_encoding_store
+	      && t->opcode_modifier.d)
+	    goto check_reverse;
 	  /* Fall through.  */
 
 	case 3:
-	  /* If we swap operand in encoding, we match the next one.  */
-	  if (i.swap_operand && t->opcode_modifier.s)
+	  /* If we want store form, we skip the current load.  */
+	  if (i.dir_encoding == dir_encoding_store
+	      && i.mem_operands == 0
+	      && t->opcode_modifier.load)
 	    continue;
 	  /* Fall through.  */
 	case 4:
@@ -9725,11 +9793,13 @@ parse_real_register (char *reg_string, char **end_op)
      mode.  */
   if ((r->reg_flags & RegVRex))
     {
+      if (i.vec_encoding == vex_encoding_default)
+	i.vec_encoding = vex_encoding_evex;
+
       if (!cpu_arch_flags.bitfield.cpuvrex
+	  || i.vec_encoding != vex_encoding_evex
 	  || flag_code != CODE_64BIT)
 	return (const reg_entry *) NULL;
-
-      i.need_vrex = 1;
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex))
@@ -9774,7 +9844,7 @@ parse_register (char *reg_string, char **end_op)
 		&& (valueT) e->X_add_number < i386_regtab_size);
 	  r = i386_regtab + e->X_add_number;
 	  if ((r->reg_flags & RegVRex))
-	    i.need_vrex = 1;
+	    i.vec_encoding = vex_encoding_evex;
 	  *end_op = input_line_pointer;
 	}
       *input_line_pointer = c;

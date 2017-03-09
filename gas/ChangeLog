@@ -1,3 +1,25 @@
+2017-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (_i386_insn): Add dir_encoding and
+	vec_encoding.  Remove swap_operand and need_vrex.
+	(extra_symbol_chars): Add '}'.
+	(md_begin): Mark '}' with LEX_BEGIN_NAME.  Allow '}' in
+	mnemonic.
+	(build_vex_prefix): Don't use 2-byte VEX encoding with
+	{vex3}.  Check dir_encoding and load.
+	(parse_insn): Check pseudo prefixes.  Set dir_encoding.
+	(VEX_check_operands): Likewise.
+	(match_template): Check dir_encoding and load.
+	(parse_real_register): Set vec_encoding instead of need_vrex.
+	(parse_register): Likewise.
+	* doc/c-i386.texi: Document {disp8}, {disp32}, {load}, {store},
+	{vex2}, {vex3} and {evex}.  Remove ".s", ".d8" and ".d32"
+	* testsuite/gas/i386/i386.exp: Run pseudos and x86-64-pseudos.
+	* testsuite/gas/i386/pseudos.d: New file.
+	* testsuite/gas/i386/pseudos.s: Likewise.
+	* testsuite/gas/i386/x86-64-pseudos.d: Likewise.
+	* testsuite/gas/i386/x86-64-pseudos.s: Likewise.
+
 2017-03-08  Peter Bergner <bergner@vnet.ibm.com>
 
 	* testsuite/gas/ppc/altivec2.d (as): Use the -mpower8 option.

@@ -1,5 +1,15 @@
 2017-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Replace S with Load.
+	* i386-opc.h (S): Removed.
+	(Load): New.
+	(i386_opcode_modifier): Replace s with load.
+	* i386-opc.tbl: Add {disp8}, {disp32}, {swap}, {vex2}, {vex3}
+	and {evex}.  Replace S with Load.
+	* i386-tbl.h: Regenerated.
+
+2017-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.tbl: Use CpuCET on rdsspq.
 	* i386-tbl.h: Regenerated.
 
