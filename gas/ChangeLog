@@ -1,5 +1,10 @@
 2017-03-08  Peter Bergner <bergner@vnet.ibm.com>
 
+	* testsuite/gas/ppc/altivec2.d (as): Use the -mpower8 option.
+	(objdump): Use the -Mpower8 option.
+
+2017-03-08  Peter Bergner <bergner@vnet.ibm.com>
+
 	* testsuite/gas/ppc/power9.d <lnia> New test.
 	* testsuite/gas/ppc/power9.s: Likewise.
 

@@ -94,7 +94,7 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_A2),
     0 },
   { "altivec", PPC_OPCODE_PPC,
-    PPC_OPCODE_ALTIVEC | PPC_OPCODE_ALTIVEC2 },
+    PPC_OPCODE_ALTIVEC },
   { "any",     0,
     PPC_OPCODE_ANY },
   { "booke",   PPC_OPCODE_PPC | PPC_OPCODE_BOOKE,
@@ -226,7 +226,7 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_E500),
     PPC_OPCODE_VLE },
   { "vsx",     PPC_OPCODE_PPC,
-    PPC_OPCODE_VSX | PPC_OPCODE_VSX3 },
+    PPC_OPCODE_VSX },
   { "htm",     PPC_OPCODE_PPC,
     PPC_OPCODE_HTM },
 };

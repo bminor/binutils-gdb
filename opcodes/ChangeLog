@@ -1,5 +1,10 @@
 2017-03-08  Peter Bergner  <bergner@vnet.ibm.com>
 
+	* ppc-dis.c (ppc_opts) <altivec>: Do not use PPC_OPCODE_ALTIVEC2;
+	<vsx>: Do not use PPC_OPCODE_VSX3;
+
+2017-03-08  Peter Bergner  <bergner@vnet.ibm.com>
+
 	* ppc-opc.c (powerpc_opcodes) <lnia>: New extended mnemonic.
 
 2017-03-06  H.J. Lu  <hongjiu.lu@intel.com>
