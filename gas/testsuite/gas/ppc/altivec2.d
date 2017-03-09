@@ -1,5 +1,5 @@
-#as: -maltivec
-#objdump: -dr -Maltivec
+#as: -mpower8
+#objdump: -dr -Mpower8
 #name: Altivec ISA 2.07 instructions
 
 .*
