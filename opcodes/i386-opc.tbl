@@ -6002,7 +6002,7 @@ ptwrite, 1, 0xf30fae, 0x4, 2, CpuPTWRITE, Modrm|CheckRegSize|No_bSuf|No_wSuf|No_
 incsspd, 0, 0xf30f01e9, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 incsspq, 0, 0xf30f01e9, None, 3, CpuCET|Cpu64, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { 0 }
 rdsspd, 1, 0xf30f1e, 0x1, 2, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
-rdsspq, 1, 0xf30f1e, 0x1, 2, CpuRDPID|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64 }
+rdsspq, 1, 0xf30f1e, 0x1, 2, CpuCET|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64 }
 savessp, 0, 0xf30f01ea, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rstorssp, 1, 0xf30f01, 0x5, 2, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 wrssd, 2, 0x0f38f6, None, 3, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
