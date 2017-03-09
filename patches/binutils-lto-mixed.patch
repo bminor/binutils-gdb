@@ -394,12 +394,12 @@ index 0000000..5088e37
 +	(lto_run_tests): Add "LTO 4[acd]" tests.
 +	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 2930089..058891a 100644
+index 0a4a044..6fdc4a0 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
-@@ -1121,6 +1121,9 @@ struct bfd_section *bfd_create_gnu_debuglink_section
- bfd_boolean bfd_fill_in_gnu_debuglink_section
-    (bfd *abfd, struct bfd_section *sect, const char *filename);
+@@ -1123,6 +1123,9 @@ bfd_boolean bfd_fill_in_gnu_debuglink_section
+ 
+ char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
  
 +const char *bfd_extract_object_only_section
 +   (bfd *abfd);
@@ -407,7 +407,7 @@ index 2930089..058891a 100644
  /* Extracted from libbfd.c.  */
  
  /* Byte swapping macros for user section data.  */
-@@ -1689,6 +1692,9 @@ extern asection _bfd_std_section[4];
+@@ -1691,6 +1694,9 @@ extern asection _bfd_std_section[4];
  #define BFD_COM_SECTION_NAME "*COM*"
  #define BFD_IND_SECTION_NAME "*IND*"
  
@@ -417,7 +417,7 @@ index 2930089..058891a 100644
  /* Pointer to the common section.  */
  #define bfd_com_section_ptr (&_bfd_std_section[0])
  /* Pointer to the undefined section.  */
-@@ -6681,6 +6687,14 @@ struct bfd_build_id
+@@ -6684,6 +6690,14 @@ struct bfd_build_id
      bfd_byte data[1];
    };
  
@@ -432,7 +432,7 @@ index 2930089..058891a 100644
  struct bfd
  {
    /* The filename the application opened the BFD with.  */
-@@ -6858,6 +6872,9 @@ struct bfd
+@@ -6862,6 +6876,9 @@ struct bfd
    /* Set if this is a plugin output file.  */
    unsigned int lto_output : 1;
  
@@ -442,7 +442,7 @@ index 2930089..058891a 100644
    /* Set to dummy BFD created when claimed by a compiler plug-in
       library.  */
    bfd *plugin_dummy_bfd;
-@@ -6883,6 +6900,9 @@ struct bfd
+@@ -6887,6 +6904,9 @@ struct bfd
    /* The last section on the section list.  */
    struct bfd_section *section_last;
  
@@ -452,7 +452,7 @@ index 2930089..058891a 100644
    /* The number of sections.  */
    unsigned int section_count;
  
-@@ -7194,6 +7214,8 @@ bfd_boolean bfd_convert_section_contents
+@@ -7198,6 +7218,8 @@ bfd_boolean bfd_convert_section_contents
     (bfd *ibfd, asection *isec, bfd *obfd,
      bfd_byte **ptr, bfd_size_type *ptr_size);
  
@@ -462,7 +462,7 @@ index 2930089..058891a 100644
  symindex bfd_get_next_mapent
     (bfd *abfd, symindex previous, carsym **sym);
 diff --git a/bfd/bfd.c b/bfd/bfd.c
-index 1607f39..6015ffc 100644
+index a9402e48..c56f777 100644
 --- a/bfd/bfd.c
 +++ b/bfd/bfd.c
 @@ -57,6 +57,14 @@ CODE_FRAGMENT
@@ -480,7 +480,7 @@ index 1607f39..6015ffc 100644
  .struct bfd
  .{
  .  {* The filename the application opened the BFD with.  *}
-@@ -234,6 +242,9 @@ CODE_FRAGMENT
+@@ -235,6 +243,9 @@ CODE_FRAGMENT
  .  {* Set if this is a plugin output file.  *}
  .  unsigned int lto_output : 1;
  .
@@ -490,7 +490,7 @@ index 1607f39..6015ffc 100644
  .  {* Set to dummy BFD created when claimed by a compiler plug-in
  .     library.  *}
  .  bfd *plugin_dummy_bfd;
-@@ -259,6 +270,9 @@ CODE_FRAGMENT
+@@ -260,6 +271,9 @@ CODE_FRAGMENT
  .  {* The last section on the section list.  *}
  .  struct bfd_section *section_last;
  .
@@ -500,7 +500,7 @@ index 1607f39..6015ffc 100644
  .  {* The number of sections.  *}
  .  unsigned int section_count;
  .
-@@ -2233,3 +2247,42 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
+@@ -2234,3 +2248,42 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
    *ptr_size = size;
    return TRUE;
  }
@@ -544,7 +544,7 @@ index 1607f39..6015ffc 100644
 +  return NULL;
 +}
 diff --git a/bfd/elf.c b/bfd/elf.c
-index 33fb4d2..0604e9c 100644
+index 9418e51..df26dc0 100644
 --- a/bfd/elf.c
 +++ b/bfd/elf.c
 @@ -2611,6 +2611,7 @@ static const struct bfd_elf_special_section special_sections_g[] =
@@ -659,12 +659,12 @@ index 34b2dc2..c49585c 100644
        return TRUE;
      }
 diff --git a/bfd/opncls.c b/bfd/opncls.c
-index 10684d2..198a28e 100644
+index 4137a3b..19634df 100644
 --- a/bfd/opncls.c
 +++ b/bfd/opncls.c
-@@ -1695,3 +1695,69 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
- 
-   return TRUE;
+@@ -1997,3 +1997,69 @@ bfd_follow_build_id_debuglink (bfd *abfd, const char *dir)
+ 				   get_build_id_name,
+ 				   check_build_id_file);
  }
 +
 +/*
@@ -699,7 +699,7 @@ index 10684d2..198a28e 100644
 +  name = make_temp_file (".obj-only.o");
 +
 +  /* Open the object-only file.  */
-+  file = real_fopen (name, FOPEN_WB);
++  file = _bfd_real_fopen (name, FOPEN_WB);
 +  if (!bfd_get_full_section_contents (abfd, sec, &memhunk))
 +    {
 +      err = bfd_get_error ();
@@ -986,10 +986,10 @@ index 4b3cf6a..f4a38ec 100644
  .#define bfd_com_section_ptr (&_bfd_std_section[0])
  .{* Pointer to the undefined section.  *}
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index 2636ab4..14bf17a 100644
+index 868f122..6850a4d 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
-@@ -1140,35 +1140,6 @@ is_specified_symbol (const char *name, htab_t htab)
+@@ -1148,35 +1148,6 @@ is_specified_symbol (const char *name, htab_t htab)
    return htab_find (htab, name) != NULL;
  }
  
@@ -1025,7 +1025,7 @@ index 2636ab4..14bf17a 100644
  /* Return TRUE if the section is a DWO section.  */
  
  static bfd_boolean
-@@ -1274,7 +1245,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+@@ -1300,7 +1271,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
        /* PR binutils/3181
  	 If we are going to strip the group signature symbol, then
  	 strip the group section too.  */
@@ -1034,7 +1034,7 @@ index 2636ab4..14bf17a 100644
        if (gsym != NULL)
  	gname = gsym->name;
        else
-@@ -3150,7 +3121,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+@@ -3486,7 +3457,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
  
    if ((isection->flags & SEC_GROUP) != 0)
      {
@@ -1044,10 +1044,10 @@ index 2636ab4..14bf17a 100644
        if (gsym != NULL)
  	{
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index b488714..4648356 100644
+index bf5185a..287b81f 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -4077,6 +4077,7 @@ get_section_type_name (unsigned int sh_type)
+@@ -4057,6 +4057,7 @@ get_section_type_name (unsigned int sh_type)
      case 0x7ffffffd:		return "AUXILIARY";
      case 0x7fffffff:		return "FILTER";
      case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
@@ -1093,7 +1093,7 @@ index 3835fcb..752160e 100644
    unsigned int allow_undefined_version: 1;
  
 diff --git a/include/elf/common.h b/include/elf/common.h
-index a6c1ff8..521cd8e 100644
+index f45c256..d148d3d 100644
 --- a/include/elf/common.h
 +++ b/include/elf/common.h
 @@ -503,6 +503,7 @@
@@ -1429,7 +1429,7 @@ index 0943bb2..7670f8f 100644
    /* It opened OK, the format checked out, and the plugins have had
       their chance to claim it, so this is success.  */
 diff --git a/ld/ldlang.c b/ld/ldlang.c
-index dafc348..63061b1 100644
+index ff6ef39..70bb14f 100644
 --- a/ld/ldlang.c
 +++ b/ld/ldlang.c
 @@ -36,6 +36,7 @@
@@ -1491,7 +1491,7 @@ index dafc348..63061b1 100644
    lang_list_init (stat_ptr);
  
    lang_list_init (&input_file_chain);
-@@ -2873,6 +2887,12 @@ load_symbols (lang_input_statement_type *entry,
+@@ -2870,6 +2884,12 @@ load_symbols (lang_input_statement_type *entry,
  		  loaded = FALSE;
  		}
  
@@ -1504,7 +1504,7 @@ index dafc348..63061b1 100644
  	      subsbfd = member;
  	      if (!(*link_info.callbacks
  		    ->add_archive_element) (&link_info, member,
-@@ -6926,7 +6946,38 @@ lang_process (void)
+@@ -6924,7 +6944,38 @@ lang_process (void)
  	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
  	}
      }
@@ -1543,7 +1543,7 @@ index dafc348..63061b1 100644
  
    /* Make sure that nobody has tried to add a symbol to this list
       before now.  */
-@@ -8442,3 +8493,965 @@ lang_print_memory_usage (void)
+@@ -8440,3 +8491,965 @@ lang_print_memory_usage (void)
        printf ("    %6.2f%%\n", percent);
      }
  }
@@ -2581,7 +2581,7 @@ index dac152b..72d03db 100644
    OPTION_DEFAULT_SCRIPT,
    OPTION_PRINT_OUTPUT_FORMAT,
 diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 1e48b1a..cbad988 100644
+index e049de3..2269676 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
 @@ -232,6 +232,9 @@ main (int argc, char **argv)
@@ -2679,7 +2679,7 @@ index 1e48b1a..cbad988 100644
  
    ldlang_add_file (input);
  
-@@ -1498,3 +1481,38 @@ notice (struct bfd_link_info *info,
+@@ -1494,3 +1477,38 @@ notice (struct bfd_link_info *info,
  
    return TRUE;
  }
@@ -2818,7 +2818,7 @@ index 6f79ae2..aa098ef 100644
     its own newly-added input files and libs to claim.  */
  extern bfd_boolean no_more_claiming;
 diff --git a/ld/scripttempl/armbpabi.sc b/ld/scripttempl/armbpabi.sc
-index 0657aa9..cb4202d 100644
+index dee1028..466365a 100644
 --- a/ld/scripttempl/armbpabi.sc
 +++ b/ld/scripttempl/armbpabi.sc
 @@ -36,7 +36,7 @@ INTERP=".interp       0 : { *(.interp) }"
@@ -2831,7 +2831,7 @@ index 0657aa9..cb4202d 100644
    SBSS=".sbss         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elf.sc b/ld/scripttempl/elf.sc
-index e65f9a3..ce128ed 100644
+index d9138bc..579ac1e 100644
 --- a/ld/scripttempl/elf.sc
 +++ b/ld/scripttempl/elf.sc
 @@ -172,7 +172,7 @@ RELA_IPLT=".rela.iplt    ${RELOCATING-0} :
@@ -2857,7 +2857,7 @@ index b44b643..9df262e 100644
  INIT_ARRAY=".init_array   ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elf64hppa.sc b/ld/scripttempl/elf64hppa.sc
-index b741f88..7d6895f 100644
+index dec42b5..4fb5b57 100644
 --- a/ld/scripttempl/elf64hppa.sc
 +++ b/ld/scripttempl/elf64hppa.sc
 @@ -132,7 +132,7 @@ fi
@@ -2870,7 +2870,7 @@ index b741f88..7d6895f 100644
    SBSS=".sbss         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/elfxtensa.sc b/ld/scripttempl/elfxtensa.sc
-index 6eb9d33..08dce0e 100644
+index 769168e..4f5a76d 100644
 --- a/ld/scripttempl/elfxtensa.sc
 +++ b/ld/scripttempl/elfxtensa.sc
 @@ -145,7 +145,7 @@ fi
@@ -2896,10 +2896,10 @@ index e9b6eea..5d3bf61 100644
    SBSS=".sbss         ${RELOCATING-0} :
    {
 diff --git a/ld/scripttempl/pe.sc b/ld/scripttempl/pe.sc
-index ef9e76c..2d2ab57 100644
+index 9981848..a04efd1 100644
 --- a/ld/scripttempl/pe.sc
 +++ b/ld/scripttempl/pe.sc
-@@ -165,6 +165,7 @@ SECTIONS
+@@ -170,6 +170,7 @@ SECTIONS
      *(.drectve)
      ${RELOCATING+ *(.note.GNU-stack)}
      ${RELOCATING+ *(.gnu.lto_*)}
@@ -2908,10 +2908,10 @@ index ef9e76c..2d2ab57 100644
  
    .idata ${RELOCATING+BLOCK(__section_alignment__)} :
 diff --git a/ld/scripttempl/pep.sc b/ld/scripttempl/pep.sc
-index a972942..29eac9b 100644
+index 16dc57f..a5444fc 100644
 --- a/ld/scripttempl/pep.sc
 +++ b/ld/scripttempl/pep.sc
-@@ -178,6 +178,7 @@ SECTIONS
+@@ -183,6 +183,7 @@ SECTIONS
      *(.drectve)
      ${RELOCATING+ *(.note.GNU-stack)}
      ${RELOCATING+ *(.gnu.lto_*)}
@@ -3065,7 +3065,7 @@ index 0000000..d4c5852
 +.* .gnu_object_only.*
 +#pass
 diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
-index b525acf..54c151b 100644
+index 80c084b..e12f8f0 100644
 --- a/ld/testsuite/ld-plugin/lto.exp
 +++ b/ld/testsuite/ld-plugin/lto.exp
 @@ -86,6 +86,15 @@ set lto_link_tests [list \
@@ -3097,7 +3097,7 @@ index b525acf..54c151b 100644
    [list "Compile 11a" \
     "" "-O -flto" \
     {lto-11a.c} {} ""] \
-@@ -319,9 +334,21 @@ set lto_run_tests [list \
+@@ -324,9 +339,21 @@ set lto_run_tests [list \
    [list "LTO 3c" \
     "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" "" \
     {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"] \
@@ -3119,7 +3119,7 @@ index b525acf..54c151b 100644
    [list "LTO 11" \
     "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" "" \
     {dummy.c} "lto-11.exe" "lto-11.out" "" "c"] \
-@@ -418,6 +445,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
+@@ -431,6 +458,15 @@ if { [is_elf_format] && [check_lto_shared_available] } {
      }
  }
  
@@ -3135,7 +3135,7 @@ index b525acf..54c151b 100644
  set testname "Build liblto-11.a"
  remote_file host delete "tmpdir/liblto-11.a"
  set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
-@@ -470,8 +506,30 @@ if { [at_least_gcc_version 4 7] } {
+@@ -483,8 +519,30 @@ if { [at_least_gcc_version 4 7] } {
  # Run "ld -r" to generate inputs for complex LTO tests.
  run_dump_test "lto-3r"
  remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
