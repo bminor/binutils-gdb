@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --merge-notes options to objcopy to reduce the size of notes in
+  a binary file by merging and deleting redundant notes.
+
 * Add support for locating separate debug info files using the build-id
   method, where the separate file has a name based upon the build-id of
   the original file.

@@ -7759,7 +7759,6 @@ remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
-  gdb_byte buf[MAX_REGISTER_SIZE];
 
   /* Make sure the entire registers array is valid.  */
   switch (packet_support (PACKET_P))
@@ -7769,7 +7768,7 @@ remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
       /* Make sure all the necessary registers are cached.  */
       for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	if (rsa->regs[i].in_g_packet)
-	  regcache_raw_read (regcache, rsa->regs[i].regnum, buf);
+	  regcache_raw_update (regcache, rsa->regs[i].regnum);
       break;
     case PACKET_ENABLE:
       break;
@@ -9665,11 +9664,9 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
   xsnprintf (buf, buf_end - buf, "%s", ";");
   buf++;
 
-  /* Send conditions to the target and free the vector.  */
-  for (int ix = 0; ix < bp_tgt->conditions.size (); ix++)
+  /* Send conditions to the target.  */
+  for (agent_expr *aexpr : bp_tgt->conditions)
     {
-      struct agent_expr *aexpr = bp_tgt->conditions[ix];
-
       xsnprintf (buf, buf_end - buf, "X%x,", aexpr->len);
       buf += strlen (buf);
       for (int i = 0; i < aexpr->len; ++i)
@@ -9693,10 +9690,8 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
 
   /* Concatenate all the agent expressions that are commands into the
      cmds parameter.  */
-  for (int ix = 0; ix < bp_tgt->tcommands.size (); ix++)
+  for (agent_expr *aexpr : bp_tgt->tcommands)
     {
-      struct agent_expr *aexpr = bp_tgt->tcommands[ix];
-
       sprintf (buf, "X%x,", aexpr->len);
       buf += strlen (buf);
       for (int i = 0; i < aexpr->len; ++i)

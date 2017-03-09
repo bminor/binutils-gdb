@@ -642,15 +642,17 @@ registers_changed (void)
   alloca (0);
 }
 
-enum register_status
-regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
+void
+regcache_raw_update (struct regcache *regcache, int regnum)
 {
-  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+
   /* Make certain that the register cache is up-to-date with respect
      to the current thread.  This switching shouldn't be necessary
      only there is still only one target side register cache.  Sigh!
      On the bright side, at least there is a regcache object.  */
+
   if (!regcache->readonly_p
       && regcache_register_status (regcache, regnum) == REG_UNKNOWN)
     {
@@ -666,6 +668,13 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
       if (regcache->register_status[regnum] == REG_UNKNOWN)
 	regcache->register_status[regnum] = REG_UNAVAILABLE;
     }
+}
+
+enum register_status
+regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
+{
+  gdb_assert (buf != NULL);
+  regcache_raw_update (regcache, regnum);
 
   if (regcache->register_status[regnum] != REG_VALID)
     memset (buf, 0, regcache->descr->sizeof_register[regnum]);

@@ -1,3 +1,144 @@
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/step-over-exit.exp: Add explicit test message.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18360
+	* gdb.threads/interrupt-while-step-over.c: New file.
+	* gdb.threads/interrupt-while-step-over.exp: New file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/amd64-entry-value-param-dwarf5.exp: Use with_test_prefix.
+	* gdb.arch/amd64-entry-value-param.exp: Use with_test_prefix.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/i386-pkru.exp (probe PKRU support): Handle detecting
+	PKRU as not supported as a PASS.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-fun-addr.exp: Use $testfile1/$testfile2 for test
+	prefix instead of $binfile1/$binfile2.
+	* gdb.btrace/gcore.exp: Use "core" instead of unstable path name
+	in test message.
+	* gdb.python/py-completion.exp: Use "load python file" as test
+	messages instead of unstable path names.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR cli/21218
+	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
+	New proc.
+	(top level): Call it.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR tui/21216
+	* gdb.tui/tui-nl-filtered-output.exp: New file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/completion.exp: Move TUI completion tests to ...
+	* gdb.tui/completion.exp: ... this new file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-disasm-long-lines.c,
+	gdb.base/tui-disasm-long-lines.exp, gdb.base/tui-layout.c,
+	gdb.base/tui-layout.exp: Move to ...
+	* gdb.tui/: ... this new directory.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.c: New file.
+	* gdb.base/tui-layout.exp: New file.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.c: Rename to ...
+	* gdb.base/tui-disasm-long-lines.c: ... this.
+	* gdb.base/tui-layout.exp: Rename to ...
+	* gdb.base/tui-disasm-long-lines.exp: ... this.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.exp: Add intro comment and fix typo.
+
+2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-mpx-call.c: New file.
+	* i386-mpx-call.exp: New file.
+
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp: Delete test.
+	* gdb.arch/powerpc-power.s: Likewise.
+	* gdb.disasm/disassembler-options.exp: New test.
+	* gdb.arch/powerpc-altivec.exp: Likewise.
+	* gdb.arch/powerpc-altivec.s: Likewise.
+	* gdb.arch/powerpc-altivec2.exp: Likewise.
+	* gdb.arch/powerpc-altivec2.s: Likewise.
+	* gdb.arch/powerpc-altivec3.exp: Likewise.
+	* gdb.arch/powerpc-altivec3.s: Likewise.
+	* gdb.arch/powerpc-power7.exp: Likewise.
+	* gdb.arch/powerpc-power7.s: Likewise.
+	* gdb.arch/powerpc-power8.exp: Likewise.
+	* gdb.arch/powerpc-power8.s: Likewise.
+	* gdb.arch/powerpc-power9.exp: Likewise.
+	* gdb.arch/powerpc-power9.s: Likewise.
+	* gdb.arch/powerpc-vsx.exp: Likewise.
+	* gdb.arch/powerpc-vsx.s: Likewise.
+	* gdb.arch/powerpc-vsx2.exp: Likewise.
+	* gdb.arch/powerpc-vsx2.s: Likewise.
+	* gdb.arch/powerpc-vsx3.exp: Likewise.
+	* gdb.arch/powerpc-vsx3.s: Likewise.
+	* gdb.arch/arm-disassembler-options.exp: Likewise.
+	* gdb.arch/powerpc-disassembler-options.exp: Likewise.
+	* gdb.arch/s390-disassembler-options.exp: Likewise.
+
+2017-02-23  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.reverse/insn-reverse.x86.c (check_rdrand_support): Renamed to ...
+	(check_supported_features): ... this. Changed return type to void.
+	(supports_rdseed): New static global.
+	(rdseed): Check supports_rdseed.
+	(initialize): Call check_supported_features.
+
+2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.arch/ppc64-isa207-atomic-inst.exp: New testcase based on
+	gdb.arch/ppc64-atomic-inst.exp.  Add tests for lbarx/stbcx, lharx/sthcx
+	and lqarx/stqcx.
+	* gdb.arch/ppc64-isa207-atomic-inst.S: New file.
+	* gdb.arch/ppc64-isa207-atomic-inst.c: Likewise.
+
+2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.arch/ppc64-atomic-inst.exp: Fix test names starting with
+	uppercase.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/formdata16.c: New file.
+	* gdb.dwarf2/formdata16.exp: New file.
+	* lib/dwarf.exp (Dwarf): Add DW_FORM_data16.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-entry-value-param-dwarf5.S: New file.
+	* gdb.arch/amd64-entry-value-param-dwarf5.c: New file.
+	* gdb.arch/amd64-entry-value-param-dwarf5.exp: New file.
+	* gdb.arch/amd64-entry-value.exp: Rename DW_OP_GNU_*, DW_TAG_GNU_* and
+	DW_AT_GNU_*.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-error.exp (file $testfile): Update expected string.
+
 2017-02-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21164

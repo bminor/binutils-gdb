@@ -36,6 +36,7 @@
 #define GDBARCH_H
 
 #include "frame.h"
+#include "dis-asm.h"
 
 struct floatformat;
 struct ui_file;
@@ -1544,6 +1545,14 @@ extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu
 typedef int (gdbarch_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarch);
 extern int gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size);
+
+/* Functions for allowing a target to modify its disassembler options. */
+
+extern char ** gdbarch_disassembler_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_disassembler_options (struct gdbarch *gdbarch, char ** disassembler_options);
+
+extern const disasm_options_t * gdbarch_valid_disassembler_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch, const disasm_options_t * valid_disassembler_options);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

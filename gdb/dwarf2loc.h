@@ -56,6 +56,8 @@ int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
    offset in the parent objfile.  */
 CORE_ADDR dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *cu);
 
+short dwarf2_version (struct dwarf2_per_cu_data *per_cu);
+
 /* Find a particular location expression from a location list.  */
 const gdb_byte *dwarf2_find_location_expression
   (struct dwarf2_loclist_baton *baton,

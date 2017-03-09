@@ -481,6 +481,10 @@ namespace eval Dwarf {
 		_op .8byte $value
 	    }
 
+	    DW_FORM_data16 {
+		_op .8byte $value
+	    }
+
 	    DW_FORM_strp {
 		variable _strings
 		variable _cu_offset_size

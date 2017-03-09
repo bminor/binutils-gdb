@@ -401,7 +401,7 @@ bsd_uthread_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct target_ops *beneath = find_target_beneath (ops);
-  CORE_ADDR addr = ptid_get_tid (inferior_ptid);
+  CORE_ADDR addr = ptid_get_tid (ptid);
 
   if (addr != 0)
     {

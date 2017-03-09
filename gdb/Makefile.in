@@ -523,6 +523,12 @@ SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
+SUBDIR_UNITTESTS_SRCS = \
+	unittests/function-view-selftests.c
+
+SUBDIR_UNITTESTS_OBS = \
+	function-view-selftests.o
+
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
 # in INCLUDE_DIR.
@@ -1055,7 +1061,6 @@ SFILES = \
 	dwarf2loc.c \
 	dwarf2read.c \
 	elfread.c \
-	environ.c \
 	eval.c \
 	event-loop.c \
 	event-top.c \
@@ -1201,6 +1206,7 @@ SFILES = \
 	common/common-regcache.c \
 	common/common-utils.c \
 	common/errors.c \
+	common/environ.c \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
@@ -1279,7 +1285,6 @@ HFILES_NO_SRCDIR = \
 	dwarf2-frame-tailcall.h \
 	dwarf2expr.h \
 	dwarf2loc.h \
-	environ.h \
 	event-loop.h \
 	event-top.h \
 	exceptions.h \
@@ -1480,6 +1485,7 @@ HFILES_NO_SRCDIR = \
 	common/common-types.h \
 	common/common-utils.h \
 	common/errors.h \
+	common/environ.h \
 	common/fileio.h \
 	common/format.h \
 	common/gdb_assert.h \
@@ -1906,6 +1912,10 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/tui/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ${srcdir}/unittests/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

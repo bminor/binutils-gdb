@@ -906,7 +906,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 
   abbrev_ptr = stash->dwarf_abbrev_buffer + offset;
   abbrev_end = stash->dwarf_abbrev_buffer + stash->dwarf_abbrev_size;
-  abbrev_number = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+  abbrev_number = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					 FALSE, abbrev_end);
   abbrev_ptr += bytes_read;
 
   /* Loop until we reach an abbrev number of 0.  */
@@ -920,15 +921,18 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
       /* Read in abbrev header.  */
       cur_abbrev->number = abbrev_number;
       cur_abbrev->tag = (enum dwarf_tag)
-	safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+	_bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+			       FALSE, abbrev_end);
       abbrev_ptr += bytes_read;
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr, abbrev_end);
       abbrev_ptr += 1;
 
       /* Now read in declarations.  */
-      abbrev_name = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+      abbrev_name = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					   FALSE, abbrev_end);
       abbrev_ptr += bytes_read;
-      abbrev_form = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+      abbrev_form = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					   FALSE, abbrev_end);
       abbrev_ptr += bytes_read;
 
       while (abbrev_name)
@@ -963,9 +967,11 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	    = (enum dwarf_attribute) abbrev_name;
 	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form
 	    = (enum dwarf_form) abbrev_form;
-	  abbrev_name = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+	  abbrev_name = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					       FALSE, abbrev_end);
 	  abbrev_ptr += bytes_read;
-	  abbrev_form = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+	  abbrev_form = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					       FALSE, abbrev_end);
 	  abbrev_ptr += bytes_read;
 	}
 
@@ -983,7 +989,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
       if ((unsigned int) (abbrev_ptr - stash->dwarf_abbrev_buffer)
 	  >= stash->dwarf_abbrev_size)
 	break;
-      abbrev_number = safe_read_leb128 (abfd, abbrev_ptr, &bytes_read, FALSE, abbrev_end);
+      abbrev_number = _bfd_safe_read_leb128 (abfd, abbrev_ptr,
+					     &bytes_read, FALSE, abbrev_end);
       abbrev_ptr += bytes_read;
       if (lookup_abbrev (abbrev_number, abbrevs) != NULL)
 	break;
@@ -1104,7 +1111,8 @@ read_attribute_value (struct attribute *  attr,
       blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
       if (blk == NULL)
 	return NULL;
-      blk->size = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
+      blk->size = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					 FALSE, info_ptr_end);
       info_ptr += bytes_read;
       blk->data = read_n_bytes (abfd, info_ptr, info_ptr_end, blk->size);
       info_ptr += blk->size;
@@ -1133,11 +1141,13 @@ read_attribute_value (struct attribute *  attr,
       attr->u.val = 1;
       break;
     case DW_FORM_sdata:
-      attr->u.sval = safe_read_leb128 (abfd, info_ptr, &bytes_read, TRUE, info_ptr_end);
+      attr->u.sval = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					    TRUE, info_ptr_end);
       info_ptr += bytes_read;
       break;
     case DW_FORM_udata:
-      attr->u.val = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
+      attr->u.val = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					   FALSE, info_ptr_end);
       info_ptr += bytes_read;
       break;
     case DW_FORM_ref1:
@@ -1161,11 +1171,13 @@ read_attribute_value (struct attribute *  attr,
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
-      attr->u.val = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
+      attr->u.val = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					   FALSE, info_ptr_end);
       info_ptr += bytes_read;
       break;
     case DW_FORM_indirect:
-      form = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
+      form = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+				    FALSE, info_ptr_end);
       info_ptr += bytes_read;
       info_ptr = read_attribute_value (attr, form, unit, info_ptr, info_ptr_end);
       break;
@@ -1918,11 +1930,13 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 
       table->files[table->num_files].name = cur_file;
       table->files[table->num_files].dir =
-	safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	_bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
       line_ptr += bytes_read;
-      table->files[table->num_files].time = safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+      table->files[table->num_files].time
+	= _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
       line_ptr += bytes_read;
-      table->files[table->num_files].size = safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+      table->files[table->num_files].size
+	= _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
       line_ptr += bytes_read;
       table->num_files++;
     }
@@ -1986,7 +2000,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      exop_len = safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	      exop_len = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+						FALSE, line_end);
 	      line_ptr += bytes_read;
 	      extended_op = read_1_byte (abfd, line_ptr, line_end);
 	      line_ptr += 1;
@@ -2027,19 +2042,23 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		    }
 		  table->files[table->num_files].name = cur_file;
 		  table->files[table->num_files].dir =
-		    safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					   FALSE, line_end);
 		  line_ptr += bytes_read;
 		  table->files[table->num_files].time =
-		    safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					   FALSE, line_end);
 		  line_ptr += bytes_read;
 		  table->files[table->num_files].size =
-		    safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					   FALSE, line_end);
 		  line_ptr += bytes_read;
 		  table->num_files++;
 		  break;
 		case DW_LNE_set_discriminator:
 		  discriminator =
-		    safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					   FALSE, line_end);
 		  line_ptr += bytes_read;
 		  break;
 		case DW_LNE_HP_source_file_correlation:
@@ -2068,12 +2087,14 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	    case DW_LNS_advance_pc:
 	      if (lh.maximum_ops_per_insn == 1)
 		address += (lh.minimum_instruction_length
-			    * safe_read_leb128 (abfd, line_ptr, &bytes_read,
-						FALSE, line_end));
+			    * _bfd_safe_read_leb128 (abfd, line_ptr,
+						     &bytes_read,
+						     FALSE, line_end));
 	      else
 		{
-		  bfd_vma adjust = safe_read_leb128 (abfd, line_ptr, &bytes_read,
-						     FALSE, line_end);
+		  bfd_vma adjust = _bfd_safe_read_leb128 (abfd, line_ptr,
+							  &bytes_read,
+							  FALSE, line_end);
 		  address = ((op_index + adjust) / lh.maximum_ops_per_insn
 			     * lh.minimum_instruction_length);
 		  op_index = (op_index + adjust) % lh.maximum_ops_per_insn;
@@ -2081,7 +2102,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_advance_line:
-	      line += safe_read_leb128 (abfd, line_ptr, &bytes_read, TRUE, line_end);
+	      line += _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					     TRUE, line_end);
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_set_file:
@@ -2090,7 +2112,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 
 		/* The file and directory tables are 0
 		   based, the references are 1 based.  */
-		file = safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+		file = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					      FALSE, line_end);
 		line_ptr += bytes_read;
 		if (filename)
 		  free (filename);
@@ -2098,7 +2121,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		break;
 	      }
 	    case DW_LNS_set_column:
-	      column = safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	      column = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					      FALSE, line_end);
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_negate_stmt:
@@ -2128,7 +2152,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      /* Unknown standard opcode, ignore it.  */
 	      for (i = 0; i < lh.standard_opcode_lengths[op_code]; i++)
 		{
-		  (void) safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+		  (void) _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+						FALSE, line_end);
 		  line_ptr += bytes_read;
 		}
 	      break;
@@ -2562,7 +2587,8 @@ find_abstract_instance_name (struct comp_unit *unit,
       info_ptr_end = unit->end_ptr;
     }
 
-  abbrev_number = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
+  abbrev_number = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					 FALSE, info_ptr_end);
   info_ptr += bytes_read;
 
   if (abbrev_number)
@@ -2702,7 +2728,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
       if (info_ptr >= info_ptr_end)
 	goto fail;
 
-      abbrev_number = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
+      abbrev_number = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					     FALSE, info_ptr_end);
       info_ptr += bytes_read;
 
       if (! abbrev_number)
@@ -3018,7 +3045,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
   if (! abbrevs)
     return NULL;
 
-  abbrev_number = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, end_ptr);
+  abbrev_number = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+					 FALSE, end_ptr);
   info_ptr += bytes_read;
   if (! abbrev_number)
     {

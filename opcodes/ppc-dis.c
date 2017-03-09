@@ -26,6 +26,7 @@
 #include "elf/ppc.h"
 #include "opintl.h"
 #include "opcode/ppc.h"
+#include "libiberty.h"
 
 /* This file provides several disassembler functions, all of which use
    the disassembler interface defined in dis-asm.h.  Several functions
@@ -93,7 +94,7 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_A2),
     0 },
   { "altivec", PPC_OPCODE_PPC,
-    PPC_OPCODE_ALTIVEC | PPC_OPCODE_ALTIVEC2 },
+    PPC_OPCODE_ALTIVEC },
   { "any",     0,
     PPC_OPCODE_ANY },
   { "booke",   PPC_OPCODE_PPC | PPC_OPCODE_BOOKE,
@@ -172,7 +173,11 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "ppc32",   PPC_OPCODE_PPC,
     0 },
+  { "32",      PPC_OPCODE_PPC,
+    0 },
   { "ppc64",   PPC_OPCODE_PPC | PPC_OPCODE_64,
+    0 },
+  { "64",      PPC_OPCODE_PPC | PPC_OPCODE_64,
     0 },
   { "ppc64bridge", PPC_OPCODE_PPC | PPC_OPCODE_64_BRIDGE,
     0 },
@@ -221,7 +226,7 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_E500),
     PPC_OPCODE_VLE },
   { "vsx",     PPC_OPCODE_PPC,
-    PPC_OPCODE_VSX | PPC_OPCODE_VSX3 },
+    PPC_OPCODE_VSX },
   { "htm",     PPC_OPCODE_PPC,
     PPC_OPCODE_HTM },
 };
@@ -252,8 +257,8 @@ ppc_parse_cpu (ppc_cpu_t ppc_cpu, ppc_cpu_t *sticky, const char *arg)
 {
   unsigned int i;
 
-  for (i = 0; i < sizeof (ppc_opts) / sizeof (ppc_opts[0]); i++)
-    if (strcmp (ppc_opts[i].opt, arg) == 0)
+  for (i = 0; i < ARRAY_SIZE (ppc_opts); i++)
+    if (disassembler_options_cmp (ppc_opts[i].opt, arg) == 0)
       {
 	if (ppc_opts[i].sticky)
 	  {
@@ -264,7 +269,7 @@ ppc_parse_cpu (ppc_cpu_t ppc_cpu, ppc_cpu_t *sticky, const char *arg)
 	ppc_cpu = ppc_opts[i].cpu;
 	break;
       }
-  if (i >= sizeof (ppc_opts) / sizeof (ppc_opts[0]))
+  if (i >= ARRAY_SIZE (ppc_opts))
     return 0;
 
   ppc_cpu |= *sticky;
@@ -278,7 +283,6 @@ powerpc_init_dialect (struct disassemble_info *info)
 {
   ppc_cpu_t dialect = 0;
   ppc_cpu_t sticky = 0;
-  char *arg;
   struct dis_private *priv = calloc (sizeof (*priv), 1);
 
   if (priv == NULL)
@@ -324,29 +328,22 @@ powerpc_init_dialect (struct disassemble_info *info)
       break;
     default:
       dialect = ppc_parse_cpu (dialect, &sticky, "power9") | PPC_OPCODE_ANY;
+      break;
     }
 
-  arg = info->disassembler_options;
-  while (arg != NULL)
+  char *opt;
+  FOR_EACH_DISASSEMBLER_OPTION (opt, info->disassembler_options)
     {
       ppc_cpu_t new_cpu = 0;
-      char *end = strchr (arg, ',');
 
-      if (end != NULL)
-	*end = 0;
-
-      if ((new_cpu = ppc_parse_cpu (dialect, &sticky, arg)) != 0)
-	dialect = new_cpu;
-      else if (strcmp (arg, "32") == 0)
+      if (disassembler_options_cmp (opt, "32") == 0)
 	dialect &= ~(ppc_cpu_t) PPC_OPCODE_64;
-      else if (strcmp (arg, "64") == 0)
+      else if (disassembler_options_cmp (opt, "64") == 0)
 	dialect |= PPC_OPCODE_64;
+      else if ((new_cpu = ppc_parse_cpu (dialect, &sticky, opt)) != 0)
+	dialect = new_cpu;
       else
-	fprintf (stderr, _("warning: ignoring unknown -M%s option\n"), arg);
-
-      if (end != NULL)
-	*end++ = ',';
-      arg = end;
+	fprintf (stderr, _("warning: ignoring unknown -M%s option\n"), opt);
     }
 
   info->private_data = priv;
@@ -767,6 +764,26 @@ print_insn_powerpc (bfd_vma memaddr,
   return 4;
 }
 
+const disasm_options_t *
+disassembler_options_powerpc (void)
+{
+  static disasm_options_t *opts = NULL;
+
+  if (opts == NULL)
+    {
+      size_t i, num_options = ARRAY_SIZE (ppc_opts);
+      opts = XNEW (disasm_options_t);
+      opts->name = XNEWVEC (const char *, num_options + 1);
+      for (i = 0; i < num_options; i++)
+	opts->name[i] = ppc_opts[i].opt;
+      /* The array we return must be NULL terminated.  */
+      opts->name[i] = NULL;
+      opts->description = NULL;
+    }
+
+  return opts;
+}
+
 void
 print_ppc_disassembler_options (FILE *stream)
 {
@@ -776,7 +793,7 @@ print_ppc_disassembler_options (FILE *stream)
 The following PPC specific disassembler options are supported for use with\n\
 the -M switch:\n"));
 
-  for (col = 0, i = 0; i < sizeof (ppc_opts) / sizeof (ppc_opts[0]); i++)
+  for (col = 0, i = 0; i < ARRAY_SIZE (ppc_opts); i++)
     {
       col += fprintf (stream, " %s,", ppc_opts[i].opt);
       if (col > 66)
@@ -785,5 +802,5 @@ the -M switch:\n"));
 	  col = 0;
 	}
     }
-  fprintf (stream, " 32, 64\n");
+  fprintf (stream, "\n");
 }

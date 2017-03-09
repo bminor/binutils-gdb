@@ -3856,11 +3856,11 @@ symfile_free_objfile (struct objfile *objfile)
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
 void
-expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
-			 expand_symtabs_symbol_matcher_ftype *symbol_matcher,
-			 expand_symtabs_exp_notify_ftype *expansion_notify,
-			 enum search_domain kind,
-			 void *data)
+expand_symtabs_matching
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind)
 {
   struct objfile *objfile;
 
@@ -3869,8 +3869,7 @@ expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
     if (objfile->sf)
       objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
 						symbol_matcher,
-						expansion_notify, kind,
-						data);
+						expansion_notify, kind);
   }
 }
 

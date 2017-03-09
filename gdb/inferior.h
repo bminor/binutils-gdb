@@ -132,6 +132,20 @@ extern void child_terminal_init_with_pgrp (int pgrp);
 
 /* From fork-child.c */
 
+/* Report an error that happened when starting to trace the inferior
+   (i.e., when the "traceme_fun" callback is called on fork_inferior)
+   and bail out.  This function does not return.  */
+
+extern void trace_start_error (const char *fmt, ...)
+  ATTRIBUTE_NORETURN;
+
+/* Like "trace_start_error", but the error message is constructed by
+   combining STRING with the system error message for errno.  This
+   function does not return.  */
+
+extern void trace_start_error_with_name (const char *string)
+  ATTRIBUTE_NORETURN;
+
 extern int fork_inferior (char *, char *, char **,
 			  void (*)(void),
 			  void (*)(int), void (*)(void), char *,

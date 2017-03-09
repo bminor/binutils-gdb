@@ -34,56 +34,56 @@ mask:
 	bif v3.8b, v1.8b, v2.8b
 	addv b4, v3.8b
 	mov x1, v4.d[0]
-	cmp x1, #306
+	cmp x1, #50
 	bne .Lfailure
 
 	mov v3.16b, v0.16b
 	bif v3.16b, v1.16b, v2.16b
 	addv b4, v3.16b
 	mov x1, v4.d[0]
-	cmp x1, #1020
+	cmp x1, #252
 	bne .Lfailure
 
 	mov v3.8b, v0.8b
 	bit v3.8b, v1.8b, v2.8b
 	addv b4, v3.8b
 	mov x1, v4.d[0]
-	cmp x1, #306
+	cmp x1, #50
 	bne .Lfailure
 
 	mov v3.16b, v0.16b
 	bit v3.16b, v1.16b, v2.16b
 	addv b4, v3.16b
 	mov x1, v4.d[0]
-	cmp x1, #1037
+	cmp x1, #13
 	bne .Lfailure
 
 	mov v3.8b, v2.8b
 	bsl v3.8b, v0.8b, v1.8b
 	addv b4, v3.8b
 	mov x1, v4.d[0]
-	cmp x1, #306
+	cmp x1, #50
 	bne .Lfailure
 
 	mov v3.16b, v2.16b
 	bsl v3.16b, v0.16b, v1.16b
 	addv b4, v3.16b
 	mov x1, v4.d[0]
-	cmp x1, #1020
+	cmp x1, #252
 	bne .Lfailure
 
 	mov v3.8b, v0.8b
 	eor v3.8b, v1.8b, v2.8b
 	addv b4, v3.8b
 	mov x1, v4.d[0]
-	cmp x1, #1020
+	cmp x1, #252
 	bne .Lfailure
 
 	mov v3.16b, v0.16b
 	eor v3.16b, v1.16b, v2.16b
 	addv b4, v3.16b
 	mov x1, v4.d[0]
-	cmp x1, #2039
+	cmp x1, #247
 	bne .Lfailure
 
 	pass

@@ -60,6 +60,7 @@
 #include "mi/mi-common.h"
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
+#include "common/function-view.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -5850,10 +5851,9 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
 /* Implementation of the la_iterate_over_symbols method.  */
 
 static void
-ada_iterate_over_symbols (const struct block *block,
-			  const char *name, domain_enum domain,
-			  symbol_found_callback_ftype *callback,
-			  void *data)
+ada_iterate_over_symbols
+  (const struct block *block, const char *name, domain_enum domain,
+   gdb::function_view<symbol_found_callback_ftype> callback)
 {
   int ndefs, i;
   struct block_symbol *results;
@@ -5861,7 +5861,7 @@ ada_iterate_over_symbols (const struct block *block,
   ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
   for (i = 0; i < ndefs; ++i)
     {
-      if (! (*callback) (results[i].symbol, data))
+      if (!callback (results[i].symbol))
 	break;
     }
 }
@@ -6497,30 +6497,6 @@ symbol_completion_add (VEC(char_ptr) **sv,
   VEC_safe_push (char_ptr, *sv, completion);
 }
 
-/* An object of this type is passed as the user_data argument to the
-   expand_symtabs_matching method.  */
-struct add_partial_datum
-{
-  VEC(char_ptr) **completions;
-  const char *text;
-  int text_len;
-  const char *text0;
-  const char *word;
-  int wild_match;
-  int encoded;
-};
-
-/* A callback for expand_symtabs_matching.  */
-
-static int
-ada_complete_symbol_matcher (const char *name, void *user_data)
-{
-  struct add_partial_datum *data = (struct add_partial_datum *) user_data;
-  
-  return symbol_completion_match (name, data->text, data->text_len,
-                                  data->wild_match, data->encoded) != NULL;
-}
-
 /* Return a list of possible symbol names completing TEXT0.  WORD is
    the entire command on which completion is made.  */
 
@@ -6569,19 +6545,16 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
 
   /* First, look at the partial symtab symbols.  */
-  {
-    struct add_partial_datum data;
-
-    data.completions = &completions;
-    data.text = text;
-    data.text_len = text_len;
-    data.text0 = text0;
-    data.word = word;
-    data.wild_match = wild_match_p;
-    data.encoded = encoded_p;
-    expand_symtabs_matching (NULL, ada_complete_symbol_matcher, NULL,
-			     ALL_DOMAIN, &data);
-  }
+  expand_symtabs_matching (NULL,
+			   [&] (const char *symname)
+			   {
+			     return symbol_completion_match (symname,
+							     text, text_len,
+							     wild_match_p,
+							     encoded_p);
+			   },
+			   NULL,
+			   ALL_DOMAIN);
 
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore
@@ -13267,30 +13240,6 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
   VEC_truncate(ada_exc_info, *exceptions, skip + to_sort_len);
 }
 
-/* A function intended as the "name_matcher" callback in the struct
-   quick_symbol_functions' expand_symtabs_matching method.
-
-   SEARCH_NAME is the symbol's search name.
-
-   If USER_DATA is not NULL, it is a pointer to a regext_t object
-   used to match the symbol (by natural name).  Otherwise, when USER_DATA
-   is null, no filtering is performed, and all symbols are a positive
-   match.  */
-
-static int
-ada_exc_search_name_matches (const char *search_name, void *user_data)
-{
-  regex_t *preg = (regex_t *) user_data;
-
-  if (preg == NULL)
-    return 1;
-
-  /* In Ada, the symbol "search name" is a linkage name, whereas
-     the regular expression used to do the matching refers to
-     the natural name.  So match against the decoded name.  */
-  return (regexec (preg, ada_decode (search_name), 0, NULL, 0) == 0);
-}
-
 /* Add all exceptions defined by the Ada standard whose name match
    a regular expression.
 
@@ -13370,6 +13319,15 @@ ada_add_exceptions_from_frame (regex_t *preg, struct frame_info *frame,
     }
 }
 
+/* Return true if NAME matches PREG or if PREG is NULL.  */
+
+static bool
+name_matches_regex (const char *name, regex_t *preg)
+{
+  return (preg == NULL
+	  || regexec (preg, ada_decode (name), 0, NULL, 0) == 0);
+}
+
 /* Add all exceptions defined globally whose name name match
    a regular expression, excluding standard exceptions.
 
@@ -13395,8 +13353,17 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
   struct objfile *objfile;
   struct compunit_symtab *s;
 
-  expand_symtabs_matching (NULL, ada_exc_search_name_matches, NULL,
-			   VARIABLES_DOMAIN, preg);
+  /* In Ada, the symbol "search name" is a linkage name, whereas the
+     regular expression used to do the matching refers to the natural
+     name.  So match against the decoded name.  */
+  expand_symtabs_matching (NULL,
+			   [&] (const char *search_name)
+			   {
+			     const char *decoded = ada_decode (search_name);
+			     return name_matches_regex (decoded, preg);
+			   },
+			   NULL,
+			   VARIABLES_DOMAIN);
 
   ALL_COMPUNITS (objfile, s)
     {
@@ -13411,9 +13378,7 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    if (ada_is_non_standard_exception_sym (sym)
-		&& (preg == NULL
-		    || regexec (preg, SYMBOL_NATURAL_NAME (sym),
-				0, NULL, 0) == 0))
+		&& name_matches_regex (SYMBOL_NATURAL_NAME (sym), preg))
 	      {
 		struct ada_exc_info info
 		  = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};

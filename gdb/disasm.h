@@ -138,4 +138,12 @@ extern int gdb_buffered_insn_length (struct gdbarch *gdbarch,
 				     const gdb_byte *insn, int max_len,
 				     CORE_ADDR memaddr);
 
+/* Returns GDBARCH's disassembler options.  */
+
+extern char *get_disassembler_options (struct gdbarch *gdbarch);
+
+/* Sets the active gdbarch's disassembler options to OPTIONS.  */
+
+extern void set_disassembler_options (char *options);
+
 #endif

@@ -79,6 +79,9 @@
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
 
+/* Holds the current set of options to be passed to the disassembler.  */
+static char *s390_disassembler_options;
+
 enum s390_abi_kind
 {
   ABI_LINUX_S390,
@@ -8112,6 +8115,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   s390_init_linux_record_tdep (&s390_linux_record_tdep, ABI_LINUX_S390);
   s390_init_linux_record_tdep (&s390x_linux_record_tdep, ABI_LINUX_ZSERIES);
+
+  set_gdbarch_disassembler_options (gdbarch, &s390_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_s390 ());
 
   return gdbarch;
 }

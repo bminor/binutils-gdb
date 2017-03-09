@@ -4432,7 +4432,7 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 		      + eh->root.u.def.section->output_section->vma);
       rela.r_addend = 0;
       rela.r_info = ELF32_R_INFO (eh->dynindx, R_PARISC_COPY);
-      if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (eh->root.u.def.section == htab->etab.sdynrelro)
 	sec = htab->etab.sreldynrelro;
       else
 	sec = htab->etab.srelbss;

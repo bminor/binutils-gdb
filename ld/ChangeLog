@@ -1,3 +1,178 @@
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (open_input_bfds): Check that lang_assignment_statement
+	is not an assert before referencing defsym.
+
+2017-03-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/eh3.d: Adjust for eh_frame alignment change.
+	* testsuite/ld-elf/eh6.d: Likewise.
+	* testsuite/ld-alpha/tlsbin.dd: Likewise.
+	* testsuite/ld-alpha/tlsbin.td: Likewise.
+	* testsuite/ld-alpha/tlsbinr.dd: Likewise.
+	* testsuite/ld-alpha/tlspic.dd: Likewise.
+	* testsuite/ld-alpha/tlspic.rd: Likewise.
+	* testsuite/ld-alpha/tlspic.sd: Likewise.
+	* testsuite/ld-alpha/tlspic.td: Likewise.
+	* testsuite/ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame2-n64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame3.d: Likewise.
+	* testsuite/ld-x86-64/pr20830a.d: Likewise.
+	* testsuite/ld-x86-64/pr21038a.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c.d: Likewise.
+
+2017-03-03  Max Bolingbroke  <batterseapower@hotmail.com>
+
+	PR 12969
+	* pe-dll.c (generate_edata): Fail if the input file(s) require too
+	many ordinals.
+
+2017-03-02  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp: Pass -ansi when compiling new.cc
+	and dl3.cc.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/merge.d: xfail for nios.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/addpcis.d: Define ext1 and ext2 at
+	limits of addpcis range.
+
+2017-02-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/jalr4.dd: Adjust for `jalr $0, $25'
+	instructions.
+	* testsuite/ld-mips-elf/jalr4-r6.dd: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
+2017-02-27   Georg-Johann Lay  <gjl@gcc.gnu.org>
+
+	PR target/20849
+        * scripttempl/avrtiny.sc (__RODATA_PM_OFFSET__): New define.
+        (.rodata): New section.
+        (.data): Remove .rodata*.
+
+2017-02-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/elf.exp: Xfail pr20995 tests on hppa64-hpux.
+	Set up HPUX defsym.  Run pr14170 tests and build symbol3 objects,
+	defining HPUX where necessary.  Define HPUX for implib tests.
+	* testsuite/ld-elf/comm-data4.d: Run for hpux.
+	* testsuite/ld-elf/endsym.d: Likewise.
+	* testsuite/ld-elf/linkoncerdiff.d: Likewise.
+	* testsuite/ld-elf/comm-data4.s: Add alternate .comm when HPUX.
+	* testsuite/ld-elf/comm-data5.s: Likewise.
+	* testsuite/ld-elf/endsym.s: Likewise.
+	* testsuite/ld-elf/pr14170c.s: Likewise.
+	* testsuite/ld-elf/symbol3.s: Likewise.
+	* testsuite/ld-elf/implib.s: Likewise.  Don't start directives
+	in first column.
+	* testsuite/ld-elf/linkoncerdiff2.s: Don't use numeric labels.
+	* testsuite/ld-elf/warn3.d: Run for hpux.
+	* testsuite/ld-scripts/rgn-at10.d: Xfail for hpux.
+	* testsuite/ld-scripts/rgn-at11.d: Likewise.
+	* testsuite/ld-scripts/size-2.d: Remove xfail for hpux.
+
+2017-02-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-elf/ver_def.d: New test.
+	* testsuite/ld-elf/ver_def.ld: New test linker script.
+	* testsuite/ld-elf/ver_def.ver: New test version script.
+	* testsuite/ld-elf/ver_def.s: New test source.
+	* testsuite/ld-elf/readelf.exp: New test script.
+
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/relax-jalr-n32.d: Remove `--relax'
+	option.
+	* testsuite/ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n64.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n64-shared.d: Likewise.
+
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/jalr4.dd: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
+2017-02-23  Alan Modra  <amodra@gmail.com>
+
+	PR 20744
+	* testsuite/ld-powerpc/vle-reloc-2.s: Use r6 for last insn of
+	each group.
+	* testsuite/ld-powerpc/vle-reloc-2.d: Update for above change
+	and sdarel reloc fix.
+
+2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/20828
+	* testsuite/ld-elf/pr20828-d.sd: New test.
+	* testsuite/ld-elf/pr20828-e.sd: New test.
+	* testsuite/ld-elf/pr20828-v.od: New test.
+	* testsuite/ld-elf/pr20828-v.ver: New test version script.
+	* testsuite/ld-elf/pr20828-v.ld: New test linker script.
+	* testsuite/ld-elf/pr20828.ld: Add `.gnu.version' and
+	`.gnu.version_d'.
+	* testsuite/ld-elf/shared.exp: Run the new tests.
+
+2017-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-ifunc/pr18808b.c (bar): Fix compile time warning
+	about non-void function returning without a result.
+
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
+	PR 15041
+	* scripttempl/pe.sc: Don't combine sections for ld -r.
+	* scripttempl/pep.sc: Likewise.
+
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
+	PR 21099
+	* emulparams/elf32m32c.sh: Define STACK_ADDR and STACK_SENTINEL
+	rather than using OTHER_SECTIONS.
+	* emulparams/elf32mt.sh: Likewise.
+	* emulparams/elf32rx.sh: Likewise.
+	* emulparams/elf32rl78.sh: Likewise.  Use OTHER_SYMBOLS to
+	define __rl78_abs__.
+	* emulparams/shelf.sh: Define STACK_ADDR and STACK_SENTINEL
+	rather than using OTHER_SECTIONS.
+	* emulparams/shelf32.sh: Likewise.  Use OTHER_SECTIONS for .cranges.
+	* emulparams/shelf64.sh: Unset OTHER_SECTIONS.
+	* emulparams/shelf_nbsd.sh: Unset STACK_ADDR not OTHER_SECTIONS.
+	* emulparams/shelf_uclinux.sh: Likewise.
+	* emulparams/shlsymbian.sh: Unset STACK_ADDR.  Use OTHER_SYMBOLS
+	to define _stack, not OTHER_SECTIONS.
+	* scripttempl/elf.sc: Move STACK, TINY_DATA_SECTION, and
+	TINY_BSS_SECTION before debug sections.  Add STACK_SENTINEL.
+	* scripttempl/arclinux.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* scripttempl/armbpabi.sc: Move STACK before debug sections.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfarc.sc: Delete STACK.
+	* scripttempl/epiphany_4x4.sc: Delete STACK.  Move TINY_DATA_SECTION,
+	TINY_BSS_SECTION, and .stack before debug sections.
+
+2017-02-17  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/20825
+	* ld.texinfo (Options): Add missing @item entry for --pop-state.
+
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/dwarf2.err: Accept other errors between the
+	multiple definition errors.
+
+2017-02-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/dwarf2.err: Add missing newline at end.
+	* testsuite/ld-elf/dwarf3.err: Likewise.  Allow match without filename.
+
 2017-02-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/ld-elf/shared.exp: Update expected results.

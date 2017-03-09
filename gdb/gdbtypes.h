@@ -1041,12 +1041,12 @@ struct func_type
 
     unsigned int is_noreturn : 1;
 
-    /* * Only those DW_TAG_GNU_call_site's in this function that have
-       DW_AT_GNU_tail_call set are linked in this list.  Function
+    /* * Only those DW_TAG_call_site's in this function that have
+       DW_AT_call_tail_call set are linked in this list.  Function
        without its tail call list complete
-       (DW_AT_GNU_all_tail_call_sites or its superset
-       DW_AT_GNU_all_call_sites) has TAIL_CALL_LIST NULL, even if some
-       DW_TAG_GNU_call_site's exist in such function. */
+       (DW_AT_call_all_tail_calls or its superset
+       DW_AT_call_all_calls) has TAIL_CALL_LIST NULL, even if some
+       DW_TAG_call_site's exist in such function. */
 
     struct call_site *tail_call_list;
 
@@ -1106,13 +1106,12 @@ struct call_site_parameter
 
   union call_site_parameter_u u;
 
-  /* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_value.  It
-     is never NULL.  */
+  /* * DW_TAG_formal_parameter's DW_AT_call_value.  It is never NULL.  */
 
   const gdb_byte *value;
   size_t value_size;
 
-  /* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_data_value.
+  /* * DW_TAG_formal_parameter's DW_AT_call_data_value.
      It may be NULL if not provided by DWARF.  */
 
   const gdb_byte *data_value;
@@ -1120,8 +1119,7 @@ struct call_site_parameter
 };
 
 /* * A place where a function gets called from, represented by
-   DW_TAG_GNU_call_site.  It can be looked up from
-   symtab->call_site_htab.  */
+   DW_TAG_call_site.  It can be looked up from symtab->call_site_htab.  */
 
 struct call_site
   {
@@ -1135,7 +1133,7 @@ struct call_site
 
     struct call_site *tail_call_next;
 
-    /* * Describe DW_AT_GNU_call_site_target.  Missing attribute uses
+    /* * Describe DW_AT_call_target.  Missing attribute uses
        FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
 
     struct call_site_target target;
@@ -1149,7 +1147,7 @@ struct call_site
 
     struct dwarf2_per_cu_data *per_cu;
 
-    /* * Describe DW_TAG_GNU_call_site's DW_TAG_formal_parameter.  */
+    /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */
 
     struct call_site_parameter parameter[1];
   };

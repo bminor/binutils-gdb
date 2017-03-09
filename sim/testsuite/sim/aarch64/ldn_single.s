@@ -48,7 +48,7 @@ input:
 	mov x6, v3.d[0]
 	cmp x5, #221
 	bne .Lfailure
-	cmp x6, #307
+	cmp x6, #51
 	bne .Lfailure
 
 	mov x2, x0
@@ -68,7 +68,7 @@ input:
 	bne .Lfailure
 	cmp x5, #200
 	bne .Lfailure
-	cmp x6, #264
+	cmp x6, #8
 	bne .Lfailure
 
 	mov x2, x0
@@ -90,9 +90,9 @@ input:
 	bne .Lfailure
 	cmp x5, #232
 	bne .Lfailure
-	cmp x6, #296
+	cmp x6, #40
 	bne .Lfailure
-	cmp x7, #360
+	cmp x7, #104
 	bne .Lfailure
 
 	pass

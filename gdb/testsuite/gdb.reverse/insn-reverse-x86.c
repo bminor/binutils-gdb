@@ -18,20 +18,38 @@
 #include <cpuid.h>
 #include <stdint.h>
 
-/* 0 if the CPU supports rdrand/rdseed and non-zero otherwise.  */
+/* 0 if the CPU supports rdrand and non-zero otherwise.  */
 static unsigned int supports_rdrand;
 
-/* Returns non-zero if rdrand/rdseed instructions are supported and
-   zero otherwise.  */
+/* 0 if the CPU supports rdseed and non-zero otherwise.  */
+static unsigned int supports_rdseed;
 
-static unsigned int
-check_rdrand_support (void)
+/* Check supported features and set globals accordingly.  The globals
+   can be used to prevent unsupported tests from running.  */
+
+static void
+check_supported_features (void)
 {
   unsigned int rdrand_mask = (1 << 30);
+  unsigned int rdseed_mask = (1 << 18);
   unsigned int eax, ebx, ecx, edx;
+  unsigned int vendor;
+  unsigned int max_level;
 
-  __get_cpuid (1, &eax, &ebx, &ecx, &edx);
-  return ((ecx & rdrand_mask) == rdrand_mask);
+  max_level = __get_cpuid_max (0, &vendor);
+
+  if (max_level < 1)
+    return;
+
+  __cpuid (1, eax, ebx, ecx, edx);
+
+  supports_rdrand = ((ecx & rdrand_mask) == rdrand_mask);
+
+  if (max_level >= 7)
+    {
+      __cpuid_count (7, 0, eax, ebx, ecx, edx);
+      supports_rdseed = ((ebx & rdseed_mask) == rdseed_mask);
+    }
 }
 
 /* Test rdrand support for various output registers.  */
@@ -147,7 +165,7 @@ rdseed (void)
   /* Get a random seed from the rdseed assembly instruction.  */
   register long seed;
 
-  if (!supports_rdrand)
+  if (!supports_rdseed)
     return;
 
   /* 16-bit random seeds.  */
@@ -250,7 +268,7 @@ static void
 initialize (void)
 {
   /* Initialize supported features.  */
-  supports_rdrand = check_rdrand_support ();
+  check_supported_features ();
 }
 
 /* Functions testing instruction decodings.  GDB will test all of these.  */

@@ -1733,7 +1733,7 @@ Specify which s390 processor variant is the target, @samp{g5} (or
 @samp{arch3}), @samp{g6}, @samp{z900} (or @samp{arch5}), @samp{z990} (or
 @samp{arch6}), @samp{z9-109}, @samp{z9-ec} (or @samp{arch7}), @samp{z10} (or
 @samp{arch8}), @samp{z196} (or @samp{arch9}), @samp{zEC12} (or @samp{arch10}),
-or @samp{z13} (or @samp{arch11}).
+@samp{z13} (or @samp{arch11}), or @samp{arch12}.
 @item -mregnames
 @itemx -mno-regnames
 Allow or disallow symbolic names for registers.
@@ -4555,6 +4555,11 @@ Some machine configurations provide additional directives.
 @ifclear no-space-dir
 * Zero::                        @code{.zero @var{size}}
 @end ifclear
+@ifset ELF
+* 2byte::                       @code{.2byte @var{expressions}}
+* 4byte::                       @code{.4byte @var{expressions}}
+* 8byte::                       @code{.8byte @var{bignums}}
+@end ifset
 * Deprecated::                  Deprecated Directives
 @end menu
 
@@ -7332,6 +7337,39 @@ expression.  This directive is actually an alias for the @samp{.skip} directive
 so in can take an optional second argument of the value to store in the bytes
 instead of zero.  Using @samp{.zero} in this way would be confusing however.
 @end ifclear
+
+@ifset ELF
+@node 2byte
+@section @code{.2byte @var{expression} [, @var{expression}]*}
+@cindex @code{2byte} directive
+@cindex two-byte integer
+@cindex integer, 2-byte
+
+This directive @code{.2byte}, which is available for ELF targets, expects zero
+or more expressions, separated by commas. Each expression is assembled into the
+next two bytes.
+
+@node 4byte
+@section @code{.4byte @var{expression} [, @var{expression}]*}
+@cindex @code{4byte} directive
+@cindex four-byte integer
+@cindex integer, 4-byte
+
+This directive @code{.4byte}, which is available for ELF targets, expects zero
+or more expressions, separated by commas. Each expression is assembled into the
+next four bytes.
+
+@node 8byte
+@section @code{.8byte @var{expression} [, @var{expression}]*}
+@cindex @code{8byte} directive
+@cindex eight-byte integer
+@cindex integer, 8-byte
+
+This directive @code{.8byte}, which is available for ELF targets, expects zero
+or more bignums, separated by commas.  For each bignum, it emits
+an 8-byte integer.  If the bignum won't fit in 8 bytes, it prints a
+warning message; and just takes the lowest order 8 bytes of the bignum.
+@end ifset
 
 @node Deprecated
 @section Deprecated Directives

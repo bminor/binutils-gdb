@@ -937,37 +937,6 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     }
 }
 
-/* Helper function for maintenance_expand_symtabs.
-   This is the name_matcher function for expand_symtabs_matching.  */
-
-static int
-maintenance_expand_name_matcher (const char *symname, void *data)
-{
-  /* Since we're not searching on symbols, just return TRUE.  */
-  return 1;
-}
-
-/* Helper function for maintenance_expand_symtabs.
-   This is the file_matcher function for expand_symtabs_matching.  */
-
-static int
-maintenance_expand_file_matcher (const char *filename, void *data,
-				 int basenames)
-{
-  const char *regexp = (const char *) data;
-
-  QUIT;
-
-  /* KISS: Only apply the regexp to the complete file name.  */
-  if (basenames)
-    return 0;
-
-  if (regexp == NULL || re_exec (filename))
-    return 1;
-
-  return 0;
-}
-
 /* Expand all symbol tables whose name matches an optional regexp.  */
 
 static void
@@ -1003,8 +972,20 @@ maintenance_expand_symtabs (char *args, int from_tty)
       if (objfile->sf)
 	{
 	  objfile->sf->qf->expand_symtabs_matching
-	    (objfile, maintenance_expand_file_matcher,
-	     maintenance_expand_name_matcher, NULL, ALL_DOMAIN, regexp);
+	    (objfile,
+	     [&] (const char *filename, bool basenames)
+	     {
+	       /* KISS: Only apply the regexp to the complete file name.  */
+	       return (!basenames
+		       && (regexp == NULL || re_exec (filename)));
+	     },
+	     [] (const char *symname)
+	     {
+	       /* Since we're not searching on symbols, just return true.  */
+	       return true;
+	     },
+	     NULL,
+	     ALL_DOMAIN);
 	}
     }
 

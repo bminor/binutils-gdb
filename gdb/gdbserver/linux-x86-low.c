@@ -148,7 +148,8 @@ static const int x86_64_regmap[] =
   -1, -1, -1, -1, -1, -1, -1, -1,       /* zmm0 ... zmm31 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1					/* pkru  */
 };
 
 #define X86_64_NUM_REGS (sizeof (x86_64_regmap) / sizeof (x86_64_regmap[0]))
@@ -822,8 +823,11 @@ x86_linux_read_description (void)
 	    {
 	      switch (xcr0 & X86_XSTATE_ALL_MASK)
 	        {
-		case X86_XSTATE_AVX512_MASK:
-		  return tdesc_amd64_avx512_linux;
+		case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+		  return tdesc_amd64_avx_mpx_avx512_pku_linux;
+
+		case X86_XSTATE_AVX_AVX512_MASK:
+		  return tdesc_amd64_avx_avx512_linux;
 
 		case X86_XSTATE_AVX_MPX_MASK:
 		  return tdesc_amd64_avx_mpx_linux;
@@ -847,8 +851,12 @@ x86_linux_read_description (void)
 	    {
 	      switch (xcr0 & X86_XSTATE_ALL_MASK)
 	        {
-		case X86_XSTATE_AVX512_MASK:
-		  return tdesc_x32_avx512_linux;
+		case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+		  /* No x32 MPX and PKU, fall back to avx_avx512.  */
+		  return tdesc_x32_avx_avx512_linux;
+
+		case X86_XSTATE_AVX_AVX512_MASK:
+		  return tdesc_x32_avx_avx512_linux;
 
 		case X86_XSTATE_MPX_MASK: /* No MPX on x32.  */
 		case X86_XSTATE_AVX_MASK:
@@ -869,8 +877,11 @@ x86_linux_read_description (void)
 	{
 	  switch (xcr0 & X86_XSTATE_ALL_MASK)
 	    {
-	    case (X86_XSTATE_AVX512_MASK):
-	      return tdesc_i386_avx512_linux;
+	    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+	      return tdesc_i386_avx_mpx_avx512_pku_linux;
+
+	    case (X86_XSTATE_AVX_AVX512_MASK):
+	      return tdesc_i386_avx_avx512_linux;
 
 	    case (X86_XSTATE_MPX_MASK):
 	      return tdesc_i386_mpx_linux;
@@ -2895,8 +2906,10 @@ x86_get_ipa_tdesc_idx (void)
     return X86_TDESC_MPX;
   if (tdesc == tdesc_amd64_avx_mpx_linux)
     return X86_TDESC_AVX_MPX;
-  if (tdesc == tdesc_amd64_avx512_linux || tdesc == tdesc_x32_avx512_linux)
-    return X86_TDESC_AVX512;
+  if (tdesc == tdesc_amd64_avx_mpx_avx512_pku_linux || tdesc == tdesc_x32_avx_avx512_linux)
+    return X86_TDESC_AVX_MPX_AVX512_PKU;
+  if (tdesc == tdesc_amd64_avx_avx512_linux)
+    return X86_TDESC_AVX_AVX512;
 #endif
 
   if (tdesc == tdesc_i386_mmx_linux)
@@ -2909,8 +2922,10 @@ x86_get_ipa_tdesc_idx (void)
     return X86_TDESC_MPX;
   if (tdesc == tdesc_i386_avx_mpx_linux)
     return X86_TDESC_AVX_MPX;
-  if (tdesc == tdesc_i386_avx512_linux)
-    return X86_TDESC_AVX512;
+  if (tdesc == tdesc_i386_avx_mpx_avx512_pku_linux)
+    return X86_TDESC_AVX_MPX_AVX512_PKU;
+  if (tdesc == tdesc_i386_avx_avx512_linux)
+    return X86_TDESC_AVX_AVX512;
 
   return 0;
 }
@@ -2968,13 +2983,14 @@ initialize_low_arch (void)
 #ifdef __x86_64__
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
-  init_registers_amd64_avx512_linux ();
   init_registers_amd64_mpx_linux ();
   init_registers_amd64_avx_mpx_linux ();
+  init_registers_amd64_avx_avx512_linux ();
+  init_registers_amd64_avx_mpx_avx512_pku_linux ();
 
   init_registers_x32_linux ();
   init_registers_x32_avx_linux ();
-  init_registers_x32_avx512_linux ();
+  init_registers_x32_avx_avx512_linux ();
 
   tdesc_amd64_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
@@ -2983,9 +2999,10 @@ initialize_low_arch (void)
   init_registers_i386_linux ();
   init_registers_i386_mmx_linux ();
   init_registers_i386_avx_linux ();
-  init_registers_i386_avx512_linux ();
   init_registers_i386_mpx_linux ();
   init_registers_i386_avx_mpx_linux ();
+  init_registers_i386_avx_avx512_linux ();
+  init_registers_i386_avx_mpx_avx512_pku_linux ();
 
   tdesc_i386_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_i386_linux_no_xml, tdesc_i386_linux);

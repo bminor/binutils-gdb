@@ -724,7 +724,7 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
   if (var->saved_item != NULL)
     {
       value_free (var->saved_item->value);
-      xfree (var->saved_item);
+      delete var->saved_item;
       var->saved_item = NULL;
     }
 }
@@ -799,7 +799,7 @@ update_dynamic_varobj_children (struct varobj *var,
 				 can_mention ? cchanged : NULL, i,
 				 item);
 
-	  xfree (item);
+	  delete item;
 	}
       else
 	{

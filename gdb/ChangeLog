@@ -1,3 +1,504 @@
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18360
+	* infrun.c (start_step_over, do_target_resume, resume)
+	(restart_threads): Assert we're not resuming a thread that is
+	meant to be stopped.
+	(infrun_thread_stop_requested_callback): Delete.
+	(infrun_thread_stop_requested): If the thread is internally
+	stopped, queue a pending stop event and clear the thread's
+	inline-frame state.
+	(handle_stop_requested): New function.
+	(handle_syscall_event, handle_inferior_event_1): Use
+	handle_stop_requested.
+	(handle_stop_requested): New function.
+	(handle_signal_stop): Set the thread's stop_signal here instead of
+	at caller.
+	(finish_step_over): Clear step over info unconditionally.
+	(handle_signal_stop): If the user had interrupted the event
+	thread, consider the stop a random signal.
+	(handle_signal_stop) <signal arrived while stepping over
+	breakpoint>: Don't restart threads here.
+	(stop_waiting): Don't clear step-over info here.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR 21206
+	* common/gdb_unlinker.h (unlinker::unlinker): Attribute nonnull
+	goes to argument 2, not 1.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR cli/21218
+	* top.c (gdb_readline_wrapper): Avoid passing NULL to
+	display_gdb_prompt.
+	(command_line_input): Add comment.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR tui/21216
+	* tui/tui-file.c (tui_file::write): New.
+	* tui/tui-file.h (tui_file): Override "write".
+	* tui/tui-io.c (do_tui_putc, update_start_line): New functions,
+	factored out from ...
+	(tui_puts): ... here.
+	(tui_putc): Use them.
+	(tui_write): New function.
+	* tui/tui-io.h (tui_write): Declare.
+
+2017-03-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Replace "environ.c" with
+	"common/environ.c".
+	(HFILES_NO_SRCDIR): Likewise, for "environ.h".
+	* environ.c: Include "common-defs.h" instead of "defs.h.  Moved
+	to...
+	* common/environ.c: ... here.
+	* environ.h: Moved to...
+	* common/environ.h: ... here.
+
+2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdbarch.sh (pstring_ptr): New static function.
+	(gdbarch_disassembler_options): Use it.
+	(gdbarch_verify_disassembler_options): Print valid_disassembler_options,
+	not valid_disassembler_option->name.
+	* gdbarch.c: Regenerate.
+
+2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/powerpc/ppc64-linux.mh (MH_CFLAGS): Delete.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-regs.c (tui_restore_gdbout): Don't delete gdb_stdout.
+
+2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i387-tdep.h (i387_reset_bnd_regs): Add function definition.
+	* i387-tdep.c (i387_reset_bnd_regs): Add function implementation.
+	* i386-tdep.c (i386_push_dummy_call): Call i387_reset_bnd_regs.
+	* amd64-tdep.c (amd64_push_dummy_call): Call i387_reset_bnd_regs.
+
+2017-03-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* xtensa-linux-nat.c (fetch_gregs): Remove const.
+
+2017-03-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_commands): Use range-based
+	for loop.
+
+2017-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/21165
+	* ada-valprint.c (ada_val_print_ref): Call value_fetch_lazy if
+	value is lazy.
+	* valprint.c (common_val_print): Likewise.
+
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* NEWS: Mention new set/show disassembler-options commands.
+	* doc/gdb.texinfo: Document new set/show disassembler-options commands.
+	* disasm.c: Include "arch-utils.h", "gdbcmd.h" and "safe-ctype.h".
+	(prospective_options): New static variable.
+	(gdb_disassembler::gdb_disassembler): Initialize
+	m_di.disassembler_options.
+	(gdb_buffered_insn_length_init_dis): Initilize di->disassembler_options.
+	(get_disassembler_options): New function.
+	(set_disassembler_options): Likewise.
+	(set_disassembler_options_sfunc): Likewise.
+	(show_disassembler_options_sfunc): Likewise.
+	(disassembler_options_completer): Likewise.
+	(_initialize_disasm): Likewise.
+	* disasm.h (get_disassembler_options): New prototype.
+	(set_disassembler_options): Likewise.
+	* gdbarch.sh (gdbarch_disassembler_options): New variable.
+	(gdbarch_verify_disassembler_options): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* arm-tdep.c (num_disassembly_options): Delete.
+	(set_disassembly_style): Likewise.
+	(arm_disassembler_options): New static variable.
+	(set_disassembly_style_sfunc): Convert short style name into long
+	option name.  Call set_disassembler_options.
+	(show_disassembly_style_sfunc): New function.
+	(arm_gdbarch_init): Call set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+	(_initialize_arm_tdep): Delete regnames variable and update callers.
+	(arm_disassembler_options): Initialize.
+	(disasm_options): New variable.
+	(num_disassembly_options): Rename from this...
+	(num_disassembly_styles): ...to this.  Compute by scanning through
+	disasm_options.
+	(valid_disassembly_styles): Initialize using disasm_options.
+	Remove calls to parse_arm_disassembler_option, get_arm_regnames and
+	set_arm_regname_option.
+	Pass show_disassembly_style_sfunc to the "disassembler" setshow command.
+	* rs6000-tdep.c (powerpc_disassembler_options): New static variable.
+	(rs6000_gdbarch_init): Call set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+	* s390-tdep.c (s390_disassembler_options): New static variable.
+	(s390_gdbarch_init):all set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+
+2017-02-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_condition): Remove "struct"
+	keyword from range-based for loop.
+
+2017-02-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_condition): Use range-based
+	for loop.  Update comment.
+
+2017-02-27  Yao Qi  <yao.qi@linaro.org>
+
+	* f-typeprint.c (f_print_type): Check "varstring" is empty first.
+
+2017-02-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache_raw_update): New function.
+	(regcache_raw_read): Move code to regcache_raw_update.
+	* regcache.h (regcache_raw_update): New declaration.
+	* remote.c (remote_prepare_to_store): Call regcache_raw_update.
+
+2017-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (create_debug_type_hash_table): Initialize
+	header.signature and header.type_offset_in_tu.
+
+2017-02-24  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (make_file_symbol_completion_list_1): Use
+	add_symtab_completions.
+
+2017-02-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* stack.c (frame_info): Use frame_unwind_register_value to avoid buf.
+
+2017-02-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* i386-tdep.c (i386_pseudo_register_read_into_value): Use
+	I386_MAX_REGISTER_SIZE.
+	(i386_pseudo_register_write): Likewise.
+	(i386_process_record): Likewise.
+	* i387-tdep.c (i387_supply_xsave): Likewise.
+	* m68k-linux-nat.c (fetch_register): Use M68K_MAX_REGISTER_SIZE.
+	(store_register): Likewise.
+
+2017-02-23  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c: Include "common/function-view.h".
+	(ada_iterate_over_symbols): Adjust to use function_view as
+	callback type.
+	(struct add_partial_datum, ada_complete_symbol_matcher): Delete.
+	(ada_make_symbol_completion_list): Use a lambda.
+	(ada_exc_search_name_matches): Delete.
+	(name_matches_regex): New.
+	(ada_add_global_exceptions): Use a lambda and name_matches_regex.
+	* compile/compile-c-support.c: Include "common/function-view.h".
+	(print_one_macro): Change prototype to accept a ui_file pointer.
+	(write_macro_definitions): Use a lambda.
+	* dwarf2read.c: Include "common/function-view.h".
+	(dw2_map_expand_apply, dw2_map_symtabs_matching_filename)
+	(dw2_expand_symtabs_matching): Adjust to use function_view as
+	callback type.
+	* language.h: Include "common/function-view.h".
+	(struct language_defn) <la_iterate_over_symbols>: Adjust to use
+	function_view as callback type.
+	(LA_ITERATE_OVER_SYMBOLS): Remove DATA parameter.
+	* linespec.c: Include "common/function-view.h".
+	(collect_info::add_symbol): New method.
+	(struct symbol_and_data_callback, iterate_inline_only, struct
+	symbol_matcher_data, iterate_name_matcher): Delete.
+	(iterate_over_all_matching_symtabs): Adjust to use function_view
+	as callback type and lambdas.
+	(iterate_over_file_blocks): Adjust to use function_view as
+	callback type.
+	(decode_compound_collector): Now a class with private fields.
+	(decode_compound_collector::release_symbols): New method.
+	(collect_one_symbol): Rename to...
+	(decode_compound_collector::operator()): ... this and adjust.
+	(lookup_prefix_sym): decode_compound_collector construction bits
+	move to decode_compound_collector ctor.  Pass the
+	decode_compound_collector object directly as callback.  Remove
+	cleanups and use decode_compound_collector::release_symbols
+	instead.
+	(symtab_collector): Now a class with private fields.
+	(symtab_collector::release_symtabs): New method.
+	(add_symtabs_to_list): Rename to...
+	(symtab_collector::operator()): ... this and adjust.
+	(collect_symtabs_from_filename): symtab_collector construction
+	bits move to symtab_collector ctor.  Pass the symtab_collector
+	object directly as callback.  Remove cleanups and use
+	symtab_collector::release_symtabs instead.
+	(collect_symbols): Delete.
+	(add_matching_symbols_to_info): Use lambdas.
+	* macrocmd.c (print_macro_callback): Delete.
+	(info_macro_command): Use a lambda.
+	(info_macros_command): Pass print_macro_definition as callable
+	directly.
+	(print_one_macro): Remove 'ignore' parameter.
+	(macro_list_command): Adjust.
+	* macrotab.c (macro_for_each_data::fn): Now a function_view.
+	(macro_for_each_data::user_data): Delete field.
+	(foreach_macro): Adjust to call the function_view.
+	(macro_for_each): Adjust to use function_view as callback type.
+	(foreach_macro_in_scope): Adjust to call the function_view.
+	(macro_for_each_in_scope): Adjust to use function_view as callback
+	type.
+	* macrotab.h: Include "common/function-view.h".
+	(macro_callback_fn): Declare a prototype instead of a pointer.
+	Remove "user_data" parameter.
+	(macro_for_each, macro_for_each_in_scope): Adjust to use
+	function_view as callback type.
+	* psymtab.c (partial_map_expand_apply)
+	(psym_map_symtabs_matching_filename, recursively_search_psymtabs):
+	Adjust to use function_view as callback type and to return bool.
+	(psym_expand_symtabs_matching): Adjust to use function_view as
+	callback types.
+	* symfile-debug.c (debug_qf_map_symtabs_matching_filename): Adjust
+	to use function_view as callback type and to return bool.
+	(debug_qf_expand_symtabs_matching): Adjust to use function_view as
+	callback types.
+	* symfile.c (expand_symtabs_matching): Adjust to use function_view
+	as callback types.
+	* symfile.h: Include "common/function-view.h".
+	(expand_symtabs_file_matcher_ftype)
+	(expand_symtabs_symbol_matcher_ftype)
+	(expand_symtabs_exp_notify_ftype): Remove "data" parameter and
+	return bool.
+	(quick_symbol_functions::map_symtabs_matching_filename)
+	(quick_symbol_functions::expand_symtabs_matching): Adjust to use
+	function_view as callback type and return bool.
+	(expand_symtabs_matching): Adjust to use function_view as callback
+	type.
+	(maintenance_expand_name_matcher)
+	(maintenance_expand_file_matcher): Delete.
+	(maintenance_expand_symtabs): Use lambdas.
+	* symtab.c (iterate_over_some_symtabs): Adjust to use
+	function_view as callback types and return bool.
+	(iterate_over_symtabs): Likewise.  Use unique_xmalloc_ptr instead
+	of a cleanup.
+	(lookup_symtab_callback): Delete.
+	(lookup_symtab): Use a lambda.
+	(iterate_over_symbols): Adjust to use function_view as callback
+	type.
+	(struct search_symbols_data, search_symbols_file_matches)
+	(search_symbols_name_matches): Delete.
+	(search_symbols): Use a pair of lambdas.
+	(struct add_name_data, add_macro_name, symbol_completion_matcher)
+	(symtab_expansion_callback): Delete.
+	(default_make_symbol_completion_list_break_on_1): Use lambdas.
+	* symtab.h: Include "common/function-view.h".
+	(iterate_over_some_symtabs): Adjust to use function_view as
+	callback type and return bool.
+	(iterate_over_symtabs): Adjust to use function_view as callback
+	type.
+	(symbol_found_callback_ftype): Remove 'data' parameter and return
+	bool.
+	(iterate_over_symbols): Adjust to use function_view as callback
+	type.
+
+2017-02-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS): New.
+	(%.o) <unittests/%.c>: New pattern.
+	* configure.ac ($development): Add $(SUBDIR_UNITTESTS_OBS) to
+	CONFIG_OBS, and $(SUBDIR_UNITTESTS_SRCS) to CONFIG_SRCS.
+	* common/function-view.h: New file.
+	* unittests/function-view-selftests.c: New file.
+	* configure: Regenerate.
+
+2017-02-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* bsd-uthread.c (bsd_uthread_thread_alive): Use ptid instead of
+	inferior_ptid.
+	* go32-nat.c (go32_thread_alive): Likewise.
+
+2017-02-23  Yao Qi  <yao.qi@linaro.org>
+
+	* varobj-iter.h (varobj_iter_delete): Call xfree instead of
+	delete.
+
+2017-02-23  Yao Qi  <yao.qi@linaro.org>
+
+	* varobj.c (varobj_clear_saved_item): Use delete instead of
+	xfree.
+	(update_dynamic_varobj_children): Likewise.
+
+2017-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_record_block_ranges): Add forgotten BASEADDR.
+
+2017-02-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/enum-flags.h (enum_flags::enum_flags): Initialize
+	m_enum_value to 0 in default constructor.
+
+2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* rs6000-tdep.c (LOAD_AND_RESERVE_MASK): Rename from LWARX_MASK.
+	(STORE_CONDITIONAL_MASK): Rename from STWCX_MASK.
+	(LBARX_INSTRUCTION, LHARX_INSTRUCTION, LQARX_INSTRUCTION,
+	STBCX_INSTRUCTION, STHCX_INSTRUCTION, STQCX_INSTRUCTION): New defines.
+	(IS_LOAD_AND_RESERVE_INSN, IS_STORE_CONDITIONAL_INSN): New macros.
+	(ppc_displaced_step_copy_insn): Use IS_LOAD_AND_RESERVE_INSN.
+	(ppc_deal_with_atomic_sequence): Use IS_LOAD_AND_RESERVE_INSN and
+	IS_STORE_CONDITIONAL_INSN.
+
+2017-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2_rnglists_process: Initialize range_beginning and range_end.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes since GDB 7.12): Add DWARF-5.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (skip_one_die, read_attribute_value)
+	(dwarf2_const_value_attr, dump_die_shallow)
+	(dwarf2_get_attr_constant_value, dwarf2_fetch_constant_bytes)
+	(skip_form_bytes, attr_form_is_constant): Handle DW_FORM_data16.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (read_file_scope): Rename DW_MACRO_GNU_*.
+	(dwarf_parse_macro_header): Accept DWARF version 5.
+	(dwarf_decode_macro_bytes, dwarf_decode_macros): Rename DW_MACRO_GNU_*.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* block.c (call_site_for_pc): Rename DW_OP_GNU_*, DW_TAG_GNU_* and
+	DW_AT_GNU_*.
+	* common/common-exceptions.h (enum errors): Likewise.
+	* dwarf2-frame.c (class dwarf_expr_executor): Likewise.
+	* dwarf2expr.c (dwarf_block_to_dwarf_reg)
+	(dwarf_expr_context::execute_stack_op): Likewise.
+	* dwarf2expr.h (struct dwarf_expr_context, struct dwarf_expr_piece):
+	Likewise.
+	* dwarf2loc.c (dwarf_evaluate_loc_desc::get_base_type)
+	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value)
+	(show_entry_values_debug, call_site_to_target_addr)
+	(func_addr_to_tail_call_list, func_verify_no_selftailcall)
+	(dwarf_expr_reg_to_entry_parameter, dwarf_entry_parameter_to_value)
+	(entry_data_value_free_closure, value_of_dwarf_reg_entry)
+	(value_of_dwarf_block_entry, indirect_pieced_value)
+	(symbol_needs_eval_context::push_dwarf_reg_entry_value):
+	(disassemble_dwarf_expression): Likewise.
+	* dwarf2read.c (process_die, inherit_abstract_dies)
+	(read_call_site_scope): Likewise.
+	* gdbtypes.h (struct func_type, struct call_site_parameter)
+	(struct call_site): Likewise.
+	* stack.c (read_frame_arg): Likewise.
+	* std-operator.def (OP_VAR_ENTRY_VALUE): Likewise.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* defs.h (read_unsigned_leb128): New declaration.
+	* dwarf2loc.c (decode_debug_loclists_addresses): New function.
+	(decode_debug_loc_dwo_addresses): Update DEBUG_LOC_* to DW_LLE_*.
+	(dwarf2_find_location_expression): Call also
+	decode_debug_loclists_addresses.  Handle DWARF-5 ULEB128 length.
+	* dwarf2loc.h (dwarf2_version): New declaration.
+	* dwarf2read.c (struct dwarf2_per_objfile): Add loclists, line_str,
+	rnglists.
+	(dwarf2_elf_names): Add .debug_loclists, .debug_line_str,
+	.debug_rnglists.
+	(struct dwop_section_names): Add loclists_dwo.
+	(dwop_section_names): Add .debug_loclists.dwo.
+	(struct comp_unit_head): Add unit_type, signature, type_offset_in_tu.
+	(struct dwarf2_per_cu_data): Add dwarf_version.
+	(struct dwo_sections): Add loclists.
+	(struct attr_abbrev): Add implicit_const.
+	(read_indirect_line_string): New declaration.
+	(read_unsigned_leb128): Delete declaration.
+	(rcuh_kind): New definition.
+	(read_and_check_comp_unit_head): Change parameter
+	is_debug_types_section to section_kind.
+	(dwarf2_locate_sections): Handle loclists, line_str and rnglists.
+	(read_comp_unit_head): Change parameter abfd to section, add parameter
+	section_kind.  Handle DWARF-5.
+	(error_check_comp_unit_head): Accept also DWARF version 5.
+	(read_and_check_comp_unit_head): Change parameter
+	is_debug_types_section to section_kind.
+	(read_and_check_type_unit_head): Delete function.
+	(read_abbrev_offset): Handle DWARF-5.
+	(create_debug_type_hash_table): Add parameter section_kind.  Process
+	only DW_UT_type.  Use signature and type_offset_in_tu from struct
+	comp_unit_head.
+	(create_debug_types_hash_table): Update create_debug_type_hash_table
+	caller.
+	(create_all_type_units): Call create_debug_type_hash_table.
+	(read_cutu_die_from_dwo, init_cutu_and_read_dies): Change
+	read_and_check_type_unit_head caller to read_and_check_comp_unit_head
+	caller.
+	(skip_one_die): Handle DW_FORM_implicit_const.
+	(dwarf2_rnglists_process): New function.
+	(dwarf2_ranges_process): Call dwarf2_rnglists_process for DWARF-5.
+	(abbrev_table_read_table): Handle DW_FORM_implicit_const.
+	(read_attribute_value): Handle DW_FORM_implicit_const,
+	DW_FORM_line_strp.
+	(read_attribute): Handle DW_FORM_implicit_const.
+	(read_indirect_string_at_offset_from): New function from
+	read_indirect_string_at_offset.
+	(read_indirect_string_at_offset): Call
+	read_indirect_string_at_offset_from.
+	(read_indirect_line_string_at_offset): New function.
+	(read_indirect_string): New function comment.
+	(read_indirect_line_string): New function.
+	(read_unsigned_leb128): Make it global.
+	(dwarf2_string_attr): Handle DWARF-5.
+	(add_include_dir_stub, read_formatted_entries): New functions.
+	(dwarf_decode_line_header, dump_die_shallow, cu_debug_loc_section):
+	Handle DWARF-5.
+	(per_cu_header_read_in): Update read_comp_unit_head caller.
+	(dwarf2_version): New function.
+	* symfile.h (struct dwarf2_debug_sections): Add loclists, line_str and
+	rnglists.
+	* xcoffread.c (dwarf2_xcoff_names): Update struct dwarf2_debug_sections
+	fields.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (abbrev_table_read_table): Read the data only once.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_ranges_process): New function from
+	dwarf2_ranges_read.
+	(dwarf2_ranges_read, dwarf2_record_block_ranges): Use
+	dwarf2_ranges_process.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (create_debug_type_hash_table): New function from
+	create_debug_types_hash_table.
+	(create_debug_types_hash_table): Call create_debug_type_hash_table.
+	(create_all_type_units, open_and_init_dwo_file): Update
+	create_debug_types_hash_table callers.
+
+2017-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/16188
+	* fork-child.c (trace_start_error): Fix thinko.  va_end should
+	refer to 'ap', not 'args'.
+
+2017-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16188
+	* darwin-nat.c (darwin_ptrace_me): Check if calls to system
+	calls succeeded.
+	* fork-child.c (trace_start_error): New function.
+	(trace_start_error_with_name): Likewise.
+	* gnu-nat.c (gnu_ptrace_me): Check if call to PTRACE succeeded.
+	* inf-ptrace.c (inf_ptrace_me): Likewise.
+	* inferior.h (trace_start_error): New prototype.
+	(trace_start_error_with_name): Likewise.
+
 2017-02-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21164
@@ -223,7 +724,7 @@
 	(build_command_line): Make args a constant pointer.
 
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
-	
+
 	* cli-decode.c (lookup_cmd_1, lookup_cmd_composition):
 	Remove case-insensitive search.
 
@@ -1706,7 +2207,7 @@
 
 2017-01-01  Joel Brobecker  <brobecker@adacore.com>
 
-        Update copyright year range in all GDB files.
+	Update copyright year range in all GDB files.
 
 2017-01-01  Joel Brobecker  <brobecker@adacore.com>
 

@@ -73,10 +73,14 @@ START_RELOC_NUMBERS (elf_ppc_reloc_type)
   RELOC_NUMBER (R_PPC_ADDR30,		 37)
 
 #ifndef RELOC_MACROS_GEN_FUNC
-/* Fake relocations for branch stubs, only used internally by ld.  */
+/* Relocations only used internally by ld.  If you need to use these
+   reloc numbers, you can change them to some other unused value
+   without affecting the ABI.  They will never appear in object files.  */
   RELOC_NUMBER (R_PPC_RELAX,		 48)
   RELOC_NUMBER (R_PPC_RELAX_PLT,	 49)
   RELOC_NUMBER (R_PPC_RELAX_PLTREL24,	 50)
+/* Reloc only used internally by gas.  As above, value is unimportant.  */
+  RELOC_NUMBER (R_PPC_16DX_HA,		 51)
 #endif
 
   /* Relocs added to support TLS.  */

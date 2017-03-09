@@ -869,6 +869,7 @@ something as follows:
 
 @kindex --pop-state
 @cindex pop state governing input file handling
+@item --pop-state
 Undoes the effect of --push-state, restores the previous values of the
 flags governing input file handling.
 

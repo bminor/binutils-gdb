@@ -145,9 +145,6 @@ static const char *const arm_mode_strings[] =
 static const char *arm_fallback_mode_string = "auto";
 static const char *arm_force_mode_string = "auto";
 
-/* Number of different reg name sets (options).  */
-static int num_disassembly_options;
-
 /* The standard register names, and all the valid aliases for them.  Note
    that `fp', `sp' and `pc' are not added in this alias list, because they
    have been added as builtin user registers in
@@ -208,6 +205,9 @@ static const char *const arm_register_names[] =
  "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
  "fps", "cpsr" };		/* 24 25       */
 
+/* Holds the current set of options to be passed to the disassembler.  */
+static char *arm_disassembler_options;
+
 /* Valid register name styles.  */
 static const char **valid_disassembly_styles;
 
@@ -218,7 +218,9 @@ static const char *disassembly_style;
    style.  */
 static void set_disassembly_style_sfunc(char *, int,
 					 struct cmd_list_element *);
-static void set_disassembly_style (void);
+static void show_disassembly_style_sfunc (struct ui_file *, int,
+					  struct cmd_list_element *,
+					  const char *);
 
 static void convert_from_extended (const struct floatformat *, const void *,
 				   void *, int);
@@ -8539,9 +8541,32 @@ arm_show_force_mode (struct ui_file *file, int from_tty,
 
 static void
 set_disassembly_style_sfunc (char *args, int from_tty,
-			      struct cmd_list_element *c)
+			     struct cmd_list_element *c)
 {
-  set_disassembly_style ();
+  /* Convert the short style name into the long style name (eg, reg-names-*)
+     before calling the generic set_disassembler_options() function.  */
+  std::string long_name = std::string ("reg-names-") + disassembly_style;
+  set_disassembler_options (&long_name[0]);
+}
+
+static void
+show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c, const char *value)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  char *options = get_disassembler_options (gdbarch);
+  const char *style = "";
+  int len = 0;
+  char *opt;
+
+  FOR_EACH_DISASSEMBLER_OPTION (opt, options)
+    if (CONST_STRNEQ (opt, "reg-names-"))
+      {
+	style = &opt[strlen ("reg-names-")];
+	len = strcspn (style, ",");
+      }
+
+  fprintf_unfiltered (file, "The disassembly style is \"%.*s\".\n", len, style);
 }
 
 /* Return the ARM register name corresponding to register I.  */
@@ -8580,21 +8605,6 @@ arm_register_name (struct gdbarch *gdbarch, int i)
     return "";
 
   return arm_register_names[i];
-}
-
-static void
-set_disassembly_style (void)
-{
-  int current;
-
-  /* Find the style that the user wants.  */
-  for (current = 0; current < num_disassembly_options; current++)
-    if (disassembly_style == valid_disassembly_styles[current])
-      break;
-  gdb_assert (current < num_disassembly_options);
-
-  /* Synchronize the disassembler.  */
-  set_arm_regname_option (current);
 }
 
 /* Test whether the coff symbol specific value corresponds to a Thumb
@@ -9556,6 +9566,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     user_reg_add (gdbarch, arm_register_aliases[i].name,
 		  value_of_arm_user_reg, &arm_register_aliases[i].regnum);
 
+  set_gdbarch_disassembler_options (gdbarch, &arm_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch, disassembler_options_arm ());
+
   return gdbarch;
 }
 
@@ -9579,8 +9592,7 @@ _initialize_arm_tdep (void)
   long length;
   const char *setname;
   const char *setdesc;
-  const char *const *regnames;
-  int i;
+  int i, j;
   char regdesc[1024], *rdptr = regdesc;
   size_t rest = sizeof (regdesc);
 
@@ -9608,9 +9620,6 @@ _initialize_arm_tdep (void)
   initialize_tdesc_arm_with_vfpv3 ();
   initialize_tdesc_arm_with_neon ();
 
-  /* Get the number of possible sets of register names defined in opcodes.  */
-  num_disassembly_options = get_arm_regname_num_options ();
-
   /* Add root prefix command for all "set arm"/"show arm" commands.  */
   add_prefix_cmd ("arm", no_class, set_arm_command,
 		  _("Various ARM-specific commands."),
@@ -9620,30 +9629,30 @@ _initialize_arm_tdep (void)
 		  _("Various ARM-specific commands."),
 		  &showarmcmdlist, "show arm ", 0, &showlist);
 
-  /* Sync the opcode insn printer with our register viewer.  */
-  parse_arm_disassembler_option ("reg-names-std");
 
-  /* Initialize the array that will be passed to
-     add_setshow_enum_cmd().  */
+  arm_disassembler_options = xstrdup ("reg-names-std");
+  const disasm_options_t *disasm_options = disassembler_options_arm ();
+  int num_disassembly_styles = 0;
+  for (i = 0; disasm_options->name[i] != NULL; i++)
+    if (CONST_STRNEQ (disasm_options->name[i], "reg-names-"))
+      num_disassembly_styles++;
+
+  /* Initialize the array that will be passed to add_setshow_enum_cmd().  */
   valid_disassembly_styles = XNEWVEC (const char *,
-				      num_disassembly_options + 1);
-  for (i = 0; i < num_disassembly_options; i++)
-    {
-      get_arm_regnames (i, &setname, &setdesc, &regnames);
-      valid_disassembly_styles[i] = setname;
-      length = snprintf (rdptr, rest, "%s - %s\n", setname, setdesc);
-      rdptr += length;
-      rest -= length;
-      /* When we find the default names, tell the disassembler to use
-	 them.  */
-      if (!strcmp (setname, "std"))
-	{
-          disassembly_style = setname;
-          set_arm_regname_option (i);
-	}
-    }
+				      num_disassembly_styles + 1);
+  for (i = j = 0; disasm_options->name[i] != NULL; i++)
+    if (CONST_STRNEQ (disasm_options->name[i], "reg-names-"))
+      {
+	size_t offset = strlen ("reg-names-");
+	const char *style = disasm_options->name[i];
+	valid_disassembly_styles[j++] = &style[offset];
+	length = snprintf (rdptr, rest, "%s - %s\n", &style[offset],
+			   disasm_options->description[i]);
+	rdptr += length;
+	rest -= length;
+      }
   /* Mark the end of valid options.  */
-  valid_disassembly_styles[num_disassembly_options] = NULL;
+  valid_disassembly_styles[num_disassembly_styles] = NULL;
 
   /* Create the help text.  */
   std::string helptext = string_printf ("%s%s%s",
@@ -9657,8 +9666,7 @@ _initialize_arm_tdep (void)
 		       _("Show the disassembly style."),
 		       helptext.c_str (),
 		       set_disassembly_style_sfunc,
-		       NULL, /* FIXME: i18n: The disassembly style is
-				\"%s\".  */
+		       show_disassembly_style_sfunc,
 		       &setarmcmdlist, &showarmcmdlist);
 
   add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32,

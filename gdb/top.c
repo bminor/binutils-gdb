@@ -1030,8 +1030,11 @@ gdb_readline_wrapper (const char *prompt)
   if (cleanup->target_is_async_orig)
     target_async (0);
 
-  /* Display our prompt and prevent double prompt display.  */
-  display_gdb_prompt (prompt);
+  /* Display our prompt and prevent double prompt display.  Don't pass
+     down a NULL prompt, since that has special meaning for
+     display_gdb_prompt -- it indicates a request to print the primary
+     prompt, while we want a secondary prompt here.  */
+  display_gdb_prompt (prompt != NULL ? prompt : "");
   if (ui->command_editing)
     rl_already_prompted = 1;
 
@@ -1307,6 +1310,9 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
       if (cmd != NULL)
 	break;
 
+      /* Got partial input.  I.e., got a line that ends with a
+	 continuation character (backslash).  Suppress printing the
+	 prompt again.  */
       prompt = NULL;
     }
 

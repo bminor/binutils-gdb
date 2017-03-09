@@ -19080,6 +19080,10 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
       cur_proc_ptr->func_end_sym = exp->X_add_symbol;
     }
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   /* Generate a .pdr section.  */
   if (!ECOFF_DEBUGGING && mips_flag_pdr)
     {
@@ -19087,10 +19091,6 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
       subsegT saved_subseg = now_subseg;
       expressionS exp;
       char *fragp;
-
-#ifdef md_flush_pending_output
-      md_flush_pending_output ();
-#endif
 
       gas_assert (pdr_seg);
       subseg_set (pdr_seg, 0);

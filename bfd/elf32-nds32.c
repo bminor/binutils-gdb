@@ -8696,8 +8696,8 @@ nds32_elf_relax_delete_blanks (bfd *abfd, asection *sec,
 	      unsigned long before, between;
 	      bfd_byte *endp, *p;
 
-	      val = read_unsigned_leb128 (abfd, contents + irel->r_offset,
-					  &len);
+	      val = _bfd_read_unsigned_leb128 (abfd, contents + irel->r_offset,
+					       &len);
 
 	      before = get_nds32_elf_blank_total (&blank_t, irel->r_addend, 0);
 	      between = get_nds32_elf_blank_total (&blank_t,

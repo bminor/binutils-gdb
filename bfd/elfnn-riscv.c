@@ -52,6 +52,10 @@
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
+/* The global pointer's symbol name.  */
+
+#define GP_NAME "__global_pointer$"
+
 /* The RISC-V linker needs to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
    This is so that it can later discard them if they are found to be
@@ -1463,7 +1467,7 @@ riscv_global_pointer_value (struct bfd_link_info *info)
 {
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (info->hash, "__global_pointer$", FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->hash, GP_NAME, FALSE, FALSE, TRUE);
   if (h == NULL || h->type != bfd_link_hash_defined)
     return 0;
 
@@ -2408,7 +2412,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
       rela.r_offset = sec_addr (h->root.u.def.section) + h->root.u.def.value;
       rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;
@@ -2808,6 +2812,16 @@ _bfd_riscv_relax_lui (bfd *abfd,
     return TRUE;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
+
+  if (gp)
+    {
+      /* If gp and the symbol are in the same output section, then
+	 consider only that section's alignment.  */
+      struct bfd_link_hash_entry *h =
+	bfd_link_hash_lookup (link_info->hash, GP_NAME, FALSE, FALSE, TRUE);
+      if (h->u.def.section->output_section == sym_sec->output_section)
+	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+    }
 
   /* Is the reference in range of x0 or gp?
      Valid gp range conservatively because of alignment issue.  */

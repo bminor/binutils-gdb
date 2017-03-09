@@ -1163,6 +1163,10 @@ m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
 # each address in memory.
 m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
 
+# Functions for allowing a target to modify its disassembler options.
+v:char **:disassembler_options:::0:0::0:pstring_ptr (gdbarch->disassembler_options)
+v:const disasm_options_t *:valid_disassembler_options:::0:0::0:host_address_to_string (gdbarch->valid_disassembler_options)
+
 EOF
 }
 
@@ -1259,6 +1263,7 @@ cat <<EOF
 #define GDBARCH_H
 
 #include "frame.h"
+#include "dis-asm.h"
 
 struct floatformat;
 struct ui_file;
@@ -1671,6 +1676,14 @@ pstring (const char *string)
   if (string == NULL)
     return "(null)";
   return string;
+}
+
+static char *
+pstring_ptr (char **string)
+{
+  if (string == NULL || *string == NULL)
+    return "(null)";
+  return *string;
 }
 
 /* Helper function to print a list of strings, represented as "const

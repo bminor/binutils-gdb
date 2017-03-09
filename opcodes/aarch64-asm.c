@@ -436,38 +436,27 @@ aarch64_ins_fpimm (const aarch64_operand *self, const aarch64_opnd_info *info,
   return NULL;
 }
 
-/* Insert field rot for the rotate immediate in
-   FCMLA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #<rotate>.  */
+/* Insert 1-bit rotation immediate (#90 or #270).  */
 const char *
-aarch64_ins_imm_rotate (const aarch64_operand *self,
-			const aarch64_opnd_info *info,
-			aarch64_insn *code, const aarch64_inst *inst)
+aarch64_ins_imm_rotate1 (const aarch64_operand *self,
+			 const aarch64_opnd_info *info,
+			 aarch64_insn *code, const aarch64_inst *inst)
+{
+  uint64_t rot = (info->imm.value - 90) / 180;
+  assert (rot < 2U);
+  insert_field (self->fields[0], code, rot, inst->opcode->mask);
+  return NULL;
+}
+
+/* Insert 2-bit rotation immediate (#0, #90, #180 or #270).  */
+const char *
+aarch64_ins_imm_rotate2 (const aarch64_operand *self,
+			 const aarch64_opnd_info *info,
+			 aarch64_insn *code, const aarch64_inst *inst)
 {
   uint64_t rot = info->imm.value / 90;
-
-  switch (info->type)
-    {
-    case AARCH64_OPND_IMM_ROT1:
-    case AARCH64_OPND_IMM_ROT2:
-      /* value	rot
-	 0	0
-	 90	1
-	 180	2
-	 270	3  */
-      assert (rot < 4U);
-      break;
-    case AARCH64_OPND_IMM_ROT3:
-      /* value	rot
-	 90	0
-	 270	1  */
-      rot = (rot - 1) / 2;
-      assert (rot < 2U);
-      break;
-    default:
-      assert (0);
-    }
+  assert (rot < 4U);
   insert_field (self->fields[0], code, rot, inst->opcode->mask);
-
   return NULL;
 }
 
@@ -883,6 +872,20 @@ aarch64_ins_sve_addr_ri_s9xvl (const aarch64_operand *self,
   return NULL;
 }
 
+/* Encode an SVE address [X<n>, #<SVE_imm4> << <shift>], where <SVE_imm4>
+   is a 4-bit signed number and where <shift> is SELF's operand-dependent
+   value.  fields[0] specifies the base register field.  */
+const char *
+aarch64_ins_sve_addr_ri_s4 (const aarch64_operand *self,
+			    const aarch64_opnd_info *info, aarch64_insn *code,
+			    const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  int factor = 1 << get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+  insert_field (FLD_SVE_imm4, code, info->addr.offset.imm / factor, 0);
+  return NULL;
+}
+
 /* Encode an SVE address [X<n>, #<SVE_imm6> << <shift>], where <SVE_imm6>
    is a 6-bit unsigned number and where <shift> is SELF's operand-dependent
    value.  fields[0] specifies the base register field.  */
@@ -1038,6 +1041,21 @@ aarch64_ins_sve_limm_mov (const aarch64_operand *self,
 			  const aarch64_inst *inst)
 {
   return aarch64_ins_limm (self, info, code, inst);
+}
+
+/* Encode Zn[MM], where Zn occupies the least-significant part of the field
+   and where MM occupies the most-significant part.  The operand-dependent
+   value specifies the number of bits in Zn.  */
+const char *
+aarch64_ins_sve_quad_index (const aarch64_operand *self,
+			    const aarch64_opnd_info *info, aarch64_insn *code,
+			    const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  unsigned int reg_bits = get_operand_specific_data (self);
+  assert (info->reglane.regno < (1U << reg_bits));
+  unsigned int val = (info->reglane.index << reg_bits) + info->reglane.regno;
+  insert_all_fields (self, code, val);
+  return NULL;
 }
 
 /* Encode {Zn.<T> - Zm.<T>}.  The fields array specifies which field
@@ -1265,8 +1283,8 @@ do_misc_encoding (aarch64_inst *inst)
       break;
     case OP_MOV_Z_V:
       /* Fill in the zero immediate.  */
-      insert_field (FLD_SVE_tsz, &inst->value,
-		    1 << aarch64_get_variant (inst), 0);
+      insert_fields (&inst->value, 1 << aarch64_get_variant (inst), 0,
+		     2, FLD_imm5, FLD_SVE_tszh);
       break;
     case OP_MOV_Z_Z:
       /* Copy Zn to Zm.  */
@@ -1607,10 +1625,10 @@ convert_bfc_to_bfm (aarch64_inst *inst)
   /* Insert XZR.  */
   copy_operand_info (inst, 3, 2);
   copy_operand_info (inst, 2, 1);
-  copy_operand_info (inst, 0, 0);
+  copy_operand_info (inst, 1, 0);
   inst->operands[1].reg.regno = 0x1f;
 
-  /* Convert the immedate operand.  */
+  /* Convert the immediate operand.  */
   lsb = inst->operands[2].imm.value;
   width = inst->operands[3].imm.value;
   if (inst->operands[2].qualifier == AARCH64_OPND_QLF_imm_0_31)

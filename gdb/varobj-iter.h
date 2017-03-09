@@ -67,6 +67,6 @@ struct varobj_iter_ops
       if ((ITER) != NULL)		       \
 	{				       \
 	  (ITER)->ops->dtor (ITER);	       \
-	  delete (ITER);		       \
+	  xfree (ITER);		       \
 	}				       \
     } while (0)

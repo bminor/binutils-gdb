@@ -159,13 +159,16 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
   { ".dwabrev", NULL },
   { ".dwline", NULL },
   { ".dwloc", NULL },
+  { NULL, NULL }, /* debug_loclists */
   /* AIX XCOFF defines one, named DWARF section for macro debug information.
      XLC does not generate debug_macinfo for DWARF4 and below.
      The section is assigned to debug_macro for DWARF5 and above. */
   { NULL, NULL },
   { ".dwmac", NULL },
   { ".dwstr", NULL },
+  { NULL, NULL }, /* debug_line_str */
   { ".dwrnges", NULL },
+  { NULL, NULL }, /* debug_rnglists */
   { ".dwpbtyp", NULL },
   { NULL, NULL }, /* debug_addr */
   { ".dwframe", NULL },

@@ -407,10 +407,9 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 		  /* Initialize it just to avoid a GCC false warning.  */
 		  struct value *val_deref = NULL, *entryval_deref;
 
-		  /* DW_AT_GNU_call_site_value does match with the current
+		  /* DW_AT_call_value does match with the current
 		     value.  If it is a reference still try to verify if
-		     dereferenced DW_AT_GNU_call_site_data_value does not
-		     differ.  */
+		     dereferenced DW_AT_call_data_value does not differ.  */
 
 		  TRY
 		    {
@@ -1631,57 +1630,52 @@ frame_info (char *addr_exp, int from_tty)
   /* Print as much information as possible on the location of all the
      registers.  */
   {
-    enum lval_type lval;
-    int optimized;
-    int unavailable;
-    CORE_ADDR addr;
-    int realnum;
     int count;
     int i;
     int need_nl = 1;
+    int sp_regnum = gdbarch_sp_regnum (gdbarch);
 
     /* The sp is special; what's displayed isn't the save address, but
        the value of the previous frame's sp.  This is a legacy thing,
        at one stage the frame cached the previous frame's SP instead
        of its address, hence it was easiest to just display the cached
        value.  */
-    if (gdbarch_sp_regnum (gdbarch) >= 0)
+    if (sp_regnum >= 0)
       {
-	/* Find out the location of the saved stack pointer with out
-           actually evaluating it.  */
-	frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
-			       &optimized, &unavailable, &lval, &addr,
-			       &realnum, NULL);
-	if (!optimized && !unavailable && lval == not_lval)
-	  {
-	    enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-	    int sp_size = register_size (gdbarch, gdbarch_sp_regnum (gdbarch));
-	    gdb_byte value[MAX_REGISTER_SIZE];
-	    CORE_ADDR sp;
+	struct value *value = frame_unwind_register_value (fi, sp_regnum);
+	gdb_assert (value != NULL);
 
-	    frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
-				   &optimized, &unavailable, &lval, &addr,
-				   &realnum, value);
-	    /* NOTE: cagney/2003-05-22: This is assuming that the
-               stack pointer was packed as an unsigned integer.  That
-               may or may not be valid.  */
-	    sp = extract_unsigned_integer (value, sp_size, byte_order);
-	    printf_filtered (" Previous frame's sp is ");
-	    fputs_filtered (paddress (gdbarch, sp), gdb_stdout);
-	    printf_filtered ("\n");
-	    need_nl = 0;
-	  }
-	else if (!optimized && !unavailable && lval == lval_memory)
+	if (!value_optimized_out (value) && value_entirely_available (value))
 	  {
-	    printf_filtered (" Previous frame's sp at ");
-	    fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
-	    printf_filtered ("\n");
-	    need_nl = 0;
-	  }
-	else if (!optimized && !unavailable && lval == lval_register)
-	  {
-	    printf_filtered (" Previous frame's sp in %s\n",
-			     gdbarch_register_name (gdbarch, realnum));
+	    if (VALUE_LVAL (value) == not_lval)
+	      {
+		CORE_ADDR sp;
+		enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+		int sp_size = register_size (gdbarch, sp_regnum);
+
+		sp = extract_unsigned_integer (value_contents_all (value),
+					       sp_size, byte_order);
+
+		printf_filtered (" Previous frame's sp is ");
+		fputs_filtered (paddress (gdbarch, sp), gdb_stdout);
+		printf_filtered ("\n");
+	      }
+	    else if (VALUE_LVAL (value) == lval_memory)
+	      {
+		printf_filtered (" Previous frame's sp at ");
+		fputs_filtered (paddress (gdbarch, value_address (value)),
+				gdb_stdout);
+		printf_filtered ("\n");
+	      }
+	    else if (VALUE_LVAL (value) == lval_register)
+	      {
+		printf_filtered (" Previous frame's sp in %s\n",
+				 gdbarch_register_name (gdbarch,
+							VALUE_REGNUM (value)));
+	      }
+
+	    release_value (value);
+	    value_free (value);
 	    need_nl = 0;
 	  }
 	/* else keep quiet.  */
@@ -1691,9 +1685,15 @@ frame_info (char *addr_exp, int from_tty)
     numregs = gdbarch_num_regs (gdbarch)
 	      + gdbarch_num_pseudo_regs (gdbarch);
     for (i = 0; i < numregs; i++)
-      if (i != gdbarch_sp_regnum (gdbarch)
+      if (i != sp_regnum
 	  && gdbarch_register_reggroup_p (gdbarch, i, all_reggroup))
 	{
+	  enum lval_type lval;
+	  int optimized;
+	  int unavailable;
+	  CORE_ADDR addr;
+	  int realnum;
+
 	  /* Find out the location of the saved register without
              fetching the corresponding value.  */
 	  frame_register_unwind (fi, i, &optimized, &unavailable,

@@ -28,8 +28,9 @@ class tui_file : public stdio_file
 public:
   explicit tui_file (FILE *stream);
 
-  void flush () override;
+  void write (const char *buf, long length_buf) override;
   void puts (const char *) override;
+  void flush () override;
 };
 
 #endif

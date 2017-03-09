@@ -1,3 +1,18 @@
+2017-03-08  Jiong Wang  <jiong.wang@arm.com>
+
+        * gdb.texinfo (Memory Protection Extensions): Add missing escape
+	character "@".
+
+2017-03-07  Walfred Tedeschi <walfred.tedeschi@intel.com>
+
+	* Memory Protection Extensions: Add information about inferior
+	calls.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Print Settings, Tail Call Frames): Rename DW_OP_GNU_*,
+	DW_TAG_GNU_* and DW_AT_GNU_*.
+
 2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* python.texi (Recordings In Python): New section.

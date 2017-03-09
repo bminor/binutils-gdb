@@ -2045,6 +2045,21 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0x1fffc1,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
+  /* A split-field reloc for addpcis, non-relative (gas internal use only).  */
+  HOWTO (R_PPC64_16DX_HA,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc64_elf_ha_reloc,	/* special_function */
+	 "R_PPC64_16DX_HA",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x1fffc1,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* Like R_PPC64_ADDR16_HI, but no overflow.  */
   HOWTO (R_PPC64_ADDR16_HIGH,	/* type */
 	 16,			/* rightshift */
@@ -2449,6 +2464,8 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_HI16_PCREL:			r = R_PPC64_REL16_HI;
       break;
     case BFD_RELOC_HI16_S_PCREL:		r = R_PPC64_REL16_HA;
+      break;
+    case BFD_RELOC_PPC_16DX_HA:			r = R_PPC64_16DX_HA;
       break;
     case BFD_RELOC_PPC_REL16DX_HA:		r = R_PPC64_REL16DX_HA;
       break;
@@ -12215,8 +12232,7 @@ static const unsigned char glink_eh_frame_cie[] =
   65,					/* RA reg.  */
   1,					/* Augmentation size.  */
   DW_EH_PE_pcrel | DW_EH_PE_sdata4,	/* FDE encoding.  */
-  DW_CFA_def_cfa, 1, 0,			/* def_cfa: r1 offset 0.  */
-  0, 0, 0, 0
+  DW_CFA_def_cfa, 1, 0			/* def_cfa: r1 offset 0.  */
 };
 
 /* Stripping output sections is normally done before dynamic section
@@ -12669,21 +12685,19 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  && !bfd_is_abs_section (htab->glink_eh_frame->output_section)
 	  && htab->glink_eh_frame->output_section->size != 0)
 	{
-	  size_t size = 0, align;
+	  size_t size = 0, align = 4;
 
 	  for (stub_sec = htab->params->stub_bfd->sections;
 	       stub_sec != NULL;
 	       stub_sec = stub_sec->next)
 	    if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
-	      size += 24;
+	      size += (17 + align - 1) & -align;
 	  if (htab->glink != NULL && htab->glink->size != 0)
-	    size += 24;
+	    size += (24 + align - 1) & -align;
 	  if (size != 0)
-	    size += sizeof (glink_eh_frame_cie);
-	  align = 1;
-	  align <<= htab->glink_eh_frame->output_section->alignment_power;
-	  align -= 1;
-	  size = (size + align) & ~align;
+	    size += (sizeof (glink_eh_frame_cie) + align - 1) & -align;
+	  align = 1ul << htab->glink_eh_frame->output_section->alignment_power;
+	  size = (size + align - 1) & -align;
 	  htab->glink_eh_frame->rawsize = htab->glink_eh_frame->size;
 	  htab->glink_eh_frame->size = size;
 	}
@@ -12728,12 +12742,13 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	return FALSE;
       htab->glink_eh_frame->contents = p;
       last_fde = p;
+      align = 4;
 
       memcpy (p, glink_eh_frame_cie, sizeof (glink_eh_frame_cie));
       /* CIE length (rewrite in case little-endian).  */
-      last_fde_len = sizeof (glink_eh_frame_cie) - 4;
+      last_fde_len = ((sizeof (glink_eh_frame_cie) + align - 1) & -align) - 4;
       bfd_put_32 (htab->elf.dynobj, last_fde_len, p);
-      p += sizeof (glink_eh_frame_cie);
+      p += last_fde_len + 4;
 
       for (stub_sec = htab->params->stub_bfd->sections;
 	   stub_sec != NULL;
@@ -12741,9 +12756,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
 	  {
 	    last_fde = p;
-	    last_fde_len = 20;
+	    last_fde_len = ((17 + align - 1) & -align) - 4;
 	    /* FDE length.  */
-	    bfd_put_32 (htab->elf.dynobj, 20, p);
+	    bfd_put_32 (htab->elf.dynobj, last_fde_len, p);
 	    p += 4;
 	    /* CIE pointer.  */
 	    val = p - htab->glink_eh_frame->contents;
@@ -12757,14 +12772,14 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	    /* Augmentation.  */
 	    p += 1;
 	    /* Pad.  */
-	    p += 7;
+	    p += ((17 + align - 1) & -align) - 17;
 	  }
       if (htab->glink != NULL && htab->glink->size != 0)
 	{
 	  last_fde = p;
-	  last_fde_len = 20;
+	  last_fde_len = ((24 + align - 1) & -align) - 4;
 	  /* FDE length.  */
-	  bfd_put_32 (htab->elf.dynobj, 20, p);
+	  bfd_put_32 (htab->elf.dynobj, last_fde_len, p);
 	  p += 4;
 	  /* CIE pointer.  */
 	  val = p - htab->glink_eh_frame->contents;
@@ -12785,15 +12800,14 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  *p++ = DW_CFA_advance_loc + 4;
 	  *p++ = DW_CFA_restore_extended;
 	  *p++ = 65;
+	  p += ((24 + align - 1) & -align) - 24;
 	}
       /* Subsume any padding into the last FDE if user .eh_frame
 	 sections are aligned more than glink_eh_frame.  Otherwise any
 	 zero padding will be seen as a terminator.  */
+      align = 1ul << htab->glink_eh_frame->output_section->alignment_power;
       size = p - htab->glink_eh_frame->contents;
-      align = 1;
-      align <<= htab->glink_eh_frame->output_section->alignment_power;
-      align -= 1;
-      pad = ((size + align) & ~align) - size;
+      pad = ((size + align - 1) & -align) - size;
       htab->glink_eh_frame->size = size + pad;
       bfd_put_32 (htab->elf.dynobj, last_fde_len + pad, last_fde);
     }
@@ -14790,8 +14804,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 
 	  if (bfd_link_pic (info)
-	      ? ((h != NULL && pc_dynrelocs (h))
-		 || must_be_dyn_reloc (info, r_type))
+	      ? ((h == NULL
+		  || h->dyn_relocs != NULL)
+		 && ((h != NULL && pc_dynrelocs (h))
+		     || must_be_dyn_reloc (info, r_type)))
 	      : (h != NULL
 		 ? h->dyn_relocs != NULL
 		 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC))
@@ -15477,7 +15493,7 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	srel = htab->elf.sreldynrelro;
       else
 	srel = htab->elf.srelbss;
@@ -15603,7 +15619,8 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (htab->elf.sgot != NULL && htab->elf.sgot->size != 0)
+  if (htab->elf.sgot != NULL && htab->elf.sgot->size != 0
+      && htab->elf.sgot->output_section != bfd_abs_section_ptr)
     {
       /* Fill in the first entry in the global offset table.
 	 We use it to hold the link-time TOCbase.  */
@@ -15615,7 +15632,8 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
       elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize = 8;
     }
 
-  if (htab->elf.splt != NULL && htab->elf.splt->size != 0)
+  if (htab->elf.splt != NULL && htab->elf.splt->size != 0
+      && htab->elf.splt->output_section != bfd_abs_section_ptr)
     {
       /* Set .plt entry size.  */
       elf_section_data (htab->elf.splt->output_section)->this_hdr.sh_entsize
@@ -15648,8 +15666,10 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
       bfd_vma val;
       bfd_byte *p;
       asection *stub_sec;
+      size_t align = 4;
 
-      p = htab->glink_eh_frame->contents + sizeof (glink_eh_frame_cie);
+      p = htab->glink_eh_frame->contents;
+      p += (sizeof (glink_eh_frame_cie) + align - 1) & -align;
       for (stub_sec = htab->params->stub_bfd->sections;
 	   stub_sec != NULL;
 	   stub_sec = stub_sec->next)
@@ -15679,7 +15699,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	    /* Augmentation.  */
 	    p += 1;
 	    /* Pad.  */
-	    p += 7;
+	    p += ((17 + align - 1) & -align) - 17;
 	  }
       if (htab->glink != NULL && htab->glink->size != 0)
 	{
@@ -15709,6 +15729,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	  p += 1;
 	  /* Ops.  */
 	  p += 7;
+	  p += ((24 + align - 1) & -align) - 24;
 	}
 
       if (htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME

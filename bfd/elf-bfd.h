@@ -342,6 +342,10 @@ struct eh_cie_fde
 	 make_per_encoding_relative is.  */
       unsigned int per_encoding_relative : 1;
 
+      /* True if the CIE contains personality data aligned to a
+	 multiple of eight bytes.  */
+      unsigned int per_encoding_aligned8 : 1;
+
       /* True if we need to add an 'R' (FDE encoding) entry to the
 	 CIE's augmentation data.  */
       unsigned int add_fde_encoding : 1;
@@ -350,7 +354,7 @@ struct eh_cie_fde
       unsigned int merged : 1;
 
       /* Unused bits.  */
-      unsigned int pad1 : 18;
+      unsigned int pad1 : 17;
     } cie;
   } u;
   unsigned int reloc_index;
