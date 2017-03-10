@@ -1,3 +1,11 @@
+2017-03-10  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/8128
+	* gdb.cp/templates.exp (test_ptype_of_templates): Remove argument
+	type from destructor regexps.
+	Add a branch which actually passes the test.
+	Adjust "ptype t5i" test names.
+
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/step-over-exit.exp: Add explicit test message.

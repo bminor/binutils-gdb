@@ -226,13 +226,21 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   language_cplus, DMGL_ANSI);
   fputs_filtered ("(", stream);
 
-  /* Skip the class variable.  */
+  /* Skip the class variable.  We keep this here to accommodate older
+     compilers and debug formats which may not support artificial
+     parameters.  */
   i = staticp ? 0 : 1;
   if (nargs > i)
     {
       while (i < nargs)
 	{
-	  c_print_type (args[i++].type, "", stream, 0, 0, flags);
+	  struct field arg = args[i++];
+
+	  /* Skip any artificial arguments.  */
+	  if (FIELD_ARTIFICIAL (arg))
+	    continue;
+
+	  c_print_type (arg.type, "", stream, 0, 0, flags);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");
