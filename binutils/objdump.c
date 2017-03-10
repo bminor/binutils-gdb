@@ -3766,7 +3766,7 @@ main (int argc, char **argv)
 	    }
 	  break;
 	case 'w':
-	  wide_output = TRUE;
+	  do_wide = wide_output = TRUE;
 	  break;
 	case OPTION_ADJUST_VMA:
 	  adjust_section_vma = parse_vma (optarg, "--adjust-vma");

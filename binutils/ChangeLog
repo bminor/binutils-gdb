@@ -1,3 +1,8 @@
+2017-03-10  Chia-Hao Lo  <fcamel@gmail.com>
+
+	PR binutils/21235
+	* objdump.c (main): Set do_wide with --wide.
+
 2017-03-10  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_name): Rearrange switch table in order of
