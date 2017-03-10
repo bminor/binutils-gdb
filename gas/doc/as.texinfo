@@ -7345,9 +7345,11 @@ instead of zero.  Using @samp{.zero} in this way would be confusing however.
 @cindex two-byte integer
 @cindex integer, 2-byte
 
-This directive @code{.2byte}, which is available for ELF targets, expects zero
-or more expressions, separated by commas. Each expression is assembled into the
-next two bytes.
+This directive expects zero or more expressions, separated by commas.  Each
+expression is evaluated and placed in the next two bytes of the current
+section.  If an expression will not fit in two bytes, a warning message
+is displayed and the lowest two bytes of the expression's value are used.
+This directive is only available for ELF targets,
 
 @node 4byte
 @section @code{.4byte @var{expression} [, @var{expression}]*}
@@ -7355,9 +7357,11 @@ next two bytes.
 @cindex four-byte integer
 @cindex integer, 4-byte
 
-This directive @code{.4byte}, which is available for ELF targets, expects zero
-or more expressions, separated by commas. Each expression is assembled into the
-next four bytes.
+This directive expects zero or more expressions, separated by commas.  Each
+expression is evaluated and placed in the next four bytes of the current
+section.  If an expression will not fit in four bytes, a warning message
+is displayed and the lowest four bytes of the expression's value are used.
+This directive is only available for ELF targets,
 
 @node 8byte
 @section @code{.8byte @var{expression} [, @var{expression}]*}
@@ -7365,10 +7369,11 @@ next four bytes.
 @cindex eight-byte integer
 @cindex integer, 8-byte
 
-This directive @code{.8byte}, which is available for ELF targets, expects zero
-or more bignums, separated by commas.  For each bignum, it emits
-an 8-byte integer.  If the bignum won't fit in 8 bytes, it prints a
-warning message; and just takes the lowest order 8 bytes of the bignum.
+This directive expects zero or more expressions, separated by commas.  Each
+expression is evaluated and the resulting bignum is placed in the next eight
+bytes of the current section.  If an expression will not fit in eight bytes, a
+warning message is displayed and the lowest eight bytes of the expression's
+value are used.  This directive is only available for ELF targets,
 @end ifset
 
 @node Deprecated
