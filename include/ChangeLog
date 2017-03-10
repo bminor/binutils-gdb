@@ -1,3 +1,11 @@
+2017-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (EM_LANAI): New machine number.
+	(EM_BPF): Likewise.
+	(EM_WEBASSEMBLY): Likewise.
+	Move low value, deprecated, numbers to their numerical
+	equivalents.
+
 2017-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21231

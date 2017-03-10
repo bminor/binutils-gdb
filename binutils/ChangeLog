@@ -1,3 +1,8 @@
+2017-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_name): Rearrange switch table in order of
+	increasing machine number.  Add missing entries.
+
 2017-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21231
