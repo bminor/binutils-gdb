@@ -4768,12 +4768,32 @@ lang_check_section_addresses (void)
   asection *s, *p;
   struct check_sec *sections;
   size_t i, count;
+  bfd_vma addr_mask;
   bfd_vma s_start;
   bfd_vma s_end;
   bfd_vma p_start = 0;
   bfd_vma p_end = 0;
   lang_memory_region_type *m;
   bfd_boolean overlays;
+
+  /* Detect address space overflow.  */
+  addr_mask = ((bfd_vma) 1 <<
+	       (bfd_arch_bits_per_address (link_info.output_bfd) - 1)) - 1;
+  addr_mask = (addr_mask << 1) + 1;
+  for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
+    {
+      s_end = (s->vma + s->size) & addr_mask;
+      if (s_end != 0 && s_end < s->vma)
+	einfo (_("%X%P: section %s VMA wraps around address space\n"),
+	       s->name);
+      else
+	{
+	  s_end = (s->lma + s->size) & addr_mask;
+	  if (s_end != 0 && s_end < s->lma)
+	    einfo (_("%X%P: section %s LMA wraps around address space\n"),
+		   s->name);
+	}
+    }
 
   if (bfd_count_sections (link_info.output_bfd) <= 1)
     return;

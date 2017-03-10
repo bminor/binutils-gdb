@@ -78,4 +78,17 @@ proc section_check {} {
     }
 }
 
+proc overflow_check {} {
+    # Test only on some 32-bit targets that are often tested
+    if { ![istarget i?86-*-*]
+	 && ![istarget powerpc-*-*]
+	 && ![istarget arm*-*-*] } {
+	return
+    }
+
+    run_dump_test "over"
+    run_dump_test "over2"
+}
+
 section_check
+overflow_check

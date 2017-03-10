@@ -1,3 +1,13 @@
+2017-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* ldlang.c (lang_check_section_addresses): Check for address space
+	overflow.
+	* testsuite/ld-checks/checks.exp (overflow_check): New procedure
+	* testsuite/ld-checks/over.s: New test source.
+	* testsuite/ld-checks/over.d: New test.
+	* testsuite/ld-checks/over2.s: New test source.
+	* testsuite/ld-checks/over2.d: New test.
+
 2017-03-13  Alexey Neyman  <stilor@att.net>
 
 	* emulparams/elf32ppccommon.sh (LIBPATH_SUFFIX): Set from target
