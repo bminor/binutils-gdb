@@ -2447,6 +2447,13 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 #endif
 
 	case rs_leb128:
+	  if (pass == 0 && !S_IS_DEFINED (fragP->fr_symbol))
+	      {
+		as_bad_where (fragP->fr_file, fragP->fr_line,
+			      _("leb128 operand is an undefined symbol: %s"),
+			      S_GET_NAME (fragP->fr_symbol));
+	      }
+	    
 	  /* Initial guess is always 1; doing otherwise can result in
 	     stable solutions that are larger than the minimum.  */
 	  address += fragP->fr_offset = 1;
