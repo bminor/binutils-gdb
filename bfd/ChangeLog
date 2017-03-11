@@ -1,3 +1,9 @@
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c: Remove ATTRIBUTE_UNUSED throughout when function
+	parameter is in fact used.  Whitespace fixes.
+	* elf64-ppc.c: Likewise.
+
 2017-03-09  Sam Thursfield  <sam.thursfield@codethink.co.uk>
 
 	* rs6000-core.c (CORE_NEW): Simplify macro when

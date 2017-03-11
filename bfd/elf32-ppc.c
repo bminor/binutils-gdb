@@ -2045,7 +2045,7 @@ ppc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 
 static void
-ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+ppc_elf_info_to_howto (bfd *abfd,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
 {
@@ -2082,10 +2082,10 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 /* Handle the R_PPC_ADDR16_HA and R_PPC_REL16_HA relocs.  */
 
 static bfd_reloc_status_type
-ppc_elf_addr16_ha_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+ppc_elf_addr16_ha_reloc (bfd *abfd,
 			 arelent *reloc_entry,
 			 asymbol *symbol,
-			 void *data ATTRIBUTE_UNUSED,
+			 void *data,
 			 asection *input_section,
 			 bfd *output_bfd,
 			 char **error_message ATTRIBUTE_UNUSED)
@@ -2648,7 +2648,7 @@ static struct bfd_elf_special_section ppc_alt_plt =
   { STRING_COMMA_LEN (".plt"),             0, SHT_PROGBITS, SHF_ALLOC };
 
 static const struct bfd_elf_special_section *
-ppc_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+ppc_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 {
   const struct bfd_elf_special_section *ssect;
 
@@ -8250,7 +8250,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  wrel->r_info = ELF32_R_INFO (0, R_PPC_ADDR16_HA);
 		  wrel->r_addend = got_addr;
 		  insn &= ~0xffff;
-		  insn |= ((unsigned int )(got_addr + 0x8000) >> 16) & 0xffff;
+		  insn |= ((unsigned int) (got_addr + 0x8000) >> 16) & 0xffff;
 		  bfd_put_32 (input_bfd, insn, p);
 
 		  /* Convert lis to lwz, loading address from GOT.  */
@@ -10990,7 +10990,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 /* VxWorks uses the elf default section flags for .plt.  */
 static const struct bfd_elf_special_section *
-ppc_elf_vxworks_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+ppc_elf_vxworks_get_sec_type_attr (bfd *abfd, asection *sec)
 {
   if (sec->name == NULL)
     return NULL;
@@ -11027,23 +11027,23 @@ static bfd_boolean
 ppc_elf_vxworks_add_symbol_hook (bfd *abfd,
 				 struct bfd_link_info *info,
 				 Elf_Internal_Sym *sym,
-				 const char **namep ATTRIBUTE_UNUSED,
-				 flagword *flagsp ATTRIBUTE_UNUSED,
+				 const char **namep,
+				 flagword *flagsp,
 				 asection **secp,
 				 bfd_vma *valp)
 {
-  if (!elf_vxworks_add_symbol_hook(abfd, info, sym,namep, flagsp, secp,
-				   valp))
+  if (!elf_vxworks_add_symbol_hook (abfd, info, sym, namep, flagsp, secp,
+				    valp))
     return FALSE;
 
-  return ppc_elf_add_symbol_hook(abfd, info, sym,namep, flagsp, secp, valp);
+  return ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp);
 }
 
 static void
 ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
-  ppc_elf_final_write_processing(abfd, linker);
-  elf_vxworks_final_write_processing(abfd, linker);
+  ppc_elf_final_write_processing (abfd, linker);
+  elf_vxworks_final_write_processing (abfd, linker);
 }
 
 /* On VxWorks, we emit relocations against _PROCEDURE_LINKAGE_TABLE_, so
