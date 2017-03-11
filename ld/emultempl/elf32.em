@@ -1446,7 +1446,9 @@ fragment <<EOF
 	  path = command_line.rpath;
 	  if (path)
 	    {
+	      path = gld${EMULATION_NAME}_add_sysroot (path);
 	      found = gld${EMULATION_NAME}_search_needed (path, &n, force);
+	      free ((char *) path);
 	      if (found)
 		break;
 	    }

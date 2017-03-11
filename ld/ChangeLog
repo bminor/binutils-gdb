@@ -1,5 +1,10 @@
 2017-03-11  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Add
+	sysroot for -rpath search.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_add_sysroot): Rewrite.
 	Only prefix absolute paths with sysroot.  Handle DOS paths.
 	(gld${EMULATION_NAME}_check_ld_elf_hints): Constify variable.
