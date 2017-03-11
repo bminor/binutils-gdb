@@ -5777,14 +5777,11 @@ one new output section.
 
 If new output sections are created to hold orphaned input sections,
 then the linker must decide where to place these new output sections
-in relation to existing output sections.  The linker uses a simple
-heuristic to do this.  It attempts to place orphan sections after
-sections of the same attribute, such as code vs data, loadable vs
-non-loadable, etc.  If no sections with matching attributes are found,
-the orphan section is placed at the end of the file.
-
-For ELF targets, the attribute of the section includes section type as
-well as section flag.
+in relation to existing output sections.  On most modern targets, the
+linker attempts to place orphan sections after sections of the same
+attribute, such as code vs data, loadable vs non-loadable, etc.  If no
+sections with matching attributes are found, or your target lacks this
+support, the orphan section is placed at the end of the file.
 
 The command line options @samp{--orphan-handling} and @samp{--unique}
 (@pxref{Options,,Command Line Options}) can be used to control which
