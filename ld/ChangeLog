@@ -1,5 +1,10 @@
 2017-03-11  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/shared.exp: Use -Wl,-export-dynamic rather
+	than -rdynamic.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
 	* ld.texinfo (Orphan Sections): Mention that not all targets
 	handle orphans well.
 	* testsuite/ld-elf/orphan-9.d: Don't run for i860 and i960.
