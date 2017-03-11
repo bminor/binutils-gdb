@@ -1,5 +1,14 @@
 2017-03-11  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_add_sysroot): Rewrite.
+	Only prefix absolute paths with sysroot.  Handle DOS paths.
+	(gld${EMULATION_NAME}_check_ld_elf_hints): Constify variable.
+	(gld${EMULATION_NAME}_check_ld_so_conf): Likewise.
+	(gld${EMULATION_NAME}_after_open): Short-circuit NULL path
+	searches.  Rename variable.  Simplify get_runpath search.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/shared.exp: Use -Wl,-export-dynamic rather
 	than -rdynamic.
 
