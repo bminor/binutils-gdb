@@ -1,5 +1,33 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (%.o: ../common/%.c): New rule.
+	(signals.o: ../common/signals.c): Remove.
+	(print-utils.o: ../common/print-utils.c): Remove.
+	(rsp-low.o: ../common/rsp-low.c): Remove.
+	(common-utils.o: ../common/common-utils.c): Remove.
+	(posix-strerror.o: ../common/posix-strerror.c): Remove.
+	(mingw-strerror.o: ../common/mingw-strerror.c): Remove.
+	(vec.o: ../common/vec.c): Remove.
+	(gdb_vecs.o: ../common/gdb_vecs.c): Remove.
+	(xml-utils.o: ../common/xml-utils.c): Remove.
+	(ptid.o: ../common/ptid.c): Remove.
+	(buffer.o: ../common/buffer.c): Remove.
+	(format.o: ../common/format.c): Remove.
+	(filestuff.o: ../common/filestuff.c): Remove.
+	(agent.o: ../common/agent.c): Remove.
+	(errors.o: ../common/errors.c): Remove.
+	(environ.o: ../common/environ.c): Remove.
+	(common-debug.o: ../common/common-debug.c): Remove.
+	(cleanups.o: ../common/cleanups.c): Remove.
+	(common-exceptions.o: ../common/common-exceptions.c): Remove.
+	(fileio.o: ../common/fileio.c): Remove.
+	(common-regcache.o: ../common/common-regcache.c): Remove.
+	(signals-state-save-restore.o: ../common/signals-state-save-restore.c): Remove.
+	(new-op.o: ../common/new-op.c): Remove.
+	(btrace-common.o: ../common/btrace-common.c): Remove.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (%.o: ../target/%.c): New rule.
 	(waitstatus.o: ../target/waitstatus.c): Remove.
 

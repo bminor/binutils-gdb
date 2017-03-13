@@ -735,76 +735,6 @@ ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
-signals.o: ../common/signals.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-print-utils.o: ../common/print-utils.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-rsp-low.o: ../common/rsp-low.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-utils.o: ../common/common-utils.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-posix-strerror.o: ../common/posix-strerror.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-mingw-strerror.o: ../common/mingw-strerror.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-vec.o: ../common/vec.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-gdb_vecs.o: ../common/gdb_vecs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-xml-utils.o: ../common/xml-utils.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-ptid.o: ../common/ptid.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-buffer.o: ../common/buffer.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-format.o: ../common/format.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-filestuff.o: ../common/filestuff.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-agent.o: ../common/agent.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-errors.o: ../common/errors.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-environ.o: ../common/environ.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-debug.o: ../common/common-debug.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-cleanups.o: ../common/cleanups.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-exceptions.o: ../common/common-exceptions.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-fileio.o: ../common/fileio.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-regcache.o: ../common/common-regcache.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-signals-state-save-restore.o: ../common/signals-state-save-restore.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-new-op.o: ../common/new-op.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 # Arch object files rules form ../arch
 
 arm.o: ../arch/arm.c
@@ -855,9 +785,6 @@ aarch64-linux-hw-point.o: ../nat/aarch64-linux-hw-point.c
 aarch64-linux.o: ../nat/aarch64-linux.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
-btrace-common.o: ../common/btrace-common.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
 x86-linux.o: ../nat/x86-linux.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -877,6 +804,10 @@ aarch64-insn.o: ../arch/aarch64-insn.c
 # Rules for objects that go in the gdbserver binary.
 
 %.o: %.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ../common/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
