@@ -881,188 +881,19 @@ aarch64-insn.o: ../arch/aarch64-insn.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
-reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
-arm-with-iwmmxt.c : $(srcdir)/../regformats/arm/arm-with-iwmmxt.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-iwmmxt.dat arm-with-iwmmxt.c
-arm-with-vfpv2.c : $(srcdir)/../regformats/arm/arm-with-vfpv2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-vfpv2.dat arm-with-vfpv2.c
-arm-with-vfpv3.c : $(srcdir)/../regformats/arm/arm-with-vfpv3.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-vfpv3.dat arm-with-vfpv3.c
-arm-with-neon.c : $(srcdir)/../regformats/arm/arm-with-neon.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-neon.dat arm-with-neon.c
-reg-bfin.c : $(srcdir)/../regformats/reg-bfin.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-bfin.dat reg-bfin.c
-reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c
-reg-crisv32.c : $(srcdir)/../regformats/reg-crisv32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-crisv32.dat reg-crisv32.c
-i386.c : $(srcdir)/../regformats/i386/i386.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386.dat i386.c
-i386-linux.c : $(srcdir)/../regformats/i386/i386-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-linux.dat i386-linux.c
-i386-avx.c : $(srcdir)/../regformats/i386/i386-avx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx.dat i386-avx.c
-i386-avx-linux.c : $(srcdir)/../regformats/i386/i386-avx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-linux.dat i386-avx-linux.c
-i386-avx-avx512.c : $(srcdir)/../regformats/i386/i386-avx-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-avx512.dat i386-avx-avx512.c
-i386-avx-avx512-linux.c : $(srcdir)/../regformats/i386/i386-avx-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-avx512-linux.dat i386-avx-avx512-linux.c
-i386-mpx.c : $(srcdir)/../regformats/i386/i386-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mpx.dat i386-mpx.c
-i386-mpx-linux.c : $(srcdir)/../regformats/i386/i386-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mpx-linux.dat i386-mpx-linux.c
-i386-avx-mpx-avx512-pku.c : $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku.dat i386-avx-mpx-avx512-pku.c
-i386-avx-mpx-avx512-pku-linux.c : $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-avx512-pku-linux.dat i386-avx-mpx-avx512-pku-linux.c
-i386-avx-mpx.c : $(srcdir)/../regformats/i386/i386-avx-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx.dat i386-avx-mpx.c
-i386-avx-mpx-linux.c : $(srcdir)/../regformats/i386/i386-avx-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-linux.dat i386-avx-mpx-linux.c
-i386-mmx.c : $(srcdir)/../regformats/i386/i386-mmx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mmx.dat i386-mmx.c
-i386-mmx-linux.c : $(srcdir)/../regformats/i386/i386-mmx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mmx-linux.dat i386-mmx-linux.c
-reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
-reg-m32r.c : $(srcdir)/../regformats/reg-m32r.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m32r.dat reg-m32r.c
-reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
-reg-cf.c : $(srcdir)/../regformats/reg-cf.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cf.dat reg-cf.c
-mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips-linux.dat mips-linux.c
-mips-dsp-linux.c : $(srcdir)/../regformats/mips-dsp-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips-dsp-linux.dat mips-dsp-linux.c
-mips64-linux.c : $(srcdir)/../regformats/mips64-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
-mips64-dsp-linux.c : $(srcdir)/../regformats/mips64-dsp-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-dsp-linux.dat mips64-dsp-linux.c
-nios2-linux.c :	$(srcdir)/../regformats/nios2-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/nios2-linux.dat nios2-linux.c
-powerpc-32.c : $(srcdir)/../regformats/rs6000/powerpc-32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
-powerpc-32l.c : $(srcdir)/../regformats/rs6000/powerpc-32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32l.dat powerpc-32l.c
-powerpc-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat powerpc-altivec32l.c
-powerpc-cell32l.c : $(srcdir)/../regformats/rs6000/powerpc-cell32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-cell32l.dat powerpc-cell32l.c
-powerpc-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat powerpc-vsx32l.c
-powerpc-isa205-32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-32l.dat powerpc-isa205-32l.c
-powerpc-isa205-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec32l.dat powerpc-isa205-altivec32l.c
-powerpc-isa205-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx32l.dat powerpc-isa205-vsx32l.c
-powerpc-e500l.c : $(srcdir)/../regformats/rs6000/powerpc-e500l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500l.dat powerpc-e500l.c
-powerpc-64l.c : $(srcdir)/../regformats/rs6000/powerpc-64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64l.dat powerpc-64l.c
-powerpc-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat powerpc-altivec64l.c
-powerpc-cell64l.c : $(srcdir)/../regformats/rs6000/powerpc-cell64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-cell64l.dat powerpc-cell64l.c
-powerpc-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat powerpc-vsx64l.c
-powerpc-isa205-64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-64l.dat powerpc-isa205-64l.c
-powerpc-isa205-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec64l.dat powerpc-isa205-altivec64l.c
-powerpc-isa205-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat powerpc-isa205-vsx64l.c
-s390-linux32.c : $(srcdir)/../regformats/s390-linux32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32.dat s390-linux32.c
-s390-linux32v1.c : $(srcdir)/../regformats/s390-linux32v1.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32v1.dat s390-linux32v1.c
-s390-linux32v2.c : $(srcdir)/../regformats/s390-linux32v2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32v2.dat s390-linux32v2.c
-s390-linux64.c : $(srcdir)/../regformats/s390-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64.dat s390-linux64.c
-s390-linux64v1.c : $(srcdir)/../regformats/s390-linux64v1.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v1.dat s390-linux64v1.c
-s390-linux64v2.c : $(srcdir)/../regformats/s390-linux64v2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v2.dat s390-linux64v2.c
-s390-te-linux64.c : $(srcdir)/../regformats/s390-te-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-te-linux64.dat s390-te-linux64.c
-s390-vx-linux64.c : $(srcdir)/../regformats/s390-vx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-vx-linux64.dat s390-vx-linux64.c
-s390-tevx-linux64.c : $(srcdir)/../regformats/s390-tevx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-tevx-linux64.dat s390-tevx-linux64.c
-s390x-linux64.c : $(srcdir)/../regformats/s390x-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64.dat s390x-linux64.c
-s390x-linux64v1.c : $(srcdir)/../regformats/s390x-linux64v1.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v1.dat s390x-linux64v1.c
-s390x-linux64v2.c : $(srcdir)/../regformats/s390x-linux64v2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v2.dat s390x-linux64v2.c
-s390x-te-linux64.c : $(srcdir)/../regformats/s390x-te-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-te-linux64.dat s390x-te-linux64.c
-s390x-vx-linux64.c : $(srcdir)/../regformats/s390x-vx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-vx-linux64.dat s390x-vx-linux64.c
-s390x-tevx-linux64.c : $(srcdir)/../regformats/s390x-tevx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-tevx-linux64.dat s390x-tevx-linux64.c
+# Rules for register format descriptions.
 
-tic6x-c64xp-linux.c : $(srcdir)/../regformats/tic6x-c64xp-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64xp-linux.dat tic6x-c64xp-linux.c
-tic6x-c64x-linux.c : $(srcdir)/../regformats/tic6x-c64x-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64x-linux.dat tic6x-c64x-linux.c
-tic6x-c62x-linux.c : $(srcdir)/../regformats/tic6x-c62x-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c62x-linux.dat tic6x-c62x-linux.c
+%.c: ../regformats/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
 
-reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
-reg-sparc64.c : $(srcdir)/../regformats/reg-sparc64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sparc64.dat reg-sparc64.c
-reg-spu.c : $(srcdir)/../regformats/reg-spu.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-spu.dat reg-spu.c
-amd64.c : $(srcdir)/../regformats/i386/amd64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64.dat amd64.c
-amd64-linux.c : $(srcdir)/../regformats/i386/amd64-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-linux.dat amd64-linux.c
-amd64-avx.c : $(srcdir)/../regformats/i386/amd64-avx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx.dat amd64-avx.c
-amd64-avx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-linux.dat amd64-avx-linux.c
-amd64-avx-avx512.c : $(srcdir)/../regformats/i386/amd64-avx-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-avx512.dat amd64-avx-avx512.c
-amd64-avx-avx512-linux.c : $(srcdir)/../regformats/i386/amd64-avx-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-avx512-linux.dat amd64-avx-avx512-linux.c
-amd64-mpx.c : $(srcdir)/../regformats/i386/amd64-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-mpx.dat amd64-mpx.c
-amd64-mpx-linux.c : $(srcdir)/../regformats/i386/amd64-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-mpx-linux.dat amd64-mpx-linux.c
-amd64-avx-mpx-avx512-pku.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku.dat amd64-avx-mpx-avx512-pku.c
-amd64-avx-mpx-avx512-pku-linux.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat amd64-avx-mpx-avx512-pku-linux.c
-amd64-avx-mpx.c : $(srcdir)/../regformats/i386/amd64-avx-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx.dat amd64-avx-mpx.c
-amd64-avx-mpx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-linux.dat amd64-avx-mpx-linux.c
-x32.c : $(srcdir)/../regformats/i386/x32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32.dat x32.c
-x32-linux.c : $(srcdir)/../regformats/i386/x32-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-linux.dat x32-linux.c
-x32-avx.c : $(srcdir)/../regformats/i386/x32-avx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx.dat x32-avx.c
-x32-avx-linux.c : $(srcdir)/../regformats/i386/x32-avx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx-linux.dat x32-avx-linux.c
-x32-avx-avx512.c : $(srcdir)/../regformats/i386/x32-avx-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx-avx512.dat x32-avx-avx512.c
-x32-avx-avx512-linux.c : $(srcdir)/../regformats/i386/x32-avx-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx-avx512-linux.dat x32-avx-avx512-linux.c
-reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c
-reg-tilegx.c : $(srcdir)/../regformats/reg-tilegx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx.dat reg-tilegx.c
-reg-tilegx32.c : $(srcdir)/../regformats/reg-tilegx32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx32.dat reg-tilegx32.c
+%.c: ../regformats/arm/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
+
+%.c: ../regformats/i386/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
+
+%.c: ../regformats/rs6000/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
 
 #
 # Dependency tracking.
