@@ -1,5 +1,10 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.c (target_fetch_registers, target_store_registers): Add
+	assert.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* regcache.h (regcache_get_ptid): New function.
 	* regcache.c (regcache_get_ptid): New function.
 
