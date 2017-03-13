@@ -1,3 +1,8 @@
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.h (regcache_get_ptid): New function.
+	* regcache.c (regcache_get_ptid): New function.
+
 2017-03-13  Mark Wielaard  <mark@klomp.org>
 
 	* cp-name-parser.y (make_empty): Initialize d_printing to zero.

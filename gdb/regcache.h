@@ -39,6 +39,10 @@ struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
 struct regcache *regcache_xmalloc (struct gdbarch *gdbarch,
 				   struct address_space *aspace);
 
+/* Return REGCACHE's ptid.  */
+
+extern ptid_t regcache_get_ptid (const struct regcache *regcache);
+
 /* Return REGCACHE's architecture.  */
 
 extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);

@@ -215,6 +215,16 @@ struct regcache
   ptid_t ptid;
 };
 
+/* See regcache.h.  */
+
+ptid_t
+regcache_get_ptid (const struct regcache *regcache)
+{
+  gdb_assert (!ptid_equal (regcache->ptid, minus_one_ptid));
+
+  return regcache->ptid;
+}
+
 static struct regcache *
 regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
 		    int readonly_p)
