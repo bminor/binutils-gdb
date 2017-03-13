@@ -1,3 +1,10 @@
+2017-03-13  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes) <srli/C>: Use match_opcode.
+	<srl> Likewise.
+	<srai> Likewise.
+	<sra> Likewise.
+
 2017-03-27  Alan Modra  <amodra@gmail.com>
 
 	PR 21303
