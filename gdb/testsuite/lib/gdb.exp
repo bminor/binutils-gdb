@@ -6023,6 +6023,32 @@ proc multi_line_input { args } {
     return [join $args "\n"]
 }
 
+# Return the version of the DejaGnu framework.
+#
+# The return value is a list containing the major, minor and patch version
+# numbers.  If the version does not contain a minor or patch number, they will
+# be set to 0.  For example:
+#
+#   1.6   -> {1 6 0}
+#   1.6.1 -> {1 6 1}
+#   2     -> {2 0 0}
+
+proc dejagnu_version { } {
+    # The frame_version variable is defined by DejaGnu, in runtest.exp.
+    global frame_version
+
+    verbose -log "DejaGnu version: $frame_version"
+    verbose -log "Expect version: [exp_version]"
+    verbose -log "Tcl version: [info tclversion]"
+
+    set dg_ver [split $frame_version .]
+
+    while { [llength $dg_ver] < 3 } {
+	lappend dg_ver 0
+    }
+
+    return $dg_ver
+}
 
 # Always load compatibility stuff.
 load_lib future.exp

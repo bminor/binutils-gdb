@@ -24,13 +24,7 @@
 # Return true if the running version of DejaGnu is known to not be
 # able to run this test.
 proc bad_dejagnu {} {
-    global frame_version
-
-    verbose -log "DejaGnu version: $frame_version"
-    verbose -log "Expect version: [exp_version]"
-    verbose -log "Tcl version: [info tclversion]"
-
-    set dj_ver [split $frame_version .]
+    set dj_ver [dejagnu_version]
     set dj_ver_major [lindex $dj_ver 0]
     set dj_ver_minor [lindex $dj_ver 1]
 

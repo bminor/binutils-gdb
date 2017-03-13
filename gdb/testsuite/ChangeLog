@@ -1,3 +1,9 @@
+2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (dejagnu_version): New proc.
+	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
+	Use dejagnu_version.
+
 2017-03-10  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/8128
