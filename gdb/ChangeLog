@@ -1,3 +1,7 @@
+2017-03-13  Mark Wielaard  <mark@klomp.org>
+
+	* cp-name-parser.y (make_empty): Initialize d_printing to zero.
+
 2017-03-10  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/8218

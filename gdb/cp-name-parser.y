@@ -201,6 +201,7 @@ make_empty (enum demangle_component_type d_type)
 {
   struct demangle_component *ret = d_grab ();
   ret->type = d_type;
+  ret->d_printing = 0;
   return ret;
 }
 
