@@ -1,3 +1,11 @@
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* elf/aarch64.h (R_AARCH64_TLSDESC_LD64_LO12_NC): Rename to
+	R_AARCH64_TLSDESC_LD64_LO12.
+	(R_AARCH64_TLSDESC_ADD_LO12_NC): Rename to
+	R_AARCH64_TLSDESC_ADD_LO12_NC.
+
 2017-03-10  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (EM_LANAI): New machine number.

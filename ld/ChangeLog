@@ -1,3 +1,8 @@
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* testsuite/ld-aarch64/ifunc-5r-local.d: Update regexp.
+
 2017-03-13  Tristan Gingold  <gingold@adacore.com>
 
 	* ldlang.c (lang_check_section_addresses): Check for address space

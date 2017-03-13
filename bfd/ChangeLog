@@ -1,3 +1,26 @@
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* reloc.c (BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC): Rename to
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12.
+	(BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC): Rename to
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): Update reloc
+	names.
+	(IS_AARCH64_TLSDESC_RELOC): Likewise.
+	(elfNN_aarch64_howto_table): Likewise.
+	(aarch64_tls_transition_without_check): Likewise.
+	(aarch64_reloc_got_type): Likewise.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_tls_relax): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
 2017-03-11  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c: Remove ATTRIBUTE_UNUSED throughout when function

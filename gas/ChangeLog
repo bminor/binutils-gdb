@@ -1,3 +1,15 @@
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* config/tc-aarch64.c (reloc_table): Rename
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC to
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12.  Rname
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC to
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+	* testsuite/gas/aarch64/tls.d: Update regexp.
+
 2017-03-10  Tobin C. Harding  <me@tobin.cc>
 	    Nick Clifton  <nickc@redhat.com>
 
