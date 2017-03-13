@@ -1,5 +1,11 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers,
+	amd64_linux_fetch_inferior_registers): Use regcache->ptid
+	instead of inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target.c (target_fetch_registers, target_store_registers): Add
 	assert.
 
