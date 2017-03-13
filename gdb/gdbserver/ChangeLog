@@ -1,5 +1,10 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (%.o: ../target/%.c): New rule.
+	(waitstatus.o: ../target/waitstatus.c): Remove.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in
 	(%.c: ../regformats/%.dat,
 	(%.c: ../regformats/arm/%.dat,

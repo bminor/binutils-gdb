@@ -328,10 +328,6 @@ FLAGS_TO_PASS = \
 # All generated files which can be included by another file.
 generated_files = config.h $(GNULIB_H)
 
-%.o: %.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
@@ -796,9 +792,6 @@ cleanups.o: ../common/cleanups.c
 common-exceptions.o: ../common/common-exceptions.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
-waitstatus.o: ../target/waitstatus.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
 fileio.o: ../common/fileio.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -878,6 +871,16 @@ linux-namespaces.o: ../nat/linux-namespaces.c
 # Architecture specific object files rules from ../arch
 
 aarch64-insn.o: ../arch/aarch64-insn.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+# Rules for objects that go in the gdbserver binary.
+
+%.o: %.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ../target/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
