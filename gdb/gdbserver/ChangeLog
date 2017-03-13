@@ -1,5 +1,14 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (%-ipa.o: ../common/%.c): New rule.
+	(print-utils-ipa.o: ../common/print-utils.c): Remove.
+	(rsp-low-ipa.o: ../common/rsp-low.c): Remove.
+	(errors-ipa.o: ../common/errors.c): Remove.
+	(format-ipa.o: ../common/format.c): Remove.
+	(common-utils-ipa.o: ../common/common-utils.c): Remove.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (%-ipa.o: %.c): New rule.
 	(tracepoint-ipa.o: tracepoint.c): Remove.
 	(utils-ipa.o: utils.c): Remove.

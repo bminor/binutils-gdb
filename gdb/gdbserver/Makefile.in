@@ -544,12 +544,6 @@ IPAGENT_COMPILE = $(COMPILE.pre) $(IPAGENT_CFLAGS) $(COMPILE.post)
 ax-ipa.o: ax.c
 	$(IPAGENT_COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
-format-ipa.o: ../common/format.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-common-utils-ipa.o: ../common/common-utils.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
 linux-i386-ipa.o: linux-i386-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
@@ -565,15 +559,7 @@ linux-s390-ipa.o: linux-s390-ipa.c
 linux-ppc-ipa.o: linux-ppc-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-print-utils-ipa.o: ../common/print-utils.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-rsp-low-ipa.o: ../common/rsp-low.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-errors-ipa.o: ../common/errors.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
+
 
 ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
@@ -582,6 +568,10 @@ ax.o: ax.c
 # Rules for objects that go in the in-process agent.
 
 %-ipa.o: %.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+
+%-ipa.o: ../common/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
