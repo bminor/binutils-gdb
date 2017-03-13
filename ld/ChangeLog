@@ -1,3 +1,8 @@
+2017-03-13  Alexey Neyman  <stilor@att.net>
+
+	* emulparams/elf32ppccommon.sh (LIBPATH_SUFFIX): Set from target
+	cpu, not host.
+
 2017-03-11  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Add
