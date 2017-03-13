@@ -1,5 +1,10 @@
 2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
+	Skip for versions of DejaGnu < 1.5.
+
+2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* lib/gdb.exp (dejagnu_version): New proc.
 	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
 	Use dejagnu_version.

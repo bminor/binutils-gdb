@@ -1007,6 +1007,17 @@ proc_with_prefix redefine_backtrace_test {} {
 # while entering a multi-line command (in a secondary prompt).
 
 proc_with_prefix backslash_in_multi_line_command_test {} {
+    set dg_ver [dejagnu_version]
+    set dg_major [lindex $dg_ver 0]
+    set dg_minor [lindex $dg_ver 1]
+
+    # With older versions of DejaGnu, the "\\\n" we send gets replaced with a
+    # space, thus breaking the test.  Just skip it in that case.
+    if { $dg_major == 1 && $dg_minor < 5 } {
+	untested "dejagnu version is too old"
+	return
+    }
+
     gdb_breakpoint "main"
 
     gdb_test_multiple "commands" "commands" {
