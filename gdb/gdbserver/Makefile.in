@@ -747,54 +747,6 @@ arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-# Native object files rules from ../nat
-
-x86-dregs.o: ../nat/x86-dregs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-amd64-linux-siginfo.o: ../nat/amd64-linux-siginfo.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-btrace.o: ../nat/linux-btrace.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-osdata.o: ../nat/linux-osdata.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-procfs.o: ../nat/linux-procfs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-ptrace.o: ../nat/linux-ptrace.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-waitpid.o: ../nat/linux-waitpid.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-mips-linux-watch.o: ../nat/mips-linux-watch.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-ppc-linux.o: ../nat/ppc-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-personality.o: ../nat/linux-personality.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-aarch64-linux-hw-point.o: ../nat/aarch64-linux-hw-point.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-aarch64-linux.o: ../nat/aarch64-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-x86-linux.o: ../nat/x86-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-x86-linux-dregs.o: ../nat/x86-linux-dregs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-namespaces.o: ../nat/linux-namespaces.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 # Architecture specific object files rules from ../arch
 
 aarch64-insn.o: ../arch/aarch64-insn.c
@@ -808,6 +760,10 @@ aarch64-insn.o: ../arch/aarch64-insn.c
 	$(POSTCOMPILE)
 
 %.o: ../common/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ../nat/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
