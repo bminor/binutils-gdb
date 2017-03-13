@@ -1,5 +1,11 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* alpha-bsd-nat.c (alphabsd_fetch_inferior_registers,
+	alphabsd_store_inferior_registers): Use regcache->ptid instead
+	of inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* aix-thread.c (aix_thread_fetch_registers,
 	aix_thread_store_registers): Use regcache->ptid instead of
 	inferior_ptid.
