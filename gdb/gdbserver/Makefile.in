@@ -540,26 +540,11 @@ IPAGENT_CFLAGS = $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 
 IPAGENT_COMPILE = $(COMPILE.pre) $(IPAGENT_CFLAGS) $(COMPILE.post)
 
-# In-process agent object rules
+# Rules for special cases.
+
 ax-ipa.o: ax.c
 	$(IPAGENT_COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
-linux-i386-ipa.o: linux-i386-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-amd64-ipa.o: linux-amd64-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-aarch64-ipa.o: linux-aarch64-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-s390-ipa.o: linux-s390-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-ppc-ipa.o: linux-ppc-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-
 
 ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
@@ -568,6 +553,17 @@ ax.o: ax.c
 # Rules for objects that go in the in-process agent.
 
 %-ipa.o: %.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+
+# Note: Between two matching pattern rules, GNU Make 3.81 chooses the first one.
+# Therefore, this one needs to be before "%.o: %.c" for it to be considered for
+# files such as linux-amd64-ipa.o generated from linux-amd64-ipa.c.
+#
+# Later versions of GNU Make choose the rule with the shortest stem, so it would
+# work in any order.
+
+%-ipa.o: %-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 

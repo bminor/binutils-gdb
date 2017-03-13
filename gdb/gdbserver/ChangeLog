@@ -1,5 +1,15 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (%-ipa.o: %-ipa.c): New rule.
+	(ax-ipa.o: ax.c): Remove.
+	(linux-i386-ipa.o: linux-i386-ipa.c): Remove.
+	(linux-amd64-ipa.o: linux-amd64-ipa.c): Remove.
+	(linux-aarch64-ipa.o: linux-aarch64-ipa.c): Remove.
+	(linux-s390-ipa.o: linux-s390-ipa.c): Remove.
+	(linux-ppc-ipa.o: linux-ppc-ipa.c): Remove.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (%-ipa.o: ../common/%.c): New rule.
 	(print-utils-ipa.o: ../common/print-utils.c): Remove.
 	(rsp-low-ipa.o: ../common/rsp-low.c): Remove.
