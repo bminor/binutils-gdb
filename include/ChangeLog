@@ -1,3 +1,12 @@
+2017-03-13  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR demangler/70909
+	PR demangler/67264
+	* demangle.h (struct demangle_component): Add d_printing field.
+	(cplus_demangle_print): Remove const qualifier from tree
+	parameter.
+	(cplus_demangle_print_callback): Likewise.
+
 2017-03-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21202
