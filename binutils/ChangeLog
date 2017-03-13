@@ -1,3 +1,13 @@
+2017-03-13  Alan Modra  <amodra@gmail.com>
+	    Taeung Song <treeze.taeung@gmail.com>
+
+	* objdump.c (update_source_path): Add abfd param.  Add struct
+	stat var.  Pass to try_print_file_open.  Warn if source is more
+	recent than object.
+	(try_print_file_open, slurp_file): Add struct stat param to
+	return fstat.
+	(show_line): Call update_source_path with bfd.
+
 2017-03-10  Chia-Hao Lo  <fcamel@gmail.com>
 
 	PR binutils/21235
