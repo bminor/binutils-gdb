@@ -1,5 +1,12 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* aarch64-linux-nat.c (fetch_gregs_from_thread,
+	store_gregs_to_thread, fetch_fpregs_from_thread,
+	store_fpregs_to_thread): Use regcache->ptid instead of
+	inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers,
 	amd64_linux_fetch_inferior_registers): Use regcache->ptid
 	instead of inferior_ptid.
