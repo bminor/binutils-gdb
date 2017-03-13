@@ -1,5 +1,13 @@
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (%.o: ../arch/%.c): New rule.
+	(arm.o: ../arch/arm.c): Remove.
+	(arm-linux.o: ../arch/arm-linux.c): Remove.
+	(arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c): Remove.
+	(aarch64-insn.o: ../arch/aarch64-insn.c): Remove.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (%.o: ../nat/%.c): New rule.
 	(x86-dregs.o: ../nat/x86-dregs.c): Remove.
 	(amd64-linux-siginfo.o: ../nat/amd64-linux-siginfo.c): Remove.

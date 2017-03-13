@@ -735,27 +735,13 @@ ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
-# Arch object files rules form ../arch
-
-arm.o: ../arch/arm.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-arm-linux.o: ../arch/arm-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-# Architecture specific object files rules from ../arch
-
-aarch64-insn.o: ../arch/aarch64-insn.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 # Rules for objects that go in the gdbserver binary.
 
 %.o: %.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ../arch/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
