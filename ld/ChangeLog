@@ -1,3 +1,7 @@
+2017-03-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/sec64k.exp: Don't run on h8300 and ip2k.
+
 2017-03-15  Tristan Gingold  <gingold@adacore.com>
 
 	* testsuite/ld-checks/checks.exp (overflow_check): Disable for
