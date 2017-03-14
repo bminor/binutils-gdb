@@ -85,6 +85,9 @@ proc overflow_check {} {
 	 && ![istarget arm*-*-*] } {
 	return
     }
+    if ![is_elf_format] {
+	return
+    }
 
     run_dump_test "over"
     run_dump_test "over2"
