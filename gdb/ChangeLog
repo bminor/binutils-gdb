@@ -1,3 +1,9 @@
+2017-03-14  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_demangled_name_to_comp): Update comment.
+	(main): Use std::unique_ptr.  Remove calls to
+	cp_demangled_name_parse_free.
+
 2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* alpha-bsd-nat.c (alphabsd_fetch_inferior_registers,

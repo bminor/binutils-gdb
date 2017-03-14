@@ -2057,10 +2057,9 @@ cp_merge_demangle_parse_infos (struct demangle_parse_info *dest,
 }
 
 /* Convert a demangled name to a demangle_component tree.  On success,
-   a structure containing the root of the new tree is returned; it must
-   be freed by calling cp_demangled_name_parse_free. On error, NULL is
-   returned, and an error message will be set in *ERRMSG (which does
-   not need to be freed).  */
+   a structure containing the root of the new tree is returned.  On
+   error, NULL is returned, and an error message will be set in
+   *ERRMSG (which does not need to be freed).  */
 
 struct std::unique_ptr<demangle_parse_info>
 cp_demangled_name_to_comp (const char *demangled_name, const char **errmsg)
@@ -2161,7 +2160,6 @@ main (int argc, char **argv)
   char buf[65536];
   int arg;
   const char *errmsg;
-  struct demangle_parse_info *result;
 
   arg = 1;
   if (argv[arg] && strcmp (argv[arg], "--debug") == 0)
@@ -2187,7 +2185,9 @@ main (int argc, char **argv)
 	      printf ("%s\n", buf);
 	    continue;
 	  }
-	result = cp_demangled_name_to_comp (str2, &errmsg);
+
+	std::unique_ptr<demangle_parse_info> result
+	  = cp_demangled_name_to_comp (str2, &errmsg);
 	if (result == NULL)
 	  {
 	    fputs (errmsg, stderr);
@@ -2196,7 +2196,6 @@ main (int argc, char **argv)
 	  }
 
 	cp_print (result->tree);
-	cp_demangled_name_parse_free (result);
 
 	free (str2);
 	if (c)
@@ -2208,7 +2207,8 @@ main (int argc, char **argv)
       }
   else
     {
-      result = cp_demangled_name_to_comp (argv[arg], &errmsg);
+      std::unique_ptr<demangle_parse_info> result
+	= cp_demangled_name_to_comp (argv[arg], &errmsg);
       if (result == NULL)
 	{
 	  fputs (errmsg, stderr);
@@ -2216,7 +2216,6 @@ main (int argc, char **argv)
 	  return 0;
 	}
       cp_print (result->tree);
-      cp_demangled_name_parse_free (result);
       putchar ('\n');
     }
   return 0;
