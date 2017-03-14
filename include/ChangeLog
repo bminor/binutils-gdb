@@ -1,3 +1,8 @@
+2017-03-14  Jakub Jelinek  <jakub@redhat.com>
+
+	PR debug/77589
+	* dwarf2.def (DW_OP_GNU_variable_value): New opcode.
+
 2017-03-13  Markus Trippelsdorf  <markus@trippelsdorf.de>
 
 	PR demangler/70909
