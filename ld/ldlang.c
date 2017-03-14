@@ -4783,13 +4783,13 @@ lang_check_section_addresses (void)
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
       s_end = (s->vma + s->size) & addr_mask;
-      if (s_end != 0 && s_end < s->vma)
+      if (s_end != 0 && s_end < (s->vma & addr_mask))
 	einfo (_("%X%P: section %s VMA wraps around address space\n"),
 	       s->name);
       else
 	{
 	  s_end = (s->lma + s->size) & addr_mask;
-	  if (s_end != 0 && s_end < s->lma)
+	  if (s_end != 0 && s_end < (s->lma & addr_mask))
 	    einfo (_("%X%P: section %s LMA wraps around address space\n"),
 		   s->name);
 	}
