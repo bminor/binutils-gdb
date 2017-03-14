@@ -1,3 +1,16 @@
+2017-03-14  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_description): Move symbol
+	printing code to...
+	(print_symbol_for_build_attribute): New function.  ...here.
+	Add to find the best symbol to associate with an OPEN note.
+	Add code to cache the symbol table and string table, so that they
+	are not loaded every time a note is displayed.
+	* testsuite/binutils-all/note-2-32.s: Add a function symbol.
+	* testsuite/binutils-all/note-2-64.s: Likewise.
+	* testsuite/binutils-all/note-2-32.d: Update expected note output.
+	* testsuite/binutils-all/note-2-64.d: Likewise.
+
 2017-03-13  Alan Modra  <amodra@gmail.com>
 	    Taeung Song <treeze.taeung@gmail.com>
 
