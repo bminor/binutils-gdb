@@ -1,3 +1,8 @@
+2017-03-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* parse.c (length_of_subexp): Make static.
+	* parser-defs.h (length_of_subexp): Remove.
+
 2017-03-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-nat.c (linux_proc_xfer_partial): Handle write operations

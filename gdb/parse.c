@@ -827,7 +827,7 @@ prefixify_expression (struct expression *expr)
 /* Return the number of exp_elements in the postfix subexpression 
    of EXPR whose operator is at index ENDPOS - 1 in EXPR.  */
 
-int
+static int
 length_of_subexp (struct expression *expr, int endpos)
 {
   int oplen, args;

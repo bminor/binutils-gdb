@@ -246,8 +246,6 @@ extern void type_stack_cleanup (void *arg);
 
 extern void push_typelist (VEC (type_ptr) *typelist);
 
-extern int length_of_subexp (struct expression *, int);
-
 extern int dump_subexp (struct expression *, struct ui_file *, int);
 
 extern int dump_subexp_body_standard (struct expression *, 
