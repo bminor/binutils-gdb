@@ -1,3 +1,11 @@
+2017-03-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21220
+	* inf-ptrace.c (inf_ptrace_xfer_partial): In "case
+	TARGET_OBJECT_MEMORY", extract the logic for ptrace peek/poke...
+	(inf_ptrace_peek_poke): ...here.  New function.  Now also loop
+	over ptrace peek/poke until end of buffer or error.
+
 2017-03-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* parse.c (length_of_subexp): Make static.
