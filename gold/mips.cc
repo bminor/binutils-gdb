@@ -474,22 +474,24 @@ class Mips_got_entry
          ? this->d.object->name().c_str()
          : this->d.sym->name());
     size_t addend = this->addend_;
-    return name_hash_value ^ this->symndx_ ^ addend;
+    return name_hash_value ^ this->symndx_ ^ (addend << 16);
   }
 
   // Return whether this entry is equal to OTHER.
   bool
   equals(Mips_got_entry<size, big_endian>* other) const
   {
+    if (this->symndx_ != other->symndx_
+        || this->tls_type_ != other->tls_type_)
+      return false;
+
     if (this->tls_type_ == GOT_TLS_LDM)
       return true;
 
-    return ((this->tls_type_ == other->tls_type_)
-             && (this->symndx_ == other->symndx_)
-             && ((this->symndx_ != -1U)
-                  ? (this->d.object == other->d.object)
-                  : (this->d.sym == other->d.sym))
-             && (this->addend_ == other->addend_));
+    return (((this->symndx_ != -1U)
+              ? (this->d.object == other->d.object)
+              : (this->d.sym == other->d.sym))
+            && (this->addend_ == other->addend_));
   }
 
   // Return input object that needs this GOT entry.
