@@ -2926,8 +2926,7 @@ symbol_refs_local(const Symbol* sym, bool has_dynsym_entry,
 
   // If we don't have a definition in a regular file, then we can't
   // resolve locally.  The sym is either undefined or dynamic.
-  if (sym->source() != Symbol::FROM_OBJECT || sym->object()->is_dynamic()
-      || sym->is_undefined())
+  if (sym->is_from_dynobj() || sym->is_undefined())
     return false;
 
   // Forced local symbols resolve locally.
@@ -8378,7 +8377,7 @@ Target_mips<size, big_endian>::got_section(Symbol_table* symtab,
                                     this->got_,
                                     0, 0, elfcpp::STT_OBJECT,
                                     elfcpp::STB_GLOBAL,
-                                    elfcpp::STV_DEFAULT, 0,
+                                    elfcpp::STV_HIDDEN, 0,
                                     false, false);
     }
 
@@ -8391,53 +8390,30 @@ template<int size, bool big_endian>
 void
 Target_mips<size, big_endian>::set_gp(Layout* layout, Symbol_table* symtab)
 {
-  if (this->gp_ != NULL)
-    return;
-
-  Output_data* section = layout->find_output_section(".got");
-  if (section == NULL)
-    {
-      // If there is no .got section, gp should be based on .sdata.
-      // TODO(sasa): This is probably not needed.  This was needed for older
-      // MIPS architectures which accessed both GOT and .sdata section using
-      // gp-relative addressing.  Modern Mips Linux ELF architectures don't
-      // access .sdata using gp-relative addressing.
-      for (Layout::Section_list::const_iterator
-           p = layout->section_list().begin();
-           p != layout->section_list().end();
-           ++p)
-        {
-          if (strcmp((*p)->name(), ".sdata") == 0)
-            {
-              section = *p;
-              break;
-            }
-        }
-    }
+  gold_assert(this->gp_ == NULL);
 
   Sized_symbol<size>* gp =
     static_cast<Sized_symbol<size>*>(symtab->lookup("_gp"));
-  if (gp != NULL)
+
+  // Set _gp symbol if the linker script hasn't created it.
+  if (gp == NULL || gp->source() != Symbol::IS_CONSTANT)
     {
-      if (gp->source() != Symbol::IS_CONSTANT && section != NULL)
-        gp->init_output_data(gp->name(), NULL, section, MIPS_GP_OFFSET, 0,
-                             elfcpp::STT_OBJECT,
-                             elfcpp::STB_GLOBAL,
-                             elfcpp::STV_DEFAULT, 0,
-                             false, false);
-      this->gp_ = gp;
+      // If there is no .got section, gp should be based on .sdata.
+      Output_data* gp_section = (this->got_ != NULL
+                                 ? this->got_->output_section()
+                                 : layout->find_output_section(".sdata"));
+
+      if (gp_section != NULL)
+        gp = static_cast<Sized_symbol<size>*>(symtab->define_in_output_data(
+                                          "_gp", NULL, Symbol_table::PREDEFINED,
+                                          gp_section, MIPS_GP_OFFSET, 0,
+                                          elfcpp::STT_NOTYPE,
+                                          elfcpp::STB_LOCAL,
+                                          elfcpp::STV_DEFAULT,
+                                          0, false, false));
     }
-  else if (section != NULL)
-    {
-      gp = static_cast<Sized_symbol<size>*>(symtab->define_in_output_data(
-                                      "_gp", NULL, Symbol_table::PREDEFINED,
-                                      section, MIPS_GP_OFFSET, 0,
-                                      elfcpp::STT_OBJECT,
-                                      elfcpp::STB_GLOBAL,
-                                      elfcpp::STV_DEFAULT,
-                                      0, false, false));
-      this->gp_ = gp;
-    }
+
+  this->gp_ = gp;
 }
 
 // Set the dynamic symbol indexes.  INDEX is the index of the first
@@ -9579,9 +9555,6 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
   if (this->got16_addends_.size() > 0)
       gold_error("Can't find matching LO16 reloc");
 
-  // Set _gp value.
-  this->set_gp(layout, symtab);
-
   // Check for any mips16 stub sections that we can discard.
   if (!parameters->options().relocatable())
     {
@@ -9747,6 +9720,9 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
   if (this->copy_relocs_.any_saved_relocs())
     this->copy_relocs_.emit_mips(this->rel_dyn_section(layout), symtab, layout,
                                  this);
+
+  // Set _gp value.
+  this->set_gp(layout, symtab);
 
   // Emit dynamic relocs.
   for (typename std::vector<Dyn_reloc>::iterator p = this->dyn_relocs_.begin();
@@ -10864,13 +10840,6 @@ Target_mips<size, big_endian>::Scan::global(
     // there is one.  We ignore MIPS16 stub sections and .pdr section when
     // looking for relocs that would need to refer to MIPS16 stubs.
     mips_sym->set_need_fn_stub();
-
-  // A reference to _GLOBAL_OFFSET_TABLE_ implies that we need a got
-  // section.  We check here to avoid creating a dynamic reloc against
-  // _GLOBAL_OFFSET_TABLE_.
-  if (!target->has_got_section()
-      && strcmp(gsym->name(), "_GLOBAL_OFFSET_TABLE_") == 0)
-    target->got_section(symtab, layout);
 
   // We need PLT entries if there are static-only relocations against
   // an externally-defined function.  This can technically occur for
