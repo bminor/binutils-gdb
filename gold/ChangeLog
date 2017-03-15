@@ -1,5 +1,13 @@
 2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
+        * mips.cc (Mips_relocate_functions::rel26): Don't print relocation
+        overflow error message.
+        (Target_mips::relocate_special_relocatable): Improve relocation
+        overflow error message.
+        (Target_mips::Relocate::relocate): Likewise.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
         * mips.cc (symbol_refs_local): Return false if a symbol
         is from a dynamic object.
         (Target_mips::got_section): Make _GLOBAL_OFFSET_TABLE_ STV_HIDDEN.

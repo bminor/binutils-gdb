@@ -4591,15 +4591,9 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
       }
     x = psymval->value(object, x) >> shift;
 
-    if (!calculate_only && !local && !gsym->is_weak_undefined())
-      {
-        if ((x >> 26) != ((address + 4) >> (26 + shift)))
-          {
-            gold_error(_("relocation truncated to fit: %u against '%s'"),
-                       r_type, gsym->name());
-            return This::STATUS_OVERFLOW;
-          }
-      }
+    if (!calculate_only && !local && !gsym->is_weak_undefined()
+        && ((x >> 26) != ((address + 4) >> (26 + shift))))
+      return This::STATUS_OVERFLOW;
 
     val = Bits<32>::bit_select32(val, x, 0x03ffffff);
 
@@ -10307,7 +10301,9 @@ Target_mips<size, big_endian>::relocate_special_relocatable(
       break;
     case Reloc_funcs::STATUS_OVERFLOW:
       gold_error_at_location(relinfo, relnum, reloc.get_r_offset(),
-                             _("relocation overflow"));
+			     _("relocation overflow: "
+			       "%u against local symbol %u in %s"),
+			     r_type, r_sym, object->name().c_str());
       break;
     case Reloc_funcs::STATUS_BAD_RELOC:
       gold_error_at_location(relinfo, relnum, reloc.get_r_offset(),
@@ -12188,8 +12184,21 @@ Target_mips<size, big_endian>::Relocate::relocate(
     case Reloc_funcs::STATUS_OKAY:
       break;
     case Reloc_funcs::STATUS_OVERFLOW:
-      gold_error_at_location(relinfo, relnum, r_offset,
-                             _("relocation overflow"));
+      if (gsym == NULL)
+        gold_error_at_location(relinfo, relnum, r_offset,
+                               _("relocation overflow: "
+                                 "%u against local symbol %u in %s"),
+                               r_type, r_sym, object->name().c_str());
+      else if (gsym->is_defined() && gsym->source() == Symbol::FROM_OBJECT)
+        gold_error_at_location(relinfo, relnum, r_offset,
+                               _("relocation overflow: "
+                                 "%u against '%s' defined in %s"),
+                               r_type, gsym->demangled_name().c_str(),
+                               gsym->object()->name().c_str());
+      else
+        gold_error_at_location(relinfo, relnum, r_offset,
+                               _("relocation overflow: %u against '%s'"),
+                               r_type, gsym->demangled_name().c_str());
       break;
     case Reloc_funcs::STATUS_BAD_RELOC:
       gold_error_at_location(relinfo, relnum, r_offset,
