@@ -4539,8 +4539,7 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
     Valtype32 val = elfcpp::Swap<32, big_endian>::readval(wv);
 
     // Try converting J(AL)R to B(AL), if the target is in range.
-    if (!parameters->options().relocatable()
-        && r_type == elfcpp::R_MIPS_JALR
+    if (r_type == elfcpp::R_MIPS_JALR
         && !cross_mode_jump
         && ((jalr_to_bal && val == 0x0320f809)    // jalr t9
             || (jr_to_b && val == 0x03200008)))   // jr t9
@@ -11570,7 +11569,6 @@ Target_mips<size, big_endian>::Relocate::relocate(
   //
   // (c) the section allows direct references to MIPS16 functions.
   if (r_type != elfcpp::R_MIPS16_26
-      && !parameters->options().relocatable()
       && ((mips_sym != NULL
            && mips_sym->has_mips16_fn_stub()
            && (r_type != elfcpp::R_MIPS16_CALL16 || mips_sym->need_fn_stub()))
@@ -11606,7 +11604,7 @@ Target_mips<size, big_endian>::Relocate::relocate(
   // to a standard MIPS function, we need to redirect the call to the stub.
   // Note that we specifically exclude R_MIPS16_CALL16 from this behavior;
   // indirect calls should use an indirect stub instead.
-  else if (r_type == elfcpp::R_MIPS16_26 && !parameters->options().relocatable()
+  else if (r_type == elfcpp::R_MIPS16_26
            && ((mips_sym != NULL
                 && (mips_sym->has_mips16_call_stub()
                     || mips_sym->has_mips16_call_fp_stub()))
@@ -11668,7 +11666,6 @@ Target_mips<size, big_endian>::Relocate::relocate(
   // entry is used if a standard PLT entry has also been made.
   else if ((r_type == elfcpp::R_MIPS16_26
             || r_type == elfcpp::R_MICROMIPS_26_S1)
-          && !parameters->options().relocatable()
           && mips_sym != NULL
           && mips_sym->has_plt_offset()
           && mips_sym->has_comp_plt_offset()
@@ -11697,8 +11694,7 @@ Target_mips<size, big_endian>::Relocate::relocate(
   // symbol would be 16-bit code, and that direct jumps were therefore
   // acceptable.
   cross_mode_jump =
-    (!parameters->options().relocatable()
-     && !(gsym != NULL && gsym->is_weak_undefined())
+    (!(gsym != NULL && gsym->is_weak_undefined())
      && ((r_type == elfcpp::R_MIPS16_26 && !target_is_16_bit_code)
          || (r_type == elfcpp::R_MICROMIPS_26_S1 && !target_is_micromips_code)
          || ((r_type == elfcpp::R_MIPS_26 || r_type == elfcpp::R_MIPS_JALR)
@@ -12252,8 +12248,7 @@ Target_mips<size, big_endian>::Relocate::relocate(
       r_addend = calculated_value;
     }
 
-  bool jal_shuffle = jal_reloc(r_type) ? !parameters->options().relocatable()
-                                       : false;
+  bool jal_shuffle = jal_reloc(r_type);
   Reloc_funcs::mips_reloc_shuffle(view, r_type, jal_shuffle);
 
   // Report any errors.
