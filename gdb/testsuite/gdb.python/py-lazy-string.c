@@ -18,6 +18,9 @@
 int
 main ()
 {
+  const char *ptr = "pointer";
+  const char array[] = "array";
+  pointer typedef_ptr = "typedef pointer";
   const char *null = 0;
 
   return 0; /* break here */

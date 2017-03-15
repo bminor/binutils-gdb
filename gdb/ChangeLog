@@ -1,5 +1,20 @@
 2017-03-16  Doug Evans  <dje@google.com>
 
+	PR python/17728, python/18439, python/18779
+	* python/py-lazy-string.c (lazy_string_object): Clarify use of LENGTH
+	member.  Change type of TYPE member to PyObject *.  All uses updated.
+	(stpy_convert_to_value): Fix handling of TYPE_CODE_PTR.
+	(gdbpy_create_lazy_string_object): Flag bad length values.
+	Handle TYPE_CODE_ARRAY with possibly different user-provided length.
+	Handle typedefs in incoming type.
+	(stpy_lazy_string_elt_type): New function.
+	(gdbpy_extract_lazy_string): Call it.
+	* python/py-value.c (valpy_lazy_string): Flag bad length values.
+	Fix handling of TYPE_CODE_PTR.  Handle TYPE_CODE_ARRAY.  Handle
+	typedefs in incoming type.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
 	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
 	* guile/scm-type.c (tyscm_scm_to_type): New function.
 

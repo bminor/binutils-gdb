@@ -400,9 +400,19 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
    A lazy string is a pointer to a string with an optional encoding and
    length.  If ENCODING is not given, encoding is set to None.  If an
    ENCODING is provided the encoding parameter is set to ENCODING, but
-   the string is not encoded.  If LENGTH is provided then the length
-   parameter is set to LENGTH, otherwise length will be set to -1 (first
-   null of appropriate with).  */
+   the string is not encoded.
+   If LENGTH is provided then the length parameter is set to LENGTH.
+   Otherwise if the value is an array of known length then the array's length
+   is used.  Otherwise the length will be set to -1 (meaning first null of
+   appropriate with).
+
+   Note: In order to not break any existing uses this allows creating
+   lazy strings from anything.  PR 20769.  E.g.,
+   gdb.parse_and_eval("my_int_variable").lazy_string().
+   "It's easier to relax restrictions than it is to impose them after the
+   fact."  So we should be flagging any unintended uses as errors, but it's
+   perhaps too late for that.  */
+
 static PyObject *
 valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
@@ -416,16 +426,66 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 				    &user_encoding, &length))
     return NULL;
 
+  if (length < -1)
+    {
+      PyErr_SetString (PyExc_ValueError, _("Invalid length."));
+      return NULL;
+    }
+
   TRY
     {
       scoped_value_mark free_values;
+      struct type *type, *realtype;
+      CORE_ADDR addr;
 
-      if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
-	value = value_ind (value);
+      type = value_type (value);
+      realtype = check_typedef (type);
 
-      str_obj = gdbpy_create_lazy_string_object (value_address (value), length,
-						 user_encoding,
-						 value_type (value));
+      switch (TYPE_CODE (realtype))
+	{
+	case TYPE_CODE_ARRAY:
+	  {
+	    LONGEST array_length = -1;
+	    LONGEST low_bound, high_bound;
+
+	    /* PR 20786: There's no way to specify an array of length zero.
+	       Record a length of [0,-1] which is how Ada does it.  Anything
+	       we do is broken, but this one possible solution.  */
+	    if (get_array_bounds (realtype, &low_bound, &high_bound))
+	      array_length = high_bound - low_bound + 1;
+	    if (length == -1)
+	      length = array_length;
+	    else if (array_length == -1)
+	      {
+		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+						0, length - 1);
+	      }
+	    else if (length != array_length)
+	      {
+		/* We need to create a new array type with the
+		   specified length.  */
+		if (length > array_length)
+		  error (_("Length is larger than array size."));
+		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+						low_bound,
+						low_bound + length - 1);
+	      }
+	    addr = value_address (value);
+	    break;
+	  }
+	case TYPE_CODE_PTR:
+	  /* If a length is specified we defer creating an array of the
+	     specified width until we need to.  */
+	  addr = value_as_address (value);
+	  break;
+	default:
+	  /* Should flag an error here.  PR 20769.  */
+	  addr = value_address (value);
+	  break;
+	}
+
+      str_obj = gdbpy_create_lazy_string_object (addr, length, user_encoding,
+						 type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

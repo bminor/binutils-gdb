@@ -1,7 +1,19 @@
+<<<<<<< HEAD
 2017-03-16  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* gdb.cp/m-static.exp: Fix expectation for prototype of
 	test5.single_constructor and single_constructor::single_constructor.
+=======
+2017-03-15  Doug Evans  <dje@google.com>
+
+	PR python/17728, python/18439, python/18779
+	* gdb.python/py-value.c (main) Delete locals sptr, sn.
+	* gdb.python/py-lazy-string.c (pointer): New typedef.
+	(main): New locals ptr, array, typedef_ptr.
+	* gdb.python/py-value.exp: Move lazy string tests to ...
+	* gdb.python/py-lazy-string.exp: ... here.  Add more tests for pointer,
+	array, typedef lazy strings.
+>>>>>>> Fix various python lazy string bugs.
 
 2017-03-14  Anton Kolesov  <anton.kolesov@synopsys.com>
 
