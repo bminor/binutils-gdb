@@ -2090,7 +2090,7 @@ riscv_pre_output_hook (void)
   for (s = stdoutput->sections; s; s = s->next)
     for (frch = seg_info (s)->frchainP; frch; frch = frch->frch_next)
       {
-	const fragS *frag;
+	fragS *frag;
 
 	for (frag = frch->frch_root; frag; frag = frag->fr_next)
 	  {
