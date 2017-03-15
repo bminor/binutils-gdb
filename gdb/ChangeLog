@@ -1,5 +1,21 @@
 2017-03-16  Doug Evans  <dje@google.com>
 
+	* guile/scm-lazy-string.c (lazy_string_smob): Clarify use of LENGTH
+	member.  Change type of TYPE member to SCM.  All uses updated.
+	(lsscm_make_lazy_string_smob): Add assert.
+	(lsscm_make_lazy_string): Flag bad length values.
+	(lsscm_elt_type): New function.
+	(gdbscm_lazy_string_to_value): Rewrite to use
+	lsscm_safe_lazy_string_to_value.
+	(lsscm_safe_lazy_string_to_value): Fix handling of TYPE_CODE_PTR.
+	* guile/scm-value.c (gdbscm_value_to_lazy_string): Flag bad length
+	values.  Fix TYPE_CODE_PTR.  Handle TYPE_CODE_ARRAY.  Handle typedefs
+	in incoming type.
+	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
+	* guile/scm-type.c (tyscm_scm_to_type): New function.
+
+2017-03-15  Doug Evans  <dje@google.com>
+
 	PR python/17728, python/18439, python/18779
 	* python/py-lazy-string.c (lazy_string_object): Clarify use of LENGTH
 	member.  Change type of TYPE member to PyObject *.  All uses updated.

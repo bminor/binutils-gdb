@@ -1173,8 +1173,10 @@ gdbscm_value_to_string (SCM self, SCM rest)
    Return a Scheme object representing a lazy_string_object type.
    A lazy string is a pointer to a string with an optional encoding and length.
    If ENCODING is not given, the target's charset is used.
-   If LENGTH is provided then the length parameter is set to LENGTH, otherwise
-   length will be set to -1 (first null of appropriate with).
+   If LENGTH is provided then the length parameter is set to LENGTH.
+   Otherwise if the value is an array of known length then the array's length
+   is used.  Otherwise the length will be set to -1 (meaning first null of
+   appropriate with).
    LENGTH must be a Scheme integer, it can't be a <gdb:value> integer.  */
 
 static SCM
@@ -1198,18 +1200,69 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 			      &encoding_arg_pos, &encoding,
 			      &length_arg_pos, &length);
 
+  if (length < -1)
+    {
+      gdbscm_out_of_range_error (FUNC_NAME, length_arg_pos,
+				 scm_from_int (length),
+				 _("invalid length"));
+    }
+
   cleanups = make_cleanup (xfree, encoding);
 
   TRY
     {
       struct cleanup *inner_cleanup
 	= make_cleanup_value_free_to_mark (value_mark ());
+      struct type *type, *realtype;
+      CORE_ADDR addr;
 
-      if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
-	value = value_ind (value);
+      type = value_type (value);
+      realtype = check_typedef (type);
 
-      result = lsscm_make_lazy_string (value_address (value), length,
-				       encoding, value_type (value));
+      switch (TYPE_CODE (realtype))
+	{
+	case TYPE_CODE_ARRAY:
+	  {
+	    LONGEST array_length = -1;
+	    LONGEST low_bound, high_bound;
+
+	    /* PR 20786: There's no way to specify an array of length zero.
+	       Record a length of [0,-1] which is how Ada does it.  Anything
+	       we do is broken, but this one possible solution.  */
+	    if (get_array_bounds (realtype, &low_bound, &high_bound))
+	      array_length = high_bound - low_bound + 1;
+	    if (length == -1)
+	      length = array_length;
+	    else if (array_length == -1)
+	      {
+		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+						0, length - 1);
+	      }
+	    else if (length != array_length)
+	      {
+		/* We need to create a new array type with the
+		   specified length.  */
+		if (length > array_length)
+		  error (_("length is larger than array size"));
+		type = lookup_array_range_type (TYPE_TARGET_TYPE (type),
+						low_bound,
+						low_bound + length - 1);
+	      }
+	    addr = value_address (value);
+	    break;
+	  }
+	case TYPE_CODE_PTR:
+	  /* If a length is specified we defer creating an array of the
+	     specified width until we need to.  */
+	  addr = value_as_address (value);
+	  break;
+	default:
+	  /* Should flag an error here.  PR 20769.  */
+	  addr = value_address (value);
+	  break;
+	}
+
+      result = lsscm_make_lazy_string (addr, length, encoding, type);
 
       do_cleanups (inner_cleanup);
     }

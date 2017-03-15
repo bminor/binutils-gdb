@@ -6,6 +6,14 @@
 =======
 2017-03-15  Doug Evans  <dje@google.com>
 
+	* gdb.guile/scm-value.c (main) Delete locals sptr, sn.
+	* gdb.guile/scm-lazy-string.c: New file.
+	* gdb.guile/scm-value.exp: Move lazy string tests to ...
+	* gdb.guile/scm-lazy-string.exp: ... here, new file.  Add more tests
+	for pointer, array, typedef lazy strings.
+
+2017-03-15  Doug Evans  <dje@google.com>
+
 	PR python/17728, python/18439, python/18779
 	* gdb.python/py-value.c (main) Delete locals sptr, sn.
 	* gdb.python/py-lazy-string.c (pointer): New typedef.
