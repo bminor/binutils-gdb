@@ -1,5 +1,13 @@
 2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
+	* mips.cc (Target_mips::Relocate::calculated_value_): New data
+	member.
+	(Target_mips::Relocate::calculate_only_): Likewise.
+	(Target_mips::Relocate::relocate): Handle multiple consecutive
+	relocations with the same offset.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
 	* mips.cc (Target_mips::Relocate::relocate): Remove redundant
 	checks for relocatable link.
 	(Mips_relocate_functions::reljalr): Likewise.
