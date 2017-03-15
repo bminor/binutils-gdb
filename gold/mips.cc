@@ -64,6 +64,9 @@ template<int size, bool big_endian>
 class Mips_output_section_reginfo;
 
 template<int size, bool big_endian>
+class Mips_output_section_options;
+
+template<int size, bool big_endian>
 class Mips_output_data_la25_stub;
 
 template<int size, bool big_endian>
@@ -2821,6 +2824,31 @@ class Mips_output_section_reginfo : public Output_section_data
   Valtype cprmask4_;
 };
 
+// This class handles .MIPS.options output section.
+
+template<int size, bool big_endian>
+class Mips_output_section_options : public Output_section
+{
+ public:
+  Mips_output_section_options(const char* name, elfcpp::Elf_Word type,
+                              elfcpp::Elf_Xword flags,
+                              Target_mips<size, big_endian>* target)
+    : Output_section(name, type, flags), target_(target)
+  {
+    // After the input sections are written, we only need to update
+    // ri_gp_value field of ODK_REGINFO entries.
+    this->set_after_input_sections();
+  }
+
+ protected:
+  // Write out option section.
+  void
+  do_write(Output_file* of);
+
+ private:
+  Target_mips<size, big_endian>* target_;
+};
+
 // This class handles .MIPS.abiflags output section.
 
 template<int size, bool big_endian>
@@ -3634,6 +3662,18 @@ class Target_mips : public Sized_target<size, big_endian>
   do_make_elf_object(const std::string&, Input_file*, off_t,
                      const elfcpp::Ehdr<size, !big_endian>&)
   { gold_unreachable(); }
+
+  // Make an output section.
+  Output_section*
+  do_make_output_section(const char* name, elfcpp::Elf_Word type,
+                         elfcpp::Elf_Xword flags)
+    {
+      if (type == elfcpp::SHT_MIPS_OPTIONS)
+        return new Mips_output_section_options<size, big_endian>(name, type,
+                                                                 flags, this);
+      else
+        return new Output_section(name, type, flags);
+    }
 
   // Adjust ELF file header.
   void
@@ -8175,6 +8215,44 @@ Mips_output_section_reginfo<size, big_endian>::do_write(Output_file* of)
                                            this->target_->gp_value());
 
   of->write_output_view(offset, data_size, view);
+}
+
+// Mips_output_section_options methods.
+
+template<int size, bool big_endian>
+void
+Mips_output_section_options<size, big_endian>::do_write(Output_file* of)
+{
+  off_t offset = this->offset();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
+  unsigned char* view = of->get_output_view(offset, oview_size);
+  const unsigned char* end = view + oview_size;
+
+  while (view + 8 <= end)
+    {
+      unsigned char kind = elfcpp::Swap<8, big_endian>::readval(view);
+      unsigned char sz = elfcpp::Swap<8, big_endian>::readval(view + 1);
+      if (sz < 8)
+        {
+          gold_error(_("Warning: bad `%s' option size %u smaller "
+                       "than its header in output section"),
+                     this->name(), sz);
+          break;
+        }
+
+      // Only update ri_gp_value (GP register value) field of ODK_REGINFO entry.
+      if (this->target_->is_output_n64() && kind == elfcpp::ODK_REGINFO)
+        elfcpp::Swap<size, big_endian>::writeval(view + 32,
+                                                 this->target_->gp_value());
+      else if (kind == elfcpp::ODK_REGINFO)
+        elfcpp::Swap<size, big_endian>::writeval(view + 28,
+                                                 this->target_->gp_value());
+
+      view += sz;
+    }
+
+  of->write_output_view(offset, oview_size, view);
 }
 
 // Mips_output_section_abiflags methods.
