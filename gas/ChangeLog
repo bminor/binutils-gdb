@@ -1,3 +1,8 @@
+2017-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-riscv.c (riscv_pre_output_hook): Fix compile time
+	warning about discarding a const qualifier.
+
 2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
 
 	* config/tc-riscv.h (HWARD2_USE_FIXED_ADVANCE_PC): New define.
