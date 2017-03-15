@@ -1592,10 +1592,11 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
       local_symbol_is_micromips_(), mips16_stub_sections_(),
       local_non_16bit_calls_(), local_16bit_calls_(), local_mips16_fn_stubs_(),
       local_mips16_call_stubs_(), gp_(0), has_reginfo_section_(false),
-      got_info_(NULL), section_is_mips16_fn_stub_(),
-      section_is_mips16_call_stub_(), section_is_mips16_call_fp_stub_(),
-      pdr_shndx_(-1U), attributes_section_data_(NULL), abiflags_(NULL),
-      gprmask_(0), cprmask1_(0), cprmask2_(0), cprmask3_(0), cprmask4_(0)
+      merge_processor_specific_data_(true), got_info_(NULL),
+      section_is_mips16_fn_stub_(), section_is_mips16_call_stub_(),
+      section_is_mips16_call_fp_stub_(), pdr_shndx_(-1U),
+      attributes_section_data_(NULL), abiflags_(NULL), gprmask_(0),
+      cprmask1_(0), cprmask2_(0), cprmask3_(0), cprmask4_(0)
   {
     this->is_pic_ = (ehdr.get_e_flags() & elfcpp::EF_MIPS_PIC) != 0;
     this->is_n32_ = elfcpp::abi_n32(ehdr.get_e_flags());
@@ -1836,6 +1837,11 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   has_reginfo_section() const
   { return this->has_reginfo_section_; }
 
+  // Return whether we want to merge processor-specific data.
+  bool
+  merge_processor_specific_data() const
+  { return this->merge_processor_specific_data_; }
+
   // Return gprmask from the .reginfo section of this object.
   Valtype
   gprmask() const
@@ -1926,6 +1932,8 @@ class Mips_relobj : public Sized_relobj_file<size, big_endian>
   bool is_n32_ : 1;
   // Whether the object contains a .reginfo section.
   bool has_reginfo_section_ : 1;
+  // Whether we merge processor-specific data of this object to output.
+  bool merge_processor_specific_data_ : 1;
   // The Mips_got_info for this object.
   Mips_got_info<size, big_endian>* got_info_;
 
@@ -6818,6 +6826,16 @@ Mips_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   // Call parent class to read symbol information.
   this->base_read_symbols(sd);
 
+  // If this input file is a binary file, it has no processor
+  // specific data.
+  Input_file::Format format = this->input_file()->format();
+  if (format != Input_file::FORMAT_ELF)
+    {
+      gold_assert(format == Input_file::FORMAT_BINARY);
+      this->merge_processor_specific_data_ = false;
+      return;
+    }
+
   // Read processor-specific flags in ELF file header.
   const unsigned char* pehdr = this->get_view(elfcpp::file_header_offset,
                                             elfcpp::Elf_sizes<size>::ehdr_size,
@@ -6837,9 +6855,26 @@ Mips_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   const size_t shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   const unsigned char* pshdrs = sd->section_headers->data();
   const unsigned char* ps = pshdrs + shdr_size;
+  bool must_merge_processor_specific_data = false;
   for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
     {
       elfcpp::Shdr<size, big_endian> shdr(ps);
+
+      // Sometimes an object has no contents except the section name string
+      // table and an empty symbol table with the undefined symbol.  We
+      // don't want to merge processor-specific data from such an object.
+      if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
+        {
+          // Symbol table is not empty.
+          const typename elfcpp::Elf_types<size>::Elf_WXword sym_size =
+            elfcpp::Elf_sizes<size>::sym_size;
+          if (shdr.get_sh_size() > sym_size)
+            must_merge_processor_specific_data = true;
+        }
+      else if (shdr.get_sh_type() != elfcpp::SHT_STRTAB)
+        // If this is neither an empty symbol table nor a string table,
+        // be conservative.
+        must_merge_processor_specific_data = true;
 
       if (shdr.get_sh_type() == elfcpp::SHT_MIPS_REGINFO)
         {
@@ -7013,6 +7048,10 @@ Mips_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
           this->pdr_shndx_ = i;
         }
     }
+
+  // This is rare.
+  if (!must_merge_processor_specific_data)
+    this->merge_processor_specific_data_ = false;
 }
 
 // Discard MIPS16 stub secions that are not needed.
@@ -9600,6 +9639,8 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                         const Input_objects* input_objects,
                                         Symbol_table* symtab)
 {
+  const bool relocatable = parameters->options().relocatable();
+
   // Add +1 to MIPS16 and microMIPS init_ and _fini symbols so that DT_INIT and
   // DT_FINI have correct values.
   Mips_symbol<size>* init = static_cast<Mips_symbol<size>*>(
@@ -9633,19 +9674,6 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
   if (this->got16_addends_.size() > 0)
       gold_error("Can't find matching LO16 reloc");
 
-  // Check for any mips16 stub sections that we can discard.
-  if (!parameters->options().relocatable())
-    {
-      for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-          p != input_objects->relobj_end();
-          ++p)
-        {
-          Mips_relobj<size, big_endian>* object =
-            Mips_relobj<size, big_endian>::as_mips_relobj(*p);
-          object->discard_mips16_stub_sections(symtab);
-        }
-    }
-
   Valtype gprmask = 0;
   Valtype cprmask1 = 0;
   Valtype cprmask2 = 0;
@@ -9660,6 +9688,13 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
       Mips_relobj<size, big_endian>* relobj =
         Mips_relobj<size, big_endian>::as_mips_relobj(*p);
 
+      // Check for any mips16 stub sections that we can discard.
+      if (!relocatable)
+        relobj->discard_mips16_stub_sections(symtab);
+
+      if (!relobj->merge_processor_specific_data())
+        continue;
+
       // Merge .reginfo contents of input objects.
       if (relobj->has_reginfo_section())
         {
@@ -9670,24 +9705,6 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
           cprmask3 |= relobj->cprmask3();
           cprmask4 |= relobj->cprmask4();
         }
-
-      Input_file::Format format = relobj->input_file()->format();
-      if (format != Input_file::FORMAT_ELF)
-        continue;
-
-      // If all input sections will be discarded, don't use this object
-      // file for merging processor specific flags.
-      bool should_merge_processor_specific_flags = false;
-
-      for (unsigned int i = 1; i < relobj->shnum(); ++i)
-        if (relobj->output_section(i) != NULL)
-          {
-            should_merge_processor_specific_flags = true;
-            break;
-          }
-
-      if (!should_merge_processor_specific_flags)
-        continue;
 
       // Merge processor specific flags.
       Mips_abiflags<big_endian> in_abiflags;
@@ -9723,7 +9740,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                         elfcpp::SHF_ALLOC,
                                         abiflags_section, ORDER_INVALID, false);
 
-      if (!parameters->options().relocatable() && os != NULL)
+      if (!relocatable && os != NULL)
         {
           Output_segment* abiflags_segment =
             layout->make_output_segment(elfcpp::PT_MIPS_ABIFLAGS, elfcpp::PF_R);
@@ -9744,7 +9761,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                         elfcpp::SHF_ALLOC, reginfo_section,
                                         ORDER_INVALID, false);
 
-      if (!parameters->options().relocatable() && os != NULL)
+      if (!relocatable && os != NULL)
         {
           Output_segment* reginfo_segment =
             layout->make_output_segment(elfcpp::PT_MIPS_REGINFO,
@@ -9789,7 +9806,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                     false, false);
     }
 
-  if (!parameters->options().relocatable() && !parameters->doing_static_link())
+  if (!relocatable && !parameters->doing_static_link())
     // In case there is no .got section, create one.
     this->got_section(symtab, layout);
 
@@ -9821,7 +9838,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
                                                                symtab));
 
   // Add NULL segment.
-  if (!parameters->options().relocatable())
+  if (!relocatable)
     layout->make_output_segment(elfcpp::PT_NULL, 0);
 
   // Fill in some more dynamic tags.
@@ -9833,7 +9850,7 @@ Target_mips<size, big_endian>::do_finalize_sections(Layout* layout,
 
   Output_data_dynamic* const odyn = layout->dynamic_data();
   if (odyn != NULL
-      && !parameters->options().relocatable()
+      && !relocatable
       && !parameters->doing_static_link())
   {
     unsigned int d_val;
