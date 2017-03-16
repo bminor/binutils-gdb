@@ -3327,6 +3327,11 @@ struct ppc_elf_link_hash_table
   /* True if the target system is VxWorks.  */
   unsigned int is_vxworks:1;
 
+  /* Whether there exist local gnu indirect function resolvers,
+     referenced by dynamic relocations.  */
+  unsigned int local_ifunc_resolver:1;
+  unsigned int maybe_local_ifunc_resolver:1;
+
   /* The size of PLT entries.  */
   int plt_entry_size;
   /* The distance between adjacent PLT slots.  */
@@ -8386,6 +8391,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  loc += (htab->elf.irelplt->reloc_count++
 			  * sizeof (Elf32_External_Rela));
 		  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
+		  htab->local_ifunc_resolver = 1;
 
 		  ent->plt.offset |= 1;
 		}
@@ -8574,7 +8580,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			bfd_byte * loc;
 
 			if (ifunc != NULL)
-			  rsec = htab->elf.irelplt;
+			  {
+			    rsec = htab->elf.irelplt;
+			    if (indx == 0)
+			      htab->local_ifunc_resolver = 1;
+			    else if (is_static_defined (h))
+			      htab->maybe_local_ifunc_resolver = 1;
+			  }
 			outrel.r_offset = (htab->elf.sgot->output_section->vma
 					   + htab->elf.sgot->output_offset
 					   + off);
@@ -8867,6 +8879,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      int skip;
 	      bfd_byte *loc;
 	      asection *sreloc;
+	      long indx = 0;
+
 #ifdef DEBUG
 	      fprintf (stderr, "ppc_elf_relocate_section needs to "
 		       "create relocation for %s\n",
@@ -8877,12 +8891,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.  */
-	      sreloc = elf_section_data (input_section)->sreloc;
-	      if (ifunc)
-		sreloc = htab->elf.irelplt;
-	      if (sreloc == NULL)
-		return FALSE;
-
 	      skip = 0;
 	      outrel.r_offset = _bfd_elf_section_offset (output_bfd, info,
 							 input_section,
@@ -8900,9 +8908,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			    || h->root.type == bfd_link_hash_undefweak))
 		       || !SYMBOL_REFERENCES_LOCAL (info, h))
 		{
-		  BFD_ASSERT (h->dynindx != -1);
+		  indx = h->dynindx;
+		  BFD_ASSERT (indx != -1);
 		  unresolved_reloc = FALSE;
-		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
+		  outrel.r_info = ELF32_R_INFO (indx, r_type);
 		  outrel.r_addend = rel->r_addend;
 		}
 	      else
@@ -8911,8 +8920,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 		  if (r_type != R_PPC_ADDR32)
 		    {
-		      long indx = 0;
-
 		      if (ifunc != NULL)
 			{
 			  /* If we get here when building a static
@@ -8976,6 +8983,18 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  else
 		    outrel.r_info = ELF32_R_INFO (0, R_PPC_RELATIVE);
 		}
+
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (ifunc)
+		{
+		  sreloc = htab->elf.irelplt;
+		  if (indx == 0)
+		    htab->local_ifunc_resolver = 1;
+		  else if (is_static_defined (h))
+		    htab->maybe_local_ifunc_resolver = 1;
+		}
+	      if (sreloc == NULL)
+		return FALSE;
 
 	      loc = sreloc->contents;
 	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
@@ -10267,12 +10286,19 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 	    if (!htab->elf.dynamic_sections_created
 		|| h->dynindx == -1)
-	      loc = (htab->elf.irelplt->contents
-		     + (htab->elf.irelplt->reloc_count++
-			* sizeof (Elf32_External_Rela)));
+	      {
+		loc = (htab->elf.irelplt->contents
+		       + (htab->elf.irelplt->reloc_count++
+			  * sizeof (Elf32_External_Rela)));
+		htab->local_ifunc_resolver = 1;
+	      }
 	    else
-	      loc = (htab->elf.srelplt->contents
-		     + reloc_index * sizeof (Elf32_External_Rela));
+	      {
+		loc = (htab->elf.srelplt->contents
+		       + reloc_index * sizeof (Elf32_External_Rela));
+		if (h->type == STT_GNU_IFUNC && is_static_defined (h))
+		  htab->maybe_local_ifunc_resolver = 1;
+	      }
 	    bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
 	    if (!h->def_regular)
@@ -10476,6 +10502,17 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_PPC_GOT:
 	      dyn.d_un.d_ptr = got;
 	      break;
+
+	    case DT_TEXTREL:
+	      if (htab->local_ifunc_resolver)
+		info->callbacks->einfo
+		  (_("%X%P: text relocations and GNU indirect "
+		     "functions will result in a segfault at runtime\n"));
+	      else if (htab->maybe_local_ifunc_resolver)
+		info->callbacks->einfo
+		  (_("%P: warning: text relocations and GNU indirect "
+		     "functions may result in a segfault at runtime\n"));
+	      continue;
 
 	    default:
 	      if (htab->is_vxworks
