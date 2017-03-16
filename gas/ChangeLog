@@ -1,3 +1,8 @@
+2017-03-16  Rinat Zelig  <rinat@mellanox.com>
+
+	* config/tc-arc.c (assemble_insn): Only handle ".t" and ".nt"
+	specially for ARCv2.
+
 2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
 
 	* config/tc-riscv.c (validate_riscv_insn): Add 'o' RVC immediate
