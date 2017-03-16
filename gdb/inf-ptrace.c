@@ -462,7 +462,7 @@ inf_ptrace_peek_poke (pid_t pid, gdb_byte *readbuf,
   /* We transfer aligned words.  Thus align ADDR down to a word
      boundary and determine how many bytes to skip at the
      beginning.  */
-  unsigned int skip = addr & (sizeof (PTRACE_TYPE_RET) - 1);
+  ULONGEST skip = addr & (sizeof (PTRACE_TYPE_RET) - 1);
   addr -= skip;
 
   for (n = 0;
