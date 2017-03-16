@@ -31,6 +31,7 @@
 #include "gdbcmd.h"
 
 #include "s390-linux-tdep.h"
+#include "s390-tdep.h"
 #include "elf/common.h"
 
 #include <asm/ptrace.h>
