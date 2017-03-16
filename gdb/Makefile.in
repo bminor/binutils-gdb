@@ -817,6 +817,7 @@ ALL_TARGET_OBS = \
 	iq2000-tdep.o \
 	linux-record.o \
 	linux-tdep.o \
+	lk-cmds.o \
 	lk-lists.o \
 	lk-low.o \
 	lk-modules.o \
@@ -1106,6 +1107,7 @@ SFILES = \
 	jit.c \
 	language.c \
 	linespec.c \
+	lk-cmds.c \
 	lk-lists.c \
 	lk-low.c \
 	lk-modules.c \
@@ -1356,6 +1358,7 @@ HFILES_NO_SRCDIR = \
 	linux-nat.h \
 	linux-record.h \
 	linux-tdep.h \
+	lk-cmds.h \
 	lk-lists.h \
 	lk-low.h \
 	lk-modules.h \
@@ -2556,6 +2559,7 @@ ALLDEPFILES = \
 	linux-fork.c \
 	linux-record.c \
 	linux-tdep.c \
+	lk-cmds.c \
 	lk-lists.c \
 	lk-low.c \
 	lk-modules.c \

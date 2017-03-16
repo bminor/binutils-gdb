@@ -27,6 +27,7 @@
 #include "gdbthread.h"
 #include "gdbtypes.h"
 #include "inferior.h"
+#include "lk-cmds.h"
 #include "lk-lists.h"
 #include "lk-low.h"
 #include "lk-modules.h"
@@ -797,6 +798,8 @@ lk_try_push_target ()
 
   if (!target_is_pushed (linux_kernel_ops))
     push_target (linux_kernel_ops);
+
+  lk_init_cmds ();
 
   set_solib_ops (gdbarch, lk_modules_so_ops);
 }

@@ -78,4 +78,6 @@ extern void val_print_not_allocated (struct ui_file *stream);
 
 extern void val_print_not_associated (struct ui_file *stream);
 
+extern void whatis_exp (char *exp, int show);
+
 #endif
