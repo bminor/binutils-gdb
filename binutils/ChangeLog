@@ -1,3 +1,8 @@
+2017-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Add support for
+	GNU_BUILD_ATTRIBUTE_SHORT_ENUM.
+
 2017-03-14  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (print_gnu_build_attribute_description): Move symbol

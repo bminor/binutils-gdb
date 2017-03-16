@@ -1,3 +1,8 @@
+2017-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (GNU_BUILD_ATTRIBUTE_SHORT_ENUM): New GNU BUILD
+	note type.
+
 2017-03-14  Jakub Jelinek  <jakub@redhat.com>
 
 	PR debug/77589

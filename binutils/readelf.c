@@ -16833,6 +16833,11 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       expected_types = "*";
       ++ name;
       break;
+    case GNU_BUILD_ATTRIBUTE_SHORT_ENUM:
+      text = _("<short enum>");
+      expected_types = "!+";
+      ++ name;
+      break;
 
     default:
       if (ISPRINT (* name))
