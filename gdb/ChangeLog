@@ -1,3 +1,16 @@
+2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (indirect_synthetic_pointer): Get data type of
+	pointed-to DIE and pass it to dwarf2_evaluate_loc_desc_full.
+	(dwarf2_evaluate_loc_desc_full): New parameter subobj_type; rename
+	byte_offset to subobj_byte_offset.  Fix the handling of
+	DWARF_VALUE_STACK on big-endian targets when coming via an
+	implicit pointer.
+	(dwarf2_evaluate_loc_desc): Adjust call to
+	dwarf2_evaluate_loc_desc_full.
+	* dwarf2loc.h (dwarf2_fetch_die_type_sect_off): New declaration.
+	* dwarf2read.c (dwarf2_fetch_die_type_sect_off): New function.
+
 2017-03-16  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (thumb_record_misc): Decode CBNZ, CBZ, REV16,

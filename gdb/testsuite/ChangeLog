@@ -1,3 +1,9 @@
+2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/dwarf.exp: Add support for DW_OP_implicit_pointer.
+	* gdb.dwarf2/nonvar-access.exp: Add test for stack value location
+	and implicit pointer into such a location.
+
 2017-03-16  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-lazy-string (pointer): Really add new typedef.

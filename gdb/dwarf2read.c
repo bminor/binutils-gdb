@@ -20775,6 +20775,31 @@ dwarf2_fetch_constant_bytes (sect_offset offset,
   return result;
 }
 
+/* Return the type of the die at OFFSET in PER_CU.  Return NULL if no
+   valid type for this die is found.  */
+
+struct type *
+dwarf2_fetch_die_type_sect_off (sect_offset offset,
+				struct dwarf2_per_cu_data *per_cu)
+{
+  struct dwarf2_cu *cu;
+  struct die_info *die;
+
+  dw2_setup (per_cu->objfile);
+
+  if (per_cu->cu == NULL)
+    load_cu (per_cu);
+  cu = per_cu->cu;
+  if (!cu)
+    return NULL;
+
+  die = follow_die_offset (offset, per_cu->is_dwz, &cu);
+  if (!die)
+    return NULL;
+
+  return die_type (die, cu);
+}
+
 /* Return the type of the DIE at DIE_OFFSET in the CU named by
    PER_CU.  */
 
