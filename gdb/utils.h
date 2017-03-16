@@ -24,6 +24,7 @@
 #include "exceptions.h"
 #include "common/scoped_restore.h"
 #include <chrono>
+#include <string>
 
 extern void initialize_utils (void);
 
@@ -139,6 +140,22 @@ extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 extern void substitute_path_component (std::string &str,
 				       const std::string &from,
 				       const std::string &to);
+
+/* Concatenate an arbitrary number of path elements.  Adds and removes
+   directory separators as needed.
+
+   concat_path (/first, second)		=> /first/second
+   concat_path (first, second)		=> first/second
+   concat_path (first/, second)		=> first/second
+   concat_path (first, /second)		=> first/second
+   concat_path (first/, /second)	=> first/second
+   concat_path (target:, second)	=> target:second
+   */
+
+extern std::string _concat_path (std::initializer_list<std::string> args,
+				 std::string dir_separator);
+
+#define concat_path(...) _concat_path ({__VA_ARGS__}, SLASH_STRING)
 
 char *ldirname (const char *filename);
 
