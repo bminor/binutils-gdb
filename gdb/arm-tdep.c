@@ -12905,17 +12905,43 @@ thumb2_record_decode_insn_handler (insn_decode_record *thumb2_insn_r)
   return -1;
 }
 
+/* Abstract memory reader.  */
+
+class abstract_memory_reader
+{
+public:
+  /* Read LEN bytes of target memory at address MEMADDR, placing the
+     results in GDB's memory at BUF.  Return true on success.  */
+
+  virtual bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len) = 0;
+};
+
+/* Instruction reader from real target.  */
+
+class instruction_reader : public abstract_memory_reader
+{
+ public:
+  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len)
+  {
+    if (target_read_memory (memaddr, buf, len))
+      return false;
+    else
+      return true;
+  }
+};
+
 /* Extracts arm/thumb/thumb2 insn depending on the size, and returns 0 on success 
 and positive val on fauilure.  */
 
 static int
-extract_arm_insn (insn_decode_record *insn_record, uint32_t insn_size)
+extract_arm_insn (abstract_memory_reader& reader,
+		  insn_decode_record *insn_record, uint32_t insn_size)
 {
   gdb_byte buf[insn_size];
 
   memset (&buf[0], 0, insn_size);
   
-  if (target_read_memory (insn_record->this_addr, &buf[0], insn_size))
+  if (!reader.read (insn_record->this_addr, buf, insn_size))
     return 1;
   insn_record->arm_insn = (uint32_t) extract_unsigned_integer (&buf[0],
                            insn_size, 
@@ -12929,8 +12955,8 @@ typedef int (*sti_arm_hdl_fp_t) (insn_decode_record*);
    dispatch it.  */
 
 static int
-decode_insn (insn_decode_record *arm_record, record_type_t record_type,
-	     uint32_t insn_size)
+decode_insn (abstract_memory_reader &reader, insn_decode_record *arm_record,
+	     record_type_t record_type, uint32_t insn_size)
 {
 
   /* (Starting from numerical 0); bits 25, 26, 27 decodes type of arm
@@ -12964,7 +12990,7 @@ decode_insn (insn_decode_record *arm_record, record_type_t record_type,
   uint32_t ret = 0;    /* return value: negative:failure   0:success.  */
   uint32_t insn_id = 0;
 
-  if (extract_arm_insn (arm_record, insn_size))
+  if (extract_arm_insn (reader, arm_record, insn_size))
     {
       if (record_debug)
 	{
@@ -13073,7 +13099,8 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       paddress (gdbarch, arm_record.this_addr));
     }
 
-  if (extract_arm_insn (&arm_record, 2))
+  instruction_reader reader;
+  if (extract_arm_insn (reader, &arm_record, 2))
     {
       if (record_debug)
 	{
@@ -13094,7 +13121,7 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   if (!(u_regval & t_bit))
     {
       /* We are decoding arm insn.  */
-      ret = decode_insn (&arm_record, ARM_RECORD, ARM_INSN_SIZE_BYTES);
+      ret = decode_insn (reader, &arm_record, ARM_RECORD, ARM_INSN_SIZE_BYTES);
     }
   else
     {
@@ -13102,13 +13129,14 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       /* is it thumb2 insn?  */
       if ((0x1D == insn_id) || (0x1E == insn_id) || (0x1F == insn_id))
 	{
-	  ret = decode_insn (&arm_record, THUMB2_RECORD,
+	  ret = decode_insn (reader, &arm_record, THUMB2_RECORD,
 			     THUMB2_INSN_SIZE_BYTES);
 	}
       else
 	{
 	  /* We are decoding thumb insn.  */
-	  ret = decode_insn (&arm_record, THUMB_RECORD, THUMB_INSN_SIZE_BYTES);
+	  ret = decode_insn (reader, &arm_record, THUMB_RECORD,
+			     THUMB_INSN_SIZE_BYTES);
 	}
     }
 

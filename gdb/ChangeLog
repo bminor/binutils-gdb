@@ -1,3 +1,10 @@
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (abstract_memory_reader): New class.
+	(instruction_reader): New class.
+	(extract_arm_insn): Add argument 'reader'.  Callers updated.
+	(decode_insn): Likewise.
+
 2017-03-16  Doug Evans  <dje@google.com>
 
 	* guile/scm-lazy-string.c (lazy_string_smob): Clarify use of LENGTH
