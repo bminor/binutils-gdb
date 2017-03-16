@@ -28,6 +28,11 @@ struct program_space;
 
 #include "symfile-add-flags.h"
 
+/* Returns the solib_search_path.  The returned string is malloc'ed and must be
+   freed by the caller.  */
+
+extern const char *get_solib_search_path ();
+
 /* Called when we free all symtabs, to free the shared library information
    as well.  */
 

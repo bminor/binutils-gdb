@@ -36,7 +36,7 @@ esac
 
 # List of objectfiles for Linux kernel support.  To be included into *-linux*
 # targets wich support Linux kernel debugging.
-lk_target_obs="lk-lists.o lk-low.o"
+lk_target_obs="lk-lists.o lk-low.o lk-modules.o"
 
 # map target info into gdb names.
 

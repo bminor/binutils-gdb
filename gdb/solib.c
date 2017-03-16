@@ -107,6 +107,14 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* see solib.h.  */
+
+const char *
+get_solib_search_path ()
+{
+  return solib_search_path ? solib_search_path : "";
+}
+
 /* Same as HAVE_DOS_BASED_FILE_SYSTEM, but useable as an rvalue.  */
 #if (HAVE_DOS_BASED_FILE_SYSTEM)
 #  define DOS_BASED_FILE_SYSTEM 1
