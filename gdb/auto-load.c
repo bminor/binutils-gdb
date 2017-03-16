@@ -40,6 +40,7 @@
 #include "filestuff.h"
 #include "extension.h"
 #include "gdb/section-scripts.h"
+#include <string>
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).
@@ -175,21 +176,20 @@ static VEC (char_ptr) *auto_load_safe_path_vec;
    this vector must be freed by free_char_ptr_vec by the caller.  */
 
 static VEC (char_ptr) *
-auto_load_expand_dir_vars (const char *string)
+auto_load_expand_dir_vars (std::string orig)
 {
   VEC (char_ptr) *dir_vec;
-  char *s;
+  std::string str = orig;
 
-  s = xstrdup (string);
-  substitute_path_component (&s, "$datadir", gdb_datadir);
-  substitute_path_component (&s, "$debugdir", debug_file_directory);
+  substitute_path_component (str, "$datadir", gdb_datadir);
+  substitute_path_component (str, "$debugdir", debug_file_directory);
 
-  if (debug_auto_load && strcmp (s, string) != 0)
+  if (debug_auto_load && str.compare (orig) != 0)
     fprintf_unfiltered (gdb_stdlog,
-			_("auto-load: Expanded $-variables to \"%s\".\n"), s);
+			_("auto-load: Expanded $-variables to \"%s\".\n"),
+			str.c_str ());
 
-  dir_vec = dirnames_to_char_ptr_vec (s);
-  xfree(s);
+  dir_vec = dirnames_to_char_ptr_vec (str.c_str ());
 
   return dir_vec;
 }

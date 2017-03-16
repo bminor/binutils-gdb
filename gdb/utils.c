@@ -66,6 +66,8 @@
 #include "interps.h"
 #include "gdb_regex.h"
 
+#include <string>
+
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
 #endif
@@ -3158,49 +3160,25 @@ make_cleanup_free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec)
   return make_cleanup (do_free_char_ptr_vec, char_ptr_vec);
 }
 
-/* Substitute all occurences of string FROM by string TO in *STRINGP.  *STRINGP
-   must come from xrealloc-compatible allocator and it may be updated.  FROM
-   needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be
-   located at the start or end of *STRINGP.  */
+/* See utils.h.  */
 
 void
-substitute_path_component (char **stringp, const char *from, const char *to)
+substitute_path_component (std::string &str, const std::string &from,
+			   const std::string &to)
 {
-  char *string = *stringp, *s;
-  const size_t from_len = strlen (from);
-  const size_t to_len = strlen (to);
-
-  for (s = string;;)
+  for (size_t pos = str.find (from); pos != std::string::npos;
+       pos = str.find (from, pos + 1))
     {
-      s = strstr (s, from);
-      if (s == NULL)
-	break;
-
-      if ((s == string || IS_DIR_SEPARATOR (s[-1])
-	   || s[-1] == DIRNAME_SEPARATOR)
-          && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
-	      || s[from_len] == DIRNAME_SEPARATOR))
+      char start, end;
+      start = str[pos - 1];
+      end = str[pos + from.length ()];
+      if ((pos == 0 || IS_DIR_SEPARATOR (start) || start == DIRNAME_SEPARATOR)
+	  && (end == '\0' || IS_DIR_SEPARATOR (end)
+	      || end == DIRNAME_SEPARATOR))
 	{
-	  char *string_new;
-
-	  string_new
-	    = (char *) xrealloc (string, (strlen (string) + to_len + 1));
-
-	  /* Relocate the current S pointer.  */
-	  s = s - string + string_new;
-	  string = string_new;
-
-	  /* Replace from by to.  */
-	  memmove (&s[to_len], &s[from_len], strlen (&s[from_len]) + 1);
-	  memcpy (s, to, to_len);
-
-	  s += to_len;
+	  str.replace (pos, from.length (), to);
 	}
-      else
-	s++;
     }
-
-  *stringp = string;
 }
 
 #ifdef HAVE_WAITPID
