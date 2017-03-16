@@ -1,5 +1,18 @@
 2017-03-16  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c [GDB_SELF_TEST]: include "selftests.h".
+	(arm_record_test): Declare.
+	(_initialize_arm_tdep) [GDB_SELF_TEST]: call register_self_test.
+	(thumb_record_ld_st_reg_offset): Rewrite the opcode matching to
+	align with the manual.
+	(thumb_record_misc): Adjust the code order to align with the
+	manual.
+	(thumb2_record_decode_insn_handler): Fix instruction matching.
+	(instruction_reader_thumb): New class.
+	(arm_record_test): New function.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c (abstract_memory_reader): New class.
 	(instruction_reader): New class.
 	(extract_arm_insn): Add argument 'reader'.  Callers updated.
