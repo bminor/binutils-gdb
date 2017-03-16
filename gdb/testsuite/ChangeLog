@@ -1,3 +1,8 @@
+2017-03-16  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/m-static.exp: Fix expectation for prototype of
+	test5.single_constructor and single_constructor::single_constructor.
+
 2017-03-14  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* lib/gdb.exp (get_valueof, get_integer_valueof, get_sizeof):
