@@ -1,3 +1,12 @@
+2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-dis.c (enforced_isa_mask): Declare.
+	(cpu_types): Likewise.
+	(parse_cpu_option): New function.
+	(parse_disassembler_options): Use it.
+	(print_insn_arc): Use enforced_isa_mask.
+	(print_arc_disassembler_options): Document new options.
+
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
 	* alpha-dis.c: Include disassemble.h, don't include
