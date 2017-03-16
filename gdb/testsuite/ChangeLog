@@ -1,3 +1,7 @@
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-lazy-string (pointer): Really add new typedef.
+
 2017-03-16  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* gdb.cp/m-static.exp: Fix expectation for prototype of
