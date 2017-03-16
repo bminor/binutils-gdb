@@ -11979,7 +11979,6 @@ thumb_record_misc (insn_decode_record *thumb_insn_r)
 	case 9: /* fall through  */
 	case 11:
 	  /* CBNZ, CBZ */
-	  return -1;
 	  break;
 	case 2:
 	  /* SXTH, SXTB, UXTH, UXTB */
@@ -12012,7 +12011,8 @@ thumb_record_misc (insn_decode_record *thumb_insn_r)
 	  break;
 	case 10:
 	  /* REV, REV16, REVSH */
-	  return -1;
+	  record_buf[0] = bits (thumb_insn_r->arm_insn, 0, 2);
+	  thumb_insn_r->reg_rec_count = 1;
 	  break;
 	case 12: /* fall through  */
 	case 13:

@@ -1,5 +1,10 @@
 2017-03-16  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (thumb_record_misc): Decode CBNZ, CBZ, REV16,
+	and REVSH instructions.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c [GDB_SELF_TEST]: include "selftests.h".
 	(arm_record_test): Declare.
 	(_initialize_arm_tdep) [GDB_SELF_TEST]: call register_self_test.
