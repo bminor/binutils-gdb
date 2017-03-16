@@ -817,6 +817,8 @@ ALL_TARGET_OBS = \
 	iq2000-tdep.o \
 	linux-record.o \
 	linux-tdep.o \
+	lk-lists.o \
+	lk-low.o \
 	lm32-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o \
@@ -1103,6 +1105,8 @@ SFILES = \
 	jit.c \
 	language.c \
 	linespec.c \
+	lk-lists.c \
+	lk-low.c \
 	location.c \
 	m2-exp.y \
 	m2-lang.c \
@@ -1350,6 +1354,8 @@ HFILES_NO_SRCDIR = \
 	linux-nat.h \
 	linux-record.h \
 	linux-tdep.h \
+	lk-lists.h \
+	lk-low.h \
 	location.h \
 	m2-lang.h \
 	m32r-tdep.h \
@@ -2547,6 +2553,8 @@ ALLDEPFILES = \
 	linux-fork.c \
 	linux-record.c \
 	linux-tdep.c \
+	lk-lists.c \
+	lk-low.c \
 	lm32-tdep.c \
 	m32r-linux-nat.c \
 	m32r-linux-tdep.c \

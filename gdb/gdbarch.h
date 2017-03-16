@@ -1553,6 +1553,13 @@ extern void set_gdbarch_disassembler_options (struct gdbarch *gdbarch, char ** d
 
 extern const disasm_options_t * gdbarch_valid_disassembler_options (struct gdbarch *gdbarch);
 extern void set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch, const disasm_options_t * valid_disassembler_options);
+/* Initiate architecture dependent private data for the linux-kernel target. */
+
+extern int gdbarch_lk_init_private_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_lk_init_private_ftype) (struct gdbarch *gdbarch);
+extern void gdbarch_lk_init_private (struct gdbarch *gdbarch);
+extern void set_gdbarch_lk_init_private (struct gdbarch *gdbarch, gdbarch_lk_init_private_ftype *lk_init_private);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

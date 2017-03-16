@@ -34,6 +34,10 @@ case $targ in
     ;;
 esac
 
+# List of objectfiles for Linux kernel support.  To be included into *-linux*
+# targets wich support Linux kernel debugging.
+lk_target_obs="lk-lists.o lk-low.o"
+
 # map target info into gdb names.
 
 case "${targ}" in
@@ -479,7 +483,7 @@ powerpc*-*-*)
 s390*-*-linux*)
 	# Target: S390 running Linux
 	gdb_target_obs="s390-linux-tdep.o solib-svr4.o linux-tdep.o \
-			linux-record.o"
+			linux-record.o ${lk_target_obs}"
 	build_gdbserver=yes
 	;;
 
