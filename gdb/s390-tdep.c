@@ -40,6 +40,7 @@
 #include "reggroups.h"
 #include "regset.h"
 #include "s390-linux-tdep.h"
+#include "s390-lk-tdep.h"
 #include "s390-tdep.h"
 #include "target-descriptions.h"
 #include "trad-frame.h"
@@ -1032,7 +1033,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
 {
   asection *section = bfd_get_section_by_name (abfd, ".reg");
   CORE_ADDR hwcap = 0;
-  int high_gprs, v1, v2, te, vx;
+  int high_gprs, v1, v2, te, vx, cr;
 
   target_auxv_search (target, AT_HWCAP, &hwcap);
   if (!section)
@@ -1044,6 +1045,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
   v2 = (bfd_get_section_by_name (abfd, ".reg-s390-system-call") != NULL);
   vx = (hwcap & HWCAP_S390_VX);
   te = (hwcap & HWCAP_S390_TE);
+  cr = (bfd_get_section_by_name (abfd, ".reg-s390-ctrs") != NULL);
 
   switch (bfd_section_size (abfd, section))
     {
@@ -1060,6 +1062,8 @@ s390_core_read_description (struct gdbarch *gdbarch,
 
     case s390x_sizeof_gregset:
       return (te && vx ? tdesc_s390x_tevx_linux64 :
+	      vx && cr ? tdesc_s390x_vxcr_linux64 :
+	      cr ? tdesc_s390x_cr_linux64 :
 	      vx ? tdesc_s390x_vx_linux64 :
 	      te ? tdesc_s390x_te_linux64 :
 	      v2 ? tdesc_s390x_linux64v2 :
@@ -1116,6 +1120,22 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
       cb (".reg-s390-vxrs-high", 16 * 16, &s390_vxrs_high_regset,
 	  "s390 vector registers 16-31", cb_data);
     }
+
+  /* Privileged registers for kernel debugging.  */
+  if (bfd_get_section_by_name (core_bfd, ".reg-s390-timer"))
+    cb (".reg-s390-timer", 8, &s390x_timer_regset, "s390 timer", cb_data);
+  if (bfd_get_section_by_name (core_bfd, ".reg-s390-todcmp"))
+    cb (".reg-s390-todcmp", 8, &s390x_todcmp_regset,
+	"s390 clock comperator", cb_data);
+  if (bfd_get_section_by_name (core_bfd, ".reg-s390-todpreg"))
+    cb (".reg-s390-todpreg", 4, &s390x_todpreg_regset,
+	"s390 TOD programable register", cb_data);
+  if (bfd_get_section_by_name (core_bfd, ".reg-s390-ctrs"))
+    cb (".reg-s390-ctrs", 16 * 8, &s390x_cr_regset,
+	"s390 control registers", cb_data);
+  if (bfd_get_section_by_name (core_bfd, ".reg-s390-prefix"))
+    cb (".reg-s390-prefix", 4, &s390x_prefix_regset,
+	"s390 prefix area", cb_data);
 }
 
 
@@ -2986,6 +3006,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int have_linux_v2 = 0;
   int have_tdb = 0;
   int have_vx = 0;
+  int have_privileged = 0;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -3158,6 +3179,30 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						S390_V16_REGNUM + i,
 						vxrs_high[i]);
 	  have_vx = 1;
+	}
+
+      /* Control registers.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.cr");
+      if (feature)
+	{
+	  for (i = 0; i < 16; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_CR0_REGNUM + i, cr[i]);
+	}
+
+      /* Privileged registers.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.privileged");
+      if (feature)
+	{
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      S390_TIMER_REGNUM, "timer");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      S390_TODCMP_REGNUM, "todcmp");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      S390_TODPREG_REGNUM, "todpreg");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      S390_PREFIX_REGNUM, "prefix");
+	  have_privileged = 1;
 	}
 
       if (!valid_p)
@@ -3340,8 +3385,14 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_valid_disassembler_options (gdbarch,
 					  disassembler_options_s390 ());
 
-  /* Note that GNU/Linux is the only OS supported on this platform.  */
-  s390_gdbarch_linux_init (info, gdbarch);
+  /* Note that GNU/Linux is the only OS supported on this platform.
+     Nevertheless we need to distinguish between a kernel- and user-space
+     gdbarch.  GDBs osabi support is not sufficient for our case as for both
+     cases the ELF bits are for Linux.  Thus fallback to this method.  */
+  if (have_privileged)
+    s390_gdbarch_lk_init (info, gdbarch);
+  else
+    s390_gdbarch_linux_init (info, gdbarch);
 
   return gdbarch;
 }

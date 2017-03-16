@@ -319,4 +319,66 @@ enum
 #define S390_IS_TDBREGSET_REGNUM(i)				\
   ((i) >= S390_TDB_DWORD0_REGNUM && (i) <= S390_TDB_R15_REGNUM)
 
+/* Definitions for address translation.  */
+/* DAT Table types.  */
+#define S390_LK_DAT_TT_REGION1  3
+#define S390_LK_DAT_TT_REGION2  2
+#define S390_LK_DAT_TT_REGION3  1
+#define S390_LK_DAT_TT_SEGMENT  0
+
+/* Region-First-Table */
+#define S390_LK_RFTE_TL  0x3ULL		/* Table-Length */
+#define S390_LK_RFTE_TT  0xcULL		/* Table-Type */
+#define S390_LK_RFTE_I   0x20ULL	/* Region-Invalid Bit */
+#define S390_LK_RFTE_TF  0xc0ULL	/* Table Offset */
+#define S390_LK_RFTE_P   0x200ULL	/* DAT-Protection Bit */
+#define S390_LK_RFTE_O  ~0xfffULL	/* Region-Second-Table Origin */
+
+/* Region-Second-Table flags.  */
+#define S390_LK_RSTE_TL  0x3ULL		/* Table-Length */
+#define S390_LK_RSTE_TT  0xcULL		/* Table-Type */
+#define S390_LK_RSTE_I   0x20ULL	/* Region-Invalid Bit */
+#define S390_LK_RSTE_TF  0xc0ULL	/* Table Offset */
+#define S390_LK_RSTE_P   0x200ULL	/* DAT-Protection Bit */
+#define S390_LK_RSTE_O  ~0xfffULL	/* Region-Third-Table Origin */
+
+/* Region-Third-Table flags.  */
+#define S390_LK_RTTE_TL    0x3ULL	/* Table-Length */
+#define S390_LK_RTTE_TT    0xcULL	/* Table-Type */
+#define S390_LK_RTTE_CR    0x10ULL	/* Common-Region Bit */
+#define S390_LK_RTTE_I     0x20ULL	/* Region-Invalid Bit */
+#define S390_LK_RTTE_TF    0xc0ULL	/* Table Offset */
+#define S390_LK_RTTE_P     0x200ULL	/* DAT-Protection Bit */
+#define S390_LK_RTTE_FC    0x400ULL	/* Format-Control Bit */
+#define S390_LK_RTTE_F     0x800ULL	/* Fetch-Protection Bit */
+#define S390_LK_RTTE_ACC   0xf000ULL	/* Access-Control Bits */
+#define S390_LK_RTTE_AV    0x10000ULL	/* ACCF-Validity Control */
+#define S390_LK_RTTE_O    ~0xfffULL	/* Segment-Table Origin */
+#define S390_LK_RTTE_RFAA ~0x7fffffffULL /* Region-Frame Absolute Address */
+
+/* Segment-Table flags.  */
+#define S390_LK_STE_TT    0xcULL	/* Table-Type */
+#define S390_LK_STE_I     0x20ULL	/* Segment-Invalid Bit */
+#define S390_LK_STE_TF    0xc0ULL	/* Table Offset */
+#define S390_LK_STE_P     0x200ULL	/* DAT-Protection Bit */
+#define S390_LK_STE_FC    0x400ULL	/* Format-Control Bit */
+#define S390_LK_STE_F     0x800ULL	/* Fetch-Protection Bit */
+#define S390_LK_STE_ACC   0xf000ULL	/* Access-Control Bits */
+#define S390_LK_STE_AV    0x10000ULL	/* ACCF-Validity Control */
+#define S390_LK_STE_O    ~0x7ffULL	/* Page-Table Origin */
+#define S390_LK_STE_SFAA ~0xfffffULL	/* Segment-Frame Absolute Address */
+
+/* Page-Table flags.  */
+#define S390_LK_PTE_P     0x200ULL	/* DAT-Protection Bit */
+#define S390_LK_PTE_I     0x400ULL	/* Page-Invalid Bit */
+#define S390_LK_PTE_PFAA ~0xfffULL	/* Page-Frame Absolute Address */
+
+/* Virtual Address Fields.  */
+#define S390_LK_VADDR_RFX 0xffe0000000000000ULL
+#define S390_LK_VADDR_RSX 0x001ffc0000000000ULL
+#define S390_LK_VADDR_RTX 0x000003ff80000000ULL
+#define S390_LK_VADDR_SX  0x000000007ff00000ULL
+#define S390_LK_VADDR_PX  0x00000000000ff000ULL
+#define S390_LK_VADDR_BX  0x0000000000000fffULL
+
 #endif /* S390_TDEP_H */

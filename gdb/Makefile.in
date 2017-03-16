@@ -863,6 +863,7 @@ ALL_TARGET_OBS = \
 	rs6000-tdep.o \
 	rx-tdep.o \
 	s390-linux-tdep.o \
+	s390-lk-tdep.o \
 	s390-tdep.o \
 	score-tdep.o \
 	sh-linux-tdep.o \
@@ -1421,6 +1422,7 @@ HFILES_NO_SRCDIR = \
 	rs6000-aix-tdep.h \
 	rs6000-tdep.h \
 	s390-linux-tdep.h \
+	s390-lk-tdep.h \
 	s390-tdep.h \
 	score-tdep.h \
 	selftest-arch.h \
@@ -2620,6 +2622,7 @@ ALLDEPFILES = \
 	rx-tdep.c \
 	s390-linux-nat.c \
 	s390-linux-tdep.c \
+	s390-lk-tdep.c \
 	s390-tdep.c \
 	score-tdep.c \
 	ser-go32.c \
