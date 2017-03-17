@@ -1,3 +1,10 @@
+2017-03-17  Alan Modra  <amodra@gmail.com>
+
+	PR 21248
+	* ppc-opc.c (powerpc_opcodes): Enable mfivor32, mfivor33,
+	mtivor32, and mtivor33 for e6500.  Move mfibatl and mfibatu after
+	those spr mnemonics they alias.  Similarly for mtibatl, mtibatu.
+
 2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
 
 	* riscv-opc.c (riscv_opcodes> <c.li>: Use the 'o' immediate encoding.
