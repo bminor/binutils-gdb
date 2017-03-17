@@ -1,3 +1,9 @@
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-linux-nat.c (fetch_fpregs, store_fpregs, fetch_regs,
+	store_regs, fetch_wmmx_regs, store_wmmx_regs, fetch_vfp_regs,
+	store_vfp_regs): Use ptid from regcache.
+
 2017-03-17  Pedro Alves  <palves@redhat.com>
 
 	PR remote/21188
