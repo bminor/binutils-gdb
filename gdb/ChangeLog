@@ -1,3 +1,17 @@
+2017-03-17  Pedro Alves  <palves@redhat.com>
+
+	PR remote/21188
+	* ser-base.c (ser_base_wait_for): Add comment.
+	(do_ser_base_readchar): Improve comment based on the ser-unix.c's
+	version.
+	* ser-unix.c (hardwire_raw): Remove reference to
+	scb->current_timeout.
+	(wait_for, do_hardwire_readchar, hardwire_readchar): Delete.
+	(hardwire_ops): Install ser_base_readchar instead of
+	hardwire_readchar.
+	* serial.h (struct serial) <current_timeout, timeout_remaining>:
+	Remove fields.
+
 2017-03-17  Jonah Graham  <jonah@kichwacoders.com>
 
 	PR gdb/19637
