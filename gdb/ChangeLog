@@ -1,5 +1,10 @@
 2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* hppa-linux-nat.c (fetch_register, store_register): Use ptid
+	from regcache.  Use get_ptrace_pid.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* corelow.c (get_core_register_section): Use ptid from regcache,
 	update doc.
 
