@@ -1,3 +1,8 @@
+2017-03-21  gingold  <gingold@gingold-Precision-7510>
+
+	* ldlang.c (lang_check_section_addresses): Check only for
+	allocated sections.
+
 2017-03-17  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/sec64k.exp: Don't run on h8300 and ip2k.

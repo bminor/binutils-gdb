@@ -4776,24 +4776,25 @@ lang_check_section_addresses (void)
   lang_memory_region_type *m;
   bfd_boolean overlays;
 
-  /* Detect address space overflow.  */
+  /* Detect address space overflow on allocated sections.  */
   addr_mask = ((bfd_vma) 1 <<
 	       (bfd_arch_bits_per_address (link_info.output_bfd) - 1)) - 1;
   addr_mask = (addr_mask << 1) + 1;
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
-    {
-      s_end = (s->vma + s->size) & addr_mask;
-      if (s_end != 0 && s_end < (s->vma & addr_mask))
-	einfo (_("%X%P: section %s VMA wraps around address space\n"),
-	       s->name);
-      else
-	{
-	  s_end = (s->lma + s->size) & addr_mask;
-	  if (s_end != 0 && s_end < (s->lma & addr_mask))
-	    einfo (_("%X%P: section %s LMA wraps around address space\n"),
-		   s->name);
-	}
-    }
+    if ((s->flags & SEC_ALLOC) != 0)
+      {
+	s_end = (s->vma + s->size) & addr_mask;
+	if (s_end != 0 && s_end < (s->vma & addr_mask))
+	  einfo (_("%X%P: section %s VMA wraps around address space\n"),
+		 s->name);
+	else
+	  {
+	    s_end = (s->lma + s->size) & addr_mask;
+	    if (s_end != 0 && s_end < (s->lma & addr_mask))
+	      einfo (_("%X%P: section %s LMA wraps around address space\n"),
+		     s->name);
+	  }
+      }
 
   if (bfd_count_sections (link_info.output_bfd) <= 1)
     return;
