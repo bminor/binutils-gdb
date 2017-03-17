@@ -1,5 +1,10 @@
 2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers,
+	i386_darwin_store_inferior_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* i386-bsd-nat.c (i386bsd_fetch_inferior_registers,
 	i386bsd_store_inferior_registers): Use ptid from regcache.
 
