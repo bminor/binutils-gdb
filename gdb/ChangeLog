@@ -1,5 +1,10 @@
 2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* hppa-nbsd-nat.c (hppanbsd_fetch_registers,
+	hppanbsd_store_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* hppa-linux-nat.c (fetch_register, store_register): Use ptid
 	from regcache.  Use get_ptrace_pid.
 
