@@ -1,3 +1,9 @@
+2017-03-17  Jonah Graham  <jonah@kichwacoders.com>
+
+	PR gdb/19637
+	* python/lib/gdb/printer/bound_registers.py: Add support for
+	Python 3.
+
 2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf2loc.c (indirect_synthetic_pointer): Get data type of

@@ -16,6 +16,11 @@
 
 import gdb.printing
 
+if sys.version_info[0] > 2:
+    # Python 3 removed basestring and long
+    basestring = str
+    long = int
+
 class MpxBound128Printer:
     """Adds size field to a mpx __gdb_builtin_type_bound128 type."""
 
