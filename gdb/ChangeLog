@@ -1,5 +1,10 @@
 2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* corelow.c (get_core_register_section): Use ptid from regcache,
+	update doc.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* bsd-uthread.c (bsd_uthread_fetch_registers,
 	bsd_uthread_store_registers): Use ptid from regcache, set and
 	restore inferior_ptid.
