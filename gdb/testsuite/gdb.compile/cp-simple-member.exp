@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ if {[prepare_for_testing $testfile $testfile $srcfile \
 }
 
 if {![runto_main]} {
+    untested "could not run to main"
     return -1
 }
 
@@ -71,6 +72,5 @@ gdb_test "compile code get_values ()" \
 gdb_test "compile code ATYPE i;" \
     ".*.ATYPE. was not declared in this scope$failed"
 
-# !!keiths; The "to ..." part depends on how we name anonymous types.
 gdb_test "compile code N::ANON_E nse = E_A" \
-    ".*cannot convert .myenum. to .N::anonymous enum.*$failed"
+    ".*cannot convert.*$failed"

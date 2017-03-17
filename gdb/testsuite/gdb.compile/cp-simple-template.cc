@@ -1,4 +1,4 @@
-/* Copyright 2016 Free Software Foundation, Inc.
+/* Copyright 2016-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -12,9 +12,6 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-
-// NOTE: We cannot currently use namespaces until namespace-qualified
-// symbol lookups are fixed in gdb
 
 template <typename T, int V>
 T mytemplate (int a)
