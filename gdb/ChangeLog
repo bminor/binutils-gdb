@@ -1,5 +1,11 @@
 2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* bsd-uthread.c (bsd_uthread_fetch_registers,
+	bsd_uthread_store_registers): Use ptid from regcache, set and
+	restore inferior_ptid.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* arm-nbsd-nat.c (fetch_register, fetch_regs, fetch_fp_register,
 	fetch_fp_regs, store_register, store_regs, store_fp_register,
 	store_fp_regs): Use ptid from regcache.
