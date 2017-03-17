@@ -16848,7 +16848,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	    len = left;
 	  printf ("%.*s ", len, name);
 	  left -= len;
-	  name += len + 1;
+	  name += len;
 	}
       else
 	{
