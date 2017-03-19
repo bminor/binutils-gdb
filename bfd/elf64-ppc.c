@@ -3188,7 +3188,7 @@ compare_symbols (const void *ap, const void *bp)
   if ((a->flags & BSF_DYNAMIC) == 0 && (b->flags & BSF_DYNAMIC) != 0)
     return 1;
 
-  return 0;
+  return a > b;
 }
 
 /* Search SYMS for a symbol of the given VALUE.  */

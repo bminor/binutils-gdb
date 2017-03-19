@@ -1,3 +1,8 @@
+2017-03-20  Alan Modra  <amodra@gmail.com>
+
+	PR 21266
+	* elf64-ppc.c (compare_symbols): Stabilize sort.
+
 2017-03-18  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add
