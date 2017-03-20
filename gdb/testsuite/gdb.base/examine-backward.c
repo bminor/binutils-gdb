@@ -32,6 +32,14 @@ literals.  The content of each array is the same as followings:
   };
 */
 
+/* This is here just to ensure we have a null character before
+   TestStrings, to avoid showing garbage when we look for strings
+   backwards from TestStrings.  */
+
+const char Barrier[] = {
+  0x00,
+};
+
 const char TestStrings[] = {
   0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
   0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50,

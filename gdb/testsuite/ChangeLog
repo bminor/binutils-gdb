@@ -1,3 +1,9 @@
+2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/examine-backward.c (Barrier): New character array
+	constant, to ensure that TestStrings is preceded by a string
+	terminator.
+
 2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* lib/dwarf.exp: Add support for DW_OP_implicit_pointer.
