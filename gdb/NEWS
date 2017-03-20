@@ -84,6 +84,10 @@ flash-erase
   Erases all the flash memory regions reported by the target.  This is
   equivalent to the CLI command flash-erase.
 
+-file-list-shared-libraries
+  List the shared libraries in the program.  This is
+  equivalent to the CLI command "info shared".
+
 * New commands
 
 set disassembler-options

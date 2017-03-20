@@ -26603,8 +26603,8 @@ that thread.
 
 @item =library-loaded,...
 Reports that a new library file was loaded by the program.  This
-notification has 4 fields---@var{id}, @var{target-name},
-@var{host-name}, and @var{symbols-loaded}.  The @var{id} field is an
+notification has 5 fields---@var{id}, @var{target-name},
+@var{host-name}, @var{symbols-loaded} and @var{ranges}.  The @var{id} field is an
 opaque identifier of the library.  For remote debugging case,
 @var{target-name} and @var{host-name} fields give the name of the
 library file on the target, and on the host respectively.  For native
@@ -26614,7 +26614,8 @@ and should not be relied on to convey any useful information.  The
 @var{thread-group} field, if present, specifies the id of the thread
 group in whose context the library was loaded.  If the field is
 absent, it means the library was loaded in the context of all present
-thread groups.
+thread groups.  The @var{ranges} field specifies the ranges of addresses belonging
+to this library.
 
 @item =library-unloaded,...
 Reports that a library was unloaded by the program.  This notification
@@ -31535,26 +31536,45 @@ The @value{GDBN} equivalent is @samp{info sources}.
 (gdb)
 @end smallexample
 
-@ignore
 @subheading The @code{-file-list-shared-libraries} Command
 @findex -file-list-shared-libraries
 
 @subsubheading Synopsis
 
 @smallexample
- -file-list-shared-libraries
+ -file-list-shared-libraries [ @var{regexp} ]
 @end smallexample
 
 List the shared libraries in the program.
+With a regular expression @var{regexp}, only those libraries whose
+names match @var{regexp} are listed.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{info shared}.
+The corresponding @value{GDBN} command is @samp{info shared}.  The fields
+have a similar meaning to the @code{=library-loaded} notification.
+The @code{ranges} field specifies the multiple segments belonging to this
+library.  Each range has the following fields:
+
+@table @samp
+@item from
+The address defining the inclusive lower bound of the segment.
+@item to
+The address defining the exclusive upper bound of the segment.
+@end table
 
 @subsubheading Example
-N.A.
+@smallexample
+(gdb)
+-file-list-exec-source-files
+^done,shared-libraries=[
+@{id="/lib/libfoo.so",target-name="/lib/libfoo.so",host-name="/lib/libfoo.so",symbols-loaded="1",thread-group="i1",ranges=[@{from="0x72815989",to="0x728162c0"@}]@},
+@{id="/lib/libbar.so",target-name="/lib/libbar.so",host-name="/lib/libbar.so",symbols-loaded="1",thread-group="i1",ranges=[@{from="0x76ee48c0",to="0x76ee9160"@}]@}]
+(gdb)
+@end smallexample
 
 
+@ignore
 @subheading The @code{-file-list-symbol-files} Command
 @findex -file-list-symbol-files
 

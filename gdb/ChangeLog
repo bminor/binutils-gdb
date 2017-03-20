@@ -1,5 +1,21 @@
 2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
 
+	* NEWS: Add an entry about new '-file-list-shared-libraries' command.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries):
+	New function definition.
+	* mi/mi-cmds.c (mi_cmds): Add -file-list-shared-libraries command.
+	* mi/mi-cmds.h (mi_cmd_file_list_shared_libraries):
+	New function declaration.
+	* mi/mi-interp.c (mi_output_solib_attribs): New Function.
+	* mi/mi-interp.h: New file.
+	* solib.c (info_sharedlibrary_command): Replace for loop with
+	ALL_SO_LIBS macro
+	* solib.h (update_solib_list): New function declaration.
+	(so_list_head): Move macro.
+	* solist.h (ALL_SO_LIBS): New macro.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
 	* infcmd.c (post_create_inferior): Remove unused argument in
 	call to solib_add.
 	* remote.c (remote_start_remote): Likewise.

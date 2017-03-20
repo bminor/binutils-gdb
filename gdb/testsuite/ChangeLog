@@ -1,5 +1,10 @@
 2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
 
+	* gdb.mi/mi-solib.exp (test_file_list_shared_libraries):
+	New procedure.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
 	* lib/mi-support.exp (mi_gdb_test): Add additional message
 	for unexpected output.
 
