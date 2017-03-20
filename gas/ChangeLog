@@ -1,3 +1,13 @@
+2017-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (2byte): Note that if no expressions are present
+	the directive does nothing.  Emphasize that the output is
+	unaligned, and that this can have an effect on the relocations
+	generated.
+	(4byte): Simplify description.  Refer back to the 2byte
+	description.
+	(8byte): Likewise.
+
 2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/tc-arm.c (arm_fpus): Note entires that should not be

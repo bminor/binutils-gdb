@@ -7345,10 +7345,19 @@ instead of zero.  Using @samp{.zero} in this way would be confusing however.
 @cindex two-byte integer
 @cindex integer, 2-byte
 
-This directive expects zero or more expressions, separated by commas.  Each
-expression is evaluated and placed in the next two bytes of the current
-section.  If an expression will not fit in two bytes, a warning message
-is displayed and the lowest two bytes of the expression's value are used.
+This directive expects zero or more expressions, separated by commas.  If there
+are no expressions then the directive does nothing.  Otherwise each expression
+is evaluated in turn and placed in the next two bytes of the current output
+section, using the endian model of the target.  If an expression will not fit
+in two bytes, a warning message is displayed and the least significant two
+bytes of the expression's value are used.  If an expression cannot be evaluated
+at assembly time then relocations will be generated in order to compute the
+value at link time.  
+
+This directive does not apply any alignment before or after inserting the
+values.  As a result of this, if relocations are generated, they may be
+different from those used for inserting values with a guaranteed alignment.
+
 This directive is only available for ELF targets,
 
 @node 4byte
@@ -7357,11 +7366,8 @@ This directive is only available for ELF targets,
 @cindex four-byte integer
 @cindex integer, 4-byte
 
-This directive expects zero or more expressions, separated by commas.  Each
-expression is evaluated and placed in the next four bytes of the current
-section.  If an expression will not fit in four bytes, a warning message
-is displayed and the lowest four bytes of the expression's value are used.
-This directive is only available for ELF targets,
+Like the @option{.2byte} directive, except that it inserts unaligned, four byte
+long values into the output.
 
 @node 8byte
 @section @code{.8byte @var{expression} [, @var{expression}]*}
@@ -7369,11 +7375,9 @@ This directive is only available for ELF targets,
 @cindex eight-byte integer
 @cindex integer, 8-byte
 
-This directive expects zero or more expressions, separated by commas.  Each
-expression is evaluated and the resulting bignum is placed in the next eight
-bytes of the current section.  If an expression will not fit in eight bytes, a
-warning message is displayed and the lowest eight bytes of the expression's
-value are used.  This directive is only available for ELF targets,
+Like the @option{.8byte} directive, except that it inserts unaligned, eight
+byte long bignum values into the output.
+
 @end ifset
 
 @node Deprecated
