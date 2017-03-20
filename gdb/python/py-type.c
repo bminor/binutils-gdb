@@ -770,6 +770,7 @@ typy_lookup_type (struct demangle_component *demangled,
 
   if (demangled_type == DEMANGLE_COMPONENT_POINTER
       || demangled_type == DEMANGLE_COMPONENT_REFERENCE
+      || demangled_type == DEMANGLE_COMPONENT_RVALUE_REFERENCE
       || demangled_type == DEMANGLE_COMPONENT_CONST
       || demangled_type == DEMANGLE_COMPONENT_VOLATILE)
     {
@@ -787,6 +788,9 @@ typy_lookup_type (struct demangle_component *demangled,
 	    {
 	    case DEMANGLE_COMPONENT_REFERENCE:
 	      rtype = lookup_lvalue_reference_type (type);
+	      break;
+	    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+	      rtype = lookup_rvalue_reference_type (type);
 	      break;
 	    case DEMANGLE_COMPONENT_POINTER:
 	      rtype = lookup_pointer_type (type);

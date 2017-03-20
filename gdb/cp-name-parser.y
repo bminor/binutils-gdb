@@ -770,6 +770,10 @@ ptr_operator	:	'*' qualifiers_opt
 			{ $$.comp = make_empty (DEMANGLE_COMPONENT_REFERENCE);
 			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_left ($$.comp); }
+		|	ANDAND
+			{ $$.comp = make_empty (DEMANGLE_COMPONENT_RVALUE_REFERENCE);
+			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
+			  $$.last = &d_left ($$.comp); }
 		|	nested_name '*' qualifiers_opt
 			{ $$.comp = make_empty (DEMANGLE_COMPONENT_PTRMEM_TYPE);
 			  $$.comp->u.s_binary.left = $1.comp;

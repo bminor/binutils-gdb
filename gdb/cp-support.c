@@ -494,6 +494,7 @@ replace_typedefs (struct demangle_parse_info *info,
 	case DEMANGLE_COMPONENT_RESTRICT_THIS:
 	case DEMANGLE_COMPONENT_POINTER:
 	case DEMANGLE_COMPONENT_REFERENCE:
+	case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
 	  replace_typedefs (info, d_left (ret_comp), finder, data);
 	  break;
 

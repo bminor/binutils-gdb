@@ -1,6 +1,15 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* cp-name-parser.y (ptr_operator): Handle the '&&' token in
+	typename.
+	* cp-support.c (replace_typedefs): Handle
+	DEMANGLE_COMPONENT_RVALUE_REFERENCE.
+	* python/py-type.c (typy_lookup_type): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* c-exp.y (ptr_operator): Handle the '&&' token in the typename.
 	* parse.c (insert_type): Change assert statement.
 	(follow_types): Handle rvalue reference types.
