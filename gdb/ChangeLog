@@ -1,5 +1,13 @@
 2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* spu-linux-nat.c (spu_fetch_inferior_registers,
+	spu_store_inferior_registers): Use ptid from regcache, set and
+	restore inferior_ptid.
+	* spu-multiarch.c (spu_fetch_registers, spu_store_registers):
+	Likewise.
+
+2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* i386-linux-nat.c (fetch_register, store_register,
 	i386_linux_fetch_inferior_registers,
 	i386_linux_store_inferior_registers): Use ptid from regcache.
