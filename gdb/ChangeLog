@@ -1,3 +1,11 @@
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* gdbtypes.h (enum type_code) <TYPE_CODE_RVALUE_REF>: New constant.
+	(TYPE_IS_REFERENCE): New macro.
+	(struct type): Add rvalue_reference_type field.
+	(TYPE_RVALUE_REFERENCE_TYPE): New macro.
+
 2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
 
 	* NEWS: Add an entry about new '-file-list-shared-libraries' command.

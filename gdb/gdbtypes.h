@@ -160,6 +160,8 @@ enum type_code
 
     TYPE_CODE_REF,		/**< C++ Reference types */
 
+    TYPE_CODE_RVALUE_REF,	/**< C++ rvalue reference types */
+
     TYPE_CODE_CHAR,		/**< *real* character type */
 
     /* * Boolean type.  0 is false, 1 is true, and other values are
@@ -334,6 +336,11 @@ enum type_instance_flag_value
 
 #define TYPE_ATOMIC(t) \
   (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC)
+
+/* * True if this type represents either an lvalue or lvalue reference type.  */
+
+#define TYPE_IS_REFERENCE(t) \
+  (TYPE_CODE (t) == TYPE_CODE_REF || TYPE_CODE (t) == TYPE_CODE_RVALUE_REF)
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -739,6 +746,10 @@ struct type
   /* * C++: also need a reference type.  */
 
   struct type *reference_type;
+
+  /* * A C++ rvalue reference type added in C++11. */
+
+  struct type *rvalue_reference_type;
 
   /* * Variant chain.  This points to a type that differs from this
      one only in qualifiers and length.  Currently, the possible
@@ -1196,6 +1207,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
+#define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
 /* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
