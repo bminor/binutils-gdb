@@ -1,6 +1,13 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* dwarf2read.c (process_die, read_type_die_1): Handle the
+	DW_TAG_rvalue_reference_type DIE.
+	(read_tag_reference_type): Add new parameter "refcode".
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* c-typeprint.c (c_print_type, c_type_print_varspec_prefix)
 	(c_type_print_modifier, c_type_print_varspec_suffix)
 	(c_type_print_base): Support printing rvalue reference types.

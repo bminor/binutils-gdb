@@ -8388,6 +8388,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_pointer_type:
     case DW_TAG_ptr_to_member_type:
     case DW_TAG_reference_type:
+    case DW_TAG_rvalue_reference_type:
     case DW_TAG_string_type:
       break;
 
@@ -14567,15 +14568,18 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
-/* Extract all information from a DW_TAG_reference_type DIE and add to
+/* Extract all information from a DW_TAG_{rvalue_,}reference_type DIE and add to
    the user defined type vector.  */
 
 static struct type *
-read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
+read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu,
+                          enum type_code refcode)
 {
   struct comp_unit_head *cu_header = &cu->header;
   struct type *type, *target_type;
   struct attribute *attr;
+
+  gdb_assert (refcode == TYPE_CODE_REF || refcode == TYPE_CODE_RVALUE_REF);
 
   target_type = die_type (die, cu);
 
@@ -14584,7 +14588,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
   if (type)
     return type;
 
-  type = lookup_lvalue_reference_type (target_type);
+  type = lookup_reference_type (target_type, refcode);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {
@@ -19620,7 +19624,10 @@ read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
       this_type = read_tag_ptr_to_member_type (die, cu);
       break;
     case DW_TAG_reference_type:
-      this_type = read_tag_reference_type (die, cu);
+      this_type = read_tag_reference_type (die, cu, TYPE_CODE_REF);
+      break;
+    case DW_TAG_rvalue_reference_type:
+      this_type = read_tag_reference_type (die, cu, TYPE_CODE_RVALUE_REF);
       break;
     case DW_TAG_const_type:
       this_type = read_tag_const_type (die, cu);
