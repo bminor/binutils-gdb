@@ -1,3 +1,8 @@
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Add additional message
+	for unexpected output.
+
 2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/examine-backward.c (Barrier): New character array
