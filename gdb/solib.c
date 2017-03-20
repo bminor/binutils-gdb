@@ -763,17 +763,10 @@ solib_used (const struct so_list *const known)
    to the list, and leave their symbols_loaded flag clear.
 
    If FROM_TTY is non-null, feel free to print messages about what
-   we're doing.
+   we're doing.  */
 
-   If TARGET is non-null, add the sections of all new shared objects
-   to TARGET's section table.  Note that this doesn't remove any
-   sections for shared objects that have been unloaded, and it
-   doesn't check to see if the new shared objects are already present in
-   the section table.  But we only use this for core files and
-   processes we've just attached to, so that's okay.  */
-
-static void
-update_solib_list (int from_tty, struct target_ops *target)
+void
+update_solib_list (int from_tty)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   struct so_list *inferior = ops->current_sos();
@@ -974,11 +967,10 @@ libpthread_solib_p (struct so_list *so)
    If READSYMS is 0, defer reading symbolic information until later
    but still do any needed low level processing.
 
-   FROM_TTY and TARGET are as described for update_solib_list, above.  */
+   FROM_TTY is described for update_solib_list, above.  */
 
 void
-solib_add (const char *pattern, int from_tty,
-	   struct target_ops *target, int readsyms)
+solib_add (const char *pattern, int from_tty, int readsyms)
 {
   struct so_list *gdb;
 
@@ -1003,7 +995,7 @@ solib_add (const char *pattern, int from_tty,
 	error (_("Invalid regexp: %s"), re_err);
     }
 
-  update_solib_list (from_tty, target);
+  update_solib_list (from_tty);
 
   /* Walk the list of currently loaded shared libraries, and read
      symbols for any that match the pattern --- or any whose symbols
@@ -1086,7 +1078,7 @@ info_sharedlibrary_command (char *pattern, int from_tty)
   /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
   addr_width = 4 + (gdbarch_ptr_bit (gdbarch) / 4);
 
-  update_solib_list (from_tty, 0);
+  update_solib_list (from_tty);
 
   /* make_cleanup_ui_out_table_begin_end needs to know the number of
      rows, so we need to make two passes over the libs.  */
@@ -1276,7 +1268,7 @@ static void
 sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
-  solib_add (args, from_tty, (struct target_ops *) 0, 1);
+  solib_add (args, from_tty, 1);
 }
 
 /* Implements the command "nosharedlibrary", which discards symbols
@@ -1323,7 +1315,7 @@ handle_solib_event (void)
      be adding them automatically.  Switch terminal for any messages
      produced by breakpoint_re_set.  */
   target_terminal_ours_for_output ();
-  solib_add (NULL, 0, &current_target, auto_solib_add);
+  solib_add (NULL, 0, auto_solib_add);
   target_terminal_inferior ();
 }
 
@@ -1441,7 +1433,7 @@ reload_shared_libraries (char *ignored, int from_tty,
      removed.  Call it only after the solib target has been initialized by
      solib_create_inferior_hook.  */
 
-  solib_add (NULL, 0, NULL, auto_solib_add);
+  solib_add (NULL, 0, auto_solib_add);
 
   breakpoint_re_set ();
 

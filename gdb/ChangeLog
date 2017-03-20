@@ -1,3 +1,23 @@
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* infcmd.c (post_create_inferior): Remove unused argument in
+	call to solib_add.
+	* remote.c (remote_start_remote): Likewise.
+	* solib-frv.c (frv_fetch_objfile_link_map): Likewise.
+	* solib-svr4.c: (svr4_fetch_objfile_link_map): Likewise.
+	(enable_break): Likewise.
+	* solib.c (update_solib_list): Remove unused target argument
+	and its documentation.
+	(solib_add): Remove unused target argument.  Remove unused
+	argument in call to update_solib_list.
+	(info_sharedlibrary_command): Remove unused argument in call
+	to update_solib_list.
+	(sharedlibrary_command): Remove unused argument in call to
+	solib_add.
+	(handle_solib_event): Likewise.
+	(reload_shared_libraries): Likewise.
+	* solib.h (solib_add): Remove unused target argument.
+
 2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (is_rsi, is_rie): Remove functions.
