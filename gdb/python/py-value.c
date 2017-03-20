@@ -369,7 +369,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 	      if (was_pointer)
 		type = lookup_pointer_type (type);
 	      else
-		type = lookup_reference_type (type);
+		type = lookup_lvalue_reference_type (type);
 	    }
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
@@ -801,7 +801,8 @@ valpy_getitem (PyObject *self, PyObject *key)
 	  if (TYPE_CODE (val_type) == TYPE_CODE_PTR)
 	    res_val = value_cast (lookup_pointer_type (base_class_type), tmp);
 	  else if (TYPE_CODE (val_type) == TYPE_CODE_REF)
-	    res_val = value_cast (lookup_reference_type (base_class_type), tmp);
+	    res_val = value_cast (lookup_lvalue_reference_type (base_class_type),
+	                          tmp);
 	  else
 	    res_val = value_cast (base_class_type, tmp);
 	}

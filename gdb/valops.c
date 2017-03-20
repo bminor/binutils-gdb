@@ -1536,7 +1536,7 @@ value_ref (struct value *arg1)
     return arg1;
 
   arg2 = value_addr (arg1);
-  deprecated_set_value_type (arg2, lookup_reference_type (type));
+  deprecated_set_value_type (arg2, lookup_lvalue_reference_type (type));
   return arg2;
 }
 
@@ -3639,7 +3639,7 @@ value_rtti_indirect_type (struct value *v, int *full,
       real_type = make_cv_type (TYPE_CONST (target_type),
 				TYPE_VOLATILE (target_type), real_type, NULL);
       if (TYPE_CODE (type) == TYPE_CODE_REF)
-        real_type = lookup_reference_type (real_type);
+        real_type = lookup_lvalue_reference_type (real_type);
       else if (TYPE_CODE (type) == TYPE_CODE_PTR)
         real_type = lookup_pointer_type (real_type);
       else

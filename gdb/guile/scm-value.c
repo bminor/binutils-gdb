@@ -591,7 +591,7 @@ gdbscm_value_dynamic_type (SCM self)
 	      if (was_pointer)
 		type = lookup_pointer_type (type);
 	      else
-		type = lookup_reference_type (type);
+		type = lookup_lvalue_reference_type (type);
 	    }
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)

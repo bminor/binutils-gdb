@@ -2771,7 +2771,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	      if (TYPE_CODE (check_typedef (type)) != TYPE_CODE_REF)
 		{
-		  type = lookup_reference_type (type);
+		  type = lookup_lvalue_reference_type (type);
 		  result = allocate_value (type);
 		}
 	    }

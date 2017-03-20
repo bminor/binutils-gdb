@@ -384,15 +384,21 @@ lookup_pointer_type (struct type *type)
 /* Lookup a C++ `reference' to a type TYPE.  TYPEPTR, if nonzero,
    points to a pointer to memory where the reference type should be
    stored.  If *TYPEPTR is zero, update it to point to the reference
-   type we return.  We allocate new memory if needed.  */
+   type we return.  We allocate new memory if needed. REFCODE denotes
+   the kind of reference type to lookup (lvalue or rvalue reference).  */
 
 struct type *
-make_reference_type (struct type *type, struct type **typeptr)
+make_reference_type (struct type *type, struct type **typeptr,
+                      enum type_code refcode)
 {
   struct type *ntype;	/* New type */
+  struct type **reftype;
   struct type *chain;
 
-  ntype = TYPE_REFERENCE_TYPE (type);
+  gdb_assert (refcode == TYPE_CODE_REF || refcode == TYPE_CODE_RVALUE_REF);
+
+  ntype = (refcode == TYPE_CODE_REF ? TYPE_REFERENCE_TYPE (type)
+           : TYPE_RVALUE_REFERENCE_TYPE (type));
 
   if (ntype)
     {
@@ -421,7 +427,10 @@ make_reference_type (struct type *type, struct type **typeptr)
     }
 
   TYPE_TARGET_TYPE (ntype) = type;
-  TYPE_REFERENCE_TYPE (type) = ntype;
+  reftype = (refcode == TYPE_CODE_REF ? &TYPE_REFERENCE_TYPE (type)
+             : &TYPE_RVALUE_REFERENCE_TYPE (type));
+
+  *reftype = ntype;
 
   /* FIXME!  Assume the machine has only one representation for
      references, and that it matches the (only) representation for
@@ -429,10 +438,9 @@ make_reference_type (struct type *type, struct type **typeptr)
 
   TYPE_LENGTH (ntype) =
     gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
-  TYPE_CODE (ntype) = TYPE_CODE_REF;
+  TYPE_CODE (ntype) = refcode;
 
-  if (!TYPE_REFERENCE_TYPE (type))	/* Remember it, if don't have one.  */
-    TYPE_REFERENCE_TYPE (type) = ntype;
+  *reftype = ntype;
 
   /* Update the length of all the other variants of this type.  */
   chain = TYPE_CHAIN (ntype);
@@ -449,9 +457,25 @@ make_reference_type (struct type *type, struct type **typeptr)
    details.  */
 
 struct type *
-lookup_reference_type (struct type *type)
+lookup_reference_type (struct type *type, enum type_code refcode)
 {
-  return make_reference_type (type, (struct type **) 0);
+  return make_reference_type (type, (struct type **) 0, refcode);
+}
+
+/* Lookup the lvalue reference type for the type TYPE.  */
+
+struct type *
+lookup_lvalue_reference_type (struct type *type)
+{
+  return lookup_reference_type (type, TYPE_CODE_REF);
+}
+
+/* Lookup the rvalue reference type for the type TYPE.  */
+
+struct type *
+lookup_rvalue_reference_type (struct type *type)
+{
+  return lookup_reference_type (type, TYPE_CODE_RVALUE_REF);
 }
 
 /* Lookup a function type that returns type TYPE.  TYPEPTR, if

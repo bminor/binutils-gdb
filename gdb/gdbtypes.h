@@ -1714,9 +1714,13 @@ extern void append_flags_type_flag (struct type *type, int bitpos,
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
 
-extern struct type *lookup_reference_type (struct type *);
+extern struct type *lookup_reference_type (struct type *, enum type_code);
+extern struct type *lookup_lvalue_reference_type (struct type *);
+extern struct type *lookup_rvalue_reference_type (struct type *);
 
-extern struct type *make_reference_type (struct type *, struct type **);
+
+extern struct type *make_reference_type (struct type *, struct type **,
+                                         enum type_code);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 

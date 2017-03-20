@@ -845,7 +845,7 @@ gdbscm_type_reference (SCM self)
 
   TRY
     {
-      type = lookup_reference_type (type);
+      type = lookup_lvalue_reference_type (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

@@ -14584,7 +14584,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
   if (type)
     return type;
 
-  type = lookup_reference_type (target_type);
+  type = lookup_lvalue_reference_type (target_type);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {

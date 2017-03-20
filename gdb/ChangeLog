@@ -1,6 +1,35 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* dwarf2read.c (read_tag_reference_type): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* f-exp.y: Likewise.
+	* gdbtypes.c (make_reference_type, lookup_reference_type):
+	Generalize with rvalue reference types.
+	(lookup_lvalue_reference_type, lookup_rvalue_reference_type): New
+	convenience wrappers for lookup_reference_type().
+	* gdbtypes.h (make_reference_type, lookup_reference_type): Add a
+	reference kind parameter.
+	(lookup_lvalue_reference_type, lookup_rvalue_reference_type): Add
+	wrappers for lookup_reference_type().
+	* guile/scm-type.c (gdbscm_type_reference): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+	* guile/scm-value.c (gdbscm_value_dynamic_type): Likewise.
+	* parse.c (follow_types): Likewise.
+	* python/py-type.c (typy_reference, typy_lookup_type): Likewise.
+	* python/py-value.c (valpy_get_dynamic_type, valpy_getitem):
+	Likewise.
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type)
+	(gdbpy_invoke_xmethod): Likewise.
+	* stabsread.c: Provide extra argument to make_reference_type()
+	call.
+	* valops.c (value_ref, value_rtti_indirect_type): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* gdbtypes.h (enum type_code) <TYPE_CODE_RVALUE_REF>: New constant.
 	(TYPE_IS_REFERENCE): New macro.
 	(struct type): Add rvalue_reference_type field.

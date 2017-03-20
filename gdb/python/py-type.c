@@ -626,7 +626,7 @@ typy_reference (PyObject *self, PyObject *args)
 
   TRY
     {
-      type = lookup_reference_type (type);
+      type = lookup_lvalue_reference_type (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -786,7 +786,7 @@ typy_lookup_type (struct demangle_component *demangled,
 	  switch (demangled_type)
 	    {
 	    case DEMANGLE_COMPONENT_REFERENCE:
-	      rtype =  lookup_reference_type (type);
+	      rtype = lookup_lvalue_reference_type (type);
 	      break;
 	    case DEMANGLE_COMPONENT_POINTER:
 	      rtype = lookup_pointer_type (type);

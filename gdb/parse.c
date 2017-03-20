@@ -1686,7 +1686,7 @@ follow_types (struct type *follow_type)
 	make_addr_space = 0;
 	break;
       case tp_reference:
-	follow_type = lookup_reference_type (follow_type);
+	follow_type = lookup_lvalue_reference_type (follow_type);
 	if (make_const)
 	  follow_type = make_cv_type (make_const, 
 				      TYPE_VOLATILE (follow_type), 
