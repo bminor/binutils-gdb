@@ -1162,6 +1162,10 @@ A pointer-to-member.
 @item gdb.TYPE_CODE_REF
 A reference type.
 
+@vindex TYPE_CODE_RVALUE_REF
+@item gdb.TYPE_CODE_RVALUE_REF
+A C@t{++}11 rvalue reference type.
+
 @vindex TYPE_CODE_CHAR
 @item gdb.TYPE_CODE_CHAR
 A character type.

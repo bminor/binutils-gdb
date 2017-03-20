@@ -1,6 +1,25 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* doc/python.texi (Types in Python): Add TYPE_CODE_RVALUE_REF to
+	table of constants.
+	* python/lib/gdb/command/explore.py: Support exploring values
+	of rvalue reference types.
+	* python/lib/gdb/types.py: Implement get_basic_type() for
+	rvalue reference types.
+	* python/py-type.c (pyty_codes) <TYPE_CODE_RVALUE_REF>: New
+	constant.
+	* python/py-value.c (valpy_getitem): Add an rvalue reference
+	check.
+	(valpy_reference_value): Add new parameter "refcode".
+	(valpy_lvalue_reference_value, valpy_rvalue_reference_value):
+	New wrappers for valpy_reference_value().
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type)
+	(gdbpy_invoke_xmethod): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* dwarf2read.c (process_die, read_type_die_1): Handle the
 	DW_TAG_rvalue_reference_type DIE.
 	(read_tag_reference_type): Add new parameter "refcode".

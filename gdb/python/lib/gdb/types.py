@@ -31,8 +31,10 @@ def get_basic_type(type_):
     """
 
     while (type_.code == gdb.TYPE_CODE_REF or
+           type_.code == gdb.TYPE_CODE_RVALUE_REF or
            type_.code == gdb.TYPE_CODE_TYPEDEF):
-        if type_.code == gdb.TYPE_CODE_REF:
+        if (type_.code == gdb.TYPE_CODE_REF or
+            type_.code == gdb.TYPE_CODE_RVALUE_REF):
             type_ = type_.target()
         else:
             type_ = type_.strip_typedefs()
