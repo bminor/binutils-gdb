@@ -127,6 +127,7 @@ enum type_pieces
     tp_end = -1, 
     tp_pointer, 
     tp_reference, 
+    tp_rvalue_reference,
     tp_array, 
     tp_function,
     tp_function_with_arguments,

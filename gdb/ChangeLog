@@ -1,6 +1,15 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* c-exp.y (ptr_operator): Handle the '&&' token in the typename.
+	* parse.c (insert_type): Change assert statement.
+	(follow_types): Handle rvalue reference types.
+	* parser-defs.h (enum type_pieces) <tp_rvalue_reference>: New
+	constant.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* ada-lang.c (ada_evaluate_subexp): Adhere to the new
 	value_ref() interface.
 	* c-valprint.c (c_value_print): Likewise.

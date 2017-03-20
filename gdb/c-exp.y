@@ -744,7 +744,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			       says of sizeof:  "When applied to a reference
 			       or a reference type, the result is the size of
 			       the referenced type."  */
-			  if (TYPE_CODE (type) == TYPE_CODE_REF)
+			  if (TYPE_IS_REFERENCE (type))
 			    type = check_typedef (TYPE_TARGET_TYPE (type));
 			  write_exp_elt_longcst (pstate,
 						 (LONGEST) TYPE_LENGTH (type));
@@ -1085,6 +1085,10 @@ ptr_operator:
 			{ insert_type (tp_reference); }
 	|	'&' ptr_operator
 			{ insert_type (tp_reference); }
+	|       ANDAND
+			{ insert_type (tp_rvalue_reference); }
+	|       ANDAND ptr_operator
+			{ insert_type (tp_rvalue_reference); }
 	;
 
 ptr_operator_ts: ptr_operator
