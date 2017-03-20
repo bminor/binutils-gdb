@@ -1,3 +1,68 @@
+2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-linux-nat.c (fetch_register, store_register,
+	i386_linux_fetch_inferior_registers,
+	i386_linux_store_inferior_registers): Use ptid from regcache.
+	* ia64-linux-nat.c (ia64_linux_fetch_register,
+	ia64_linux_store_register): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register,
+	inf_ptrace_store_register): Likewise.
+	* m32r-linux-nat.c (m32r_linux_fetch_inferior_registers,
+	m32r_linux_store_inferior_registers): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_fetch_inferior_registers,
+	m68kbsd_store_inferior_registers): Likewise.
+	* m68k-linux-nat.c (fetch_register, store_register,
+	m68k_linux_fetch_inferior_registers,
+	m68k_linux_store_inferior_registers): Likewise.
+	* m88k-bsd-nat.c (m88kbsd_fetch_inferior_registers,
+	m88kbsd_store_inferior_registers): Likewise.
+	* mips-fbsd-nat.c (mips_fbsd_fetch_inferior_registers,
+	mips_fbsd_store_inferior_registers): Likewise.
+	* mips-linux-nat.c (mips64_linux_regsets_fetch_registers,
+	mips64_linux_regsets_store_registers): Likewise.
+	* mips-nbsd-nat.c (mipsnbsd_fetch_inferior_registers,
+	mipsnbsd_store_inferior_registers): Likewise.
+	* mips-obsd-nat.c (mips64obsd_fetch_inferior_registers,
+	mips64obsd_store_inferior_registers): Likewise.
+	* nto-procfs.c (procfs_fetch_registers, procfs_store_registers):
+	Likewise.
+	* ppc-fbsd-nat.c (ppcfbsd_fetch_inferior_registers,
+	ppcfbsd_store_inferior_registers): Likewise.
+	* ppc-linux-nat.c (ppc_linux_fetch_inferior_registers,
+	ppc_linux_store_inferior_registers): Likewise.
+	* ppc-nbsd-nat.c (ppcnbsd_fetch_inferior_registers,
+	ppcnbsd_store_inferior_registers): Likewise.
+	* ppc-obsd-nat.c (ppcobsd_fetch_registers,
+	ppcobsd_store_registers): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers):
+	Likewise.
+	* ravenscar-thread.c (ravenscar_fetch_registers,
+	ravenscar_store_registers, ravenscar_prepare_to_store):
+	Likewise.
+	* record-btrace.c (record_btrace_fetch_registers,
+	record_btrace_store_registers, record_btrace_prepare_to_store):
+	Likewise.
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register):
+	Lookup inferior using ptid from regcache, instead of
+	current_inferior.
+	* remote.c (remote_fetch_registers, remote_store_registers): Use
+	ptid from regcache.
+	* rs6000-nat.c (fetch_register, store_register): Likewise.
+	* s390-linux-nat.c (s390_linux_fetch_inferior_registers,
+	s390_linux_store_inferior_registers): Likewise.
+	* sh-nbsd-nat.c (shnbsd_fetch_inferior_registers,
+	shnbsd_store_inferior_registers): Likewise.
+	* sol-thread.c (sol_thread_fetch_registers,
+	sol_thread_store_registers): Likewise.
+	* sparc-nat.c (sparc_fetch_inferior_registers,
+	sparc_store_inferior_registers): Likewise.
+	* tilegx-linux-nat.c (fetch_inferior_registers,
+	store_inferior_registers): Likewise.
+	* vax-bsd-nat.c (vaxbsd_fetch_inferior_registers,
+	vaxbsd_store_inferior_registers): Likewise.
+	* xtensa-linux-nat.c (fetch_gregs, store_gregs, fetch_xtregs,
+	store_xtregs): Likewise.
+
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441

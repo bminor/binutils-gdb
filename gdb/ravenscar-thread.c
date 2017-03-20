@@ -268,10 +268,11 @@ ravenscar_fetch_registers (struct target_ops *ops,
                            struct regcache *regcache, int regnum)
 {
   struct target_ops *beneath = find_target_beneath (ops);
+  ptid_t ptid = regcache_get_ptid (regcache);
 
   if (!ravenscar_runtime_initialized ()
-      || ptid_equal (inferior_ptid, base_magic_null_ptid)
-      || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
+      || ptid_equal (ptid, base_magic_null_ptid)
+      || ptid_equal (ptid, ravenscar_running_thread ()))
     beneath->to_fetch_registers (beneath, regcache, regnum);
   else
     {
@@ -288,10 +289,11 @@ ravenscar_store_registers (struct target_ops *ops,
                            struct regcache *regcache, int regnum)
 {
   struct target_ops *beneath = find_target_beneath (ops);
+  ptid_t ptid = regcache_get_ptid (regcache);
 
   if (!ravenscar_runtime_initialized ()
-      || ptid_equal (inferior_ptid, base_magic_null_ptid)
-      || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
+      || ptid_equal (ptid, base_magic_null_ptid)
+      || ptid_equal (ptid, ravenscar_running_thread ()))
     beneath->to_store_registers (beneath, regcache, regnum);
   else
     {
@@ -308,10 +310,11 @@ ravenscar_prepare_to_store (struct target_ops *self,
 			    struct regcache *regcache)
 {
   struct target_ops *beneath = find_target_beneath (self);
+  ptid_t ptid = regcache_get_ptid (regcache);
 
   if (!ravenscar_runtime_initialized ()
-      || ptid_equal (inferior_ptid, base_magic_null_ptid)
-      || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
+      || ptid_equal (ptid, base_magic_null_ptid)
+      || ptid_equal (ptid, ravenscar_running_thread ()))
     beneath->to_prepare_to_store (beneath, regcache);
   else
     {

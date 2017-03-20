@@ -462,16 +462,17 @@ sol_thread_fetch_registers (struct target_ops *ops,
   gdb_gregset_t *gregset_p = &gregset;
   gdb_fpregset_t *fpregset_p = &fpregset;
   struct target_ops *beneath = find_target_beneath (ops);
+  ptid_t ptid = regcache_get_ptid (regcache);
 
-  if (!ptid_tid_p (inferior_ptid))
+  if (!ptid_tid_p (ptid))
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
       beneath->to_fetch_registers (beneath, regcache, regnum);
       return;
     }
 
-  /* Solaris thread: convert INFERIOR_PTID into a td_thrhandle_t.  */
-  thread = ptid_get_tid (inferior_ptid);
+  /* Solaris thread: convert PTID into a td_thrhandle_t.  */
+  thread = ptid_get_tid (ptid);
   if (thread == 0)
     error (_("sol_thread_fetch_registers: thread == 0"));
 
@@ -514,8 +515,9 @@ sol_thread_store_registers (struct target_ops *ops,
   td_err_e val;
   prgregset_t gregset;
   prfpregset_t fpregset;
+  ptid_t ptid = regcache_get_ptid (regcache);
 
-  if (!ptid_tid_p (inferior_ptid))
+  if (!ptid_tid_p (ptid))
     {
       struct target_ops *beneath = find_target_beneath (ops);
 
@@ -524,8 +526,8 @@ sol_thread_store_registers (struct target_ops *ops,
       return;
     }
 
-  /* Solaris thread: convert INFERIOR_PTID into a td_thrhandle_t.  */
-  thread = ptid_get_tid (inferior_ptid);
+  /* Solaris thread: convert PTID into a td_thrhandle_t.  */
+  thread = ptid_get_tid (ptid);
 
   val = p_td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)

@@ -7711,7 +7711,7 @@ remote_fetch_registers (struct target_ops *ops,
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
+  set_general_thread (regcache_get_ptid (regcache));
 
   if (regnum >= 0)
     {
@@ -7868,7 +7868,7 @@ remote_store_registers (struct target_ops *ops,
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
+  set_general_thread (regcache_get_ptid (regcache));
 
   if (regnum >= 0)
     {

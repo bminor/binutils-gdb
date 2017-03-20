@@ -120,9 +120,9 @@ ppcfbsd_fetch_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int regno)
 {
   gdb_gregset_t regs;
+  pid_t pid = ptid_get_lwp (regcache_get_ptid (regcache));
 
-  if (ptrace (PT_GETREGS, ptid_get_lwp (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
   supply_gregset (regcache, &regs);
@@ -132,8 +132,7 @@ ppcfbsd_fetch_inferior_registers (struct target_ops *ops,
       const struct regset *fpregset = ppc_fbsd_fpregset ();
       gdb_fpregset_t fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_lwp (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
       ppc_supply_fpregset (fpregset, regcache, regno, &fpregs, sizeof fpregs);
@@ -148,29 +147,26 @@ ppcfbsd_store_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int regno)
 {
   gdb_gregset_t regs;
+  pid_t pid = ptid_get_lwp (regcache_get_ptid (regcache));
 
-  if (ptrace (PT_GETREGS, ptid_get_lwp (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
   fill_gregset (regcache, &regs, regno);
 
-  if (ptrace (PT_SETREGS, ptid_get_lwp (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't write registers"));
 
   if (regno == -1 || getfpregs_supplies (get_regcache_arch (regcache), regno))
     {
       gdb_fpregset_t fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_lwp (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
       fill_fpregset (regcache, &fpregs, regno);
 
-      if (ptrace (PT_SETFPREGS, ptid_get_lwp (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't set FP registers"));
     }
 }

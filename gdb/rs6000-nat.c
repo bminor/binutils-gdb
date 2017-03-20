@@ -164,6 +164,7 @@ fetch_register (struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
+  pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
   /* Retrieved values may be -1, so infer errors from errno.  */
   errno = 0;
@@ -172,7 +173,7 @@ fetch_register (struct regcache *regcache, int regno)
 
   /* Floating-point registers.  */
   if (isfloat)
-    rs6000_ptrace32 (PT_READ_FPR, ptid_get_pid (inferior_ptid), addr, nr, 0);
+    rs6000_ptrace32 (PT_READ_FPR, pid, addr, nr, 0);
 
   /* Bogus register number.  */
   else if (nr < 0)
@@ -188,15 +189,13 @@ fetch_register (struct regcache *regcache, int regno)
   else
     {
       if (!ARCH64 ())
-	*addr = rs6000_ptrace32 (PT_READ_GPR, ptid_get_pid (inferior_ptid),
-				 (int *) nr, 0, 0);
+	*addr = rs6000_ptrace32 (PT_READ_GPR, pid, (int *) nr, 0, 0);
       else
 	{
 	  /* PT_READ_GPR requires the buffer parameter to point to long long,
 	     even if the register is really only 32 bits.  */
 	  long long buf;
-	  rs6000_ptrace64 (PT_READ_GPR, ptid_get_pid (inferior_ptid),
-			   nr, 0, &buf);
+	  rs6000_ptrace64 (PT_READ_GPR, pid, nr, 0, &buf);
 	  if (register_size (gdbarch, regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
@@ -224,6 +223,7 @@ store_register (struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
+  pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
   /* Fetch the register's value from the register cache.  */
   regcache_raw_collect (regcache, regno, addr);
@@ -235,7 +235,7 @@ store_register (struct regcache *regcache, int regno)
 
   /* Floating-point registers.  */
   if (isfloat)
-    rs6000_ptrace32 (PT_WRITE_FPR, ptid_get_pid (inferior_ptid), addr, nr, 0);
+    rs6000_ptrace32 (PT_WRITE_FPR, pid, addr, nr, 0);
 
   /* Bogus register number.  */
   else if (nr < 0)
@@ -253,8 +253,7 @@ store_register (struct regcache *regcache, int regno)
          the register's value is passed by value, but for 64-bit inferiors,
 	 the address of a buffer containing the value is passed.  */
       if (!ARCH64 ())
-	rs6000_ptrace32 (PT_WRITE_GPR, ptid_get_pid (inferior_ptid),
-			 (int *) nr, *addr, 0);
+	rs6000_ptrace32 (PT_WRITE_GPR, pid, (int *) nr, *addr, 0);
       else
 	{
 	  /* PT_WRITE_GPR requires the buffer parameter to point to an 8-byte
@@ -264,8 +263,7 @@ store_register (struct regcache *regcache, int regno)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
-	  rs6000_ptrace64 (PT_WRITE_GPR, ptid_get_pid (inferior_ptid),
-			   nr, 0, &buf);
+	  rs6000_ptrace64 (PT_WRITE_GPR, pid, nr, 0, &buf);
 	}
     }
 

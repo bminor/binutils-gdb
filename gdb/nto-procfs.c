@@ -868,7 +868,7 @@ procfs_fetch_registers (struct target_ops *ops,
   reg;
   int regsize;
 
-  procfs_set_thread (inferior_ptid);
+  procfs_set_thread (regcache_get_ptid (regcache));
   if (devctl (ctl_fd, DCMD_PROC_GETGREG, &reg, sizeof (reg), &regsize) == EOK)
     nto_supply_gregset (regcache, (char *) &reg.greg);
   if (devctl (ctl_fd, DCMD_PROC_GETFPREG, &reg, sizeof (reg), &regsize)
@@ -1350,10 +1350,11 @@ procfs_store_registers (struct target_ops *ops,
   unsigned off;
   int len, regset, regsize, dev_set, err;
   char *data;
+  ptid_t ptid = regcache_get_ptid (regcache);
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (ptid_equal (ptid, null_ptid))
     return;
-  procfs_set_thread (inferior_ptid);
+  procfs_set_thread (ptid);
 
   if (regno == -1)
     {

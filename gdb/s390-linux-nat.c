@@ -40,6 +40,7 @@
 #include <sys/ucontext.h>
 #include <elf.h>
 #include <algorithm>
+#include "inf-ptrace.h"
 
 /* Per-thread arch-specific data.  */
 
@@ -370,7 +371,7 @@ static void
 s390_linux_fetch_inferior_registers (struct target_ops *ops,
 				     struct regcache *regcache, int regnum)
 {
-  int tid = s390_inferior_tid ();
+  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   if (regnum == -1 || S390_IS_GREGSET_REGNUM (regnum))
     fetch_regs (regcache, tid);
@@ -413,7 +414,7 @@ static void
 s390_linux_store_inferior_registers (struct target_ops *ops,
 				     struct regcache *regcache, int regnum)
 {
-  int tid = s390_inferior_tid ();
+  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   if (regnum == -1 || S390_IS_GREGSET_REGNUM (regnum))
     store_regs (regcache, tid, regnum);

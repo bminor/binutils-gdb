@@ -174,7 +174,7 @@ supply_fpregset (struct regcache *regcache,
 static void
 fetch_gregs (struct regcache *regcache, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (regcache_get_ptid (regcache));
   gdb_gregset_t regs;
   int areg;
   
@@ -193,7 +193,7 @@ fetch_gregs (struct regcache *regcache, int regnum)
 static void
 store_gregs (struct regcache *regcache, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (regcache_get_ptid (regcache));
   gdb_gregset_t regs;
   int areg;
 
@@ -221,7 +221,7 @@ static int xtreg_high;
 static void
 fetch_xtregs (struct regcache *regcache, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (regcache_get_ptid (regcache));
   const xtensa_regtable_t *ptr;
   char xtregs [XTENSA_ELF_XTREG_SIZE];
 
@@ -237,7 +237,7 @@ fetch_xtregs (struct regcache *regcache, int regnum)
 static void
 store_xtregs (struct regcache *regcache, int regnum)
 {
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = ptid_get_lwp (regcache_get_ptid (regcache));
   const xtensa_regtable_t *ptr;
   char xtregs [XTENSA_ELF_XTREG_SIZE];
 
