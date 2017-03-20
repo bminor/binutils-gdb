@@ -1212,41 +1212,6 @@ is_rsy (bfd_byte *insn, int op1, int op2,
 
 
 static int
-is_rsi (bfd_byte *insn, int op,
-	unsigned int *r1, unsigned int *r3, int *i2)
-{
-  if (insn[0] == op)
-    {
-      *r1 = (insn[1] >> 4) & 0xf;
-      *r3 = insn[1] & 0xf;
-      /* i2 is a 16-bit signed quantity.  */
-      *i2 = (((insn[2] << 8) | insn[3]) ^ 0x8000) - 0x8000;
-      return 1;
-    }
-  else
-    return 0;
-}
-
-
-static int
-is_rie (bfd_byte *insn, int op1, int op2,
-	unsigned int *r1, unsigned int *r3, int *i2)
-{
-  if (insn[0] == op1
-      && insn[5] == op2)
-    {
-      *r1 = (insn[1] >> 4) & 0xf;
-      *r3 = insn[1] & 0xf;
-      /* i2 is a 16-bit signed quantity.  */
-      *i2 = (((insn[2] << 8) | insn[3]) ^ 0x8000) - 0x8000;
-      return 1;
-    }
-  else
-    return 0;
-}
-
-
-static int
 is_rx (bfd_byte *insn, int op,
        unsigned int *r1, int *d2, unsigned int *x2, unsigned int *b2)
 {
@@ -1976,20 +1941,6 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 				      amode | (from + insnlen));
     }
 
-  /* Handle PC-relative branch instructions.  */
-  else if (is_ri (insn, op1_brc, op2_brc, &r1, &i2)
-	   || is_ril (insn, op1_brcl, op2_brcl, &r1, &i2)
-	   || is_ri (insn, op1_brct, op2_brct, &r1, &i2)
-	   || is_ri (insn, op1_brctg, op2_brctg, &r1, &i2)
-	   || is_rsi (insn, op_brxh, &r1, &r3, &i2)
-	   || is_rie (insn, op1_brxhg, op2_brxhg, &r1, &r3, &i2)
-	   || is_rsi (insn, op_brxle, &r1, &r3, &i2)
-	   || is_rie (insn, op1_brxlg, op2_brxlg, &r1, &r3, &i2))
-    {
-      /* Update PC.  */
-      regcache_write_pc (regs, pc - to + from);
-    }
-
   /* Handle LOAD ADDRESS RELATIVE LONG.  */
   else if (is_ril (insn, op1_larl, op2_larl, &r1, &i2))
     {
@@ -2004,9 +1955,11 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
   else if (insn[0] == 0x0 && insn[1] == 0x1)
     regcache_write_pc (regs, from);
 
-  /* For any other insn, PC points right after the original instruction.  */
+  /* For any other insn, adjust PC by negated displacement.  PC then
+     points right after the original instruction, except for PC-relative
+     branches, where it points to the adjusted branch target.  */
   else
-    regcache_write_pc (regs, from + insnlen);
+    regcache_write_pc (regs, pc - to + from);
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,

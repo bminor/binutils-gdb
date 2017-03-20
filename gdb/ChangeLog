@@ -1,3 +1,10 @@
+2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (is_rsi, is_rie): Remove functions.
+	(s390_displaced_step_fixup): Cover relative branches with the
+	default fixup handling.  This fixes lack of support for some
+	relative branch instructions.
+
 2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* i386-gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Use
