@@ -1,6 +1,15 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* c-typeprint.c (c_print_type, c_type_print_varspec_prefix)
+	(c_type_print_modifier, c_type_print_varspec_suffix)
+	(c_type_print_base): Support printing rvalue reference types.
+	* c-valprint.c (c_val_print, c_value_print): Support printing
+	rvalue reference values.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* cp-name-parser.y (ptr_operator): Handle the '&&' token in
 	typename.
 	* cp-support.c (replace_typedefs): Handle

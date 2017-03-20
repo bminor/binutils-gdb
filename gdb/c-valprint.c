@@ -541,6 +541,7 @@ c_val_print (struct type *type,
       break;
 
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_FUNC:
@@ -587,8 +588,7 @@ c_value_print (struct value *val, struct ui_file *stream,
   val_type = value_type (val);
   type = check_typedef (val_type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
-      || TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type))
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.
