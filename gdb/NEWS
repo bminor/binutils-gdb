@@ -7,9 +7,12 @@
   added by the Memory Protection Keys for Userspace feature which will be
   available in future Intel CPUs.
 
+* GDB now supports C++11 rvalue references.
+
 * Python Scripting
 
   ** New functions to start, stop and access a running btrace recording.
+  ** Rvalue references are now supported in gdb.Type.
 
 * GDB now supports recording and replaying rdrand and rdseed Intel 64
   instructions.

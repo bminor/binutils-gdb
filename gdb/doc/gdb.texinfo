@@ -14827,9 +14827,9 @@ see @ref{Completion, ,Command Completion}.
 
 @cindex reference declarations
 @item
-@value{GDBN} understands variables declared as C@t{++} references; you can use
-them in expressions just as you do in C@t{++} source---they are automatically
-dereferenced.
+@value{GDBN} understands variables declared as C@t{++} lvalue or rvalue
+references; you can use them in expressions just as you do in C@t{++}
+source---they are automatically dereferenced.
 
 In the parameter list shown when @value{GDBN} displays a frame, the values of
 reference variables are not displayed (unlike other variables); this

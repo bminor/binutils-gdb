@@ -1,3 +1,21 @@
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+	    Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/14441
+	* gdb.cp/demangle.exp: Add rvalue reference tests.
+	* gdb.cp/rvalue-ref-casts.cc: New file.
+	* gdb.cp/rvalue-ref-casts.exp: New file.
+	* gdb.cp/rvalue-ref-overload.cc: New file.
+	* gdb.cp/rvalue-ref-overload.exp: New file.
+	* gdb.cp/rvalue-ref-params.cc: New file.
+	* gdb.cp/rvalue-ref-params.exp: New file.
+	* gdb.cp/rvalue-ref-sizeof.cc: New file.
+	* gdb.cp/rvalue-ref-sizeof.exp: New file.
+	* gdb.cp/rvalue-ref-types.cc: New file.
+	* gdb.cp/rvalue-ref-types.exp: New file.
+	* gdb.python/py-rvalue-ref-value-cc.cc: New file.
+	* gdb.python/py-rvalue-ref-value-cc.exp: New file.
+
 2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
 
 	* gdb.mi/mi-solib.exp (test_file_list_shared_libraries):

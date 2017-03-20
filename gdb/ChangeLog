@@ -1,6 +1,13 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* NEWS: Mention support for rvalue references in GDB and python.
+	* doc/gdb.texinfo (C Plus Plus Expressions): Mention that GDB
+	supports both lvalue and rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* gdbtypes.c (rank_one_type): Implement overloading
 	resolution rules regarding rvalue references.
 
