@@ -1,3 +1,7 @@
+2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Add neon-vfpv3 as an alias for neon.
+
 2017-03-16  Rinat Zelig  <rinat@mellanox.com>
 
 	* config/tc-arc.c (assemble_insn): Only handle ".t" and ".nt"
