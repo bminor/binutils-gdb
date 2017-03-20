@@ -25781,7 +25781,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"softvfp+vfp",	FPU_ARCH_VFP_V2},
   {"vfp",		FPU_ARCH_VFP_V2},
   {"vfp9",		FPU_ARCH_VFP_V2},
-  {"vfp3",              FPU_ARCH_VFP_V3}, /* For backwards compatibility.  */
+  {"vfp3",		FPU_ARCH_VFP_V3}, /* Undocumented, use vfpv3.  */
   {"vfp10",		FPU_ARCH_VFP_V2},
   {"vfp10-r0",		FPU_ARCH_VFP_V1},
   {"vfpxd",		FPU_ARCH_VFP_V1xD},
@@ -25794,10 +25794,10 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"vfpv3xd-fp16",	FPU_ARCH_VFP_V3xD_FP16},
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
-  {"arm1136jfs",	FPU_ARCH_VFP_V2},
+  {"arm1136jfs",	FPU_ARCH_VFP_V2}, /* Undocumented, use arm1136jf-s.  */
   {"arm1136jf-s",	FPU_ARCH_VFP_V2},
   {"maverick",		FPU_ARCH_MAVERICK},
-  {"neon",              FPU_ARCH_VFP_V3_PLUS_NEON_V1},
+  {"neon",		FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-vfpv3",	FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-fp16",		FPU_ARCH_NEON_FP16},
   {"vfpv4",		FPU_ARCH_VFP_V4},

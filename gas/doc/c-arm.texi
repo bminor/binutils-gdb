@@ -285,6 +285,8 @@ The following format options are recognized:
 @code{arm1136jf-s},
 @code{maverick},
 @code{neon},
+@code{neon-vfpv3},
+@code{neon-fp16},
 @code{neon-vfpv4},
 @code{neon-fp-armv8},
 @code{crypto-neon-fp-armv8},
@@ -297,7 +299,7 @@ also affects the way in which the @code{.double} assembler directive behaves
 when assembling little-endian code.
 
 The default is dependent on the processor selected.  For Architecture 5 or
-later, the default is to assembler for VFP instructions; for earlier
+later, the default is to assemble for VFP instructions; for earlier
 architectures the default is to assemble for FPA instructions.
 
 @cindex @code{-mthumb} command line option, ARM

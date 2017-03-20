@@ -1,5 +1,12 @@
 2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
 
+	* config/tc-arm.c (arm_fpus): Note entires that should not be
+	documented.
+	* doc/c-arm.texi (-mfpu): Add missing FPU entries for neon-vfpv3 and
+	neon-fp16.  Fix spelling error.
+
+2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
+
 	* config/tc-arm.c (arm_fpus): Add neon-vfpv3 as an alias for neon.
 
 2017-03-16  Rinat Zelig  <rinat@mellanox.com>
