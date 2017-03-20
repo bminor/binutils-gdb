@@ -58,6 +58,8 @@ const struct rank VOID_PTR_CONVERSION_BADNESS = {2,0};
 const struct rank BOOL_CONVERSION_BADNESS = {3,0};
 const struct rank BASE_CONVERSION_BADNESS = {2,0};
 const struct rank REFERENCE_CONVERSION_BADNESS = {2,0};
+const struct rank LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS = {5,0};
+const struct rank DIFFERENT_REFERENCE_TYPE_BADNESS = {6,0};
 const struct rank NULL_POINTER_CONVERSION_BADNESS = {2,0};
 const struct rank NS_POINTER_CONVERSION_BADNESS = {10,0};
 const struct rank NS_INTEGER_POINTER_CONVERSION_BADNESS = {3,0};
@@ -3611,14 +3613,64 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 {
   struct rank rank = {0,0};
 
-  if (types_equal (parm, arg))
-    return EXACT_MATCH_BADNESS;
-
   /* Resolve typedefs */
   if (TYPE_CODE (parm) == TYPE_CODE_TYPEDEF)
     parm = check_typedef (parm);
   if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
     arg = check_typedef (arg);
+
+  if (value != NULL)
+    {
+      /* An rvalue argument cannot be bound to a non-const lvalue
+         reference parameter...  */
+      if (VALUE_LVAL (value) == not_lval
+          && TYPE_CODE (parm) == TYPE_CODE_REF
+          && !TYPE_CONST (parm->main_type->target_type))
+        return INCOMPATIBLE_TYPE_BADNESS;
+
+      /* ... and an lvalue argument cannot be bound to an rvalue
+         reference parameter.  [C++ 13.3.3.1.4p3]  */
+      if (VALUE_LVAL (value) != not_lval
+          && TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
+        return INCOMPATIBLE_TYPE_BADNESS;
+    }
+
+  if (types_equal (parm, arg))
+    return EXACT_MATCH_BADNESS;
+
+  /* An lvalue reference to a function should get higher priority than an
+     rvalue reference to a function.  */
+
+  if (value != NULL && TYPE_CODE (arg) == TYPE_CODE_RVALUE_REF
+      && TYPE_CODE (TYPE_TARGET_TYPE (arg)) == TYPE_CODE_FUNC)
+    {
+      return (sum_ranks (rank_one_type (parm,
+              lookup_pointer_type (TYPE_TARGET_TYPE (arg)), NULL),
+              DIFFERENT_REFERENCE_TYPE_BADNESS));
+    }
+
+  /* If a conversion to one type of reference is an identity conversion, and a
+     conversion to the second type of reference is a non-identity conversion,
+     choose the first type.  */
+
+  if (value != NULL && TYPE_IS_REFERENCE (parm) && TYPE_IS_REFERENCE (arg)
+     && TYPE_CODE (parm) != TYPE_CODE (arg))
+    {
+      return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm),
+              TYPE_TARGET_TYPE (arg), NULL), DIFFERENT_REFERENCE_TYPE_BADNESS));
+    }
+
+  /* An rvalue should be first tried to bind to an rvalue reference, and then to
+     an lvalue reference.  */
+
+  if (value != NULL && TYPE_CODE (parm) == TYPE_CODE_REF
+      && VALUE_LVAL (value) == not_lval)
+    {
+      if (TYPE_IS_REFERENCE (arg))
+	arg = TYPE_TARGET_TYPE (arg);
+      return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
+			 LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS));
+    }
 
   /* See through references, since we can almost make non-references
      references.  */

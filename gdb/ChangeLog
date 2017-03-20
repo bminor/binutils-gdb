@@ -1,6 +1,12 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* gdbtypes.c (rank_one_type): Implement overloading
+	resolution rules regarding rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* aarch64-tdep.c (aarch64_type_align)
 	(aarch64_extract_return_value, aarch64_store_return_value): Change
 	lvalue reference type checks to general reference type checks.
