@@ -4997,12 +4997,6 @@ process_program_headers (FILE * file)
 	     section in the DYNAMIC segment.  */
 	  dynamic_addr = segment->p_offset;
 	  dynamic_size = segment->p_filesz;
-	  /* PR binutils/17512: Avoid corrupt dynamic section info in the segment.  */
-	  if (dynamic_addr + dynamic_size >= current_file_size)
-	    {
-	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
-	      dynamic_addr = dynamic_size = 0;
-	    }
 
 	  /* Try to locate the .dynamic section. If there is
 	     a section header table, we can easily locate it.  */
@@ -5036,6 +5030,16 @@ process_program_headers (FILE * file)
 	      else if (dynamic_addr > segment->p_offset)
 		warn (_("the .dynamic section is not the first section"
 			" in the dynamic segment.\n"));
+	    }
+
+	  /* PR binutils/17512: Avoid corrupt dynamic section info in the
+	     segment.  Check this after matching against the section headers
+	     so we don't warn on debuginfo file (which have NOBITS .dynamic
+	     sections).  */
+	  if (dynamic_addr + dynamic_size >= current_file_size)
+	    {
+	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
+	      dynamic_addr = dynamic_size = 0;
 	    }
 	  break;
 

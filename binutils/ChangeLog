@@ -1,3 +1,8 @@
+2017-03-20  Mark Wielaard  <mark@klomp.org>
+
+	* readelf.c (process_program_headers): Move dynamic_addr check
+	after .dynamic section cross check.
+
 2017-03-17  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (print_gnu_build_attribute_name): Fix off by one error
