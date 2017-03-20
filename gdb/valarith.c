@@ -232,11 +232,11 @@ binop_types_user_defined_p (enum exp_opcode op,
     return 0;
 
   type1 = check_typedef (type1);
-  if (TYPE_CODE (type1) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type1))
     type1 = check_typedef (TYPE_TARGET_TYPE (type1));
 
   type2 = check_typedef (type2);
-  if (TYPE_CODE (type2) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type2))
     type2 = check_typedef (TYPE_TARGET_TYPE (type2));
 
   return (TYPE_CODE (type1) == TYPE_CODE_STRUCT
@@ -270,7 +270,7 @@ unop_user_defined_p (enum exp_opcode op, struct value *arg1)
   if (op == UNOP_ADDR)
     return 0;
   type1 = check_typedef (value_type (arg1));
-  if (TYPE_CODE (type1) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type1))
     type1 = check_typedef (TYPE_TARGET_TYPE (type1));
   return TYPE_CODE (type1) == TYPE_CODE_STRUCT;
 }

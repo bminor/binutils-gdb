@@ -227,6 +227,7 @@ sparc_integral_or_pointer_p (const struct type *type)
       return (len == 1 || len == 2 || len == 4 || len == 8);
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       /* Allow either 32-bit or 64-bit pointers.  */
       return (len == 4 || len == 8);
     default:

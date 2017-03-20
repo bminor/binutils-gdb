@@ -281,7 +281,7 @@ int
 val_print_scalar_type_p (struct type *type)
 {
   type = check_typedef (type);
-  while (TYPE_CODE (type) == TYPE_CODE_REF)
+  while (TYPE_IS_REFERENCE (type))
     {
       type = TYPE_TARGET_TYPE (type);
       type = check_typedef (type);
@@ -536,7 +536,7 @@ get_value_addr_contents (struct value *deref_val)
     }
 }
 
-/* generic_val_print helper for TYPE_CODE_REF.  */
+/* generic_val_print helper for TYPE_CODE_{RVALUE_,}REF.  */
 
 static void
 generic_val_print_ref (struct type *type,
@@ -960,6 +960,7 @@ generic_val_print (struct type *type,
       break;
 
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       generic_val_print_ref (type, embedded_offset, stream, recurse,
 			     original_value, options);
       break;

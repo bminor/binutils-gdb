@@ -1989,8 +1989,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
 	  t = check_typedef (t);
-	  if (TYPE_CODE (t) == TYPE_CODE_PTR
-	      || TYPE_CODE (t) == TYPE_CODE_REF)
+	  if (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
 	    t = TYPE_TARGET_TYPE (t);
 
 	  if (TYPE_CODE (t) != TYPE_CODE_STRUCT

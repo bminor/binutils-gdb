@@ -1691,7 +1691,7 @@ x_command (char *exp, int from_tty)
       if (from_tty)
 	*exp = 0;
       val = evaluate_expression (expr.get ());
-      if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
+      if (TYPE_IS_REFERENCE (value_type (val)))
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */

@@ -491,6 +491,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
@@ -1000,6 +1001,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       /* It's implementation-defined, and I'll bet this is what GCC
          does.  */
       break;

@@ -2136,7 +2136,7 @@ varobj_get_value_type (const struct varobj *var)
 
   type = check_typedef (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type))
     type = get_target_type (type);
 
   type = check_typedef (type);

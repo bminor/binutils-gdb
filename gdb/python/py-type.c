@@ -460,8 +460,7 @@ typy_get_composite (struct type *type)
 	}
       END_CATCH
 
-      if (TYPE_CODE (type) != TYPE_CODE_PTR
-	  && TYPE_CODE (type) != TYPE_CODE_REF)
+      if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	break;
       type = TYPE_TARGET_TYPE (type);
     }
@@ -921,7 +920,7 @@ typy_template_argument (PyObject *self, PyObject *args)
   TRY
     {
       type = check_typedef (type);
-      if (TYPE_CODE (type) == TYPE_CODE_REF)
+      if (TYPE_IS_REFERENCE (type))
 	type = check_typedef (TYPE_TARGET_TYPE (type));
     }
   CATCH (except, RETURN_MASK_ALL)

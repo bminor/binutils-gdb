@@ -3622,10 +3622,11 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
   /* See through references, since we can almost make non-references
      references.  */
-  if (TYPE_CODE (arg) == TYPE_CODE_REF)
+
+  if (TYPE_IS_REFERENCE (arg))
     return (sum_ranks (rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL),
                        REFERENCE_CONVERSION_BADNESS));
-  if (TYPE_CODE (parm) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (parm))
     return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
                        REFERENCE_CONVERSION_BADNESS));
   if (overload_debug)

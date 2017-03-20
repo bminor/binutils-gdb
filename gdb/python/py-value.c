@@ -217,6 +217,7 @@ valpy_referenced_value (PyObject *self, PyObject *args)
           res_val = value_ind (self_val);
           break;
         case TYPE_CODE_REF:
+        case TYPE_CODE_RVALUE_REF:
           res_val = coerce_ref (self_val);
           break;
         default:
@@ -363,8 +364,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
       type = value_type (val);
       type = check_typedef (type);
 
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR)
-	   || (TYPE_CODE (type) == TYPE_CODE_REF))
+      if (((TYPE_CODE (type) == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
 	{
 	  struct value *target;
@@ -1054,7 +1054,7 @@ enum valpy_opcode
 
 /* If TYPE is a reference, return the target; otherwise return TYPE.  */
 #define STRIP_REFERENCE(TYPE) \
-  ((TYPE_CODE (TYPE) == TYPE_CODE_REF) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
+  (TYPE_IS_REFERENCE (TYPE) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
 
 /* Helper for valpy_binop.  Returns a value object which is the result
    of applying the operation specified by OPCODE to the given

@@ -1,6 +1,70 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* aarch64-tdep.c (aarch64_type_align)
+	(aarch64_extract_return_value, aarch64_store_return_value): Change
+	lvalue reference type checks to general reference type checks.
+	* amd64-tdep.c (amd64_classify): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_passed_by_integer_register):
+	Likewise.
+	* arm-tdep.c (arm_type_align, arm_extract_return_value)
+	(arm_store_return_value): Likewise.
+	* ax-gdb.c (gen_fetch, gen_cast): Likewise.
+	* c-typeprint.c (c_print_type): Likewise.
+	* c-varobj.c (adjust_value_for_child_access, c_value_of_variable)
+	(cplus_number_of_children, cplus_describe_child): Likewise.
+	* compile/compile-c-symbols.c (generate_vla_size): Likewise.
+	* completer.c (expression_completer): Likewise.
+	* cp-support.c (make_symbol_overload_list_adl_namespace):
+	Likewise.
+	* darwin-nat-info.c (info_mach_region_command): Likewise.
+	* dwarf2loc.c (entry_data_value_coerce_ref)
+	(value_of_dwarf_reg_entry): Likewise.
+	* eval.c (ptrmath_type_p, evaluate_subexp_standard)
+	(evaluate_subexp_for_address, evaluate_subexp_for_sizeof):
+	Likewise.
+	* findvar.c (extract_typed_address, store_typed_address):
+	Likewise.
+	* gdbtypes.c (rank_one_type): Likewise.
+	* hppa-tdep.c (hppa64_integral_or_pointer_p): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* language.c (pointer_type): Likewise.
+	* m32c-tdep.c (m32c_reg_arg_type, m32c_m16c_address_to_pointer):
+	Likewise.
+	* m88k-tdep.c (m88k_integral_or_pointer_p): Likewise.
+	* mn10300-tdep.c (mn10300_type_align): Likewise.
+	* msp430-tdep.c (msp430_push_dummy_call): Likewise.
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value)
+	(ppc64_sysv_abi_push_param, ppc64_sysv_abi_return_value):
+	Likewise.
+	* printcmd.c (print_formatted, x_command): Likewise.
+	* python/py-type.c (typy_get_composite, typy_template_argument):
+	Likewise.
+	* python/py-value.c (valpy_referenced_value)
+	(valpy_get_dynamic_type, value_has_field): Likewise.
+	* s390-linux-tdep.c (s390_function_arg_integer): Likewise.
+	* sparc-tdep.c (sparc_integral_or_pointer_p): Likewise.
+	* sparc64-tdep.c (sparc64_integral_or_pointer_p): Likewise.
+	* spu-tdep.c (spu_scalar_value_p): Likewise.
+	* symtab.c (lookup_symbol_aux): Likewise.
+	* typeprint.c (whatis_exp, print_type_scalar): Likewise.
+	* valarith.c (binop_types_user_defined_p, unop_user_defined_p):
+	Likewise.
+	* valops.c (value_cast_pointers, value_cast)
+	(value_reinterpret_cast, value_dynamic_cast, value_addr, typecmp)
+	(value_struct_elt, value_struct_elt_bitpos)
+	(value_find_oload_method_list, find_overload_match)
+	(value_rtti_indirect_type): Likewise.
+	* valprint.c (val_print_scalar_type_p, generic_val_print):
+	Likewise.
+	* value.c (value_actual_type, value_as_address, unpack_long)
+	(pack_long, pack_unsigned_long, coerce_ref_if_computed)
+	(coerce_ref): Likewise.
+	* varobj.c (varobj_get_value_type): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* doc/python.texi (Types in Python): Add TYPE_CODE_RVALUE_REF to
 	table of constants.
 	* python/lib/gdb/command/explore.py: Support exploring values

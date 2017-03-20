@@ -68,6 +68,7 @@ sparc64_integral_or_pointer_p (const struct type *type)
       return 1;
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       {
 	int len = TYPE_LENGTH (type);
 	gdb_assert (len == 8);

@@ -157,10 +157,11 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       {
 	struct value *new_value;
 
-	if (TYPE_CODE (arg_type) == TYPE_CODE_REF)
+	if (TYPE_IS_REFERENCE (arg_type))
 	  return value_cast_pointers (type, arg, 0);
 
 	/* Cast the value to the reference's target type, and then

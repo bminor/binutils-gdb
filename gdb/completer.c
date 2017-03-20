@@ -611,8 +611,7 @@ expression_completer (struct cmd_list_element *ignore,
       for (;;)
 	{
 	  type = check_typedef (type);
-	  if (TYPE_CODE (type) != TYPE_CODE_PTR
-	      && TYPE_CODE (type) != TYPE_CODE_REF)
+	  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	    break;
 	  type = TYPE_TARGET_TYPE (type);
 	}

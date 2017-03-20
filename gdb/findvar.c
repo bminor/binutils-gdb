@@ -169,8 +169,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
 CORE_ADDR
 extract_typed_address (const gdb_byte *buf, struct type *type)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_PTR
-      && TYPE_CODE (type) != TYPE_CODE_REF)
+  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
     internal_error (__FILE__, __LINE__,
 		    _("extract_typed_address: "
 		    "type is not a pointer or reference"));
@@ -242,8 +241,7 @@ store_unsigned_integer (gdb_byte *addr, int len,
 void
 store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_PTR
-      && TYPE_CODE (type) != TYPE_CODE_REF)
+  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
     internal_error (__FILE__, __LINE__,
 		    _("store_typed_address: "
 		    "type is not a pointer or reference"));

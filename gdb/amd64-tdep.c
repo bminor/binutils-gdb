@@ -679,7 +679,7 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
   if ((code == TYPE_CODE_INT || code == TYPE_CODE_ENUM
        || code == TYPE_CODE_BOOL || code == TYPE_CODE_RANGE
        || code == TYPE_CODE_CHAR
-       || code == TYPE_CODE_PTR || code == TYPE_CODE_REF)
+       || code == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type))
       && (len == 1 || len == 2 || len == 4 || len == 8))
     theclass[0] = AMD64_INTEGER;
 

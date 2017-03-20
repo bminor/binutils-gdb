@@ -3104,7 +3104,7 @@ s390_function_arg_integer (struct type *type)
       || code == TYPE_CODE_CHAR
       || code == TYPE_CODE_BOOL
       || code == TYPE_CODE_PTR
-      || code == TYPE_CODE_REF)
+      || TYPE_IS_REFERENCE (type))
     return 1;
 
   return ((code == TYPE_CODE_UNION || code == TYPE_CODE_STRUCT)

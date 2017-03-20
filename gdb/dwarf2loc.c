@@ -1348,7 +1348,7 @@ entry_data_value_coerce_ref (const struct value *value)
   struct type *checked_type = check_typedef (value_type (value));
   struct value *target_val;
 
-  if (TYPE_CODE (checked_type) != TYPE_CODE_REF)
+  if (!TYPE_IS_REFERENCE (checked_type))
     return NULL;
 
   target_val = (struct value *) value_computed_closure (value);
@@ -1423,7 +1423,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
      TYPE_CODE_REF with non-entry data value would give current value - not the
      entry value.  */
 
-  if (TYPE_CODE (checked_type) != TYPE_CODE_REF
+  if (!TYPE_IS_REFERENCE (checked_type)
       || TYPE_TARGET_TYPE (checked_type) == NULL)
     return outer_val;
 
