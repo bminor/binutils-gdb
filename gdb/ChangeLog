@@ -1,6 +1,19 @@
 2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
 
 	PR gdb/14441
+	* ada-lang.c (ada_evaluate_subexp): Adhere to the new
+	value_ref() interface.
+	* c-valprint.c (c_value_print): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* python/py-value.c (valpy_reference_value): Likewise.
+	* valops.c (value_cast, value_reinterpret_cast)
+	(value_dynamic_cast, typecmp): Likewise.
+	(value_ref): Parameterize by kind of return value reference type.
+	* value.h (value_ref): Add new parameter "refcode".
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
 	* dwarf2read.c (read_tag_reference_type): Use
 	lookup_lvalue_reference_type() instead of lookup_reference_type().
 	* eval.c (evaluate_subexp_standard): Likewise.

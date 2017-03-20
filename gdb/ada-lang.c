@@ -10707,7 +10707,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		     should return a ref as it should be valid to ask
 		     for its address; so rebuild a ref after coerce.  */
 		  arg1 = ada_coerce_ref (arg1);
-		  return value_ref (arg1);
+		  return value_ref (arg1, TYPE_CODE_REF);
 		}
 	    }
 

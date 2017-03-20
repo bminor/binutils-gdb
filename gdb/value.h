@@ -775,7 +775,7 @@ extern struct value *value_ind (struct value *arg1);
 
 extern struct value *value_addr (struct value *arg1);
 
-extern struct value *value_ref (struct value *arg1);
+extern struct value *value_ref (struct value *arg1, enum type_code refcode);
 
 extern struct value *value_assign (struct value *toval,
 				   struct value *fromval);

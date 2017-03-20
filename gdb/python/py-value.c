@@ -248,7 +248,7 @@ valpy_reference_value (PyObject *self, PyObject *args)
       scoped_value_mark free_values;
 
       self_val = ((value_object *) self)->value;
-      result = value_to_value_object (value_ref (self_val));
+      result = value_to_value_object (value_ref (self_val, TYPE_CODE_REF));
     }
   CATCH (except, RETURN_MASK_ALL)
     {

@@ -373,7 +373,7 @@ value_cast (struct type *type, struct value *arg2)
       struct type *dereftype = check_typedef (TYPE_TARGET_TYPE (t1));
       struct value *val =  value_cast (dereftype, arg2);
 
-      return value_ref (val); 
+      return value_ref (val, TYPE_CODE (t1));
     }
 
   code2 = TYPE_CODE (check_typedef (value_type (arg2)));
@@ -623,7 +623,8 @@ value_reinterpret_cast (struct type *type, struct value *arg)
     error (_("Invalid reinterpret_cast"));
 
   if (is_ref)
-    result = value_cast (type, value_ref (value_ind (result)));
+    result = value_cast (type, value_ref (value_ind (result),
+                                          TYPE_CODE (type)));
 
   return result;
 }
@@ -819,7 +820,9 @@ value_dynamic_cast (struct type *type, struct value *arg)
 				arg_type,
 				&result) == 1)
 	return value_cast (type,
-			   is_ref ? value_ref (result) : value_addr (result));
+			   is_ref
+			   ? value_ref (result, TYPE_CODE (resolved_type))
+			   : value_addr (result));
     }
 
   /* The second dynamic check specified in 5.2.7.  */
@@ -831,7 +834,9 @@ value_dynamic_cast (struct type *type, struct value *arg)
 			       value_address (tem), tem,
 			       rtti_type, &result) == 1)
     return value_cast (type,
-		       is_ref ? value_ref (result) : value_addr (result));
+		       is_ref
+		       ? value_ref (result, TYPE_CODE (resolved_type))
+		       : value_addr (result));
 
   if (TYPE_CODE (resolved_type) == TYPE_CODE_PTR)
     return value_zero (type, not_lval);
@@ -1527,16 +1532,20 @@ value_addr (struct value *arg1)
    contents.  */
 
 struct value *
-value_ref (struct value *arg1)
+value_ref (struct value *arg1, enum type_code refcode)
 {
   struct value *arg2;
   struct type *type = check_typedef (value_type (arg1));
 
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  gdb_assert (refcode == TYPE_CODE_REF || refcode == TYPE_CODE_RVALUE_REF);
+
+  if ((TYPE_CODE (type) == TYPE_CODE_REF
+       || TYPE_CODE (type) == TYPE_CODE_RVALUE_REF)
+      && TYPE_CODE (type) == refcode)
     return arg1;
 
   arg2 = value_addr (arg1);
-  deprecated_set_value_type (arg2, lookup_lvalue_reference_type (type));
+  deprecated_set_value_type (arg2, lookup_reference_type (type, refcode));
   return arg2;
 }
 
@@ -1743,7 +1752,7 @@ typecmp (int staticp, int varargs, int nargs,
 	  if (TYPE_CODE (tt2) == TYPE_CODE_ARRAY)
 	    t2[i] = value_coerce_array (t2[i]);
 	  else
-	    t2[i] = value_ref (t2[i]);
+	    t2[i] = value_ref (t2[i], TYPE_CODE (tt1));
 	  continue;
 	}
 

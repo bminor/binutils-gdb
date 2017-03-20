@@ -168,7 +168,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
 	   if the value was not previously in memory - in some cases
 	   we should clearly be allowing this, but how?  */
 	new_value = value_cast (TYPE_TARGET_TYPE (type), arg);
-	new_value = value_ref (new_value);
+	new_value = value_ref (new_value, TYPE_CODE (type));
 	return new_value;
       }
     case TYPE_CODE_INT:
