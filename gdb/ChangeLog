@@ -1,5 +1,19 @@
 2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* windows-nat.c (do_windows_fetch_inferior_registers): Add
+	windows_thread_info parameter and use it instead of
+	current_thread.
+	(windows_fetch_inferior_registers): Don't set current_thread,
+	pass the thread to do_windows_fetch_inferior_registers.  Use
+	ptid from regcache instead of inferior_ptid.
+	(do_windows_store_inferior_registers): Add windows_thread_info
+	parameter and use it instead of current_thread.
+	(windows_store_inferior_registers): Don't set current_thread,
+	pass the thread to do_windows_store_inferior_registers.  Use
+	ptid from regcache instead of inferior_ptid.
+
+2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ser-mingw.c (ser_windows_raw): Remove reference to
 	struct serial::current_timeout.
 
