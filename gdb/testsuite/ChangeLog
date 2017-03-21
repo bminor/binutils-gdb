@@ -1,3 +1,9 @@
+2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20928
+	* gdb.arch/sparc64-regs.exp: New file.
+	* gdb.arch/sparc64-regs.S: Likewise.
+
 2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* gdb.python/py-record-btrace.exp: Check for buffer on Python 2

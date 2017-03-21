@@ -174,6 +174,31 @@ sparc64_pstate_type (struct gdbarch *gdbarch)
 }
 
 static struct type *
+sparc64_ccr_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->sparc64_ccr_type == NULL)
+    {
+      struct type *type;
+
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_ccr", 8);
+      append_flags_type_flag (type, 0, "icc.c");
+      append_flags_type_flag (type, 1, "icc.v");
+      append_flags_type_flag (type, 2, "icc.z");
+      append_flags_type_flag (type, 3, "icc.n");
+      append_flags_type_flag (type, 4, "xcc.c");
+      append_flags_type_flag (type, 5, "xcc.v");
+      append_flags_type_flag (type, 6, "xcc.z");
+      append_flags_type_flag (type, 7, "xcc.n");
+
+      tdep->sparc64_ccr_type = type;
+    }
+
+  return tdep->sparc64_ccr_type;
+}
+
+static struct type *
 sparc64_fsr_type (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -183,16 +208,16 @@ sparc64_fsr_type (struct gdbarch *gdbarch)
       struct type *type;
 
       type = arch_flags_type (gdbarch, "builtin_type_sparc64_fsr", 8);
-      append_flags_type_flag (type, 0, "NXA");
-      append_flags_type_flag (type, 1, "DZA");
-      append_flags_type_flag (type, 2, "UFA");
-      append_flags_type_flag (type, 3, "OFA");
-      append_flags_type_flag (type, 4, "NVA");
-      append_flags_type_flag (type, 5, "NXC");
-      append_flags_type_flag (type, 6, "DZC");
-      append_flags_type_flag (type, 7, "UFC");
-      append_flags_type_flag (type, 8, "OFC");
-      append_flags_type_flag (type, 9, "NVC");
+      append_flags_type_flag (type, 0, "NXC");
+      append_flags_type_flag (type, 1, "DZC");
+      append_flags_type_flag (type, 2, "UFC");
+      append_flags_type_flag (type, 3, "OFC");
+      append_flags_type_flag (type, 4, "NVC");
+      append_flags_type_flag (type, 5, "NXA");
+      append_flags_type_flag (type, 6, "DZA");
+      append_flags_type_flag (type, 7, "UFA");
+      append_flags_type_flag (type, 8, "OFA");
+      append_flags_type_flag (type, 9, "NVA");
       append_flags_type_flag (type, 22, "NS");
       append_flags_type_flag (type, 23, "NXM");
       append_flags_type_flag (type, 24, "DZM");
@@ -319,7 +344,7 @@ sparc64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC64_ASI_REGNUM)
     return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_CCR_REGNUM)
-    return builtin_type (gdbarch)->builtin_int64;
+    return sparc64_ccr_type (gdbarch);
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D62_REGNUM)
     return builtin_type (gdbarch)->builtin_double;
   if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q60_REGNUM)

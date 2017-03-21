@@ -88,6 +88,7 @@ struct gdbarch_tdep
   /* ISA-specific data types.  */
   struct type *sparc_psr_type;
   struct type *sparc_fsr_type;
+  struct type *sparc64_ccr_type;
   struct type *sparc64_pstate_type;
   struct type *sparc64_fsr_type;
   struct type *sparc64_fprs_type;

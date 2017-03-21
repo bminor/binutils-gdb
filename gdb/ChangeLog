@@ -1,3 +1,10 @@
+2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20928
+	* gdb/sparc-tdep.h (gdbarch_tdep) <sparc64_ccr_type>: New field.
+	* gdb/sparc64-tdep.c (sparc64_ccr_type): New function.
+	(sparc64_fsr_type): Fix %fsr decoding.
+
 2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* python/py-record-btrace.c (btpy_insn_data): Change return type
