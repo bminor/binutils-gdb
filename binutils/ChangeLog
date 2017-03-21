@@ -1,3 +1,12 @@
+2017-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Allow stack
+	protection notes to contain numeric values.  Use a colon rather
+	than a space to separate a string name from its values.  Decode
+	the numeric value of a stack protection note.
+	* objcopy.c (merge_gnu_build_notes): Allow version notes to
+	contain extra text after the protocol version number.
+
 2017-03-20  Mark Wielaard  <mark@klomp.org>
 
 	* readelf.c (process_program_headers): Move dynamic_addr check

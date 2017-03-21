@@ -16809,7 +16809,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     case GNU_BUILD_ATTRIBUTE_STACK_PROT:
       text = _("<stack prot>");
-      expected_types = "!+";
+      expected_types = "!+*";
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_RELRO:
@@ -16850,7 +16850,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	  if (len > left && ! do_wide)
 	    len = left;
-	  printf ("%.*s ", len, name);
+	  printf ("%.*s:", len, name);
 	  left -= len;
 	  name += len;
 	}
@@ -16871,7 +16871,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     }
 
   if (strchr (expected_types, name_type) == NULL)
-    warn (_("attribute does not have the expected type\n"));
+    warn (_("attribute does not have an expected type (%c)\n"), name_type);
 
   if ((unsigned long)(name - pnote->namedata) > pnote->namesz)
     {
@@ -16888,9 +16888,10 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	unsigned int bytes = pnote->namesz - (name - pnote->namedata);
-	unsigned long val = 0;
-	unsigned int shift = 0;
+	unsigned int   bytes = pnote->namesz - (name - pnote->namedata);
+	unsigned long  val = 0;
+	unsigned int   shift = 0;
+	char *         decoded = NULL;
 
 	while (bytes --)
 	  {
@@ -16900,33 +16901,44 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	    shift += 8;
 	  }
 
-	if (name_attribute == GNU_BUILD_ATTRIBUTE_PIC)
+	switch (name_attribute)
 	  {
-	    char * pic_type = NULL;
-
+	  case GNU_BUILD_ATTRIBUTE_PIC:
 	    switch (val)
 	      {
-	      case 0: pic_type = "static"; break;
-	      case 1: pic_type = "pic"; break;
-	      case 2: pic_type = "PIC"; break;
-	      case 3: pic_type = "pie"; break;
-	      case 4: pic_type = "PIE"; break;
+	      case 0: decoded = "static"; break;
+	      case 1: decoded = "pic"; break;
+	      case 2: decoded = "PIC"; break;
+	      case 3: decoded = "pie"; break;
+	      case 4: decoded = "PIE"; break;
+	      default: break;
 	      }
-
-	    if (pic_type != NULL)
+	    break;
+	  case GNU_BUILD_ATTRIBUTE_STACK_PROT:
+	    switch (val)
 	      {
-		if (do_wide)
-		  left -= printf ("%s", pic_type);
-		else
-		  left -= printf ("%-.*s", left, pic_type);
-		break;
+		/* Based upon the SPCT_FLAG_xxx enum values in gcc/cfgexpand.c.  */
+	      case 0: decoded = "off"; break;
+	      case 1: decoded = "on"; break;
+	      case 2: decoded = "all"; break;
+	      case 3: decoded = "strong"; break;
+	      case 4: decoded = "explicit"; break;
+	      default: break;
 	      }
+	    break;
+	  default:
+	    break;
 	  }
 
-	if (do_wide)
-	  left -= printf ("0x%lx", val);
+	if (decoded != NULL)
+	  print_symbol (-left, decoded);
 	else
-	  left -= printf ("0x%-.*lx", left, val);
+	  {
+	    if (do_wide)
+	      left -= printf ("0x%lx", val);
+	    else
+	      left -= printf ("0x%-.*lx", left, val);
+	  }
       }
       break;
     case GNU_BUILD_ATTRIBUTE_TYPE_STRING:
