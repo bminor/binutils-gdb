@@ -1,3 +1,12 @@
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* arc-nps400-tbl.h: Add cp32/cp16 instructions format.
+	* arc-opc.c: Add F_NPS_NA, NPS_DMA_IMM_ENTRY, NPS_DMA_IMM_OFFSET.
+	(insert_nps_imm_offset): New function.
+	(extract_nps_imm_offset): New function.
+	(insert_nps_imm_entry): New function.
+	(extract_nps_imm_entry): New function.
+
 2017-03-17  Alan Modra  <amodra@gmail.com>
 
 	PR 21248

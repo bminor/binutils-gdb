@@ -1,3 +1,8 @@
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* testsuite/gas/arc/nps400-11.s: New file.
+	* testsuite/gas/arc/nps400-11.d: New file.
+
 2017-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (2byte): Note that if no expressions are present

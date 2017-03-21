@@ -832,6 +832,70 @@ extract_nps_cmem_uimm16 (unsigned long long insn ATTRIBUTE_UNUSED,
   return (NPS_CMEM_HIGH_VALUE << 16) | (insn & 0xffff);
 }
 
+static unsigned long long int
+insert_nps_imm_offset (unsigned long long insn ATTRIBUTE_UNUSED,
+			long long int value ATTRIBUTE_UNUSED,
+			const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 0:
+    case 16:
+    case 32:
+    case 48:
+    case 64:
+      value = value >> 4;
+      break;
+    default:
+      *errmsg = _("Invalid position, should be 0, 16, 32, 48 or 64.");
+      value = 0;
+    }
+  insn |= (value << 10);
+  return insn;
+}
+
+static long long int
+extract_nps_imm_offset (unsigned long long insn ATTRIBUTE_UNUSED,
+				bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn >> 10) & 0x7) * 16;
+}
+
+static unsigned long long
+insert_nps_imm_entry (unsigned long long insn ATTRIBUTE_UNUSED,
+				long long value ATTRIBUTE_UNUSED,
+				const char **errmsg ATTRIBUTE_UNUSED)
+{
+  switch (value)
+    {
+    case 16:
+      value = 0;
+      break;
+    case 32:
+      value = 1;
+      break;
+    case 64:
+      value = 2;
+      break;
+    case 128:
+    value = 3;
+    break;
+    default:
+      *errmsg = _("Invalid position, should be 16, 32, 64 or 128.");
+      value = 0;
+    }
+  insn |= (value << 2);
+  return insn;
+}
+
+static long long int
+extract_nps_imm_entry (unsigned long long insn ATTRIBUTE_UNUSED,
+				bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int imm_entry = ((insn >> 2) & 0x7);
+  return (1 << (imm_entry + 4));
+}
+
 #define MAKE_SRC_POS_INSERT_EXTRACT_FUNCS(NAME,SHIFT)         \
 static unsigned long long                                               \
 insert_nps_##NAME##_pos (unsigned long long insn ATTRIBUTE_UNUSED,      \
@@ -1301,7 +1365,10 @@ const struct arc_flag_operand arc_flag_operands[] =
 #define F_NPS_CL (F_NE + 1)
   { "cl", 0, 0, 0, 1 },
 
-#define F_NPS_FLAG (F_NPS_CL + 1)
+#define F_NPS_NA (F_NPS_CL + 1)
+  { "na", 1, 1, 9, 1 },
+
+#define F_NPS_FLAG (F_NPS_NA + 1)
   { "f", 1, 1, 20, 1 },
 
 #define F_NPS_R     (F_NPS_FLAG + 1)
@@ -1513,7 +1580,10 @@ const struct arc_flag_class arc_flag_classes[] =
 #define C_NPS_CL     (C_NE + 1)
   { F_CLASS_REQUIRED, { F_NPS_CL, F_NULL}},
 
-#define C_NPS_F     (C_NPS_CL + 1)
+#define C_NPS_NA     (C_NPS_CL + 1)
+  { F_CLASS_OPTIONAL, { F_NPS_NA, F_NULL}},
+
+#define C_NPS_F     (C_NPS_NA + 1)
   { F_CLASS_OPTIONAL, { F_NPS_FLAG, F_NULL}},
 
 #define C_NPS_R     (C_NPS_F + 1)
@@ -2207,7 +2277,13 @@ const struct arc_operand arc_operands[] =
 #define NPS_PMU_NUM_JOB     (NPS_PMU_NXT_DST + 1)
   { 2, 6, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_pmu_num_job, extract_nps_pmu_num_job },
 
-#define NPS_R_DST_3B_48	(NPS_PMU_NUM_JOB + 1)
+#define NPS_DMA_IMM_ENTRY  (NPS_PMU_NUM_JOB + 1)
+  { 3, 2, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_imm_entry, extract_nps_imm_entry },
+
+#define NPS_DMA_IMM_OFFSET  (NPS_DMA_IMM_ENTRY + 1)
+  { 4, 10, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_imm_offset, extract_nps_imm_offset },
+
+#define NPS_R_DST_3B_48	(NPS_DMA_IMM_OFFSET + 1)
   { 3, 40, 0, ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_40_dst, extract_nps_3bit_reg_at_40_dst },
 
 #define NPS_R_SRC1_3B_48	(NPS_R_DST_3B_48 + 1)

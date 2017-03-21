@@ -53,6 +53,7 @@ typedef enum
   BRCC,
   CONTROL,
   DIVREM,
+  DMA,
   DPI,
   DSP,
   EI,

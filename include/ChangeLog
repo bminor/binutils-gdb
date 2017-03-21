@@ -1,3 +1,7 @@
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* opcode/arc.h (insn_class_t): Add DMA class.
+
 2017-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (GNU_BUILD_ATTRIBUTE_SHORT_ENUM): New GNU BUILD
