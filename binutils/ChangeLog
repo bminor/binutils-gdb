@@ -1,3 +1,13 @@
+2017-03-21  Andi Kleen  <ak@linux.intel.com>
+
+	* objdump.c (unwind_inlines): Add.
+	(option_values): Add OPTION_INLINES.
+	(show_line): Unwind inlines if requested.
+	(main): Parse OPTION_INLINES.
+	(usage): Document --inlines.
+	* doc/binutils.texi: Document --inlines.
+	* NEWS: Likewise.
+
 2017-03-21  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (print_gnu_build_attribute_name): Allow stack

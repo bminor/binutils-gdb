@@ -761,7 +761,8 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
    [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
    [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
-   [@option{-l}|@option{--line-numbers}] [@option{-n}|@option{-v}|@option{--numeric-sort}]
+   [@option{-l}|@option{--line-numbers}] [@option{--inlines}]
+   [@option{-n}|@option{-v}|@option{--numeric-sort}]
    [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
    [@option{-r}|@option{--reverse-sort}] [@option{-S}|@option{--print-size}]
    [@option{-s}|@option{--print-armap}] [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
@@ -967,6 +968,16 @@ line number.  For a defined symbol, look for the line number of the
 address of the symbol.  For an undefined symbol, look for the line
 number of a relocation entry which refers to the symbol.  If line number
 information can be found, print it after the other symbol information.
+
+@item --inlines
+@cindex objdump inlines
+When option @option{-l} is active, if the address belongs to a
+function that was inlined, then this option causes the source 
+information for all enclosing scopes back to the first non-inlined
+function to be printed as well.  For example, if @code{main} inlines
+@code{callee1} which inlines @code{callee2}, and address is from
+@code{callee2}, the source information for @code{callee1} and @code{main}
+will also be printed.
 
 @item -n
 @itemx -v

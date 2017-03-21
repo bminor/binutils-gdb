@@ -117,6 +117,7 @@ static bfd_boolean display_file_offsets;/* -F */
 static const char *prefix;		/* --prefix */
 static int prefix_strip;		/* --prefix-strip */
 static size_t prefix_length;
+static bfd_boolean unwind_inlines;	/* --inlines.  */
 
 /* A structure to record the sections mentioned in -j switches.  */
 struct only
@@ -257,6 +258,7 @@ usage (FILE *stream, int status)
       --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
       --special-syms             Include special symbols in symbol dumps\n\
+      --inlines                  Print all inlines for source line (with -l)\n\
       --prefix=PREFIX            Add PREFIX to absolute paths for -S\n\
       --prefix-strip=LEVEL       Strip initial directory names for -S\n"));
       fprintf (stream, _("\
@@ -296,7 +298,8 @@ enum option_values
     OPTION_ADJUST_VMA,
     OPTION_DWARF_DEPTH,
     OPTION_DWARF_CHECK,
-    OPTION_DWARF_START
+    OPTION_DWARF_START,
+    OPTION_INLINES
   };
 
 static struct option long_options[]=
@@ -348,6 +351,7 @@ static struct option long_options[]=
   {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
+  {"inlines",          no_argument, 0, OPTION_INLINES},
   {0, no_argument, 0, 0}
 };
 
@@ -1543,6 +1547,17 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
           else
             printf ("%s:%u\n", filename == NULL ? "???" : filename, linenumber);
         }
+      if (unwind_inlines)
+	{
+	  const char *filename2;
+	  const char *functionname2;
+	  unsigned line2;
+
+	  while (bfd_find_inliner_info (abfd, &filename2, &functionname2,
+					&line2))
+	    printf ("inlined by %s:%u (%s)\n", filename2, line2,
+		    functionname2);
+	}
     }
 
   if (with_source_code
@@ -3807,6 +3822,9 @@ main (int argc, char **argv)
 	  insn_width = strtoul (optarg, NULL, 0);
 	  if (insn_width <= 0)
 	    fatal (_("error: instruction width must be positive"));
+	  break;
+	case OPTION_INLINES:
+	  unwind_inlines = TRUE;
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)
