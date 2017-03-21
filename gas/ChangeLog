@@ -1,3 +1,10 @@
+2017-03-21  Palmer Dabbbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (md_show_usage): Remove defuct -m32, -m64,
+	-msoft-float, -mhard-float, -mno-rvc, and -mrvc options; and don't
+	print an invalid default ISA string.
+	* doc/c-riscv.texi (OPTIONS): Add -fpic and -fno-pic options.
+
 2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
 
 	* config/tc-riscv.c (validate_riscv_insn): Add 'o' RVC immediate
