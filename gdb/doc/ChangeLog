@@ -1,3 +1,8 @@
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recordings In Python): Document return type of
+	gdb.BtraceInstruction.data.
+
 2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
 
 	* gdb.texinfo (gdb/mi Symbol Query Commands): Document new MI

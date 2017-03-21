@@ -3185,7 +3185,8 @@ if the instruction is a gap or the debug symbols could not be read.
 
 @defvar BtraceInstruction.data
 A buffer with the raw instruction data.  May be @code{None} if the
-instruction is a gap.
+instruction is a gap.  In Python 3, the return value is a @code{memoryview}
+object.
 @end defvar
 
 @defvar BtraceInstruction.decoded
