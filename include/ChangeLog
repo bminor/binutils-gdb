@@ -1,3 +1,11 @@
+2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	Backport from mainline
+	2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* opcode/s390.h (S390_INSTR_FLAG_VX2): Remove.
+	(S390_INSTR_FLAG_FACILITY_MASK): Adjust value.
+
 2017-02-28  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc64.h (R_PPC64_16DX_HA): New.  Expand fake reloc comment.

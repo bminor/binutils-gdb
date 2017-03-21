@@ -1,3 +1,11 @@
+2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	Backport from mainline
+	2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Remove vx2 check.
+	* s390-opc.txt: Remove vx2 instruction flags.
+
 2017-03-08  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (ppc_opts) <altivec>: Do not use PPC_OPCODE_ALTIVEC2;
