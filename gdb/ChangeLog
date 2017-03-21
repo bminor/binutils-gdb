@@ -1,3 +1,8 @@
+2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ser-mingw.c (ser_windows_raw): Remove reference to
+	struct serial::current_timeout.
+
 2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
 
 	PR tdep/20928
