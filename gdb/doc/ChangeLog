@@ -1,3 +1,7 @@
+2017-03-22  Yao Qi  <yao.qi@linaro.org>
+
+	* python.texi (Inferiors In Python): Remove @code from Python.
+
 2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* python.texi (Recordings In Python): Document return type of
