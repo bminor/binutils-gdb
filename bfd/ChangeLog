@@ -1,3 +1,17 @@
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't initially mark
+	SEC_GROUP sections as SEC_EXCLUDE.
+	(bfd_elf_set_group_contents): Replace use of abort with an assert.
+	(assign_section_numbers): Use resolve_section_groups flag instead
+	of relocatable link type.
+	(_bfd_elf_init_private_section_data): Use resolve_section_groups
+	flag instead of checking the final_link flag for part of the
+	checks in here.  Fix white space as a result.
+	* elflink.c (elf_link_input_bfd): Use resolve_section_groups flag
+	instead of relocatable link type.
+	(bfd_elf_final_link): Likewise.
+
 2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Remove unused

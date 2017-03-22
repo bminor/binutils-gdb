@@ -10277,7 +10277,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  continue;
 	}
 
-      if (bfd_link_relocatable (flinfo->info)
+      if (!flinfo->info->resolve_section_groups
 	  && (o->flags & (SEC_LINKER_CREATED | SEC_GROUP)) == SEC_GROUP)
 	{
 	  /* Deal with the group signature symbol.  */
@@ -10285,6 +10285,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  unsigned long symndx = sec_data->this_hdr.sh_info;
 	  asection *osec = o->output_section;
 
+	  BFD_ASSERT (bfd_link_relocatable (flinfo->info));
 	  if (symndx >= locsymcount
 	      || (elf_bad_symtab (input_bfd)
 		  && flinfo->sections[symndx] == NULL))
@@ -12463,10 +12464,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (bfd_link_relocatable (info))
+  if (!info->resolve_section_groups)
     {
       bfd_boolean failed = FALSE;
 
+      BFD_ASSERT (bfd_link_relocatable (info));
       bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
       if (failed)
 	goto error_return;

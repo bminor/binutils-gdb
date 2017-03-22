@@ -1,3 +1,24 @@
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.h (struct args_type): Add force_group_allocation field.
+	* ldgram.y: Add support for FORCE_GROUP_ALLOCATION.
+	* ldlex.h: Likewise.
+	* ldlex.l: Likewise.
+	* lexsup.c: Likewise.
+	* ldlang.c (unique_section_p): Check resolve_section_groups flag
+	not the relaxable link flag.
+	(lang_add_section): Discard section groups when we're resolving
+	groups.  Clear the SEC_LINK_ONCE flag if we're resolving section
+	groups.
+	* ldmain.c (main): Initialise resolve_section_groups flag in
+	link_info based on command line flags.
+	* testsuite/ld-elf/group11.d: New file.
+	* testsuite/ld-elf/group12.d: New file.
+	* testsuite/ld-elf/group12.ld: New file.
+	* NEWS: Mention new features.
+	* ld.texinfo (Options): Document --force-group-allocation.
+	(Miscellaneous Commands): Document FORCE_GROUP_ALLOCATION.
+
 2017-06-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21529

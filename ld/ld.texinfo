@@ -1484,6 +1484,18 @@ and also prevents any possible confusion over resolving to the wrong
 duplicate when there are many dynamic modules with specialized search
 paths for runtime symbol resolution.
 
+@cindex group allocation in linker script
+@cindex section groups
+@cindex COMDAT
+@kindex --force-group-allocation
+@item --force-group-allocation
+This option causes the linker to place section group members like
+normal input sections, and to delete the section groups.  This is the
+default behaviour for a final link but this option can be used to
+change the behaviour of a relocatable link (@samp{-r}).  The script
+command @code{FORCE_GROUP_ALLOCATION} has the same
+effect. @xref{Miscellaneous Commands}.
+
 @cindex symbols, from command line
 @kindex --defsym=@var{symbol}=@var{exp}
 @item --defsym=@var{symbol}=@var{expression}
@@ -3725,6 +3737,17 @@ output file is specified (@samp{-r}).
 This command has the same effect as the @samp{--no-define-common}
 command-line option: to make @code{ld} omit the assignment of addresses
 to common symbols even for a non-relocatable output file.
+
+@item FORCE_GROUP_ALLOCATION
+@kindex FORCE_GROUP_ALLOCATION
+@cindex group allocation in linker script
+@cindex section groups
+@cindex COMDAT
+This command has the same effect as the
+@samp{--force-group-allocation} command-line option: to make
+@command{ld} place section group members like normal input sections,
+and to delete the section groups even if a relocatable output file is
+specified (@samp{-r}).
 
 @item INSERT [ AFTER | BEFORE ] @var{output_section}
 @kindex INSERT

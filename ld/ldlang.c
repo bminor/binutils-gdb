@@ -207,7 +207,7 @@ unique_section_p (const asection *sec,
   struct unique_sections *unam;
   const char *secnam;
 
-  if (bfd_link_relocatable (&link_info)
+  if (!link_info.resolve_section_groups
       && sec->owner != NULL
       && bfd_is_group_section (sec->owner, sec))
     return !(os != NULL
@@ -2349,6 +2349,12 @@ lang_add_section (lang_statement_list_type *ptr,
   if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
     discard = TRUE;
 
+  /* Discard the group descriptor sections when we're finally placing the
+     sections from within the group.  */
+  if ((section->flags & SEC_GROUP) == SEC_GROUP
+      && link_info.resolve_section_groups)
+    discard = TRUE;
+
   /* Discard debugging sections if we are stripping debugging
      information.  */
   if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
@@ -2389,8 +2395,14 @@ lang_add_section (lang_statement_list_type *ptr,
      already been processed.  One reason to do this is that on pe
      format targets, .text$foo sections go into .text and it's odd
      to see .text with SEC_LINK_ONCE set.  */
-
-  if (!bfd_link_relocatable (&link_info))
+  if ((flags & (SEC_LINK_ONCE | SEC_GROUP)) == (SEC_LINK_ONCE | SEC_GROUP))
+    {
+      if (link_info.resolve_section_groups)
+        flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
+      else
+        flags &= ~(SEC_LINK_DUPLICATES | SEC_RELOC);
+    }
+  else if (!bfd_link_relocatable (&link_info))
     flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
 
   switch (output->sectype)
