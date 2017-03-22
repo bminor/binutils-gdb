@@ -1,3 +1,8 @@
+2017-03-22  Jonah Graham  <jonah@kichwacoders.com>
+
+	PR gdb/19637
+	* python/lib/gdb/printer/bound_registers.py: Import sys.
+
 2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* windows-nat.c (do_windows_fetch_inferior_registers): Add
