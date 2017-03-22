@@ -1,3 +1,11 @@
+2017-03-22  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Wrap locally used classes in anonymous
+	namespace.
+	* arm-tdep.c: Likewise.
+	* linespec.c: Likewise.
+	* ui-out.c: Likewise.
+
 2017-03-22  Jonah Graham  <jonah@kichwacoders.com>
 
 	PR gdb/19637

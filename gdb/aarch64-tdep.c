@@ -196,6 +196,8 @@ show_aarch64_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("AArch64 debugging is %s.\n"), value);
 }
 
+namespace {
+
 /* Abstract instruction reader.  */
 
 class abstract_instruction_reader
@@ -216,6 +218,8 @@ class instruction_reader : public abstract_instruction_reader
     return read_code_unsigned_integer (memaddr, len, byte_order);
   }
 };
+
+} // namespace
 
 /* Analyze a prologue, looking for a recognizable stack frame
    and frame pointer.  Scan until we encounter a store that could
