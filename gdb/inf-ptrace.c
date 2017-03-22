@@ -520,7 +520,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const gdb_byte *writebuf,
 			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = get_ptrace_pid (inferior_ptid);
 
   switch (object)
     {

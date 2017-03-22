@@ -3890,7 +3890,6 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
 			const gdb_byte *writebuf,
 			ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  struct cleanup *old_chain;
   enum target_xfer_status xfer;
 
   if (object == TARGET_OBJECT_SIGNAL_INFO)
@@ -3903,15 +3902,9 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
   if (object == TARGET_OBJECT_MEMORY && ptid_equal (inferior_ptid, null_ptid))
     return TARGET_XFER_EOF;
 
-  old_chain = save_inferior_ptid ();
-
-  if (ptid_lwp_p (inferior_ptid))
-    inferior_ptid = pid_to_ptid (ptid_get_lwp (inferior_ptid));
-
   xfer = linux_ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
 				     offset, len, xfered_len);
 
-  do_cleanups (old_chain);
   return xfer;
 }
 
@@ -4001,8 +3994,8 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
 
   /* We could keep this file open and cache it - possibly one per
      thread.  That requires some juggling, but is even faster.  */
-  xsnprintf (filename, sizeof filename, "/proc/%d/mem",
-	     ptid_get_pid (inferior_ptid));
+  xsnprintf (filename, sizeof filename, "/proc/%ld/mem",
+	     ptid_get_lwp (inferior_ptid));
   fd = gdb_open_cloexec (filename, ((readbuf ? O_RDONLY : O_WRONLY)
 				    | O_LARGEFILE), 0);
   if (fd == -1)
@@ -4095,7 +4088,7 @@ linux_proc_xfer_spu (struct target_ops *ops, enum target_object object,
   char buf[128];
   int fd = 0;
   int ret = -1;
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = ptid_get_lwp (inferior_ptid);
 
   if (!annex)
     {
