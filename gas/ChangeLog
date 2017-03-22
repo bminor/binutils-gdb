@@ -1,3 +1,12 @@
+2017-03-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_relax_frag): Change fx_size of the
+	reassigned fixup to size of jump instruction (3) and fx_r_type
+	to BFD_RELOC_XTENSA_SLOT0_OP, as there's only one slot.
+	(add_jump_to_trampoline): Search
+	origfrag->tc_frag_data.slot_symbols for the slot with non-NULL
+	symbol and use that slot instead of slot 0.
+
 2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): Remove S390_INSTR_FLAG_VX2

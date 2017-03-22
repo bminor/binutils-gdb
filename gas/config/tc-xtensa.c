@@ -9414,7 +9414,9 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
 			  /* Move the fix-up from the original j insn to this one.  */
 			  fixP->fx_frag = fragP;
 			  fixP->fx_where = fragP->fr_fix - 3;
+			  fixP->fx_size = 3;
 			  fixP->tc_fix_data.slot = 0;
+			  fixP->fx_r_type = BFD_RELOC_XTENSA_SLOT0_OP;
 
 			  xtensa_add_cached_fixup (&fixup_cache, fixP);
 
@@ -10045,11 +10047,21 @@ add_jump_to_trampoline (struct trampoline_frag *trampP, fragS *origfrag)
   xtensa_format fmt;
   xtensa_isa isa = xtensa_default_isa;
   int growth = 0;
+  int i, slot = -1;
+
+  for (i = 0; i < MAX_SLOTS; ++i)
+    if (origfrag->tc_frag_data.slot_symbols[i])
+      {
+	gas_assert (slot == -1);
+	slot = i;
+      }
+
+  gas_assert (slot >= 0 && slot < MAX_SLOTS);
 
   lsym = tramp->fr_symbol;
   /* Assemble a jump to the target label in the trampoline frag.  */
-  tsym = origfrag->tc_frag_data.slot_symbols[0];
-  toffset = origfrag-> tc_frag_data.slot_offsets[0];
+  tsym = origfrag->tc_frag_data.slot_symbols[slot];
+  toffset = origfrag-> tc_frag_data.slot_offsets[slot];
   tinsn_init (&insn);
   insn.insn_type = ITYPE_INSN;
   insn.opcode = xtensa_j_opcode;
@@ -10069,8 +10081,8 @@ add_jump_to_trampoline (struct trampoline_frag *trampP, fragS *origfrag)
   if (fixP)
     fixP->fx_offset += 3;
   /* Modify the original j to point here.  */
-  origfrag->tc_frag_data.slot_symbols[0] = lsym;
-  origfrag->tc_frag_data.slot_offsets[0] = tramp->fr_fix - 3;
+  origfrag->tc_frag_data.slot_symbols[slot] = lsym;
+  origfrag->tc_frag_data.slot_offsets[slot] = tramp->fr_fix - 3;
   /* If trampoline is full, remove it from the list.  */
   check_and_update_trampolines ();
 
