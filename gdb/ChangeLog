@@ -1,5 +1,10 @@
 2017-03-23  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_record_load_store): Fix code
+	indentation.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c: Remove AARCH64_RECORD_FAILURE.
 
 2017-03-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>

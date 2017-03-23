@@ -3609,15 +3609,19 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
     {
       opc = bits (aarch64_insn_r->aarch64_insn, 22, 23);
       if (!(opc >> 1))
-        if (opc & 0x01)
-          ld_flag = 0x01;
-        else
-          ld_flag = 0x0;
+	{
+	  if (opc & 0x01)
+	    ld_flag = 0x01;
+	  else
+	    ld_flag = 0x0;
+	}
       else
-        if (size_bits != 0x03)
-          ld_flag = 0x01;
-        else
-          return AARCH64_RECORD_UNKNOWN;
+	{
+	  if (size_bits != 0x03)
+	    ld_flag = 0x01;
+	  else
+	    return AARCH64_RECORD_UNKNOWN;
+	}
 
       if (record_debug)
 	{
