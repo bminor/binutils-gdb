@@ -1,3 +1,7 @@
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Remove AARCH64_RECORD_FAILURE.
+
 2017-03-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
 	python/python.c (do_start_initialization): Fix memory leak.
