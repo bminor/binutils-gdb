@@ -4526,8 +4526,8 @@ procfs_set_exec_trap (void)
    inf-ptrace?  */
 
 static void
-procfs_create_inferior (struct target_ops *ops, char *exec_file,
-			char *allargs, char **env, int from_tty)
+procfs_create_inferior (struct target_ops *ops, const char *exec_file,
+			const std::string &allargs, char **env, int from_tty)
 {
   char *shell_file = getenv ("SHELL");
   char *tryname;

@@ -1,3 +1,41 @@
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c (free_vector_argv): New function.
+	* common/common-utils.h: Include <vector>.
+	(free_vector_argv): New prototype.
+	* darwin-nat.c (darwin_create_inferior): Rewrite function
+	prototype in order to constify "exec_file" and accept a
+	"std::string" for "allargs".
+	* fork-child.c: Include <vector>.
+	(breakup_args): Rewrite function, using C++.
+	(fork_inferior): Rewrite function header, constify "exec_file_arg"
+	and accept "std::string" for "allargs".  Update the code to
+	calculate "argv" based on "allargs".  Update calls to "exec_fun"
+	and "execvp".
+	* gnu-nat.c (gnu_create_inferior): Rewrite function prototype in
+	order to constify "exec_file" and accept a "std::string" for
+	"allargs".
+	* go32-nat.c (go32_create_inferior): Likewise.
+	* inf-ptrace.c (inf_ptrace_create_inferior): Likewise.
+	* infcmd.c (run_command_1): Constify "exec_file".  Use
+	"std::string" for inferior arguments.
+	* inferior.h (fork_inferior): Update prototype.
+	* linux-nat.c (linux_nat_create_inferior): Rewrite function
+	prototype in order to constify "exec_file" and accept a
+	"std::string" for "allargs".
+	* nto-procfs.c (procfs_create_inferior): Likewise.
+	* procfs.c (procfs_create_inferior): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Likewise.
+	* remote.c (extended_remote_run): Update code to accept
+	"std::string" as argument.
+	(extended_remote_create_inferior): Rewrite function prototype in
+	order to constify "exec_file" and accept a "std::string" for
+	"allargs".
+	* rs6000-nat.c (super_create_inferior): Likewise.
+	(rs6000_create_inferior): Likewise.
+	* target.h (struct target_ops) <to_create_inferior>: Likewise.
+	* windows-nat.c (windows_create_inferior): Likewise.
+
 2017-04-11  Pedro Alves  <palves@redhat.com>
 
 	* thread.c: Fix whitespace throughout.

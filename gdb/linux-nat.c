@@ -1105,8 +1105,8 @@ linux_nat_post_attach_wait (ptid_t ptid, int first, int *signalled)
 
 static void
 linux_nat_create_inferior (struct target_ops *ops, 
-			   char *exec_file, char *allargs, char **env,
-			   int from_tty)
+			   const char *exec_file, const std::string &allargs,
+			   char **env, int from_tty)
 {
   struct cleanup *restore_personality
     = maybe_disable_address_space_randomization (disable_randomization);

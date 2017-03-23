@@ -607,13 +607,14 @@ gdbsim_load (struct target_ops *self, const char *args, int fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
-			char **env, int from_tty)
+gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
+			const std::string &allargs, char **env, int from_tty)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
   int len;
   char *arg_buf, **argv;
+  const char *args = allargs.c_str ();
 
   if (exec_file == 0 || exec_bfd == 0)
     warning (_("No executable file specified."));
@@ -633,7 +634,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
 
   if (exec_file != NULL)
     {
-      len = strlen (exec_file) + 1 + strlen (args) + 1 + /*slop */ 10;
+      len = strlen (exec_file) + 1 + allargs.size () + 1 + /*slop */ 10;
       arg_buf = (char *) alloca (len);
       arg_buf[0] = '\0';
       strcat (arg_buf, exec_file);

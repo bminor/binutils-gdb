@@ -34,6 +34,7 @@
 #include "top.h"
 #include "signals-state-save-restore.h"
 #include <signal.h>
+#include <vector>
 
 /* This just gets used as a default if we can't find SHELL.  */
 #define SHELL_FILE "/bin/sh"
@@ -48,41 +49,32 @@ static char *exec_wrapper;
    fill in ARGV with the four arguments "a", "b", "c", "d".  */
 
 static void
-breakup_args (char *scratch, char **argv)
+breakup_args (const std::string &scratch, std::vector<char *> &argv)
 {
-  char *cp = scratch, *tmp;
-
-  for (;;)
+  for (size_t cur_pos = 0; cur_pos < scratch.size ();)
     {
-      /* Scan past leading separators */
-      while (*cp == ' ' || *cp == '\t' || *cp == '\n')
-	cp++;
+      /* Skip whitespace-like chars.  */
+      std::size_t pos = scratch.find_first_not_of (" \t\n", cur_pos);
 
-      /* Break if at end of string.  */
-      if (*cp == '\0')
-	break;
+      if (pos != std::string::npos)
+	cur_pos = pos;
 
-      /* Take an arg.  */
-      *argv++ = cp;
+      /* Find the position of the next separator.  */
+      std::size_t next_sep = scratch.find_first_of (" \t\n", cur_pos);
 
-      /* Scan for next arg separator.  */
-      tmp = strchr (cp, ' ');
-      if (tmp == NULL)
-	tmp = strchr (cp, '\t');
-      if (tmp == NULL)
-	tmp = strchr (cp, '\n');
+      /* No separator found, which means this is the last
+	 argument.  */
+      if (next_sep == std::string::npos)
+	next_sep = scratch.size ();
 
-      /* No separators => end of string => break.  */
-      if (tmp == NULL)
-	break;
-      cp = tmp;
+      char *arg = savestring (scratch.c_str () + cur_pos, next_sep - cur_pos);
+      argv.push_back (arg);
 
-      /* Replace the separator with a terminator.  */
-      *cp++ = '\0';
+      cur_pos = next_sep;
     }
 
-  /* Null-terminate the vector.  */
-  *argv = NULL;
+  /* NULL-terminate the vector.  */
+  argv.push_back (NULL);
 }
 
 /* When executing a command under the given shell, return non-zero if
@@ -145,9 +137,10 @@ trace_start_error_with_name (const char *string)
    made static to ensure that they survive the vfork call.  */
 
 int
-fork_inferior (char *exec_file_arg, char *allargs, char **env,
-	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
-	       void (*pre_trace_fun) (void), char *shell_file_arg,
+fork_inferior (const char *exec_file_arg, const std::string &allargs,
+	       char **env, void (*traceme_fun) (void),
+	       void (*init_trace_fun) (int), void (*pre_trace_fun) (void),
+	       char *shell_file_arg,
                void (*exec_fun)(const char *file, char * const *argv,
                                 char * const *env))
 {
@@ -159,10 +152,10 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
      to you in the parent process.  It's only used by humans for debugging.  */
   static int debug_setpgrp = 657473;
   static char *shell_file;
-  static char *exec_file;
+  static const char *exec_file;
   char **save_our_env;
   int shell = 0;
-  static char **argv;
+  std::vector<char *> argv;
   const char *inferior_io_terminal = get_inferior_io_terminal ();
   struct inferior *inf;
   int i;
@@ -171,9 +164,10 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
-  exec_file = exec_file_arg;
-  if (exec_file == 0)
+  if (exec_file_arg == NULL)
     exec_file = get_exec_file (1);
+  else
+    exec_file = exec_file_arg;
 
   /* 'startup_with_shell' is declared in inferior.h and bound to the
      "set startup-with-shell" option.  If 0, we'll just do a
@@ -191,43 +185,26 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   if (!shell)
     {
-      /* We're going to call execvp.  Create argument vector.
-	 Calculate an upper bound on the length of the vector by
-	 assuming that every other character is a separate
-	 argument.  */
-      int argc = (strlen (allargs) + 1) / 2 + 2;
-
-      argv = XALLOCAVEC (char *, argc);
-      argv[0] = exec_file;
-      breakup_args (allargs, &argv[1]);
+      /* We're going to call execvp.  Create argument vector.  */
+      argv.push_back (xstrdup (exec_file));
+      breakup_args (allargs, argv);
     }
   else
     {
       /* We're going to call a shell.  */
-      char *shell_command;
-      int len;
-      char *p;
+      std::string shell_command;
+      const char *p;
       int need_to_quote;
       const int escape_bang = escape_bang_in_quoted_argument (shell_file);
 
-      /* Multiplying the length of exec_file by 4 is to account for the
-         fact that it may expand when quoted; it is a worst-case number
-         based on every character being '.  */
-      len = 5 + 4 * strlen (exec_file) + 1 + strlen (allargs) + 1 + /*slop */ 12;
-      if (exec_wrapper)
-        len += strlen (exec_wrapper) + 1;
-
-      shell_command = (char *) alloca (len);
-      shell_command[0] = '\0';
-
-      strcat (shell_command, "exec ");
+      shell_command = std::string ("exec ");
 
       /* Add any exec wrapper.  That may be a program name with arguments, so
 	 the user must handle quoting.  */
       if (exec_wrapper)
 	{
-	  strcat (shell_command, exec_wrapper);
-	  strcat (shell_command, " ");
+	  shell_command += exec_wrapper;
+	  shell_command += ' ';
 	}
 
       /* Now add exec_file, quoting as necessary.  */
@@ -268,33 +245,32 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
     end_scan:
       if (need_to_quote)
 	{
-	  strcat (shell_command, "'");
+	  shell_command += '\'';
 	  for (p = exec_file; *p != '\0'; ++p)
 	    {
 	      if (*p == '\'')
-		strcat (shell_command, "'\\''");
+		shell_command += "'\\''";
 	      else if (*p == '!' && escape_bang)
-		strcat (shell_command, "\\!");
+		shell_command += "\\!";
 	      else
-		strncat (shell_command, p, 1);
+		shell_command += *p;
 	    }
-	  strcat (shell_command, "'");
+	  shell_command += '\'';
 	}
       else
-	strcat (shell_command, exec_file);
+	shell_command += exec_file;
 
-      strcat (shell_command, " ");
-      strcat (shell_command, allargs);
+      shell_command += " " + allargs;
 
       /* If we decided above to start up with a shell, we exec the
 	 shell, "-c" says to interpret the next arg as a shell command
 	 to execute, and this command is "exec <target-program>
-	 <args>".  */
-      argv = (char **) alloca (4 * sizeof (char *));
-      argv[0] = shell_file;
-      argv[1] = (char *) "-c";
-      argv[2] = shell_command;
-      argv[3] = (char *) 0;
+	 <args>".  We xstrdup all the strings here because they will
+	 be free'd later in the code.  */
+      argv.push_back (xstrdup (shell_file));
+      argv.push_back (xstrdup ("-c"));
+      argv.push_back (xstrdup (shell_command.c_str ()));
+      argv.push_back (NULL);
     }
 
   /* Retain a copy of our environment variables, since the child will
@@ -401,9 +377,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
       environ = env;
 
       if (exec_fun != NULL)
-        (*exec_fun) (argv[0], argv, env);
+        (*exec_fun) (argv[0], &argv[0], env);
       else
-        execvp (argv[0], argv);
+        execvp (argv[0], &argv[0]);
 
       /* If we get here, it's an error.  */
       save_errno = errno;
@@ -416,6 +392,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
       gdb_flush (gdb_stderr);
       _exit (0177);
     }
+
+  free_vector_argv (argv);
 
   /* Restore our environment in case a vforked child clob'd it.  */
   environ = save_our_env;

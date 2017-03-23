@@ -146,7 +146,7 @@ extern void trace_start_error (const char *fmt, ...)
 extern void trace_start_error_with_name (const char *string)
   ATTRIBUTE_NORETURN;
 
-extern int fork_inferior (char *, char *, char **,
+extern int fork_inferior (const char *, const std::string &, char **,
 			  void (*)(void),
 			  void (*)(int), void (*)(void), char *,
                           void (*)(const char *,

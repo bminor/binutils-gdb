@@ -90,8 +90,8 @@ inf_ptrace_me (void)
 
 static void
 inf_ptrace_create_inferior (struct target_ops *ops,
-			    char *exec_file, char *allargs, char **env,
-			    int from_tty)
+			    const char *exec_file, const std::string &allargs,
+			    char **env, int from_tty)
 {
   int pid;
 
