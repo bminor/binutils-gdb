@@ -1550,7 +1550,7 @@ do_start_initialization ()
      /foo/bin/python
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
-  const char *libdir = ldirname (python_libdir);
+  char *libdir = ldirname (python_libdir);
   progname = concat (libdir, SLASH_STRING, "bin",
 		     SLASH_STRING, "python", (char *) NULL);
   xfree (libdir);
