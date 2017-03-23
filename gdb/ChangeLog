@@ -1,5 +1,12 @@
 2017-03-23  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_process_record_test): Declare.
+	(_initialize_aarch64_tdep): Register it.
+	(aarch64_record_load_store): Handle PRFM instruction.
+	(aarch64_process_record_test): New function.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_record_load_store): Fix code
 	indentation.
 

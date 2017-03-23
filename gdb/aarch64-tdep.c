@@ -3038,6 +3038,11 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      paddress (gdbarch, tdep->lowest_pc));
 }
 
+namespace selftests
+{
+static void aarch64_process_record_test (void);
+}
+
 /* Suppress warning from -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_aarch64_tdep;
 
@@ -3060,6 +3065,7 @@ When on, AArch64 specific debugging is enabled."),
 
 #if GDB_SELF_TEST
   register_self_test (selftests::aarch64_analyze_prologue_test);
+  register_self_test (selftests::aarch64_process_record_test);
 #endif
 }
 
@@ -3617,10 +3623,23 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
 	}
       else
 	{
-	  if (size_bits != 0x03)
-	    ld_flag = 0x01;
+	  if (size_bits == 0x3 && vector_flag == 0x0 && opc == 0x2)
+	    {
+	      /* PRFM (immediate) */
+	      return AARCH64_RECORD_SUCCESS;
+	    }
+	  else if (size_bits == 0x2 && vector_flag == 0x0 && opc == 0x2)
+	    {
+	      /* LDRSW (immediate) */
+	      ld_flag = 0x1;
+	    }
 	  else
-	    return AARCH64_RECORD_UNKNOWN;
+	    {
+	      if (opc & 0x01)
+		ld_flag = 0x01;
+	      else
+		ld_flag = 0x0;
+	    }
 	}
 
       if (record_debug)
@@ -3948,6 +3967,41 @@ deallocate_reg_mem (insn_decode_record *record)
   xfree (record->aarch64_regs);
   xfree (record->aarch64_mems);
 }
+
+#if GDB_SELF_TEST
+namespace selftests {
+
+static void
+aarch64_process_record_test (void)
+{
+  struct gdbarch_info info;
+  uint32_t ret;
+
+  gdbarch_info_init (&info);
+  info.bfd_arch_info = bfd_scan_arch ("aarch64");
+
+  struct gdbarch *gdbarch = gdbarch_find_by_info (info);
+  SELF_CHECK (gdbarch != NULL);
+
+  insn_decode_record aarch64_record;
+
+  memset (&aarch64_record, 0, sizeof (insn_decode_record));
+  aarch64_record.regcache = NULL;
+  aarch64_record.this_addr = 0;
+  aarch64_record.gdbarch = gdbarch;
+
+  /* 20 00 80 f9	prfm	pldl1keep, [x1] */
+  aarch64_record.aarch64_insn = 0xf9800020;
+  ret = aarch64_record_decode_insn_handler (&aarch64_record);
+  SELF_CHECK (ret == AARCH64_RECORD_SUCCESS);
+  SELF_CHECK (aarch64_record.reg_rec_count == 0);
+  SELF_CHECK (aarch64_record.mem_rec_count == 0);
+
+  deallocate_reg_mem (&aarch64_record);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
 
 /* Parse the current instruction and record the values of the registers and
    memory that will be changed in current instruction to record_arch_list
