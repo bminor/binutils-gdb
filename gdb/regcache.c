@@ -666,11 +666,7 @@ regcache_raw_update (struct regcache *regcache, int regnum)
   if (!regcache->readonly_p
       && regcache_register_status (regcache, regnum) == REG_UNKNOWN)
     {
-      struct cleanup *old_chain = save_inferior_ptid ();
-
-      inferior_ptid = regcache->ptid;
       target_fetch_registers (regcache, regnum);
-      do_cleanups (old_chain);
 
       /* A number of targets can't access the whole set of raw
 	 registers (because the debug API provides no means to get at
@@ -937,8 +933,7 @@ void
 regcache_raw_write (struct regcache *regcache, int regnum,
 		    const gdb_byte *buf)
 {
-  struct cleanup *chain_before_save_inferior;
-  struct cleanup *chain_before_invalidate_register;
+  struct cleanup *old_chain;
 
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
@@ -956,24 +951,18 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 		  regcache->descr->sizeof_register[regnum]) == 0))
     return;
 
-  chain_before_save_inferior = save_inferior_ptid ();
-  inferior_ptid = regcache->ptid;
-
   target_prepare_to_store (regcache);
   regcache_raw_set_cached_value (regcache, regnum, buf);
 
   /* Register a cleanup function for invalidating the register after it is
      written, in case of a failure.  */
-  chain_before_invalidate_register
-    = make_cleanup_regcache_invalidate (regcache, regnum);
+  old_chain = make_cleanup_regcache_invalidate (regcache, regnum);
 
   target_store_registers (regcache, regnum);
 
   /* The target did not throw an error so we can discard invalidating the
      register and restore the cleanup chain to what it was.  */
-  discard_cleanups (chain_before_invalidate_register);
-
-  do_cleanups (chain_before_save_inferior);
+  discard_cleanups (old_chain);
 }
 
 void

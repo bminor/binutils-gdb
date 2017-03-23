@@ -3587,8 +3587,6 @@ debug_print_register (const char * func,
 void
 target_fetch_registers (struct regcache *regcache, int regno)
 {
-  gdb_assert (ptid_equal (regcache_get_ptid (regcache), inferior_ptid));
-
   current_target.to_fetch_registers (&current_target, regcache, regno);
   if (targetdebug)
     debug_print_register ("target_fetch_registers", regcache, regno);
@@ -3599,8 +3597,6 @@ target_store_registers (struct regcache *regcache, int regno)
 {
   if (!may_write_registers)
     error (_("Writing to registers is not allowed (regno %d)"), regno);
-
-  gdb_assert (ptid_equal (regcache_get_ptid (regcache), inferior_ptid));
 
   current_target.to_store_registers (&current_target, regcache, regno);
   if (targetdebug)

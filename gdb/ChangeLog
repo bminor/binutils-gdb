@@ -1,3 +1,15 @@
+2017-03-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* fbsd-tdep.c (fbsd_corefile_thread): Don't set/restore
+	inferior_ptid.
+	* proc-service.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* regcache.c (regcache_raw_update, regcache_raw_write): Likewise.
+	* sol-thread.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* target.c (target_fetch_registers, target_store_registers):
+	Remove asserts.
+
 2017-03-23  Alan Hayward  <alan.hayward@arm.com>
 
 	* sol-thread.c (sol_thread_store_registers): Remove regcache calls.
