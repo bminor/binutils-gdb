@@ -1,3 +1,7 @@
+2017-03-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	python/python.c (do_start_initialization): Fix memory leak.
+
 2017-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inf-ptrace.c (inf_ptrace_xfer_partial): Get pid from ptid
