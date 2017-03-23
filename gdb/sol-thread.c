@@ -536,12 +536,6 @@ sol_thread_store_registers (struct target_ops *ops,
 
   if (regnum != -1)
     {
-      /* Not writing all the registers.  */
-      char old_value[MAX_REGISTER_SIZE];
-
-      /* Save new register value.  */
-      regcache_raw_collect (regcache, regnum, old_value);
-
       val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
 	error (_("sol_thread_store_registers: td_thr_getgregs %s"),
@@ -550,9 +544,6 @@ sol_thread_store_registers (struct target_ops *ops,
       if (val != TD_OK)
 	error (_("sol_thread_store_registers: td_thr_getfpregs %s"),
 	       td_err_string (val));
-
-      /* Restore new register value.  */
-      regcache_raw_supply (regcache, regnum, old_value);
     }
 
   fill_gregset (regcache, (gdb_gregset_t *) &gregset, regnum);

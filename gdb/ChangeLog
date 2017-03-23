@@ -1,3 +1,7 @@
+2017-03-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* sol-thread.c (sol_thread_store_registers): Remove regcache calls.
+
 2017-03-23  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_process_record_test): Declare.
