@@ -1258,6 +1258,41 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
   reinit_frame_cache ();
 }
 
+void
+regcache_debug_print_register (const char *func, struct regcache *regcache,
+			       int regno)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  fprintf_unfiltered (gdb_stdlog, "%s ", func);
+  if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
+      && gdbarch_register_name (gdbarch, regno) != NULL
+      && gdbarch_register_name (gdbarch, regno)[0] != '\0')
+    fprintf_unfiltered (gdb_stdlog, "(%s)",
+			gdbarch_register_name (gdbarch, regno));
+  else
+    fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
+  if (regno >= 0 && regno < gdbarch_num_regs (gdbarch))
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      int size = register_size (gdbarch, regno);
+      gdb_byte *buf = register_buffer (regcache, regno);
+
+      fprintf_unfiltered (gdb_stdlog, " = ");
+      for (int i = 0; i < size; i++)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	}
+      if (size <= sizeof (LONGEST))
+	{
+	  ULONGEST val = extract_unsigned_integer (buf, size, byte_order);
+
+	  fprintf_unfiltered (gdb_stdlog, " %s %s",
+			      core_addr_to_string_nz (val), plongest (val));
+	}
+    }
+  fprintf_unfiltered (gdb_stdlog, "\n");
+}
 
 static void
 reg_flush_command (char *command, int from_tty)

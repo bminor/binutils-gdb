@@ -1,3 +1,11 @@
+2017-03-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache_debug_print_register): New function.
+	* regcache.h (regcache_debug_print_register): New declaration.
+	* target.c (debug_print_register): Remove.
+	(target_fetch_registers): Call regcache_debug_print_register.
+	(target_store_registers): Likewise.
+
 2017-03-24  Pádraig Brady  <pbrady@fb.com>
 
 	* dwarf2read.c (setup_type_unit_groups): Ensure dir_index doesn't

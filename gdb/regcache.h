@@ -236,4 +236,10 @@ extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);
 
+/* Dump the contents of a register from the register cache to the target
+   debug.  */
+extern void regcache_debug_print_register (const char *func,
+					   struct regcache *regcache,
+					   int regno);
+
 #endif /* REGCACHE_H */
