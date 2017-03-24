@@ -9416,7 +9416,8 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 	  const char *dir = NULL;
 	  struct file_entry *fe = &lh->file_names[i];
 
-	  if (fe->dir_index && lh->include_dirs != NULL)
+	  if (fe->dir_index && lh->include_dirs != NULL
+	      && (fe->dir_index - 1) < lh->num_include_dirs)
 	    dir = lh->include_dirs[fe->dir_index - 1];
 	  dwarf2_start_subfile (fe->name, dir);
 
@@ -17985,7 +17986,8 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
   char *copied_name = NULL;
   int file_is_pst;
 
-  if (fe.dir_index && lh->include_dirs != NULL)
+  if (fe.dir_index && lh->include_dirs != NULL
+      && (fe.dir_index - 1) < lh->num_include_dirs)
     dir_name = lh->include_dirs[fe.dir_index - 1];
 
   if (!IS_ABSOLUTE_PATH (include_name)
@@ -18366,7 +18368,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
           struct file_entry *fe = &lh->file_names[state_machine.file - 1];
           const char *dir = NULL;
 
-          if (fe->dir_index && lh->include_dirs != NULL)
+          if (fe->dir_index && lh->include_dirs != NULL
+              && (fe->dir_index - 1) < lh->num_include_dirs)
             dir = lh->include_dirs[fe->dir_index - 1];
 
 	  dwarf2_start_subfile (fe->name, dir);
@@ -18529,7 +18532,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		else
 		  {
 		    fe = &lh->file_names[state_machine.file - 1];
-		    if (fe->dir_index && lh->include_dirs != NULL)
+		    if (fe->dir_index && lh->include_dirs != NULL
+		        && (fe->dir_index - 1) < lh->num_include_dirs)
 		      dir = lh->include_dirs[fe->dir_index - 1];
 		    if (record_lines_p)
 		      {
@@ -18671,7 +18675,8 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 	  struct file_entry *fe;
 
 	  fe = &lh->file_names[i];
-	  if (fe->dir_index && lh->include_dirs != NULL)
+	  if (fe->dir_index && lh->include_dirs != NULL
+	      && (fe->dir_index - 1) < lh->num_include_dirs)
 	    dir = lh->include_dirs[fe->dir_index - 1];
 	  dwarf2_start_subfile (fe->name, dir);
 
@@ -21380,7 +21385,8 @@ file_file_name (int file, struct line_header *lh)
       struct file_entry *fe = &lh->file_names[file - 1];
 
       if (IS_ABSOLUTE_PATH (fe->name) || fe->dir_index == 0
-	  || lh->include_dirs == NULL)
+	  || lh->include_dirs == NULL
+	  || (fe->dir_index - 1) >= lh->num_include_dirs)
         return xstrdup (fe->name);
       return concat (lh->include_dirs[fe->dir_index - 1], SLASH_STRING,
 		     fe->name, (char *) NULL);
