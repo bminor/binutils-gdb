@@ -1,3 +1,9 @@
+2017-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR 21303
+	* ppc-dis.c (struct ppc_mopt): Comment.
+	(ppc_opts <e200z4>): Move PPC_OPCODE_VLE from .sticky to .cpu.
+
 2017-03-27  Rinat Zelig  <rinat@mellanox.com>
 
 	* arc-nps400-tbl.h: Add Ultra Ip and Miscellaneous instructions format.

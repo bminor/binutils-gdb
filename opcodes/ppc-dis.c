@@ -46,8 +46,19 @@ struct dis_private
   (((struct dis_private *) ((INFO)->private_data))->dialect)
 
 struct ppc_mopt {
+  /* Option string, without -m or -M prefix.  */
   const char *opt;
+  /* CPU option flags.  */
   ppc_cpu_t cpu;
+  /* Flags that should stay on, even when combined with another cpu
+     option.  This should only be used for generic options like
+     "-many" or "-maltivec" where it is reasonable to add some
+     capability to another cpu selection.  The added flags are sticky
+     so that, for example, "-many -me500" and "-me500 -many" result in
+     the same assembler or disassembler behaviour.  Do not use
+     "sticky" for specific cpus, as this will prevent that cpu's flags
+     from overriding the defaults set in powerpc_init_dialect or a
+     prior -m option.  */
   ppc_cpu_t sticky;
 };
 
@@ -109,8 +120,8 @@ struct ppc_mopt ppc_opts[] = {
   { "e200z4",  (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE| PPC_OPCODE_SPE
 		| PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI
-		| PPC_OPCODE_E500 | PPC_OPCODE_E200Z4),
-    PPC_OPCODE_VLE },
+		| PPC_OPCODE_E500 | PPC_OPCODE_VLE | PPC_OPCODE_E200Z4),
+    0 },
   { "e300",    PPC_OPCODE_PPC | PPC_OPCODE_E300,
     0 },
   { "e500",    (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_SPE
