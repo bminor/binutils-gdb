@@ -1,3 +1,8 @@
+2017-03-25  Jim Wilson  <jim.wilson@linaro.org>
+
+	* simulator.c (set_flags_for_add32): Cast result to uint32_t in carry
+	flag check.
+
 2017-03-03  Jim Wilson  <jim.wilson@linaro.org>
 
 	* simulator.c (mul64hi): Shift carry left by 32.

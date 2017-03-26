@@ -1650,7 +1650,7 @@ set_flags_for_add32 (sim_cpu *cpu, int32_t value1, int32_t value2)
   if (result & (1 << 31))
     flags |= N;
 
-  if (uresult != result)
+  if (uresult != (uint32_t)result)
     flags |= C;
 
   if (sresult != result)
