@@ -1,3 +1,10 @@
+2017-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR 21303
+	* testsuite/gas/ppc/pr21303.d,
+	* testsuite/gas/ppc/pr21303.s: New test
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
 2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	Backport from mainline
