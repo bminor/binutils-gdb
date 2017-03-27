@@ -1,3 +1,15 @@
+2017-04-04  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/21233
+	* ldlang.c (insert_undefined): Set `mark' for ELF symbols.
+	* testsuite/ld-elf/pr21233.sd: New test.
+	* testsuite/ld-elf/pr21233-l.sd: New test.
+	* testsuite/ld-elf/pr21233.ld: New test linker script.
+	* testsuite/ld-elf/pr21233-e.ld: New test linker script.
+	* testsuite/ld-elf/pr21233.s: New test source.
+	* testsuite/ld-elf/pr21233-l.s: New test source.
+	* testsuite/ld-elf/shared.exp: Run the new tests.
+
 2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention support for ELF SHF_GNU_MBIND and

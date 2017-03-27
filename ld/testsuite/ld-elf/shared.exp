@@ -115,6 +115,45 @@ if { [check_gc_sections_available] } {
 	    {{objdump -p pr20828-v.od}} \
 	    "pr20828-v-2"]]
 }
+# PR ld/21233 check for correct dynamic symbol table entries where:
+# - a symbol has been defined in a shared library used in the link,
+# - the symbol has been referenced from a section swept in garbage collection,
+# - the symbol has also been forced to be entered in the output file as an
+#   undefined symbol, either with a command-line option or a linker script
+#   command.
+# Verify that the undefined symbol is global rather than local.
+if { [check_gc_sections_available] } {
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC\
+	     (auxiliary shared library)" \
+	    "$LFLAGS -shared -T pr21233.ld" "" "$AFLAGS_PIC" \
+	    {pr21233-l.s} \
+	    {{readelf --dyn-syms pr21233-l.sd}} \
+	    "libpr21233.so"] \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
+	    "$LFLAGS --gc-sections -e foo --undefined=bar -T pr21233.ld" \
+	    "tmpdir/libpr21233.so" "" \
+	    {pr21233.s} \
+	    {{readelf --dyn-syms pr21233.sd}} \
+	    "pr21233-1"] \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC (--require-defined)" \
+	    "$LFLAGS --gc-sections -e foo --require-defined=bar\
+	     -T pr21233.ld" \
+	    "tmpdir/libpr21233.so" "" \
+	    {pr21233.s} \
+	    {{readelf --dyn-syms pr21233.sd}} \
+	    "pr21233-2"] \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC (EXTERN)" \
+	    "$LFLAGS --gc-sections -e foo -T pr21233-e.ld" \
+	    "tmpdir/libpr21233.so" "" \
+	    {pr21233.s} \
+	    {{readelf --dyn-syms pr21233.sd}} \
+	    "pr21233-3"]]
+}
 
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {
