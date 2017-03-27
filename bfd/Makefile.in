@@ -793,6 +793,7 @@ BFD32_BACKENDS = \
 	versados.lo \
 	vms-lib.lo \
 	vms-misc.lo \
+	wasm-module.lo \
 	xcofflink.lo \
 	xsym.lo \
 	xtensa-isa.lo \
@@ -986,6 +987,7 @@ BFD32_BACKENDS_CFILES = \
 	versados.c \
 	vms-lib.c \
 	vms-misc.c \
+	wasm-module.c \
 	xcofflink.c \
 	xsym.c \
 	xtensa-isa.c \
@@ -1671,6 +1673,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-alpha.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-lib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-misc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wasm-module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcofflink.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xsym.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtensa-isa.Plo@am__quote@

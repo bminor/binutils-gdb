@@ -386,6 +386,7 @@ vms-alpha.c
 vms-lib.c
 vms-misc.c
 vms.h
+wasm-module.c
 xcofflink.c
 xsym.c
 xsym.h

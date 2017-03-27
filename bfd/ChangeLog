@@ -1,5 +1,18 @@
 2017-03-27  Pip Cet  <pipcet@gmail.com>
 
+	* wasm-module.c: New file to support WebAssembly modules.
+	* wasm-module.h: New file to support WebAssembly modules.
+	* doc/webassembly.texi: Start documenting wasm-module.c.
+	* config.bfd: Add wasm_vec.
+	* targets.c: Likewise.
+	* configure.ac: Likewise.
+	* Makefile.am: Add entries for wasm-module.c.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2017-03-27  Pip Cet  <pipcet@gmail.com>
+
 	* cpu-wasm32.c: New file to support wasm32 architecture.
 	* elf32-wasm32.c: New file to support wasm32 architecture.
 	* Makefile.am: Add wasm32 architecture.
