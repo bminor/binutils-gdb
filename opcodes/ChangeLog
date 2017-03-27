@@ -1,3 +1,13 @@
+2017-03-27  Rinat Zelig  <rinat@mellanox.com>
+
+	* arc-nps400-tbl.h: Add Ultra Ip and Miscellaneous instructions format.
+	* arc-opc.c: Add defines. e.g. F_NJ, F_NM , F_NO_T, F_NPS_SR,
+	F_NPS_M, F_NPS_CORE, F_NPS_ALL.
+	(insert_nps_misc_imm_offset): New function.
+	(extract_nps_misc imm_offset): New function.
+	(arc_num_flag_operands): Add F_NJ, F_NM, F_NO_T.
+	(arc_flag_special_cases): Add F_NJ, F_NM, F_NO_T.
+
 2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-mkopc.c (main): Remove vx2 check.

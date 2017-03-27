@@ -905,6 +905,78 @@ XLDST_LIKE("xst", 0xe)
 /* cp32<.na> [xd:src1,src2,src2,src2], [cm:src2] */
 { "cp32", 0x48078181, 0xf80ffdff, ARC_OPCODE_ARC700, DMA, NPS400, { BRAKET, NPS_XD, COLON, NPS_DPI_SRC1_3B, NPS_R_SRC2_3B, NPS_R_SRC2_3B, NPS_R_SRC2_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup }, { C_NPS_NA }},
 
+/* Ultra IP Instructions.  */
+
+/* uip<.na> dst, [cm:src2], [cm:src1] */
+{ "uip", 0x480740a2, 0xf81fc1e3, ARC_OPCODE_ARC700, ULTRAIP, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, BRAKETdup }, { C_NPS_NA }},
+
+/* uip<.na> dst, [cm:src2], [cm:src1], src2 */
+{ "uip", 0x480700a2, 0xf81fc1e3, ARC_OPCODE_ARC700, ULTRAIP, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, BRAKETdup, NPS_R_SRC2_3B }, { C_NPS_NA }},
+
+/* Miscellaneous Instructions.  */
+
+/* whash dst,[cm:src1],src2 */
+{ "whash", 0x38150000, 0xf8ff0000, ARC_OPCODE_ARC700, MISC, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RC }, { 0 }},
+
+/* whash 0,[cm:src1],src2 */
+{ "whash", 0x3815003e, 0xf8ff003f, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, RC }, { 0 }},
+
+/* whash dst,[cm:src1],size */
+{ "whash", 0x38550000, 0xf8ff0000, ARC_OPCODE_ARC700, MISC, NPS400, { RA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, NPS_WHASH_SIZE }, { 0 }},
+
+/* whash 0,[cm:src1],size */
+{ "whash", 0x3855003e, 0xf8ff003f, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, BRAKET, NPS_CM, COLON, RB, BRAKETdup, NPS_WHASH_SIZE }, { 0 }},
+
+/* mcmp<.s><.m> dst,[cm:src1],[cm:src2],src2 */
+{ "mcmp", 0x48024000, 0xf81fdf7f, ARC_OPCODE_ARC700, MISC, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, NPS_R_SRC2_3B }, { C_NPS_SR, C_NPS_M }},
+
+/* mcmp<.s><.m> dst,[cm:src1,src1],[cm:src2],src2 */
+{ "mcmp", 0x48020000, 0xf81fdf7f, ARC_OPCODE_ARC700, MISC, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, NPS_DPI_SRC1_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, NPS_R_SRC2_3B }, { C_NPS_SR, C_NPS_M }},
+
+/* mcmp.<s><.m> dst,[cm:src1,offset],[cm:src2],src2 */
+{ "mcmp", 0x48024000, 0xf81fc000, ARC_OPCODE_ARC700, MISC, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, 
+NPS_MISC_IMM_OFFSET, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, NPS_R_SRC2_3B }, { C_NPS_SR, C_NPS_M }},
+
+/* mcmp<.s><.m> dst,[cm:src1],[cm: src2],size */
+{ "mcmp", 0x4802c000, 0xf81fcf00, ARC_OPCODE_ARC700, MISC, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, NPS_MISC_IMM_SIZE }, { C_NPS_SR, C_NPS_M }},
+
+/* mcmp<.s><.m> dst,[cm:src1,offset],[cm:src2],size */
+{ "mcmp", 0x4802c000, 0xf81fc000, ARC_OPCODE_ARC700, MISC, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, 
+NPS_MISC_IMM_OFFSET, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, NPS_MISC_IMM_SIZE }, { C_NPS_SR, C_NPS_M }},
+
+/* mcmp<.s><.m> dst,[cm:src1,src1],[cm:src2],size */
+{ "mcmp", 0x48028000, 0xf81fdf00, ARC_OPCODE_ARC700, MISC, NPS400, { NPS_R_DST_3B, BRAKET, NPS_CM, COLON, NPS_DPI_SRC1_3B, NPS_DPI_SRC1_3B, BRAKETdup, BRAKET, NPS_CM, COLON, NPS_R_SRC2_3B, BRAKETdup, NPS_MISC_IMM_SIZE }, { C_NPS_SR, C_NPS_M }},
+
+#define ASRI_LIKE(SUBOP2, FLAG)	\
+  { "asri", (0x3856003e | (SUBOP2 << 6)), 0xf8ff8fff, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, RB }, { FLAG }},
+
+ASRI_LIKE (0x0, 0)
+ASRI_LIKE (0x1, C_NPS_CORE)
+ASRI_LIKE (0x2, C_NPS_CLSR)
+ASRI_LIKE (0x3, C_NPS_ALL)
+ASRI_LIKE (0x4, C_NPS_GIC)
+
+/* rspi.gic 0,src1 */
+{ "rspi", 0x3856017e, 0xf8ff8fff, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, RB }, { C_NPS_RSPI_GIC }},
+
+/* wkup.cl */
+{ "wkup", 0x385b013e, 0xf8ff8fff, ARC_OPCODE_ARC700, MISC, NPS400, { 0 }, { C_NPS_CL }},
+
+/* wkup 0, src2 */
+{ "wkup", 0x385b003e, 0xf8ff8fff, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, RC }, { 0 }},
+
+/* getsti dst,[cm:src2] */
+{ "getsti", 0x382f0024, 0xf8ff803f, ARC_OPCODE_ARC700, MISC, NPS400, { RB, BRAKET, NPS_CM, COLON, RC, BRAKETdup }, { 0 }},
+
+/* getsti 0, [cm:src2] */
+{ "getsti", 0x3e2f7024, 0xfffff03f, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, BRAKET, NPS_CM, COLON, RC, BRAKETdup }, { 0 }},
+
+/* getrtc dst,[cm:src2] */
+{ "getrtc", 0x382f0025, 0xf8ff803f, ARC_OPCODE_ARC700, MISC, NPS400, { RB, BRAKET, NPS_CM, COLON, RC, BRAKETdup }, { 0 }},
+
+/* getrtc 0, [cm:src2] */
+{ "getrtc", 0x3e2f7025, 0xfffff03f, ARC_OPCODE_ARC700, MISC, NPS400, { ZA, BRAKET, NPS_CM, COLON, RC, BRAKETdup }, { 0 }},
+
 /* Atomic Operations.  */
 
 /* exc<.di><.f> a,a,[xa:b] */

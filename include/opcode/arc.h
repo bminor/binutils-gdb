@@ -68,6 +68,7 @@ typedef enum
   LOGICAL,
   LOOP,
   MEMORY,
+  MISC,
   MOVE,
   MPY,
   NET,
@@ -77,6 +78,7 @@ typedef enum
   PUSH,
   STORE,
   SUB,
+  ULTRAIP,
   XY
 } insn_class_t;
 
@@ -141,7 +143,7 @@ typedef enum
 struct arc_opcode
 {
   /* The opcode name.  */
-  const char *name;
+  const char * name;
 
   /* The opcode itself.  Those bits which will be filled in with
      operands are zeroes.  */
@@ -371,7 +373,7 @@ extern const unsigned arc_NToperand;
 struct arc_flag_operand
 {
   /* The flag name.  */
-  const char *name;
+  const char * name;
 
   /* The flag code.  */
   unsigned code;
@@ -453,13 +455,13 @@ struct arc_operand_operation
 struct arc_pseudo_insn
 {
   /* Mnemonic for pseudo/alias insn.  */
-  const char *mnemonic_p;
+  const char * mnemonic_p;
 
   /* Mnemonic for real instruction.  */
-  const char *mnemonic_r;
+  const char * mnemonic_r;
 
   /* Flag that will have to be added (if any).  */
-  const char *flag_r;
+  const char * flag_r;
 
   /* Amount of operands.  */
   unsigned operand_cnt;
@@ -486,7 +488,7 @@ struct arc_aux_reg
   insn_subclass_t subclass;
 
   /* Register name.  */
-  const char *name;
+  const char * name;
 
   /* Size of the string.  */
   size_t length;

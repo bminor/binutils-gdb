@@ -1,3 +1,8 @@
+2017-03-27  Rinat Zelig  <rinat@mellanox.com>
+
+	* testsuite/gas/arc/nps400-12.s: New file.
+	* testsuite/gas/arc/nps400-12.d: New file.
+
 2017-03-24  Thomas preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.: (md_begin): Set selected_cpu from *mcpu_cpu_opt when
