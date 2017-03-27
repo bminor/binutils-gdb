@@ -413,8 +413,8 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 	gdb_xml_error (parser, _("Bitfield \"%s\" has start after end"),
 		       field_name);
       if (end >= data->current_type_size * TARGET_CHAR_BIT)
-	gdb_xml_error (parser,
-		       _("Bitfield \"%s\" does not fit in struct"));
+	gdb_xml_error (parser, _("Bitfield \"%s\" does not fit in struct"),
+		       field_name);
 
       if (field_type != NULL)
 	tdesc_add_typed_bitfield (t, field_name, start, end, field_type);

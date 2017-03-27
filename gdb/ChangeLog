@@ -1,5 +1,14 @@
 2017-03-27  Pedro Alves  <palves@redhat.com>
 
+	* xml-support.h (gdb_xml_debug): Pass a "first-to-check" argument
+	to ATTRIBUTE_PRINTF.
+	* solib-target.c (library_list_start_list): Print "string" not
+	"version".
+	* xml-tdesc.c (tdesc_start_field): Pass "field_name" to
+	gdb_xml_error call.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (struct file_and_directory): New.
 	(dwarf2_get_dwz_file): Adjust to use std::string.
 	(dw2_get_file_names_reader): Adjust to use file_and_directory.
