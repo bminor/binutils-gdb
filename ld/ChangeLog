@@ -1,3 +1,8 @@
+2017-04-04  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/21233
+	* ldlang.c (insert_undefined): Set `mark' for ELF symbols.
+
 2017-03-07  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (open_input_bfds): Check that lang_assignment_statement
