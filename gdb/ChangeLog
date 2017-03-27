@@ -1,5 +1,12 @@
 2017-03-27  Pedro Alves  <palves@redhat.com>
 
+	* cp-name-parser.y (make_empty): Delete.
+	(demangler_special, nested_name, ptr_operator, array_indicator)
+	(direct_declarator, declarator_1): Use fill_comp instead of
+	make_empty.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
 	* xml-support.h (gdb_xml_debug): Pass a "first-to-check" argument
 	to ATTRIBUTE_PRINTF.
 	* solib-target.c (library_list_start_list): Print "string" not

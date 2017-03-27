@@ -197,15 +197,6 @@ fill_comp (enum demangle_component_type d_type, struct demangle_component *lhs,
 }
 
 static struct demangle_component *
-make_empty (enum demangle_component_type d_type)
-{
-  struct demangle_component *ret = d_grab ();
-  ret->type = d_type;
-  ret->d_printing = 0;
-  return ret;
-}
-
-static struct demangle_component *
 make_operator (const char *name, int args)
 {
   struct demangle_component *ret = d_grab ();
@@ -433,9 +424,7 @@ function
 
 demangler_special
 		:	DEMANGLER_SPECIAL start
-			{ $$ = make_empty ((enum demangle_component_type) $1);
-			  d_left ($$) = $2;
-			  d_right ($$) = NULL; }
+			{ $$ = fill_comp ((enum demangle_component_type) $1, $2, NULL); }
 		|	CONSTRUCTION_VTABLE start CONSTRUCTION_IN start
 			{ $$ = fill_comp (DEMANGLE_COMPONENT_CONSTRUCTION_VTABLE, $2, $4); }
 		;
@@ -600,30 +589,22 @@ ext_only_name	:	nested_name unqualified_name
 		;
 
 nested_name	:	NAME COLONCOLON
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_QUAL_NAME);
-			  d_left ($$.comp) = $1;
-			  d_right ($$.comp) = NULL;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_QUAL_NAME, $1, NULL);
 			  $$.last = $$.comp;
 			}
 		|	nested_name NAME COLONCOLON
 			{ $$.comp = $1.comp;
-			  d_right ($1.last) = make_empty (DEMANGLE_COMPONENT_QUAL_NAME);
+			  d_right ($1.last) = fill_comp (DEMANGLE_COMPONENT_QUAL_NAME, $2, NULL);
 			  $$.last = d_right ($1.last);
-			  d_left ($$.last) = $2;
-			  d_right ($$.last) = NULL;
 			}
 		|	templ COLONCOLON
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_QUAL_NAME);
-			  d_left ($$.comp) = $1;
-			  d_right ($$.comp) = NULL;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_QUAL_NAME, $1, NULL);
 			  $$.last = $$.comp;
 			}
 		|	nested_name templ COLONCOLON
 			{ $$.comp = $1.comp;
-			  d_right ($1.last) = make_empty (DEMANGLE_COMPONENT_QUAL_NAME);
+			  d_right ($1.last) = fill_comp (DEMANGLE_COMPONENT_QUAL_NAME, $2, NULL);
 			  $$.last = d_right ($1.last);
-			  d_left ($$.last) = $2;
-			  d_right ($$.last) = NULL;
 			}
 		;
 
@@ -761,45 +742,34 @@ builtin_type	:	int_seq
 		;
 
 ptr_operator	:	'*' qualifiers_opt
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_POINTER);
-			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_POINTER, NULL, NULL);
 			  $$.last = &d_left ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $2, 0); }
 		/* g++ seems to allow qualifiers after the reference?  */
 		|	'&'
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_REFERENCE);
-			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_REFERENCE, NULL, NULL);
 			  $$.last = &d_left ($$.comp); }
 		|	ANDAND
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_RVALUE_REFERENCE);
-			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_RVALUE_REFERENCE, NULL, NULL);
 			  $$.last = &d_left ($$.comp); }
 		|	nested_name '*' qualifiers_opt
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_PTRMEM_TYPE);
-			  $$.comp->u.s_binary.left = $1.comp;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_PTRMEM_TYPE, $1.comp, NULL);
 			  /* Convert the innermost DEMANGLE_COMPONENT_QUAL_NAME to a DEMANGLE_COMPONENT_NAME.  */
 			  *$1.last = *d_left ($1.last);
-			  $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_right ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $3, 0); }
 		|	COLONCOLON nested_name '*' qualifiers_opt
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_PTRMEM_TYPE);
-			  $$.comp->u.s_binary.left = $2.comp;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_PTRMEM_TYPE, $2.comp, NULL);
 			  /* Convert the innermost DEMANGLE_COMPONENT_QUAL_NAME to a DEMANGLE_COMPONENT_NAME.  */
 			  *$2.last = *d_left ($2.last);
-			  $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_right ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $4, 0); }
 		;
 
 array_indicator	:	'[' ']'
-			{ $$ = make_empty (DEMANGLE_COMPONENT_ARRAY_TYPE);
-			  d_left ($$) = NULL;
-			}
+			{ $$ = fill_comp (DEMANGLE_COMPONENT_ARRAY_TYPE, NULL, NULL); }
 		|	'[' INT ']'
-			{ $$ = make_empty (DEMANGLE_COMPONENT_ARRAY_TYPE);
-			  d_left ($$) = $2;
-			}
+			{ $$ = fill_comp (DEMANGLE_COMPONENT_ARRAY_TYPE, $2, NULL); }
 		;
 
 /* Details of this approach inspired by the G++ < 3.4 parser.  */
@@ -952,8 +922,7 @@ direct_declarator
 			  $$.last = &d_right ($2);
 			}
 		|	colon_ext_name
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_TYPED_NAME);
-			  d_left ($$.comp) = $1;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_TYPED_NAME, $1, NULL);
 			  $$.last = &d_right ($$.comp);
 			}
 		;
@@ -969,8 +938,7 @@ declarator_1	:	ptr_operator declarator_1
 			  $$.last = $1.last;
 			  *$2.last = $1.comp; }
 		|	colon_ext_name
-			{ $$.comp = make_empty (DEMANGLE_COMPONENT_TYPED_NAME);
-			  d_left ($$.comp) = $1;
+			{ $$.comp = fill_comp (DEMANGLE_COMPONENT_TYPED_NAME, $1, NULL);
 			  $$.last = &d_right ($$.comp);
 			}
 		|	direct_declarator_1
