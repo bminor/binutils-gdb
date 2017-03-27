@@ -1,5 +1,21 @@
 2017-03-27  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (file_entry) <dir_index>: Add comment.
+	(file_entry::include_dir): New method.
+	(line_header::include_dir_at, line_header::file_name_at): New
+	methods.
+	(setup_type_unit_groups, setup_type_unit_groups)
+	(psymtab_include_file_name): Simplify using the new methods.
+	(lnp_state_machine) <the_line_header>: New field.
+	<file>: Add comment.
+	(lnp_state_machine::current_file): New method.
+	(dwarf_record_line): Simplify using the new methods.
+	(init_lnp_state_machine): Initialize the "the_line_header" field.
+	(dwarf_decode_lines_1, dwarf_decode_lines, file_file_name):
+	Simplify using the new methods.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
 	* cp-name-parser.y (make_empty): Delete.
 	(demangler_special, nested_name, ptr_operator, array_indicator)
 	(direct_declarator, declarator_1): Use fill_comp instead of

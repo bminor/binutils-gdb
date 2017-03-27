@@ -1054,7 +1054,12 @@ typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 
 struct file_entry
 {
+  /* Return the include directory at DIR_INDEX stored in LH.  Returns
+     NULL if DIR_INDEX is out of bounds.  */
+  const char *include_dir (const line_header *lh) const;
+
   const char *name;
+  /* The directory index (1-based).  */
   unsigned int dir_index;
   unsigned int mod_time;
   unsigned int length;
@@ -1069,6 +1074,24 @@ struct file_entry
    which contains the following information.  */
 struct line_header
 {
+  /* Return the include dir at INDEX (0-based).  Returns NULL if INDEX
+     is out of bounds.  */
+  const char *include_dir_at (unsigned int index) const
+  {
+    if (include_dirs == NULL || index >= num_include_dirs)
+      return NULL;
+    return include_dirs[index];
+  }
+
+  /* Return the file name at INDEX (0-based).  Returns NULL if INDEX
+     is out of bounds.  */
+  file_entry *file_name_at (unsigned int index) const
+  {
+    if (file_names == NULL || index >= num_file_names)
+      return NULL;
+    return &file_names[index];
+  }
+
   /* Offset of line number information in .debug_line section.  */
   sect_offset offset;
 
@@ -1108,6 +1131,14 @@ struct line_header
      header.  These point into dwarf2_per_objfile->line_buffer.  */
   const gdb_byte *statement_program_start, *statement_program_end;
 };
+
+const char *
+file_entry::include_dir (const line_header *lh) const
+{
+  /* lh->include_dirs is 0-based, but the directory index numbers in
+     the statement program are 1-based.  */
+  return lh->include_dir_at (dir_index - 1);
+}
 
 /* When we construct a partial symbol table entry we only
    need this much information.  */
@@ -9423,13 +9454,9 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 
       for (i = 0; i < lh->num_file_names; ++i)
 	{
-	  const char *dir = NULL;
-	  struct file_entry *fe = &lh->file_names[i];
+	  file_entry &fe = lh->file_names[i];
 
-	  if (fe->dir_index && lh->include_dirs != NULL
-	      && (fe->dir_index - 1) < lh->num_include_dirs)
-	    dir = lh->include_dirs[fe->dir_index - 1];
-	  dwarf2_start_subfile (fe->name, dir);
+	  dwarf2_start_subfile (fe.name, fe.include_dir (lh));
 
 	  if (current_subfile->symtab == NULL)
 	    {
@@ -9441,8 +9468,8 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 		= allocate_symtab (cust, current_subfile->name);
 	    }
 
-	  fe->symtab = current_subfile->symtab;
-	  tu_group->symtabs[i] = fe->symtab;
+	  fe.symtab = current_subfile->symtab;
+	  tu_group->symtabs[i] = fe.symtab;
 	}
     }
   else
@@ -17983,17 +18010,14 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 			   const struct partial_symtab *pst,
 			   const char *comp_dir)
 {
-  const struct file_entry fe = lh->file_names [file_index];
+  const file_entry &fe = lh->file_names[file_index];
   const char *include_name = fe.name;
   const char *include_name_to_compare = include_name;
-  const char *dir_name = NULL;
   const char *pst_filename;
   char *copied_name = NULL;
   int file_is_pst;
 
-  if (fe.dir_index && lh->include_dirs != NULL
-      && (fe.dir_index - 1) < lh->num_include_dirs)
-    dir_name = lh->include_dirs[fe.dir_index - 1];
+  const char *dir_name = fe.include_dir (lh);
 
   if (!IS_ABSOLUTE_PATH (include_name)
       && (dir_name != NULL || comp_dir != NULL))
@@ -18058,11 +18082,22 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 
 /* State machine to track the state of the line number program.  */
 
-typedef struct
+struct lnp_state_machine
 {
+  file_entry *current_file ()
+  {
+    /* lh->file_names is 0-based, but the file name numbers in the
+       statement program are 1-based.  */
+    return the_line_header->file_name_at (file - 1);
+  }
+
+  /* The line number header.  */
+  line_header *the_line_header;
+
   /* These are part of the standard DWARF line number state machine.  */
 
   unsigned char op_index;
+  /* The line table index (1-based) of the current file.  */
   unsigned int file;
   unsigned int line;
   CORE_ADDR address;
@@ -18085,7 +18120,7 @@ typedef struct
      example, when discriminators are present.  PR 17276.  */
   unsigned int last_line;
   int line_has_non_zero_discriminator;
-} lnp_state_machine;
+};
 
 /* There's a lot of static state to pass to dwarf_record_line.
    This keeps it all together.  */
@@ -18211,10 +18246,9 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
 		   int end_sequence)
 {
   const struct line_header *lh = reader->line_header;
-  unsigned int file, line, discriminator;
+  unsigned int line, discriminator;
   int is_stmt;
 
-  file = state->file;
   line = state->line;
   is_stmt = state->is_stmt;
   discriminator = state->discriminator;
@@ -18224,19 +18258,21 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
       fprintf_unfiltered (gdb_stdlog,
 			  "Processing actual line %u: file %u,"
 			  " address %s, is_stmt %u, discrim %u\n",
-			  line, file,
+			  line, state->file,
 			  paddress (reader->gdbarch, state->address),
 			  is_stmt, discriminator);
     }
 
-  if (file == 0 || file - 1 >= lh->num_file_names)
+  file_entry *fe = state->current_file ();
+
+  if (fe == NULL)
     dwarf2_debug_line_missing_file_complaint ();
   /* For now we ignore lines not starting on an instruction boundary.
      But not when processing end_sequence for compatibility with the
      previous version of the code.  */
   else if (state->op_index == 0 || end_sequence)
     {
-      lh->file_names[file - 1].included_p = 1;
+      fe->included_p = 1;
       if (reader->record_lines_p && is_stmt)
 	{
 	  if (state->last_subfile != current_subfile || end_sequence)
@@ -18290,6 +18326,7 @@ init_lnp_state_machine (lnp_state_machine *state,
   state->address = gdbarch_adjust_dwarf2_line (reader->gdbarch, 0, 0);
   state->is_stmt = reader->line_header->default_is_stmt;
   state->discriminator = 0;
+  state->the_line_header = reader->line_header;
 }
 
 /* Check address and if invalid nop-out the rest of the lines in this
@@ -18364,20 +18401,14 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
       /* Reset the state machine at the start of each sequence.  */
       init_lnp_state_machine (&state_machine, &reader_state);
 
-      if (record_lines_p && lh->num_file_names >= state_machine.file)
+      if (record_lines_p)
 	{
-          /* Start a subfile for the current file of the state machine.  */
-	  /* lh->include_dirs and lh->file_names are 0-based, but the
-	     directory and file name numbers in the statement program
-	     are 1-based.  */
-          struct file_entry *fe = &lh->file_names[state_machine.file - 1];
-          const char *dir = NULL;
+	  /* Start a subfile for the current file of the state
+	     machine.  */
+	  const file_entry *fe = state_machine.current_file ();
 
-          if (fe->dir_index && lh->include_dirs != NULL
-              && (fe->dir_index - 1) < lh->num_include_dirs)
-            dir = lh->include_dirs[fe->dir_index - 1];
-
-	  dwarf2_start_subfile (fe->name, dir);
+	  if (fe != NULL)
+	    dwarf2_start_subfile (fe->name, fe->include_dir (lh));
 	}
 
       /* Decode the table.  */
@@ -18522,26 +18553,19 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      break;
 	    case DW_LNS_set_file:
 	      {
-		/* The arrays lh->include_dirs and lh->file_names are
-		   0-based, but the directory and file name numbers in
-		   the statement program are 1-based.  */
-		struct file_entry *fe;
-		const char *dir = NULL;
-
 		state_machine.file = read_unsigned_leb128 (abfd, line_ptr,
 							   &bytes_read);
 		line_ptr += bytes_read;
-		if (state_machine.file == 0
-		    || state_machine.file - 1 >= lh->num_file_names)
+
+		const file_entry *fe = state_machine.current_file ();
+		if (fe == NULL)
 		  dwarf2_debug_line_missing_file_complaint ();
 		else
 		  {
-		    fe = &lh->file_names[state_machine.file - 1];
-		    if (fe->dir_index && lh->include_dirs != NULL
-		        && (fe->dir_index - 1) < lh->num_include_dirs)
-		      dir = lh->include_dirs[fe->dir_index - 1];
 		    if (record_lines_p)
 		      {
+			const char *dir = fe->include_dir (lh);
+
 			state_machine.last_subfile = current_subfile;
 			state_machine.line_has_non_zero_discriminator
 			  = state_machine.discriminator != 0;
@@ -18676,21 +18700,16 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 
       for (i = 0; i < lh->num_file_names; i++)
 	{
-	  const char *dir = NULL;
-	  struct file_entry *fe;
+	  file_entry &fe = lh->file_names[i];
 
-	  fe = &lh->file_names[i];
-	  if (fe->dir_index && lh->include_dirs != NULL
-	      && (fe->dir_index - 1) < lh->num_include_dirs)
-	    dir = lh->include_dirs[fe->dir_index - 1];
-	  dwarf2_start_subfile (fe->name, dir);
+	  dwarf2_start_subfile (fe.name, fe.include_dir (lh));
 
 	  if (current_subfile->symtab == NULL)
 	    {
 	      current_subfile->symtab
 		= allocate_symtab (cust, current_subfile->name);
 	    }
-	  fe->symtab = current_subfile->symtab;
+	  fe.symtab = current_subfile->symtab;
 	}
     }
 }
@@ -18899,19 +18918,19 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			  cu);
       if (attr)
 	{
-	  int file_index = DW_UNSND (attr);
+	  unsigned int file_index = DW_UNSND (attr);
+	  struct file_entry *fe;
 
-	  if (cu->line_header == NULL
-	      || file_index > cu->line_header->num_file_names)
+	  if (cu->line_header != NULL && file_index > 0)
+	    fe = cu->line_header->file_name_at (file_index - 1);
+	  else
+	    fe = NULL;
+
+	  if (fe == NULL)
 	    complaint (&symfile_complaints,
 		       _("file index out of range"));
-	  else if (file_index > 0)
-	    {
-	      struct file_entry *fe;
-
-	      fe = &cu->line_header->file_names[file_index - 1];
-	      symbol_set_symtab (sym, fe->symtab);
-	    }
+	  else
+	    symbol_set_symtab (sym, fe->symtab);
 	}
 
       switch (die->tag)
@@ -21387,14 +21406,15 @@ file_file_name (int file, struct line_header *lh)
      table?  Remember that file numbers start with one, not zero.  */
   if (1 <= file && file <= lh->num_file_names)
     {
-      struct file_entry *fe = &lh->file_names[file - 1];
+      const file_entry &fe = lh->file_names[file - 1];
 
-      if (IS_ABSOLUTE_PATH (fe->name) || fe->dir_index == 0
-	  || lh->include_dirs == NULL
-	  || (fe->dir_index - 1) >= lh->num_include_dirs)
-        return xstrdup (fe->name);
-      return concat (lh->include_dirs[fe->dir_index - 1], SLASH_STRING,
-		     fe->name, (char *) NULL);
+      if (!IS_ABSOLUTE_PATH (fe.name))
+	{
+	  const char *dir = fe.include_dir (lh);
+	  if (dir != NULL)
+	    return concat (dir, SLASH_STRING, fe.name, (char *) NULL);
+	}
+      return xstrdup (fe.name);
     }
   else
     {
