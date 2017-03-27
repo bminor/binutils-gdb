@@ -2943,20 +2943,19 @@ dummy_obstack_deallocate (void *object, void *data)
 /* Simple, portable version of dirname that does not modify its
    argument.  */
 
-char *
+std::string
 ldirname (const char *filename)
 {
+  std::string dirname;
   const char *base = lbasename (filename);
-  char *dirname;
 
   while (base > filename && IS_DIR_SEPARATOR (base[-1]))
     --base;
 
   if (base == filename)
-    return NULL;
+    return dirname;
 
-  dirname = (char *) xmalloc (base - filename + 2);
-  memcpy (dirname, filename, base - filename);
+  dirname = std::string (filename, base - filename);
 
   /* On DOS based file systems, convert "d:foo" to "d:.", so that we
      create "d:./bar" later instead of the (different) "d:/bar".  */
@@ -2964,7 +2963,6 @@ ldirname (const char *filename)
       && !IS_DIR_SEPARATOR (filename[0]))
     dirname[base++ - filename] = '.';
 
-  dirname[base - filename] = '\0';
   return dirname;
 }
 

@@ -1885,9 +1885,27 @@ static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
 static void process_queue (void);
 
-static void find_file_and_directory (struct die_info *die,
-				     struct dwarf2_cu *cu,
-				     const char **name, const char **comp_dir);
+/* The return type of find_file_and_directory.  Note, the enclosed
+   string pointers are only valid while this object is valid.  */
+
+struct file_and_directory
+{
+  /* The filename.  This is never NULL.  */
+  const char *name;
+
+  /* The compilation directory.  NULL if not known.  If we needed to
+     compute a new string, this points to COMP_DIR_STORAGE, otherwise,
+     points directly to the DW_AT_comp_dir string attribute owned by
+     the obstack that owns the DIE.  */
+  const char *comp_dir;
+
+  /* If we needed to build a new string for comp_dir, this is what
+     owns the storage.  */
+  std::string comp_dir_storage;
+};
+
+static file_and_directory find_file_and_directory (struct die_info *die,
+						   struct dwarf2_cu *cu);
 
 static char *file_full_name (int file, struct line_header *lh,
 			     const char *comp_dir);
@@ -2552,18 +2570,15 @@ dwarf2_get_dwz_file (void)
   buildid_len = (size_t) buildid_len_arg;
 
   filename = (const char *) data;
+
+  std::string abs_storage;
   if (!IS_ABSOLUTE_PATH (filename))
     {
       char *abs = gdb_realpath (objfile_name (dwarf2_per_objfile->objfile));
-      char *rel;
 
       make_cleanup (xfree, abs);
-      abs = ldirname (abs);
-      make_cleanup (xfree, abs);
-
-      rel = concat (abs, SLASH_STRING, filename, (char *) NULL);
-      make_cleanup (xfree, rel);
-      filename = rel;
+      abs_storage = ldirname (abs) + SLASH_STRING + filename;
+      filename = abs_storage.c_str ();
     }
 
   /* First try the file name given in the section.  If that doesn't
@@ -3332,7 +3347,6 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   struct line_header *lh;
   struct attribute *attr;
   int i;
-  const char *name, *comp_dir;
   void **slot;
   struct quick_file_names *qfn;
   unsigned int line_offset;
@@ -3385,13 +3399,13 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   gdb_assert (slot != NULL);
   *slot = qfn;
 
-  find_file_and_directory (comp_unit_die, cu, &name, &comp_dir);
+  file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
 
   qfn->num_file_names = lh->num_file_names;
   qfn->file_names =
     XOBNEWVEC (&objfile->objfile_obstack, const char *, lh->num_file_names);
   for (i = 0; i < lh->num_file_names; ++i)
-    qfn->file_names[i] = file_full_name (i + 1, lh, comp_dir);
+    qfn->file_names[i] = file_full_name (i + 1, lh, fnd.comp_dir);
   qfn->real_names = NULL;
 
   free_line_header (lh);
@@ -9122,37 +9136,38 @@ producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
   return cu->producer_is_gcc_lt_4_3;
 }
 
-static void
-find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
-			 const char **name, const char **comp_dir)
+static file_and_directory
+find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 {
+  file_and_directory res;
+
   /* Find the filename.  Do not use dwarf2_name here, since the filename
      is not a source language identifier.  */
-  *name = dwarf2_string_attr (die, DW_AT_name, cu);
-  *comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
+  res.name = dwarf2_string_attr (die, DW_AT_name, cu);
+  res.comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
 
-  if (*comp_dir == NULL
-      && producer_is_gcc_lt_4_3 (cu) && *name != NULL
-      && IS_ABSOLUTE_PATH (*name))
+  if (res.comp_dir == NULL
+      && producer_is_gcc_lt_4_3 (cu) && res.name != NULL
+      && IS_ABSOLUTE_PATH (res.name))
     {
-      char *d = ldirname (*name);
-
-      *comp_dir = d;
-      if (d != NULL)
-	make_cleanup (xfree, d);
+      res.comp_dir_storage = ldirname (res.name);
+      if (!res.comp_dir_storage.empty ())
+	res.comp_dir = res.comp_dir_storage.c_str ();
     }
-  if (*comp_dir != NULL)
+  if (res.comp_dir != NULL)
     {
       /* Irix 6.2 native cc prepends <machine>.: to the compilation
 	 directory, get rid of it.  */
-      const char *cp = strchr (*comp_dir, ':');
+      const char *cp = strchr (res.comp_dir, ':');
 
-      if (cp && cp != *comp_dir && cp[-1] == '.' && cp[1] == '/')
-	*comp_dir = cp + 1;
+      if (cp && cp != res.comp_dir && cp[-1] == '.' && cp[1] == '/')
+	res.comp_dir = cp + 1;
     }
 
-  if (*name == NULL)
-    *name = "<unknown>";
+  if (res.name == NULL)
+    res.name = "<unknown>";
+
+  return res;
 }
 
 /* Handle DW_AT_stmt_list for a compilation unit.
@@ -9262,12 +9277,9 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
   struct attribute *attr;
-  const char *name = NULL;
-  const char *comp_dir = NULL;
   struct die_info *child_die;
   CORE_ADDR baseaddr;
 
@@ -9281,7 +9293,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
     lowpc = highpc;
   lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
 
-  find_file_and_directory (die, cu, &name, &comp_dir);
+  file_and_directory fnd = find_file_and_directory (die, cu);
 
   prepare_one_comp_unit (cu, die, cu->language);
 
@@ -9295,12 +9307,12 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->producer && strstr (cu->producer, "GNU Go ") != NULL)
     set_cu_language (DW_LANG_Go, cu);
 
-  dwarf2_start_symtab (cu, name, comp_dir, lowpc);
+  dwarf2_start_symtab (cu, fnd.name, fnd.comp_dir, lowpc);
 
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
      for DW_AT_decl_file.  */
-  handle_DW_AT_stmt_list (die, cu, comp_dir, lowpc);
+  handle_DW_AT_stmt_list (die, cu, fnd.comp_dir, lowpc);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -9338,8 +9350,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  dwarf_decode_macros (cu, macro_offset, 0);
 	}
     }
-
-  do_cleanups (back_to);
 }
 
 /* TU version of handle_DW_AT_stmt_list for read_type_unit_scope.
@@ -10893,49 +10903,44 @@ open_and_init_dwp_file (void)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwp_file *dwp_file;
-  char *dwp_name;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, 0);
 
   /* Try to find first .dwp for the binary file before any symbolic links
      resolving.  */
 
   /* If the objfile is a debug file, find the name of the real binary
      file and get the name of dwp file from there.  */
+  std::string dwp_name;
   if (objfile->separate_debug_objfile_backlink != NULL)
     {
       struct objfile *backlink = objfile->separate_debug_objfile_backlink;
       const char *backlink_basename = lbasename (backlink->original_name);
-      char *debug_dirname = ldirname (objfile->original_name);
 
-      make_cleanup (xfree, debug_dirname);
-      dwp_name = xstrprintf ("%s%s%s.dwp", debug_dirname,
-			     SLASH_STRING, backlink_basename);
+      dwp_name = ldirname (objfile->original_name) + SLASH_STRING + backlink_basename;
     }
   else
-    dwp_name = xstrprintf ("%s.dwp", objfile->original_name);
-  make_cleanup (xfree, dwp_name);
+    dwp_name = objfile->original_name;
 
-  gdb_bfd_ref_ptr dbfd (open_dwp_file (dwp_name));
+  dwp_name += ".dwp";
+
+  gdb_bfd_ref_ptr dbfd (open_dwp_file (dwp_name.c_str ()));
   if (dbfd == NULL
       && strcmp (objfile->original_name, objfile_name (objfile)) != 0)
     {
       /* Try to find .dwp for the binary file after gdb_realpath resolving.  */
-      dwp_name = xstrprintf ("%s.dwp", objfile_name (objfile));
-      make_cleanup (xfree, dwp_name);
-      dbfd = open_dwp_file (dwp_name);
+      dwp_name = objfile_name (objfile);
+      dwp_name += ".dwp";
+      dbfd = open_dwp_file (dwp_name.c_str ());
     }
 
   if (dbfd == NULL)
     {
       if (dwarf_read_debug)
-	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name);
-      do_cleanups (cleanups);
+	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name.c_str ());
       return NULL;
     }
   dwp_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwp_file);
   dwp_file->name = bfd_get_filename (dbfd.get ());
   dwp_file->dbfd = dbfd.release ();
-  do_cleanups (cleanups);
 
   /* +1: section 0 is unused */
   dwp_file->num_sections = bfd_count_sections (dwp_file->dbfd) + 1;
@@ -10959,7 +10964,7 @@ open_and_init_dwp_file (void)
       error (_("Dwarf Error: DWP file CU version %s doesn't match"
 	       " TU version %s [in DWP file %s]"),
 	     pulongest (dwp_file->cus->version),
-	     pulongest (dwp_file->tus->version), dwp_name);
+	     pulongest (dwp_file->tus->version), dwp_name.c_str ());
     }
   dwp_file->version = dwp_file->cus->version;
 

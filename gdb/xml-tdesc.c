@@ -694,7 +694,6 @@ file_read_description_xml (const char *filename)
   struct target_desc *tdesc;
   char *tdesc_str;
   struct cleanup *back_to;
-  char *dirname;
 
   tdesc_str = xml_fetch_content_from_file (filename, NULL);
   if (tdesc_str == NULL)
@@ -705,11 +704,8 @@ file_read_description_xml (const char *filename)
 
   back_to = make_cleanup (xfree, tdesc_str);
 
-  dirname = ldirname (filename);
-  if (dirname != NULL)
-    make_cleanup (xfree, dirname);
-
-  tdesc = tdesc_parse_xml (tdesc_str, xml_fetch_content_from_file, dirname);
+  tdesc = tdesc_parse_xml (tdesc_str, xml_fetch_content_from_file,
+			   (void *) ldirname (filename).c_str ());
   do_cleanups (back_to);
 
   return tdesc;

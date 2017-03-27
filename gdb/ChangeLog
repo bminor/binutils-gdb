@@ -1,3 +1,22 @@
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct file_and_directory): New.
+	(dwarf2_get_dwz_file): Adjust to use std::string.
+	(dw2_get_file_names_reader): Adjust to use file_and_directory.
+	(find_file_and_directory): Adjust to return a file_and_directory
+	object.
+	(read_file_scope): Adjust to use file_and_directory.  Remove
+	make_cleanup/do_cleanups calls.
+	(open_and_init_dwp_file): Adjust to use std::string.  Remove
+	make_cleanup/do_cleanups calls.
+	* python/python.c (do_start_initialization): Adjust to ldirname
+	returning a std::string.
+	* utils.c (ldirname): Now returns a std::string.
+	* utils.h (ldirname): Change return type to std::string.
+	* xml-syscall.c (xml_init_syscalls_info): Adjust to ldirname
+	returning a std::string.
+	* xml-tdesc.c (file_read_description_xml): Likewise.
+
 2017-03-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* regcache.c (regcache_debug_print_register): New function.
