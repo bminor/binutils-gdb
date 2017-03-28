@@ -1,3 +1,9 @@
+2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/16044
+	* testsuite/ld-cris/pr16044.d, testsuite/ld-cris/dso-1c.s,
+	testsuite/ld-cris/dso-2b.s, testsuite/ld-cris/dso-4.s: New test.
+
 2017-03-21  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Return
