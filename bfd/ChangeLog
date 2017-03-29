@@ -1,3 +1,13 @@
+2017-03-29  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18025
+	* coff-bfd.h (struct coff_section_data): Add new fields:
+	saved_bias and bias.
+	* coffgen.c (coff_find_nearest_line_with_names): Cache the bias
+	computed for PE binaries.
+	* dwarf2.c (scan_unit_for_symbols): Only warn once about each
+	missing abbrev.
+
 2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/16044
