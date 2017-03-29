@@ -121,6 +121,18 @@ riscv_subset_supports (const char *feature)
 }
 
 static void
+riscv_clear_subsets (void)
+{
+  while (riscv_subsets != NULL)
+    {
+      struct riscv_subset *next = riscv_subsets->next;
+      free (riscv_subsets->name);
+      free (riscv_subsets);
+      riscv_subsets = next;
+    }
+}
+
+static void
 riscv_add_subset (const char *subset)
 {
   struct riscv_subset *s = xmalloc (sizeof *s);
@@ -138,6 +150,8 @@ riscv_set_arch (const char *s)
   const char *all_subsets = "imafdc";
   const char *extension = NULL;
   const char *p = s;
+
+  riscv_clear_subsets();
 
   if (strncmp (p, "rv32", 4) == 0)
     {
@@ -1802,6 +1816,7 @@ riscv_after_parse_args (void)
     riscv_set_arch (xlen == 64 ? "rv64g" : "rv32g");
 
   /* Add the RVC extension, regardless of -march, to support .option rvc.  */
+  riscv_set_rvc (FALSE);
   if (riscv_subset_supports ("c"))
     riscv_set_rvc (TRUE);
   else

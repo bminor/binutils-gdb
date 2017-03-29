@@ -1,3 +1,9 @@
+2017-03-30  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (riscv_clear_subsets): New function.
+	(riscv_add_subset): Call riscv_clear_subsets and riscv_set_rvc to
+	clear RVC when it's been previously set.
+
 2017-03-21  Palmer Dabbbelt  <palmer@dabbelt.com>
 
 	* config/tc-riscv.c (md_show_usage): Remove defuct -m32, -m64,
