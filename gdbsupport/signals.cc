@@ -335,6 +335,10 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGLIBRT)
     return GDB_SIGNAL_LIBRT;
 #endif
+#if defined (SIGPROT)
+  if (hostsig == SIGPROT)
+    return GDB_SIGNAL_PROT;
+#endif
 
 #if defined (REALTIME_LO)
   if (hostsig >= REALTIME_LO && hostsig < REALTIME_HI)
@@ -591,6 +595,10 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
 #if defined (SIGLIBRT)
     case GDB_SIGNAL_LIBRT:
       return SIGLIBRT;
+#endif
+#if defined (SIGPROT)
+    case GDB_SIGNAL_PROT:
+      return SIGPROT;
 #endif
 
     default:
