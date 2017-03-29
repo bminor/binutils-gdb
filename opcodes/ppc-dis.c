@@ -106,7 +106,7 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "altivec", PPC_OPCODE_PPC,
     PPC_OPCODE_ALTIVEC },
-  { "any",     0,
+  { "any",     PPC_OPCODE_PPC,
     PPC_OPCODE_ANY },
   { "booke",   PPC_OPCODE_PPC | PPC_OPCODE_BOOKE,
     0 },
@@ -226,6 +226,8 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "pwrx",    PPC_OPCODE_POWER | PPC_OPCODE_POWER2,
     0 },
+  { "raw",     PPC_OPCODE_PPC,
+    PPC_OPCODE_RAW },
   { "spe",     PPC_OPCODE_PPC | PPC_OPCODE_EFS,
     PPC_OPCODE_SPE },
   { "titan",   (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_PMR
@@ -494,14 +496,12 @@ skip_optional_operands (const unsigned char *opindex,
   return 1;
 }
 
-/* Find a match for INSN in the opcode table, given machine DIALECT.
-   A DIALECT of -1 is special, matching all machine opcode variations.  */
+/* Find a match for INSN in the opcode table, given machine DIALECT.  */
 
 static const struct powerpc_opcode *
 lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
 {
-  const struct powerpc_opcode *opcode;
-  const struct powerpc_opcode *opcode_end;
+  const struct powerpc_opcode *opcode, *opcode_end, *last;
   unsigned long op;
 
   /* Get the major opcode of the instruction.  */
@@ -509,6 +509,7 @@ lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
 
   /* Find the first match in the opcode table for this major opcode.  */
   opcode_end = powerpc_opcodes + powerpc_opcd_indices[op + 1];
+  last = NULL;
   for (opcode = powerpc_opcodes + powerpc_opcd_indices[op];
        opcode < opcode_end;
        ++opcode)
@@ -518,7 +519,7 @@ lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
       int invalid;
 
       if ((insn & opcode->mask) != opcode->opcode
-	  || (dialect != (ppc_cpu_t) -1
+	  || ((dialect & PPC_OPCODE_ANY) == 0
 	      && ((opcode->flags & dialect) == 0
 		  || (opcode->deprecated & dialect) != 0)))
 	continue;
@@ -534,10 +535,16 @@ lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
       if (invalid)
 	continue;
 
-      return opcode;
+      if ((dialect & PPC_OPCODE_RAW) == 0)
+	return opcode;
+
+      /* The raw machine insn is one that is not a specialization.  */
+      if (last == NULL
+	  || (last->mask & ~opcode->mask) != 0)
+	last = opcode;
     }
 
-  return NULL;
+  return last;
 }
 
 /* Find a match for INSN in the VLE opcode table.  */
@@ -645,9 +652,9 @@ print_insn_powerpc (bfd_vma memaddr,
 	insn_is_short = PPC_OP_SE_VLE(opcode->mask);
     }
   if (opcode == NULL)
-    opcode = lookup_powerpc (insn, dialect);
+    opcode = lookup_powerpc (insn, dialect & ~PPC_OPCODE_ANY);
   if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
-    opcode = lookup_powerpc (insn, (ppc_cpu_t) -1);
+    opcode = lookup_powerpc (insn, dialect);
 
   if (opcode != NULL)
     {

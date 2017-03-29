@@ -1,3 +1,8 @@
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (PPC_OPCODE_RAW): Define.
+	(PPC_OPCODE_*): Make them all unsigned long long constants.
+
 2017-03-27  Pip Cet  <pipcet@gmail.com>
 
 	* elf/wasm32.h: New file to support wasm32 architecture.

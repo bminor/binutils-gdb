@@ -1,3 +1,7 @@
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_parse_option): Reject -mraw.
+
 2017-03-27  Alan Modra  <amodra@gmail.com>
 
 	PR 21303

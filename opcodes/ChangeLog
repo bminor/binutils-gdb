@@ -1,3 +1,12 @@
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Set PPC_OPCODE_PPC for "any" flags.  Add
+	"raw" option.
+	(lookup_powerpc): Don't special case -1 dialect.  Handle
+	PPC_OPCODE_RAW.
+	(print_insn_powerpc): Mask out PPC_OPCODE_ANY on first
+	lookup_powerpc call, pass it on second.
+
 2017-03-27  Alan Modra  <amodra@gmail.com>
 
 	PR 21303

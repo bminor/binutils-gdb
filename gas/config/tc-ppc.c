@@ -1193,7 +1193,8 @@ md_parse_option (int c, const char *arg)
 
     case 'm':
       new_cpu = ppc_parse_cpu (ppc_cpu, &sticky, arg);
-      if (new_cpu != 0)
+      /* "raw" is only valid for the disassembler.  */
+      if (new_cpu != 0 && (new_cpu & PPC_OPCODE_RAW) == 0)
 	{
 	  ppc_cpu = new_cpu;
 	  if (strcmp (arg, "vle") == 0)
