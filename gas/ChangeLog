@@ -1,3 +1,9 @@
+2017-03-30  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (riscv_clear_subsets): New function.
+	(riscv_add_subset): Call riscv_clear_subsets and riscv_set_rvc to
+	clear RVC when it's been previously set.
+
 2017-03-31  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/21333
