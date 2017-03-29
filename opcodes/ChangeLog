@@ -1,3 +1,9 @@
+2017-03-29  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Add support for missing SPARC ASIs from UA2005, UA2007, OSA2011, &
+	OSA2015.
+	* opcodes/sparc-opc.c (asi_table): New ASIs.
+
 2017-03-29  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (ppc_opts): Set PPC_OPCODE_PPC for "any" flags.  Add
