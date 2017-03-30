@@ -91,15 +91,15 @@ gnu_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
   struct proc *thread;
+  ptid_t ptid = regcache_get_ptid (regcache);
 
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (gnu_current_inf,
-			      ptid_get_lwp (inferior_ptid));
+  thread = inf_tid_to_thread (gnu_current_inf, ptid_get_lwp (ptid));
   if (!thread)
     error (_("Can't fetch registers from thread %s: No such thread"),
-	   target_pid_to_str (inferior_ptid));
+	   target_pid_to_str (ptid));
 
   if (regno < I386_NUM_GREGS || regno == -1)
     {
@@ -184,15 +184,15 @@ gnu_store_registers (struct target_ops *ops,
 {
   struct proc *thread;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  ptid_t ptid = regcache_get_ptid (regcache);
 
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (gnu_current_inf,
-			      ptid_get_lwp (inferior_ptid));
+  thread = inf_tid_to_thread (gnu_current_inf, ptid_get_lwp (ptid));
   if (!thread)
     error (_("Couldn't store registers into thread %s: No such thread"),
-	   target_pid_to_str (inferior_ptid));
+	   target_pid_to_str (ptid));
 
   if (regno < I386_NUM_GREGS || regno == -1)
     {

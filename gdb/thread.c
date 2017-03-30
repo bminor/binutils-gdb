@@ -192,21 +192,6 @@ clear_thread_inferior_resources (struct thread_info *tp)
   thread_cancel_execution_command (tp);
 }
 
-static void
-free_thread (struct thread_info *tp)
-{
-  if (tp->priv)
-    {
-      if (tp->private_dtor)
-	tp->private_dtor (tp->priv);
-      else
-	xfree (tp->priv);
-    }
-
-  xfree (tp->name);
-  xfree (tp);
-}
-
 void
 init_thread_list (void)
 {
@@ -220,7 +205,7 @@ init_thread_list (void)
   for (tp = thread_list; tp; tp = tpnext)
     {
       tpnext = tp->next;
-      free_thread (tp);
+      delete tp;
     }
 
   thread_list = NULL;
@@ -233,16 +218,7 @@ init_thread_list (void)
 static struct thread_info *
 new_thread (struct inferior *inf, ptid_t ptid)
 {
-  struct thread_info *tp;
-
-  gdb_assert (inf != NULL);
-
-  tp = XCNEW (struct thread_info);
-
-  tp->ptid = ptid;
-  tp->global_num = ++highest_thread_num;
-  tp->inf = inf;
-  tp->per_inf_num = ++inf->highest_thread_num;
+  thread_info *tp = new thread_info (inf, ptid);
 
   if (thread_list == NULL)
     thread_list = tp;
@@ -254,11 +230,6 @@ new_thread (struct inferior *inf, ptid_t ptid)
 	;
       last->next = tp;
     }
-
-  /* Nothing to follow yet.  */
-  tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-  tp->state = THREAD_STOPPED;
-  tp->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
   return tp;
 }
@@ -334,6 +305,33 @@ struct thread_info *
 add_thread (ptid_t ptid)
 {
   return add_thread_with_info (ptid, NULL);
+}
+
+thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
+  : ptid (ptid_), inf (inf_)
+{
+  gdb_assert (inf_ != NULL);
+
+  this->global_num = ++highest_thread_num;
+  this->per_inf_num = ++inf_->highest_thread_num;
+
+  /* Nothing to follow yet.  */
+  memset (&this->pending_follow, 0, sizeof (this->pending_follow));
+  this->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
+  this->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
+}
+
+thread_info::~thread_info ()
+{
+  if (this->priv)
+    {
+      if (this->private_dtor)
+	this->private_dtor (this->priv);
+      else
+	xfree (this->priv);
+    }
+
+  xfree (this->name);
 }
 
 /* Add TP to the end of the step-over chain LIST_P.  */
@@ -470,7 +468,7 @@ delete_thread_1 (ptid_t ptid, int silent)
   else
     thread_list = tp->next;
 
-  free_thread (tp);
+  delete tp;
 }
 
 /* Delete thread PTID and notify of thread exit.  If this is
@@ -1655,8 +1653,6 @@ set_thread_refcount (void *data)
 struct cleanup *
 make_cleanup_restore_current_thread (void)
 {
-  struct thread_info *tp;
-  struct frame_info *frame;
   struct current_thread_cleanup *old = XNEW (struct current_thread_cleanup);
 
   old->inferior_ptid = inferior_ptid;
@@ -1668,6 +1664,8 @@ make_cleanup_restore_current_thread (void)
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
+      struct frame_info *frame;
+
       old->was_stopped = is_stopped (inferior_ptid);
       if (old->was_stopped
 	  && target_has_registers
@@ -1687,7 +1685,8 @@ make_cleanup_restore_current_thread (void)
       old->selected_frame_id = get_frame_id (frame);
       old->selected_frame_level = frame_relative_level (frame);
 
-      tp = find_thread_ptid (inferior_ptid);
+      struct thread_info *tp = find_thread_ptid (inferior_ptid);
+
       if (tp)
 	tp->refcount++;
     }

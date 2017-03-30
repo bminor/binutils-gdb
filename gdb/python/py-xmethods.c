@@ -464,9 +464,10 @@ gdbpy_get_xmethod_result_type (const struct extension_language_defn *extlang,
       if (!types_equal (obj_type, this_ptr))
 	obj = value_cast (this_ptr, obj);
     }
-  else if (TYPE_CODE (obj_type) == TYPE_CODE_REF)
+  else if (TYPE_IS_REFERENCE (obj_type))
     {
-      struct type *this_ref = lookup_reference_type (this_type);
+      struct type *this_ref
+        = lookup_reference_type (this_type, TYPE_CODE (obj_type));
 
       if (!types_equal (obj_type, this_ref))
 	obj = value_cast (this_ref, obj);
@@ -552,9 +553,10 @@ gdbpy_invoke_xmethod (const struct extension_language_defn *extlang,
       if (!types_equal (obj_type, this_ptr))
 	obj = value_cast (this_ptr, obj);
     }
-  else if (TYPE_CODE (obj_type) == TYPE_CODE_REF)
+  else if (TYPE_IS_REFERENCE (obj_type))
     {
-      struct type *this_ref = lookup_reference_type (this_type);
+      struct type *this_ref
+	= lookup_reference_type (this_type, TYPE_CODE (obj_type));
 
       if (!types_equal (obj_type, this_ref))
 	obj = value_cast (this_ref, obj);

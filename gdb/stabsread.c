@@ -1794,7 +1794,8 @@ again:
 
     case '&':			/* Reference to another type */
       type1 = read_type (pp, objfile);
-      type = make_reference_type (type1, dbx_lookup_type (typenums, objfile));
+      type = make_reference_type (type1, dbx_lookup_type (typenums, objfile),
+                                  TYPE_CODE_REF);
       break;
 
     case 'f':			/* Function returning another type */

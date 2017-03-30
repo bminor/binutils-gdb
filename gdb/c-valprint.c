@@ -541,6 +541,7 @@ c_val_print (struct type *type,
       break;
 
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_FUNC:
@@ -587,8 +588,7 @@ c_value_print (struct value *val, struct ui_file *stream,
   val_type = value_type (val);
   type = check_typedef (val_type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
-      || TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type))
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.
@@ -606,10 +606,14 @@ c_value_print (struct value *val, struct ui_file *stream,
       else if (options->objectprint
 	       && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
 	{
-	  int is_ref = TYPE_CODE (type) == TYPE_CODE_REF;
+	  int is_ref = TYPE_IS_REFERENCE (type);
+	  enum type_code refcode = TYPE_CODE_UNDEF;
 
 	  if (is_ref)
-	    val = value_addr (val);
+	    {
+	      val = value_addr (val);
+	      refcode = TYPE_CODE (type);
+	    }
 
 	  /* Pointer to class, check real type of object.  */
 	  fprintf_filtered (stream, "(");
@@ -635,7 +639,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 
 	  if (is_ref)
 	    {
-	      val = value_ref (value_ind (val));
+	      val = value_ref (value_ind (val), refcode);
 	      type = value_type (val);
 	    }
 

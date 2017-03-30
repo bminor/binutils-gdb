@@ -51,6 +51,8 @@
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
 
+#include "inf-ptrace.h"
+
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
 #endif
@@ -106,13 +108,7 @@ fetch_register (struct regcache *regcache, int regno)
   long regaddr, val;
   int i;
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-  int tid;
-
-  /* Overload thread id onto process id.  */
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* no thread id, just use
-					   process id.  */
+  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   regaddr = 4 * regmap[regno];
   for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
@@ -159,14 +155,8 @@ store_register (const struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   long regaddr, val;
   int i;
-  int tid;
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-
-  /* Overload thread id onto process id.  */
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* no thread id, just use
-					   process id.  */
+  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   regaddr = 4 * regmap[regno];
 
@@ -406,7 +396,7 @@ static void
 m68k_linux_fetch_inferior_registers (struct target_ops *ops,
 				     struct regcache *regcache, int regno)
 {
-  int tid;
+  pid_t tid;
 
   /* Use the old method of peeking around in `struct user' if the
      GETREGS request isn't available.  */
@@ -416,10 +406,7 @@ m68k_linux_fetch_inferior_registers (struct target_ops *ops,
       return;
     }
 
-  /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* Not a threaded program.  */
+  tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -463,7 +450,7 @@ static void
 m68k_linux_store_inferior_registers (struct target_ops *ops,
 				     struct regcache *regcache, int regno)
 {
-  int tid;
+  pid_t tid;
 
   /* Use the old method of poking around in `struct user' if the
      SETREGS request isn't available.  */
@@ -473,10 +460,7 @@ m68k_linux_store_inferior_registers (struct target_ops *ops,
       return;
     }
 
-  /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* Not a threaded program.  */
+  tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   /* Use the PTRACE_SETFPREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that

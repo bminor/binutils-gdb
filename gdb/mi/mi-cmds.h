@@ -70,6 +70,7 @@ extern mi_cmd_argv_ftype mi_cmd_exec_step;
 extern mi_cmd_argv_ftype mi_cmd_exec_step_instruction;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_file;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_files;
+extern mi_cmd_argv_ftype mi_cmd_file_list_shared_libraries;
 extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
 extern mi_cmd_argv_ftype mi_cmd_inferior_tty_set;
 extern mi_cmd_argv_ftype mi_cmd_inferior_tty_show;

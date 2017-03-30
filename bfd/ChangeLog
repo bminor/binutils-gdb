@@ -1,3 +1,109 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* elf32-wasm32.c: Add relocation code, two relocs.
+	* reloc.c: Add wasm32 relocations.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* bfd/po/bfd.pot: Regenerate.
+
+2017-03-29  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18025
+	* coff-bfd.h (struct coff_section_data): Add new fields:
+	saved_bias and bias.
+	* coffgen.c (coff_find_nearest_line_with_names): Cache the bias
+	computed for PE binaries.
+	* dwarf2.c (scan_unit_for_symbols): Only warn once about each
+	missing abbrev.
+
+2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/16044
+	* elf32-cris.c (elf_cris_adjust_gotplt_to_got): Adjust BFD_ASSERT
+	to handle a local symbol with a hash-symbol-entry; without PLT.
+	Add BFD_ASSERT for an incidental case with GOT entry present.
+	(cris_elf_check_relocs): Increment PLT refcount only if the symbol
+	isn't forced-or-set local.
+
+2017-03-27  Pip Cet  <pipcet@gmail.com>
+
+	* wasm-module.c: New file to support WebAssembly modules.
+	* wasm-module.h: New file to support WebAssembly modules.
+	* doc/webassembly.texi: Start documenting wasm-module.c.
+	* config.bfd: Add wasm_vec.
+	* targets.c: Likewise.
+	* configure.ac: Likewise.
+	* Makefile.am: Add entries for wasm-module.c.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2017-03-27  Pip Cet  <pipcet@gmail.com>
+
+	* cpu-wasm32.c: New file to support wasm32 architecture.
+	* elf32-wasm32.c: New file to support wasm32 architecture.
+	* Makefile.am: Add wasm32 architecture.
+	* archures.c: Likewise.
+	* config.bfd: Likewise.
+	* configure.ac: Likewise.
+	* targets.c: Likewise.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2017-03-20  Alan Modra  <amodra@gmail.com>
+
+	PR 21266
+	* elf64-ppc.c (compare_symbols): Stabilize sort.
+
+2017-03-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add
+	local_ifunc_resolver and maybe_local_ifunc_resolver.
+	(ppc_build_one_stub): Set flags on emitting dynamic
+	relocation to ifunc.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_finish_dynamic_symbol): Likewise.
+	(ppc64_elf_finish_dynamic_sections): Error on DT_TEXTREL with
+	local dynamic relocs to ifuncs.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add
+	local_ifunc_resolver and maybe_local_ifunc_resolver.
+	(ppc_elf_relocate_section): Set flag on emitting dynamic
+	relocation to ifuncs.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_finish_dynamic_sections): Error on DT_TEXTREL with local
+	dynamic relocs to ifuncs.
+
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* reloc.c (BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC): Rename to
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12.
+	(BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC): Rename to
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): Update reloc
+	names.
+	(IS_AARCH64_TLSDESC_RELOC): Likewise.
+	(elfNN_aarch64_howto_table): Likewise.
+	(aarch64_tls_transition_without_check): Likewise.
+	(aarch64_reloc_got_type): Likewise.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_tls_relax): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c: Remove ATTRIBUTE_UNUSED throughout when function
+	parameter is in fact used.  Whitespace fixes.
+	* elf64-ppc.c: Likewise.
+
 2017-03-09  Sam Thursfield  <sam.thursfield@codethink.co.uk>
 
 	* rs6000-core.c (CORE_NEW): Simplify macro when

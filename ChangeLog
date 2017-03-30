@@ -1,3 +1,8 @@
+2017-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* config.sub: Sync with master version in config project.
+	* config.guess: Likewise.
+
 2017-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* configure.ac: Update year in copyright notice.

@@ -204,6 +204,7 @@ struct gdbarch_tdep
   int lcount_regnum;
   int sar_regnum;		/* Register number of SAR.  */
   int litbase_regnum;		/* Register number of LITBASE.  */
+  int threadptr_regnum;		/* Register number of THREADPTR.  */
 
   int interrupt_regnum;		/* Register number for interrupt.  */
   int interrupt2_regnum;	/* Register number for interrupt2.  */

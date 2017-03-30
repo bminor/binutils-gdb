@@ -429,8 +429,9 @@ gdbsim_fetch_register (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct inferior *inf = find_inferior_ptid (regcache_get_ptid (regcache));
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
+    = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
   if (regno == -1)
     {
@@ -505,8 +506,9 @@ gdbsim_store_register (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct inferior *inf = find_inferior_ptid (regcache_get_ptid (regcache));
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
+    = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
   if (regno == -1)
     {

@@ -760,7 +760,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
 		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
-		          || TYPE_CODE (arg_type) == TYPE_CODE_REF
+		          || TYPE_IS_REFERENCE (arg_type)
 			  || TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
 			  || TYPE_CODE (arg_type) == TYPE_CODE_UNION))
 		    {

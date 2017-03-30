@@ -1,3 +1,99 @@
+2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/16044
+	* testsuite/ld-cris/pr16044.d, testsuite/ld-cris/dso-1c.s,
+	testsuite/ld-cris/dso-2b.s, testsuite/ld-cris/dso-4.s: New test.
+
+2017-03-21  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Return
+	false for nios2-*-elf.
+
+2017-03-21  gingold  <gingold@gingold-Precision-7510>
+
+	* ldlang.c (lang_check_section_addresses): Check only for
+	allocated sections.
+
+2017-03-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/sec64k.exp: Don't run on h8300 and ip2k.
+
+2017-03-15  Tristan Gingold  <gingold@adacore.com>
+
+	* testsuite/ld-checks/checks.exp (overflow_check): Disable for
+	non-elf targets.
+
+2017-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_check_section_addresses): Use addr_mask to
+	check VMA and LMA.
+
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* testsuite/ld-aarch64/ifunc-5r-local.d: Update regexp.
+
+2017-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* ldlang.c (lang_check_section_addresses): Check for address space
+	overflow.
+	* testsuite/ld-checks/checks.exp (overflow_check): New procedure
+	* testsuite/ld-checks/over.s: New test source.
+	* testsuite/ld-checks/over.d: New test.
+	* testsuite/ld-checks/over2.s: New test source.
+	* testsuite/ld-checks/over2.d: New test.
+
+2017-03-13  Alexey Neyman  <stilor@att.net>
+
+	* emulparams/elf32ppccommon.sh (LIBPATH_SUFFIX): Set from target
+	cpu, not host.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Add
+	sysroot for -rpath search.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_add_sysroot): Rewrite.
+	Only prefix absolute paths with sysroot.  Handle DOS paths.
+	(gld${EMULATION_NAME}_check_ld_elf_hints): Constify variable.
+	(gld${EMULATION_NAME}_check_ld_so_conf): Likewise.
+	(gld${EMULATION_NAME}_after_open): Short-circuit NULL path
+	searches.  Rename variable.  Simplify get_runpath search.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp: Use -Wl,-export-dynamic rather
+	than -rdynamic.
+
+2017-03-11  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Orphan Sections): Mention that not all targets
+	handle orphans well.
+	* testsuite/ld-elf/orphan-9.d: Don't run for i860 and i960.
+	* testsuite/ld-elf/orphan-10.d: Likewise.
+
+2017-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldlang.c (lang_size_sections_1): Shortcut loop only after
+	tracking changes to the default regions LMA.
+	* testsuite/ld-elf/orphan-9.ld: Extend header comment.
+	* testsuite/ld-elf/orphan-10.d: New file.
+	* testsuite/ld-elf/orphan-10.s: New file.
+	* NEWS: Mention change in behaviour.
+
+2017-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldlang.c (lang_leave_output_section_statement): Move lma_region
+	logic to...
+	(lang_propagate_lma_regions): ...this new function.
+	(lang_process): Call new function.
+	* testsuite/ld-elf/orphan-9.d: New file.
+	* testsuite/ld-elf/orphan-9.ld: New file.
+	* testsuite/ld-elf/orphan-9.s: New file.
+	* NEWS: Mention change in behaviour.
+
 2017-03-07  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (open_input_bfds): Check that lang_assignment_statement
@@ -79,7 +175,8 @@
 
 2017-02-24  Maciej W. Rozycki  <macro@imgtec.com>
 
-	* testsuite/ld-elf/ver_def.d: New test.
+	* testsuite/ld-elf/ver_def.vd: New test.
+	* testsuite/ld-elf/ver_def-tic6x.vd: New test.
 	* testsuite/ld-elf/ver_def.ld: New test linker script.
 	* testsuite/ld-elf/ver_def.ver: New test version script.
 	* testsuite/ld-elf/ver_def.s: New test source.

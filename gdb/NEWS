@@ -7,9 +7,12 @@
   added by the Memory Protection Keys for Userspace feature which will be
   available in future Intel CPUs.
 
+* GDB now supports C++11 rvalue references.
+
 * Python Scripting
 
   ** New functions to start, stop and access a running btrace recording.
+  ** Rvalue references are now supported in gdb.Type.
 
 * GDB now supports recording and replaying rdrand and rdseed Intel 64
   instructions.
@@ -84,6 +87,10 @@ flash-erase
   Erases all the flash memory regions reported by the target.  This is
   equivalent to the CLI command flash-erase.
 
+-file-list-shared-libraries
+  List the shared libraries in the program.  This is
+  equivalent to the CLI command "info shared".
+
 * New commands
 
 set disassembler-options
@@ -93,6 +100,9 @@ show disassembler-options
   multiple options can be placed together into a comma separated list.
   The default value is the empty string.  Currently, the only supported
   targets are ARM, PowerPC and S/390.
+
+maint print arc arc-instruction address
+  Print internal disassembler information about instruction at a given address.
 
 *** Changes in GDB 7.12
 

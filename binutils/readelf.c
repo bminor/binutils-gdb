@@ -151,6 +151,7 @@
 #include "elf/v850.h"
 #include "elf/vax.h"
 #include "elf/visium.h"
+#include "elf/wasm32.h"
 #include "elf/x86-64.h"
 #include "elf/xc16x.h"
 #include "elf/xgate.h"
@@ -809,6 +810,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_XTENSA_OLD:
     case EM_MICROBLAZE:
     case EM_MICROBLAZE_OLD:
+    case EM_WEBASSEMBLY:
       return TRUE;
 
     case EM_68HC05:
@@ -1496,6 +1498,10 @@ dump_relocations (FILE * file,
 
 	case EM_TILEPRO:
 	  rtype = elf_tilepro_reloc_type (type);
+	  break;
+
+	case EM_WEBASSEMBLY:
+	  rtype = elf_wasm32_reloc_type (type);
 	  break;
 
 	case EM_XGATE:
@@ -2205,11 +2211,11 @@ get_machine_name (unsigned e_machine)
 
   switch (e_machine)
     {
+      /* Please keep this switch table sorted by increasing EM_ value.  */
+      /* 0 */
     case EM_NONE:		return _("None");
-    case EM_AARCH64:		return "AArch64";
     case EM_M32:		return "WE32100";
     case EM_SPARC:		return "Sparc";
-    case EM_SPU:		return "SPU";
     case EM_386:		return "Intel 80386";
     case EM_68K:		return "MC68000";
     case EM_88K:		return "MC88000";
@@ -2217,61 +2223,50 @@ get_machine_name (unsigned e_machine)
     case EM_860:		return "Intel 80860";
     case EM_MIPS:		return "MIPS R3000";
     case EM_S370:		return "IBM System/370";
+      /* 10 */
     case EM_MIPS_RS3_LE:	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
     case EM_PARISC:		return "HPPA";
-    case EM_PPC_OLD:		return "Power PC (old)";
+    case EM_VPP550:		return "Fujitsu VPP500";
     case EM_SPARC32PLUS:	return "Sparc v8+" ;
     case EM_960:		return "Intel 90860";
     case EM_PPC:		return "PowerPC";
+      /* 20 */
     case EM_PPC64:		return "PowerPC64";
+    case EM_S390_OLD:
+    case EM_S390:		return "IBM S/390";
+    case EM_SPU:		return "SPU";
+      /* 30 */
+    case EM_V800:		return "Renesas V850 (using RH850 ABI)";
     case EM_FR20:		return "Fujitsu FR20";
-    case EM_FT32:		return "FTDI FT32";
     case EM_RH32:		return "TRW RH32";
     case EM_MCORE:		return "MCORE";
+      /* 40 */
     case EM_ARM:		return "ARM";
     case EM_OLD_ALPHA:		return "Digital Alpha (old)";
     case EM_SH:			return "Renesas / SuperH SH";
     case EM_SPARCV9:		return "Sparc v9";
     case EM_TRICORE:		return "Siemens Tricore";
     case EM_ARC:		return "ARC";
-    case EM_ARC_COMPACT:	return "ARCompact";
-    case EM_ARC_COMPACT2:	return "ARCv2";
     case EM_H8_300:		return "Renesas H8/300";
     case EM_H8_300H:		return "Renesas H8/300H";
     case EM_H8S:		return "Renesas H8S";
     case EM_H8_500:		return "Renesas H8/500";
+      /* 50 */
     case EM_IA_64:		return "Intel IA-64";
     case EM_MIPS_X:		return "Stanford MIPS-X";
     case EM_COLDFIRE:		return "Motorola Coldfire";
-    case EM_ALPHA:		return "Alpha";
-    case EM_CYGNUS_D10V:
-    case EM_D10V:		return "d10v";
-    case EM_CYGNUS_D30V:
-    case EM_D30V:		return "d30v";
-    case EM_CYGNUS_M32R:
-    case EM_M32R:		return "Renesas M32R (formerly Mitsubishi M32r)";
-    case EM_CYGNUS_V850:
-    case EM_V800:		return "Renesas V850 (using RH850 ABI)";
-    case EM_V850:		return "Renesas V850";
-    case EM_CYGNUS_MN10300:
-    case EM_MN10300:		return "mn10300";
-    case EM_CYGNUS_MN10200:
-    case EM_MN10200:		return "mn10200";
-    case EM_MOXIE:		return "Moxie";
-    case EM_CYGNUS_FR30:
-    case EM_FR30:		return "Fujitsu FR30";
-    case EM_CYGNUS_FRV:		return "Fujitsu FR-V";
-    case EM_PJ_OLD:
-    case EM_PJ:			return "picoJava";
+    case EM_68HC12:		return "Motorola MC68HC12 Microcontroller";
     case EM_MMA:		return "Fujitsu Multimedia Accelerator";
     case EM_PCP:		return "Siemens PCP";
     case EM_NCPU:		return "Sony nCPU embedded RISC processor";
     case EM_NDR1:		return "Denso NDR1 microprocesspr";
     case EM_STARCORE:		return "Motorola Star*Core processor";
     case EM_ME16:		return "Toyota ME16 processor";
+      /* 60 */
     case EM_ST100:		return "STMicroelectronics ST100 processor";
     case EM_TINYJ:		return "Advanced Logic Corp. TinyJ embedded processor";
+    case EM_X86_64:		return "Advanced Micro Devices X86-64";
     case EM_PDSP:		return "Sony DSP processor";
     case EM_PDP10:		return "Digital Equipment Corp. PDP-10";
     case EM_PDP11:		return "Digital Equipment Corp. PDP-11";
@@ -2279,75 +2274,89 @@ get_machine_name (unsigned e_machine)
     case EM_ST9PLUS:		return "STMicroelectronics ST9+ 8/16 bit microcontroller";
     case EM_ST7:		return "STMicroelectronics ST7 8-bit microcontroller";
     case EM_68HC16:		return "Motorola MC68HC16 Microcontroller";
-    case EM_68HC12:		return "Motorola MC68HC12 Microcontroller";
+      /* 70 */
     case EM_68HC11:		return "Motorola MC68HC11 Microcontroller";
     case EM_68HC08:		return "Motorola MC68HC08 Microcontroller";
     case EM_68HC05:		return "Motorola MC68HC05 Microcontroller";
     case EM_SVX:		return "Silicon Graphics SVx";
     case EM_ST19:		return "STMicroelectronics ST19 8-bit microcontroller";
     case EM_VAX:		return "Digital VAX";
-    case EM_VISIUM:		return "CDS VISIUMcore processor";
-    case EM_AVR_OLD:
-    case EM_AVR:		return "Atmel AVR 8-bit microcontroller";
     case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
     case EM_JAVELIN:		return "Infineon Technologies 32-bit embedded cpu";
     case EM_FIREPATH:		return "Element 14 64-bit DSP processor";
     case EM_ZSP:		return "LSI Logic's 16-bit DSP processor";
+      /* 80 */
     case EM_MMIX:		return "Donald Knuth's educational 64-bit processor";
     case EM_HUANY:		return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:		return "Vitesse Prism";
-    case EM_X86_64:		return "Advanced Micro Devices X86-64";
-    case EM_L1OM:		return "Intel L1OM";
-    case EM_K1OM:		return "Intel K1OM";
-    case EM_S390_OLD:
-    case EM_S390:		return "IBM S/390";
-    case EM_SCORE:		return "SUNPLUS S+Core";
-    case EM_XSTORMY16:		return "Sanyo XStormy16 CPU core";
+    case EM_AVR_OLD:
+    case EM_AVR:		return "Atmel AVR 8-bit microcontroller";
+    case EM_CYGNUS_FR30:
+    case EM_FR30:		return "Fujitsu FR30";
+    case EM_CYGNUS_D10V:
+    case EM_D10V:		return "d10v";
+    case EM_CYGNUS_D30V:
+    case EM_D30V:		return "d30v";
+    case EM_CYGNUS_V850:
+    case EM_V850:		return "Renesas V850";
+    case EM_CYGNUS_M32R:
+    case EM_M32R:		return "Renesas M32R (formerly Mitsubishi M32r)";
+    case EM_CYGNUS_MN10300:
+    case EM_MN10300:		return "mn10300";
+      /* 90 */
+    case EM_CYGNUS_MN10200:
+    case EM_MN10200:		return "mn10200";
+    case EM_PJ:			return "picoJava";
     case EM_OR1K:		return "OpenRISC 1000";
-    case EM_CRX:		return "National Semiconductor CRX microprocessor";
-    case EM_ADAPTEVA_EPIPHANY:	return "Adapteva EPIPHANY";
-    case EM_DLX:		return "OpenDLX";
-    case EM_IP2K_OLD:
-    case EM_IP2K:		return "Ubicom IP2xxx 8-bit microcontrollers";
-    case EM_IQ2000:       	return "Vitesse IQ2000";
+    case EM_ARC_COMPACT:	return "ARCompact";
     case EM_XTENSA_OLD:
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
     case EM_VIDEOCORE:		return "Alphamosaic VideoCore processor";
     case EM_TMM_GPP:		return "Thompson Multimedia General Purpose Processor";
     case EM_NS32K:		return "National Semiconductor 32000 series";
     case EM_TPC:		return "Tenor Network TPC processor";
-    case EM_ST200:		return "STMicroelectronics ST200 microcontroller";
+    case EM_SNP1K:	        return "Trebia SNP 1000 processor";
+      /* 100 */
+    case EM_ST200:		return "STMicroelectronics ST200 microcontroller";  
+    case EM_IP2K_OLD:
+    case EM_IP2K:		return "Ubicom IP2xxx 8-bit microcontrollers";
     case EM_MAX:		return "MAX Processor";
     case EM_CR:			return "National Semiconductor CompactRISC";
     case EM_F2MC16:		return "Fujitsu F2MC16";
     case EM_MSP430:		return "Texas Instruments msp430 microcontroller";
-    case EM_LATTICEMICO32:	return "Lattice Mico32";
-    case EM_M32C_OLD:
-    case EM_M32C:	        return "Renesas M32c";
-    case EM_MT:                 return "Morpho Techologies MT processor";
     case EM_BLACKFIN:		return "Analog Devices Blackfin";
     case EM_SE_C33:		return "S1C33 Family of Seiko Epson processors";
     case EM_SEP:		return "Sharp embedded microprocessor";
     case EM_ARCA:		return "Arca RISC microprocessor";
+      /* 110 */
     case EM_UNICORE:		return "Unicore";
     case EM_EXCESS:		return "eXcess 16/32/64-bit configurable embedded CPU";
     case EM_DXP:		return "Icera Semiconductor Inc. Deep Execution Processor";
-    case EM_NIOS32:		return "Altera Nios";
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
+    case EM_CRX:		return "National Semiconductor CRX microprocessor";
+    case EM_XGATE:		return "Motorola XGATE embedded processor";
     case EM_C166:
     case EM_XC16X:		return "Infineon Technologies xc16x";
     case EM_M16C:		return "Renesas M16C series microprocessors";
     case EM_DSPIC30F:		return "Microchip Technology dsPIC30F Digital Signal Controller";
     case EM_CE:			return "Freescale Communication Engine RISC core";
+      /* 120 */
+    case EM_M32C:	        return "Renesas M32c";
+      /* 130 */
     case EM_TSK3000:		return "Altium TSK3000 core";
     case EM_RS08:		return "Freescale RS08 embedded processor";
     case EM_ECOG2:		return "Cyan Technology eCOG2 microprocessor";
+    case EM_SCORE:		return "SUNPLUS S+Core";
     case EM_DSP24:		return "New Japan Radio (NJR) 24-bit DSP Processor";
     case EM_VIDEOCORE3:		return "Broadcom VideoCore III processor";
+    case EM_LATTICEMICO32:	return "Lattice Mico32";
     case EM_SE_C17:		return "Seiko Epson C17 family";
+      /* 140 */
     case EM_TI_C6000:		return "Texas Instruments TMS320C6000 DSP family";
     case EM_TI_C2000:		return "Texas Instruments TMS320C2000 DSP family";
     case EM_TI_C5500:		return "Texas Instruments TMS320C55x DSP family";
+    case EM_TI_PRU:		return "TI PRU I/O processor";
+      /* 160 */
     case EM_MMDSP_PLUS:		return "STMicroelectronics 64bit VLIW Data Signal Processor";
     case EM_CYPRESS_M8C:	return "Cypress M8C microprocessor";
     case EM_R32C:		return "Renesas R32C series microprocessors";
@@ -2358,38 +2367,47 @@ get_machine_name (unsigned e_machine)
     case EM_NDS32:		return "Andes Technology compact code size embedded RISC processor family";
     case EM_ECOG1X:		return "Cyan Technology eCOG1X family";
     case EM_MAXQ30:		return "Dallas Semiconductor MAXQ30 Core microcontrollers";
+      /* 170 */
     case EM_XIMO16:		return "New Japan Radio (NJR) 16-bit DSP Processor";
     case EM_MANIK:		return "M2000 Reconfigurable RISC Microprocessor";
     case EM_CRAYNV2:		return "Cray Inc. NV2 vector architecture";
-    case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
-    case EM_CR16:
-    case EM_MICROBLAZE:
-    case EM_MICROBLAZE_OLD:	return "Xilinx MicroBlaze";
-    case EM_RISCV:		return "RISC-V";
-    case EM_RL78:		return "Renesas RL78";
     case EM_RX:			return "Renesas RX";
     case EM_METAG:		return "Imagination Technologies Meta processor architecture";
     case EM_MCST_ELBRUS:	return "MCST Elbrus general purpose hardware architecture";
     case EM_ECOG16:		return "Cyan Technology eCOG16 family";
+    case EM_CR16:
+    case EM_MICROBLAZE:
+    case EM_MICROBLAZE_OLD:	return "Xilinx MicroBlaze";
     case EM_ETPU:		return "Freescale Extended Time Processing Unit";
     case EM_SLE9X:		return "Infineon Technologies SLE9X core";
-    case EM_AVR32:		return "Atmel Corporation 32-bit microprocessor family";
+      /* 180 */
+    case EM_L1OM:		return "Intel L1OM";
+    case EM_K1OM:		return "Intel K1OM";
+    case EM_INTEL182:		return "Intel (reserved)";
+    case EM_AARCH64:		return "AArch64";
+    case EM_ARM184:		return "ARM (reserved)";
+    case EM_AVR32:		return "Atmel Corporation 32-bit microprocessor";
     case EM_STM8:		return "STMicroeletronics STM8 8-bit microcontroller";
     case EM_TILE64:		return "Tilera TILE64 multicore architecture family";
     case EM_TILEPRO:		return "Tilera TILEPro multicore architecture family";
-    case EM_TILEGX:		return "Tilera TILE-Gx multicore architecture family";
+      /* 190 */
     case EM_CUDA:		return "NVIDIA CUDA architecture";
-    case EM_XGATE:		return "Motorola XGATE embedded processor";
+    case EM_TILEGX:		return "Tilera TILE-Gx multicore architecture family";
     case EM_CLOUDSHIELD:	return "CloudShield architecture family";
     case EM_COREA_1ST:		return "KIPO-KAIST Core-A 1st generation processor family";
     case EM_COREA_2ND:		return "KIPO-KAIST Core-A 2nd generation processor family";
+    case EM_ARC_COMPACT2:	return "ARCv2";
     case EM_OPEN8:		return "Open8 8-bit RISC soft processor core";
+    case EM_RL78:		return "Renesas RL78";
     case EM_VIDEOCORE5:		return "Broadcom VideoCore V processor";
+    case EM_78K0R:		return "Renesas 78K0R";
+      /* 200 */
     case EM_56800EX:		return "Freescale 56800EX Digital Signal Controller (DSC)";
     case EM_BA1:		return "Beyond BA1 CPU architecture";
     case EM_BA2:		return "Beyond BA2 CPU architecture";
     case EM_XCORE:		return "XMOS xCORE processor family";
     case EM_MCHP_PIC:		return "Microchip 8-bit PIC(r) family";
+      /* 210 */
     case EM_KM32:		return "KM211 KM32 32-bit processor";
     case EM_KMX32:		return "KM211 KMX32 32-bit processor";
     case EM_KMX16:		return "KM211 KMX16 16-bit processor";
@@ -2400,9 +2418,29 @@ get_machine_name (unsigned e_machine)
     case EM_COOL:		return "Bluechip Systems CoolEngine";
     case EM_NORC:		return "Nanoradio Optimized RISC";
     case EM_CSR_KALIMBA:	return "CSR Kalimba architecture family";
+      /* 220 */
     case EM_Z80:		return "Zilog Z80";
-    case EM_AMDGPU:		return "AMD GPU architecture";
-    case EM_TI_PRU:		return "TI PRU I/O processor";
+    case EM_VISIUM:		return "CDS VISIUMcore processor";
+    case EM_FT32:               return "FTDI Chip FT32";
+    case EM_MOXIE:              return "Moxie";
+    case EM_AMDGPU: 	 	return "AMD GPU";
+    case EM_RISCV: 	 	return "RISC-V";
+    case EM_LANAI:		return "Lanai 32-bit processor";
+    case EM_BPF:		return "Linux BPF";
+
+      /* Large numbers...  */
+    case EM_MT:                 return "Morpho Techologies MT processor";
+    case EM_ALPHA:		return "Alpha";
+    case EM_WEBASSEMBLY:	return "Web Assembly";
+    case EM_DLX:		return "OpenDLX";  
+    case EM_XSTORMY16:		return "Sanyo XStormy16 CPU core";
+    case EM_IQ2000:       	return "Vitesse IQ2000";
+    case EM_M32C_OLD:
+    case EM_NIOS32:		return "Altera Nios";
+    case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
+    case EM_ADAPTEVA_EPIPHANY:	return "Adapteva EPIPHANY";
+    case EM_CYGNUS_FRV:		return "Fujitsu FR-V";
+
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -4965,12 +5003,6 @@ process_program_headers (FILE * file)
 	     section in the DYNAMIC segment.  */
 	  dynamic_addr = segment->p_offset;
 	  dynamic_size = segment->p_filesz;
-	  /* PR binutils/17512: Avoid corrupt dynamic section info in the segment.  */
-	  if (dynamic_addr + dynamic_size >= current_file_size)
-	    {
-	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
-	      dynamic_addr = dynamic_size = 0;
-	    }
 
 	  /* Try to locate the .dynamic section. If there is
 	     a section header table, we can easily locate it.  */
@@ -5004,6 +5036,16 @@ process_program_headers (FILE * file)
 	      else if (dynamic_addr > segment->p_offset)
 		warn (_("the .dynamic section is not the first section"
 			" in the dynamic segment.\n"));
+	    }
+
+	  /* PR binutils/17512: Avoid corrupt dynamic section info in the
+	     segment.  Check this after matching against the section headers
+	     so we don't warn on debuginfo file (which have NOBITS .dynamic
+	     sections).  */
+	  if (dynamic_addr + dynamic_size >= current_file_size)
+	    {
+	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
+	      dynamic_addr = dynamic_size = 0;
 	    }
 	  break;
 
@@ -12055,6 +12097,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_VAX_32.  */
     case EM_VISIUM:
       return reloc_type == 3;  /* R_VISIUM_32. */
+    case EM_WEBASSEMBLY:
+      return reloc_type == 1;  /* R_WASM32_32.  */
     case EM_X86_64:
     case EM_L1OM:
     case EM_K1OM:
@@ -12360,6 +12404,7 @@ is_none_reloc (unsigned int reloc_type)
     case EM_TI_C6000:/* R_C6000_NONE.  */
     case EM_X86_64:  /* R_X86_64_NONE.  */
     case EM_XC16X:
+    case EM_WEBASSEMBLY: /* R_WASM32_NONE.  */
       return reloc_type == 0;
 
     case EM_AARCH64:
@@ -16566,24 +16611,145 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
   return TRUE;
 }
 
+/* Print the name of the symbol associated with a build attribute
+   that is attached to address OFFSET.  */
+
+static bfd_boolean
+print_symbol_for_build_attribute (FILE *         file,
+				  unsigned long  offset,
+				  bfd_boolean    is_open_attr)
+{
+  static FILE *             saved_file = NULL;
+  static char *             strtab;
+  static unsigned long      strtablen;
+  static Elf_Internal_Sym * symtab;
+  static unsigned long      nsyms;
+  Elf_Internal_Sym *  saved_sym = NULL;
+  Elf_Internal_Sym *  sym;
+
+  if (saved_file == NULL || file != saved_file)
+    {
+      Elf_Internal_Shdr * symsec;
+
+      /* Load the symbol and string sections.  */
+      for (symsec = section_headers;
+	   symsec < section_headers + elf_header.e_shnum;
+	   symsec ++)
+	{
+	  if (symsec->sh_type == SHT_SYMTAB)
+	    {
+	      symtab = GET_ELF_SYMBOLS (file, symsec, & nsyms);
+
+	      if (symsec->sh_link < elf_header.e_shnum)
+		{
+		  Elf_Internal_Shdr * strtab_sec = section_headers + symsec->sh_link;
+
+		  strtab = (char *) get_data (NULL, file, strtab_sec->sh_offset,
+					      1, strtab_sec->sh_size,
+					      _("string table"));
+		  strtablen = strtab != NULL ? strtab_sec->sh_size : 0;
+		}
+	    }
+	}
+      saved_file = file;
+    }
+
+  if (symtab == NULL || strtab == NULL)
+    {
+      printf ("\n");
+      return FALSE;
+    }
+
+  /* Find a symbol whose value matches offset.  */
+  for (sym = symtab; sym < symtab + nsyms; sym ++)
+    if (sym->st_value == offset)
+      {
+	if (sym->st_name >= strtablen)
+	  /* Huh ?  This should not happen.  */
+	  continue;
+
+	if (strtab[sym->st_name] == 0)
+	  continue;
+
+	if (is_open_attr)
+	  {
+	    /* For OPEN attributes we prefer GLOBAL over LOCAL symbols
+	       and FILE or OBJECT symbols over NOTYPE symbols.  We skip
+	       FUNC symbols entirely.  */
+	    switch (ELF_ST_TYPE (sym->st_info))
+	      {
+	      case STT_FILE:
+		saved_sym = sym;
+		/* We can stop searching now.  */
+		sym = symtab + nsyms;
+		continue;
+
+	      case STT_OBJECT:
+		saved_sym = sym;
+		continue;
+
+	      case STT_FUNC:
+		/* Ignore function symbols.  */
+		continue;
+
+	      default:
+		break;
+	      }
+
+	    switch (ELF_ST_BIND (sym->st_info))
+	      {
+	      case STB_GLOBAL:
+		if (saved_sym == NULL
+		    || ELF_ST_TYPE (saved_sym->st_info) != STT_OBJECT)
+		  saved_sym = sym;
+		break;
+
+	      case STB_LOCAL:
+		if (saved_sym == NULL)
+		  saved_sym = sym;
+		break;
+
+	      default:
+		break;
+	      }
+	  }
+	else
+	  {
+	    if (ELF_ST_TYPE (sym->st_info) != STT_FUNC)
+	      continue;
+
+	    saved_sym = sym;
+	    break;
+	  }
+      }
+
+  printf (" (%s: %s)\n",
+	  is_open_attr ? _("file") : _("func"),
+	  saved_sym ? strtab + saved_sym->st_name : _("<no symbol found>)"));
+  return TRUE;
+}
+
 static bfd_boolean
 print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
-				       FILE *              file,
-				       Elf_Internal_Shdr * section ATTRIBUTE_UNUSED)
+				       FILE *              file)
 {
   static unsigned long global_offset = 0;
-  unsigned long       i;
-  unsigned long       strtab_size = 0;
-  char *              strtab = NULL;
-  Elf_Internal_Sym *  symtab = NULL;
-  unsigned long       nsyms = 0;
-  Elf_Internal_Shdr * symsec = NULL;
-  unsigned int        desc_size = is_32bit_elf ? 4 : 8;
+  unsigned long        offset;
+  unsigned int         desc_size = is_32bit_elf ? 4 : 8;
+  bfd_boolean          is_open_attr = pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN;
 
-  if (pnote->descsz  == 0)
+  if (pnote->descsz == 0)
     {
-      printf (_("    Applies from offset %#lx\n"), global_offset);
-      return TRUE;
+      if (is_open_attr)
+	{
+	  printf (_("    Applies from offset %#lx\n"), global_offset);
+	  return TRUE;
+	}
+      else
+	{
+	  printf (_("    Applies to func at %#lx"), global_offset);
+	  return print_symbol_for_build_attribute (file, global_offset, is_open_attr);
+	}
     }
 
   if (pnote->descsz != desc_size)
@@ -16593,88 +16759,19 @@ print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
       return FALSE;
     }
 
-  /* Load the symbols.  */
-  for (symsec = section_headers;
-       symsec < section_headers + elf_header.e_shnum;
-       symsec ++)
+  offset = byte_get ((unsigned char *) pnote->descdata, desc_size);
+
+  if (is_open_attr)
     {
-      if (symsec->sh_type == SHT_SYMTAB)
-	{
-	  symtab = GET_ELF_SYMBOLS (file, symsec, & nsyms);
-
-	  if (symsec->sh_link < elf_header.e_shnum)
-	    {
-	      Elf_Internal_Shdr * strtab_sec = section_headers + symsec->sh_link;
-
-	      strtab = (char *) get_data (NULL, file, strtab_sec->sh_offset,
-					  1, strtab_sec->sh_size,
-					  _("string table"));
-	      strtab_size = strtab != NULL ? strtab_sec->sh_size : 0;
-	    }
-	}
+      printf (_("    Applies from offset %#lx"), offset);
+      global_offset = offset;
+    }
+  else
+    {
+      printf (_("    Applies to func at %#lx"), offset);
     }
 
-  printf (_("    Applies from offset"));
-
-  for (i = 0; i < pnote->descsz; i += desc_size)
-    {
-      Elf_Internal_Sym * saved_sym = NULL;
-      Elf_Internal_Sym * sym;
-      unsigned long offset;
-
-      offset = byte_get ((unsigned char *) pnote->descdata + i, desc_size);
-
-      if (i + desc_size == pnote->descsz)
-	printf (_(" %#lx"), offset);
-      else
-	printf (_(" %#lx, "), offset);
-
-      if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN)
-	global_offset = offset;
-
-      if (symtab == NULL || strtab == NULL)
-	continue;
-
-      /* Find a symbol whose value matches offset.  */
-      for (sym = symtab; sym < symtab + nsyms; sym ++)
-	if (sym->st_value == offset)
-	  {
-	    if (sym->st_name < strtab_size)
-	      {
-		if (strtab[sym->st_name] == 0)
-		  continue;
-
-		if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN)
-		  {
-		    /* For OPEN attributes we prefer GLOBAL symbols, if there
-		       is one that matches.  But keep a record of a matching
-		       LOCAL symbol, just in case that is all that we can find.  */
-		    if (ELF_ST_BIND (sym->st_info) == STB_LOCAL)
-		      {
-			saved_sym = sym;
-			continue;
-		      }
-		    printf (_(" (file: %s)"), strtab + sym->st_name);
-		  }
-		else if (ELF_ST_TYPE (sym->st_info) != STT_FUNC)
-		  continue;
-		else
-		  printf (_(" (function: %s)"), strtab + sym->st_name);
-		break;
-	      }
-	  }
-
-      if (sym == symtab + nsyms)
-	{
-	  if (saved_sym)
-	    printf (_(" (file: %s)"), strtab + saved_sym->st_name);
-	  else
-	    printf (_(" (<symbol name unknown>)"));
-	}
-    }
-
-  printf ("\n");
-  return TRUE;
+  return print_symbol_for_build_attribute (file, offset, is_open_attr);
 }
 
 static bfd_boolean
@@ -16721,7 +16818,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     case GNU_BUILD_ATTRIBUTE_STACK_PROT:
       text = _("<stack prot>");
-      expected_types = "!+";
+      expected_types = "!+*";
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_RELRO:
@@ -16749,6 +16846,11 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       expected_types = "*";
       ++ name;
       break;
+    case GNU_BUILD_ATTRIBUTE_SHORT_ENUM:
+      text = _("<short enum>");
+      expected_types = "!+";
+      ++ name;
+      break;
 
     default:
       if (ISPRINT (* name))
@@ -16757,9 +16859,9 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	  if (len > left && ! do_wide)
 	    len = left;
-	  printf ("%.*s ", len, name);
+	  printf ("%.*s:", len, name);
 	  left -= len;
-	  name += len + 1;
+	  name += len;
 	}
       else
 	{
@@ -16778,7 +16880,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     }
 
   if (strchr (expected_types, name_type) == NULL)
-    warn (_("attribute does not have the expected type\n"));
+    warn (_("attribute does not have an expected type (%c)\n"), name_type);
 
   if ((unsigned long)(name - pnote->namedata) > pnote->namesz)
     {
@@ -16795,9 +16897,10 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	unsigned int bytes = pnote->namesz - (name - pnote->namedata);
-	unsigned long val = 0;
-	unsigned int shift = 0;
+	unsigned int   bytes = pnote->namesz - (name - pnote->namedata);
+	unsigned long  val = 0;
+	unsigned int   shift = 0;
+	char *         decoded = NULL;
 
 	while (bytes --)
 	  {
@@ -16807,33 +16910,44 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	    shift += 8;
 	  }
 
-	if (name_attribute == GNU_BUILD_ATTRIBUTE_PIC)
+	switch (name_attribute)
 	  {
-	    char * pic_type = NULL;
-
+	  case GNU_BUILD_ATTRIBUTE_PIC:
 	    switch (val)
 	      {
-	      case 0: pic_type = "static"; break;
-	      case 1: pic_type = "pic"; break;
-	      case 2: pic_type = "PIC"; break;
-	      case 3: pic_type = "pie"; break;
-	      case 4: pic_type = "PIE"; break;
+	      case 0: decoded = "static"; break;
+	      case 1: decoded = "pic"; break;
+	      case 2: decoded = "PIC"; break;
+	      case 3: decoded = "pie"; break;
+	      case 4: decoded = "PIE"; break;
+	      default: break;
 	      }
-
-	    if (pic_type != NULL)
+	    break;
+	  case GNU_BUILD_ATTRIBUTE_STACK_PROT:
+	    switch (val)
 	      {
-		if (do_wide)
-		  left -= printf ("%s", pic_type);
-		else
-		  left -= printf ("%-.*s", left, pic_type);
-		break;
+		/* Based upon the SPCT_FLAG_xxx enum values in gcc/cfgexpand.c.  */
+	      case 0: decoded = "off"; break;
+	      case 1: decoded = "on"; break;
+	      case 2: decoded = "all"; break;
+	      case 3: decoded = "strong"; break;
+	      case 4: decoded = "explicit"; break;
+	      default: break;
 	      }
+	    break;
+	  default:
+	    break;
 	  }
 
-	if (do_wide)
-	  left -= printf ("0x%lx", val);
+	if (decoded != NULL)
+	  print_symbol (-left, decoded);
 	else
-	  left -= printf ("0x%-.*lx", left, val);
+	  {
+	    if (do_wide)
+	      left -= printf ("0x%lx", val);
+	    else
+	      left -= printf ("0x%-.*lx", left, val);
+	  }
       }
       break;
     case GNU_BUILD_ATTRIBUTE_TYPE_STRING:
@@ -16861,8 +16975,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 static bfd_boolean
 process_note (Elf_Internal_Note *  pnote,
-	      FILE *               file,
-	      Elf_Internal_Shdr *  section)
+	      FILE *               file)
 {
   const char * name = pnote->namesz ? pnote->namedata : "(NONE)";
   const char * nt;
@@ -16930,7 +17043,7 @@ process_note (Elf_Internal_Note *  pnote,
     return print_core_note (pnote);
   else if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
 	   || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
-    return print_gnu_build_attribute_description (pnote, file, section);
+    return print_gnu_build_attribute_description (pnote, file);
 
   if (pnote->descsz)
     {
@@ -17084,7 +17197,7 @@ process_notes_at (FILE *              file,
 	  inote.namedata = temp;
 	}
 
-      if (! process_note (& inote, file, section))
+      if (! process_note (& inote, file))
 	res = FALSE;
 
       if (temp != NULL)

@@ -333,6 +333,19 @@ tyscm_get_type_smob_arg_unsafe (SCM self, int arg_pos, const char *func_name)
   return t_smob;
 }
 
+/* Return the type field of T_SCM, an object of type <gdb:type>.
+   This exists so that we don't have to export the struct's contents.  */
+
+struct type *
+tyscm_scm_to_type (SCM t_scm)
+{
+  type_smob *t_smob;
+
+  gdb_assert (tyscm_is_type (t_scm));
+  t_smob = (type_smob *) SCM_SMOB_DATA (t_scm);
+  return t_smob->type;
+}
+
 /* Helper function for save_objfile_types to make a deep copy of the type.  */
 
 static int
@@ -832,7 +845,7 @@ gdbscm_type_reference (SCM self)
 
   TRY
     {
-      type = lookup_reference_type (type);
+      type = lookup_lvalue_reference_type (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

@@ -1,3 +1,119 @@
+2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-section-script.exp (sepdebug): New testcases.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.arch/arc-analyze-prologue.S: New file.
+	* gdb.arch/arc-analyze-prologue.exp: Likewise.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.arch/arc-decode-insn.S: New file.
+	* gdb.arch/arc-decode-insn.exp: Likewise.
+
+2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20928
+	* gdb.arch/sparc64-regs.exp: New file.
+	* gdb.arch/sparc64-regs.S: Likewise.
+
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.python/py-record-btrace.exp: Check for buffer on Python 2
+	and memory view on Python 3.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+	    Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/14441
+	* gdb.cp/demangle.exp: Add rvalue reference tests.
+	* gdb.cp/rvalue-ref-casts.cc: New file.
+	* gdb.cp/rvalue-ref-casts.exp: New file.
+	* gdb.cp/rvalue-ref-overload.cc: New file.
+	* gdb.cp/rvalue-ref-overload.exp: New file.
+	* gdb.cp/rvalue-ref-params.cc: New file.
+	* gdb.cp/rvalue-ref-params.exp: New file.
+	* gdb.cp/rvalue-ref-sizeof.cc: New file.
+	* gdb.cp/rvalue-ref-sizeof.exp: New file.
+	* gdb.cp/rvalue-ref-types.cc: New file.
+	* gdb.cp/rvalue-ref-types.exp: New file.
+	* gdb.python/py-rvalue-ref-value-cc.cc: New file.
+	* gdb.python/py-rvalue-ref-value-cc.exp: New file.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* gdb.mi/mi-solib.exp (test_file_list_shared_libraries):
+	New procedure.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Add additional message
+	for unexpected output.
+
+2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/examine-backward.c (Barrier): New character array
+	constant, to ensure that TestStrings is preceded by a string
+	terminator.
+
+2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/dwarf.exp: Add support for DW_OP_implicit_pointer.
+	* gdb.dwarf2/nonvar-access.exp: Add test for stack value location
+	and implicit pointer into such a location.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-lazy-string (pointer): Really add new typedef.
+
+2017-03-16  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/m-static.exp: Fix expectation for prototype of
+	test5.single_constructor and single_constructor::single_constructor.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* gdb.guile/scm-value.c (main) Delete locals sptr, sn.
+	* gdb.guile/scm-lazy-string.c: New file.
+	* gdb.guile/scm-value.exp: Move lazy string tests to ...
+	* gdb.guile/scm-lazy-string.exp: ... here, new file.  Add more tests
+	for pointer, array, typedef lazy strings.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	PR python/17728, python/18439, python/18779
+	* gdb.python/py-value.c (main) Delete locals sptr, sn.
+	* gdb.python/py-lazy-string.c (pointer): New typedef.
+	(main): New locals ptr, array, typedef_ptr.
+	* gdb.python/py-value.exp: Move lazy string tests to ...
+	* gdb.python/py-lazy-string.exp: ... here.  Add more tests for pointer,
+	array, typedef lazy strings.
+
+2017-03-14  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* lib/gdb.exp (get_valueof, get_integer_valueof, get_sizeof):
+	  Add optional 'test' parameter.
+
+2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
+	Skip for versions of DejaGnu < 1.5.
+
+2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (dejagnu_version): New proc.
+	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
+	Use dejagnu_version.
+
+2017-03-10  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/8128
+	* gdb.cp/templates.exp (test_ptype_of_templates): Remove argument
+	type from destructor regexps.
+	Add a branch which actually passes the test.
+	Adjust "ptype t5i" test names.
+
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/step-over-exit.exp: Add explicit test message.

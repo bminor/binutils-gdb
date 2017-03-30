@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Add support for the wasm32 ELF conversion of the Web Assembly file format.
+
+* Add --inlines option to objdump, which extends the --line-numbers option
+  so that inlined functions will display their nesting information.
+
 * Add --merge-notes options to objcopy to reduce the size of notes in
   a binary file by merging and deleting redundant notes.
 

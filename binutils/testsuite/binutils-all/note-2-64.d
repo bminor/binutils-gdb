@@ -13,5 +13,5 @@
 [ 	]+\*<ABI>0x0[ 	]+0x00000000[ 	]+NT_GNU_BUILD_ATTRIBUTE_OPEN[ 	]+Applies from offset 0x100
 [ 	]+\$<version>1[ 	]+0x00000008[ 	]+NT_GNU_BUILD_ATTRIBUTE_OPEN[ 	]+Applies from offset 0x10. \(file: note2.s\)
 [ 	]+!<stack prot>false[ 	]+0x00000000[ 	]+NT_GNU_BUILD_ATTRIBUTE_OPEN[ 	]+Applies from offset 0x10.
-[ 	]+\*<PIC>pic[ 	]+0x00000000[ 	]+NT_GNU_BUILD_ATTRIBUTE_FUNC[ 	]+Applies from offset 0x10.
+[ 	]+\*<PIC>pic[ 	]+0x00000000[ 	]+NT_GNU_BUILD_ATTRIBUTE_FUNC[ 	]+Applies to func at 0x10. \(func: func1\)
 #...

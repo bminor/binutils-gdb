@@ -39,8 +39,11 @@ note1.s:
 
 	.global note2.s
 note2.s:
+	.global func1
+	.type func1, STT_FUNC
+func1:	
 	.word 0x100
-	
+
 	.pushsection .gnu.build.attributes, "0x100000", %note
 	.dc.l 4 	
 	.dc.l 8		

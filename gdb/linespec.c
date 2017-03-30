@@ -2793,6 +2793,8 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
   return values;
 }
 
+namespace {
+
 /* A function object that serves as symbol_found_callback_ftype
    callback for iterate_over_symbols.  This is used by
    lookup_prefix_sym to collect type symbols.  */
@@ -2858,6 +2860,8 @@ decode_compound_collector::operator () (symbol *sym)
 
   return true; /* Continue iterating.  */
 }
+
+} // namespace
 
 /* Return any symbols corresponding to CLASS_NAME in FILE_SYMTABS.  */
 
@@ -3095,6 +3099,8 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 
 
 
+namespace {
+
 /* This function object is a callback for iterate_over_symtabs, used
    when collecting all matching symtabs.  */
 
@@ -3147,6 +3153,8 @@ symtab_collector::operator () (struct symtab *symtab)
 
   return false;
 }
+
+} // namespace
 
 /* Given a file name, return a VEC of all matching symtabs.  If
    SEARCH_PSPACE is not NULL, the search is restricted to just that

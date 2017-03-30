@@ -1,3 +1,103 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* readelf.c: Add support for wasm32 ELF format WebAssembly files.
+	(guess_is_rela): Likewise.
+	(dump_relocations): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_none_reloc_): Likewise.
+	* NEWS: Mention the new support.
+	* testsuite/lib/binutils-common.exp (is_elf_format): Mark wasm32
+	as ELF target.
+	(supports_gnu_unique): Mark wasm32 as supporting STB_GNU_UNIQUE.
+	* testsuite/binutils-all/nm.exp: Mark wasm32 as requiring .size annotations.
+	* testsuite/binutils-all/wasm32: New directory.
+	* testsuite/binutils-all/wasm32/create-wasm.d: New file.
+	* testsuite/binutils-all/wasm32/create-wasm.s: Likewise.
+	* testsuite/binutils-all/wasm32/custom-section.d: Likewise.
+	* testsuite/binutils-all/wasm32/custom-section.s: Likewise.
+	* testsuite/binutils-all/wasm32/invalid-wasm-1.d: Likewise.
+	* testsuite/binutils-all/wasm32/invalid-wasm-1.s: Likewise.
+	* testsuite/binutils-all/wasm32/long-sections.d: Likewise.
+	* testsuite/binutils-all/wasm32/long-sections.s: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm.d: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm.s: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm-2.d: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm-2.s: Likewise.
+	* testsuite/binutils-all/wasm32/prepared-section.d: Likewise.
+	* testsuite/binutils-all/wasm32/prepared-section.s: Likewise.
+	* testsuite/binutils-all/wasm32/wasm32.exp: New file, run tests.
+
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* doc/binutils.texi (objdump): Document PowerPC -M options.
+
+2017-03-21  Andi Kleen  <ak@linux.intel.com>
+
+	* objdump.c (unwind_inlines): Add.
+	(option_values): Add OPTION_INLINES.
+	(show_line): Unwind inlines if requested.
+	(main): Parse OPTION_INLINES.
+	(usage): Document --inlines.
+	* doc/binutils.texi: Document --inlines.
+	* NEWS: Likewise.
+
+2017-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Allow stack
+	protection notes to contain numeric values.  Use a colon rather
+	than a space to separate a string name from its values.  Decode
+	the numeric value of a stack protection note.
+	* objcopy.c (merge_gnu_build_notes): Allow version notes to
+	contain extra text after the protocol version number.
+
+2017-03-20  Mark Wielaard  <mark@klomp.org>
+
+	* readelf.c (process_program_headers): Move dynamic_addr check
+	after .dynamic section cross check.
+
+2017-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Fix off by one error
+	printing the value for a build note with an ascii name.
+
+2017-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Add support for
+	GNU_BUILD_ATTRIBUTE_SHORT_ENUM.
+
+2017-03-14  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_gnu_build_attribute_description): Move symbol
+	printing code to...
+	(print_symbol_for_build_attribute): New function.  ...here.
+	Add to find the best symbol to associate with an OPEN note.
+	Add code to cache the symbol table and string table, so that they
+	are not loaded every time a note is displayed.
+	* testsuite/binutils-all/note-2-32.s: Add a function symbol.
+	* testsuite/binutils-all/note-2-64.s: Likewise.
+	* testsuite/binutils-all/note-2-32.d: Update expected note output.
+	* testsuite/binutils-all/note-2-64.d: Likewise.
+
+2017-03-13  Alan Modra  <amodra@gmail.com>
+	    Taeung Song <treeze.taeung@gmail.com>
+
+	* objdump.c (update_source_path): Add abfd param.  Add struct
+	stat var.  Pass to try_print_file_open.  Warn if source is more
+	recent than object.
+	(try_print_file_open, slurp_file): Add struct stat param to
+	return fstat.
+	(show_line): Call update_source_path with bfd.
+
+2017-03-10  Chia-Hao Lo  <fcamel@gmail.com>
+
+	PR binutils/21235
+	* objdump.c (main): Set do_wide with --wide.
+
+2017-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_name): Rearrange switch table in order of
+	increasing machine number.  Add missing entries.
+
 2017-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21231

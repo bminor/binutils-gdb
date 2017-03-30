@@ -494,6 +494,7 @@ replace_typedefs (struct demangle_parse_info *info,
 	case DEMANGLE_COMPONENT_RESTRICT_THIS:
 	case DEMANGLE_COMPONENT_POINTER:
 	case DEMANGLE_COMPONENT_REFERENCE:
+	case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
 	  replace_typedefs (info, d_left (ret_comp), finder, data);
 	  break;
 
@@ -1241,7 +1242,7 @@ make_symbol_overload_list_adl_namespace (struct type *type,
   int i, prefix_len;
 
   while (TYPE_CODE (type) == TYPE_CODE_PTR
-	 || TYPE_CODE (type) == TYPE_CODE_REF
+	 || TYPE_IS_REFERENCE (type)
          || TYPE_CODE (type) == TYPE_CODE_ARRAY
          || TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {

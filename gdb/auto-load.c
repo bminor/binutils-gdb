@@ -1174,7 +1174,8 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
   bfd_byte *data = NULL;
 
   scripts_sect = bfd_get_section_by_name (abfd, section_name);
-  if (scripts_sect == NULL)
+  if (scripts_sect == NULL
+      || (bfd_get_section_flags (abfd, scripts_sect) & SEC_HAS_CONTENTS) == 0)
     return;
 
   if (!bfd_get_full_section_contents (abfd, scripts_sect, &data))

@@ -250,11 +250,6 @@ struct serial
 				   buffer.  -ve for sticky errors.  */
     unsigned char *bufp;	/* Current byte */
     unsigned char buf[BUFSIZ];	/* Da buffer itself */
-    int current_timeout;	/* (ser-unix.c termio{,s} only), last
-				   value of VTIME */
-    int timeout_remaining;	/* (ser-unix.c termio{,s} only), we
-				   still need to wait for this many
-				   more seconds.  */
     struct serial *next;	/* Pointer to the next `struct serial *' */
     int debug_p;		/* Trace this serial devices operation.  */
     int async_state;		/* Async internal state.  */

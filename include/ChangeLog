@@ -1,3 +1,65 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* opcode/wasm.h: New file to support wasm32 architecture.
+	* elf/wasm32.h: Add R_WASM32_32 relocation.
+
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (PPC_OPCODE_RAW): Define.
+	(PPC_OPCODE_*): Make them all unsigned long long constants.
+
+2017-03-27  Pip Cet  <pipcet@gmail.com>
+
+	* elf/wasm32.h: New file to support wasm32 architecture.
+
+2017-03-27  Rinat Zelig  <rinat@mellanox.com>
+
+	* opcode/arc.h (insn_class_t): Add ULTRAIP and MISC class.
+
+2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* opcode/s390.h (S390_INSTR_FLAG_VX2): Remove.
+	(S390_INSTR_FLAG_FACILITY_MASK): Adjust value.
+
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* opcode/arc.h (insn_class_t): Add DMA class.
+
+2017-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (GNU_BUILD_ATTRIBUTE_SHORT_ENUM): New GNU BUILD
+	note type.
+
+2017-03-14  Jakub Jelinek  <jakub@redhat.com>
+
+	PR debug/77589
+	* dwarf2.def (DW_OP_GNU_variable_value): New opcode.
+
+2017-03-13  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR demangler/70909
+	PR demangler/67264
+	* demangle.h (struct demangle_component): Add d_printing field.
+	(cplus_demangle_print): Remove const qualifier from tree
+	parameter.
+	(cplus_demangle_print_callback): Likewise.
+
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* elf/aarch64.h (R_AARCH64_TLSDESC_LD64_LO12_NC): Rename to
+	R_AARCH64_TLSDESC_LD64_LO12.
+	(R_AARCH64_TLSDESC_ADD_LO12_NC): Rename to
+	R_AARCH64_TLSDESC_ADD_LO12_NC.
+
+2017-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (EM_LANAI): New machine number.
+	(EM_BPF): Likewise.
+	(EM_WEBASSEMBLY): Likewise.
+	Move low value, deprecated, numbers to their numerical
+	equivalents.
+
 2017-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21231

@@ -1820,6 +1820,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget msp430-*-*]
 	 && ![istarget mt-*-*]
 	 && ![istarget nds32*-*-*]
+	 && ![istarget nios2-*-elf]
 	 && ![istarget or1k*-*-*]
 	 && ![istarget pj-*-*]
 	 && ![istarget pru-*-*]

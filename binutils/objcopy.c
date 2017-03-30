@@ -1933,7 +1933,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
     }
 
   if (pnotes[0].namedata[0] != GNU_BUILD_ATTRIBUTE_TYPE_STRING
-      || strcmp (pnotes[0].namedata + 2, "1") != 0)
+      || pnotes[0].namedata[2] != '1')
     {
       err = _("bad GNU build attribute notes: version note not v1");
       goto done;

@@ -648,6 +648,7 @@ type_aggregate_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (type) == TYPE_CODE_UNION
+	  || TYPE_CODE (type) == TYPE_CODE_MODULE
 	  || (TYPE_CODE (type) == TYPE_CODE_ENUM
 	      && TYPE_DECLARED_CLASS (type)));
 }

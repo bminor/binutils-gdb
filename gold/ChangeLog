@@ -1,3 +1,60 @@
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_got_entry::hash()): Shift addend to reduce
+	possibility of collisions.
+	(Mips_got_entry::equals): Fix case for GOT_TLS_LDM
+	entries.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relobj::merge_processor_specific_data_): New data
+	member.
+	(Mips_relobj::merge_processor_specific_data): New method.
+	(Mips_relobj::do_read_symbols): Set merge_processor_specific_data_
+	to false, only if the input file is a binary or if object has no
+	contents except the section name string table and an empty symbol
+	table with the undefined symbol.
+	(Target_mips::do_finalize_sections): Refactor.  Skip empty object files
+	for merging processor-specific data.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Target_mips::Relocate::calculated_value_): New data
+	member.
+	(Target_mips::Relocate::calculate_only_): Likewise.
+	(Target_mips::Relocate::relocate): Handle multiple consecutive
+	relocations with the same offset.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Target_mips::Relocate::relocate): Remove redundant
+	checks for relocatable link.
+	(Mips_relocate_functions::reljalr): Likewise.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (class Mips_output_section_options): New class.
+	(Target_mips::do_make_output_section): New method.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relocate_functions::rel26): Don't print relocation
+	overflow error message.
+	(Target_mips::relocate_special_relocatable): Improve relocation
+	overflow error message.
+	(Target_mips::Relocate::relocate): Likewise.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (symbol_refs_local): Return false if a symbol
+	is from a dynamic object.
+	(Target_mips::got_section): Make _GLOBAL_OFFSET_TABLE_ STV_HIDDEN.
+	(Target_mips::set_gp): Refactor.  Make _gp STT_NOTYPE and
+	STB_LOCAL.
+	(Target_mips::do_finalize_sections): Set _gp after all the checks
+	for creating .got are done.
+	(Target_mips::Scan::global): Remove unused code.
+
 2017-02-22  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::make_iplt_section): Check that

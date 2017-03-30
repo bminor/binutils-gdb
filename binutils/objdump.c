@@ -117,6 +117,7 @@ static bfd_boolean display_file_offsets;/* -F */
 static const char *prefix;		/* --prefix */
 static int prefix_strip;		/* --prefix-strip */
 static size_t prefix_length;
+static bfd_boolean unwind_inlines;	/* --inlines.  */
 
 /* A structure to record the sections mentioned in -j switches.  */
 struct only
@@ -257,6 +258,7 @@ usage (FILE *stream, int status)
       --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
       --special-syms             Include special symbols in symbol dumps\n\
+      --inlines                  Print all inlines for source line (with -l)\n\
       --prefix=PREFIX            Add PREFIX to absolute paths for -S\n\
       --prefix-strip=LEVEL       Strip initial directory names for -S\n"));
       fprintf (stream, _("\
@@ -296,7 +298,8 @@ enum option_values
     OPTION_ADJUST_VMA,
     OPTION_DWARF_DEPTH,
     OPTION_DWARF_CHECK,
-    OPTION_DWARF_START
+    OPTION_DWARF_START,
+    OPTION_INLINES
   };
 
 static struct option long_options[]=
@@ -348,6 +351,7 @@ static struct option long_options[]=
   {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
+  {"inlines",          no_argument, 0, OPTION_INLINES},
   {0, no_argument, 0, 0}
 };
 
@@ -1263,24 +1267,23 @@ static struct print_file_list *print_files;
 /* Read a complete file into memory.  */
 
 static const char *
-slurp_file (const char *fn, size_t *size)
+slurp_file (const char *fn, size_t *size, struct stat *fst)
 {
 #ifdef HAVE_MMAP
   int ps = getpagesize ();
   size_t msize;
 #endif
   const char *map;
-  struct stat st;
   int fd = open (fn, O_RDONLY | O_BINARY);
 
   if (fd < 0)
     return NULL;
-  if (fstat (fd, &st) < 0)
+  if (fstat (fd, fst) < 0)
     {
       close (fd);
       return NULL;
     }
-  *size = st.st_size;
+  *size = fst->st_size;
 #ifdef HAVE_MMAP
   msize = (*size + ps - 1) & ~(ps - 1);
   map = mmap (NULL, msize, PROT_READ, MAP_SHARED, fd, 0);
@@ -1360,13 +1363,13 @@ index_file (const char *map, size_t size, unsigned int *maxline)
    linked list and returns that node.  Returns NULL on failure.  */
 
 static struct print_file_list *
-try_print_file_open (const char *origname, const char *modname)
+try_print_file_open (const char *origname, const char *modname, struct stat *fst)
 {
   struct print_file_list *p;
 
   p = (struct print_file_list *) xmalloc (sizeof (struct print_file_list));
 
-  p->map = slurp_file (modname, &p->mapsize);
+  p->map = slurp_file (modname, &p->mapsize, fst);
   if (p->map == NULL)
     {
       free (p);
@@ -1389,36 +1392,47 @@ try_print_file_open (const char *origname, const char *modname)
    If found, add location to print_files linked list.  */
 
 static struct print_file_list *
-update_source_path (const char *filename)
+update_source_path (const char *filename, bfd *abfd)
 {
   struct print_file_list *p;
   const char *fname;
+  struct stat fst;
   int i;
 
-  p = try_print_file_open (filename, filename);
-  if (p != NULL)
-    return p;
-
-  if (include_path_count == 0)
-    return NULL;
-
-  /* Get the name of the file.  */
-  fname = lbasename (filename);
-
-  /* If file exists under a new path, we need to add it to the list
-     so that show_line knows about it.  */
-  for (i = 0; i < include_path_count; i++)
+  p = try_print_file_open (filename, filename, &fst);
+  if (p == NULL)
     {
-      char *modname = concat (include_paths[i], "/", fname, (const char *) 0);
+      if (include_path_count == 0)
+	return NULL;
 
-      p = try_print_file_open (filename, modname);
-      if (p)
-	return p;
+      /* Get the name of the file.  */
+      fname = lbasename (filename);
 
-      free (modname);
+      /* If file exists under a new path, we need to add it to the list
+	 so that show_line knows about it.  */
+      for (i = 0; i < include_path_count; i++)
+	{
+	  char *modname = concat (include_paths[i], "/", fname,
+				  (const char *) 0);
+
+	  p = try_print_file_open (filename, modname, &fst);
+	  if (p)
+	    break;
+
+	  free (modname);
+	}
     }
 
-  return NULL;
+  if (p != NULL)
+    {
+      long mtime = bfd_get_mtime (abfd);
+
+      if (fst.st_mtime > mtime)
+	warn (_("source file %s is more recent than object file\n"),
+	      filename);
+    }
+
+  return p;
 }
 
 /* Print a source file line.  */
@@ -1533,6 +1547,17 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
           else
             printf ("%s:%u\n", filename == NULL ? "???" : filename, linenumber);
         }
+      if (unwind_inlines)
+	{
+	  const char *filename2;
+	  const char *functionname2;
+	  unsigned line2;
+
+	  while (bfd_find_inliner_info (abfd, &filename2, &functionname2,
+					&line2))
+	    printf ("inlined by %s:%u (%s)\n", filename2, line2,
+		    functionname2);
+	}
     }
 
   if (with_source_code
@@ -1551,7 +1576,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	{
 	  if (reloc)
 	    filename = xstrdup (filename);
-	  p = update_source_path (filename);
+	  p = update_source_path (filename, abfd);
 	}
 
       if (p != NULL && linenumber != p->last_line)
@@ -3766,7 +3791,7 @@ main (int argc, char **argv)
 	    }
 	  break;
 	case 'w':
-	  wide_output = TRUE;
+	  do_wide = wide_output = TRUE;
 	  break;
 	case OPTION_ADJUST_VMA:
 	  adjust_section_vma = parse_vma (optarg, "--adjust-vma");
@@ -3797,6 +3822,9 @@ main (int argc, char **argv)
 	  insn_width = strtoul (optarg, NULL, 0);
 	  if (insn_width <= 0)
 	    fatal (_("error: instruction width must be positive"));
+	  break;
+	case OPTION_INLINES:
+	  unwind_inlines = TRUE;
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)

@@ -2499,7 +2499,7 @@ ppc64_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 
 static void
-ppc64_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
   unsigned int type;
@@ -3188,7 +3188,7 @@ compare_symbols (const void *ap, const void *bp)
   if ((a->flags & BSF_DYNAMIC) == 0 && (b->flags & BSF_DYNAMIC) != 0)
     return 1;
 
-  return 0;
+  return a > b;
 }
 
 /* Search SYMS for a symbol of the given VALUE.  */
@@ -4105,6 +4105,11 @@ struct ppc_link_hash_table
   /* Whether func_desc_adjust needs to be run over symbols.  */
   unsigned int need_func_desc_adj:1;
 
+  /* Whether there exist local gnu indirect function resolvers,
+     referenced by dynamic relocations.  */
+  unsigned int local_ifunc_resolver:1;
+  unsigned int maybe_local_ifunc_resolver:1;
+
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
 
@@ -4278,7 +4283,7 @@ static hashval_t
 tocsave_htab_hash (const void *p)
 {
   const struct tocsave_entry *e = (const struct tocsave_entry *) p;
-  return ((bfd_vma)(intptr_t) e->sec ^ e->offset) >> 3;
+  return ((bfd_vma) (intptr_t) e->sec ^ e->offset) >> 3;
 }
 
 static int
@@ -11164,6 +11169,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 		   * sizeof (Elf64_External_Rela)));
 	  bfd_elf64_swap_reloca_out (info->output_bfd, &rela, rl);
 	  stub_entry->plt_ent->plt.offset |= 1;
+	  htab->local_ifunc_resolver = 1;
 	}
 
       off = (dest
@@ -14485,7 +14491,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			 ? h->elf.type == STT_GNU_IFUNC
 			 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC);
 		if (ifunc)
-		  relgot = htab->elf.irelplt;
+		  {
+		    relgot = htab->elf.irelplt;
+		    if (indx == 0)
+		      htab->local_ifunc_resolver = 1;
+		    else if (is_static_defined (&h->elf))
+		      htab->maybe_local_ifunc_resolver = 1;
+		  }
 		else if (indx != 0
 			 || (bfd_link_pic (info)
 			     && (h == NULL
@@ -14815,6 +14827,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_boolean skip, relocate;
 	      asection *sreloc;
 	      bfd_vma out_off;
+	      long indx = 0;
 
 	      /* When generating a dynamic object, these relocations
 		 are copied into the output file to be resolved at run
@@ -14851,8 +14864,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		       && !is_opd
 		       && r_type != R_PPC64_TOC)
 		{
-		  BFD_ASSERT (h->elf.dynindx != -1);
-		  outrel.r_info = ELF64_R_INFO (h->elf.dynindx, r_type);
+		  indx = h->elf.dynindx;
+		  BFD_ASSERT (indx != -1);
+		  outrel.r_info = ELF64_R_INFO (indx, r_type);
 		}
 	      else
 		{
@@ -14895,8 +14909,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    }
 		  else
 		    {
-		      long indx = 0;
-
 		      if (h != NULL
 			  ? h->elf.type == STT_GNU_IFUNC
 			  : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
@@ -14951,7 +14963,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (h != NULL
 		  ? h->elf.type == STT_GNU_IFUNC
 		  : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
-		sreloc = htab->elf.irelplt;
+		{
+		  sreloc = htab->elf.irelplt;
+		  if (indx == 0)
+		    htab->local_ifunc_resolver = 1;
+		  else if (is_static_defined (&h->elf))
+		    htab->maybe_local_ifunc_resolver = 1;
+		}
 	      if (sreloc == NULL)
 		abort ();
 
@@ -15400,7 +15418,7 @@ static bfd_boolean
 ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 				 struct bfd_link_info *info,
 				 struct elf_link_hash_entry *h,
-				 Elf_Internal_Sym *sym ATTRIBUTE_UNUSED)
+				 Elf_Internal_Sym *sym)
 {
   struct ppc_link_hash_table *htab;
   struct plt_entry *ent;
@@ -15437,6 +15455,7 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 	    loc = (htab->elf.irelplt->contents
 		   + (htab->elf.irelplt->reloc_count++
 		      * sizeof (Elf64_External_Rela)));
+	    htab->local_ifunc_resolver = 1;
 	  }
 	else
 	  {
@@ -15448,6 +15467,8 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 	    loc = (htab->elf.srelplt->contents
 		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
 		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
+	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
+	      htab->maybe_local_ifunc_resolver = 1;
 	  }
 	bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
 
@@ -15613,6 +15634,17 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_PLTRELSZ:
 	      dyn.d_un.d_val = htab->elf.srelplt->size;
 	      break;
+
+	    case DT_TEXTREL:
+	      if (htab->local_ifunc_resolver)
+		info->callbacks->einfo
+		  (_("%X%P: text relocations and GNU indirect "
+		     "functions will result in a segfault at runtime\n"));
+	      else if (htab->maybe_local_ifunc_resolver)
+		info->callbacks->einfo
+		  (_("%P: warning: text relocations and GNU indirect "
+		     "functions may result in a segfault at runtime\n"));
+	      continue;
 	    }
 
 	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);

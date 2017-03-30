@@ -2372,6 +2372,8 @@ enum bfd_architecture
 #define bfd_mach_nios2r2       2
   bfd_arch_visium,     /* Visium */
 #define bfd_mach_visium        1
+  bfd_arch_wasm32,     /* WebAssembly */
+#define bfd_mach_wasm32        1
   bfd_arch_pru,        /* PRU */
 #define bfd_mach_pru   0
   bfd_arch_last
@@ -6156,13 +6158,13 @@ instructions.  */
   BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
 
 /* AArch64 TLS DESC relocation.  */
-  BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC,
+  BFD_RELOC_AARCH64_TLSDESC_LD64_LO12,
 
 /* AArch64 TLS DESC relocation.  */
   BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC,
 
 /* AArch64 TLS DESC relocation.  */
-  BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
+  BFD_RELOC_AARCH64_TLSDESC_ADD_LO12,
 
 /* AArch64 TLS DESC relocation.  */
   BFD_RELOC_AARCH64_TLSDESC_OFF_G1,
@@ -6462,6 +6464,18 @@ assembler and not (currently) written to any object files.  */
   BFD_RELOC_VISIUM_HI16_PCREL,
   BFD_RELOC_VISIUM_LO16_PCREL,
   BFD_RELOC_VISIUM_IM16_PCREL,
+
+/* WebAssembly relocations.  */
+  BFD_RELOC_WASM32_LEB128,
+  BFD_RELOC_WASM32_LEB128_GOT,
+  BFD_RELOC_WASM32_LEB128_GOT_CODE,
+  BFD_RELOC_WASM32_LEB128_PLT,
+  BFD_RELOC_WASM32_PLT_INDEX,
+  BFD_RELOC_WASM32_ABS32_CODE,
+  BFD_RELOC_WASM32_COPY,
+  BFD_RELOC_WASM32_CODE_POINTER,
+  BFD_RELOC_WASM32_INDEX,
+  BFD_RELOC_WASM32_PLT_SIG,
   BFD_RELOC_UNUSED };
 
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

@@ -291,7 +291,7 @@ s390_parse_cpu (const char *         arg,
     { STRING_COMMA_LEN ("z13"), STRING_COMMA_LEN ("arch11"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
     { STRING_COMMA_LEN ("arch12"), STRING_COMMA_LEN (""),
-      S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX | S390_INSTR_FLAG_VX2 }
+      S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
   };
   static struct
   {
@@ -303,9 +303,7 @@ s390_parse_cpu (const char *         arg,
     { "htm",   S390_INSTR_FLAG_HTM, TRUE },
     { "nohtm", S390_INSTR_FLAG_HTM, FALSE },
     { "vx",    S390_INSTR_FLAG_VX, TRUE },
-    { "novx",  S390_INSTR_FLAG_VX, FALSE },
-    { "vx2",    S390_INSTR_FLAG_VX2, TRUE },
-    { "novx2",  S390_INSTR_FLAG_VX2, FALSE }
+    { "novx",  S390_INSTR_FLAG_VX, FALSE }
   };
   unsigned int icpu;
   char *ilp_bak;

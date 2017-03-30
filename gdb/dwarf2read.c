@@ -1054,7 +1054,12 @@ typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 
 struct file_entry
 {
+  /* Return the include directory at DIR_INDEX stored in LH.  Returns
+     NULL if DIR_INDEX is out of bounds.  */
+  const char *include_dir (const line_header *lh) const;
+
   const char *name;
+  /* The directory index (1-based).  */
   unsigned int dir_index;
   unsigned int mod_time;
   unsigned int length;
@@ -1069,6 +1074,24 @@ struct file_entry
    which contains the following information.  */
 struct line_header
 {
+  /* Return the include dir at INDEX (0-based).  Returns NULL if INDEX
+     is out of bounds.  */
+  const char *include_dir_at (unsigned int index) const
+  {
+    if (include_dirs == NULL || index >= num_include_dirs)
+      return NULL;
+    return include_dirs[index];
+  }
+
+  /* Return the file name at INDEX (0-based).  Returns NULL if INDEX
+     is out of bounds.  */
+  file_entry *file_name_at (unsigned int index) const
+  {
+    if (file_names == NULL || index >= num_file_names)
+      return NULL;
+    return &file_names[index];
+  }
+
   /* Offset of line number information in .debug_line section.  */
   sect_offset offset;
 
@@ -1108,6 +1131,14 @@ struct line_header
      header.  These point into dwarf2_per_objfile->line_buffer.  */
   const gdb_byte *statement_program_start, *statement_program_end;
 };
+
+const char *
+file_entry::include_dir (const line_header *lh) const
+{
+  /* lh->include_dirs is 0-based, but the directory index numbers in
+     the statement program are 1-based.  */
+  return lh->include_dir_at (dir_index - 1);
+}
 
 /* When we construct a partial symbol table entry we only
    need this much information.  */
@@ -1885,9 +1916,27 @@ static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
 static void process_queue (void);
 
-static void find_file_and_directory (struct die_info *die,
-				     struct dwarf2_cu *cu,
-				     const char **name, const char **comp_dir);
+/* The return type of find_file_and_directory.  Note, the enclosed
+   string pointers are only valid while this object is valid.  */
+
+struct file_and_directory
+{
+  /* The filename.  This is never NULL.  */
+  const char *name;
+
+  /* The compilation directory.  NULL if not known.  If we needed to
+     compute a new string, this points to COMP_DIR_STORAGE, otherwise,
+     points directly to the DW_AT_comp_dir string attribute owned by
+     the obstack that owns the DIE.  */
+  const char *comp_dir;
+
+  /* If we needed to build a new string for comp_dir, this is what
+     owns the storage.  */
+  std::string comp_dir_storage;
+};
+
+static file_and_directory find_file_and_directory (struct die_info *die,
+						   struct dwarf2_cu *cu);
 
 static char *file_full_name (int file, struct line_header *lh,
 			     const char *comp_dir);
@@ -2552,18 +2601,15 @@ dwarf2_get_dwz_file (void)
   buildid_len = (size_t) buildid_len_arg;
 
   filename = (const char *) data;
+
+  std::string abs_storage;
   if (!IS_ABSOLUTE_PATH (filename))
     {
       char *abs = gdb_realpath (objfile_name (dwarf2_per_objfile->objfile));
-      char *rel;
 
       make_cleanup (xfree, abs);
-      abs = ldirname (abs);
-      make_cleanup (xfree, abs);
-
-      rel = concat (abs, SLASH_STRING, filename, (char *) NULL);
-      make_cleanup (xfree, rel);
-      filename = rel;
+      abs_storage = ldirname (abs) + SLASH_STRING + filename;
+      filename = abs_storage.c_str ();
     }
 
   /* First try the file name given in the section.  If that doesn't
@@ -3332,7 +3378,6 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   struct line_header *lh;
   struct attribute *attr;
   int i;
-  const char *name, *comp_dir;
   void **slot;
   struct quick_file_names *qfn;
   unsigned int line_offset;
@@ -3385,13 +3430,13 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   gdb_assert (slot != NULL);
   *slot = qfn;
 
-  find_file_and_directory (comp_unit_die, cu, &name, &comp_dir);
+  file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
 
   qfn->num_file_names = lh->num_file_names;
   qfn->file_names =
     XOBNEWVEC (&objfile->objfile_obstack, const char *, lh->num_file_names);
   for (i = 0; i < lh->num_file_names; ++i)
-    qfn->file_names[i] = file_full_name (i + 1, lh, comp_dir);
+    qfn->file_names[i] = file_full_name (i + 1, lh, fnd.comp_dir);
   qfn->real_names = NULL;
 
   free_line_header (lh);
@@ -8388,6 +8433,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_pointer_type:
     case DW_TAG_ptr_to_member_type:
     case DW_TAG_reference_type:
+    case DW_TAG_rvalue_reference_type:
     case DW_TAG_string_type:
       break;
 
@@ -9121,37 +9167,38 @@ producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
   return cu->producer_is_gcc_lt_4_3;
 }
 
-static void
-find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
-			 const char **name, const char **comp_dir)
+static file_and_directory
+find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 {
+  file_and_directory res;
+
   /* Find the filename.  Do not use dwarf2_name here, since the filename
      is not a source language identifier.  */
-  *name = dwarf2_string_attr (die, DW_AT_name, cu);
-  *comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
+  res.name = dwarf2_string_attr (die, DW_AT_name, cu);
+  res.comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
 
-  if (*comp_dir == NULL
-      && producer_is_gcc_lt_4_3 (cu) && *name != NULL
-      && IS_ABSOLUTE_PATH (*name))
+  if (res.comp_dir == NULL
+      && producer_is_gcc_lt_4_3 (cu) && res.name != NULL
+      && IS_ABSOLUTE_PATH (res.name))
     {
-      char *d = ldirname (*name);
-
-      *comp_dir = d;
-      if (d != NULL)
-	make_cleanup (xfree, d);
+      res.comp_dir_storage = ldirname (res.name);
+      if (!res.comp_dir_storage.empty ())
+	res.comp_dir = res.comp_dir_storage.c_str ();
     }
-  if (*comp_dir != NULL)
+  if (res.comp_dir != NULL)
     {
       /* Irix 6.2 native cc prepends <machine>.: to the compilation
 	 directory, get rid of it.  */
-      const char *cp = strchr (*comp_dir, ':');
+      const char *cp = strchr (res.comp_dir, ':');
 
-      if (cp && cp != *comp_dir && cp[-1] == '.' && cp[1] == '/')
-	*comp_dir = cp + 1;
+      if (cp && cp != res.comp_dir && cp[-1] == '.' && cp[1] == '/')
+	res.comp_dir = cp + 1;
     }
 
-  if (*name == NULL)
-    *name = "<unknown>";
+  if (res.name == NULL)
+    res.name = "<unknown>";
+
+  return res;
 }
 
 /* Handle DW_AT_stmt_list for a compilation unit.
@@ -9261,12 +9308,9 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
   struct attribute *attr;
-  const char *name = NULL;
-  const char *comp_dir = NULL;
   struct die_info *child_die;
   CORE_ADDR baseaddr;
 
@@ -9280,7 +9324,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
     lowpc = highpc;
   lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
 
-  find_file_and_directory (die, cu, &name, &comp_dir);
+  file_and_directory fnd = find_file_and_directory (die, cu);
 
   prepare_one_comp_unit (cu, die, cu->language);
 
@@ -9294,12 +9338,12 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->producer && strstr (cu->producer, "GNU Go ") != NULL)
     set_cu_language (DW_LANG_Go, cu);
 
-  dwarf2_start_symtab (cu, name, comp_dir, lowpc);
+  dwarf2_start_symtab (cu, fnd.name, fnd.comp_dir, lowpc);
 
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
      for DW_AT_decl_file.  */
-  handle_DW_AT_stmt_list (die, cu, comp_dir, lowpc);
+  handle_DW_AT_stmt_list (die, cu, fnd.comp_dir, lowpc);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -9337,8 +9381,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  dwarf_decode_macros (cu, macro_offset, 0);
 	}
     }
-
-  do_cleanups (back_to);
 }
 
 /* TU version of handle_DW_AT_stmt_list for read_type_unit_scope.
@@ -9412,12 +9454,9 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 
       for (i = 0; i < lh->num_file_names; ++i)
 	{
-	  const char *dir = NULL;
-	  struct file_entry *fe = &lh->file_names[i];
+	  file_entry &fe = lh->file_names[i];
 
-	  if (fe->dir_index && lh->include_dirs != NULL)
-	    dir = lh->include_dirs[fe->dir_index - 1];
-	  dwarf2_start_subfile (fe->name, dir);
+	  dwarf2_start_subfile (fe.name, fe.include_dir (lh));
 
 	  if (current_subfile->symtab == NULL)
 	    {
@@ -9429,8 +9468,8 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 		= allocate_symtab (cust, current_subfile->name);
 	    }
 
-	  fe->symtab = current_subfile->symtab;
-	  tu_group->symtabs[i] = fe->symtab;
+	  fe.symtab = current_subfile->symtab;
+	  tu_group->symtabs[i] = fe.symtab;
 	}
     }
   else
@@ -10891,49 +10930,44 @@ open_and_init_dwp_file (void)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwp_file *dwp_file;
-  char *dwp_name;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, 0);
 
   /* Try to find first .dwp for the binary file before any symbolic links
      resolving.  */
 
   /* If the objfile is a debug file, find the name of the real binary
      file and get the name of dwp file from there.  */
+  std::string dwp_name;
   if (objfile->separate_debug_objfile_backlink != NULL)
     {
       struct objfile *backlink = objfile->separate_debug_objfile_backlink;
       const char *backlink_basename = lbasename (backlink->original_name);
-      char *debug_dirname = ldirname (objfile->original_name);
 
-      make_cleanup (xfree, debug_dirname);
-      dwp_name = xstrprintf ("%s%s%s.dwp", debug_dirname,
-			     SLASH_STRING, backlink_basename);
+      dwp_name = ldirname (objfile->original_name) + SLASH_STRING + backlink_basename;
     }
   else
-    dwp_name = xstrprintf ("%s.dwp", objfile->original_name);
-  make_cleanup (xfree, dwp_name);
+    dwp_name = objfile->original_name;
 
-  gdb_bfd_ref_ptr dbfd (open_dwp_file (dwp_name));
+  dwp_name += ".dwp";
+
+  gdb_bfd_ref_ptr dbfd (open_dwp_file (dwp_name.c_str ()));
   if (dbfd == NULL
       && strcmp (objfile->original_name, objfile_name (objfile)) != 0)
     {
       /* Try to find .dwp for the binary file after gdb_realpath resolving.  */
-      dwp_name = xstrprintf ("%s.dwp", objfile_name (objfile));
-      make_cleanup (xfree, dwp_name);
-      dbfd = open_dwp_file (dwp_name);
+      dwp_name = objfile_name (objfile);
+      dwp_name += ".dwp";
+      dbfd = open_dwp_file (dwp_name.c_str ());
     }
 
   if (dbfd == NULL)
     {
       if (dwarf_read_debug)
-	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name);
-      do_cleanups (cleanups);
+	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name.c_str ());
       return NULL;
     }
   dwp_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwp_file);
   dwp_file->name = bfd_get_filename (dbfd.get ());
   dwp_file->dbfd = dbfd.release ();
-  do_cleanups (cleanups);
 
   /* +1: section 0 is unused */
   dwp_file->num_sections = bfd_count_sections (dwp_file->dbfd) + 1;
@@ -10957,7 +10991,7 @@ open_and_init_dwp_file (void)
       error (_("Dwarf Error: DWP file CU version %s doesn't match"
 	       " TU version %s [in DWP file %s]"),
 	     pulongest (dwp_file->cus->version),
-	     pulongest (dwp_file->tus->version), dwp_name);
+	     pulongest (dwp_file->tus->version), dwp_name.c_str ());
     }
   dwp_file->version = dwp_file->cus->version;
 
@@ -14567,15 +14601,18 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
-/* Extract all information from a DW_TAG_reference_type DIE and add to
+/* Extract all information from a DW_TAG_{rvalue_,}reference_type DIE and add to
    the user defined type vector.  */
 
 static struct type *
-read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
+read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu,
+                          enum type_code refcode)
 {
   struct comp_unit_head *cu_header = &cu->header;
   struct type *type, *target_type;
   struct attribute *attr;
+
+  gdb_assert (refcode == TYPE_CODE_REF || refcode == TYPE_CODE_RVALUE_REF);
 
   target_type = die_type (die, cu);
 
@@ -14584,7 +14621,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
   if (type)
     return type;
 
-  type = lookup_reference_type (target_type);
+  type = lookup_reference_type (target_type, refcode);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {
@@ -17973,16 +18010,14 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 			   const struct partial_symtab *pst,
 			   const char *comp_dir)
 {
-  const struct file_entry fe = lh->file_names [file_index];
+  const file_entry &fe = lh->file_names[file_index];
   const char *include_name = fe.name;
   const char *include_name_to_compare = include_name;
-  const char *dir_name = NULL;
   const char *pst_filename;
   char *copied_name = NULL;
   int file_is_pst;
 
-  if (fe.dir_index && lh->include_dirs != NULL)
-    dir_name = lh->include_dirs[fe.dir_index - 1];
+  const char *dir_name = fe.include_dir (lh);
 
   if (!IS_ABSOLUTE_PATH (include_name)
       && (dir_name != NULL || comp_dir != NULL))
@@ -18047,11 +18082,22 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 
 /* State machine to track the state of the line number program.  */
 
-typedef struct
+struct lnp_state_machine
 {
+  file_entry *current_file ()
+  {
+    /* lh->file_names is 0-based, but the file name numbers in the
+       statement program are 1-based.  */
+    return the_line_header->file_name_at (file - 1);
+  }
+
+  /* The line number header.  */
+  line_header *the_line_header;
+
   /* These are part of the standard DWARF line number state machine.  */
 
   unsigned char op_index;
+  /* The line table index (1-based) of the current file.  */
   unsigned int file;
   unsigned int line;
   CORE_ADDR address;
@@ -18074,7 +18120,7 @@ typedef struct
      example, when discriminators are present.  PR 17276.  */
   unsigned int last_line;
   int line_has_non_zero_discriminator;
-} lnp_state_machine;
+};
 
 /* There's a lot of static state to pass to dwarf_record_line.
    This keeps it all together.  */
@@ -18200,10 +18246,9 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
 		   int end_sequence)
 {
   const struct line_header *lh = reader->line_header;
-  unsigned int file, line, discriminator;
+  unsigned int line, discriminator;
   int is_stmt;
 
-  file = state->file;
   line = state->line;
   is_stmt = state->is_stmt;
   discriminator = state->discriminator;
@@ -18213,19 +18258,21 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
       fprintf_unfiltered (gdb_stdlog,
 			  "Processing actual line %u: file %u,"
 			  " address %s, is_stmt %u, discrim %u\n",
-			  line, file,
+			  line, state->file,
 			  paddress (reader->gdbarch, state->address),
 			  is_stmt, discriminator);
     }
 
-  if (file == 0 || file - 1 >= lh->num_file_names)
+  file_entry *fe = state->current_file ();
+
+  if (fe == NULL)
     dwarf2_debug_line_missing_file_complaint ();
   /* For now we ignore lines not starting on an instruction boundary.
      But not when processing end_sequence for compatibility with the
      previous version of the code.  */
   else if (state->op_index == 0 || end_sequence)
     {
-      lh->file_names[file - 1].included_p = 1;
+      fe->included_p = 1;
       if (reader->record_lines_p && is_stmt)
 	{
 	  if (state->last_subfile != current_subfile || end_sequence)
@@ -18279,6 +18326,7 @@ init_lnp_state_machine (lnp_state_machine *state,
   state->address = gdbarch_adjust_dwarf2_line (reader->gdbarch, 0, 0);
   state->is_stmt = reader->line_header->default_is_stmt;
   state->discriminator = 0;
+  state->the_line_header = reader->line_header;
 }
 
 /* Check address and if invalid nop-out the rest of the lines in this
@@ -18353,19 +18401,14 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
       /* Reset the state machine at the start of each sequence.  */
       init_lnp_state_machine (&state_machine, &reader_state);
 
-      if (record_lines_p && lh->num_file_names >= state_machine.file)
+      if (record_lines_p)
 	{
-          /* Start a subfile for the current file of the state machine.  */
-	  /* lh->include_dirs and lh->file_names are 0-based, but the
-	     directory and file name numbers in the statement program
-	     are 1-based.  */
-          struct file_entry *fe = &lh->file_names[state_machine.file - 1];
-          const char *dir = NULL;
+	  /* Start a subfile for the current file of the state
+	     machine.  */
+	  const file_entry *fe = state_machine.current_file ();
 
-          if (fe->dir_index && lh->include_dirs != NULL)
-            dir = lh->include_dirs[fe->dir_index - 1];
-
-	  dwarf2_start_subfile (fe->name, dir);
+	  if (fe != NULL)
+	    dwarf2_start_subfile (fe->name, fe->include_dir (lh));
 	}
 
       /* Decode the table.  */
@@ -18510,25 +18553,19 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      break;
 	    case DW_LNS_set_file:
 	      {
-		/* The arrays lh->include_dirs and lh->file_names are
-		   0-based, but the directory and file name numbers in
-		   the statement program are 1-based.  */
-		struct file_entry *fe;
-		const char *dir = NULL;
-
 		state_machine.file = read_unsigned_leb128 (abfd, line_ptr,
 							   &bytes_read);
 		line_ptr += bytes_read;
-		if (state_machine.file == 0
-		    || state_machine.file - 1 >= lh->num_file_names)
+
+		const file_entry *fe = state_machine.current_file ();
+		if (fe == NULL)
 		  dwarf2_debug_line_missing_file_complaint ();
 		else
 		  {
-		    fe = &lh->file_names[state_machine.file - 1];
-		    if (fe->dir_index && lh->include_dirs != NULL)
-		      dir = lh->include_dirs[fe->dir_index - 1];
 		    if (record_lines_p)
 		      {
+			const char *dir = fe->include_dir (lh);
+
 			state_machine.last_subfile = current_subfile;
 			state_machine.line_has_non_zero_discriminator
 			  = state_machine.discriminator != 0;
@@ -18663,20 +18700,16 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 
       for (i = 0; i < lh->num_file_names; i++)
 	{
-	  const char *dir = NULL;
-	  struct file_entry *fe;
+	  file_entry &fe = lh->file_names[i];
 
-	  fe = &lh->file_names[i];
-	  if (fe->dir_index && lh->include_dirs != NULL)
-	    dir = lh->include_dirs[fe->dir_index - 1];
-	  dwarf2_start_subfile (fe->name, dir);
+	  dwarf2_start_subfile (fe.name, fe.include_dir (lh));
 
 	  if (current_subfile->symtab == NULL)
 	    {
 	      current_subfile->symtab
 		= allocate_symtab (cust, current_subfile->name);
 	    }
-	  fe->symtab = current_subfile->symtab;
+	  fe.symtab = current_subfile->symtab;
 	}
     }
 }
@@ -18885,19 +18918,19 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			  cu);
       if (attr)
 	{
-	  int file_index = DW_UNSND (attr);
+	  unsigned int file_index = DW_UNSND (attr);
+	  struct file_entry *fe;
 
-	  if (cu->line_header == NULL
-	      || file_index > cu->line_header->num_file_names)
+	  if (cu->line_header != NULL && file_index > 0)
+	    fe = cu->line_header->file_name_at (file_index - 1);
+	  else
+	    fe = NULL;
+
+	  if (fe == NULL)
 	    complaint (&symfile_complaints,
 		       _("file index out of range"));
-	  else if (file_index > 0)
-	    {
-	      struct file_entry *fe;
-
-	      fe = &cu->line_header->file_names[file_index - 1];
-	      symbol_set_symtab (sym, fe->symtab);
-	    }
+	  else
+	    symbol_set_symtab (sym, fe->symtab);
 	}
 
       switch (die->tag)
@@ -19620,7 +19653,10 @@ read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
       this_type = read_tag_ptr_to_member_type (die, cu);
       break;
     case DW_TAG_reference_type:
-      this_type = read_tag_reference_type (die, cu);
+      this_type = read_tag_reference_type (die, cu, TYPE_CODE_REF);
+      break;
+    case DW_TAG_rvalue_reference_type:
+      this_type = read_tag_reference_type (die, cu, TYPE_CODE_RVALUE_REF);
       break;
     case DW_TAG_const_type:
       this_type = read_tag_const_type (die, cu);
@@ -20775,6 +20811,31 @@ dwarf2_fetch_constant_bytes (sect_offset offset,
   return result;
 }
 
+/* Return the type of the die at OFFSET in PER_CU.  Return NULL if no
+   valid type for this die is found.  */
+
+struct type *
+dwarf2_fetch_die_type_sect_off (sect_offset offset,
+				struct dwarf2_per_cu_data *per_cu)
+{
+  struct dwarf2_cu *cu;
+  struct die_info *die;
+
+  dw2_setup (per_cu->objfile);
+
+  if (per_cu->cu == NULL)
+    load_cu (per_cu);
+  cu = per_cu->cu;
+  if (!cu)
+    return NULL;
+
+  die = follow_die_offset (offset, per_cu->is_dwz, &cu);
+  if (!die)
+    return NULL;
+
+  return die_type (die, cu);
+}
+
 /* Return the type of the DIE at DIE_OFFSET in the CU named by
    PER_CU.  */
 
@@ -21345,13 +21406,15 @@ file_file_name (int file, struct line_header *lh)
      table?  Remember that file numbers start with one, not zero.  */
   if (1 <= file && file <= lh->num_file_names)
     {
-      struct file_entry *fe = &lh->file_names[file - 1];
+      const file_entry &fe = lh->file_names[file - 1];
 
-      if (IS_ABSOLUTE_PATH (fe->name) || fe->dir_index == 0
-	  || lh->include_dirs == NULL)
-        return xstrdup (fe->name);
-      return concat (lh->include_dirs[fe->dir_index - 1], SLASH_STRING,
-		     fe->name, (char *) NULL);
+      if (!IS_ABSOLUTE_PATH (fe.name))
+	{
+	  const char *dir = fe.include_dir (lh);
+	  if (dir != NULL)
+	    return concat (dir, SLASH_STRING, fe.name, (char *) NULL);
+	}
+      return xstrdup (fe.name);
     }
   else
     {

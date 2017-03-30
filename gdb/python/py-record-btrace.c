@@ -330,7 +330,12 @@ btpy_insn_data (PyObject *self, void *closure)
   if (object == NULL)
     return NULL;
 
+#ifdef IS_PY3K
   return PyMemoryView_FromObject (object);
+#else
+  return PyBuffer_FromObject (object, 0, Py_END_OF_BUFFER);
+#endif
+
 }
 
 /* Implementation of BtraceInstruction.decode [str].  Returns

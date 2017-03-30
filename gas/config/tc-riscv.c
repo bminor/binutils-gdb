@@ -506,6 +506,7 @@ validate_riscv_insn (const struct riscv_opcode *opc)
 	  case 'c': break; /* RS1, constrained to equal sp */
 	  case 'i': used_bits |= ENCODE_RVC_SIMM3(-1U); break;
 	  case 'j': used_bits |= ENCODE_RVC_IMM (-1U); break;
+	  case 'o': used_bits |= ENCODE_RVC_IMM (-1U); break;
 	  case 'k': used_bits |= ENCODE_RVC_LW_IMM (-1U); break;
 	  case 'l': used_bits |= ENCODE_RVC_LD_IMM (-1U); break;
 	  case 'm': used_bits |= ENCODE_RVC_LWSP_IMM (-1U); break;
@@ -1327,6 +1328,13 @@ rvc_imm_done:
 		  ip->insn_opcode |=
 		    ENCODE_RVC_LDSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
+		case 'o':
+		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
+		      || imm_expr->X_op != O_constant
+		      || !VALID_RVC_IMM (imm_expr->X_add_number))
+		    break;
+		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
+		  goto rvc_imm_done;
 		case 'K':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
@@ -1847,6 +1855,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   unsigned int subtype;
   bfd_byte *buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
   bfd_boolean relaxable = FALSE;
+  offsetT loc;
 
   /* Remember value for tc_gen_reloc.  */
   fixP->fx_addnumber = *valP;
@@ -1932,30 +1941,31 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	    case BFD_RELOC_RISCV_CFA:
 	      /* Load the byte to get the subtype.  */
-	      subtype = bfd_get_8 (NULL, &fixP->fx_frag->fr_literal[fixP->fx_where]);
+	      subtype = bfd_get_8 (NULL, &((fragS *) (fixP->fx_frag->fr_opcode))->fr_literal[fixP->fx_where]);
+	      loc = fixP->fx_frag->fr_fix - (subtype & 7);
 	      switch (subtype)
 		{
 		case DW_CFA_advance_loc1:
-		  fixP->fx_where++;
-		  fixP->fx_next->fx_where++;
+		  fixP->fx_where = loc + 1;
+		  fixP->fx_next->fx_where = loc + 1;
 		  fixP->fx_r_type = BFD_RELOC_RISCV_SET8;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB8;
 		  break;
 
 		case DW_CFA_advance_loc2:
 		  fixP->fx_size = 2;
-		  fixP->fx_where++;
 		  fixP->fx_next->fx_size = 2;
-		  fixP->fx_next->fx_where++;
+		  fixP->fx_where = loc + 1;
+		  fixP->fx_next->fx_where = loc + 1;
 		  fixP->fx_r_type = BFD_RELOC_RISCV_SET16;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB16;
 		  break;
 
 		case DW_CFA_advance_loc4:
 		  fixP->fx_size = 4;
-		  fixP->fx_where++;
 		  fixP->fx_next->fx_size = 4;
-		  fixP->fx_next->fx_where++;
+		  fixP->fx_where = loc;
+		  fixP->fx_next->fx_where = loc;
 		  fixP->fx_r_type = BFD_RELOC_RISCV_SET32;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB32;
 		  break;
@@ -1964,6 +1974,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		  if (subtype < 0x80 && (subtype & 0x40))
 		    {
 		      /* DW_CFA_advance_loc */
+		      fixP->fx_frag = (fragS *) fixP->fx_frag->fr_opcode;
+		      fixP->fx_next->fx_frag = fixP->fx_frag;
 		      fixP->fx_r_type = BFD_RELOC_RISCV_SET6;
 		      fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_SUB6;
 		    }
@@ -2073,13 +2085,12 @@ riscv_pre_output_hook (void)
   for (s = stdoutput->sections; s; s = s->next)
     for (frch = seg_info (s)->frchainP; frch; frch = frch->frch_next)
       {
-	const fragS *frag;
+	fragS *frag;
 
 	for (frag = frch->frch_root; frag; frag = frag->fr_next)
 	  {
 	    if (frag->fr_type == rs_cfa)
 	      {
-		fragS *loc4_frag;
 		expressionS exp;
 
 		symbolS *add_symbol = frag->fr_symbol->sy_value.X_add_symbol;
@@ -2090,8 +2101,7 @@ riscv_pre_output_hook (void)
 		exp.X_add_number = 0;
 		exp.X_op_symbol = op_symbol;
 
-		loc4_frag = (fragS *) frag->fr_opcode;
-		fix_new_exp (loc4_frag, (int) frag->fr_offset, 1, &exp, 0,
+		fix_new_exp (frag, (int) frag->fr_offset, 1, &exp, 0,
 			     BFD_RELOC_RISCV_CFA);
 	      }
 	  }
@@ -2465,15 +2475,10 @@ md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
 RISC-V options:\n\
-  -m32           assemble RV32 code\n\
-  -m64           assemble RV64 code (default)\n\
   -fpic          generate position-independent code\n\
   -fno-pic       don't generate position-independent code (default)\n\
-  -msoft-float   don't use F registers for floating-point values\n\
-  -mhard-float   use F registers for floating-point values (default)\n\
-  -mno-rvc       disable the C extension for compressed instructions (default)\n\
-  -mrvc          enable the C extension for compressed instructions\n\
-  -march=ISA     set the RISC-V architecture, RV64IMAFD by default\n\
+  -march=ISA     set the RISC-V architecture\n\
+  -mabi=ABI      set the RISC-V ABI\n\
 "));
 }
 

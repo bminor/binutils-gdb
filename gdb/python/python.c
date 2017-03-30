@@ -1550,7 +1550,7 @@ do_start_initialization ()
      /foo/bin/python
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
-  progname = concat (ldirname (python_libdir), SLASH_STRING, "bin",
+  progname = concat (ldirname (python_libdir).c_str (), SLASH_STRING, "bin",
 		     SLASH_STRING, "python", (char *) NULL);
 #ifdef IS_PY3K
   oldloc = xstrdup (setlocale (LC_ALL, NULL));

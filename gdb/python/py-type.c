@@ -106,6 +106,7 @@ static struct pyty_code pyty_codes[] =
   ENTRY (TYPE_CODE_METHODPTR),
   ENTRY (TYPE_CODE_MEMBERPTR),
   ENTRY (TYPE_CODE_REF),
+  ENTRY (TYPE_CODE_RVALUE_REF),
   ENTRY (TYPE_CODE_CHAR),
   ENTRY (TYPE_CODE_BOOL),
   ENTRY (TYPE_CODE_COMPLEX),
@@ -459,8 +460,7 @@ typy_get_composite (struct type *type)
 	}
       END_CATCH
 
-      if (TYPE_CODE (type) != TYPE_CODE_PTR
-	  && TYPE_CODE (type) != TYPE_CODE_REF)
+      if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	break;
       type = TYPE_TARGET_TYPE (type);
     }
@@ -626,7 +626,7 @@ typy_reference (PyObject *self, PyObject *args)
 
   TRY
     {
-      type = lookup_reference_type (type);
+      type = lookup_lvalue_reference_type (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -770,6 +770,7 @@ typy_lookup_type (struct demangle_component *demangled,
 
   if (demangled_type == DEMANGLE_COMPONENT_POINTER
       || demangled_type == DEMANGLE_COMPONENT_REFERENCE
+      || demangled_type == DEMANGLE_COMPONENT_RVALUE_REFERENCE
       || demangled_type == DEMANGLE_COMPONENT_CONST
       || demangled_type == DEMANGLE_COMPONENT_VOLATILE)
     {
@@ -786,7 +787,10 @@ typy_lookup_type (struct demangle_component *demangled,
 	  switch (demangled_type)
 	    {
 	    case DEMANGLE_COMPONENT_REFERENCE:
-	      rtype =  lookup_reference_type (type);
+	      rtype = lookup_lvalue_reference_type (type);
+	      break;
+	    case DEMANGLE_COMPONENT_RVALUE_REFERENCE:
+	      rtype = lookup_rvalue_reference_type (type);
 	      break;
 	    case DEMANGLE_COMPONENT_POINTER:
 	      rtype = lookup_pointer_type (type);
@@ -916,7 +920,7 @@ typy_template_argument (PyObject *self, PyObject *args)
   TRY
     {
       type = check_typedef (type);
-      if (TYPE_CODE (type) == TYPE_CODE_REF)
+      if (TYPE_IS_REFERENCE (type))
 	type = check_typedef (TYPE_TARGET_TYPE (type));
     }
   CATCH (except, RETURN_MASK_ALL)

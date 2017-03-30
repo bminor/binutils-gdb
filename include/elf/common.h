@@ -112,13 +112,15 @@
 #define EM_860		  7	/* Intel 80860 */
 #define EM_MIPS		  8	/* MIPS R3000 (officially, big-endian only) */
 #define EM_S370		  9	/* IBM System/370 */
-#define EM_MIPS_RS3_LE	 10	/* MIPS R3000 little-endian (Oct 4 1999 Draft) Deprecated */
+#define EM_MIPS_RS3_LE	 10	/* MIPS R3000 little-endian (Oct 4 1999 Draft).  Deprecated.  */
+#define EM_OLD_SPARCV9	 11	/* Old version of Sparc v9, from before the ABI.  Deprecated.  */
 #define EM_res011	 11	/* Reserved */
 #define EM_res012	 12	/* Reserved */
 #define EM_res013	 13	/* Reserved */
 #define EM_res014	 14	/* Reserved */
 #define EM_PARISC	 15	/* HPPA */
 #define EM_res016	 16	/* Reserved */
+#define EM_PPC_OLD	 17	/* Old version of PowerPC.  Deprecated.  */
 #define EM_VPP550	 17	/* Fujitsu VPP500 */
 #define EM_SPARC32PLUS	 18	/* Sun's "v8plus" */
 #define EM_960		 19	/* Intel 80960 */
@@ -198,10 +200,12 @@
 #define EM_OR1K		 92	/* OpenRISC 1000 32-bit embedded processor */
 #define EM_ARC_COMPACT	 93	/* ARC International ARCompact processor */
 #define EM_XTENSA	 94	/* Tensilica Xtensa Architecture */
+#define EM_SCORE_OLD	 95	/* Old Sunplus S+core7 backend magic number. Written in the absence of an ABI.  */
 #define EM_VIDEOCORE	 95	/* Alphamosaic VideoCore processor */
 #define EM_TMM_GPP	 96	/* Thompson Multimedia General Purpose Processor */
 #define EM_NS32K	 97	/* National Semiconductor 32000 series */
 #define EM_TPC		 98	/* Tenor Network TPC processor */
+#define EM_PJ_OLD	 99	/* Old value for picoJava.  Deprecated.  */
 #define EM_SNP1K	 99	/* Trebia SNP 1000 processor */
 #define EM_ST200	100	/* STMicroelectronics ST200 microcontroller */
 #define EM_IP2K		101	/* Ubicom IP2022 micro controller */
@@ -218,6 +222,7 @@
 #define EM_DXP		112	/* Icera Semiconductor Inc. Deep Execution Processor */
 #define EM_ALTERA_NIOS2	113	/* Altera Nios II soft-core processor */
 #define EM_CRX		114	/* National Semiconductor CRX */
+#define EM_CR16_OLD	115	/* Old, value for National Semiconductor CompactRISC.  Deprecated.  */
 #define EM_XGATE	115	/* Motorola XGATE embedded processor */
 #define EM_C166		116	/* Infineon C16x/XC16x processor */
 #define EM_M16C		117	/* Renesas M16C series microprocessors */
@@ -331,6 +336,8 @@
 #define EM_MOXIE        223     /* Moxie processor family */
 #define EM_AMDGPU 	224 	/* AMD GPU architecture */
 #define EM_RISCV 	243 	/* RISC-V */
+#define EM_LANAI	244	/* Lanai 32-bit processor.  */
+#define EM_BPF		247	/* Linux BPF – in-kernel virtual machine.  */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -344,19 +351,6 @@
    unofficial e_machine number should eventually ask registry@sco.com for
    an officially blessed number to be added to the list above.	*/
 
-/* Old version of Sparc v9, from before the ABI;
-   This should be removed shortly.  */
-#define EM_OLD_SPARCV9		11
-
-/* Old version of PowerPC, this should be removed shortly. */
-#define EM_PPC_OLD		17
-
-/* picoJava */
-#define EM_PJ_OLD		99
-
-/* Old, unofficial value for National Semiconductor CompactRISC - CR16 */
-#define EM_CR16_OLD		115
-
 /* AVR magic number.  Written in the absense of an ABI.  */
 #define EM_AVR_OLD		0x1057
 
@@ -368,6 +362,9 @@
 
 /* FR30 magic number - no EABI available.  */
 #define EM_CYGNUS_FR30		0x3330
+
+/* Unofficial value for Web Assembly binaries, as used by LLVM.  */
+#define EM_WEBASSEMBLY		0x4157
 
 /* DLX magic number.  Written in the absense of an ABI.  */
 #define EM_DLX			0x5aa5
@@ -426,12 +423,9 @@
 /* Old, unofficial value for Moxie.  */
 #define EM_MOXIE_OLD            0xFEED
 
-/* Old Sunplus S+core7 backend magic number. Written in the absence of an ABI.  */
-#define EM_SCORE_OLD            95
-
 #define EM_MICROBLAZE_OLD	0xbaab	/* Old MicroBlaze */
 
-#define EM_ADAPTEVA_EPIPHANY   0x1223  /* Adapteva's Epiphany architecture.  */
+#define EM_ADAPTEVA_EPIPHANY	0x1223  /* Adapteva's Epiphany architecture.  */
 
 /* Old constant that might be in use by some software. */
 #define EM_OPENRISC		EM_OR1K
@@ -688,6 +682,7 @@
 #define GNU_BUILD_ATTRIBUTE_TOOL	5
 #define GNU_BUILD_ATTRIBUTE_ABI		6
 #define GNU_BUILD_ATTRIBUTE_PIC		7
+#define GNU_BUILD_ATTRIBUTE_SHORT_ENUM	8
 
 #define NOTE_GNU_PROPERTY_SECTION_NAME	".note.gnu.property"
 #define GNU_BUILD_ATTRS_SECTION_NAME	".gnu.build.attributes"

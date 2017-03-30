@@ -30,6 +30,8 @@
 #include <string>
 #include <memory>
 
+namespace {
+
 /* A header of a ui_out_table.  */
 
 class ui_out_hdr
@@ -90,6 +92,8 @@ class ui_out_hdr
   /* Printed header text of the column.  */
   std::string m_header;
 };
+
+} // namespace
 
 /* A level of nesting (either a list or a tuple) in a ui_out output.  */
 

@@ -110,7 +110,7 @@ c_print_type (struct type *type,
 		      && !TYPE_VECTOR (type))
 		  || code == TYPE_CODE_MEMBERPTR
 		  || code == TYPE_CODE_METHODPTR
-		  || code == TYPE_CODE_REF)))
+		  || TYPE_IS_REFERENCE (type))))
 	fputs_filtered (" ", stream);
       need_post_space = (varstring != NULL && strcmp (varstring, "") != 0);
       c_type_print_varspec_prefix (type, stream, show, 0, need_post_space,
@@ -226,13 +226,21 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   language_cplus, DMGL_ANSI);
   fputs_filtered ("(", stream);
 
-  /* Skip the class variable.  */
+  /* Skip the class variable.  We keep this here to accommodate older
+     compilers and debug formats which may not support artificial
+     parameters.  */
   i = staticp ? 0 : 1;
   if (nargs > i)
     {
       while (i < nargs)
 	{
-	  c_print_type (args[i++].type, "", stream, 0, 0, flags);
+	  struct field arg = args[i++];
+
+	  /* Skip any artificial arguments.  */
+	  if (FIELD_ARTIFICIAL (arg))
+	    continue;
+
+	  c_print_type (arg.type, "", stream, 0, 0, flags);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");
@@ -339,9 +347,10 @@ c_type_print_varspec_prefix (struct type *type,
       break;
 
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
 				   stream, show, 1, 0, flags);
-      fprintf_filtered (stream, "&");
+      fprintf_filtered (stream, TYPE_CODE(type) == TYPE_CODE_REF ? "&" : "&&");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
 
@@ -408,8 +417,7 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
   /* We don't print `const' qualifiers for references --- since all
      operators affect the thing referenced, not the reference itself,
      every reference is `const'.  */
-  if (TYPE_CONST (type)
-      && TYPE_CODE (type) != TYPE_CODE_REF)
+  if (TYPE_CONST (type) && !TYPE_IS_REFERENCE (type))
     {
       if (need_pre_space)
 	fprintf_filtered (stream, " ");
@@ -720,6 +728,7 @@ c_type_print_varspec_suffix (struct type *type,
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
 				   show, 1, 0, flags);
       break;
@@ -888,6 +897,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
     case TYPE_CODE_PTR:
     case TYPE_CODE_MEMBERPTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_METHODPTR:

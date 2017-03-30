@@ -96,6 +96,7 @@ mn10300_type_align (struct type *type)
     case TYPE_CODE_FLT:
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       return TYPE_LENGTH (type);
 
     case TYPE_CODE_COMPLEX:

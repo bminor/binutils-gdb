@@ -946,9 +946,10 @@ namespace eval Dwarf {
 		    define_label $l2
 		}
 
+		DW_OP_implicit_pointer -
 		DW_OP_GNU_implicit_pointer {
 		    if {[llength $line] != 3} {
-			error "usage: DW_OP_GNU_implicit_pointer LABEL OFFSET"
+			error "usage: $opcode LABEL OFFSET"
 		    }
 
 		    # Here label is a section offset.

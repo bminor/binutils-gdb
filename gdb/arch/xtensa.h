@@ -43,4 +43,6 @@ typedef struct
 #define XTENSA_ELF_NGREG (sizeof (xtensa_elf_gregset_t) \
 			  / sizeof (xtensa_elf_greg_t))
 
+#define C0_NREGS   16	/* Number of A-registers to track in call0 ABI.  */
+
 #endif

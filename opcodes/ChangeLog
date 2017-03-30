@@ -1,3 +1,78 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* configure.ac: Add (empty) bfd_wasm32_arch target.
+	* configure: Regenerate
+	* po/opcodes.pot: Regenerate.
+
+2017-03-29  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Add support for missing SPARC ASIs from UA2005, UA2007, OSA2011, &
+	OSA2015.
+	* opcodes/sparc-opc.c (asi_table): New ASIs.
+
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Set PPC_OPCODE_PPC for "any" flags.  Add
+	"raw" option.
+	(lookup_powerpc): Don't special case -1 dialect.  Handle
+	PPC_OPCODE_RAW.
+	(print_insn_powerpc): Mask out PPC_OPCODE_ANY on first
+	lookup_powerpc call, pass it on second.
+
+2017-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR 21303
+	* ppc-dis.c (struct ppc_mopt): Comment.
+	(ppc_opts <e200z4>): Move PPC_OPCODE_VLE from .sticky to .cpu.
+
+2017-03-27  Rinat Zelig  <rinat@mellanox.com>
+
+	* arc-nps400-tbl.h: Add Ultra Ip and Miscellaneous instructions format.
+	* arc-opc.c: Add defines. e.g. F_NJ, F_NM , F_NO_T, F_NPS_SR,
+	F_NPS_M, F_NPS_CORE, F_NPS_ALL.
+	(insert_nps_misc_imm_offset): New function.
+	(extract_nps_misc imm_offset): New function.
+	(arc_num_flag_operands): Add F_NJ, F_NM, F_NO_T.
+	(arc_flag_special_cases): Add F_NJ, F_NM, F_NO_T.
+
+2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Remove vx2 check.
+	* s390-opc.txt: Remove vx2 instruction flags.
+
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* arc-nps400-tbl.h: Add cp32/cp16 instructions format.
+	* arc-opc.c: Add F_NPS_NA, NPS_DMA_IMM_ENTRY, NPS_DMA_IMM_OFFSET.
+	(insert_nps_imm_offset): New function.
+	(extract_nps_imm_offset): New function.
+	(insert_nps_imm_entry): New function.
+	(extract_nps_imm_entry): New function.
+
+2017-03-17  Alan Modra  <amodra@gmail.com>
+
+	PR 21248
+	* ppc-opc.c (powerpc_opcodes): Enable mfivor32, mfivor33,
+	mtivor32, and mtivor33 for e6500.  Move mfibatl and mfibatu after
+	those spr mnemonics they alias.  Similarly for mtibatl, mtibatu.
+
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* riscv-opc.c (riscv_opcodes> <c.li>: Use the 'o' immediate encoding.
+	<c.andi>: Likewise.
+	<c.addiw> Likewise.
+
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* riscv-opc.c (riscv_opcodes) <c.addi>: Use match_opcode.
+
+2017-03-13  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes) <srli/C>: Use match_opcode.
+	<srl> Likewise.
+	<srai> Likewise.
+	<sra> Likewise.
+
 2017-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Replace S with Load.

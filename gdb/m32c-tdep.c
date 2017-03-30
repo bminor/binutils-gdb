@@ -2011,7 +2011,7 @@ m32c_reg_arg_type (struct type *type)
   return (code == TYPE_CODE_INT
 	  || code == TYPE_CODE_ENUM
 	  || code == TYPE_CODE_PTR
-	  || code == TYPE_CODE_REF
+	  || TYPE_IS_REFERENCE (type)
 	  || code == TYPE_CODE_BOOL
 	  || code == TYPE_CODE_CHAR);
 }
@@ -2433,8 +2433,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target_code;
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR ||
-	      TYPE_CODE (type) == TYPE_CODE_REF);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
 
   target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
 
@@ -2513,8 +2512,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
   CORE_ADDR ptr;
   enum type_code target_code;
 
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR ||
-	      TYPE_CODE (type) == TYPE_CODE_REF);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
 
   ptr = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 

@@ -50,7 +50,7 @@ static void
 i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regno)
 {
-  thread_t current_thread = ptid_get_tid (inferior_ptid);
+  thread_t current_thread = ptid_get_tid (regcache_get_ptid (regcache));
   int fetched = 0;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -167,7 +167,7 @@ static void
 i386_darwin_store_inferior_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regno)
 {
-  thread_t current_thread = ptid_get_tid (inferior_ptid);
+  thread_t current_thread = ptid_get_tid (regcache_get_ptid (regcache));
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
 #ifdef BFD64

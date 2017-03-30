@@ -1,3 +1,190 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* config/tc-wasm32.h: New file: Add WebAssembly assembler target.
+	* config/tc-wasm32.c: New file: Add WebAssembly assembler target.
+	* Makefile.am: Add WebAssembly assembler target.
+	* configure.tgt: Add WebAssembly assembler target.
+	* doc/c-wasm32.texi: New file: Start documenting WebAssembly
+	assembler.
+	* doc/all.texi: Define WASM32.
+	* doc/as.texinfo: Add WebAssembly entries.
+	* NEWS: Mention the new support.
+	* Makefile.in: Regenerate.
+	* po/gas.pot: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* testsuite/gas/wasm32: New directory.
+	* testsuite/gas/wasm32/allinsn.d: New file.
+	* testsuite/gas/wasm32/allinsn.s: New file.
+	* testsuite/gas/wasm32/illegal.l: New file.
+	* testsuite/gas/wasm32/illegal.s: New file.
+	* testsuite/gas/wasm32/illegal-2.l: New file.
+	* testsuite/gas/wasm32/illegal-2.s: New file.
+	* testsuite/gas/wasm32/illegal-3.l: New file.
+	* testsuite/gas/wasm32/illegal-3.s: New file.
+	* testsuite/gas/wasm32/illegal-4.l: New file.
+	* testsuite/gas/wasm32/illegal-4.s: New file.
+	* testsuite/gas/wasm32/illegal-5.l: New file.
+	* testsuite/gas/wasm32/illegal-5.s: New file.
+	* testsuite/gas/wasm32/illegal-6.l: New file.
+	* testsuite/gas/wasm32/illegal-6.s: New file.
+	* testsuite/gas/wasm32/illegal-7.l: New file.
+	* testsuite/gas/wasm32/illegal-7.s: New file.
+	* testsuite/gas/wasm32/illegal-8.l: New file.
+	* testsuite/gas/wasm32/illegal-8.s: New file.
+	* testsuite/gas/wasm32/illegal-9.l: New file.
+	* testsuite/gas/wasm32/illegal-9.s: New file.
+	* testsuite/gas/wasm32/illegal-10.l: New file.
+	* testsuite/gas/wasm32/illegal-10.s: New file.
+	* testsuite/gas/wasm32/illegal-11.l: New file.
+	* testsuite/gas/wasm32/illegal-11.s: New file.
+	* testsuite/gas/wasm32/illegal-12.l: New file.
+	* testsuite/gas/wasm32/illegal-12.s: New file.
+	* testsuite/gas/wasm32/illegal-13.l: New file.
+	* testsuite/gas/wasm32/illegal-13.s: New file.
+	* testsuite/gas/wasm32/illegal-14.l: New file.
+	* testsuite/gas/wasm32/illegal-14.s: New file.
+	* testsuite/gas/wasm32/illegal-15.l: New file.
+	* testsuite/gas/wasm32/illegal-15.s: New file.
+	* testsuite/gas/wasm32/illegal-16.l: New file.
+	* testsuite/gas/wasm32/illegal-16.s: New file.
+	* testsuite/gas/wasm32/illegal-17.l: New file.
+	* testsuite/gas/wasm32/illegal-17.s: New file.
+	* testsuite/gas/wasm32/illegal-18.l: New file.
+	* testsuite/gas/wasm32/illegal-18.s: New file.
+	* testsuite/gas/wasm32/illegal-19.l: New file.
+	* testsuite/gas/wasm32/illegal-19.s: New file.
+	* testsuite/gas/wasm32/illegal-20.l: New file.
+	* testsuite/gas/wasm32/illegal-20.s: New file.
+	* testsuite/gas/wasm32/illegal-21.l: New file.
+	* testsuite/gas/wasm32/illegal-21.s: New file.
+	* testsuite/gas/wasm32/illegal-22.l: New file.
+	* testsuite/gas/wasm32/illegal-22.s: New file.
+	* testsuite/gas/wasm32/illegal-24.l: New file.
+	* testsuite/gas/wasm32/illegal-24.s: New file.
+	* testsuite/gas/wasm32/illegal-25.l: New file.
+	* testsuite/gas/wasm32/illegal-25.s: New file.
+	* testsuite/gas/wasm32/reloc.d: New file.
+	* testsuite/gas/wasm32/reloc.s: New file.
+	* testsuite/gas/wasm32/wasm32.exp: New tests for WebAssembly
+	architecture.
+
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_parse_option): Reject -mraw.
+
+2017-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR 21303
+	* testsuite/gas/ppc/pr21303.d,
+	* testsuite/gas/ppc/pr21303.s: New test
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2017-03-27  Rinat Zelig  <rinat@mellanox.com>
+
+	* testsuite/gas/arc/nps400-12.s: New file.
+	* testsuite/gas/arc/nps400-12.d: New file.
+
+2017-03-24  Thomas preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.: (md_begin): Set selected_cpu from *mcpu_cpu_opt when
+	CPU_DEFAULT is defined.
+
+2017-03-21  Palmer Dabbbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (md_show_usage): Remode defuct -m32, -m64,
+	-msoft-float, -mhard-float, -mno-rvc, and -mrvc options; and don't
+	print an invalid default ISA string.
+	* doc/c-riscv.texi (OPTIONS): Add -fpic and -fno-pic options.
+
+2017-03-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_relax_frag): Change fx_size of the
+	reassigned fixup to size of jump instruction (3) and fx_r_type
+	to BFD_RELOC_XTENSA_SLOT0_OP, as there's only one slot.
+	(add_jump_to_trampoline): Search
+	origfrag->tc_frag_data.slot_symbols for the slot with non-NULL
+	symbol and use that slot instead of slot 0.
+
+2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Remove S390_INSTR_FLAG_VX2
+	from cpu_table.  Remove vx2, and novx2 from cpu_flags.
+
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* testsuite/gas/arc/nps400-11.s: New file.
+	* testsuite/gas/arc/nps400-11.d: New file.
+
+2017-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (2byte): Note that if no expressions are present
+	the directive does nothing.  Emphasize that the output is
+	unaligned, and that this can have an effect on the relocations
+	generated.
+	(4byte): Simplify description.  Refer back to the 2byte
+	description.
+	(8byte): Likewise.
+
+2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Note entires that should not be
+	documented.
+	* doc/c-arm.texi (-mfpu): Add missing FPU entries for neon-vfpv3 and
+	neon-fp16.  Fix spelling error.
+
+2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Add neon-vfpv3 as an alias for neon.
+
+2017-03-16  Rinat Zelig  <rinat@mellanox.com>
+
+	* config/tc-arc.c (assemble_insn): Only handle ".t" and ".nt"
+	specially for ARCv2.
+
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* config/tc-riscv.c (validate_riscv_insn): Add 'o' RVC immediate
+	encoding format, which can accept 0-valued immediates.
+	(riscv_ip): Likewise.
+
+2017-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-riscv.c (riscv_pre_output_hook): Fix compile time
+	warning about discarding a const qualifier.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.h (HWARD2_USE_FIXED_ADVANCE_PC): New define.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix): Set fx_frag and
+	fx_next->fx_frag for CFA_advance_loc relocations.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix): Compute the correct offsets
+	for CFA relocations.
+
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* config/tc-aarch64.c (reloc_table): Rename
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC to
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12.  Rname
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC to
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+	* testsuite/gas/aarch64/tls.d: Update regexp.
+
+2017-03-10  Tobin C. Harding  <me@tobin.cc>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (2byte): Tidy up wording.  Add note that
+	overlarge values will produce a warning message and be trunacted.
+	(4byte): Likewise.
+
 2017-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (_i386_insn): Add dir_encoding and

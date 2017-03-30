@@ -127,6 +127,7 @@ enum type_pieces
     tp_end = -1, 
     tp_pointer, 
     tp_reference, 
+    tp_rvalue_reference,
     tp_array, 
     tp_function,
     tp_function_with_arguments,
@@ -245,8 +246,6 @@ extern void push_type_stack (struct type_stack *stack);
 extern void type_stack_cleanup (void *arg);
 
 extern void push_typelist (VEC (type_ptr) *typelist);
-
-extern int length_of_subexp (struct expression *, int);
 
 extern int dump_subexp (struct expression *, struct ui_file *, int);
 

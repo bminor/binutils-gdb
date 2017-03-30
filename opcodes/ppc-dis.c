@@ -46,8 +46,19 @@ struct dis_private
   (((struct dis_private *) ((INFO)->private_data))->dialect)
 
 struct ppc_mopt {
+  /* Option string, without -m or -M prefix.  */
   const char *opt;
+  /* CPU option flags.  */
   ppc_cpu_t cpu;
+  /* Flags that should stay on, even when combined with another cpu
+     option.  This should only be used for generic options like
+     "-many" or "-maltivec" where it is reasonable to add some
+     capability to another cpu selection.  The added flags are sticky
+     so that, for example, "-many -me500" and "-me500 -many" result in
+     the same assembler or disassembler behaviour.  Do not use
+     "sticky" for specific cpus, as this will prevent that cpu's flags
+     from overriding the defaults set in powerpc_init_dialect or a
+     prior -m option.  */
   ppc_cpu_t sticky;
 };
 
@@ -95,7 +106,7 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "altivec", PPC_OPCODE_PPC,
     PPC_OPCODE_ALTIVEC },
-  { "any",     0,
+  { "any",     PPC_OPCODE_PPC,
     PPC_OPCODE_ANY },
   { "booke",   PPC_OPCODE_PPC | PPC_OPCODE_BOOKE,
     0 },
@@ -109,8 +120,8 @@ struct ppc_mopt ppc_opts[] = {
   { "e200z4",  (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE| PPC_OPCODE_SPE
 		| PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI
-		| PPC_OPCODE_E500 | PPC_OPCODE_E200Z4),
-    PPC_OPCODE_VLE },
+		| PPC_OPCODE_E500 | PPC_OPCODE_VLE | PPC_OPCODE_E200Z4),
+    0 },
   { "e300",    PPC_OPCODE_PPC | PPC_OPCODE_E300,
     0 },
   { "e500",    (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_SPE
@@ -215,6 +226,8 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "pwrx",    PPC_OPCODE_POWER | PPC_OPCODE_POWER2,
     0 },
+  { "raw",     PPC_OPCODE_PPC,
+    PPC_OPCODE_RAW },
   { "spe",     PPC_OPCODE_PPC | PPC_OPCODE_EFS,
     PPC_OPCODE_SPE },
   { "titan",   (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_PMR
@@ -483,14 +496,12 @@ skip_optional_operands (const unsigned char *opindex,
   return 1;
 }
 
-/* Find a match for INSN in the opcode table, given machine DIALECT.
-   A DIALECT of -1 is special, matching all machine opcode variations.  */
+/* Find a match for INSN in the opcode table, given machine DIALECT.  */
 
 static const struct powerpc_opcode *
 lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
 {
-  const struct powerpc_opcode *opcode;
-  const struct powerpc_opcode *opcode_end;
+  const struct powerpc_opcode *opcode, *opcode_end, *last;
   unsigned long op;
 
   /* Get the major opcode of the instruction.  */
@@ -498,6 +509,7 @@ lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
 
   /* Find the first match in the opcode table for this major opcode.  */
   opcode_end = powerpc_opcodes + powerpc_opcd_indices[op + 1];
+  last = NULL;
   for (opcode = powerpc_opcodes + powerpc_opcd_indices[op];
        opcode < opcode_end;
        ++opcode)
@@ -507,7 +519,7 @@ lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
       int invalid;
 
       if ((insn & opcode->mask) != opcode->opcode
-	  || (dialect != (ppc_cpu_t) -1
+	  || ((dialect & PPC_OPCODE_ANY) == 0
 	      && ((opcode->flags & dialect) == 0
 		  || (opcode->deprecated & dialect) != 0)))
 	continue;
@@ -523,10 +535,16 @@ lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
       if (invalid)
 	continue;
 
-      return opcode;
+      if ((dialect & PPC_OPCODE_RAW) == 0)
+	return opcode;
+
+      /* The raw machine insn is one that is not a specialization.  */
+      if (last == NULL
+	  || (last->mask & ~opcode->mask) != 0)
+	last = opcode;
     }
 
-  return NULL;
+  return last;
 }
 
 /* Find a match for INSN in the VLE opcode table.  */
@@ -634,9 +652,9 @@ print_insn_powerpc (bfd_vma memaddr,
 	insn_is_short = PPC_OP_SE_VLE(opcode->mask);
     }
   if (opcode == NULL)
-    opcode = lookup_powerpc (insn, dialect);
+    opcode = lookup_powerpc (insn, dialect & ~PPC_OPCODE_ANY);
   if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
-    opcode = lookup_powerpc (insn, (ppc_cpu_t) -1);
+    opcode = lookup_powerpc (insn, dialect);
 
   if (opcode != NULL)
     {

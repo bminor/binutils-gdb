@@ -2259,6 +2259,8 @@ coff_find_nearest_line_with_names (bfd *abfd,
 				     &coff_data(abfd)->dwarf2_find_line_info))
     return TRUE;
 
+  sec_data = coff_section_data (abfd, section);
+
   /* If the DWARF lookup failed, but there is DWARF information available
      then the problem might be that the file has been rebased.  This tool
      changes the VMAs of all the sections, but it does not update the DWARF
@@ -2267,8 +2269,26 @@ coff_find_nearest_line_with_names (bfd *abfd,
     {
       bfd_signed_vma bias;
 
-      bias = _bfd_dwarf2_find_symbol_bias (symbols,
-					   & coff_data (abfd)->dwarf2_find_line_info);
+      /* Create a cache of the result for the next call.  */
+      if (sec_data == NULL && section->owner == abfd)
+	{
+	  amt = sizeof (struct coff_section_tdata);
+	  section->used_by_bfd = bfd_zalloc (abfd, amt);
+	  sec_data = (struct coff_section_tdata *) section->used_by_bfd;
+	}
+
+      if (sec_data != NULL && sec_data->saved_bias)
+	bias = sec_data->saved_bias;
+      else
+	{
+	  bias = _bfd_dwarf2_find_symbol_bias (symbols,
+					       & coff_data (abfd)->dwarf2_find_line_info);
+	  if (sec_data)
+	    {
+	      sec_data->saved_bias = TRUE;
+	      sec_data->bias = bias;
+	    }
+	}
 
       if (bias
 	  && _bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section,
@@ -2363,10 +2383,16 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	}
     }
 
-  /* Now wander though the raw linenumbers of the section.  */
-  /* If we have been called on this section before, and the offset we
-     want is further down then we can prime the lookup loop.  */
-  sec_data = coff_section_data (abfd, section);
+  if (section->lineno_count == 0)
+    {
+      *functionname_ptr = NULL;
+      *line_ptr = 0;
+      return TRUE;
+    }
+
+  /* Now wander though the raw linenumbers of the section.
+     If we have been called on this section before, and the offset
+     we want is further down then we can prime the lookup loop.  */
   if (sec_data != NULL
       && sec_data->i > 0
       && offset >= sec_data->offset)
@@ -2395,6 +2421,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	      coff_symbol_type *coff = (coff_symbol_type *) (l->u.sym);
 	      if (coff->symbol.value > offset)
 		break;
+
 	      *functionname_ptr = coff->symbol.name;
 	      last_value = coff->symbol.value;
 	      if (coff->native)
@@ -2451,6 +2478,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
       section->used_by_bfd = bfd_zalloc (abfd, amt);
       sec_data = (struct coff_section_tdata *) section->used_by_bfd;
     }
+
   if (sec_data != NULL)
     {
       sec_data->offset = offset;

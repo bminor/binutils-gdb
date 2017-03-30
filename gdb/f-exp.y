@@ -513,7 +513,7 @@ ptype	:	typebase
 			follow_type = lookup_pointer_type (follow_type);
 			break;
 		      case tp_reference:
-			follow_type = lookup_reference_type (follow_type);
+			follow_type = lookup_lvalue_reference_type (follow_type);
 			break;
 		      case tp_array:
 			array_size = pop_type_int ();

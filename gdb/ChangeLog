@@ -1,3 +1,774 @@
+2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* auto-load.c (auto_load_section_scripts): Check SEC_HAS_CONTENTS.
+
+2017-03-29  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbthread.h (struct thread_info): Declare constructor and
+	destructor.  Add some in-class member initializers.
+	* thread.c (free_thread): Remove.
+	(init_thread_list): Call delete instead of free_thread.
+	(new_thread): Call thread_info constructor.
+	(thread_info::thread_info): New function.
+	(thread_info::~thread_info): New function.
+	(delete_thread_1): Call delete instead of free_thread.
+	(make_cleanup_restore_current_thread): Move tp and frame to
+	inner block.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_frame_cache): Add support for prologue analysis.
+	(arc_skip_prologue): Likewise.
+	(arc_make_frame_cache): Likewise.
+	(arc_pv_get_operand): New function.
+	(arc_is_in_prologue): Likewise.
+	(arc_analyze_prologue): Likewise.
+	(arc_print_frame_cache): Likewise.
+	(MAX_PROLOGUE_LENGTH): New constant.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* configure.tgt: Add arc-insn.o.
+	* arc-tdep.c (arc_delayed_print_insn): Make non-static.
+	(dump_arc_instruction_command): New function.
+	(arc_fprintf_disasm): Likewise.
+	(arc_disassemble_info): Likewise.
+	(arc_insn_get_operand_value): Likewise.
+	(arc_insn_get_operand_value_signed): Likewise.
+	(arc_insn_get_memory_base_reg): Likewise.
+	(arc_insn_get_memory_offset): Likewise.
+	(arc_insn_get_branch_target): Likewise.
+	(arc_insn_dump): Likewise.
+	(arc_insn_get_linear_next_pc): Likewise.
+	* arc-tdep.h (arc_delayed_print_insn): Add function declaration.
+	(arc_disassemble_info): Likewise.
+	(arc_insn_get_branch_target): Likewise.
+	(arc_insn_get_linear_next_pc): Likewise.
+	* NEWS: Mention new "maint print arc arc-instruction".
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep (maintenance_print_arc_list): New variable.
+	(maintenance_print_arc_command): New function.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (core_v2_register_names, core_arcompact_register_names)
+	Add "limm" and "reserved".
+	(arc_cannot_fetch_register, arc_cannot_store_register): Add
+	ARC_RESERVED_REGNUM and ARC_LIMM_REGNUM.
+	* arc-tdep.h (arc_regnum): Likewise.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
+	for THREADPTR register.
+	(supply_gregset_reg): Call regcache_raw_supply for THREADPTR
+	register.
+	* xtensa-tdep.c (XTENSA_DBREGN_UREG): New definition.
+	(xtensa_derive_tdep): Initialize tdep->threadptr_regnum.
+	* xtensa-tdep.h (gdbarch_tdep::threadptr_regnum): New field.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Treat all
+	registers above gdbarch_num_regs (gdbarch) as privileged in
+	call0 ABI.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
+	for a single specified register or for all registers in
+	a0_base..a0_base + C0_NREGS range.
+	(supply_gregset_reg): Call regcache_raw_supply for a single
+	specified register or for all registers in a0_base..a0_base +
+	C0_NREGS range.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* arch/xtensa.h (C0_NREGS): Add definition.
+	* xtensa-tdep.c (C0_NREGS): Remove definition.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_scan_prologue, call0_analyze_prologue):
+	Drop xtensa_default_isa initialization.
+	(xtensa_gdbarch_init): Initialize xtensa_default_isa.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (file_entry) <dir_index>: Add comment.
+	(file_entry::include_dir): New method.
+	(line_header::include_dir_at, line_header::file_name_at): New
+	methods.
+	(setup_type_unit_groups, setup_type_unit_groups)
+	(psymtab_include_file_name): Simplify using the new methods.
+	(lnp_state_machine) <the_line_header>: New field.
+	<file>: Add comment.
+	(lnp_state_machine::current_file): New method.
+	(dwarf_record_line): Simplify using the new methods.
+	(init_lnp_state_machine): Initialize the "the_line_header" field.
+	(dwarf_decode_lines_1, dwarf_decode_lines, file_file_name):
+	Simplify using the new methods.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (make_empty): Delete.
+	(demangler_special, nested_name, ptr_operator, array_indicator)
+	(direct_declarator, declarator_1): Use fill_comp instead of
+	make_empty.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.h (gdb_xml_debug): Pass a "first-to-check" argument
+	to ATTRIBUTE_PRINTF.
+	* solib-target.c (library_list_start_list): Print "string" not
+	"version".
+	* xml-tdesc.c (tdesc_start_field): Pass "field_name" to
+	gdb_xml_error call.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct file_and_directory): New.
+	(dwarf2_get_dwz_file): Adjust to use std::string.
+	(dw2_get_file_names_reader): Adjust to use file_and_directory.
+	(find_file_and_directory): Adjust to return a file_and_directory
+	object.
+	(read_file_scope): Adjust to use file_and_directory.  Remove
+	make_cleanup/do_cleanups calls.
+	(open_and_init_dwp_file): Adjust to use std::string.  Remove
+	make_cleanup/do_cleanups calls.
+	* python/python.c (do_start_initialization): Adjust to ldirname
+	returning a std::string.
+	* utils.c (ldirname): Now returns a std::string.
+	* utils.h (ldirname): Change return type to std::string.
+	* xml-syscall.c (xml_init_syscalls_info): Adjust to ldirname
+	returning a std::string.
+	* xml-tdesc.c (file_read_description_xml): Likewise.
+
+2017-03-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache_debug_print_register): New function.
+	* regcache.h (regcache_debug_print_register): New declaration.
+	* target.c (debug_print_register): Remove.
+	(target_fetch_registers): Call regcache_debug_print_register.
+	(target_store_registers): Likewise.
+
+2017-03-24  Pádraig Brady  <pbrady@fb.com>
+
+	* dwarf2read.c (setup_type_unit_groups): Ensure dir_index doesn't
+	reference beyond the 'lh->include_dirs' array before accessing to
+	it.
+	(psymtab_include_file_name): Likewise.
+	(dwarf_decode_lines_1): Likewise.
+	(dwarf_decode_lines): Likewise.
+	(file_file_name): Likewise.
+
+2017-03-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* fbsd-tdep.c (fbsd_corefile_thread): Don't set/restore
+	inferior_ptid.
+	* proc-service.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* regcache.c (regcache_raw_update, regcache_raw_write): Likewise.
+	* sol-thread.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* target.c (target_fetch_registers, target_store_registers):
+	Remove asserts.
+
+2017-03-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* sol-thread.c (sol_thread_store_registers): Remove regcache calls.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_process_record_test): Declare.
+	(_initialize_aarch64_tdep): Register it.
+	(aarch64_record_load_store): Handle PRFM instruction.
+	(aarch64_process_record_test): New function.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_record_load_store): Fix code
+	indentation.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Remove AARCH64_RECORD_FAILURE.
+
+2017-03-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	python/python.c (do_start_initialization): Fix memory leak.
+
+2017-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Get pid from ptid
+	using get_ptrace_pid.
+	* linux-nat.c (linux_nat_xfer_partial): Don't set/restore
+	inferior_ptid.
+	(linux_proc_xfer_partial, linux_proc_xfer_spu): Use lwp of
+	inferior_ptid instead of pid.
+
+2017-03-22  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Wrap locally used classes in anonymous
+	namespace.
+	* arm-tdep.c: Likewise.
+	* linespec.c: Likewise.
+	* ui-out.c: Likewise.
+
+2017-03-22  Jonah Graham  <jonah@kichwacoders.com>
+
+	PR gdb/19637
+	* python/lib/gdb/printer/bound_registers.py: Import sys.
+
+2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* windows-nat.c (do_windows_fetch_inferior_registers): Add
+	windows_thread_info parameter and use it instead of
+	current_thread.
+	(windows_fetch_inferior_registers): Don't set current_thread,
+	pass the thread to do_windows_fetch_inferior_registers.  Use
+	ptid from regcache instead of inferior_ptid.
+	(do_windows_store_inferior_registers): Add windows_thread_info
+	parameter and use it instead of current_thread.
+	(windows_store_inferior_registers): Don't set current_thread,
+	pass the thread to do_windows_store_inferior_registers.  Use
+	ptid from regcache instead of inferior_ptid.
+
+2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ser-mingw.c (ser_windows_raw): Remove reference to
+	struct serial::current_timeout.
+
+2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20928
+	* gdb/sparc-tdep.h (gdbarch_tdep) <sparc64_ccr_type>: New field.
+	* gdb/sparc64-tdep.c (sparc64_ccr_type): New function.
+	(sparc64_fsr_type): Fix %fsr decoding.
+
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (btpy_insn_data): Change return type
+	for Python 2.
+
+2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* spu-linux-nat.c (spu_fetch_inferior_registers,
+	spu_store_inferior_registers): Use ptid from regcache, set and
+	restore inferior_ptid.
+	* spu-multiarch.c (spu_fetch_registers, spu_store_registers):
+	Likewise.
+
+2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-linux-nat.c (fetch_register, store_register,
+	i386_linux_fetch_inferior_registers,
+	i386_linux_store_inferior_registers): Use ptid from regcache.
+	* ia64-linux-nat.c (ia64_linux_fetch_register,
+	ia64_linux_store_register): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register,
+	inf_ptrace_store_register): Likewise.
+	* m32r-linux-nat.c (m32r_linux_fetch_inferior_registers,
+	m32r_linux_store_inferior_registers): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_fetch_inferior_registers,
+	m68kbsd_store_inferior_registers): Likewise.
+	* m68k-linux-nat.c (fetch_register, store_register,
+	m68k_linux_fetch_inferior_registers,
+	m68k_linux_store_inferior_registers): Likewise.
+	* m88k-bsd-nat.c (m88kbsd_fetch_inferior_registers,
+	m88kbsd_store_inferior_registers): Likewise.
+	* mips-fbsd-nat.c (mips_fbsd_fetch_inferior_registers,
+	mips_fbsd_store_inferior_registers): Likewise.
+	* mips-linux-nat.c (mips64_linux_regsets_fetch_registers,
+	mips64_linux_regsets_store_registers): Likewise.
+	* mips-nbsd-nat.c (mipsnbsd_fetch_inferior_registers,
+	mipsnbsd_store_inferior_registers): Likewise.
+	* mips-obsd-nat.c (mips64obsd_fetch_inferior_registers,
+	mips64obsd_store_inferior_registers): Likewise.
+	* nto-procfs.c (procfs_fetch_registers, procfs_store_registers):
+	Likewise.
+	* ppc-fbsd-nat.c (ppcfbsd_fetch_inferior_registers,
+	ppcfbsd_store_inferior_registers): Likewise.
+	* ppc-linux-nat.c (ppc_linux_fetch_inferior_registers,
+	ppc_linux_store_inferior_registers): Likewise.
+	* ppc-nbsd-nat.c (ppcnbsd_fetch_inferior_registers,
+	ppcnbsd_store_inferior_registers): Likewise.
+	* ppc-obsd-nat.c (ppcobsd_fetch_registers,
+	ppcobsd_store_registers): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers):
+	Likewise.
+	* ravenscar-thread.c (ravenscar_fetch_registers,
+	ravenscar_store_registers, ravenscar_prepare_to_store):
+	Likewise.
+	* record-btrace.c (record_btrace_fetch_registers,
+	record_btrace_store_registers, record_btrace_prepare_to_store):
+	Likewise.
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register):
+	Lookup inferior using ptid from regcache, instead of
+	current_inferior.
+	* remote.c (remote_fetch_registers, remote_store_registers): Use
+	ptid from regcache.
+	* rs6000-nat.c (fetch_register, store_register): Likewise.
+	* s390-linux-nat.c (s390_linux_fetch_inferior_registers,
+	s390_linux_store_inferior_registers): Likewise.
+	* sh-nbsd-nat.c (shnbsd_fetch_inferior_registers,
+	shnbsd_store_inferior_registers): Likewise.
+	* sol-thread.c (sol_thread_fetch_registers,
+	sol_thread_store_registers): Likewise.
+	* sparc-nat.c (sparc_fetch_inferior_registers,
+	sparc_store_inferior_registers): Likewise.
+	* tilegx-linux-nat.c (fetch_inferior_registers,
+	store_inferior_registers): Likewise.
+	* vax-bsd-nat.c (vaxbsd_fetch_inferior_registers,
+	vaxbsd_store_inferior_registers): Likewise.
+	* xtensa-linux-nat.c (fetch_gregs, store_gregs, fetch_xtregs,
+	store_xtregs): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* NEWS: Mention support for rvalue references in GDB and python.
+	* doc/gdb.texinfo (C Plus Plus Expressions): Mention that GDB
+	supports both lvalue and rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* gdbtypes.c (rank_one_type): Implement overloading
+	resolution rules regarding rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* aarch64-tdep.c (aarch64_type_align)
+	(aarch64_extract_return_value, aarch64_store_return_value): Change
+	lvalue reference type checks to general reference type checks.
+	* amd64-tdep.c (amd64_classify): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_passed_by_integer_register):
+	Likewise.
+	* arm-tdep.c (arm_type_align, arm_extract_return_value)
+	(arm_store_return_value): Likewise.
+	* ax-gdb.c (gen_fetch, gen_cast): Likewise.
+	* c-typeprint.c (c_print_type): Likewise.
+	* c-varobj.c (adjust_value_for_child_access, c_value_of_variable)
+	(cplus_number_of_children, cplus_describe_child): Likewise.
+	* compile/compile-c-symbols.c (generate_vla_size): Likewise.
+	* completer.c (expression_completer): Likewise.
+	* cp-support.c (make_symbol_overload_list_adl_namespace):
+	Likewise.
+	* darwin-nat-info.c (info_mach_region_command): Likewise.
+	* dwarf2loc.c (entry_data_value_coerce_ref)
+	(value_of_dwarf_reg_entry): Likewise.
+	* eval.c (ptrmath_type_p, evaluate_subexp_standard)
+	(evaluate_subexp_for_address, evaluate_subexp_for_sizeof):
+	Likewise.
+	* findvar.c (extract_typed_address, store_typed_address):
+	Likewise.
+	* gdbtypes.c (rank_one_type): Likewise.
+	* hppa-tdep.c (hppa64_integral_or_pointer_p): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* language.c (pointer_type): Likewise.
+	* m32c-tdep.c (m32c_reg_arg_type, m32c_m16c_address_to_pointer):
+	Likewise.
+	* m88k-tdep.c (m88k_integral_or_pointer_p): Likewise.
+	* mn10300-tdep.c (mn10300_type_align): Likewise.
+	* msp430-tdep.c (msp430_push_dummy_call): Likewise.
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value)
+	(ppc64_sysv_abi_push_param, ppc64_sysv_abi_return_value):
+	Likewise.
+	* printcmd.c (print_formatted, x_command): Likewise.
+	* python/py-type.c (typy_get_composite, typy_template_argument):
+	Likewise.
+	* python/py-value.c (valpy_referenced_value)
+	(valpy_get_dynamic_type, value_has_field): Likewise.
+	* s390-linux-tdep.c (s390_function_arg_integer): Likewise.
+	* sparc-tdep.c (sparc_integral_or_pointer_p): Likewise.
+	* sparc64-tdep.c (sparc64_integral_or_pointer_p): Likewise.
+	* spu-tdep.c (spu_scalar_value_p): Likewise.
+	* symtab.c (lookup_symbol_aux): Likewise.
+	* typeprint.c (whatis_exp, print_type_scalar): Likewise.
+	* valarith.c (binop_types_user_defined_p, unop_user_defined_p):
+	Likewise.
+	* valops.c (value_cast_pointers, value_cast)
+	(value_reinterpret_cast, value_dynamic_cast, value_addr, typecmp)
+	(value_struct_elt, value_struct_elt_bitpos)
+	(value_find_oload_method_list, find_overload_match)
+	(value_rtti_indirect_type): Likewise.
+	* valprint.c (val_print_scalar_type_p, generic_val_print):
+	Likewise.
+	* value.c (value_actual_type, value_as_address, unpack_long)
+	(pack_long, pack_unsigned_long, coerce_ref_if_computed)
+	(coerce_ref): Likewise.
+	* varobj.c (varobj_get_value_type): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* doc/python.texi (Types in Python): Add TYPE_CODE_RVALUE_REF to
+	table of constants.
+	* python/lib/gdb/command/explore.py: Support exploring values
+	of rvalue reference types.
+	* python/lib/gdb/types.py: Implement get_basic_type() for
+	rvalue reference types.
+	* python/py-type.c (pyty_codes) <TYPE_CODE_RVALUE_REF>: New
+	constant.
+	* python/py-value.c (valpy_getitem): Add an rvalue reference
+	check.
+	(valpy_reference_value): Add new parameter "refcode".
+	(valpy_lvalue_reference_value, valpy_rvalue_reference_value):
+	New wrappers for valpy_reference_value().
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type)
+	(gdbpy_invoke_xmethod): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* dwarf2read.c (process_die, read_type_die_1): Handle the
+	DW_TAG_rvalue_reference_type DIE.
+	(read_tag_reference_type): Add new parameter "refcode".
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* c-typeprint.c (c_print_type, c_type_print_varspec_prefix)
+	(c_type_print_modifier, c_type_print_varspec_suffix)
+	(c_type_print_base): Support printing rvalue reference types.
+	* c-valprint.c (c_val_print, c_value_print): Support printing
+	rvalue reference values.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* cp-name-parser.y (ptr_operator): Handle the '&&' token in
+	typename.
+	* cp-support.c (replace_typedefs): Handle
+	DEMANGLE_COMPONENT_RVALUE_REFERENCE.
+	* python/py-type.c (typy_lookup_type): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* c-exp.y (ptr_operator): Handle the '&&' token in the typename.
+	* parse.c (insert_type): Change assert statement.
+	(follow_types): Handle rvalue reference types.
+	* parser-defs.h (enum type_pieces) <tp_rvalue_reference>: New
+	constant.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* ada-lang.c (ada_evaluate_subexp): Adhere to the new
+	value_ref() interface.
+	* c-valprint.c (c_value_print): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* python/py-value.c (valpy_reference_value): Likewise.
+	* valops.c (value_cast, value_reinterpret_cast)
+	(value_dynamic_cast, typecmp): Likewise.
+	(value_ref): Parameterize by kind of return value reference type.
+	* value.h (value_ref): Add new parameter "refcode".
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* dwarf2read.c (read_tag_reference_type): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* f-exp.y: Likewise.
+	* gdbtypes.c (make_reference_type, lookup_reference_type):
+	Generalize with rvalue reference types.
+	(lookup_lvalue_reference_type, lookup_rvalue_reference_type): New
+	convenience wrappers for lookup_reference_type().
+	* gdbtypes.h (make_reference_type, lookup_reference_type): Add a
+	reference kind parameter.
+	(lookup_lvalue_reference_type, lookup_rvalue_reference_type): Add
+	wrappers for lookup_reference_type().
+	* guile/scm-type.c (gdbscm_type_reference): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+	* guile/scm-value.c (gdbscm_value_dynamic_type): Likewise.
+	* parse.c (follow_types): Likewise.
+	* python/py-type.c (typy_reference, typy_lookup_type): Likewise.
+	* python/py-value.c (valpy_get_dynamic_type, valpy_getitem):
+	Likewise.
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type)
+	(gdbpy_invoke_xmethod): Likewise.
+	* stabsread.c: Provide extra argument to make_reference_type()
+	call.
+	* valops.c (value_ref, value_rtti_indirect_type): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* gdbtypes.h (enum type_code) <TYPE_CODE_RVALUE_REF>: New constant.
+	(TYPE_IS_REFERENCE): New macro.
+	(struct type): Add rvalue_reference_type field.
+	(TYPE_RVALUE_REFERENCE_TYPE): New macro.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* NEWS: Add an entry about new '-file-list-shared-libraries' command.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries):
+	New function definition.
+	* mi/mi-cmds.c (mi_cmds): Add -file-list-shared-libraries command.
+	* mi/mi-cmds.h (mi_cmd_file_list_shared_libraries):
+	New function declaration.
+	* mi/mi-interp.c (mi_output_solib_attribs): New Function.
+	* mi/mi-interp.h: New file.
+	* solib.c (info_sharedlibrary_command): Replace for loop with
+	ALL_SO_LIBS macro
+	* solib.h (update_solib_list): New function declaration.
+	(so_list_head): Move macro.
+	* solist.h (ALL_SO_LIBS): New macro.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* infcmd.c (post_create_inferior): Remove unused argument in
+	call to solib_add.
+	* remote.c (remote_start_remote): Likewise.
+	* solib-frv.c (frv_fetch_objfile_link_map): Likewise.
+	* solib-svr4.c: (svr4_fetch_objfile_link_map): Likewise.
+	(enable_break): Likewise.
+	* solib.c (update_solib_list): Remove unused target argument
+	and its documentation.
+	(solib_add): Remove unused target argument.  Remove unused
+	argument in call to update_solib_list.
+	(info_sharedlibrary_command): Remove unused argument in call
+	to update_solib_list.
+	(sharedlibrary_command): Remove unused argument in call to
+	solib_add.
+	(handle_solib_event): Likewise.
+	(reload_shared_libraries): Likewise.
+	* solib.h (solib_add): Remove unused target argument.
+
+2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (is_rsi, is_rie): Remove functions.
+	(s390_displaced_step_fixup): Cover relative branches with the
+	default fixup handling.  This fixes lack of support for some
+	relative branch instructions.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Use
+	ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers,
+	i386_darwin_store_inferior_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-bsd-nat.c (i386bsd_fetch_inferior_registers,
+	i386bsd_store_inferior_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hppa-obsd-nat.c (hppaobsd_fetch_registers,
+	hppaobsd_store_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hppa-nbsd-nat.c (hppanbsd_fetch_registers,
+	hppanbsd_store_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hppa-linux-nat.c (fetch_register, store_register): Use ptid
+	from regcache.  Use get_ptrace_pid.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* corelow.c (get_core_register_section): Use ptid from regcache,
+	update doc.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* bsd-uthread.c (bsd_uthread_fetch_registers,
+	bsd_uthread_store_registers): Use ptid from regcache, set and
+	restore inferior_ptid.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-nbsd-nat.c (fetch_register, fetch_regs, fetch_fp_register,
+	fetch_fp_regs, store_register, store_regs, store_fp_register,
+	store_fp_regs): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-linux-nat.c (fetch_fpregs, store_fpregs, fetch_regs,
+	store_regs, fetch_wmmx_regs, store_wmmx_regs, fetch_vfp_regs,
+	store_vfp_regs): Use ptid from regcache.
+
+2017-03-17  Pedro Alves  <palves@redhat.com>
+
+	PR remote/21188
+	* ser-base.c (ser_base_wait_for): Add comment.
+	(do_ser_base_readchar): Improve comment based on the ser-unix.c's
+	version.
+	* ser-unix.c (hardwire_raw): Remove reference to
+	scb->current_timeout.
+	(wait_for, do_hardwire_readchar, hardwire_readchar): Delete.
+	(hardwire_ops): Install ser_base_readchar instead of
+	hardwire_readchar.
+	* serial.h (struct serial) <current_timeout, timeout_remaining>:
+	Remove fields.
+
+2017-03-17  Jonah Graham  <jonah@kichwacoders.com>
+
+	PR gdb/19637
+	* python/lib/gdb/printer/bound_registers.py: Add support for
+	Python 3.
+
+2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (indirect_synthetic_pointer): Get data type of
+	pointed-to DIE and pass it to dwarf2_evaluate_loc_desc_full.
+	(dwarf2_evaluate_loc_desc_full): New parameter subobj_type; rename
+	byte_offset to subobj_byte_offset.  Fix the handling of
+	DWARF_VALUE_STACK on big-endian targets when coming via an
+	implicit pointer.
+	(dwarf2_evaluate_loc_desc): Adjust call to
+	dwarf2_evaluate_loc_desc_full.
+	* dwarf2loc.h (dwarf2_fetch_die_type_sect_off): New declaration.
+	* dwarf2read.c (dwarf2_fetch_die_type_sect_off): New function.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_record_misc): Decode CBNZ, CBZ, REV16,
+	and REVSH instructions.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c [GDB_SELF_TEST]: include "selftests.h".
+	(arm_record_test): Declare.
+	(_initialize_arm_tdep) [GDB_SELF_TEST]: call register_self_test.
+	(thumb_record_ld_st_reg_offset): Rewrite the opcode matching to
+	align with the manual.
+	(thumb_record_misc): Adjust the code order to align with the
+	manual.
+	(thumb2_record_decode_insn_handler): Fix instruction matching.
+	(instruction_reader_thumb): New class.
+	(arm_record_test): New function.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (abstract_memory_reader): New class.
+	(instruction_reader): New class.
+	(extract_arm_insn): Add argument 'reader'.  Callers updated.
+	(decode_insn): Likewise.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile/scm-lazy-string.c (lazy_string_smob): Clarify use of LENGTH
+	member.  Change type of TYPE member to SCM.  All uses updated.
+	(lsscm_make_lazy_string_smob): Add assert.
+	(lsscm_make_lazy_string): Flag bad length values.
+	(lsscm_elt_type): New function.
+	(gdbscm_lazy_string_to_value): Rewrite to use
+	lsscm_safe_lazy_string_to_value.
+	(lsscm_safe_lazy_string_to_value): Fix handling of TYPE_CODE_PTR.
+	* guile/scm-value.c (gdbscm_value_to_lazy_string): Flag bad length
+	values.  Fix TYPE_CODE_PTR.  Handle TYPE_CODE_ARRAY.  Handle typedefs
+	in incoming type.
+	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
+	* guile/scm-type.c (tyscm_scm_to_type): New function.
+
+2017-03-15  Doug Evans  <dje@google.com>
+
+	PR python/17728, python/18439, python/18779
+	* python/py-lazy-string.c (lazy_string_object): Clarify use of LENGTH
+	member.  Change type of TYPE member to PyObject *.  All uses updated.
+	(stpy_convert_to_value): Fix handling of TYPE_CODE_PTR.
+	(gdbpy_create_lazy_string_object): Flag bad length values.
+	Handle TYPE_CODE_ARRAY with possibly different user-provided length.
+	Handle typedefs in incoming type.
+	(stpy_lazy_string_elt_type): New function.
+	(gdbpy_extract_lazy_string): Call it.
+	* python/py-value.c (valpy_lazy_string): Flag bad length values.
+	Fix handling of TYPE_CODE_PTR.  Handle TYPE_CODE_ARRAY.  Handle
+	typedefs in incoming type.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
+	* guile/scm-type.c (tyscm_scm_to_type): New function.
+
+2017-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* inf-ptrace.c (inf_ptrace_peek_poke): Change the type to
+	"ULONGEST" for "skip".
+
+2017-03-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21220
+	* inf-ptrace.c (inf_ptrace_xfer_partial): In "case
+	TARGET_OBJECT_MEMORY", extract the logic for ptrace peek/poke...
+	(inf_ptrace_peek_poke): ...here.  New function.  Now also loop
+	over ptrace peek/poke until end of buffer or error.
+
+2017-03-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* parse.c (length_of_subexp): Make static.
+	* parser-defs.h (length_of_subexp): Remove.
+
+2017-03-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-nat.c (linux_proc_xfer_partial): Handle write operations
+	as well.
+
+2017-03-14  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_demangled_name_to_comp): Update comment.
+	(main): Use std::unique_ptr.  Remove calls to
+	cp_demangled_name_parse_free.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* alpha-bsd-nat.c (alphabsd_fetch_inferior_registers,
+	alphabsd_store_inferior_registers): Use regcache->ptid instead
+	of inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aix-thread.c (aix_thread_fetch_registers,
+	aix_thread_store_registers): Use regcache->ptid instead of
+	inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aarch64-linux-nat.c (fetch_gregs_from_thread,
+	store_gregs_to_thread, fetch_fpregs_from_thread,
+	store_fpregs_to_thread): Use regcache->ptid instead of
+	inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers,
+	amd64_linux_fetch_inferior_registers): Use regcache->ptid
+	instead of inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target.c (target_fetch_registers, target_store_registers): Add
+	assert.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.h (regcache_get_ptid): New function.
+	* regcache.c (regcache_get_ptid): New function.
+
+2017-03-13  Mark Wielaard  <mark@klomp.org>
+
+	* cp-name-parser.y (make_empty): Initialize d_printing to zero.
+
+2017-03-10  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/8218
+	* c-typeprint.c (cp_type_print_method_args): Skip artificial arguments.
+
 2017-03-08  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/18360

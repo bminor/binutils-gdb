@@ -409,8 +409,7 @@ language_info (int quietly)
 int
 pointer_type (struct type *type)
 {
-  return TYPE_CODE (type) == TYPE_CODE_PTR ||
-    TYPE_CODE (type) == TYPE_CODE_REF;
+  return TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
 }
 
 

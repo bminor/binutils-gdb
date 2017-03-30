@@ -161,6 +161,7 @@ m88k_integral_or_pointer_p (const struct type *type)
       return 1;
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       {
 	/* Allow only 32-bit pointers.  */
 	return (TYPE_LENGTH (type) == 4);
