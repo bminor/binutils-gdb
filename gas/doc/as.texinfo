@@ -7728,8 +7728,11 @@ subject, see the hardware manufacturer's manual.
 @ifset VISIUM
 * Visium-Dependent::            Visium Dependent Features
 @end ifset
+@ifset WASM32
+* WebAssembly-Dependent::       WebAssembly Dependent Features
+@end ifset
 @ifset XGATE
-* XGATE-Dependent::             XGATE Features
+* XGATE-Dependent::             XGATE Dependent Features
 @end ifset
 @ifset XSTORMY16
 * XSTORMY16-Dependent::         XStormy16 Dependent Features
@@ -7973,6 +7976,10 @@ family.
 
 @ifset VISIUM
 @include c-visium.texi
+@end ifset
+
+@ifset WASM32
+@include c-wasm32.texi
 @end ifset
 
 @ifset XGATE

@@ -1,3 +1,9 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* configure.ac: Add (empty) bfd_wasm32_arch target.
+	* configure: Regenerate
+	* po/opcodes.pot: Regenerate.
+
 2017-03-29  Sheldon Lobo  <sheldon.lobo@oracle.com>
 
 	Add support for missing SPARC ASIs from UA2005, UA2007, OSA2011, &

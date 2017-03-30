@@ -23,7 +23,107 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "bfd_stdint.h"
+#include "libiberty.h"
 #include "elf/wasm32.h"
+
+static reloc_howto_type elf32_wasm32_howto_table[] =
+{
+  HOWTO (R_WASM32_NONE,		/* type */
+         0,			/* rightshift */
+         3,			/* size (0 = byte, 1 = short, 2 = long) */
+         0,			/* bitsize */
+         FALSE,			/* pc_relative */
+         0,			/* bitpos */
+         complain_overflow_dont,/* complain_on_overflow */
+         bfd_elf_generic_reloc,	/* special_function */
+         "R_WASM32_NONE",	/* name */
+         FALSE,			/* partial_inplace */
+         0,			/* src_mask */
+         0,			/* dst_mask */
+         FALSE),		/* pcrel_offset */
+
+  /* 32 bit absolute */
+  HOWTO (R_WASM32_32,		/* type */
+         0,			/* rightshift */
+         2,			/* size (0 = byte, 1 = short, 2 = long) */
+         32,			/* bitsize */
+         FALSE,			/* pc_relative */
+         0,			/* bitpos */
+         complain_overflow_bitfield,/* complain_on_overflow */
+         bfd_elf_generic_reloc,	/* special_function */
+         "R_WASM32_32",	/* name */
+         FALSE,			/* partial_inplace */
+         0xffffffff,		/* src_mask */
+         0xffffffff,		/* dst_mask */
+         FALSE),		/* pcrel_offset */
+};
+
+/* Look up the relocation CODE.  */
+
+static reloc_howto_type *
+elf32_wasm32_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+                                bfd_reloc_code_real_type code)
+{
+  switch (code)
+    {
+    case BFD_RELOC_NONE:
+      return &elf32_wasm32_howto_table[R_WASM32_NONE];
+    case BFD_RELOC_32:
+      return &elf32_wasm32_howto_table[R_WASM32_32];
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+/* Look up the relocation R_NAME.  */
+
+static reloc_howto_type *
+elf32_wasm32_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+                                const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (elf32_wasm32_howto_table); i++)
+    if (elf32_wasm32_howto_table[i].name != NULL
+        && strcasecmp (elf32_wasm32_howto_table[i].name, r_name) == 0)
+      return &elf32_wasm32_howto_table[i];
+
+  return NULL;
+}
+
+/* Look up the relocation R_TYPE.  */
+
+static reloc_howto_type *
+elf32_wasm32_rtype_to_howto (bfd *abfd, unsigned r_type)
+{
+  unsigned int i = r_type;
+
+  if (i >= ARRAY_SIZE (elf32_wasm32_howto_table))
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%B: invalid relocation type %d"),
+			  abfd, (int) r_type);
+      i = R_WASM32_NONE;
+    }
+
+  if (elf32_wasm32_howto_table[i].type != r_type)
+    return NULL;
+
+  return &elf32_wasm32_howto_table[i];
+}
+
+/* Translate the ELF-internal relocation RELA into CACHE_PTR.  */
+
+static void
+elf32_wasm32_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+                                arelent *cache_ptr,
+                                Elf_Internal_Rela *dst)
+{
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+  cache_ptr->howto = elf32_wasm32_rtype_to_howto (abfd, r_type);
+}
 
 #define ELF_ARCH		bfd_arch_wasm32
 #define ELF_TARGET_ID		EM_WEBASSEMBLY
@@ -40,8 +140,11 @@
 /* For testing. */
 #define elf_backend_want_dynrelro       1
 
-#define bfd_elf32_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_name_lookup _bfd_norelocs_bfd_reloc_name_lookup
+#define elf_info_to_howto		elf32_wasm32_info_to_howto_rela
+#define elf_info_to_howto_rel		NULL
+
+#define bfd_elf32_bfd_reloc_type_lookup elf32_wasm32_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup elf32_wasm32_reloc_name_lookup
 
 #define ELF_DYNAMIC_INTERPRETER  "/sbin/elf-dynamic-interpreter.so"
 

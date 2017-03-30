@@ -1,3 +1,32 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* readelf.c: Add support for wasm32 ELF format WebAssembly files.
+	(guess_is_rela): Likewise.
+	(dump_relocations): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_none_reloc_): Likewise.
+	* NEWS: Mention the new support.
+	* testsuite/lib/binutils-common.exp (is_elf_format): Mark wasm32
+	as ELF target.
+	(supports_gnu_unique): Mark wasm32 as supporting STB_GNU_UNIQUE.
+	* testsuite/binutils-all/nm.exp: Mark wasm32 as requiring .size annotations.
+	* testsuite/binutils-all/wasm32: New directory.
+	* testsuite/binutils-all/wasm32/create-wasm.d: New file.
+	* testsuite/binutils-all/wasm32/create-wasm.s: Likewise.
+	* testsuite/binutils-all/wasm32/custom-section.d: Likewise.
+	* testsuite/binutils-all/wasm32/custom-section.s: Likewise.
+	* testsuite/binutils-all/wasm32/invalid-wasm-1.d: Likewise.
+	* testsuite/binutils-all/wasm32/invalid-wasm-1.s: Likewise.
+	* testsuite/binutils-all/wasm32/long-sections.d: Likewise.
+	* testsuite/binutils-all/wasm32/long-sections.s: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm.d: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm.s: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm-2.d: Likewise.
+	* testsuite/binutils-all/wasm32/parse-wasm-2.s: Likewise.
+	* testsuite/binutils-all/wasm32/prepared-section.d: Likewise.
+	* testsuite/binutils-all/wasm32/prepared-section.s: Likewise.
+	* testsuite/binutils-all/wasm32/wasm32.exp: New file, run tests.
+
 2017-03-29  Alan Modra  <amodra@gmail.com>
 
 	* doc/binutils.texi (objdump): Document PowerPC -M options.

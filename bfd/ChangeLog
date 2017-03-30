@@ -1,3 +1,11 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* elf32-wasm32.c: Add relocation code, two relocs.
+	* reloc.c: Add wasm32 relocations.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* bfd/po/bfd.pot: Regenerate.
+
 2017-03-29  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18025

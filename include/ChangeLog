@@ -1,3 +1,8 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* opcode/wasm.h: New file to support wasm32 architecture.
+	* elf/wasm32.h: Add R_WASM32_32 relocation.
+
 2017-03-29  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (PPC_OPCODE_RAW): Define.

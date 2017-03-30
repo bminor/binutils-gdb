@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the wasm32 ELF conversion of the Web Assembly file format.
+
 * Add --inlines option to objdump, which extends the --line-numbers option
   so that inlined functions will display their nesting information.
 

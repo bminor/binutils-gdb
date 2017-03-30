@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2017-03-27 11:46+0100\n"
+"POT-Creation-Date: 2017-03-29 17:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -206,7 +206,7 @@ msgid "Warning: Writing section `%s' at huge (ie negative) file offset 0x%lx."
 msgstr ""
 
 #: bout.c:1142 elf-m10300.c:2651 elf32-avr.c:2452 elf32-frv.c:5633
-#: elf64-ia64-vms.c:353 elfxx-sparc.c:2876 reloc.c:7981 reloc16.c:156
+#: elf64-ia64-vms.c:353 elfxx-sparc.c:2876 reloc.c:8004 reloc16.c:156
 #: elf32-ia64.c:351 elf64-ia64.c:351
 msgid "%P%F: --relax and -r may not be used together\n"
 msgstr ""
@@ -617,16 +617,16 @@ msgstr ""
 msgid "<corrupt info> %s"
 msgstr ""
 
-#: coffgen.c:2638 elflink.c:13940 linker.c:2931
+#: coffgen.c:2666 elflink.c:13940 linker.c:2931
 msgid "%F%P: already_linked_table: %E\n"
 msgstr ""
 
-#: coffgen.c:2965 elflink.c:12981
+#: coffgen.c:2993 elflink.c:12981
 #, c-format
 msgid "Removing unused section '%s' in file '%B'"
 msgstr ""
 
-#: coffgen.c:3041 elflink.c:13219
+#: coffgen.c:3069 elflink.c:13219
 msgid "Warning: gc-sections option ignored"
 msgstr ""
 
@@ -736,26 +736,26 @@ msgstr ""
 msgid "Dwarf Error: Unable to read alt ref %u."
 msgstr ""
 
-#: dwarf2.c:2600 dwarf2.c:2745 dwarf2.c:3063
+#: dwarf2.c:2600 dwarf2.c:2750 dwarf2.c:3071
 #, c-format
 msgid "Dwarf Error: Could not find abbrev number %u."
 msgstr ""
 
-#: dwarf2.c:3015
+#: dwarf2.c:3023
 #, c-format
 msgid ""
 "Dwarf Error: found dwarf version '%u', this reader only handles version 2, 3 "
 "and 4 information."
 msgstr ""
 
-#: dwarf2.c:3026
+#: dwarf2.c:3034
 #, c-format
 msgid ""
 "Dwarf Error: found address size '%u', this reader can not handle sizes "
 "greater than '%u'."
 msgstr ""
 
-#: dwarf2.c:3129
+#: dwarf2.c:3137
 msgid ""
 "Dwarf Error: DW_AT_comp_dir attribute encountered with a non-string form."
 msgstr ""
@@ -1680,7 +1680,7 @@ msgstr ""
 #. Ignore init flag - it may not be set, despite the flags field containing valid data.
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
-#: elf32-arm.c:14101 elf32-bfin.c:4919 elf32-cris.c:4084 elf32-m68hc1x.c:1413
+#: elf32-arm.c:14101 elf32-bfin.c:4919 elf32-cris.c:4089 elf32-m68hc1x.c:1413
 #: elf32-m68k.c:1200 elf32-score.c:4009 elf32-score7.c:3818 elf32-vax.c:536
 #: elf32-xgate.c:669 elfxx-mips.c:15782
 #: /work/sources/binutils/current/bfd/elfnn-aarch64.c:6695
@@ -2072,14 +2072,14 @@ msgid ""
 "-mno-small-tls)"
 msgstr ""
 
-#: elf32-cris.c:3231
+#: elf32-cris.c:3233
 #, c-format
 msgid ""
 "%B, section %A:\n"
 "  v10/v32 compatible object %s must not contain a PIC relocation"
 msgstr ""
 
-#: elf32-cris.c:3285
+#: elf32-cris.c:3287
 #, c-format
 msgid ""
 "%B, section %A:\n"
@@ -2087,52 +2087,52 @@ msgid ""
 "recompile with -fPIC"
 msgstr ""
 
-#: elf32-cris.c:3500
+#: elf32-cris.c:3505
 #, c-format
 msgid ""
 "%B, section %A:\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
 
-#: elf32-cris.c:3924
+#: elf32-cris.c:3929
 #, c-format
 msgid ""
 "%B, section `%A', to symbol `%s':\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
 
-#: elf32-cris.c:4036
+#: elf32-cris.c:4041
 msgid "Unexpected machine number"
 msgstr ""
 
-#: elf32-cris.c:4087
+#: elf32-cris.c:4092
 #, c-format
 msgid " [symbols have a _ prefix]"
 msgstr ""
 
-#: elf32-cris.c:4090
+#: elf32-cris.c:4095
 #, c-format
 msgid " [v10 and v32]"
 msgstr ""
 
-#: elf32-cris.c:4093
+#: elf32-cris.c:4098
 #, c-format
 msgid " [v32]"
 msgstr ""
 
-#: elf32-cris.c:4137
+#: elf32-cris.c:4142
 msgid "%B: uses _-prefixed symbols, but writing file with non-prefixed symbols"
 msgstr ""
 
-#: elf32-cris.c:4138
+#: elf32-cris.c:4143
 msgid "%B: uses non-prefixed symbols, but writing file with _-prefixed symbols"
 msgstr ""
 
-#: elf32-cris.c:4157
+#: elf32-cris.c:4162
 msgid "%B contains CRIS v32 code, incompatible with previous objects"
 msgstr ""
 
-#: elf32-cris.c:4159
+#: elf32-cris.c:4164
 msgid "%B contains non-CRIS-v32 code, incompatible with previous objects"
 msgstr ""
 
@@ -2356,7 +2356,8 @@ msgstr ""
 
 #. Unknown relocation.
 #: elf32-i386.c:387 elf32-m68k.c:352 elf32-ppc.c:2074 elf32-s390.c:346
-#: elf32-tic6x.c:2674 elf64-ppc.c:2515 elf64-s390.c:372 elf64-x86-64.c:289
+#: elf32-tic6x.c:2674 elf32-wasm32.c:106 elf64-ppc.c:2515 elf64-s390.c:372
+#: elf64-x86-64.c:289
 #, c-format
 msgid "%B: invalid relocation type %d"
 msgstr ""
@@ -2947,7 +2948,7 @@ msgstr ""
 msgid "%B: Unmatched OMIT_FP in %A."
 msgstr ""
 
-#: elf32-nds32.c:13026 reloc.c:8192
+#: elf32-nds32.c:13026 reloc.c:8215
 #, c-format
 msgid "%X%P: %B(%A): relocation \"%R\" goes out of range\n"
 msgstr ""
@@ -5841,21 +5842,21 @@ msgstr ""
 msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
 msgstr ""
 
-#: reloc.c:8028
+#: reloc.c:8051
 msgid "INPUT_SECTION_FLAGS are not supported.\n"
 msgstr ""
 
-#: reloc.c:8126
+#: reloc.c:8149
 #, c-format
 msgid "%X%P: %B(%A): error: relocation for offset %V has no value\n"
 msgstr ""
 
-#: reloc.c:8202
+#: reloc.c:8225
 #, c-format
 msgid "%X%P: %B(%A): relocation \"%R\" is not supported\n"
 msgstr ""
 
-#: reloc.c:8211
+#: reloc.c:8234
 #, c-format
 msgid "%X%P: %B(%A): relocation \"%R\" returns an unrecognized value %x\n"
 msgstr ""

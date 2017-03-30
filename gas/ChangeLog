@@ -1,3 +1,73 @@
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* config/tc-wasm32.h: New file: Add WebAssembly assembler target.
+	* config/tc-wasm32.c: New file: Add WebAssembly assembler target.
+	* Makefile.am: Add WebAssembly assembler target.
+	* configure.tgt: Add WebAssembly assembler target.
+	* doc/c-wasm32.texi: New file: Start documenting WebAssembly
+	assembler.
+	* doc/all.texi: Define WASM32.
+	* doc/as.texinfo: Add WebAssembly entries.
+	* NEWS: Mention the new support.
+	* Makefile.in: Regenerate.
+	* po/gas.pot: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* testsuite/gas/wasm32: New directory.
+	* testsuite/gas/wasm32/allinsn.d: New file.
+	* testsuite/gas/wasm32/allinsn.s: New file.
+	* testsuite/gas/wasm32/illegal.l: New file.
+	* testsuite/gas/wasm32/illegal.s: New file.
+	* testsuite/gas/wasm32/illegal-2.l: New file.
+	* testsuite/gas/wasm32/illegal-2.s: New file.
+	* testsuite/gas/wasm32/illegal-3.l: New file.
+	* testsuite/gas/wasm32/illegal-3.s: New file.
+	* testsuite/gas/wasm32/illegal-4.l: New file.
+	* testsuite/gas/wasm32/illegal-4.s: New file.
+	* testsuite/gas/wasm32/illegal-5.l: New file.
+	* testsuite/gas/wasm32/illegal-5.s: New file.
+	* testsuite/gas/wasm32/illegal-6.l: New file.
+	* testsuite/gas/wasm32/illegal-6.s: New file.
+	* testsuite/gas/wasm32/illegal-7.l: New file.
+	* testsuite/gas/wasm32/illegal-7.s: New file.
+	* testsuite/gas/wasm32/illegal-8.l: New file.
+	* testsuite/gas/wasm32/illegal-8.s: New file.
+	* testsuite/gas/wasm32/illegal-9.l: New file.
+	* testsuite/gas/wasm32/illegal-9.s: New file.
+	* testsuite/gas/wasm32/illegal-10.l: New file.
+	* testsuite/gas/wasm32/illegal-10.s: New file.
+	* testsuite/gas/wasm32/illegal-11.l: New file.
+	* testsuite/gas/wasm32/illegal-11.s: New file.
+	* testsuite/gas/wasm32/illegal-12.l: New file.
+	* testsuite/gas/wasm32/illegal-12.s: New file.
+	* testsuite/gas/wasm32/illegal-13.l: New file.
+	* testsuite/gas/wasm32/illegal-13.s: New file.
+	* testsuite/gas/wasm32/illegal-14.l: New file.
+	* testsuite/gas/wasm32/illegal-14.s: New file.
+	* testsuite/gas/wasm32/illegal-15.l: New file.
+	* testsuite/gas/wasm32/illegal-15.s: New file.
+	* testsuite/gas/wasm32/illegal-16.l: New file.
+	* testsuite/gas/wasm32/illegal-16.s: New file.
+	* testsuite/gas/wasm32/illegal-17.l: New file.
+	* testsuite/gas/wasm32/illegal-17.s: New file.
+	* testsuite/gas/wasm32/illegal-18.l: New file.
+	* testsuite/gas/wasm32/illegal-18.s: New file.
+	* testsuite/gas/wasm32/illegal-19.l: New file.
+	* testsuite/gas/wasm32/illegal-19.s: New file.
+	* testsuite/gas/wasm32/illegal-20.l: New file.
+	* testsuite/gas/wasm32/illegal-20.s: New file.
+	* testsuite/gas/wasm32/illegal-21.l: New file.
+	* testsuite/gas/wasm32/illegal-21.s: New file.
+	* testsuite/gas/wasm32/illegal-22.l: New file.
+	* testsuite/gas/wasm32/illegal-22.s: New file.
+	* testsuite/gas/wasm32/illegal-24.l: New file.
+	* testsuite/gas/wasm32/illegal-24.s: New file.
+	* testsuite/gas/wasm32/illegal-25.l: New file.
+	* testsuite/gas/wasm32/illegal-25.s: New file.
+	* testsuite/gas/wasm32/reloc.d: New file.
+	* testsuite/gas/wasm32/reloc.s: New file.
+	* testsuite/gas/wasm32/wasm32.exp: New tests for WebAssembly
+	architecture.
+
 2017-03-29  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_parse_option): Reject -mraw.
