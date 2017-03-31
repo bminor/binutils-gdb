@@ -1,5 +1,10 @@
 2017-04-12  Pedro Alves  <palves@redhat.com>
 
+	* i386-tdep.c (i386_elf_init_abi, i386_go32_init_abi): Remove
+	calls to set_gdbarch_gnu_triplet_regexp.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/21323
 	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_wchar_t>:
 	New enum value.
