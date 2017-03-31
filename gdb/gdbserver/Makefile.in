@@ -413,47 +413,10 @@ tags: TAGS
 
 clean:
 	rm -f *.o ${ADD_FILES} *~
-	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)
-	rm -f aarch64.c
-	rm -f reg-arm.c reg-bfin.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
-	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
-	rm -f reg-tilegx.c reg-tilegx32.c
-	rm -f arm-with-iwmmxt.c
-	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
-	rm -f mips-linux.c mips-dsp-linux.c
-	rm -f mips64-linux.c mips64-dsp-linux.c
-	rm -f nios2-linux.c
-	rm -f powerpc-32.c powerpc-32l.c powerpc-64l.c powerpc-e500l.c
-	rm -f powerpc-altivec32l.c powerpc-cell32l.c powerpc-vsx32l.c
-	rm -f powerpc-altivec64l.c powerpc-cell64l.c powerpc-vsx64l.c
-	rm -f powerpc-isa205-32l.c powerpc-isa205-64l.c
-	rm -f powerpc-isa205-altivec32l.c powerpc-isa205-vsx32l.c powerpc-isa205-altivec64l.c
-	rm -f powerpc-isa205-vsx64l.c
-	rm -f s390-linux32.c s390-linux64.c s390x-linux64.c
-	rm -f s390-linux32v1.c s390-linux32v2.c s390-linux64v1.c
-	rm -f s390-linux64v2.c s390x-linux64v1.c s390x-linux64v2.c
-	rm -f s390-te-linux64.c s390x-te-linux64.c
-	rm -f s390-vx-linux64.c s390x-vx-linux64.c
-	rm -f s390-tevx-linux64.c s390x-tevx-linux64.c
-	rm -f tic6x-c64xp-linux.c tic6x-c64x-linux.c tic6x-c62x-linux.c
-	rm -f xml-builtin.c stamp-xml
-	rm -f i386-avx.c i386-avx-linux.c
-	rm -f i386-mpx.c i386-mpx-linux.c
-	rm -f i386-avx-mpx.c i386-avx-mpx-linux.c
-	rm -f i386-avx-avx512.c i386-avx-avx512-linux.c
-	rm -f i386-avx-mpx-avx512-pku.c i386-avx-mpx-avx512-pku-linux.c
-	rm -f amd64-avx.c amd64-avx-linux.c
-	rm -f amd64-mpx.c amd64-mpx-linux.c
-	rm -f amd64-avx-mpx.c amd64-avx-mpx-linux.c
-	rm -f amd64-avx-avx512.c amd64-avx-avx512-linux.c
-	rm -f amd64-avx-mpx-avx512-pku.c amd64-avx-mpx-avx512-pku-linux.c
-	rm -f i386-mmx.c i386-mmx-linux.c
-	rm -f x32.c x32-linux.c
-	rm -f x32-avx.c x32-avx-linux.c
-	rm -f x32-avx-avx512.c x32-avx-avx512-linux.c
+	rm -f *-generated.c
+	rm -f stamp-xml
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
@@ -504,15 +467,15 @@ am--refresh:
 
 force:
 
-version.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
+version-generated.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
 	$(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
-	    $(host_alias) $(target_alias) version.c
+	    $(host_alias) $(target_alias) $@
 
-xml-builtin.c: stamp-xml; @true
+xml-builtin-generated.c: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 	rm -f xml-builtin.tmp
 	$(SHELL) $(XML_DIR)/feature_to_c.sh xml-builtin.tmp $(XML_FILES)
-	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin.c
+	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin-generated.c
 	echo stamp > stamp-xml
 
 .PRECIOUS: xml-builtin.c
@@ -552,6 +515,10 @@ ax.o: ax.c
 
 # Rules for objects that go in the in-process agent.
 
+%-ipa.o: %-generated.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+
 %-ipa.o: %.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
@@ -573,6 +540,10 @@ ax.o: ax.c
 
 # Rules for objects that go in the gdbserver binary.
 
+%.o: %-generated.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
 %.o: %.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -593,18 +564,19 @@ ax.o: ax.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-# Rules for register format descriptions.
+# Rules for register format descriptions.  Suffix destination files with
+# -generated to identify and clean them easily.
 
-%.c: ../regformats/%.dat | $(regdat_sh)
+%-generated.c: ../regformats/%.dat | $(regdat_sh)
 	$(SHELL) $(regdat_sh) $< $@
 
-%.c: ../regformats/arm/%.dat | $(regdat_sh)
+%-generated.c: ../regformats/arm/%.dat | $(regdat_sh)
 	$(SHELL) $(regdat_sh) $< $@
 
-%.c: ../regformats/i386/%.dat | $(regdat_sh)
+%-generated.c: ../regformats/i386/%.dat | $(regdat_sh)
 	$(SHELL) $(regdat_sh) $< $@
 
-%.c: ../regformats/rs6000/%.dat | $(regdat_sh)
+%-generated.c: ../regformats/rs6000/%.dat | $(regdat_sh)
 	$(SHELL) $(regdat_sh) $< $@
 
 #
