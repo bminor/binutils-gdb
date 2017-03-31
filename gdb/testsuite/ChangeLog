@@ -1,3 +1,14 @@
+2017-04-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR testsuite/8595
+	* gdb.base/environ.exp: Make test available in all architectures.
+	Move bits related to "info program" testing to
+	gdb.base/info-program.exp.  Rewrite tests to use the two new
+	procedures mentione below.
+	(test_set_show_env_var) New procedure.
+	(test_set_show_env_var_equal): Likewise.
+	* gdb.base/info-program.exp: New file.
+
 2017-04-27  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/oranking.cc (test15): New function.
