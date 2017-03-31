@@ -1,3 +1,9 @@
+2017-03-31  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/21333
+	* config/tc-s390.c (tc_s390_fix_adjustable): Allow non pc-relative
+	fixups in mergeable sections to be adjusted.
+
 2017-03-30  Pip Cet  <pipcet@gmail.com>
 
 	* config/tc-wasm32.h: New file: Add WebAssembly assembler target.
