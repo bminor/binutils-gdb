@@ -2785,8 +2785,22 @@ _bfd_coff_gc_mark_hook (asection *sec,
         case bfd_link_hash_common:
           return h->root.u.c.p->section;
 
-	case bfd_link_hash_undefined:
 	case bfd_link_hash_undefweak:
+	  if (h->symbol_class == C_NT_WEAK && h->numaux == 1)
+	    {
+	      /* PE weak externals.  A weak symbol may include an auxiliary
+		 record indicating that if the weak symbol is not resolved,
+		 another external symbol is used instead.  */
+	      struct coff_link_hash_entry *h2 =
+		h->auxbfd->tdata.coff_obj_data->sym_hashes[
+		    h->aux->x_sym.x_tagndx.l];
+
+	      if (h2 && h2->root.type != bfd_link_hash_undefined)
+		return  h2->root.u.def.section;
+	    }
+	  break;
+
+	case bfd_link_hash_undefined:
         default:
           break;
         }
@@ -2897,7 +2911,7 @@ _bfd_coff_gc_mark_extra_sections (struct bfd_link_info *info,
       asection *isec;
       bfd_boolean some_kept;
 
-      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (ibfd) != bfd_target_coff_flavour)
 	continue;
 
       /* Ensure all linker created sections are kept, and see whether

@@ -1,3 +1,9 @@
+2017-04-07  gingold  <gingold@gingold-Precision-7510>
+
+	* coffgen.c (_bfd_coff_gc_mark_hook): Handle PE weak
+	external symbols with a definition.
+	(_bfd_coff_gc_mark_extra_sections): Fix typo.
+
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
 	* po/SRC-POTFILES.in: Regenerate.

@@ -1,3 +1,9 @@
+2017-04-07  gingold  <gingold@gingold-Precision-7510>
+
+	* testsuite/ld-pe/pe.exp: New test.
+	* testsuite/ld-pe/weakdef-1.s: New test source.
+	* testsuite/ld-pe/weakdef-1.d: New test.
+
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/mbind1a.d: Remove matches for PT_LOAD segments.
