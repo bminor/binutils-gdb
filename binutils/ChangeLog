@@ -1,5 +1,11 @@
 2017-04-03  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21344
+	* readelf.c (process_mips_specific): Check for an out of range GOT
+	entry before reading the module pointer.
+
+2017-04-03  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21343
 	* readelf.c (get_unwind_section_word): Fix snafu checking for
 	invalid word offsets in ARM unwind information.

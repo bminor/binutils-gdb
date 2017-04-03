@@ -15464,14 +15464,24 @@ process_mips_specific (FILE * file)
       printf (_(" Lazy resolver\n"));
       if (ent == (bfd_vma) -1)
 	goto got_print_fail;
-      if (data
-	  && (byte_get (data + ent - pltgot, addr_size)
-	      >> (addr_size * 8 - 1)) != 0)
+
+      if (data)
 	{
-	  ent = print_mips_got_entry (data, pltgot, ent, data_end);
-	  printf (_(" Module pointer (GNU extension)\n"));
-	  if (ent == (bfd_vma) -1)
-	    goto got_print_fail;
+	  /* PR 21344 */
+	  if (data + ent - pltgot > data_end - addr_size)
+	    {
+	      error (_("Invalid got entry - %#lx - overflows GOT table\n"), ent);
+	      goto got_print_fail;
+	    }
+	  
+	  if (byte_get (data + ent - pltgot, addr_size)
+	      >> (addr_size * 8 - 1) != 0)
+	    {
+	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
+	      printf (_(" Module pointer (GNU extension)\n"));
+	      if (ent == (bfd_vma) -1)
+		goto got_print_fail;
+	    }
 	}
       printf ("\n");
 
