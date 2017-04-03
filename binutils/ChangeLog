@@ -1,3 +1,9 @@
+2017-04-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21343
+	* readelf.c (get_unwind_section_word): Fix snafu checking for
+	invalid word offsets in ARM unwind information.
+
 2017-03-31  Pip Cet  <pipcet@gmail.com>
 
 	* NEWS: Use "WebAssembly" consistently.

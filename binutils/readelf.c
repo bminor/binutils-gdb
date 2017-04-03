@@ -8053,9 +8053,9 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
     return FALSE;
 
   /* If the offset is invalid then fail.  */
-  if (word_offset > (sec->sh_size - 4)
-      /* PR 18879 */
-      || (sec->sh_size < 5 && word_offset >= sec->sh_size)
+  if (/* PR 21343 *//* PR 18879 */
+      sec->sh_size < 4
+      || word_offset > (sec->sh_size - 4)
       || ((bfd_signed_vma) word_offset) < 0)
     return FALSE;
 
