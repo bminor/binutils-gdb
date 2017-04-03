@@ -126,7 +126,7 @@ riscv_clear_subsets (void)
   while (riscv_subsets != NULL)
     {
       struct riscv_subset *next = riscv_subsets->next;
-      free (riscv_subsets->name);
+      free ((void *) riscv_subsets->name);
       free (riscv_subsets);
       riscv_subsets = next;
     }
