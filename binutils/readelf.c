@@ -4794,9 +4794,19 @@ get_program_headers (FILE * file)
   if (program_headers != NULL)
     return TRUE;
 
-  phdrs = (Elf_Internal_Phdr *) cmalloc (elf_header.e_phnum,
-                                         sizeof (Elf_Internal_Phdr));
+  /* Be kind to memory checkers by looking for
+     e_phnum values which we know must be invalid.  */
+  if (elf_header.e_phnum
+      * (is_32bit_elf ? sizeof (Elf32_External_Phdr) : sizeof (Elf64_External_Phdr))
+      >= current_file_size)
+    {
+      error (_("Too many program headers - %#x - the file is not that big\n"),
+	     elf_header.e_phnum);
+      return FALSE;
+    }
 
+  phdrs = (Elf_Internal_Phdr *) cmalloc (elf_header.e_phnum,
+					 sizeof (Elf_Internal_Phdr));
   if (phdrs == NULL)
     {
       error (_("Out of memory reading %u program headers\n"),
@@ -15470,7 +15480,8 @@ process_mips_specific (FILE * file)
 	  /* PR 21344 */
 	  if (data + ent - pltgot > data_end - addr_size)
 	    {
-	      error (_("Invalid got entry - %#lx - overflows GOT table\n"), ent);
+	      error (_("Invalid got entry - %#lx - overflows GOT table\n"),
+		     (long) ent);
 	      goto got_print_fail;
 	    }
 	  

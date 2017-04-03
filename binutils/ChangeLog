@@ -1,5 +1,11 @@
 2017-04-03  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21345
+	* readelf.c (get_program_headers): Check for there being too many
+	program headers before attempting to allocate space for them.
+
+2017-04-03  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21344
 	* readelf.c (process_mips_specific): Check for an out of range GOT
 	entry before reading the module pointer.
