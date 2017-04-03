@@ -1,3 +1,16 @@
+2017-04-03  Andrew Jenner  <andrew@codesourcery.com>
+
+	* config.sub: Handle ia16 in $basic_machine.
+
+	bfd/
+	* config.bfd: Handle ia16.
+
+	gas/
+	* configure.tgt: Handle ia16.
+
+	ld/
+	* configure.tgt: Handle ia16.
+
 2017-03-22  Nick Clifton  <nickc@redhat.com>
 
 	* config.sub: Sync with master version in config project.
