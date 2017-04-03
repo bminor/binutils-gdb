@@ -1,3 +1,9 @@
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (GP_NAME): Delete.
+	(riscv_global_pointer_value): Change GP_NAME to RISCV_GP_SYMBOL.
+	(_bfd_riscv_relax_lui): Likewise.
+
 2017-04-04  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21342

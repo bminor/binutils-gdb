@@ -1,3 +1,8 @@
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* riscv-dis.c (riscv_disassemble_insn): Change "_gp" to
+	RISCV_GP_SYMBOL.
+
 2017-03-30  Pip Cet  <pipcet@gmail.com>
 
 	* configure.ac: Add (empty) bfd_wasm32_arch target.
