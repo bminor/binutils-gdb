@@ -766,6 +766,39 @@ typedef asection * (*elf_gc_mark_hook_fn)
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
+enum elf_property_kind
+ {
+    /* A new property.  */
+    property_unknown = 0,
+    /* A property ignored by backend.  */
+    property_ignored,
+    /* A corrupt property reported by backend.  */
+    property_corrupt,
+    /* A property should be removed due to property merge.  */
+    property_remove,
+    /* A property which is a number.  */
+    property_number
+ };
+
+typedef struct elf_property
+{
+  unsigned int pr_type;
+  unsigned int pr_datasz;
+  union
+    {
+      /* For property_number, this is a number.  */
+      bfd_vma number;
+      /* Add a new one if elf_property_kind is updated.  */
+    } u;
+  enum elf_property_kind pr_kind;
+} elf_property;
+
+typedef struct elf_property_list
+{
+  struct elf_property_list *next;
+  struct elf_property property;
+} elf_property_list;
+
 struct bfd_elf_section_reloc_data;
 
 struct elf_backend_data
@@ -1389,6 +1422,19 @@ struct elf_backend_data
      or give an error and return FALSE.  */
   bfd_boolean (*obj_attrs_handle_unknown) (bfd *, int);
 
+  /* Parse GNU properties.  Return the property kind.  If the property
+     is corrupt, issue an error message and return property_corrupt.  */
+  enum elf_property_kind (*parse_gnu_properties) (bfd *, unsigned int,
+						  bfd_byte *,
+						  unsigned int);
+
+  /* Merge GNU properties.  Return TRUE if property is updated.  */
+  bfd_boolean (*merge_gnu_properties) (bfd *, elf_property *,
+				       elf_property *);
+
+  /* Set up GNU properties.  */
+  void (*setup_gnu_properties) (struct bfd_link_info *);
+
   /* Encoding used for compact EH tables.  */
   int (*compact_eh_encoding) (struct bfd_link_info *);
 
@@ -1798,6 +1844,10 @@ struct elf_obj_tdata
   /* Symbol buffer.  */
   void *symbuf;
 
+  /* List of GNU properties.  Will be updated by setup_gnu_properties
+     after all input GNU properties are merged for output.  */
+  elf_property_list *properties;
+
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
 
@@ -1882,6 +1932,7 @@ struct elf_obj_tdata
   (elf_known_obj_attributes (bfd) [OBJ_ATTR_PROC])
 #define elf_other_obj_attributes_proc(bfd) \
   (elf_other_obj_attributes (bfd) [OBJ_ATTR_PROC])
+#define elf_properties(bfd) (elf_tdata (bfd) -> properties)
 
 extern void _bfd_elf_swap_verdef_in
   (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);
@@ -2537,6 +2588,13 @@ extern bfd_boolean _bfd_elf_merge_object_attributes
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_list (bfd *, bfd *);
 extern Elf_Internal_Shdr *_bfd_elf_single_rel_hdr (asection *sec);
+
+extern bfd_boolean _bfd_elf_parse_gnu_properties
+  (bfd *, Elf_Internal_Note *);
+extern elf_property * _bfd_elf_get_property
+  (bfd *, unsigned int, unsigned int);
+extern void _bfd_elf_link_setup_gnu_properties
+  (struct bfd_link_info *);
 
 /* The linker may need to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.

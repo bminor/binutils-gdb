@@ -519,6 +519,15 @@
 #ifndef elf_backend_obj_attrs_handle_unknown
 #define elf_backend_obj_attrs_handle_unknown	NULL
 #endif
+#ifndef elf_backend_parse_gnu_properties
+#define elf_backend_parse_gnu_properties	NULL
+#endif
+#ifndef elf_backend_merge_gnu_properties
+#define elf_backend_merge_gnu_properties	NULL
+#endif
+#ifndef elf_backend_setup_gnu_properties
+#define elf_backend_setup_gnu_properties	_bfd_elf_link_setup_gnu_properties
+#endif
 #ifndef elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment	1
 #endif
@@ -838,6 +847,9 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_obj_attrs_section_type,
   elf_backend_obj_attrs_order,
   elf_backend_obj_attrs_handle_unknown,
+  elf_backend_parse_gnu_properties,
+  elf_backend_merge_gnu_properties,
+  elf_backend_setup_gnu_properties,
   elf_backend_compact_eh_encoding,
   elf_backend_cant_unwind_opcode,
   elf_backend_static_tls_alignment,

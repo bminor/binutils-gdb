@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for ELF GNU program properties.
+
 * Add support for the Texas Instruments PRU processor.
 
 * When configuring for arc*-*-linux* targets the default linker emulation will

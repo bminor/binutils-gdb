@@ -1,3 +1,46 @@
+2017-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld/NEWS: Mention support for ELF GNU program properties.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Call
+	ELF setup_gnu_properties.
+	* testsuite/ld-i386/i386.exp: Run property tests for Linux/i386.
+	* testsuite/ld-i386/pass.c: New file.
+	* testsuite/ld-i386/property-1.r: Likewise.
+	* testsuite/ld-i386/property-2.r: Likewise.
+	* testsuite/ld-i386/property-3.r: Likewise.
+	* testsuite/ld-i386/property-4.r: Likewise.
+	* testsuite/ld-i386/property-5.r: Likewise.
+	* testsuite/ld-i386/property-6.r: Likewise.
+	* testsuite/ld-i386/property-6a.c: Likewise.
+	* testsuite/ld-i386/property-6b.c: Likewise.
+	* testsuite/ld-i386/property-6c.S: Likewise.
+	* testsuite/ld-i386/property-7.r: Likewise.
+	* testsuite/ld-i386/property-no-copy.S: Likewise.
+	* testsuite/ld-i386/property-stack.S: Likewise.
+	* testsuite/ld-i386/property-unsorted-1.S: Likewise.
+	* testsuite/ld-i386/property-unsorted-2.S: Likewise.
+	* testsuite/ld-i386/property-x86-1.S: Likewise.
+	* testsuite/ld-i386/property-x86-2.S: Likewise.
+	* testsuite/ld-x86-64/pass.c: Likewise.
+	* testsuite/ld-x86-64/property-1.r: Likewise.
+	* testsuite/ld-x86-64/property-2.r: Likewise.
+	* testsuite/ld-x86-64/property-3.r: Likewise.
+	* testsuite/ld-x86-64/property-4.r: Likewise.
+	* testsuite/ld-x86-64/property-5.r: Likewise.
+	* testsuite/ld-x86-64/property-6.r: Likewise.
+	* testsuite/ld-x86-64/property-6a.c: Likewise.
+	* testsuite/ld-x86-64/property-6b.c: Likewise.
+	* testsuite/ld-x86-64/property-6c.S: Likewise.
+	* testsuite/ld-x86-64/property-7.r: Likewise.
+	* testsuite/ld-x86-64/property-no-copy.S: Likewise.
+	* testsuite/ld-x86-64/property-stack.S: Likewise.
+	* testsuite/ld-x86-64/property-unsorted-1.S: Likewise.
+	* testsuite/ld-x86-64/property-unsorted-2.S: Likewise.
+	* testsuite/ld-x86-64/property-x86-1.S: Likewise.
+	* testsuite/ld-x86-64/property-x86-2.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run property tests for
+	Linux/x86-64.
+
 2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/16044

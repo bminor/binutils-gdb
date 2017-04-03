@@ -365,7 +365,7 @@ selarchs="$f"
 # Target backend .o files.
 tb=
 
-elf="elf.lo elflink.lo elf-attrs.lo elf-strtab.lo
+elf="elf.lo elflink.lo elf-attrs.lo elf-strtab.lo elf-properties.lo
      elf-eh-frame.lo dwarf1.lo dwarf2.lo"
 coffgen="coffgen.lo dwarf2.lo"
 coff="cofflink.lo $coffgen"

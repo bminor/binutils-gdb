@@ -9691,6 +9691,9 @@ elfobj_grok_gnu_note (bfd *abfd, Elf_Internal_Note *note)
     default:
       return TRUE;
 
+    case NT_GNU_PROPERTY_TYPE_0:
+      return _bfd_elf_parse_gnu_properties (abfd, note);
+
     case NT_GNU_BUILD_ID:
       return elfobj_grok_gnu_build_id (abfd, note);
     }
