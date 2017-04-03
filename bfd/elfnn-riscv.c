@@ -52,10 +52,6 @@
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
-/* The global pointer's symbol name.  */
-
-#define GP_NAME "__global_pointer$"
-
 /* The RISC-V linker needs to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
    This is so that it can later discard them if they are found to be
@@ -1467,7 +1463,7 @@ riscv_global_pointer_value (struct bfd_link_info *info)
 {
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (info->hash, GP_NAME, FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->hash, RISCV_GP_SYMBOL, FALSE, FALSE, TRUE);
   if (h == NULL || h->type != bfd_link_hash_defined)
     return 0;
 
@@ -2818,7 +2814,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
       /* If gp and the symbol are in the same output section, then
 	 consider only that section's alignment.  */
       struct bfd_link_hash_entry *h =
-	bfd_link_hash_lookup (link_info->hash, GP_NAME, FALSE, FALSE, TRUE);
+	bfd_link_hash_lookup (link_info->hash, RISCV_GP_SYMBOL, FALSE, FALSE,
+			      TRUE);
       if (h->u.def.section->output_section == sym_sec->output_section)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
     }

@@ -383,7 +383,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	pd->hi_addr[i] = -1;
 
       for (i = 0; i < info->symtab_size; i++)
-	if (strcmp (bfd_asymbol_name (info->symtab[i]), "_gp") == 0)
+	if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
 	  pd->gp = bfd_asymbol_value (info->symtab[i]);
     }
   else

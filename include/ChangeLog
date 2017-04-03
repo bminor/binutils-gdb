@@ -1,3 +1,7 @@
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elf/riscv.h (RISCV_GP_SYMBOL): New define.
+
 2017-03-27  Andrew Waterman  <andrew@sifive.com>
 
 	* opcode/riscv-opc.h (CSR_PMPCFG0): New define.

@@ -1,3 +1,9 @@
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (GP_NAME): Delete.
+	(riscv_global_pointer_value): Change GP_NAME to RISCV_GP_SYMBOL.
+	(_bfd_riscv_relax_lui): Likewise.
+
 2017-01-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elfnn-riscv.c (riscv_elf_object_p): New function.
