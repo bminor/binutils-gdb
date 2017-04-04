@@ -1,5 +1,10 @@
 2017-04-04  Pedro Alves  <palves@redhat.com>
 
+	* common/gdb_optional.h (gdb::optiona): Add operator->, operator*,
+	operator bool, has_value and get methods.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (struct file_entry): Add ctors, and initialize all
 	fields.
 	(line_header): Initialize all data fields.  Change type of
