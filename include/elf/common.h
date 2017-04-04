@@ -460,6 +460,11 @@
 #define PT_GNU_STACK	(PT_LOOS + 0x474e551) /* Stack flags */
 #define PT_GNU_RELRO	(PT_LOOS + 0x474e552) /* Read-only after relocation */
 
+/* Mbind segments */
+#define PT_GNU_MBIND_NUM 4096
+#define PT_GNU_MBIND_LO (PT_LOOS + 0x474e555)
+#define PT_GNU_MBIND_HI (PT_GNU_MBIND_LO + PT_GNU_MBIND_NUM - 1)
+
 /* Program segment permissions, in program header p_flags field.  */
 
 #define PF_X		(1 << 0)	/* Segment is executable */
@@ -542,6 +547,8 @@
 					   builds when those objects
 					   are not to be further
 					   relocated.  */
+
+#define SHF_GNU_MBIND	0x01000000	/* Mbind section.  */
 
 /* Compression types.  */
 #define ELFCOMPRESS_ZLIB   1		/* Compressed with zlib.  */

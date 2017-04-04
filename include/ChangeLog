@@ -1,3 +1,57 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (PT_GNU_MBIND_NUM): New.
+	(PT_GNU_MBIND_LO): Likewise.
+	(PT_GNU_MBIND_HI): Likewise.
+	(SHF_GNU_MBIND): Likewise.
+
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elf/riscv.h (RISCV_GP_SYMBOL): New define.
+
+2017-03-27  Andrew Waterman  <andrew@sifive.com>
+
+	* opcode/riscv-opc.h (CSR_PMPCFG0): New define.
+	(CSR_PMPCFG1): Likewise.
+	(CSR_PMPCFG2): Likewise.
+	(CSR_PMPCFG3): Likewise.
+	(CSR_PMPADDR0): Likewise.
+	(CSR_PMPADDR1): Likewise.
+	(CSR_PMPADDR2): Likewise.
+	(CSR_PMPADDR3): Likewise.
+	(CSR_PMPADDR4): Likewise.
+	(CSR_PMPADDR5): Likewise.
+	(CSR_PMPADDR6): Likewise.
+	(CSR_PMPADDR7): Likewise.
+	(CSR_PMPADDR8): Likewise.
+	(CSR_PMPADDR9): Likewise.
+	(CSR_PMPADDR10): Likewise.
+	(CSR_PMPADDR11): Likewise.
+	(CSR_PMPADDR12): Likewise.
+	(CSR_PMPADDR13): Likewise.
+	(CSR_PMPADDR14): Likewise.
+	(CSR_PMPADDR15): Likewise.
+	(pmpcfg0): Declare register.
+	(pmpcfg1): Likewise.
+	(pmpcfg2): Likewise.
+	(pmpcfg3): Likewise.
+	(pmpaddr0): Likewise.
+	(pmpaddr1): Likewise.
+	(pmpaddr2): Likewise.
+	(pmpaddr3): Likewise.
+	(pmpaddr4): Likewise.
+	(pmpaddr5): Likewise.
+	(pmpaddr6): Likewise.
+	(pmpaddr7): Likewise.
+	(pmpaddr8): Likewise.
+	(pmpaddr9): Likewise.
+	(pmpaddr10): Likewise.
+	(pmpaddr11): Likewise.
+	(pmpaddr12): Likewise.
+	(pmpaddr13): Likewise.
+	(pmpaddr14): Likewise.
+	(pmpaddr15): Likewise.
+
 2017-03-30  Pip Cet  <pipcet@gmail.com>
 
 	* opcode/wasm.h: New file to support wasm32 architecture.

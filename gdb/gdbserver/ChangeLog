@@ -1,3 +1,19 @@
+2017-04-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (clean): Clear .deps.
+
+2017-03-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* .gitignore: Remove generated files, replace with wildcard.
+	* (clean): Replace removal of generated files with wildcard.
+	(version.c): Replace with...
+	(version-generated.c): ...this.
+	(xml-builtin.c): Replace with...
+	(xml-builtin-generated.c): ...this.
+	(%-ipa.o: %-generated.c, %.o: %-generated.c): New rules.
+	(%.c: *regformats*): Replace with...
+	(%-generated.c: *regformats*): ...this.
+
 2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* linux-xtensa-low.c (regnum::R_THREADPTR): New enum member.

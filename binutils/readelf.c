@@ -3825,7 +3825,12 @@ get_segment_type (unsigned long p_type)
     case PT_GNU_RELRO:  return "GNU_RELRO";
 
     default:
-      if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
+      if (p_type >= PT_GNU_MBIND_LO && p_type <= PT_GNU_MBIND_HI)
+	{
+	  sprintf (buff, "GNU_MBIND+%#lx",
+		   p_type - PT_GNU_MBIND_LO);
+	}
+      else if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
 	  const char * result;
 
@@ -4794,9 +4799,19 @@ get_program_headers (FILE * file)
   if (program_headers != NULL)
     return TRUE;
 
-  phdrs = (Elf_Internal_Phdr *) cmalloc (elf_header.e_phnum,
-                                         sizeof (Elf_Internal_Phdr));
+  /* Be kind to memory checkers by looking for
+     e_phnum values which we know must be invalid.  */
+  if (elf_header.e_phnum
+      * (is_32bit_elf ? sizeof (Elf32_External_Phdr) : sizeof (Elf64_External_Phdr))
+      >= current_file_size)
+    {
+      error (_("Too many program headers - %#x - the file is not that big\n"),
+	     elf_header.e_phnum);
+      return FALSE;
+    }
 
+  phdrs = (Elf_Internal_Phdr *) cmalloc (elf_header.e_phnum,
+					 sizeof (Elf_Internal_Phdr));
   if (phdrs == NULL)
     {
       error (_("Out of memory reading %u program headers\n"),
@@ -5534,7 +5549,9 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* ARM specific.  */
       /* 21 */ { STRING_COMMA_LEN ("ENTRYSECT") },
       /* 22 */ { STRING_COMMA_LEN ("ARM_PURECODE") },
-      /* 23 */ { STRING_COMMA_LEN ("COMDEF") }
+      /* 23 */ { STRING_COMMA_LEN ("COMDEF") },
+      /* GNU specific.  */
+      /* 24 */ { STRING_COMMA_LEN ("GNU_MBIND") },
     };
 
   if (do_section_details)
@@ -5567,6 +5584,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_TLS:		sindex = 9; break;
 	    case SHF_EXCLUDE:		sindex = 18; break;
 	    case SHF_COMPRESSED:	sindex = 20; break;
+	    case SHF_GNU_MBIND:		sindex = 24; break;
 
 	    default:
 	      sindex = -1;
@@ -5660,6 +5678,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_TLS:		*p = 'T'; break;
 	    case SHF_EXCLUDE:		*p = 'E'; break;
 	    case SHF_COMPRESSED:	*p = 'C'; break;
+	    case SHF_GNU_MBIND:		*p = 'D'; break;
 
 	    default:
 	      if ((elf_header.e_machine == EM_X86_64
@@ -6188,7 +6207,9 @@ process_section_headers (FILE * file)
 	      if (section->sh_info < 1 || section->sh_info >= elf_header.e_shnum)
 		warn (_("[%2u]: Expected link to another section in info field"), i);
 	    }
-	  else if (section->sh_type < SHT_LOOS && section->sh_info != 0)
+	  else if (section->sh_type < SHT_LOOS
+		   && (section->sh_flags & SHF_GNU_MBIND) == 0
+		   && section->sh_info != 0)
 	    warn (_("[%2u]: Unexpected value (%u) in info field.\n"),
 		  i, section->sh_info);
 	  break;
@@ -8053,9 +8074,9 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
     return FALSE;
 
   /* If the offset is invalid then fail.  */
-  if (word_offset > (sec->sh_size - 4)
-      /* PR 18879 */
-      || (sec->sh_size < 5 && word_offset >= sec->sh_size)
+  if (/* PR 21343 *//* PR 18879 */
+      sec->sh_size < 4
+      || word_offset > (sec->sh_size - 4)
       || ((bfd_signed_vma) word_offset) < 0)
     return FALSE;
 
@@ -15464,14 +15485,25 @@ process_mips_specific (FILE * file)
       printf (_(" Lazy resolver\n"));
       if (ent == (bfd_vma) -1)
 	goto got_print_fail;
-      if (data
-	  && (byte_get (data + ent - pltgot, addr_size)
-	      >> (addr_size * 8 - 1)) != 0)
+
+      if (data)
 	{
-	  ent = print_mips_got_entry (data, pltgot, ent, data_end);
-	  printf (_(" Module pointer (GNU extension)\n"));
-	  if (ent == (bfd_vma) -1)
-	    goto got_print_fail;
+	  /* PR 21344 */
+	  if (data + ent - pltgot > data_end - addr_size)
+	    {
+	      error (_("Invalid got entry - %#lx - overflows GOT table\n"),
+		     (long) ent);
+	      goto got_print_fail;
+	    }
+	  
+	  if (byte_get (data + ent - pltgot, addr_size)
+	      >> (addr_size * 8 - 1) != 0)
+	    {
+	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
+	      printf (_(" Module pointer (GNU extension)\n"));
+	      if (ent == (bfd_vma) -1)
+		goto got_print_fail;
+	    }
 	}
       printf ("\n");
 

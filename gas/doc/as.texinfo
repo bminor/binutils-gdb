@@ -6525,6 +6525,8 @@ combination of the following characters:
 @table @code
 @item a
 section is allocatable
+@item d
+section is a GNU_MBIND section
 @item e
 section is excluded from executable and shared library.
 @item w

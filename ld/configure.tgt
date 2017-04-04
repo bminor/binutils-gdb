@@ -408,6 +408,7 @@ i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-elf*)		targ_emul=elf32_i960
 			;;
+ia16-*-elf*)		targ_emul=elf_i386 targ_extra_emuls=i386msdos ;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
 ia64-*-freebsd* | ia64-*-kfreebsd*-gnu)
 		        targ_emul=elf64_ia64_fbsd

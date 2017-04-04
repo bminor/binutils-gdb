@@ -62,6 +62,7 @@ case ${cpu} in
   fido)			cpu_type=m68k ;;
   hppa*)		cpu_type=hppa ;;
   i[3-7]86)		cpu_type=i386 arch=i386;;
+  ia16)			cpu_type=i386 arch=i386;;
   ia64)			cpu_type=ia64 ;;
   ip2k)			cpu_type=ip2k endian=big ;;
   iq2000)		cpu_type=iq2000 endian=big ;;
@@ -291,6 +292,8 @@ case ${generic_target} in
   i860-*-*)				fmt=elf endian=little ;;
 
   i960-*-elf*)				fmt=elf ;;
+
+  ia16-*-elf*)				fmt=elf ;;
 
   ia64-*-elf*)				fmt=elf ;;
   ia64-*-*vms*)				fmt=elf em=vms ;;

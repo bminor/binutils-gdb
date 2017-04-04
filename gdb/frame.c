@@ -1410,16 +1410,21 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
 	}
       else
 	{
-	  gdb_byte buf[MAX_REGISTER_SIZE];
-	  enum lval_type lval;
-	  CORE_ADDR addr;
-	  int realnum;
+	  struct value *value = frame_unwind_register_value (frame->next,
+							     regnum);
+	  gdb_assert (value != NULL);
+	  *optimizedp = value_optimized_out (value);
+	  *unavailablep = !value_entirely_available (value);
 
-	  frame_register (frame, regnum, optimizedp, unavailablep,
-			  &lval, &addr, &realnum, buf);
 	  if (*optimizedp || *unavailablep)
-	    return 0;
-	  memcpy (myaddr, buf + offset, curr_len);
+	    {
+	      release_value (value);
+	      value_free (value);
+	      return 0;
+	    }
+	  memcpy (myaddr, value_contents_all (value) + offset, curr_len);
+	  release_value (value);
+	  value_free (value);
 	}
 
       myaddr += curr_len;
@@ -1460,11 +1465,15 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 	}
       else
 	{
-	  gdb_byte buf[MAX_REGISTER_SIZE];
+	  struct value *value = frame_unwind_register_value (frame->next,
+							     regnum);
+	  gdb_assert (value != NULL);
 
-	  deprecated_frame_register_read (frame, regnum, buf);
-	  memcpy (buf + offset, myaddr, curr_len);
-	  put_frame_register (frame, regnum, buf);
+	  memcpy ((char *) value_contents_writeable (value) + offset, myaddr,
+		  curr_len);
+	  put_frame_register (frame, regnum, value_contents_raw (value));
+	  release_value (value);
+	  value_free (value);
 	}
 
       myaddr += curr_len;

@@ -1,3 +1,59 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (get_program_header_size): Add a GNU_MBIND segment for
+	each GNU_MBIND section and align GNU_MBIND section to page size.
+	(_bfd_elf_map_sections_to_segments): Create a GNU_MBIND
+	segment for each GNU_MBIND section.
+	(_bfd_elf_init_private_section_data): Copy sh_info from input
+	for GNU_MBIND section.
+
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (GP_NAME): Delete.
+	(riscv_global_pointer_value): Change GP_NAME to RISCV_GP_SYMBOL.
+	(_bfd_riscv_relax_lui): Likewise.
+
+2017-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21342
+	* elflink.c (_bfd_elf_define_linkage_sym): Prevent null pointer
+	dereference.
+	(bfd_elf_final_link): Only initialize the extended symbol index
+	section if there are extended symbol tables to list.
+
+2017-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf-properties.lo.
+	(BFD32_BACKENDS_CFILES): Add elf-properties.c.
+	* configure.ac (elf): Add elf-properties.lo.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+	* elf-bfd.h (elf_property_kind): New.
+	(elf_property): Likewise.
+	(elf_property_list): Likewise.
+	(elf_properties): Likewise.
+	(_bfd_elf_parse_gnu_properties): Likewise.
+	(_bfd_elf_get_property): Likewise.
+	(_bfd_elf_link_setup_gnu_properties): Likewise.
+	(elf_backend_data): Add parse_gnu_properties, merge_gnu_properties
+	and setup_gnu_properties.
+	(elf_obj_tdata): Add properties.
+	* elf-properties.c: New file.
+	* elf32-i386.c (elf_i386_parse_gnu_properties): New.
+	(elf_i386_merge_gnu_properties): Likewise.
+	(elf_backend_parse_gnu_properties): Likewise.
+	(elf_backend_merge_gnu_properties): Likewise.
+	* elf64-x86-64.c (elf_x86_64_parse_gnu_properties): Likewise.
+	(elf_x86_64_merge_gnu_properties): Likewise.
+	(elf_backend_parse_gnu_properties): Likewise.
+	(elf_backend_merge_gnu_properties): Likewise.
+	* elfxx-target.h (elf_backend_merge_gnu_properties): Likewise.
+	(elf_backend_parse_gnu_properties): Likewise.
+	(elf_backend_setup_gnu_properties): Likewise.
+	(elfNN_bed): Add elf_backend_parse_gnu_properties,
+	elf_backend_merge_gnu_properties and
+	elf_backend_setup_gnu_properties.
+
 2017-03-30  Pip Cet  <pipcet@gmail.com>
 
 	* elf32-wasm32.c: Add relocation code, two relocs.

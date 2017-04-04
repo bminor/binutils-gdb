@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
+
+* Add support for ELF GNU program properties.
+
 * Add support for the Texas Instruments PRU processor.
 
 * When configuring for arc*-*-linux* targets the default linker emulation will

@@ -1,3 +1,37 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for ELF SHF_GNU_MBIND and
+	PT_GNU_MBIND_XXX.
+	* readelf.c (get_segment_type): Handle PT_GNU_MBIND_XXX.
+	(get_elf_section_flags): Handle SHF_GNU_MBIND.
+	(process_section_headers): Likewise.
+	* testsuite/binutils-all/mbind1.s: New file.
+	* testsuite/binutils-all/objcopy.exp: Run readelf test on
+	mbind1.s.
+
+2017-04-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21345
+	* readelf.c (get_program_headers): Check for there being too many
+	program headers before attempting to allocate space for them.
+
+2017-04-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21344
+	* readelf.c (process_mips_specific): Check for an out of range GOT
+	entry before reading the module pointer.
+
+2017-04-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21343
+	* readelf.c (get_unwind_section_word): Fix snafu checking for
+	invalid word offsets in ARM unwind information.
+
+2017-03-31  Pip Cet  <pipcet@gmail.com>
+
+	* NEWS: Use "WebAssembly" consistently.
+	* testsuite/binutils-all/wasm32/wasm32.exp: Fix copyright notice.
+
 2017-03-30  Pip Cet  <pipcet@gmail.com>
 
 	* readelf.c: Add support for wasm32 ELF format WebAssembly files.
