@@ -34,8 +34,9 @@ class optional
 {
 public:
 
-  optional ()
-    : m_instantiated (false)
+  constexpr optional ()
+    : m_dummy (),
+      m_instantiated (false)
   {
   }
 
