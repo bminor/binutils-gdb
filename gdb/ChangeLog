@@ -1,5 +1,17 @@
 2017-04-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-fbsd-tdep.o.
+	(ALLDEPFILES): Remove alpha-fbsd-tdep.c
+	* NEWS: Mention that support for FreeBSD/alpha was removed.
+	* alpha-fbsd-tdep.c: Delete file.
+	* config/alpha/fbsd.mh: Delete file.
+	* configure.host: Delete alpha*-*-freebsd* and
+	alpha*-*-kfreebsd*-gnu.
+	* configure.tgt: Delete alpha*-*-freebsd* and
+	alpha*-*-kfreebsd*-gnu.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers,
 	amd64bsd_store_inferior_registers): Use ptid from regcache.
 
