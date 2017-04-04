@@ -198,7 +198,7 @@ i[34567]86-*-dicos*)
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
 	# Target: FreeBSD/i386
 	gdb_target_obs="i386-tdep.o i387-tdep.o i386-bsd-tdep.o i386-fbsd-tdep.o \
-			bsd-uthread.o fbsd-tdep.o solib-svr4.o"
+			fbsd-tdep.o solib-svr4.o"
 	;;
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 	# Target: NetBSD/i386
@@ -682,7 +682,7 @@ x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 	# Target: FreeBSD/amd64
 	gdb_target_obs="amd64-tdep.o amd64-fbsd-tdep.o i386-tdep.o \
 			i387-tdep.o i386-bsd-tdep.o i386-fbsd-tdep.o \
-			bsd-uthread.o fbsd-tdep.o solib-svr4.o"
+			fbsd-tdep.o solib-svr4.o"
 	;;
 x86_64-*-mingw* | x86_64-*-cygwin*)
         # Target: MingW/amd64

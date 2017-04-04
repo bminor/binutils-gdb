@@ -1,5 +1,21 @@
 2017-04-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64-fbsd-tdep.c: Remove "bsd-uthread.h" include.
+	(amd64fbsd_jmp_buf_reg_offset): Remove.
+	(amd64fbsd_supply_uthread): Remove function.
+	(amd64fbsd_collect_uthread): Remove function.
+	(amd64fbsd_init_abi): Don't set bsd-uthread callbacks.
+	* configure.tgt (i[34567]86-*-freebsd*): Remove bsd-uthread.o.
+	(x86_64-*-freebsd*): Remove bsd-uthread.o.
+	(fbsd-nat.c): Update comment.
+	* i386-fbsd-tdep.c: Remove "bsd-uthread.h" include.
+	(i386fbsd_jmp_buf_reg_offset): Remove.
+	(i386fbsd_supply_uthread): Remove function.
+	(i386fbsd_collect_uthread): Remove function.
+	(i386fbsd_init_abi): Don't set bsd-uthread callbacks.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-fbsd-tdep.o.
 	(ALLDEPFILES): Remove alpha-fbsd-tdep.c
 	* NEWS: Mention that support for FreeBSD/alpha was removed.
