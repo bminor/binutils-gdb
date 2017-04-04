@@ -1,3 +1,8 @@
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers): Use ptid from regcache.
+
 2017-04-04  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2read.c (lnp_state_machine): Now a class.  Initialize all
