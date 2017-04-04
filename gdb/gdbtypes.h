@@ -45,6 +45,7 @@
  */
 
 #include "hashtab.h"
+#include "common/offset-type.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -57,18 +58,11 @@ struct language_defn;
 
 /* * Offset relative to the start of its containing CU (compilation
    unit).  */
-typedef struct
-{
-  unsigned int cu_off;
-} cu_offset;
+DEFINE_OFFSET_TYPE (cu_offset, unsigned int);
 
 /* * Offset relative to the start of its .debug_info or .debug_types
    section.  */
-
-typedef struct
-{
-  unsigned int sect_off;
-} sect_offset;
+DEFINE_OFFSET_TYPE (sect_offset, unsigned int);
 
 /* Some macros for char-based bitfields.  */
 
@@ -1108,7 +1102,7 @@ union call_site_parameter_u
      DW_TAG_formal_parameter which is referenced by both
      caller and the callee.  */
 
-  cu_offset param_offset;
+  cu_offset param_cu_off;
 };
 
 struct call_site_parameter

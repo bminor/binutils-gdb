@@ -172,16 +172,16 @@ struct dwarf_expr_context
   virtual CORE_ADDR get_tls_address (CORE_ADDR offset) = 0;
 
   /* Execute DW_AT_location expression for the DWARF expression
-     subroutine in the DIE at DIE_OFFSET in the CU.  Do not touch
+     subroutine in the DIE at DIE_CU_OFF in the CU.  Do not touch
      STACK while it being passed to and returned from the called DWARF
      subroutine.  */
-  virtual void dwarf_call (cu_offset die_offset) = 0;
+  virtual void dwarf_call (cu_offset die_cu_off) = 0;
 
-  /* Return the base type given by the indicated DIE.  This can throw
-     an exception if the DIE is invalid or does not represent a base
-     type.  SIZE is non-zero if this function should verify that the
-     resulting type has the correct size.  */
-  virtual struct type *get_base_type (cu_offset die, int size)
+  /* Return the base type given by the indicated DIE at DIE_CU_OFF.
+     This can throw an exception if the DIE is invalid or does not
+     represent a base type.  SIZE is non-zero if this function should
+     verify that the resulting type has the correct size.  */
+  virtual struct type *get_base_type (cu_offset die_cu_off, int size)
   {
     /* Anything will do.  */
     return builtin_type (this->gdbarch)->builtin_int;
@@ -249,7 +249,7 @@ struct dwarf_expr_piece
     struct
     {
       /* The referent DIE from DW_OP_implicit_pointer.  */
-      sect_offset die;
+      sect_offset die_sect_off;
       /* The byte offset into the resulting data.  */
       LONGEST offset;
     } ptr;

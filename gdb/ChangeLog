@@ -1,5 +1,30 @@
 2017-04-04  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/offset-type-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add offset-type-selftests.o.
+	* common/offset-type.h: New file.
+	* common/preprocessor.h: New file.
+	* common/traits.h: New file.
+	* common/valid-expr.h: New file.
+	* dwarf2expr.c: Include "common/underlying.h".  Adjust to use
+	sect_offset and cu_offset strong typedefs throughout.
+	* dwarf2expr.h: Adjust to use sect_offset and cu_offset strong
+	typedefs throughout.
+	* dwarf2loc.c: Include "common/underlying.h".  Adjust to use
+	sect_offset and cu_offset strong typedefs throughout.
+	* dwarf2read.c: Adjust to use sect_offset and cu_offset strong
+	typedefs throughout.
+	* gdbtypes.h: Include "common/offset-type.h".
+	(cu_offset): Now an offset type (strong typedef) instead of a
+	struct.
+	(sect_offset): Likewise.
+	(union call_site_parameter_u): Rename "param_offset" field to
+	"param_cu_off".
+	* unittests/offset-type-selftests.c: New file.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
 	* common/underlying.h: New file.
 	* dwarf2read.c: Include "common/gdb_optional.h" and
 	"common/underlying.h".

@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
+#include "common/underlying.h"
 
 extern int dwarf_always_disassemble;
 
@@ -1191,7 +1192,7 @@ call_site_parameter_matches (struct call_site_parameter *parameter,
       case CALL_SITE_PARAMETER_FB_OFFSET:
 	return kind_u.fb_offset == parameter->u.fb_offset;
       case CALL_SITE_PARAMETER_PARAM_OFFSET:
-	return kind_u.param_offset.cu_off == parameter->u.param_offset.cu_off;
+	return kind_u.param_cu_off == parameter->u.param_cu_off;
       }
   return 0;
 }
@@ -2255,7 +2256,8 @@ indirect_pieced_value (struct value *value)
 					TYPE_LENGTH (type), byte_order);
   byte_offset += piece->v.ptr.offset;
 
-  return indirect_synthetic_pointer (piece->v.ptr.die, byte_offset, c->per_cu,
+  return indirect_synthetic_pointer (piece->v.ptr.die_sect_off,
+				     byte_offset, c->per_cu,
 				     frame, type);
 }
 
@@ -2280,7 +2282,7 @@ coerce_pieced_ref (const struct value *value)
       gdb_assert (closure != NULL);
       gdb_assert (closure->n_pieces == 1);
 
-      return indirect_synthetic_pointer (closure->pieces->v.ptr.die,
+      return indirect_synthetic_pointer (closure->pieces->v.ptr.die_sect_off,
 					 closure->pieces->v.ptr.offset,
 					 closure->per_cu, frame, type);
     }
@@ -3642,12 +3644,11 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    struct dwarf2_locexpr_baton block;
 	    int size = (op == DW_OP_call2 ? 2 : 4);
-	    cu_offset offset;
 
 	    uoffset = extract_unsigned_integer (op_ptr, size, byte_order);
 	    op_ptr += size;
 
-	    offset.cu_off = uoffset;
+	    cu_offset offset = (cu_offset) uoffset;
 	    block = dwarf2_fetch_die_loc_cu_off (offset, per_cu,
 						 get_ax_pc, expr);
 
@@ -4192,15 +4193,15 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_GNU_deref_type:
 	  {
 	    int addr_size = *data++;
-	    cu_offset offset;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &ul);
-	    offset.cu_off = ul;
+	    cu_offset offset = (cu_offset) ul;
 	    type = dwarf2_get_die_type (offset, per_cu);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]> %d", phex_nz (offset.cu_off, 0),
+	    fprintf_filtered (stream, " [0x%s]> %d",
+			      phex_nz (to_underlying (offset), 0),
 			      addr_size);
 	  }
 	  break;
@@ -4208,15 +4209,15 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
 	  {
-	    cu_offset type_die;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &ul);
-	    type_die.cu_off = ul;
+	    cu_offset type_die = (cu_offset) ul;
 	    type = dwarf2_get_die_type (type_die, per_cu);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]>", phex_nz (type_die.cu_off, 0));
+	    fprintf_filtered (stream, " [0x%s]>",
+			      phex_nz (to_underlying (type_die), 0));
 	  }
 	  break;
 
@@ -4224,18 +4225,17 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_GNU_regval_type:
 	  {
 	    uint64_t reg;
-	    cu_offset type_die;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &reg);
 	    data = safe_read_uleb128 (data, end, &ul);
-	    type_die.cu_off = ul;
+	    cu_offset type_die = (cu_offset) ul;
 
 	    type = dwarf2_get_die_type (type_die, per_cu);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]> [$%s]",
-			      phex_nz (type_die.cu_off, 0),
+			      phex_nz (to_underlying (type_die), 0),
 			      locexpr_regname (arch, reg));
 	  }
 	  break;
@@ -4245,12 +4245,10 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_reinterpret:
 	case DW_OP_GNU_reinterpret:
 	  {
-	    cu_offset type_die;
-
 	    data = safe_read_uleb128 (data, end, &ul);
-	    type_die.cu_off = ul;
+	    cu_offset type_die = (cu_offset) ul;
 
-	    if (type_die.cu_off == 0)
+	    if (to_underlying (type_die) == 0)
 	      fprintf_filtered (stream, "<0>");
 	    else
 	      {
@@ -4259,7 +4257,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 		type = dwarf2_get_die_type (type_die, per_cu);
 		fprintf_filtered (stream, "<");
 		type_print (type, "", stream, -1);
-		fprintf_filtered (stream, " [0x%s]>", phex_nz (type_die.cu_off, 0));
+		fprintf_filtered (stream, " [0x%s]>",
+				  phex_nz (to_underlying (type_die), 0));
 	      }
 	  }
 	  break;
