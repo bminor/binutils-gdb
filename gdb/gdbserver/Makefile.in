@@ -417,6 +417,7 @@ clean:
 	rm -f $(IPA_LIB)
 	rm -f *-generated.c
 	rm -f stamp-xml
+	rm -f $(DEPDIR)/*.Po
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
