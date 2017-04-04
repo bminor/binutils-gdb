@@ -1648,6 +1648,9 @@ handle_qxfer_threads_worker (struct inferior_list_entry *inf, void *arg)
   int core = target_core_of_thread (ptid);
   char core_s[21];
   const char *name = target_thread_name (ptid);
+  int handle_len;
+  gdb_byte *handle;
+  bool handle_status = target_thread_handle (ptid, &handle, &handle_len);
 
   write_ptid (ptid_s, ptid);
 
@@ -1661,6 +1664,13 @@ handle_qxfer_threads_worker (struct inferior_list_entry *inf, void *arg)
 
   if (name != NULL)
     buffer_xml_printf (buffer, " name=\"%s\"", name);
+
+  if (handle_status)
+    {
+      char *handle_s = (char *) alloca (handle_len * 2 + 1);
+      bin2hex (handle, handle_s, handle_len);
+      buffer_xml_printf (buffer, " handle=\"%s\"", handle_s);
+    }
 
   buffer_xml_printf (buffer, "/>\n");
 }

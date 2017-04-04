@@ -1,5 +1,19 @@
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
+	* linux-low.h (struct lwp_info): Add new field, thread_handle.
+	(thread_db_thread_handle): Declare.
+	* linux-low.c (linux_target_ops): Initialize thread_handle.
+	* server.c (handle_qxfer_threads_worker): Add support for
+	"handle" attribute.
+	* target.h (struct target_ops): Add new function pointer,
+	thread_handle.
+	(target_thread_handle): Define.
+	* thread-db.c (find_one_thread, attach_thread): Set thread_handle
+	field in lwp.
+	(thread_db_thread_handle): New function.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
 	* linux-low.c (handle_extended_wait): Call thread_db_notice_clone().
 	* linux-low.h (thread_db_notice_clone): Declare.
 	* thread-db.c (thread_db_notice_clone): New function.

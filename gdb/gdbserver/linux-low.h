@@ -374,6 +374,9 @@ struct lwp_info
   /* The thread handle, used for e.g. TLS access.  Only valid if
      THREAD_KNOWN is set.  */
   td_thrhandle_t th;
+
+  /* The pthread_t handle.  */
+  thread_t thread_handle;
 #endif
 
   /* Arch-specific additions.  */
@@ -415,5 +418,7 @@ int thread_db_look_up_one_symbol (const char *name, CORE_ADDR *addrp);
    whatever is required have the clone under thread_db's control.  */
 
 void thread_db_notice_clone (struct process_info *proc, ptid_t lwp);
+
+bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;

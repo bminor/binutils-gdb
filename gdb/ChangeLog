@@ -1,5 +1,23 @@
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
+	* remote.c (vector): Include.
+	(struct private_thread_info): Add field, thread_handle.
+	(free_private_thread_info): Deallocate storage associated with
+	thread handle.
+	(get_private_info_thread): Initialize `thread_handle' field.
+	(struct thread_item): Add field, thread_handle.
+	(clear_threads_listing_context): Deallocate storage associated
+	with thread handle.
+	(start_thread): Add support for "handle" attribute.
+	(thread_attributes): Add "handle".
+	(remote_get_threads_with_qthreadinfo): Initialize thread_handle
+	field.
+	(remote_update_thread_list): Update thread_handle.
+	(remote_thread_handle_to_thread_info): New function.
+	(init_remote_ops): Initialize to_thread_handle_to_thread_info.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
 	* python/py-inferior.c (gdbpy_thread_from_thread_handle): New
 	function.
 	(inferior_object_methods): Add gdbpy_thread_from_thread_handle.

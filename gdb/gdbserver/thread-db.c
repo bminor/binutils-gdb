@@ -200,6 +200,7 @@ find_one_thread (ptid_t ptid)
 
   lwp->thread_known = 1;
   lwp->th = th;
+  lwp->thread_handle = ti.ti_tid;
 
   return 1;
 }
@@ -231,6 +232,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   gdb_assert (lwp != NULL);
   lwp->thread_known = 1;
   lwp->th = *th_p;
+  lwp->thread_handle = ti_p->ti_tid;
 
   return 1;
 }
@@ -437,6 +439,36 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
     }
   else
     return err;
+}
+
+/* See linux-low.h.  */
+
+bool
+thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len)
+{
+  struct thread_db *thread_db;
+  struct lwp_info *lwp;
+  struct thread_info *thread
+    = (struct thread_info *) find_inferior_id (&all_threads, ptid);
+
+  if (thread == NULL)
+    return false;
+
+  thread_db = get_thread_process (thread)->priv->thread_db;
+
+  if (thread_db == NULL)
+    return false;
+
+  lwp = get_thread_lwp (thread);
+
+  if (!lwp->thread_known && !find_one_thread (thread->entry.id))
+    return false;
+
+  gdb_assert (lwp->thread_known);
+
+  *handle = (gdb_byte *) &lwp->thread_handle;
+  *handle_len = sizeof (lwp->thread_handle);
+  return true;
 }
 
 #ifdef USE_LIBTHREAD_DB_DIRECTLY

@@ -7705,6 +7705,11 @@ static struct target_ops linux_target_ops = {
   linux_supports_software_single_step,
   linux_supports_catch_syscall,
   linux_get_ipa_tdesc_idx,
+#if USE_THREAD_DB
+  thread_db_thread_handle,
+#else
+  NULL,
+#endif
 };
 
 #ifdef HAVE_LINUX_REGSETS

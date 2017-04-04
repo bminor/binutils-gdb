@@ -74,6 +74,7 @@
 #include <algorithm>
 #include "common/scoped_restore.h"
 #include "environ.h"
+#include "common/byte-vector.h"
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -451,6 +452,10 @@ struct private_thread_info
   char *name;
   int core;
 
+  /* Thread handle, perhaps a pthread_t or thread_t value, stored as a
+     sequence of bytes.  */
+  gdb::byte_vector *thread_handle;
+
   /* Whether the target stopped for a breakpoint/watchpoint.  */
   enum target_stop_reason stop_reason;
 
@@ -482,6 +487,7 @@ free_private_thread_info (struct private_thread_info *info)
 {
   xfree (info->extra);
   xfree (info->name);
+  delete info->thread_handle;
   xfree (info);
 }
 
@@ -1971,6 +1977,7 @@ get_private_info_thread (struct thread_info *thread)
       priv->last_resume_step = 0;
       priv->last_resume_sig = GDB_SIGNAL_0;
       priv->vcont_resumed = 0;
+      priv->thread_handle = nullptr;
     }
 
   return thread->priv;
@@ -2997,6 +3004,10 @@ typedef struct thread_item
 
   /* The core the thread was running on.  -1 if not known.  */
   int core;
+
+  /* The thread handle associated with the thread.  */
+  gdb::byte_vector *thread_handle;
+
 } thread_item_t;
 DEF_VEC_O(thread_item_t);
 
@@ -3024,6 +3035,7 @@ clear_threads_listing_context (void *p)
     {
       xfree (item->extra);
       xfree (item->name);
+      delete item->thread_handle;
     }
 
   VEC_free (thread_item_t, context->items);
@@ -3062,6 +3074,7 @@ remote_newthread_step (threadref *ref, void *data)
   item.core = -1;
   item.name = NULL;
   item.extra = NULL;
+  item.thread_handle = nullptr;
 
   VEC_safe_push (thread_item_t, context->items, &item);
 
@@ -3132,6 +3145,17 @@ start_thread (struct gdb_xml_parser *parser,
   attr = xml_find_attribute (attributes, "name");
   item.name = attr != NULL ? xstrdup ((const char *) attr->value) : NULL;
 
+  attr = xml_find_attribute (attributes, "handle");
+  if (attr != NULL)
+    {
+      item.thread_handle = new gdb::byte_vector
+                             (strlen ((const char *) attr->value) / 2);
+      hex2bin ((const char *) attr->value, item.thread_handle->data (),
+               item.thread_handle->size ());
+    }
+  else
+    item.thread_handle = nullptr;
+
   item.extra = 0;
 
   VEC_safe_push (thread_item_t, data->items, &item);
@@ -3153,6 +3177,7 @@ const struct gdb_xml_attribute thread_attributes[] = {
   { "id", GDB_XML_AF_NONE, NULL, NULL },
   { "core", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
   { "name", GDB_XML_AF_OPTIONAL, NULL, NULL },
+  { "handle", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
@@ -3228,6 +3253,7 @@ remote_get_threads_with_qthreadinfo (struct target_ops *ops,
 		  item.core = -1;
 		  item.name = NULL;
 		  item.extra = NULL;
+		  item.thread_handle = nullptr;
 
 		  VEC_safe_push (thread_item_t, context->items, &item);
 		}
@@ -3333,6 +3359,8 @@ remote_update_thread_list (struct target_ops *ops)
 	      item->extra = NULL;
 	      info->name = item->name;
 	      item->name = NULL;
+	      info->thread_handle = item->thread_handle;
+	      item->thread_handle = nullptr;
 	    }
 	}
     }
@@ -13526,6 +13554,35 @@ remote_execution_direction (struct target_ops *self)
   return rs->last_resume_exec_dir;
 }
 
+/* Return pointer to the thread_info struct which corresponds to
+   THREAD_HANDLE (having length HANDLE_LEN).  */
+
+static struct thread_info *
+remote_thread_handle_to_thread_info (struct target_ops *ops,
+				     const gdb_byte *thread_handle,
+				     int handle_len,
+				     struct inferior *inf)
+{
+  struct thread_info *tp;
+
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      struct private_thread_info *priv = get_private_info_thread (tp);
+
+      if (tp->inf == inf && priv != NULL)
+        {
+	  if (handle_len != priv->thread_handle->size ())
+	    error (_("Thread handle size mismatch: %d vs %zu (from remote)"),
+	           handle_len, priv->thread_handle->size ());
+	  if (memcmp (thread_handle, priv->thread_handle->data (),
+	              handle_len) == 0)
+	    return tp;
+	}
+    }
+
+  return NULL;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -13674,6 +13731,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_insert_exec_catchpoint = remote_insert_exec_catchpoint;
   remote_ops.to_remove_exec_catchpoint = remote_remove_exec_catchpoint;
   remote_ops.to_execution_direction = remote_execution_direction;
+  remote_ops.to_thread_handle_to_thread_info =
+    remote_thread_handle_to_thread_info;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
