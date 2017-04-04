@@ -1,3 +1,41 @@
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct file_entry): Add ctors, and initialize all
+	fields.
+	(line_header): Initialize all data fields.  Change type of
+	standard_opcode_lengths to std::unique_ptr<unsigned char[]>.
+	Change type of include_dirs to std::vector<const char *>.  Remove
+	num_include_dirs, include_dirs_size.  Change type of file_names to
+	std::vector<file_entry>.  Remove num_file_names, file_names_size.
+	(line_header::line_header): New.
+	(line_header::add_include_dir, line_header::add_file_name): New
+	methods.
+	(line_header::include_dir_at): Remove NULL check.
+	(line_header::file_name_at): Add const overload.
+	(line_header_up): New unique_ptr typedef.
+	(dw2_get_file_names_reader): Use line_header_up.  Adjust to use
+	std::vector.  Remove free_line_header call.
+	(dwarf2_build_include_psymtabs): Use line_header_up.  Remove
+	free_line_header call.
+	(free_cu_line_header): Delete.
+	(handle_DW_AT_stmt_list, handle_DW_AT_stmt_list)
+	(setup_type_unit_groups): Use line_header_up instead of cleanups.
+	Adjust to use std::vector.
+	(free_line_header): Delete.
+	(free_line_header_voidp): Use delete.
+	(add_include_dir): Replace with ...
+	(line_header::add_include_dir): ... this method.  Use std::vector.
+	(add_file_name): Replace with ...
+	(line_header::add_file_name): ... this method.  Use std::vector.
+	(add_include_dir_stub): Delete.
+	(read_formatted_entries): Remove memset.
+	(dwarf_decode_line_header): Return a line_header_up instead of a
+	raw pointer.  Remove cleanup handling.  Pass lambdas to
+	read_formatted_entries.  Adjust to use line_header methods.
+	(dwarf_decode_lines_1): Adjust to use line_header methods.
+	(dwarf_decode_lines, file_file_name, file_full_name): Adjust to
+	use std::vector.
+
 2017-04-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* remote.c (set_general_thread, set_continue_thread): Use ptid_t

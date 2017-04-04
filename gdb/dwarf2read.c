@@ -1054,19 +1054,36 @@ typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 
 struct file_entry
 {
+  file_entry () = default;
+
+  file_entry (const char *name_, unsigned int dir_index_,
+	      unsigned int mod_time_, unsigned int length_)
+    : name (name_),
+      dir_index (dir_index_),
+      mod_time (mod_time_),
+      length (length_)
+  {}
+
   /* Return the include directory at DIR_INDEX stored in LH.  Returns
      NULL if DIR_INDEX is out of bounds.  */
   const char *include_dir (const line_header *lh) const;
 
-  const char *name;
+  /* The file name.  Note this is an observing pointer.  The memory is
+     owned by debug_line_buffer.  */
+  const char *name {};
+
   /* The directory index (1-based).  */
-  unsigned int dir_index;
-  unsigned int mod_time;
-  unsigned int length;
-  /* Non-zero if referenced by the Line Number Program.  */
-  int included_p;
+  unsigned int dir_index {};
+
+  unsigned int mod_time {};
+
+  unsigned int length {};
+
+  /* True if referenced by the Line Number Program.  */
+  bool included_p {};
+
   /* The associated symbol table, if any.  */
-  struct symtab *symtab;
+  struct symtab *symtab {};
 };
 
 /* The line number information for a compilation unit (found in the
@@ -1074,63 +1091,78 @@ struct file_entry
    which contains the following information.  */
 struct line_header
 {
+  line_header ()
+    : offset_in_dwz {}
+  {}
+
+  /* Add an entry to the include directory table.  */
+  void add_include_dir (const char *include_dir);
+
+  /* Add an entry to the file name table.  */
+  void add_file_name (const char *name, unsigned int dir_index,
+		      unsigned int mod_time, unsigned int length);
+
   /* Return the include dir at INDEX (0-based).  Returns NULL if INDEX
      is out of bounds.  */
   const char *include_dir_at (unsigned int index) const
   {
-    if (include_dirs == NULL || index >= num_include_dirs)
+    if (index >= include_dirs.size ())
       return NULL;
     return include_dirs[index];
   }
 
   /* Return the file name at INDEX (0-based).  Returns NULL if INDEX
      is out of bounds.  */
-  file_entry *file_name_at (unsigned int index) const
+  file_entry *file_name_at (unsigned int index)
   {
-    if (file_names == NULL || index >= num_file_names)
+    if (index >= file_names.size ())
+      return NULL;
+    return &file_names[index];
+  }
+
+  /* Const version of the above.  */
+  const file_entry *file_name_at (unsigned int index) const
+  {
+    if (index >= file_names.size ())
       return NULL;
     return &file_names[index];
   }
 
   /* Offset of line number information in .debug_line section.  */
-  sect_offset offset;
+  sect_offset offset {};
 
   /* OFFSET is for struct dwz_file associated with dwarf2_per_objfile.  */
-  unsigned offset_in_dwz : 1;
+  unsigned offset_in_dwz : 1; /* Can't initialize bitfields in-class.  */
 
-  unsigned int total_length;
-  unsigned short version;
-  unsigned int header_length;
-  unsigned char minimum_instruction_length;
-  unsigned char maximum_ops_per_instruction;
-  unsigned char default_is_stmt;
-  int line_base;
-  unsigned char line_range;
-  unsigned char opcode_base;
+  unsigned int total_length {};
+  unsigned short version {};
+  unsigned int header_length {};
+  unsigned char minimum_instruction_length {};
+  unsigned char maximum_ops_per_instruction {};
+  unsigned char default_is_stmt {};
+  int line_base {};
+  unsigned char line_range {};
+  unsigned char opcode_base {};
 
   /* standard_opcode_lengths[i] is the number of operands for the
      standard opcode whose value is i.  This means that
      standard_opcode_lengths[0] is unused, and the last meaningful
      element is standard_opcode_lengths[opcode_base - 1].  */
-  unsigned char *standard_opcode_lengths;
+  std::unique_ptr<unsigned char[]> standard_opcode_lengths;
 
-  /* The include_directories table.  NOTE!  These strings are not
-     allocated with xmalloc; instead, they are pointers into
-     debug_line_buffer.  If you try to free them, `free' will get
-     indigestion.  */
-  unsigned int num_include_dirs, include_dirs_size;
-  const char **include_dirs;
+  /* The include_directories table.  Note these are observing
+     pointers.  The memory is owned by debug_line_buffer.  */
+  std::vector<const char *> include_dirs;
 
-  /* The file_names table.  NOTE!  These strings are not allocated
-     with xmalloc; instead, they are pointers into debug_line_buffer.
-     Don't try to free them directly.  */
-  unsigned int num_file_names, file_names_size;
-  struct file_entry *file_names;
+  /* The file_names table.  */
+  std::vector<file_entry> file_names;
 
   /* The start and end of the statement program following this
      header.  These point into dwarf2_per_objfile->line_buffer.  */
-  const gdb_byte *statement_program_start, *statement_program_end;
+  const gdb_byte *statement_program_start {}, *statement_program_end {};
 };
+
+typedef std::unique_ptr<line_header> line_header_up;
 
 const char *
 file_entry::include_dir (const line_header *lh) const
@@ -1597,10 +1629,8 @@ static int die_is_declaration (struct die_info *, struct dwarf2_cu *cu);
 static struct die_info *die_specification (struct die_info *die,
 					   struct dwarf2_cu **);
 
-static void free_line_header (struct line_header *lh);
-
-static struct line_header *dwarf_decode_line_header (unsigned int offset,
-						     struct dwarf2_cu *cu);
+static line_header_up dwarf_decode_line_header (unsigned int offset,
+						struct dwarf2_cu *cu);
 
 static void dwarf_decode_lines (struct line_header *, const char *,
 				struct dwarf2_cu *, struct partial_symtab *,
@@ -3375,7 +3405,6 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   struct dwarf2_per_cu_data *this_cu = cu->per_cu;  
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_per_cu_data *lh_cu;
-  struct line_header *lh;
   struct attribute *attr;
   int i;
   void **slot;
@@ -3393,9 +3422,10 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
     }
 
   lh_cu = this_cu;
-  lh = NULL;
   slot = NULL;
   line_offset = 0;
+
+  line_header_up lh;
 
   attr = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
   if (attr)
@@ -3432,14 +3462,12 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
 
-  qfn->num_file_names = lh->num_file_names;
+  qfn->num_file_names = lh->file_names.size ();
   qfn->file_names =
-    XOBNEWVEC (&objfile->objfile_obstack, const char *, lh->num_file_names);
-  for (i = 0; i < lh->num_file_names; ++i)
-    qfn->file_names[i] = file_full_name (i + 1, lh, fnd.comp_dir);
+    XOBNEWVEC (&objfile->objfile_obstack, const char *, lh->file_names.size ());
+  for (i = 0; i < lh->file_names.size (); ++i)
+    qfn->file_names[i] = file_full_name (i + 1, lh.get (), fnd.comp_dir);
   qfn->real_names = NULL;
-
-  free_line_header (lh);
 
   lh_cu->v.quick->file_names = qfn;
 }
@@ -4661,7 +4689,7 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
 			       struct die_info *die,
 			       struct partial_symtab *pst)
 {
-  struct line_header *lh = NULL;
+  line_header_up lh;
   struct attribute *attr;
 
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
@@ -4671,9 +4699,7 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
     return;  /* No linetable, so no includes.  */
 
   /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
-  dwarf_decode_lines (lh, pst->dirname, cu, pst, pst->textlow, 1);
-
-  free_line_header (lh);
+  dwarf_decode_lines (lh.get (), pst->dirname, cu, pst, pst->textlow, 1);
 }
 
 static hashval_t
@@ -9143,17 +9169,6 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (cleanups);
 }
 
-/* Cleanup function for handle_DW_AT_stmt_list.  */
-
-static void
-free_cu_line_header (void *arg)
-{
-  struct dwarf2_cu *cu = (struct dwarf2_cu *) arg;
-
-  free_line_header (cu->line_header);
-  cu->line_header = NULL;
-}
-
 /* Check for possibly missing DW_AT_comp_dir with relative .debug_line
    directory paths.  GCC SVN r127613 (new option -fdebug-prefix-map) fixed
    this, it was first present in GCC release 4.3.0.  */
@@ -9267,9 +9282,10 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 
   /* dwarf_decode_line_header does not yet provide sufficient information.
      We always have to call also dwarf_decode_lines for it.  */
-  cu->line_header = dwarf_decode_line_header (line_offset, cu);
-  if (cu->line_header == NULL)
+  line_header_up lh = dwarf_decode_line_header (line_offset, cu);
+  if (lh == NULL)
     return;
+  cu->line_header = lh.get ();
 
   if (dwarf2_per_objfile->line_header_hash == NULL)
     slot = NULL;
@@ -9294,11 +9310,12 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 	 number information unit.  And if we're not using line_header_hash
 	 then this is what we want as well.  */
       gdb_assert (die->tag != DW_TAG_partial_unit);
-      make_cleanup (free_cu_line_header, cu);
     }
   decode_mapping = (die->tag != DW_TAG_partial_unit);
   dwarf_decode_lines (cu->line_header, comp_dir, cu, NULL, lowpc,
 		      decode_mapping);
+
+  lh.release ();
 }
 
 /* Process DW_TAG_compile_unit or DW_TAG_partial_unit.  */
@@ -9395,7 +9412,6 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
   struct dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct type_unit_group *tu_group;
   int first_time;
-  struct line_header *lh;
   struct attribute *attr;
   unsigned int i, line_offset;
   struct signatured_type *sig_type;
@@ -9419,7 +9435,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 
   /* We have to handle the case of both a missing DW_AT_stmt_list or bad
      debug info.  */
-  lh = NULL;
+  line_header_up lh;
   if (attr != NULL)
     {
       line_offset = DW_UNSND (attr);
@@ -9437,8 +9453,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  cu->line_header = lh;
-  make_cleanup (free_cu_line_header, cu);
+  cu->line_header = lh.get ();
 
   if (first_time)
     {
@@ -9449,14 +9464,14 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 	 process_full_type_unit still needs to know if this is the first
 	 time.  */
 
-      tu_group->num_symtabs = lh->num_file_names;
-      tu_group->symtabs = XNEWVEC (struct symtab *, lh->num_file_names);
+      tu_group->num_symtabs = lh->file_names.size ();
+      tu_group->symtabs = XNEWVEC (struct symtab *, lh->file_names.size ());
 
-      for (i = 0; i < lh->num_file_names; ++i)
+      for (i = 0; i < lh->file_names.size (); ++i)
 	{
 	  file_entry &fe = lh->file_names[i];
 
-	  dwarf2_start_subfile (fe.name, fe.include_dir (lh));
+	  dwarf2_start_subfile (fe.name, fe.include_dir (lh.get ()));
 
 	  if (current_subfile->symtab == NULL)
 	    {
@@ -9476,13 +9491,15 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
     {
       restart_symtab (tu_group->compunit_symtab, "", 0);
 
-      for (i = 0; i < lh->num_file_names; ++i)
+      for (i = 0; i < lh->file_names.size (); ++i)
 	{
 	  struct file_entry *fe = &lh->file_names[i];
 
 	  fe->symtab = tu_group->symtabs[i];
 	}
     }
+
+  lh.release ();
 
   /* The main symtab is allocated last.  Type units don't have DW_AT_name
      so they don't have a "real" (so to speak) symtab anyway.
@@ -17564,28 +17581,6 @@ die_specification (struct die_info *die, struct dwarf2_cu **spec_cu)
     return follow_die_ref (die, spec_attr, spec_cu);
 }
 
-/* Free the line_header structure *LH, and any arrays and strings it
-   refers to.
-   NOTE: This is also used as a "cleanup" function.  */
-
-static void
-free_line_header (struct line_header *lh)
-{
-  if (lh->standard_opcode_lengths)
-    xfree (lh->standard_opcode_lengths);
-
-  /* Remember that all the lh->file_names[i].name pointers are
-     pointers into debug_line_buffer, and don't need to be freed.  */
-  if (lh->file_names)
-    xfree (lh->file_names);
-
-  /* Similarly for the include directory names.  */
-  if (lh->include_dirs)
-    xfree (lh->include_dirs);
-
-  xfree (lh);
-}
-
 /* Stub for free_line_header to match void * callback types.  */
 
 static void
@@ -17593,69 +17588,30 @@ free_line_header_voidp (void *arg)
 {
   struct line_header *lh = (struct line_header *) arg;
 
-  free_line_header (lh);
+  delete lh;
 }
 
-/* Add an entry to LH's include directory table.  */
-
-static void
-add_include_dir (struct line_header *lh, const char *include_dir)
+void
+line_header::add_include_dir (const char *include_dir)
 {
   if (dwarf_line_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "Adding dir %u: %s\n",
-			lh->num_include_dirs + 1, include_dir);
+    fprintf_unfiltered (gdb_stdlog, "Adding dir %zu: %s\n",
+			include_dirs.size () + 1, include_dir);
 
-  /* Grow the array if necessary.  */
-  if (lh->include_dirs_size == 0)
-    {
-      lh->include_dirs_size = 1; /* for testing */
-      lh->include_dirs = XNEWVEC (const char *, lh->include_dirs_size);
-    }
-  else if (lh->num_include_dirs >= lh->include_dirs_size)
-    {
-      lh->include_dirs_size *= 2;
-      lh->include_dirs = XRESIZEVEC (const char *, lh->include_dirs,
-				     lh->include_dirs_size);
-    }
-
-  lh->include_dirs[lh->num_include_dirs++] = include_dir;
+  include_dirs.push_back (include_dir);
 }
 
-/* Add an entry to LH's file name table.  */
-
-static void
-add_file_name (struct line_header *lh,
-               const char *name,
-               unsigned int dir_index,
-               unsigned int mod_time,
-               unsigned int length)
+void
+line_header::add_file_name (const char *name,
+			    unsigned int dir_index,
+			    unsigned int mod_time,
+			    unsigned int length)
 {
-  struct file_entry *fe;
-
   if (dwarf_line_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "Adding file %u: %s\n",
-			lh->num_file_names + 1, name);
+			(unsigned) file_names.size () + 1, name);
 
-  /* Grow the array if necessary.  */
-  if (lh->file_names_size == 0)
-    {
-      lh->file_names_size = 1; /* for testing */
-      lh->file_names = XNEWVEC (struct file_entry, lh->file_names_size);
-    }
-  else if (lh->num_file_names >= lh->file_names_size)
-    {
-      lh->file_names_size *= 2;
-      lh->file_names
-	= XRESIZEVEC (struct file_entry, lh->file_names, lh->file_names_size);
-    }
-
-  fe = &lh->file_names[lh->num_file_names++];
-  fe->name = name;
-  fe->dir_index = dir_index;
-  fe->mod_time = mod_time;
-  fe->length = length;
-  fe->included_p = 0;
-  fe->symtab = NULL;
+  file_names.emplace_back (name, dir_index, mod_time, length);
 }
 
 /* A convenience function to find the proper .debug_line section for a CU.  */
@@ -17679,16 +17635,6 @@ get_debug_line_section (struct dwarf2_cu *cu)
     section = &dwarf2_per_objfile->line;
 
   return section;
-}
-
-/* Forwarding function for read_formatted_entries.  */
-
-static void
-add_include_dir_stub (struct line_header *lh, const char *name,
-		      unsigned int dir_index, unsigned int mod_time,
-		      unsigned int length)
-{
-  add_include_dir (lh, name);
 }
 
 /* Read directory or file name entry format, starting with byte of
@@ -17730,8 +17676,6 @@ read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
     {
       const gdb_byte *format = format_header_data;
       struct file_entry fe;
-
-      memset (&fe, 0, sizeof (fe));
 
       for (formati = 0; formati < format_count; formati++)
 	{
@@ -17826,11 +17770,9 @@ read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
    the returned object point into the dwarf line section buffer,
    and must not be freed.  */
 
-static struct line_header *
+static line_header_up
 dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 {
-  struct cleanup *back_to;
-  struct line_header *lh;
   const gdb_byte *line_ptr;
   unsigned int bytes_read, offset_size;
   int i;
@@ -17861,10 +17803,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       return 0;
     }
 
-  lh = XNEW (struct line_header);
-  memset (lh, 0, sizeof (*lh));
-  back_to = make_cleanup ((make_cleanup_ftype *) free_line_header,
-                          (void *) lh);
+  line_header_up lh (new line_header ());
 
   lh->offset.sect_off = offset;
   lh->offset_in_dwz = cu->per_cu->is_dwz;
@@ -17879,7 +17818,6 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   if (line_ptr + lh->total_length > (section->buffer + section->size))
     {
       dwarf2_statement_list_fits_in_line_number_section_complaint ();
-      do_cleanups (back_to);
       return 0;
     }
   lh->statement_program_end = line_ptr + lh->total_length;
@@ -17940,7 +17878,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   line_ptr += 1;
   lh->opcode_base = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
-  lh->standard_opcode_lengths = XNEWVEC (unsigned char, lh->opcode_base);
+  lh->standard_opcode_lengths.reset (new unsigned char[lh->opcode_base]);
 
   lh->standard_opcode_lengths[0] = 1;  /* This should never be used anyway.  */
   for (i = 1; i < lh->opcode_base; ++i)
@@ -17952,11 +17890,22 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   if (lh->version >= 5)
     {
       /* Read directory table.  */
-      read_formatted_entries (abfd, &line_ptr, lh, &cu->header,
-			      add_include_dir_stub);
+      read_formatted_entries (abfd, &line_ptr, lh.get (), &cu->header,
+			      [] (struct line_header *lh, const char *name,
+				  unsigned int dir_index, unsigned int mod_time,
+				  unsigned int length)
+	{
+	  lh->add_include_dir (name);
+	});
 
       /* Read file name table.  */
-      read_formatted_entries (abfd, &line_ptr, lh, &cu->header, add_file_name);
+      read_formatted_entries (abfd, &line_ptr, lh.get (), &cu->header,
+			      [] (struct line_header *lh, const char *name,
+				  unsigned int dir_index, unsigned int mod_time,
+				  unsigned int length)
+	{
+	  lh->add_file_name (name, dir_index, mod_time, length);
+	});
     }
   else
     {
@@ -17964,7 +17913,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
 	{
 	  line_ptr += bytes_read;
-	  add_include_dir (lh, cur_dir);
+	  lh->add_include_dir (cur_dir);
 	}
       line_ptr += bytes_read;
 
@@ -17981,7 +17930,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 	  length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
 
-	  add_file_name (lh, cur_file, dir_index, mod_time, length);
+	  lh->add_file_name (cur_file, dir_index, mod_time, length);
 	}
       line_ptr += bytes_read;
     }
@@ -17992,7 +17941,6 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 	       _("line number info header doesn't "
 		 "fit in `.debug_line' section"));
 
-  discard_cleanups (back_to);
   return lh;
 }
 
@@ -18489,7 +18437,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
                     length =
                       read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                     line_ptr += bytes_read;
-                    add_file_name (lh, cur_file, dir_index, mod_time, length);
+                    lh->add_file_name (cur_file, dir_index, mod_time, length);
                   }
 		  break;
 		case DW_LNE_set_discriminator:
@@ -18681,7 +18629,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 
       /* Now that we're done scanning the Line Header Program, we can
          create the psymtab of each included file.  */
-      for (file_index = 0; file_index < lh->num_file_names; file_index++)
+      for (file_index = 0; file_index < lh->file_names.size (); file_index++)
         if (lh->file_names[file_index].included_p == 1)
           {
 	    const char *include_name =
@@ -18698,7 +18646,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
       struct compunit_symtab *cust = buildsym_compunit_symtab ();
       int i;
 
-      for (i = 0; i < lh->num_file_names; i++)
+      for (i = 0; i < lh->file_names.size (); i++)
 	{
 	  file_entry &fe = lh->file_names[i];
 
@@ -21404,7 +21352,7 @@ file_file_name (int file, struct line_header *lh)
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
-  if (1 <= file && file <= lh->num_file_names)
+  if (1 <= file && file <= lh->file_names.size ())
     {
       const file_entry &fe = lh->file_names[file - 1];
 
@@ -21443,7 +21391,7 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
-  if (1 <= file && file <= lh->num_file_names)
+  if (1 <= file && file <= lh->file_names.size ())
     {
       char *relative = file_file_name (file, lh);
 
