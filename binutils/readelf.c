@@ -3825,7 +3825,12 @@ get_segment_type (unsigned long p_type)
     case PT_GNU_RELRO:  return "GNU_RELRO";
 
     default:
-      if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
+      if (p_type >= PT_GNU_MBIND_LO && p_type <= PT_GNU_MBIND_HI)
+	{
+	  sprintf (buff, "GNU_MBIND+%#lx",
+		   p_type - PT_GNU_MBIND_LO);
+	}
+      else if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
 	  const char * result;
 
@@ -5544,7 +5549,9 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* ARM specific.  */
       /* 21 */ { STRING_COMMA_LEN ("ENTRYSECT") },
       /* 22 */ { STRING_COMMA_LEN ("ARM_PURECODE") },
-      /* 23 */ { STRING_COMMA_LEN ("COMDEF") }
+      /* 23 */ { STRING_COMMA_LEN ("COMDEF") },
+      /* GNU specific.  */
+      /* 24 */ { STRING_COMMA_LEN ("GNU_MBIND") },
     };
 
   if (do_section_details)
@@ -5577,6 +5584,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_TLS:		sindex = 9; break;
 	    case SHF_EXCLUDE:		sindex = 18; break;
 	    case SHF_COMPRESSED:	sindex = 20; break;
+	    case SHF_GNU_MBIND:		sindex = 24; break;
 
 	    default:
 	      sindex = -1;
@@ -5670,6 +5678,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_TLS:		*p = 'T'; break;
 	    case SHF_EXCLUDE:		*p = 'E'; break;
 	    case SHF_COMPRESSED:	*p = 'C'; break;
+	    case SHF_GNU_MBIND:		*p = 'D'; break;
 
 	    default:
 	      if ((elf_header.e_machine == EM_X86_64
@@ -6198,7 +6207,9 @@ process_section_headers (FILE * file)
 	      if (section->sh_info < 1 || section->sh_info >= elf_header.e_shnum)
 		warn (_("[%2u]: Expected link to another section in info field"), i);
 	    }
-	  else if (section->sh_type < SHT_LOOS && section->sh_info != 0)
+	  else if (section->sh_type < SHT_LOOS
+		   && (section->sh_flags & SHF_GNU_MBIND) == 0
+		   && section->sh_info != 0)
 	    warn (_("[%2u]: Unexpected value (%u) in info field.\n"),
 		  i, section->sh_info);
 	  break;

@@ -1,3 +1,38 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for ELF SHF_GNU_MBIND.
+	* config/obj-elf.c (section_match): New.
+	(get_section): Match both sh_info and group name.
+	(obj_elf_change_section): Add argument for sh_info.  Pass both
+	sh_info and group name to get_section. Issue an error for
+	SHF_GNU_MBIND section without SHF_ALLOC.  Set sh_info.
+	(obj_elf_parse_section_letters): Set SHF_GNU_MBIND for 'd'.
+	(obj_elf_section): Support SHF_GNU_MBIND section info.
+	* config/obj-elf.h (obj_elf_change_section): Add argument for
+	sh_info.
+	* config/tc-arm.c (start_unwind_section): Pass 0 as sh_info to
+	obj_elf_change_section.
+	* config/tc-ia64.c (obj_elf_vms_common): Likewise.
+	* config/tc-microblaze.c (microblaze_s_data): Likewise.
+	(microblaze_s_sdata): Likewise.
+	(microblaze_s_rdata): Likewise.
+	(microblaze_s_bss): Likewise.
+	* config/tc-mips.c (s_change_section): Likewise.
+	* config/tc-msp430.c (msp430_profiler): Likewise.
+	* config/tc-rx.c (parse_rx_section): Likewise.
+	* config/tc-tic6x.c (tic6x_start_unwind_section): Likewise.
+	* doc/as.texinfo: Document 'd' for SHF_GNU_MBIND.
+	* testsuite/gas/elf/elf.exp: Run section12a, section12b and
+	section13.
+	* testsuite/gas/elf/section10.d: Updated.
+	* testsuite/gas/elf/section10.s: Likewise.
+	* testsuite/gas/elf/section12.s: New file.
+	* testsuite/gas/elf/section12a.d: Likewise.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section13.l: Likewise.
+	* testsuite/gas/elf/section13.d: Likewise.
+	* testsuite/gas/elf/section13.s: Likewise.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* config/tc-riscv.c (riscv_clear_subsets): Cast argument to free to

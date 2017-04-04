@@ -1,3 +1,14 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for ELF SHF_GNU_MBIND and
+	PT_GNU_MBIND_XXX.
+	* readelf.c (get_segment_type): Handle PT_GNU_MBIND_XXX.
+	(get_elf_section_flags): Handle SHF_GNU_MBIND.
+	(process_section_headers): Likewise.
+	* testsuite/binutils-all/mbind1.s: New file.
+	* testsuite/binutils-all/objcopy.exp: Run readelf test on
+	mbind1.s.
+
 2017-04-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21345

@@ -2093,6 +2093,47 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	}
     }
 
+  if (!bfd_link_relocatable (&link_info)
+      && (s->flags & SEC_ALLOC) != 0
+      && (elf_section_flags (s) & SHF_GNU_MBIND) != 0)
+    {
+      /* Find the output mbind section with the same type, attributes
+	 and sh_info field.  */
+      for (os = &lang_output_section_statement.head->output_section_statement;
+	   os != NULL;
+	   os = os->next)
+	if (os->bfd_section != NULL
+	    && !bfd_is_abs_section (os->bfd_section)
+	    && (elf_section_flags (os->bfd_section) & SHF_GNU_MBIND) != 0
+	    && ((s->flags & (SEC_ALLOC
+			     | SEC_LOAD
+			     | SEC_HAS_CONTENTS
+			     | SEC_READONLY
+			     | SEC_CODE))
+		== (os->bfd_section->flags & (SEC_ALLOC
+					      | SEC_LOAD
+					      | SEC_HAS_CONTENTS
+					      | SEC_READONLY
+					      | SEC_CODE)))
+	    && (elf_section_data (os->bfd_section)->this_hdr.sh_info
+		== elf_section_data (s)->this_hdr.sh_info))
+	    {
+	      lang_add_section (&os->children, s, NULL, os);
+	      return os;
+	    }
+
+      /* Create the output mbind section with the ".mbind." prefix
+	 in section name.  */
+      if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	secname = ".mbind.bss";
+      else if ((s->flags & SEC_READONLY) == 0)
+	secname = ".mbind.data";
+      else if ((s->flags & SEC_CODE) == 0)
+	secname = ".mbind.rodata";
+      else
+	secname = ".mbind.text";
+    }
+
   /* Look through the script to see where to place this section.  */
   if (constraint == 0)
     for (os = lang_output_section_find (secname);
@@ -2105,8 +2146,11 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
 	/* SEC_EXCLUDE is cleared when doing a relocatable link.  But
 	   we can't merge 2 input sections with the same name when only
-	   one of them has SHF_EXCLUDE.  */
+	   one of them has SHF_EXCLUDE.  Don't merge 2 sections with
+	   different sh_info.  */
 	if (os->bfd_section != NULL
+	    && (elf_section_data (os->bfd_section)->this_hdr.sh_info
+		== elf_section_data (s)->this_hdr.sh_info)
 	    && (os->bfd_section->flags == 0
 		|| ((!bfd_link_relocatable (&link_info)
 		     || (iself && (((elf_section_flags (s)

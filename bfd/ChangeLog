@@ -1,3 +1,12 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (get_program_header_size): Add a GNU_MBIND segment for
+	each GNU_MBIND section and align GNU_MBIND section to page size.
+	(_bfd_elf_map_sections_to_segments): Create a GNU_MBIND
+	segment for each GNU_MBIND section.
+	(_bfd_elf_init_private_section_data): Copy sh_info from input
+	for GNU_MBIND section.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* elfnn-riscv.c (GP_NAME): Delete.

@@ -1,3 +1,10 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (PT_GNU_MBIND_NUM): New.
+	(PT_GNU_MBIND_LO): Likewise.
+	(PT_GNU_MBIND_HI): Likewise.
+	(SHF_GNU_MBIND): Likewise.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* elf/riscv.h (RISCV_GP_SYMBOL): New define.

@@ -1,3 +1,18 @@
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for ELF SHF_GNU_MBIND and
+	PT_GNU_MBIND_XXX.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Place
+	input GNU_MBIND sections with the same type, attributes and
+	sh_info field into a single output GNU_MBIND section.
+	* testsuite/ld-elf/elf.exp: Run mbind2a and mbind2b.
+	* testsuite/ld-elf/mbind1.s: New file.
+	* testsuite/ld-elf/mbind1a.d: Likewise.
+	* testsuite/ld-elf/mbind1b.d: Likewise.
+	* testsuite/ld-elf/mbind1c.d: Likewise.
+	* testsuite/ld-elf/mbind2a.s: Likewise.
+	* testsuite/ld-elf/mbind2b.c: Likewise.
+
 2017-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention support for ELF GNU program properties.

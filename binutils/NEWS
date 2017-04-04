@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
+
 * Add support for the wasm32 ELF conversion of the WebAssembly file format.
 
 * Add --inlines option to objdump, which extends the --line-numbers option

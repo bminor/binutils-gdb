@@ -298,6 +298,27 @@ if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_ld_link_exec_tests $array_tests_pie $xfails
+
+    run_ld_link_exec_tests [list \
+	[list \
+	    "Run mbind2a" \
+	    "$NOPIE_LDFLAGS -Wl,-z,common-page-size=0x4000" \
+	    "" \
+	    { mbind2a.s mbind2b.c } \
+	    "mbind2a" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+	[list \
+	    "Run mbind2b" \
+	    "-static -Wl,-z,common-page-size=0x4000" \
+	    "" \
+	    { mbind2a.s mbind2b.c } \
+	    "mbind2b" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+    ]
 }
 
 # <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
