@@ -71,6 +71,8 @@
 #include "namespace.h"
 #include "common/gdb_unlinker.h"
 #include "common/function-view.h"
+#include "common/gdb_optional.h"
+#include "common/underlying.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1052,20 +1054,28 @@ typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 				      int has_children,
 				      void *data);
 
+/* A 1-based directory index.  This is a strong typedef to prevent
+   accidentally using a directory index as a 0-based index into an
+   array/vector.  */
+enum class dir_index : unsigned int {};
+
+/* Likewise, a 1-based file name index.  */
+enum class file_name_index : unsigned int {};
+
 struct file_entry
 {
   file_entry () = default;
 
-  file_entry (const char *name_, unsigned int dir_index_,
+  file_entry (const char *name_, dir_index d_index_,
 	      unsigned int mod_time_, unsigned int length_)
     : name (name_),
-      dir_index (dir_index_),
+      d_index (d_index_),
       mod_time (mod_time_),
       length (length_)
   {}
 
-  /* Return the include directory at DIR_INDEX stored in LH.  Returns
-     NULL if DIR_INDEX is out of bounds.  */
+  /* Return the include directory at D_INDEX stored in LH.  Returns
+     NULL if D_INDEX is out of bounds.  */
   const char *include_dir (const line_header *lh) const;
 
   /* The file name.  Note this is an observing pointer.  The memory is
@@ -1073,7 +1083,7 @@ struct file_entry
   const char *name {};
 
   /* The directory index (1-based).  */
-  unsigned int dir_index {};
+  dir_index d_index {};
 
   unsigned int mod_time {};
 
@@ -1099,25 +1109,33 @@ struct line_header
   void add_include_dir (const char *include_dir);
 
   /* Add an entry to the file name table.  */
-  void add_file_name (const char *name, unsigned int dir_index,
+  void add_file_name (const char *name, dir_index d_index,
 		      unsigned int mod_time, unsigned int length);
 
-  /* Return the include dir at INDEX (0-based).  Returns NULL if INDEX
+  /* Return the include dir at INDEX (1-based).  Returns NULL if INDEX
      is out of bounds.  */
-  const char *include_dir_at (unsigned int index) const
+  const char *include_dir_at (dir_index index) const
   {
-    if (index >= include_dirs.size ())
+    /* Convert directory index number (1-based) to vector index
+       (0-based).  */
+    size_t vec_index = to_underlying (index) - 1;
+
+    if (vec_index >= include_dirs.size ())
       return NULL;
-    return include_dirs[index];
+    return include_dirs[vec_index];
   }
 
-  /* Return the file name at INDEX (0-based).  Returns NULL if INDEX
+  /* Return the file name at INDEX (1-based).  Returns NULL if INDEX
      is out of bounds.  */
-  file_entry *file_name_at (unsigned int index)
+  file_entry *file_name_at (file_name_index index)
   {
-    if (index >= file_names.size ())
+    /* Convert file name index number (1-based) to vector index
+       (0-based).  */
+    size_t vec_index = to_underlying (index) - 1;
+
+    if (vec_index >= file_names.size ())
       return NULL;
-    return &file_names[index];
+    return &file_names[vec_index];
   }
 
   /* Const version of the above.  */
@@ -1167,9 +1185,7 @@ typedef std::unique_ptr<line_header> line_header_up;
 const char *
 file_entry::include_dir (const line_header *lh) const
 {
-  /* lh->include_dirs is 0-based, but the directory index numbers in
-     the statement program are 1-based.  */
-  return lh->include_dir_at (dir_index - 1);
+  return lh->include_dir_at (d_index);
 }
 
 /* When we construct a partial symbol table entry we only
@@ -17603,7 +17619,7 @@ line_header::add_include_dir (const char *include_dir)
 
 void
 line_header::add_file_name (const char *name,
-			    unsigned int dir_index,
+			    dir_index d_index,
 			    unsigned int mod_time,
 			    unsigned int length)
 {
@@ -17611,7 +17627,7 @@ line_header::add_file_name (const char *name,
     fprintf_unfiltered (gdb_stdlog, "Adding file %u: %s\n",
 			(unsigned) file_names.size () + 1, name);
 
-  file_names.emplace_back (name, dir_index, mod_time, length);
+  file_names.emplace_back (name, d_index, mod_time, length);
 }
 
 /* A convenience function to find the proper .debug_line section for a CU.  */
@@ -17648,7 +17664,7 @@ read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
 			const struct comp_unit_head *cu_header,
 			void (*callback) (struct line_header *lh,
 					  const char *name,
-					  unsigned int dir_index,
+					  dir_index d_index,
 					  unsigned int mod_time,
 					  unsigned int length))
 {
@@ -17679,71 +17695,51 @@ read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
 
       for (formati = 0; formati < format_count; formati++)
 	{
-	  ULONGEST content_type, form;
-	  const char *string_trash;
-	  const char **stringp = &string_trash;
-	  unsigned int uint_trash, *uintp = &uint_trash;
-
-	  content_type = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  ULONGEST content_type = read_unsigned_leb128 (abfd, format, &bytes_read);
 	  format += bytes_read;
-	  switch (content_type)
-	    {
-	    case DW_LNCT_path:
-	      stringp = &fe.name;
-	      break;
-	    case DW_LNCT_directory_index:
-	      uintp = &fe.dir_index;
-	      break;
-	    case DW_LNCT_timestamp:
-	      uintp = &fe.mod_time;
-	      break;
-	    case DW_LNCT_size:
-	      uintp = &fe.length;
-	      break;
-	    case DW_LNCT_MD5:
-	      break;
-	    default:
-	      complaint (&symfile_complaints,
-			 _("Unknown format content type %s"),
-			 pulongest (content_type));
-	    }
 
-	  form = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  ULONGEST form  = read_unsigned_leb128 (abfd, format, &bytes_read);
 	  format += bytes_read;
+
+	  gdb::optional<const char *> string;
+	  gdb::optional<unsigned int> uint;
+
 	  switch (form)
 	    {
 	    case DW_FORM_string:
-	      *stringp = read_direct_string (abfd, buf, &bytes_read);
+	      string.emplace (read_direct_string (abfd, buf, &bytes_read));
 	      buf += bytes_read;
 	      break;
 
 	    case DW_FORM_line_strp:
-	      *stringp = read_indirect_line_string (abfd, buf, cu_header, &bytes_read);
+	      string.emplace (read_indirect_line_string (abfd, buf,
+							 cu_header,
+							 &bytes_read));
 	      buf += bytes_read;
 	      break;
 
 	    case DW_FORM_data1:
-	      *uintp = read_1_byte (abfd, buf);
+	      uint.emplace (read_1_byte (abfd, buf));
 	      buf += 1;
 	      break;
 
 	    case DW_FORM_data2:
-	      *uintp = read_2_bytes (abfd, buf);
+	      uint.emplace (read_2_bytes (abfd, buf));
 	      buf += 2;
 	      break;
 
 	    case DW_FORM_data4:
-	      *uintp = read_4_bytes (abfd, buf);
+	      uint.emplace (read_4_bytes (abfd, buf));
 	      buf += 4;
 	      break;
 
 	    case DW_FORM_data8:
-	      *uintp = read_8_bytes (abfd, buf);
+	      uint.emplace (read_8_bytes (abfd, buf));
 	      buf += 8;
 	      break;
 
 	    case DW_FORM_udata:
-	      *uintp = read_unsigned_leb128 (abfd, buf, &bytes_read);
+	      uint.emplace (read_unsigned_leb128 (abfd, buf, &bytes_read));
 	      buf += bytes_read;
 	      break;
 
@@ -17752,9 +17748,35 @@ read_formatted_entries (bfd *abfd, const gdb_byte **bufp,
 		 current GDB.  */
 	      break;
 	    }
+
+	  switch (content_type)
+	    {
+	    case DW_LNCT_path:
+	      if (string.has_value ())
+		fe.name = *string;
+	      break;
+	    case DW_LNCT_directory_index:
+	      if (uint.has_value ())
+		fe.d_index = (dir_index) *uint;
+	      break;
+	    case DW_LNCT_timestamp:
+	      if (uint.has_value ())
+		fe.mod_time = *uint;
+	      break;
+	    case DW_LNCT_size:
+	      if (uint.has_value ())
+		fe.length = *uint;
+	      break;
+	    case DW_LNCT_MD5:
+	      break;
+	    default:
+	      complaint (&symfile_complaints,
+			 _("Unknown format content type %s"),
+			 pulongest (content_type));
+	    }
 	}
 
-      callback (lh, fe.name, fe.dir_index, fe.mod_time, fe.length);
+      callback (lh, fe.name, fe.d_index, fe.mod_time, fe.length);
     }
 
   *bufp = buf;
@@ -17892,7 +17914,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       /* Read directory table.  */
       read_formatted_entries (abfd, &line_ptr, lh.get (), &cu->header,
 			      [] (struct line_header *lh, const char *name,
-				  unsigned int dir_index, unsigned int mod_time,
+				  dir_index d_index, unsigned int mod_time,
 				  unsigned int length)
 	{
 	  lh->add_include_dir (name);
@@ -17901,10 +17923,10 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       /* Read file name table.  */
       read_formatted_entries (abfd, &line_ptr, lh.get (), &cu->header,
 			      [] (struct line_header *lh, const char *name,
-				  unsigned int dir_index, unsigned int mod_time,
+				  dir_index d_index, unsigned int mod_time,
 				  unsigned int length)
 	{
-	  lh->add_file_name (name, dir_index, mod_time, length);
+	  lh->add_file_name (name, d_index, mod_time, length);
 	});
     }
   else
@@ -17920,17 +17942,18 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       /* Read file name table.  */
       while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
 	{
-	  unsigned int dir_index, mod_time, length;
+	  unsigned int mod_time, length;
+	  dir_index d_index;
 
 	  line_ptr += bytes_read;
-	  dir_index = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  d_index = (dir_index) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
 	  mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
 	  length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
 
-	  lh->add_file_name (cur_file, dir_index, mod_time, length);
+	  lh->add_file_name (cur_file, d_index, mod_time, length);
 	}
       line_ptr += bytes_read;
     }
@@ -18036,7 +18059,7 @@ struct lnp_state_machine
   {
     /* lh->file_names is 0-based, but the file name numbers in the
        statement program are 1-based.  */
-    return the_line_header->file_name_at (file - 1);
+    return the_line_header->file_name_at (file);
   }
 
   /* The line number header.  */
@@ -18046,7 +18069,7 @@ struct lnp_state_machine
 
   unsigned char op_index;
   /* The line table index (1-based) of the current file.  */
-  unsigned int file;
+  file_name_index file;
   unsigned int line;
   CORE_ADDR address;
   int is_stmt;
@@ -18206,7 +18229,7 @@ dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
       fprintf_unfiltered (gdb_stdlog,
 			  "Processing actual line %u: file %u,"
 			  " address %s, is_stmt %u, discrim %u\n",
-			  line, state->file,
+			  line, to_underlying (state->file),
 			  paddress (reader->gdbarch, state->address),
 			  is_stmt, discriminator);
     }
@@ -18265,7 +18288,7 @@ init_lnp_state_machine (lnp_state_machine *state,
 
   /* Initialize these according to the DWARF spec.  */
   state->op_index = 0;
-  state->file = 1;
+  state->file = (file_name_index) 1;
   state->line = 1;
   /* Call `gdbarch_adjust_dwarf2_line' on the initial 0 address as if there
      was a line entry for it so that the backend has a chance to adjust it
@@ -18423,12 +18446,13 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		case DW_LNE_define_file:
                   {
                     const char *cur_file;
-                    unsigned int dir_index, mod_time, length;
+		    unsigned int mod_time, length;
+		    dir_index dindex;
 
                     cur_file = read_direct_string (abfd, line_ptr,
 						   &bytes_read);
                     line_ptr += bytes_read;
-                    dir_index =
+                    dindex = (dir_index)
                       read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                     line_ptr += bytes_read;
                     mod_time =
@@ -18437,7 +18461,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
                     length =
                       read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                     line_ptr += bytes_read;
-                    lh->add_file_name (cur_file, dir_index, mod_time, length);
+                    lh->add_file_name (cur_file, dindex, mod_time, length);
                   }
 		  break;
 		case DW_LNE_set_discriminator:
@@ -18501,8 +18525,9 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      break;
 	    case DW_LNS_set_file:
 	      {
-		state_machine.file = read_unsigned_leb128 (abfd, line_ptr,
-							   &bytes_read);
+		state_machine.file
+		  = (file_name_index) read_unsigned_leb128 (abfd, line_ptr,
+							    &bytes_read);
 		line_ptr += bytes_read;
 
 		const file_entry *fe = state_machine.current_file ();
@@ -18866,11 +18891,11 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			  cu);
       if (attr)
 	{
-	  unsigned int file_index = DW_UNSND (attr);
+	  file_name_index file_index = (file_name_index) DW_UNSND (attr);
 	  struct file_entry *fe;
 
-	  if (cu->line_header != NULL && file_index > 0)
-	    fe = cu->line_header->file_name_at (file_index - 1);
+	  if (cu->line_header != NULL)
+	    fe = cu->line_header->file_name_at (file_index);
 	  else
 	    fe = NULL;
 

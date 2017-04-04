@@ -1,5 +1,23 @@
 2017-04-04  Pedro Alves  <palves@redhat.com>
 
+	* common/underlying.h: New file.
+	* dwarf2read.c: Include "common/gdb_optional.h" and
+	"common/underlying.h".
+	(dir_index, file_name_index): New types.
+	(file_entry): Use them.
+	(file_entry::include): Use to_underlying.
+	(line_header::add_file_name): Use dir_index.
+	(read_formatted_entries): Use gdb::optional.  Read form before
+	writting to file_entry.
+	(dwarf_decode_line_header): Use dir_index.
+	(lnp_state_machine::current_file): Use to_underlying.
+	(lnp_state_machine::file): Change type to file_name_index.
+	(dwarf_record_line): Use to_underlying.
+	(init_lnp_state_machine): Use file_name_index.
+	(dwarf_decode_lines_1): Use dir_index and file_name_index.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
 	* common/gdb_optional.h (gdb::optiona): Add operator->, operator*,
 	operator bool, has_value and get methods.
 
