@@ -851,3 +851,19 @@ thread_db_handle_monitor_command (char *mon)
   /* Tell server.c to perform default processing.  */
   return 0;
 }
+
+/* See linux-low.h.  */
+
+void
+thread_db_notice_clone (struct process_info *proc, ptid_t ptid)
+{
+  struct thread_db *thread_db = proc->priv->thread_db;
+
+  /* If the thread layer isn't initialized, return.  It may just
+     be that the program uses clone, but does not use libthread_db.  */
+  if (thread_db == NULL || !thread_db->all_symbols_looked_up)
+    return;
+
+  if (!find_one_thread (ptid))
+    warning ("Cannot find thread after clone.\n");
+}

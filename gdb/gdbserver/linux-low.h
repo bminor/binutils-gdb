@@ -410,4 +410,10 @@ int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
 int thread_db_look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 
+/* Called from linux-low.c when a clone event is detected.  Upon entry,
+   both the clone and the parent should be stopped.  This function does
+   whatever is required have the clone under thread_db's control.  */
+
+void thread_db_notice_clone (struct process_info *proc, ptid_t lwp);
+
 extern int have_ptrace_getregset;

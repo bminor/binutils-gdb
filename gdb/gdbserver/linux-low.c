@@ -656,6 +656,8 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  new_lwp->status_pending = status;
 	}
 
+      thread_db_notice_clone (get_thread_process (event_thr), ptid);
+
       /* Don't report the event.  */
       return 1;
     }
