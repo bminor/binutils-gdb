@@ -119,15 +119,18 @@ _bfd_elf_define_linkage_sym (bfd *abfd,
 	 defined in shared libraries can't be overridden, because we
 	 lose the link to the bfd which is via the symbol section.  */
       h->root.type = bfd_link_hash_new;
+      bh = &h->root;
     }
+  else
+    bh = NULL;
 
-  bh = &h->root;
   bed = get_elf_backend_data (abfd);
   if (!_bfd_generic_link_add_one_symbol (info, abfd, name, BSF_GLOBAL,
 					 sec, 0, NULL, FALSE, bed->collect,
 					 &bh))
     return NULL;
   h = (struct elf_link_hash_entry *) bh;
+  BFD_ASSERT (h != NULL);
   h->def_regular = 1;
   h->non_elf = 0;
   h->root.linker_def = 1;
@@ -12038,24 +12041,28 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       /* Finish up and write out the symbol string table (.strtab)
 	 section.  */
-      Elf_Internal_Shdr *symstrtab_hdr;
+      Elf_Internal_Shdr *symstrtab_hdr = NULL;
       file_ptr off = symtab_hdr->sh_offset + symtab_hdr->sh_size;
 
-      symtab_shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
-      if (symtab_shndx_hdr != NULL && symtab_shndx_hdr->sh_name != 0)
+      if (elf_symtab_shndx_list (abfd))
 	{
-	  symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
-	  symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
-	  symtab_shndx_hdr->sh_addralign = sizeof (Elf_External_Sym_Shndx);
-	  amt = bfd_get_symcount (abfd) * sizeof (Elf_External_Sym_Shndx);
-	  symtab_shndx_hdr->sh_size = amt;
+	  symtab_shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
 
-	  off = _bfd_elf_assign_file_position_for_section (symtab_shndx_hdr,
-							   off, TRUE);
+	  if (symtab_shndx_hdr != NULL && symtab_shndx_hdr->sh_name != 0)
+	    {
+	      symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
+	      symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
+	      symtab_shndx_hdr->sh_addralign = sizeof (Elf_External_Sym_Shndx);
+	      amt = bfd_get_symcount (abfd) * sizeof (Elf_External_Sym_Shndx);
+	      symtab_shndx_hdr->sh_size = amt;
 
-	  if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_bwrite (flinfo.symshndxbuf, amt, abfd) != amt))
-	    return FALSE;
+	      off = _bfd_elf_assign_file_position_for_section (symtab_shndx_hdr,
+							       off, TRUE);
+
+	      if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
+		  || (bfd_bwrite (flinfo.symshndxbuf, amt, abfd) != amt))
+		return FALSE;
+	    }
 	}
 
       symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;

@@ -1,3 +1,11 @@
+2017-04-04  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21342
+	* elflink.c (_bfd_elf_define_linkage_sym): Prevent null pointer
+	dereference.
+	(bfd_elf_final_link): Only initialize the extended symbol index
+	section if there are extended symbol tables to list.
+
 2017-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add elf-properties.lo.
