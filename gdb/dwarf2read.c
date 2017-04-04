@@ -18057,62 +18057,203 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
 
 /* State machine to track the state of the line number program.  */
 
-struct lnp_state_machine
+class lnp_state_machine
 {
+public:
+  /* Initialize a machine state for the start of a line number
+     program.  */
+  lnp_state_machine (gdbarch *arch, line_header *lh, bool record_lines_p);
+
   file_entry *current_file ()
   {
     /* lh->file_names is 0-based, but the file name numbers in the
        statement program are 1-based.  */
-    return the_line_header->file_name_at (file);
+    return m_line_header->file_name_at (m_file);
   }
 
+  /* Record the line in the state machine.  END_SEQUENCE is true if
+     we're processing the end of a sequence.  */
+  void record_line (bool end_sequence);
+
+  /* Check address and if invalid nop-out the rest of the lines in this
+     sequence.  */
+  void check_line_address (struct dwarf2_cu *cu,
+			   const gdb_byte *line_ptr,
+			   CORE_ADDR lowpc, CORE_ADDR address);
+
+  void handle_set_discriminator (unsigned int discriminator)
+  {
+    m_discriminator = discriminator;
+    m_line_has_non_zero_discriminator |= discriminator != 0;
+  }
+
+  /* Handle DW_LNE_set_address.  */
+  void handle_set_address (CORE_ADDR baseaddr, CORE_ADDR address)
+  {
+    m_op_index = 0;
+    address += baseaddr;
+    m_address = gdbarch_adjust_dwarf2_line (m_gdbarch, address, false);
+  }
+
+  /* Handle DW_LNS_advance_pc.  */
+  void handle_advance_pc (CORE_ADDR adjust);
+
+  /* Handle a special opcode.  */
+  void handle_special_opcode (unsigned char op_code);
+
+  /* Handle DW_LNS_advance_line.  */
+  void handle_advance_line (int line_delta)
+  {
+    advance_line (line_delta);
+  }
+
+  /* Handle DW_LNS_set_file.  */
+  void handle_set_file (file_name_index file);
+
+  /* Handle DW_LNS_negate_stmt.  */
+  void handle_negate_stmt ()
+  {
+    m_is_stmt = !m_is_stmt;
+  }
+
+  /* Handle DW_LNS_const_add_pc.  */
+  void handle_const_add_pc ();
+
+  /* Handle DW_LNS_fixed_advance_pc.  */
+  void handle_fixed_advance_pc (CORE_ADDR addr_adj)
+  {
+    m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+    m_op_index = 0;
+  }
+
+  /* Handle DW_LNS_copy.  */
+  void handle_copy ()
+  {
+    record_line (false);
+    m_discriminator = 0;
+  }
+
+  /* Handle DW_LNE_end_sequence.  */
+  void handle_end_sequence ()
+  {
+    m_record_line_callback = ::record_line;
+  }
+
+private:
+  /* Advance the line by LINE_DELTA.  */
+  void advance_line (int line_delta)
+  {
+    m_line += line_delta;
+
+    if (line_delta != 0)
+      m_line_has_non_zero_discriminator = m_discriminator != 0;
+  }
+
+  gdbarch *m_gdbarch;
+
+  /* True if we're recording lines.
+     Otherwise we're building partial symtabs and are just interested in
+     finding include files mentioned by the line number program.  */
+  bool m_record_lines_p;
+
   /* The line number header.  */
-  line_header *the_line_header;
+  line_header *m_line_header;
 
-  /* These are part of the standard DWARF line number state machine.  */
+  /* These are part of the standard DWARF line number state machine,
+     and initialized according to the DWARF spec.  */
 
-  unsigned char op_index;
+  unsigned char m_op_index = 0;
   /* The line table index (1-based) of the current file.  */
-  file_name_index file;
-  unsigned int line;
-  CORE_ADDR address;
-  int is_stmt;
-  unsigned int discriminator;
+  file_name_index m_file = (file_name_index) 1;
+  unsigned int m_line = 1;
+
+  /* These are initialized in the constructor.  */
+
+  CORE_ADDR m_address;
+  bool m_is_stmt;
+  unsigned int m_discriminator;
 
   /* Additional bits of state we need to track.  */
 
   /* The last file that we called dwarf2_start_subfile for.
      This is only used for TLLs.  */
-  unsigned int last_file;
+  unsigned int m_last_file = 0;
   /* The last file a line number was recorded for.  */
-  struct subfile *last_subfile;
+  struct subfile *m_last_subfile = NULL;
 
   /* The function to call to record a line.  */
-  record_line_ftype *record_line;
+  record_line_ftype *m_record_line_callback = NULL;
 
   /* The last line number that was recorded, used to coalesce
      consecutive entries for the same line.  This can happen, for
      example, when discriminators are present.  PR 17276.  */
-  unsigned int last_line;
-  int line_has_non_zero_discriminator;
+  unsigned int m_last_line = 0;
+  bool m_line_has_non_zero_discriminator = false;
 };
 
-/* There's a lot of static state to pass to dwarf_record_line.
-   This keeps it all together.  */
-
-typedef struct
+void
+lnp_state_machine::handle_advance_pc (CORE_ADDR adjust)
 {
-  /* The gdbarch.  */
-  struct gdbarch *gdbarch;
+  CORE_ADDR addr_adj = (((m_op_index + adjust)
+			 / m_line_header->maximum_ops_per_instruction)
+			* m_line_header->minimum_instruction_length);
+  m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  m_op_index = ((m_op_index + adjust)
+		% m_line_header->maximum_ops_per_instruction);
+}
 
-  /* The line number header.  */
-  struct line_header *line_header;
+void
+lnp_state_machine::handle_special_opcode (unsigned char op_code)
+{
+  unsigned char adj_opcode = op_code - m_line_header->opcode_base;
+  CORE_ADDR addr_adj = (((m_op_index
+			  + (adj_opcode / m_line_header->line_range))
+			 / m_line_header->maximum_ops_per_instruction)
+			* m_line_header->minimum_instruction_length);
+  m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  m_op_index = ((m_op_index + (adj_opcode / m_line_header->line_range))
+		% m_line_header->maximum_ops_per_instruction);
 
-  /* Non-zero if we're recording lines.
-     Otherwise we're building partial symtabs and are just interested in
-     finding include files mentioned by the line number program.  */
-  int record_lines_p;
-} lnp_reader_state;
+  int line_delta = (m_line_header->line_base
+		    + (adj_opcode % m_line_header->line_range));
+  advance_line (line_delta);
+  record_line (false);
+  m_discriminator = 0;
+}
+
+void
+lnp_state_machine::handle_set_file (file_name_index file)
+{
+  m_file = file;
+
+  const file_entry *fe = current_file ();
+  if (fe == NULL)
+    dwarf2_debug_line_missing_file_complaint ();
+  else if (m_record_lines_p)
+    {
+      const char *dir = fe->include_dir (m_line_header);
+
+      m_last_subfile = current_subfile;
+      m_line_has_non_zero_discriminator = m_discriminator != 0;
+      dwarf2_start_subfile (fe->name, dir);
+    }
+}
+
+void
+lnp_state_machine::handle_const_add_pc ()
+{
+  CORE_ADDR adjust
+    = (255 - m_line_header->opcode_base) / m_line_header->line_range;
+
+  CORE_ADDR addr_adj
+    = (((m_op_index + adjust)
+	/ m_line_header->maximum_ops_per_instruction)
+       * m_line_header->minimum_instruction_length);
+
+  m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  m_op_index = ((m_op_index + adjust)
+		% m_line_header->maximum_ops_per_instruction);
+}
 
 /* Ignore this record_line request.  */
 
@@ -18213,104 +18354,76 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
   dwarf_record_line_1 (gdbarch, subfile, 0, address, p_record_line);
 }
 
-/* Record the line in STATE.
-   END_SEQUENCE is non-zero if we're processing the end of a sequence.  */
-
-static void
-dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
-		   int end_sequence)
+void
+lnp_state_machine::record_line (bool end_sequence)
 {
-  const struct line_header *lh = reader->line_header;
-  unsigned int line, discriminator;
-  int is_stmt;
-
-  line = state->line;
-  is_stmt = state->is_stmt;
-  discriminator = state->discriminator;
-
   if (dwarf_line_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Processing actual line %u: file %u,"
 			  " address %s, is_stmt %u, discrim %u\n",
-			  line, to_underlying (state->file),
-			  paddress (reader->gdbarch, state->address),
-			  is_stmt, discriminator);
+			  m_line, to_underlying (m_file),
+			  paddress (m_gdbarch, m_address),
+			  m_is_stmt, m_discriminator);
     }
 
-  file_entry *fe = state->current_file ();
+  file_entry *fe = current_file ();
 
   if (fe == NULL)
     dwarf2_debug_line_missing_file_complaint ();
   /* For now we ignore lines not starting on an instruction boundary.
      But not when processing end_sequence for compatibility with the
      previous version of the code.  */
-  else if (state->op_index == 0 || end_sequence)
+  else if (m_op_index == 0 || end_sequence)
     {
       fe->included_p = 1;
-      if (reader->record_lines_p && is_stmt)
+      if (m_record_lines_p && m_is_stmt)
 	{
-	  if (state->last_subfile != current_subfile || end_sequence)
+	  if (m_last_subfile != current_subfile || end_sequence)
 	    {
-	      dwarf_finish_line (reader->gdbarch, state->last_subfile,
-				 state->address, state->record_line);
+	      dwarf_finish_line (m_gdbarch, m_last_subfile,
+				 m_address, m_record_line_callback);
 	    }
 
 	  if (!end_sequence)
 	    {
-	      if (dwarf_record_line_p (line, state->last_line,
-				       state->line_has_non_zero_discriminator,
-				       state->last_subfile))
+	      if (dwarf_record_line_p (m_line, m_last_line,
+				       m_line_has_non_zero_discriminator,
+				       m_last_subfile))
 		{
-		  dwarf_record_line_1 (reader->gdbarch, current_subfile,
-				       line, state->address,
-				       state->record_line);
+		  dwarf_record_line_1 (m_gdbarch, current_subfile,
+				       m_line, m_address,
+				       m_record_line_callback);
 		}
-	      state->last_subfile = current_subfile;
-	      state->last_line = line;
+	      m_last_subfile = current_subfile;
+	      m_last_line = m_line;
 	    }
 	}
     }
 }
 
-/* Initialize STATE for the start of a line number program.  */
-
-static void
-init_lnp_state_machine (lnp_state_machine *state,
-			const lnp_reader_state *reader)
+lnp_state_machine::lnp_state_machine (gdbarch *arch, line_header *lh,
+				      bool record_lines_p)
 {
-  memset (state, 0, sizeof (*state));
+  m_gdbarch = arch;
+  m_record_lines_p = record_lines_p;
+  m_line_header = lh;
 
-  /* Just starting, there is no "last file".  */
-  state->last_file = 0;
-  state->last_subfile = NULL;
+  m_record_line_callback = ::record_line;
 
-  state->record_line = record_line;
-
-  state->last_line = 0;
-  state->line_has_non_zero_discriminator = 0;
-
-  /* Initialize these according to the DWARF spec.  */
-  state->op_index = 0;
-  state->file = (file_name_index) 1;
-  state->line = 1;
   /* Call `gdbarch_adjust_dwarf2_line' on the initial 0 address as if there
      was a line entry for it so that the backend has a chance to adjust it
      and also record it in case it needs it.  This is currently used by MIPS
      code, cf. `mips_adjust_dwarf2_line'.  */
-  state->address = gdbarch_adjust_dwarf2_line (reader->gdbarch, 0, 0);
-  state->is_stmt = reader->line_header->default_is_stmt;
-  state->discriminator = 0;
-  state->the_line_header = reader->line_header;
+  m_address = gdbarch_adjust_dwarf2_line (arch, 0, 0);
+  m_is_stmt = lh->default_is_stmt;
+  m_discriminator = 0;
 }
 
-/* Check address and if invalid nop-out the rest of the lines in this
-   sequence.  */
-
-static void
-check_line_address (struct dwarf2_cu *cu, lnp_state_machine *state,
-		    const gdb_byte *line_ptr,
-		    CORE_ADDR lowpc, CORE_ADDR address)
+void
+lnp_state_machine::check_line_address (struct dwarf2_cu *cu,
+				       const gdb_byte *line_ptr,
+				       CORE_ADDR lowpc, CORE_ADDR address)
 {
   /* If address < lowpc then it's not a usable value, it's outside the
      pc range of the CU.  However, we restrict the test to only address
@@ -18328,9 +18441,9 @@ check_line_address (struct dwarf2_cu *cu, lnp_state_machine *state,
       complaint (&symfile_complaints,
 		 _(".debug_line address at offset 0x%lx is 0 [in module %s]"),
 		 line_offset, objfile_name (objfile));
-      state->record_line = noop_record_line;
-      /* Note: sm.record_line is left as noop_record_line
-	 until we see DW_LNE_end_sequence.  */
+      m_record_line_callback = noop_record_line;
+      /* Note: record_line_callback is left as noop_record_line until
+	 we see DW_LNE_end_sequence.  */
     }
 }
 
@@ -18351,30 +18464,23 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  /* Non-zero if we're recording line info (as opposed to building partial
-     symtabs).  */
-  int record_lines_p = !decode_for_pst_p;
-  /* A collection of things we need to pass to dwarf_record_line.  */
-  lnp_reader_state reader_state;
+  /* True if we're recording line info (as opposed to building partial
+     symtabs and just interested in finding include files mentioned by
+     the line number program).  */
+  bool record_lines_p = !decode_for_pst_p;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   line_ptr = lh->statement_program_start;
   line_end = lh->statement_program_end;
 
-  reader_state.gdbarch = gdbarch;
-  reader_state.line_header = lh;
-  reader_state.record_lines_p = record_lines_p;
-
   /* Read the statement sequences until there's nothing left.  */
   while (line_ptr < line_end)
     {
-      /* The DWARF line number program state machine.  */
-      lnp_state_machine state_machine;
-      int end_sequence = 0;
-
-      /* Reset the state machine at the start of each sequence.  */
-      init_lnp_state_machine (&state_machine, &reader_state);
+      /* The DWARF line number program state machine.  Reset the state
+	 machine at the start of each sequence.  */
+      lnp_state_machine state_machine (gdbarch, lh, record_lines_p);
+      bool end_sequence = false;
 
       if (record_lines_p)
 	{
@@ -18395,28 +18501,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	  if (op_code >= lh->opcode_base)
 	    {
 	      /* Special opcode.  */
-	      unsigned char adj_opcode;
-	      CORE_ADDR addr_adj;
-	      int line_delta;
-
-	      adj_opcode = op_code - lh->opcode_base;
-	      addr_adj = (((state_machine.op_index
-			    + (adj_opcode / lh->line_range))
-			   / lh->maximum_ops_per_instruction)
-			  * lh->minimum_instruction_length);
-	      state_machine.address
-		+= gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
-	      state_machine.op_index = ((state_machine.op_index
-					 + (adj_opcode / lh->line_range))
-					% lh->maximum_ops_per_instruction);
-	      line_delta = lh->line_base + (adj_opcode % lh->line_range);
-	      state_machine.line += line_delta;
-	      if (line_delta != 0)
-		state_machine.line_has_non_zero_discriminator
-		  = state_machine.discriminator != 0;
-
-	      dwarf_record_line (&reader_state, &state_machine, 0);
-	      state_machine.discriminator = 0;
+	      state_machine.handle_special_opcode (op_code);
 	    }
 	  else switch (op_code)
 	    {
@@ -18430,21 +18515,18 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      switch (extended_op)
 		{
 		case DW_LNE_end_sequence:
-		  state_machine.record_line = record_line;
-		  end_sequence = 1;
+		  state_machine.handle_end_sequence ();
+		  end_sequence = true;
 		  break;
 		case DW_LNE_set_address:
 		  {
 		    CORE_ADDR address
 		      = read_address (abfd, line_ptr, cu, &bytes_read);
-
 		    line_ptr += bytes_read;
-		    check_line_address (cu, &state_machine, line_ptr,
-					lowpc, address);
-		    state_machine.op_index = 0;
-		    address += baseaddr;
-		    state_machine.address
-		      = gdbarch_adjust_dwarf2_line (gdbarch, address, 0);
+
+		    state_machine.check_line_address (cu, line_ptr,
+						      lowpc, address);
+		    state_machine.handle_set_address (baseaddr, address);
 		  }
 		  break;
 		case DW_LNE_define_file:
@@ -18469,16 +18551,19 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
                   }
 		  break;
 		case DW_LNE_set_discriminator:
-		  /* The discriminator is not interesting to the debugger;
-		     just ignore it.  We still need to check its value though:
-		     if there are consecutive entries for the same
-		     (non-prologue) line we want to coalesce them.
-		     PR 17276.  */
-		  state_machine.discriminator
-		    = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-		  state_machine.line_has_non_zero_discriminator
-		    |= state_machine.discriminator != 0;
-		  line_ptr += bytes_read;
+		  {
+		    /* The discriminator is not interesting to the
+		       debugger; just ignore it.  We still need to
+		       check its value though:
+		       if there are consecutive entries for the same
+		       (non-prologue) line we want to coalesce them.
+		       PR 17276.  */
+		    unsigned int discr
+		      = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		    line_ptr += bytes_read;
+
+		    state_machine.handle_set_discriminator (discr);
+		  }
 		  break;
 		default:
 		  complaint (&symfile_complaints,
@@ -18496,59 +18581,34 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		}
 	      break;
 	    case DW_LNS_copy:
-	      dwarf_record_line (&reader_state, &state_machine, 0);
-	      state_machine.discriminator = 0;
+	      state_machine.handle_copy ();
 	      break;
 	    case DW_LNS_advance_pc:
 	      {
 		CORE_ADDR adjust
 		  = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-		CORE_ADDR addr_adj;
-
-		addr_adj = (((state_machine.op_index + adjust)
-			     / lh->maximum_ops_per_instruction)
-			    * lh->minimum_instruction_length);
-		state_machine.address
-		  += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
-		state_machine.op_index = ((state_machine.op_index + adjust)
-					  % lh->maximum_ops_per_instruction);
 		line_ptr += bytes_read;
+
+		state_machine.handle_advance_pc (adjust);
 	      }
 	      break;
 	    case DW_LNS_advance_line:
 	      {
 		int line_delta
 		  = read_signed_leb128 (abfd, line_ptr, &bytes_read);
-
-		state_machine.line += line_delta;
-		if (line_delta != 0)
-		  state_machine.line_has_non_zero_discriminator
-		    = state_machine.discriminator != 0;
 		line_ptr += bytes_read;
+
+		state_machine.handle_advance_line (line_delta);
 	      }
 	      break;
 	    case DW_LNS_set_file:
 	      {
-		state_machine.file
+		file_name_index file
 		  = (file_name_index) read_unsigned_leb128 (abfd, line_ptr,
 							    &bytes_read);
 		line_ptr += bytes_read;
 
-		const file_entry *fe = state_machine.current_file ();
-		if (fe == NULL)
-		  dwarf2_debug_line_missing_file_complaint ();
-		else
-		  {
-		    if (record_lines_p)
-		      {
-			const char *dir = fe->include_dir (lh);
-
-			state_machine.last_subfile = current_subfile;
-			state_machine.line_has_non_zero_discriminator
-			  = state_machine.discriminator != 0;
-			dwarf2_start_subfile (fe->name, dir);
-		      }
-		  }
+		state_machine.handle_set_file (file);
 	      }
 	      break;
 	    case DW_LNS_set_column:
@@ -18556,7 +18616,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_negate_stmt:
-	      state_machine.is_stmt = (!state_machine.is_stmt);
+	      state_machine.handle_negate_stmt ();
 	      break;
 	    case DW_LNS_set_basic_block:
 	      break;
@@ -18566,28 +18626,14 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	       instruction length since special opcode 255 would have
 	       scaled the increment.  */
 	    case DW_LNS_const_add_pc:
-	      {
-		CORE_ADDR adjust = (255 - lh->opcode_base) / lh->line_range;
-		CORE_ADDR addr_adj;
-
-		addr_adj = (((state_machine.op_index + adjust)
-			     / lh->maximum_ops_per_instruction)
-			    * lh->minimum_instruction_length);
-		state_machine.address
-		  += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
-		state_machine.op_index = ((state_machine.op_index + adjust)
-					  % lh->maximum_ops_per_instruction);
-	      }
+	      state_machine.handle_const_add_pc ();
 	      break;
 	    case DW_LNS_fixed_advance_pc:
 	      {
-		CORE_ADDR addr_adj;
-
-		addr_adj = read_2_bytes (abfd, line_ptr);
-		state_machine.address
-		  += gdbarch_adjust_dwarf2_line (gdbarch, addr_adj, 1);
-		state_machine.op_index = 0;
+		CORE_ADDR addr_adj = read_2_bytes (abfd, line_ptr);
 		line_ptr += 2;
+
+		state_machine.handle_fixed_advance_pc (addr_adj);
 	      }
 	      break;
 	    default:
@@ -18609,7 +18655,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 
       /* We got a DW_LNE_end_sequence (or we ran off the end of the buffer,
 	 in which case we still finish recording the last line).  */
-      dwarf_record_line (&reader_state, &state_machine, 1);
+      state_machine.record_line (true);
     }
 }
 

@@ -1,5 +1,28 @@
 2017-04-04  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (lnp_state_machine): Now a class.  Initialize all
+	data fields, make them private and add "m_" prefixes.
+	(lnp_state_machine::lnp_state_machine): New ctor.
+	(record_line, check_line_address, handle_set_discriminator)
+	(handle_set_address, handle_advance_pc, handle_special_opcode)
+	(handle_advance_line, handle_set_file, handle_negate_stmt)
+	(handle_const_add_pc, handle_fixed_advance_pc, handle_copy)
+	(end_sequence, advance_line): New methods.
+	(m_gdbarch, m_record_lines_p): New fields.
+	(lnp_reader_state): Delete.
+	(dwarf_record_line): Rename to ...
+	(lnp_state_machine::record_line): ... adjust.
+	(init_lnp_state_machine): Delete.
+	(lnp_state_machine::lnp_state_machine): New.
+	(check_line_address): Rename to ...
+	(lnp_state_machine::check_line_address): This.
+	(dwarf_decode_lines_1): Remove reference to "reader_state".
+	Adjust lnp_state_machine having a non-default ctor.  Use bool.
+	State machine internal state manipulation moved to
+	lnp_state_machine methods.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/offset-type-selftests.c.
 	(SUBDIR_UNITTESTS_OBS): Add offset-type-selftests.o.
