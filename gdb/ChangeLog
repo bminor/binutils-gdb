@@ -1,3 +1,8 @@
+2017-05-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* frame.c (get_frame_register_bytes): Unwind using value.
+	(put_frame_register_bytes): Likewise.
+
 2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* auto-load.c (auto_load_section_scripts): Check SEC_HAS_CONTENTS.
