@@ -1,3 +1,9 @@
+2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21352
+	* tracefile.c (tsave_command): Fix argument parsing for '-r'
+	option.
+
 2017-04-05  Yao Qi  <yao.qi@linaro.org>
 
 	* frame.c (frame_unwind_register_unsigned): Call
