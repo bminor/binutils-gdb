@@ -106,10 +106,10 @@ mi_cmd_info_os (const char *command, char **argv, int argc)
   switch (argc)
     {
     case 0:
-      info_osdata_command ("", 0);
+      info_osdata (NULL);
       break;
     case 1:
-      info_osdata_command (argv[0], 0);
+      info_osdata (argv[0]);
       break;
     default:
       error (_("Usage: -info-os [INFOTYPE]"));

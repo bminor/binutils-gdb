@@ -1,5 +1,16 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-cmd-info.c (mi_cmd_info_os): Call info_osdata instead of
+	info_osdata_command.
+	* osdata.c (info_osdata_command): Rename to ...
+	(info_osdata): ... this.  Constify 'type' parameter, and remove
+	the 'from_tty' parameter.  Accept NULL TYPE.
+	(info_osdata_command): New function.
+	* osdata.h (info_osdata_command): Remove declaration.
+	(info_osdata): New declaration.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* mi/mi-cmd-break.c (mi_cmd_break_insert_1, mi_cmd_break_insert)
 	(mi_cmd_dprintf_insert, mi_cmd_break_passcount)
 	(mi_cmd_break_watch, mi_cmd_break_commands): Constify 'command'
