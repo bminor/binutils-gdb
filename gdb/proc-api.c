@@ -54,8 +54,8 @@
 
 struct trans {
   long value;                   /* The numeric value */
-  char *name;                   /* The equivalent symbolic value */
-  char *desc;                   /* Short description of value */
+  const char *name;             /* The equivalent symbolic value */
+  const char *desc;             /* Short description of value */
 };
 
 static int   procfs_trace    = 0;
@@ -733,7 +733,7 @@ wait_with_trace (int *wstat, char *file, int line)
 }
 
 void
-procfs_note (char *msg, char *file, int line)
+procfs_note (const char *msg, const char *file, int line)
 {
   prepare_to_trace ();
   if (procfs_trace)

@@ -1,5 +1,18 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* proc-api.c (struct trans): Constify.
+	(procfs_note): Constify.
+	* proc-events.c (struct trans, syscall_table):
+	* proc-flags.c (struct trans): Constify.
+	* proc-utils.h (procfs_note): Constify.
+	* proc-why.c (struct trans): Constify.
+	* procfs.c (dead_procinfo, find_syscall, proc_warn, proc_error)
+	(procfs_detach): Constify.
+	* sol-thread.c (struct string_map): Constify.
+	(td_err_string, td_state_string): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* proc-api.c (procfs_filename): Don't initialize
         procfs_filename.
 	(prepare_to_trace): Assume procfs_filename is non-NULL.
