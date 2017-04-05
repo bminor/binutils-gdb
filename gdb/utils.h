@@ -298,7 +298,7 @@ extern void (*deprecated_error_begin_hook) (void);
 
 /* Message to be printed before the warning message, when a warning occurs.  */
 
-extern char *warning_pre_print;
+extern const char *warning_pre_print;
 
 extern void error_stream (const string_file &) ATTRIBUTE_NORETURN;
 

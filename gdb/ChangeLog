@@ -1,5 +1,12 @@
 2017-04-05  Pedro Alves	 <palves@redhat.com>
 
+	* main.c (captured_main_1): Use gdb::unique_xmalloc_ptr to manage
+	the memory of the temporary warning_pre_print override.
+	* utils.c (warning_pre_print): Constify.
+	* utils.h (warning_pre_print): Constify.
+
+2017-04-05  Pedro Alves	 <palves@redhat.com>
+
 	* cli/cli-cmds.c (shell_escape): Constify 'arg' parameter.
 	(shell_command): New function.
 	(make_command): Use std::string.

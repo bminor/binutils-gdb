@@ -122,7 +122,7 @@ show_sevenbit_strings (struct ui_file *file, int from_tty,
 
 /* String to be printed before warning messages, if any.  */
 
-char *warning_pre_print = "\nwarning: ";
+const char *warning_pre_print = "\nwarning: ";
 
 int pagination_enabled = 1;
 static void
