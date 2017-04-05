@@ -1,5 +1,13 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* macroexp.c (macro_buffer::shared): Now a bool.
+	(init_buffer): Update.
+	(init_shared_buffer): Constify 'addr' parameter.
+	(substitute_args, expand, macro_expand, macro_expand_next): Remove
+	casts.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* arm-tdep.c (show_disassembly_style_sfunc): Constify local.
 	* disasm.c (set_disassembler_options): Constify local.
 	* i386-tdep.c (i386_print_insn): Remove cast and FIXME comment.
