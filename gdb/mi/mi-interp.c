@@ -202,7 +202,7 @@ mi_interp::exec (const char *command)
 }
 
 void
-mi_cmd_interpreter_exec (char *command, char **argv, int argc)
+mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
   int i;

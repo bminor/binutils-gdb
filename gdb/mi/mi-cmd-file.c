@@ -34,7 +34,7 @@
    current file being executed.  */
 
 void
-mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
+mi_cmd_file_list_exec_source_file (const char *command, char **argv, int argc)
 {
   struct symtab_and_line st;
   struct ui_out *uiout = current_uiout;
@@ -81,7 +81,7 @@ print_partial_file_name (const char *filename, const char *fullname,
 }
 
 void
-mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
+mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct compunit_symtab *cu;
@@ -114,7 +114,7 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
 /* See mi-cmds.h.  */
 
 void
-mi_cmd_file_list_shared_libraries (char *command, char **argv, int argc)
+mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   const char *pattern;

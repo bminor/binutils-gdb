@@ -167,7 +167,7 @@ mi_argv_to_format (char **argv, int argc)
    If not, it will insert other type breakpoint.  */
 
 static void
-mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
+mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 {
   char *address = NULL;
   int hardware = 0;
@@ -365,7 +365,7 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
    See the MI manual for the list of possible options.  */
 
 void
-mi_cmd_break_insert (char *command, char **argv, int argc)
+mi_cmd_break_insert (const char *command, char **argv, int argc)
 {
   mi_cmd_break_insert_1 (0, command, argv, argc);
 }
@@ -374,7 +374,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
    See the MI manual for the list of possible options.  */
 
 void
-mi_cmd_dprintf_insert (char *command, char **argv, int argc)
+mi_cmd_dprintf_insert (const char *command, char **argv, int argc)
 {
   mi_cmd_break_insert_1 (1, command, argv, argc);
 }
@@ -387,7 +387,7 @@ enum wp_type
 };
 
 void
-mi_cmd_break_passcount (char *command, char **argv, int argc)
+mi_cmd_break_passcount (const char *command, char **argv, int argc)
 {
   int n;
   int p;
@@ -418,7 +418,7 @@ mi_cmd_break_passcount (char *command, char **argv, int argc)
    -break-watch -a <expr> --> insert an access wp.  */
 
 void
-mi_cmd_break_watch (char *command, char **argv, int argc)
+mi_cmd_break_watch (const char *command, char **argv, int argc)
 {
   char *expr = NULL;
   enum wp_type type = REG_WP;
@@ -496,7 +496,7 @@ mi_read_next_line (void)
 }
 
 void
-mi_cmd_break_commands (char *command, char **argv, int argc)
+mi_cmd_break_commands (const char *command, char **argv, int argc)
 {
   struct command_line *break_command;
   char *endptr;
