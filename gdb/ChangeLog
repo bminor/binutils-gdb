@@ -1,3 +1,8 @@
+2017-04-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/ptid.c (ptid_lwp_p, ptid_tid_p): Remove comparison with
+	minus_one_ptid and null_ptid.
+
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
 	* warning.m4 (build_warnings): Remove -Wno-write-strings.

@@ -97,10 +97,6 @@ ptid_is_pid (ptid_t ptid)
 int
 ptid_lwp_p (ptid_t ptid)
 {
-  if (ptid_equal (minus_one_ptid, ptid)
-      || ptid_equal (null_ptid, ptid))
-    return 0;
-
   return (ptid_get_lwp (ptid) != 0);
 }
 
@@ -109,10 +105,6 @@ ptid_lwp_p (ptid_t ptid)
 int
 ptid_tid_p (ptid_t ptid)
 {
-  if (ptid_equal (minus_one_ptid, ptid)
-      || ptid_equal (null_ptid, ptid))
-    return 0;
-
   return (ptid_get_tid (ptid) != 0);
 }
 
