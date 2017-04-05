@@ -1,3 +1,7 @@
+2017-05-03  Kito Cheng  <kito.cheng@gmail.com>
+
+	* riscv-dis.c (print_insn_args): Handle 'Co' operands.
+
 2017-05-01  Michael Clark  <michaeljclark@mac.com>
 
 	* riscv-opc.c (riscv_opcodes) <call>: Use RA not T1 as a temporary
