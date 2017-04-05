@@ -130,7 +130,8 @@ if { [check_gc_sections_available] } {
 	    "$LFLAGS -shared -T pr21233.ld" "" "$AFLAGS_PIC" \
 	    {pr21233-l.s} \
 	    {{readelf --dyn-syms pr21233-l.sd}} \
-	    "libpr21233.so"] \
+	    "libpr21233.so"]]
+    run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
 	    "$LFLAGS --gc-sections -e foo --undefined=bar -T pr21233.ld" \
@@ -152,7 +153,7 @@ if { [check_gc_sections_available] } {
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
-	    "pr21233-3"]]
+	     "pr21233-3"]] "cris*-*-*"
 }
 
 # Check to see if the C compiler works

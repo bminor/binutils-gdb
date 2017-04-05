@@ -1,3 +1,9 @@
+2017-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/21233
+	* testsuite/ld-elf/shared.exp: Xfail all PR21233 tests but the
+	first test for cris*-*-*.
+
 2017-04-04  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/21233
