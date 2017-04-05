@@ -47,7 +47,7 @@ create_event_object (PyTypeObject *py_type)
    function acquires a new reference to ATTR.  */
 
 int
-evpy_add_attribute (PyObject *event, char *name, PyObject *attr)
+evpy_add_attribute (PyObject *event, const char *name, PyObject *attr)
 {
   return PyObject_SetAttrString (event, name, attr);
 }
@@ -67,7 +67,7 @@ gdbpy_initialize_event (void)
 
 int
 gdbpy_initialize_event_generic (PyTypeObject *type,
-                                char *name)
+                                const char *name)
 {
   if (PyType_Ready (type) < 0)
     return -1;

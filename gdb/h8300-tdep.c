@@ -954,7 +954,7 @@ h8300_register_name (struct gdbarch *gdbarch, int regno)
 {
   /* The register names change depending on which h8300 processor
      type is selected.  */
-  static char *register_names[] = {
+  static const char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6",
     "sp", "", "pc", "cycles", "tick", "inst",
     "ccr",			/* pseudo register */
@@ -971,7 +971,7 @@ h8300_register_name (struct gdbarch *gdbarch, int regno)
 static const char *
 h8300s_register_name (struct gdbarch *gdbarch, int regno)
 {
-  static char *register_names[] = {
+  static const char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",
     "sp", "", "pc", "cycles", "", "tick", "inst",
     "mach", "macl",
@@ -989,7 +989,7 @@ h8300s_register_name (struct gdbarch *gdbarch, int regno)
 static const char *
 h8300sx_register_name (struct gdbarch *gdbarch, int regno)
 {
-  static char *register_names[] = {
+  static const char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",
     "sp", "", "pc", "cycles", "", "tick", "inst",
     "mach", "macl", "sbr", "vbr",

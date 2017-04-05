@@ -41,7 +41,7 @@ static int bppy_live;
 gdbpy_breakpoint_object *bppy_pending_object;
 
 /* Function that is called when a Python condition is evaluated.  */
-static char * const stop_func = "stop";
+static const char stop_func[] = "stop";
 
 /* This is used to initialize various gdb.bp_* constants.  */
 struct pybp_code
@@ -400,7 +400,7 @@ bppy_get_location (PyObject *self, void *closure)
 static PyObject *
 bppy_get_expression (PyObject *self, void *closure)
 {
-  char *str;
+  const char *str;
   gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
   struct watchpoint *wp;
 

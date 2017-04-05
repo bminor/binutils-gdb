@@ -509,7 +509,7 @@ complete_set_gnutarget (struct cmd_list_element *cmd,
 
 /* Set the gnutarget.  */
 void
-set_gnutarget (char *newtarget)
+set_gnutarget (const char *newtarget)
 {
   if (gnutarget_string != NULL)
     xfree (gnutarget_string);

@@ -356,7 +356,7 @@ print_percentage (int portion, int total)
    BCACHE holds.  Statistics are printed using `printf_filtered' and
    its ilk.  */
 void
-print_bcache_statistics (struct bcache *c, char *type)
+print_bcache_statistics (struct bcache *c, const char *type)
 {
   int occupied_buckets;
   int max_chain_length;

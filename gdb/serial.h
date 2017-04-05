@@ -259,7 +259,7 @@ struct serial
 
 struct serial_ops
   {
-    char *name;
+    const char *name;
     int (*open) (struct serial *, const char *name);
     void (*close) (struct serial *);
     int (*fdopen) (struct serial *, int fd);

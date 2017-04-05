@@ -103,7 +103,7 @@ typedef struct
 
 typedef struct 
 {
-  char* name;             	/* Register name.  */
+  const char *name;            	/* Register name.  */
   int offset;             	/* Offset.  */
   xtensa_register_type_t type;  /* Register type.  */
   xtensa_register_group_t group;/* Register group.  */

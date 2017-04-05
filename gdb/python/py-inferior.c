@@ -576,7 +576,10 @@ get_buffer (PyObject *self, Py_buffer *buf, int flags)
   ret = PyBuffer_FillInfo (buf, self, membuf_obj->buffer,
 			   membuf_obj->length, 0,
 			   PyBUF_CONTIG);
-  buf->format = "c";
+
+  /* Despite the documentation saying this field is a "const char *",
+     in Python 3.4 at least, it's really a "char *".  */
+  buf->format = (char *) "c";
 
   return ret;
 }

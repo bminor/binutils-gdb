@@ -843,7 +843,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	}
       else
 	{
-	  char *access = NULL;
+	  const char *access = NULL;
 	  int children[3];
 
 	  cplus_class_num_children (type, children);

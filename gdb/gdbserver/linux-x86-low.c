@@ -1067,7 +1067,7 @@ append_insns (CORE_ADDR *to, size_t len, const unsigned char *buf)
 }
 
 static int
-push_opcode (unsigned char *buf, char *op)
+push_opcode (unsigned char *buf, const char *op)
 {
   unsigned char *buf_org = buf;
 

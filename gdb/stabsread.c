@@ -85,14 +85,14 @@ struct field_info
   };
 
 static void
-read_one_struct_field (struct field_info *, char **, char *,
+read_one_struct_field (struct field_info *, const char **, const char *,
 		       struct type *, struct objfile *);
 
 static struct type *dbx_alloc_type (int[2], struct objfile *);
 
-static long read_huge_number (char **, int, int *, int);
+static long read_huge_number (const char **, int, int *, int);
 
-static struct type *error_type (char **, struct objfile *);
+static struct type *error_type (const char **, struct objfile *);
 
 static void
 patch_block_stabs (struct pending *, struct pending_stabs *,
@@ -100,35 +100,37 @@ patch_block_stabs (struct pending *, struct pending_stabs *,
 
 static void fix_common_block (struct symbol *, CORE_ADDR);
 
-static int read_type_number (char **, int *);
+static int read_type_number (const char **, int *);
 
-static struct type *read_type (char **, struct objfile *);
+static struct type *read_type (const char **, struct objfile *);
 
-static struct type *read_range_type (char **, int[2], int, struct objfile *);
+static struct type *read_range_type (const char **, int[2],
+				     int, struct objfile *);
 
-static struct type *read_sun_builtin_type (char **, int[2], struct objfile *);
+static struct type *read_sun_builtin_type (const char **,
+					   int[2], struct objfile *);
 
-static struct type *read_sun_floating_type (char **, int[2],
+static struct type *read_sun_floating_type (const char **, int[2],
 					    struct objfile *);
 
-static struct type *read_enum_type (char **, struct type *, struct objfile *);
+static struct type *read_enum_type (const char **, struct type *, struct objfile *);
 
 static struct type *rs6000_builtin_type (int, struct objfile *);
 
 static int
-read_member_functions (struct field_info *, char **, struct type *,
+read_member_functions (struct field_info *, const char **, struct type *,
 		       struct objfile *);
 
 static int
-read_struct_fields (struct field_info *, char **, struct type *,
+read_struct_fields (struct field_info *, const char **, struct type *,
 		    struct objfile *);
 
 static int
-read_baseclasses (struct field_info *, char **, struct type *,
+read_baseclasses (struct field_info *, const char **, struct type *,
 		  struct objfile *);
 
 static int
-read_tilde_fields (struct field_info *, char **, struct type *,
+read_tilde_fields (struct field_info *, const char **, struct type *,
 		   struct objfile *);
 
 static int attach_fn_fields_to_type (struct field_info *, struct type *);
@@ -136,24 +138,25 @@ static int attach_fn_fields_to_type (struct field_info *, struct type *);
 static int attach_fields_to_type (struct field_info *, struct type *,
 				  struct objfile *);
 
-static struct type *read_struct_type (char **, struct type *,
+static struct type *read_struct_type (const char **, struct type *,
                                       enum type_code,
 				      struct objfile *);
 
-static struct type *read_array_type (char **, struct type *,
+static struct type *read_array_type (const char **, struct type *,
 				     struct objfile *);
 
-static struct field *read_args (char **, int, struct objfile *, int *, int *);
+static struct field *read_args (const char **, int, struct objfile *,
+				int *, int *);
 
 static void add_undefined_type (struct type *, int[2]);
 
 static int
-read_cpp_abbrev (struct field_info *, char **, struct type *,
+read_cpp_abbrev (struct field_info *, const char **, struct type *,
 		 struct objfile *);
 
-static char *find_name_end (char *name);
+static const char *find_name_end (const char *name);
 
-static int process_reference (char **string);
+static int process_reference (const char **string);
 
 void stabsread_clear_cache (void);
 
@@ -381,7 +384,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 {
   int ii;
   char *name;
-  char *pp;
+  const char *pp;
   struct symbol *sym;
 
   if (stabs)
@@ -461,7 +464,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
    Returns 0 for success, -1 for error.  */
 
 static int
-read_type_number (char **pp, int *typenums)
+read_type_number (const char **pp, int *typenums)
 {
   int nbits;
 
@@ -496,7 +499,7 @@ read_type_number (char **pp, int *typenums)
 
 struct ref_map
 {
-  char *stabs;
+  const char *stabs;
   CORE_ADDR value;
   struct symbol *sym;
 };
@@ -528,7 +531,7 @@ stabsread_clear_cache (void)
    find them, using their reference numbers as our index.
    These will be used later when we resolve references.  */
 void
-ref_add (int refnum, struct symbol *sym, char *stabs, CORE_ADDR value)
+ref_add (int refnum, struct symbol *sym, const char *stabs, CORE_ADDR value)
 {
   if (ref_count == 0)
     ref_chunk = 0;
@@ -563,9 +566,9 @@ ref_search (int refnum)
    reference number.  Move STRING beyond the reference id.  */
 
 static int
-process_reference (char **string)
+process_reference (const char **string)
 {
-  char *p;
+  const char *p;
   int refnum = 0;
 
   if (**string != '#')
@@ -588,9 +591,9 @@ process_reference (char **string)
    definition for later use.  Return the reference number.  */
 
 int
-symbol_reference_defined (char **string)
+symbol_reference_defined (const char **string)
 {
-  char *p = *string;
+  const char *p = *string;
   int refnum = 0;
 
   refnum = process_reference (&p);
@@ -641,12 +644,12 @@ static int stab_register_index;
 static int stab_regparm_index;
 
 struct symbol *
-define_symbol (CORE_ADDR valu, char *string, int desc, int type,
+define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	       struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol *sym;
-  char *p = (char *) find_name_end (string);
+  const char *p = find_name_end (string);
   int deftype;
   int synonym = 0;
   int i;
@@ -976,7 +979,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  struct type *ftype = SYMBOL_TYPE (sym);
 	  int nsemi = 0;
 	  int nparams = 0;
-	  char *p1 = p;
+	  const char *p1 = p;
 
 	  /* Obtain a worst case guess for the number of arguments
 	     by counting the semicolons.  */
@@ -1490,7 +1493,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
    debugger will be able to read the new symbol tables.  */
 
 static struct type *
-error_type (char **pp, struct objfile *objfile)
+error_type (const char **pp, struct objfile *objfile)
 {
   complaint (&symfile_complaints,
 	     _("couldn't parse type; debugger out of date?"));
@@ -1523,7 +1526,7 @@ error_type (char **pp, struct objfile *objfile)
    deciding whether to call read_type.  */
 
 static struct type *
-read_type (char **pp, struct objfile *objfile)
+read_type (const char **pp, struct objfile *objfile)
 {
   struct type *type = 0;
   struct type *type1;
@@ -1595,7 +1598,7 @@ again:
 	char *type_name;
 
 	{
-	  char *from, *to, *p, *q1, *q2;
+	  const char *from, *p, *q1, *q2;
 
 	  /* Set the type code according to the following letter.  */
 	  switch ((*pp)[0])
@@ -1661,7 +1664,7 @@ again:
 	    }
 	  if (type_name == NULL)
 	    {
-	      to = type_name = (char *)
+	      char *to = type_name = (char *)
 		obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
 
 	      /* Copy the name.  */
@@ -1910,7 +1913,7 @@ again:
       else
 	/* type attribute */
 	{
-	  char *attr = *pp;
+	  const char *attr = *pp;
 
 	  /* Skip to the semicolon.  */
 	  while (**pp != ';' && **pp != '\0')
@@ -2280,8 +2283,8 @@ stabs_method_name_from_physname (const char *physname)
    Returns 1 for success, 0 for failure.  */
 
 static int
-read_member_functions (struct field_info *fip, char **pp, struct type *type,
-		       struct objfile *objfile)
+read_member_functions (struct field_info *fip, const char **pp,
+		       struct type *type, struct objfile *objfile)
 {
   int nfn_fields = 0;
   int length = 0;
@@ -2296,7 +2299,7 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
   struct next_fnfieldlist *new_fnlist;
   struct next_fnfield *new_sublist;
   char *main_fn_name;
-  char *p;
+  const char *p;
 
   /* Process each list until we find something that is not a member function
      or find the end of the functions.  */
@@ -2770,10 +2773,10 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
    keep parsing and it's time for error_type().  */
 
 static int
-read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
+read_cpp_abbrev (struct field_info *fip, const char **pp, struct type *type,
 		 struct objfile *objfile)
 {
-  char *p;
+  const char *p;
   const char *name;
   char cpp_abbrev;
   struct type *context;
@@ -2866,7 +2869,7 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 }
 
 static void
-read_one_struct_field (struct field_info *fip, char **pp, char *p,
+read_one_struct_field (struct field_info *fip, const char **pp, const char *p,
 		       struct type *type, struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -3009,10 +3012,10 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
    Returns 1 for success, 0 for failure.  */
 
 static int
-read_struct_fields (struct field_info *fip, char **pp, struct type *type,
+read_struct_fields (struct field_info *fip, const char **pp, struct type *type,
 		    struct objfile *objfile)
 {
-  char *p;
+  const char *p;
   struct nextfield *newobj;
 
   /* We better set p right now, in case there are no fields at all...    */
@@ -3107,7 +3110,7 @@ read_struct_fields (struct field_info *fip, char **pp, struct type *type,
 
 
 static int
-read_baseclasses (struct field_info *fip, char **pp, struct type *type,
+read_baseclasses (struct field_info *fip, const char **pp, struct type *type,
 		  struct objfile *objfile)
 {
   int i;
@@ -3233,10 +3236,10 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
    so we can look for the vptr base class info.  */
 
 static int
-read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
+read_tilde_fields (struct field_info *fip, const char **pp, struct type *type,
 		   struct objfile *objfile)
 {
-  char *p;
+  const char *p;
 
   STABS_CONTINUE (pp, objfile);
 
@@ -3509,7 +3512,7 @@ set_length_in_type_chain (struct type *type)
  */
 
 static struct type *
-read_struct_type (char **pp, struct type *type, enum type_code type_code,
+read_struct_type (const char **pp, struct type *type, enum type_code type_code,
                   struct objfile *objfile)
 {
   struct cleanup *back_to;
@@ -3583,7 +3586,7 @@ read_struct_type (char **pp, struct type *type, enum type_code type_code,
    array.  */
 
 static struct type *
-read_array_type (char **pp, struct type *type,
+read_array_type (const char **pp, struct type *type,
 		 struct objfile *objfile)
 {
   struct type *index_type, *element_type, *range_type;
@@ -3646,11 +3649,11 @@ read_array_type (char **pp, struct type *type,
    Also defines the symbols that represent the values of the type.  */
 
 static struct type *
-read_enum_type (char **pp, struct type *type,
+read_enum_type (const char **pp, struct type *type,
 		struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  char *p;
+  const char *p;
   char *name;
   long n;
   struct symbol *sym;
@@ -3772,7 +3775,7 @@ read_enum_type (char **pp, struct type *type,
    FIXME.  */
 
 static struct type *
-read_sun_builtin_type (char **pp, int typenums[2], struct objfile *objfile)
+read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile)
 {
   int type_bits;
   int nbits;
@@ -3847,7 +3850,8 @@ read_sun_builtin_type (char **pp, int typenums[2], struct objfile *objfile)
 }
 
 static struct type *
-read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
+read_sun_floating_type (const char **pp, int typenums[2],
+			struct objfile *objfile)
 {
   int nbits;
   int details;
@@ -3895,9 +3899,10 @@ read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
    If encounter garbage, set *BITS to -1 and return 0.  */
 
 static long
-read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
+read_huge_number (const char **pp, int end, int *bits,
+		  int twos_complement_bits)
 {
-  char *p = *pp;
+  const char *p = *pp;
   int sign = 1;
   int sign_bit = 0;
   long n = 0;
@@ -3932,7 +3937,7 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
 	 negative number.  */
 
       size_t len;
-      char *p1 = p;
+      const char *p1 = p;
 
       while ((c = *p1) >= '0' && c < '8')
 	p1++;
@@ -4059,11 +4064,11 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
 }
 
 static struct type *
-read_range_type (char **pp, int typenums[2], int type_size,
+read_range_type (const char **pp, int typenums[2], int type_size,
                  struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  char *orig_pp = *pp;
+  const char *orig_pp = *pp;
   int rangenums[2];
   long n2, n3;
   int n2bits, n3bits;
@@ -4267,7 +4272,7 @@ handle_true_range:
    if there is an error.  */
 
 static struct field *
-read_args (char **pp, int end, struct objfile *objfile, int *nargsp,
+read_args (const char **pp, int end, struct objfile *objfile, int *nargsp,
 	   int *varargsp)
 {
   /* FIXME!  Remove this arbitrary limit!  */
@@ -4331,7 +4336,7 @@ static char *common_block_name;
    to remain after this function returns.  */
 
 void
-common_block_start (char *name, struct objfile *objfile)
+common_block_start (const char *name, struct objfile *objfile)
 {
   if (common_block_name != NULL)
     {
@@ -4814,10 +4819,10 @@ finish_global_stabs (struct objfile *objfile)
 
 /* Find the end of the name, delimited by a ':', but don't match
    ObjC symbols which look like -[Foo bar::]:bla.  */
-static char *
-find_name_end (char *name)
+static const char *
+find_name_end (const char *name)
 {
-  char *s = name;
+  const char *s = name;
 
   if (s[0] == '-' || *s == '+')
     {

@@ -262,7 +262,7 @@ struct private_thread_info
 };
 
 
-static char *
+static const char *
 thread_db_err_str (td_err_e err)
 {
   static char buf[64];

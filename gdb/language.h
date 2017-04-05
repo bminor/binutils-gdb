@@ -183,7 +183,7 @@ struct language_defn
 
     /* Parser error function.  */
 
-    void (*la_error) (char *);
+    void (*la_error) (const char *);
 
     /* Given an expression *EXPP created by prefixifying the result of
        la_parser, perform any remaining processing necessary to complete
@@ -271,7 +271,7 @@ struct language_defn
     /* If this is non-NULL, specifies the name that of the implicit
        local variable that refers to the current object instance.  */
 
-    char *la_name_of_this;
+    const char *la_name_of_this;
 
     /* This is a function that lookup_symbol will call when it gets to
        the part of symbol lookup where C looks up static and global

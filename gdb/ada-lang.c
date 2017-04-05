@@ -130,7 +130,7 @@ static void replace_operator_with_call (struct expression **, int, int, int,
 
 static int possible_user_operator_p (enum exp_opcode, struct value **);
 
-static char *ada_op_name (enum exp_opcode);
+static const char *ada_op_name (enum exp_opcode);
 
 static const char *ada_decoded_op_name (enum exp_opcode);
 
@@ -150,7 +150,7 @@ static enum ada_renaming_category parse_old_style_renaming (struct type *,
 static struct symbol *find_old_style_renaming_symbol (const char *,
 						      const struct block *);
 
-static struct type *ada_lookup_struct_elt_type (struct type *, char *,
+static struct type *ada_lookup_struct_elt_type (struct type *, const char *,
                                                 int, int, int *);
 
 static struct value *evaluate_subexp_type (struct expression *, int *);
@@ -1576,7 +1576,7 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
 
 /* Names of MAX_ADA_DIMENS bounds in P_BOUNDS fields of array descriptors.  */
 
-static char *bound_name[] = {
+static const char *bound_name[] = {
   "LB0", "UB0", "LB1", "UB1", "LB2", "UB2", "LB3", "UB3",
   "LB4", "UB4", "LB5", "UB5", "LB6", "UB6", "LB7", "UB7"
 };
@@ -4035,10 +4035,10 @@ See set/show multiple-symbol."));
 
 int
 get_selections (int *choices, int n_choices, int max_results,
-                int is_all_choice, char *annotation_suffix)
+                int is_all_choice, const char *annotation_suffix)
 {
   char *args;
-  char *prompt;
+  const char *prompt;
   int n_chosen;
   int first_choice = is_all_choice ? 2 : 1;
 
@@ -7066,7 +7066,7 @@ ada_is_variant_part (struct type *type, int field_num)
 struct type *
 ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
-  char *name = ada_variant_discrim_name (var_type);
+  const char *name = ada_variant_discrim_name (var_type);
 
   return ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
 }
@@ -7087,7 +7087,7 @@ ada_is_others_clause (struct type *type, int field_num)
    returns the name of the discriminant controlling the variant.
    The value is valid until the next call to ada_variant_discrim_name.  */
 
-char *
+const char *
 ada_variant_discrim_name (struct type *type0)
 {
   static char *result = NULL;
@@ -7484,7 +7484,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
    calling error.  */
 
 struct value *
-ada_value_struct_elt (struct value *arg, char *name, int no_err)
+ada_value_struct_elt (struct value *arg, const char *name, int no_err)
 {
   struct type *t, *t1;
   struct value *v;
@@ -7598,7 +7598,7 @@ type_as_string (struct type *type)
    TYPE is not a type of the right kind.  */
 
 static struct type *
-ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
+ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
                             int noerr, int *dispp)
 {
   int i;
@@ -7711,7 +7711,7 @@ BadName:
 static int
 is_unchecked_variant (struct type *var_type, struct type *outer_type)
 {
-  char *discrim_name = ada_variant_discrim_name (var_type);
+  const char *discrim_name = ada_variant_discrim_name (var_type);
 
   return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1, NULL) 
 	  == NULL);
@@ -7729,7 +7729,7 @@ ada_which_variant_applies (struct type *var_type, struct type *outer_type,
 {
   int others_clause;
   int i;
-  char *discrim_name = ada_variant_discrim_name (var_type);
+  const char *discrim_name = ada_variant_discrim_name (var_type);
   struct value *outer;
   struct value *discrim;
   LONGEST discrim_val;
@@ -11834,7 +11834,7 @@ ada_modulus (struct type *type)
    an Ada83 compiler). As such, we do not include Numeric_Error from
    this list of standard exceptions.  */
 
-static char *standard_exc[] = {
+static const char *standard_exc[] = {
   "constraint_error",
   "program_error",
   "storage_error",
@@ -12791,19 +12791,19 @@ static struct breakpoint_ops catch_assert_breakpoint_ops;
    Return NULL if ARGPS does not contain any more tokens.  */
 
 static char *
-ada_get_next_arg (char **argsp)
+ada_get_next_arg (const char **argsp)
 {
-  char *args = *argsp;
-  char *end;
+  const char *args = *argsp;
+  const char *end;
   char *result;
 
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
   if (args[0] == '\0')
     return NULL; /* No more arguments.  */
   
   /* Find the end of the current argument.  */
 
-  end = skip_to_space (args);
+  end = skip_to_space_const (args);
 
   /* Adjust ARGSP to point to the start of the next argument.  */
 
@@ -12827,7 +12827,7 @@ ada_get_next_arg (char **argsp)
    after use).  Otherwise COND_STRING is set to NULL.  */
 
 static void
-catch_ada_exception_command_split (char *args,
+catch_ada_exception_command_split (const char *args,
                                    enum ada_exception_catchpoint_kind *ex,
 				   char **excep_string,
 				   char **cond_string)
@@ -12850,12 +12850,12 @@ catch_ada_exception_command_split (char *args,
 
   /* Check to see if we have a condition.  */
 
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces (args);
+      args = skip_spaces_const (args);
 
       if (args[0] == '\0')
         error (_("Condition missing after `if' keyword"));
@@ -13077,9 +13077,10 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 /* Implement the "catch exception" command.  */
 
 static void
-catch_ada_exception_command (char *arg, int from_tty,
+catch_ada_exception_command (char *arg_entry, int from_tty,
 			     struct cmd_list_element *command)
 {
+  const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   enum ada_exception_catchpoint_kind ex_kind;
@@ -13107,16 +13108,16 @@ catch_ada_exception_command (char *arg, int from_tty,
    (the memory needs to be deallocated after use).  */
 
 static void
-catch_ada_assert_command_split (char *args, char **cond_string)
+catch_ada_assert_command_split (const char *args, char **cond_string)
 {
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
 
   /* Check whether a condition was provided.  */
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces (args);
+      args = skip_spaces_const (args);
       if (args[0] == '\0')
         error (_("condition missing after `if' keyword"));
       *cond_string = xstrdup (args);
@@ -13131,9 +13132,10 @@ catch_ada_assert_command_split (char *args, char **cond_string)
 /* Implement the "catch assert" command.  */
 
 static void
-catch_assert_command (char *arg, int from_tty,
+catch_assert_command (char *arg_entry, int from_tty,
 		      struct cmd_list_element *command)
 {
+  const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   char *cond_string = NULL;
@@ -13571,7 +13573,7 @@ ada_operator_check (struct expression *exp, int pos,
   return 0;
 }
 
-static char *
+static const char *
 ada_op_name (enum exp_opcode opcode)
 {
   switch (opcode)

@@ -125,7 +125,7 @@ enum
 static const char *
 sh64_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  static char *register_names[] =
+  static const char *register_names[] =
   {
     /* SH MEDIA MODE (ISA 32) */
     /* general registers (64-bit) 0-63 */

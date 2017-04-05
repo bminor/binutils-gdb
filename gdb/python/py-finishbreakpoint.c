@@ -33,7 +33,7 @@
 #include "py-ref.h"
 
 /* Function that is called when a Python finish bp is found out of scope.  */
-static char * const outofscope_func = "out_of_scope";
+static const char outofscope_func[] = "out_of_scope";
 
 /* struct implementing the gdb.FinishBreakpoint object by extending
    the gdb.Breakpoint class.  */

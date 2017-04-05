@@ -32,10 +32,8 @@
 /* Struct representing built-in completion types.  */
 struct cmdpy_completer
 {
-  /* Python symbol name.
-     This isn't a const char * for Python 2.4's sake.
-     PyModule_AddIntConstant only takes a char *, sigh.  */
-  char *name;
+  /* Python symbol name.  */
+  const char *name;
   /* Completion function.  */
   completer_ftype *completer;
 };
@@ -111,8 +109,10 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
 /* Called by gdb to invoke the command.  */
 
 static void
-cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
+cmdpy_function (struct cmd_list_element *command,
+		char *args_entry, int from_tty)
 {
+  const char *args = args_entry;
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
 
   gdbpy_enter enter_py (get_current_arch (), current_language);

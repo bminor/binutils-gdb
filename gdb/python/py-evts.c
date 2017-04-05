@@ -38,7 +38,7 @@ static struct PyModuleDef EventModuleDef =
 /* Initialize python events.  */
 
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-add_new_registry (eventregistry_object **registryp, char *name)
+add_new_registry (eventregistry_object **registryp, const char *name)
 {
   *registryp = create_eventregistry_object ();
 

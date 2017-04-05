@@ -50,7 +50,7 @@ show_varobjdebug (struct ui_file *file, int from_tty,
 }
 
 /* String representations of gdb's format codes.  */
-char *varobj_format_string[] =
+const char *varobj_format_string[] =
   { "natural", "binary", "decimal", "hexadecimal", "octal", "zero-hexadecimal" };
 
 /* True if we want to allow Python-based pretty-printing.  */

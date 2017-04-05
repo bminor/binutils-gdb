@@ -1479,7 +1479,8 @@ undef_cmd_error (const char *cmdtype, const char *q)
    the function field of the struct cmd_list_element is 0).  */
 
 struct cmd_list_element *
-lookup_cmd (const char **line, struct cmd_list_element *list, char *cmdtype,
+lookup_cmd (const char **line, struct cmd_list_element *list,
+	    const char *cmdtype,
 	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;

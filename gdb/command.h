@@ -204,7 +204,8 @@ extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 #define CMD_LIST_AMBIGUOUS ((struct cmd_list_element *) -1)
 
 extern struct cmd_list_element *lookup_cmd (const char **,
-					    struct cmd_list_element *, char *,
+					    struct cmd_list_element *,
+					    const char *,
 					    int, int);
 
 extern struct cmd_list_element *lookup_cmd_1 (const char **,

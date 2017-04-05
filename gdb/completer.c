@@ -1684,7 +1684,8 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 		    const struct match_list_displayer *displayer)
 {
   int printed_len, extension_char, slen, tlen;
-  char *s, c, *new_full_pathname, *dn;
+  char *s, c, *new_full_pathname;
+  const char *dn;
   extern int _rl_complete_mark_directories;
 
   extension_char = 0;

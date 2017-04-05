@@ -2324,7 +2324,8 @@ extern void complete_target_initialization (struct target_ops *t);
 /* Adds a command ALIAS for target T and marks it deprecated.  This is useful
    for maintaining backwards compatibility when renaming targets.  */
 
-extern void add_deprecated_target_alias (struct target_ops *t, char *alias);
+extern void add_deprecated_target_alias (struct target_ops *t,
+					 const char *alias);
 
 extern void push_target (struct target_ops *);
 

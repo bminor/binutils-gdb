@@ -1,5 +1,245 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* ada-exp.y (yyerror): Constify.
+	* ada-lang.c (bound_name, get_selections)
+	(ada_variant_discrim_type)
+	(ada_variant_discrim_name, ada_value_struct_elt)
+	(ada_lookup_struct_elt_type, is_unchecked_variant)
+	(ada_which_variant_applies, standard_exc, ada_get_next_arg)
+	(catch_ada_exception_command_split)
+	(catch_ada_assert_command_split, catch_assert_command)
+	(ada_op_name): Constify.
+	* ada-lang.h (ada_yyerror, get_selections)
+	(ada_variant_discrim_name, ada_value_struct_elt): Constify.
+	* arc-tdep.c (arc_print_frame_cache): Constify.
+	* arm-tdep.c (arm_skip_stub): Constify.
+	* ax-gdb.c (gen_binop, gen_struct_ref_recursive, gen_struct_ref)
+	(gen_aggregate_elt_ref): Constify.
+	* bcache.c (print_bcache_statistics): Constify.
+	* bcache.h (print_bcache_statistics): Constify.
+	* break-catch-throw.c (catch_exception_command_1):
+	* breakpoint.c (struct ep_type_description::description):
+	Constify.
+	(add_solib_catchpoint): Constify.
+	(catch_fork_command_1): Add cast.
+	(add_catch_command): Constify.
+	* breakpoint.h (add_catch_command, add_solib_catchpoint):
+	Constify.
+	* bsd-uthread.c (bsd_uthread_state): Constify.
+	* buildsym.c (patch_subfile_names): Constify.
+	* buildsym.h (next_symbol_text_func, patch_subfile_names):
+	Constify.
+	* c-exp.y (yyerror): Constify.
+	(token::oper): Constify.
+	* c-lang.h (c_yyerror, cp_print_class_member): Constify.
+	* c-varobj.c (cplus_describe_child): Constify.
+	* charset.c (find_charset_names): Add cast.
+	(find_charset_names): Constify array and add const_cast.
+	* cli/cli-cmds.c (complete_command, cd_command): Constify.
+	(edit_command): Constify.
+	* cli/cli-decode.c (lookup_cmd): Constify.
+	* cli/cli-dump.c (dump_memory_command, dump_value_command):
+	Constify.
+	(struct dump_context): Constify.
+	(add_dump_command, restore_command): Constify.
+	* cli/cli-script.c (get_command_line): Constify.
+	* cli/cli-script.h (get_command_line): Constify.
+	* cli/cli-utils.c (check_for_argument): Constify.
+	* cli/cli-utils.h (check_for_argument): Constify.
+	* coff-pe-read.c (struct read_pe_section_data): Constify.
+	* command.h (lookup_cmd): Constify.
+	* common/print-utils.c (decimal2str): Constify.
+	* completer.c (gdb_print_filename): Constify.
+	* corefile.c (set_gnutarget): Constify.
+	* cp-name-parser.y (yyerror): Constify.
+	* cp-valprint.c (cp_print_class_member): Constify.
+	* cris-tdep.c (cris_register_name, crisv32_register_name):
+	Constify.
+	* d-exp.y (yyerror): Constify.
+	(struct token::oper): Constify.
+	* d-lang.h (d_yyerror): Constify.
+	* dbxread.c (struct header_file_location::name): Constify.
+	(add_old_header_file, add_new_header_file, last_function_name)
+	(dbx_next_symbol_text, add_bincl_to_list)
+	(find_corresponding_bincl_psymtab, set_namestring)
+	(find_stab_function_addr, read_dbx_symtab, start_psymtab)
+	(dbx_end_psymtab, read_ofile_symtab, process_one_symbol):
+	* defs.h (command_line_input, print_address_symbolic)
+	(deprecated_readline_begin_hook): Constify.
+	* dwarf2read.c (anonymous_struct_prefix, dwarf_bool_name):
+	Constify.
+	* event-top.c (handle_line_of_input): Constify and add cast.
+	* exceptions.c (catch_errors): Constify.
+	* exceptions.h (catch_errors): Constify.
+	* expprint.c (print_subexp_standard, op_string, op_name)
+	(op_name_standard, dump_raw_expression, dump_raw_expression):
+	* expression.h (op_name, op_string, dump_raw_expression):
+	Constify.
+	* f-exp.y (yyerror): Constify.
+	(struct token::oper): Constify.
+	(struct f77_boolean_val::name): Constify.
+	* f-lang.c (f_word_break_characters): Constify.
+	* f-lang.h (f_yyerror): Constify.
+	* fork-child.c (fork_inferior): Add cast.
+	* frv-tdep.c (struct gdbarch_tdep::register_names): Constify.
+	(new_variant): Constify.
+	* gdbarch.sh (pstring_ptr, pstring_list): Constify.
+	* gdbarch.c: Regenerate.
+	* gdbcore.h (set_gnutarget): Constify.
+	* go-exp.y (yyerror): Constify.
+	(token::oper): Constify.
+	* go-lang.h (go_yyerror): Constify.
+	* go32-nat.c (go32_sysinfo): Constify.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_expression): Constify.
+	* guile/scm-cmd.c (cmdscm_function): Constify.
+	* guile/scm-param.c (pascm_param_value): Constify.
+	* h8300-tdep.c (h8300_register_name, h8300s_register_name)
+	(h8300sx_register_name): Constify.
+	* hppa-tdep.c (hppa32_register_name, hppa64_register_name):
+	Constify.
+	* ia64-tdep.c (ia64_register_names): Constify.
+	* infcmd.c (construct_inferior_arguments): Constify.
+	(path_command, attach_post_wait): Constify.
+	* language.c (show_range_command, show_case_command)
+	(unk_lang_error): Constify.
+	* language.h (language_defn::la_error)
+	(language_defn::la_name_of_this): Constify.
+	* linespec.c (decode_line_2): Constify.
+	* linux-thread-db.c (thread_db_err_str): Constify.
+	* lm32-tdep.c (lm32_register_name): Constify.
+	* m2-exp.y (yyerror): Constify.
+	* m2-lang.h (m2_yyerror): Constify.
+	* m32r-tdep.c (m32r_register_names): Constify and make static.
+	* m68hc11-tdep.c (m68hc11_register_names): Constify.
+	* m88k-tdep.c (m88k_register_name): Constify.
+	* macroexp.c (appendmem): Constify.
+	* mdebugread.c (fdr_name, add_data_symbol, parse_type)
+	(upgrade_type, parse_external, parse_partial_symbols)
+	(mdebug_next_symbol_text, cross_ref, mylookup_symbol, new_psymtab)
+	(new_symbol): Constify.
+	* memattr.c (mem_info_command): Constify.
+	* mep-tdep.c (register_name_from_keyword): Constify.
+	* mi/mi-cmd-env.c (mi_cmd_env_path, _initialize_mi_cmd_env):
+	Constify.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Constify.
+	* mi/mi-cmd-var.c (mi_cmd_var_show_attributes): Constify.
+	* mi/mi-main.c (captured_mi_execute_command): Constify and add
+	cast.
+	(mi_execute_async_cli_command): Constify.
+	* mips-tdep.c (mips_register_name): Constify.
+	* mn10300-tdep.c (register_name, mn10300_generic_register_name)
+	(am33_register_name, am33_2_register_name)
+	* moxie-tdep.c (moxie_register_names): Constify.
+	* nat/linux-osdata.c (osdata_type): Constify fields.
+	* nto-tdep.c (nto_parse_redirection): Constify.
+	* objc-lang.c (lookup_struct_typedef, lookup_objc_class)
+	(lookup_child_selector): Constify.
+	(objc_methcall::name): Constify.
+	* objc-lang.h (lookup_objc_class, lookup_child_selector)
+	(lookup_struct_typedef): Constify.
+	* objfiles.c (pc_in_section): Constify.
+	* objfiles.h (pc_in_section): Constify.
+	* p-exp.y (struct token::oper): Constify.
+	(yyerror): Constify.
+	* p-lang.h (pascal_yyerror): Constify.
+	* parser-defs.h (op_name_standard): Constify.
+	(op_print::string): Constify.
+	(exp_descriptor::op_name): Constify.
+	* printcmd.c (print_address_symbolic): Constify.
+	* psymtab.c (print_partial_symbols): Constify.
+	* python/py-breakpoint.c (stop_func): Constify.
+	(bppy_get_expression): Constify.
+	* python/py-cmd.c (cmdpy_completer::name): Constify.
+	(cmdpy_function): Constify.
+	* python/py-event.c (evpy_add_attribute)
+	(gdbpy_initialize_event_generic): Constify.
+	* python/py-event.h (evpy_add_attribute)
+	(gdbpy_initialize_event_generic): Constify.
+	* python/py-evts.c (add_new_registry): Constify.
+	* python/py-finishbreakpoint.c (outofscope_func): Constify.
+	* python/py-framefilter.c (get_py_iter_from_func): Constify.
+	* python/py-inferior.c (get_buffer): Add cast.
+	* python/py-param.c (parm_constant::name): Constify.
+	* python/py-unwind.c (fprint_frame_id): Constify.
+	* python/python.c (gdbpy_parameter_value): Constify.
+	* remote-fileio.c (remote_fio_func_map): Make 'name' const.
+	* remote.c (memory_packet_config::name): Constify.
+	(show_packet_config_cmd, remote_write_bytes)
+	(remote_buffer_add_string):
+	* reverse.c (exec_reverse_once): Constify.
+	* rs6000-tdep.c (variant::name, variant::description): Constify.
+	* rust-exp.y (rustyyerror): Constify.
+	* rust-lang.c (rust_op_name): Constify.
+	* rust-lang.h (rustyyerror): Constify.
+	* serial.h (serial_ops::name): Constify.
+	* sh-tdep.c (sh_sh_register_name, sh_sh3_register_name)
+	(sh_sh3e_register_name, sh_sh2e_register_name)
+	(sh_sh2a_register_name, sh_sh2a_nofpu_register_name)
+	(sh_sh_dsp_register_name, sh_sh3_dsp_register_name)
+	(sh_sh4_register_name, sh_sh4_nofpu_register_name)
+	(sh_sh4al_dsp_register_name): Constify.
+	* sh64-tdep.c (sh64_register_name): Constify.
+	* solib-darwin.c (lookup_symbol_from_bfd): Constify.
+	* spu-tdep.c (spu_register_name, info_spu_dma_cmdlist): Constify.
+	* stabsread.c (patch_block_stabs, read_type_number)
+	(ref_map::stabs, ref_add, process_reference)
+	(symbol_reference_defined, define_symbol, define_symbol)
+	(error_type, read_type, read_member_functions, read_cpp_abbrev)
+	(read_one_struct_field, read_struct_fields, read_baseclasses)
+	(read_tilde_fields, read_struct_type, read_array_type)
+	(read_enum_type, read_sun_builtin_type, read_sun_floating_type)
+	(read_huge_number, read_range_type, read_args, common_block_start)
+	(find_name_end): Constify.
+	* stabsread.h (common_block_start, define_symbol)
+	(process_one_symbol, symbol_reference_defined, ref_add):
+	* symfile.c (get_section_index, add_symbol_file_command):
+	* symfile.h (get_section_index): Constify.
+	* target-descriptions.c (tdesc_type::name): Constify.
+	(tdesc_free_type): Add cast.
+	* target.c (find_default_run_target):
+	(add_deprecated_target_alias, find_default_run_target)
+	(target_announce_detach): Constify.
+	(do_option): Constify.
+	* target.h (add_deprecated_target_alias): Constify.
+	* thread.c (print_thread_info_1): Constify.
+	* top.c (deprecated_readline_begin_hook, command_line_input):
+	Constify.
+	(init_main): Add casts.
+	* top.h (handle_line_of_input): Constify.
+	* tracefile-tfile.c (tfile_write_uploaded_tsv): Constify.
+	* tracepoint.c (tvariables_info_1, trace_status_mi): Constify.
+	(tfind_command): Rename to ...
+	(tfind_command_1): ... this and constify.
+	(tfind_command): New function.
+	(tfind_end_command, tfind_start_command): Adjust.
+	(encode_source_string): Constify.
+	* tracepoint.h (encode_source_string): Constify.
+	* tui/tui-data.c (tui_partial_win_by_name): Constify.
+	* tui/tui-data.h (tui_partial_win_by_name): Constify.
+	* tui/tui-source.c (tui_set_source_content_nil): Constify.
+	* tui/tui-source.h (tui_set_source_content_nil): Constify.
+	* tui/tui-win.c (parse_scrolling_args): Constify.
+	* tui/tui-windata.c (tui_erase_data_content): Constify.
+	* tui/tui-windata.h (tui_erase_data_content): Constify.
+	* tui/tui-winsource.c (tui_erase_source_content): Constify.
+	* tui/tui.c (tui_enable): Add cast.
+	* utils.c (defaulted_query): Constify.
+	(init_page_info): Add cast.
+	(puts_debug, subset_compare): Constify.
+	* utils.h (subset_compare): Constify.
+	* varobj.c (varobj_format_string): Constify.
+	* varobj.h (varobj_format_string): Constify.
+	* vax-tdep.c (vax_register_name): Constify.
+	* windows-nat.c (windows_detach): Constify.
+	* xcoffread.c (process_linenos, xcoff_next_symbol_text): Constify.
+	* xml-support.c (gdb_xml_end_element): Constify.
+	* xml-tdesc.c (tdesc_start_reg): Constify.
+	* xstormy16-tdep.c (xstormy16_register_name): Constify.
+	* xtensa-tdep.c (xtensa_find_register_by_name): Constify.
+	* xtensa-tdep.h (xtensa_register_t::name): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* proc-api.c (struct trans): Constify.
 	(procfs_note): Constify.
 	* proc-events.c (struct trans, syscall_table):

@@ -159,7 +159,7 @@ extern int ada_get_field_index (const struct type *type,
 
 extern int ada_parse (struct parser_state *);    /* Defined in ada-exp.y */
 
-extern void ada_yyerror (char *); /* Defined in ada-exp.y */
+extern void ada_yyerror (const char *); /* Defined in ada-exp.y */
 
                         /* Defined in ada-typeprint.c */
 extern void ada_print_type (struct type *, const char *, struct ui_file *, int,
@@ -243,7 +243,7 @@ extern void ada_fill_in_ada_prototype (struct symbol *);
 
 extern int user_select_syms (struct block_symbol *, int, int);
 
-extern int get_selections (int *, int, int, int, char *);
+extern int get_selections (int *, int, int, int, const char *);
 
 extern int ada_scan_number (const char *, int, LONGEST *, int *);
 
@@ -288,9 +288,9 @@ extern int ada_is_others_clause (struct type *, int);
 
 extern int ada_in_variant (LONGEST, struct type *, int);
 
-extern char *ada_variant_discrim_name (struct type *);
+extern const char *ada_variant_discrim_name (struct type *);
 
-extern struct value *ada_value_struct_elt (struct value *, char *, int);
+extern struct value *ada_value_struct_elt (struct value *, const char *, int);
 
 extern int ada_is_aligner_type (struct type *);
 

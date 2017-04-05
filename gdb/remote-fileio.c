@@ -1100,7 +1100,7 @@ remote_fileio_func_system (char *buf)
 }
 
 static struct {
-  char *name;
+  const char *name;
   void (*func)(char *);
 } remote_fio_func_map[] = {
   { "open", remote_fileio_func_open },

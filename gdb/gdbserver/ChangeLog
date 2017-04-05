@@ -1,5 +1,10 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* gdbreplay.c (sync_error): Constify.
+	* linux-x86-low.c (push_opcode): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* win32-low.c (get_child_debug_event)
 	<CREATE_PROCESS_DEBUG_EVENT>: Don't report TARGET_WAITKIND_EXECD.
 	Report TARGET_WAITKIND_SPURIOUS instead.

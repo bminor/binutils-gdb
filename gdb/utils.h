@@ -37,7 +37,7 @@ extern int strcmp_iw_ordered (const char *, const char *);
 
 extern int streq (const char *, const char *);
 
-extern int subset_compare (char *, char *);
+extern int subset_compare (const char *, const char *);
 
 int compare_positive_ints (const void *ap, const void *bp);
 int compare_strings (const void *ap, const void *bp);

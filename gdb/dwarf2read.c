@@ -1825,7 +1825,7 @@ static const char *dwarf_attr_name (unsigned int);
 
 static const char *dwarf_form_name (unsigned int);
 
-static char *dwarf_bool_name (unsigned int);
+static const char *dwarf_bool_name (unsigned int);
 
 static const char *dwarf_type_encoding_name (unsigned int);
 
@@ -19800,7 +19800,7 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
    prefix part in such case.  See
    http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
 
-static char *
+static const char *
 anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
@@ -19853,7 +19853,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *parent, *spec_die;
   struct dwarf2_cu *spec_cu;
   struct type *parent_type;
-  char *retval;
+  const char *retval;
 
   if (cu->language != language_cplus
       && cu->language != language_fortran && cu->language != language_d
@@ -20255,7 +20255,7 @@ dwarf_form_name (unsigned form)
   return name;
 }
 
-static char *
+static const char *
 dwarf_bool_name (unsigned mybool)
 {
   if (mybool)

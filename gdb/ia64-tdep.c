@@ -140,7 +140,7 @@ enum pseudo_regs { FIRST_PSEUDO_REGNUM = NUM_IA64_RAW_REGS,
 /* Array of register names; There should be ia64_num_regs strings in
    the initializer.  */
 
-static char *ia64_register_names[] = 
+static const char *ia64_register_names[] =
 { "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
   "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
   "r16",  "r17",  "r18",  "r19",  "r20",  "r21",  "r22",  "r23",

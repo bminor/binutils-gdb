@@ -706,7 +706,11 @@ static VEC (char_ptr) *charsets;
 static void
 find_charset_names (void)
 {
-  VEC_safe_push (char_ptr, charsets, GDB_DEFAULT_HOST_CHARSET);
+  /* Cast is fine here, because CHARSETS is never released.  Note that
+     the vec does not hold "const char *" pointers instead of "char *"
+     because the non-phony version stores heap-allocated strings in
+     it.  */
+  VEC_safe_push (char_ptr, charsets, (char *) GDB_DEFAULT_HOST_CHARSET);
   VEC_safe_push (char_ptr, charsets, NULL);
 }
 
@@ -775,7 +779,7 @@ static void
 find_charset_names (void)
 {
   struct pex_obj *child;
-  char *args[3];
+  const char *args[3];
   int err, status;
   int fail = 1;
   int flags;
@@ -811,7 +815,8 @@ find_charset_names (void)
 #endif
   /* Note that we simply ignore errors here.  */
   if (!pex_run_in_environment (child, flags,
-			       args[0], args, environ_vector (iconv_env),
+			       args[0], const_cast<char **> (args),
+			       environ_vector (iconv_env),
 			       NULL, NULL, &err))
     {
       FILE *in = pex_read_output (child, 0);

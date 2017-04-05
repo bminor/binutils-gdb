@@ -650,7 +650,7 @@ command_line_append_input_line (struct buffer *cmd_line_buffer, char *rl)
 
 char *
 handle_line_of_input (struct buffer *cmd_line_buffer,
-		      char *rl, int repeat, char *annotation_suffix)
+		      char *rl, int repeat, const char *annotation_suffix)
 {
   struct ui *ui = current_ui;
   int from_tty = ui->instream == ui->stdin_stream;

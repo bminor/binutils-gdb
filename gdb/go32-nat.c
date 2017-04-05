@@ -1126,7 +1126,7 @@ go32_sysinfo (char *arg, int from_tty)
   /* CPUID with EAX = 1 returns processor signature and features.  */
   if (cpuid_max >= 1)
     {
-      static char *brand_name[] = {
+      static const char *brand_name[] = {
 	"",
 	" Celeron",
 	" III",

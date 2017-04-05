@@ -46,7 +46,7 @@
 
 extern void _initialize_language (void);
 
-static void unk_lang_error (char *);
+static void unk_lang_error (const char *);
 
 static int unk_lang_parser (struct parser_state *);
 
@@ -206,7 +206,7 @@ show_range_command (struct ui_file *file, int from_tty,
 {
   if (range_mode == range_mode_auto)
     {
-      char *tmp;
+      const char *tmp;
 
       switch (range_check)
 	{
@@ -280,7 +280,7 @@ show_case_command (struct ui_file *file, int from_tty,
 {
   if (case_mode == case_mode_auto)
     {
-      char *tmp = NULL;
+      const char *tmp = NULL;
 
       switch (case_sensitivity)
 	{
@@ -731,7 +731,7 @@ unk_lang_parser (struct parser_state *ps)
 }
 
 static void
-unk_lang_error (char *msg)
+unk_lang_error (const char *msg)
 {
   error (_("Attempted to parse an expression with unknown language"));
 }

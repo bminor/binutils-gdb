@@ -492,7 +492,7 @@ mi_cmd_var_show_attributes (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   int attr;
-  char *attstr;
+  const char *attstr;
   struct varobj *var;
 
   if (argc != 1)

@@ -464,7 +464,7 @@ bsd_uthread_update_thread_list (struct target_ops *ops)
 }
 
 /* Possible states a thread can be in.  */
-static char *bsd_uthread_state[] =
+static const char *bsd_uthread_state[] =
 {
   "RUNNING",
   "SIGTHREAD",

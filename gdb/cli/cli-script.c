@@ -166,7 +166,7 @@ build_command_line (enum command_control_type type, const char *args)
    such as "if" and "while".  */
 
 struct command_line *
-get_command_line (enum command_control_type type, char *arg)
+get_command_line (enum command_control_type type, const char *arg)
 {
   struct command_line *cmd;
   struct cleanup *old_chain = NULL;

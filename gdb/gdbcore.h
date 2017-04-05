@@ -167,7 +167,7 @@ extern void validate_files (void);
 
 extern char *gnutarget;
 
-extern void set_gnutarget (char *);
+extern void set_gnutarget (const char *);
 
 /* Structure to keep track of core register reading functions for
    various core file types.  */

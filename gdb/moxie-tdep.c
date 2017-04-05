@@ -74,7 +74,7 @@ typedef BP_MANIPULATION (moxie_break_insn) moxie_breakpoint;
 
 /* Moxie register names.  */
 
-char *moxie_register_names[] = {
+static const char *moxie_register_names[] = {
   "$fp",  "$sp",  "$r0",  "$r1",  "$r2",
   "$r3",  "$r4",  "$r5", "$r6", "$r7",
   "$r8", "$r9", "$r10", "$r11", "$r12",

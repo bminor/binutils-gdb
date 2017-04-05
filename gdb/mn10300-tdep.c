@@ -246,8 +246,8 @@ mn10300_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-static char *
-register_name (int reg, char **regs, long sizeof_regs)
+static const char *
+register_name (int reg, const char **regs, long sizeof_regs)
 {
   if (reg < 0 || reg >= sizeof_regs / sizeof (regs[0]))
     return NULL;
@@ -258,7 +258,7 @@ register_name (int reg, char **regs, long sizeof_regs)
 static const char *
 mn10300_generic_register_name (struct gdbarch *gdbarch, int reg)
 {
-  static char *regs[] =
+  static const char *regs[] =
   { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
     "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
     "", "", "", "", "", "", "", "",
@@ -271,7 +271,7 @@ mn10300_generic_register_name (struct gdbarch *gdbarch, int reg)
 static const char *
 am33_register_name (struct gdbarch *gdbarch, int reg)
 {
-  static char *regs[] =
+  static const char *regs[] =
   { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
     "sp", "pc", "mdr", "psw", "lir", "lar", "",
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -283,7 +283,7 @@ am33_register_name (struct gdbarch *gdbarch, int reg)
 static const char *
 am33_2_register_name (struct gdbarch *gdbarch, int reg)
 {
-  static char *regs[] =
+  static const char *regs[] =
   {
     "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
     "sp", "pc", "mdr", "psw", "lir", "lar", "mdrq", "r0",

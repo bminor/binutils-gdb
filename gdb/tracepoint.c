@@ -170,7 +170,6 @@ static void actions_command (char *, int);
 static void tstart_command (char *, int);
 static void tstop_command (char *, int);
 static void tstatus_command (char *, int);
-static void tfind_command (char *, int);
 static void tfind_pc_command (char *, int);
 static void tfind_tracepoint_command (char *, int);
 static void tfind_line_command (char *, int);
@@ -508,7 +507,7 @@ tvariables_info_1 (void)
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     {
       struct cleanup *back_to2;
-      char *c;
+      const char *c;
       char *name;
 
       back_to2 = make_cleanup_ui_out_tuple_begin_end (uiout, "variable");
@@ -2058,7 +2057,7 @@ trace_status_mi (int on_stop)
     }
   else
     {
-      char *stop_reason = NULL;
+      const char *stop_reason = NULL;
       int stopping_tracepoint = -1;
 
       if (!on_stop)
@@ -2343,7 +2342,7 @@ check_trace_running (struct trace_status *status)
 
 /* tfind command */
 static void
-tfind_command (char *args, int from_tty)
+tfind_command_1 (const char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
@@ -2377,18 +2376,24 @@ tfind_command (char *args, int from_tty)
   tfind_1 (tfind_number, frameno, 0, 0, from_tty);
 }
 
+static void
+tfind_command (char *args, int from_tty)
+{
+  tfind_command_1 (const_cast<char *> (args), from_tty);
+}
+
 /* tfind end */
 static void
 tfind_end_command (char *args, int from_tty)
 {
-  tfind_command ("-1", from_tty);
+  tfind_command_1 ("-1", from_tty);
 }
 
 /* tfind start */
 static void
 tfind_start_command (char *args, int from_tty)
 {
-  tfind_command ("0", from_tty);
+  tfind_command_1 ("0", from_tty);
 }
 
 /* tfind pc command */
@@ -2957,9 +2962,10 @@ tdump_command (char *args, int from_tty)
 /* This version does not do multiple encodes for long strings; it should
    return an offset to the next piece to encode.  FIXME  */
 
-extern int
+int
 encode_source_string (int tpnum, ULONGEST addr,
-		      char *srctype, const char *src, char *buf, int buf_size)
+		      const char *srctype, const char *src,
+		      char *buf, int buf_size)
 {
   if (80 + strlen (srctype) > buf_size)
     error (_("Buffer too small for source encoding"));

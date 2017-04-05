@@ -1136,7 +1136,8 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   int retval;
   int def_value;
   char def_answer, not_def_answer;
-  char *y_string, *n_string, *question, *prompt;
+  const char *y_string, *n_string;
+  char *question, *prompt;
   struct cleanup *old_chain;
 
   /* Set up according to which answer is the default.  */
@@ -1626,7 +1627,7 @@ init_page_info (void)
       /* Readline should have fetched the termcap entry for us.
          Only try to use tgetnum function if rl_get_screen_size
          did not return a useful value. */
-      if (((rows <= 0) && (tgetnum ("li") < 0))
+      if (((rows <= 0) && (tgetnum ((char *) "li") < 0))
 	/* Also disable paging if inside Emacs.  $EMACS was used
 	   before Emacs v25.1, $INSIDE_EMACS is used since then.  */
 	  || getenv ("EMACS") || getenv ("INSIDE_EMACS"))
@@ -2137,8 +2138,8 @@ puts_debug (char *prefix, char *string, char *suffix)
   /* Print prefix and suffix after each line.  */
   static int new_line = 1;
   static int return_p = 0;
-  static char *prev_prefix = "";
-  static char *prev_suffix = "";
+  static const char *prev_prefix = "";
+  static const char *prev_suffix = "";
 
   if (*string == '\n')
     return_p = 0;
@@ -2607,7 +2608,7 @@ streq (const char *lhs, const char *rhs)
    **    at index 0.
  */
 int
-subset_compare (char *string_to_compare, char *template_string)
+subset_compare (const char *string_to_compare, const char *template_string)
 {
   int match;
 

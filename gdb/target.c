@@ -91,7 +91,7 @@ static int return_zero_has_execution (struct target_ops *, ptid_t);
 
 static void target_command (char *, int);
 
-static struct target_ops *find_default_run_target (char *);
+static struct target_ops *find_default_run_target (const char *);
 
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
@@ -403,7 +403,7 @@ add_target (struct target_ops *t)
 /* See target.h.  */
 
 void
-add_deprecated_target_alias (struct target_ops *t, char *alias)
+add_deprecated_target_alias (struct target_ops *t, const char *alias)
 {
   struct cmd_list_element *c;
   char *alt;
@@ -2624,7 +2624,7 @@ show_auto_connect_native_target (struct ui_file *file, int from_tty,
    called for errors); else, return NULL on error.  */
 
 static struct target_ops *
-find_default_run_target (char *do_mesg)
+find_default_run_target (const char *do_mesg)
 {
   struct target_ops *runable = NULL;
 
@@ -3291,7 +3291,7 @@ void
 target_announce_detach (int from_tty)
 {
   pid_t pid;
-  char *exec_file;
+  const char *exec_file;
 
   if (!from_tty)
     return;
@@ -3518,7 +3518,7 @@ str_comma_list_concat_elem (char *list, const char *elem)
 
 static char *
 do_option (int *target_options, char *ret,
-	   int opt, char *opt_str)
+	   int opt, const char *opt_str)
 {
   if ((*target_options & opt) != 0)
     {

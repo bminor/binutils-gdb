@@ -247,7 +247,7 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 }
 
 static void
-dump_memory_command (char *cmd, char *mode)
+dump_memory_command (char *cmd, const char *mode)
 {
   dump_memory_to_file (cmd, mode, "binary");
 }
@@ -298,7 +298,7 @@ dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 }
 
 static void
-dump_value_command (char *cmd, char *mode)
+dump_value_command (char *cmd, const char *mode)
 {
   dump_value_to_file (cmd, mode, "binary");
 }
@@ -377,8 +377,8 @@ append_binary_value (char *args, int from_tty)
 
 struct dump_context
 {
-  void (*func) (char *cmd, char *mode);
-  char *mode;
+  void (*func) (char *cmd, const char *mode);
+  const char *mode;
 };
 
 static void
@@ -390,8 +390,9 @@ call_dump_func (struct cmd_list_element *c, char *args, int from_tty)
 }
 
 static void
-add_dump_command (char *name, void (*func) (char *args, char *mode),
-		  char *descr)
+add_dump_command (const char *name,
+		  void (*func) (char *args, const char *mode),
+		  const char *descr)
 
 {
   struct cmd_list_element *c;
@@ -576,7 +577,7 @@ restore_command (char *args_in, int from_tty)
   filename = scan_filename_with_cleanup (&args, NULL);
   if (args != NULL && *args != '\0')
     {
-      char *binary_string = "binary";
+      static const char binary_string[] = "binary";
 
       /* Look for optional "binary" flag.  */
       if (startswith (args, binary_string))

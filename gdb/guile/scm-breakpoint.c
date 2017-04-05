@@ -851,7 +851,6 @@ gdbscm_breakpoint_expression (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  char *str;
   struct watchpoint *wp;
 
   if (!is_watchpoint (bp_smob->bp))
@@ -859,7 +858,7 @@ gdbscm_breakpoint_expression (SCM self)
 
   wp = (struct watchpoint *) bp_smob->bp;
 
-  str = wp->exp_string;
+  const char *str = wp->exp_string;
   if (! str)
     str = "";
 

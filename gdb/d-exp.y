@@ -69,7 +69,7 @@ int yyparse (void);
 
 static int yylex (void);
 
-void yyerror (char *);
+void yyerror (const char *);
 
 static int type_aggregate_p (struct type *);
 
@@ -957,7 +957,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
 
 struct token
 {
-  char *oper;
+  const char *oper;
   int token;
   enum exp_opcode opcode;
 };
@@ -1648,7 +1648,7 @@ d_parse (struct parser_state *par_state)
 }
 
 void
-yyerror (char *msg)
+yyerror (const char *msg)
 {
   if (prev_lexptr)
     lexptr = prev_lexptr;

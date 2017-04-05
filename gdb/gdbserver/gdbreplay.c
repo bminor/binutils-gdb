@@ -142,7 +142,7 @@ perror_with_name (const char *string)
 }
 
 static void
-sync_error (FILE *fp, char *desc, int expect, int got)
+sync_error (FILE *fp, const char *desc, int expect, int got)
 {
   fprintf (stderr, "\n%s\n", desc);
   fprintf (stderr, "At logfile offset %ld, expected '0x%x' got '0x%x'\n",

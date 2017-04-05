@@ -301,7 +301,7 @@ py_print_value (struct ui_out *out, struct value *val,
    This function can return an iterator, or NULL.  */
 
 static PyObject *
-get_py_iter_from_func (PyObject *filter, char *func)
+get_py_iter_from_func (PyObject *filter, const char *func)
 {
   if (PyObject_HasAttrString (filter, func))
     {

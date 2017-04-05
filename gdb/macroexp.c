@@ -170,7 +170,7 @@ appendc (struct macro_buffer *b, int c)
 
 /* Append the LEN bytes at ADDR to the buffer B.  */
 static void
-appendmem (struct macro_buffer *b, char *addr, int len)
+appendmem (struct macro_buffer *b, const char *addr, int len)
 {
   int new_len = b->len + len;
 

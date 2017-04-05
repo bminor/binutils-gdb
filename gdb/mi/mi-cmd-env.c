@@ -116,7 +116,7 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   char *exec_path;
-  char *env;
+  const char *env;
   int reset = 0;
   int oind = 0;
   int i;
@@ -271,7 +271,7 @@ void
 _initialize_mi_cmd_env (void)
 {
   struct gdb_environ *environment;
-  char *env;
+  const char *env;
 
   /* We want original execution path to reset to, if desired later.
      At this point, current inferior is not created, so cannot use

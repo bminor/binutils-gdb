@@ -6215,7 +6215,7 @@ bptype_string (enum bptype type)
   struct ep_type_description
     {
       enum bptype type;
-      char *description;
+      const char *description;
     };
   static struct ep_type_description bptypes[] =
   {
@@ -8507,7 +8507,7 @@ static struct breakpoint_ops catch_solib_breakpoint_ops;
    created in an enabled state.  */
 
 void
-add_solib_catchpoint (char *arg, int is_load, int is_temp, int enabled)
+add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
 {
   struct solib_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
@@ -8515,7 +8515,7 @@ add_solib_catchpoint (char *arg, int is_load, int is_temp, int enabled)
 
   if (!arg)
     arg = "";
-  arg = skip_spaces (arg);
+  arg = skip_spaces_const (arg);
 
   c = new solib_catchpoint ();
   cleanup = make_cleanup (xfree, c);
@@ -15857,7 +15857,7 @@ static struct cmd_list_element *catch_cmdlist;
 static struct cmd_list_element *tcatch_cmdlist;
 
 void
-add_catch_command (char *name, char *docstring,
+add_catch_command (const char *name, const char *docstring,
 		   cmd_sfunc_ftype *sfunc,
 		   completer_ftype *completer,
 		   void *user_data_catch,

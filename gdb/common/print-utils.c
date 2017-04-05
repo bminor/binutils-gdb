@@ -38,7 +38,7 @@ get_print_cell (void)
 }
 
 static char *
-decimal2str (char *sign, ULONGEST addr, int width)
+decimal2str (const char *sign, ULONGEST addr, int width)
 {
   /* Steal code from valprint.c:print_decimal().  Should this worry
      about the real size of addr as the above does?  */

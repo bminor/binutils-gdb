@@ -8367,7 +8367,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
     {
       /* Use the name suffix to determine which register contains the
          target PC.  */
-      static char *table[15] =
+      static const char *table[15] =
       {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
        "r8", "r9", "sl", "fp", "ip", "sp", "lr"
       };

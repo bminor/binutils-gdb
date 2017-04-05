@@ -262,7 +262,7 @@ extern int operator_check_standard (struct expression *exp, int pos,
 				      (struct objfile *objfile, void *data),
 				    void *data);
 
-extern char *op_name_standard (enum exp_opcode);
+extern const char *op_name_standard (enum exp_opcode);
 
 extern struct type *follow_types (struct type *);
 
@@ -312,7 +312,7 @@ enum precedence
 
 struct op_print
   {
-    char *string;
+    const char *string;
     enum exp_opcode opcode;
     /* Precedence of operator.  These values are used only by comparisons.  */
     enum precedence precedence;
@@ -352,7 +352,7 @@ struct exp_descriptor
        The returned value should never be NULL, even if EXP_OPCODE is
        an unknown opcode (a string containing an image of the numeric
        value of the opcode can be returned, for instance).  */
-    char *(*op_name) (enum exp_opcode);
+    const char *(*op_name) (enum exp_opcode);
 
     /* Dump the rest of this (prefix) expression after the operator
        itself has been printed.  See dump_subexp_body_standard in

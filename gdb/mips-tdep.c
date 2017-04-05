@@ -608,7 +608,7 @@ mips_register_name (struct gdbarch *gdbarch, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* GPR names for all ABIs other than n32/n64.  */
-  static char *mips_gpr_names[] = {
+  static const char *mips_gpr_names[] = {
     "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
     "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
     "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
@@ -616,7 +616,7 @@ mips_register_name (struct gdbarch *gdbarch, int regno)
   };
 
   /* GPR names for n32 and n64 ABIs.  */
-  static char *mips_n32_n64_gpr_names[] = {
+  static const char *mips_n32_n64_gpr_names[] = {
     "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
     "a4", "a5", "a6", "a7", "t0", "t1", "t2", "t3",
     "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
@@ -6880,7 +6880,7 @@ set_mips_command (char *args, int from_tty)
 static void
 show_mipsfpu_command (char *args, int from_tty)
 {
-  char *fpu;
+  const char *fpu;
 
   if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
     {

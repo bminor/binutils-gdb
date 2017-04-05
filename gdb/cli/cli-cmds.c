@@ -242,10 +242,11 @@ help_command (char *command, int from_tty)
    [Is that why this function writes output with *_unfiltered?]  */
 
 static void
-complete_command (char *arg, int from_tty)
+complete_command (char *arg_entry, int from_tty)
 {
+  const char *arg = arg_entry;
   int argpoint;
-  char *point, *arg_prefix;
+  char *arg_prefix;
   VEC (char_ptr) *completions;
 
   dont_repeat ();
@@ -270,7 +271,7 @@ complete_command (char *arg, int from_tty)
      within, and except for filenames at the beginning of, the word to
      be completed.  The following crude imitation of readline's
      word-breaking tries to accomodate this.  */
-  point = arg + argpoint;
+  const char *point = arg + argpoint;
   while (point > arg)
     {
       if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
@@ -392,10 +393,7 @@ cd_command (char *dir, int from_tty)
      repeat might be useful but is more likely to be a mistake.  */
   dont_repeat ();
 
-  if (dir == 0)
-    dir = "~";
-
-  dir = tilde_expand (dir);
+  dir = tilde_expand (dir != NULL ? dir : "~");
   cleanup = make_cleanup (xfree, dir);
 
   if (chdir (dir) < 0)
@@ -809,7 +807,7 @@ edit_command (char *arg, int from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct symbol *sym;
-  char *editor;
+  const char *editor;
   char *p;
   const char *fn;
 

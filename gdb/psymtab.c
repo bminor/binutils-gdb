@@ -875,7 +875,7 @@ psym_forget_cached_source_info (struct objfile *objfile)
 
 static void
 print_partial_symbols (struct gdbarch *gdbarch,
-		       struct partial_symbol **p, int count, char *what,
+		       struct partial_symbol **p, int count, const char *what,
 		       struct ui_file *outfile)
 {
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);

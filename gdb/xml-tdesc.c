@@ -184,7 +184,8 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
   struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
   struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
   int ix = 0, length;
-  char *name, *group, *type;
+  char *name, *group;
+  const char *type;
   int bitsize, regnum, save_restore;
 
   length = VEC_length (gdb_xml_value_s, attributes);

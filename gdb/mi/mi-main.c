@@ -89,7 +89,7 @@ static void mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
-static void mi_execute_async_cli_command (char *cli_command,
+static void mi_execute_async_cli_command (const char *cli_command,
 					  char **argv, int argc);
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
@@ -2031,7 +2031,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	/* Echo the command on the console.  */
 	fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
 	/* Call the "console" interpreter.  */
-	argv[0] = INTERP_CONSOLE;
+	argv[0] = (char *) INTERP_CONSOLE;
 	argv[1] = context->command;
 	mi_cmd_interpreter_exec ("-interpreter-exec", argv, 2);
 
@@ -2344,7 +2344,7 @@ mi_execute_cli_command (const char *cmd, int args_p, const char *args)
 }
 
 void
-mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
+mi_execute_async_cli_command (const char *cli_command, char **argv, int argc)
 {
   struct cleanup *old_cleanups;
   char *run;

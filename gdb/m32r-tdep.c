@@ -202,7 +202,7 @@ m32r_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-char *m32r_register_names[] = {
+static const char *m32r_register_names[] = {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "fp", "lr", "sp",
   "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch",

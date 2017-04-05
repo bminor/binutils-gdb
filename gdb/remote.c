@@ -1025,7 +1025,7 @@ static int remote_async_terminal_ours_p;
 
 struct memory_packet_config
 {
-  char *name;
+  const char *name;
   long size;
   int fixed_p;
 };
@@ -1242,7 +1242,7 @@ static enum packet_support packet_support (int packet);
 static void
 show_packet_config_cmd (struct packet_config *config)
 {
-  char *support = "internal-error";
+  const char *support = "internal-error";
 
   switch (packet_config_support (config))
     {
@@ -8239,7 +8239,7 @@ static enum target_xfer_status
 remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
 		    int unit_size, ULONGEST *xfered_len)
 {
-  char *packet_format = 0;
+  const char *packet_format = NULL;
 
   /* Check whether the target supports binary download.  */
   check_binary_download (memaddr);
@@ -11190,7 +11190,7 @@ remote_read_description (struct target_ops *target)
    decrease *LEFT.  Otherwise raise an error.  */
 
 static void
-remote_buffer_add_string (char **buffer, int *left, char *string)
+remote_buffer_add_string (char **buffer, int *left, const char *string)
 {
   int len = strlen (string);
 
