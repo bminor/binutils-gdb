@@ -1,5 +1,12 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* proc-api.c (procfs_filename): Don't initialize
+        procfs_filename.
+	(prepare_to_trace): Assume procfs_filename is non-NULL.
+	(_initialize_proc_api): Give procfs_filename a default value here.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* break-catch-throw.c (handle_gnu_v3_exceptions): Constify
 	'cond_string' parameter.
 	(extract_exception_regexp): Constify 'string' parameter.
