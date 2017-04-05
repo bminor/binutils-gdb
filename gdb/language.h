@@ -321,7 +321,7 @@ struct language_defn
     char string_lower_bound;
 
     /* The list of characters forming word boundaries.  */
-    char *(*la_word_break_characters) (void);
+    const char *(*la_word_break_characters) (void);
 
     /* Should return a vector of all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
@@ -583,7 +583,7 @@ extern char *language_class_name_from_physname (const struct language_defn *,
 					        const char *physname);
 
 /* Splitting strings into words.  */
-extern char *default_word_break_characters (void);
+extern const char *default_word_break_characters (void);
 
 /* Print the index of an array element using the C99 syntax.  */
 extern void default_print_array_index (struct value *index_value,

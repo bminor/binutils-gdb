@@ -698,7 +698,7 @@ default_pass_by_reference (struct type *type)
    delimiting words.  This is a reasonable default value that
    most languages should be able to use.  */
 
-char *
+const char *
 default_word_break_characters (void)
 {
   return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";

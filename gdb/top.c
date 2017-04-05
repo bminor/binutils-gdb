@@ -2022,7 +2022,7 @@ init_main (void)
   /* Setup important stuff for command line editing.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
   rl_completion_entry_function = readline_line_completion_function;
-  rl_completer_word_break_characters = default_word_break_characters ();
+  set_rl_completer_word_break_characters (default_word_break_characters ());
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";

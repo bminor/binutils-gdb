@@ -1,5 +1,25 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_completer_word_break_characters): Now a const
+	array.
+	(ada_get_gdb_completer_word_break_characters): Constify.
+	* completer.c (gdb_completer_command_word_break_characters)
+	(gdb_completer_file_name_break_characters)
+	(gdb_completer_quote_characters): Now const arrays.
+	(get_gdb_completer_quote_characters): Constify.
+	(set_rl_completer_word_break_characters): New function.
+	(set_gdb_completion_word_break_characters)
+	(complete_line_internal): Use it.
+	* completer.h (get_gdb_completer_quote_characters): Constify.
+	(set_rl_completer_word_break_characters): Declare.
+	* f-lang.c (f_word_break_characters): Constify.
+	* language.c (default_word_break_characters): Constify.
+	* language.h (language_defn::la_word_break_characters): Constify.
+	(default_word_break_characters): Constify.
+	* top.c (init_main): Use set_rl_completer_word_break_characters.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* aix-thread.c (aix_thread_pid_to_str)
 	(aix_thread_extra_thread_info): Constify.
 	* bsd-kvm.c (bsd_kvm_pid_to_str): Constify.
