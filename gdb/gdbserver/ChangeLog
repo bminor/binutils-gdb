@@ -1,5 +1,9 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* configure: Regenerate.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* gdbreplay.c (sync_error): Constify.
 	* linux-x86-low.c (push_opcode): Constify.
 

@@ -1,5 +1,10 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* warning.m4 (build_warnings): Remove -Wno-write-strings.
+	* configure: Regenerate.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* ada-exp.y (yyerror): Constify.
 	* ada-lang.c (bound_name, get_selections)
 	(ada_variant_discrim_type)
