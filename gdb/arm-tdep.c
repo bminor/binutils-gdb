@@ -8562,7 +8562,7 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
   char *options = get_disassembler_options (gdbarch);
   const char *style = "";
   int len = 0;
-  char *opt;
+  const char *opt;
 
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     if (CONST_STRNEQ (opt, "reg-names-"))

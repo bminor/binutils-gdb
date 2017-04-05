@@ -1,3 +1,9 @@
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (show_disassembly_style_sfunc): Constify local.
+	* disasm.c (set_disassembler_options): Constify local.
+	* i386-tdep.c (i386_print_insn): Remove cast and FIXME comment.
+
 2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21352

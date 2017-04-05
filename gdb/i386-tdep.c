@@ -4009,9 +4009,7 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
   gdb_assert (disassembly_flavor == att_flavor
 	      || disassembly_flavor == intel_flavor);
 
-  /* FIXME: kettenis/20020915: Until disassembler_options is properly
-     constified, cast to prevent a compiler warning.  */
-  info->disassembler_options = (char *) disassembly_flavor;
+  info->disassembler_options = disassembly_flavor;
 
   return print_insn_i386 (pc, info);
 }

@@ -6101,9 +6101,9 @@ arm_symbol_is_valid (asymbol * sym,
 /* Parse the string of disassembler options.  */
 
 static void
-parse_arm_disassembler_options (char *options)
+parse_arm_disassembler_options (const char *options)
 {
-  char *opt;
+  const char *opt;
 
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     {

@@ -210,7 +210,7 @@ typedef struct disassemble_info
   bfd_vma target2;		/* Second target address for dref2 */
 
   /* Command line options specific to the target disassembler.  */
-  char * disassembler_options;
+  const char *disassembler_options;
 
   /* If non-zero then try not disassemble beyond this address, even if
      there are values left in the buffer.  This address is the address
@@ -369,10 +369,10 @@ extern char *remove_whitespace_and_extra_commas (char *);
 extern int disassembler_options_cmp (const char *, const char *);
 
 /* A helper function for FOR_EACH_DISASSEMBLER_OPTION.  */
-static inline char *
-next_disassembler_option (char *options)
+static inline const char *
+next_disassembler_option (const char *options)
 {
-  char *opt = strchr (options, ',');
+  const char *opt = strchr (options, ',');
   if (opt != NULL)
     opt++;
   return opt;

@@ -1,3 +1,10 @@
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* arc-dis.c (parse_option, parse_disassembler_options): Constify.
+	* arm-dis.c (parse_arm_disassembler_options): Constify.
+	* ppc-dis.c (powerpc_init_dialect): Constify local.
+	* vax-dis.c (parse_disassembler_options): Constify.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* riscv-dis.c (riscv_disassemble_insn): Change "_gp" to
