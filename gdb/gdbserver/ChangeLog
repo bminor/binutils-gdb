@@ -1,5 +1,11 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* win32-low.c (get_child_debug_event)
+	<CREATE_PROCESS_DEBUG_EVENT>: Don't report TARGET_WAITKIND_EXECD.
+	Report TARGET_WAITKIND_SPURIOUS instead.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
         * remote-utils.c (remote_prepare, remote_open): Constify.
         * remote-utils.h (remote_prepare, remote_open): Constify.
         * server.c (captured_main): Constify 'port' handling.
