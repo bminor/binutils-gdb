@@ -54,12 +54,11 @@ struct is_specified_symbol_predicate_data
   bfd_boolean	found;
 };
 
-/* A list to support redefine_sym.  */
+/* A node includes symbol name mapping to support redefine_sym.  */
 struct redefine_node
 {
   char *source;
   char *target;
-  struct redefine_node *next;
 };
 
 struct addsym_node
@@ -249,7 +248,8 @@ static htab_t localize_specific_htab = NULL;
 static htab_t globalize_specific_htab = NULL;
 static htab_t keepglobal_specific_htab = NULL;
 static htab_t weaken_specific_htab = NULL;
-static struct redefine_node *redefine_sym_list = NULL;
+static htab_t redefine_specific_htab = NULL;
+static htab_t redefine_specific_reverse_htab = NULL;
 static struct addsym_node *add_sym_list = NULL, **add_sym_tail = &add_sym_list;
 static int add_symbols = 0;
 
@@ -947,6 +947,34 @@ find_section_list (const char *name, bfd_boolean add, unsigned int context)
   return p;
 }
 
+/* S1 is the entry node already in the table, S2 is the key node.  */
+
+static int
+eq_string_redefnode (const void *s1, const void *s2)
+{
+  struct redefine_node *node1 = (struct redefine_node *) s1;
+  struct redefine_node *node2 = (struct redefine_node *) s2;
+  return !strcmp ((const char *) node1->source, (const char *) node2->source);
+}
+
+/* P is redefine node.  Hash value is generated from its "source" filed.  */
+
+static hashval_t
+htab_hash_redefnode (const void *p)
+{
+  struct redefine_node *redefnode = (struct redefine_node *) p;
+  return htab_hash_string (redefnode->source);
+}
+
+/* Create hashtab used for redefine node.  */
+
+static htab_t
+create_symbol2redef_htab (void)
+{
+  return htab_create_alloc (16, htab_hash_redefnode, eq_string_redefnode, NULL,
+			    xcalloc, free);
+}
+
 /* There is htab_hash_string but no htab_eq_string. Makes sense.  */
 
 static int
@@ -971,6 +999,10 @@ create_symbol_htabs (void)
   globalize_specific_htab = create_symbol_htab ();
   keepglobal_specific_htab = create_symbol_htab ();
   weaken_specific_htab = create_symbol_htab ();
+  redefine_specific_htab = create_symbol2redef_htab ();
+  /* As there is no bidirectional hash table in libiberty, need a reverse table
+     to check duplicated target string.  */
+  redefine_specific_reverse_htab = create_symbol_htab ();
 }
 
 /* Add a symbol to strip_specific_list.  */
@@ -979,6 +1011,14 @@ static void
 add_specific_symbol (const char *name, htab_t htab)
 {
   *htab_find_slot (htab, name, INSERT) = (char *) name;
+}
+
+/* Like add_specific_symbol, but the element type is void *.  */
+
+static void
+add_specific_symbol_node (const void *node, htab_t htab)
+{
+  *htab_find_slot (htab, node, INSERT) = (void *) node;
 }
 
 /* Add symbols listed in `filename' to strip_specific_list.  */
@@ -1439,7 +1479,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    to[dst_count++] = create_new_symbol (ptr, obfd);
 	}
 
-      if (redefine_sym_list || section_rename_list)
+      if (htab_elements (redefine_specific_htab) || section_rename_list)
 	{
 	  char *new_name;
 
@@ -1625,42 +1665,40 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 static const char *
 lookup_sym_redefinition (const char *source)
 {
-  struct redefine_node *list;
+  struct redefine_node key_node = {(char *) source, NULL};
+  struct redefine_node *redef_node
+    = (struct redefine_node *) htab_find (redefine_specific_htab, &key_node);
 
-  for (list = redefine_sym_list; list != NULL; list = list->next)
-    if (strcmp (source, list->source) == 0)
-      return list->target;
-
-  return source;
+  return redef_node == NULL ? source : redef_node->target;
 }
 
-/* Add a node to a symbol redefine list.  */
+/* Insert a node into symbol redefine hash tabel.  */
 
 static void
-redefine_list_append (const char *cause, const char *source, const char *target)
+add_redefine_and_check (const char *cause, const char *source,
+			const char *target)
 {
-  struct redefine_node **p;
-  struct redefine_node *list;
-  struct redefine_node *new_node;
-
-  for (p = &redefine_sym_list; (list = *p) != NULL; p = &list->next)
-    {
-      if (strcmp (source, list->source) == 0)
-	fatal (_("%s: Multiple redefinition of symbol \"%s\""),
-	       cause, source);
-
-      if (strcmp (target, list->target) == 0)
-	fatal (_("%s: Symbol \"%s\" is target of more than one redefinition"),
-	       cause, target);
-    }
-
-  new_node = (struct redefine_node *) xmalloc (sizeof (struct redefine_node));
+  struct redefine_node *new_node
+    = (struct redefine_node *) xmalloc (sizeof (struct redefine_node));
 
   new_node->source = strdup (source);
   new_node->target = strdup (target);
-  new_node->next = NULL;
 
-  *p = new_node;
+  if (htab_find (redefine_specific_htab, new_node) != HTAB_EMPTY_ENTRY)
+    fatal (_("%s: Multiple redefinition of symbol \"%s\""),
+	   cause, source);
+
+  if (htab_find (redefine_specific_reverse_htab, target) != HTAB_EMPTY_ENTRY)
+    fatal (_("%s: Symbol \"%s\" is target of more than one redefinition"),
+	   cause, target);
+
+  /* Insert the NEW_NODE into hash table for quick search.  */
+  add_specific_symbol_node (new_node, redefine_specific_htab);
+
+  /* Insert the target string into the reverse hash table, this is needed for
+     duplicated target string check.  */
+  add_specific_symbol (new_node->target, redefine_specific_reverse_htab);
+
 }
 
 /* Handle the --redefine-syms option.  Read lines containing "old new"
@@ -1745,7 +1783,7 @@ add_redefine_syms_file (const char *filename)
 	end_of_line:
 	  /* Append the redefinition to the list.  */
 	  if (buf[0] != '\0')
-	    redefine_list_append (filename, &buf[0], &buf[outsym_off]);
+	    add_redefine_and_check (filename, &buf[0], &buf[outsym_off]);
 
 	  lineno++;
 	  len = 0;
@@ -2695,13 +2733,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       || htab_elements (globalize_specific_htab) != 0
       || htab_elements (keepglobal_specific_htab) != 0
       || htab_elements (weaken_specific_htab) != 0
+      || htab_elements (redefine_specific_htab) != 0
       || prefix_symbols_string
       || sections_removed
       || sections_copied
       || convert_debugging
       || change_leading_char
       || remove_leading_char
-      || redefine_sym_list
       || section_rename_list
       || weaken
       || add_symbols)
@@ -4750,7 +4788,7 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_REDEFINE_SYM:
 	  {
-	    /* Push this redefinition onto redefine_symbol_list.  */
+	    /* Insert this redefinition onto redefine_specific_htab.  */
 
 	    int len;
 	    const char *s;
@@ -4771,7 +4809,7 @@ copy_main (int argc, char *argv[])
 	    target = (char *) xmalloc (len + 1);
 	    strcpy (target, nextarg);
 
-	    redefine_list_append ("--redefine-sym", source, target);
+	    add_redefine_and_check ("--redefine-sym", source, target);
 
 	    free (source);
 	    free (target);
