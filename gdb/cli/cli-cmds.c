@@ -82,7 +82,7 @@ static void show_user (char *, int);
 
 static void make_command (char *, int);
 
-static void shell_escape (char *, int);
+static void shell_escape (const char *, int);
 
 static void edit_command (char *, int);
 
@@ -735,7 +735,7 @@ echo_command (char *text, int from_tty)
 }
 
 static void
-shell_escape (char *arg, int from_tty)
+shell_escape (const char *arg, int from_tty)
 {
 #if defined(CANT_FORK) || \
       (!defined(HAVE_WORKING_VFORK) && !defined(HAVE_WORKING_FORK))
@@ -793,6 +793,14 @@ shell_escape (char *arg, int from_tty)
   else
     error (_("Fork failed"));
 #endif /* Can fork.  */
+}
+
+/* Implementation of the "shell" command.  */
+
+static void
+shell_command (char *arg, int from_tty)
+{
+  shell_escape (arg, from_tty);
 }
 
 static void
@@ -1306,18 +1314,14 @@ disassemble_command (char *arg, int from_tty)
 static void
 make_command (char *arg, int from_tty)
 {
-  char *p;
-
   if (arg == 0)
-    p = "make";
+    shell_escape ("make", from_tty);
   else
     {
-      p = (char *) xmalloc (sizeof ("make ") + strlen (arg));
-      strcpy (p, "make ");
-      strcpy (p + sizeof ("make ") - 1, arg);
-    }
+      std::string cmd = std::string ("make ") + arg;
 
-  shell_escape (p, from_tty);
+      shell_escape (cmd.c_str (), from_tty);
+    }
 }
 
 static void
@@ -1881,7 +1885,7 @@ from the target."),
 		  _("Generic command for showing gdb debugging flags"),
 		  &showdebuglist, "show debug ", 0, &showlist);
 
-  c = add_com ("shell", class_support, shell_escape, _("\
+  c = add_com ("shell", class_support, shell_command, _("\
 Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell."));
   set_cmd_completer (c, filename_completer);

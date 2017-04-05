@@ -1,3 +1,10 @@
+2017-04-05  Pedro Alves	 <palves@redhat.com>
+
+	* cli/cli-cmds.c (shell_escape): Constify 'arg' parameter.
+	(shell_command): New function.
+	(make_command): Use std::string.
+	(init_cli_cmds): Register shell_command instead of shell_escape.
+
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (dprintf_function, dprintf_channel): Don't initialize.
