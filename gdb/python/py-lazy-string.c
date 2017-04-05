@@ -300,7 +300,7 @@ static PyMethodDef lazy_string_object_methods[] = {
 };
 
 
-static PyGetSetDef lazy_string_object_getset[] = {
+static gdb_PyGetSetDef lazy_string_object_getset[] = {
   { "address", stpy_get_address, NULL, "Address of the string.", NULL },
   { "encoding", stpy_get_encoding, NULL, "Encoding of the string.", NULL },
   { "length", stpy_get_length, NULL, "Length of the string.", NULL },

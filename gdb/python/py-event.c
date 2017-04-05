@@ -114,7 +114,7 @@ evpy_emit_event (PyObject *event,
   return 0;
 }
 
-static PyGetSetDef event_object_getset[] =
+static gdb_PyGetSetDef event_object_getset[] =
 {
   { "__dict__", gdb_py_generic_dict, NULL,
     "The __dict__ for this event.", &event_object_type },

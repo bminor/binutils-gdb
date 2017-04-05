@@ -1767,7 +1767,7 @@ gdbpy_initialize_values (void)
 
 
 
-static PyGetSetDef value_object_getset[] = {
+static gdb_PyGetSetDef value_object_getset[] = {
   { "address", valpy_get_address, NULL, "The address of the value.",
     NULL },
   { "is_optimized_out", valpy_get_is_optimized_out, NULL,

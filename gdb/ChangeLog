@@ -1,5 +1,28 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* python/python-internal.h (gdb_PyGetSetDef): New type.
+	* python/py-block.c (block_object_getset)
+	(breakpoint_object_getset): Now a gdb_PyGetSetDef array.
+	* python/py-event.c (event_object_getset)
+	(finish_breakpoint_object_getset): Likewise.
+	* python/py-inferior.c (inferior_object_getset): Likewise.
+	* python/py-infthread.c (thread_object_getset): Likewise.
+	* python/py-lazy-string.c (lazy_string_object_getset): Likewise.
+	* python/py-linetable.c (linetable_entry_object_getset): Likewise.
+	* python/py-objfile.c (objfile_getset): Likewise.
+	* python/py-progspace.c (pspace_getset): Likewise.
+	* python/py-record-btrace.c (btpy_insn_getset, btpy_call_getset):
+	Likewise.
+	* python/py-record.c (recpy_record_getset): Likewise.
+	* python/py-symbol.c (symbol_object_getset): Likewise.
+	* python/py-symtab.c (symtab_object_getset, sal_object_getset):
+	Likewise.
+	* python/py-type.c (type_object_getset, field_object_getset):
+	Likewise.
+	* python/py-value.c (value_object_getset): Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* python/python-internal.h (gdb_PyObject_CallMethod)
 	(gdb_PyErr_NewException, gdb_PySys_GetObject, gdb_PySys_SetPath):
 	New functions.

@@ -378,7 +378,7 @@ gdbpy_initialize_pspace (void)
 
 
 
-static PyGetSetDef pspace_getset[] =
+static gdb_PyGetSetDef pspace_getset[] =
 {
   { "__dict__", gdb_py_generic_dict, NULL,
     "The __dict__ for this progspace.", &pspace_object_type },

@@ -827,7 +827,7 @@ gdbpy_initialize_inferior (void)
 				 &membuf_object_type);
 }
 
-static PyGetSetDef inferior_object_getset[] =
+static gdb_PyGetSetDef inferior_object_getset[] =
 {
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
   { "pid", infpy_get_pid, NULL, "PID of inferior, as assigned by the OS.",

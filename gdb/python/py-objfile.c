@@ -670,7 +670,7 @@ Add FILE_NAME to the list of files containing debug info for the objfile." },
   { NULL }
 };
 
-static PyGetSetDef objfile_getset[] =
+static gdb_PyGetSetDef objfile_getset[] =
 {
   { "__dict__", gdb_py_generic_dict, NULL,
     "The __dict__ for this objfile.", &objfile_object_type },

@@ -286,6 +286,36 @@ gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
 
 #define PySys_SetPath gdb_PySys_SetPath
 
+/* Wrap PyGetSetDef to allow convenient construction with string
+   literals.  Unfortunately, PyGetSetDef's 'name' and 'doc' members
+   are 'char *' instead of 'const char *', meaning that in order to
+   list-initialize PyGetSetDef arrays with string literals (and
+   without the wrapping below) would require writing explicit 'char *'
+   casts.  Instead, we extend PyGetSetDef and add constexpr
+   constructors that accept const 'name' and 'doc', hiding the ugly
+   casts here in a single place.  */
+
+struct gdb_PyGetSetDef : PyGetSetDef
+{
+  constexpr gdb_PyGetSetDef (const char *name_, getter get_, setter set_,
+			     const char *doc_, void *closure_)
+    : PyGetSetDef {const_cast<char *> (name_), get_, set_,
+		   const_cast<char *> (doc_), closure_}
+  {}
+
+  /* Alternative constructor that allows omitting the closure in list
+     initialization.  */
+  constexpr gdb_PyGetSetDef (const char *name_, getter get_, setter set_,
+			     const char *doc_)
+    : gdb_PyGetSetDef {name_, get_, set_, doc_, NULL}
+  {}
+
+  /* Constructor for the sentinel entries.  */
+  constexpr gdb_PyGetSetDef (std::nullptr_t)
+    : gdb_PyGetSetDef {NULL, NULL, NULL, NULL, NULL}
+  {}
+};
+
 /* In order to be able to parse symtab_and_line_to_sal_object function
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"

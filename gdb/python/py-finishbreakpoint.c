@@ -426,7 +426,7 @@ gdbpy_initialize_finishbreakpoints (void)
   return 0;
 }
 
-static PyGetSetDef finish_breakpoint_object_getset[] = {
+static gdb_PyGetSetDef finish_breakpoint_object_getset[] = {
   { "return_value", bpfinishpy_get_returnvalue, NULL,
   "gdb.Value object representing the return value, if any. \
 None otherwise.", NULL },

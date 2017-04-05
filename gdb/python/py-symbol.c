@@ -560,7 +560,7 @@ gdbpy_initialize_symbols (void)
 
 
 
-static PyGetSetDef symbol_object_getset[] = {
+static gdb_PyGetSetDef symbol_object_getset[] = {
   { "type", sympy_get_type, NULL,
     "Type of the symbol.", NULL },
   { "symtab", sympy_get_symtab, NULL,

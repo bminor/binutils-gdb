@@ -903,7 +903,7 @@ recpy_bt_goto (PyObject *self, PyObject *args)
 
 /* BtraceInstruction members.  */
 
-struct PyGetSetDef btpy_insn_getset[] =
+struct gdb_PyGetSetDef btpy_insn_getset[] =
 {
   { "number", btpy_number, NULL, "instruction number", NULL},
   { "error", btpy_insn_error, NULL, "error number for gaps", NULL},
@@ -920,7 +920,7 @@ executed speculatively", NULL},
 
 /* BtraceFunctionCall members.  */
 
-static PyGetSetDef btpy_call_getset[] =
+static gdb_PyGetSetDef btpy_call_getset[] =
 {
   { "number", btpy_number, NULL, "function call number", NULL},
   { "level", btpy_call_level, NULL, "call stack level", NULL},

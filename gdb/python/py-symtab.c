@@ -544,7 +544,7 @@ gdbpy_initialize_symtabs (void)
 
 
 
-static PyGetSetDef symtab_object_getset[] = {
+static gdb_PyGetSetDef symtab_object_getset[] = {
   { "filename", stpy_get_filename, NULL,
     "The symbol table's source filename.", NULL },
   { "objfile", stpy_get_objfile, NULL, "The symtab's objfile.",
@@ -606,7 +606,7 @@ PyTypeObject symtab_object_type = {
   symtab_object_getset		  /*tp_getset */
 };
 
-static PyGetSetDef sal_object_getset[] = {
+static gdb_PyGetSetDef sal_object_getset[] = {
   { "symtab", salpy_get_symtab, NULL, "Symtab object.", NULL },
   { "pc", salpy_get_pc, NULL, "Return the symtab_and_line's pc.", NULL },
   { "last", salpy_get_last, NULL,

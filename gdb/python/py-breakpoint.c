@@ -1048,7 +1048,7 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
   return PyObject_GenericSetAttr ((PyObject *)self, name, v);
 }
 
-static PyGetSetDef breakpoint_object_getset[] = {
+static gdb_PyGetSetDef breakpoint_object_getset[] = {
   { "enabled", bppy_get_enabled, bppy_set_enabled,
     "Boolean telling whether the breakpoint is enabled.", NULL },
   { "silent", bppy_get_silent, bppy_set_silent,
