@@ -1347,14 +1347,14 @@ type_object_to_type (PyObject *obj)
 PyObject *
 gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static char *keywords[] = { "name", "block", NULL };
+  static const char *keywords[] = { "name", "block", NULL };
   const char *type_name = NULL;
   struct type *type = NULL;
   PyObject *block_obj = NULL;
   const struct block *block = NULL;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O", keywords,
-				     &type_name, &block_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O", keywords,
+					&type_name, &block_obj))
     return NULL;
 
   if (block_obj)

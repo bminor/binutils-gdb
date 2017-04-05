@@ -572,11 +572,11 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
   const char *arg;
   PyObject *from_tty_obj = NULL, *to_string_obj = NULL;
   int from_tty, to_string;
-  static char *keywords[] = {"command", "from_tty", "to_string", NULL };
+  static const char *keywords[] = { "command", "from_tty", "to_string", NULL };
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O!O!", keywords, &arg,
-				     &PyBool_Type, &from_tty_obj,
-				     &PyBool_Type, &to_string_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!O!", keywords, &arg,
+					&PyBool_Type, &from_tty_obj,
+					&PyBool_Type, &to_string_obj))
     return NULL;
 
   from_tty = 0;
@@ -1047,11 +1047,11 @@ static PyObject *
 gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 {
   const char *arg;
-  static char *keywords[] = {"text", "stream", NULL };
+  static const char *keywords[] = { "text", "stream", NULL };
   int stream_type = 0;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
-				     &stream_type))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
+					&stream_type))
     return NULL;
 
   TRY
@@ -1088,11 +1088,11 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static char *keywords[] = {"stream", NULL };
+  static const char *keywords[] = { "stream", NULL };
   int stream_type = 0;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "|i", keywords,
-				     &stream_type))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|i", keywords,
+					&stream_type))
     return NULL;
 
   switch (stream_type)

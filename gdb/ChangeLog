@@ -1,5 +1,24 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* python/python-internal.h (gdb_PyArg_ParseTupleAndKeywords): New
+	static inline function.
+	* python/py-arch.c (archpy_disassemble): Constify 'keywords'
+	array and use gdb_PyArg_ParseTupleAndKeywords.
+	* python/py-cmd.c (cmdpy_init): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-inferior.c (infpy_read_memory, infpy_write_memory)
+	(infpy_search_memory): Likewise.
+	* python/py-objfile.c (objfpy_add_separate_debug_file)
+	(gdbpy_lookup_objfile): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol)
+	(gdbpy_lookup_global_symbol): Likewise.
+	* python/py-type.c (gdbpy_lookup_type): Likewise.
+	* python/py-value.c (valpy_lazy_string, valpy_string): Likewise.
+	* python/python.c (execute_gdb_command, gdbpy_write, gdbpy_flush):
+	Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* python/python-internal.h (gdb_PyGetSetDef): New type.
 	* python/py-block.c (block_object_getset)
 	(breakpoint_object_getset): Now a gdb_PyGetSetDef array.

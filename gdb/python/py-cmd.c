@@ -490,8 +490,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   char *docstring = NULL;
   struct cmd_list_element **cmd_list;
   char *cmd_name, *pfx_name;
-  static char *keywords[] = { "name", "command_class", "completer_class",
-			      "prefix", NULL };
+  static const char *keywords[] = { "name", "command_class", "completer_class",
+				    "prefix", NULL };
   PyObject *is_prefix = NULL;
   int cmp;
 
@@ -504,9 +504,9 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "si|iO",
-				     keywords, &name, &cmdtype,
-			  &completetype, &is_prefix))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "si|iO",
+					keywords, &name, &cmdtype,
+					&completetype, &is_prefix))
     return -1;
 
   if (cmdtype != no_class && cmdtype != class_run

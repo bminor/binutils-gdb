@@ -316,6 +316,34 @@ struct gdb_PyGetSetDef : PyGetSetDef
   {}
 };
 
+/* The 'keywords' parameter of PyArg_ParseTupleAndKeywords has type
+   'char **'.  However, string literals are const in C++, and so to
+   avoid casting at every keyword array definition, we'll need to make
+   the keywords array an array of 'const char *'.  To avoid having all
+   callers add a 'const_cast<char **>' themselves when passing such an
+   array through 'char **', we define our own version of
+   PyArg_ParseTupleAndKeywords here with a corresponding 'keywords'
+   parameter type that does the cast in a single place.  (This is not
+   an overload of PyArg_ParseTupleAndKeywords in order to make it
+   clearer that we're calling our own function instead of a function
+   that exists in some newer Python version.)  */
+
+static inline int
+gdb_PyArg_ParseTupleAndKeywords (PyObject *args, PyObject *kw,
+				 const char *format, const char **keywords, ...)
+{
+  va_list ap;
+  int res;
+
+  va_start (ap, keywords);
+  res = PyArg_VaParseTupleAndKeywords (args, kw, format,
+				       const_cast<char **> (keywords),
+				       ap);
+  va_end (ap);
+
+  return res;
+}
+
 /* In order to be able to parse symtab_and_line_to_sal_object function
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"

@@ -431,11 +431,11 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
   gdb_py_longest length = -1;
   struct value *value = ((value_object *) self)->value;
   const char *user_encoding = NULL;
-  static char *keywords[] = { "encoding", "length", NULL };
+  static const char *keywords[] = { "encoding", "length", NULL };
   PyObject *str_obj = NULL;
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG, keywords,
-				    &user_encoding, &length))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG,
+					keywords, &user_encoding, &length))
     return NULL;
 
   if (length < -1)
@@ -526,10 +526,10 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   const char *user_encoding = NULL;
   const char *la_encoding = NULL;
   struct type *char_type;
-  static char *keywords[] = { "encoding", "errors", "length", NULL };
+  static const char *keywords[] = { "encoding", "errors", "length", NULL };
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
-				    &user_encoding, &errors, &length))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
+					&user_encoding, &errors, &length))
     return NULL;
 
   TRY
