@@ -1,5 +1,10 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (dprintf_function, dprintf_channel): Don't initialize.
+	* tracepoint.c (default_collect): Don't initialize.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* macroexp.c (macro_buffer::shared): Now a bool.
 	(init_buffer): Update.
 	(init_shared_buffer): Constify 'addr' parameter.

@@ -345,7 +345,7 @@ static const char *dprintf_style = dprintf_style_gdb;
    copied into the command, so it can be anything that GDB can
    evaluate to a callable address, not necessarily a function name.  */
 
-static char *dprintf_function = "";
+static char *dprintf_function;
 
 /* The channel to use for dynamic printf if the preferred style is to
    call into the inferior; if a nonempty string, it will be passed to
@@ -355,7 +355,7 @@ static char *dprintf_function = "";
    "stderr", this could be an app-specific expression like
    "mystreams[curlogger]".  */
 
-static char *dprintf_channel = "";
+static char *dprintf_channel;
 
 /* True if dprintf commands should continue to operate even if GDB
    has disconnected.  */

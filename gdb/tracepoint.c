@@ -139,7 +139,7 @@ static struct traceframe_info *traceframe_info;
 static struct cmd_list_element *tfindlist;
 
 /* List of expressions to collect by default at each tracepoint hit.  */
-char *default_collect = "";
+char *default_collect;
 
 static int disconnected_tracing;
 
