@@ -1372,7 +1372,7 @@ thread_db_update_thread_list (struct target_ops *ops)
   ops->beneath->to_update_thread_list (ops->beneath);
 }
 
-static char *
+static const char *
 thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   struct thread_info *thread_info = find_thread_ptid (ptid);
@@ -1397,7 +1397,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 /* Return a string describing the state of the thread specified by
    INFO.  */
 
-static char *
+static const char *
 thread_db_extra_thread_info (struct target_ops *self,
 			     struct thread_info *info)
 {

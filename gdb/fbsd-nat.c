@@ -368,7 +368,7 @@ fbsd_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Convert PTID to a string.  Returns the string in a static
    buffer.  */
 
-static char *
+static const char *
 fbsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   lwpid_t lwp;

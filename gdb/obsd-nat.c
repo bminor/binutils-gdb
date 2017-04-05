@@ -35,7 +35,7 @@
 
 #ifdef PT_GET_THREAD_FIRST
 
-static char *
+static const char *
 obsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   if (ptid_get_lwp (ptid) != 0)

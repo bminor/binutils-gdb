@@ -2652,7 +2652,7 @@ proc_string (struct proc *proc)
   return tid_str;
 }
 
-static char *
+static const char *
 gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;

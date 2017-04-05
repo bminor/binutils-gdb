@@ -2807,7 +2807,7 @@ windows_close (struct target_ops *self)
 }
 
 /* Convert pid to printable format.  */
-static char *
+static const char *
 windows_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];

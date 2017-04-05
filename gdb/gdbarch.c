@@ -3691,7 +3691,7 @@ gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch)
   return gdbarch->core_pid_to_str != NULL;
 }
 
-char *
+const char *
 gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   gdb_assert (gdbarch != NULL);

@@ -941,7 +941,7 @@ go32_thread_alive (struct target_ops *ops, ptid_t ptid)
   return !ptid_equal (ptid, null_ptid);
 }
 
-static char *
+static const char *
 go32_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);

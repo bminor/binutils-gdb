@@ -491,7 +491,7 @@ static char *bsd_uthread_state[] =
 /* Return a string describing th state of the thread specified by
    INFO.  */
 
-static char *
+static const char *
 bsd_uthread_extra_thread_info (struct target_ops *self,
 			       struct thread_info *info)
 {
@@ -511,7 +511,7 @@ bsd_uthread_extra_thread_info (struct target_ops *self,
   return NULL;
 }
 
-static char *
+static const char *
 bsd_uthread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   if (ptid_get_tid (ptid) != 0)

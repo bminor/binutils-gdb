@@ -965,7 +965,7 @@ core_read_description (struct target_ops *target)
   return target->beneath->to_read_description (target->beneath);
 }
 
-static char *
+static const char *
 core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];

@@ -1,3 +1,46 @@
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* aix-thread.c (aix_thread_pid_to_str)
+	(aix_thread_extra_thread_info): Constify.
+	* bsd-kvm.c (bsd_kvm_pid_to_str): Constify.
+	* bsd-uthread.c (bsd_uthread_extra_thread_info)
+	(bsd_uthread_pid_to_str): Constify.
+	* corelow.c (core_pid_to_str): Constify.
+	* darwin-nat.c (darwin_pid_to_str): Constify.
+	* fbsd-nat.c (fbsd_pid_to_str): Constify.
+	* fbsd-tdep.c (fbsd_core_pid_to_str, gdbarch_core_pid_to_str):
+	Constify.
+	* gnu-nat.c (gnu_pid_to_str): Constify.
+	* go32-nat.c (go32_pid_to_str): Constify.
+	* i386-cygwin-tdep.c (i386_windows_core_pid_to_str): Constify.
+	* inf-ptrace.c (inf_ptrace_pid_to_str): Constify.
+	* inferior.c (inferior_pid_to_str): Constify.
+	* linux-nat.c (linux_nat_pid_to_str): Constify.
+	* linux-tdep.c (linux_core_pid_to_str): Constify.
+	* linux-thread-db.c (thread_db_pid_to_str)
+	(thread_db_extra_thread_info): Constify.
+	* nto-tdep.c (nto_extra_thread_info): Constify.
+	* nto-tdep.h (nto_extra_thread_info): Constify.
+	* obsd-nat.c (obsd_pid_to_str): Constify.
+	* procfs.c (procfs_pid_to_str): Constify.
+	* ravenscar-thread.c (ravenscar_extra_thread_info)
+	(ravenscar_pid_to_str): Constify.
+	* remote-sim.c (gdbsim_pid_to_str): Constify.
+	* remote.c (remote_threads_extra_info, remote_pid_to_str):
+	Constify.
+	* sol-thread.c (solaris_pid_to_str): Constify.
+	* sol2-tdep.c (sol2_core_pid_to_str): Constify.
+	* sol2-tdep.h (sol2_core_pid_to_str): Constify.
+	* target.c (default_pid_to_str, target_pid_to_str)
+	(normal_pid_to_str, default_pid_to_str): Constify.
+	* target.h (target_ops::to_pid_to_str)
+	(target_ops::to_extra_thread_info): Constify.
+	(target_pid_to_str, normal_pid_to_str): Constify.
+	* windows-nat.c (windows_pid_to_str): Constify.
+	* gdbarch.sh (core_pid_to_str): Constify.
+	* target-delegates.c: Regenerate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2017-04-05  Pedro Alves	 <palves@redhat.com>
 
 	* main.c (captured_main_1): Use gdb::unique_xmalloc_ptr to manage

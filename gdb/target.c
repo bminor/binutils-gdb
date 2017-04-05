@@ -103,7 +103,7 @@ static int dummy_find_memory_regions (struct target_ops *self,
 static char *dummy_make_corefile_notes (struct target_ops *self,
 					bfd *ignore1, int *ignore2);
 
-static char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
+static const char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
 
 static enum exec_direction_kind default_execution_direction
     (struct target_ops *self);
@@ -2303,7 +2303,7 @@ default_target_wait (struct target_ops *ops,
   return minus_one_ptid;
 }
 
-char *
+const char *
 target_pid_to_str (ptid_t ptid)
 {
   return (*current_target.to_pid_to_str) (&current_target, ptid);
@@ -3344,7 +3344,7 @@ generic_mourn_inferior (void)
 /* Convert a normal process ID to a string.  Returns the string in a
    static buffer.  */
 
-char *
+const char *
 normal_pid_to_str (ptid_t ptid)
 {
   static char buf[32];
@@ -3353,7 +3353,7 @@ normal_pid_to_str (ptid_t ptid)
   return buf;
 }
 
-static char *
+static const char *
 default_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);

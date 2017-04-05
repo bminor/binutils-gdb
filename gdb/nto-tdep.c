@@ -408,7 +408,7 @@ static const char *nto_thread_state_str[] =
   "NET_REPLY"	/* 20 0x14 */
 };
 
-char *
+const char *
 nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
 {
   if (ti && ti->priv

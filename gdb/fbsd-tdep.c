@@ -32,7 +32,7 @@
 
 /* This is how we want PTIDs from core files to be printed.  */
 
-static char *
+static const char *
 fbsd_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];

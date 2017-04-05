@@ -54,8 +54,8 @@ static const char ravenscar_runtime_initializer[] =
 
 static void ravenscar_update_thread_list (struct target_ops *ops);
 static ptid_t ravenscar_running_thread (void);
-static char *ravenscar_extra_thread_info (struct target_ops *self,
-					  struct thread_info *tp);
+static const char *ravenscar_extra_thread_info (struct target_ops *self,
+						struct thread_info *tp);
 static int ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid);
 static void ravenscar_fetch_registers (struct target_ops *ops,
                                        struct regcache *regcache, int regnum);
@@ -241,7 +241,7 @@ ravenscar_running_thread (void)
     return ptid_build (ptid_get_pid (base_ptid), 0, tid);
 }
 
-static char *
+static const char *
 ravenscar_extra_thread_info (struct target_ops *self, struct thread_info *tp)
 {
   return "Ravenscar task";
@@ -254,7 +254,7 @@ ravenscar_thread_alive (struct target_ops *ops, ptid_t ptid)
   return 1;
 }
 
-static char *
+static const char *
 ravenscar_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[30];

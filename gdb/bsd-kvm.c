@@ -329,7 +329,7 @@ bsd_kvm_thread_alive (struct target_ops *ops,
   return 1;
 }
 
-static char *
+static const char *
 bsd_kvm_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];

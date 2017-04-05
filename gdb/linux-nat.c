@@ -3940,7 +3940,7 @@ linux_nat_update_thread_list (struct target_ops *ops)
     }
 }
 
-static char *
+static const char *
 linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];

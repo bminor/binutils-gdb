@@ -1725,7 +1725,7 @@ aix_thread_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Return a printable representation of composite PID for use in
    "info threads" output.  */
 
-static char *
+static const char *
 aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char *ret = NULL;
@@ -1745,7 +1745,7 @@ aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 /* Return a printable representation of extra information about
    THREAD, for use in "info threads" output.  */
 
-static char *
+static const char *
 aix_thread_extra_thread_info (struct target_ops *self,
 			      struct thread_info *thread)
 {

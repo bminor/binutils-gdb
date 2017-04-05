@@ -135,7 +135,7 @@ static target_xfer_partial_ftype procfs_xfer_partial;
 static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 
 static void procfs_update_thread_list (struct target_ops *ops);
-static char *procfs_pid_to_str (struct target_ops *, ptid_t);
+static const char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
 static int proc_find_memory_regions (struct target_ops *self,
 				     find_memory_region_ftype, void *);
@@ -4691,7 +4691,7 @@ procfs_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Convert PTID to a string.  Returns the string in a static
    buffer.  */
 
-static char *
+static const char *
 procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];
