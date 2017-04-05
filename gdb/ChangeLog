@@ -1,5 +1,10 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* MAINTAINERS (Global Maintainers): Add Simon Marchi.
+	(Write After Approval): Remove Simon Marchi.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* common/gdb_optional.h (optional::optional): Make constexpr and
 	initialize m_dummy.
 
