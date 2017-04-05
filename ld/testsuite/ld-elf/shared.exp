@@ -131,6 +131,9 @@ if { [check_gc_sections_available] } {
 	    {pr21233-l.s} \
 	    {{readelf --dyn-syms pr21233-l.sd}} \
 	    "libpr21233.so"]]
+
+    setup_kfail "cris*-*-*" "ld/21233"
+
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
@@ -138,7 +141,11 @@ if { [check_gc_sections_available] } {
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
-	    "pr21233-1"] \
+	    "pr21233-1"]]
+
+    setup_kfail "cris*-*-*" "ld/21233"
+
+    run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--require-defined)" \
 	    "$LFLAGS --gc-sections -e foo --require-defined=bar\
@@ -146,14 +153,18 @@ if { [check_gc_sections_available] } {
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
-	    "pr21233-2"] \
+	    "pr21233-2"]]
+
+    setup_kfail "cris*-*-*" "ld/21233"
+
+    run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (EXTERN)" \
 	    "$LFLAGS --gc-sections -e foo -T pr21233-e.ld" \
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
-	     "pr21233-3"]] "cris*-*-*"
+	    "pr21233-3"]]
 }
 
 # Check to see if the C compiler works
