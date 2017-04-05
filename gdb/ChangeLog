@@ -1,5 +1,25 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Constify
+	'cond_string' parameter.
+	(extract_exception_regexp): Constify 'string' parameter.
+	(catch_exception_command_1): Constify.
+	* breakpoint.c (init_catchpoint)
+	(create_fork_vfork_event_catchpoint): Constify 'cond_string'
+	parameter.
+	(ep_parse_optional_if_clause, catch_fork_command_1)
+	(catch_exec_command_1): Constify.
+	* breakpoint.h (init_catchpoint): Constify 'cond_string'
+	parameter.
+	(ep_parse_optional_if_clause): Constify.
+	* cli/cli-utils.c (remove_trailing_whitespace)
+	(check_for_argument): Constify.
+	* cli/cli-utils.h (remove_trailing_whitespace): Constify and add
+	non-const overload.
+	(check_for_argument): Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* event-top.c (command_line_handler): Add cast to execute_command
 	call.
 	* record-btrace.c (cmd_record_btrace_bts_start)

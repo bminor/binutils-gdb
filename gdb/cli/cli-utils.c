@@ -238,8 +238,8 @@ number_is_in_list (const char *list, int number)
 
 /* See documentation in cli-utils.h.  */
 
-char *
-remove_trailing_whitespace (const char *start, char *s)
+const char *
+remove_trailing_whitespace (const char *start, const char *s)
 {
   while (s > start && isspace (*(s - 1)))
     --s;
@@ -288,7 +288,7 @@ extract_arg (char **arg)
 /* See documentation in cli-utils.h.  */
 
 int
-check_for_argument (char **str, char *arg, int arg_len)
+check_for_argument (const char **str, const char *arg, int arg_len)
 {
   if (strncmp (*str, arg, arg_len) == 0
       && ((*str)[arg_len] == '\0' || isspace ((*str)[arg_len])))

@@ -1295,7 +1295,7 @@ extern void
 
 extern void init_catchpoint (struct breakpoint *b,
 			     struct gdbarch *gdbarch, int tempflag,
-			     char *cond_string,
+			     const char *cond_string,
 			     const struct breakpoint_ops *ops);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
@@ -1641,7 +1641,7 @@ extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
 
 extern void breakpoint_free_objfile (struct objfile *objfile);
 
-extern char *ep_parse_optional_if_clause (char **arg);
+extern const char *ep_parse_optional_if_clause (const char **arg);
 
 /* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" to
    UIOUT iff debugging multiple threads.  */
