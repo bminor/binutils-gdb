@@ -2647,7 +2647,8 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  const char *name = s->name + 5;
 		  bfd *ibfd;
 		  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
-		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
+		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+			&& ibfd->flags & DYNAMIC)
 		      {
 			asection *target = bfd_get_section_by_name (ibfd, name);
 			if (target != NULL

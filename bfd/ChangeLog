@@ -1,5 +1,10 @@
 2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf32-arc.c (elf_arc_size_dynamic_sections): Changed condition to
+	require TEXTREL.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* arc-got.h (relocate_fix_got_relocs_for_got_info): Added TCB_SIZE to
 	patched section contents for TLS IE reloc.
 	* elf32-arc.c: Remove TCB_SIZE preprocessor macro.
