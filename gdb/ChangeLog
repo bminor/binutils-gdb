@@ -1,3 +1,8 @@
+2017-04-05  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/thread-specific-bp.exp (check_thread_specific_breakpoint):
+	Use gdb_test_multiple, and don't match anchor.
+
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
 	* MAINTAINERS (Global Maintainers): Add Simon Marchi.
