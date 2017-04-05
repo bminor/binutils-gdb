@@ -1,3 +1,9 @@
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+        * remote-utils.c (remote_prepare, remote_open): Constify.
+        * remote-utils.h (remote_prepare, remote_open): Constify.
+        * server.c (captured_main): Constify 'port' handling.
+
 2017-04-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in (clean): Clear .deps.

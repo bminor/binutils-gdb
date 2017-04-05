@@ -3511,7 +3511,8 @@ captured_main (int argc, char *argv[])
 {
   int bad_attach;
   int pid;
-  char *arg_end, *port;
+  char *arg_end;
+  const char *port = NULL;
   char **next_arg = &argv[1];
   volatile int multi_mode = 0;
   volatile int attach = 0;
@@ -3608,7 +3609,8 @@ captured_main (int argc, char *argv[])
 	{
 	  /* "-" specifies a stdio connection and is a form of port
 	     specification.  */
-	  *next_arg = STDIO_CONNECTION_NAME;
+	  port = STDIO_CONNECTION_NAME;
+	  next_arg++;
 	  break;
 	}
       else if (strcmp (*next_arg, "--disable-randomization") == 0)
@@ -3627,8 +3629,11 @@ captured_main (int argc, char *argv[])
       continue;
     }
 
-  port = *next_arg;
-  next_arg++;
+  if (port == NULL)
+    {
+      port = *next_arg;
+      next_arg++;
+    }
   if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
     {
       gdbserver_usage (stderr);
