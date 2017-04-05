@@ -1,5 +1,17 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c (command_line_handler): Add cast to execute_command
+	call.
+	* record-btrace.c (cmd_record_btrace_bts_start)
+	(cmd_record_btrace_pt_start, cmd_record_btrace_start)
+	(cmd_record_btrace_start): Add cast to execute_command call.
+	* record-full.c (record_full_goto_insn):
+	* record.c (record_start, record_stop): Add cast to
+	execute_command_to_string calls.
+	(cmd_record_start): Add cast to execute_command calls.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* python/python-internal.h (gdb_PyArg_ParseTupleAndKeywords): New
 	static inline function.
 	* python/py-arch.c (archpy_disassemble): Constify 'keywords'

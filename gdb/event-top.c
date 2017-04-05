@@ -766,7 +766,7 @@ command_line_handler (char *rl)
 	 hung up but GDB is still alive.  In such a case, we just quit
 	 gdb killing the inferior program too.  */
       printf_unfiltered ("quit\n");
-      execute_command ("quit", 1);
+      execute_command ((char *) "quit", 1);
     }
   else if (cmd == NULL)
     {
