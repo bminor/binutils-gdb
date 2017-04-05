@@ -1,5 +1,13 @@
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
+	* python/python-internal.h (gdb_PyObject_CallMethod)
+	(gdb_PyErr_NewException, gdb_PySys_GetObject, gdb_PySys_SetPath):
+	New functions.
+	(GDB_PYSYS_SETPATH_CHAR, PyObject_CallMethod, PyErr_NewException)
+	(PySys_GetObject, PySys_SetPath): New macros.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
 	* mi/mi-cmd-info.c (mi_cmd_info_os): Call info_osdata instead of
 	info_osdata_command.
 	* osdata.c (info_osdata_command): Rename to ...

@@ -223,6 +223,69 @@ gdb_PyObject_HasAttrString (PyObject *obj,
 
 #define PyObject_HasAttrString(obj, attr) gdb_PyObject_HasAttrString (obj, attr)
 
+/* PyObject_CallMethod's 'method' and 'format' parameters were missing
+   the 'const' qualifier before Python 3.4.  Hence, we wrap the
+   function in our own version to avoid errors with string literals.
+   Note, this is a variadic template because PyObject_CallMethod is a
+   varargs function and Python doesn't have a "PyObject_VaCallMethod"
+   variant taking a va_list that we could defer to instead.  */
+
+template<typename... Args>
+static inline PyObject *
+gdb_PyObject_CallMethod (PyObject *o, const char *method, const char *format,
+			 Args... args) /* ARI: editCase function */
+{
+  return PyObject_CallMethod (o,
+			      const_cast<char *> (method),
+			      const_cast<char *> (format),
+			      args...);
+}
+
+#undef PyObject_CallMethod
+#define PyObject_CallMethod gdb_PyObject_CallMethod
+
+/* The 'name' parameter of PyErr_NewException was missing the 'const'
+   qualifier in Python <= 3.4.  Hence, we wrap it in a function to
+   avoid errors when compiled with -Werror.  */
+
+static inline PyObject*
+gdb_PyErr_NewException (const char *name, PyObject *base, PyObject *dict)
+{
+  return PyErr_NewException (const_cast<char *> (name), base, dict);
+}
+
+#define PyErr_NewException gdb_PyErr_NewException
+
+/* PySys_GetObject's 'name' parameter was missing the 'const'
+   qualifier before Python 3.4.  Hence, we wrap it in a function to
+   avoid errors when compiled with -Werror.  */
+
+static inline PyObject *
+gdb_PySys_GetObject (const char *name)
+{
+  return PySys_GetObject (const_cast<char *> (name));
+}
+
+#define PySys_GetObject gdb_PySys_GetObject
+
+/* PySys_SetPath's 'path' parameter was missing the 'const' qualifier
+   before Python 3.6.  Hence, we wrap it in a function to avoid errors
+   when compiled with -Werror.  */
+
+#ifdef IS_PY3K
+# define GDB_PYSYS_SETPATH_CHAR wchar_t
+#else
+# define GDB_PYSYS_SETPATH_CHAR char
+#endif
+
+static inline void
+gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
+{
+  PySys_SetPath (const_cast<GDB_PYSYS_SETPATH_CHAR *> (path));
+}
+
+#define PySys_SetPath gdb_PySys_SetPath
+
 /* In order to be able to parse symtab_and_line_to_sal_object function
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"
