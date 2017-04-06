@@ -1,3 +1,9 @@
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/mbind1a.d: Remove matches for PT_LOAD segments.
+	* testsuite/ld-elf/mbind1b.d: Likewise.
+	* testsuite/ld-elf/mbind1c.d: Likewise.
+
 2017-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/21233
