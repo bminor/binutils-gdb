@@ -1,5 +1,34 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (actions_command): Update.
+	* python/python.c (python_command, python_interactive_command):
+	Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands): Update.
+	* guile/guile.c (guile_command): Update.
+	* defs.h (read_command_lines, read_command_lines_1): Return
+	command_line_up.
+	(command_lines_deleter): New struct.
+	(command_line_up): New typedef.
+	* compile/compile.c (compile_code_command)
+	(compile_print_command): Update.
+	* cli/cli-script.h (get_command_line, copy_command_lines): Return
+	command_line_up.
+	(make_cleanup_free_command_lines): Remove.
+	* cli/cli-script.c (get_command_line, read_command_lines_1)
+	(copy_command_lines): Return command_line_up.
+	(while_command, if_command, read_command_lines, define_command)
+	(document_command): Update.
+	(do_free_command_lines_cleanup, make_cleanup_free_command_lines):
+	Remove.
+	* breakpoint.h (breakpoint_set_commands): Change type of
+	"commands".
+	* breakpoint.c (breakpoint_set_commands): Change type of
+	"commands".  Update.
+	(do_map_commands_command, update_dprintf_command_list)
+	(create_tracepoint_from_upload): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (scope_info): Update.
 	* spu-tdep.c (spu_catch_start): Update.
 	* python/python.c (gdbpy_decode_line): Update.

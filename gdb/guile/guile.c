@@ -215,10 +215,9 @@ guile_command (char *arg, int from_tty)
     }
   else
     {
-      struct command_line *l = get_command_line (guile_control, "");
+      command_line_up l = get_command_line (guile_control, "");
 
-      make_cleanup_free_command_lines (&l);
-      execute_control_command_untraced (l);
+      execute_control_command_untraced (l.get ());
     }
 
   do_cleanups (cleanup);
@@ -421,11 +420,9 @@ guile_command (char *arg, int from_tty)
     {
       /* Even if Guile isn't enabled, we still have to slurp the
 	 command list to the corresponding "end".  */
-      struct command_line *l = get_command_line (guile_control, "");
-      struct cleanup *cleanups = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (guile_control, "");
 
-      execute_control_command_untraced (l);
-      do_cleanups (cleanups);
+      execute_control_command_untraced (l.get ());
     }
 }
 

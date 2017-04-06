@@ -1475,7 +1475,7 @@ extern void disable_breakpoint (struct breakpoint *);
 extern void enable_breakpoint (struct breakpoint *);
 
 extern void breakpoint_set_commands (struct breakpoint *b, 
-				     struct command_line *commands);
+				     command_line_up &&commands);
 
 extern void breakpoint_set_silent (struct breakpoint *b, int silent);
 

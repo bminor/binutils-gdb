@@ -1271,12 +1271,12 @@ static_tracepoints_here (CORE_ADDR addr)
 
 void
 breakpoint_set_commands (struct breakpoint *b, 
-			 struct command_line *commands)
+			 command_line_up &&commands)
 {
-  validate_commands_for_breakpoint (b, commands);
+  validate_commands_for_breakpoint (b, commands.get ());
 
   decref_counted_command_line (&b->commands);
-  b->commands = alloc_counted_command_line (commands);
+  b->commands = alloc_counted_command_line (commands.release ());
   observer_notify_breakpoint_modified (b);
 }
 
@@ -1358,7 +1358,7 @@ do_map_commands_command (struct breakpoint *b, void *data)
 
   if (info->cmd == NULL)
     {
-      struct command_line *l;
+      command_line_up l;
 
       if (info->control != NULL)
 	l = copy_command_lines (info->control->body_list[0]);
@@ -1382,7 +1382,7 @@ do_map_commands_command (struct breakpoint *b, void *data)
 	  do_cleanups (old_chain);
 	}
 
-      info->cmd = alloc_counted_command_line (l);
+      info->cmd = alloc_counted_command_line (l.release ());
     }
 
   /* If a breakpoint was on the list more than once, we don't need to
@@ -9191,7 +9191,7 @@ update_dprintf_command_list (struct breakpoint *b)
     printf_cmd_line->next = NULL;
     printf_cmd_line->line = printf_line;
 
-    breakpoint_set_commands (b, printf_cmd_line);
+    breakpoint_set_commands (b, command_line_up (printf_cmd_line));
   }
 }
 
@@ -15356,14 +15356,14 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
      function.  */
   if (!VEC_empty (char_ptr, utp->cmd_strings))
     {
-      struct command_line *cmd_list;
+      command_line_up cmd_list;
 
       this_utp = utp;
       next_cmd = 0;
 
       cmd_list = read_command_lines_1 (read_uploaded_action, 1, NULL, NULL);
 
-      breakpoint_set_commands (&tp->base, cmd_list);
+      breakpoint_set_commands (&tp->base, std::move (cmd_list));
     }
   else if (!VEC_empty (char_ptr, utp->actions)
 	   || !VEC_empty (char_ptr, utp->step_actions))

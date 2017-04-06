@@ -647,20 +647,17 @@ static void
 actions_command (char *args, int from_tty)
 {
   struct tracepoint *t;
-  struct command_line *l;
 
   t = get_tracepoint_by_number (&args, NULL);
   if (t)
     {
-      char *tmpbuf =
-	xstrprintf ("Enter actions for tracepoint %d, one per line.",
-		    t->base.number);
-      struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
+      std::string tmpbuf =
+	string_printf ("Enter actions for tracepoint %d, one per line.",
+		       t->base.number);
 
-      l = read_command_lines (tmpbuf, from_tty, 1,
-			      check_tracepoint_command, t);
-      do_cleanups (cleanups);
-      breakpoint_set_commands (&t->base, l);
+      command_line_up l = read_command_lines (&tmpbuf[0], from_tty, 1,
+					      check_tracepoint_command, t);
+      breakpoint_set_commands (&t->base, std::move (l));
     }
   /* else just return */
 }

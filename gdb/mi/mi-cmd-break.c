@@ -493,7 +493,7 @@ mi_read_next_line (void)
 void
 mi_cmd_break_commands (const char *command, char **argv, int argc)
 {
-  struct command_line *break_command;
+  command_line_up break_command;
   char *endptr;
   int bnum;
   struct breakpoint *b;
@@ -523,6 +523,6 @@ mi_cmd_break_commands (const char *command, char **argv, int argc)
   else
     break_command = read_command_lines_1 (mi_read_next_line, 1, 0, 0);
 
-  breakpoint_set_commands (b, break_command);
+  breakpoint_set_commands (b, std::move (break_command));
 }
 
