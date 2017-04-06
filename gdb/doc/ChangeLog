@@ -1,5 +1,10 @@
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.texinfo (qXfer:threads:read): Add documentation for handle
+	attribute.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
 	* python.texi (Inferiors In Python): Add description for method
 	Inferior.thread_from_thread_handle.
 

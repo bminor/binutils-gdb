@@ -40784,7 +40784,9 @@ identifies the thread (@pxref{thread-id syntax}).  The
 the thread was last executing on.  The @samp{name} attribute, if
 present, specifies the human-readable name of the thread.  The content
 of the of @samp{thread} element is interpreted as human-readable
-auxiliary information.
+auxiliary information.  The @samp{handle} attribute, if present,
+is a hex encoded representation of the thread handle.
+
 
 @node Traceframe Info Format
 @section Traceframe Info Format
