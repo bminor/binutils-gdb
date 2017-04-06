@@ -1,5 +1,14 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (find_pcs_for_symtab_line): Change return type.
+	* symtab.c (find_pcs_for_symtab_line): Change return type.
+	* python/py-linetable.c (build_line_table_tuple_from_pcs): Change
+	type of "vec".  Update.
+	(ltpy_get_pcs_for_line): Update.
+	* linespec.c (decode_digits_ordinary): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (actions_command): Update.
 	* python/python.c (python_command, python_interactive_command):
 	Update.

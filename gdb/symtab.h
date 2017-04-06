@@ -20,7 +20,7 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
-#include "vec.h"
+#include <vector>
 #include "gdb_vecs.h"
 #include "gdbtypes.h"
 #include "common/enum-flags.h"
@@ -1618,8 +1618,8 @@ void iterate_over_symtabs (const char *name,
 			   gdb::function_view<bool (symtab *)> callback);
 
 
-VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
-					   struct linetable_entry **best_entry);
+std::vector<CORE_ADDR> find_pcs_for_symtab_line
+    (struct symtab *symtab, int line, struct linetable_entry **best_entry);
 
 /* Prototype for callbacks for LA_ITERATE_OVER_SYMBOLS.  The callback
    is called once per matching symbol SYM.  The callback should return

@@ -3469,9 +3469,7 @@ decode_digits_ordinary (struct linespec_state *self,
 
   for (ix = 0; VEC_iterate (symtab_ptr, ls->file_symtabs, ix, elt); ++ix)
     {
-      int i;
-      VEC (CORE_ADDR) *pcs;
-      CORE_ADDR pc;
+      std::vector<CORE_ADDR> pcs;
 
       /* The logic above should ensure this.  */
       gdb_assert (elt != NULL);
@@ -3479,7 +3477,7 @@ decode_digits_ordinary (struct linespec_state *self,
       set_current_program_space (SYMTAB_PSPACE (elt));
 
       pcs = find_pcs_for_symtab_line (elt, line, best_entry);
-      for (i = 0; VEC_iterate (CORE_ADDR, pcs, i, pc); ++i)
+      for (CORE_ADDR pc : pcs)
 	{
 	  struct symtab_and_line sal;
 
@@ -3490,8 +3488,6 @@ decode_digits_ordinary (struct linespec_state *self,
 	  sal.pc = pc;
 	  add_sal_to_sals_basic (sals, &sal);
 	}
-
-      VEC_free (CORE_ADDR, pcs);
     }
 }
 
