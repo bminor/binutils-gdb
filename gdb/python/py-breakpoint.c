@@ -680,22 +680,16 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	{
 	case bp_breakpoint:
 	  {
-	    struct event_location *location;
-	    struct cleanup *cleanup;
-
-	    location
+	    event_location_up location
 	      = string_to_event_location_basic (&copy, current_language);
-	    cleanup = make_cleanup_delete_event_location (location);
 	    create_breakpoint (python_gdbarch,
-			       location, NULL, -1, NULL,
+			       location.get (), NULL, -1, NULL,
 			       0,
 			       temporary_bp, bp_breakpoint,
 			       0,
 			       AUTO_BOOLEAN_TRUE,
 			       &bkpt_breakpoint_ops,
 			       0, 1, internal_bp, 0);
-
-	    do_cleanups (cleanup);
 	    break;
 	  }
         case bp_watchpoint:

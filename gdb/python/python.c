@@ -672,7 +672,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct cleanup *cleanups;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
-  struct event_location *location = NULL;
+  event_location_up location;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -682,15 +682,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   sals.sals = NULL;
 
   if (arg != NULL)
-    {
-      location = string_to_event_location_basic (&arg, python_language);
-      make_cleanup_delete_event_location (location);
-    }
+    location = string_to_event_location_basic (&arg, python_language);
 
   TRY
     {
       if (location != NULL)
-	sals = decode_line_1 (location, 0, NULL, NULL, 0);
+	sals = decode_line_1 (location.get (), 0, NULL, NULL, 0);
       else
 	{
 	  set_default_source_symtab_and_line ();

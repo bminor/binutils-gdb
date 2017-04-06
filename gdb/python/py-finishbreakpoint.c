@@ -293,14 +293,11 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   TRY
     {
-      struct event_location *location;
-      struct cleanup *back_to;
-
       /* Set a breakpoint on the return address.  */
-      location = new_address_location (get_frame_pc (prev_frame), NULL, 0);
-      back_to = make_cleanup_delete_event_location (location);
+      event_location_up location
+	= new_address_location (get_frame_pc (prev_frame), NULL, 0);
       create_breakpoint (python_gdbarch,
-                         location, NULL, thread, NULL,
+                         location.get (), NULL, thread, NULL,
                          0,
                          1 /*temp_flag*/,
                          bp_breakpoint,
@@ -308,7 +305,6 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                          AUTO_BOOLEAN_TRUE,
                          &bkpt_breakpoint_ops,
                          0, 1, internal_bp, 0);
-      do_cleanups (back_to);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

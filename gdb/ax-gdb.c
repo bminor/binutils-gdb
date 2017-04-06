@@ -2604,16 +2604,14 @@ agent_command_1 (char *exp, int eval)
       int ix;
       struct linespec_sals *iter;
       struct cleanup *old_chain;
-      struct event_location *location;
 
       exp = skip_spaces (exp);
       init_linespec_result (&canonical);
-      location = new_linespec_location (&exp);
-      old_chain = make_cleanup_delete_event_location (location);
-      decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, NULL,
+      event_location_up location = new_linespec_location (&exp);
+      decode_line_full (location.get (), DECODE_LINE_FUNFIRSTLINE, NULL,
 			(struct symtab *) NULL, 0, &canonical,
 			NULL, NULL);
-      make_cleanup_destroy_linespec_result (&canonical);
+      old_chain = make_cleanup_destroy_linespec_result (&canonical);
       exp = skip_spaces (exp);
       if (exp[0] == ',')
         {

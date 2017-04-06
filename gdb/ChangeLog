@@ -1,3 +1,48 @@
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (scope_info): Update.
+	* spu-tdep.c (spu_catch_start): Update.
+	* python/python.c (gdbpy_decode_line): Update.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Update.
+	* python/py-breakpoint.c (bppy_init): Update.
+	* probe.c (parse_probes): Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Update.
+	* location.h (event_location_deleter): New struct.
+	(event_location_up): New typedef.
+	(new_linespec_location, new_address_location, new_probe_location)
+	(new_explicit_location, copy_event_location)
+	(string_to_event_location, string_to_event_location_basic)
+	(string_to_explicit_location): Update return type.
+	(make_cleanup_delete_event_location): Remove.
+	* location.c (new_linespec_location, new_address_location)
+	(new_probe_location, new_explicit_location, copy_event_location):
+	Return event_location_up.
+	(delete_event_location_cleanup)
+	(make_cleanup_delete_event_location): Remove.
+	(string_to_explicit_location, string_to_event_location_basic)
+	(string_to_event_location): Return event_location_up.
+	* linespec.c (canonicalize_linespec, event_location_to_sals)
+	(decode_line_with_current_source)
+	(decode_line_with_last_displayed, decode_objc): Update.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Update.
+	* completer.c (location_completer): Update.
+	* cli/cli-cmds.c (edit_command, list_command): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint)
+	(create_thread_event_breakpoint): Update.
+	(init_breakpoint_sal): Update.  Remove some dead code.
+	(create_breakpoint_sal): Change type of "location".  Update.
+	(create_breakpoints_sal, create_breakpoint, break_command_1)
+	(dprintf_command, break_range_command, until_break_command)
+	(init_ada_exception_breakpoint)
+	(strace_marker_create_sals_from_location)
+	(update_static_tracepoint, trace_command, ftrace_command)
+	(strace_command, create_tracepoint_from_upload): Update.
+	* break-catch-throw.c (re_set_exception_catchpoint): Update.
+	* ax-gdb.c (agent_command_1): Update.
+
 2017-04-12  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add i386-go32-tdep.o.

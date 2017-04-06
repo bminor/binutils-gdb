@@ -828,28 +828,25 @@ edit_command (char *arg, int from_tty)
     }
   else
     {
-      struct cleanup *cleanup;
-      struct event_location *location;
       char *arg1;
 
       /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
-      location = string_to_event_location (&arg1, current_language);
-      cleanup = make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, NULL, NULL, 0);
+      event_location_up location = string_to_event_location (&arg1,
+							     current_language);
+      sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+			    NULL, NULL, 0);
 
       filter_sals (&sals);
       if (! sals.nelts)
 	{
 	  /*  C++  */
-	  do_cleanups (cleanup);
 	  return;
 	}
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
 	  xfree (sals.sals);
-	  do_cleanups (cleanup);
 	  return;
 	}
 
@@ -891,7 +888,6 @@ edit_command (char *arg, int from_tty)
 
       if (sal.symtab == 0)
         error (_("No line number known for %s."), arg);
-      do_cleanups (cleanup);
     }
 
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
@@ -920,9 +916,6 @@ list_command (char *arg, int from_tty)
   int dummy_beg = 0;
   int linenum_beg = 0;
   char *p;
-  struct cleanup *cleanup;
-
-  cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Pull in the current default source line if necessary.  */
   if (arg == NULL || ((arg[0] == '+' || arg[0] == '-') && arg[1] == '\0'))
@@ -985,24 +978,21 @@ list_command (char *arg, int from_tty)
     dummy_beg = 1;
   else
     {
-      struct event_location *location;
-
-      location = string_to_event_location (&arg1, current_language);
-      make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, NULL, NULL, 0);
+      event_location_up location = string_to_event_location (&arg1,
+							     current_language);
+      sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+			    NULL, NULL, 0);
 
       filter_sals (&sals);
       if (!sals.nelts)
 	{
 	  /*  C++  */
-	  do_cleanups (cleanup);
 	  return;
 	}
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
 	  xfree (sals.sals);
-	  do_cleanups (cleanup);
 	  return;
 	}
 
@@ -1027,28 +1017,22 @@ list_command (char *arg, int from_tty)
 	dummy_end = 1;
       else
 	{
-	  struct event_location *location;
-
-	  location = string_to_event_location (&arg1, current_language);
-	  make_cleanup_delete_event_location (location);
+	  event_location_up location
+	    = string_to_event_location (&arg1, current_language);
 	  if (dummy_beg)
-	    sals_end = decode_line_1 (location,
+	    sals_end = decode_line_1 (location.get (),
 				      DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 	  else
-	    sals_end = decode_line_1 (location, DECODE_LINE_LIST_MODE,
+	    sals_end = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
 				      NULL, sal.symtab, sal.line);
 
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)
-	    {
-	      do_cleanups (cleanup);
-	      return;
-	    }
+	    return;
 	  if (sals_end.nelts > 1)
 	    {
 	      ambiguous_line_spec (&sals_end);
 	      xfree (sals_end.sals);
-	      do_cleanups (cleanup);
 	      return;
 	    }
 	  sal_end = sals_end.sals[0];
@@ -1129,7 +1113,6 @@ list_command (char *arg, int from_tty)
 			 ? sal.line + get_lines_to_list ()
 			 : sal_end.line + 1),
 			0);
-  do_cleanups (cleanup);
 }
 
 /* Subroutine of disassemble_command to simplify it.

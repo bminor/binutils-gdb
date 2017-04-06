@@ -81,7 +81,7 @@ initialize_explicit_location (struct explicit_location *explicit_loc)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_linespec_location (char **linespec)
 {
   struct event_location *location;
@@ -98,7 +98,7 @@ new_linespec_location (char **linespec)
       if ((p - orig) > 0)
 	EL_LINESPEC (location) = savestring (orig, p - orig);
     }
-  return location;
+  return event_location_up (location);
 }
 
 /* See description in location.h.  */
@@ -112,7 +112,7 @@ get_linespec_location (const struct event_location *location)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_address_location (CORE_ADDR addr, const char *addr_string,
 		      int addr_string_len)
 {
@@ -123,7 +123,7 @@ new_address_location (CORE_ADDR addr, const char *addr_string,
   EL_ADDRESS (location) = addr;
   if (addr_string != NULL)
     EL_STRING (location) = xstrndup (addr_string, addr_string_len);
-  return location;
+  return event_location_up (location);
 }
 
 /* See description in location.h.  */
@@ -146,7 +146,7 @@ get_address_string_location (const struct event_location *location)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_probe_location (const char *probe)
 {
   struct event_location *location;
@@ -155,7 +155,7 @@ new_probe_location (const char *probe)
   EL_TYPE (location) = PROBE_LOCATION;
   if (probe != NULL)
     EL_PROBE (location) = xstrdup (probe);
-  return location;
+  return event_location_up (location);
 }
 
 /* See description in location.h.  */
@@ -169,7 +169,7 @@ get_probe_location (const struct event_location *location)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_explicit_location (const struct explicit_location *explicit_loc)
 {
   struct event_location tmp;
@@ -293,7 +293,7 @@ explicit_location_to_linespec (const struct explicit_location *explicit_loc)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 copy_event_location (const struct event_location *src)
 {
   struct event_location *dst;
@@ -339,25 +339,7 @@ copy_event_location (const struct event_location *src)
       gdb_assert_not_reached ("unknown event location type");
     }
 
-  return dst;
-}
-
-/* A cleanup function for struct event_location.  */
-
-static void
-delete_event_location_cleanup (void *data)
-{
-  struct event_location *location = (struct event_location *) data;
-
-  delete_event_location (location);
-}
-
-/* See description in location.h.  */
-
-struct cleanup *
-make_cleanup_delete_event_location (struct event_location *location)
-{
-  return make_cleanup (delete_event_location_cleanup, location);
+  return event_location_up (dst);
 }
 
 /* See description in location.h.  */
@@ -505,13 +487,12 @@ explicit_location_lex_one (const char **inp,
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 string_to_explicit_location (const char **argp,
 			     const struct language_defn *language,
 			     int dont_throw)
 {
-  struct cleanup *cleanup;
-  struct event_location *location;
+  event_location_up location;
 
   /* It is assumed that input beginning with '-' and a non-digit
      character is an explicit location.  "-p" is reserved, though,
@@ -524,7 +505,6 @@ string_to_explicit_location (const char **argp,
     return NULL;
 
   location = new_explicit_location (NULL);
-  cleanup = make_cleanup_delete_event_location (location);
 
   /* Process option/argument pairs.  dprintf_command
      requires that processing stop on ','.  */
@@ -591,7 +571,6 @@ string_to_explicit_location (const char **argp,
 	  *argp = start;
 	  discard_cleanups (oarg_cleanup);
 	  do_cleanups (opt_cleanup);
-	  discard_cleanups (cleanup);
 	  return location;
 	}
 
@@ -621,17 +600,16 @@ string_to_explicit_location (const char **argp,
 	       "line offset."));
     }
 
-  discard_cleanups (cleanup);
   return location;
 }
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 string_to_event_location_basic (char **stringp,
 				const struct language_defn *language)
 {
-  struct event_location *location;
+  event_location_up location;
   const char *cs;
 
   /* Try the input as a probe spec.  */
@@ -666,16 +644,15 @@ string_to_event_location_basic (char **stringp,
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 string_to_event_location (char **stringp,
 			  const struct language_defn *language)
 {
-  struct event_location *location;
   const char *arg, *orig;
 
   /* Try an explicit location.  */
   orig = arg = *stringp;
-  location = string_to_explicit_location (&arg, language, 0);
+  event_location_up location = string_to_explicit_location (&arg, language, 0);
   if (location != NULL)
     {
       /* It was a valid explicit location.  Advance STRINGP to

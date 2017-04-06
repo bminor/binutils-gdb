@@ -1751,7 +1751,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 
   /* Save everything as an explicit location.  */
   canon = state->canonical->location
-    = new_explicit_location (&ls->explicit_loc);
+    = new_explicit_location (&ls->explicit_loc).release ();
   explicit_loc = get_explicit_location (canon);
 
   if (explicit_loc->label_name != NULL)
@@ -2491,7 +2491,7 @@ event_location_to_sals (linespec_parser *parser,
 	    addr = linespec_expression_to_pc (&const_expr);
 	    if (PARSER_STATE (parser)->canonical != NULL)
 	      PARSER_STATE (parser)->canonical->location
-		= copy_event_location (location);
+		= copy_event_location (location).release ();
 
 	    do_cleanups (cleanup);
 	  }
@@ -2630,8 +2630,6 @@ decode_line_with_current_source (char *string, int flags)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line cursal;
-  struct event_location *location;
-  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
@@ -2640,15 +2638,14 @@ decode_line_with_current_source (char *string, int flags)
      and get a default source symtab+line or it will recursively call us!  */
   cursal = get_current_source_symtab_and_line ();
 
-  location = string_to_event_location (&string, current_language);
-  cleanup = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, flags, NULL,
+  event_location_up location = string_to_event_location (&string,
+							 current_language);
+  sals = decode_line_1 (location.get (), flags, NULL,
 			cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
 
-  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2658,25 +2655,23 @@ struct symtabs_and_lines
 decode_line_with_last_displayed (char *string, int flags)
 {
   struct symtabs_and_lines sals;
-  struct event_location *location;
-  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
 
-  location = string_to_event_location (&string, current_language);
-  cleanup = make_cleanup_delete_event_location (location);
+  event_location_up location = string_to_event_location (&string,
+							 current_language);
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location, flags, NULL,
+    sals = decode_line_1 (location.get (), flags, NULL,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (location, flags, NULL, (struct symtab *) NULL, 0);
+    sals = decode_line_1 (location.get (), flags, NULL,
+			  (struct symtab *) NULL, 0);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
 
-  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2785,7 +2780,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 	    str = xstrdup (saved_arg);
 
 	  make_cleanup (xfree, str);
-	  self->canonical->location = new_linespec_location (&str);
+	  self->canonical->location = new_linespec_location (&str).release ();
 	}
     }
 

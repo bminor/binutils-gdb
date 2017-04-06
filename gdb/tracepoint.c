@@ -2591,20 +2591,18 @@ scope_info (char *args, int from_tty)
   int j, count = 0;
   struct gdbarch *gdbarch;
   int regno;
-  struct event_location *location;
-  struct cleanup *back_to;
 
   if (args == 0 || *args == 0)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  location = string_to_event_location (&args, current_language);
-  back_to = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, NULL, 0);
+  event_location_up location = string_to_event_location (&args,
+							 current_language);
+  sals = decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
+			NULL, NULL, 0);
   if (sals.nelts == 0)
     {
       /* Presumably decode_line_1 has already warned.  */
-      do_cleanups (back_to);
       return;
     }
 
@@ -2743,7 +2741,6 @@ scope_info (char *args, int from_tty)
   if (count <= 0)
     printf_filtered ("Scope for %s contains no locals or arguments.\n",
 		     save_args);
-  do_cleanups (back_to);
 }
 
 /* Helper for trace_dump_command.  Dump the action list starting at

@@ -1934,8 +1934,6 @@ spu_catch_start (struct objfile *objfile)
   struct bound_minimal_symbol minsym;
   struct compunit_symtab *cust;
   CORE_ADDR pc;
-  struct event_location *location;
-  struct cleanup *back_to;
 
   /* Do this only if requested by "set spu stop-on-load on".  */
   if (!spu_stop_on_load_p)
@@ -1979,9 +1977,8 @@ spu_catch_start (struct objfile *objfile)
 
   /* Use a numerical address for the set_breakpoint command to avoid having
      the breakpoint re-set incorrectly.  */
-  location = new_address_location (pc, NULL, 0);
-  back_to = make_cleanup_delete_event_location (location);
-  create_breakpoint (get_objfile_arch (objfile), location,
+  event_location_up location = new_address_location (pc, NULL, 0);
+  create_breakpoint (get_objfile_arch (objfile), location.get (),
 		     NULL /* cond_string */, -1 /* thread */,
 		     NULL /* extra_string */,
 		     0 /* parse_condition_and_thread */, 1 /* tempflag */,
@@ -1990,7 +1987,6 @@ spu_catch_start (struct objfile *objfile)
 		     AUTO_BOOLEAN_FALSE /* pending_break_support */,
 		     &bkpt_breakpoint_ops /* ops */, 0 /* from_tty */,
 		     1 /* enabled */, 0 /* internal  */, 0);
-  do_cleanups (back_to);
 }
 
 

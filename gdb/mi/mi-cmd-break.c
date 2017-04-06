@@ -180,7 +180,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   int tracepoint = 0;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
   enum bptype type_wanted;
-  struct event_location *location;
+  event_location_up location;
   struct breakpoint_ops *ops;
   int is_explicit = 0;
   struct explicit_location explicit_loc;
@@ -343,15 +343,10 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     {
       location = string_to_event_location_basic (&address, current_language);
       if (*address)
-	{
-	  delete_event_location (location);
-	  error (_("Garbage '%s' at end of location"), address);
-	}
+	error (_("Garbage '%s' at end of location"), address);
     }
 
-  make_cleanup_delete_event_location (location);
-
-  create_breakpoint (get_current_arch (), location, condition, thread,
+  create_breakpoint (get_current_arch (), location.get (), condition, thread,
 		     extra_string,
 		     0 /* condition and thread are valid.  */,
 		     temp_p, type_wanted,
