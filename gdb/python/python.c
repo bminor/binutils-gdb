@@ -352,7 +352,7 @@ python_run_simple_file (FILE *file, const char *filename)
   /* Because we have a string for a filename, and are using Python to
      open the file, we need to expand any tilde in the path first.  */
   gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-  gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), "r"));
+  gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), (char *) "r"));
   if (python_file == NULL)
     {
       gdbpy_print_stack ();

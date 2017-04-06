@@ -1,3 +1,8 @@
+2017-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* python/python.c (python_run_simple_file): Cast mode literal to
+	non-const char pointer as expected by PyFile_FromString.
+
 2017-04-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/ptid.c (ptid_lwp_p, ptid_tid_p): Remove comparison with
