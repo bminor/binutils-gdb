@@ -1,3 +1,14 @@
+2017-04-06  Pip Cet  <pipcet@gmail.com>
+
+	* Makefile.am: Add wasm32-dis.c.
+	* configure.ac: Add wasm32-dis.c to wasm32 target.
+	* disassemble.c: Add wasm32 disassembler code.
+	* wasm32-dis.c: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
 	* arc-dis.c (parse_option, parse_disassembler_options): Constify.
