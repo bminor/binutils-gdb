@@ -164,6 +164,7 @@ elf-linux-core.h
 elf-m10200.c
 elf-m10300.c
 elf-nacl.c
+elf-properties.c
 elf-strtab.c
 elf-vxworks.c
 elf.c
