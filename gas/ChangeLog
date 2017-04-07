@@ -1,5 +1,10 @@
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/ppc/altivec2.s: Delete E6500 vector insns.
+	* testsuite/gas/ppc/altivec2.d: Adjust to suit.
+
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/elf/section12a.d: Don't expect alignment of 1
 	for .mbind.text.
 

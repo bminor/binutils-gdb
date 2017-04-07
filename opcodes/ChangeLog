@@ -1,3 +1,11 @@
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes <mviwsplt, mvidsplt, lvexbx, lvepxl,
+	lvexhx, lvepx, lvexwx, stvexbx, stvexhx, stvexwx, lvtrx, lvtlx,
+	lvswx, stvfrx, stvflx, stvswx, lvsm, stvepxl, lvtrxl, stvepx,
+	lvtlxl, lvswxl, stvfrxl, stvflxl, stvswxl>): Enable E6500 only
+	vector instructions with E6500 not PPCVEC2.
+
 2017-04-06  Pip Cet  <pipcet@gmail.com>
 
 	* Makefile.am: Add wasm32-dis.c.
