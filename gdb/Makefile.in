@@ -525,11 +525,13 @@ SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
 	unittests/function-view-selftests.c \
-	unittests/offset-type-selftests.c
+	unittests/offset-type-selftests.c \
+	unittests/ptid-selftests.c
 
 SUBDIR_UNITTESTS_OBS = \
 	function-view-selftests.o \
-	offset-type-selftests.o
+	offset-type-selftests.o \
+	ptid-selftests.o
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file

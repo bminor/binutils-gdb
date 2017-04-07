@@ -1,3 +1,30 @@
+2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/ptid.h (struct ptid): Change to...
+	(class ptid_t): ... this.
+	<ptid_t>: New constructors.
+	<pid, lwp_p, lwp, tid_p, tid, is_pid, operator==, operator!=,
+	matches>: New methods.
+	<make_null, make_minus_one>: New static methods.
+	<pid>: Rename to...
+	<m_pid>: ...this.
+	<lwp>: Rename to...
+	<m_lwp>: ...this.
+	<tid>: Rename to...
+	<m_tid>: ...this.
+	(ptid_build, ptid_get_pid, ptid_get_lwp, ptid_get_tid, ptid_equal,
+	ptid_is_pid, ptid_lwp_p, ptid_tid_p, ptid_match): Take ptid arguments
+	as references, move comment to class ptid_t.
+	* common/ptid.c (null_ptid, minus_one_ptid): Initialize with
+	ptid_t static methods.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_tid,
+	ptid_equal, ptid_is_pid, ptid_lwp_p, ptid_tid_p, ptid_match):
+	Take ptid arguments as references, implement using ptid_t methods.
+	* unittests/ptid-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/ptid-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add unittests/ptid-selftests.o.
+
 2017-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* python/python.c (python_run_simple_file): Cast mode literal to

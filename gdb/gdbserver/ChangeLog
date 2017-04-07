@@ -1,3 +1,8 @@
+2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (handle_v_cont): Initialize thread_resume::thread
+	with null_ptid.
+
 2017-04-05  Pedro Alves  <palves@redhat.com>
 
 	* configure: Regenerate.
