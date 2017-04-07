@@ -1,3 +1,9 @@
+2017-04-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* bfin-tdep.c (BFIN_MAX_REGISTER_SIZE): Add.
+	(bfin_pseudo_register_read): Use BFIN_MAX_REGISTER_SIZE.
+	(bfin_pseudo_register_write): Likewise
+
 2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/ptid.h (struct ptid): Change to...
