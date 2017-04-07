@@ -420,7 +420,7 @@ event_location_to_string (struct event_location *location)
    past any strings that it lexes.  Returns a malloc'd copy of the
    lexed string or NULL if no lexing was done.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 explicit_location_lex_one (const char **inp,
 			   const struct language_defn *language)
 {
@@ -444,7 +444,8 @@ explicit_location_lex_one (const char **inp,
 	  if (end == NULL)
 	    error (_("Unmatched quote, %s."), start);
 	  *inp = end + 1;
-	  return savestring (start + 1, *inp - start - 2);
+	  return gdb::unique_xmalloc_ptr<char> (savestring (start + 1,
+							    *inp - start - 2));
 	}
     }
 
@@ -461,7 +462,8 @@ explicit_location_lex_one (const char **inp,
       while (isdigit (*inp[0]))
 	++(*inp);
       if (*inp[0] == '\0' || isspace (*inp[0]) || *inp[0] == ',')
-	return savestring (start, *inp - start);
+	return gdb::unique_xmalloc_ptr<char> (savestring (start,
+							  *inp - start));
 
       /* Otherwise stop at the next occurrence of whitespace, '\0',
 	 keyword, or ','.  */
@@ -480,7 +482,7 @@ explicit_location_lex_one (const char **inp,
     }
 
   if (*inp - start > 0)
-    return savestring (start, *inp - start);
+    return gdb::unique_xmalloc_ptr<char> (savestring (start, *inp - start));
 
   return NULL;
 }
@@ -511,9 +513,7 @@ string_to_explicit_location (const char **argp,
   while ((*argp)[0] != '\0' && (*argp)[0] != ',')
     {
       int len;
-      char *opt, *oarg;
       const char *start;
-      struct cleanup *opt_cleanup, *oarg_cleanup;
 
       /* If *ARGP starts with a keyword, stop processing
 	 options.  */
@@ -524,44 +524,40 @@ string_to_explicit_location (const char **argp,
       start = *argp;
 
       /* Get the option string.  */
-      opt = explicit_location_lex_one (argp, language);
-      opt_cleanup = make_cleanup (xfree, opt);
+      gdb::unique_xmalloc_ptr<char> opt
+	= explicit_location_lex_one (argp, language);
 
       *argp = skip_spaces_const (*argp);
 
       /* Get the argument string.  */
-      oarg = explicit_location_lex_one (argp, language);
-      oarg_cleanup = make_cleanup (xfree, oarg);
+      gdb::unique_xmalloc_ptr<char> oarg
+	= explicit_location_lex_one (argp, language);
+      bool have_oarg = oarg != NULL;
       *argp = skip_spaces_const (*argp);
 
       /* Use the length of the option to allow abbreviations.  */
-      len = strlen (opt);
+      len = strlen (opt.get ());
 
       /* All options have a required argument.  Checking for this required
 	 argument is deferred until later.  */
-      if (strncmp (opt, "-source", len) == 0)
-	EL_EXPLICIT (location)->source_filename = oarg;
-      else if (strncmp (opt, "-function", len) == 0)
-	EL_EXPLICIT (location)->function_name = oarg;
-      else if (strncmp (opt, "-line", len) == 0)
+      if (strncmp (opt.get (), "-source", len) == 0)
+	EL_EXPLICIT (location)->source_filename = oarg.release ();
+      else if (strncmp (opt.get (), "-function", len) == 0)
+	EL_EXPLICIT (location)->function_name = oarg.release ();
+      else if (strncmp (opt.get (), "-line", len) == 0)
 	{
-	  if (oarg != NULL)
-	    {
-	      EL_EXPLICIT (location)->line_offset
-		= linespec_parse_line_offset (oarg);
-	      do_cleanups (oarg_cleanup);
-	      do_cleanups (opt_cleanup);
-	      continue;
-	    }
+	  if (have_oarg)
+	    EL_EXPLICIT (location)->line_offset
+	      = linespec_parse_line_offset (oarg.get ());
 	}
-      else if (strncmp (opt, "-label", len) == 0)
-	EL_EXPLICIT (location)->label_name = oarg;
+      else if (strncmp (opt.get (), "-label", len) == 0)
+	EL_EXPLICIT (location)->label_name = oarg.release ();
       /* Only emit an "invalid argument" error for options
 	 that look like option strings.  */
-      else if (opt[0] == '-' && !isdigit (opt[1]))
+      else if (opt.get ()[0] == '-' && !isdigit (opt.get ()[1]))
 	{
 	  if (!dont_throw)
-	    error (_("invalid explicit location argument, \"%s\""), opt);
+	    error (_("invalid explicit location argument, \"%s\""), opt.get ());
 	}
       else
 	{
@@ -569,8 +565,6 @@ string_to_explicit_location (const char **argp,
 	     Stop parsing and return whatever explicit location was
 	     parsed.  */
 	  *argp = start;
-	  discard_cleanups (oarg_cleanup);
-	  do_cleanups (opt_cleanup);
 	  return location;
 	}
 
@@ -578,14 +572,8 @@ string_to_explicit_location (const char **argp,
 	 case, it provides a much better user experience to issue
 	 the "invalid argument" error before any missing
 	 argument error.  */
-      if (oarg == NULL && !dont_throw)
-	error (_("missing argument for \"%s\""), opt);
-
-      /* The option/argument pair was successfully processed;
-	 oarg belongs to the explicit location, and opt should
-	 be freed.  */
-      discard_cleanups (oarg_cleanup);
-      do_cleanups (opt_cleanup);
+      if (!have_oarg && !dont_throw)
+	error (_("missing argument for \"%s\""), opt.get ());
     }
 
   /* One special error check:  If a source filename was given
