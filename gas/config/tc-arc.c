@@ -445,6 +445,8 @@ static struct hash_control *arc_addrtype_hash;
 #define ARC_CPU_TYPE_AV2HS(NAME,EXTRA)			\
   { #NAME,  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,	\
       EF_ARC_CPU_ARCV2HS, EXTRA}
+#define ARC_CPU_TYPE_NONE				\
+  { 0, 0, 0, 0, 0 }
 
 /* A table of CPU names and opcode sets.  */
 static const struct cpu_type
@@ -457,32 +459,7 @@ static const struct cpu_type
 }
   cpu_types[] =
 {
-  ARC_CPU_TYPE_A7xx (arc700, 0x00),
-  ARC_CPU_TYPE_A7xx (nps400, NPS400),
-
-  ARC_CPU_TYPE_AV2EM (arcem,	  0x00),
-  ARC_CPU_TYPE_AV2EM (em,	  0x00),
-  ARC_CPU_TYPE_AV2EM (em4,	  CD),
-  ARC_CPU_TYPE_AV2EM (em4_dmips,  CD),
-  ARC_CPU_TYPE_AV2EM (em4_fpus,	  CD),
-  ARC_CPU_TYPE_AV2EM (em4_fpuda,  CD | DPA),
-  ARC_CPU_TYPE_AV2EM (quarkse_em, CD | SPX | DPX),
-
-  ARC_CPU_TYPE_AV2HS (archs,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs34,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs38,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs38_linux, CD),
-
-  ARC_CPU_TYPE_A6xx (arc600, 0x00),
-  ARC_CPU_TYPE_A6xx (arc600_norm,     0x00),
-  ARC_CPU_TYPE_A6xx (arc600_mul64,    0x00),
-  ARC_CPU_TYPE_A6xx (arc600_mul32x16, 0x00),
-  ARC_CPU_TYPE_A6xx (arc601,	      0x00),
-  ARC_CPU_TYPE_A6xx (arc601_norm,     0x00),
-  ARC_CPU_TYPE_A6xx (arc601_mul64,    0x00),
-  ARC_CPU_TYPE_A6xx (arc601_mul32x16, 0x00),
-  { 0, 0, 0, 0, 0 }
+  #include "elf/arc-cpu.def"
 };
 
 /* Information about the cpu/variant we're assembling for.  */
