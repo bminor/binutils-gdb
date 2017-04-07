@@ -1,3 +1,7 @@
+2017-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/ptid-selftests.c: Fix erroneous assert messages.
+
 2017-04-07  Alan Hayward  <alan.hayward@arm.com>
 
 	* bfin-tdep.c (BFIN_MAX_REGISTER_SIZE): Add.

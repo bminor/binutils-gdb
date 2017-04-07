@@ -129,21 +129,21 @@ static_assert (!ptid_t (2, 2, 2).matches (pid), "other both doesn't match pid");
 
 /* Verify matches against exact matches.  */
 
-static_assert (!pid.matches (lwp), "pid matches lwp");
+static_assert (!pid.matches (lwp), "pid doesn't match lwp");
 static_assert (lwp.matches (lwp), "lwp matches lwp");
-static_assert (!tid.matches (lwp), "tid matches lwp");
-static_assert (!both.matches (lwp), "both matches lwp");
+static_assert (!tid.matches (lwp), "tid doesn't match lwp");
+static_assert (!both.matches (lwp), "both doesn't match lwp");
 static_assert (!ptid_t (2, 2, 0).matches (lwp), "other lwp doesn't match lwp");
 
-static_assert (!pid.matches (tid), "pid matches tid");
-static_assert (!lwp.matches (tid), "lwp matches tid");
+static_assert (!pid.matches (tid), "pid doesn't match tid");
+static_assert (!lwp.matches (tid), "lwp doesn't match tid");
 static_assert (tid.matches (tid), "tid matches tid");
-static_assert (!both.matches (tid), "both matches tid");
+static_assert (!both.matches (tid), "both doesn't match tid");
 static_assert (!ptid_t (2, 0, 2).matches (tid), "other tid doesn't match tid");
 
-static_assert (!pid.matches (both), "pid matches both");
-static_assert (!lwp.matches (both), "lwp matches both");
-static_assert (!tid.matches (both), "tid matches both");
+static_assert (!pid.matches (both), "pid doesn't match both");
+static_assert (!lwp.matches (both), "lwp doesn't match both");
+static_assert (!tid.matches (both), "tid doesn't match both");
 static_assert (both.matches (both), "both matches both");
 static_assert (!ptid_t (2, 2, 2).matches (both),
 	       "other both doesn't match both");
