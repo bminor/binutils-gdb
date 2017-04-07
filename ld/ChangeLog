@@ -1,3 +1,9 @@
+2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	PR ld/21306
+	* testsuite/ld-elf/pr19579a.c (main): Updated.
+
 2017-04-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 21090

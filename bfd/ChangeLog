@@ -1,3 +1,15 @@
+2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	PR ld/21306
+	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Check
+	ELF_COMMON_DEF_P for common symbols.
+	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+	* elflink.c (_bfd_elf_merge_symbol): Revert commits
+	202ac193bbbecc96a4978d1ac3d17148253f9b01 and
+	07492f668d2173da7a2bda3707ff0985e0f460b6.
+
 2017-04-07  Pedro Alves  <palves@redhat.com>
 
 	* opncls.c (bfd_get_debug_link_info): Rename to...

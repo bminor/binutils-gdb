@@ -4926,7 +4926,8 @@ do_ifunc_pointer:
 		{
 		  /* Symbol is referenced locally.  Make sure it is
 		     defined locally or for a branch.  */
-		  fail = !h->def_regular && !branch;
+		  fail = (!(h->def_regular || ELF_COMMON_DEF_P (h))
+			  && !branch);
 		}
 	      else if (!(bfd_link_pie (info)
 			 && (h->needs_copy || eh->needs_copy)))
