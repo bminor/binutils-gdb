@@ -2117,7 +2117,7 @@ void
 mi_execute_command (const char *cmd, int from_tty)
 {
   char *token;
-  struct mi_parse *command = NULL;
+  std::unique_ptr<struct mi_parse> command;
 
   /* This is to handle EOF (^D). We just quit gdb.  */
   /* FIXME: we should call some API function here.  */
@@ -2158,7 +2158,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
       TRY
 	{
-	  captured_mi_execute_command (current_uiout, command);
+	  captured_mi_execute_command (current_uiout, command.get ());
 	}
       CATCH (result, RETURN_MASK_ALL)
 	{
@@ -2186,7 +2186,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	  && thread_count () != 0
 	  /* If the command already reports the thread change, no need to do it
 	     again.  */
-	  && !command_notifies_uscc_observer (command))
+	  && !command_notifies_uscc_observer (command.get ()))
 	{
 	  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
 	  int report_change = 0;
@@ -2210,8 +2210,6 @@ mi_execute_command (const char *cmd, int from_tty)
 		  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 	    }
 	}
-
-      mi_parse_free (command);
 
       do_cleanups (cleanup);
     }

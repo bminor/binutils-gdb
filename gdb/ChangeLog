@@ -1,5 +1,16 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-parse.h (struct mi_parse): Add constructor, destructor.
+	(mi_parse): Update return type.
+	(mi_parse_free): Remove.
+	* mi/mi-parse.c (mi_parse::mi_parse): New constructor.
+	(mi_parse::~mi_parse): Rename from mi_parse_free.
+	(mi_parse_cleanup): Remove.
+	(mi_parse): Return a unique_ptr.  Use new.
+	* mi/mi-main.c (mi_execute_command): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* location.c (explicit_location_lex_one): Return a
 	unique_xmalloc_ptr.
 	(string_to_explicit_location): Update.  Remove cleanups.
