@@ -1629,9 +1629,9 @@ d_parse (struct parser_state *par_state)
 
   back_to = make_cleanup (null_cleanup, NULL);
 
-  make_cleanup_restore_integer (&yydebug);
+  scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
+							parser_debug);
   make_cleanup_clear_parser_state (&pstate);
-  yydebug = parser_debug;
 
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;

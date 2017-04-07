@@ -1,5 +1,18 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (exec_direction_forward): Remove.
+	(exec_reverse_continue, mi_execute_command): Use scoped_restore.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	scoped_restore.
+	* guile/guile.c (guile_repl_command, guile_command)
+	(gdbscm_execute_gdb_command): Use scoped_restore.
+	* go-exp.y (go_parse): Use scoped_restore.
+	* d-exp.y (d_parse): Use scoped_restore.
+	* cli/cli-decode.c (cmd_func): Use scoped_restore.
+	* c-exp.y (c_parse): Use scoped_restore.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-parse.h (struct mi_parse): Add constructor, destructor.
 	(mi_parse): Update return type.
 	(mi_parse_free): Remove.

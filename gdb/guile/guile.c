@@ -163,10 +163,7 @@ const struct extension_language_ops guile_extension_ops =
 static void
 guile_repl_command (char *arg, int from_tty)
 {
-  struct cleanup *cleanup;
-
-  cleanup = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
   arg = skip_spaces (arg);
 
@@ -183,8 +180,6 @@ guile_repl_command (char *arg, int from_tty)
       dont_repeat ();
       gdbscm_enter_repl ();
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implementation of the gdb "guile" command.
@@ -196,10 +191,7 @@ guile_repl_command (char *arg, int from_tty)
 static void
 guile_command (char *arg, int from_tty)
 {
-  struct cleanup *cleanup;
-
-  cleanup = make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
   arg = skip_spaces (arg);
 
@@ -209,6 +201,8 @@ guile_command (char *arg, int from_tty)
 
       if (msg != NULL)
 	{
+	  /* It is ok that this is a "dangling cleanup" because we
+	     throw immediately.  */
 	  make_cleanup (xfree, msg);
 	  error ("%s", msg);
 	}
@@ -219,8 +213,6 @@ guile_command (char *arg, int from_tty)
 
       execute_control_command_untraced (l.get ());
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Given a command_line, return a command string suitable for passing
@@ -326,10 +318,8 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 
   TRY
     {
-      struct cleanup *inner_cleanups;
-
-      inner_cleanups = make_cleanup_restore_integer (&current_ui->async);
-      current_ui->async = 0;
+      scoped_restore restore_async = make_scoped_restore (&current_ui->async,
+							  0);
 
       scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
@@ -339,8 +329,6 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
-
-      do_cleanups (inner_cleanups);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
