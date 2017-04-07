@@ -218,7 +218,7 @@ void (*deprecated_warning_hook) (const char *, va_list);
    called to notify the GUI that we are done with the interaction
    window and it can close it.  */
 
-void (*deprecated_readline_begin_hook) (char *, ...);
+void (*deprecated_readline_begin_hook) (const char *, ...);
 char *(*deprecated_readline_hook) (const char *);
 void (*deprecated_readline_end_hook) (void);
 
@@ -1216,7 +1216,8 @@ gdb_safe_append_history (void)
    as the user has requested.  */
 
 char *
-command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
+command_line_input (const char *prompt_arg, int repeat,
+		    const char *annotation_suffix)
 {
   static struct buffer cmd_line_buffer;
   static int cmd_line_buffer_initialized;
@@ -2022,7 +2023,7 @@ init_main (void)
   /* Setup important stuff for command line editing.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
   rl_completion_entry_function = readline_line_completion_function;
-  rl_completer_word_break_characters = default_word_break_characters ();
+  set_rl_completer_word_break_characters (default_word_break_characters ());
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";

@@ -930,7 +930,7 @@ set_disassembler_options (char *prospective_options)
   char **disassembler_options = gdbarch_disassembler_options (gdbarch);
   const disasm_options_t *valid_options;
   char *options = remove_whitespace_and_extra_commas (prospective_options);
-  char *opt;
+  const char *opt;
 
   /* Allow all architectures, even ones that do not support 'set disassembler',
      to reset their disassembler options to NULL.  */

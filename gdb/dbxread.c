@@ -237,7 +237,7 @@ find_text_range (bfd * sym_bfd, struct objfile *objfile)
 
 struct header_file_location
 {
-  char *name;			/* Name of header file */
+  const char *name;		/* Name of header file */
   int instance;			/* See above */
   struct partial_symtab *pst;	/* Partial symtab that has the
 				   BINCL/EINCL defs for this file.  */
@@ -262,13 +262,14 @@ static void read_dbx_symtab (minimal_symbol_reader &, struct objfile *);
 
 static void free_bincl_list (struct objfile *);
 
-static struct partial_symtab *find_corresponding_bincl_psymtab (char *, int);
+static struct partial_symtab *find_corresponding_bincl_psymtab (const char *,
+								int);
 
-static void add_bincl_to_list (struct partial_symtab *, char *, int);
+static void add_bincl_to_list (struct partial_symtab *, const char *, int);
 
 static void init_bincl_list (int, struct objfile *);
 
-static char *dbx_next_symbol_text (struct objfile *);
+static const char *dbx_next_symbol_text (struct objfile *);
 
 static void fill_symbuf (bfd *);
 
@@ -284,13 +285,13 @@ static void record_minimal_symbol (minimal_symbol_reader &,
 				   const char *, CORE_ADDR, int,
 				   struct objfile *);
 
-static void add_new_header_file (char *, int);
+static void add_new_header_file (const char *, int);
 
-static void add_old_header_file (char *, int);
+static void add_old_header_file (const char *, int);
 
 static void add_this_object_header_file (int);
 
-static struct partial_symtab *start_psymtab (struct objfile *, char *,
+static struct partial_symtab *start_psymtab (struct objfile *, const char *,
 					     CORE_ADDR, int,
 					     struct partial_symbol **,
 					     struct partial_symbol **);
@@ -340,7 +341,7 @@ add_this_object_header_file (int i)
    symbol tables for the same header file.  */
 
 static void
-add_old_header_file (char *name, int instance)
+add_old_header_file (const char *name, int instance)
 {
   struct header_file *p = HEADER_FILES (dbxread_objfile);
   int i;
@@ -366,7 +367,7 @@ add_old_header_file (char *name, int instance)
    so we record the file when its "begin" is seen and ignore the "end".  */
 
 static void
-add_new_header_file (char *name, int instance)
+add_new_header_file (const char *name, int instance)
 {
   int i;
   struct header_file *hfile;
@@ -734,7 +735,7 @@ static int symbuf_end;
 
 /* Name of last function encountered.  Used in Solaris to approximate
    object file boundaries.  */
-static char *last_function_name;
+static const char *last_function_name;
 
 /* The address in memory of the string table of the object file we are
    reading (which might not be the "main" object file, but might be a
@@ -842,7 +843,7 @@ stabs_seek (int sym_offset)
    (a \ at the end of the text of a name)
    call this function to get the continuation.  */
 
-static char *
+static const char *
 dbx_next_symbol_text (struct objfile *objfile)
 {
   struct internal_nlist nlist;
@@ -873,7 +874,7 @@ init_bincl_list (int number, struct objfile *objfile)
 /* Add a bincl to the list.  */
 
 static void
-add_bincl_to_list (struct partial_symtab *pst, char *name, int instance)
+add_bincl_to_list (struct partial_symtab *pst, const char *name, int instance)
 {
   if (next_bincl >= bincl_list + bincls_allocated)
     {
@@ -895,7 +896,7 @@ add_bincl_to_list (struct partial_symtab *pst, char *name, int instance)
    with that header_file_location.  */
 
 static struct partial_symtab *
-find_corresponding_bincl_psymtab (char *name, int instance)
+find_corresponding_bincl_psymtab (const char *name, int instance)
 {
   struct header_file_location *bincl;
 
@@ -933,10 +934,10 @@ make_cleanup_free_bincl_list (struct objfile *objfile)
    give a fake name, and print a single error message per symbol file read,
    rather than abort the symbol reading or flood the user with messages.  */
 
-static char *
+static const char *
 set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
 {
-  char *namestring;
+  const char *namestring;
 
   if (nlist->n_strx + file_string_table_offset
       >= DBX_STRINGTAB_SIZE (objfile)
@@ -954,18 +955,19 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
 }
 
 static CORE_ADDR
-find_stab_function_addr (char *namestring, const char *filename,
+find_stab_function_addr (const char *namestring, const char *filename,
 			 struct objfile *objfile)
 {
   struct bound_minimal_symbol msym;
-  char *p;
   int n;
 
-  p = strchr (namestring, ':');
-  if (p == NULL)
-    p = namestring;
-  n = p - namestring;
-  p = (char *) alloca (n + 2);
+  const char *colon = strchr (namestring, ':');
+  if (colon == NULL)
+    n = 0;
+  else
+    n = colon - namestring;
+
+  char *p = (char *) alloca (n + 2);
   strncpy (p, namestring, n);
   p[n] = 0;
 
@@ -1017,10 +1019,10 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
   struct internal_nlist nlist;
   CORE_ADDR text_addr;
   int text_size;
-  char *sym_name;
+  const char *sym_name;
   int sym_len;
 
-  char *namestring;
+  const char *namestring;
   int nsl;
   int past_first_source_file = 0;
   CORE_ADDR last_function_start = 0;
@@ -1283,7 +1285,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	    static int prev_so_symnum = -10;
 	    static int first_so_symnum;
 	    const char *p;
-	    static char *dirname_nso;
+	    static const char *dirname_nso;
 	    int prev_textlow_not_set;
 
 	    valu = nlist.n_value + ANOFFSET (objfile->section_offsets,
@@ -1477,7 +1479,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	case N_M2C:		/* I suspect that I can ignore this here.  */
 	case N_SCOPE:		/* Same.   */
 	{
-	  char *p;
+	  const char *p;
 
 	  namestring = set_namestring (objfile, &nlist);
 
@@ -1631,7 +1633,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		     Accept either.  */
 		  while (*p && *p != ';' && *p != ',')
 		    {
-		      char *q;
+		      const char *q;
 
 		      /* Check for and handle cretinous dbx symbol name
 			 continuation!  */
@@ -1996,7 +1998,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
    (normal).  */
 
 static struct partial_symtab *
-start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
+start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
 	       int ldsymoff, struct partial_symbol **global_syms,
 	       struct partial_symbol **static_syms)
 {
@@ -2057,15 +2059,15 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
   if (pst->texthigh == 0 && last_function_name
       && gdbarch_sofun_address_maybe_missing (gdbarch))
     {
-      char *p;
       int n;
       struct bound_minimal_symbol minsym;
 
-      p = strchr (last_function_name, ':');
-      if (p == NULL)
-	p = last_function_name;
-      n = p - last_function_name;
-      p = (char *) alloca (n + 2);
+      const char *colon = strchr (last_function_name, ':');
+      if (colon == NULL)
+	n = 0;
+      else
+	n = colon - last_function_name;
+      char *p = (char *) alloca (n + 2);
       strncpy (p, last_function_name, n);
       p[n] = 0;
 
@@ -2293,7 +2295,7 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 static void
 read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
-  char *namestring;
+  const char *namestring;
   struct external_nlist *bufp;
   struct internal_nlist nlist;
   unsigned char type;
@@ -2499,7 +2501,7 @@ cp_set_block_scope (const struct symbol *symbol,
    is used in end_symtab.  */
 
 void
-process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
+process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		    const struct section_offsets *section_offsets,
 		    struct objfile *objfile)
 {
@@ -2805,7 +2807,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
          down ONE MORE function call level, which we really don't want
          to do).  */
       {
-	char *p;
+	const char *p;
 
 	/* Normal object file and NLMs have non-zero text seg offsets,
 	   but don't need their static syms offset in this fashion.
@@ -2898,7 +2900,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       if (name)
 	{
 	  int deftype;
-	  char *colon_pos = strchr (name, ':');
+	  const char *colon_pos = strchr (name, ':');
 
 	  if (colon_pos == NULL)
 	    deftype = '\0';
@@ -3021,7 +3023,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
          definition.  If a symbol reference is being defined, go ahead
          and add it.  Otherwise, just return.  */
 
-      char *s = name;
+      const char *s = name;
       int refnum;
 
       /* If this stab defines a new reference ID that is not on the

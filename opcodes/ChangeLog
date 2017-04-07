@@ -1,3 +1,29 @@
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes <mviwsplt, mvidsplt, lvexbx, lvepxl,
+	lvexhx, lvepx, lvexwx, stvexbx, stvexhx, stvexwx, lvtrx, lvtlx,
+	lvswx, stvfrx, stvflx, stvswx, lvsm, stvepxl, lvtrxl, stvepx,
+	lvtlxl, lvswxl, stvfrxl, stvflxl, stvswxl>): Enable E6500 only
+	vector instructions with E6500 not PPCVEC2.
+
+2017-04-06  Pip Cet  <pipcet@gmail.com>
+
+	* Makefile.am: Add wasm32-dis.c.
+	* configure.ac: Add wasm32-dis.c to wasm32 target.
+	* disassemble.c: Add wasm32 disassembler code.
+	* wasm32-dis.c: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* arc-dis.c (parse_option, parse_disassembler_options): Constify.
+	* arm-dis.c (parse_arm_disassembler_options): Constify.
+	* ppc-dis.c (powerpc_init_dialect): Constify local.
+	* vax-dis.c (parse_disassembler_options): Constify.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* riscv-dis.c (riscv_disassemble_insn): Change "_gp" to

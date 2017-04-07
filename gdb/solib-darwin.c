@@ -170,7 +170,7 @@ struct darwin_so_list
 /* Lookup the value for a specific symbol.  */
 
 static CORE_ADDR
-lookup_symbol_from_bfd (bfd *abfd, char *symname)
+lookup_symbol_from_bfd (bfd *abfd, const char *symname)
 {
   long storage_needed;
   asymbol **symbol_table;

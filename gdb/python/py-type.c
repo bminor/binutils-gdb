@@ -1347,14 +1347,14 @@ type_object_to_type (PyObject *obj)
 PyObject *
 gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static char *keywords[] = { "name", "block", NULL };
+  static const char *keywords[] = { "name", "block", NULL };
   const char *type_name = NULL;
   struct type *type = NULL;
   PyObject *block_obj = NULL;
   const struct block *block = NULL;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O", keywords,
-				     &type_name, &block_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O", keywords,
+					&type_name, &block_obj))
     return NULL;
 
   if (block_obj)
@@ -1413,7 +1413,7 @@ gdbpy_initialize_types (void)
 
 
 
-static PyGetSetDef type_object_getset[] =
+static gdb_PyGetSetDef type_object_getset[] =
 {
   { "code", typy_get_code, NULL,
     "The code for this type.", NULL },
@@ -1587,7 +1587,7 @@ PyTypeObject type_object_type =
   0,				  /* tp_new */
 };
 
-static PyGetSetDef field_object_getset[] =
+static gdb_PyGetSetDef field_object_getset[] =
 {
   { "__dict__", gdb_py_generic_dict, NULL,
     "The __dict__ for this field.", &field_object_type },

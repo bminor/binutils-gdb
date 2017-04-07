@@ -309,7 +309,7 @@ typedef void initialize_file_ftype (void);
 
 extern char *gdb_readline_wrapper (const char *);
 
-extern char *command_line_input (const char *, int, char *);
+extern char *command_line_input (const char *, int, const char *);
 
 extern void print_prompt (void);
 
@@ -324,7 +324,8 @@ extern int info_verbose;
 extern void set_next_address (struct gdbarch *, CORE_ADDR);
 
 extern int print_address_symbolic (struct gdbarch *, CORE_ADDR,
-				   struct ui_file *, int, char *);
+				   struct ui_file *, int,
+				   const char *);
 
 extern int build_address_symbolic (struct gdbarch *,
 				   CORE_ADDR addr,
@@ -678,7 +679,7 @@ extern int (*deprecated_query_hook) (const char *, va_list)
 extern void (*deprecated_warning_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_interactive_hook) (void);
-extern void (*deprecated_readline_begin_hook) (char *, ...)
+extern void (*deprecated_readline_begin_hook) (const char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);

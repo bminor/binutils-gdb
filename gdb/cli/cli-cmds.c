@@ -82,7 +82,7 @@ static void show_user (char *, int);
 
 static void make_command (char *, int);
 
-static void shell_escape (char *, int);
+static void shell_escape (const char *, int);
 
 static void edit_command (char *, int);
 
@@ -242,10 +242,11 @@ help_command (char *command, int from_tty)
    [Is that why this function writes output with *_unfiltered?]  */
 
 static void
-complete_command (char *arg, int from_tty)
+complete_command (char *arg_entry, int from_tty)
 {
+  const char *arg = arg_entry;
   int argpoint;
-  char *point, *arg_prefix;
+  char *arg_prefix;
   VEC (char_ptr) *completions;
 
   dont_repeat ();
@@ -270,7 +271,7 @@ complete_command (char *arg, int from_tty)
      within, and except for filenames at the beginning of, the word to
      be completed.  The following crude imitation of readline's
      word-breaking tries to accomodate this.  */
-  point = arg + argpoint;
+  const char *point = arg + argpoint;
   while (point > arg)
     {
       if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
@@ -392,10 +393,7 @@ cd_command (char *dir, int from_tty)
      repeat might be useful but is more likely to be a mistake.  */
   dont_repeat ();
 
-  if (dir == 0)
-    dir = "~";
-
-  dir = tilde_expand (dir);
+  dir = tilde_expand (dir != NULL ? dir : "~");
   cleanup = make_cleanup (xfree, dir);
 
   if (chdir (dir) < 0)
@@ -735,7 +733,7 @@ echo_command (char *text, int from_tty)
 }
 
 static void
-shell_escape (char *arg, int from_tty)
+shell_escape (const char *arg, int from_tty)
 {
 #if defined(CANT_FORK) || \
       (!defined(HAVE_WORKING_VFORK) && !defined(HAVE_WORKING_FORK))
@@ -795,13 +793,21 @@ shell_escape (char *arg, int from_tty)
 #endif /* Can fork.  */
 }
 
+/* Implementation of the "shell" command.  */
+
+static void
+shell_command (char *arg, int from_tty)
+{
+  shell_escape (arg, from_tty);
+}
+
 static void
 edit_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct symbol *sym;
-  char *editor;
+  const char *editor;
   char *p;
   const char *fn;
 
@@ -1306,18 +1312,14 @@ disassemble_command (char *arg, int from_tty)
 static void
 make_command (char *arg, int from_tty)
 {
-  char *p;
-
   if (arg == 0)
-    p = "make";
+    shell_escape ("make", from_tty);
   else
     {
-      p = (char *) xmalloc (sizeof ("make ") + strlen (arg));
-      strcpy (p, "make ");
-      strcpy (p + sizeof ("make ") - 1, arg);
-    }
+      std::string cmd = std::string ("make ") + arg;
 
-  shell_escape (p, from_tty);
+      shell_escape (cmd.c_str (), from_tty);
+    }
 }
 
 static void
@@ -1881,7 +1883,7 @@ from the target."),
 		  _("Generic command for showing gdb debugging flags"),
 		  &showdebuglist, "show debug ", 0, &showlist);
 
-  c = add_com ("shell", class_support, shell_escape, _("\
+  c = add_com ("shell", class_support, shell_command, _("\
 Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell."));
   set_cmd_completer (c, filename_completer);

@@ -58,7 +58,7 @@ struct builtin_d_type
 
 extern int d_parse (struct parser_state *);
 
-extern void d_yyerror (char *);
+extern void d_yyerror (const char *);
 
 /* Defined in d-lang.c  */
 

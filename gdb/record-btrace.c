@@ -2897,7 +2897,7 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
 
   TRY
     {
-      execute_command ("target record-btrace", from_tty);
+      execute_command ((char *) "target record-btrace", from_tty);
     }
   CATCH (exception, RETURN_MASK_ALL)
     {
@@ -2919,7 +2919,7 @@ cmd_record_btrace_pt_start (char *args, int from_tty)
 
   TRY
     {
-      execute_command ("target record-btrace", from_tty);
+      execute_command ((char *) "target record-btrace", from_tty);
     }
   CATCH (exception, RETURN_MASK_ALL)
     {
@@ -2941,7 +2941,7 @@ cmd_record_btrace_start (char *args, int from_tty)
 
   TRY
     {
-      execute_command ("target record-btrace", from_tty);
+      execute_command ((char *) "target record-btrace", from_tty);
     }
   CATCH (exception, RETURN_MASK_ALL)
     {
@@ -2949,7 +2949,7 @@ cmd_record_btrace_start (char *args, int from_tty)
 
       TRY
 	{
-	  execute_command ("target record-btrace", from_tty);
+	  execute_command ((char *) "target record-btrace", from_tty);
 	}
       CATCH (exception, RETURN_MASK_ALL)
 	{

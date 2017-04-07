@@ -1,3 +1,28 @@
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/altivec2.s: Delete E6500 vector insns.
+	* testsuite/gas/ppc/altivec2.d: Adjust to suit.
+
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section12a.d: Don't expect alignment of 1
+	for .mbind.text.
+
+2017-04-06  Pip Cet  <pipcet@gmail.com>
+
+	* testsuite/gas/wasm32/allinsn.d: Adjust test for disassembler
+	changes.
+	* testsuite/gas/wasm32/disass.d: New test.
+	* testsuite/gas/wasm32/disass.s: New test.
+	* testsuite/gas/wasm32/disass-2.d: New test.
+	* testsuite/gas/wasm32/disass-2.s: New test.
+	* testsuite/gas/wasm32/reloc.d: Adjust test for changed reloc
+	names.
+	* testsuite/gas/wasm32/reloc.s: Update test for changed assembler
+	syntax.
+	* testsuite/gas/wasm32/wasm32.exp: Run new tests.  Expect allinsn
+	test to succeed.
+
 2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention support for ELF SHF_GNU_MBIND.

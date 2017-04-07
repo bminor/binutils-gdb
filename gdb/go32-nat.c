@@ -941,7 +941,7 @@ go32_thread_alive (struct target_ops *ops, ptid_t ptid)
   return !ptid_equal (ptid, null_ptid);
 }
 
-static char *
+static const char *
 go32_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);
@@ -1126,7 +1126,7 @@ go32_sysinfo (char *arg, int from_tty)
   /* CPUID with EAX = 1 returns processor signature and features.  */
   if (cpuid_max >= 1)
     {
-      static char *brand_name[] = {
+      static const char *brand_name[] = {
 	"",
 	" Celeron",
 	" III",

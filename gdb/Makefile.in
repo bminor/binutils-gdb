@@ -524,10 +524,14 @@ SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
-	unittests/function-view-selftests.c
+	unittests/function-view-selftests.c \
+	unittests/offset-type-selftests.c \
+	unittests/ptid-selftests.c
 
 SUBDIR_UNITTESTS_OBS = \
-	function-view-selftests.o
+	function-view-selftests.o \
+	offset-type-selftests.o \
+	ptid-selftests.o
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -744,7 +748,6 @@ ALL_64_TARGET_OBS = \
 	aarch64-newlib-tdep.o \
 	aarch64-tdep.o \
 	alpha-bsd-tdep.o \
-	alpha-fbsd-tdep.o \
 	alpha-linux-tdep.o \
 	alpha-mdebug-tdep.o \
 	alpha-nbsd-tdep.o \
@@ -2458,7 +2461,6 @@ ALLDEPFILES = \
 	aix-thread.c \
 	alpha-bsd-nat.c \
 	alpha-bsd-tdep.c \
-	alpha-fbsd-tdep.c \
 	alpha-linux-nat.c \
 	alpha-linux-tdep.c \
 	alpha-mdebug-tdep.c \

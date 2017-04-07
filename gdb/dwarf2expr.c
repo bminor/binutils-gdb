@@ -27,6 +27,7 @@
 #include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
+#include "common/underlying.h"
 
 /* Cookie for gdbarch data.  */
 
@@ -317,7 +318,7 @@ dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
     }
   else if (p->location == DWARF_VALUE_IMPLICIT_POINTER)
     {
-      p->v.ptr.die.sect_off = this->len;
+      p->v.ptr.die_sect_off = (sect_offset) this->len;
       p->v.ptr.offset = value_as_long (fetch (0));
     }
   else if (p->location == DWARF_VALUE_REGISTER)
@@ -976,11 +977,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    if (op == DW_OP_deref_type || op == DW_OP_GNU_deref_type)
 	      {
-		cu_offset type_die;
-
 		op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-		type_die.cu_off = uoffset;
-		type = get_base_type (type_die, 0);
+		cu_offset type_die_cu_off = (cu_offset) uoffset;
+		type = get_base_type (type_die_cu_off, 0);
 	      }
 	    else
 	      type = address_type;
@@ -1283,21 +1282,19 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_call2:
 	  {
-	    cu_offset offset;
-
-	    offset.cu_off = extract_unsigned_integer (op_ptr, 2, byte_order);
+	    cu_offset cu_off
+	      = (cu_offset) extract_unsigned_integer (op_ptr, 2, byte_order);
 	    op_ptr += 2;
-	    this->dwarf_call (offset);
+	    this->dwarf_call (cu_off);
 	  }
 	  goto no_push;
 
 	case DW_OP_call4:
 	  {
-	    cu_offset offset;
-
-	    offset.cu_off = extract_unsigned_integer (op_ptr, 4, byte_order);
+	    cu_offset cu_off
+	      = (cu_offset) extract_unsigned_integer (op_ptr, 4, byte_order);
 	    op_ptr += 4;
-	    this->dwarf_call (offset);
+	    this->dwarf_call (cu_off);
 	  }
 	  goto no_push;
 	
@@ -1344,8 +1341,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  {
 	    union call_site_parameter_u kind_u;
 
-	    kind_u.param_offset.cu_off = extract_unsigned_integer (op_ptr, 4,
-								   byte_order);
+	    kind_u.param_cu_off
+	      = (cu_offset) extract_unsigned_integer (op_ptr, 4, byte_order);
 	    op_ptr += 4;
 	    this->push_dwarf_reg_entry_value (CALL_SITE_PARAMETER_PARAM_OFFSET,
 					      kind_u,
@@ -1356,18 +1353,18 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
 	  {
-	    cu_offset type_die;
 	    int n;
 	    const gdb_byte *data;
 	    struct type *type;
 
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	    type_die.cu_off = uoffset;
+	    cu_offset type_die_cu_off = (cu_offset) uoffset;
+
 	    n = *op_ptr++;
 	    data = op_ptr;
 	    op_ptr += n;
 
-	    type = get_base_type (type_die, n);
+	    type = get_base_type (type_die_cu_off, n);
 	    result_val = value_from_contents (type, data);
 	  }
 	  break;
@@ -1375,14 +1372,13 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_regval_type:
 	case DW_OP_GNU_regval_type:
 	  {
-	    cu_offset type_die;
 	    struct type *type;
 
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	    type_die.cu_off = uoffset;
+	    cu_offset type_die_cu_off = (cu_offset) uoffset;
 
-	    type = get_base_type (type_die, 0);
+	    type = get_base_type (type_die_cu_off, 0);
 	    result_val = this->get_reg_value (type, reg);
 	  }
 	  break;
@@ -1392,16 +1388,15 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_reinterpret:
 	case DW_OP_GNU_reinterpret:
 	  {
-	    cu_offset type_die;
 	    struct type *type;
 
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	    type_die.cu_off = uoffset;
+	    cu_offset type_die_cu_off = (cu_offset) uoffset;
 
-	    if (type_die.cu_off == 0)
+	    if (to_underlying (type_die_cu_off) == 0)
 	      type = address_type;
 	    else
-	      type = get_base_type (type_die, 0);
+	      type = get_base_type (type_die_cu_off, 0);
 
 	    result_val = fetch (0);
 	    pop ();

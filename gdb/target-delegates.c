@@ -1502,17 +1502,17 @@ debug_update_thread_list (struct target_ops *self)
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
-static char *
+static const char *
 delegate_pid_to_str (struct target_ops *self, ptid_t arg1)
 {
   self = self->beneath;
   return self->to_pid_to_str (self, arg1);
 }
 
-static char *
+static const char *
 debug_pid_to_str (struct target_ops *self, ptid_t arg1)
 {
-  char * result;
+  const char * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_pid_to_str (...)\n", debug_target.to_shortname);
   result = debug_target.to_pid_to_str (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_pid_to_str (", debug_target.to_shortname);
@@ -1520,28 +1520,28 @@ debug_pid_to_str (struct target_ops *self, ptid_t arg1)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_ptid_t (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_char_p (result);
+  target_debug_print_const_char_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }
 
-static char *
+static const char *
 delegate_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
 {
   self = self->beneath;
   return self->to_extra_thread_info (self, arg1);
 }
 
-static char *
+static const char *
 tdefault_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
 {
   return NULL;
 }
 
-static char *
+static const char *
 debug_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
 {
-  char * result;
+  const char * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_extra_thread_info (...)\n", debug_target.to_shortname);
   result = debug_target.to_extra_thread_info (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_extra_thread_info (", debug_target.to_shortname);
@@ -1549,7 +1549,7 @@ debug_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_thread_info_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_char_p (result);
+  target_debug_print_const_char_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

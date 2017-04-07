@@ -1,3 +1,733 @@
+2017-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/ptid-selftests.c: Fix erroneous assert messages.
+
+2017-04-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* bfin-tdep.c (BFIN_MAX_REGISTER_SIZE): Add.
+	(bfin_pseudo_register_read): Use BFIN_MAX_REGISTER_SIZE.
+	(bfin_pseudo_register_write): Likewise
+
+2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/ptid.h (struct ptid): Change to...
+	(class ptid_t): ... this.
+	<ptid_t>: New constructors.
+	<pid, lwp_p, lwp, tid_p, tid, is_pid, operator==, operator!=,
+	matches>: New methods.
+	<make_null, make_minus_one>: New static methods.
+	<pid>: Rename to...
+	<m_pid>: ...this.
+	<lwp>: Rename to...
+	<m_lwp>: ...this.
+	<tid>: Rename to...
+	<m_tid>: ...this.
+	(ptid_build, ptid_get_pid, ptid_get_lwp, ptid_get_tid, ptid_equal,
+	ptid_is_pid, ptid_lwp_p, ptid_tid_p, ptid_match): Take ptid arguments
+	as references, move comment to class ptid_t.
+	* common/ptid.c (null_ptid, minus_one_ptid): Initialize with
+	ptid_t static methods.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_tid,
+	ptid_equal, ptid_is_pid, ptid_lwp_p, ptid_tid_p, ptid_match):
+	Take ptid arguments as references, implement using ptid_t methods.
+	* unittests/ptid-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/ptid-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add unittests/ptid-selftests.o.
+
+2017-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* python/python.c (python_run_simple_file): Cast mode literal to
+	non-const char pointer as expected by PyFile_FromString.
+
+2017-04-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/ptid.c (ptid_lwp_p, ptid_tid_p): Remove comparison with
+	minus_one_ptid and null_ptid.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* warning.m4 (build_warnings): Remove -Wno-write-strings.
+	* configure: Regenerate.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y (yyerror): Constify.
+	* ada-lang.c (bound_name, get_selections)
+	(ada_variant_discrim_type)
+	(ada_variant_discrim_name, ada_value_struct_elt)
+	(ada_lookup_struct_elt_type, is_unchecked_variant)
+	(ada_which_variant_applies, standard_exc, ada_get_next_arg)
+	(catch_ada_exception_command_split)
+	(catch_ada_assert_command_split, catch_assert_command)
+	(ada_op_name): Constify.
+	* ada-lang.h (ada_yyerror, get_selections)
+	(ada_variant_discrim_name, ada_value_struct_elt): Constify.
+	* arc-tdep.c (arc_print_frame_cache): Constify.
+	* arm-tdep.c (arm_skip_stub): Constify.
+	* ax-gdb.c (gen_binop, gen_struct_ref_recursive, gen_struct_ref)
+	(gen_aggregate_elt_ref): Constify.
+	* bcache.c (print_bcache_statistics): Constify.
+	* bcache.h (print_bcache_statistics): Constify.
+	* break-catch-throw.c (catch_exception_command_1):
+	* breakpoint.c (struct ep_type_description::description):
+	Constify.
+	(add_solib_catchpoint): Constify.
+	(catch_fork_command_1): Add cast.
+	(add_catch_command): Constify.
+	* breakpoint.h (add_catch_command, add_solib_catchpoint):
+	Constify.
+	* bsd-uthread.c (bsd_uthread_state): Constify.
+	* buildsym.c (patch_subfile_names): Constify.
+	* buildsym.h (next_symbol_text_func, patch_subfile_names):
+	Constify.
+	* c-exp.y (yyerror): Constify.
+	(token::oper): Constify.
+	* c-lang.h (c_yyerror, cp_print_class_member): Constify.
+	* c-varobj.c (cplus_describe_child): Constify.
+	* charset.c (find_charset_names): Add cast.
+	(find_charset_names): Constify array and add const_cast.
+	* cli/cli-cmds.c (complete_command, cd_command): Constify.
+	(edit_command): Constify.
+	* cli/cli-decode.c (lookup_cmd): Constify.
+	* cli/cli-dump.c (dump_memory_command, dump_value_command):
+	Constify.
+	(struct dump_context): Constify.
+	(add_dump_command, restore_command): Constify.
+	* cli/cli-script.c (get_command_line): Constify.
+	* cli/cli-script.h (get_command_line): Constify.
+	* cli/cli-utils.c (check_for_argument): Constify.
+	* cli/cli-utils.h (check_for_argument): Constify.
+	* coff-pe-read.c (struct read_pe_section_data): Constify.
+	* command.h (lookup_cmd): Constify.
+	* common/print-utils.c (decimal2str): Constify.
+	* completer.c (gdb_print_filename): Constify.
+	* corefile.c (set_gnutarget): Constify.
+	* cp-name-parser.y (yyerror): Constify.
+	* cp-valprint.c (cp_print_class_member): Constify.
+	* cris-tdep.c (cris_register_name, crisv32_register_name):
+	Constify.
+	* d-exp.y (yyerror): Constify.
+	(struct token::oper): Constify.
+	* d-lang.h (d_yyerror): Constify.
+	* dbxread.c (struct header_file_location::name): Constify.
+	(add_old_header_file, add_new_header_file, last_function_name)
+	(dbx_next_symbol_text, add_bincl_to_list)
+	(find_corresponding_bincl_psymtab, set_namestring)
+	(find_stab_function_addr, read_dbx_symtab, start_psymtab)
+	(dbx_end_psymtab, read_ofile_symtab, process_one_symbol):
+	* defs.h (command_line_input, print_address_symbolic)
+	(deprecated_readline_begin_hook): Constify.
+	* dwarf2read.c (anonymous_struct_prefix, dwarf_bool_name):
+	Constify.
+	* event-top.c (handle_line_of_input): Constify and add cast.
+	* exceptions.c (catch_errors): Constify.
+	* exceptions.h (catch_errors): Constify.
+	* expprint.c (print_subexp_standard, op_string, op_name)
+	(op_name_standard, dump_raw_expression, dump_raw_expression):
+	* expression.h (op_name, op_string, dump_raw_expression):
+	Constify.
+	* f-exp.y (yyerror): Constify.
+	(struct token::oper): Constify.
+	(struct f77_boolean_val::name): Constify.
+	* f-lang.c (f_word_break_characters): Constify.
+	* f-lang.h (f_yyerror): Constify.
+	* fork-child.c (fork_inferior): Add cast.
+	* frv-tdep.c (struct gdbarch_tdep::register_names): Constify.
+	(new_variant): Constify.
+	* gdbarch.sh (pstring_ptr, pstring_list): Constify.
+	* gdbarch.c: Regenerate.
+	* gdbcore.h (set_gnutarget): Constify.
+	* go-exp.y (yyerror): Constify.
+	(token::oper): Constify.
+	* go-lang.h (go_yyerror): Constify.
+	* go32-nat.c (go32_sysinfo): Constify.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_expression): Constify.
+	* guile/scm-cmd.c (cmdscm_function): Constify.
+	* guile/scm-param.c (pascm_param_value): Constify.
+	* h8300-tdep.c (h8300_register_name, h8300s_register_name)
+	(h8300sx_register_name): Constify.
+	* hppa-tdep.c (hppa32_register_name, hppa64_register_name):
+	Constify.
+	* ia64-tdep.c (ia64_register_names): Constify.
+	* infcmd.c (construct_inferior_arguments): Constify.
+	(path_command, attach_post_wait): Constify.
+	* language.c (show_range_command, show_case_command)
+	(unk_lang_error): Constify.
+	* language.h (language_defn::la_error)
+	(language_defn::la_name_of_this): Constify.
+	* linespec.c (decode_line_2): Constify.
+	* linux-thread-db.c (thread_db_err_str): Constify.
+	* lm32-tdep.c (lm32_register_name): Constify.
+	* m2-exp.y (yyerror): Constify.
+	* m2-lang.h (m2_yyerror): Constify.
+	* m32r-tdep.c (m32r_register_names): Constify and make static.
+	* m68hc11-tdep.c (m68hc11_register_names): Constify.
+	* m88k-tdep.c (m88k_register_name): Constify.
+	* macroexp.c (appendmem): Constify.
+	* mdebugread.c (fdr_name, add_data_symbol, parse_type)
+	(upgrade_type, parse_external, parse_partial_symbols)
+	(mdebug_next_symbol_text, cross_ref, mylookup_symbol, new_psymtab)
+	(new_symbol): Constify.
+	* memattr.c (mem_info_command): Constify.
+	* mep-tdep.c (register_name_from_keyword): Constify.
+	* mi/mi-cmd-env.c (mi_cmd_env_path, _initialize_mi_cmd_env):
+	Constify.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Constify.
+	* mi/mi-cmd-var.c (mi_cmd_var_show_attributes): Constify.
+	* mi/mi-main.c (captured_mi_execute_command): Constify and add
+	cast.
+	(mi_execute_async_cli_command): Constify.
+	* mips-tdep.c (mips_register_name): Constify.
+	* mn10300-tdep.c (register_name, mn10300_generic_register_name)
+	(am33_register_name, am33_2_register_name)
+	* moxie-tdep.c (moxie_register_names): Constify.
+	* nat/linux-osdata.c (osdata_type): Constify fields.
+	* nto-tdep.c (nto_parse_redirection): Constify.
+	* objc-lang.c (lookup_struct_typedef, lookup_objc_class)
+	(lookup_child_selector): Constify.
+	(objc_methcall::name): Constify.
+	* objc-lang.h (lookup_objc_class, lookup_child_selector)
+	(lookup_struct_typedef): Constify.
+	* objfiles.c (pc_in_section): Constify.
+	* objfiles.h (pc_in_section): Constify.
+	* p-exp.y (struct token::oper): Constify.
+	(yyerror): Constify.
+	* p-lang.h (pascal_yyerror): Constify.
+	* parser-defs.h (op_name_standard): Constify.
+	(op_print::string): Constify.
+	(exp_descriptor::op_name): Constify.
+	* printcmd.c (print_address_symbolic): Constify.
+	* psymtab.c (print_partial_symbols): Constify.
+	* python/py-breakpoint.c (stop_func): Constify.
+	(bppy_get_expression): Constify.
+	* python/py-cmd.c (cmdpy_completer::name): Constify.
+	(cmdpy_function): Constify.
+	* python/py-event.c (evpy_add_attribute)
+	(gdbpy_initialize_event_generic): Constify.
+	* python/py-event.h (evpy_add_attribute)
+	(gdbpy_initialize_event_generic): Constify.
+	* python/py-evts.c (add_new_registry): Constify.
+	* python/py-finishbreakpoint.c (outofscope_func): Constify.
+	* python/py-framefilter.c (get_py_iter_from_func): Constify.
+	* python/py-inferior.c (get_buffer): Add cast.
+	* python/py-param.c (parm_constant::name): Constify.
+	* python/py-unwind.c (fprint_frame_id): Constify.
+	* python/python.c (gdbpy_parameter_value): Constify.
+	* remote-fileio.c (remote_fio_func_map): Make 'name' const.
+	* remote.c (memory_packet_config::name): Constify.
+	(show_packet_config_cmd, remote_write_bytes)
+	(remote_buffer_add_string):
+	* reverse.c (exec_reverse_once): Constify.
+	* rs6000-tdep.c (variant::name, variant::description): Constify.
+	* rust-exp.y (rustyyerror): Constify.
+	* rust-lang.c (rust_op_name): Constify.
+	* rust-lang.h (rustyyerror): Constify.
+	* serial.h (serial_ops::name): Constify.
+	* sh-tdep.c (sh_sh_register_name, sh_sh3_register_name)
+	(sh_sh3e_register_name, sh_sh2e_register_name)
+	(sh_sh2a_register_name, sh_sh2a_nofpu_register_name)
+	(sh_sh_dsp_register_name, sh_sh3_dsp_register_name)
+	(sh_sh4_register_name, sh_sh4_nofpu_register_name)
+	(sh_sh4al_dsp_register_name): Constify.
+	* sh64-tdep.c (sh64_register_name): Constify.
+	* solib-darwin.c (lookup_symbol_from_bfd): Constify.
+	* spu-tdep.c (spu_register_name, info_spu_dma_cmdlist): Constify.
+	* stabsread.c (patch_block_stabs, read_type_number)
+	(ref_map::stabs, ref_add, process_reference)
+	(symbol_reference_defined, define_symbol, define_symbol)
+	(error_type, read_type, read_member_functions, read_cpp_abbrev)
+	(read_one_struct_field, read_struct_fields, read_baseclasses)
+	(read_tilde_fields, read_struct_type, read_array_type)
+	(read_enum_type, read_sun_builtin_type, read_sun_floating_type)
+	(read_huge_number, read_range_type, read_args, common_block_start)
+	(find_name_end): Constify.
+	* stabsread.h (common_block_start, define_symbol)
+	(process_one_symbol, symbol_reference_defined, ref_add):
+	* symfile.c (get_section_index, add_symbol_file_command):
+	* symfile.h (get_section_index): Constify.
+	* target-descriptions.c (tdesc_type::name): Constify.
+	(tdesc_free_type): Add cast.
+	* target.c (find_default_run_target):
+	(add_deprecated_target_alias, find_default_run_target)
+	(target_announce_detach): Constify.
+	(do_option): Constify.
+	* target.h (add_deprecated_target_alias): Constify.
+	* thread.c (print_thread_info_1): Constify.
+	* top.c (deprecated_readline_begin_hook, command_line_input):
+	Constify.
+	(init_main): Add casts.
+	* top.h (handle_line_of_input): Constify.
+	* tracefile-tfile.c (tfile_write_uploaded_tsv): Constify.
+	* tracepoint.c (tvariables_info_1, trace_status_mi): Constify.
+	(tfind_command): Rename to ...
+	(tfind_command_1): ... this and constify.
+	(tfind_command): New function.
+	(tfind_end_command, tfind_start_command): Adjust.
+	(encode_source_string): Constify.
+	* tracepoint.h (encode_source_string): Constify.
+	* tui/tui-data.c (tui_partial_win_by_name): Constify.
+	* tui/tui-data.h (tui_partial_win_by_name): Constify.
+	* tui/tui-source.c (tui_set_source_content_nil): Constify.
+	* tui/tui-source.h (tui_set_source_content_nil): Constify.
+	* tui/tui-win.c (parse_scrolling_args): Constify.
+	* tui/tui-windata.c (tui_erase_data_content): Constify.
+	* tui/tui-windata.h (tui_erase_data_content): Constify.
+	* tui/tui-winsource.c (tui_erase_source_content): Constify.
+	* tui/tui.c (tui_enable): Add cast.
+	* utils.c (defaulted_query): Constify.
+	(init_page_info): Add cast.
+	(puts_debug, subset_compare): Constify.
+	* utils.h (subset_compare): Constify.
+	* varobj.c (varobj_format_string): Constify.
+	* varobj.h (varobj_format_string): Constify.
+	* vax-tdep.c (vax_register_name): Constify.
+	* windows-nat.c (windows_detach): Constify.
+	* xcoffread.c (process_linenos, xcoff_next_symbol_text): Constify.
+	* xml-support.c (gdb_xml_end_element): Constify.
+	* xml-tdesc.c (tdesc_start_reg): Constify.
+	* xstormy16-tdep.c (xstormy16_register_name): Constify.
+	* xtensa-tdep.c (xtensa_find_register_by_name): Constify.
+	* xtensa-tdep.h (xtensa_register_t::name): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* proc-api.c (struct trans): Constify.
+	(procfs_note): Constify.
+	* proc-events.c (struct trans, syscall_table):
+	* proc-flags.c (struct trans): Constify.
+	* proc-utils.h (procfs_note): Constify.
+	* proc-why.c (struct trans): Constify.
+	* procfs.c (dead_procinfo, find_syscall, proc_warn, proc_error)
+	(procfs_detach): Constify.
+	* sol-thread.c (struct string_map): Constify.
+	(td_err_string, td_state_string): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* proc-api.c (procfs_filename): Don't initialize
+        procfs_filename.
+	(prepare_to_trace): Assume procfs_filename is non-NULL.
+	(_initialize_proc_api): Give procfs_filename a default value here.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Constify
+	'cond_string' parameter.
+	(extract_exception_regexp): Constify 'string' parameter.
+	(catch_exception_command_1): Constify.
+	* breakpoint.c (init_catchpoint)
+	(create_fork_vfork_event_catchpoint): Constify 'cond_string'
+	parameter.
+	(ep_parse_optional_if_clause, catch_fork_command_1)
+	(catch_exec_command_1): Constify.
+	* breakpoint.h (init_catchpoint): Constify 'cond_string'
+	parameter.
+	(ep_parse_optional_if_clause): Constify.
+	* cli/cli-utils.c (remove_trailing_whitespace)
+	(check_for_argument): Constify.
+	* cli/cli-utils.h (remove_trailing_whitespace): Constify and add
+	non-const overload.
+	(check_for_argument): Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_line_handler): Add cast to execute_command
+	call.
+	* record-btrace.c (cmd_record_btrace_bts_start)
+	(cmd_record_btrace_pt_start, cmd_record_btrace_start)
+	(cmd_record_btrace_start): Add cast to execute_command call.
+	* record-full.c (record_full_goto_insn):
+	* record.c (record_start, record_stop): Add cast to
+	execute_command_to_string calls.
+	(cmd_record_start): Add cast to execute_command calls.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_PyArg_ParseTupleAndKeywords): New
+	static inline function.
+	* python/py-arch.c (archpy_disassemble): Constify 'keywords'
+	array and use gdb_PyArg_ParseTupleAndKeywords.
+	* python/py-cmd.c (cmdpy_init): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-inferior.c (infpy_read_memory, infpy_write_memory)
+	(infpy_search_memory): Likewise.
+	* python/py-objfile.c (objfpy_add_separate_debug_file)
+	(gdbpy_lookup_objfile): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol)
+	(gdbpy_lookup_global_symbol): Likewise.
+	* python/py-type.c (gdbpy_lookup_type): Likewise.
+	* python/py-value.c (valpy_lazy_string, valpy_string): Likewise.
+	* python/python.c (execute_gdb_command, gdbpy_write, gdbpy_flush):
+	Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_PyGetSetDef): New type.
+	* python/py-block.c (block_object_getset)
+	(breakpoint_object_getset): Now a gdb_PyGetSetDef array.
+	* python/py-event.c (event_object_getset)
+	(finish_breakpoint_object_getset): Likewise.
+	* python/py-inferior.c (inferior_object_getset): Likewise.
+	* python/py-infthread.c (thread_object_getset): Likewise.
+	* python/py-lazy-string.c (lazy_string_object_getset): Likewise.
+	* python/py-linetable.c (linetable_entry_object_getset): Likewise.
+	* python/py-objfile.c (objfile_getset): Likewise.
+	* python/py-progspace.c (pspace_getset): Likewise.
+	* python/py-record-btrace.c (btpy_insn_getset, btpy_call_getset):
+	Likewise.
+	* python/py-record.c (recpy_record_getset): Likewise.
+	* python/py-symbol.c (symbol_object_getset): Likewise.
+	* python/py-symtab.c (symtab_object_getset, sal_object_getset):
+	Likewise.
+	* python/py-type.c (type_object_getset, field_object_getset):
+	Likewise.
+	* python/py-value.c (value_object_getset): Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_PyObject_CallMethod)
+	(gdb_PyErr_NewException, gdb_PySys_GetObject, gdb_PySys_SetPath):
+	New functions.
+	(GDB_PYSYS_SETPATH_CHAR, PyObject_CallMethod, PyErr_NewException)
+	(PySys_GetObject, PySys_SetPath): New macros.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-cmd-info.c (mi_cmd_info_os): Call info_osdata instead of
+	info_osdata_command.
+	* osdata.c (info_osdata_command): Rename to ...
+	(info_osdata): ... this.  Constify 'type' parameter, and remove
+	the 'from_tty' parameter.  Accept NULL TYPE.
+	(info_osdata_command): New function.
+	* osdata.h (info_osdata_command): Remove declaration.
+	(info_osdata): New declaration.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1, mi_cmd_break_insert)
+	(mi_cmd_dprintf_insert, mi_cmd_break_passcount)
+	(mi_cmd_break_watch, mi_cmd_break_commands): Constify 'command'
+	parameter.
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert, mi_cmd_catch_exception)
+	(mi_cmd_catch_load, mi_cmd_catch_unload): Constify cmd' parameter.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Constify 'command'
+	parameter.
+	* mi/mi-cmd-env.c (mi_cmd_env_pwd, mi_cmd_env_cd, mi_cmd_env_path)
+	(mi_cmd_env_dir, mi_cmd_inferior_tty_set, _cmd_inferior_tty_show)
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file)
+	(mi_cmd_file_list_exec_source_files)
+	(mi_cmd_file_list_shared_libraries): Constify 'command' parameter.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions)
+	(mi_cmd_info_gdb_mi_command, mi_cmd_info_os): Constify 'command'
+	parameter.
+	* mi/mi-cmd-stack.c (mi_cmd_enable_frame_filters)
+	(mi_cmd_stack_list_frames, mi_cmd_stack_info_depth)
+	(mi_cmd_stack_list_locals, mi_cmd_stack_list_args)
+	(mi_cmd_stack_list_variables, mi_cmd_stack_select_frame)
+	(mi_cmd_stack_info_frame): Constify 'command' parameter.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_get)
+	(mi_cmd_target_file_put, mi_cmd_target_file_delete): Constify
+	'command' parameter.
+	* mi/mi-cmd-var.c (mi_cmd_var_create, mi_cmd_var_delete)
+	(mi_cmd_var_set_format, mi_cmd_var_set_visualizer)
+	(mi_cmd_var_set_frozen, mi_cmd_var_show_format)
+	(mi_cmd_var_info_num_children, mi_cmd_var_list_children)
+	(mi_cmd_var_info_type, mi_cmd_var_info_path_expression)
+	(mi_cmd_var_info_expression, mi_cmd_var_show_attributes)
+	(mi_cmd_var_evaluate_expression, mi_cmd_var_assign)
+	(mi_cmd_var_update, mi_cmd_enable_pretty_printing)
+	(mi_cmd_var_set_update_range): Constify 'command' parameter.
+	* mi/mi-cmds.h (mi_cmd_argv_ftype): Constify 'command' parameter.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Constify 'command'
+	parameter.
+	* mi/mi-main.c (mi_cmd_gdb_exit, mi_cmd_exec_next)
+	(mi_cmd_exec_next_instruction, mi_cmd_exec_step)
+	(mi_cmd_exec_step_instruction, mi_cmd_exec_finish)
+	(mi_cmd_exec_return ,mi_cmd_exec_jump, mi_cmd_exec_continue)
+	(mi_cmd_exec_interrupt, mi_cmd_exec_run, mi_cmd_target_detach)
+	(mi_cmd_target_flash_erase, mi_cmd_thread_select)
+	(mi_cmd_thread_list_ids, mi_cmd_thread_info)
+	(mi_cmd_list_thread_groups, mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_changed_registers)
+	(mi_cmd_data_write_register_values)
+	(mi_cmd_data_evaluate_expression, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_cmd_data_write_memory)
+	(mi_cmd_data_write_memory_bytes, mi_cmd_enable_timings)
+	(mi_cmd_list_features, mi_cmd_list_target_features)
+	(mi_cmd_add_inferior, mi_cmd_remove_inferior)
+	(mi_cmd_trace_define_variable, mi_cmd_trace_list_variables)
+	(mi_cmd_trace_find, mi_cmd_trace_save, mi_cmd_trace_start)
+	(mi_cmd_trace_status, mi_cmd_trace_stop, mi_cmd_ada_task_info)
+	(mi_cmd_trace_frame_collected): Constify 'command'
+	parameter.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Constify
+	'command' parameter.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_completer_word_break_characters): Now a const
+	array.
+	(ada_get_gdb_completer_word_break_characters): Constify.
+	* completer.c (gdb_completer_command_word_break_characters)
+	(gdb_completer_file_name_break_characters)
+	(gdb_completer_quote_characters): Now const arrays.
+	(get_gdb_completer_quote_characters): Constify.
+	(set_rl_completer_word_break_characters): New function.
+	(set_gdb_completion_word_break_characters)
+	(complete_line_internal): Use it.
+	* completer.h (get_gdb_completer_quote_characters): Constify.
+	(set_rl_completer_word_break_characters): Declare.
+	* f-lang.c (f_word_break_characters): Constify.
+	* language.c (default_word_break_characters): Constify.
+	* language.h (language_defn::la_word_break_characters): Constify.
+	(default_word_break_characters): Constify.
+	* top.c (init_main): Use set_rl_completer_word_break_characters.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* aix-thread.c (aix_thread_pid_to_str)
+	(aix_thread_extra_thread_info): Constify.
+	* bsd-kvm.c (bsd_kvm_pid_to_str): Constify.
+	* bsd-uthread.c (bsd_uthread_extra_thread_info)
+	(bsd_uthread_pid_to_str): Constify.
+	* corelow.c (core_pid_to_str): Constify.
+	* darwin-nat.c (darwin_pid_to_str): Constify.
+	* fbsd-nat.c (fbsd_pid_to_str): Constify.
+	* fbsd-tdep.c (fbsd_core_pid_to_str, gdbarch_core_pid_to_str):
+	Constify.
+	* gnu-nat.c (gnu_pid_to_str): Constify.
+	* go32-nat.c (go32_pid_to_str): Constify.
+	* i386-cygwin-tdep.c (i386_windows_core_pid_to_str): Constify.
+	* inf-ptrace.c (inf_ptrace_pid_to_str): Constify.
+	* inferior.c (inferior_pid_to_str): Constify.
+	* linux-nat.c (linux_nat_pid_to_str): Constify.
+	* linux-tdep.c (linux_core_pid_to_str): Constify.
+	* linux-thread-db.c (thread_db_pid_to_str)
+	(thread_db_extra_thread_info): Constify.
+	* nto-tdep.c (nto_extra_thread_info): Constify.
+	* nto-tdep.h (nto_extra_thread_info): Constify.
+	* obsd-nat.c (obsd_pid_to_str): Constify.
+	* procfs.c (procfs_pid_to_str): Constify.
+	* ravenscar-thread.c (ravenscar_extra_thread_info)
+	(ravenscar_pid_to_str): Constify.
+	* remote-sim.c (gdbsim_pid_to_str): Constify.
+	* remote.c (remote_threads_extra_info, remote_pid_to_str):
+	Constify.
+	* sol-thread.c (solaris_pid_to_str): Constify.
+	* sol2-tdep.c (sol2_core_pid_to_str): Constify.
+	* sol2-tdep.h (sol2_core_pid_to_str): Constify.
+	* target.c (default_pid_to_str, target_pid_to_str)
+	(normal_pid_to_str, default_pid_to_str): Constify.
+	* target.h (target_ops::to_pid_to_str)
+	(target_ops::to_extra_thread_info): Constify.
+	(target_pid_to_str, normal_pid_to_str): Constify.
+	* windows-nat.c (windows_pid_to_str): Constify.
+	* gdbarch.sh (core_pid_to_str): Constify.
+	* target-delegates.c: Regenerate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2017-04-05  Pedro Alves	 <palves@redhat.com>
+
+	* main.c (captured_main_1): Use gdb::unique_xmalloc_ptr to manage
+	the memory of the temporary warning_pre_print override.
+	* utils.c (warning_pre_print): Constify.
+	* utils.h (warning_pre_print): Constify.
+
+2017-04-05  Pedro Alves	 <palves@redhat.com>
+
+	* cli/cli-cmds.c (shell_escape): Constify 'arg' parameter.
+	(shell_command): New function.
+	(make_command): Use std::string.
+	(init_cli_cmds): Register shell_command instead of shell_escape.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (dprintf_function, dprintf_channel): Don't initialize.
+	* tracepoint.c (default_collect): Don't initialize.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* macroexp.c (macro_buffer::shared): Now a bool.
+	(init_buffer): Update.
+	(init_shared_buffer): Constify 'addr' parameter.
+	(substitute_args, expand, macro_expand, macro_expand_next): Remove
+	casts.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (show_disassembly_style_sfunc): Constify local.
+	* disasm.c (set_disassembler_options): Constify local.
+	* i386-tdep.c (i386_print_insn): Remove cast and FIXME comment.
+
+2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21352
+	* tracefile.c (tsave_command): Fix argument parsing for '-r'
+	option.
+
+2017-04-05  Yao Qi  <yao.qi@linaro.org>
+
+	* frame.c (frame_unwind_register_unsigned): Call
+	frame_unwind_register_value.
+
+2017-04-05  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/thread-specific-bp.exp (check_thread_specific_breakpoint):
+	Use gdb_test_multiple, and don't match anchor.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS (Global Maintainers): Add Simon Marchi.
+	(Write After Approval): Remove Simon Marchi.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_optional.h (optional::optional): Make constexpr and
+	initialize m_dummy.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-fbsd-tdep.c: Remove "bsd-uthread.h" include.
+	(amd64fbsd_jmp_buf_reg_offset): Remove.
+	(amd64fbsd_supply_uthread): Remove function.
+	(amd64fbsd_collect_uthread): Remove function.
+	(amd64fbsd_init_abi): Don't set bsd-uthread callbacks.
+	* configure.tgt (i[34567]86-*-freebsd*): Remove bsd-uthread.o.
+	(x86_64-*-freebsd*): Remove bsd-uthread.o.
+	(fbsd-nat.c): Update comment.
+	* i386-fbsd-tdep.c: Remove "bsd-uthread.h" include.
+	(i386fbsd_jmp_buf_reg_offset): Remove.
+	(i386fbsd_supply_uthread): Remove function.
+	(i386fbsd_collect_uthread): Remove function.
+	(i386fbsd_init_abi): Don't set bsd-uthread callbacks.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-fbsd-tdep.o.
+	(ALLDEPFILES): Remove alpha-fbsd-tdep.c
+	* NEWS: Mention that support for FreeBSD/alpha was removed.
+	* alpha-fbsd-tdep.c: Delete file.
+	* config/alpha/fbsd.mh: Delete file.
+	* configure.host: Delete alpha*-*-freebsd* and
+	alpha*-*-kfreebsd*-gnu.
+	* configure.tgt: Delete alpha*-*-freebsd* and
+	alpha*-*-kfreebsd*-gnu.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers): Use ptid from regcache.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (lnp_state_machine): Now a class.  Initialize all
+	data fields, make them private and add "m_" prefixes.
+	(lnp_state_machine::lnp_state_machine): New ctor.
+	(record_line, check_line_address, handle_set_discriminator)
+	(handle_set_address, handle_advance_pc, handle_special_opcode)
+	(handle_advance_line, handle_set_file, handle_negate_stmt)
+	(handle_const_add_pc, handle_fixed_advance_pc, handle_copy)
+	(end_sequence, advance_line): New methods.
+	(m_gdbarch, m_record_lines_p): New fields.
+	(lnp_reader_state): Delete.
+	(dwarf_record_line): Rename to ...
+	(lnp_state_machine::record_line): ... adjust.
+	(init_lnp_state_machine): Delete.
+	(lnp_state_machine::lnp_state_machine): New.
+	(check_line_address): Rename to ...
+	(lnp_state_machine::check_line_address): This.
+	(dwarf_decode_lines_1): Remove reference to "reader_state".
+	Adjust lnp_state_machine having a non-default ctor.  Use bool.
+	State machine internal state manipulation moved to
+	lnp_state_machine methods.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/offset-type-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add offset-type-selftests.o.
+	* common/offset-type.h: New file.
+	* common/preprocessor.h: New file.
+	* common/traits.h: New file.
+	* common/valid-expr.h: New file.
+	* dwarf2expr.c: Include "common/underlying.h".  Adjust to use
+	sect_offset and cu_offset strong typedefs throughout.
+	* dwarf2expr.h: Adjust to use sect_offset and cu_offset strong
+	typedefs throughout.
+	* dwarf2loc.c: Include "common/underlying.h".  Adjust to use
+	sect_offset and cu_offset strong typedefs throughout.
+	* dwarf2read.c: Adjust to use sect_offset and cu_offset strong
+	typedefs throughout.
+	* gdbtypes.h: Include "common/offset-type.h".
+	(cu_offset): Now an offset type (strong typedef) instead of a
+	struct.
+	(sect_offset): Likewise.
+	(union call_site_parameter_u): Rename "param_offset" field to
+	"param_cu_off".
+	* unittests/offset-type-selftests.c: New file.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* common/underlying.h: New file.
+	* dwarf2read.c: Include "common/gdb_optional.h" and
+	"common/underlying.h".
+	(dir_index, file_name_index): New types.
+	(file_entry): Use them.
+	(file_entry::include): Use to_underlying.
+	(line_header::add_file_name): Use dir_index.
+	(read_formatted_entries): Use gdb::optional.  Read form before
+	writting to file_entry.
+	(dwarf_decode_line_header): Use dir_index.
+	(lnp_state_machine::current_file): Use to_underlying.
+	(lnp_state_machine::file): Change type to file_name_index.
+	(dwarf_record_line): Use to_underlying.
+	(init_lnp_state_machine): Use file_name_index.
+	(dwarf_decode_lines_1): Use dir_index and file_name_index.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_optional.h (gdb::optiona): Add operator->, operator*,
+	operator bool, has_value and get methods.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct file_entry): Add ctors, and initialize all
+	fields.
+	(line_header): Initialize all data fields.  Change type of
+	standard_opcode_lengths to std::unique_ptr<unsigned char[]>.
+	Change type of include_dirs to std::vector<const char *>.  Remove
+	num_include_dirs, include_dirs_size.  Change type of file_names to
+	std::vector<file_entry>.  Remove num_file_names, file_names_size.
+	(line_header::line_header): New.
+	(line_header::add_include_dir, line_header::add_file_name): New
+	methods.
+	(line_header::include_dir_at): Remove NULL check.
+	(line_header::file_name_at): Add const overload.
+	(line_header_up): New unique_ptr typedef.
+	(dw2_get_file_names_reader): Use line_header_up.  Adjust to use
+	std::vector.  Remove free_line_header call.
+	(dwarf2_build_include_psymtabs): Use line_header_up.  Remove
+	free_line_header call.
+	(free_cu_line_header): Delete.
+	(handle_DW_AT_stmt_list, handle_DW_AT_stmt_list)
+	(setup_type_unit_groups): Use line_header_up instead of cleanups.
+	Adjust to use std::vector.
+	(free_line_header): Delete.
+	(free_line_header_voidp): Use delete.
+	(add_include_dir): Replace with ...
+	(line_header::add_include_dir): ... this method.  Use std::vector.
+	(add_file_name): Replace with ...
+	(line_header::add_file_name): ... this method.  Use std::vector.
+	(add_include_dir_stub): Delete.
+	(read_formatted_entries): Remove memset.
+	(dwarf_decode_line_header): Return a line_header_up instead of a
+	raw pointer.  Remove cleanup handling.  Pass lambdas to
+	read_formatted_entries.  Adjust to use line_header methods.
+	(dwarf_decode_lines_1): Adjust to use line_header methods.
+	(dwarf_decode_lines, file_file_name, file_full_name): Adjust to
+	use std::vector.
+
 2017-04-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* remote.c (set_general_thread, set_continue_thread): Use ptid_t

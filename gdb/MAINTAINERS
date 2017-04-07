@@ -155,6 +155,7 @@ Andrew Cagney			cagney@gnu.org
 Doug Evans			dje@google.com
 Daniel Jacobowitz		drow@false.org
 Mark Kettenis           	kettenis@gnu.org
+Simon Marchi			simon.marchi@ericsson.com
 Yao Qi				yao.qi@arm.com
 Stan Shebs			stanshebs@google.com
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
@@ -592,7 +593,6 @@ Michal Ludvig                                   mludvig@suse.cz
 Edjunior B. Machado				emachado@linux.vnet.ibm.com
 Luis Machado					lgustavo@codesourcery.com
 Jose E. Marchesi                                jose.marchesi@oracle.com
-Simon Marchi					simon.marchi@ericsson.com
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
 Roland McGrath					roland@hack.frob.com

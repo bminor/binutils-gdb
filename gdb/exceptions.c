@@ -221,8 +221,8 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
 /* This function is superseded by catch_exceptions().  */
 
 int
-catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
-	      return_mask mask)
+catch_errors (catch_errors_ftype *func, void *func_args,
+	      const char *errstring, return_mask mask)
 {
   struct gdb_exception exception = exception_none;
   volatile int val = 0;

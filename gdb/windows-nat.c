@@ -1925,7 +1925,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
 
   if (detached && from_tty)
     {
-      char *exec_file = get_exec_file (0);
+      const char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
       printf_unfiltered ("Detaching from program: %s, Pid %u\n", exec_file,
@@ -2807,7 +2807,7 @@ windows_close (struct target_ops *self)
 }
 
 /* Convert pid to printable format.  */
-static char *
+static const char *
 windows_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];

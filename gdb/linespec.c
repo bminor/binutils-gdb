@@ -1293,7 +1293,8 @@ decode_line_2 (struct linespec_state *self,
 	       struct symtabs_and_lines *result,
 	       const char *select_mode)
 {
-  char *args, *prompt;
+  char *args;
+  const char *prompt;
   int i;
   struct cleanup *old_chain;
   VEC (const_char_ptr) *filters = NULL;

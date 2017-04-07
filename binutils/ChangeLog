@@ -1,3 +1,20 @@
+2017-04-05  Jiong Wang  <jiong.wang@arm.com>
+
+	* objcopy.c (struct redefine_node): Delete the field "next".
+	(redefine_sym_list): Deleted.
+	(redefine_specific_htab): New hash table.
+	(redefine_specific_reverse_htab): Likewise.
+	(eq_string_redefnode): New function.
+	(htab_hash_redefnode): Likewise.
+	(create_symbol2redef_htab): Likewise.
+	(add_specific_symbol_node): Likewise.
+	(create_symbol_htabs): Create redefine_specific_htab and
+	redefine_specific_reverse_htab.
+	(lookup_sym_redefinition): Use hash table instead of list.
+	(redefine_list_append): Likewise, and rename to add_redefine_and_check.
+	(copy_main): Use redefine_specific_htab instead of redefine_sym_list.
+	Update comments.
+
 2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention support for ELF SHF_GNU_MBIND and

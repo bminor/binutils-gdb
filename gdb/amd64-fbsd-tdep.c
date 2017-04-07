@@ -28,7 +28,6 @@
 #include "x86-xstate.h"
 
 #include "amd64-tdep.h"
-#include "bsd-uthread.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
 
@@ -150,28 +149,6 @@ int amd64fbsd_sc_reg_offset[] =
   -1				/* %gs */
 };
 
-/* From /usr/src/lib/libc/amd64/gen/_setjmp.S.  */
-static int amd64fbsd_jmp_buf_reg_offset[] =
-{
-  -1,				/* %rax */
-  1 * 8,			/* %rbx */
-  -1,				/* %rcx */
-  -1,				/* %rdx */
-  -1,				/* %rsi */
-  -1,				/* %rdi */
-  3 * 8,			/* %rbp */
-  2 * 8,			/* %rsp */
-  -1,				/* %r8 ...  */
-  -1,
-  -1,
-  -1,				/* ... %r11 */
-  4 * 8,			/* %r12 ...  */
-  5 * 8,
-  6 * 8,
-  7 * 8,			/* ... %r15 */
-  0 * 8				/* %rip */
-};
-
 /* Implement the core_read_description gdbarch method.  */
 
 static const struct target_desc *
@@ -226,46 +203,6 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 static void
-amd64fbsd_supply_uthread (struct regcache *regcache,
-			  int regnum, CORE_ADDR addr)
-{
-  gdb_byte buf[8];
-  int i;
-
-  gdb_assert (regnum >= -1);
-
-  for (i = 0; i < ARRAY_SIZE (amd64fbsd_jmp_buf_reg_offset); i++)
-    {
-      if (amd64fbsd_jmp_buf_reg_offset[i] != -1
-	  && (regnum == -1 || regnum == i))
-	{
-	  read_memory (addr + amd64fbsd_jmp_buf_reg_offset[i], buf, 8);
-	  regcache_raw_supply (regcache, i, buf);
-	}
-    }
-}
-
-static void
-amd64fbsd_collect_uthread (const struct regcache *regcache,
-			   int regnum, CORE_ADDR addr)
-{
-  gdb_byte buf[8];
-  int i;
-
-  gdb_assert (regnum >= -1);
-
-  for (i = 0; i < ARRAY_SIZE (amd64fbsd_jmp_buf_reg_offset); i++)
-    {
-      if (amd64fbsd_jmp_buf_reg_offset[i] != -1
-	  && (regnum == -1 || regnum == i))
-	{
-	  regcache_raw_collect (regcache, i, buf);
-	  write_memory (addr + amd64fbsd_jmp_buf_reg_offset[i], buf, 8);
-	}
-    }
-}
-
-static void
 amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -297,10 +234,6 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_core_read_description (gdbarch,
 				     amd64fbsd_core_read_description);
-
-  /* FreeBSD provides a user-level threads implementation.  */
-  bsd_uthread_set_supply_uthread (gdbarch, amd64fbsd_supply_uthread);
-  bsd_uthread_set_collect_uthread (gdbarch, amd64fbsd_collect_uthread);
 
   /* FreeBSD uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets

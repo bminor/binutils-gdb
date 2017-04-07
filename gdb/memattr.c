@@ -441,7 +441,7 @@ mem_info_command (char *args, int from_tty)
 
   for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     {
-      char *tmp;
+      const char *tmp;
 
       printf_filtered ("%-3d %-3c\t",
 		       m->number,

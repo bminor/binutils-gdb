@@ -128,7 +128,8 @@ static void gen_binop (struct agent_expr *ax,
 		       struct axs_value *value1,
 		       struct axs_value *value2,
 		       enum agent_op op,
-		       enum agent_op op_unsigned, int may_carry, char *name);
+		       enum agent_op op_unsigned, int may_carry,
+		       const char *name);
 static void gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 			     struct type *result_type);
 static void gen_complement (struct agent_expr *ax, struct axs_value *value);
@@ -144,12 +145,13 @@ static void gen_primitive_field (struct expression *exp,
 static int gen_struct_ref_recursive (struct expression *exp,
 				     struct agent_expr *ax,
 				     struct axs_value *value,
-				     char *field, int offset,
+				     const char *field, int offset,
 				     struct type *type);
 static void gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 			    struct axs_value *value,
-			    char *field,
-			    char *operator_name, char *operand_name);
+			    const char *field,
+			    const char *operator_name,
+			    const char *operand_name);
 static void gen_static_field (struct gdbarch *gdbarch,
 			      struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int fieldno);
@@ -1149,7 +1151,7 @@ static void
 gen_binop (struct agent_expr *ax, struct axs_value *value,
 	   struct axs_value *value1, struct axs_value *value2,
 	   enum agent_op op, enum agent_op op_unsigned,
-	   int may_carry, char *name)
+	   int may_carry, const char *name)
 {
   /* We only handle INT op INT.  */
   if ((TYPE_CODE (value1->type) != TYPE_CODE_INT)
@@ -1434,7 +1436,7 @@ gen_primitive_field (struct expression *exp,
 static int
 gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
 			  struct axs_value *value,
-			  char *field, int offset, struct type *type)
+			  const char *field, int offset, struct type *type)
 {
   int i, rslt;
   int nbases = TYPE_N_BASECLASSES (type);
@@ -1498,8 +1500,8 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
    it operates on; we use them in error messages.  */
 static void
 gen_struct_ref (struct expression *exp, struct agent_expr *ax,
-		struct axs_value *value, char *field,
-		char *operator_name, char *operand_name)
+		struct axs_value *value, const char *field,
+		const char *operator_name, const char *operand_name)
 {
   struct type *type;
   int found;
@@ -1671,7 +1673,8 @@ static int
 gen_aggregate_elt_ref (struct expression *exp,
 		       struct agent_expr *ax, struct axs_value *value,
 		       struct type *type, char *field,
-		       char *operator_name, char *operand_name)
+		       const char *operator_name,
+		       const char *operand_name)
 {
   switch (TYPE_CODE (type))
     {

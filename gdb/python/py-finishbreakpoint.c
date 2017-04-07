@@ -33,7 +33,7 @@
 #include "py-ref.h"
 
 /* Function that is called when a Python finish bp is found out of scope.  */
-static char * const outofscope_func = "out_of_scope";
+static const char outofscope_func[] = "out_of_scope";
 
 /* struct implementing the gdb.FinishBreakpoint object by extending
    the gdb.Breakpoint class.  */
@@ -156,7 +156,7 @@ bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 static int
 bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  static char *keywords[] = { "frame", "internal", NULL };
+  static const char *keywords[] = { "frame", "internal", NULL };
   struct finish_breakpoint_object *self_bpfinish =
       (struct finish_breakpoint_object *) self;
   PyObject *frame_obj = NULL;
@@ -169,8 +169,8 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   CORE_ADDR pc;
   struct symbol *function;
 
-  if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|OO", keywords,
-                                    &frame_obj, &internal))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "|OO", keywords,
+					&frame_obj, &internal))
     return -1;
 
   TRY
@@ -426,7 +426,7 @@ gdbpy_initialize_finishbreakpoints (void)
   return 0;
 }
 
-static PyGetSetDef finish_breakpoint_object_getset[] = {
+static gdb_PyGetSetDef finish_breakpoint_object_getset[] = {
   { "return_value", bpfinishpy_get_returnvalue, NULL,
   "gdb.Value object representing the return value, if any. \
 None otherwise.", NULL },

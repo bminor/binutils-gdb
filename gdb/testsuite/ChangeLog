@@ -1,3 +1,8 @@
+2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21352
+	* gdb.trace/tsv.exp: Add test for "tsave -r".
+
 2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-section-script.exp (sepdebug): New testcases.

@@ -40,7 +40,7 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* This is how we want PTIDs from Solaris core files to be
    printed.  */
 
-char *
+const char *
 sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];

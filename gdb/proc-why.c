@@ -38,8 +38,8 @@
 struct trans
 {
   int value;                    /* The numeric value.  */
-  char *name;                   /* The equivalent symbolic value.  */
-  char *desc;                   /* Short description of value.  */
+  const char *name;                   /* The equivalent symbolic value.  */
+  const char *desc;                   /* Short description of value.  */
 };
 
 /* Translate values in the pr_why field of a `struct prstatus' or

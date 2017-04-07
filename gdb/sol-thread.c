@@ -86,7 +86,7 @@ struct ps_prochandle
 struct string_map
 {
   int num;
-  char *str;
+  const char *str;
 };
 
 static struct ps_prochandle main_ph;
@@ -179,7 +179,7 @@ static td_thr_setgregs_ftype *p_td_thr_setgregs;
 /* Return the libthread_db error string associated with ERRCODE.  If
    ERRCODE is unknown, return an appropriate message.  */
 
-static char *
+static const char *
 td_err_string (td_err_e errcode)
 {
   static struct string_map td_err_table[] =
@@ -223,7 +223,7 @@ td_err_string (td_err_e errcode)
 /* Return the libthread_db state string assicoated with STATECODE.
    If STATECODE is unknown, return an appropriate message.  */
 
-static char *
+static const char *
 td_state_string (td_thr_state_e statecode)
 {
   static struct string_map td_thr_state_table[] =
@@ -1021,7 +1021,7 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
 /* Convert PTID to printable form.  */
 
-static char *
+static const char *
 solaris_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[100];

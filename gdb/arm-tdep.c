@@ -8367,7 +8367,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
     {
       /* Use the name suffix to determine which register contains the
          target PC.  */
-      static char *table[15] =
+      static const char *table[15] =
       {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
        "r8", "r9", "sl", "fp", "ip", "sp", "lr"
       };
@@ -8562,7 +8562,7 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
   char *options = get_disassembler_options (gdbarch);
   const char *style = "";
   int len = 0;
-  char *opt;
+  const char *opt;
 
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     if (CONST_STRNEQ (opt, "reg-names-"))

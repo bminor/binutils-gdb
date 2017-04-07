@@ -194,7 +194,7 @@ typedef void (record_line_ftype) (struct subfile *subfile, int line,
 
 /* Function to invoke get the next symbol.  Return the symbol name.  */
 
-EXTERN char *(*next_symbol_text_func) (struct objfile *);
+EXTERN const char *(*next_symbol_text_func) (struct objfile *);
 
 extern void add_symbol_to_list (struct symbol *symbol,
 				struct pending **listhead);
@@ -216,7 +216,7 @@ extern void really_free_pendings (void *dummy);
 
 extern void start_subfile (const char *name);
 
-extern void patch_subfile_names (struct subfile *subfile, char *name);
+extern void patch_subfile_names (struct subfile *subfile, const char *name);
 
 extern void push_subfile (void);
 

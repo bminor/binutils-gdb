@@ -251,7 +251,7 @@ tui_set_source_content (struct symtab *s,
 
 void
 tui_set_source_content_nil (struct tui_win_info *win_info, 
-			    char *warning_string)
+			    const char *warning_string)
 {
   int line_width;
   int n_lines;

@@ -41,7 +41,7 @@ static int bppy_live;
 gdbpy_breakpoint_object *bppy_pending_object;
 
 /* Function that is called when a Python condition is evaluated.  */
-static char * const stop_func = "stop";
+static const char stop_func[] = "stop";
 
 /* This is used to initialize various gdb.bp_* constants.  */
 struct pybp_code
@@ -400,7 +400,7 @@ bppy_get_location (PyObject *self, void *closure)
 static PyObject *
 bppy_get_expression (PyObject *self, void *closure)
 {
-  char *str;
+  const char *str;
   gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
   struct watchpoint *wp;
 
@@ -637,8 +637,8 @@ bppy_get_ignore_count (PyObject *self, void *closure)
 static int
 bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  static char *keywords[] = { "spec", "type", "wp_class", "internal",
-			      "temporary", NULL };
+  static const char *keywords[] = { "spec", "type", "wp_class", "internal",
+				    "temporary", NULL };
   const char *spec;
   int type = bp_breakpoint;
   int access_type = hw_write;
@@ -647,9 +647,9 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   int internal_bp = 0;
   int temporary_bp = 0;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kwargs, "s|iiOO", keywords,
-				     &spec, &type, &access_type,
-				     &internal, &temporary))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "s|iiOO", keywords,
+					&spec, &type, &access_type,
+					&internal, &temporary))
     return -1;
 
   if (internal)
@@ -1048,7 +1048,7 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
   return PyObject_GenericSetAttr ((PyObject *)self, name, v);
 }
 
-static PyGetSetDef breakpoint_object_getset[] = {
+static gdb_PyGetSetDef breakpoint_object_getset[] = {
   { "enabled", bppy_get_enabled, bppy_set_enabled,
     "Boolean telling whether the breakpoint is enabled.", NULL },
   { "silent", bppy_get_silent, bppy_set_silent,

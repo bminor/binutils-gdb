@@ -37,7 +37,7 @@ extern int strcmp_iw_ordered (const char *, const char *);
 
 extern int streq (const char *, const char *);
 
-extern int subset_compare (char *, char *);
+extern int subset_compare (const char *, const char *);
 
 int compare_positive_ints (const void *ap, const void *bp);
 int compare_strings (const void *ap, const void *bp);
@@ -298,7 +298,7 @@ extern void (*deprecated_error_begin_hook) (void);
 
 /* Message to be printed before the warning message, when a warning occurs.  */
 
-extern char *warning_pre_print;
+extern const char *warning_pre_print;
 
 extern void error_stream (const string_file &) ATTRIBUTE_NORETURN;
 

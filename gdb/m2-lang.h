@@ -22,7 +22,7 @@ struct parser_state;
 
 extern int m2_parse (struct parser_state *); /* Defined in m2-exp.y */
 
-extern void m2_yyerror (char *);	/* Defined in m2-exp.y */
+extern void m2_yyerror (const char *);	/* Defined in m2-exp.y */
 
 /* Defined in m2-typeprint.c */
 extern void m2_print_type (struct type *, const char *, struct ui_file *, int,

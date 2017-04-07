@@ -228,7 +228,7 @@ extract_call_winsize (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 /* Find register by name.  */
 static int
-xtensa_find_register_by_name (struct gdbarch *gdbarch, char *name)
+xtensa_find_register_by_name (struct gdbarch *gdbarch, const char *name)
 {
   int i;
 

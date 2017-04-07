@@ -27,7 +27,7 @@ extern const char *pascal_main_name (void);
 
 extern int pascal_parse (struct parser_state *); /* Defined in p-exp.y */
 
-extern void pascal_yyerror (char *);	/* Defined in p-exp.y */
+extern void pascal_yyerror (const char *);	/* Defined in p-exp.y */
 
 /* Defined in p-typeprint.c */
 extern void pascal_print_type (struct type *, const char *, struct ui_file *,

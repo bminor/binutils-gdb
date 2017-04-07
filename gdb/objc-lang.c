@@ -81,7 +81,7 @@ static const struct objfile_data *objc_objfile_data;
    suitably defined.  */
 
 struct symbol *
-lookup_struct_typedef (char *name, const struct block *block, int noerr)
+lookup_struct_typedef (const char *name, const struct block *block, int noerr)
 {
   struct symbol *sym;
 
@@ -106,7 +106,7 @@ lookup_struct_typedef (char *name, const struct block *block, int noerr)
 }
 
 CORE_ADDR 
-lookup_objc_class (struct gdbarch *gdbarch, char *classname)
+lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
 {
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *classval;
@@ -135,7 +135,7 @@ lookup_objc_class (struct gdbarch *gdbarch, char *classname)
 }
 
 CORE_ADDR
-lookup_child_selector (struct gdbarch *gdbarch, char *selname)
+lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
 {
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *selstring;
@@ -1233,7 +1233,7 @@ print_object_command (char *args, int from_tty)
  */
 
 struct objc_methcall {
-  char *name;
+  const char *name;
  /* Return instance method to be called.  */
   int (*stop_at) (CORE_ADDR, CORE_ADDR *);
   /* Start of pc range corresponding to method invocation.  */

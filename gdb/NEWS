@@ -104,6 +104,11 @@ show disassembler-options
 maint print arc arc-instruction address
   Print internal disassembler information about instruction at a given address.
 
+* Removed targets and native configurations
+
+Alpha running FreeBSD         alpha*-*-freebsd*
+Alpha running GNU/kFreeBSD    alpha*-*-kfreebsd*-gnu
+
 *** Changes in GDB 7.12
 
 * GDB and GDBserver now build with a C++ compiler by default.

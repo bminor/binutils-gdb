@@ -192,7 +192,7 @@ static void
 tfile_write_uploaded_tsv (struct trace_file_writer *self,
 			  struct uploaded_tsv *utsv)
 {
-  char *buf = "";
+  char *buf = NULL;
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
 
@@ -204,7 +204,7 @@ tfile_write_uploaded_tsv (struct trace_file_writer *self,
 
   fprintf (writer->fp, "tsv %x:%s:%x:%s\n",
 	   utsv->number, phex_nz (utsv->initial_value, 8),
-	   utsv->builtin, buf);
+	   utsv->builtin, buf != NULL ? buf : "");
 
   if (utsv->name)
     xfree (buf);

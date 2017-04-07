@@ -1,3 +1,13 @@
+2017-04-06  Pip Cet  <pipcet@gmail.com>
+
+	* dis-asm.h: Add prototypes for wasm32 disassembler.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* dis-asm.h (disassemble_info) <disassembler_options>: Now a
+	"const char *".
+	(next_disassembler_option): Constify.
+
 2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf/common.h (PT_GNU_MBIND_NUM): New.

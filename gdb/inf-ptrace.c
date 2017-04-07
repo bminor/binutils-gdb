@@ -619,7 +619,7 @@ inf_ptrace_files_info (struct target_ops *ignore)
 		   target_pid_to_str (inferior_ptid));
 }
 
-static char *
+static const char *
 inf_ptrace_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);

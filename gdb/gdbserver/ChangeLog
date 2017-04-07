@@ -1,3 +1,29 @@
+2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (handle_v_cont): Initialize thread_resume::thread
+	with null_ptid.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* configure: Regenerate.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* gdbreplay.c (sync_error): Constify.
+	* linux-x86-low.c (push_opcode): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* win32-low.c (get_child_debug_event)
+	<CREATE_PROCESS_DEBUG_EVENT>: Don't report TARGET_WAITKIND_EXECD.
+	Report TARGET_WAITKIND_SPURIOUS instead.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+        * remote-utils.c (remote_prepare, remote_open): Constify.
+        * remote-utils.h (remote_prepare, remote_open): Constify.
+        * server.c (captured_main): Constify 'port' handling.
+
 2017-04-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in (clean): Clear .deps.

@@ -344,7 +344,7 @@ powerpc_init_dialect (struct disassemble_info *info)
       break;
     }
 
-  char *opt;
+  const char *opt;
   FOR_EACH_DISASSEMBLER_OPTION (opt, info->disassembler_options)
     {
       ppc_cpu_t new_cpu = 0;

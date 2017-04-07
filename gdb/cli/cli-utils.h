@@ -137,7 +137,16 @@ extern int number_is_in_list (const char *list, int number);
 /* Reverse S to the last non-whitespace character without skipping past
    START.  */
 
-extern char *remove_trailing_whitespace (const char *start, char *s);
+extern const char *remove_trailing_whitespace (const char *start,
+					       const char *s);
+
+/* Same, for non-const S.  */
+
+static inline char *
+remove_trailing_whitespace (const char *start, char *s)
+{
+  return (char *) remove_trailing_whitespace (start, (const char *) s);
+}
 
 /* A helper function to extract an argument from *ARG.  An argument is
    delimited by whitespace.  The return value is either NULL if no
@@ -156,6 +165,15 @@ extern char *extract_arg_const (const char **arg);
    string.  The argument must also either be at the end of the string,
    or be followed by whitespace.  Returns 1 if it finds the argument,
    0 otherwise.  If the argument is found, it updates *STR.  */
-extern int check_for_argument (char **str, char *arg, int arg_len);
+extern int check_for_argument (const char **str, const char *arg, int arg_len);
+
+/* Same, for non-const STR.  */
+
+static inline int
+check_for_argument (char **str, const char *arg, int arg_len)
+{
+  return check_for_argument (const_cast<const char **> (str),
+			     arg, arg_len);
+}
 
 #endif /* CLI_UTILS_H */

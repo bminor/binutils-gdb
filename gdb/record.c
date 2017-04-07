@@ -99,25 +99,25 @@ record_start (const char *method, const char *format, int from_tty)
   if (method == NULL)
     {
       if (format == NULL)
-	execute_command_to_string ("record", from_tty);
+	execute_command_to_string ((char *) "record", from_tty);
       else
 	error (_("Invalid format."));
     }
   else if (strcmp (method, "full") == 0)
     {
       if (format == NULL)
-	execute_command_to_string ("record full", from_tty);
+	execute_command_to_string ((char *) "record full", from_tty);
       else
 	error (_("Invalid format."));
     }
   else if (strcmp (method, "btrace") == 0)
     {
       if (format == NULL)
-	execute_command_to_string ("record btrace", from_tty);
+	execute_command_to_string ((char *) "record btrace", from_tty);
       else if (strcmp (format, "bts") == 0)
-	execute_command_to_string ("record btrace bts", from_tty);
+	execute_command_to_string ((char *) "record btrace bts", from_tty);
       else if (strcmp (format, "pt") == 0)
-	execute_command_to_string ("record btrace pt", from_tty);
+	execute_command_to_string ((char *) "record btrace pt", from_tty);
       else
 	error (_("Invalid format."));
     }
@@ -130,7 +130,7 @@ record_start (const char *method, const char *format, int from_tty)
 void
 record_stop (int from_tty)
 {
-  execute_command_to_string ("record stop", from_tty);
+  execute_command_to_string ((char *) "record stop", from_tty);
 }
 
 /* See record.h.  */
@@ -265,7 +265,7 @@ show_record_debug (struct ui_file *file, int from_tty,
 static void
 cmd_record_start (char *args, int from_tty)
 {
-  execute_command ("target record-full", from_tty);
+  execute_command ((char *) "target record-full", from_tty);
 }
 
 /* Truncate the record log from the present point

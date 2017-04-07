@@ -1530,7 +1530,7 @@ arc_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 /* Dump the frame info.  Used for internal debugging only.  */
 
 static void
-arc_print_frame_cache (struct gdbarch *gdbarch, char *message,
+arc_print_frame_cache (struct gdbarch *gdbarch, const char *message,
 		       struct arc_frame_cache *cache, int addresses_known)
 {
   debug_printf ("arc: frame_info %s\n", message);

@@ -107,7 +107,7 @@ static void darwin_create_inferior (struct target_ops *ops, char *exec_file,
 
 static void darwin_files_info (struct target_ops *ops);
 
-static char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
+static const char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
 
 static int darwin_thread_alive (struct target_ops *ops, ptid_t tpid);
 
@@ -1970,7 +1970,7 @@ darwin_files_info (struct target_ops *ops)
 {
 }
 
-static char *
+static const char *
 darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];

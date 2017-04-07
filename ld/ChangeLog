@@ -1,3 +1,55 @@
+2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19579
+	PR ld/21306
+	* testsuite/ld-elf/pr19579a.c (main): Updated.
+
+2017-04-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 21090
+	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Explicitly
+	disable PIE for the non-pie version of the test.
+
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/mbind2a.s: Don't use @, the ARM comment char.
+
+2017-04-07  gingold  <gingold@gingold-Precision-7510>
+
+	* testsuite/ld-pe/pe.exp: New test.
+	* testsuite/ld-pe/weakdef-1.s: New test source.
+	* testsuite/ld-pe/weakdef-1.d: New test.
+
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/mbind1a.d: Remove matches for PT_LOAD segments.
+	* testsuite/ld-elf/mbind1b.d: Likewise.
+	* testsuite/ld-elf/mbind1c.d: Likewise.
+
+2017-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/21233
+	* testsuite/ld-elf/shared.exp: Change xfails to kfails and fix
+	indentation issue introduced with last commit.
+
+2017-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/21233
+	* testsuite/ld-elf/shared.exp: Xfail all PR21233 tests but the
+	first test for cris*-*-*.
+
+2017-04-04  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/21233
+	* ldlang.c (insert_undefined): Set `mark' for ELF symbols.
+	* testsuite/ld-elf/pr21233.sd: New test.
+	* testsuite/ld-elf/pr21233-l.sd: New test.
+	* testsuite/ld-elf/pr21233.ld: New test linker script.
+	* testsuite/ld-elf/pr21233-e.ld: New test linker script.
+	* testsuite/ld-elf/pr21233.s: New test source.
+	* testsuite/ld-elf/pr21233-l.s: New test source.
+	* testsuite/ld-elf/shared.exp: Run the new tests.
+
 2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention support for ELF SHF_GNU_MBIND and

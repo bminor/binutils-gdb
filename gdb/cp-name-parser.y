@@ -173,7 +173,7 @@ static struct demangle_component *d_binary (const char *,
 
 int yyparse (void);
 static int yylex (void);
-static void yyerror (char *);
+static void yyerror (const char *);
 
 /* Enable yydebug for the stand-alone parser.  */
 #ifdef TEST_CPNAMES
@@ -1934,7 +1934,7 @@ yylex (void)
 }
 
 static void
-yyerror (char *msg)
+yyerror (const char *msg)
 {
   if (global_errmsg)
     return;

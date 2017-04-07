@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2017-03-29 17:08+0100\n"
+"POT-Creation-Date: 2017-04-06 16:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1693,6 +1693,22 @@ msgstr ""
 
 #: v850-opc.c:532
 msgid "invalid register name"
+msgstr ""
+
+#: wasm32-dis.c:89
+msgid "Disassemble \"register\" names"
+msgstr ""
+
+#: wasm32-dis.c:90
+msgid "Name well-known globals"
+msgstr ""
+
+#: wasm32-dis.c:489
+#, c-format
+msgid ""
+"The following WebAssembly-specific disassembler options are supported for "
+"use\n"
+"with the -M switch:\n"
 msgstr ""
 
 #: xc16x-asm.c:65

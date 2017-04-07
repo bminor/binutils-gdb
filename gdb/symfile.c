@@ -1768,7 +1768,7 @@ symfile_bfd_open (const char *name)
    the section was not found.  */
 
 int
-get_section_index (struct objfile *objfile, char *section_name)
+get_section_index (struct objfile *objfile, const char *section_name)
 {
   asection *sect = bfd_get_section_by_name (objfile->obfd, section_name);
 
@@ -2235,8 +2235,8 @@ add_symbol_file_command (char *args, int from_tty)
 
   struct sect_opt
   {
-    char *name;
-    char *value;
+    const char *name;
+    const char *value;
   };
 
   struct section_addr_info *section_addrs;
@@ -2333,14 +2333,14 @@ add_symbol_file_command (char *args, int from_tty)
   for (i = 0; i < section_index; i++)
     {
       CORE_ADDR addr;
-      char *val = sect_opts[i].value;
-      char *sec = sect_opts[i].name;
+      const char *val = sect_opts[i].value;
+      const char *sec = sect_opts[i].name;
 
       addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
          entered on the command line.  */
-      section_addrs->other[sec_num].name = sec;
+      section_addrs->other[sec_num].name = (char *) sec;
       section_addrs->other[sec_num].addr = addr;
       printf_unfiltered ("\t%s_addr = %s\n", sec,
 			 paddress (gdbarch, addr));

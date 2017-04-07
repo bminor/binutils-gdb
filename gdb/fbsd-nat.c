@@ -321,7 +321,7 @@ fbsd_fetch_kinfo_proc (pid_t pid, struct kinfo_proc *kp)
   FreeBSD's first thread support was via a "reentrant" version of libc
   (libc_r) that first shipped in 2.2.7.  This library multiplexed all
   of the threads in a process onto a single kernel thread.  This
-  library is supported via the bsd-uthread target.
+  library was supported via the bsd-uthread target.
 
   FreeBSD 5.1 introduced two new threading libraries that made use of
   multiple kernel threads.  The first (libkse) scheduled M user
@@ -368,7 +368,7 @@ fbsd_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Convert PTID to a string.  Returns the string in a static
    buffer.  */
 
-static char *
+static const char *
 fbsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   lwpid_t lwp;

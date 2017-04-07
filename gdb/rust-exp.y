@@ -2471,7 +2471,7 @@ rust_parse (struct parser_state *state)
 /* The parser error handler.  */
 
 void
-rustyyerror (char *msg)
+rustyyerror (const char *msg)
 {
   const char *where = prev_lexptr ? prev_lexptr : lexptr;
   error (_("%s in expression, near `%s'."), (msg ? msg : "Error"), where);

@@ -292,7 +292,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	 <args>".  */
       argv = (char **) alloca (4 * sizeof (char *));
       argv[0] = shell_file;
-      argv[1] = "-c";
+      argv[1] = (char *) "-c";
       argv[2] = shell_command;
       argv[3] = (char *) 0;
     }

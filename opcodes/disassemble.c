@@ -94,6 +94,7 @@
 #define ARCH_vax
 #define ARCH_visium
 #define ARCH_w65
+#define ARCH_wasm32
 #define ARCH_xstormy16
 #define ARCH_xc16x
 #define ARCH_xgate
@@ -474,6 +475,11 @@ disassembler (bfd *abfd)
       disassemble = print_insn_w65;
       break;
 #endif
+#ifdef ARCH_wasm32
+    case bfd_arch_wasm32:
+      disassemble = print_insn_wasm32;
+      break;
+#endif
 #ifdef ARCH_xgate
     case bfd_arch_xgate:
       disassemble = print_insn_xgate;
@@ -580,6 +586,9 @@ disassembler_usage (FILE *stream ATTRIBUTE_UNUSED)
 #ifdef ARCH_s390
   print_s390_disassembler_options (stream);
 #endif
+#ifdef ARCH_wasm32
+  print_wasm32_disassembler_options (stream);
+#endif
 
   return;
 }
@@ -648,6 +657,11 @@ disassemble_init_for_target (struct disassemble_info * info)
 #endif
 #if defined (ARCH_powerpc) || defined (ARCH_rs6000)
       disassemble_init_powerpc (info);
+      break;
+#endif
+#ifdef ARCH_wasm32
+    case bfd_arch_wasm32:
+      disassemble_init_wasm32 (info);
       break;
 #endif
 #ifdef ARCH_s390

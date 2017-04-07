@@ -21,8 +21,6 @@
 # wasm32 assembler testsuite.
 
 if [istarget wasm32-*-*] {
-    # no disassembler support yet
-    setup_xfail "wasm32-*-*"
     run_dump_test "allinsn"
     # no GOT/PLT relocs yet.
     setup_xfail "wasm32-*-*"
@@ -55,4 +53,6 @@ if [istarget wasm32-*-*] {
     # illegal-23 has become legal
     run_list_test "illegal-24"
     run_list_test "illegal-25"
+    run_dump_test "disass"
+    run_dump_test "disass-2"
 }

@@ -1891,7 +1891,7 @@ rust_operator_length (const struct expression *exp, int pc, int *oplenp,
 
 /* op_name implementation for Rust.  */
 
-static char *
+static const char *
 rust_op_name (enum exp_opcode opcode)
 {
   switch (opcode)

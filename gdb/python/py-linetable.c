@@ -550,7 +550,7 @@ PyTypeObject ltpy_iterator_object_type = {
 };
 
 
-static PyGetSetDef linetable_entry_object_getset[] = {
+static gdb_PyGetSetDef linetable_entry_object_getset[] = {
   { "line", ltpy_entry_get_line, NULL,
     "The line number in the source file.", NULL },
   { "pc", ltpy_entry_get_pc, NULL,

@@ -101,7 +101,7 @@ tui_delete_data_content_windows (void)
 
 
 void
-tui_erase_data_content (char *prompt)
+tui_erase_data_content (const char *prompt)
 {
   werase (TUI_DATA_WIN->generic.handle);
   tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);

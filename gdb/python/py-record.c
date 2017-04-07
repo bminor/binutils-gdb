@@ -175,7 +175,7 @@ Rewind to given location."},
 
 /* Record member list.  */
 
-static PyGetSetDef recpy_record_getset[] = {
+static gdb_PyGetSetDef recpy_record_getset[] = {
   { "ptid", recpy_ptid, NULL, "Current thread.", NULL },
   { "method", recpy_method, NULL, "Current recording method.", NULL },
   { "format", recpy_format, NULL, "Current recording format.", NULL },

@@ -1360,7 +1360,7 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 
       if (uiout->is_mi_like_p ())
 	{
-	  char *state = "stopped";
+	  const char *state = "stopped";
 
 	  if (tp->state == THREAD_RUNNING)
 	    state = "running";

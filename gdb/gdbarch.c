@@ -84,7 +84,7 @@ pstring (const char *string)
   return string;
 }
 
-static char *
+static const char *
 pstring_ptr (char **string)
 {
   if (string == NULL || *string == NULL)
@@ -95,7 +95,7 @@ pstring_ptr (char **string)
 /* Helper function to print a list of strings, represented as "const
    char *const *".  The list is printed comma-separated.  */
 
-static char *
+static const char *
 pstring_list (const char *const *list)
 {
   static char ret[100];
@@ -3691,7 +3691,7 @@ gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch)
   return gdbarch->core_pid_to_str != NULL;
 }
 
-char *
+const char *
 gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   gdb_assert (gdbarch != NULL);

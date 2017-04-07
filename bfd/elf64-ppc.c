@@ -6595,7 +6595,7 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
       unsigned long r_symndx;
       enum elf_ppc64_reloc_type r_type;
       struct elf_link_hash_entry *h = NULL;
-      struct plt_entry **plt_list;
+      struct plt_entry **plt_list = NULL;
       unsigned char tls_type = 0;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
@@ -6674,6 +6674,8 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	    if (ent->got.refcount > 0)
 	      ent->got.refcount -= 1;
 	  }
+	  if (h != NULL && !bfd_link_pic (info) && abiversion (abfd) != 1)
+	    plt_list = &h->plt.plist;
 	  break;
 
 	case R_PPC64_PLT16_HA:
@@ -6685,7 +6687,6 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_REL14_BRNTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
 	case R_PPC64_REL24:
-	  plt_list = NULL;
 	  if (h != NULL)
 	    plt_list = &h->plt.plist;
 	  else if (local_got_ents != NULL)
@@ -6697,20 +6698,38 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	      if ((local_got_tls_masks[r_symndx] & PLT_IFUNC) != 0)
 		plt_list = local_plt + r_symndx;
 	    }
-	  if (plt_list)
-	    {
-	      struct plt_entry *ent;
+	  break;
 
-	      for (ent = *plt_list; ent != NULL; ent = ent->next)
-		if (ent->addend == rel->r_addend)
-		  break;
-	      if (ent != NULL && ent->plt.refcount > 0)
-		ent->plt.refcount -= 1;
-	    }
+	case R_PPC64_ADDR64:
+	case R_PPC64_ADDR16:
+	case R_PPC64_ADDR16_DS:
+	case R_PPC64_ADDR16_HA:
+	case R_PPC64_ADDR16_HI:
+	case R_PPC64_ADDR16_HIGH:
+	case R_PPC64_ADDR16_HIGHA:
+	case R_PPC64_ADDR16_HIGHER:
+	case R_PPC64_ADDR16_HIGHERA:
+	case R_PPC64_ADDR16_HIGHEST:
+	case R_PPC64_ADDR16_HIGHESTA:
+	case R_PPC64_ADDR16_LO:
+	case R_PPC64_ADDR16_LO_DS:
+	  if (h != NULL && !bfd_link_pic (info) && abiversion (abfd) != 1
+	      && rel->r_addend == 0)
+	    plt_list = &h->plt.plist;
 	  break;
 
 	default:
 	  break;
+	}
+      if (plt_list != NULL)
+	{
+	  struct plt_entry *ent;
+
+	  for (ent = *plt_list; ent != NULL; ent = ent->next)
+	    if (ent->addend == rel->r_addend)
+	      break;
+	  if (ent != NULL && ent->plt.refcount > 0)
+	    ent->plt.refcount -= 1;
 	}
     }
   return TRUE;

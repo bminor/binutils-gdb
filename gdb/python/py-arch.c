@@ -116,7 +116,7 @@ archpy_name (PyObject *self, PyObject *args)
 static PyObject *
 archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static char *keywords[] = { "start_pc", "end_pc", "count", NULL };
+  static const char *keywords[] = { "start_pc", "end_pc", "count", NULL };
   CORE_ADDR start, end = 0;
   CORE_ADDR pc;
   gdb_py_ulongest start_temp;
@@ -126,8 +126,9 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
   ARCHPY_REQUIRE_VALID (self, gdbarch);
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, GDB_PY_LLU_ARG "|OO", keywords,
-                                    &start_temp, &end_obj, &count_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, GDB_PY_LLU_ARG "|OO",
+					keywords, &start_temp, &end_obj,
+					&count_obj))
     return NULL;
 
   start = start_temp;
