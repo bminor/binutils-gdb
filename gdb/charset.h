@@ -93,10 +93,8 @@ class wchar_iterator
      buffer.  CHARSET is the name of the character set in which INPUT is
      encoded.  WIDTH is the number of bytes in a base character of
      CHARSET.
-   
-     This function either returns a new character set iterator, or calls
-     error.  The result can be freed using a cleanup; see
-     make_cleanup_wchar_iterator.  */
+
+     This constructor can throw on error.  */
   wchar_iterator (const gdb_byte *input, size_t bytes, const char *charset,
 		  size_t width);
 

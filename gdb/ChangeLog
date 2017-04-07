@@ -1,5 +1,9 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* charset.h (wchar_iterator): Fix comment.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* charset.c (iconv_wrapper): New class.
 	(cleanup_iconv): Remove.
 	(convert_between_encodings): Use it.
