@@ -1,5 +1,13 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* gnu-v3-abi.c (value_and_voffset_p): Remove typedef.
+	(compare_value_and_voffset): Change type.  Update.
+	(compute_vtable_size): Change type of "offset_vec".
+	(gnuv3_print_vtable): Use std::vector.  Remove cleanups.
+	(gnuv3_get_typeid): Remove extraneous declaration.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* charset.h (wchar_iterator): Fix comment.
 
 2017-04-12  Tom Tromey  <tom@tromey.com>

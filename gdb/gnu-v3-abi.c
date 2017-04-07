@@ -27,6 +27,7 @@
 #include "valprint.h"
 #include "c-lang.h"
 #include "typeprint.h"
+#include <algorithm>
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 
@@ -767,9 +768,6 @@ struct value_and_voffset
   int max_voffset;
 };
 
-typedef struct value_and_voffset *value_and_voffset_p;
-DEF_VEC_P (value_and_voffset_p);
-
 /* Hash function for value_and_voffset.  */
 
 static hashval_t
@@ -792,25 +790,18 @@ eq_value_and_voffset (const void *a, const void *b)
 	  == value_address (ovb->value) + value_embedded_offset (ovb->value));
 }
 
-/* qsort comparison function for value_and_voffset.  */
+/* Comparison function for value_and_voffset.  */
 
-static int
-compare_value_and_voffset (const void *a, const void *b)
+static bool
+compare_value_and_voffset (const struct value_and_voffset *va,
+			   const struct value_and_voffset *vb)
 {
-  const struct value_and_voffset * const *ova
-    = (const struct value_and_voffset * const *) a;
-  CORE_ADDR addra = (value_address ((*ova)->value)
-		     + value_embedded_offset ((*ova)->value));
-  const struct value_and_voffset * const *ovb
-    = (const struct value_and_voffset * const *) b;
-  CORE_ADDR addrb = (value_address ((*ovb)->value)
-		     + value_embedded_offset ((*ovb)->value));
+  CORE_ADDR addra = (value_address (va->value)
+		     + value_embedded_offset (va->value));
+  CORE_ADDR addrb = (value_address (vb->value)
+		     + value_embedded_offset (vb->value));
 
-  if (addra < addrb)
-    return -1;
-  if (addra > addrb)
-    return 1;
-  return 0;
+  return addra < addrb;
 }
 
 /* A helper function used when printing vtables.  This determines the
@@ -821,7 +812,7 @@ compare_value_and_voffset (const void *a, const void *b)
 
 static void
 compute_vtable_size (htab_t offset_hash,
-		     VEC (value_and_voffset_p) **offset_vec,
+		     std::vector<value_and_voffset *> *offset_vec,
 		     struct value *value)
 {
   int i;
@@ -847,7 +838,7 @@ compute_vtable_size (htab_t offset_hash,
       current_vo->value = value;
       current_vo->max_voffset = -1;
       *slot = current_vo;
-      VEC_safe_push (value_and_voffset_p, *offset_vec, current_vo);
+      offset_vec->push_back (current_vo);
     }
 
   /* Update the value_and_voffset object with the highest vtable
@@ -940,10 +931,7 @@ gnuv3_print_vtable (struct value *value)
   struct type *type;
   struct value *vtable;
   struct value_print_options opts;
-  struct cleanup *cleanup;
-  VEC (value_and_voffset_p) *result_vec = NULL;
-  struct value_and_voffset *iter;
-  int i, count;
+  int count;
 
   value = coerce_ref (value);
   type = check_typedef (value_type (value));
@@ -978,17 +966,14 @@ gnuv3_print_vtable (struct value *value)
   htab_up offset_hash (htab_create_alloc (1, hash_value_and_voffset,
 					  eq_value_and_voffset,
 					  xfree, xcalloc, xfree));
-  cleanup = make_cleanup (VEC_cleanup (value_and_voffset_p), &result_vec);
+  std::vector<value_and_voffset *> result_vec;
 
   compute_vtable_size (offset_hash.get (), &result_vec, value);
-
-  qsort (VEC_address (value_and_voffset_p, result_vec),
-	 VEC_length (value_and_voffset_p, result_vec),
-	 sizeof (value_and_voffset_p),
-	 compare_value_and_voffset);
+  std::sort (result_vec.begin (), result_vec.end (),
+	     compare_value_and_voffset);
 
   count = 0;
-  for (i = 0; VEC_iterate (value_and_voffset_p, result_vec, i, iter); ++i)
+  for (value_and_voffset *iter : result_vec)
     {
       if (iter->max_voffset >= 0)
 	{
@@ -998,8 +983,6 @@ gnuv3_print_vtable (struct value *value)
 	  ++count;
 	}
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Return a GDB type representing `struct std::type_info', laid out
@@ -1077,7 +1060,6 @@ gnuv3_get_typeid (struct value *value)
   struct type *typeinfo_type;
   struct type *type;
   struct gdbarch *gdbarch;
-  struct cleanup *cleanup;
   struct value *result;
   std::string type_name, canonical;
 
