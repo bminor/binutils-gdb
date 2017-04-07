@@ -91,8 +91,6 @@ static void add_symbol_file_command (char *, int);
 
 static const struct sym_fns *find_sym_fns (bfd *);
 
-static void decrement_reading_symtab (void *);
-
 static void overlay_invalidate_all (void);
 
 static void overlay_auto_command (char *, int);
@@ -193,22 +191,15 @@ print_symbol_loading_p (int from_tty, int exec, int full)
 
 int currently_reading_symtab = 0;
 
-static void
-decrement_reading_symtab (void *dummy)
-{
-  currently_reading_symtab--;
-  gdb_assert (currently_reading_symtab >= 0);
-}
-
 /* Increment currently_reading_symtab and return a cleanup that can be
    used to decrement it.  */
 
-struct cleanup *
+scoped_restore_tmpl<int>
 increment_reading_symtab (void)
 {
-  ++currently_reading_symtab;
-  gdb_assert (currently_reading_symtab > 0);
-  return make_cleanup (decrement_reading_symtab, NULL);
+  gdb_assert (currently_reading_symtab >= 0);
+  return make_scoped_restore (&currently_reading_symtab,
+			      currently_reading_symtab + 1);
 }
 
 /* Remember the lowest-addressed loadable section we've seen.

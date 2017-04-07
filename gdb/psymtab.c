@@ -770,10 +770,9 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
   /* If it has not yet been read in, read it.  */
   if (!pst->readin)
     {
-      struct cleanup *back_to = increment_reading_symtab ();
+      scoped_restore decrementer = increment_reading_symtab ();
 
       (*pst->read_symtab) (pst, objfile);
-      do_cleanups (back_to);
     }
 
   return pst->compunit_symtab;

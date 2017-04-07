@@ -2885,7 +2885,7 @@ dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   if (!per_cu->v.quick->compunit_symtab)
     {
       struct cleanup *back_to = make_cleanup (free_cached_comp_units, NULL);
-      increment_reading_symtab ();
+      scoped_restore decrementer = increment_reading_symtab ();
       dw2_do_instantiate_symtab (per_cu);
       process_cu_includes ();
       do_cleanups (back_to);
