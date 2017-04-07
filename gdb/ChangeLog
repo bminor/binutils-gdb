@@ -1,5 +1,11 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-loc2c.c (compute_stack_depth_worker): Change
+	type of "to_do".  Update.
+	(compute_stack_depth): Use std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* printcmd.c (find_instruction_backward): Use std::vector.
 
 2017-04-12  Tom Tromey  <tom@tromey.com>
