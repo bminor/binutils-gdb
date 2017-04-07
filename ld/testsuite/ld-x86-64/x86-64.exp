@@ -1277,7 +1277,7 @@ if { [isnative] && [which $CC] != 0 } {
 	]
     }
 
-    undefined_weak "" ""
+    undefined_weak "-fno-pie" "-no-pie"
     undefined_weak "-fPIE" ""
     undefined_weak "-fPIE" "-pie"
     undefined_weak "-fPIE" "-Wl,-z,nodynamic-undefined-weak"

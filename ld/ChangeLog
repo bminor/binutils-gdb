@@ -1,3 +1,9 @@
+2017-04-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 21090
+	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Explicitly
+	disable PIE for the non-pie version of the test.
+
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/mbind2a.s: Don't use @, the ARM comment char.
