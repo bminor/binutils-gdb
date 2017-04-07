@@ -151,14 +151,29 @@ bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
 			      mem_bfd_iovec_stat);
 }
 
+struct jit_reader
+{
+  jit_reader (struct gdb_reader_funcs *f, gdb_dlhandle_up &&h)
+    : functions (f), handle (std::move (h))
+  {
+  }
+
+  ~jit_reader ()
+  {
+    functions->destroy (functions);
+  }
+
+  jit_reader (const jit_reader &) = delete;
+  jit_reader &operator= (const jit_reader &) = delete;
+
+  struct gdb_reader_funcs *functions;
+  gdb_dlhandle_up handle;
+};
+
 /* One reader that has been loaded successfully, and can potentially be used to
    parse debug info.  */
 
-static struct jit_reader
-{
-  struct gdb_reader_funcs *functions;
-  void *handle;
-} *loaded_jit_reader = NULL;
+static struct jit_reader *loaded_jit_reader = NULL;
 
 typedef struct gdb_reader_funcs * (reader_init_fn_type) (void);
 static const char *reader_init_fn_sym = "gdb_init_reader";
@@ -168,17 +183,13 @@ static const char *reader_init_fn_sym = "gdb_init_reader";
 static struct jit_reader *
 jit_reader_load (const char *file_name)
 {
-  void *so;
   reader_init_fn_type *init_fn;
-  struct jit_reader *new_reader = NULL;
   struct gdb_reader_funcs *funcs = NULL;
-  struct cleanup *old_cleanups;
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog, _("Opening shared object %s.\n"),
                         file_name);
-  so = gdb_dlopen (file_name);
-  old_cleanups = make_cleanup_dlclose (so);
+  gdb_dlhandle_up so = gdb_dlopen (file_name);
 
   init_fn = (reader_init_fn_type *) gdb_dlsym (so, reader_init_fn_sym);
   if (!init_fn)
@@ -192,12 +203,7 @@ jit_reader_load (const char *file_name)
   if (funcs->reader_version != GDB_READER_INTERFACE_VERSION)
     error (_("Reader version does not match GDB version."));
 
-  new_reader = XCNEW (struct jit_reader);
-  new_reader->functions = funcs;
-  new_reader->handle = so;
-
-  discard_cleanups (old_cleanups);
-  return new_reader;
+  return new jit_reader (funcs, std::move (so));
 }
 
 /* Provides the jit-reader-load command.  */
@@ -240,10 +246,8 @@ jit_reader_unload_command (char *args, int from_tty)
 
   reinit_frame_cache ();
   jit_inferior_exit_hook (current_inferior ());
-  loaded_jit_reader->functions->destroy (loaded_jit_reader->functions);
 
-  gdb_dlclose (loaded_jit_reader->handle);
-  xfree (loaded_jit_reader);
+  delete loaded_jit_reader;
   loaded_jit_reader = NULL;
 }
 

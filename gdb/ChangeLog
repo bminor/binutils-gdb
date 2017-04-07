@@ -1,5 +1,22 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* jit.c (struct jit_reader): Declare separately.  Add constructor
+	and destructor.  Change type of "handle".
+	(loaded_jit_reader): Define separately.
+	(jit_reader_load): Update.  New "new".
+	(jit_reader_unload_command): Use "delete".
+	* gdb-dlfcn.h (struct dlclose_deleter): New.
+	(gdb_dlhandle_up): New typedef.
+	(gdb_dlopen, gdb_dlsym): Update types.
+	(gdb_dlclose): Remove.
+	* gdb-dlfcn.c (gdb_dlopen): Return a gdb_dlhandle_up.
+	(gdb_dlsym): Change type of "handle".
+	(make_cleanup_dlclose): Remove.
+	(dlclose_deleter::operator()): Rename from gdb_dlclose.
+	* compile/compile-c-support.c (load_libcc): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (find_pcs_for_symtab_line): Change return type.
 	* symtab.c (find_pcs_for_symtab_line): Change return type.
 	* python/py-linetable.c (build_line_table_tuple_from_pcs): Change
