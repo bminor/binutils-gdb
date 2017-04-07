@@ -1,4 +1,28 @@
-2017-04-07  gingold  <gingold@gingold-Precision-7510>
+2017-04-07  Pedro Alves  <palves@redhat.com>
+
+	* opncls.c (bfd_get_debug_link_info): Rename to...
+	(bfd_get_debug_link_info_1): ... this.  Change type of second
+	parameter to void pointer.  Adjust.
+	(bfd_get_debug_link_info): Reimplement on top of
+	bfd_get_debug_link_info_1.
+	(separate_debug_file_exists, separate_alt_debug_file_exists):
+	Change type of second parameter to void pointer.  Adjust.
+	(get_func_type, check_func_type): Change type of second parameter
+	to void pointer.
+	(find_separate_debug_file): Add 'func_data' parameter.  Pass it to
+	the callback functions instead of passing the address of a local.
+	(bfd_follow_gnu_debuglink): Pass address of unsigned long local to
+	find_separate_debug_file.
+	(get_alt_debug_link_info_shim): Change type of second parameter to
+	void pointer.  Adjust.
+	(bfd_follow_gnu_debugaltlink): Adjust to pass NULL to
+	find_separate_debug_file.
+	(get_build_id_name, bfd_boolean check_build_id_file): Change type
+	of second parameter to void pointer.  Adjust.
+	(bfd_follow_build_id_debuglink): Pass address of bfd_build_id
+	pointer local to find_separate_debug_file.
+
+2017-04-07  Tristan Gingold  <gingold@gingold-Precision-7510>
 
 	* coffgen.c (_bfd_coff_gc_mark_hook): Handle PE weak
 	external symbols with a definition.
