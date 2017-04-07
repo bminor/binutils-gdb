@@ -1,5 +1,12 @@
 2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21090
+	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Use
+	NOPIE_CFLAGS and NOPIE_LDFLAGS to disable PIE for the non-pie
+	version of the test.
+
+2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19579
 	PR ld/21306
 	* testsuite/ld-elf/pr19579a.c (main): Updated.

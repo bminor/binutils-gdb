@@ -589,6 +589,8 @@ proc undefined_weak {cflags ldflags} {
 
 # Add $PLT_CFLAGS if PLT is expected.
 global PLT_CFLAGS
+# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
+global NOPIE_CFLAGS NOPIE_LDFLAGS
 
 # Must be native with the C compiler
 if { [isnative] && [which $CC] != 0 } {
@@ -1277,7 +1279,7 @@ if { [isnative] && [which $CC] != 0 } {
 	]
     }
 
-    undefined_weak "-fno-pie" "-no-pie"
+    undefined_weak "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS"
     undefined_weak "-fPIE" ""
     undefined_weak "-fPIE" "-pie"
     undefined_weak "-fPIE" "-Wl,-z,nodynamic-undefined-weak"
