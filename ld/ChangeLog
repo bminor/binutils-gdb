@@ -1,3 +1,7 @@
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/mbind2a.s: Don't use @, the ARM comment char.
+
 2017-04-07  gingold  <gingold@gingold-Precision-7510>
 
 	* testsuite/ld-pe/pe.exp: New test.
