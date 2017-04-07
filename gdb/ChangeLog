@@ -1,5 +1,11 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* charset.c (iconv_wrapper): New class.
+	(cleanup_iconv): Remove.
+	(convert_between_encodings): Use it.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile.h (increment_reading_symtab): Update type.
 	* symfile.c (decrement_reading_symtab): Remove.
 	(increment_reading_symtab): Return a scoped_restore_tmpl<int>.
