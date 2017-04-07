@@ -1,5 +1,9 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (find_instruction_backward): Use std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (objfilep): Remove typedef.
 	(reread_symbols): Use a std::vector.
 
