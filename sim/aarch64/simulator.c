@@ -5468,6 +5468,47 @@ do_vec_ADDP (sim_cpu *cpu)
     }
 }
 
+/* Float point vector convert to longer (precision).  */
+static void
+do_vec_FCVTL (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = half (0) / all (1)
+     instr[29,23] = 00 1110 0
+     instr[22]    = single (0) / double (1)
+     instr[21,10] = 10 0001 0111 10
+     instr[9,5]   = Rn
+     instr[4,0]   = Rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned full = INSTR (30, 30);
+  unsigned i;
+
+  NYI_assert (31, 31, 0);
+  NYI_assert (29, 23, 0x1C);
+  NYI_assert (21, 10, 0x85E);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (INSTR (22, 22))
+    {
+      for (i = 0; i < 2; i++)
+	aarch64_set_vec_double (cpu, rd, i,
+				aarch64_get_vec_float (cpu, rn, i + 2*full));
+    }
+  else
+    {
+      HALT_NYI;
+
+#if 0
+      /* TODO: Implement missing half-float support.  */
+      for (i = 0; i < 4; i++)
+	aarch64_set_vec_float (cpu, rd, i,
+			     aarch64_get_vec_halffloat (cpu, rn, i + 4*full));
+#endif
+    }
+}
+
 static void
 do_vec_FABS (sim_cpu *cpu)
 {
@@ -5716,6 +5757,13 @@ do_vec_op1 (sim_cpu *cpu)
     case 0x30: do_vec_mull (cpu); return;
     case 0x33: do_vec_FMLA (cpu); return;
     case 0x35: do_vec_fadd (cpu); return;
+
+    case 0x1E:
+      switch (INSTR (20, 16))
+	{
+	case 0x01: do_vec_FCVTL (cpu); return;
+	default: HALT_NYI;
+	}
 
     case 0x2E:
       switch (INSTR (20, 16))

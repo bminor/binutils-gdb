@@ -1,5 +1,7 @@
 2017-04-08  Jim Wilson  <jim.wilson@linaro.org>
 
+	* fcvtl.s: New.
+
 	* fcmXX.s: New.
 
 2017-03-25  Jim Wilson  <jim.wilson@linaro.org>

@@ -1,5 +1,8 @@
 2017-04-08  Jim Wilson  <jim.wilson@linaro.org>
 
+	* simulator.c (do_vec_FCVTL): New.
+	(do_vec_op1): Call do_vec_FCVTL.
+
 	* simulator.c (do_scalar_FCMGE_zero, do_scalar_FCMLE_zero,
 	do_scalar_FCMGT_zero, do_scalar_FCMEQ_zero, do_scalar_FCMLT_zero): New.
 	(do_scalar_vec): Add calls to new functions.
