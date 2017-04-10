@@ -1,5 +1,17 @@
 2017-04-10  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (add_thread_silent, delete_thread_1, find_thread_ptid)
+	(ptid_to_global_thread_id, in_thread_list)
+	(do_captured_list_thread_ids, set_resumed, set_running)
+	(set_executing, set_stop_requested, finish_thread_state)
+	(validate_registers_access, can_access_registers_ptid)
+	(print_thread_info_1, switch_to_thread)
+	(do_restore_current_thread_cleanup)
+	(make_cleanup_restore_current_thread, thread_command)
+	(thread_name_command): Use operator== instead of ptid_equal.
+
+2017-04-10  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (struct current_thread_cleanup) <next>: Delete field.
 	(current_thread_cleanup_chain): Delete.
 	(restore_current_thread_cleanup_dtor)
