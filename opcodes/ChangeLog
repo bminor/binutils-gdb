@@ -1,12 +1,14 @@
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (ppc_opts): Remove PPC_OPCODE_ALTIVEC2,
-	PPC_OPCODE_VSX3, PPC_OPCODE_HTM and "htm".
+	PPC_OPCODE_VSX3, PPC_OPCODE_HTM and "htm".  Formatting.  Set
+	PPC_OPCODE_TMR for e6500.
 	* ppc-opc.c (PPCVEC2): Define as PPC_OPCODE_POWER8|PPC_OPCODE_E6500.
 	(PPCVEC3): Define as PPC_OPCODE_POWER9.
 	(PPCVSX2): Define as PPC_OPCODE_POWER8.
 	(PPCVSX3): Define as PPC_OPCODE_POWER9.
 	(PPCHTM): Define as PPC_OPCODE_POWER8.
+	(powerpc_opcodes <mftmr, mttmr>): Remove now unnecessary E6500.
 
 2017-04-10  Alan Modra  <amodra@gmail.com>
 

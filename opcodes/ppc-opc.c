@@ -5312,7 +5312,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lxvdsx",	X(31,332),	XX1_MASK,    PPCVSX,	0,		{XT6, RA0, RB}},
 
 {"mfpmr",	X(31,334),	X_MASK, PPCPMR|PPCE300, 0,		{RT, PMR}},
-{"mftmr",	X(31,366),	X_MASK,	PPCTMR|E6500,	0,		{RT, TMR}},
+{"mftmr",	X(31,366),	X_MASK,	     PPCTMR,	0,		{RT, TMR}},
 
 {"slbsync",	X(31,338),	0xffffffff,  POWER9,	0,		{0}},
 
@@ -5668,7 +5668,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divwu.",	XO(31,459,0,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 
 {"mtpmr",	X(31,462),	X_MASK, PPCPMR|PPCE300, 0,		{PMR, RS}},
-{"mttmr",	X(31,494),	X_MASK,	PPCTMR|E6500,	0,		{TMR, RS}},
+{"mttmr",	X(31,494),	X_MASK,	     PPCTMR,	0,		{TMR, RS}},
 
 {"slbieg",	X(31,466),	XRA_MASK,    POWER9,	0,		{RS, RB}},
 
