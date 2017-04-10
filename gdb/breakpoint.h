@@ -26,6 +26,7 @@
 #include "command.h"
 #include "break-common.h"
 #include "probe.h"
+#include "location.h"
 #include <vector>
 
 struct value;
@@ -38,7 +39,6 @@ struct bpstats;
 struct bp_location;
 struct linespec_result;
 struct linespec_sals;
-struct event_location;
 
 /* Why are we removing the breakpoint from the target?  */
 
@@ -716,8 +716,8 @@ struct breakpoint
        non-thread-specific ordinary breakpoints this is NULL.  */
     struct program_space *pspace;
 
-    /* Location we used to set the breakpoint (malloc'd).  */
-    struct event_location *location;
+    /* Location we used to set the breakpoint.  */
+    event_location_up location;
 
     /* The filter that should be passed to decode_line_full when
        re-setting this breakpoint.  This may be NULL, but otherwise is
@@ -725,8 +725,8 @@ struct breakpoint
     char *filter;
 
     /* For a ranged breakpoint, the location we used to find
-       the end of the range (malloc'd).  */
-    struct event_location *location_range_end;
+       the end of the range.  */
+    event_location_up location_range_end;
 
     /* Architecture we used to set the breakpoint.  */
     struct gdbarch *gdbarch;

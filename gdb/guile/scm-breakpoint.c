@@ -184,7 +184,7 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
       gdbscm_printf (port, " hit:%d", b->hit_count);
       gdbscm_printf (port, " ignore:%d", b->ignore_count);
 
-      str = event_location_to_string (b->location);
+      str = event_location_to_string (b->location.get ());
       if (str != NULL)
 	gdbscm_printf (port, " @%s", str);
     }
@@ -832,7 +832,7 @@ gdbscm_breakpoint_location (SCM self)
   if (bp_smob->bp->type != bp_breakpoint)
     return SCM_BOOL_F;
 
-  str = event_location_to_string (bp_smob->bp->location);
+  str = event_location_to_string (bp_smob->bp->location.get ());
   if (! str)
     str = "";
 

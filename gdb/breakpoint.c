@@ -67,7 +67,6 @@
 #include "dummy-frame.h"
 #include "interps.h"
 #include "format.h"
-#include "location.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"
 
@@ -3472,7 +3471,7 @@ create_overlay_event_breakpoint (void)
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
-      b->location = new_explicit_location (&explicit_loc).release ();
+      b->location = new_explicit_location (&explicit_loc);
 
       if (overlay_debugging == ovly_auto)
         {
@@ -3552,8 +3551,7 @@ create_longjmp_master_breakpoint (void)
 								 objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
-	      b->location
-		= new_probe_location ("-probe-stap libc:longjmp").release ();
+	      b->location = new_probe_location ("-probe-stap libc:longjmp");
 	      b->enable_state = bp_disabled;
 	    }
 
@@ -3593,7 +3591,7 @@ create_longjmp_master_breakpoint (void)
 					  &internal_breakpoint_ops);
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.function_name = ASTRDUP (func_name);
-	  b->location = new_explicit_location (&explicit_loc).release ();
+	  b->location = new_explicit_location (&explicit_loc);
 	  b->enable_state = bp_disabled;
 	}
     }
@@ -3651,7 +3649,7 @@ create_std_terminate_master_breakpoint (void)
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
-      b->location = new_explicit_location (&explicit_loc).release ();
+      b->location = new_explicit_location (&explicit_loc);
       b->enable_state = bp_disabled;
     }
   }
@@ -3720,8 +3718,7 @@ create_exception_master_breakpoint (void)
 								 objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
-	      b->location
-		= new_probe_location ("-probe-stap libgcc:unwind").release ();
+	      b->location = new_probe_location ("-probe-stap libgcc:unwind");
 	      b->enable_state = bp_disabled;
 	    }
 
@@ -3756,7 +3753,7 @@ create_exception_master_breakpoint (void)
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
-      b->location = new_explicit_location (&explicit_loc).release ();
+      b->location = new_explicit_location (&explicit_loc);
       b->enable_state = bp_disabled;
     }
 }
@@ -3766,7 +3763,7 @@ create_exception_master_breakpoint (void)
 static int
 breakpoint_event_location_empty_p (const struct breakpoint *b)
 {
-  return b->location != NULL && event_location_empty_p (b->location);
+  return b->location != NULL && event_location_empty_p (b->location.get ());
 }
 
 void
@@ -6150,7 +6147,7 @@ print_breakpoint_location (struct breakpoint *b,
     set_current_program_space (loc->pspace);
 
   if (b->display_canonical)
-    uiout->field_string ("what", event_location_to_string (b->location));
+    uiout->field_string ("what", event_location_to_string (b->location.get ()));
   else if (loc && loc->symtab)
     {
       struct symbol *sym 
@@ -6182,7 +6179,8 @@ print_breakpoint_location (struct breakpoint *b,
     }
   else
     {
-      uiout->field_string ("pending", event_location_to_string (b->location));
+      uiout->field_string ("pending",
+			   event_location_to_string (b->location.get ()));
       /* If extra_string is available, it could be holding a condition
 	 or dprintf arguments.  In either case, make sure it is printed,
 	 too, but only for non-MI streams.  */
@@ -6670,9 +6668,9 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  uiout->field_string ("original-location", w->exp_string);
 	}
       else if (b->location != NULL
-	       && event_location_to_string (b->location) != NULL)
+	       && event_location_to_string (b->location.get ()) != NULL)
 	uiout->field_string ("original-location",
-			     event_location_to_string (b->location));
+			     event_location_to_string (b->location.get ()));
     }
 }
 
@@ -7796,7 +7794,7 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 
   b->enable_state = bp_enabled;
   /* location has to be used or breakpoint_re_set will delete me.  */
-  b->location = new_address_location (b->loc->address, NULL, 0).release ();
+  b->location = new_address_location (b->loc->address, NULL, 0);
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
@@ -9285,7 +9283,8 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		{
 		  /* We already know the marker exists, otherwise, we
 		     wouldn't see a sal for it.  */
-		  const char *p = &event_location_to_string (b->location)[3];
+		  const char *p
+		    = &event_location_to_string (b->location.get ())[3];
 		  const char *endp;
 		  char *marker_str;
 
@@ -9348,9 +9347,9 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 
   b->display_canonical = display_canonical;
   if (location != NULL)
-    b->location = location.release ();
+    b->location = std::move (location);
   else
-    b->location = new_address_location (b->loc->address, NULL, 0).release ();
+    b->location = new_address_location (b->loc->address, NULL, 0);
   b->filter = filter;
 }
 
@@ -9879,7 +9878,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	b = new breakpoint ();
 
       init_raw_breakpoint_without_location (b, gdbarch, type_wanted, ops);
-      b->location = copy_event_location (location).release ();
+      b->location = copy_event_location (location);
 
       if (parse_extra)
 	b->cond_string = NULL;
@@ -10305,8 +10304,8 @@ static void
 print_recreate_ranged_breakpoint (struct breakpoint *b, struct ui_file *fp)
 {
   fprintf_unfiltered (fp, "break-range %s, %s",
-		      event_location_to_string (b->location),
-		      event_location_to_string (b->location_range_end));
+		      event_location_to_string (b->location.get ()),
+		      event_location_to_string (b->location_range_end.get ()));
   print_recreate_thread (b, fp);
 }
 
@@ -10452,8 +10451,8 @@ break_range_command (char *arg, int from_tty)
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->disposition = disp_donttouch;
-  b->location = start_location.release ();
-  b->location_range_end = end_location.release ();
+  b->location = std::move (start_location);
+  b->location_range_end = std::move (end_location);
   b->loc->length = length;
 
   do_cleanups (cleanup_bkpt);
@@ -11899,9 +11898,8 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 
   b->enable_state = enabled ? bp_enabled : bp_disabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->location
-    = string_to_event_location (&addr_string,
-				language_def (language_ada)).release ();
+  b->location = string_to_event_location (&addr_string,
+					  language_def (language_ada));
   b->language = language_ada;
 }
 
@@ -12769,18 +12767,18 @@ say_where (struct breakpoint *b)
       if (b->extra_string == NULL)
 	{
 	  printf_filtered (_(" (%s) pending."),
-			   event_location_to_string (b->location));
+			   event_location_to_string (b->location.get ()));
 	}
       else if (b->type == bp_dprintf)
 	{
 	  printf_filtered (_(" (%s,%s) pending."),
-			   event_location_to_string (b->location),
+			   event_location_to_string (b->location.get ()),
 			   b->extra_string);
 	}
       else
 	{
 	  printf_filtered (_(" (%s %s) pending."),
-			   event_location_to_string (b->location),
+			   event_location_to_string (b->location.get ()),
 			   b->extra_string);
 	}
     }
@@ -12805,7 +12803,7 @@ say_where (struct breakpoint *b)
 	       different file name, and this at least reflects the
 	       real situation somewhat.  */
 	    printf_filtered (": %s.",
-			     event_location_to_string (b->location));
+			     event_location_to_string (b->location.get ()));
 	}
 
       if (b->loc->next)
@@ -12842,8 +12840,6 @@ base_breakpoint_dtor (struct breakpoint *self)
   xfree (self->cond_string);
   xfree (self->extra_string);
   xfree (self->filter);
-  delete_event_location (self->location);
-  delete_event_location (self->location_range_end);
 }
 
 static struct bp_location *
@@ -13177,7 +13173,7 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 		    _("unhandled breakpoint type %d"), (int) tp->type);
 
   fprintf_unfiltered (fp, " %s",
-		      event_location_to_string (tp->location));
+		      event_location_to_string (tp->location.get ()));
 
   /* Print out extra_string if this breakpoint is pending.  It might
      contain, for example, conditions that were set by the user.  */
@@ -13501,7 +13497,7 @@ tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
 		    _("unhandled tracepoint type %d"), (int) self->type);
 
   fprintf_unfiltered (fp, " %s",
-		      event_location_to_string (self->location));
+		      event_location_to_string (self->location.get ()));
   print_recreate_thread (self, fp);
 
   if (tp->pass_count)
@@ -13603,7 +13599,7 @@ static void
 dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 {
   fprintf_unfiltered (fp, "dprintf %s,%s",
-		      event_location_to_string (tp->location),
+		      event_location_to_string (tp->location.get ()),
 		      tp->extra_string);
   print_recreate_thread (tp, fp);
 }
@@ -14119,13 +14115,13 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  b->loc->line_number = sal2.line;
 	  b->loc->symtab = sym != NULL ? sal2.symtab : NULL;
 
-	  delete_event_location (b->location);
+	  b->location.reset (NULL);
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.source_filename
 	    = ASTRDUP (symtab_to_filename_for_display (sal2.symtab));
 	  explicit_loc.line_offset.offset = b->loc->line_number;
 	  explicit_loc.line_offset.sign = LINE_OFFSET_NONE;
-	  b->location = new_explicit_location (&explicit_loc).release ();
+	  b->location = new_explicit_location (&explicit_loc);
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */
@@ -14424,7 +14420,7 @@ breakpoint_re_set_default (struct breakpoint *b)
   struct symtabs_and_lines expanded_end = {0};
   struct program_space *filter_pspace = current_program_space;
 
-  sals = location_to_sals (b, b->location, filter_pspace, &found);
+  sals = location_to_sals (b, b->location.get (), filter_pspace, &found);
   if (found)
     {
       make_cleanup (xfree, sals.sals);
@@ -14433,7 +14429,7 @@ breakpoint_re_set_default (struct breakpoint *b)
 
   if (b->location_range_end != NULL)
     {
-      sals_end = location_to_sals (b, b->location_range_end,
+      sals_end = location_to_sals (b, b->location_range_end.get (),
 				   filter_pspace, &found);
       if (found)
 	{

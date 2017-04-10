@@ -1,5 +1,28 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_download_tracepoint): Update.
+	* python/py-breakpoint.c (bppy_get_location): Update.
+	* guile/scm-breakpoint.c (bpscm_print_breakpoint_smob)
+	(gdbscm_breakpoint_location): Update.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Update.
+	* breakpoint.h (struct breakpoint) <location, location_range_end>:
+	Change type to event_location_up.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint)
+	(breakpoint_event_location_empty_p, print_breakpoint_location)
+	(print_one_breakpoint_location, create_thread_event_breakpoint)
+	(init_breakpoint_sal, create_breakpoint)
+	(print_recreate_ranged_breakpoint, break_range_command)
+	(init_ada_exception_breakpoint, say_where): Update.
+	(base_breakpoint_dtor): Don't call delete_event_location.
+	(bkpt_print_recreate, tracepoint_print_recreate)
+	(dprintf_print_recreate, update_static_tracepoint)
+	(breakpoint_re_set_default): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-loc2c.c (compute_stack_depth_worker): Change
 	type of "to_do".  Update.
 	(compute_stack_depth): Use std::vector.
