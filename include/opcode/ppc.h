@@ -179,9 +179,6 @@ extern const int vle_num_opcodes;
 /* Opcode which is supported by the e500 family */
 #define PPC_OPCODE_E500	       0x100000000ull
 
-/* Opcode is supported by Extended Altivec Vector Unit */
-#define PPC_OPCODE_ALTIVEC2    0x200000000ull
-
 /* Opcode is supported by Power E6500 */
 #define PPC_OPCODE_E6500       0x400000000ull
 
