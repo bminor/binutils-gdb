@@ -1,3 +1,10 @@
+2017-04-10  Alan Modra  <amodra@gmail.com>
+
+	PR 21287
+	* elf.c (special_sections_f): Match .fini_array and .fini_array.*.
+	(special_sections_i): Likewise for .init_array.
+	(special_sections_p): Likewise for .preinit_array.
+
 2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579

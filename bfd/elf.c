@@ -2601,9 +2601,9 @@ static const struct bfd_elf_special_section special_sections_d[] =
 
 static const struct bfd_elf_special_section special_sections_f[] =
 {
-  { STRING_COMMA_LEN (".fini"),       0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { STRING_COMMA_LEN (".fini_array"), 0, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { NULL,                          0, 0, 0,              0 }
+  { STRING_COMMA_LEN (".fini"),        0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".fini_array"), -2, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { NULL,                          0 , 0, 0,              0 }
 };
 
 static const struct bfd_elf_special_section special_sections_g[] =
@@ -2628,10 +2628,10 @@ static const struct bfd_elf_special_section special_sections_h[] =
 
 static const struct bfd_elf_special_section special_sections_i[] =
 {
-  { STRING_COMMA_LEN (".init"),       0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { STRING_COMMA_LEN (".init_array"), 0, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".interp"),     0, SHT_PROGBITS,   0 },
-  { NULL,                      0,     0, 0,              0 }
+  { STRING_COMMA_LEN (".init"),        0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".init_array"), -2, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".interp"),      0, SHT_PROGBITS,   0 },
+  { NULL,                      0,      0, 0,              0 }
 };
 
 static const struct bfd_elf_special_section special_sections_l[] =
@@ -2649,9 +2649,9 @@ static const struct bfd_elf_special_section special_sections_n[] =
 
 static const struct bfd_elf_special_section special_sections_p[] =
 {
-  { STRING_COMMA_LEN (".preinit_array"), 0, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".plt"),           0, SHT_PROGBITS,      SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,                   0,           0, 0,                 0 }
+  { STRING_COMMA_LEN (".preinit_array"), -2, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".plt"),            0, SHT_PROGBITS,      SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,                   0,            0, 0,                 0 }
 };
 
 static const struct bfd_elf_special_section special_sections_r[] =

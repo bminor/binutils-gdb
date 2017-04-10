@@ -1,5 +1,15 @@
 2017-04-10  Alan Modra  <amodra@gmail.com>
 
+	PR 21287
+	* testsuite/ld-elf/init-fini-arrays.d: Match INIT_ARRAY and FINI_ARRAY.
+	* testsuite/ld-elf/init-fini-arrays.s: Use %init_array and %fini_array
+	section types.
+	* testsuite/lib/ld-lib.exp (default_ld_compile): Trim assembler
+	warnings about "ignoring incorrect section type".
+	(run_ld_link_exec_tests, run_cc_link_tests): Delete old comment.
+
+2017-04-10  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elfvsb/elfvsb.exp (visibility_run): Delete
 	sh1p.o, sh2p.o, sh1np.o and sh2np.o before compiling.  Use
 	remote_file host exists rather than file exists.
