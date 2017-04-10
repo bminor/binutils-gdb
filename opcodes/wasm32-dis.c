@@ -23,7 +23,6 @@
 #include "opintl.h"
 #include "safe-ctype.h"
 #include "floatformat.h"
-#include <float.h>
 #include "libiberty.h"
 #include "elf-bfd.h"
 #include "elf/internal.h"
@@ -405,7 +404,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
           if (ret < 0)
             return -1;
           len += ret;
-          prin (stream, " %.*g", DECIMAL_DIG, fconstant);
+	  prin (stream, " %.9g", fconstant);
           break;
 
         case wasm_constant_f64:
@@ -413,7 +412,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
           if (ret < 0)
             return -1;
           len += ret;
-          prin (stream, " %.*g", DECIMAL_DIG, fconstant);
+	  prin (stream, " %.17g", fconstant);
           break;
 
         case wasm_call:

@@ -1,3 +1,8 @@
+2017-04-09  Pip Cet  <pipcet@gmail.com>
+
+	* wasm32-dis.c (print_insn_wasm32): Avoid DECIMAL_DIG, specify
+	appropriate floating-point precision directly.
+
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes <mviwsplt, mvidsplt, lvexbx, lvepxl,
