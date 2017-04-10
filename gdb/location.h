@@ -114,18 +114,11 @@ extern char *
 extern const char *
   event_location_to_string (struct event_location *location);
 
-/* Free an event location and any associated data.  */
-
-extern void delete_event_location (struct event_location *location);
-
 /* A deleter for a struct event_location.  */
 
 struct event_location_deleter
 {
-  void operator() (event_location *location) const
-  {
-    delete_event_location (location);
-  }
+  void operator() (event_location *location) const;
 };
 
 /* A unique pointer for event_location.  */

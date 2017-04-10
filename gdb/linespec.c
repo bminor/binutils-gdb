@@ -1750,8 +1750,9 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
     return;
 
   /* Save everything as an explicit location.  */
-  canon = state->canonical->location
-    = new_explicit_location (&ls->explicit_loc).release ();
+  state->canonical->location
+    = new_explicit_location (&ls->explicit_loc);
+  canon = state->canonical->location.get ();
   explicit_loc = get_explicit_location (canon);
 
   if (explicit_loc->label_name != NULL)
@@ -2491,7 +2492,7 @@ event_location_to_sals (linespec_parser *parser,
 	    addr = linespec_expression_to_pc (&const_expr);
 	    if (PARSER_STATE (parser)->canonical != NULL)
 	      PARSER_STATE (parser)->canonical->location
-		= copy_event_location (location).release ();
+		= copy_event_location (location);
 
 	    do_cleanups (cleanup);
 	  }
@@ -2780,7 +2781,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 	    str = xstrdup (saved_arg);
 
 	  make_cleanup (xfree, str);
-	  self->canonical->location = new_linespec_location (&str).release ();
+	  self->canonical->location = new_linespec_location (&str);
 	}
     }
 
@@ -3892,7 +3893,6 @@ linespec_result::~linespec_result ()
   int i;
   struct linespec_sals *lsal;
 
-  delete_event_location (location);
   for (i = 0; VEC_iterate (linespec_sals, sals, i, lsal); ++i)
     {
       xfree (lsal->canonical);

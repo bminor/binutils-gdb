@@ -19,6 +19,7 @@
 
 struct symtab;
 
+#include "location.h"
 #include "vec.h"
 
 /* Flags to pass to decode_line_1 and decode_line_full.  */
@@ -61,7 +62,6 @@ struct linespec_result
   linespec_result ()
     : special_display (0),
       pre_expanded (0),
-      location (NULL),
       sals (NULL)
   {
   }
@@ -83,8 +83,8 @@ struct linespec_result
   int pre_expanded;
 
   /* If PRE_EXPANDED is non-zero, this is set to the location entered
-     by the user.  This will be freed by destroy_linespec_result.  */
-  struct event_location *location;
+     by the user.  */
+  event_location_up location;
 
   /* The sals.  The vector will be freed by the destructor.  */
   VEC (linespec_sals) *sals;

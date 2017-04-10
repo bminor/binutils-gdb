@@ -9429,7 +9429,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 	 'break', without arguments.  */
       event_location_up location
 	= (canonical->location != NULL
-	   ? copy_event_location (canonical->location) : NULL);
+	   ? copy_event_location (canonical->location.get ()) : NULL);
       char *filter_string = lsal->canonical ? xstrdup (lsal->canonical) : NULL;
 
       make_cleanup (xfree, filter_string);
@@ -13390,7 +13390,8 @@ bkpt_probe_create_sals_from_location (const struct event_location *location,
   struct linespec_sals lsal;
 
   lsal.sals = parse_probes (location, NULL, canonical);
-  lsal.canonical = xstrdup (event_location_to_string (canonical->location));
+  lsal.canonical
+    = xstrdup (event_location_to_string (canonical->location.get ()));
   VEC_safe_push (linespec_sals, canonical->sals, &lsal);
 }
 
@@ -13646,10 +13647,11 @@ strace_marker_create_sals_from_location (const struct event_location *location,
 
   str = savestring (arg_start, arg - arg_start);
   cleanup = make_cleanup (xfree, str);
-  canonical->location = new_linespec_location (&str).release ();
+  canonical->location = new_linespec_location (&str);
   do_cleanups (cleanup);
 
-  lsal.canonical = xstrdup (event_location_to_string (canonical->location));
+  lsal.canonical
+    = xstrdup (event_location_to_string (canonical->location.get ()));
   VEC_safe_push (linespec_sals, canonical->sals, &lsal);
 }
 
@@ -13686,7 +13688,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
       expanded.nelts = 1;
       expanded.sals = &lsal->sals.sals[i];
 
-      location = copy_event_location (canonical->location);
+      location = copy_event_location (canonical->location.get ());
 
       tp = new tracepoint ();
       init_breakpoint_sal (&tp->base, gdbarch, expanded,

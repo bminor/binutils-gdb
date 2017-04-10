@@ -342,10 +342,8 @@ copy_event_location (const struct event_location *src)
   return event_location_up (dst);
 }
 
-/* See description in location.h.  */
-
 void
-delete_event_location (struct event_location *location)
+event_location_deleter::operator() (event_location *location) const
 {
   if (location != NULL)
     {
