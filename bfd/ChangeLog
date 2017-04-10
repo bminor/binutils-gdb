@@ -1,3 +1,37 @@
+2017-04-10  Qing Zhao  <qing.zhao@oracle.com>
+
+        * elf32-sparc.c (elf_backend_fixup_symbol): New.
+        * elf64-sparc.c (elf_backend_fixup_symbol): New.
+        * elfxx-sparc.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): New.
+        (_bfd_sparc_elf_link_hash_entry): Add has_got_reloc and
+        has_non_got_reloc.
+        (link_hash_newfunc): Initialize has_got_reloc and
+	has_non_got_reloc.
+        (_bfd_sparc_elf_size_dynamic_sections): Set interp to .interp
+        section.
+        (_bfd_sparc_elf_copy_indirect_symbol): Copy has_got_reloc and
+        has_non_got_reloc.
+        (_bfd_sparc_elf_check_relocs): Set has_got_reloc and
+        has_non_got_reloc.
+        (_bfd_sparc_elf_fixup_symbol): New function.
+        (allocate_dynrelocs): Don't allocate space for dynamic
+        relocations and discard relocations against resolved undefined
+        weak symbols in executable.  Don't make resolved undefined weak
+        symbols in executable dynamic.  Keep dynamic non-GOT/non-PLT
+        relocation against undefined weak symbols in PIE.
+        (_bfd_sparc_elf_relocate_section): Don't generate dynamic
+        relocations against resolved undefined weak symbols in PIE
+        (_bfd_sparc_elf_finish_dynamic_symbol): Keep PLT/GOT entries
+        without ynamic PLT/GOT relocations for resolved undefined weak
+        symbols.
+        Don't generate dynamic relocation against resolved undefined
+        weak symbol in executable.
+        (pie_finish_undefweak_symbol): New function.
+        (_bfd_sparc_elf_finish_dynamic_sections): Call
+        pie_finish_undefweak_symbol on all symbols in PIE.
+        * elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Add interp.
+        (_bfd_sparc_elf_fixup_symbol): New function.
+
 2017-04-10  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Remove ns32k from obsolete list.

@@ -904,6 +904,8 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
   _bfd_sparc_elf_finish_dynamic_sections
+#define elf_backend_fixup_symbol \
+  _bfd_sparc_elf_fixup_symbol
 
 #define bfd_elf64_mkobject \
   _bfd_sparc_elf_mkobject
