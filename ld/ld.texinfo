@@ -943,6 +943,13 @@ Omit all symbol information from the output file.
 @itemx --strip-debug
 Omit debugger symbol information (but not all symbols) from the output file.
 
+@kindex --strip-discarded
+@kindex --no-strip-discarded
+@item --strip-discarded
+@itemx --no-strip-discarded
+Omit (or do not omit) global symbols defined in discarded sections.
+Enabled by default.
+
 @kindex -t
 @kindex --trace
 @cindex input files, displaying
@@ -1518,6 +1525,13 @@ linker to be used at load-time.  This is only meaningful for ELF
 executables that contain dynamic relocations, and usually requires
 entry point code that is capable of processing these relocations.
 
+@kindex --embedded-relocs
+@item --embedded-relocs
+This option is similar to the @option{--emit-relocs} option except
+that the relocs are stored in a target specific section.  This option
+is only supported by the @samp{BFIN}, @samp{CR16} and @emph{M68K}
+targets.
+
 @kindex --fatal-warnings
 @kindex --no-fatal-warnings
 @item --fatal-warnings
@@ -1979,6 +1993,12 @@ patterns in the linker script.
 This option will apply @code{SORT_BY_ALIGNMENT} to all wildcard section
 patterns in the linker script.
 
+@kindex --spare-dynamic-tags
+@item --spare-dynamic-tags=@var{count}
+This option specifies the number of empty slots to leave in the
+.dynamic section of ELF shared objects.  Empty slots may be needed by
+post processing tools, such as the prelinker.  The default is 5.
+
 @kindex --split-by-file
 @item --split-by-file[=@var{size}]
 Similar to @option{--split-by-reloc} but creates a new output section for
@@ -2008,6 +2028,11 @@ as execution time and memory usage.
 Use @var{directory} as the location of the sysroot, overriding the
 configure-time default.  This option is only supported by linkers
 that were configured using @option{--with-sysroot}.
+
+@kindex --task-link
+@item --task-link
+This is used by COFF/PE based targets to create a task-linked object
+file where all of the global symbols have been converted to statics.
 
 @kindex --traditional-format
 @cindex traditional format
