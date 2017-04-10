@@ -1,3 +1,9 @@
+2017-04-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21364
+	* osdata.c (info_osdata): Check if 'type' is an empty string
+	instead of NULL.
+
 2017-04-10  Pedro Alves  <palves@redhat.com>
 
 	* thread.c (add_thread_silent, delete_thread_1, find_thread_ptid)
