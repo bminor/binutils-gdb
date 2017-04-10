@@ -1912,7 +1912,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int detached = 1;
 
-  ptid_t ptid = {-1};
+  ptid_t ptid = minus_one_ptid;
   windows_resume (ops, ptid, 0, GDB_SIGNAL_0);
 
   if (!DebugActiveProcessStop (current_event.dwProcessId))

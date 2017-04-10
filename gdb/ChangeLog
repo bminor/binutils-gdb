@@ -1,3 +1,8 @@
+2017-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-nat.c (windows_detach): Initialize ptid with
+	minus_one_ptid.
+
 2017-04-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* unittests/ptid-selftests.c: Fix erroneous assert messages.
