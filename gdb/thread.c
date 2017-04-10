@@ -1549,11 +1549,6 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
 
 struct current_thread_cleanup
 {
-  /* Next in list of currently installed 'struct
-     current_thread_cleanup' cleanups.  See
-     'current_thread_cleanup_chain' below.  */
-  struct current_thread_cleanup *next;
-
   thread_info *thread;
   struct frame_id selected_frame_id;
   int selected_frame_level;
@@ -1561,13 +1556,6 @@ struct current_thread_cleanup
   int inf_id;
   int was_removable;
 };
-
-/* A chain of currently installed 'struct current_thread_cleanup'
-   cleanups.  Restoring the previously selected thread looks up the
-   old thread in the thread list by ptid.  If the thread changes ptid,
-   we need to update the cleanup's thread structure so the look up
-   succeeds.  */
-static struct current_thread_cleanup *current_thread_cleanup_chain;
 
 static void
 do_restore_current_thread_cleanup (void *arg)
@@ -1609,8 +1597,6 @@ restore_current_thread_cleanup_dtor (void *arg)
   struct thread_info *tp;
   struct inferior *inf;
 
-  current_thread_cleanup_chain = current_thread_cleanup_chain->next;
-
   if (old->thread != NULL)
     old->thread->decref ();
 
@@ -1641,9 +1627,6 @@ make_cleanup_restore_current_thread (void)
   old->thread = NULL;
   old->inf_id = current_inferior ()->num;
   old->was_removable = current_inferior ()->removable;
-
-  old->next = current_thread_cleanup_chain;
-  current_thread_cleanup_chain = old;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     {

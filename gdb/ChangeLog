@@ -1,3 +1,11 @@
+2017-04-10  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (struct current_thread_cleanup) <next>: Delete field.
+	(current_thread_cleanup_chain): Delete.
+	(restore_current_thread_cleanup_dtor)
+	(make_cleanup_restore_current_thread): Remove references to
+	current_thread_cleanup_chain.
+
 2017-04-10  Alan Hayward  <alan.hayward@arm.com>
 
 	* msp430-tdep.c (msp430_pseudo_register_read): Never return
