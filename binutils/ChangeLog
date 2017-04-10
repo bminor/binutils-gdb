@@ -1,3 +1,9 @@
+2017-04-10  John Delsignor  <john.delsignore@roguewave.com>
+
+	PR binutils/21319
+	* dwarf.c (display_gdb_index): Correct test for a corrupt address
+	table size.
+
 2017-04-05  Jiong Wang  <jiong.wang@arm.com>
 
 	* objcopy.c (struct redefine_node): Delete the field "next".

@@ -7670,7 +7670,7 @@ display_gdb_index (struct dwarf_section *section,
   symbol_table = start + symbol_table_offset;
   constant_pool = start + constant_pool_offset;
 
-  if (address_table + address_table_size * (2 + 8 + 4) > section->start + section->size)
+  if (address_table + address_table_size > section->start + section->size)
     {
       warn (_("Address table extends beyond end of section.\n"));
       return 0;
