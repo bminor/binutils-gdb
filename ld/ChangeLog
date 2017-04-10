@@ -1,3 +1,9 @@
+2017-04-10  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elfvsb/elfvsb.exp (visibility_run): Delete
+	sh1p.o, sh2p.o, sh1np.o and sh2np.o before compiling.  Use
+	remote_file host exists rather than file exists.
+
 2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21090
