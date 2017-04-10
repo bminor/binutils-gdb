@@ -7547,6 +7547,10 @@ xtensa_maybe_create_literal_pool_frag (bfd_boolean create,
       lps->seg = now_seg;
       lps->frag_list.next = &lps->frag_list;
       lps->frag_list.prev = &lps->frag_list;
+      /* Put candidate literal pool at the beginning of every section,
+         so that even when section starts with literal load there's a
+	 literal pool available.  */
+      lps->frag_count = auto_litpool_limit;
     }
 
   lps->frag_count++;
@@ -11035,6 +11039,30 @@ xtensa_move_seg_list_to_beginning (seg_list *head)
 static void mark_literal_frags (seg_list *);
 
 static void
+xg_promote_candidate_litpool (struct litpool_seg *lps,
+			      struct litpool_frag *lp)
+{
+  fragS *poolbeg;
+  fragS *poolend;
+  symbolS *lsym;
+  char label[10 + 2 * sizeof (fragS *)];
+
+  poolbeg = lp->fragP;
+  lp->priority = 1;
+  poolbeg->fr_subtype = RELAX_LITERAL_POOL_BEGIN;
+  poolend = poolbeg->fr_next;
+  gas_assert (poolend->fr_type == rs_machine_dependent &&
+	      poolend->fr_subtype == RELAX_LITERAL_POOL_END);
+  /* Create a local symbol pointing to the
+     end of the pool.  */
+  sprintf (label, ".L0_LT_%p", poolbeg);
+  lsym = (symbolS *)local_symbol_make (label, lps->seg,
+				       0, poolend);
+  poolbeg->fr_symbol = lsym;
+  /* Rest is done in xtensa_relax_frag.  */
+}
+
+static void
 xtensa_move_literals (void)
 {
   seg_list *segment;
@@ -11121,27 +11149,17 @@ xtensa_move_literals (void)
 				      /* This is still a "candidate" but the next one
 				         will be too far away, so revert to the nearest
 					 one, convert it and add the jump around.  */
-				      fragS *poolbeg;
-				      fragS *poolend;
-				      symbolS *lsym;
-				      char label[10 + 2 * sizeof (fragS *)];
 				      lp = lpf->prev;
-				      poolbeg = lp->fragP;
-				      lp->priority = 1;
-				      poolbeg->fr_subtype = RELAX_LITERAL_POOL_BEGIN;
-				      poolend = poolbeg->fr_next;
-				      gas_assert (poolend->fr_type == rs_machine_dependent &&
-						  poolend->fr_subtype == RELAX_LITERAL_POOL_END);
-				      /* Create a local symbol pointing to the
-				         end of the pool.  */
-				      sprintf (label, ".L0_LT_%p", poolbeg);
-				      lsym = (symbolS *)local_symbol_make (label, lps->seg,
-									   0, poolend);
-				      poolbeg->fr_symbol = lsym;
-				      /* Rest is done in xtensa_relax_frag.  */
+				      break;
 				    }
 				}
 			    }
+
+			  /* Convert candidate and add the jump around.  */
+			  if (lp->fragP->fr_subtype ==
+			      RELAX_LITERAL_POOL_CANDIDATE_BEGIN)
+			    xg_promote_candidate_litpool (lps, lp);
+
 			  if (! litfrag->tc_frag_data.literal_frag)
 			    {
 			      /* Take earliest use of this literal to avoid
@@ -11413,7 +11431,6 @@ xtensa_switch_to_literal_fragment (emit_state *result)
 static void
 xtensa_switch_to_non_abs_literal_fragment (emit_state *result)
 {
-  static bfd_boolean recursive = FALSE;
   fragS *pool_location = get_literal_pool_location (now_seg);
   segT lit_seg;
   bfd_boolean is_init =
@@ -11423,23 +11440,14 @@ xtensa_switch_to_non_abs_literal_fragment (emit_state *result)
 
   if (pool_location == NULL
       && !use_literal_section
-      && !recursive
       && !is_init && ! is_fini)
     {
       if (!auto_litpools)
 	{
 	  as_bad (_("literal pool location required for text-section-literals; specify with .literal_position"));
 	}
-
-      /* When we mark a literal pool location, we want to put a frag in
-	 the literal pool that points to it.  But to do that, we want to
-	 switch_to_literal_fragment.  But literal sections don't have
-	 literal pools, so their location is always null, so we would
-	 recurse forever.  This is kind of hacky, but it works.  */
-
-      recursive = TRUE;
-      xtensa_mark_literal_pool_location ();
-      recursive = FALSE;
+      xtensa_maybe_create_literal_pool_frag (TRUE, TRUE);
+      pool_location = get_literal_pool_location (now_seg);
     }
 
   lit_seg = cache_literal_section (FALSE);

@@ -1,3 +1,23 @@
+2017-04-10  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_maybe_create_literal_pool_frag):
+	Initialize lps->frag_count with auto_litpool_limit.
+	(xg_promote_candidate_litpool): New function.
+	(xtensa_move_literals): Extract candidate litpool promotion code
+	into separate function. Call it for all possible found
+	candidates.
+	(xtensa_switch_to_literal_fragment): Drop 'recursive' flag and
+	call to xtensa_mark_literal_pool_location that it guards.
+	Replace it with call to xtensa_maybe_create_literal_pool_frag.
+	Initialize pool_location with created literal pool candidate.
+	* testsuite/gas/xtensa/all.exp: Add new tests.
+	* testsuite/gas/xtensa/auto-litpools-first1.d: New test results.
+	* testsuite/gas/xtensa/auto-litpools-first1.s: New test.
+	* testsuite/gas/xtensa/auto-litpools-first2.d: New test results.
+	* testsuite/gas/xtensa/auto-litpools-first2.s: New test.
+	* testsuite/gas/xtensa/auto-litpools.d: Fix offsets changed due
+	to additional jump instruction.
+
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/altivec2.s: Delete E6500 vector insns.
