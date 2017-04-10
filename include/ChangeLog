@@ -2,6 +2,7 @@
 
 	* opcode/ppc.h (PPC_OPCODE_ALTIVEC2): Delete.
 	(PPC_OPCODE_VSX3): Delete.
+	(PPC_OPCODE_HTM): Delete.
 
 2017-04-06  Pip Cet  <pipcet@gmail.com>
 

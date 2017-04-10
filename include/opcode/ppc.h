@@ -191,11 +191,6 @@ extern const int vle_num_opcodes;
 /* Opcode is only supported by Power8 architecture.  */
 #define PPC_OPCODE_POWER8     0x2000000000ull
 
-/* Opcode which is supported by the Hardware Transactional Memory extension.  */
-/* Currently, this is the same as the POWER8 mask.  If another cpu comes out
-   that isn't a superset of POWER8, we can define this to its own mask.  */
-#define PPC_OPCODE_HTM        PPC_OPCODE_POWER8
-
 /* Opcode is supported by ppc750cl.  */
 #define PPC_OPCODE_750	      0x4000000000ull
 

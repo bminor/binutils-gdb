@@ -1,3 +1,8 @@
+2017-04-11  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_show_usage): Delete mention of -mhtm.
+	* testsuite/gas/ppc/htm.d: Pass -mpower8 and -Mpower8.
+
 2017-04-10  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_maybe_create_literal_pool_frag):

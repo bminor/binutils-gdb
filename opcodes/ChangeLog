@@ -1,11 +1,12 @@
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
-	* ppc-dis.c (ppc_opts): Remove PPC_OPCODE_ALTIVEC2 and
-	PPC_OPCODE_VSX3.
+	* ppc-dis.c (ppc_opts): Remove PPC_OPCODE_ALTIVEC2,
+	PPC_OPCODE_VSX3, PPC_OPCODE_HTM and "htm".
 	* ppc-opc.c (PPCVEC2): Define as PPC_OPCODE_POWER8|PPC_OPCODE_E6500.
 	(PPCVEC3): Define as PPC_OPCODE_POWER9.
 	(PPCVSX2): Define as PPC_OPCODE_POWER8.
 	(PPCVSX3): Define as PPC_OPCODE_POWER9.
+	(PPCHTM): Define as PPC_OPCODE_POWER8.
 
 2017-04-10  Alan Modra  <amodra@gmail.com>
 

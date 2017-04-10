@@ -3121,7 +3121,7 @@ extract_vleil (unsigned long insn,
 #define E500	PPC_OPCODE_E500
 #define E6500	PPC_OPCODE_E6500
 #define PPCVLE  PPC_OPCODE_VLE
-#define PPCHTM  PPC_OPCODE_HTM
+#define PPCHTM  PPC_OPCODE_POWER8
 #define E200Z4  PPC_OPCODE_E200Z4
 /* The list of embedded processors that use the embedded operand ordering
    for the 3 operand dcbt and dcbtst instructions.  */

@@ -1346,7 +1346,6 @@ PowerPC options:\n\
   fprintf (stream, _("\
 -maltivec               generate code for AltiVec\n\
 -mvsx                   generate code for Vector-Scalar (VSX) instructions\n\
--mhtm                   generate code for Hardware Transactional Memory\n\
 -me300                  generate code for PowerPC e300 family\n\
 -me500, -me500x2        generate code for Motorola e500 core complex\n\
 -me500mc,               generate code for Freescale e500mc core complex\n\
