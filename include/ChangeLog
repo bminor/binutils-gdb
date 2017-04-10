@@ -1,6 +1,7 @@
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (PPC_OPCODE_ALTIVEC2): Delete.
+	(PPC_OPCODE_VSX3): Delete.
 
 2017-04-06  Pip Cet  <pipcet@gmail.com>
 
