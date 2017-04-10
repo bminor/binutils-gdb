@@ -100,7 +100,6 @@ case $targ in
  mips*-sgi-* | mips*-*-bsd* | \
  mips*-*-lnews* | \
  mips*-*-sysv* | mips*-*-riscos* | \
- ns32k-*-* | \
  sh*-*-symbianelf* | \
  sparclet-*-aout* | \
  sparc86x-*-aout* | \
