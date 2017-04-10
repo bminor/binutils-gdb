@@ -1,5 +1,30 @@
 2017-04-10  Yao Qi  <yao.qi@linaro.org>
 
+	PR gdb/19942
+	* gdbthread.h (thread_info::deletable): New method.
+	(thread_info::incref): New method.
+	(thread_info::decref): New method.
+	(thread_info::refcount): Move it to private.
+	* infrun.c (save_stop_context): Call inc_refcount.
+	(release_stop_context_cleanup): Likewise.
+	* thread.c (set_thread_exited): New function.
+	(init_thread_list): Delete "tp" only it is deletable, otherwise
+	call set_thread_exited.
+	(delete_thread_1): Call set_thread_exited.
+	(current_thread_cleanup) <inferior_pid>: Remove.
+	<thread>: New field.
+	(restore_current_thread_ptid_changed): Removed.
+	(do_restore_current_thread_cleanup): Adjust.
+	(restore_current_thread_cleanup_dtor): Don't call
+	find_thread_ptid.
+	(set_thread_refcount): Use dec_refcount.
+	(make_cleanup_restore_current_thread): Adjust.
+	(thread_apply_all_command): Call inc_refcount.
+	(_initialize_thread): Don't call
+	observer_attach_thread_ptid_changed.
+
+2017-04-10  Yao Qi  <yao.qi@linaro.org>
+
 	* thread.c (delete_thread_1): Hoist code on marking thread as
 	exited.
 

@@ -183,6 +183,27 @@ public:
   explicit thread_info (inferior *inf, ptid_t ptid);
   ~thread_info ();
 
+  bool deletable () const
+  {
+    /* If this is the current thread, or there's code out there that
+       relies on it existing (m_refcount > 0) we can't delete yet.  */
+    return (m_refcount == 0 && !ptid_equal (ptid, inferior_ptid));
+  }
+
+  /* Increase the refcount.  */
+  void incref ()
+  {
+    gdb_assert (m_refcount >= 0);
+    m_refcount++;
+  }
+
+  /* Decrease the refcount.  */
+  void decref ()
+  {
+    m_refcount--;
+    gdb_assert (m_refcount >= 0);
+  }
+
   struct thread_info *next = NULL;
   ptid_t ptid;			/* "Actual process id";
 				    In fact, this may be overloaded with 
@@ -253,11 +274,6 @@ public:
      like a software single-step breakpoint, EXECUTING will be false,
      but STATE will still be THREAD_RUNNING.  */
   enum thread_state state = THREAD_STOPPED;
-
-  /* If this is > 0, then it means there's code out there that relies
-     on this thread being listed.  Don't delete it from the lists even
-     if we detect it exiting.  */
-  int refcount = 0;
 
   /* State of GDB control of inferior thread execution.
      See `struct thread_control_state'.  */
@@ -346,6 +362,13 @@ public:
      fields point to self.  */
   struct thread_info *step_over_prev = NULL;
   struct thread_info *step_over_next = NULL;
+
+private:
+
+  /* If this is > 0, then it means there's code out there that relies
+     on this thread being listed.  Don't delete it from the lists even
+     if we detect it exiting.  */
+  int m_refcount = 0;
 };
 
 /* Create an empty thread list, or empty the existing one.  */

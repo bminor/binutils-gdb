@@ -8165,7 +8165,7 @@ save_stop_context (void)
       /* Take a strong reference so that the thread can't be deleted
 	 yet.  */
       sc->thread = inferior_thread ();
-      sc->thread->refcount++;
+      sc->thread->incref ();
     }
   else
     sc->thread = NULL;
@@ -8182,7 +8182,7 @@ release_stop_context_cleanup (void *arg)
   struct stop_context *sc = (struct stop_context *) arg;
 
   if (sc->thread != NULL)
-    sc->thread->refcount--;
+    sc->thread->decref ();
   xfree (sc);
 }
 
