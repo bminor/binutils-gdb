@@ -3887,45 +3887,18 @@ symbol_to_sal (struct symtab_and_line *result,
   return 0;
 }
 
-/* See the comment in linespec.h.  */
-
-void
-init_linespec_result (struct linespec_result *lr)
-{
-  memset (lr, 0, sizeof (*lr));
-}
-
-/* See the comment in linespec.h.  */
-
-void
-destroy_linespec_result (struct linespec_result *ls)
+linespec_result::~linespec_result ()
 {
   int i;
   struct linespec_sals *lsal;
 
-  delete_event_location (ls->location);
-  for (i = 0; VEC_iterate (linespec_sals, ls->sals, i, lsal); ++i)
+  delete_event_location (location);
+  for (i = 0; VEC_iterate (linespec_sals, sals, i, lsal); ++i)
     {
       xfree (lsal->canonical);
       xfree (lsal->sals.sals);
     }
-  VEC_free (linespec_sals, ls->sals);
-}
-
-/* Cleanup function for a linespec_result.  */
-
-static void
-cleanup_linespec_result (void *a)
-{
-  destroy_linespec_result ((struct linespec_result *) a);
-}
-
-/* See the comment in linespec.h.  */
-
-struct cleanup *
-make_cleanup_destroy_linespec_result (struct linespec_result *ls)
-{
-  return make_cleanup (cleanup_linespec_result, ls);
+  VEC_free (linespec_sals, sals);
 }
 
 /* Return the quote characters permitted by the linespec parser.  */

@@ -41,12 +41,12 @@ struct linespec_sals
 {
   /* This is the location corresponding to the sals contained in this
      object.  It can be passed as the FILTER argument to future calls
-     to decode_line_full.  This is freed by
-     destroy_linespec_result.  */
+     to decode_line_full.  This is freed by the linespec_result
+     destructor.  */
   char *canonical;
 
-  /* Sals.  The 'sals' field is destroyed by
-     destroy_linespec_result.  */
+  /* Sals.  The 'sals' field is destroyed by the linespec_result
+     destructor.  */
   struct symtabs_and_lines sals;
 };
 
@@ -54,12 +54,23 @@ typedef struct linespec_sals linespec_sals;
 DEF_VEC_O (linespec_sals);
 
 /* An instance of this may be filled in by decode_line_1.  The caller
-   must call init_linespec_result to initialize it and
-   destroy_linespec_result to destroy it.  The caller must make copies
-   of any data that it needs to keep.  */
+   must make copies of any data that it needs to keep.  */
 
 struct linespec_result
 {
+  linespec_result ()
+    : special_display (0),
+      pre_expanded (0),
+      location (NULL),
+      sals (NULL)
+  {
+  }
+
+  ~linespec_result ();
+
+  linespec_result (const linespec_result &) = delete;
+  linespec_result &operator= (const linespec_result &) = delete;
+
   /* If non-zero, the linespec should be displayed to the user.  This
      is used by "unusual" linespecs where the ordinary `info break'
      display mechanism would do the wrong thing.  */
@@ -75,23 +86,9 @@ struct linespec_result
      by the user.  This will be freed by destroy_linespec_result.  */
   struct event_location *location;
 
-  /* The sals.  The vector will be freed by
-     destroy_linespec_result.  */
+  /* The sals.  The vector will be freed by the destructor.  */
   VEC (linespec_sals) *sals;
 };
-
-/* Initialize a linespec_result.  */
-
-extern void init_linespec_result (struct linespec_result *);
-
-/* Destroy a linespec_result.  */
-
-extern void destroy_linespec_result (struct linespec_result *);
-
-/* Return a cleanup that destroys a linespec_result.  */
-
-extern struct cleanup *
-        make_cleanup_destroy_linespec_result (struct linespec_result *);
 
 /* Decode a linespec using the provided default symtab and line.  */
 

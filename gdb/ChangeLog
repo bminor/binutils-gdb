@@ -1,5 +1,20 @@
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
+	* linespec.h (struct linespec_result): Add constructor and
+	destructor.
+	(init_linespec_result, destroy_linespec_result)
+	(make_cleanup_destroy_linespec_result): Don't declare.
+	* linespec.c (init_linespec_result): Remove.
+	(linespec_result::~linespec_result): Rename from
+	destroy_linespec_result.  Update.
+	(cleanup_linespec_result, make_cleanup_destroy_linespec_result):
+	Remove.
+	* breakpoint.c (create_breakpoint, break_range_command)
+	(decode_location_default): Update.
+	* ax-gdb.c (agent_command_1): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_download_tracepoint): Update.
 	* python/py-breakpoint.c (bppy_get_location): Update.
 	* guile/scm-breakpoint.c (bpscm_print_breakpoint_smob)
