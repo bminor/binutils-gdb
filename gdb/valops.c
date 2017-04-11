@@ -3169,33 +3169,6 @@ classify_oload_match (struct badness_vector *oload_champ_bv,
   return worst;
 }
 
-/* C++: return 1 is NAME is a legitimate name for the destructor of
-   type TYPE.  If TYPE does not have a destructor, or if NAME is
-   inappropriate for TYPE, an error is signaled.  Parameter TYPE should not yet
-   have CHECK_TYPEDEF applied, this function will apply it itself.  */
-
-int
-destructor_name_p (const char *name, struct type *type)
-{
-  if (name[0] == '~')
-    {
-      const char *dname = type_name_no_tag_or_error (type);
-      const char *cp = strchr (dname, '<');
-      unsigned int len;
-
-      /* Do not compare the template part for template classes.  */
-      if (cp == NULL)
-	len = strlen (dname);
-      else
-	len = cp - dname;
-      if (strlen (name + 1) != len || strncmp (dname, name + 1, len) != 0)
-	error (_("name of destructor must equal name of class"));
-      else
-	return 1;
-    }
-  return 0;
-}
-
 /* Find an enum constant named NAME in TYPE.  TYPE must be an "enum
    class".  If the name is found, return a value representing it;
    otherwise throw an exception.  */

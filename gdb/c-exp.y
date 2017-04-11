@@ -958,8 +958,6 @@ qualified_name:	TYPENAME COLONCOLON name
 			  memcpy (buf+1, $4.ptr, $4.length);
 			  buf[tmp_token.length] = 0;
 
-			  /* Check for valid destructor name.  */
-			  destructor_name_p (tmp_token.ptr, $1.type);
 			  write_exp_elt_opcode (pstate, OP_SCOPE);
 			  write_exp_elt_type (pstate, type);
 			  write_exp_string (pstate, tmp_token);

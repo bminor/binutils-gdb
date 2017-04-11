@@ -16370,8 +16370,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	}
 
       /* The exception for DW_TAG_typedef with has_children above is
-	 a workaround of GCC PR debug/47510.  In the case of this complaint
-	 type_name_no_tag_or_error will error on such types later.
+	 a workaround of GCC PR debug/47510.
 
 	 GDB skipped children of DW_TAG_typedef by the shortcut above and then
 	 it could not find the child DIEs referenced later, this is checked
@@ -16911,38 +16910,6 @@ fixup_partial_die (struct partial_die_info *part_die,
 	  || part_die->tag == DW_TAG_structure_type
 	  || part_die->tag == DW_TAG_union_type))
     guess_partial_die_structure_name (part_die, cu);
-
-  /* GCC might emit a nameless struct or union that has a linkage
-     name.  See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
-  if (part_die->name == NULL
-      && (part_die->tag == DW_TAG_class_type
-	  || part_die->tag == DW_TAG_interface_type
-	  || part_die->tag == DW_TAG_structure_type
-	  || part_die->tag == DW_TAG_union_type)
-      && part_die->linkage_name != NULL)
-    {
-      char *demangled;
-
-      demangled = gdb_demangle (part_die->linkage_name, DMGL_TYPES);
-      if (demangled)
-	{
-	  const char *base;
-
-	  /* Strip any leading namespaces/classes, keep only the base name.
-	     DW_AT_name for named DIEs does not contain the prefixes.  */
-	  base = strrchr (demangled, ':');
-	  if (base && base > demangled && base[-1] == ':')
-	    base++;
-	  else
-	    base = demangled;
-
-	  part_die->name
-	    = ((const char *)
-	       obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-			      base, strlen (base)));
-	  xfree (demangled);
-	}
-    }
 
   part_die->fixup_called = 1;
 }
@@ -20182,42 +20149,6 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
   return NULL;
 }
 
-/* GCC might emit a nameless typedef that has a linkage name.  Determine the
-   prefix part in such case.  See
-   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
-
-static char *
-anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
-{
-  struct attribute *attr;
-  const char *base;
-
-  if (die->tag != DW_TAG_class_type && die->tag != DW_TAG_interface_type
-      && die->tag != DW_TAG_structure_type && die->tag != DW_TAG_union_type)
-    return NULL;
-
-  if (dwarf2_string_attr (die, DW_AT_name, cu) != NULL)
-    return NULL;
-
-  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-  if (attr == NULL)
-    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
-  if (attr == NULL || DW_STRING (attr) == NULL)
-    return NULL;
-
-  /* dwarf2_name had to be already called.  */
-  gdb_assert (DW_STRING_IS_CANONICAL (attr));
-
-  /* Strip the base name, keep any leading namespaces/classes.  */
-  base = strrchr (DW_STRING (attr), ':');
-  if (base == NULL || base == DW_STRING (attr) || base[-1] != ':')
-    return "";
-
-  return (char *) obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-				 DW_STRING (attr),
-				 &base[-1] - DW_STRING (attr));
-}
-
 /* Return the name of the namespace/class that DIE is defined within,
    or "" if we can't tell.  The caller should not xfree the result.
 
@@ -20239,16 +20170,11 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *parent, *spec_die;
   struct dwarf2_cu *spec_cu;
   struct type *parent_type;
-  char *retval;
 
   if (cu->language != language_cplus
       && cu->language != language_fortran && cu->language != language_d
       && cu->language != language_rust)
     return "";
-
-  retval = anonymous_struct_prefix (die, cu);
-  if (retval)
-    return retval;
 
   /* We have to be careful in the presence of DW_AT_specification.
      For example, with GCC 3.4, given the code
@@ -20485,10 +20411,10 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if ((!attr || !DW_STRING (attr))
       && die->tag != DW_TAG_namespace
-      && die->tag != DW_TAG_class_type
+      /*      && die->tag != DW_TAG_class_type
       && die->tag != DW_TAG_interface_type
       && die->tag != DW_TAG_structure_type
-      && die->tag != DW_TAG_union_type)
+      && die->tag != DW_TAG_union_type*/)
     return NULL;
 
   switch (die->tag)

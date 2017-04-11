@@ -325,8 +325,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 			const char *nested_name,
 			const struct block *block)
 {
-  /* type_name_no_tag_required provides better error reporting using the
-     original type.  */
+  /* We report more useful errors using the original type.  */
   struct type *saved_parent_type = parent_type;
 
   parent_type = check_typedef (parent_type);
@@ -339,7 +338,7 @@ d_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_MODULE:
 	{
 	  int size;
-	  const char *parent_name = type_name_no_tag_or_error (saved_parent_type);
+	  const char *parent_name = TYPE_TAG_NAME (saved_parent_type);
 	  struct block_symbol sym
 	    = d_lookup_symbol_in_module (parent_name, nested_name,
 					 block, VAR_DOMAIN, 0);

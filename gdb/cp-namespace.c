@@ -301,6 +301,9 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
   unsigned int prefix_len;
   struct block_symbol sym;
 
+  if (the_namespace == NULL)
+    return cp_lookup_bare_symbol (NULL, name, block, domain, search);
+
   if (the_namespace[0] != '\0')
     {
       concatenated_name
@@ -927,8 +930,6 @@ cp_lookup_nested_symbol (struct type *parent_type,
 			 const struct block *block,
 			 const domain_enum domain)
 {
-  /* type_name_no_tag_or_error provides better error reporting using the
-     original type.  */
   struct type *saved_parent_type = parent_type;
 
   parent_type = check_typedef (parent_type);
@@ -956,16 +957,20 @@ cp_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_MODULE:
       {
 	int size;
-	const char *parent_name = type_name_no_tag_or_error (saved_parent_type);
+	const char *parent_name = TYPE_TAG_NAME (saved_parent_type);
 	struct block_symbol sym;
 	char *concatenated_name;
 	int is_in_anonymous;
 
-	size = strlen (parent_name) + 2 + strlen (nested_name) + 1;
+	size = (parent_name == NULL ? CP_ANONYMOUS_NAMESPACE_LEN
+		    : strlen (parent_name)) + 2 + strlen (nested_name) + 1;
 	concatenated_name = (char *) alloca (size);
 	xsnprintf (concatenated_name, size, "%s::%s",
-		   parent_name, nested_name);
-	is_in_anonymous = cp_is_in_anonymous (concatenated_name);
+		   (parent_name == NULL
+		    ? CP_ANONYMOUS_NAMESPACE_STR : parent_name)
+		   , nested_name);
+	is_in_anonymous = (parent_name == NULL
+			   ? 1 :cp_is_in_anonymous (concatenated_name));
 
 	sym = cp_lookup_nested_symbol_1 (parent_type, nested_name,
 					 concatenated_name, block, domain,
