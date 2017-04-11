@@ -1,3 +1,7 @@
+2017-04-11  Pedro Alves  <palves@redhat.com>
+
+	* thread.c: Fix whitespace throughout.
+
 2017-04-11  Philipp Rudo  <prudo@linux.vnet.ibm.com>
 
 	* linux-nat.c (linux_nat_detach): Remove delete_lwp call.

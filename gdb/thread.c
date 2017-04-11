@@ -529,11 +529,11 @@ find_thread_ptid (ptid_t ptid)
  * Calls a callback function once for each thread, so long as
  * the callback function returns false.  If the callback function
  * returns true, the iteration will end and the current thread
- * will be returned.  This can be useful for implementing a 
+ * will be returned.  This can be useful for implementing a
  * search for a thread with arbitrary attributes, or for applying
  * some operation to every thread.
  *
- * FIXME: some of the existing functionality, such as 
+ * FIXME: some of the existing functionality, such as
  * "Thread apply all", might be rewritten using this functionality.
  */
 
@@ -562,7 +562,7 @@ thread_count (void)
   for (tp = thread_list; tp; tp = tp->next)
     ++result;
 
-  return result;  
+  return result;
 }
 
 int
@@ -943,8 +943,8 @@ set_running (ptid_t ptid, int running)
   int all = ptid == minus_one_ptid;
   int any_started = 0;
 
-  /* We try not to notify the observer if no thread has actually changed 
-     the running state -- merely to reduce the number of messages to 
+  /* We try not to notify the observer if no thread has actually changed
+     the running state -- merely to reduce the number of messages to
      frontend.  Frontend is supposed to handle multiple *running just fine.  */
   if (all || ptid_is_pid (ptid))
     {
@@ -1082,8 +1082,8 @@ finish_thread_state (ptid_t ptid)
     {
       for (tp = thread_list; tp; tp = tp->next)
 	{
- 	  if (tp->state == THREAD_EXITED)
-  	    continue;
+	  if (tp->state == THREAD_EXITED)
+	    continue;
 	  if (all || ptid_get_pid (ptid) == ptid_get_pid (tp->ptid))
 	    {
 	      if (set_running_thread (tp, tp->executing))
@@ -1409,8 +1409,8 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
 /* Implementation of the "info threads" command.
 
    Note: this has the drawback that it _really_ switches
-         threads, which frees the frame cache.  A no-side
-         effects info-threads command would be nicer.  */
+	 threads, which frees the frame cache.  A no-side
+	 effects info-threads command would be nicer.  */
 
 static void
 info_threads_command (char *arg, int from_tty)
@@ -1764,16 +1764,16 @@ thread_apply_all_command (char *cmd, int from_tty)
       int i = 0, k;
 
       /* Save a copy of the thread_list in case we execute detach
-         command.  */
+	 command.  */
       tp_array = XNEWVEC (struct thread_info *, tc);
       make_cleanup (xfree, tp_array);
 
       ALL_NON_EXITED_THREADS (tp)
-        {
-          tp_array[i] = tp;
-          tp->incref ();
-          i++;
-        }
+	{
+	  tp_array[i] = tp;
+	  tp->incref ();
+	  i++;
+	}
       /* Because we skipped exited threads, we may end up with fewer
 	 threads in the array than the total count of threads.  */
       gdb_assert (i <= tc);
@@ -1786,16 +1786,16 @@ thread_apply_all_command (char *cmd, int from_tty)
       make_cleanup (set_thread_refcount, &ta_cleanup);
 
       for (k = 0; k != i; k++)
-        if (thread_alive (tp_array[k]))
-          {
-            switch_to_thread (tp_array[k]->ptid);
-            printf_filtered (_("\nThread %s (%s):\n"),
+	if (thread_alive (tp_array[k]))
+	  {
+	    switch_to_thread (tp_array[k]->ptid);
+	    printf_filtered (_("\nThread %s (%s):\n"),
 			     print_thread_id (tp_array[k]),
 			     target_pid_to_str (inferior_ptid));
-            execute_command (cmd, from_tty);
+	    execute_command (cmd, from_tty);
 
-            /* Restore exact command used previously.  */
-            strcpy (cmd, saved_cmd);
+	    /* Restore exact command used previously.  */
+	    strcpy (cmd, saved_cmd);
 	  }
     }
 
@@ -1937,7 +1937,8 @@ thread_command (char *tidstr, int from_tty)
       if (result == GDB_RC_FAIL)
 	return;
 
-      /* Print if the thread has not changed, otherwise an event will be sent.  */
+      /* Print if the thread has not changed, otherwise an event will
+	 be sent.  */
       if (inferior_ptid == previous_ptid)
 	{
 	  print_selected_thread_frame (current_uiout,
@@ -2027,11 +2028,11 @@ thread_find_command (char *arg, int from_tty)
 int print_thread_events = 1;
 static void
 show_print_thread_events (struct ui_file *file, int from_tty,
-                          struct cmd_list_element *c, const char *value)
+			  struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file,
 		    _("Printing of thread events is %s.\n"),
-                    value);
+		    value);
 }
 
 static int
@@ -2170,7 +2171,8 @@ thread_num_make_value_helper (struct gdbarch *gdbarch, int global)
    threads exist.  */
 
 static struct value *
-thread_id_per_inf_num_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+thread_id_per_inf_num_make_value (struct gdbarch *gdbarch,
+				  struct internalvar *var,
 				  void *ignore)
 {
   return thread_num_make_value_helper (gdbarch, 0);
@@ -2212,7 +2214,7 @@ _initialize_thread (void)
 {
   static struct cmd_list_element *thread_apply_list = NULL;
 
-  add_info ("threads", info_threads_command, 
+  add_info ("threads", info_threads_command,
 	    _("Display currently known threads.\n\
 Usage: info threads [-gid] [ID]...\n\
 -gid: Show global thread IDs.\n\
@@ -2252,12 +2254,12 @@ Will display thread ids whose name, target ID, or extra info matches REGEXP."),
   add_com_alias ("t", "thread", class_run, 1);
 
   add_setshow_boolean_cmd ("thread-events", no_class,
-         &print_thread_events, _("\
+			   &print_thread_events, _("\
 Set printing of thread events (such as thread start and exit)."), _("\
 Show printing of thread events (such as thread start and exit)."), NULL,
-         NULL,
-         show_print_thread_events,
-         &setprintlist, &showprintlist);
+			   NULL,
+			   show_print_thread_events,
+			   &setprintlist, &showprintlist);
 
   create_internalvar_type_lazy ("_thread", &thread_funcs, NULL);
   create_internalvar_type_lazy ("_gthread", &gthread_funcs, NULL);
