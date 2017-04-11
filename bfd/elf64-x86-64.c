@@ -6913,8 +6913,8 @@ elf_x86_64_parse_gnu_properties (bfd *abfd, unsigned int type,
 	{
 	  _bfd_error_handler
 	    ((type == GNU_PROPERTY_X86_ISA_1_USED
-	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>\n")
-	      : _("error: %B: <corrupt x86 ISA needed size: 0x%x>\n")),
+	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>")
+	      : _("error: %B: <corrupt x86 ISA needed size: 0x%x>")),
 	     abfd, datasz);
 	  return property_corrupt;
 	}

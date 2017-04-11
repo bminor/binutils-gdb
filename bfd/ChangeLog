@@ -1,5 +1,12 @@
 2017-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-properties.c (_bfd_elf_parse_gnu_properties): Remove the
+	extra `\n' in warning/error messages.
+	* elf32-i386.c (elf_i386_parse_gnu_properties): Likewise.
+	* elf64-x86-64.c (elf_x86_64_parse_gnu_properties): Likewise.
+
+2017-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-properties.c (_bfd_elf_parse_gnu_properties): Ignore
 	processor-specific properties with generic ELF target vector.
 
