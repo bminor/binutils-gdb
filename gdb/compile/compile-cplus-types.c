@@ -1298,7 +1298,7 @@ ccp_convert_struct_or_union (compile_cplus_instance *instance,
 
   /* Get the decl name of this type.  */
   if (TYPE_NAME (type) != NULL)
-      name = decl_name (TYPE_NAME (type));
+    name = decl_name (TYPE_NAME (type));
 
   /* First things first: If this type has any templates in it, make sure
      that we collect default arguments and get those types defined BEFORE

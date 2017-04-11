@@ -478,7 +478,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (TYPE_CODE (gdb_ptr_type) != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
-  gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_ptr_type);
+  gdb_type_from_ptr = check_typedef (TYPE_TARGET_TYPE (gdb_ptr_type));
 
   if (types_deeply_equal (gdb_type, gdb_type_from_ptr))
     {

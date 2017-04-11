@@ -45,6 +45,6 @@ gdb_continue_to_breakpoint "testing location"
 
 gdb_test "compile print integers" " = \\{0, 0, 0, 0, 0, 0, 0, 0, 0, 0\\}"
 
-gdb_test "compile print strings" " = \\{$hex \"hello\", $hex \"hello\", \
-$hex \"hello\", $hex \"hello\", $hex \"hello\", $hex \"hello\", \
-$hex \"hello\", $hex \"hello\", $hex \"hello\", $hex \"hello\"\\}"
+gdb_test "compile print strings" " = \\{$hex \"hello\", $hex \"hello\",\
+    $hex \"hello\", $hex \"hello\", $hex \"hello\", $hex \"hello\",\
+    $hex \"hello\", $hex \"hello\", $hex \"hello\", $hex \"hello\"\\}"

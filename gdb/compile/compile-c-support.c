@@ -487,18 +487,23 @@ struct cplus_add_input
   {
     switch (type)
       {
-      case COMPILE_I_PRINT_ADDRESS_SCOPE:
       case COMPILE_I_PRINT_VALUE_SCOPE:
+      case COMPILE_I_PRINT_ADDRESS_SCOPE:
 	fprintf_unfiltered
 	  (buf,
+	   /* "auto" strips ref- and cv- qualifiers, so we need to also strip
+	      those from COMPILE_I_EXPR_PTR_TYPE.  */
 	   "auto " COMPILE_I_EXPR_VAL " = %s;\n"
-	   "decltype ( %s ) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+	   "typedef "
+	     "std::add_pointer<std::remove_cv<decltype (%s)>::type>::type "
+	     " __gdb_expr_ptr;\n"
+	   "__gdb_expr_ptr " COMPILE_I_EXPR_PTR_TYPE ";\n"
 	   "std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s ("
 	   COMPILE_I_EXPR_VAL "),\n"
-	   "sizeof (decltype(%s)));\n"
+	   "\tsizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
 	   ,input, input,
 	   (type == COMPILE_I_PRINT_ADDRESS_SCOPE
-	    ? "std::__addressof" : ""), input);
+	    ? "std::__addressof" : ""));
 	break;
 
       default:
@@ -512,7 +517,7 @@ struct cplus_add_input
 /* A host class representing a compile program.
 
    CompileInstanceType is the type of the compile_instance for the
-   langauge.
+   language.
 
    PushUserExpressionPolicy and PopUserExpressionPolicy are used to
    push and pop user expression pragmas to the compile plug-in.
