@@ -113,7 +113,15 @@ bad_size:
 
       if (type >= GNU_PROPERTY_LOPROC)
 	{
-	  if (type < GNU_PROPERTY_LOUSER && bed->parse_gnu_properties)
+	  if (bed->elf_machine_code == EM_NONE)
+	    {
+	      /* Ignore processor-specific properties with generic ELF
+		 target vector.  They should be handled by the matching
+		 ELF target vector.  */
+	      goto next;
+	    }
+	  else if (type < GNU_PROPERTY_LOUSER
+		   && bed->parse_gnu_properties)
 	    {
 	      enum elf_property_kind kind
 		= bed->parse_gnu_properties (abfd, type, ptr, datasz);
