@@ -8160,7 +8160,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      gdb_byte buf[MAX_REGISTER_SIZE];
+      gdb_byte buf[FP_REGISTER_SIZE];
 
       switch (gdbarch_tdep (gdbarch)->fp_model)
 	{
