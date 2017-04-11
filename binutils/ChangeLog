@@ -1,5 +1,9 @@
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* readelf.c (process_mips_specific): Remove null GOT data check.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/binutils-all/mips/mips16-alias.d: New test.
 	* testsuite/binutils-all/mips/mips16-noalias.d: New test.
 	* testsuite/binutils-all/mips/mips16-alias.s: New test source.

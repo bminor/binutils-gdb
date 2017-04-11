@@ -15483,8 +15483,7 @@ process_mips_specific (FILE * file)
       data = (unsigned char *) get_data (NULL, file, offset,
                                          global_end - pltgot, 1,
 					 _("Global Offset Table data"));
-      if (data == NULL)
-	return FALSE;
+      /* PR 12855: Null data is handled gracefully throughout.  */
       data_end = data + (global_end - pltgot);
 
       printf (_("\nPrimary GOT:\n"));
