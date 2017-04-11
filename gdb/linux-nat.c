@@ -1549,7 +1549,6 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 
       inf_ptrace_detach_success (ops);
     }
-  delete_lwp (main_lwp->ptid);
 }
 
 /* Resume execution of the inferior process.  If STEP is nonzero,
