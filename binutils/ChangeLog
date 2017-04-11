@@ -1,5 +1,10 @@
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* readelf.c (process_mips_specific): Remove error reporting from
+	GOT[1] processing.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* readelf.c (process_mips_specific): Remove null GOT data check.
 
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
