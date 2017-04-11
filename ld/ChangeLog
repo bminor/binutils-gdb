@@ -1,3 +1,25 @@
+2017-04-11  Alan Modra  <amodra@gmail.com>
+
+	PR 21274
+	PR 18466
+	* emultempl/pe.em (pe_find_data_imports): Don't use fixed size
+	symbol buffer.  Instead, xmalloc max size needed with space for
+	prefix.  Wrap overlong lines.  Formatting.  Pass symbol buffer
+	copy of name to pe_walk_relocs_of_symbol.
+	(make_inport_fixup): Add "name" param, pass to pe_create_import_fixup.
+	* emultempl/pe.em (pep_find_data_imports): As for pe_find_data_imports.
+	(make_import_fixup): Add "name" param, pass to pep_create_import_fixup.
+	Use bfd_get_signed_* and remove unnecessary casts.  Formatting.
+	* pe-dll.c (pe_walk_relocs_of_symbol): Add "name" param.  Pass to
+	callback.
+	(make_import_fixup_mark): Add "name" param.  Make use of prefix
+	space rather than xmalloc here.
+	(pe_create_import_fixup): Likewise.
+	* pe-dll.h (pe_walk_relocs_of_symbol): Update prototype.
+	(pe_create_import_fixup): Likewise.
+	* pep-dll.h (pep_walk_relocs_of_symbol): Likewise.
+	(pep_create_import_fixup): Likewise.
+
 2017-04-10  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (--strip-discarded): Document.
