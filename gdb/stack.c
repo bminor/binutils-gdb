@@ -1196,7 +1196,6 @@ print_frame (struct frame_info *frame, int print_level,
     {
       struct gdbarch *gdbarch = get_frame_arch (frame);
       int numargs;
-      struct cleanup *args_list_chain;
 
       if (gdbarch_frame_num_args_p (gdbarch))
 	{
@@ -1206,20 +1205,20 @@ print_frame (struct frame_info *frame, int print_level,
       else
 	numargs = -1;
     
-      args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
-      TRY
-	{
-	  print_frame_args (func, frame, numargs, gdb_stdout);
-	}
-      CATCH (e, RETURN_MASK_ERROR)
-	{
-	}
-      END_CATCH
+      {
+	ui_out_emit_list list_emitter (uiout, "args");
+	TRY
+	  {
+	    print_frame_args (func, frame, numargs, gdb_stdout);
+	  }
+	CATCH (e, RETURN_MASK_ERROR)
+	  {
+	  }
+	END_CATCH
 
-      /* FIXME: ARGS must be a list.  If one argument is a string it
-	  will have " that will not be properly escaped.  */
-      /* Invoke ui_out_tuple_end.  */
-      do_cleanups (args_list_chain);
+	/* FIXME: ARGS must be a list.  If one argument is a string it
+	   will have " that will not be properly escaped.  */
+      }
       QUIT;
     }
   uiout->text (")");

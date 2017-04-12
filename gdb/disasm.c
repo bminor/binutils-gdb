@@ -732,13 +732,9 @@ do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  CORE_ADDR low, CORE_ADDR high,
 		  int how_many, int flags)
 {
-  struct cleanup *ui_out_chain;
-
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list list_emitter (uiout, "asm_insns");
 
   dump_insns (gdbarch, uiout, low, high, how_many, flags, NULL);
-
-  do_cleanups (ui_out_chain);
 }
 
 /* Initialize the disassemble info struct ready for the specified

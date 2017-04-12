@@ -772,16 +772,14 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	{
 	  int j;
 	  varobj_p child;
-	  struct cleanup *cleanup;
 
-	  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "new_children");
+	  ui_out_emit_list list_emitter (uiout, "new_children");
 	  for (j = 0; VEC_iterate (varobj_p, r->newobj, j, child); ++j)
 	    {
 	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	      print_varobj (child, print_values, 1 /* print_expression */);
 	    }
 
-	  do_cleanups (cleanup);
 	  VEC_free (varobj_p, r->newobj);
 	  r->newobj = NULL;	/* Paranoia.  */
 	}

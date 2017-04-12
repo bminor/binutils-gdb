@@ -686,8 +686,7 @@ print_one_inferior (struct inferior *inferior, void *xdata)
       if (!VEC_empty (int, data.cores))
 	{
 	  int *b, *e;
-	  struct cleanup *back_to_2 =
-	    make_cleanup_ui_out_list_begin_end (uiout, "cores");
+	  ui_out_emit_list list_emitter (uiout, "cores");
 
 	  qsort (VEC_address (int, data.cores),
 		 VEC_length (int, data.cores), sizeof (int),
@@ -699,8 +698,6 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 
 	  for (; b != e; ++b)
 	    uiout->field_int (NULL, *b);
-
-	  do_cleanups (back_to_2);
 	}
 
       if (top_data->recurse)
@@ -994,7 +991,6 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   int regnum, numregs;
   int i;
-  struct cleanup *cleanup;
 
   /* Note that the test for a valid register must include checking the
      gdbarch_register_name because gdbarch_num_regs may be allocated
@@ -1006,7 +1002,7 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
   gdbarch = get_current_arch ();
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
-  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");
+  ui_out_emit_list list_emitter (uiout, "register-names");
 
   if (argc == 0)		/* No args, just do all the regs.  */
     {
@@ -1035,7 +1031,6 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
       else
 	uiout->field_string (NULL, gdbarch_register_name (gdbarch, regnum));
     }
-  do_cleanups (cleanup);
 }
 
 void
@@ -1157,7 +1152,6 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   struct gdbarch *gdbarch;
   int regnum, numregs, format;
   int i;
-  struct cleanup *list_cleanup;
   int skip_unavailable = 0;
   int oind = 0;
   enum opt
@@ -1204,7 +1198,7 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   gdbarch = get_frame_arch (frame);
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
-  list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
+  ui_out_emit_list list_emitter (uiout, "register-values");
 
   if (argc - oind == 1)
     {
@@ -1234,7 +1228,6 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
       else
 	error (_("bad register number"));
     }
-  do_cleanups (list_cleanup);
 }
 
 /* Output one register REGNUM's contents in the desired FORMAT.  If
@@ -1830,10 +1823,9 @@ mi_cmd_list_features (const char *command, char **argv, int argc)
 {
   if (argc == 0)
     {
-      struct cleanup *cleanup = NULL;
       struct ui_out *uiout = current_uiout;
 
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
+      ui_out_emit_list list_emitter (uiout, "features");
       uiout->field_string (NULL, "frozen-varobjs");
       uiout->field_string (NULL, "pending-breakpoints");
       uiout->field_string (NULL, "thread-info");
@@ -1848,7 +1840,6 @@ mi_cmd_list_features (const char *command, char **argv, int argc)
       if (ext_lang_initialized_p (get_ext_lang_defn (EXT_LANG_PYTHON)))
 	uiout->field_string (NULL, "python");
 
-      do_cleanups (cleanup);
       return;
     }
 
@@ -1860,15 +1851,13 @@ mi_cmd_list_target_features (const char *command, char **argv, int argc)
 {
   if (argc == 0)
     {
-      struct cleanup *cleanup = NULL;
       struct ui_out *uiout = current_uiout;
 
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
+      ui_out_emit_list list_emitter (uiout, "features");
       if (mi_async_p ())
 	uiout->field_string (NULL, "async");
       if (target_can_execute_reverse)
 	uiout->field_string (NULL, "reverse");
-      do_cleanups (cleanup);
       return;
     }
 
@@ -2787,12 +2776,9 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Explicitly wholly collected variables.  */
   {
-    struct cleanup *list_cleanup;
     int i;
 
-    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout,
-						       "explicit-variables");
-
+    ui_out_emit_list list_emitter (uiout, "explicit-variables");
     const std::vector<std::string> &wholly_collected
       = clist->wholly_collected ();
     for (size_t i = 0; i < wholly_collected.size (); i++)
@@ -2800,19 +2786,14 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	const std::string &str = wholly_collected[i];
 	print_variable_or_computed (str.c_str (), var_print_values);
       }
-
-    do_cleanups (list_cleanup);
   }
 
   /* Computed expressions.  */
   {
-    struct cleanup *list_cleanup;
     char *p;
     int i;
 
-    list_cleanup
-      = make_cleanup_ui_out_list_begin_end (uiout,
-					    "computed-expressions");
+    ui_out_emit_list list_emitter (uiout, "computed-expressions");
 
     const std::vector<std::string> &computed = clist->computed ();
     for (size_t i = 0; i < computed.size (); i++)
@@ -2820,8 +2801,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	const std::string &str = computed[i];
 	print_variable_or_computed (str.c_str (), comp_print_values);
       }
-
-    do_cleanups (list_cleanup);
   }
 
   /* Registers.  Given pseudo-registers, and that some architectures
@@ -2829,13 +2808,12 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
      the trace frame info, but instead consult the register cache for
      register availability.  */
   {
-    struct cleanup *list_cleanup;
     struct frame_info *frame;
     struct gdbarch *gdbarch;
     int regnum;
     int numregs;
 
-    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "registers");
+    ui_out_emit_list list_emitter (uiout, "registers");
 
     frame = get_selected_frame (NULL);
     gdbarch = get_frame_arch (frame);
@@ -2849,8 +2827,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
 	output_register (frame, regnum, registers_format, 1);
       }
-
-    do_cleanups (list_cleanup);
   }
 
   /* Trace state variables.  */

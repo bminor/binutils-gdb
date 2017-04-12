@@ -4885,13 +4885,11 @@ print_solib_event (int is_catchpoint)
 
   if (any_deleted)
     {
-      struct cleanup *cleanup;
       char *name;
       int ix;
 
       current_uiout->text (_("  Inferior unloaded "));
-      cleanup = make_cleanup_ui_out_list_begin_end (current_uiout,
-						    "removed");
+      ui_out_emit_list list_emitter (current_uiout, "removed");
       for (ix = 0;
 	   VEC_iterate (char_ptr, current_program_space->deleted_solibs,
 			ix, name);
@@ -4902,19 +4900,15 @@ print_solib_event (int is_catchpoint)
 	  current_uiout->field_string ("library", name);
 	  current_uiout->text ("\n");
 	}
-
-      do_cleanups (cleanup);
     }
 
   if (any_added)
     {
       struct so_list *iter;
       int ix;
-      struct cleanup *cleanup;
 
       current_uiout->text (_("  Inferior loaded "));
-      cleanup = make_cleanup_ui_out_list_begin_end (current_uiout,
-						    "added");
+      ui_out_emit_list list_emitter (current_uiout, "added");
       for (ix = 0;
 	   VEC_iterate (so_list_ptr, current_program_space->added_solibs,
 			ix, iter);
@@ -4925,8 +4919,6 @@ print_solib_event (int is_catchpoint)
 	  current_uiout->field_string ("library", iter->so_name);
 	  current_uiout->text ("\n");
 	}
-
-      do_cleanups (cleanup);
     }
 }
 
@@ -6271,7 +6263,6 @@ output_thread_groups (struct ui_out *uiout,
 		      VEC(int) *inf_num,
 		      int mi_only)
 {
-  struct cleanup *back_to;
   int is_mi = uiout->is_mi_like_p ();
   int inf;
   int i;
@@ -6281,7 +6272,7 @@ output_thread_groups (struct ui_out *uiout,
   if (!is_mi && mi_only)
     return;
 
-  back_to = make_cleanup_ui_out_list_begin_end (uiout, field_name);
+  ui_out_emit_list list_emitter (uiout, field_name);
 
   for (i = 0; VEC_iterate (int, inf_num, i, inf); ++i)
     {
@@ -6302,8 +6293,6 @@ output_thread_groups (struct ui_out *uiout,
 	  uiout->text (plongest (inf));
 	}
     }
-
-  do_cleanups (back_to);
 }
 
 /* Print B to gdb_stdout.  */

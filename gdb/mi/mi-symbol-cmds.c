@@ -33,7 +33,6 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
   char *filename;
   struct symtab *s;
   int i;
-  struct cleanup *cleanup_stack;
   struct ui_out *uiout = current_uiout;
 
   if (argc != 1)
@@ -50,8 +49,8 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
      need to perform any other sorting.  */
 
   gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-  cleanup_stack = make_cleanup_ui_out_list_begin_end (uiout, "lines");
 
+  ui_out_emit_list list_emitter (uiout, "lines");
   if (SYMTAB_LINETABLE (s) != NULL && SYMTAB_LINETABLE (s)->nitems > 0)
     for (i = 0; i < SYMTAB_LINETABLE (s)->nitems; i++)
     {
@@ -59,6 +58,4 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
       uiout->field_core_addr ("pc", gdbarch, SYMTAB_LINETABLE (s)->item[i].pc);
       uiout->field_int ("line", SYMTAB_LINETABLE (s)->item[i].line);
     }
-
-  do_cleanups (cleanup_stack);
 }

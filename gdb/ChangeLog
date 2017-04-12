@@ -1,5 +1,28 @@
 2017-04-22  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Use
+	ui_out_emit_list.
+	* stack.c (print_frame): Use ui_out_emit_list.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Use
+	ui_out_emit_list.
+	* mi/mi-main.c (print_one_inferior)
+	(mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_register_values, mi_cmd_list_features)
+	(mi_cmd_list_target_features, mi_cmd_trace_frame_collected): Use
+	ui_out_emit_list.
+	* mi/mi-interp.c (mi_on_normal_stop_1): Use ui_out_emit_list.
+	(mi_output_solib_attribs): Use ui_out_emit_list,
+	ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_list.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_list_args, list_args_or_locals): Use
+	ui_out_emit_list.
+	* disasm.c (do_assembly_only): Use ui_out_emit_list.
+	* breakpoint.c (print_solib_event, output_thread_groups): Use
+	ui_out_emit_list.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (print_variable_or_computed): Use ui_out_emit_tuple.
 	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_tuple.
 	* mi/mi-cmd-stack.c (list_arg_or_local): Use ui_out_emit_tuple.
