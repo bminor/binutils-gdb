@@ -155,7 +155,7 @@ static pthdb_session_t pd_session;
 /* Return a printable representation of pthdebug function return
    STATUS.  */
 
-static char *
+static const char *
 pd_status2str (int status)
 {
   switch (status)

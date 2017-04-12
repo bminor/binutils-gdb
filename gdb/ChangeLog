@@ -1,3 +1,7 @@
+2017-04-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aix-thread.c (pd_status2str): Change return type to const char *.
+
 2017-04-12  Pedro Alves  <palves@redhat.com>
 
 	* i386-tdep.c (i386_elf_init_abi, i386_go32_init_abi): Remove
