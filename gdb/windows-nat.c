@@ -2432,7 +2432,7 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
 #else  /* !__CYGWIN__ */
   char real_path[__PMAX];
   char shell[__PMAX]; /* Path to shell */
-  char *toexec;
+  const char *toexec;
   const char *allargs = origallargs.c_str ();
   char *args, *allargs_copy;
   size_t args_len, allargs_len;
