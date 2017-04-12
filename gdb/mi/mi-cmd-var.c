@@ -30,6 +30,7 @@
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"
+#include "common/gdb_optional.h"
 
 extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
@@ -712,10 +713,10 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
   for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
     {
       int from, to;
-      struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
+      gdb::optional<ui_out_emit_tuple> tuple_emitter;
       if (mi_version (uiout) > 1)
-	make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	tuple_emitter.emplace (uiout, nullptr);
       uiout->field_string ("name", varobj_get_objname (r->varobj));
 
       switch (r->status)
@@ -784,8 +785,6 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	  VEC_free (varobj_p, r->newobj);
 	  r->newobj = NULL;	/* Paranoia.  */
 	}
-
-      do_cleanups (cleanup);
     }
   VEC_free (varobj_update_result, changes);
 }

@@ -34,6 +34,7 @@
 #include "extension.h"
 #include <ctype.h>
 #include "mi-parse.h"
+#include "common/gdb_optional.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -483,7 +484,6 @@ static void
 list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 		   enum print_values values, int skip_unavailable)
 {
-  struct cleanup *old_chain;
   struct ui_out *uiout = current_uiout;
 
   gdb_assert (!arg->val || !arg->error);
@@ -507,10 +507,9 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 					 TYPE_LENGTH (value_type (arg->val))))))
     return;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
-
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
   if (values != PRINT_NO_VALUES || what == all)
-    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+    tuple_emitter.emplace (uiout, nullptr);
 
   string_file stb;
 
@@ -556,8 +555,6 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	stb.printf (_("<error reading variable: %s>"), error_message);
       uiout->field_stream ("value", stb);
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Print a list of the objects for the frame FI in a certain form,

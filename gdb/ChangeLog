@@ -1,5 +1,11 @@
 2017-04-22  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (print_variable_or_computed): Use ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_tuple.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Use ui_out_emit_tuple.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (tvariables_info_1)
 	(print_one_static_tracepoint_marker): Use ui_out_emit_tuple.
 

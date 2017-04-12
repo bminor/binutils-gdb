@@ -2656,7 +2656,6 @@ mi_cmd_ada_task_info (const char *command, char **argv, int argc)
 static void
 print_variable_or_computed (const char *expression, enum print_values values)
 {
-  struct cleanup *old_chain;
   struct value *val;
   struct type *type;
   struct ui_out *uiout = current_uiout;
@@ -2670,9 +2669,9 @@ print_variable_or_computed (const char *expression, enum print_values values)
   else
     val = evaluate_expression (expr.get ());
 
-  old_chain = make_cleanup (null_cleanup, NULL);
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
   if (values != PRINT_NO_VALUES)
-    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+    tuple_emitter.emplace (uiout, nullptr);
   uiout->field_string ("name", expression);
 
   switch (values)
@@ -2704,8 +2703,6 @@ print_variable_or_computed (const char *expression, enum print_values values)
       }
       break;
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Implement the "-trace-frame-collected" command.  */
