@@ -5204,10 +5204,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Wide character types.  */
   builtin_type->builtin_char16
-    = arch_integer_type (gdbarch, 16, 0, "char16_t");
+    = arch_integer_type (gdbarch, 16, 1, "char16_t");
   builtin_type->builtin_char32
-    = arch_integer_type (gdbarch, 32, 0, "char32_t");
-	
+    = arch_integer_type (gdbarch, 32, 1, "char32_t");
 
   /* Default data/code pointer types.  */
   builtin_type->builtin_data_ptr

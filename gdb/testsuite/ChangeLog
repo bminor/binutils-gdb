@@ -1,3 +1,9 @@
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR c++/21323
+	* gdb.cp/wide_char_types.c: New file.
+	* gdb.cp/wide_char_types.exp: New file.
+
 2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21352

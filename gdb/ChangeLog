@@ -1,3 +1,16 @@
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR c++/21323
+	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_char16_t,
+	cplus_primitive_type_char32_t>: New enum values.
+	(cplus_language_arch_info): Register cplus_primitive_type_char16_t
+	and cplus_primitive_type_char32_t.
+	* dwarf2read.c (read_base_type) <DW_ATE_UTF>: If bit size is 16 or
+	32, use the archtecture's built-in type for char16_t and char32_t,
+	respectively.  Otherwise, fallback to init_integer_type as before,
+	but make the type unsigned, and issue a complaint.
+	* gdbtypes.c (gdbtypes_post_init): Make char16_t and char32_t unsigned.
+
 2017-04-12  Alan Hayward  <alan.hayward@arm.com>
 
 	* m32r-tdep.c (M32R_ARG_REGISTER_SIZE): Added.
