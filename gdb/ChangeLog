@@ -1,3 +1,17 @@
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add i386-go32-tdep.o.
+	* configure.tgt: Handle i[34567]86-*-go32* and
+	i[34567]86-*-msdosdjgpp*.
+	* i386-tdep.c (i386_svr4_reg_to_regnum):
+	Make extern.
+	(i386_go32_init_abi, i386_coff_osabi_sniffer): Moved to
+	i386-go32-tdep.c.
+	(_initialize_i386_tdep): DJGPP bits moved to i386-go32-tdep.c.
+	* i386-go32-tdep.c: New file.
+	* i386-tdep.h (tdesc_i386_mmx, i386_svr4_reg_to_regnum): New
+	declarations.
+
 2017-04-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* aix-thread.c (pd_status2str): Change return type to const char *.

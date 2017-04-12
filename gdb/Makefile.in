@@ -810,6 +810,7 @@ ALL_TARGET_OBS = \
 	i386-dicos-tdep.o \
 	i386-fbsd-tdep.o \
 	i386-gnu-tdep.o \
+	i386-go32-tdep.o \
 	i386-linux-tdep.o \
 	i386-nbsd-tdep.o \
 	i386-nto-tdep.o \
