@@ -961,14 +961,12 @@ print_one_bfd (void **slot, void *data)
   bfd *abfd = (struct bfd *) *slot;
   struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
   struct ui_out *uiout = (struct ui_out *) data;
-  struct cleanup *inner;
 
-  inner = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
   uiout->field_int ("refcount", gdata->refc);
   uiout->field_string ("addr", host_address_to_string (abfd));
   uiout->field_string ("filename", bfd_get_filename (abfd));
   uiout->text ("\n");
-  do_cleanups (inner);
 
   return 1;
 }

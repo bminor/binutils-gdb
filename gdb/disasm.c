@@ -437,18 +437,15 @@ do_mixed_source_and_assembly_deprecated
 		  for (; next_line < mle[i].line; next_line++)
 		    {
 		      struct cleanup *ui_out_list_chain_line;
-		      struct cleanup *ui_out_tuple_chain_line;
 		      
-		      ui_out_tuple_chain_line
-			= make_cleanup_ui_out_tuple_begin_end (uiout,
-							       "src_and_asm_line");
+		      ui_out_emit_tuple tuple_emitter (uiout,
+						       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  psl_flags);
 		      ui_out_list_chain_line
 			= make_cleanup_ui_out_list_begin_end (uiout,
 							      "line_asm_insn");
 		      do_cleanups (ui_out_list_chain_line);
-		      do_cleanups (ui_out_tuple_chain_line);
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added.  */
@@ -680,22 +677,18 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		 a bunch of line tuples with no asm entries.  */
 	      int l;
 	      struct cleanup *ui_out_list_chain_line;
-	      struct cleanup *ui_out_tuple_chain_line;
 
 	      gdb_assert (sal.symtab != NULL);
 	      for (l = start_preceding_line_to_display;
 		   l < end_preceding_line_to_display;
 		   ++l)
 		{
-		  ui_out_tuple_chain_line
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  ui_out_emit_tuple tuple_emitter (uiout, "src_and_asm_line");
 		  print_source_lines (sal.symtab, l, l + 1, psl_flags);
 		  ui_out_list_chain_line
 		    = make_cleanup_ui_out_list_begin_end (uiout,
 							  "line_asm_insn");
 		  do_cleanups (ui_out_list_chain_line);
-		  do_cleanups (ui_out_tuple_chain_line);
 		}
 	    }
 	  ui_out_tuple_chain

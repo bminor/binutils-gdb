@@ -678,10 +678,9 @@ info_probes_for_ops (const char *arg, int from_tty,
 
   for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
     {
-      struct cleanup *inner;
       const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
-      inner = make_cleanup_ui_out_tuple_begin_end (current_uiout, "probe");
+      ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
 
       current_uiout->field_string ("type",probe_type);
       current_uiout->field_string ("provider", probe->probe->provider);
@@ -708,8 +707,6 @@ info_probes_for_ops (const char *arg, int from_tty,
       current_uiout->field_string ("object",
 			   objfile_name (probe->objfile));
       current_uiout->text ("\n");
-
-      do_cleanups (inner);
     }
 
   any_found = !VEC_empty (bound_probe_s, probes);

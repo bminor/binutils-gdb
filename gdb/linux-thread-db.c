@@ -1636,7 +1636,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   /* Note I is incremented inside the cycle, not at its end.  */
   for (i = 0; i < info_count;)
     {
-      struct cleanup *chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
       char *pids_end;
 
       info = array[i];
@@ -1661,7 +1661,6 @@ info_auto_load_libthread_db (char *args, int from_tty)
       uiout->field_string ("pids", pids);
 
       uiout->text ("\n");
-      do_cleanups (chain);
     }
 
   do_cleanups (back_to);

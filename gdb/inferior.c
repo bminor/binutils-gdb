@@ -587,12 +587,10 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
   uiout->table_body ();
   for (inf = inferior_list; inf; inf = inf->next)
     {
-      struct cleanup *chain2;
-
       if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       if (inf == current_inferior ())
 	uiout->field_string ("current", "*");
@@ -623,7 +621,6 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 	}
 
       uiout->text ("\n");
-      do_cleanups (chain2);
     }
 
   do_cleanups (old_chain);

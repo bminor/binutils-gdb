@@ -6619,12 +6619,9 @@ print_one_breakpoint_location (struct breakpoint *b,
   l = b->commands ? b->commands->commands : NULL;
   if (!part_of_multiple && l)
     {
-      struct cleanup *script_chain;
-
       annotate_field (9);
-      script_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "script");
+      ui_out_emit_tuple tuple_emitter (uiout, "script");
       print_command_lines (uiout, l, 4);
-      do_cleanups (script_chain);
     }
 
   if (is_tracepoint (b))
@@ -6679,13 +6676,13 @@ print_one_breakpoint (struct breakpoint *b,
 		      struct bp_location **last_loc, 
 		      int allflag)
 {
-  struct cleanup *bkpt_chain;
   struct ui_out *uiout = current_uiout;
 
-  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
+  {
+    ui_out_emit_tuple tuple_emitter (uiout, "bkpt");
 
-  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
-  do_cleanups (bkpt_chain);
+    print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
+  }
 
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
@@ -6708,10 +6705,8 @@ print_one_breakpoint (struct breakpoint *b,
 
 	  for (loc = b->loc; loc; loc = loc->next, ++n)
 	    {
-	      struct cleanup *inner2 =
-		make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	      print_one_breakpoint_location (b, loc, n, last_loc, allflag);
-	      do_cleanups (inner2);
 	    }
 	}
     }

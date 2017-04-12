@@ -725,13 +725,11 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
   struct btrace_insn_iterator begin, end;
-  struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
   unsigned int context, covered;
 
   uiout = current_uiout;
-  uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "insn history");
+  ui_out_emit_tuple tuple_emitter (uiout, "insn history");
   context = abs (size);
   if (context == 0)
     error (_("Bad record instruction-history-size."));
@@ -800,7 +798,6 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
     }
 
   btrace_set_insn_history (btinfo, &begin, &end);
-  do_cleanups (uiout_cleanup);
 }
 
 /* The to_insn_history_range method of target record-btrace.  */
@@ -812,14 +809,12 @@ record_btrace_insn_history_range (struct target_ops *self,
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
   struct btrace_insn_iterator begin, end;
-  struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
   unsigned int low, high;
   int found;
 
   uiout = current_uiout;
-  uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "insn history");
+  ui_out_emit_tuple tuple_emitter (uiout, "insn history");
   low = from;
   high = to;
 
@@ -852,8 +847,6 @@ record_btrace_insn_history_range (struct target_ops *self,
 
   btrace_insn_history (uiout, btinfo, &begin, &end, flags);
   btrace_set_insn_history (btinfo, &begin, &end);
-
-  do_cleanups (uiout_cleanup);
 }
 
 /* The to_insn_history_from method of target record-btrace.  */
@@ -1085,14 +1078,12 @@ record_btrace_call_history (struct target_ops *self, int size, int int_flags)
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
   struct btrace_call_iterator begin, end;
-  struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
   unsigned int context, covered;
   record_print_flags flags = (enum record_print_flag) int_flags;
 
   uiout = current_uiout;
-  uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "insn history");
+  ui_out_emit_tuple tuple_emitter (uiout, "insn history");
   context = abs (size);
   if (context == 0)
     error (_("Bad record function-call-history-size."));
@@ -1164,7 +1155,6 @@ record_btrace_call_history (struct target_ops *self, int size, int int_flags)
     }
 
   btrace_set_call_history (btinfo, &begin, &end);
-  do_cleanups (uiout_cleanup);
 }
 
 /* The to_call_history_range method of target record-btrace.  */
@@ -1177,15 +1167,13 @@ record_btrace_call_history_range (struct target_ops *self,
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
   struct btrace_call_iterator begin, end;
-  struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
   unsigned int low, high;
   int found;
   record_print_flags flags = (enum record_print_flag) int_flags;
 
   uiout = current_uiout;
-  uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "func history");
+  ui_out_emit_tuple tuple_emitter (uiout, "func history");
   low = from;
   high = to;
 
@@ -1218,8 +1206,6 @@ record_btrace_call_history_range (struct target_ops *self,
 
   btrace_call_history (uiout, btinfo, &begin, &end, flags);
   btrace_set_call_history (btinfo, &begin, &end);
-
-  do_cleanups (uiout_cleanup);
 }
 
 /* The to_call_history_from method of target record-btrace.  */

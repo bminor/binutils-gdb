@@ -805,8 +805,7 @@ print_frame_info (struct frame_info *frame, int print_level,
       || get_frame_type (frame) == SIGTRAMP_FRAME
       || get_frame_type (frame) == ARCH_FRAME)
     {
-      struct cleanup *uiout_cleanup
-	= make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
+      ui_out_emit_tuple tuple_emitter (uiout, "frame");
 
       annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			    gdbarch, get_frame_pc (frame));
@@ -851,7 +850,6 @@ print_frame_info (struct frame_info *frame, int print_level,
 	do_gdb_disassembly (get_frame_arch (frame), 1,
 			    get_frame_pc (frame), get_frame_pc (frame) + 1);
 
-      do_cleanups (uiout_cleanup);
       return;
     }
 

@@ -387,13 +387,10 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 	   fi && (i <= frame_high || frame_high == -1);
 	   i++, fi = get_prev_frame (fi))
 	{
-	  struct cleanup *cleanup_frame;
-
 	  QUIT;
-	  cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
+	  ui_out_emit_tuple tuple_emitter (uiout, "frame");
 	  uiout->field_int ("level", i);
 	  list_args_or_locals (arguments, print_values, fi, skip_unavailable);
-	  do_cleanups (cleanup_frame);
 	}
     }
   do_cleanups (cleanup_stack_args);

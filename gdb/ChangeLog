@@ -1,3 +1,43 @@
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* record-btrace.c (record_btrace_insn_history)
+	(record_btrace_insn_history_range, record_btrace_call_history)
+	(record_btrace_call_history_range): Use ui_out_emit_tuple.
+	* thread.c (do_captured_list_thread_ids, print_thread_info_1): Use
+	ui_out_emit_tuple.
+	* stack.c (print_frame_info): Use ui_out_emit_tuple.
+	* solib.c (info_sharedlibrary_command): Use ui_out_emit_tuple.
+	* skip.c (skip_info): Use ui_out_emit_tuple.
+	* remote.c (show_remote_cmd): Use ui_out_emit_tuple.
+	* progspace.c (print_program_space): Use ui_out_emit_tuple.
+	* probe.c (info_probes_for_ops): Use ui_out_emit_tuple.
+	* osdata.c (info_osdata): Use ui_out_emit_tuple.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Use
+	ui_out_emit_tuple.
+	* mi/mi-main.c (print_one_inferior, list_available_thread_groups)
+	(output_register, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_load_progress)
+	(mi_cmd_trace_frame_collected): Use ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children, varobj_update_one):
+	Use ui_out_emit_tuple.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_args): Use
+	ui_out_emit_tuple.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions)
+	(mi_cmd_info_gdb_mi_command): Use ui_out_emit_tuple.
+	* linux-thread-db.c (info_auto_load_libthread_db): Use
+	ui_out_emit_tuple.
+	* inferior.c (print_inferior): Use ui_out_emit_tuple.
+	* gdb_bfd.c (print_one_bfd): Use ui_out_emit_tuple.
+	* disasm.c (do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly): Use ui_out_emit_tuple.
+	* cp-abi.c (list_cp_abis): Use ui_out_emit_tuple.
+	* cli/cli-setshow.c (cmd_show_list): Use ui_out_emit_tuple.
+	* breakpoint.c (print_one_breakpoint_location)
+	(print_one_breakpoint): Use ui_out_emit_tuple.
+	* auto-load.c (print_script, info_auto_load_cmd): Use
+	ui_out_emit_tuple.
+	* ada-tasks.c (print_ada_task_info): Use ui_out_emit_tuple.
+
 2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* thread.c (print_thread_info_1): Remove dead code.

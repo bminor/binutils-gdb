@@ -718,26 +718,25 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
 {
   struct thread_info *tp;
   int num = 0;
-  struct cleanup *cleanup_chain;
   int current_thread = -1;
 
   update_thread_list ();
 
-  cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "thread-ids");
+  {
+    ui_out_emit_tuple tuple_emitter (uiout, "thread-ids");
 
-  for (tp = thread_list; tp; tp = tp->next)
-    {
-      if (tp->state == THREAD_EXITED)
-	continue;
+    for (tp = thread_list; tp; tp = tp->next)
+      {
+	if (tp->state == THREAD_EXITED)
+	  continue;
 
-      if (tp->ptid == inferior_ptid)
-	current_thread = tp->global_num;
+	if (tp->ptid == inferior_ptid)
+	  current_thread = tp->global_num;
 
-      num++;
-      uiout->field_int ("thread-id", tp->global_num);
-    }
-
-  do_cleanups (cleanup_chain);
+	num++;
+	uiout->field_int ("thread-id", tp->global_num);
+      }
+  }
 
   if (current_thread != -1)
     uiout->field_int ("current-thread-id", current_thread);
@@ -1299,14 +1298,13 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 
   ALL_THREADS_BY_INFERIOR (inf, tp)
     {
-      struct cleanup *chain2;
       int core;
 
       if (!should_print_thread (requested_threads, default_inf_num,
 				global_ids, pid, tp))
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       if (!uiout->is_mi_like_p ())
 	{
@@ -1386,8 +1384,6 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
       core = target_core_of_thread (tp->ptid);
       if (uiout->is_mi_like_p () && core != -1)
 	uiout->field_int ("core", core);
-
-      do_cleanups (chain2);
     }
 
   /* Restores the current thread and the frame selected before

@@ -660,8 +660,7 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 		  compare_positive_ints))
     {
       struct collect_cores_data data;
-      struct cleanup *back_to
-	= make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       uiout->field_fmt ("id", "i%d", inferior->num);
       uiout->field_string ("type", "process");
@@ -706,8 +705,6 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 
       if (top_data->recurse)
 	print_thread_info (uiout, NULL, inferior->pid);
-
-      do_cleanups (back_to);
     }
 
   return 0;
@@ -831,8 +828,6 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 		    ix_items, item);
        ix_items++)
     {
-      struct cleanup *back_to;
-
       const char *pid = get_osdata_column (item, "pid");
       const char *cmd = get_osdata_column (item, "command");
       const char *user = get_osdata_column (item, "user");
@@ -849,7 +844,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 	continue;
 
 
-      back_to = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       uiout->field_fmt ("id", "%s", pid);
       uiout->field_string ("type", "process");
@@ -875,21 +870,16 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 		   VEC_iterate (osdata_item_s, children, ix_child, child);
 		   ++ix_child)
 		{
-		  struct cleanup *back_to_2 =
-		    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+		  ui_out_emit_tuple tuple_emitter (uiout, NULL);
 		  const char *tid = get_osdata_column (child, "tid");
 		  const char *tcore = get_osdata_column (child, "core");
 
 		  uiout->field_string ("id", tid);
 		  if (tcore)
 		    uiout->field_string ("core", tcore);
-
-		  do_cleanups (back_to_2);
 		}
 	    }
 	}
-
-      do_cleanups (back_to);
     }
 
   do_cleanups (cleanup);
@@ -1257,13 +1247,12 @@ output_register (struct frame_info *frame, int regnum, int format,
 {
   struct ui_out *uiout = current_uiout;
   struct value *val = value_of_register (regnum, frame);
-  struct cleanup *tuple_cleanup;
   struct value_print_options opts;
 
   if (skip_unavailable && !value_entirely_available (val))
     return;
 
-  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
   uiout->field_int ("number", regnum);
 
   if (format == 'N')
@@ -1280,8 +1269,6 @@ output_register (struct frame_info *frame, int regnum, int format,
 	     value_embedded_offset (val), 0,
 	     &stb, 0, val, &opts, current_language);
   uiout->field_stream ("value", stb);
-
-  do_cleanups (tuple_cleanup);
 }
 
 /* Write given values into registers. The registers and values are
@@ -1520,11 +1507,10 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
       {
 	int col;
 	int col_byte;
-	struct cleanup *cleanup_tuple;
 	struct cleanup *cleanup_list_data;
 	struct value_print_options opts;
 
-	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	uiout->field_core_addr ("addr", gdbarch, addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr +
 	   row_byte); */
@@ -1564,7 +1550,6 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	      }
 	    uiout->field_stream ("ascii", stream);
 	  }
-	do_cleanups (cleanup_tuple);
       }
     do_cleanups (cleanup_list);
   }
@@ -1629,7 +1614,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
        VEC_iterate (memory_read_result_s, result, ix, read_result);
        ++ix)
     {
-      struct cleanup *t = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
       char *data, *p;
       int i;
       int alloc_len;
@@ -1649,7 +1634,6 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
 	}
       uiout->field_string ("contents", data);
       xfree (data);
-      do_cleanups (t);
     }
   do_cleanups (cleanups);
 }
@@ -2385,19 +2369,18 @@ mi_load_progress (const char *section_name,
 		 strcmp (previous_sect_name, section_name) : 1);
   if (new_section)
     {
-      struct cleanup *cleanup_tuple;
-
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
       if (current_token)
 	fputs_unfiltered (current_token, mi->raw_stdout);
       fputs_unfiltered ("+download", mi->raw_stdout);
-      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      uiout->field_string ("section", section_name);
-      uiout->field_int ("section-size", total_section);
-      uiout->field_int ("total-size", grand_total);
-      do_cleanups (cleanup_tuple);
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	uiout->field_string ("section", section_name);
+	uiout->field_int ("section-size", total_section);
+	uiout->field_int ("total-size", grand_total);
+      }
       mi_out_put (uiout, mi->raw_stdout);
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
@@ -2406,19 +2389,18 @@ mi_load_progress (const char *section_name,
   steady_clock::time_point time_now = steady_clock::now ();
   if (time_now - last_update > milliseconds (500))
     {
-      struct cleanup *cleanup_tuple;
-
       last_update = time_now;
       if (current_token)
 	fputs_unfiltered (current_token, mi->raw_stdout);
       fputs_unfiltered ("+download", mi->raw_stdout);
-      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      uiout->field_string ("section", section_name);
-      uiout->field_int ("section-sent", sent_so_far);
-      uiout->field_int ("section-size", total_section);
-      uiout->field_int ("total-sent", total_sent);
-      uiout->field_int ("total-size", grand_total);
-      do_cleanups (cleanup_tuple);
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	uiout->field_string ("section", section_name);
+	uiout->field_int ("section-sent", sent_so_far);
+	uiout->field_int ("section-size", total_section);
+	uiout->field_int ("total-sent", total_sent);
+	uiout->field_int ("total-size", grand_total);
+      }
       mi_out_put (uiout, mi->raw_stdout);
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
@@ -2888,12 +2870,11 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
     for (i = 0; VEC_iterate (int, tinfo->tvars, i, tvar); i++)
       {
-	struct cleanup *cleanup_child;
 	struct trace_state_variable *tsv;
 
 	tsv = find_trace_state_variable_by_number (tvar);
 
-	cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
 	if (tsv != NULL)
 	  {
@@ -2911,8 +2892,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	    uiout->field_skip ("name");
 	    uiout->field_skip ("current");
 	  }
-
-	do_cleanups (cleanup_child);
       }
 
     do_cleanups (list_cleanup);

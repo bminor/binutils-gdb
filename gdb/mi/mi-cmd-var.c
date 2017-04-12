@@ -421,11 +421,9 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 	   ix < to && VEC_iterate (varobj_p, children, ix, child);
 	   ++ix)
 	{
-	  struct cleanup *cleanup_child;
+	  ui_out_emit_tuple child_emitter (uiout, "child");
 
-	  cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, "child");
 	  print_varobj (child, print_values, 1 /* print expression */);
-	  do_cleanups (cleanup_child);
 	}
       do_cleanups (cleanup_children);
     }
@@ -778,12 +776,8 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "new_children");
 	  for (j = 0; VEC_iterate (varobj_p, r->newobj, j, child); ++j)
 	    {
-	      struct cleanup *cleanup_child;
-
-	      cleanup_child
-		= make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	      print_varobj (child, print_values, 1 /* print_expression */);
-	      do_cleanups (cleanup_child);
 	    }
 
 	  do_cleanups (cleanup);
