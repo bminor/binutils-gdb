@@ -1,6 +1,6 @@
 2017-04-12  Alan Hayward  <alan.hayward@arm.com>
 
-	* m32r-tdep.c M32R_ARG_REGISTER_SIZE: Added.
+	* m32r-tdep.c (M32R_ARG_REGISTER_SIZE): Added.
 	(m32r_push_dummy_call): Use M32R_ARG_REGISTER_SIZE.
 
 2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
