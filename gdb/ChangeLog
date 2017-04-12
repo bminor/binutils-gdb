@@ -1,5 +1,10 @@
 2017-04-22  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (tvariables_info_1)
+	(print_one_static_tracepoint_marker): Use ui_out_emit_tuple.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (print_frame_arg): Use ui_out_emit_tuple,
 	annotate_arg_emitter.
 	* breakpoint.c (print_mention_watchpoint)
