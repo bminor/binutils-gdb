@@ -31,6 +31,7 @@
 #include "gdb_select.h"
 #include "gdbcmd.h"
 #include "filestuff.h"
+#include "gdb_termios.h"
 
 #ifdef HAVE_TERMIOS
 

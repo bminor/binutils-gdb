@@ -20,7 +20,7 @@
 #ifndef INFLOW_H
 #define INFLOW_H
 
-#include "terminal.h"		/* For HAVE_TERMIOS et.al.  */
+#include "gdb_termios.h"
 
 #ifdef HAVE_TERMIOS
 # define PROCESS_GROUP_TYPE pid_t

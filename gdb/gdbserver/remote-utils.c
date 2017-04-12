@@ -17,7 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include "terminal.h"
+#include "gdb_termios.h"
 #include "target.h"
 #include "gdbthread.h"
 #include "tdesc.h"

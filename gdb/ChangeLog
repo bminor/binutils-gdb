@@ -1,3 +1,14 @@
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/gdb_termios.h".
+	* common/common.m4: Check headers 'termios.h', 'termio.h' and
+	'sgtty.h'.
+	* common/gdb_termios.h: New file, with parts of "terminal.h".
+	* inflow.c: Include "gdb_termios.h".
+	* ser-unix.c: Include "gdb_termios.h".
+	* terminal.h: Move terminal-related defines to
+	"common/gdb_termios.h".
+
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
 	* probe.c (parse_probes): Update.

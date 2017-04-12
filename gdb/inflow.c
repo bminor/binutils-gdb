@@ -31,6 +31,7 @@
 
 #include "inflow.h"
 #include "gdbcmd.h"
+#include "gdb_termios.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
