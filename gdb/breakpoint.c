@@ -10778,37 +10778,37 @@ print_it_watchpoint (bpstat bs)
 static void
 print_mention_watchpoint (struct breakpoint *b)
 {
-  struct cleanup *ui_out_chain;
   struct watchpoint *w = (struct watchpoint *) b;
   struct ui_out *uiout = current_uiout;
+  const char *tuple_name;
 
   switch (b->type)
     {
     case bp_watchpoint:
       uiout->text ("Watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+      tuple_name = "wpt";
       break;
     case bp_hardware_watchpoint:
       uiout->text ("Hardware watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+      tuple_name = "wpt";
       break;
     case bp_read_watchpoint:
       uiout->text ("Hardware read watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
+      tuple_name = "hw-rwpt";
       break;
     case bp_access_watchpoint:
       uiout->text ("Hardware access (read/write) watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
+      tuple_name = "hw-awpt";
       break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Invalid hardware watchpoint type."));
     }
 
+  ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
   uiout->field_int ("number", b->number);
   uiout->text (": ");
   uiout->field_string ("exp", w->exp_string);
-  do_cleanups (ui_out_chain);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for
@@ -10977,31 +10977,31 @@ print_mention_masked_watchpoint (struct breakpoint *b)
 {
   struct watchpoint *w = (struct watchpoint *) b;
   struct ui_out *uiout = current_uiout;
-  struct cleanup *ui_out_chain;
+  const char *tuple_name;
 
   switch (b->type)
     {
     case bp_hardware_watchpoint:
       uiout->text ("Masked hardware watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+      tuple_name = "wpt";
       break;
     case bp_read_watchpoint:
       uiout->text ("Masked hardware read watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
+      tuple_name = "hw-rwpt";
       break;
     case bp_access_watchpoint:
       uiout->text ("Masked hardware access (read/write) watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
+      tuple_name = "hw-awpt";
       break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Invalid hardware watchpoint type."));
     }
 
+  ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
   uiout->field_int ("number", b->number);
   uiout->text (": ");
   uiout->field_string ("exp", w->exp_string);
-  do_cleanups (ui_out_chain);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for

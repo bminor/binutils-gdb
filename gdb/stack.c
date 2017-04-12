@@ -224,7 +224,6 @@ static void
 print_frame_arg (const struct frame_arg *arg)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *old_chain;
   const char *error_message = NULL;
 
   string_file stb;
@@ -235,9 +234,8 @@ print_frame_arg (const struct frame_arg *arg)
 	      || (!uiout->is_mi_like_p ()
 		  && arg->entry_kind == print_entry_values_compact));
 
-  annotate_arg_begin ();
-
-  old_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  annotate_arg_emitter arg_emitter;
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
   fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (arg->sym),
 			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
   if (arg->entry_kind == print_entry_values_compact)
@@ -305,11 +303,6 @@ print_frame_arg (const struct frame_arg *arg)
     }
 
   uiout->field_stream ("value", stb);
-
-  /* Also invoke ui_out_tuple_end.  */
-  do_cleanups (old_chain);
-
-  annotate_arg_end ();
 }
 
 /* Read in inferior function local SYM at FRAME into ARGP.  Caller is

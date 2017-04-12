@@ -1,5 +1,13 @@
 2017-04-22  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (print_frame_arg): Use ui_out_emit_tuple,
+	annotate_arg_emitter.
+	* breakpoint.c (print_mention_watchpoint)
+	(print_mention_masked_watchpoint): Use ui_out_emit_tuple.
+	* annotate.h (struct annotate_arg_emitter): New.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
 	* record-btrace.c (record_btrace_insn_history)
 	(record_btrace_insn_history_range, record_btrace_call_history)
 	(record_btrace_call_history_range): Use ui_out_emit_tuple.
