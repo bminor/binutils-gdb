@@ -3200,6 +3200,9 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   xtensa_verify_config (gdbarch);
   xtensa_session_once_reported = 0;
 
+  set_gdbarch_wchar_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+  set_gdbarch_wchar_signed (gdbarch, 0);
+
   /* Pseudo-Register read/write.  */
   set_gdbarch_pseudo_register_read (gdbarch, xtensa_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, xtensa_pseudo_register_write);

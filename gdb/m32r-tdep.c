@@ -911,6 +911,9 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
+
   set_gdbarch_read_pc (gdbarch, m32r_read_pc);
   set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
 

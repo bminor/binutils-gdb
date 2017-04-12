@@ -1,5 +1,14 @@
 2017-04-12  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/21323
+	* gdb.cp/wide_char_types.c: Include <wchar.h>.
+	(wchar): New global.
+	* gdb.cp/wide_char_types.exp (wide_char_types_program)
+	(do_test_wide_char, wide_char_types_no_program, top level): Add
+	wchar_t testing.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
 	PR c++/21323
 	* gdb.cp/wide_char_types.c: New file.
 	* gdb.cp/wide_char_types.exp: New file.

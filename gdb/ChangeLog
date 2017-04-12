@@ -1,5 +1,33 @@
 2017-04-12  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/21323
+	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_wchar_t>:
+	New enum value.
+	(cplus_language_arch_info): Register cplus_primitive_type_wchar_t.
+	* gdbtypes.h (struct builtin_type) <builtin_wchar>: New field.
+	* gdbtypes.c (gdbtypes_post_init): Create the "wchar_t" type.
+	* gdbarch.sh (wchar_bit, wchar_signed): New per-arch values.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Override
+	gdbarch_wchar_bit and gdbarch_wchar_signed.
+	* alpha-tdep.c (alpha_gdbarch_init): Likewise.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* h8300-tdep.c (h8300_gdbarch_init): Likewise.
+	* i386-nto-tdep.c (i386nto_init_abi): Likewise.
+	* i386-tdep.c (i386_go32_init_abi): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* sparc64-tdep.c (sparc64_init_abi): Likewise.
+	* windows-tdep.c (windows_init_abi): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
 	PR c++/21323
 	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_char16_t,
 	cplus_primitive_type_char32_t>: New enum values.

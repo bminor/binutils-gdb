@@ -188,6 +188,17 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 extern const struct floatformat ** gdbarch_long_double_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat ** long_double_format);
 
+/* The ABI default bit-size for "wchar_t".  wchar_t is a built-in type
+   starting with C++11. */
+
+extern int gdbarch_wchar_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_wchar_bit (struct gdbarch *gdbarch, int wchar_bit);
+
+/* One if `wchar_t' is signed, zero if unsigned. */
+
+extern int gdbarch_wchar_signed (struct gdbarch *gdbarch);
+extern void set_gdbarch_wchar_signed (struct gdbarch *gdbarch, int wchar_signed);
+
 /* Returns the floating-point format to be used for values of length LENGTH.
    NAME, if non-NULL, is the type name, which may be used to distinguish
    different target formats of the same length. */

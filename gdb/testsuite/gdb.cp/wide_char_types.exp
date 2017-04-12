@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test GDB's awareness of the char16_t, char32_t (C++11+) built-in
-# types.  We also run most tests here in C mode, and check whether the
-# built-ins are disabled (gdb uses the typedefs in the debug info
-# instead.)
+# Test GDB's awareness of the wchar_t (C++98+) and char16_t, char32_t
+# (C++11+) built-in types.  We also run most tests here in C mode, and
+# check whether the built-ins are disabled (gdb uses the typedefs in
+# the debug info instead.)
 
 standard_testfile
 
-# Test char16_t/char32_t in language LANG, against symbols in
+# Test char16_t/char32_t/wchar_t in language LANG, against symbols in
 # a program.  Lang can be "c", "c++03" or "c++11".  In C++11,
 # char16_t/char32_t are built-in types, and the debug information
 # reflects that (see
@@ -51,16 +51,16 @@ proc wide_char_types_program {lang} {
 	fail "can't run to main"
 	return 0
     }
-    do_test_wide_char $lang "u16" "u32"
+    do_test_wide_char $lang "u16" "u32" "wchar"
 }
 
-# Test char16_t/char32_t in language LANG.  Use CHAR16_EXP and
-# CHAR32_EXP as expression for each of the corresponding types.
-# (E.g., CHAR16_EXP will be u16 when testing against the program, and
-# "(char16_t)-1" when testing the built-in types without a program
-# loaded.)
+# Test char16_t/char32_t/wchar_t in language LANG.  Use CHAR16_EXP,
+# CHAR32_EXP, and WCHAR_EXP as expression for each of the
+# corresponding types.  (E.g., CHAR16_EXP will be u16 when testing
+# against the program, and "(char16_t)-1" when testing the built-in
+# types without a program loaded.)
 
-proc do_test_wide_char {lang char16_exp char32_exp} {
+proc do_test_wide_char {lang char16_exp char32_exp wchar_exp} {
     global gdb_prompt
 
     # Check that the fixed-width wide types are distinct built-in
@@ -78,11 +78,40 @@ proc do_test_wide_char {lang char16_exp char32_exp} {
 	    "char32_t is typedef"
     }
 
+    # wchar_t is a disctinct built-in type in C++03+.
+    if {$lang != "c"} {
+	gdb_test "ptype $wchar_exp" "type = wchar_t" \
+	    "wchar_t is distinct"
+    } else {
+	gdb_test "ptype $wchar_exp" "type = (unsigned )?(long|int|short)" \
+	    "wchar_t is typedef"
+    }
+
     # Check that the fixed-width wide char types are unsigned.
     gdb_test "p $char16_exp" " = 65535 u'\\\\xffff'" \
 	"char16_t is unsigned"
     gdb_test "p $char32_exp" " = 4294967295 U'\\\\xffffffff'" \
 	"char32_t is unsigned"
+
+    # Whether wchar_t is signed is implementation-dependent.  While we
+    # ignore whether GDB got the ABI size/sign details right here,
+    # this at least verifies that the value isn't garbage, and that
+    # GDB correctly outputs the character using the "L" prefix.
+    set test "wchar_t sign"
+    gdb_test_multiple "p $wchar_exp" $test {
+	-re " = 4294967295 L'\\\\xffffffff'\r\n$gdb_prompt $" {
+	    pass "$test (unsigned)"
+	}
+	-re " = 65535 L'\\\\xffff'\r\n$gdb_prompt $" {
+	    pass "$test (unsigned)"
+	}
+	-re " = -1 L'\\\\xffffffff'\r\n$gdb_prompt $" {
+	    pass "$test (signed)"
+	}
+	-re " = -1 L'\\\\xffff'\r\n$gdb_prompt $" {
+	    pass "$test (signed)"
+	}
+    }
 
     # Check sizeof.  These are fixed-width.
     gdb_test "p sizeof($char16_exp)" "= 2" \
@@ -90,14 +119,19 @@ proc do_test_wide_char {lang char16_exp char32_exp} {
     gdb_test "p sizeof($char32_exp)" "= 4" \
 	"sizeof(char16_t) == 4"
 
+    # Size of wchar_t depends on ABI.
+    gdb_test "p sizeof($wchar_exp)" "= (2|4)" \
+	"sizeof(wchar_t)"
+
     # Test printing wide literal strings.  Note that when testing with
     # no program started, this relies on GDB's awareness of the
     # built-in wide char types.
     gdb_test {p U"hello"} {= U"hello"}
     gdb_test {p u"hello"} {= u"hello"}
+    gdb_test {p L"hello"} {= L"hello"}
 }
 
-# Make sure that the char16_t/char32_t types are recognized as
+# Make sure that the char16_t/char32_t/wchar_t types are recognized as
 # distinct built-in types in C++ mode, even with no program loaded.
 # Check that in C mode, the types are not recognized.
 
@@ -116,8 +150,12 @@ proc wide_char_types_no_program {} {
 	gdb_test "p (char32_t) -1" "No symbol table is loaded.*" \
 	    "char32_t is not built-in"
 
+	gdb_test "p (wchar_t) -1" "No symbol table is loaded.*" \
+	    "wchar_t is not built-in"
+
 	gdb_test {p U"hello"} "No type named char32_t\\\."
 	gdb_test {p u"hello"} "No type named char16_t\\\."
+	gdb_test {p L"hello"} "No type named wchar_t\\\."
     }
 
     # Note GDB does not distinguish C++ dialects, so the fixed-width
@@ -126,7 +164,7 @@ proc wide_char_types_no_program {} {
     with_test_prefix "c++" {
 	gdb_test "set language c++"
 
-	do_test_wide_char "c++11" "(char16_t) -1" "(char32_t) -1"
+	do_test_wide_char "c++11" "(char16_t) -1" "(char32_t) -1" "(wchar_t) -1"
     }
 }
 

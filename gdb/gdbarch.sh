@@ -383,6 +383,12 @@ v:const struct floatformat **:double_format:::::floatformats_ieee_double::pforma
 v:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
 v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (gdbarch->long_double_format)
 
+# The ABI default bit-size for "wchar_t".  wchar_t is a built-in type
+# starting with C++11.
+v:int:wchar_bit:::8 * sizeof (wchar_t):4*TARGET_CHAR_BIT::0
+# One if \`wchar_t' is signed, zero if unsigned.
+v:int:wchar_signed:::1:-1:1
+
 # Returns the floating-point format to be used for values of length LENGTH.
 # NAME, if non-NULL, is the type name, which may be used to distinguish
 # different target formats of the same length.

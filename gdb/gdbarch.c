@@ -184,6 +184,8 @@ struct gdbarch
   const struct floatformat ** double_format;
   int long_double_bit;
   const struct floatformat ** long_double_format;
+  int wchar_bit;
+  int wchar_signed;
   gdbarch_floatformat_for_type_ftype *floatformat_for_type;
   int ptr_bit;
   int addr_bit;
@@ -389,6 +391,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
+  gdbarch->wchar_bit = 4*TARGET_CHAR_BIT;
+  gdbarch->wchar_signed = -1;
   gdbarch->floatformat_for_type = default_floatformat_for_type;
   gdbarch->ptr_bit = gdbarch->int_bit;
   gdbarch->char_signed = -1;
@@ -533,6 +537,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of long_double_bit, invalid_p == 0 */
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = floatformats_ieee_double;
+  /* Skip verify of wchar_bit, invalid_p == 0 */
+  if (gdbarch->wchar_signed == -1)
+    gdbarch->wchar_signed = 1;
   /* Skip verify of floatformat_for_type, invalid_p == 0 */
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (gdbarch->addr_bit == 0)
@@ -1457,6 +1464,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: vtable_function_descriptors = %s\n",
                       plongest (gdbarch->vtable_function_descriptors));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: wchar_bit = %s\n",
+                      plongest (gdbarch->wchar_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: wchar_signed = %s\n",
+                      plongest (gdbarch->wchar_signed));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_write_pc_p() = %d\n",
                       gdbarch_write_pc_p (gdbarch));
   fprintf_unfiltered (file,
@@ -1755,6 +1768,41 @@ set_gdbarch_long_double_format (struct gdbarch *gdbarch,
                                 const struct floatformat ** long_double_format)
 {
   gdbarch->long_double_format = long_double_format;
+}
+
+int
+gdbarch_wchar_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of wchar_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_wchar_bit called\n");
+  return gdbarch->wchar_bit;
+}
+
+void
+set_gdbarch_wchar_bit (struct gdbarch *gdbarch,
+                       int wchar_bit)
+{
+  gdbarch->wchar_bit = wchar_bit;
+}
+
+int
+gdbarch_wchar_signed (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable changed from pre-default.  */
+  gdb_assert (gdbarch->wchar_signed != -1);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_wchar_signed called\n");
+  return gdbarch->wchar_signed;
+}
+
+void
+set_gdbarch_wchar_signed (struct gdbarch *gdbarch,
+                          int wchar_signed)
+{
+  gdbarch->wchar_signed = wchar_signed;
 }
 
 const struct floatformat **

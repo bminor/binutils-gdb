@@ -1112,6 +1112,9 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  set_gdbarch_wchar_bit (gdbarch, 32);
+  set_gdbarch_wchar_signed (gdbarch, 0);
+
   set_gdbarch_read_pc (gdbarch, moxie_read_pc);
   set_gdbarch_write_pc (gdbarch, moxie_write_pc);
   set_gdbarch_unwind_sp (gdbarch, moxie_unwind_sp);

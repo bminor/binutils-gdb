@@ -5207,6 +5207,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = arch_integer_type (gdbarch, 16, 1, "char16_t");
   builtin_type->builtin_char32
     = arch_integer_type (gdbarch, 32, 1, "char32_t");
+  builtin_type->builtin_wchar
+    = arch_integer_type (gdbarch, gdbarch_wchar_bit (gdbarch),
+			 !gdbarch_wchar_signed (gdbarch), "wchar_t");
 
   /* Default data/code pointer types.  */
   builtin_type->builtin_data_ptr

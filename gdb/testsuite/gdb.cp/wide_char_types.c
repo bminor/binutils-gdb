@@ -17,9 +17,11 @@
 */
 
 #include <uchar.h>
+#include <wchar.h>
 
 char16_t u16 = -1;
 char32_t u32 = -1;
+wchar_t wchar = -1;
 
 int
 main ()
