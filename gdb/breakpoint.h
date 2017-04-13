@@ -674,110 +674,109 @@ extern int target_exact_watchpoints;
 /* This is for all kinds of breakpoints.  */
 
 struct breakpoint
-  {
-    /* Methods associated with this breakpoint.  */
-    const struct breakpoint_ops *ops;
+{
+  /* Methods associated with this breakpoint.  */
+  const struct breakpoint_ops *ops;
 
-    struct breakpoint *next;
-    /* Type of breakpoint.  */
-    enum bptype type;
-    /* Zero means disabled; remember the info but don't break here.  */
-    enum enable_state enable_state;
-    /* What to do with this breakpoint after we hit it.  */
-    enum bpdisp disposition;
-    /* Number assigned to distinguish breakpoints.  */
-    int number;
+  struct breakpoint *next;
+  /* Type of breakpoint.  */
+  enum bptype type;
+  /* Zero means disabled; remember the info but don't break here.  */
+  enum enable_state enable_state;
+  /* What to do with this breakpoint after we hit it.  */
+  enum bpdisp disposition;
+  /* Number assigned to distinguish breakpoints.  */
+  int number;
 
-    /* Location(s) associated with this high-level breakpoint.  */
-    struct bp_location *loc;
+  /* Location(s) associated with this high-level breakpoint.  */
+  struct bp_location *loc;
 
-    /* Non-zero means a silent breakpoint (don't print frame info
-       if we stop here).  */
-    unsigned char silent;
-    /* Non-zero means display ADDR_STRING to the user verbatim.  */
-    unsigned char display_canonical;
-    /* Number of stops at this breakpoint that should
-       be continued automatically before really stopping.  */
-    int ignore_count;
+  /* Non-zero means a silent breakpoint (don't print frame info if we
+     stop here).  */
+  unsigned char silent;
+  /* Non-zero means display ADDR_STRING to the user verbatim.  */
+  unsigned char display_canonical;
+  /* Number of stops at this breakpoint that should be continued
+     automatically before really stopping.  */
+  int ignore_count;
 
-    /* Number of stops at this breakpoint before it will be
-       disabled.  */
-    int enable_count;
+  /* Number of stops at this breakpoint before it will be
+     disabled.  */
+  int enable_count;
 
-    /* Chain of command lines to execute when this breakpoint is
-       hit.  */
-    struct counted_command_line *commands;
-    /* Stack depth (address of frame).  If nonzero, break only if fp
-       equals this.  */
-    struct frame_id frame_id;
+  /* Chain of command lines to execute when this breakpoint is
+     hit.  */
+  struct counted_command_line *commands;
+  /* Stack depth (address of frame).  If nonzero, break only if fp
+     equals this.  */
+  struct frame_id frame_id;
 
-    /* The program space used to set the breakpoint.  This is only set
-       for breakpoints which are specific to a program space; for
-       non-thread-specific ordinary breakpoints this is NULL.  */
-    struct program_space *pspace;
+  /* The program space used to set the breakpoint.  This is only set
+     for breakpoints which are specific to a program space; for
+     non-thread-specific ordinary breakpoints this is NULL.  */
+  struct program_space *pspace;
 
-    /* Location we used to set the breakpoint.  */
-    event_location_up location;
+  /* Location we used to set the breakpoint.  */
+  event_location_up location;
 
-    /* The filter that should be passed to decode_line_full when
-       re-setting this breakpoint.  This may be NULL, but otherwise is
-       allocated with xmalloc.  */
-    char *filter;
+  /* The filter that should be passed to decode_line_full when
+     re-setting this breakpoint.  This may be NULL, but otherwise is
+     allocated with xmalloc.  */
+  char *filter;
 
-    /* For a ranged breakpoint, the location we used to find
-       the end of the range.  */
-    event_location_up location_range_end;
+  /* For a ranged breakpoint, the location we used to find the end of
+     the range.  */
+  event_location_up location_range_end;
 
-    /* Architecture we used to set the breakpoint.  */
-    struct gdbarch *gdbarch;
-    /* Language we used to set the breakpoint.  */
-    enum language language;
-    /* Input radix we used to set the breakpoint.  */
-    int input_radix;
-    /* String form of the breakpoint condition (malloc'd), or NULL if
-       there is no condition.  */
-    char *cond_string;
+  /* Architecture we used to set the breakpoint.  */
+  struct gdbarch *gdbarch;
+  /* Language we used to set the breakpoint.  */
+  enum language language;
+  /* Input radix we used to set the breakpoint.  */
+  int input_radix;
+  /* String form of the breakpoint condition (malloc'd), or NULL if
+     there is no condition.  */
+  char *cond_string;
 
-    /* String form of extra parameters, or NULL if there are none.
+  /* String form of extra parameters, or NULL if there are none.
      Malloc'd.  */
-    char *extra_string;
+  char *extra_string;
 
-    /* Holds the address of the related watchpoint_scope breakpoint
-       when using watchpoints on local variables (might the concept of
-       a related breakpoint be useful elsewhere, if not just call it
-       the watchpoint_scope breakpoint or something like that.
-       FIXME).  */
-    struct breakpoint *related_breakpoint;
+  /* Holds the address of the related watchpoint_scope breakpoint when
+     using watchpoints on local variables (might the concept of a
+     related breakpoint be useful elsewhere, if not just call it the
+     watchpoint_scope breakpoint or something like that.  FIXME).  */
+  struct breakpoint *related_breakpoint;
 
-    /* Thread number for thread-specific breakpoint, 
-       or -1 if don't care.  */
-    int thread;
+  /* Thread number for thread-specific breakpoint, or -1 if don't
+     care.  */
+  int thread;
 
-    /* Ada task number for task-specific breakpoint, 
-       or 0 if don't care.  */
-    int task;
+  /* Ada task number for task-specific breakpoint, or 0 if don't
+     care.  */
+  int task;
 
-    /* Count of the number of times this breakpoint was taken, dumped
-       with the info, but not used for anything else.  Useful for
-       seeing how many times you hit a break prior to the program
-       aborting, so you can back up to just before the abort.  */
-    int hit_count;
+  /* Count of the number of times this breakpoint was taken, dumped
+     with the info, but not used for anything else.  Useful for seeing
+     how many times you hit a break prior to the program aborting, so
+     you can back up to just before the abort.  */
+  int hit_count;
 
-    /* Is breakpoint's condition not yet parsed because we found
-       no location initially so had no context to parse
-       the condition in.  */
-    int condition_not_parsed;
+  /* Is breakpoint's condition not yet parsed because we found no
+     location initially so had no context to parse the condition
+     in.  */
+  int condition_not_parsed;
 
-    /* With a Python scripting enabled GDB, store a reference to the
-       Python object that has been associated with this breakpoint.
-       This is always NULL for a GDB that is not script enabled.  It
-       can sometimes be NULL for enabled GDBs as not all breakpoint
-       types are tracked by the scripting language API.  */
-    struct gdbpy_breakpoint_object *py_bp_object;
+  /* With a Python scripting enabled GDB, store a reference to the
+     Python object that has been associated with this breakpoint.
+     This is always NULL for a GDB that is not script enabled.  It can
+     sometimes be NULL for enabled GDBs as not all breakpoint types
+     are tracked by the scripting language API.  */
+  struct gdbpy_breakpoint_object *py_bp_object;
 
-    /* Same as py_bp_object, but for Scheme.  */
-    struct gdbscm_breakpoint_object *scm_bp_object;
-  };
+  /* Same as py_bp_object, but for Scheme.  */
+  struct gdbscm_breakpoint_object *scm_bp_object;
+};
 
 /* An instance of this type is used to represent a watchpoint.  It
    includes a "struct breakpoint" as a kind of base class; users

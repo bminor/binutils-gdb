@@ -1,5 +1,9 @@
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.h (struct breakpoint): Reindent.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (bp_location): Rename to ...
 	(bp_locations): ... this.  All references updated.
 	(bp_location_count): Rename to ...
