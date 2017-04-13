@@ -202,7 +202,7 @@ mi_interp::exec (const char *command)
 }
 
 void
-mi_cmd_interpreter_exec (char *command, char **argv, int argc)
+mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
   int i;
@@ -1114,6 +1114,33 @@ mi_on_resume (ptid_t ptid)
     }
 }
 
+/* See mi-interp.h.  */
+
+void
+mi_output_solib_attribs (ui_out *uiout, struct so_list *solib)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  uiout->field_string ("id", solib->so_original_name);
+  uiout->field_string ("target-name", solib->so_original_name);
+  uiout->field_string ("host-name", solib->so_name);
+  uiout->field_int ("symbols-loaded", solib->symbols_loaded);
+  if (!gdbarch_has_global_solist (target_gdbarch ()))
+      uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
+
+  struct cleanup *cleanup
+    = make_cleanup_ui_out_list_begin_end (uiout, "ranges");
+  struct cleanup *tuple_clean_up
+    = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  if (solib->addr_high != 0)
+    {
+      uiout->field_core_addr ("from", gdbarch, solib->addr_low);
+      uiout->field_core_addr ("to", gdbarch, solib->addr_high);
+    }
+  do_cleanups (tuple_clean_up);
+  do_cleanups (cleanup);
+}
+
 static void
 mi_solib_loaded (struct so_list *solib)
 {
@@ -1135,14 +1162,7 @@ mi_solib_loaded (struct so_list *solib)
 
       uiout->redirect (mi->event_channel);
 
-      uiout->field_string ("id", solib->so_original_name);
-      uiout->field_string ("target-name", solib->so_original_name);
-      uiout->field_string ("host-name", solib->so_name);
-      uiout->field_int ("symbols-loaded", solib->symbols_loaded);
-      if (!gdbarch_has_global_solist (target_gdbarch ()))
-	{
-	  uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
-	}
+      mi_output_solib_attribs (uiout, solib);
 
       uiout->redirect (NULL);
 

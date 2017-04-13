@@ -1627,14 +1627,12 @@ ccp_convert_namespace (compile_cplus_instance *instance,
 
 
   char *name = NULL;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  struct cleanup *cleanups = make_cleanup (free_current_contents, &name);
+
   if (TYPE_NAME (type) != NULL)
-    {
-      name = cp_func_name (TYPE_NAME (type));
-      make_cleanup (xfree, name);
-    }
+    name = cp_func_name (TYPE_NAME (type));
   else
-    name = "";
+    name = xstrdup ("");	// !!keiths: anonymous namespace?!
 
   /* Push scope.  */
   instance->enter_scope (scope);

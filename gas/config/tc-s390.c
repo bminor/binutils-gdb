@@ -289,6 +289,8 @@ s390_parse_cpu (const char *         arg,
     { STRING_COMMA_LEN ("zEC12"), STRING_COMMA_LEN ("arch10"),
       S390_INSTR_FLAG_HTM },
     { STRING_COMMA_LEN ("z13"), STRING_COMMA_LEN ("arch11"),
+      S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
+    { STRING_COMMA_LEN ("arch12"), STRING_COMMA_LEN (""),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
   };
   static struct
@@ -2131,9 +2133,11 @@ md_pcrel_from_section (fixS *fixp, segT sec ATTRIBUTE_UNUSED)
 int
 tc_s390_fix_adjustable (fixS *fixP)
 {
-  /* Don't adjust references to merge sections.  */
-  if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
+  /* Don't adjust pc-relative references to merge sections.  */
+  if (fixP->fx_pcrel
+      && (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
     return 0;
+
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (   fixP->fx_r_type == BFD_RELOC_16_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_32_GOTOFF

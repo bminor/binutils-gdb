@@ -573,7 +573,7 @@ i386_svr4_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 /* Wrapper on i386_svr4_dwarf_reg_to_regnum to return
    num_regs + num_pseudo_regs for other debug formats.  */
 
-static int
+int
 i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   int regnum = i386_svr4_dwarf_reg_to_regnum (gdbarch, reg);
@@ -2684,6 +2684,13 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int write_pass;
   int args_space = 0;
 
+  /* BND registers can be in arbitrary values at the moment of the
+     inferior call.  This can cause boundary violations that are not
+     due to a real bug or even desired by the user.  The best to be done
+     is set the BND registers to allow access to the whole memory, INIT
+     state, before pushing the inferior call.   */
+  i387_reset_bnd_regs (gdbarch, regcache);
+
   /* Determine the total space required for arguments and struct
      return address in a first pass (allowing for 16-byte-aligned
      arguments), then push arguments in a second pass.  */
@@ -3271,7 +3278,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 				      int regnum,
 				      struct value *result_value)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte raw_buf[I386_MAX_REGISTER_SIZE];
   enum register_status status;
   gdb_byte *buf = value_contents_raw (result_value);
 
@@ -3476,7 +3483,7 @@ void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const gdb_byte *buf)
 {
-  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  gdb_byte raw_buf[I386_MAX_REGISTER_SIZE];
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
@@ -4002,9 +4009,7 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
   gdb_assert (disassembly_flavor == att_flavor
 	      || disassembly_flavor == intel_flavor);
 
-  /* FIXME: kettenis/20020915: Until disassembler_options is properly
-     constified, cast to prevent a compiler warning.  */
-  info->disassembler_options = (char *) disassembly_flavor;
+  info->disassembler_options = disassembly_flavor;
 
   return print_insn_i386 (pc, info);
 }
@@ -4459,8 +4464,6 @@ i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      i386_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					i386_stap_parse_special_token);
-
-  set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
 }
 
 /* System V Release 4 (SVR4).  */
@@ -4484,33 +4487,6 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc_offset = 20;
 }
 
-/* DJGPP.  */
-
-static void
-i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* DJGPP doesn't have any special frames for signal handlers.  */
-  tdep->sigtramp_p = NULL;
-
-  tdep->jb_pc_offset = 36;
-
-  /* DJGPP does not support the SSE registers.  */
-  if (! tdesc_has_registers (info.target_desc))
-    tdep->tdesc = tdesc_i386_mmx;
-
-  /* Native compiler is GCC, which uses the SVR4 register numbering
-     even in COFF and STABS.  See the comment in i386_gdbarch_init,
-     before the calls to set_gdbarch_stab_reg_to_regnum and
-     set_gdbarch_sdb_reg_to_regnum.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
-  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
-
-  set_gdbarch_has_dos_based_file_system (gdbarch, 1);
-
-  set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
-}
 
 
 /* i386 register groups.  In addition to the normal groups, add "mmx"
@@ -5060,7 +5036,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   uint32_t opcode;
   uint8_t opcode8;
   ULONGEST addr;
-  gdb_byte buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[I386_MAX_REGISTER_SIZE];
   struct i386_record_s ir;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   uint8_t rex_w = -1;
@@ -8735,15 +8711,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-static enum gdb_osabi
-i386_coff_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "coff-go32-exe") == 0
-      || strcmp (bfd_get_target (abfd), "coff-go32") == 0)
-    return GDB_OSABI_GO32;
-
-  return GDB_OSABI_UNKNOWN;
-}
 
 
 /* Return the target description for a specified XSAVE feature mask.  */
@@ -9081,13 +9048,8 @@ Show Intel Memory Protection Extensions specific variables."),
  in the bound table.",
 	   &mpx_set_cmdlist);
 
-  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
-				  i386_coff_osabi_sniffer);
-
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SVR4,
 			  i386_svr4_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_GO32,
-			  i386_go32_init_abi);
 
   /* Initialize the i386-specific register groups.  */
   i386_init_reggroups ();

@@ -355,27 +355,29 @@ gdb_xml_end_element (void *data, const XML_Char *name)
   /* Call the element processor.  */
   if (scope->element != NULL && scope->element->end_handler)
     {
-      char *body;
+      const char *scope_body;
 
       if (scope->body == NULL)
-	body = "";
+	scope_body = "";
       else
 	{
 	  int length;
 
 	  length = obstack_object_size (scope->body);
 	  obstack_1grow (scope->body, '\0');
-	  body = (char *) obstack_finish (scope->body);
+	  char *body = (char *) obstack_finish (scope->body);
 
 	  /* Strip leading and trailing whitespace.  */
 	  while (length > 0 && ISSPACE (body[length-1]))
 	    body[--length] = '\0';
 	  while (*body && ISSPACE (*body))
 	    body++;
+
+	  scope_body = body;
 	}
 
       scope->element->end_handler (parser, scope->element, parser->user_data,
-				   body);
+				   scope_body);
     }
   else if (scope->element == NULL)
     XML_DefaultCurrent (parser->expat_parser);

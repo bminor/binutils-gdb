@@ -711,7 +711,6 @@ TUI command to control the register window."), tuicmd);
 static void
 tui_restore_gdbout (void *ui)
 {
-  delete gdb_stdout;
   gdb_stdout = (struct ui_file*) ui;
   pagination_enabled = 1;
 }

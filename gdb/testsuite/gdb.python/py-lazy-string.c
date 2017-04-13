@@ -15,9 +15,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+typedef const char* pointer;
+
 int
 main ()
 {
+  const char *ptr = "pointer";
+  const char array[] = "array";
+  pointer typedef_ptr = "typedef pointer";
   const char *null = 0;
 
   return 0; /* break here */

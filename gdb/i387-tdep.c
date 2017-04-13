@@ -912,7 +912,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
   ULONGEST clear_bv;
-  static const gdb_byte zero[MAX_REGISTER_SIZE] = { 0 };
+  static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
   enum
     {
       none = 0x0,
@@ -1859,4 +1859,21 @@ i387_return_value (struct gdbarch *gdbarch, struct regcache *regcache)
      tag word is 0x3fff.  */
   regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM (tdep), 0x3fff);
 
+}
+
+/* See i387-tdep.h.  */
+
+void
+i387_reset_bnd_regs (struct gdbarch *gdbarch, struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (I387_BND0R_REGNUM (tdep) > 0)
+    {
+      gdb_byte bnd_buf[16];
+
+      memset (bnd_buf, 0, 16);
+      for (int i = 0; i < I387_NUM_BND_REGS; i++)
+	regcache_raw_write (regcache, I387_BND0R_REGNUM (tdep) + i, bnd_buf);
+    }
 }

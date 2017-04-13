@@ -217,6 +217,7 @@ valpy_referenced_value (PyObject *self, PyObject *args)
           res_val = value_ind (self_val);
           break;
         case TYPE_CODE_REF:
+        case TYPE_CODE_RVALUE_REF:
           res_val = coerce_ref (self_val);
           break;
         default:
@@ -238,7 +239,7 @@ valpy_referenced_value (PyObject *self, PyObject *args)
 /* Return a value which is a reference to the value.  */
 
 static PyObject *
-valpy_reference_value (PyObject *self, PyObject *args)
+valpy_reference_value (PyObject *self, PyObject *args, enum type_code refcode)
 {
   PyObject *result = NULL;
 
@@ -248,7 +249,7 @@ valpy_reference_value (PyObject *self, PyObject *args)
       scoped_value_mark free_values;
 
       self_val = ((value_object *) self)->value;
-      result = value_to_value_object (value_ref (self_val));
+      result = value_to_value_object (value_ref (self_val, refcode));
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -257,6 +258,18 @@ valpy_reference_value (PyObject *self, PyObject *args)
   END_CATCH
 
   return result;
+}
+
+static PyObject *
+valpy_lvalue_reference_value (PyObject *self, PyObject *args)
+{
+  return valpy_reference_value (self, args, TYPE_CODE_REF);
+}
+
+static PyObject *
+valpy_rvalue_reference_value (PyObject *self, PyObject *args)
+{
+  return valpy_reference_value (self, args, TYPE_CODE_RVALUE_REF);
 }
 
 /* Return a "const" qualified version of the value.  */
@@ -351,8 +364,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
       type = value_type (val);
       type = check_typedef (type);
 
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR)
-	   || (TYPE_CODE (type) == TYPE_CODE_REF))
+      if (((TYPE_CODE (type) == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
 	{
 	  struct value *target;
@@ -369,7 +381,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 	      if (was_pointer)
 		type = lookup_pointer_type (type);
 	      else
-		type = lookup_reference_type (type);
+		type = lookup_lvalue_reference_type (type);
 	    }
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
@@ -400,32 +412,92 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
    A lazy string is a pointer to a string with an optional encoding and
    length.  If ENCODING is not given, encoding is set to None.  If an
    ENCODING is provided the encoding parameter is set to ENCODING, but
-   the string is not encoded.  If LENGTH is provided then the length
-   parameter is set to LENGTH, otherwise length will be set to -1 (first
-   null of appropriate with).  */
+   the string is not encoded.
+   If LENGTH is provided then the length parameter is set to LENGTH.
+   Otherwise if the value is an array of known length then the array's length
+   is used.  Otherwise the length will be set to -1 (meaning first null of
+   appropriate with).
+
+   Note: In order to not break any existing uses this allows creating
+   lazy strings from anything.  PR 20769.  E.g.,
+   gdb.parse_and_eval("my_int_variable").lazy_string().
+   "It's easier to relax restrictions than it is to impose them after the
+   fact."  So we should be flagging any unintended uses as errors, but it's
+   perhaps too late for that.  */
+
 static PyObject *
 valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
   gdb_py_longest length = -1;
   struct value *value = ((value_object *) self)->value;
   const char *user_encoding = NULL;
-  static char *keywords[] = { "encoding", "length", NULL };
+  static const char *keywords[] = { "encoding", "length", NULL };
   PyObject *str_obj = NULL;
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG, keywords,
-				    &user_encoding, &length))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG,
+					keywords, &user_encoding, &length))
     return NULL;
+
+  if (length < -1)
+    {
+      PyErr_SetString (PyExc_ValueError, _("Invalid length."));
+      return NULL;
+    }
 
   TRY
     {
       scoped_value_mark free_values;
+      struct type *type, *realtype;
+      CORE_ADDR addr;
 
-      if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
-	value = value_ind (value);
+      type = value_type (value);
+      realtype = check_typedef (type);
 
-      str_obj = gdbpy_create_lazy_string_object (value_address (value), length,
-						 user_encoding,
-						 value_type (value));
+      switch (TYPE_CODE (realtype))
+	{
+	case TYPE_CODE_ARRAY:
+	  {
+	    LONGEST array_length = -1;
+	    LONGEST low_bound, high_bound;
+
+	    /* PR 20786: There's no way to specify an array of length zero.
+	       Record a length of [0,-1] which is how Ada does it.  Anything
+	       we do is broken, but this one possible solution.  */
+	    if (get_array_bounds (realtype, &low_bound, &high_bound))
+	      array_length = high_bound - low_bound + 1;
+	    if (length == -1)
+	      length = array_length;
+	    else if (array_length == -1)
+	      {
+		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+						0, length - 1);
+	      }
+	    else if (length != array_length)
+	      {
+		/* We need to create a new array type with the
+		   specified length.  */
+		if (length > array_length)
+		  error (_("Length is larger than array size."));
+		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+						low_bound,
+						low_bound + length - 1);
+	      }
+	    addr = value_address (value);
+	    break;
+	  }
+	case TYPE_CODE_PTR:
+	  /* If a length is specified we defer creating an array of the
+	     specified width until we need to.  */
+	  addr = value_as_address (value);
+	  break;
+	default:
+	  /* Should flag an error here.  PR 20769.  */
+	  addr = value_address (value);
+	  break;
+	}
+
+      str_obj = gdbpy_create_lazy_string_object (addr, length, user_encoding,
+						 type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -454,10 +526,10 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   const char *user_encoding = NULL;
   const char *la_encoding = NULL;
   struct type *char_type;
-  static char *keywords[] = { "encoding", "errors", "length", NULL };
+  static const char *keywords[] = { "encoding", "errors", "length", NULL };
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
-				    &user_encoding, &errors, &length))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
+					&user_encoding, &errors, &length))
     return NULL;
 
   TRY
@@ -585,8 +657,7 @@ value_has_field (struct value *v, PyObject *field)
     {
       val_type = value_type (v);
       val_type = check_typedef (val_type);
-      if (TYPE_CODE (val_type) == TYPE_CODE_REF
-	  || TYPE_CODE (val_type) == TYPE_CODE_PTR)
+      if (TYPE_IS_REFERENCE (val_type) || TYPE_CODE (val_type) == TYPE_CODE_PTR)
       val_type = check_typedef (TYPE_TARGET_TYPE (val_type));
 
       type_code = TYPE_CODE (val_type);
@@ -741,7 +812,11 @@ valpy_getitem (PyObject *self, PyObject *key)
 	  if (TYPE_CODE (val_type) == TYPE_CODE_PTR)
 	    res_val = value_cast (lookup_pointer_type (base_class_type), tmp);
 	  else if (TYPE_CODE (val_type) == TYPE_CODE_REF)
-	    res_val = value_cast (lookup_reference_type (base_class_type), tmp);
+	    res_val = value_cast (lookup_lvalue_reference_type (base_class_type),
+	                          tmp);
+	  else if (TYPE_CODE (val_type) == TYPE_CODE_RVALUE_REF)
+	    res_val = value_cast (lookup_rvalue_reference_type (base_class_type),
+	                          tmp);
 	  else
 	    res_val = value_cast (base_class_type, tmp);
 	}
@@ -979,7 +1054,7 @@ enum valpy_opcode
 
 /* If TYPE is a reference, return the target; otherwise return TYPE.  */
 #define STRIP_REFERENCE(TYPE) \
-  ((TYPE_CODE (TYPE) == TYPE_CODE_REF) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
+  (TYPE_IS_REFERENCE (TYPE) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
 
 /* Helper for valpy_binop.  Returns a value object which is the result
    of applying the operation specified by OPCODE to the given
@@ -1692,7 +1767,7 @@ gdbpy_initialize_values (void)
 
 
 
-static PyGetSetDef value_object_getset[] = {
+static gdb_PyGetSetDef value_object_getset[] = {
   { "address", valpy_get_address, NULL, "The address of the value.",
     NULL },
   { "is_optimized_out", valpy_get_is_optimized_out, NULL,
@@ -1723,8 +1798,10 @@ reinterpret_cast operator."
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "referenced_value", valpy_referenced_value, METH_NOARGS,
     "Return the value referenced by a TYPE_CODE_REF or TYPE_CODE_PTR value." },
-  { "reference_value", valpy_reference_value, METH_NOARGS,
+  { "reference_value", valpy_lvalue_reference_value, METH_NOARGS,
     "Return a value of type TYPE_CODE_REF referencing this value." },
+  { "rvalue_reference_value", valpy_rvalue_reference_value, METH_NOARGS,
+    "Return a value of type TYPE_CODE_RVALUE_REF referencing this value." },
   { "const_value", valpy_const_value, METH_NOARGS,
     "Return a 'const' qualied version of the same value." },
   { "lazy_string", (PyCFunction) valpy_lazy_string,

@@ -3248,7 +3248,7 @@ most appropriate encoding when the string is printed.
 
 @deffn {Scheme Procedure} lazy-string-type lazy-string
 Return the type that is represented by @var{lazy-string}'s type.
-For a lazy string this will always be a pointer type.  To
+For a lazy string this is a pointer or array type.  To
 resolve this to the lazy string's character type, use @code{type-target-type}.
 @xref{Types In Guile}.
 @end deffn

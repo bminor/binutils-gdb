@@ -137,58 +137,94 @@ static int tui_readline_pipe[2];
    This may be the main gdb prompt or a secondary prompt.  */
 static char *tui_rl_saved_prompt;
 
+/* Print a character in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
+
+static void
+do_tui_putc (WINDOW *w, char c)
+{
+  static int tui_skip_line = -1;
+
+  /* Catch annotation and discard them.  We need two \032 and discard
+     until a \n is seen.  */
+  if (c == '\032')
+    {
+      tui_skip_line++;
+    }
+  else if (tui_skip_line != 1)
+    {
+      tui_skip_line = -1;
+      /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+      if (c == '\t')
+	{
+	  int col;
+
+	  col = getcurx (w);
+	  do
+	    {
+	      waddch (w, ' ');
+	      col++;
+	    }
+	  while ((col % 8) != 0);
+	}
+      else
+	waddch (w, c);
+    }
+  else if (c == '\n')
+    tui_skip_line = -1;
+}
+
+/* Update the cached value of the command window's start line based on
+   the window's current Y coordinate.  */
+
+static void
+update_cmdwin_start_line ()
+{
+  TUI_CMD_WIN->detail.command_info.start_line
+    = getcury (TUI_CMD_WIN->generic.handle);
+}
+
+/* Print a character in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
+
 static void
 tui_putc (char c)
 {
-  char buf[2];
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
 
-  buf[0] = c;
-  buf[1] = 0;
-  tui_puts (buf);
+  do_tui_putc (w, c);
+  update_cmdwin_start_line ();
 }
 
-/* Print the string in the curses command window.
-   The output is buffered.  It is up to the caller to refresh the screen
-   if necessary.  */
+/* Print LENGTH characters from the buffer pointed to by BUF to the
+   curses command window.  The output is buffered.  It is up to the
+   caller to refresh the screen if necessary.  */
+
+void
+tui_write (const char *buf, size_t length)
+{
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
+
+  for (size_t i = 0; i < length; i++)
+    do_tui_putc (w, buf[i]);
+  update_cmdwin_start_line ();
+}
+
+/* Print a string in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
 
 void
 tui_puts (const char *string)
 {
-  static int tui_skip_line = -1;
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
   char c;
-  WINDOW *w;
 
-  w = TUI_CMD_WIN->generic.handle;
   while ((c = *string++) != 0)
-    {
-      /* Catch annotation and discard them.  We need two \032 and
-         discard until a \n is seen.  */
-      if (c == '\032')
-        {
-          tui_skip_line++;
-        }
-      else if (tui_skip_line != 1)
-        {
-          tui_skip_line = -1;
-	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
-	  if (c == '\t')
-	    {
-	      int col;
-
-	      col = getcurx (w);
-	      do
-		{
-		  waddch (w, ' ');
-		  col++;
-		} while ((col % 8) != 0);
-	    }
-	  else
-	    waddch (w, c);
-        }
-      else if (c == '\n')
-        tui_skip_line = -1;
-    }
-  TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
+    do_tui_putc (w, c);
+  update_cmdwin_start_line ();
 }
 
 /* Readline callback.

@@ -340,6 +340,7 @@ enum record_i386_regnum
 #define I386_MAX_REGISTER_SIZE	64
 
 extern struct target_desc *tdesc_i386;
+extern struct target_desc *tdesc_i386_mmx;
 
 /* Types for i386-specific registers.  */
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);
@@ -431,6 +432,10 @@ extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 
 /* Initialize a SVR4 architecture variant.  */
 extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
+
+/* Convert SVR4 register number REG to the appropriate register number
+   used by GDB.  */
+extern int i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg);
 
 extern int i386_process_record (struct gdbarch *gdbarch,
                                 struct regcache *regcache, CORE_ADDR addr);

@@ -64,39 +64,6 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
   }
 
-struct dynamic_sections
-{
-  bfd_boolean	  initialized;
-  asection *      sgot;
-  asection *      srelgot;
-  asection *      sgotplt;
-  asection *      srelgotplt;
-  asection *      sdyn;
-  asection *      splt;
-  asection *      srelplt;
-};
-
-enum dyn_section_types
-{
-  got = 0,
-  relgot,
-  gotplt,
-  dyn,
-  plt,
-  relplt,
-  DYN_SECTION_TYPES_END
-};
-
-const char * dyn_section_names[DYN_SECTION_TYPES_END] =
-{
-  ".got",
-  ".rela.got",
-  ".got.plt",
-  ".dynamic",
-  ".plt",
-  ".rela.plt"
-};
-
 
 /* The default symbols representing the init and fini dyn values.
    TODO: Check what is the relation of those strings with arclinux.em
@@ -1562,58 +1529,6 @@ elf_arc_relocate_section (bfd *		          output_bfd,
     (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
   == ARC_ELF_DATA ? ((struct elf_arc_link_hash_table *) ((p)->hash)) : NULL)
 
-static struct dynamic_sections
-arc_create_dynamic_sections (bfd * abfd, struct bfd_link_info *info)
-{
-  struct elf_link_hash_table *htab;
-  bfd	 *dynobj;
-  struct dynamic_sections ds =
-    {
-      .initialized = FALSE,
-      .sgot = NULL,
-      .srelgot = NULL,
-      .sgotplt = NULL,
-      .srelgotplt = NULL,
-      .sdyn = NULL,
-      .splt = NULL,
-      .srelplt = NULL
-    };
-
-  htab = elf_hash_table (info);
-  BFD_ASSERT (htab);
-
-  /* Create dynamic sections for relocatable executables so that we
-     can copy relocations.  */
-  if (! htab->dynamic_sections_created && bfd_link_pic (info))
-    {
-      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
-	BFD_ASSERT (0);
-    }
-
-  dynobj = (elf_hash_table (info))->dynobj;
-
-  if (dynobj)
-    {
-      ds.sgot = htab->sgot;
-      ds.srelgot = htab->srelgot;
-
-      ds.sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-      ds.srelgotplt = ds.srelplt;
-
-      ds.splt = bfd_get_section_by_name (dynobj, ".plt");
-      ds.srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-    }
-
-  if (htab->dynamic_sections_created)
-    {
-      ds.sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
-    }
-
-  ds.initialized = TRUE;
-
-  return ds;
-}
-
 static bfd_boolean
 elf_arc_check_relocs (bfd *			 abfd,
 		      struct bfd_link_info *     info,
@@ -2168,17 +2083,17 @@ static bfd_boolean
 elf_arc_finish_dynamic_sections (bfd * output_bfd,
 				 struct bfd_link_info *info)
 {
-  struct dynamic_sections ds = arc_create_dynamic_sections (output_bfd, info);
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bfd *dynobj = (elf_hash_table (info))->dynobj;
+  asection *sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
-  if (ds.sdyn)
+  if (sdyn)
     {
       Elf32_External_Dyn *dyncon, *dynconend;
 
-      dyncon = (Elf32_External_Dyn *) ds.sdyn->contents;
+      dyncon = (Elf32_External_Dyn *) sdyn->contents;
       dynconend
-	= (Elf32_External_Dyn *) (ds.sdyn->contents + ds.sdyn->size);
+	= (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn internal_dyn;
@@ -2260,8 +2175,9 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 	}
 
       /* TODO: Validate this.  */
-      elf_section_data (htab->srelplt->output_section)->this_hdr.sh_entsize
-	= 0xc;
+      if (htab->srelplt->output_section != bfd_abs_section_ptr)
+	elf_section_data (htab->srelplt->output_section)
+	  ->this_hdr.sh_entsize = 12;
     }
 
   /* Fill in the first three entries in the global offset table.  */
@@ -2276,12 +2192,12 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 	{
 	  asection *sec = h->root.u.def.section;
 
-	  if (ds.sdyn == NULL)
+	  if (sdyn == NULL)
 	    bfd_put_32 (output_bfd, (bfd_vma) 0,
 			sec->contents);
 	  else
 	    bfd_put_32 (output_bfd,
-			ds.sdyn->output_section->vma + ds.sdyn->output_offset,
+			sdyn->output_section->vma + sdyn->output_offset,
 			sec->contents);
 	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 4);
 	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 8);
@@ -2300,26 +2216,25 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 
 /* Set the sizes of the dynamic sections.  */
 static bfd_boolean
-elf_arc_size_dynamic_sections (bfd * output_bfd,
+elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 			       struct bfd_link_info *info)
 {
-  bfd *	   dynobj;
-  asection *      s;
-  bfd_boolean	  relocs_exist = FALSE;
-  bfd_boolean	  reltext_exist = FALSE;
-  struct dynamic_sections ds = arc_create_dynamic_sections (output_bfd, info);
+  bfd *dynobj;
+  asection *s;
+  bfd_boolean relocs_exist = FALSE;
+  bfd_boolean reltext_exist = FALSE;
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
-  dynobj = (elf_hash_table (info))->dynobj;
+  dynobj = htab->dynobj;
   BFD_ASSERT (dynobj != NULL);
 
-  if ((elf_hash_table (info))->dynamic_sections_created)
+  if (htab->dynamic_sections_created)
     {
       struct elf_link_hash_entry *h;
 
       /* Set the contents of the .interp section to the
 	 interpreter.  */
-      if (!bfd_link_pic (info) && !info->nointerp)
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -2347,54 +2262,70 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
 	htab->srelgot->size = 0;
     }
 
-  if (htab->splt != NULL && htab->splt->size == 0)
-    htab->splt->flags |= SEC_EXCLUDE;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      if (strncmp (s->name, ".rela", 5) == 0)
+      if (s == htab->splt
+	  || s == htab->sgot
+	  || s == htab->sgotplt
+	  || s == htab->sdynbss)
 	{
-	  if (s->size == 0)
+	  /* Strip this section if we don't need it.  */
+	}
+      else if (strncmp (s->name, ".rela", 5) == 0)
+	{
+	  if (s->size != 0 && s != htab->srelplt)
 	    {
-	      s->flags |= SEC_EXCLUDE;
-	    }
-	  else
-	    {
-	      if (strcmp (s->name, ".rela.plt") != 0)
+	      if (!reltext_exist)
 		{
-		  const char *outname =
-		    bfd_get_section_name (output_bfd,
-					  htab->srelplt->output_section);
-
-		  asection *target = bfd_get_section_by_name (output_bfd,
-							      outname + 4);
-
-		  relocs_exist = TRUE;
-		  if (target != NULL && target->size != 0
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext_exist = TRUE;
+		  const char *name = s->name + 5;
+		  bfd *ibfd;
+		  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
+		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
+		      {
+			asection *target = bfd_get_section_by_name (ibfd, name);
+			if (target != NULL
+			    && elf_section_data (target)->sreloc == s
+			    && ((target->output_section->flags
+				 & (SEC_READONLY | SEC_ALLOC))
+				== (SEC_READONLY | SEC_ALLOC)))
+			  {
+			    reltext_exist = TRUE;
+			    break;
+			  }
+		      }
 		}
+	      relocs_exist = TRUE;
 	    }
 
 	  /* We use the reloc_count field as a counter if we need to
 	     copy relocs into the output file.  */
 	  s->reloc_count = 0;
 	}
+      else
+	{
+	  /* It's not one of our sections, so don't allocate space.  */
+	  continue;
+	}
 
-      if (strcmp (s->name, ".dynamic") == 0)
+      if (s->size == 0)
+	{
+	  s->flags |= SEC_EXCLUDE;
+	  continue;
+	}
+
+      if ((s->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
-      if (s->size != 0)
-	s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
-
-      if (s->contents == NULL && s->size != 0)
+      /* Allocate memory for the section contents.  */
+      s->contents = bfd_zalloc (dynobj, s->size);
+      if (s->contents == NULL)
 	return FALSE;
     }
 
-  if (ds.sdyn)
+  if (htab->dynamic_sections_created)
     {
       /* TODO: Check if this is needed.  */
       if (!bfd_link_pic (info))
@@ -2405,19 +2336,17 @@ elf_arc_size_dynamic_sections (bfd * output_bfd,
 	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0)
-	   )
+	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	  return FALSE;
 
-      if (relocs_exist == TRUE)
+      if (relocs_exist)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf32_External_Rela))
-	   )
+					    sizeof (Elf32_External_Rela)))
 	  return FALSE;
 
-      if (reltext_exist == TRUE)
+      if (reltext_exist)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
 	  return FALSE;
     }

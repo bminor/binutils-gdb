@@ -2738,12 +2738,19 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  continue;
 	}
 
-      abbrev = lookup_abbrev (abbrev_number,unit->abbrevs);
+      abbrev = lookup_abbrev (abbrev_number, unit->abbrevs);
       if (! abbrev)
 	{
-	  _bfd_error_handler
-	    (_("Dwarf Error: Could not find abbrev number %u."),
-	     abbrev_number);
+	  static unsigned int previous_failed_abbrev = -1U;
+
+	  /* Avoid multiple reports of the same missing abbrev.  */
+	  if (abbrev_number != previous_failed_abbrev)
+	    {
+	      _bfd_error_handler
+		(_("Dwarf Error: Could not find abbrev number %u."),
+		 abbrev_number);
+	      previous_failed_abbrev = abbrev_number;
+	    }
 	  bfd_set_error (bfd_error_bad_value);
 	  goto fail;
 	}
@@ -2760,7 +2767,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  func->tag = abbrev->tag;
 	  func->prev_func = unit->function_table;
 	  unit->function_table = func;
-      unit->number_of_functions++;
+	  unit->number_of_functions++;
 	  BFD_ASSERT (!unit->cached);
 
 	  if (func->tag == DW_TAG_inlined_subroutine)
@@ -2785,7 +2792,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      var->stack = 1;
 	      var->prev_var = unit->variable_table;
 	      unit->variable_table = var;
-	      BFD_ASSERT (!unit->cached);
+	      /* PR 18205: Missing debug information can cause this
+		 var to be attached to an already cached unit.  */
 	    }
 
 	  /* No inline function in scope at this nesting level.  */

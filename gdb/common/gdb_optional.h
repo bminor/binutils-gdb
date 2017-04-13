@@ -34,8 +34,9 @@ class optional
 {
 public:
 
-  optional ()
-    : m_instantiated (false)
+  constexpr optional ()
+    : m_dummy (),
+      m_instantiated (false)
   {
   }
 
@@ -61,6 +62,31 @@ public:
     m_instantiated = true;
   }
 
+  /* Observers.  */
+  constexpr const T *operator-> () const
+  { return std::addressof (this->get ()); }
+
+  T *operator-> ()
+  { return std::addressof (this->get ()); }
+
+  constexpr const T &operator* () const &
+  { return this->get (); }
+
+  T &operator* () &
+  { return this->get (); }
+
+  T &&operator* () &&
+  { return std::move (this->get ()); }
+
+  constexpr const T &&operator* () const &&
+  { return std::move (this->get ()); }
+
+  constexpr explicit operator bool () const noexcept
+  { return m_instantiated; }
+
+  constexpr bool has_value () const noexcept
+  { return m_instantiated; }
+
 private:
 
   /* Destroy the object.  */
@@ -70,6 +96,10 @@ private:
     m_instantiated = false;
     m_item.~T ();
   }
+
+  /* The get operations have m_instantiated as a precondition.  */
+  T &get () noexcept { return m_item; }
+  constexpr const T &get () const noexcept { return m_item; }
 
   /* The object.  */
   union

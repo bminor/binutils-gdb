@@ -35,6 +35,7 @@
 #include "tracepoint.h"
 #include "dll.h"
 #include "hostio.h"
+#include <vector>
 
 /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
    `vCont'.  Note the multi-process extensions made `vCont' a
@@ -78,7 +79,8 @@ static int vCont_supported;
    space randomization feature before starting an inferior.  */
 int disable_randomization = 1;
 
-static char **program_argv, **wrapper_argv;
+static std::vector<char *> program_argv;
+static std::vector<char *> wrapper_argv;
 
 int pass_signals[GDB_SIGNAL_LAST];
 int program_signals[GDB_SIGNAL_LAST];
@@ -239,29 +241,21 @@ target_running (void)
 static int
 start_inferior (char **argv)
 {
-  char **new_argv = argv;
+  std::vector<char *> new_argv;
 
-  if (wrapper_argv != NULL)
-    {
-      int i, count = 1;
+  if (!wrapper_argv.empty ())
+    new_argv.insert (new_argv.begin (),
+		     wrapper_argv.begin (),
+		     wrapper_argv.end ());
 
-      for (i = 0; wrapper_argv[i] != NULL; i++)
-	count++;
-      for (i = 0; argv[i] != NULL; i++)
-	count++;
-      new_argv = XALLOCAVEC (char *, count);
-      count = 0;
-      for (i = 0; wrapper_argv[i] != NULL; i++)
-	new_argv[count++] = wrapper_argv[i];
-      for (i = 0; argv[i] != NULL; i++)
-	new_argv[count++] = argv[i];
-      new_argv[count] = NULL;
-    }
+  for (int i = 0; argv[i] != NULL; ++i)
+    new_argv.push_back (argv[i]);
+
+  new_argv.push_back (NULL);
 
   if (debug_threads)
     {
-      int i;
-      for (i = 0; new_argv[i]; ++i)
+      for (int i = 0; i < new_argv.size (); ++i)
 	debug_printf ("new_argv[%d] = \"%s\"\n", i, new_argv[i]);
       debug_flush ();
     }
@@ -271,7 +265,7 @@ start_inferior (char **argv)
   signal (SIGTTIN, SIG_DFL);
 #endif
 
-  signal_pid = create_inferior (new_argv[0], new_argv);
+  signal_pid = create_inferior (new_argv[0], &new_argv[0]);
 
   /* FIXME: we don't actually know at this point that the create
      actually succeeded.  We won't know that until we wait.  */
@@ -288,7 +282,7 @@ start_inferior (char **argv)
   atexit (restore_old_foreground_pgrp);
 #endif
 
-  if (wrapper_argv != NULL)
+  if (!wrapper_argv.empty ())
     {
       ptid_t ptid = pid_to_ptid (signal_pid);
 
@@ -2654,7 +2648,7 @@ handle_v_cont (char *own_buf)
   char *p, *q;
   int n = 0, i = 0;
   struct thread_resume *resume_info;
-  struct thread_resume default_action = {{0}};
+  struct thread_resume default_action { null_ptid };
 
   /* Count the number of semicolons in the packet.  There should be one
      for every action.  */
@@ -2852,7 +2846,8 @@ handle_v_attach (char *own_buf)
 static int
 handle_v_run (char *own_buf)
 {
-  char *p, *next_p, **new_argv;
+  char *p, *next_p;
+  std::vector<char *> new_argv;
   int i, new_argc;
 
   new_argc = 0;
@@ -2862,62 +2857,51 @@ handle_v_run (char *own_buf)
       new_argc++;
     }
 
-  new_argv = (char **) calloc (new_argc + 2, sizeof (char *));
-  if (new_argv == NULL)
-    {
-      write_enn (own_buf);
-      return 0;
-    }
-
-  i = 0;
-  for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
+  for (i = 0, p = own_buf + strlen ("vRun;"); *p; p = next_p, ++i)
     {
       next_p = strchr (p, ';');
       if (next_p == NULL)
 	next_p = p + strlen (p);
 
       if (i == 0 && p == next_p)
-	new_argv[i] = NULL;
+	{
+	  /* No program specified.  */
+	  new_argv.push_back (NULL);
+	}
       else
 	{
-	  /* FIXME: Fail request if out of memory instead of dying.  */
-	  new_argv[i] = (char *) xmalloc (1 + (next_p - p) / 2);
-	  hex2bin (p, (gdb_byte *) new_argv[i], (next_p - p) / 2);
-	  new_argv[i][(next_p - p) / 2] = '\0';
+	  size_t len = (next_p - p) / 2;
+	  char *arg = (char *) xmalloc (len + 1);
+
+	  hex2bin (p, (gdb_byte *) arg, len);
+	  arg[len] = '\0';
+	  new_argv.push_back (arg);
 	}
 
       if (*next_p)
 	next_p++;
-      i++;
     }
-  new_argv[i] = NULL;
+  new_argv.push_back (NULL);
 
   if (new_argv[0] == NULL)
     {
       /* GDB didn't specify a program to run.  Use the program from the
 	 last run with the new argument list.  */
-
-      if (program_argv == NULL)
+      if (program_argv.empty ())
 	{
 	  write_enn (own_buf);
-	  freeargv (new_argv);
+	  free_vector_argv (new_argv);
 	  return 0;
 	}
 
-      new_argv[0] = strdup (program_argv[0]);
-      if (new_argv[0] == NULL)
-	{
-	  write_enn (own_buf);
-	  freeargv (new_argv);
-	  return 0;
-	}
+      new_argv.push_back (xstrdup (program_argv[0]));
     }
 
   /* Free the old argv and install the new one.  */
-  freeargv (program_argv);
+  free_vector_argv (program_argv);
   program_argv = new_argv;
 
-  start_inferior (program_argv);
+  start_inferior (&program_argv[0]);
   if (last_status.kind == TARGET_WAITKIND_STOPPED)
     {
       prepare_resume_reply (own_buf, last_ptid, &last_status);
@@ -3511,7 +3495,8 @@ captured_main (int argc, char *argv[])
 {
   int bad_attach;
   int pid;
-  char *arg_end, *port;
+  char *arg_end;
+  const char *port = NULL;
   char **next_arg = &argv[1];
   volatile int multi_mode = 0;
   volatile int attach = 0;
@@ -3535,13 +3520,18 @@ captured_main (int argc, char *argv[])
 	multi_mode = 1;
       else if (strcmp (*next_arg, "--wrapper") == 0)
 	{
+	  char **tmp;
+
 	  next_arg++;
 
-	  wrapper_argv = next_arg;
+	  tmp = next_arg;
 	  while (*next_arg != NULL && strcmp (*next_arg, "--") != 0)
-	    next_arg++;
+	    {
+	      wrapper_argv.push_back (*next_arg);
+	      next_arg++;
+	    }
 
-	  if (next_arg == wrapper_argv || *next_arg == NULL)
+	  if (next_arg == tmp || *next_arg == NULL)
 	    {
 	      gdbserver_usage (stderr);
 	      exit (1);
@@ -3608,7 +3598,8 @@ captured_main (int argc, char *argv[])
 	{
 	  /* "-" specifies a stdio connection and is a form of port
 	     specification.  */
-	  *next_arg = STDIO_CONNECTION_NAME;
+	  port = STDIO_CONNECTION_NAME;
+	  next_arg++;
 	  break;
 	}
       else if (strcmp (*next_arg, "--disable-randomization") == 0)
@@ -3627,8 +3618,11 @@ captured_main (int argc, char *argv[])
       continue;
     }
 
-  port = *next_arg;
-  next_arg++;
+  if (port == NULL)
+    {
+      port = *next_arg;
+      next_arg++;
+    }
   if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
     {
       gdbserver_usage (stderr);
@@ -3687,13 +3681,12 @@ captured_main (int argc, char *argv[])
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_argv = XNEWVEC (char *, n + 1);
       for (i = 0; i < n; i++)
-	program_argv[i] = xstrdup (next_arg[i]);
-      program_argv[i] = NULL;
+	program_argv.push_back (xstrdup (next_arg[i]));
+      program_argv.push_back (NULL);
 
       /* Wait till we are at first instruction in program.  */
-      start_inferior (program_argv);
+      start_inferior (&program_argv[0]);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -4308,9 +4301,9 @@ process_serial_event (void)
 	  fprintf (stderr, "GDBserver restarting\n");
 
 	  /* Wait till we are at 1st instruction in prog.  */
-	  if (program_argv != NULL)
+	  if (!program_argv.empty ())
 	    {
-	      start_inferior (program_argv);
+	      start_inferior (&program_argv[0]);
 	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 		{
 		  /* Stopped at the first instruction of the target

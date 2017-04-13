@@ -282,6 +282,11 @@ proc default_ld_compile { cc source object } {
     remote_file build delete "ld.tmp"
     remote_file host delete "ld.tmp"
     set exec_output [prune_warnings $exec_output]
+    # Versions of gcc up to and including pre-release gcc-7, at least on
+    # some targets, generate .section directives with incorrect type.
+    # Ignore warnings from the assembler about this.
+    regsub -all "(^|\n)\[^\n\]*: ignoring incorrect section type \[^\n\]*" $exec_output "" exec_output
+    regsub -all "^\[^\n\]*: Assembler messages:\n" $exec_output "" exec_output
     if [string match "" $exec_output] then {
 	if {![file exists $object]} then {
 	    regexp ".*/(\[^/\]*)$" $source all dobj
@@ -1421,9 +1426,6 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    set objfile "tmpdir/$fileroot.o"
 	    lappend objfiles $objfile
 
-	    # We ignore warnings since some compilers may generate
-	    # incorrect section attributes and the assembler will warn
-	    # them.
 	    if { [ string match "c++" $lang ] } {
 		set cmd "$CXX -c $CXXFLAGS $cflags"
 	    } else {
@@ -1598,9 +1600,6 @@ proc run_cc_link_tests { ldtests } {
 	    set objfile "tmpdir/$fileroot.o"
 	    lappend objfiles $objfile
 
-	    # We ignore warnings since some compilers may generate
-	    # incorrect section attributes and the assembler will warn
-	    # them.
 	    if { [ string match "c++" $lang ] } {
 		set cmd "$CXX -c $CXXFLAGS $cflags"
 	    } else {
@@ -1820,6 +1819,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget msp430-*-*]
 	 && ![istarget mt-*-*]
 	 && ![istarget nds32*-*-*]
+	 && ![istarget nios2-*-elf]
 	 && ![istarget or1k*-*-*]
 	 && ![istarget pj-*-*]
 	 && ![istarget pru-*-*]

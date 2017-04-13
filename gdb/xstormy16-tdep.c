@@ -103,7 +103,7 @@ enum
 static const char *
 xstormy16_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static char *register_names[] = {
+  static const char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13",
     "psw", "sp", "pc"
@@ -808,6 +808,9 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+
+  set_gdbarch_wchar_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+  set_gdbarch_wchar_signed (gdbarch, 1);
 
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);

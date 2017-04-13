@@ -675,9 +675,9 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 
   extra->NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 
-  add_data_entry (abfd, extra, 0, ".edata", ib);
-  add_data_entry (abfd, extra, 2, ".rsrc", ib);
-  add_data_entry (abfd, extra, 3, ".pdata", ib);
+  add_data_entry (abfd, extra, PE_EXPORT_TABLE, ".edata", ib);
+  add_data_entry (abfd, extra, PE_RESOURCE_TABLE, ".rsrc", ib);
+  add_data_entry (abfd, extra, PE_EXCEPTION_TABLE, ".pdata", ib);
 
   /* In theory we do not need to call add_data_entry for .idata$2 or
      .idata$5.  It will be done in bfd_coff_final_link where all the
@@ -695,7 +695,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   if (extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress == 0)
     /* Until other .idata fixes are made (pending patch), the entry for
        .idata is needed for backwards compatibility.  FIXME.  */
-    add_data_entry (abfd, extra, 1, ".idata", ib);
+    add_data_entry (abfd, extra, PE_IMPORT_TABLE, ".idata", ib);
 
   /* For some reason, the virtual size (which is what's set by
      add_data_entry) for .reloc is not the same as the size recorded
@@ -703,7 +703,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
      but since it's the best we've got, use it.  It does do the right
      thing for .pdata.  */
   if (pe->has_reloc_section)
-    add_data_entry (abfd, extra, 5, ".reloc", ib);
+    add_data_entry (abfd, extra, PE_BASE_RELOCATION_TABLE, ".reloc", ib);
 
   {
     asection *sec;

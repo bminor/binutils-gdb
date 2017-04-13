@@ -79,6 +79,9 @@
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
 
+/* Holds the current set of options to be passed to the disassembler.  */
+static char *s390_disassembler_options;
+
 enum s390_abi_kind
 {
   ABI_LINUX_S390,
@@ -1209,41 +1212,6 @@ is_rsy (bfd_byte *insn, int op1, int op2,
 
 
 static int
-is_rsi (bfd_byte *insn, int op,
-	unsigned int *r1, unsigned int *r3, int *i2)
-{
-  if (insn[0] == op)
-    {
-      *r1 = (insn[1] >> 4) & 0xf;
-      *r3 = insn[1] & 0xf;
-      /* i2 is a 16-bit signed quantity.  */
-      *i2 = (((insn[2] << 8) | insn[3]) ^ 0x8000) - 0x8000;
-      return 1;
-    }
-  else
-    return 0;
-}
-
-
-static int
-is_rie (bfd_byte *insn, int op1, int op2,
-	unsigned int *r1, unsigned int *r3, int *i2)
-{
-  if (insn[0] == op1
-      && insn[5] == op2)
-    {
-      *r1 = (insn[1] >> 4) & 0xf;
-      *r3 = insn[1] & 0xf;
-      /* i2 is a 16-bit signed quantity.  */
-      *i2 = (((insn[2] << 8) | insn[3]) ^ 0x8000) - 0x8000;
-      return 1;
-    }
-  else
-    return 0;
-}
-
-
-static int
 is_rx (bfd_byte *insn, int op,
        unsigned int *r1, int *d2, unsigned int *x2, unsigned int *b2)
 {
@@ -1973,20 +1941,6 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 				      amode | (from + insnlen));
     }
 
-  /* Handle PC-relative branch instructions.  */
-  else if (is_ri (insn, op1_brc, op2_brc, &r1, &i2)
-	   || is_ril (insn, op1_brcl, op2_brcl, &r1, &i2)
-	   || is_ri (insn, op1_brct, op2_brct, &r1, &i2)
-	   || is_ri (insn, op1_brctg, op2_brctg, &r1, &i2)
-	   || is_rsi (insn, op_brxh, &r1, &r3, &i2)
-	   || is_rie (insn, op1_brxhg, op2_brxhg, &r1, &r3, &i2)
-	   || is_rsi (insn, op_brxle, &r1, &r3, &i2)
-	   || is_rie (insn, op1_brxlg, op2_brxlg, &r1, &r3, &i2))
-    {
-      /* Update PC.  */
-      regcache_write_pc (regs, pc - to + from);
-    }
-
   /* Handle LOAD ADDRESS RELATIVE LONG.  */
   else if (is_ril (insn, op1_larl, op2_larl, &r1, &i2))
     {
@@ -2001,9 +1955,11 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
   else if (insn[0] == 0x0 && insn[1] == 0x1)
     regcache_write_pc (regs, from);
 
-  /* For any other insn, PC points right after the original instruction.  */
+  /* For any other insn, adjust PC by negated displacement.  PC then
+     points right after the original instruction, except for PC-relative
+     branches, where it points to the adjusted branch target.  */
   else
-    regcache_write_pc (regs, from + insnlen);
+    regcache_write_pc (regs, pc - to + from);
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
@@ -3148,7 +3104,7 @@ s390_function_arg_integer (struct type *type)
       || code == TYPE_CODE_CHAR
       || code == TYPE_CODE_BOOL
       || code == TYPE_CODE_PTR
-      || code == TYPE_CODE_REF)
+      || TYPE_IS_REFERENCE (type))
     return 1;
 
   return ((code == TYPE_CODE_UNION || code == TYPE_CODE_STRUCT)
@@ -8112,6 +8068,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   s390_init_linux_record_tdep (&s390_linux_record_tdep, ABI_LINUX_S390);
   s390_init_linux_record_tdep (&s390x_linux_record_tdep, ABI_LINUX_ZSERIES);
+
+  set_gdbarch_disassembler_options (gdbarch, &s390_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_s390 ());
 
   return gdbarch;
 }

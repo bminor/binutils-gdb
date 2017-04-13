@@ -151,12 +151,10 @@ compile_code_command (char *arg, int from_tty)
     eval_compile_command (NULL, arg, scope, NULL);
   else
     {
-      struct command_line *l = get_command_line (compile_control, "");
-      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (compile_control, "");
 
       l->control_u.compile.scope = scope;
-      execute_control_command_untraced (l);
-      do_cleanups (cleanup);
+      execute_control_command_untraced (l.get ());
     }
 }
 
@@ -192,13 +190,11 @@ compile_print_command (char *arg_param, int from_tty)
     eval_compile_command (NULL, arg, scope, &fmt);
   else
     {
-      struct command_line *l = get_command_line (compile_control, "");
-      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (compile_control, "");
 
       l->control_u.compile.scope = scope;
       l->control_u.compile.scope_data = &fmt;
-      execute_control_command_untraced (l);
-      do_cleanups (cleanup);
+      execute_control_command_untraced (l.get ());
     }
 }
 

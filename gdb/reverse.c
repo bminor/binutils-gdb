@@ -43,7 +43,7 @@ exec_direction_default (void *notused)
    Used to implement reverse-next etc. commands.  */
 
 static void
-exec_reverse_once (char *cmd, char *args, int from_tty)
+exec_reverse_once (const char *cmd, char *args, int from_tty)
 {
   char *reverse_command;
   enum exec_direction_kind dir = execution_direction;

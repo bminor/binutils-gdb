@@ -489,11 +489,11 @@ core_detach (struct target_ops *ops, const char *args, int from_tty)
    them to core_vec->core_read_registers, as the register set numbered
    WHICH.
 
-   If inferior_ptid's lwp member is zero, do the single-threaded
-   thing: look for a section named NAME.  If inferior_ptid's lwp
+   If ptid's lwp member is zero, do the single-threaded
+   thing: look for a section named NAME.  If ptid's lwp
    member is non-zero, do the multi-threaded thing: look for a section
    named "NAME/LWP", where LWP is the shortest ASCII decimal
-   representation of inferior_ptid's lwp member.
+   representation of ptid's lwp member.
 
    HUMAN_NAME is a human-readable name for the kind of registers the
    NAME section contains, for use in error messages.
@@ -517,12 +517,13 @@ get_core_register_section (struct regcache *regcache,
   char *contents;
   bool variable_size_section = (regset != NULL
 				&& regset->flags & REGSET_VARIABLE_SIZE);
+  ptid_t ptid = regcache_get_ptid (regcache);
 
   xfree (section_name);
 
-  if (ptid_get_lwp (inferior_ptid))
+  if (ptid_get_lwp (ptid))
     section_name = xstrprintf ("%s/%ld", name,
-			       ptid_get_lwp (inferior_ptid));
+			       ptid_get_lwp (ptid));
   else
     section_name = xstrdup (name);
 
@@ -964,7 +965,7 @@ core_read_description (struct target_ops *target)
   return target->beneath->to_read_description (target->beneath);
 }
 
-static char *
+static const char *
 core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];

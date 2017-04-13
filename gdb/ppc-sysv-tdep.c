@@ -806,7 +806,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	    || TYPE_CODE (type) == TYPE_CODE_CHAR
 	    || TYPE_CODE (type) == TYPE_CODE_BOOL
 	    || TYPE_CODE (type) == TYPE_CODE_PTR
-	    || TYPE_CODE (type) == TYPE_CODE_REF
+	    || TYPE_IS_REFERENCE (type)
 	    || TYPE_CODE (type) == TYPE_CODE_ENUM)
 	   && TYPE_LENGTH (type) <= tdep->wordsize)
     {
@@ -1494,7 +1494,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	    || TYPE_CODE (type) == TYPE_CODE_BOOL
 	    || TYPE_CODE (type) == TYPE_CODE_CHAR
 	    || TYPE_CODE (type) == TYPE_CODE_PTR
-	    || TYPE_CODE (type) == TYPE_CODE_REF)
+	    || TYPE_IS_REFERENCE (type))
 	   && TYPE_LENGTH (type) <= tdep->wordsize)
     {
       ULONGEST word = 0;
@@ -2000,8 +2000,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* All pointers live in r3.  */
-  if (TYPE_CODE (valtype) == TYPE_CODE_PTR
-      || TYPE_CODE (valtype) == TYPE_CODE_REF)
+  if (TYPE_CODE (valtype) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (valtype))
     {
       int regnum = tdep->ppc_gp0_regnum + 3;
 

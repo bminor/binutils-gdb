@@ -30,6 +30,7 @@
 #include "elf-bfd.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "safe-ctype.h"
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
@@ -53,12 +54,11 @@ struct is_specified_symbol_predicate_data
   bfd_boolean	found;
 };
 
-/* A list to support redefine_sym.  */
+/* A node includes symbol name mapping to support redefine_sym.  */
 struct redefine_node
 {
   char *source;
   char *target;
-  struct redefine_node *next;
 };
 
 struct addsym_node
@@ -94,7 +94,11 @@ static int copy_width = 1;
 static bfd_boolean verbose;		/* Print file and target names.  */
 static bfd_boolean preserve_dates;	/* Preserve input file timestamp.  */
 static int deterministic = -1;		/* Enable deterministic archives.  */
-static int status = 0;		/* Exit status.  */
+static int status = 0;			/* Exit status.  */
+
+static bfd_boolean    merge_notes = FALSE;	/* Merge note sections.  */
+static bfd_byte *     merged_notes = NULL;	/* Contents on note section undergoing a merge.  */
+static bfd_size_type  merged_size = 0;		/* New, smaller size of the merged note section.  */
 
 enum strip_action
 {
@@ -244,7 +248,8 @@ static htab_t localize_specific_htab = NULL;
 static htab_t globalize_specific_htab = NULL;
 static htab_t keepglobal_specific_htab = NULL;
 static htab_t weaken_specific_htab = NULL;
-static struct redefine_node *redefine_sym_list = NULL;
+static htab_t redefine_specific_htab = NULL;
+static htab_t redefine_specific_reverse_htab = NULL;
 static struct addsym_node *add_sym_list = NULL, **add_sym_tail = &add_sym_list;
 static int add_symbols = 0;
 
@@ -315,6 +320,7 @@ enum command_line_switch
   OPTION_LOCALIZE_HIDDEN,
   OPTION_LOCALIZE_SYMBOLS,
   OPTION_LONG_SECTION_NAMES,
+  OPTION_MERGE_NOTES,
   OPTION_NO_CHANGE_WARNINGS,
   OPTION_ONLY_KEEP_DEBUG,
   OPTION_PAD_TO,
@@ -436,6 +442,7 @@ static struct option copy_options[] =
   {"localize-symbol", required_argument, 0, 'L'},
   {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
   {"long-section-names", required_argument, 0, OPTION_LONG_SECTION_NAMES},
+  {"merge-notes", no_argument, 0, 'M'},
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"no-change-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
@@ -634,6 +641,7 @@ copy_usage (FILE *stream, int exit_status)
      --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
      --elf-stt-common=[yes|no]     Generate ELF common symbols with STT_COMMON\n\
                                      type\n\
+  -M  --merge-notes                Remove redundant entries in note sections\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
   -V --version                     Display this program's version number\n\
@@ -939,6 +947,34 @@ find_section_list (const char *name, bfd_boolean add, unsigned int context)
   return p;
 }
 
+/* S1 is the entry node already in the table, S2 is the key node.  */
+
+static int
+eq_string_redefnode (const void *s1, const void *s2)
+{
+  struct redefine_node *node1 = (struct redefine_node *) s1;
+  struct redefine_node *node2 = (struct redefine_node *) s2;
+  return !strcmp ((const char *) node1->source, (const char *) node2->source);
+}
+
+/* P is redefine node.  Hash value is generated from its "source" filed.  */
+
+static hashval_t
+htab_hash_redefnode (const void *p)
+{
+  struct redefine_node *redefnode = (struct redefine_node *) p;
+  return htab_hash_string (redefnode->source);
+}
+
+/* Create hashtab used for redefine node.  */
+
+static htab_t
+create_symbol2redef_htab (void)
+{
+  return htab_create_alloc (16, htab_hash_redefnode, eq_string_redefnode, NULL,
+			    xcalloc, free);
+}
+
 /* There is htab_hash_string but no htab_eq_string. Makes sense.  */
 
 static int
@@ -963,6 +999,10 @@ create_symbol_htabs (void)
   globalize_specific_htab = create_symbol_htab ();
   keepglobal_specific_htab = create_symbol_htab ();
   weaken_specific_htab = create_symbol_htab ();
+  redefine_specific_htab = create_symbol2redef_htab ();
+  /* As there is no bidirectional hash table in libiberty, need a reverse table
+     to check duplicated target string.  */
+  redefine_specific_reverse_htab = create_symbol_htab ();
 }
 
 /* Add a symbol to strip_specific_list.  */
@@ -971,6 +1011,14 @@ static void
 add_specific_symbol (const char *name, htab_t htab)
 {
   *htab_find_slot (htab, name, INSERT) = (char *) name;
+}
+
+/* Like add_specific_symbol, but the element type is void *.  */
+
+static void
+add_specific_symbol_node (const void *node, htab_t htab)
+{
+  *htab_find_slot (htab, node, INSERT) = (void *) node;
 }
 
 /* Add symbols listed in `filename' to strip_specific_list.  */
@@ -1201,6 +1249,24 @@ is_update_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   return FALSE;
 }
 
+static bfd_boolean
+is_merged_note_section (bfd * abfd, asection * sec)
+{
+  if (merge_notes
+      && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && elf_section_data (sec)->this_hdr.sh_type == SHT_NOTE
+      /* FIXME: We currently only support merging GNU_BUILD_NOTEs.
+	 We should add support for more note types.  */
+      && ((elf_section_data (sec)->this_hdr.sh_flags & SHF_GNU_BUILD_NOTE) != 0
+	  /* Old versions of GAS (prior to 2.27) could not set the section
+	     flags to OS-specific values, so we also accept sections with the
+	     expected name.  */
+	  || (strcmp (sec->name, GNU_BUILD_ATTRS_SECTION_NAME) == 0)))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* See if a non-group section is being removed.  */
 
 static bfd_boolean
@@ -1413,7 +1479,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    to[dst_count++] = create_new_symbol (ptr, obfd);
 	}
 
-      if (redefine_sym_list || section_rename_list)
+      if (htab_elements (redefine_specific_htab) || section_rename_list)
 	{
 	  char *new_name;
 
@@ -1599,42 +1665,40 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 static const char *
 lookup_sym_redefinition (const char *source)
 {
-  struct redefine_node *list;
+  struct redefine_node key_node = {(char *) source, NULL};
+  struct redefine_node *redef_node
+    = (struct redefine_node *) htab_find (redefine_specific_htab, &key_node);
 
-  for (list = redefine_sym_list; list != NULL; list = list->next)
-    if (strcmp (source, list->source) == 0)
-      return list->target;
-
-  return source;
+  return redef_node == NULL ? source : redef_node->target;
 }
 
-/* Add a node to a symbol redefine list.  */
+/* Insert a node into symbol redefine hash tabel.  */
 
 static void
-redefine_list_append (const char *cause, const char *source, const char *target)
+add_redefine_and_check (const char *cause, const char *source,
+			const char *target)
 {
-  struct redefine_node **p;
-  struct redefine_node *list;
-  struct redefine_node *new_node;
-
-  for (p = &redefine_sym_list; (list = *p) != NULL; p = &list->next)
-    {
-      if (strcmp (source, list->source) == 0)
-	fatal (_("%s: Multiple redefinition of symbol \"%s\""),
-	       cause, source);
-
-      if (strcmp (target, list->target) == 0)
-	fatal (_("%s: Symbol \"%s\" is target of more than one redefinition"),
-	       cause, target);
-    }
-
-  new_node = (struct redefine_node *) xmalloc (sizeof (struct redefine_node));
+  struct redefine_node *new_node
+    = (struct redefine_node *) xmalloc (sizeof (struct redefine_node));
 
   new_node->source = strdup (source);
   new_node->target = strdup (target);
-  new_node->next = NULL;
 
-  *p = new_node;
+  if (htab_find (redefine_specific_htab, new_node) != HTAB_EMPTY_ENTRY)
+    fatal (_("%s: Multiple redefinition of symbol \"%s\""),
+	   cause, source);
+
+  if (htab_find (redefine_specific_reverse_htab, target) != HTAB_EMPTY_ENTRY)
+    fatal (_("%s: Symbol \"%s\" is target of more than one redefinition"),
+	   cause, target);
+
+  /* Insert the NEW_NODE into hash table for quick search.  */
+  add_specific_symbol_node (new_node, redefine_specific_htab);
+
+  /* Insert the target string into the reverse hash table, this is needed for
+     duplicated target string check.  */
+  add_specific_symbol (new_node->target, redefine_specific_reverse_htab);
+
 }
 
 /* Handle the --redefine-syms option.  Read lines containing "old new"
@@ -1719,7 +1783,7 @@ add_redefine_syms_file (const char *filename)
 	end_of_line:
 	  /* Append the redefinition to the list.  */
 	  if (buf[0] != '\0')
-	    redefine_list_append (filename, &buf[0], &buf[outsym_off]);
+	    add_redefine_and_check (filename, &buf[0], &buf[outsym_off]);
 
 	  lineno++;
 	  len = 0;
@@ -1818,6 +1882,255 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+/* Merge the notes on SEC, removing redundant entries.
+   Returns the new, smaller size of the section upon success.  */
+
+static bfd_size_type
+merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte * contents)
+{
+  Elf_Internal_Note * pnotes_end;
+  Elf_Internal_Note * pnotes;
+  Elf_Internal_Note * pnote;
+  bfd_size_type       remain = size;
+  unsigned            version_notes_seen = 0;
+  bfd_boolean         duplicate_found = FALSE;
+  const char *        err = NULL;
+  bfd_byte *          in = contents;
+
+  /* Make a copy of the notes.
+     Minimum size of a note is 12 bytes.  */
+  pnote = pnotes = (Elf_Internal_Note *) xmalloc ((size / 12) * sizeof (Elf_Internal_Note));
+  while (remain >= 12)
+    {
+      pnote->namesz = (bfd_get_32 (abfd, in    ) + 3) & ~3;
+      pnote->descsz = (bfd_get_32 (abfd, in + 4) + 3) & ~3;
+      pnote->type   =  bfd_get_32 (abfd, in + 8);
+
+      if (pnote->type    != NT_GNU_BUILD_ATTRIBUTE_OPEN
+	  && pnote->type != NT_GNU_BUILD_ATTRIBUTE_FUNC)
+	{
+	  err = _("corrupt GNU build attribute note: wrong note type");
+	  goto done;
+	}
+
+      if (pnote->namesz + pnote->descsz + 12 > remain)
+	{
+	  err = _("corrupt GNU build attribute note: note too big");
+	  goto done;
+	}
+
+      if (pnote->namesz < 2)
+	{
+	  err = _("corrupt GNU build attribute note: name too small");
+	  goto done;
+	}
+
+      if (pnote->descsz != 0
+	  && pnote->descsz != 4
+	  && pnote->descsz != 8)
+	{
+	  err = _("corrupt GNU build attribute note: bad description size");
+	  goto done;
+	}
+
+      pnote->namedata = (char *)(in + 12);
+      pnote->descdata = (char *)(in + 12 + pnote->namesz);
+
+      remain -= 12 + pnote->namesz + pnote->descsz;
+      in     += 12 + pnote->namesz + pnote->descsz;
+
+      if (pnote->namesz > 1 && pnote->namedata[1] == GNU_BUILD_ATTRIBUTE_VERSION)
+	++ version_notes_seen;
+      pnote ++;
+    }
+
+  pnotes_end = pnote;
+
+  /* Check that the notes are valid.  */
+  if (remain != 0)
+    {
+      err = _("corrupt GNU build attribute notes: data at end");
+      goto done;
+    }
+
+  if (version_notes_seen == 0)
+    {
+      err = _("bad GNU build attribute notes: no version note");
+      goto done;
+    }
+
+  /* Merging is only needed if there is more than one version note...  */
+  if (version_notes_seen == 1)
+    goto done;
+
+  /* The first note should be the first version note.  */
+  if (pnotes[0].namedata[1] != GNU_BUILD_ATTRIBUTE_VERSION)
+    {
+      err = _("bad GNU build attribute notes: first note not version note");
+      goto done;
+    }
+
+  if (pnotes[0].namedata[0] != GNU_BUILD_ATTRIBUTE_TYPE_STRING
+      || pnotes[0].namedata[2] != '1')
+    {
+      err = _("bad GNU build attribute notes: version note not v1");
+      goto done;
+    }
+
+  /* Now merge the notes.  The rules are:
+     1. Preserve the ordering of the notes.
+     2. Preserve any NT_GNU_BUILD_ATTRIBUTE_FUNC notes.
+     3. Eliminate any NT_GNU_BUILD_ATTRIBUTE_OPEN notes that have the same
+        full name field as the immediately preceeding note with the same type
+	of name.
+     4. If an NT_GNU_BUILD_ATTRIBUTE_OPEN note is going to be preserved and
+        its description field is empty then the nearest preceeding OPEN note
+	with a non-empty description field must also be preserved *OR* the
+	description field of the note must be changed to contain the starting
+	address to which it refers.  */
+  for (pnote = pnotes + 1; pnote < pnotes_end; pnote ++)
+    {
+      Elf_Internal_Note * back;
+      Elf_Internal_Note * prev_open = NULL;
+
+      if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+	continue;
+
+      /* Scan for duplicates.  Clear the type field of any found - but do not
+	 delete them just yet.  */
+      for (back = pnote - 1; back >= pnotes; back --)
+	{
+	  if (back->descsz > 0
+	      && back->type != NT_GNU_BUILD_ATTRIBUTE_FUNC
+	      && prev_open == NULL)
+	    prev_open = back;
+
+	  if (back->type == pnote->type
+	      && back->namedata[1] == pnote->namedata[1])
+	    {
+	      if (back->namesz == pnote->namesz
+		  && memcmp (back->namedata, pnote->namedata, back->namesz) == 0)
+		{
+		  duplicate_found = TRUE;
+		  pnote->type = 0;
+		  break;
+		}
+
+	      /* If we have found an attribute match then stop searching backwards.  */
+	      if (! ISPRINT (back->namedata[1])
+		  || strcmp (back->namedata + 2, pnote->namedata + 2) == 0)
+		{
+		  /* Since we are keeping this note we must check to see if its
+		     description refers back to an earlier OPEN note.  If so
+		     then we must make sure that version note is also preserved.  */
+		  if (pnote->descsz == 0
+		      && prev_open != NULL
+		      && prev_open->type == 0)
+		    prev_open->type = NT_GNU_BUILD_ATTRIBUTE_FUNC;
+
+		  break;
+		}
+	    }
+	}
+    }
+
+  if (duplicate_found)
+    {
+      bfd_byte *     new_contents;
+      bfd_byte *     old;
+      bfd_byte *     new;
+      bfd_size_type  new_size;
+      arelent **     relpp = NULL;
+      long           relsize;
+      long           relcount = 0;
+
+      relsize = bfd_get_reloc_upper_bound (abfd, sec);
+      if (relsize > 0)
+	{
+	  /* If there are relocs associated with this section then we may
+	     have to adjust them as well, as we remove notes.  */
+	  relpp = (arelent **) xmalloc (relsize);
+	  relcount = bfd_canonicalize_reloc (abfd, sec, relpp, isympp);
+	  if (relcount < 0)
+	    /* Do not bother complaining here - copy_relocations_in_section
+	       will do that for us.  */
+	    relcount = 0;
+	}
+
+      /* Eliminate the duplicates.  */
+      new = new_contents = xmalloc (size);
+      for (pnote = pnotes, old = contents;
+	   pnote < pnotes_end;
+	   pnote ++)
+	{
+	  bfd_size_type note_size = 12 + pnote->namesz + pnote->descsz;
+
+	  if (pnote->type == 0)
+	    {
+	      if (relcount > 0)
+		{
+		  arelent ** rel;
+
+		  /* If there is a reloc at the current offset, delete it.
+		     Adjust the location of any relocs above the current
+		     location downwards by the size of the note being deleted.
+		     FIXME: We could optimize this loop by retaining a pointer to
+		     the last reloc below the current note.  */
+		  for (rel = relpp; rel < relpp + relcount; rel ++)
+		    {
+		      if ((* rel)->howto == NULL)
+			continue;
+		      if ((* rel)->address < (bfd_vma) (new - new_contents))
+			continue;
+		      if ((* rel)->address >= (bfd_vma) ((new + note_size) - new_contents))
+			  (* rel)->address -= note_size;
+		      else
+			(* rel)->howto = NULL;
+		    }
+		}
+	    }
+	  else
+	    {
+	      memcpy (new, old, note_size);
+	      new += note_size;
+	    }
+
+	  old += note_size;
+	}
+
+      new_size = new - new_contents;
+      memcpy (contents, new_contents, new_size);
+      size = new_size;
+      free (new_contents);
+
+      if (relcount > 0)
+	{
+	  arelent ** rel;
+
+	  for (rel = relpp; rel < relpp + relcount; rel ++)
+	    if ((* rel)->howto == NULL)
+	      {
+		/* Delete eliminated relocs.
+		   FIXME: There are better ways to do this.  */
+		memmove (rel, rel + 1, ((relcount - (rel - relpp)) - 1) * sizeof (* rel));
+		relcount --;
+	      }
+	  bfd_set_reloc (abfd, sec, relpp, relcount);
+	}
+    }
+
+ done:
+  if (err)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      bfd_nonfatal_message (NULL, abfd, sec, err);
+      status = 1;
+    }
+
+  free (pnotes);
+  return size;
+}
+
 /* Copy object file IBFD onto OBFD.
    Returns TRUE upon success, FALSE otherwise.  */
 
@@ -1827,6 +2140,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   bfd_vma start;
   long symcount;
   asection **osections = NULL;
+  asection *osec;
   asection *gnu_debuglink_section = NULL;
   bfd_size_type *gaps = NULL;
   bfd_size_type max_gap = 0;
@@ -2127,8 +2441,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	   pupdate != NULL;
 	   pupdate = pupdate->next)
 	{
-	  asection *osec;
-
 	  pupdate->section = bfd_get_section_by_name (ibfd, pupdate->name);
 	  if (pupdate->section == NULL)
 	    {
@@ -2145,16 +2457,63 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
+  if (merge_notes)
+    {
+      /* This palaver is necessary because we must set the output
+	 section size first, before its contents are ready.  */
+      osec = bfd_get_section_by_name (ibfd, GNU_BUILD_ATTRS_SECTION_NAME);
+      if (osec && is_merged_note_section (ibfd, osec))
+	{
+	  bfd_size_type size;
+	  
+	  size = bfd_get_section_size (osec);
+	  if (size == 0)
+	    {
+	      bfd_nonfatal_message (NULL, ibfd, osec, _("warning: note section is empty"));
+	      merge_notes = FALSE;
+	    }
+	  else if (! bfd_get_full_section_contents (ibfd, osec, & merged_notes))
+	    {
+	      bfd_nonfatal_message (NULL, ibfd, osec, _("warning: could not load note section"));
+	      free (merged_notes);
+	      merged_notes = NULL;
+	      merge_notes = FALSE;
+	    }
+	  else
+	    {
+	      merged_size = merge_gnu_build_notes (ibfd, osec, size, merged_notes);
+	      if (merged_size == size)
+		{
+		  /* Merging achieves nothing.  */
+		  free (merged_notes);
+		  merged_notes = NULL;
+		  merge_notes = FALSE;
+		  merged_size = 0;
+		}
+	      else
+		{
+		  if (osec->output_section == NULL
+		      || ! bfd_set_section_size (obfd, osec->output_section, merged_size))
+		    {
+		      bfd_nonfatal_message (NULL, obfd, osec, _("warning: failed to set merged notes size"));
+		      free (merged_notes);
+		      merged_notes = NULL;
+		      merge_notes = FALSE;
+		      merged_size = 0;
+		    }
+		}
+	    }
+	}
+    }
+
   if (dump_sections != NULL)
     {
       struct section_add * pdump;
 
       for (pdump = dump_sections; pdump != NULL; pdump = pdump->next)
 	{
-	  asection * sec;
-
-	  sec = bfd_get_section_by_name (ibfd, pdump->name);
-	  if (sec == NULL)
+	  osec = bfd_get_section_by_name (ibfd, pdump->name);
+	  if (osec == NULL)
 	    {
 	      bfd_nonfatal_message (NULL, ibfd, NULL,
 				    _("can't dump section '%s' - it does not exist"),
@@ -2162,17 +2521,17 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      continue;
 	    }
 
-	  if ((bfd_get_section_flags (ibfd, sec) & SEC_HAS_CONTENTS) == 0)
+	  if ((bfd_get_section_flags (ibfd, osec) & SEC_HAS_CONTENTS) == 0)
 	    {
-	      bfd_nonfatal_message (NULL, ibfd, sec,
+	      bfd_nonfatal_message (NULL, ibfd, osec,
 				    _("can't dump section - it has no contents"));
 	      continue;
 	    }
 
-	  bfd_size_type size = bfd_get_section_size (sec);
+	  bfd_size_type size = bfd_get_section_size (osec);
 	  if (size == 0)
 	    {
-	      bfd_nonfatal_message (NULL, ibfd, sec,
+	      bfd_nonfatal_message (NULL, ibfd, osec,
 				    _("can't dump section - it is empty"));
 	      continue;
 	    }
@@ -2187,7 +2546,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    }
 
 	  bfd_byte * contents = xmalloc (size);
-	  if (bfd_get_section_contents (ibfd, sec, contents, 0, size))
+	  if (bfd_get_section_contents (ibfd, osec, contents, 0, size))
 	    {
 	      if (fwrite (contents, 1, size, f) != size)
 		{
@@ -2198,7 +2557,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		}
 	    }
 	  else
-	    bfd_nonfatal_message (NULL, ibfd, sec,
+	    bfd_nonfatal_message (NULL, ibfd, osec,
 				  _("could not retrieve section contents"));
 
 	  fclose (f);
@@ -2236,7 +2595,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    {
 	      bfd_vma debuglink_vma;
 	      asection * highest_section;
-	      asection * sec;
 
 	      /* The PE spec requires that all sections be adjacent and sorted
 		 in ascending order of VMA.  It also specifies that debug
@@ -2248,13 +2606,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		 VMA which makes it contiguous with other debug sections.  So
 		 walk the current section list, find the section with the
 		 highest VMA and start the debuglink section after that one.  */
-	      for (sec = obfd->sections, highest_section = NULL;
-		   sec != NULL;
-		   sec = sec->next)
-		if (sec->vma > 0
+	      for (osec = obfd->sections, highest_section = NULL;
+		   osec != NULL;
+		   osec = osec->next)
+		if (osec->vma > 0
 		    && (highest_section == NULL
-			|| sec->vma > highest_section->vma))
-		  highest_section = sec;
+			|| osec->vma > highest_section->vma))
+		  highest_section = osec;
 
 	      if (highest_section)
 		debuglink_vma = BFD_ALIGN (highest_section->vma
@@ -2375,13 +2733,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       || htab_elements (globalize_specific_htab) != 0
       || htab_elements (keepglobal_specific_htab) != 0
       || htab_elements (weaken_specific_htab) != 0
+      || htab_elements (redefine_specific_htab) != 0
       || prefix_symbols_string
       || sections_removed
       || sections_copied
       || convert_debugging
       || change_leading_char
       || remove_leading_char
-      || redefine_sym_list
       || section_rename_list
       || weaken
       || add_symbols)
@@ -2442,8 +2800,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	   pupdate != NULL;
 	   pupdate = pupdate->next)
 	{
-	  asection *osec;
-
 	  osec = pupdate->section->output_section;
 	  if (! bfd_set_section_contents (obfd, osec, pupdate->contents,
 					  0, pupdate->size))
@@ -2452,6 +2808,24 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      return FALSE;
 	    }
 	}
+    }
+
+  if (merge_notes)
+    {
+      osec = bfd_get_section_by_name (obfd, GNU_BUILD_ATTRS_SECTION_NAME);
+      if (osec && is_merged_note_section (obfd, osec))
+	{
+	  if (! bfd_set_section_contents (obfd, osec, merged_notes, 0, merged_size))
+	    {
+	      bfd_nonfatal_message (NULL, obfd, osec, _("error: failed to copy merged notes into output"));
+	      return FALSE;
+	    }
+	}
+      else
+	bfd_nonfatal_message (NULL, obfd, osec, _("ICE: lost merged note section"));
+      free (merged_notes);
+      merged_notes = NULL;
+      merge_notes = FALSE;
     }
 
   if (gnu_debuglink_filename != NULL)
@@ -3179,7 +3553,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 /* Return TRUE if input section ISECTION should be skipped.  */
 
 static bfd_boolean
-skip_section (bfd *ibfd, sec_ptr isection)
+skip_section (bfd *ibfd, sec_ptr isection, bfd_boolean skip_copy)
 {
   sec_ptr osection;
   bfd_size_type size;
@@ -3197,6 +3571,11 @@ skip_section (bfd *ibfd, sec_ptr isection)
     return TRUE;
 
   if (is_update_section (ibfd, isection))
+    return TRUE;
+
+  /* When merging a note section we skip the copying of the contents,
+     but not the copying of the relocs associated with the contents.  */
+  if (skip_copy && is_merged_note_section (ibfd, isection))
     return TRUE;
 
   flags = bfd_get_section_flags (ibfd, isection);
@@ -3265,7 +3644,7 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   long relcount;
   sec_ptr osection;
 
-  if (skip_section (ibfd, isection))
+ if (skip_section (ibfd, isection, FALSE))
     return;
 
   osection = isection->output_section;
@@ -3354,7 +3733,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   sec_ptr osection;
   bfd_size_type size;
 
-  if (skip_section (ibfd, isection))
+  if (skip_section (ibfd, isection, TRUE))
     return;
 
   osection = isection->output_section;
@@ -4010,7 +4389,7 @@ copy_main (int argc, char *argv[])
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
 
-  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:wDU",
+  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:MN:s:O:d:F:L:G:R:SpgxXHhVvW:wDU",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -4102,6 +4481,10 @@ copy_main (int argc, char *argv[])
 
 	case 'K':
 	  add_specific_symbol (optarg, keep_specific_htab);
+	  break;
+
+	case 'M':
+	  merge_notes = TRUE;
 	  break;
 
 	case 'N':
@@ -4405,7 +4788,7 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_REDEFINE_SYM:
 	  {
-	    /* Push this redefinition onto redefine_symbol_list.  */
+	    /* Insert this redefinition onto redefine_specific_htab.  */
 
 	    int len;
 	    const char *s;
@@ -4426,7 +4809,7 @@ copy_main (int argc, char *argv[])
 	    target = (char *) xmalloc (len + 1);
 	    strcpy (target, nextarg);
 
-	    redefine_list_append ("--redefine-sym", source, target);
+	    add_redefine_and_check ("--redefine-sym", source, target);
 
 	    free (source);
 	    free (target);

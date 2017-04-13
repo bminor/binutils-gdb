@@ -25,7 +25,7 @@
 /* Implement the "-info-ada-exceptions" GDB/MI command.  */
 
 void
-mi_cmd_info_ada_exceptions (char *command, char **argv, int argc)
+mi_cmd_info_ada_exceptions (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct gdbarch *gdbarch = get_current_arch ();
@@ -74,7 +74,7 @@ mi_cmd_info_ada_exceptions (char *command, char **argv, int argc)
 /* Implement the "-info-gdb-mi-command" GDB/MI command.  */
 
 void
-mi_cmd_info_gdb_mi_command (char *command, char **argv, int argc)
+mi_cmd_info_gdb_mi_command (const char *command, char **argv, int argc)
 {
   const char *cmd_name;
   struct mi_cmd *cmd;
@@ -101,15 +101,15 @@ mi_cmd_info_gdb_mi_command (char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_info_os (char *command, char **argv, int argc)
+mi_cmd_info_os (const char *command, char **argv, int argc)
 {
   switch (argc)
     {
     case 0:
-      info_osdata_command ("", 0);
+      info_osdata (NULL);
       break;
     case 1:
-      info_osdata_command (argv[0], 0);
+      info_osdata (argv[0]);
       break;
     default:
       error (_("Usage: -info-os [INFOTYPE]"));

@@ -241,6 +241,8 @@ static const int map_gcc_gdb[] =
   BFIN_LB1_REGNUM
 };
 
+/* Big enough to hold the size of the largest register in bytes.  */
+#define BFIN_MAX_REGISTER_SIZE	4
 
 struct bfin_frame_cache
 {
@@ -689,7 +691,7 @@ static enum register_status
 bfin_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, gdb_byte *buffer)
 {
-  gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
+  gdb_byte buf[BFIN_MAX_REGISTER_SIZE];
   enum register_status status;
 
   if (regnum != BFIN_CC_REGNUM)
@@ -710,7 +712,7 @@ static void
 bfin_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const gdb_byte *buffer)
 {
-  gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
+  gdb_byte buf[BFIN_MAX_REGISTER_SIZE];
 
   if (regnum != BFIN_CC_REGNUM)
     internal_error (__FILE__, __LINE__,

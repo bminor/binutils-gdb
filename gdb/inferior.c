@@ -542,7 +542,7 @@ number_of_inferiors (void)
 /* Converts an inferior process id to a string.  Like
    target_pid_to_str, but special cases the null process.  */
 
-static char *
+static const char *
 inferior_pid_to_str (int pid)
 {
   if (pid != 0)

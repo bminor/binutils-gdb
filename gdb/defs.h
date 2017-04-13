@@ -309,7 +309,7 @@ typedef void initialize_file_ftype (void);
 
 extern char *gdb_readline_wrapper (const char *);
 
-extern char *command_line_input (const char *, int, char *);
+extern char *command_line_input (const char *, int, const char *);
 
 extern void print_prompt (void);
 
@@ -324,7 +324,8 @@ extern int info_verbose;
 extern void set_next_address (struct gdbarch *, CORE_ADDR);
 
 extern int print_address_symbolic (struct gdbarch *, CORE_ADDR,
-				   struct ui_file *, int, char *);
+				   struct ui_file *, int,
+				   const char *);
 
 extern int build_address_symbolic (struct gdbarch *,
 				   CORE_ADDR addr,
@@ -444,14 +445,28 @@ struct command_line
     struct command_line **body_list;
   };
 
-extern struct command_line *read_command_lines (char *, int, int,
-						void (*)(char *, void *),
-						void *);
-extern struct command_line *read_command_lines_1 (char * (*) (void), int,
-						  void (*)(char *, void *),
-						  void *);
-
 extern void free_command_lines (struct command_line **);
+
+/* A deleter for command_line that calls free_command_lines.  */
+
+struct command_lines_deleter
+{
+  void operator() (command_line *lines) const
+  {
+    free_command_lines (&lines);
+  }
+};
+
+/* A unique pointer to a command_line.  */
+
+typedef std::unique_ptr<command_line, command_lines_deleter> command_line_up;
+
+extern command_line_up read_command_lines (char *, int, int,
+					   void (*)(char *, void *),
+					   void *);
+extern command_line_up read_command_lines_1 (char * (*) (void), int,
+					     void (*)(char *, void *),
+					     void *);
 
 /* * Parameters of the "info proc" command.  */
 
@@ -678,7 +693,7 @@ extern int (*deprecated_query_hook) (const char *, va_list)
 extern void (*deprecated_warning_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_interactive_hook) (void);
-extern void (*deprecated_readline_begin_hook) (char *, ...)
+extern void (*deprecated_readline_begin_hook) (const char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);

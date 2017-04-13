@@ -531,6 +531,16 @@ SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
+SUBDIR_UNITTESTS_SRCS = \
+	unittests/function-view-selftests.c \
+	unittests/offset-type-selftests.c \
+	unittests/ptid-selftests.c
+
+SUBDIR_UNITTESTS_OBS = \
+	function-view-selftests.o \
+	offset-type-selftests.o \
+	ptid-selftests.o
+
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
 # in INCLUDE_DIR.
@@ -746,7 +756,6 @@ ALL_64_TARGET_OBS = \
 	aarch64-newlib-tdep.o \
 	aarch64-tdep.o \
 	alpha-bsd-tdep.o \
-	alpha-fbsd-tdep.o \
 	alpha-linux-tdep.o \
 	alpha-mdebug-tdep.o \
 	alpha-nbsd-tdep.o \
@@ -809,6 +818,7 @@ ALL_TARGET_OBS = \
 	i386-dicos-tdep.o \
 	i386-fbsd-tdep.o \
 	i386-gnu-tdep.o \
+	i386-go32-tdep.o \
 	i386-linux-tdep.o \
 	i386-nbsd-tdep.o \
 	i386-nto-tdep.o \
@@ -1063,7 +1073,6 @@ SFILES = \
 	dwarf2loc.c \
 	dwarf2read.c \
 	elfread.c \
-	environ.c \
 	eval.c \
 	event-loop.c \
 	event-top.c \
@@ -1209,6 +1218,7 @@ SFILES = \
 	common/common-regcache.c \
 	common/common-utils.c \
 	common/errors.c \
+	common/environ.c \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
@@ -1287,7 +1297,6 @@ HFILES_NO_SRCDIR = \
 	dwarf2-frame-tailcall.h \
 	dwarf2expr.h \
 	dwarf2loc.h \
-	environ.h \
 	event-loop.h \
 	event-top.h \
 	exceptions.h \
@@ -1488,6 +1497,7 @@ HFILES_NO_SRCDIR = \
 	common/common-types.h \
 	common/common-utils.h \
 	common/errors.h \
+	common/environ.h \
 	common/fileio.h \
 	common/format.h \
 	common/gdb_assert.h \
@@ -1914,6 +1924,10 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/tui/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ${srcdir}/unittests/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -2456,7 +2470,6 @@ ALLDEPFILES = \
 	aix-thread.c \
 	alpha-bsd-nat.c \
 	alpha-bsd-tdep.c \
-	alpha-fbsd-tdep.c \
 	alpha-linux-nat.c \
 	alpha-linux-tdep.c \
 	alpha-mdebug-tdep.c \

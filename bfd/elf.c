@@ -2601,9 +2601,9 @@ static const struct bfd_elf_special_section special_sections_d[] =
 
 static const struct bfd_elf_special_section special_sections_f[] =
 {
-  { STRING_COMMA_LEN (".fini"),       0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { STRING_COMMA_LEN (".fini_array"), 0, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { NULL,                          0, 0, 0,              0 }
+  { STRING_COMMA_LEN (".fini"),        0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".fini_array"), -2, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { NULL,                          0 , 0, 0,              0 }
 };
 
 static const struct bfd_elf_special_section special_sections_g[] =
@@ -2628,10 +2628,10 @@ static const struct bfd_elf_special_section special_sections_h[] =
 
 static const struct bfd_elf_special_section special_sections_i[] =
 {
-  { STRING_COMMA_LEN (".init"),       0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { STRING_COMMA_LEN (".init_array"), 0, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".interp"),     0, SHT_PROGBITS,   0 },
-  { NULL,                      0,     0, 0,              0 }
+  { STRING_COMMA_LEN (".init"),        0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".init_array"), -2, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".interp"),      0, SHT_PROGBITS,   0 },
+  { NULL,                      0,      0, 0,              0 }
 };
 
 static const struct bfd_elf_special_section special_sections_l[] =
@@ -2649,9 +2649,9 @@ static const struct bfd_elf_special_section special_sections_n[] =
 
 static const struct bfd_elf_special_section special_sections_p[] =
 {
-  { STRING_COMMA_LEN (".preinit_array"), 0, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".plt"),           0, SHT_PROGBITS,      SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,                   0,           0, 0,                 0 }
+  { STRING_COMMA_LEN (".preinit_array"), -2, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".plt"),            0, SHT_PROGBITS,      SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,                   0,            0, 0,                 0 }
 };
 
 static const struct bfd_elf_special_section special_sections_r[] =
@@ -4330,9 +4330,33 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  /* Let the backend count up any program headers it might need.  */
   bed = get_elf_backend_data (abfd);
-  if (bed->elf_backend_additional_program_headers)
+
+ if ((abfd->flags & D_PAGED) != 0)
+   {
+     /* Add a PT_GNU_MBIND segment for each mbind section.  */
+     unsigned int page_align_power = bfd_log2 (bed->commonpagesize);
+     for (s = abfd->sections; s != NULL; s = s->next)
+       if (elf_section_flags (s) & SHF_GNU_MBIND)
+	 {
+	   if (elf_section_data (s)->this_hdr.sh_info
+	       > PT_GNU_MBIND_NUM)
+	     {
+	       _bfd_error_handler
+		 /* xgettext:c-format */
+		 (_("%B: GNU_MBIN section `%A' has invalid sh_info field: %d"),
+		     abfd, s, elf_section_data (s)->this_hdr.sh_info);
+	       continue;
+	     }
+	   /* Align mbind section to page size.  */
+	   if (s->alignment_power < page_align_power)
+	     s->alignment_power = page_align_power;
+	   segs ++;
+	 }
+   }
+
+ /* Let the backend count up any program headers it might need.  */
+ if (bed->elf_backend_additional_program_headers)
     {
       int a;
 
@@ -4504,6 +4528,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       bfd_boolean writable;
       int tls_count = 0;
       asection *first_tls = NULL;
+      asection *first_mbind = NULL;
       asection *dynsec, *eh_frame_hdr;
       bfd_size_type amt;
       bfd_vma addr_mask, wrap_to = 0;
@@ -4836,6 +4861,9 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		first_tls = s;
 	      tls_count++;
 	    }
+	  if (first_mbind == NULL
+	      && (elf_section_flags (s) & SHF_GNU_MBIND) != 0)
+	    first_mbind = s;
 	}
 
       /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
@@ -4882,6 +4910,35 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  *pm = m;
 	  pm = &m->next;
 	}
+
+      if (first_mbind && (abfd->flags & D_PAGED) != 0)
+	for (s = first_mbind; s != NULL; s = s->next)
+	  if ((elf_section_flags (s) & SHF_GNU_MBIND) != 0
+	      && (elf_section_data (s)->this_hdr.sh_info
+		  <= PT_GNU_MBIND_NUM))
+	    {
+	      /* Mandated PF_R.  */
+	      unsigned long p_flags = PF_R;
+	      if ((s->flags & SEC_READONLY) == 0)
+		p_flags |= PF_W;
+	      if ((s->flags & SEC_CODE) != 0)
+		p_flags |= PF_X;
+
+	      amt = sizeof (struct elf_segment_map) + sizeof (asection *);
+	      m = bfd_zalloc (abfd, amt);
+	      if (m == NULL)
+		goto error_return;
+	      m->next = NULL;
+	      m->p_type = (PT_GNU_MBIND_LO
+			   + elf_section_data (s)->this_hdr.sh_info);
+	      m->count = 1;
+	      m->p_flags_valid = 1;
+	      m->sections[0] = s;
+	      m->p_flags = p_flags;
+
+	      *pm = m;
+	      pm = &m->next;
+	    }
 
       /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
 	 segment.  */
@@ -6689,11 +6746,16 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  /* Special segments, such as the PT_PHDR segment, may contain
 	     no sections, but ordinary, loadable segments should contain
 	     something.  They are allowed by the ELF spec however, so only
-	     a warning is produced.  */
-	  if (segment->p_type == PT_LOAD)
+	     a warning is produced.  
+	     There is however the valid use case of embedded systems which
+	     have segments with p_filesz of 0 and a p_memsz > 0 to initialize
+	     flash memory with zeros.  No warning is shown for that case.  */
+	  if (segment->p_type == PT_LOAD
+	      && (segment->p_filesz > 0 || segment->p_memsz == 0))
+	    /* xgettext:c-format */
 	    _bfd_error_handler (_("\
-%B: warning: Empty loadable segment detected, is this intentional ?"),
-				ibfd);
+%B: warning: Empty loadable segment detected at vaddr=0x%.8x, is this intentional ?"),
+				ibfd, segment->p_vaddr);
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -7353,6 +7415,11 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
   /* FIXME: Is this correct for all OS/PROC specific flags?  */
   elf_section_flags (osec) |= (elf_section_flags (isec)
 			       & (SHF_MASKOS | SHF_MASKPROC));
+
+  /* Copy sh_info from input for mbind section.  */
+  if (elf_section_flags (isec) & SHF_GNU_MBIND)
+    elf_section_data (osec)->this_hdr.sh_info
+      = elf_section_data (isec)->this_hdr.sh_info;
 
   /* Set things up for objcopy and relocatable link.  The output
      SHT_GROUP section will have its elf_next_in_group pointing back
@@ -9685,6 +9752,9 @@ elfobj_grok_gnu_note (bfd *abfd, Elf_Internal_Note *note)
     {
     default:
       return TRUE;
+
+    case NT_GNU_PROPERTY_TYPE_0:
+      return _bfd_elf_parse_gnu_properties (abfd, note);
 
     case NT_GNU_BUILD_ID:
       return elfobj_grok_gnu_build_id (abfd, note);

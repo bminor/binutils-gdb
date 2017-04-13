@@ -4926,7 +4926,8 @@ do_ifunc_pointer:
 		{
 		  /* Symbol is referenced locally.  Make sure it is
 		     defined locally or for a branch.  */
-		  fail = !h->def_regular && !branch;
+		  fail = (!(h->def_regular || ELF_COMMON_DEF_P (h))
+			  && !branch);
 		}
 	      else if (!(bfd_link_pie (info)
 			 && (h->needs_copy || eh->needs_copy)))
@@ -6189,7 +6190,7 @@ do_glob_dat:
 		       + h->root.u.def.section->output_offset);
       rela.r_info = htab->r_info (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;
@@ -6896,8 +6897,80 @@ elf_x86_64_relocs_compatible (const bfd_target *input,
 	  && _bfd_elf_relocs_compatible (input, output));
 }
 
+/* Parse x86-64 GNU properties.  */
+
+static enum elf_property_kind
+elf_x86_64_parse_gnu_properties (bfd *abfd, unsigned int type,
+				 bfd_byte *ptr, unsigned int datasz)
+{
+  elf_property *prop;
+
+  switch (type)
+    {
+    case GNU_PROPERTY_X86_ISA_1_USED:
+    case GNU_PROPERTY_X86_ISA_1_NEEDED:
+      if (datasz != 4)
+	{
+	  _bfd_error_handler
+	    ((type == GNU_PROPERTY_X86_ISA_1_USED
+	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>")
+	      : _("error: %B: <corrupt x86 ISA needed size: 0x%x>")),
+	     abfd, datasz);
+	  return property_corrupt;
+	}
+      prop = _bfd_elf_get_property (abfd, type, datasz);
+      prop->u.number = bfd_h_get_32 (abfd, ptr);
+      prop->pr_kind = property_number;
+      break;
+
+    default:
+      return property_ignored;
+    }
+
+  return property_number;
+}
+
+/* Merge x86-64 GNU property BPROP with APROP.  If APROP isn't NULL,
+   return TRUE if APROP is updated.  Otherwise, return TRUE if BPROP
+   should be merged with ABFD.  */
+
+static bfd_boolean
+elf_x86_64_merge_gnu_properties (bfd *abfd ATTRIBUTE_UNUSED,
+				 elf_property *aprop,
+				 elf_property *bprop)
+{
+  unsigned int number;
+  bfd_boolean updated = FALSE;
+  unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
+
+  switch (pr_type)
+    {
+    case GNU_PROPERTY_X86_ISA_1_USED:
+    case GNU_PROPERTY_X86_ISA_1_NEEDED:
+      if (aprop != NULL && bprop != NULL)
+	{
+	  number = aprop->u.number;
+	  aprop->u.number = number | bprop->u.number;
+	  updated = number != (unsigned int) aprop->u.number;
+	}
+      else
+	{
+	  /* Return TRUE if APROP is NULL to indicate that BPROP should
+	     be added to ABFD.  */
+	  updated = aprop == NULL;
+	}
+      break;
+
+    default:
+      /* Never should happen.  */
+      abort ();
+    }
+
+  return updated;
+}
+
 static const struct bfd_elf_special_section
-  elf_x86_64_special_sections[]=
+elf_x86_64_special_sections[]=
 {
   { STRING_COMMA_LEN (".gnu.linkonce.lb"), -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
   { STRING_COMMA_LEN (".gnu.linkonce.lr"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
@@ -6988,6 +7061,10 @@ static const struct bfd_elf_special_section
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_fixup_symbol \
   elf_x86_64_fixup_symbol
+#define elf_backend_parse_gnu_properties \
+  elf_x86_64_parse_gnu_properties
+#define elf_backend_merge_gnu_properties \
+ elf_x86_64_merge_gnu_properties
 
 #include "elf64-target.h"
 

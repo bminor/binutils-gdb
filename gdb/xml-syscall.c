@@ -363,7 +363,6 @@ static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)
 {
   char *full_file;
-  char *dirname;
   struct syscalls_info *syscalls_info;
   struct cleanup *back_to;
 
@@ -373,12 +372,9 @@ xml_init_syscalls_info (const char *filename)
 
   back_to = make_cleanup (xfree, full_file);
 
-  dirname = ldirname (filename);
-  if (dirname != NULL)
-    make_cleanup (xfree, dirname);
-
   syscalls_info = syscall_parse_xml (full_file,
-				     xml_fetch_content_from_file, dirname);
+				     xml_fetch_content_from_file,
+				     (void *) ldirname (filename).c_str ());
   do_cleanups (back_to);
 
   return syscalls_info;

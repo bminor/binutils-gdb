@@ -287,7 +287,7 @@ get_osdata_column (struct osdata_item *item, const char *name)
 }
 
 void
-info_osdata_command (char *type, int from_tty)
+info_osdata (const char *type)
 {
   struct ui_out *uiout = current_uiout;
   struct osdata *osdata = NULL;
@@ -297,12 +297,15 @@ info_osdata_command (char *type, int from_tty)
   int nrows;
   int col_to_skip = -1;
 
+  if (type == NULL)
+    type = "";
+
   osdata = get_osdata (type);
   old_chain = make_cleanup_osdata_free (osdata);
 
   nrows = VEC_length (osdata_item_s, osdata->items);
 
-  if (!type && nrows == 0)
+  if (*type == '\0' && nrows == 0)
     error (_("Available types of OS data not reported."));
   
   if (!VEC_empty (osdata_item_s, osdata->items))
@@ -315,7 +318,7 @@ info_osdata_command (char *type, int from_tty)
 	 for a column named "Title", and only include it with MI
 	 output; this column's normal use is for titles for interface
 	 elements like menus, and it clutters up CLI output.  */
-      if (!type && !uiout->is_mi_like_p ())
+      if (*type == '\0' && !uiout->is_mi_like_p ())
 	{
 	  struct osdata_column *col;
 	  int ix;
@@ -405,6 +408,12 @@ info_osdata_command (char *type, int from_tty)
     }
 
   do_cleanups (old_chain);
+}
+
+static void
+info_osdata_command (char *arg, int from_tty)
+{
+  info_osdata (arg);
 }
 
 extern initialize_file_ftype _initialize_osdata; /* -Wmissing-prototypes */

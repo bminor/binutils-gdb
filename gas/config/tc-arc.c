@@ -4010,11 +4010,19 @@ assemble_insn (const struct arc_opcode *opcode,
       if (!strcmp (flg_operand->name, "d"))
 	has_delay_slot = TRUE;
 
-      /* There is an exceptional case when we cannot insert a flag
-	 just as it is.  The .T flag must be handled in relation with
-	 the relative address.  */
-      if (!strcmp (flg_operand->name, "t")
-	  || !strcmp (flg_operand->name, "nt"))
+      /* There is an exceptional case when we cannot insert a flag just as
+	 it is.  On ARCv2 the '.t' and '.nt' flags must be handled in
+	 relation with the relative address.  Unfortunately, some of the
+	 ARC700 extensions (NPS400) also have a '.nt' flag that should be
+	 handled in the normal way.
+
+	 Flag operands don't have an architecture field, so we can't
+	 directly validate that FLAG_OPERAND is valid for the current
+	 architecture, what we do instead is just validate that we're
+	 assembling for an ARCv2 architecture.  */
+      if ((selected_cpu.flags & ARC_OPCODE_ARCV2)
+	  && (!strcmp (flg_operand->name, "t")
+	      || !strcmp (flg_operand->name, "nt")))
 	{
 	  unsigned bitYoperand = 0;
 	  /* FIXME! move selection bbit/brcc in arc-opc.c.  */

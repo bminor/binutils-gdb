@@ -203,7 +203,7 @@ static void xcoff_initial_scan (struct objfile *, symfile_add_flags);
 static void scan_xcoff_symtab (minimal_symbol_reader &,
 			       struct objfile *);
 
-static char *xcoff_next_symbol_text (struct objfile *);
+static const char *xcoff_next_symbol_text (struct objfile *);
 
 static void record_include_begin (struct coff_symbol *);
 
@@ -771,7 +771,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    /* Pick a fake name that will produce the same results as this
 	       one when passed to deduce_language_from_filename.  Kludge on
 	       top of kludge.  */
-	    char *fakename = strrchr (inclTable[ii].name, '.');
+	    const char *fakename = strrchr (inclTable[ii].name, '.');
 
 	    if (fakename == NULL)
 	      fakename = " ?";
@@ -963,11 +963,11 @@ static char *raw_symbol;
 /* This is the function which stabsread.c calls to get symbol
    continuations.  */
 
-static char *
+static const char *
 xcoff_next_symbol_text (struct objfile *objfile)
 {
   struct internal_syment symbol;
-  char *retval;
+  const char *retval;
 
   /* FIXME: is this the same as the passed arg?  */
   if (this_symtab_objfile)

@@ -139,7 +139,7 @@ static struct traceframe_info *traceframe_info;
 static struct cmd_list_element *tfindlist;
 
 /* List of expressions to collect by default at each tracepoint hit.  */
-char *default_collect = "";
+char *default_collect;
 
 static int disconnected_tracing;
 
@@ -170,7 +170,6 @@ static void actions_command (char *, int);
 static void tstart_command (char *, int);
 static void tstop_command (char *, int);
 static void tstatus_command (char *, int);
-static void tfind_command (char *, int);
 static void tfind_pc_command (char *, int);
 static void tfind_tracepoint_command (char *, int);
 static void tfind_line_command (char *, int);
@@ -508,7 +507,7 @@ tvariables_info_1 (void)
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     {
       struct cleanup *back_to2;
-      char *c;
+      const char *c;
       char *name;
 
       back_to2 = make_cleanup_ui_out_tuple_begin_end (uiout, "variable");
@@ -648,20 +647,17 @@ static void
 actions_command (char *args, int from_tty)
 {
   struct tracepoint *t;
-  struct command_line *l;
 
   t = get_tracepoint_by_number (&args, NULL);
   if (t)
     {
-      char *tmpbuf =
-	xstrprintf ("Enter actions for tracepoint %d, one per line.",
-		    t->base.number);
-      struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
+      std::string tmpbuf =
+	string_printf ("Enter actions for tracepoint %d, one per line.",
+		       t->base.number);
 
-      l = read_command_lines (tmpbuf, from_tty, 1,
-			      check_tracepoint_command, t);
-      do_cleanups (cleanups);
-      breakpoint_set_commands (&t->base, l);
+      command_line_up l = read_command_lines (&tmpbuf[0], from_tty, 1,
+					      check_tracepoint_command, t);
+      breakpoint_set_commands (&t->base, std::move (l));
     }
   /* else just return */
 }
@@ -2058,7 +2054,7 @@ trace_status_mi (int on_stop)
     }
   else
     {
-      char *stop_reason = NULL;
+      const char *stop_reason = NULL;
       int stopping_tracepoint = -1;
 
       if (!on_stop)
@@ -2343,7 +2339,7 @@ check_trace_running (struct trace_status *status)
 
 /* tfind command */
 static void
-tfind_command (char *args, int from_tty)
+tfind_command_1 (const char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
@@ -2377,18 +2373,24 @@ tfind_command (char *args, int from_tty)
   tfind_1 (tfind_number, frameno, 0, 0, from_tty);
 }
 
+static void
+tfind_command (char *args, int from_tty)
+{
+  tfind_command_1 (const_cast<char *> (args), from_tty);
+}
+
 /* tfind end */
 static void
 tfind_end_command (char *args, int from_tty)
 {
-  tfind_command ("-1", from_tty);
+  tfind_command_1 ("-1", from_tty);
 }
 
 /* tfind start */
 static void
 tfind_start_command (char *args, int from_tty)
 {
-  tfind_command ("0", from_tty);
+  tfind_command_1 ("0", from_tty);
 }
 
 /* tfind pc command */
@@ -2586,20 +2588,18 @@ scope_info (char *args, int from_tty)
   int j, count = 0;
   struct gdbarch *gdbarch;
   int regno;
-  struct event_location *location;
-  struct cleanup *back_to;
 
   if (args == 0 || *args == 0)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  location = string_to_event_location (&args, current_language);
-  back_to = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, NULL, 0);
+  event_location_up location = string_to_event_location (&args,
+							 current_language);
+  sals = decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
+			NULL, NULL, 0);
   if (sals.nelts == 0)
     {
       /* Presumably decode_line_1 has already warned.  */
-      do_cleanups (back_to);
       return;
     }
 
@@ -2738,7 +2738,6 @@ scope_info (char *args, int from_tty)
   if (count <= 0)
     printf_filtered ("Scope for %s contains no locals or arguments.\n",
 		     save_args);
-  do_cleanups (back_to);
 }
 
 /* Helper for trace_dump_command.  Dump the action list starting at
@@ -2957,9 +2956,10 @@ tdump_command (char *args, int from_tty)
 /* This version does not do multiple encodes for long strings; it should
    return an offset to the next piece to encode.  FIXME  */
 
-extern int
+int
 encode_source_string (int tpnum, ULONGEST addr,
-		      char *srctype, const char *src, char *buf, int buf_size)
+		      const char *srctype, const char *src,
+		      char *buf, int buf_size)
 {
   if (80 + strlen (srctype) > buf_size)
     error (_("Buffer too small for source encoding"));

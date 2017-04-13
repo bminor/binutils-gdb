@@ -261,14 +261,14 @@ construct_inferior_arguments (int argc, char **argv)
 #ifdef __MINGW32__
       /* This holds all the characters considered special to the
 	 Windows shells.  */
-      char *special = "\"!&*|[]{}<>?`~^=;, \t\n";
-      const char quote = '"';
+      static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
+      static const char quote = '"';
 #else
       /* This holds all the characters considered special to the
 	 typical Unix shells.  We include `^' because the SunOS
 	 /bin/sh treats it as a synonym for `|'.  */
-      char *special = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
-      const char quote = '\'';
+      static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
+      static const char quote = '\'';
 #endif
       int i;
       int length = 0;
@@ -458,7 +458,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
 	  if (!gdbarch_has_global_solist (target_gdbarch ()))
-	    solib_add (NULL, 0, target, auto_solib_add);
+	    solib_add (NULL, 0, auto_solib_add);
 	}
     }
 
@@ -526,7 +526,7 @@ prepare_execution_command (struct target_ops *target, int background)
 static void
 run_command_1 (char *args, int from_tty, int tbreak_at_main)
 {
-  char *exec_file;
+  const char *exec_file;
   struct cleanup *old_chain;
   ptid_t ptid;
   struct ui_out *uiout = current_uiout;
@@ -574,7 +574,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   if (tbreak_at_main)
     tbreak_command (main_name (), 0);
 
-  exec_file = (char *) get_exec_file (0);
+  exec_file = get_exec_file (0);
 
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program
@@ -607,7 +607,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
-  run_target->to_create_inferior (run_target, exec_file, get_inferior_args (),
+  run_target->to_create_inferior (run_target, exec_file,
+				  std::string (get_inferior_args ()),
 				  environ_vector (current_inferior ()->environment),
 				  from_tty);
   /* to_create_inferior should push the target, so after this point we
@@ -2267,7 +2268,7 @@ static void
 path_command (char *dirname, int from_tty)
 {
   char *exec_path;
-  char *env;
+  const char *env;
 
   dont_repeat ();
   env = get_in_environ (current_inferior ()->environment, path_var_name);
@@ -2681,7 +2682,7 @@ enum attach_post_wait_mode
    should be running.  Else if ATTACH, */
 
 static void
-attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
+attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mode)
 {
   struct inferior *inferior;
 

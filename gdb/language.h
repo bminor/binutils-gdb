@@ -24,6 +24,7 @@
 #define LANGUAGE_H 1
 
 #include "symtab.h"
+#include "common/function-view.h"
 
 /* Forward decls for prototypes.  */
 struct value;
@@ -186,7 +187,7 @@ struct language_defn
 
     /* Parser error function.  */
 
-    void (*la_error) (char *);
+    void (*la_error) (const char *);
 
     /* Given an expression *EXPP created by prefixifying the result of
        la_parser, perform any remaining processing necessary to complete
@@ -274,7 +275,7 @@ struct language_defn
     /* If this is non-NULL, specifies the name that of the implicit
        local variable that refers to the current object instance.  */
 
-    char *la_name_of_this;
+    const char *la_name_of_this;
 
     /* This is a function that lookup_symbol will call when it gets to
        the part of symbol lookup where C looks up static and global
@@ -324,7 +325,7 @@ struct language_defn
     char string_lower_bound;
 
     /* The list of characters forming word boundaries.  */
-    char *(*la_word_break_characters) (void);
+    const char *(*la_word_break_characters) (void);
 
     /* Should return a vector of all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
@@ -376,18 +377,15 @@ struct language_defn
        The caller is responsible for iterating up through superblocks
        if desired.
 
-       For each one, call CALLBACK with the symbol and the DATA
-       argument.  If CALLBACK returns zero, the iteration ends at that
-       point.
+       For each one, call CALLBACK with the symbol.  If CALLBACK
+       returns false, the iteration ends at that point.
 
        This field may not be NULL.  If the language does not need any
        special processing here, 'iterate_over_symbols' should be
        used as the definition.  */
-    void (*la_iterate_over_symbols) (const struct block *block,
-				     const char *name,
-				     domain_enum domain,
-				     symbol_found_callback_ftype *callback,
-				     void *data);
+    void (*la_iterate_over_symbols)
+      (const struct block *block, const char *name, domain_enum domain,
+       gdb::function_view<symbol_found_callback_ftype> callback);
 
     /* Hash the given STRING.  Use default_compute_string_hash if no
        special treatment is required.  */
@@ -535,9 +533,8 @@ extern enum language set_language (enum language);
 #define LA_PRINT_ARRAY_INDEX(index_value, stream, options) \
   (current_language->la_print_array_index(index_value, stream, options))
 
-#define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK, DATA) \
-  (current_language->la_iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK, \
-					      DATA))
+#define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
+  (current_language->la_iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,
@@ -594,7 +591,7 @@ extern char *language_class_name_from_physname (const struct language_defn *,
 					        const char *physname);
 
 /* Splitting strings into words.  */
-extern char *default_word_break_characters (void);
+extern const char *default_word_break_characters (void);
 
 /* Print the index of an array element using the C99 syntax.  */
 extern void default_print_array_index (struct value *index_value,

@@ -26,6 +26,7 @@
 #include "opcode/arm.h"
 #include "opintl.h"
 #include "safe-ctype.h"
+#include "libiberty.h"
 #include "floatformat.h"
 
 /* FIXME: This shouldn't be done here.  */
@@ -39,10 +40,6 @@
 /* FIXME: Belongs in global header.  */
 #ifndef strneq
 #define strneq(a,b,n)	(strncmp ((a), (b), (n)) == 0)
-#endif
-
-#ifndef NUM_ELEM
-#define NUM_ELEM(a)     (sizeof (a) / sizeof (a)[0])
 #endif
 
 /* Cached mapping symbol state.  */
@@ -3198,18 +3195,20 @@ arm_regname;
 
 static const arm_regname regnames[] =
 {
-  { "raw" , "Select raw register names",
+  { "reg-names-raw", N_("Select raw register names"),
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}},
-  { "gcc",  "Select register names used by GCC",
+  { "reg-names-gcc", N_("Select register names used by GCC"),
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "sl",  "fp",  "ip",  "sp",  "lr",  "pc" }},
-  { "std",  "Select register names used in ARM's ISA documentation",
+  { "reg-names-std", N_("Select register names used in ARM's ISA documentation"),
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp",  "lr",  "pc" }},
-  { "apcs", "Select register names used in the APCS",
+  { "force-thumb", N_("Assume all insns are Thumb insns"), {NULL} },
+  { "no-force-thumb", N_("Examine preceding label to determine an insn's type"), {NULL} },
+  { "reg-names-apcs", N_("Select register names used in the APCS"),
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "sl",  "fp",  "ip",  "sp",  "lr",  "pc" }},
-  { "atpcs", "Select register names used in the ATPCS",
+  { "reg-names-atpcs", N_("Select register names used in the ATPCS"),
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v8",  "IP",  "SP",  "LR",  "PC" }},
-  { "special-atpcs", "Select special register names used in the ATPCS",
-    { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }},
+  { "reg-names-special-atpcs", N_("Select special register names used in the ATPCS"),
+    { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }}
 };
 
 static const char *const iwmmxt_wwnames[] =
@@ -3235,7 +3234,7 @@ static const char *const iwmmxt_cregnames[] =
 /* Default to GCC register name set.  */
 static unsigned int regname_selected = 1;
 
-#define NUM_ARM_REGNAMES  NUM_ELEM (regnames)
+#define NUM_ARM_OPTIONS   ARRAY_SIZE (regnames)
 #define arm_regnames      regnames[regname_selected].reg_names
 
 static bfd_boolean force_thumb = FALSE;
@@ -3254,31 +3253,6 @@ static bfd_vma ifthen_address;
 
 
 /* Functions.  */
-int
-get_arm_regname_num_options (void)
-{
-  return NUM_ARM_REGNAMES;
-}
-
-int
-set_arm_regname_option (int option)
-{
-  int old = regname_selected;
-  regname_selected = option;
-  return old;
-}
-
-int
-get_arm_regnames (int option,
-		  const char **setname,
-		  const char **setdescription,
-		  const char *const **register_names)
-{
-  *setname = regnames[option].name;
-  *setdescription = regnames[option].description;
-  *register_names = regnames[option].reg_names;
-  return 16;
-}
 
 /* Decode a bitfield of the form matching regexp (N(-N)?,)*N(-N)?.
    Returns pointer to following character of the format string and
@@ -6124,62 +6098,37 @@ arm_symbol_is_valid (asymbol * sym,
   return (name && *name != '$' && strncmp (name, "__tagsym$$", 10));
 }
 
-/* Parse an individual disassembler option.  */
-
-void
-parse_arm_disassembler_option (char *option)
-{
-  if (option == NULL)
-    return;
-
-  if (CONST_STRNEQ (option, "reg-names-"))
-    {
-      int i;
-
-      option += 10;
-
-      for (i = NUM_ARM_REGNAMES; i--;)
-	if (strneq (option, regnames[i].name, strlen (regnames[i].name)))
-	  {
-	    regname_selected = i;
-	    break;
-	  }
-
-      if (i < 0)
-	/* XXX - should break 'option' at following delimiter.  */
-	fprintf (stderr, _("Unrecognised register name set: %s\n"), option);
-    }
-  else if (CONST_STRNEQ (option, "force-thumb"))
-    force_thumb = 1;
-  else if (CONST_STRNEQ (option, "no-force-thumb"))
-    force_thumb = 0;
-  else
-    /* XXX - should break 'option' at following delimiter.  */
-    fprintf (stderr, _("Unrecognised disassembler option: %s\n"), option);
-
-  return;
-}
-
-/* Parse the string of disassembler options, spliting it at whitespaces
-   or commas.  (Whitespace separators supported for backwards compatibility).  */
+/* Parse the string of disassembler options.  */
 
 static void
-parse_disassembler_options (char *options)
+parse_arm_disassembler_options (const char *options)
 {
-  if (options == NULL)
-    return;
+  const char *opt;
 
-  while (*options)
+  FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     {
-      parse_arm_disassembler_option (options);
+      if (CONST_STRNEQ (opt, "reg-names-"))
+	{
+	  unsigned int i;
+	  for (i = 0; i < NUM_ARM_OPTIONS; i++)
+	    if (disassembler_options_cmp (opt, regnames[i].name) == 0)
+	      {
+		regname_selected = i;
+		break;
+	      }
 
-      /* Skip forward to next seperator.  */
-      while ((*options) && (! ISSPACE (*options)) && (*options != ','))
-	++ options;
-      /* Skip forward past seperators.  */
-      while (ISSPACE (*options) || (*options == ','))
-	++ options;
+	  if (i >= NUM_ARM_OPTIONS)
+	    fprintf (stderr, _("Unrecognised register name set: %s\n"), opt);
+	}
+      else if (CONST_STRNEQ (opt, "force-thumb"))
+	force_thumb = 1;
+      else if (CONST_STRNEQ (opt, "no-force-thumb"))
+	force_thumb = 0;
+      else
+	fprintf (stderr, _("Unrecognised disassembler option: %s\n"), opt);
     }
+
+  return;
 }
 
 static bfd_boolean
@@ -6473,7 +6422,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 
   if (info->disassembler_options)
     {
-      parse_disassembler_options (info->disassembler_options);
+      parse_arm_disassembler_options (info->disassembler_options);
 
       /* To avoid repeated parsing of these options, we remove them here.  */
       info->disassembler_options = NULL;
@@ -6842,21 +6791,51 @@ print_insn_little_arm (bfd_vma pc, struct disassemble_info *info)
   return print_insn (pc, info, TRUE);
 }
 
+const disasm_options_t *
+disassembler_options_arm (void)
+{
+  static disasm_options_t *opts = NULL;
+
+  if (opts == NULL)
+    {
+      unsigned int i;
+      opts = XNEW (disasm_options_t);
+      opts->name = XNEWVEC (const char *, NUM_ARM_OPTIONS + 1);
+      opts->description = XNEWVEC (const char *, NUM_ARM_OPTIONS + 1);
+      for (i = 0; i < NUM_ARM_OPTIONS; i++)
+	{
+	  opts->name[i] = regnames[i].name;
+	  if (regnames[i].description != NULL)
+	    opts->description[i] = _(regnames[i].description);
+	  else
+	    opts->description[i] = NULL;
+	}
+      /* The array we return must be NULL terminated.  */
+      opts->name[i] = NULL;
+      opts->description[i] = NULL;
+    }
+
+  return opts;
+}
+
 void
 print_arm_disassembler_options (FILE *stream)
 {
-  int i;
-
+  unsigned int i, max_len = 0;
   fprintf (stream, _("\n\
 The following ARM specific disassembler options are supported for use with\n\
 the -M switch:\n"));
 
-  for (i = NUM_ARM_REGNAMES; i--;)
-    fprintf (stream, "  reg-names-%s %*c%s\n",
-	     regnames[i].name,
-	     (int)(14 - strlen (regnames[i].name)), ' ',
-	     regnames[i].description);
+  for (i = 0; i < NUM_ARM_OPTIONS; i++)
+    {
+      unsigned int len = strlen (regnames[i].name);
+      if (max_len < len)
+	max_len = len;
+    }
 
-  fprintf (stream, "  force-thumb              Assume all insns are Thumb insns\n");
-  fprintf (stream, "  no-force-thumb           Examine preceding label to determine an insn's type\n\n");
+  for (i = 0, max_len++; i < NUM_ARM_OPTIONS; i++)
+    fprintf (stream, "  %s%*c %s\n",
+	     regnames[i].name,
+	     (int)(max_len - strlen (regnames[i].name)), ' ',
+	     _(regnames[i].description));
 }

@@ -27,6 +27,7 @@
 #include "macrotab.h"
 #include "macroscope.h"
 #include "regcache.h"
+#include "common/function-view.h"
 
 /* See compile-internal.h.  */
 
@@ -74,16 +75,18 @@ template <typename FUNCTYPE>
 FUNCTYPE *
 load_libcompile (const char *fe_libcc, const char *fe_context)
 {
-  void *handle;
   FUNCTYPE *func;
 
   /* gdb_dlopen will call error () on an error, so no need to check
      value.  */
-  handle = gdb_dlopen (fe_libcc);
+  gdb_dlhandle_up handle = gdb_dlopen (fe_libcc);
   func = (FUNCTYPE *) (gdb_dlsym (handle, fe_context));
 
   if (func == NULL)
     error (_("could not find symbol %s in library %s"), fe_context, fe_libcc);
+
+  /* Leave the library open.  */
+  handle.release ();
   return func;
 }
 
@@ -152,10 +155,8 @@ cplus_get_compile_context (void)
 static void
 print_one_macro (const char *name, const struct macro_definition *macro,
 		 struct macro_source_file *source, int line,
-		 void *user_data)
+		 ui_file *file)
 {
-  struct ui_file *file = (struct ui_file *) user_data;
-
   /* Don't print command-line defines.  They will be supplied another
      way.  */
   if (line == 0)
@@ -198,7 +199,16 @@ write_macro_definitions (const struct block *block, CORE_ADDR pc,
     scope = user_macro_scope ();
 
   if (scope != NULL && scope->file != NULL && scope->file->table != NULL)
-    macro_for_each_in_scope (scope->file, scope->line, print_one_macro, file);
+    {
+      macro_for_each_in_scope (scope->file, scope->line,
+			       [&] (const char *name,
+				    const macro_definition *macro,
+				    macro_source_file *source,
+				    int line)
+	{
+	  print_one_macro (name, macro, source, line, file);
+	});
+    }
 }
 
 /* Generate a structure holding all the registers used by the function

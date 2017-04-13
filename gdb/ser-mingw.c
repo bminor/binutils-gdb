@@ -163,8 +163,6 @@ ser_windows_raw (struct serial *scb)
   state.fAbortOnError = FALSE;
   state.ByteSize = 8;
 
-  scb->current_timeout = 0;
-
   if (SetCommState (h, &state) == 0)
     warning (_("SetCommState failed"));
 }

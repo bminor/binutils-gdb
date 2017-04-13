@@ -613,7 +613,7 @@ typedef BP_MANIPULATION (hppa_break_insn) hppa_breakpoint;
 static const char *
 hppa32_register_name (struct gdbarch *gdbarch, int i)
 {
-  static char *names[] = {
+  static const char *names[] = {
     "flags",  "r1",      "rp",     "r3",
     "r4",     "r5",      "r6",     "r7",
     "r8",     "r9",      "r10",    "r11",
@@ -656,7 +656,7 @@ hppa32_register_name (struct gdbarch *gdbarch, int i)
 static const char *
 hppa64_register_name (struct gdbarch *gdbarch, int i)
 {
-  static char *names[] = {
+  static const char *names[] = {
     "flags",  "r1",      "rp",     "r3",
     "r4",     "r5",      "r6",     "r7",
     "r8",     "r9",      "r10",    "r11",
@@ -895,6 +895,7 @@ hppa64_integral_or_pointer_p (const struct type *type)
       }
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       return (TYPE_LENGTH (type) == 8);
     default:
       break;

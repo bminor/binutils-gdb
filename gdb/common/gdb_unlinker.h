@@ -32,7 +32,7 @@ class unlinker
 {
  public:
 
-  unlinker (const char *filename) ATTRIBUTE_NONNULL (1)
+  unlinker (const char *filename) ATTRIBUTE_NONNULL (2)
     : m_filename (filename)
   {
     gdb_assert (filename != NULL);

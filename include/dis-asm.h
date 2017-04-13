@@ -210,7 +210,7 @@ typedef struct disassemble_info
   bfd_vma target2;		/* Second target address for dref2 */
 
   /* Command line options specific to the target disassembler.  */
-  char * disassembler_options;
+  const char *disassembler_options;
 
   /* If non-zero then try not disassemble beyond this address, even if
      there are values left in the buffer.  This address is the address
@@ -221,6 +221,16 @@ typedef struct disassemble_info
   bfd_vma stop_vma;
 
 } disassemble_info;
+
+/* This struct is used to pass information about valid disassembler options
+   and their descriptions from the target to the generic GDB functions that
+   set and display them.  */
+
+typedef struct
+{
+  const char **name;
+  const char **description;
+} disasm_options_t;
 
 
 /* Standard disassemblers.  Disassemble one instruction at the given
@@ -308,6 +318,7 @@ extern int print_insn_v850		(bfd_vma, disassemble_info *);
 extern int print_insn_vax		(bfd_vma, disassemble_info *);
 extern int print_insn_visium		(bfd_vma, disassemble_info *);
 extern int print_insn_w65		(bfd_vma, disassemble_info *);
+extern int print_insn_wasm32		(bfd_vma, disassemble_info *);
 extern int print_insn_xc16x		(bfd_vma, disassemble_info *);
 extern int print_insn_xgate             (bfd_vma, disassemble_info *);
 extern int print_insn_xstormy16		(bfd_vma, disassemble_info *);
@@ -332,14 +343,16 @@ extern void print_ppc_disassembler_options (FILE *);
 extern void print_riscv_disassembler_options (FILE *);
 extern void print_arm_disassembler_options (FILE *);
 extern void print_arc_disassembler_options (FILE *);
-extern void parse_arm_disassembler_option (char *);
 extern void print_s390_disassembler_options (FILE *);
-extern int  get_arm_regname_num_options (void);
-extern int  set_arm_regname_option (int);
-extern int  get_arm_regnames (int, const char **, const char **, const char *const **);
+extern void print_wasm32_disassembler_options (FILE *);
 extern bfd_boolean aarch64_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bfd_boolean arm_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern void disassemble_init_powerpc (struct disassemble_info *);
+extern void disassemble_init_s390 (struct disassemble_info *);
+extern void disassemble_init_wasm32 (struct disassemble_info *);
+extern const disasm_options_t *disassembler_options_powerpc (void);
+extern const disasm_options_t *disassembler_options_arm (void);
+extern const disasm_options_t *disassembler_options_s390 (void);
 
 /* Fetch the disassembler for a given BFD, if that support is available.  */
 extern disassembler_ftype disassembler (bfd *);
@@ -350,6 +363,29 @@ extern void disassemble_init_for_target (struct disassemble_info * dinfo);
 
 /* Document any target specific options available from the disassembler.  */
 extern void disassembler_usage (FILE *);
+
+/* Remove whitespace and consecutive commas.  */
+extern char *remove_whitespace_and_extra_commas (char *);
+
+/* Like STRCMP, but treat ',' the same as '\0' so that we match
+   strings like "foobar" against "foobar,xxyyzz,...".  */
+extern int disassembler_options_cmp (const char *, const char *);
+
+/* A helper function for FOR_EACH_DISASSEMBLER_OPTION.  */
+static inline const char *
+next_disassembler_option (const char *options)
+{
+  const char *opt = strchr (options, ',');
+  if (opt != NULL)
+    opt++;
+  return opt;
+}
+
+/* A macro for iterating over each comma separated option in OPTIONS.  */
+#define FOR_EACH_DISASSEMBLER_OPTION(OPT, OPTIONS) \
+  for ((OPT) = (OPTIONS); \
+       (OPT) != NULL; \
+       (OPT) = next_disassembler_option (OPT))
 
 
 /* This block of definitions is for particular callers who read instructions

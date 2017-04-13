@@ -155,7 +155,7 @@ static pthdb_session_t pd_session;
 /* Return a printable representation of pthdebug function return
    STATUS.  */
 
-static char *
+static const char *
 pd_status2str (int status)
 {
   switch (status)
@@ -1297,8 +1297,8 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
     }
 }
 
-/* Fetch register REGNO if != -1 or all registers otherwise in the
-   thread/process specified by inferior_ptid.  */
+/* Fetch register REGNO if != -1 or all registers otherwise from the
+   thread/process connected to REGCACHE.  */
 
 static void
 aix_thread_fetch_registers (struct target_ops *ops,
@@ -1308,11 +1308,11 @@ aix_thread_fetch_registers (struct target_ops *ops,
   pthdb_tid_t tid;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  if (!PD_TID (inferior_ptid))
+  if (!PD_TID (regcache_get_ptid (regcache)))
     beneath->to_fetch_registers (beneath, regcache, regno);
   else
     {
-      thread = find_thread_ptid (inferior_ptid);
+      thread = find_thread_ptid (regcache_get_ptid (regcache));
       tid = thread->priv->tid;
 
       if (tid == PTHDB_INVALID_TID)
@@ -1652,7 +1652,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 }
 
 /* Store gdb's current view of the register set into the
-   thread/process specified by inferior_ptid.  */
+   thread/process connected to REGCACHE.  */
 
 static void
 aix_thread_store_registers (struct target_ops *ops,
@@ -1662,11 +1662,11 @@ aix_thread_store_registers (struct target_ops *ops,
   pthdb_tid_t tid;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  if (!PD_TID (inferior_ptid))
+  if (!PD_TID (regcache_get_ptid (regcache)))
     beneath->to_store_registers (beneath, regcache, regno);
   else
     {
-      thread = find_thread_ptid (inferior_ptid);
+      thread = find_thread_ptid (regcache_get_ptid (regcache));
       tid = thread->priv->tid;
 
       if (tid == PTHDB_INVALID_TID)
@@ -1725,7 +1725,7 @@ aix_thread_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Return a printable representation of composite PID for use in
    "info threads" output.  */
 
-static char *
+static const char *
 aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char *ret = NULL;
@@ -1745,7 +1745,7 @@ aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 /* Return a printable representation of extra information about
    THREAD, for use in "info threads" output.  */
 
-static char *
+static const char *
 aix_thread_extra_thread_info (struct target_ops *self,
 			      struct thread_info *thread)
 {

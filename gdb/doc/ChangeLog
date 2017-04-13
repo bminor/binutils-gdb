@@ -1,3 +1,42 @@
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Document "set debug arc 2".
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Add "maint print arc arc-instruction".
+
+2017-03-22  Yao Qi  <yao.qi@linaro.org>
+
+	* python.texi (Inferiors In Python): Remove @code from Python.
+
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recordings In Python): Document return type of
+	gdb.BtraceInstruction.data.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* gdb.texinfo (gdb/mi Symbol Query Commands): Document new MI
+	command file-list-shared-libraries
+	(GDB/MI Async Records): Update documentation of library-loaded with new
+	field.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile.texi (Lazy Strings In Guile): Mention arrays.
+	* python.texi (Lazy Strings In Python): Ditto.
+
+2017-03-08  Jiong Wang  <jiong.wang@arm.com>
+
+        * gdb.texinfo (Memory Protection Extensions): Add missing escape
+	character "@".
+
+2017-03-07  Walfred Tedeschi <walfred.tedeschi@intel.com>
+
+	* Memory Protection Extensions: Add information about inferior
+	calls.
+
 2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Print Settings, Tail Call Frames): Rename DW_OP_GNU_*,

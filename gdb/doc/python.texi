@@ -1162,6 +1162,10 @@ A pointer-to-member.
 @item gdb.TYPE_CODE_REF
 A reference type.
 
+@vindex TYPE_CODE_RVALUE_REF
+@item gdb.TYPE_CODE_RVALUE_REF
+A C@t{++}11 rvalue reference type.
+
 @vindex TYPE_CODE_CHAR
 @item gdb.TYPE_CODE_CHAR
 A character type.
@@ -2756,7 +2760,7 @@ return an empty tuple.
 Read @var{length} addressable memory units from the inferior, starting at
 @var{address}.  Returns a buffer object, which behaves much like an array
 or a string.  It can be modified and given to the
-@code{Inferior.write_memory} function.  In @code{Python} 3, the return
+@code{Inferior.write_memory} function.  In Python 3, the return
 value is a @code{memoryview} object.
 @end defun
 
@@ -3181,7 +3185,8 @@ if the instruction is a gap or the debug symbols could not be read.
 
 @defvar BtraceInstruction.data
 A buffer with the raw instruction data.  May be @code{None} if the
-instruction is a gap.
+instruction is a gap.  In Python 3, the return value is a @code{memoryview}
+object.
 @end defvar
 
 @defvar BtraceInstruction.decoded
@@ -5133,7 +5138,7 @@ is not writable.
 
 @defvar LazyString.type
 This attribute holds the type that is represented by the lazy string's
-type.  For a lazy string this will always be a pointer type.  To
+type.  For a lazy string this is a pointer or array type.  To
 resolve this to the lazy string's character type, use the type's
 @code{target} method.  @xref{Types In Python}.  This attribute is not
 writable.

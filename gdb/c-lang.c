@@ -960,6 +960,9 @@ enum cplus_primitive_types {
   cplus_primitive_type_decfloat,
   cplus_primitive_type_decdouble,
   cplus_primitive_type_declong,
+  cplus_primitive_type_char16_t,
+  cplus_primitive_type_char32_t,
+  cplus_primitive_type_wchar_t,
   nr_cplus_primitive_types
 };
 
@@ -1015,6 +1018,12 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_decdouble;
   lai->primitive_type_vector [cplus_primitive_type_declong]
     = builtin->builtin_declong;
+  lai->primitive_type_vector [cplus_primitive_type_char16_t]
+    = builtin->builtin_char16;
+  lai->primitive_type_vector [cplus_primitive_type_char32_t]
+    = builtin->builtin_char32;
+  lai->primitive_type_vector [cplus_primitive_type_wchar_t]
+    = builtin->builtin_wchar;
 
   lai->bool_type_symbol = "bool";
   lai->bool_type_default = builtin->builtin_bool;

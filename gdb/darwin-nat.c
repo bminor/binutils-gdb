@@ -102,12 +102,14 @@ static void darwin_ptrace_me (void);
 
 static void darwin_ptrace_him (int pid);
 
-static void darwin_create_inferior (struct target_ops *ops, char *exec_file,
-				    char *allargs, char **env, int from_tty);
+static void darwin_create_inferior (struct target_ops *ops,
+				    const char *exec_file,
+				    const std::string &allargs,
+				    char **env, int from_tty);
 
 static void darwin_files_info (struct target_ops *ops);
 
-static char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
+static const char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
 
 static int darwin_thread_alive (struct target_ops *ops, ptid_t tpid);
 
@@ -1826,8 +1828,10 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
 }
 
 static void
-darwin_create_inferior (struct target_ops *ops, char *exec_file,
-			char *allargs, char **env, int from_tty)
+darwin_create_inferior (struct target_ops *ops,
+			const char *exec_file,
+			const std::string &allargs,
+			char **env, int from_tty)
 {
   /* Do the hard work.  */
   fork_inferior (exec_file, allargs, env, darwin_ptrace_me, darwin_ptrace_him,
@@ -1970,7 +1974,7 @@ darwin_files_info (struct target_ops *ops)
 {
 }
 
-static char *
+static const char *
 darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];

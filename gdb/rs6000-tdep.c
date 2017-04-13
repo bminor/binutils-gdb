@@ -106,6 +106,9 @@
     && (regnum) >= (tdep)->ppc_efpr0_regnum \
     && (regnum) < (tdep)->ppc_efpr0_regnum + ppc_num_efprs)
 
+/* Holds the current set of options to be passed to the disassembler.  */
+static char *powerpc_disassembler_options;
+
 /* The list of available "set powerpc ..." and "show powerpc ..."
    commands.  */
 static struct cmd_list_element *setpowerpccmdlist = NULL;
@@ -3143,10 +3146,10 @@ rs6000_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
 struct variant
   {
     /* Name of this variant.  */
-    char *name;
+    const char *name;
 
     /* English description of the variant.  */
-    char *description;
+    const char *description;
 
     /* bfd_arch_info.arch corresponding to variant.  */
     enum bfd_architecture arch;
@@ -6608,6 +6611,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     register_e500_ravenscar_ops (gdbarch);
   else
     register_ppc_ravenscar_ops (gdbarch);
+
+  set_gdbarch_disassembler_options (gdbarch, &powerpc_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_powerpc ());
 
   return gdbarch;
 }

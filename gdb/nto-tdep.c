@@ -190,7 +190,7 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
 		       const char **perr)
 {
   char **argv;
-  char *in, *out, *err, *p;
+  const char *in, *out, *err, *p;
   int argc, i, n;
 
   for (n = 0; pargv[n]; n++);
@@ -408,7 +408,7 @@ static const char *nto_thread_state_str[] =
   "NET_REPLY"	/* 20 0x14 */
 };
 
-char *
+const char *
 nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
 {
   if (ti && ti->priv

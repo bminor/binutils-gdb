@@ -22113,7 +22113,8 @@ start_unwind_section (const segT text_seg, int idx)
       linkonce = 1;
     }
 
-  obj_elf_change_section (sec_name, type, flags, 0, group_name, linkonce, 0);
+  obj_elf_change_section (sec_name, type, 0, flags, 0, group_name,
+			  linkonce, 0);
 
   /* Set the section link for index tables.  */
   if (idx)
@@ -25040,8 +25041,8 @@ md_begin (void)
       mcpu_cpu_opt = &cpu_default;
       selected_cpu = cpu_default;
     }
-  else if (no_cpu_selected ())
-    selected_cpu = cpu_default;
+  else
+    selected_cpu = *mcpu_cpu_opt;
 #else
   if (mcpu_cpu_opt)
     selected_cpu = *mcpu_cpu_opt;
@@ -25781,7 +25782,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"softvfp+vfp",	FPU_ARCH_VFP_V2},
   {"vfp",		FPU_ARCH_VFP_V2},
   {"vfp9",		FPU_ARCH_VFP_V2},
-  {"vfp3",              FPU_ARCH_VFP_V3}, /* For backwards compatibility.  */
+  {"vfp3",		FPU_ARCH_VFP_V3}, /* Undocumented, use vfpv3.  */
   {"vfp10",		FPU_ARCH_VFP_V2},
   {"vfp10-r0",		FPU_ARCH_VFP_V1},
   {"vfpxd",		FPU_ARCH_VFP_V1xD},
@@ -25794,10 +25795,11 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"vfpv3xd-fp16",	FPU_ARCH_VFP_V3xD_FP16},
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
-  {"arm1136jfs",	FPU_ARCH_VFP_V2},
+  {"arm1136jfs",	FPU_ARCH_VFP_V2}, /* Undocumented, use arm1136jf-s.  */
   {"arm1136jf-s",	FPU_ARCH_VFP_V2},
   {"maverick",		FPU_ARCH_MAVERICK},
-  {"neon",              FPU_ARCH_VFP_V3_PLUS_NEON_V1},
+  {"neon",		FPU_ARCH_VFP_V3_PLUS_NEON_V1},
+  {"neon-vfpv3",	FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-fp16",		FPU_ARCH_NEON_FP16},
   {"vfpv4",		FPU_ARCH_VFP_V4},
   {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},

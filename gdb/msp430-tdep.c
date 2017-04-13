@@ -221,10 +221,9 @@ msp430_pseudo_register_read (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int regnum, gdb_byte *buffer)
 {
-  enum register_status status = REG_UNKNOWN;
-
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
     {
+      enum register_status status;
       ULONGEST val;
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int regsize = register_size (gdbarch, regnum);
@@ -234,11 +233,10 @@ msp430_pseudo_register_read (struct gdbarch *gdbarch,
       if (status == REG_VALID)
 	store_unsigned_integer (buffer, regsize, byte_order, val);
 
+      return status;
     }
   else
     gdb_assert_not_reached ("invalid pseudo register number");
-
-  return status;
 }
 
 /* Implement the "pseudo_register_write" gdbarch method.  */
@@ -760,7 +758,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
 		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
-		          || TYPE_CODE (arg_type) == TYPE_CODE_REF
+		          || TYPE_IS_REFERENCE (arg_type)
 			  || TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
 			  || TYPE_CODE (arg_type) == TYPE_CODE_UNION))
 		    {

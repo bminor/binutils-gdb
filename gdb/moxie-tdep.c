@@ -74,7 +74,7 @@ typedef BP_MANIPULATION (moxie_break_insn) moxie_breakpoint;
 
 /* Moxie register names.  */
 
-char *moxie_register_names[] = {
+static const char *moxie_register_names[] = {
   "$fp",  "$sp",  "$r0",  "$r1",  "$r2",
   "$r3",  "$r4",  "$r5", "$r6", "$r7",
   "$r8", "$r9", "$r10", "$r11", "$r12",
@@ -1111,6 +1111,9 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Allocate space for the new architecture.  */
   tdep = XNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  set_gdbarch_wchar_bit (gdbarch, 32);
+  set_gdbarch_wchar_signed (gdbarch, 0);
 
   set_gdbarch_read_pc (gdbarch, moxie_read_pc);
   set_gdbarch_write_pc (gdbarch, moxie_write_pc);

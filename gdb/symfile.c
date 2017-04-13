@@ -91,8 +91,6 @@ static void add_symbol_file_command (char *, int);
 
 static const struct sym_fns *find_sym_fns (bfd *);
 
-static void decrement_reading_symtab (void *);
-
 static void overlay_invalidate_all (void);
 
 static void overlay_auto_command (char *, int);
@@ -193,22 +191,15 @@ print_symbol_loading_p (int from_tty, int exec, int full)
 
 int currently_reading_symtab = 0;
 
-static void
-decrement_reading_symtab (void *dummy)
-{
-  currently_reading_symtab--;
-  gdb_assert (currently_reading_symtab >= 0);
-}
-
 /* Increment currently_reading_symtab and return a cleanup that can be
    used to decrement it.  */
 
-struct cleanup *
+scoped_restore_tmpl<int>
 increment_reading_symtab (void)
 {
-  ++currently_reading_symtab;
-  gdb_assert (currently_reading_symtab > 0);
-  return make_cleanup (decrement_reading_symtab, NULL);
+  gdb_assert (currently_reading_symtab >= 0);
+  return make_scoped_restore (&currently_reading_symtab,
+			      currently_reading_symtab + 1);
 }
 
 /* Remember the lowest-addressed loadable section we've seen.
@@ -1768,7 +1759,7 @@ symfile_bfd_open (const char *name)
    the section was not found.  */
 
 int
-get_section_index (struct objfile *objfile, char *section_name)
+get_section_index (struct objfile *objfile, const char *section_name)
 {
   asection *sect = bfd_get_section_by_name (objfile->obfd, section_name);
 
@@ -2235,8 +2226,8 @@ add_symbol_file_command (char *args, int from_tty)
 
   struct sect_opt
   {
-    char *name;
-    char *value;
+    const char *name;
+    const char *value;
   };
 
   struct section_addr_info *section_addrs;
@@ -2333,14 +2324,14 @@ add_symbol_file_command (char *args, int from_tty)
   for (i = 0; i < section_index; i++)
     {
       CORE_ADDR addr;
-      char *val = sect_opts[i].value;
-      char *sec = sect_opts[i].name;
+      const char *val = sect_opts[i].value;
+      const char *sec = sect_opts[i].name;
 
       addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
          entered on the command line.  */
-      section_addrs->other[sec_num].name = sec;
+      section_addrs->other[sec_num].name = (char *) sec;
       section_addrs->other[sec_num].addr = addr;
       printf_unfiltered ("\t%s_addr = %s\n", sec,
 			 paddress (gdbarch, addr));
@@ -2443,10 +2434,6 @@ remove_symbol_file_command (char *args, int from_tty)
   do_cleanups (my_cleanups);
 }
 
-typedef struct objfile *objfilep;
-
-DEF_VEC_P (objfilep);
-
 /* Re-read symbols if a symbol-file has changed.  */
 
 void
@@ -2456,10 +2443,7 @@ reread_symbols (void)
   long new_modtime;
   struct stat new_statbuf;
   int res;
-  VEC (objfilep) *new_objfiles = NULL;
-  struct cleanup *all_cleanups;
-
-  all_cleanups = make_cleanup (VEC_cleanup (objfilep), &new_objfiles);
+  std::vector<struct objfile *> new_objfiles;
 
   /* With the addition of shared libraries, this should be modified,
      the load time should be saved in the partial symbol tables, since
@@ -2670,14 +2654,12 @@ reread_symbols (void)
 	  objfile->mtime = new_modtime;
 	  init_entry_point_info (objfile);
 
-	  VEC_safe_push (objfilep, new_objfiles, objfile);
+	  new_objfiles.push_back (objfile);
 	}
     }
 
-  if (new_objfiles)
+  if (!new_objfiles.empty ())
     {
-      int ix;
-
       /* Notify objfiles that we've modified objfile sections.  */
       objfiles_changed ();
 
@@ -2686,15 +2668,13 @@ reread_symbols (void)
       /* clear_objfile_data for each objfile was called before freeing it and
 	 observer_notify_new_objfile (NULL) has been called by
 	 clear_symtab_users above.  Notify the new files now.  */
-      for (ix = 0; VEC_iterate (objfilep, new_objfiles, ix, objfile); ix++)
-	observer_notify_new_objfile (objfile);
+      for (auto iter : new_objfiles)
+	observer_notify_new_objfile (iter);
 
       /* At least one objfile has changed, so we can consider that
          the executable we're debugging has changed too.  */
       observer_notify_executable_changed ();
     }
-
-  do_cleanups (all_cleanups);
 }
 
 
@@ -3856,11 +3836,11 @@ symfile_free_objfile (struct objfile *objfile)
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
 void
-expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
-			 expand_symtabs_symbol_matcher_ftype *symbol_matcher,
-			 expand_symtabs_exp_notify_ftype *expansion_notify,
-			 enum search_domain kind,
-			 void *data)
+expand_symtabs_matching
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   enum search_domain kind)
 {
   struct objfile *objfile;
 
@@ -3869,8 +3849,7 @@ expand_symtabs_matching (expand_symtabs_file_matcher_ftype *file_matcher,
     if (objfile->sf)
       objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
 						symbol_matcher,
-						expansion_notify, kind,
-						data);
+						expansion_notify, kind);
   }
 }
 

@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
+#include "common/underlying.h"
 
 extern int dwarf_always_disassemble;
 
@@ -50,7 +51,8 @@ static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 						    const gdb_byte *data,
 						    size_t size,
 						    struct dwarf2_per_cu_data *per_cu,
-						    LONGEST byte_offset);
+						    struct type *subobj_type,
+						    LONGEST subobj_byte_offset);
 
 static struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
     (struct frame_info *frame,
@@ -1190,7 +1192,7 @@ call_site_parameter_matches (struct call_site_parameter *parameter,
       case CALL_SITE_PARAMETER_FB_OFFSET:
 	return kind_u.fb_offset == parameter->u.fb_offset;
       case CALL_SITE_PARAMETER_PARAM_OFFSET:
-	return kind_u.param_offset.cu_off == parameter->u.param_offset.cu_off;
+	return kind_u.param_cu_off == parameter->u.param_cu_off;
       }
   return 0;
 }
@@ -1347,7 +1349,7 @@ entry_data_value_coerce_ref (const struct value *value)
   struct type *checked_type = check_typedef (value_type (value));
   struct value *target_val;
 
-  if (TYPE_CODE (checked_type) != TYPE_CODE_REF)
+  if (!TYPE_IS_REFERENCE (checked_type))
     return NULL;
 
   target_val = (struct value *) value_computed_closure (value);
@@ -1422,7 +1424,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
      TYPE_CODE_REF with non-entry data value would give current value - not the
      entry value.  */
 
-  if (TYPE_CODE (checked_type) != TYPE_CODE_REF
+  if (!TYPE_IS_REFERENCE (checked_type)
       || TYPE_TARGET_TYPE (checked_type) == NULL)
     return outer_val;
 
@@ -2163,12 +2165,18 @@ indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
     = dwarf2_fetch_die_loc_sect_off (die, per_cu,
 				     get_frame_address_in_block_wrapper, frame);
 
+  /* Get type of pointed-to DIE.  */
+  struct type *orig_type = dwarf2_fetch_die_type_sect_off (die, per_cu);
+  if (orig_type == NULL)
+    invalid_synthetic_pointer ();
+
   /* If pointed-to DIE has a DW_AT_location, evaluate it and return the
      resulting value.  Otherwise, it may have a DW_AT_const_value instead,
      or it may've been optimized out.  */
   if (baton.data != NULL)
-    return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
-					  baton.data, baton.size, baton.per_cu,
+    return dwarf2_evaluate_loc_desc_full (orig_type, frame, baton.data,
+					  baton.size, baton.per_cu,
+					  TYPE_TARGET_TYPE (type),
 					  byte_offset);
   else
     return fetch_const_value_from_synthetic_pointer (die, byte_offset, per_cu,
@@ -2248,7 +2256,8 @@ indirect_pieced_value (struct value *value)
 					TYPE_LENGTH (type), byte_order);
   byte_offset += piece->v.ptr.offset;
 
-  return indirect_synthetic_pointer (piece->v.ptr.die, byte_offset, c->per_cu,
+  return indirect_synthetic_pointer (piece->v.ptr.die_sect_off,
+				     byte_offset, c->per_cu,
 				     frame, type);
 }
 
@@ -2273,7 +2282,7 @@ coerce_pieced_ref (const struct value *value)
       gdb_assert (closure != NULL);
       gdb_assert (closure->n_pieces == 1);
 
-      return indirect_synthetic_pointer (closure->pieces->v.ptr.die,
+      return indirect_synthetic_pointer (closure->pieces->v.ptr.die_sect_off,
 					 closure->pieces->v.ptr.offset,
 					 closure->per_cu, frame, type);
     }
@@ -2327,23 +2336,30 @@ static const struct lval_funcs pieced_value_funcs = {
 
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the
-   context of FRAME.  BYTE_OFFSET is applied after the contents are
-   computed.  */
+   context of FRAME.  If SUBOBJ_TYPE is non-NULL, return instead the
+   location of the subobject of type SUBOBJ_TYPE at byte offset
+   SUBOBJ_BYTE_OFFSET within the variable of type TYPE.  */
 
 static struct value *
 dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 			       const gdb_byte *data, size_t size,
 			       struct dwarf2_per_cu_data *per_cu,
-			       LONGEST byte_offset)
+			       struct type *subobj_type,
+			       LONGEST subobj_byte_offset)
 {
   struct value *retval;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
 
-  if (byte_offset < 0)
+  if (subobj_type == NULL)
+    {
+      subobj_type = type;
+      subobj_byte_offset = 0;
+    }
+  else if (subobj_byte_offset < 0)
     invalid_synthetic_pointer ();
 
   if (size == 0)
-    return allocate_optimized_out_value (type);
+    return allocate_optimized_out_value (subobj_type);
 
   dwarf_evaluate_loc_desc ctx;
   ctx.frame = frame;
@@ -2366,8 +2382,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
 	  free_values.free_to_mark ();
-	  retval = allocate_value (type);
-	  mark_value_bytes_unavailable (retval, 0, TYPE_LENGTH (type));
+	  retval = allocate_value (subobj_type);
+	  mark_value_bytes_unavailable (retval, 0,
+					TYPE_LENGTH (subobj_type));
 	  return retval;
 	}
       else if (ex.error == NO_ENTRY_VALUE_ERROR)
@@ -2375,7 +2392,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  if (entry_values_debug)
 	    exception_print (gdb_stdout, ex);
 	  free_values.free_to_mark ();
-	  return allocate_optimized_out_value (type);
+	  return allocate_optimized_out_value (subobj_type);
 	}
       else
 	throw_exception (ex);
@@ -2390,7 +2407,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
       for (i = 0; i < ctx.num_pieces; ++i)
 	bit_size += ctx.pieces[i].size;
-      if (8 * (byte_offset + TYPE_LENGTH (type)) > bit_size)
+      if (8 * (subobj_byte_offset + TYPE_LENGTH (subobj_type)) > bit_size)
 	invalid_synthetic_pointer ();
 
       c = allocate_piece_closure (per_cu, ctx.num_pieces, ctx.pieces,
@@ -2398,8 +2415,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
       free_values.free_to_mark ();
-      retval = allocate_computed_value (type, &pieced_value_funcs, c);
-      set_value_offset (retval, byte_offset);
+      retval = allocate_computed_value (subobj_type,
+					&pieced_value_funcs, c);
+      set_value_offset (retval, subobj_byte_offset);
     }
   else
     {
@@ -2412,10 +2430,10 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	      = longest_to_int (value_as_long (ctx.fetch (0)));
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
 
-	    if (byte_offset != 0)
+	    if (subobj_byte_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
 	    free_values.free_to_mark ();
-	    retval = value_from_register (type, gdb_regnum, frame);
+	    retval = value_from_register (subobj_type, gdb_regnum, frame);
 	    if (value_optimized_out (retval))
 	      {
 		struct value *tmp;
@@ -2426,8 +2444,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 		   inspecting a register ($pc, $sp, etc.), return a
 		   generic optimized out value instead, so that we show
 		   <optimized out> instead of <not saved>.  */
-		tmp = allocate_value (type);
-		value_contents_copy (tmp, 0, retval, 0, TYPE_LENGTH (type));
+		tmp = allocate_value (subobj_type);
+		value_contents_copy (tmp, 0, retval, 0,
+				     TYPE_LENGTH (subobj_type));
 		retval = tmp;
 	      }
 	  }
@@ -2447,7 +2466,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	       the operation.  Therefore, we do the conversion here
 	       since the type is readily available.  */
 
-	    switch (TYPE_CODE (type))
+	    switch (TYPE_CODE (subobj_type))
 	      {
 		case TYPE_CODE_FUNC:
 		case TYPE_CODE_METHOD:
@@ -2460,7 +2479,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    address = value_as_address (value_from_pointer (ptr_type, address));
 
 	    free_values.free_to_mark ();
-	    retval = value_at_lazy (type, address + byte_offset);
+	    retval = value_at_lazy (subobj_type,
+				    address + subobj_byte_offset);
 	    if (in_stack_memory)
 	      set_value_stack (retval, 1);
 	  }
@@ -2469,17 +2489,14 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_STACK:
 	  {
 	    struct value *value = ctx.fetch (0);
-	    gdb_byte *contents;
-	    const gdb_byte *val_bytes;
 	    size_t n = TYPE_LENGTH (value_type (value));
+	    size_t len = TYPE_LENGTH (subobj_type);
+	    size_t max = TYPE_LENGTH (type);
+	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
 	    struct cleanup *cleanup;
 
-	    if (byte_offset + TYPE_LENGTH (type) > n)
+	    if (subobj_byte_offset + len > max)
 	      invalid_synthetic_pointer ();
-
-	    val_bytes = value_contents_all (value);
-	    val_bytes += byte_offset;
-	    n -= byte_offset;
 
 	    /* Preserve VALUE because we are going to free values back
 	       to the mark, but we still need the value contents
@@ -2488,17 +2505,14 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    free_values.free_to_mark ();
 	    cleanup = make_cleanup_value_free (value);
 
-	    retval = allocate_value (type);
-	    contents = value_contents_raw (retval);
-	    if (n > TYPE_LENGTH (type))
-	      {
-		struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+	    retval = allocate_value (subobj_type);
 
-		if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
-		  val_bytes += n - TYPE_LENGTH (type);
-		n = TYPE_LENGTH (type);
-	      }
-	    memcpy (contents, val_bytes, n);
+	    /* The given offset is relative to the actual object.  */
+	    if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
+	      subobj_byte_offset += n - max;
+
+	    memcpy (value_contents_raw (retval),
+		    value_contents_all (value) + subobj_byte_offset, len);
 
 	    do_cleanups (cleanup);
 	  }
@@ -2507,21 +2521,21 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_LITERAL:
 	  {
 	    bfd_byte *contents;
-	    size_t n = TYPE_LENGTH (type);
+	    size_t n = TYPE_LENGTH (subobj_type);
 
-	    if (byte_offset + n > ctx.len)
+	    if (subobj_byte_offset + n > ctx.len)
 	      invalid_synthetic_pointer ();
 
 	    free_values.free_to_mark ();
-	    retval = allocate_value (type);
+	    retval = allocate_value (subobj_type);
 	    contents = value_contents_raw (retval);
-	    memcpy (contents, ctx.data + byte_offset, n);
+	    memcpy (contents, ctx.data + subobj_byte_offset, n);
 	  }
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
 	  free_values.free_to_mark ();
-	  retval = allocate_optimized_out_value (type);
+	  retval = allocate_optimized_out_value (subobj_type);
 	  break;
 
 	  /* DWARF_VALUE_IMPLICIT_POINTER was converted to a pieced
@@ -2547,7 +2561,8 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 			  const gdb_byte *data, size_t size,
 			  struct dwarf2_per_cu_data *per_cu)
 {
-  return dwarf2_evaluate_loc_desc_full (type, frame, data, size, per_cu, 0);
+  return dwarf2_evaluate_loc_desc_full (type, frame, data, size, per_cu,
+					NULL, 0);
 }
 
 /* Evaluates a dwarf expression and stores the result in VAL, expecting
@@ -3629,12 +3644,11 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    struct dwarf2_locexpr_baton block;
 	    int size = (op == DW_OP_call2 ? 2 : 4);
-	    cu_offset offset;
 
 	    uoffset = extract_unsigned_integer (op_ptr, size, byte_order);
 	    op_ptr += size;
 
-	    offset.cu_off = uoffset;
+	    cu_offset offset = (cu_offset) uoffset;
 	    block = dwarf2_fetch_die_loc_cu_off (offset, per_cu,
 						 get_ax_pc, expr);
 
@@ -4179,15 +4193,15 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_GNU_deref_type:
 	  {
 	    int addr_size = *data++;
-	    cu_offset offset;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &ul);
-	    offset.cu_off = ul;
+	    cu_offset offset = (cu_offset) ul;
 	    type = dwarf2_get_die_type (offset, per_cu);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]> %d", phex_nz (offset.cu_off, 0),
+	    fprintf_filtered (stream, " [0x%s]> %d",
+			      phex_nz (to_underlying (offset), 0),
 			      addr_size);
 	  }
 	  break;
@@ -4195,15 +4209,15 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
 	  {
-	    cu_offset type_die;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &ul);
-	    type_die.cu_off = ul;
+	    cu_offset type_die = (cu_offset) ul;
 	    type = dwarf2_get_die_type (type_die, per_cu);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]>", phex_nz (type_die.cu_off, 0));
+	    fprintf_filtered (stream, " [0x%s]>",
+			      phex_nz (to_underlying (type_die), 0));
 	  }
 	  break;
 
@@ -4211,18 +4225,17 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_GNU_regval_type:
 	  {
 	    uint64_t reg;
-	    cu_offset type_die;
 	    struct type *type;
 
 	    data = safe_read_uleb128 (data, end, &reg);
 	    data = safe_read_uleb128 (data, end, &ul);
-	    type_die.cu_off = ul;
+	    cu_offset type_die = (cu_offset) ul;
 
 	    type = dwarf2_get_die_type (type_die, per_cu);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]> [$%s]",
-			      phex_nz (type_die.cu_off, 0),
+			      phex_nz (to_underlying (type_die), 0),
 			      locexpr_regname (arch, reg));
 	  }
 	  break;
@@ -4232,12 +4245,10 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_reinterpret:
 	case DW_OP_GNU_reinterpret:
 	  {
-	    cu_offset type_die;
-
 	    data = safe_read_uleb128 (data, end, &ul);
-	    type_die.cu_off = ul;
+	    cu_offset type_die = (cu_offset) ul;
 
-	    if (type_die.cu_off == 0)
+	    if (to_underlying (type_die) == 0)
 	      fprintf_filtered (stream, "<0>");
 	    else
 	      {
@@ -4246,7 +4257,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 		type = dwarf2_get_die_type (type_die, per_cu);
 		fprintf_filtered (stream, "<");
 		type_print (type, "", stream, -1);
-		fprintf_filtered (stream, " [0x%s]>", phex_nz (type_die.cu_off, 0));
+		fprintf_filtered (stream, " [0x%s]>",
+				  phex_nz (to_underlying (type_die), 0));
 	      }
 	  }
 	  break;

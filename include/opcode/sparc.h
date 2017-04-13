@@ -117,6 +117,14 @@ typedef struct sparc_opcode
   short architecture;	/* Bitmask of sparc_opcode_arch_val's.  */
 } sparc_opcode;
 
+/* Struct for ASIs - to handle ASIs introduced in a specific architecture */
+typedef struct
+{
+  int value;
+  const char *name;
+  short architecture;
+} sparc_asi;
+
 /* FIXME: Add F_ANACHRONISTIC flag for v9.  */
 #define	F_DELAYED	0x00000001 /* Delayed branch.  */
 #define	F_ALIAS		0x00000002 /* Alias for a "real" instruction.  */
@@ -296,7 +304,7 @@ typedef struct sparc_opcode
 extern const struct sparc_opcode sparc_opcodes[];
 extern const int sparc_num_opcodes;
 
-extern int sparc_encode_asi (const char *);
+extern const sparc_asi *sparc_encode_asi (const char *);
 extern const char *sparc_decode_asi (int);
 extern int sparc_encode_membar (const char *);
 extern const char *sparc_decode_membar (int);

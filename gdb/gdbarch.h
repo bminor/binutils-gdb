@@ -36,6 +36,7 @@
 #define GDBARCH_H
 
 #include "frame.h"
+#include "dis-asm.h"
 
 struct floatformat;
 struct ui_file;
@@ -186,6 +187,17 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 
 extern const struct floatformat ** gdbarch_long_double_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat ** long_double_format);
+
+/* The ABI default bit-size for "wchar_t".  wchar_t is a built-in type
+   starting with C++11. */
+
+extern int gdbarch_wchar_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_wchar_bit (struct gdbarch *gdbarch, int wchar_bit);
+
+/* One if `wchar_t' is signed, zero if unsigned. */
+
+extern int gdbarch_wchar_signed (struct gdbarch *gdbarch);
+extern void set_gdbarch_wchar_signed (struct gdbarch *gdbarch, int wchar_signed);
 
 /* Returns the floating-point format to be used for values of length LENGTH.
    NAME, if non-NULL, is the type name, which may be used to distinguish
@@ -905,8 +917,8 @@ extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 
 extern int gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch);
 
-typedef char * (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
-extern char * gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
+typedef const char * (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
+extern const char * gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch, gdbarch_core_pid_to_str_ftype *core_pid_to_str);
 
 /* How the core target extracts the name of a thread from a core file. */
@@ -1544,6 +1556,14 @@ extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu
 typedef int (gdbarch_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarch);
 extern int gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size);
+
+/* Functions for allowing a target to modify its disassembler options. */
+
+extern char ** gdbarch_disassembler_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_disassembler_options (struct gdbarch *gdbarch, char ** disassembler_options);
+
+extern const disasm_options_t * gdbarch_valid_disassembler_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch, const disasm_options_t * valid_disassembler_options);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

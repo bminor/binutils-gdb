@@ -115,30 +115,28 @@ build_linetable_entry (int line, CORE_ADDR address)
   return (PyObject *) obj;
 }
 
-/* Internal helper function to build a Python Tuple from a GDB Vector.
+/* Internal helper function to build a Python Tuple from a vector.
    A line table entry can have multiple PCs for a given source line.
    Construct a Tuple of all entries for the given source line, LINE
-   from the line table VEC.  Construct one line table entry object per
+   from the line table PCS.  Construct one line table entry object per
    address.  */
 
 static PyObject *
-build_line_table_tuple_from_pcs (int line, VEC (CORE_ADDR) *vec)
+build_line_table_tuple_from_pcs (int line, const std::vector<CORE_ADDR> &pcs)
 {
-  int vec_len = 0;
-  CORE_ADDR pc;
   int i;
 
-  vec_len = VEC_length (CORE_ADDR, vec);
-  if (vec_len < 1)
+  if (pcs.size () < 1)
     Py_RETURN_NONE;
 
-  gdbpy_ref<> tuple (PyTuple_New (vec_len));
+  gdbpy_ref<> tuple (PyTuple_New (pcs.size ()));
 
   if (tuple == NULL)
     return NULL;
 
-  for (i = 0; VEC_iterate (CORE_ADDR, vec, i, pc); ++i)
+  for (i = 0; i < pcs.size (); ++i)
     {
+      CORE_ADDR pc = pcs[i];
       gdbpy_ref<> obj (build_linetable_entry (line, pc));
 
       if (obj == NULL)
@@ -160,8 +158,7 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
   struct symtab *symtab;
   gdb_py_longest py_line;
   struct linetable_entry *best_entry = NULL;
-  VEC (CORE_ADDR) *pcs = NULL;
-  PyObject *tuple;
+  std::vector<CORE_ADDR> pcs;
 
   LTPY_REQUIRE_VALID (self, symtab);
 
@@ -178,10 +175,7 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
     }
   END_CATCH
 
-  tuple = build_line_table_tuple_from_pcs (py_line, pcs);
-  VEC_free (CORE_ADDR, pcs);
-
-  return tuple;
+  return build_line_table_tuple_from_pcs (py_line, pcs);
 }
 
 /* Implementation of gdb.LineTable.has_line (self, line) -> Boolean.
@@ -550,7 +544,7 @@ PyTypeObject ltpy_iterator_object_type = {
 };
 
 
-static PyGetSetDef linetable_entry_object_getset[] = {
+static gdb_PyGetSetDef linetable_entry_object_getset[] = {
   { "line", ltpy_entry_get_line, NULL,
     "The line number in the source file.", NULL },
   { "pc", ltpy_entry_get_pc, NULL,

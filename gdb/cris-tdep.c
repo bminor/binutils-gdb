@@ -1695,7 +1695,7 @@ cris_special_register_name (struct gdbarch *gdbarch, int regno)
 static const char *
 cris_register_name (struct gdbarch *gdbarch, int regno)
 {
-  static char *cris_genreg_names[] =
+  static const char *cris_genreg_names[] =
   { "r0",  "r1",  "r2",  "r3", \
     "r4",  "r5",  "r6",  "r7", \
     "r8",  "r9",  "r10", "r11", \
@@ -1720,14 +1720,14 @@ cris_register_name (struct gdbarch *gdbarch, int regno)
 static const char *
 crisv32_register_name (struct gdbarch *gdbarch, int regno)
 {
-  static char *crisv32_genreg_names[] =
+  static const char *crisv32_genreg_names[] =
     { "r0",  "r1",  "r2",  "r3", \
       "r4",  "r5",  "r6",  "r7", \
       "r8",  "r9",  "r10", "r11", \
       "r12", "r13", "sp",  "acr"
     };
 
-  static char *crisv32_sreg_names[] =
+  static const char *crisv32_sreg_names[] =
     { "s0",  "s1",  "s2",  "s3", \
       "s4",  "s5",  "s6",  "s7", \
       "s8",  "s9",  "s10", "s11", \

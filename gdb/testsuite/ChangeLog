@@ -1,3 +1,249 @@
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/21323
+	* gdb.cp/wide_char_types.c: Include <wchar.h>.
+	(wchar): New global.
+	* gdb.cp/wide_char_types.exp (wide_char_types_program)
+	(do_test_wide_char, wide_char_types_no_program, top level): Add
+	wchar_t testing.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR c++/21323
+	* gdb.cp/wide_char_types.c: New file.
+	* gdb.cp/wide_char_types.exp: New file.
+
+2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21352
+	* gdb.trace/tsv.exp: Add test for "tsave -r".
+
+2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-section-script.exp (sepdebug): New testcases.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.arch/arc-analyze-prologue.S: New file.
+	* gdb.arch/arc-analyze-prologue.exp: Likewise.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.arch/arc-decode-insn.S: New file.
+	* gdb.arch/arc-decode-insn.exp: Likewise.
+
+2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20928
+	* gdb.arch/sparc64-regs.exp: New file.
+	* gdb.arch/sparc64-regs.S: Likewise.
+
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.python/py-record-btrace.exp: Check for buffer on Python 2
+	and memory view on Python 3.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+	    Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/14441
+	* gdb.cp/demangle.exp: Add rvalue reference tests.
+	* gdb.cp/rvalue-ref-casts.cc: New file.
+	* gdb.cp/rvalue-ref-casts.exp: New file.
+	* gdb.cp/rvalue-ref-overload.cc: New file.
+	* gdb.cp/rvalue-ref-overload.exp: New file.
+	* gdb.cp/rvalue-ref-params.cc: New file.
+	* gdb.cp/rvalue-ref-params.exp: New file.
+	* gdb.cp/rvalue-ref-sizeof.cc: New file.
+	* gdb.cp/rvalue-ref-sizeof.exp: New file.
+	* gdb.cp/rvalue-ref-types.cc: New file.
+	* gdb.cp/rvalue-ref-types.exp: New file.
+	* gdb.python/py-rvalue-ref-value-cc.cc: New file.
+	* gdb.python/py-rvalue-ref-value-cc.exp: New file.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* gdb.mi/mi-solib.exp (test_file_list_shared_libraries):
+	New procedure.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Add additional message
+	for unexpected output.
+
+2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/examine-backward.c (Barrier): New character array
+	constant, to ensure that TestStrings is preceded by a string
+	terminator.
+
+2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/dwarf.exp: Add support for DW_OP_implicit_pointer.
+	* gdb.dwarf2/nonvar-access.exp: Add test for stack value location
+	and implicit pointer into such a location.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-lazy-string (pointer): Really add new typedef.
+
+2017-03-16  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.cp/m-static.exp: Fix expectation for prototype of
+	test5.single_constructor and single_constructor::single_constructor.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* gdb.guile/scm-value.c (main) Delete locals sptr, sn.
+	* gdb.guile/scm-lazy-string.c: New file.
+	* gdb.guile/scm-value.exp: Move lazy string tests to ...
+	* gdb.guile/scm-lazy-string.exp: ... here, new file.  Add more tests
+	for pointer, array, typedef lazy strings.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	PR python/17728, python/18439, python/18779
+	* gdb.python/py-value.c (main) Delete locals sptr, sn.
+	* gdb.python/py-lazy-string.c (pointer): New typedef.
+	(main): New locals ptr, array, typedef_ptr.
+	* gdb.python/py-value.exp: Move lazy string tests to ...
+	* gdb.python/py-lazy-string.exp: ... here.  Add more tests for pointer,
+	array, typedef lazy strings.
+
+2017-03-14  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* lib/gdb.exp (get_valueof, get_integer_valueof, get_sizeof):
+	  Add optional 'test' parameter.
+
+2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
+	Skip for versions of DejaGnu < 1.5.
+
+2017-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (dejagnu_version): New proc.
+	* gdb.threads/attach-many-short-lived-threads.exp (bad_dejagnu):
+	Use dejagnu_version.
+
+2017-03-10  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/8128
+	* gdb.cp/templates.exp (test_ptype_of_templates): Remove argument
+	type from destructor regexps.
+	Add a branch which actually passes the test.
+	Adjust "ptype t5i" test names.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/step-over-exit.exp: Add explicit test message.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18360
+	* gdb.threads/interrupt-while-step-over.c: New file.
+	* gdb.threads/interrupt-while-step-over.exp: New file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/amd64-entry-value-param-dwarf5.exp: Use with_test_prefix.
+	* gdb.arch/amd64-entry-value-param.exp: Use with_test_prefix.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/i386-pkru.exp (probe PKRU support): Handle detecting
+	PKRU as not supported as a PASS.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-fun-addr.exp: Use $testfile1/$testfile2 for test
+	prefix instead of $binfile1/$binfile2.
+	* gdb.btrace/gcore.exp: Use "core" instead of unstable path name
+	in test message.
+	* gdb.python/py-completion.exp: Use "load python file" as test
+	messages instead of unstable path names.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR cli/21218
+	* gdb.base/commands.exp (backslash_in_multi_line_command_test):
+	New proc.
+	(top level): Call it.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR tui/21216
+	* gdb.tui/tui-nl-filtered-output.exp: New file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/completion.exp: Move TUI completion tests to ...
+	* gdb.tui/completion.exp: ... this new file.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-disasm-long-lines.c,
+	gdb.base/tui-disasm-long-lines.exp, gdb.base/tui-layout.c,
+	gdb.base/tui-layout.exp: Move to ...
+	* gdb.tui/: ... this new directory.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.c: New file.
+	* gdb.base/tui-layout.exp: New file.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.c: Rename to ...
+	* gdb.base/tui-disasm-long-lines.c: ... this.
+	* gdb.base/tui-layout.exp: Rename to ...
+	* gdb.base/tui-disasm-long-lines.exp: ... this.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/tui-layout.exp: Add intro comment and fix typo.
+
+2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-mpx-call.c: New file.
+	* i386-mpx-call.exp: New file.
+
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power.exp: Delete test.
+	* gdb.arch/powerpc-power.s: Likewise.
+	* gdb.disasm/disassembler-options.exp: New test.
+	* gdb.arch/powerpc-altivec.exp: Likewise.
+	* gdb.arch/powerpc-altivec.s: Likewise.
+	* gdb.arch/powerpc-altivec2.exp: Likewise.
+	* gdb.arch/powerpc-altivec2.s: Likewise.
+	* gdb.arch/powerpc-altivec3.exp: Likewise.
+	* gdb.arch/powerpc-altivec3.s: Likewise.
+	* gdb.arch/powerpc-power7.exp: Likewise.
+	* gdb.arch/powerpc-power7.s: Likewise.
+	* gdb.arch/powerpc-power8.exp: Likewise.
+	* gdb.arch/powerpc-power8.s: Likewise.
+	* gdb.arch/powerpc-power9.exp: Likewise.
+	* gdb.arch/powerpc-power9.s: Likewise.
+	* gdb.arch/powerpc-vsx.exp: Likewise.
+	* gdb.arch/powerpc-vsx.s: Likewise.
+	* gdb.arch/powerpc-vsx2.exp: Likewise.
+	* gdb.arch/powerpc-vsx2.s: Likewise.
+	* gdb.arch/powerpc-vsx3.exp: Likewise.
+	* gdb.arch/powerpc-vsx3.s: Likewise.
+	* gdb.arch/arm-disassembler-options.exp: Likewise.
+	* gdb.arch/powerpc-disassembler-options.exp: Likewise.
+	* gdb.arch/s390-disassembler-options.exp: Likewise.
+
+2017-02-23  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.reverse/insn-reverse.x86.c (check_rdrand_support): Renamed to ...
+	(check_supported_features): ... this. Changed return type to void.
+	(supports_rdseed): New static global.
+	(rdseed): Check supports_rdseed.
+	(initialize): Call check_supported_features.
+
 2017-02-21  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.arch/ppc64-isa207-atomic-inst.exp: New testcase based on

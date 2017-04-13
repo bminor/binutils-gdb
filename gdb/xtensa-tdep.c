@@ -228,7 +228,7 @@ extract_call_winsize (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 /* Find register by name.  */
 static int
-xtensa_find_register_by_name (struct gdbarch *gdbarch, char *name)
+xtensa_find_register_by_name (struct gdbarch *gdbarch, const char *name)
 {
   int i;
 
@@ -578,7 +578,8 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
   /* We have to find out how to deal with priveleged registers.
      Let's treat them as pseudo-registers, but we cannot read/write them.  */
      
-  else if (regnum < gdbarch_tdep (gdbarch)->a0_base)
+  else if (gdbarch_tdep (gdbarch)->call_abi == CallAbiCall0Only
+	   || regnum < gdbarch_tdep (gdbarch)->a0_base)
     {
       buffer[0] = (gdb_byte)0;
       buffer[1] = (gdb_byte)0;
@@ -942,7 +943,6 @@ typedef struct xtensa_windowed_frame_cache
 
 #define C0_MAXOPDS  3	/* Maximum number of operands for prologue
 			   analysis.  */
-#define C0_NREGS   16	/* Number of A-registers to track.  */
 #define C0_CLESV   12	/* Callee-saved registers are here and up.  */
 #define C0_SP	    1	/* Register used as SP.  */
 #define C0_FP	   15	/* Register used as FP.  */
@@ -1151,8 +1151,6 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
   if (start_addr == 0)
     return fp_regnum;
 
-  if (!xtensa_default_isa)
-    xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
   gdb_assert (XTENSA_ISA_BSZ >= xtensa_isa_maxlength (isa));
   ins = xtensa_insnbuf_alloc (isa);
@@ -2427,8 +2425,6 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   cache->call0 = 1;
   rtmp = (xtensa_c0reg_t*) alloca(nregs * sizeof(xtensa_c0reg_t));
 
-  if (!xtensa_default_isa)
-    xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
   gdb_assert (XTENSA_ISA_BSZ >= xtensa_isa_maxlength (isa));
   ins = xtensa_insnbuf_alloc (isa);
@@ -3111,6 +3107,8 @@ xtensa_derive_tdep (struct gdbarch_tdep *tdep)
 
 /* Special registers 0..255 (core).  */
 #define XTENSA_DBREGN_SREG(n)  (0x0200+(n))
+/* User registers 0..255.  */
+#define XTENSA_DBREGN_UREG(n)  (0x0300+(n))
 
   for (rmap = tdep->regmap, n = 0; rmap->target_number != -1; n++, rmap++)
     {
@@ -3142,6 +3140,8 @@ xtensa_derive_tdep (struct gdbarch_tdep *tdep)
 	tdep->litbase_regnum = n;
       else if (rmap->target_number == XTENSA_DBREGN_SREG(230))
 	tdep->ps_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_UREG(231))
+	tdep->threadptr_regnum = n;
 #if 0
       else if (rmap->target_number == XTENSA_DBREGN_SREG(226))
 	tdep->interrupt_regnum = n;
@@ -3186,6 +3186,9 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   DEBUGTRACE ("gdbarch_init()\n");
 
+  if (!xtensa_default_isa)
+    xtensa_default_isa = xtensa_isa_init (0, 0);
+
   /* We have to set the byte order before we call gdbarch_alloc.  */
   info.byte_order = XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
 
@@ -3196,6 +3199,9 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Verify our configuration.  */
   xtensa_verify_config (gdbarch);
   xtensa_session_once_reported = 0;
+
+  set_gdbarch_wchar_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+  set_gdbarch_wchar_signed (gdbarch, 0);
 
   /* Pseudo-Register read/write.  */
   set_gdbarch_pseudo_register_read (gdbarch, xtensa_pseudo_register_read);

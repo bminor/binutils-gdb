@@ -6278,7 +6278,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 when the symbol does not resolve locally.  */
       if (h != NULL && !SYMBOL_CALLS_LOCAL (info, &h->root))
 	return bfd_reloc_continue;
+      /* We can't optimize cross-mode jumps either.  */
+      if (*cross_mode_jump_p)
+	return bfd_reloc_continue;
       value = symbol + addend;
+      /* Neither we can non-instruction-aligned targets.  */
+      if (r_type == R_MIPS_JALR ? (value & 3) != 0 : (value & 1) == 0)
+	return bfd_reloc_continue;
       break;
 
     case R_MIPS_PJUMP:
@@ -6459,13 +6465,13 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       && !cross_mode_jump_p
       && ((JAL_TO_BAL_P (input_bfd)
 	   && r_type == R_MIPS_26
-	   && (x >> 26) == 0x3)		/* jal addr */
+	   && (x >> 26) == 0x3)			/* jal addr */
 	  || (JALR_TO_BAL_P (input_bfd)
 	      && r_type == R_MIPS_JALR
-	      && x == 0x0320f809)	/* jalr t9 */
+	      && x == 0x0320f809)		/* jalr t9 */
 	  || (JR_TO_B_P (input_bfd)
 	      && r_type == R_MIPS_JALR
-	      && x == 0x03200008)))	/* jr t9 */
+	      && (x & ~1) == 0x03200008)))	/* jr t9 / jalr zero, t9 */
     {
       bfd_vma addr;
       bfd_vma dest;
@@ -6482,7 +6488,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       off = dest - addr;
       if (off <= 0x1ffff && off >= -0x20000)
 	{
-	  if (x == 0x03200008)	/* jr t9 */
+	  if ((x & ~1) == 0x03200008)		/* jr t9 / jalr zero, t9 */
 	    x = 0x10000000 | (((bfd_vma) off >> 2) & 0xffff);   /* b addr */
 	  else
 	    x = 0x04110000 | (((bfd_vma) off >> 2) & 0xffff);   /* bal addr */
@@ -8883,167 +8889,6 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
-bfd_boolean
-_bfd_mips_relax_section (bfd *abfd, asection *sec,
-			 struct bfd_link_info *link_info,
-			 bfd_boolean *again)
-{
-  Elf_Internal_Rela *internal_relocs;
-  Elf_Internal_Rela *irel, *irelend;
-  Elf_Internal_Shdr *symtab_hdr;
-  bfd_byte *contents = NULL;
-  size_t extsymoff;
-  bfd_boolean changed_contents = FALSE;
-  bfd_vma sec_start = sec->output_section->vma + sec->output_offset;
-  Elf_Internal_Sym *isymbuf = NULL;
-
-  /* We are not currently changing any sizes, so only one pass.  */
-  *again = FALSE;
-
-  if (bfd_link_relocatable (link_info))
-    return TRUE;
-
-  internal_relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
-					       link_info->keep_memory);
-  if (internal_relocs == NULL)
-    return TRUE;
-
-  irelend = internal_relocs + sec->reloc_count
-    * get_elf_backend_data (abfd)->s->int_rels_per_ext_rel;
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
-
-  for (irel = internal_relocs; irel < irelend; irel++)
-    {
-      bfd_vma symval;
-      bfd_signed_vma sym_offset;
-      unsigned int r_type;
-      unsigned long r_symndx;
-      asection *sym_sec;
-      unsigned long instruction;
-
-      /* Turn jalr into bgezal, and jr into beq, if they're marked
-	 with a JALR relocation, that indicate where they jump to.
-	 This saves some pipeline bubbles.  */
-      r_type = ELF_R_TYPE (abfd, irel->r_info);
-      if (r_type != R_MIPS_JALR)
-	continue;
-
-      r_symndx = ELF_R_SYM (abfd, irel->r_info);
-      /* Compute the address of the jump target.  */
-      if (r_symndx >= extsymoff)
-	{
-	  struct mips_elf_link_hash_entry *h
-	    = ((struct mips_elf_link_hash_entry *)
-	       elf_sym_hashes (abfd) [r_symndx - extsymoff]);
-
-	  while (h->root.root.type == bfd_link_hash_indirect
-		 || h->root.root.type == bfd_link_hash_warning)
-	    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
-
-	  /* If a symbol is undefined, or if it may be overridden,
-	     skip it.  */
-	  if (! ((h->root.root.type == bfd_link_hash_defined
-		  || h->root.root.type == bfd_link_hash_defweak)
-		 && h->root.root.u.def.section)
-	      || (bfd_link_pic (link_info) && ! link_info->symbolic
-		  && !h->root.forced_local))
-	    continue;
-
-	  sym_sec = h->root.root.u.def.section;
-	  if (sym_sec->output_section)
-	    symval = (h->root.root.u.def.value
-		      + sym_sec->output_section->vma
-		      + sym_sec->output_offset);
-	  else
-	    symval = h->root.root.u.def.value;
-	}
-      else
-	{
-	  Elf_Internal_Sym *isym;
-
-	  /* Read this BFD's symbols if we haven't done so already.  */
-	  if (isymbuf == NULL && symtab_hdr->sh_info != 0)
-	    {
-	      isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
-	      if (isymbuf == NULL)
-		isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
-						symtab_hdr->sh_info, 0,
-						NULL, NULL, NULL);
-	      if (isymbuf == NULL)
-		goto relax_return;
-	    }
-
-	  isym = isymbuf + r_symndx;
-	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;
-	  else if (isym->st_shndx == SHN_ABS)
-	    sym_sec = bfd_abs_section_ptr;
-	  else if (isym->st_shndx == SHN_COMMON)
-	    sym_sec = bfd_com_section_ptr;
-	  else
-	    sym_sec
-	      = bfd_section_from_elf_index (abfd, isym->st_shndx);
-	  symval = isym->st_value
-	    + sym_sec->output_section->vma
-	    + sym_sec->output_offset;
-	}
-
-      /* Compute branch offset, from delay slot of the jump to the
-	 branch target.  */
-      sym_offset = (symval + irel->r_addend)
-	- (sec_start + irel->r_offset + 4);
-
-      /* Branch offset must be properly aligned.  */
-      if ((sym_offset & 3) != 0)
-	continue;
-
-      sym_offset >>= 2;
-
-      /* Check that it's in range.  */
-      if (sym_offset < -0x8000 || sym_offset >= 0x8000)
-	continue;
-
-      /* Get the section contents if we haven't done so already.  */
-      if (!mips_elf_get_section_contents (abfd, sec, &contents))
-	goto relax_return;
-
-      instruction = bfd_get_32 (abfd, contents + irel->r_offset);
-
-      /* If it was jalr <reg>, turn it into bgezal $zero, <target>.  */
-      if ((instruction & 0xfc1fffff) == 0x0000f809)
-	instruction = 0x04110000;
-      /* If it was jr <reg>, turn it into b <target>.  */
-      else if ((instruction & 0xfc1fffff) == 0x00000008)
-	instruction = 0x10000000;
-      else
-	continue;
-
-      instruction |= (sym_offset & 0xffff);
-      bfd_put_32 (abfd, instruction, contents + irel->r_offset);
-      changed_contents = TRUE;
-    }
-
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    {
-      if (!changed_contents && !link_info->keep_memory)
-        free (contents);
-      else
-        {
-          /* Cache the section contents for elf_link_input_bfd.  */
-          elf_section_data (sec)->this_hdr.contents = contents;
-        }
-    }
-  return TRUE;
-
- relax_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    free (contents);
-  return FALSE;
-}
-
 /* Allocate space for global sym dynamic relocs.  */
 
 static bfd_boolean
@@ -11328,7 +11173,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 		      + h->root.u.def.value);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_COPY);
       rel.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->root.sdynrelro)
 	srel = htab->root.sreldynrelro;
       else
 	srel = htab->root.srelbss;

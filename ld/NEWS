@@ -1,9 +1,19 @@
 -*- text -*-
 
+* Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
+
+* Add support for ELF GNU program properties.
+
 * Add support for the Texas Instruments PRU processor.
 
 * When configuring for arc*-*-linux* targets the default linker emulation will
   change if --with-cpu=nps400 is used at configure time.
+
+* Improve assignment of LMAs to orphan sections in some edge cases where a
+  mixture of both AT>LMA_REGION and AT(LMA) are used.
+
+* Orphan sections placed after an empty section that has an AT(LMA) will now
+  take an load memory address starting from LMA.
 
 Changes in 2.28:
 

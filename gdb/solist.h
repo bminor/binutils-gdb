@@ -24,6 +24,11 @@
 #include "symtab.h"
 #include "gdb_bfd.h"
 
+#define ALL_SO_LIBS(so) \
+    for (so = so_list_head; \
+	 so != NULL; \
+	 so = so->next)
+
 /* Forward declaration for target specific link map information.  This
    struct is opaque to all but the target specific file.  */
 struct lm_info;
@@ -74,7 +79,10 @@ struct so_list
 
     /* Record the range of addresses belonging to this shared library.
        There may not be just one (e.g. if two segments are relocated
-       differently); but this is only used for "info sharedlibrary".  */
+       differently).  This is used for "info sharedlibrary" and
+       the MI command "-file-list-shared-libraries".  The latter has a format
+       that supports outputting multiple segments once the related code
+       supports them.  */
     CORE_ADDR addr_low, addr_high;
   };
 

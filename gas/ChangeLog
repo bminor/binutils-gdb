@@ -1,3 +1,559 @@
+2017-04-11  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_show_usage): Delete mention of -mhtm.
+	* testsuite/gas/ppc/htm.d: Pass -mpower8 and -Mpower8.
+
+2017-04-10  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_maybe_create_literal_pool_frag):
+	Initialize lps->frag_count with auto_litpool_limit.
+	(xg_promote_candidate_litpool): New function.
+	(xtensa_move_literals): Extract candidate litpool promotion code
+	into separate function. Call it for all possible found
+	candidates.
+	(xtensa_switch_to_literal_fragment): Drop 'recursive' flag and
+	call to xtensa_mark_literal_pool_location that it guards.
+	Replace it with call to xtensa_maybe_create_literal_pool_frag.
+	Initialize pool_location with created literal pool candidate.
+	* testsuite/gas/xtensa/all.exp: Add new tests.
+	* testsuite/gas/xtensa/auto-litpools-first1.d: New test results.
+	* testsuite/gas/xtensa/auto-litpools-first1.s: New test.
+	* testsuite/gas/xtensa/auto-litpools-first2.d: New test results.
+	* testsuite/gas/xtensa/auto-litpools-first2.s: New test.
+	* testsuite/gas/xtensa/auto-litpools.d: Fix offsets changed due
+	to additional jump instruction.
+
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/altivec2.s: Delete E6500 vector insns.
+	* testsuite/gas/ppc/altivec2.d: Adjust to suit.
+
+2017-04-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section12a.d: Don't expect alignment of 1
+	for .mbind.text.
+
+2017-04-06  Pip Cet  <pipcet@gmail.com>
+
+	* testsuite/gas/wasm32/allinsn.d: Adjust test for disassembler
+	changes.
+	* testsuite/gas/wasm32/disass.d: New test.
+	* testsuite/gas/wasm32/disass.s: New test.
+	* testsuite/gas/wasm32/disass-2.d: New test.
+	* testsuite/gas/wasm32/disass-2.s: New test.
+	* testsuite/gas/wasm32/reloc.d: Adjust test for changed reloc
+	names.
+	* testsuite/gas/wasm32/reloc.s: Update test for changed assembler
+	syntax.
+	* testsuite/gas/wasm32/wasm32.exp: Run new tests.  Expect allinsn
+	test to succeed.
+
+2017-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for ELF SHF_GNU_MBIND.
+	* config/obj-elf.c (section_match): New.
+	(get_section): Match both sh_info and group name.
+	(obj_elf_change_section): Add argument for sh_info.  Pass both
+	sh_info and group name to get_section. Issue an error for
+	SHF_GNU_MBIND section without SHF_ALLOC.  Set sh_info.
+	(obj_elf_parse_section_letters): Set SHF_GNU_MBIND for 'd'.
+	(obj_elf_section): Support SHF_GNU_MBIND section info.
+	* config/obj-elf.h (obj_elf_change_section): Add argument for
+	sh_info.
+	* config/tc-arm.c (start_unwind_section): Pass 0 as sh_info to
+	obj_elf_change_section.
+	* config/tc-ia64.c (obj_elf_vms_common): Likewise.
+	* config/tc-microblaze.c (microblaze_s_data): Likewise.
+	(microblaze_s_sdata): Likewise.
+	(microblaze_s_rdata): Likewise.
+	(microblaze_s_bss): Likewise.
+	* config/tc-mips.c (s_change_section): Likewise.
+	* config/tc-msp430.c (msp430_profiler): Likewise.
+	* config/tc-rx.c (parse_rx_section): Likewise.
+	* config/tc-tic6x.c (tic6x_start_unwind_section): Likewise.
+	* doc/as.texinfo: Document 'd' for SHF_GNU_MBIND.
+	* testsuite/gas/elf/elf.exp: Run section12a, section12b and
+	section13.
+	* testsuite/gas/elf/section10.d: Updated.
+	* testsuite/gas/elf/section10.s: Likewise.
+	* testsuite/gas/elf/section12.s: New file.
+	* testsuite/gas/elf/section12a.d: Likewise.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section13.l: Likewise.
+	* testsuite/gas/elf/section13.d: Likewise.
+	* testsuite/gas/elf/section13.s: Likewise.
+
+2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (riscv_clear_subsets): Cast argument to free to
+	avoid const warnings.
+
+2017-03-30  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (riscv_clear_subsets): New function.
+	(riscv_add_subset): Call riscv_clear_subsets and riscv_set_rvc to
+	clear RVC when it's been previously set.
+
+2017-03-31  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/21333
+	* config/tc-s390.c (tc_s390_fix_adjustable): Allow non pc-relative
+	fixups in mergeable sections to be adjusted.
+
+2017-03-30  Pip Cet  <pipcet@gmail.com>
+
+	* config/tc-wasm32.h: New file: Add WebAssembly assembler target.
+	* config/tc-wasm32.c: New file: Add WebAssembly assembler target.
+	* Makefile.am: Add WebAssembly assembler target.
+	* configure.tgt: Add WebAssembly assembler target.
+	* doc/c-wasm32.texi: New file: Start documenting WebAssembly
+	assembler.
+	* doc/all.texi: Define WASM32.
+	* doc/as.texinfo: Add WebAssembly entries.
+	* NEWS: Mention the new support.
+	* Makefile.in: Regenerate.
+	* po/gas.pot: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* testsuite/gas/wasm32: New directory.
+	* testsuite/gas/wasm32/allinsn.d: New file.
+	* testsuite/gas/wasm32/allinsn.s: New file.
+	* testsuite/gas/wasm32/illegal.l: New file.
+	* testsuite/gas/wasm32/illegal.s: New file.
+	* testsuite/gas/wasm32/illegal-2.l: New file.
+	* testsuite/gas/wasm32/illegal-2.s: New file.
+	* testsuite/gas/wasm32/illegal-3.l: New file.
+	* testsuite/gas/wasm32/illegal-3.s: New file.
+	* testsuite/gas/wasm32/illegal-4.l: New file.
+	* testsuite/gas/wasm32/illegal-4.s: New file.
+	* testsuite/gas/wasm32/illegal-5.l: New file.
+	* testsuite/gas/wasm32/illegal-5.s: New file.
+	* testsuite/gas/wasm32/illegal-6.l: New file.
+	* testsuite/gas/wasm32/illegal-6.s: New file.
+	* testsuite/gas/wasm32/illegal-7.l: New file.
+	* testsuite/gas/wasm32/illegal-7.s: New file.
+	* testsuite/gas/wasm32/illegal-8.l: New file.
+	* testsuite/gas/wasm32/illegal-8.s: New file.
+	* testsuite/gas/wasm32/illegal-9.l: New file.
+	* testsuite/gas/wasm32/illegal-9.s: New file.
+	* testsuite/gas/wasm32/illegal-10.l: New file.
+	* testsuite/gas/wasm32/illegal-10.s: New file.
+	* testsuite/gas/wasm32/illegal-11.l: New file.
+	* testsuite/gas/wasm32/illegal-11.s: New file.
+	* testsuite/gas/wasm32/illegal-12.l: New file.
+	* testsuite/gas/wasm32/illegal-12.s: New file.
+	* testsuite/gas/wasm32/illegal-13.l: New file.
+	* testsuite/gas/wasm32/illegal-13.s: New file.
+	* testsuite/gas/wasm32/illegal-14.l: New file.
+	* testsuite/gas/wasm32/illegal-14.s: New file.
+	* testsuite/gas/wasm32/illegal-15.l: New file.
+	* testsuite/gas/wasm32/illegal-15.s: New file.
+	* testsuite/gas/wasm32/illegal-16.l: New file.
+	* testsuite/gas/wasm32/illegal-16.s: New file.
+	* testsuite/gas/wasm32/illegal-17.l: New file.
+	* testsuite/gas/wasm32/illegal-17.s: New file.
+	* testsuite/gas/wasm32/illegal-18.l: New file.
+	* testsuite/gas/wasm32/illegal-18.s: New file.
+	* testsuite/gas/wasm32/illegal-19.l: New file.
+	* testsuite/gas/wasm32/illegal-19.s: New file.
+	* testsuite/gas/wasm32/illegal-20.l: New file.
+	* testsuite/gas/wasm32/illegal-20.s: New file.
+	* testsuite/gas/wasm32/illegal-21.l: New file.
+	* testsuite/gas/wasm32/illegal-21.s: New file.
+	* testsuite/gas/wasm32/illegal-22.l: New file.
+	* testsuite/gas/wasm32/illegal-22.s: New file.
+	* testsuite/gas/wasm32/illegal-24.l: New file.
+	* testsuite/gas/wasm32/illegal-24.s: New file.
+	* testsuite/gas/wasm32/illegal-25.l: New file.
+	* testsuite/gas/wasm32/illegal-25.s: New file.
+	* testsuite/gas/wasm32/reloc.d: New file.
+	* testsuite/gas/wasm32/reloc.s: New file.
+	* testsuite/gas/wasm32/wasm32.exp: New tests for WebAssembly
+	architecture.
+
+2017-03-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_parse_option): Reject -mraw.
+
+2017-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR 21303
+	* testsuite/gas/ppc/pr21303.d,
+	* testsuite/gas/ppc/pr21303.s: New test
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2017-03-27  Rinat Zelig  <rinat@mellanox.com>
+
+	* testsuite/gas/arc/nps400-12.s: New file.
+	* testsuite/gas/arc/nps400-12.d: New file.
+
+2017-03-24  Thomas preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.: (md_begin): Set selected_cpu from *mcpu_cpu_opt when
+	CPU_DEFAULT is defined.
+
+2017-03-21  Palmer Dabbbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (md_show_usage): Remode defuct -m32, -m64,
+	-msoft-float, -mhard-float, -mno-rvc, and -mrvc options; and don't
+	print an invalid default ISA string.
+	* doc/c-riscv.texi (OPTIONS): Add -fpic and -fno-pic options.
+
+2017-03-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_relax_frag): Change fx_size of the
+	reassigned fixup to size of jump instruction (3) and fx_r_type
+	to BFD_RELOC_XTENSA_SLOT0_OP, as there's only one slot.
+	(add_jump_to_trampoline): Search
+	origfrag->tc_frag_data.slot_symbols for the slot with non-NULL
+	symbol and use that slot instead of slot 0.
+
+2017-03-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Remove S390_INSTR_FLAG_VX2
+	from cpu_table.  Remove vx2, and novx2 from cpu_flags.
+
+2017-03-21  Rinat Zelig  <rinat@mellanox.com>
+
+	* testsuite/gas/arc/nps400-11.s: New file.
+	* testsuite/gas/arc/nps400-11.d: New file.
+
+2017-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (2byte): Note that if no expressions are present
+	the directive does nothing.  Emphasize that the output is
+	unaligned, and that this can have an effect on the relocations
+	generated.
+	(4byte): Simplify description.  Refer back to the 2byte
+	description.
+	(8byte): Likewise.
+
+2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Note entires that should not be
+	documented.
+	* doc/c-arm.texi (-mfpu): Add missing FPU entries for neon-vfpv3 and
+	neon-fp16.  Fix spelling error.
+
+2017-03-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c (arm_fpus): Add neon-vfpv3 as an alias for neon.
+
+2017-03-16  Rinat Zelig  <rinat@mellanox.com>
+
+	* config/tc-arc.c (assemble_insn): Only handle ".t" and ".nt"
+	specially for ARCv2.
+
+2017-03-14  Kito Cheng  <kito.cheng@gmail.com>
+
+	* config/tc-riscv.c (validate_riscv_insn): Add 'o' RVC immediate
+	encoding format, which can accept 0-valued immediates.
+	(riscv_ip): Likewise.
+
+2017-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-riscv.c (riscv_pre_output_hook): Fix compile time
+	warning about discarding a const qualifier.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.h (HWARD2_USE_FIXED_ADVANCE_PC): New define.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix): Set fx_frag and
+	fx_next->fx_frag for CFA_advance_loc relocations.
+
+2017-03-02  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix): Compute the correct offsets
+	for CFA relocations.
+
+2017-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21202
+	* config/tc-aarch64.c (reloc_table): Rename
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC to
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12.  Rname
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC to
+	BFD_RELOC_AARCH64_TLSDESC_ADD_LO12.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+	* testsuite/gas/aarch64/tls.d: Update regexp.
+
+2017-03-10  Tobin C. Harding  <me@tobin.cc>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (2byte): Tidy up wording.  Add note that
+	overlarge values will produce a warning message and be trunacted.
+	(4byte): Likewise.
+
+2017-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (_i386_insn): Add dir_encoding and
+	vec_encoding.  Remove swap_operand and need_vrex.
+	(extra_symbol_chars): Add '}'.
+	(md_begin): Mark '}' with LEX_BEGIN_NAME.  Allow '}' in
+	mnemonic.
+	(build_vex_prefix): Don't use 2-byte VEX encoding with
+	{vex3}.  Check dir_encoding and load.
+	(parse_insn): Check pseudo prefixes.  Set dir_encoding.
+	(VEX_check_operands): Likewise.
+	(match_template): Check dir_encoding and load.
+	(parse_real_register): Set vec_encoding instead of need_vrex.
+	(parse_register): Likewise.
+	* doc/c-i386.texi: Document {disp8}, {disp32}, {load}, {store},
+	{vex2}, {vex3} and {evex}.  Remove ".s", ".d8" and ".d32"
+	* testsuite/gas/i386/i386.exp: Run pseudos and x86-64-pseudos.
+	* testsuite/gas/i386/pseudos.d: New file.
+	* testsuite/gas/i386/pseudos.s: Likewise.
+	* testsuite/gas/i386/x86-64-pseudos.d: Likewise.
+	* testsuite/gas/i386/x86-64-pseudos.s: Likewise.
+
+2017-03-08  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/altivec2.d (as): Use the -mpower8 option.
+	(objdump): Use the -Mpower8 option.
+
+2017-03-08  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <lnia> New test.
+	* testsuite/gas/ppc/power9.s: Likewise.
+
+2017-03-07  Alan Modra  <amodra@gmail.com>
+
+	* doc/as.texinfo (2byte, 4byte, 8byte): Correct @section placement.
+
+2017-03-07  Tobin C. Harding  <me@tobin.cc>
+	    Alan Modra  <amodra@gmail.com>
+
+	* doc/as.texinfo (2byte, 4byte, 8byte): Document.
+	* doc/c-arm.texi (2byte, 4byte, 8byte): Omit if ELF.
+
+2017-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .cet.
+	* doc/c-i386.texi: Document cet.
+	* testsuite/gas/i386/cet-intel.d: New file.
+	* testsuite/gas/i386/cet.d: Likewise.
+	* testsuite/gas/i386/cet.s: Likewise.
+	* testsuite/gas/i386/x86-64-cet-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run Intel CET tests.
+
+2017-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/x86-64-mpx-inval-2.s: Force a good alignment.
+	* testsuite/gas/i386/x86-64-mpx-inval-2.l: Expect [0-9A-F]+.
+
+2017-03-06  Alan Modra  <amodra@gmail.com>
+
+	* dw2gencfi.c (encoding_size): Return unsigned int.
+	(emit_expr_encoded): Assert size matches reloc bitsize.
+	(output_fde): Use unsigned for offset_size and addr_size.  Set
+	addr_size earlier and use in place of constant 4 and uses of
+	DWARF2_FDE_RELOC_SIZE.  Assert it matches reloc bitsize.
+
+2017-03-06  Alan Modra  <amodra@gmail.com>
+
+	* dw2gencfi.c: Wrap overlong lines.  Add parens for emacs
+	auto reformat.  Formatting and whitespace fixes.
+
+2017-03-05  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (out_debug_abbrev): Use DW_FORM_strp instead of
+	DW_FORM_string for DW_AT_name, DW_AT_comp_dir and DW_AT_producer.
+	(out_debug_info): Accept symbols to name, comp_dir and producer in
+	the .debug_str section and emit those offsets not full strings.
+	(out_debug_str): New function that outputs the strings for name,
+	comp_dir and producer in .debug_str and generates symbols to those
+	strings.
+	(out_debug_line): Create a .debug_str section if necessary and call
+	out_debug_str before calling out_debug_info.
+	* testsuite/gas/aarch64/dwarf.d: Add extra section symbol to expected
+	output.
+
+2017-03-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* write.c (relax_segment) <rs_org>: Only bail out if the fixed
+	part of the frag has overrun the location requested.
+
+	* testsuite/gas/all/org-1.d: New test.
+	* testsuite/gas/all/org-2.d: New test.
+	* testsuite/gas/all/org-3.d: New test.
+	* testsuite/gas/all/org-4.d: New test.
+	* testsuite/gas/all/org-5.d: New test.
+	* testsuite/gas/all/org-6.d: New test.
+	* testsuite/gas/all/org-1.l: New stderr output.
+	* testsuite/gas/all/org-2.l: New stderr output.
+	* testsuite/gas/all/org-3.l: New stderr output.
+	* testsuite/gas/all/org-1.s: New test source.
+	* testsuite/gas/all/org-2.s: New test source.
+	* testsuite/gas/all/org-3.s: New test source.
+	* testsuite/gas/all/org-4.s: New test source.
+	* testsuite/gas/all/org-5.s: New test source.
+	* testsuite/gas/all/org-6.s: New test source.
+	* testsuite/gas/all/gas.exp: Run the new tests.
+
+	* testsuite/gas/mips/org-1.d: New test.
+	* testsuite/gas/mips/org-2.d: New test.
+	* testsuite/gas/mips/org-3.d: New test.
+	* testsuite/gas/mips/org-4.d: New test.
+	* testsuite/gas/mips/org-5.d: New test.
+	* testsuite/gas/mips/org-6.d: New test.
+	* testsuite/gas/mips/org-7.d: New test.
+	* testsuite/gas/mips/org-8.d: New test.
+	* testsuite/gas/mips/org-9.d: New test.
+	* testsuite/gas/mips/org-10.d: New test.
+	* testsuite/gas/mips/org-11.d: New test.
+	* testsuite/gas/mips/org-12.d: New test.
+	* testsuite/gas/mips/org-1.l: New stderr output.
+	* testsuite/gas/mips/org-4.l: New stderr output.
+	* testsuite/gas/mips/org-5.l: New stderr output.
+	* testsuite/gas/mips/org-6.l: New stderr output.
+	* testsuite/gas/mips/org-10.l: New stderr output.
+	* testsuite/gas/mips/org-1.s: New test source.
+	* testsuite/gas/mips/org-2.s: New test source.
+	* testsuite/gas/mips/org-3.s: New test source.
+	* testsuite/gas/mips/org-4.s: New test source.
+	* testsuite/gas/mips/org-5.s: New test source.
+	* testsuite/gas/mips/org-6.s: New test source.
+	* testsuite/gas/mips/org-7.s: New test source.
+	* testsuite/gas/mips/org-8.s: New test source.
+	* testsuite/gas/mips/org-9.s: New test source.
+	* testsuite/gas/mips/org-10.s: New test source.
+	* testsuite/gas/mips/org-11.s: New test source.
+	* testsuite/gas/mips/org-12.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-03-01  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* doc/c-aarch64.texi (AArch64 Extensions): Document rcpc.
+
+2017-02-28  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/x86-64-avx.s: Add suffixed variants of
+	VPCMPESTR{I,M}.
+	* testsuite/gas/i386/x86-64-sse2avx.s: Likewise.
+	* testsuite/gas/i386/x86-64-sse4_2.s: Add suffixed variants
+	of PCMPESTR{I,M}.
+	* testsuite/gas/i386/ilp32/x86-64-avx-intel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-avx.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-sse2avx.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-sse4_2-intel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-sse4_2.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx.d: Likewise.
+	* testsuite/gas/i386/x86-64-sse2avx.d: Likewise.
+	* testsuite/gas/i386/x86-64-sse4_2-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-sse4_2.d: Likewise.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-nios2.h (TC_FORCE_RELOCATION_SUB_LOCAL): Define.
+
+2017-02-28  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Use BFD_RELOC_PPC_16DX_HA for addpcis.
+	(md_apply_fix): Remove fx_subsy check.  Move code converting to
+	pcrel reloc earlier and handle BFD_RELOC_PPC_16DX_HA.  Remove code
+	emiiting errors on seeing fx_pcrel set on unexpected relocs, as
+	that is done now by the generic code via..
+	* config/tc-ppc.h (TC_FORCE_RELOCATION_SUB_LOCAL): ..this. Define.
+	(TC_VALIDATE_FIX_SUB): Define.
+
+2017-02-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/jalr4.s: Add `jalr $0, $25' instructions.
+	* testsuite/gas/mips/jalr4.d: Adjust accordingly.  Remove MIPSr6
+	encoding patterns.
+	* testsuite/gas/mips/jalr4-n64.d: Likewise.
+	* testsuite/gas/mips/mipsr6@jalr4.d: New test.
+	* testsuite/gas/mips/mipsr6@jalr4-n32.d: New test.
+	* testsuite/gas/mips/mipsr6@jalr4-n64.d: New test.
+
+2017-02-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/strtab.s: Don't put directives on first
+	column or continuation with labels not in first column.
+
+2017-02-24  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* doc/c-aarch64.texi: Document that sve implies fp16, simd and compnum.
+	* config/tc-aarch64.c (parse_vector_type_for_operand): Allow .q
+	to be used with SVE registers.
+	(parse_operands): Handle new SVE operands.
+	(aarch64_features): Make "sve" require F16 rather than FP.  Also
+	require COMPNUM.
+	* testsuite/gas/aarch64/sve.s: Add tests for new instructions.
+	Include compnum tests.
+	* testsuite/gas/aarch64/sve.d: Update accordingly.
+	* testsuite/gas/aarch64/sve-invalid.s: Add tests for new instructions.
+	* testsuite/gas/aarch64/sve-invalid.l: Update accordingly.  Also
+	update expected output for new FMOV and MOV alternatives.
+
+2017-02-24  Richard Sandiford  <richard.sandiford@arm.com>
+
+	* doc/c-aarch64.texi: Add a "compnum" entry.
+	* config/tc-aarch64.c (aarch64_features): Likewise,
+	* testsuite/gas/aarch64/advsimd-compnum.s: New test.
+	* testsuite/gas/aarch64/advsimd-compnum.d: Likewise.
+
+2017-02-24  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/opcode.s: Add alternative TEST forms.
+	* testsuite/gas/i386/x86-64-opcode.s: Likewise.
+	* testsuite/gas/i386/opcode.d: Adjust accordingly.
+	* testsuite/gas/i386/opcode-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-opcode.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-opcode.d: Likewise.
+
+2017-02-24  Sheldon Lobo  <sheldon.lobo@oracle.com>
+
+	Test cases for the architecture level aware SPARC ASI work.
+	* gas/testsuite/gas/sparc/sparc.exp: 2 new tests
+	* gas/testsuite/gas/sparc/asi-bump-warn.s: New test
+	* gas/testsuite/gas/sparc/asi-bump-warn.l: Likewise
+	* gas/testsuite/gas/sparc/asi-arch-error.s: Likewise
+	* gas/testsuite/gas/sparc/asi-arch-error.l: Likewise
+
+2017-02-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/jalr4.d: New test.
+	* testsuite/gas/mips/jalr4-n32.d: New test.
+	* testsuite/gas/mips/jalr4-n64.d: New test.
+	* testsuite/gas/mips/jalr4.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-02-23  Sheldon Lobo <sheldon.lobo@oracle.com>
+
+	Add support for associating SPARC ASIs with an architecture level.
+	* config/tc-sparc.c (parse_sparc_asi): New encode SPARC ASIs.
+
+2017-02-23  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/all/err-sizeof.s: Don't use sums or differences
+	of symbols as expression.
+
+2017-02-23  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/testsuite/gas/i386/x86-64-mpx-inval-2.d: Add 32- and 16-
+ 	bit GPR forms of BNDCL, BNDCU, and BNDCN. Add RSP-as-index
+	Intel syntax forms of BNDMK, BNDSTX, and BNDLDX.
+	* gas/testsuite/gas/i386/x86-64-mpx-inval-2.l: Adjust.
+
+2017-02-22  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* ecoff.c (ecoff_directive_end) [md_flush_pending_output]: Call
+	`md_flush_pending_output'.
+	* config/tc-mips.c (s_mips_end) [md_flush_pending_output]: Call
+	`md_flush_pending_output' unconditionally.
+	* testsuite/gas/mips/debug-label-end-1.d: New test.
+	* testsuite/gas/mips/debug-label-end-2.d: New test.
+	* testsuite/gas/mips/debug-label-end-3.d: New test.
+	* testsuite/gas/mips/debug-label-end.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-02-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* testsuite/gas/all/err-sizeof.s: Include cris*-*-* in the list of

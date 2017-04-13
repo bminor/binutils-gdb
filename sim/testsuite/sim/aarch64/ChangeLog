@@ -1,3 +1,24 @@
+2017-04-08  Jim Wilson  <jim.wilson@linaro.org>
+
+	* fcvtl.s: New.
+
+	* fcmXX.s: New.
+
+2017-03-25  Jim Wilson  <jim.wilson@linaro.org>
+
+	* adds.s: Add checks for values -2 and 1, where C is not set.
+
+2017-03-03  Jim Wilson  <jim.wilson@linaro.org>
+
+	* sumov.s: Correct compare test values.
+	* sumulh.s: New.
+
+2017-02-25  Jim Wilson  <jim.wilson@linaro.org>
+
+	* sumov.s: New.
+
+	* cnt.s: New.
+
 2017-02-19  Jim Wilson  <jim.wilson@linaro.org>
 
 	* bit.s: Change cmp immediates to account for addv bug fix.

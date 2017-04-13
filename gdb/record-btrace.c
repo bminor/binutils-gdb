@@ -1425,7 +1425,7 @@ record_btrace_fetch_registers (struct target_ops *ops,
   struct btrace_insn_iterator *replay;
   struct thread_info *tp;
 
-  tp = find_thread_ptid (inferior_ptid);
+  tp = find_thread_ptid (regcache_get_ptid (regcache));
   gdb_assert (tp != NULL);
 
   replay = tp->btrace.replay;
@@ -1466,7 +1466,7 @@ record_btrace_store_registers (struct target_ops *ops,
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, inferior_ptid))
+      && record_btrace_is_replaying (ops, regcache_get_ptid (regcache)))
     error (_("Cannot write registers while replaying."));
 
   gdb_assert (may_write_registers != 0);
@@ -1484,7 +1484,7 @@ record_btrace_prepare_to_store (struct target_ops *ops,
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, inferior_ptid))
+      && record_btrace_is_replaying (ops, regcache_get_ptid (regcache)))
     return;
 
   t = ops->beneath;
@@ -2897,7 +2897,7 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
 
   TRY
     {
-      execute_command ("target record-btrace", from_tty);
+      execute_command ((char *) "target record-btrace", from_tty);
     }
   CATCH (exception, RETURN_MASK_ALL)
     {
@@ -2919,7 +2919,7 @@ cmd_record_btrace_pt_start (char *args, int from_tty)
 
   TRY
     {
-      execute_command ("target record-btrace", from_tty);
+      execute_command ((char *) "target record-btrace", from_tty);
     }
   CATCH (exception, RETURN_MASK_ALL)
     {
@@ -2941,7 +2941,7 @@ cmd_record_btrace_start (char *args, int from_tty)
 
   TRY
     {
-      execute_command ("target record-btrace", from_tty);
+      execute_command ((char *) "target record-btrace", from_tty);
     }
   CATCH (exception, RETURN_MASK_ALL)
     {
@@ -2949,7 +2949,7 @@ cmd_record_btrace_start (char *args, int from_tty)
 
       TRY
 	{
-	  execute_command ("target record-btrace", from_tty);
+	  execute_command ((char *) "target record-btrace", from_tty);
 	}
       CATCH (exception, RETURN_MASK_ALL)
 	{

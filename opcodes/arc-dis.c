@@ -733,7 +733,7 @@ operand_iterator_next (struct arc_operand_iterator *iter,
 /* Helper for parsing the options.  */
 
 static void
-parse_option (char *option)
+parse_option (const char *option)
 {
   if (CONST_STRNEQ (option, "dsp"))
     add_to_decodelist (DSP, NONE);
@@ -772,7 +772,7 @@ parse_option (char *option)
 /* Go over the options list and parse it.  */
 
 static void
-parse_disassembler_options (char *options)
+parse_disassembler_options (const char *options)
 {
   if (options == NULL)
     return;

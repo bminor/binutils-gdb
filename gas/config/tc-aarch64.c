@@ -837,7 +837,7 @@ elt_size:
       element_size = 64;
       break;
     case 'q':
-      if (width == 1)
+      if (reg_type == REG_TYPE_ZN || width == 1)
 	{
 	  type = NT_q;
 	  element_size = 128;
@@ -2679,7 +2679,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,				/* adr_type */
    0,
    0,
-   BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
+   BFD_RELOC_AARCH64_TLSDESC_ADD_LO12,
    BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
    0},
 
@@ -5431,6 +5431,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->qualifier = AARCH64_OPND_QLF_S_D;
 	  break;
 
+	case AARCH64_OPND_SVE_Zm3_INDEX:
+	case AARCH64_OPND_SVE_Zm3_22_INDEX:
+	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  reg_type = REG_TYPE_ZN;
 	  goto vector_reg_index;
@@ -5567,6 +5570,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_IMM_ROT1:
 	case AARCH64_OPND_IMM_ROT2:
 	case AARCH64_OPND_IMM_ROT3:
+	case AARCH64_OPND_SVE_IMM_ROT1:
+	case AARCH64_OPND_SVE_IMM_ROT2:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
 	  break;
@@ -6090,6 +6095,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* No qualifier.  */
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
@@ -7671,7 +7677,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
       fixP->fx_r_type = (ilp32_p
 			 ? BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC
-			 : BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC);
+			 : BFD_RELOC_AARCH64_TLSDESC_LD64_LO12);
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
@@ -7679,11 +7685,11 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       gas_assert (seg->use_rela_p);
       break;
 
-    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -7911,11 +7917,11 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST8_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
@@ -8436,7 +8442,11 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
 			AARCH64_ARCH_NONE},
   {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP
+			AARCH64_FEATURE (AARCH64_FEATURE_F16
+					 | AARCH64_FEATURE_SIMD
+					 | AARCH64_FEATURE_COMPNUM, 0)},
+  {"compnum",		AARCH64_FEATURE (AARCH64_FEATURE_COMPNUM, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_F16
 					 | AARCH64_FEATURE_SIMD, 0)},
   {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
 			AARCH64_ARCH_NONE},

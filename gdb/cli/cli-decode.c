@@ -23,6 +23,7 @@
 #include "ui-out.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
+#include "common/gdb_optional.h"
 
 /* Prototypes for local functions.  */
 
@@ -1479,7 +1480,8 @@ undef_cmd_error (const char *cmdtype, const char *q)
    the function field of the struct cmd_list_element is 0).  */
 
 struct cmd_list_element *
-lookup_cmd (const char **line, struct cmd_list_element *list, char *cmdtype,
+lookup_cmd (const char **line, struct cmd_list_element *list,
+	    const char *cmdtype,
 	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;
@@ -1877,17 +1879,12 @@ cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
 {
   if (cmd_func_p (cmd))
     {
-      struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+      gdb::optional<scoped_restore_tmpl<int>> restore_suppress;
 
       if (cmd->suppress_notification != NULL)
-	{
-	  make_cleanup_restore_integer (cmd->suppress_notification);
-	  *cmd->suppress_notification = 1;
-	}
+	restore_suppress.emplace (cmd->suppress_notification, 1);
 
       (*cmd->func) (cmd, args, from_tty);
-
-      do_cleanups (cleanups);
     }
   else
     error (_("Invalid command"));

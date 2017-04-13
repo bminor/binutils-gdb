@@ -56,6 +56,7 @@ amd64_windows_passed_by_integer_register (struct type *type)
       case TYPE_CODE_CHAR:
       case TYPE_CODE_PTR:
       case TYPE_CODE_REF:
+      case TYPE_CODE_RVALUE_REF:
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
 	return (TYPE_LENGTH (type) == 1

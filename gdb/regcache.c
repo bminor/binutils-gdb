@@ -215,6 +215,16 @@ struct regcache
   ptid_t ptid;
 };
 
+/* See regcache.h.  */
+
+ptid_t
+regcache_get_ptid (const struct regcache *regcache)
+{
+  gdb_assert (!ptid_equal (regcache->ptid, minus_one_ptid));
+
+  return regcache->ptid;
+}
+
 static struct regcache *
 regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
 		    int readonly_p)
@@ -642,23 +652,21 @@ registers_changed (void)
   alloca (0);
 }
 
-enum register_status
-regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
+void
+regcache_raw_update (struct regcache *regcache, int regnum)
 {
-  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+
   /* Make certain that the register cache is up-to-date with respect
      to the current thread.  This switching shouldn't be necessary
      only there is still only one target side register cache.  Sigh!
      On the bright side, at least there is a regcache object.  */
+
   if (!regcache->readonly_p
       && regcache_register_status (regcache, regnum) == REG_UNKNOWN)
     {
-      struct cleanup *old_chain = save_inferior_ptid ();
-
-      inferior_ptid = regcache->ptid;
       target_fetch_registers (regcache, regnum);
-      do_cleanups (old_chain);
 
       /* A number of targets can't access the whole set of raw
 	 registers (because the debug API provides no means to get at
@@ -666,6 +674,13 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
       if (regcache->register_status[regnum] == REG_UNKNOWN)
 	regcache->register_status[regnum] = REG_UNAVAILABLE;
     }
+}
+
+enum register_status
+regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
+{
+  gdb_assert (buf != NULL);
+  regcache_raw_update (regcache, regnum);
 
   if (regcache->register_status[regnum] != REG_VALID)
     memset (buf, 0, regcache->descr->sizeof_register[regnum]);
@@ -918,8 +933,7 @@ void
 regcache_raw_write (struct regcache *regcache, int regnum,
 		    const gdb_byte *buf)
 {
-  struct cleanup *chain_before_save_inferior;
-  struct cleanup *chain_before_invalidate_register;
+  struct cleanup *old_chain;
 
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
@@ -937,24 +951,18 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 		  regcache->descr->sizeof_register[regnum]) == 0))
     return;
 
-  chain_before_save_inferior = save_inferior_ptid ();
-  inferior_ptid = regcache->ptid;
-
   target_prepare_to_store (regcache);
   regcache_raw_set_cached_value (regcache, regnum, buf);
 
   /* Register a cleanup function for invalidating the register after it is
      written, in case of a failure.  */
-  chain_before_invalidate_register
-    = make_cleanup_regcache_invalidate (regcache, regnum);
+  old_chain = make_cleanup_regcache_invalidate (regcache, regnum);
 
   target_store_registers (regcache, regnum);
 
   /* The target did not throw an error so we can discard invalidating the
      register and restore the cleanup chain to what it was.  */
-  discard_cleanups (chain_before_invalidate_register);
-
-  do_cleanups (chain_before_save_inferior);
+  discard_cleanups (old_chain);
 }
 
 void
@@ -1250,6 +1258,41 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
   reinit_frame_cache ();
 }
 
+void
+regcache_debug_print_register (const char *func, struct regcache *regcache,
+			       int regno)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  fprintf_unfiltered (gdb_stdlog, "%s ", func);
+  if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
+      && gdbarch_register_name (gdbarch, regno) != NULL
+      && gdbarch_register_name (gdbarch, regno)[0] != '\0')
+    fprintf_unfiltered (gdb_stdlog, "(%s)",
+			gdbarch_register_name (gdbarch, regno));
+  else
+    fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
+  if (regno >= 0 && regno < gdbarch_num_regs (gdbarch))
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      int size = register_size (gdbarch, regno);
+      gdb_byte *buf = register_buffer (regcache, regno);
+
+      fprintf_unfiltered (gdb_stdlog, " = ");
+      for (int i = 0; i < size; i++)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	}
+      if (size <= sizeof (LONGEST))
+	{
+	  ULONGEST val = extract_unsigned_integer (buf, size, byte_order);
+
+	  fprintf_unfiltered (gdb_stdlog, " %s %s",
+			      core_addr_to_string_nz (val), plongest (val));
+	}
+    }
+  fprintf_unfiltered (gdb_stdlog, "\n");
+}
 
 static void
 reg_flush_command (char *command, int from_tty)

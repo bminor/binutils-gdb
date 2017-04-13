@@ -128,8 +128,10 @@ enum tdesc_type_kind
 
 typedef struct tdesc_type
 {
-  /* The name of this type.  */
-  char *name;
+  /* The name of this type.  If this type is a built-in type, this is
+     a pointer to a constant string.  Otherwise, it's a
+     malloc-allocated string (and thus must be freed).  */
+  const char *name;
 
   /* Identify the kind of this type.  */
   enum tdesc_type_kind kind;
@@ -1335,7 +1337,7 @@ tdesc_free_type (struct tdesc_type *type)
       break;
     }
 
-  xfree (type->name);
+  xfree ((char *) type->name);
   xfree (type);
 }
 

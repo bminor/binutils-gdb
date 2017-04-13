@@ -50,7 +50,7 @@ show_varobjdebug (struct ui_file *file, int from_tty,
 }
 
 /* String representations of gdb's format codes.  */
-char *varobj_format_string[] =
+const char *varobj_format_string[] =
   { "natural", "binary", "decimal", "hexadecimal", "octal", "zero-hexadecimal" };
 
 /* True if we want to allow Python-based pretty-printing.  */
@@ -724,7 +724,7 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
   if (var->saved_item != NULL)
     {
       value_free (var->saved_item->value);
-      xfree (var->saved_item);
+      delete var->saved_item;
       var->saved_item = NULL;
     }
 }
@@ -799,7 +799,7 @@ update_dynamic_varobj_children (struct varobj *var,
 				 can_mention ? cchanged : NULL, i,
 				 item);
 
-	  xfree (item);
+	  delete item;
 	}
       else
 	{
@@ -2136,7 +2136,7 @@ varobj_get_value_type (const struct varobj *var)
 
   type = check_typedef (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type))
     type = get_target_type (type);
 
   type = check_typedef (type);

@@ -691,41 +691,85 @@ EOF
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   fragment <<EOF
 
-/* Add the sysroot to every entry in a path separated by
-   config.rpath_separator.  */
+/* Prefix the sysroot to absolute paths in PATH, a string containing
+   paths separated by config.rpath_separator.  If running on a DOS
+   file system, paths containing a drive spec won't have the sysroot
+   prefix added, unless the sysroot also specifies the same drive.  */
 
-static char *
+static const char *
 gld${EMULATION_NAME}_add_sysroot (const char *path)
 {
-  int len, colons, i;
-  char *ret, *p;
+  size_t len, extra;
+  const char *p;
+  char *ret, *q;
+  int dos_drive_sysroot = HAS_DRIVE_SPEC (ld_sysroot);
 
-  len = strlen (path);
-  colons = 0;
-  i = 0;
-  while (path[i])
-    if (path[i++] == config.rpath_separator)
-      colons++;
+  len = strlen (ld_sysroot);
+  for (extra = 0, p = path; ; )
+    {
+      int dos_drive = HAS_DRIVE_SPEC (p);
 
-  if (path[i])
-    colons++;
+      if (dos_drive)
+	p += 2;
+      if (IS_DIR_SEPARATOR (*p)
+	  && (!dos_drive
+	      || (dos_drive_sysroot
+		  && ld_sysroot[0] == p[-2])))
+	{
+	  if (dos_drive && dos_drive_sysroot)
+	    extra += len - 2;
+	  else
+	    extra += len;
+	}
+      p = strchr (p, config.rpath_separator);
+      if (!p)
+	break;
+      ++p;
+    }
 
-  len = len + (colons + 1) * strlen (ld_sysroot);
-  ret = xmalloc (len + 1);
-  strcpy (ret, ld_sysroot);
-  p = ret + strlen (ret);
-  i = 0;
-  while (path[i])
-    if (path[i] == config.rpath_separator)
-      {
-	*p++ = path[i++];
-	strcpy (p, ld_sysroot);
-	p = p + strlen (p);
-      }
-    else
-      *p++ = path[i++];
+  ret = xmalloc (strlen (path) + extra + 1);
 
-  *p = 0;
+  for (q = ret, p = path; ; )
+    {
+      const char *end;
+      int dos_drive = HAS_DRIVE_SPEC (p);
+
+      if (dos_drive)
+	{
+	  *q++ = *p++;
+	  *q++ = *p++;
+	}
+      if (IS_DIR_SEPARATOR (*p)
+	  && (!dos_drive
+	      || (dos_drive_sysroot
+		  && ld_sysroot[0] == p[-2])))
+	{
+	  if (dos_drive && dos_drive_sysroot)
+	    {
+	      strcpy (q, ld_sysroot + 2);
+	      q += len - 2;
+	    }
+	  else
+	    {
+	      strcpy (q, ld_sysroot);
+	      q += len;
+	    }
+	}
+      end = strchr (p, config.rpath_separator);
+      if (end)
+	{
+	  size_t n = end - p + 1;
+	  strncpy (q, p, n);
+	  q += n;
+	  p += n;
+	}
+      else
+	{
+	  strcpy (q, p);
+	  break;
+	}
+    }
+
   return ret;
 }
 
@@ -745,7 +789,7 @@ gld${EMULATION_NAME}_check_ld_elf_hints (const struct bfd_link_needed_list *l,
 					 int force)
 {
   static bfd_boolean initialized;
-  static char *ld_elf_hints;
+  static const char *ld_elf_hints;
   struct dt_needed needed;
 
   if (!initialized)
@@ -963,7 +1007,7 @@ gld${EMULATION_NAME}_check_ld_so_conf (const struct bfd_link_needed_list *l,
 				       int force)
 {
   static bfd_boolean initialized;
-  static char *ld_so_conf;
+  static const char *ld_so_conf;
   struct dt_needed needed;
 
   if (! initialized)
@@ -986,9 +1030,8 @@ gld${EMULATION_NAME}_check_ld_so_conf (const struct bfd_link_needed_list *l,
 
       if (info.path)
 	{
-	  char *d = gld${EMULATION_NAME}_add_sysroot (info.path);
+	  ld_so_conf = gld${EMULATION_NAME}_add_sysroot (info.path);
 	  free (info.path);
-	  ld_so_conf = d;
 	}
       initialized = TRUE;
     }
@@ -1215,6 +1258,8 @@ gld${EMULATION_NAME}_after_open (void)
 	}
     }
 
+  get_elf_backend_data (link_info.output_bfd)->setup_gnu_properties (&link_info);
+
   if (bfd_link_relocatable (&link_info))
     {
       if (link_info.execstack == ! link_info.noexecstack)
@@ -1381,9 +1426,9 @@ gld${EMULATION_NAME}_after_open (void)
 	  size_t len;
 	  search_dirs_type *search;
 EOF
-if [ "x${NATIVE}" = xyes ] ; then
+if [ "x${NATIVE}" = xyes ] || [ "x${USE_LIBPATH}" = xyes ] ; then
 fragment <<EOF
-	  const char *lib_path;
+	  const char *path;
 EOF
 fi
 if [ "x${USE_LIBPATH}" = xyes ] ; then
@@ -1400,9 +1445,15 @@ fragment <<EOF
 EOF
 if [ "x${USE_LIBPATH}" = xyes ] ; then
 fragment <<EOF
-	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath,
-						  &n, force))
-	    break;
+	  path = command_line.rpath;
+	  if (path)
+	    {
+	      path = gld${EMULATION_NAME}_add_sysroot (path);
+	      found = gld${EMULATION_NAME}_search_needed (path, &n, force);
+	      free ((char *) path);
+	      if (found)
+		break;
+	    }
 EOF
 fi
 if [ "x${NATIVE}" = xyes ] ; then
@@ -1410,13 +1461,14 @@ fragment <<EOF
 	  if (command_line.rpath_link == NULL
 	      && command_line.rpath == NULL)
 	    {
-	      lib_path = (const char *) getenv ("LD_RUN_PATH");
-	      if (gld${EMULATION_NAME}_search_needed (lib_path, &n,
-						      force))
+	      path = (const char *) getenv ("LD_RUN_PATH");
+	      if (path
+		  && gld${EMULATION_NAME}_search_needed (path, &n, force))
 		break;
 	    }
-	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
-	  if (gld${EMULATION_NAME}_search_needed (lib_path, &n, force))
+	  path = (const char *) getenv ("LD_LIBRARY_PATH");
+	  if (path
+	      && gld${EMULATION_NAME}_search_needed (path, &n, force))
 	    break;
 EOF
 fi
@@ -1426,16 +1478,11 @@ fragment <<EOF
 	  rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
 	  for (; !found && rp != NULL; rp = rp->next)
 	    {
-	      const char *tmpname = rp->name;
-
-	      if (IS_ABSOLUTE_PATH (tmpname))
-		tmpname = gld${EMULATION_NAME}_add_sysroot (tmpname);
+	      path = gld${EMULATION_NAME}_add_sysroot (rp->name);
 	      found = (rp->by == l->by
-		       && gld${EMULATION_NAME}_search_needed (tmpname,
-							      &n,
+		       && gld${EMULATION_NAME}_search_needed (path, &n,
 							      force));
-	      if (tmpname != rp->name)
-		free ((char *) tmpname);
+	      free ((char *) path);
 	    }
 	  if (found)
 	    break;
@@ -2046,6 +2093,47 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	}
     }
 
+  if (!bfd_link_relocatable (&link_info)
+      && (s->flags & SEC_ALLOC) != 0
+      && (elf_section_flags (s) & SHF_GNU_MBIND) != 0)
+    {
+      /* Find the output mbind section with the same type, attributes
+	 and sh_info field.  */
+      for (os = &lang_output_section_statement.head->output_section_statement;
+	   os != NULL;
+	   os = os->next)
+	if (os->bfd_section != NULL
+	    && !bfd_is_abs_section (os->bfd_section)
+	    && (elf_section_flags (os->bfd_section) & SHF_GNU_MBIND) != 0
+	    && ((s->flags & (SEC_ALLOC
+			     | SEC_LOAD
+			     | SEC_HAS_CONTENTS
+			     | SEC_READONLY
+			     | SEC_CODE))
+		== (os->bfd_section->flags & (SEC_ALLOC
+					      | SEC_LOAD
+					      | SEC_HAS_CONTENTS
+					      | SEC_READONLY
+					      | SEC_CODE)))
+	    && (elf_section_data (os->bfd_section)->this_hdr.sh_info
+		== elf_section_data (s)->this_hdr.sh_info))
+	    {
+	      lang_add_section (&os->children, s, NULL, os);
+	      return os;
+	    }
+
+      /* Create the output mbind section with the ".mbind." prefix
+	 in section name.  */
+      if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	secname = ".mbind.bss";
+      else if ((s->flags & SEC_READONLY) == 0)
+	secname = ".mbind.data";
+      else if ((s->flags & SEC_CODE) == 0)
+	secname = ".mbind.rodata";
+      else
+	secname = ".mbind.text";
+    }
+
   /* Look through the script to see where to place this section.  */
   if (constraint == 0)
     for (os = lang_output_section_find (secname);
@@ -2058,8 +2146,11 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
 	/* SEC_EXCLUDE is cleared when doing a relocatable link.  But
 	   we can't merge 2 input sections with the same name when only
-	   one of them has SHF_EXCLUDE.  */
+	   one of them has SHF_EXCLUDE.  Don't merge 2 sections with
+	   different sh_info.  */
 	if (os->bfd_section != NULL
+	    && (elf_section_data (os->bfd_section)->this_hdr.sh_info
+		== elf_section_data (s)->this_hdr.sh_info)
 	    && (os->bfd_section->flags == 0
 		|| ((!bfd_link_relocatable (&link_info)
 		     || (iself && (((elf_section_flags (s)

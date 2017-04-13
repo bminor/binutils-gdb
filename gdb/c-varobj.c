@@ -78,7 +78,7 @@ adjust_value_for_child_access (struct value **value,
      to us, is already supposed to be
      reference-stripped.  */
 
-  gdb_assert (TYPE_CODE (*type) != TYPE_CODE_REF);
+  gdb_assert (!TYPE_IS_REFERENCE (*type));
 
   /* Pointers to structures are treated just like
      structures when accessing children.  Don't
@@ -488,7 +488,7 @@ c_value_of_variable (const struct varobj *var,
   struct type *type = get_type (var);
 
   /* Strip top-level references.  */
-  while (TYPE_CODE (type) == TYPE_CODE_REF)
+  while (TYPE_IS_REFERENCE (type))
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
   switch (TYPE_CODE (type))
@@ -580,7 +580,7 @@ cplus_number_of_children (const struct varobj *var)
       if (opts.objectprint)
         {
           value = var->value;
-          lookup_actual_type = (TYPE_CODE (var->type) == TYPE_CODE_REF
+          lookup_actual_type = (TYPE_IS_REFERENCE (var->type)
 				|| TYPE_CODE (var->type) == TYPE_CODE_PTR);
         }
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
@@ -617,7 +617,7 @@ cplus_number_of_children (const struct varobj *var)
 	  const struct varobj *parent = var->parent;
 
 	  value = parent->value;
-	  lookup_actual_type = (TYPE_CODE (parent->type) == TYPE_CODE_REF
+	  lookup_actual_type = (TYPE_IS_REFERENCE (parent->type)
 				|| TYPE_CODE (parent->type) == TYPE_CODE_PTR);
         }
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
@@ -722,7 +722,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 
   var = (CPLUS_FAKE_CHILD (parent)) ? parent->parent : parent;
   if (opts.objectprint)
-    lookup_actual_type = (TYPE_CODE (var->type) == TYPE_CODE_REF
+    lookup_actual_type = (TYPE_IS_REFERENCE (var->type)
 			  || TYPE_CODE (var->type) == TYPE_CODE_PTR);
   value = var->value;
   type = varobj_get_value_type (var);
@@ -843,7 +843,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	}
       else
 	{
-	  char *access = NULL;
+	  const char *access = NULL;
 	  int children[3];
 
 	  cplus_class_num_children (type, children);

@@ -1105,8 +1105,8 @@ linux_nat_post_attach_wait (ptid_t ptid, int first, int *signalled)
 
 static void
 linux_nat_create_inferior (struct target_ops *ops, 
-			   char *exec_file, char *allargs, char **env,
-			   int from_tty)
+			   const char *exec_file, const std::string &allargs,
+			   char **env, int from_tty)
 {
   struct cleanup *restore_personality
     = maybe_disable_address_space_randomization (disable_randomization);
@@ -1549,7 +1549,6 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 
       inf_ptrace_detach_success (ops);
     }
-  delete_lwp (main_lwp->ptid);
 }
 
 /* Resume execution of the inferior process.  If STEP is nonzero,
@@ -3890,7 +3889,6 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
 			const gdb_byte *writebuf,
 			ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  struct cleanup *old_chain;
   enum target_xfer_status xfer;
 
   if (object == TARGET_OBJECT_SIGNAL_INFO)
@@ -3903,15 +3901,9 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
   if (object == TARGET_OBJECT_MEMORY && ptid_equal (inferior_ptid, null_ptid))
     return TARGET_XFER_EOF;
 
-  old_chain = save_inferior_ptid ();
-
-  if (ptid_lwp_p (inferior_ptid))
-    inferior_ptid = pid_to_ptid (ptid_get_lwp (inferior_ptid));
-
   xfer = linux_ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
 				     offset, len, xfered_len);
 
-  do_cleanups (old_chain);
   return xfer;
 }
 
@@ -3947,7 +3939,7 @@ linux_nat_update_thread_list (struct target_ops *ops)
     }
 }
 
-static char *
+static const char *
 linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
@@ -3978,10 +3970,9 @@ linux_child_pid_to_exec_file (struct target_ops *self, int pid)
   return linux_proc_pid_to_exec_file (pid);
 }
 
-/* Implement the to_xfer_partial interface for memory reads using the /proc
-   filesystem.  Because we can use a single read() call for /proc, this
-   can be much more efficient than banging away at PTRACE_PEEKTEXT,
-   but it doesn't support writes.  */
+/* Implement the to_xfer_partial target method using /proc/<pid>/mem.
+   Because we can use a single read/write call, this can be much more
+   efficient than banging away at PTRACE_PEEKTEXT.  */
 
 static enum target_xfer_status
 linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
@@ -3993,7 +3984,7 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
   int fd;
   char filename[64];
 
-  if (object != TARGET_OBJECT_MEMORY || !readbuf)
+  if (object != TARGET_OBJECT_MEMORY)
     return TARGET_XFER_EOF;
 
   /* Don't bother for one word.  */
@@ -4002,28 +3993,29 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
 
   /* We could keep this file open and cache it - possibly one per
      thread.  That requires some juggling, but is even faster.  */
-  xsnprintf (filename, sizeof filename, "/proc/%d/mem",
-	     ptid_get_pid (inferior_ptid));
-  fd = gdb_open_cloexec (filename, O_RDONLY | O_LARGEFILE, 0);
+  xsnprintf (filename, sizeof filename, "/proc/%ld/mem",
+	     ptid_get_lwp (inferior_ptid));
+  fd = gdb_open_cloexec (filename, ((readbuf ? O_RDONLY : O_WRONLY)
+				    | O_LARGEFILE), 0);
   if (fd == -1)
     return TARGET_XFER_EOF;
 
-  /* If pread64 is available, use it.  It's faster if the kernel
-     supports it (only one syscall), and it's 64-bit safe even on
-     32-bit platforms (for instance, SPARC debugging a SPARC64
-     application).  */
+  /* Use pread64/pwrite64 if available, since they save a syscall and can
+     handle 64-bit offsets even on 32-bit platforms (for instance, SPARC
+     debugging a SPARC64 application).  */
 #ifdef HAVE_PREAD64
-  if (pread64 (fd, readbuf, len, offset) != len)
+  ret = (readbuf ? pread64 (fd, readbuf, len, offset)
+	 : pwrite64 (fd, writebuf, len, offset));
 #else
-  if (lseek (fd, offset, SEEK_SET) == -1 || read (fd, readbuf, len) != len)
+  ret = lseek (fd, offset, SEEK_SET);
+  if (ret != -1)
+    ret = (readbuf ? read (fd, readbuf, len)
+	   : write (fd, writebuf, len));
 #endif
-    ret = 0;
-  else
-    ret = len;
 
   close (fd);
 
-  if (ret == 0)
+  if (ret == -1 || ret == 0)
     return TARGET_XFER_EOF;
   else
     {
@@ -4095,7 +4087,7 @@ linux_proc_xfer_spu (struct target_ops *ops, enum target_object object,
   char buf[128];
   int fd = 0;
   int ret = -1;
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = ptid_get_lwp (inferior_ptid);
 
   if (!annex)
     {

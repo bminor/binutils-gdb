@@ -26,6 +26,7 @@
 #include "command.h"
 #include "break-common.h"
 #include "probe.h"
+#include "location.h"
 #include <vector>
 
 struct value;
@@ -38,7 +39,6 @@ struct bpstats;
 struct bp_location;
 struct linespec_result;
 struct linespec_sals;
-struct event_location;
 
 /* Why are we removing the breakpoint from the target?  */
 
@@ -716,8 +716,8 @@ struct breakpoint
        non-thread-specific ordinary breakpoints this is NULL.  */
     struct program_space *pspace;
 
-    /* Location we used to set the breakpoint (malloc'd).  */
-    struct event_location *location;
+    /* Location we used to set the breakpoint.  */
+    event_location_up location;
 
     /* The filter that should be passed to decode_line_full when
        re-setting this breakpoint.  This may be NULL, but otherwise is
@@ -725,8 +725,8 @@ struct breakpoint
     char *filter;
 
     /* For a ranged breakpoint, the location we used to find
-       the end of the range (malloc'd).  */
-    struct event_location *location_range_end;
+       the end of the range.  */
+    event_location_up location_range_end;
 
     /* Architecture we used to set the breakpoint.  */
     struct gdbarch *gdbarch;
@@ -1275,7 +1275,7 @@ extern void initialize_breakpoint_ops (void);
    function.  */
 
 extern void
-  add_catch_command (char *name, char *docstring,
+  add_catch_command (const char *name, const char *docstring,
 		     cmd_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
@@ -1295,7 +1295,7 @@ extern void
 
 extern void init_catchpoint (struct breakpoint *b,
 			     struct gdbarch *gdbarch, int tempflag,
-			     char *cond_string,
+			     const char *cond_string,
 			     const struct breakpoint_ops *ops);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
@@ -1475,7 +1475,7 @@ extern void disable_breakpoint (struct breakpoint *);
 extern void enable_breakpoint (struct breakpoint *);
 
 extern void breakpoint_set_commands (struct breakpoint *b, 
-				     struct command_line *commands);
+				     command_line_up &&commands);
 
 extern void breakpoint_set_silent (struct breakpoint *b, int silent);
 
@@ -1517,7 +1517,7 @@ extern int is_catchpoint (struct breakpoint *);
 
 /* Shared helper function (MI and CLI) for creating and installing
    a shared object event catchpoint.  */
-extern void add_solib_catchpoint (char *arg, int is_load, int is_temp,
+extern void add_solib_catchpoint (const char *arg, int is_load, int is_temp,
                                   int enabled);
 
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
@@ -1641,7 +1641,7 @@ extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
 
 extern void breakpoint_free_objfile (struct objfile *objfile);
 
-extern char *ep_parse_optional_if_clause (char **arg);
+extern const char *ep_parse_optional_if_clause (const char **arg);
 
 /* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" to
    UIOUT iff debugging multiple threads.  */

@@ -620,7 +620,7 @@ static int
 ptrmath_type_p (const struct language_defn *lang, struct type *type)
 {
   type = check_typedef (type);
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type))
     type = TYPE_TARGET_TYPE (type);
 
   switch (TYPE_CODE (type))
@@ -2491,7 +2491,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  type = check_typedef (value_type (arg1));
 	  if (TYPE_CODE (type) == TYPE_CODE_PTR
-	      || TYPE_CODE (type) == TYPE_CODE_REF
+	      || TYPE_IS_REFERENCE (type)
 	  /* In C you can dereference an array to get the 1st elt.  */
 	      || TYPE_CODE (type) == TYPE_CODE_ARRAY
 	    )
@@ -2769,9 +2769,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	    {
 	      struct type *type = value_type (result);
 
-	      if (TYPE_CODE (check_typedef (type)) != TYPE_CODE_REF)
+	      if (!TYPE_IS_REFERENCE (type))
 		{
-		  type = lookup_reference_type (type);
+		  type = lookup_lvalue_reference_type (type);
 		  result = allocate_value (type);
 		}
 	    }
@@ -2872,7 +2872,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 
       /* C++: The "address" of a reference should yield the address
        * of the object pointed to.  Let value_addr() deal with it.  */
-      if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_REF)
+      if (TYPE_IS_REFERENCE (SYMBOL_TYPE (var)))
 	goto default_case;
 
       (*pos) += 4;
@@ -2911,7 +2911,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 	{
 	  struct type *type = check_typedef (value_type (x));
 
-	  if (TYPE_CODE (type) == TYPE_CODE_REF)
+	  if (TYPE_IS_REFERENCE (type))
 	    return value_zero (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			       not_lval);
 	  else if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
@@ -3001,7 +3001,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
       type = check_typedef (value_type (val));
       if (TYPE_CODE (type) != TYPE_CODE_PTR
-	  && TYPE_CODE (type) != TYPE_CODE_REF
+	  && !TYPE_IS_REFERENCE (type)
 	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
 	error (_("Attempt to take contents of a non-pointer value."));
       type = TYPE_TARGET_TYPE (type);
@@ -3073,7 +3073,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
      the size of the referenced type."  */
   type = check_typedef (type);
   if (exp->language_defn->la_language == language_cplus
-      && TYPE_CODE (type) == TYPE_CODE_REF)
+      && (TYPE_IS_REFERENCE (type)))
     type = check_typedef (TYPE_TARGET_TYPE (type));
   return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 }

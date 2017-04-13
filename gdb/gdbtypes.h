@@ -46,6 +46,7 @@
 
 #include "hashtab.h"
 #include "cp-abi.h"
+#include "common/offset-type.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -58,18 +59,11 @@ struct language_defn;
 
 /* * Offset relative to the start of its containing CU (compilation
    unit).  */
-typedef struct
-{
-  unsigned int cu_off;
-} cu_offset;
+DEFINE_OFFSET_TYPE (cu_offset, unsigned int);
 
 /* * Offset relative to the start of its .debug_info or .debug_types
    section.  */
-
-typedef struct
-{
-  unsigned int sect_off;
-} sect_offset;
+DEFINE_OFFSET_TYPE (sect_offset, unsigned int);
 
 /* Some macros for char-based bitfields.  */
 
@@ -160,6 +154,8 @@ enum type_code
     TYPE_CODE_MEMBERPTR,
 
     TYPE_CODE_REF,		/**< C++ Reference types */
+
+    TYPE_CODE_RVALUE_REF,	/**< C++ rvalue reference types */
 
     TYPE_CODE_CHAR,		/**< *real* character type */
 
@@ -335,6 +331,11 @@ enum type_instance_flag_value
 
 #define TYPE_ATOMIC(t) \
   (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC)
+
+/* * True if this type represents either an lvalue or lvalue reference type.  */
+
+#define TYPE_IS_REFERENCE(t) \
+  (TYPE_CODE (t) == TYPE_CODE_REF || TYPE_CODE (t) == TYPE_CODE_RVALUE_REF)
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -740,6 +741,10 @@ struct type
   /* * C++: also need a reference type.  */
 
   struct type *reference_type;
+
+  /* * A C++ rvalue reference type added in C++11. */
+
+  struct type *rvalue_reference_type;
 
   /* * Variant chain.  This points to a type that differs from this
      one only in qualifiers and length.  Currently, the possible
@@ -1153,7 +1158,7 @@ union call_site_parameter_u
      DW_TAG_formal_parameter which is referenced by both
      caller and the callee.  */
 
-  cu_offset param_offset;
+  cu_offset param_cu_off;
 };
 
 struct call_site_parameter
@@ -1252,6 +1257,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
+#define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
 /* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
@@ -1591,6 +1597,7 @@ struct builtin_type
   /* Wide character types.  */
   struct type *builtin_char16;
   struct type *builtin_char32;
+  struct type *builtin_wchar;
 
   /* Pointer types.  */
 
@@ -1796,9 +1803,13 @@ extern void append_flags_type_flag (struct type *type, int bitpos,
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
 
-extern struct type *lookup_reference_type (struct type *);
+extern struct type *lookup_reference_type (struct type *, enum type_code);
+extern struct type *lookup_lvalue_reference_type (struct type *);
+extern struct type *lookup_rvalue_reference_type (struct type *);
 
-extern struct type *make_reference_type (struct type *, struct type **);
+
+extern struct type *make_reference_type (struct type *, struct type **,
+                                         enum type_code);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 

@@ -100,7 +100,6 @@ case $targ in
  mips*-sgi-* | mips*-*-bsd* | \
  mips*-*-lnews* | \
  mips*-*-sysv* | mips*-*-riscos* | \
- ns32k-*-* | \
  sh*-*-symbianelf* | \
  sparclet-*-aout* | \
  sparc86x-*-aout* | \
@@ -173,6 +172,7 @@ fido*)		 targ_archs=bfd_m68k_arch ;;
 hppa*)		 targ_archs=bfd_hppa_arch ;;
 i[3-7]86)	 targ_archs=bfd_i386_arch ;;
 i370)		 targ_archs=bfd_i370_arch ;;
+ia16)		 targ_archs=bfd_i386_arch ;;
 lm32)	         targ_archs=bfd_lm32_arch ;;
 m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
 m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
@@ -197,6 +197,7 @@ tilegx*)	 targ_archs=bfd_tilegx_arch ;;
 tilepro*)	 targ_archs=bfd_tilepro_arch ;;
 v850*)		 targ_archs="bfd_v850_arch bfd_v850_rh850_arch" ;;
 visium*)	 targ_archs=bfd_visium_arch ;;
+wasm32)		 targ_archs=bfd_wasm32_arch ;;
 x86_64*)	 targ_archs=bfd_i386_arch ;;
 xtensa*)	 targ_archs=bfd_xtensa_arch ;;
 xgate)		 targ_archs=bfd_xgate_arch ;;
@@ -903,6 +904,11 @@ case "${targ}" in
   i960-*-elf*)
     targ_defvec=i960_elf32_vec
     targ_selvecs="icoff_le_vec icoff_be_vec"
+    ;;
+
+  ia16-*-elf)
+    targ_defvec=i386_elf32_vec
+    targ_selvecs="i386_msdos_vec i386_aout_vec"
     ;;
 
   ip2k-*-elf)
@@ -1791,6 +1797,11 @@ case "${targ}" in
 
   visium-*-elf)
     targ_defvec=visium_elf32_vec
+    ;;
+
+  wasm32-*-*)
+    targ_defvec=wasm32_elf32_vec
+    targ_selvecs="wasm_vec"
     ;;
 
   we32k-*-*)

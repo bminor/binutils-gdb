@@ -93,6 +93,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_hint);
 AARCH64_DECL_OPD_EXTRACTOR (ext_prfop);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reg_extended);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reg_shifted);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s4);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s4xvl);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s6xvl);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s9xvl);
@@ -110,11 +111,13 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_sve_float_half_two);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_float_zero_one);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_index);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_limm_mov);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sve_quad_index);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_reglist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_scale);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_shlimm);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_shrimm);
-AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate);
+AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate1);
+AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate2);
 
 #undef AARCH64_DECL_OPD_EXTRACTOR
 

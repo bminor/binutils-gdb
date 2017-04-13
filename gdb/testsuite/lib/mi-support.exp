@@ -824,7 +824,7 @@ proc mi_gdb_test { args } {
 	}
 	 -re ".*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
-		fail "$message"
+		fail "$message (unexpected output)"
 	    }
 	    set result 1
 	}

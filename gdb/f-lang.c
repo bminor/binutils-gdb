@@ -203,7 +203,7 @@ f_language_arch_info (struct gdbarch *gdbarch,
 
 /* Remove the modules separator :: from the default break list.  */
 
-static char *
+static const char *
 f_word_break_characters (void)
 {
   static char *retval;

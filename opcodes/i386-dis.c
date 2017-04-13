@@ -117,6 +117,7 @@ static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
 static void CRC32_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
+static void PCMPESTR_Fixup (int, int);
 static void OP_LWPCB_E (int, int);
 static void OP_LWP_E (int, int);
 static void OP_Vex_2src_1 (int, int);
@@ -722,6 +723,7 @@ enum
   REG_0F01,
   REG_0F0D,
   REG_0F18,
+  REG_0F1E_MOD_3,
   REG_0F71,
   REG_0F72,
   REG_0F73,
@@ -775,6 +777,7 @@ enum
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
+  MOD_0F1E_PREFIX_1,
   MOD_0F24,
   MOD_0F26,
   MOD_0F2B_PREFIX_0,
@@ -813,6 +816,8 @@ enum
   MOD_0FE7_PREFIX_2,
   MOD_0FF0_PREFIX_3,
   MOD_0F382A_PREFIX_2,
+  MOD_0F38F5_PREFIX_2,
+  MOD_0F38F6_PREFIX_0,
   MOD_62_32BIT,
   MOD_C4_32BIT,
   MOD_C5_32BIT,
@@ -932,6 +937,7 @@ enum
   RM_0F01_REG_3,
   RM_0F01_REG_5,
   RM_0F01_REG_7,
+  RM_0F1E_MOD_3_REG_7,
   RM_0FAE_REG_5,
   RM_0FAE_REG_6,
   RM_0FAE_REG_7
@@ -940,12 +946,16 @@ enum
 enum
 {
   PREFIX_90 = 0,
+  PREFIX_MOD_0_0F01_REG_5,
+  PREFIX_MOD_3_0F01_REG_5_RM_1,
+  PREFIX_MOD_3_0F01_REG_5_RM_2,
   PREFIX_0F10,
   PREFIX_0F11,
   PREFIX_0F12,
   PREFIX_0F16,
   PREFIX_0F1A,
   PREFIX_0F1B,
+  PREFIX_0F1E,
   PREFIX_0F2A,
   PREFIX_0F2B,
   PREFIX_0F2C,
@@ -984,6 +994,7 @@ enum
   PREFIX_0FAE_REG_3,
   PREFIX_MOD_0_0FAE_REG_4,
   PREFIX_MOD_3_0FAE_REG_4,
+  PREFIX_MOD_0_0FAE_REG_5,
   PREFIX_0FAE_REG_6,
   PREFIX_0FAE_REG_7,
   PREFIX_0FB8,
@@ -1047,6 +1058,7 @@ enum
   PREFIX_0F38DF,
   PREFIX_0F38F0,
   PREFIX_0F38F1,
+  PREFIX_0F38F5,
   PREFIX_0F38F6,
   PREFIX_0F3A08,
   PREFIX_0F3A09,
@@ -2191,8 +2203,6 @@ enum
   VEX_W_0F3A4A_P_2,
   VEX_W_0F3A4B_P_2,
   VEX_W_0F3A4C_P_2,
-  VEX_W_0F3A60_P_2,
-  VEX_W_0F3A61_P_2,
   VEX_W_0F3A62_P_2,
   VEX_W_0F3A63_P_2,
   VEX_W_0F3ADF_P_2,
@@ -2840,7 +2850,7 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F1B) },
   { "nopQ",		{ Ev }, 0 },
   { "nopQ",		{ Ev }, 0 },
-  { "nopQ",		{ Ev }, 0 },
+  { PREFIX_TABLE (PREFIX_0F1E) },
   { "nopQ",		{ Ev }, 0 },
   /* 20 */
   { "movZ",		{ Rm, Cm }, 0 },
@@ -3511,7 +3521,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_F6 */
   {
     { "testA",	{ Eb, Ib }, 0 },
-    { Bad_Opcode },
+    { "testA",	{ Eb, Ib }, 0 },
     { "notA",	{ Ebh1 }, 0 },
     { "negA",	{ Ebh1 }, 0 },
     { "mulA",	{ Eb }, 0 },	/* Don't print the implicit %al register,  */
@@ -3522,7 +3532,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_F7 */
   {
     { "testQ",	{ Ev, Iv }, 0 },
-    { Bad_Opcode },
+    { "testQ",	{ Ev, Iv }, 0 },
     { "notQ",	{ Evh1 }, 0 },
     { "negQ",	{ Evh1 }, 0 },
     { "mulQ",	{ Ev }, 0 },	/* Don't print the implicit register.  */
@@ -3589,6 +3599,17 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_5) },
     { MOD_TABLE (MOD_0F18_REG_6) },
     { MOD_TABLE (MOD_0F18_REG_7) },
+  },
+  /* REG_0F1E_MOD_3 */
+  {
+    { "nopQ",		{ Ev }, 0 },
+    { "rdsspK",		{ Rdq }, PREFIX_OPCODE },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { RM_TABLE (RM_0F1E_MOD_3_REG_7) },
   },
   /* REG_0F71 */
   {
@@ -3759,6 +3780,24 @@ static const struct dis386 prefix_table[][4] = {
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
+  /* PREFIX_MOD_0_0F01_REG_5 */
+  {
+    { Bad_Opcode },
+    { "rstorssp",	{ Mq }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_MOD_3_0F01_REG_5_RM_1 */
+  {
+    { Bad_Opcode },
+    { "incsspK",	{ Skip_MODRM }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_MOD_3_0F01_REG_5_RM_2 */
+  {
+    { Bad_Opcode },
+    { "savessp",	{ Skip_MODRM }, PREFIX_OPCODE },
+  },
+
   /* PREFIX_0F10 */
   {
     { "movups",	{ XM, EXx }, PREFIX_OPCODE },
@@ -3804,6 +3843,14 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F1B_PREFIX_1) },
     { "bndmov", { Ebnd, Gbnd }, 0 },
     { "bndcn",  { Gbnd, Ev_bnd }, 0 },
+  },
+
+  /* PREFIX_0F1E */
+  {
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { MOD_TABLE (MOD_0F1E_PREFIX_1) },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F2A */
@@ -4081,11 +4128,17 @@ static const struct dis386 prefix_table[][4] = {
     { "ptwrite%LQ", { Edq }, 0 },
   },
 
+  /* PREFIX_MOD_0_0FAE_REG_5 */
+  {
+    { "xrstor",		{ FXSAVE }, PREFIX_OPCODE },
+    { "setssbsy",	{ Mq }, PREFIX_OPCODE },
+  },
+
   /* PREFIX_0FAE_REG_6 */
   {
-    { "xsaveopt",      { FXSAVE }, 0 },
-    { Bad_Opcode },
-    { "clwb",	{ Mb }, 0 },
+    { "xsaveopt",	{ FXSAVE }, PREFIX_OPCODE },
+    { "clrssbsy",	{ Mq }, PREFIX_OPCODE },
+    { "clwb",	{ Mb }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0FAE_REG_7 */
@@ -4514,9 +4567,16 @@ static const struct dis386 prefix_table[][4] = {
     { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0F38F6 */
+  /* PREFIX_0F38F5 */
   {
     { Bad_Opcode },
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38F5_PREFIX_2) },
+  },
+
+  /* PREFIX_0F38F6 */
+  {
+    { MOD_TABLE (MOD_0F38F6_PREFIX_0) },
     { "adoxS",	{ Gdq, Edq}, PREFIX_OPCODE },
     { "adcxS",	{ Gdq, Edq}, PREFIX_OPCODE },
     { Bad_Opcode },
@@ -4652,14 +4712,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pcmpestrm", { XM, EXx, Ib }, PREFIX_OPCODE },
+    { "pcmpestrm", { XM, { PCMPESTR_Fixup, x_mode }, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F3A61 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pcmpestri", { XM, EXx, Ib }, PREFIX_OPCODE },
+    { "pcmpestri", { XM, { PCMPESTR_Fixup, x_mode }, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F3A62 */
@@ -7247,7 +7307,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38F5) },
     { PREFIX_TABLE (PREFIX_0F38F6) },
     { Bad_Opcode },
     /* f8 */
@@ -9998,12 +10058,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A60_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A60_P_2) },
+    { "vpcmpestrm",	{ XM, { PCMPESTR_Fixup, x_mode }, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A61_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A61_P_2) },
+    { "vpcmpestri",	{ XM, { PCMPESTR_Fixup, x_mode }, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A62_P_2 */
@@ -11346,14 +11406,6 @@ static const struct dis386 vex_w_table[][2] = {
     { "vpblendvb",	{ XM, Vex, EXx, XMVexI4 }, 0 },
   },
   {
-    /* VEX_W_0F3A60_P_2 */
-    { "vpcmpestrm",	{ XM, EXx, Ib }, 0 },
-  },
-  {
-    /* VEX_W_0F3A61_P_2 */
-    { "vpcmpestri",	{ XM, EXx, Ib }, 0 },
-  },
-  {
     /* VEX_W_0F3A62_P_2 */
     { "vpcmpistrm",	{ XM, EXx, Ib }, 0 },
   },
@@ -11415,7 +11467,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F01_REG_5 */
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_MOD_0_0F01_REG_5) },
     { RM_TABLE (RM_0F01_REG_5) },
   },
   {
@@ -11487,6 +11539,11 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_0F1B_PREFIX_1 */
     { "bndmk",		{ Gbnd, Ev_bnd }, 0 },
     { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* MOD_0F1E_PREFIX_1 */
+    { "nopQ",		{ Ev }, 0 },
+    { REG_TABLE (REG_0F1E_MOD_3) },
   },
   {
     /* MOD_0F24 */
@@ -11596,7 +11653,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_5 */
-    { "xrstor",		{ FXSAVE }, 0 },
+    { PREFIX_TABLE (PREFIX_MOD_0_0FAE_REG_5) },
     { RM_TABLE (RM_0FAE_REG_5) },
   },
   {
@@ -11663,6 +11720,14 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F382A_PREFIX_2 */
     { "movntdqa",	{ XM, Mx }, 0 },
+  },
+  {
+    /* MOD_0F38F5_PREFIX_2 */
+    { "wrussK",		{ M, Gdq }, PREFIX_OPCODE },
+  },
+  {
+    /* MOD_0F38F6_PREFIX_0 */
+    { "wrssK",		{ M, Gdq }, PREFIX_OPCODE },
   },
   {
     /* MOD_62_32BIT */
@@ -12166,8 +12231,8 @@ static const struct dis386 rm_table[][8] = {
   {
     /* RM_0F01_REG_5 */
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_MOD_3_0F01_REG_5_RM_1) },
+    { PREFIX_TABLE (PREFIX_MOD_3_0F01_REG_5_RM_2) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -12181,6 +12246,17 @@ static const struct dis386 rm_table[][8] = {
     { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
     { "mwaitx",		{ { OP_Mwaitx,  0 } }, 0  },
     { "clzero",		{ Skip_MODRM }, 0  },
+  },
+  {
+    /* RM_0F1E_MOD_3_REG_7 */
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "endbr64",	{ Skip_MODRM },  PREFIX_OPCODE },
+    { "endbr32",	{ Skip_MODRM },  PREFIX_OPCODE },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   {
     /* RM_0FAE_REG_5 */
@@ -12771,8 +12847,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vindex = *codep++;
       dp = &vex_table[vex_table_index][vindex];
       end_codep = codep;
-      /* There is no MODRM byte for VEX [82|77].  */
-      if (vindex != 0x77 && vindex != 0x82)
+      /* There is no MODRM byte for VEX0F 77.  */
+      if (vex_table_index != VEX_0F || vindex != 0x77)
 	{
 	  FETCH_DATA (info, codep + 1);
 	  modrm.mod = (*codep >> 6) & 3;
@@ -12814,8 +12890,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vindex = *codep++;
       dp = &vex_table[dp->op[1].bytemode][vindex];
       end_codep = codep;
-      /* There is no MODRM byte for VEX [82|77].  */
-      if (vindex != 0x77 && vindex != 0x82)
+      /* There is no MODRM byte for VEX 77.  */
+      if (vindex != 0x77)
 	{
 	  FETCH_DATA (info, codep + 1);
 	  modrm.mod = (*codep >> 6) & 3;
@@ -16895,6 +16971,27 @@ FXSAVE_Fixup (int bytemode, int sizeflag)
       mnemonicendp = p;
     }
   OP_M (bytemode, sizeflag);
+}
+
+static void
+PCMPESTR_Fixup (int bytemode, int sizeflag)
+{
+  /* Add proper suffix to "{,v}pcmpestr{i,m}".  */
+  if (!intel_syntax)
+    {
+      char *p = mnemonicendp;
+
+      USED_REX (REX_W);
+      if (rex & REX_W)
+	*p++ = 'q';
+      else if (sizeflag & SUFFIX_ALWAYS)
+	*p++ = 'l';
+
+      *p = '\0';
+      mnemonicendp = p;
+    }
+
+  OP_EX (bytemode, sizeflag);
 }
 
 /* Display the destination register operand for instructions with

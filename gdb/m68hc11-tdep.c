@@ -166,7 +166,7 @@ struct m68hc11_unwind_cache
 
 /* Table of registers for 68HC11.  This includes the hard registers
    and the soft registers used by GCC.  */
-static char *
+static const char *
 m68hc11_register_names[] =
 {
   "x",    "d",    "y",    "sp",   "pc",   "a",    "b",

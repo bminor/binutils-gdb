@@ -63,7 +63,7 @@ DEF_ENUM_FLAGS_TYPE (enum c_string_type_values, c_string_type);
 
 extern int c_parse (struct parser_state *);
 
-extern void c_yyerror (char *);
+extern void c_yyerror (const char *);
 
 extern int c_parse_escape (const char **, struct obstack *);
 
@@ -120,7 +120,7 @@ extern void c_type_print_base (struct type *, struct ui_file *,
 /* These are in cp-valprint.c */
 
 extern void cp_print_class_member (const gdb_byte *, struct type *,
-				   struct ui_file *, char *);
+				   struct ui_file *, const char *);
 
 extern void cp_print_value_fields (struct type *, struct type *,
 				   LONGEST, CORE_ADDR,

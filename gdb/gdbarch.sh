@@ -383,6 +383,12 @@ v:const struct floatformat **:double_format:::::floatformats_ieee_double::pforma
 v:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
 v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (gdbarch->long_double_format)
 
+# The ABI default bit-size for "wchar_t".  wchar_t is a built-in type
+# starting with C++11.
+v:int:wchar_bit:::8 * sizeof (wchar_t):4*TARGET_CHAR_BIT::0
+# One if \`wchar_t' is signed, zero if unsigned.
+v:int:wchar_signed:::1:-1:1
+
 # Returns the floating-point format to be used for values of length LENGTH.
 # NAME, if non-NULL, is the type name, which may be used to distinguish
 # different target formats of the same length.
@@ -745,7 +751,7 @@ M:ULONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, ULONGE
 M:ULONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, ULONGEST len:readbuf, offset, len
 
 # How the core target converts a PTID from a core file to a string.
-M:char *:core_pid_to_str:ptid_t ptid:ptid
+M:const char *:core_pid_to_str:ptid_t ptid:ptid
 
 # How the core target extracts the name of a thread from a core file.
 M:const char *:core_thread_name:struct thread_info *thr:thr
@@ -1163,6 +1169,10 @@ m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
 # each address in memory.
 m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
 
+# Functions for allowing a target to modify its disassembler options.
+v:char **:disassembler_options:::0:0::0:pstring_ptr (gdbarch->disassembler_options)
+v:const disasm_options_t *:valid_disassembler_options:::0:0::0:host_address_to_string (gdbarch->valid_disassembler_options)
+
 EOF
 }
 
@@ -1259,6 +1269,7 @@ cat <<EOF
 #define GDBARCH_H
 
 #include "frame.h"
+#include "dis-asm.h"
 
 struct floatformat;
 struct ui_file;
@@ -1673,10 +1684,18 @@ pstring (const char *string)
   return string;
 }
 
+static const char *
+pstring_ptr (char **string)
+{
+  if (string == NULL || *string == NULL)
+    return "(null)";
+  return *string;
+}
+
 /* Helper function to print a list of strings, represented as "const
    char *const *".  The list is printed comma-separated.  */
 
-static char *
+static const char *
 pstring_list (const char *const *list)
 {
   static char ret[100];

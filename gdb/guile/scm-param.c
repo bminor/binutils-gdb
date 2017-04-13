@@ -602,7 +602,7 @@ pascm_param_value (enum var_types type, void *var,
     case var_filename:
     case var_enum:
       {
-	char *str = * (char **) var;
+	const char *str = *(char **) var;
 
 	if (str == NULL)
 	  str = "";

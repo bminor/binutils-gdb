@@ -50,6 +50,8 @@ if [istarget "tic6x-*-*"] {
 # - the shared library symbols have been swept in section garbage collection.
 # Verify that the symbols are global rather than local and that a version
 # script adjusts them accordingly.
+# Also verify that a version definition supplied by an object rather than
+# a version script and forcibly exported is unaffected by section GC.
 if { [check_gc_sections_available] } {
     run_ld_link_tests [list \
 	[list \
@@ -77,7 +79,92 @@ if { [check_gc_sections_available] } {
 	    {pr20828.s} \
 	    {{readelf --dyn-syms pr20828-b.sd} \
 	     {readelf --dyn-syms pr20828-c.sd}} \
-	    "pr20828-2.so"]]
+	    "pr20828-2.so"] \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC\
+	     (versioned shared library)" \
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld\
+	     --version-script=pr20828-v.ver" \
+	    "" "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-c.sd} \
+	     {readelf --dyn-syms pr20828-d.sd} \
+	     {readelf --dyn-syms pr20828-e.sd}} \
+	    "libpr20828-v.so"] \
+	[list \
+	    "PR ld/20828 dynamic symbols with section GC (versioned)" \
+	    "$LFLAGS -shared --gc-sections -T pr20828.ld\
+	     --version-script=pr20828-v.ver" \
+	    "tmpdir/libpr20828-v.so" \
+	    "$AFLAGS_PIC" \
+	    {pr20828.s} \
+	    {{readelf --dyn-syms pr20828-c.sd} \
+	     {readelf --dyn-syms pr20828-d.sd} \
+	     {readelf --dyn-syms pr20828-e.sd}} \
+	    "pr20828-v.so"] \
+	[list \
+	    "PR ld/20828 forcibly exported symbol version without section GC" \
+	    "$LFLAGS -e foo -E -T pr20828-v.ld" "" "" \
+	    {pr20828-v.s} \
+	    {{objdump -p pr20828-v.od}} \
+	    "pr20828-v-1"] \
+	[list \
+	    "PR ld/20828 forcibly exported symbol version with section GC" \
+	    "$LFLAGS -e foo --gc-sections -E -T pr20828-v.ld" "" "" \
+	    {pr20828-v.s} \
+	    {{objdump -p pr20828-v.od}} \
+	    "pr20828-v-2"]]
+}
+# PR ld/21233 check for correct dynamic symbol table entries where:
+# - a symbol has been defined in a shared library used in the link,
+# - the symbol has been referenced from a section swept in garbage collection,
+# - the symbol has also been forced to be entered in the output file as an
+#   undefined symbol, either with a command-line option or a linker script
+#   command.
+# Verify that the undefined symbol is global rather than local.
+if { [check_gc_sections_available] } {
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC\
+	     (auxiliary shared library)" \
+	    "$LFLAGS -shared -T pr21233.ld" "" "$AFLAGS_PIC" \
+	    {pr21233-l.s} \
+	    {{readelf --dyn-syms pr21233-l.sd}} \
+	    "libpr21233.so"]]
+
+    setup_kfail "cris*-*-*" "ld/21233"
+
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
+	    "$LFLAGS --gc-sections -e foo --undefined=bar -T pr21233.ld" \
+	    "tmpdir/libpr21233.so" "" \
+	    {pr21233.s} \
+	    {{readelf --dyn-syms pr21233.sd}} \
+	    "pr21233-1"]]
+
+    setup_kfail "cris*-*-*" "ld/21233"
+
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC (--require-defined)" \
+	    "$LFLAGS --gc-sections -e foo --require-defined=bar\
+	     -T pr21233.ld" \
+	    "tmpdir/libpr21233.so" "" \
+	    {pr21233.s} \
+	    {{readelf --dyn-syms pr21233.sd}} \
+	    "pr21233-2"]]
+
+    setup_kfail "cris*-*-*" "ld/21233"
+
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/21233 dynamic symbols with section GC (EXTERN)" \
+	    "$LFLAGS --gc-sections -e foo -T pr21233-e.ld" \
+	    "tmpdir/libpr21233.so" "" \
+	    {pr21233.s} \
+	    {{readelf --dyn-syms pr21233.sd}} \
+	    "pr21233-3"]]
 }
 
 # Check to see if the C compiler works
@@ -292,7 +379,7 @@ set build_tests {
    "" ""
    {pr2404b.c} {} "libpr2404b.a"}
   {"Build rdynamic-1"
-   "-rdynamic -Wl,--gc-sections" "-ffunction-sections"
+   "-Wl,-export-dynamic,--gc-sections" "-ffunction-sections"
    {rdynamic-1.c} {{readelf {-s} rdynamic-1.rd}} "rdynamic-1"}
   {"Build dynamic-1"
    "-Wl,--dynamic-list,dynamic-1.syms -Wl,--gc-sections" "-ffunction-sections"
@@ -545,10 +632,10 @@ set build_cxx_tests {
    "-shared -Wl,--dynamic-list-cpp-typeinfo" "-fPIC"
    {dl3.cc} {} "libdl3c.so" "c++"}
   {"Build libdnew1a.so with --Bsymbolic-functions --dynamic-list-cpp-new"
-   "-shared -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" "-fPIC"
+   "-shared -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" "-fPIC -ansi"
    {del.cc new.cc} {} "libnew1a.so" "c++"}
   {"Build libdnew1b.so with --dynamic-list-data --dynamic-list-cpp-new"
-   "-shared -Wl,--dynamic-list-data,--dynamic-list-cpp-new" "-fPIC"
+   "-shared -Wl,--dynamic-list-data,--dynamic-list-cpp-new" "-fPIC -ansi"
    {del.cc new.cc} {} "libnew1b.so" "c++"}
 }
 
@@ -565,10 +652,10 @@ set run_cxx_tests {
      {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
     {"Run with libnew1a.so"
      "-Wl,--no-as-needed tmpdir/libnew1a.so" ""
-     {dl5.cc} "dl5a" "dl5.out" "" "c++"}
+     {dl5.cc} "dl5a" "dl5.out" "-ansi" "c++"}
     {"Run with libnew1b.so"
      "-Wl,--no-as-needed tmpdir/libnew1b.so" ""
-     {dl5.cc} "dl5b" "dl5.out" "" "c++"}
+     {dl5.cc} "dl5b" "dl5.out" "-ansi" "c++"}
 }
 
 run_cc_link_tests $build_cxx_tests

@@ -205,17 +205,14 @@ re_set_exception_catchpoint (struct breakpoint *self)
   struct symtabs_and_lines sals_end = {0};
   struct cleanup *cleanup;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
-  struct event_location *location;
   struct program_space *filter_pspace = current_program_space;
 
   /* We first try to use the probe interface.  */
   TRY
     {
-      location
+      event_location_up location
 	= new_probe_location (exception_functions[kind].probe);
-      cleanup = make_cleanup_delete_event_location (location);
-      sals = parse_probes (location, filter_pspace, NULL);
-      do_cleanups (cleanup);
+      sals = parse_probes (location.get (), filter_pspace, NULL);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -228,10 +225,9 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.function_name
 	    = ASTRDUP (exception_functions[kind].function);
-	  location = new_explicit_location (&explicit_loc);
-	  cleanup = make_cleanup_delete_event_location (location);
-	  self->ops->decode_location (self, location, filter_pspace, &sals);
-	  do_cleanups (cleanup);
+	  event_location_up location = new_explicit_location (&explicit_loc);
+	  self->ops->decode_location (self, location.get (), filter_pspace,
+				      &sals);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -383,7 +379,8 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
 }
 
 static void
-handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
+handle_gnu_v3_exceptions (int tempflag, char *except_rx,
+			  const char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
   regex_t *pattern = NULL;
@@ -425,18 +422,18 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
    the end of the string.  */
 
 static char *
-extract_exception_regexp (char **string)
+extract_exception_regexp (const char **string)
 {
-  char *start;
-  char *last, *last_space;
+  const char *start;
+  const char *last, *last_space;
 
-  start = skip_spaces (*string);
+  start = skip_spaces_const (*string);
 
   last = start;
   last_space = start;
   while (*last != '\0')
     {
-      char *if_token = last;
+      const char *if_token = last;
 
       /* Check for the "if".  */
       if (check_for_argument (&if_token, "if", 2))
@@ -444,7 +441,7 @@ extract_exception_regexp (char **string)
 
       /* No "if" token here.  Skip to the next word start.  */
       last_space = skip_to_space (last);
-      last = skip_spaces (last_space);
+      last = skip_spaces_const (last_space);
     }
 
   *string = last;
@@ -457,16 +454,18 @@ extract_exception_regexp (char **string)
    commands.  */
 
 static void
-catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
+catch_exception_command_1 (enum exception_event_kind ex_event,
+			   char *arg_entry,
 			   int tempflag, int from_tty)
 {
   char *except_rx;
-  char *cond_string = NULL;
+  const char *cond_string = NULL;
   struct cleanup *cleanup;
+  const char *arg = arg_entry;
 
   if (!arg)
     arg = "";
-  arg = skip_spaces (arg);
+  arg = skip_spaces_const (arg);
 
   except_rx = extract_exception_regexp (&arg);
   cleanup = make_cleanup (xfree, except_rx);

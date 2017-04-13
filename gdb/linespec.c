@@ -44,6 +44,7 @@
 #include "ada-lang.h"
 #include "stack.h"
 #include "location.h"
+#include "common/function-view.h"
 
 typedef struct type *typep;
 DEF_VEC_P (typep);
@@ -160,7 +161,22 @@ struct collect_info
 
   /* The result being accumulated.  */
   struct search_multiple_result result;
+
+  /* Possibly add a symbol to the results.  */
+  bool add_symbol (block_symbol *bsym);
 };
+
+bool
+collect_info::add_symbol (block_symbol *bsym)
+{
+  /* In list mode, add all matching symbols, regardless of class.
+     This allows the user to type "list a_global_variable".  */
+  if (SYMBOL_CLASS (bsym->symbol) == LOC_BLOCK || this->state->list_mode)
+    VEC_safe_push (block_symbol_d, this->result.symbols, bsym);
+
+  /* Continue iterating.  */
+  return true;
+}
 
 /* Token types  */
 
@@ -253,10 +269,9 @@ typedef struct ls_parser linespec_parser;
 
 /* Prototypes for local functions.  */
 
-static void iterate_over_file_blocks (struct symtab *symtab,
-				      const char *name, domain_enum domain,
-				      symbol_found_callback_ftype *callback,
-				      void *data);
+static void iterate_over_file_blocks
+  (struct symtab *symtab, const char *name, domain_enum domain,
+   gdb::function_view<symbol_found_callback_ftype> callback);
 
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
@@ -908,83 +923,26 @@ maybe_add_address (htab_t set, struct program_space *pspace, CORE_ADDR addr)
   return 1;
 }
 
-/* A callback function and the additional data to call it with.  */
-
-struct symbol_and_data_callback
-{
-  /* The callback to use.  */
-  symbol_found_callback_ftype *callback;
-
-  /* Data to be passed to the callback.  */
-  void *data;
-};
-
-/* A helper for iterate_over_all_matching_symtabs that is used to
-   restrict calls to another callback to symbols representing inline
-   symbols only.  */
-
-static int
-iterate_inline_only (struct block_symbol sym, void *d)
-{
-  if (SYMBOL_INLINED (sym.symbol))
-    {
-      struct symbol_and_data_callback *cad
-	= (struct symbol_and_data_callback *) d;
-
-      return cad->callback (sym, cad->data);
-    }
-  return 1; /* Continue iterating.  */
-}
-
-/* Some data for the expand_symtabs_matching callback.  */
-
-struct symbol_matcher_data
-{
-  /* The lookup name against which symbol name should be compared.  */
-  const char *lookup_name;
-
-  /* The routine to be used for comparison.  */
-  symbol_name_cmp_ftype symbol_name_cmp;
-};
-
-/* A helper for iterate_over_all_matching_symtabs that is passed as a
-   callback to the expand_symtabs_matching method.  */
-
-static int
-iterate_name_matcher (const char *name, void *d)
-{
-  const struct symbol_matcher_data *data
-    = (const struct symbol_matcher_data *) d;
-
-  if (data->symbol_name_cmp (name, data->lookup_name) == 0)
-    return 1; /* Expand this symbol's symbol table.  */
-  return 0; /* Skip this symbol.  */
-}
-
 /* A helper that walks over all matching symtabs in all objfiles and
    calls CALLBACK for each symbol matching NAME.  If SEARCH_PSPACE is
    not NULL, then the search is restricted to just that program
-   space.  If INCLUDE_INLINE is nonzero then symbols representing
+   space.  If INCLUDE_INLINE is true then symbols representing
    inlined instances of functions will be included in the result.  */
 
 static void
-iterate_over_all_matching_symtabs (struct linespec_state *state,
-				   const char *name,
-				   const domain_enum domain,
-				   symbol_found_callback_ftype *callback,
-				   void *data,
-				   struct program_space *search_pspace,
-				   int include_inline)
+iterate_over_all_matching_symtabs
+  (struct linespec_state *state, const char *name, const domain_enum domain,
+   struct program_space *search_pspace, bool include_inline,
+   gdb::function_view<symbol_found_callback_ftype> callback)
 {
   struct objfile *objfile;
   struct program_space *pspace;
-  struct symbol_matcher_data matcher_data;
 
-  matcher_data.lookup_name = name;
-  matcher_data.symbol_name_cmp =
-    state->language->la_get_symbol_name_cmp != NULL
-    ? state->language->la_get_symbol_name_cmp (name)
-    : strcmp_iw;
+  /* The routine to be used for comparison.  */
+  symbol_name_cmp_ftype symbol_name_cmp
+    = (state->language->la_get_symbol_name_cmp != NULL
+       ? state->language->la_get_symbol_name_cmp (name)
+       : strcmp_iw);
 
   ALL_PSPACES (pspace)
   {
@@ -1000,20 +958,24 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
       struct compunit_symtab *cu;
 
       if (objfile->sf)
-	objfile->sf->qf->expand_symtabs_matching (objfile, NULL,
-						  iterate_name_matcher,
-						  NULL, ALL_DOMAIN,
-						  &matcher_data);
+	objfile->sf->qf->expand_symtabs_matching
+	  (objfile,
+	   NULL,
+	   [&] (const char *symbol_name)
+	   {
+	     return symbol_name_cmp (symbol_name, name) == 0;
+	   },
+	   NULL,
+	   ALL_DOMAIN);
 
       ALL_OBJFILE_COMPUNITS (objfile, cu)
 	{
 	  struct symtab *symtab = COMPUNIT_FILETABS (cu);
 
-	  iterate_over_file_blocks (symtab, name, domain, callback, data);
+	  iterate_over_file_blocks (symtab, name, domain, callback);
 
 	  if (include_inline)
 	    {
-	      struct symbol_and_data_callback cad = { callback, data };
 	      struct block *block;
 	      int i;
 
@@ -1023,7 +985,14 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 		{
 		  block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
 		  state->language->la_iterate_over_symbols
-		    (block, name, domain, iterate_inline_only, &cad);
+		    (block, name, domain, [&] (block_symbol *bsym)
+		     {
+		       /* Restrict calls to CALLBACK to symbols
+			  representing inline symbols only.  */
+		       if (SYMBOL_INLINED (bsym->symbol))
+			 return callback (bsym);
+		       return true;
+		     });
 		}
 	    }
 	}
@@ -1052,16 +1021,16 @@ get_current_search_block (void)
 /* Iterate over static and global blocks.  */
 
 static void
-iterate_over_file_blocks (struct symtab *symtab,
-			  const char *name, domain_enum domain,
-			  symbol_found_callback_ftype *callback, void *data)
+iterate_over_file_blocks
+  (struct symtab *symtab, const char *name, domain_enum domain,
+   gdb::function_view<symbol_found_callback_ftype> callback)
 {
   struct block *block;
 
   for (block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
        block != NULL;
        block = BLOCK_SUPERBLOCK (block))
-    LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback, data);
+    LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback);
 }
 
 /* A helper for find_method.  This finds all methods in type T which
@@ -1250,7 +1219,8 @@ decode_line_2 (struct linespec_state *self,
 	       struct symtabs_and_lines *result,
 	       const char *select_mode)
 {
-  char *args, *prompt;
+  char *args;
+  const char *prompt;
   int i;
   struct cleanup *old_chain;
   VEC (const_char_ptr) *filters = NULL;
@@ -1706,8 +1676,9 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
     return;
 
   /* Save everything as an explicit location.  */
-  canon = state->canonical->location
+  state->canonical->location
     = new_explicit_location (&ls->explicit_loc);
+  canon = state->canonical->location.get ();
   explicit_loc = get_explicit_location (canon);
 
   if (explicit_loc->label_name != NULL)
@@ -2596,8 +2567,6 @@ decode_line_with_current_source (char *string, int flags)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line cursal;
-  struct event_location *location;
-  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
@@ -2606,15 +2575,14 @@ decode_line_with_current_source (char *string, int flags)
      and get a default source symtab+line or it will recursively call us!  */
   cursal = get_current_source_symtab_and_line ();
 
-  location = string_to_event_location (&string, current_language);
-  cleanup = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, flags, NULL,
+  event_location_up location = string_to_event_location (&string,
+							 current_language);
+  sals = decode_line_1 (location.get (), flags, NULL,
 			cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
 
-  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2624,25 +2592,23 @@ struct symtabs_and_lines
 decode_line_with_last_displayed (char *string, int flags)
 {
   struct symtabs_and_lines sals;
-  struct event_location *location;
-  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
 
-  location = string_to_event_location (&string, current_language);
-  cleanup = make_cleanup_delete_event_location (location);
+  event_location_up location = string_to_event_location (&string,
+							 current_language);
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location, flags, NULL,
+    sals = decode_line_1 (location.get (), flags, NULL,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (location, flags, NULL, (struct symtab *) NULL, 0);
+    sals = decode_line_1 (location.get (), flags, NULL,
+			  (struct symtab *) NULL, 0);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
 
-  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2760,62 +2726,76 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
   return values;
 }
 
-/* An instance of this type is used when collecting prefix symbols for
-   decode_compound.  */
+namespace {
 
-struct decode_compound_collector
+/* A function object that serves as symbol_found_callback_ftype
+   callback for iterate_over_symbols.  This is used by
+   lookup_prefix_sym to collect type symbols.  */
+class decode_compound_collector
 {
-  /* The result vector.  */
-  VEC (block_symbol_d) *symbols;
-
-  /* A hash table of all symbols we found.  We use this to avoid
-     adding any symbol more than once.  */
-  htab_t unique_syms;
-
+public:
   decode_compound_collector ()
-  : symbols (NULL),
-    unique_syms (NULL)
+    : m_symbols (NULL)
   {
+    m_unique_syms = htab_create_alloc (1, htab_hash_pointer,
+				       htab_eq_pointer, NULL,
+				       xcalloc, xfree);
   }
 
   ~decode_compound_collector ()
   {
-    if (unique_syms != NULL)
-      htab_delete (unique_syms);
+    if (m_unique_syms != NULL)
+      htab_delete (m_unique_syms);
   }
+
+  /* Releases ownership of the collected symbols and returns them.  */
+  VEC (block_symbol_d) *release_symbols ()
+  {
+    VEC (block_symbol_d) *res = m_symbols;
+    m_symbols = NULL;
+    return res;
+  }
+
+  /* Callable as a symbol_found_callback_ftype callback.  */
+  bool operator () (block_symbol *bsym);
+
+private:
+  /* A hash table of all symbols we found.  We use this to avoid
+     adding any symbol more than once.  */
+  htab_t m_unique_syms;
+
+  /* The result vector.  */
+  VEC (block_symbol_d) *m_symbols;
 };
 
-/* A callback for iterate_over_symbols that is used by
-   lookup_prefix_sym to collect type symbols.  */
-
-static int
-collect_one_symbol (struct block_symbol block_sym, void *d)
+bool
+decode_compound_collector::operator () (block_symbol *bsym)
 {
-  struct decode_compound_collector *collector
-    = (struct decode_compound_collector *) d;
   void **slot;
   struct type *t;
-  struct symbol *sym = block_sym.symbol;
+  struct symbol *sym = bsym->symbol;
 
   if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
-    return 1; /* Continue iterating.  */
+    return true; /* Continue iterating.  */
 
   t = SYMBOL_TYPE (sym);
   t = check_typedef (t);
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION
       && TYPE_CODE (t) != TYPE_CODE_NAMESPACE)
-    return 1; /* Continue iterating.  */
+    return true; /* Continue iterating.  */
 
-  slot = htab_find_slot (collector->unique_syms, sym, INSERT);
+  slot = htab_find_slot (m_unique_syms, sym, INSERT);
   if (!*slot)
     {
       *slot = sym;
-      VEC_safe_push (block_symbol_d, collector->symbols, &block_sym);
+      VEC_safe_push (block_symbol_d, m_symbols, bsym);
     }
 
-  return 1; /* Continue iterating.  */
+  return true; /* Continue iterating.  */
 }
+
+} // namespace
 
 /* Return any symbols corresponding to CLASS_NAME in FILE_SYMTABS.  */
 
@@ -2825,27 +2805,16 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
 {
   int ix;
   struct symtab *elt;
-  struct decode_compound_collector collector;
-  struct cleanup *outer;
-  struct cleanup *cleanup;
-
-  collector.symbols = NULL;
-  outer = make_cleanup (VEC_cleanup (block_symbol_d), &collector.symbols);
-
-  collector.unique_syms = htab_create_alloc (1, htab_hash_pointer,
-					     htab_eq_pointer, NULL,
-					     xcalloc, xfree);
+  decode_compound_collector collector;
 
   for (ix = 0; VEC_iterate (symtab_ptr, file_symtabs, ix, elt); ++ix)
     {
       if (elt == NULL)
 	{
 	  iterate_over_all_matching_symtabs (state, class_name, STRUCT_DOMAIN,
-					     collect_one_symbol, &collector,
-					     NULL, 0);
+					     NULL, false, collector);
 	  iterate_over_all_matching_symtabs (state, class_name, VAR_DOMAIN,
-					     collect_one_symbol, &collector,
-					     NULL, 0);
+					     NULL, false, collector);
 	}
       else
 	{
@@ -2853,15 +2822,12 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  iterate_over_file_blocks (elt, class_name, STRUCT_DOMAIN,
-				    collect_one_symbol, &collector);
-	  iterate_over_file_blocks (elt, class_name, VAR_DOMAIN,
-				    collect_one_symbol, &collector);
+	  iterate_over_file_blocks (elt, class_name, STRUCT_DOMAIN, collector);
+	  iterate_over_file_blocks (elt, class_name, VAR_DOMAIN, collector);
 	}
     }
 
-  discard_cleanups (outer);
-  return collector.symbols;
+  return collector.release_symbols ();
 }
 
 /* A qsort comparison function for symbols.  The resulting order does
@@ -3073,46 +3039,62 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 
 
 
-/* This object is used when collecting all matching symtabs.  */
+namespace {
 
-struct symtab_collector
+/* This function object is a callback for iterate_over_symtabs, used
+   when collecting all matching symtabs.  */
+
+class symtab_collector
 {
-  /* The result vector of symtabs.  */
-  VEC (symtab_ptr) *symtabs;
-
-  /* This is used to ensure the symtabs are unique.  */
-  htab_t symtab_table;
-
+public:
   symtab_collector ()
-  : symtabs (NULL),
-    symtab_table (NULL)
   {
+    m_symtabs = NULL;
+    m_symtab_table = htab_create (1, htab_hash_pointer, htab_eq_pointer,
+				  NULL);
   }
 
   ~symtab_collector ()
   {
-    if (symtab_table != NULL)
-      htab_delete (symtab_table);
+    if (m_symtab_table != NULL)
+      htab_delete (m_symtab_table);
   }
+
+  /* Callable as a symbol_found_callback_ftype callback.  */
+  bool operator () (symtab *sym);
+
+  /* Releases ownership of the collected symtabs and returns them.  */
+  VEC (symtab_ptr) *release_symtabs ()
+  {
+    VEC (symtab_ptr) *res = m_symtabs;
+    m_symtabs = NULL;
+    return res;
+  }
+
+private:
+  /* The result vector of symtabs.  */
+  VEC (symtab_ptr) *m_symtabs;
+
+  /* This is used to ensure the symtabs are unique.  */
+  htab_t m_symtab_table;
 };
 
-/* Callback for iterate_over_symtabs.  */
-
-static int
-add_symtabs_to_list (struct symtab *symtab, void *d)
+bool
+symtab_collector::operator () (struct symtab *symtab)
 {
-  struct symtab_collector *data = (struct symtab_collector *) d;
   void **slot;
 
-  slot = htab_find_slot (data->symtab_table, symtab, INSERT);
+  slot = htab_find_slot (m_symtab_table, symtab, INSERT);
   if (!*slot)
     {
       *slot = symtab;
-      VEC_safe_push (symtab_ptr, data->symtabs, symtab);
+      VEC_safe_push (symtab_ptr, m_symtabs, symtab);
     }
 
-  return 0;
+  return false;
 }
+
+} // namespace
 
 /* Given a file name, return a VEC of all matching symtabs.  If
    SEARCH_PSPACE is not NULL, the search is restricted to just that
@@ -3122,33 +3104,29 @@ static VEC (symtab_ptr) *
 collect_symtabs_from_filename (const char *file,
 			       struct program_space *search_pspace)
 {
-  struct symtab_collector collector;
-  struct cleanup *cleanups;
-  struct program_space *pspace;
-
-  collector.symtabs = NULL;
-  collector.symtab_table = htab_create (1, htab_hash_pointer, htab_eq_pointer,
-					NULL);
+  symtab_collector collector;
 
   /* Find that file's data.  */
   if (search_pspace == NULL)
     {
+      struct program_space *pspace;
+
       ALL_PSPACES (pspace)
         {
 	  if (pspace->executing_startup)
 	    continue;
 
 	  set_current_program_space (pspace);
-	  iterate_over_symtabs (file, add_symtabs_to_list, &collector);
+	  iterate_over_symtabs (file, collector);
 	}
     }
   else
     {
       set_current_program_space (search_pspace);
-      iterate_over_symtabs (file, add_symtabs_to_list, &collector);
+      iterate_over_symtabs (file, collector);
     }
 
-  return collector.symtabs;
+  return collector.release_symtabs ();
 }
 
 /* Return all the symtabs associated to the FILENAME.  If SEARCH_PSPACE is
@@ -3507,9 +3485,7 @@ decode_digits_ordinary (struct linespec_state *self,
 
   for (ix = 0; VEC_iterate (symtab_ptr, ls->file_symtabs, ix, elt); ++ix)
     {
-      int i;
-      VEC (CORE_ADDR) *pcs;
-      CORE_ADDR pc;
+      std::vector<CORE_ADDR> pcs;
 
       /* The logic above should ensure this.  */
       gdb_assert (elt != NULL);
@@ -3517,7 +3493,7 @@ decode_digits_ordinary (struct linespec_state *self,
       set_current_program_space (SYMTAB_PSPACE (elt));
 
       pcs = find_pcs_for_symtab_line (elt, line, best_entry);
-      for (i = 0; VEC_iterate (CORE_ADDR, pcs, i, pc); ++i)
+      for (CORE_ADDR pc : pcs)
 	{
 	  struct symtab_and_line sal;
 
@@ -3528,8 +3504,6 @@ decode_digits_ordinary (struct linespec_state *self,
 	  sal.pc = pc;
 	  add_sal_to_sals_basic (sals, &sal);
 	}
-
-      VEC_free (CORE_ADDR, pcs);
     }
 }
 
@@ -3591,20 +3565,6 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
   return offset;
 }
 
-
-/* A callback used to possibly add a symbol to the results.  */
-
-static int
-collect_symbols (struct block_symbol sym, void *data)
-{
-  struct collect_info *info = (struct collect_info *) data;
-
-  /* In list mode, add all matching symbols, regardless of class.
-     This allows the user to type "list a_global_variable".  */
-  if (SYMBOL_CLASS (sym.symbol) == LOC_BLOCK || info->state->list_mode)
-    VEC_safe_push (block_symbol_d, info->result.symbols, &sym);
-  return 1; /* Continue iterating.  */
-}
 
 /* We've found a minimal symbol MSYMBOL in OBJFILE to associate with our
    linespec; return the SAL in RESULT.  This function should return SALs
@@ -3874,8 +3834,8 @@ add_matching_symbols_to_info (const char *name,
       if (elt == NULL)
 	{
 	  iterate_over_all_matching_symtabs (info->state, name, domain,
-					     collect_symbols, info,
-					     pspace, 1);
+					     pspace, true, [&] (block_symbol *bsym)
+	    { return info->add_symbol (bsym); });
 	  search_minsyms_for_name (info, name, pspace, NULL);
 	}
       else if (pspace == NULL || pspace == SYMTAB_PSPACE (elt))
@@ -3886,8 +3846,8 @@ add_matching_symbols_to_info (const char *name,
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  iterate_over_file_blocks (elt, name, domain,
-				    collect_symbols, info);
+	  iterate_over_file_blocks (elt, name, domain, [&] (block_symbol *bsym)
+	    { return info->add_symbol (bsym); });
 
 	  /* If no new symbols were found in this iteration and this symtab
 	     is in assembler, we might actually be looking for a label for
@@ -3944,45 +3904,17 @@ symbol_to_sal (struct symtab_and_line *result,
   return 0;
 }
 
-/* See the comment in linespec.h.  */
-
-void
-init_linespec_result (struct linespec_result *lr)
-{
-  memset (lr, 0, sizeof (*lr));
-}
-
-/* See the comment in linespec.h.  */
-
-void
-destroy_linespec_result (struct linespec_result *ls)
+linespec_result::~linespec_result ()
 {
   int i;
   struct linespec_sals *lsal;
 
-  delete_event_location (ls->location);
-  for (i = 0; VEC_iterate (linespec_sals, ls->sals, i, lsal); ++i)
+  for (i = 0; VEC_iterate (linespec_sals, sals, i, lsal); ++i)
     {
       xfree (lsal->canonical);
       xfree (lsal->sals.sals);
     }
-  VEC_free (linespec_sals, ls->sals);
-}
-
-/* Cleanup function for a linespec_result.  */
-
-static void
-cleanup_linespec_result (void *a)
-{
-  destroy_linespec_result ((struct linespec_result *) a);
-}
-
-/* See the comment in linespec.h.  */
-
-struct cleanup *
-make_cleanup_destroy_linespec_result (struct linespec_result *ls)
-{
-  return make_cleanup (cleanup_linespec_result, ls);
+  VEC_free (linespec_sals, sals);
 }
 
 /* Return the quote characters permitted by the linespec parser.  */

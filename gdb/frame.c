@@ -1270,10 +1270,27 @@ frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, regnum);
-  gdb_byte buf[MAX_REGISTER_SIZE];
+  struct value *value = frame_unwind_register_value (frame, regnum);
 
-  frame_unwind_register (frame, regnum, buf);
-  return extract_unsigned_integer (buf, size, byte_order);
+  gdb_assert (value != NULL);
+
+  if (value_optimized_out (value))
+    {
+      throw_error (OPTIMIZED_OUT_ERROR,
+		   _("Register %d was not saved"), regnum);
+    }
+  if (!value_entirely_available (value))
+    {
+      throw_error (NOT_AVAILABLE_ERROR,
+		   _("Register %d is not available"), regnum);
+    }
+
+  ULONGEST r = extract_unsigned_integer (value_contents_all (value), size,
+					 byte_order);
+
+  release_value (value);
+  value_free (value);
+  return r;
 }
 
 ULONGEST
@@ -1410,16 +1427,21 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
 	}
       else
 	{
-	  gdb_byte buf[MAX_REGISTER_SIZE];
-	  enum lval_type lval;
-	  CORE_ADDR addr;
-	  int realnum;
+	  struct value *value = frame_unwind_register_value (frame->next,
+							     regnum);
+	  gdb_assert (value != NULL);
+	  *optimizedp = value_optimized_out (value);
+	  *unavailablep = !value_entirely_available (value);
 
-	  frame_register (frame, regnum, optimizedp, unavailablep,
-			  &lval, &addr, &realnum, buf);
 	  if (*optimizedp || *unavailablep)
-	    return 0;
-	  memcpy (myaddr, buf + offset, curr_len);
+	    {
+	      release_value (value);
+	      value_free (value);
+	      return 0;
+	    }
+	  memcpy (myaddr, value_contents_all (value) + offset, curr_len);
+	  release_value (value);
+	  value_free (value);
 	}
 
       myaddr += curr_len;
@@ -1460,11 +1482,15 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 	}
       else
 	{
-	  gdb_byte buf[MAX_REGISTER_SIZE];
+	  struct value *value = frame_unwind_register_value (frame->next,
+							     regnum);
+	  gdb_assert (value != NULL);
 
-	  deprecated_frame_register_read (frame, regnum, buf);
-	  memcpy (buf + offset, myaddr, curr_len);
-	  put_frame_register (frame, regnum, buf);
+	  memcpy ((char *) value_contents_writeable (value) + offset, myaddr,
+		  curr_len);
+	  put_frame_register (frame, regnum, value_contents_raw (value));
+	  release_value (value);
+	  value_free (value);
 	}
 
       myaddr += curr_len;

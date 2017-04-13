@@ -21,6 +21,7 @@
 #define COMMON_UTILS_H
 
 #include <string>
+#include <vector>
 
 /* If possible, define FUNCTION_NAME, a macro containing the name of
    the function being defined.  Since this macro may not always be
@@ -102,5 +103,9 @@ extern const char *skip_spaces_const (const char *inp);
 /* A const-correct version of the above.  */
 
 extern const char *skip_to_space_const (const char *inp);
+
+/* Assumes that V is an argv for a program, and iterates through
+   freeing all the elements.  */
+extern void free_vector_argv (std::vector<char *> &v);
 
 #endif

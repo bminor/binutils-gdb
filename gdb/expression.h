@@ -146,12 +146,12 @@ extern struct value *evaluate_subexp_standard
 
 extern void print_expression (struct expression *, struct ui_file *);
 
-extern char *op_name (struct expression *exp, enum exp_opcode opcode);
+extern const char *op_name (struct expression *exp, enum exp_opcode opcode);
 
-extern char *op_string (enum exp_opcode);
+extern const char *op_string (enum exp_opcode);
 
 extern void dump_raw_expression (struct expression *,
-				 struct ui_file *, char *);
+				 struct ui_file *, const char *);
 extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 /* In an OP_RANGE expression, either bound could be empty, indicating

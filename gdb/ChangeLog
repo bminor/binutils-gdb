@@ -1,3 +1,2259 @@
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* probe.c (parse_probes): Update.
+	* location.h (delete_event_location): Don't declare.
+	(event_location_deleter::operator()): Update.
+	* location.c (event_location_deleter::operator()): Rename from
+	delete_event_location.
+	* linespec.h (linespec_result) <location>: Change type to
+	event_location_up.
+	* linespec.c (canonicalize_linespec, event_location_to_sals)
+	(decode_objc): Update.
+	(linespec_result): Don't call delete_event_location.
+	* breakpoint.c (create_breakpoints_sal)
+	(bkpt_probe_create_sals_from_location)
+	(strace_marker_create_sals_from_location): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* linespec.h (struct linespec_result): Add constructor and
+	destructor.
+	(init_linespec_result, destroy_linespec_result)
+	(make_cleanup_destroy_linespec_result): Don't declare.
+	* linespec.c (init_linespec_result): Remove.
+	(linespec_result::~linespec_result): Rename from
+	destroy_linespec_result.  Update.
+	(cleanup_linespec_result, make_cleanup_destroy_linespec_result):
+	Remove.
+	* breakpoint.c (create_breakpoint, break_range_command)
+	(decode_location_default): Update.
+	* ax-gdb.c (agent_command_1): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_download_tracepoint): Update.
+	* python/py-breakpoint.c (bppy_get_location): Update.
+	* guile/scm-breakpoint.c (bpscm_print_breakpoint_smob)
+	(gdbscm_breakpoint_location): Update.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Update.
+	* breakpoint.h (struct breakpoint) <location, location_range_end>:
+	Change type to event_location_up.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint)
+	(breakpoint_event_location_empty_p, print_breakpoint_location)
+	(print_one_breakpoint_location, create_thread_event_breakpoint)
+	(init_breakpoint_sal, create_breakpoint)
+	(print_recreate_ranged_breakpoint, break_range_command)
+	(init_ada_exception_breakpoint, say_where): Update.
+	(base_breakpoint_dtor): Don't call delete_event_location.
+	(bkpt_print_recreate, tracepoint_print_recreate)
+	(dprintf_print_recreate, update_static_tracepoint)
+	(breakpoint_re_set_default): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-loc2c.c (compute_stack_depth_worker): Change
+	type of "to_do".  Update.
+	(compute_stack_depth): Use std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (find_instruction_backward): Use std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (objfilep): Remove typedef.
+	(reread_symbols): Use a std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (exec_direction_forward): Remove.
+	(exec_reverse_continue, mi_execute_command): Use scoped_restore.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	scoped_restore.
+	* guile/guile.c (guile_repl_command, guile_command)
+	(gdbscm_execute_gdb_command): Use scoped_restore.
+	* go-exp.y (go_parse): Use scoped_restore.
+	* d-exp.y (d_parse): Use scoped_restore.
+	* cli/cli-decode.c (cmd_func): Use scoped_restore.
+	* c-exp.y (c_parse): Use scoped_restore.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-parse.h (struct mi_parse): Add constructor, destructor.
+	(mi_parse): Update return type.
+	(mi_parse_free): Remove.
+	* mi/mi-parse.c (mi_parse::mi_parse): New constructor.
+	(mi_parse::~mi_parse): Rename from mi_parse_free.
+	(mi_parse_cleanup): Remove.
+	(mi_parse): Return a unique_ptr.  Use new.
+	* mi/mi-main.c (mi_execute_command): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* location.c (explicit_location_lex_one): Return a
+	unique_xmalloc_ptr.
+	(string_to_explicit_location): Update.  Remove cleanups.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* gnu-v3-abi.c (value_and_voffset_p): Remove typedef.
+	(compare_value_and_voffset): Change type.  Update.
+	(compute_vtable_size): Change type of "offset_vec".
+	(gnuv3_print_vtable): Use std::vector.  Remove cleanups.
+	(gnuv3_get_typeid): Remove extraneous declaration.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* charset.h (wchar_iterator): Fix comment.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* charset.c (iconv_wrapper): New class.
+	(cleanup_iconv): Remove.
+	(convert_between_encodings): Use it.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile.h (increment_reading_symtab): Update type.
+	* symfile.c (decrement_reading_symtab): Remove.
+	(increment_reading_symtab): Return a scoped_restore_tmpl<int>.
+	* psymtab.c (psymtab_to_symtab): Update.
+	* dwarf2read.c (dw2_instantiate_symtab): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* jit.c (struct jit_reader): Declare separately.  Add constructor
+	and destructor.  Change type of "handle".
+	(loaded_jit_reader): Define separately.
+	(jit_reader_load): Update.  New "new".
+	(jit_reader_unload_command): Use "delete".
+	* gdb-dlfcn.h (struct dlclose_deleter): New.
+	(gdb_dlhandle_up): New typedef.
+	(gdb_dlopen, gdb_dlsym): Update types.
+	(gdb_dlclose): Remove.
+	* gdb-dlfcn.c (gdb_dlopen): Return a gdb_dlhandle_up.
+	(gdb_dlsym): Change type of "handle".
+	(make_cleanup_dlclose): Remove.
+	(dlclose_deleter::operator()): Rename from gdb_dlclose.
+	* compile/compile-c-support.c (load_libcc): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (find_pcs_for_symtab_line): Change return type.
+	* symtab.c (find_pcs_for_symtab_line): Change return type.
+	* python/py-linetable.c (build_line_table_tuple_from_pcs): Change
+	type of "vec".  Update.
+	(ltpy_get_pcs_for_line): Update.
+	* linespec.c (decode_digits_ordinary): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (actions_command): Update.
+	* python/python.c (python_command, python_interactive_command):
+	Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands): Update.
+	* guile/guile.c (guile_command): Update.
+	* defs.h (read_command_lines, read_command_lines_1): Return
+	command_line_up.
+	(command_lines_deleter): New struct.
+	(command_line_up): New typedef.
+	* compile/compile.c (compile_code_command)
+	(compile_print_command): Update.
+	* cli/cli-script.h (get_command_line, copy_command_lines): Return
+	command_line_up.
+	(make_cleanup_free_command_lines): Remove.
+	* cli/cli-script.c (get_command_line, read_command_lines_1)
+	(copy_command_lines): Return command_line_up.
+	(while_command, if_command, read_command_lines, define_command)
+	(document_command): Update.
+	(do_free_command_lines_cleanup, make_cleanup_free_command_lines):
+	Remove.
+	* breakpoint.h (breakpoint_set_commands): Change type of
+	"commands".
+	* breakpoint.c (breakpoint_set_commands): Change type of
+	"commands".  Update.
+	(do_map_commands_command, update_dprintf_command_list)
+	(create_tracepoint_from_upload): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (scope_info): Update.
+	* spu-tdep.c (spu_catch_start): Update.
+	* python/python.c (gdbpy_decode_line): Update.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Update.
+	* python/py-breakpoint.c (bppy_init): Update.
+	* probe.c (parse_probes): Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Update.
+	* location.h (event_location_deleter): New struct.
+	(event_location_up): New typedef.
+	(new_linespec_location, new_address_location, new_probe_location)
+	(new_explicit_location, copy_event_location)
+	(string_to_event_location, string_to_event_location_basic)
+	(string_to_explicit_location): Update return type.
+	(make_cleanup_delete_event_location): Remove.
+	* location.c (new_linespec_location, new_address_location)
+	(new_probe_location, new_explicit_location, copy_event_location):
+	Return event_location_up.
+	(delete_event_location_cleanup)
+	(make_cleanup_delete_event_location): Remove.
+	(string_to_explicit_location, string_to_event_location_basic)
+	(string_to_event_location): Return event_location_up.
+	* linespec.c (canonicalize_linespec, event_location_to_sals)
+	(decode_line_with_current_source)
+	(decode_line_with_last_displayed, decode_objc): Update.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Update.
+	* completer.c (location_completer): Update.
+	* cli/cli-cmds.c (edit_command, list_command): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint)
+	(create_thread_event_breakpoint): Update.
+	(init_breakpoint_sal): Update.  Remove some dead code.
+	(create_breakpoint_sal): Change type of "location".  Update.
+	(create_breakpoints_sal, create_breakpoint, break_command_1)
+	(dprintf_command, break_range_command, until_break_command)
+	(init_ada_exception_breakpoint)
+	(strace_marker_create_sals_from_location)
+	(update_static_tracepoint, trace_command, ftrace_command)
+	(strace_command, create_tracepoint_from_upload): Update.
+	* break-catch-throw.c (re_set_exception_catchpoint): Update.
+	* ax-gdb.c (agent_command_1): Update.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add i386-go32-tdep.o.
+	* configure.tgt: Handle i[34567]86-*-go32* and
+	i[34567]86-*-msdosdjgpp*.
+	* i386-tdep.c (i386_svr4_reg_to_regnum):
+	Make extern.
+	(i386_go32_init_abi, i386_coff_osabi_sniffer): Moved to
+	i386-go32-tdep.c.
+	(_initialize_i386_tdep): DJGPP bits moved to i386-go32-tdep.c.
+	* i386-go32-tdep.c: New file.
+	* i386-tdep.h (tdesc_i386_mmx, i386_svr4_reg_to_regnum): New
+	declarations.
+
+2017-04-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aix-thread.c (pd_status2str): Change return type to const char *.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	* i386-tdep.c (i386_elf_init_abi, i386_go32_init_abi): Remove
+	calls to set_gdbarch_gnu_triplet_regexp.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/21323
+	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_wchar_t>:
+	New enum value.
+	(cplus_language_arch_info): Register cplus_primitive_type_wchar_t.
+	* gdbtypes.h (struct builtin_type) <builtin_wchar>: New field.
+	* gdbtypes.c (gdbtypes_post_init): Create the "wchar_t" type.
+	* gdbarch.sh (wchar_bit, wchar_signed): New per-arch values.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Override
+	gdbarch_wchar_bit and gdbarch_wchar_signed.
+	* alpha-tdep.c (alpha_gdbarch_init): Likewise.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* h8300-tdep.c (h8300_gdbarch_init): Likewise.
+	* i386-nto-tdep.c (i386nto_init_abi): Likewise.
+	* i386-tdep.c (i386_go32_init_abi): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* sparc64-tdep.c (sparc64_init_abi): Likewise.
+	* windows-tdep.c (windows_init_abi): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR c++/21323
+	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_char16_t,
+	cplus_primitive_type_char32_t>: New enum values.
+	(cplus_language_arch_info): Register cplus_primitive_type_char16_t
+	and cplus_primitive_type_char32_t.
+	* dwarf2read.c (read_base_type) <DW_ATE_UTF>: If bit size is 16 or
+	32, use the archtecture's built-in type for char16_t and char32_t,
+	respectively.  Otherwise, fallback to init_integer_type as before,
+	but make the type unsigned, and issue a complaint.
+	* gdbtypes.c (gdbtypes_post_init): Make char16_t and char32_t unsigned.
+
+2017-04-12  Alan Hayward  <alan.hayward@arm.com>
+
+	* m32r-tdep.c (M32R_ARG_REGISTER_SIZE): Added.
+	(m32r_push_dummy_call): Use M32R_ARG_REGISTER_SIZE.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* windows-nat.c (windows_create_inferior): Declare 'toexec' as
+	'const char *'.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c (free_vector_argv): New function.
+	* common/common-utils.h: Include <vector>.
+	(free_vector_argv): New prototype.
+	* darwin-nat.c (darwin_create_inferior): Rewrite function
+	prototype in order to constify "exec_file" and accept a
+	"std::string" for "allargs".
+	* fork-child.c: Include <vector>.
+	(breakup_args): Rewrite function, using C++.
+	(fork_inferior): Rewrite function header, constify "exec_file_arg"
+	and accept "std::string" for "allargs".  Update the code to
+	calculate "argv" based on "allargs".  Update calls to "exec_fun"
+	and "execvp".
+	* gnu-nat.c (gnu_create_inferior): Rewrite function prototype in
+	order to constify "exec_file" and accept a "std::string" for
+	"allargs".
+	* go32-nat.c (go32_create_inferior): Likewise.
+	* inf-ptrace.c (inf_ptrace_create_inferior): Likewise.
+	* infcmd.c (run_command_1): Constify "exec_file".  Use
+	"std::string" for inferior arguments.
+	* inferior.h (fork_inferior): Update prototype.
+	* linux-nat.c (linux_nat_create_inferior): Rewrite function
+	prototype in order to constify "exec_file" and accept a
+	"std::string" for "allargs".
+	* nto-procfs.c (procfs_create_inferior): Likewise.
+	* procfs.c (procfs_create_inferior): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Likewise.
+	* remote.c (extended_remote_run): Update code to accept
+	"std::string" as argument.
+	(extended_remote_create_inferior): Rewrite function prototype in
+	order to constify "exec_file" and accept a "std::string" for
+	"allargs".
+	* rs6000-nat.c (super_create_inferior): Likewise.
+	(rs6000_create_inferior): Likewise.
+	* target.h (struct target_ops) <to_create_inferior>: Likewise.
+	* windows-nat.c (windows_create_inferior): Likewise.
+
+2017-04-11  Pedro Alves  <palves@redhat.com>
+
+	* thread.c: Fix whitespace throughout.
+
+2017-04-11  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* linux-nat.c (linux_nat_detach): Remove delete_lwp call.
+
+2017-04-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* arm-tdep.c (arm_store_return_value): Use FP_REGISTER_SIZE
+
+2017-04-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21364
+	* osdata.c (info_osdata): Check if 'type' is an empty string
+	instead of NULL.
+
+2017-04-10  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (add_thread_silent, delete_thread_1, find_thread_ptid)
+	(ptid_to_global_thread_id, in_thread_list)
+	(do_captured_list_thread_ids, set_resumed, set_running)
+	(set_executing, set_stop_requested, finish_thread_state)
+	(validate_registers_access, can_access_registers_ptid)
+	(print_thread_info_1, switch_to_thread)
+	(do_restore_current_thread_cleanup)
+	(make_cleanup_restore_current_thread, thread_command)
+	(thread_name_command): Use operator== instead of ptid_equal.
+
+2017-04-10  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (struct current_thread_cleanup) <next>: Delete field.
+	(current_thread_cleanup_chain): Delete.
+	(restore_current_thread_cleanup_dtor)
+	(make_cleanup_restore_current_thread): Remove references to
+	current_thread_cleanup_chain.
+
+2017-04-10  Alan Hayward  <alan.hayward@arm.com>
+
+	* msp430-tdep.c (msp430_pseudo_register_read): Never return
+	REG_UNKNOWN.
+
+2017-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/19942
+	* gdbthread.h (thread_info::deletable): New method.
+	(thread_info::incref): New method.
+	(thread_info::decref): New method.
+	(thread_info::refcount): Move it to private.
+	* infrun.c (save_stop_context): Call inc_refcount.
+	(release_stop_context_cleanup): Likewise.
+	* thread.c (set_thread_exited): New function.
+	(init_thread_list): Delete "tp" only it is deletable, otherwise
+	call set_thread_exited.
+	(delete_thread_1): Call set_thread_exited.
+	(current_thread_cleanup) <inferior_pid>: Remove.
+	<thread>: New field.
+	(restore_current_thread_ptid_changed): Removed.
+	(do_restore_current_thread_cleanup): Adjust.
+	(restore_current_thread_cleanup_dtor): Don't call
+	find_thread_ptid.
+	(set_thread_refcount): Use dec_refcount.
+	(make_cleanup_restore_current_thread): Adjust.
+	(thread_apply_all_command): Call inc_refcount.
+	(_initialize_thread): Don't call
+	observer_attach_thread_ptid_changed.
+
+2017-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* thread.c (delete_thread_1): Hoist code on marking thread as
+	exited.
+
+2017-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-nat.c (windows_detach): Initialize ptid with
+	minus_one_ptid.
+
+2017-04-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/ptid-selftests.c: Fix erroneous assert messages.
+
+2017-04-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* bfin-tdep.c (BFIN_MAX_REGISTER_SIZE): Add.
+	(bfin_pseudo_register_read): Use BFIN_MAX_REGISTER_SIZE.
+	(bfin_pseudo_register_write): Likewise
+
+2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/ptid.h (struct ptid): Change to...
+	(class ptid_t): ... this.
+	<ptid_t>: New constructors.
+	<pid, lwp_p, lwp, tid_p, tid, is_pid, operator==, operator!=,
+	matches>: New methods.
+	<make_null, make_minus_one>: New static methods.
+	<pid>: Rename to...
+	<m_pid>: ...this.
+	<lwp>: Rename to...
+	<m_lwp>: ...this.
+	<tid>: Rename to...
+	<m_tid>: ...this.
+	(ptid_build, ptid_get_pid, ptid_get_lwp, ptid_get_tid, ptid_equal,
+	ptid_is_pid, ptid_lwp_p, ptid_tid_p, ptid_match): Take ptid arguments
+	as references, move comment to class ptid_t.
+	* common/ptid.c (null_ptid, minus_one_ptid): Initialize with
+	ptid_t static methods.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_tid,
+	ptid_equal, ptid_is_pid, ptid_lwp_p, ptid_tid_p, ptid_match):
+	Take ptid arguments as references, implement using ptid_t methods.
+	* unittests/ptid-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/ptid-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add unittests/ptid-selftests.o.
+
+2017-04-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* python/python.c (python_run_simple_file): Cast mode literal to
+	non-const char pointer as expected by PyFile_FromString.
+
+2017-04-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/ptid.c (ptid_lwp_p, ptid_tid_p): Remove comparison with
+	minus_one_ptid and null_ptid.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* warning.m4 (build_warnings): Remove -Wno-write-strings.
+	* configure: Regenerate.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* ada-exp.y (yyerror): Constify.
+	* ada-lang.c (bound_name, get_selections)
+	(ada_variant_discrim_type)
+	(ada_variant_discrim_name, ada_value_struct_elt)
+	(ada_lookup_struct_elt_type, is_unchecked_variant)
+	(ada_which_variant_applies, standard_exc, ada_get_next_arg)
+	(catch_ada_exception_command_split)
+	(catch_ada_assert_command_split, catch_assert_command)
+	(ada_op_name): Constify.
+	* ada-lang.h (ada_yyerror, get_selections)
+	(ada_variant_discrim_name, ada_value_struct_elt): Constify.
+	* arc-tdep.c (arc_print_frame_cache): Constify.
+	* arm-tdep.c (arm_skip_stub): Constify.
+	* ax-gdb.c (gen_binop, gen_struct_ref_recursive, gen_struct_ref)
+	(gen_aggregate_elt_ref): Constify.
+	* bcache.c (print_bcache_statistics): Constify.
+	* bcache.h (print_bcache_statistics): Constify.
+	* break-catch-throw.c (catch_exception_command_1):
+	* breakpoint.c (struct ep_type_description::description):
+	Constify.
+	(add_solib_catchpoint): Constify.
+	(catch_fork_command_1): Add cast.
+	(add_catch_command): Constify.
+	* breakpoint.h (add_catch_command, add_solib_catchpoint):
+	Constify.
+	* bsd-uthread.c (bsd_uthread_state): Constify.
+	* buildsym.c (patch_subfile_names): Constify.
+	* buildsym.h (next_symbol_text_func, patch_subfile_names):
+	Constify.
+	* c-exp.y (yyerror): Constify.
+	(token::oper): Constify.
+	* c-lang.h (c_yyerror, cp_print_class_member): Constify.
+	* c-varobj.c (cplus_describe_child): Constify.
+	* charset.c (find_charset_names): Add cast.
+	(find_charset_names): Constify array and add const_cast.
+	* cli/cli-cmds.c (complete_command, cd_command): Constify.
+	(edit_command): Constify.
+	* cli/cli-decode.c (lookup_cmd): Constify.
+	* cli/cli-dump.c (dump_memory_command, dump_value_command):
+	Constify.
+	(struct dump_context): Constify.
+	(add_dump_command, restore_command): Constify.
+	* cli/cli-script.c (get_command_line): Constify.
+	* cli/cli-script.h (get_command_line): Constify.
+	* cli/cli-utils.c (check_for_argument): Constify.
+	* cli/cli-utils.h (check_for_argument): Constify.
+	* coff-pe-read.c (struct read_pe_section_data): Constify.
+	* command.h (lookup_cmd): Constify.
+	* common/print-utils.c (decimal2str): Constify.
+	* completer.c (gdb_print_filename): Constify.
+	* corefile.c (set_gnutarget): Constify.
+	* cp-name-parser.y (yyerror): Constify.
+	* cp-valprint.c (cp_print_class_member): Constify.
+	* cris-tdep.c (cris_register_name, crisv32_register_name):
+	Constify.
+	* d-exp.y (yyerror): Constify.
+	(struct token::oper): Constify.
+	* d-lang.h (d_yyerror): Constify.
+	* dbxread.c (struct header_file_location::name): Constify.
+	(add_old_header_file, add_new_header_file, last_function_name)
+	(dbx_next_symbol_text, add_bincl_to_list)
+	(find_corresponding_bincl_psymtab, set_namestring)
+	(find_stab_function_addr, read_dbx_symtab, start_psymtab)
+	(dbx_end_psymtab, read_ofile_symtab, process_one_symbol):
+	* defs.h (command_line_input, print_address_symbolic)
+	(deprecated_readline_begin_hook): Constify.
+	* dwarf2read.c (anonymous_struct_prefix, dwarf_bool_name):
+	Constify.
+	* event-top.c (handle_line_of_input): Constify and add cast.
+	* exceptions.c (catch_errors): Constify.
+	* exceptions.h (catch_errors): Constify.
+	* expprint.c (print_subexp_standard, op_string, op_name)
+	(op_name_standard, dump_raw_expression, dump_raw_expression):
+	* expression.h (op_name, op_string, dump_raw_expression):
+	Constify.
+	* f-exp.y (yyerror): Constify.
+	(struct token::oper): Constify.
+	(struct f77_boolean_val::name): Constify.
+	* f-lang.c (f_word_break_characters): Constify.
+	* f-lang.h (f_yyerror): Constify.
+	* fork-child.c (fork_inferior): Add cast.
+	* frv-tdep.c (struct gdbarch_tdep::register_names): Constify.
+	(new_variant): Constify.
+	* gdbarch.sh (pstring_ptr, pstring_list): Constify.
+	* gdbarch.c: Regenerate.
+	* gdbcore.h (set_gnutarget): Constify.
+	* go-exp.y (yyerror): Constify.
+	(token::oper): Constify.
+	* go-lang.h (go_yyerror): Constify.
+	* go32-nat.c (go32_sysinfo): Constify.
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_expression): Constify.
+	* guile/scm-cmd.c (cmdscm_function): Constify.
+	* guile/scm-param.c (pascm_param_value): Constify.
+	* h8300-tdep.c (h8300_register_name, h8300s_register_name)
+	(h8300sx_register_name): Constify.
+	* hppa-tdep.c (hppa32_register_name, hppa64_register_name):
+	Constify.
+	* ia64-tdep.c (ia64_register_names): Constify.
+	* infcmd.c (construct_inferior_arguments): Constify.
+	(path_command, attach_post_wait): Constify.
+	* language.c (show_range_command, show_case_command)
+	(unk_lang_error): Constify.
+	* language.h (language_defn::la_error)
+	(language_defn::la_name_of_this): Constify.
+	* linespec.c (decode_line_2): Constify.
+	* linux-thread-db.c (thread_db_err_str): Constify.
+	* lm32-tdep.c (lm32_register_name): Constify.
+	* m2-exp.y (yyerror): Constify.
+	* m2-lang.h (m2_yyerror): Constify.
+	* m32r-tdep.c (m32r_register_names): Constify and make static.
+	* m68hc11-tdep.c (m68hc11_register_names): Constify.
+	* m88k-tdep.c (m88k_register_name): Constify.
+	* macroexp.c (appendmem): Constify.
+	* mdebugread.c (fdr_name, add_data_symbol, parse_type)
+	(upgrade_type, parse_external, parse_partial_symbols)
+	(mdebug_next_symbol_text, cross_ref, mylookup_symbol, new_psymtab)
+	(new_symbol): Constify.
+	* memattr.c (mem_info_command): Constify.
+	* mep-tdep.c (register_name_from_keyword): Constify.
+	* mi/mi-cmd-env.c (mi_cmd_env_path, _initialize_mi_cmd_env):
+	Constify.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Constify.
+	* mi/mi-cmd-var.c (mi_cmd_var_show_attributes): Constify.
+	* mi/mi-main.c (captured_mi_execute_command): Constify and add
+	cast.
+	(mi_execute_async_cli_command): Constify.
+	* mips-tdep.c (mips_register_name): Constify.
+	* mn10300-tdep.c (register_name, mn10300_generic_register_name)
+	(am33_register_name, am33_2_register_name)
+	* moxie-tdep.c (moxie_register_names): Constify.
+	* nat/linux-osdata.c (osdata_type): Constify fields.
+	* nto-tdep.c (nto_parse_redirection): Constify.
+	* objc-lang.c (lookup_struct_typedef, lookup_objc_class)
+	(lookup_child_selector): Constify.
+	(objc_methcall::name): Constify.
+	* objc-lang.h (lookup_objc_class, lookup_child_selector)
+	(lookup_struct_typedef): Constify.
+	* objfiles.c (pc_in_section): Constify.
+	* objfiles.h (pc_in_section): Constify.
+	* p-exp.y (struct token::oper): Constify.
+	(yyerror): Constify.
+	* p-lang.h (pascal_yyerror): Constify.
+	* parser-defs.h (op_name_standard): Constify.
+	(op_print::string): Constify.
+	(exp_descriptor::op_name): Constify.
+	* printcmd.c (print_address_symbolic): Constify.
+	* psymtab.c (print_partial_symbols): Constify.
+	* python/py-breakpoint.c (stop_func): Constify.
+	(bppy_get_expression): Constify.
+	* python/py-cmd.c (cmdpy_completer::name): Constify.
+	(cmdpy_function): Constify.
+	* python/py-event.c (evpy_add_attribute)
+	(gdbpy_initialize_event_generic): Constify.
+	* python/py-event.h (evpy_add_attribute)
+	(gdbpy_initialize_event_generic): Constify.
+	* python/py-evts.c (add_new_registry): Constify.
+	* python/py-finishbreakpoint.c (outofscope_func): Constify.
+	* python/py-framefilter.c (get_py_iter_from_func): Constify.
+	* python/py-inferior.c (get_buffer): Add cast.
+	* python/py-param.c (parm_constant::name): Constify.
+	* python/py-unwind.c (fprint_frame_id): Constify.
+	* python/python.c (gdbpy_parameter_value): Constify.
+	* remote-fileio.c (remote_fio_func_map): Make 'name' const.
+	* remote.c (memory_packet_config::name): Constify.
+	(show_packet_config_cmd, remote_write_bytes)
+	(remote_buffer_add_string):
+	* reverse.c (exec_reverse_once): Constify.
+	* rs6000-tdep.c (variant::name, variant::description): Constify.
+	* rust-exp.y (rustyyerror): Constify.
+	* rust-lang.c (rust_op_name): Constify.
+	* rust-lang.h (rustyyerror): Constify.
+	* serial.h (serial_ops::name): Constify.
+	* sh-tdep.c (sh_sh_register_name, sh_sh3_register_name)
+	(sh_sh3e_register_name, sh_sh2e_register_name)
+	(sh_sh2a_register_name, sh_sh2a_nofpu_register_name)
+	(sh_sh_dsp_register_name, sh_sh3_dsp_register_name)
+	(sh_sh4_register_name, sh_sh4_nofpu_register_name)
+	(sh_sh4al_dsp_register_name): Constify.
+	* sh64-tdep.c (sh64_register_name): Constify.
+	* solib-darwin.c (lookup_symbol_from_bfd): Constify.
+	* spu-tdep.c (spu_register_name, info_spu_dma_cmdlist): Constify.
+	* stabsread.c (patch_block_stabs, read_type_number)
+	(ref_map::stabs, ref_add, process_reference)
+	(symbol_reference_defined, define_symbol, define_symbol)
+	(error_type, read_type, read_member_functions, read_cpp_abbrev)
+	(read_one_struct_field, read_struct_fields, read_baseclasses)
+	(read_tilde_fields, read_struct_type, read_array_type)
+	(read_enum_type, read_sun_builtin_type, read_sun_floating_type)
+	(read_huge_number, read_range_type, read_args, common_block_start)
+	(find_name_end): Constify.
+	* stabsread.h (common_block_start, define_symbol)
+	(process_one_symbol, symbol_reference_defined, ref_add):
+	* symfile.c (get_section_index, add_symbol_file_command):
+	* symfile.h (get_section_index): Constify.
+	* target-descriptions.c (tdesc_type::name): Constify.
+	(tdesc_free_type): Add cast.
+	* target.c (find_default_run_target):
+	(add_deprecated_target_alias, find_default_run_target)
+	(target_announce_detach): Constify.
+	(do_option): Constify.
+	* target.h (add_deprecated_target_alias): Constify.
+	* thread.c (print_thread_info_1): Constify.
+	* top.c (deprecated_readline_begin_hook, command_line_input):
+	Constify.
+	(init_main): Add casts.
+	* top.h (handle_line_of_input): Constify.
+	* tracefile-tfile.c (tfile_write_uploaded_tsv): Constify.
+	* tracepoint.c (tvariables_info_1, trace_status_mi): Constify.
+	(tfind_command): Rename to ...
+	(tfind_command_1): ... this and constify.
+	(tfind_command): New function.
+	(tfind_end_command, tfind_start_command): Adjust.
+	(encode_source_string): Constify.
+	* tracepoint.h (encode_source_string): Constify.
+	* tui/tui-data.c (tui_partial_win_by_name): Constify.
+	* tui/tui-data.h (tui_partial_win_by_name): Constify.
+	* tui/tui-source.c (tui_set_source_content_nil): Constify.
+	* tui/tui-source.h (tui_set_source_content_nil): Constify.
+	* tui/tui-win.c (parse_scrolling_args): Constify.
+	* tui/tui-windata.c (tui_erase_data_content): Constify.
+	* tui/tui-windata.h (tui_erase_data_content): Constify.
+	* tui/tui-winsource.c (tui_erase_source_content): Constify.
+	* tui/tui.c (tui_enable): Add cast.
+	* utils.c (defaulted_query): Constify.
+	(init_page_info): Add cast.
+	(puts_debug, subset_compare): Constify.
+	* utils.h (subset_compare): Constify.
+	* varobj.c (varobj_format_string): Constify.
+	* varobj.h (varobj_format_string): Constify.
+	* vax-tdep.c (vax_register_name): Constify.
+	* windows-nat.c (windows_detach): Constify.
+	* xcoffread.c (process_linenos, xcoff_next_symbol_text): Constify.
+	* xml-support.c (gdb_xml_end_element): Constify.
+	* xml-tdesc.c (tdesc_start_reg): Constify.
+	* xstormy16-tdep.c (xstormy16_register_name): Constify.
+	* xtensa-tdep.c (xtensa_find_register_by_name): Constify.
+	* xtensa-tdep.h (xtensa_register_t::name): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* proc-api.c (struct trans): Constify.
+	(procfs_note): Constify.
+	* proc-events.c (struct trans, syscall_table):
+	* proc-flags.c (struct trans): Constify.
+	* proc-utils.h (procfs_note): Constify.
+	* proc-why.c (struct trans): Constify.
+	* procfs.c (dead_procinfo, find_syscall, proc_warn, proc_error)
+	(procfs_detach): Constify.
+	* sol-thread.c (struct string_map): Constify.
+	(td_err_string, td_state_string): Constify.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* proc-api.c (procfs_filename): Don't initialize
+        procfs_filename.
+	(prepare_to_trace): Assume procfs_filename is non-NULL.
+	(_initialize_proc_api): Give procfs_filename a default value here.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Constify
+	'cond_string' parameter.
+	(extract_exception_regexp): Constify 'string' parameter.
+	(catch_exception_command_1): Constify.
+	* breakpoint.c (init_catchpoint)
+	(create_fork_vfork_event_catchpoint): Constify 'cond_string'
+	parameter.
+	(ep_parse_optional_if_clause, catch_fork_command_1)
+	(catch_exec_command_1): Constify.
+	* breakpoint.h (init_catchpoint): Constify 'cond_string'
+	parameter.
+	(ep_parse_optional_if_clause): Constify.
+	* cli/cli-utils.c (remove_trailing_whitespace)
+	(check_for_argument): Constify.
+	* cli/cli-utils.h (remove_trailing_whitespace): Constify and add
+	non-const overload.
+	(check_for_argument): Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (command_line_handler): Add cast to execute_command
+	call.
+	* record-btrace.c (cmd_record_btrace_bts_start)
+	(cmd_record_btrace_pt_start, cmd_record_btrace_start)
+	(cmd_record_btrace_start): Add cast to execute_command call.
+	* record-full.c (record_full_goto_insn):
+	* record.c (record_start, record_stop): Add cast to
+	execute_command_to_string calls.
+	(cmd_record_start): Add cast to execute_command calls.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_PyArg_ParseTupleAndKeywords): New
+	static inline function.
+	* python/py-arch.c (archpy_disassemble): Constify 'keywords'
+	array and use gdb_PyArg_ParseTupleAndKeywords.
+	* python/py-cmd.c (cmdpy_init): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-inferior.c (infpy_read_memory, infpy_write_memory)
+	(infpy_search_memory): Likewise.
+	* python/py-objfile.c (objfpy_add_separate_debug_file)
+	(gdbpy_lookup_objfile): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol)
+	(gdbpy_lookup_global_symbol): Likewise.
+	* python/py-type.c (gdbpy_lookup_type): Likewise.
+	* python/py-value.c (valpy_lazy_string, valpy_string): Likewise.
+	* python/python.c (execute_gdb_command, gdbpy_write, gdbpy_flush):
+	Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_PyGetSetDef): New type.
+	* python/py-block.c (block_object_getset)
+	(breakpoint_object_getset): Now a gdb_PyGetSetDef array.
+	* python/py-event.c (event_object_getset)
+	(finish_breakpoint_object_getset): Likewise.
+	* python/py-inferior.c (inferior_object_getset): Likewise.
+	* python/py-infthread.c (thread_object_getset): Likewise.
+	* python/py-lazy-string.c (lazy_string_object_getset): Likewise.
+	* python/py-linetable.c (linetable_entry_object_getset): Likewise.
+	* python/py-objfile.c (objfile_getset): Likewise.
+	* python/py-progspace.c (pspace_getset): Likewise.
+	* python/py-record-btrace.c (btpy_insn_getset, btpy_call_getset):
+	Likewise.
+	* python/py-record.c (recpy_record_getset): Likewise.
+	* python/py-symbol.c (symbol_object_getset): Likewise.
+	* python/py-symtab.c (symtab_object_getset, sal_object_getset):
+	Likewise.
+	* python/py-type.c (type_object_getset, field_object_getset):
+	Likewise.
+	* python/py-value.c (value_object_getset): Likewise.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_PyObject_CallMethod)
+	(gdb_PyErr_NewException, gdb_PySys_GetObject, gdb_PySys_SetPath):
+	New functions.
+	(GDB_PYSYS_SETPATH_CHAR, PyObject_CallMethod, PyErr_NewException)
+	(PySys_GetObject, PySys_SetPath): New macros.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-cmd-info.c (mi_cmd_info_os): Call info_osdata instead of
+	info_osdata_command.
+	* osdata.c (info_osdata_command): Rename to ...
+	(info_osdata): ... this.  Constify 'type' parameter, and remove
+	the 'from_tty' parameter.  Accept NULL TYPE.
+	(info_osdata_command): New function.
+	* osdata.h (info_osdata_command): Remove declaration.
+	(info_osdata): New declaration.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1, mi_cmd_break_insert)
+	(mi_cmd_dprintf_insert, mi_cmd_break_passcount)
+	(mi_cmd_break_watch, mi_cmd_break_commands): Constify 'command'
+	parameter.
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert, mi_cmd_catch_exception)
+	(mi_cmd_catch_load, mi_cmd_catch_unload): Constify cmd' parameter.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Constify 'command'
+	parameter.
+	* mi/mi-cmd-env.c (mi_cmd_env_pwd, mi_cmd_env_cd, mi_cmd_env_path)
+	(mi_cmd_env_dir, mi_cmd_inferior_tty_set, _cmd_inferior_tty_show)
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file)
+	(mi_cmd_file_list_exec_source_files)
+	(mi_cmd_file_list_shared_libraries): Constify 'command' parameter.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions)
+	(mi_cmd_info_gdb_mi_command, mi_cmd_info_os): Constify 'command'
+	parameter.
+	* mi/mi-cmd-stack.c (mi_cmd_enable_frame_filters)
+	(mi_cmd_stack_list_frames, mi_cmd_stack_info_depth)
+	(mi_cmd_stack_list_locals, mi_cmd_stack_list_args)
+	(mi_cmd_stack_list_variables, mi_cmd_stack_select_frame)
+	(mi_cmd_stack_info_frame): Constify 'command' parameter.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_get)
+	(mi_cmd_target_file_put, mi_cmd_target_file_delete): Constify
+	'command' parameter.
+	* mi/mi-cmd-var.c (mi_cmd_var_create, mi_cmd_var_delete)
+	(mi_cmd_var_set_format, mi_cmd_var_set_visualizer)
+	(mi_cmd_var_set_frozen, mi_cmd_var_show_format)
+	(mi_cmd_var_info_num_children, mi_cmd_var_list_children)
+	(mi_cmd_var_info_type, mi_cmd_var_info_path_expression)
+	(mi_cmd_var_info_expression, mi_cmd_var_show_attributes)
+	(mi_cmd_var_evaluate_expression, mi_cmd_var_assign)
+	(mi_cmd_var_update, mi_cmd_enable_pretty_printing)
+	(mi_cmd_var_set_update_range): Constify 'command' parameter.
+	* mi/mi-cmds.h (mi_cmd_argv_ftype): Constify 'command' parameter.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Constify 'command'
+	parameter.
+	* mi/mi-main.c (mi_cmd_gdb_exit, mi_cmd_exec_next)
+	(mi_cmd_exec_next_instruction, mi_cmd_exec_step)
+	(mi_cmd_exec_step_instruction, mi_cmd_exec_finish)
+	(mi_cmd_exec_return ,mi_cmd_exec_jump, mi_cmd_exec_continue)
+	(mi_cmd_exec_interrupt, mi_cmd_exec_run, mi_cmd_target_detach)
+	(mi_cmd_target_flash_erase, mi_cmd_thread_select)
+	(mi_cmd_thread_list_ids, mi_cmd_thread_info)
+	(mi_cmd_list_thread_groups, mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_changed_registers)
+	(mi_cmd_data_write_register_values)
+	(mi_cmd_data_evaluate_expression, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_cmd_data_write_memory)
+	(mi_cmd_data_write_memory_bytes, mi_cmd_enable_timings)
+	(mi_cmd_list_features, mi_cmd_list_target_features)
+	(mi_cmd_add_inferior, mi_cmd_remove_inferior)
+	(mi_cmd_trace_define_variable, mi_cmd_trace_list_variables)
+	(mi_cmd_trace_find, mi_cmd_trace_save, mi_cmd_trace_start)
+	(mi_cmd_trace_status, mi_cmd_trace_stop, mi_cmd_ada_task_info)
+	(mi_cmd_trace_frame_collected): Constify 'command'
+	parameter.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Constify
+	'command' parameter.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_completer_word_break_characters): Now a const
+	array.
+	(ada_get_gdb_completer_word_break_characters): Constify.
+	* completer.c (gdb_completer_command_word_break_characters)
+	(gdb_completer_file_name_break_characters)
+	(gdb_completer_quote_characters): Now const arrays.
+	(get_gdb_completer_quote_characters): Constify.
+	(set_rl_completer_word_break_characters): New function.
+	(set_gdb_completion_word_break_characters)
+	(complete_line_internal): Use it.
+	* completer.h (get_gdb_completer_quote_characters): Constify.
+	(set_rl_completer_word_break_characters): Declare.
+	* f-lang.c (f_word_break_characters): Constify.
+	* language.c (default_word_break_characters): Constify.
+	* language.h (language_defn::la_word_break_characters): Constify.
+	(default_word_break_characters): Constify.
+	* top.c (init_main): Use set_rl_completer_word_break_characters.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* aix-thread.c (aix_thread_pid_to_str)
+	(aix_thread_extra_thread_info): Constify.
+	* bsd-kvm.c (bsd_kvm_pid_to_str): Constify.
+	* bsd-uthread.c (bsd_uthread_extra_thread_info)
+	(bsd_uthread_pid_to_str): Constify.
+	* corelow.c (core_pid_to_str): Constify.
+	* darwin-nat.c (darwin_pid_to_str): Constify.
+	* fbsd-nat.c (fbsd_pid_to_str): Constify.
+	* fbsd-tdep.c (fbsd_core_pid_to_str, gdbarch_core_pid_to_str):
+	Constify.
+	* gnu-nat.c (gnu_pid_to_str): Constify.
+	* go32-nat.c (go32_pid_to_str): Constify.
+	* i386-cygwin-tdep.c (i386_windows_core_pid_to_str): Constify.
+	* inf-ptrace.c (inf_ptrace_pid_to_str): Constify.
+	* inferior.c (inferior_pid_to_str): Constify.
+	* linux-nat.c (linux_nat_pid_to_str): Constify.
+	* linux-tdep.c (linux_core_pid_to_str): Constify.
+	* linux-thread-db.c (thread_db_pid_to_str)
+	(thread_db_extra_thread_info): Constify.
+	* nto-tdep.c (nto_extra_thread_info): Constify.
+	* nto-tdep.h (nto_extra_thread_info): Constify.
+	* obsd-nat.c (obsd_pid_to_str): Constify.
+	* procfs.c (procfs_pid_to_str): Constify.
+	* ravenscar-thread.c (ravenscar_extra_thread_info)
+	(ravenscar_pid_to_str): Constify.
+	* remote-sim.c (gdbsim_pid_to_str): Constify.
+	* remote.c (remote_threads_extra_info, remote_pid_to_str):
+	Constify.
+	* sol-thread.c (solaris_pid_to_str): Constify.
+	* sol2-tdep.c (sol2_core_pid_to_str): Constify.
+	* sol2-tdep.h (sol2_core_pid_to_str): Constify.
+	* target.c (default_pid_to_str, target_pid_to_str)
+	(normal_pid_to_str, default_pid_to_str): Constify.
+	* target.h (target_ops::to_pid_to_str)
+	(target_ops::to_extra_thread_info): Constify.
+	(target_pid_to_str, normal_pid_to_str): Constify.
+	* windows-nat.c (windows_pid_to_str): Constify.
+	* gdbarch.sh (core_pid_to_str): Constify.
+	* target-delegates.c: Regenerate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2017-04-05  Pedro Alves	 <palves@redhat.com>
+
+	* main.c (captured_main_1): Use gdb::unique_xmalloc_ptr to manage
+	the memory of the temporary warning_pre_print override.
+	* utils.c (warning_pre_print): Constify.
+	* utils.h (warning_pre_print): Constify.
+
+2017-04-05  Pedro Alves	 <palves@redhat.com>
+
+	* cli/cli-cmds.c (shell_escape): Constify 'arg' parameter.
+	(shell_command): New function.
+	(make_command): Use std::string.
+	(init_cli_cmds): Register shell_command instead of shell_escape.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (dprintf_function, dprintf_channel): Don't initialize.
+	* tracepoint.c (default_collect): Don't initialize.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* macroexp.c (macro_buffer::shared): Now a bool.
+	(init_buffer): Update.
+	(init_shared_buffer): Constify 'addr' parameter.
+	(substitute_args, expand, macro_expand, macro_expand_next): Remove
+	casts.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* arm-tdep.c (show_disassembly_style_sfunc): Constify local.
+	* disasm.c (set_disassembler_options): Constify local.
+	* i386-tdep.c (i386_print_insn): Remove cast and FIXME comment.
+
+2017-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21352
+	* tracefile.c (tsave_command): Fix argument parsing for '-r'
+	option.
+
+2017-04-05  Yao Qi  <yao.qi@linaro.org>
+
+	* frame.c (frame_unwind_register_unsigned): Call
+	frame_unwind_register_value.
+
+2017-04-05  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/thread-specific-bp.exp (check_thread_specific_breakpoint):
+	Use gdb_test_multiple, and don't match anchor.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS (Global Maintainers): Add Simon Marchi.
+	(Write After Approval): Remove Simon Marchi.
+
+2017-04-05  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_optional.h (optional::optional): Make constexpr and
+	initialize m_dummy.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-fbsd-tdep.c: Remove "bsd-uthread.h" include.
+	(amd64fbsd_jmp_buf_reg_offset): Remove.
+	(amd64fbsd_supply_uthread): Remove function.
+	(amd64fbsd_collect_uthread): Remove function.
+	(amd64fbsd_init_abi): Don't set bsd-uthread callbacks.
+	* configure.tgt (i[34567]86-*-freebsd*): Remove bsd-uthread.o.
+	(x86_64-*-freebsd*): Remove bsd-uthread.o.
+	(fbsd-nat.c): Update comment.
+	* i386-fbsd-tdep.c: Remove "bsd-uthread.h" include.
+	(i386fbsd_jmp_buf_reg_offset): Remove.
+	(i386fbsd_supply_uthread): Remove function.
+	(i386fbsd_collect_uthread): Remove function.
+	(i386fbsd_init_abi): Don't set bsd-uthread callbacks.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Remove alpha-fbsd-tdep.o.
+	(ALLDEPFILES): Remove alpha-fbsd-tdep.c
+	* NEWS: Mention that support for FreeBSD/alpha was removed.
+	* alpha-fbsd-tdep.c: Delete file.
+	* config/alpha/fbsd.mh: Delete file.
+	* configure.host: Delete alpha*-*-freebsd* and
+	alpha*-*-kfreebsd*-gnu.
+	* configure.tgt: Delete alpha*-*-freebsd* and
+	alpha*-*-kfreebsd*-gnu.
+
+2017-04-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers): Use ptid from regcache.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (lnp_state_machine): Now a class.  Initialize all
+	data fields, make them private and add "m_" prefixes.
+	(lnp_state_machine::lnp_state_machine): New ctor.
+	(record_line, check_line_address, handle_set_discriminator)
+	(handle_set_address, handle_advance_pc, handle_special_opcode)
+	(handle_advance_line, handle_set_file, handle_negate_stmt)
+	(handle_const_add_pc, handle_fixed_advance_pc, handle_copy)
+	(end_sequence, advance_line): New methods.
+	(m_gdbarch, m_record_lines_p): New fields.
+	(lnp_reader_state): Delete.
+	(dwarf_record_line): Rename to ...
+	(lnp_state_machine::record_line): ... adjust.
+	(init_lnp_state_machine): Delete.
+	(lnp_state_machine::lnp_state_machine): New.
+	(check_line_address): Rename to ...
+	(lnp_state_machine::check_line_address): This.
+	(dwarf_decode_lines_1): Remove reference to "reader_state".
+	Adjust lnp_state_machine having a non-default ctor.  Use bool.
+	State machine internal state manipulation moved to
+	lnp_state_machine methods.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/offset-type-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add offset-type-selftests.o.
+	* common/offset-type.h: New file.
+	* common/preprocessor.h: New file.
+	* common/traits.h: New file.
+	* common/valid-expr.h: New file.
+	* dwarf2expr.c: Include "common/underlying.h".  Adjust to use
+	sect_offset and cu_offset strong typedefs throughout.
+	* dwarf2expr.h: Adjust to use sect_offset and cu_offset strong
+	typedefs throughout.
+	* dwarf2loc.c: Include "common/underlying.h".  Adjust to use
+	sect_offset and cu_offset strong typedefs throughout.
+	* dwarf2read.c: Adjust to use sect_offset and cu_offset strong
+	typedefs throughout.
+	* gdbtypes.h: Include "common/offset-type.h".
+	(cu_offset): Now an offset type (strong typedef) instead of a
+	struct.
+	(sect_offset): Likewise.
+	(union call_site_parameter_u): Rename "param_offset" field to
+	"param_cu_off".
+	* unittests/offset-type-selftests.c: New file.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* common/underlying.h: New file.
+	* dwarf2read.c: Include "common/gdb_optional.h" and
+	"common/underlying.h".
+	(dir_index, file_name_index): New types.
+	(file_entry): Use them.
+	(file_entry::include): Use to_underlying.
+	(line_header::add_file_name): Use dir_index.
+	(read_formatted_entries): Use gdb::optional.  Read form before
+	writting to file_entry.
+	(dwarf_decode_line_header): Use dir_index.
+	(lnp_state_machine::current_file): Use to_underlying.
+	(lnp_state_machine::file): Change type to file_name_index.
+	(dwarf_record_line): Use to_underlying.
+	(init_lnp_state_machine): Use file_name_index.
+	(dwarf_decode_lines_1): Use dir_index and file_name_index.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_optional.h (gdb::optiona): Add operator->, operator*,
+	operator bool, has_value and get methods.
+
+2017-04-04  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct file_entry): Add ctors, and initialize all
+	fields.
+	(line_header): Initialize all data fields.  Change type of
+	standard_opcode_lengths to std::unique_ptr<unsigned char[]>.
+	Change type of include_dirs to std::vector<const char *>.  Remove
+	num_include_dirs, include_dirs_size.  Change type of file_names to
+	std::vector<file_entry>.  Remove num_file_names, file_names_size.
+	(line_header::line_header): New.
+	(line_header::add_include_dir, line_header::add_file_name): New
+	methods.
+	(line_header::include_dir_at): Remove NULL check.
+	(line_header::file_name_at): Add const overload.
+	(line_header_up): New unique_ptr typedef.
+	(dw2_get_file_names_reader): Use line_header_up.  Adjust to use
+	std::vector.  Remove free_line_header call.
+	(dwarf2_build_include_psymtabs): Use line_header_up.  Remove
+	free_line_header call.
+	(free_cu_line_header): Delete.
+	(handle_DW_AT_stmt_list, handle_DW_AT_stmt_list)
+	(setup_type_unit_groups): Use line_header_up instead of cleanups.
+	Adjust to use std::vector.
+	(free_line_header): Delete.
+	(free_line_header_voidp): Use delete.
+	(add_include_dir): Replace with ...
+	(line_header::add_include_dir): ... this method.  Use std::vector.
+	(add_file_name): Replace with ...
+	(line_header::add_file_name): ... this method.  Use std::vector.
+	(add_include_dir_stub): Delete.
+	(read_formatted_entries): Remove memset.
+	(dwarf_decode_line_header): Return a line_header_up instead of a
+	raw pointer.  Remove cleanup handling.  Pass lambdas to
+	read_formatted_entries.  Adjust to use line_header methods.
+	(dwarf_decode_lines_1): Adjust to use line_header methods.
+	(dwarf_decode_lines, file_file_name, file_full_name): Adjust to
+	use std::vector.
+
+2017-04-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote.c (set_general_thread, set_continue_thread): Use ptid_t
+	instead of struct ptid.
+
+2017-05-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* frame.c (get_frame_register_bytes): Unwind using value.
+	(put_frame_register_bytes): Likewise.
+
+2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* auto-load.c (auto_load_section_scripts): Check SEC_HAS_CONTENTS.
+
+2017-03-29  Yao Qi  <yao.qi@linaro.org>
+
+	* gdbthread.h (struct thread_info): Declare constructor and
+	destructor.  Add some in-class member initializers.
+	* thread.c (free_thread): Remove.
+	(init_thread_list): Call delete instead of free_thread.
+	(new_thread): Call thread_info constructor.
+	(thread_info::thread_info): New function.
+	(thread_info::~thread_info): New function.
+	(delete_thread_1): Call delete instead of free_thread.
+	(make_cleanup_restore_current_thread): Move tp and frame to
+	inner block.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_frame_cache): Add support for prologue analysis.
+	(arc_skip_prologue): Likewise.
+	(arc_make_frame_cache): Likewise.
+	(arc_pv_get_operand): New function.
+	(arc_is_in_prologue): Likewise.
+	(arc_analyze_prologue): Likewise.
+	(arc_print_frame_cache): Likewise.
+	(MAX_PROLOGUE_LENGTH): New constant.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* configure.tgt: Add arc-insn.o.
+	* arc-tdep.c (arc_delayed_print_insn): Make non-static.
+	(dump_arc_instruction_command): New function.
+	(arc_fprintf_disasm): Likewise.
+	(arc_disassemble_info): Likewise.
+	(arc_insn_get_operand_value): Likewise.
+	(arc_insn_get_operand_value_signed): Likewise.
+	(arc_insn_get_memory_base_reg): Likewise.
+	(arc_insn_get_memory_offset): Likewise.
+	(arc_insn_get_branch_target): Likewise.
+	(arc_insn_dump): Likewise.
+	(arc_insn_get_linear_next_pc): Likewise.
+	* arc-tdep.h (arc_delayed_print_insn): Add function declaration.
+	(arc_disassemble_info): Likewise.
+	(arc_insn_get_branch_target): Likewise.
+	(arc_insn_get_linear_next_pc): Likewise.
+	* NEWS: Mention new "maint print arc arc-instruction".
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep (maintenance_print_arc_list): New variable.
+	(maintenance_print_arc_command): New function.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (core_v2_register_names, core_arcompact_register_names)
+	Add "limm" and "reserved".
+	(arc_cannot_fetch_register, arc_cannot_store_register): Add
+	ARC_RESERVED_REGNUM and ARC_LIMM_REGNUM.
+	* arc-tdep.h (arc_regnum): Likewise.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
+	for THREADPTR register.
+	(supply_gregset_reg): Call regcache_raw_supply for THREADPTR
+	register.
+	* xtensa-tdep.c (XTENSA_DBREGN_UREG): New definition.
+	(xtensa_derive_tdep): Initialize tdep->threadptr_regnum.
+	* xtensa-tdep.h (gdbarch_tdep::threadptr_regnum): New field.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Treat all
+	registers above gdbarch_num_regs (gdbarch) as privileged in
+	call0 ABI.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-nat.c (fill_gregset): Call regcache_raw_collect
+	for a single specified register or for all registers in
+	a0_base..a0_base + C0_NREGS range.
+	(supply_gregset_reg): Call regcache_raw_supply for a single
+	specified register or for all registers in a0_base..a0_base +
+	C0_NREGS range.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* arch/xtensa.h (C0_NREGS): Add definition.
+	* xtensa-tdep.c (C0_NREGS): Remove definition.
+
+2017-03-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.c (xtensa_scan_prologue, call0_analyze_prologue):
+	Drop xtensa_default_isa initialization.
+	(xtensa_gdbarch_init): Initialize xtensa_default_isa.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (file_entry) <dir_index>: Add comment.
+	(file_entry::include_dir): New method.
+	(line_header::include_dir_at, line_header::file_name_at): New
+	methods.
+	(setup_type_unit_groups, setup_type_unit_groups)
+	(psymtab_include_file_name): Simplify using the new methods.
+	(lnp_state_machine) <the_line_header>: New field.
+	<file>: Add comment.
+	(lnp_state_machine::current_file): New method.
+	(dwarf_record_line): Simplify using the new methods.
+	(init_lnp_state_machine): Initialize the "the_line_header" field.
+	(dwarf_decode_lines_1, dwarf_decode_lines, file_file_name):
+	Simplify using the new methods.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (make_empty): Delete.
+	(demangler_special, nested_name, ptr_operator, array_indicator)
+	(direct_declarator, declarator_1): Use fill_comp instead of
+	make_empty.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.h (gdb_xml_debug): Pass a "first-to-check" argument
+	to ATTRIBUTE_PRINTF.
+	* solib-target.c (library_list_start_list): Print "string" not
+	"version".
+	* xml-tdesc.c (tdesc_start_field): Pass "field_name" to
+	gdb_xml_error call.
+
+2017-03-27  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct file_and_directory): New.
+	(dwarf2_get_dwz_file): Adjust to use std::string.
+	(dw2_get_file_names_reader): Adjust to use file_and_directory.
+	(find_file_and_directory): Adjust to return a file_and_directory
+	object.
+	(read_file_scope): Adjust to use file_and_directory.  Remove
+	make_cleanup/do_cleanups calls.
+	(open_and_init_dwp_file): Adjust to use std::string.  Remove
+	make_cleanup/do_cleanups calls.
+	* python/python.c (do_start_initialization): Adjust to ldirname
+	returning a std::string.
+	* utils.c (ldirname): Now returns a std::string.
+	* utils.h (ldirname): Change return type to std::string.
+	* xml-syscall.c (xml_init_syscalls_info): Adjust to ldirname
+	returning a std::string.
+	* xml-tdesc.c (file_read_description_xml): Likewise.
+
+2017-03-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache_debug_print_register): New function.
+	* regcache.h (regcache_debug_print_register): New declaration.
+	* target.c (debug_print_register): Remove.
+	(target_fetch_registers): Call regcache_debug_print_register.
+	(target_store_registers): Likewise.
+
+2017-03-24  Pádraig Brady  <pbrady@fb.com>
+
+	* dwarf2read.c (setup_type_unit_groups): Ensure dir_index doesn't
+	reference beyond the 'lh->include_dirs' array before accessing to
+	it.
+	(psymtab_include_file_name): Likewise.
+	(dwarf_decode_lines_1): Likewise.
+	(dwarf_decode_lines): Likewise.
+	(file_file_name): Likewise.
+
+2017-03-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* fbsd-tdep.c (fbsd_corefile_thread): Don't set/restore
+	inferior_ptid.
+	* proc-service.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* regcache.c (regcache_raw_update, regcache_raw_write): Likewise.
+	* sol-thread.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* target.c (target_fetch_registers, target_store_registers):
+	Remove asserts.
+
+2017-03-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* sol-thread.c (sol_thread_store_registers): Remove regcache calls.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_process_record_test): Declare.
+	(_initialize_aarch64_tdep): Register it.
+	(aarch64_record_load_store): Handle PRFM instruction.
+	(aarch64_process_record_test): New function.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_record_load_store): Fix code
+	indentation.
+
+2017-03-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Remove AARCH64_RECORD_FAILURE.
+
+2017-03-23  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	python/python.c (do_start_initialization): Fix memory leak.
+
+2017-03-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Get pid from ptid
+	using get_ptrace_pid.
+	* linux-nat.c (linux_nat_xfer_partial): Don't set/restore
+	inferior_ptid.
+	(linux_proc_xfer_partial, linux_proc_xfer_spu): Use lwp of
+	inferior_ptid instead of pid.
+
+2017-03-22  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Wrap locally used classes in anonymous
+	namespace.
+	* arm-tdep.c: Likewise.
+	* linespec.c: Likewise.
+	* ui-out.c: Likewise.
+
+2017-03-22  Jonah Graham  <jonah@kichwacoders.com>
+
+	PR gdb/19637
+	* python/lib/gdb/printer/bound_registers.py: Import sys.
+
+2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* windows-nat.c (do_windows_fetch_inferior_registers): Add
+	windows_thread_info parameter and use it instead of
+	current_thread.
+	(windows_fetch_inferior_registers): Don't set current_thread,
+	pass the thread to do_windows_fetch_inferior_registers.  Use
+	ptid from regcache instead of inferior_ptid.
+	(do_windows_store_inferior_registers): Add windows_thread_info
+	parameter and use it instead of current_thread.
+	(windows_store_inferior_registers): Don't set current_thread,
+	pass the thread to do_windows_store_inferior_registers.  Use
+	ptid from regcache instead of inferior_ptid.
+
+2017-03-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ser-mingw.c (ser_windows_raw): Remove reference to
+	struct serial::current_timeout.
+
+2017-03-21  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20928
+	* gdb/sparc-tdep.h (gdbarch_tdep) <sparc64_ccr_type>: New field.
+	* gdb/sparc64-tdep.c (sparc64_ccr_type): New function.
+	(sparc64_fsr_type): Fix %fsr decoding.
+
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (btpy_insn_data): Change return type
+	for Python 2.
+
+2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* spu-linux-nat.c (spu_fetch_inferior_registers,
+	spu_store_inferior_registers): Use ptid from regcache, set and
+	restore inferior_ptid.
+	* spu-multiarch.c (spu_fetch_registers, spu_store_registers):
+	Likewise.
+
+2017-03-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-linux-nat.c (fetch_register, store_register,
+	i386_linux_fetch_inferior_registers,
+	i386_linux_store_inferior_registers): Use ptid from regcache.
+	* ia64-linux-nat.c (ia64_linux_fetch_register,
+	ia64_linux_store_register): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register,
+	inf_ptrace_store_register): Likewise.
+	* m32r-linux-nat.c (m32r_linux_fetch_inferior_registers,
+	m32r_linux_store_inferior_registers): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_fetch_inferior_registers,
+	m68kbsd_store_inferior_registers): Likewise.
+	* m68k-linux-nat.c (fetch_register, store_register,
+	m68k_linux_fetch_inferior_registers,
+	m68k_linux_store_inferior_registers): Likewise.
+	* m88k-bsd-nat.c (m88kbsd_fetch_inferior_registers,
+	m88kbsd_store_inferior_registers): Likewise.
+	* mips-fbsd-nat.c (mips_fbsd_fetch_inferior_registers,
+	mips_fbsd_store_inferior_registers): Likewise.
+	* mips-linux-nat.c (mips64_linux_regsets_fetch_registers,
+	mips64_linux_regsets_store_registers): Likewise.
+	* mips-nbsd-nat.c (mipsnbsd_fetch_inferior_registers,
+	mipsnbsd_store_inferior_registers): Likewise.
+	* mips-obsd-nat.c (mips64obsd_fetch_inferior_registers,
+	mips64obsd_store_inferior_registers): Likewise.
+	* nto-procfs.c (procfs_fetch_registers, procfs_store_registers):
+	Likewise.
+	* ppc-fbsd-nat.c (ppcfbsd_fetch_inferior_registers,
+	ppcfbsd_store_inferior_registers): Likewise.
+	* ppc-linux-nat.c (ppc_linux_fetch_inferior_registers,
+	ppc_linux_store_inferior_registers): Likewise.
+	* ppc-nbsd-nat.c (ppcnbsd_fetch_inferior_registers,
+	ppcnbsd_store_inferior_registers): Likewise.
+	* ppc-obsd-nat.c (ppcobsd_fetch_registers,
+	ppcobsd_store_registers): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers):
+	Likewise.
+	* ravenscar-thread.c (ravenscar_fetch_registers,
+	ravenscar_store_registers, ravenscar_prepare_to_store):
+	Likewise.
+	* record-btrace.c (record_btrace_fetch_registers,
+	record_btrace_store_registers, record_btrace_prepare_to_store):
+	Likewise.
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register):
+	Lookup inferior using ptid from regcache, instead of
+	current_inferior.
+	* remote.c (remote_fetch_registers, remote_store_registers): Use
+	ptid from regcache.
+	* rs6000-nat.c (fetch_register, store_register): Likewise.
+	* s390-linux-nat.c (s390_linux_fetch_inferior_registers,
+	s390_linux_store_inferior_registers): Likewise.
+	* sh-nbsd-nat.c (shnbsd_fetch_inferior_registers,
+	shnbsd_store_inferior_registers): Likewise.
+	* sol-thread.c (sol_thread_fetch_registers,
+	sol_thread_store_registers): Likewise.
+	* sparc-nat.c (sparc_fetch_inferior_registers,
+	sparc_store_inferior_registers): Likewise.
+	* tilegx-linux-nat.c (fetch_inferior_registers,
+	store_inferior_registers): Likewise.
+	* vax-bsd-nat.c (vaxbsd_fetch_inferior_registers,
+	vaxbsd_store_inferior_registers): Likewise.
+	* xtensa-linux-nat.c (fetch_gregs, store_gregs, fetch_xtregs,
+	store_xtregs): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* NEWS: Mention support for rvalue references in GDB and python.
+	* doc/gdb.texinfo (C Plus Plus Expressions): Mention that GDB
+	supports both lvalue and rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* gdbtypes.c (rank_one_type): Implement overloading
+	resolution rules regarding rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* aarch64-tdep.c (aarch64_type_align)
+	(aarch64_extract_return_value, aarch64_store_return_value): Change
+	lvalue reference type checks to general reference type checks.
+	* amd64-tdep.c (amd64_classify): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_passed_by_integer_register):
+	Likewise.
+	* arm-tdep.c (arm_type_align, arm_extract_return_value)
+	(arm_store_return_value): Likewise.
+	* ax-gdb.c (gen_fetch, gen_cast): Likewise.
+	* c-typeprint.c (c_print_type): Likewise.
+	* c-varobj.c (adjust_value_for_child_access, c_value_of_variable)
+	(cplus_number_of_children, cplus_describe_child): Likewise.
+	* compile/compile-c-symbols.c (generate_vla_size): Likewise.
+	* completer.c (expression_completer): Likewise.
+	* cp-support.c (make_symbol_overload_list_adl_namespace):
+	Likewise.
+	* darwin-nat-info.c (info_mach_region_command): Likewise.
+	* dwarf2loc.c (entry_data_value_coerce_ref)
+	(value_of_dwarf_reg_entry): Likewise.
+	* eval.c (ptrmath_type_p, evaluate_subexp_standard)
+	(evaluate_subexp_for_address, evaluate_subexp_for_sizeof):
+	Likewise.
+	* findvar.c (extract_typed_address, store_typed_address):
+	Likewise.
+	* gdbtypes.c (rank_one_type): Likewise.
+	* hppa-tdep.c (hppa64_integral_or_pointer_p): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* language.c (pointer_type): Likewise.
+	* m32c-tdep.c (m32c_reg_arg_type, m32c_m16c_address_to_pointer):
+	Likewise.
+	* m88k-tdep.c (m88k_integral_or_pointer_p): Likewise.
+	* mn10300-tdep.c (mn10300_type_align): Likewise.
+	* msp430-tdep.c (msp430_push_dummy_call): Likewise.
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value)
+	(ppc64_sysv_abi_push_param, ppc64_sysv_abi_return_value):
+	Likewise.
+	* printcmd.c (print_formatted, x_command): Likewise.
+	* python/py-type.c (typy_get_composite, typy_template_argument):
+	Likewise.
+	* python/py-value.c (valpy_referenced_value)
+	(valpy_get_dynamic_type, value_has_field): Likewise.
+	* s390-linux-tdep.c (s390_function_arg_integer): Likewise.
+	* sparc-tdep.c (sparc_integral_or_pointer_p): Likewise.
+	* sparc64-tdep.c (sparc64_integral_or_pointer_p): Likewise.
+	* spu-tdep.c (spu_scalar_value_p): Likewise.
+	* symtab.c (lookup_symbol_aux): Likewise.
+	* typeprint.c (whatis_exp, print_type_scalar): Likewise.
+	* valarith.c (binop_types_user_defined_p, unop_user_defined_p):
+	Likewise.
+	* valops.c (value_cast_pointers, value_cast)
+	(value_reinterpret_cast, value_dynamic_cast, value_addr, typecmp)
+	(value_struct_elt, value_struct_elt_bitpos)
+	(value_find_oload_method_list, find_overload_match)
+	(value_rtti_indirect_type): Likewise.
+	* valprint.c (val_print_scalar_type_p, generic_val_print):
+	Likewise.
+	* value.c (value_actual_type, value_as_address, unpack_long)
+	(pack_long, pack_unsigned_long, coerce_ref_if_computed)
+	(coerce_ref): Likewise.
+	* varobj.c (varobj_get_value_type): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* doc/python.texi (Types in Python): Add TYPE_CODE_RVALUE_REF to
+	table of constants.
+	* python/lib/gdb/command/explore.py: Support exploring values
+	of rvalue reference types.
+	* python/lib/gdb/types.py: Implement get_basic_type() for
+	rvalue reference types.
+	* python/py-type.c (pyty_codes) <TYPE_CODE_RVALUE_REF>: New
+	constant.
+	* python/py-value.c (valpy_getitem): Add an rvalue reference
+	check.
+	(valpy_reference_value): Add new parameter "refcode".
+	(valpy_lvalue_reference_value, valpy_rvalue_reference_value):
+	New wrappers for valpy_reference_value().
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type)
+	(gdbpy_invoke_xmethod): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* dwarf2read.c (process_die, read_type_die_1): Handle the
+	DW_TAG_rvalue_reference_type DIE.
+	(read_tag_reference_type): Add new parameter "refcode".
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* c-typeprint.c (c_print_type, c_type_print_varspec_prefix)
+	(c_type_print_modifier, c_type_print_varspec_suffix)
+	(c_type_print_base): Support printing rvalue reference types.
+	* c-valprint.c (c_val_print, c_value_print): Support printing
+	rvalue reference values.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* cp-name-parser.y (ptr_operator): Handle the '&&' token in
+	typename.
+	* cp-support.c (replace_typedefs): Handle
+	DEMANGLE_COMPONENT_RVALUE_REFERENCE.
+	* python/py-type.c (typy_lookup_type): Likewise.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* c-exp.y (ptr_operator): Handle the '&&' token in the typename.
+	* parse.c (insert_type): Change assert statement.
+	(follow_types): Handle rvalue reference types.
+	* parser-defs.h (enum type_pieces) <tp_rvalue_reference>: New
+	constant.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* ada-lang.c (ada_evaluate_subexp): Adhere to the new
+	value_ref() interface.
+	* c-valprint.c (c_value_print): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* python/py-value.c (valpy_reference_value): Likewise.
+	* valops.c (value_cast, value_reinterpret_cast)
+	(value_dynamic_cast, typecmp): Likewise.
+	(value_ref): Parameterize by kind of return value reference type.
+	* value.h (value_ref): Add new parameter "refcode".
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* dwarf2read.c (read_tag_reference_type): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* f-exp.y: Likewise.
+	* gdbtypes.c (make_reference_type, lookup_reference_type):
+	Generalize with rvalue reference types.
+	(lookup_lvalue_reference_type, lookup_rvalue_reference_type): New
+	convenience wrappers for lookup_reference_type().
+	* gdbtypes.h (make_reference_type, lookup_reference_type): Add a
+	reference kind parameter.
+	(lookup_lvalue_reference_type, lookup_rvalue_reference_type): Add
+	wrappers for lookup_reference_type().
+	* guile/scm-type.c (gdbscm_type_reference): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+	* guile/scm-value.c (gdbscm_value_dynamic_type): Likewise.
+	* parse.c (follow_types): Likewise.
+	* python/py-type.c (typy_reference, typy_lookup_type): Likewise.
+	* python/py-value.c (valpy_get_dynamic_type, valpy_getitem):
+	Likewise.
+	* python/py-xmethods.c (gdbpy_get_xmethod_result_type)
+	(gdbpy_invoke_xmethod): Likewise.
+	* stabsread.c: Provide extra argument to make_reference_type()
+	call.
+	* valops.c (value_ref, value_rtti_indirect_type): Use
+	lookup_lvalue_reference_type() instead of lookup_reference_type().
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* gdbtypes.h (enum type_code) <TYPE_CODE_RVALUE_REF>: New constant.
+	(TYPE_IS_REFERENCE): New macro.
+	(struct type): Add rvalue_reference_type field.
+	(TYPE_RVALUE_REFERENCE_TYPE): New macro.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* NEWS: Add an entry about new '-file-list-shared-libraries' command.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries):
+	New function definition.
+	* mi/mi-cmds.c (mi_cmds): Add -file-list-shared-libraries command.
+	* mi/mi-cmds.h (mi_cmd_file_list_shared_libraries):
+	New function declaration.
+	* mi/mi-interp.c (mi_output_solib_attribs): New Function.
+	* mi/mi-interp.h: New file.
+	* solib.c (info_sharedlibrary_command): Replace for loop with
+	ALL_SO_LIBS macro
+	* solib.h (update_solib_list): New function declaration.
+	(so_list_head): Move macro.
+	* solist.h (ALL_SO_LIBS): New macro.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* infcmd.c (post_create_inferior): Remove unused argument in
+	call to solib_add.
+	* remote.c (remote_start_remote): Likewise.
+	* solib-frv.c (frv_fetch_objfile_link_map): Likewise.
+	* solib-svr4.c: (svr4_fetch_objfile_link_map): Likewise.
+	(enable_break): Likewise.
+	* solib.c (update_solib_list): Remove unused target argument
+	and its documentation.
+	(solib_add): Remove unused target argument.  Remove unused
+	argument in call to update_solib_list.
+	(info_sharedlibrary_command): Remove unused argument in call
+	to update_solib_list.
+	(sharedlibrary_command): Remove unused argument in call to
+	solib_add.
+	(handle_solib_event): Likewise.
+	(reload_shared_libraries): Likewise.
+	* solib.h (solib_add): Remove unused target argument.
+
+2017-03-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (is_rsi, is_rie): Remove functions.
+	(s390_displaced_step_fixup): Cover relative branches with the
+	default fixup handling.  This fixes lack of support for some
+	relative branch instructions.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Use
+	ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers,
+	i386_darwin_store_inferior_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* i386-bsd-nat.c (i386bsd_fetch_inferior_registers,
+	i386bsd_store_inferior_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hppa-obsd-nat.c (hppaobsd_fetch_registers,
+	hppaobsd_store_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hppa-nbsd-nat.c (hppanbsd_fetch_registers,
+	hppanbsd_store_registers): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hppa-linux-nat.c (fetch_register, store_register): Use ptid
+	from regcache.  Use get_ptrace_pid.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* corelow.c (get_core_register_section): Use ptid from regcache,
+	update doc.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* bsd-uthread.c (bsd_uthread_fetch_registers,
+	bsd_uthread_store_registers): Use ptid from regcache, set and
+	restore inferior_ptid.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-nbsd-nat.c (fetch_register, fetch_regs, fetch_fp_register,
+	fetch_fp_regs, store_register, store_regs, store_fp_register,
+	store_fp_regs): Use ptid from regcache.
+
+2017-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-linux-nat.c (fetch_fpregs, store_fpregs, fetch_regs,
+	store_regs, fetch_wmmx_regs, store_wmmx_regs, fetch_vfp_regs,
+	store_vfp_regs): Use ptid from regcache.
+
+2017-03-17  Pedro Alves  <palves@redhat.com>
+
+	PR remote/21188
+	* ser-base.c (ser_base_wait_for): Add comment.
+	(do_ser_base_readchar): Improve comment based on the ser-unix.c's
+	version.
+	* ser-unix.c (hardwire_raw): Remove reference to
+	scb->current_timeout.
+	(wait_for, do_hardwire_readchar, hardwire_readchar): Delete.
+	(hardwire_ops): Install ser_base_readchar instead of
+	hardwire_readchar.
+	* serial.h (struct serial) <current_timeout, timeout_remaining>:
+	Remove fields.
+
+2017-03-17  Jonah Graham  <jonah@kichwacoders.com>
+
+	PR gdb/19637
+	* python/lib/gdb/printer/bound_registers.py: Add support for
+	Python 3.
+
+2017-03-16  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (indirect_synthetic_pointer): Get data type of
+	pointed-to DIE and pass it to dwarf2_evaluate_loc_desc_full.
+	(dwarf2_evaluate_loc_desc_full): New parameter subobj_type; rename
+	byte_offset to subobj_byte_offset.  Fix the handling of
+	DWARF_VALUE_STACK on big-endian targets when coming via an
+	implicit pointer.
+	(dwarf2_evaluate_loc_desc): Adjust call to
+	dwarf2_evaluate_loc_desc_full.
+	* dwarf2loc.h (dwarf2_fetch_die_type_sect_off): New declaration.
+	* dwarf2read.c (dwarf2_fetch_die_type_sect_off): New function.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (thumb_record_misc): Decode CBNZ, CBZ, REV16,
+	and REVSH instructions.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c [GDB_SELF_TEST]: include "selftests.h".
+	(arm_record_test): Declare.
+	(_initialize_arm_tdep) [GDB_SELF_TEST]: call register_self_test.
+	(thumb_record_ld_st_reg_offset): Rewrite the opcode matching to
+	align with the manual.
+	(thumb_record_misc): Adjust the code order to align with the
+	manual.
+	(thumb2_record_decode_insn_handler): Fix instruction matching.
+	(instruction_reader_thumb): New class.
+	(arm_record_test): New function.
+
+2017-03-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (abstract_memory_reader): New class.
+	(instruction_reader): New class.
+	(extract_arm_insn): Add argument 'reader'.  Callers updated.
+	(decode_insn): Likewise.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile/scm-lazy-string.c (lazy_string_smob): Clarify use of LENGTH
+	member.  Change type of TYPE member to SCM.  All uses updated.
+	(lsscm_make_lazy_string_smob): Add assert.
+	(lsscm_make_lazy_string): Flag bad length values.
+	(lsscm_elt_type): New function.
+	(gdbscm_lazy_string_to_value): Rewrite to use
+	lsscm_safe_lazy_string_to_value.
+	(lsscm_safe_lazy_string_to_value): Fix handling of TYPE_CODE_PTR.
+	* guile/scm-value.c (gdbscm_value_to_lazy_string): Flag bad length
+	values.  Fix TYPE_CODE_PTR.  Handle TYPE_CODE_ARRAY.  Handle typedefs
+	in incoming type.
+	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
+	* guile/scm-type.c (tyscm_scm_to_type): New function.
+
+2017-03-15  Doug Evans  <dje@google.com>
+
+	PR python/17728, python/18439, python/18779
+	* python/py-lazy-string.c (lazy_string_object): Clarify use of LENGTH
+	member.  Change type of TYPE member to PyObject *.  All uses updated.
+	(stpy_convert_to_value): Fix handling of TYPE_CODE_PTR.
+	(gdbpy_create_lazy_string_object): Flag bad length values.
+	Handle TYPE_CODE_ARRAY with possibly different user-provided length.
+	Handle typedefs in incoming type.
+	(stpy_lazy_string_elt_type): New function.
+	(gdbpy_extract_lazy_string): Call it.
+	* python/py-value.c (valpy_lazy_string): Flag bad length values.
+	Fix handling of TYPE_CODE_PTR.  Handle TYPE_CODE_ARRAY.  Handle
+	typedefs in incoming type.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile/guile-internal.h (tyscm_scm_to_type): Declare.
+	* guile/scm-type.c (tyscm_scm_to_type): New function.
+
+2017-03-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* inf-ptrace.c (inf_ptrace_peek_poke): Change the type to
+	"ULONGEST" for "skip".
+
+2017-03-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21220
+	* inf-ptrace.c (inf_ptrace_xfer_partial): In "case
+	TARGET_OBJECT_MEMORY", extract the logic for ptrace peek/poke...
+	(inf_ptrace_peek_poke): ...here.  New function.  Now also loop
+	over ptrace peek/poke until end of buffer or error.
+
+2017-03-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* parse.c (length_of_subexp): Make static.
+	* parser-defs.h (length_of_subexp): Remove.
+
+2017-03-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-nat.c (linux_proc_xfer_partial): Handle write operations
+	as well.
+
+2017-03-14  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_demangled_name_to_comp): Update comment.
+	(main): Use std::unique_ptr.  Remove calls to
+	cp_demangled_name_parse_free.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* alpha-bsd-nat.c (alphabsd_fetch_inferior_registers,
+	alphabsd_store_inferior_registers): Use regcache->ptid instead
+	of inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aix-thread.c (aix_thread_fetch_registers,
+	aix_thread_store_registers): Use regcache->ptid instead of
+	inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aarch64-linux-nat.c (fetch_gregs_from_thread,
+	store_gregs_to_thread, fetch_fpregs_from_thread,
+	store_fpregs_to_thread): Use regcache->ptid instead of
+	inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers,
+	amd64_linux_fetch_inferior_registers): Use regcache->ptid
+	instead of inferior_ptid.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target.c (target_fetch_registers, target_store_registers): Add
+	assert.
+
+2017-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.h (regcache_get_ptid): New function.
+	* regcache.c (regcache_get_ptid): New function.
+
+2017-03-13  Mark Wielaard  <mark@klomp.org>
+
+	* cp-name-parser.y (make_empty): Initialize d_printing to zero.
+
+2017-03-10  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/8218
+	* c-typeprint.c (cp_type_print_method_args): Skip artificial arguments.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18360
+	* infrun.c (start_step_over, do_target_resume, resume)
+	(restart_threads): Assert we're not resuming a thread that is
+	meant to be stopped.
+	(infrun_thread_stop_requested_callback): Delete.
+	(infrun_thread_stop_requested): If the thread is internally
+	stopped, queue a pending stop event and clear the thread's
+	inline-frame state.
+	(handle_stop_requested): New function.
+	(handle_syscall_event, handle_inferior_event_1): Use
+	handle_stop_requested.
+	(handle_stop_requested): New function.
+	(handle_signal_stop): Set the thread's stop_signal here instead of
+	at caller.
+	(finish_step_over): Clear step over info unconditionally.
+	(handle_signal_stop): If the user had interrupted the event
+	thread, consider the stop a random signal.
+	(handle_signal_stop) <signal arrived while stepping over
+	breakpoint>: Don't restart threads here.
+	(stop_waiting): Don't clear step-over info here.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR 21206
+	* common/gdb_unlinker.h (unlinker::unlinker): Attribute nonnull
+	goes to argument 2, not 1.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR cli/21218
+	* top.c (gdb_readline_wrapper): Avoid passing NULL to
+	display_gdb_prompt.
+	(command_line_input): Add comment.
+
+2017-03-08  Pedro Alves  <palves@redhat.com>
+
+	PR tui/21216
+	* tui/tui-file.c (tui_file::write): New.
+	* tui/tui-file.h (tui_file): Override "write".
+	* tui/tui-io.c (do_tui_putc, update_start_line): New functions,
+	factored out from ...
+	(tui_puts): ... here.
+	(tui_putc): Use them.
+	(tui_write): New function.
+	* tui/tui-io.h (tui_write): Declare.
+
+2017-03-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Replace "environ.c" with
+	"common/environ.c".
+	(HFILES_NO_SRCDIR): Likewise, for "environ.h".
+	* environ.c: Include "common-defs.h" instead of "defs.h.  Moved
+	to...
+	* common/environ.c: ... here.
+	* environ.h: Moved to...
+	* common/environ.h: ... here.
+
+2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdbarch.sh (pstring_ptr): New static function.
+	(gdbarch_disassembler_options): Use it.
+	(gdbarch_verify_disassembler_options): Print valid_disassembler_options,
+	not valid_disassembler_option->name.
+	* gdbarch.c: Regenerate.
+
+2017-03-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/powerpc/ppc64-linux.mh (MH_CFLAGS): Delete.
+
+2017-03-07  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-regs.c (tui_restore_gdbout): Don't delete gdb_stdout.
+
+2017-03-07  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i387-tdep.h (i387_reset_bnd_regs): Add function definition.
+	* i387-tdep.c (i387_reset_bnd_regs): Add function implementation.
+	* i386-tdep.c (i386_push_dummy_call): Call i387_reset_bnd_regs.
+	* amd64-tdep.c (amd64_push_dummy_call): Call i387_reset_bnd_regs.
+
+2017-03-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* xtensa-linux-nat.c (fetch_gregs): Remove const.
+
+2017-03-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_commands): Use range-based
+	for loop.
+
+2017-03-03  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/21165
+	* ada-valprint.c (ada_val_print_ref): Call value_fetch_lazy if
+	value is lazy.
+	* valprint.c (common_val_print): Likewise.
+
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* NEWS: Mention new set/show disassembler-options commands.
+	* doc/gdb.texinfo: Document new set/show disassembler-options commands.
+	* disasm.c: Include "arch-utils.h", "gdbcmd.h" and "safe-ctype.h".
+	(prospective_options): New static variable.
+	(gdb_disassembler::gdb_disassembler): Initialize
+	m_di.disassembler_options.
+	(gdb_buffered_insn_length_init_dis): Initilize di->disassembler_options.
+	(get_disassembler_options): New function.
+	(set_disassembler_options): Likewise.
+	(set_disassembler_options_sfunc): Likewise.
+	(show_disassembler_options_sfunc): Likewise.
+	(disassembler_options_completer): Likewise.
+	(_initialize_disasm): Likewise.
+	* disasm.h (get_disassembler_options): New prototype.
+	(set_disassembler_options): Likewise.
+	* gdbarch.sh (gdbarch_disassembler_options): New variable.
+	(gdbarch_verify_disassembler_options): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* arm-tdep.c (num_disassembly_options): Delete.
+	(set_disassembly_style): Likewise.
+	(arm_disassembler_options): New static variable.
+	(set_disassembly_style_sfunc): Convert short style name into long
+	option name.  Call set_disassembler_options.
+	(show_disassembly_style_sfunc): New function.
+	(arm_gdbarch_init): Call set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+	(_initialize_arm_tdep): Delete regnames variable and update callers.
+	(arm_disassembler_options): Initialize.
+	(disasm_options): New variable.
+	(num_disassembly_options): Rename from this...
+	(num_disassembly_styles): ...to this.  Compute by scanning through
+	disasm_options.
+	(valid_disassembly_styles): Initialize using disasm_options.
+	Remove calls to parse_arm_disassembler_option, get_arm_regnames and
+	set_arm_regname_option.
+	Pass show_disassembly_style_sfunc to the "disassembler" setshow command.
+	* rs6000-tdep.c (powerpc_disassembler_options): New static variable.
+	(rs6000_gdbarch_init): Call set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+	* s390-tdep.c (s390_disassembler_options): New static variable.
+	(s390_gdbarch_init):all set_gdbarch_disassembler_options and
+	set_gdbarch_verify_disassembler_options.
+
+2017-02-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_condition): Remove "struct"
+	keyword from range-based for loop.
+
+2017-02-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_add_target_side_condition): Use range-based
+	for loop.  Update comment.
+
+2017-02-27  Yao Qi  <yao.qi@linaro.org>
+
+	* f-typeprint.c (f_print_type): Check "varstring" is empty first.
+
+2017-02-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache_raw_update): New function.
+	(regcache_raw_read): Move code to regcache_raw_update.
+	* regcache.h (regcache_raw_update): New declaration.
+	* remote.c (remote_prepare_to_store): Call regcache_raw_update.
+
+2017-02-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (create_debug_type_hash_table): Initialize
+	header.signature and header.type_offset_in_tu.
+
+2017-02-24  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (make_file_symbol_completion_list_1): Use
+	add_symtab_completions.
+
+2017-02-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* stack.c (frame_info): Use frame_unwind_register_value to avoid buf.
+
+2017-02-24  Alan Hayward  <alan.hayward@arm.com>
+
+	* i386-tdep.c (i386_pseudo_register_read_into_value): Use
+	I386_MAX_REGISTER_SIZE.
+	(i386_pseudo_register_write): Likewise.
+	(i386_process_record): Likewise.
+	* i387-tdep.c (i387_supply_xsave): Likewise.
+	* m68k-linux-nat.c (fetch_register): Use M68K_MAX_REGISTER_SIZE.
+	(store_register): Likewise.
+
+2017-02-23  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c: Include "common/function-view.h".
+	(ada_iterate_over_symbols): Adjust to use function_view as
+	callback type.
+	(struct add_partial_datum, ada_complete_symbol_matcher): Delete.
+	(ada_make_symbol_completion_list): Use a lambda.
+	(ada_exc_search_name_matches): Delete.
+	(name_matches_regex): New.
+	(ada_add_global_exceptions): Use a lambda and name_matches_regex.
+	* compile/compile-c-support.c: Include "common/function-view.h".
+	(print_one_macro): Change prototype to accept a ui_file pointer.
+	(write_macro_definitions): Use a lambda.
+	* dwarf2read.c: Include "common/function-view.h".
+	(dw2_map_expand_apply, dw2_map_symtabs_matching_filename)
+	(dw2_expand_symtabs_matching): Adjust to use function_view as
+	callback type.
+	* language.h: Include "common/function-view.h".
+	(struct language_defn) <la_iterate_over_symbols>: Adjust to use
+	function_view as callback type.
+	(LA_ITERATE_OVER_SYMBOLS): Remove DATA parameter.
+	* linespec.c: Include "common/function-view.h".
+	(collect_info::add_symbol): New method.
+	(struct symbol_and_data_callback, iterate_inline_only, struct
+	symbol_matcher_data, iterate_name_matcher): Delete.
+	(iterate_over_all_matching_symtabs): Adjust to use function_view
+	as callback type and lambdas.
+	(iterate_over_file_blocks): Adjust to use function_view as
+	callback type.
+	(decode_compound_collector): Now a class with private fields.
+	(decode_compound_collector::release_symbols): New method.
+	(collect_one_symbol): Rename to...
+	(decode_compound_collector::operator()): ... this and adjust.
+	(lookup_prefix_sym): decode_compound_collector construction bits
+	move to decode_compound_collector ctor.  Pass the
+	decode_compound_collector object directly as callback.  Remove
+	cleanups and use decode_compound_collector::release_symbols
+	instead.
+	(symtab_collector): Now a class with private fields.
+	(symtab_collector::release_symtabs): New method.
+	(add_symtabs_to_list): Rename to...
+	(symtab_collector::operator()): ... this and adjust.
+	(collect_symtabs_from_filename): symtab_collector construction
+	bits move to symtab_collector ctor.  Pass the symtab_collector
+	object directly as callback.  Remove cleanups and use
+	symtab_collector::release_symtabs instead.
+	(collect_symbols): Delete.
+	(add_matching_symbols_to_info): Use lambdas.
+	* macrocmd.c (print_macro_callback): Delete.
+	(info_macro_command): Use a lambda.
+	(info_macros_command): Pass print_macro_definition as callable
+	directly.
+	(print_one_macro): Remove 'ignore' parameter.
+	(macro_list_command): Adjust.
+	* macrotab.c (macro_for_each_data::fn): Now a function_view.
+	(macro_for_each_data::user_data): Delete field.
+	(foreach_macro): Adjust to call the function_view.
+	(macro_for_each): Adjust to use function_view as callback type.
+	(foreach_macro_in_scope): Adjust to call the function_view.
+	(macro_for_each_in_scope): Adjust to use function_view as callback
+	type.
+	* macrotab.h: Include "common/function-view.h".
+	(macro_callback_fn): Declare a prototype instead of a pointer.
+	Remove "user_data" parameter.
+	(macro_for_each, macro_for_each_in_scope): Adjust to use
+	function_view as callback type.
+	* psymtab.c (partial_map_expand_apply)
+	(psym_map_symtabs_matching_filename, recursively_search_psymtabs):
+	Adjust to use function_view as callback type and to return bool.
+	(psym_expand_symtabs_matching): Adjust to use function_view as
+	callback types.
+	* symfile-debug.c (debug_qf_map_symtabs_matching_filename): Adjust
+	to use function_view as callback type and to return bool.
+	(debug_qf_expand_symtabs_matching): Adjust to use function_view as
+	callback types.
+	* symfile.c (expand_symtabs_matching): Adjust to use function_view
+	as callback types.
+	* symfile.h: Include "common/function-view.h".
+	(expand_symtabs_file_matcher_ftype)
+	(expand_symtabs_symbol_matcher_ftype)
+	(expand_symtabs_exp_notify_ftype): Remove "data" parameter and
+	return bool.
+	(quick_symbol_functions::map_symtabs_matching_filename)
+	(quick_symbol_functions::expand_symtabs_matching): Adjust to use
+	function_view as callback type and return bool.
+	(expand_symtabs_matching): Adjust to use function_view as callback
+	type.
+	(maintenance_expand_name_matcher)
+	(maintenance_expand_file_matcher): Delete.
+	(maintenance_expand_symtabs): Use lambdas.
+	* symtab.c (iterate_over_some_symtabs): Adjust to use
+	function_view as callback types and return bool.
+	(iterate_over_symtabs): Likewise.  Use unique_xmalloc_ptr instead
+	of a cleanup.
+	(lookup_symtab_callback): Delete.
+	(lookup_symtab): Use a lambda.
+	(iterate_over_symbols): Adjust to use function_view as callback
+	type.
+	(struct search_symbols_data, search_symbols_file_matches)
+	(search_symbols_name_matches): Delete.
+	(search_symbols): Use a pair of lambdas.
+	(struct add_name_data, add_macro_name, symbol_completion_matcher)
+	(symtab_expansion_callback): Delete.
+	(default_make_symbol_completion_list_break_on_1): Use lambdas.
+	* symtab.h: Include "common/function-view.h".
+	(iterate_over_some_symtabs): Adjust to use function_view as
+	callback type and return bool.
+	(iterate_over_symtabs): Adjust to use function_view as callback
+	type.
+	(symbol_found_callback_ftype): Remove 'data' parameter and return
+	bool.
+	(iterate_over_symbols): Adjust to use function_view as callback
+	type.
+
+2017-02-23  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS): New.
+	(%.o) <unittests/%.c>: New pattern.
+	* configure.ac ($development): Add $(SUBDIR_UNITTESTS_OBS) to
+	CONFIG_OBS, and $(SUBDIR_UNITTESTS_SRCS) to CONFIG_SRCS.
+	* common/function-view.h: New file.
+	* unittests/function-view-selftests.c: New file.
+	* configure: Regenerate.
+
+2017-02-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* bsd-uthread.c (bsd_uthread_thread_alive): Use ptid instead of
+	inferior_ptid.
+	* go32-nat.c (go32_thread_alive): Likewise.
+
+2017-02-23  Yao Qi  <yao.qi@linaro.org>
+
+	* varobj-iter.h (varobj_iter_delete): Call xfree instead of
+	delete.
+
+2017-02-23  Yao Qi  <yao.qi@linaro.org>
+
+	* varobj.c (varobj_clear_saved_item): Use delete instead of
+	xfree.
+	(update_dynamic_varobj_children): Likewise.
+
 2017-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_record_block_ranges): Add forgotten BASEADDR.
@@ -394,7 +2650,7 @@
 	(build_command_line): Make args a constant pointer.
 
 2017-02-08  Jerome Guitton  <guitton@adacore.com>
-	
+
 	* cli-decode.c (lookup_cmd_1, lookup_cmd_composition):
 	Remove case-insensitive search.
 
@@ -1877,7 +4133,7 @@
 
 2017-01-01  Joel Brobecker  <brobecker@adacore.com>
 
-        Update copyright year range in all GDB files.
+	Update copyright year range in all GDB files.
 
 2017-01-01  Joel Brobecker  <brobecker@adacore.com>
 

@@ -24,6 +24,6 @@ struct gdbarch;
 
 CORE_ADDR sol2_skip_solib_resolver (struct gdbarch *, CORE_ADDR);
 
-char *sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
+const char *sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
 
 #endif /* sol2-tdep.h */
