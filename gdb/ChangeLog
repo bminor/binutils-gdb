@@ -1,3 +1,17 @@
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (execv_argv): New class.
+	(breakup_args): Refactored as ...
+	(execv_argv::init_for_no_shell): .. this method of execv_argv.
+	Copy arguments to storage and replace separators with NULL
+	terminators in place.
+	(escape_bang_in_quoted_argument): Adjust to return bool.
+	(execv_argv::execv_argv): New ctor.
+	(execv_argv::init_for_shell): New method, factored out from
+	fork_inferior.  Don't strdup strings into the vector.
+	(fork_inferior): Eliminate "shell" local and use execv_argv.  Use
+	Remove free_vector_argv call.
+
 2017-04-13  Yao Qi  <yao.qi@linaro.org>
 
 	* rx-tdep.c (rx_fpsw_type): Check tdep->rx_fpsw_type instead of
