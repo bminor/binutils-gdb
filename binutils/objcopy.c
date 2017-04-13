@@ -321,6 +321,7 @@ enum command_line_switch
   OPTION_LOCALIZE_SYMBOLS,
   OPTION_LONG_SECTION_NAMES,
   OPTION_MERGE_NOTES,
+  OPTION_NO_MERGE_NOTES,
   OPTION_NO_CHANGE_WARNINGS,
   OPTION_ONLY_KEEP_DEBUG,
   OPTION_PAD_TO,
@@ -368,6 +369,8 @@ static struct option strip_options[] =
   {"input-target", required_argument, 0, 'I'},
   {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
   {"keep-symbol", required_argument, 0, 'K'},
+  {"merge-notes", no_argument, 0, 'M'},
+  {"no-merge-notes", no_argument, 0, OPTION_NO_MERGE_NOTES},
   {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
   {"output-file", required_argument, 0, 'o'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
@@ -443,6 +446,7 @@ static struct option copy_options[] =
   {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
   {"long-section-names", required_argument, 0, OPTION_LONG_SECTION_NAMES},
   {"merge-notes", no_argument, 0, 'M'},
+  {"no-merge-notes", no_argument, 0, OPTION_NO_MERGE_NOTES},
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"no-change-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
@@ -642,6 +646,7 @@ copy_usage (FILE *stream, int exit_status)
      --elf-stt-common=[yes|no]     Generate ELF common symbols with STT_COMMON\n\
                                      type\n\
   -M  --merge-notes                Remove redundant entries in note sections\n\
+      --no-merge-notes             Do not attempt to remove redundant notes (default)\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
   -V --version                     Display this program's version number\n\
@@ -686,6 +691,8 @@ strip_usage (FILE *stream, int exit_status)
      --strip-dwo                   Remove all DWO sections\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
      --only-keep-debug             Strip everything but the debug information\n\
+  -M  --merge-notes                Remove redundant entries in note sections (default)\n\
+      --no-merge-notes             Do not attempt to remove redundant notes\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
   -K --keep-symbol=<name>          Do not strip symbol <name>\n\
      --keep-file-symbols           Do not strip file symbol(s)\n\
@@ -1882,6 +1889,22 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+/* Returns the number of bytes needed to store VAL.  */
+
+static inline unsigned int
+num_bytes (unsigned long val)
+{
+  unsigned int count = 0;
+
+  /* FIXME: There must be a faster way to do this.  */
+  while (val)
+    {
+      count ++;
+      val >>= 8;
+    }
+  return count;
+}
+
 /* Merge the notes on SEC, removing redundant entries.
    Returns the new, smaller size of the section upon success.  */
 
@@ -1899,7 +1922,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 
   /* Make a copy of the notes.
      Minimum size of a note is 12 bytes.  */
-  pnote = pnotes = (Elf_Internal_Note *) xmalloc ((size / 12) * sizeof (Elf_Internal_Note));
+  pnote = pnotes = (Elf_Internal_Note *) xcalloc ((size / 12), sizeof (Elf_Internal_Note));
   while (remain >= 12)
     {
       pnote->namesz = (bfd_get_32 (abfd, in    ) + 3) & ~3;
@@ -1939,6 +1962,12 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
       remain -= 12 + pnote->namesz + pnote->descsz;
       in     += 12 + pnote->namesz + pnote->descsz;
 
+      if (pnote->namedata[pnote->namesz - 1] != 0)
+	{
+	  err = _("corrupt GNU build attribute note: name not NUL terminated");
+	  goto done;
+	}
+      
       if (pnote->namesz > 1 && pnote->namedata[1] == GNU_BUILD_ATTRIBUTE_VERSION)
 	++ version_notes_seen;
       pnote ++;
@@ -1983,7 +2012,9 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
      3. Eliminate any NT_GNU_BUILD_ATTRIBUTE_OPEN notes that have the same
         full name field as the immediately preceeding note with the same type
 	of name.
-     4. If an NT_GNU_BUILD_ATTRIBUTE_OPEN note is going to be preserved and
+     4. Combine the numeric value of any NT_GNU_BUILD_ATTRIBUTE_OPEN notes
+        of type GNU_BUILD_ATTRIBUTE_STACK_SIZE.
+     5. If an NT_GNU_BUILD_ATTRIBUTE_OPEN note is going to be preserved and
         its description field is empty then the nearest preceeding OPEN note
 	with a non-empty description field must also be preserved *OR* the
 	description field of the note must be changed to contain the starting
@@ -2008,6 +2039,54 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	  if (back->type == pnote->type
 	      && back->namedata[1] == pnote->namedata[1])
 	    {
+	      if (back->namedata[1] == GNU_BUILD_ATTRIBUTE_STACK_SIZE)
+		{
+		  unsigned char * name;
+		  unsigned long   note_val;
+		  unsigned long   back_val;
+		  unsigned int    shift;
+		  unsigned int    bytes;
+		  unsigned long   byte;
+
+		  for (shift = 0, note_val = 0, bytes = pnote->namesz - 2, name = (unsigned char *) pnote->namedata + 2;
+		       bytes--;)
+		    {
+		      byte = (* name ++) & 0xff;
+		      note_val |= byte << shift;
+		      shift += 8;
+		    }
+		  for (shift = 0, back_val = 0, bytes = back->namesz - 2, name = (unsigned char *) back->namedata + 2;
+		       bytes--;)
+		    {
+		      byte = (* name ++) & 0xff;
+		      back_val |= byte << shift;
+		      shift += 8;
+		    }
+		  back_val += note_val;
+		  if (num_bytes (back_val) >= back->namesz - 2)
+		    {
+		      /* We have a problem - the new value requires more bytes of
+			 storage in the name field than are available.  Currently
+			 we have no way of fixing this, so we just preserve both
+			 notes.  */
+		      continue;
+		    }
+		  /* Write the new val into back.  */
+		  name = (unsigned char *) back->namedata + 2;
+		  while (name < (unsigned char *) back->namedata + back->namesz)
+		    {
+		      byte = back_val & 0xff;
+		      * name ++ = byte;
+		      if (back_val == 0)
+			break;
+		      back_val >>= 8;
+		    }
+
+		  duplicate_found = TRUE;
+		  pnote->type = 0;
+		  break;
+		}
+		  
 	      if (back->namesz == pnote->namesz
 		  && memcmp (back->namedata, pnote->namedata, back->namesz) == 0)
 		{
@@ -2018,10 +2097,11 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 
 	      /* If we have found an attribute match then stop searching backwards.  */
 	      if (! ISPRINT (back->namedata[1])
+		  /* Names are NUL terminated, so this is safe.  */
 		  || strcmp (back->namedata + 2, pnote->namedata + 2) == 0)
 		{
 		  /* Since we are keeping this note we must check to see if its
-		     description refers back to an earlier OPEN note.  If so
+		     description refers back to an earlier OPEN version note.  If so
 		     then we must make sure that version note is also preserved.  */
 		  if (pnote->descsz == 0
 		      && prev_open != NULL
@@ -2821,8 +2901,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      return FALSE;
 	    }
 	}
-      else
-	bfd_nonfatal_message (NULL, obfd, osec, _("ICE: lost merged note section"));
+      else if (! is_strip)
+	bfd_nonfatal_message (NULL, obfd, osec, _("could not find any mergeable note sections"));
       free (merged_notes);
       merged_notes = NULL;
       merge_notes = FALSE;
@@ -4023,6 +4103,8 @@ strip_main (int argc, char *argv[])
   int i;
   char *output_file = NULL;
 
+  merge_notes = TRUE;
+
   while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVvwDU",
 			   strip_options, (int *) 0)) != EOF)
     {
@@ -4059,6 +4141,12 @@ strip_main (int argc, char *argv[])
 	  break;
 	case 'K':
 	  add_specific_symbol (optarg, keep_specific_htab);
+	  break;
+	case 'M':
+	  merge_notes = TRUE;
+	  break;
+	case OPTION_NO_MERGE_NOTES:
+	  merge_notes = FALSE;
 	  break;
 	case 'N':
 	  add_specific_symbol (optarg, strip_specific_htab);
@@ -4485,6 +4573,9 @@ copy_main (int argc, char *argv[])
 
 	case 'M':
 	  merge_notes = TRUE;
+	  break;
+	case OPTION_NO_MERGE_NOTES:
+	  merge_notes = FALSE;
 	  break;
 
 	case 'N':

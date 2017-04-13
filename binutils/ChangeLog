@@ -1,3 +1,13 @@
+2017-04-13  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c: Add --no-merge-notes option to disable note merging.
+	Add --[no-]merge-notes option to strip, and enable it by default.
+	(num_bytes): New function.
+	(merge_gnu_build_notes): Add code to merge stack size notes.
+	* binutils.texi: Update strip and objcopy documentation.
+	* readelf.c (print_gnu_build_attribute_name): Use defined
+	constants for note types.
+
 2017-04-10  John Delsignor  <john.delsignore@roguewave.com>
 
 	PR binutils/21319

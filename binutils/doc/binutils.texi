@@ -1191,6 +1191,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--decompress-debug-sections}]
         [@option{--elf-stt-common=@var{val}}]
         [@option{--merge-notes}]
+        [@option{--no-merge-notes}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -2008,8 +2009,9 @@ converted to the @code{STT_COMMON} or @code{STT_OBJECT} type.
 type to @code{STT_OBJECT}.
 
 @item --merge-notes
-For ELF files, attempt to reduce the size of any SHT_NOTE type
-sections by removing duplicate notes.
+@itemx --no-merge-notes
+For ELF files, attempt (or do not attempt) to reduce the size of any
+SHT_NOTE type sections by removing duplicate notes.
 
 @item -V
 @itemx --version
@@ -3114,7 +3116,8 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-s}|@option{--strip-all}]
       [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
       [@option{--strip-dwo}]
-      [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname}]
+      [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
+      [@option{-M}|@option{--merge-notes}][@option{--no-merge-notes}]
       [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname}]
       [@option{-w}|@option{--wildcard}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
@@ -3240,6 +3243,13 @@ Remove all symbols that are not needed for relocation processing.
 @itemx --keep-symbol=@var{symbolname}
 When stripping symbols, keep symbol @var{symbolname} even if it would
 normally be stripped.  This option may be given more than once.
+
+@item -M
+@itemx --merge-notes
+@itemx --no-merge-notes
+For ELF files, attempt (or do not attempt) to reduce the size of any
+SHT_NOTE type sections by removing duplicate notes.  The default is to
+attempt this reduction.
 
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}

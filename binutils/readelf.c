@@ -16809,9 +16809,12 @@ print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
 static bfd_boolean
 print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 {
+  static const char string_expected [2] = { GNU_BUILD_ATTRIBUTE_TYPE_STRING, 0 };
+  static const char number_expected [2] = { GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC, 0 };
+  static const char bool_expected [3] = { GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE, GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE, 0 };
   char         name_type;
   char         name_attribute;
-  char *       expected_types;
+  const char * expected_types;
   const char * name = pnote->namedata;
   const char * text;
   int          left;
@@ -16845,7 +16848,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_VERSION:
       text = _("<version>");
-      expected_types = "$";
+      expected_types = string_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_STACK_PROT:
@@ -16855,17 +16858,17 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     case GNU_BUILD_ATTRIBUTE_RELRO:
       text = _("<relro>");
-      expected_types = "!+";
+      expected_types = bool_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_STACK_SIZE:
       text = _("<stack size>");
-      expected_types = "*";
+      expected_types = number_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_TOOL:
       text = _("<tool>");
-      expected_types = "$";
+      expected_types = string_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_ABI:
@@ -16875,12 +16878,12 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     case GNU_BUILD_ATTRIBUTE_PIC:
       text = _("<PIC>");
-      expected_types = "*";
+      expected_types = number_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_SHORT_ENUM:
       text = _("<short enum>");
-      expected_types = "!+";
+      expected_types = bool_expected;
       ++ name;
       break;
 
