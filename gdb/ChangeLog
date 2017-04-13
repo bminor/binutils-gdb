@@ -1,5 +1,11 @@
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
+	PR threads/13217
+	* gdb.threads/threadapply.exp (thr_apply_detach): New procedure.
+	(top level): Call it twice, with different thread sets.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
 	* thread.c: Include <algorithm>.
 	(thread_array_cleanup): Delete.
 	(scoped_inc_dec_ref): New class.
