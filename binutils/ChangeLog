@@ -1,5 +1,17 @@
 2017-04-13  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21379
+	* readelf.c (process_dynamic_section): Detect over large section
+	offsets in the DT_SYMTAB entry.
+
+2017-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21345
+	* readelf.c (process_mips_specific): Catch an unfeasible memory
+	allocation before it happens and print a suitable error message.
+
+2017-04-13  Nick Clifton  <nickc@redhat.com>
+
 	* objcopy.c: Add --no-merge-notes option to disable note merging.
 	Add --[no-]merge-notes option to strip, and enable it by default.
 	(num_bytes): New function.
