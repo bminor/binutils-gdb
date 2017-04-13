@@ -433,9 +433,6 @@ struct inferior
 
 DECLARE_REGISTRY (inferior);
 
-/* Create an empty inferior list, or empty the existing one.  */
-extern void init_inferior_list (void);
-
 /* Add an inferior to the inferior list, print a message that a new
    inferior is found, and return the pointer to the new inferior.
    Caller may use this pointer to initialize the private inferior

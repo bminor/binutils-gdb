@@ -105,24 +105,6 @@ free_inferior (struct inferior *inf)
   xfree (inf);
 }
 
-void
-init_inferior_list (void)
-{
-  struct inferior *inf, *infnext;
-
-  highest_inferior_num = 0;
-  if (!inferior_list)
-    return;
-
-  for (inf = inferior_list; inf; inf = infnext)
-    {
-      infnext = inf->next;
-      free_inferior (inf);
-    }
-
-  inferior_list = NULL;
-}
-
 struct inferior *
 add_inferior_silent (int pid)
 {

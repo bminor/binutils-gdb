@@ -1,5 +1,10 @@
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
+	* inferior.c (init_inferior_list): Delete.
+	* inferior.h (init_inferior_list): Delete.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
 	PR threads/13217
 	* gdb.threads/threadapply.exp (thr_apply_detach): New procedure.
 	(top level): Call it twice, with different thread sets.
