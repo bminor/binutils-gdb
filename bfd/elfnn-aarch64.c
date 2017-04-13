@@ -2849,7 +2849,7 @@ _bfd_aarch64_add_stub_entry_in_group (const char *stub_name,
   if (stub_entry == NULL)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%s: cannot create stub entry %s"),
+      _bfd_error_handler (_("%B: cannot create stub entry %s"),
 			  section->owner, stub_name);
       return NULL;
     }

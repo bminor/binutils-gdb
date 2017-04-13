@@ -3685,9 +3685,8 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info, bfd_boolean final)
 overflow:
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%s: short data segment overflowed (0x%lx >= 0x400000)"),
-	     bfd_get_filename (abfd),
-	     (unsigned long) (max_short_vma - min_short_vma));
+	    (_("%B: short data segment overflowed (0x%lx >= 0x400000)"),
+	     abfd, (unsigned long) (max_short_vma - min_short_vma));
 	  return FALSE;
 	}
       else if ((gp_val > min_short_vma
@@ -3696,8 +3695,7 @@ overflow:
 		   && max_short_vma - gp_val >= 0x200000))
 	{
 	  _bfd_error_handler
-	    (_("%s: __gp does not cover short data segment"),
-	     bfd_get_filename (abfd));
+	    (_("%B: __gp does not cover short data segment"), abfd);
 	  return FALSE;
 	}
     }

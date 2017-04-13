@@ -1942,8 +1942,8 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
     }
   else if (hdr->s_nreloc == 0xffff)
     _bfd_error_handler
-      (_("%s: warning: claims to have 0xffff relocs, without overflow"),
-       bfd_get_filename (abfd));
+      (_("%B: warning: claims to have 0xffff relocs, without overflow"),
+       abfd);
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET
@@ -3767,8 +3767,8 @@ coff_write_object_contents (bfd * abfd)
 		  bfd_set_error (bfd_error_file_too_big);
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: section %s: string table overflow at offset %ld"),
-		    abfd, current->name, string_size);
+		    (_("%B: section %A: string table overflow at offset %ld"),
+		    abfd, current, string_size);
 		  return FALSE;
 		}
 

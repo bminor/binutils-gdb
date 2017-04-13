@@ -894,14 +894,14 @@ _bfd_elf_setup_sections (bfd *abfd)
 	    /* There are some unknown sections in the group.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: unknown [%d] section `%s' in group [%s]"),
+	      (_("%B: unknown [%d] section `%s' in group [%A]"),
 	       abfd,
 	       (unsigned int) idx->shdr->sh_type,
 	       bfd_elf_string_from_elf_section (abfd,
 						(elf_elfheader (abfd)
 						 ->e_shstrndx),
 						idx->shdr->sh_name),
-	       shdr->bfd_section->name);
+	       shdr->bfd_section);
 	    result = FALSE;
 	  }
     }

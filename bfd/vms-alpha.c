@@ -3672,7 +3672,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 
 	  if (section->reloc_count == 0)
 	    _bfd_error_handler
-	      (_("SEC_RELOC with no relocs in section %s"), section->name);
+	      (_("SEC_RELOC with no relocs in section %A"), section);
 
 #if VMS_DEBUG
 	  else
@@ -3724,8 +3724,8 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 
 		  /* Regular relocs are intertwined with binary data.  */
 	          if (curr_addr > addr)
-		    _bfd_error_handler (_("Size error in section %s"),
-					section->name);
+		    _bfd_error_handler (_("Size error in section %A"),
+					section);
 		  size = addr - curr_addr;
 		  sto_imm (abfd, section, size, curr_data, curr_addr);
 		  curr_data += size;
@@ -3937,8 +3937,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	    {
 	      /* Output rest of section.  */
 	      if (curr_addr > section->size)
-		_bfd_error_handler (_("Size error in section %s"),
-				    section->name);
+		_bfd_error_handler (_("Size error in section %A"), section);
 	      size = section->size - curr_addr;
 	      sto_imm (abfd, section, size, curr_data, curr_addr);
 	      curr_data += size;

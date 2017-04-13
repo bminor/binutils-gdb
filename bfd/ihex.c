@@ -830,8 +830,8 @@ ihex_write_object_contents (bfd *abfd)
 		      sprintf_vma (buf, where);
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%s: address 0x%s out of range for Intel Hex file"),
-			 bfd_get_filename (abfd), buf);
+			(_("%B: address 0x%s out of range for Intel Hex file"),
+			 abfd, buf);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }

@@ -1,5 +1,57 @@
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h: Use %B and %A in error messages throughout file.
+	* aout-cris.c: Likewise.
+	* archive.c: Likewise.
+	* binary.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-tic4x.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffgen.c: Likewise.
+	* cofflink.c: Likewise.
+	* coffswap.h: Likewise.
+	* cpu-arm.c: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arc.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-rx.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-visium.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* hpux-core.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: Likewise.
+	* linker.c: Likewise.
+	* merge.c: Likewise.
+	* mmo.c: Likewise.
+	* oasys.c: Likewise.
+	* pdp11.c: Likewise.
+	* peXXigen.c: Likewise.
+	* rs6000-core.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* xcofflink.c: Likewise.
+
+2017-04-13  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (PRINT_TYPE): Define.
 	(_doprnt): New function.
 	(error_handler_internal): Use _doprnt.

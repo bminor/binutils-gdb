@@ -2727,20 +2727,16 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 		      || bfd_link_relocatable (flaginfo->info)))
 		_bfd_error_handler
 		  /* xgettext: c-format */
-		  (_("%s: %s: reloc overflow: 0x%lx > 0xffff"),
-		   bfd_get_filename (output_bfd),
-		   bfd_get_section_name (output_bfd, sec),
-		   sec->reloc_count);
+		  (_("%B: %A: reloc overflow: 0x%lx > 0xffff"),
+		   output_bfd, sec, sec->reloc_count);
 
 	      if (sec->lineno_count > 0xffff
 		  && (! obj_pe (output_bfd)
 		      || bfd_link_relocatable (flaginfo->info)))
 		_bfd_error_handler
 		  /* xgettext: c-format */
-		  (_("%s: warning: %s: line number overflow: 0x%lx > 0xffff"),
-		   bfd_get_filename (output_bfd),
-		   bfd_get_section_name (output_bfd, sec),
-		   sec->lineno_count);
+		  (_("%B: warning: %A: line number overflow: 0x%lx > 0xffff"),
+		   output_bfd, sec, sec->lineno_count);
 
 	      auxp->x_scn.x_nreloc = sec->reloc_count;
 	      auxp->x_scn.x_nlinno = sec->lineno_count;

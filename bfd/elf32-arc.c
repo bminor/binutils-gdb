@@ -565,8 +565,8 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("ERROR: Attempting to link %B "
-				"with a binary %s of different architecture"),
-			      ibfd, bfd_get_filename (obfd));
+				"with a binary %B of different architecture"),
+			      ibfd, obfd);
 	  return FALSE;
 	}
       else if (in_flags != out_flags)
@@ -574,9 +574,9 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  /* Warn if different flags.  */
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%s: uses different e_flags (0x%lx) fields than "
+	    (_("%B: uses different e_flags (0x%lx) fields than "
 	       "previous modules (0x%lx)"),
-	     bfd_get_filename (ibfd), (long)in_flags, (long)out_flags);
+	     ibfd, (long) in_flags, (long) out_flags);
 	  if (in_flags && out_flags)
 	    return FALSE;
 	  /* MWDT doesnt set the eflags hence make sure we choose the

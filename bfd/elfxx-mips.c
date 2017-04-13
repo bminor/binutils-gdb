@@ -14685,8 +14685,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%s: illegal section name `%s'"),
-		 bfd_get_filename (abfd), o->name);
+		(_("%B: illegal section name `%A'"), abfd, o);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return FALSE;
 	    }
