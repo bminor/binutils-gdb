@@ -1198,6 +1198,11 @@
 	* frame.c (get_frame_register_bytes): Unwind using value.
 	(put_frame_register_bytes): Likewise.
 
+2017-03-30  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (type_aggregate_p): Treat TYPE_CODE_MODULE as being
+	aggregate-like.
+
 2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* auto-load.c (auto_load_section_scripts): Check SEC_HAS_CONTENTS.
