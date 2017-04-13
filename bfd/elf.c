@@ -836,7 +836,7 @@ _bfd_elf_setup_sections (bfd *abfd)
 		  _bfd_error_handler
 		    /* xgettext:c-format */
 		    (_("%B: sh_link [%d] in section `%A' is incorrect"),
-		     s->owner, s, elfsec);
+		     s->owner, elfsec, s);
 		  result = FALSE;
 		}
 
@@ -3213,7 +3213,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("%B: error: Alignment power %d of section `%A' is too big"),
-	 abfd, asect, asect->alignment_power);
+	 abfd, asect->alignment_power, asect);
       arg->failed = TRUE;
       return;
     }

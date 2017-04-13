@@ -1569,8 +1569,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	/* xgettext:c-format */
 	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
 	   "in section `%A' failed"),
-	 abfd, sec, from->name, to->name, name,
-	 (unsigned long) rel->r_offset);
+	 abfd, from->name, to->name, name,
+	 (unsigned long) rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -3836,7 +3836,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, input_section, r_type);
+	     input_bfd, r_type, input_section);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

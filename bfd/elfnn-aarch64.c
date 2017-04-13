@@ -6109,7 +6109,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  /* xgettext:c-format */
 	  _bfd_error_handler
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, input_section, r_type);
+	     input_bfd, r_type, input_section);
 	  return FALSE;
 	}
       bfd_r_type = elfNN_aarch64_bfd_reloc_from_howto (howto);

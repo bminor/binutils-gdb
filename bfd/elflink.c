@@ -1298,25 +1298,25 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	  /* xgettext:c-format */
 	  (_("%s: TLS definition in %B section %A "
 	     "mismatches non-TLS definition in %B section %A"),
-	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
+	   h->root.root.string, tbfd, tsec, ntbfd, ntsec);
       else if (!tdef && !ntdef)
 	_bfd_error_handler
 	  /* xgettext:c-format */
 	  (_("%s: TLS reference in %B "
 	     "mismatches non-TLS reference in %B"),
-	   tbfd, ntbfd, h->root.root.string);
+	   h->root.root.string, tbfd, ntbfd);
       else if (tdef)
 	_bfd_error_handler
 	  /* xgettext:c-format */
 	  (_("%s: TLS definition in %B section %A "
 	     "mismatches non-TLS reference in %B"),
-	   tbfd, tsec, ntbfd, h->root.root.string);
+	   h->root.root.string, tbfd, tsec, ntbfd);
       else
 	_bfd_error_handler
 	  /* xgettext:c-format */
 	  (_("%s: TLS reference in %B "
 	     "mismatches non-TLS definition in %B section %A"),
-	   tbfd, ntbfd, ntsec, h->root.root.string);
+	   h->root.root.string, tbfd, ntbfd, ntsec);
 
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -2359,8 +2359,8 @@ elf_link_read_relocs_from_section (bfd *abfd,
 		/* xgettext:c-format */
 		(_("%B: bad reloc symbol index (0x%lx >= 0x%lx)"
 		   " for offset 0x%lx in section `%A'"),
-		 abfd, sec,
-		 (unsigned long) r_symndx, (unsigned long) nsyms, irela->r_offset);
+		 abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
+		 irela->r_offset, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -2369,10 +2369,11 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: non-zero symbol index (0x%lx) for offset 0x%lx in section `%A'"
+	    (_("%B: non-zero symbol index (0x%lx)"
+	       " for offset 0x%lx in section `%A'"
 	       " when the object file has no symbol table"),
-	     abfd, sec,
-	     (unsigned long) r_symndx, (unsigned long) nsyms, irela->r_offset);
+	     abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
+	     irela->r_offset, sec);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -4673,15 +4674,15 @@ error_free_dyn:
 		      /* xgettext:c-format */
 		      (_("Warning: alignment %u of common symbol `%s' in %B is"
 			 " greater than the alignment (%u) of its section %A"),
-		       common_bfd, h->root.u.def.section,
-		       1 << common_align, name, 1 << normal_align);
+		       1 << common_align, name, common_bfd,
+		       1 << normal_align, h->root.u.def.section);
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
 		      (_("Warning: alignment %u of symbol `%s' in %B"
 			 " is smaller than %u in %B"),
-		       normal_bfd, common_bfd,
-		       1 << normal_align, name, 1 << common_align);
+		       1 << normal_align, name, normal_bfd,
+		       1 << common_align, common_bfd);
 		}
 	    }
 
@@ -4697,9 +4698,8 @@ error_free_dyn:
 		  /* xgettext:c-format */
 		  (_("Warning: size of symbol `%s' changed"
 		     " from %lu in %B to %lu in %B"),
-		   old_bfd, abfd,
-		   name, (unsigned long) h->size,
-		   (unsigned long) isym->st_size);
+		   name, (unsigned long) h->size, old_bfd,
+		   (unsigned long) isym->st_size, abfd);
 
 	      h->size = isym->st_size;
 	    }
@@ -4733,7 +4733,7 @@ error_free_dyn:
 		    _bfd_error_handler
 		      (_("Warning: type of symbol `%s' changed"
 			 " from %d to %d in %B"),
-		       abfd, name, h->type, type);
+		       name, h->type, type, abfd);
 
 		  h->type = type;
 		}
@@ -9456,8 +9456,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       def_bfd = flinfo->output_bfd;
       if (hi->root.u.def.section != bfd_abs_section_ptr)
 	def_bfd = hi->root.u.def.section->owner;
-      _bfd_error_handler (msg, flinfo->output_bfd, def_bfd,
-			  h->root.root.string);
+      _bfd_error_handler (msg, flinfo->output_bfd,
+			  h->root.root.string, def_bfd);
       bfd_set_error (bfd_error_bad_value);
       eoinfo->failed = TRUE;
       return FALSE;
@@ -10384,7 +10384,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			/* xgettext:c-format */
 			(_("error: %B contains a reloc (0x%s) for section %A "
 			   "that references a non-existent global symbol"),
-			 input_bfd, o, buffer);
+			 input_bfd, buffer, o);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
@@ -12982,8 +12982,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 
 	  if (info->print_gc_sections && o->size != 0)
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("Removing unused section '%s' in file '%B'"),
-				sub, o->name);
+	    _bfd_error_handler (_("Removing unused section '%A' in file '%B'"),
+				o, sub);
 
 	  /* But we also have to update some of the relocation
 	     info we collected before.  */

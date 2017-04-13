@@ -584,8 +584,9 @@ elf64_ia64_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: Can't relax br at 0x%lx in section `%A'. Please use brl or indirect branch."),
-		 sec->owner, sec, (unsigned long) roff);
+		(_("%B: Can't relax br at 0x%lx in section `%A'."
+		   " Please use brl or indirect branch."),
+		 sec->owner, (unsigned long) roff, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -3947,9 +3948,10 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 	      case R_IA64_LTOFF_DTPREL22:
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B: missing TLS section for relocation %s against `%s' at 0x%lx in section `%A'."),
-		   input_bfd, input_section, howto->name, name,
-		   rel->r_offset);
+		  (_("%B: missing TLS section for relocation %s against `%s'"
+		     " at 0x%lx in section `%A'."),
+		   input_bfd, howto->name, name,
+		   rel->r_offset, input_section);
 		break;
 
 	      case R_IA64_PCREL21B:
@@ -3963,9 +3965,10 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 		       that the section is too big to relax.  */
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: Can't relax br (%s) to `%s' at 0x%lx in section `%A' with size 0x%lx (> 0x1000000)."),
-		       input_bfd, input_section, howto->name, name,
-		       rel->r_offset, input_section->size);
+		      (_("%B: Can't relax br (%s) to `%s' at 0x%lx in section"
+			 " `%A' with size 0x%lx (> 0x1000000)."),
+		       input_bfd, howto->name, name, rel->r_offset,
+		       input_section, input_section->size);
 		    break;
 		  }
 		/* Fall through.  */
@@ -5135,15 +5138,15 @@ error_free_dyn:
 		      /* xgettext:c-format */
 		      (_("Warning: alignment %u of common symbol `%s' in %B"
 			 " is greater than the alignment (%u) of its section %A"),
-		       common_bfd, h->root.u.def.section,
-		       1 << common_align, name, 1 << normal_align);
+		       1 << common_align, name, common_bfd,
+		       1 << normal_align, h->root.u.def.section);
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
 		      (_("Warning: alignment %u of symbol `%s' in %B"
 			 " is smaller than %u in %B"),
-		       normal_bfd, common_bfd,
-		       1 << normal_align, name, 1 << common_align);
+		       1 << normal_align, name, normal_bfd,
+		       1 << common_align, common_bfd);
 		}
 	    }
 
@@ -5158,9 +5161,8 @@ error_free_dyn:
 		  /* xgettext:c-format */
 		  (_("Warning: size of symbol `%s' changed"
 		     " from %lu in %B to %lu in %B"),
-		   old_bfd, abfd,
-		   name, (unsigned long) h->size,
-		   (unsigned long) isym->st_size);
+		   name, (unsigned long) h->size, old_bfd,
+		   (unsigned long) isym->st_size, abfd);
 
 	      h->size = isym->st_size;
 	    }
@@ -5186,7 +5188,7 @@ error_free_dyn:
 		      /* xgettext:c-format */
 		      (_("Warning: type of symbol `%s' changed"
 			 " from %d to %d in %B"),
-		       abfd, name, h->type, type);
+		       name, h->type, type, abfd);
 
 		  h->type = type;
 		}

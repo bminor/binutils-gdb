@@ -617,8 +617,9 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: Can't relax br at 0x%lx in section `%A'. Please use brl or indirect branch."),
-		 sec->owner, sec, (unsigned long) roff);
+		(_("%B: Can't relax br at 0x%lx in section `%A'."
+		   " Please use brl or indirect branch."),
+		 sec->owner, (unsigned long) roff, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -4474,9 +4475,10 @@ missing_tls_sec:
 	      case R_IA64_LTOFF_DTPREL22:
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B: missing TLS section for relocation %s against `%s' at 0x%lx in section `%A'."),
-		   input_bfd, input_section, howto->name, name,
-		   rel->r_offset);
+		  (_("%B: missing TLS section for relocation %s against `%s'"
+		     " at 0x%lx in section `%A'."),
+		   input_bfd, howto->name, name,
+		   rel->r_offset, input_section);
 		break;
 
 	      case R_IA64_PCREL21B:
@@ -4490,9 +4492,10 @@ missing_tls_sec:
 		       that the section is too big to relax.  */
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: Can't relax br (%s) to `%s' at 0x%lx in section `%A' with size 0x%lx (> 0x1000000)."),
-		       input_bfd, input_section, howto->name, name,
-		       rel->r_offset, input_section->size);
+		      (_("%B: Can't relax br (%s) to `%s' at 0x%lx"
+			 " in section `%A' with size 0x%lx (> 0x1000000)."),
+		       input_bfd, howto->name, name, rel->r_offset,
+		       input_section, input_section->size);
 		    break;
 		  }
 		/* Fall through.  */

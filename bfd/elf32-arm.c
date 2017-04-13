@@ -4092,7 +4092,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  _bfd_error_handler
 		    (_("%B(%s): warning: interworking not enabled.\n"
 		       "  first occurrence: %B: Thumb call to ARM"),
-		     sym_sec->owner, input_bfd, name);
+		     sym_sec->owner, name, input_bfd);
 		}
 
 	      stub_type =
@@ -8810,7 +8810,7 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
 	  _bfd_error_handler
 	    (_("%B(%s): warning: interworking not enabled.\n"
 	       "  first occurrence: %B: Thumb call to ARM"),
-	     sym_sec->owner, input_bfd, name);
+	     sym_sec->owner, name, input_bfd);
 
 	  return FALSE;
 	}
@@ -8900,7 +8900,7 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
 	  _bfd_error_handler
 	    (_("%B(%s): warning: interworking not enabled.\n"
 	       "  first occurrence: %B: arm call to thumb"),
-	     sym_sec->owner, input_bfd, name);
+	     sym_sec->owner, name, input_bfd);
 	}
 
       --my_offset;
@@ -19697,9 +19697,8 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	(_("error: Source object %B has EABI version %d, but target %B has EABI version %d"),
-	 ibfd, obfd,
-	 (in_flags & EF_ARM_EABIMASK) >> 24,
-	 (out_flags & EF_ARM_EABIMASK) >> 24);
+	 ibfd, (in_flags & EF_ARM_EABIMASK) >> 24,
+	 obfd, (out_flags & EF_ARM_EABIMASK) >> 24);
       return FALSE;
     }
 
@@ -19713,9 +19712,8 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    (_("error: %B is compiled for APCS-%d, whereas target %B uses APCS-%d"),
-	     ibfd, obfd,
-	     in_flags & EF_ARM_APCS_26 ? 26 : 32,
-	     out_flags & EF_ARM_APCS_26 ? 26 : 32);
+	     ibfd, in_flags & EF_ARM_APCS_26 ? 26 : 32,
+	     obfd, out_flags & EF_ARM_APCS_26 ? 26 : 32);
 	  flags_compatible = FALSE;
 	}
 
