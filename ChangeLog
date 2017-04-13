@@ -1,3 +1,7 @@
+2017-04-13  Andrew Jenner  <andrew@codesourcery.com>
+
+	* config.sub: Sync with master version in config project.
+
 2017-04-03  Andrew Jenner  <andrew@codesourcery.com>
 
 	* config.sub: Handle ia16 in $basic_machine.
