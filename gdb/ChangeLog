@@ -1,5 +1,17 @@
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
+	* thread.c: Include <algorithm>.
+	(thread_array_cleanup): Delete.
+	(scoped_inc_dec_ref): New class.
+	(live_threads_count): New function.
+	(set_thread_refcount): Delete.
+	(tp_array_compar_ascending): Now a bool.
+	(tp_array_compar): Convert to a std::sort comparison function.
+	(thread_apply_all_command): Use std::vector and scoped_inc_dec_ref
+	and live_threads_count.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (follow_fork_inferior): Also switch the current
 	inferior.
 
