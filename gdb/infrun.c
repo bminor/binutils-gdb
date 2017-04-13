@@ -498,11 +498,11 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->gdbarch = parent_inf->gdbarch;
 	  copy_inferior_target_desc_info (child_inf, parent_inf);
 
-	  old_chain = save_inferior_ptid ();
-	  save_current_program_space ();
+	  old_chain = save_current_space_and_thread ();
 
 	  inferior_ptid = child_ptid;
 	  add_thread (inferior_ptid);
+	  set_current_inferior (child_inf);
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 
 	  /* If this is a vfork child, then the address-space is
@@ -631,6 +631,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       inferior_ptid = child_ptid;
       add_thread (inferior_ptid);
+      set_current_inferior (child_inf);
 
       /* If this is a vfork child, then the address-space is shared
 	 with the parent.  If we detached from the parent, then we can
