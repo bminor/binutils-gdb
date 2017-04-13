@@ -1,3 +1,8 @@
+2017-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* rl78-tdep.c (rl78_gdbarch_init): Use XCNEW instead of XNEW.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.h (struct breakpoint): Reindent.
