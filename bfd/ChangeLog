@@ -1,5 +1,10 @@
 2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Always return TRUE
+	if forced local.
+
+2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_final_link): Reorder comment about
 	dynamic symbol sorting.
 

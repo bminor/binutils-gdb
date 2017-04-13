@@ -3063,10 +3063,10 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
    to resolve local to the current module, and false otherwise.  Differs
    from (the inverse of) _bfd_elf_dynamic_symbol_p in the treatment of
    undefined symbols.  The two functions are virtually identical except
-   for the place where forced_local and dynindx == -1 are tested.  If
-   either of those tests are true, _bfd_elf_dynamic_symbol_p will say
-   the symbol is local, while _bfd_elf_symbol_refs_local_p will say
-   the symbol is local only for defined symbols.
+   for the place where dynindx == -1 is tested.  If that test is true,
+   _bfd_elf_dynamic_symbol_p will say the symbol is local, while
+   _bfd_elf_symbol_refs_local_p will say the symbol is local only for
+   defined symbols.
    It might seem that _bfd_elf_dynamic_symbol_p could be rewritten as
    !_bfd_elf_symbol_refs_local_p, except that targets differ in their
    treatment of undefined weak symbols.  For those that do not make
@@ -3089,6 +3089,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
       || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL)
     return TRUE;
 
+  /* Forced local symbols resolve locally.  */
+  if (h->forced_local)
+    return TRUE;
+
   /* Common symbols that become definitions don't get the DEF_REGULAR
      flag set, so test it first, and don't bail out.  */
   if (ELF_COMMON_DEF_P (h))
@@ -3098,11 +3102,7 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   else if (!h->def_regular)
     return FALSE;
 
-  /* Forced local symbols resolve locally.  */
-  if (h->forced_local)
-    return TRUE;
-
-  /* As do non-dynamic symbols.  */
+  /* Non-dynamic symbols resolve locally.  */
   if (h->dynindx == -1)
     return TRUE;
 
