@@ -1,3 +1,23 @@
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bp_location): Rename to ...
+	(bp_locations): ... this.  All references updated.
+	(bp_location_count): Rename to ...
+	(bp_locations_count): ... this.  All references updated.
+	(bp_location_placed_address_before_address_max): Rename to ...
+	(bp_locations_placed_address_before_address_max): ... this.  All
+	references updated.
+	(bp_location_shadow_len_after_address_max): Rename to ...
+	(bp_locations_shadow_len_after_address_max): ... this.  All
+	references updated.
+	(bp_location_compare_addrs): Rename to ...
+	(bp_locations_compare_addrs): ... this.  All references updated.
+	(bp_location_compare):Rename to ...
+	(bp_locations_compare): ... this.  All references updated.
+	(bp_location_target_extensions_update): Rename to ...
+	(bp_locations_target_extensions_update): ... this.  All references
+	updated.
+
 2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add "common/gdb_termios.h".

@@ -578,8 +578,8 @@ int target_exact_watchpoints = 0;
    while executing the block of ALL_BP_LOCATIONS.  */
 
 #define ALL_BP_LOCATIONS(B,BP_TMP)					\
-	for (BP_TMP = bp_location;					\
-	     BP_TMP < bp_location + bp_location_count && (B = *BP_TMP);	\
+	for (BP_TMP = bp_locations;					\
+	     BP_TMP < bp_locations + bp_locations_count && (B = *BP_TMP);\
 	     BP_TMP++)
 
 /* Iterates through locations with address ADDRESS for the currently selected
@@ -592,7 +592,7 @@ int target_exact_watchpoints = 0;
 	for (BP_LOCP_START = BP_LOCP_START == NULL ? get_first_locp_gte_addr (ADDRESS) : BP_LOCP_START, \
 	     BP_LOCP_TMP = BP_LOCP_START;				\
 	     BP_LOCP_START						\
-	     && (BP_LOCP_TMP < bp_location + bp_location_count		\
+	     && (BP_LOCP_TMP < bp_locations + bp_locations_count	\
 	     && (*BP_LOCP_TMP)->address == ADDRESS);			\
 	     BP_LOCP_TMP++)
 
@@ -606,33 +606,33 @@ int target_exact_watchpoints = 0;
 
 struct breakpoint *breakpoint_chain;
 
-/* Array is sorted by bp_location_compare - primarily by the ADDRESS.  */
+/* Array is sorted by bp_locations_compare - primarily by the ADDRESS.  */
 
-static struct bp_location **bp_location;
+static struct bp_location **bp_locations;
 
-/* Number of elements of BP_LOCATION.  */
+/* Number of elements of BP_LOCATIONS.  */
 
-static unsigned bp_location_count;
+static unsigned bp_locations_count;
 
 /* Maximum alignment offset between bp_target_info.PLACED_ADDRESS and
-   ADDRESS for the current elements of BP_LOCATION which get a valid
+   ADDRESS for the current elements of BP_LOCATIONS which get a valid
    result from bp_location_has_shadow.  You can use it for roughly
-   limiting the subrange of BP_LOCATION to scan for shadow bytes for
+   limiting the subrange of BP_LOCATIONS to scan for shadow bytes for
    an address you need to read.  */
 
-static CORE_ADDR bp_location_placed_address_before_address_max;
+static CORE_ADDR bp_locations_placed_address_before_address_max;
 
 /* Maximum offset plus alignment between bp_target_info.PLACED_ADDRESS
    + bp_target_info.SHADOW_LEN and ADDRESS for the current elements of
-   BP_LOCATION which get a valid result from bp_location_has_shadow.
-   You can use it for roughly limiting the subrange of BP_LOCATION to
+   BP_LOCATIONS which get a valid result from bp_location_has_shadow.
+   You can use it for roughly limiting the subrange of BP_LOCATIONS to
    scan for shadow bytes for an address you need to read.  */
 
-static CORE_ADDR bp_location_shadow_len_after_address_max;
+static CORE_ADDR bp_locations_shadow_len_after_address_max;
 
 /* The locations that no longer correspond to any breakpoint, unlinked
-   from bp_location array, but for which a hit may still be reported
-   by a target.  */
+   from the bp_locations array, but for which a hit may still be
+   reported by a target.  */
 VEC(bp_location_p) *moribund_locations = NULL;
 
 /* Number of last breakpoint made.  */
@@ -920,10 +920,10 @@ show_condition_evaluation_mode (struct ui_file *file, int from_tty,
 
 /* A comparison function for bp_location AP and BP that is used by
    bsearch.  This comparison function only cares about addresses, unlike
-   the more general bp_location_compare function.  */
+   the more general bp_locations_compare function.  */
 
 static int
-bp_location_compare_addrs (const void *ap, const void *bp)
+bp_locations_compare_addrs (const void *ap, const void *bp)
 {
   const struct bp_location *a = *(const struct bp_location **) ap;
   const struct bp_location *b = *(const struct bp_location **) bp;
@@ -952,9 +952,9 @@ get_first_locp_gte_addr (CORE_ADDR address)
 
   /* Find a close match to the first location at ADDRESS.  */
   locp_found = ((struct bp_location **)
-		bsearch (&dummy_locp, bp_location, bp_location_count,
+		bsearch (&dummy_locp, bp_locations, bp_locations_count,
 			 sizeof (struct bp_location **),
-			 bp_location_compare_addrs));
+			 bp_locations_compare_addrs));
 
   /* Nothing was found, nothing left to do.  */
   if (locp_found == NULL)
@@ -962,7 +962,7 @@ get_first_locp_gte_addr (CORE_ADDR address)
 
   /* We may have found a location that is at ADDRESS but is not the first in the
      location's list.  Go backwards (if possible) and locate the first one.  */
-  while ((locp_found - 1) >= bp_location
+  while ((locp_found - 1) >= bp_locations
 	 && (*(locp_found - 1))->address == address)
     locp_found--;
 
@@ -1568,15 +1568,15 @@ one_breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
    a failed assertion internal error will be raised.
 
    The range of shadowed area by each bp_location is:
-     bl->address - bp_location_placed_address_before_address_max
-     up to bl->address + bp_location_shadow_len_after_address_max
+     bl->address - bp_locations_placed_address_before_address_max
+     up to bl->address + bp_locations_shadow_len_after_address_max
    The range we were requested to resolve shadows for is:
      memaddr ... memaddr + len
    Thus the safe cutoff boundaries for performance optimization are
      memaddr + len <= (bl->address
-		       - bp_location_placed_address_before_address_max)
+		       - bp_locations_placed_address_before_address_max)
    and:
-     bl->address + bp_location_shadow_len_after_address_max <= memaddr  */
+     bl->address + bp_locations_shadow_len_after_address_max <= memaddr  */
 
 void
 breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
@@ -1592,26 +1592,26 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
      report higher one.  */
 
   bc_l = 0;
-  bc_r = bp_location_count;
+  bc_r = bp_locations_count;
   while (bc_l + 1 < bc_r)
     {
       struct bp_location *bl;
 
       bc = (bc_l + bc_r) / 2;
-      bl = bp_location[bc];
+      bl = bp_locations[bc];
 
       /* Check first BL->ADDRESS will not overflow due to the added
 	 constant.  Then advance the left boundary only if we are sure
 	 the BC element can in no way affect the BUF content (MEMADDR
 	 to MEMADDR + LEN range).
 
-	 Use the BP_LOCATION_SHADOW_LEN_AFTER_ADDRESS_MAX safety
+	 Use the BP_LOCATIONS_SHADOW_LEN_AFTER_ADDRESS_MAX safety
 	 offset so that we cannot miss a breakpoint with its shadow
 	 range tail still reaching MEMADDR.  */
 
-      if ((bl->address + bp_location_shadow_len_after_address_max
+      if ((bl->address + bp_locations_shadow_len_after_address_max
 	   >= bl->address)
-	  && (bl->address + bp_location_shadow_len_after_address_max
+	  && (bl->address + bp_locations_shadow_len_after_address_max
 	      <= memaddr))
 	bc_l = bc;
       else
@@ -1632,14 +1632,14 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
      on "master" locations, we'd forget to restore the shadow of L1
      and L2.  */
   while (bc_l > 0
-	 && bp_location[bc_l]->address == bp_location[bc_l - 1]->address)
+	 && bp_locations[bc_l]->address == bp_locations[bc_l - 1]->address)
     bc_l--;
 
   /* Now do full processing of the found relevant range of elements.  */
 
-  for (bc = bc_l; bc < bp_location_count; bc++)
+  for (bc = bc_l; bc < bp_locations_count; bc++)
   {
-    struct bp_location *bl = bp_location[bc];
+    struct bp_location *bl = bp_locations[bc];
 
     /* bp_location array has BL->OWNER always non-NULL.  */
     if (bl->owner->type == bp_none)
@@ -1649,9 +1649,9 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
     /* Performance optimization: any further element can no longer affect BUF
        content.  */
 
-    if (bl->address >= bp_location_placed_address_before_address_max
-        && memaddr + len <= (bl->address
-			     - bp_location_placed_address_before_address_max))
+    if (bl->address >= bp_locations_placed_address_before_address_max
+	&& memaddr + len <= (bl->address
+			     - bp_locations_placed_address_before_address_max))
       break;
 
     if (!bp_location_has_shadow (bl))
@@ -12127,7 +12127,7 @@ breakpoint_auto_delete (bpstat bs)
    qsort being an unstable algorithm.  */
 
 static int
-bp_location_compare (const void *ap, const void *bp)
+bp_locations_compare (const void *ap, const void *bp)
 {
   const struct bp_location *a = *(const struct bp_location **) ap;
   const struct bp_location *b = *(const struct bp_location **) bp;
@@ -12158,17 +12158,17 @@ bp_location_compare (const void *ap, const void *bp)
   return (a > b) - (a < b);
 }
 
-/* Set bp_location_placed_address_before_address_max and
-   bp_location_shadow_len_after_address_max according to the current
-   content of the bp_location array.  */
+/* Set bp_locations_placed_address_before_address_max and
+   bp_locations_shadow_len_after_address_max according to the current
+   content of the bp_locations array.  */
 
 static void
-bp_location_target_extensions_update (void)
+bp_locations_target_extensions_update (void)
 {
   struct bp_location *bl, **blp_tmp;
 
-  bp_location_placed_address_before_address_max = 0;
-  bp_location_shadow_len_after_address_max = 0;
+  bp_locations_placed_address_before_address_max = 0;
+  bp_locations_shadow_len_after_address_max = 0;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
     {
@@ -12182,15 +12182,15 @@ bp_location_target_extensions_update (void)
 
       gdb_assert (bl->address >= start);
       addr = bl->address - start;
-      if (addr > bp_location_placed_address_before_address_max)
-	bp_location_placed_address_before_address_max = addr;
+      if (addr > bp_locations_placed_address_before_address_max)
+	bp_locations_placed_address_before_address_max = addr;
 
       /* Zero SHADOW_LEN would not pass bp_location_has_shadow.  */
 
       gdb_assert (bl->address < end);
       addr = end - bl->address;
-      if (addr > bp_location_shadow_len_after_address_max)
-	bp_location_shadow_len_after_address_max = addr;
+      if (addr > bp_locations_shadow_len_after_address_max)
+	bp_locations_shadow_len_after_address_max = addr;
     }
 }
 
@@ -12355,30 +12355,30 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   struct bp_location *awp_loc_first; /* access watchpoint */
   struct bp_location *rwp_loc_first; /* read watchpoint */
 
-  /* Saved former bp_location array which we compare against the newly
-     built bp_location from the current state of ALL_BREAKPOINTS.  */
-  struct bp_location **old_location, **old_locp;
-  unsigned old_location_count;
+  /* Saved former bp_locations array which we compare against the newly
+     built bp_locations from the current state of ALL_BREAKPOINTS.  */
+  struct bp_location **old_locations, **old_locp;
+  unsigned old_locations_count;
 
-  old_location = bp_location;
-  old_location_count = bp_location_count;
-  bp_location = NULL;
-  bp_location_count = 0;
-  cleanups = make_cleanup (xfree, old_location);
+  old_locations = bp_locations;
+  old_locations_count = bp_locations_count;
+  bp_locations = NULL;
+  bp_locations_count = 0;
+  cleanups = make_cleanup (xfree, old_locations);
 
   ALL_BREAKPOINTS (b)
     for (loc = b->loc; loc; loc = loc->next)
-      bp_location_count++;
+      bp_locations_count++;
 
-  bp_location = XNEWVEC (struct bp_location *, bp_location_count);
-  locp = bp_location;
+  bp_locations = XNEWVEC (struct bp_location *, bp_locations_count);
+  locp = bp_locations;
   ALL_BREAKPOINTS (b)
     for (loc = b->loc; loc; loc = loc->next)
       *locp++ = loc;
-  qsort (bp_location, bp_location_count, sizeof (*bp_location),
-	 bp_location_compare);
+  qsort (bp_locations, bp_locations_count, sizeof (*bp_locations),
+	 bp_locations_compare);
 
-  bp_location_target_extensions_update ();
+  bp_locations_target_extensions_update ();
 
   /* Identify bp_location instances that are no longer present in the
      new list, and therefore should be freed.  Note that it's not
@@ -12390,8 +12390,9 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
      LOCP is kept in sync with OLD_LOCP, each pointing to the current
      and former bp_location array state respectively.  */
 
-  locp = bp_location;
-  for (old_locp = old_location; old_locp < old_location + old_location_count;
+  locp = bp_locations;
+  for (old_locp = old_locations;
+       old_locp < old_locations + old_locations_count;
        old_locp++)
     {
       struct bp_location *old_loc = *old_locp;
@@ -12406,12 +12407,12 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
       /* Skip LOCP entries which will definitely never be needed.
 	 Stop either at or being the one matching OLD_LOC.  */
-      while (locp < bp_location + bp_location_count
+      while (locp < bp_locations + bp_locations_count
 	     && (*locp)->address < old_loc->address)
 	locp++;
 
       for (loc2p = locp;
-	   (loc2p < bp_location + bp_location_count
+	   (loc2p < bp_locations + bp_locations_count
 	    && (*loc2p)->address == old_loc->address);
 	   loc2p++)
 	{
@@ -12471,7 +12472,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	      if (breakpoint_address_is_meaningful (old_loc->owner))
 		{
 		  for (loc2p = locp;
-		       (loc2p < bp_location + bp_location_count
+		       (loc2p < bp_locations + bp_locations_count
 			&& (*loc2p)->address == old_loc->address);
 		       loc2p++)
 		    {
