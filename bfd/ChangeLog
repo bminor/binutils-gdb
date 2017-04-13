@@ -1,3 +1,10 @@
+2017-04-13  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (arm_type_of_stub): Supply missing args to "long
+	branch veneers" error.  Fix double space and format message.
+	* elf32-avr.c (avr_add_stub): Do not pass NULL as %B arg.
+	* elf64-ppc.c (tocsave_find): Supply missing %B arg.
+
 2017-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579

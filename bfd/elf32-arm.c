@@ -4024,10 +4024,12 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      if (!thumb_only)
 		{
 		  if (input_sec->flags & SEC_ELF_PURECODE)
-		    _bfd_error_handler (_("\
-%B(%A): warning: long branch  veneers used in section with SHF_ARM_PURECODE section \
-attribute is only supported for M-profile targets that implement the movw instruction."),
-					input_sec);
+		    _bfd_error_handler
+		      (_("%B(%A): warning: long branch veneers used in"
+			 " section with SHF_ARM_PURECODE section"
+			 " attribute is only supported for M-profile"
+			 " targets that implement the movw instruction."),
+		       input_bfd, input_sec);
 
 		  stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 		    /* PIC stubs.  */
@@ -4056,10 +4058,12 @@ attribute is only supported for M-profile targets that implement the movw instru
 		  else
 		    {
 		      if (input_sec->flags & SEC_ELF_PURECODE)
-			_bfd_error_handler (_("\
-%B(%A): warning: long branch  veneers used in section with SHF_ARM_PURECODE section \
-attribute is only supported for M-profile targets that implement the movw instruction."),
-					    input_sec);
+			_bfd_error_handler
+			  (_("%B(%A): warning: long branch veneers used in"
+			     " section with SHF_ARM_PURECODE section"
+			     " attribute is only supported for M-profile"
+			     " targets that implement the movw instruction."),
+			   input_bfd, input_sec);
 
 		      stub_type = (bfd_link_pic (info) | globals->pic_veneer)
 			/* PIC stub.  */
@@ -4073,13 +4077,12 @@ attribute is only supported for M-profile targets that implement the movw instru
 	  else
 	    {
 	      if (input_sec->flags & SEC_ELF_PURECODE)
-		_bfd_error_handler (_("%B(%s): warning: long branch "
-				      " veneers used in section with "
-				      "SHF_ARM_PURECODE section "
-				      "attribute is only supported"
-				      " for M-profile targets that "
-				      "implement the movw "
-				      "instruction."));
+		_bfd_error_handler
+		  (_("%B(%A): warning: long branch veneers used in"
+		     " section with SHF_ARM_PURECODE section"
+		     " attribute is only supported" " for M-profile"
+		     " targets that implement the movw instruction."),
+		   input_bfd, input_sec);
 
 	      /* Thumb to arm.  */
 	      if (sym_sec != NULL
@@ -4126,13 +4129,12 @@ attribute is only supported for M-profile targets that implement the movw instru
 	   || r_type == R_ARM_TLS_CALL)
     {
       if (input_sec->flags & SEC_ELF_PURECODE)
-	_bfd_error_handler (_("%B(%s): warning: long branch "
-			      " veneers used in section with "
-			      "SHF_ARM_PURECODE section "
-			      "attribute is only supported"
-			      " for M-profile targets that "
-			      "implement the movw "
-			      "instruction."));
+	_bfd_error_handler
+	  (_("%B(%A): warning: long branch veneers used in"
+	     " section with SHF_ARM_PURECODE section"
+	     " attribute is only supported for M-profile"
+	     " targets that implement the movw instruction."),
+	   input_bfd, input_sec);
       if (branch_type == ST_BRANCH_TO_THUMB)
 	{
 	  /* Arm to thumb.  */
