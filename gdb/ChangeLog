@@ -1,5 +1,10 @@
 2017-04-13  Yao Qi  <yao.qi@linaro.org>
 
+	* rx-tdep.c (rx_fpsw_type): Check tdep->rx_fpsw_type instead of
+	tdep->rx_psw_type.
+
+2017-04-13  Yao Qi  <yao.qi@linaro.org>
+
 	* rl78-tdep.c (rl78_gdbarch_init): Use XCNEW instead of XNEW.
 	* rx-tdep.c (rx_gdbarch_init): Likewise.
 
