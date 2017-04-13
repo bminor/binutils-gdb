@@ -1,5 +1,18 @@
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
+	* coffcode.h: Wrap some overly long _bfd_error_handler args.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-mep.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+
+2017-04-13  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h: Use %B and %A in error messages throughout file.
 	* aout-cris.c: Likewise.
 	* archive.c: Likewise.

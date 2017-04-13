@@ -8620,11 +8620,12 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 			if (is_not_last_in_it_block)
 			  {
 			    _bfd_error_handler
-			      /* Note - overlong line used here to allow for translation.  */
 			      /* xgettext:c-format */
-			      (_("\
-%B(%A+0x%lx): error: multiple load detected in non-last IT block instruction : STM32L4XX veneer cannot be generated.\n"
-				 "Use gcc option -mrestrict-it to generate only one instruction per IT block.\n"),
+			      (_("%B(%A+0x%lx): error: multiple load detected"
+				 " in non-last IT block instruction :"
+				 " STM32L4XX veneer cannot be generated.\n"
+				 "Use gcc option -mrestrict-it to generate"
+				 " only one instruction per IT block.\n"),
 			       abfd, sec, (long) i);
 			  }
 			else

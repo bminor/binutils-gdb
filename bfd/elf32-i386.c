@@ -1655,7 +1655,8 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: direct GOT relocation R_386_GOT32X against `%s' without base register can not be used when making a shared object"),
+	(_("%B: direct GOT relocation R_386_GOT32X against `%s' without base"
+	   " register can not be used when making a shared object"),
 	 abfd, name);
       return FALSE;
     }
@@ -4367,7 +4368,9 @@ disallow_got32:
 
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: direct GOT relocation %s against `%s' without base register can not be used when making a shared object"),
+		    (_("%B: direct GOT relocation %s against `%s'"
+		       " without base register can not be used"
+		       " when making a shared object"),
 		     input_bfd, howto->name, name);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
@@ -4415,7 +4418,8 @@ disallow_got32:
 
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"),
+		    (_("%B: relocation R_386_GOTOFF against undefined %s"
+		       " `%s' can not be used when making a shared object"),
 		     input_bfd, v, h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
@@ -4427,7 +4431,8 @@ disallow_got32:
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation R_386_GOTOFF against protected %s `%s' can not be used when making a shared object"),
+		    (_("%B: relocation R_386_GOTOFF against protected %s"
+		       " `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
 		     h->root.root.string);

@@ -11139,9 +11139,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 	      /* xgettext:c-format */
 	      (_("%A has both ordered [`%A' in %B] "
 		 "and unordered [`%A' in %B] sections"),
-	       o, linkorder_sec,
-	       linkorder_sec->owner, other_sec,
-	       other_sec->owner);
+	       o, linkorder_sec, linkorder_sec->owner,
+	       other_sec, other_sec->owner);
 	  else
 	    _bfd_error_handler
 	      (_("%A has both ordered and unordered sections"), o);

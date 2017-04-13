@@ -2524,7 +2524,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					       isym, NULL);
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: '%s' accessed both as normal and thread local symbol"),
+		      (_("%B: '%s' accessed both as normal and"
+			 " thread local symbol"),
 		       abfd, name);
 		    bfd_set_error (bfd_error_bad_value);
 		    goto error_return;
@@ -4773,7 +4774,8 @@ do_ifunc_pointer:
 
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: relocation R_X86_64_GOTOFF64 against undefined %s `%s' can not be used when making a shared object"),
+		    (_("%B: relocation R_X86_64_GOTOFF64 against undefined %s"
+		       " `%s' can not be used when making a shared object"),
 		     input_bfd, v, h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
@@ -4786,7 +4788,8 @@ do_ifunc_pointer:
 		{
 		  _bfd_error_handler
 	      /* xgettext:c-format */
-		    (_("%B: relocation R_X86_64_GOTOFF64 against protected %s `%s' can not be used when making a shared object"),
+		    (_("%B: relocation R_X86_64_GOTOFF64 against protected %s"
+		       " `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
 		     h->root.root.string);

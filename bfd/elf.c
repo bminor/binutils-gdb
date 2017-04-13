@@ -339,7 +339,8 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 	{
 	  /* PR 17512: file: f057ec89.  */
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: attempt to load strings from a non-string section (number %d)"),
+	  _bfd_error_handler (_("%B: attempt to load strings from"
+				" a non-string section (number %d)"),
 			      abfd, shindex);
 	  return NULL;
 	}
@@ -492,8 +493,8 @@ bfd_elf_get_elf_syms (bfd *ibfd,
       {
 	symoffset += (esym - (bfd_byte *) extsym_buf) / extsym_size;
 	/* xgettext:c-format */
-	_bfd_error_handler (_("%B symbol number %lu references "
-			      "nonexistent SHT_SYMTAB_SHNDX section"),
+	_bfd_error_handler (_("%B symbol number %lu references"
+			      " nonexistent SHT_SYMTAB_SHNDX section"),
 			    ibfd, (unsigned long) symoffset);
 	if (alloc_intsym != NULL)
 	  free (alloc_intsym);
@@ -649,7 +650,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: corrupt size field in group section header: 0x%lx"), abfd, shdr->sh_size);
+			(_("%B: corrupt size field in group section"
+			   " header: 0x%lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
 		      continue;
@@ -663,11 +665,13 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: invalid size field in group section header: 0x%lx"), abfd, shdr->sh_size);
+			(_("%B: invalid size field in group section"
+			   " header: 0x%lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
-		      /* PR 17510: If the group contents are even partially
-			 corrupt, do not allow any of the contents to be used.  */
+		      /* PR 17510: If the group contents are even
+			 partially corrupt, do not allow any of the
+			 contents to be used.  */
 		      memset (shdr->contents, 0, amt);
 		      continue;
 		    }
@@ -2085,7 +2089,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: warning: multiple symbol tables detected - ignoring the table in section %u"),
+	    (_("%B: warning: multiple symbol tables detected"
+	       " - ignoring the table in section %u"),
 	     abfd, shindex);
 	  goto success;
 	}
@@ -2168,7 +2173,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: warning: multiple dynamic symbol tables detected - ignoring the table in section %u"),
+	    (_("%B: warning: multiple dynamic symbol tables detected"
+	       " - ignoring the table in section %u"),
 	     abfd, shindex);
 	  goto success;
 	}
@@ -3769,7 +3775,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		      asection *kept;
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: sh_link of section `%A' points to discarded section `%A' of `%B'"),
+			(_("%B: sh_link of section `%A' points to"
+			   " discarded section `%A' of `%B'"),
 			 abfd, d->this_hdr.bfd_section,
 			 s, s->owner);
 		      /* Point to the kept section if it has the same
@@ -3793,7 +3800,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: sh_link of section `%A' points to removed section `%A' of `%B'"),
+			(_("%B: sh_link of section `%A' points to"
+			   " removed section `%A' of `%B'"),
 			 abfd, d->this_hdr.bfd_section, s, s->owner);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
@@ -5393,7 +5401,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	       && strcmp (m->sections[0]->name, ".dynamic") != 0)
 	{
 	  _bfd_error_handler
-	    (_("%B: The first section in the PT_DYNAMIC segment is not the .dynamic section"),
+	    (_("%B: The first section in the PT_DYNAMIC segment"
+	       " is not the .dynamic section"),
 	     abfd);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -5420,7 +5429,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		      && p->p_paddr < (bfd_vma) off))
 		{
 		  _bfd_error_handler
-		    (_("%B: Not enough room for program headers, try linking with -N"),
+		    (_("%B: Not enough room for program headers,"
+		       " try linking with -N"),
 		     abfd);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;

@@ -3836,8 +3836,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: unknown relocation type %d"),
-	     input_bfd, (int) r_type);
+	    (_("%B: unknown relocation type %d"), input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = FALSE;
 	  continue;

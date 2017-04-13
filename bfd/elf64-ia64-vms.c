@@ -3555,7 +3555,8 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 		     shared libraries nor dynamic executables.  */
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: non-pic code with imm relocation against dynamic symbol `%s'"),
+		    (_("%B: non-pic code with imm relocation against"
+		       " dynamic symbol `%s'"),
 		     input_bfd,
 		     h ? h->root.root.string
 		       : bfd_elf_sym_name (input_bfd, symtab_hdr, sym,

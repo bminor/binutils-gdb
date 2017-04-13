@@ -965,7 +965,8 @@ handle_COMDAT (bfd * abfd,
 	  /* PR 17512 file: 078-11867-0.004  */
 	  if (symname == NULL)
 	    {
-	      _bfd_error_handler (_("%B: unable to load COMDAT section name"), abfd);
+	      _bfd_error_handler (_("%B: unable to load COMDAT section name"),
+				  abfd);
 	      break;
 	    }
 
@@ -1005,7 +1006,8 @@ handle_COMDAT (bfd * abfd,
 
 		if (isym.n_sclass == C_STAT && strcmp (name, symname) != 0)
 		  /* xgettext:c-format */
-		  _bfd_error_handler (_("%B: warning: COMDAT symbol '%s' does not match section name '%s'"),
+		  _bfd_error_handler (_("%B: warning: COMDAT symbol '%s'"
+					" does not match section name '%s'"),
 				      abfd, symname, name);
 
 		seen_state = 1;
@@ -1014,7 +1016,8 @@ handle_COMDAT (bfd * abfd,
 		if (esym + bfd_coff_symesz (abfd) >= esymend)
 		  {
 		    /* xgettext:c-format */
-		    _bfd_error_handler (_("%B: warning: No symbol for section '%s' found"),
+		    _bfd_error_handler (_("%B: warning: No symbol for"
+					  " section '%s' found"),
 					abfd, symname);
 		    break;
 		  }
@@ -1239,7 +1242,8 @@ styp_to_sec_flags (bfd *abfd,
 	     variable as this will allow some .sys files generate by
 	     other toolchains to be processed.  See bugzilla issue 196.  */
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"),
+	  _bfd_error_handler (_("%B: Warning: Ignoring section flag"
+				" IMAGE_SCN_MEM_NOT_PAGED in section %s"),
 			      abfd, name);
 	  break;
 	case IMAGE_SCN_MEM_EXECUTE:
@@ -2784,7 +2788,8 @@ coff_write_relocs (bfd * abfd, int first_undef)
 		      {
 			bfd_set_error (bfd_error_bad_value);
 			/* xgettext:c-format */
-			_bfd_error_handler (_("%B: reloc against a non-existant symbol index: %ld"),
+			_bfd_error_handler (_("%B: reloc against a non-existent"
+					      " symbol index: %ld"),
 					    abfd, n.r_symndx);
 			return FALSE;
 		      }
