@@ -92,9 +92,10 @@ save_current_inferior (void)
   return old_chain;
 }
 
-static void
-free_inferior (struct inferior *inf)
+inferior::~inferior ()
 {
+  inferior *inf = this;
+
   discard_all_inferior_continuations (inf);
   inferior_free_data (inf);
   xfree (inf->args);
@@ -102,37 +103,33 @@ free_inferior (struct inferior *inf)
   free_environ (inf->environment);
   target_desc_info_free (inf->tdesc_info);
   xfree (inf->priv);
-  xfree (inf);
+}
+
+inferior::inferior (int pid_)
+  : num (++highest_inferior_num),
+    pid (pid_),
+    environment (make_environ ()),
+    registry_data ()
+{
+  init_environ (this->environment);
+  inferior_alloc_data (this);
 }
 
 struct inferior *
 add_inferior_silent (int pid)
 {
-  struct inferior *inf;
-
-  inf = XNEW (struct inferior);
-  memset (inf, 0, sizeof (*inf));
-  inf->pid = pid;
-
-  inf->control.stop_soon = NO_STOP_QUIETLY;
-
-  inf->num = ++highest_inferior_num;
+  inferior *inf = new inferior (pid);
 
   if (inferior_list == NULL)
     inferior_list = inf;
   else
     {
-      struct inferior *last;
+      inferior *last;
 
       for (last = inferior_list; last->next != NULL; last = last->next)
 	;
       last->next = inf;
     }
-
-  inf->environment = make_environ ();
-  init_environ (inf->environment);
-
-  inferior_alloc_data (inf);
 
   observer_notify_inferior_added (inf);
 
@@ -207,7 +204,7 @@ delete_inferior (struct inferior *todel)
   if (program_space_empty_p (inf->pspace))
     delete_program_space (inf->pspace);
 
-  free_inferior (inf);
+  delete inf;
 }
 
 /* If SILENT then be quiet -- don't announce a inferior exit, or the
