@@ -1,3 +1,7 @@
+2017-04-13  Alan Modra  <amodra@gmail.com>
+
+	* bfd-in2.h: Regenerate.
+
 2017-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-properties.c (_bfd_elf_parse_gnu_properties): Remove the
