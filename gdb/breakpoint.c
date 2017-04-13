@@ -11062,7 +11062,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   const struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
   struct value *val, *mark, *result;
   int saved_bitpos = 0, saved_bitsize = 0;
-  struct frame_info *frame;
   const char *exp_start = NULL;
   const char *exp_end = NULL;
   const char *tok, *end_tok;
@@ -11240,21 +11239,32 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   if (*tok)
     error (_("Junk at end of command."));
 
-  frame = block_innermost_frame (exp_valid_block);
+  frame_info *wp_frame = block_innermost_frame (exp_valid_block);
+
+  /* Save this because create_internal_breakpoint below invalidates
+     'wp_frame'.  */
+  frame_id watchpoint_frame = get_frame_id (wp_frame);
 
   /* If the expression is "local", then set up a "watchpoint scope"
      breakpoint at the point where we've left the scope of the watchpoint
      expression.  Create the scope breakpoint before the watchpoint, so
      that we will encounter it first in bpstat_stop_status.  */
-  if (exp_valid_block && frame)
+  if (exp_valid_block != NULL && wp_frame != NULL)
     {
-      if (frame_id_p (frame_unwind_caller_id (frame)))
+      frame_id caller_frame_id = frame_unwind_caller_id (wp_frame);
+
+      if (frame_id_p (caller_frame_id))
 	{
+	  gdbarch *caller_arch = frame_unwind_caller_arch (wp_frame);
+	  CORE_ADDR caller_pc = frame_unwind_caller_pc (wp_frame);
+
  	  scope_breakpoint
-	    = create_internal_breakpoint (frame_unwind_caller_arch (frame),
-					  frame_unwind_caller_pc (frame),
+	    = create_internal_breakpoint (caller_arch, caller_pc,
 					  bp_watchpoint_scope,
 					  &momentary_breakpoint_ops);
+
+	  /* create_internal_breakpoint could invalidate WP_FRAME.  */
+	  wp_frame = NULL;
 
 	  scope_breakpoint->enable_state = bp_enabled;
 
@@ -11262,13 +11272,11 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  scope_breakpoint->disposition = disp_del;
 
 	  /* Only break in the proper frame (help with recursion).  */
-	  scope_breakpoint->frame_id = frame_unwind_caller_id (frame);
+	  scope_breakpoint->frame_id = caller_frame_id;
 
 	  /* Set the address at which we will stop.  */
-	  scope_breakpoint->loc->gdbarch
-	    = frame_unwind_caller_arch (frame);
-	  scope_breakpoint->loc->requested_address
-	    = frame_unwind_caller_pc (frame);
+	  scope_breakpoint->loc->gdbarch = caller_arch;
+	  scope_breakpoint->loc->requested_address = caller_pc;
 	  scope_breakpoint->loc->address
 	    = adjust_breakpoint_address (scope_breakpoint->loc->gdbarch,
 					 scope_breakpoint->loc->requested_address,
@@ -11340,9 +11348,9 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else
     b->cond_string = 0;
 
-  if (frame)
+  if (frame_id_p (watchpoint_frame))
     {
-      w->watchpoint_frame = get_frame_id (frame);
+      w->watchpoint_frame = watchpoint_frame;
       w->watchpoint_thread = inferior_ptid;
     }
   else

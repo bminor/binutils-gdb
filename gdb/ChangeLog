@@ -1,5 +1,10 @@
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (watch_command_1): Save watchpoint-frame info
+	before calling create_internal_breakpoint.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
 	* fork-child.c (execv_argv): New class.
 	(breakup_args): Refactored as ...
 	(execv_argv::init_for_no_shell): .. this method of execv_argv.
