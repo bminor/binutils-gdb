@@ -1505,6 +1505,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
 	common/gdb_sys_time.h \
+	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
 	common/host-defs.h \

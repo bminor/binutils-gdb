@@ -43,62 +43,235 @@ extern char **environ;
 
 static char *exec_wrapper;
 
-/* Break up SCRATCH into an argument vector suitable for passing to
-   execvp and store it in ARGV.  E.g., on "run a b c d" this routine
-   would get as input the string "a b c d", and as output it would
-   fill in ARGV with the four arguments "a", "b", "c", "d".  */
+/* Build the argument vector for execv(3).  */
 
-static void
-breakup_args (const std::string &scratch, std::vector<char *> &argv)
+class execv_argv
 {
-  for (size_t cur_pos = 0; cur_pos < scratch.size ();)
+public:
+  /* EXEC_FILE is the file to run.  ALLARGS is a string containing the
+     arguments to the program.  If starting with a shell, SHELL_FILE
+     is the shell to run.  Otherwise, SHELL_FILE is NULL.  */
+  execv_argv (const char *exec_file, const std::string &allargs,
+	      const char *shell_file);
+
+  /* Return a pointer to the built argv, in the type expected by
+     execv.  The result is (only) valid for as long as this execv_argv
+     object is live.  We return a "char **" because that's the type
+     that the execv functions expect.  Note that it is guaranteed that
+     the execv functions do not modify the argv[] array nor the
+     strings to which the array point.  */
+  char **argv ()
+  {
+    return const_cast<char **> (&m_argv[0]);
+  }
+
+private:
+  /* Disable copying.  */
+  execv_argv (const execv_argv &) = delete;
+  void operator= (const execv_argv &) = delete;
+
+  /* Helper methods for constructing the argument vector.  */
+
+  /* Used when building an argv for a straight execv call, without
+     going via the shell.  */
+  void init_for_no_shell (const char *exec_file,
+			  const std::string &allargs);
+
+  /* Used when building an argv for execing a shell that execs the
+     child program.  */
+  void init_for_shell (const char *exec_file,
+		       const std::string &allargs,
+		       const char *shell_file);
+
+  /* The argument vector built.  Holds non-owning pointers.  Elements
+     either point to the strings passed to the execv_argv ctor, or
+     inside M_STORAGE.  */
+  std::vector<const char *> m_argv;
+
+  /* Storage.  In the no-shell case, this contains a copy of the
+     arguments passed to the ctor, split by '\0'.  In the shell case,
+     this contains the quoted shell command.  I.e., SHELL_COMMAND in
+     {"$SHELL" "-c", SHELL_COMMAND, NULL}.  */
+  std::string m_storage;
+};
+
+/* Create argument vector for straight call to execvp.  Breaks up
+   ALLARGS into an argument vector suitable for passing to execvp and
+   stores it in M_ARGV.  E.g., on "run a b c d" this routine would get
+   as input the string "a b c d", and as output it would fill in
+   M_ARGV with the four arguments "a", "b", "c", "d".  Each argument
+   in M_ARGV points to a substring of a copy of ALLARGS stored in
+   M_STORAGE.  */
+
+void
+execv_argv::init_for_no_shell (const char *exec_file,
+			       const std::string &allargs)
+{
+
+  /* Save/work with a copy stored in our storage.  The pointers pushed
+     to M_ARGV point directly into M_STORAGE, which is modified in
+     place with the necessary NULL terminators.  This avoids N heap
+     allocations and string dups when 1 is sufficient.  */
+  std::string &args_copy = m_storage = allargs;
+
+  m_argv.push_back (exec_file);
+
+  for (size_t cur_pos = 0; cur_pos < args_copy.size ();)
     {
       /* Skip whitespace-like chars.  */
-      std::size_t pos = scratch.find_first_not_of (" \t\n", cur_pos);
+      std::size_t pos = args_copy.find_first_not_of (" \t\n", cur_pos);
 
       if (pos != std::string::npos)
 	cur_pos = pos;
 
       /* Find the position of the next separator.  */
-      std::size_t next_sep = scratch.find_first_of (" \t\n", cur_pos);
+      std::size_t next_sep = args_copy.find_first_of (" \t\n", cur_pos);
 
-      /* No separator found, which means this is the last
-	 argument.  */
       if (next_sep == std::string::npos)
-	next_sep = scratch.size ();
+	{
+	  /* No separator found, which means this is the last
+	     argument.  */
+	  next_sep = args_copy.size ();
+	}
+      else
+	{
+	  /* Replace the separator with a terminator.  */
+	  args_copy[next_sep++] = '\0';
+	}
 
-      char *arg = savestring (scratch.c_str () + cur_pos, next_sep - cur_pos);
-      argv.push_back (arg);
+      m_argv.push_back (&args_copy[cur_pos]);
 
       cur_pos = next_sep;
     }
 
   /* NULL-terminate the vector.  */
-  argv.push_back (NULL);
+  m_argv.push_back (NULL);
 }
 
-/* When executing a command under the given shell, return non-zero if
-   the '!' character should be escaped when embedded in a quoted
+/* When executing a command under the given shell, return true if the
+   '!' character should be escaped when embedded in a quoted
    command-line argument.  */
 
-static int
+static bool
 escape_bang_in_quoted_argument (const char *shell_file)
 {
-  const int shell_file_len = strlen (shell_file);
+  size_t shell_file_len = strlen (shell_file);
 
   /* Bang should be escaped only in C Shells.  For now, simply check
      that the shell name ends with 'csh', which covers at least csh
      and tcsh.  This should be good enough for now.  */
 
   if (shell_file_len < 3)
-    return 0;
+    return false;
 
   if (shell_file[shell_file_len - 3] == 'c'
       && shell_file[shell_file_len - 2] == 's'
       && shell_file[shell_file_len - 1] == 'h')
-    return 1;
+    return true;
 
-  return 0;
+  return false;
+}
+
+/* See declaration.  */
+
+execv_argv::execv_argv (const char *exec_file,
+			const std::string &allargs,
+			const char *shell_file)
+{
+  if (shell_file == NULL)
+    init_for_no_shell (exec_file, allargs);
+  else
+    init_for_shell (exec_file, allargs, shell_file);
+}
+
+/* See declaration.  */
+
+void
+execv_argv::init_for_shell (const char *exec_file,
+			    const std::string &allargs,
+			    const char *shell_file)
+{
+  /* We're going to call a shell.  */
+  bool escape_bang = escape_bang_in_quoted_argument (shell_file);
+
+  /* We need to build a new shell command string, and make argv point
+     to it.  So build it in the storage.  */
+  std::string &shell_command = m_storage;
+
+  shell_command = "exec ";
+
+  /* Add any exec wrapper.  That may be a program name with arguments,
+     so the user must handle quoting.  */
+  if (exec_wrapper)
+    {
+      shell_command += exec_wrapper;
+      shell_command += ' ';
+    }
+
+  /* Now add exec_file, quoting as necessary.  */
+
+  /* Quoting in this style is said to work with all shells.  But csh
+     on IRIX 4.0.1 can't deal with it.  So we only quote it if we need
+     to.  */
+  bool need_to_quote;
+  const char *p = exec_file;
+  while (1)
+    {
+      switch (*p)
+	{
+	case '\'':
+	case '!':
+	case '"':
+	case '(':
+	case ')':
+	case '$':
+	case '&':
+	case ';':
+	case '<':
+	case '>':
+	case ' ':
+	case '\n':
+	case '\t':
+	  need_to_quote = true;
+	  goto end_scan;
+
+	case '\0':
+	  need_to_quote = false;
+	  goto end_scan;
+
+	default:
+	  break;
+	}
+      ++p;
+    }
+ end_scan:
+  if (need_to_quote)
+    {
+      shell_command += '\'';
+      for (p = exec_file; *p != '\0'; ++p)
+	{
+	  if (*p == '\'')
+	    shell_command += "'\\''";
+	  else if (*p == '!' && escape_bang)
+	    shell_command += "\\!";
+	  else
+	    shell_command += *p;
+	}
+      shell_command += '\'';
+    }
+  else
+    shell_command += exec_file;
+
+  shell_command += ' ' + allargs;
+
+  /* If we decided above to start up with a shell, we exec the shell.
+     "-c" says to interpret the next arg as a shell command to
+     execute, and this command is "exec <target-program> <args>".  */
+  m_argv.reserve (4);
+  m_argv.push_back (shell_file);
+  m_argv.push_back ("-c");
+  m_argv.push_back (shell_command.c_str ());
+  m_argv.push_back (NULL);
 }
 
 /* See inferior.h.  */
@@ -154,8 +327,6 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
   static char *shell_file;
   static const char *exec_file;
   char **save_our_env;
-  int shell = 0;
-  std::vector<char *> argv;
   const char *inferior_io_terminal = get_inferior_io_terminal ();
   struct inferior *inf;
   int i;
@@ -172,106 +343,20 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
   /* 'startup_with_shell' is declared in inferior.h and bound to the
      "set startup-with-shell" option.  If 0, we'll just do a
      fork/exec, no shell, so don't bother figuring out what shell.  */
-  shell_file = shell_file_arg;
   if (startup_with_shell)
     {
+      shell_file = shell_file_arg;
       /* Figure out what shell to start up the user program under.  */
       if (shell_file == NULL)
 	shell_file = getenv ("SHELL");
       if (shell_file == NULL)
 	shell_file = default_shell_file;
-      shell = 1;
-    }
-
-  if (!shell)
-    {
-      /* We're going to call execvp.  Create argument vector.  */
-      argv.push_back (xstrdup (exec_file));
-      breakup_args (allargs, argv);
     }
   else
-    {
-      /* We're going to call a shell.  */
-      std::string shell_command;
-      const char *p;
-      int need_to_quote;
-      const int escape_bang = escape_bang_in_quoted_argument (shell_file);
+    shell_file = NULL;
 
-      shell_command = std::string ("exec ");
-
-      /* Add any exec wrapper.  That may be a program name with arguments, so
-	 the user must handle quoting.  */
-      if (exec_wrapper)
-	{
-	  shell_command += exec_wrapper;
-	  shell_command += ' ';
-	}
-
-      /* Now add exec_file, quoting as necessary.  */
-
-      /* Quoting in this style is said to work with all shells.  But
-         csh on IRIX 4.0.1 can't deal with it.  So we only quote it if
-         we need to.  */
-      p = exec_file;
-      while (1)
-	{
-	  switch (*p)
-	    {
-	    case '\'':
-	    case '!':
-	    case '"':
-	    case '(':
-	    case ')':
-	    case '$':
-	    case '&':
-	    case ';':
-	    case '<':
-	    case '>':
-	    case ' ':
-	    case '\n':
-	    case '\t':
-	      need_to_quote = 1;
-	      goto end_scan;
-
-	    case '\0':
-	      need_to_quote = 0;
-	      goto end_scan;
-
-	    default:
-	      break;
-	    }
-	  ++p;
-	}
-    end_scan:
-      if (need_to_quote)
-	{
-	  shell_command += '\'';
-	  for (p = exec_file; *p != '\0'; ++p)
-	    {
-	      if (*p == '\'')
-		shell_command += "'\\''";
-	      else if (*p == '!' && escape_bang)
-		shell_command += "\\!";
-	      else
-		shell_command += *p;
-	    }
-	  shell_command += '\'';
-	}
-      else
-	shell_command += exec_file;
-
-      shell_command += " " + allargs;
-
-      /* If we decided above to start up with a shell, we exec the
-	 shell, "-c" says to interpret the next arg as a shell command
-	 to execute, and this command is "exec <target-program>
-	 <args>".  We xstrdup all the strings here because they will
-	 be free'd later in the code.  */
-      argv.push_back (xstrdup (shell_file));
-      argv.push_back (xstrdup ("-c"));
-      argv.push_back (xstrdup (shell_command.c_str ()));
-      argv.push_back (NULL);
-    }
+  /* Build the argument vector.  */
+  execv_argv child_argv (exec_file, allargs, shell_file);
 
   /* Retain a copy of our environment variables, since the child will
      replace the value of environ and if we're vforked, we have to
@@ -376,6 +461,8 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
          path to find $SHELL.  Rich Pixley says so, and I agree.  */
       environ = env;
 
+      char **argv = child_argv.argv ();
+
       if (exec_fun != NULL)
         (*exec_fun) (argv[0], &argv[0], env);
       else
@@ -392,8 +479,6 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
       gdb_flush (gdb_stderr);
       _exit (0177);
     }
-
-  free_vector_argv (argv);
 
   /* Restore our environment in case a vforked child clob'd it.  */
   environ = save_our_env;

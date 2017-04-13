@@ -1,5 +1,11 @@
 2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* remote-utils.c: Include "gdb_termios.h" instead of
+	"terminal.h".
+	* terminal.h: Delete file.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* server.c: Include <vector>.
 	<program_argv, wrapper_argv>: Convert to std::vector.
 	(start_inferior): Rewrite function to use C++.

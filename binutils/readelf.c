@@ -9436,6 +9436,12 @@ process_dynamic_section (FILE * file)
 	     processing that.  This is overkill, I know, but it
 	     should work.  */
 	  section.sh_offset = offset_from_vma (file, entry->d_un.d_val, 0);
+	  if ((bfd_size_type) section.sh_offset > current_file_size)
+	    {
+	      /* See PR 21379 for a reproducer.  */
+	      error (_("Invalid DT_SYMTAB entry: %lx"), (long) section.sh_offset);
+	      return FALSE;
+	    }
 
 	  if (archive_file_offset != 0)
 	    section.sh_size = archive_file_size - section.sh_offset;
@@ -15370,6 +15376,15 @@ process_mips_specific (FILE * file)
 	  return FALSE;
 	}
 
+      /* PR 21345 - print a slightly more helpful error message
+	 if we are sure that the cmalloc will fail.  */
+      if (conflictsno * sizeof (* iconf) > current_file_size)
+	{
+	  error (_("Overlarge number of conflicts detected: %lx\n"),
+		 (long) conflictsno);
+	  return FALSE;
+	}
+
       iconf = (Elf32_Conflict *) cmalloc (conflictsno, sizeof (* iconf));
       if (iconf == NULL)
 	{
@@ -16656,10 +16671,11 @@ print_symbol_for_build_attribute (FILE *         file,
   static unsigned long      strtablen;
   static Elf_Internal_Sym * symtab;
   static unsigned long      nsyms;
-  Elf_Internal_Sym *  saved_sym = NULL;
-  Elf_Internal_Sym *  sym;
+  Elf_Internal_Sym *        saved_sym = NULL;
+  Elf_Internal_Sym *        sym;
 
-  if (saved_file == NULL || file != saved_file)
+  if (section_headers != NULL
+      && (saved_file == NULL || file != saved_file))
     {
       Elf_Internal_Shdr * symsec;
 
@@ -16809,9 +16825,12 @@ print_gnu_build_attribute_description (Elf_Internal_Note * pnote,
 static bfd_boolean
 print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 {
+  static const char string_expected [2] = { GNU_BUILD_ATTRIBUTE_TYPE_STRING, 0 };
+  static const char number_expected [2] = { GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC, 0 };
+  static const char bool_expected [3] = { GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE, GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE, 0 };
   char         name_type;
   char         name_attribute;
-  char *       expected_types;
+  const char * expected_types;
   const char * name = pnote->namedata;
   const char * text;
   int          left;
@@ -16819,7 +16838,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   if (name == NULL || pnote->namesz < 2)
     {
       error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
-      print_symbol (-20, _("  <corrupt name field>"));
+      print_symbol (-20, _("  <corrupt name>"));
       return FALSE;
     }
 
@@ -16845,7 +16864,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_VERSION:
       text = _("<version>");
-      expected_types = "$";
+      expected_types = string_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_STACK_PROT:
@@ -16855,17 +16874,17 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     case GNU_BUILD_ATTRIBUTE_RELRO:
       text = _("<relro>");
-      expected_types = "!+";
+      expected_types = bool_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_STACK_SIZE:
       text = _("<stack size>");
-      expected_types = "*";
+      expected_types = number_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_TOOL:
       text = _("<tool>");
-      expected_types = "$";
+      expected_types = string_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_ABI:
@@ -16875,12 +16894,12 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     case GNU_BUILD_ATTRIBUTE_PIC:
       text = _("<PIC>");
-      expected_types = "*";
+      expected_types = number_expected;
       ++ name;
       break;
     case GNU_BUILD_ATTRIBUTE_SHORT_ENUM:
       text = _("<short enum>");
-      expected_types = "!+";
+      expected_types = bool_expected;
       ++ name;
       break;
 
@@ -17449,7 +17468,7 @@ process_arch_specific (FILE * file)
       return process_mips_specific (file);
 
     case EM_MSP430:
-      return process_attributes (file, "mspabi", SHT_MSP430_ATTRIBUTES,
+     return process_attributes (file, "mspabi", SHT_MSP430_ATTRIBUTES,
 				 display_msp430x_attribute,
 				 display_generic_attribute);
 

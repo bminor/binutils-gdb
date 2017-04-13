@@ -949,8 +949,8 @@ microblaze_elf_relocate_section (bfd *output_bfd,
       if (r_type < 0 || r_type >= (int) R_MICROBLAZE_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%s: unknown relocation type %d"),
-			      bfd_get_filename (input_bfd), (int) r_type);
+	  _bfd_error_handler (_("%B: unknown relocation type %d"),
+			      input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
 	  continue;
@@ -1077,12 +1077,12 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%s: The target (%s) of an %s relocation "
-			     "is in the wrong section (%s)"),
-			   bfd_get_filename (input_bfd),
+			  (_("%B: The target (%s) of an %s relocation"
+			     " is in the wrong section (%A)"),
+			   input_bfd,
 			   sym_name,
 			   microblaze_elf_howto_table[(int) r_type]->name,
-			   bfd_get_section_name (sec->owner, sec));
+			   sec);
 			/*bfd_set_error (bfd_error_bad_value); ??? why? */
 			ret = FALSE;
 			continue;
@@ -1125,12 +1125,12 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%s: The target (%s) of an %s relocation "
-			     "is in the wrong section (%s)"),
-			   bfd_get_filename (input_bfd),
+			  (_("%B: The target (%s) of an %s relocation"
+			     " is in the wrong section (%A)"),
+			   input_bfd,
 			   sym_name,
 			   microblaze_elf_howto_table[(int) r_type]->name,
-			   bfd_get_section_name (sec->owner, sec));
+			   sec);
 			/*bfd_set_error (bfd_error_bad_value); ??? why? */
 			ret = FALSE;
 			continue;

@@ -44,6 +44,7 @@
 #include "cli/cli-utils.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"
+#include <algorithm>
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
@@ -69,16 +70,27 @@ static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
 
-/* Data to cleanup thread array.  */
+/* RAII type used to increase / decrease the refcount of each thread
+   in a given list of threads.  */
 
-struct thread_array_cleanup
+class scoped_inc_dec_ref
 {
-  /* Array of thread pointers used to set
-     reference count.  */
-  struct thread_info **tp_array;
+public:
+  explicit scoped_inc_dec_ref (const std::vector<thread_info *> &thrds)
+    : m_thrds (thrds)
+  {
+    for (thread_info *thr : m_thrds)
+      thr->incref ();
+  }
 
-  /* Thread count in the array.  */
-  int count;
+  ~scoped_inc_dec_ref ()
+  {
+    for (thread_info *thr : m_thrds)
+      thr->decref ();
+  }
+
+private:
+  const std::vector<thread_info *> &m_thrds;
 };
 
 
@@ -560,6 +572,20 @@ thread_count (void)
   struct thread_info *tp;
 
   for (tp = thread_list; tp; tp = tp->next)
+    ++result;
+
+  return result;
+}
+
+/* Return the number of non-exited threads in the thread list.  */
+
+static int
+live_threads_count (void)
+{
+  int result = 0;
+  struct thread_info *tp;
+
+  ALL_NON_EXITED_THREADS (tp)
     ++result;
 
   return result;
@@ -1605,19 +1631,6 @@ restore_current_thread_cleanup_dtor (void *arg)
   xfree (old);
 }
 
-/* Set the thread reference count.  */
-
-static void
-set_thread_refcount (void *data)
-{
-  int k;
-  struct thread_array_cleanup *ta_cleanup
-    = (struct thread_array_cleanup *) data;
-
-  for (k = 0; k != ta_cleanup->count; k++)
-    ta_cleanup->tp_array[k]->decref ();
-}
-
 struct cleanup *
 make_cleanup_restore_current_thread (void)
 {
@@ -1693,30 +1706,30 @@ print_thread_id (struct thread_info *thr)
   return s;
 }
 
-/* If non-zero tp_array_compar should sort in ascending order, otherwise in
-   descending order.  */
+/* If true, tp_array_compar should sort in ascending order, otherwise
+   in descending order.  */
 
-static int tp_array_compar_ascending;
+static bool tp_array_compar_ascending;
 
 /* Sort an array for struct thread_info pointers by thread ID (first
    by inferior number, and then by per-inferior thread number).  The
    order is determined by TP_ARRAY_COMPAR_ASCENDING.  */
 
-static int
-tp_array_compar (const void *ap_voidp, const void *bp_voidp)
+static bool
+tp_array_compar (const thread_info *a, const thread_info *b)
 {
-  const struct thread_info *a = *(const struct thread_info * const *) ap_voidp;
-  const struct thread_info *b = *(const struct thread_info * const *) bp_voidp;
-
   if (a->inf->num != b->inf->num)
     {
-      return (((a->inf->num > b->inf->num) - (a->inf->num < b->inf->num))
-	      * (tp_array_compar_ascending ? +1 : -1));
+      if (tp_array_compar_ascending)
+	return a->inf->num < b->inf->num;
+      else
+	return a->inf->num > b->inf->num;
     }
 
-  return (((a->per_inf_num > b->per_inf_num)
-	   - (a->per_inf_num < b->per_inf_num))
-	  * (tp_array_compar_ascending ? +1 : -1));
+  if (tp_array_compar_ascending)
+    return (a->per_inf_num < b->per_inf_num);
+  else
+    return (a->per_inf_num > b->per_inf_num);
 }
 
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
@@ -1732,15 +1745,13 @@ thread_apply_all_command (char *cmd, int from_tty)
 {
   struct cleanup *old_chain;
   char *saved_cmd;
-  int tc;
-  struct thread_array_cleanup ta_cleanup;
 
-  tp_array_compar_ascending = 0;
+  tp_array_compar_ascending = false;
   if (cmd != NULL
       && check_for_argument (&cmd, "-ascending", strlen ("-ascending")))
     {
       cmd = skip_spaces (cmd);
-      tp_array_compar_ascending = 1;
+      tp_array_compar_ascending = true;
     }
 
   if (cmd == NULL || *cmd == '\000')
@@ -1755,42 +1766,40 @@ thread_apply_all_command (char *cmd, int from_tty)
   saved_cmd = xstrdup (cmd);
   make_cleanup (xfree, saved_cmd);
 
-  /* Note this includes exited threads.  */
-  tc = thread_count ();
+  int tc = live_threads_count ();
   if (tc != 0)
     {
-      struct thread_info **tp_array;
-      struct thread_info *tp;
-      int i = 0, k;
+      /* Save a copy of the thread list and increment each thread's
+	 refcount while executing the command in the context of each
+	 thread, in case the command is one that wipes threads.  E.g.,
+	 detach, kill, disconnect, etc., or even normally continuing
+	 over an inferior or thread exit.  */
+      std::vector<thread_info *> thr_list_cpy;
+      thr_list_cpy.reserve (tc);
 
-      /* Save a copy of the thread_list in case we execute detach
-	 command.  */
-      tp_array = XNEWVEC (struct thread_info *, tc);
-      make_cleanup (xfree, tp_array);
+      {
+	thread_info *tp;
 
-      ALL_NON_EXITED_THREADS (tp)
-	{
-	  tp_array[i] = tp;
-	  tp->incref ();
-	  i++;
-	}
-      /* Because we skipped exited threads, we may end up with fewer
-	 threads in the array than the total count of threads.  */
-      gdb_assert (i <= tc);
-
-      if (i != 0)
-	qsort (tp_array, i, sizeof (*tp_array), tp_array_compar);
-
-      ta_cleanup.tp_array = tp_array;
-      ta_cleanup.count = i;
-      make_cleanup (set_thread_refcount, &ta_cleanup);
-
-      for (k = 0; k != i; k++)
-	if (thread_alive (tp_array[k]))
+	ALL_NON_EXITED_THREADS (tp)
 	  {
-	    switch_to_thread (tp_array[k]->ptid);
+	    thr_list_cpy.push_back (tp);
+	  }
+
+	gdb_assert (thr_list_cpy.size () == tc);
+      }
+
+      /* Increment the refcounts, and restore them back on scope
+	 exit.  */
+      scoped_inc_dec_ref inc_dec_ref (thr_list_cpy);
+
+      std::sort (thr_list_cpy.begin (), thr_list_cpy.end (), tp_array_compar);
+
+      for (thread_info *thr : thr_list_cpy)
+	if (thread_alive (thr))
+	  {
+	    switch_to_thread (thr->ptid);
 	    printf_filtered (_("\nThread %s (%s):\n"),
-			     print_thread_id (tp_array[k]),
+			     print_thread_id (thr),
 			     target_pid_to_str (inferior_ptid));
 	    execute_command (cmd, from_tty);
 

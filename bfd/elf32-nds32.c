@@ -4969,8 +4969,8 @@ nds32_elf_relocate_section (bfd *                  output_bfd ATTRIBUTE_UNUSED,
 	  if (bfd_link_pic (info))
 	    {
 	      _bfd_error_handler
-		(_("%s: warning: cannot deal R_NDS32_25_ABS_RELA in shared "
-		   "mode."), bfd_get_filename (input_bfd));
+		(_("%B: warning: cannot deal R_NDS32_25_ABS_RELA in shared "
+		   "mode."), input_bfd);
 	      return FALSE;
 	    }
 	  break;
@@ -15433,9 +15433,9 @@ nds32_elf_ex9_build_hash_table (bfd *abfd, asection *sec,
 			  /* Incorrect alignment.  */
 			  _bfd_error_handler
 			    /* xgettext:c-format */
-			    (_("%s: warning: unaligned small data access. "
+			    (_("%B: warning: unaligned small data access. "
 			       "For entry: {%d, %d, %d}, addr = 0x%x, align = 0x%x."),
-			     bfd_get_filename (abfd), irel->r_offset,
+			     abfd, irel->r_offset,
 			     irel->r_info, irel->r_addend, relocation, align);
 			  off += 4;
 			  continue;

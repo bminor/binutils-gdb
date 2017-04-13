@@ -18,6 +18,11 @@
 	PR gdb/21352
 	* gdb.trace/tsv.exp: Add test for "tsave -r".
 
+2017-03-30  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/watch-loc.c: New file.
+	* gdb.dlang/watch-loc.exp: New file.
+
 2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-section-script.exp (sepdebug): New testcases.

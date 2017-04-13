@@ -1086,9 +1086,8 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
       else
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%s: line number overflow: 0x%lx > 0xffff"),
-			      bfd_get_filename (abfd),
-			      scnhdr_int->s_nlnno);
+	  _bfd_error_handler (_("%B: line number overflow: 0x%lx > 0xffff"),
+			      abfd, scnhdr_int->s_nlnno);
 	  bfd_set_error (bfd_error_file_truncated);
 	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nlnno);
 	  ret = 0;
@@ -4220,16 +4219,16 @@ rsrc_process_section (bfd * abfd,
       if (data > dataend)
 	{
 	  /* Corrupted .rsrc section - cannot merge.  */
-	  _bfd_error_handler (_("%s: .rsrc merge failure: corrupt .rsrc section"),
-			      bfd_get_filename (abfd));
+	  _bfd_error_handler (_("%B: .rsrc merge failure: corrupt .rsrc section"),
+			      abfd);
 	  bfd_set_error (bfd_error_file_truncated);
 	  goto end;
 	}
 
       if ((data - p) > rsrc_sizes [num_resource_sets])
 	{
-	  _bfd_error_handler (_("%s: .rsrc merge failure: unexpected .rsrc size"),
-			      bfd_get_filename (abfd));
+	  _bfd_error_handler (_("%B: .rsrc merge failure: unexpected .rsrc size"),
+			      abfd);
 	  bfd_set_error (bfd_error_file_truncated);
 	  goto end;
 	}

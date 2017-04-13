@@ -1,3 +1,109 @@
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (free_inferior): Convert to ...
+	(inferior::~inferior): ... this dtor.
+	(inferior::inferior): New ctor, factored out from ...
+	(add_inferior_silent): ... here.  Allocate the inferior with a new
+	expression.
+	(delete_inferior): Call delete instead of free_inferior.
+	* inferior.h (gdb_environ, continuation): Forward declare.
+	(inferior): Now a class.  Add in-class initialization to all
+	members.  Make boolean fields bool, except 'detaching'.
+	(inferior::inferior): New explicit ctor.
+	(inferior::~inferior): New.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (init_inferior_list): Delete.
+	* inferior.h (init_inferior_list): Delete.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	PR threads/13217
+	* gdb.threads/threadapply.exp (thr_apply_detach): New procedure.
+	(top level): Call it twice, with different thread sets.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* thread.c: Include <algorithm>.
+	(thread_array_cleanup): Delete.
+	(scoped_inc_dec_ref): New class.
+	(live_threads_count): New function.
+	(set_thread_refcount): Delete.
+	(tp_array_compar_ascending): Now a bool.
+	(tp_array_compar): Convert to a std::sort comparison function.
+	(thread_apply_all_command): Use std::vector and scoped_inc_dec_ref
+	and live_threads_count.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (follow_fork_inferior): Also switch the current
+	inferior.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (watch_command_1): Save watchpoint-frame info
+	before calling create_internal_breakpoint.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (execv_argv): New class.
+	(breakup_args): Refactored as ...
+	(execv_argv::init_for_no_shell): .. this method of execv_argv.
+	Copy arguments to storage and replace separators with NULL
+	terminators in place.
+	(escape_bang_in_quoted_argument): Adjust to return bool.
+	(execv_argv::execv_argv): New ctor.
+	(execv_argv::init_for_shell): New method, factored out from
+	fork_inferior.  Don't strdup strings into the vector.
+	(fork_inferior): Eliminate "shell" local and use execv_argv.  Use
+	Remove free_vector_argv call.
+
+2017-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* rx-tdep.c (rx_fpsw_type): Check tdep->rx_fpsw_type instead of
+	tdep->rx_psw_type.
+
+2017-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* rl78-tdep.c (rl78_gdbarch_init): Use XCNEW instead of XNEW.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.h (struct breakpoint): Reindent.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bp_location): Rename to ...
+	(bp_locations): ... this.  All references updated.
+	(bp_location_count): Rename to ...
+	(bp_locations_count): ... this.  All references updated.
+	(bp_location_placed_address_before_address_max): Rename to ...
+	(bp_locations_placed_address_before_address_max): ... this.  All
+	references updated.
+	(bp_location_shadow_len_after_address_max): Rename to ...
+	(bp_locations_shadow_len_after_address_max): ... this.  All
+	references updated.
+	(bp_location_compare_addrs): Rename to ...
+	(bp_locations_compare_addrs): ... this.  All references updated.
+	(bp_location_compare):Rename to ...
+	(bp_locations_compare): ... this.  All references updated.
+	(bp_location_target_extensions_update): Rename to ...
+	(bp_locations_target_extensions_update): ... this.  All references
+	updated.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/gdb_termios.h".
+	* common/common.m4: Check headers 'termios.h', 'termio.h' and
+	'sgtty.h'.
+	* common/gdb_termios.h: New file, with parts of "terminal.h".
+	* inflow.c: Include "gdb_termios.h".
+	* ser-unix.c: Include "gdb_termios.h".
+	* terminal.h: Move terminal-related defines to
+	"common/gdb_termios.h".
+
 2017-04-12  Tom Tromey  <tom@tromey.com>
 
 	* probe.c (parse_probes): Update.
@@ -1152,6 +1258,11 @@
 
 	* frame.c (get_frame_register_bytes): Unwind using value.
 	(put_frame_register_bytes): Likewise.
+
+2017-03-30  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (type_aggregate_p): Treat TYPE_CODE_MODULE as being
+	aggregate-like.
 
 2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

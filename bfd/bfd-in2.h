@@ -1069,7 +1069,8 @@ bfd *bfd_openr (const char *filename, const char *target);
 
 bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
 
-bfd *bfd_openstreamr (const char * filename, const char * target, void * stream);
+bfd *bfd_openstreamr (const char * filename, const char * target,
+    void * stream);
 
 bfd *bfd_openr_iovec (const char *filename, const char *target,
     void *(*open_func) (struct bfd *nbfd,

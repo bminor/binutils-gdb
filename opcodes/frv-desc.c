@@ -6386,6 +6386,7 @@ frv_cgen_cpu_open (enum cgen_cpu_open_arg arg_type, ...)
 	    const char *name = va_arg (ap, const char *);
 	    const CGEN_MACH *mach =
 	      lookup_mach_via_bfd_name (frv_cgen_mach_table, name);
+
 	    if (mach != NULL)
 	      machs |= 1 << mach->num;
 	    break;

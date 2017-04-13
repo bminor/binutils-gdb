@@ -182,7 +182,7 @@ rx_fpsw_type (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (tdep->rx_psw_type == NULL)
+  if (tdep->rx_fpsw_type == NULL)
     {
       tdep->rx_fpsw_type = arch_flags_type (gdbarch, "rx_fpsw_type", 4);
       append_flags_type_flag (tdep->rx_fpsw_type, 0, "RM0");
@@ -1101,7 +1101,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 
