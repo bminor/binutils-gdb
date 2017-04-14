@@ -80,7 +80,7 @@ load_libcompile (const char *fe_libcc, const char *fe_context)
   /* gdb_dlopen will call error () on an error, so no need to check
      value.  */
   gdb_dlhandle_up handle = gdb_dlopen (fe_libcc);
-  func = (FUNCTYPE *) (gdb_dlsym (handle, fe_context));
+  func = (FUNCTYPE *) gdb_dlsym (handle, fe_context);
 
   if (func == NULL)
     error (_("could not find symbol %s in library %s"), fe_context, fe_libcc);
