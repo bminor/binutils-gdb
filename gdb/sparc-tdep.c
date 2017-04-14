@@ -1749,6 +1749,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, floatformats_sparc_quad);
 
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 1);
+
   set_gdbarch_num_regs (gdbarch, SPARC32_NUM_REGS);
   set_gdbarch_register_name (gdbarch, sparc32_register_name);
   set_gdbarch_register_type (gdbarch, sparc32_register_type);

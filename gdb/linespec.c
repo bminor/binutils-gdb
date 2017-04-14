@@ -1750,8 +1750,9 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
     return;
 
   /* Save everything as an explicit location.  */
-  canon = state->canonical->location
+  state->canonical->location
     = new_explicit_location (&ls->explicit_loc);
+  canon = state->canonical->location.get ();
   explicit_loc = get_explicit_location (canon);
 
   if (explicit_loc->label_name != NULL)
@@ -2630,8 +2631,6 @@ decode_line_with_current_source (char *string, int flags)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line cursal;
-  struct event_location *location;
-  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
@@ -2640,15 +2639,14 @@ decode_line_with_current_source (char *string, int flags)
      and get a default source symtab+line or it will recursively call us!  */
   cursal = get_current_source_symtab_and_line ();
 
-  location = string_to_event_location (&string, current_language);
-  cleanup = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, flags, NULL,
+  event_location_up location = string_to_event_location (&string,
+							 current_language);
+  sals = decode_line_1 (location.get (), flags, NULL,
 			cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
 
-  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2658,25 +2656,23 @@ struct symtabs_and_lines
 decode_line_with_last_displayed (char *string, int flags)
 {
   struct symtabs_and_lines sals;
-  struct event_location *location;
-  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
 
-  location = string_to_event_location (&string, current_language);
-  cleanup = make_cleanup_delete_event_location (location);
+  event_location_up location = string_to_event_location (&string,
+							 current_language);
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location, flags, NULL,
+    sals = decode_line_1 (location.get (), flags, NULL,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (location, flags, NULL, (struct symtab *) NULL, 0);
+    sals = decode_line_1 (location.get (), flags, NULL,
+			  (struct symtab *) NULL, 0);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
 
-  do_cleanups (cleanup);
   return sals;
 }
 
@@ -3474,9 +3470,7 @@ decode_digits_ordinary (struct linespec_state *self,
 
   for (ix = 0; VEC_iterate (symtab_ptr, ls->file_symtabs, ix, elt); ++ix)
     {
-      int i;
-      VEC (CORE_ADDR) *pcs;
-      CORE_ADDR pc;
+      std::vector<CORE_ADDR> pcs;
 
       /* The logic above should ensure this.  */
       gdb_assert (elt != NULL);
@@ -3484,7 +3478,7 @@ decode_digits_ordinary (struct linespec_state *self,
       set_current_program_space (SYMTAB_PSPACE (elt));
 
       pcs = find_pcs_for_symtab_line (elt, line, best_entry);
-      for (i = 0; VEC_iterate (CORE_ADDR, pcs, i, pc); ++i)
+      for (CORE_ADDR pc : pcs)
 	{
 	  struct symtab_and_line sal;
 
@@ -3495,8 +3489,6 @@ decode_digits_ordinary (struct linespec_state *self,
 	  sal.pc = pc;
 	  add_sal_to_sals_basic (sals, &sal);
 	}
-
-      VEC_free (CORE_ADDR, pcs);
     }
 }
 
@@ -3896,45 +3888,17 @@ symbol_to_sal (struct symtab_and_line *result,
   return 0;
 }
 
-/* See the comment in linespec.h.  */
-
-void
-init_linespec_result (struct linespec_result *lr)
-{
-  memset (lr, 0, sizeof (*lr));
-}
-
-/* See the comment in linespec.h.  */
-
-void
-destroy_linespec_result (struct linespec_result *ls)
+linespec_result::~linespec_result ()
 {
   int i;
   struct linespec_sals *lsal;
 
-  delete_event_location (ls->location);
-  for (i = 0; VEC_iterate (linespec_sals, ls->sals, i, lsal); ++i)
+  for (i = 0; VEC_iterate (linespec_sals, sals, i, lsal); ++i)
     {
       xfree (lsal->canonical);
       xfree (lsal->sals.sals);
     }
-  VEC_free (linespec_sals, ls->sals);
-}
-
-/* Cleanup function for a linespec_result.  */
-
-static void
-cleanup_linespec_result (void *a)
-{
-  destroy_linespec_result ((struct linespec_result *) a);
-}
-
-/* See the comment in linespec.h.  */
-
-struct cleanup *
-make_cleanup_destroy_linespec_result (struct linespec_result *ls)
-{
-  return make_cleanup (cleanup_linespec_result, ls);
+  VEC_free (linespec_sals, sals);
 }
 
 /* Return the quote characters permitted by the linespec parser.  */

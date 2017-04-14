@@ -1,3 +1,11 @@
+2017-04-11  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (PPC_OPCODE_ALTIVEC2): Delete.
+	(PPC_OPCODE_VSX3): Delete.
+	(PPC_OPCODE_HTM): Delete.
+	(PPC_OPCODE_*): Renumber and order chronologically.
+	(PPC_OPCODE_SPE): Comment on this and other bits used for APUinfo.
+
 2017-04-06  Pip Cet  <pipcet@gmail.com>
 
 	* dis-asm.h: Add prototypes for wasm32 disassembler.

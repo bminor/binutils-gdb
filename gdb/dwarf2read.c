@@ -2885,7 +2885,7 @@ dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   if (!per_cu->v.quick->compunit_symtab)
     {
       struct cleanup *back_to = make_cleanup (free_cached_comp_units, NULL);
-      increment_reading_symtab ();
+      scoped_restore decrementer = increment_reading_symtab ();
       dw2_do_instantiate_symtab (per_cu);
       process_cu_includes ();
       do_cleanups (back_to);
@@ -15125,9 +15125,22 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	  type = init_integer_type (objfile, bits, 1, name);
 	break;
       case DW_ATE_UTF:
-	/* We just treat this as an integer and then recognize the
-	   type by name elsewhere.  */
-	type = init_integer_type (objfile, bits, 0, name);
+	{
+	  gdbarch *arch = get_objfile_arch (objfile);
+
+	  if (bits == 16)
+	    type = builtin_type (arch)->builtin_char16;
+	  else if (bits == 32)
+	    type = builtin_type (arch)->builtin_char32;
+	  else
+	    {
+	      complaint (&symfile_complaints,
+			 _("unsupported DW_ATE_UTF bit size: '%d'"),
+			 bits);
+	      type = init_integer_type (objfile, bits, 1, name);
+	    }
+	  return set_die_type (die, type, cu);
+	}
 	break;
 
       default:

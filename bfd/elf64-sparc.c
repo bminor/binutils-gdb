@@ -466,10 +466,10 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-            (_("Register %%g%d used incompatibly: %s in %B, previously %s in %B"),
-             abfd, p->abfd, (int) sym->st_value,
-             **namep ? *namep : "#scratch",
-             *p->name ? p->name : "#scratch");
+	    (_("Register %%g%d used incompatibly: %s in %B,"
+	       " previously %s in %B"),
+	     (int) sym->st_value, **namep ? *namep : "#scratch", abfd,
+	     *p->name ? p->name : "#scratch", p->abfd);
 	  return FALSE;
 	}
 
@@ -490,8 +490,9 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 		    type = 0;
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("Symbol `%s' has differing types: REGISTER in %B, previously %s in %B"),
-		     abfd, p->abfd, *namep, stt_types[type]);
+		    (_("Symbol `%s' has differing types: REGISTER in %B,"
+		       " previously %s in %B"),
+		     *namep, abfd, stt_types[type], p->abfd);
 		  return FALSE;
 		}
 
@@ -536,8 +537,9 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	      type = 0;
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("Symbol `%s' has differing types: %s in %B, previously REGISTER in %B"),
-	       abfd, p->abfd, *namep, stt_types[type]);
+	      (_("Symbol `%s' has differing types: %s in %B,"
+		 " previously REGISTER in %B"),
+	       *namep, stt_types[type], abfd, p->abfd);
 	    return FALSE;
 	  }
     }
@@ -904,6 +906,8 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
   _bfd_sparc_elf_finish_dynamic_sections
+#define elf_backend_fixup_symbol \
+  _bfd_sparc_elf_fixup_symbol
 
 #define bfd_elf64_mkobject \
   _bfd_sparc_elf_mkobject

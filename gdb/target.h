@@ -591,7 +591,8 @@ struct target_ops
        ENV is the environment vector to pass.  Errors reported with error().
        On VxWorks and various standalone systems, we ignore exec_file.  */
     void (*to_create_inferior) (struct target_ops *, 
-				char *, char *, char **, int);
+				const char *, const std::string &,
+				char **, int);
     void (*to_post_startup_inferior) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
     int (*to_insert_fork_catchpoint) (struct target_ops *, int)

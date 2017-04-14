@@ -1503,6 +1503,7 @@ struct builtin_type
   /* Wide character types.  */
   struct type *builtin_char16;
   struct type *builtin_char32;
+  struct type *builtin_wchar;
 
   /* Pointer types.  */
 

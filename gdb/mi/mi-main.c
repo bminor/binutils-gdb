@@ -54,6 +54,7 @@
 #include "extension.h"
 #include "gdbcmd.h"
 #include "observer.h"
+#include "common/gdb_optional.h"
 
 #include <ctype.h>
 #include "run-time-clock.h"
@@ -312,16 +313,9 @@ exec_continue (char **argv, int argc)
 }
 
 static void
-exec_direction_forward (void *notused)
-{
-  execution_direction = EXEC_FORWARD;
-}
-
-static void
 exec_reverse_continue (char **argv, int argc)
 {
   enum exec_direction_kind dir = execution_direction;
-  struct cleanup *old_chain;
 
   if (dir == EXEC_REVERSE)
     error (_("Already in reverse mode."));
@@ -329,10 +323,9 @@ exec_reverse_continue (char **argv, int argc)
   if (!target_can_execute_reverse)
     error (_("Target %s does not support this command."), target_shortname);
 
-  old_chain = make_cleanup (exec_direction_forward, NULL);
-  execution_direction = EXEC_REVERSE;
+  scoped_restore save_exec_dir = make_scoped_restore (&execution_direction,
+						      EXEC_REVERSE);
   exec_continue (argv, argc);
-  do_cleanups (old_chain);
 }
 
 void
@@ -2117,7 +2110,7 @@ void
 mi_execute_command (const char *cmd, int from_tty)
 {
   char *token;
-  struct mi_parse *command = NULL;
+  std::unique_ptr<struct mi_parse> command;
 
   /* This is to handle EOF (^D). We just quit gdb.  */
   /* FIXME: we should call some API function here.  */
@@ -2140,15 +2133,13 @@ mi_execute_command (const char *cmd, int from_tty)
   if (command != NULL)
     {
       ptid_t previous_ptid = inferior_ptid;
-      struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
-      command->token = token;
+      gdb::optional<scoped_restore_tmpl<int>> restore_suppress;
 
       if (command->cmd != NULL && command->cmd->suppress_notification != NULL)
-        {
-          make_cleanup_restore_integer (command->cmd->suppress_notification);
-          *command->cmd->suppress_notification = 1;
-        }
+	restore_suppress.emplace (command->cmd->suppress_notification, 1);
+
+      command->token = token;
 
       if (do_timings)
 	{
@@ -2158,7 +2149,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
       TRY
 	{
-	  captured_mi_execute_command (current_uiout, command);
+	  captured_mi_execute_command (current_uiout, command.get ());
 	}
       CATCH (result, RETURN_MASK_ALL)
 	{
@@ -2186,7 +2177,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	  && thread_count () != 0
 	  /* If the command already reports the thread change, no need to do it
 	     again.  */
-	  && !command_notifies_uscc_observer (command))
+	  && !command_notifies_uscc_observer (command.get ()))
 	{
 	  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
 	  int report_change = 0;
@@ -2210,10 +2201,6 @@ mi_execute_command (const char *cmd, int from_tty)
 		  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 	    }
 	}
-
-      mi_parse_free (command);
-
-      do_cleanups (cleanup);
     }
 }
 

@@ -1268,6 +1268,9 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
 
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
+
   set_gdbarch_num_regs (gdbarch, SPARC64_NUM_REGS);
   set_gdbarch_register_name (gdbarch, sparc64_register_name);
   set_gdbarch_register_type (gdbarch, sparc64_register_type);

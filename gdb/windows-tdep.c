@@ -466,6 +466,9 @@ init_w32_command_list (void)
 void
 windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
+
   /* Canonical paths on this target look like
      `c:\Program Files\Foo App\mydll.dll', for example.  */
   set_gdbarch_has_dos_based_file_system (gdbarch, 1);

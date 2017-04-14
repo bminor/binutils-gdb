@@ -2131,7 +2131,8 @@ gnu_ptrace_me (void)
 
 static void
 gnu_create_inferior (struct target_ops *ops, 
-		     char *exec_file, char *allargs, char **env,
+		     const char *exec_file, const std::string &allargs,
+		     char **env,
 		     int from_tty)
 {
   struct inf *inf = cur_inf ();

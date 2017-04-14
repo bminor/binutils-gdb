@@ -445,14 +445,28 @@ struct command_line
     struct command_line **body_list;
   };
 
-extern struct command_line *read_command_lines (char *, int, int,
-						void (*)(char *, void *),
-						void *);
-extern struct command_line *read_command_lines_1 (char * (*) (void), int,
-						  void (*)(char *, void *),
-						  void *);
-
 extern void free_command_lines (struct command_line **);
+
+/* A deleter for command_line that calls free_command_lines.  */
+
+struct command_lines_deleter
+{
+  void operator() (command_line *lines) const
+  {
+    free_command_lines (&lines);
+  }
+};
+
+/* A unique pointer to a command_line.  */
+
+typedef std::unique_ptr<command_line, command_lines_deleter> command_line_up;
+
+extern command_line_up read_command_lines (char *, int, int,
+					   void (*)(char *, void *),
+					   void *);
+extern command_line_up read_command_lines_1 (char * (*) (void), int,
+					     void (*)(char *, void *),
+					     void *);
 
 /* * Parameters of the "info proc" command.  */
 

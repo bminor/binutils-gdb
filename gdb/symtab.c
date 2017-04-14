@@ -3289,15 +3289,15 @@ done:
 }
 
 /* Given SYMTAB, returns all the PCs function in the symtab that
-   exactly match LINE.  Returns NULL if there are no exact matches,
-   but updates BEST_ITEM in this case.  */
+   exactly match LINE.  Returns an empty vector if there are no exact
+   matches, but updates BEST_ITEM in this case.  */
 
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 find_pcs_for_symtab_line (struct symtab *symtab, int line,
 			  struct linetable_entry **best_item)
 {
   int start = 0;
-  VEC (CORE_ADDR) *result = NULL;
+  std::vector<CORE_ADDR> result;
 
   /* First, collect all the PCs that are at this line.  */
   while (1)
@@ -3320,8 +3320,7 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 	  break;
 	}
 
-      VEC_safe_push (CORE_ADDR, result,
-		     SYMTAB_LINETABLE (symtab)->item[idx].pc);
+      result.push_back (SYMTAB_LINETABLE (symtab)->item[idx].pc);
       start = idx + 1;
     }
 

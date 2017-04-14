@@ -1,3 +1,530 @@
+2017-04-13  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21385
+	* windows-nat.c (windows_create_inferior): Declare 'allargs'
+	independently of the host, and fix build breakage on Cygwin.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (free_inferior): Convert to ...
+	(inferior::~inferior): ... this dtor.
+	(inferior::inferior): New ctor, factored out from ...
+	(add_inferior_silent): ... here.  Allocate the inferior with a new
+	expression.
+	(delete_inferior): Call delete instead of free_inferior.
+	* inferior.h (gdb_environ, continuation): Forward declare.
+	(inferior): Now a class.  Add in-class initialization to all
+	members.  Make boolean fields bool, except 'detaching'.
+	(inferior::inferior): New explicit ctor.
+	(inferior::~inferior): New.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (init_inferior_list): Delete.
+	* inferior.h (init_inferior_list): Delete.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	PR threads/13217
+	* gdb.threads/threadapply.exp (thr_apply_detach): New procedure.
+	(top level): Call it twice, with different thread sets.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* thread.c: Include <algorithm>.
+	(thread_array_cleanup): Delete.
+	(scoped_inc_dec_ref): New class.
+	(live_threads_count): New function.
+	(set_thread_refcount): Delete.
+	(tp_array_compar_ascending): Now a bool.
+	(tp_array_compar): Convert to a std::sort comparison function.
+	(thread_apply_all_command): Use std::vector and scoped_inc_dec_ref
+	and live_threads_count.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (follow_fork_inferior): Also switch the current
+	inferior.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (watch_command_1): Save watchpoint-frame info
+	before calling create_internal_breakpoint.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (execv_argv): New class.
+	(breakup_args): Refactored as ...
+	(execv_argv::init_for_no_shell): .. this method of execv_argv.
+	Copy arguments to storage and replace separators with NULL
+	terminators in place.
+	(escape_bang_in_quoted_argument): Adjust to return bool.
+	(execv_argv::execv_argv): New ctor.
+	(execv_argv::init_for_shell): New method, factored out from
+	fork_inferior.  Don't strdup strings into the vector.
+	(fork_inferior): Eliminate "shell" local and use execv_argv.  Use
+	Remove free_vector_argv call.
+
+2017-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* rx-tdep.c (rx_fpsw_type): Check tdep->rx_fpsw_type instead of
+	tdep->rx_psw_type.
+
+2017-04-13  Yao Qi  <yao.qi@linaro.org>
+
+	* rl78-tdep.c (rl78_gdbarch_init): Use XCNEW instead of XNEW.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.h (struct breakpoint): Reindent.
+
+2017-04-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bp_location): Rename to ...
+	(bp_locations): ... this.  All references updated.
+	(bp_location_count): Rename to ...
+	(bp_locations_count): ... this.  All references updated.
+	(bp_location_placed_address_before_address_max): Rename to ...
+	(bp_locations_placed_address_before_address_max): ... this.  All
+	references updated.
+	(bp_location_shadow_len_after_address_max): Rename to ...
+	(bp_locations_shadow_len_after_address_max): ... this.  All
+	references updated.
+	(bp_location_compare_addrs): Rename to ...
+	(bp_locations_compare_addrs): ... this.  All references updated.
+	(bp_location_compare):Rename to ...
+	(bp_locations_compare): ... this.  All references updated.
+	(bp_location_target_extensions_update): Rename to ...
+	(bp_locations_target_extensions_update): ... this.  All references
+	updated.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/gdb_termios.h".
+	* common/common.m4: Check headers 'termios.h', 'termio.h' and
+	'sgtty.h'.
+	* common/gdb_termios.h: New file, with parts of "terminal.h".
+	* inflow.c: Include "gdb_termios.h".
+	* ser-unix.c: Include "gdb_termios.h".
+	* terminal.h: Move terminal-related defines to
+	"common/gdb_termios.h".
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* probe.c (parse_probes): Update.
+	* location.h (delete_event_location): Don't declare.
+	(event_location_deleter::operator()): Update.
+	* location.c (event_location_deleter::operator()): Rename from
+	delete_event_location.
+	* linespec.h (linespec_result) <location>: Change type to
+	event_location_up.
+	* linespec.c (canonicalize_linespec, event_location_to_sals)
+	(decode_objc): Update.
+	(linespec_result): Don't call delete_event_location.
+	* breakpoint.c (create_breakpoints_sal)
+	(bkpt_probe_create_sals_from_location)
+	(strace_marker_create_sals_from_location): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* linespec.h (struct linespec_result): Add constructor and
+	destructor.
+	(init_linespec_result, destroy_linespec_result)
+	(make_cleanup_destroy_linespec_result): Don't declare.
+	* linespec.c (init_linespec_result): Remove.
+	(linespec_result::~linespec_result): Rename from
+	destroy_linespec_result.  Update.
+	(cleanup_linespec_result, make_cleanup_destroy_linespec_result):
+	Remove.
+	* breakpoint.c (create_breakpoint, break_range_command)
+	(decode_location_default): Update.
+	* ax-gdb.c (agent_command_1): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_download_tracepoint): Update.
+	* python/py-breakpoint.c (bppy_get_location): Update.
+	* guile/scm-breakpoint.c (bpscm_print_breakpoint_smob)
+	(gdbscm_breakpoint_location): Update.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Update.
+	* breakpoint.h (struct breakpoint) <location, location_range_end>:
+	Change type to event_location_up.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint)
+	(breakpoint_event_location_empty_p, print_breakpoint_location)
+	(print_one_breakpoint_location, create_thread_event_breakpoint)
+	(init_breakpoint_sal, create_breakpoint)
+	(print_recreate_ranged_breakpoint, break_range_command)
+	(init_ada_exception_breakpoint, say_where): Update.
+	(base_breakpoint_dtor): Don't call delete_event_location.
+	(bkpt_print_recreate, tracepoint_print_recreate)
+	(dprintf_print_recreate, update_static_tracepoint)
+	(breakpoint_re_set_default): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-loc2c.c (compute_stack_depth_worker): Change
+	type of "to_do".  Update.
+	(compute_stack_depth): Use std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (find_instruction_backward): Use std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (objfilep): Remove typedef.
+	(reread_symbols): Use a std::vector.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (exec_direction_forward): Remove.
+	(exec_reverse_continue, mi_execute_command): Use scoped_restore.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	scoped_restore.
+	* guile/guile.c (guile_repl_command, guile_command)
+	(gdbscm_execute_gdb_command): Use scoped_restore.
+	* go-exp.y (go_parse): Use scoped_restore.
+	* d-exp.y (d_parse): Use scoped_restore.
+	* cli/cli-decode.c (cmd_func): Use scoped_restore.
+	* c-exp.y (c_parse): Use scoped_restore.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-parse.h (struct mi_parse): Add constructor, destructor.
+	(mi_parse): Update return type.
+	(mi_parse_free): Remove.
+	* mi/mi-parse.c (mi_parse::mi_parse): New constructor.
+	(mi_parse::~mi_parse): Rename from mi_parse_free.
+	(mi_parse_cleanup): Remove.
+	(mi_parse): Return a unique_ptr.  Use new.
+	* mi/mi-main.c (mi_execute_command): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* location.c (explicit_location_lex_one): Return a
+	unique_xmalloc_ptr.
+	(string_to_explicit_location): Update.  Remove cleanups.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* gnu-v3-abi.c (value_and_voffset_p): Remove typedef.
+	(compare_value_and_voffset): Change type.  Update.
+	(compute_vtable_size): Change type of "offset_vec".
+	(gnuv3_print_vtable): Use std::vector.  Remove cleanups.
+	(gnuv3_get_typeid): Remove extraneous declaration.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* charset.h (wchar_iterator): Fix comment.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* charset.c (iconv_wrapper): New class.
+	(cleanup_iconv): Remove.
+	(convert_between_encodings): Use it.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile.h (increment_reading_symtab): Update type.
+	* symfile.c (decrement_reading_symtab): Remove.
+	(increment_reading_symtab): Return a scoped_restore_tmpl<int>.
+	* psymtab.c (psymtab_to_symtab): Update.
+	* dwarf2read.c (dw2_instantiate_symtab): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* jit.c (struct jit_reader): Declare separately.  Add constructor
+	and destructor.  Change type of "handle".
+	(loaded_jit_reader): Define separately.
+	(jit_reader_load): Update.  New "new".
+	(jit_reader_unload_command): Use "delete".
+	* gdb-dlfcn.h (struct dlclose_deleter): New.
+	(gdb_dlhandle_up): New typedef.
+	(gdb_dlopen, gdb_dlsym): Update types.
+	(gdb_dlclose): Remove.
+	* gdb-dlfcn.c (gdb_dlopen): Return a gdb_dlhandle_up.
+	(gdb_dlsym): Change type of "handle".
+	(make_cleanup_dlclose): Remove.
+	(dlclose_deleter::operator()): Rename from gdb_dlclose.
+	* compile/compile-c-support.c (load_libcc): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (find_pcs_for_symtab_line): Change return type.
+	* symtab.c (find_pcs_for_symtab_line): Change return type.
+	* python/py-linetable.c (build_line_table_tuple_from_pcs): Change
+	type of "vec".  Update.
+	(ltpy_get_pcs_for_line): Update.
+	* linespec.c (decode_digits_ordinary): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (actions_command): Update.
+	* python/python.c (python_command, python_interactive_command):
+	Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands): Update.
+	* guile/guile.c (guile_command): Update.
+	* defs.h (read_command_lines, read_command_lines_1): Return
+	command_line_up.
+	(command_lines_deleter): New struct.
+	(command_line_up): New typedef.
+	* compile/compile.c (compile_code_command)
+	(compile_print_command): Update.
+	* cli/cli-script.h (get_command_line, copy_command_lines): Return
+	command_line_up.
+	(make_cleanup_free_command_lines): Remove.
+	* cli/cli-script.c (get_command_line, read_command_lines_1)
+	(copy_command_lines): Return command_line_up.
+	(while_command, if_command, read_command_lines, define_command)
+	(document_command): Update.
+	(do_free_command_lines_cleanup, make_cleanup_free_command_lines):
+	Remove.
+	* breakpoint.h (breakpoint_set_commands): Change type of
+	"commands".
+	* breakpoint.c (breakpoint_set_commands): Change type of
+	"commands".  Update.
+	(do_map_commands_command, update_dprintf_command_list)
+	(create_tracepoint_from_upload): Update.
+
+2017-04-12  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (scope_info): Update.
+	* spu-tdep.c (spu_catch_start): Update.
+	* python/python.c (gdbpy_decode_line): Update.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Update.
+	* python/py-breakpoint.c (bppy_init): Update.
+	* probe.c (parse_probes): Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Update.
+	* location.h (event_location_deleter): New struct.
+	(event_location_up): New typedef.
+	(new_linespec_location, new_address_location, new_probe_location)
+	(new_explicit_location, copy_event_location)
+	(string_to_event_location, string_to_event_location_basic)
+	(string_to_explicit_location): Update return type.
+	(make_cleanup_delete_event_location): Remove.
+	* location.c (new_linespec_location, new_address_location)
+	(new_probe_location, new_explicit_location, copy_event_location):
+	Return event_location_up.
+	(delete_event_location_cleanup)
+	(make_cleanup_delete_event_location): Remove.
+	(string_to_explicit_location, string_to_event_location_basic)
+	(string_to_event_location): Return event_location_up.
+	* linespec.c (canonicalize_linespec, event_location_to_sals)
+	(decode_line_with_current_source)
+	(decode_line_with_last_displayed, decode_objc): Update.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Update.
+	* completer.c (location_completer): Update.
+	* cli/cli-cmds.c (edit_command, list_command): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint)
+	(create_thread_event_breakpoint): Update.
+	(init_breakpoint_sal): Update.  Remove some dead code.
+	(create_breakpoint_sal): Change type of "location".  Update.
+	(create_breakpoints_sal, create_breakpoint, break_command_1)
+	(dprintf_command, break_range_command, until_break_command)
+	(init_ada_exception_breakpoint)
+	(strace_marker_create_sals_from_location)
+	(update_static_tracepoint, trace_command, ftrace_command)
+	(strace_command, create_tracepoint_from_upload): Update.
+	* break-catch-throw.c (re_set_exception_catchpoint): Update.
+	* ax-gdb.c (agent_command_1): Update.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add i386-go32-tdep.o.
+	* configure.tgt: Handle i[34567]86-*-go32* and
+	i[34567]86-*-msdosdjgpp*.
+	* i386-tdep.c (i386_svr4_reg_to_regnum):
+	Make extern.
+	(i386_go32_init_abi, i386_coff_osabi_sniffer): Moved to
+	i386-go32-tdep.c.
+	(_initialize_i386_tdep): DJGPP bits moved to i386-go32-tdep.c.
+	* i386-go32-tdep.c: New file.
+	* i386-tdep.h (tdesc_i386_mmx, i386_svr4_reg_to_regnum): New
+	declarations.
+
+2017-04-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aix-thread.c (pd_status2str): Change return type to const char *.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	* i386-tdep.c (i386_elf_init_abi, i386_go32_init_abi): Remove
+	calls to set_gdbarch_gnu_triplet_regexp.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/21323
+	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_wchar_t>:
+	New enum value.
+	(cplus_language_arch_info): Register cplus_primitive_type_wchar_t.
+	* gdbtypes.h (struct builtin_type) <builtin_wchar>: New field.
+	* gdbtypes.c (gdbtypes_post_init): Create the "wchar_t" type.
+	* gdbarch.sh (wchar_bit, wchar_signed): New per-arch values.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Override
+	gdbarch_wchar_bit and gdbarch_wchar_signed.
+	* alpha-tdep.c (alpha_gdbarch_init): Likewise.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* h8300-tdep.c (h8300_gdbarch_init): Likewise.
+	* i386-nto-tdep.c (i386nto_init_abi): Likewise.
+	* i386-tdep.c (i386_go32_init_abi): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* sparc64-tdep.c (sparc64_init_abi): Likewise.
+	* windows-tdep.c (windows_init_abi): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+
+2017-04-12  Pedro Alves  <palves@redhat.com>
+
+	PR c++/21323
+	* c-lang.c (cplus_primitive_types) <cplus_primitive_type_char16_t,
+	cplus_primitive_type_char32_t>: New enum values.
+	(cplus_language_arch_info): Register cplus_primitive_type_char16_t
+	and cplus_primitive_type_char32_t.
+	* dwarf2read.c (read_base_type) <DW_ATE_UTF>: If bit size is 16 or
+	32, use the archtecture's built-in type for char16_t and char32_t,
+	respectively.  Otherwise, fallback to init_integer_type as before,
+	but make the type unsigned, and issue a complaint.
+	* gdbtypes.c (gdbtypes_post_init): Make char16_t and char32_t unsigned.
+
+2017-04-12  Alan Hayward  <alan.hayward@arm.com>
+
+	* m32r-tdep.c (M32R_ARG_REGISTER_SIZE): Added.
+	(m32r_push_dummy_call): Use M32R_ARG_REGISTER_SIZE.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* windows-nat.c (windows_create_inferior): Declare 'toexec' as
+	'const char *'.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c (free_vector_argv): New function.
+	* common/common-utils.h: Include <vector>.
+	(free_vector_argv): New prototype.
+	* darwin-nat.c (darwin_create_inferior): Rewrite function
+	prototype in order to constify "exec_file" and accept a
+	"std::string" for "allargs".
+	* fork-child.c: Include <vector>.
+	(breakup_args): Rewrite function, using C++.
+	(fork_inferior): Rewrite function header, constify "exec_file_arg"
+	and accept "std::string" for "allargs".  Update the code to
+	calculate "argv" based on "allargs".  Update calls to "exec_fun"
+	and "execvp".
+	* gnu-nat.c (gnu_create_inferior): Rewrite function prototype in
+	order to constify "exec_file" and accept a "std::string" for
+	"allargs".
+	* go32-nat.c (go32_create_inferior): Likewise.
+	* inf-ptrace.c (inf_ptrace_create_inferior): Likewise.
+	* infcmd.c (run_command_1): Constify "exec_file".  Use
+	"std::string" for inferior arguments.
+	* inferior.h (fork_inferior): Update prototype.
+	* linux-nat.c (linux_nat_create_inferior): Rewrite function
+	prototype in order to constify "exec_file" and accept a
+	"std::string" for "allargs".
+	* nto-procfs.c (procfs_create_inferior): Likewise.
+	* procfs.c (procfs_create_inferior): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Likewise.
+	* remote.c (extended_remote_run): Update code to accept
+	"std::string" as argument.
+	(extended_remote_create_inferior): Rewrite function prototype in
+	order to constify "exec_file" and accept a "std::string" for
+	"allargs".
+	* rs6000-nat.c (super_create_inferior): Likewise.
+	(rs6000_create_inferior): Likewise.
+	* target.h (struct target_ops) <to_create_inferior>: Likewise.
+	* windows-nat.c (windows_create_inferior): Likewise.
+
+2017-04-11  Pedro Alves  <palves@redhat.com>
+
+	* thread.c: Fix whitespace throughout.
+
+2017-04-11  Philipp Rudo  <prudo@linux.vnet.ibm.com>
+
+	* linux-nat.c (linux_nat_detach): Remove delete_lwp call.
+
+2017-04-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* arm-tdep.c (arm_store_return_value): Use FP_REGISTER_SIZE
+
+2017-04-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21364
+	* osdata.c (info_osdata): Check if 'type' is an empty string
+	instead of NULL.
+
+2017-04-10  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (add_thread_silent, delete_thread_1, find_thread_ptid)
+	(ptid_to_global_thread_id, in_thread_list)
+	(do_captured_list_thread_ids, set_resumed, set_running)
+	(set_executing, set_stop_requested, finish_thread_state)
+	(validate_registers_access, can_access_registers_ptid)
+	(print_thread_info_1, switch_to_thread)
+	(do_restore_current_thread_cleanup)
+	(make_cleanup_restore_current_thread, thread_command)
+	(thread_name_command): Use operator== instead of ptid_equal.
+
+2017-04-10  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (struct current_thread_cleanup) <next>: Delete field.
+	(current_thread_cleanup_chain): Delete.
+	(restore_current_thread_cleanup_dtor)
+	(make_cleanup_restore_current_thread): Remove references to
+	current_thread_cleanup_chain.
+
+2017-04-10  Alan Hayward  <alan.hayward@arm.com>
+
+	* msp430-tdep.c (msp430_pseudo_register_read): Never return
+	REG_UNKNOWN.
+
+2017-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/19942
+	* gdbthread.h (thread_info::deletable): New method.
+	(thread_info::incref): New method.
+	(thread_info::decref): New method.
+	(thread_info::refcount): Move it to private.
+	* infrun.c (save_stop_context): Call inc_refcount.
+	(release_stop_context_cleanup): Likewise.
+	* thread.c (set_thread_exited): New function.
+	(init_thread_list): Delete "tp" only it is deletable, otherwise
+	call set_thread_exited.
+	(delete_thread_1): Call set_thread_exited.
+	(current_thread_cleanup) <inferior_pid>: Remove.
+	<thread>: New field.
+	(restore_current_thread_ptid_changed): Removed.
+	(do_restore_current_thread_cleanup): Adjust.
+	(restore_current_thread_cleanup_dtor): Don't call
+	find_thread_ptid.
+	(set_thread_refcount): Use dec_refcount.
+	(make_cleanup_restore_current_thread): Adjust.
+	(thread_apply_all_command): Call inc_refcount.
+	(_initialize_thread): Don't call
+	observer_attach_thread_ptid_changed.
+
+2017-04-10  Yao Qi  <yao.qi@linaro.org>
+
+	* thread.c (delete_thread_1): Hoist code on marking thread as
+	exited.
+
+2017-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-nat.c (windows_detach): Initialize ptid with
+	minus_one_ptid.
+
 2017-04-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* unittests/ptid-selftests.c: Fix erroneous assert messages.
@@ -737,6 +1264,11 @@
 
 	* frame.c (get_frame_register_bytes): Unwind using value.
 	(put_frame_register_bytes): Likewise.
+
+2017-03-30  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (type_aggregate_p): Treat TYPE_CODE_MODULE as being
+	aggregate-like.
 
 2017-03-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

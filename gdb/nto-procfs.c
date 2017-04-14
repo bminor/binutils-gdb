@@ -1163,8 +1163,9 @@ breakup_args (char *scratch, char **argv)
 }
 
 static void
-procfs_create_inferior (struct target_ops *ops, char *exec_file,
-			char *allargs, char **env, int from_tty)
+procfs_create_inferior (struct target_ops *ops, const char *exec_file,
+			const std::string &allargs,
+			char **env, int from_tty)
 {
   struct inheritance inherit;
   pid_t pid;
@@ -1176,7 +1177,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
   const char *inferior_io_terminal = get_inferior_io_terminal ();
   struct inferior *inf;
 
-  argv = xmalloc (((strlen (allargs) + 1) / (unsigned) 2 + 2) *
+  argv = xmalloc ((allargs.size () / (unsigned) 2 + 2) *
 		  sizeof (*argv));
   argv[0] = get_exec_file (1);
   if (!argv[0])
@@ -1187,7 +1188,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 	return;
     }
 
-  args = xstrdup (allargs);
+  args = xstrdup (allargs.c_str ());
   breakup_args (args, (exec_file != NULL) ? &argv[1] : &argv[0]);
 
   argv = nto_parse_redirection (argv, &in, &out, &err);

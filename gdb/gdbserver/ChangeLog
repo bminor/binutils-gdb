@@ -1,3 +1,18 @@
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* remote-utils.c: Include "gdb_termios.h" instead of
+	"terminal.h".
+	* terminal.h: Delete file.
+
+2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c: Include <vector>.
+	<program_argv, wrapper_argv>: Convert to std::vector.
+	(start_inferior): Rewrite function to use C++.
+	(handle_v_run): Likewise.  Update code that calculates the argv
+	based on the vRun packet; use C++.
+	(captured_main): Likewise.
+
 2017-04-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* server.c (handle_v_cont): Initialize thread_resume::thread

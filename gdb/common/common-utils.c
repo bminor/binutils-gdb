@@ -317,3 +317,14 @@ skip_to_space_const (const char *chp)
     chp++;
   return chp;
 }
+
+/* See common/common-utils.h.  */
+
+void
+free_vector_argv (std::vector<char *> &v)
+{
+  for (char *el : v)
+    xfree (el);
+
+  v.clear ();
+}

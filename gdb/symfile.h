@@ -556,7 +556,7 @@ extern int symfile_map_offsets_to_segments (bfd *,
 struct symfile_segment_data *get_symfile_segment_data (bfd *abfd);
 void free_symfile_segment_data (struct symfile_segment_data *data);
 
-extern struct cleanup *increment_reading_symtab (void);
+extern scoped_restore_tmpl<int> increment_reading_symtab (void);
 
 void expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,

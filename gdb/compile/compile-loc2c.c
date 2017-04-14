@@ -72,7 +72,7 @@ struct insn_info
 static void
 compute_stack_depth_worker (int start, int *need_tempvar,
 			    struct insn_info *info,
-			    VEC (int) **to_do,
+			    std::vector<int> *to_do,
 			    enum bfd_endian byte_order, unsigned int addr_size,
 			    const gdb_byte *op_ptr, const gdb_byte *op_end)
 {
@@ -334,7 +334,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  /* If the destination has not been seen yet, add it to the
 	     to-do list.  */
 	  if (!info[offset].visited)
-	    VEC_safe_push (int, *to_do, offset);
+	    to_do->push_back (offset);
 	  SET_CHECK_DEPTH (offset);
 	  info[offset].label = 1;
 	  /* We're done with this line of code.  */
@@ -348,7 +348,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  /* If the destination has not been seen yet, add it to the
 	     to-do list.  */
 	  if (!info[offset].visited)
-	    VEC_safe_push (int, *to_do, offset);
+	    to_do->push_back (offset);
 	  SET_CHECK_DEPTH (offset);
 	  info[offset].label = 1;
 	  break;
@@ -390,22 +390,21 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 		     struct insn_info **info)
 {
   unsigned char *set;
-  struct cleanup *outer_cleanup, *cleanup;
-  VEC (int) *to_do = NULL;
+  struct cleanup *outer_cleanup;
+  std::vector<int> to_do;
   int stack_depth, i;
 
   *info = XCNEWVEC (struct insn_info, op_end - op_ptr);
   outer_cleanup = make_cleanup (xfree, *info);
 
-  cleanup = make_cleanup (VEC_cleanup (int), &to_do);
-
-  VEC_safe_push (int, to_do, 0);
+  to_do.push_back (0);
   (*info)[0].depth = initial_depth;
   (*info)[0].visited = 1;
 
-  while (!VEC_empty (int, to_do))
+  while (!to_do.empty ())
     {
-      int ndx = VEC_pop (int, to_do);
+      int ndx = to_do.back ();
+      to_do.pop_back ();
 
       compute_stack_depth_worker (ndx, need_tempvar, *info, &to_do,
 				  byte_order, addr_size,
@@ -422,7 +421,6 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 	*is_tls = 1;
     }
 
-  do_cleanups (cleanup);
   discard_cleanups (outer_cleanup);
   return stack_depth + 1;
 }

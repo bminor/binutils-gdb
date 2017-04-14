@@ -1080,6 +1080,11 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   else
     set_gdbarch_frame_red_zone_size (gdbarch, 0);
 
+  if (tdep->wordsize == 8)
+    set_gdbarch_wchar_bit (gdbarch, 32);
+  else
+    set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_auto_wide_charset (gdbarch, rs6000_aix_auto_wide_charset);
 
   set_solib_ops (gdbarch, &solib_aix_so_ops);

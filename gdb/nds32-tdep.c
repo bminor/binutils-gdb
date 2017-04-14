@@ -2069,6 +2069,9 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
+
   if (fpu_freg == -1)
     num_regs = NDS32_NUM_REGS;
   else if (use_pseudo_fsrs == 1)

@@ -82,24 +82,24 @@ extern const int vle_num_opcodes;
 /* Opcode is defined for the POWER2 (Rios 2) architecture.  */
 #define PPC_OPCODE_POWER2	       0x4ull
 
+/* Opcode is only defined on 64 bit architectures.  */
+#define PPC_OPCODE_64		       0x8ull
+
 /* Opcode is supported by the Motorola PowerPC 601 processor.  The 601
    is assumed to support all PowerPC (PPC_OPCODE_PPC) instructions,
    but it also supports many additional POWER instructions.  */
-#define PPC_OPCODE_601		       0x8ull
+#define PPC_OPCODE_601		      0x10ull
 
 /* Opcode is supported in both the Power and PowerPC architectures
    (ie, compiler's -mcpu=common or assembler's -mcom).  More than just
    the intersection of PPC_OPCODE_PPC with the union of PPC_OPCODE_POWER
    and PPC_OPCODE_POWER2 because many instructions changed mnemonics
    between POWER and POWERPC.  */
-#define PPC_OPCODE_COMMON	      0x10ull
+#define PPC_OPCODE_COMMON	      0x20ull
 
 /* Opcode is supported for any Power or PowerPC platform (this is
    for the assembler's -many option, and it eliminates duplicates).  */
-#define PPC_OPCODE_ANY		      0x20ull
-
-/* Opcode is only defined on 64 bit architectures.  */
-#define PPC_OPCODE_64		      0x40ull
+#define PPC_OPCODE_ANY		      0x40ull
 
 /* Opcode is supported as part of the 64-bit bridge.  */
 #define PPC_OPCODE_64_BRIDGE	      0x80ull
@@ -113,115 +113,107 @@ extern const int vle_num_opcodes;
 /* Opcode is supported by PowerPC BookE processor.  */
 #define PPC_OPCODE_BOOKE	     0x400ull
 
-/* Opcode is supported by PowerPC 440 processor.  */
-#define PPC_OPCODE_440		     0x800ull
-
 /* Opcode is only supported by Power4 architecture.  */
-#define PPC_OPCODE_POWER4	    0x1000ull
+#define PPC_OPCODE_POWER4	     0x800ull
 
-/* Opcode is only supported by Power7 architecture.  */
-#define PPC_OPCODE_POWER7	    0x2000ull
+/* Opcode is only supported by e500x2 Core.
+   This bit, PPC_OPCODE_EFS, PPC_OPCODE_VLE, and all those with APU in
+   their comment mark opcodes so that when those instructions are used
+   an APUinfo entry can be generated.  */
+#define PPC_OPCODE_SPE		    0x1000ull
 
-/* Opcode is only supported by e500x2 Core.  */
-#define PPC_OPCODE_SPE		    0x4000ull
-
-/* Opcode is supported by e500x2 Integer select APU.  */
-#define PPC_OPCODE_ISEL		    0x8000ull
+/* Opcode is supported by Integer select APU.  */
+#define PPC_OPCODE_ISEL		    0x2000ull
 
 /* Opcode is an e500 SPE floating point instruction.  */
-#define PPC_OPCODE_EFS		   0x10000ull
+#define PPC_OPCODE_EFS		    0x4000ull
 
 /* Opcode is supported by branch locking APU.  */
-#define PPC_OPCODE_BRLOCK	   0x20000ull
+#define PPC_OPCODE_BRLOCK	    0x8000ull
 
 /* Opcode is supported by performance monitor APU.  */
-#define PPC_OPCODE_PMR		   0x40000ull
+#define PPC_OPCODE_PMR		   0x10000ull
 
 /* Opcode is supported by cache locking APU.  */
-#define PPC_OPCODE_CACHELCK	   0x80000ull
+#define PPC_OPCODE_CACHELCK	   0x20000ull
 
 /* Opcode is supported by machine check APU.  */
-#define PPC_OPCODE_RFMCI	  0x100000ull
+#define PPC_OPCODE_RFMCI	   0x40000ull
+
+/* Opcode is supported by PowerPC 440 processor.  */
+#define PPC_OPCODE_440		   0x80000ull
 
 /* Opcode is only supported by Power5 architecture.  */
-#define PPC_OPCODE_POWER5	  0x200000ull
+#define PPC_OPCODE_POWER5	  0x100000ull
 
 /* Opcode is supported by PowerPC e300 family.  */
-#define PPC_OPCODE_E300           0x400000ull
+#define PPC_OPCODE_E300		  0x200000ull
 
 /* Opcode is only supported by Power6 architecture.  */
-#define PPC_OPCODE_POWER6	  0x800000ull
+#define PPC_OPCODE_POWER6	  0x400000ull
 
 /* Opcode is only supported by PowerPC Cell family.  */
-#define PPC_OPCODE_CELL		 0x1000000ull
+#define PPC_OPCODE_CELL		  0x800000ull
 
 /* Opcode is supported by CPUs with paired singles support.  */
-#define PPC_OPCODE_PPCPS	 0x2000000ull
+#define PPC_OPCODE_PPCPS	 0x1000000ull
 
 /* Opcode is supported by Power E500MC */
-#define PPC_OPCODE_E500MC        0x4000000ull
+#define PPC_OPCODE_E500MC	 0x2000000ull
 
 /* Opcode is supported by PowerPC 405 processor.  */
-#define PPC_OPCODE_405		 0x8000000ull
+#define PPC_OPCODE_405		 0x4000000ull
 
 /* Opcode is supported by Vector-Scalar (VSX) Unit */
-#define PPC_OPCODE_VSX		0x10000000ull
+#define PPC_OPCODE_VSX		 0x8000000ull
+
+/* Opcode is only supported by Power7 architecture.  */
+#define PPC_OPCODE_POWER7	0x10000000ull
 
 /* Opcode is supported by A2.  */
-#define PPC_OPCODE_A2	 	0x20000000ull
+#define PPC_OPCODE_A2		0x20000000ull
 
 /* Opcode is supported by PowerPC 476 processor.  */
 #define PPC_OPCODE_476		0x40000000ull
 
 /* Opcode is supported by AppliedMicro Titan core */
-#define PPC_OPCODE_TITAN        0x80000000ull
+#define PPC_OPCODE_TITAN	0x80000000ull
 
 /* Opcode which is supported by the e500 family */
-#define PPC_OPCODE_E500	       0x100000000ull
-
-/* Opcode is supported by Extended Altivec Vector Unit */
-#define PPC_OPCODE_ALTIVEC2    0x200000000ull
+#define PPC_OPCODE_E500        0x100000000ull
 
 /* Opcode is supported by Power E6500 */
-#define PPC_OPCODE_E6500       0x400000000ull
+#define PPC_OPCODE_E6500       0x200000000ull
 
 /* Opcode is supported by Thread management APU */
-#define PPC_OPCODE_TMR         0x800000000ull
+#define PPC_OPCODE_TMR	       0x400000000ull
 
 /* Opcode which is supported by the VLE extension.  */
-#define PPC_OPCODE_VLE	      0x1000000000ull
+#define PPC_OPCODE_VLE	       0x800000000ull
 
 /* Opcode is only supported by Power8 architecture.  */
-#define PPC_OPCODE_POWER8     0x2000000000ull
-
-/* Opcode which is supported by the Hardware Transactional Memory extension.  */
-/* Currently, this is the same as the POWER8 mask.  If another cpu comes out
-   that isn't a superset of POWER8, we can define this to its own mask.  */
-#define PPC_OPCODE_HTM        PPC_OPCODE_POWER8
+#define PPC_OPCODE_POWER8     0x1000000000ull
 
 /* Opcode is supported by ppc750cl.  */
-#define PPC_OPCODE_750	      0x4000000000ull
+#define PPC_OPCODE_750	      0x2000000000ull
 
 /* Opcode is supported by ppc7450.  */
-#define PPC_OPCODE_7450	      0x8000000000ull
+#define PPC_OPCODE_7450       0x4000000000ull
 
 /* Opcode is supported by ppc821/850/860.  */
-#define PPC_OPCODE_860	     0x10000000000ull
+#define PPC_OPCODE_860	      0x8000000000ull
 
 /* Opcode is only supported by Power9 architecture.  */
-#define PPC_OPCODE_POWER9    0x20000000000ull
-
-/* Opcode is supported by Vector-Scalar (VSX) Unit from ISA 2.08.  */
-#define PPC_OPCODE_VSX3      0x40000000000ull
+#define PPC_OPCODE_POWER9    0x10000000000ull
 
 /* Opcode is supported by e200z4.  */
-#define PPC_OPCODE_E200Z4    0x80000000000ull
+#define PPC_OPCODE_E200Z4    0x20000000000ull
 
 /* Disassemble to instructions matching later in the opcode table
    with fewer "mask" bits set rather than the earlist match.  Fewer
    "mask" bits set imply a more general form of the opcode, in fact
    the underlying machine instruction.  */
-#define PPC_OPCODE_RAW	    0x100000000000ull
+#define PPC_OPCODE_RAW	     0x40000000000ull
 
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)

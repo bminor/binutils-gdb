@@ -7128,7 +7128,8 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
+		(_("%B: Warning: bad `%s' option size %u smaller than"
+		   " its header"),
 		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
 	      break;
 	    }
@@ -7362,7 +7363,8 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
+		(_("%B: Warning: bad `%s' option size %u smaller than"
+		   " its header"),
 		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
 	      break;
 	    }
@@ -8875,7 +8877,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, FALSE);
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		(_("%B: relocation %s against `%s' can not be used"
+		   " when making a shared object; recompile with -fPIC"),
 		 abfd, howto->name,
 		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
@@ -10132,9 +10135,10 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 						 sec);
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"),
-			 input_bfd, input_section, name, howto->name,
-			 rel->r_offset);
+			(_("%B: Can't find matching LO16 reloc against `%s'"
+			   " for %s at 0x%lx in section `%A'"),
+			 input_bfd, name,
+			 howto->name, rel->r_offset, input_section);
 		    }
 		}
 	      else
@@ -10679,8 +10683,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
 		     htab->root.sgotplt->output_section,
-		     htab->root.splt->output_section,
-		     (long) gotpc_offset);
+		     (long) gotpc_offset,
+		     htab->root.splt->output_section);
 		  bfd_set_error (bfd_error_no_error);
 		  return FALSE;
 		}
@@ -11246,8 +11250,8 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 	    (_("%B: `%A' offset of %ld from `%A' beyond the range of ADDIUPC"),
 	     output_bfd,
 	     htab->root.sgotplt->output_section,
-	     htab->root.splt->output_section,
-	     (long) gotpc_offset);
+	     (long) gotpc_offset,
+	     htab->root.splt->output_section);
 	  bfd_set_error (bfd_error_no_error);
 	  return FALSE;
 	}
@@ -14684,8 +14688,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%s: illegal section name `%s'"),
-		 bfd_get_filename (abfd), o->name);
+		(_("%B: illegal section name `%A'"), abfd, o);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return FALSE;
 	    }
@@ -15197,19 +15200,19 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    _bfd_error_handler
 	      (_("Warning: %B uses unknown floating point ABI %d "
 		 "(set by %B), %B uses unknown floating point ABI %d"),
-	       obfd, abi_fp_bfd, ibfd, out_fp, in_fp);
+	       obfd, out_fp, abi_fp_bfd, ibfd, in_fp);
 	  else if (!out_string)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("Warning: %B uses unknown floating point ABI %d "
 		 "(set by %B), %B uses %s"),
-	       obfd, abi_fp_bfd, ibfd, out_fp, in_string);
+	       obfd, out_fp, abi_fp_bfd, ibfd, in_string);
 	  else if (!in_string)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("Warning: %B uses %s (set by %B), "
 		 "%B uses unknown floating point ABI %d"),
-	       obfd, abi_fp_bfd, ibfd, out_string, in_fp);
+	       obfd, out_string, abi_fp_bfd, ibfd, in_fp);
 	  else
 	    {
 	      /* If one of the bfds is soft-float, the other must be
@@ -15222,7 +15225,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("Warning: %B uses %s (set by %B), %B uses %s"),
-		 obfd, abi_fp_bfd, ibfd, out_string, in_string);
+		 obfd, out_string, abi_fp_bfd, ibfd, in_string);
 	    }
 	}
     }
@@ -15242,8 +15245,8 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      /* xgettext:c-format */
 	      (_("Warning: %B uses %s (set by %B), "
 		 "%B uses unknown MSA ABI %d"),
-	       obfd, abi_msa_bfd, ibfd,
-	       "-mmsa", in_attr[Tag_GNU_MIPS_ABI_MSA].i);
+	       obfd, "-mmsa", abi_msa_bfd,
+	       ibfd, in_attr[Tag_GNU_MIPS_ABI_MSA].i);
 	    break;
 
 	  default:
@@ -15254,8 +15257,8 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 		  /* xgettext:c-format */
 		  (_("Warning: %B uses unknown MSA ABI %d "
 		     "(set by %B), %B uses %s"),
-		     obfd, abi_msa_bfd, ibfd,
-		     out_attr[Tag_GNU_MIPS_ABI_MSA].i, "-mmsa");
+		     obfd, out_attr[Tag_GNU_MIPS_ABI_MSA].i,
+		   abi_msa_bfd, ibfd, "-mmsa");
 		  break;
 
 	      default:
@@ -15263,9 +15266,8 @@ mips_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 		  /* xgettext:c-format */
 		  (_("Warning: %B uses unknown MSA ABI %d "
 		     "(set by %B), %B uses unknown MSA ABI %d"),
-		   obfd, abi_msa_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_MSA].i,
-		   in_attr[Tag_GNU_MIPS_ABI_MSA].i);
+		   obfd, out_attr[Tag_GNU_MIPS_ABI_MSA].i,
+		   abi_msa_bfd, ibfd, in_attr[Tag_GNU_MIPS_ABI_MSA].i);
 		break;
 	      }
 	  }

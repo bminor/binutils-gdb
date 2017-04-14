@@ -8160,7 +8160,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      gdb_byte buf[MAX_REGISTER_SIZE];
+      gdb_byte buf[FP_REGISTER_SIZE];
 
       switch (gdbarch_tdep (gdbarch)->fp_model)
 	{
@@ -9403,6 +9403,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* On ARM targets char defaults to unsigned.  */
   set_gdbarch_char_signed (gdbarch, 0);
+
+  /* wchar_t is unsigned under the AAPCS.  */
+  if (tdep->arm_abi == ARM_ABI_AAPCS)
+    set_gdbarch_wchar_signed (gdbarch, 0);
+  else
+    set_gdbarch_wchar_signed (gdbarch, 1);
+  set_gdbarch_wchar_bit (gdbarch, 32);
 
   /* Note: for displaced stepping, this includes the breakpoint, and one word
      of additional scratch space.  This setting isn't used for anything beside

@@ -9526,7 +9526,7 @@ extended_remote_disable_randomization (int val)
 }
 
 static int
-extended_remote_run (char *args)
+extended_remote_run (const std::string &args)
 {
   struct remote_state *rs = get_remote_state ();
   int len;
@@ -9545,14 +9545,13 @@ extended_remote_run (char *args)
   len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len,
 		      strlen (remote_exec_file));
 
-  gdb_assert (args != NULL);
-  if (*args)
+  if (!args.empty ())
     {
       struct cleanup *back_to;
       int i;
       char **argv;
 
-      argv = gdb_buildargv (args);
+      argv = gdb_buildargv (args.c_str ());
       back_to = make_cleanup_freeargv (argv);
       for (i = 0; argv[i] != NULL; i++)
 	{
@@ -9597,7 +9596,8 @@ extended_remote_run (char *args)
 
 static void
 extended_remote_create_inferior (struct target_ops *ops,
-				 char *exec_file, char *args,
+				 const char *exec_file,
+				 const std::string &args,
 				 char **env, int from_tty)
 {
   int run_worked;
@@ -9622,7 +9622,7 @@ extended_remote_create_inferior (struct target_ops *ops,
 	 user requested.  */
       if (remote_exec_file[0])
 	error (_("Remote target does not support \"set remote exec-file\""));
-      if (args[0])
+      if (!args.empty ())
 	error (_("Remote target does not support \"set args\" or run <ARGS>"));
 
       /* Fall back to "R".  */
@@ -12416,7 +12416,7 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	{
 	  strcpy (buf, "QTDPsrc:");
 	  encode_source_string (b->number, loc->address, "at",
-				event_location_to_string (b->location),
+				event_location_to_string (b->location.get ()),
 				buf + strlen (buf), 2048 - strlen (buf));
 	  putpkt (buf);
 	  remote_get_noisy_reply (&target_buf, &target_buf_size);

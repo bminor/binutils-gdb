@@ -1,3 +1,55 @@
+2017-04-11  Alan Modra  <amodra@gmail.com>
+
+	PR 21274
+	PR 18466
+	* emultempl/pe.em (pe_find_data_imports): Don't use fixed size
+	symbol buffer.  Instead, xmalloc max size needed with space for
+	prefix.  Wrap overlong lines.  Formatting.  Pass symbol buffer
+	copy of name to pe_walk_relocs_of_symbol.
+	(make_inport_fixup): Add "name" param, pass to pe_create_import_fixup.
+	* emultempl/pe.em (pep_find_data_imports): As for pe_find_data_imports.
+	(make_import_fixup): Add "name" param, pass to pep_create_import_fixup.
+	Use bfd_get_signed_* and remove unnecessary casts.  Formatting.
+	* pe-dll.c (pe_walk_relocs_of_symbol): Add "name" param.  Pass to
+	callback.
+	(make_import_fixup_mark): Add "name" param.  Make use of prefix
+	space rather than xmalloc here.
+	(pe_create_import_fixup): Likewise.
+	* pe-dll.h (pe_walk_relocs_of_symbol): Update prototype.
+	(pe_create_import_fixup): Likewise.
+	* pep-dll.h (pep_walk_relocs_of_symbol): Likewise.
+	(pep_create_import_fixup): Likewise.
+
+2017-04-10  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (--strip-discarded): Document.
+	(--embedded-relocs): Document.
+	(--spare-dynamic-tags): Document.
+	(--task-link): Document.
+
+2017-04-10  Alan Modra  <amodra@gmail.com>
+
+	PR 21287
+	* testsuite/ld-elf/init-fini-arrays.d: Match INIT_ARRAY and FINI_ARRAY.
+	* testsuite/ld-elf/init-fini-arrays.s: Use %init_array and %fini_array
+	section types.
+	* testsuite/lib/ld-lib.exp (default_ld_compile): Trim assembler
+	warnings about "ignoring incorrect section type".
+	(run_ld_link_exec_tests, run_cc_link_tests): Delete old comment.
+
+2017-04-10  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elfvsb/elfvsb.exp (visibility_run): Delete
+	sh1p.o, sh2p.o, sh1np.o and sh2np.o before compiling.  Use
+	remote_file host exists rather than file exists.
+
+2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Use
+	NOPIE_CFLAGS and NOPIE_LDFLAGS to disable PIE for the non-pie
+	version of the test.
+
 2017-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579

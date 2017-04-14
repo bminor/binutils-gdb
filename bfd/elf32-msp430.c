@@ -2445,9 +2445,8 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %B uses %s instructions but %B uses %s"),
-	 ibfd, first_input_bfd,
-	 isa_type (in_attr[OFBA_MSPABI_Tag_ISA].i),
-	 isa_type (out_attr[OFBA_MSPABI_Tag_ISA].i));
+	 ibfd, isa_type (in_attr[OFBA_MSPABI_Tag_ISA].i),
+	 first_input_bfd, isa_type (out_attr[OFBA_MSPABI_Tag_ISA].i));
       result = FALSE;
     }
 
@@ -2458,9 +2457,8 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %B uses the %s code model whereas %B uses the %s code model"),
-	 ibfd, first_input_bfd,
-	 code_model (in_attr[OFBA_MSPABI_Tag_Code_Model].i),
-	 code_model (out_attr[OFBA_MSPABI_Tag_Code_Model].i));
+	 ibfd, code_model (in_attr[OFBA_MSPABI_Tag_Code_Model].i),
+	 first_input_bfd, code_model (out_attr[OFBA_MSPABI_Tag_Code_Model].i));
       result = FALSE;
     }
 
@@ -2482,9 +2480,8 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %B uses the %s data model whereas %B uses the %s data model"),
-	 ibfd, first_input_bfd,
-	 data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
-	 data_model (out_attr[OFBA_MSPABI_Tag_Data_Model].i));
+	 ibfd, data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
+	 first_input_bfd, data_model (out_attr[OFBA_MSPABI_Tag_Data_Model].i));
       result = FALSE;
     }
 
@@ -2507,8 +2504,8 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %B uses the %s data model but %B only uses MSP430 instructions"),
-	 ibfd, first_input_bfd,
-	 data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i));
+	 ibfd, data_model (in_attr[OFBA_MSPABI_Tag_Data_Model].i),
+	 first_input_bfd);
       result = FALSE;
     }
 

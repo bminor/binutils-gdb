@@ -433,11 +433,9 @@ python_command (char *arg, int from_tty)
     }
   else
     {
-      struct command_line *l = get_command_line (python_control, "");
-      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (python_control, "");
 
-      execute_control_command_untraced (l);
-      do_cleanups (cleanup);
+      execute_control_command_untraced (l.get ());
     }
 }
 
@@ -672,7 +670,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct cleanup *cleanups;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
-  struct event_location *location = NULL;
+  event_location_up location;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -682,15 +680,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   sals.sals = NULL;
 
   if (arg != NULL)
-    {
-      location = string_to_event_location_basic (&arg, python_language);
-      make_cleanup_delete_event_location (location);
-    }
+    location = string_to_event_location_basic (&arg, python_language);
 
   TRY
     {
       if (location != NULL)
-	sals = decode_line_1 (location, 0, NULL, NULL, 0);
+	sals = decode_line_1 (location.get (), 0, NULL, NULL, 0);
       else
 	{
 	  set_default_source_symtab_and_line ();
@@ -1455,11 +1450,9 @@ python_interactive_command (char *arg, int from_tty)
     error (_("Python scripting is not supported in this copy of GDB."));
   else
     {
-      struct command_line *l = get_command_line (python_control, "");
-      struct cleanup *cleanups = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (python_control, "");
 
-      execute_control_command_untraced (l);
-      do_cleanups (cleanups);
+      execute_control_command_untraced (l.get ());
     }
 }
 

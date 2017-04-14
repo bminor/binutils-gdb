@@ -481,14 +481,32 @@ host_hex_value (char c)
 
 /* Public character management functions.  */
 
-/* A cleanup function which is run to close an iconv descriptor.  */
-
-static void
-cleanup_iconv (void *p)
+class iconv_wrapper
 {
-  iconv_t *descp = (iconv_t *) p;
-  iconv_close (*descp);
-}
+public:
+
+  iconv_wrapper (const char *to, const char *from)
+  {
+    m_desc = iconv_open (to, from);
+    if (m_desc == (iconv_t) -1)
+      perror_with_name (_("Converting character sets"));
+  }
+
+  ~iconv_wrapper ()
+  {
+    iconv_close (m_desc);
+  }
+
+  size_t convert (ICONV_CONST char **inp, size_t *inleft, char **outp,
+		  size_t *outleft)
+  {
+    return iconv (m_desc, inp, inleft, outp, outleft);
+  }
+
+private:
+
+  iconv_t m_desc;
+};
 
 void
 convert_between_encodings (const char *from, const char *to,
@@ -496,8 +514,6 @@ convert_between_encodings (const char *from, const char *to,
 			   int width, struct obstack *output,
 			   enum transliterations translit)
 {
-  iconv_t desc;
-  struct cleanup *cleanups;
   size_t inleft;
   ICONV_CONST char *inp;
   unsigned int space_request;
@@ -509,10 +525,7 @@ convert_between_encodings (const char *from, const char *to,
       return;
     }
 
-  desc = iconv_open (to, from);
-  if (desc == (iconv_t) -1)
-    perror_with_name (_("Converting character sets"));
-  cleanups = make_cleanup (cleanup_iconv, &desc);
+  iconv_wrapper desc (to, from);
 
   inleft = num_bytes;
   inp = (ICONV_CONST char *) bytes;
@@ -531,7 +544,7 @@ convert_between_encodings (const char *from, const char *to,
       outp = (char *) obstack_base (output) + old_size;
       outleft = space_request;
 
-      r = iconv (desc, &inp, &inleft, &outp, &outleft);
+      r = desc.convert (&inp, &inleft, &outp, &outleft);
 
       /* Now make sure that the object on the obstack only includes
 	 bytes we have converted.  */
@@ -583,8 +596,6 @@ convert_between_encodings (const char *from, const char *to,
 	    }
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 

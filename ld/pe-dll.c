@@ -1275,8 +1275,8 @@ static struct bfd_section *current_sec;
 
 void
 pe_walk_relocs_of_symbol (struct bfd_link_info *info,
-			  const char *name,
-			  int (*cb) (arelent *, asection *))
+			  char *name,
+			  int (*cb) (arelent *, asection *, char *))
 {
   bfd *b;
   asection *s;
@@ -1315,7 +1315,7 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 	      struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
 	      if (!strcmp (name, sym->name))
-		cb (relocs[i], s);
+		cb (relocs[i], s, name);
 	    }
 
 	  free (relocs);
@@ -2396,37 +2396,21 @@ make_singleton_name_thunk (const char *import, bfd *parent)
 }
 
 static char *
-make_import_fixup_mark (arelent *rel)
+make_import_fixup_mark (arelent *rel, char *name)
 {
   /* We convert reloc to symbol, for later reference.  */
-  static int counter;
-  static char *fixup_name = NULL;
-  static size_t buffer_len = 0;
-
+  static unsigned int counter;
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
-
   bfd *abfd = bfd_asymbol_bfd (sym);
   struct bfd_link_hash_entry *bh;
+  char *fixup_name, buf[26];
+  size_t prefix_len;
 
-  if (!fixup_name)
-    {
-      fixup_name = xmalloc (384);
-      buffer_len = 384;
-    }
-
-  if (strlen (sym->name) + 25 > buffer_len)
-  /* Assume 25 chars for "__fu" + counter + "_".  If counter is
-     bigger than 20 digits long, we've got worse problems than
-     overflowing this buffer...  */
-    {
-      free (fixup_name);
-      /* New buffer size is length of symbol, plus 25, but
-	 then rounded up to the nearest multiple of 128.  */
-      buffer_len = ((strlen (sym->name) + 25) + 127) & ~127;
-      fixup_name = xmalloc (buffer_len);
-    }
-
-  sprintf (fixup_name, "__fu%d_%s", counter++, sym->name);
+  /* "name" buffer has space before the symbol name for prefixes.  */
+  sprintf (buf, "__fu%d_", counter++);
+  prefix_len = strlen (buf);
+  fixup_name = name - prefix_len;
+  memcpy (fixup_name, buf, prefix_len);
 
   bh = NULL;
   bfd_coff_link_add_one_symbol (&link_info, abfd, fixup_name, BSF_GLOBAL,
@@ -2626,23 +2610,25 @@ pe_create_runtime_relocator_reference (bfd *parent)
 }
 
 void
-pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend)
+pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name)
 {
-  char buf[300];
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   struct bfd_link_hash_entry *name_thunk_sym;
   struct bfd_link_hash_entry *name_imp_sym;
-  const char *name = sym->name;
-  char *fixup_name = make_import_fixup_mark (rel);
+  char *fixup_name, *impname;
   bfd *b;
   int need_import_table = 1;
 
-  sprintf (buf, "__imp_%s", name);
-  name_imp_sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
+  /* name buffer is allocated with space at beginning for prefixes.  */
+  impname = name - (sizeof "__imp_" - 1);
+  memcpy (impname, "__imp_", sizeof "__imp_" - 1);
+  name_imp_sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
 
-  sprintf (buf, "__nm_thnk_%s", name);
+  impname = name - (sizeof "__nm_thnk_" - 1);
+  memcpy (impname, "__nm_thnk_", sizeof "__nm_thnk_" - 1);
+  name_thunk_sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
 
-  name_thunk_sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
+  fixup_name = make_import_fixup_mark (rel, name);
 
   /* For version 2 pseudo relocation we don't need to add an import
      if the import symbol is already present.  */

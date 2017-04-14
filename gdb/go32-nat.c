@@ -631,8 +631,9 @@ go32_kill_inferior (struct target_ops *ops)
 }
 
 static void
-go32_create_inferior (struct target_ops *ops, char *exec_file,
-		      char *args, char **env, int from_tty)
+go32_create_inferior (struct target_ops *ops,
+		      const char *exec_file,
+		      const std::string &allargs, char **env, int from_tty)
 {
   extern char **environ;
   jmp_buf start_state;
@@ -641,6 +642,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   size_t cmdlen;
   struct inferior *inf;
   int result;
+  const char *args = allargs.c_str ();
 
   /* If no exec file handed to us, get it from the exec-file command -- with
      a good, common error message if none is specified.  */

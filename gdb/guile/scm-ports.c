@@ -470,8 +470,7 @@ ioscm_with_output_to_port_worker (SCM port, SCM thunk, enum oport oport,
 
   cleanups = set_batch_flag_and_make_cleanup_restore_page_info ();
 
-  make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
   ui_file_up port_file (new ioscm_file_port (port));
 

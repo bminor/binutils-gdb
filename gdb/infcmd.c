@@ -526,7 +526,7 @@ prepare_execution_command (struct target_ops *target, int background)
 static void
 run_command_1 (char *args, int from_tty, int tbreak_at_main)
 {
-  char *exec_file;
+  const char *exec_file;
   struct cleanup *old_chain;
   ptid_t ptid;
   struct ui_out *uiout = current_uiout;
@@ -574,7 +574,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   if (tbreak_at_main)
     tbreak_command (main_name (), 0);
 
-  exec_file = (char *) get_exec_file (0);
+  exec_file = get_exec_file (0);
 
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program
@@ -607,7 +607,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
-  run_target->to_create_inferior (run_target, exec_file, get_inferior_args (),
+  run_target->to_create_inferior (run_target, exec_file,
+				  std::string (get_inferior_args ()),
 				  environ_vector (current_inferior ()->environment),
 				  from_tty);
   /* to_create_inferior should push the target, so after this point we

@@ -507,17 +507,13 @@ location_completer (struct cmd_list_element *ignore,
 {
   VEC (char_ptr) *matches = NULL;
   const char *copy = text;
-  struct event_location *location;
 
-  location = string_to_explicit_location (&copy, current_language, 1);
+  event_location_up location = string_to_explicit_location (&copy,
+							    current_language,
+							    1);
   if (location != NULL)
-    {
-      struct cleanup *cleanup;
-
-      cleanup = make_cleanup_delete_event_location (location);
-      matches = explicit_location_completer (ignore, location, text, word);
-      do_cleanups (cleanup);
-    }
+    matches = explicit_location_completer (ignore, location.get (),
+					   text, word);
   else
     {
       /* This is an address or linespec location.

@@ -318,7 +318,7 @@ info_osdata (const char *type)
 	 for a column named "Title", and only include it with MI
 	 output; this column's normal use is for titles for interface
 	 elements like menus, and it clutters up CLI output.  */
-      if (!type && !uiout->is_mi_like_p ())
+      if (*type == '\0' && !uiout->is_mi_like_p ())
 	{
 	  struct osdata_column *col;
 	  int ix;

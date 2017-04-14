@@ -5468,6 +5468,47 @@ do_vec_ADDP (sim_cpu *cpu)
     }
 }
 
+/* Float point vector convert to longer (precision).  */
+static void
+do_vec_FCVTL (sim_cpu *cpu)
+{
+  /* instr[31]    = 0
+     instr[30]    = half (0) / all (1)
+     instr[29,23] = 00 1110 0
+     instr[22]    = single (0) / double (1)
+     instr[21,10] = 10 0001 0111 10
+     instr[9,5]   = Rn
+     instr[4,0]   = Rd.  */
+
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+  unsigned full = INSTR (30, 30);
+  unsigned i;
+
+  NYI_assert (31, 31, 0);
+  NYI_assert (29, 23, 0x1C);
+  NYI_assert (21, 10, 0x85E);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (INSTR (22, 22))
+    {
+      for (i = 0; i < 2; i++)
+	aarch64_set_vec_double (cpu, rd, i,
+				aarch64_get_vec_float (cpu, rn, i + 2*full));
+    }
+  else
+    {
+      HALT_NYI;
+
+#if 0
+      /* TODO: Implement missing half-float support.  */
+      for (i = 0; i < 4; i++)
+	aarch64_set_vec_float (cpu, rd, i,
+			     aarch64_get_vec_halffloat (cpu, rn, i + 4*full));
+#endif
+    }
+}
+
 static void
 do_vec_FABS (sim_cpu *cpu)
 {
@@ -5716,6 +5757,13 @@ do_vec_op1 (sim_cpu *cpu)
     case 0x30: do_vec_mull (cpu); return;
     case 0x33: do_vec_FMLA (cpu); return;
     case 0x35: do_vec_fadd (cpu); return;
+
+    case 0x1E:
+      switch (INSTR (20, 16))
+	{
+	case 0x01: do_vec_FCVTL (cpu); return;
+	default: HALT_NYI;
+	}
 
     case 0x2E:
       switch (INSTR (20, 16))
@@ -8926,6 +8974,146 @@ do_scalar_SSHL (sim_cpu *cpu)
 			 aarch64_get_vec_s64 (cpu, rn, 0) >> - shift);
 }
 
+/* Floating point scalar compare greater than or equal to 0.  */
+static void
+do_scalar_FCMGE_zero (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0111 1110 1
+     instr [22,22] = size
+     instr [21,16] = 1000 00
+     instr [15,10] = 1100 10
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned size = INSTR (22, 22);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 23, 0x0FD);
+  NYI_assert (21, 16, 0x20);
+  NYI_assert (15, 10, 0x32);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (size)
+    aarch64_set_vec_u64 (cpu, rd, 0,
+			 aarch64_get_vec_double (cpu, rn, 0) >= 0.0 ? -1 : 0);
+  else
+    aarch64_set_vec_u32 (cpu, rd, 0,
+			 aarch64_get_vec_float (cpu, rn, 0) >= 0.0 ? -1 : 0);
+}
+
+/* Floating point scalar compare less than or equal to 0.  */
+static void
+do_scalar_FCMLE_zero (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0111 1110 1
+     instr [22,22] = size
+     instr [21,16] = 1000 00
+     instr [15,10] = 1101 10
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned size = INSTR (22, 22);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 23, 0x0FD);
+  NYI_assert (21, 16, 0x20);
+  NYI_assert (15, 10, 0x36);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (size)
+    aarch64_set_vec_u64 (cpu, rd, 0,
+			 aarch64_get_vec_double (cpu, rn, 0) <= 0.0 ? -1 : 0);
+  else
+    aarch64_set_vec_u32 (cpu, rd, 0,
+			 aarch64_get_vec_float (cpu, rn, 0) <= 0.0 ? -1 : 0);
+}
+
+/* Floating point scalar compare greater than 0.  */
+static void
+do_scalar_FCMGT_zero (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0101 1110 1
+     instr [22,22] = size
+     instr [21,16] = 1000 00
+     instr [15,10] = 1100 10
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned size = INSTR (22, 22);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 23, 0x0BD);
+  NYI_assert (21, 16, 0x20);
+  NYI_assert (15, 10, 0x32);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (size)
+    aarch64_set_vec_u64 (cpu, rd, 0,
+			 aarch64_get_vec_double (cpu, rn, 0) > 0.0 ? -1 : 0);
+  else
+    aarch64_set_vec_u32 (cpu, rd, 0,
+			 aarch64_get_vec_float (cpu, rn, 0) > 0.0 ? -1 : 0);
+}
+
+/* Floating point scalar compare equal to 0.  */
+static void
+do_scalar_FCMEQ_zero (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0101 1110 1
+     instr [22,22] = size
+     instr [21,16] = 1000 00
+     instr [15,10] = 1101 10
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned size = INSTR (22, 22);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 23, 0x0BD);
+  NYI_assert (21, 16, 0x20);
+  NYI_assert (15, 10, 0x36);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (size)
+    aarch64_set_vec_u64 (cpu, rd, 0,
+			 aarch64_get_vec_double (cpu, rn, 0) == 0.0 ? -1 : 0);
+  else
+    aarch64_set_vec_u32 (cpu, rd, 0,
+			 aarch64_get_vec_float (cpu, rn, 0) == 0.0 ? -1 : 0);
+}
+
+/* Floating point scalar compare less than 0.  */
+static void
+do_scalar_FCMLT_zero (sim_cpu *cpu)
+{
+  /* instr [31,23] = 0101 1110 1
+     instr [22,22] = size
+     instr [21,16] = 1000 00
+     instr [15,10] = 1110 10
+     instr [9, 5]  = Rn
+     instr [4, 0]  = Rd.  */
+
+  unsigned size = INSTR (22, 22);
+  unsigned rn = INSTR (9, 5);
+  unsigned rd = INSTR (4, 0);
+
+  NYI_assert (31, 23, 0x0BD);
+  NYI_assert (21, 16, 0x20);
+  NYI_assert (15, 10, 0x3A);
+
+  TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
+  if (size)
+    aarch64_set_vec_u64 (cpu, rd, 0,
+			 aarch64_get_vec_double (cpu, rn, 0) < 0.0 ? -1 : 0);
+  else
+    aarch64_set_vec_u32 (cpu, rd, 0,
+			 aarch64_get_vec_float (cpu, rn, 0) < 0.0 ? -1 : 0);
+}
+
 static void
 do_scalar_shift (sim_cpu *cpu)
 {
@@ -9249,7 +9437,9 @@ do_scalar_vec (sim_cpu *cpu)
 	case 0x0D: do_scalar_CMGT (cpu); return;
 	case 0x11: do_scalar_USHL (cpu); return;
 	case 0x2E: do_scalar_NEG (cpu); return;
+	case 0x32: do_scalar_FCMGE_zero (cpu); return;
 	case 0x35: do_scalar_FABD (cpu); return;
+	case 0x36: do_scalar_FCMLE_zero (cpu); return;
 	case 0x39: do_scalar_FCM (cpu); return;
 	case 0x3B: do_scalar_FCM (cpu); return;
 	default:
@@ -9263,6 +9453,9 @@ do_scalar_vec (sim_cpu *cpu)
 	{
 	case 0x21: do_double_add (cpu); return;
 	case 0x11: do_scalar_SSHL (cpu); return;
+	case 0x32: do_scalar_FCMGT_zero (cpu); return;
+	case 0x36: do_scalar_FCMEQ_zero (cpu); return;
+	case 0x3A: do_scalar_FCMLT_zero (cpu); return;
 	default:
 	  HALT_NYI;
 	}

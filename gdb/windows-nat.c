@@ -1912,7 +1912,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int detached = 1;
 
-  ptid_t ptid = {-1};
+  ptid_t ptid = minus_one_ptid;
   windows_resume (ops, ptid, 0, GDB_SIGNAL_0);
 
   if (!DebugActiveProcessStop (current_event.dwProcessId))
@@ -2412,8 +2412,9 @@ redirect_inferior_handles (const char *cmd_orig, char *cmd,
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-windows_create_inferior (struct target_ops *ops, char *exec_file,
-		       char *allargs, char **in_env, int from_tty)
+windows_create_inferior (struct target_ops *ops, const char *exec_file,
+			 const std::string &origallargs, char **in_env,
+			 int from_tty)
 {
   STARTUPINFO si;
 #ifdef __CYGWIN__
@@ -2431,7 +2432,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 #else  /* !__CYGWIN__ */
   char real_path[__PMAX];
   char shell[__PMAX]; /* Path to shell */
-  char *toexec;
+  const char *toexec;
   char *args, *allargs_copy;
   size_t args_len, allargs_len;
   int fd_inp = -1, fd_out = -1, fd_err = -1;
@@ -2447,6 +2448,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   size_t envsize;
   char **env;
 #endif	/* !__CYGWIN__ */
+  const char *allargs = origallargs.c_str ();
   PROCESS_INFORMATION pi;
   BOOL ret;
   DWORD flags = 0;

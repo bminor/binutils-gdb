@@ -1,3 +1,43 @@
+2017-04-13  Alan Modra  <amodra@gmail.com>
+
+	* epiphany-desc.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* ip2k-desc.c: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* lm32-desc.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mt-desc.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* xc16x-desc.c: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+
+2017-04-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Remove PPC_OPCODE_ALTIVEC2,
+	PPC_OPCODE_VSX3, PPC_OPCODE_HTM and "htm".  Formatting.  Set
+	PPC_OPCODE_TMR for e6500.
+	* ppc-opc.c (PPCVEC2): Define as PPC_OPCODE_POWER8|PPC_OPCODE_E6500.
+	(PPCVEC3): Define as PPC_OPCODE_POWER9.
+	(PPCVSX2): Define as PPC_OPCODE_POWER8.
+	(PPCVSX3): Define as PPC_OPCODE_POWER9.
+	(PPCHTM): Define as PPC_OPCODE_POWER8.
+	(powerpc_opcodes <mftmr, mttmr>): Remove now unnecessary E6500.
+
+2017-04-10  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts <476>): Remove PPC_OPCODE_440.
+	* ppc-opc.c (MULHW): Add PPC_OPCODE_476.
+	(powerpc_opcodes): Adjust PPC440, PPC464 and PPC476 insns to suit
+	removal of PPC_OPCODE_440 from ppc476 cpu selection bits.
+
+2017-04-09  Pip Cet  <pipcet@gmail.com>
+
+	* wasm32-dis.c (print_insn_wasm32): Avoid DECIMAL_DIG, specify
+	appropriate floating-point precision directly.
+
 2017-04-07  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes <mviwsplt, mvidsplt, lvexbx, lvepxl,

@@ -81,7 +81,7 @@ initialize_explicit_location (struct explicit_location *explicit_loc)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_linespec_location (char **linespec)
 {
   struct event_location *location;
@@ -98,7 +98,7 @@ new_linespec_location (char **linespec)
       if ((p - orig) > 0)
 	EL_LINESPEC (location) = savestring (orig, p - orig);
     }
-  return location;
+  return event_location_up (location);
 }
 
 /* See description in location.h.  */
@@ -112,7 +112,7 @@ get_linespec_location (const struct event_location *location)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_address_location (CORE_ADDR addr, const char *addr_string,
 		      int addr_string_len)
 {
@@ -123,7 +123,7 @@ new_address_location (CORE_ADDR addr, const char *addr_string,
   EL_ADDRESS (location) = addr;
   if (addr_string != NULL)
     EL_STRING (location) = xstrndup (addr_string, addr_string_len);
-  return location;
+  return event_location_up (location);
 }
 
 /* See description in location.h.  */
@@ -146,7 +146,7 @@ get_address_string_location (const struct event_location *location)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_probe_location (const char *probe)
 {
   struct event_location *location;
@@ -155,7 +155,7 @@ new_probe_location (const char *probe)
   EL_TYPE (location) = PROBE_LOCATION;
   if (probe != NULL)
     EL_PROBE (location) = xstrdup (probe);
-  return location;
+  return event_location_up (location);
 }
 
 /* See description in location.h.  */
@@ -169,7 +169,7 @@ get_probe_location (const struct event_location *location)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 new_explicit_location (const struct explicit_location *explicit_loc)
 {
   struct event_location tmp;
@@ -293,7 +293,7 @@ explicit_location_to_linespec (const struct explicit_location *explicit_loc)
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 copy_event_location (const struct event_location *src)
 {
   struct event_location *dst;
@@ -339,31 +339,11 @@ copy_event_location (const struct event_location *src)
       gdb_assert_not_reached ("unknown event location type");
     }
 
-  return dst;
+  return event_location_up (dst);
 }
-
-/* A cleanup function for struct event_location.  */
-
-static void
-delete_event_location_cleanup (void *data)
-{
-  struct event_location *location = (struct event_location *) data;
-
-  delete_event_location (location);
-}
-
-/* See description in location.h.  */
-
-struct cleanup *
-make_cleanup_delete_event_location (struct event_location *location)
-{
-  return make_cleanup (delete_event_location_cleanup, location);
-}
-
-/* See description in location.h.  */
 
 void
-delete_event_location (struct event_location *location)
+event_location_deleter::operator() (event_location *location) const
 {
   if (location != NULL)
     {
@@ -438,7 +418,7 @@ event_location_to_string (struct event_location *location)
    past any strings that it lexes.  Returns a malloc'd copy of the
    lexed string or NULL if no lexing was done.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 explicit_location_lex_one (const char **inp,
 			   const struct language_defn *language)
 {
@@ -462,7 +442,8 @@ explicit_location_lex_one (const char **inp,
 	  if (end == NULL)
 	    error (_("Unmatched quote, %s."), start);
 	  *inp = end + 1;
-	  return savestring (start + 1, *inp - start - 2);
+	  return gdb::unique_xmalloc_ptr<char> (savestring (start + 1,
+							    *inp - start - 2));
 	}
     }
 
@@ -479,7 +460,8 @@ explicit_location_lex_one (const char **inp,
       while (isdigit (*inp[0]))
 	++(*inp);
       if (*inp[0] == '\0' || isspace (*inp[0]) || *inp[0] == ',')
-	return savestring (start, *inp - start);
+	return gdb::unique_xmalloc_ptr<char> (savestring (start,
+							  *inp - start));
 
       /* Otherwise stop at the next occurrence of whitespace, '\0',
 	 keyword, or ','.  */
@@ -498,20 +480,19 @@ explicit_location_lex_one (const char **inp,
     }
 
   if (*inp - start > 0)
-    return savestring (start, *inp - start);
+    return gdb::unique_xmalloc_ptr<char> (savestring (start, *inp - start));
 
   return NULL;
 }
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 string_to_explicit_location (const char **argp,
 			     const struct language_defn *language,
 			     int dont_throw)
 {
-  struct cleanup *cleanup;
-  struct event_location *location;
+  event_location_up location;
 
   /* It is assumed that input beginning with '-' and a non-digit
      character is an explicit location.  "-p" is reserved, though,
@@ -524,16 +505,13 @@ string_to_explicit_location (const char **argp,
     return NULL;
 
   location = new_explicit_location (NULL);
-  cleanup = make_cleanup_delete_event_location (location);
 
   /* Process option/argument pairs.  dprintf_command
      requires that processing stop on ','.  */
   while ((*argp)[0] != '\0' && (*argp)[0] != ',')
     {
       int len;
-      char *opt, *oarg;
       const char *start;
-      struct cleanup *opt_cleanup, *oarg_cleanup;
 
       /* If *ARGP starts with a keyword, stop processing
 	 options.  */
@@ -544,44 +522,40 @@ string_to_explicit_location (const char **argp,
       start = *argp;
 
       /* Get the option string.  */
-      opt = explicit_location_lex_one (argp, language);
-      opt_cleanup = make_cleanup (xfree, opt);
+      gdb::unique_xmalloc_ptr<char> opt
+	= explicit_location_lex_one (argp, language);
 
       *argp = skip_spaces_const (*argp);
 
       /* Get the argument string.  */
-      oarg = explicit_location_lex_one (argp, language);
-      oarg_cleanup = make_cleanup (xfree, oarg);
+      gdb::unique_xmalloc_ptr<char> oarg
+	= explicit_location_lex_one (argp, language);
+      bool have_oarg = oarg != NULL;
       *argp = skip_spaces_const (*argp);
 
       /* Use the length of the option to allow abbreviations.  */
-      len = strlen (opt);
+      len = strlen (opt.get ());
 
       /* All options have a required argument.  Checking for this required
 	 argument is deferred until later.  */
-      if (strncmp (opt, "-source", len) == 0)
-	EL_EXPLICIT (location)->source_filename = oarg;
-      else if (strncmp (opt, "-function", len) == 0)
-	EL_EXPLICIT (location)->function_name = oarg;
-      else if (strncmp (opt, "-line", len) == 0)
+      if (strncmp (opt.get (), "-source", len) == 0)
+	EL_EXPLICIT (location)->source_filename = oarg.release ();
+      else if (strncmp (opt.get (), "-function", len) == 0)
+	EL_EXPLICIT (location)->function_name = oarg.release ();
+      else if (strncmp (opt.get (), "-line", len) == 0)
 	{
-	  if (oarg != NULL)
-	    {
-	      EL_EXPLICIT (location)->line_offset
-		= linespec_parse_line_offset (oarg);
-	      do_cleanups (oarg_cleanup);
-	      do_cleanups (opt_cleanup);
-	      continue;
-	    }
+	  if (have_oarg)
+	    EL_EXPLICIT (location)->line_offset
+	      = linespec_parse_line_offset (oarg.get ());
 	}
-      else if (strncmp (opt, "-label", len) == 0)
-	EL_EXPLICIT (location)->label_name = oarg;
+      else if (strncmp (opt.get (), "-label", len) == 0)
+	EL_EXPLICIT (location)->label_name = oarg.release ();
       /* Only emit an "invalid argument" error for options
 	 that look like option strings.  */
-      else if (opt[0] == '-' && !isdigit (opt[1]))
+      else if (opt.get ()[0] == '-' && !isdigit (opt.get ()[1]))
 	{
 	  if (!dont_throw)
-	    error (_("invalid explicit location argument, \"%s\""), opt);
+	    error (_("invalid explicit location argument, \"%s\""), opt.get ());
 	}
       else
 	{
@@ -589,9 +563,6 @@ string_to_explicit_location (const char **argp,
 	     Stop parsing and return whatever explicit location was
 	     parsed.  */
 	  *argp = start;
-	  discard_cleanups (oarg_cleanup);
-	  do_cleanups (opt_cleanup);
-	  discard_cleanups (cleanup);
 	  return location;
 	}
 
@@ -599,14 +570,8 @@ string_to_explicit_location (const char **argp,
 	 case, it provides a much better user experience to issue
 	 the "invalid argument" error before any missing
 	 argument error.  */
-      if (oarg == NULL && !dont_throw)
-	error (_("missing argument for \"%s\""), opt);
-
-      /* The option/argument pair was successfully processed;
-	 oarg belongs to the explicit location, and opt should
-	 be freed.  */
-      discard_cleanups (oarg_cleanup);
-      do_cleanups (opt_cleanup);
+      if (!have_oarg && !dont_throw)
+	error (_("missing argument for \"%s\""), opt.get ());
     }
 
   /* One special error check:  If a source filename was given
@@ -621,17 +586,16 @@ string_to_explicit_location (const char **argp,
 	       "line offset."));
     }
 
-  discard_cleanups (cleanup);
   return location;
 }
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 string_to_event_location_basic (char **stringp,
 				const struct language_defn *language)
 {
-  struct event_location *location;
+  event_location_up location;
   const char *cs;
 
   /* Try the input as a probe spec.  */
@@ -666,16 +630,15 @@ string_to_event_location_basic (char **stringp,
 
 /* See description in location.h.  */
 
-struct event_location *
+event_location_up
 string_to_event_location (char **stringp,
 			  const struct language_defn *language)
 {
-  struct event_location *location;
   const char *arg, *orig;
 
   /* Try an explicit location.  */
   orig = arg = *stringp;
-  location = string_to_explicit_location (&arg, language, 0);
+  event_location_up location = string_to_explicit_location (&arg, language, 0);
   if (location != NULL)
     {
       /* It was a valid explicit location.  Advance STRINGP to
