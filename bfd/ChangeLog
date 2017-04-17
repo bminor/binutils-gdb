@@ -1,3 +1,7 @@
+2017-04-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh (development): Set to false.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* coffcode.h: Wrap some overly long _bfd_error_handler args.
