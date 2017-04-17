@@ -1,3 +1,8 @@
+2017-04-17  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.0 branch created (725bf5cf125783c2a7ca4ab63d3768e220bab2db):
+	* version.in: Bump version to 7.99.90.DATE-git.
+
 2017-04-13  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21385
