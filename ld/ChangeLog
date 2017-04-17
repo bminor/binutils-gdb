@@ -1,3 +1,13 @@
+2017-04-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/indirect5a.c,
+	* testsuite/ld-elf/indirect5b.c,
+	* testsuite/ld-elf/indirect5.map,
+	* testsuite/ld-elf/indirect5.out: New test.
+	* testsuite/ld-elf/indirect6a.c: Likewise.
+	* testsuite/ld-elf/indirect.exp (check_dynamic_syms): New proc.
+	Run new tests and check dynsyms.
+
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	PR 21274

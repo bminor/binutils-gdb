@@ -1,3 +1,9 @@
+2017-04-17  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Undo dynamic linking
+	state when a regular object file defines a symbol with
+	incompatible type to that defined by an earlier shared lib.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* coffcode.h: Wrap some overly long _bfd_error_handler args.

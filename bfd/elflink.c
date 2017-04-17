@@ -1242,23 +1242,50 @@ _bfd_elf_merge_symbol (bfd *abfd,
   oldfunc = (h->type != STT_NOTYPE
 	     && bed->is_function_type (h->type));
 
-  /* If creating a default indirect symbol ("foo" or "foo@") from a
-     dynamic versioned definition ("foo@@") skip doing so if there is
-     an existing regular definition with a different type.  We don't
-     want, for example, a "time" variable in the executable overriding
-     a "time" function in a shared library.  */
-  if (pold_alignment == NULL
-      && newdyn
-      && newdef
-      && !olddyn
-      && (olddef || h->root.type == bfd_link_hash_common)
+  if (!(newfunc && oldfunc)
       && ELF_ST_TYPE (sym->st_info) != h->type
       && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
       && h->type != STT_NOTYPE
-      && !(newfunc && oldfunc))
+      && (newdef || bfd_is_com_section (sec))
+      && (olddef || h->root.type == bfd_link_hash_common))
     {
-      *skip = TRUE;
-      return TRUE;
+      /* If creating a default indirect symbol ("foo" or "foo@") from
+	 a dynamic versioned definition ("foo@@") skip doing so if
+	 there is an existing regular definition with a different
+	 type.  We don't want, for example, a "time" variable in the
+	 executable overriding a "time" function in a shared library.  */
+      if (newdyn
+	  && !olddyn)
+	{
+	  *skip = TRUE;
+	  return TRUE;
+	}
+
+      /* When adding a symbol from a regular object file after we have
+	 created indirect symbols, undo the indirection and any
+	 dynamic state.  */
+      if (hi != h
+	  && !newdyn
+	  && olddyn)
+	{
+	  h = hi;
+	  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+	  h->forced_local = 0;
+	  h->ref_dynamic = 0;
+	  h->def_dynamic = 0;
+	  h->dynamic_def = 0;
+	  if (h->root.u.undef.next || info->hash->undefs_tail == &h->root)
+	    {
+	      h->root.type = bfd_link_hash_undefined;
+	      h->root.u.undef.abfd = abfd;
+	    }
+	  else
+	    {
+	      h->root.type = bfd_link_hash_new;
+	      h->root.u.undef.abfd = NULL;
+	    }
+	  return TRUE;
+	}
     }
 
   /* Check TLS symbols.  We don't check undefined symbols introduced
