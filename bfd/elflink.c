@@ -5948,13 +5948,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 			       struct bfd_link_info *info,
 			       asection **sinterpptr)
 {
-  size_t soname_indx;
   bfd *dynobj;
   const struct elf_backend_data *bed;
 
   *sinterpptr = NULL;
-
-  soname_indx = (size_t) -1;
 
   if (!is_elf_hash_table (info->hash))
     return TRUE;
@@ -5970,6 +5967,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       struct elf_info_failed eif;
       bfd_boolean all_defined;
       asection *s;
+      size_t soname_indx;
 
       eif.info = info;
       eif.failed = FALSE;
@@ -5985,6 +5983,17 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (eif.failed)
 	    return FALSE;
 	}
+
+      if (soname != NULL)
+	{
+	  soname_indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					     soname, TRUE);
+	  if (soname_indx == (size_t) -1
+	      || !_bfd_elf_add_dynamic_entry (info, DT_SONAME, soname_indx))
+	    return FALSE;
+	}
+      else
+	soname_indx = (size_t) -1;
 
       /* Make all global versions with definition.  */
       for (t = info->version_info; t != NULL; t = t->next)
@@ -6493,15 +6502,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info) || info->nointerp);
-
-      if (soname != NULL)
-	{
-	  soname_indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
-					     soname, TRUE);
-	  if (soname_indx == (size_t) -1
-	      || !_bfd_elf_add_dynamic_entry (info, DT_SONAME, soname_indx))
-	    return FALSE;
-	}
 
       if (info->symbolic)
 	{

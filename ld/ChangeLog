@@ -1,3 +1,12 @@
+2017-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21389
+	* testsuite/ld-elf/pr21389.map: New file.
+	* testsuite/ld-elf/pr21389.s: Likewise.
+	* testsuite/ld-elf/pr21389a.d: Likewise.
+	* testsuite/ld-elf/pr21389b.d: Likewise.
+	* testsuite/ld-elf/pr21389c.d: Likewise.
+
 2017-04-17  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/indirect5a.c,

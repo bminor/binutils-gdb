@@ -1,3 +1,9 @@
+2017-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21389
+	* elflink.c (bfd_elf_size_dynamic_sections): Get soname index
+	before generating the version definition section.
+
 2017-04-17  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Undo dynamic linking
