@@ -1,5 +1,34 @@
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
+	* tracefile-tfile.c (tfile_write_tdesc): Adjust to use
+	gdb::optional<std::string>.
+	* xml-support.c: Include <string>.
+	(scope_level::scope_level(scope_level &&))
+	(scope_level::~scope_level): Delete.
+	(scope_level::body): Now a std::string.
+	(gdb_xml_body_text, gdb_xml_end_element): Adjust.
+	(xinclude_parsing_data::xinclude_parsing_data): Add 'output'
+	parameter.
+	(xinclude_parsing_data::~xinclude_parsing_data): Delete.
+	(xinclude_parsing_data::output): Now a std::string reference.
+	(xinclude_start_include): Adjust.
+	(xml_xinclude_default): Adjust.
+	(xml_process_xincludes): Add 'output' parameter, and return bool.
+	* xml-support.h (xml_process_xincludes): Add 'output' parameter,
+	and return bool.
+	* xml-tdesc.c: Include <unordered_map> and <string>.
+	(tdesc_xml_cache): Delete.
+	(tdesc_xml_cache_s): Delete.
+	(xml_cache): Now an std::unordered_map.
+	(tdesc_parse_xml): Adjust to use std::string and unordered_map.
+	(target_fetch_description_xml): Change return type to
+	gdb::optional<std::string>, and adjust.
+	* xml-tdesc.h: Include "common/gdb_optional.h" and <string>.
+	(target_fetch_description_xml): Change return type to
+	gdb::optional<std::string>.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/optional-selftests.c.
 	(SUBDIR_UNITTESTS_OBS): Add optional-selftests.o.

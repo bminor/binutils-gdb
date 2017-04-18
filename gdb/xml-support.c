@@ -23,6 +23,7 @@
 #include "filestuff.h"
 #include "safe-ctype.h"
 #include <vector>
+#include <string>
 
 /* Debugging flag.  */
 static int debug_xml;
@@ -46,28 +47,8 @@ struct scope_level
   explicit scope_level (const gdb_xml_element *elements_ = NULL)
     : elements (elements_),
       element (NULL),
-      seen (0),
-      body (NULL)
+      seen (0)
   {}
-
-  scope_level (scope_level &&other) noexcept
-    : elements (other.elements),
-      element (other.element),
-      seen (other.seen),
-      body (other.body)
-  {
-    if (this != &other)
-      other.body = NULL;
-  }
-
-  ~scope_level ()
-  {
-    if (this->body)
-      {
-	obstack_free (this->body, NULL);
-	xfree (this->body);
-      }
-  }
 
   /* Elements we allow at this level.  */
   const struct gdb_xml_element *elements;
@@ -79,8 +60,8 @@ struct scope_level
      optional and repeatable checking).  */
   unsigned int seen;
 
-  /* Body text accumulation.  This is an owning pointer.  */
-  struct obstack *body;
+  /* Body text accumulation.  */
+  std::string body;
 };
 
 /* The parser itself, and our additional state.  */
@@ -120,14 +101,7 @@ gdb_xml_body_text (void *data, const XML_Char *text, int length)
     return;
 
   scope_level &scope = parser->scopes.back ();
-
-  if (scope.body == NULL)
-    {
-      scope.body = XCNEW (struct obstack);
-      obstack_init (scope.body);
-    }
-
-  obstack_grow (scope.body, text, length);
+  scope.body.append (text, length);
 }
 
 /* Issue a debugging message from one of PARSER's handlers.  */
@@ -390,29 +364,27 @@ gdb_xml_end_element (gdb_xml_parser *parser, const XML_Char *name)
   /* Call the element processor.  */
   if (scope->element != NULL && scope->element->end_handler)
     {
-      const char *scope_body;
+      const char *body;
 
-      if (scope->body == NULL)
-	scope_body = "";
+      if (scope->body.empty ())
+	body = "";
       else
 	{
 	  int length;
 
-	  length = obstack_object_size (scope->body);
-	  obstack_1grow (scope->body, '\0');
-	  char *body = (char *) obstack_finish (scope->body);
+	  length = scope->body.size ();
+	  body = scope->body.c_str ();
 
 	  /* Strip leading and trailing whitespace.  */
-	  while (length > 0 && ISSPACE (body[length-1]))
-	    body[--length] = '\0';
+	  while (length > 0 && ISSPACE (body[length - 1]))
+	    length--;
+	  scope->body.erase (length);
 	  while (*body && ISSPACE (*body))
 	    body++;
-
-	  scope_body = body;
 	}
 
       scope->element->end_handler (parser, scope->element, parser->user_data,
-				   scope_body);
+				   body);
     }
   else if (scope->element == NULL)
     XML_DefaultCurrent (parser->expat_parser);
@@ -726,23 +698,18 @@ gdb_xml_parse_attr_enum (struct gdb_xml_parser *parser,
 
 struct xinclude_parsing_data
 {
-  xinclude_parsing_data (xml_fetch_another fetcher_, void *fetcher_baton_,
+  xinclude_parsing_data (std::string &output_,
+			 xml_fetch_another fetcher_, void *fetcher_baton_,
 			 int include_depth_)
-    : skip_depth (0),
+    : output (output_),
+      skip_depth (0),
       include_depth (include_depth_),
       fetcher (fetcher_),
       fetcher_baton (fetcher_baton_)
-  {
-    obstack_init (&this->obstack);
-  }
+  {}
 
-  ~xinclude_parsing_data ()
-  {
-    obstack_free (&this->obstack, NULL);
-  }
-
-  /* The obstack to build the output in.  */
-  struct obstack obstack;
+  /* Where the output goes.  */
+  std::string &output;
 
   /* A count indicating whether we are in an element whose
      children should not be copied to the output, and if so,
@@ -782,14 +749,10 @@ xinclude_start_include (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Could not load XML document \"%s\""), href);
   back_to = make_cleanup (xfree, text);
 
-  output = xml_process_xincludes (parser->name, text, data->fetcher,
-				  data->fetcher_baton,
-				  data->include_depth + 1);
-  if (output == NULL)
+  if (!xml_process_xincludes (data->output, parser->name, text, data->fetcher,
+			      data->fetcher_baton,
+			      data->include_depth + 1))
     gdb_xml_error (parser, _("Parsing \"%s\" failed"), href);
-
-  obstack_grow (&data->obstack, output, strlen (output));
-  xfree (output);
 
   do_cleanups (back_to);
 
@@ -821,7 +784,7 @@ xml_xinclude_default (void *data_, const XML_Char *s, int len)
 
   /* Otherwise just add it to the end of the document we're building
      up.  */
-  obstack_grow (&data->obstack, s, len);
+  data->output.append (s, len);
 }
 
 static void XMLCALL
@@ -871,14 +834,13 @@ const struct gdb_xml_element xinclude_elements[] = {
 
 /* The main entry point for <xi:include> processing.  */
 
-char *
-xml_process_xincludes (const char *name, const char *text,
+bool
+xml_process_xincludes (std::string &result,
+		       const char *name, const char *text,
 		       xml_fetch_another fetcher, void *fetcher_baton,
 		       int depth)
 {
-  char *result = NULL;
-
-  xinclude_parsing_data data (fetcher, fetcher_baton, depth);
+  xinclude_parsing_data data (result, fetcher, fetcher_baton, depth);
 
   gdb_xml_parser parser (name, xinclude_elements, &data);
   parser.is_xinclude = true;
@@ -901,16 +863,12 @@ xml_process_xincludes (const char *name, const char *text,
 
   if (gdb_xml_parse (&parser, text) == 0)
     {
-      obstack_1grow (&data.obstack, '\0');
-      result = xstrdup ((const char *) obstack_finish (&data.obstack));
-
       if (depth == 0)
 	gdb_xml_debug (&parser, _("XInclude processing succeeded."));
+      return true;
     }
-  else
-    result = NULL;
 
-  return result;
+  return false;
 }
 #endif /* HAVE_LIBEXPAT */
 

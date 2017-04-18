@@ -54,17 +54,18 @@ extern const char *xml_builtin[][2];
 
 typedef char *(*xml_fetch_another) (const char *href, void *baton);
 
-/* Return a new string which is the expansion of TEXT after processing
-   <xi:include> tags.  FETCHER will be called (with FETCHER_BATON) to
-   retrieve any new files.  DEPTH should be zero on the initial call.
+/* Append the expansion of TEXT after processing <xi:include> tags in
+   RESULT.  FETCHER will be called (with FETCHER_BATON) to retrieve
+   any new files.  DEPTH should be zero on the initial call.
 
-   On failure, this function uses NAME in a warning and returns NULL.
+   On failure, this function uses NAME in a warning and returns false.
    It may throw an exception, but does not for XML parsing
    problems.  */
 
-char *xml_process_xincludes (const char *name, const char *text,
-			     xml_fetch_another fetcher, void *fetcher_baton,
-			     int depth);
+bool xml_process_xincludes (std::string &result,
+			    const char *name, const char *text,
+			    xml_fetch_another fetcher, void *fetcher_baton,
+			    int depth);
 
 /* Simplified XML parser infrastructure.  */
 
