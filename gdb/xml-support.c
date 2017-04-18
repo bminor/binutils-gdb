@@ -72,73 +72,156 @@ struct gdb_xml_parser
 		  void *user_data);
   ~gdb_xml_parser();
 
-  XML_Parser expat_parser;	/* The underlying expat parser.  */
+  /* Associate DTD_NAME, which must be the name of a compiled-in DTD,
+     with the parser.  */
+  void use_dtd (const char *dtd_name);
 
-  const char *name;		/* Name of this parser.  */
-  void *user_data;		/* The user's callback data, for handlers.  */
+  /* Return the name of the expected / default DTD, if specified.  */
+  const char *dtd_name ()
+  { return m_dtd_name; }
+
+  /* Invoke the parser on BUFFER.  BUFFER is the data to parse, which
+     should be NUL-terminated.
+
+     The return value is 0 for success or -1 for error.  It may throw,
+     but only if something unexpected goes wrong during parsing; parse
+     errors will be caught, warned about, and reported as failure.  */
+  int parse (const char *buffer);
+
+  /* Issue a debugging message.  */
+  void vdebug (const char *format, va_list ap)
+    ATTRIBUTE_PRINTF (2, 0);
+
+  /* Issue an error message, and stop parsing.  */
+  void verror (const char *format, va_list ap)
+    ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
+
+  void body_text (const XML_Char *text, int length);
+  void start_element (const XML_Char *name, const XML_Char **attrs);
+  void end_element (const XML_Char *name);
+
+  /* Return the name of this parser.  */
+  const char *name ()
+  { return m_name; }
+
+  /* Return the user's callback data, for handlers.  */
+  void *user_data ()
+  { return m_user_data; };
+
+  /* Are we the special <xi:include> parser?  */
+  void set_is_xinclude (bool is_xinclude)
+  { m_is_xinclude = is_xinclude; }
+
+  /* A thrown error, if any.  */
+  void set_error (gdb_exception error)
+  {
+    m_error = error;
+#ifdef HAVE_XML_STOPPARSER
+    XML_StopParser (m_expat_parser, XML_FALSE);
+#endif
+  }
+
+  /* Return the underlying expat parser.  */
+  XML_Parser expat_parser ()
+  { return m_expat_parser; }
+
+private:
+  /* The underlying expat parser.  */
+  XML_Parser m_expat_parser;
+
+  /* Name of this parser.  */
+  const char *m_name;
+
+  /* The user's callback data, for handlers.  */
+  void *m_user_data;
 
   /* Scoping stack.  */
-  std::vector<scope_level> scopes;
+  std::vector<scope_level> m_scopes;
 
-  struct gdb_exception error;	/* A thrown error, if any.  */
-  int last_line;		/* The line of the thrown error, or 0.  */
+/* A thrown error, if any.  */
+  struct gdb_exception m_error;
 
-  const char *dtd_name;		/* The name of the expected / default DTD,
-				   if specified.  */
-  bool is_xinclude;		/* Are we the special <xi:include> parser?  */
+  /* The line of the thrown error, or 0.  */
+  int m_last_line;
+
+  /* The name of the expected / default DTD, if specified.  */
+  const char *m_dtd_name;
+
+  /* Are we the special <xi:include> parser?  */
+  bool m_is_xinclude;
 };
 
 /* Process some body text.  We accumulate the text for later use; it's
    wrong to do anything with it immediately, because a single block of
    text might be broken up into multiple calls to this function.  */
 
+void
+gdb_xml_parser::body_text (const XML_Char *text, int length)
+{
+  if (m_error.reason < 0)
+    return;
+
+  scope_level &scope = m_scopes.back ();
+  scope.body.append (text, length);
+}
+
 static void
 gdb_xml_body_text (void *data, const XML_Char *text, int length)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
 
-  if (parser->error.reason < 0)
-    return;
-
-  scope_level &scope = parser->scopes.back ();
-  scope.body.append (text, length);
+  parser->body_text (text, length);
 }
 
 /* Issue a debugging message from one of PARSER's handlers.  */
 
 void
-gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
+gdb_xml_parser::vdebug (const char *format, va_list ap)
 {
-  int line = XML_GetCurrentLineNumber (parser->expat_parser);
-  va_list ap;
+  int line = XML_GetCurrentLineNumber (m_expat_parser);
   char *message;
 
-  if (!debug_xml)
-    return;
-
-  va_start (ap, format);
   message = xstrvprintf (format, ap);
   if (line)
     fprintf_unfiltered (gdb_stderr, "%s (line %d): %s\n",
-			parser->name, line, message);
+			m_name, line, message);
   else
     fprintf_unfiltered (gdb_stderr, "%s: %s\n",
-			parser->name, message);
+			m_name, message);
   xfree (message);
+}
+
+void
+gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
+{
+  if (!debug_xml)
+    return;
+
+  va_list ap;
+  va_start (ap, format);
+  parser->vdebug (format, ap);
+  va_end (ap);
 }
 
 /* Issue an error message from one of PARSER's handlers, and stop
    parsing.  */
 
 void
+gdb_xml_parser::verror (const char *format, va_list ap)
+{
+  int line = XML_GetCurrentLineNumber (m_expat_parser);
+
+  m_last_line = line;
+  throw_verror (XML_PARSE_ERROR, format, ap);
+}
+
+void
 gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
 {
-  int line = XML_GetCurrentLineNumber (parser->expat_parser);
   va_list ap;
-
-  parser->last_line = line;
   va_start (ap, format);
-  throw_verror (XML_PARSE_ERROR, format, ap);
+  parser->verror (format, ap);
+  va_end (ap);
 }
 
 /* Find the attribute named NAME in the set of parsed attributes
@@ -171,15 +254,16 @@ gdb_xml_values_cleanup (void *data)
   VEC_free (gdb_xml_value_s, *values);
 }
 
-/* Handle the start of an element.  DATA is our local XML parser, NAME
-   is the element, and ATTRS are the names and values of this
-   element's attributes.  */
+/* Handle the start of an element.  NAME is the element, and ATTRS are
+   the names and values of this element's attributes.  */
 
-static void
-gdb_xml_start_element (void *data, const XML_Char *name,
-		       const XML_Char **attrs)
+void
+gdb_xml_parser::start_element (const XML_Char *name,
+			       const XML_Char **attrs)
 {
-  struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
+  if (m_error.reason < 0)
+    return;
+
   const struct gdb_xml_element *element;
   const struct gdb_xml_attribute *attribute;
   VEC(gdb_xml_value_s) *attributes = NULL;
@@ -194,12 +278,12 @@ gdb_xml_start_element (void *data, const XML_Char *name,
      recursion unrolls all such elements will have been popped back
      already, but if one of those pushes reallocates the vector,
      previous element references will be invalidated.  */
-  parser->scopes.emplace_back ();
+  m_scopes.emplace_back ();
 
   /* Get a reference to the current scope.  */
-  scope_level &scope = parser->scopes[parser->scopes.size () - 2];
+  scope_level &scope = m_scopes[m_scopes.size () - 2];
 
-  gdb_xml_debug (parser, _("Entering element <%s>"), name);
+  gdb_xml_debug (this, _("Entering element <%s>"), name);
 
   /* Find this element in the list of the current scope's allowed
      children.  Record that we've seen it.  */
@@ -215,21 +299,21 @@ gdb_xml_start_element (void *data, const XML_Char *name,
       /* If we're working on XInclude, <xi:include> can be the child
 	 of absolutely anything.  Copy the previous scope's element
 	 list into the new scope even if there was no match.  */
-      if (parser->is_xinclude)
+      if (m_is_xinclude)
 	{
-	  XML_DefaultCurrent (parser->expat_parser);
+	  XML_DefaultCurrent (m_expat_parser);
 
-	  scope_level &unknown_scope = parser->scopes.back ();
+	  scope_level &unknown_scope = m_scopes.back ();
 	  unknown_scope.elements = scope.elements;
 	  return;
 	}
 
-      gdb_xml_debug (parser, _("Element <%s> unknown"), name);
+      gdb_xml_debug (this, _("Element <%s> unknown"), name);
       return;
     }
 
   if (!(element->flags & GDB_XML_EF_REPEATABLE) && (seen & scope.seen))
-    gdb_xml_error (parser, _("Element <%s> only expected once"), name);
+    gdb_xml_error (this, _("Element <%s> only expected once"), name);
 
   scope.seen |= seen;
 
@@ -253,14 +337,14 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 
       if (*p != NULL && val == NULL)
 	{
-	  gdb_xml_debug (parser, _("Attribute \"%s\" missing a value"),
+	  gdb_xml_debug (this, _("Attribute \"%s\" missing a value"),
 			 attribute->name);
 	  continue;
 	}
 
       if (*p == NULL && !(attribute->flags & GDB_XML_AF_OPTIONAL))
 	{
-	  gdb_xml_error (parser, _("Required attribute \"%s\" of "
+	  gdb_xml_error (this, _("Required attribute \"%s\" of "
 				   "<%s> not specified"),
 			 attribute->name, element->name);
 	  continue;
@@ -269,11 +353,11 @@ gdb_xml_start_element (void *data, const XML_Char *name,
       if (*p == NULL)
 	continue;
 
-      gdb_xml_debug (parser, _("Parsing attribute %s=\"%s\""),
+      gdb_xml_debug (this, _("Parsing attribute %s=\"%s\""),
 		     attribute->name, val);
 
       if (attribute->handler)
-	parsed_value = attribute->handler (parser, attribute, val);
+	parsed_value = attribute->handler (this, attribute, val);
       else
 	parsed_value = xstrdup (val);
 
@@ -296,19 +380,19 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 	      break;
 
 	  if (attribute == NULL || attribute->name == NULL)
-	    gdb_xml_debug (parser, _("Ignoring unknown attribute %s"), *p);
+	    gdb_xml_debug (this, _("Ignoring unknown attribute %s"), *p);
 	}
     }
 
   /* Call the element handler if there is one.  */
   if (element->start_handler)
-    element->start_handler (parser, element, parser->user_data, attributes);
+    element->start_handler (this, element, m_user_data, attributes);
 
   /* Fill in a new scope level.  Note that we must delay getting a
      back reference till here because above we might have recursed,
      which may have reallocated the vector which invalidates
      iterators/pointers/references.  */
-  scope_level &new_scope = parser->scopes.back ();
+  scope_level &new_scope = m_scopes.back ();
   new_scope.element = element;
   new_scope.elements = element->children;
 
@@ -324,41 +408,37 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
 
-  if (parser->error.reason < 0)
-    return;
-
   TRY
     {
-      gdb_xml_start_element (data, name, attrs);
+      parser->start_element (name, attrs);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
-      parser->error = ex;
-#ifdef HAVE_XML_STOPPARSER
-      XML_StopParser (parser->expat_parser, XML_FALSE);
-#endif
+      parser->set_error (ex);
     }
   END_CATCH
 }
 
-/* Handle the end of an element.  PARSER is our local XML parser, and
-   NAME is the current element.  */
+/* Handle the end of an element.  NAME is the current element.  */
 
-static void
-gdb_xml_end_element (gdb_xml_parser *parser, const XML_Char *name)
+void
+gdb_xml_parser::end_element (const XML_Char *name)
 {
-  struct scope_level *scope = &parser->scopes.back ();
+  if (m_error.reason < 0)
+    return;
+
+  struct scope_level *scope = &m_scopes.back ();
   const struct gdb_xml_element *element;
   unsigned int seen;
 
-  gdb_xml_debug (parser, _("Leaving element <%s>"), name);
+  gdb_xml_debug (this, _("Leaving element <%s>"), name);
 
   for (element = scope->elements, seen = 1;
        element != NULL && element->name != NULL;
        element++, seen <<= 1)
     if ((scope->seen & seen) == 0
 	&& (element->flags & GDB_XML_EF_OPTIONAL) == 0)
-      gdb_xml_error (parser, _("Required element <%s> is missing"),
+      gdb_xml_error (this, _("Required element <%s> is missing"),
 		     element->name);
 
   /* Call the element processor.  */
@@ -383,14 +463,14 @@ gdb_xml_end_element (gdb_xml_parser *parser, const XML_Char *name)
 	    body++;
 	}
 
-      scope->element->end_handler (parser, scope->element, parser->user_data,
-				   body);
+      scope->element->end_handler (this, scope->element,
+				   m_user_data, body);
     }
   else if (scope->element == NULL)
-    XML_DefaultCurrent (parser->expat_parser);
+    XML_DefaultCurrent (m_expat_parser);
 
   /* Pop the scope level.  */
-  parser->scopes.pop_back ();
+  m_scopes.pop_back ();
 }
 
 /* Wrapper for gdb_xml_end_element, to prevent throwing exceptions
@@ -401,19 +481,13 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
 
-  if (parser->error.reason < 0)
-    return;
-
   TRY
     {
-      gdb_xml_end_element (parser, name);
+      parser->end_element (name);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
-      parser->error = ex;
-#ifdef HAVE_XML_STOPPARSER
-      XML_StopParser (parser->expat_parser, XML_FALSE);
-#endif
+      parser->set_error (ex);
     }
   END_CATCH
 }
@@ -422,34 +496,34 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
 
 gdb_xml_parser::~gdb_xml_parser ()
 {
-  XML_ParserFree (this->expat_parser);
+  XML_ParserFree (m_expat_parser);
 }
 
 /* Initialize a parser.  */
 
-gdb_xml_parser::gdb_xml_parser (const char *name_,
+gdb_xml_parser::gdb_xml_parser (const char *name,
 				const gdb_xml_element *elements,
-				void *user_data_)
-  : name (name_),
-    user_data (user_data_),
-    error (exception_none),
-    last_line (0),
-    dtd_name (NULL),
-    is_xinclude (false)
+				void *user_data)
+  : m_name (name),
+    m_user_data (user_data),
+    m_error (exception_none),
+    m_last_line (0),
+    m_dtd_name (NULL),
+    m_is_xinclude (false)
 {
-  this->expat_parser = XML_ParserCreateNS (NULL, '!');
-  if (this->expat_parser == NULL)
+  m_expat_parser = XML_ParserCreateNS (NULL, '!');
+  if (m_expat_parser == NULL)
     malloc_failure (0);
 
-  XML_SetUserData (this->expat_parser, this);
+  XML_SetUserData (m_expat_parser, this);
 
   /* Set the callbacks.  */
-  XML_SetElementHandler (this->expat_parser, gdb_xml_start_element_wrapper,
+  XML_SetElementHandler (m_expat_parser, gdb_xml_start_element_wrapper,
 			 gdb_xml_end_element_wrapper);
-  XML_SetCharacterDataHandler (this->expat_parser, gdb_xml_body_text);
+  XML_SetCharacterDataHandler (m_expat_parser, gdb_xml_body_text);
 
   /* Initialize the outer scope.  */
-  this->scopes.emplace_back (elements);
+  m_scopes.emplace_back (elements);
 }
 
 /* External entity handler.  The only external entities we support
@@ -463,19 +537,20 @@ gdb_xml_fetch_external_entity (XML_Parser expat_parser,
 			       const XML_Char *systemId,
 			       const XML_Char *publicId)
 {
-  struct gdb_xml_parser *parser
-    = (struct gdb_xml_parser *) XML_GetUserData (expat_parser);
   XML_Parser entity_parser;
   const char *text;
   enum XML_Status status;
 
   if (systemId == NULL)
     {
-      text = fetch_xml_builtin (parser->dtd_name);
+      gdb_xml_parser *parser
+	= (gdb_xml_parser *) XML_GetUserData (expat_parser);
+
+      text = fetch_xml_builtin (parser->dtd_name ());
       if (text == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("could not locate built-in DTD %s"),
-			parser->dtd_name);
+			parser->dtd_name ());
     }
   else
     {
@@ -484,7 +559,8 @@ gdb_xml_fetch_external_entity (XML_Parser expat_parser,
 	return XML_STATUS_ERROR;
     }
 
-  entity_parser = XML_ExternalEntityParserCreate (expat_parser, context, NULL);
+  entity_parser = XML_ExternalEntityParserCreate (expat_parser,
+						  context, NULL);
 
   /* Don't use our handlers for the contents of the DTD.  Just let expat
      process it.  */
@@ -500,23 +576,20 @@ gdb_xml_fetch_external_entity (XML_Parser expat_parser,
   return status;
 }
 
-/* Associate DTD_NAME, which must be the name of a compiled-in DTD,
-   with PARSER.  */
-
 void
-gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name)
+gdb_xml_parser::use_dtd (const char *dtd_name)
 {
   enum XML_Error err;
 
-  parser->dtd_name = dtd_name;
+  m_dtd_name = dtd_name;
 
-  XML_SetParamEntityParsing (parser->expat_parser,
+  XML_SetParamEntityParsing (m_expat_parser,
 			     XML_PARAM_ENTITY_PARSING_UNLESS_STANDALONE);
-  XML_SetExternalEntityRefHandler (parser->expat_parser,
+  XML_SetExternalEntityRefHandler (m_expat_parser,
 				   gdb_xml_fetch_external_entity);
 
   /* Even if no DTD is provided, use the built-in DTD anyway.  */
-  err = XML_UseForeignDTD (parser->expat_parser, XML_TRUE);
+  err = XML_UseForeignDTD (m_expat_parser, XML_TRUE);
   if (err != XML_ERROR_NONE)
     internal_error (__FILE__, __LINE__,
 		    _("XML_UseForeignDTD failed: %s"),
@@ -531,41 +604,41 @@ gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name)
    errors will be caught, warned about, and reported as failure.  */
 
 int
-gdb_xml_parse (struct gdb_xml_parser *parser, const char *buffer)
+gdb_xml_parser::parse (const char *buffer)
 {
   enum XML_Status status;
   const char *error_string;
 
-  gdb_xml_debug (parser, _("Starting:\n%s"), buffer);
+  gdb_xml_debug (this, _("Starting:\n%s"), buffer);
 
-  status = XML_Parse (parser->expat_parser, buffer, strlen (buffer), 1);
+  status = XML_Parse (m_expat_parser, buffer, strlen (buffer), 1);
 
-  if (status == XML_STATUS_OK && parser->error.reason == 0)
+  if (status == XML_STATUS_OK && m_error.reason == 0)
     return 0;
 
-  if (parser->error.reason == RETURN_ERROR
-      && parser->error.error == XML_PARSE_ERROR)
+  if (m_error.reason == RETURN_ERROR
+      && m_error.error == XML_PARSE_ERROR)
     {
-      gdb_assert (parser->error.message != NULL);
-      error_string = parser->error.message;
+      gdb_assert (m_error.message != NULL);
+      error_string = m_error.message;
     }
   else if (status == XML_STATUS_ERROR)
     {
-      enum XML_Error err = XML_GetErrorCode (parser->expat_parser);
+      enum XML_Error err = XML_GetErrorCode (m_expat_parser);
 
       error_string = XML_ErrorString (err);
     }
   else
     {
-      gdb_assert (parser->error.reason < 0);
-      throw_exception (parser->error);
+      gdb_assert (m_error.reason < 0);
+      throw_exception (m_error);
     }
 
-  if (parser->last_line != 0)
-    warning (_("while parsing %s (at line %d): %s"), parser->name,
-	     parser->last_line, error_string);
+  if (m_last_line != 0)
+    warning (_("while parsing %s (at line %d): %s"), m_name,
+	     m_last_line, error_string);
   else
-    warning (_("while parsing %s: %s"), parser->name, error_string);
+    warning (_("while parsing %s: %s"), m_name, error_string);
 
   return -1;
 }
@@ -577,8 +650,8 @@ gdb_xml_parse_quick (const char *name, const char *dtd_name,
 {
   gdb_xml_parser parser (name, elements, user_data);
   if (dtd_name != NULL)
-    gdb_xml_use_dtd (&parser, dtd_name);
-  return gdb_xml_parse (&parser, document);
+    parser.use_dtd (dtd_name);
+  return parser.parse (document);
 }
 
 /* Parse a field VALSTR that we expect to contain an integer value.
@@ -749,7 +822,8 @@ xinclude_start_include (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Could not load XML document \"%s\""), href);
   back_to = make_cleanup (xfree, text);
 
-  if (!xml_process_xincludes (data->output, parser->name, text, data->fetcher,
+  if (!xml_process_xincludes (data->output, parser->name (),
+			      text, data->fetcher,
 			      data->fetcher_baton,
 			      data->include_depth + 1))
     gdb_xml_error (parser, _("Parsing \"%s\" failed"), href);
@@ -774,8 +848,7 @@ static void XMLCALL
 xml_xinclude_default (void *data_, const XML_Char *s, int len)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data_;
-  struct xinclude_parsing_data *data
-    = (struct xinclude_parsing_data *) parser->user_data;
+  xinclude_parsing_data *data = (xinclude_parsing_data *) parser->user_data ();
 
   /* If we are inside of e.g. xi:include or the DTD, don't save this
      string.  */
@@ -793,8 +866,7 @@ xml_xinclude_start_doctype (void *data_, const XML_Char *doctypeName,
 			    int has_internal_subset)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data_;
-  struct xinclude_parsing_data *data
-    = (struct xinclude_parsing_data *) parser->user_data;
+  xinclude_parsing_data *data = (xinclude_parsing_data *) parser->user_data ();
 
   /* Don't print out the doctype, or the contents of the DTD internal
      subset, if any.  */
@@ -805,8 +877,7 @@ static void XMLCALL
 xml_xinclude_end_doctype (void *data_)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data_;
-  struct xinclude_parsing_data *data
-    = (struct xinclude_parsing_data *) parser->user_data;
+  xinclude_parsing_data *data = (xinclude_parsing_data *) parser->user_data ();
 
   data->skip_depth--;
 }
@@ -843,25 +914,25 @@ xml_process_xincludes (std::string &result,
   xinclude_parsing_data data (result, fetcher, fetcher_baton, depth);
 
   gdb_xml_parser parser (name, xinclude_elements, &data);
-  parser.is_xinclude = true;
+  parser.set_is_xinclude (true);
 
-  XML_SetCharacterDataHandler (parser.expat_parser, NULL);
-  XML_SetDefaultHandler (parser.expat_parser, xml_xinclude_default);
+  XML_SetCharacterDataHandler (parser.expat_parser (), NULL);
+  XML_SetDefaultHandler (parser.expat_parser (), xml_xinclude_default);
 
   /* Always discard the XML version declarations; the only important
      thing this provides is encoding, and our result will have been
      converted to UTF-8.  */
-  XML_SetXmlDeclHandler (parser.expat_parser, xml_xinclude_xml_decl);
+  XML_SetXmlDeclHandler (parser.expat_parser (), xml_xinclude_xml_decl);
 
   if (depth > 0)
     /* Discard the doctype for included documents.  */
-    XML_SetDoctypeDeclHandler (parser.expat_parser,
+    XML_SetDoctypeDeclHandler (parser.expat_parser (),
 			       xml_xinclude_start_doctype,
 			       xml_xinclude_end_doctype);
 
-  gdb_xml_use_dtd (&parser, "xinclude.dtd");
+  parser.use_dtd ("xinclude.dtd");
 
-  if (gdb_xml_parse (&parser, text) == 0)
+  if (parser.parse (text) == 0)
     {
       if (depth == 0)
 	gdb_xml_debug (&parser, _("XInclude processing succeeded."));

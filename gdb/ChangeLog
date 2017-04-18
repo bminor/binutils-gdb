@@ -1,5 +1,39 @@
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
+	* xml-support.c (gdb_xml_parser) <use_dtd, dtd_name, parse,
+	vdebug, verror, body_text, start_element, end_element, name,
+	user_data, set_is_xinclude, set_error, expat_parser>: New methods.
+	<name, user_data, expat_parser, scopes, error, last_line, dtd_name,
+	is_xinclude>: Make private and add m_ prefix.
+	(gdb_xml_parser::body_text): New method, based on ...
+	(gdb_xml_body_text): ... this.  Adjust.
+	(gdb_xml_parser::vdebug): New method, based on ...
+	(gdb_xml_debug): ... this.  Adjust.
+	(gdb_xml_parser::verror): New method, based on ...
+	(gdb_xml_error): ... this.  Adjust.
+	(gdb_xml_parser::start_element): New method, based on ...
+	(gdb_xml_start_element): ... this.  Adjust.
+	(gdb_xml_start_element_wrapper): Defer to
+	gdb_xml_parser::start_element and gdb_xml_parser::set_error.
+	(gdb_xml_parser::end_element): New method, based on ...
+	(gdb_xml_end_element_wrapper): ... this.  Adjust.
+	(gdb_xml_parser::~gdb_xml_parser): Adjust.
+	(gdb_xml_parser::gdb_xml_parser): Adjust to field renames.
+	(gdb_xml_parser::use_dtd): New method, based on ...
+	(gdb_xml_use_dtd): ... this.  Adjust.
+	(gdb_xml_parser::parse): New method, based on ...
+	(gdb_xml_parse): ... this.  Adjust.
+	(gdb_xml_parse_quick): Adjust to call the parser's parse method.
+	(xinclude_start_include): Adjust to call the parser's name method.
+	(xml_xinclude_default, xml_xinclude_start_doctype)
+	(xml_xinclude_end_doctype): Adjust to call the parser's user_data
+	method.
+	(xml_process_xincludes): Adjust to call parser methods.
+	* xml-support.h (gdb_xml_use_dtd, gdb_xml_parse): Delete
+	declarations.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
 	* tracefile-tfile.c (tfile_write_tdesc): Adjust to use
 	gdb::optional<std::string>.
 	* xml-support.c: Include <string>.

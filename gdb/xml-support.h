@@ -172,20 +172,6 @@ struct gdb_xml_element
   gdb_xml_element_end_handler *end_handler;
 };
 
-/* Associate DTD_NAME, which must be the name of a compiled-in DTD,
-   with PARSER.  */
-
-void gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name);
-
-/* Invoke PARSER on BUFFER.  BUFFER is the data to parse, which
-   should be NUL-terminated.
-
-   The return value is 0 for success or -1 for error.  It may throw,
-   but only if something unexpected goes wrong during parsing; parse
-   errors will be caught, warned about, and reported as failure.  */
-
-int gdb_xml_parse (struct gdb_xml_parser *parser, const char *buffer);
-
 /* Parse a XML document.  DOCUMENT is the data to parse, which should
    be NUL-terminated. If non-NULL, use the compiled-in DTD named
    DTD_NAME to drive the parsing.
