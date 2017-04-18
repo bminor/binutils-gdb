@@ -1,5 +1,15 @@
 2017-05-23  John Baldwin  <jhb@FreeBSD.org>
 
+	* mips-fbsd-tdep.c (MIPS_PC_REGNUM): Remove.
+	(MIPS_FP0_REGNUM): Remove.
+	(MIPS_FSR_REGNUM): Remove.
+	(mips_fbsd_supply_fpregs): Use mips_regnum.
+	(mips_fbsd_supply_gregs): Likewise.
+	(mips_fbsd_collect_fpregs): Likewise.
+	(mips_fbsd_collect_gregs): Likewise.
+
+2017-05-23  John Baldwin  <jhb@FreeBSD.org>
+
 	* mips-fbsd-nat.c (getregs_supplies): Fix upper bound comparison.
 	(getpfpregs_supplies): New function.
 	(mips_fbsd_fetch_inferior_registers): Remove early exit and use
