@@ -1,3 +1,11 @@
+2017-04-18  John Baldwin  <jhb@FreeBSD.org>
+
+	PR threads/20743
+	* fbsd-nat.c (resume_one_thread_cb): Remove.
+	(resume_all_threads_cb): Remove.
+	(fbsd_resume): Use ALL_NON_EXITED_THREADS instead of
+	iterate_over_threads.
+
 2017-04-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.
