@@ -1,3 +1,22 @@
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (gdb_xml_parser): Add ctor/dtor.  Make is_xinclude
+	a bool.
+	(gdb_xml_end_element): Change type of first parameter.
+	(gdb_xml_cleanup): Rename to ...
+	(gdb_xml_parser::~gdb_xml_parser): ... this.
+	(gdb_xml_create_parser_and_cleanup): Delete with ...
+	(gdb_xml_parser::gdb_xml_parser): ... creation parts factored out
+	to this new ctor.
+	(gdb_xml_parse_quick): Create a local gdb_xml_parser instead of
+	using gdb_xml_create_parser_and_cleanup.
+	(xinclude_parsing_data): Add ctor/dtor.
+	(xml_xinclude_cleanup): Delete.
+	(xml_process_xincludes): Create a local xinclude_parsing_data
+	instead of heap-allocating one.  Create a local gdb_xml_parser
+	instead of heap-allocating one with
+	gdb_xml_create_parser_and_cleanup.
+
 2017-04-18  John Baldwin  <jhb@FreeBSD.org>
 
 	PR threads/20743

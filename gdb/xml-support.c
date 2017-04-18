@@ -61,6 +61,11 @@ DEF_VEC_O(scope_level_s);
 /* The parser itself, and our additional state.  */
 struct gdb_xml_parser
 {
+  gdb_xml_parser (const char *name,
+		  const gdb_xml_element *elements,
+		  void *user_data);
+  ~gdb_xml_parser();
+
   XML_Parser expat_parser;	/* The underlying expat parser.  */
 
   const char *name;		/* Name of this parser.  */
@@ -73,7 +78,7 @@ struct gdb_xml_parser
 
   const char *dtd_name;		/* The name of the expected / default DTD,
 				   if specified.  */
-  int is_xinclude;		/* Are we the special <xi:include> parser?  */
+  bool is_xinclude;		/* Are we the special <xi:include> parser?  */
 };
 
 /* Process some body text.  We accumulate the text for later use; it's
@@ -331,13 +336,12 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
   END_CATCH
 }
 
-/* Handle the end of an element.  DATA is our local XML parser, and
+/* Handle the end of an element.  PARSER is our local XML parser, and
    NAME is the current element.  */
 
 static void
-gdb_xml_end_element (void *data, const XML_Char *name)
+gdb_xml_end_element (gdb_xml_parser *parser, const XML_Char *name)
 {
-  struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
   struct scope_level *scope = VEC_last (scope_level_s, parser->scopes);
   const struct gdb_xml_element *element;
   unsigned int seen;
@@ -404,7 +408,7 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
 
   TRY
     {
-      gdb_xml_end_element (data, name);
+      gdb_xml_end_element (parser, name);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
@@ -418,66 +422,52 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
 
 /* Free a parser and all its associated state.  */
 
-static void
-gdb_xml_cleanup (void *arg)
+gdb_xml_parser::~gdb_xml_parser ()
 {
-  struct gdb_xml_parser *parser = (struct gdb_xml_parser *) arg;
   struct scope_level *scope;
   int ix;
 
-  XML_ParserFree (parser->expat_parser);
+  XML_ParserFree (this->expat_parser);
 
   /* Clean up the scopes.  */
-  for (ix = 0; VEC_iterate (scope_level_s, parser->scopes, ix, scope); ix++)
+  for (ix = 0; VEC_iterate (scope_level_s, this->scopes, ix, scope); ix++)
     if (scope->body)
       {
 	obstack_free (scope->body, NULL);
 	xfree (scope->body);
       }
-  VEC_free (scope_level_s, parser->scopes);
-
-  xfree (parser);
+  VEC_free (scope_level_s, this->scopes);
 }
 
-/* Initialize a parser and store it to *PARSER_RESULT.  Register a
-   cleanup to destroy the parser.  */
+/* Initialize a parser.  */
 
-static struct cleanup *
-gdb_xml_create_parser_and_cleanup (const char *name,
-				   const struct gdb_xml_element *elements,
-				   void *user_data,
-				   struct gdb_xml_parser **parser_result)
+gdb_xml_parser::gdb_xml_parser (const char *name_,
+				const gdb_xml_element *elements,
+				void *user_data_)
+  : name (name_),
+    user_data (user_data_),
+    scopes (NULL),
+    error (exception_none),
+    last_line (0),
+    dtd_name (NULL),
+    is_xinclude (false)
 {
-  struct gdb_xml_parser *parser;
-  struct scope_level start_scope;
-  struct cleanup *result;
+  this->expat_parser = XML_ParserCreateNS (NULL, '!');
+  if (this->expat_parser == NULL)
+    malloc_failure (0);
 
-  /* Initialize the parser.  */
-  parser = XCNEW (struct gdb_xml_parser);
-  parser->expat_parser = XML_ParserCreateNS (NULL, '!');
-  if (parser->expat_parser == NULL)
-    {
-      xfree (parser);
-      malloc_failure (0);
-    }
-
-  parser->name = name;
-
-  parser->user_data = user_data;
-  XML_SetUserData (parser->expat_parser, parser);
+  XML_SetUserData (this->expat_parser, this);
 
   /* Set the callbacks.  */
-  XML_SetElementHandler (parser->expat_parser, gdb_xml_start_element_wrapper,
+  XML_SetElementHandler (this->expat_parser, gdb_xml_start_element_wrapper,
 			 gdb_xml_end_element_wrapper);
-  XML_SetCharacterDataHandler (parser->expat_parser, gdb_xml_body_text);
+  XML_SetCharacterDataHandler (this->expat_parser, gdb_xml_body_text);
 
   /* Initialize the outer scope.  */
+  scope_level start_scope;
   memset (&start_scope, 0, sizeof (start_scope));
   start_scope.elements = elements;
-  VEC_safe_push (scope_level_s, parser->scopes, &start_scope);
-
-  *parser_result = parser;
-  return make_cleanup (gdb_xml_cleanup, parser);
+  VEC_safe_push (scope_level_s, this->scopes, &start_scope);
 }
 
 /* External entity handler.  The only external entities we support
@@ -603,19 +593,10 @@ gdb_xml_parse_quick (const char *name, const char *dtd_name,
 		     const struct gdb_xml_element *elements,
 		     const char *document, void *user_data)
 {
-  struct gdb_xml_parser *parser;
-  struct cleanup *back_to;
-  int result;
-
-  back_to = gdb_xml_create_parser_and_cleanup (name, elements,
-					       user_data, &parser);
+  gdb_xml_parser parser (name, elements, user_data);
   if (dtd_name != NULL)
-    gdb_xml_use_dtd (parser, dtd_name);
-  result = gdb_xml_parse (parser, document);
-
-  do_cleanups (back_to);
-
-  return result;
+    gdb_xml_use_dtd (&parser, dtd_name);
+  return gdb_xml_parse (&parser, document);
 }
 
 /* Parse a field VALSTR that we expect to contain an integer value.
@@ -735,6 +716,21 @@ gdb_xml_parse_attr_enum (struct gdb_xml_parser *parser,
 
 struct xinclude_parsing_data
 {
+  xinclude_parsing_data (xml_fetch_another fetcher_, void *fetcher_baton_,
+			 int include_depth_)
+    : skip_depth (0),
+      include_depth (include_depth_),
+      fetcher (fetcher_),
+      fetcher_baton (fetcher_baton_)
+  {
+    obstack_init (&this->obstack);
+  }
+
+  ~xinclude_parsing_data ()
+  {
+    obstack_free (&this->obstack, NULL);
+  }
+
   /* The obstack to build the output in.  */
   struct obstack obstack;
 
@@ -851,15 +847,6 @@ xml_xinclude_xml_decl (void *data_, const XML_Char *version,
      output.  */
 }
 
-static void
-xml_xinclude_cleanup (void *data_)
-{
-  struct xinclude_parsing_data *data = (struct xinclude_parsing_data *) data_;
-
-  obstack_free (&data->obstack, NULL);
-  xfree (data);
-}
-
 const struct gdb_xml_attribute xinclude_attributes[] = {
   { "href", GDB_XML_AF_NONE, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
@@ -879,51 +866,40 @@ xml_process_xincludes (const char *name, const char *text,
 		       xml_fetch_another fetcher, void *fetcher_baton,
 		       int depth)
 {
-  struct gdb_xml_parser *parser;
-  struct xinclude_parsing_data *data;
-  struct cleanup *back_to;
   char *result = NULL;
 
-  data = XCNEW (struct xinclude_parsing_data);
-  obstack_init (&data->obstack);
-  back_to = make_cleanup (xml_xinclude_cleanup, data);
+  xinclude_parsing_data data (fetcher, fetcher_baton, depth);
 
-  gdb_xml_create_parser_and_cleanup (name, xinclude_elements,
-				     data, &parser);
-  parser->is_xinclude = 1;
+  gdb_xml_parser parser (name, xinclude_elements, &data);
+  parser.is_xinclude = true;
 
-  data->include_depth = depth;
-  data->fetcher = fetcher;
-  data->fetcher_baton = fetcher_baton;
-
-  XML_SetCharacterDataHandler (parser->expat_parser, NULL);
-  XML_SetDefaultHandler (parser->expat_parser, xml_xinclude_default);
+  XML_SetCharacterDataHandler (parser.expat_parser, NULL);
+  XML_SetDefaultHandler (parser.expat_parser, xml_xinclude_default);
 
   /* Always discard the XML version declarations; the only important
      thing this provides is encoding, and our result will have been
      converted to UTF-8.  */
-  XML_SetXmlDeclHandler (parser->expat_parser, xml_xinclude_xml_decl);
+  XML_SetXmlDeclHandler (parser.expat_parser, xml_xinclude_xml_decl);
 
   if (depth > 0)
     /* Discard the doctype for included documents.  */
-    XML_SetDoctypeDeclHandler (parser->expat_parser,
+    XML_SetDoctypeDeclHandler (parser.expat_parser,
 			       xml_xinclude_start_doctype,
 			       xml_xinclude_end_doctype);
 
-  gdb_xml_use_dtd (parser, "xinclude.dtd");
+  gdb_xml_use_dtd (&parser, "xinclude.dtd");
 
-  if (gdb_xml_parse (parser, text) == 0)
+  if (gdb_xml_parse (&parser, text) == 0)
     {
-      obstack_1grow (&data->obstack, '\0');
-      result = xstrdup ((const char *) obstack_finish (&data->obstack));
+      obstack_1grow (&data.obstack, '\0');
+      result = xstrdup ((const char *) obstack_finish (&data.obstack));
 
       if (depth == 0)
-	gdb_xml_debug (parser, _("XInclude processing succeeded."));
+	gdb_xml_debug (&parser, _("XInclude processing succeeded."));
     }
   else
     result = NULL;
 
-  do_cleanups (back_to);
   return result;
 }
 #endif /* HAVE_LIBEXPAT */
