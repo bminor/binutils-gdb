@@ -22,6 +22,7 @@
 #include "xml-support.h"
 #include "filestuff.h"
 #include "safe-ctype.h"
+#include <vector>
 
 /* Debugging flag.  */
 static int debug_xml;
@@ -42,6 +43,32 @@ static int debug_xml;
    nesting.  */
 struct scope_level
 {
+  explicit scope_level (const gdb_xml_element *elements_ = NULL)
+    : elements (elements_),
+      element (NULL),
+      seen (0),
+      body (NULL)
+  {}
+
+  scope_level (scope_level &&other) noexcept
+    : elements (other.elements),
+      element (other.element),
+      seen (other.seen),
+      body (other.body)
+  {
+    if (this != &other)
+      other.body = NULL;
+  }
+
+  ~scope_level ()
+  {
+    if (this->body)
+      {
+	obstack_free (this->body, NULL);
+	xfree (this->body);
+      }
+  }
+
   /* Elements we allow at this level.  */
   const struct gdb_xml_element *elements;
 
@@ -52,11 +79,9 @@ struct scope_level
      optional and repeatable checking).  */
   unsigned int seen;
 
-  /* Body text accumulation.  */
+  /* Body text accumulation.  This is an owning pointer.  */
   struct obstack *body;
 };
-typedef struct scope_level scope_level_s;
-DEF_VEC_O(scope_level_s);
 
 /* The parser itself, and our additional state.  */
 struct gdb_xml_parser
@@ -71,7 +96,8 @@ struct gdb_xml_parser
   const char *name;		/* Name of this parser.  */
   void *user_data;		/* The user's callback data, for handlers.  */
 
-  VEC(scope_level_s) *scopes;	/* Scoping stack.  */
+  /* Scoping stack.  */
+  std::vector<scope_level> scopes;
 
   struct gdb_exception error;	/* A thrown error, if any.  */
   int last_line;		/* The line of the thrown error, or 0.  */
@@ -89,18 +115,19 @@ static void
 gdb_xml_body_text (void *data, const XML_Char *text, int length)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
-  struct scope_level *scope = VEC_last (scope_level_s, parser->scopes);
 
   if (parser->error.reason < 0)
     return;
 
-  if (scope->body == NULL)
+  scope_level &scope = parser->scopes.back ();
+
+  if (scope.body == NULL)
     {
-      scope->body = XCNEW (struct obstack);
-      obstack_init (scope->body);
+      scope.body = XCNEW (struct obstack);
+      obstack_init (scope.body);
     }
 
-  obstack_grow (scope->body, text, length);
+  obstack_grow (scope.body, text, length);
 }
 
 /* Issue a debugging message from one of PARSER's handlers.  */
@@ -179,8 +206,6 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 		       const XML_Char **attrs)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
-  struct scope_level *scope;
-  struct scope_level new_scope;
   const struct gdb_xml_element *element;
   const struct gdb_xml_attribute *attribute;
   VEC(gdb_xml_value_s) *attributes = NULL;
@@ -189,11 +214,16 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 
   /* Push an error scope.  If we return or throw an exception before
      filling this in, it will tell us to ignore children of this
-     element.  */
-  VEC_reserve (scope_level_s, parser->scopes, 1);
-  scope = VEC_last (scope_level_s, parser->scopes);
-  memset (&new_scope, 0, sizeof (new_scope));
-  VEC_quick_push (scope_level_s, parser->scopes, &new_scope);
+     element.  Note we don't take a reference to the element yet
+     because further below we'll process the element which may recurse
+     back here and push more elements to the vector.  When the
+     recursion unrolls all such elements will have been popped back
+     already, but if one of those pushes reallocates the vector,
+     previous element references will be invalidated.  */
+  parser->scopes.emplace_back ();
+
+  /* Get a reference to the current scope.  */
+  scope_level &scope = parser->scopes[parser->scopes.size () - 2];
 
   gdb_xml_debug (parser, _("Entering element <%s>"), name);
 
@@ -201,7 +231,7 @@ gdb_xml_start_element (void *data, const XML_Char *name,
      children.  Record that we've seen it.  */
 
   seen = 1;
-  for (element = scope->elements; element && element->name;
+  for (element = scope.elements; element && element->name;
        element++, seen <<= 1)
     if (strcmp (element->name, name) == 0)
       break;
@@ -213,12 +243,10 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 	 list into the new scope even if there was no match.  */
       if (parser->is_xinclude)
 	{
-	  struct scope_level *unknown_scope;
-
 	  XML_DefaultCurrent (parser->expat_parser);
 
-	  unknown_scope = VEC_last (scope_level_s, parser->scopes);
-	  unknown_scope->elements = scope->elements;
+	  scope_level &unknown_scope = parser->scopes.back ();
+	  unknown_scope.elements = scope.elements;
 	  return;
 	}
 
@@ -226,10 +254,10 @@ gdb_xml_start_element (void *data, const XML_Char *name,
       return;
     }
 
-  if (!(element->flags & GDB_XML_EF_REPEATABLE) && (seen & scope->seen))
+  if (!(element->flags & GDB_XML_EF_REPEATABLE) && (seen & scope.seen))
     gdb_xml_error (parser, _("Element <%s> only expected once"), name);
 
-  scope->seen |= seen;
+  scope.seen |= seen;
 
   back_to = make_cleanup (gdb_xml_values_cleanup, &attributes);
 
@@ -302,10 +330,13 @@ gdb_xml_start_element (void *data, const XML_Char *name,
   if (element->start_handler)
     element->start_handler (parser, element, parser->user_data, attributes);
 
-  /* Fill in a new scope level.  */
-  scope = VEC_last (scope_level_s, parser->scopes);
-  scope->element = element;
-  scope->elements = element->children;
+  /* Fill in a new scope level.  Note that we must delay getting a
+     back reference till here because above we might have recursed,
+     which may have reallocated the vector which invalidates
+     iterators/pointers/references.  */
+  scope_level &new_scope = parser->scopes.back ();
+  new_scope.element = element;
+  new_scope.elements = element->children;
 
   do_cleanups (back_to);
 }
@@ -342,7 +373,7 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
 static void
 gdb_xml_end_element (gdb_xml_parser *parser, const XML_Char *name)
 {
-  struct scope_level *scope = VEC_last (scope_level_s, parser->scopes);
+  struct scope_level *scope = &parser->scopes.back ();
   const struct gdb_xml_element *element;
   unsigned int seen;
 
@@ -387,12 +418,7 @@ gdb_xml_end_element (gdb_xml_parser *parser, const XML_Char *name)
     XML_DefaultCurrent (parser->expat_parser);
 
   /* Pop the scope level.  */
-  if (scope->body)
-    {
-      obstack_free (scope->body, NULL);
-      xfree (scope->body);
-    }
-  VEC_pop (scope_level_s, parser->scopes);
+  parser->scopes.pop_back ();
 }
 
 /* Wrapper for gdb_xml_end_element, to prevent throwing exceptions
@@ -424,19 +450,7 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
 
 gdb_xml_parser::~gdb_xml_parser ()
 {
-  struct scope_level *scope;
-  int ix;
-
   XML_ParserFree (this->expat_parser);
-
-  /* Clean up the scopes.  */
-  for (ix = 0; VEC_iterate (scope_level_s, this->scopes, ix, scope); ix++)
-    if (scope->body)
-      {
-	obstack_free (scope->body, NULL);
-	xfree (scope->body);
-      }
-  VEC_free (scope_level_s, this->scopes);
 }
 
 /* Initialize a parser.  */
@@ -446,7 +460,6 @@ gdb_xml_parser::gdb_xml_parser (const char *name_,
 				void *user_data_)
   : name (name_),
     user_data (user_data_),
-    scopes (NULL),
     error (exception_none),
     last_line (0),
     dtd_name (NULL),
@@ -464,10 +477,7 @@ gdb_xml_parser::gdb_xml_parser (const char *name_,
   XML_SetCharacterDataHandler (this->expat_parser, gdb_xml_body_text);
 
   /* Initialize the outer scope.  */
-  scope_level start_scope;
-  memset (&start_scope, 0, sizeof (start_scope));
-  start_scope.elements = elements;
-  VEC_safe_push (scope_level_s, this->scopes, &start_scope);
+  this->scopes.emplace_back (elements);
 }
 
 /* External entity handler.  The only external entities we support

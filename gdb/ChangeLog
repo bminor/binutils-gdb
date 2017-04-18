@@ -1,5 +1,20 @@
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
+	* xml-support.c: Include <vector>.
+	(scope_level::scope_level(const gdb_xml_element *))
+	(scope_level::scope_level(scope_level&&)): New.
+	(scope_level::~scope_level): New.
+	(scope_level_s): Delete.
+	(gdb_xml_parser::scopes): Now a std::vector.
+	(gdb_xml_body_text, gdb_xml_start_element, gdb_xml_end_element):
+	Use std::vector.
+	(gdb_xml_parser::~gdb_xml_parser): Remove now unnecessary
+	scope cleanup code.
+	(gdb_xml_parser::gdb_xml_parser): Remove explicit initialization
+	of the scopes member.  Use std::vector::emplace_back.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
 	* xml-support.c (gdb_xml_parser): Add ctor/dtor.  Make is_xinclude
 	a bool.
 	(gdb_xml_end_element): Change type of first parameter.
