@@ -1,5 +1,28 @@
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
+	* common/gdb_optional.h: Include common/traits.h.
+	(in_place_t): New type.
+	(in_place): New constexpr variable.
+	(optional::optional): Remove member initialization of
+	m_instantiated.
+	(optional::optional(in_place_t...)): New constructor.
+	(optional::~optional): Use reset.
+	(optional::optional(const optional&)): New.
+	(optional::optional(const optional&&)): New.
+	(optional::optional(T &)): New.
+	(optional::optional(T &&)): New.
+	(operator::operator=(const optional &)): New.
+	(operator::operator=(optional &&)): New.
+	(operator::operator= (const T &))
+	(operator::operator= (T &&))
+	(operator::emplace (Args &&... args)): Return a T&.  Use reset.
+	(operator::reset): New.
+	(operator::m_instantiated):: Add in-class initializer.
+	* common/traits.h: Include <type_traits>.
+	(struct And): New types.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
 	* xml-support.c: Include <vector>.
 	(scope_level::scope_level(const gdb_xml_element *))
 	(scope_level::scope_level(scope_level&&)): New.

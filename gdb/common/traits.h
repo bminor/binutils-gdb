@@ -18,6 +18,8 @@
 #ifndef COMMON_TRAITS_H
 #define COMMON_TRAITS_H
 
+#include <type_traits>
+
 namespace gdb {
 
 /* Pre C++14-safe (CWG 1558) version of C++17's std::void_t.  See
@@ -28,6 +30,30 @@ struct make_void { typedef void type; };
 
 template<typename... Ts>
 using void_t = typename make_void<Ts...>::type;
+
+/* A few trait helpers, mainly stolen from libstdc++.  Uppercase
+   because "and" is a keyword.  */
+
+template<typename...>
+struct And;
+
+template<>
+struct And<> : public std::true_type
+{};
+
+template<typename B1>
+struct And<B1> : public B1
+{};
+
+template<typename B1, typename B2>
+struct And<B1, B2>
+  : public std::conditional<B1::value, B2, B1>::type
+{};
+
+template<typename B1, typename B2, typename B3, typename... Bn>
+struct And<B1, B2, B3, Bn...>
+  : public std::conditional<B1::value, And<B2, B3, Bn...>, B1>::type
+{};
 
 }
 
