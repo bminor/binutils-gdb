@@ -997,46 +997,6 @@ show_debug_xml (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("XML debugging is %s.\n"), value);
 }
 
-void
-obstack_xml_printf (struct obstack *obstack, const char *format, ...)
-{
-  va_list ap;
-  const char *f;
-  const char *prev;
-  int percent = 0;
-
-  va_start (ap, format);
-
-  prev = format;
-  for (f = format; *f; f++)
-    {
-      if (percent)
-       {
-         switch (*f)
-           {
-           case 's':
-             {
-               char *p;
-               char *a = va_arg (ap, char *);
-
-               obstack_grow (obstack, prev, f - prev - 1);
-               p = xml_escape_text (a);
-               obstack_grow_str (obstack, p);
-               xfree (p);
-               prev = f + 1;
-             }
-             break;
-           }
-         percent = 0;
-       }
-      else if (*f == '%')
-       percent = 1;
-    }
-
-  obstack_grow_str (obstack, prev);
-  va_end (ap);
-}
-
 char *
 xml_fetch_content_from_file (const char *filename, void *baton)
 {

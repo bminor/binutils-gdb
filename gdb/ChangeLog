@@ -1,5 +1,10 @@
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
+	* xml-support.c (obstack_xml_printf): Delete.
+	* xml-support.h (obstack_xml_printf): Delete.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
 	* xml-support.c (gdb_xml_parser) <use_dtd, dtd_name, parse,
 	vdebug, verror, body_text, start_element, end_element, name,
 	user_data, set_is_xinclude, set_error, expat_parser>: New methods.
