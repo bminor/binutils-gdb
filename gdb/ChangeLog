@@ -1,5 +1,26 @@
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/optional-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add optional-selftests.o.
+	* unittests/optional-selftests.c: New file.
+	* unittests/optional/assignment/1.cc: New file.
+	* unittests/optional/assignment/2.cc: New file.
+	* unittests/optional/assignment/3.cc: New file.
+	* unittests/optional/assignment/4.cc: New file.
+	* unittests/optional/assignment/5.cc: New file.
+	* unittests/optional/assignment/6.cc: New file.
+	* unittests/optional/assignment/7.cc: New file.
+	* unittests/optional/cons/copy.cc: New file.
+	* unittests/optional/cons/default.cc: New file.
+	* unittests/optional/cons/move.cc: New file.
+	* unittests/optional/cons/value.cc: New file.
+	* unittests/optional/in_place.cc: New file.
+	* unittests/optional/observers/1.cc: New file.
+	* unittests/optional/observers/2.cc: New file.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
 	* common/gdb_optional.h: Include common/traits.h.
 	(in_place_t): New type.
 	(in_place): New constexpr variable.
