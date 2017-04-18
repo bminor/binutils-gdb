@@ -1,3 +1,11 @@
+2017-05-23  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-fbsd-nat.c (getregs_supplies): Fix upper bound comparison.
+	(getpfpregs_supplies): New function.
+	(mips_fbsd_fetch_inferior_registers): Remove early exit and use
+	getfpregs_supplies.
+	(mips_fbsd_store_inferior_registers): Likewise.
+
 2017-05-22  Pedro Alves <palves@redhat.com>
 
 	* MAINTAINERS (Host/Native): Add John Baldwin as FreeBSD

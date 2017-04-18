@@ -31,13 +31,22 @@
 #include "mips-fbsd-tdep.h"
 #include "inf-ptrace.h"
 
-/* Determine if PT_GETREGS fetches this register.  */
+/* Determine if PT_GETREGS fetches REGNUM.  */
 
 static bool
 getregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
   return (regnum >= MIPS_ZERO_REGNUM
-	  && regnum <= gdbarch_pc_regnum (gdbarch));
+	  && regnum <= mips_regnum (gdbarch)->pc);
+}
+
+/* Determine if PT_GETFPREGS fetches REGNUM.  */
+
+static bool
+getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
+{
+  return (regnum >= mips_regnum (gdbarch)->fp0
+	  && regnum < mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
@@ -58,12 +67,9 @@ mips_fbsd_fetch_inferior_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't get registers"));
 
       mips_fbsd_supply_gregs (regcache, regnum, &regs, sizeof (register_t));
-      if (regnum != -1)
-	return;
     }
 
-  if (regnum == -1
-      || regnum >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  if (regnum == -1 || getfpregs_supplies (gdbarch, regnum))
     {
       struct fpreg fpregs;
 
@@ -97,13 +103,9 @@ mips_fbsd_store_inferior_registers (struct target_ops *ops,
 
       if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't write registers"));
-
-      if (regnum != -1)
-	return;
     }
 
-  if (regnum == -1
-      || regnum >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  if (regnum == -1 || getfpregs_supplies (gdbarch, regnum))
     {
       struct fpreg fpregs;
 
