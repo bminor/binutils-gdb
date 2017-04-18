@@ -1,3 +1,8 @@
+2017-04-19  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_info <dynamic_undefined_weak>):
+	Revise comment.
+
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (PPC_OPCODE_ALTIVEC2): Delete.

@@ -1,3 +1,21 @@
+2017-04-19  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Hide undefweak
+	or make dynamic for info->dynamic_undefined_weak 0 and 1.
+	* elf32-ppc.c:Formatting.
+	(ensure_undefweak_dynamic): Don't make dynamic when
+	info->dynamic_undefined_weak is zero.
+	(allocate_dynrelocs): Discard undefweak dyn_relocs for
+	info->dynamic_undefined_weak.  Discard undef dyn_relocs when
+	not default visibility.  Discard undef and undefweak
+	dyn_relocs earlier.
+	(ppc_elf_relocate_section): Adjust to suit.
+	* elf64-ppc.c: Formatting.
+	(ensure_undefweak_dynamic): Don't make dynamic when
+	info->dynamic_undefined_weak is zero.
+	(allocate_dynrelocs): Discard undefweak dyn_relocs for
+	info->dynamic_undefined_weak.  Discard them earlier.
+
 2017-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21389

@@ -2609,7 +2609,7 @@ ppc_elf_modify_segment_map (bfd *abfd,
       amt += (m->count - j - 1) * sizeof (asection *);
       n = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
       if (n == NULL)
-        return FALSE;
+	return FALSE;
 
       n->p_type = PT_LOAD;
       n->count = m->count - j;
@@ -5947,6 +5947,7 @@ ensure_undefweak_dynamic (struct bfd_link_info *info,
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   if (htab->dynamic_sections_created
+      && info->dynamic_undefined_weak != 0
       && h->root.type == bfd_link_hash_undefweak
       && h->dynindx == -1
       && !h->forced_local
@@ -6036,6 +6037,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else
     eh->elf.got.offset = (bfd_vma) -1;
 
+  /* If no dynamic sections we can't have dynamic relocs, except for
+     IFUNCs which are handled even in static executables.  */
   if (!htab->elf.dynamic_sections_created
       && h->type != STT_GNU_IFUNC)
     eh->dyn_relocs = NULL;
@@ -6050,13 +6053,25 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      changes.  */
   else if (bfd_link_pic (info))
     {
+      /* Discard relocs on undefined symbols that must be local.  */
+      if (h->root.type == bfd_link_hash_undefined
+	  && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	eh->dyn_relocs = NULL;
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility, or when dynamic_undefined_weak says so.  */
+      else if (h->root.type == bfd_link_hash_undefweak
+	       && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		   || info->dynamic_undefined_weak == 0))
+	eh->dyn_relocs = NULL;
+
       /* Relocs that use pc_count are those that appear on a call insn,
 	 or certain REL relocs (see must_be_dyn_reloc) that can be
 	 generated via assembly.  We want calls to protected symbols to
 	 resolve directly to the function rather than going via the plt.
 	 If people want function pointer comparisons to work as expected
 	 then they should avoid writing weird assembly.  */
-      if (SYMBOL_CALLS_LOCAL (info, h))
+      else if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf_dyn_relocs **pp;
 
@@ -6084,24 +6099,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      /* Discard relocs on undefined symbols that must be local.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefined
-	  && (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
-	      || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
-	eh->dyn_relocs = NULL;
-
-      /* Also discard relocs on undefined weak syms with non-default
-	 visibility.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak)
+      if (eh->dyn_relocs != NULL)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-	    eh->dyn_relocs = NULL;
-
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
-	  else if (!ensure_undefweak_dynamic (info, h))
+	  if (!ensure_undefweak_dynamic (info, h))
 	    return FALSE;
 	}
     }
@@ -8859,10 +8861,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if ((bfd_link_pic (info)
 	       && !(h != NULL
 		    && ((h->root.type == bfd_link_hash_undefined
-			 && (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
-			     || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
+			 && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 			|| (h->root.type == bfd_link_hash_undefweak
-			    && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)))
+			    && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+				|| info->dynamic_undefined_weak == 0))))
 	       && (must_be_dyn_reloc (info, r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
@@ -10979,7 +10981,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_finish_dynamic_sections	ppc_elf_finish_dynamic_sections
 #define elf_backend_fake_sections		ppc_elf_fake_sections
 #define elf_backend_additional_program_headers	ppc_elf_additional_program_headers
-#define elf_backend_modify_segment_map     	ppc_elf_modify_segment_map
+#define elf_backend_modify_segment_map		ppc_elf_modify_segment_map
 #define elf_backend_grok_prstatus		ppc_elf_grok_prstatus
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
 #define elf_backend_write_core_note		ppc_elf_write_core_note
@@ -11049,7 +11051,7 @@ ppc_elf_vxworks_link_hash_table_create (bfd *abfd)
   if (ret)
     {
       struct ppc_elf_link_hash_table *htab
-        = (struct ppc_elf_link_hash_table *)ret;
+	= (struct ppc_elf_link_hash_table *)ret;
       htab->is_vxworks = 1;
       htab->plt_type = PLT_VXWORKS;
       htab->plt_entry_size = VXWORKS_PLT_ENTRY_SIZE;

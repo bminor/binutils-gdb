@@ -1,3 +1,17 @@
+2017-04-19  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (dynamic-undefined-weak): Document.
+	(nodynamic-undefined-weak): Document that this option now can
+	be used with shared libs.
+	* emulparams/dynamic_undefined_weak.sh: Support -z
+	dynamic-undefined-weak.
+	* emulparams/elf32ppccommon.sh: Include dynamic_undefined_weak.sh.
+	* testsuite/ld-undefined/weak-undef.exp (undef_weak_so),
+	(undef_weak_exe): New.  Use them.  Add -z dynamic-undefined-weak
+	and -z nodynamic-undefined-weak tests.
+	* Makefile.am: Update powerpc dependencies.
+	* Makefile.in: Regenerate.
+
 2017-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21389

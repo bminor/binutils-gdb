@@ -2803,6 +2803,24 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   if (! _bfd_elf_fix_symbol_flags (h, eif))
     return FALSE;
 
+  if (h->root.type == bfd_link_hash_undefweak)
+    {
+      if (eif->info->dynamic_undefined_weak == 0)
+	_bfd_elf_link_hash_hide_symbol (eif->info, h, TRUE);
+      else if (eif->info->dynamic_undefined_weak > 0
+	       && h->ref_regular
+	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       && !bfd_hide_sym_by_version (eif->info->version_info,
+					    h->root.root.string))
+	{
+	  if (!bfd_elf_link_record_dynamic_symbol (eif->info, h))
+	    {
+	      eif->failed = TRUE;
+	      return FALSE;
+	    }
+	}
+    }
+
   /* If this symbol does not require a PLT entry, and it is not
      defined by a dynamic object, or is not referenced by a regular
      object, ignore it.  We do have to handle a weak defined symbol,

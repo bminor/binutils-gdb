@@ -9695,6 +9695,7 @@ ensure_undefweak_dynamic (struct bfd_link_info *info,
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   if (htab->dynamic_sections_created
+      && info->dynamic_undefined_weak != 0
       && h->root.type == bfd_link_hash_undefweak
       && h->dynindx == -1
       && !h->forced_local
@@ -9785,8 +9786,17 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	allocate_got (h, info, gent);
       }
 
+  /* If no dynamic sections we can't have dynamic relocs, except for
+     IFUNCs which are handled even in static executables.  */
   if (!htab->elf.dynamic_sections_created
       && h->type != STT_GNU_IFUNC)
+    eh->dyn_relocs = NULL;
+
+  /* Also discard relocs on undefined weak syms with non-default
+     visibility, or when dynamic_undefined_weak says so.  */
+  else if (h->root.type == bfd_link_hash_undefweak
+	   && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	       || info->dynamic_undefined_weak == 0))
     eh->dyn_relocs = NULL;
 
   if (eh->dyn_relocs != NULL)
@@ -9821,17 +9831,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		}
 	    }
 
-	  /* Also discard relocs on undefined weak syms with
-	     non-default visibility.  */
-	  if (eh->dyn_relocs != NULL
-	      && h->root.type == bfd_link_hash_undefweak)
+	  if (eh->dyn_relocs != NULL)
 	    {
-	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-		eh->dyn_relocs = NULL;
-
 	      /* Make sure this symbol is output as a dynamic symbol.
 		 Undefined weak syms won't yet be marked as dynamic.  */
-	      else if (!ensure_undefweak_dynamic (info, h))
+	      if (!ensure_undefweak_dynamic (info, h))
 		return FALSE;
 	    }
 	}
@@ -14320,7 +14324,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      addend = 0;
 	      reloc_dest = DEST_STUB;
 
- 	      if ((stub_entry->stub_type == ppc_stub_plt_call
+	      if ((stub_entry->stub_type == ppc_stub_plt_call
 		   || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 		  && (ALWAYS_EMIT_R2SAVE
 		      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
