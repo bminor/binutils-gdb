@@ -1,5 +1,28 @@
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/scoped_restore-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add scoped_restore-selftests.o.
+	* common/scoped_restore.h (scoped_restore_base): Make "class".
+	(scoped_restore_base::release): New public method.
+	(scoped_restore_base::scoped_restore_base): New protected ctor.
+	(scoped_restore_base::m_saved_var): New protected field.
+	(scoped_restore_tmpl::scoped_restore_tmpl(T*)): Initialize the
+	scoped_restore_base base class instead of m_saved_var directly.
+	(scoped_restore_tmpl::scoped_restore_tmpl(T*, T2)): Likewise.
+	(scoped_restore_tmpl::scoped_restore_tmpl(const
+	scoped_restore_tmpl<T>&)): Likewise.
+	(scoped_restore_tmpl::~scoped_restore_tmpl): Use the saved_var
+	method.
+	(scoped_restore_tmpl::saved_var): New method.
+	(scoped_restore_tmpl::m_saved_var): Delete.
+	* inferior.h (inferior::detaching): Now a bool.
+	* infrun.c (prepare_for_detach): Use a scoped_restore instead of a
+	cleanup.
+	* unittests/scoped_restore-selftests.c: New file.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS):
 	Re-sort in alphabetic order.
 

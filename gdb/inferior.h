@@ -387,7 +387,7 @@ public:
   bool waiting_for_vfork_done = false;
 
   /* True if we're in the process of detaching from this inferior.  */
-  int detaching = 0;
+  bool detaching = false;
 
   /* What is left to do for an execution command after any thread of
      this inferior stops.  For continuations associated with a

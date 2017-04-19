@@ -3630,7 +3630,6 @@ prepare_for_detach (void)
 {
   struct inferior *inf = current_inferior ();
   ptid_t pid_ptid = pid_to_ptid (inf->pid);
-  struct cleanup *old_chain_1;
   struct displaced_step_inferior_state *displaced;
 
   displaced = get_displaced_stepping_state (inf->pid);
@@ -3644,8 +3643,7 @@ prepare_for_detach (void)
     fprintf_unfiltered (gdb_stdlog,
 			"displaced-stepping in-process while detaching");
 
-  old_chain_1 = make_cleanup_restore_integer (&inf->detaching);
-  inf->detaching = 1;
+  scoped_restore restore_detaching = make_scoped_restore (&inf->detaching, true);
 
   while (!ptid_equal (displaced->step_ptid, null_ptid))
     {
@@ -3685,12 +3683,12 @@ prepare_for_detach (void)
 	 inferior, so this must mean the process is gone.  */
       if (!ecs->wait_some_more)
 	{
-	  discard_cleanups (old_chain_1);
+	  restore_detaching.release ();
 	  error (_("Program exited while detaching"));
 	}
     }
 
-  discard_cleanups (old_chain_1);
+  restore_detaching.release ();
 }
 
 /* Wait for control to return from inferior to debugger.
