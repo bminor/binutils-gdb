@@ -1,3 +1,12 @@
+2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/16044
+	* elf32-cris.c (elf_cris_adjust_gotplt_to_got): Adjust BFD_ASSERT
+	to handle a local symbol with a hash-symbol-entry; without PLT.
+	Add BFD_ASSERT for an incidental case with GOT entry present.
+	(cris_elf_check_relocs): Increment PLT refcount only if the symbol
+	isn't forced-or-set local.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (arm_type_of_stub): Supply missing args to "long
