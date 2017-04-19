@@ -1,3 +1,8 @@
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS):
+	Re-sort in alphabetic order.
+
 2017-04-18  Pedro Alves  <palves@redhat.com>
 
 	* xml-support.c (obstack_xml_printf): Delete.
