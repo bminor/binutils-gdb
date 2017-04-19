@@ -1,3 +1,9 @@
+2017-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21401
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Don't abort
+	on on undefined IFUNC symbol in the second PLT.
+
 2017-04-19  Wedson Almeida Filho  <wedsonaf@gmail.com>
 
 	* peXXigen.c (pe_print_reloc): Correct chunk_end.

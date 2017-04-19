@@ -1,3 +1,9 @@
+2017-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21401
+	* testsuite/ld-ifunc/ifunc.exp: Add a libtest-2-now.so test with
+	-z now.
+
 2017-04-19  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (dynamic-undefined-weak): Document.
