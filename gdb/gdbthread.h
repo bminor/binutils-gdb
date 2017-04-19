@@ -186,7 +186,7 @@ typedef VEC (value_ptr) value_vec;
    inferior_ptid global.  However, when GDB needs to remember the
    selected thread to later restore it, GDB bumps the thread object's
    refcount, to prevent something deleting the thread object before
-   reverting back (e.g., due to a "kill" command.  If the thread
+   reverting back (e.g., due to a "kill" command).  If the thread
    meanwhile exits before being re-selected, then the thread object is
    left listed in the thread list, but marked with state
    THREAD_EXITED.  (See make_cleanup_restore_current_thread and

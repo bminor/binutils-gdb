@@ -1,5 +1,10 @@
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (thread): Add missing closing parenthesis in
+	comment.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
 	* common/refcounted-object.h: New file.
 	* gdbthread.h: Include "common/refcounted-object.h".
 	(thread_info): Inherit from refcounted_object and add comments.
