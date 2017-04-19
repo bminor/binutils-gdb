@@ -13,45 +13,56 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-static enum {ABC = 1, DEF, GHI, JKL} anon_e = GHI;
-static union
-{
-  char aa;
-  int bb;
-  float ff;
-  double dd;
-  void *pp;
-} anon_u = { 'a' };
-
-static struct
-{
-  char *ptr;
-  int len;
-} anon_s = {"abracadabra", 11};
-
-struct A
-{
-  A (void) : e (AA)
+namespace {
+  static enum {ABC = 1, DEF, GHI, JKL} anon_e = GHI;
+  static union
   {
-    this->u.b = 0;
-    this->s.ptr = "hello";
-    this->s.len = 5;
-  }
+    char aa;
+    int bb;
+    float ff;
+    double dd;
+    void *pp;
+  } anon_u = { 'a' };
 
-  enum {AA = 10, BB, CC, DD} e;
-  union
-  {
-    char a;
-    int b;
-    float f;
-    double d;
-    void *p;
-  } u;
-  struct
+  static struct
   {
     char *ptr;
     int len;
-  } s;
+    struct
+    {
+      unsigned MAGIC;
+    };
+    union
+    {
+      int ua;
+      char *ub;
+    };
+  } anon_s = {"abracadabra", 11, 0xdead, 0xbeef};
+
+  struct A
+  {
+    A (void) : e (AA)
+    {
+      this->u.b = 0;
+      this->s.ptr = "hello";
+      this->s.len = 5;
+    }
+
+    enum {AA = 10, BB, CC, DD} e;
+    union
+    {
+      char a;
+      int b;
+      float f;
+      double d;
+      void *p;
+    } u;
+    struct
+    {
+      char *ptr;
+      int len;
+    } s;
+  };
 };
 
 int

@@ -370,8 +370,7 @@ compile_cplus_instance::leave_scope ()
       if (debug_compile_cplus_scopes)
 	printf_unfiltered ("leaving scope %p\n", current);
 
-      /* Pop namespaces.  Do not push the last scope_component -- that's
-	 the type we are converting, not a namespace.  */
+      /* Pop namespaces.  */
       std::for_each
 	(current.begin (),current.end () - 1, [this] (const auto &comp) {
 	  gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))
@@ -1631,8 +1630,6 @@ ccp_convert_namespace (compile_cplus_instance *instance,
 
   if (TYPE_NAME (type) != NULL)
     name = cp_func_name (TYPE_NAME (type));
-  else
-    name = xstrdup ("");	// !!keiths: anonymous namespace?!
 
   /* Push scope.  */
   instance->enter_scope (scope);

@@ -48,6 +48,8 @@ CompileExpression::new "var"
 CompileExpression::test "anon_e" {(3|GHI)}
 CompileExpression::test "anon_u.aa" {97( 'a')?}
 CompileExpression::test "anon_s.len" 11
+CompileExpression::test "anon_s.MAGIC" "57005"
+CompileExpression::test "anon_s.ua" "48879"
 CompileExpression::test "a.u.b" 0
 CompileExpression::test "a.s.len" 5
 CompileExpression::test "a.e" {(10|A::AA)}
