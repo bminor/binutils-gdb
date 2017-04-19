@@ -1,3 +1,7 @@
+2017-04-19  Wedson Almeida Filho  <wedsonaf@gmail.com>
+
+	* peXXigen.c (pe_print_reloc): Correct chunk_end.
+
 2017-04-19  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Hide undefweak
