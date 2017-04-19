@@ -32,6 +32,7 @@ struct terminal_info;
 struct target_desc_info;
 struct gdb_environ;
 struct continuation;
+struct inferior;
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -46,6 +47,7 @@ struct continuation;
 #include "registry.h"
 
 #include "symfile-add-flags.h"
+#include "common/refcounted-object.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;
@@ -298,6 +300,11 @@ struct inferior_control_state
   enum stop_kind stop_soon;
 };
 
+/* Return a pointer to the current inferior.  */
+extern inferior *current_inferior ();
+
+extern void set_current_inferior (inferior *);
+
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
    but is more general and applies also to targets that do not have a
@@ -305,13 +312,29 @@ struct inferior_control_state
    inferior, as does each attachment to an existing process.
    Inferiors have unique internal identifiers that are different from
    target process ids.  Each inferior may in turn have multiple
-   threads running in it.  */
+   threads running in it.
 
-class inferior
+   Inferiors are intrusively refcounted objects.  Unlike thread
+   objects, being the user-selected inferior is considered a strong
+   reference and is thus accounted for in the inferior object's
+   refcount (see set_current_inferior).  When GDB needs to remember
+   the selected inferior to later restore it, GDB temporarily bumps
+   the inferior object's refcount, to prevent something deleting the
+   inferior object before reverting back (e.g., due to a
+   "remove-inferiors" command (see
+   make_cleanup_restore_current_thread).  All other inferior
+   references are considered weak references.  Inferiors are always
+   listed exactly once in the inferior list, so placing an inferior in
+   the inferior list is an implicit, not counted strong reference.  */
+
+class inferior : public refcounted_object
 {
 public:
   explicit inferior (int pid);
   ~inferior ();
+
+  /* Returns true if we can delete this inferior.  */
+  bool deletable () const { return refcount () == 0; }
 
   /* Pointer to next inferior in singly-linked list of inferiors.  */
   struct inferior *next = NULL;
@@ -516,12 +539,6 @@ extern int number_of_live_inferiors (void);
 /* Returns true if there are any live inferiors in the inferior list
    (not cores, not executables, real live processes).  */
 extern int have_live_inferiors (void);
-
-/* Return a pointer to the current inferior.  It is an error to call
-   this if there is no current inferior.  */
-extern struct inferior *current_inferior (void);
-
-extern void set_current_inferior (struct inferior *);
 
 extern struct cleanup *save_current_inferior (void);
 

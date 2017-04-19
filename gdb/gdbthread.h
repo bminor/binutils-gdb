@@ -31,6 +31,7 @@ struct symtab;
 #include "common/vec.h"
 #include "target/waitstatus.h"
 #include "cli/cli-utils.h"
+#include "common/refcounted-object.h"
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
    finishing, until(ling),...  */
@@ -177,7 +178,24 @@ typedef struct value *value_ptr;
 DEF_VEC_P (value_ptr);
 typedef VEC (value_ptr) value_vec;
 
-struct thread_info
+/* Threads are intrusively refcounted objects.  Being the
+   user-selected thread is normally considered an implicit strong
+   reference and is thus not accounted in the refcount, unlike
+   inferior objects.  This is necessary, because there's no "current
+   thread" pointer.  Instead the current thread is inferred from the
+   inferior_ptid global.  However, when GDB needs to remember the
+   selected thread to later restore it, GDB bumps the thread object's
+   refcount, to prevent something deleting the thread object before
+   reverting back (e.g., due to a "kill" command.  If the thread
+   meanwhile exits before being re-selected, then the thread object is
+   left listed in the thread list, but marked with state
+   THREAD_EXITED.  (See make_cleanup_restore_current_thread and
+   delete_thread).  All other thread references are considered weak
+   references.  Placing a thread in the thread list is an implicit
+   strong reference, and is thus not accounted for in the thread's
+   refcount.  */
+
+class thread_info : public refcounted_object
 {
 public:
   explicit thread_info (inferior *inf, ptid_t ptid);
@@ -186,22 +204,8 @@ public:
   bool deletable () const
   {
     /* If this is the current thread, or there's code out there that
-       relies on it existing (m_refcount > 0) we can't delete yet.  */
-    return (m_refcount == 0 && !ptid_equal (ptid, inferior_ptid));
-  }
-
-  /* Increase the refcount.  */
-  void incref ()
-  {
-    gdb_assert (m_refcount >= 0);
-    m_refcount++;
-  }
-
-  /* Decrease the refcount.  */
-  void decref ()
-  {
-    m_refcount--;
-    gdb_assert (m_refcount >= 0);
+       relies on it existing (refcount > 0) we can't delete yet.  */
+    return (refcount () == 0 && !ptid_equal (ptid, inferior_ptid));
   }
 
   struct thread_info *next = NULL;
@@ -362,13 +366,6 @@ public:
      fields point to self.  */
   struct thread_info *step_over_prev = NULL;
   struct thread_info *step_over_next = NULL;
-
-private:
-
-  /* If this is > 0, then it means there's code out there that relies
-     on this thread being listed.  Don't delete it from the lists even
-     if we detect it exiting.  */
-  int m_refcount = 0;
 };
 
 /* Create an empty thread list, or empty the existing one.  */

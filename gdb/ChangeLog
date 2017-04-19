@@ -1,5 +1,43 @@
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
+	* common/refcounted-object.h: New file.
+	* gdbthread.h: Include "common/refcounted-object.h".
+	(thread_info): Inherit from refcounted_object and add comments.
+	(thread_info::incref, thread_info::decref)
+	(thread_info::m_refcount): Delete.
+	(thread_info::deletable): Use the refcounted_object::refcount()
+	method.
+	* inferior.c (current_inferior_): Add comment.
+	(set_current_inferior): Increment/decrement refcounts.
+	(prune_inferiors, remove_inferior_command): Skip inferiors marked
+	not-deletable instead of comparing with the current inferior.
+	(initialize_inferiors): Increment the initial inferior's refcount.
+	* inferior.h (struct inferior): Forward declare.
+	Include "common/refcounted-object.h".
+	(current_inferior, set_current_inferior): Move declaration to
+	before struct inferior's definition, and fix comment.
+	(inferior): Inherit from refcounted_object.  Add comments.
+	* thread.c (switch_to_thread_no_regs): Reference the thread's
+	inferior pointer directly instead of doing a ptid lookup.
+	(switch_to_no_thread): New function.
+	(switch_to_thread(thread_info *)): New function, factored out
+	from ...
+	(switch_to_thread(ptid_t)): ... this.
+	(restore_current_thread): Delete.
+	(current_thread_cleanup): Remove 'inf_id' and 'was_removable'
+	fields, and add 'inf' field.
+	(do_restore_current_thread_cleanup): Check whether old->inf is
+	alive instead of looking up an inferior by ptid.  Use
+	switch_to_thread and switch_to_no_thread.
+	(restore_current_thread_cleanup_dtor): Use old->inf directly
+	instead of lookup up an inferior by id.  Decref the inferior.
+	Don't restore 'removable'.
+	(make_cleanup_restore_current_thread): Same the inferior pointer
+	in old, instead of the inferior number.  Incref the inferior.
+	Don't save/clear 'removable'.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/scoped_restore-selftests.c.
 	(SUBDIR_UNITTESTS_OBS): Add scoped_restore-selftests.o.
