@@ -104,6 +104,10 @@ struct bfd_link_hash_entry
      IR object file.  */
   unsigned int non_ir_ref : 1;
 
+  /* Symbol is referenced in a dynamic object after it has been defined
+     in an IR object.  */
+  unsigned int dynamic_ref_after_ir_def : 1;
+
   /* Symbol is a built-in define.  These will be overridden by PROVIDE
      in a linker script.  */
   unsigned int linker_def : 1;

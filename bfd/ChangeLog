@@ -1,3 +1,12 @@
+2017-09-27  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/21382
+	* elflink.c (elf_link_add_object_symbols): Preserve
+	dynamic_ref_after_ir_def when restoring the symbol table for
+	unneeded dynamic object.
+
 2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_perform_relocation): Correct microMIPS
