@@ -1,3 +1,60 @@
+2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Always return TRUE
+	if forced local.
+
+2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_final_link): Reorder comment about
+	dynamic symbol sorting.
+
+2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21382
+	* elflink.c (elf_link_add_object_symbols): Preserve
+	dynamic_ref_after_ir_def when restoring the symbol table for
+	unneeded dynamic object.
+
+2017-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21401
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Don't abort
+	on on undefined IFUNC symbol in the second PLT.
+
+2017-04-19  Wedson Almeida Filho  <wedsonaf@gmail.com>
+
+	* peXXigen.c (pe_print_reloc): Correct chunk_end.
+
+2017-04-19  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Hide undefweak
+	or make dynamic for info->dynamic_undefined_weak 0 and 1.
+	* elf32-ppc.c:Formatting.
+	(ensure_undefweak_dynamic): Don't make dynamic when
+	info->dynamic_undefined_weak is zero.
+	(allocate_dynrelocs): Discard undefweak dyn_relocs for
+	info->dynamic_undefined_weak.  Discard undef dyn_relocs when
+	not default visibility.  Discard undef and undefweak
+	dyn_relocs earlier.
+	(ppc_elf_relocate_section): Adjust to suit.
+	* elf64-ppc.c: Formatting.
+	(ensure_undefweak_dynamic): Don't make dynamic when
+	info->dynamic_undefined_weak is zero.
+	(allocate_dynrelocs): Discard undefweak dyn_relocs for
+	info->dynamic_undefined_weak.  Discard them earlier.
+
+2017-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21389
+	* elflink.c (bfd_elf_size_dynamic_sections): Get soname index
+	before generating the version definition section.
+
+2017-04-17  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Undo dynamic linking
+	state when a regular object file defines a symbol with
+	incompatible type to that defined by an earlier shared lib.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* coffcode.h: Wrap some overly long _bfd_error_handler args.

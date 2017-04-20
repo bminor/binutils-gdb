@@ -289,6 +289,12 @@ set lto_link_elf_tests [list \
   [list "PR ld/14918" \
    "-flto" "-flto" \
    {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
+  [list "Build pr21382a.o" \
+   "" "-O2 -flto" \
+   {pr21382a.c} {} "" "c"] \
+  [list "Build pr21382.so" \
+   "-shared" "-O2 -fpic" \
+   {pr21382b.c} {} "pr21382.so" "c"] \
 ]
 
 # Check final symbols in executables.
@@ -387,6 +393,9 @@ set lto_run_elf_shared_tests [list \
   [list "LTO 7" \
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-7b.o tmpdir/lto-7c.o tmpdir/lto-7a.o -Wl,--no-as-needed tmpdir/liblto-7.so" "" \
    {dummy.c} "lto-7.exe" "lto-7.out" "" "c"] \
+  [list "Run pr21382" \
+   "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr21382a.o tmpdir/pr21382.so" "" \
+   {dummy.c} "pr21382.exe" "pass.out" "" "c"] \
 ]
 
 # LTO run-time tests for ELF

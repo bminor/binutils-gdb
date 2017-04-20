@@ -6013,7 +6013,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       got_offset = h->got.offset;
 
       if (got_offset == (bfd_vma) -1
-	  || h->type == STT_GNU_IFUNC
+	  || (h->type == STT_GNU_IFUNC && h->def_regular)
 	  || plt == NULL
 	  || got == NULL)
 	abort ();

@@ -978,8 +978,7 @@ foreach { abi } $abis {
             "$abi_asflags($abi)" \
             [list ehdr_start-${suff}.s] \
             [list "readelf -s ehdr_start-1.nd"] \
-            "ehdr_start-1-${abi}"]]
-    run_ld_link_tests [list \
+            "ehdr_start-1-${abi}"] \
         [list \
             "MIPS magic __ehdr_start symbol test 2 ($abi)" \
             "$abi_ldflags($abi) -T ehdr_start-2.ld" "" \

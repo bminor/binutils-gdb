@@ -1,3 +1,64 @@
+2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21402
+	* testsuite/ld-elf/indirect.exp: Pass $NOPIE_LDFLAGS and
+	$NOPIE_CFLAGS to non-PIE indirect5 and indirect6 tests.  Skip
+	PIE indirect5 and indirect6 tests on i386.
+
+2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Join `__ehdr_start' tests.
+
+2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21382
+	* plugin.c (is_visible_from_outside): Symbol may be visible
+	from outside if dynamic_ref_after_ir_def is set.
+	(plugin_notice): Set dynamic_ref_after_ir_def if the symbol is
+	defined in an IR object and referenced in a dynamic object.
+	* testsuite/ld-plugin/lto.exp: Run PR ld/21382 tests.
+	* testsuite/ld-plugin/pr21382a.c: New file.
+	* testsuite/ld-plugin/pr21382b.c: Likewise.
+
+2017-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21401
+	* testsuite/ld-ifunc/ifunc.exp: Add a libtest-2-now.so test with
+	-z now.
+
+2017-04-19  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (dynamic-undefined-weak): Document.
+	(nodynamic-undefined-weak): Document that this option now can
+	be used with shared libs.
+	* emulparams/dynamic_undefined_weak.sh: Support -z
+	dynamic-undefined-weak.
+	* emulparams/elf32ppccommon.sh: Include dynamic_undefined_weak.sh.
+	* testsuite/ld-undefined/weak-undef.exp (undef_weak_so),
+	(undef_weak_exe): New.  Use them.  Add -z dynamic-undefined-weak
+	and -z nodynamic-undefined-weak tests.
+	* Makefile.am: Update powerpc dependencies.
+	* Makefile.in: Regenerate.
+
+2017-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21389
+	* testsuite/ld-elf/pr21389.map: New file.
+	* testsuite/ld-elf/pr21389.s: Likewise.
+	* testsuite/ld-elf/pr21389a.d: Likewise.
+	* testsuite/ld-elf/pr21389b.d: Likewise.
+	* testsuite/ld-elf/pr21389c.d: Likewise.
+
+2017-04-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/indirect5a.c,
+	* testsuite/ld-elf/indirect5b.c,
+	* testsuite/ld-elf/indirect5.map,
+	* testsuite/ld-elf/indirect5.out: New test.
+	* testsuite/ld-elf/indirect6a.c: Likewise.
+	* testsuite/ld-elf/indirect.exp (check_dynamic_syms): New proc.
+	Run new tests and check dynsyms.
+
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	PR 21274

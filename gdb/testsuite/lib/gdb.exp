@@ -6070,5 +6070,24 @@ proc dejagnu_version { } {
     return $dg_ver
 }
 
+# Define user-defined command COMMAND using the COMMAND_LIST as the
+# command's definition.  The terminating "end" is added automatically.
+
+proc gdb_define_cmd {command command_list} {
+    global gdb_prompt
+
+    set input [multi_line_input {*}$command_list "end"]
+    set test "define $command"
+
+    gdb_test_multiple "define $command" $test {
+	-re "End with"  {
+	    gdb_test_multiple $input $test {
+		-re "\r\n$gdb_prompt " {
+		}
+	    }
+	}
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

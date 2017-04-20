@@ -1,3 +1,10 @@
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/threadapply.exp (kill_and_remove_inferior): New
+	procedure.
+	(top level): Call it.
+	* lib/gdb.exp (gdb_define_cmd): New procedure.
+
 2017-04-12  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/21323
