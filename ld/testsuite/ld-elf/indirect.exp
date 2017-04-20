@@ -129,6 +129,8 @@ set testname "Indirect symbol 2"
 set cmd "$ld -shared  -o tmpdir/indirect2.so tmpdir/indirect2.o"
 check_link_message "$cmd" [list $string2 $string] "$testname"
 
+global NOPIE_CFLAGS NOPIE_LDFLAGS
+
 set run_tests {
     {"Run with libindirect3c.so 1"
      "-Wl,--no-as-needed tmpdir/indirect3a.o tmpdir/indirect3b.o tmpdir/libindirect3c.so" ""
@@ -155,17 +157,17 @@ set run_tests {
      "-Wl,--no-as-needed tmpdir/libindirect4c.so tmpdir/indirect4b.o tmpdir/indirect4a.o" ""
      {dummy.c} "indirect4d" "indirect4.out"}
     {"Run indirect5 1"
-     "-Wl,--no-as-needed tmpdir/libindirect5.so" ""
-     {indirect5a.c} "indirect5a" "indirect5.out"}
+     "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libindirect5.so" ""
+     {indirect5a.c} "indirect5a" "indirect5.out" "$NOPIE_CFLAGS"}
     {"Run indirect5 2"
-     "-Wl,--no-as-needed tmpdir/indirect5a.o tmpdir/libindirect5.so" ""
-     {dummy.c} "indirect5b" "indirect5.out"}
+     "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/indirect5a.o tmpdir/libindirect5.so" ""
+     {dummy.c} "indirect5b" "indirect5.out" "$NOPIE_CFLAGS"}
     {"Run indirect6 1"
-     "-Wl,--no-as-needed tmpdir/libindirect5.so" ""
-     {indirect6a.c} "indirect6a" "indirect5.out"}
+     "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libindirect5.so" ""
+     {indirect6a.c} "indirect6a" "indirect5.out" "$NOPIE_CFLAGS"}
     {"Run indirect6 2"
-     "-Wl,--no-as-needed tmpdir/indirect6a.o tmpdir/libindirect5.so" ""
-     {dummy.c} "indirect6b" "indirect5.out"}
+     "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/indirect6a.o tmpdir/libindirect5.so" ""
+     {dummy.c} "indirect6b" "indirect5.out" "$NOPIE_CFLAGS"}
     {"Run with libpr18720c.so 1"
      "-Wl,--no-as-needed tmpdir/pr18720a.o tmpdir/pr18720b.o tmpdir/libpr18720c.so" ""
      {check-ptr-eq.c} "pr18720a" "pr18720.out"}
@@ -218,6 +220,11 @@ foreach t [list indirect5a indirect5b indirect6a indirect6b] {
     } else {
 	fail $testname
     }
+}
+
+# PR ld/21402: i386 doesn't support mixing different symbol types in PIE.
+if {[istarget "i?86-*-*"]} {
+    return
 }
 
 send_log "$CC -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie"

@@ -1,3 +1,10 @@
+2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21402
+	* testsuite/ld-elf/indirect.exp: Pass $NOPIE_LDFLAGS and
+	$NOPIE_CFLAGS to non-PIE indirect5 and indirect6 tests.  Skip
+	PIE indirect5 and indirect6 tests on i386.
+
 2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips-elf.exp: Join `__ehdr_start' tests.
