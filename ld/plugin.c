@@ -629,7 +629,9 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
 
   if (bfd_link_relocatable (&link_info))
     return TRUE;
-  if (link_info.export_dynamic || bfd_link_dll (&link_info))
+  if (blhe->dynamic_ref_after_ir_def
+      || link_info.export_dynamic
+      || bfd_link_dll (&link_info))
     {
       /* Check if symbol is hidden by version script.  */
       if (bfd_hide_sym_by_version (link_info.version_info,
@@ -1316,12 +1318,21 @@ plugin_notice (struct bfd_link_info *info,
       /* If this is a ref, set non_ir_ref.  */
       else if (bfd_is_und_section (section))
 	{
+	   if (h->type == bfd_link_hash_defweak
+	       || h->type == bfd_link_hash_defined)
+	     {
+	       /* Check if the symbol is referenced in a dynamic object
+		  after it has been defined in an IR object.  */
+	       if ((abfd->flags & DYNAMIC) != 0
+		   && is_ir_dummy_bfd (h->u.def.section->owner))
+		 h->dynamic_ref_after_ir_def = TRUE;
+	     }
 	  /* Replace the undefined dummy bfd with the real one.  */
-	  if ((h->type == bfd_link_hash_undefined
-	       || h->type == bfd_link_hash_undefweak)
-	      && (h->u.undef.abfd == NULL
-		  || (h->u.undef.abfd->flags & BFD_PLUGIN) != 0))
-	    h->u.undef.abfd = abfd;
+	   else if ((h->type == bfd_link_hash_undefined
+		     || h->type == bfd_link_hash_undefweak)
+		    && (h->u.undef.abfd == NULL
+			|| (h->u.undef.abfd->flags & BFD_PLUGIN) != 0))
+	     h->u.undef.abfd = abfd;
 	  h->non_ir_ref = TRUE;
 	}
 

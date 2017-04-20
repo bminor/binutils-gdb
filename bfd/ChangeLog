@@ -1,3 +1,10 @@
+2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21382
+	* elflink.c (elf_link_add_object_symbols): Preserve
+	dynamic_ref_after_ir_def when restoring the symbol table for
+	unneeded dynamic object.
+
 2017-04-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21401

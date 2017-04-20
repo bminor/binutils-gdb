@@ -1,3 +1,14 @@
+2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21382
+	* plugin.c (is_visible_from_outside): Symbol may be visible
+	from outside if dynamic_ref_after_ir_def is set.
+	(plugin_notice): Set dynamic_ref_after_ir_def if the symbol is
+	defined in an IR object and referenced in a dynamic object.
+	* testsuite/ld-plugin/lto.exp: Run PR ld/21382 tests.
+	* testsuite/ld-plugin/pr21382a.c: New file.
+	* testsuite/ld-plugin/pr21382b.c: Likewise.
+
 2017-04-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21401
