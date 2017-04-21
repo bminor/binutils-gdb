@@ -9596,10 +9596,12 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      (unsigned long) tdep->lowest_pc);
 }
 
+#if GDB_SELF_TEST
 namespace selftests
 {
 static void arm_record_test (void);
 }
+#endif
 
 extern initialize_file_ftype _initialize_arm_tdep; /* -Wmissing-prototypes */
 
