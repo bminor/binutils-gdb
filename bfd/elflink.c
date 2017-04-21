@@ -3750,6 +3750,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (!just_syms
 	  && (bfd_link_pic (info)
 	      || (!bfd_link_relocatable (info)
+		  && info->nointerp
 		  && (info->export_dynamic || info->dynamic)))
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
