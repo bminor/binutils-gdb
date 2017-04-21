@@ -1,3 +1,11 @@
+2017-04-21  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_restore): Remove argument 2.  Replace
+	argument 3 with regcache.  Get register status from
+	src->register_status and get register contents from
+	register_buffer (src, regnum).
+	(regcache_cpy): Update.
+
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (thread): Add missing closing parenthesis in

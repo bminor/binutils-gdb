@@ -374,17 +374,15 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
 }
 
 static void
-regcache_restore (struct regcache *dst,
-		  regcache_cooked_read_ftype *cooked_read,
-		  void *cooked_read_context)
+regcache_restore (struct regcache *dst, struct regcache *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
-  gdb_byte buf[MAX_REGISTER_SIZE];
   int regnum;
 
   /* The dst had better not be read-only.  If it is, the `restore'
      doesn't make much sense.  */
   gdb_assert (!dst->readonly_p);
+  gdb_assert (src->readonly_p);
   /* Copy over any registers, being careful to only restore those that
      were both saved and need to be restored.  The full [0 .. gdbarch_num_regs
      + gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -393,11 +391,8 @@ regcache_restore (struct regcache *dst,
     {
       if (gdbarch_register_reggroup_p (gdbarch, regnum, restore_reggroup))
 	{
-	  enum register_status status;
-
-	  status = cooked_read (cooked_read_context, regnum, buf);
-	  if (status == REG_VALID)
-	    regcache_cooked_write (dst, regnum, buf);
+	  if (src->register_status[regnum] == REG_VALID)
+	    regcache_cooked_write (dst, regnum, register_buffer (src, regnum));
 	}
     }
 }
@@ -424,7 +419,7 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   if (!src->readonly_p)
     regcache_save (dst, do_cooked_read, src);
   else if (!dst->readonly_p)
-    regcache_restore (dst, do_cooked_read, src);
+    regcache_restore (dst, src);
   else
     regcache_cpy_no_passthrough (dst, src);
 }
