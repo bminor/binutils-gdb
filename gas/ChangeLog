@@ -1,3 +1,9 @@
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21380
+	* testsuite/gas/aarch64/illegal-3.s: New file.
+	* testsuite/gas/aarch64/illegal-3.d: New file.
+
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_show_usage): Delete mention of -mhtm.

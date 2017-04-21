@@ -1,3 +1,9 @@
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21380
+	* aarch64-tbl.h (aarch64_opcode_table): Fix masks for LD1R, LD2R,
+	LD3R and LD4R.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* epiphany-desc.c: Regenerate.
