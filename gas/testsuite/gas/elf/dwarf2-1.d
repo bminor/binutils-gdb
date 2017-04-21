@@ -71,7 +71,7 @@ Raw dump of debug contents of section .[z]?debug_line:
   \[0x.*\]  Extended opcode 2: set Address to .*
   \[0x.*\]  Advance Line by 3 to 4
   \[0x.*\]  Copy
-  \[0x.*\]  Copy
+  \[0x.*\]  Copy \(view 1\)
   \[0x.*\]  Extended opcode 2: set Address to .*
   \[0x.*\]  Extended opcode 1: End of Sequence
 
