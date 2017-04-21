@@ -1,3 +1,9 @@
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21378
+	* readelf.c (print_gnu_build_attribute_name): Check for an
+	overlarge name field.
+
 2017-04-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21379

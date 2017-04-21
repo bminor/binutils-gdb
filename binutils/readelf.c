@@ -16948,10 +16948,18 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	unsigned int   bytes = pnote->namesz - (name - pnote->namedata);
-	unsigned long  val = 0;
-	unsigned int   shift = 0;
-	char *         decoded = NULL;
+	unsigned int        bytes = pnote->namesz - (name - pnote->namedata);
+	unsigned long long  val = 0;
+	unsigned int        shift = 0;
+	char *              decoded = NULL;
+
+	/* PR 21378 */
+	if (bytes > sizeof (val))
+	  {
+	    error (_("corrupt name field: namesz of %lu is too large for a numeric value\n"),
+		   pnote->namesz);
+	    return FALSE;
+	  }
 
 	while (bytes --)
 	  {
@@ -16995,9 +17003,9 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	else
 	  {
 	    if (do_wide)
-	      left -= printf ("0x%lx", val);
+	      left -= printf ("0x%llx", val);
 	    else
-	      left -= printf ("0x%-.*lx", left, val);
+	      left -= printf ("0x%-.*llx", left, val);
 	  }
       }
       break;
