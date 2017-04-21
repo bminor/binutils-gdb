@@ -3040,10 +3040,12 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      paddress (gdbarch, tdep->lowest_pc));
 }
 
+#if GDB_SELF_TEST
 namespace selftests
 {
 static void aarch64_process_record_test (void);
 }
+#endif
 
 /* Suppress warning from -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_aarch64_tdep;

@@ -1,3 +1,9 @@
+2017-04-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* aarch64-tdep.c (selftests::aarch64_process_record_test): Make it #if
+	GDB_SELF_TEST.
+	* arm-tdep.c (selftests::arm_record_test): Likewise.
+
 2017-04-18  John Baldwin  <jhb@FreeBSD.org>
 
 	PR threads/20743
