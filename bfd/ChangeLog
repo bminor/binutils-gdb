@@ -1,5 +1,19 @@
 2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21402
+	* elf32-i386.c (elf_i386_link_hash_entry): Add
+	no_finish_dynamic_symbol.
+	(elf_i386_link_hash_newfunc): Set no_finish_dynamic_symbol to 0.
+	(elf_i386_allocate_dynrelocs): If a symbol isn't undefined weak
+	symbol, don't make it dynamic in PIE.
+	(elf_i386_relocate_section): If a symbol isn't dynamic in PIE,
+	set no_finish_dynamic_symbol and generate R_386_RELATIVE
+	relocation for R_386_GOT32
+	(elf_i386_finish_dynamic_symbol): Abort if no_finish_dynamic_symbol
+	isn't 0.
+
+2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19617
 	PR ld/21086
 	* elflink.c (elf_link_add_object_symbols): Require

@@ -820,6 +820,9 @@ struct elf_i386_link_hash_entry
   /* Symbol has non-GOT/non-PLT relocations in text sections.  */
   unsigned int has_non_got_reloc : 1;
 
+  /* Don't call finish_dynamic_symbol on this symbol.  */
+  unsigned int no_finish_dynamic_symbol : 1;
+
   /* 0: symbol isn't ___tls_get_addr.
      1: symbol is ___tls_get_addr.
      2: symbol is unknown.  */
@@ -959,6 +962,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->gotoff_ref = 0;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
+      eh->no_finish_dynamic_symbol = 0;
       eh->tls_get_addr = 2;
       eh->func_pointer_refcount = 0;
       eh->plt_got.offset = (bfd_vma) -1;
@@ -2863,10 +2867,14 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       int tls_type = elf_i386_hash_entry(h)->tls_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
+	 Undefined weak syms won't yet be marked as dynamic.
+	 PR ld/21402: If this symbol isn't undefined weak symbol,
+	 don't make it dynamic in PIE.   */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero
+	  && (h->root.type == bfd_link_hash_undefweak
+	      || !bfd_link_pie (info)))
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3818,6 +3826,7 @@ elf_i386_relocate_section (bfd *output_bfd,
       bfd_vma st_size;
       asection *resolved_plt;
       bfd_boolean resolved_to_zero;
+      bfd_boolean relative_reloc;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == R_386_GNU_VTINHERIT
@@ -4268,6 +4277,7 @@ r_386_got32:
 	  if (htab->elf.sgot == NULL)
 	    abort ();
 
+	  relative_reloc = FALSE;
 	  if (h != NULL)
 	    {
 	      bfd_boolean dyn;
@@ -4301,6 +4311,17 @@ r_386_got32:
 		      bfd_put_32 (output_bfd, relocation,
 				  htab->elf.sgot->contents + off);
 		      h->got.offset |= 1;
+
+		      if (h->dynindx == -1
+			  && !h->forced_local
+			  && h->root.type != bfd_link_hash_undefweak
+			  && bfd_link_pie (info))
+			{
+			  /* PR ld/21402: If this symbol isn't dynamic
+			     in PIE, generate R_386_RELATIVE here.  */
+			  eh->no_finish_dynamic_symbol = 1;
+			  relative_reloc = TRUE;
+			}
 		    }
 		}
 	      else
@@ -4322,25 +4343,27 @@ r_386_got32:
 		{
 		  bfd_put_32 (output_bfd, relocation,
 			      htab->elf.sgot->contents + off);
+		  local_got_offsets[r_symndx] |= 1;
 
 		  if (bfd_link_pic (info))
-		    {
-		      asection *s;
-		      Elf_Internal_Rela outrel;
-
-		      s = htab->elf.srelgot;
-		      if (s == NULL)
-			abort ();
-
-		      outrel.r_offset = (htab->elf.sgot->output_section->vma
-					 + htab->elf.sgot->output_offset
-					 + off);
-		      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
-		      elf_append_rel (output_bfd, s, &outrel);
-		    }
-
-		  local_got_offsets[r_symndx] |= 1;
+		    relative_reloc = TRUE;
 		}
+	    }
+
+	  if (relative_reloc)
+	    {
+	      asection *s;
+	      Elf_Internal_Rela outrel;
+
+	      s = htab->elf.srelgot;
+	      if (s == NULL)
+		abort ();
+
+	      outrel.r_offset = (htab->elf.sgot->output_section->vma
+				 + htab->elf.sgot->output_offset
+				 + off);
+	      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+	      elf_append_rel (output_bfd, s, &outrel);
 	    }
 
 	  if (off >= (bfd_vma) -2)
@@ -5321,6 +5344,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
   plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
 
   eh = (struct elf_i386_link_hash_entry *) h;
+  if (eh->no_finish_dynamic_symbol)
+    abort ();
 
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their

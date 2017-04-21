@@ -1,5 +1,11 @@
 2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21402
+	* testsuite/ld-elf/indirect.exp: Don't skip PIE indirect5 and
+	indirect6 tests on i386.
+
+2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19617
 	PR ld/21086
 	* testsuite/ld-elf/pr19617a.d: Pass --no-dynamic-linker to ld.

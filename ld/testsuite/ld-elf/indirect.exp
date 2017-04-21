@@ -222,11 +222,6 @@ foreach t [list indirect5a indirect5b indirect6a indirect6b] {
     }
 }
 
-# PR ld/21402: i386 doesn't support mixing different symbol types in PIE.
-if {[istarget "i?86-*-*"]} {
-    return
-}
-
 send_log "$CC -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie"
 catch "exec $CC -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie" exec_output
 send_log "$exec_output"
