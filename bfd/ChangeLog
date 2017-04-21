@@ -1,3 +1,11 @@
+2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19617
+	PR ld/21086
+	* elflink.c (elf_link_add_object_symbols): Require
+	--no-dynamic-linker with -E/--dynamic-list when creating
+	dynamic sections.
+
 2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elflink.c (_bfd_elf_symbol_refs_local_p): Always return TRUE
