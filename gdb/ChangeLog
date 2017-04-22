@@ -1,3 +1,7 @@
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* thread.c (print_thread_info_1): Remove dead code.
+
 2017-04-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* aarch64-tdep.c (selftests::aarch64_process_record_test): Make it #if

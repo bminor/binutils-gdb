@@ -28088,9 +28088,6 @@ The result is a list of threads.  The following attributes are
 defined for a given thread:
 
 @table @samp
-@item current
-This field exists only for the current thread.  It has the value @samp{*}.
-
 @item id
 The global identifier that @value{GDBN} uses to refer to the thread.
 

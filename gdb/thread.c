@@ -1308,15 +1308,7 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 
       chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-      if (uiout->is_mi_like_p ())
-	{
-	  /* Compatibility.  */
-	  if (tp->ptid == current_ptid)
-	    uiout->text ("* ");
-	  else
-	    uiout->text ("  ");
-	}
-      else
+      if (!uiout->is_mi_like_p ())
 	{
 	  if (tp->ptid == current_ptid)
 	    uiout->field_string ("current", "*");
