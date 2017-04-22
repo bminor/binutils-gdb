@@ -1,3 +1,8 @@
+2017-04-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/vle.s: Format.  Add se_rfgi and e_sc.
+	* testsuite/gas/ppc/vle.d: Update.
+
 2017-04-21  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21380

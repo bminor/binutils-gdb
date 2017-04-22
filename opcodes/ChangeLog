@@ -1,3 +1,11 @@
+2017-04-22  Alexander Fedotov  <alfedotov@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (ELEV): Define.
+	(vle_opcodes): Add se_rfgi and e_sc.
+	(powerpc_opcodes): Enable lbdx, lhdx, lwdx, stbdx, sthdx, stwdx
+	for E200Z4.
+
 2017-04-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-opc.c (sparc_opcodes): Mark RETT instructions as v6notv9.
