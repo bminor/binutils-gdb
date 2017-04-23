@@ -1692,8 +1692,8 @@ info_frame_command (const char *addr_exp, int from_tty)
    frames.  */
 
 static void
-backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
-		     int from_tty)
+backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
+		     int no_filters, int from_tty)
 {
   struct frame_info *fi;
   int count;
@@ -1775,11 +1775,9 @@ backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 
   if (! no_filters)
     {
-      frame_filter_flags flags = PRINT_LEVEL | PRINT_FRAME_INFO | PRINT_ARGS;
       enum ext_lang_frame_args arg_type;
 
-      if (show_locals)
-	flags |= PRINT_LOCALS;
+      flags |= PRINT_LEVEL | PRINT_FRAME_INFO | PRINT_ARGS;
       if (from_tty)
 	flags |= PRINT_MORE_FRAMES;
 
@@ -1809,7 +1807,7 @@ backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 	     the frame->prev field gets set to NULL in that case).  */
 
 	  print_frame_info (fi, 1, LOCATION, 1, 0);
-	  if (show_locals)
+	  if ((flags & PRINT_LOCALS) != 0)
 	    {
 	      struct frame_id frame_id = get_frame_id (fi);
 
@@ -1850,8 +1848,8 @@ backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 static void
 backtrace_command (const char *arg, int from_tty)
 {
-  bool fulltrace = false;
   bool filters = true;
+  frame_filter_flags flags = 0;
 
   if (arg)
     {
@@ -1868,7 +1866,7 @@ backtrace_command (const char *arg, int from_tty)
 	  if (subset_compare (this_arg.c_str (), "no-filters"))
 	    filters = false;
 	  else if (subset_compare (this_arg.c_str (), "full"))
-	    fulltrace = true;
+	    flags |= PRINT_LOCALS;
 	  else
 	    {
 	      /* Not a recognized argument, so stop.  */
@@ -1881,8 +1879,7 @@ backtrace_command (const char *arg, int from_tty)
 	arg = NULL;
     }
 
-  backtrace_command_1 (arg, fulltrace /* show_locals */,
-		       !filters /* no frame-filters */, from_tty);
+  backtrace_command_1 (arg, flags, !filters /* no frame-filters */, from_tty);
 }
 
 /* Iterate over the local variables of a block B, calling CB with
