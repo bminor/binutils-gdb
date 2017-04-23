@@ -1,5 +1,20 @@
 2017-04-23  Alan Modra  <amodra@gmail.com>
 
+	PR 21412
+	* elf-bfd.h (struct elf_backend_data <get_reloc_section>): Change
+	parameters and comment.
+	(_bfd_elf_get_reloc_section): Delete.
+	(_bfd_elf_plt_get_reloc_section): Declare.
+	* elf.c (_bfd_elf_plt_get_reloc_section, elf_get_reloc_section):
+	New functions.  Don't blindly skip over assumed .rel/.rela prefix.
+	Extracted from..
+	(_bfd_elf_get_reloc_section): ..here.  Delete.
+	(assign_section_numbers): Call elf_get_reloc_section.
+	* elf64-ppc.c (elf_backend_get_reloc_section): Define.
+	* elfxx-target.h (elf_backend_get_reloc_section): Update.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
 	PR 21409
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Don't segfault when
 	no symbols.

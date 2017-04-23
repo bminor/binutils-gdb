@@ -715,7 +715,7 @@
 #endif
 
 #ifndef elf_backend_get_reloc_section
-#define elf_backend_get_reloc_section _bfd_elf_get_reloc_section
+#define elf_backend_get_reloc_section _bfd_elf_plt_get_reloc_section
 #endif
 
 #ifndef elf_backend_copy_special_section_fields

@@ -1360,8 +1360,10 @@ struct elf_backend_data
   bfd_size_type (*maybe_function_sym) (const asymbol *sym, asection *sec,
 				       bfd_vma *code_off);
 
-  /* Return the section which RELOC_SEC applies to.  */
-  asection *(*get_reloc_section) (asection *reloc_sec);
+  /* Given NAME, the name of a relocation section stripped of its
+     .rel/.rela prefix, return the section in ABFD to which the
+     relocations apply.  */
+  asection *(*get_reloc_section) (bfd *abfd, const char *name);
 
   /* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
      has a type >= SHT_LOOS.  Returns TRUE if the fields were initialised,
@@ -2448,7 +2450,7 @@ extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 extern bfd_size_type _bfd_elf_maybe_function_sym (const asymbol *, asection *,
 						  bfd_vma *);
 
-extern asection *_bfd_elf_get_reloc_section (asection *);
+extern asection *_bfd_elf_plt_get_reloc_section (bfd *, const char *);
 
 extern int bfd_elf_get_default_section_type (flagword);
 
