@@ -1,5 +1,11 @@
 2017-04-23  Alan Modra  <amodra@gmail.com>
 
+	PR 21415
+	* objdump.c (disassemble_section): Check bfd_get_section_contents
+	status.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
 	PR 21408
 	* dwarf.c (display_debug_lines_decoded): Don't segfault on NULL
 	file_table.
