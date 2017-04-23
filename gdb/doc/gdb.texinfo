@@ -7307,44 +7307,42 @@ frame (frame zero), followed by its caller (frame one), and on up the
 stack.
 
 @anchor{backtrace-command}
-@table @code
 @kindex backtrace
 @kindex bt @r{(@code{backtrace})}
-@item backtrace
-@itemx bt
-Print a backtrace of the entire stack: one line per frame for all
-frames in the stack.
+To print a backtrace of the entire stack, use the @code{backtrace}
+command, or its alias @code{bt}.  This command will print one line per
+frame for frames in the stack.  By default, all stack frames are
+printed.  You can stop the backtrace at any time by typing the system
+interrupt character, normally @kbd{Ctrl-c}.
 
-You can stop the backtrace at any time by typing the system interrupt
-character, normally @kbd{Ctrl-c}.
+@table @code
+@item backtrace [@var{args}@dots{}]
+@itemx bt [@var{args}@dots{}]
+Print the backtrace of the entire stack.  The optional @var{args} can
+be one of the following:
 
-@item backtrace @var{n}
-@itemx bt @var{n}
-Similar, but print only the innermost @var{n} frames.
+@table @code
+@item @var{n}
+@itemx @var{n}
+Print only the innermost @var{n} frames, where @var{n} is a positive
+number.
 
-@item backtrace -@var{n}
-@itemx bt -@var{n}
-Similar, but print only the outermost @var{n} frames.
+@item -@var{n}
+@itemx -@var{n}
+Print only the outermost @var{n} frames, where @var{n} is a positive
+number.
 
-@item backtrace full
-@itemx bt full
-@itemx bt full @var{n}
-@itemx bt full -@var{n}
-Print the values of the local variables also.  As described above,
-@var{n} specifies the number of frames to print.
+@item full
+Print the values of the local variables also.  This can be combined
+with a number to limit the number of frames shown.
 
-@item backtrace no-filters
-@itemx bt no-filters
-@itemx bt no-filters @var{n}
-@itemx bt no-filters -@var{n}
-@itemx bt no-filters full
-@itemx bt no-filters full @var{n}
-@itemx bt no-filters full -@var{n}
+@item no-filters
 Do not run Python frame filters on this backtrace.  @xref{Frame
 Filter API}, for more information.  Additionally use @ref{disable
 frame-filter all} to turn off all frame filters.  This is only
 relevant when @value{GDBN} has been configured with @code{Python}
 support.
+@end table
 @end table
 
 @kindex where

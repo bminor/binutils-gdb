@@ -1850,61 +1850,39 @@ backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 static void
 backtrace_command (const char *arg, int from_tty)
 {
-  int fulltrace_arg = -1, arglen = 0, argc = 0, no_filters  = -1;
-  int user_arg = 0;
+  bool fulltrace = false;
+  bool filters = true;
 
-  std::string reconstructed_arg;
   if (arg)
     {
-      char **argv;
-      int i;
+      bool done = false;
 
-      gdb_argv built_argv (arg);
-      argv = built_argv.get ();
-      argc = 0;
-      for (i = 0; argv[i]; i++)
+      while (!done)
 	{
-	  unsigned int j;
+	  const char *save_arg = arg;
+	  std::string this_arg = extract_arg (&arg);
 
-	  for (j = 0; j < strlen (argv[i]); j++)
-	    argv[i][j] = TOLOWER (argv[i][j]);
+	  if (this_arg.empty ())
+	    break;
 
-	  if (no_filters < 0 && subset_compare (argv[i], "no-filters"))
-	    no_filters = argc;
+	  if (subset_compare (this_arg.c_str (), "no-filters"))
+	    filters = false;
+	  else if (subset_compare (this_arg.c_str (), "full"))
+	    fulltrace = true;
 	  else
 	    {
-	      if (fulltrace_arg < 0 && subset_compare (argv[i], "full"))
-		fulltrace_arg = argc;
-	      else
-		{
-		  user_arg++;
-		  arglen += strlen (argv[i]);
-		}
+	      /* Not a recognized argument, so stop.  */
+	      arg = save_arg;
+	      done = true;
 	    }
-	  argc++;
 	}
-      arglen += user_arg;
-      if (fulltrace_arg >= 0 || no_filters >= 0)
-	{
-	  if (arglen > 0)
-	    {
-	      for (i = 0; i < argc; i++)
-		{
-		  if (i != fulltrace_arg && i != no_filters)
-		    {
-		      reconstructed_arg += argv[i];
-		      reconstructed_arg += " ";
-		    }
-		}
-	      arg = reconstructed_arg.c_str ();
-	    }
-	  else
-	    arg = NULL;
-	}
+
+      if (*arg == '\0')
+	arg = NULL;
     }
 
-  backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */,
-		       no_filters >= 0 /* no frame-filters */, from_tty);
+  backtrace_command_1 (arg, fulltrace /* show_locals */,
+		       !filters /* no frame-filters */, from_tty);
 }
 
 /* Iterate over the local variables of a block B, calling CB with

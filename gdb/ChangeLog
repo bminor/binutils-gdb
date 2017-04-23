@@ -1,3 +1,7 @@
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (backtrace_command): Rewrite command line parsing.
+
 2018-03-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (DEF_VEC_I(offset_type)): Remove.
