@@ -916,7 +916,7 @@ py_print_args (PyObject *filter,
     containing all the frames level that have already been printed.
     If a frame level has been printed, do not print it again (in the
     case of elided frames).  Returns EXT_LANG_BT_ERROR on error, with any
-    GDB exceptions converted to a Python exception, or EXT_LANG_BT_COMPLETED
+    GDB exceptions converted to a Python exception, or EXT_LANG_BT_OK
     on success.  It can also throw an exception RETURN_QUIT.  */
 
 static enum ext_lang_bt_status
@@ -969,7 +969,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       if (py_mi_print_variables (filter, out, &opts,
 				 args_type, frame) == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
-      return EXT_LANG_BT_COMPLETED;
+      return EXT_LANG_BT_OK;
     }
 
   gdb::optional<ui_out_emit_tuple> tuple;
@@ -1270,7 +1270,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	}
     }
 
-  return EXT_LANG_BT_COMPLETED;
+  return EXT_LANG_BT_OK;
 }
 
 /* Helper function to initiate frame filter invocation at starting
@@ -1328,7 +1328,7 @@ bootstrap_python_frame_filters (struct frame_info *frame,
     format, OUT is the output stream to print.  FRAME_LOW is the
     beginning of the slice of frames to print, and FRAME_HIGH is the
     upper limit of the frames to count.  Returns EXT_LANG_BT_ERROR on error,
-    or EXT_LANG_BT_COMPLETED on success.  */
+    or EXT_LANG_BT_OK on success.  */
 
 enum ext_lang_bt_status
 gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,

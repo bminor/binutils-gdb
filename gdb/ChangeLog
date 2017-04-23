@@ -1,5 +1,14 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (py_print_frame): Return
+	EXT_LANG_BT_OK.
+	(gdbpy_apply_frame_filter): Update comment.
+	* extension.h (enum ext_lang_bt_status) <EXT_LANG_BT_COMPLETED>:
+	Remove.
+	<EXT_LANG_BT_NO_FILTERS>: Change value.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	PR backtrace/15582:
 	* stack.c (backtrace_command): Parse "hide" argument.
 	* python/py-framefilter.c (py_print_frame): Handle PRINT_HIDE.

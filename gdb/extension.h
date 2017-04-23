@@ -76,13 +76,9 @@ enum ext_lang_bt_status
        succeeded.  */
     EXT_LANG_BT_OK = 1,
 
-    /* Return when the frame filter process is complete, and all
-       operations have succeeded.  */
-    EXT_LANG_BT_COMPLETED = 2,
-
     /* Return when the frame filter process is complete, but there
        were no filter registered and enabled to process.  */
-    EXT_LANG_BT_NO_FILTERS = 3
+    EXT_LANG_BT_NO_FILTERS = 2
   };
 
 /* Flags to pass to apply_extlang_frame_filter.  */
