@@ -1,5 +1,10 @@
 2017-04-23  Alan Modra  <amodra@gmail.com>
 
+	PR 21417
+	* ar.c (main): Check that an archive file is given after options.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
 	PR 21415
 	* objdump.c (disassemble_section): Check bfd_get_section_contents
 	status.

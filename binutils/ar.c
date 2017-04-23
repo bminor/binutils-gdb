@@ -788,6 +788,8 @@ main (int argc, char **argv)
 	}
 
       inarch_filename = argv[arg_index++];
+      if (inarch_filename == NULL)
+	usage (0);
 
       for (file_count = 0; argv[arg_index + file_count] != NULL; file_count++)
 	continue;
