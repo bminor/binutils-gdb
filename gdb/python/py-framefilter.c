@@ -560,6 +560,9 @@ enumerate_args (PyObject *iter,
 	    }
 	  END_CATCH
 
+	  gdb::unique_xmalloc_ptr<char> arg_holder (arg.error);
+	  gdb::unique_xmalloc_ptr<char> entry_holder (entryarg.error);
+
 	  /* The object has not provided a value, so this is a frame
 	     argument to be read by GDB.  In this case we have to
 	     account for entry-values.  */
@@ -571,11 +574,7 @@ enumerate_args (PyObject *iter,
 				       args_type,
 				       print_args_field,
 				       NULL) == EXT_LANG_BT_ERROR)
-		{
-		  xfree (arg.error);
-		  xfree (entryarg.error);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 	    }
 
 	  if (entryarg.entry_kind != print_entry_values_no)
@@ -589,8 +588,6 @@ enumerate_args (PyObject *iter,
 		    }
 		  CATCH (except, RETURN_MASK_ALL)
 		    {
-		      xfree (arg.error);
-		      xfree (entryarg.error);
 		      gdbpy_convert_exception (except);
 		      return EXT_LANG_BT_ERROR;
 		    }
@@ -600,15 +597,8 @@ enumerate_args (PyObject *iter,
 	      if (py_print_single_arg (out, NULL, &entryarg, NULL, &opts,
 				       args_type, print_args_field, NULL)
 		  == EXT_LANG_BT_ERROR)
-		{
-		  xfree (arg.error);
-		  xfree (entryarg.error);
-		  return EXT_LANG_BT_ERROR;
-		}
+		return EXT_LANG_BT_ERROR;
 	    }
-
-	  xfree (arg.error);
-	  xfree (entryarg.error);
 	}
       else
 	{

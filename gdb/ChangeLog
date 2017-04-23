@@ -1,5 +1,10 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (enumerate_args): Use
+	gdb::unique_xmalloc_ptr.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (py_print_frame): Return
 	EXT_LANG_BT_OK.
 	(gdbpy_apply_frame_filter): Update comment.
