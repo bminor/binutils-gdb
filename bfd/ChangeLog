@@ -1,3 +1,9 @@
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21409
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Don't segfault when
+	no symbols.
+
 2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21402
