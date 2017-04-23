@@ -1,5 +1,13 @@
 2017-04-23  Alan Modra  <amodra@gmail.com>
 
+	PR 21414
+	* section.c (GLOBAL_SYM_INIT): Make available in bfd.h.
+	* elf.c (lcomm_sym): New.
+	(_bfd_elf_large_com_section): Use lcomm_sym section symbol.
+	* bfd-in2.h: Regenerate.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
 	PR 21412
 	* elf-bfd.h (struct elf_backend_data <get_reloc_section>): Change
 	parameters and comment.

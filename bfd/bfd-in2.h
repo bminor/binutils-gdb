@@ -1839,6 +1839,18 @@ extern asection _bfd_std_section[4];
      { NULL }, { NULL }                                                \
     }
 
+/* We use a macro to initialize the static asymbol structures because
+   traditional C does not permit us to initialize a union member while
+   gcc warns if we don't initialize it.
+   the_bfd, name, value, attr, section [, udata]  */
+#ifdef __STDC__
+#define GLOBAL_SYM_INIT(NAME, SECTION) \
+  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
+#else
+#define GLOBAL_SYM_INIT(NAME, SECTION) \
+  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
+#endif
+
 void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
