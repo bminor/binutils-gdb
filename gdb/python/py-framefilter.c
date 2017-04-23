@@ -1238,37 +1238,37 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	return EXT_LANG_BT_ERROR;
     }
 
-  {
-    /* Finally recursively print elided frames, if any.  */
-    gdbpy_ref<> elided (get_py_iter_from_func (filter, "elided"));
-    if (elided == NULL)
-      return EXT_LANG_BT_ERROR;
+  if ((flags & PRINT_HIDE) == 0)
+    {
+      /* Finally recursively print elided frames, if any.  */
+      gdbpy_ref<> elided (get_py_iter_from_func (filter, "elided"));
+      if (elided == NULL)
+	return EXT_LANG_BT_ERROR;
 
-    if (elided != Py_None)
-      {
-	PyObject *item;
+      if (elided != Py_None)
+	{
+	  PyObject *item;
 
-	ui_out_emit_list inner_list_emiter (out, "children");
+	  ui_out_emit_list inner_list_emiter (out, "children");
 
-	if (! out->is_mi_like_p ())
-	  indent++;
+	  if (! out->is_mi_like_p ())
+	    indent++;
 
-	while ((item = PyIter_Next (elided.get ())))
-	  {
-	    gdbpy_ref<> item_ref (item);
+	  while ((item = PyIter_Next (elided.get ())))
+	    {
+	      gdbpy_ref<> item_ref (item);
 
-	    enum ext_lang_bt_status success = py_print_frame (item, flags,
-							      args_type, out,
-							      indent,
-							      levels_printed);
+	      enum ext_lang_bt_status success
+		= py_print_frame (item, flags, args_type, out, indent,
+				  levels_printed);
 
-	    if (success == EXT_LANG_BT_ERROR)
-	      return EXT_LANG_BT_ERROR;
-	  }
-	if (item == NULL && PyErr_Occurred ())
-	  return EXT_LANG_BT_ERROR;
-      }
-  }
+	      if (success == EXT_LANG_BT_ERROR)
+		return EXT_LANG_BT_ERROR;
+	    }
+	  if (item == NULL && PyErr_Occurred ())
+	    return EXT_LANG_BT_ERROR;
+	}
+    }
 
   return EXT_LANG_BT_COMPLETED;
 }

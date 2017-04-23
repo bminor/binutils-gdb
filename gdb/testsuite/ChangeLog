@@ -1,3 +1,8 @@
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
+	PR backtrace/15582:
+	* gdb.python/py-framefilter.exp: Add "bt hide" test.
+
 2018-03-23  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/22968

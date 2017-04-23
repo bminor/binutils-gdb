@@ -1,5 +1,10 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	PR backtrace/15582:
+	* gdb.texinfo (Backtrace): Mention "hide" argument.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* gdb.texinfo (Backtrace): Describe options individually.
 
 2018-03-19  Tom Tromey  <tom@tromey.com>

@@ -157,6 +157,9 @@ gdb_test "bt no-filter full" \
 gdb_test "bt full" \
     ".*#0.*end_func.*str = $hex \"The End\".*st2 = $hex \"Is Near\".*b = 12.*c = 5.*#1.*in funca \\(\\).*#2.*in funcb \\(j=10\\).*bar = \{a = 42, b = 84\}.*#22.*in func1 \\(\\).*#23.*in func2 \\(f=3\\).*elided = $hex \"Elided frame\".*fb = \{nothing = $hex \"Elided Foo Bar\", f = 84, s = 38\}.*bf = $hex.*" \
     "bt full with Reverse disabled"
+gdb_test "bt full hide" \
+    ".*#0.*end_func.*str = $hex \"The End\".*st2 = $hex \"Is Near\".*b = 12.*c = 5.*#1.*in funca \\(\\).*#2.*in funcb \\(j=10\\).*bar = \{a = 42, b = 84\}.*#22.*in func1 \\(\\)\[^#\]*#24.*in func3 \\(i=3\\).*" \
+    "bt full hide with Reverse disabled"
 
 # Test set print frame-arguments
 # none

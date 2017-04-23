@@ -1867,6 +1867,8 @@ backtrace_command (const char *arg, int from_tty)
 	    filters = false;
 	  else if (subset_compare (this_arg.c_str (), "full"))
 	    flags |= PRINT_LOCALS;
+	  else if (subset_compare (this_arg.c_str (), "hide"))
+	    flags |= PRINT_HIDE;
 	  else
 	    {
 	      /* Not a recognized argument, so stop.  */

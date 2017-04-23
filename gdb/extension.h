@@ -103,6 +103,9 @@ enum frame_filter_flag
 
     /* Set this flag if a "More frames" message is to be printed.  */
     PRINT_MORE_FRAMES = 1 << 4,
+
+    /* Set this flag if elided frames should not be printed.  */
+    PRINT_HIDE = 1 << 5,
   };
 
 DEF_ENUM_FLAGS_TYPE (enum frame_filter_flag, frame_filter_flags);

@@ -7342,6 +7342,12 @@ Filter API}, for more information.  Additionally use @ref{disable
 frame-filter all} to turn off all frame filters.  This is only
 relevant when @value{GDBN} has been configured with @code{Python}
 support.
+
+@item hide
+A Python frame filter might decide to ``elide'' some frames.  Normally
+such elided frames are still printed, but they are indented relative
+to the filtered frames that cause them to be elided.  The @code{hide}
+option causes elided frames to not be printed at all.
 @end table
 @end table
 
