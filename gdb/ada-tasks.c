@@ -1008,7 +1008,6 @@ print_ada_task_info (struct ui_out *uiout,
   struct ada_tasks_inferior_data *data;
   int taskno, nb_tasks;
   int taskno_arg = 0;
-  struct cleanup *old_chain;
   int nb_columns;
 
   if (ada_build_task_list () == 0)
@@ -1047,8 +1046,7 @@ print_ada_task_info (struct ui_out *uiout,
     nb_tasks = VEC_length (ada_task_info_s, data->task_list);
 
   nb_columns = uiout->is_mi_like_p () ? 8 : 7;
-  old_chain = make_cleanup_ui_out_table_begin_end (uiout, nb_columns,
-						   nb_tasks, "tasks");
+  ui_out_emit_table table_emitter (uiout, nb_columns, nb_tasks, "tasks");
   uiout->table_header (1, ui_left, "current", "");
   uiout->table_header (3, ui_right, "id", "ID");
   uiout->table_header (9, ui_right, "task-id", "TID");
@@ -1143,8 +1141,6 @@ print_ada_task_info (struct ui_out *uiout,
 
       uiout->text ("\n");
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Print a detailed description of the Ada task whose ID is TASKNO_STR

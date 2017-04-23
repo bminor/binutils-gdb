@@ -346,7 +346,6 @@ skip_info (char *arg, int from_tty)
   struct skiplist_entry *e;
   int num_printable_entries = 0;
   struct value_print_options opts;
-  struct cleanup *tbl_chain;
 
   get_user_print_options (&opts);
 
@@ -367,9 +366,8 @@ skip_info (char *arg, int from_tty)
       return;
     }
 
-  tbl_chain = make_cleanup_ui_out_table_begin_end (current_uiout, 6,
-						   num_printable_entries,
-						   "SkiplistTable");
+  ui_out_emit_table table_emitter (current_uiout, 6, num_printable_entries,
+				   "SkiplistTable");
 
   current_uiout->table_header (5, ui_left, "number", "Num");   /* 1 */
   current_uiout->table_header (3, ui_left, "enabled", "Enb");  /* 2 */
@@ -411,8 +409,6 @@ skip_info (char *arg, int from_tty)
 
       current_uiout->text ("\n");
     }
-
-  do_cleanups (tbl_chain);
 }
 
 static void

@@ -1,3 +1,22 @@
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (tvariables_info_1): Use ui_out_emit_table.
+	(info_static_tracepoint_markers_command): Likewise.
+	* solib.c (info_sharedlibrary_command): Use ui_out_emit_table.
+	* skip.c (skip_info): Use ui_out_emit_table.
+	* progspace.c (print_program_space): Use ui_out_emit_table.
+	* osdata.c (info_osdata): Use ui_out_emit_table.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions): Use
+	ui_out_emit_table.
+	* linux-thread-db.c (info_auto_load_libthread_db): Use
+	ui_out_emit_table.
+	* inferior.c (print_inferior): Use ui_out_emit_table.
+	* gdb_bfd.c (maintenance_info_bfds): Use ui_out_emit_table.
+	* breakpoint.c (breakpoint_1): Use ui_out_emit_table.
+	* auto-load.c (auto_load_info_scripts): Use ui_out_emit_table.
+	* ada-tasks.c (print_ada_task_info): Use ui_out_emit_table.
+	* ui-out.h (class ui_out_emit_table): New.
+
 2017-08-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-tdep.c (mips_fpu_type_str): New function.

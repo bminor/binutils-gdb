@@ -1382,18 +1382,18 @@ auto_load_info_scripts (char *pattern, int from_tty,
   if (nr_scripts > 0 && pattern == auto_load_info_scripts_pattern_nl)
     uiout->text ("\n");
 
-  /* Note: This creates a cleanup to output the table end marker.  */
-  make_cleanup_ui_out_table_begin_end (uiout, 2, nr_scripts,
-				       "AutoLoadedScriptsTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 2, nr_scripts,
+				     "AutoLoadedScriptsTable");
 
-  uiout->table_header (7, ui_left, "loaded", "Loaded");
-  uiout->table_header (70, ui_left, "script", "Script");
-  uiout->table_body ();
+    uiout->table_header (7, ui_left, "loaded", "Loaded");
+    uiout->table_header (70, ui_left, "script", "Script");
+    uiout->table_body ();
 
-  print_scripts (script_files);
-  print_scripts (script_texts);
+    print_scripts (script_files);
+    print_scripts (script_texts);
+  }
 
-  /* Finish up the table before checking for no matching scripts.  */
   do_cleanups (script_chain);
 
   if (nr_scripts == 0)

@@ -534,7 +534,6 @@ static void
 print_inferior (struct ui_out *uiout, char *requested_inferiors)
 {
   struct inferior *inf;
-  struct cleanup *old_chain;
   int inf_count = 0;
 
   /* Compute number of inferiors we will print.  */
@@ -552,8 +551,7 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
       return;
     }
 
-  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 4, inf_count,
-						   "inferiors");
+  ui_out_emit_table table_emitter (uiout, 4, inf_count, "inferiors");
   uiout->table_header (1, ui_left, "current", "");
   uiout->table_header (4, ui_left, "number", "Num");
   uiout->table_header (17, ui_left, "target-id", "Description");
@@ -597,8 +595,6 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 
       uiout->text ("\n");
     }
-
-  do_cleanups (old_chain);
 }
 
 static void

@@ -482,7 +482,6 @@ tvariables_info_1 (void)
   struct trace_state_variable *tsv;
   int ix;
   int count = 0;
-  struct cleanup *back_to;
   struct ui_out *uiout = current_uiout;
 
   if (VEC_length (tsv_s, tvariables) == 0 && !uiout->is_mi_like_p ())
@@ -496,8 +495,7 @@ tvariables_info_1 (void)
     tsv->value_known = target_get_trace_state_variable_value (tsv->number,
 							      &(tsv->value));
 
-  back_to = make_cleanup_ui_out_table_begin_end (uiout, 3,
-                                                 count, "trace-variables");
+  ui_out_emit_table table_emitter (uiout, 3, count, "trace-variables");
   uiout->table_header (15, ui_left, "name", "Name");
   uiout->table_header (11, ui_left, "initial", "Initial");
   uiout->table_header (11, ui_left, "current", "Current");
@@ -531,8 +529,6 @@ tvariables_info_1 (void)
         uiout->field_string ("current", c);
       uiout->text ("\n");
     }
-
-  do_cleanups (back_to);
 }
 
 /* List all the trace state variables.  */
@@ -3952,9 +3948,8 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
      don't work without in-process agent, so we don't bother users to type
      `set agent on' when to use static tracepoint.  */
 
-  old_chain
-    = make_cleanup_ui_out_table_begin_end (uiout, 5, -1,
-					   "StaticTracepointMarkersTable");
+  ui_out_emit_table table_emitter (uiout, 5, -1,
+				   "StaticTracepointMarkersTable");
 
   uiout->table_header (7, ui_left, "counter", "Cnt");
 
@@ -3970,7 +3965,7 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
   uiout->table_body ();
 
   markers = target_static_tracepoint_markers_by_strid (NULL);
-  make_cleanup (VEC_cleanup (static_tracepoint_marker_p), &markers);
+  old_chain = make_cleanup (VEC_cleanup (static_tracepoint_marker_p), &markers);
 
   for (i = 0;
        VEC_iterate (static_tracepoint_marker_p,
