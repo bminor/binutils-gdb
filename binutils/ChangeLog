@@ -1,5 +1,10 @@
 2017-04-23  Alan Modra  <amodra@gmail.com>
 
+	PR 21418
+	* ar.c (main): Check -a, -b, -i and -N args are given.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
 	PR 21417
 	* ar.c (main): Check that an archive file is given after options.
 

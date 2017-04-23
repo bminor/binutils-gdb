@@ -776,12 +776,18 @@ main (int argc, char **argv)
       default_deterministic ();
 
       if (postype != pos_default)
-	posname = argv[arg_index++];
+	{
+	  posname = argv[arg_index++];
+	  if (posname == NULL)
+	    fatal (_("missing position arg."));
+	}
 
       if (counted_name_mode)
 	{
 	  if (operation != extract && operation != del)
 	    fatal (_("`N' is only meaningful with the `x' and `d' options."));
+	  if (argv[arg_index] == NULL)
+	    fatal (_("`N' missing value."));
 	  counted_name_counter = atoi (argv[arg_index++]);
 	  if (counted_name_counter <= 0)
 	    fatal (_("Value for `N' must be positive."));
