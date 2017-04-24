@@ -1,3 +1,10 @@
+2017-04-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/ld-sparc/tlssunbin64.dd: Expect `return' instructions
+	instead of `rett' in V9.
+	* testsuite/ld-sparc/tlssunnopic64.dd: Likewise.
+	* testsuite/ld-sparc/tlssunpic64.dd: Likewise.
+
 2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21402
