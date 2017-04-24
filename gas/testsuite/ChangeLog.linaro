@@ -1,0 +1,11 @@
+2017-06-14  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	Backport from mainline:
+	2017-04-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.s: Explain
+	expectation of LDR not generating a MOVS for low registers and small
+	constants.  Add tests of MOVW generation.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: Update
+	expected disassembly.
+

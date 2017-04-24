@@ -1,3 +1,11 @@
+2017-06-14  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	Backport from mainline:
+	2017-04-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Remove code generating MOVS.
+	Forbid MOV.W and MOVW if destination is SP or PC.
+
 2016-08-29  Adhemerval Zanella  <adhemerval.zanella@linaro.com>
 
 	Backport from mainline:
