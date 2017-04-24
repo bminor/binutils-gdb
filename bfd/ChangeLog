@@ -1,5 +1,14 @@
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21402
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): If a symbol isn't
+	undefined weak symbol, don't make it dynamic.
+	(elf_i386_relocate_section): If a symbol isn't dynamic in PIC,
+	set no_finish_dynamic_symbol and generate R_386_RELATIVE
+	relocation for R_386_GOT32.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/21425
 	* elf32-i386.c (ELF_MAXPAGESIZE): Set to 0x1000 for VxWorks.
 

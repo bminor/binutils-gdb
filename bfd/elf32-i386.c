@@ -2748,7 +2748,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -2867,14 +2868,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       int tls_type = elf_i386_hash_entry(h)->tls_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.
-	 PR ld/21402: If this symbol isn't undefined weak symbol,
-	 don't make it dynamic in PIE.   */
+	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
 	  && !resolved_to_zero
-	  && (h->root.type == bfd_link_hash_undefweak
-	      || !bfd_link_pie (info)))
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3035,7 +3033,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     Undefined weak syms won't yet be marked as dynamic.  */
 	  if (h->dynindx == -1
 	      && !h->forced_local
-	      && !resolved_to_zero)
+	      && !resolved_to_zero
+	      && h->root.type == bfd_link_hash_undefweak)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
@@ -4315,10 +4314,10 @@ r_386_got32:
 		      if (h->dynindx == -1
 			  && !h->forced_local
 			  && h->root.type != bfd_link_hash_undefweak
-			  && bfd_link_pie (info))
+			  && bfd_link_pic (info))
 			{
 			  /* PR ld/21402: If this symbol isn't dynamic
-			     in PIE, generate R_386_RELATIVE here.  */
+			     in PIC, generate R_386_RELATIVE here.  */
 			  eh->no_finish_dynamic_symbol = 1;
 			  relative_reloc = TRUE;
 			}
