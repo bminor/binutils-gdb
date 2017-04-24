@@ -1,3 +1,12 @@
+2017-05-01  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/21404
+	* elf32-avr.c (avr_should_move_sym): New function.
+	(avr_should_reduce_sym_size): Likewise.
+	(avr_should_increase_sym_size): Likewise.
+	(elf32_avr_relax_delete_bytes): Adjust symbol values
+	and sizes by calling new functions.
+
 2017-05-01  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* config.bfd (riscv32-*): Enable rv64.
