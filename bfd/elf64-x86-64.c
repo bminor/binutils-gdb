@@ -867,6 +867,9 @@ struct elf_x86_64_link_hash_entry
   /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
   unsigned int has_non_got_reloc : 1;
 
+  /* Don't call finish_dynamic_symbol on this symbol.  */
+  unsigned int no_finish_dynamic_symbol : 1;
+
   /* 0: symbol isn't __tls_get_addr.
      1: symbol is __tls_get_addr.
      2: symbol is unknown.  */
@@ -1022,6 +1025,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->has_bnd_reloc = 0;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
+      eh->no_finish_dynamic_symbol = 0;
       eh->tls_get_addr = 2;
       eh->func_pointer_refcount = 0;
       eh->plt_bnd.offset = (bfd_vma) -1;
@@ -3218,7 +3222,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3338,7 +3343,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3475,6 +3481,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  if (h->dynindx == -1
 	      && ! h->forced_local
 	      && ! resolved_to_zero
+	      && h->root.type == bfd_link_hash_undefweak
 	      && ! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 
@@ -4270,6 +4277,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       asection *base_got, *resolved_plt;
       bfd_vma st_size;
       bfd_boolean resolved_to_zero;
+      bfd_boolean relative_reloc;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_X86_64_GNU_VTINHERIT
@@ -4637,6 +4645,7 @@ do_ifunc_pointer:
 	  if (htab->elf.sgot == NULL)
 	    abort ();
 
+	  relative_reloc = FALSE;
 	  if (h != NULL)
 	    {
 	      bfd_boolean dyn;
@@ -4683,6 +4692,17 @@ do_ifunc_pointer:
 		      /* Note that this is harmless for the GOTPLT64 case,
 			 as -1 | 1 still is -1.  */
 		      h->got.offset |= 1;
+
+		      if (h->dynindx == -1
+			  && !h->forced_local
+			  && h->root.type != bfd_link_hash_undefweak
+			  && bfd_link_pic (info))
+			{
+			  /* If this symbol isn't dynamic in PIC,
+			     generate R_X86_64_RELATIVE here.  */
+			  eh->no_finish_dynamic_symbol = 1;
+			  relative_reloc = TRUE;
+			}
 		    }
 		}
 	      else
@@ -4704,28 +4724,30 @@ do_ifunc_pointer:
 		{
 		  bfd_put_64 (output_bfd, relocation,
 			      base_got->contents + off);
+		  local_got_offsets[r_symndx] |= 1;
 
 		  if (bfd_link_pic (info))
-		    {
-		      asection *s;
-		      Elf_Internal_Rela outrel;
-
-		      /* We need to generate a R_X86_64_RELATIVE reloc
-			 for the dynamic linker.  */
-		      s = htab->elf.srelgot;
-		      if (s == NULL)
-			abort ();
-
-		      outrel.r_offset = (base_got->output_section->vma
-					 + base_got->output_offset
-					 + off);
-		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
-		      outrel.r_addend = relocation;
-		      elf_append_rela (output_bfd, s, &outrel);
-		    }
-
-		  local_got_offsets[r_symndx] |= 1;
+		    relative_reloc = TRUE;
 		}
+	    }
+
+	  if (relative_reloc)
+	    {
+	      asection *s;
+	      Elf_Internal_Rela outrel;
+
+	      /* We need to generate a R_X86_64_RELATIVE reloc
+		 for the dynamic linker.  */
+	      s = htab->elf.srelgot;
+	      if (s == NULL)
+		abort ();
+
+	      outrel.r_offset = (base_got->output_section->vma
+				 + base_got->output_offset
+				 + off);
+	      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
+	      outrel.r_addend = relocation;
+	      elf_append_rela (output_bfd, s, &outrel);
 	    }
 
 	  if (off >= (bfd_vma) -2)
@@ -5797,6 +5819,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  : get_elf_x86_64_backend_data (output_bfd));
 
   eh = (struct elf_x86_64_link_hash_entry *) h;
+  if (eh->no_finish_dynamic_symbol)
+    abort ();
 
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their

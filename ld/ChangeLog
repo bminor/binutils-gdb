@@ -1,5 +1,10 @@
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/no-plt.exp: Also check no-plt-1e.nd.
+	* testsuite/ld-x86-64/no-plt-1e.nd: New file.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/pr12570a.d: Skip for nacl targets.
 	* testsuite/ld-i386/pr12570b.d: Likewise.
 

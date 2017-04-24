@@ -1,5 +1,19 @@
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add
+	no_finish_dynamic_symbol.
+	(elf_x86_64_link_hash_newfunc): Set no_finish_dynamic_symbol to
+	0.
+	(elf_x86_64_allocate_dynrelocs): If a symbol isn't undefined
+	weak symbol, don't make it dynamic.
+	(elf_x86_64_relocate_section): If a symbol isn't dynamic in PIC,
+	set no_finish_dynamic_symbol and generate R_X86_64_RELATIVE
+	relocation for GOT reference.
+	(elf_x86_64_finish_dynamic_symbol): Abort if
+	no_finish_dynamic_symbol isn't 0.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/21402
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): If a symbol isn't
 	undefined weak symbol, don't make it dynamic.
