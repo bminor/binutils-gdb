@@ -1,3 +1,7 @@
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (process_mips_specific): Add static GOT support.
+
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* readelf.c (process_mips_specific): Remove error reporting from

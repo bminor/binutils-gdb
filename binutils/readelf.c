@@ -15007,8 +15007,93 @@ process_mips_specific (FILE * file)
 
   /* We have a lot of special sections.  Thanks SGI!  */
   if (dynamic_section == NULL)
-    /* No information available.  */
-    return res;
+    {
+      /* No dynamic information available.  See if there is static GOT.  */
+      sect = find_section (".got");
+      if (sect != NULL)
+	{
+	  unsigned char *data_end;
+	  unsigned char *data;
+	  bfd_vma ent, end;
+	  int addr_size;
+
+	  pltgot = sect->sh_addr;
+
+	  ent = pltgot;
+	  addr_size = (is_32bit_elf ? 4 : 8);
+	  end = pltgot + sect->sh_size;
+
+	  data = (unsigned char *) get_data (NULL, file, sect->sh_offset,
+					     end - pltgot, 1,
+					     _("Global Offset Table data"));
+	  /* PR 12855: Null data is handled gracefully throughout.  */
+	  data_end = data + (end - pltgot);
+
+	  printf (_("\nStatic GOT:\n"));
+	  printf (_(" Canonical gp value: "));
+	  print_vma (ent + 0x7ff0, LONG_HEX);
+	  printf ("\n\n");
+
+	  /* In a dynamic binary GOT[0] is reserved for the dynamic
+	     loader to store the lazy resolver pointer, however in
+	     a static binary it may well have been omitted and GOT
+	     reduced to a table of addresses.
+	     PR 21344: Check for the entry being fully available
+	     before fetching it.  */
+	  if (data
+	      && data + ent - pltgot + addr_size <= data_end
+	      && byte_get (data + ent - pltgot, addr_size) == 0)
+	    {
+	      printf (_(" Reserved entries:\n"));
+	      printf (_("  %*s %10s %*s\n"),
+		      addr_size * 2, _("Address"), _("Access"),
+		      addr_size * 2, _("Value"));
+	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
+	      printf ("\n");
+	      if (ent == (bfd_vma) -1)
+		goto sgot_print_fail;
+
+	      /* Check for the MSB of GOT[1] being set, identifying a
+		 GNU object.  This entry will be used by some runtime
+		 loaders, to store the module pointer.  Otherwise this
+		 is an ordinary local entry.
+		 PR 21344: Check for the entry being fully available
+		 before fetching it.  */
+	      if (data
+		  && data + ent - pltgot + addr_size <= data_end
+		  && (byte_get (data + ent - pltgot, addr_size)
+		      >> (addr_size * 8 - 1)) != 0)
+		{
+		  ent = print_mips_got_entry (data, pltgot, ent, data_end);
+		  printf ("\n");
+		  if (ent == (bfd_vma) -1)
+		    goto sgot_print_fail;
+		}
+	      printf ("\n");
+	    }
+
+	  if (ent < end)
+	    {
+	      printf (_(" Local entries:\n"));
+	      printf ("  %*s %10s %*s\n",
+		      addr_size * 2, _("Address"), _("Access"),
+		      addr_size * 2, _("Value"));
+	      while (ent < end)
+		{
+		  ent = print_mips_got_entry (data, pltgot, ent, data_end);
+		  printf ("\n");
+		  if (ent == (bfd_vma) -1)
+		    goto sgot_print_fail;
+		}
+	      printf ("\n");
+	    }
+
+	sgot_print_fail:
+	  if (data)
+	    free (data);
+	}
+      return res;
+    }
 
   for (entry = dynamic_section;
        /* PR 17531 file: 012-50589-0.004.  */
