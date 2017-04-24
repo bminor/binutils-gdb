@@ -6460,7 +6460,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
 			      &sweep_info);
 
-      _bfd_elf_link_renumber_dynsyms (output_bfd, info, &section_sym_count);
+      if (elf_hash_table (info)->dynamic_sections_created)
+	_bfd_elf_link_renumber_dynsyms (output_bfd, info, &section_sym_count);
     }
 
   /* Any syms created from now on start with -1 in

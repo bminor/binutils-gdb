@@ -1,3 +1,9 @@
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (bfd_elf_size_dynamic_sections): Only call
+	`_bfd_elf_link_renumber_dynsyms' after section GC if dynamic
+	sections have been created.
+
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21431
