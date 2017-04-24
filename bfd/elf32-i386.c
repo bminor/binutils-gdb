@@ -6680,6 +6680,8 @@ elf32_i386_nacl_elf_object_p (bfd *abfd)
 #undef	TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-i386-vxworks"
 #undef	ELF_OSABI
+#undef	ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			0x1000
 #undef	elf_backend_plt_alignment
 #define elf_backend_plt_alignment	4
 
