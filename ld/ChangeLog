@@ -1,3 +1,23 @@
+2017-04-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/21404
+	* testsuite/ld-avr/pr21404-1.d: New test.
+	* testsuite/ld-avr/pr21404-1.s: New test.
+	* testsuite/ld-avr/pr21404-2.d: New test.
+	* testsuite/ld-avr/pr21404-2.s: New test.
+	* testsuite/ld-avr/pr21404-3.d: New test.
+	* testsuite/ld-avr/pr21404-3.s: New test.
+	* testsuite/ld-avr/pr21404-4.d: New test.
+	* testsuite/ld-avr/pr21404-4.s: New test.
+	* testsuite/ld-avr/pr21404-5.d: New test.
+	* testsuite/ld-avr/pr21404-5.s: New test.
+	* testsuite/ld-avr/pr21404-6.d: New test.
+	* testsuite/ld-avr/pr21404-6.s: New test.
+	* testsuite/ld-avr/pr21404-7.d: New test.
+	* testsuite/ld-avr/pr21404-7.s: New test.
+	* testsuite/ld-avr/pr21404-8.d: New test.
+	* testsuite/ld-avr/pr21404-8.s: New test.
+
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20815
