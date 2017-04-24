@@ -1,3 +1,8 @@
+2017-04-24  Yao Qi  <yao.qi@linaro.org>
+
+	* doublest.c (convert_doublest_to_floatformat): Call
+	floatformat_totalsize_bytes.
+
 2017-04-22  Tom Tromey  <tom@tromey.com>
 
 	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Use
