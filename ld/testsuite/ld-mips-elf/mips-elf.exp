@@ -1129,3 +1129,13 @@ if { $linux_gnu } {
 		  "export-$class-ref"]]
     }
 }
+
+# PR ld/21334 GOT relocation in static binary test.
+run_ld_link_tests [list \
+    [list \
+	"PR ld/21233 MIPS GOT16 relocation in static binary" \
+	"$abi_ldflags(o32) -e foo -T pr21334.ld" "" "$abi_asflags(o32)" \
+	{pr21334.s} \
+	{{objdump {-d --prefix-addresses} pr21334.dd} \
+	 {readelf -A pr21334.gd}} \
+	"pr21334"]]

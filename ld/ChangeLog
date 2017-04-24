@@ -1,3 +1,12 @@
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/21334
+	* testsuite/ld-mips-elf/pr21334.dd: New test.
+	* testsuite/ld-mips-elf/pr21334.gd: New test.
+	* testsuite/ld-mips-elf/pr21334.ld: New test linker script.
+	* testsuite/ld-mips-elf/pr21334.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/no-plt.exp: Also check no-plt-1e.nd.
