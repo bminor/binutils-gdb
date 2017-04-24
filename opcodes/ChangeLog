@@ -1,3 +1,9 @@
+2018-05-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR gdb/23200
+	* aarch64-opc.c (aarch64_logical_immediate_p): Update
+	DEBUG_TRACE arguments.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* epiphany-desc.c: Regenerate.
