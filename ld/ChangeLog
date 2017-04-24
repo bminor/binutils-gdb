@@ -1,3 +1,8 @@
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20815
+	* testsuite/ld-i386/vxworks2.sd: Add space for program headers.
+
 2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/16044

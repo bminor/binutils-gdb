@@ -1,3 +1,8 @@
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21425
+	* elf32-i386.c (ELF_MAXPAGESIZE): Set to 0x1000 for VxWorks.
+
 2017-03-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/16044
