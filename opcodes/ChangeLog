@@ -1,3 +1,8 @@
+2017-04-24  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-opc.c (aarch64_logical_immediate_p): Update DEBUG_TRACE
+	arguments.
+
 2017-04-22  Alexander Fedotov  <alfedotov@gmail.com>
 	    Alan Modra  <amodra@gmail.com>
 
