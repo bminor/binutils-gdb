@@ -1,5 +1,10 @@
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/pr12570a.d: Skip for nacl targets.
+	* testsuite/ld-i386/pr12570b.d: Likewise.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20815
 	* testsuite/ld-i386/vxworks2.sd: Add space for program headers.
 
