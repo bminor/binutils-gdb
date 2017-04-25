@@ -1,5 +1,10 @@
 2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* testsuite/gas/arc/leave_enter.d: Update test.
+	* testsuite/gas/arc/leave_enter.s: Likewise.
+
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* testsuite/gas/arc/b.d: Update test.
 	* testsuite/gas/arc/noargs_hs.d: Likewise.
 

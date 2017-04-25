@@ -1,5 +1,12 @@
 2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* arc-dis.c (print_insn_arc): Smartly print enter/leave mnemonics.
+	* arc-opc.c (insert_r13el): New function.
+	(R13_EL): Define.
+	* arc-tbl.h: Add new enter/leave variants.
+
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* arc-tbl.h: Reorder NOP entry to be before MOV instructions.
 
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>

@@ -1208,9 +1208,22 @@ print_insn_arc (bfd_vma memaddr,
 	  if (operand->flags & ARC_OPERAND_TRUNCATE
 	      && !(operand->flags & ARC_OPERAND_ALIGNED32)
 	      && !(operand->flags & ARC_OPERAND_ALIGNED16)
-	      && value > 0 && value <= 14)
-	    (*info->fprintf_func) (info->stream, "r13-%s",
-				   regnames[13 + value - 1]);
+	      && value >= 0 && value <= 14)
+	    {
+	      switch (value)
+		{
+		case 0:
+		  need_comma = FALSE;
+		  break;
+		case 1:
+		  (*info->fprintf_func) (info->stream, "r13");
+		  break;
+		default:
+		  (*info->fprintf_func) (info->stream, "r13-%s",
+					 regnames[13 + value - 1]);
+		  break;
+		}
+	    }
 	  else
 	    {
 	      const char *rname = get_auxreg (opcode, value, isa_mask);
