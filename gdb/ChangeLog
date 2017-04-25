@@ -1,5 +1,12 @@
 2017-04-25  Pedro Alves  <palves@redhat.com>
 
+	* btrace.c (pt_btrace_insn_flags): Change parameter type to
+	reference.
+	(pt_btrace_insn): New function.
+	(ftrace_add_pt): Remove memset call and use pt_btrace_insn.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_catchpoint_location): Now a "class".  Remove
 	"base" field and inherit from "bp_location" instead.  Add
 	non-default ctor.
