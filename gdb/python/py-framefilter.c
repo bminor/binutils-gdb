@@ -457,6 +457,7 @@ py_print_single_arg (struct ui_out *out,
   CATCH (except, RETURN_MASK_ERROR)
     {
       gdbpy_convert_exception (except);
+      retval = EXT_LANG_BT_ERROR;
     }
   END_CATCH
 

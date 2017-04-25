@@ -1,5 +1,10 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* python/py-framefilter.c (py_print_single_arg): Return
+	EXT_LANG_BT_ERROR from catch.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	PR backtrace/15584:
 	* stack.c (backtrace_command_1): Move some code into no-filters
 	"if".
