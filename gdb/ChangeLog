@@ -1,3 +1,9 @@
+2017-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call
+	set_gdbarch_wchar_bit.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+
 2017-04-25  Pedro Alves  <palves@redhat.com>
 
 	* common/poison.h [!HAVE_IS_TRIVIALLY_COPYABLE] (IsRelocatable)
