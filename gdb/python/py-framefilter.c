@@ -215,7 +215,7 @@ py_print_type (struct ui_out *out, struct value *val)
       type_print (value_type (val), "", &stb, -1);
       out->field_stream ("type", stb);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       gdbpy_convert_exception (except);
       return EXT_LANG_BT_ERROR;
@@ -255,7 +255,7 @@ py_print_value (struct ui_out *out, struct value *val,
 	{
 	  type = check_typedef (value_type (val));
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
 	  return EXT_LANG_BT_ERROR;
@@ -282,7 +282,7 @@ py_print_value (struct ui_out *out, struct value *val,
 	  common_val_print (val, &stb, indent, opts, language);
 	  out->field_stream ("value", stb);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
 	  return EXT_LANG_BT_ERROR;
@@ -497,7 +497,7 @@ enumerate_args (PyObject *iter,
     {
       annotate_frame_args ();
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       gdbpy_convert_exception (except);
       return EXT_LANG_BT_ERROR;
@@ -553,7 +553,7 @@ enumerate_args (PyObject *iter,
 	    {
 	      read_frame_arg (sym, frame, &arg, &entryarg);
 	    }
-	  CATCH (except, RETURN_MASK_ALL)
+	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      gdbpy_convert_exception (except);
 	      return EXT_LANG_BT_ERROR;
@@ -586,7 +586,7 @@ enumerate_args (PyObject *iter,
 		      out->text (", ");
 		      out->wrap_hint ("    ");
 		    }
-		  CATCH (except, RETURN_MASK_ALL)
+		  CATCH (except, RETURN_MASK_ERROR)
 		    {
 		      gdbpy_convert_exception (except);
 		      return EXT_LANG_BT_ERROR;
@@ -622,7 +622,7 @@ enumerate_args (PyObject *iter,
 	    {
 	      out->text (", ");
 	    }
-	  CATCH (except, RETURN_MASK_ALL)
+	  CATCH (except, RETURN_MASK_ERROR)
 	    {
 	      gdbpy_convert_exception (except);
 	      return EXT_LANG_BT_ERROR;
@@ -636,7 +636,7 @@ enumerate_args (PyObject *iter,
 	{
 	  annotate_arg_end ();
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      CATCH (except, RETURN_MASK_ERROR)
 	{
 	  gdbpy_convert_exception (except);
 	  return EXT_LANG_BT_ERROR;
@@ -867,7 +867,7 @@ py_print_args (PyObject *filter,
       if (! out->is_mi_like_p ())
 	out->text (" (");
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       gdbpy_convert_exception (except);
       return EXT_LANG_BT_ERROR;
@@ -884,7 +884,7 @@ py_print_args (PyObject *filter,
       if (! out->is_mi_like_p ())
 	out->text (")");
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       gdbpy_convert_exception (except);
       return EXT_LANG_BT_ERROR;
@@ -1336,7 +1336,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
     {
       gdbarch = get_frame_arch (frame);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (except, RETURN_MASK_ERROR)
     {
       /* Let gdb try to print the stack trace.  */
       return EXT_LANG_BT_NO_FILTERS;

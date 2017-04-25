@@ -1,5 +1,12 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	PR cli/17716:
+	* python/py-framefilter.c (py_print_type, py_print_value)
+	(enumerate_args, py_print_args, gdbpy_apply_frame_filter): Use
+	RETURN_MASK_ERROR.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (enumerate_args): Use
 	gdb::unique_xmalloc_ptr.
 
