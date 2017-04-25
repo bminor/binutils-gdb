@@ -1,3 +1,15 @@
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Correct
+	BFD_RELOC_MIPS16_16_PCREL_S1 fixup size.
+	* testsuite/gas/mips/mips16-branch-addend-4.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-5.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-5.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-branch-addend-4.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-5.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-04-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	PR gas/21407
