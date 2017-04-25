@@ -1,5 +1,12 @@
 2017-04-25  Pedro Alves  <palves@redhat.com>
 
+	* common/poison.h [!HAVE_IS_TRIVIALLY_COPYABLE] (IsRelocatable)
+	(BothAreRelocatable, memcopy, memmove): Don't define.
+	* common/traits.h (__has_feature, HAVE_IS_TRIVIALLY_COPYABLE): New
+	macros.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
 	* common/common-defs.h: Include "common/poison.h".
 	* common/function-view.h: (Not, Or, Requires): Move to traits.h
 	and adjust.
