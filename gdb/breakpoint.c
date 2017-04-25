@@ -7428,8 +7428,6 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
 				      enum bptype bptype,
 				      const struct breakpoint_ops *ops)
 {
-  memset (b, 0, sizeof (*b));
-
   gdb_assert (ops != NULL);
 
   b->ops = ops;
@@ -7437,17 +7435,7 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
   b->gdbarch = gdbarch;
   b->language = current_language->la_language;
   b->input_radix = input_radix;
-  b->thread = -1;
-  b->enable_state = bp_enabled;
-  b->next = 0;
-  b->silent = 0;
-  b->ignore_count = 0;
-  b->commands = NULL;
-  b->frame_id = null_frame_id;
-  b->condition_not_parsed = 0;
-  b->py_bp_object = NULL;
   b->related_breakpoint = b;
-  b->location = NULL;
 }
 
 /* Helper to set_raw_breakpoint below.  Creates a breakpoint

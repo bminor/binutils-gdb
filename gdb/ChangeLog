@@ -1,5 +1,12 @@
 2017-04-25  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.h (struct breakpoint): In-class initialize all
+	fields.  Make boolean fields "bool".
+	* breakpoint.c (init_raw_breakpoint_without_location): Remove
+	memset call and initializations no longer necessary.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
 	* btrace.c (pt_btrace_insn_flags): Change parameter type to
 	reference.
 	(pt_btrace_insn): New function.

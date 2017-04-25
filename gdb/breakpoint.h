@@ -681,45 +681,45 @@ extern int target_exact_watchpoints;
 struct breakpoint
 {
   /* Methods associated with this breakpoint.  */
-  const struct breakpoint_ops *ops;
+  const breakpoint_ops *ops = NULL;
 
-  struct breakpoint *next;
+  breakpoint *next = NULL;
   /* Type of breakpoint.  */
-  enum bptype type;
+  bptype type = bp_none;
   /* Zero means disabled; remember the info but don't break here.  */
-  enum enable_state enable_state;
+  enum enable_state enable_state = bp_enabled;
   /* What to do with this breakpoint after we hit it.  */
-  enum bpdisp disposition;
+  bpdisp disposition = disp_del;
   /* Number assigned to distinguish breakpoints.  */
-  int number;
+  int number = 0;
 
   /* Location(s) associated with this high-level breakpoint.  */
-  struct bp_location *loc;
+  bp_location *loc = NULL;
 
-  /* Non-zero means a silent breakpoint (don't print frame info if we
-     stop here).  */
-  unsigned char silent;
-  /* Non-zero means display ADDR_STRING to the user verbatim.  */
-  unsigned char display_canonical;
+  /* True means a silent breakpoint (don't print frame info if we stop
+     here).  */
+  bool silent = false;
+  /* True means display ADDR_STRING to the user verbatim.  */
+  bool display_canonical = false;
   /* Number of stops at this breakpoint that should be continued
      automatically before really stopping.  */
-  int ignore_count;
+  int ignore_count = 0;
 
   /* Number of stops at this breakpoint before it will be
      disabled.  */
-  int enable_count;
+  int enable_count = 0;
 
   /* Chain of command lines to execute when this breakpoint is
      hit.  */
-  struct counted_command_line *commands;
+  counted_command_line *commands = NULL;
   /* Stack depth (address of frame).  If nonzero, break only if fp
      equals this.  */
-  struct frame_id frame_id;
+  struct frame_id frame_id = null_frame_id;
 
   /* The program space used to set the breakpoint.  This is only set
      for breakpoints which are specific to a program space; for
      non-thread-specific ordinary breakpoints this is NULL.  */
-  struct program_space *pspace;
+  program_space *pspace = NULL;
 
   /* Location we used to set the breakpoint.  */
   event_location_up location;
@@ -727,60 +727,60 @@ struct breakpoint
   /* The filter that should be passed to decode_line_full when
      re-setting this breakpoint.  This may be NULL, but otherwise is
      allocated with xmalloc.  */
-  char *filter;
+  char *filter = NULL;
 
   /* For a ranged breakpoint, the location we used to find the end of
      the range.  */
   event_location_up location_range_end;
 
   /* Architecture we used to set the breakpoint.  */
-  struct gdbarch *gdbarch;
+  struct gdbarch *gdbarch = NULL;
   /* Language we used to set the breakpoint.  */
-  enum language language;
+  enum language language = language_unknown;
   /* Input radix we used to set the breakpoint.  */
-  int input_radix;
+  int input_radix = 0;
   /* String form of the breakpoint condition (malloc'd), or NULL if
      there is no condition.  */
-  char *cond_string;
+  char *cond_string = NULL;
 
   /* String form of extra parameters, or NULL if there are none.
      Malloc'd.  */
-  char *extra_string;
+  char *extra_string = NULL;
 
   /* Holds the address of the related watchpoint_scope breakpoint when
      using watchpoints on local variables (might the concept of a
      related breakpoint be useful elsewhere, if not just call it the
      watchpoint_scope breakpoint or something like that.  FIXME).  */
-  struct breakpoint *related_breakpoint;
+  breakpoint *related_breakpoint = NULL;
 
   /* Thread number for thread-specific breakpoint, or -1 if don't
      care.  */
-  int thread;
+  int thread = -1;
 
   /* Ada task number for task-specific breakpoint, or 0 if don't
      care.  */
-  int task;
+  int task = 0;
 
   /* Count of the number of times this breakpoint was taken, dumped
      with the info, but not used for anything else.  Useful for seeing
      how many times you hit a break prior to the program aborting, so
      you can back up to just before the abort.  */
-  int hit_count;
+  int hit_count = 0;
 
   /* Is breakpoint's condition not yet parsed because we found no
      location initially so had no context to parse the condition
      in.  */
-  int condition_not_parsed;
+  int condition_not_parsed = 0;
 
   /* With a Python scripting enabled GDB, store a reference to the
      Python object that has been associated with this breakpoint.
      This is always NULL for a GDB that is not script enabled.  It can
      sometimes be NULL for enabled GDBs as not all breakpoint types
      are tracked by the scripting language API.  */
-  struct gdbpy_breakpoint_object *py_bp_object;
+  gdbpy_breakpoint_object *py_bp_object = NULL;
 
   /* Same as py_bp_object, but for Scheme.  */
-  struct gdbscm_breakpoint_object *scm_bp_object;
+  gdbscm_breakpoint_object *scm_bp_object = NULL;
 };
 
 /* An instance of this type is used to represent a watchpoint.  It
