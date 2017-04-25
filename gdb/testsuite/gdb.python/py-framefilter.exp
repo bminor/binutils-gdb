@@ -213,6 +213,12 @@ gdb_test_multiple "bt 1" $test {
     }
 }
 
+# Now verify that we can see a quit.
+gdb_test_no_output "python name_error = KeyboardInterrupt" \
+    "Change ErrorFilter to throw KeyboardInterrupt"
+gdb_test "bt 1" "Quit" "bt 1 with KeyboardInterrupt"
+
+
 # Test with no debuginfo
 
 # We cannot use prepare_for_testing as we have to set the safe-patch

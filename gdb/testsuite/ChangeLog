@@ -1,5 +1,11 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	* gdb.python/py-framefilter.exp: Add test for KeyboardInterrupt.
+	* gdb.python/py-framefilter.py (name_error): New global.
+	(ErrorInName.function): Use name_error.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	PR backtrace/15582:
 	* gdb.python/py-framefilter.exp: Add "bt hide" test.
 
