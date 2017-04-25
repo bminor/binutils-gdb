@@ -1,5 +1,11 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	PR backtrace/15584:
+	* stack.c (backtrace_command_1): Move some code into no-filters
+	"if".
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (throw_quit_or_print_exception): New
 	function.
 	(gdbpy_apply_frame_filter): Use it.

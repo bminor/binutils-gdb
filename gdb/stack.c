@@ -1698,49 +1698,17 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
   struct frame_info *fi;
   int count;
   int i;
-  struct frame_info *trailing;
-  int trailing_level, py_start = 0, py_end = 0;
+  int py_start = 0, py_end = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
 
   if (!target_has_stack)
     error (_("No stack."));
 
-  /* The following code must do two things.  First, it must set the
-     variable TRAILING to the frame from which we should start
-     printing.  Second, it must set the variable count to the number
-     of frames which we should print, or -1 if all of them.  */
-  trailing = get_current_frame ();
-
-  trailing_level = 0;
   if (count_exp)
     {
       count = parse_and_eval_long (count_exp);
       if (count < 0)
-	{
-	  struct frame_info *current;
-
-	  py_start = count;
-	  count = -count;
-
-	  current = trailing;
-	  while (current && count--)
-	    {
-	      QUIT;
-	      current = get_prev_frame (current);
-	    }
-
-	  /* Will stop when CURRENT reaches the top of the stack.
-	     TRAILING will be COUNT below it.  */
-	  while (current)
-	    {
-	      QUIT;
-	      trailing = get_prev_frame (trailing);
-	      current = get_prev_frame (current);
-	      trailing_level++;
-	    }
-
-	  count = -1;
-	}
+	py_start = count;
       else
 	{
 	  py_start = 0;
@@ -1753,24 +1721,6 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
     {
       py_end = -1;
       count = -1;
-    }
-
-  if (info_verbose)
-    {
-      /* Read in symbols for all of the frames.  Need to do this in a
-         separate pass so that "Reading in symbols for xxx" messages
-         don't screw up the appearance of the backtrace.  Also if
-         people have strong opinions against reading symbols for
-         backtrace this may have to be an option.  */
-      i = count;
-      for (fi = trailing; fi != NULL && i--; fi = get_prev_frame (fi))
-	{
-	  CORE_ADDR pc;
-
-	  QUIT;
-	  pc = get_frame_address_in_block (fi);
-	  expand_symtab_containing_pc (pc, find_pc_mapped_section (pc));
-	}
     }
 
   if (! no_filters)
@@ -1797,6 +1747,57 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
      "no-filters" has been specified from the command.  */
   if (no_filters ||  result == EXT_LANG_BT_NO_FILTERS)
     {
+      struct frame_info *trailing;
+
+      /* The following code must do two things.  First, it must set the
+	 variable TRAILING to the frame from which we should start
+	 printing.  Second, it must set the variable count to the number
+	 of frames which we should print, or -1 if all of them.  */
+      trailing = get_current_frame ();
+
+      if (count_exp != NULL && count < 0)
+	{
+	  struct frame_info *current;
+
+	  count = -count;
+
+	  current = trailing;
+	  while (current && count--)
+	    {
+	      QUIT;
+	      current = get_prev_frame (current);
+	    }
+
+	  /* Will stop when CURRENT reaches the top of the stack.
+	     TRAILING will be COUNT below it.  */
+	  while (current)
+	    {
+	      QUIT;
+	      trailing = get_prev_frame (trailing);
+	      current = get_prev_frame (current);
+	    }
+
+	  count = -1;
+	}
+
+      if (info_verbose)
+	{
+	  /* Read in symbols for all of the frames.  Need to do this in a
+	     separate pass so that "Reading in symbols for xxx" messages
+	     don't screw up the appearance of the backtrace.  Also if
+	     people have strong opinions against reading symbols for
+	     backtrace this may have to be an option.  */
+	  i = count;
+	  for (fi = trailing; fi != NULL && i--; fi = get_prev_frame (fi))
+	    {
+	      CORE_ADDR pc;
+
+	      QUIT;
+	      pc = get_frame_address_in_block (fi);
+	      expand_symtab_containing_pc (pc, find_pc_mapped_section (pc));
+	    }
+	}
+
       for (i = 0, fi = trailing; fi && count--; i++, fi = get_prev_frame (fi))
 	{
 	  QUIT;
