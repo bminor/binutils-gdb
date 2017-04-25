@@ -1,3 +1,8 @@
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/enum-flags.h (enum_flags): Don't implement copy ctor and
+	assignment operator.
+
 2017-04-24  Yao Qi  <yao.qi@linaro.org>
 
 	* doublest.c (convert_doublest_to_floatformat): Call
