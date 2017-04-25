@@ -1,3 +1,7 @@
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-tbl.h: Reorder NOP entry to be before MOV instructions.
+
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-dis.c (print_mips_disassembler_options): Add
