@@ -1,5 +1,14 @@
 2017-04-25  Pedro Alves  <palves@redhat.com>
 
+	* common/common-defs.h: Include "common/poison.h".
+	* common/function-view.h: (Not, Or, Requires): Move to traits.h
+	and adjust.
+	* common/poison.h: New file.
+	* common/traits.h: Include <type_traits>.
+	(Not, Or, Requires): New, moved from common/function-view.h.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.h (struct breakpoint): In-class initialize all
 	fields.  Make boolean fields "bool".
 	* breakpoint.c (init_raw_breakpoint_without_location): Remove
