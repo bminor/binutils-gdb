@@ -1,5 +1,10 @@
 2018-03-26  Tom Tromey  <tom@tromey.com>
 
+	PR python/16486:
+	* python/py-framefilter.c (py_print_args): Call wrap_hint.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
 	* python/py-framefilter.c (py_print_single_arg): Return
 	EXT_LANG_BT_ERROR from catch.
 

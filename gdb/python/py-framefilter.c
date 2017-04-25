@@ -864,6 +864,7 @@ py_print_args (PyObject *filter,
 
   TRY
     {
+      out->wrap_hint ("   ");
       annotate_frame_args ();
       if (! out->is_mi_like_p ())
 	out->text (" (");
