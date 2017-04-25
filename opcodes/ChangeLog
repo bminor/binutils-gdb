@@ -1,3 +1,9 @@
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips16-opc.c (AL): New macro.
+	(mips16_opcodes): Mark "nop", "la", "dla", and synthetic forms
+	of "ld" and "lw" as aliases.
+
 2017-04-24  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-opc.c (aarch64_logical_immediate_p): Update DEBUG_TRACE
