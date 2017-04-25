@@ -209,7 +209,7 @@ struct regcache
      cache can only be updated via the methods regcache_dup() and
      regcache_cpy().  The actual contents are determined by the
      reggroup_save and reggroup_restore methods.  */
-  int readonly_p;
+  bool readonly_p;
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
   ptid_t ptid;
@@ -227,7 +227,7 @@ regcache_get_ptid (const struct regcache *regcache)
 
 static struct regcache *
 regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
-		    int readonly_p)
+		    bool readonly_p)
 {
   struct regcache_descr *descr;
   struct regcache *regcache;
@@ -259,7 +259,7 @@ regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
 struct regcache *
 regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
 {
-  return regcache_xmalloc_1 (gdbarch, aspace, 1);
+  return regcache_xmalloc_1 (gdbarch, aspace, true);
 }
 
 void
@@ -507,7 +507,7 @@ get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 	&& get_regcache_arch (list->regcache) == gdbarch)
       return list->regcache;
 
-  new_regcache = regcache_xmalloc_1 (gdbarch, aspace, 0);
+  new_regcache = regcache_xmalloc_1 (gdbarch, aspace, false);
   new_regcache->ptid = ptid;
 
   list = XNEW (struct regcache_list);
