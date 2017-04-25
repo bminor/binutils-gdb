@@ -947,7 +947,6 @@ get_first_locp_gte_addr (CORE_ADDR address)
   struct bp_location **locp_found = NULL;
 
   /* Initialize the dummy location's address field.  */
-  memset (&dummy_loc, 0, sizeof (struct bp_location));
   dummy_loc.address = address;
 
   /* Find a close match to the first location at ADDRESS.  */
@@ -7300,11 +7299,9 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     }
 }
 
-void
-init_bp_location (struct bp_location *loc, const struct bp_location_ops *ops,
-		  struct breakpoint *owner)
+bp_location::bp_location (const bp_location_ops *ops, breakpoint *owner)
 {
-  memset (loc, 0, sizeof (*loc));
+  bp_location *loc = this;
 
   gdb_assert (ops != NULL);
 
@@ -12824,11 +12821,7 @@ base_breakpoint_dtor (struct breakpoint *self)
 static struct bp_location *
 base_breakpoint_allocate_location (struct breakpoint *self)
 {
-  struct bp_location *loc;
-
-  loc = new struct bp_location ();
-  init_bp_location (loc, &bp_location_ops, self);
-  return loc;
+  return new bp_location (&bp_location_ops, self);
 }
 
 static void

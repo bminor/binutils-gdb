@@ -310,20 +310,25 @@ struct bp_location_ops
   void (*dtor) (struct bp_location *self);
 };
 
-struct bp_location
+class bp_location
 {
+public:
+  bp_location () = default;
+
+  bp_location (const bp_location_ops *ops, breakpoint *owner);
+
   /* Chain pointer to the next breakpoint location for
      the same parent breakpoint.  */
-  struct bp_location *next;
+  bp_location *next = NULL;
 
   /* Methods associated with this location.  */
-  const struct bp_location_ops *ops;
+  const bp_location_ops *ops = NULL;
 
   /* The reference count.  */
-  int refc;
+  int refc = 0;
 
   /* Type of this breakpoint location.  */
-  enum bp_loc_type loc_type;
+  bp_loc_type loc_type {};
 
   /* Each breakpoint location must belong to exactly one higher-level
      breakpoint.  This pointer is NULL iff this bp_location is no
@@ -331,7 +336,7 @@ struct bp_location
      is deleted, its locations may still be found in the
      moribund_locations list, or if we had stopped for it, in
      bpstats.  */
-  struct breakpoint *owner;
+  breakpoint *owner = NULL;
 
   /* Conditional.  Break only if this expression's value is nonzero.
      Unlike string form of condition, which is associated with
@@ -360,32 +365,32 @@ struct bp_location
      duplicates of this location and thus we don't need to call
      force_breakpoint_reinsertion (...) for this location.  */
 
-  enum condition_status condition_changed;
+  condition_status condition_changed {};
 
   agent_expr_up cmd_bytecode;
 
   /* Signals that breakpoint conditions and/or commands need to be
      re-synched with the target.  This has no use other than
      target-side breakpoints.  */
-  char needs_update;
+  bool needs_update = false;
 
   /* This location's address is in an unloaded solib, and so this
      location should not be inserted.  It will be automatically
      enabled when that solib is loaded.  */
-  char shlib_disabled; 
+  bool shlib_disabled = false;
 
   /* Is this particular location enabled.  */
-  char enabled;
+  bool enabled = false;
   
   /* Nonzero if this breakpoint is now inserted.  */
-  char inserted;
+  bool inserted = false;
 
   /* Nonzero if this is a permanent breakpoint.  There is a breakpoint
      instruction hard-wired into the target's code.  Don't try to
      write another breakpoint instruction on top of it, or restore its
      value.  Step over it using the architecture's
      gdbarch_skip_permanent_breakpoint method.  */
-  char permanent;
+  bool permanent = false;
 
   /* Nonzero if this is not the first breakpoint in the list
      for the given address.  location of tracepoint can _never_
@@ -393,7 +398,7 @@ struct bp_location
      kinds of breakpoints, because two locations at the same
      address may have different actions, so both of these locations
      should be downloaded and so that `tfind N' always works.  */
-  char duplicate;
+  bool duplicate = false;
 
   /* If we someday support real thread-specific breakpoints, then
      the breakpoint location will need a thread identifier.  */
@@ -403,7 +408,7 @@ struct bp_location
 
   /* Architecture associated with this location's address.  May be
      different from the breakpoint architecture.  */
-  struct gdbarch *gdbarch;
+  struct gdbarch *gdbarch = NULL;
 
   /* The program space associated with this breakpoint location
      address.  Note that an address space may be represented in more
@@ -411,26 +416,26 @@ struct bp_location
      its own program space, but there will only be one address space
      for all of them), but we must not insert more than one location
      at the same address in the same address space.  */
-  struct program_space *pspace;
+  program_space *pspace = NULL;
 
   /* Note that zero is a perfectly valid code address on some platforms
      (for example, the mn10200 (OBSOLETE) and mn10300 simulators).  NULL
      is not a special value for this field.  Valid for all types except
      bp_loc_other.  */
-  CORE_ADDR address;
+  CORE_ADDR address = 0;
 
   /* For hardware watchpoints, the size of the memory region being
      watched.  For hardware ranged breakpoints, the size of the
      breakpoint range.  */
-  int length;
+  int length = 0;
 
   /* Type of hardware watchpoint.  */
-  enum target_hw_bp_type watchpoint_type;
+  target_hw_bp_type watchpoint_type {};
 
   /* For any breakpoint type with an address, this is the section
      associated with the address.  Used primarily for overlay
      debugging.  */
-  struct obj_section *section;
+  obj_section *section = NULL;
 
   /* Address at which breakpoint was requested, either by the user or
      by GDB for internal breakpoints.  This will usually be the same
@@ -438,24 +443,24 @@ struct bp_location
      ADJUST_BREAKPOINT_ADDRESS has computed a different address at
      which to place the breakpoint in order to comply with a
      processor's architectual constraints.  */
-  CORE_ADDR requested_address;
+  CORE_ADDR requested_address = 0;
 
   /* An additional address assigned with this location.  This is currently
      only used by STT_GNU_IFUNC resolver breakpoints to hold the address
      of the resolver function.  */
-  CORE_ADDR related_address;
+  CORE_ADDR related_address = 0;
 
   /* If the location comes from a probe point, this is the probe associated
      with it.  */
-  struct bound_probe probe;
+  bound_probe probe {};
 
-  char *function_name;
+  char *function_name = NULL;
 
   /* Details of the placed breakpoint, when inserted.  */
-  struct bp_target_info target_info;
+  bp_target_info target_info {};
 
   /* Similarly, for the breakpoint at an overlay's LMA, if necessary.  */
-  struct bp_target_info overlay_target_info;
+  bp_target_info overlay_target_info {};
 
   /* In a non-stop mode, it's possible that we delete a breakpoint,
      but as we do that, some still running thread hits that breakpoint.
@@ -466,19 +471,19 @@ struct bp_location
      breakpoint was deleted, we retire all locations of that breakpoint.
      This variable keeps a number of events still to go, when
      it becomes 0 this location is retired.  */
-  int events_till_retirement;
+  int events_till_retirement = 0;
 
   /* Line number which was used to place this location.
 
      Breakpoint placed into a comment keeps it's user specified line number
      despite ADDRESS resolves into a different line number.  */
 
-  int line_number;
+  int line_number = 0;
 
   /* Symtab which was used to place this location.  This is used
      to find the corresponding source file name.  */
 
-  struct symtab *symtab;
+  struct symtab *symtab = NULL;
 };
 
 /* The possible return values for print_bpstat, print_it_normal,
@@ -1204,10 +1209,6 @@ extern int breakpoint_address_match (struct address_space *aspace1,
 extern void until_break_command (char *, int, int);
 
 /* Initialize a struct bp_location.  */
-
-extern void init_bp_location (struct bp_location *loc,
-			      const struct bp_location_ops *ops,
-			      struct breakpoint *owner);
 
 extern void update_breakpoint_locations (struct breakpoint *b,
 					 struct program_space *filter_pspace,

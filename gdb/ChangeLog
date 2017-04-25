@@ -1,5 +1,20 @@
 2017-04-25  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_catchpoint_location): Now a "class".  Remove
+	"base" field and inherit from "bp_location" instead.  Add
+	non-default ctor.
+	(allocate_location_exception): Use new non-default ctor.
+	* breakpoint.c (get_first_locp_gte_addr): Remove memset call.
+	(init_bp_location): Convert to ...
+	(bp_location::bp_location): ... this new ctor, and remove memset
+	call.
+	(base_breakpoint_allocate_location): Use the new non-default ctor.
+	* breakpoint.h (bp_location): Now a class.  Declare default and
+	non-default ctors.  In-class initialize all members.
+	(init_bp_location): Remove declaration.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
 	* common/enum-flags.h (enum_flags): Don't implement copy ctor and
 	assignment operator.
 
