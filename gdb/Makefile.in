@@ -904,9 +904,21 @@ ALL_TARGET_OBS = \
 	xtensa-linux-tdep.o \
 	xtensa-tdep.o
 
-# Host-dependent makefile fragment comes in here.
-@host_makefile_frag@
-# End of host-dependent makefile fragment
+# The following native-target dependent variables are defined on
+# configure.nat.
+NAT_FILE = @NAT_FILE@
+NATDEPFILES = @NATDEPFILES@
+NAT_CDEPS = @NAT_CDEPS@
+LOADLIBES = @LOADLIBES@
+MH_CFLAGS = @MH_CFLAGS@
+XM_CLIBS = @XM_CLIBS@
+NAT_GENERATED_FILES = @NAT_GENERATED_FILES@
+HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
+
+# Native-target dependent makefile fragment comes in here.
+@nat_extra_makefile_frag@
+
+# End of native-target dependent variables.
 
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
@@ -2320,21 +2332,21 @@ subdir_do: force
 		else true ; fi ; \
 	done
 
-Makefile: Makefile.in config.status @frags@
+Makefile: Makefile.in config.status
 	# Regenerate the Makefile and the tm.h / nm.h links.
 	CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS= \
 	  CONFIG_HEADERS= \
 	  $(SHELL) config.status
 
-$(GNULIB_BUILDDIR)/Makefile: gnulib/Makefile.in config.status @frags@
+$(GNULIB_BUILDDIR)/Makefile: gnulib/Makefile.in config.status
 	@cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-data-directory/Makefile: data-directory/Makefile.in config.status @frags@
+data-directory/Makefile: data-directory/Makefile.in config.status
 	CONFIG_FILES="data-directory/Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \

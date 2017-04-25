@@ -1,3 +1,7 @@
+2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile: Remove "@host_makefile_frag@".
+
 2017-05-05  Pedro Alves  <palves@redhat.com>
 
 	* configure: Regenerate.

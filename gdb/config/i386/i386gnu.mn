@@ -1,15 +1,3 @@
-# Host: Intel 386 running the GNU Hurd
-NATDEPFILES= i386-gnu-nat.o gnu-nat.o \
-	     x86-nat.o x86-dregs.o fork-child.o \
-	     notify_S.o process_reply_S.o msg_reply_S.o \
-	     msg_U.o exc_request_U.o exc_request_S.o
-HAVE_NATIVE_GCORE_HOST = 1
-
-NAT_FILE= nm-i386gnu.h
-MH_CFLAGS = -D_GNU_SOURCE
-
-XM_CLIBS = -lshouldbeinlibc
-
 # Use our own user stubs for the msg rpcs, so we can make them time out, in
 # case the program is fucked, or we guess the wrong signal thread.
 msg-MIGUFLAGS = -D'MSG_IMPORTS=waittime 1000;'

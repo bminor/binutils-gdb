@@ -1,0 +1,602 @@
+# ; -*- mode: sh ; -*-
+# Copyright (C) 2013-2017 Free Software Foundation, Inc.
+#
+# This file is part of GDB.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Variables defined here:
+#
+# NAT_FILE - The header file with definitions for this native target.
+#
+# NATDEPFILES - Source files required for native debugging on this
+#               native target.
+#
+# NAT_CDEPS - Dynamic symbols to be exported for libthread_db.
+#
+# LOADLIBES - Libraries against which GDB will be linked for this
+#             native target.
+#
+# MH_CFLAGS - Additional CFLAGS for this host.
+#
+# XM_CLIBS - Host-dependent libraries against which GDB will be linked
+#            for this native target.
+#
+# HAVE_NATIVE_GCORE_HOST - Whether gcore should be installed on this
+#                          native target.
+#
+# nat_extra_makefile_frag - File containing extra fragments of
+#                           Makefile that will be used by this native
+#                           target.
+#
+# Notes:
+#
+# - To avoid shell expansion of variables, declare them with single
+#   quotes.
+#
+# - nat_extra_makefile_frag should contain the full path of the file.
+
+
+case ${gdb_host_cpu} in
+  aarch64)
+    case ${gdb_host} in
+      linux)
+	#  Host: AArch64 based machine running GNU/Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o aarch64-linux-nat.o aarch32-linux-nat.o \
+		proc-service.o linux-thread-db.o linux-nat.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-osdata.o linux-waitpid.o \
+		linux-personality.o linux-namespaces.o aarch64-linux-hw-point.o \
+		aarch64-linux.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+    esac
+    ;;
+  alpha)
+    case ${gdb_host} in
+      alpha-linux)
+	# Host: Little-endian Alpha running Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o alpha-linux-nat.o \
+		fork-child.o proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-waitpid.o linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+
+	# doublest.c currently assumes some properties of FP arithmetic
+	# on the host which require this.
+	MH_CFLAGS='-mieee'
+	;;
+      nbsd)
+	# Host: NetBSD/alpha
+	NATDEPFILES='fork-child.o inf-ptrace.o alpha-bsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+    esac
+    ;;
+  arm)
+    case ${gdb_host} in
+      linux)
+	# Host: ARM based machine running GNU/Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o arm-linux-nat.o \
+		aarch32-linux-nat.o proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-waitpid.o linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      nbsdelf)
+	# Host: NetBSD/arm
+	NATDEPFILES='fork-child.o inf-ptrace.o arm-nbsd-nat.o'
+	;;
+    esac
+    ;;
+  i386)
+    case ${gdb_host} in
+      cygwin64)
+	#  Native config information for GDB on PowerPC systems running FreeBSD.
+	NATDEPFILES='x86-nat.o x86-dregs.o windows-nat.o amd64-windows-nat.o'
+	;;
+      cygwin)
+	MH_CFLAGS=
+	NATDEPFILES='x86-nat.o x86-dregs.o windows-nat.o i386-windows-nat.o'
+	XM_CLIBS=
+	;;
+      darwin)
+	# Host: IA86 running Darwin
+	NATDEPFILES='fork-child.o darwin-nat.o \
+	     i386-darwin-nat.o x86-nat.o x86-dregs.o amd64-nat.o darwin-nat-info.o'
+	;;
+      fbsd64)
+	# Host: FreeBSD/amd64
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		fbsd-nat.o amd64-nat.o amd64-bsd-nat.o amd64-fbsd-nat.o \
+		bsd-kvm.o x86-nat.o x86-dregs.o x86-bsd-nat.o'
+	HAVE_NATIVE_GCORE_HOST=1
+
+	LOADLIBES='-lkvm'
+	;;
+      fbsd)
+	# Host: FreeBSD/i386
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		fbsd-nat.o x86-nat.o x86-dregs.o x86-bsd-nat.o i386-bsd-nat.o \
+		i386-fbsd-nat.o bsd-kvm.o'
+	NAT_FILE='nm-fbsd.h'
+	HAVE_NATIVE_GCORE_HOST=1
+
+	LOADLIBES='-lkvm'
+	;;
+      go32)
+	# Host: Intel x86 running DJGPP
+
+	# We include several header files from config/djgpp
+	MH_CFLAGS='-I$(srcdir)/config/djgpp'
+
+	NATDEPFILES='go32-nat.o x86-nat.o x86-dregs.o'
+
+	XM_CLIBS='-ldbg'
+	;;
+      i386gnu)
+	# Host: Intel 386 running the GNU Hurd
+	NATDEPFILES='i386-gnu-nat.o gnu-nat.o \
+		     x86-nat.o x86-dregs.o fork-child.o \
+		     notify_S.o process_reply_S.o msg_reply_S.o \
+		     msg_U.o exc_request_U.o exc_request_S.o'
+	HAVE_NATIVE_GCORE_HOST=1
+
+	NAT_FILE='nm-i386gnu.h'
+	MH_CFLAGS='-D_GNU_SOURCE'
+
+	XM_CLIBS='-lshouldbeinlibc'
+
+	nat_extra_makefile_frag="${srcdir}/config/${gdb_host_cpu}/i386gnu.mn"
+	;;
+      i386sol2)
+	# Host: Solaris x86
+	NATDEPFILES='fork-child.o i386-v4-nat.o i386-sol2-nat.o \
+		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
+	HAVE_NATIVE_GCORE_HOST=1
+	;;
+      linux64)
+	# Host: GNU/Linux x86-64
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		x86-nat.o x86-dregs.o amd64-nat.o amd64-linux-nat.o \
+		x86-linux-nat.o \
+		linux-nat.o linux-osdata.o \
+		proc-service.o linux-thread-db.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-btrace.o \
+		linux-waitpid.o linux-personality.o x86-linux.o \
+		x86-linux-dregs.o amd64-linux-siginfo.o linux-namespaces.o'
+	NAT_FILE='config/nm-linux.h'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      linux)
+	# Host: Intel 386 running GNU/Linux.
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		x86-nat.o x86-dregs.o i386-linux-nat.o x86-linux-nat.o \
+		proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-btrace.o linux-waitpid.o linux-personality.o x86-linux.o \
+		x86-linux-dregs.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      mingw64)
+	NATDEPFILES='x86-nat.o x86-dregs.o windows-nat.o amd64-windows-nat.o'
+	;;
+      mingw)
+	MH_CFLAGS=
+	NATDEPFILES='x86-nat.o x86-dregs.o windows-nat.o i386-windows-nat.o'
+	XM_CLIBS=
+	;;
+      nbsd64)
+	# Host: NetBSD/amd64
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		nbsd-nat.o amd64-nat.o x86-bsd-nat.o amd64-bsd-nat.o amd64-nbsd-nat.o'
+	;;
+      nbsdelf)
+	# Host: NetBSD/i386 ELF
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		nbsd-nat.o x86-bsd-nat.o i386-bsd-nat.o i386-nbsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      nto)
+	# Host: Intel 386 running QNX.
+	NATDEPFILES='nto-procfs.o'
+	NAT_FILE='config/nm-nto.h'
+	;;
+      obsd64)
+	# Host: OpenBSD/amd64
+	NATDEPFILES='fork-child.o inf-ptrace.o obsd-nat.o \
+		amd64-nat.o x86-bsd-nat.o amd64-bsd-nat.o amd64-obsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      obsd)
+	# Host: OpenBSD/i386 ELF
+	NATDEPFILES='fork-child.o inf-ptrace.o obsd-nat.o \
+		x86-bsd-nat.o i386-bsd-nat.o i386-obsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      sol2-64)
+	# Host: Solaris x86_64
+	NATDEPFILES='fork-child.o amd64-nat.o i386-v4-nat.o i386-sol2-nat.o \
+		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
+	HAVE_NATIVE_GCORE_HOST=1
+	;;
+    esac
+    ;;
+  ia64)
+    case ${gdb_host} in
+      linux)
+	# Host: Intel IA-64 running GNU/Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		ia64-linux-nat.o \
+		proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o \
+		linux-personality.o \
+		linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+    esac
+    ;;
+  m32r)
+    case ${gdb_host} in
+      linux)
+	# Host: M32R based machine running GNU/Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o				\
+		m32r-linux-nat.o proc-service.o linux-thread-db.o	\
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-waitpid.o linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+    esac
+    ;;
+  m68k)
+    case ${gdb_host} in
+      linux)
+	# Host: Motorola m68k running GNU/Linux.
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		m68k-linux-nat.o \
+		proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-personality.o \
+		linux-waitpid.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      nbsdelf)
+	# Host: NetBSD/m68k ELF
+	NATDEPFILES='m68k-bsd-nat.o bsd-kvm.o fork-child.o inf-ptrace.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      obsd)
+	# Host: OpenBSD/m68k
+	NATDEPFILES='m68k-bsd-nat.o bsd-kvm.o fork-child.o inf-ptrace.o'
+
+	LOADLIBES='-lkvm'
+	;;
+    esac
+    ;;
+  m88k)
+    case ${gdb_host} in
+      obsd)
+	# Host: OpenBSD/m88k
+	NATDEPFILES='fork-child.o inf-ptrace.o m88k-bsd-nat.o'
+	;;
+    esac
+    ;;
+  mips)
+    case ${gdb_host} in
+      fbsd)
+	# Host: FreeBSD/mips
+	NATDEPFILES='fork-child.o inf-ptrace.o fbsd-nat.o mips-fbsd-nat.o'
+	HAVE_NATIVE_GCORE_HOST=1
+	;;
+      linux)
+	# Host: Linux/MIPS
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o mips-linux-nat.o \
+		linux-thread-db.o proc-service.o \
+		linux-nat.o linux-osdata.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		linux-personality.o \
+		mips-linux-watch.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      nbsd)
+	# Host: NetBSD/mips
+	NATDEPFILES='fork-child.o inf-ptrace.o mips-nbsd-nat.o'
+	;;
+      obsd64)
+	# Host: OpenBSD/mips64
+	NATDEPFILES='fork-child.o inf-ptrace.o obsd-nat.o mips64-obsd-nat.o'
+	;;
+    esac
+    ;;
+  pa)
+    case ${gdb_host} in
+      linux)
+	# Host: Hewlett-Packard PA-RISC machine, running Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		hppa-linux-nat.o proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      nbsd)
+	# Host: NetBSD/hppa
+	NATDEPFILES='fork-child.o inf-ptrace.o nbsd-nat.o hppa-nbsd-nat.o'
+	;;
+      obsd)
+	# Host: OpenBSD/hppa
+	NATDEPFILES='fork-child.o inf-ptrace.o obsd-nat.o hppa-obsd-nat.o'
+	;;
+    esac
+    ;;
+  powerpc)
+    case ${gdb_host} in
+      aix)
+	# Host: IBM PowerPC running AIX
+	# aix-thread.o is not listed in NATDEPFILES as it is pulled in by configure.
+	NATDEPFILES='fork-child.o inf-ptrace.o rs6000-nat.o'
+
+	# When compiled with cc, for debugging, this argument should be passed.
+	# We have no idea who our current compiler is though, so we skip it.
+	# MH_CFLAGS='-bnodelcsect'
+	;;
+      fbsd)
+	#  Native config information for GDB on PowerPC systems running FreeBSD.
+	NATDEPFILES='fbsd-nat.o fork-child.o inf-ptrace.o ppc-fbsd-nat.o bsd-kvm.o'
+	HAVE_NATIVE_GCORE_HOST=1
+
+	LOADLIBES='-lkvm'
+	;;
+      linux)
+	# Host: PowerPC, running Linux
+	XM_CLIBS=
+
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		ppc-linux-nat.o proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-waitpid.o linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      nbsd)
+	# Host: NetBSD/powerpc
+	NATDEPFILES='fork-child.o inf-ptrace.o ppc-nbsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      obsd)
+	# Host: OpenBSD/powerpc
+	NATDEPFILES='fork-child.o inf-ptrace.o obsd-nat.o ppc-obsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      ppc64-linux)
+	# Host: PowerPC64, running Linux
+	XM_CLIBS=
+
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		ppc-linux-nat.o proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-waitpid.o ppc-linux.o linux-personality.o \
+		linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      spu-linux)
+	# Target: Cell BE (PowerPC64 + SPU)
+	# This implements a 'pseudo-native' GDB running on the
+	# PPU side of the Cell BE and debugging the SPU side.
+
+	NATDEPFILES='spu-linux-nat.o fork-child.o inf-ptrace.o \
+		      linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		      linux-personality.o linux-namespaces.o'
+	;;
+    esac
+    ;;
+  s390)
+    case ${gdb_host} in
+      linux)
+	# Host: S390, running Linux
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o s390-linux-nat.o \
+		linux-thread-db.o proc-service.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-personality.o \
+		linux-waitpid.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+    esac
+    ;;
+  sh)
+    case ${gdb_host} in
+      nbsd)
+	# Host: NetBSD/sh
+	NATDEPFILES='fork-child.o inf-ptrace.o sh-nbsd-nat.o'
+	;;
+    esac
+    ;;
+  sparc)
+    case ${gdb_host} in
+      fbsd)
+	# Host: FreeBSD/sparc64
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		fbsd-nat.o sparc-nat.o sparc64-nat.o sparc64-fbsd-nat.o \
+		bsd-kvm.o'
+	HAVE_NATIVE_GCORE_HOST=1
+
+	LOADLIBES='-lkvm'
+	;;
+      linux64)
+	# Host: GNU/Linux UltraSPARC
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='sparc-nat.o sparc64-nat.o sparc64-linux-nat.o \
+		fork-child.o inf-ptrace.o \
+		proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      linux)
+	# Host: GNU/Linux SPARC
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='sparc-nat.o sparc-linux-nat.o \
+		fork-child.o inf-ptrace.o \
+		proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+      nbsd64)
+	# Host: NetBSD/sparc64
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		sparc64-nbsd-nat.o sparc-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      nbsdelf)
+	# Host: NetBSD/sparc ELF
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		sparc-nat.o sparc-nbsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      obsd64)
+	# Host: OpenBSD/sparc64
+	NATDEPFILES='fork-child.o inf-ptrace.o obsd-nat.o \
+		sparc64-obsd-nat.o sparc-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      sol2)
+	# Host: Solaris SPARC & UltraSPARC
+	NAT_FILE='nm-sol2.h'
+	NATDEPFILES='sparc-sol2-nat.o \
+		fork-child.o \
+		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
+	HAVE_NATIVE_GCORE_HOST=1
+	;;
+    esac
+    ;;
+  tilegx)
+    case ${gdb_host} in
+      linux)
+	# Host: Tilera TILE-Gx running GNU/Linux.
+	NAT_FILE='config/nm-linux.h'
+	NATDEPFILES='inf-ptrace.o fork-child.o \
+		tilegx-linux-nat.o \
+		proc-service.o linux-thread-db.o \
+		linux-nat.o linux-osdata.o linux-fork.o \
+		linux-procfs.o linux-ptrace.o linux-waitpid.o \
+		linux-personality.o linux-namespaces.o'
+
+	# The dynamically loaded libthread_db needs access to symbols in the
+	# gdb executable.
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+    esac
+    ;;
+  vax)
+    case ${gdb_host} in
+      nbsdelf)
+	# Host: NetBSD/vax ELF
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		vax-bsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+      obsd)
+	# Host: OpenBSD/vax
+	NATDEPFILES='fork-child.o inf-ptrace.o \
+		vax-bsd-nat.o bsd-kvm.o'
+
+	LOADLIBES='-lkvm'
+	;;
+    esac
+    ;;
+  xtensa)
+    case ${gdb_host} in
+      linux)
+	# Host: Xtensa, running GNU/Linux.
+	NAT_FILE='config/nm-linux.h'
+
+	NATDEPFILES='inf-ptrace.o fork-child.o xtensa-linux-nat.o \
+		linux-thread-db.o proc-service.o \
+		linux-nat.o linux-osdata.o linux-fork.o linux-procfs.o linux-ptrace.o \
+		linux-waitpid.o linux-personality.o linux-namespaces.o'
+	NAT_CDEPS='$(srcdir)/proc-service.list'
+
+	LOADLIBES='-ldl $(RDYNAMIC)'
+	;;
+    esac
+    ;;
+esac
