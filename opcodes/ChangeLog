@@ -1,5 +1,10 @@
 2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-dis.c (print_mips_disassembler_options): Add
+	`no-aliases'.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips16-opc.c (AL): New macro.
 	(mips16_opcodes): Mark "nop", "la", "dla", and synthetic forms
 	of "ld" and "lw" as aliases.
