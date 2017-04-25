@@ -3584,8 +3584,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 
 	  insn |= val & 0x3fffffff;
 
-	  /* See if we have a delay slot.  */
-	  if (sparc_relax && fixP->fx_where + 8 <= fixP->fx_frag->fr_fix)
+	  /* See if we have a delay slot.  In that case we attempt to
+             optimize several cases transforming CALL instructions
+             into branches.  But we can only do that if the relocation
+             can be completely resolved here, i.e. if no undefined
+             symbol is associated with it.  */
+	  if (sparc_relax && fixP->fx_addsy == NULL
+	      && fixP->fx_where + 8 <= fixP->fx_frag->fr_fix)
 	    {
 #define G0		0
 #define O7		15
