@@ -1,3 +1,12 @@
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_section_headers): Warn about overlarge
+	sections.
+	(print_gnu_build_attribute_name): Print the number of unrecognised
+	note types.  Fix formatting in the presence of errors.
+	(testsuite/binutils-all/note-2-32.s): Fix encoding of numeric notes.
+	(testsuite/binutils-all/note-2-64.s): Likewise.
+
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* readelf.c (process_mips_specific): Add static GOT support.

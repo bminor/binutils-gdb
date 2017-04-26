@@ -6215,6 +6215,13 @@ process_section_headers (FILE * file)
 	  break;
 	}
 
+      /* Check the sh_size field.  */
+      if (section->sh_size > current_file_size
+	  && section->sh_type != SHT_NOBITS
+	  && section->sh_type != SHT_NULL
+	  && section->sh_type < SHT_LOOS)
+	warn (_("Size of section %u is larger than the entire file!\n"), i);
+
       printf ("  [%2u] ", i);
       if (do_section_details)
 	printf ("%s\n      ", printable_section_name (section));
@@ -16982,7 +16989,6 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       expected_types = bool_expected;
       ++ name;
       break;
-
     default:
       if (ISPRINT (* name))
 	{
@@ -16996,9 +17002,11 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	}
       else
 	{
-	  error (_("unexpected character in name field\n"));
-	  print_symbol (- left, _("<unknown attribute>"));
-	  return 0;
+	  static char tmpbuf [128];
+	  error (_("unrecognised byte in name field: %d\n"), * name);
+	  sprintf (tmpbuf, _("<unknown:_%d>"), * name);
+	  text = tmpbuf;
+	  name ++;
 	}
       expected_types = "*$!+";
       break;
@@ -17028,7 +17036,10 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	unsigned int        bytes = pnote->namesz - (name - pnote->namedata);
+	/* The -1 is because the name field is always 0 terminated, and we
+	   want to be able to ensure that the shift in the while loop below
+	   will not overflow.  */
+	unsigned int        bytes = (pnote->namesz - (name - pnote->namedata)) - 1;
 	unsigned long long  val = 0;
 	unsigned int        shift = 0;
 	char *              decoded = NULL;
@@ -17036,10 +17047,12 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	/* PR 21378 */
 	if (bytes > sizeof (val))
 	  {
-	    error (_("corrupt name field: namesz of %lu is too large for a numeric value\n"),
-		   pnote->namesz);
-	    return FALSE;
+	    error (_("corrupt numeric name field: too many bytes in the value: %x\n"),
+		   bytes);
+	    bytes = sizeof (val);
 	  }
+	/* We do not bother to warn if bytes == 0 as this can
+	   happen with some early versions of the gcc plugin.  */
 
 	while (bytes --)
 	  {
@@ -17079,7 +17092,15 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	  }
 
 	if (decoded != NULL)
-	  print_symbol (-left, decoded);
+	  {
+	    print_symbol (-left, decoded);
+	    left = 0;
+	  }
+	else if (val == 0)
+	  {
+	    printf ("0x0");
+	    left -= 3;
+	  }
 	else
 	  {
 	    if (do_wide)

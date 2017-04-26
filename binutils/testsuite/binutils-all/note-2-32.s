@@ -17,23 +17,21 @@ note1.s:
 	.dc.l 0x100
 	.asciz "$gcc 7.0.1"
 
-	.dc.l 2
-	.dc.l 0
-	.dc.l 0x100
-	.dc.b 0x2b, 0x2
-	.dc.b  0, 0
-
 	.dc.l 3
 	.dc.l 0
 	.dc.l 0x100
-	.dc.b 0x2a, 0x7, 0
-	.dc.b  0
+	.dc.b 0x2b, 0x2, 0
+	.dc.b 0
 
-	.dc.l 3
+	.dc.l 4
 	.dc.l 0
 	.dc.l 0x100
-	.dc.b 0x2a, 0x6, 0
-	.dc.b  0
+	.dc.b 0x2a, 0x7, 0, 0
+
+	.dc.l 4
+	.dc.l 0
+	.dc.l 0x100
+	.dc.b 0x2a, 0x6, 0, 0
 	.popsection
 
 
@@ -55,23 +53,21 @@ func1:
 	.dc.l 0x100	
 	.asciz "$gcc 7.0.1"	
 
-	.dc.l 2		
+	.dc.l 3		
 	.dc.l 0		
 	.dc.l 0x100	
-	.dc.b 0x21, 0x2	
-	.dc.b  0, 0 	
+	.dc.b 0x21, 0x2, 0
+	.dc.b 0 	
 
-	.dc.l 3		
+	.dc.l 4		
 	.dc.l 0		
 	.dc.l 0x101	
-	.dc.b 0x2a, 0x7, 1 	
-	.dc.b  0 	
+	.dc.b 0x2a, 0x7, 1, 0
 
-	.dc.l 3		
+	.dc.l 4		
 	.dc.l 0		
 	.dc.l 0x100	
-	.dc.b 0x2a, 0x6, 0 	
-	.dc.b  0 	
+	.dc.b 0x2a, 0x6, 0, 0
 	.popsection
 
 	.global note3.s
