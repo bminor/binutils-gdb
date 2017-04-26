@@ -6707,6 +6707,8 @@ bfd_boolean
 bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 {
   const struct elf_backend_data *bed;
+  unsigned long section_sym_count;
+  bfd_size_type dynsymcount;
 
   if (!is_elf_hash_table (info->hash))
     return TRUE;
@@ -6714,23 +6716,29 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
   bed = get_elf_backend_data (output_bfd);
   (*bed->elf_backend_init_index_section) (output_bfd, info);
 
+  /* Assign dynsym indices.  In a shared library we generate a section
+     symbol for each output section, which come first.  Next come all
+     of the back-end allocated local dynamic syms, followed by the rest
+     of the global symbols.
+
+     This is usually not needed for static binaries, however backends
+     can request to always do it, e.g. the MIPS backend uses dynamic
+     symbol counts to lay out GOT, which will be produced in the
+     presence of GOT relocations even in static binaries (holding fixed
+     data in that case, to satisfy those relocations).  */
+
+  if (elf_hash_table (info)->dynamic_sections_created
+      || bed->always_renumber_dynsyms)
+    dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
+						  &section_sym_count);
+
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       bfd *dynobj;
       asection *s;
-      bfd_size_type dynsymcount;
-      unsigned long section_sym_count;
       unsigned int dtagcount;
 
       dynobj = elf_hash_table (info)->dynobj;
-
-      /* Assign dynsym indicies.  In a shared library we generate a
-	 section symbol for each output section, which come first.
-	 Next come all of the back-end allocated local dynamic syms,
-	 followed by the rest of the global symbols.  */
-
-      dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
-						    &section_sym_count);
 
       /* Work out the size of the symbol version section.  */
       s = bfd_get_linker_section (dynobj, ".gnu.version");
@@ -12983,7 +12991,11 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
   elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
 			  &sweep_info);
 
-  if (elf_hash_table (info)->dynamic_sections_created)
+  /* We need to reassign dynsym indices now that symbols may have
+     been removed.  See the call in `bfd_elf_size_dynsym_hash_dynstr'
+     for the details of the conditions used here.  */
+  if (elf_hash_table (info)->dynamic_sections_created
+      || bed->always_renumber_dynsyms)
     _bfd_elf_link_renumber_dynsyms (abfd, info, &section_sym_count);
   return TRUE;
 }

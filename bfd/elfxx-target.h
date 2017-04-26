@@ -126,6 +126,9 @@
 #ifndef elf_backend_extern_protected_data
 #define elf_backend_extern_protected_data 0
 #endif
+#ifndef elf_backend_always_renumber_dynsyms
+#define elf_backend_always_renumber_dynsyms FALSE
+#endif
 #ifndef elf_backend_stack_align
 #define elf_backend_stack_align 16
 #endif
@@ -866,7 +869,8 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_no_page_alias,
   elf_backend_default_execstack,
   elf_backend_caches_rawsize,
-  elf_backend_extern_protected_data
+  elf_backend_extern_protected_data,
+  elf_backend_always_renumber_dynsyms
 };
 
 /* Forward declaration for use when initialising alternative_target field.  */

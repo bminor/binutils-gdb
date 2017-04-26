@@ -1478,6 +1478,10 @@ struct elf_backend_data
   /* Address of protected data defined in the shared library may be
      external, i.e., due to copy relocation.   */
   unsigned extern_protected_data : 1;
+
+  /* True if `_bfd_elf_link_renumber_dynsyms' must be called even for
+     static binaries.  */
+  unsigned always_renumber_dynsyms : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data

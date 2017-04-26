@@ -196,3 +196,4 @@ literal_reloc_p (int r_type)
 #define elf_backend_post_process_headers _bfd_mips_post_process_headers
 #define elf_backend_compact_eh_encoding _bfd_mips_elf_compact_eh_encoding
 #define elf_backend_cant_unwind_opcode _bfd_mips_elf_cant_unwind_opcode
+#define elf_backend_always_renumber_dynsyms TRUE

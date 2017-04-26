@@ -1,5 +1,19 @@
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
+	PR ld/21334
+	* elf-bfd.h (elf_backend_data): Add `always_renumber_dynsyms'
+	member.
+	* elfxx-target.h [!elf_backend_always_renumber_dynsyms]
+	(elf_backend_always_renumber_dynsyms): Define.
+	(elfNN_bed): Initialize `always_renumber_dynsyms' member.
+	* elfxx-mips.h (elf_backend_always_renumber_dynsyms): Define.
+	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Also call
+	`_bfd_elf_link_renumber_dynsyms' if the backend has requested
+	it.
+	(elf_gc_sweep): Likewise.
+
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elflink.c (elf_gc_sweep): Only call
 	`_bfd_elf_link_renumber_dynsyms' if dynamic sections have been
 	created.
