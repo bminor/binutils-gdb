@@ -3399,7 +3399,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	      if (directory_table == NULL)
 		{
 		  printf (_("CU: %s:\n"), file_table[0].name);
-		  printf (_("File name                            Line number    Starting address\n"));
+		  printf (_("File name                            Line number    Starting address    View\n"));
 		}
 	      else
 		{
@@ -3424,7 +3424,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		  else
 		    printf ("%s:\n", file_table[0].name);
 
-		  printf (_("File name                            Line number    Starting address\n"));
+		  printf (_("File name                            Line number    Starting address    View\n"));
 		}
 	    }
 
@@ -3438,12 +3438,14 @@ display_debug_lines_decoded (struct dwarf_section *section,
       while (data < end_of_sequence)
 	{
 	  unsigned char op_code;
+	  int xop;
 	  int adv;
 	  unsigned long int uladv;
 	  unsigned int bytes_read;
 	  int is_special_opcode = 0;
 
 	  op_code = *data++;
+	  xop = op_code;
 
 	  if (op_code >= linfo.li_opcode_base)
 	    {
@@ -3453,21 +3455,28 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		{
 		  uladv *= linfo.li_min_insn_length;
 		  state_machine_regs.address += uladv;
+		  if (uladv)
+		    state_machine_regs.view = 0;
 		}
 	      else
 		{
-		  state_machine_regs.address
-		    += ((state_machine_regs.op_index + uladv)
-			/ linfo.li_max_ops_per_insn)
+		  unsigned addrdelta
+		    = ((state_machine_regs.op_index + uladv)
+		       / linfo.li_max_ops_per_insn)
 		    * linfo.li_min_insn_length;
+		  state_machine_regs.address
+		    += addrdelta;
 		  state_machine_regs.op_index
 		    = (state_machine_regs.op_index + uladv)
 		    % linfo.li_max_ops_per_insn;
+		  if (addrdelta)
+		    state_machine_regs.view = 0;
 		}
 
 	      adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
 	      state_machine_regs.line += adv;
 	      is_special_opcode = 1;
+	      /* Increment view after printing this row.  */
 	    }
 	  else switch (op_code)
 		 {
@@ -3488,6 +3497,8 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		       }
 		     ext_op_code_len += bytes_read;
 		     ext_op_code = *op_code_data++;
+		     xop = ext_op_code;
+		     xop = -xop;
 
 		     switch (ext_op_code)
 		       {
@@ -3500,6 +3511,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 						ext_op_code_len - bytes_read - 1,
 						end);
 			 state_machine_regs.op_index = 0;
+			 state_machine_regs.view = 0;
 			 break;
 		       case DW_LNE_define_file:
 			 {
@@ -3542,6 +3554,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		     break;
 		   }
 		 case DW_LNS_copy:
+		   /* Increment view after printing this row.  */
 		   break;
 
 		 case DW_LNS_advance_pc:
@@ -3551,16 +3564,22 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		     {
 		       uladv *= linfo.li_min_insn_length;
 		       state_machine_regs.address += uladv;
+		       if (uladv)
+			 state_machine_regs.view = 0;
 		     }
 		   else
 		     {
-		       state_machine_regs.address
-			 += ((state_machine_regs.op_index + uladv)
-			     / linfo.li_max_ops_per_insn)
+		       unsigned addrdelta
+			 = ((state_machine_regs.op_index + uladv)
+			    / linfo.li_max_ops_per_insn)
 			 * linfo.li_min_insn_length;
+		       state_machine_regs.address
+			 += addrdelta;
 		       state_machine_regs.op_index
 			 = (state_machine_regs.op_index + uladv)
 			 % linfo.li_max_ops_per_insn;
+		       if (addrdelta)
+			 state_machine_regs.view = 0;
 		     }
 		   break;
 
@@ -3628,16 +3647,22 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		     {
 		       uladv *= linfo.li_min_insn_length;
 		       state_machine_regs.address += uladv;
+		       if (uladv)
+			 state_machine_regs.view = 0;
 		     }
 		   else
 		     {
-		       state_machine_regs.address
-			 += ((state_machine_regs.op_index + uladv)
-			     / linfo.li_max_ops_per_insn)
+		       unsigned addrdelta
+			 = ((state_machine_regs.op_index + uladv)
+			    / linfo.li_max_ops_per_insn)
 			 * linfo.li_min_insn_length;
+		       state_machine_regs.address
+			 += addrdelta;
 		       state_machine_regs.op_index
 			 = (state_machine_regs.op_index + uladv)
 			 % linfo.li_max_ops_per_insn;
+		       if (addrdelta)
+			 state_machine_regs.view = 0;
 		     }
 		   break;
 
@@ -3645,6 +3670,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		   SAFE_BYTE_GET_AND_INC (uladv, data, 2, end);
 		   state_machine_regs.address += uladv;
 		   state_machine_regs.op_index = 0;
+		   /* Do NOT reset view.  */
 		   break;
 
 		 case DW_LNS_set_prologue_end:
@@ -3676,8 +3702,9 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
 	  /* Only Special opcodes, DW_LNS_copy and DW_LNE_end_sequence adds a row
 	     to the DWARF address/line matrix.  */
-	  if ((is_special_opcode) || (op_code == DW_LNE_end_sequence)
-	      || (op_code == DW_LNS_copy))
+	  if (xop == -DW_LNE_end_sequence)
+	    putchar ('\n');
+	  else if ((is_special_opcode) || (xop == DW_LNS_copy))
 	    {
 	      const unsigned int MAX_FILENAME_LENGTH = 35;
 	      char *fileName;
@@ -3718,11 +3745,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	      if (!do_wide || (fileNameLength <= MAX_FILENAME_LENGTH))
 		{
 		  if (linfo.li_max_ops_per_insn == 1)
-		    printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x\n",
+		    printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x",
 			    newFileName, state_machine_regs.line,
 			    state_machine_regs.address);
 		  else
-		    printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x[%d]\n",
+		    printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x[%d]",
 			    newFileName, state_machine_regs.line,
 			    state_machine_regs.address,
 			    state_machine_regs.op_index);
@@ -3730,18 +3757,21 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	      else
 		{
 		  if (linfo.li_max_ops_per_insn == 1)
-		    printf ("%s  %11d  %#18" DWARF_VMA_FMT "x\n",
+		    printf ("%s  %11d  %#18" DWARF_VMA_FMT "x",
 			    newFileName, state_machine_regs.line,
 			    state_machine_regs.address);
 		  else
-		    printf ("%s  %11d  %#18" DWARF_VMA_FMT "x[%d]\n",
+		    printf ("%s  %11d  %#18" DWARF_VMA_FMT "x[%d]",
 			    newFileName, state_machine_regs.line,
 			    state_machine_regs.address,
 			    state_machine_regs.op_index);
 		}
 
-	      if (op_code == DW_LNE_end_sequence)
-		printf ("\n");
+	      if (state_machine_regs.view)
+		printf ("  %u\n", state_machine_regs.view);
+	      else
+		putchar ('\n');
+	      state_machine_regs.view++;
 
 	      free (newFileName);
 	    }
