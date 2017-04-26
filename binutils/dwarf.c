@@ -3503,7 +3503,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		     switch (ext_op_code)
 		       {
 		       case DW_LNE_end_sequence:
-			 reset_state_machine (linfo.li_default_is_stmt);
+			 /* Reset stuff after printing this row.  */
 			 break;
 		       case DW_LNE_set_address:
 			 SAFE_BYTE_GET_AND_INC (state_machine_regs.address,
@@ -3702,9 +3702,8 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
 	  /* Only Special opcodes, DW_LNS_copy and DW_LNE_end_sequence adds a row
 	     to the DWARF address/line matrix.  */
-	  if (xop == -DW_LNE_end_sequence)
-	    putchar ('\n');
-	  else if ((is_special_opcode) || (xop == DW_LNS_copy))
+	  if ((is_special_opcode) || (xop == -DW_LNE_end_sequence)
+	      || (xop == DW_LNS_copy))
 	    {
 	      const unsigned int MAX_FILENAME_LENGTH = 35;
 	      char *fileName;
@@ -3772,6 +3771,12 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	      else
 		putchar ('\n');
 	      state_machine_regs.view++;
+
+	      if (xop == -DW_LNE_end_sequence)
+		{
+		  reset_state_machine (linfo.li_default_is_stmt);
+		  putchar ('\n');
+		}
 
 	      free (newFileName);
 	    }
