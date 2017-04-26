@@ -1500,6 +1500,104 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   Addend addend_;
 };
 
+// The SHT_RELR version of Output_reloc<>.  This is a relative reloc,
+// and holds nothing but an offset.  Rather than duplicate all the fields
+// of the SHT_REL version except for the symbol and relocation type, we
+// simply use an SHT_REL as a proxy.
+
+template<bool dynamic, int size, bool big_endian>
+class Output_reloc<elfcpp::SHT_RELR, dynamic, size, big_endian>
+{
+ public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+
+  // An uninitialized entry.
+  Output_reloc()
+    : rel_()
+  { }
+
+  // A reloc against a global symbol.
+
+  Output_reloc(Symbol* gsym, Output_data* od, Address address)
+    : rel_(gsym, 0, od, address, true, true, false)
+  { }
+
+  Output_reloc(Symbol* gsym, Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address)
+    : rel_(gsym, 0, relobj, shndx, address, true, true, false)
+  { }
+
+  // A reloc against a local symbol.
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
+	       unsigned int local_sym_index, Output_data* od, Address address,
+	       bool is_section_symbol)
+    : rel_(relobj, local_sym_index, 0, od, address, true,
+	   true, is_section_symbol, false)
+  { }
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
+	       unsigned int local_sym_index, unsigned int shndx,
+	       Address address, bool is_section_symbol)
+    : rel_(relobj, local_sym_index, 0, shndx, address, true,
+	   true, is_section_symbol, false)
+  { }
+
+  // A reloc against the STT_SECTION symbol of an output section.
+
+  Output_reloc(Output_section* os, Output_data* od, Address address)
+    : rel_(os, 0, od, address, true)
+  { }
+
+  Output_reloc(Output_section* os, Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address)
+    : rel_(os, 0, relobj, shndx, address, true)
+  { }
+
+  // A relative relocation with no symbol.
+
+  Output_reloc(Output_data* od, Address address)
+    : rel_(0, od, address, true)
+  { }
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address)
+    : rel_(0, relobj, shndx, address, true)
+  { }
+
+  // Return whether this is a RELATIVE relocation.
+  bool
+  is_relative() const
+  { return true; }
+
+  // Return whether this is a relocation which should not use
+  // a symbol, but which obtains its addend from a symbol.
+  bool
+  is_symbolless() const
+  { return true; }
+
+  // If this relocation is against an input section, return the
+  // relocatable object containing the input section.
+  Sized_relobj<size, big_endian>*
+  get_relobj() const
+  { return this->rel_.get_relobj(); }
+
+  // Write the reloc entry to an output view.
+  void
+  write(unsigned char* pov) const;
+
+  // Return whether this reloc should be sorted before the argument
+  // when sorting dynamic relocs.
+  bool
+  sort_before(const Output_reloc<elfcpp::SHT_RELR, dynamic, size, big_endian>&
+	      r2) const
+  { return this->rel_.compare(r2.rel_) < 0; }
+
+ private:
+  // The basic reloc.
+  Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian> rel_;
+};
+
 // Output_data_reloc_generic is a non-template base class for
 // Output_data_reloc_base.  This gives the generic code a way to hold
 // a pointer to a reloc section.
@@ -2342,6 +2440,127 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
     this->add(od, Output_reloc_type(type, arg, relobj, shndx, address,
 				    addend));
   }
+};
+
+// The SHT_RELR version of Output_data_reloc.
+
+template<bool dynamic, int size, bool big_endian>
+class Output_data_reloc<elfcpp::SHT_RELR, dynamic, size, big_endian>
+  : public Output_data_reloc_base<elfcpp::SHT_RELR, dynamic, size, big_endian>
+{
+ private:
+  typedef Output_data_reloc_base<elfcpp::SHT_RELR, dynamic, size,
+				 big_endian> Base;
+
+ public:
+  typedef typename Base::Output_reloc_type Output_reloc_type;
+  typedef typename Output_reloc_type::Address Address;
+
+  Output_data_reloc()
+    : Output_data_reloc_base<elfcpp::SHT_RELR, dynamic, size, big_endian>(false)
+  { }
+
+  void
+  add_global_generic(Symbol*, unsigned int, Output_data*, uint64_t, uint64_t)
+  {
+    gold_unreachable();
+  }
+
+  void
+  add_global_generic(Symbol*, unsigned int, Output_data*, Relobj*,
+		     unsigned int, uint64_t, uint64_t)
+  {
+    gold_unreachable();
+  }
+
+  // Add a RELATIVE reloc against a global symbol.  The final relocation
+  // will not reference the symbol.
+
+  void
+  add_global_relative(Symbol* gsym, Output_data* od, Address address)
+  {
+    this->add(od, Output_reloc_type(gsym, od, address));
+  }
+
+  void
+  add_global_relative(Symbol* gsym, Output_data* od,
+		      Sized_relobj<size, big_endian>* relobj,
+		      unsigned int shndx, Address address)
+  {
+    this->add(od, Output_reloc_type(gsym, relobj, shndx, address));
+  }
+
+  void
+  add_local_generic(Relobj*, unsigned int, unsigned int, Output_data*, uint64_t,
+		    uint64_t)
+  {
+    gold_unreachable();
+  }
+
+  void
+  add_local_generic(Relobj*, unsigned int, unsigned int, Output_data*,
+		    unsigned int, uint64_t, uint64_t)
+  {
+    gold_unreachable();
+  }
+
+  // Add a RELATIVE reloc against a local symbol.
+
+  void
+  add_local_relative(Sized_relobj<size, big_endian>* relobj,
+		     unsigned int local_sym_index, Output_data* od,
+		     Address address)
+  {
+    this->add(od, Output_reloc_type(relobj, local_sym_index, od, address,
+				    false));
+  }
+
+  void
+  add_local_relative(Sized_relobj<size, big_endian>* relobj,
+		     unsigned int local_sym_index, Output_data* od,
+		     unsigned int shndx, Address address)
+  {
+    this->add(od, Output_reloc_type(relobj, local_sym_index, shndx, address,
+				    false));
+  }
+
+  void
+  add_output_section_generic(Output_section*, unsigned int, Output_data*,
+			     uint64_t, uint64_t)
+  {
+    gold_unreachable();
+  }
+
+  void
+  add_output_section_generic(Output_section*, unsigned int, Output_data*,
+			     Relobj*, unsigned int, uint64_t, uint64_t)
+  {
+    gold_unreachable();
+  }
+
+  // Add a RELATIVE reloc against an output section symbol.
+
+  void
+  add_output_section_relative(Output_section* os, Output_data* od,
+			      Address address)
+  { this->add(od, Output_reloc_type(os, od, address)); }
+
+  void
+  add_output_section_relative(Output_section* os, Output_data* od,
+			      Sized_relobj<size, big_endian>* relobj,
+			      unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(os, relobj, shndx, address)); }
+
+  // Add a relative relocation
+
+  void
+  add_relative(Output_data* od, Address address)
+  { this->add(od, Output_reloc_type(od, address)); }
+
+  void
+  add_relative(Output_data* od, Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(relobj, shndx, address)); }
 };
 
 // Output_relocatable_relocs represents a relocation section in a

@@ -358,6 +358,7 @@ enum SHT
   SHT_PREINIT_ARRAY = 16,
   SHT_GROUP = 17,
   SHT_SYMTAB_SHNDX = 18,
+  SHT_RELR = 19,		// Experimental
   SHT_LOOS = 0x60000000,
   SHT_HIOS = 0x6fffffff,
   SHT_LOPROC = 0x70000000,
@@ -719,6 +720,11 @@ enum DT
 
   DT_PREINIT_ARRAY = 32,
   DT_PREINIT_ARRAYSZ = 33,
+  DT_SYMTAB_SHNDX = 34,
+  DT_RELRSZ = 35,		// Experimental
+  DT_RELR = 36,			// Experimental
+  DT_RELRENT = 37,		// Experimental
+
   DT_LOOS = 0x6000000d,
   DT_HIOS = 0x6ffff000,
   DT_LOPROC = 0x70000000,
@@ -1021,6 +1027,7 @@ struct Elf_sizes
   // Sizes of ELF reloc entries.
   static const int rel_size = sizeof(internal::Rel_data<size>);
   static const int rela_size = sizeof(internal::Rela_data<size>);
+  static const int relr_size = sizeof(internal::Relr_data<size>);
   // Size of ELF dynamic entry.
   static const int dyn_size = sizeof(internal::Dyn_data<size>);
   // Size of ELF version structures.
@@ -1664,6 +1671,48 @@ class Rela_write
 
  private:
   internal::Rela_data<size>* p_;
+};
+
+// Accessor class for an ELF Relr relocation.
+
+template<int size, bool big_endian>
+class Relr
+{
+ public:
+  Relr(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Relr_data<size>*>(p))
+  { }
+
+  template<typename File>
+  Relr(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Relr_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  typename Elf_types<size>::Elf_Addr
+  get_r_offset() const
+  { return Convert<size, big_endian>::convert_host(this->p_->r_offset); }
+
+ private:
+  const internal::Relr_data<size>* p_;
+};
+
+// Writer class for an ELF Relr relocation.
+
+template<int size, bool big_endian>
+class Relr_write
+{
+ public:
+  Relr_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Relr_data<size>*>(p))
+  { }
+
+  void
+  put_r_offset(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->r_offset = Convert<size, big_endian>::convert_host(v); }
+
+ private:
+  internal::Relr_data<size>* p_;
 };
 
 // MIPS-64 has a non-standard relocation layout.

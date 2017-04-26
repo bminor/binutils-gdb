@@ -834,6 +834,10 @@ class General_options
 		 N_("Exclude libraries from automatic export"),
 		 N_(("lib,lib ...")));
 
+  DEFINE_bool(experimental_use_relr, options::TWO_DASHES, '\0', false,
+	      N_("(x86-64 only) Generate RELR dynamic relocations"),
+	      N_("Do not generate RELR dynamic relocations"));
+
   DEFINE_bool(export_dynamic, options::TWO_DASHES, 'E', false,
 	      N_("Export all dynamic symbols"),
 	      N_("Do not export all dynamic symbols"));

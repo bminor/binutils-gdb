@@ -584,13 +584,15 @@ class Target_x86_64 : public Sized_target<size, false>
   // uses only Elf64_Rela relocation entries with explicit addends."
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, false> Reloc_section;
 
+  typedef Output_data_reloc<elfcpp::SHT_RELR, true, size, false> Relr_section;
+
   Target_x86_64(const Target::Target_info* info = &x86_64_info)
     : Sized_target<size, false>(info),
       got_(NULL), plt_(NULL), got_plt_(NULL), got_irelative_(NULL),
       got_tlsdesc_(NULL), global_offset_table_(NULL), rela_dyn_(NULL),
-      rela_irelative_(NULL), copy_relocs_(elfcpp::R_X86_64_COPY),
-      got_mod_index_offset_(-1U), tlsdesc_reloc_info_(),
-      tls_base_symbol_defined_(false)
+      rela_irelative_(NULL), relr_dyn_(NULL),
+      copy_relocs_(elfcpp::R_X86_64_COPY), got_mod_index_offset_(-1U),
+      tlsdesc_reloc_info_(), tls_base_symbol_defined_(false)
   { }
 
   // Hook for a new output section.
@@ -1172,6 +1174,10 @@ class Target_x86_64 : public Sized_target<size, false>
   Reloc_section*
   rela_irelative_section(Layout*);
 
+  // Get the RELR dynamic reloc section, creating it if necessary.
+  Relr_section*
+  relr_dyn_section(Layout*);
+
   // Add a potential copy relocation.
   void
   copy_reloc(Symbol_table* symtab, Layout* layout,
@@ -1235,6 +1241,8 @@ class Target_x86_64 : public Sized_target<size, false>
   Reloc_section* rela_dyn_;
   // The section to use for IRELATIVE relocs.
   Reloc_section* rela_irelative_;
+  // The RELR dynamic reloc section.
+  Relr_section* relr_dyn_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_RELA, size, false> copy_relocs_;
   // Offset of the GOT entry for the TLS module index.
@@ -1429,6 +1437,23 @@ Target_x86_64<size>::rela_irelative_section(Layout* layout)
 		  == this->rela_irelative_->output_section());
     }
   return this->rela_irelative_;
+}
+
+// Get the RELR dynamic reloc section, creating it if necessary.
+
+template<int size>
+typename Target_x86_64<size>::Relr_section*
+Target_x86_64<size>::relr_dyn_section(Layout* layout)
+{
+  if (this->relr_dyn_ == NULL)
+    {
+      gold_assert(layout != NULL);
+      this->relr_dyn_ = new Relr_section();
+      layout->add_output_section_data(".relr.dyn", elfcpp::SHT_RELR,
+				      elfcpp::SHF_ALLOC, this->relr_dyn_,
+				      ORDER_DYNAMIC_RELOCS, false);
+    }
+  return this->relr_dyn_;
 }
 
 // Write the first three reserved words of the .got.plt section.
@@ -2966,14 +2991,25 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
       if (parameters->options().output_is_position_independent())
 	{
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-	  rela_dyn->add_local_relative(object, r_sym,
-				       (size == 32
-					? elfcpp::R_X86_64_RELATIVE64
-					: elfcpp::R_X86_64_RELATIVE),
-				       output_section, data_shndx,
-				       reloc.get_r_offset(),
-				       reloc.get_r_addend(), is_ifunc);
+	  if (size == 64
+	      && !is_ifunc
+	      && parameters->options().experimental_use_relr())
+	    {
+	      Relr_section* relr_dyn = target->relr_dyn_section(layout);
+	      relr_dyn->add_local_relative(object, r_sym, output_section,
+					   data_shndx, reloc.get_r_offset());
+	    }
+	  else
+	    {
+	      Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	      rela_dyn->add_local_relative(object, r_sym,
+					   (size == 32
+					    ? elfcpp::R_X86_64_RELATIVE64
+					    : elfcpp::R_X86_64_RELATIVE),
+					   output_section, data_shndx,
+					   reloc.get_r_offset(),
+					   reloc.get_r_addend(), is_ifunc);
+	    }
 	}
       break;
 
@@ -2991,12 +3027,22 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	  if (size == 32 && r_type == elfcpp::R_X86_64_32)
 	    {
 	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-	      Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-	      rela_dyn->add_local_relative(object, r_sym,
-					   elfcpp::R_X86_64_RELATIVE,
-					   output_section, data_shndx,
-					   reloc.get_r_offset(),
-					   reloc.get_r_addend(), is_ifunc);
+	      if (!is_ifunc && parameters->options().experimental_use_relr())
+		{
+		  Relr_section* relr_dyn = target->relr_dyn_section(layout);
+		  relr_dyn->add_local_relative(object, r_sym, output_section,
+					       data_shndx,
+					       reloc.get_r_offset());
+		}
+	      else
+		{
+		  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		  rela_dyn->add_local_relative(object, r_sym,
+					       elfcpp::R_X86_64_RELATIVE,
+					       output_section, data_shndx,
+					       reloc.get_r_offset(),
+					       reloc.get_r_addend(), is_ifunc);
+		}
 	      break;
 	    }
 
@@ -3099,15 +3145,7 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 		// R_X86_64_RELATIVE assumes a 64-bit relocation.
-		if (r_type != elfcpp::R_X86_64_GOT32)
-		  {
-		    unsigned int got_offset =
-		      object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
-		    rela_dyn->add_local_relative(object, r_sym,
-						 elfcpp::R_X86_64_RELATIVE,
-						 got, got_offset, 0, is_ifunc);
-		  }
-		else
+		if (r_type == elfcpp::R_X86_64_GOT32)
 		  {
 		    this->check_non_pic(object, r_type, NULL);
 
@@ -3115,6 +3153,24 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 		    rela_dyn->add_local(
 			object, r_sym, r_type, got,
 			object->local_got_offset(r_sym, GOT_TYPE_STANDARD), 0);
+		  }
+		else if (size == 64
+			 && !is_ifunc
+			 && parameters->options().experimental_use_relr())
+		  {
+		    Relr_section* relr_dyn = target->relr_dyn_section(layout);
+		    unsigned int got_offset =
+		      object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
+		    relr_dyn->add_local_relative(object, r_sym, got,
+						 got_offset);
+		  }
+		else
+		  {
+		    unsigned int got_offset =
+		      object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
+		    rela_dyn->add_local_relative(object, r_sym,
+						 elfcpp::R_X86_64_RELATIVE,
+						 got, got_offset, 0, is_ifunc);
 		  }
 	      }
 	  }
@@ -3478,12 +3534,24 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 		      || (size == 32 && r_type == elfcpp::R_X86_64_32))
 		     && gsym->can_use_relative_reloc(false))
 	      {
-		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-		rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_RELATIVE,
-					      output_section, object,
-					      data_shndx,
-					      reloc.get_r_offset(),
-					      reloc.get_r_addend(), false);
+		if (parameters->options().experimental_use_relr())
+		  {
+		    Relr_section* relr_dyn = target->relr_dyn_section(layout);
+		    relr_dyn->add_global_relative(gsym,
+						  output_section, object,
+						  data_shndx,
+						  reloc.get_r_offset());
+		  }
+		else
+		  {
+		    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		    rela_dyn->add_global_relative(gsym,
+						  elfcpp::R_X86_64_RELATIVE,
+						  output_section, object,
+						  data_shndx,
+						  reloc.get_r_offset(),
+						  reloc.get_r_addend(), false);
+		  }
 	      }
 	    else
 	      {
@@ -3886,7 +3954,8 @@ Target_x86_64<size>::do_finalize_sections(
 				  ? NULL
 				  : this->plt_->rela_plt());
   layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
-				  this->rela_dyn_, true, false);
+				  this->rela_dyn_, true, false,
+				  this->relr_dyn_);
 
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();
