@@ -1,3 +1,9 @@
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21434
+	* reloc.c (bfd_perform_relocation): Check for a negative address
+	in the reloc.
+
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/21334
