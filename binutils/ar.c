@@ -738,6 +738,9 @@ main (int argc, char **argv)
 
   arg_index = 0;
 
+  if (argv[arg_index] == NULL)
+    usage (0);
+
   if (mri_mode)
     {
       default_deterministic ();

@@ -1,5 +1,12 @@
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21407
+	* bucomm.c (get_file_size): Return -1 if file_name is NULL.
+	* ar.c (main): Fail with usage() invocation if no file names are
+	provided.
+
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (process_section_headers): Warn about overlarge
 	sections.
 	(print_gnu_build_attribute_name): Print the number of unrecognised
