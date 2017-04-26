@@ -4052,20 +4052,20 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	     relocation.  */
 	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+	}
 
-	  if (htab->elf.srelplt->size != 0)
-	    {
-	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-		  || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-		  || !add_dynamic_entry (DT_JMPREL, 0))
-		return FALSE;
-	    }
-
-	  if (htab->tlsdesc_plt
-	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
-		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
+      if (htab->elf.srelplt->size != 0)
+	{
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return FALSE;
 	}
+
+      if (htab->tlsdesc_plt
+	  && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
+	      || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
+	return FALSE;
 
       if (relocs)
 	{

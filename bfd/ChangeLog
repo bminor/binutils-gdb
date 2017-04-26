@@ -1,3 +1,10 @@
+2017-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Alwasys add
+	DT_PLTRELSZ, DT_PLTREL and DT_JMPREL for .rel.plt section.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Alwasys
+	add DT_PLTRELSZ, DT_PLTREL and DT_JMPREL for .rela.plt section.
+
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21434

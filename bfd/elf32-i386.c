@@ -3577,14 +3577,14 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	     relocation.  */
 	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+	}
 
-	  if (htab->elf.srelplt->size != 0)
-	    {
-	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-		  || !add_dynamic_entry (DT_PLTREL, DT_REL)
-		  || !add_dynamic_entry (DT_JMPREL, 0))
-		return FALSE;
-	    }
+      if (htab->elf.srelplt->size != 0)
+	{
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_REL)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
+	    return FALSE;
 	}
 
       if (relocs)

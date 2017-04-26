@@ -1,3 +1,8 @@
+2017-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/tlsdesc2.d: New test.
+	* testsuite/ld-x86-64/tlsdesc2.d: Likewise.
+
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/21334
