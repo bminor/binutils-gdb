@@ -1,3 +1,20 @@
+2017-04-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* gdbarch.sh: New gdbarch method execute_dwarf_cfa_vendor_op.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Made the
+	visibility external.
+	(execute_cfa_program): Call execute_dwarf_cfa_vendor_op for CFI
+	between DW_CFA_lo_user and DW_CFA_high_user inclusive.
+	(enum cfa_how_kind): Move to ...
+	(struct dwarf2_frame_state_reg_info): Likewise.
+	(struct dwarf2_frame_state): Likewise.
+	* dwarf2-frame.h: ... here.
+	(dwarf2_frame_state_alloc_regs): New declaration.
+	* sparc-tdep.c (sparc_execute_dwarf_cfa_vendor_op): New function.
+	(sparc32_gdbarch_init): Register execute_dwarf_cfa_vendor_op hook.
+
 2017-04-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* xtensa-tdep.c (xtensa_pseudo_register_read): Use

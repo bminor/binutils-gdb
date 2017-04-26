@@ -165,58 +165,6 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 				     CORE_ADDR func_base);
 
 
-enum cfa_how_kind
-{
-  CFA_UNSET,
-  CFA_REG_OFFSET,
-  CFA_EXP
-};
-
-struct dwarf2_frame_state_reg_info
-{
-  struct dwarf2_frame_state_reg *reg;
-  int num_regs;
-
-  LONGEST cfa_offset;
-  ULONGEST cfa_reg;
-  enum cfa_how_kind cfa_how;
-  const gdb_byte *cfa_exp;
-
-  /* Used to implement DW_CFA_remember_state.  */
-  struct dwarf2_frame_state_reg_info *prev;
-};
-
-/* Structure describing a frame state.  */
-
-struct dwarf2_frame_state
-{
-  /* Each register save state can be described in terms of a CFA slot,
-     another register, or a location expression.  */
-  struct dwarf2_frame_state_reg_info regs;
-
-  /* The PC described by the current frame state.  */
-  CORE_ADDR pc;
-
-  /* Initial register set from the CIE.
-     Used to implement DW_CFA_restore.  */
-  struct dwarf2_frame_state_reg_info initial;
-
-  /* The information we care about from the CIE.  */
-  LONGEST data_align;
-  ULONGEST code_align;
-  ULONGEST retaddr_column;
-
-  /* Flags for known producer quirks.  */
-
-  /* The ARM compilers, in DWARF2 mode, assume that DW_CFA_def_cfa
-     and DW_CFA_def_cfa_offset takes a factored offset.  */
-  int armcc_cfa_offsets_sf;
-
-  /* The ARM compilers, in DWARF2 or DWARF3 mode, may assume that
-     the CFA is defined as REG - OFFSET rather than REG + OFFSET.  */
-  int armcc_cfa_offsets_reversed;
-};
-
 /* Store the length the expression for the CFA in the `cfa_reg' field,
    which is unused in that case.  */
 #define cfa_exp_len cfa_reg
@@ -224,7 +172,7 @@ struct dwarf2_frame_state
 /* Assert that the register set RS is large enough to store gdbarch_num_regs
    columns.  If necessary, enlarge the register set.  */
 
-static void
+void
 dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
 			       int num_regs)
 {
@@ -672,31 +620,6 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      /* cfa_how deliberately not set.  */
 	      break;
 
-	    case DW_CFA_GNU_window_save:
-	      /* This is SPARC-specific code, and contains hard-coded
-		 constants for the register numbering scheme used by
-		 GCC.  Rather than having a architecture-specific
-		 operation that's only ever used by a single
-		 architecture, we provide the implementation here.
-		 Incidentally that's what GCC does too in its
-		 unwinder.  */
-	      {
-		int size = register_size (gdbarch, 0);
-
-		dwarf2_frame_state_alloc_regs (&fs->regs, 32);
-		for (reg = 8; reg < 16; reg++)
-		  {
-		    fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
-		    fs->regs.reg[reg].loc.reg = reg + 16;
-		  }
-		for (reg = 16; reg < 32; reg++)
-		  {
-		    fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
-		    fs->regs.reg[reg].loc.offset = (reg - 16) * size;
-		  }
-	      }
-	      break;
-
 	    case DW_CFA_GNU_args_size:
 	      /* Ignored.  */
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
@@ -713,8 +636,17 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      break;
 
 	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("Unknown CFI encountered."));
+	      if (insn >= DW_CFA_lo_user && insn <= DW_CFA_hi_user)
+		{
+		  /* Handle vendor-specific CFI for different architectures.  */
+		  if (!gdbarch_execute_dwarf_cfa_vendor_op (gdbarch, insn, fs))
+		    error (_("Call Frame Instruction op %d in vendor extension "
+			     "space is not handled on this architecture."),
+			   insn);
+		}
+	      else
+		internal_error (__FILE__, __LINE__,
+				_("Unknown CFI encountered."));
 	    }
 	}
     }
