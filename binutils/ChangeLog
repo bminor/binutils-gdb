@@ -1,6 +1,6 @@
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
-	PR binutils/21407
+	PR binutils/21433
 	* bucomm.c (get_file_size): Return -1 if file_name is NULL.
 	* ar.c (main): Fail with usage() invocation if no file names are
 	provided.
