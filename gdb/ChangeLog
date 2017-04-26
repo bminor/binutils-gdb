@@ -1,5 +1,11 @@
 2017-04-26  Alan Hayward  <alan.hayward@arm.com>
 
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Use
+	regcache_raw_read_unsigned.
+	(xtensa_pseudo_register_write): Likewise.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
 	* nds32-tdep.c (nds32_pseudo_register_read): Abort on errors.
 	(nds32_pseudo_register_write): Likewise.
 
