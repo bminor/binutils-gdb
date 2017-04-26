@@ -1,3 +1,8 @@
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* nds32-tdep.c (nds32_pseudo_register_read): Abort on errors.
+	(nds32_pseudo_register_write): Likewise.
+
 2017-04-25  Yao Qi  <yao.qi@linaro.org>
 
 	* regcache.c (struct regcache) <readonly_p>: Change its type
