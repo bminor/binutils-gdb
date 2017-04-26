@@ -1,5 +1,25 @@
 2018-02-26  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (backtrace_command_1): Update.
+	* python/python-internal.h (gdbpy_apply_frame_filter): Change type
+	of "flags".
+	* python/py-framefilter.c (py_print_frame)
+	(gdbpy_apply_frame_filter): Change type of "flags".
+	* mi/mi-cmd-stack.c (mi_apply_ext_lang_frame_filter): Change type
+	of "flags".
+	(mi_cmd_stack_list_frames, mi_cmd_stack_list_locals)
+	(mi_cmd_stack_list_args, mi_cmd_stack_list_variables): Update.
+	* extension.h (enum frame_filter_flag): Rename from
+	frame_filter_flags.
+	(frame_filter_flags): Define using DEF_ENUM_FLAGS_TYPE.
+	(apply_ext_lang_frame_filter): Change type of "flags".
+	* extension.c (apply_ext_lang_frame_filter): Change type of
+	"flags".
+	* extension-priv.h (struct extension_language_ops)
+	<apply_frame_filter>: Change type of "flags".
+
+2018-02-26  Tom Tromey  <tom@tromey.com>
+
 	PR python/16497:
 	* stack.c (backtrace_command_1): Set PRINT_MORE_FRAMES flag.  Fix
 	off-by-one in py_end computation.

@@ -57,7 +57,8 @@ mi_cmd_enable_frame_filters (const char *command, char **argv, int argc)
 /* Like apply_ext_lang_frame_filter, but take a print_values */
 
 static enum ext_lang_bt_status
-mi_apply_ext_lang_frame_filter (struct frame_info *frame, int flags,
+mi_apply_ext_lang_frame_filter (struct frame_info *frame,
+				frame_filter_flags flags,
 				enum print_values print_values,
 				struct ui_out *out,
 				int frame_low, int frame_high)
@@ -146,7 +147,7 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 
   if (! raw_arg && frame_filters)
     {
-      int flags = PRINT_LEVEL | PRINT_FRAME_INFO;
+      frame_filter_flags flags = PRINT_LEVEL | PRINT_FRAME_INFO;
       int py_frame_low = frame_low;
 
       /* We cannot pass -1 to frame_low, as that would signify a
@@ -262,7 +263,7 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
 
    if (! raw_arg && frame_filters)
      {
-       int flags = PRINT_LEVEL | PRINT_LOCALS;
+       frame_filter_flags flags = PRINT_LEVEL | PRINT_LOCALS;
 
        result = mi_apply_ext_lang_frame_filter (frame, flags, print_value,
 						current_uiout, 0, 0);
@@ -359,7 +360,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 
   if (! raw_arg && frame_filters)
     {
-      int flags = PRINT_LEVEL | PRINT_ARGS;
+      frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS;
       int py_frame_low = frame_low;
 
       /* We cannot pass -1 to frame_low, as that would signify a
@@ -451,7 +452,7 @@ mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
 
    if (! raw_arg && frame_filters)
      {
-       int flags = PRINT_LEVEL | PRINT_ARGS | PRINT_LOCALS;
+       frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS | PRINT_LOCALS;
 
        result = mi_apply_ext_lang_frame_filter (frame, flags,
 						print_value,

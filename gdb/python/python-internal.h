@@ -459,7 +459,8 @@ extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
    const struct language_defn *language);
 extern enum ext_lang_bt_status gdbpy_apply_frame_filter
   (const struct extension_language_defn *,
-   struct frame_info *frame, int flags, enum ext_lang_frame_args args_type,
+   struct frame_info *frame, frame_filter_flags flags,
+   enum ext_lang_frame_args args_type,
    struct ui_out *out, int frame_low, int frame_high);
 extern void gdbpy_preserve_values (const struct extension_language_defn *,
 				   struct objfile *objfile,

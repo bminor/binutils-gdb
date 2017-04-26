@@ -920,7 +920,7 @@ py_print_args (PyObject *filter,
     on success.  It can also throw an exception RETURN_QUIT.  */
 
 static enum ext_lang_bt_status
-py_print_frame (PyObject *filter, int flags,
+py_print_frame (PyObject *filter, frame_filter_flags flags,
 		enum ext_lang_frame_args args_type,
 		struct ui_out *out, int indent, htab_t levels_printed)
 {
@@ -1332,7 +1332,7 @@ bootstrap_python_frame_filters (struct frame_info *frame,
 
 enum ext_lang_bt_status
 gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
-			  struct frame_info *frame, int flags,
+			  struct frame_info *frame, frame_filter_flags flags,
 			  enum ext_lang_frame_args args_type,
 			  struct ui_out *out, int frame_low, int frame_high)
 {

@@ -1775,7 +1775,7 @@ backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 
   if (! no_filters)
     {
-      int flags = PRINT_LEVEL | PRINT_FRAME_INFO | PRINT_ARGS;
+      frame_filter_flags flags = PRINT_LEVEL | PRINT_FRAME_INFO | PRINT_ARGS;
       enum ext_lang_frame_args arg_type;
 
       if (show_locals)

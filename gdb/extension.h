@@ -87,23 +87,25 @@ enum ext_lang_bt_status
 
 /* Flags to pass to apply_extlang_frame_filter.  */
 
-enum frame_filter_flags
+enum frame_filter_flag
   {
     /* Set this flag if frame level is to be printed.  */
-    PRINT_LEVEL = 1,
+    PRINT_LEVEL = 1 << 0,
 
     /* Set this flag if frame information is to be printed.  */
-    PRINT_FRAME_INFO = 2,
+    PRINT_FRAME_INFO = 1 << 1,
 
     /* Set this flag if frame arguments are to be printed.  */
-    PRINT_ARGS = 4,
+    PRINT_ARGS = 1 << 2,
 
     /* Set this flag if frame locals are to be printed.  */
-    PRINT_LOCALS = 8,
+    PRINT_LOCALS = 1 << 3,
 
     /* Set this flag if a "More frames" message is to be printed.  */
-    PRINT_MORE_FRAMES = 16,
+    PRINT_MORE_FRAMES = 1 << 4,
   };
+
+DEF_ENUM_FLAGS_TYPE (enum frame_filter_flag, frame_filter_flags);
 
 /* A choice of the different frame argument printing strategies that
    can occur in different cases of frame filter instantiation.  */
@@ -287,7 +289,8 @@ extern int apply_ext_lang_val_pretty_printer
    const struct language_defn *language);
 
 extern enum ext_lang_bt_status apply_ext_lang_frame_filter
-  (struct frame_info *frame, int flags, enum ext_lang_frame_args args_type,
+  (struct frame_info *frame, frame_filter_flags flags,
+   enum ext_lang_frame_args args_type,
    struct ui_out *out, int frame_low, int frame_high);
 
 extern void preserve_ext_lang_values (struct objfile *, htab_t copied_types);

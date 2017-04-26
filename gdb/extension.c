@@ -553,7 +553,8 @@ apply_ext_lang_val_pretty_printer (struct type *type,
    rather than trying filters in other extension languages.  */
 
 enum ext_lang_bt_status
-apply_ext_lang_frame_filter (struct frame_info *frame, int flags,
+apply_ext_lang_frame_filter (struct frame_info *frame,
+			     frame_filter_flags flags,
 			     enum ext_lang_frame_args args_type,
 			     struct ui_out *out,
 			     int frame_low, int frame_high)
