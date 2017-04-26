@@ -1,3 +1,9 @@
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (elf_gc_sweep): Only call
+	`_bfd_elf_link_renumber_dynsyms' if dynamic sections have been
+	created.
+
 2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21425

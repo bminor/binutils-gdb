@@ -12983,7 +12983,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
   elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
 			  &sweep_info);
 
-  _bfd_elf_link_renumber_dynsyms (abfd, info, &section_sym_count);
+  if (elf_hash_table (info)->dynamic_sections_created)
+    _bfd_elf_link_renumber_dynsyms (abfd, info, &section_sym_count);
   return TRUE;
 }
 
