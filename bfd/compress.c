@@ -542,7 +542,6 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
 {
   bfd_size_type uncompressed_size;
   bfd_byte *uncompressed_buffer;
-  bfd_boolean ret;
 
   /* Error if not opened for read.  */
   if (abfd->direction != read_direction
@@ -558,18 +557,18 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
   /* Read in the full section contents and compress it.  */
   uncompressed_size = sec->size;
   uncompressed_buffer = (bfd_byte *) bfd_malloc (uncompressed_size);
+  /* PR 21431 */
+  if (uncompressed_buffer == NULL)
+    return FALSE;
+
   if (!bfd_get_section_contents (abfd, sec, uncompressed_buffer,
 				 0, uncompressed_size))
-    ret = FALSE;
-  else
-    {
-      uncompressed_size = bfd_compress_section_contents (abfd, sec,
-							 uncompressed_buffer,
-							 uncompressed_size);
-      ret = uncompressed_size != 0;
-    }
+    return FALSE;
 
-  return ret;
+  uncompressed_size = bfd_compress_section_contents (abfd, sec,
+						     uncompressed_buffer,
+						     uncompressed_size);
+  return uncompressed_size != 0;
 }
 
 /*
