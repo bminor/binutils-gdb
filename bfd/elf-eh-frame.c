@@ -326,9 +326,9 @@ size_of_output_cie_fde (struct eh_cie_fde *entry)
 /* Return the offset of the FDE or CIE after ENT.  */
 
 static unsigned int
-next_cie_fde_offset (struct eh_cie_fde *ent,
-		     struct eh_cie_fde *last,
-		     asection *sec)
+next_cie_fde_offset (const struct eh_cie_fde *ent,
+		     const struct eh_cie_fde *last,
+		     const asection *sec)
 {
   while (++ent < last)
     {
@@ -1334,7 +1334,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
    after .eh_frame editing.  */
 
 static bfd_signed_vma
-offset_adjust (bfd_vma offset, asection *sec)
+offset_adjust (bfd_vma offset, const asection *sec)
 {
   struct eh_frame_sec_info *sec_info
     = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
@@ -1442,7 +1442,7 @@ _bfd_elf_adjust_eh_frame_global_symbol (struct elf_link_hash_entry *h,
    if any symbol was changed.  */
 
 static int
-adjust_eh_frame_local_symbols (asection *sec,
+adjust_eh_frame_local_symbols (const asection *sec,
 			       struct elf_reloc_cookie *cookie)
 {
   unsigned int shndx;
@@ -2546,7 +2546,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 /* Return the width of FDE addresses.  This is the default implementation.  */
 
 unsigned int
-_bfd_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+_bfd_elf_eh_frame_address_size (bfd *abfd, const asection *sec ATTRIBUTE_UNUSED)
 {
   return elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64 ? 8 : 4;
 }

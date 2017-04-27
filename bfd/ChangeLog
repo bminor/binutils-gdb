@@ -1,5 +1,18 @@
 2017-04-27  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_backend_data): Make asection param of
+	elf_backend_eh_frame_address_size const.
+	(_bfd_elf_eh_frame_address_size): Likewise.
+	* elf32-m32c.c (_bfd_m32c_elf_eh_frame_address_size): Likewise.
+	* elf32-msp430.c (elf32_msp430_eh_frame_address_size): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_eh_frame_address_size): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_eh_frame_address_size): Likewise.
+	* elf-eh-frame.c (_bfd_elf_eh_frame_address_size): Likewise.
+	(next_cie_fde_offset): Constify params.
+	(offset_adjust, adjust_eh_frame_local_symbols): Likewise.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct eh_cie_fde): Add aug_str_len and aug_data_len.
 	(_bfd_elf_adjust_eh_frame_global_symbol): Declare.
 	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Set aug_str_len and

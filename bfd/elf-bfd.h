@@ -1291,7 +1291,7 @@ struct elf_backend_data
      that can't be determined for some reason.  The default definition
      goes by the bfd's EI_CLASS.  */
   unsigned int (*elf_backend_eh_frame_address_size)
-    (bfd *, asection *);
+    (bfd *, const asection *);
 
   /* These functions tell elf-eh-frame whether to attempt to turn
      absolute or lsda encodings into pc-relative ones.  The default
@@ -1987,7 +1987,7 @@ extern void bfd_elf_print_symbol
   (bfd *, void *, asymbol *, bfd_print_symbol_type);
 
 extern unsigned int _bfd_elf_eh_frame_address_size
-  (bfd *, asection *);
+  (bfd *, const asection *);
 extern bfd_byte _bfd_elf_encode_eh_address
   (bfd *abfd, struct bfd_link_info *info, asection *osec, bfd_vma offset,
    asection *loc_sec, bfd_vma loc_offset, bfd_vma *encoded);
