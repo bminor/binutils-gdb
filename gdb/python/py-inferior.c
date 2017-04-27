@@ -223,11 +223,14 @@ inferior_to_inferior_object (struct inferior *inferior)
       inf_obj->threads = NULL;
       inf_obj->nthreads = 0;
 
+      /* PyObject_New initializes the new object with a refcount of 1.  This
+	 counts for the reference we are keeping in the inferior data.  */
       set_inferior_data (inferior, infpy_inf_data_key, inf_obj);
 
     }
-  else
-    Py_INCREF ((PyObject *)inf_obj);
+
+  /* We are returning a new reference.  */
+  Py_INCREF ((PyObject *)inf_obj);
 
   return (PyObject *) inf_obj;
 }
