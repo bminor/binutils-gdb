@@ -1153,13 +1153,12 @@ exp_fold_tree_1 (etree_type *tree)
 	     2) Section relative symbol values cannot be correctly
 	     converted to absolute values, as is required by many
 	     expressions, until final section sizing is complete.  */
-	  if ((expld.result.valid_p
-	       && (expld.phase == lang_final_phase_enum
-		   || expld.assign_name != NULL))
-	      || (expld.phase <= lang_mark_phase_enum
-		  && tree->type.node_class == etree_assign
-		  && tree->assign.defsym))
+	  if (expld.phase == lang_final_phase_enum
+              || expld.assign_name != NULL)
 	    {
+	      if (tree->type.node_class == etree_provide)
+		tree->type.node_class = etree_provided;
+
 	      if (h == NULL)
 		{
 		  h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
@@ -1169,44 +1168,49 @@ exp_fold_tree_1 (etree_type *tree)
 			   tree->assign.dst);
 		}
 
-	      if (expld.result.section == NULL)
-		expld.result.section = expld.section;
-	      if (!update_definedness (tree->assign.dst, h) && 0)
-		{
-		  /* Symbol was already defined.  For now this error
-		     is disabled because it causes failures in the ld
-		     testsuite: ld-elf/var1, ld-scripts/defined5, and
-		     ld-scripts/pr14962.  Some of these no doubt
-		     reflect scripts used in the wild.  */
-		  (*link_info.callbacks->multiple_definition)
-		    (&link_info, h, link_info.output_bfd,
-		     expld.result.section, expld.result.value);
-		}
-	      h->type = bfd_link_hash_defined;
-	      h->u.def.value = expld.result.value;
-	      h->u.def.section = expld.result.section;
-	      h->linker_def = ! tree->assign.type.lineno;
-	      h->ldscript_def = 1;
-	      if (tree->type.node_class == etree_provide)
-		tree->type.node_class = etree_provided;
+              /* If the expression is not valid then fake a zero value.  In
+                 the final phase any errors will already have been raised,
+                 in earlier phases we want to create this definition so
+                 that it can be seen by other expressions.  */
+              if (!expld.result.valid_p
+                  && h->type == bfd_link_hash_new)
+                {
+                  expld.result.value = 0;
+                  expld.result.section = NULL;
+                  expld.result.valid_p = TRUE;
+                }
 
-	      /* Copy the symbol type if this is an expression only
-		 referencing a single symbol.  (If the expression
-		 contains ternary conditions, ignoring symbols on
-		 false branches.)  */
-	      if (expld.result.valid_p
-		  && expld.assign_src != NULL
-		  && expld.assign_src != (struct bfd_link_hash_entry *) 0 - 1)
-		bfd_copy_link_hash_symbol_type (link_info.output_bfd, h,
-						expld.assign_src);
-	    }
-	  else if (expld.phase == lang_final_phase_enum)
-	    {
-	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
-					FALSE, FALSE, TRUE);
-	      if (h != NULL
-		  && h->type == bfd_link_hash_new)
-		h->type = bfd_link_hash_undefined;
+	      if (expld.result.valid_p)
+		{
+		  if (expld.result.section == NULL)
+		    expld.result.section = expld.section;
+		  if (!update_definedness (tree->assign.dst, h) && 0)
+		    {
+		      /* Symbol was already defined.  For now this error
+			 is disabled because it causes failures in the ld
+			 testsuite: ld-elf/var1, ld-scripts/defined5, and
+			 ld-scripts/pr14962.  Some of these no doubt
+			 reflect scripts used in the wild.  */
+		      (*link_info.callbacks->multiple_definition)
+			(&link_info, h, link_info.output_bfd,
+			 expld.result.section, expld.result.value);
+		    }
+		  h->type = bfd_link_hash_defined;
+		  h->u.def.value = expld.result.value;
+		  h->u.def.section = expld.result.section;
+		  h->linker_def = ! tree->assign.type.lineno;
+		  h->ldscript_def = 1;
+
+		  /* Copy the symbol type if this is an expression only
+		     referencing a single symbol.  (If the expression
+		     contains ternary conditions, ignoring symbols on
+		     false branches.)  */
+		  if (expld.assign_src != NULL
+		      && (expld.assign_src
+			  != (struct bfd_link_hash_entry *) 0 - 1))
+		    bfd_copy_link_hash_symbol_type (link_info.output_bfd, h,
+						    expld.assign_src);
+		}
 	    }
 	  expld.assign_name = NULL;
 	}

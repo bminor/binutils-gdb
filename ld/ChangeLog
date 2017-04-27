@@ -1,5 +1,18 @@
 2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ldexp.c (exp_fold_tree_1): Rework condition underwhich provide
+	nodes are ignored in the tree walk, and move the location at which
+	we change provide nodes into provided nodes.
+	(exp_init_os): Add etree_provided.
+	* testsuite/ld-scripts/provide-6.d: New file.
+	* testsuite/ld-scripts/provide-6.t: New file.
+	* testsuite/ld-scripts/provide-7.d: New file.
+	* testsuite/ld-scripts/provide-7.t: New file.
+	* testsuite/ld-scripts/provide-8.d: New file.
+	* testsuite/ld-scripts/provide-8.t: New file.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/ld-scripts/provide-3.d: Add xfail directive.
 	* testsuite/ld-scripts/provide-4.d: Use new map file name.
 	* testsuite/ld-scripts/provide-5.d: Use new map file name.
