@@ -326,6 +326,12 @@ struct eh_cie_fde
 	 or 0 if the CIE doesn't have any.  */
       unsigned int personality_offset : 8;
 
+      /* Length of augmentation.  aug_str_len is the length of the
+	 string including null terminator.  aug_data_len is the length
+	 of the rest up to the initial insns.  */
+      unsigned int aug_str_len : 3;
+      unsigned int aug_data_len : 5;
+
       /* True if we have marked relocations associated with this CIE.  */
       unsigned int gc_mark : 1;
 
@@ -354,7 +360,7 @@ struct eh_cie_fde
       unsigned int merged : 1;
 
       /* Unused bits.  */
-      unsigned int pad1 : 17;
+      unsigned int pad1 : 9;
     } cie;
   } u;
   unsigned int reloc_index;
@@ -2180,6 +2186,8 @@ extern bfd_boolean _bfd_elf_end_eh_frame_parsing
 extern bfd_boolean _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,
    bfd_boolean (*) (bfd_vma, void *), struct elf_reloc_cookie *);
+extern bfd_boolean _bfd_elf_adjust_eh_frame_global_symbol
+  (struct elf_link_hash_entry *, void *);
 extern bfd_boolean _bfd_elf_discard_section_eh_frame_hdr
   (bfd *, struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset

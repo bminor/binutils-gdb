@@ -13807,6 +13807,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   if (o != NULL)
     {
       asection *i;
+      int eh_changed = 0;
 
       for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	{
@@ -13824,10 +13825,17 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, i,
 						 bfd_elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    changed = 1;
+	    {
+	      eh_changed = 1;
+	      if (i->size != i->rawsize)
+		changed = 1;
+	    }
 
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
+      if (eh_changed)
+	elf_link_hash_traverse (elf_hash_table (info),
+				_bfd_elf_adjust_eh_frame_global_symbol, NULL);
     }
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)

@@ -1,5 +1,19 @@
 2017-04-27  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct eh_cie_fde): Add aug_str_len and aug_data_len.
+	(_bfd_elf_adjust_eh_frame_global_symbol): Declare.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Set aug_str_len and
+	aug_data_len.
+	(offset_adjust): New function.
+	(_bfd_elf_adjust_eh_frame_global_symbol): Likewise.
+	(adjust_eh_frame_local_symbols): Likewise.
+	(_bfd_elf_discard_section_eh_frame): Call adjust_eh_frame_local_symbols
+	after changing anything.  Return true if anything changed.
+	* elflink.c (bfd_elf_discard_info): If .eh_frame changed, call
+	_bfd_elf_adjust_eh_frame_global_symbol for globals.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (_bfd_elf_link_hash_hide_symbol): Clear dynstr_index
 	when force_local.
 
