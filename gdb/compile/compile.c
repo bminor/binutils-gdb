@@ -39,6 +39,8 @@
 #include "osabi.h"
 #include "gdb_wait.h"
 #include "valprint.h"
+#include "common/gdb_optional.h"
+#include "common/gdb_unlinker.h"
 
 
 
@@ -427,16 +429,6 @@ cleanup_compile_instance (void *arg)
   inst->destroy (inst);
 }
 
-/* A cleanup function to unlink a file.  */
-
-static void
-cleanup_unlink_file (void *arg)
-{
-  const char *filename = (const char *) arg;
-
-  unlink (filename);
-}
-
 /* A helper function suitable for use as the "print_callback" in the
    compiler object.  */
 
@@ -455,7 +447,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 		   enum compile_i_scope_types scope)
 {
   struct compile_instance *compiler;
-  struct cleanup *cleanup, *inner_cleanup;
+  struct cleanup *cleanup;
   const struct block *expr_block;
   CORE_ADDR trash_pc, expr_pc;
   int argc;
@@ -547,12 +539,15 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   compile_file_names fnames = get_new_file_names ();
 
+  gdb::optional<gdb::unlinker> source_remover;
+
   {
     gdb_file_up src = gdb_fopen_cloexec (fnames.source_file (), "w");
     if (src == NULL)
       perror_with_name (_("Could not open source file for writing"));
-    inner_cleanup = make_cleanup (cleanup_unlink_file,
-				  (void *) fnames.source_file ());
+
+    source_remover.emplace (fnames.source_file ());
+
     if (fputs (code.c_str (), src.get ()) == EOF)
       perror_with_name (_("Could not write to source file"));
   }
@@ -572,7 +567,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     fprintf_unfiltered (gdb_stdlog, "object file produced: %s\n\n",
 			fnames.object_file ());
 
-  discard_cleanups (inner_cleanup);
+  /* Keep the source file.  */
+  source_remover->keep ();
+
   do_cleanups (cleanup);
 
   return fnames;
@@ -594,14 +591,13 @@ void
 eval_compile_command (struct command_line *cmd, const char *cmd_string,
 		      enum compile_i_scope_types scope, void *scope_data)
 {
-  struct cleanup *cleanup_unlink;
   struct compile_module *compile_module;
 
   compile_file_names fnames = compile_to_object (cmd, cmd_string, scope);
 
-  cleanup_unlink = make_cleanup (cleanup_unlink_file,
-				 (void *) fnames.object_file ());
-  make_cleanup (cleanup_unlink_file, (void *) fnames.source_file ());
+  gdb::unlinker object_remover (fnames.object_file ());
+  gdb::unlinker source_remover (fnames.source_file ());
+
   compile_module = compile_object_load (fnames, scope, scope_data);
   if (compile_module == NULL)
     {
@@ -610,7 +606,11 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
 			    COMPILE_I_PRINT_VALUE_SCOPE, scope_data);
       return;
     }
-  discard_cleanups (cleanup_unlink);
+
+  /* Keep the files.  */
+  source_remover.keep ();
+  object_remover.keep ();
+
   compile_object_run (compile_module);
 }
 

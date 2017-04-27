@@ -1,5 +1,11 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile.c (cleanup_unlink_file): Remove.
+	(compile_to_object): Use gdb::unlinker.
+	(eval_compile_command): Likewise.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (make_cleanup_fclose): Remove.
 	* utils.c (do_fclose_cleanup, make_cleanup_fclose): Remove.
 
