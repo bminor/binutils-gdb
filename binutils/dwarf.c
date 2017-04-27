@@ -3767,7 +3767,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		}
 
 	      if (state_machine_regs.view)
-		printf ("  %u\n", state_machine_regs.view);
+		printf ("  %6u\n", state_machine_regs.view);
 	      else
 		putchar ('\n');
 	      state_machine_regs.view++;
