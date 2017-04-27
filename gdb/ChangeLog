@@ -1,5 +1,14 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-cmds.c (find_and_open_script): Change return type.
+	Remove "streamp" and "full_path" parameters.
+	(source_script_with_search): Update.
+	* auto-load.c (source_script_file): Update.
+	* cli/cli-cmds.h (find_and_open_script): Change type.
+	(open_script): New struct.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* xml-support.c (xml_fetch_content_from_file): Update.
 	* ui-file.c (stdio_file::open): Update.
 	* tracefile-tfile.c (tfile_start): Update.

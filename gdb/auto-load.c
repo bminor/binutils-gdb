@@ -928,10 +928,7 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 		    const char *section_name, unsigned int offset,
 		    const char *file)
 {
-  FILE *stream;
-  char *full_path;
-  int opened, in_hash_table;
-  struct cleanup *cleanups;
+  int in_hash_table;
   objfile_script_sourcer_func *sourcer;
 
   /* Skip this script if support is not compiled in.  */
@@ -953,27 +950,22 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
       return;
     }
 
-  opened = find_and_open_script (file, 1 /*search_path*/,
-				 &stream, &full_path);
+  gdb::optional<open_script> opened = find_and_open_script (file,
+							    1 /*search_path*/);
 
-  cleanups = make_cleanup (null_cleanup, NULL);
   if (opened)
     {
-      make_cleanup_fclose (stream);
-      make_cleanup (xfree, full_path);
-
-      if (!file_is_auto_load_safe (full_path,
+      if (!file_is_auto_load_safe (opened->full_path.get (),
 				   _("auto-load: Loading %s script "
 				     "\"%s\" from section \"%s\" of "
 				     "objfile \"%s\".\n"),
-				   ext_lang_name (language), full_path,
+				   ext_lang_name (language),
+				   opened->full_path.get (),
 				   section_name, objfile_name (objfile)))
-	opened = 0;
+	opened.reset ();
     }
   else
     {
-      full_path = NULL;
-
       /* If one script isn't found it's not uncommon for more to not be
 	 found either.  We don't want to print a message for each script,
 	 too much noise.  Instead, we print the warning once and tell the
@@ -986,14 +978,16 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 					    section_name, offset);
     }
 
-  in_hash_table = maybe_add_script_file (pspace_info, opened, file, full_path,
+  in_hash_table = maybe_add_script_file (pspace_info, bool (opened), file,
+					 (opened
+					  ? opened->full_path.get ()
+					  : NULL),
 					 language);
 
   /* If this file is not currently loaded, load it.  */
   if (opened && !in_hash_table)
-    sourcer (language, objfile, stream, full_path);
-
-  do_cleanups (cleanups);
+    sourcer (language, objfile, opened->stream.get (),
+	     opened->full_path.get ());
 }
 
 /* Subroutine of source_section_scripts to simplify it.

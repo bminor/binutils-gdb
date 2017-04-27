@@ -506,22 +506,21 @@ show_script_ext_mode (struct ui_file *file, int from_tty,
 
 /* Try to open SCRIPT_FILE.
    If successful, the full path name is stored in *FULL_PATHP,
-   the stream is stored in *STREAMP, and return 1.
-   The caller is responsible for freeing *FULL_PATHP.
-   If not successful, return 0; errno is set for the last file
+   and the stream is returned.
+   If not successful, return NULL; errno is set for the last file
    we tried to open.
 
    If SEARCH_PATH is non-zero, and the file isn't found in cwd,
    search for it in the source search path.  */
 
-int
-find_and_open_script (const char *script_file, int search_path,
-		      FILE **streamp, char **full_pathp)
+gdb::optional<open_script>
+find_and_open_script (const char *script_file, int search_path)
 {
   char *file;
   int fd;
   struct cleanup *old_cleanups;
   int search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
+  gdb::optional<open_script> opened;
 
   file = tilde_expand (script_file);
   old_cleanups = make_cleanup (xfree, file);
@@ -531,32 +530,33 @@ find_and_open_script (const char *script_file, int search_path,
 
   /* Search for and open 'file' on the search path used for source
      files.  Put the full location in *FULL_PATHP.  */
+  char *temp_path;
   fd = openp (source_path, search_flags,
-	      file, O_RDONLY, full_pathp);
+	      file, O_RDONLY, &temp_path);
+  gdb::unique_xmalloc_ptr<char> full_path (temp_path);
 
   if (fd == -1)
     {
       int save_errno = errno;
       do_cleanups (old_cleanups);
       errno = save_errno;
-      return 0;
+      return opened;
     }
 
   do_cleanups (old_cleanups);
 
-  *streamp = fdopen (fd, FOPEN_RT);
-  if (*streamp == NULL)
+  FILE *result = fdopen (fd, FOPEN_RT);
+  if (result == NULL)
     {
       int save_errno = errno;
 
       close (fd);
-      if (full_pathp)
-	xfree (*full_pathp);
       errno = save_errno;
-      return 0;
     }
+  else
+    opened.emplace (gdb_file_up (result), std::move (full_path));
 
-  return 1;
+  return opened;
 }
 
 /* Load script FILE, which has already been opened as STREAM.
@@ -607,14 +607,12 @@ source_script_from_stream (FILE *stream, const char *file,
 static void
 source_script_with_search (const char *file, int from_tty, int search_path)
 {
-  FILE *stream;
-  char *full_path;
-  struct cleanup *old_cleanups;
 
   if (file == NULL || *file == 0)
     error (_("source command requires file name of file to source."));
 
-  if (!find_and_open_script (file, search_path, &stream, &full_path))
+  gdb::optional<open_script> opened = find_and_open_script (file, search_path);
+  if (!opened)
     {
       /* The script wasn't found, or was otherwise inaccessible.
          If the source command was invoked interactively, throw an
@@ -629,15 +627,13 @@ source_script_with_search (const char *file, int from_tty, int search_path)
 	}
     }
 
-  old_cleanups = make_cleanup (xfree, full_path);
-  make_cleanup_fclose (stream);
   /* The python support reopens the file, so we need to pass full_path here
      in case the file was found on the search path.  It's useful to do this
      anyway so that error messages show the actual file used.  But only do
      this if we (may have) used search_path, as printing the full path in
      errors for the non-search case can be more noise than signal.  */
-  source_script_from_stream (stream, file, search_path ? full_path : file);
-  do_cleanups (old_cleanups);
+  source_script_from_stream (opened->stream.get (), file,
+			     search_path ? opened->full_path.get () : file);
 }
 
 /* Wrapper around source_script_with_search to export it to main.c
