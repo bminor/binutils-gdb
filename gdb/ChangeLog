@@ -1,5 +1,9 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* fbsd-nat.c (fbsd_find_memory_regions): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-cmds.c (find_and_open_script): Change return type.
 	Remove "streamp" and "full_path" parameters.
 	(source_script_with_search): Update.
