@@ -1,3 +1,8 @@
+2017-05-01  Michael Clark  <michaeljclark@mac.com>
+
+	* riscv-opc.c (riscv_opcodes) <call>: Use RA not T1 as a temporary
+	register.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* riscv-dis.c (riscv_disassemble_insn): Change "_gp" to
