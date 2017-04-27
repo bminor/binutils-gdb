@@ -858,9 +858,6 @@ struct elf_x86_64_link_hash_entry
      real definition and check it when allowing copy reloc in PIE.  */
   unsigned int needs_copy : 1;
 
-  /* TRUE if symbol has at least one BND relocation.  */
-  unsigned int has_bnd_reloc : 1;
-
   /* TRUE if symbol has GOT or PLT relocations.  */
   unsigned int has_got_reloc : 1;
 
@@ -883,7 +880,7 @@ struct elf_x86_64_link_hash_entry
      GOT and PLT relocations against the same function.  */
   union gotplt_union plt_got;
 
-  /* Information about the second PLT entry. Filled when has_bnd_reloc is
+  /* Information about the second PLT entry. Filled when info>bndplt is
      set.  */
   union gotplt_union plt_bnd;
 
@@ -1022,7 +1019,6 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->dyn_relocs = NULL;
       eh->tls_type = GOT_UNKNOWN;
       eh->needs_copy = 0;
-      eh->has_bnd_reloc = 0;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
       eh->no_finish_dynamic_symbol = 0;
@@ -1241,7 +1237,6 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_x86_64_link_hash_entry *) dir;
   eind = (struct elf_x86_64_link_hash_entry *) ind;
 
-  edir->has_bnd_reloc |= eind->has_bnd_reloc;
   edir->has_got_reloc |= eind->has_got_reloc;
   edir->has_non_got_reloc |= eind->has_non_got_reloc;
 
@@ -2352,8 +2347,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  && (get_elf_x86_64_backend_data (abfd)
 		      == &elf_x86_64_arch_bed))
 		{
-		  elf_x86_64_hash_entry (h)->has_bnd_reloc = 1;
-
 		  /* Create the second PLT for Intel MPX support.  */
 		  if (htab->plt_bnd == NULL)
 		    {
@@ -5898,7 +5891,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  /* Use the second PLT with BND relocations.  */
 	  const bfd_byte *plt_entry, *plt2_entry;
 
-	  if (eh->has_bnd_reloc)
+	  if (info->bndplt)
 	    {
 	      plt_entry = elf_x86_64_bnd_plt_entry;
 	      plt2_entry = elf_x86_64_bnd_plt2_entry;
@@ -6046,7 +6039,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	 are the identical.  */
       plt_got_insn_size = elf_x86_64_bnd_arch_bed.plt_got_insn_size;
       plt_got_offset = elf_x86_64_bnd_arch_bed.plt_got_offset;
-      if (eh->has_bnd_reloc)
+      if (info->bndplt)
 	got_plt_entry = elf_x86_64_bnd_plt2_entry;
       else
 	{
