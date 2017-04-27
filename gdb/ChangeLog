@@ -1,3 +1,8 @@
+2017-04-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-inferior.c (inferior_to_inferior_object): Increment reference
+	count when creating the object.
+
 2017-04-25  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call
