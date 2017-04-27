@@ -1,5 +1,17 @@
 2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/ld-scripts/provide-3.d: Add xfail directive.
+	* testsuite/ld-scripts/provide-4.d: Use new map file name.
+	* testsuite/ld-scripts/provide-5.d: Use new map file name.
+	* testsuite/ld-scripts/provide-4-map.d: Renamed to...
+	* testsuite/ld-scripts/provide-4.map: ...this.
+	* testsuite/ld-scripts/provide-5-map.d: Renamed to...
+	* testsuite/ld-scripts/provide-5.map: ...this.
+	* testsuite/ld-scripts/provide.exp: Move xfail into provide-3.d
+	file, and run tests in a loop.
+
+2018-01-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ldexp.c (exp_print_tree): Use '=' instead of ',' when printing
 	PROVIDE statements.
 	* testsuite/ld-scripts/provide-4.map: Update expected output.

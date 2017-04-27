@@ -36,11 +36,11 @@ if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
-run_dump_test provide-1
-run_dump_test provide-2
-setup_xfail *-*-*
-run_dump_test provide-3
-run_dump_test provide-4
-run_dump_test provide-5
+set test_list [lsort [glob -nocomplain $srcdir/$subdir/provide-*.d]]
+foreach test_file $test_list {
+    set test_name [file rootname $test_file]
+    verbose $test_name
+    run_dump_test $test_name
+}
 
 set LDFLAGS "$saved_LDFLAGS"
