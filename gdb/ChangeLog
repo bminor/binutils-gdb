@@ -1,3 +1,11 @@
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* ia64-tdep.c (examine_prologue): Use get_frame_register_unsigned.
+	(ia64_sigtramp_frame_prev_register): Use read_memory_unsigned_integer.
+	(ia64_access_reg): Use get_frame_register_unsigned.
+	(ia64_access_rse_reg): Likewise.
+	(ia64_libunwind_frame_prev_register): Likewise.
+
 2017-04-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* gdbarch.sh: New gdbarch method execute_dwarf_cfa_vendor_op.
