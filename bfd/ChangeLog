@@ -1,5 +1,10 @@
 2017-04-27  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_link_hash_hide_symbol): Clear dynstr_index
+	when force_local.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Define.
 	(ppc_elf_select_plt_layout, ppc_elf_tls_setup): Use it.
 	(ppc_elf_adjust_dynamic_symbol, allocate_dynrelocs): Likewise.

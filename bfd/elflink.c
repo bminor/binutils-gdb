@@ -7295,9 +7295,10 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
       h->forced_local = 1;
       if (h->dynindx != -1)
 	{
-	  h->dynindx = -1;
 	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 				  h->dynstr_index);
+	  h->dynindx = -1;
+	  h->dynstr_index = 0;
 	}
     }
 }
