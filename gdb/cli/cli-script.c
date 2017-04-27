@@ -1585,58 +1585,34 @@ document_command (char *comname, int from_tty)
   }
 }
 
-struct source_cleanup_lines_args
-{
-  int old_line;
-  const char *old_file;
-};
-
-static void
-source_cleanup_lines (void *args)
-{
-  struct source_cleanup_lines_args *p =
-    (struct source_cleanup_lines_args *) args;
-
-  source_line_number = p->old_line;
-  source_file_name = p->old_file;
-}
-
 /* Used to implement source_command.  */
 
 void
 script_from_file (FILE *stream, const char *file)
 {
-  struct cleanup *old_cleanups;
-  struct source_cleanup_lines_args old_lines;
-
   if (stream == NULL)
     internal_error (__FILE__, __LINE__, _("called with NULL file pointer!"));
 
-  old_lines.old_line = source_line_number;
-  old_lines.old_file = source_file_name;
-  old_cleanups = make_cleanup (source_cleanup_lines, &old_lines);
-  source_line_number = 0;
-  source_file_name = file;
+  scoped_restore restore_line_number
+    = make_scoped_restore (&source_line_number, 0);
+  scoped_restore resotre_file
+    = make_scoped_restore (&source_file_name, file);
 
-  {
-    scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-    TRY
-      {
-	read_command_file (stream);
-      }
-    CATCH (e, RETURN_MASK_ERROR)
-      {
-	/* Re-throw the error, but with the file name information
-	   prepended.  */
-	throw_error (e.error,
-		     _("%s:%d: Error in sourced command file:\n%s"),
-		     source_file_name, source_line_number, e.message);
-      }
-    END_CATCH
-  }
-
-  do_cleanups (old_cleanups);
+  TRY
+    {
+      read_command_file (stream);
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      /* Re-throw the error, but with the file name information
+	 prepended.  */
+      throw_error (e.error,
+		   _("%s:%d: Error in sourced command file:\n%s"),
+		   source_file_name, source_line_number, e.message);
+    }
+  END_CATCH
 }
 
 /* Print the definition of user command C to STREAM.  Or, if C is a

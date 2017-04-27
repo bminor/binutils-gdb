@@ -1,5 +1,18 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* reverse.c (exec_direction_default): Remove.
+	(exec_reverse_once): Use scoped_restore.
+	* remote.c (restore_remote_timeout): Remove.
+	(remote_flash_erase, remote_flash_write, remote_flash_done)
+	(readchar, remote_serial_write): Use scoped_restore.
+	* cli/cli-script.c (struct source_cleanup_lines_args)
+	(source_cleanup_lines): Remove.
+	(script_from_file): Use scoped_restore.
+	* cli/cli-cmds.c (source_verbose_cleanup): Remove.
+	(source_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (make_cleanup_free_so): Remove.
 	* utils.c (do_free_so, make_cleanup_free_so): Remove.
 	* solist.h (struct so_deleter): New.

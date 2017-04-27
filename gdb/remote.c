@@ -72,6 +72,7 @@
 #include "btrace.h"
 #include "record-btrace.h"
 #include <algorithm>
+#include "common/scoped_restore.h"
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -8469,14 +8470,6 @@ remote_send_printf (const char *format, ...)
   return packet_check_result (rs->buf);
 }
 
-static void
-restore_remote_timeout (void *p)
-{
-  int value = *(int *)p;
-
-  remote_timeout = value;
-}
-
 /* Flash writing can take quite some time.  We'll set
    effectively infinite timeout for flash operations.
    In future, we'll need to decide on a better approach.  */
@@ -8487,12 +8480,9 @@ remote_flash_erase (struct target_ops *ops,
                     ULONGEST address, LONGEST length)
 {
   int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
-  int saved_remote_timeout = remote_timeout;
   enum packet_result ret;
-  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-                                          &saved_remote_timeout);
-
-  remote_timeout = remote_flash_timeout;
+  scoped_restore restore_timeout
+    = make_scoped_restore (&remote_timeout, remote_flash_timeout);
 
   ret = remote_send_printf ("vFlashErase:%s,%s",
 			    phex (address, addr_size),
@@ -8506,8 +8496,6 @@ remote_flash_erase (struct target_ops *ops,
     default:
       break;
     }
-
-  do_cleanups (back_to);
 }
 
 static enum target_xfer_status
@@ -8515,30 +8503,21 @@ remote_flash_write (struct target_ops *ops, ULONGEST address,
 		    ULONGEST length, ULONGEST *xfered_len,
 		    const gdb_byte *data)
 {
-  int saved_remote_timeout = remote_timeout;
-  enum target_xfer_status ret;
-  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-					  &saved_remote_timeout);
-
-  remote_timeout = remote_flash_timeout;
-  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length, 1,
-				xfered_len,'X', 0);
-  do_cleanups (back_to);
-
-  return ret;
+  scoped_restore restore_timeout
+    = make_scoped_restore (&remote_timeout, remote_flash_timeout);
+  return remote_write_bytes_aux ("vFlashWrite:", address, data, length, 1,
+				 xfered_len,'X', 0);
 }
 
 static void
 remote_flash_done (struct target_ops *ops)
 {
-  int saved_remote_timeout = remote_timeout;
   int ret;
-  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-                                          &saved_remote_timeout);
 
-  remote_timeout = remote_flash_timeout;
+  scoped_restore restore_timeout
+    = make_scoped_restore (&remote_timeout, remote_flash_timeout);
+
   ret = remote_send_printf ("vFlashDone");
-  do_cleanups (back_to);
 
   switch (ret)
     {
@@ -8586,18 +8565,18 @@ readchar (int timeout)
 {
   int ch;
   struct remote_state *rs = get_remote_state ();
-  struct cleanup *old_chain;
 
-  old_chain = make_cleanup_override_quit_handler (remote_serial_quit_handler);
+  {
+    scoped_restore restore_quit
+      = make_scoped_restore (&quit_handler, remote_serial_quit_handler);
 
-  rs->got_ctrlc_during_io = 0;
+    rs->got_ctrlc_during_io = 0;
 
-  ch = serial_readchar (rs->remote_desc, timeout);
+    ch = serial_readchar (rs->remote_desc, timeout);
 
-  if (rs->got_ctrlc_during_io)
-    set_quit_flag ();
-
-  do_cleanups (old_chain);
+    if (rs->got_ctrlc_during_io)
+      set_quit_flag ();
+  }
 
   if (ch >= 0)
     return ch;
@@ -8628,9 +8607,9 @@ static void
 remote_serial_write (const char *str, int len)
 {
   struct remote_state *rs = get_remote_state ();
-  struct cleanup *old_chain;
 
-  old_chain = make_cleanup_override_quit_handler (remote_serial_quit_handler);
+  scoped_restore restore_quit
+    = make_scoped_restore (&quit_handler, remote_serial_quit_handler);
 
   rs->got_ctrlc_during_io = 0;
 
@@ -8642,8 +8621,6 @@ remote_serial_write (const char *str, int len)
 
   if (rs->got_ctrlc_during_io)
     set_quit_flag ();
-
-  do_cleanups (old_chain);
 }
 
 /* Send the command in *BUF to the remote machine, and read the reply

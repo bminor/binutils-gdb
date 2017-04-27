@@ -30,13 +30,6 @@
 /* User interface:
    reverse-step, reverse-next etc.  */
 
-static void
-exec_direction_default (void *notused)
-{
-  /* Return execution direction to default state.  */
-  execution_direction = EXEC_FORWARD;
-}
-
 /* exec_reverse_once -- accepts an arbitrary gdb command (string), 
    and executes it with exec-direction set to 'reverse'.
 
@@ -45,9 +38,7 @@ exec_direction_default (void *notused)
 static void
 exec_reverse_once (const char *cmd, char *args, int from_tty)
 {
-  char *reverse_command;
   enum exec_direction_kind dir = execution_direction;
-  struct cleanup *old_chain;
 
   if (dir == EXEC_REVERSE)
     error (_("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
@@ -56,12 +47,10 @@ exec_reverse_once (const char *cmd, char *args, int from_tty)
   if (!target_can_execute_reverse)
     error (_("Target %s does not support this command."), target_shortname);
 
-  reverse_command = xstrprintf ("%s %s", cmd, args ? args : "");
-  old_chain = make_cleanup (exec_direction_default, NULL);
-  make_cleanup (xfree, reverse_command);
-  execution_direction = EXEC_REVERSE;
-  execute_command (reverse_command, from_tty);
-  do_cleanups (old_chain);
+  std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
+  scoped_restore restore_exec_dir
+    = make_scoped_restore (&execution_direction, EXEC_REVERSE);
+  execute_command (&reverse_command[0], from_tty);
 }
 
 static void

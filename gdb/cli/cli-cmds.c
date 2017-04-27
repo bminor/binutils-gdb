@@ -645,26 +645,14 @@ source_script (const char *file, int from_tty)
   source_script_with_search (file, from_tty, 0);
 }
 
-/* Return the source_verbose global variable to its previous state
-   on exit from the source command, by whatever means.  */
-static void
-source_verbose_cleanup (void *old_value)
-{
-  source_verbose = *(int *)old_value;
-  xfree (old_value);
-}
-
 static void
 source_command (char *args, int from_tty)
 {
-  struct cleanup *old_cleanups;
   char *file = args;
   int *old_source_verbose = XNEW (int);
   int search_path = 0;
 
-  *old_source_verbose = source_verbose;
-  old_cleanups = make_cleanup (source_verbose_cleanup, 
-			       old_source_verbose);
+  scoped_restore save_source_verbose = make_scoped_restore (&source_verbose);
 
   /* -v causes the source command to run in verbose mode.
      -s causes the file to be searched in the source search path,
@@ -705,8 +693,6 @@ source_command (char *args, int from_tty)
     }
 
   source_script_with_search (file, from_tty, search_path);
-
-  do_cleanups (old_cleanups);
 }
 
 
