@@ -48,7 +48,6 @@ set t "print value of Child&& in f2"
 gdb_start_again "marker2 here" $t
 gdb_test "print C" ".*id = 42.*" $t
 
-setup_kfail "c++/15372" "*-*-*"
 gdb_test "print f1 (static_cast<Child&&> (C))" ".* = 42.*" \
     "print value of f1 on Child&& in f2"
 

@@ -1,3 +1,15 @@
+2017-04-27  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/oranking.cc (test15): New function.
+	(main): Call test15 and declare additional variables for testing.
+	* gdb.cp/oranking.exp: Remove kfail status for "p foo4(&a)" and
+	"p foo101('abc')" tests.
+	Add tests for cv qualifier overloads.
+	* gdb.cp/rvalue-ref-overloads.exp: Remove kfail status for
+	"lvalue reference overload" test.
+	* gdb.cp/rvalue-ref-params.exp: Remove kfail status for
+	"print value of f1 on Child&& in f2" test.
+
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/threadapply.exp (kill_and_remove_inferior): New
