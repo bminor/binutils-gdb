@@ -1143,8 +1143,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	  /* Done with all files, everything from here on is globals.  */
 	}
 
-      if ((cs->c_sclass == C_EXT || cs->c_sclass == C_HIDEXT)
-	  && cs->c_naux == 1)
+      if (cs->c_sclass == C_EXT || cs->c_sclass == C_HIDEXT ||
+	  cs->c_sclass == C_WEAKEXT)
 	{
 	  /* Dealing with a symbol with a csect entry.  */
 
@@ -1154,9 +1154,41 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 #define	CSECT_SMTYP(PP) (SMTYP_SMTYP(CSECT(PP).x_smtyp))
 #define	CSECT_SCLAS(PP) (CSECT(PP).x_smclas)
 
-	  /* Convert the auxent to something we can access.  */
-	  bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-				0, cs->c_naux, &main_aux);
+	  /* Convert the auxent to something we can access.
+	     XCOFF can have more than one auxiliary entries.
+
+	     Actual functions will have two auxiliary entries, one to have the
+	     function size and other to have the smtype/smclass (LD/PR).
+
+	     c_type value of main symbol table will be set only in case of
+	     C_EXT/C_HIDEEXT/C_WEAKEXT storage class symbols.
+	     Bit 10 of type is set if symbol is a function, ie the value is set
+	     to 32(0x20). So we need to read the first function auxiliay entry
+	     which contains the size. */
+	  if (cs->c_naux > 1 && ISFCN (cs->c_type))
+	  {
+	    /* a function entry point.  */
+
+	    fcn_start_addr = cs->c_value;
+
+	    /* save the function header info, which will be used
+	       when `.bf' is seen.  */
+	    fcn_cs_saved = *cs;
+
+	    /* Convert the auxent to something we can access.  */
+	    bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
+				  0, cs->c_naux, &fcn_aux_saved);
+	    continue;
+	  }
+	  /* Read the csect auxiliary header, which is always the last by
+	     onvention. */
+	  bfd_coff_swap_aux_in (abfd,
+			       raw_auxptr
+			       + ((coff_data (abfd)->local_symesz)
+			       * (cs->c_naux - 1)),
+			       cs->c_type, cs->c_sclass,
+			       cs->c_naux - 1, cs->c_naux,
+			       &main_aux);
 
 	  switch (CSECT_SMTYP (&main_aux))
 	    {
@@ -1241,16 +1273,11 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
 	      switch (CSECT_SCLAS (&main_aux))
 		{
+		/* We never really come to this part as this case has been
+		   handled in ISFCN check above.
+		   This and other cases of XTY_LD are kept just for
+		   reference. */
 		case XMC_PR:
-		  /* a function entry point.  */
-		function_entry_point:
-
-		  fcn_start_addr = cs->c_value;
-
-		  /* save the function header info, which will be used
-		     when `.bf' is seen.  */
-		  fcn_cs_saved = *cs;
-		  fcn_aux_saved = main_aux;
 		  continue;
 
 		case XMC_GL:
@@ -1281,16 +1308,6 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	    default:
 	      break;
 	    }
-	}
-
-      /* If explicitly specified as a function, treat is as one.  This check
-	 evaluates to true for @FIX* bigtoc CSECT symbols, so it must occur
-	 after the above CSECT check.  */
-      if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
-	{
-	  bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-				0, cs->c_naux, &main_aux);
-	  goto function_entry_point;
 	}
 
       switch (cs->c_sclass)
@@ -1574,7 +1591,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
       SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
       SYMBOL_DUP (sym, sym2);
 
-      if (cs->c_sclass == C_EXT)
+      if (cs->c_sclass == C_EXT || C_WEAKEXT)
 	add_symbol_to_list (sym2, &global_symbols);
       else if (cs->c_sclass == C_HIDEXT || cs->c_sclass == C_STAT)
 	add_symbol_to_list (sym2, &file_symbols);
@@ -2250,6 +2267,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	{
 	case C_EXT:
 	case C_HIDEXT:
+	case C_WEAKEXT:
 	  {
 	    /* The CSECT auxent--always the last auxent.  */
 	    union internal_auxent csect_aux;

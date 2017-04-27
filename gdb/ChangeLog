@@ -1,3 +1,13 @@
+2017-04-27  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* xcoffread.c (read_xcoff_symtab): Read correct function auxiliary
+	entry if xlc -qfuncsect or gcc -ffunction-sections compiler option
+	is used in AIX.
+	(read_xcoff_symtab): Handle C_WEAKEXT storage class.
+	(process_xcoff_symbol): Likewise.
+	(scan_xcoff_symtab): Likewise.
+
 2017-04-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* ia64-tdep.c (examine_prologue): Use get_frame_register_unsigned.
