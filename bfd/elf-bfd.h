@@ -1441,7 +1441,7 @@ struct elf_backend_data
 				       elf_property *);
 
   /* Set up GNU properties.  */
-  void (*setup_gnu_properties) (struct bfd_link_info *);
+  bfd *(*setup_gnu_properties) (struct bfd_link_info *);
 
   /* Encoding used for compact EH tables.  */
   int (*compact_eh_encoding) (struct bfd_link_info *);
@@ -2607,7 +2607,7 @@ extern bfd_boolean _bfd_elf_parse_gnu_properties
   (bfd *, Elf_Internal_Note *);
 extern elf_property * _bfd_elf_get_property
   (bfd *, unsigned int, unsigned int);
-extern void _bfd_elf_link_setup_gnu_properties
+extern bfd *_bfd_elf_link_setup_gnu_properties
   (struct bfd_link_info *);
 
 /* The linker may need to keep track of the number of relocs that it

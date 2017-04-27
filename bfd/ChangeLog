@@ -1,5 +1,13 @@
 2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-bfd.h (elf_backend_data): Change setup_gnu_properties
+	to return bfd *.
+	(_bfd_elf_link_setup_gnu_properties): Return bfd *.
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Return
+	the first relocatable ELF input with GNU properties.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_finish_dynamic_sections): Simplify
 	VxWorks for non-PIC.
 
