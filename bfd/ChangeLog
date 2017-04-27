@@ -1,3 +1,8 @@
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Simplify
+	VxWorks for non-PIC.
+
 2017-04-27  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data): Make asection param of

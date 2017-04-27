@@ -5848,9 +5848,15 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
 
-      /* Fill in the first entry in the procedure linkage table.  */
       if (htab->elf.splt && htab->elf.splt->size > 0)
 	{
+	  /* UnixWare sets the entsize of .plt to 4, although that doesn't
+	     really seem like the right value.  */
+	  elf_section_data (htab->elf.splt->output_section)
+	    ->this_hdr.sh_entsize = 4;
+
+	  /* Fill in the special first entry in the procedure linkage
+	     table.  */
 	  if (bfd_link_pic (info))
 	    {
 	      memcpy (htab->elf.splt->contents, abed->plt->pic_plt0_entry,
@@ -5882,6 +5888,9 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	      if (abed->is_vxworks)
 		{
 		  Elf_Internal_Rela rel;
+		  int num_plts = (htab->elf.splt->size
+				  / abed->plt->plt_entry_size) - 1;
+		  unsigned char *p;
 
 		  /* Generate a relocation for _GLOBAL_OFFSET_TABLE_ + 4.
 		     On IA32 we use REL relocations so the addend goes in
@@ -5900,39 +5909,28 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
 					    htab->srelplt2->contents +
 					    sizeof (Elf32_External_Rel));
-		}
-	    }
 
-	  /* UnixWare sets the entsize of .plt to 4, although that doesn't
-	     really seem like the right value.  */
-	  elf_section_data (htab->elf.splt->output_section)
-	    ->this_hdr.sh_entsize = 4;
+		  /* Correct the .rel.plt.unloaded relocations.  */
+		  p = htab->srelplt2->contents;
+		  if (bfd_link_pic (info))
+		    p += PLTRESOLVE_RELOCS_SHLIB * sizeof (Elf32_External_Rel);
+		  else
+		    p += PLTRESOLVE_RELOCS * sizeof (Elf32_External_Rel);
 
-	  /* Correct the .rel.plt.unloaded relocations.  */
-	  if (abed->is_vxworks && !bfd_link_pic (info))
-	    {
-	      int num_plts = (htab->elf.splt->size
-                              / abed->plt->plt_entry_size) - 1;
-	      unsigned char *p;
+		  for (; num_plts; num_plts--)
+		    {
+		      bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
+		      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
+						 R_386_32);
+		      bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
+		      p += sizeof (Elf32_External_Rel);
 
-	      p = htab->srelplt2->contents;
-	      if (bfd_link_pic (info))
-		p += PLTRESOLVE_RELOCS_SHLIB * sizeof (Elf32_External_Rel);
-	      else
-		p += PLTRESOLVE_RELOCS * sizeof (Elf32_External_Rel);
-
-	      for (; num_plts; num_plts--)
-		{
-		  Elf_Internal_Rela rel;
-		  bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
-		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
-		  bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
-		  p += sizeof (Elf32_External_Rel);
-
-		  bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
-		  rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx, R_386_32);
-		  bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
-		  p += sizeof (Elf32_External_Rel);
+		      bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
+		      rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx,
+						 R_386_32);
+		      bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
+		      p += sizeof (Elf32_External_Rel);
+		    }
 		}
 	    }
 	}
