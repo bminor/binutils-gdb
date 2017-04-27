@@ -786,7 +786,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 {
   char *filename, *debugfile;
   int len, retval;
-  FILE *input;
   struct cleanup *cleanups;
   const char *suffix = ext_lang_auto_load_suffix (language);
 
@@ -797,7 +796,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   cleanups = make_cleanup (xfree, filename);
 
-  input = gdb_fopen_cloexec (filename, "r");
+  gdb_file_up input = gdb_fopen_cloexec (filename, "r");
   debugfile = filename;
   if (debug_auto_load)
     fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
@@ -845,8 +844,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       int is_safe;
       struct auto_load_pspace_info *pspace_info;
 
-      make_cleanup_fclose (input);
-
       is_safe
 	= file_is_auto_load_safe (debugfile,
 				  _("auto-load: Loading %s script \"%s\""
@@ -875,7 +872,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 	     compiled in.  And the extension language is required to implement
 	     this function.  */
 	  gdb_assert (sourcer != NULL);
-	  sourcer (language, objfile, input, debugfile);
+	  sourcer (language, objfile, input.get (), debugfile);
 	}
 
       retval = 1;

@@ -1,5 +1,30 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* xml-support.c (xml_fetch_content_from_file): Update.
+	* ui-file.c (stdio_file::open): Update.
+	* tracefile-tfile.c (tfile_start): Update.
+	* remote.c (remote_file_put, remote_file_get): Update.
+	* nat/linux-procfs.c (linux_proc_get_int)
+	(linux_proc_pid_get_state, linux_proc_tid_get_name): Update.
+	* nat/linux-osdata.c (linux_common_core_of_thread): Update.
+	(command_from_pid, commandline_from_pid, linux_xfer_osdata_cpus)
+	(print_sockets, linux_xfer_osdata_shm, linux_xfer_osdata_sem)
+	(linux_xfer_osdata_msg, linux_xfer_osdata_modules): Update.
+	* nat/linux-btrace.c (linux_determine_kernel_start): Update.
+	* linux-nat.c (linux_proc_pending_signals): Update.
+	* dwarf2read.c (write_psymtabs_to_index): Use gdb_file_up.
+	(file_closer): Remove.
+	* compile/compile.c (compile_to_object): Update.
+	* common/filestuff.h (struct gdb_file_deleter): New.
+	(gdb_file_up): New typedef.
+	(gdb_fopen_cloexec): Change return type.
+	* common/filestuff.c (gdb_fopen_cloexec): Return gdb_file_up.
+	* cli/cli-dump.c (fopen_with_cleanup): Remove.
+	(dump_binary_file, restore_binary_file): Update.
+	* auto-load.c (auto_load_objfile_script_1): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (tvariables_info_1): Use ui_out_emit_table.
 	(info_static_tracepoint_markers_command): Likewise.
 	* solib.c (info_sharedlibrary_command): Use ui_out_emit_table.

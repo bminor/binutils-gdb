@@ -300,7 +300,7 @@ gdb_open_cloexec (const char *filename, int flags, unsigned long mode)
 
 /* See filestuff.h.  */
 
-FILE *
+gdb_file_up
 gdb_fopen_cloexec (const char *filename, const char *opentype)
 {
   FILE *result;
@@ -336,7 +336,7 @@ gdb_fopen_cloexec (const char *filename, const char *opentype)
   if (result != NULL)
     maybe_mark_cloexec (fileno (result));
 
-  return result;
+  return gdb_file_up (result);
 }
 
 #ifdef HAVE_SOCKETS

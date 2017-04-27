@@ -11902,7 +11902,6 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
 {
   struct cleanup *back_to, *close_cleanup;
   int retcode, fd, remote_errno, bytes, io_size;
-  FILE *file;
   gdb_byte *buffer;
   int bytes_in_buffer;
   int saw_eof;
@@ -11912,10 +11911,9 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
-  file = gdb_fopen_cloexec (local_file, "rb");
+  gdb_file_up file = gdb_fopen_cloexec (local_file, "rb");
   if (file == NULL)
     perror_with_name (local_file);
-  back_to = make_cleanup_fclose (file);
 
   fd = remote_hostio_open (find_target_at (process_stratum), NULL,
 			   remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
@@ -11928,7 +11926,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
   buffer = (gdb_byte *) xmalloc (io_size);
-  make_cleanup (xfree, buffer);
+  back_to = make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
 
@@ -11941,10 +11939,10 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
 	{
 	  bytes = fread (buffer + bytes_in_buffer, 1,
 			 io_size - bytes_in_buffer,
-			 file);
+			 file.get ());
 	  if (bytes == 0)
 	    {
-	      if (ferror (file))
+	      if (ferror (file.get ()))
 		error (_("Error reading %s."), local_file);
 	      else
 		{
@@ -11995,7 +11993,6 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
 {
   struct cleanup *back_to, *close_cleanup;
   int fd, remote_errno, bytes, io_size;
-  FILE *file;
   gdb_byte *buffer;
   ULONGEST offset;
   struct remote_state *rs = get_remote_state ();
@@ -12009,16 +12006,15 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   if (fd == -1)
     remote_hostio_error (remote_errno);
 
-  file = gdb_fopen_cloexec (local_file, "wb");
+  gdb_file_up file = gdb_fopen_cloexec (local_file, "wb");
   if (file == NULL)
     perror_with_name (local_file);
-  back_to = make_cleanup_fclose (file);
 
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
   buffer = (gdb_byte *) xmalloc (io_size);
-  make_cleanup (xfree, buffer);
+  back_to = make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
 
@@ -12035,7 +12031,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
 
       offset += bytes;
 
-      bytes = fwrite (buffer, 1, bytes, file);
+      bytes = fwrite (buffer, 1, bytes, file.get ());
       if (bytes == 0)
 	perror_with_name (local_file);
     }

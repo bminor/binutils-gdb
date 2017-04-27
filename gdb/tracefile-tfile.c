@@ -89,7 +89,7 @@ tfile_start (struct trace_file_writer *self, const char *filename)
     = (struct tfile_trace_file_writer *) self;
 
   writer->pathname = tilde_expand (filename);
-  writer->fp = gdb_fopen_cloexec (writer->pathname, "wb");
+  writer->fp = gdb_fopen_cloexec (writer->pathname, "wb").release ();
   if (writer->fp == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
 	   writer->pathname, safe_strerror (errno));

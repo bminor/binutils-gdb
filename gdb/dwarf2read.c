@@ -23780,20 +23780,6 @@ recursively_write_psymbols (struct objfile *objfile,
 		  1);
 }
 
-/* Closes FILE on scope exit.  */
-struct file_closer
-{
-  explicit file_closer (FILE *file)
-    : m_file (file)
-  {}
-
-  ~file_closer ()
-  { fclose (m_file); }
-
-private:
-  FILE *m_file;
-};
-
 /* Create an index file for OBJFILE in the directory DIR.  */
 
 static void
@@ -23815,7 +23801,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   std::string filename (std::string (dir) + SLASH_STRING
 			+ lbasename (objfile_name (objfile)) + INDEX_SUFFIX);
 
-  FILE *out_file = gdb_fopen_cloexec (filename.c_str (), "wb");
+  FILE *out_file = gdb_fopen_cloexec (filename.c_str (), "wb").release ();
   if (!out_file)
     error (_("Can't open `%s' for writing"), filename.c_str ());
 
@@ -23824,7 +23810,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
      still open.  (Don't call anything here that might throw until
      file_closer is created.)  */
   gdb::unlinker unlink_file (filename.c_str ());
-  file_closer close_out_file (out_file);
+  gdb_file_up close_out_file (out_file);
 
   mapped_symtab symtab;
   data_buf cu_list;

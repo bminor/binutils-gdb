@@ -1001,7 +1001,7 @@ char *
 xml_fetch_content_from_file (const char *filename, void *baton)
 {
   const char *dirname = (const char *) baton;
-  FILE *file;
+  gdb_file_up file;
   struct cleanup *back_to;
   char *text;
   size_t len, offset;
@@ -1021,21 +1021,19 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   if (file == NULL)
     return NULL;
 
-  back_to = make_cleanup_fclose (file);
-
   /* Read in the whole file, one chunk at a time.  */
   len = 4096;
   offset = 0;
   text = (char *) xmalloc (len);
-  make_cleanup (free_current_contents, &text);
+  back_to = make_cleanup (free_current_contents, &text);
   while (1)
     {
       size_t bytes_read;
 
       /* Continue reading where the last read left off.  Leave at least
 	 one byte so that we can NUL-terminate the result.  */
-      bytes_read = fread (text + offset, 1, len - offset - 1, file);
-      if (ferror (file))
+      bytes_read = fread (text + offset, 1, len - offset - 1, file.get ());
+      if (ferror (file.get ()))
 	{
 	  warning (_("Read error from \"%s\""), filename);
 	  do_cleanups (back_to);
@@ -1044,14 +1042,13 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 
       offset += bytes_read;
 
-      if (feof (file))
+      if (feof (file.get ()))
 	break;
 
       len = len * 2;
       text = (char *) xrealloc (text, len);
     }
 
-  fclose (file);
   discard_cleanups (back_to);
 
   text[offset] = '\0';
