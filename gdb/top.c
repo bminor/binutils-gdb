@@ -346,16 +346,16 @@ make_delete_ui_cleanup (struct ui *ui)
 /* Open file named NAME for read/write, making sure not to make it the
    controlling terminal.  */
 
-static FILE *
+static gdb_file_up
 open_terminal_stream (const char *name)
 {
   int fd;
 
-  fd = open (name, O_RDWR | O_NOCTTY);
+  fd = gdb_open_cloexec (name, O_RDWR | O_NOCTTY, 0);
   if (fd < 0)
     perror_with_name  (_("opening terminal failed"));
 
-  return fdopen (fd, "w+");
+  return gdb_file_up (fdopen (fd, "w+"));
 }
 
 /* Implementation of the "new-ui" command.  */
@@ -365,7 +365,7 @@ new_ui_command (char *args, int from_tty)
 {
   struct ui *ui;
   struct interp *interp;
-  FILE *stream[3] = { NULL, NULL, NULL };
+  gdb_file_up stream[3];
   int i;
   int res;
   int argc;
@@ -390,18 +390,13 @@ new_ui_command (char *args, int from_tty)
   {
     scoped_restore save_ui = make_scoped_restore (&current_ui);
 
-    failure_chain = make_cleanup (null_cleanup, NULL);
-
     /* Open specified terminal, once for each of
        stdin/stdout/stderr.  */
     for (i = 0; i < 3; i++)
-      {
-	stream[i] = open_terminal_stream (tty_name);
-	make_cleanup_fclose (stream[i]);
-      }
+      stream[i] = open_terminal_stream (tty_name);
 
-    ui = new_ui (stream[0], stream[1], stream[2]);
-    make_cleanup (delete_ui_cleanup, ui);
+    ui = new_ui (stream[0].get (), stream[1].get (), stream[2].get ());
+    failure_chain = make_cleanup (delete_ui_cleanup, ui);
 
     ui->async = 1;
 
@@ -410,6 +405,11 @@ new_ui_command (char *args, int from_tty)
     set_top_level_interpreter (interpreter_name);
 
     interp_pre_command_loop (top_level_interpreter ());
+
+    /* Make sure the files are not closed.  */
+    stream[0].release ();
+    stream[1].release ();
+    stream[2].release ();
 
     discard_cleanups (failure_chain);
 
