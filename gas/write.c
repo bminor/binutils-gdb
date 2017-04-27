@@ -2453,7 +2453,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			      _("leb128 operand is an undefined symbol: %s"),
 			      S_GET_NAME (fragP->fr_symbol));
 	      }
-	    
+
 	  /* Initial guess is always 1; doing otherwise can result in
 	     stable solutions that are larger than the minimum.  */
 	  address += fragP->fr_offset = 1;
