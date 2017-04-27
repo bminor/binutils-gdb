@@ -1353,9 +1353,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   int c;
   int desc;
   int noprint = 0;
-  FILE *stream;
   int nlines = stopline - line;
-  struct cleanup *cleanup;
   struct ui_out *uiout = current_uiout;
 
   /* Regardless of whether we can open the file, set current_source_symtab.  */
@@ -1448,15 +1446,14 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       perror_with_name (symtab_to_filename_for_display (s));
     }
 
-  stream = fdopen (desc, FDOPEN_MODE);
-  clearerr (stream);
-  cleanup = make_cleanup_fclose (stream);
+  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  clearerr (stream.get ());
 
   while (nlines-- > 0)
     {
       char buf[20];
 
-      c = fgetc (stream);
+      c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       last_line_listed = current_source_line;
@@ -1479,12 +1476,12 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  else if (c == '\r')
 	    {
 	      /* Skip a \r character, but only before a \n.  */
-	      int c1 = fgetc (stream);
+	      int c1 = fgetc (stream.get ());
 
 	      if (c1 != '\n')
 		printf_filtered ("^%c", c + 0100);
 	      if (c1 != EOF)
-		ungetc (c1, stream);
+		ungetc (c1, stream.get ());
 	    }
 	  else
 	    {
@@ -1492,10 +1489,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      uiout->text (buf);
 	    }
 	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
+      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Show source lines from the file of symtab S, starting with line
@@ -1630,7 +1625,6 @@ forward_search_command (char *regex, int from_tty)
 {
   int c;
   int desc;
-  FILE *stream;
   int line;
   char *msg;
   struct cleanup *cleanups;
@@ -1659,9 +1653,8 @@ forward_search_command (char *regex, int from_tty)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
   discard_cleanups (cleanups);
-  stream = fdopen (desc, FDOPEN_MODE);
-  clearerr (stream);
-  cleanups = make_cleanup_fclose (stream);
+  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  clearerr (stream.get ());
   while (1)
     {
       static char *buf = NULL;
@@ -1672,7 +1665,7 @@ forward_search_command (char *regex, int from_tty)
       buf = (char *) xmalloc (cursize);
       p = buf;
 
-      c = fgetc (stream);
+      c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       do
@@ -1686,7 +1679,7 @@ forward_search_command (char *regex, int from_tty)
 	      cursize = newsize;
 	    }
 	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
+      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
 
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
@@ -1701,7 +1694,6 @@ forward_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match!  */
-	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = std::max (line - lines_to_list / 2, 1);
@@ -1711,7 +1703,6 @@ forward_search_command (char *regex, int from_tty)
     }
 
   printf_filtered (_("Expression not found\n"));
-  do_cleanups (cleanups);
 }
 
 static void
@@ -1719,7 +1710,6 @@ reverse_search_command (char *regex, int from_tty)
 {
   int c;
   int desc;
-  FILE *stream;
   int line;
   char *msg;
   struct cleanup *cleanups;
@@ -1748,23 +1738,22 @@ reverse_search_command (char *regex, int from_tty)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
   discard_cleanups (cleanups);
-  stream = fdopen (desc, FDOPEN_MODE);
-  clearerr (stream);
-  cleanups = make_cleanup_fclose (stream);
+  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  clearerr (stream.get ());
   while (line > 1)
     {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!!  */
       char buf[4096];		/* Should be reasonable???  */
       char *p = buf;
 
-      c = fgetc (stream);
+      c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       do
 	{
 	  *p++ = c;
 	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
+      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
 
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
@@ -1779,25 +1768,23 @@ reverse_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match!  */
-	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line--;
-      if (fseek (stream, current_source_symtab->line_charpos[line - 1], 0) < 0)
+      if (fseek (stream.get (),
+		 current_source_symtab->line_charpos[line - 1], 0) < 0)
 	{
 	  const char *filename;
 
-	  do_cleanups (cleanups);
 	  filename = symtab_to_filename_for_display (current_source_symtab);
 	  perror_with_name (filename);
 	}
     }
 
   printf_filtered (_("Expression not found\n"));
-  do_cleanups (cleanups);
   return;
 }
 

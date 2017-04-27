@@ -1,5 +1,10 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* source.c (print_source_lines_base, forward_search_command)
+	(reverse_search_command): Use gdb_file_up.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* fbsd-nat.c (fbsd_find_memory_regions): Update.
 
 2017-08-03  Tom Tromey  <tom@tromey.com>
