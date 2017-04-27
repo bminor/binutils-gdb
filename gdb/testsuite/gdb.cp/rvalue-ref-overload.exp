@@ -60,7 +60,6 @@ gdb_test "print foo_rr_instance1.overload1arg(static_cast<foo&&>(arg))" \
     "print call overloaded func foo && arg"
 
 # Test lvalue vs rvalue function overloads
-setup_kfail "c++/15372" "*-*-*"
 gdb_test "print f (i)" "= 1" "lvalue reference overload"
 
 gdb_test "print f (ci)" "= 2" "lvalue reference to const overload"

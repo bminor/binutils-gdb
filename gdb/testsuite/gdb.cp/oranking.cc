@@ -147,6 +147,23 @@ int test14 (){
   return foo14(e); // 46
 }
 
+/* Test cv qualifier overloads.  */
+int foo15 (char *arg) { return 47; }
+int foo15 (const char *arg) { return 48; }
+int foo15 (volatile char *arg) { return 49; }
+int foo15 (const volatile char *arg) { return 50; }
+static int
+test15 ()
+{
+  char *c = 0;
+  const char *cc = 0;
+  volatile char *vc = 0;
+  const volatile char *cvc = 0;
+
+  // 47 + 48 + 49 + 50 = 194
+  return foo15 (c) + foo15 (cc) + foo15 (vc)  + foo15 (cvc);
+}
+
 int main() {
   B b;
   foo0(b);
@@ -202,6 +219,11 @@ int main() {
   E e;
   foo14(e);
   test14();
+
+  const char *cc = 0;
+  volatile char *vc = 0;
+  const volatile char *cvc = 0;
+  test15 ();
 
   return 0; // end of main
 }

@@ -1,3 +1,15 @@
+2017-04-27  Keith Seitz  <keiths@redhat.com>
+
+	* gdbtypes.c (LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS)
+	DIFFERENT_REFERENCE_TYPE_BADNESS): Remove.
+	(CV_CONVERSION_BADNESS): Define.
+	(rank_one_type): Remove overly restrictive rvalue reference
+	rank checks.
+	Add cv-qualifier checks and subranks for type equality.
+	* gdbtypes.h (REFERENCE_CONVERSION_RVALUE,
+	REFERENCE_CONVERSION_CONST_LVALUE, CV_CONVERSION_BADNESS,
+	CV_CONVERSION_CONST, CV_CONVERSION_VOLATILE): Declare.
+
 2017-04-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/py-inferior.c (inferior_to_inferior_object): Increment reference
