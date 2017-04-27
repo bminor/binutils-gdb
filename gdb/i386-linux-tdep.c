@@ -678,16 +678,9 @@ i386_linux_core_read_xcr0 (bfd *abfd)
   return xcr0;
 }
 
-/* Get Linux/x86 target description from core dump.  */
-
-static const struct target_desc *
-i386_linux_core_read_description (struct gdbarch *gdbarch,
-				  struct target_ops *target,
-				  bfd *abfd)
+const struct target_desc *
+i386_linux_read_description (uint64_t xcr0)
 {
-  /* Linux/i386.  */
-  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
-
   switch ((xcr0 & X86_XSTATE_ALL_MASK))
     {
     case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
@@ -708,10 +701,27 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
       break;
     }
 
+  return NULL;
+}
+
+/* Get Linux/x86 target description from core dump.  */
+
+static const struct target_desc *
+i386_linux_core_read_description (struct gdbarch *gdbarch,
+				  struct target_ops *target,
+				  bfd *abfd)
+{
+  /* Linux/i386.  */
+  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
+  const struct target_desc * tdesc = i386_linux_read_description (xcr0);
+
+  if (tdesc != NULL)
+    return tdesc;
+
   if (bfd_get_section_by_name (abfd, ".reg-xfp") != NULL)
-    return tdesc_i386_linux;
+    return i386_linux_read_description (X86_XSTATE_SSE_MASK);
   else
-    return tdesc_i386_mmx_linux;
+    return i386_linux_read_description (X86_XSTATE_X87_MASK);
 }
 
 /* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
@@ -835,7 +845,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, I386_LINUX_NUM_REGS);
 
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_i386_linux;
+    tdesc = i386_linux_read_description (X86_XSTATE_SSE_MASK);
   tdep->tdesc = tdesc;
 
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
