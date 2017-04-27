@@ -17179,7 +17179,82 @@ pic_need_relax (symbolS *sym)
 	  /* A global or weak symbol is treated as external.  */
 	  && (!S_IS_WEAK (sym) && !S_IS_EXTERNAL (sym)));
 }
+
+/* Given a MIPS16 variant frag FRAGP and PC-relative operand PCREL_OP
+   convert a section-relative value VAL to the equivalent PC-relative
+   value.  */
 
+static offsetT
+mips16_pcrel_val (fragS *fragp, const struct mips_pcrel_operand *pcrel_op,
+		  offsetT val, long stretch)
+{
+  fragS *sym_frag;
+  addressT addr;
+
+  gas_assert (pcrel_op->root.root.type == OP_PCREL);
+
+  sym_frag = symbol_get_frag (fragp->fr_symbol);
+
+  /* If the relax_marker of the symbol fragment differs from the
+     relax_marker of this fragment, we have not yet adjusted the
+     symbol fragment fr_address.  We want to add in STRETCH in
+     order to get a better estimate of the address.  This
+     particularly matters because of the shift bits.  */
+  if (stretch != 0 && sym_frag->relax_marker != fragp->relax_marker)
+    {
+      fragS *f;
+
+      /* Adjust stretch for any alignment frag.  Note that if have
+	 been expanding the earlier code, the symbol may be
+	 defined in what appears to be an earlier frag.  FIXME:
+	 This doesn't handle the fr_subtype field, which specifies
+	 a maximum number of bytes to skip when doing an
+	 alignment.  */
+      for (f = fragp; f != NULL && f != sym_frag; f = f->fr_next)
+	{
+	  if (f->fr_type == rs_align || f->fr_type == rs_align_code)
+	    {
+	      if (stretch < 0)
+		stretch = -(-stretch & ~((1 << (int) f->fr_offset) - 1));
+	      else
+		stretch &= ~((1 << (int) f->fr_offset) - 1);
+	      if (stretch == 0)
+		break;
+	    }
+	}
+      if (f != NULL)
+	val += stretch;
+    }
+
+  addr = fragp->fr_address + fragp->fr_fix;
+
+  /* The base address rules are complicated.  The base address of
+     a branch is the following instruction.  The base address of a
+     PC relative load or add is the instruction itself, but if it
+     is in a delay slot (in which case it can not be extended) use
+     the address of the instruction whose delay slot it is in.  */
+  if (pcrel_op->include_isa_bit)
+    {
+      addr += 2;
+
+      /* If we are currently assuming that this frag should be
+	 extended, then the current address is two bytes higher.  */
+      if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
+	addr += 2;
+
+      /* Ignore the low bit in the target, since it will be set
+	 for a text label.  */
+      val &= -2;
+    }
+  else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
+    addr -= 4;
+  else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
+    addr -= 2;
+
+  val -= addr & -(1 << pcrel_op->align_log2);
+
+  return val;
+}
 
 /* Given a mips16 variant frag FRAGP, return non-zero if it needs an
    extended opcode.  SEC is the section the frag is in.  */
@@ -17187,11 +17262,10 @@ pic_need_relax (symbolS *sym)
 static int
 mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 {
-  int type;
   const struct mips_int_operand *operand;
   offsetT val;
   segT symsec;
-  fragS *sym_frag;
+  int type;
 
   if (RELAX_MIPS16_USER_SMALL (fragp->fr_subtype))
     return 0;
@@ -17207,80 +17281,18 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 	  : !bfd_is_abs_section (symsec)))
     return 1;
 
-  sym_frag = symbol_get_frag (fragp->fr_symbol);
   val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
 
   if (operand->root.type == OP_PCREL)
     {
       const struct mips_pcrel_operand *pcrel_op;
-      addressT addr;
       offsetT maxtiny;
 
       if (RELAX_MIPS16_ALWAYS_EXTENDED (fragp->fr_subtype))
 	return 1;
 
       pcrel_op = (const struct mips_pcrel_operand *) operand;
-
-      /* If the relax_marker of the symbol fragment differs from the
-	 relax_marker of this fragment, we have not yet adjusted the
-	 symbol fragment fr_address.  We want to add in STRETCH in
-	 order to get a better estimate of the address.  This
-	 particularly matters because of the shift bits.  */
-      if (stretch != 0
-	  && sym_frag->relax_marker != fragp->relax_marker)
-	{
-	  fragS *f;
-
-	  /* Adjust stretch for any alignment frag.  Note that if have
-             been expanding the earlier code, the symbol may be
-             defined in what appears to be an earlier frag.  FIXME:
-             This doesn't handle the fr_subtype field, which specifies
-             a maximum number of bytes to skip when doing an
-             alignment.  */
-	  for (f = fragp; f != NULL && f != sym_frag; f = f->fr_next)
-	    {
-	      if (f->fr_type == rs_align || f->fr_type == rs_align_code)
-		{
-		  if (stretch < 0)
-		    stretch = - ((- stretch)
-				 & ~ ((1 << (int) f->fr_offset) - 1));
-		  else
-		    stretch &= ~ ((1 << (int) f->fr_offset) - 1);
-		  if (stretch == 0)
-		    break;
-		}
-	    }
-	  if (f != NULL)
-	    val += stretch;
-	}
-
-      addr = fragp->fr_address + fragp->fr_fix;
-
-      /* The base address rules are complicated.  The base address of
-         a branch is the following instruction.  The base address of a
-         PC relative load or add is the instruction itself, but if it
-         is in a delay slot (in which case it can not be extended) use
-         the address of the instruction whose delay slot it is in.  */
-      if (pcrel_op->include_isa_bit)
-	{
-	  addr += 2;
-
-	  /* If we are currently assuming that this frag should be
-	     extended, then, the current address is two bytes
-	     higher.  */
-	  if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
-	    addr += 2;
-
-	  /* Ignore the low bit in the target, since it will be set
-             for a text label.  */
-	  val &= -2;
-	}
-      else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
-	addr -= 4;
-      else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
-	addr -= 2;
-
-      val -= addr & -(1 << pcrel_op->align_log2);
+      val = mips16_pcrel_val (fragp, pcrel_op, val, stretch);
 
       /* If any of the shifted bits are set, we must use an extended
          opcode.  If the address depends on the size of this
@@ -18377,39 +18389,21 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       if (operand->root.type == OP_PCREL)
 	{
 	  const struct mips_pcrel_operand *pcrel_op;
-	  addressT addr;
 
 	  pcrel_op = (const struct mips_pcrel_operand *) operand;
-	  addr = fragp->fr_address + fragp->fr_fix;
 
-	  /* The rules for the base address of a PC relative reloc are
-             complicated; see mips16_extended_frag.  */
-	  if (pcrel_op->include_isa_bit)
+	  if (pcrel_op->include_isa_bit && !need_reloc)
 	    {
-	      if (!need_reloc)
-		{
-		  if (!ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
-		    as_bad_where (fragp->fr_file, fragp->fr_line,
-				  _("branch to a symbol in another ISA mode"));
-		  else if ((fragp->fr_offset & 0x1) != 0)
-		    as_bad_where (fragp->fr_file, fragp->fr_line,
-				  _("branch to misaligned address (0x%lx)"),
-				  (long) val);
-		}
-	      addr += 2;
-	      if (ext)
-		addr += 2;
-	      /* Ignore the low bit in the target, since it will be
-                 set for a text label.  */
-	      val &= -2;
+	      if (!ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
+		as_bad_where (fragp->fr_file, fragp->fr_line,
+			      _("branch to a symbol in another ISA mode"));
+	      else if ((fragp->fr_offset & 0x1) != 0)
+		as_bad_where (fragp->fr_file, fragp->fr_line,
+			      _("branch to misaligned address (0x%lx)"),
+			      (long) val);
 	    }
-	  else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
-	    addr -= 4;
-	  else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
-	    addr -= 2;
 
-	  addr &= -(1 << pcrel_op->align_log2);
-	  val -= addr;
+	  val = mips16_pcrel_val (fragp, pcrel_op, val, 0);
 
 	  /* Make sure the section winds up with the alignment we have
              assumed.  */

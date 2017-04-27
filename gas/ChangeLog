@@ -1,5 +1,13 @@
 2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (mips16_pcrel_val): New function, factored
+	out from...
+	(mips16_extended_frag): ... here.
+	(md_convert_frag): Use `mips16_pcrel_val' rather than repeated
+	code in MIPS16 relaxation, with `stretch' hardcoded to 0.
+
+2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (RELAX_MIPS16_LONG_BRANCH): Rename to...
 	(RELAX_MIPS16_ALWAYS_EXTENDED): ... this.
 	(RELAX_MIPS16_MARK_LONG_BRANCH): Rename to...
