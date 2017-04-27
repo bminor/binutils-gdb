@@ -3850,7 +3850,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  /* Reserve room for the initial entry.
 	     FIXME: we could probably do away with it in this case.  */
 	  if (htab->elf.splt->size == 0)
-	    htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
+	    htab->elf.splt->size = GET_PLT_ENTRY_SIZE (output_bfd);
 	  htab->tlsdesc_plt = htab->elf.splt->size;
 	  htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
 	}

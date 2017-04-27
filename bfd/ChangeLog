@@ -1,5 +1,10 @@
 2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Use "="
+	instead of "+=" to update 0.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_create_dynamic_sections): Create the
 	.plt.got section here.
 	(elf_i386_check_relocs): Don't create the .plt.got section.
