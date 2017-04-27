@@ -1,5 +1,17 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (make_cleanup_restore_current_language): Remove.
+	* utils.c (do_restore_current_language)
+	(make_cleanup_restore_current_language): Remove.
+	* parse.c (parse_exp_in_context_1)
+	(parse_expression_with_language): Use
+	scoped_restore_current_language.
+	* mi/mi-main.c (mi_cmd_execute): Use
+	scoped_restore_current_language.
+	* language.h (scoped_restore_current_language): New class.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile.c (cleanup_unlink_file): Remove.
 	(compile_to_object): Use gdb::unlinker.
 	(eval_compile_command): Likewise.

@@ -113,8 +113,6 @@ extern struct cleanup *make_cleanup_value_free (struct value *);
 struct so_list;
 extern struct cleanup *make_cleanup_free_so (struct so_list *so);
 
-extern struct cleanup *make_cleanup_restore_current_language (void);
-
 /* A deleter for a hash table.  */
 struct htab_deleter
 {

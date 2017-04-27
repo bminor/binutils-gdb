@@ -633,4 +633,30 @@ extern const struct language_defn opencl_language_defn;
 extern const struct language_defn pascal_language_defn;
 extern const struct language_defn rust_language_defn;
 
+/* Save the current language and restore it upon destruction.  */
+
+class scoped_restore_current_language
+{
+public:
+
+  explicit scoped_restore_current_language ()
+    : m_lang (current_language->la_language)
+  {
+  }
+
+  ~scoped_restore_current_language ()
+  {
+    set_language (m_lang);
+  }
+
+  scoped_restore_current_language (const scoped_restore_current_language &)
+      = delete;
+  scoped_restore_current_language &operator=
+      (const scoped_restore_current_language &) = delete;
+
+private:
+
+  enum language m_lang;
+};
+
 #endif /* defined (LANGUAGE_H) */

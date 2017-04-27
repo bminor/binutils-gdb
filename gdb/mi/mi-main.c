@@ -2243,9 +2243,10 @@ mi_cmd_execute (struct mi_parse *parse)
 	error (_("Invalid frame id: %d"), frame);
     }
 
+  gdb::optional<scoped_restore_current_language> lang_saver;
   if (parse->language != language_unknown)
     {
-      make_cleanup_restore_current_language ();
+      lang_saver.emplace ();
       set_language (parse->language);
     }
 
