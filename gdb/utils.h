@@ -101,8 +101,6 @@ extern struct cleanup *(make_cleanup_free_section_addr_info
 
 /* For make_cleanup_close see common/filestuff.h.  */
 
-extern struct cleanup *make_cleanup_fclose (FILE *file);
-
 extern struct cleanup *make_cleanup_restore_integer (int *variable);
 extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
 

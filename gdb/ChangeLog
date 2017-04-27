@@ -1,5 +1,10 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (make_cleanup_fclose): Remove.
+	* utils.c (do_fclose_cleanup, make_cleanup_fclose): Remove.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* top.c (open_terminal_stream): Return gdb_file_up.
 	(new_ui_command): Update.
 

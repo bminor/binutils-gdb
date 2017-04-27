@@ -148,24 +148,6 @@ make_cleanup_freeargv (char **arg)
   return make_cleanup (do_freeargv, arg);
 }
 
-/* Helper function which does the work for make_cleanup_fclose.  */
-
-static void
-do_fclose_cleanup (void *arg)
-{
-  FILE *file = (FILE *) arg;
-
-  fclose (file);
-}
-
-/* Return a new cleanup that closes FILE.  */
-
-struct cleanup *
-make_cleanup_fclose (FILE *file)
-{
-  return make_cleanup (do_fclose_cleanup, file);
-}
-
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
 static void
