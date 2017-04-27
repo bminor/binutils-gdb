@@ -1,3 +1,9 @@
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pr21038a.d: Update DW_CFA_nop paddings
+	in .eh_frame section.
+	* testsuite/ld-x86-64/pr21038c.d: Update .eh_frame order.
+
 2017-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/tlsdesc2.d: New test.

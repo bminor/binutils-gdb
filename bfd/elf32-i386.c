@@ -1124,18 +1124,70 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 					       &htab->srelplt2))
     return FALSE;
 
-  if (!info->no_ld_generated_unwind_info
-      && htab->plt_eh_frame == NULL
-      && htab->elf.splt != NULL)
+  if (htab->elf.splt != NULL)
     {
-      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			| SEC_LINKER_CREATED);
-      htab->plt_eh_frame
-	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame", flags);
-      if (htab->plt_eh_frame == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 2))
-	return FALSE;
+      if (htab->plt_got == NULL
+	  && !get_elf_i386_backend_data (dynobj)->is_vxworks
+	  && get_elf_i386_backend_data (dynobj) == &elf_i386_arch_bed)
+	{
+	  /* Create the GOT procedure linkage table.  */
+	  unsigned int plt_got_align;
+	  const struct elf_backend_data *bed;
+
+	  bed = get_elf_backend_data (dynobj);
+	  BFD_ASSERT (sizeof (elf_i386_got_plt_entry) == 8
+		      && (sizeof (elf_i386_got_plt_entry)
+			  == sizeof (elf_i386_pic_got_plt_entry)));
+	  plt_got_align = 3;
+
+	  htab->plt_got
+	    = bfd_make_section_anyway_with_flags (dynobj,
+						  ".plt.got",
+						  (bed->dynamic_sec_flags
+						   | SEC_ALLOC
+						   | SEC_CODE
+						   | SEC_LOAD
+						   | SEC_READONLY));
+	  if (htab->plt_got == NULL
+	      || !bfd_set_section_alignment (dynobj,
+					     htab->plt_got,
+					     plt_got_align))
+	    return FALSE;
+	}
+
+      if (!info->no_ld_generated_unwind_info)
+	{
+	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+			    | SEC_LINKER_CREATED);
+
+	  if (htab->plt_eh_frame == NULL)
+	    {
+	      htab->plt_eh_frame
+		= bfd_make_section_anyway_with_flags (dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_eh_frame,
+						 2))
+		return FALSE;
+	    }
+
+	  if (htab->plt_got_eh_frame == NULL
+	      && htab->plt_got != NULL)
+	    {
+	      htab->plt_got_eh_frame
+		= bfd_make_section_anyway_with_flags (dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_got_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_got_eh_frame,
+						 2))
+		return FALSE;
+	    }
+	}
     }
 
   return TRUE;
@@ -1858,7 +1910,6 @@ elf_i386_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   bfd_byte *contents;
-  bfd_boolean use_plt_got;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -1889,10 +1940,6 @@ elf_i386_check_relocs (bfd *abfd,
       sec->check_relocs_failed = 1;
       return FALSE;
     }
-
-  use_plt_got = (!get_elf_i386_backend_data (abfd)->is_vxworks
-		 && (get_elf_i386_backend_data (abfd)
-		     == &elf_i386_arch_bed));
 
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
@@ -2351,58 +2398,6 @@ do_size:
 
 	default:
 	  break;
-	}
-
-      if (use_plt_got
-	  && h != NULL
-	  && h->plt.refcount > 0
-	  && (((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
-	      || h->got.refcount > 0)
-	  && htab->plt_got == NULL)
-	{
-	  /* Create the GOT procedure linkage table.  */
-	  unsigned int plt_got_align;
-	  const struct elf_backend_data *bed;
-
-	  bed = get_elf_backend_data (info->output_bfd);
-	  BFD_ASSERT (sizeof (elf_i386_got_plt_entry) == 8
-		      && (sizeof (elf_i386_got_plt_entry)
-			  == sizeof (elf_i386_pic_got_plt_entry)));
-	  plt_got_align = 3;
-
-	  if (htab->elf.dynobj == NULL)
-	    htab->elf.dynobj = abfd;
-	  htab->plt_got
-	    = bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						  ".plt.got",
-						  (bed->dynamic_sec_flags
-						   | SEC_ALLOC
-						   | SEC_CODE
-						   | SEC_LOAD
-						   | SEC_READONLY));
-	  if (htab->plt_got == NULL
-	      || !bfd_set_section_alignment (htab->elf.dynobj,
-					     htab->plt_got,
-					     plt_got_align))
-	    goto error_return;
-
-	  if (!info->no_ld_generated_unwind_info
-	      && htab->plt_got_eh_frame == NULL
-	      && get_elf_i386_backend_data (abfd)->plt->eh_frame_plt_got != NULL)
-	    {
-	      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-				| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-				| SEC_LINKER_CREATED);
-	      htab->plt_got_eh_frame
-		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						      ".eh_frame",
-						      flags);
-	      if (htab->plt_got_eh_frame == NULL
-		  || !bfd_set_section_alignment (htab->elf.dynobj,
-						 htab->plt_got_eh_frame,
-						 2))
-		goto error_return;
-	    }
 	}
 
       if (r_type == R_386_GOT32X

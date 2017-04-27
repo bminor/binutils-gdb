@@ -1,5 +1,15 @@
 2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Create the
+	.plt.got section here.
+	(elf_i386_check_relocs): Don't create the .plt.got section.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Create
+	the .plt.got and .plt.bnd sections here.
+	(elf_x86_64_check_relocs): Don't create the .plt.got nor
+	.plt.bnd sections.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Remove
 	has_bnd_reloc.
 	(elf_x86_64_link_hash_newfunc): Don't clear has_bnd_reloc.

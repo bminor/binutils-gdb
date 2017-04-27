@@ -1197,19 +1197,106 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       htab->interp = s;
     }
 
-  if (!info->no_ld_generated_unwind_info
-      && htab->plt_eh_frame == NULL
-      && htab->elf.splt != NULL)
+  if (htab->elf.splt != NULL)
     {
-      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			| SEC_LINKER_CREATED);
-      htab->plt_eh_frame
-	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame", flags);
-      if (htab->plt_eh_frame == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame,
-					 ABI_64_P (dynobj) ? 3 : 2))
-	return FALSE;
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (dynobj);
+      flagword pltflags = (bed->dynamic_sec_flags
+			   | SEC_ALLOC
+			   | SEC_CODE
+			   | SEC_LOAD
+			   | SEC_READONLY);
+
+      if (htab->plt_got == NULL
+	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed)
+	{
+	  /* Create the GOT procedure linkage table.  */
+	  unsigned int plt_got_align;
+
+	  BFD_ASSERT (sizeof (elf_x86_64_legacy_plt2_entry) == 8
+		      && (sizeof (elf_x86_64_bnd_plt2_entry)
+			  == sizeof (elf_x86_64_legacy_plt2_entry)));
+	  plt_got_align = 3;
+
+	  htab->plt_got
+	    = bfd_make_section_anyway_with_flags (dynobj,
+						  ".plt.got",
+						  pltflags);
+	  if (htab->plt_got == NULL
+	      || !bfd_set_section_alignment (dynobj,
+					     htab->plt_got,
+					     plt_got_align))
+	    return FALSE;
+	}
+
+      /* MPX PLT is supported only if elf_x86_64_arch_bed is used in
+	 64-bit mode.  */
+      if (ABI_64_P (dynobj)
+	  && info->bndplt
+	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed
+	  && htab->plt_bnd == NULL)
+	{
+	  /* Create the second PLT for Intel MPX support.  */
+	  BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
+		      && (sizeof (elf_x86_64_bnd_plt2_entry)
+			  == sizeof (elf_x86_64_legacy_plt2_entry)));
+
+	  htab->plt_bnd
+	    = bfd_make_section_anyway_with_flags (dynobj,
+						  ".plt.bnd",
+						  pltflags);
+	  if (htab->plt_bnd == NULL
+	      || !bfd_set_section_alignment (dynobj, htab->plt_bnd, 3))
+	    return FALSE;
+	}
+
+      if (!info->no_ld_generated_unwind_info)
+	{
+	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+			    | SEC_LINKER_CREATED);
+
+	  if (htab->plt_eh_frame == NULL)
+	    {
+	      htab->plt_eh_frame
+		= bfd_make_section_anyway_with_flags (dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_eh_frame,
+						 ABI_64_P (dynobj) ? 3 : 2))
+		return FALSE;
+	    }
+
+	  if (htab->plt_got_eh_frame == NULL
+	      && htab->plt_got != NULL)
+	    {
+	      htab->plt_got_eh_frame
+		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_got_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_got_eh_frame,
+						 ABI_64_P (dynobj) ? 3 : 2))
+		return FALSE;
+	    }
+
+	  if (htab->plt_bnd_eh_frame == NULL
+	      && htab->plt_bnd != NULL)
+	    {
+	      htab->plt_bnd_eh_frame
+		= bfd_make_section_anyway_with_flags (dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_bnd_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_bnd_eh_frame,
+						 3))
+		return FALSE;
+	    }
+	}
     }
 
   /* Align .got section to its entry size.  */
@@ -2198,7 +2285,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   bfd_byte *contents;
-  bfd_boolean use_plt_got;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -2229,8 +2315,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       sec->check_relocs_failed = 1;
       return FALSE;
     }
-
-  use_plt_got = get_elf_x86_64_backend_data (abfd) == &elf_x86_64_arch_bed;
 
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
@@ -2340,59 +2424,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_PLT32:
 	    case R_X86_64_32:
 	    case R_X86_64_64:
-	      /* MPX PLT is supported only if elf_x86_64_arch_bed
-		 is used in 64-bit mode.  */
-	      if (ABI_64_P (abfd)
-		  && info->bndplt
-		  && (get_elf_x86_64_backend_data (abfd)
-		      == &elf_x86_64_arch_bed))
-		{
-		  /* Create the second PLT for Intel MPX support.  */
-		  if (htab->plt_bnd == NULL)
-		    {
-		      const struct elf_backend_data *bed;
-
-		      bed = get_elf_backend_data (info->output_bfd);
-		      BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
-				  && (sizeof (elf_x86_64_bnd_plt2_entry)
-				      == sizeof (elf_x86_64_legacy_plt2_entry)));
-
-		      if (htab->elf.dynobj == NULL)
-			htab->elf.dynobj = abfd;
-		      htab->plt_bnd
-			= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-							      ".plt.bnd",
-							     (bed->dynamic_sec_flags
-							      | SEC_ALLOC
-							      | SEC_CODE
-							      | SEC_LOAD
-							      | SEC_READONLY));
-		      if (htab->plt_bnd == NULL
-			  || !bfd_set_section_alignment (htab->elf.dynobj,
-							 htab->plt_bnd,
-							 3))
-			goto error_return;
-		    }
-
-		  if (!info->no_ld_generated_unwind_info
-		      && htab->plt_bnd_eh_frame == NULL)
-		    {
-		      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-					| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-					| SEC_LINKER_CREATED);
-		      htab->plt_bnd_eh_frame
-			= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-							      ".eh_frame",
-							      flags);
-		      if (htab->plt_bnd_eh_frame == NULL
-			  || !bfd_set_section_alignment (htab->elf.dynobj,
-							 htab->plt_bnd_eh_frame,
-							 3))
-			goto error_return;
-		    }
-		}
-	      /* Fall through.  */
-
 	    case R_X86_64_32S:
 	    case R_X86_64_PC64:
 	    case R_X86_64_GOTPCREL:
@@ -2796,58 +2827,6 @@ do_size:
 
 	default:
 	  break;
-	}
-
-      if (use_plt_got
-	  && h != NULL
-	  && h->plt.refcount > 0
-	  && (((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
-	      || h->got.refcount > 0)
-	  && htab->plt_got == NULL)
-	{
-	  /* Create the GOT procedure linkage table.  */
-	  unsigned int plt_got_align;
-	  const struct elf_backend_data *bed;
-
-	  bed = get_elf_backend_data (info->output_bfd);
-	  BFD_ASSERT (sizeof (elf_x86_64_legacy_plt2_entry) == 8
-		      && (sizeof (elf_x86_64_bnd_plt2_entry)
-			  == sizeof (elf_x86_64_legacy_plt2_entry)));
-	  plt_got_align = 3;
-
-	  if (htab->elf.dynobj == NULL)
-	    htab->elf.dynobj = abfd;
-	  htab->plt_got
-	    = bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						  ".plt.got",
-						  (bed->dynamic_sec_flags
-						   | SEC_ALLOC
-						   | SEC_CODE
-						   | SEC_LOAD
-						   | SEC_READONLY));
-	  if (htab->plt_got == NULL
-	      || !bfd_set_section_alignment (htab->elf.dynobj,
-					     htab->plt_got,
-					     plt_got_align))
-	    goto error_return;
-
-	  if (!info->no_ld_generated_unwind_info
-	      && htab->plt_got_eh_frame == NULL
-	      && get_elf_x86_64_backend_data (abfd)->eh_frame_plt_got != NULL)
-	    {
-	      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-				| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-				| SEC_LINKER_CREATED);
-	      htab->plt_got_eh_frame
-		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						      ".eh_frame",
-						      flags);
-	      if (htab->plt_got_eh_frame == NULL
-		  || !bfd_set_section_alignment (htab->elf.dynobj,
-						 htab->plt_got_eh_frame,
-						 ABI_64_P (htab->elf.dynobj) ? 3 : 2))
-		goto error_return;
-	    }
 	}
 
       if ((r_type == R_X86_64_GOTPCREL
