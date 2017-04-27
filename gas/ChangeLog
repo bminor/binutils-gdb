@@ -1,3 +1,7 @@
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (S_FORCE_RELOC): Separate section and symbol tests.
+
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (RELAX_ENCODE): Add `PIC' flag.
