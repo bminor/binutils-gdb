@@ -1146,9 +1146,9 @@ static bfd_boolean mips_ignore_branch_isa;
 #define RELAX_MIPS16_EXTENDED(i) (((i) & 0x1000) != 0)
 #define RELAX_MIPS16_MARK_EXTENDED(i) ((i) | 0x1000)
 #define RELAX_MIPS16_CLEAR_EXTENDED(i) ((i) &~ 0x1000)
-#define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x2000) != 0)
-#define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x2000)
-#define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x2000)
+#define RELAX_MIPS16_ALWAYS_EXTENDED(i) (((i) & 0x2000) != 0)
+#define RELAX_MIPS16_MARK_ALWAYS_EXTENDED(i) ((i) | 0x2000)
+#define RELAX_MIPS16_CLEAR_ALWAYS_EXTENDED(i) ((i) & ~0x2000)
 
 /* For microMIPS code, we use relaxation similar to one we use for
    MIPS16 code.  Some instructions that take immediate values support
@@ -17216,7 +17216,7 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
       addressT addr;
       offsetT maxtiny;
 
-      if (RELAX_MIPS16_LONG_BRANCH (fragp->fr_subtype))
+      if (RELAX_MIPS16_ALWAYS_EXTENDED (fragp->fr_subtype))
 	return 1;
 
       pcrel_op = (const struct mips_pcrel_operand *) operand;
@@ -17289,7 +17289,7 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
       if ((val & ((1 << operand->shift) - 1)) != 0)
 	{
 	  fragp->fr_subtype =
-	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
+	    RELAX_MIPS16_MARK_ALWAYS_EXTENDED (fragp->fr_subtype);
 	  return 1;
 	}
 
@@ -17310,7 +17310,7 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
 	{
 	  fragp->fr_subtype =
-	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
+	    RELAX_MIPS16_MARK_ALWAYS_EXTENDED (fragp->fr_subtype);
 	  return 1;
 	}
     }

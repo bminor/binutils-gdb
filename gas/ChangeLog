@@ -1,3 +1,13 @@
+2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MIPS16_LONG_BRANCH): Rename to...
+	(RELAX_MIPS16_ALWAYS_EXTENDED): ... this.
+	(RELAX_MIPS16_MARK_LONG_BRANCH): Rename to...
+	(RELAX_MIPS16_MARK_ALWAYS_EXTENDED): ... this.
+	(RELAX_MIPS16_CLEAR_LONG_BRANCH): Rename to...
+	(RELAX_MIPS16_CLEAR_ALWAYS_EXTENDED): ... this.
+	(mips16_extended_frag): Adjust accordingly.
+
 2017-04-27  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (S_FORCE_RELOC): Separate section and symbol tests.
