@@ -176,3 +176,66 @@ run_ld_link_exec_tests [list \
 	"pass.out" \
     ] \
 ]
+
+# -mtls-dialect=gnu2 isn't supported on x32.
+if [istarget "x86_64-*-linux*-gnux32"] {
+    return
+}
+
+run_cc_link_tests [list \
+    [list \
+	"Build libtlsdesc1.so" \
+	"-shared" \
+	"-fPIC $GNU2_CFLAGS" \
+	{ tlsdesc1b.c } \
+	{} \
+	"libtlsdesc1.so" \
+    ] \
+    [list \
+	"Build libtlsdesc1n.so" \
+	"-Wl,-z,now -shared" \
+	"-fPIC $GNU2_CFLAGS" \
+	{ tlsdesc1b.c } \
+	{} \
+	"libtlsdesc1n.so" \
+    ] \
+]
+
+run_ld_link_exec_tests [list \
+    [list \
+	"Run tlsdesc1" \
+	"-Wl,--no-as-needed tmpdir/libtlsdesc1.so" \
+	"" \
+	{ tlsdesc1a.c } \
+	"tlsdesc1a" \
+	"pass.out" \
+	"$GNU2_CFLAGS" \
+    ] \
+    [list \
+	"Run tlsdesc1 (-z now)" \
+	"-Wl,-z,now -Wl,--no-as-needed tmpdir/libtlsdesc1n.so" \
+	"" \
+	{ tlsdesc1a.c } \
+	"tlsdesc1b" \
+	"pass.out" \
+	"$GNU2_CFLAGS" \
+    ] \
+    [list \
+	"Run tlsdesc1 with PIE" \
+	"-pie -Wl,--no-as-needed tmpdir/libtlsdesc1.so" \
+	"" \
+	{ tlsdesc1a.c } \
+	"tlsdesc1c" \
+	"pass.out" \
+	"-fPIE $GNU2_CFLAGS" \
+    ] \
+    [list \
+	"Run tlsdesc1 with PIE (-z now)" \
+	"-pie -Wl,-z,now -Wl,--no-as-needed tmpdir/libtlsdesc1n.so" \
+	"" \
+	{ tlsdesc1a.c } \
+	"tlsdesc1d" \
+	"pass.out" \
+	"-fPIE $GNU2_CFLAGS" \
+    ] \
+]

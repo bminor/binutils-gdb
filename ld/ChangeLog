@@ -1,5 +1,16 @@
 2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/config/default.exp (GNU2_CFLAGS): New.  Set
+	to -mtls-dialect=gnu2 if target compiler supports it.
+	* testsuite/ld-i386/tls.exp: Run -mtls-dialect=gnu2 tests.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-i386/tlsdesc1a.c: New file.
+	* testsuite/ld-i386/tlsdesc1b.c: Likewise.
+	* testsuite/ld-x86-64/tlsdesc1a.c: Likewise.
+	* testsuite/ld-x86-64/tlsdesc1b.c: Likewise.
+
+2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/shared.exp: Add run-time tests for -z now.
 	* testsuite/ld-i386/tls.exp: Likewise.
 	* testsuite/ld-ifunc/ifunc.exp: Likewise.
