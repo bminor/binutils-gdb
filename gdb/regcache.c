@@ -422,8 +422,9 @@ regcache_dup (struct regcache *src)
 {
   struct regcache *newbuf;
 
+  gdb_assert (!src->m_readonly_p);
   newbuf = regcache_xmalloc (src->arch (), get_regcache_aspace (src));
-  regcache_cpy (newbuf, src);
+  newbuf->save (do_cooked_read, src);
   return newbuf;
 }
 

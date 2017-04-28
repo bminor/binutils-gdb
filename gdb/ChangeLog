@@ -1,5 +1,11 @@
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (regcache_dup): Assert !src->m_readonly_p and
+	call method save instead of regcache_cpy.
+	* regcache.h (struct regcache): Make regcache_dup a friend.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (struct regcache): Move to regcache.h
 	(regcache::arch): New method.
 	(regcache_get_ptid): Update.

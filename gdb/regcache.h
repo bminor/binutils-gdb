@@ -373,6 +373,9 @@ private:
 
   friend void
   regcache_cpy (struct regcache *dst, struct regcache *src);
+
+  friend struct regcache *
+  regcache_dup (struct regcache *src);
 };
 
 /* Copy/duplicate the contents of a register cache.  By default, the
