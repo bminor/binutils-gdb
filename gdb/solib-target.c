@@ -29,24 +29,30 @@
 /* Private data for each loaded library.  */
 struct lm_info_target : public lm_info_base
 {
+  ~lm_info_target ()
+  {
+    VEC_free (CORE_ADDR, this->segment_bases);
+    VEC_free (CORE_ADDR, this->section_bases);
+  }
+
   /* The library's name.  The name is normally kept in the struct
      so_list; it is only here during XML parsing.  */
-  char *name;
+  std::string name;
 
   /* The target can either specify segment bases or section bases, not
      both.  */
 
   /* The base addresses for each independently relocatable segment of
      this shared library.  */
-  VEC(CORE_ADDR) *segment_bases;
+  VEC(CORE_ADDR) *segment_bases = NULL;
 
   /* The base addresses for each independently allocatable,
      relocatable section of this shared library.  */
-  VEC(CORE_ADDR) *section_bases;
+  VEC(CORE_ADDR) *section_bases = NULL;
 
   /* The cached offsets for each section of this shared library,
      determined from SEGMENT_BASES, or SECTION_BASES.  */
-  struct section_offsets *offsets;
+  section_offsets *offsets = NULL;
 };
 
 typedef lm_info_target *lm_info_target_p;
@@ -119,7 +125,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
-  lm_info_target *item = XCNEW (lm_info_target);
+  lm_info_target *item = new lm_info_target;
   const char *name
     = (const char *) xml_find_attribute (attributes, "name")->value;
 
@@ -173,12 +179,8 @@ solib_target_free_library_list (void *p)
   int ix;
 
   for (ix = 0; VEC_iterate (lm_info_target_p, *result, ix, info); ix++)
-    {
-      xfree (info->name);
-      VEC_free (CORE_ADDR, info->segment_bases);
-      VEC_free (CORE_ADDR, info->section_bases);
-      xfree (info);
-    }
+    delete info;
+
   VEC_free (lm_info_target_p, *result);
   *result = NULL;
 }
@@ -282,16 +284,16 @@ solib_target_current_sos (void)
   for (ix = 0; VEC_iterate (lm_info_target_p, library_list, ix, info); ix++)
     {
       new_solib = XCNEW (struct so_list);
-      strncpy (new_solib->so_name, info->name, SO_NAME_MAX_PATH_SIZE - 1);
+      strncpy (new_solib->so_name, info->name.c_str (),
+	       SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      strncpy (new_solib->so_original_name, info->name,
+      strncpy (new_solib->so_original_name, info->name.c_str (),
 	       SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_original_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       new_solib->lm_info = info;
 
       /* We no longer need this copy of the name.  */
-      xfree (info->name);
-      info->name = NULL;
+      info->name.clear ();
 
       /* Add it to the list.  */
       if (!start)
@@ -326,10 +328,9 @@ solib_target_free_so (struct so_list *so)
 {
   lm_info_target *li = (lm_info_target *) so->lm_info;
 
-  gdb_assert (li->name == NULL);
-  xfree (li->offsets);
-  VEC_free (CORE_ADDR, li->segment_bases);
-  xfree (li);
+  gdb_assert (li->name.empty ());
+
+  delete li;
 }
 
 static void

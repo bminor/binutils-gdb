@@ -1,5 +1,16 @@
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* solib-target.c (struct lm_info_target): Add destructor,
+	initialize fields.
+	<name>: Change type to std::string.
+	(library_list_start_library): Allocate lm_info_target with new.
+	(solib_target_free_library_list): Free lm_info_target with
+	delete.
+	(solib_target_current_sos): Adapt to std::string.
+	(solib_target_free_so): Free lm_info_target with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* solib-frv.c (struct lm_info_frv): Add destructor, initialize
 	fields.
 	(frv_current_sos): Allocate lm_info_frv with new.
