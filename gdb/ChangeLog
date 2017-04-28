@@ -1,5 +1,14 @@
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (regcache::regcache): New function.
+	(regcache::~regcache): New function.
+	(regcache_xmalloc_1): Remove.
+	(regcache_xmalloc): Call new regcache.
+	(regcache_xfree): Call delete regcache.
+	(get_thread_arch_aspace_regcache): Call new regcache.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
 	* mips-linux-nat.c (mips_linux_new_thread): Use ptid method
 	lwp instead of ptid_get_lwp.
 

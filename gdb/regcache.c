@@ -191,6 +191,17 @@ regcache_register_size (const struct regcache *regcache, int n)
 
 struct regcache
 {
+public:
+  regcache (gdbarch *gdbarch, address_space *aspace_)
+    : regcache (gdbarch, aspace_, true)
+  {}
+
+  ~regcache ()
+  {
+    xfree (registers);
+    xfree (register_status);
+  }
+
   struct regcache_descr *descr;
 
   /* The address space of this register cache (for registers where it
@@ -213,6 +224,32 @@ struct regcache
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
   ptid_t ptid;
+
+private:
+  regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_)
+    : aspace (aspace_), readonly_p (readonly_p_)
+  {
+    gdb_assert (gdbarch != NULL);
+    descr = regcache_descr (gdbarch);
+
+  if (readonly_p)
+    {
+      registers = XCNEWVEC (gdb_byte, descr->sizeof_cooked_registers);
+      register_status = XCNEWVEC (signed char,
+				  descr->sizeof_cooked_register_status);
+    }
+  else
+    {
+      registers = XCNEWVEC (gdb_byte, descr->sizeof_raw_registers);
+      register_status = XCNEWVEC (signed char,
+				  descr->sizeof_raw_register_status);
+    }
+  ptid = minus_one_ptid;
+  }
+
+  friend regcache *
+  get_thread_arch_aspace_regcache (ptid_t ptid, gdbarch *gdbarch,
+				   address_space *aspace);
 };
 
 /* See regcache.h.  */
@@ -225,41 +262,10 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid;
 }
 
-static struct regcache *
-regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
-		    bool readonly_p)
-{
-  struct regcache_descr *descr;
-  struct regcache *regcache;
-
-  gdb_assert (gdbarch != NULL);
-  descr = regcache_descr (gdbarch);
-  regcache = XNEW (struct regcache);
-  regcache->descr = descr;
-  regcache->readonly_p = readonly_p;
-  if (readonly_p)
-    {
-      regcache->registers
-	= XCNEWVEC (gdb_byte, descr->sizeof_cooked_registers);
-      regcache->register_status
-	= XCNEWVEC (signed char, descr->sizeof_cooked_register_status);
-    }
-  else
-    {
-      regcache->registers
-	= XCNEWVEC (gdb_byte, descr->sizeof_raw_registers);
-      regcache->register_status
-	= XCNEWVEC (signed char, descr->sizeof_raw_register_status);
-    }
-  regcache->aspace = aspace;
-  regcache->ptid = minus_one_ptid;
-  return regcache;
-}
-
 struct regcache *
 regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
 {
-  return regcache_xmalloc_1 (gdbarch, aspace, true);
+  return new regcache (gdbarch, aspace);
 }
 
 void
@@ -267,9 +273,8 @@ regcache_xfree (struct regcache *regcache)
 {
   if (regcache == NULL)
     return;
-  xfree (regcache->registers);
-  xfree (regcache->register_status);
-  xfree (regcache);
+
+  delete regcache;
 }
 
 static void
@@ -507,7 +512,7 @@ get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 	&& get_regcache_arch (list->regcache) == gdbarch)
       return list->regcache;
 
-  new_regcache = regcache_xmalloc_1 (gdbarch, aspace, false);
+  new_regcache = new regcache (gdbarch, aspace, false);
   new_regcache->ptid = ptid;
 
   list = XNEW (struct regcache_list);
