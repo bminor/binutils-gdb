@@ -624,7 +624,7 @@ write_watchpoint_regs (void)
 static void
 mips_linux_new_thread (struct lwp_info *lp)
 {
-  long tid = ptid_get_lwp (lp->ptid);
+  long tid = lp->ptid.lwp ();
 
   if (!mips_linux_read_watch_registers (tid,
 					&watch_readback,
