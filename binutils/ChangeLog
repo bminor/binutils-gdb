@@ -1,5 +1,11 @@
 2017-04-28  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21439
+	* readelf.c (print_gnu_build_attribute_name): Allow for an empty
+	name field.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21437
 	* readelf.c (process_version_sections): Check for underflow when
 	computing the start address of the auxillary version data.

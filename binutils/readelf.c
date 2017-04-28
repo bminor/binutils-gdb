@@ -17037,17 +17037,22 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	/* The -1 is because the name field is always 0 terminated, and we
-	   want to be able to ensure that the shift in the while loop below
-	   will not overflow.  */
-	unsigned int        bytes = (pnote->namesz - (name - pnote->namedata)) - 1;
+	unsigned int        bytes;
 	unsigned long long  val = 0;
 	unsigned int        shift = 0;
 	char *              decoded = NULL;
 
-	/* PR 21378 */
+	bytes = pnote->namesz - (name - pnote->namedata);
+	if (bytes > 0)
+	  /* The -1 is because the name field is always 0 terminated, and we
+	     want to be able to ensure that the shift in the while loop below
+	     will not overflow.  */
+	  -- bytes;
+
 	if (bytes > sizeof (val))
 	  {
+	    fprintf (stderr, "namesz %lx name %p namedata %p\n",
+		     pnote->namesz, name, pnote->namedata);
 	    error (_("corrupt numeric name field: too many bytes in the value: %x\n"),
 		   bytes);
 	    bytes = sizeof (val);
