@@ -125,8 +125,13 @@ struct ext_link_map
 
 struct lm_info_dsbt : public lm_info_base
 {
+  ~lm_info_dsbt ()
+  {
+    xfree (this->map);
+  }
+
   /* The loadmap, digested into an easier to use form.  */
-  struct int_elf32_dsbt_loadmap *map;
+  int_elf32_dsbt_loadmap *map = NULL;
 };
 
 /* Per pspace dsbt specific data.  */
@@ -711,7 +716,7 @@ dsbt_current_sos (void)
 	    }
 
 	  sop = XCNEW (struct so_list);
-	  lm_info_dsbt *li = XCNEW (lm_info_dsbt);
+	  lm_info_dsbt *li = new lm_info_dsbt;
 	  sop->lm_info = li;
 	  li->map = loadmap;
 	  /* Fetch the name.  */
@@ -930,8 +935,8 @@ dsbt_relocate_main_executable (void)
   dsbt_get_initial_loadmaps ();
   ldm = info->exec_loadmap;
 
-  xfree (info->main_executable_lm_info);
-  info->main_executable_lm_info = XCNEW (lm_info_dsbt);
+  delete info->main_executable_lm_info;
+  info->main_executable_lm_info = new lm_info_dsbt;
   info->main_executable_lm_info->map = ldm;
 
   new_offsets = XCNEWVEC (struct section_offsets,
@@ -1006,12 +1011,9 @@ dsbt_clear_solib (void)
 
   info->lm_base_cache = 0;
   info->main_lm_addr = 0;
-  if (info->main_executable_lm_info != 0)
-    {
-      xfree (info->main_executable_lm_info->map);
-      xfree (info->main_executable_lm_info);
-      info->main_executable_lm_info = 0;
-    }
+
+  delete info->main_executable_lm_info;
+  info->main_executable_lm_info = NULL;
 }
 
 static void
@@ -1019,8 +1021,7 @@ dsbt_free_so (struct so_list *so)
 {
   lm_info_dsbt *li = (lm_info_dsbt *) so->lm_info;
 
-  xfree (li->map);
-  xfree (li);
+  delete li;
 }
 
 static void
