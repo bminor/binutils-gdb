@@ -159,14 +159,6 @@ struct lm_info
   CORE_ADDR lm_addr;
 };
 
-struct darwin_so_list
-{
-  /* Common field.  */
-  struct so_list sl;
-  /* Darwin specific data.  */
-  struct lm_info li;
-};
-
 /* Lookup the value for a specific symbol.  */
 
 static CORE_ADDR
@@ -271,7 +263,6 @@ darwin_current_sos (void)
       unsigned long hdr_val;
       char *file_path;
       int errcode;
-      struct darwin_so_list *dnew;
       struct so_list *newobj;
       struct cleanup *old_chain;
 
@@ -302,11 +293,10 @@ darwin_current_sos (void)
 	break;
 
       /* Create and fill the new so_list element.  */
-      dnew = XCNEW (struct darwin_so_list);
-      newobj = &dnew->sl;
-      old_chain = make_cleanup (xfree, dnew);
+      newobj = XCNEW (struct so_list);
+      old_chain = make_cleanup (xfree, newobj);
 
-      newobj->lm_info = &dnew->li;
+      newobj->lm_info = XCNEW (struct lm_info);
 
       strncpy (newobj->so_name, file_path, SO_NAME_MAX_PATH_SIZE - 1);
       newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
@@ -587,6 +577,7 @@ darwin_clear_solib (void)
 static void
 darwin_free_so (struct so_list *so)
 {
+  xfree (so->lm_info);
 }
 
 /* The section table is built from bfd sections using bfd VMAs.
