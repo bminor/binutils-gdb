@@ -1,3 +1,8 @@
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c (mips_linux_new_thread): Get lwpid from
+	lwp_info instead of getting from inferior_ptid.
+
 2017-04-27  Keith Seitz  <keiths@redhat.com>
 
 	* gdbtypes.c (LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS)
