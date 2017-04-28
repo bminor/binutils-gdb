@@ -240,6 +240,15 @@ public:
     : regcache (gdbarch, aspace_, true)
   {}
 
+  struct readonly_t {};
+  static constexpr readonly_t readonly {};
+
+  /* Create a readonly regcache from a non-readonly regcache.  */
+  regcache (readonly_t, const regcache &src);
+
+  regcache (const regcache &) = delete;
+  void operator= (const regcache &) = delete;
+
   ~regcache ()
   {
     xfree (m_registers);
@@ -373,9 +382,6 @@ private:
 
   friend void
   regcache_cpy (struct regcache *dst, struct regcache *src);
-
-  friend struct regcache *
-  regcache_dup (struct regcache *src);
 };
 
 /* Copy/duplicate the contents of a register cache.  By default, the

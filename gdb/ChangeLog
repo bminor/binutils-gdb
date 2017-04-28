@@ -1,4 +1,13 @@
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* regcache.c (regcache::regcache): New tag dispatch ctor.
+	(do_cooked_read): Moved above.
+	(regcache_dup): Use the tag dispatch ctor..
+	* regcache.h (regcache): Declare ctor, delete copy ctor and
+	assignment operator, remove friend regcache_dup.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
 	* regcache.c (regcache_dup): Assert !src->m_readonly_p and
 	call method save instead of regcache_cpy.

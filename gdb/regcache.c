@@ -209,6 +209,21 @@ regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
   m_ptid = minus_one_ptid;
 }
 
+static enum register_status
+do_cooked_read (void *src, int regnum, gdb_byte *buf)
+{
+  struct regcache *regcache = (struct regcache *) src;
+
+  return regcache_cooked_read (regcache, regnum, buf);
+}
+
+regcache::regcache (readonly_t, const regcache &src)
+  : regcache (src.arch (), src.aspace (), true)
+{
+  gdb_assert (!src.m_readonly_p);
+  save (do_cooked_read, (void *) &src);
+}
+
 gdbarch *
 regcache::arch () const
 {
@@ -371,14 +386,6 @@ regcache::restore (struct regcache *src)
     }
 }
 
-static enum register_status
-do_cooked_read (void *src, int regnum, gdb_byte *buf)
-{
-  struct regcache *regcache = (struct regcache *) src;
-
-  return regcache_cooked_read (regcache, regnum, buf);
-}
-
 void
 regcache_cpy (struct regcache *dst, struct regcache *src)
 {
@@ -420,12 +427,7 @@ regcache::cpy_no_passthrough (struct regcache *src)
 struct regcache *
 regcache_dup (struct regcache *src)
 {
-  struct regcache *newbuf;
-
-  gdb_assert (!src->m_readonly_p);
-  newbuf = regcache_xmalloc (src->arch (), get_regcache_aspace (src));
-  newbuf->save (do_cooked_read, src);
-  return newbuf;
+  return new regcache (regcache::readonly, *src);
 }
 
 enum register_status
