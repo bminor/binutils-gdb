@@ -1,5 +1,63 @@
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* solist.h (struct lm_info): Remove.
+	(struct lm_info_base): New class.
+	(struct so_list) <lm_info>: Change type to lm_info_base *.
+	* nto-tdep.c (struct lm_info): Remove.
+	(lm_addr): Adjust.
+	* solib-aix.c (struct lm_info): Rename to ...
+	(struct lm_info_aix): ... this.  Extend lm_info_base.
+	(lm_info_p): Rename to ...
+	(lm_info_aix_p): ... this, and adjust.
+	(solib_aix_new_lm_info, solib_aix_xfree_lm_info,
+	solib_aix_parse_libraries, library_list_start_library,
+	solib_aix_free_library_list, solib_aix_parse_libraries,
+	solib_aix_get_library_list,
+	solib_aix_relocate_section_addresses, solib_aix_free_so,
+	solib_aix_get_section_offsets,
+	solib_aix_solib_create_inferior_hook, solib_aix_current_sos):
+	Adjust.
+	(struct solib_aix_inferior_data) <library_list>: Adjust.
+	* solib-darwin.c (struct lm_info): Rename to ...
+	(struct lm_info_darwin): ... this.  Extend lm_info_base.
+	(darwin_current_sos, darwin_relocate_section_addresses): Adjust.
+	* solib-dsbt.c (struct lm_info): Rename to ...
+	(struct lm_info_dsbt): ... this.  Extend lm_info_base.
+	(struct dsbt_info) <main_executable_lm_info): Adjust.
+	(dsbt_current_sos, dsbt_relocate_main_executable, dsbt_free_so,
+	dsbt_relocate_section_addresses): Adjust.
+	* solib-frv.c (struct lm_info): Rename to ...
+	(struct lm_info_frv): ... this.  Extend lm_info_base.
+	(main_executable_lm_info): Adjust.
+	(frv_current_sos, frv_relocate_main_executable, frv_free_so,
+	frv_relocate_section_addresses, frv_fdpic_find_global_pointer,
+	find_canonical_descriptor_in_load_object,
+	frv_fdpic_find_canonical_descriptor): Adjust.
+	* solib-svr4.c (struct lm_info): Move to solib-svr4.h, renamed
+	to lm_info_svr4.
+	(lm_info_read, lm_addr_check, svr4_keep_data_in_core,
+	svr4_clear_so, svr4_copy_library_list,
+	library_list_start_library, svr4_default_sos, svr4_read_so_list,
+	svr4_current_sos, svr4_fetch_objfile_link_map,
+	solist_update_incremental): Adjust.
+	* solib-svr4.h (struct lm_info_svr4): Move here from
+	solib-svr4.c.
+	* solib-target.c (struct lm_info): Rename to ...
+	(struct lm_info_target): ... this.  Extend lm_info_base.
+	(lm_info_p): Rename to ...
+	(lm_info_target_p): ... this.
+	(solib_target_parse_libraries, library_list_start_segment,
+	library_list_start_section, library_list_start_library,
+	library_list_end_library, solib_target_free_library_list,
+	solib_target_current_sos, solib_target_free_so,
+	solib_target_relocate_section_addresses): Adjust.
+	* windows-nat.c (struct lm_info): Rename to ...
+	(struct lm_info_windows): ... this.  Extend lm_info_base.
+	(windows_make_so, handle_load_dll, handle_unload_dll,
+	windows_xfer_shared_libraries): Adjust.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* solib-darwin.c (struct darwin_so_list): Remove.
 	(darwin_current_sos): Allocate an so_list object instead of a
 	darwin_so_list, separately allocate an lm_info object.

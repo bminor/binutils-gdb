@@ -27,7 +27,7 @@
 #include "solib-target.h"
 
 /* Private data for each loaded library.  */
-struct lm_info
+struct lm_info_target : public lm_info_base
 {
   /* The library's name.  The name is normally kept in the struct
      so_list; it is only here during XML parsing.  */
@@ -49,12 +49,12 @@ struct lm_info
   struct section_offsets *offsets;
 };
 
-typedef struct lm_info *lm_info_p;
-DEF_VEC_P(lm_info_p);
+typedef lm_info_target *lm_info_target_p;
+DEF_VEC_P(lm_info_target_p);
 
 #if !defined(HAVE_LIBEXPAT)
 
-static VEC(lm_info_p) *
+static VEC(lm_info_target_p) *
 solib_target_parse_libraries (const char *library)
 {
   static int have_warned;
@@ -80,8 +80,8 @@ library_list_start_segment (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  VEC(lm_info_p) **list = (VEC(lm_info_p) **) user_data;
-  struct lm_info *last = VEC_last (lm_info_p, *list);
+  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
+  lm_info_target *last = VEC_last (lm_info_target_p, *list);
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
   CORE_ADDR address = (CORE_ADDR) *address_p;
@@ -98,8 +98,8 @@ library_list_start_section (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  VEC(lm_info_p) **list = (VEC(lm_info_p) **) user_data;
-  struct lm_info *last = VEC_last (lm_info_p, *list);
+  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
+  lm_info_target *last = VEC_last (lm_info_target_p, *list);
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
   CORE_ADDR address = (CORE_ADDR) *address_p;
@@ -118,13 +118,13 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  VEC(lm_info_p) **list = (VEC(lm_info_p) **) user_data;
-  struct lm_info *item = XCNEW (struct lm_info);
+  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
+  lm_info_target *item = XCNEW (lm_info_target);
   const char *name
     = (const char *) xml_find_attribute (attributes, "name")->value;
 
   item->name = xstrdup (name);
-  VEC_safe_push (lm_info_p, *list, item);
+  VEC_safe_push (lm_info_target_p, *list, item);
 }
 
 static void
@@ -132,8 +132,8 @@ library_list_end_library (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
 			  void *user_data, const char *body_text)
 {
-  VEC(lm_info_p) **list = (VEC(lm_info_p) **) user_data;
-  struct lm_info *lm_info = VEC_last (lm_info_p, *list);
+  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
+  lm_info_target *lm_info = VEC_last (lm_info_target_p, *list);
 
   if (lm_info->segment_bases == NULL
       && lm_info->section_bases == NULL)
@@ -168,18 +168,18 @@ library_list_start_list (struct gdb_xml_parser *parser,
 static void
 solib_target_free_library_list (void *p)
 {
-  VEC(lm_info_p) **result = (VEC(lm_info_p) **) p;
-  struct lm_info *info;
+  VEC(lm_info_target_p) **result = (VEC(lm_info_target_p) **) p;
+  lm_info_target *info;
   int ix;
 
-  for (ix = 0; VEC_iterate (lm_info_p, *result, ix, info); ix++)
+  for (ix = 0; VEC_iterate (lm_info_target_p, *result, ix, info); ix++)
     {
       xfree (info->name);
       VEC_free (CORE_ADDR, info->segment_bases);
       VEC_free (CORE_ADDR, info->section_bases);
       xfree (info);
     }
-  VEC_free (lm_info_p, *result);
+  VEC_free (lm_info_target_p, *result);
   *result = NULL;
 }
 
@@ -229,10 +229,10 @@ static const struct gdb_xml_element library_list_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-static VEC(lm_info_p) *
+static VEC(lm_info_target_p) *
 solib_target_parse_libraries (const char *library)
 {
-  VEC(lm_info_p) *result = NULL;
+  VEC(lm_info_target_p) *result = NULL;
   struct cleanup *back_to = make_cleanup (solib_target_free_library_list,
 					  &result);
 
@@ -255,8 +255,8 @@ solib_target_current_sos (void)
   struct so_list *new_solib, *start = NULL, *last = NULL;
   char *library_document;
   struct cleanup *old_chain;
-  VEC(lm_info_p) *library_list;
-  struct lm_info *info;
+  VEC(lm_info_target_p) *library_list;
+  lm_info_target *info;
   int ix;
 
   /* Fetch the list of shared libraries.  */
@@ -279,7 +279,7 @@ solib_target_current_sos (void)
     return NULL;
 
   /* Build a struct so_list for each entry on the list.  */
-  for (ix = 0; VEC_iterate (lm_info_p, library_list, ix, info); ix++)
+  for (ix = 0; VEC_iterate (lm_info_target_p, library_list, ix, info); ix++)
     {
       new_solib = XCNEW (struct so_list);
       strncpy (new_solib->so_name, info->name, SO_NAME_MAX_PATH_SIZE - 1);
@@ -304,7 +304,7 @@ solib_target_current_sos (void)
     }
 
   /* Free the library list, but not its members.  */
-  VEC_free (lm_info_p, library_list);
+  VEC_free (lm_info_target_p, library_list);
 
   return start;
 }
@@ -324,10 +324,12 @@ solib_target_clear_solib (void)
 static void
 solib_target_free_so (struct so_list *so)
 {
-  gdb_assert (so->lm_info->name == NULL);
-  xfree (so->lm_info->offsets);
-  VEC_free (CORE_ADDR, so->lm_info->segment_bases);
-  xfree (so->lm_info);
+  lm_info_target *li = (lm_info_target *) so->lm_info;
+
+  gdb_assert (li->name == NULL);
+  xfree (li->offsets);
+  VEC_free (CORE_ADDR, li->segment_bases);
+  xfree (li);
 }
 
 static void
@@ -335,23 +337,24 @@ solib_target_relocate_section_addresses (struct so_list *so,
 					 struct target_section *sec)
 {
   CORE_ADDR offset;
+  lm_info_target *li = (lm_info_target *) so->lm_info;
 
   /* Build the offset table only once per object file.  We can not do
      it any earlier, since we need to open the file first.  */
-  if (so->lm_info->offsets == NULL)
+  if (li->offsets == NULL)
     {
       int num_sections = gdb_bfd_count_sections (so->abfd);
 
-      so->lm_info->offsets
+      li->offsets
 	= ((struct section_offsets *)
 	   xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections)));
 
-      if (so->lm_info->section_bases)
+      if (li->section_bases)
 	{
 	  int i;
 	  asection *sect;
 	  int num_section_bases
-	    = VEC_length (CORE_ADDR, so->lm_info->section_bases);
+	    = VEC_length (CORE_ADDR, li->section_bases);
 	  int num_alloc_sections = 0;
 
 	  for (i = 0, sect = so->abfd->sections;
@@ -371,7 +374,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 	      CORE_ADDR *section_bases;
 
 	      section_bases = VEC_address (CORE_ADDR,
-					   so->lm_info->section_bases);
+					   li->section_bases);
 
 	      so->addr_low = ~(CORE_ADDR) 0;
 	      so->addr_high = 0;
@@ -395,7 +398,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		      gdb_assert (so->addr_low <= so->addr_high);
 		      found_range = 1;
 		    }
-		  so->lm_info->offsets->offsets[i]
+		  li->offsets->offsets[i]
 		    = section_bases[bases_index];
 		  bases_index++;
 		}
@@ -404,7 +407,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 	      gdb_assert (so->addr_low <= so->addr_high);
 	    }
 	}
-      else if (so->lm_info->segment_bases)
+      else if (li->segment_bases)
 	{
 	  struct symfile_segment_data *data;
 
@@ -419,12 +422,10 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 	      int num_bases;
 	      CORE_ADDR *segment_bases;
 
-	      num_bases = VEC_length (CORE_ADDR, so->lm_info->segment_bases);
-	      segment_bases = VEC_address (CORE_ADDR,
-					   so->lm_info->segment_bases);
+	      num_bases = VEC_length (CORE_ADDR, li->segment_bases);
+	      segment_bases = VEC_address (CORE_ADDR, li->segment_bases);
 
-	      if (!symfile_map_offsets_to_segments (so->abfd, data,
-						    so->lm_info->offsets,
+	      if (!symfile_map_offsets_to_segments (so->abfd, data, li->offsets,
 						    num_bases, segment_bases))
 		warning (_("\
 Could not relocate shared library \"%s\": bad offsets"), so->so_name);
@@ -459,9 +460,9 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 	}
     }
 
-  offset = so->lm_info->offsets->offsets[gdb_bfd_section_index
-					 (sec->the_bfd_section->owner,
-					  sec->the_bfd_section)];
+  offset = li->offsets->offsets[gdb_bfd_section_index
+			        (sec->the_bfd_section->owner,
+				 sec->the_bfd_section)];
   sec->addr += offset;
   sec->endaddr += offset;
 }

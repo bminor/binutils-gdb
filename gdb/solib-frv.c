@@ -202,7 +202,7 @@ struct ext_link_map
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info
+struct lm_info_frv : public lm_info_base
   {
     /* The loadmap, digested into an easier to use form.  */
     struct int_elf32_fdpic_loadmap *map;
@@ -231,7 +231,7 @@ struct lm_info
    of loaded shared objects.  ``main_executable_lm_info'' provides
    a way to get at this information so that it doesn't need to be
    frequently recomputed.  Initialized by frv_relocate_main_executable().  */
-static struct lm_info *main_executable_lm_info;
+static lm_info_frv *main_executable_lm_info;
 
 static void frv_relocate_main_executable (void);
 static CORE_ADDR main_got (void);
@@ -389,10 +389,11 @@ frv_current_sos (void)
 	    }
 
 	  sop = XCNEW (struct so_list);
-	  sop->lm_info = XCNEW (struct lm_info);
-	  sop->lm_info->map = loadmap;
-	  sop->lm_info->got_value = got_addr;
-	  sop->lm_info->lm_addr = lm_addr;
+	  lm_info_frv *li = XCNEW (lm_info_frv);
+	  sop->lm_info = li;
+	  li->map = loadmap;
+	  li->got_value = got_addr;
+	  li->lm_addr = lm_addr;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
@@ -783,7 +784,7 @@ frv_relocate_main_executable (void)
 
   if (main_executable_lm_info)
     xfree (main_executable_lm_info);
-  main_executable_lm_info = XCNEW (struct lm_info);
+  main_executable_lm_info = XCNEW (lm_info_frv);
   main_executable_lm_info->map = ldm;
 
   new_offsets = XCNEWVEC (struct section_offsets,
@@ -870,10 +871,12 @@ frv_clear_solib (void)
 static void
 frv_free_so (struct so_list *so)
 {
-  xfree (so->lm_info->map);
-  xfree (so->lm_info->dyn_syms);
-  xfree (so->lm_info->dyn_relocs);
-  xfree (so->lm_info);
+  lm_info_frv *li = (lm_info_frv *) so->lm_info;
+
+  xfree (li->map);
+  xfree (li->dyn_syms);
+  xfree (li->dyn_relocs);
+  xfree (li);
 }
 
 static void
@@ -881,9 +884,8 @@ frv_relocate_section_addresses (struct so_list *so,
                                  struct target_section *sec)
 {
   int seg;
-  struct int_elf32_fdpic_loadmap *map;
-
-  map = so->lm_info->map;
+  lm_info_frv *li = (lm_info_frv *) so->lm_info;
+  int_elf32_fdpic_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)
     {
@@ -926,15 +928,14 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
   while (so)
     {
       int seg;
-      struct int_elf32_fdpic_loadmap *map;
-
-      map = so->lm_info->map;
+      lm_info_frv *li = (lm_info_frv *) so->lm_info;
+      int_elf32_fdpic_loadmap *map = li->map;
 
       for (seg = 0; seg < map->nsegs; seg++)
 	{
 	  if (map->segs[seg].addr <= addr
 	      && addr < map->segs[seg].addr + map->segs[seg].p_memsz)
-	    return so->lm_info->got_value;
+	    return li->got_value;
 	}
 
       so = so->next;
@@ -947,7 +948,7 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
 
 /* Forward declarations for frv_fdpic_find_canonical_descriptor().  */
 static CORE_ADDR find_canonical_descriptor_in_load_object
-  (CORE_ADDR, CORE_ADDR, const char *, bfd *, struct lm_info *);
+  (CORE_ADDR, CORE_ADDR, const char *, bfd *, lm_info_frv *);
 
 /* Given a function entry point, attempt to find the canonical descriptor
    associated with that entry point.  Return 0 if no canonical descriptor
@@ -987,8 +988,10 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
       so = master_so_list ();
       while (so)
 	{
+	  lm_info_frv *li = (lm_info_frv *) so->lm_info;
+
 	  addr = find_canonical_descriptor_in_load_object
-		   (entry_point, got_value, name, so->abfd, so->lm_info);
+		   (entry_point, got_value, name, so->abfd, li);
 
 	  if (addr != 0)
 	    break;
@@ -1003,7 +1006,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
 static CORE_ADDR
 find_canonical_descriptor_in_load_object
   (CORE_ADDR entry_point, CORE_ADDR got_value, const char *name, bfd *abfd,
-   struct lm_info *lm)
+   lm_info_frv *lm)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   arelent *rel;
@@ -1141,8 +1144,10 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
      of shared libraries.  */
   for (so = master_so_list (); so; so = so->next)
     {
+      lm_info_frv *li = (lm_info_frv *) so->lm_info;
+
       if (so->objfile == objfile)
-	return so->lm_info->lm_addr;
+	return li->lm_addr;
     }
 
   /* Not found!  */

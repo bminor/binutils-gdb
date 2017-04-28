@@ -123,7 +123,7 @@ struct ext_link_map
 
 /* Link map info to include in an allocated so_list entry */
 
-struct lm_info
+struct lm_info_dsbt : public lm_info_base
 {
   /* The loadmap, digested into an easier to use form.  */
   struct int_elf32_dsbt_loadmap *map;
@@ -137,7 +137,7 @@ struct dsbt_info
      of loaded shared objects.  ``main_executable_lm_info'' provides
      a way to get at this information so that it doesn't need to be
      frequently recomputed.  Initialized by dsbt_relocate_main_executable.  */
-  struct lm_info *main_executable_lm_info;
+  struct lm_info_dsbt *main_executable_lm_info;
 
   /* Load maps for the main executable and the interpreter.  These are obtained
      from ptrace.  They are the starting point for getting into the program,
@@ -711,8 +711,9 @@ dsbt_current_sos (void)
 	    }
 
 	  sop = XCNEW (struct so_list);
-	  sop->lm_info = XCNEW (struct lm_info);
-	  sop->lm_info->map = loadmap;
+	  lm_info_dsbt *li = XCNEW (lm_info_dsbt);
+	  sop->lm_info = li;
+	  li->map = loadmap;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
@@ -930,7 +931,7 @@ dsbt_relocate_main_executable (void)
   ldm = info->exec_loadmap;
 
   xfree (info->main_executable_lm_info);
-  info->main_executable_lm_info = XCNEW (struct lm_info);
+  info->main_executable_lm_info = XCNEW (lm_info_dsbt);
   info->main_executable_lm_info->map = ldm;
 
   new_offsets = XCNEWVEC (struct section_offsets,
@@ -1016,8 +1017,10 @@ dsbt_clear_solib (void)
 static void
 dsbt_free_so (struct so_list *so)
 {
-  xfree (so->lm_info->map);
-  xfree (so->lm_info);
+  lm_info_dsbt *li = (lm_info_dsbt *) so->lm_info;
+
+  xfree (li->map);
+  xfree (li);
 }
 
 static void
@@ -1025,9 +1028,8 @@ dsbt_relocate_section_addresses (struct so_list *so,
 				 struct target_section *sec)
 {
   int seg;
-  struct int_elf32_dsbt_loadmap *map;
-
-  map = so->lm_info->map;
+  lm_info_dsbt *li = (lm_info_dsbt *) so->lm_info;
+  int_elf32_dsbt_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)
     {

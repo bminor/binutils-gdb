@@ -153,7 +153,7 @@ darwin_load_image_infos (struct darwin_info *info)
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info
+struct lm_info_darwin : public lm_info_base
 {
   /* The target location of lm.  */
   CORE_ADDR lm_addr;
@@ -296,13 +296,14 @@ darwin_current_sos (void)
       newobj = XCNEW (struct so_list);
       old_chain = make_cleanup (xfree, newobj);
 
-      newobj->lm_info = XCNEW (struct lm_info);
+      lm_info_darwin *li = XCNEW (lm_info_darwin);
+      newobj->lm_info = li;
 
       strncpy (newobj->so_name, file_path, SO_NAME_MAX_PATH_SIZE - 1);
       newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       strcpy (newobj->so_original_name, newobj->so_name);
       xfree (file_path);
-      newobj->lm_info->lm_addr = load_addr;
+      li->lm_addr = load_addr;
 
       if (head == NULL)
 	head = newobj;
@@ -587,8 +588,10 @@ static void
 darwin_relocate_section_addresses (struct so_list *so,
 				   struct target_section *sec)
 {
-  sec->addr += so->lm_info->lm_addr;
-  sec->endaddr += so->lm_info->lm_addr;
+  lm_info_darwin *li = (lm_info_darwin *) so->lm_info;
+
+  sec->addr += li->lm_addr;
+  sec->endaddr += li->lm_addr;
 
   /* Best effort to set addr_high/addr_low.  This is used only by
      'info sharedlibary'.  */
