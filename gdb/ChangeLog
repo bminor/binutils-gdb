@@ -1,4 +1,9 @@
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* infcmd.c (get_return_value): Use regcache ctor, and remove
+	cleanup.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
 	    Pedro Alves  <palves@redhat.com>
 
 	* regcache.c (regcache::regcache): New tag dispatch ctor.
