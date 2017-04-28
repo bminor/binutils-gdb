@@ -1,5 +1,14 @@
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* solib-frv.c (struct lm_info_frv): Add destructor, initialize
+	fields.
+	(frv_current_sos): Allocate lm_info_frv with new.
+	(frv_relocate_main_executable): Free lm_info_frv with delete,
+	allocate with new.
+	(frv_clear_solib, frv_free_so): Free lm_info_frv with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* solib-frv.c (struct lm_info_frv): Fix indentation.
 
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>

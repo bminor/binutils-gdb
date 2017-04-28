@@ -204,13 +204,19 @@ struct ext_link_map
 
 struct lm_info_frv : public lm_info_base
 {
+  ~lm_info_frv ()
+  {
+    xfree (this->map);
+    xfree (this->dyn_syms);
+    xfree (this->dyn_relocs);
+  }
 
   /* The loadmap, digested into an easier to use form.  */
-  struct int_elf32_fdpic_loadmap *map;
+  int_elf32_fdpic_loadmap *map = NULL;
   /* The GOT address for this link map entry.  */
-  CORE_ADDR got_value;
+  CORE_ADDR got_value = 0;
   /* The link map address, needed for frv_fetch_objfile_link_map().  */
-  CORE_ADDR lm_addr;
+  CORE_ADDR lm_addr = 0;
 
   /* Cached dynamic symbol table and dynamic relocs initialized and
      used only by find_canonical_descriptor_in_load_object().
@@ -222,10 +228,9 @@ struct lm_info_frv : public lm_info_base
      supplied to the first call.  Thus the caching of the dynamic
      symbols (dyn_syms) is critical for correct operation.  The
      caching of the dynamic relocations could be dispensed with.  */
-  asymbol **dyn_syms;
-  arelent **dyn_relocs;
-  int dyn_reloc_count;	/* Number of dynamic relocs.  */
-
+  asymbol **dyn_syms = NULL;
+  arelent **dyn_relocs = NULL;
+  int dyn_reloc_count = 0;	/* Number of dynamic relocs.  */
 };
 
 /* The load map, got value, etc. are not available from the chain
@@ -390,7 +395,7 @@ frv_current_sos (void)
 	    }
 
 	  sop = XCNEW (struct so_list);
-	  lm_info_frv *li = XCNEW (lm_info_frv);
+	  lm_info_frv *li = new lm_info_frv;
 	  sop->lm_info = li;
 	  li->map = loadmap;
 	  li->got_value = got_addr;
@@ -783,9 +788,8 @@ frv_relocate_main_executable (void)
   if (ldm == NULL)
     error (_("Unable to load the executable's loadmap."));
 
-  if (main_executable_lm_info)
-    xfree (main_executable_lm_info);
-  main_executable_lm_info = XCNEW (lm_info_frv);
+  delete main_executable_lm_info;
+  main_executable_lm_info = new lm_info_frv;
   main_executable_lm_info->map = ldm;
 
   new_offsets = XCNEWVEC (struct section_offsets,
@@ -859,14 +863,9 @@ frv_clear_solib (void)
   lm_base_cache = 0;
   enable_break2_done = 0;
   main_lm_addr = 0;
-  if (main_executable_lm_info != 0)
-    {
-      xfree (main_executable_lm_info->map);
-      xfree (main_executable_lm_info->dyn_syms);
-      xfree (main_executable_lm_info->dyn_relocs);
-      xfree (main_executable_lm_info);
-      main_executable_lm_info = 0;
-    }
+
+  delete main_executable_lm_info;
+  main_executable_lm_info = NULL;
 }
 
 static void
@@ -874,10 +873,7 @@ frv_free_so (struct so_list *so)
 {
   lm_info_frv *li = (lm_info_frv *) so->lm_info;
 
-  xfree (li->map);
-  xfree (li->dyn_syms);
-  xfree (li->dyn_relocs);
-  xfree (li);
+  delete li;
 }
 
 static void
