@@ -1,3 +1,10 @@
+2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/shared.exp: Add run-time tests for -z now.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+
 2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/pr21038a.d: Update DW_CFA_nop paddings
