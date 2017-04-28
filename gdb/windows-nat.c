@@ -587,7 +587,7 @@ struct safe_symbol_file_add_args
 /* Maintain a linked list of "so" information.  */
 struct lm_info_windows : public lm_info_base
 {
-  LPVOID load_addr;
+  LPVOID load_addr = 0;
 };
 
 static struct so_list solib_start, *solib_end;
@@ -645,7 +645,7 @@ windows_make_so (const char *name, LPVOID load_addr)
     }
 #endif
   so = XCNEW (struct so_list);
-  lm_info_windows *li = XCNEW (struct lm_info_windows);
+  lm_info_windows *li = new lm_info_windows;
   so->lm_info = li;
   li->load_addr = load_addr;
   strcpy (so->so_original_name, name);
@@ -784,8 +784,9 @@ handle_load_dll (void *dummy)
 static void
 windows_free_so (struct so_list *so)
 {
-  if (so->lm_info)
-    xfree (so->lm_info);
+  lm_info_windows *li = (lm_info_windows *) so->lm_info;
+
+  delete li;
   xfree (so);
 }
 
