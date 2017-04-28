@@ -1,3 +1,8 @@
+2017-04-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-tdep.c (print_gp_register_row): Replace printf_filtered
+	with fprintf_filtered.
+
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
 	* regcache.c (regcache::regcache): New function.
