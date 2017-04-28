@@ -1,5 +1,16 @@
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* solib-svr4.h (struct lm_info_svr4): Initialize fields.
+	<l_addr_p>: Change type to bool.
+	* solib-svr4.c (lm_info_read): Allocate lm_info_svr4 with new.
+	(svr4_free_so): Free lm_info_svr4 with delete.
+	(svr4_copy_library_list): Replace memcpy with call to copy
+	constructor.
+	(library_list_start_library, svr4_default_sos): Allocate
+	lm_info_svr4 with new.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* solib-target.c (struct lm_info_target): Add destructor,
 	initialize fields.
 	<name>: Change type to std::string.

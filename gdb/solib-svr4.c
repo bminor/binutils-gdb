@@ -189,7 +189,7 @@ lm_info_read (CORE_ADDR lm_addr)
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
-      lm_info = XCNEW (lm_info_svr4);
+      lm_info = new lm_info_svr4;
       lm_info->lm_addr = lm_addr;
 
       lm_info->l_addr_inferior = extract_typed_address (&lm[lmo->l_addr_offset],
@@ -1080,7 +1080,9 @@ struct svr4_library_list
 static void
 svr4_free_so (struct so_list *so)
 {
-  xfree (so->lm_info);
+  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+
+  delete li;
 }
 
 /* Implement target_so_ops.clear_so.  */
@@ -1125,8 +1127,8 @@ svr4_copy_library_list (struct so_list *src)
       newobj = XNEW (struct so_list);
       memcpy (newobj, src, sizeof (struct so_list));
 
-      newobj->lm_info = XNEW (lm_info_svr4);
-      memcpy (newobj->lm_info, src->lm_info, sizeof (lm_info_svr4));
+      lm_info_svr4 *src_li = (lm_info_svr4 *) src->lm_info;
+      newobj->lm_info = new lm_info_svr4 (*src_li);
 
       newobj->next = NULL;
       *link = newobj;
@@ -1162,7 +1164,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);
-  lm_info_svr4 *li = XCNEW (lm_info_svr4);
+  lm_info_svr4 *li = new lm_info_svr4;
   new_elem->lm_info = li;
   li->lm_addr = *lmp;
   li->l_addr_inferior = *l_addrp;
@@ -1317,7 +1319,7 @@ svr4_default_sos (void)
     return NULL;
 
   newobj = XCNEW (struct so_list);
-  lm_info_svr4 *li = XCNEW (lm_info_svr4);
+  lm_info_svr4 *li = new lm_info_svr4;
   newobj->lm_info = li;
 
   /* Nothing will ever check the other fields if we set l_addr_p.  */
