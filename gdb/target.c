@@ -3552,7 +3552,7 @@ target_fetch_registers (struct regcache *regcache, int regno)
 {
   current_target.to_fetch_registers (&current_target, regcache, regno);
   if (targetdebug)
-    regcache_debug_print_register ("target_fetch_registers", regcache, regno);
+    regcache->debug_print_register ("target_fetch_registers", regno);
 }
 
 void
@@ -3564,8 +3564,7 @@ target_store_registers (struct regcache *regcache, int regno)
   current_target.to_store_registers (&current_target, regcache, regno);
   if (targetdebug)
     {
-      regcache_debug_print_register ("target_store_registers", regcache,
-				     regno);
+      regcache->debug_print_register ("target_store_registers", regno);
     }
 }
 

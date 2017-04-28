@@ -1,3 +1,55 @@
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (struct regcache): Move to regcache.h
+	(regcache::arch): New method.
+	(regcache_get_ptid): Update.
+	(get_regcache_arch): Call arch method.
+	(get_regcache_aspace): Call method aspace.
+	(register_buffer): Change it to method.
+	(regcache_save): Change it to regcache::save.
+	(regcache_restore): Likewise.
+	(regcache_cpy_no_passthrough): Remove the declaration.
+	(regcache_cpy): Call methods restore and cpy_no_passthrough.
+	(regcache_cpy_no_passthrough): Change it to method
+	cpy_no_passthrough.
+	(regcache_register_status): Change it to method
+	get_register_status.
+	(regcache_invalidate): Change it to method invalidate.
+	(regcache_thread_ptid_changed): Use methods ptid and set_ptid.
+	(regcache_raw_update): Change it to method raw_update.
+	(regcache_raw_read): Likewise.
+	(regcache_raw_read_signed): Likewise.
+	(regcache_raw_read_unsigned): Likewise.
+	(regcache_raw_write_signed): Likewise.
+	(regcache_raw_write_unsigned): Likewise.
+	(regcache_cooked_read): Likewise.
+	(regcache_cooked_read_value): Likewise.
+	(regcache_cooked_read_signed): Likewise.
+	(regcache_cooked_read_unsigned): Likewise.
+	(regcache_cooked_write_signed): Likewise.
+	(regcache_cooked_write_unsigned): Likewise.
+	(regcache_raw_set_cached_value): Likewise.
+	(regcache_raw_write): Likewise.
+	(regcache_cooked_write): Likewise.
+	(regcache_xfer_part): Likewise.
+	(regcache_raw_read_part): Likewise.
+	(regcache_raw_write_part): Likewise.
+	(regcache_cooked_read_part): Likewise.
+	(regcache_cooked_write_part): Likewise.
+	(regcache_raw_supply): Likewise.
+	(regcache_raw_collect): Likewise.
+	(regcache_transfer_regset): Likewise.
+	(regcache_supply_regset): Likewise.
+	(regcache_collect_regset): Likewise.
+	(regcache_debug_print_register): Likewise.
+	(enum regcache_dump_what): Move it to regcache.h.
+	(regcache_dump): Change it to method dump.
+	* regcache.h (enum regcache_dump_what): New.
+	(class regcache): New.
+	* target.c (target_fetch_registers): Call method
+	debug_print_register.
+	(target_store_registers): Likewise.
+
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* windows-nat.c (struct lm_info_windows): Initialize field.
