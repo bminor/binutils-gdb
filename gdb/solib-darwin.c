@@ -156,7 +156,7 @@ darwin_load_image_infos (struct darwin_info *info)
 struct lm_info_darwin : public lm_info_base
 {
   /* The target location of lm.  */
-  CORE_ADDR lm_addr;
+  CORE_ADDR lm_addr = 0;
 };
 
 /* Lookup the value for a specific symbol.  */
@@ -296,7 +296,7 @@ darwin_current_sos (void)
       newobj = XCNEW (struct so_list);
       old_chain = make_cleanup (xfree, newobj);
 
-      lm_info_darwin *li = XCNEW (lm_info_darwin);
+      lm_info_darwin *li = new lm_info_darwin;
       newobj->lm_info = li;
 
       strncpy (newobj->so_name, file_path, SO_NAME_MAX_PATH_SIZE - 1);
@@ -578,7 +578,9 @@ darwin_clear_solib (void)
 static void
 darwin_free_so (struct so_list *so)
 {
-  xfree (so->lm_info);
+  lm_info_darwin *li = (lm_info_darwin *) so->lm_info;
+
+  delete li;
 }
 
 /* The section table is built from bfd sections using bfd VMAs.
