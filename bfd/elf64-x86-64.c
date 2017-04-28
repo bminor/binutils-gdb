@@ -3178,7 +3178,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 if PLT is used.  */
       eh->func_pointer_refcount = 0;
 
-      if ((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
+      if (htab->plt_got != NULL
+	  && (info->flags & DF_BIND_NOW)
+	  && !h->pointer_equality_needed)
 	{
 	  /* Don't use the regular PLT for DF_BIND_NOW. */
 	  h->plt.offset = (bfd_vma) -1;
