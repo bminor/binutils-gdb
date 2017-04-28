@@ -82,6 +82,7 @@
 #include "common-debug.h"
 #include "cleanups.h"
 #include "common-exceptions.h"
+#include "common/poison.h"
 
 #define EXTERN_C extern "C"
 #define EXTERN_C_PUSH extern "C" {

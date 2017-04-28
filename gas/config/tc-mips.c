@@ -18445,15 +18445,11 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      exp.X_add_symbol = fragp->fr_symbol;
 	      exp.X_add_number = fragp->fr_offset;
 
-	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 2, &exp,
+	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
 				  TRUE, reloc);
 
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
-
-	      /* These relocations can have an addend that won't fit
-		 in 2 octets.  */
-	      fixp->fx_no_overflow = 1;
 	    }
 	  else
 	    as_bad_where (fragp->fr_file, fragp->fr_line,

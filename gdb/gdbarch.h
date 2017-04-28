@@ -827,6 +827,13 @@ typedef const char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gd
 extern const char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
 extern void set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name);
 
+/* Execute vendor-specific DWARF Call Frame Instruction.  OP is the instruction.
+   FS are passed from the generic execute_cfa_program function. */
+
+typedef bool (gdbarch_execute_dwarf_cfa_vendor_op_ftype) (struct gdbarch *gdbarch, gdb_byte op, struct dwarf2_frame_state *fs);
+extern bool gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op, struct dwarf2_frame_state *fs);
+extern void set_gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdbarch_execute_dwarf_cfa_vendor_op_ftype *execute_dwarf_cfa_vendor_op);
+
 /* Return the appropriate type_flags for the supplied address class.
    This function should return 1 if the address class was recognized and
    type_flags was set, zero otherwise. */

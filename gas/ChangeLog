@@ -1,3 +1,57 @@
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/leave_enter.d: Update test.
+	* testsuite/gas/arc/leave_enter.s: Likewise.
+
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/b.d: Update test.
+	* testsuite/gas/arc/noargs_hs.d: Likewise.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Correct
+	BFD_RELOC_MIPS16_16_PCREL_S1 fixup size.
+	* testsuite/gas/mips/mips16-branch-addend-4.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-5.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-5.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-branch-addend-4.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-5.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-04-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	PR gas/21407
+	* config/tc-sparc.c (md_apply_fix): Do not transform `call'
+	instructions into branch instructions in fixups generating
+	additional relocations.
+	* testsuite/gas/sparc/call-relax.s: New file.
+	* testsuite/gas/sparc/call-relax.d: Likewise.
+	* testsuite/gas/sparc/call-relax-aout.d: Likewise.
+	* testsuite/gas/sparc/sparc.exp: Test call-relax and call-relax-aout.
+
+2017-04-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Remove code generating MOVS.
+	Forbid MOV.W and MOVW if destination is SP or PC.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.s: Explain
+	expectation of LDR not generating a MOVS for low registers and small
+	constants.  Add tests of MOVW generation.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: Update
+	expected disassembly.
+
+2017-04-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/vle.s: Format.  Add se_rfgi and e_sc.
+	* testsuite/gas/ppc/vle.d: Update.
+
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21380
+	* testsuite/gas/aarch64/illegal-3.s: New file.
+	* testsuite/gas/aarch64/illegal-3.d: New file.
+
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_show_usage): Delete mention of -mhtm.

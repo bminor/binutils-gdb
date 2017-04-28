@@ -310,14 +310,13 @@ print_program_space (struct ui_out *uiout, int requested)
 
   ALL_PSPACES (pspace)
     {
-      struct cleanup *chain2;
       struct inferior *inf;
       int printed_header;
 
       if (requested != -1 && requested != pspace->num)
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       if (pspace == current_program_space)
 	uiout->field_string ("current", "*");
@@ -354,7 +353,6 @@ print_program_space (struct ui_out *uiout, int requested)
 	  }
 
       uiout->text ("\n");
-      do_cleanups (chain2);
     }
 
   do_cleanups (old_chain);

@@ -2433,7 +2433,6 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
   char real_path[__PMAX];
   char shell[__PMAX]; /* Path to shell */
   const char *toexec;
-  const char *allargs = origallargs.c_str ();
   char *args, *allargs_copy;
   size_t args_len, allargs_len;
   int fd_inp = -1, fd_out = -1, fd_err = -1;
@@ -2449,6 +2448,7 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
   size_t envsize;
   char **env;
 #endif	/* !__CYGWIN__ */
+  const char *allargs = origallargs.c_str ();
   PROCESS_INFORMATION pi;
   BOOL ret;
   DWORD flags = 0;

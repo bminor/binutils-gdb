@@ -624,7 +624,10 @@ bfd_perform_relocation (bfd *abfd,
      PR 17512: file: c146ab8b, 46dff27f, 38e53ebf.  */
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   if (octets + bfd_get_reloc_size (howto)
-      > bfd_get_section_limit_octets (abfd, input_section))
+      > bfd_get_section_limit_octets (abfd, input_section)
+      /* Check for an overly large offset which
+	 masquerades as a negative value too.  */
+      || (octets + bfd_get_reloc_size (howto) < bfd_get_reloc_size (howto)))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the

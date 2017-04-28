@@ -26876,24 +26876,36 @@ corresponds to the frame's code address.  This field may be absent.
 @subsection @sc{gdb/mi} Thread Information
 
 Whenever @value{GDBN} has to report an information about a thread, it
-uses a tuple with the following fields:
+uses a tuple with the following fields.  The fields are always present unless
+stated otherwise.
 
 @table @code
 @item id
-The global numeric id assigned to the thread by @value{GDBN}.  This field is
-always present.
+The global numeric id assigned to the thread by @value{GDBN}.
 
 @item target-id
-Target-specific string identifying the thread.  This field is always present.
+The target-specific string identifying the thread.
 
 @item details
 Additional information about the thread provided by the target.
 It is supposed to be human-readable and not interpreted by the
 frontend.  This field is optional.
 
+@item name
+The name of the thread.  If the user specified a name using the
+@code{thread name} command, then this name is given.  Otherwise, if
+@value{GDBN} can extract the thread name from the target, then that
+name is given.  If @value{GDBN} cannot find the thread name, then this
+field is omitted.
+
 @item state
-Either @samp{stopped} or @samp{running}, depending on whether the
-thread is presently running.  This field is always present.
+The execution state of the thread, either @samp{stopped} or @samp{running},
+depending on whether the thread is presently running.
+
+@item frame
+The stack frame currently executing in the thread.  This field is only present
+if the thread is stopped.  Its format is documented in
+@ref{GDB/MI Frame Information}.
 
 @item core
 The value of this field is an integer number of the processor core the
@@ -28108,51 +28120,18 @@ about all threads.
 
 @subsubheading Result
 
-The result is a list of threads.  The following attributes are
-defined for a given thread:
+The result contains the following attributes:
 
 @table @samp
-@item current
-This field exists only for the current thread.  It has the value @samp{*}.
+@item threads
+A list of threads.  The format of the elements of the list is described in
+@ref{GDB/MI Thread Information}.
 
-@item id
-The global identifier that @value{GDBN} uses to refer to the thread.
-
-@item target-id
-The identifier that the target uses to refer to the thread.
-
-@item details
-Extra information about the thread, in a target-specific format.  This
-field is optional.
-
-@item name
-The name of the thread.  If the user specified a name using the
-@code{thread name} command, then this name is given.  Otherwise, if
-@value{GDBN} can extract the thread name from the target, then that
-name is given.  If @value{GDBN} cannot find the thread name, then this
-field is omitted.
-
-@item frame
-The stack frame currently executing in the thread.
-
-@item state
-The thread's state.  The @samp{state} field may have the following
-values:
-
-@table @code
-@item stopped
-The thread is stopped.  Frame information is available for stopped
-threads.
-
-@item running
-The thread is running.  There's no frame information for running
-threads.
-
-@end table
-
-@item core
-If @value{GDBN} can find the CPU core on which this thread is running,
-then this field is the core identifier.  This field is optional.
+@item current-thread-id
+The global id of the currently selected thread.  This field is omitted if there
+is no selected thread (for example, when the selected inferior is not running,
+and therefore has no threads) or if a @var{thread-id} argument was passed to
+the command.
 
 @end table
 

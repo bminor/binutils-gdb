@@ -652,8 +652,10 @@ const struct powerpc_operand powerpc_operands[] =
 #define SH6_MASK ((0x1f << 11) | (1 << 1))
   { 0x3f, PPC_OPSHIFT_INV, insert_sh6, extract_sh6, 0 },
 
-  /* The SH field of the tlbwe instruction, which is optional.  */
+  /* The SH field of some variants of the tlbre and tlbwe
+     instructions, and the ELEV field of the e_sc instruction.  */
 #define SHO SH6 + 1
+#define ELEV SHO
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The SI field in a D form instruction.  */
@@ -5874,7 +5876,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mcrxr",	X(31,512),	XBFRARB_MASK, COM,	POWER7,		{BF}},
 
 {"lbdcbx",	X(31,514),	X_MASK,      E200Z4,	0,		{RT, RA, RB}},
-{"lbdx",	X(31,515),	X_MASK,	     E500MC,	0,		{RT, RA, RB}},
+{"lbdx",	X(31,515),	X_MASK,	 E500MC|E200Z4,	0,		{RT, RA, RB}},
 
 {"bblels",	X(31,518),	X_MASK,	     PPCBRLK,	0,		{0}},
 
@@ -5925,7 +5927,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"maskir.",	XRC(31,541,1),	X_MASK,	     M601,	0,		{RA, RS, RB}},
 
 {"lhdcbx",	X(31,546),	X_MASK,      E200Z4,	0,		{RT, RA, RB}},
-{"lhdx",	X(31,547),	X_MASK,	     E500MC,	0,		{RT, RA, RB}},
+{"lhdx",	X(31,547),	X_MASK,	 E500MC|E200Z4,	0,		{RT, RA, RB}},
 
 {"lvtrx",	X(31,549),	X_MASK,	     E6500,	0,		{VD, RA0, RB}},
 
@@ -5949,7 +5951,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mcrxrx",	X(31,576),     XBFRARB_MASK, POWER9,	0,		{BF}},
 
 {"lwdcbx",	X(31,578),	X_MASK,      E200Z4,	0,		{RT, RA, RB}},
-{"lwdx",	X(31,579),	X_MASK,	     E500MC,	0,		{RT, RA, RB}},
+{"lwdx",	X(31,579),	X_MASK,	 E500MC|E200Z4,	0,		{RT, RA, RB}},
 
 {"lvtlx",	X(31,581),	X_MASK,	     E6500,	0,		{VD, RA0, RB}},
 
@@ -6000,7 +6002,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lfdux",	X(31,631),	X_MASK,	     COM,	PPCEFS,		{FRT, RAS, RB}},
 
 {"stbdcbx",	X(31,642),	X_MASK,      E200Z4,	0,		{RS, RA, RB}},
-{"stbdx",	X(31,643),	X_MASK,	     E500MC,	0,		{RS, RA, RB}},
+{"stbdx",	X(31,643),	X_MASK,	 E500MC|E200Z4,	0,		{RS, RA, RB}},
 
 {"stvlx",	X(31,647),	X_MASK,	     CELL,	0,		{VS, RA0, RB}},
 {"stbfcmux",	APU(31,647,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
@@ -6038,7 +6040,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"sre.",	XRC(31,665,1),	X_MASK,	     M601,	0,		{RA, RS, RB}},
 
 {"sthdcbx",	X(31,674),	X_MASK,      E200Z4,	0,		{RS, RA, RB}},
-{"sthdx",	X(31,675),	X_MASK,	     E500MC,	0,		{RS, RA, RB}},
+{"sthdx",	X(31,675),	X_MASK,	 E500MC|E200Z4,	0,		{RS, RA, RB}},
 
 {"stvfrx",	X(31,677),	X_MASK,	     E6500,	0,		{VS, RA0, RB}},
 
@@ -6056,7 +6058,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"sriq.",	XRC(31,696,1),	X_MASK,	     M601,	0,		{RA, RS, SH}},
 
 {"stwdcbx",	X(31,706),	X_MASK,	     E200Z4,	0,		{RS, RA, RB}},
-{"stwdx",	X(31,707),	X_MASK,	     E500MC,	0,		{RS, RA, RB}},
+{"stwdx",	X(31,707),	X_MASK,	 E500MC|E200Z4,	0,		{RS, RA, RB}},
 
 {"stvflx",	X(31,709),	X_MASK,	     E6500,	0,		{VS, RA0, RB}},
 
@@ -7109,6 +7111,7 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"se_rfci",	C(9),		C_MASK,		PPCVLE,	0,		{}},
 {"se_rfdi",	C(10),		C_MASK,		PPCVLE,	0,		{}},
 {"se_rfmci",	C(11),		C_MASK, PPCRFMCI|PPCVLE, 0,		{}},
+{"se_rfgi",	C(12),		C_MASK,		PPCVLE,	0,		{}},
 {"se_not",	SE_R(0,2),	SE_R_MASK,	PPCVLE,	0,		{RX}},
 {"se_neg",	SE_R(0,3),	SE_R_MASK,	PPCVLE,	0,		{RX}},
 {"se_mflr",	SE_R(0,8),	SE_R_MASK,	PPCVLE,	0,		{RX}},
@@ -7266,6 +7269,7 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"e_btl",	EBD15(30,8,BO32T,1), EBD15_MASK, PPCVLE, 0,		{BI32,B15}},
 
 {"e_cmph",	X(31,14),	X_MASK,		PPCVLE,	0,		{CRD, RA, RB}},
+{"e_sc",	X(31,36),	XRTRA_MASK,	PPCVLE,	0,		{ELEV}},
 {"e_cmphl",	X(31,46),	X_MASK,		PPCVLE,	0,		{CRD, RA, RB}},
 {"e_crandc",	XL(31,129),	XL_MASK,	PPCVLE,	0,		{BT, BA, BB}},
 {"e_crnand",	XL(31,225),	XL_MASK,	PPCVLE,	0,		{BT, BA, BB}},

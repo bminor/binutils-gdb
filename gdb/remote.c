@@ -13799,11 +13799,10 @@ show_remote_cmd (char *args, int from_tty)
 {
   /* We can't just use cmd_show_list here, because we want to skip
      the redundant "show remote Z-packet" and the legacy aliases.  */
-  struct cleanup *showlist_chain;
   struct cmd_list_element *list = remote_show_cmdlist;
   struct ui_out *uiout = current_uiout;
 
-  showlist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "showlist");
+  ui_out_emit_tuple tuple_emitter (uiout, "showlist");
   for (; list != NULL; list = list->next)
     if (strcmp (list->name, "Z-packet") == 0)
       continue;
@@ -13813,8 +13812,7 @@ show_remote_cmd (char *args, int from_tty)
       continue;
     else
       {
-	struct cleanup *option_chain
-	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+	ui_out_emit_tuple option_emitter (uiout, "option");
 
 	uiout->field_string ("name", list->name);
 	uiout->text (":  ");
@@ -13822,12 +13820,7 @@ show_remote_cmd (char *args, int from_tty)
 	  do_show_command (NULL, from_tty, list);
 	else
 	  cmd_func (list, NULL, from_tty);
-	/* Close the tuple.  */
-	do_cleanups (option_chain);
       }
-
-  /* Close the tuple.  */
-  do_cleanups (showlist_chain);
 }
 
 

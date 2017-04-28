@@ -12224,14 +12224,14 @@ static char *ada_exception_catchpoint_cond_string (const char *excep_string);
    when symbols change.  */
 
 /* An instance of this type is used to represent an Ada catchpoint
-   breakpoint location.  It includes a "struct bp_location" as a kind
-   of base class; users downcast to "struct bp_location *" when
-   needed.  */
+   breakpoint location.  */
 
-struct ada_catchpoint_location
+class ada_catchpoint_location : public bp_location
 {
-  /* The base class.  */
-  struct bp_location base;
+public:
+  ada_catchpoint_location (const bp_location_ops *ops, breakpoint *owner)
+    : bp_location (ops, owner)
+  {}
 
   /* The condition that checks whether the exception that was raised
      is the specific exception the user specified on catchpoint
@@ -12347,12 +12347,7 @@ static struct bp_location *
 allocate_location_exception (enum ada_exception_catchpoint_kind ex,
 			     struct breakpoint *self)
 {
-  struct ada_catchpoint_location *loc;
-
-  loc = new ada_catchpoint_location ();
-  init_bp_location (&loc->base, &ada_catchpoint_location_ops, self);
-  loc->excep_cond_expr = NULL;
-  return &loc->base;
+  return new ada_catchpoint_location (&ada_catchpoint_location_ops, self);
 }
 
 /* Implement the RE_SET method in the breakpoint_ops structure for all

@@ -68,7 +68,6 @@ static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
-static void restore_current_thread (ptid_t);
 
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
@@ -719,26 +718,25 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
 {
   struct thread_info *tp;
   int num = 0;
-  struct cleanup *cleanup_chain;
   int current_thread = -1;
 
   update_thread_list ();
 
-  cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "thread-ids");
+  {
+    ui_out_emit_tuple tuple_emitter (uiout, "thread-ids");
 
-  for (tp = thread_list; tp; tp = tp->next)
-    {
-      if (tp->state == THREAD_EXITED)
-	continue;
+    for (tp = thread_list; tp; tp = tp->next)
+      {
+	if (tp->state == THREAD_EXITED)
+	  continue;
 
-      if (tp->ptid == inferior_ptid)
-	current_thread = tp->global_num;
+	if (tp->ptid == inferior_ptid)
+	  current_thread = tp->global_num;
 
-      num++;
-      uiout->field_int ("thread-id", tp->global_num);
-    }
-
-  do_cleanups (cleanup_chain);
+	num++;
+	uiout->field_int ("thread-id", tp->global_num);
+      }
+  }
 
   if (current_thread != -1)
     uiout->field_int ("current-thread-id", current_thread);
@@ -1300,24 +1298,15 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 
   ALL_THREADS_BY_INFERIOR (inf, tp)
     {
-      struct cleanup *chain2;
       int core;
 
       if (!should_print_thread (requested_threads, default_inf_num,
 				global_ids, pid, tp))
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      if (uiout->is_mi_like_p ())
-	{
-	  /* Compatibility.  */
-	  if (tp->ptid == current_ptid)
-	    uiout->text ("* ");
-	  else
-	    uiout->text ("  ");
-	}
-      else
+      if (!uiout->is_mi_like_p ())
 	{
 	  if (tp->ptid == current_ptid)
 	    uiout->field_string ("current", "*");
@@ -1395,8 +1384,6 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
       core = target_core_of_thread (tp->ptid);
       if (uiout->is_mi_like_p () && core != -1)
 	uiout->field_int ("core", core);
-
-      do_cleanups (chain2);
     }
 
   /* Restores the current thread and the frame selected before
@@ -1458,10 +1445,8 @@ info_threads_command (char *arg, int from_tty)
 void
 switch_to_thread_no_regs (struct thread_info *thread)
 {
-  struct inferior *inf;
+  struct inferior *inf = thread->inf;
 
-  inf = find_inferior_ptid (thread->ptid);
-  gdb_assert (inf != NULL);
   set_current_program_space (inf->pspace);
   set_current_inferior (inf);
 
@@ -1469,45 +1454,50 @@ switch_to_thread_no_regs (struct thread_info *thread)
   stop_pc = ~(CORE_ADDR) 0;
 }
 
-/* Switch from one thread to another.  */
+/* Switch to no thread selected.  */
 
-void
-switch_to_thread (ptid_t ptid)
+static void
+switch_to_no_thread ()
 {
-  /* Switch the program space as well, if we can infer it from the now
-     current thread.  Otherwise, it's up to the caller to select the
-     space it wants.  */
-  if (ptid != null_ptid)
-    {
-      struct inferior *inf;
-
-      inf = find_inferior_ptid (ptid);
-      gdb_assert (inf != NULL);
-      set_current_program_space (inf->pspace);
-      set_current_inferior (inf);
-    }
-
-  if (ptid == inferior_ptid)
+  if (inferior_ptid == null_ptid)
     return;
 
-  inferior_ptid = ptid;
+  inferior_ptid = null_ptid;
+  reinit_frame_cache ();
+  stop_pc = ~(CORE_ADDR) 0;
+}
+
+/* Switch from one thread to another.  */
+
+static void
+switch_to_thread (thread_info *thr)
+{
+  gdb_assert (thr != NULL);
+
+  if (inferior_ptid == thr->ptid)
+    return;
+
+  switch_to_thread_no_regs (thr);
+
   reinit_frame_cache ();
 
   /* We don't check for is_stopped, because we're called at times
      while in the TARGET_RUNNING state, e.g., while handling an
      internal event.  */
-  if (inferior_ptid != null_ptid
-      && !is_exited (ptid)
-      && !is_executing (ptid))
-    stop_pc = regcache_read_pc (get_thread_regcache (ptid));
-  else
-    stop_pc = ~(CORE_ADDR) 0;
+  if (thr->state != THREAD_EXITED
+      && !thr->executing)
+    stop_pc = regcache_read_pc (get_thread_regcache (thr->ptid));
 }
 
-static void
-restore_current_thread (ptid_t ptid)
+/* See gdbthread.h.  */
+
+void
+switch_to_thread (ptid_t ptid)
 {
-  switch_to_thread (ptid);
+  if (ptid == null_ptid)
+    switch_to_no_thread ();
+  else
+    switch_to_thread (find_thread_ptid (ptid));
 }
 
 static void
@@ -1578,8 +1568,7 @@ struct current_thread_cleanup
   struct frame_id selected_frame_id;
   int selected_frame_level;
   int was_stopped;
-  int inf_id;
-  int was_removable;
+  inferior *inf;
 };
 
 static void
@@ -1595,12 +1584,12 @@ do_restore_current_thread_cleanup (void *arg)
       /* If the previously selected thread belonged to a process that has
 	 in the mean time exited (or killed, detached, etc.), then don't revert
 	 back to it, but instead simply drop back to no thread selected.  */
-      && find_inferior_ptid (old->thread->ptid) != NULL)
-    restore_current_thread (old->thread->ptid);
+      && old->inf->pid != 0)
+    switch_to_thread (old->thread);
   else
     {
-      restore_current_thread (null_ptid);
-      set_current_inferior (find_inferior_id (old->inf_id));
+      switch_to_no_thread ();
+      set_current_inferior (old->inf);
     }
 
   /* The running state of the originally selected thread may have
@@ -1619,15 +1608,11 @@ static void
 restore_current_thread_cleanup_dtor (void *arg)
 {
   struct current_thread_cleanup *old = (struct current_thread_cleanup *) arg;
-  struct thread_info *tp;
-  struct inferior *inf;
 
   if (old->thread != NULL)
     old->thread->decref ();
 
-  inf = find_inferior_id (old->inf_id);
-  if (inf != NULL)
-    inf->removable = old->was_removable;
+  old->inf->decref ();
   xfree (old);
 }
 
@@ -1637,8 +1622,7 @@ make_cleanup_restore_current_thread (void)
   struct current_thread_cleanup *old = XNEW (struct current_thread_cleanup);
 
   old->thread = NULL;
-  old->inf_id = current_inferior ()->num;
-  old->was_removable = current_inferior ()->removable;
+  old->inf = current_inferior ();
 
   if (inferior_ptid != null_ptid)
     {
@@ -1670,7 +1654,7 @@ make_cleanup_restore_current_thread (void)
       old->thread = tp;
     }
 
-  current_inferior ()->removable = 0;
+  old->inf->incref ();
 
   return make_cleanup_dtor (do_restore_current_thread_cleanup, old,
 			    restore_current_thread_cleanup_dtor);

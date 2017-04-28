@@ -1,3 +1,440 @@
+2017-04-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* gdbarch.sh: New gdbarch method execute_dwarf_cfa_vendor_op.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Made the
+	visibility external.
+	(execute_cfa_program): Call execute_dwarf_cfa_vendor_op for CFI
+	between DW_CFA_lo_user and DW_CFA_high_user inclusive.
+	(enum cfa_how_kind): Move to ...
+	(struct dwarf2_frame_state_reg_info): Likewise.
+	(struct dwarf2_frame_state): Likewise.
+	* dwarf2-frame.h: ... here.
+	(dwarf2_frame_state_alloc_regs): New declaration.
+	* sparc-tdep.c (sparc_execute_dwarf_cfa_vendor_op): New function.
+	(sparc32_gdbarch_init): Register execute_dwarf_cfa_vendor_op hook.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Use
+	regcache_raw_read_unsigned.
+	(xtensa_pseudo_register_write): Likewise.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* nds32-tdep.c (nds32_pseudo_register_read): Abort on errors.
+	(nds32_pseudo_register_write): Likewise.
+
+2017-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (struct regcache) <readonly_p>: Change its type
+	to bool.
+	(regcache_xmalloc_1): Update parameter type and callers update.
+
+2017-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call
+	set_gdbarch_wchar_bit.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/poison.h [!HAVE_IS_TRIVIALLY_COPYABLE] (IsRelocatable)
+	(BothAreRelocatable, memcopy, memmove): Don't define.
+	* common/traits.h (__has_feature, HAVE_IS_TRIVIALLY_COPYABLE): New
+	macros.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h: Include "common/poison.h".
+	* common/function-view.h: (Not, Or, Requires): Move to traits.h
+	and adjust.
+	* common/poison.h: New file.
+	* common/traits.h: Include <type_traits>.
+	(Not, Or, Requires): New, moved from common/function-view.h.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.h (struct breakpoint): In-class initialize all
+	fields.  Make boolean fields "bool".
+	* breakpoint.c (init_raw_breakpoint_without_location): Remove
+	memset call and initializations no longer necessary.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (pt_btrace_insn_flags): Change parameter type to
+	reference.
+	(pt_btrace_insn): New function.
+	(ftrace_add_pt): Remove memset call and use pt_btrace_insn.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_catchpoint_location): Now a "class".  Remove
+	"base" field and inherit from "bp_location" instead.  Add
+	non-default ctor.
+	(allocate_location_exception): Use new non-default ctor.
+	* breakpoint.c (get_first_locp_gte_addr): Remove memset call.
+	(init_bp_location): Convert to ...
+	(bp_location::bp_location): ... this new ctor, and remove memset
+	call.
+	(base_breakpoint_allocate_location): Use the new non-default ctor.
+	* breakpoint.h (bp_location): Now a class.  Declare default and
+	non-default ctors.  In-class initialize all members.
+	(init_bp_location): Remove declaration.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/enum-flags.h (enum_flags): Don't implement copy ctor and
+	assignment operator.
+
+2017-04-24  Yao Qi  <yao.qi@linaro.org>
+
+	* doublest.c (convert_doublest_to_floatformat): Call
+	floatformat_totalsize_bytes.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Use
+	ui_out_emit_list.
+	* stack.c (print_frame): Use ui_out_emit_list.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Use
+	ui_out_emit_list.
+	* mi/mi-main.c (print_one_inferior)
+	(mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_register_values, mi_cmd_list_features)
+	(mi_cmd_list_target_features, mi_cmd_trace_frame_collected): Use
+	ui_out_emit_list.
+	* mi/mi-interp.c (mi_on_normal_stop_1): Use ui_out_emit_list.
+	(mi_output_solib_attribs): Use ui_out_emit_list,
+	ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_list.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_list_args, list_args_or_locals): Use
+	ui_out_emit_list.
+	* disasm.c (do_assembly_only): Use ui_out_emit_list.
+	* breakpoint.c (print_solib_event, output_thread_groups): Use
+	ui_out_emit_list.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (print_variable_or_computed): Use ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_tuple.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Use ui_out_emit_tuple.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (tvariables_info_1)
+	(print_one_static_tracepoint_marker): Use ui_out_emit_tuple.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (print_frame_arg): Use ui_out_emit_tuple,
+	annotate_arg_emitter.
+	* breakpoint.c (print_mention_watchpoint)
+	(print_mention_masked_watchpoint): Use ui_out_emit_tuple.
+	* annotate.h (struct annotate_arg_emitter): New.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* record-btrace.c (record_btrace_insn_history)
+	(record_btrace_insn_history_range, record_btrace_call_history)
+	(record_btrace_call_history_range): Use ui_out_emit_tuple.
+	* thread.c (do_captured_list_thread_ids, print_thread_info_1): Use
+	ui_out_emit_tuple.
+	* stack.c (print_frame_info): Use ui_out_emit_tuple.
+	* solib.c (info_sharedlibrary_command): Use ui_out_emit_tuple.
+	* skip.c (skip_info): Use ui_out_emit_tuple.
+	* remote.c (show_remote_cmd): Use ui_out_emit_tuple.
+	* progspace.c (print_program_space): Use ui_out_emit_tuple.
+	* probe.c (info_probes_for_ops): Use ui_out_emit_tuple.
+	* osdata.c (info_osdata): Use ui_out_emit_tuple.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Use
+	ui_out_emit_tuple.
+	* mi/mi-main.c (print_one_inferior, list_available_thread_groups)
+	(output_register, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_load_progress)
+	(mi_cmd_trace_frame_collected): Use ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children, varobj_update_one):
+	Use ui_out_emit_tuple.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_args): Use
+	ui_out_emit_tuple.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions)
+	(mi_cmd_info_gdb_mi_command): Use ui_out_emit_tuple.
+	* linux-thread-db.c (info_auto_load_libthread_db): Use
+	ui_out_emit_tuple.
+	* inferior.c (print_inferior): Use ui_out_emit_tuple.
+	* gdb_bfd.c (print_one_bfd): Use ui_out_emit_tuple.
+	* disasm.c (do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly): Use ui_out_emit_tuple.
+	* cp-abi.c (list_cp_abis): Use ui_out_emit_tuple.
+	* cli/cli-setshow.c (cmd_show_list): Use ui_out_emit_tuple.
+	* breakpoint.c (print_one_breakpoint_location)
+	(print_one_breakpoint): Use ui_out_emit_tuple.
+	* auto-load.c (print_script, info_auto_load_cmd): Use
+	ui_out_emit_tuple.
+	* ada-tasks.c (print_ada_task_info): Use ui_out_emit_tuple.
+
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* thread.c (print_thread_info_1): Remove dead code.
+
+2017-04-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* aarch64-tdep.c (selftests::aarch64_process_record_test): Make it #if
+	GDB_SELF_TEST.
+	* arm-tdep.c (selftests::arm_record_test): Likewise.
+
+2017-04-21  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_restore): Remove argument 2.  Replace
+	argument 3 with regcache.  Get register status from
+	src->register_status and get register contents from
+	register_buffer (src, regnum).
+	(regcache_cpy): Update.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (thread): Add missing closing parenthesis in
+	comment.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
+	* common/refcounted-object.h: New file.
+	* gdbthread.h: Include "common/refcounted-object.h".
+	(thread_info): Inherit from refcounted_object and add comments.
+	(thread_info::incref, thread_info::decref)
+	(thread_info::m_refcount): Delete.
+	(thread_info::deletable): Use the refcounted_object::refcount()
+	method.
+	* inferior.c (current_inferior_): Add comment.
+	(set_current_inferior): Increment/decrement refcounts.
+	(prune_inferiors, remove_inferior_command): Skip inferiors marked
+	not-deletable instead of comparing with the current inferior.
+	(initialize_inferiors): Increment the initial inferior's refcount.
+	* inferior.h (struct inferior): Forward declare.
+	Include "common/refcounted-object.h".
+	(current_inferior, set_current_inferior): Move declaration to
+	before struct inferior's definition, and fix comment.
+	(inferior): Inherit from refcounted_object.  Add comments.
+	* thread.c (switch_to_thread_no_regs): Reference the thread's
+	inferior pointer directly instead of doing a ptid lookup.
+	(switch_to_no_thread): New function.
+	(switch_to_thread(thread_info *)): New function, factored out
+	from ...
+	(switch_to_thread(ptid_t)): ... this.
+	(restore_current_thread): Delete.
+	(current_thread_cleanup): Remove 'inf_id' and 'was_removable'
+	fields, and add 'inf' field.
+	(do_restore_current_thread_cleanup): Check whether old->inf is
+	alive instead of looking up an inferior by ptid.  Use
+	switch_to_thread and switch_to_no_thread.
+	(restore_current_thread_cleanup_dtor): Use old->inf directly
+	instead of lookup up an inferior by id.  Decref the inferior.
+	Don't restore 'removable'.
+	(make_cleanup_restore_current_thread): Same the inferior pointer
+	in old, instead of the inferior number.  Incref the inferior.
+	Don't save/clear 'removable'.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/scoped_restore-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add scoped_restore-selftests.o.
+	* common/scoped_restore.h (scoped_restore_base): Make "class".
+	(scoped_restore_base::release): New public method.
+	(scoped_restore_base::scoped_restore_base): New protected ctor.
+	(scoped_restore_base::m_saved_var): New protected field.
+	(scoped_restore_tmpl::scoped_restore_tmpl(T*)): Initialize the
+	scoped_restore_base base class instead of m_saved_var directly.
+	(scoped_restore_tmpl::scoped_restore_tmpl(T*, T2)): Likewise.
+	(scoped_restore_tmpl::scoped_restore_tmpl(const
+	scoped_restore_tmpl<T>&)): Likewise.
+	(scoped_restore_tmpl::~scoped_restore_tmpl): Use the saved_var
+	method.
+	(scoped_restore_tmpl::saved_var): New method.
+	(scoped_restore_tmpl::m_saved_var): Delete.
+	* inferior.h (inferior::detaching): Now a bool.
+	* infrun.c (prepare_for_detach): Use a scoped_restore instead of a
+	cleanup.
+	* unittests/scoped_restore-selftests.c: New file.
+
+2017-04-19  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS, SUBDIR_UNITTESTS_OBS):
+	Re-sort in alphabetic order.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (obstack_xml_printf): Delete.
+	* xml-support.h (obstack_xml_printf): Delete.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (gdb_xml_parser) <use_dtd, dtd_name, parse,
+	vdebug, verror, body_text, start_element, end_element, name,
+	user_data, set_is_xinclude, set_error, expat_parser>: New methods.
+	<name, user_data, expat_parser, scopes, error, last_line, dtd_name,
+	is_xinclude>: Make private and add m_ prefix.
+	(gdb_xml_parser::body_text): New method, based on ...
+	(gdb_xml_body_text): ... this.  Adjust.
+	(gdb_xml_parser::vdebug): New method, based on ...
+	(gdb_xml_debug): ... this.  Adjust.
+	(gdb_xml_parser::verror): New method, based on ...
+	(gdb_xml_error): ... this.  Adjust.
+	(gdb_xml_parser::start_element): New method, based on ...
+	(gdb_xml_start_element): ... this.  Adjust.
+	(gdb_xml_start_element_wrapper): Defer to
+	gdb_xml_parser::start_element and gdb_xml_parser::set_error.
+	(gdb_xml_parser::end_element): New method, based on ...
+	(gdb_xml_end_element_wrapper): ... this.  Adjust.
+	(gdb_xml_parser::~gdb_xml_parser): Adjust.
+	(gdb_xml_parser::gdb_xml_parser): Adjust to field renames.
+	(gdb_xml_parser::use_dtd): New method, based on ...
+	(gdb_xml_use_dtd): ... this.  Adjust.
+	(gdb_xml_parser::parse): New method, based on ...
+	(gdb_xml_parse): ... this.  Adjust.
+	(gdb_xml_parse_quick): Adjust to call the parser's parse method.
+	(xinclude_start_include): Adjust to call the parser's name method.
+	(xml_xinclude_default, xml_xinclude_start_doctype)
+	(xml_xinclude_end_doctype): Adjust to call the parser's user_data
+	method.
+	(xml_process_xincludes): Adjust to call parser methods.
+	* xml-support.h (gdb_xml_use_dtd, gdb_xml_parse): Delete
+	declarations.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* tracefile-tfile.c (tfile_write_tdesc): Adjust to use
+	gdb::optional<std::string>.
+	* xml-support.c: Include <string>.
+	(scope_level::scope_level(scope_level &&))
+	(scope_level::~scope_level): Delete.
+	(scope_level::body): Now a std::string.
+	(gdb_xml_body_text, gdb_xml_end_element): Adjust.
+	(xinclude_parsing_data::xinclude_parsing_data): Add 'output'
+	parameter.
+	(xinclude_parsing_data::~xinclude_parsing_data): Delete.
+	(xinclude_parsing_data::output): Now a std::string reference.
+	(xinclude_start_include): Adjust.
+	(xml_xinclude_default): Adjust.
+	(xml_process_xincludes): Add 'output' parameter, and return bool.
+	* xml-support.h (xml_process_xincludes): Add 'output' parameter,
+	and return bool.
+	* xml-tdesc.c: Include <unordered_map> and <string>.
+	(tdesc_xml_cache): Delete.
+	(tdesc_xml_cache_s): Delete.
+	(xml_cache): Now an std::unordered_map.
+	(tdesc_parse_xml): Adjust to use std::string and unordered_map.
+	(target_fetch_description_xml): Change return type to
+	gdb::optional<std::string>, and adjust.
+	* xml-tdesc.h: Include "common/gdb_optional.h" and <string>.
+	(target_fetch_description_xml): Change return type to
+	gdb::optional<std::string>.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/optional-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add optional-selftests.o.
+	* unittests/optional-selftests.c: New file.
+	* unittests/optional/assignment/1.cc: New file.
+	* unittests/optional/assignment/2.cc: New file.
+	* unittests/optional/assignment/3.cc: New file.
+	* unittests/optional/assignment/4.cc: New file.
+	* unittests/optional/assignment/5.cc: New file.
+	* unittests/optional/assignment/6.cc: New file.
+	* unittests/optional/assignment/7.cc: New file.
+	* unittests/optional/cons/copy.cc: New file.
+	* unittests/optional/cons/default.cc: New file.
+	* unittests/optional/cons/move.cc: New file.
+	* unittests/optional/cons/value.cc: New file.
+	* unittests/optional/in_place.cc: New file.
+	* unittests/optional/observers/1.cc: New file.
+	* unittests/optional/observers/2.cc: New file.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_optional.h: Include common/traits.h.
+	(in_place_t): New type.
+	(in_place): New constexpr variable.
+	(optional::optional): Remove member initialization of
+	m_instantiated.
+	(optional::optional(in_place_t...)): New constructor.
+	(optional::~optional): Use reset.
+	(optional::optional(const optional&)): New.
+	(optional::optional(const optional&&)): New.
+	(optional::optional(T &)): New.
+	(optional::optional(T &&)): New.
+	(operator::operator=(const optional &)): New.
+	(operator::operator=(optional &&)): New.
+	(operator::operator= (const T &))
+	(operator::operator= (T &&))
+	(operator::emplace (Args &&... args)): Return a T&.  Use reset.
+	(operator::reset): New.
+	(operator::m_instantiated):: Add in-class initializer.
+	* common/traits.h: Include <type_traits>.
+	(struct And): New types.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c: Include <vector>.
+	(scope_level::scope_level(const gdb_xml_element *))
+	(scope_level::scope_level(scope_level&&)): New.
+	(scope_level::~scope_level): New.
+	(scope_level_s): Delete.
+	(gdb_xml_parser::scopes): Now a std::vector.
+	(gdb_xml_body_text, gdb_xml_start_element, gdb_xml_end_element):
+	Use std::vector.
+	(gdb_xml_parser::~gdb_xml_parser): Remove now unnecessary
+	scope cleanup code.
+	(gdb_xml_parser::gdb_xml_parser): Remove explicit initialization
+	of the scopes member.  Use std::vector::emplace_back.
+
+2017-04-18  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (gdb_xml_parser): Add ctor/dtor.  Make is_xinclude
+	a bool.
+	(gdb_xml_end_element): Change type of first parameter.
+	(gdb_xml_cleanup): Rename to ...
+	(gdb_xml_parser::~gdb_xml_parser): ... this.
+	(gdb_xml_create_parser_and_cleanup): Delete with ...
+	(gdb_xml_parser::gdb_xml_parser): ... creation parts factored out
+	to this new ctor.
+	(gdb_xml_parse_quick): Create a local gdb_xml_parser instead of
+	using gdb_xml_create_parser_and_cleanup.
+	(xinclude_parsing_data): Add ctor/dtor.
+	(xml_xinclude_cleanup): Delete.
+	(xml_process_xincludes): Create a local xinclude_parsing_data
+	instead of heap-allocating one.  Create a local gdb_xml_parser
+	instead of heap-allocating one with
+	gdb_xml_create_parser_and_cleanup.
+
+2017-04-18  John Baldwin  <jhb@FreeBSD.org>
+
+	PR threads/20743
+	* fbsd-nat.c (resume_one_thread_cb): Remove.
+	(resume_all_threads_cb): Remove.
+	(fbsd_resume): Use ALL_NON_EXITED_THREADS instead of
+	iterate_over_threads.
+
+2017-04-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2017-04-17  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.0 branch created (725bf5cf125783c2a7ca4ab63d3768e220bab2db):
+	* version.in: Bump version to 8.0.50.DATE-git.
+
+2017-04-13  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21385
+	* windows-nat.c (windows_create_inferior): Declare 'allargs'
+	independently of the host, and fix build breakage on Cygwin.
+
 2017-04-13  Pedro Alves  <palves@redhat.com>
 
 	* inferior.c (free_inferior): Convert to ...

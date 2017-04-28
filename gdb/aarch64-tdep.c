@@ -2977,7 +2977,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
   set_gdbarch_char_signed (gdbarch, 0);
-  set_gdbarch_wchar_bit (gdbarch, 64);
   set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
@@ -3040,10 +3039,12 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      paddress (gdbarch, tdep->lowest_pc));
 }
 
+#if GDB_SELF_TEST
 namespace selftests
 {
 static void aarch64_process_record_test (void);
 }
+#endif
 
 /* Suppress warning from -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_aarch64_tdep;

@@ -1090,14 +1090,12 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 
   ALL_SO_LIBS (so)
     {
-      struct cleanup *lib_cleanup;
-
       if (! so->so_name[0])
 	continue;
       if (pattern && ! re_exec (so->so_name))
 	continue;
 
-      lib_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "lib");
+      ui_out_emit_tuple tuple_emitter (uiout, "lib");
 
       if (so->addr_high != 0)
 	{
@@ -1123,8 +1121,6 @@ info_sharedlibrary_command (char *pattern, int from_tty)
       uiout->field_string ("name", so->so_name);
 
       uiout->text ("\n");
-
-      do_cleanups (lib_cleanup);
     }
 
   do_cleanups (table_cleanup);

@@ -25,6 +25,7 @@ struct frame_info;
 struct minimal_symbol;
 struct type;
 struct gdbarch_info;
+struct dwarf2_frame_state;
 
 template <size_t bp_size, const gdb_byte *break_insn>
 struct bp_manipulation
@@ -129,6 +130,11 @@ CORE_ADDR default_adjust_dwarf2_addr (CORE_ADDR pc);
 /* Do nothing default implementation of gdbarch_adjust_dwarf2_line.  */
 
 CORE_ADDR default_adjust_dwarf2_line (CORE_ADDR addr, int rel);
+
+/* Default DWARF vendor CFI handler.  */
+
+bool default_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+					  struct dwarf2_frame_state *fs);
 
 /* Version of cannot_fetch_register() / cannot_store_register() that
    always fails.  */

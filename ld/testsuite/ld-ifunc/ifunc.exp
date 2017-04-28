@@ -234,6 +234,10 @@ if ![ld_link $ld "tmpdir/libtest-2.so" "-shared tmpdir/test-2.o"] {
     fail "Could not link libtest-2.so"
     set fails [expr $fails + 1]
 }
+if ![ld_link $ld "tmpdir/libtest-2-now.so" "-shared -z now tmpdir/test-2.o"] {
+    fail "Could not link libtest-2-now.so"
+    set fails [expr $fails + 1]
+}
 
 if { $fails == 0 } {
   pass "Building ifunc binaries"
@@ -304,6 +308,10 @@ if {[contains_ifunc_symbol tmpdir/test-1] != 0} {
 }
 if {[contains_ifunc_symbol tmpdir/libtest-2.so] != 0} {
     fail "libtest-2.so contains IFUNC symbols"
+    set fails [expr $fails + 1]
+}
+if {[contains_ifunc_symbol tmpdir/libtest-2-now.so] != 0} {
+    fail "libtest-2-now.so contains IFUNC symbols"
     set fails [expr $fails + 1]
 }
 

@@ -660,8 +660,7 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 		  compare_positive_ints))
     {
       struct collect_cores_data data;
-      struct cleanup *back_to
-	= make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       uiout->field_fmt ("id", "i%d", inferior->num);
       uiout->field_string ("type", "process");
@@ -687,8 +686,7 @@ print_one_inferior (struct inferior *inferior, void *xdata)
       if (!VEC_empty (int, data.cores))
 	{
 	  int *b, *e;
-	  struct cleanup *back_to_2 =
-	    make_cleanup_ui_out_list_begin_end (uiout, "cores");
+	  ui_out_emit_list list_emitter (uiout, "cores");
 
 	  qsort (VEC_address (int, data.cores),
 		 VEC_length (int, data.cores), sizeof (int),
@@ -700,14 +698,10 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 
 	  for (; b != e; ++b)
 	    uiout->field_int (NULL, *b);
-
-	  do_cleanups (back_to_2);
 	}
 
       if (top_data->recurse)
 	print_thread_info (uiout, NULL, inferior->pid);
-
-      do_cleanups (back_to);
     }
 
   return 0;
@@ -831,8 +825,6 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 		    ix_items, item);
        ix_items++)
     {
-      struct cleanup *back_to;
-
       const char *pid = get_osdata_column (item, "pid");
       const char *cmd = get_osdata_column (item, "command");
       const char *user = get_osdata_column (item, "user");
@@ -849,7 +841,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 	continue;
 
 
-      back_to = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       uiout->field_fmt ("id", "%s", pid);
       uiout->field_string ("type", "process");
@@ -875,21 +867,16 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 		   VEC_iterate (osdata_item_s, children, ix_child, child);
 		   ++ix_child)
 		{
-		  struct cleanup *back_to_2 =
-		    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+		  ui_out_emit_tuple tuple_emitter (uiout, NULL);
 		  const char *tid = get_osdata_column (child, "tid");
 		  const char *tcore = get_osdata_column (child, "core");
 
 		  uiout->field_string ("id", tid);
 		  if (tcore)
 		    uiout->field_string ("core", tcore);
-
-		  do_cleanups (back_to_2);
 		}
 	    }
 	}
-
-      do_cleanups (back_to);
     }
 
   do_cleanups (cleanup);
@@ -1004,7 +991,6 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   int regnum, numregs;
   int i;
-  struct cleanup *cleanup;
 
   /* Note that the test for a valid register must include checking the
      gdbarch_register_name because gdbarch_num_regs may be allocated
@@ -1016,7 +1002,7 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
   gdbarch = get_current_arch ();
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
-  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");
+  ui_out_emit_list list_emitter (uiout, "register-names");
 
   if (argc == 0)		/* No args, just do all the regs.  */
     {
@@ -1045,7 +1031,6 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
       else
 	uiout->field_string (NULL, gdbarch_register_name (gdbarch, regnum));
     }
-  do_cleanups (cleanup);
 }
 
 void
@@ -1167,7 +1152,6 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   struct gdbarch *gdbarch;
   int regnum, numregs, format;
   int i;
-  struct cleanup *list_cleanup;
   int skip_unavailable = 0;
   int oind = 0;
   enum opt
@@ -1214,7 +1198,7 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   gdbarch = get_frame_arch (frame);
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
-  list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
+  ui_out_emit_list list_emitter (uiout, "register-values");
 
   if (argc - oind == 1)
     {
@@ -1244,7 +1228,6 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
       else
 	error (_("bad register number"));
     }
-  do_cleanups (list_cleanup);
 }
 
 /* Output one register REGNUM's contents in the desired FORMAT.  If
@@ -1257,13 +1240,12 @@ output_register (struct frame_info *frame, int regnum, int format,
 {
   struct ui_out *uiout = current_uiout;
   struct value *val = value_of_register (regnum, frame);
-  struct cleanup *tuple_cleanup;
   struct value_print_options opts;
 
   if (skip_unavailable && !value_entirely_available (val))
     return;
 
-  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
   uiout->field_int ("number", regnum);
 
   if (format == 'N')
@@ -1280,8 +1262,6 @@ output_register (struct frame_info *frame, int regnum, int format,
 	     value_embedded_offset (val), 0,
 	     &stb, 0, val, &opts, current_language);
   uiout->field_stream ("value", stb);
-
-  do_cleanups (tuple_cleanup);
 }
 
 /* Write given values into registers. The registers and values are
@@ -1520,11 +1500,10 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
       {
 	int col;
 	int col_byte;
-	struct cleanup *cleanup_tuple;
 	struct cleanup *cleanup_list_data;
 	struct value_print_options opts;
 
-	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	uiout->field_core_addr ("addr", gdbarch, addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr +
 	   row_byte); */
@@ -1564,7 +1543,6 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	      }
 	    uiout->field_stream ("ascii", stream);
 	  }
-	do_cleanups (cleanup_tuple);
       }
     do_cleanups (cleanup_list);
   }
@@ -1629,7 +1607,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
        VEC_iterate (memory_read_result_s, result, ix, read_result);
        ++ix)
     {
-      struct cleanup *t = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
       char *data, *p;
       int i;
       int alloc_len;
@@ -1649,7 +1627,6 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
 	}
       uiout->field_string ("contents", data);
       xfree (data);
-      do_cleanups (t);
     }
   do_cleanups (cleanups);
 }
@@ -1846,10 +1823,9 @@ mi_cmd_list_features (const char *command, char **argv, int argc)
 {
   if (argc == 0)
     {
-      struct cleanup *cleanup = NULL;
       struct ui_out *uiout = current_uiout;
 
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
+      ui_out_emit_list list_emitter (uiout, "features");
       uiout->field_string (NULL, "frozen-varobjs");
       uiout->field_string (NULL, "pending-breakpoints");
       uiout->field_string (NULL, "thread-info");
@@ -1864,7 +1840,6 @@ mi_cmd_list_features (const char *command, char **argv, int argc)
       if (ext_lang_initialized_p (get_ext_lang_defn (EXT_LANG_PYTHON)))
 	uiout->field_string (NULL, "python");
 
-      do_cleanups (cleanup);
       return;
     }
 
@@ -1876,15 +1851,13 @@ mi_cmd_list_target_features (const char *command, char **argv, int argc)
 {
   if (argc == 0)
     {
-      struct cleanup *cleanup = NULL;
       struct ui_out *uiout = current_uiout;
 
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
+      ui_out_emit_list list_emitter (uiout, "features");
       if (mi_async_p ())
 	uiout->field_string (NULL, "async");
       if (target_can_execute_reverse)
 	uiout->field_string (NULL, "reverse");
-      do_cleanups (cleanup);
       return;
     }
 
@@ -2385,19 +2358,18 @@ mi_load_progress (const char *section_name,
 		 strcmp (previous_sect_name, section_name) : 1);
   if (new_section)
     {
-      struct cleanup *cleanup_tuple;
-
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
       if (current_token)
 	fputs_unfiltered (current_token, mi->raw_stdout);
       fputs_unfiltered ("+download", mi->raw_stdout);
-      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      uiout->field_string ("section", section_name);
-      uiout->field_int ("section-size", total_section);
-      uiout->field_int ("total-size", grand_total);
-      do_cleanups (cleanup_tuple);
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	uiout->field_string ("section", section_name);
+	uiout->field_int ("section-size", total_section);
+	uiout->field_int ("total-size", grand_total);
+      }
       mi_out_put (uiout, mi->raw_stdout);
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
@@ -2406,19 +2378,18 @@ mi_load_progress (const char *section_name,
   steady_clock::time_point time_now = steady_clock::now ();
   if (time_now - last_update > milliseconds (500))
     {
-      struct cleanup *cleanup_tuple;
-
       last_update = time_now;
       if (current_token)
 	fputs_unfiltered (current_token, mi->raw_stdout);
       fputs_unfiltered ("+download", mi->raw_stdout);
-      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      uiout->field_string ("section", section_name);
-      uiout->field_int ("section-sent", sent_so_far);
-      uiout->field_int ("section-size", total_section);
-      uiout->field_int ("total-sent", total_sent);
-      uiout->field_int ("total-size", grand_total);
-      do_cleanups (cleanup_tuple);
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	uiout->field_string ("section", section_name);
+	uiout->field_int ("section-sent", sent_so_far);
+	uiout->field_int ("section-size", total_section);
+	uiout->field_int ("total-sent", total_sent);
+	uiout->field_int ("total-size", grand_total);
+      }
       mi_out_put (uiout, mi->raw_stdout);
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
@@ -2674,7 +2645,6 @@ mi_cmd_ada_task_info (const char *command, char **argv, int argc)
 static void
 print_variable_or_computed (const char *expression, enum print_values values)
 {
-  struct cleanup *old_chain;
   struct value *val;
   struct type *type;
   struct ui_out *uiout = current_uiout;
@@ -2688,9 +2658,9 @@ print_variable_or_computed (const char *expression, enum print_values values)
   else
     val = evaluate_expression (expr.get ());
 
-  old_chain = make_cleanup (null_cleanup, NULL);
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
   if (values != PRINT_NO_VALUES)
-    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+    tuple_emitter.emplace (uiout, nullptr);
   uiout->field_string ("name", expression);
 
   switch (values)
@@ -2722,8 +2692,6 @@ print_variable_or_computed (const char *expression, enum print_values values)
       }
       break;
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Implement the "-trace-frame-collected" command.  */
@@ -2808,12 +2776,9 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Explicitly wholly collected variables.  */
   {
-    struct cleanup *list_cleanup;
     int i;
 
-    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout,
-						       "explicit-variables");
-
+    ui_out_emit_list list_emitter (uiout, "explicit-variables");
     const std::vector<std::string> &wholly_collected
       = clist->wholly_collected ();
     for (size_t i = 0; i < wholly_collected.size (); i++)
@@ -2821,19 +2786,14 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	const std::string &str = wholly_collected[i];
 	print_variable_or_computed (str.c_str (), var_print_values);
       }
-
-    do_cleanups (list_cleanup);
   }
 
   /* Computed expressions.  */
   {
-    struct cleanup *list_cleanup;
     char *p;
     int i;
 
-    list_cleanup
-      = make_cleanup_ui_out_list_begin_end (uiout,
-					    "computed-expressions");
+    ui_out_emit_list list_emitter (uiout, "computed-expressions");
 
     const std::vector<std::string> &computed = clist->computed ();
     for (size_t i = 0; i < computed.size (); i++)
@@ -2841,8 +2801,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	const std::string &str = computed[i];
 	print_variable_or_computed (str.c_str (), comp_print_values);
       }
-
-    do_cleanups (list_cleanup);
   }
 
   /* Registers.  Given pseudo-registers, and that some architectures
@@ -2850,13 +2808,12 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
      the trace frame info, but instead consult the register cache for
      register availability.  */
   {
-    struct cleanup *list_cleanup;
     struct frame_info *frame;
     struct gdbarch *gdbarch;
     int regnum;
     int numregs;
 
-    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "registers");
+    ui_out_emit_list list_emitter (uiout, "registers");
 
     frame = get_selected_frame (NULL);
     gdbarch = get_frame_arch (frame);
@@ -2870,8 +2827,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
 	output_register (frame, regnum, registers_format, 1);
       }
-
-    do_cleanups (list_cleanup);
   }
 
   /* Trace state variables.  */
@@ -2888,12 +2843,11 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
     for (i = 0; VEC_iterate (int, tinfo->tvars, i, tvar); i++)
       {
-	struct cleanup *cleanup_child;
 	struct trace_state_variable *tsv;
 
 	tsv = find_trace_state_variable_by_number (tvar);
 
-	cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
 	if (tsv != NULL)
 	  {
@@ -2911,8 +2865,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	    uiout->field_skip ("name");
 	    uiout->field_skip ("current");
 	  }
-
-	do_cleanups (cleanup_child);
       }
 
     do_cleanups (list_cleanup);

@@ -546,6 +546,21 @@ extract_rrange (unsigned long long  insn,
 }
 
 static unsigned long long
+insert_r13el (unsigned long long insn,
+	      long long int value,
+	      const char **errmsg)
+{
+  if (value != 13)
+    {
+      *errmsg = _("Invalid register number, should be fp");
+      return insn;
+    }
+
+  insn |= 0x02;
+  return insn;
+}
+
+static unsigned long long
 insert_fpel (unsigned long long  insn,
 	     long long           value,
 	     const char **       errmsg)
@@ -1876,7 +1891,10 @@ const struct arc_operand arc_operands[] =
 #define RRANGE_EL	(ZA + 1)
   { 4, 0, 0, ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK | ARC_OPERAND_TRUNCATE,
     insert_rrange, extract_rrange},
-#define FP_EL		(RRANGE_EL + 1)
+#define R13_EL		(RRANGE_EL + 1)
+  { 1, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_IGNORE | ARC_OPERAND_NCHK,
+    insert_r13el, extract_rrange },
+#define FP_EL		(R13_EL + 1)
   { 1, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_IGNORE | ARC_OPERAND_NCHK,
     insert_fpel, extract_fpel },
 #define BLINK_EL	(FP_EL + 1)

@@ -3808,11 +3808,10 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	    }
 
 	  /* Print the Compilation Unit's name and a header.  */
-	  if (directory_table == NULL)
-	    {
-	      printf (_("CU: %s:\n"), file_table[0].name);
-	      printf (_("File name                            Line number    Starting address\n"));
-	    }
+	  if (file_table == NULL)
+	    ;
+	  else if (directory_table == NULL)
+	    printf (_("CU: %s:\n"), file_table[0].name);
 	  else
 	    {
 	      unsigned int ix = file_table[0].directory_index;
@@ -3836,10 +3835,9 @@ display_debug_lines_decoded (struct dwarf_section *section,
 		printf (_("CU: %s/%s:\n"), directory, file_table[0].name);
 	      else
 		printf ("%s:\n", file_table[0].name);
-
-	      printf (_("File name                            Line number    Starting address\n"));
 	    }
 
+	  printf (_("File name                            Line number    Starting address\n"));
 	  saved_linfo = linfo;
 	}
 

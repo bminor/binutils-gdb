@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "floatformat.h"
 #include "frame.h"
@@ -1536,6 +1537,34 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
 }
 
+/* Implement the execute_dwarf_cfa_vendor_op method.  */
+
+static bool
+sparc_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+				   struct dwarf2_frame_state *fs)
+{
+  /* Only DW_CFA_GNU_window_save is expected on SPARC.  */
+  if (op != DW_CFA_GNU_window_save)
+    return false;
+
+  uint64_t reg;
+  int size = register_size (gdbarch, 0);
+
+  dwarf2_frame_state_alloc_regs (&fs->regs, 32);
+  for (reg = 8; reg < 16; reg++)
+    {
+      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
+      fs->regs.reg[reg].loc.reg = reg + 16;
+    }
+  for (reg = 16; reg < 32; reg++)
+    {
+      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
+      fs->regs.reg[reg].loc.offset = (reg - 16) * size;
+    }
+
+  return true;
+}
+
 
 /* The SPARC Architecture doesn't have hardware single-step support,
    and most operating systems don't implement it either, so we provide
@@ -1801,6 +1830,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_frame_set_init_reg (gdbarch, sparc32_dwarf2_frame_init_reg);
+  /* Register DWARF vendor CFI handler.  */
+  set_gdbarch_execute_dwarf_cfa_vendor_op (gdbarch,
+					   sparc_execute_dwarf_cfa_vendor_op);
   /* FIXME: kettenis/20050423: Don't enable the unwinder until the
      StackGhost issues have been resolved.  */
 

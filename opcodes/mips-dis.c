@@ -2434,6 +2434,9 @@ The following MIPS specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _("\n\
+  no-aliases               Use canonical instruction forms.\n"));
+
+  fprintf (stream, _("\n\
   msa                      Recognize MSA instructions.\n"));
 
   fprintf (stream, _("\n\

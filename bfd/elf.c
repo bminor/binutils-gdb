@@ -3538,17 +3538,39 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
 }
 
-/* Return the section which RELOC_SEC applies to.  */
+/* Given NAME, the name of a relocation section stripped of its
+   .rel/.rela prefix, return the section in ABFD to which the
+   relocations apply.  */
 
 asection *
-_bfd_elf_get_reloc_section (asection *reloc_sec)
+_bfd_elf_plt_get_reloc_section (bfd *abfd, const char *name)
+{
+  /* If a target needs .got.plt section, relocations in rela.plt/rel.plt
+     section likely apply to .got.plt or .got section.  */
+  if (get_elf_backend_data (abfd)->want_got_plt
+      && strcmp (name, ".plt") == 0)
+    {
+      asection *sec;
+
+      name = ".got.plt";
+      sec = bfd_get_section_by_name (abfd, name);
+      if (sec != NULL)
+	return sec;
+      name = ".got";
+    }
+
+  return bfd_get_section_by_name (abfd, name);
+}
+
+/* Return the section to which RELOC_SEC applies.  */
+
+static asection *
+elf_get_reloc_section (asection *reloc_sec)
 {
   const char *name;
   unsigned int type;
   bfd *abfd;
-
-  if (reloc_sec == NULL)
-    return NULL;
+  const struct elf_backend_data *bed;
 
   type = elf_section_data (reloc_sec)->this_hdr.sh_type;
   if (type != SHT_REL && type != SHT_RELA)
@@ -3556,28 +3578,15 @@ _bfd_elf_get_reloc_section (asection *reloc_sec)
 
   /* We look up the section the relocs apply to by name.  */
   name = reloc_sec->name;
-  if (type == SHT_REL)
-    name += 4;
-  else
-    name += 5;
+  if (strncmp (name, ".rel", 4) != 0)
+    return NULL;
+  name += 4;
+  if (type == SHT_RELA && *name++ != 'a')
+    return NULL;
 
-  /* If a target needs .got.plt section, relocations in rela.plt/rel.plt
-     section apply to .got.plt section.  */
   abfd = reloc_sec->owner;
-  if (get_elf_backend_data (abfd)->want_got_plt
-      && strcmp (name, ".plt") == 0)
-    {
-      /* .got.plt is a linker created input section.  It may be mapped
-	 to some other output section.  Try two likely sections.  */
-      name = ".got.plt";
-      reloc_sec = bfd_get_section_by_name (abfd, name);
-      if (reloc_sec != NULL)
-	return reloc_sec;
-      name = ".got";
-    }
-
-  reloc_sec = bfd_get_section_by_name (abfd, name);
-  return reloc_sec;
+  bed = get_elf_backend_data (abfd);
+  return bed->get_reloc_section (abfd, name);
 }
 
 /* Assign all ELF section numbers.  The dummy first section is handled here
@@ -3841,7 +3850,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 
-	  s = get_elf_backend_data (abfd)->get_reloc_section (sec);
+	  s = elf_get_reloc_section (sec);
 	  if (s != NULL)
 	    {
 	      d->this_hdr.sh_info = elf_section_data (s)->this_idx;
@@ -11235,9 +11244,11 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
 
 /* It is only used by x86-64 so far.
    ??? This repeats *COM* id of zero.  sec->id is supposed to be unique,
-   but current usage would allow all of _bfd_std_section to be zero.  t*/
+   but current usage would allow all of _bfd_std_section to be zero.  */
+static const asymbol lcomm_sym
+  = GLOBAL_SYM_INIT ("LARGE_COMMON", &_bfd_elf_large_com_section);
 asection _bfd_elf_large_com_section
-  = BFD_FAKE_SECTION (_bfd_elf_large_com_section, NULL,
+  = BFD_FAKE_SECTION (_bfd_elf_large_com_section, &lcomm_sym,
 		      "LARGE_COMMON", 0, SEC_IS_COMMON);
 
 void

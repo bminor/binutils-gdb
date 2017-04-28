@@ -506,15 +506,12 @@ tvariables_info_1 (void)
 
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     {
-      struct cleanup *back_to2;
       const char *c;
-      char *name;
 
-      back_to2 = make_cleanup_ui_out_tuple_begin_end (uiout, "variable");
+      ui_out_emit_tuple tuple_emitter (uiout, "variable");
 
-      name = concat ("$", tsv->name, (char *) NULL);
-      make_cleanup (xfree, name);
-      uiout->field_string ("name", name);
+      std::string name = std::string ("$") + tsv->name;
+      uiout->field_string ("name", name.c_str ());
       uiout->field_string ("initial", plongest (tsv->initial_value));
 
       if (tsv->value_known)
@@ -533,8 +530,6 @@ tvariables_info_1 (void)
       if (c)
         uiout->field_string ("current", c);
       uiout->text ("\n");
-
-      do_cleanups (back_to2);
     }
 
   do_cleanups (back_to);
@@ -3841,7 +3836,6 @@ print_one_static_tracepoint_marker (int count,
   char wrap_indent[80];
   char extra_field_indent[80];
   struct ui_out *uiout = current_uiout;
-  struct cleanup *bkpt_chain;
   VEC(breakpoint_p) *tracepoints;
 
   struct symtab_and_line sal;
@@ -3852,7 +3846,7 @@ print_one_static_tracepoint_marker (int count,
 
   tracepoints = static_tracepoints_here (marker->address);
 
-  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "marker");
+  ui_out_emit_tuple tuple_emitter (uiout, "marker");
 
   /* A counter field to help readability.  This is not a stable
      identifier!  */
@@ -3919,24 +3913,22 @@ print_one_static_tracepoint_marker (int count,
 
   if (!VEC_empty (breakpoint_p, tracepoints))
     {
-      struct cleanup *cleanup_chain;
       int ix;
       struct breakpoint *b;
 
-      cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "tracepoints-at");
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, "tracepoints-at");
 
-      uiout->text (extra_field_indent);
-      uiout->text (_("Probed by static tracepoints: "));
-      for (ix = 0; VEC_iterate(breakpoint_p, tracepoints, ix, b); ix++)
-	{
-	  if (ix > 0)
-	    uiout->text (", ");
-	  uiout->text ("#");
-	  uiout->field_int ("tracepoint-id", b->number);
-	}
-
-      do_cleanups (cleanup_chain);
+	uiout->text (extra_field_indent);
+	uiout->text (_("Probed by static tracepoints: "));
+	for (ix = 0; VEC_iterate(breakpoint_p, tracepoints, ix, b); ix++)
+	  {
+	    if (ix > 0)
+	      uiout->text (", ");
+	    uiout->text ("#");
+	    uiout->field_int ("tracepoint-id", b->number);
+	  }
+      }
 
       if (uiout->is_mi_like_p ())
 	uiout->field_int ("number-of-tracepoints",
@@ -3945,8 +3937,6 @@ print_one_static_tracepoint_marker (int count,
 	uiout->text ("\n");
     }
   VEC_free (breakpoint_p, tracepoints);
-
-  do_cleanups (bkpt_chain);
 }
 
 static void

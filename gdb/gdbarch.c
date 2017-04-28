@@ -275,6 +275,7 @@ struct gdbarch
   int have_nonsteppable_watchpoint;
   gdbarch_address_class_type_flags_ftype *address_class_type_flags;
   gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name;
+  gdbarch_execute_dwarf_cfa_vendor_op_ftype *execute_dwarf_cfa_vendor_op;
   gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags;
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
@@ -436,6 +437,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->make_symbol_special = default_make_symbol_special;
   gdbarch->adjust_dwarf2_addr = default_adjust_dwarf2_addr;
   gdbarch->adjust_dwarf2_line = default_adjust_dwarf2_line;
+  gdbarch->execute_dwarf_cfa_vendor_op = default_execute_dwarf_cfa_vendor_op;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
   gdbarch->skip_permanent_breakpoint = default_skip_permanent_breakpoint;
   gdbarch->displaced_step_hw_singlestep = default_displaced_step_hw_singlestep;
@@ -634,6 +636,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
   /* Skip verify of address_class_type_flags, has predicate.  */
   /* Skip verify of address_class_type_flags_to_name, has predicate.  */
+  /* Skip verify of execute_dwarf_cfa_vendor_op, invalid_p == 0 */
   /* Skip verify of address_class_name_to_type_flags, has predicate.  */
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate.  */
@@ -974,6 +977,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elfcore_write_linux_prpsinfo = <%s>\n",
                       host_address_to_string (gdbarch->elfcore_write_linux_prpsinfo));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: execute_dwarf_cfa_vendor_op = <%s>\n",
+                      host_address_to_string (gdbarch->execute_dwarf_cfa_vendor_op));
   fprintf_unfiltered (file,
                       "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
                       host_address_to_string (gdbarch->fast_tracepoint_valid_at));
@@ -3521,6 +3527,23 @@ set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch,
                                               gdbarch_address_class_type_flags_to_name_ftype address_class_type_flags_to_name)
 {
   gdbarch->address_class_type_flags_to_name = address_class_type_flags_to_name;
+}
+
+bool
+gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op, struct dwarf2_frame_state *fs)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->execute_dwarf_cfa_vendor_op != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_execute_dwarf_cfa_vendor_op called\n");
+  return gdbarch->execute_dwarf_cfa_vendor_op (gdbarch, op, fs);
+}
+
+void
+set_gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch,
+                                         gdbarch_execute_dwarf_cfa_vendor_op_ftype execute_dwarf_cfa_vendor_op)
+{
+  gdbarch->execute_dwarf_cfa_vendor_op = execute_dwarf_cfa_vendor_op;
 }
 
 int

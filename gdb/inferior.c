@@ -50,7 +50,9 @@ static int highest_inferior_num;
    `set print inferior-events'.  */
 static int print_inferior_events = 0;
 
-/* The Current Inferior.  */
+/* The Current Inferior.  This is a strong reference.  I.e., whenever
+   an inferior is the current inferior, its refcount is
+   incremented.  */
 static struct inferior *current_inferior_ = NULL;
 
 struct inferior*
@@ -65,6 +67,8 @@ set_current_inferior (struct inferior *inf)
   /* There's always an inferior.  */
   gdb_assert (inf != NULL);
 
+  inf->incref ();
+  current_inferior_->decref ();
   current_inferior_ = inf;
 }
 
@@ -483,13 +487,12 @@ void
 prune_inferiors (void)
 {
   struct inferior *ss, **ss_link;
-  struct inferior *current = current_inferior ();
 
   ss = inferior_list;
   ss_link = &inferior_list;
   while (ss)
     {
-      if (ss == current
+      if (!ss->deletable ()
 	  || !ss->removable
 	  || ss->pid != 0)
 	{
@@ -584,12 +587,10 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
   uiout->table_body ();
   for (inf = inferior_list; inf; inf = inf->next)
     {
-      struct cleanup *chain2;
-
       if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       if (inf == current_inferior ())
 	uiout->field_string ("current", "*");
@@ -620,7 +621,6 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 	}
 
       uiout->text ("\n");
-      do_cleanups (chain2);
     }
 
   do_cleanups (old_chain);
@@ -774,7 +774,7 @@ remove_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      if (inf == current_inferior ())
+      if (!inf->deletable ())
 	{
 	  warning (_("Can not remove current inferior %d."), num);
 	  continue;
@@ -1017,6 +1017,7 @@ initialize_inferiors (void)
      that.  Do this after initialize_progspace, due to the
      current_program_space reference.  */
   current_inferior_ = add_inferior (0);
+  current_inferior_->incref ();
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;
   /* The architecture will be initialized shortly, by

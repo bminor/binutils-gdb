@@ -30,4 +30,6 @@ if [is_elf_format] {
     run_dump_test "mips16-pcrel"
     run_dump_test "mips16-extend-noinsn"
     run_dump_test "mips16-extend-insn"
+    run_dump_test "mips16-alias"
+    run_dump_test "mips16-noalias"
 }
