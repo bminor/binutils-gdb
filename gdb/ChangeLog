@@ -1,5 +1,15 @@
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* solib-aix.c (struct lm_info_aix): Initialize fields in-class.
+	<filename, member_name>: Change type to std::string.
+	(solib_aix_new_lm_info, solib_aix_xfree_lm_info): Remove.
+	(library_list_start_library): Allocate lm_info_aix with new.
+	(solib_aix_free_library_list, solib_aix_free_so): Free with delete.
+	(solib_aix_current_sos): Adapt to std::string, copy lm_info_aix
+	with copy constructor.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* solist.h (struct lm_info): Remove.
 	(struct lm_info_base): New class.
 	(struct so_list) <lm_info>: Change type to lm_info_base *.

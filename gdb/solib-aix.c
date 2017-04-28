@@ -39,52 +39,27 @@ struct lm_info_aix : public lm_info_base
      for the main executable, this is usually a shared library (which,
      on AIX, is an archive library file, created using the "ar"
      command).  */
-  char *filename;
+  std::string filename;
 
   /* The name of the shared object file with the actual dynamic
-     loading dependency.  This may be NULL (Eg. main executable).  */
-  char *member_name;
+     loading dependency.  This may be empty (Eg. main executable).  */
+  std::string member_name;
 
   /* The address in inferior memory where the text section got mapped.  */
-  CORE_ADDR text_addr;
+  CORE_ADDR text_addr = 0;
 
   /* The size of the text section, obtained via the loader data.  */
-  ULONGEST text_size;
+  ULONGEST text_size = 0;
 
   /* The address in inferior memory where the data section got mapped.  */
-  CORE_ADDR data_addr;
+  CORE_ADDR data_addr = 0;
 
   /* The size of the data section, obtained via the loader data.  */
-  ULONGEST data_size;
+  ULONGEST data_size = 0;
 };
 
 typedef lm_info_aix *lm_info_aix_p;
 DEF_VEC_P(lm_info_aix_p);
-
-/* Return a deep copy of the given struct lm_info object.  */
-
-static lm_info_aix *
-solib_aix_new_lm_info (lm_info_aix *info)
-{
-  lm_info_aix *result = XCNEW (lm_info_aix);
-
-  memcpy (result, info, sizeof (lm_info_aix));
-  result->filename = xstrdup (info->filename);
-  if (info->member_name != NULL)
-    result->member_name = xstrdup (info->member_name);
-
-  return result;
-}
-
-/* Free the memory allocated for the given lm_info.  */
-
-static void
-solib_aix_xfree_lm_info (lm_info_aix *info)
-{
-  xfree (info->filename);
-  xfree (info->member_name);
-  xfree (info);
-}
 
 /* This module's per-inferior data.  */
 
@@ -162,7 +137,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    VEC (gdb_xml_value_s) *attributes)
 {
   VEC (lm_info_aix_p) **list = (VEC (lm_info_aix_p) **) user_data;
-  lm_info_aix *item = XCNEW (lm_info_aix);
+  lm_info_aix *item = new lm_info_aix;
   struct gdb_xml_value *attr;
 
   attr = xml_find_attribute (attributes, "name");
@@ -215,7 +190,8 @@ solib_aix_free_library_list (void *p)
     fprintf_unfiltered (gdb_stdlog, "DEBUG: solib_aix_free_library_list\n");
 
   for (ix = 0; VEC_iterate (lm_info_aix_p, *result, ix, info); ix++)
-    solib_aix_xfree_lm_info (info);
+    delete info;
+
   VEC_free (lm_info_aix_p, *result);
   *result = NULL;
 }
@@ -443,10 +419,13 @@ solib_aix_relocate_section_addresses (struct so_list *so,
 static void
 solib_aix_free_so (struct so_list *so)
 {
+  lm_info_aix *li = (lm_info_aix *) so->lm_info;
+
   if (solib_aix_debug)
     fprintf_unfiltered (gdb_stdlog, "DEBUG: solib_aix_free_so (%s)\n",
 			so->so_name);
-  solib_aix_xfree_lm_info ((lm_info_aix *) so->lm_info);
+
+  delete li;
 }
 
 /* Implement the "clear_solib" target_so_ops method.  */
@@ -568,15 +547,15 @@ solib_aix_current_sos (void)
   for (ix = 1; VEC_iterate (lm_info_aix_p, library_list, ix, info); ix++)
     {
       struct so_list *new_solib = XCNEW (struct so_list);
-      char *so_name;
+      std::string so_name;
 
-      if (info->member_name == NULL)
+      if (info->member_name.empty ())
 	{
 	 /* INFO->FILENAME is probably not an archive, but rather
 	    a shared object.  Unusual, but it should be possible
 	    to link a program against a shared object directory,
 	    without having to put it in an archive first.  */
-	 so_name = xstrdup (info->filename);
+	 so_name = info->filename;
 	}
       else
 	{
@@ -584,14 +563,15 @@ solib_aix_current_sos (void)
 	    is a member of an archive.  Create a synthetic so_name
 	    that follows the same convention as AIX's ldd tool
 	    (Eg: "/lib/libc.a(shr.o)").  */
-	 so_name = xstrprintf ("%s(%s)", info->filename, info->member_name);
+	 so_name = string_printf ("%s(%s)", info->filename.c_str (),
+				  info->member_name.c_str ());
 	}
-      strncpy (new_solib->so_original_name, so_name,
+      strncpy (new_solib->so_original_name, so_name.c_str (),
 	       SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       memcpy (new_solib->so_name, new_solib->so_original_name,
 	      SO_NAME_MAX_PATH_SIZE);
-      new_solib->lm_info = solib_aix_new_lm_info (info);
+      new_solib->lm_info = new lm_info_aix (*info);
 
       /* Add it to the list.  */
       if (!start)
