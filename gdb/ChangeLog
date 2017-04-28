@@ -1,5 +1,10 @@
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
+	* mips-linux-nat.c (mips_linux_new_thread): Use ptid method
+	lwp instead of ptid_get_lwp.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
 	* mips-linux-nat.c (mips_linux_new_thread): Get lwpid from
 	lwp_info instead of getting from inferior_ptid.
 
