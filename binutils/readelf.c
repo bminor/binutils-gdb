@@ -10178,8 +10178,9 @@ process_version_sections (FILE * file)
 		printf (_("  Index: %d  Cnt: %d  "),
 			ent.vd_ndx, ent.vd_cnt);
 
-		/* Check for overflow.  */
-		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart))
+		/* Check for overflow and underflow.  */
+		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart)
+		    || (vstart + ent.vd_aux < vstart))
 		  break;
 
 		vstart += ent.vd_aux;

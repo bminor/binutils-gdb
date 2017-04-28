@@ -1,5 +1,11 @@
 2017-04-28  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21437
+	* readelf.c (process_version_sections): Check for underflow when
+	computing the start address of the auxillary version data.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21438
 	* dwarf.c (process_extended_line_op): Do not assume that the
 	string extracted from the section is NUL terminated.
