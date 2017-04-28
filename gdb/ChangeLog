@@ -1,5 +1,9 @@
 2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* solib-frv.c (struct lm_info_frv): Fix indentation.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* solib-dsbt.c (struct lm_info_dsbt): Add destructor, initialize
 	map field.
 	(dsbt_current_sos): Allocate lm_info_dsbt with new.

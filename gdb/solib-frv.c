@@ -203,29 +203,30 @@ struct ext_link_map
 /* Link map info to include in an allocated so_list entry.  */
 
 struct lm_info_frv : public lm_info_base
-  {
-    /* The loadmap, digested into an easier to use form.  */
-    struct int_elf32_fdpic_loadmap *map;
-    /* The GOT address for this link map entry.  */
-    CORE_ADDR got_value;
-    /* The link map address, needed for frv_fetch_objfile_link_map().  */
-    CORE_ADDR lm_addr;
+{
 
-    /* Cached dynamic symbol table and dynamic relocs initialized and
-       used only by find_canonical_descriptor_in_load_object().
+  /* The loadmap, digested into an easier to use form.  */
+  struct int_elf32_fdpic_loadmap *map;
+  /* The GOT address for this link map entry.  */
+  CORE_ADDR got_value;
+  /* The link map address, needed for frv_fetch_objfile_link_map().  */
+  CORE_ADDR lm_addr;
 
-       Note: kevinb/2004-02-26: It appears that calls to
-       bfd_canonicalize_dynamic_reloc() will use the same symbols as
-       those supplied to the first call to this function.  Therefore,
-       it's important to NOT free the asymbol ** data structure
-       supplied to the first call.  Thus the caching of the dynamic
-       symbols (dyn_syms) is critical for correct operation.  The
-       caching of the dynamic relocations could be dispensed with.  */
-    asymbol **dyn_syms;
-    arelent **dyn_relocs;
-    int dyn_reloc_count;	/* Number of dynamic relocs.  */
+  /* Cached dynamic symbol table and dynamic relocs initialized and
+     used only by find_canonical_descriptor_in_load_object().
 
-  };
+     Note: kevinb/2004-02-26: It appears that calls to
+     bfd_canonicalize_dynamic_reloc() will use the same symbols as
+     those supplied to the first call to this function.  Therefore,
+     it's important to NOT free the asymbol ** data structure
+     supplied to the first call.  Thus the caching of the dynamic
+     symbols (dyn_syms) is critical for correct operation.  The
+     caching of the dynamic relocations could be dispensed with.  */
+  asymbol **dyn_syms;
+  arelent **dyn_relocs;
+  int dyn_reloc_count;	/* Number of dynamic relocs.  */
+
+};
 
 /* The load map, got value, etc. are not available from the chain
    of loaded shared objects.  ``main_executable_lm_info'' provides
