@@ -472,15 +472,20 @@ process_extended_line_op (unsigned char * data,
       printf (_("  Entry\tDir\tTime\tSize\tName\n"));
       printf ("   %d\t", ++state_machine_regs.last_file_entry);
 
-      name = data;
-      data += strnlen ((char *) data, end - data) + 1;
-      printf ("%s\t", dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
-      data += bytes_read;
-      printf ("%s\t", dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
-      data += bytes_read;
-      printf ("%s\t", dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
-      data += bytes_read;
-      printf ("%s\n\n", name);
+      {
+	size_t l;
+
+	name = data;
+	l = strnlen ((char *) data, end - data);
+	data += len + 1;
+	printf ("%s\t", dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+	data += bytes_read;
+	printf ("%s\t", dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+	data += bytes_read;
+	printf ("%s\t", dwarf_vmatoa ("u", read_uleb128 (data, & bytes_read, end)));
+	data += bytes_read;
+	printf ("%.*s\n\n", (int) l, name);
+      }
 
       if (((unsigned int) (data - orig_data) != len) || data == end)
 	warn (_("DW_LNE_define_file: Bad opcode length\n"));
@@ -597,36 +602,56 @@ static const unsigned char *
 fetch_indirect_string (dwarf_vma offset)
 {
   struct dwarf_section *section = &debug_displays [str].section;
+  const unsigned char * ret;
 
   if (section->start == NULL)
     return (const unsigned char *) _("<no .debug_str section>");
 
-  if (offset > section->size)
+  if (offset >= section->size)
     {
       warn (_("DW_FORM_strp offset too big: %s\n"),
 	    dwarf_vmatoa ("x", offset));
       return (const unsigned char *) _("<offset is too big>");
     }
 
-  return (const unsigned char *) section->start + offset;
+  ret = section->start + offset;
+  /* Unfortunately we cannot rely upon the .debug_str section ending with a
+     NUL byte.  Since our caller is expecting to receive a well formed C
+     string we test for the lack of a terminating byte here.  */
+  if (strnlen ((const char *) ret, section->size - offset)
+      == section->size - offset)
+    ret = (const unsigned char *)
+      _("<no NUL byte at end of .debug_str section>");
+
+  return ret; 
 }
 
 static const unsigned char *
 fetch_indirect_line_string (dwarf_vma offset)
 {
   struct dwarf_section *section = &debug_displays [line_str].section;
+  const unsigned char * ret;
 
   if (section->start == NULL)
     return (const unsigned char *) _("<no .debug_line_str section>");
 
-  if (offset > section->size)
+  if (offset >= section->size)
     {
       warn (_("DW_FORM_line_strp offset too big: %s\n"),
 	    dwarf_vmatoa ("x", offset));
       return (const unsigned char *) _("<offset is too big>");
     }
 
-  return (const unsigned char *) section->start + offset;
+  ret = section->start + offset;
+  /* Unfortunately we cannot rely upon the .debug_line_str section ending
+     with a NUL byte.  Since our caller is expecting to receive a well formed
+     C string we test for the lack of a terminating byte here.  */
+  if (strnlen ((const char *) ret, section->size - offset)
+      == section->size - offset)
+    ret = (const unsigned char *)
+      _("<no NUL byte at end of .debug_line_str section>");
+
+  return ret;
 }
 
 static const char *
@@ -639,6 +664,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   struct dwarf_section *str_section = &debug_displays [str_sec_idx].section;
   dwarf_vma index_offset = idx * offset_size;
   dwarf_vma str_offset;
+  const char * ret;
 
   if (index_section->start == NULL)
     return (dwo ? _("<no .debug_str_offsets.dwo section>")
@@ -646,7 +672,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
 
   if (this_set != NULL)
     index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
-  if (index_offset > index_section->size)
+  if (index_offset >= index_section->size)
     {
       warn (_("DW_FORM_GNU_str_index offset too big: %s\n"),
 	    dwarf_vmatoa ("x", index_offset));
@@ -659,14 +685,22 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
 
   str_offset = byte_get (index_section->start + index_offset, offset_size);
   str_offset -= str_section->address;
-  if (str_offset > str_section->size)
+  if (str_offset >= str_section->size)
     {
       warn (_("DW_FORM_GNU_str_index indirect offset too big: %s\n"),
 	    dwarf_vmatoa ("x", str_offset));
       return _("<indirect index offset is too big>");
     }
 
-  return (const char *) str_section->start + str_offset;
+  ret = (const char *) str_section->start + str_offset;
+  /* Unfortunately we cannot rely upon str_section ending with a NUL byte.
+     Since our caller is expecting to receive a well formed C string we test
+     for the lack of a terminating byte here.  */
+  if (strnlen (ret, str_section->size - str_offset)
+      == str_section->size - str_offset)
+    ret = (const char *) _("<no NUL byte at end of section>");
+
+  return ret;
 }
 
 static const char *

@@ -1,3 +1,13 @@
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21438
+	* dwarf.c (process_extended_line_op): Do not assume that the
+	string extracted from the section is NUL terminated.
+	(fetch_indirect_string): If the string retrieved from the section
+	is not NUL terminated, return an error message.
+	(fetch_indirect_line_string): Likewise.
+	(fetch_indexed_string): Likewise.
+
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21433
