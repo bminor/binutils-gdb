@@ -268,24 +268,6 @@ make_cleanup_value_free (struct value *value)
   return make_cleanup (do_value_free, value);
 }
 
-/* Helper for make_cleanup_free_so.  */
-
-static void
-do_free_so (void *arg)
-{
-  struct so_list *so = (struct so_list *) arg;
-
-  free_so (so);
-}
-
-/* Make cleanup handler calling free_so for SO.  */
-
-struct cleanup *
-make_cleanup_free_so (struct so_list *so)
-{
-  return make_cleanup (do_free_so, so);
-}
-
 /* Helper function for make_cleanup_clear_parser_state.  */
 
 static void

@@ -179,6 +179,18 @@ struct target_so_ops
 /* Free the memory associated with a (so_list *).  */
 void free_so (struct so_list *so);
 
+/* A deleter that calls free_so.  */
+struct so_deleter
+{
+  void operator() (struct so_list *so) const
+  {
+    free_so (so);
+  }
+};
+
+/* A unique pointer to a so_list.  */
+typedef std::unique_ptr<so_list, so_deleter> so_list_up;
+
 /* Return address of first so_list entry in master shared object list.  */
 struct so_list *master_so_list (void);
 

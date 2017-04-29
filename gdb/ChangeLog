@@ -1,5 +1,13 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (make_cleanup_free_so): Remove.
+	* utils.c (do_free_so, make_cleanup_free_so): Remove.
+	* solist.h (struct so_deleter): New.
+	(so_list_up): New typedef.
+	* solib-svr4.c (svr4_read_so_list): Use so_list_up.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (make_cleanup_restore_current_language): Remove.
 	* utils.c (do_restore_current_language)
 	(make_cleanup_restore_current_language): Remove.
