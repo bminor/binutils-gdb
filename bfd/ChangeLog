@@ -1,3 +1,10 @@
+2017-04-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21432
+	* reloc.c (reloc_offset_in_range): New function.
+	(bfd_perform_relocation, bfd_install_relocation): Use it.
+	(_bfd_final_link_relocate): Likewise.
+
 2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Check plt_got
