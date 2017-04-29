@@ -1,5 +1,9 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* jit.c (jit_reader_load_command): Use unique_xmalloc_ptr.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_restore_gdbout): Remove.
 	(tui_register_format): Use scoped_restore.
 
