@@ -434,8 +434,6 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   bfd_vma sec_end    = sec_start + size;
   bfd_size_type sec_offset = 0;
   bfd_size_type sec_load_count = size;
-  struct cleanup *old_chain;
-  gdb_byte *buf;
   int ret;
 
   /* Ignore non-loadable sections, eg. from elf files.  */
@@ -463,9 +461,8 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
     sec_load_count -= sec_end - data->load_end;
 
   /* Get the data.  */
-  buf = (gdb_byte *) xmalloc (size);
-  old_chain = make_cleanup (xfree, buf);
-  if (!bfd_get_section_contents (ibfd, isec, buf, 0, size))
+  gdb::byte_vector buf (size);
+  if (!bfd_get_section_contents (ibfd, isec, buf.data (), 0, size))
     error (_("Failed to read bfd file %s: '%s'."), bfd_get_filename (ibfd), 
 	   bfd_errmsg (bfd_get_error ()));
 
@@ -487,11 +484,9 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 
   /* Write the data.  */
   ret = target_write_memory (sec_start + sec_offset + data->load_offset, 
-			     buf + sec_offset, sec_load_count);
+			     &buf[sec_offset], sec_load_count);
   if (ret != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (ret));
-  do_cleanups (old_chain);
-  return;
 }
 
 static void

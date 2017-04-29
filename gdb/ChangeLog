@@ -1,5 +1,19 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* valops.c (search_struct_method): Use gdb::byte_vector.
+	* valarith.c (value_concat): Use std::vector.
+	* target.c (memory_xfer_partial): Use gdb::byte_vector.
+	(simple_search_memory): Likewise.
+	* printcmd.c (find_string_backward): Use gdb::byte_vector.
+	* mi/mi-main.c (mi_cmd_data_write_memory): Use gdb::byte_vector.
+	* gcore.c (gcore_copy_callback): Use gdb::byte_vector.
+	* elfread.c (elf_rel_plt_read): Use std::string.
+	* cp-valprint.c (cp_print_value): Use gdb::byte_vector.
+	* cli/cli-dump.c (restore_section_callback): Use
+	gdb::byte_vector.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* jit.c (jit_reader_load_command): Use unique_xmalloc_ptr.
 
 2017-08-03  Tom Tromey  <tom@tromey.com>

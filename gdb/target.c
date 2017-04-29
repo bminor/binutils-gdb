@@ -46,6 +46,7 @@
 #include "top.h"
 #include "event-top.h"
 #include <algorithm>
+#include "byte-vector.h"
 
 static void target_info (char *, int);
 
@@ -1284,9 +1285,6 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
     }
   else
     {
-      gdb_byte *buf;
-      struct cleanup *old_chain;
-
       /* A large write request is likely to be partially satisfied
 	 by memory_xfer_partial_1.  We will continually malloc
 	 and free a copy of the entire write request for breakpoint
@@ -1295,15 +1293,10 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	 to mitigate this.  */
       len = std::min (ops->to_get_memory_xfer_limit (ops), len);
 
-      buf = (gdb_byte *) xmalloc (len);
-      old_chain = make_cleanup (xfree, buf);
-      memcpy (buf, writebuf, len);
-
-      breakpoint_xfer_memory (NULL, buf, writebuf, memaddr, len);
-      res = memory_xfer_partial_1 (ops, object, NULL, buf, memaddr, len,
+      gdb::byte_vector buf (writebuf, writebuf + len);
+      breakpoint_xfer_memory (NULL, buf.data (), writebuf, memaddr, len);
+      res = memory_xfer_partial_1 (ops, object, NULL, buf.data (), memaddr, len,
 				   xfered_len);
-
-      do_cleanups (old_chain);
     }
 
   return res;
@@ -2439,9 +2432,7 @@ simple_search_memory (struct target_ops *ops,
 #define SEARCH_CHUNK_SIZE 16000
   const unsigned chunk_size = SEARCH_CHUNK_SIZE;
   /* Buffer to hold memory contents for searching.  */
-  gdb_byte *search_buf;
   unsigned search_buf_size;
-  struct cleanup *old_cleanups;
 
   search_buf_size = chunk_size + pattern_len - 1;
 
@@ -2449,20 +2440,17 @@ simple_search_memory (struct target_ops *ops,
   if (search_space_len < search_buf_size)
     search_buf_size = search_space_len;
 
-  search_buf = (gdb_byte *) malloc (search_buf_size);
-  if (search_buf == NULL)
-    error (_("Unable to allocate memory to perform the search."));
-  old_cleanups = make_cleanup (free_current_contents, &search_buf);
+  gdb::byte_vector search_buf (search_buf_size);
 
   /* Prime the search buffer.  */
 
   if (target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-		   search_buf, start_addr, search_buf_size) != search_buf_size)
+		   search_buf.data (), start_addr, search_buf_size)
+      != search_buf_size)
     {
       warning (_("Unable to access %s bytes of target "
 		 "memory at %s, halting search."),
 	       pulongest (search_buf_size), hex_string (start_addr));
-      do_cleanups (old_cleanups);
       return -1;
     }
 
@@ -2478,15 +2466,14 @@ simple_search_memory (struct target_ops *ops,
       unsigned nr_search_bytes
 	= std::min (search_space_len, (ULONGEST) search_buf_size);
 
-      found_ptr = (gdb_byte *) memmem (search_buf, nr_search_bytes,
+      found_ptr = (gdb_byte *) memmem (search_buf.data (), nr_search_bytes,
 				       pattern, pattern_len);
 
       if (found_ptr != NULL)
 	{
-	  CORE_ADDR found_addr = start_addr + (found_ptr - search_buf);
+	  CORE_ADDR found_addr = start_addr + (found_ptr - search_buf.data ());
 
 	  *found_addrp = found_addr;
-	  do_cleanups (old_cleanups);
 	  return 1;
 	}
 
@@ -2507,20 +2494,19 @@ simple_search_memory (struct target_ops *ops,
 	  /* Copy the trailing part of the previous iteration to the front
 	     of the buffer for the next iteration.  */
 	  gdb_assert (keep_len == pattern_len - 1);
-	  memcpy (search_buf, search_buf + chunk_size, keep_len);
+	  memcpy (&search_buf[0], &search_buf[chunk_size], keep_len);
 
 	  nr_to_read = std::min (search_space_len - keep_len,
 				 (ULONGEST) chunk_size);
 
 	  if (target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-			   search_buf + keep_len, read_addr,
+			   &search_buf[keep_len], read_addr,
 			   nr_to_read) != nr_to_read)
 	    {
 	      warning (_("Unable to access %s bytes of target "
 			 "memory at %s, halting search."),
 		       plongest (nr_to_read),
 		       hex_string (read_addr));
-	      do_cleanups (old_cleanups);
 	      return -1;
 	    }
 
@@ -2530,7 +2516,6 @@ simple_search_memory (struct target_ops *ops,
 
   /* Not found.  */
 
-  do_cleanups (old_cleanups);
   return 0;
 }
 

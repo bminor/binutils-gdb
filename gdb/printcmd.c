@@ -898,8 +898,6 @@ find_string_backward (struct gdbarch *gdbarch,
                       int *strings_counted)
 {
   const int chunk_size = 0x20;
-  gdb_byte *buffer = NULL;
-  struct cleanup *cleanup = NULL;
   int read_error = 0;
   int chars_read = 0;
   int chars_to_read = chunk_size;
@@ -908,14 +906,13 @@ find_string_backward (struct gdbarch *gdbarch,
   CORE_ADDR string_start_addr = addr;
 
   gdb_assert (char_size == 1 || char_size == 2 || char_size == 4);
-  buffer = (gdb_byte *) xmalloc (chars_to_read * char_size);
-  cleanup = make_cleanup (xfree, buffer);
+  gdb::byte_vector buffer (chars_to_read * char_size);
   while (count > 0 && read_error == 0)
     {
       int i;
 
       addr -= chars_to_read * char_size;
-      chars_read = read_memory_backward (gdbarch, addr, buffer,
+      chars_read = read_memory_backward (gdbarch, addr, buffer.data (),
                                          chars_to_read * char_size);
       chars_read /= char_size;
       read_error = (chars_read == chars_to_read) ? 0 : 1;
@@ -924,7 +921,7 @@ find_string_backward (struct gdbarch *gdbarch,
         {
           int offset = (chars_to_read - i - 1) * char_size;
 
-          if (integer_is_zero (buffer + offset, char_size)
+          if (integer_is_zero (&buffer[offset], char_size)
               || chars_counted == options->print_max)
             {
               /* Found '\0' or reached print_max.  As OFFSET is the offset to
@@ -947,7 +944,6 @@ find_string_backward (struct gdbarch *gdbarch,
       string_start_addr -= chars_counted * char_size;
     }
 
-  do_cleanups (cleanup);
   return string_start_addr;
 }
 

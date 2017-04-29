@@ -540,9 +540,6 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
   asection *plt, *relplt, *got_plt;
   int plt_elf_idx;
   bfd_size_type reloc_count, reloc;
-  char *string_buffer = NULL;
-  size_t string_buffer_size = 0;
-  struct cleanup *back_to;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
@@ -576,7 +573,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
   if (! bed->s->slurp_reloc_table (obfd, relplt, dyn_symbol_table, TRUE))
     return;
 
-  back_to = make_cleanup (free_current_contents, &string_buffer);
+  std::string string_buffer;
 
   reloc_count = relplt->size / elf_section_data (relplt)->this_hdr.sh_entsize;
   for (reloc = 0; reloc < reloc_count; reloc++)
@@ -584,11 +581,10 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       const char *name;
       struct minimal_symbol *msym;
       CORE_ADDR address;
+      const char *got_suffix = SYMBOL_GOT_PLT_SUFFIX;
       const size_t got_suffix_len = strlen (SYMBOL_GOT_PLT_SUFFIX);
-      size_t name_len;
 
       name = bfd_asymbol_name (*relplt->relocation[reloc].sym_ptr_ptr);
-      name_len = strlen (name);
       address = relplt->relocation[reloc].address;
 
       /* Does the pointer reside in the .got.plt section?  */
@@ -601,24 +597,16 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 	 OBJFILE the symbol is undefined and the objfile having NAME defined
 	 may not yet have been loaded.  */
 
-      if (string_buffer_size < name_len + got_suffix_len + 1)
-	{
-	  string_buffer_size = 2 * (name_len + got_suffix_len);
-	  string_buffer = (char *) xrealloc (string_buffer, string_buffer_size);
-	}
-      memcpy (string_buffer, name, name_len);
-      memcpy (&string_buffer[name_len], SYMBOL_GOT_PLT_SUFFIX,
-	      got_suffix_len + 1);
+      string_buffer.assign (name);
+      string_buffer.append (got_suffix, got_suffix + got_suffix_len);
 
-      msym = record_minimal_symbol (reader, string_buffer,
-				    name_len + got_suffix_len,
+      msym = record_minimal_symbol (reader, string_buffer.c_str (),
+				    string_buffer.size (),
                                     true, address, mst_slot_got_plt, got_plt,
 				    objfile);
       if (msym)
 	SET_MSYMBOL_SIZE (msym, ptr_size);
     }
-
-  do_cleanups (back_to);
 }
 
 /* The data pointer is htab_t for gnu_ifunc_record_cache_unchecked.  */
