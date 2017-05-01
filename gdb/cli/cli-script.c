@@ -372,16 +372,6 @@ execute_cmd_post_hook (struct cmd_list_element *c)
     }
 }
 
-/* Execute the command in CMD.  */
-static void
-do_restore_user_call_depth (void * call_depth)
-{	
-  int *depth = (int *) call_depth;
-
-  (*depth)--;
-}
-
-
 void
 execute_user_command (struct cmd_list_element *c, char *args)
 {
@@ -389,7 +379,6 @@ execute_user_command (struct cmd_list_element *c, char *args)
   struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
-  static int user_call_depth = 0;
   extern unsigned int max_user_call_depth;
 
   cmdlines = c->user_commands;
@@ -399,14 +388,12 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   scoped_user_args_level push_user_args (args);
 
-  if (++user_call_depth > max_user_call_depth)
+  if (user_args_stack.size () > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));
-
-  old_chain = make_cleanup (do_restore_user_call_depth, &user_call_depth);
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  make_cleanup (do_restore_instream_cleanup, ui->instream);
+  old_chain = make_cleanup (do_restore_instream_cleanup, ui->instream);
   ui->instream = NULL;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
