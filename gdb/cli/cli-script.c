@@ -398,7 +398,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  command_nest_depth++;
+  scoped_restore save_nesting
+    = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
   while (cmdlines)
     {
       ret = execute_control_command (cmdlines);
@@ -409,7 +410,6 @@ execute_user_command (struct cmd_list_element *c, char *args)
 	}
       cmdlines = cmdlines->next;
     }
-  command_nest_depth--;
   do_cleanups (old_chain);
 }
 
@@ -529,9 +529,9 @@ execute_control_command (struct command_line *cmd)
 	    current = *cmd->body_list;
 	    while (current)
 	      {
-		command_nest_depth++;
+		scoped_restore save_nesting
+		  = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
 		ret = execute_control_command (current);
-		command_nest_depth--;
 
 		/* If we got an error, or a "break" command, then stop
 		   looping.  */
@@ -588,9 +588,9 @@ execute_control_command (struct command_line *cmd)
 	/* Execute commands in the given arm.  */
 	while (current)
 	  {
-	    command_nest_depth++;
+	    scoped_restore save_nesting
+	      = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
 	    ret = execute_control_command (current);
-	    command_nest_depth--;
 
 	    /* If we got an error, get out.  */
 	    if (ret != simple_control)

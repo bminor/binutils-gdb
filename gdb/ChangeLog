@@ -1,5 +1,10 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-script.c (execute_user_command)
+	(execute_control_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-script.c (do_restore_user_call_depth): Remove.
 	(execute_user_command): Remove user_call_depth; use
 	user_args_stack's size instead.
