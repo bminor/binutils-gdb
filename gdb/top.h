@@ -290,8 +290,6 @@ extern void show_history (char *, int);
 
 extern void set_verbose (char *, int, struct cmd_list_element *);
 
-extern void do_restore_instream_cleanup (void *stream);
-
 extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
 				   char *rl, int repeat,
 				   const char *annotation_suffix);

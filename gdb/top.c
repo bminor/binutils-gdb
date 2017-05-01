@@ -444,27 +444,14 @@ quit_cover (void)
    event-top.c into this file, top.c.  */
 /* static */ const char *source_file_name;
 
-/* Clean up on error during a "source" command (or execution of a
-   user-defined command).  */
-
-void
-do_restore_instream_cleanup (void *stream)
-{
-  struct ui *ui = current_ui;
-
-  /* Restore the previous input stream.  */
-  ui->instream = (FILE *) stream;
-}
-
 /* Read commands from STREAM.  */
 void
 read_command_file (FILE *stream)
 {
   struct ui *ui = current_ui;
-  struct cleanup *cleanups;
 
-  cleanups = make_cleanup (do_restore_instream_cleanup, ui->instream);
-  ui->instream = stream;
+  scoped_restore save_instream
+    = make_scoped_restore (&ui->instream, stream);
 
   /* Read commands from `instream' and execute them until end of file
      or error reading instream.  */
@@ -479,8 +466,6 @@ read_command_file (FILE *stream)
 	break;
       command_handler (command);
     }
-
-  do_cleanups (cleanups);
 }
 
 void (*pre_init_ui_hook) (void);

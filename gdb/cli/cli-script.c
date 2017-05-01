@@ -377,7 +377,6 @@ execute_user_command (struct cmd_list_element *c, char *args)
 {
   struct ui *ui = current_ui;
   struct command_line *cmdlines;
-  struct cleanup *old_chain;
   enum command_control_type ret;
   extern unsigned int max_user_call_depth;
 
@@ -393,8 +392,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  old_chain = make_cleanup (do_restore_instream_cleanup, ui->instream);
-  ui->instream = NULL;
+  scoped_restore restore_instream
+    = make_scoped_restore (&ui->instream, nullptr);
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -410,7 +409,6 @@ execute_user_command (struct cmd_list_element *c, char *args)
 	}
       cmdlines = cmdlines->next;
     }
-  do_cleanups (old_chain);
 }
 
 /* This function is called every time GDB prints a prompt.  It ensures

@@ -1,5 +1,12 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* top.h (do_restore_instream_cleanup): Remove.
+	* top.c (do_restore_instream_cleanup): Remove.
+	(read_command_file): Use scoped_restore.
+	* cli/cli-script.c (execute_user_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-script.c (execute_user_command)
 	(execute_control_command): Use scoped_restore.
 
