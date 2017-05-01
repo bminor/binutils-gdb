@@ -1,3 +1,8 @@
+2017-05-01  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (merge_gnu_build_notes): Correct code deleting
+	relocs.
+
 2017-04-28  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21439
