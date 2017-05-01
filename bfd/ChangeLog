@@ -1,3 +1,7 @@
+2017-05-01  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config.bfd (riscv32-*): Enable rv64.
+
 2017-05-02  Alan Modra  <amodra@gmail.com>
 
 	PR 21384
