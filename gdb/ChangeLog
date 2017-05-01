@@ -1,5 +1,15 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (compute_python_string): Return std::string.
+	(gdbpy_eval_from_control_command): Update.
+	(do_start_initialization): Use std::string.
+	* python/py-varobj.c (py_varobj_iter_next): Use string_printf, not
+	xstrprintf.
+	* python/py-breakpoint.c (local_setattro): Use string_printf, not
+	xstrprintf.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* top.h (do_restore_instream_cleanup): Remove.
 	* top.c (do_restore_instream_cleanup): Remove.
 	(read_command_file): Use scoped_restore.

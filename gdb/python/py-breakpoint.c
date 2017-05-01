@@ -1026,15 +1026,12 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
 	extlang = get_breakpoint_cond_ext_lang (obj->bp, EXT_LANG_PYTHON);
       if (extlang != NULL)
 	{
-	  char *error_text;
-
-	  error_text
-	    = xstrprintf (_("Only one stop condition allowed.  There is"
-			    " currently a %s stop condition defined for"
-			    " this breakpoint."),
-			  ext_lang_capitalized_name (extlang));
-	  PyErr_SetString (PyExc_RuntimeError, error_text);
-	  xfree (error_text);
+	  std::string error_text
+	    = string_printf (_("Only one stop condition allowed.  There is"
+			       " currently a %s stop condition defined for"
+			       " this breakpoint."),
+			     ext_lang_capitalized_name (extlang));
+	  PyErr_SetString (PyExc_RuntimeError, error_text.c_str ());
 	  return -1;
 	}
     }

@@ -365,32 +365,19 @@ python_run_simple_file (FILE *file, const char *filename)
 }
 
 /* Given a command_line, return a command string suitable for passing
-   to Python.  Lines in the string are separated by newlines.  The
-   return value is allocated using xmalloc and the caller is
-   responsible for freeing it.  */
+   to Python.  Lines in the string are separated by newlines.  */
 
-static char *
+static std::string
 compute_python_string (struct command_line *l)
 {
   struct command_line *iter;
-  char *script = NULL;
-  int size = 0;
-  int here;
+  std::string script;
 
-  for (iter = l; iter; iter = iter->next)
-    size += strlen (iter->line) + 1;
-
-  script = (char *) xmalloc (size + 1);
-  here = 0;
   for (iter = l; iter; iter = iter->next)
     {
-      int len = strlen (iter->line);
-
-      strcpy (&script[here], iter->line);
-      here += len;
-      script[here++] = '\n';
+      script += iter->line;
+      script += '\n';
     }
-  script[here] = '\0';
   return script;
 }
 
@@ -402,16 +389,14 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 				 struct command_line *cmd)
 {
   int ret;
-  char *script;
 
   if (cmd->body_count != 1)
     error (_("Invalid \"python\" block structure."));
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  script = compute_python_string (cmd->body_list[0]);
-  ret = PyRun_SimpleString (script);
-  xfree (script);
+  std::string script = compute_python_string (cmd->body_list[0]);
+  ret = PyRun_SimpleString (script.c_str ());
   if (ret)
     error (_("Error while executing Python code."));
 }
@@ -1532,7 +1517,6 @@ do_start_initialization ()
 #ifdef IS_PY3K
   int i;
   size_t progsize, count;
-  char *oldloc;
   wchar_t *progname_copy;
 #endif
 
@@ -1546,25 +1530,22 @@ do_start_initialization ()
   progname = concat (ldirname (python_libdir).c_str (), SLASH_STRING, "bin",
 		     SLASH_STRING, "python", (char *) NULL);
 #ifdef IS_PY3K
-  oldloc = xstrdup (setlocale (LC_ALL, NULL));
+  std::string oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
   progsize = strlen (progname);
   progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
   if (!progname_copy)
     {
-      xfree (oldloc);
       fprintf (stderr, "out of memory\n");
       return false;
     }
   count = mbstowcs (progname_copy, progname, progsize + 1);
   if (count == (size_t) -1)
     {
-      xfree (oldloc);
       fprintf (stderr, "Could not convert python path to string\n");
       return false;
     }
-  setlocale (LC_ALL, oldloc);
-  xfree (oldloc);
+  setlocale (LC_ALL, oldloc.c_str ());
 
   /* Note that Py_SetProgramName expects the string it is passed to
      remain alive for the duration of the program's execution, so
