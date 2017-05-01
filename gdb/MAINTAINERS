@@ -153,8 +153,6 @@ Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
 Doug Evans			dje@google.com
-Daniel Jacobowitz		drow@false.org
-Mark Kettenis           	kettenis@gnu.org
 Simon Marchi			simon.marchi@ericsson.com
 Yao Qi				yao.qi@arm.com
 Stan Shebs			stanshebs@google.com
@@ -254,7 +252,6 @@ the native maintainer when resolving ABI issues.
 	h8300		--target=h8300-elf ,-Werror
 
 	i386		--target=i386-elf ,-Werror
-			Mark Kettenis           kettenis@gnu.org
 
 	ia64		--target=ia64-linux-gnu ,-Werror
 			(--target=ia64-elf broken)
@@ -271,7 +268,6 @@ the native maintainer when resolving ABI issues.
 	m68k		--target=m68k-elf ,-Werror
 
 	m88k		--target=m88k-openbsd ,-Werror
-			Mark Kettenis		kettenis@gnu.org
 
 	mcore		Deleted
 
@@ -358,25 +354,17 @@ their platform.
 Darwin			Tristan Gingold		gingold@adacore.com
 djgpp native		Eli Zaretskii		eliz@gnu.org
 GNU Hurd		Alfred M. Szmidt	ams@gnu.org
-GNU/Linux/x86 native & host
-			Mark Kettenis		kettenis@gnu.org
-GNU/Linux MIPS native & host
-			Daniel Jacobowitz	drow@false.org
 GNU/Linux m68k		Andreas Schwab		schwab@linux-m68k.org
-FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
 
 
 Core: Generic components used by all of GDB
-
-threads			Mark Kettenis		kettenis@gnu.org
 
 linespec		Keith Seitz             keiths@redhat.com
 
 language support
   Ada			Joel Brobecker		brobecker@adacore.com
 			Paul Hilfinger		hilfinger@gnat.com
-  C++			Daniel Jacobowitz	drow@false.org
   D			Iain Buclaw		ibuclaw@gdcproject.org
   Objective C support   Adam Fedor		fedor@gnu.org
   Rust			Tom Tromey		tom@tromey.com
@@ -724,7 +712,8 @@ Fernando Nasser (testsuite/, mi, cli, KOD)      fnasser at redhat dot com
 Mark Salter (testsuite/lib+config)		msalter at redhat dot com
 Jim Kingdon (web pages)				kingdon at panix dot com
 Jim Ingham (gdbtk, libgui)			jingham at apple dot com
-Mark Kettenis (hurd native)			kettenis at gnu dot org
+Mark Kettenis (global, i386-elf, m88k-openbsd,
+  GNU/Linux x86, FreeBSD, hurd native, threads) kettenis at gnu dot org
 Ian Roxborough (in-tree tcl, tk, itcl)		irox at redhat dot com
 Robert Lipe (SCO/Unixware)			rjl at sco dot com
 Peter Schauer (global, AIX, xcoffsolib,
@@ -736,6 +725,8 @@ Fred Fish (global)
 Jim Blandy (global)				jimb@red-bean.com
 Michael Snyder (global)
 Christopher Faylor (MS Windows, host & native)
+Daniel Jacobowitz (global, GNU/Linux MIPS,
+  C++, GDBserver)				drow at false dot org
 
 
 Folks that have been caught up in a paper trail:
