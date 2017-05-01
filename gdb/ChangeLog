@@ -1,5 +1,12 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* top.h (in_user_command): Remove.
+	* top.c (in_user_command): Remove.
+	* cli/cli-script.c (do_restore_user_call_depth)
+	(execute_user_command): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* valops.c (search_struct_method): Use gdb::byte_vector.
 	* valarith.c (value_concat): Use std::vector.
 	* target.c (memory_xfer_partial): Use gdb::byte_vector.

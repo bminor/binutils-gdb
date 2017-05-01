@@ -129,10 +129,6 @@ show_confirm (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Flag to indicate whether a user defined command is currently running.  */
-
-int in_user_command;
-
 /* Current working directory.  */
 
 char *current_directory;

@@ -379,8 +379,6 @@ do_restore_user_call_depth (void * call_depth)
   int *depth = (int *) call_depth;
 
   (*depth)--;
-  if ((*depth) == 0)
-    in_user_command = 0;
 }
 
 
@@ -410,10 +408,6 @@ execute_user_command (struct cmd_list_element *c, char *args)
      user-defined function.  */
   make_cleanup (do_restore_instream_cleanup, ui->instream);
   ui->instream = NULL;
-
-  /* Also set the global in_user_command, so that NULL instream is
-     not confused with Insight.  */
-  in_user_command = 1;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 

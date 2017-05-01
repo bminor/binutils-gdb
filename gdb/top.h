@@ -218,7 +218,6 @@ extern void ui_unregister_input_event_handler (struct ui *ui);
 
 /* From top.c.  */
 extern char *saved_command_line;
-extern int in_user_command;
 extern int confirm;
 extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
