@@ -1,3 +1,8 @@
+2017-05-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Move Daniel Jacobowitz and Mark Kettenis to
+	the past maintainers section.
+
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
 	* infcmd.c (get_return_value): Use regcache ctor, and remove
