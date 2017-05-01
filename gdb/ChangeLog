@@ -1,5 +1,9 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (gdbpy_decode_line): Use unique_xmalloc_ptr.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (compute_python_string): Return std::string.
 	(gdbpy_eval_from_control_command): Update.
 	(do_start_initialization): Use std::string.

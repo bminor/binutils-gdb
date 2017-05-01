@@ -652,15 +652,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 						  appease gcc.  */
   struct symtab_and_line sal;
   char *arg = NULL;
-  struct cleanup *cleanups;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
   event_location_up location;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
-
-  cleanups = make_cleanup (null_cleanup, NULL);
 
   sals.sals = NULL;
 
@@ -685,12 +682,13 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     }
   END_CATCH
 
+  /* Ensure that the sals data is freed, when needed.  */
+  gdb::unique_xmalloc_ptr<struct symtab_and_line> free_sals;
   if (sals.sals != NULL && sals.sals != &sal)
-    make_cleanup (xfree, sals.sals);
+    free_sals.reset (sals.sals);
 
   if (except.reason < 0)
     {
-      do_cleanups (cleanups);
       /* We know this will always throw.  */
       gdbpy_convert_exception (except);
       return NULL;
@@ -702,20 +700,14 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
       result.reset (PyTuple_New (sals.nelts));
       if (result == NULL)
-	{
-	  do_cleanups (cleanups);
-	  return NULL;
-	}
+	return NULL;
       for (i = 0; i < sals.nelts; ++i)
 	{
 	  PyObject *obj;
 
 	  obj = symtab_and_line_to_sal_object (sals.sals[i]);
 	  if (! obj)
-	    {
-	      do_cleanups (cleanups);
-	      return NULL;
-	    }
+	    return NULL;
 
 	  PyTuple_SetItem (result.get (), i, obj);
 	}
@@ -728,19 +720,13 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   gdbpy_ref<> return_result (PyTuple_New (2));
   if (return_result == NULL)
-    {
-      do_cleanups (cleanups);
-      return NULL;
-    }
+    return NULL;
 
   if (arg != NULL && strlen (arg) > 0)
     {
       unparsed.reset (PyString_FromString (arg));
       if (unparsed == NULL)
-	{
-	  do_cleanups (cleanups);
-	  return NULL;
-	}
+	return NULL;
     }
   else
     {
@@ -750,8 +736,6 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   PyTuple_SetItem (return_result.get (), 0, unparsed.release ());
   PyTuple_SetItem (return_result.get (), 1, result.release ());
-
-  do_cleanups (cleanups);
 
   return return_result.release ();
 }
