@@ -1,3 +1,216 @@
+2017-04-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21432
+	* reloc.c (reloc_offset_in_range): New function.
+	(bfd_perform_relocation, bfd_install_relocation): Use it.
+	(_bfd_final_link_relocate): Likewise.
+
+2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Check plt_got
+	before using .plt.got.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewise.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Use "="
+	instead of "+=" to update 0.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Create the
+	.plt.got section here.
+	(elf_i386_check_relocs): Don't create the .plt.got section.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Create
+	the .plt.got and .plt.bnd sections here.
+	(elf_x86_64_check_relocs): Don't create the .plt.got nor
+	.plt.bnd sections.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Remove
+	has_bnd_reloc.
+	(elf_x86_64_link_hash_newfunc): Don't clear has_bnd_reloc.
+	(elf_x86_64_copy_indirect_symbol): Don't copy has_bnd_reloc.
+	(elf_x86_64_check_relocs): Don't set has_bnd_reloc.
+	(elf_x86_64_finish_dynamic_symbol): Check bndplt instead of
+	has_bnd_reloc.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Change setup_gnu_properties
+	to return bfd *.
+	(_bfd_elf_link_setup_gnu_properties): Return bfd *.
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Return
+	the first relocatable ELF input with GNU properties.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Simplify
+	VxWorks for non-PIC.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data): Make asection param of
+	elf_backend_eh_frame_address_size const.
+	(_bfd_elf_eh_frame_address_size): Likewise.
+	* elf32-m32c.c (_bfd_m32c_elf_eh_frame_address_size): Likewise.
+	* elf32-msp430.c (elf32_msp430_eh_frame_address_size): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_eh_frame_address_size): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_eh_frame_address_size): Likewise.
+	* elf-eh-frame.c (_bfd_elf_eh_frame_address_size): Likewise.
+	(next_cie_fde_offset): Constify params.
+	(offset_adjust, adjust_eh_frame_local_symbols): Likewise.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct eh_cie_fde): Add aug_str_len and aug_data_len.
+	(_bfd_elf_adjust_eh_frame_global_symbol): Declare.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Set aug_str_len and
+	aug_data_len.
+	(offset_adjust): New function.
+	(_bfd_elf_adjust_eh_frame_global_symbol): Likewise.
+	(adjust_eh_frame_local_symbols): Likewise.
+	(_bfd_elf_discard_section_eh_frame): Call adjust_eh_frame_local_symbols
+	after changing anything.  Return true if anything changed.
+	* elflink.c (bfd_elf_discard_info): If .eh_frame changed, call
+	_bfd_elf_adjust_eh_frame_global_symbol for globals.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_link_hash_hide_symbol): Clear dynstr_index
+	when force_local.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Define.
+	(ppc_elf_select_plt_layout, ppc_elf_tls_setup): Use it.
+	(ppc_elf_adjust_dynamic_symbol, allocate_dynrelocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.  Delete silly optimisation
+	for undef and undefweak dyn_relocs.
+	* elf64-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Define.
+	(ppc64_elf_adjust_dynamic_symbol, ppc64_elf_tls_setup): Use it.
+	(allocate_got, allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2017-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Alwasys add
+	DT_PLTRELSZ, DT_PLTREL and DT_JMPREL for .rel.plt section.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Alwasys
+	add DT_PLTRELSZ, DT_PLTREL and DT_JMPREL for .rela.plt section.
+
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21434
+	* reloc.c (bfd_perform_relocation): Check for a negative address
+	in the reloc.
+
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/21334
+	* elf-bfd.h (elf_backend_data): Add `always_renumber_dynsyms'
+	member.
+	* elfxx-target.h [!elf_backend_always_renumber_dynsyms]
+	(elf_backend_always_renumber_dynsyms): Define.
+	(elfNN_bed): Initialize `always_renumber_dynsyms' member.
+	* elfxx-mips.h (elf_backend_always_renumber_dynsyms): Define.
+	* elflink.c (bfd_elf_size_dynamic_sections): Also call
+	`_bfd_elf_link_renumber_dynsyms' if the backend has requested
+	it.
+	(bfd_elf_size_dynsym_hash_dynstr): Likewise.
+
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elflink.c (bfd_elf_size_dynamic_sections): Only call
+	`_bfd_elf_link_renumber_dynsyms' after section GC if dynamic
+	sections have been created.
+
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21431
+	* compress.c (bfd_init_section_compress_status): Check the return
+	value from bfd_malloc.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add
+	no_finish_dynamic_symbol.
+	(elf_x86_64_link_hash_newfunc): Set no_finish_dynamic_symbol to
+	0.
+	(elf_x86_64_allocate_dynrelocs): If a symbol isn't undefined
+	weak symbol, don't make it dynamic.
+	(elf_x86_64_relocate_section): If a symbol isn't dynamic in PIC,
+	set no_finish_dynamic_symbol and generate R_X86_64_RELATIVE
+	relocation for GOT reference.
+	(elf_x86_64_finish_dynamic_symbol): Abort if
+	no_finish_dynamic_symbol isn't 0.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21402
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): If a symbol isn't
+	undefined weak symbol, don't make it dynamic.
+	(elf_i386_relocate_section): If a symbol isn't dynamic in PIC,
+	set no_finish_dynamic_symbol and generate R_386_RELATIVE
+	relocation for R_386_GOT32.
+
+2017-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21425
+	* elf32-i386.c (ELF_MAXPAGESIZE): Set to 0x1000 for VxWorks.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21414
+	* section.c (GLOBAL_SYM_INIT): Make available in bfd.h.
+	* elf.c (lcomm_sym): New.
+	(_bfd_elf_large_com_section): Use lcomm_sym section symbol.
+	* bfd-in2.h: Regenerate.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21412
+	* elf-bfd.h (struct elf_backend_data <get_reloc_section>): Change
+	parameters and comment.
+	(_bfd_elf_get_reloc_section): Delete.
+	(_bfd_elf_plt_get_reloc_section): Declare.
+	* elf.c (_bfd_elf_plt_get_reloc_section, elf_get_reloc_section):
+	New functions.  Don't blindly skip over assumed .rel/.rela prefix.
+	Extracted from..
+	(_bfd_elf_get_reloc_section): ..here.  Delete.
+	(assign_section_numbers): Call elf_get_reloc_section.
+	* elf64-ppc.c (elf_backend_get_reloc_section): Define.
+	* elfxx-target.h (elf_backend_get_reloc_section): Update.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21409
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Don't segfault when
+	no symbols.
+
+2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21402
+	* elf32-i386.c (elf_i386_link_hash_entry): Add
+	no_finish_dynamic_symbol.
+	(elf_i386_link_hash_newfunc): Set no_finish_dynamic_symbol to 0.
+	(elf_i386_allocate_dynrelocs): If a symbol isn't undefined weak
+	symbol, don't make it dynamic in PIE.
+	(elf_i386_relocate_section): If a symbol isn't dynamic in PIE,
+	set no_finish_dynamic_symbol and generate R_386_RELATIVE
+	relocation for R_386_GOT32
+	(elf_i386_finish_dynamic_symbol): Abort if no_finish_dynamic_symbol
+	isn't 0.
+
+2017-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19617
+	PR ld/21086
+	* elflink.c (elf_link_add_object_symbols): Require
+	--no-dynamic-linker with -E/--dynamic-list when creating
+	dynamic sections.
+
 2017-04-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elflink.c (_bfd_elf_symbol_refs_local_p): Always return TRUE

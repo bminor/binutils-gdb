@@ -34,6 +34,7 @@
 #include "extension.h"
 #include <ctype.h>
 #include "mi-parse.h"
+#include "common/gdb_optional.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -81,7 +82,6 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   int frame_low;
   int frame_high;
   int i;
-  struct cleanup *cleanup_stack;
   struct frame_info *fi;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
   int raw_arg = 0;
@@ -142,7 +142,7 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   if (fi == NULL)
     error (_("-stack-list-frames: Not enough frames in stack."));
 
-  cleanup_stack = make_cleanup_ui_out_list_begin_end (current_uiout, "stack");
+  ui_out_emit_list list_emitter (current_uiout, "stack");
 
   if (! raw_arg && frame_filters)
     {
@@ -176,8 +176,6 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 	  print_frame_info (fi, 1, LOC_AND_ADDRESS, 0 /* args */, 0);
 	}
     }
-
-  do_cleanups (cleanup_stack);
 }
 
 void
@@ -290,7 +288,6 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
   int frame_high;
   int i;
   struct frame_info *fi;
-  struct cleanup *cleanup_stack_args;
   enum print_values print_values;
   struct ui_out *uiout = current_uiout;
   int raw_arg = 0;
@@ -358,8 +355,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
   if (fi == NULL)
     error (_("-stack-list-arguments: Not enough frames in stack."));
 
-  cleanup_stack_args
-    = make_cleanup_ui_out_list_begin_end (uiout, "stack-args");
+  ui_out_emit_list list_emitter (uiout, "stack-args");
 
   if (! raw_arg && frame_filters)
     {
@@ -387,16 +383,12 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 	   fi && (i <= frame_high || frame_high == -1);
 	   i++, fi = get_prev_frame (fi))
 	{
-	  struct cleanup *cleanup_frame;
-
 	  QUIT;
-	  cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
+	  ui_out_emit_tuple tuple_emitter (uiout, "frame");
 	  uiout->field_int ("level", i);
 	  list_args_or_locals (arguments, print_values, fi, skip_unavailable);
-	  do_cleanups (cleanup_frame);
 	}
     }
-  do_cleanups (cleanup_stack_args);
 }
 
 /* Print a list of the local variables (including arguments) for the 
@@ -486,7 +478,6 @@ static void
 list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 		   enum print_values values, int skip_unavailable)
 {
-  struct cleanup *old_chain;
   struct ui_out *uiout = current_uiout;
 
   gdb_assert (!arg->val || !arg->error);
@@ -510,10 +501,9 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 					 TYPE_LENGTH (value_type (arg->val))))))
     return;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
-
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
   if (values != PRINT_NO_VALUES || what == all)
-    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+    tuple_emitter.emplace (uiout, nullptr);
 
   string_file stb;
 
@@ -559,8 +549,6 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	stb.printf (_("<error reading variable: %s>"), error_message);
       uiout->field_stream ("value", stb);
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Print a list of the objects for the frame FI in a certain form,
@@ -576,7 +564,6 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
   const struct block *block;
   struct symbol *sym;
   struct block_iterator iter;
-  struct cleanup *cleanup_list;
   struct type *type;
   const char *name_of_result;
   struct ui_out *uiout = current_uiout;
@@ -599,7 +586,7 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 		      "unexpected what_to_list: %d", (int) what);
     }
 
-  cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, name_of_result);
+  ui_out_emit_list list_emitter (uiout, name_of_result);
 
   while (block != 0)
     {
@@ -687,7 +674,6 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
       else
 	block = BLOCK_SUPERBLOCK (block);
     }
-  do_cleanups (cleanup_list);
 }
 
 void

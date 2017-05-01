@@ -1,3 +1,17 @@
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Thread Information): Add missing
+	fields, re-word some things.
+	(GDB/MI Thread Commands): Describe fields found in the output of
+	-thread-info, remove description of fields in the
+	thread output tuple, replace with a cross-reference to "GDB/MI
+	Thread Information".
+
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Thread Commands): Remove "current" field
+	from -thread-info output.
+
 2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* gdb.texinfo (Synopsys ARC): Document "set debug arc 2".

@@ -72,6 +72,10 @@ if [istarget sparc*-*-*] {
         run_dump_test "v9branch1"
         run_dump_test "imm-plus-rreg"
         run_dump_test "dcti-couples-v9"
+        run_dump_test "call-relax"
+    } else {
+        # The next tests are a.out only.
+        run_dump_test "call-relax-aout"
     }
 
     if [gas_64_check] {

@@ -145,6 +145,8 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 /* Use some short hand macros to keep down the length of the lines in
    the opcodes table.  */
 
+#define AL	INSN2_ALIAS
+
 #define UBD     INSN_UNCOND_BRANCH_DELAY
 
 #define WR_1	INSN_WRITE_1
@@ -188,8 +190,8 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 const struct mips_opcode mips16_opcodes[] =
 {
 /* name,    args,	match,	mask,		pinfo,			pinfo2, membership,	ase,	exclusions */
-{"nop",	    "",		0x6500, 0xffff,		0,			SH|RD_16,	I1,	0,	0 }, /* move $0,$Z */
-{"la",	    "x,A",	0x0800, 0xf800,		WR_1,			RD_PC,		I1,	0,	0 },
+{"nop",	    "",		0x6500, 0xffff,		0,			SH|RD_16|AL,	I1,	0,	0 }, /* move $0,$Z */
+{"la",	    "x,A",	0x0800, 0xf800,		WR_1,			RD_PC|AL,	I1,	0,	0 },
 {"abs",	    "x,w",	0, (int) M_ABS,		INSN_MACRO,		0,		I1,	0,	0 },
 {"addiu",   "y,x,F",	0x4000, 0xf810,		WR_1|RD_2,		0,		I1,	0,	0 },
 {"addiu",   "x,k",	0x4800, 0xf800,		MOD_1,			0,		I1,	0,	0 },
@@ -234,7 +236,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"cmpi",    "x,U",	0x7000, 0xf800,		RD_1|WR_T,		0,		I1,	0,	0 },
 {"cmp",	    "x,y",	0xe80a, 0xf81f,		RD_1|RD_2|WR_T,		SH,		I1,	0,	0 },
 {"cmp",     "x,U",	0x7000, 0xf800,		RD_1|WR_T,		0,		I1,	0,	0 },
-{"dla",	    "y,E",	0xfe00, 0xff00,		WR_1, 			RD_PC,		I3,	0,	0 },
+{"dla",	    "y,E",	0xfe00, 0xff00,		WR_1, 			RD_PC|AL,	I3,	0,	0 },
 {"daddiu",  "y,x,F",	0x4010, 0xf810,		WR_1|RD_2, 		0,		I3,	0,	0 },
 {"daddiu",  "y,j",	0xfd00, 0xff00,		MOD_1,			0,		I3,	0,	0 },
 {"daddiu",  "S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
@@ -301,14 +303,14 @@ const struct mips_opcode mips16_opcodes[] =
 {"lb",	    "y,5(x)",	0x8000, 0xf800,		WR_1|RD_3,		0,		I1,	0,	0 },
 {"lbu",	    "y,5(x)",	0xa000, 0xf800,		WR_1|RD_3,		0,		I1,	0,	0 },
 {"ld",	    "y,D(x)",	0x3800, 0xf800,		WR_1|RD_3, 		0,		I3,	0,	0 },
-{"ld",	    "y,B",	0xfc00, 0xff00,		WR_1,	 		RD_PC,		I3,	0,	0 },
+{"ld",	    "y,B",	0xfc00, 0xff00,		WR_1,	 		RD_PC|AL,	I3,	0,	0 },
 {"ld",	    "y,D(P)",	0xfc00, 0xff00,		WR_1,	 		RD_PC,		I3,	0,	0 },
 {"ld",	    "y,D(S)",	0xf800, 0xff00,		WR_1,			RD_SP,		I3,	0,	0 },
 {"lh",	    "y,H(x)",	0x8800, 0xf800,		WR_1|RD_3,		0,		I1,	0,	0 },
 {"lhu",	    "y,H(x)",	0xa800, 0xf800,		WR_1|RD_3,		0,		I1,	0,	0 },
 {"li",	    "x,U",	0x6800, 0xf800,		WR_1,			0,		I1,	0,	0 },
 {"lw",	    "y,W(x)",	0x9800, 0xf800,		WR_1|RD_3,		0,		I1,	0,	0 },
-{"lw",	    "x,A",	0xb000, 0xf800,		WR_1,			RD_PC,		I1,	0,	0 },
+{"lw",	    "x,A",	0xb000, 0xf800,		WR_1,			RD_PC|AL,	I1,	0,	0 },
 {"lw",	    "x,V(P)",	0xb000, 0xf800,		WR_1,			RD_PC,		I1,	0,	0 },
 {"lw",	    "x,V(S)",	0x9000, 0xf800,		WR_1,			RD_SP,		I1,	0,	0 },
 {"lwu",     "y,W(x)",	0xb800, 0xf800,		WR_1|RD_3, 		0,		I3,	0,	0 },

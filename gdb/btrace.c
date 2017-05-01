@@ -1112,15 +1112,26 @@ pt_reclassify_insn (enum pt_insn_class iclass)
 /* Return the btrace instruction flags for INSN.  */
 
 static btrace_insn_flags
-pt_btrace_insn_flags (const struct pt_insn *insn)
+pt_btrace_insn_flags (const struct pt_insn &insn)
 {
   btrace_insn_flags flags = 0;
 
-  if (insn->speculative)
+  if (insn.speculative)
     flags |= BTRACE_INSN_FLAG_SPECULATIVE;
 
   return flags;
 }
+
+/* Return the btrace instruction for INSN.  */
+
+static btrace_insn
+pt_btrace_insn (const struct pt_insn &insn)
+{
+  return {(CORE_ADDR) insn.ip, (gdb_byte) insn.size,
+	  pt_reclassify_insn (insn.iclass),
+	  pt_btrace_insn_flags (insn)};
+}
+
 
 /* Add function branch trace using DECODER.  */
 
@@ -1138,7 +1149,6 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
   end = *pend;
   for (;;)
     {
-      struct btrace_insn btinsn;
       struct pt_insn insn;
 
       errcode = pt_insn_sync_forward (decoder);
@@ -1150,7 +1160,6 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	  break;
 	}
 
-      memset (&btinsn, 0, sizeof (btinsn));
       for (;;)
 	{
 	  errcode = pt_insn_next (decoder, &insn, sizeof(insn));
@@ -1207,11 +1216,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	  /* Maintain the function level offset.  */
 	  *plevel = std::min (*plevel, end->level);
 
-	  btinsn.pc = (CORE_ADDR) insn.ip;
-	  btinsn.size = (gdb_byte) insn.size;
-	  btinsn.iclass = pt_reclassify_insn (insn.iclass);
-	  btinsn.flags = pt_btrace_insn_flags (&insn);
-
+	  btrace_insn btinsn = pt_btrace_insn (insn);
 	  ftrace_update_insns (end, &btinsn);
 	}
 

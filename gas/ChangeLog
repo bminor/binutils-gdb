@@ -1,3 +1,128 @@
+2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips16_pcrel_val): New function, factored
+	out from...
+	(mips16_extended_frag): ... here.
+	(md_convert_frag): Use `mips16_pcrel_val' rather than repeated
+	code in MIPS16 relaxation, with `stretch' hardcoded to 0.
+
+2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MIPS16_LONG_BRANCH): Rename to...
+	(RELAX_MIPS16_ALWAYS_EXTENDED): ... this.
+	(RELAX_MIPS16_MARK_LONG_BRANCH): Rename to...
+	(RELAX_MIPS16_MARK_ALWAYS_EXTENDED): ... this.
+	(RELAX_MIPS16_CLEAR_LONG_BRANCH): Rename to...
+	(RELAX_MIPS16_CLEAR_ALWAYS_EXTENDED): ... this.
+	(mips16_extended_frag): Adjust accordingly.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (S_FORCE_RELOC): Separate section and symbol tests.
+
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (RELAX_ENCODE): Add `PIC' flag.
+	(RELAX_PIC): New macro.
+	(RELAX_USE_SECOND, RELAX_SECOND_LONGER, RELAX_NOMACRO)
+	(RELAX_DELAY_SLOT, RELAX_DELAY_SLOT_16BIT)
+	(RELAX_DELAY_SLOT_SIZE_FIRST, RELAX_DELAY_SLOT_SIZE_SECOND):
+	Shift bits.
+	(RELAX_BRANCH_ENCODE): Add `pic' flag.
+	(RELAX_BRANCH_UNCOND, RELAX_BRANCH_LIKELY, RELAX_BRANCH_LINK)
+	(RELAX_BRANCH_TOOFAR): Shift bits.
+	(RELAX_BRANCH_PIC): New macro.
+	(RELAX_MICROMIPS_ENCODE): Add `pic' flag.
+	(RELAX_MICROMIPS_PIC): New macro.
+	(RELAX_MICROMIPS_UNCOND, RELAX_MICROMIPS_COMPACT)
+	(RELAX_MICROMIPS_LINK, RELAX_MICROMIPS_NODS)
+	(RELAX_MICROMIPS_RELAX32): Shift bits.
+	(relax_close_frag): Pass `mips_pic' setting to RELAX_ENCODE.
+	(append_insn): Pass `mips_pic' setting to RELAX_BRANCH_ENCODE
+	and RELAX_MICROMIPS_ENCODE, and record it in `fx_tcbit2' of the
+	first fixup created.
+	(md_apply_fix) <BFD_RELOC_16_PCREL_S2>: Use `fx_tcbit2' of the
+	fixup processed rather than `mips_pic' in choosing to relax an
+	out of range branch to a jump.
+	(relaxed_branch_length): Use the `pic' flag of the relaxed frag
+	rather than `mips_pic'.
+	(relaxed_micromips_32bit_branch_length): Likewise.
+	(md_estimate_size_before_relax): Likewise.
+	(md_convert_frag): Likewise.
+
+	* testsuite/gas/mips/option-pic-relax-0.d: New test.
+	* testsuite/gas/mips/option-pic-relax-1.d: New test.
+	* testsuite/gas/mips/option-pic-relax-2.d: New test.
+	* testsuite/gas/mips/option-pic-relax-3.d: New test.
+	* testsuite/gas/mips/option-pic-relax-3a.d: New test.
+	* testsuite/gas/mips/option-pic-relax-4.d: New test.
+	* testsuite/gas/mips/option-pic-relax-5.d: New test.
+	* testsuite/gas/mips/option-pic-relax-2.l: New stderr output.
+	* testsuite/gas/mips/option-pic-relax-3.l: New stderr output.
+	* testsuite/gas/mips/option-pic-relax-4.l: New stderr output.
+	* testsuite/gas/mips/option-pic-relax-5.l: New stderr output.
+	* testsuite/gas/mips/option-pic-relax-0.s: New test source.
+	* testsuite/gas/mips/option-pic-relax-1.s: New test source.
+	* testsuite/gas/mips/option-pic-relax-2.s: New test source.
+	* testsuite/gas/mips/option-pic-relax-3.s: New test source.
+	* testsuite/gas/mips/option-pic-relax-4.s: New test source.
+	* testsuite/gas/mips/option-pic-relax-5.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/leave_enter.d: Update test.
+	* testsuite/gas/arc/leave_enter.s: Likewise.
+
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/b.d: Update test.
+	* testsuite/gas/arc/noargs_hs.d: Likewise.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Correct
+	BFD_RELOC_MIPS16_16_PCREL_S1 fixup size.
+	* testsuite/gas/mips/mips16-branch-addend-4.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-5.d: New test.
+	* testsuite/gas/mips/mips16-branch-addend-5.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-branch-addend-4.s: New test source.
+	* testsuite/gas/mips/mips16-branch-addend-5.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-04-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	PR gas/21407
+	* config/tc-sparc.c (md_apply_fix): Do not transform `call'
+	instructions into branch instructions in fixups generating
+	additional relocations.
+	* testsuite/gas/sparc/call-relax.s: New file.
+	* testsuite/gas/sparc/call-relax.d: Likewise.
+	* testsuite/gas/sparc/call-relax-aout.d: Likewise.
+	* testsuite/gas/sparc/sparc.exp: Test call-relax and call-relax-aout.
+
+2017-04-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Remove code generating MOVS.
+	Forbid MOV.W and MOVW if destination is SP or PC.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.s: Explain
+	expectation of LDR not generating a MOVS for low registers and small
+	constants.  Add tests of MOVW generation.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: Update
+	expected disassembly.
+
+2017-04-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/vle.s: Format.  Add se_rfgi and e_sc.
+	* testsuite/gas/ppc/vle.d: Update.
+
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21380
+	* testsuite/gas/aarch64/illegal-3.s: New file.
+	* testsuite/gas/aarch64/illegal-3.d: New file.
+
 2017-04-11  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_show_usage): Delete mention of -mhtm.

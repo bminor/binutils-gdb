@@ -144,8 +144,7 @@ mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
   update_solib_list (1);
 
   /* Print the table header.  */
-  struct cleanup *cleanup
-    = make_cleanup_ui_out_list_begin_end (uiout, "shared-libraries");
+  ui_out_emit_list list_emitter (uiout, "shared-libraries");
 
   ALL_SO_LIBS (so)
     {
@@ -160,6 +159,4 @@ mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
 
       do_cleanups (tuple_clean_up);
     }
-
-  do_cleanups (cleanup);
 }

@@ -1,3 +1,48 @@
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (print_insn_arc): Smartly print enter/leave mnemonics.
+	* arc-opc.c (insert_r13el): New function.
+	(R13_EL): Define.
+	* arc-tbl.h: Add new enter/leave variants.
+
+2017-04-25  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-tbl.h: Reorder NOP entry to be before MOV instructions.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (print_mips_disassembler_options): Add
+	`no-aliases'.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips16-opc.c (AL): New macro.
+	(mips16_opcodes): Mark "nop", "la", "dla", and synthetic forms
+	of "ld" and "lw" as aliases.
+
+2017-04-24  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-opc.c (aarch64_logical_immediate_p): Update DEBUG_TRACE
+	arguments.
+
+2017-04-22  Alexander Fedotov  <alfedotov@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (ELEV): Define.
+	(vle_opcodes): Add se_rfgi and e_sc.
+	(powerpc_opcodes): Enable lbdx, lhdx, lwdx, stbdx, sthdx, stwdx
+	for E200Z4.
+
+2017-04-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-opc.c (sparc_opcodes): Mark RETT instructions as v6notv9.
+
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21380
+	* aarch64-tbl.h (aarch64_opcode_table): Fix masks for LD1R, LD2R,
+	LD3R and LD4R.
+
 2017-04-13  Alan Modra  <amodra@gmail.com>
 
 	* epiphany-desc.c: Regenerate.

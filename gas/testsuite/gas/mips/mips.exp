@@ -1552,6 +1552,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-branch-addend-1"
     run_dump_test "mips16-branch-addend-2"
     run_dump_test "mips16-branch-addend-3"
+    run_dump_test "mips16-branch-addend-4"
+    run_dump_test "mips16-branch-addend-5"
     run_dump_test "mips16-branch-absolute"
     run_dump_test "mips16-branch-absolute-addend"
     if $has_newabi {
@@ -1798,6 +1800,13 @@ if { [istarget mips*-*-vxworks*] } {
 	"MIPS invalid PIC option in VxWorks PIC"
     run_list_test "option-pic-vxworks-2" "-mvxworks-pic" \
 	"MIPS invalid switch to SVR4 PIC from VxWorks PIC"
+    run_dump_test "option-pic-relax-0"
+    run_dump_test "option-pic-relax-1"
+    run_dump_test "option-pic-relax-2"
+    run_dump_test "option-pic-relax-3"
+    run_dump_test "option-pic-relax-3a"
+    run_dump_test "option-pic-relax-4"
+    run_dump_test "option-pic-relax-5"
 
     run_dump_test_arches "isa-override-1" "" [mips_arch_list_matching mips1]
     run_list_test_arches "isa-override-2" "-32" [mips_arch_list_matching mips1]

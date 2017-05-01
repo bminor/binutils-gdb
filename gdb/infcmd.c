@@ -1604,15 +1604,9 @@ advance_command (char *arg, int from_tty)
 struct value *
 get_return_value (struct value *function, struct type *value_type)
 {
-  struct regcache *stop_regs;
-  struct gdbarch *gdbarch;
+  regcache stop_regs (regcache::readonly, *get_current_regcache ());
+  struct gdbarch *gdbarch = stop_regs.arch ();
   struct value *value;
-  struct cleanup *cleanup;
-
-  stop_regs = regcache_dup (get_current_regcache ());
-  cleanup = make_cleanup_regcache_xfree (stop_regs);
-
-  gdbarch = get_regcache_arch (stop_regs);
 
   value_type = check_typedef (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
@@ -1631,7 +1625,7 @@ get_return_value (struct value *function, struct type *value_type)
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, function, value_type, stop_regs,
+      gdbarch_return_value (gdbarch, function, value_type, &stop_regs,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1640,8 +1634,6 @@ get_return_value (struct value *function, struct type *value_type)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
-
-  do_cleanups (cleanup);
 
   return value;
 }

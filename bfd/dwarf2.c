@@ -4205,7 +4205,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
          looking up the function by section + offset uses the
          DW_AT_decl_line from the function DW_TAG_subprogram for the line,
          which will be the line of the function name.  */
-      if ((section->flags & SEC_CODE) == 0)
+      if (symbols != NULL && (section->flags & SEC_CODE) == 0)
 	{
 	  asymbol **tmp;
 

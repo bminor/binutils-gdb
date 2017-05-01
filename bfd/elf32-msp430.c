@@ -2552,7 +2552,8 @@ uses_large_model (bfd *abfd)
 }
 
 static unsigned int
-elf32_msp430_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+elf32_msp430_eh_frame_address_size (bfd *abfd,
+				    const asection *sec ATTRIBUTE_UNUSED)
 {
   return uses_large_model (abfd) ? 4 : 2;
 }

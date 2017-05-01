@@ -121,6 +121,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_special_sections	      ppc64_elf_special_sections
 #define elf_backend_merge_symbol_attribute    ppc64_elf_merge_symbol_attribute
 #define elf_backend_merge_symbol	      ppc64_elf_merge_symbol
+#define elf_backend_get_reloc_section	      bfd_get_section_by_name
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -3819,6 +3820,13 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     }
 }
 
+/* Whether an undefined weak symbol should resolve to its link-time
+   value, even in PIC or PIE objects.  */
+#define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
+  ((H)->root.type == bfd_link_hash_undefweak		\
+   && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
+       || (INFO)->dynamic_undefined_weak == 0))
+
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
    section, and instead use a dynamic relocation to point into the
@@ -7296,8 +7304,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (ent == NULL
 	  || (h->type != STT_GNU_IFUNC
 	      && (SYMBOL_CALLS_LOCAL (info, h)
-		  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-		      && h->root.type == bfd_link_hash_undefweak)))
+		  || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	  || ((struct ppc_link_hash_entry *) h)->save_res)
 	{
 	  h->plt.plist = NULL;
@@ -8353,8 +8360,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 	      && (tga_fd->type == STT_FUNC
 		  || tga_fd->needs_plt)
 	      && !(SYMBOL_CALLS_LOCAL (info, tga_fd)
-		   || (ELF_ST_VISIBILITY (tga_fd->other) != STV_DEFAULT
-		       && tga_fd->root.type == bfd_link_hash_undefweak)))
+		   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, tga_fd)))
 	    {
 	      struct plt_entry *ent;
 
@@ -9658,8 +9664,7 @@ allocate_got (struct elf_link_hash_entry *h,
 	    || (htab->elf.dynamic_sections_created
 		&& h->dynindx != -1
 		&& !SYMBOL_REFERENCES_LOCAL (info, h)))
-	   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	       || h->root.type != bfd_link_hash_undefweak))
+	   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
     {
       asection *relgot = ppc64_elf_tdata (gent->owner)->relgot;
       relgot->size += rentsize;
@@ -9794,9 +9799,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   /* Also discard relocs on undefined weak syms with non-default
      visibility, or when dynamic_undefined_weak says so.  */
-  else if (h->root.type == bfd_link_hash_undefweak
-	   && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	       || info->dynamic_undefined_weak == 0))
+  else if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
     eh->dyn_relocs = NULL;
 
   if (eh->dyn_relocs != NULL)
@@ -14457,8 +14460,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    if (!htab->elf.dynamic_sections_created
 			|| h->elf.dynindx == -1
 			|| SYMBOL_REFERENCES_LOCAL (info, &h->elf)
-			|| (ELF_ST_VISIBILITY (h->elf.other) != STV_DEFAULT
-			    && h->elf.root.type == bfd_link_hash_undefweak))
+			|| UNDEFWEAK_NO_DYNAMIC_RELOC (info, &h->elf))
 		      /* This is actually a static link, or it is a
 			 -Bsymbolic link and the symbol is defined
 			 locally, or the symbol was forced to be local
@@ -14524,9 +14526,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		else if (indx != 0
 			 || (bfd_link_pic (info)
 			     && (h == NULL
-				 || (ELF_ST_VISIBILITY (h->elf.other)
-				     == STV_DEFAULT)
-				 || h->elf.root.type != bfd_link_hash_undefweak
+				 || !UNDEFWEAK_NO_DYNAMIC_RELOC (info, &h->elf)
 				 || (tls_type == (TLS_TLS | TLS_LD)
 				     && !h->elf.def_dynamic))))
 		  relgot = ppc64_elf_tdata (ent->owner)->relgot;

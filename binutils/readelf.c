@@ -6215,6 +6215,13 @@ process_section_headers (FILE * file)
 	  break;
 	}
 
+      /* Check the sh_size field.  */
+      if (section->sh_size > current_file_size
+	  && section->sh_type != SHT_NOBITS
+	  && section->sh_type != SHT_NULL
+	  && section->sh_type < SHT_LOOS)
+	warn (_("Size of section %u is larger than the entire file!\n"), i);
+
       printf ("  [%2u] ", i);
       if (do_section_details)
 	printf ("%s\n      ", printable_section_name (section));
@@ -10171,8 +10178,9 @@ process_version_sections (FILE * file)
 		printf (_("  Index: %d  Cnt: %d  "),
 			ent.vd_ndx, ent.vd_cnt);
 
-		/* Check for overflow.  */
-		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart))
+		/* Check for overflow and underflow.  */
+		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart)
+		    || (vstart + ent.vd_aux < vstart))
 		  break;
 
 		vstart += ent.vd_aux;
@@ -15007,8 +15015,93 @@ process_mips_specific (FILE * file)
 
   /* We have a lot of special sections.  Thanks SGI!  */
   if (dynamic_section == NULL)
-    /* No information available.  */
-    return res;
+    {
+      /* No dynamic information available.  See if there is static GOT.  */
+      sect = find_section (".got");
+      if (sect != NULL)
+	{
+	  unsigned char *data_end;
+	  unsigned char *data;
+	  bfd_vma ent, end;
+	  int addr_size;
+
+	  pltgot = sect->sh_addr;
+
+	  ent = pltgot;
+	  addr_size = (is_32bit_elf ? 4 : 8);
+	  end = pltgot + sect->sh_size;
+
+	  data = (unsigned char *) get_data (NULL, file, sect->sh_offset,
+					     end - pltgot, 1,
+					     _("Global Offset Table data"));
+	  /* PR 12855: Null data is handled gracefully throughout.  */
+	  data_end = data + (end - pltgot);
+
+	  printf (_("\nStatic GOT:\n"));
+	  printf (_(" Canonical gp value: "));
+	  print_vma (ent + 0x7ff0, LONG_HEX);
+	  printf ("\n\n");
+
+	  /* In a dynamic binary GOT[0] is reserved for the dynamic
+	     loader to store the lazy resolver pointer, however in
+	     a static binary it may well have been omitted and GOT
+	     reduced to a table of addresses.
+	     PR 21344: Check for the entry being fully available
+	     before fetching it.  */
+	  if (data
+	      && data + ent - pltgot + addr_size <= data_end
+	      && byte_get (data + ent - pltgot, addr_size) == 0)
+	    {
+	      printf (_(" Reserved entries:\n"));
+	      printf (_("  %*s %10s %*s\n"),
+		      addr_size * 2, _("Address"), _("Access"),
+		      addr_size * 2, _("Value"));
+	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
+	      printf ("\n");
+	      if (ent == (bfd_vma) -1)
+		goto sgot_print_fail;
+
+	      /* Check for the MSB of GOT[1] being set, identifying a
+		 GNU object.  This entry will be used by some runtime
+		 loaders, to store the module pointer.  Otherwise this
+		 is an ordinary local entry.
+		 PR 21344: Check for the entry being fully available
+		 before fetching it.  */
+	      if (data
+		  && data + ent - pltgot + addr_size <= data_end
+		  && (byte_get (data + ent - pltgot, addr_size)
+		      >> (addr_size * 8 - 1)) != 0)
+		{
+		  ent = print_mips_got_entry (data, pltgot, ent, data_end);
+		  printf ("\n");
+		  if (ent == (bfd_vma) -1)
+		    goto sgot_print_fail;
+		}
+	      printf ("\n");
+	    }
+
+	  if (ent < end)
+	    {
+	      printf (_(" Local entries:\n"));
+	      printf ("  %*s %10s %*s\n",
+		      addr_size * 2, _("Address"), _("Access"),
+		      addr_size * 2, _("Value"));
+	      while (ent < end)
+		{
+		  ent = print_mips_got_entry (data, pltgot, ent, data_end);
+		  printf ("\n");
+		  if (ent == (bfd_vma) -1)
+		    goto sgot_print_fail;
+		}
+	      printf ("\n");
+	    }
+
+	sgot_print_fail:
+	  if (data)
+	    free (data);
+	}
+      return res;
+    }
 
   for (entry = dynamic_section;
        /* PR 17531 file: 012-50589-0.004.  */
@@ -15483,8 +15576,7 @@ process_mips_specific (FILE * file)
       data = (unsigned char *) get_data (NULL, file, offset,
                                          global_end - pltgot, 1,
 					 _("Global Offset Table data"));
-      if (data == NULL)
-	return FALSE;
+      /* PR 12855: Null data is handled gracefully throughout.  */
       data_end = data + (global_end - pltgot);
 
       printf (_("\nPrimary GOT:\n"));
@@ -15501,24 +15593,20 @@ process_mips_specific (FILE * file)
       if (ent == (bfd_vma) -1)
 	goto got_print_fail;
 
-      if (data)
+      /* Check for the MSB of GOT[1] being set, denoting a GNU object.
+	 This entry will be used by some runtime loaders, to store the
+	 module pointer.  Otherwise this is an ordinary local entry.
+	 PR 21344: Check for the entry being fully available before
+	 fetching it.  */
+      if (data
+	  && data + ent - pltgot + addr_size <= data_end
+	  && (byte_get (data + ent - pltgot, addr_size)
+	      >> (addr_size * 8 - 1)) != 0)
 	{
-	  /* PR 21344 */
-	  if (data + ent - pltgot > data_end - addr_size)
-	    {
-	      error (_("Invalid got entry - %#lx - overflows GOT table\n"),
-		     (long) ent);
-	      goto got_print_fail;
-	    }
-	  
-	  if (byte_get (data + ent - pltgot, addr_size)
-	      >> (addr_size * 8 - 1) != 0)
-	    {
-	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
-	      printf (_(" Module pointer (GNU extension)\n"));
-	      if (ent == (bfd_vma) -1)
-		goto got_print_fail;
-	    }
+	  ent = print_mips_got_entry (data, pltgot, ent, data_end);
+	  printf (_(" Module pointer (GNU extension)\n"));
+	  if (ent == (bfd_vma) -1)
+	    goto got_print_fail;
 	}
       printf ("\n");
 
@@ -16902,7 +16990,6 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       expected_types = bool_expected;
       ++ name;
       break;
-
     default:
       if (ISPRINT (* name))
 	{
@@ -16916,9 +17003,11 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	}
       else
 	{
-	  error (_("unexpected character in name field\n"));
-	  print_symbol (- left, _("<unknown attribute>"));
-	  return 0;
+	  static char tmpbuf [128];
+	  error (_("unrecognised byte in name field: %d\n"), * name);
+	  sprintf (tmpbuf, _("<unknown:_%d>"), * name);
+	  text = tmpbuf;
+	  name ++;
 	}
       expected_types = "*$!+";
       break;
@@ -16948,10 +17037,28 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	unsigned int   bytes = pnote->namesz - (name - pnote->namedata);
-	unsigned long  val = 0;
-	unsigned int   shift = 0;
-	char *         decoded = NULL;
+	unsigned int        bytes;
+	unsigned long long  val = 0;
+	unsigned int        shift = 0;
+	char *              decoded = NULL;
+
+	bytes = pnote->namesz - (name - pnote->namedata);
+	if (bytes > 0)
+	  /* The -1 is because the name field is always 0 terminated, and we
+	     want to be able to ensure that the shift in the while loop below
+	     will not overflow.  */
+	  -- bytes;
+
+	if (bytes > sizeof (val))
+	  {
+	    fprintf (stderr, "namesz %lx name %p namedata %p\n",
+		     pnote->namesz, name, pnote->namedata);
+	    error (_("corrupt numeric name field: too many bytes in the value: %x\n"),
+		   bytes);
+	    bytes = sizeof (val);
+	  }
+	/* We do not bother to warn if bytes == 0 as this can
+	   happen with some early versions of the gcc plugin.  */
 
 	while (bytes --)
 	  {
@@ -16991,13 +17098,21 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	  }
 
 	if (decoded != NULL)
-	  print_symbol (-left, decoded);
+	  {
+	    print_symbol (-left, decoded);
+	    left = 0;
+	  }
+	else if (val == 0)
+	  {
+	    printf ("0x0");
+	    left -= 3;
+	  }
 	else
 	  {
 	    if (do_wide)
-	      left -= printf ("0x%lx", val);
+	      left -= printf ("0x%llx", val);
 	    else
-	      left -= printf ("0x%-.*lx", left, val);
+	      left -= printf ("0x%-.*llx", left, val);
 	  }
       }
       break;

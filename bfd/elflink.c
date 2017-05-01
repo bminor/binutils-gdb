@@ -3851,6 +3851,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (!just_syms
 	  && (bfd_link_pic (info)
 	      || (!bfd_link_relocatable (info)
+		  && info->nointerp
 		  && (info->export_dynamic || info->dynamic)))
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
@@ -6459,7 +6460,12 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
 			      &sweep_info);
 
-      _bfd_elf_link_renumber_dynsyms (output_bfd, info, &section_sym_count);
+      /* We need to reassign dynsym indices now that symbols may have
+	 been removed.  See the call in `bfd_elf_size_dynsym_hash_dynstr'
+	 for the details of the conditions used here.  */
+      if (elf_hash_table (info)->dynamic_sections_created
+	  || bed->always_renumber_dynsyms)
+	_bfd_elf_link_renumber_dynsyms (output_bfd, info, &section_sym_count);
     }
 
   /* Any syms created from now on start with -1 in
@@ -6826,6 +6832,8 @@ bfd_boolean
 bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 {
   const struct elf_backend_data *bed;
+  unsigned long section_sym_count;
+  bfd_size_type dynsymcount;
 
   if (!is_elf_hash_table (info->hash))
     return TRUE;
@@ -6833,23 +6841,29 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
   bed = get_elf_backend_data (output_bfd);
   (*bed->elf_backend_init_index_section) (output_bfd, info);
 
+  /* Assign dynsym indices.  In a shared library we generate a section
+     symbol for each output section, which come first.  Next come all
+     of the back-end allocated local dynamic syms, followed by the rest
+     of the global symbols.
+
+     This is usually not needed for static binaries, however backends
+     can request to always do it, e.g. the MIPS backend uses dynamic
+     symbol counts to lay out GOT, which will be produced in the
+     presence of GOT relocations even in static binaries (holding fixed
+     data in that case, to satisfy those relocations).  */
+
+  if (elf_hash_table (info)->dynamic_sections_created
+      || bed->always_renumber_dynsyms)
+    dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
+						  &section_sym_count);
+
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       bfd *dynobj;
       asection *s;
-      bfd_size_type dynsymcount;
-      unsigned long section_sym_count;
       unsigned int dtagcount;
 
       dynobj = elf_hash_table (info)->dynobj;
-
-      /* Assign dynsym indicies.  In a shared library we generate a
-	 section symbol for each output section, which come first.
-	 Next come all of the back-end allocated local dynamic syms,
-	 followed by the rest of the global symbols.  */
-
-      dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
-						    &section_sym_count);
 
       /* Work out the size of the symbol version section.  */
       s = bfd_get_linker_section (dynobj, ".gnu.version");
@@ -7281,9 +7295,10 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
       h->forced_local = 1;
       if (h->dynindx != -1)
 	{
-	  h->dynindx = -1;
 	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 				  h->dynstr_index);
+	  h->dynindx = -1;
+	  h->dynstr_index = 0;
 	}
     }
 }
@@ -13792,6 +13807,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   if (o != NULL)
     {
       asection *i;
+      int eh_changed = 0;
 
       for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	{
@@ -13809,10 +13825,17 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, i,
 						 bfd_elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    changed = 1;
+	    {
+	      eh_changed = 1;
+	      if (i->size != i->rawsize)
+		changed = 1;
+	    }
 
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
+      if (eh_changed)
+	elf_link_hash_traverse (elf_hash_table (info),
+				_bfd_elf_adjust_eh_frame_global_symbol, NULL);
     }
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)

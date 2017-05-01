@@ -1,3 +1,26 @@
+2017-04-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR testsuite/8595
+	* gdb.base/environ.exp: Make test available in all architectures.
+	Move bits related to "info program" testing to
+	gdb.base/info-program.exp.  Rewrite tests to use the two new
+	procedures mentione below.
+	(test_set_show_env_var) New procedure.
+	(test_set_show_env_var_equal): Likewise.
+	* gdb.base/info-program.exp: New file.
+
+2017-04-27  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/oranking.cc (test15): New function.
+	(main): Call test15 and declare additional variables for testing.
+	* gdb.cp/oranking.exp: Remove kfail status for "p foo4(&a)" and
+	"p foo101('abc')" tests.
+	Add tests for cv qualifier overloads.
+	* gdb.cp/rvalue-ref-overloads.exp: Remove kfail status for
+	"lvalue reference overload" test.
+	* gdb.cp/rvalue-ref-params.exp: Remove kfail status for
+	"print value of f1 on Child&& in f2" test.
+
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/threadapply.exp (kill_and_remove_inferior): New

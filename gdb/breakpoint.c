@@ -947,7 +947,6 @@ get_first_locp_gte_addr (CORE_ADDR address)
   struct bp_location **locp_found = NULL;
 
   /* Initialize the dummy location's address field.  */
-  memset (&dummy_loc, 0, sizeof (struct bp_location));
   dummy_loc.address = address;
 
   /* Find a close match to the first location at ADDRESS.  */
@@ -4885,13 +4884,11 @@ print_solib_event (int is_catchpoint)
 
   if (any_deleted)
     {
-      struct cleanup *cleanup;
       char *name;
       int ix;
 
       current_uiout->text (_("  Inferior unloaded "));
-      cleanup = make_cleanup_ui_out_list_begin_end (current_uiout,
-						    "removed");
+      ui_out_emit_list list_emitter (current_uiout, "removed");
       for (ix = 0;
 	   VEC_iterate (char_ptr, current_program_space->deleted_solibs,
 			ix, name);
@@ -4902,19 +4899,15 @@ print_solib_event (int is_catchpoint)
 	  current_uiout->field_string ("library", name);
 	  current_uiout->text ("\n");
 	}
-
-      do_cleanups (cleanup);
     }
 
   if (any_added)
     {
       struct so_list *iter;
       int ix;
-      struct cleanup *cleanup;
 
       current_uiout->text (_("  Inferior loaded "));
-      cleanup = make_cleanup_ui_out_list_begin_end (current_uiout,
-						    "added");
+      ui_out_emit_list list_emitter (current_uiout, "added");
       for (ix = 0;
 	   VEC_iterate (so_list_ptr, current_program_space->added_solibs,
 			ix, iter);
@@ -4925,8 +4918,6 @@ print_solib_event (int is_catchpoint)
 	  current_uiout->field_string ("library", iter->so_name);
 	  current_uiout->text ("\n");
 	}
-
-      do_cleanups (cleanup);
     }
 }
 
@@ -6271,7 +6262,6 @@ output_thread_groups (struct ui_out *uiout,
 		      VEC(int) *inf_num,
 		      int mi_only)
 {
-  struct cleanup *back_to;
   int is_mi = uiout->is_mi_like_p ();
   int inf;
   int i;
@@ -6281,7 +6271,7 @@ output_thread_groups (struct ui_out *uiout,
   if (!is_mi && mi_only)
     return;
 
-  back_to = make_cleanup_ui_out_list_begin_end (uiout, field_name);
+  ui_out_emit_list list_emitter (uiout, field_name);
 
   for (i = 0; VEC_iterate (int, inf_num, i, inf); ++i)
     {
@@ -6302,8 +6292,6 @@ output_thread_groups (struct ui_out *uiout,
 	  uiout->text (plongest (inf));
 	}
     }
-
-  do_cleanups (back_to);
 }
 
 /* Print B to gdb_stdout.  */
@@ -6619,12 +6607,9 @@ print_one_breakpoint_location (struct breakpoint *b,
   l = b->commands ? b->commands->commands : NULL;
   if (!part_of_multiple && l)
     {
-      struct cleanup *script_chain;
-
       annotate_field (9);
-      script_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "script");
+      ui_out_emit_tuple tuple_emitter (uiout, "script");
       print_command_lines (uiout, l, 4);
-      do_cleanups (script_chain);
     }
 
   if (is_tracepoint (b))
@@ -6679,13 +6664,13 @@ print_one_breakpoint (struct breakpoint *b,
 		      struct bp_location **last_loc, 
 		      int allflag)
 {
-  struct cleanup *bkpt_chain;
   struct ui_out *uiout = current_uiout;
 
-  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
+  {
+    ui_out_emit_tuple tuple_emitter (uiout, "bkpt");
 
-  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
-  do_cleanups (bkpt_chain);
+    print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
+  }
 
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
@@ -6708,10 +6693,8 @@ print_one_breakpoint (struct breakpoint *b,
 
 	  for (loc = b->loc; loc; loc = loc->next, ++n)
 	    {
-	      struct cleanup *inner2 =
-		make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	      print_one_breakpoint_location (b, loc, n, last_loc, allflag);
-	      do_cleanups (inner2);
 	    }
 	}
     }
@@ -7316,11 +7299,9 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     }
 }
 
-void
-init_bp_location (struct bp_location *loc, const struct bp_location_ops *ops,
-		  struct breakpoint *owner)
+bp_location::bp_location (const bp_location_ops *ops, breakpoint *owner)
 {
-  memset (loc, 0, sizeof (*loc));
+  bp_location *loc = this;
 
   gdb_assert (ops != NULL);
 
@@ -7447,8 +7428,6 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
 				      enum bptype bptype,
 				      const struct breakpoint_ops *ops)
 {
-  memset (b, 0, sizeof (*b));
-
   gdb_assert (ops != NULL);
 
   b->ops = ops;
@@ -7456,17 +7435,7 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
   b->gdbarch = gdbarch;
   b->language = current_language->la_language;
   b->input_radix = input_radix;
-  b->thread = -1;
-  b->enable_state = bp_enabled;
-  b->next = 0;
-  b->silent = 0;
-  b->ignore_count = 0;
-  b->commands = NULL;
-  b->frame_id = null_frame_id;
-  b->condition_not_parsed = 0;
-  b->py_bp_object = NULL;
   b->related_breakpoint = b;
-  b->location = NULL;
 }
 
 /* Helper to set_raw_breakpoint below.  Creates a breakpoint
@@ -10783,37 +10752,37 @@ print_it_watchpoint (bpstat bs)
 static void
 print_mention_watchpoint (struct breakpoint *b)
 {
-  struct cleanup *ui_out_chain;
   struct watchpoint *w = (struct watchpoint *) b;
   struct ui_out *uiout = current_uiout;
+  const char *tuple_name;
 
   switch (b->type)
     {
     case bp_watchpoint:
       uiout->text ("Watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+      tuple_name = "wpt";
       break;
     case bp_hardware_watchpoint:
       uiout->text ("Hardware watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+      tuple_name = "wpt";
       break;
     case bp_read_watchpoint:
       uiout->text ("Hardware read watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
+      tuple_name = "hw-rwpt";
       break;
     case bp_access_watchpoint:
       uiout->text ("Hardware access (read/write) watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
+      tuple_name = "hw-awpt";
       break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Invalid hardware watchpoint type."));
     }
 
+  ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
   uiout->field_int ("number", b->number);
   uiout->text (": ");
   uiout->field_string ("exp", w->exp_string);
-  do_cleanups (ui_out_chain);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for
@@ -10982,31 +10951,31 @@ print_mention_masked_watchpoint (struct breakpoint *b)
 {
   struct watchpoint *w = (struct watchpoint *) b;
   struct ui_out *uiout = current_uiout;
-  struct cleanup *ui_out_chain;
+  const char *tuple_name;
 
   switch (b->type)
     {
     case bp_hardware_watchpoint:
       uiout->text ("Masked hardware watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+      tuple_name = "wpt";
       break;
     case bp_read_watchpoint:
       uiout->text ("Masked hardware read watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
+      tuple_name = "hw-rwpt";
       break;
     case bp_access_watchpoint:
       uiout->text ("Masked hardware access (read/write) watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
+      tuple_name = "hw-awpt";
       break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Invalid hardware watchpoint type."));
     }
 
+  ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
   uiout->field_int ("number", b->number);
   uiout->text (": ");
   uiout->field_string ("exp", w->exp_string);
-  do_cleanups (ui_out_chain);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for
@@ -12840,11 +12809,7 @@ base_breakpoint_dtor (struct breakpoint *self)
 static struct bp_location *
 base_breakpoint_allocate_location (struct breakpoint *self)
 {
-  struct bp_location *loc;
-
-  loc = new struct bp_location ();
-  init_bp_location (loc, &bp_location_ops, self);
-  return loc;
+  return new bp_location (&bp_location_ops, self);
 }
 
 static void

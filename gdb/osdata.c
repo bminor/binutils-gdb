@@ -381,27 +381,26 @@ info_osdata (const char *type)
                        ix_items, item);
           ix_items++)
        {
-         struct cleanup *old_chain;
          int ix_cols;
          struct osdata_column *col;
 
-         old_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "item");
+	 {
+	   ui_out_emit_tuple tuple_emitter (uiout, "item");
 
-         for (ix_cols = 0;
-              VEC_iterate (osdata_column_s, item->columns,
-                           ix_cols, col);
-              ix_cols++)
-	   {
-	     char col_name[32];
+	   for (ix_cols = 0;
+		VEC_iterate (osdata_column_s, item->columns,
+			     ix_cols, col);
+		ix_cols++)
+	     {
+	       char col_name[32];
 
-	     if (ix_cols == col_to_skip)
-	       continue;
+	       if (ix_cols == col_to_skip)
+		 continue;
 
-	     snprintf (col_name, 32, "col%d", ix_cols);
-	     uiout->field_string (col_name, col->value);
-	   }
-	 
-         do_cleanups (old_chain);
+	       snprintf (col_name, 32, "col%d", ix_cols);
+	       uiout->field_string (col_name, col->value);
+	     }
+	 }
 
          uiout->text ("\n");
        }

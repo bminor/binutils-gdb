@@ -395,14 +395,12 @@ skip_info (char *arg, int from_tty)
 
   ALL_SKIPLIST_ENTRIES (e)
     {
-      struct cleanup *entry_chain;
 
       QUIT;
       if (arg != NULL && !number_is_in_list (arg, e->number))
 	continue;
 
-      entry_chain = make_cleanup_ui_out_tuple_begin_end (current_uiout,
-							 "blklst-entry");
+      ui_out_emit_tuple tuple_emitter (current_uiout, "blklst-entry");
       current_uiout->field_int ("number", e->number); /* 1 */
 
       if (e->enabled)
@@ -426,7 +424,6 @@ skip_info (char *arg, int from_tty)
 	"function", e->function ? e->function : "<none>"); /* 6 */
 
       current_uiout->text ("\n");
-      do_cleanups (entry_chain);
     }
 
   do_cleanups (tbl_chain);

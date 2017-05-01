@@ -1,3 +1,461 @@
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* infcmd.c (get_return_value): Use regcache ctor, and remove
+	cleanup.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* regcache.c (regcache::regcache): New tag dispatch ctor.
+	(do_cooked_read): Moved above.
+	(regcache_dup): Use the tag dispatch ctor..
+	* regcache.h (regcache): Declare ctor, delete copy ctor and
+	assignment operator, remove friend regcache_dup.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_dup): Assert !src->m_readonly_p and
+	call method save instead of regcache_cpy.
+	* regcache.h (struct regcache): Make regcache_dup a friend.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (struct regcache): Move to regcache.h
+	(regcache::arch): New method.
+	(regcache_get_ptid): Update.
+	(get_regcache_arch): Call arch method.
+	(get_regcache_aspace): Call method aspace.
+	(register_buffer): Change it to method.
+	(regcache_save): Change it to regcache::save.
+	(regcache_restore): Likewise.
+	(regcache_cpy_no_passthrough): Remove the declaration.
+	(regcache_cpy): Call methods restore and cpy_no_passthrough.
+	(regcache_cpy_no_passthrough): Change it to method
+	cpy_no_passthrough.
+	(regcache_register_status): Change it to method
+	get_register_status.
+	(regcache_invalidate): Change it to method invalidate.
+	(regcache_thread_ptid_changed): Use methods ptid and set_ptid.
+	(regcache_raw_update): Change it to method raw_update.
+	(regcache_raw_read): Likewise.
+	(regcache_raw_read_signed): Likewise.
+	(regcache_raw_read_unsigned): Likewise.
+	(regcache_raw_write_signed): Likewise.
+	(regcache_raw_write_unsigned): Likewise.
+	(regcache_cooked_read): Likewise.
+	(regcache_cooked_read_value): Likewise.
+	(regcache_cooked_read_signed): Likewise.
+	(regcache_cooked_read_unsigned): Likewise.
+	(regcache_cooked_write_signed): Likewise.
+	(regcache_cooked_write_unsigned): Likewise.
+	(regcache_raw_set_cached_value): Likewise.
+	(regcache_raw_write): Likewise.
+	(regcache_cooked_write): Likewise.
+	(regcache_xfer_part): Likewise.
+	(regcache_raw_read_part): Likewise.
+	(regcache_raw_write_part): Likewise.
+	(regcache_cooked_read_part): Likewise.
+	(regcache_cooked_write_part): Likewise.
+	(regcache_raw_supply): Likewise.
+	(regcache_raw_collect): Likewise.
+	(regcache_transfer_regset): Likewise.
+	(regcache_supply_regset): Likewise.
+	(regcache_collect_regset): Likewise.
+	(regcache_debug_print_register): Likewise.
+	(enum regcache_dump_what): Move it to regcache.h.
+	(regcache_dump): Change it to method dump.
+	* regcache.h (enum regcache_dump_what): New.
+	(class regcache): New.
+	* target.c (target_fetch_registers): Call method
+	debug_print_register.
+	(target_store_registers): Likewise.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* windows-nat.c (struct lm_info_windows): Initialize field.
+	(windows_make_so): Allocate lm_info_windows with new.
+	(windows_free_so): Free lm_info_windows with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-darwin.c (struct lm_info_darwin): Initialize field.
+	(darwin_current_sos): Allocate lm_info_darwin with new, remove
+	cleanup.
+	(darwin_free_so): Free lm_info_darwin with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-svr4.h (struct lm_info_svr4): Initialize fields.
+	<l_addr_p>: Change type to bool.
+	* solib-svr4.c (lm_info_read): Allocate lm_info_svr4 with new.
+	(svr4_free_so): Free lm_info_svr4 with delete.
+	(svr4_copy_library_list): Replace memcpy with call to copy
+	constructor.
+	(library_list_start_library, svr4_default_sos): Allocate
+	lm_info_svr4 with new.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-target.c (struct lm_info_target): Add destructor,
+	initialize fields.
+	<name>: Change type to std::string.
+	(library_list_start_library): Allocate lm_info_target with new.
+	(solib_target_free_library_list): Free lm_info_target with
+	delete.
+	(solib_target_current_sos): Adapt to std::string.
+	(solib_target_free_so): Free lm_info_target with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-frv.c (struct lm_info_frv): Add destructor, initialize
+	fields.
+	(frv_current_sos): Allocate lm_info_frv with new.
+	(frv_relocate_main_executable): Free lm_info_frv with delete,
+	allocate with new.
+	(frv_clear_solib, frv_free_so): Free lm_info_frv with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-frv.c (struct lm_info_frv): Fix indentation.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-dsbt.c (struct lm_info_dsbt): Add destructor, initialize
+	map field.
+	(dsbt_current_sos): Allocate lm_info_dsbt with new.
+	(dsbt_relocate_main_executable): Free lm_info_dsbt with delete
+	and allocate with new.
+	(dsbt_clear_solib, dsbt_free_so): Free lm_info_dsbt with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-aix.c (struct lm_info_aix): Initialize fields in-class.
+	<filename, member_name>: Change type to std::string.
+	(solib_aix_new_lm_info, solib_aix_xfree_lm_info): Remove.
+	(library_list_start_library): Allocate lm_info_aix with new.
+	(solib_aix_free_library_list, solib_aix_free_so): Free with delete.
+	(solib_aix_current_sos): Adapt to std::string, copy lm_info_aix
+	with copy constructor.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solist.h (struct lm_info): Remove.
+	(struct lm_info_base): New class.
+	(struct so_list) <lm_info>: Change type to lm_info_base *.
+	* nto-tdep.c (struct lm_info): Remove.
+	(lm_addr): Adjust.
+	* solib-aix.c (struct lm_info): Rename to ...
+	(struct lm_info_aix): ... this.  Extend lm_info_base.
+	(lm_info_p): Rename to ...
+	(lm_info_aix_p): ... this, and adjust.
+	(solib_aix_new_lm_info, solib_aix_xfree_lm_info,
+	solib_aix_parse_libraries, library_list_start_library,
+	solib_aix_free_library_list, solib_aix_parse_libraries,
+	solib_aix_get_library_list,
+	solib_aix_relocate_section_addresses, solib_aix_free_so,
+	solib_aix_get_section_offsets,
+	solib_aix_solib_create_inferior_hook, solib_aix_current_sos):
+	Adjust.
+	(struct solib_aix_inferior_data) <library_list>: Adjust.
+	* solib-darwin.c (struct lm_info): Rename to ...
+	(struct lm_info_darwin): ... this.  Extend lm_info_base.
+	(darwin_current_sos, darwin_relocate_section_addresses): Adjust.
+	* solib-dsbt.c (struct lm_info): Rename to ...
+	(struct lm_info_dsbt): ... this.  Extend lm_info_base.
+	(struct dsbt_info) <main_executable_lm_info): Adjust.
+	(dsbt_current_sos, dsbt_relocate_main_executable, dsbt_free_so,
+	dsbt_relocate_section_addresses): Adjust.
+	* solib-frv.c (struct lm_info): Rename to ...
+	(struct lm_info_frv): ... this.  Extend lm_info_base.
+	(main_executable_lm_info): Adjust.
+	(frv_current_sos, frv_relocate_main_executable, frv_free_so,
+	frv_relocate_section_addresses, frv_fdpic_find_global_pointer,
+	find_canonical_descriptor_in_load_object,
+	frv_fdpic_find_canonical_descriptor): Adjust.
+	* solib-svr4.c (struct lm_info): Move to solib-svr4.h, renamed
+	to lm_info_svr4.
+	(lm_info_read, lm_addr_check, svr4_keep_data_in_core,
+	svr4_clear_so, svr4_copy_library_list,
+	library_list_start_library, svr4_default_sos, svr4_read_so_list,
+	svr4_current_sos, svr4_fetch_objfile_link_map,
+	solist_update_incremental): Adjust.
+	* solib-svr4.h (struct lm_info_svr4): Move here from
+	solib-svr4.c.
+	* solib-target.c (struct lm_info): Rename to ...
+	(struct lm_info_target): ... this.  Extend lm_info_base.
+	(lm_info_p): Rename to ...
+	(lm_info_target_p): ... this.
+	(solib_target_parse_libraries, library_list_start_segment,
+	library_list_start_section, library_list_start_library,
+	library_list_end_library, solib_target_free_library_list,
+	solib_target_current_sos, solib_target_free_so,
+	solib_target_relocate_section_addresses): Adjust.
+	* windows-nat.c (struct lm_info): Rename to ...
+	(struct lm_info_windows): ... this.  Extend lm_info_base.
+	(windows_make_so, handle_load_dll, handle_unload_dll,
+	windows_xfer_shared_libraries): Adjust.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-darwin.c (struct darwin_so_list): Remove.
+	(darwin_current_sos): Allocate an so_list object instead of a
+	darwin_so_list, separately allocate an lm_info object.
+	(darwin_free_so): Free lm_info.
+
+2017-04-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-tdep.c (print_gp_register_row): Replace printf_filtered
+	with fprintf_filtered.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache::regcache): New function.
+	(regcache::~regcache): New function.
+	(regcache_xmalloc_1): Remove.
+	(regcache_xmalloc): Call new regcache.
+	(regcache_xfree): Call delete regcache.
+	(get_thread_arch_aspace_regcache): Call new regcache.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c (mips_linux_new_thread): Use ptid method
+	lwp instead of ptid_get_lwp.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c (mips_linux_new_thread): Get lwpid from
+	lwp_info instead of getting from inferior_ptid.
+
+2017-04-27  Keith Seitz  <keiths@redhat.com>
+
+	* gdbtypes.c (LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS)
+	DIFFERENT_REFERENCE_TYPE_BADNESS): Remove.
+	(CV_CONVERSION_BADNESS): Define.
+	(rank_one_type): Remove overly restrictive rvalue reference
+	rank checks.
+	Add cv-qualifier checks and subranks for type equality.
+	* gdbtypes.h (REFERENCE_CONVERSION_RVALUE,
+	REFERENCE_CONVERSION_CONST_LVALUE, CV_CONVERSION_BADNESS,
+	CV_CONVERSION_CONST, CV_CONVERSION_VOLATILE): Declare.
+
+2017-04-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-inferior.c (inferior_to_inferior_object): Increment reference
+	count when creating the object.
+
+2017-04-27  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* xcoffread.c (read_xcoff_symtab): Read correct function auxiliary
+	entry if xlc -qfuncsect or gcc -ffunction-sections compiler option
+	is used in AIX.
+	(read_xcoff_symtab): Handle C_WEAKEXT storage class.
+	(process_xcoff_symbol): Likewise.
+	(scan_xcoff_symtab): Likewise.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* ia64-tdep.c (examine_prologue): Use get_frame_register_unsigned.
+	(ia64_sigtramp_frame_prev_register): Use read_memory_unsigned_integer.
+	(ia64_access_reg): Use get_frame_register_unsigned.
+	(ia64_access_rse_reg): Likewise.
+	(ia64_libunwind_frame_prev_register): Likewise.
+
+2017-04-26  Jiong Wang  <jiong.wang@arm.com>
+
+	* gdbarch.sh: New gdbarch method execute_dwarf_cfa_vendor_op.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Made the
+	visibility external.
+	(execute_cfa_program): Call execute_dwarf_cfa_vendor_op for CFI
+	between DW_CFA_lo_user and DW_CFA_high_user inclusive.
+	(enum cfa_how_kind): Move to ...
+	(struct dwarf2_frame_state_reg_info): Likewise.
+	(struct dwarf2_frame_state): Likewise.
+	* dwarf2-frame.h: ... here.
+	(dwarf2_frame_state_alloc_regs): New declaration.
+	* sparc-tdep.c (sparc_execute_dwarf_cfa_vendor_op): New function.
+	(sparc32_gdbarch_init): Register execute_dwarf_cfa_vendor_op hook.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* xtensa-tdep.c (xtensa_pseudo_register_read): Use
+	regcache_raw_read_unsigned.
+	(xtensa_pseudo_register_write): Likewise.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* nds32-tdep.c (nds32_pseudo_register_read): Abort on errors.
+	(nds32_pseudo_register_write): Likewise.
+
+2017-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (struct regcache) <readonly_p>: Change its type
+	to bool.
+	(regcache_xmalloc_1): Update parameter type and callers update.
+
+2017-04-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Don't call
+	set_gdbarch_wchar_bit.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/poison.h [!HAVE_IS_TRIVIALLY_COPYABLE] (IsRelocatable)
+	(BothAreRelocatable, memcopy, memmove): Don't define.
+	* common/traits.h (__has_feature, HAVE_IS_TRIVIALLY_COPYABLE): New
+	macros.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h: Include "common/poison.h".
+	* common/function-view.h: (Not, Or, Requires): Move to traits.h
+	and adjust.
+	* common/poison.h: New file.
+	* common/traits.h: Include <type_traits>.
+	(Not, Or, Requires): New, moved from common/function-view.h.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.h (struct breakpoint): In-class initialize all
+	fields.  Make boolean fields "bool".
+	* breakpoint.c (init_raw_breakpoint_without_location): Remove
+	memset call and initializations no longer necessary.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (pt_btrace_insn_flags): Change parameter type to
+	reference.
+	(pt_btrace_insn): New function.
+	(ftrace_add_pt): Remove memset call and use pt_btrace_insn.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_catchpoint_location): Now a "class".  Remove
+	"base" field and inherit from "bp_location" instead.  Add
+	non-default ctor.
+	(allocate_location_exception): Use new non-default ctor.
+	* breakpoint.c (get_first_locp_gte_addr): Remove memset call.
+	(init_bp_location): Convert to ...
+	(bp_location::bp_location): ... this new ctor, and remove memset
+	call.
+	(base_breakpoint_allocate_location): Use the new non-default ctor.
+	* breakpoint.h (bp_location): Now a class.  Declare default and
+	non-default ctors.  In-class initialize all members.
+	(init_bp_location): Remove declaration.
+
+2017-04-25  Pedro Alves  <palves@redhat.com>
+
+	* common/enum-flags.h (enum_flags): Don't implement copy ctor and
+	assignment operator.
+
+2017-04-24  Yao Qi  <yao.qi@linaro.org>
+
+	* doublest.c (convert_doublest_to_floatformat): Call
+	floatformat_totalsize_bytes.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Use
+	ui_out_emit_list.
+	* stack.c (print_frame): Use ui_out_emit_list.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Use
+	ui_out_emit_list.
+	* mi/mi-main.c (print_one_inferior)
+	(mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_register_values, mi_cmd_list_features)
+	(mi_cmd_list_target_features, mi_cmd_trace_frame_collected): Use
+	ui_out_emit_list.
+	* mi/mi-interp.c (mi_on_normal_stop_1): Use ui_out_emit_list.
+	(mi_output_solib_attribs): Use ui_out_emit_list,
+	ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_list.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_list_args, list_args_or_locals): Use
+	ui_out_emit_list.
+	* disasm.c (do_assembly_only): Use ui_out_emit_list.
+	* breakpoint.c (print_solib_event, output_thread_groups): Use
+	ui_out_emit_list.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (print_variable_or_computed): Use ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (varobj_update_one): Use ui_out_emit_tuple.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Use ui_out_emit_tuple.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (tvariables_info_1)
+	(print_one_static_tracepoint_marker): Use ui_out_emit_tuple.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (print_frame_arg): Use ui_out_emit_tuple,
+	annotate_arg_emitter.
+	* breakpoint.c (print_mention_watchpoint)
+	(print_mention_masked_watchpoint): Use ui_out_emit_tuple.
+	* annotate.h (struct annotate_arg_emitter): New.
+
+2017-04-22  Tom Tromey  <tom@tromey.com>
+
+	* record-btrace.c (record_btrace_insn_history)
+	(record_btrace_insn_history_range, record_btrace_call_history)
+	(record_btrace_call_history_range): Use ui_out_emit_tuple.
+	* thread.c (do_captured_list_thread_ids, print_thread_info_1): Use
+	ui_out_emit_tuple.
+	* stack.c (print_frame_info): Use ui_out_emit_tuple.
+	* solib.c (info_sharedlibrary_command): Use ui_out_emit_tuple.
+	* skip.c (skip_info): Use ui_out_emit_tuple.
+	* remote.c (show_remote_cmd): Use ui_out_emit_tuple.
+	* progspace.c (print_program_space): Use ui_out_emit_tuple.
+	* probe.c (info_probes_for_ops): Use ui_out_emit_tuple.
+	* osdata.c (info_osdata): Use ui_out_emit_tuple.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Use
+	ui_out_emit_tuple.
+	* mi/mi-main.c (print_one_inferior, list_available_thread_groups)
+	(output_register, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_load_progress)
+	(mi_cmd_trace_frame_collected): Use ui_out_emit_tuple.
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children, varobj_update_one):
+	Use ui_out_emit_tuple.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_args): Use
+	ui_out_emit_tuple.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions)
+	(mi_cmd_info_gdb_mi_command): Use ui_out_emit_tuple.
+	* linux-thread-db.c (info_auto_load_libthread_db): Use
+	ui_out_emit_tuple.
+	* inferior.c (print_inferior): Use ui_out_emit_tuple.
+	* gdb_bfd.c (print_one_bfd): Use ui_out_emit_tuple.
+	* disasm.c (do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly): Use ui_out_emit_tuple.
+	* cp-abi.c (list_cp_abis): Use ui_out_emit_tuple.
+	* cli/cli-setshow.c (cmd_show_list): Use ui_out_emit_tuple.
+	* breakpoint.c (print_one_breakpoint_location)
+	(print_one_breakpoint): Use ui_out_emit_tuple.
+	* auto-load.c (print_script, info_auto_load_cmd): Use
+	ui_out_emit_tuple.
+	* ada-tasks.c (print_ada_task_info): Use ui_out_emit_tuple.
+
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* thread.c (print_thread_info_1): Remove dead code.
+
+2017-04-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* aarch64-tdep.c (selftests::aarch64_process_record_test): Make it #if
+	GDB_SELF_TEST.
+	* arm-tdep.c (selftests::arm_record_test): Likewise.
+
+2017-04-21  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_restore): Remove argument 2.  Replace
+	argument 3 with regcache.  Get register status from
+	src->register_status and get register contents from
+	register_buffer (src, regnum).
+	(regcache_cpy): Update.
+
 2017-04-19  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (thread): Add missing closing parenthesis in

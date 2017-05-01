@@ -858,14 +858,14 @@ struct elf_x86_64_link_hash_entry
      real definition and check it when allowing copy reloc in PIE.  */
   unsigned int needs_copy : 1;
 
-  /* TRUE if symbol has at least one BND relocation.  */
-  unsigned int has_bnd_reloc : 1;
-
   /* TRUE if symbol has GOT or PLT relocations.  */
   unsigned int has_got_reloc : 1;
 
   /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
   unsigned int has_non_got_reloc : 1;
+
+  /* Don't call finish_dynamic_symbol on this symbol.  */
+  unsigned int no_finish_dynamic_symbol : 1;
 
   /* 0: symbol isn't __tls_get_addr.
      1: symbol is __tls_get_addr.
@@ -880,7 +880,7 @@ struct elf_x86_64_link_hash_entry
      GOT and PLT relocations against the same function.  */
   union gotplt_union plt_got;
 
-  /* Information about the second PLT entry. Filled when has_bnd_reloc is
+  /* Information about the second PLT entry. Filled when info>bndplt is
      set.  */
   union gotplt_union plt_bnd;
 
@@ -1019,9 +1019,9 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->dyn_relocs = NULL;
       eh->tls_type = GOT_UNKNOWN;
       eh->needs_copy = 0;
-      eh->has_bnd_reloc = 0;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
+      eh->no_finish_dynamic_symbol = 0;
       eh->tls_get_addr = 2;
       eh->func_pointer_refcount = 0;
       eh->plt_bnd.offset = (bfd_vma) -1;
@@ -1197,19 +1197,106 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       htab->interp = s;
     }
 
-  if (!info->no_ld_generated_unwind_info
-      && htab->plt_eh_frame == NULL
-      && htab->elf.splt != NULL)
+  if (htab->elf.splt != NULL)
     {
-      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			| SEC_LINKER_CREATED);
-      htab->plt_eh_frame
-	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame", flags);
-      if (htab->plt_eh_frame == NULL
-	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame,
-					 ABI_64_P (dynobj) ? 3 : 2))
-	return FALSE;
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (dynobj);
+      flagword pltflags = (bed->dynamic_sec_flags
+			   | SEC_ALLOC
+			   | SEC_CODE
+			   | SEC_LOAD
+			   | SEC_READONLY);
+
+      if (htab->plt_got == NULL
+	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed)
+	{
+	  /* Create the GOT procedure linkage table.  */
+	  unsigned int plt_got_align;
+
+	  BFD_ASSERT (sizeof (elf_x86_64_legacy_plt2_entry) == 8
+		      && (sizeof (elf_x86_64_bnd_plt2_entry)
+			  == sizeof (elf_x86_64_legacy_plt2_entry)));
+	  plt_got_align = 3;
+
+	  htab->plt_got
+	    = bfd_make_section_anyway_with_flags (dynobj,
+						  ".plt.got",
+						  pltflags);
+	  if (htab->plt_got == NULL
+	      || !bfd_set_section_alignment (dynobj,
+					     htab->plt_got,
+					     plt_got_align))
+	    return FALSE;
+	}
+
+      /* MPX PLT is supported only if elf_x86_64_arch_bed is used in
+	 64-bit mode.  */
+      if (ABI_64_P (dynobj)
+	  && info->bndplt
+	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed
+	  && htab->plt_bnd == NULL)
+	{
+	  /* Create the second PLT for Intel MPX support.  */
+	  BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
+		      && (sizeof (elf_x86_64_bnd_plt2_entry)
+			  == sizeof (elf_x86_64_legacy_plt2_entry)));
+
+	  htab->plt_bnd
+	    = bfd_make_section_anyway_with_flags (dynobj,
+						  ".plt.bnd",
+						  pltflags);
+	  if (htab->plt_bnd == NULL
+	      || !bfd_set_section_alignment (dynobj, htab->plt_bnd, 3))
+	    return FALSE;
+	}
+
+      if (!info->no_ld_generated_unwind_info)
+	{
+	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+			    | SEC_LINKER_CREATED);
+
+	  if (htab->plt_eh_frame == NULL)
+	    {
+	      htab->plt_eh_frame
+		= bfd_make_section_anyway_with_flags (dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_eh_frame,
+						 ABI_64_P (dynobj) ? 3 : 2))
+		return FALSE;
+	    }
+
+	  if (htab->plt_got_eh_frame == NULL
+	      && htab->plt_got != NULL)
+	    {
+	      htab->plt_got_eh_frame
+		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_got_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_got_eh_frame,
+						 ABI_64_P (dynobj) ? 3 : 2))
+		return FALSE;
+	    }
+
+	  if (htab->plt_bnd_eh_frame == NULL
+	      && htab->plt_bnd != NULL)
+	    {
+	      htab->plt_bnd_eh_frame
+		= bfd_make_section_anyway_with_flags (dynobj,
+						      ".eh_frame",
+						      flags);
+	      if (htab->plt_bnd_eh_frame == NULL
+		  || !bfd_set_section_alignment (dynobj,
+						 htab->plt_bnd_eh_frame,
+						 3))
+		return FALSE;
+	    }
+	}
     }
 
   /* Align .got section to its entry size.  */
@@ -1237,7 +1324,6 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_x86_64_link_hash_entry *) dir;
   eind = (struct elf_x86_64_link_hash_entry *) ind;
 
-  edir->has_bnd_reloc |= eind->has_bnd_reloc;
   edir->has_got_reloc |= eind->has_got_reloc;
   edir->has_non_got_reloc |= eind->has_non_got_reloc;
 
@@ -2199,7 +2285,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   bfd_byte *contents;
-  bfd_boolean use_plt_got;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -2230,8 +2315,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       sec->check_relocs_failed = 1;
       return FALSE;
     }
-
-  use_plt_got = get_elf_x86_64_backend_data (abfd) == &elf_x86_64_arch_bed;
 
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
@@ -2341,61 +2424,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_PLT32:
 	    case R_X86_64_32:
 	    case R_X86_64_64:
-	      /* MPX PLT is supported only if elf_x86_64_arch_bed
-		 is used in 64-bit mode.  */
-	      if (ABI_64_P (abfd)
-		  && info->bndplt
-		  && (get_elf_x86_64_backend_data (abfd)
-		      == &elf_x86_64_arch_bed))
-		{
-		  elf_x86_64_hash_entry (h)->has_bnd_reloc = 1;
-
-		  /* Create the second PLT for Intel MPX support.  */
-		  if (htab->plt_bnd == NULL)
-		    {
-		      const struct elf_backend_data *bed;
-
-		      bed = get_elf_backend_data (info->output_bfd);
-		      BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
-				  && (sizeof (elf_x86_64_bnd_plt2_entry)
-				      == sizeof (elf_x86_64_legacy_plt2_entry)));
-
-		      if (htab->elf.dynobj == NULL)
-			htab->elf.dynobj = abfd;
-		      htab->plt_bnd
-			= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-							      ".plt.bnd",
-							     (bed->dynamic_sec_flags
-							      | SEC_ALLOC
-							      | SEC_CODE
-							      | SEC_LOAD
-							      | SEC_READONLY));
-		      if (htab->plt_bnd == NULL
-			  || !bfd_set_section_alignment (htab->elf.dynobj,
-							 htab->plt_bnd,
-							 3))
-			goto error_return;
-		    }
-
-		  if (!info->no_ld_generated_unwind_info
-		      && htab->plt_bnd_eh_frame == NULL)
-		    {
-		      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-					| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-					| SEC_LINKER_CREATED);
-		      htab->plt_bnd_eh_frame
-			= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-							      ".eh_frame",
-							      flags);
-		      if (htab->plt_bnd_eh_frame == NULL
-			  || !bfd_set_section_alignment (htab->elf.dynobj,
-							 htab->plt_bnd_eh_frame,
-							 3))
-			goto error_return;
-		    }
-		}
-	      /* Fall through.  */
-
 	    case R_X86_64_32S:
 	    case R_X86_64_PC64:
 	    case R_X86_64_GOTPCREL:
@@ -2801,58 +2829,6 @@ do_size:
 	  break;
 	}
 
-      if (use_plt_got
-	  && h != NULL
-	  && h->plt.refcount > 0
-	  && (((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
-	      || h->got.refcount > 0)
-	  && htab->plt_got == NULL)
-	{
-	  /* Create the GOT procedure linkage table.  */
-	  unsigned int plt_got_align;
-	  const struct elf_backend_data *bed;
-
-	  bed = get_elf_backend_data (info->output_bfd);
-	  BFD_ASSERT (sizeof (elf_x86_64_legacy_plt2_entry) == 8
-		      && (sizeof (elf_x86_64_bnd_plt2_entry)
-			  == sizeof (elf_x86_64_legacy_plt2_entry)));
-	  plt_got_align = 3;
-
-	  if (htab->elf.dynobj == NULL)
-	    htab->elf.dynobj = abfd;
-	  htab->plt_got
-	    = bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						  ".plt.got",
-						  (bed->dynamic_sec_flags
-						   | SEC_ALLOC
-						   | SEC_CODE
-						   | SEC_LOAD
-						   | SEC_READONLY));
-	  if (htab->plt_got == NULL
-	      || !bfd_set_section_alignment (htab->elf.dynobj,
-					     htab->plt_got,
-					     plt_got_align))
-	    goto error_return;
-
-	  if (!info->no_ld_generated_unwind_info
-	      && htab->plt_got_eh_frame == NULL
-	      && get_elf_x86_64_backend_data (abfd)->eh_frame_plt_got != NULL)
-	    {
-	      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-				| SEC_HAS_CONTENTS | SEC_IN_MEMORY
-				| SEC_LINKER_CREATED);
-	      htab->plt_got_eh_frame
-		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						      ".eh_frame",
-						      flags);
-	      if (htab->plt_got_eh_frame == NULL
-		  || !bfd_set_section_alignment (htab->elf.dynobj,
-						 htab->plt_got_eh_frame,
-						 ABI_64_P (htab->elf.dynobj) ? 3 : 2))
-		goto error_return;
-	    }
-	}
-
       if ((r_type == R_X86_64_GOTPCREL
 	   || r_type == R_X86_64_GOTPCRELX
 	   || r_type == R_X86_64_REX_GOTPCRELX)
@@ -3202,7 +3178,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 if PLT is used.  */
       eh->func_pointer_refcount = 0;
 
-      if ((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
+      if (htab->plt_got != NULL
+	  && (info->flags & DF_BIND_NOW)
+	  && !h->pointer_equality_needed)
 	{
 	  /* Don't use the regular PLT for DF_BIND_NOW. */
 	  h->plt.offset = (bfd_vma) -1;
@@ -3218,7 +3196,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3338,7 +3317,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-	  && !resolved_to_zero)
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3475,6 +3455,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  if (h->dynindx == -1
 	      && ! h->forced_local
 	      && ! resolved_to_zero
+	      && h->root.type == bfd_link_hash_undefweak
 	      && ! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 
@@ -3871,7 +3852,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  /* Reserve room for the initial entry.
 	     FIXME: we could probably do away with it in this case.  */
 	  if (htab->elf.splt->size == 0)
-	    htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
+	    htab->elf.splt->size = GET_PLT_ENTRY_SIZE (output_bfd);
 	  htab->tlsdesc_plt = htab->elf.splt->size;
 	  htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
 	}
@@ -4045,20 +4026,20 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	     relocation.  */
 	  if (!add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;
+	}
 
-	  if (htab->elf.srelplt->size != 0)
-	    {
-	      if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-		  || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-		  || !add_dynamic_entry (DT_JMPREL, 0))
-		return FALSE;
-	    }
-
-	  if (htab->tlsdesc_plt
-	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
-		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
+      if (htab->elf.srelplt->size != 0)
+	{
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return FALSE;
 	}
+
+      if (htab->tlsdesc_plt
+	  && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
+	      || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
+	return FALSE;
 
       if (relocs)
 	{
@@ -4270,6 +4251,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       asection *base_got, *resolved_plt;
       bfd_vma st_size;
       bfd_boolean resolved_to_zero;
+      bfd_boolean relative_reloc;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_X86_64_GNU_VTINHERIT
@@ -4637,6 +4619,7 @@ do_ifunc_pointer:
 	  if (htab->elf.sgot == NULL)
 	    abort ();
 
+	  relative_reloc = FALSE;
 	  if (h != NULL)
 	    {
 	      bfd_boolean dyn;
@@ -4683,6 +4666,17 @@ do_ifunc_pointer:
 		      /* Note that this is harmless for the GOTPLT64 case,
 			 as -1 | 1 still is -1.  */
 		      h->got.offset |= 1;
+
+		      if (h->dynindx == -1
+			  && !h->forced_local
+			  && h->root.type != bfd_link_hash_undefweak
+			  && bfd_link_pic (info))
+			{
+			  /* If this symbol isn't dynamic in PIC,
+			     generate R_X86_64_RELATIVE here.  */
+			  eh->no_finish_dynamic_symbol = 1;
+			  relative_reloc = TRUE;
+			}
 		    }
 		}
 	      else
@@ -4704,28 +4698,30 @@ do_ifunc_pointer:
 		{
 		  bfd_put_64 (output_bfd, relocation,
 			      base_got->contents + off);
+		  local_got_offsets[r_symndx] |= 1;
 
 		  if (bfd_link_pic (info))
-		    {
-		      asection *s;
-		      Elf_Internal_Rela outrel;
-
-		      /* We need to generate a R_X86_64_RELATIVE reloc
-			 for the dynamic linker.  */
-		      s = htab->elf.srelgot;
-		      if (s == NULL)
-			abort ();
-
-		      outrel.r_offset = (base_got->output_section->vma
-					 + base_got->output_offset
-					 + off);
-		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
-		      outrel.r_addend = relocation;
-		      elf_append_rela (output_bfd, s, &outrel);
-		    }
-
-		  local_got_offsets[r_symndx] |= 1;
+		    relative_reloc = TRUE;
 		}
+	    }
+
+	  if (relative_reloc)
+	    {
+	      asection *s;
+	      Elf_Internal_Rela outrel;
+
+	      /* We need to generate a R_X86_64_RELATIVE reloc
+		 for the dynamic linker.  */
+	      s = htab->elf.srelgot;
+	      if (s == NULL)
+		abort ();
+
+	      outrel.r_offset = (base_got->output_section->vma
+				 + base_got->output_offset
+				 + off);
+	      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
+	      outrel.r_addend = relocation;
+	      elf_append_rela (output_bfd, s, &outrel);
 	    }
 
 	  if (off >= (bfd_vma) -2)
@@ -5797,6 +5793,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  : get_elf_x86_64_backend_data (output_bfd));
 
   eh = (struct elf_x86_64_link_hash_entry *) h;
+  if (eh->no_finish_dynamic_symbol)
+    abort ();
 
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
@@ -5874,7 +5872,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  /* Use the second PLT with BND relocations.  */
 	  const bfd_byte *plt_entry, *plt2_entry;
 
-	  if (eh->has_bnd_reloc)
+	  if (info->bndplt)
 	    {
 	      plt_entry = elf_x86_64_bnd_plt_entry;
 	      plt2_entry = elf_x86_64_bnd_plt2_entry;
@@ -6022,7 +6020,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	 are the identical.  */
       plt_got_insn_size = elf_x86_64_bnd_arch_bed.plt_got_insn_size;
       plt_got_offset = elf_x86_64_bnd_arch_bed.plt_got_offset;
-      if (eh->has_bnd_reloc)
+      if (info->bndplt)
 	got_plt_entry = elf_x86_64_bnd_plt2_entry;
       else
 	{

@@ -3221,6 +3221,13 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     }
 }
 
+/* Whether an undefined weak symbol should resolve to its link-time
+   value, even in PIC or PIE objects.  */
+#define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
+  ((H)->root.type == bfd_link_hash_undefweak		\
+   && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
+       || (INFO)->dynamic_undefined_weak == 0))
+
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
    section, and instead use a dynamic relocation to point into the
@@ -4996,8 +5003,7 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   || h->needs_plt)
 	       && h->ref_regular
 	       && !(SYMBOL_CALLS_LOCAL (info, h)
-		    || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-			&& h->root.type == bfd_link_hash_undefweak)))
+		    || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	{
 	  /* Profiling of shared libs (and pies) is not supported with
 	     secure plt, because ppc32 does profiling before a
@@ -5297,8 +5303,7 @@ ppc_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
 	      && (tga->type == STT_FUNC
 		  || tga->needs_plt)
 	      && !(SYMBOL_CALLS_LOCAL (info, tga)
-		   || (ELF_ST_VISIBILITY (tga->other) != STV_DEFAULT
-		       && tga->root.type == bfd_link_hash_undefweak)))
+		   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, tga)))
 	    {
 	      struct plt_entry *ent;
 	      for (ent = tga->plt.plist; ent != NULL; ent = ent->next)
@@ -5684,8 +5689,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (ent == NULL
 	  || (h->type != STT_GNU_IFUNC
 	      && (SYMBOL_CALLS_LOCAL (info, h)
-		  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-		      && h->root.type == bfd_link_hash_undefweak))))
+		  || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))))
 	{
 	  /* A PLT entry is not required/allowed when:
 
@@ -6018,8 +6022,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	       || (htab->elf.dynamic_sections_created
 		   && eh->elf.dynindx != -1
 		   && !SYMBOL_REFERENCES_LOCAL (info, &eh->elf)))
-	      && (ELF_ST_VISIBILITY (eh->elf.other) == STV_DEFAULT
-		  || eh->elf.root.type != bfd_link_hash_undefweak))
+	      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, &eh->elf))
 	    {
 	      asection *rsec = htab->elf.srelgot;
 
@@ -6060,9 +6063,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility, or when dynamic_undefined_weak says so.  */
-      else if (h->root.type == bfd_link_hash_undefweak
-	       && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-		   || info->dynamic_undefined_weak == 0))
+      else if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	eh->dyn_relocs = NULL;
 
       /* Relocs that use pc_count are those that appear on a call insn,
@@ -8504,8 +8505,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		if (!htab->elf.dynamic_sections_created
 		    || h->dynindx == -1
 		    || SYMBOL_REFERENCES_LOCAL (info, h)
-		    || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-			&& h->root.type == bfd_link_hash_undefweak))
+		    || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
 		     locally, or the symbol was forced to be local
@@ -8574,8 +8574,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    if (indx != 0
 			|| (bfd_link_pic (info)
 			    && (h == NULL
-				|| ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-				|| h->root.type != bfd_link_hash_undefweak
+				|| !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)
 				|| offp == &htab->tlsld_got.offset)))
 		      {
 			asection *rsec = htab->elf.srelgot;
@@ -8862,9 +8861,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	       && !(h != NULL
 		    && ((h->root.type == bfd_link_hash_undefined
 			 && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-			|| (h->root.type == bfd_link_hash_undefweak
-			    && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-				|| info->dynamic_undefined_weak == 0))))
+			|| UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	       && (must_be_dyn_reloc (info, r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
@@ -8905,10 +8902,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if ((h != NULL
-			&& (h->root.type == bfd_link_hash_undefined
-			    || h->root.type == bfd_link_hash_undefweak))
-		       || !SYMBOL_REFERENCES_LOCAL (info, h))
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, h))
 		{
 		  indx = h->dynindx;
 		  BFD_ASSERT (indx != -1);

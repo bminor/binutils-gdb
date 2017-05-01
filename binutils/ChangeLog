@@ -1,3 +1,94 @@
+2017-05-01  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (merge_gnu_build_notes): Correct code deleting
+	relocs.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21439
+	* readelf.c (print_gnu_build_attribute_name): Allow for an empty
+	name field.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21437
+	* readelf.c (process_version_sections): Check for underflow when
+	computing the start address of the auxillary version data.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21438
+	* dwarf.c (process_extended_line_op): Do not assume that the
+	string extracted from the section is NUL terminated.
+	(fetch_indirect_string): If the string retrieved from the section
+	is not NUL terminated, return an error message.
+	(fetch_indirect_line_string): Likewise.
+	(fetch_indexed_string): Likewise.
+
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21433
+	* bucomm.c (get_file_size): Return -1 if file_name is NULL.
+	* ar.c (main): Fail with usage() invocation if no file names are
+	provided.
+
+2017-04-26  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_section_headers): Warn about overlarge
+	sections.
+	(print_gnu_build_attribute_name): Print the number of unrecognised
+	note types.  Fix formatting in the presence of errors.
+	(testsuite/binutils-all/note-2-32.s): Fix encoding of numeric notes.
+	(testsuite/binutils-all/note-2-64.s): Likewise.
+
+2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (process_mips_specific): Add static GOT support.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (process_mips_specific): Remove error reporting from
+	GOT[1] processing.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (process_mips_specific): Remove null GOT data check.
+
+2017-04-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-alias.d: New test.
+	* testsuite/binutils-all/mips/mips16-noalias.d: New test.
+	* testsuite/binutils-all/mips/mips16-alias.s: New test source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21418
+	* ar.c (main): Check -a, -b, -i and -N args are given.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21417
+	* ar.c (main): Check that an archive file is given after options.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21415
+	* objdump.c (disassemble_section): Check bfd_get_section_contents
+	status.
+
+2017-04-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21408
+	* dwarf.c (display_debug_lines_decoded): Don't segfault on NULL
+	file_table.
+
+2017-04-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21378
+	* readelf.c (print_gnu_build_attribute_name): Check for an
+	overlarge name field.
+
 2017-04-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21379

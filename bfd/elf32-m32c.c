@@ -2107,7 +2107,8 @@ m32c_elf_relax_delete_bytes
 
 /* This is for versions of gcc prior to 4.3.  */
 static unsigned int
-_bfd_m32c_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+_bfd_m32c_elf_eh_frame_address_size (bfd *abfd,
+				     const asection *sec ATTRIBUTE_UNUSED)
 {
   if ((elf_elfheader (abfd)->e_flags & EF_M32C_CPU_MASK) == EF_M32C_CPU_M16C)
     return 2;

@@ -624,14 +624,13 @@ write_watchpoint_regs (void)
 static void
 mips_linux_new_thread (struct lwp_info *lp)
 {
-  int tid;
+  long tid = lp->ptid.lwp ();
 
-  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+  if (!mips_linux_read_watch_registers (tid,
 					&watch_readback,
 					&watch_readback_valid, 0))
     return;
 
-  tid = ptid_get_lwp (lp->ptid);
   if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
     perror_with_name (_("Couldn't write debug register"));
 }

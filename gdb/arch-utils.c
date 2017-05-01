@@ -204,6 +204,15 @@ default_adjust_dwarf2_line (CORE_ADDR addr, int rel)
   return addr;
 }
 
+/* See arch-utils.h.  */
+
+bool
+default_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+				     struct dwarf2_frame_state *fs)
+{
+  return false;
+}
+
 int
 cannot_register_not (struct gdbarch *gdbarch, int regnum)
 {

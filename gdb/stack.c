@@ -224,7 +224,6 @@ static void
 print_frame_arg (const struct frame_arg *arg)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *old_chain;
   const char *error_message = NULL;
 
   string_file stb;
@@ -235,9 +234,8 @@ print_frame_arg (const struct frame_arg *arg)
 	      || (!uiout->is_mi_like_p ()
 		  && arg->entry_kind == print_entry_values_compact));
 
-  annotate_arg_begin ();
-
-  old_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  annotate_arg_emitter arg_emitter;
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
   fprintf_symbol_filtered (&stb, SYMBOL_PRINT_NAME (arg->sym),
 			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
   if (arg->entry_kind == print_entry_values_compact)
@@ -305,11 +303,6 @@ print_frame_arg (const struct frame_arg *arg)
     }
 
   uiout->field_stream ("value", stb);
-
-  /* Also invoke ui_out_tuple_end.  */
-  do_cleanups (old_chain);
-
-  annotate_arg_end ();
 }
 
 /* Read in inferior function local SYM at FRAME into ARGP.  Caller is
@@ -805,8 +798,7 @@ print_frame_info (struct frame_info *frame, int print_level,
       || get_frame_type (frame) == SIGTRAMP_FRAME
       || get_frame_type (frame) == ARCH_FRAME)
     {
-      struct cleanup *uiout_cleanup
-	= make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
+      ui_out_emit_tuple tuple_emitter (uiout, "frame");
 
       annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			    gdbarch, get_frame_pc (frame));
@@ -851,7 +843,6 @@ print_frame_info (struct frame_info *frame, int print_level,
 	do_gdb_disassembly (get_frame_arch (frame), 1,
 			    get_frame_pc (frame), get_frame_pc (frame) + 1);
 
-      do_cleanups (uiout_cleanup);
       return;
     }
 
@@ -1205,7 +1196,6 @@ print_frame (struct frame_info *frame, int print_level,
     {
       struct gdbarch *gdbarch = get_frame_arch (frame);
       int numargs;
-      struct cleanup *args_list_chain;
 
       if (gdbarch_frame_num_args_p (gdbarch))
 	{
@@ -1215,20 +1205,20 @@ print_frame (struct frame_info *frame, int print_level,
       else
 	numargs = -1;
     
-      args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
-      TRY
-	{
-	  print_frame_args (func, frame, numargs, gdb_stdout);
-	}
-      CATCH (e, RETURN_MASK_ERROR)
-	{
-	}
-      END_CATCH
+      {
+	ui_out_emit_list list_emitter (uiout, "args");
+	TRY
+	  {
+	    print_frame_args (func, frame, numargs, gdb_stdout);
+	  }
+	CATCH (e, RETURN_MASK_ERROR)
+	  {
+	  }
+	END_CATCH
 
-      /* FIXME: ARGS must be a list.  If one argument is a string it
-	  will have " that will not be properly escaped.  */
-      /* Invoke ui_out_tuple_end.  */
-      do_cleanups (args_list_chain);
+	/* FIXME: ARGS must be a list.  If one argument is a string it
+	   will have " that will not be properly escaped.  */
+      }
       QUIT;
     }
   uiout->text (")");

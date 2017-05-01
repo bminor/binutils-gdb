@@ -2174,7 +2174,12 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 
   data = (bfd_byte *) xmalloc (datasize);
 
-  bfd_get_section_contents (abfd, section, data, 0, datasize);
+  if (!bfd_get_section_contents (abfd, section, data, 0, datasize))
+    {
+      non_fatal (_("Reading section %s failed because: %s"),
+		 section->name, bfd_errmsg (bfd_get_error ()));
+      return;
+    }
 
   paux->sec = section;
   pinfo->buffer = data;

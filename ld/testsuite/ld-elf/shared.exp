@@ -104,13 +104,13 @@ if { [check_gc_sections_available] } {
 	    "pr20828-v.so"] \
 	[list \
 	    "PR ld/20828 forcibly exported symbol version without section GC" \
-	    "$LFLAGS -e foo -E -T pr20828-v.ld" "" "" \
+	    "$LFLAGS --no-dynamic-linker -e foo -E -T pr20828-v.ld" "" "" \
 	    {pr20828-v.s} \
 	    {{objdump -p pr20828-v.od}} \
 	    "pr20828-v-1"] \
 	[list \
 	    "PR ld/20828 forcibly exported symbol version with section GC" \
-	    "$LFLAGS -e foo --gc-sections -E -T pr20828-v.ld" "" "" \
+	    "$LFLAGS --no-dynamic-linker -e foo --gc-sections -E -T pr20828-v.ld" "" "" \
 	    {pr20828-v.s} \
 	    {{objdump -p pr20828-v.od}} \
 	    "pr20828-v-2"]]
@@ -375,6 +375,9 @@ set build_tests {
   {"Build libpr2404a.so"
    "-shared" "-fPIC"
    {pr2404a.c} {} "libpr2404a.so"}
+  {"Build libpr2404n.so"
+   "-shared -Wl,-z,now" "-fPIC"
+   {pr2404a.c} {} "libpr2404n.so"}
   {"Build libpr2404b.a"
    "" ""
    {pr2404b.c} {} "libpr2404b.a"}
@@ -528,6 +531,9 @@ set run_tests [list \
     [list "Run pr2404" \
      "-Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404a.so" "" \
      {dummy.c} "pr2404" "pr2404.out" ] \
+    [list "Run pr2404n" \
+     "-Wl,-z,now -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404n.so" "" \
+     {dummy.c} "pr2404n" "pr2404.out" ] \
     [list "Run pr18458" \
      "-Wl,--no-as-needed,-z,now tmpdir/libpr18458a.so tmpdir/libpr18458b.so" "" \
      {pr18458c.c} "pr18458" "pass.out" ] \
@@ -688,8 +694,25 @@ if { [istarget *-*-linux*]
 	    {} \
 	    "libpr19579.so" \
 	] \
+	[list \
+	    "Build libpr19579now.so" \
+	    "-shared -Wl,-z,now" \
+	    "-fPIC" \
+	    {pr19579b.c} \
+	    {} \
+	    "libpr19579.so" \
+	] \
     ]
     run_ld_link_exec_tests [list \
+	[list \
+	    "Run pr18458 with PIE" \
+	    "-pie -Wl,--no-as-needed,-z,now tmpdir/libpr18458a.so tmpdir/libpr18458b.so" \
+	    "" \
+	    {pr18458c.c} \
+	    "pr18458p" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
 	[list \
 	    "Run pr2404 with PIE" \
 	    "-pie -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
@@ -700,8 +723,26 @@ if { [istarget *-*-linux*]
 	    "-fPIE" \
 	] \
 	[list \
+	    "Run pr2404 with PIE (-z now)" \
+	    "-pie -Wl,-z,now -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404n.so" \
+	    "" \
+	    { dummy.c } \
+	    "pr2404pien" \
+	    "pr2404.out" \
+	    "-fPIE" \
+	] \
+	[list \
 	    "Run pr18718" \
 	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 (-z now)" \
+	    "-Wl,-z,now" \
 	    "" \
 	    { pr18718.c check-ptr-eq.c } \
 	    "pr18718" \
@@ -727,6 +768,24 @@ if { [istarget *-*-linux*]
 	    "-O2 -fPIE -I../bfd" \
 	] \
 	[list \
+	    "Run pr18718 with PIE (3)" \
+	    "-pie -Wl,-z,now" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pie3" \
+	    "pass.out" \
+	    "-O2 -fPIE -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIE (4)" \
+	    "-Wl,-z,now" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pie4" \
+	    "pass.out" \
+	    "-O2 -fPIE -I../bfd" \
+	] \
+	[list \
 	    "Run pr18718 with PIC (1)" \
 	    "" \
 	    "" \
@@ -745,11 +804,38 @@ if { [istarget *-*-linux*]
 	    "-O2 -fPIC -I../bfd" \
 	] \
 	[list \
+	    "Run pr18718 with PIC (3)" \
+	    "-Wl,-z,now" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pic3" \
+	    "pass.out" \
+	    "-O2 -fPIC -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIC (4)" \
+	    "-pie -Wl,-z,now" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pic4" \
+	    "pass.out" \
+	    "-O2 -fPIC -I../bfd" \
+	] \
+	[list \
 	    "Run pr19579" \
 	    "-pie -Wl,--no-as-needed,-z,text tmpdir/pr19579a.o tmpdir/libpr19579.so" \
 	    "" \
 	    {dummy.c} \
 	    "pr19579" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr19579 (-z now)" \
+	    "-pie -Wl,-z,now -Wl,--no-as-needed,-z,text tmpdir/pr19579a.o tmpdir/libpr19579.so" \
+	    "" \
+	    {dummy.c} \
+	    "pr19579n" \
 	    "pass.out" \
 	    "-fPIE" \
 	] \

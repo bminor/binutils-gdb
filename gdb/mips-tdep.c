@@ -6539,7 +6539,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       for (byte = 0;
 	   byte < (mips_abi_regsize (gdbarch)
 		   - register_size (gdbarch, regnum)); byte++)
-	printf_filtered ("  ");
+	fprintf_filtered (file, "  ");
       /* Now print the register value in hex, endian order.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	for (byte =

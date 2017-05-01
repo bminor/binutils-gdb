@@ -299,9 +299,10 @@ elf_merge_gnu_property_list (bfd *abfd, elf_property_list **listp)
       }
 }
 
-/* Set up GNU properties.  */
+/* Set up GNU properties.  Return the first relocatable ELF input with
+   GNU properties if found.  Otherwise, return NULL.  */
 
-void
+bfd *
 _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   bfd *abfd, *first_pbfd = NULL;
@@ -336,7 +337,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 
   /* Do nothing if there is no .note.gnu.property section.  */
   if (!has_properties)
-    return;
+    return NULL;
 
   /* Merge .note.gnu.property sections.  */
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
@@ -411,7 +412,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	  /* Discard .note.gnu.property section if all properties have
 	     been removed.  */
 	  sec->output_section = bfd_abs_section_ptr;
-	  return;
+	  return NULL;
 	}
 
       /* Compute the section size.  */
@@ -488,4 +489,6 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       /* Cache the section contents for elf_link_input_bfd.  */
       elf_section_data (sec)->this_hdr.contents = contents;
     }
+
+  return first_pbfd;
 }

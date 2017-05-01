@@ -559,16 +559,15 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       && (regnum >= gdbarch_tdep (gdbarch)->a0_base)
       && (regnum <= gdbarch_tdep (gdbarch)->a0_base + 15))
     {
-      gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
+      ULONGEST value;
       enum register_status status;
 
-      status = regcache_raw_read (regcache,
-				  gdbarch_tdep (gdbarch)->wb_regnum,
-				  buf);
+      status = regcache_raw_read_unsigned (regcache,
+					   gdbarch_tdep (gdbarch)->wb_regnum,
+					   &value);
       if (status != REG_VALID)
 	return status;
-      regnum = arreg_number (gdbarch, regnum,
-			     extract_unsigned_integer (buf, 4, byte_order));
+      regnum = arreg_number (gdbarch, regnum, value);
     }
 
   /* We can always read non-pseudo registers.  */
@@ -656,12 +655,10 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       && (regnum >= gdbarch_tdep (gdbarch)->a0_base)
       && (regnum <= gdbarch_tdep (gdbarch)->a0_base + 15))
     {
-      gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
-
-      regcache_raw_read (regcache,
-			 gdbarch_tdep (gdbarch)->wb_regnum, buf);
-      regnum = arreg_number (gdbarch, regnum,
-			     extract_unsigned_integer (buf, 4, byte_order));
+      ULONGEST value;
+      regcache_raw_read_unsigned (regcache,
+				  gdbarch_tdep (gdbarch)->wb_regnum, &value);
+      regnum = arreg_number (gdbarch, regnum, value);
     }
 
   /* We can always write 'core' registers.
