@@ -1,5 +1,9 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* python/py-param.c (compute_enum_values): Use gdb_argv.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (struct gdb_argv_deleter): New.
 	(gdb_argv): New class.
 	* utils.c (gdb_argv::reset): New method.
