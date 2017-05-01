@@ -2863,6 +2863,20 @@ ldirname (const char *filename)
   return dirname;
 }
 
+/* See utils.h.  */
+
+void
+gdb_argv::reset (const char *s)
+{
+  char **argv = buildargv (s);
+
+  if (s != NULL && argv == NULL)
+    malloc_failure (0);
+
+  freeargv (m_argv);
+  m_argv = argv;
+}
+
 /* Call libiberty's buildargv, and return the result.
    If buildargv fails due to out-of-memory, call nomem.
    Therefore, the returned value is guaranteed to be non-NULL,

@@ -365,17 +365,14 @@ new_ui_command (char *args, int from_tty)
   int i;
   int res;
   int argc;
-  char **argv;
   const char *interpreter_name;
   const char *tty_name;
-  struct cleanup *success_chain;
   struct cleanup *failure_chain;
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  success_chain = make_cleanup_freeargv (argv);
-  argc = countargv (argv);
+  gdb_argv argv (args);
+  argc = argv.count ();
 
   if (argc < 2)
     error (_("usage: new-ui <interpreter> <tty>"));
@@ -408,9 +405,6 @@ new_ui_command (char *args, int from_tty)
     stream[2].release ();
 
     discard_cleanups (failure_chain);
-
-    /* This restores the previous UI and frees argv.  */
-    do_cleanups (success_chain);
   }
 
   printf_unfiltered ("New UI allocated\n");

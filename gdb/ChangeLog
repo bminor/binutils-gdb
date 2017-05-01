@@ -1,5 +1,39 @@
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (struct gdb_argv_deleter): New.
+	(gdb_argv): New class.
+	* utils.c (gdb_argv::reset): New method.
+	* tracepoint.c (delete_trace_variable_command): Use gdb_argv.
+	* tracefile.c (tsave_command): Use gdb_argv.
+	* top.c (new_ui_command): Use gdb_argv.
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols, maintenance_expand_symtabs): Use gdb_argv.
+	* symfile.c (symbol_file_command, generic_load)
+	(remove_symbol_file_command): Use gdb_argv.
+	* stack.c (backtrace_command): Use gdb_argv.
+	* source.c (add_path, show_substitute_path_command)
+	(unset_substitute_path_command, set_substitute_path_command):
+	Use gdb_argv.
+	* skip.c (skip_command): Use gdb_argv.  Use gdb_buildargv.
+	* ser-mingw.c (pipe_windows_open): Use gdb_argv.
+	* remote.c (extended_remote_run, remote_put_command)
+	(remote_get_command, remote_delete_command): Use gdb_argv.
+	* remote-sim.c (gdbsim_load, gdbsim_create_inferior)
+	(gdbsim_open): Use gdb_argv.
+	* python/py-cmd.c (gdbpy_string_to_argv): Use gdb_argv.
+	* psymtab.c (maintenance_print_psymbols): Use gdb_argv.
+	* procfs.c (procfs_info_proc): Use gdb_argv.
+	* interps.c (interpreter_exec_cmd): Use gdb_argv.
+	* infrun.c (handle_command): Use gdb_argv.
+	* inferior.c (add_inferior_command, clone_inferior_command):
+	Use gdb_argv.
+	* guile/scm-string.c (gdbscm_string_to_argv): Use gdb_argv.
+	* exec.c (exec_file_command): Use gdb_argv.
+	* cli/cli-cmds.c (alias_command): Use gdb_argv.
+	* compile/compile.c (build_argc_argv): Use gdb_argv.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (gdbpy_decode_line): Use unique_xmalloc_ptr.
 
 2017-08-03  Tom Tromey  <tom@tromey.com>

@@ -775,22 +775,16 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
   if (*input != '\0')
     {
-      char **c_argv = gdb_buildargv (input);
-      int i;
+      gdb_argv c_argv (input);
 
-      for (i = 0; c_argv[i] != NULL; ++i)
+      for (char *arg : c_argv)
 	{
-	  gdbpy_ref<> argp (PyString_FromString (c_argv[i]));
+	  gdbpy_ref<> argp (PyString_FromString (arg));
 
 	  if (argp == NULL
 	      || PyList_Append (py_argv.get (), argp.get ()) < 0)
-	    {
-	      freeargv (c_argv);
-	      return NULL;
-	    }
+	    return NULL;
 	}
-
-      freeargv (c_argv);
     }
 
   return py_argv.release ();

@@ -9519,12 +9519,9 @@ extended_remote_run (const std::string &args)
 
   if (!args.empty ())
     {
-      struct cleanup *back_to;
       int i;
-      char **argv;
 
-      argv = gdb_buildargv (args.c_str ());
-      back_to = make_cleanup_freeargv (argv);
+      gdb_argv argv (args.c_str ());
       for (i = 0; argv[i] != NULL; i++)
 	{
 	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
@@ -9533,7 +9530,6 @@ extended_remote_run (const std::string &args)
 	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf + len,
 			      strlen (argv[i]));
 	}
-      do_cleanups (back_to);
     }
 
   rs->buf[len++] = '\0';
@@ -12043,58 +12039,40 @@ remote_file_delete (const char *remote_file, int from_tty)
 static void
 remote_put_command (char *args, int from_tty)
 {
-  struct cleanup *back_to;
-  char **argv;
-
   if (args == NULL)
     error_no_arg (_("file to put"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
   if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
     error (_("Invalid parameters to remote put"));
 
   remote_file_put (argv[0], argv[1], from_tty);
-
-  do_cleanups (back_to);
 }
 
 static void
 remote_get_command (char *args, int from_tty)
 {
-  struct cleanup *back_to;
-  char **argv;
-
   if (args == NULL)
     error_no_arg (_("file to get"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
   if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
     error (_("Invalid parameters to remote get"));
 
   remote_file_get (argv[0], argv[1], from_tty);
-
-  do_cleanups (back_to);
 }
 
 static void
 remote_delete_command (char *args, int from_tty)
 {
-  struct cleanup *back_to;
-  char **argv;
-
   if (args == NULL)
     error_no_arg (_("file to delete"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
   if (argv[0] == NULL || argv[1] != NULL)
     error (_("Invalid parameters to remote delete"));
 
   remote_file_delete (argv[0], from_tty);
-
-  do_cleanups (back_to);
 }
 
 static void

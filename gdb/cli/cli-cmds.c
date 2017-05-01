@@ -1400,31 +1400,27 @@ alias_command (char *args, int from_tty)
 {
   int i, alias_argc, command_argc;
   int abbrev_flag = 0;
-  char *args2, *equals;
+  char *equals;
   const char *alias, *command;
-  char **alias_argv, **command_argv;
-  struct cleanup *cleanup;
 
   if (args == NULL || strchr (args, '=') == NULL)
     alias_usage_error ();
 
-  args2 = xstrdup (args);
-  cleanup = make_cleanup (xfree, args2);
-  equals = strchr (args2, '=');
-  *equals = '\0';
-  alias_argv = gdb_buildargv (args2);
-  make_cleanup_freeargv (alias_argv);
-  command_argv = gdb_buildargv (equals + 1);
-  make_cleanup_freeargv (command_argv);
+  equals = strchr (args, '=');
+  std::string args2 (args, equals - args);
 
-  for (i = 0; alias_argv[i] != NULL; )
+  gdb_argv built_alias_argv (args2.c_str ());
+  gdb_argv command_argv (equals + 1);
+
+  char **alias_argv = built_alias_argv.get ();
+  while (alias_argv[0] != NULL)
     {
-      if (strcmp (alias_argv[i], "-a") == 0)
+      if (strcmp (alias_argv[0], "-a") == 0)
 	{
 	  ++alias_argv;
 	  abbrev_flag = 1;
 	}
-      else if (strcmp (alias_argv[i], "--") == 0)
+      else if (strcmp (alias_argv[0], "--") == 0)
 	{
 	  ++alias_argv;
 	  break;
@@ -1449,12 +1445,13 @@ alias_command (char *args, int from_tty)
     }
 
   alias_argc = countargv (alias_argv);
-  command_argc = countargv (command_argv);
+  command_argc = command_argv.count ();
 
   /* COMMAND must exist.
      Reconstruct the command to remove any extraneous spaces,
      for better error messages.  */
-  std::string command_string (argv_to_string (command_argv, command_argc));
+  std::string command_string (argv_to_string (command_argv.get (),
+					      command_argc));
   command = command_string.c_str ();
   if (! valid_command_p (command))
     error (_("Invalid command to alias to: %s"), command);
@@ -1511,8 +1508,6 @@ alias_command (char *args, int from_tty)
 		     command_argv[command_argc - 1],
 		     class_alias, abbrev_flag, c_command->prefixlist);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Print a list of files and line numbers which a user may choose from

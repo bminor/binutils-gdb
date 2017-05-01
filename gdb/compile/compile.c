@@ -285,15 +285,17 @@ get_expr_block_and_pc (CORE_ADDR *pc)
   return block;
 }
 
-/* Call gdb_buildargv, set its result for S into *ARGVP but calculate also the
-   number of parsed arguments into *ARGCP.  If gdb_buildargv has returned NULL
-   then *ARGCP is set to zero.  */
+/* Call buildargv (via gdb_argv), set its result for S into *ARGVP but
+   calculate also the number of parsed arguments into *ARGCP.  If
+   buildargv has returned NULL then *ARGCP is set to zero.  */
 
 static void
 build_argc_argv (const char *s, int *argcp, char ***argvp)
 {
-  *argvp = gdb_buildargv (s);
-  *argcp = countargv (*argvp);
+  gdb_argv args (s);
+
+  *argcp = args.count ();
+  *argvp = args.release ();
 }
 
 /* String for 'set compile-args' and 'show compile-args'.  */
@@ -517,7 +519,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   /* Set compiler command-line arguments.  */
   get_args (compiler, gdbarch, &argc, &argv);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv_holder (argv);
 
   error_message = compiler->fe->ops->set_arguments (compiler->fe, triplet_rx,
 						    argc, argv);

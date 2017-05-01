@@ -570,8 +570,7 @@ gdbsim_load (struct target_ops *self, const char *args, int fromtty)
   if (args == NULL)
       error_no_arg (_("program to load"));
 
-  argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   prog = tilde_expand (argv[0]);
 
@@ -609,7 +608,7 @@ gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
   int len;
-  char *arg_buf, **argv;
+  char *arg_buf;
   const char *args = allargs.c_str ();
 
   if (exec_file == 0 || exec_bfd == 0)
@@ -628,6 +627,7 @@ gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
   remove_breakpoints ();
   init_wait_for_inferior ();
 
+  gdb_argv built_argv;
   if (exec_file != NULL)
     {
       len = strlen (exec_file) + 1 + allargs.size () + 1 + /*slop */ 10;
@@ -636,16 +636,14 @@ gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
       strcat (arg_buf, exec_file);
       strcat (arg_buf, " ");
       strcat (arg_buf, args);
-      argv = gdb_buildargv (arg_buf);
-      make_cleanup_freeargv (argv);
+      built_argv.reset (arg_buf);
     }
-  else
-    argv = NULL;
 
   if (!have_inferiors ())
     init_thread_list ();
 
-  if (sim_create_inferior (sim_data->gdbsim_desc, exec_bfd, argv, env)
+  if (sim_create_inferior (sim_data->gdbsim_desc, exec_bfd,
+			   built_argv.get (), env)
       != SIM_RC_OK)
     error (_("Unable to create sim inferior."));
 
@@ -728,17 +726,20 @@ gdbsim_open (const char *args, int from_tty)
       strcat (arg_buf, " ");	/* 1 */
       strcat (arg_buf, args);
     }
-  sim_argv = gdb_buildargv (arg_buf);
+
+  gdb_argv args (arg_buf);
+  sim_argv = args.get ();
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
 
   if (gdbsim_desc == 0)
     {
-      freeargv (sim_argv);
       sim_argv = NULL;
       error (_("unable to create simulator instance"));
     }
+
+  args.release ();
 
   /* Reset the pid numberings for this batch of sim instances.  */
   next_pid = INITIAL_PID;

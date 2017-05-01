@@ -484,16 +484,12 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
   if (parse_separators)
     {
-      char **argv, **argvp;
-
       /* This will properly parse the space and tab separators
 	 and any quotes that may exist.  */
-      argv = gdb_buildargv (dirname);
+      gdb_argv argv (dirname);
 
-      for (argvp = argv; *argvp; argvp++)
-	dirnames_to_char_ptr_vec_append (&dir_vec, *argvp);
-
-      freeargv (argv);
+      for (char *arg : argv)
+	dirnames_to_char_ptr_vec_append (&dir_vec, arg);
     }
   else
     VEC_safe_push (char_ptr, dir_vec, xstrdup (dirname));
@@ -1883,12 +1879,9 @@ static void
 show_substitute_path_command (char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
-  char **argv;
   char *from = NULL;
-  struct cleanup *cleanup;
   
-  argv = gdb_buildargv (args);
-  cleanup = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   /* We expect zero or one argument.  */
 
@@ -1912,8 +1905,6 @@ show_substitute_path_command (char *args, int from_tty)
         printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
       rule = rule->next;
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implement the "unset substitute-path" command.  */
@@ -1922,14 +1913,12 @@ static void
 unset_substitute_path_command (char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
-  char **argv = gdb_buildargv (args);
+  gdb_argv argv (args);
   char *from = NULL;
   int rule_found = 0;
-  struct cleanup *cleanup;
 
   /* This function takes either 0 or 1 argument.  */
 
-  cleanup = make_cleanup_freeargv (argv);
   if (argv != NULL && argv[0] != NULL && argv[1] != NULL)
     error (_("Incorrect usage, too many arguments in command"));
 
@@ -1967,8 +1956,6 @@ unset_substitute_path_command (char *args, int from_tty)
     error (_("No substitution rule defined for `%s'"), from);
 
   forget_cached_source_info ();
-
-  do_cleanups (cleanup);
 }
 
 /* Add a new source path substitution rule.  */
@@ -1976,12 +1963,9 @@ unset_substitute_path_command (char *args, int from_tty)
 static void
 set_substitute_path_command (char *args, int from_tty)
 {
-  char **argv;
   struct substitute_path_rule *rule;
-  struct cleanup *cleanup;
   
-  argv = gdb_buildargv (args);
-  cleanup = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   if (argv == NULL || argv[0] == NULL || argv [1] == NULL)
     error (_("Incorrect usage, too few arguments in command"));
@@ -2008,8 +1992,6 @@ set_substitute_path_command (char *args, int from_tty)
 
   add_substitute_path_rule (argv[0], argv[1]);
   forget_cached_source_info ();
-
-  do_cleanups (cleanup);
 }
 
 

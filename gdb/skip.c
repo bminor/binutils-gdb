@@ -217,8 +217,6 @@ skip_command (char *arg, int from_tty)
   const char *gfile = NULL;
   const char *function = NULL;
   const char *rfunction = NULL;
-  char **argv;
-  struct cleanup *cleanups;
   struct skiplist_entry *e;
   int i;
 
@@ -228,8 +226,7 @@ skip_command (char *arg, int from_tty)
       return;
     }
 
-  argv = buildargv (arg);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (arg);
 
   for (i = 0; argv[i] != NULL; ++i)
     {
@@ -276,7 +273,6 @@ skip_command (char *arg, int from_tty)
 	     FUNCTION-NAME may be `foo (int)', and therefore we pass the
 	     complete original arg to skip_function command as if the user
 	     typed "skip function arg".  */
-	  do_cleanups (cleanups);
 	  skip_function_command (arg, from_tty);
 	  return;
 	}
@@ -336,8 +332,6 @@ skip_command (char *arg, int from_tty)
 			 lower_file_text, file_to_print);
       }
   }
-
-  do_cleanups (cleanups);
 }
 
 static void

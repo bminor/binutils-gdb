@@ -1639,7 +1639,6 @@ symbol_file_command (char *args, int from_tty)
     }
   else
     {
-      char **argv = gdb_buildargv (args);
       objfile_flags flags = OBJF_USERLOADED;
       symfile_add_flags add_flags = 0;
       struct cleanup *cleanups;
@@ -1648,26 +1647,22 @@ symbol_file_command (char *args, int from_tty)
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-      cleanups = make_cleanup_freeargv (argv);
-      while (*argv != NULL)
+      gdb_argv built_argv (args);
+      for (char *arg : built_argv)
 	{
-	  if (strcmp (*argv, "-readnow") == 0)
+	  if (strcmp (arg, "-readnow") == 0)
 	    flags |= OBJF_READNOW;
-	  else if (**argv == '-')
-	    error (_("unknown option `%s'"), *argv);
+	  else if (*arg == '-')
+	    error (_("unknown option `%s'"), arg);
 	  else
 	    {
-	      symbol_file_add_main_1 (*argv, add_flags, flags);
-	      name = *argv;
+	      symbol_file_add_main_1 (arg, add_flags, flags);
+	      name = arg;
 	    }
-
-	  argv++;
 	}
 
       if (name == NULL)
 	error (_("no symbol file name was specified"));
-
-      do_cleanups (cleanups);
     }
 }
 
@@ -2061,25 +2056,23 @@ void
 generic_load (const char *args, int from_tty)
 {
   char *filename;
-  struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
+  struct cleanup *old_cleanups;
   struct load_section_data cbdata;
   struct load_progress_data total_progress;
   struct ui_out *uiout = current_uiout;
 
   CORE_ADDR entry;
-  char **argv;
 
   memset (&cbdata, 0, sizeof (cbdata));
   memset (&total_progress, 0, sizeof (total_progress));
   cbdata.progress_data = &total_progress;
 
-  make_cleanup (clear_memory_write_data, &cbdata.requests);
+  old_cleanups = make_cleanup (clear_memory_write_data, &cbdata.requests);
 
   if (args == NULL)
     error_no_arg (_("file to load"));
 
-  argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   filename = tilde_expand (argv[0]);
   make_cleanup (xfree, filename);
@@ -2227,7 +2220,6 @@ add_symbol_file_command (char *args, int from_tty)
   int i;
   int expecting_sec_name = 0;
   int expecting_sec_addr = 0;
-  char **argv;
   struct objfile *objf;
   objfile_flags flags = OBJF_USERLOADED | OBJF_SHARED;
   symfile_add_flags add_flags = 0;
@@ -2254,8 +2246,7 @@ add_symbol_file_command (char *args, int from_tty)
   if (args == NULL)
     error (_("add-symbol-file takes a file name and an address"));
 
-  argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (arg = argv[0], argcnt = 0; arg != NULL; arg = argv[++argcnt])
     {
@@ -2375,7 +2366,6 @@ add_symbol_file_command (char *args, int from_tty)
 static void
 remove_symbol_file_command (char *args, int from_tty)
 {
-  char **argv;
   struct objfile *objf = NULL;
   struct cleanup *my_cleanups;
   struct program_space *pspace = current_program_space;
@@ -2387,7 +2377,7 @@ remove_symbol_file_command (char *args, int from_tty)
 
   my_cleanups = make_cleanup (null_cleanup, NULL);
 
-  argv = gdb_buildargv (args);
+  gdb_argv argv (args);
 
   if (strcmp (argv[0], "-a") == 0)
     {

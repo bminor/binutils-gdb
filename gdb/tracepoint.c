@@ -447,10 +447,6 @@ trace_variable_command (char *args, int from_tty)
 static void
 delete_trace_variable_command (char *args, int from_tty)
 {
-  int ix;
-  char **argv;
-  struct cleanup *back_to;
-
   if (args == NULL)
     {
       if (query (_("Delete all trace state variables? ")))
@@ -460,18 +456,15 @@ delete_trace_variable_command (char *args, int from_tty)
       return;
     }
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
-  for (ix = 0; argv[ix] != NULL; ix++)
+  for (char *arg : argv)
     {
-      if (*argv[ix] == '$')
-	delete_trace_state_variable (argv[ix] + 1);
+      if (*arg == '$')
+	delete_trace_state_variable (arg + 1);
       else
-	warning (_("Name \"%s\" not prefixed with '$', ignoring"), argv[ix]);
+	warning (_("Name \"%s\" not prefixed with '$', ignoring"), arg);
     }
-
-  do_cleanups (back_to);
 
   dont_repeat ();
 }

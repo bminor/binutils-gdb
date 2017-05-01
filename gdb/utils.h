@@ -86,6 +86,124 @@ extern int parse_pid_to_attach (const char *args);
 extern int parse_escape (struct gdbarch *, const char **);
 
 char **gdb_buildargv (const char *);
+
+/* A wrapper for an array of char* that was allocated in the way that
+   'buildargv' does, and should be freed with 'freeargv'.  */
+
+class gdb_argv
+{
+public:
+
+  /* A constructor that initializes to NULL.  */
+
+  gdb_argv ()
+    : m_argv (NULL)
+  {
+  }
+
+  /* A constructor that calls buildargv on STR.  STR may be NULL, in
+     which case this object is initialized with a NULL array.  If
+     buildargv fails due to out-of-memory, call malloc_failure.
+     Therefore, the value is guaranteed to be non-NULL, unless the
+     parameter itself is NULL.  */
+
+  explicit gdb_argv (const char *str)
+    : m_argv (NULL)
+  {
+    reset (str);
+  }
+
+  /* A constructor that takes ownership of an existing array.  */
+
+  explicit gdb_argv (char **array)
+    : m_argv (array)
+  {
+  }
+
+  gdb_argv (const gdb_argv &) = delete;
+  gdb_argv &operator= (const gdb_argv &) = delete;
+
+  ~gdb_argv ()
+  {
+    freeargv (m_argv);
+  }
+
+  /* Call buildargv on STR, storing the result in this object.  Any
+     previous state is freed.  STR may be NULL, in which case this
+     object is reset with a NULL array.  If buildargv fails due to
+     out-of-memory, call malloc_failure.  Therefore, the value is
+     guaranteed to be non-NULL, unless the parameter itself is
+     NULL.  */
+
+  void reset (const char *str);
+
+  /* Return the underlying array.  */
+
+  char **get ()
+  {
+    return m_argv;
+  }
+
+  /* Return the underlying array, transferring ownership to the
+     caller.  */
+
+  char **release ()
+  {
+    char **result = m_argv;
+    m_argv = NULL;
+    return result;
+  }
+
+  /* Return the number of items in the array.  */
+
+  int count () const
+  {
+    return countargv (m_argv);
+  }
+
+  /* Index into the array.  */
+
+  char *operator[] (int arg)
+  {
+    gdb_assert (m_argv != NULL);
+    return m_argv[arg];
+  }
+
+  /* The iterator type.  */
+
+  typedef char **iterator;
+
+  /* Return an iterator pointing to the start of the array.  */
+
+  iterator begin ()
+  {
+    return m_argv;
+  }
+
+  /* Return an iterator pointing to the end of the array.  */
+
+  iterator end ()
+  {
+    return m_argv + count ();
+  }
+
+  bool operator!= (nullptr_t)
+  {
+    return m_argv != NULL;
+  }
+
+  bool operator== (nullptr_t)
+  {
+    return m_argv == NULL;
+  }
+
+private:
+
+  /* The wrapped array.  */
+
+  char **m_argv;
+};
+
 
 /* Cleanup utilities.  */
 

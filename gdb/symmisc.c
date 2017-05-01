@@ -407,7 +407,6 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
 static void
 maintenance_print_symbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
   struct cleanup *cleanups;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
@@ -415,8 +414,8 @@ maintenance_print_symbols (char *args, int from_tty)
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
+  cleanups = make_cleanup (null_cleanup, NULL);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -709,7 +708,6 @@ print_symbol (void *args)
 static void
 maintenance_print_msymbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
   struct cleanup *cleanups;
   char *objfile_arg = NULL;
@@ -718,8 +716,8 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
+  cleanups = make_cleanup (null_cleanup, NULL);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -944,14 +942,11 @@ maintenance_expand_symtabs (char *args, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
-  struct cleanup *cleanups;
-  char **argv;
   char *regexp = NULL;
 
   /* We use buildargv here so that we handle spaces in the regexp
      in a way that allows adding more arguments later.  */
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   if (argv != NULL)
     {
@@ -988,8 +983,6 @@ maintenance_expand_symtabs (char *args, int from_tty)
 	     ALL_DOMAIN);
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 
