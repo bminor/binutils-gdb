@@ -177,6 +177,11 @@ run_ld_link_exec_tests [list \
     ] \
 ]
 
+# Run-time tests which require working GNU2 TLS support.
+if { ![check_gnu2_tls_available] } {
+    return
+}
+
 run_cc_link_tests [list \
     [list \
 	"Build libtlsdesc1.so" \
