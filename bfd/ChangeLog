@@ -1,3 +1,7 @@
+2017-05-01  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config.bfd (riscv32-*): Enable rv64.
+
 2017-04-03  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* elfnn-riscv.c (GP_NAME): Delete.
