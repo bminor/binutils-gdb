@@ -129,7 +129,7 @@ extern void set_gdbarch_bits_big_endian (struct gdbarch *gdbarch, int bits_big_e
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.
-   v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
+   v;TARGET_CHAR_BIT;int;char_bit;;;;8 * sizeof (char);8;;0;
   
    Number of bits in a short or unsigned short for the target machine. */
 

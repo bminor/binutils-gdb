@@ -1,3 +1,8 @@
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh: Use semi-colon as field separator instead of colon.
+	* gdbarch.h: Re-generate.
+
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-instruction.o.
