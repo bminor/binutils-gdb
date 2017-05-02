@@ -1,3 +1,23 @@
+2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-branch-absolute-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-2.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32-1.d:
+	New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-2.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64-1.d:
+	New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/tls.exp: Add -Wl,--no-as-needed to

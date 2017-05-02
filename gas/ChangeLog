@@ -1,3 +1,34 @@
+2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn): Call `symbol_append' for any
+	expression symbol created for MIPS16 relaxation.
+	(match_mips16_insn): Don't encode a constant value as an
+	immediate with a PC-relative operand.
+
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-1.d: New
+	test.
+	* testsuite/gas/mips/mips16-branch-absolute-n32-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-n32-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-n32-1.d: New
+	test.
+	* testsuite/gas/mips/mips16-branch-absolute-n64-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-n64-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-n64-1.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.s: New test source.
+	* testsuite/gas/mips/mips16-branch-absolute-1.s: New test
+	source.
+	* testsuite/gas/mips/mips16-branch-absolute-2.s: New test
+	source.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-1.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (mips16_pcrel_val): New function, factored

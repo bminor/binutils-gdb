@@ -7419,6 +7419,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       else
 	{
 	  symbol = make_expr_symbol (address_expr);
+	  symbol_append (symbol, symbol_lastP, &symbol_rootP, &symbol_lastP);
 	  offset = 0;
 	}
       add_relaxed_insn (ip, 4, 0,
@@ -8087,6 +8088,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
   const char *args;
   const struct mips_operand *operand;
   const struct mips_operand *ext_operand;
+  bfd_boolean pcrel = FALSE;
   int required_insn_length;
   struct mips_arg_info arg;
   int relax_char;
@@ -8148,6 +8150,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    }
 	  else if (relax_char
 		   && offset_expr.X_op == O_constant
+		   && !pcrel
 		   && calculate_reloc (*offset_reloc,
 				       offset_expr.X_add_number,
 				       &value))
@@ -8216,7 +8219,9 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
       if (!operand)
 	abort ();
 
-      if (operand->type != OP_PCREL)
+      if (operand->type == OP_PCREL)
+	pcrel = TRUE;
+      else
 	{
 	  ext_operand = decode_mips16_operand (c, TRUE);
 	  if (operand != ext_operand)
