@@ -36,16 +36,6 @@
 
 #endif
 
-#define BTPY_REQUIRE_VALID_CALL(obj, iter)				\
-  do {									\
-    struct thread_info *tinfo = find_thread_ptid (obj->ptid);		\
-    if (tinfo == NULL || btrace_is_empty (tinfo))			\
-      return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));	\
-    if (0 == btrace_find_call_by_number (&iter, &tinfo->btrace,		\
-					 obj->number))			\
-      return PyErr_Format (gdbpy_gdb_error, _("No such call segment."));\
-  } while (0)
-
 /* Python object for btrace record lists.  */
 
 typedef struct {
@@ -66,12 +56,6 @@ typedef struct {
   /* Either &BTPY_CALL_TYPE or &RECPY_INSN_TYPE.  */
   PyTypeObject* element_type;
 } btpy_list_object;
-
-/* Python type for btrace function-calls.  */
-
-static PyTypeObject btpy_call_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
 
 /* Python type for btrace lists.  */
 
@@ -121,6 +105,49 @@ btrace_insn_from_recpy_insn (const PyObject * const pyobject)
   return insn;
 }
 
+/* Returns either a btrace_function for the given Python
+   gdb.RecordFunctionSegment object or sets an appropriate Python exception and
+   returns NULL.  */
+
+static const btrace_function *
+btrace_func_from_recpy_func (const PyObject * const pyobject)
+{
+  const btrace_function *func;
+  const recpy_element_object *obj;
+  thread_info *tinfo;
+  btrace_call_iterator iter;
+
+  if (Py_TYPE (pyobject) != &recpy_func_type)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("Must be gdb.RecordFunctionSegment"));
+      return NULL;
+    }
+
+  obj = (const recpy_element_object *) pyobject;
+  tinfo = find_thread_ptid (obj->ptid);
+
+  if (tinfo == NULL || btrace_is_empty (tinfo))
+    {
+      PyErr_Format (gdbpy_gdb_error, _("No such function segment."));
+      return NULL;
+    }
+
+  if (btrace_find_call_by_number (&iter, &tinfo->btrace, obj->number) == 0)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("No such function segment."));
+      return NULL;
+    }
+
+  func = btrace_call_get (&iter);
+  if (func == NULL)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("Not a valid function segment."));
+      return NULL;
+    }
+
+  return func;
+}
+
 /* Looks at the recorded item with the number NUMBER and create a
    gdb.RecordInstruction or gdb.RecordGap object for it accordingly.  */
 
@@ -147,24 +174,6 @@ btpy_insn_or_gap_new (const thread_info *tinfo, Py_ssize_t number)
   return recpy_insn_new (tinfo->ptid, RECORD_METHOD_BTRACE, number);
 }
 
-/* Create a new gdb.BtraceFunctionCall object.  */
-
-static PyObject *
-btpy_call_new (ptid_t ptid, Py_ssize_t number)
-{
-  recpy_element_object * const obj = PyObject_New (recpy_element_object,
-						   &btpy_call_type);
-
-  if (obj == NULL)
-    return NULL;
-
-  obj->ptid = ptid;
-  obj->method = RECORD_METHOD_BTRACE;
-  obj->number = number;
-
-  return (PyObject *) obj;
-}
-
 /* Create a new gdb.BtraceList object.  */
 
 static PyObject *
@@ -184,28 +193,6 @@ btpy_list_new (ptid_t ptid, Py_ssize_t first, Py_ssize_t last, Py_ssize_t step,
   obj->element_type = element_type;
 
   return (PyObject *) obj;
-}
-
-/* Implementation of BtraceInstruction.number [int] and
-   BtraceFunctionCall.number [int].  */
-
-static PyObject *
-btpy_number (PyObject *self, void *closure)
-{
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-
-  return PyInt_FromSsize_t (obj->number);
-}
-
-/* Implementation of BtraceInstruction.__hash__ () -> int and
-   BtraceFunctionCall.__hash__ () -> int.  */
-
-static Py_hash_t
-btpy_hash (PyObject *self)
-{
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-
-  return obj->number;
 }
 
 /* Implementation of RecordInstruction.sal [gdb.Symtab_and_line] for btrace.
@@ -344,40 +331,32 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
   return PyBytes_FromString (strfile.string ().c_str ());
 }
 
-/* Implementation of BtraceFunctionCall.level [int].  Returns the
-   call level.  */
+/* Implementation of RecordFunctionSegment.level [int] for btrace.
+   Returns the call level.  */
 
-static PyObject *
-btpy_call_level (PyObject *self, void *closure)
+PyObject *
+recpy_bt_func_level (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-  const struct btrace_function *func;
-  struct btrace_call_iterator iter;
+  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  thread_info *tinfo;
 
-  BTPY_REQUIRE_VALID_CALL (obj, iter);
-
-  func = btrace_call_get (&iter);
   if (func == NULL)
-    Py_RETURN_NONE;
+    return NULL;
 
-  return PyInt_FromLong (iter.btinfo->level + func->level);
+  tinfo = find_thread_ptid (((recpy_element_object *) self)->ptid);
+  return PyInt_FromLong (tinfo->btrace.level + func->level);
 }
 
-/* Implementation of BtraceFunctionCall.symbol [gdb.Symbol].  Returns
-   the symbol associated with this function call.  */
+/* Implementation of RecordFunctionSegment.symbol [gdb.Symbol] for btrace.
+   Returns the symbol associated with this function call.  */
 
-static PyObject *
-btpy_call_symbol (PyObject *self, void *closure)
+PyObject *
+recpy_bt_func_symbol (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-  const struct btrace_function *func;
-  struct btrace_call_iterator iter;
+  const btrace_function * const func = btrace_func_from_recpy_func (self);
 
-  BTPY_REQUIRE_VALID_CALL (obj, iter);
-
-  func = btrace_call_get (&iter);
   if (func == NULL)
-    Py_RETURN_NONE;
+    return NULL;
 
   if (func->sym == NULL)
     Py_RETURN_NONE;
@@ -385,22 +364,17 @@ btpy_call_symbol (PyObject *self, void *closure)
   return symbol_to_symbol_object (func->sym);
 }
 
-/* Implementation of BtraceFunctionCall.instructions [list].
-   Return the list of instructions that belong to this function call.  */
+/* Implementation of RecordFunctionSegment.instructions [list] for btrace.
+   Returns the list of instructions that belong to this function call.  */
 
-static PyObject *
-btpy_call_instructions (PyObject *self, void *closure)
+PyObject *
+recpy_bt_func_instructions (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-  const struct btrace_function *func;
-  struct btrace_call_iterator iter;
+  const btrace_function * const func = btrace_func_from_recpy_func (self);
   unsigned int len;
 
-  BTPY_REQUIRE_VALID_CALL (obj, iter);
-
-  func = btrace_call_get (&iter);
   if (func == NULL)
-    Py_RETURN_NONE;
+    return NULL;
 
   len = VEC_length (btrace_insn_s, func->insn);
 
@@ -408,111 +382,63 @@ btpy_call_instructions (PyObject *self, void *closure)
   if (len == 0)
     len = 1;
 
-  return btpy_list_new (obj->ptid, func->insn_offset, func->insn_offset + len,
-			1, &recpy_insn_type);
+  return btpy_list_new (((recpy_element_object *) self)->ptid,
+			func->insn_offset, func->insn_offset + len, 1,
+			&recpy_insn_type);
 }
 
-/* Implementation of BtraceFunctionCall.up [gdb.BtraceRecordCall].
-   Return the caller / returnee of this function.  */
+/* Implementation of RecordFunctionSegment.up [RecordFunctionSegment] for
+   btrace.  Returns the caller / returnee of this function.  */
 
-static PyObject *
-btpy_call_up (PyObject *self, void *closure)
+PyObject *
+recpy_bt_func_up (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-  const struct btrace_function *func;
-  struct btrace_call_iterator iter;
+  const btrace_function * const func = btrace_func_from_recpy_func (self);
 
-  BTPY_REQUIRE_VALID_CALL (obj, iter);
-
-  func = btrace_call_get (&iter);
   if (func == NULL)
-    Py_RETURN_NONE;
+    return NULL;
 
   if (func->up == NULL)
     Py_RETURN_NONE;
 
-  return btpy_call_new (obj->ptid, func->up->number);
+  return recpy_func_new (((recpy_element_object *) self)->ptid,
+			 RECORD_METHOD_BTRACE, func->up->number);
 }
 
-/* Implementation of BtraceFunctionCall.prev_sibling [BtraceFunctionCall].
-   Return a previous segment of this function.  */
+/* Implementation of RecordFunctionSegment.prev [RecordFunctionSegment] for
+   btrace.  Returns a previous segment of this function.  */
 
-static PyObject *
-btpy_call_prev_sibling (PyObject *self, void *closure)
+PyObject *
+recpy_bt_func_prev (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-  const struct btrace_function *func;
-  struct btrace_call_iterator iter;
+  const btrace_function * const func = btrace_func_from_recpy_func (self);
 
-  BTPY_REQUIRE_VALID_CALL (obj, iter);
-
-  func = btrace_call_get (&iter);
   if (func == NULL)
-    Py_RETURN_NONE;
+    return NULL;
 
   if (func->segment.prev == NULL)
     Py_RETURN_NONE;
 
-  return btpy_call_new (obj->ptid, func->segment.prev->number);
+  return recpy_func_new (((recpy_element_object *) self)->ptid,
+			 RECORD_METHOD_BTRACE, func->segment.prev->number);
 }
 
-/* Implementation of BtraceFunctionCall.next_sibling [BtraceFunctionCall].
-   Return a following segment of this function.  */
+/* Implementation of RecordFunctionSegment.next [RecordFunctionSegment] for
+   btrace.  Returns a following segment of this function.  */
 
-static PyObject *
-btpy_call_next_sibling (PyObject *self, void *closure)
+PyObject *
+recpy_bt_func_next (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (const recpy_element_object *) self;
-  const struct btrace_function *func;
-  struct btrace_call_iterator iter;
+  const btrace_function * const func = btrace_func_from_recpy_func (self);
 
-  BTPY_REQUIRE_VALID_CALL (obj, iter);
-
-  func = btrace_call_get (&iter);
   if (func == NULL)
-    Py_RETURN_NONE;
+    return NULL;
 
   if (func->segment.next == NULL)
     Py_RETURN_NONE;
 
-  return btpy_call_new (obj->ptid, func->segment.next->number);
-}
-
-/* Python rich compare function to allow for equality and inequality checks
-   in Python.  */
-
-static PyObject *
-btpy_richcompare (PyObject *self, PyObject *other, int op)
-{
-  const recpy_element_object * const obj1 = (recpy_element_object *) self;
-  const recpy_element_object * const obj2 = (recpy_element_object *) other;
-
-  if (Py_TYPE (self) != Py_TYPE (other))
-    {
-      Py_INCREF (Py_NotImplemented);
-      return Py_NotImplemented;
-    }
-
-  switch (op)
-  {
-    case Py_EQ:
-      if (ptid_equal (obj1->ptid, obj2->ptid) && obj1->number == obj2->number)
-	Py_RETURN_TRUE;
-      else
-	Py_RETURN_FALSE;
-
-    case Py_NE:
-      if (!ptid_equal (obj1->ptid, obj2->ptid) || obj1->number != obj2->number)
-	Py_RETURN_TRUE;
-      else
-	Py_RETURN_FALSE;
-
-    default:
-      break;
-  }
-
-  Py_INCREF (Py_NotImplemented);
-  return Py_NotImplemented;
+  return recpy_func_new (((recpy_element_object *) self)->ptid,
+			 RECORD_METHOD_BTRACE, func->segment.next->number);
 }
 
 /* Implementation of BtraceList.__len__ (self) -> int.  */
@@ -550,7 +476,7 @@ btpy_list_item (PyObject *self, Py_ssize_t index)
   if (obj->element_type == &recpy_insn_type)
     return recpy_insn_new (obj->ptid, RECORD_METHOD_BTRACE, number);
   else
-    return btpy_call_new (obj->ptid, number);
+    return recpy_func_new (obj->ptid, RECORD_METHOD_BTRACE, number);
 }
 
 /* Implementation of BtraceList.__getitem__ (self, slice) -> BtraceList.  */
@@ -839,7 +765,7 @@ recpy_bt_function_call_history (PyObject *self, void *closure)
   btrace_call_end (&iterator, &tinfo->btrace);
   last = btrace_call_number (&iterator);
 
-  return btpy_list_new (record->ptid, first, last, 1, &btpy_call_type);
+  return btpy_list_new (record->ptid, first, last, 1, &recpy_func_type);
 }
 
 /* Implementation of BtraceRecord.goto (self, BtraceInstruction) -> None.  */
@@ -880,23 +806,6 @@ recpy_bt_goto (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
-/* BtraceFunctionCall members.  */
-
-static gdb_PyGetSetDef btpy_call_getset[] =
-{
-  { "number", btpy_number, NULL, "function call number", NULL},
-  { "level", btpy_call_level, NULL, "call stack level", NULL},
-  { "symbol", btpy_call_symbol, NULL, "associated line and symbol", NULL},
-  { "instructions", btpy_call_instructions, NULL, "list of instructions in \
-this function segment", NULL},
-  { "up", btpy_call_up, NULL, "caller or returned-to function segment", NULL},
-  { "prev_sibling", btpy_call_prev_sibling, NULL, "previous segment of this \
-function", NULL},
-  { "next_sibling", btpy_call_next_sibling, NULL, "next segment of this \
-function", NULL},
-  {NULL}
-};
-
 /* BtraceList methods.  */
 
 struct PyMethodDef btpy_list_methods[] =
@@ -925,15 +834,6 @@ static PyMappingMethods btpy_list_mapping_methods =
 int
 gdbpy_initialize_btrace (void)
 {
-  btpy_call_type.tp_new = PyType_GenericNew;
-  btpy_call_type.tp_flags = Py_TPFLAGS_DEFAULT;
-  btpy_call_type.tp_basicsize = sizeof (recpy_element_object);
-  btpy_call_type.tp_name = "gdb.BtraceFunctionCall";
-  btpy_call_type.tp_doc = "GDB btrace call object";
-  btpy_call_type.tp_getset = btpy_call_getset;
-  btpy_call_type.tp_richcompare = btpy_richcompare;
-  btpy_call_type.tp_hash = btpy_hash;
-
   btpy_list_type.tp_new = PyType_GenericNew;
   btpy_list_type.tp_flags = Py_TPFLAGS_DEFAULT;
   btpy_list_type.tp_basicsize = sizeof (btpy_list_object);
@@ -950,9 +850,5 @@ gdbpy_initialize_btrace (void)
 
   btpy_list_mapping_methods.mp_subscript = btpy_list_slice;
 
-  if (PyType_Ready (&btpy_call_type) < 0
-      || PyType_Ready (&btpy_list_type) < 0)
-    return -1;
-  else
-    return 0;
+  return PyType_Ready (&btpy_list_type);
 }

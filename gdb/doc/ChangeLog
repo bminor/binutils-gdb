@@ -1,5 +1,11 @@
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* python.texi (Recording in Python): Replace gdb.BtraceFunction with
+	gdb.RecordFunctionSegment.  Rename prev_sibling and next_sibling to
+	prev and next.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python.texi (Recording in Python): Replace gdb.BtraceInstruction with
 	gdb.RecordInstruction
 

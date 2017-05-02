@@ -67,4 +67,25 @@ extern PyObject *recpy_bt_insn_size (PyObject *self, void *closure);
 /* Implementation of RecordInstruction.is_speculative [bool].  */
 extern PyObject *recpy_bt_insn_is_speculative (PyObject *self, void *closure);
 
+/* Implementation of RecordFunctionSegment.number [int].  */
+extern PyObject *recpy_bt_func_number (PyObject *self, void *closure);
+
+/* Implementation of RecordFunctionSegment.number [int].  */
+extern PyObject *recpy_bt_func_level (PyObject *self, void *closure);
+
+/* Implementation of RecordFunctionSegment.symbol [gdb.Symbol].  */
+extern PyObject *recpy_bt_func_symbol (PyObject *self, void *closure);
+
+/* Implementation of RecordFunctionSegment.instructions [list].  */
+extern PyObject *recpy_bt_func_instructions (PyObject *self, void *closure);
+
+/* Implementation of RecordFunctionSegment.up [RecordFunctionSegment].  */
+extern PyObject *recpy_bt_func_up (PyObject *self, void *closure);
+
+/* Implementation of RecordFunctionSegment.prev [RecordFunctionSegment].  */
+extern PyObject *recpy_bt_func_prev (PyObject *self, void *closure);
+
+/* Implementation of RecordFunctionSegment.next [RecordFunctionSegment].  */
+extern PyObject *recpy_bt_func_next (PyObject *self, void *closure);
+
 #endif /* GDB_PY_RECORD_BTRACE_H */
