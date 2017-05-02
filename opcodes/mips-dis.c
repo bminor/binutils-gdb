@@ -1281,9 +1281,10 @@ print_insn_arg (struct disassemble_info *info,
 	pcrel_op = (const struct mips_pcrel_operand *) operand;
 	info->target = mips_decode_pcrel_operand (pcrel_op, base_pc, uval);
 
-	/* Preserve the ISA bit for the GDB disassembler,
-	   otherwise clear it.  */
-	if (info->flavour != bfd_target_unknown_flavour)
+	/* For jumps and branches clear the ISA bit except for
+	   the GDB disassembler.  */
+	if (pcrel_op->include_isa_bit
+	    && info->flavour != bfd_target_unknown_flavour)
 	  info->target &= -2;
 
 	(*info->print_address_func) (info->target, info);
