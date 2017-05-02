@@ -1,3 +1,11 @@
+2017-05-02  Alan Modra  <amodra@gmail.com>
+
+	PR 21384
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): Test h->non_elf
+	rather than h->root.type == bfd_link_hash_new.
+	(bfd_elf_record_link_assignment): Similarly, call
+	bfd_elf_link_mark_dynamic_symbol when h->non_elf.
+
 2017-04-29  Alan Modra  <amodra@gmail.com>
 
 	PR 21432
