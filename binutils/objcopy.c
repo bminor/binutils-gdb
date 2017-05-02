@@ -2137,6 +2137,13 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	    relcount = 0;
 	}
 
+      /* A few targets (eg MIPS, SPARC) create multiple internal relocs to
+	 represent a single external reloc.  Unfortunately the current BFD
+	 API does not handle deleting relocs in such situations very well
+	 and so it is unsafe to proceed.  */
+      if (relcount > sec->reloc_count)
+	goto done;
+
       /* Eliminate the duplicates.  */
       new = new_contents = xmalloc (size);
       for (pnote = pnotes, old = contents;
