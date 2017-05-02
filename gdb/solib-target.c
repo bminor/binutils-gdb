@@ -347,7 +347,6 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	{
 	  int i;
 	  asection *sect;
-	  int num_section_bases = li->section_bases.size ();
 	  int num_alloc_sections = 0;
 
 	  for (i = 0, sect = so->abfd->sections;
@@ -356,7 +355,7 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	    if ((bfd_get_section_flags (so->abfd, sect) & SEC_ALLOC))
 	      num_alloc_sections++;
 
-	  if (num_alloc_sections != num_section_bases)
+	  if (num_alloc_sections != li->section_bases.size ())
 	    warning (_("\
 Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		     so->so_name);
@@ -407,37 +406,34 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 	    {
 	      ULONGEST orig_delta;
 	      int i;
-	      int num_bases;
-	      CORE_ADDR *segment_bases;
-
-	      num_bases = li->segment_bases.size ();
-	      segment_bases = li->segment_bases.data ();
 
 	      if (!symfile_map_offsets_to_segments (so->abfd, data, li->offsets,
-						    num_bases, segment_bases))
+						    li->segment_bases.size (),
+						    li->segment_bases.data ()))
 		warning (_("\
 Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 
 	      /* Find the range of addresses to report for this library in
 		 "info sharedlibrary".  Report any consecutive segments
 		 which were relocated as a single unit.  */
-	      gdb_assert (num_bases > 0);
-	      orig_delta = segment_bases[0] - data->segment_bases[0];
+	      gdb_assert (li->segment_bases.size () > 0);
+	      orig_delta = li->segment_bases[0] - data->segment_bases[0];
 
 	      for (i = 1; i < data->num_segments; i++)
 		{
 		  /* If we have run out of offsets, assume all
 		     remaining segments have the same offset.  */
-		  if (i >= num_bases)
+		  if (i >= li->segment_bases.size ())
 		    continue;
 
 		  /* If this segment does not have the same offset, do
 		     not include it in the library's range.  */
-		  if (segment_bases[i] - data->segment_bases[i] != orig_delta)
+		  if (li->segment_bases[i] - data->segment_bases[i]
+		      != orig_delta)
 		    break;
 		}
 
-	      so->addr_low = segment_bases[0];
+	      so->addr_low = li->segment_bases[0];
 	      so->addr_high = (data->segment_bases[i - 1]
 			       + data->segment_sizes[i - 1]
 			       + orig_delta);

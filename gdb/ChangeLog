@@ -1,3 +1,8 @@
+2017-05-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Remove num_section_bases, num_bases, segment_bases variables.
+
 2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/gdb_vecs.h (DEF_VEC_I (CORE_ADDR)): Remove.
