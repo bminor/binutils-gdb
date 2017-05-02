@@ -1,5 +1,15 @@
 2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solib-target.c: Include <vector>
+	(struct lm_info_target) <~lm_info_target>: Remove.
+	<segment_bases, section_bases>: Change type to
+	std::vector<CORE_ADDR>.
+	(library_list_start_segment, library_list_start_section,
+	library_list_end_library,
+	solib_target_relocate_section_addresses): Adjust.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbarch.sh (software_single_step): Change return type to
 	std::vector<CORE_ADDR>.
 	* gdbarch.c, gdbarch.h: Re-generate.

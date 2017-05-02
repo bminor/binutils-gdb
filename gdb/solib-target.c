@@ -25,16 +25,11 @@
 #include "target.h"
 #include "vec.h"
 #include "solib-target.h"
+#include <vector>
 
 /* Private data for each loaded library.  */
 struct lm_info_target : public lm_info_base
 {
-  ~lm_info_target ()
-  {
-    VEC_free (CORE_ADDR, this->segment_bases);
-    VEC_free (CORE_ADDR, this->section_bases);
-  }
-
   /* The library's name.  The name is normally kept in the struct
      so_list; it is only here during XML parsing.  */
   std::string name;
@@ -44,11 +39,11 @@ struct lm_info_target : public lm_info_base
 
   /* The base addresses for each independently relocatable segment of
      this shared library.  */
-  VEC(CORE_ADDR) *segment_bases = NULL;
+  std::vector<CORE_ADDR> segment_bases;
 
   /* The base addresses for each independently allocatable,
      relocatable section of this shared library.  */
-  VEC(CORE_ADDR) *section_bases = NULL;
+  std::vector<CORE_ADDR> section_bases;
 
   /* The cached offsets for each section of this shared library,
      determined from SEGMENT_BASES, or SECTION_BASES.  */
@@ -92,11 +87,11 @@ library_list_start_segment (struct gdb_xml_parser *parser,
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
-  if (last->section_bases != NULL)
+  if (!last->section_bases.empty ())
     gdb_xml_error (parser,
 		   _("Library list with both segments and sections"));
 
-  VEC_safe_push (CORE_ADDR, last->segment_bases, address);
+  last->segment_bases.push_back (address);
 }
 
 static void
@@ -110,11 +105,11 @@ library_list_start_section (struct gdb_xml_parser *parser,
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
-  if (last->segment_bases != NULL)
+  if (!last->segment_bases.empty ())
     gdb_xml_error (parser,
 		   _("Library list with both segments and sections"));
 
-  VEC_safe_push (CORE_ADDR, last->section_bases, address);
+  last->section_bases.push_back (address);
 }
 
 /* Handle the start of a <library> element.  */
@@ -141,10 +136,8 @@ library_list_end_library (struct gdb_xml_parser *parser,
   VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
   lm_info_target *lm_info = VEC_last (lm_info_target_p, *list);
 
-  if (lm_info->segment_bases == NULL
-      && lm_info->section_bases == NULL)
-    gdb_xml_error (parser,
-		   _("No segment or section bases defined"));
+  if (lm_info->segment_bases.empty () && lm_info->section_bases.empty ())
+    gdb_xml_error (parser, _("No segment or section bases defined"));
 }
 
 
@@ -350,12 +343,11 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	= ((struct section_offsets *)
 	   xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections)));
 
-      if (li->section_bases)
+      if (!li->section_bases.empty ())
 	{
 	  int i;
 	  asection *sect;
-	  int num_section_bases
-	    = VEC_length (CORE_ADDR, li->section_bases);
+	  int num_section_bases = li->section_bases.size ();
 	  int num_alloc_sections = 0;
 
 	  for (i = 0, sect = so->abfd->sections;
@@ -372,10 +364,6 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 	    {
 	      int bases_index = 0;
 	      int found_range = 0;
-	      CORE_ADDR *section_bases;
-
-	      section_bases = VEC_address (CORE_ADDR,
-					   li->section_bases);
 
 	      so->addr_low = ~(CORE_ADDR) 0;
 	      so->addr_high = 0;
@@ -389,7 +377,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		    {
 		      CORE_ADDR low, high;
 
-		      low = section_bases[i];
+		      low = li->section_bases[i];
 		      high = low + bfd_section_size (so->abfd, sect) - 1;
 
 		      if (low < so->addr_low)
@@ -399,8 +387,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		      gdb_assert (so->addr_low <= so->addr_high);
 		      found_range = 1;
 		    }
-		  li->offsets->offsets[i]
-		    = section_bases[bases_index];
+		  li->offsets->offsets[i] = li->section_bases[bases_index];
 		  bases_index++;
 		}
 	      if (!found_range)
@@ -408,7 +395,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 	      gdb_assert (so->addr_low <= so->addr_high);
 	    }
 	}
-      else if (li->segment_bases)
+      else if (!li->segment_bases.empty ())
 	{
 	  struct symfile_segment_data *data;
 
@@ -423,8 +410,8 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 	      int num_bases;
 	      CORE_ADDR *segment_bases;
 
-	      num_bases = VEC_length (CORE_ADDR, li->segment_bases);
-	      segment_bases = VEC_address (CORE_ADDR, li->segment_bases);
+	      num_bases = li->segment_bases.size ();
+	      segment_bases = li->segment_bases.data ();
 
 	      if (!symfile_map_offsets_to_segments (so->abfd, data, li->offsets,
 						    num_bases, segment_bases))
