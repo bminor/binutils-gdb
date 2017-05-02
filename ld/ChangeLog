@@ -1,3 +1,11 @@
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21384
+	* testsuite/ld-elf/pr21384.d: New file.
+	* testsuite/ld-elf/pr21384.dl: Likewise.
+	* testsuite/ld-elf/pr21384.ld: Likewise.
+	* testsuite/ld-elf/pr21384.s: Likewise.
+
 2017-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/tls.exp: Run GNU2 TLS tests only if there
