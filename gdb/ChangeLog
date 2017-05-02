@@ -1,5 +1,17 @@
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (btrace_fetch): Set inferior_ptid.
+	* python/py-record-btrace.c: Add "py-record.h" include.
+	(recpy_bt_format, recpy_bt_replay_position, recpy_bt_begin,
+	recpy_bt_end, recpy_bt_instruction_history,
+	recpy_bt_function_call_history, recpy_bt_goto): Use ptid stored
+	in gdb.Record object instead of current ptid.
+	* python/py-record.c: Include new "py-record.h" file.
+	(recpy_record_object): Moved to py-record.h.
+	* python/py-record.h: New file.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN,
 	BTPY_REQUIRE_VALID_CALL, recpy_bt_function_call_history): Fix
 	indentation.

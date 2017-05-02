@@ -18,25 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "inferior.h"
-#include "record.h"
-#include "python-internal.h"
+#include "py-record.h"
 #include "py-record-btrace.h"
 #include "py-record-full.h"
 #include "target.h"
-
-/* Python Record object.  */
-
-typedef struct
-{
-  PyObject_HEAD
-
-  /* The ptid this object refers to.  */
-  ptid_t ptid;
-
-  /* The current recording method.  */
-  enum record_method method;
-} recpy_record_object;
 
 /* Python Record type.  */
 
