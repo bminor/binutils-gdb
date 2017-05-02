@@ -29,6 +29,27 @@ static PyTypeObject recpy_record_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
 };
 
+/* Python RecordGap type.  */
+
+PyTypeObject recpy_gap_type = {
+  PyVarObject_HEAD_INIT (NULL, 0)
+};
+
+/* Python RecordGap object.  */
+typedef struct
+{
+  PyObject_HEAD
+
+  /* Reason code.  */
+  int reason_code;
+
+  /* Reason message.  */
+  const char *reason_string;
+
+  /* Element number.  */
+  Py_ssize_t number;
+} recpy_gap_object;
+
 /* Implementation of record.method.  */
 
 static PyObject *
@@ -139,6 +160,54 @@ recpy_end (PyObject *self, void* closure)
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
+/* Create a new gdb.RecordGap object.  */
+
+PyObject *
+recpy_gap_new (int reason_code, const char *reason_string, Py_ssize_t number)
+{
+  recpy_gap_object * const obj = PyObject_New (recpy_gap_object,
+					       &recpy_gap_type);
+
+  if (obj == NULL)
+   return NULL;
+
+  obj->reason_code = reason_code;
+  obj->reason_string = reason_string;
+  obj->number = number;
+
+  return (PyObject *) obj;
+}
+
+/* Implementation of RecordGap.number [int].  */
+
+static PyObject *
+recpy_gap_number (PyObject *self, void *closure)
+{
+  const recpy_gap_object * const obj = (const recpy_gap_object *) self;
+
+  return PyInt_FromSsize_t (obj->number);
+}
+
+/* Implementation of RecordGap.error_code [int].  */
+
+static PyObject *
+recpy_gap_reason_code (PyObject *self, void *closure)
+{
+  const recpy_gap_object * const obj = (const recpy_gap_object *) self;
+
+  return PyInt_FromLong (obj->reason_code);
+}
+
+/* Implementation of RecordGap.error_string [str].  */
+
+static PyObject *
+recpy_gap_reason_string (PyObject *self, void *closure)
+{
+  const recpy_gap_object * const obj = (const recpy_gap_object *) self;
+
+  return PyString_FromString (obj->reason_string);
+}
+
 /* Record method list.  */
 
 static PyMethodDef recpy_record_methods[] = {
@@ -167,6 +236,15 @@ the current instruction and is used for e.g. record.goto (record.end).", NULL },
   { NULL }
 };
 
+/* RecordGap member list.  */
+
+static gdb_PyGetSetDef recpy_gap_getset[] = {
+  { "number", recpy_gap_number, NULL, "element number", NULL},
+  { "reason_code", recpy_gap_reason_code, NULL, "reason code", NULL},
+  { "reason_string", recpy_gap_reason_string, NULL, "reason string", NULL},
+  { NULL }
+};
+
 /* Sets up the record API in the gdb module.  */
 
 int
@@ -180,7 +258,18 @@ gdbpy_initialize_record (void)
   recpy_record_type.tp_methods = recpy_record_methods;
   recpy_record_type.tp_getset = recpy_record_getset;
 
-  return PyType_Ready (&recpy_record_type);
+  recpy_gap_type.tp_new = PyType_GenericNew;
+  recpy_gap_type.tp_flags = Py_TPFLAGS_DEFAULT;
+  recpy_gap_type.tp_basicsize = sizeof (recpy_gap_object);
+  recpy_gap_type.tp_name = "gdb.RecordGap";
+  recpy_gap_type.tp_doc = "GDB recorded gap object";
+  recpy_gap_type.tp_getset = recpy_gap_getset;
+
+  if (PyType_Ready (&recpy_record_type) < 0
+      || PyType_Ready (&recpy_gap_type) < 0)
+    return -1;
+  else
+    return 0;
 }
 
 /* Implementation of gdb.start_recording (method) -> gdb.Record.  */

@@ -1,5 +1,23 @@
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* py-record-btrace.c (btpy_insn_new): Removed.
+	(btpy_insn_or_gap_new): New function.
+	(btpy_insn_error): Removed.
+	(btpy_insn_sal, btpy_insn_pc, btpy_insn_size, btpy_insn_is_speculative,
+	btpy_insn_data, btpy_insn_decode): Remove code path for gaps.
+	(recpy_bt_replay_position, recpy_bt_begin, recpy_bt_end): Call
+	btpy_insn_or_gap_new instead of btpy_insn_new.
+	(btpy_insn_getset): Remove btpy_insn_error.
+	* py-record.c (recpy_gap_type): New static object.
+	(recpy_gap_object): New typedef.
+	(recpy_gap_new, recpy_gap_number, recpy_gap_reason_code,
+	recpy_gap_reason_string): New function.
+	(recpy_gap_getset): New static object.
+	(gdbpy_initialize_record): Initialize gdb.RecordGap type.
+	* py-record.h (recpy_gap_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python/py-record.c (recpy_ptid): Remove.
 	(recpy_record_getset): Remove recpy_ptid.
 

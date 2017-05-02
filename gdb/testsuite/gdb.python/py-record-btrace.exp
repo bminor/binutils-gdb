@@ -81,7 +81,6 @@ with_test_prefix "replay end" {
 
 with_test_prefix "instruction " {
     gdb_test "python print(i.number)" "1"
-    gdb_test "python print(i.error)" "None"
     gdb_test "python print(i.sal)" "symbol and line for .*"
     gdb_test "python print(i.pc)" "$decimal"
     if { $gdb_py_is_py3k == 0 } {

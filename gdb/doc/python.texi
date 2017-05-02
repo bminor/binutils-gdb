@@ -3160,41 +3160,50 @@ the numbers seen in @code{record instruction-history}
 (@pxref{Process Record and Replay}).
 @end defvar
 
-@defvar BtraceInstruction.error
-An integer identifying the error code for gaps in the history.
-@code{None} for regular instructions.
-@end defvar
-
 @defvar BtraceInstruction.sal
 A @code{gdb.Symtab_and_line} object representing the associated symtab
-and line of this instruction.  May be @code{None} if the instruction
-is a gap.
+and line of this instruction.  May be @code{None} if no debug information is
+available.
 @end defvar
 
 @defvar BtraceInstruction.pc
-An integer representing this instruction's address.  May be @code{None}
-if the instruction is a gap or the debug symbols could not be read.
+An integer representing this instruction's address.
 @end defvar
 
 @defvar BtraceInstruction.data
-A buffer with the raw instruction data.  May be @code{None} if the
-instruction is a gap.  In Python 3, the return value is a @code{memoryview}
-object.
+A buffer with the raw instruction data.  In Python 3, the return value is a
+@code{memoryview} object.
 @end defvar
 
 @defvar BtraceInstruction.decoded
-A human readable string with the disassembled instruction.  Contains the
-error message for gaps.
+A human readable string with the disassembled instruction.
 @end defvar
 
 @defvar BtraceInstruction.size
-The size of the instruction in bytes.  Will be @code{None} if the
-instruction is a gap.
+The size of the instruction in bytes.
 @end defvar
 
 @defvar BtraceInstruction.is_speculative
 A boolean indicating whether the instruction was executed
-speculatively.  Will be @code{None} for gaps.
+speculatively.
+@end defvar
+
+If an error occured during recording or decoding a recording, this error is
+represented by a @code{gdb.RecordGap} object in the instruction list.  It has
+the following attributes:
+
+@defvar RecordGap.number
+An integer identifying this gap.  @code{number} corresponds to the numbers seen
+in @code{record instruction-history} (@pxref{Process Record and Replay}).
+@end defvar
+
+@defvar RecordGap.error_code
+A numerical representation of the reason for the gap.  The value is specific to
+the current recording method.
+@end defvar
+
+@defvar RecordGap.error_string
+A human readable string with the reason for the gap.
 @end defvar
 
 The attributes and methods of function call objects depend on the
@@ -3221,8 +3230,8 @@ An integer representing the function call's stack level.  May be
 @end defvar
 
 @defvar BtraceFunctionCall.instructions
-A list of @code{gdb.BtraceInstruction} objects associated with this function
-call.
+A list of @code{gdb.BtraceInstruction} or @code{gdb.RecordGap} objects
+associated with this function call.
 @end defvar
 
 @defvar BtraceFunctionCall.up

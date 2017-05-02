@@ -37,4 +37,8 @@ typedef struct
   enum record_method method;
 } recpy_record_object;
 
+/* Create a new gdb.RecordGap object.  */
+extern PyObject *recpy_gap_new (int reason_code, const char *reason_string,
+				Py_ssize_t number);
+
 #endif /* GDB_PY_RECORD_H */
