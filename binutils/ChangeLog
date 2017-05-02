@@ -1,3 +1,8 @@
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (merge_gnu_build_notes): Cast relcount to unsigned
+	long when comparing with sec->reloc_count.
+
 2017-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (merge_gnu_build_notes): Disable merge if there are

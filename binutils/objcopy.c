@@ -2141,7 +2141,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	 represent a single external reloc.  Unfortunately the current BFD
 	 API does not handle deleting relocs in such situations very well
 	 and so it is unsafe to proceed.  */
-      if (relcount > sec->reloc_count)
+      if ((unsigned long) relcount > sec->reloc_count)
 	goto done;
 
       /* Eliminate the duplicates.  */
