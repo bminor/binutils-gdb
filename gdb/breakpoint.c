@@ -15079,21 +15079,17 @@ int
 insert_single_step_breakpoints (struct gdbarch *gdbarch)
 {
   struct regcache *regcache = get_current_regcache ();
-  VEC (CORE_ADDR) * next_pcs;
+  std::vector<CORE_ADDR> next_pcs;
 
   next_pcs = gdbarch_software_single_step (gdbarch, regcache);
 
-  if (next_pcs != NULL)
+  if (!next_pcs.empty ())
     {
-      int i;
-      CORE_ADDR pc;
       struct frame_info *frame = get_current_frame ();
       struct address_space *aspace = get_frame_address_space (frame);
 
-      for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
+      for (CORE_ADDR pc : next_pcs)
 	insert_single_step_breakpoint (gdbarch, aspace, pc);
-
-      VEC_free (CORE_ADDR, next_pcs);
 
       return 1;
     }

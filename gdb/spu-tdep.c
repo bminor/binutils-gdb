@@ -1612,7 +1612,7 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
 /* Software single-stepping support.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 spu_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -1622,7 +1622,7 @@ spu_software_single_step (struct regcache *regcache)
   int offset, reg;
   gdb_byte buf[4];
   ULONGEST lslr;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   pc = regcache_read_pc (regcache);
 
@@ -1645,7 +1645,7 @@ spu_software_single_step (struct regcache *regcache)
   else
     next_pc = (SPUADDR_ADDR (pc) + 4) & lslr;
 
-  VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc), next_pc));
+  next_pcs.push_back (SPUADDR (SPUADDR_SPU (pc), next_pc));
 
   if (is_branch (insn, &offset, &reg))
     {
@@ -1658,8 +1658,7 @@ spu_software_single_step (struct regcache *regcache)
 
       target = target & lslr;
       if (target != next_pc)
-	VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc),
-						     target));
+	next_pcs.push_back (SPUADDR (SPUADDR_SPU (pc), target));
     }
 
   return next_pcs;

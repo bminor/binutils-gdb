@@ -1,5 +1,42 @@
 2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbarch.sh (software_single_step): Change return type to
+	std::vector<CORE_ADDR>.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw):
+	Adjust.
+	(arm_deal_with_atomic_sequence_raw): Adjust.
+	(thumb_get_next_pcs_raw): Adjust.
+	(arm_get_next_pcs_raw): Adjust.
+	(arm_get_next_pcs): Adjust.
+	* arch/arm-get-next-pcs.h (arm_get_next_pcs): Adjust.
+	* aarch64-tdep.c (aarch64_software_single_step): Adjust.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Adjust.
+	(alpha_software_single_step): Adjust.
+	* alpha-tdep.h (alpha_software_single_step): Adjust.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Adjust.
+	* arm-tdep.c (arm_software_single_step): Adjust.
+	(arm_breakpoint_kind_from_current_state): Adjust.
+	* arm-tdep.h (arm_software_single_step): Adjust.
+	* breakpoint.c (insert_single_step_breakpoint): Adjust.
+	* cris-tdep.c (cris_software_single_step): Adjust.
+	* mips-tdep.c (mips_deal_with_atomic_sequence): Adjust.
+	(micromips_deal_with_atomic_sequence): Adjust.
+	(deal_with_atomic_sequence): Adjust.
+	(mips_software_single_step): Adjust.
+	* mips-tdep.h (mips_software_single_step): Adjust.
+	* moxie-tdep.c (moxie_software_single_step): Adjust.
+	* nios2-tdep.c (nios2_software_single_step): Adjust.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Adjust.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Adjust.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Adjust.
+	* s390-linux-tdep.c (s390_software_single_step): Adjust.
+	* sparc-tdep.c (sparc_software_single_step): Adjust.
+	* spu-tdep.c (spu_software_single_step): Adjust.
+	* tic6x-tdep.c (tic6x_software_single_step): Adjust.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbarch.sh: Use semi-colon as field separator instead of colon.
 	* gdbarch.h: Re-generate.
 

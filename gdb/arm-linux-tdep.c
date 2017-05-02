@@ -921,22 +921,16 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 
 /* Insert a single step breakpoint at the next executed instruction.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 arm_linux_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
-  CORE_ADDR pc;
-  int i;
-  VEC (CORE_ADDR) *next_pcs = NULL;
-  struct cleanup *old_chain;
 
   /* If the target does have hardware single step, GDB doesn't have
      to bother software single step.  */
   if (target_can_do_single_step () == 1)
-    return NULL;
-
-  old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+    return {};
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_linux_get_next_pcs_ops,
@@ -945,15 +939,10 @@ arm_linux_software_single_step (struct regcache *regcache)
 			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
+  std::vector<CORE_ADDR> next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
-  for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    {
-      pc = gdbarch_addr_bits_remove (gdbarch, pc);
-      VEC_replace (CORE_ADDR, next_pcs, i, pc);
-    }
-
-  discard_cleanups (old_chain);
+  for (CORE_ADDR &pc_ref : next_pcs)
+    pc_ref = gdbarch_addr_bits_remove (gdbarch, pc_ref);
 
   return next_pcs;
 }

@@ -3229,7 +3229,7 @@ gdbarch_software_single_step_p (struct gdbarch *gdbarch)
   return gdbarch->software_single_step != NULL;
 }
 
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);

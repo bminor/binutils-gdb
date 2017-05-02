@@ -35,6 +35,7 @@
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+#include <vector>
 #include "frame.h"
 #include "dis-asm.h"
 
@@ -700,8 +701,8 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 
 extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 
-typedef VEC (CORE_ADDR) * (gdbarch_software_single_step_ftype) (struct regcache *regcache);
-extern VEC (CORE_ADDR) * gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache);
+typedef std::vector<CORE_ADDR> (gdbarch_software_single_step_ftype) (struct regcache *regcache);
+extern std::vector<CORE_ADDR> gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache);
 extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
 
 /* Return non-zero if the processor is executing a delay slot and a
