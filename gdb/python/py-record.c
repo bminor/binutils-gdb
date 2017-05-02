@@ -29,16 +29,6 @@ static PyTypeObject recpy_record_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
 };
 
-/* Implementation of record.ptid.  */
-
-static PyObject *
-recpy_ptid (PyObject *self, void* closure)
-{
-  const recpy_record_object * const obj = (recpy_record_object *) self;
-
-  return gdbpy_create_ptid_object (obj->ptid);
-}
-
 /* Implementation of record.method.  */
 
 static PyObject *
@@ -161,7 +151,6 @@ Rewind to given location."},
 /* Record member list.  */
 
 static gdb_PyGetSetDef recpy_record_getset[] = {
-  { "ptid", recpy_ptid, NULL, "Current thread.", NULL },
   { "method", recpy_method, NULL, "Current recording method.", NULL },
   { "format", recpy_format, NULL, "Current recording format.", NULL },
   { "replay_position", recpy_replay_position, NULL, "Current replay position.",
