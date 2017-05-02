@@ -1,3 +1,9 @@
+2017-05-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 21440
+	* objdump.c (dump_relocs_in_section): Check for an excessive
+	number of relocs before attempting to dump them.
+
 2017-05-01  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (merge_gnu_build_notes): Correct code deleting
