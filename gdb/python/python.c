@@ -1626,6 +1626,7 @@ do_start_initialization ()
       || gdbpy_initialize_values () < 0
       || gdbpy_initialize_frames () < 0
       || gdbpy_initialize_commands () < 0
+      || gdbpy_initialize_instruction () < 0
       || gdbpy_initialize_record () < 0
       || gdbpy_initialize_btrace () < 0
       || gdbpy_initialize_symbols () < 0

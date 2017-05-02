@@ -1,5 +1,10 @@
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* python.texi (Recording in Python): Factor out the documentation of
+	gdb.RecordInstruction's super class.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python.texi (Recording in Python): Replace gdb.BtraceFunction with
 	gdb.RecordFunctionSegment.  Rename prev_sibling and next_sibling to
 	prev and next.

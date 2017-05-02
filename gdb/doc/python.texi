@@ -3149,10 +3149,30 @@ A @code{gdb.Record} object has the following methods:
 Move the replay position to the given @var{instruction}.
 @end defun
 
-A @code{gdb.RecordInstruction} object has the following attributes:
+The common @code{gdb.Instruction} class that recording method specific
+instruction objects inherit from, has the following attributes:
+
+@defvar Instruction.pc
+An integer representing this instruction's address.
+@end defvar
+
+@defvar Instruction.data
+A buffer with the raw instruction data.  In Python 3, the return value is a
+@code{memoryview} object.
+@end defvar
+
+@defvar Instruction.decoded
+A human readable string with the disassembled instruction.
+@end defvar
+
+@defvar Instruction.size
+The size of the instruction in bytes.
+@end defvar
+
+Additionally @code{gdb.RecordInstruction} has the following attributes:
 
 @defvar RecordInstruction.number
-An integer identifying this instruction.  @var{number} corresponds to
+An integer identifying this instruction.  @code{number} corresponds to
 the numbers seen in @code{record instruction-history}
 (@pxref{Process Record and Replay}).
 @end defvar
@@ -3163,26 +3183,8 @@ and line of this instruction.  May be @code{None} if no debug information is
 available.
 @end defvar
 
-@defvar RecordInstruction.pc
-An integer representing this instruction's address.
-@end defvar
-
-@defvar RecordInstruction.data
-A buffer with the raw instruction data.  In Python 3, the return value is a
-@code{memoryview} object.
-@end defvar
-
-@defvar RecordInstruction.decoded
-A human readable string with the disassembled instruction.
-@end defvar
-
-@defvar RecordInstruction.size
-The size of the instruction in bytes.
-@end defvar
-
 @defvar RecordInstruction.is_speculative
-A boolean indicating whether the instruction was executed
-speculatively.
+A boolean indicating whether the instruction was executed speculatively.
 @end defvar
 
 If an error occured during recording or decoding a recording, this error is
