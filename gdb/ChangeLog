@@ -1,5 +1,9 @@
 2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common/gdb_vecs.h (DEF_VEC_I (CORE_ADDR)): Remove.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* solib-target.c: Include <vector>
 	(struct lm_info_target) <~lm_info_target>: Remove.
 	<segment_bases, section_bases>: Change type to
