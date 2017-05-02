@@ -1,5 +1,42 @@
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN): Remove.
+	(btpy_object, btpy_insn_type, btpy_new): Remove.
+	(btpy_list_object): Use gdb.RecordInstruction type instead of
+	gdb.BtraceInstruction type.
+	(btrace_insn_from_recpy_insn): New function.
+	(btpy_insn_or_gap_new): Adjust comment. Use recpy_insn_new instead of
+	btpy_new.
+	(btpy_call_new, btpy_list_item): Do not use btpy_new anymore.
+	(btpy_number, btpy_hash, btpy_call_level, btpy_call_symbol,
+	btpy_call_instructions, btpy_call_up, btpy_call_prev_sibling,
+	btpy_call_next_sibling, btpy_richcompare): Use recpy_element_object
+	instead of btpy_object.
+	(btpy_insn_sal, btpy_insn_pc, btpy_insn_size, btpy_insn_is_speculative,
+	btpy_insn_data, btpy_insn_decode): Rename to ...
+	(recpy_bt_insn_sal, recpy_bt_insn_pc, recpy_bt_insn_size,
+	recpy_bt_insn_is_speculative, recpy_bt_insn_data,
+	recpy_bt_insn_decode): This.  Also, use new helper functions.
+	(btpy_list_position, recpy_bt_goto): Use recpy_element_object and
+	recpy_insn_type.
+	(btpy_insn_getset): Remove.
+	(gdbpy_initialize_btrace): Remove code to initialize
+	gdb.BtraceInstruction.  Use recpy_element_object.
+	* python/py-record-btrace.h (recpy_bt_insn_number, recpy_bt_insn_sal,
+	recpy_bt_insn_pc, recpy_bt_insn_data, recpy_bt_insn_decoded,
+	recpy_bt_insn_size, recpy_bt_insn_is_speculative): New export.
+	* python/py-record.c (recpy_insn_type): New static object.
+	(recpy_insn_new, recpy_insn_sal, recpy_insn_pc, recpy_insn_data,
+	recpy_insn_decoded, recpy_insn_size, recpy_insn_is_speculative,
+	recpy_element_number, recpy_element_hash, recpy_element_richcompare):
+	New function.
+	(recpy_insn_getset): New static object.
+	(gdbpy_initialize_record): Initialize gdb.RecordInstruction.
+	* python/py-record.h (recpy_element_object): New typedef.
+	(recpy_insn_type, recpy_insn_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* py-record-btrace.c (btpy_insn_new): Removed.
 	(btpy_insn_or_gap_new): New function.
 	(btpy_insn_error): Removed.

@@ -3149,41 +3149,38 @@ A @code{gdb.Record} object has the following methods:
 Move the replay position to the given @var{instruction}.
 @end defun
 
-The attributes and methods of instruction objects depend on the current
-recording method.  Currently, only btrace instructions are supported.
+A @code{gdb.RecordInstruction} object has the following attributes:
 
-A @code{gdb.BtraceInstruction} object has the following attributes:
-
-@defvar BtraceInstruction.number
+@defvar RecordInstruction.number
 An integer identifying this instruction.  @var{number} corresponds to
 the numbers seen in @code{record instruction-history}
 (@pxref{Process Record and Replay}).
 @end defvar
 
-@defvar BtraceInstruction.sal
+@defvar RecordInstruction.sal
 A @code{gdb.Symtab_and_line} object representing the associated symtab
 and line of this instruction.  May be @code{None} if no debug information is
 available.
 @end defvar
 
-@defvar BtraceInstruction.pc
+@defvar RecordInstruction.pc
 An integer representing this instruction's address.
 @end defvar
 
-@defvar BtraceInstruction.data
+@defvar RecordInstruction.data
 A buffer with the raw instruction data.  In Python 3, the return value is a
 @code{memoryview} object.
 @end defvar
 
-@defvar BtraceInstruction.decoded
+@defvar RecordInstruction.decoded
 A human readable string with the disassembled instruction.
 @end defvar
 
-@defvar BtraceInstruction.size
+@defvar RecordInstruction.size
 The size of the instruction in bytes.
 @end defvar
 
-@defvar BtraceInstruction.is_speculative
+@defvar RecordInstruction.is_speculative
 A boolean indicating whether the instruction was executed
 speculatively.
 @end defvar
@@ -3230,7 +3227,7 @@ An integer representing the function call's stack level.  May be
 @end defvar
 
 @defvar BtraceFunctionCall.instructions
-A list of @code{gdb.BtraceInstruction} or @code{gdb.RecordGap} objects
+A list of @code{gdb.RecordInstruction} or @code{gdb.RecordGap} objects
 associated with this function call.
 @end defvar
 

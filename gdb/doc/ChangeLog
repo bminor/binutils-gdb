@@ -1,5 +1,10 @@
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* python.texi (Recording in Python): Replace gdb.BtraceInstruction with
+	gdb.RecordInstruction
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python.texi (Recording in Python): Add documentation for
 	gdb.RecordGap and remove documentation of special cases for
 	gdb.BtraceInstruction.
