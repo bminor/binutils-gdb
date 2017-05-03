@@ -1,3 +1,8 @@
+2017-05-03  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/oranking.cc (dummy): New function to grab malloc.
+	(main): Call it.
+
 2017-04-27  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/oranking.cc (test15): New function.
