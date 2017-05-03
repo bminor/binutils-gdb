@@ -2285,14 +2285,10 @@ target_commit_resume (void)
 
 /* See target.h.  */
 
-struct cleanup *
-make_cleanup_defer_target_commit_resume (void)
+scoped_restore_tmpl<int>
+make_scoped_defer_target_commit_resume ()
 {
-  struct cleanup *old_chain;
-
-  old_chain = make_cleanup_restore_integer (&defer_target_commit_resume);
-  defer_target_commit_resume = 1;
-  return old_chain;
+  return make_scoped_restore (&defer_target_commit_resume, 1);
 }
 
 void

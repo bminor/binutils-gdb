@@ -2990,7 +2990,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain;
-  struct cleanup *defer_resume_cleanup;
   int started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
@@ -3132,26 +3131,27 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      until the target stops again.  */
   tp->prev_pc = regcache_read_pc (regcache);
 
-  defer_resume_cleanup = make_cleanup_defer_target_commit_resume ();
+  {
+    scoped_restore save_defer_tc = make_scoped_defer_target_commit_resume ();
 
-  started = start_step_over ();
+    started = start_step_over ();
 
-  if (step_over_info_valid_p ())
-    {
-      /* Either this thread started a new in-line step over, or some
-	 other thread was already doing one.  In either case, don't
-	 resume anything else until the step-over is finished.  */
-    }
-  else if (started && !target_is_non_stop_p ())
-    {
-      /* A new displaced stepping sequence was started.  In all-stop,
-	 we can't talk to the target anymore until it next stops.  */
-    }
-  else if (!non_stop && target_is_non_stop_p ())
-    {
-      /* In all-stop, but the target is always in non-stop mode.
-	 Start all other threads that are implicitly resumed too.  */
-      ALL_NON_EXITED_THREADS (tp)
+    if (step_over_info_valid_p ())
+      {
+	/* Either this thread started a new in-line step over, or some
+	   other thread was already doing one.  In either case, don't
+	   resume anything else until the step-over is finished.  */
+      }
+    else if (started && !target_is_non_stop_p ())
+      {
+	/* A new displaced stepping sequence was started.  In all-stop,
+	   we can't talk to the target anymore until it next stops.  */
+      }
+    else if (!non_stop && target_is_non_stop_p ())
+      {
+	/* In all-stop, but the target is always in non-stop mode.
+	   Start all other threads that are implicitly resumed too.  */
+	ALL_NON_EXITED_THREADS (tp)
         {
 	  /* Ignore threads of processes we're not resuming.  */
 	  if (!ptid_match (tp->ptid, resume_ptid))
@@ -3187,18 +3187,18 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	  if (!ecs->wait_some_more)
 	    error (_("Command aborted."));
 	}
-    }
-  else if (!tp->resumed && !thread_is_in_step_over_chain (tp))
-    {
-      /* The thread wasn't started, and isn't queued, run it now.  */
-      reset_ecs (ecs, tp);
-      switch_to_thread (tp->ptid);
-      keep_going_pass_signal (ecs);
-      if (!ecs->wait_some_more)
-	error (_("Command aborted."));
-    }
+      }
+    else if (!tp->resumed && !thread_is_in_step_over_chain (tp))
+      {
+	/* The thread wasn't started, and isn't queued, run it now.  */
+	reset_ecs (ecs, tp);
+	switch_to_thread (tp->ptid);
+	keep_going_pass_signal (ecs);
+	if (!ecs->wait_some_more)
+	  error (_("Command aborted."));
+      }
+  }
 
-  do_cleanups (defer_resume_cleanup);
   target_commit_resume ();
 
   discard_cleanups (old_chain);

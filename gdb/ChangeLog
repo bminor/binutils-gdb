@@ -1,5 +1,13 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* target.h (make_scoped_defer_target_commit_resume): Update.
+	* target.c (make_scoped_defer_target_commit_resume): Rename from
+	make_cleanup_defer_target_commit_resume.  Return a
+	scoped_restore.
+	* infrun.c (proceed): Use make_scoped_defer_target_commit_resume.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* main.c (captured_main_1): Remove unused declaration.
 	* spu-multiarch.c (parse_spufs_run): Remove unused declaration.
 

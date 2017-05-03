@@ -1376,10 +1376,10 @@ extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
    coalesce multiple resumption requests in a single vCont packet.  */
 extern void target_commit_resume ();
 
-/* Setup to defer target_commit_resume calls, and return a cleanup
-   that reactivates target_commit_resume, if it was previously
+/* Setup to defer target_commit_resume calls, and reactivate
+   target_commit_resume on destruction, if it was previously
    active.  */
-struct cleanup *make_cleanup_defer_target_commit_resume ();
+extern scoped_restore_tmpl<int> make_scoped_defer_target_commit_resume ();
 
 /* For target_read_memory see target/target.h.  */
 
