@@ -1,5 +1,9 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Don't copy "oarg".
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* varobj.h (varobj_gen_name): Return std::string.
 	* varobj.c (varobj_gen_name): Return std::string.
 	* mi/mi-cmd-var.c (mi_cmd_var_create): Use std::string.
