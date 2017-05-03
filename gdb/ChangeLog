@@ -1,5 +1,10 @@
 2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+ 	* configure.nat: Rearrange 'case' statements to match
+	host before cpu.
+
+2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* Makefile.in: Remove "@host_makefile_frag@".  Add variables
 	NAT_FILE, NATDEPFILES, NAT_CDEPS, LOADLIBES, MH_CFLAGS, XM_CLIBS,
 	NAT_GENERATED_FILES, HAVE_NATIVE_GCORE_HOST.  Add
