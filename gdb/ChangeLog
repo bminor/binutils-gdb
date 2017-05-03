@@ -1,5 +1,12 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* varobj.h (varobj_gen_name): Return std::string.
+	* varobj.c (varobj_gen_name): Return std::string.
+	* mi/mi-cmd-var.c (mi_cmd_var_create): Use std::string.
+	(mi_cmd_var_delete): Don't copy "name".
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-cmd-break.c (mi_argv_to_format): Return std::string.
 	(mi_cmd_break_insert_1): Update.
 
