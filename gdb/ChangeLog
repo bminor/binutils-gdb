@@ -1,5 +1,10 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-break.c (mi_argv_to_format): Return std::string.
+	(mi_cmd_break_insert_1): Update.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* target.h (make_scoped_defer_target_commit_resume): Update.
 	* target.c (make_scoped_defer_target_commit_resume): Rename from
 	make_cleanup_defer_target_commit_resume.  Return a
