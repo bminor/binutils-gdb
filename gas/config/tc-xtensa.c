@@ -27,21 +27,8 @@
 #include "xtensa-relax.h"
 #include "dwarf2dbg.h"
 #include "xtensa-istack.h"
-#include "xtensa-config.h"
+#include "xtensa-dynconfig.h"
 #include "elf/xtensa.h"
-
-/* Provide default values for new configuration settings.  */
-#ifndef XTHAL_ABI_WINDOWED
-#define XTHAL_ABI_WINDOWED 0
-#endif
-
-#ifndef XTHAL_ABI_CALL0
-#define XTHAL_ABI_CALL0 1
-#endif
-
-#ifndef XTENSA_MARCH_EARLIEST
-#define XTENSA_MARCH_EARLIEST 0
-#endif
 
 #ifndef uint32
 #define uint32 unsigned int

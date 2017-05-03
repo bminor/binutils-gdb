@@ -28,7 +28,7 @@ struct fix;
 #endif
 
 #include "xtensa-isa.h"
-#include "xtensa-config.h"
+#include "xtensa-dynconfig.h"
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 

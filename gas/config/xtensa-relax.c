@@ -93,11 +93,7 @@
 #include "xtensa-isa.h"
 #include "xtensa-relax.h"
 #include <stddef.h>
-#include "xtensa-config.h"
-
-#ifndef XCHAL_HAVE_WIDE_BRANCHES
-#define XCHAL_HAVE_WIDE_BRANCHES 0
-#endif
+#include "xtensa-dynconfig.h"
 
 /* Imported from bfd.  */
 extern xtensa_isa xtensa_default_isa;
