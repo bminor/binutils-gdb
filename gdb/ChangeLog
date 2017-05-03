@@ -1,5 +1,9 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-parse.c (mi_parse): Remove unused declaration.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Don't copy "oarg".
 
 2017-09-29  Tom Tromey  <tom@tromey.com>
