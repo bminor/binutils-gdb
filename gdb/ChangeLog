@@ -1,3 +1,9 @@
+2017-05-03  Alan Hayward  <alan.hayward@arm.com>
+
+	* frv-linux-tdep.c (frv_linux_supply_gregset): Use raw_supply_zeroed.
+	* regcache.c (regcache::raw_supply_zeroed): New function.
+	* regcache.h (regcache::raw_supply_zeroed): New declaration.
+
 2017-05-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbarch.sh: Remove commented out definition of
