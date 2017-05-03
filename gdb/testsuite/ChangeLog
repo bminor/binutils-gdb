@@ -1,3 +1,8 @@
+2017-05-03  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/oranking.cc (dummy): New function to grab malloc.
+	(main): Call it.
+
 2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
 
 	* gdb.python/py-record-btrace.exp: Rename prev_sibling and next_sibling
