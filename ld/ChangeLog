@@ -1,3 +1,8 @@
+2017-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21384.d: Adjusted to accommodate
+	additional dynamic symbols on some targets.
+
 2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips16-branch-absolute-1.d: New test.

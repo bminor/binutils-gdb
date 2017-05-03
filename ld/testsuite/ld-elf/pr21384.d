@@ -7,5 +7,6 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
 #...
  +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +edata
+#...
  +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +fdata
 #pass
