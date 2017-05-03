@@ -1,3 +1,15 @@
+2017-05-03  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-pcrel-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-6.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-1.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2017-05-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr21384.d: Adjusted to accommodate
