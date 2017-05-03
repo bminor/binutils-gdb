@@ -1561,9 +1561,23 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 	}
 
       *symbolPP = symbolP;
-      *valueP = exp.X_add_number;
-      *segP = symbolP->bsym->section;
-      *fragPP = symbolP->sy_frag;
+
+      /* A bogus input file can result in resolve_expression()
+	 generating a local symbol, so we have to check again.  */
+      if (LOCAL_SYMBOL_CHECK (symbolP))
+	{
+	  struct local_symbol *locsym = (struct local_symbol *) symbolP;
+
+	  *valueP = locsym->lsy_value;
+	  *segP = locsym->lsy_section;
+	  *fragPP = local_symbol_get_frag (locsym);
+	}
+      else
+	{
+	  *valueP = exp.X_add_number;
+	  *segP = symbolP->bsym->section;
+	  *fragPP = symbolP->sy_frag;
+	}
 
       if (*segP == expr_section)
 	switch (exp.X_op)

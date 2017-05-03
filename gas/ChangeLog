@@ -1,3 +1,9 @@
+2017-05-03  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20941
+	* symbols.c (snapshot_symbol): Handle the case where
+	resolve_expression returns a local symbol.
+
 2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (append_insn): Call `symbol_append' for any
