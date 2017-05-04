@@ -1,3 +1,24 @@
+2017-05-01  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/21404
+	* elf32-avr.c (avr_should_move_sym): New function.
+	(avr_should_reduce_sym_size): Likewise.
+	(avr_should_increase_sym_size): Likewise.
+	(elf32_avr_relax_delete_bytes): Adjust symbol values
+	and sizes by calling new functions.
+
+2017-05-01  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config.bfd (riscv32-*): Enable rv64.
+
+2017-05-02  Alan Modra  <amodra@gmail.com>
+
+	PR 21384
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): Test h->non_elf
+	rather than h->root.type == bfd_link_hash_new.
+	(bfd_elf_record_link_assignment): Similarly, call
+	bfd_elf_link_mark_dynamic_symbol when h->non_elf.
+
 2017-04-29  Alan Modra  <amodra@gmail.com>
 
 	PR 21432

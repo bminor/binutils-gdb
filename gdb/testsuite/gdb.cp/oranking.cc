@@ -1,3 +1,18 @@
+#include <cstdlib>
+
+/* Make sure `malloc' is linked into the program.  If we don't, tests
+   in the accompanying expect file may fail:
+
+   evaluation of this expression requires the program to have a function
+   "malloc".  */
+
+void
+dummy ()
+{
+  void *p = malloc (16);
+
+  free (p);
+}
 
 /* 1. A standard covnersion sequence is better than a user-defined sequence
       which is better than an elipses conversion sequence.  */
@@ -165,6 +180,8 @@ test15 ()
 }
 
 int main() {
+  dummy ();
+
   B b;
   foo0(b);
   foo1(b);

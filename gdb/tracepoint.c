@@ -2925,7 +2925,6 @@ tdump_command (char *args, int from_tty)
 {
   int stepping_frame = 0;
   struct bp_location *loc;
-  struct cleanup *old_chain;
   struct command_line *actions;
 
   /* This throws an error is not inspecting a trace frame.  */
@@ -2936,14 +2935,13 @@ tdump_command (char *args, int from_tty)
 
   /* This command only makes sense for the current frame, not the
      selected frame.  */
-  old_chain = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
+
   select_frame (get_current_frame ());
 
   actions = all_tracepoint_actions_and_cleanup (loc->owner);
 
   trace_dump_actions (actions, 0, stepping_frame, from_tty);
-
-  do_cleanups (old_chain);
 }
 
 /* Encode a piece of a tracepoint's source-level definition in a form

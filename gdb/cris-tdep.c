@@ -2060,12 +2060,12 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
    digs through the opcodes in order to find all possible targets.
    Either one ordinary target or two targets for branches may be found.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 cris_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   inst_env_type inst_env;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   /* Analyse the present instruction environment and insert 
      breakpoints.  */
@@ -2083,14 +2083,14 @@ cris_software_single_step (struct regcache *regcache)
       CORE_ADDR next_pc
 	= (CORE_ADDR) inst_env.reg[gdbarch_pc_regnum (gdbarch)];
 
-      VEC_safe_push (CORE_ADDR, next_pcs, next_pc);
+      next_pcs.push_back (next_pc);
       if (inst_env.branch_found 
 	  && (CORE_ADDR) inst_env.branch_break_address != next_pc)
 	{
 	  CORE_ADDR branch_target_address
 		= (CORE_ADDR) inst_env.branch_break_address;
 
-	  VEC_safe_push (CORE_ADDR, next_pcs, branch_target_address);
+	  next_pcs.push_back (branch_target_address);
 	}
     }
 

@@ -1,3 +1,75 @@
+2017-04-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/21404
+	* testsuite/ld-avr/pr21404-1.d: New test.
+	* testsuite/ld-avr/pr21404-1.s: New test.
+	* testsuite/ld-avr/pr21404-2.d: New test.
+	* testsuite/ld-avr/pr21404-2.s: New test.
+	* testsuite/ld-avr/pr21404-3.d: New test.
+	* testsuite/ld-avr/pr21404-3.s: New test.
+	* testsuite/ld-avr/pr21404-4.d: New test.
+	* testsuite/ld-avr/pr21404-4.s: New test.
+	* testsuite/ld-avr/pr21404-5.d: New test.
+	* testsuite/ld-avr/pr21404-5.s: New test.
+	* testsuite/ld-avr/pr21404-6.d: New test.
+	* testsuite/ld-avr/pr21404-6.s: New test.
+	* testsuite/ld-avr/pr21404-7.d: New test.
+	* testsuite/ld-avr/pr21404-7.s: New test.
+	* testsuite/ld-avr/pr21404-8.d: New test.
+	* testsuite/ld-avr/pr21404-8.s: New test.
+
+2017-05-03  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-pcrel-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-6.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-1.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21384.d: Adjusted to accommodate
+	additional dynamic symbols on some targets.
+
+2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-branch-absolute-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-2.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32-1.d:
+	New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-2.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64-1.d:
+	New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/tls.exp: Add -Wl,--no-as-needed to
+	"TLS without PLT (1)" and "TLS without PLT (3)".
+	* testsuite/ld-x86-64/tls.exp: Add -Wl,--no-as-needed to
+	to "TLS without PLT (3)".
+
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21384
+	* testsuite/ld-elf/pr21384.d: New file.
+	* testsuite/ld-elf/pr21384.dl: Likewise.
+	* testsuite/ld-elf/pr21384.ld: Likewise.
+	* testsuite/ld-elf/pr21384.s: Likewise.
+
 2017-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/tls.exp: Run GNU2 TLS tests only if there

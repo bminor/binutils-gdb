@@ -1,3 +1,299 @@
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add progspace-and-thread.c.
+	(HFILES_NO_SRCDIR): Add progspace-and-thread.h.
+	(COMMON_OBS): Add progspace-and-thread.o.
+	* breakpoint.c: Include "progspace-and-thread.h".
+	(update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, create_longjmp_master_breakpoint):
+	Use scoped_restore_current_pspace_and_thread.
+	(create_std_terminate_master_breakpoint): Use
+	scoped_restore_current_program_space.
+	(remove_breakpoint): Use scoped_restore_current_pspace_and_thread.
+	(print_breakpoint_location): Use
+	scoped_restore_current_program_space.
+	(bp_loc_is_permanent): Use
+	scoped_restore_current_pspace_and_thread.
+	(resolve_sal_pc): Use scoped_restore_current_pspace_and_thread.
+	(download_tracepoint_locations): Use
+	scoped_restore_current_pspace_and_thread.
+	(breakpoint_re_set): Use scoped_restore_current_pspace_and_thread.
+	* exec.c (exec_close_1): Use scoped_restore_current_program_space.
+	(enum step_over_calls_kind): Moved from inferior.h.
+	(class scoped_restore_current_thread): New class.
+	* gdbthread.h (make_cleanup_restore_current_thread): Delete
+	declaration.
+	(scoped_restore_current_thread): New class.
+	* infcmd.c: Include "common/gdb_optional.h".
+	(continue_1, proceed_after_attach): Use
+	scoped_restore_current_thread.
+	(notice_new_inferior): Use scoped_restore_current_thread.
+	* inferior.c: Include "progspace-and-thread.h".
+	(restore_inferior, save_current_inferior): Delete.
+	(add_inferior_command, clone_inferior_command): Use
+	scoped_restore_current_pspace_and_thread.
+	* inferior.h (scoped_restore_current_inferior): New class.
+	* infrun.c: Include "progspace-and-thread.h" and
+	"common/gdb_optional.h".
+	(follow_fork_inferior): Use
+	scoped_restore_current_pspace_and_thread.
+	(scoped_restore_exited_inferior): New class.
+	(handle_vfork_child_exec_or_exit): Use
+	scoped_restore_exited_inferior,
+	scoped_restore_current_pspace_and_thread,
+	scoped_restore_current_thread and scoped_restore.
+	(fetch_inferior_event): Use scoped_restore_current_thread.
+	* linespec.c (decode_line_full, decode_line_1): Use
+	scoped_restore_current_program_space.
+	* mi/mi-main.c: Include "progspace-and-thread.h".
+	(exec_continue): Use scoped_restore_current_thread.
+	(mi_cmd_exec_run): Use scoped_restore_current_pspace_and_thread.
+	(mi_cmd_trace_frame_collected): Use scoped_restore_current_thread.
+	* proc-service.c (ps_pglobal_lookup): Use
+	scoped_restore_current_program_space.
+	* progspace-and-thread.c: New file.
+	* progspace-and-thread.h: New file.
+	* progspace.c (release_program_space, clone_program_space): Use
+	scoped_restore_current_program_space.
+	(restore_program_space, save_current_program_space)
+	(save_current_space_and_thread): Delete.
+	(switch_to_program_space_and_thread): Moved to
+	progspace-and-thread.c.
+	* progspace.h (save_current_program_space)
+	(save_current_space_and_thread): Delete declarations.
+	(scoped_restore_current_program_space): New class.
+	* remote.c (remote_btrace_maybe_reopen): Use
+	scoped_restore_current_thread.
+	* symtab.c: Include "progspace-and-thread.h".
+	(skip_prologue_sal): Use scoped_restore_current_pspace_and_thread.
+	* thread.c (print_thread_info_1): Use
+	scoped_restore_current_thread.
+	(struct current_thread_cleanup): Delete.
+	(do_restore_current_thread_cleanup)
+	(restore_current_thread_cleanup_dtor): Rename/convert both to ...
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	... this new dtor.
+	(make_cleanup_restore_current_thread): Rename/convert to ...
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	... this new ctor.
+	(thread_apply_all_command): Use scoped_restore_current_thread.
+	(thread_apply_command): Use scoped_restore_current_thread.
+	* tracepoint.c (tdump_command): Use scoped_restore_current_thread.
+	* varobj.c (value_of_root_1): Use scoped_restore_current_thread.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (make_cleanup_restore_current_thread): Move
+	find_thread_ptid call before the is_stopped call.  Assert that the
+	thread is found.  Replace is_stopped call by checking the thread's
+	state directly.  Remove unnecessary NULL-thread check.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* corelow.c (thread_section_name): New class.
+	(get_core_register_section, get_core_siginfo): Use it.
+
+2017-05-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* corelow.c (sniff_core_bfd): Remove extra semicolon.
+	(get_core_register_section): Remove xfree of NULL pointer.
+
+2017-05-03  Alan Hayward  <alan.hayward@arm.com>
+
+	* frv-linux-tdep.c (frv_linux_supply_gregset): Use raw_supply_zeroed.
+	* regcache.c (regcache::raw_supply_zeroed): New function.
+	* regcache.h (regcache::raw_supply_zeroed): New declaration.
+
+2017-05-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh: Remove commented out definition of
+	TARGET_CHAR_BIT.
+	* gdbarch.h: Re-generate.
+
+2017-05-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* configure: Regenerate.
+
+2017-05-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Remove num_section_bases, num_bases, segment_bases variables.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/gdb_vecs.h (DEF_VEC_I (CORE_ADDR)): Remove.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* solib-target.c: Include <vector>
+	(struct lm_info_target) <~lm_info_target>: Remove.
+	<segment_bases, section_bases>: Change type to
+	std::vector<CORE_ADDR>.
+	(library_list_start_segment, library_list_start_section,
+	library_list_end_library,
+	solib_target_relocate_section_addresses): Adjust.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (software_single_step): Change return type to
+	std::vector<CORE_ADDR>.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw):
+	Adjust.
+	(arm_deal_with_atomic_sequence_raw): Adjust.
+	(thumb_get_next_pcs_raw): Adjust.
+	(arm_get_next_pcs_raw): Adjust.
+	(arm_get_next_pcs): Adjust.
+	* arch/arm-get-next-pcs.h (arm_get_next_pcs): Adjust.
+	* aarch64-tdep.c (aarch64_software_single_step): Adjust.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Adjust.
+	(alpha_software_single_step): Adjust.
+	* alpha-tdep.h (alpha_software_single_step): Adjust.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Adjust.
+	* arm-tdep.c (arm_software_single_step): Adjust.
+	(arm_breakpoint_kind_from_current_state): Adjust.
+	* arm-tdep.h (arm_software_single_step): Adjust.
+	* breakpoint.c (insert_single_step_breakpoint): Adjust.
+	* cris-tdep.c (cris_software_single_step): Adjust.
+	* mips-tdep.c (mips_deal_with_atomic_sequence): Adjust.
+	(micromips_deal_with_atomic_sequence): Adjust.
+	(deal_with_atomic_sequence): Adjust.
+	(mips_software_single_step): Adjust.
+	* mips-tdep.h (mips_software_single_step): Adjust.
+	* moxie-tdep.c (moxie_software_single_step): Adjust.
+	* nios2-tdep.c (nios2_software_single_step): Adjust.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Adjust.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Adjust.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Adjust.
+	* s390-linux-tdep.c (s390_software_single_step): Adjust.
+	* sparc-tdep.c (sparc_software_single_step): Adjust.
+	* spu-tdep.c (spu_software_single_step): Adjust.
+	* tic6x-tdep.c (tic6x_software_single_step): Adjust.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh: Use semi-colon as field separator instead of colon.
+	* gdbarch.h: Re-generate.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-instruction.o.
+	(SUBDIR_PYTHON_SRCS): Add py-instruction.c.
+	* python/py-instruction.c, python/py-instruction.h: New file.
+	* python/py-record.c: Add py-instruction.h include.
+	(gdbpy_initialize_record): Make gdb.Instruction a super class of
+	gdb.RecordInstruction.
+	* python/python-internal.h: Add gdbpy_initialize_instruction
+	declaration.
+	* python/python.c (do_start_initialization): Add
+	gdbpy_initialize_instruction.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_CALL, btpy_call_type):
+	Remove.
+	(btrace_func_from_recpy_func): New function.
+	(btpy_call_new, btpy_number, btpy_hash, btpy_richcompare): Remove.
+	(btpy_call_level, btpy_call_symbol, btpy_call_instructions,
+	btpy_call_up, btpy_call_prev_sibling, btpy_call_next_sibling): Rename to ...
+	(recpy_bt_func_level, recpy_bt_func_symbol, recpy_bt_func_instructions,
+	recpy_bt_func_up, recpy_bt_func_prev, recpy_bt_func_next): This.
+	Also, use new helper functions.
+	(btpy_list_item): Use new helper functions.
+	(recpy_bt_function_call_history): Use new type name.
+	(btpy_call_getset): Remove.
+	(gdbpy_initialize_btrace): Remove code to initialize
+	gdb.BtraceFunctionCall.
+	* python/py-record-btrace.h (recpy_bt_func_number, recpy_btb_func_level,
+	recpy_btb_func_symbol, recpy_bt_func_instructions, recpy_bt_func_up,
+	recpy_bt_func_prev, recpy_bt_func_next): New export.
+	* python/py-record.c (recpy_func_type): New static object.
+	(recpy_func_new, recpy_func_level, recpy_func_symbol,
+	recpy_func_instructions, recpy_func_up, recpy_func_prev,
+	recpy_func_next): New function.
+	(recpy_element_hash, recpy_element_richcompare): Updated comment.
+	(recpy_func_getset): New static object.
+	(gdbpy_initialize_record): Add code to initialize gdb.RecordInstruction.
+	* python/py-record.h (recpy_func_type, recpy_func_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN): Remove.
+	(btpy_object, btpy_insn_type, btpy_new): Remove.
+	(btpy_list_object): Use gdb.RecordInstruction type instead of
+	gdb.BtraceInstruction type.
+	(btrace_insn_from_recpy_insn): New function.
+	(btpy_insn_or_gap_new): Adjust comment. Use recpy_insn_new instead of
+	btpy_new.
+	(btpy_call_new, btpy_list_item): Do not use btpy_new anymore.
+	(btpy_number, btpy_hash, btpy_call_level, btpy_call_symbol,
+	btpy_call_instructions, btpy_call_up, btpy_call_prev_sibling,
+	btpy_call_next_sibling, btpy_richcompare): Use recpy_element_object
+	instead of btpy_object.
+	(btpy_insn_sal, btpy_insn_pc, btpy_insn_size, btpy_insn_is_speculative,
+	btpy_insn_data, btpy_insn_decode): Rename to ...
+	(recpy_bt_insn_sal, recpy_bt_insn_pc, recpy_bt_insn_size,
+	recpy_bt_insn_is_speculative, recpy_bt_insn_data,
+	recpy_bt_insn_decode): This.  Also, use new helper functions.
+	(btpy_list_position, recpy_bt_goto): Use recpy_element_object and
+	recpy_insn_type.
+	(btpy_insn_getset): Remove.
+	(gdbpy_initialize_btrace): Remove code to initialize
+	gdb.BtraceInstruction.  Use recpy_element_object.
+	* python/py-record-btrace.h (recpy_bt_insn_number, recpy_bt_insn_sal,
+	recpy_bt_insn_pc, recpy_bt_insn_data, recpy_bt_insn_decoded,
+	recpy_bt_insn_size, recpy_bt_insn_is_speculative): New export.
+	* python/py-record.c (recpy_insn_type): New static object.
+	(recpy_insn_new, recpy_insn_sal, recpy_insn_pc, recpy_insn_data,
+	recpy_insn_decoded, recpy_insn_size, recpy_insn_is_speculative,
+	recpy_element_number, recpy_element_hash, recpy_element_richcompare):
+	New function.
+	(recpy_insn_getset): New static object.
+	(gdbpy_initialize_record): Initialize gdb.RecordInstruction.
+	* python/py-record.h (recpy_element_object): New typedef.
+	(recpy_insn_type, recpy_insn_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* py-record-btrace.c (btpy_insn_new): Removed.
+	(btpy_insn_or_gap_new): New function.
+	(btpy_insn_error): Removed.
+	(btpy_insn_sal, btpy_insn_pc, btpy_insn_size, btpy_insn_is_speculative,
+	btpy_insn_data, btpy_insn_decode): Remove code path for gaps.
+	(recpy_bt_replay_position, recpy_bt_begin, recpy_bt_end): Call
+	btpy_insn_or_gap_new instead of btpy_insn_new.
+	(btpy_insn_getset): Remove btpy_insn_error.
+	* py-record.c (recpy_gap_type): New static object.
+	(recpy_gap_object): New typedef.
+	(recpy_gap_new, recpy_gap_number, recpy_gap_reason_code,
+	recpy_gap_reason_string): New function.
+	(recpy_gap_getset): New static object.
+	(gdbpy_initialize_record): Initialize gdb.RecordGap type.
+	* py-record.h (recpy_gap_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record.c (recpy_ptid): Remove.
+	(recpy_record_getset): Remove recpy_ptid.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch): Set inferior_ptid.
+	* python/py-record-btrace.c: Add "py-record.h" include.
+	(recpy_bt_format, recpy_bt_replay_position, recpy_bt_begin,
+	recpy_bt_end, recpy_bt_instruction_history,
+	recpy_bt_function_call_history, recpy_bt_goto): Use ptid stored
+	in gdb.Record object instead of current ptid.
+	* python/py-record.c: Include new "py-record.h" file.
+	(recpy_record_object): Moved to py-record.h.
+	* python/py-record.h: New file.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN,
+	BTPY_REQUIRE_VALID_CALL, recpy_bt_function_call_history): Fix
+	indentation.
+
 2017-05-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Move Daniel Jacobowitz and Mark Kettenis to

@@ -159,7 +159,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"TLS without PLT (3)" \
-	"-Wl,-z,now tmpdir/tls-main1.o \
+	"-Wl,--no-as-needed -Wl,-z,now tmpdir/tls-main1.o \
 	 tmpdir/libtls-1a.so tmpdir/libtls-1bn.so -Wl,-R,tmpdir" \
 	"" \
 	{ dummy.s } \

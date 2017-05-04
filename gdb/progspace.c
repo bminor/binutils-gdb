@@ -156,9 +156,9 @@ add_program_space (struct address_space *aspace)
 static void
 release_program_space (struct program_space *pspace)
 {
-  struct cleanup *old_chain = save_current_program_space ();
-
   gdb_assert (pspace != current_program_space);
+
+  scoped_restore_current_program_space restore_pspace;
 
   set_current_program_space (pspace);
 
@@ -173,8 +173,6 @@ release_program_space (struct program_space *pspace)
     /* Discard any data modules have associated with the PSPACE.  */
   program_space_free_data (pspace);
   xfree (pspace);
-
-  do_cleanups (old_chain);
 }
 
 /* Copies program space SRC to DEST.  Copies the main executable file,
@@ -183,9 +181,7 @@ release_program_space (struct program_space *pspace)
 struct program_space *
 clone_program_space (struct program_space *dest, struct program_space *src)
 {
-  struct cleanup *old_chain;
-
-  old_chain = save_current_program_space ();
+  scoped_restore_current_program_space restore_pspace;
 
   set_current_program_space (dest);
 
@@ -195,7 +191,6 @@ clone_program_space (struct program_space *dest, struct program_space *src)
   if (src->symfile_object_file != NULL)
     symbol_file_add_main (objfile_name (src->symfile_object_file), 0);
 
-  do_cleanups (old_chain);
   return dest;
 }
 
@@ -215,30 +210,6 @@ set_current_program_space (struct program_space *pspace)
 
   /* Different symbols change our view of the frame chain.  */
   reinit_frame_cache ();
-}
-
-/* A cleanups callback, helper for save_current_program_space
-   below.  */
-
-static void
-restore_program_space (void *arg)
-{
-  struct program_space *saved_pspace = (struct program_space *) arg;
-
-  set_current_program_space (saved_pspace);
-}
-
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-
-struct cleanup *
-save_current_program_space (void)
-{
-  struct cleanup *old_chain = make_cleanup (restore_program_space,
-					    current_program_space);
-
-  return old_chain;
 }
 
 /* Returns true iff there's no inferior bound to PSPACE.  */
@@ -445,51 +416,6 @@ update_address_spaces (void)
       inf->aspace = maybe_new_address_space ();
     else
       inf->aspace = inf->pspace->aspace;
-}
-
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-
-struct cleanup *
-save_current_space_and_thread (void)
-{
-  struct cleanup *old_chain;
-
-  /* If restoring to null thread, we need to restore the pspace as
-     well, hence, we need to save the current program space first.  */
-  old_chain = save_current_program_space ();
-  /* There's no need to save the current inferior here.
-     That is handled by make_cleanup_restore_current_thread.  */
-  make_cleanup_restore_current_thread ();
-
-  return old_chain;
-}
-
-/* See progspace.h  */
-
-void
-switch_to_program_space_and_thread (struct program_space *pspace)
-{
-  struct inferior *inf;
-
-  inf = find_inferior_for_program_space (pspace);
-  if (inf != NULL && inf->pid != 0)
-    {
-      struct thread_info *tp;
-
-      tp = any_live_thread_of_process (inf->pid);
-      if (tp != NULL)
-	{
-	  switch_to_thread (tp->ptid);
-	  /* Switching thread switches pspace implicitly.  We're
-	     done.  */
-	  return;
-	}
-    }
-
-  switch_to_thread (null_ptid);
-  set_current_program_space (pspace);
 }
 
 

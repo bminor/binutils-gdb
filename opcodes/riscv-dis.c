@@ -153,6 +153,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	    case 'i':
 	      print (info->stream, "%d", (int)EXTRACT_RVC_SIMM3 (l));
 	      break;
+	    case 'o':
 	    case 'j':
 	      print (info->stream, "%d", (int)EXTRACT_RVC_IMM (l));
 	      break;

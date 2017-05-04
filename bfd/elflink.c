@@ -580,7 +580,7 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
 	       && (ELF_ST_TYPE (sym->st_info) == STT_OBJECT
 		   || ELF_ST_TYPE (sym->st_info) == STT_COMMON))))
       || (d != NULL
-	  && h->root.type == bfd_link_hash_new
+	  && h->non_elf
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
     h->dynamic = 1;
 }
@@ -623,6 +623,14 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 	}
     }
 
+  /* Symbols defined in a linker script but not referenced anywhere
+     else will have non_elf set.  */
+  if (h->non_elf)
+    {
+      bfd_elf_link_mark_dynamic_symbol (info, h, NULL);
+      h->non_elf = 0;
+    }
+
   switch (h->root.type)
     {
     case bfd_link_hash_defined:
@@ -639,8 +647,6 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 	bfd_link_repair_undef_list (&htab->root);
       break;
     case bfd_link_hash_new:
-      bfd_elf_link_mark_dynamic_symbol (info, h, NULL);
-      h->non_elf = 0;
       break;
     case bfd_link_hash_indirect:
       /* We had a versioned symbol in a dynamic library.  We make the

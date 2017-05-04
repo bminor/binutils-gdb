@@ -1165,7 +1165,7 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
    Load And Reserve instruction and ending with a Store Conditional
    instruction.  If such a sequence is found, attempt to step through it.
    A breakpoint is placed at the end of the sequence.  */
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -1180,11 +1180,10 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a Load And Reserve instruction.  */
   if (!IS_LOAD_AND_RESERVE_INSN (insn))
-    return NULL;
+    return {};
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -1202,8 +1201,8 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
           int absolute = insn & 2;
 
           if (bc_insn_count >= 1)
-            return 0; /* More than one conditional branch found, fallback 
-                         to the standard single-step code.  */
+            return {}; /* More than one conditional branch found, fallback
+                          to the standard single-step code.  */
  
 	  if (absolute)
 	    breaks[1] = immediate;
@@ -1221,7 +1220,7 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
   /* Assume that the atomic sequence ends with a Store Conditional
      instruction.  */
   if (!IS_STORE_CONDITIONAL_INSN (insn))
-    return NULL;
+    return {};
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
@@ -1237,8 +1236,10 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
+  std::vector<CORE_ADDR> next_pcs;
+
   for (index = 0; index <= last_breakpoint; index++)
-    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
+    next_pcs.push_back (breaks[index]);
 
   return next_pcs;
 }

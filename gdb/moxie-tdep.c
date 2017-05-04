@@ -299,7 +299,7 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 
 /* Insert a single step breakpoint.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 moxie_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -309,7 +309,7 @@ moxie_software_single_step (struct regcache *regcache)
   uint32_t tmpu32;
   ULONGEST fp;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   addr = regcache_read_pc (regcache);
 
@@ -337,9 +337,8 @@ moxie_software_single_step (struct regcache *regcache)
 	    case 0x09: /* bleu */
 	      /* Insert breaks on both branches, because we can't currently tell
 		 which way things will go.  */
-	      VEC_safe_push (CORE_ADDR, next_pcs, addr + 2);
-	      VEC_safe_push (CORE_ADDR, next_pcs,
-			     addr + 2 + INST2OFFSET(inst));
+	      next_pcs.push_back (addr + 2);
+	      next_pcs.push_back (addr + 2 + INST2OFFSET(inst));
 	      break;
 	    default:
 	      {
@@ -351,7 +350,7 @@ moxie_software_single_step (struct regcache *regcache)
       else
 	{
 	  /* This is a Form 2 instruction.  They are all 16 bits.  */
-	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 2);
+	  next_pcs.push_back (addr + 2);
 	}
     }
   else
@@ -398,7 +397,7 @@ moxie_software_single_step (struct regcache *regcache)
 	case 0x32: /* udiv.l */
 	case 0x33: /* mod.l */
 	case 0x34: /* umod.l */
-	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 2);
+	  next_pcs.push_back (addr + 2);
 	  break;
 
 	  /* 32-bit instructions.  */
@@ -408,7 +407,7 @@ moxie_software_single_step (struct regcache *regcache)
 	case 0x37: /* sto.b */
 	case 0x38: /* ldo.s */
 	case 0x39: /* sto.s */
-	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 4);
+	  next_pcs.push_back (addr + 4);
 	  break;
 
 	  /* 48-bit instructions.  */
@@ -421,27 +420,26 @@ moxie_software_single_step (struct regcache *regcache)
 	case 0x20: /* ldi.s (immediate) */
 	case 0x22: /* lda.s */
 	case 0x24: /* sta.s */
-	  VEC_safe_push (CORE_ADDR, next_pcs, addr + 6);
+	  next_pcs.push_back (addr + 6);
 	  break;
 
 	  /* Control flow instructions.	 */
 	case 0x03: /* jsra */
 	case 0x1a: /* jmpa */
-	  VEC_safe_push (CORE_ADDR, next_pcs,
-			 moxie_process_readu (addr + 2, buf, 4, byte_order));
+	  next_pcs.push_back (moxie_process_readu (addr + 2, buf, 4,
+						   byte_order));
 	  break;
 
 	case 0x04: /* ret */
 	  regcache_cooked_read_unsigned (regcache, MOXIE_FP_REGNUM, &fp);
-	  VEC_safe_push (CORE_ADDR, next_pcs,
-			 moxie_process_readu (fp + 4, buf, 4, byte_order));
+	  next_pcs.push_back (moxie_process_readu (fp + 4, buf, 4, byte_order));
 	  break;
 
 	case 0x19: /* jsr */
 	case 0x25: /* jmp */
 	  regcache_raw_read (regcache,
 			     (inst >> 4) & 0xf, (gdb_byte *) & tmpu32);
-	  VEC_safe_push (CORE_ADDR, next_pcs, tmpu32);
+	  next_pcs.push_back (tmpu32);
 	  break;
 
 	case 0x30: /* swi */

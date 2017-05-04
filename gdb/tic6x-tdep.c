@@ -699,15 +699,12 @@ tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 
 /* This is the implementation of gdbarch method software_single_step.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 tic6x_software_single_step (struct regcache *regcache)
 {
   CORE_ADDR next_pc = tic6x_get_next_pc (regcache, regcache_read_pc (regcache));
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  VEC_safe_push (CORE_ADDR, next_pcs, next_pc);
-
-  return next_pcs;
+  return {next_pc};
 }
 
 /* This is the implementation of gdbarch method frame_align.  */

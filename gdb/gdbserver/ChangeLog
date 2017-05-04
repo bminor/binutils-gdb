@@ -1,3 +1,17 @@
+2017-05-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* configure: Regenerate.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-arm-low.c (arm_gdbserver_get_next_pcs): Adjust to
+	software_single_step change of return type to
+	std::vector<CORE_ADDR>.
+	* linux-low.c (install_software_single_step_breakpoints):
+	Likewise.
+	* linux-low.h (install_software_single_step_breakpoints):
+	Likewise.
+
 2017-04-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* remote-utils.c: Include "gdb_termios.h" instead of

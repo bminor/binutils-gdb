@@ -673,7 +673,7 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 
 /* AIX does not support PT_STEP.  Simulate it.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 rs6000_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -682,14 +682,13 @@ rs6000_software_single_step (struct regcache *regcache)
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
   int opcode;
-  VEC (CORE_ADDR) *next_pcs;
 
   loc = regcache_read_pc (regcache);
 
   insn = read_memory_integer (loc, 4, byte_order);
 
-  next_pcs = ppc_deal_with_atomic_sequence (regcache);
-  if (next_pcs != NULL)
+  std::vector<CORE_ADDR> next_pcs = ppc_deal_with_atomic_sequence (regcache);
+  if (!next_pcs.empty ())
     return next_pcs;
   
   breaks[0] = loc + PPC_INSN_SIZE;
@@ -705,7 +704,8 @@ rs6000_software_single_step (struct regcache *regcache)
       /* ignore invalid breakpoint.  */
       if (breaks[ii] == -1)
 	continue;
-      VEC_safe_push (CORE_ADDR, next_pcs, breaks[ii]);
+
+      next_pcs.push_back (breaks[ii]);
     }
 
   errno = 0;			/* FIXME, don't ignore errors!  */

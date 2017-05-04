@@ -294,6 +294,8 @@ public:
 
   void raw_supply (int regnum, const void *buf);
 
+  void raw_supply_zeroed (int regnum);
+
   enum register_status get_register_status (int regnum) const;
 
   void raw_set_cached_value (int regnum, const gdb_byte *buf);

@@ -1,3 +1,188 @@
+2017-05-03  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add `pic', `sym32' and
+	`nomacro' flags.
+	(RELAX_MIPS16_PIC, RELAX_MIPS16_SYM32, RELAX_MIPS16_NOMACRO):
+	New macros.
+	(RELAX_MIPS16_USER_SMALL, RELAX_MIPS16_USER_EXT)
+	(RELAX_MIPS16_DSLOT, RELAX_MIPS16_JAL_DSLOT)
+	(RELAX_MIPS16_EXTENDED, RELAX_MIPS16_MARK_EXTENDED)
+	(RELAX_MIPS16_CLEAR_EXTENDED, RELAX_MIPS16_ALWAYS_EXTENDED)
+	(RELAX_MIPS16_MARK_ALWAYS_EXTENDED)
+	(RELAX_MIPS16_CLEAR_ALWAYS_EXTENDED): Shift bits.
+	(RELAX_MIPS16_MACRO, RELAX_MIPS16_MARK_MACRO)
+	(RELAX_MIPS16_CLEAR_MACRO): New macros.
+	(append_insn): Pass `mips_pic', HAVE_32BIT_SYMBOLS and
+	`mips_opts.warn_about_macros' settings to RELAX_MIPS16_ENCODE.
+	(mips16_macro_frag): New function.
+	(md_estimate_size_before_relax): Handle HI16/LO16 relaxation.
+	(mips_relax_frag): Likewise.
+	(md_convert_frag): Likewise.
+
+	* testsuite/gas/mips/mips16@relax-swap3.d: Remove error output,
+	add dump patterns.
+	* testsuite/gas/mips/mips16e@relax-swap3.d: New test
+	subarchitecture.
+	* testsuite/gas/mips/micromips@relax-swap3.d: Remove trailing
+	NOP padding.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-absolute.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.d: Remove error
+	output, add dump patterns.
+	* testsuite/gas/mips/mips16@relax-swap3.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-reloc-2.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-reloc-3.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-addend-2.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-addend-3.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-absolute.l: Remove file.
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.l: Remove file.
+	* testsuite/gas/mips/relax-swap3.s: Adjust trailing padding.
+
+	* testsuite/gas/mips/mips16-pcrel-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-5.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-pic-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-pic-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-n32-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-n32-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-n64-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-n64-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-delay-0.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-delay-1.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-5.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-7.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-8.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-9.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-pic-8.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-pic-9.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-n32-8.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-n32-9.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-sym32-8.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-sym32-9.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-8.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-9.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-2.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-3.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-5.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-7.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n32-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n32-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-4.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-6.d: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-sym32-4.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-sym32-6.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n32-4.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n32-6.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-4.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-6.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-sym32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-sym32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16-pcrel-0.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-1.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-2.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-3.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-4.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-5.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-delay-0.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-delay-1.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-addend-8.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-addend-9.l: New stderr output.
+	* testsuite/gas/mips/mips16-pcrel-absolute-4.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-pcrel-absolute-6.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-pcrel-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-1.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-2.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-3.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-4.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-5.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-delay-0.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-delay-1.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-4.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-5.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-6.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-7.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-8.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-addend-9.s: New test source.
+	* testsuite/gas/mips/mips16-pcrel-absolute-2.s: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-3.s: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-4.s: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-5.s: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-6.s: New test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-7.s: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-05-03  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/20941
+	* symbols.c (snapshot_symbol): Handle the case where
+	resolve_expression returns a local symbol.
+
+2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (append_insn): Call `symbol_append' for any
+	expression symbol created for MIPS16 relaxation.
+	(match_mips16_insn): Don't encode a constant value as an
+	immediate with a PC-relative operand.
+
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-1.d: New
+	test.
+	* testsuite/gas/mips/mips16-branch-absolute-n32-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-n32-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-n32-1.d: New
+	test.
+	* testsuite/gas/mips/mips16-branch-absolute-n64-1.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-n64-2.d: New test.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-n64-1.d: New
+	test.
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-pcrel-absolute-1.s: New test source.
+	* testsuite/gas/mips/mips16-branch-absolute-1.s: New test
+	source.
+	* testsuite/gas/mips/mips16-branch-absolute-2.s: New test
+	source.
+	* testsuite/gas/mips/mips16-branch-absolute-addend-1.s: New test
+	source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-04-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (mips16_pcrel_val): New function, factored

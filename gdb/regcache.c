@@ -1199,6 +1199,26 @@ regcache::raw_supply (int regnum, const void *buf)
     }
 }
 
+/* Supply register REGNUM with zeroed value to REGCACHE.  This is not the same
+   as calling raw_supply with NULL (which will set the state to
+   unavailable).  */
+
+void
+regcache::raw_supply_zeroed (int regnum)
+{
+  void *regbuf;
+  size_t size;
+
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  gdb_assert (!m_readonly_p);
+
+  regbuf = register_buffer (regnum);
+  size = m_descr->sizeof_register[regnum];
+
+  memset (regbuf, 0, size);
+  m_register_status[regnum] = REG_VALID;
+}
+
 /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
 
 void

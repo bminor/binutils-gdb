@@ -1672,7 +1672,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 sparc_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *arch = get_regcache_arch (regcache);
@@ -1680,7 +1680,7 @@ sparc_software_single_step (struct regcache *regcache)
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   pc = regcache_raw_get_unsigned (regcache, tdep->pc_regnum);
   orig_npc = npc = regcache_raw_get_unsigned (regcache, tdep->npc_regnum);
@@ -1688,10 +1688,10 @@ sparc_software_single_step (struct regcache *regcache)
   /* Analyze the instruction at PC.  */
   nnpc = sparc_analyze_control_transfer (regcache, pc, &npc);
   if (npc != 0)
-    VEC_safe_push (CORE_ADDR, next_pcs, npc);
+    next_pcs.push_back (npc);
 
   if (nnpc != 0)
-    VEC_safe_push (CORE_ADDR, next_pcs, nnpc);
+    next_pcs.push_back (nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going

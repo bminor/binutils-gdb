@@ -2554,7 +2554,8 @@ decode_line_full (const struct event_location *location, int flags,
 		       search_pspace, default_symtab,
 		       default_line, canonical);
   cleanups = make_cleanup (linespec_parser_delete, &parser);
-  save_current_program_space ();
+
+  scoped_restore_current_program_space restore_pspace;
 
   result = event_location_to_sals (&parser, location);
   state = PARSER_STATE (&parser);
@@ -2616,7 +2617,8 @@ decode_line_1 (const struct event_location *location, int flags,
 		       search_pspace, default_symtab,
 		       default_line, NULL);
   cleanups = make_cleanup (linespec_parser_delete, &parser);
-  save_current_program_space ();
+
+  scoped_restore_current_program_space restore_pspace;
 
   result = event_location_to_sals (&parser, location);
 
