@@ -2269,41 +2269,29 @@ mi_execute_cli_command (const char *cmd, int args_p, const char *args)
 {
   if (cmd != 0)
     {
-      struct cleanup *old_cleanups;
-      char *run;
+      std::string run = cmd;
 
       if (args_p)
-	run = xstrprintf ("%s %s", cmd, args);
-      else
-	run = xstrdup (cmd);
+	run = run + " " + args;
       if (mi_debug_p)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
-			    cmd, run);
-      old_cleanups = make_cleanup (xfree, run);
-      execute_command (run, 0 /* from_tty */ );
-      do_cleanups (old_cleanups);
-      return;
+			    cmd, run.c_str ());
+      execute_command (&run[0], 0 /* from_tty */ );
     }
 }
 
 void
 mi_execute_async_cli_command (const char *cli_command, char **argv, int argc)
 {
-  struct cleanup *old_cleanups;
-  char *run;
+  std::string run = cli_command;
 
+  if (argc)
+    run = run + " " + *argv;
   if (mi_async_p ())
-    run = xstrprintf ("%s %s&", cli_command, argc ? *argv : "");
-  else
-    run = xstrprintf ("%s %s", cli_command, argc ? *argv : "");
-  old_cleanups = make_cleanup (xfree, run);
+    run += "&";
 
-  execute_command (run, 0 /* from_tty */ );
-
-  /* Do this before doing any printing.  It would appear that some
-     print code leaves garbage around in the buffer.  */
-  do_cleanups (old_cleanups);
+  execute_command (&run[0], 0 /* from_tty */ );
 }
 
 void
@@ -2806,13 +2794,9 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
   {
     struct cleanup *cleanups;
     int tvar;
-    char *tsvname;
     int i;
 
     ui_out_emit_list list_emitter (uiout, "tvars");
-
-    tsvname = NULL;
-    cleanups = make_cleanup (free_current_contents, &tsvname);
 
     for (i = 0; VEC_iterate (int, tinfo->tvars, i, tvar); i++)
       {
@@ -2824,10 +2808,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
 	if (tsv != NULL)
 	  {
-	    tsvname = (char *) xrealloc (tsvname, strlen (tsv->name) + 2);
-	    tsvname[0] = '$';
-	    strcpy (tsvname + 1, tsv->name);
-	    uiout->field_string ("name", tsvname);
+	    uiout->field_fmt ("name", "$%s", tsv->name);
 
 	    tsv->value_known = target_get_trace_state_variable_value (tsv->number,
 								      &tsv->value);
@@ -2839,8 +2820,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	    uiout->field_skip ("current");
 	  }
       }
-
-    do_cleanups (cleanups);
   }
 
   /* Memory.  */

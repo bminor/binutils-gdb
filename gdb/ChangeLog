@@ -1,5 +1,11 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (mi_execute_cli_command): Use std::string.
+	(mi_execute_async_cli_command): Likewise.
+	(mi_cmd_trace_frame_collected): Use field_fmt.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (mi_cmd_data_write_memory_bytes): Use
 	gdb::byte_vector.
 
