@@ -1797,11 +1797,17 @@ btrace_fetch (struct thread_info *tp)
   if (btinfo->replay != NULL)
     return;
 
+  /* With CLI usage, TP->PTID always equals INFERIOR_PTID here.  Now that we
+     can store a gdb.Record object in Python referring to a different thread
+     than the current one, temporarily set INFERIOR_PTID.  */
+  cleanup = save_inferior_ptid ();
+  inferior_ptid = tp->ptid;
+
   /* We should not be called on running or exited threads.  */
   gdb_assert (can_access_registers_ptid (tp->ptid));
 
   btrace_data_init (&btrace);
-  cleanup = make_cleanup_btrace_data (&btrace);
+  make_cleanup_btrace_data (&btrace);
 
   /* Let's first try to extend the trace we already have.  */
   if (btinfo->end != NULL)
