@@ -1,0 +1,33 @@
+From d7cab18a92e7d4c98ddf3d191a1d78a706dd48a4 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Tue, 2 May 2017 09:16:07 -0700
+Subject: [PATCH] Gold: Issue an error only if no symbol is folded
+
+Since one or both symbols can be folded here, it is an error only if no
+symbol is folded.
+
+	PR gold/21128
+	* testsuite/icf_safe_so_test.sh (check_fold): Issue an error
+	only if no symbol is folded.
+---
+ gold/testsuite/icf_safe_so_test.sh | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/gold/testsuite/icf_safe_so_test.sh b/gold/testsuite/icf_safe_so_test.sh
+index 28600be..bf13d38 100755
+--- a/gold/testsuite/icf_safe_so_test.sh
++++ b/gold/testsuite/icf_safe_so_test.sh
+@@ -76,7 +76,9 @@ BEGIN { discard = 0; }
+ /.*\\.text\\..*($2|$3).*/ { act[discard] = act[discard] \" \" \$0; }
+ END {
+       # printf \"kept\" act[0] \"\\nfolded\" act[1] \"\\n\";
+-      if (length(act[0]) == 0 || length(act[1]) == 0)
++      # Since one or both symbols can be folded here, it is an error only
++      # if no symbol is folded.
++      if (length(act[1]) == 0)
+ 	{
+ 	  printf \"Safe Identical Code Folding did not fold $2 and $3\\n\"
+ 	  exit 1;
+-- 
+2.9.3
+

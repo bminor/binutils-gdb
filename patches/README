@@ -21,6 +21,8 @@ patches="
 	binutils-secondary.patch
 	binutils-i386-now.patch
 	binutils-x86-64-now.patch
+	binutils-pr21128.patch
+	binutils-pr21129.patch
 "
 
 for p in $patches
