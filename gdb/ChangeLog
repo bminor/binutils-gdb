@@ -1,3 +1,8 @@
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* corelow.c (thread_section_name): New class.
+	(get_core_register_section, get_core_siginfo): Use it.
+
 2017-05-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* corelow.c (sniff_core_bfd): Remove extra semicolon.
