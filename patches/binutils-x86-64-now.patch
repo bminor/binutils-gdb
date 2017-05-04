@@ -1,32 +1,5 @@
-From cecb969d47e0df46e03be254eb339c0afdef45f3 Mon Sep 17 00:00:00 2001
-From: "H.J. Lu" <hjl.tools@gmail.com>
-Date: Thu, 27 Apr 2017 09:01:09 -0700
-Subject: [PATCH 2/2] Add elf_x86_64_lazy_plt_layout and
- elf_x86_64_non_lazy_plt_layout
-
-Set plt.has_plt0 to 0 for -z now
-Use non_lazy_plt for -z now
----
- bfd/elf64-x86-64.c                               | 724 ++++++++++++++---------
- ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d      |  14 +
- ld/testsuite/ld-ifunc/ifunc-2-local-x86-64-now.d |  26 +
- ld/testsuite/ld-ifunc/ifunc-2-x86-64-now.d       |  26 +
- ld/testsuite/ld-ifunc/pr17154-x86-64-now.d       |  40 ++
- ld/testsuite/ld-x86-64/plt2.dd                   |  28 +
- ld/testsuite/ld-x86-64/plt2.rd                   |   9 +
- ld/testsuite/ld-x86-64/plt2.s                    |   7 +
- ld/testsuite/ld-x86-64/x86-64.exp                |  12 +
- 9 files changed, 601 insertions(+), 285 deletions(-)
- create mode 100644 ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d
- create mode 100644 ld/testsuite/ld-ifunc/ifunc-2-local-x86-64-now.d
- create mode 100644 ld/testsuite/ld-ifunc/ifunc-2-x86-64-now.d
- create mode 100644 ld/testsuite/ld-ifunc/pr17154-x86-64-now.d
- create mode 100644 ld/testsuite/ld-x86-64/plt2.dd
- create mode 100644 ld/testsuite/ld-x86-64/plt2.rd
- create mode 100644 ld/testsuite/ld-x86-64/plt2.s
-
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 7c455f2..db0b6aa 100644
+index 7c455f2..c67f674 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -544,23 +544,29 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
@@ -351,18 +324,52 @@ index 7c455f2..db0b6aa 100644
    union
    {
      bfd_signed_vma refcount;
-@@ -1207,25 +1272,18 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
- 			   | SEC_LOAD
- 			   | SEC_READONLY);
+@@ -1169,149 +1234,6 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
+   return &ret->elf.root;
+ }
  
-+      /* Don't align PLT sections here since link_setup_gnu_properties
-+	 will align PLT sections.  */
-+
-       if (htab->plt_got == NULL
+-/* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
+-   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
+-   hash table.  */
+-
+-static bfd_boolean
+-elf_x86_64_create_dynamic_sections (bfd *dynobj,
+-				    struct bfd_link_info *info)
+-{
+-  struct elf_x86_64_link_hash_table *htab;
+-
+-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
+-    return FALSE;
+-
+-  htab = elf_x86_64_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  /* Set the contents of the .interp section to the interpreter.  */
+-  if (bfd_link_executable (info) && !info->nointerp)
+-    {
+-      asection *s = bfd_get_linker_section (dynobj, ".interp");
+-      if (s == NULL)
+-	abort ();
+-      s->size = htab->dynamic_interpreter_size;
+-      s->contents = (unsigned char *) htab->dynamic_interpreter;
+-      htab->interp = s;
+-    }
+-
+-  if (htab->elf.splt != NULL)
+-    {
+-      const struct elf_backend_data *bed
+-	= get_elf_backend_data (dynobj);
+-      flagword pltflags = (bed->dynamic_sec_flags
+-			   | SEC_ALLOC
+-			   | SEC_CODE
+-			   | SEC_LOAD
+-			   | SEC_READONLY);
+-
+-      if (htab->plt_got == NULL
 -	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed)
-+	  && get_elf_x86_64_backend_data (dynobj)->os == is_normal)
- 	{
- 	  /* Create the GOT procedure linkage table.  */
+-	{
+-	  /* Create the GOT procedure linkage table.  */
 -	  unsigned int plt_got_align;
 -
 -	  BFD_ASSERT (sizeof (elf_x86_64_legacy_plt2_entry) == 8
@@ -370,42 +377,104 @@ index 7c455f2..db0b6aa 100644
 -			  == sizeof (elf_x86_64_legacy_plt2_entry)));
 -	  plt_got_align = 3;
 -
- 	  htab->plt_got
- 	    = bfd_make_section_anyway_with_flags (dynobj,
- 						  ".plt.got",
- 						  pltflags);
+-	  htab->plt_got
+-	    = bfd_make_section_anyway_with_flags (dynobj,
+-						  ".plt.got",
+-						  pltflags);
 -	  if (htab->plt_got == NULL
 -	      || !bfd_set_section_alignment (dynobj,
 -					     htab->plt_got,
 -					     plt_got_align))
-+	  if (htab->plt_got == NULL)
- 	    return FALSE;
- 	}
- 
-@@ -1233,20 +1291,15 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
- 	 64-bit mode.  */
-       if (ABI_64_P (dynobj)
- 	  && info->bndplt
+-	    return FALSE;
+-	}
+-
+-      /* MPX PLT is supported only if elf_x86_64_arch_bed is used in
+-	 64-bit mode.  */
+-      if (ABI_64_P (dynobj)
+-	  && info->bndplt
 -	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed
-+	  && get_elf_x86_64_backend_data (dynobj)->os == is_normal
- 	  && htab->plt_bnd == NULL)
- 	{
- 	  /* Create the second PLT for Intel MPX support.  */
+-	  && htab->plt_bnd == NULL)
+-	{
+-	  /* Create the second PLT for Intel MPX support.  */
 -	  BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
 -		      && (sizeof (elf_x86_64_bnd_plt2_entry)
 -			  == sizeof (elf_x86_64_legacy_plt2_entry)));
 -
- 	  htab->plt_bnd
- 	    = bfd_make_section_anyway_with_flags (dynobj,
- 						  ".plt.bnd",
- 						  pltflags);
+-	  htab->plt_bnd
+-	    = bfd_make_section_anyway_with_flags (dynobj,
+-						  ".plt.bnd",
+-						  pltflags);
 -	  if (htab->plt_bnd == NULL
 -	      || !bfd_set_section_alignment (dynobj, htab->plt_bnd, 3))
-+	  if (htab->plt_bnd == NULL)
- 	    return FALSE;
- 	}
+-	    return FALSE;
+-	}
+-
+-      if (!info->no_ld_generated_unwind_info)
+-	{
+-	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+-			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+-			    | SEC_LINKER_CREATED);
+-
+-	  if (htab->plt_eh_frame == NULL)
+-	    {
+-	      htab->plt_eh_frame
+-		= bfd_make_section_anyway_with_flags (dynobj,
+-						      ".eh_frame",
+-						      flags);
+-	      if (htab->plt_eh_frame == NULL
+-		  || !bfd_set_section_alignment (dynobj,
+-						 htab->plt_eh_frame,
+-						 ABI_64_P (dynobj) ? 3 : 2))
+-		return FALSE;
+-	    }
+-
+-	  if (htab->plt_got_eh_frame == NULL
+-	      && htab->plt_got != NULL)
+-	    {
+-	      htab->plt_got_eh_frame
+-		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+-						      ".eh_frame",
+-						      flags);
+-	      if (htab->plt_got_eh_frame == NULL
+-		  || !bfd_set_section_alignment (dynobj,
+-						 htab->plt_got_eh_frame,
+-						 ABI_64_P (dynobj) ? 3 : 2))
+-		return FALSE;
+-	    }
+-
+-	  if (htab->plt_bnd_eh_frame == NULL
+-	      && htab->plt_bnd != NULL)
+-	    {
+-	      htab->plt_bnd_eh_frame
+-		= bfd_make_section_anyway_with_flags (dynobj,
+-						      ".eh_frame",
+-						      flags);
+-	      if (htab->plt_bnd_eh_frame == NULL
+-		  || !bfd_set_section_alignment (dynobj,
+-						 htab->plt_bnd_eh_frame,
+-						 3))
+-		return FALSE;
+-	    }
+-	}
+-    }
+-
+-  /* Align .got section to its entry size.  */
+-  if (htab->elf.sgot != NULL
+-      && !bfd_set_section_alignment (dynobj, htab->elf.sgot, 3))
+-    return FALSE;
+-
+-  /* Align .got.plt section to its entry size.  */
+-  if (htab->elf.sgotplt != NULL
+-      && !bfd_set_section_alignment (dynobj, htab->elf.sgotplt, 3))
+-    return FALSE;
+-
+-  return TRUE;
+-}
+-
+ /* Copy the extra info we tack onto an elf_link_hash_entry.  */
  
-@@ -2413,33 +2466,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ static void
+@@ -2413,33 +2335,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  
        if (h != NULL)
  	{
@@ -439,16 +508,22 @@ index 7c455f2..db0b6aa 100644
  	  /* It is referenced by a non-shared object. */
  	  h->ref_regular = 1;
  	  h->root.non_ir_ref = 1;
-@@ -2578,8 +2604,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -2576,14 +2471,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	create_got:
+ 	  if (eh != NULL)
  	    eh->has_got_reloc = 1;
- 	  if (htab->elf.sgot == NULL)
- 	    {
+-	  if (htab->elf.sgot == NULL)
+-	    {
 -	      if (htab->elf.dynobj == NULL)
 -		htab->elf.dynobj = abfd;
- 	      if (!_bfd_elf_create_got_section (htab->elf.dynobj,
- 						info))
- 		goto error_return;
-@@ -2748,9 +2772,6 @@ do_size:
+-	      if (!_bfd_elf_create_got_section (htab->elf.dynobj,
+-						info))
+-		goto error_return;
+-	    }
+ 	  break;
+ 
+ 	case R_X86_64_PLT32:
+@@ -2748,9 +2635,6 @@ do_size:
  		 this reloc.  */
  	      if (sreloc == NULL)
  		{
@@ -458,7 +533,7 @@ index 7c455f2..db0b6aa 100644
  		  sreloc = _bfd_elf_make_dynamic_reloc_section
  		    (sec, htab->elf.dynobj, ABI_64_P (abfd) ? 3 : 2,
  		     abfd, /*rela?*/ TRUE);
-@@ -3110,7 +3131,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -3110,7 +2994,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
    if (htab == NULL)
      return FALSE;
    bed = get_elf_backend_data (info->output_bfd);
@@ -467,7 +542,7 @@ index 7c455f2..db0b6aa 100644
  
    resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
  						      eh->has_got_reloc,
-@@ -3148,7 +3169,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -3148,7 +3032,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  					      &eh->dyn_relocs,
  					      &htab->readonly_dynrelocs_against_ifunc,
  					      plt_entry_size,
@@ -477,7 +552,7 @@ index 7c455f2..db0b6aa 100644
  					      GOT_ENTRY_SIZE, TRUE))
  	{
  	  asection *s = htab->plt_bnd;
-@@ -3158,7 +3180,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -3158,7 +3043,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	      eh->plt_bnd.offset = s->size;
  
  	      /* Make room for this entry in the .plt.bnd section.  */
@@ -486,7 +561,7 @@ index 7c455f2..db0b6aa 100644
  	    }
  
  	  return TRUE;
-@@ -3214,7 +3236,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -3214,7 +3099,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	     first entry.  The .plt section is used by prelink to undo
  	     prelinking for dynamic relocations.  */
  	  if (s->size == 0)
@@ -495,7 +570,7 @@ index 7c455f2..db0b6aa 100644
  
  	  if (use_plt_got)
  	    eh->plt_got.offset = got_s->size;
-@@ -3259,12 +3281,12 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -3259,12 +3144,12 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  
  	  /* Make room for this entry.  */
  	  if (use_plt_got)
@@ -510,7 +585,7 @@ index 7c455f2..db0b6aa 100644
  
  	      /* We also need to make an entry in the .got.plt section,
  		 which will be placed in the .got section by the linker
-@@ -3685,7 +3707,6 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3685,7 +3570,6 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
    bfd_boolean relocs;
    bfd *ibfd;
    const struct elf_backend_data *bed;
@@ -518,7 +593,7 @@ index 7c455f2..db0b6aa 100644
  
    htab = elf_x86_64_hash_table (info);
    if (htab == NULL)
-@@ -3852,9 +3873,9 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3852,9 +3736,9 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
  	  /* Reserve room for the initial entry.
  	     FIXME: we could probably do away with it in this case.  */
  	  if (htab->elf.splt->size == 0)
@@ -530,7 +605,7 @@ index 7c455f2..db0b6aa 100644
  	}
      }
  
-@@ -3877,23 +3898,20 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3877,23 +3761,20 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
  	htab->elf.sgotplt->size = 0;
      }
  
@@ -557,7 +632,7 @@ index 7c455f2..db0b6aa 100644
  
        /* Unwind info for .plt.bnd and .plt.got sections are
  	 identical.  */
-@@ -3901,7 +3919,8 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3901,7 +3782,8 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
  	  && htab->plt_bnd != NULL
  	  && htab->plt_bnd->size != 0
  	  && !bfd_is_abs_section (htab->plt_bnd->output_section))
@@ -567,7 +642,7 @@ index 7c455f2..db0b6aa 100644
      }
  
    /* We now have determined the sizes of the various dynamic sections.
-@@ -3977,7 +3996,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3977,7 +3859,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
        && htab->plt_eh_frame->contents != NULL)
      {
        memcpy (htab->plt_eh_frame->contents,
@@ -576,7 +651,7 @@ index 7c455f2..db0b6aa 100644
        bfd_put_32 (dynobj, htab->elf.splt->size,
  		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
      }
-@@ -3986,7 +4005,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3986,7 +3868,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
        && htab->plt_got_eh_frame->contents != NULL)
      {
        memcpy (htab->plt_got_eh_frame->contents,
@@ -585,7 +660,7 @@ index 7c455f2..db0b6aa 100644
  	      htab->plt_got_eh_frame->size);
        bfd_put_32 (dynobj, htab->plt_got->size,
  		  (htab->plt_got_eh_frame->contents
-@@ -3997,7 +4016,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
+@@ -3997,7 +3879,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
        && htab->plt_bnd_eh_frame->contents != NULL)
      {
        memcpy (htab->plt_bnd_eh_frame->contents,
@@ -594,7 +669,7 @@ index 7c455f2..db0b6aa 100644
  	      htab->plt_bnd_eh_frame->size);
        bfd_put_32 (dynobj, htab->plt_bnd->size,
  		  (htab->plt_bnd_eh_frame->contents
-@@ -4214,7 +4233,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4214,7 +4096,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
    Elf_Internal_Rela *rel;
    Elf_Internal_Rela *wrel;
    Elf_Internal_Rela *relend;
@@ -603,7 +678,7 @@ index 7c455f2..db0b6aa 100644
  
    BFD_ASSERT (is_x86_64_elf (input_bfd));
  
-@@ -4225,6 +4244,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4225,6 +4107,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
    htab = elf_x86_64_hash_table (info);
    if (htab == NULL)
      return FALSE;
@@ -611,7 +686,7 @@ index 7c455f2..db0b6aa 100644
    symtab_hdr = &elf_symtab_hdr (input_bfd);
    sym_hashes = elf_sym_hashes (input_bfd);
    local_got_offsets = elf_local_got_offsets (input_bfd);
-@@ -4408,7 +4428,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+@@ -4408,7 +4291,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
  
  		  if (htab->elf.splt != NULL)
  		    {
@@ -621,7 +696,7 @@ index 7c455f2..db0b6aa 100644
  		      off = (plt_index + 3) * GOT_ENTRY_SIZE;
  		      base_got = htab->elf.sgotplt;
  		    }
-@@ -4633,7 +4654,8 @@ do_ifunc_pointer:
+@@ -4633,7 +4517,8 @@ do_ifunc_pointer:
  		     state, or even just remember the offset, as
  		     finish_dynamic_symbol would use that as offset into
  		     .got.  */
@@ -631,7 +706,7 @@ index 7c455f2..db0b6aa 100644
  		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
  		  base_got = htab->elf.sgotplt;
  		}
-@@ -5776,7 +5798,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5776,7 +5661,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  				  Elf_Internal_Sym *sym)
  {
    struct elf_x86_64_link_hash_table *htab;
@@ -639,7 +714,7 @@ index 7c455f2..db0b6aa 100644
    bfd_boolean use_plt_bnd;
    struct elf_x86_64_link_hash_entry *eh;
    bfd_boolean local_undefweak;
-@@ -5788,9 +5809,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5788,9 +5672,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
    /* Use MPX backend data in case of BND relocation.  Use .plt_bnd
       section only if there is .plt section.  */
    use_plt_bnd = htab->elf.splt != NULL && htab->plt_bnd != NULL;
@@ -649,7 +724,7 @@ index 7c455f2..db0b6aa 100644
  
    eh = (struct elf_x86_64_link_hash_entry *) h;
    if (eh->no_finish_dynamic_symbol)
-@@ -5806,8 +5824,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5806,8 +5687,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
    if (h->plt.offset != (bfd_vma) -1)
      {
        bfd_vma plt_index;
@@ -659,7 +734,7 @@ index 7c455f2..db0b6aa 100644
        Elf_Internal_Rela rela;
        bfd_byte *loc;
        asection *plt, *gotplt, *relplt, *resolved_plt;
-@@ -5854,60 +5871,30 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5854,60 +5734,30 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  
        if (plt == htab->elf.splt)
  	{
@@ -728,7 +803,7 @@ index 7c455f2..db0b6aa 100644
  	  resolved_plt = plt;
  	  plt_offset = h->plt.offset;
  	}
-@@ -5922,7 +5909,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5922,7 +5772,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  			      - resolved_plt->output_section->vma
  			      - resolved_plt->output_offset
  			      - plt_offset
@@ -737,7 +812,7 @@ index 7c455f2..db0b6aa 100644
  
        /* Check PC-relative offset overflow in PLT entry.  */
        if ((plt_got_pcrel_offset + 0x80000000) > 0xffffffff)
-@@ -5931,7 +5918,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5931,7 +5781,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  				output_bfd, h->root.root.string);
  
        bfd_put_32 (output_bfd, plt_got_pcrel_offset,
@@ -747,7 +822,7 @@ index 7c455f2..db0b6aa 100644
  
        /* Fill in the entry in the global offset table, initially this
  	 points to the second part of the PLT entry.  Leave the entry
-@@ -5939,11 +5927,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5939,11 +5790,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  	 against undefined weak symbol in PIE.  */
        if (!local_undefweak)
  	{
@@ -765,14 +840,14 @@ index 7c455f2..db0b6aa 100644
  
  	  /* Fill in the entry in the .rela.plt section.  */
  	  rela.r_offset = (gotplt->output_section->vma
-@@ -5971,15 +5960,17 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5971,15 +5823,17 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  	      plt_index = htab->next_jump_slot_index++;
  	    }
  
 -	  /* Don't fill PLT entry for static executables.  */
 -	  if (plt == htab->elf.splt)
-+	  /* Don't fill PLT entry for static executables nor without
-+	     PLT0.  */
++	  /* Don't fill the second and third slots in PLT entry for
++	     static executables nor without PLT0.  */
 +	  if (plt == htab->elf.splt && htab->plt.has_plt0)
  	    {
 -	      bfd_vma plt0_offset = h->plt.offset + plt_plt_insn_end;
@@ -787,7 +862,7 @@ index 7c455f2..db0b6aa 100644
  
  	      /* Put offset for jmp .PLT0 and check for overflow.  We don't
  		 check relocation index for overflow since branch displacement
-@@ -5989,7 +5980,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5989,7 +5843,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  		info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
  					output_bfd, h->root.root.string);
  	      bfd_put_32 (output_bfd, - plt0_offset,
@@ -797,7 +872,7 @@ index 7c455f2..db0b6aa 100644
  	    }
  
  	  bed = get_elf_backend_data (output_bfd);
-@@ -5999,11 +5991,10 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5999,11 +5854,10 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
      }
    else if (eh->plt_got.offset != (bfd_vma) -1)
      {
@@ -810,7 +885,7 @@ index 7c455f2..db0b6aa 100644
  
        /* Set the entry in the GOT procedure linkage table.  */
        plt = htab->plt_got;
-@@ -6016,25 +6007,13 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -6016,25 +5870,13 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  	  || got == NULL)
  	abort ();
  
@@ -839,7 +914,7 @@ index 7c455f2..db0b6aa 100644
  
        /* Put offset the PC-relative instruction referring to the GOT
  	 entry, subtracting the size of that instruction.  */
-@@ -6044,7 +6023,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -6044,7 +5886,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  			  - plt->output_section->vma
  			  - plt->output_offset
  			  - plt_offset
@@ -848,7 +923,7 @@ index 7c455f2..db0b6aa 100644
  
        /* Check PC-relative offset overflow in GOT PLT entry.  */
        got_after_plt = got->output_section->vma > plt->output_section->vma;
-@@ -6055,7 +6034,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -6055,7 +5897,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  				output_bfd, h->root.root.string);
  
        bfd_put_32 (output_bfd, got_pcrel_offset,
@@ -858,7 +933,7 @@ index 7c455f2..db0b6aa 100644
      }
  
    if (!local_undefweak
-@@ -6290,18 +6270,11 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+@@ -6290,18 +6133,11 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
    struct elf_x86_64_link_hash_table *htab;
    bfd *dynobj;
    asection *sdyn;
@@ -877,7 +952,7 @@ index 7c455f2..db0b6aa 100644
    dynobj = htab->elf.dynobj;
    sdyn = bfd_get_linker_section (dynobj, ".dynamic");
  
-@@ -6360,76 +6333,87 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+@@ -6360,78 +6196,91 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
  	  (*bed->s->swap_dyn_out) (output_bfd, &dyn, dyncon);
  	}
  
@@ -1012,9 +1087,55 @@ index 7c455f2..db0b6aa 100644
 -      ->this_hdr.sh_entsize = sizeof (elf_x86_64_bnd_plt2_entry);
 +      ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
  
-   if (htab->elf.sgotplt)
+-  if (htab->elf.sgotplt)
++  /* GOT is always created in setup_gnu_properties.  But it may not be
++     needed.  */
++  if (htab->elf.sgotplt && htab->elf.sgotplt->size > 0)
      {
-@@ -6581,6 +6565,9 @@ elf_x86_64_output_arch_local_syms
+       if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
+ 	{
+@@ -6440,24 +6289,22 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+ 	  return FALSE;
+ 	}
+ 
+-      /* Fill in the first three entries in the global offset table.  */
+-      if (htab->elf.sgotplt->size > 0)
+-	{
+-	  /* Set the first entry in the global offset table to the address of
+-	     the dynamic section.  */
+-	  if (sdyn == NULL)
+-	    bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents);
+-	  else
+-	    bfd_put_64 (output_bfd,
+-			sdyn->output_section->vma + sdyn->output_offset,
+-			htab->elf.sgotplt->contents);
+-	  /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
+-	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
+-	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + GOT_ENTRY_SIZE*2);
+-	}
+-
+-      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize =
+-	GOT_ENTRY_SIZE;
++      /* Set the first entry in the global offset table to the address of
++	 the dynamic section.  */
++      if (sdyn == NULL)
++	bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents);
++      else
++	bfd_put_64 (output_bfd,
++		    sdyn->output_section->vma + sdyn->output_offset,
++		    htab->elf.sgotplt->contents);
++      /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
++      bfd_put_64 (output_bfd, (bfd_vma) 0,
++		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
++      bfd_put_64 (output_bfd, (bfd_vma) 0,
++		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE*2);
++
++      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize
++	= GOT_ENTRY_SIZE;
+     }
+ 
+   /* Adjust .eh_frame for .plt section.  */
+@@ -6581,6 +6428,9 @@ elf_x86_64_output_arch_local_syms
    return TRUE;
  }
  
@@ -1024,7 +1145,7 @@ index 7c455f2..db0b6aa 100644
  /* Return an array of PLT entry symbol values.  */
  
  static bfd_vma *
-@@ -6593,7 +6580,8 @@ elf_x86_64_get_plt_sym_val (bfd *abfd, asymbol **dynsyms, asection *plt,
+@@ -6593,7 +6443,8 @@ elf_x86_64_get_plt_sym_val (bfd *abfd, asymbol **dynsyms, asection *plt,
    bfd_vma *plt_sym_val;
    bfd_vma plt_offset;
    bfd_byte *plt_contents;
@@ -1034,18 +1155,20 @@ index 7c455f2..db0b6aa 100644
    Elf_Internal_Shdr *hdr;
    asection *plt_bnd;
  
-@@ -6608,10 +6596,7 @@ elf_x86_64_get_plt_sym_val (bfd *abfd, asymbol **dynsyms, asection *plt,
+@@ -6607,11 +6458,8 @@ elf_x86_64_get_plt_sym_val (bfd *abfd, asymbol **dynsyms, asection *plt,
+ 	abort ();
        plt = bfd_get_section_by_name (abfd, ".plt");
        if (plt == NULL)
- 	abort ();
+-	abort ();
 -      bed = &elf_x86_64_bnd_arch_bed;
++	return NULL;
      }
 -  else
 -    bed = get_elf_x86_64_backend_data (abfd);
  
    plt_contents = (bfd_byte *) bfd_malloc (plt->size);
    if (plt_contents == NULL)
-@@ -6624,6 +6609,29 @@ bad_return:
+@@ -6624,6 +6472,32 @@ bad_return:
        return NULL;
      }
  
@@ -1053,7 +1176,7 @@ index 7c455f2..db0b6aa 100644
 +  if (get_elf_x86_64_backend_data (abfd)->os == is_nacl)
 +    {
 +      if (plt_bnd != NULL)
-+	abort ();
++	goto bad_return;
 +      lazy_plt = &elf_x86_64_nacl_plt;
 +    }
 +  else
@@ -1067,7 +1190,10 @@ index 7c455f2..db0b6aa 100644
 +	lazy_plt = &elf_x86_64_lazy_plt;
 +    }
 +
-+  /* Skip if the .plt section doesn't support lazy binding.  */
++  /* FIXME: Only lazy dynamic relocations in .rela.plt are supported.
++     But non-lazy dynamic relocations in .rela.dyn or .rela.got may
++     also be used for .plt and .plt.got sections.  Skip if the .plt
++     section doesn't support lazy binding.  */
 +  if (memcmp (plt_contents, lazy_plt->plt0_entry,
 +	      lazy_plt->plt0_got1_offset) != 0)
 +    goto bad_return;
@@ -1075,7 +1201,7 @@ index 7c455f2..db0b6aa 100644
    slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
    if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
      goto bad_return;
-@@ -6638,7 +6646,7 @@ bad_return:
+@@ -6638,7 +6512,7 @@ bad_return:
    for (i = 0; i < count; i++)
      plt_sym_val[i] = -1;
  
@@ -1084,7 +1210,7 @@ index 7c455f2..db0b6aa 100644
    p = relplt->relocation;
    for (i = 0; i < count; i++, p++)
      {
-@@ -6653,22 +6661,22 @@ bad_return:
+@@ -6653,22 +6527,22 @@ bad_return:
  	continue;
  
        reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
@@ -1111,7 +1237,7 @@ index 7c455f2..db0b6aa 100644
  
        /* PR binutils/18437: Skip extra relocations in the .rela.plt
  	 section.  */
-@@ -6968,6 +6976,147 @@ elf_x86_64_merge_gnu_properties (bfd *abfd ATTRIBUTE_UNUSED,
+@@ -6968,6 +6842,288 @@ elf_x86_64_merge_gnu_properties (bfd *abfd ATTRIBUTE_UNUSED,
    return updated;
  }
  
@@ -1121,145 +1247,295 @@ index 7c455f2..db0b6aa 100644
 +static bfd *
 +elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 +{
-+  if (!bfd_link_relocatable (info))
++  bfd_boolean normal_target;
++  bfd_boolean lazy_plt;
++  asection *sec, *pltsec;
++  bfd *dynobj;
++  unsigned int plt_alignment;
++  struct elf_x86_64_link_hash_table *htab;
++  bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
++
++  if (bfd_link_relocatable (info))
++    return pbfd;
++
++  htab = elf_x86_64_hash_table (info);
++  if (htab == NULL)
++    return pbfd;
++
++  dynobj = htab->elf.dynobj;
++
++  /* Set htab->elf.dynobj here so that there is no need to check and
++     set it in check_relocs.  */
++  if (dynobj == NULL)
 +    {
-+      struct elf_x86_64_link_hash_table *htab
-+	= elf_x86_64_hash_table (info);
-+      if (htab != NULL)
++      bfd *abfd;
++
++      /* Find a normal input file to hold linker created
++	 sections.  */
++      for (abfd = info->input_bfds;
++	   abfd != NULL;
++	   abfd = abfd->link.next)
++	if ((abfd->flags
++	     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
++	  {
++	    htab->elf.dynobj = abfd;
++	    dynobj = abfd;
++	    break;
++	  }
++    }
++
++  htab->plt.has_plt0 = 1;
++
++  /* When lazy binding isn't used with the non-lazy PLT section or
++     disabled by "-z now", only the first instruction in the PLT
++     entry, which is an indirect jump, is required.  We can use a
++     non-lazy PLT entry template with only an indirect jump.
++     FIXME: Should we do the same for NaCl?  */
++  if (get_elf_x86_64_backend_data (info->output_bfd)->os
++      == is_normal)
++    {
++      if (info->bndplt)
 +	{
-+	  asection *pltsec = htab->elf.splt;
++	  htab->lazy_plt = &elf_x86_64_lazy_bnd_plt;
++	  htab->non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
++	}
++      else
++	{
++	  htab->lazy_plt = &elf_x86_64_lazy_plt;
++	  htab->non_lazy_plt = &elf_x86_64_non_lazy_plt;
++	}
 +
-+	  if (htab->elf.dynobj == NULL)
-+	    {
-+	      bfd *abfd;
++      if ((info->flags & DF_BIND_NOW))
++	{
++	  /* When lazy binding is disabled by "-z now", the PLT0 entry
++	     isn't required and can be skipped.  FIXME: Should it also
++	     be skipped for NaCl?  */
++	  htab->plt.has_plt0 = 0;
++	}
++      normal_target = TRUE;
++    }
++  else
++    {
++      htab->lazy_plt = &elf_x86_64_nacl_plt;
++      htab->non_lazy_plt = NULL;
++      normal_target = FALSE;
++    }
 +
-+	      /* Find a normal input file to hold linker created
-+		 sections.  */
-+	      for (abfd = info->input_bfds;
-+		   abfd != NULL;
-+		   abfd = abfd->link.next)
-+		if ((abfd->flags
-+		     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
-+		  {
-+		    htab->elf.dynobj = abfd;
-+		    break;
-+		  }
-+	    }
++  pltsec = htab->elf.splt;
 +
-+	  /* Create the ifunc sections.  */
-+	  if (htab->elf.dynobj != NULL
-+	      && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
-+						   info))
-+	    info->callbacks->einfo (_("%F: failed to create ifunc sections\n"));
++  /* If the non-lazy PLT is available, use it for all PLT entries if
++     there are no PLT0 or no .plt section.  */
++  if (htab->non_lazy_plt != NULL
++      && (!htab->plt.has_plt0 || pltsec == NULL))
++    {
++      lazy_plt = FALSE;
++      htab->plt.plt_entry
++	= htab->non_lazy_plt->plt_entry;
++      htab->plt.plt_entry_size
++	= htab->non_lazy_plt->plt_entry_size;
++      htab->plt.plt_got_offset
++	= htab->non_lazy_plt->plt_got_offset;
++      htab->plt.plt_got_insn_size
++	= htab->non_lazy_plt->plt_got_insn_size;
++      htab->plt.eh_frame_plt_size
++	= htab->non_lazy_plt->eh_frame_plt_size;
++      htab->plt.eh_frame_plt
++	= htab->non_lazy_plt->eh_frame_plt;
++    }
++  else
++    {
++      lazy_plt = TRUE;
++      htab->plt.plt_entry
++	= htab->lazy_plt->plt_entry;
++      htab->plt.plt_entry_size
++	= htab->lazy_plt->plt_entry_size;
++      htab->plt.plt_got_offset
++	= htab->lazy_plt->plt_got_offset;
++      htab->plt.plt_got_insn_size
++	= htab->lazy_plt->plt_got_insn_size;
++      htab->plt.eh_frame_plt_size
++	= htab->lazy_plt->eh_frame_plt_size;
++      htab->plt.eh_frame_plt
++	= htab->lazy_plt->eh_frame_plt;
++    }
 +
-+	  htab->plt.has_plt0 = 1;
-+	  if (get_elf_x86_64_backend_data (info->output_bfd)->os
-+	      == is_normal)
-+	    {
-+	      if (info->bndplt)
-+		{
-+		  htab->lazy_plt = &elf_x86_64_lazy_bnd_plt;
-+		  htab->non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
-+		}
-+	      else
-+		{
-+		  htab->lazy_plt = &elf_x86_64_lazy_plt;
-+		  htab->non_lazy_plt = &elf_x86_64_non_lazy_plt;
-+		}
++  /* Return if there are no normal input files.  */
++  if (dynobj == NULL)
++    return pbfd;
 +
-+	      if ((info->flags & DF_BIND_NOW))
-+		htab->plt.has_plt0 = 0;
-+	    }
-+	  else
-+	    {
-+	      htab->lazy_plt = &elf_x86_64_nacl_plt;
-+	      htab->non_lazy_plt = NULL;
-+	    }
++  /* Since create_dynamic_sections isn't always called and GOT
++     relocations need GOT relocations, create them here so that we
++     don't need to do it in check_relocs.  */
++  if (htab->elf.sgot == NULL
++      && !_bfd_elf_create_got_section (dynobj, info))
++    info->callbacks->einfo (_("%F: failed to create GOT sections\n"));
 +
-+	  /* Use non-lazy PLT if there is no PLT0 or there is IPLT for
-+	     IFUNC.  */
-+	  if (htab->non_lazy_plt != NULL
-+	      && (!htab->plt.has_plt0 || pltsec == NULL))
-+	    {
-+	      htab->plt.plt_entry
-+		= htab->non_lazy_plt->plt_entry;
-+	      htab->plt.plt_entry_size
-+		= htab->non_lazy_plt->plt_entry_size;
-+	      htab->plt.plt_got_offset
-+		= htab->non_lazy_plt->plt_got_offset;
-+	      htab->plt.plt_got_insn_size
-+		= htab->non_lazy_plt->plt_got_insn_size;
-+	      htab->plt.eh_frame_plt_size
-+		= htab->non_lazy_plt->eh_frame_plt_size;
-+	      htab->plt.eh_frame_plt
-+		= htab->non_lazy_plt->eh_frame_plt;
-+	    }
-+	  else
-+	    {
-+	      htab->plt.plt_entry
-+		= htab->lazy_plt->plt_entry;
-+	      htab->plt.plt_entry_size
-+		= htab->lazy_plt->plt_entry_size;
-+	      htab->plt.plt_got_offset
-+		= htab->lazy_plt->plt_got_offset;
-+	      htab->plt.plt_got_insn_size
-+		= htab->lazy_plt->plt_got_insn_size;
-+	      htab->plt.eh_frame_plt_size
-+		= htab->lazy_plt->eh_frame_plt_size;
-+	      htab->plt.eh_frame_plt
-+		= htab->lazy_plt->eh_frame_plt;
-+	    }
-+
-+	  /* Don't change PLT section alignment for NaCl since it uses
-+	     64-byte PLT entry and sets PLT section alignment to 32
-+	     bytes.  */
-+	  if (htab->non_lazy_plt != NULL)
-+	    {
-+	      if (pltsec != NULL)
-+		{
-+		  unsigned int plt_alignment
-+		    = bfd_log2 (htab->non_lazy_plt->plt_entry_size);
-+
-+		  if (!bfd_set_section_alignment (pltsec->owner,
-+						  pltsec,
-+						  bfd_log2 (htab->plt.plt_entry_size)))
-+		    {
++  /* Align .got and .got.plt sections to their entry size.  Do it here
++     instead of in create_dynamic_sections so that they are always
++     properly aligned even if create_dynamic_sections isn't called.  */
++  sec = htab->elf.sgot;
++  if (!bfd_set_section_alignment (dynobj, sec, 3))
++    {
 +error_alignment:
-+		      info->callbacks->einfo (_("%F%A: failed to align PLT section\n"),
-+					      pltsec);
-+		    }
++      info->callbacks->einfo (_("%F%A: failed to align section\n"),
++			      sec);
++    }
 +
-+		  pltsec = htab->plt_got;
-+		  if (!bfd_set_section_alignment (pltsec->owner,
-+						  pltsec,
-+						  plt_alignment))
-+		    goto error_alignment;
++  sec = htab->elf.sgotplt;
++  if (!bfd_set_section_alignment (dynobj, sec, 3))
++    goto error_alignment;
 +
-+		  pltsec = htab->plt_bnd;
-+		  if (pltsec != NULL
-+		      && !bfd_set_section_alignment (pltsec->owner,
-+						     pltsec,
-+						     plt_alignment))
-+		    goto error_alignment;
-+		}
++  /* Create the ifunc sections here so that check_relocs can be
++     simplified.  */
++  if (!_bfd_elf_create_ifunc_sections (dynobj, info))
++    info->callbacks->einfo (_("%F: failed to create ifunc sections\n"));
 +
-+	      pltsec = htab->elf.iplt;
-+	      if (pltsec != NULL
-+		  && !bfd_set_section_alignment (pltsec->owner,
-+						 pltsec,
-+						 bfd_log2 (htab->plt.plt_entry_size)))
++  plt_alignment = bfd_log2 (htab->plt.plt_entry_size);
++
++  if (pltsec != NULL)
++    {
++      /* Whe creating executable, set the contents of the .interp
++	 section to the interpreter.  */
++      if (bfd_link_executable (info) && !info->nointerp)
++	{
++	  asection *s = bfd_get_linker_section (dynobj, ".interp");
++	  if (s == NULL)
++	    abort ();
++	  s->size = htab->dynamic_interpreter_size;
++	  s->contents = (unsigned char *) htab->dynamic_interpreter;
++	  htab->interp = s;
++	}
++
++      /* Don't change PLT section alignment for NaCl since it uses
++	 64-byte PLT entry and sets PLT section alignment to 32
++	 bytes.  Don't create additional PLT sections for NaCl.  */
++      if (normal_target)
++	{
++	  const struct elf_backend_data *bed
++	    = get_elf_backend_data (dynobj);
++	  flagword pltflags = (bed->dynamic_sec_flags
++			       | SEC_ALLOC
++			       | SEC_CODE
++			       | SEC_LOAD
++			       | SEC_READONLY);
++	  unsigned int non_lazy_plt_alignment
++	    = bfd_log2 (htab->non_lazy_plt->plt_entry_size);
++
++	  sec = pltsec;
++	  if (!bfd_set_section_alignment (sec->owner, sec,
++					  plt_alignment))
++	    goto error_alignment;
++
++	  /* Create the GOT procedure linkage table.  */
++	  sec = bfd_make_section_anyway_with_flags (dynobj,
++						    ".plt.got",
++						    pltflags);
++	  if (sec == NULL)
++	    info->callbacks->einfo (_("%F: failed to create GOT PLT section\n"));
++
++	  if (!bfd_set_section_alignment (dynobj, sec,
++					  non_lazy_plt_alignment))
++	    goto error_alignment;
++
++	  htab->plt_got = sec;
++
++	  /* MPX PLT is supported only for non-NaCl target in 64-bit
++	     mode and is needed only for lazy binding.  */
++	  if (lazy_plt
++	      && info->bndplt
++	      && ABI_64_P (htab->elf.dynobj))
++	    {
++	      /* Create the second PLT for Intel MPX support.  */
++	      sec = bfd_make_section_anyway_with_flags (dynobj,
++							".plt.bnd",
++							pltflags);
++	      if (sec == NULL)
++		info->callbacks->einfo (_("%F: failed to create BND PLT section\n"));
++
++	      if (!bfd_set_section_alignment (dynobj, sec,
++					      non_lazy_plt_alignment))
 +		goto error_alignment;
++
++	      htab->plt_bnd = sec;
++	    }
++	}
++
++      if (!info->no_ld_generated_unwind_info)
++	{
++	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
++			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
++			    | SEC_LINKER_CREATED);
++
++	  sec = bfd_make_section_anyway_with_flags (dynobj,
++						    ".eh_frame",
++						    flags);
++	  if (sec == NULL)
++	    info->callbacks->einfo (_("%F: failed to create PLT .eh_frame section\n"));
++
++	  if (!bfd_set_section_alignment (dynobj, sec,
++					  ABI_64_P (dynobj) ? 3 : 2))
++	    goto error_alignment;
++
++	  htab->plt_eh_frame = sec;
++
++	  if (htab->plt_got != NULL)
++	    {
++	      sec = bfd_make_section_anyway_with_flags (dynobj,
++							".eh_frame",
++							flags);
++	      if (sec == NULL)
++		info->callbacks->einfo (_("%F: failed to create GOT PLT .eh_frame section\n"));
++
++	      if (!bfd_set_section_alignment (dynobj, sec,
++					      ABI_64_P (dynobj) ? 3 : 2))
++		goto error_alignment;
++
++	      htab->plt_got_eh_frame = sec;
++	    }
++
++	  if (htab->plt_bnd != NULL)
++	    {
++	      sec = bfd_make_section_anyway_with_flags (dynobj,
++							".eh_frame",
++							flags);
++	      if (sec == NULL)
++		info->callbacks->einfo (_("%F: failed to create BND PLT .eh_frame section\n"));
++
++	      if (!bfd_set_section_alignment (dynobj, sec, 3))
++		goto error_alignment;
++
++	      htab->plt_bnd_eh_frame = sec;
 +	    }
 +	}
 +    }
 +
-+  return _bfd_elf_link_setup_gnu_properties (info);
++  if (normal_target)
++    {
++      /* The .iplt section is used for IFUNC symbols in static
++	 executables.  */
++      sec = htab->elf.iplt;
++      if (sec != NULL
++	  && !bfd_set_section_alignment (sec->owner, sec,
++					 plt_alignment))
++	goto error_alignment;
++    }
++
++  return pbfd;
 +}
 +
  static const struct bfd_elf_special_section
  elf_x86_64_special_sections[]=
  {
-@@ -7064,6 +7213,8 @@ elf_x86_64_special_sections[]=
+@@ -7014,7 +7170,7 @@ elf_x86_64_special_sections[]=
+ #define elf_backend_relocs_compatible	    elf_x86_64_relocs_compatible
+ #define elf_backend_check_relocs	    elf_x86_64_check_relocs
+ #define elf_backend_copy_indirect_symbol    elf_x86_64_copy_indirect_symbol
+-#define elf_backend_create_dynamic_sections elf_x86_64_create_dynamic_sections
++#define elf_backend_create_dynamic_sections _bfd_elf_create_dynamic_sections
+ #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
+ #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol
+ #define elf_backend_output_arch_local_syms  elf_x86_64_output_arch_local_syms
+@@ -7064,6 +7220,8 @@ elf_x86_64_special_sections[]=
    elf_x86_64_parse_gnu_properties
  #define elf_backend_merge_gnu_properties \
   elf_x86_64_merge_gnu_properties
@@ -1268,7 +1544,7 @@ index 7c455f2..db0b6aa 100644
  
  #include "elf64-target.h"
  
-@@ -7265,7 +7416,7 @@ static const bfd_byte elf_x86_64_nacl_eh_frame_plt[] =
+@@ -7265,7 +7423,7 @@ static const bfd_byte elf_x86_64_nacl_eh_frame_plt[] =
      DW_CFA_nop, DW_CFA_nop
    };
  
@@ -1277,7 +1553,7 @@ index 7c455f2..db0b6aa 100644
    {
      elf_x86_64_nacl_plt0_entry,              /* plt0_entry */
      elf_x86_64_nacl_plt_entry,               /* plt_entry */
-@@ -7280,9 +7431,12 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
+@@ -7280,9 +7438,12 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
      42,                                      /* plt_plt_insn_end */
      32,                                      /* plt_lazy_offset */
      elf_x86_64_nacl_eh_frame_plt,            /* eh_frame_plt */
@@ -1423,6 +1699,414 @@ index 0000000..d9f78ed
 +0+2df <g2>:
 + +[a-f0-9]+:	e9 cc ff ff ff       	jmpq   2b0 <.plt>
 +#pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-branch-1-now.d b/ld/testsuite/ld-x86-64/bnd-branch-1-now.d
+new file mode 100644
+index 0000000..5c40b1f
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/bnd-branch-1-now.d
+@@ -0,0 +1,30 @@
++#source: bnd-branch-1.s
++#as: --64
++#ld: -z now -shared -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt.got:
++
++0+288 <.plt.got>:
++ +[a-f0-9]+:	ff 25 3a 01 20 00    	jmpq   \*0x20013a\(%rip\)        # 2003c8 <foo2>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	ff 25 3a 01 20 00    	jmpq   \*0x20013a\(%rip\)        # 2003d0 <foo3>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	ff 25 3a 01 20 00    	jmpq   \*0x20013a\(%rip\)        # 2003d8 <foo1>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	ff 25 3a 01 20 00    	jmpq   \*0x20013a\(%rip\)        # 2003e0 <foo4>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .text:
++
++0+2a8 <_start>:
++ +[a-f0-9]+:	f2 e9 ea ff ff ff    	bnd jmpq 298 <.plt.got\+0x10>
++ +[a-f0-9]+:	e8 d5 ff ff ff       	callq  288 <.plt.got>
++ +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   290 <.plt.got\+0x8>
++ +[a-f0-9]+:	e8 e3 ff ff ff       	callq  2a0 <.plt.got\+0x18>
++ +[a-f0-9]+:	f2 e8 cd ff ff ff    	bnd callq 290 <.plt.got\+0x8>
++ +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2a0 <.plt.got\+0x18>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-ifunc-1-now.d b/ld/testsuite/ld-x86-64/bnd-ifunc-1-now.d
+new file mode 100644
+index 0000000..b0c2975
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/bnd-ifunc-1-now.d
+@@ -0,0 +1,23 @@
++#source: bnd-ifunc-1.s
++#as: --64 -madd-bnd-prefix
++#ld: -z now -shared -melf_x86_64 -z bndplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1e8 <.plt>:
++ +[a-f0-9]+:	f2 ff 25 39 01 20 00 	bnd jmpq \*0x200139\(%rip\)        # 200328 <_GLOBAL_OFFSET_TABLE_\+0x18>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+1f0 <foo>:
++ +[a-f0-9]+:	f2 c3                	bnd retq 
++
++0+1f2 <bar>:
++ +[a-f0-9]+:	f2 e8 f0 ff ff ff    	bnd callq 1e8 <.plt>
++ +[a-f0-9]+:	f2 c3                	bnd retq 
++#pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d b/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d
+new file mode 100644
+index 0000000..dc23eb5
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d
+@@ -0,0 +1,38 @@
++#source: bnd-ifunc-2.s
++#as: --64 -madd-bnd-prefix
++#ld: -z now -shared -melf_x86_64 -z bndplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+2b0 <.plt>:
++ +[a-f0-9]+:	f2 ff 25 99 01 20 00 	bnd jmpq \*0x200199\(%rip\)        # 200450 <_GLOBAL_OFFSET_TABLE_\+0x18>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f2 ff 25 99 01 20 00 	bnd jmpq \*0x200199\(%rip\)        # 200458 <_GLOBAL_OFFSET_TABLE_\+0x20>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .plt.got:
++
++0+2c0 <.plt.got>:
++ +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200428 <func1>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200430 <func2>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+2d0 <resolve1>:
++ +[a-f0-9]+:	f2 e8 ea ff ff ff    	bnd callq 2c0 <.plt.got>
++
++0+2d6 <g1>:
++ +[a-f0-9]+:	f2 e9 dc ff ff ff    	bnd jmpq 2b8 <.plt\+0x8>
++
++0+2dc <resolve2>:
++ +[a-f0-9]+:	f2 e8 e6 ff ff ff    	bnd callq 2c8 <.plt.got\+0x8>
++
++0+2e2 <g2>:
++ +[a-f0-9]+:	f2 e9 c8 ff ff ff    	bnd jmpq 2b0 <.plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-plt-1-now.d b/ld/testsuite/ld-x86-64/bnd-plt-1-now.d
+new file mode 100644
+index 0000000..ecd7751
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/bnd-plt-1-now.d
+@@ -0,0 +1,30 @@
++#source: bnd-branch-1.s
++#as: --64
++#ld: -z now -shared -melf_x86_64 -z bndplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt.got:
++
++0+288 <.plt.got>:
++ +[a-f0-9]+:	f2 ff 25 39 01 20 00 	bnd jmpq \*0x200139\(%rip\)        # 2003c8 <foo2>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f2 ff 25 39 01 20 00 	bnd jmpq \*0x200139\(%rip\)        # 2003d0 <foo3>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f2 ff 25 39 01 20 00 	bnd jmpq \*0x200139\(%rip\)        # 2003d8 <foo1>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f2 ff 25 39 01 20 00 	bnd jmpq \*0x200139\(%rip\)        # 2003e0 <foo4>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+2a8 <_start>:
++ +[a-f0-9]+:	f2 e9 ea ff ff ff    	bnd jmpq 298 <.plt.got\+0x10>
++ +[a-f0-9]+:	e8 d5 ff ff ff       	callq  288 <.plt.got>
++ +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   290 <.plt.got\+0x8>
++ +[a-f0-9]+:	e8 e3 ff ff ff       	callq  2a0 <.plt.got\+0x18>
++ +[a-f0-9]+:	f2 e8 cd ff ff ff    	bnd callq 290 <.plt.got\+0x8>
++ +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2a0 <.plt.got\+0x18>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/load1b-nacl.d b/ld/testsuite/ld-x86-64/load1b-nacl.d
+index b6fa43d..524207d 100644
+--- a/ld/testsuite/ld-x86-64/load1b-nacl.d
++++ b/ld/testsuite/ld-x86-64/load1b-nacl.d
+@@ -8,48 +8,48 @@
+ 
+ SYMBOL TABLE:
+ #...
+-1003008c l     O .data	0+1 bar
++10030090 l     O .data	0+1 bar
+ #...
+-1003008d g     O .data	0+1 foo
++10030091 g     O .data	0+1 foo
+ #...
+ 
+ Disassembly of section .text:
+ 
+ 0+20000 <_start>:
+-[ 	]*[a-f0-9]+:	81 d0 8c 00 03 10    	adc    \$0x1003008c,%eax
+-[ 	]*[a-f0-9]+:	81 c3 8c 00 03 10    	add    \$0x1003008c,%ebx
+-[ 	]*[a-f0-9]+:	81 e1 8c 00 03 10    	and    \$0x1003008c,%ecx
+-[ 	]*[a-f0-9]+:	81 fa 8c 00 03 10    	cmp    \$0x1003008c,%edx
+-[ 	]*[a-f0-9]+:	81 ce 8c 00 03 10    	or     \$0x1003008c,%esi
+-[ 	]*[a-f0-9]+:	81 df 8c 00 03 10    	sbb    \$0x1003008c,%edi
+-[ 	]*[a-f0-9]+:	81 ed 8c 00 03 10    	sub    \$0x1003008c,%ebp
+-[ 	]*[a-f0-9]+:	41 81 f0 8c 00 03 10 	xor    \$0x1003008c,%r8d
+-[ 	]*[a-f0-9]+:	41 f7 c7 8c 00 03 10 	test   \$0x1003008c,%r15d
+-[ 	]*[a-f0-9]+:	48 81 d0 8c 00 03 10 	adc    \$0x1003008c,%rax
+-[ 	]*[a-f0-9]+:	48 81 c3 8c 00 03 10 	add    \$0x1003008c,%rbx
+-[ 	]*[a-f0-9]+:	48 81 e1 8c 00 03 10 	and    \$0x1003008c,%rcx
+-[ 	]*[a-f0-9]+:	48 81 fa 8c 00 03 10 	cmp    \$0x1003008c,%rdx
+-[ 	]*[a-f0-9]+:	48 81 cf 8c 00 03 10 	or     \$0x1003008c,%rdi
+-[ 	]*[a-f0-9]+:	48 81 de 8c 00 03 10 	sbb    \$0x1003008c,%rsi
+-[ 	]*[a-f0-9]+:	48 81 ed 8c 00 03 10 	sub    \$0x1003008c,%rbp
+-[ 	]*[a-f0-9]+:	49 81 f0 8c 00 03 10 	xor    \$0x1003008c,%r8
+-[ 	]*[a-f0-9]+:	49 f7 c7 8c 00 03 10 	test   \$0x1003008c,%r15
+-[ 	]*[a-f0-9]+:	81 d0 8d 00 03 10    	adc    \$0x1003008d,%eax
+-[ 	]*[a-f0-9]+:	81 c3 8d 00 03 10    	add    \$0x1003008d,%ebx
+-[ 	]*[a-f0-9]+:	81 e1 8d 00 03 10    	and    \$0x1003008d,%ecx
+-[ 	]*[a-f0-9]+:	81 fa 8d 00 03 10    	cmp    \$0x1003008d,%edx
+-[ 	]*[a-f0-9]+:	81 ce 8d 00 03 10    	or     \$0x1003008d,%esi
+-[ 	]*[a-f0-9]+:	81 df 8d 00 03 10    	sbb    \$0x1003008d,%edi
+-[ 	]*[a-f0-9]+:	81 ed 8d 00 03 10    	sub    \$0x1003008d,%ebp
+-[ 	]*[a-f0-9]+:	41 81 f0 8d 00 03 10 	xor    \$0x1003008d,%r8d
+-[ 	]*[a-f0-9]+:	41 f7 c7 8d 00 03 10 	test   \$0x1003008d,%r15d
+-[ 	]*[a-f0-9]+:	48 81 d0 8d 00 03 10 	adc    \$0x1003008d,%rax
+-[ 	]*[a-f0-9]+:	48 81 c3 8d 00 03 10 	add    \$0x1003008d,%rbx
+-[ 	]*[a-f0-9]+:	48 81 e1 8d 00 03 10 	and    \$0x1003008d,%rcx
+-[ 	]*[a-f0-9]+:	48 81 fa 8d 00 03 10 	cmp    \$0x1003008d,%rdx
+-[ 	]*[a-f0-9]+:	48 81 cf 8d 00 03 10 	or     \$0x1003008d,%rdi
+-[ 	]*[a-f0-9]+:	48 81 de 8d 00 03 10 	sbb    \$0x1003008d,%rsi
+-[ 	]*[a-f0-9]+:	48 81 ed 8d 00 03 10 	sub    \$0x1003008d,%rbp
+-[ 	]*[a-f0-9]+:	49 81 f0 8d 00 03 10 	xor    \$0x1003008d,%r8
+-[ 	]*[a-f0-9]+:	49 f7 c7 8d 00 03 10 	test   \$0x1003008d,%r15
++ +[a-f0-9]+:	81 d0 90 00 03 10    	adc    \$0x10030090,%eax
++ +[a-f0-9]+:	81 c3 90 00 03 10    	add    \$0x10030090,%ebx
++ +[a-f0-9]+:	81 e1 90 00 03 10    	and    \$0x10030090,%ecx
++ +[a-f0-9]+:	81 fa 90 00 03 10    	cmp    \$0x10030090,%edx
++ +[a-f0-9]+:	81 ce 90 00 03 10    	or     \$0x10030090,%esi
++ +[a-f0-9]+:	81 df 90 00 03 10    	sbb    \$0x10030090,%edi
++ +[a-f0-9]+:	81 ed 90 00 03 10    	sub    \$0x10030090,%ebp
++ +[a-f0-9]+:	41 81 f0 90 00 03 10 	xor    \$0x10030090,%r8d
++ +[a-f0-9]+:	41 f7 c7 90 00 03 10 	test   \$0x10030090,%r15d
++ +[a-f0-9]+:	48 81 d0 90 00 03 10 	adc    \$0x10030090,%rax
++ +[a-f0-9]+:	48 81 c3 90 00 03 10 	add    \$0x10030090,%rbx
++ +[a-f0-9]+:	48 81 e1 90 00 03 10 	and    \$0x10030090,%rcx
++ +[a-f0-9]+:	48 81 fa 90 00 03 10 	cmp    \$0x10030090,%rdx
++ +[a-f0-9]+:	48 81 cf 90 00 03 10 	or     \$0x10030090,%rdi
++ +[a-f0-9]+:	48 81 de 90 00 03 10 	sbb    \$0x10030090,%rsi
++ +[a-f0-9]+:	48 81 ed 90 00 03 10 	sub    \$0x10030090,%rbp
++ +[a-f0-9]+:	49 81 f0 90 00 03 10 	xor    \$0x10030090,%r8
++ +[a-f0-9]+:	49 f7 c7 90 00 03 10 	test   \$0x10030090,%r15
++ +[a-f0-9]+:	81 d0 91 00 03 10    	adc    \$0x10030091,%eax
++ +[a-f0-9]+:	81 c3 91 00 03 10    	add    \$0x10030091,%ebx
++ +[a-f0-9]+:	81 e1 91 00 03 10    	and    \$0x10030091,%ecx
++ +[a-f0-9]+:	81 fa 91 00 03 10    	cmp    \$0x10030091,%edx
++ +[a-f0-9]+:	81 ce 91 00 03 10    	or     \$0x10030091,%esi
++ +[a-f0-9]+:	81 df 91 00 03 10    	sbb    \$0x10030091,%edi
++ +[a-f0-9]+:	81 ed 91 00 03 10    	sub    \$0x10030091,%ebp
++ +[a-f0-9]+:	41 81 f0 91 00 03 10 	xor    \$0x10030091,%r8d
++ +[a-f0-9]+:	41 f7 c7 91 00 03 10 	test   \$0x10030091,%r15d
++ +[a-f0-9]+:	48 81 d0 91 00 03 10 	adc    \$0x10030091,%rax
++ +[a-f0-9]+:	48 81 c3 91 00 03 10 	add    \$0x10030091,%rbx
++ +[a-f0-9]+:	48 81 e1 91 00 03 10 	and    \$0x10030091,%rcx
++ +[a-f0-9]+:	48 81 fa 91 00 03 10 	cmp    \$0x10030091,%rdx
++ +[a-f0-9]+:	48 81 cf 91 00 03 10 	or     \$0x10030091,%rdi
++ +[a-f0-9]+:	48 81 de 91 00 03 10 	sbb    \$0x10030091,%rsi
++ +[a-f0-9]+:	48 81 ed 91 00 03 10 	sub    \$0x10030091,%rbp
++ +[a-f0-9]+:	49 81 f0 91 00 03 10 	xor    \$0x10030091,%r8
++ +[a-f0-9]+:	49 f7 c7 91 00 03 10 	test   \$0x10030091,%r15
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/load1b.d b/ld/testsuite/ld-x86-64/load1b.d
+index 8827f38..acbd2fc 100644
+--- a/ld/testsuite/ld-x86-64/load1b.d
++++ b/ld/testsuite/ld-x86-64/load1b.d
+@@ -8,49 +8,50 @@
+ 
+ SYMBOL TABLE:
+ #...
+-0+60017c l     O .data	0+1 bar
++0+600180 l     O .data	0+1 bar
+ #...
+-0+60017d g     O .data	0+1 foo
++0+600181 g     O .data	0+1 foo
+ #...
+ 
+ 
+ Disassembly of section .text:
+ 
+ 0+400074 <_start>:
+-[ 	]*[a-f0-9]+:	81 d0 7c 01 60 00    	adc    \$0x60017c,%eax
+-[ 	]*[a-f0-9]+:	81 c3 7c 01 60 00    	add    \$0x60017c,%ebx
+-[ 	]*[a-f0-9]+:	81 e1 7c 01 60 00    	and    \$0x60017c,%ecx
+-[ 	]*[a-f0-9]+:	81 fa 7c 01 60 00    	cmp    \$0x60017c,%edx
+-[ 	]*[a-f0-9]+:	81 ce 7c 01 60 00    	or     \$0x60017c,%esi
+-[ 	]*[a-f0-9]+:	81 df 7c 01 60 00    	sbb    \$0x60017c,%edi
+-[ 	]*[a-f0-9]+:	81 ed 7c 01 60 00    	sub    \$0x60017c,%ebp
+-[ 	]*[a-f0-9]+:	41 81 f0 7c 01 60 00 	xor    \$0x60017c,%r8d
+-[ 	]*[a-f0-9]+:	41 f7 c7 7c 01 60 00 	test   \$0x60017c,%r15d
+-[ 	]*[a-f0-9]+:	48 81 d0 7c 01 60 00 	adc    \$0x60017c,%rax
+-[ 	]*[a-f0-9]+:	48 81 c3 7c 01 60 00 	add    \$0x60017c,%rbx
+-[ 	]*[a-f0-9]+:	48 81 e1 7c 01 60 00 	and    \$0x60017c,%rcx
+-[ 	]*[a-f0-9]+:	48 81 fa 7c 01 60 00 	cmp    \$0x60017c,%rdx
+-[ 	]*[a-f0-9]+:	48 81 cf 7c 01 60 00 	or     \$0x60017c,%rdi
+-[ 	]*[a-f0-9]+:	48 81 de 7c 01 60 00 	sbb    \$0x60017c,%rsi
+-[ 	]*[a-f0-9]+:	48 81 ed 7c 01 60 00 	sub    \$0x60017c,%rbp
+-[ 	]*[a-f0-9]+:	49 81 f0 7c 01 60 00 	xor    \$0x60017c,%r8
+-[ 	]*[a-f0-9]+:	49 f7 c7 7c 01 60 00 	test   \$0x60017c,%r15
+-[ 	]*[a-f0-9]+:	81 d0 7d 01 60 00    	adc    \$0x60017d,%eax
+-[ 	]*[a-f0-9]+:	81 c3 7d 01 60 00    	add    \$0x60017d,%ebx
+-[ 	]*[a-f0-9]+:	81 e1 7d 01 60 00    	and    \$0x60017d,%ecx
+-[ 	]*[a-f0-9]+:	81 fa 7d 01 60 00    	cmp    \$0x60017d,%edx
+-[ 	]*[a-f0-9]+:	81 ce 7d 01 60 00    	or     \$0x60017d,%esi
+-[ 	]*[a-f0-9]+:	81 df 7d 01 60 00    	sbb    \$0x60017d,%edi
+-[ 	]*[a-f0-9]+:	81 ed 7d 01 60 00    	sub    \$0x60017d,%ebp
+-[ 	]*[a-f0-9]+:	41 81 f0 7d 01 60 00 	xor    \$0x60017d,%r8d
+-[ 	]*[a-f0-9]+:	41 f7 c7 7d 01 60 00 	test   \$0x60017d,%r15d
+-[ 	]*[a-f0-9]+:	48 81 d0 7d 01 60 00 	adc    \$0x60017d,%rax
+-[ 	]*[a-f0-9]+:	48 81 c3 7d 01 60 00 	add    \$0x60017d,%rbx
+-[ 	]*[a-f0-9]+:	48 81 e1 7d 01 60 00 	and    \$0x60017d,%rcx
+-[ 	]*[a-f0-9]+:	48 81 fa 7d 01 60 00 	cmp    \$0x60017d,%rdx
+-[ 	]*[a-f0-9]+:	48 81 cf 7d 01 60 00 	or     \$0x60017d,%rdi
+-[ 	]*[a-f0-9]+:	48 81 de 7d 01 60 00 	sbb    \$0x60017d,%rsi
+-[ 	]*[a-f0-9]+:	48 81 ed 7d 01 60 00 	sub    \$0x60017d,%rbp
+-[ 	]*[a-f0-9]+:	49 81 f0 7d 01 60 00 	xor    \$0x60017d,%r8
+-[ 	]*[a-f0-9]+:	49 f7 c7 7d 01 60 00 	test   \$0x60017d,%r15
++ +[a-f0-9]+:	81 d0 80 01 60 00    	adc    \$0x600180,%eax
++ +[a-f0-9]+:	81 c3 80 01 60 00    	add    \$0x600180,%ebx
++ +[a-f0-9]+:	81 e1 80 01 60 00    	and    \$0x600180,%ecx
++ +[a-f0-9]+:	81 fa 80 01 60 00    	cmp    \$0x600180,%edx
++ +[a-f0-9]+:	81 ce 80 01 60 00    	or     \$0x600180,%esi
++ +[a-f0-9]+:	81 df 80 01 60 00    	sbb    \$0x600180,%edi
++ +[a-f0-9]+:	81 ed 80 01 60 00    	sub    \$0x600180,%ebp
++ +[a-f0-9]+:	41 81 f0 80 01 60 00 	xor    \$0x600180,%r8d
++ +[a-f0-9]+:	41 f7 c7 80 01 60 00 	test   \$0x600180,%r15d
++ +[a-f0-9]+:	48 81 d0 80 01 60 00 	adc    \$0x600180,%rax
++ +[a-f0-9]+:	48 81 c3 80 01 60 00 	add    \$0x600180,%rbx
++ +[a-f0-9]+:	48 81 e1 80 01 60 00 	and    \$0x600180,%rcx
++ +[a-f0-9]+:	48 81 fa 80 01 60 00 	cmp    \$0x600180,%rdx
++ +[a-f0-9]+:	48 81 cf 80 01 60 00 	or     \$0x600180,%rdi
++ +[a-f0-9]+:	48 81 de 80 01 60 00 	sbb    \$0x600180,%rsi
++ +[a-f0-9]+:	48 81 ed 80 01 60 00 	sub    \$0x600180,%rbp
++ +[a-f0-9]+:	49 81 f0 80 01 60 00 	xor    \$0x600180,%r8
++ +[a-f0-9]+:	49 f7 c7 80 01 60 00 	test   \$0x600180,%r15
++ +[a-f0-9]+:	81 d0 81 01 60 00    	adc    \$0x600181,%eax
++ +[a-f0-9]+:	81 c3 81 01 60 00    	add    \$0x600181,%ebx
++ +[a-f0-9]+:	81 e1 81 01 60 00    	and    \$0x600181,%ecx
++ +[a-f0-9]+:	81 fa 81 01 60 00    	cmp    \$0x600181,%edx
++ +[a-f0-9]+:	81 ce 81 01 60 00    	or     \$0x600181,%esi
++ +[a-f0-9]+:	81 df 81 01 60 00    	sbb    \$0x600181,%edi
++ +[a-f0-9]+:	81 ed 81 01 60 00    	sub    \$0x600181,%ebp
++ +[a-f0-9]+:	41 81 f0 81 01 60 00 	xor    \$0x600181,%r8d
++ +[a-f0-9]+:	41 f7 c7 81 01 60 00 	test   \$0x600181,%r15d
++ +[a-f0-9]+:	48 81 d0 81 01 60 00 	adc    \$0x600181,%rax
++ +[a-f0-9]+:	48 81 c3 81 01 60 00 	add    \$0x600181,%rbx
++ +[a-f0-9]+:	48 81 e1 81 01 60 00 	and    \$0x600181,%rcx
++ +[a-f0-9]+:	48 81 fa 81 01 60 00 	cmp    \$0x600181,%rdx
++ +[a-f0-9]+:	48 81 cf 81 01 60 00 	or     \$0x600181,%rdi
++ +[a-f0-9]+:	48 81 de 81 01 60 00 	sbb    \$0x600181,%rsi
++ +[a-f0-9]+:	48 81 ed 81 01 60 00 	sub    \$0x600181,%rbp
++ +[a-f0-9]+:	49 81 f0 81 01 60 00 	xor    \$0x600181,%r8
++ +[a-f0-9]+:	49 f7 c7 81 01 60 00 	test   \$0x600181,%r15
++#pass
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/mpx.exp b/ld/testsuite/ld-x86-64/mpx.exp
+index 3de224e..1ba08e0 100644
+--- a/ld/testsuite/ld-x86-64/mpx.exp
++++ b/ld/testsuite/ld-x86-64/mpx.exp
+@@ -118,6 +118,12 @@ run_ld_link_tests {
+     {"Build mpx4"
+      "-m elf_x86_64 -z bndplt tmpdir/libcall1.so" "" "--64"
+      {mpx4a.s} {{objdump -dw mpx4.dd}} "mpx4"}
++    {"Build mpx3 (-z now)"
++     "-z now -m elf_x86_64 -z bndplt tmpdir/libcall.so" "" "--64"
++     {mpx3a.s} {{objdump -dw mpx3n.dd}} "mpx3n"}
++    {"Build mpx4 (-z now)"
++     "-z now -m elf_x86_64 -z bndplt tmpdir/libcall1.so" "" "--64"
++     {mpx4a.s} {{objdump -dw mpx4n.dd}} "mpx4n"}
+ }
+ 
+ run_ld_link_exec_tests $run_tests
+@@ -126,3 +132,7 @@ run_dump_test "bnd-branch-1"
+ run_dump_test "bnd-ifunc-1"
+ run_dump_test "bnd-ifunc-2"
+ run_dump_test "bnd-plt-1"
++run_dump_test "bnd-branch-1-now"
++run_dump_test "bnd-ifunc-1-now"
++run_dump_test "bnd-ifunc-2-now"
++run_dump_test "bnd-plt-1-now"
+diff --git a/ld/testsuite/ld-x86-64/mpx3n.dd b/ld/testsuite/ld-x86-64/mpx3n.dd
+new file mode 100644
+index 0000000..da440f4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/mpx3n.dd
+@@ -0,0 +1,18 @@
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+[a-f0-9]+ <.plt>:
++[  	]*[a-f0-9]+:	f2 ff ([0-9a-f]{2} ){5}	bnd jmpq \*0x[a-f0-9]+\(%rip\)        # [a-f0-9]+ <call1>
++[  	]*[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++[  	]*[a-f0-9]+:	bf ([0-9a-f]{2} ){4}      	mov    \$0x[a-f0-9]+,%edi
++[  	]*[a-f0-9]+:	f2 ff d7             	bnd callq \*%rdi
++[  	]*[a-f0-9]+:	48 8b ([0-9a-f]{2} ){5}	mov    0x[a-f0-9]+\(%rip\),%rdi        # [a-f0-9]+ <call2>
++[  	]*[a-f0-9]+:	f2 ff d7             	bnd callq \*%rdi
++[  	]*[a-f0-9]+:	c3                   	retq   
++#pass
+diff --git a/ld/testsuite/ld-x86-64/mpx4n.dd b/ld/testsuite/ld-x86-64/mpx4n.dd
+new file mode 100644
+index 0000000..9129429
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/mpx4n.dd
+@@ -0,0 +1,14 @@
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+400258 <.plt>:
++[  	]*[a-f0-9]+:	f2 ff 25 51 01 20 00 	bnd jmpq \*0x200151\(%rip\)        # 6003b0 <call1>
++[  	]*[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+400260 <_start>:
++[  	]*[a-f0-9]+:	bf 58 02 40 00       	mov    \$0x400258,%edi
++[  	]*[a-f0-9]+:	f2 ff d7             	bnd callq \*%rdi
+diff --git a/ld/testsuite/ld-x86-64/plt-main-bnd-now.rd b/ld/testsuite/ld-x86-64/plt-main-bnd-now.rd
+new file mode 100644
+index 0000000..2ded374
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/plt-main-bnd-now.rd
+@@ -0,0 +1,4 @@
++#failif
++#...
++ +\[[ 0-9]+\] \.plt\.bnd +.*
++#...
 diff --git a/ld/testsuite/ld-x86-64/plt2.dd b/ld/testsuite/ld-x86-64/plt2.dd
 new file mode 100644
 index 0000000..5da1190
@@ -1485,11 +2169,363 @@ index 0000000..25859fa
 +	call fn1
 +	call fn2
 +	cmpl $fn1, 8(%rsp)
+diff --git a/ld/testsuite/ld-x86-64/pr20253-1h.d b/ld/testsuite/ld-x86-64/pr20253-1h.d
+index 14a8f1b..e69893f 100644
+--- a/ld/testsuite/ld-x86-64/pr20253-1h.d
++++ b/ld/testsuite/ld-x86-64/pr20253-1h.d
+@@ -16,10 +16,10 @@ Disassembly of section .text:
+  +[a-f0-9]+:	c3                   	retq   
+ 
+ 0+40008e <_start>:
+- +[a-f0-9]+:	ff 15 28 00 20 00    	callq  \*0x200028\(%rip\)        # 6000bc <.*>
+- +[a-f0-9]+:	ff 25 2a 00 20 00    	jmpq   \*0x20002a\(%rip\)        # 6000c4 <.*>
+- +[a-f0-9]+:	48 c7 05 1f 00 20 00 00 00 00 00 	movq   \$0x0,0x20001f\(%rip\)        # 6000c4 <.*>
+- +[a-f0-9]+:	48 83 3d 0f 00 20 00 00 	cmpq   \$0x0,0x20000f\(%rip\)        # 6000bc <.*>
+- +[a-f0-9]+:	48 3b 0d 08 00 20 00 	cmp    0x200008\(%rip\),%rcx        # 6000bc <.*>
+- +[a-f0-9]+:	48 3b 0d 09 00 20 00 	cmp    0x200009\(%rip\),%rcx        # 6000c4 <.*>
++ +[a-f0-9]+:	ff 15 2c 00 20 00    	callq  \*0x20002c\(%rip\)        # 6000c0 <.got>
++ +[a-f0-9]+:	ff 25 2e 00 20 00    	jmpq   \*0x20002e\(%rip\)        # 6000c8 <.got\+0x8>
++ +[a-f0-9]+:	48 c7 05 23 00 20 00 00 00 00 00 	movq   \$0x0,0x200023\(%rip\)        # 6000c8 <.got\+0x8>
++ +[a-f0-9]+:	48 83 3d 13 00 20 00 00 	cmpq   \$0x0,0x200013\(%rip\)        # 6000c0 <.got>
++ +[a-f0-9]+:	48 3b 0d 0c 00 20 00 	cmp    0x20000c\(%rip\),%rcx        # 6000c0 <.got>
++ +[a-f0-9]+:	48 3b 0d 0d 00 20 00 	cmp    0x20000d\(%rip\),%rcx        # 6000c8 <.got\+0x8>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/pr20830a-now.d b/ld/testsuite/ld-x86-64/pr20830a-now.d
+new file mode 100644
+index 0000000..a798f96
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20830a-now.d
+@@ -0,0 +1,50 @@
++#name: PR ld/20830 (.plt.got, -z now)
++#source: pr20830.s
++#as: --64
++#ld: -z now -melf_x86_64 -shared -z relro --ld-generated-unwind-info
++#objdump: -dw -Wf
++
++.*: +file format .*
++
++Contents of the .eh_frame section:
++
++0+ 0000000000000014 00000000 CIE
++  Version:               1
++  Augmentation:          "zR"
++  Code alignment factor: 1
++  Data alignment factor: -8
++  Return address column: 16
++  Augmentation data:     1b
++
++  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
++  DW_CFA_offset: r16 \(rip\) at cfa-8
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000228..0000000000000234
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+30 0000000000000010 00000034 FDE cie=00000000 pc=0000000000000220..0000000000000228
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++
++Disassembly of section .plt.got:
++
++0+220 <.plt.got>:
++ +[a-f0-9]+:	ff 25 d2 0d 20 00    	jmpq   \*0x200dd2\(%rip\)        # 200ff8 <func>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .text:
++
++0+228 <foo>:
++ +[a-f0-9]+:	e8 f3 ff ff ff       	callq  220 <.plt.got>
++ +[a-f0-9]+:	48 8b 05 c4 0d 20 00 	mov    0x200dc4\(%rip\),%rax        # 200ff8 <func>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr20830b-now.d b/ld/testsuite/ld-x86-64/pr20830b-now.d
+new file mode 100644
+index 0000000..2adecad
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr20830b-now.d
+@@ -0,0 +1,46 @@
++#name: PR ld/20830 (.plt.got, -z now)
++#source: pr20830.s
++#as: --x32
++#ld: -z now -melf32_x86_64 -shared -z relro --ld-generated-unwind-info
++#objdump: -dw -Wf
++
++.*: +file format .*
++
++Contents of the .eh_frame section:
++
++0+ 0000000000000014 00000000 CIE
++  Version:               1
++  Augmentation:          "zR"
++  Code alignment factor: 1
++  Data alignment factor: -8
++  Return address column: 16
++  Augmentation data:     1b
++
++  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
++  DW_CFA_offset: r16 \(rip\) at cfa-8
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+18 0000000000000010 0000001c FDE cie=00000000 pc=0000000000000178..0000000000000184
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+2c 0000000000000010 00000030 FDE cie=00000000 pc=0000000000000170..0000000000000178
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++
++Disassembly of section .plt.got:
++
++0+170 <.plt.got>:
++ +[a-f0-9]+:	ff 25 82 0e 20 00    	jmpq   \*0x200e82\(%rip\)        # 200ff8 <func>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .text:
++
++0+178 <foo>:
++ +[a-f0-9]+:	e8 f3 ff ff ff       	callq  170 <.plt.got>
++ +[a-f0-9]+:	48 8b 05 74 0e 20 00 	mov    0x200e74\(%rip\),%rax        # 200ff8 <func>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr21038a-now.d b/ld/testsuite/ld-x86-64/pr21038a-now.d
+new file mode 100644
+index 0000000..a57f3b0
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21038a-now.d
+@@ -0,0 +1,50 @@
++#name: PR ld/21038 (.plt.got, -z now)
++#source: pr21038a.s
++#as: --64
++#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info
++#objdump: -dw -Wf
++
++.*: +file format .*
++
++Contents of the .eh_frame section:
++
++0+ 0000000000000014 00000000 CIE
++  Version:               1
++  Augmentation:          "zR"
++  Code alignment factor: 1
++  Data alignment factor: -8
++  Return address column: 16
++  Augmentation data:     1b
++
++  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
++  DW_CFA_offset: r16 \(rip\) at cfa-8
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000228..0000000000000234
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+30 0000000000000010 00000034 FDE cie=00000000 pc=0000000000000220..0000000000000228
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++
++Disassembly of section .plt.got:
++
++0+220 <.plt.got>:
++ +[a-f0-9]+:	f2 ff 25 d1 0d 20 00 	bnd jmpq \*0x200dd1\(%rip\)        # 200ff8 <func>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+228 <foo>:
++ +[a-f0-9]+:	e8 f3 ff ff ff       	callq  220 <.plt.got>
++ +[a-f0-9]+:	48 8b 05 c4 0d 20 00 	mov    0x200dc4\(%rip\),%rax        # 200ff8 <func>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr21038b-now.d b/ld/testsuite/ld-x86-64/pr21038b-now.d
+new file mode 100644
+index 0000000..c4f17c1
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21038b-now.d
+@@ -0,0 +1,49 @@
++#name: PR ld/21038 (.plt.bnd, -z now)
++#source: pr21038b.s
++#as: --64
++#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info
++#objdump: -dw -Wf
++
++.*: +file format .*
++
++Contents of the .eh_frame section:
++
++0+ 0000000000000014 00000000 CIE
++  Version:               1
++  Augmentation:          "zR"
++  Code alignment factor: 1
++  Data alignment factor: -8
++  Return address column: 16
++  Augmentation data:     1b
++
++  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
++  DW_CFA_offset: r16 \(rip\) at cfa-8
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000228..000000000000022d
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+30 0000000000000010 00000034 FDE cie=00000000 pc=0000000000000220..0000000000000228
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++
++Disassembly of section .plt.got:
++
++0+220 <.plt.got>:
++ +[a-f0-9]+:	f2 ff 25 d1 0d 20 00 	bnd jmpq \*0x200dd1\(%rip\)        # 200ff8 <func>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+228 <foo>:
++ +[a-f0-9]+:	e8 f3 ff ff ff       	callq  220 <.plt.got>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr21038c-now.d b/ld/testsuite/ld-x86-64/pr21038c-now.d
+new file mode 100644
+index 0000000..2076bfc
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21038c-now.d
+@@ -0,0 +1,53 @@
++#name: PR ld/21038 (.plt.got and .plt.bnd, -z now)
++#source: pr21038c.s
++#as: --64
++#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info
++#objdump: -dw -Wf
++
++.*: +file format .*
++
++Contents of the .eh_frame section:
++
++0+ 0000000000000014 00000000 CIE
++  Version:               1
++  Augmentation:          "zR"
++  Code alignment factor: 1
++  Data alignment factor: -8
++  Return address column: 16
++  Augmentation data:     1b
++
++  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
++  DW_CFA_offset: r16 \(rip\) at cfa-8
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000268..0000000000000279
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++0+30 0000000000000010 00000034 FDE cie=00000000 pc=0000000000000258..0000000000000268
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
++
++Disassembly of section .plt.got:
++
++0+258 <.plt.got>:
++ +[a-f0-9]+:	f2 ff 25 91 0d 20 00 	bnd jmpq \*0x200d91\(%rip\)        # 200ff0 <func1>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f2 ff 25 91 0d 20 00 	bnd jmpq \*0x200d91\(%rip\)        # 200ff8 <func2>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+268 <foo>:
++ +[a-f0-9]+:	e8 eb ff ff ff       	callq  258 <.plt.got>
++ +[a-f0-9]+:	e8 ee ff ff ff       	callq  260 <.plt.got\+0x8>
++ +[a-f0-9]+:	48 8b 05 77 0d 20 00 	mov    0x200d77\(%rip\),%rax        # 200ff0 <func1>
++#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 7127eca..f2dc335 100644
+index 7127eca..84cc7d7 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -1291,6 +1291,18 @@ if { ![istarget "x86_64-*-linux*"]} {
+@@ -1245,6 +1245,24 @@ if { [isnative] && [which $CC] != 0 } {
+ 		{{objdump {-drw} plt-main-bnd.dd}} \
+ 		"plt-main-pie-bnd" \
+ 	    ] \
++	    [list \
++		"Build plt-main with -z bndplt -z now" \
++		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now" \
++		"" \
++		{ plt-main5.c } \
++		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
++		"plt-main-bnd-now" \
++	    ] \
++	    [list \
++		"Build plt-main with PIE and -z bndplt -z now" \
++		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now -pie" \
++		"-fPIC" \
++		{ plt-main5.c } \
++		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
++		"plt-main-pie-bnd-now" \
++	    ] \
+ 	]
+ 
+ 	run_ld_link_exec_tests [list \
+@@ -1270,6 +1288,27 @@ if { [isnative] && [which $CC] != 0 } {
+ 		"-fPIC" \
+ 	    ] \
+ 	    [list \
++		"Run plt-main with -z bndplt -z now" \
++		"-Wl,--no-as-needed,-z,bndplt,-z,now tmpdir/plt-main1.o \
++		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-bnd-now" \
++		"plt-main.out" \
++	    ] \
++	    [list \
++		"Run plt-main with PIE and -z bndplt -z now" \
++		"-Wl,--no-as-needed,-z,bndplt,-z,now -pie tmpdir/plt-main1.o \
++		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-pie-bnd-now" \
++		"plt-main.out" \
++		"-fPIC" \
++	    ] \
++	    [list \
+ 		"Run pr20800" \
+ 		"-Wl,-z,now -pie" \
+ 		"" \
+@@ -1291,6 +1330,18 @@ if { ![istarget "x86_64-*-linux*"]} {
      return
  }
  
@@ -1508,6 +2544,12 @@ index 7127eca..f2dc335 100644
  # Linux only tests
  run_dump_test "pr17618"
  run_dump_test "pltgot-1"
--- 
-2.9.3
-
+@@ -1300,3 +1351,8 @@ run_dump_test "pr20830b"
+ run_dump_test "pr21038a"
+ run_dump_test "pr21038b"
+ run_dump_test "pr21038c"
++run_dump_test "pr20830a-now"
++run_dump_test "pr20830b-now"
++run_dump_test "pr21038a-now"
++run_dump_test "pr21038b-now"
++run_dump_test "pr21038c-now"
