@@ -61,6 +61,7 @@
 
 #include "parser-defs.h"
 #include "completer.h"
+#include "progspace-and-thread.h"
 
 /* Forward declarations for local functions.  */
 
@@ -3551,7 +3552,6 @@ skip_prologue_sal (struct symtab_and_line *sal)
 {
   struct symbol *sym;
   struct symtab_and_line start_sal;
-  struct cleanup *old_chain;
   CORE_ADDR pc, saved_pc;
   struct obj_section *section;
   const char *name;
@@ -3564,7 +3564,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
   if (sal->explicit_pc)
     return;
 
-  old_chain = save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+
   switch_to_program_space_and_thread (sal->pspace);
 
   sym = find_pc_sect_function (sal->pc, sal->section);
@@ -3583,10 +3584,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
         = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
 
       if (msymbol.minsym == NULL)
-	{
-	  do_cleanups (old_chain);
-	  return;
-	}
+	return;
 
       objfile = msymbol.objfile;
       pc = BMSYMBOL_VALUE_ADDRESS (msymbol);
@@ -3677,8 +3675,6 @@ skip_prologue_sal (struct symtab_and_line *sal)
       /* Recalculate the line number.  */
       start_sal = find_pc_sect_line (pc, section, 0);
     }
-
-  do_cleanups (old_chain);
 
   /* If we're already past the prologue, leave SAL unchanged.  Otherwise
      forward SAL to the end of the prologue.  */

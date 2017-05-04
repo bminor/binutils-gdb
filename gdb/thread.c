@@ -1240,7 +1240,6 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 {
   struct thread_info *tp;
   ptid_t current_ptid;
-  struct cleanup *old_chain;
   const char *extra_info, *name, *target_id;
   struct inferior *inf;
   int default_inf_num = current_inferior ()->num;
@@ -1248,8 +1247,7 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
   update_thread_list ();
   current_ptid = inferior_ptid;
 
-  /* We'll be switching threads temporarily.  */
-  old_chain = make_cleanup_restore_current_thread ();
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   /* For backward compatibility, we make a list for MI.  A table is
      preferable for the CLI, though, because it shows table
@@ -1296,98 +1294,104 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
       uiout->table_body ();
     }
 
-  ALL_THREADS_BY_INFERIOR (inf, tp)
-    {
-      int core;
+  /* We'll be switching threads temporarily.  */
+  {
+    scoped_restore_current_thread restore_thread;
 
-      if (!should_print_thread (requested_threads, default_inf_num,
-				global_ids, pid, tp))
-	continue;
+    ALL_THREADS_BY_INFERIOR (inf, tp)
+      {
+	int core;
 
-      ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	if (!should_print_thread (requested_threads, default_inf_num,
+				  global_ids, pid, tp))
+	  continue;
 
-      if (!uiout->is_mi_like_p ())
-	{
-	  if (tp->ptid == current_ptid)
-	    uiout->field_string ("current", "*");
-	  else
-	    uiout->field_skip ("current");
-	}
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      if (!uiout->is_mi_like_p ())
-	uiout->field_string ("id-in-tg", print_thread_id (tp));
+	if (!uiout->is_mi_like_p ())
+	  {
+	    if (tp->ptid == current_ptid)
+	      uiout->field_string ("current", "*");
+	    else
+	      uiout->field_skip ("current");
+	  }
 
-      if (show_global_ids || uiout->is_mi_like_p ())
-	uiout->field_int ("id", tp->global_num);
+	if (!uiout->is_mi_like_p ())
+	  uiout->field_string ("id-in-tg", print_thread_id (tp));
 
-      /* For the CLI, we stuff everything into the target-id field.
-	 This is a gross hack to make the output come out looking
-	 correct.  The underlying problem here is that ui-out has no
-	 way to specify that a field's space allocation should be
-	 shared by several fields.  For MI, we do the right thing
-	 instead.  */
+	if (show_global_ids || uiout->is_mi_like_p ())
+	  uiout->field_int ("id", tp->global_num);
 
-      target_id = target_pid_to_str (tp->ptid);
-      extra_info = target_extra_thread_info (tp);
-      name = tp->name ? tp->name : target_thread_name (tp);
+	/* For the CLI, we stuff everything into the target-id field.
+	   This is a gross hack to make the output come out looking
+	   correct.  The underlying problem here is that ui-out has no
+	   way to specify that a field's space allocation should be
+	   shared by several fields.  For MI, we do the right thing
+	   instead.  */
 
-      if (uiout->is_mi_like_p ())
-	{
-	  uiout->field_string ("target-id", target_id);
-	  if (extra_info)
-	    uiout->field_string ("details", extra_info);
-	  if (name)
-	    uiout->field_string ("name", name);
-	}
-      else
-	{
-	  struct cleanup *str_cleanup;
-	  char *contents;
+	target_id = target_pid_to_str (tp->ptid);
+	extra_info = target_extra_thread_info (tp);
+	name = tp->name ? tp->name : target_thread_name (tp);
 
-	  if (extra_info && name)
-	    contents = xstrprintf ("%s \"%s\" (%s)", target_id,
-				   name, extra_info);
-	  else if (extra_info)
-	    contents = xstrprintf ("%s (%s)", target_id, extra_info);
-	  else if (name)
-	    contents = xstrprintf ("%s \"%s\"", target_id, name);
-	  else
-	    contents = xstrdup (target_id);
-	  str_cleanup = make_cleanup (xfree, contents);
+	if (uiout->is_mi_like_p ())
+	  {
+	    uiout->field_string ("target-id", target_id);
+	    if (extra_info)
+	      uiout->field_string ("details", extra_info);
+	    if (name)
+	      uiout->field_string ("name", name);
+	  }
+	else
+	  {
+	    struct cleanup *str_cleanup;
+	    char *contents;
 
-	  uiout->field_string ("target-id", contents);
-	  do_cleanups (str_cleanup);
-	}
+	    if (extra_info && name)
+	      contents = xstrprintf ("%s \"%s\" (%s)", target_id,
+				     name, extra_info);
+	    else if (extra_info)
+	      contents = xstrprintf ("%s (%s)", target_id, extra_info);
+	    else if (name)
+	      contents = xstrprintf ("%s \"%s\"", target_id, name);
+	    else
+	      contents = xstrdup (target_id);
+	    str_cleanup = make_cleanup (xfree, contents);
 
-      if (tp->state == THREAD_RUNNING)
-	uiout->text ("(running)\n");
-      else
-	{
-	  /* The switch below puts us at the top of the stack (leaf
-	     frame).  */
-	  switch_to_thread (tp->ptid);
-	  print_stack_frame (get_selected_frame (NULL),
-			     /* For MI output, print frame level.  */
-			     uiout->is_mi_like_p (),
-			     LOCATION, 0);
-	}
+	    uiout->field_string ("target-id", contents);
+	    do_cleanups (str_cleanup);
+	  }
 
-      if (uiout->is_mi_like_p ())
-	{
-	  const char *state = "stopped";
+	if (tp->state == THREAD_RUNNING)
+	  uiout->text ("(running)\n");
+	else
+	  {
+	    /* The switch below puts us at the top of the stack (leaf
+	       frame).  */
+	    switch_to_thread (tp->ptid);
+	    print_stack_frame (get_selected_frame (NULL),
+			       /* For MI output, print frame level.  */
+			       uiout->is_mi_like_p (),
+			       LOCATION, 0);
+	  }
 
-	  if (tp->state == THREAD_RUNNING)
-	    state = "running";
-	  uiout->field_string ("state", state);
-	}
+	if (uiout->is_mi_like_p ())
+	  {
+	    const char *state = "stopped";
 
-      core = target_core_of_thread (tp->ptid);
-      if (uiout->is_mi_like_p () && core != -1)
-	uiout->field_int ("core", core);
+	    if (tp->state == THREAD_RUNNING)
+	      state = "running";
+	    uiout->field_string ("state", state);
+	  }
+
+	core = target_core_of_thread (tp->ptid);
+	if (uiout->is_mi_like_p () && core != -1)
+	  uiout->field_int ("core", core);
     }
 
-  /* Restores the current thread and the frame selected before
-     the "info threads" command.  */
+    /* This end scope restores the current thread and the frame
+       selected before the "info threads" command.  */
+  }
+
   do_cleanups (old_chain);
 
   if (pid == -1 && requested_threads == NULL)
@@ -1559,70 +1563,43 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
     }
 }
 
-/* Data used by the cleanup installed by
-   'make_cleanup_restore_current_thread'.  */
-
-struct current_thread_cleanup
+scoped_restore_current_thread::~scoped_restore_current_thread ()
 {
-  thread_info *thread;
-  struct frame_id selected_frame_id;
-  int selected_frame_level;
-  int was_stopped;
-  inferior *inf;
-};
-
-static void
-do_restore_current_thread_cleanup (void *arg)
-{
-  struct current_thread_cleanup *old = (struct current_thread_cleanup *) arg;
-
   /* If an entry of thread_info was previously selected, it won't be
      deleted because we've increased its refcount.  The thread represented
      by this thread_info entry may have already exited (due to normal exit,
      detach, etc), so the thread_info.state is THREAD_EXITED.  */
-  if (old->thread != NULL
+  if (m_thread != NULL
       /* If the previously selected thread belonged to a process that has
 	 in the mean time exited (or killed, detached, etc.), then don't revert
 	 back to it, but instead simply drop back to no thread selected.  */
-      && old->inf->pid != 0)
-    switch_to_thread (old->thread);
+      && m_inf->pid != 0)
+    switch_to_thread (m_thread);
   else
     {
       switch_to_no_thread ();
-      set_current_inferior (old->inf);
+      set_current_inferior (m_inf);
     }
 
   /* The running state of the originally selected thread may have
      changed, so we have to recheck it here.  */
   if (inferior_ptid != null_ptid
-      && old->was_stopped
+      && m_was_stopped
       && is_stopped (inferior_ptid)
       && target_has_registers
       && target_has_stack
       && target_has_memory)
-    restore_selected_frame (old->selected_frame_id,
-			    old->selected_frame_level);
+    restore_selected_frame (m_selected_frame_id, m_selected_frame_level);
+
+  if (m_thread != NULL)
+    m_thread->decref ();
+  m_inf->decref ();
 }
 
-static void
-restore_current_thread_cleanup_dtor (void *arg)
+scoped_restore_current_thread::scoped_restore_current_thread ()
 {
-  struct current_thread_cleanup *old = (struct current_thread_cleanup *) arg;
-
-  if (old->thread != NULL)
-    old->thread->decref ();
-
-  old->inf->decref ();
-  xfree (old);
-}
-
-struct cleanup *
-make_cleanup_restore_current_thread (void)
-{
-  struct current_thread_cleanup *old = XNEW (struct current_thread_cleanup);
-
-  old->thread = NULL;
-  old->inf = current_inferior ();
+  m_thread = NULL;
+  m_inf = current_inferior ();
 
   if (inferior_ptid != null_ptid)
     {
@@ -1631,8 +1608,8 @@ make_cleanup_restore_current_thread (void)
 
       gdb_assert (tp != NULL);
 
-      old->was_stopped = tp->state == THREAD_STOPPED;
-      if (old->was_stopped
+      m_was_stopped = tp->state == THREAD_STOPPED;
+      if (m_was_stopped
 	  && target_has_registers
 	  && target_has_stack
 	  && target_has_memory)
@@ -1647,17 +1624,14 @@ make_cleanup_restore_current_thread (void)
       else
 	frame = NULL;
 
-      old->selected_frame_id = get_frame_id (frame);
-      old->selected_frame_level = frame_relative_level (frame);
+      m_selected_frame_id = get_frame_id (frame);
+      m_selected_frame_level = frame_relative_level (frame);
 
       tp->incref ();
-      old->thread = tp;
+      m_thread = tp;
     }
 
-  old->inf->incref ();
-
-  return make_cleanup_dtor (do_restore_current_thread_cleanup, old,
-			    restore_current_thread_cleanup_dtor);
+  m_inf->incref ();
 }
 
 /* See gdbthread.h.  */
@@ -1727,7 +1701,6 @@ tp_array_compar (const thread_info *a, const thread_info *b)
 static void
 thread_apply_all_command (char *cmd, int from_tty)
 {
-  struct cleanup *old_chain;
   char *saved_cmd;
 
   tp_array_compar_ascending = false;
@@ -1742,8 +1715,6 @@ thread_apply_all_command (char *cmd, int from_tty)
     error (_("Please specify a command following the thread ID list"));
 
   update_thread_list ();
-
-  old_chain = make_cleanup_restore_current_thread ();
 
   /* Save a copy of the command in case it is clobbered by
      execute_command.  */
@@ -1778,6 +1749,8 @@ thread_apply_all_command (char *cmd, int from_tty)
 
       std::sort (thr_list_cpy.begin (), thr_list_cpy.end (), tp_array_compar);
 
+      scoped_restore_current_thread restore_thread;
+
       for (thread_info *thr : thr_list_cpy)
 	if (thread_alive (thr))
 	  {
@@ -1791,8 +1764,6 @@ thread_apply_all_command (char *cmd, int from_tty)
 	    strcpy (cmd, saved_cmd);
 	  }
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Implementation of the "thread apply" command.  */
@@ -1831,7 +1802,7 @@ thread_apply_command (char *tidlist, int from_tty)
   saved_cmd = xstrdup (cmd);
   old_chain = make_cleanup (xfree, saved_cmd);
 
-  make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
 
   parser.init (tidlist, current_inferior ()->num);
   while (!parser.finished () && parser.cur_tok () < cmd)

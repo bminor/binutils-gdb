@@ -64,6 +64,8 @@
 #include "event-loop.h"
 #include "thread-fsm.h"
 #include "common/enum-flags.h"
+#include "progspace-and-thread.h"
+#include "common/gdb_optional.h"
 
 /* Prototypes for local functions */
 
@@ -487,7 +489,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       else
 	{
 	  struct inferior *parent_inf, *child_inf;
-	  struct cleanup *old_chain;
 
 	  /* Add process to GDB's tables.  */
 	  child_inf = add_inferior (ptid_get_pid (child_ptid));
@@ -498,7 +499,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->gdbarch = parent_inf->gdbarch;
 	  copy_inferior_target_desc_info (child_inf, parent_inf);
 
-	  old_chain = save_current_space_and_thread ();
+	  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
 	  inferior_ptid = child_ptid;
 	  add_thread (inferior_ptid);
@@ -536,8 +537,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 		 required.  */
 	      solib_create_inferior_hook (0);
 	    }
-
-	  do_cleanups (old_chain);
 	}
 
       if (has_vforked)
@@ -895,6 +894,22 @@ proceed_after_vfork_done (struct thread_info *thread,
   return 0;
 }
 
+/* Save/restore inferior_ptid, current program space and current
+   inferior.  Only use this if the current context points at an exited
+   inferior (and therefore there's no current thread to save).  */
+class scoped_restore_exited_inferior
+{
+public:
+  scoped_restore_exited_inferior ()
+    : m_saved_ptid (&inferior_ptid)
+  {}
+
+private:
+  scoped_restore_tmpl<ptid_t> m_saved_ptid;
+  scoped_restore_current_program_space m_pspace;
+  scoped_restore_current_inferior m_inferior;
+};
+
 /* Called whenever we notice an exec or exit event, to handle
    detaching or resuming a vfork parent.  */
 
@@ -914,7 +929,6 @@ handle_vfork_child_exec_or_exit (int exec)
       if (inf->vfork_parent->pending_detach)
 	{
 	  struct thread_info *tp;
-	  struct cleanup *old_chain;
 	  struct program_space *pspace;
 	  struct address_space *aspace;
 
@@ -922,16 +936,17 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  inf->vfork_parent->pending_detach = 0;
 
+	  gdb::optional<scoped_restore_exited_inferior>
+	    maybe_restore_inferior;
+	  gdb::optional<scoped_restore_current_pspace_and_thread>
+	    maybe_restore_thread;
+
+	  /* If we're handling a child exit, then inferior_ptid points
+	     at the inferior's pid, not to a thread.  */
 	  if (!exec)
-	    {
-	      /* If we're handling a child exit, then inferior_ptid
-		 points at the inferior's pid, not to a thread.  */
-	      old_chain = save_inferior_ptid ();
-	      save_current_program_space ();
-	      save_current_inferior ();
-	    }
+	    maybe_restore_inferior.emplace ();
 	  else
-	    old_chain = save_current_space_and_thread ();
+	    maybe_restore_thread.emplace ();
 
 	  /* We're letting loose of the parent.  */
 	  tp = any_live_thread_of_process (inf->vfork_parent->pid);
@@ -979,8 +994,6 @@ handle_vfork_child_exec_or_exit (int exec)
 	  /* Put it back.  */
 	  inf->pspace = pspace;
 	  inf->aspace = aspace;
-
-	  do_cleanups (old_chain);
 	}
       else if (exec)
 	{
@@ -998,7 +1011,6 @@ handle_vfork_child_exec_or_exit (int exec)
 	}
       else
 	{
-	  struct cleanup *old_chain;
 	  struct program_space *pspace;
 
 	  /* If this is a vfork child exiting, then the pspace and
@@ -1010,10 +1022,11 @@ handle_vfork_child_exec_or_exit (int exec)
 	     go ahead and create a new one for this exiting
 	     inferior.  */
 
-	  /* Switch to null_ptid, so that clone_program_space doesn't want
-	     to read the selected frame of a dead process.  */
-	  old_chain = save_inferior_ptid ();
-	  inferior_ptid = null_ptid;
+	  /* Switch to null_ptid while running clone_program_space, so
+	     that clone_program_space doesn't want to read the
+	     selected frame of a dead process.  */
+	  scoped_restore restore_ptid
+	    = make_scoped_restore (&inferior_ptid, null_ptid);
 
 	  /* This inferior is dead, so avoid giving the breakpoints
 	     module the option to write through to it (cloning a
@@ -1028,10 +1041,6 @@ handle_vfork_child_exec_or_exit (int exec)
 	  inf->pspace = pspace;
 	  inf->aspace = pspace->aspace;
 
-	  /* Put back inferior_ptid.  We'll continue mourning this
-	     inferior.  */
-	  do_cleanups (old_chain);
-
 	  resume_parent = inf->vfork_parent->pid;
 	  /* Break the bonds.  */
 	  inf->vfork_parent->vfork_child = NULL;
@@ -1045,7 +1054,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	{
 	  /* If the user wanted the parent to be running, let it go
 	     free now.  */
-	  struct cleanup *old_chain = make_cleanup_restore_current_thread ();
+	  scoped_restore_current_thread restore_thread;
 
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -1053,8 +1062,6 @@ handle_vfork_child_exec_or_exit (int exec)
 				resume_parent);
 
 	  iterate_over_threads (proceed_after_vfork_done, &resume_parent);
-
-	  do_cleanups (old_chain);
 	}
     }
 }
@@ -3889,12 +3896,14 @@ fetch_inferior_event (void *client_data)
       set_current_traceframe (-1);
     }
 
+  gdb::optional<scoped_restore_current_thread> maybe_restore_thread;
+
   if (non_stop)
     /* In non-stop mode, the user/frontend should not notice a thread
        switch due to internal events.  Make sure we reverse to the
        user selected thread and frame after handling the event and
        running any breakpoint commands.  */
-    make_cleanup_restore_current_thread ();
+    maybe_restore_thread.emplace ();
 
   overlay_cache_invalid = 1;
   /* Flush target cache before starting to handle each event.  Target

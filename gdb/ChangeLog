@@ -1,5 +1,88 @@
 2017-05-04  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SFILES): Add progspace-and-thread.c.
+	(HFILES_NO_SRCDIR): Add progspace-and-thread.h.
+	(COMMON_OBS): Add progspace-and-thread.o.
+	* breakpoint.c: Include "progspace-and-thread.h".
+	(update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, create_longjmp_master_breakpoint):
+	Use scoped_restore_current_pspace_and_thread.
+	(create_std_terminate_master_breakpoint): Use
+	scoped_restore_current_program_space.
+	(remove_breakpoint): Use scoped_restore_current_pspace_and_thread.
+	(print_breakpoint_location): Use
+	scoped_restore_current_program_space.
+	(bp_loc_is_permanent): Use
+	scoped_restore_current_pspace_and_thread.
+	(resolve_sal_pc): Use scoped_restore_current_pspace_and_thread.
+	(download_tracepoint_locations): Use
+	scoped_restore_current_pspace_and_thread.
+	(breakpoint_re_set): Use scoped_restore_current_pspace_and_thread.
+	* exec.c (exec_close_1): Use scoped_restore_current_program_space.
+	(enum step_over_calls_kind): Moved from inferior.h.
+	(class scoped_restore_current_thread): New class.
+	* gdbthread.h (make_cleanup_restore_current_thread): Delete
+	declaration.
+	(scoped_restore_current_thread): New class.
+	* infcmd.c: Include "common/gdb_optional.h".
+	(continue_1, proceed_after_attach): Use
+	scoped_restore_current_thread.
+	(notice_new_inferior): Use scoped_restore_current_thread.
+	* inferior.c: Include "progspace-and-thread.h".
+	(restore_inferior, save_current_inferior): Delete.
+	(add_inferior_command, clone_inferior_command): Use
+	scoped_restore_current_pspace_and_thread.
+	* inferior.h (scoped_restore_current_inferior): New class.
+	* infrun.c: Include "progspace-and-thread.h" and
+	"common/gdb_optional.h".
+	(follow_fork_inferior): Use
+	scoped_restore_current_pspace_and_thread.
+	(scoped_restore_exited_inferior): New class.
+	(handle_vfork_child_exec_or_exit): Use
+	scoped_restore_exited_inferior,
+	scoped_restore_current_pspace_and_thread,
+	scoped_restore_current_thread and scoped_restore.
+	(fetch_inferior_event): Use scoped_restore_current_thread.
+	* linespec.c (decode_line_full, decode_line_1): Use
+	scoped_restore_current_program_space.
+	* mi/mi-main.c: Include "progspace-and-thread.h".
+	(exec_continue): Use scoped_restore_current_thread.
+	(mi_cmd_exec_run): Use scoped_restore_current_pspace_and_thread.
+	(mi_cmd_trace_frame_collected): Use scoped_restore_current_thread.
+	* proc-service.c (ps_pglobal_lookup): Use
+	scoped_restore_current_program_space.
+	* progspace-and-thread.c: New file.
+	* progspace-and-thread.h: New file.
+	* progspace.c (release_program_space, clone_program_space): Use
+	scoped_restore_current_program_space.
+	(restore_program_space, save_current_program_space)
+	(save_current_space_and_thread): Delete.
+	(switch_to_program_space_and_thread): Moved to
+	progspace-and-thread.c.
+	* progspace.h (save_current_program_space)
+	(save_current_space_and_thread): Delete declarations.
+	(scoped_restore_current_program_space): New class.
+	* remote.c (remote_btrace_maybe_reopen): Use
+	scoped_restore_current_thread.
+	* symtab.c: Include "progspace-and-thread.h".
+	(skip_prologue_sal): Use scoped_restore_current_pspace_and_thread.
+	* thread.c (print_thread_info_1): Use
+	scoped_restore_current_thread.
+	(struct current_thread_cleanup): Delete.
+	(do_restore_current_thread_cleanup)
+	(restore_current_thread_cleanup_dtor): Rename/convert both to ...
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	... this new dtor.
+	(make_cleanup_restore_current_thread): Rename/convert to ...
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	... this new ctor.
+	(thread_apply_all_command): Use scoped_restore_current_thread.
+	(thread_apply_command): Use scoped_restore_current_thread.
+	* tracepoint.c (tdump_command): Use scoped_restore_current_thread.
+	* varobj.c (value_of_root_1): Use scoped_restore_current_thread.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (make_cleanup_restore_current_thread): Move
 	find_thread_ptid call before the is_stopped call.  Assert that the
 	thread is found.  Replace is_stopped call by checking the thread's

@@ -80,6 +80,7 @@
 #include "mi/mi-common.h"
 #include "extension.h"
 #include <algorithm>
+#include "progspace-and-thread.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -3065,7 +3066,7 @@ update_inserted_breakpoint_locations (void)
      there was an error.  */
   tmp_error_stream.puts ("Warning:\n");
 
-  struct cleanup *cleanups = save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
     {
@@ -3101,8 +3102,6 @@ update_inserted_breakpoint_locations (void)
       target_terminal_ours_for_output ();
       error_stream (tmp_error_stream);
     }
-
-  do_cleanups (cleanups);
 }
 
 /* Used when starting or continuing the program.  */
@@ -3124,7 +3123,7 @@ insert_breakpoint_locations (void)
      there was an error.  */
   tmp_error_stream.puts ("Warning:\n");
 
-  struct cleanup *cleanups = save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
     {
@@ -3202,8 +3201,6 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
       target_terminal_ours_for_output ();
       error_stream (tmp_error_stream);
     }
-
-  do_cleanups (cleanups);
 }
 
 /* Used when the program stops.
@@ -3489,9 +3486,8 @@ static void
 create_longjmp_master_breakpoint (void)
 {
   struct program_space *pspace;
-  struct cleanup *old_chain;
 
-  old_chain = save_current_program_space ();
+  scoped_restore_current_program_space restore_pspace;
 
   ALL_PSPACES (pspace)
   {
@@ -3595,8 +3591,6 @@ create_longjmp_master_breakpoint (void)
 	}
     }
   }
-
-  do_cleanups (old_chain);
 }
 
 /* Create a master std::terminate breakpoint.  */
@@ -3604,10 +3598,9 @@ static void
 create_std_terminate_master_breakpoint (void)
 {
   struct program_space *pspace;
-  struct cleanup *old_chain;
   const char *const func_name = "std::terminate()";
 
-  old_chain = save_current_program_space ();
+  scoped_restore_current_program_space restore_pspace;
 
   ALL_PSPACES (pspace)
   {
@@ -3652,8 +3645,6 @@ create_std_terminate_master_breakpoint (void)
       b->enable_state = bp_disabled;
     }
   }
-
-  do_cleanups (old_chain);
 }
 
 /* Install a master breakpoint on the unwinder's debug hook.  */
@@ -4077,9 +4068,6 @@ remove_breakpoint_1 (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 remove_breakpoint (struct bp_location *bl)
 {
-  int ret;
-  struct cleanup *old_chain;
-
   /* BL is never in moribund_locations by our callers.  */
   gdb_assert (bl->owner != NULL);
 
@@ -4087,14 +4075,11 @@ remove_breakpoint (struct bp_location *bl)
      This should not ever happen.  */
   gdb_assert (bl->owner->type != bp_none);
 
-  old_chain = save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   switch_to_program_space_and_thread (bl->pspace);
 
-  ret = remove_breakpoint_1 (bl, REMOVE_BREAKPOINT);
-
-  do_cleanups (old_chain);
-  return ret;
+  return remove_breakpoint_1 (bl, REMOVE_BREAKPOINT);
 }
 
 /* Clear the "inserted" flag in all breakpoints.  */
@@ -6129,7 +6114,8 @@ print_breakpoint_location (struct breakpoint *b,
 			   struct bp_location *loc)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *old_chain = save_current_program_space ();
+
+  scoped_restore_current_program_space restore_pspace;
 
   if (loc != NULL && loc->shlib_disabled)
     loc = NULL;
@@ -6194,8 +6180,6 @@ print_breakpoint_location (struct breakpoint *b,
 			   bp_location_condition_evaluator (loc));
       uiout->text (")");
     }
-
-  do_cleanups (old_chain);
 }
 
 static const char *
@@ -9071,9 +9055,6 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
 static int
 bp_loc_is_permanent (struct bp_location *loc)
 {
-  struct cleanup *cleanup;
-  int retval;
-
   gdb_assert (loc != NULL);
 
   /* If we have a catchpoint or a watchpoint, just return 0.  We should not
@@ -9083,14 +9064,9 @@ bp_loc_is_permanent (struct bp_location *loc)
   if (!breakpoint_address_is_meaningful (loc->owner))
     return 0;
 
-  cleanup = save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
   switch_to_program_space_and_thread (loc->pspace);
-
-  retval = program_breakpoint_here_p (loc->gdbarch, loc->address);
-
-  do_cleanups (cleanup);
-
-  return retval;
+  return program_breakpoint_here_p (loc->gdbarch, loc->address);
 }
 
 /* Build a command list for the dprintf corresponding to the current
@@ -9974,16 +9950,12 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	         if we have line numbers but no functions (as can
 	         happen in assembly source).  */
 
-	      struct bound_minimal_symbol msym;
-	      struct cleanup *old_chain = save_current_space_and_thread ();
-
+	      scoped_restore_current_pspace_and_thread restore_pspace_thread;
 	      switch_to_program_space_and_thread (sal->pspace);
 
-	      msym = lookup_minimal_symbol_by_pc (sal->pc);
+	      bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (sal->pc);
 	      if (msym.minsym)
 		sal->section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
-
-	      do_cleanups (old_chain);
 	    }
 	}
     }
@@ -12177,10 +12149,9 @@ static void
 download_tracepoint_locations (void)
 {
   struct breakpoint *b;
-  struct cleanup *old_chain;
   enum tribool can_download_tracepoint = TRIBOOL_UNKNOWN;
 
-  old_chain = save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   ALL_TRACEPOINTS (b)
     {
@@ -12224,8 +12195,6 @@ download_tracepoint_locations (void)
       if (bp_location_downloaded)
 	observer_notify_breakpoint_modified (b);
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Swap the insertion/duplication state between two locations.  */
@@ -14506,32 +14475,32 @@ breakpoint_re_set (void)
   struct breakpoint *b, *b_tmp;
   enum language save_language;
   int save_input_radix;
-  struct cleanup *old_chain;
 
   save_language = current_language->la_language;
   save_input_radix = input_radix;
-  old_chain = save_current_space_and_thread ();
 
-  /* Note: we must not try to insert locations until after all
-     breakpoints have been re-set.  Otherwise, e.g., when re-setting
-     breakpoint 1, we'd insert the locations of breakpoint 2, which
-     hadn't been re-set yet, and thus may have stale locations.  */
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
-    /* Format possible error msg.  */
-    char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
-				b->number);
-    struct cleanup *cleanups = make_cleanup (xfree, message);
-    catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
-    do_cleanups (cleanups);
+    scoped_restore_current_pspace_and_thread restore_pspace_thread;
+
+    /* Note: we must not try to insert locations until after all
+       breakpoints have been re-set.  Otherwise, e.g., when re-setting
+       breakpoint 1, we'd insert the locations of breakpoint 2, which
+       hadn't been re-set yet, and thus may have stale locations.  */
+
+    ALL_BREAKPOINTS_SAFE (b, b_tmp)
+      {
+	/* Format possible error msg.  */
+	char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
+				    b->number);
+	struct cleanup *cleanups = make_cleanup (xfree, message);
+	catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
+	do_cleanups (cleanups);
+      }
+    set_language (save_language);
+    input_radix = save_input_radix;
+
+    jit_breakpoint_re_set ();
   }
-  set_language (save_language);
-  input_radix = save_input_radix;
-
-  jit_breakpoint_re_set ();
-
-  do_cleanups (old_chain);
 
   create_overlay_event_breakpoint ();
   create_longjmp_master_breakpoint ();

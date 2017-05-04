@@ -13210,12 +13210,12 @@ static void
 remote_btrace_maybe_reopen (void)
 {
   struct remote_state *rs = get_remote_state ();
-  struct cleanup *cleanup;
   struct thread_info *tp;
   int btrace_target_pushed = 0;
   int warned = 0;
 
-  cleanup = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
+
   ALL_NON_EXITED_THREADS (tp)
     {
       set_general_thread (tp->ptid);
@@ -13255,7 +13255,6 @@ remote_btrace_maybe_reopen (void)
       tp->btrace.target->ptid = tp->ptid;
       tp->btrace.target->conf = rs->btrace_config;
     }
-  do_cleanups (cleanup);
 }
 
 /* Enable branch tracing.  */

@@ -592,7 +592,27 @@ extern int print_thread_events;
 extern void print_thread_info (struct ui_out *uiout, char *requested_threads,
 			       int pid);
 
-extern struct cleanup *make_cleanup_restore_current_thread (void);
+/* Save/restore current inferior/thread/frame.  */
+
+class scoped_restore_current_thread
+{
+public:
+  scoped_restore_current_thread ();
+  ~scoped_restore_current_thread ();
+
+  /* Disable copy.  */
+  scoped_restore_current_thread
+    (const scoped_restore_current_thread &) = delete;
+  void operator=
+    (const scoped_restore_current_thread &) = delete;
+
+private:
+  thread_info *m_thread;
+  inferior *m_inf;
+  frame_id m_selected_frame_id;
+  int m_selected_frame_level;
+  bool m_was_stopped;
+};
 
 /* Returns a pointer into the thread_info corresponding to
    INFERIOR_PTID.  INFERIOR_PTID *must* be in the thread list.  */
