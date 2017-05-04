@@ -59,7 +59,6 @@ with_test_prefix "preopened record btrace" {
 
 with_test_prefix "prepare record" {
     gdb_test_no_output "python r = gdb.start_recording(\"btrace\")"
-    gdb_test "python print(len(r.ptid))" "3"
     gdb_test "python print(r.method)" "btrace"
     gdb_test "python print(r.format)" "pt|bts"
     gdb_test "stepi 100" ".*"

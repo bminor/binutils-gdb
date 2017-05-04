@@ -1,5 +1,10 @@
 2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* python/py-record.c (recpy_ptid): Remove.
+	(recpy_record_getset): Remove recpy_ptid.
+
+2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (btrace_fetch): Set inferior_ptid.
 	* python/py-record-btrace.c: Add "py-record.h" include.
 	(recpy_bt_format, recpy_bt_replay_position, recpy_bt_begin,
