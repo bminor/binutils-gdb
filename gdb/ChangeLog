@@ -1,3 +1,8 @@
+2017-05-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* corelow.c (sniff_core_bfd): Remove extra semicolon.
+	(get_core_register_section): Remove xfree of NULL pointer.
+
 2017-05-03  Alan Hayward  <alan.hayward@arm.com>
 
 	* frv-linux-tdep.c (frv_linux_supply_gregset): Use raw_supply_zeroed.

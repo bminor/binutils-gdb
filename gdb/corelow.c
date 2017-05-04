@@ -129,7 +129,7 @@ sniff_core_bfd (bfd *abfd)
 {
   struct core_fns *cf;
   struct core_fns *yummy = NULL;
-  int matches = 0;;
+  int matches = 0;
 
   /* Don't sniff if we have support for register sets in
      CORE_GDBARCH.  */
@@ -511,15 +511,13 @@ get_core_register_section (struct regcache *regcache,
 			   const char *human_name,
 			   int required)
 {
-  static char *section_name = NULL;
+  static char *section_name;
   struct bfd_section *section;
   bfd_size_type size;
   char *contents;
   bool variable_size_section = (regset != NULL
 				&& regset->flags & REGSET_VARIABLE_SIZE);
   ptid_t ptid = regcache_get_ptid (regcache);
-
-  xfree (section_name);
 
   if (ptid_get_lwp (ptid))
     section_name = xstrprintf ("%s/%ld", name,
