@@ -1,5 +1,18 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (struct print_one_inferior_data) <inferiors>: Now a
+	'std::set *'.
+	(print_one_inferior): Update.
+	(free_vector_of_ints): Remove.
+	(list_available_thread_groups): Change "ids" to std::set.
+	(mi_cmd_list_thread_groups): Update.
+	(struct collect_cores_data) <core>: Now a std::set.
+	(collect_cores): Update.
+	(unique): Remove.
+	(print_one_inferior): Update.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (mi_execute_cli_command): Use std::string.
 	(mi_execute_async_cli_command): Likewise.
 	(mi_cmd_trace_frame_collected): Use field_fmt.

@@ -62,6 +62,8 @@
 #include <chrono>
 #include "progspace-and-thread.h"
 #include "common/rsp-low.h"
+#include <algorithm>
+#include <set>
 
 enum
   {
@@ -610,8 +612,7 @@ mi_cmd_thread_info (const char *command, char **argv, int argc)
 struct collect_cores_data
 {
   int pid;
-
-  VEC (int) *cores;
+  std::set<int> cores;
 };
 
 static int
@@ -624,27 +625,16 @@ collect_cores (struct thread_info *ti, void *xdata)
       int core = target_core_of_thread (ti->ptid);
 
       if (core != -1)
-	VEC_safe_push (int, data->cores, core);
+	data->cores.insert (core);
     }
 
   return 0;
 }
 
-static int *
-unique (int *b, int *e)
-{
-  int *d = b;
-
-  while (++b != e)
-    if (*d != *b)
-      *++d = *b;
-  return ++d;
-}
-
 struct print_one_inferior_data
 {
   int recurse;
-  VEC (int) *inferiors;
+  const std::set<int> *inferiors;
 };
 
 static int
@@ -654,10 +644,9 @@ print_one_inferior (struct inferior *inferior, void *xdata)
     = (struct print_one_inferior_data *) xdata;
   struct ui_out *uiout = current_uiout;
 
-  if (VEC_empty (int, top_data->inferiors)
-      || bsearch (&(inferior->pid), VEC_address (int, top_data->inferiors),
-		  VEC_length (int, top_data->inferiors), sizeof (int),
-		  compare_positive_ints))
+  if (top_data->inferiors->empty ()
+      || (top_data->inferiors->find (inferior->pid)
+	  != top_data->inferiors->end ()))
     {
       struct collect_cores_data data;
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
@@ -676,28 +665,18 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 			       inferior->pspace->pspace_exec_filename);
 	}
 
-      data.cores = 0;
       if (inferior->pid != 0)
 	{
 	  data.pid = inferior->pid;
 	  iterate_over_threads (collect_cores, &data);
 	}
 
-      if (!VEC_empty (int, data.cores))
+      if (!data.cores.empty ())
 	{
-	  int *b, *e;
 	  ui_out_emit_list list_emitter (uiout, "cores");
 
-	  qsort (VEC_address (int, data.cores),
-		 VEC_length (int, data.cores), sizeof (int),
-		 compare_positive_ints);
-
-	  b = VEC_address (int, data.cores);
-	  e = b + VEC_length (int, data.cores);
-	  e = unique (b, e);
-
-	  for (; b != e; ++b)
-	    uiout->field_int (NULL, *b);
+	  for (int b : data.cores)
+	    uiout->field_int (NULL, b);
 	}
 
       if (top_data->recurse)
@@ -720,14 +699,6 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 
   for (p = strtok (p, ","); p;  p = strtok (NULL, ","))
     uiout->field_string (NULL, p);
-}
-
-static void
-free_vector_of_ints (void *xvector)
-{
-  VEC (int) **vector = (VEC (int) **) xvector;
-
-  VEC_free (int, *vector);
 }
 
 static void
@@ -761,7 +732,7 @@ free_splay_tree (void *xt)
 }
 
 static void
-list_available_thread_groups (VEC (int) *ids, int recurse)
+list_available_thread_groups (const std::set<int> &ids, int recurse)
 {
   struct osdata *data;
   struct osdata_item *item;
@@ -830,11 +801,8 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
       /* At present, the target will return all available processes
 	 and if information about specific ones was required, we filter
 	 undesired processes here.  */
-      if (ids && bsearch (&pid_i, VEC_address (int, ids),
-			  VEC_length (int, ids),
-			  sizeof (int), compare_positive_ints) == NULL)
+      if (!ids.empty () && ids.find (pid_i) != ids.end ())
 	continue;
-
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
@@ -881,10 +849,9 @@ void
 mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *back_to;
   int available = 0;
   int recurse = 0;
-  VEC (int) *ids = 0;
+  std::set<int> ids;
 
   enum opt
   {
@@ -936,23 +903,17 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
 
       if (*end != '\0')
 	error (_("invalid syntax of group id '%s'"), argv[oind]);
-      VEC_safe_push (int, ids, inf);
+      ids.insert (inf);
     }
-  if (VEC_length (int, ids) > 1)
-    qsort (VEC_address (int, ids),
-	   VEC_length (int, ids),
-	   sizeof (int), compare_positive_ints);
-
-  back_to = make_cleanup (free_vector_of_ints, &ids);
 
   if (available)
     {
       list_available_thread_groups (ids, recurse);
     }
-  else if (VEC_length (int, ids) == 1)
+  else if (ids.size () == 1)
     {
       /* Local thread groups, single id.  */
-      int id = *VEC_address (int, ids);
+      int id = *(ids.begin ());
       struct inferior *inf = find_inferior_id (id);
 
       if (!inf)
@@ -965,7 +926,7 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
       struct print_one_inferior_data data;
 
       data.recurse = recurse;
-      data.inferiors = ids;
+      data.inferiors = &ids;
 
       /* Local thread groups.  Either no explicit ids -- and we
 	 print everything, or several explicit ids.  In both cases,
@@ -975,8 +936,6 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
       update_thread_list ();
       iterate_over_inferiors (print_one_inferior, &data);
     }
-
-  do_cleanups (back_to);
 }
 
 void
