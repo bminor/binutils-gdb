@@ -1626,9 +1626,12 @@ make_cleanup_restore_current_thread (void)
 
   if (inferior_ptid != null_ptid)
     {
+      thread_info *tp = find_thread_ptid (inferior_ptid);
       struct frame_info *frame;
 
-      old->was_stopped = is_stopped (inferior_ptid);
+      gdb_assert (tp != NULL);
+
+      old->was_stopped = tp->state == THREAD_STOPPED;
       if (old->was_stopped
 	  && target_has_registers
 	  && target_has_stack
@@ -1647,10 +1650,7 @@ make_cleanup_restore_current_thread (void)
       old->selected_frame_id = get_frame_id (frame);
       old->selected_frame_level = frame_relative_level (frame);
 
-      struct thread_info *tp = find_thread_ptid (inferior_ptid);
-
-      if (tp)
-	tp->incref ();
+      tp->incref ();
       old->thread = tp;
     }
 

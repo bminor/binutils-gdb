@@ -1,5 +1,12 @@
 2017-05-04  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (make_cleanup_restore_current_thread): Move
+	find_thread_ptid call before the is_stopped call.  Assert that the
+	thread is found.  Replace is_stopped call by checking the thread's
+	state directly.  Remove unnecessary NULL-thread check.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
 	* corelow.c (thread_section_name): New class.
 	(get_core_register_section, get_core_siginfo): Use it.
 
