@@ -25,7 +25,6 @@
 #include "record.h"
 
 /* Python Record object.  */
-
 typedef struct
 {
   PyObject_HEAD
@@ -36,6 +35,30 @@ typedef struct
   /* The current recording method.  */
   enum record_method method;
 } recpy_record_object;
+
+/* Python recorded element object.  This is generic enough to represent
+   recorded instructions as well as recorded function call segments, hence the
+   generic name.  */
+typedef struct
+{
+  PyObject_HEAD
+
+  /* The ptid this object refers to.  */
+  ptid_t ptid;
+
+  /* The current recording method.  */
+  enum record_method method;
+
+  /* Element number.  */
+  Py_ssize_t number;
+} recpy_element_object;
+
+/* Python RecordInstruction type.  */
+extern PyTypeObject recpy_insn_type;
+
+/* Create a new gdb.RecordInstruction object.  */
+extern PyObject *recpy_insn_new (ptid_t ptid, enum record_method method,
+				 Py_ssize_t number);
 
 /* Create a new gdb.RecordGap object.  */
 extern PyObject *recpy_gap_new (int reason_code, const char *reason_string,

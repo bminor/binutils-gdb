@@ -29,6 +29,12 @@ static PyTypeObject recpy_record_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
 };
 
+/* Python RecordInstruction type.  */
+
+PyTypeObject recpy_insn_type = {
+  PyVarObject_HEAD_INIT (NULL, 0)
+};
+
 /* Python RecordGap type.  */
 
 PyTypeObject recpy_gap_type = {
@@ -160,6 +166,161 @@ recpy_end (PyObject *self, void* closure)
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
+/* Create a new gdb.RecordInstruction object.  */
+
+PyObject *
+recpy_insn_new (ptid_t ptid, enum record_method method, Py_ssize_t number)
+{
+  recpy_element_object * const obj = PyObject_New (recpy_element_object,
+						   &recpy_insn_type);
+
+  if (obj == NULL)
+   return NULL;
+
+  obj->ptid = ptid;
+  obj->method = method;
+  obj->number = number;
+
+  return (PyObject *) obj;
+}
+
+/* Implementation of RecordInstruction.sal [gdb.Symtab_and_line].  */
+
+static PyObject *
+recpy_insn_sal (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_insn_sal (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
+/* Implementation of RecordInstruction.pc [int].  */
+
+static PyObject *
+recpy_insn_pc (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_insn_pc (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
+/* Implementation of RecordInstruction.data [buffer].  */
+
+static PyObject *
+recpy_insn_data (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_insn_data (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
+/* Implementation of RecordInstruction.decoded [str].  */
+
+static PyObject *
+recpy_insn_decoded (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_insn_decoded (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
+/* Implementation of RecordInstruction.size [int].  */
+
+static PyObject *
+recpy_insn_size (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_insn_size (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
+/* Implementation of RecordInstruction.is_speculative [bool].  */
+
+static PyObject *
+recpy_insn_is_speculative (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_insn_is_speculative (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
+/* Implementation of RecordInstruction.number [int].  */
+
+static PyObject *
+recpy_element_number (PyObject *self, void* closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  return PyInt_FromSsize_t (obj->number);
+}
+
+/* Implementation of RecordInstruction.__hash__ [int].  */
+static Py_hash_t
+recpy_element_hash (PyObject *self)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  return obj->number;
+}
+
+/* Implementation of operator == and != of RecordInstruction.  */
+
+static PyObject *
+recpy_element_richcompare (PyObject *self, PyObject *other, int op)
+{
+  const recpy_element_object * const obj1 = (recpy_element_object *) self;
+  const recpy_element_object * const obj2 = (recpy_element_object *) other;
+
+  if (Py_TYPE (self) != Py_TYPE (other))
+    {
+      Py_INCREF (Py_NotImplemented);
+      return Py_NotImplemented;
+    }
+
+  switch (op)
+  {
+    case Py_EQ:
+      if (ptid_equal (obj1->ptid, obj2->ptid)
+	  && obj1->method == obj2->method
+	  && obj1->number == obj2->number)
+	Py_RETURN_TRUE;
+      else
+	Py_RETURN_FALSE;
+
+    case Py_NE:
+      if (!ptid_equal (obj1->ptid, obj2->ptid)
+	  || obj1->method != obj2->method
+	  || obj1->number != obj2->number)
+	Py_RETURN_TRUE;
+      else
+	Py_RETURN_FALSE;
+
+    default:
+      break;
+  }
+
+  Py_INCREF (Py_NotImplemented);
+  return Py_NotImplemented;
+}
+
 /* Create a new gdb.RecordGap object.  */
 
 PyObject *
@@ -236,6 +397,20 @@ the current instruction and is used for e.g. record.goto (record.end).", NULL },
   { NULL }
 };
 
+/* RecordInstruction member list.  */
+
+static gdb_PyGetSetDef recpy_insn_getset[] = {
+  { "number", recpy_element_number, NULL, "instruction number", NULL},
+  { "sal", recpy_insn_sal, NULL, "associated symbol and line", NULL},
+  { "pc", recpy_insn_pc, NULL, "instruction address", NULL},
+  { "data", recpy_insn_data, NULL, "raw instruction data", NULL},
+  { "decoded", recpy_insn_decoded, NULL, "decoded instruction", NULL},
+  { "size", recpy_insn_size, NULL, "instruction size in byte", NULL},
+  { "is_speculative", recpy_insn_is_speculative, NULL, "if the instruction was \
+  executed speculatively", NULL},
+  { NULL }
+};
+
 /* RecordGap member list.  */
 
 static gdb_PyGetSetDef recpy_gap_getset[] = {
@@ -258,6 +433,15 @@ gdbpy_initialize_record (void)
   recpy_record_type.tp_methods = recpy_record_methods;
   recpy_record_type.tp_getset = recpy_record_getset;
 
+  recpy_insn_type.tp_new = PyType_GenericNew;
+  recpy_insn_type.tp_flags = Py_TPFLAGS_DEFAULT;
+  recpy_insn_type.tp_basicsize = sizeof (recpy_element_object);
+  recpy_insn_type.tp_name = "gdb.RecordInstruction";
+  recpy_insn_type.tp_doc = "GDB recorded instruction object";
+  recpy_insn_type.tp_getset = recpy_insn_getset;
+  recpy_insn_type.tp_richcompare = recpy_element_richcompare;
+  recpy_insn_type.tp_hash = recpy_element_hash;
+
   recpy_gap_type.tp_new = PyType_GenericNew;
   recpy_gap_type.tp_flags = Py_TPFLAGS_DEFAULT;
   recpy_gap_type.tp_basicsize = sizeof (recpy_gap_object);
@@ -266,6 +450,7 @@ gdbpy_initialize_record (void)
   recpy_gap_type.tp_getset = recpy_gap_getset;
 
   if (PyType_Ready (&recpy_record_type) < 0
+      || PyType_Ready (&recpy_insn_type) < 0
       || PyType_Ready (&recpy_gap_type) < 0)
     return -1;
   else
