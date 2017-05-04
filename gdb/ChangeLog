@@ -1,5 +1,10 @@
 2017-05-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.99.91.
+	* PROBLEMS: Likewise.
+
+2017-05-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Rename the "Changes since GDB 7.12" section into
 	"Changes in GDB 8.0".
 
