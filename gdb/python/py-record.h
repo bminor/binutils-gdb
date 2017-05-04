@@ -56,8 +56,15 @@ typedef struct
 /* Python RecordInstruction type.  */
 extern PyTypeObject recpy_insn_type;
 
+/* Python RecordFunctionSegment type.  */
+extern PyTypeObject recpy_func_type;
+
 /* Create a new gdb.RecordInstruction object.  */
 extern PyObject *recpy_insn_new (ptid_t ptid, enum record_method method,
+				 Py_ssize_t number);
+
+/* Create a new gdb.RecordFunctionSegment object.  */
+extern PyObject *recpy_func_new (ptid_t ptid, enum record_method method,
 				 Py_ssize_t number);
 
 /* Create a new gdb.RecordGap object.  */

@@ -3203,48 +3203,43 @@ the current recording method.
 A human readable string with the reason for the gap.
 @end defvar
 
-The attributes and methods of function call objects depend on the
-current recording format.  Currently, only btrace function calls are
-supported.
+A @code{gdb.RecordFunctionSegment} object has the following attributes:
 
-A @code{gdb.BtraceFunctionCall} object has the following attributes:
-
-@defvar BtraceFunctionCall.number
-An integer identifying this function call.  @var{number} corresponds to
+@defvar RecordFunctionSegment.number
+An integer identifying this function segment.  @code{number} corresponds to
 the numbers seen in @code{record function-call-history}
 (@pxref{Process Record and Replay}).
 @end defvar
 
-@defvar BtraceFunctionCall.symbol
+@defvar RecordFunctionSegment.symbol
 A @code{gdb.Symbol} object representing the associated symbol.  May be
-@code{None} if the function call is a gap or the debug symbols could
-not be read.
+@code{None} if no debug information is available.
 @end defvar
 
-@defvar BtraceFunctionCall.level
+@defvar RecordFunctionSegment.level
 An integer representing the function call's stack level.  May be
 @code{None} if the function call is a gap.
 @end defvar
 
-@defvar BtraceFunctionCall.instructions
+@defvar RecordFunctionSegment.instructions
 A list of @code{gdb.RecordInstruction} or @code{gdb.RecordGap} objects
 associated with this function call.
 @end defvar
 
-@defvar BtraceFunctionCall.up
-A @code{gdb.BtraceFunctionCall} object representing the caller's
+@defvar RecordFunctionSegment.up
+A @code{gdb.RecordFunctionSegment} object representing the caller's
 function segment.  If the call has not been recorded, this will be the
 function segment to which control returns.  If neither the call nor the
 return have been recorded, this will be @code{None}.
 @end defvar
 
-@defvar BtraceFunctionCall.prev_sibling
-A @code{gdb.BtraceFunctionCall} object representing the previous
+@defvar RecordFunctionSegment.prev
+A @code{gdb.RecordFunctionSegment} object representing the previous
 segment of this function call.  May be @code{None}.
 @end defvar
 
-@defvar BtraceFunctionCall.next_sibling
-A @code{gdb.BtraceFunctionCall} object representing the next segment of
+@defvar RecordFunctionSegment.next
+A @code{gdb.RecordFunctionSegment} object representing the next segment of
 this function call.  May be @code{None}.
 @end defvar
 

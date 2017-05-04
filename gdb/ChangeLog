@@ -1,5 +1,33 @@
 2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_CALL, btpy_call_type):
+	Remove.
+	(btrace_func_from_recpy_func): New function.
+	(btpy_call_new, btpy_number, btpy_hash, btpy_richcompare): Remove.
+	(btpy_call_level, btpy_call_symbol, btpy_call_instructions,
+	btpy_call_up, btpy_call_prev_sibling, btpy_call_next_sibling): Rename to ...
+	(recpy_bt_func_level, recpy_bt_func_symbol, recpy_bt_func_instructions,
+	recpy_bt_func_up, recpy_bt_func_prev, recpy_bt_func_next): This.
+	Also, use new helper functions.
+	(btpy_list_item): Use new helper functions.
+	(recpy_bt_function_call_history): Use new type name.
+	(btpy_call_getset): Remove.
+	(gdbpy_initialize_btrace): Remove code to initialize
+	gdb.BtraceFunctionCall.
+	* python/py-record-btrace.h (recpy_bt_func_number, recpy_btb_func_level,
+	recpy_btb_func_symbol, recpy_bt_func_instructions, recpy_bt_func_up,
+	recpy_bt_func_prev, recpy_bt_func_next): New export.
+	* python/py-record.c (recpy_func_type): New static object.
+	(recpy_func_new, recpy_func_level, recpy_func_symbol,
+	recpy_func_instructions, recpy_func_up, recpy_func_prev,
+	recpy_func_next): New function.
+	(recpy_element_hash, recpy_element_richcompare): Updated comment.
+	(recpy_func_getset): New static object.
+	(gdbpy_initialize_record): Add code to initialize gdb.RecordInstruction.
+	* python/py-record.h (recpy_func_type, recpy_func_new): New export.
+
+2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN): Remove.
 	(btpy_object, btpy_insn_type, btpy_new): Remove.
 	(btpy_list_object): Use gdb.RecordInstruction type instead of

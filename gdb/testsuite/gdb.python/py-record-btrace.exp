@@ -99,8 +99,8 @@ with_test_prefix "function call" {
     gdb_test "python print(c.level)" "$decimal"
     gdb_test "python print(len(c.instructions))" "$decimal"
     gdb_test "python print(c.up)" "None"
-    gdb_test "python print(c.prev_sibling)" "None"
-    gdb_test "python print(c == c.next_sibling.prev_sibling)" "True"
+    gdb_test "python print(c.prev)" "None"
+    gdb_test "python print(c == c.next.prev)" "True"
 }
 
 with_test_prefix "list" {
