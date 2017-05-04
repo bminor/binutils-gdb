@@ -1715,11 +1715,8 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
 {
   CORE_ADDR addr;
   char *cdata;
-  gdb_byte *data;
-  gdb_byte *databuf;
   size_t len_hex, len_bytes, len_units, i, steps, remaining_units;
   long int count_units;
-  struct cleanup *back_to;
   int unit_size;
 
   if (argc != 2 && argc != 3)
@@ -1743,8 +1740,7 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
   else
     count_units = len_units;
 
-  databuf = XNEWVEC (gdb_byte, len_bytes);
-  back_to = make_cleanup (xfree, databuf);
+  gdb::byte_vector databuf (len_bytes);
 
   for (i = 0; i < len_bytes; ++i)
     {
@@ -1754,34 +1750,32 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
       databuf[i] = (gdb_byte) x;
     }
 
+  gdb::byte_vector data;
   if (len_units < count_units)
     {
       /* Pattern is made of less units than count:
          repeat pattern to fill memory.  */
-      data = (gdb_byte *) xmalloc (count_units * unit_size);
-      make_cleanup (xfree, data);
+      data = gdb::byte_vector (count_units * unit_size);
 
       /* Number of times the pattern is entirely repeated.  */
       steps = count_units / len_units;
       /* Number of remaining addressable memory units.  */
       remaining_units = count_units % len_units;
       for (i = 0; i < steps; i++)
-        memcpy (data + i * len_bytes, databuf, len_bytes);
+        memcpy (&data[i * len_bytes], &databuf[0], len_bytes);
 
       if (remaining_units > 0)
-        memcpy (data + steps * len_bytes, databuf,
+        memcpy (&data[steps * len_bytes], &databuf[0],
 		remaining_units * unit_size);
     }
   else
     {
       /* Pattern is longer than or equal to count:
          just copy count addressable memory units.  */
-      data = databuf;
+      data = std::move (databuf);
     }
 
-  write_memory_with_notification (addr, data, count_units);
-
-  do_cleanups (back_to);
+  write_memory_with_notification (addr, data.data (), count_units);
 }
 
 void

@@ -1,5 +1,10 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (mi_cmd_data_write_memory_bytes): Use
+	gdb::byte_vector.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-parse.c (mi_parse): Remove unused declaration.
 
 2017-09-29  Tom Tromey  <tom@tromey.com>
