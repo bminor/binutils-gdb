@@ -1,5 +1,21 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions): Update.
+	* ada-lang.h (struct ada_exc_info): Remove typedef.  Declare
+	operator< and operator==.
+	(ada_exceptions_list): Return a std::vector.
+	* ada-lang.c (ada_exc_info::operator<): Rename from
+	compare_ada_exception_info.
+	(ada_exc_info::operator==): New.
+	(sort_remove_dups_ada_exceptions_list): Change type of
+	"exceptions".
+	(ada_add_standard_exceptions, ada_add_exceptions_from_frame)
+	(ada_add_global_exceptions): Likewise.
+	(ada_exceptions_list_1): Return a std::vector.
+	(ada_exceptions_list): Likewise.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (struct print_one_inferior_data) <inferiors>: Now a
 	'std::set *'.
 	(print_one_inferior): Update.

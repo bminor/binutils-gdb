@@ -379,18 +379,19 @@ extern void create_ada_exception_catchpoint
 
 /* Some information about a given Ada exception.  */
 
-typedef struct ada_exc_info
+struct ada_exc_info
 {
   /* The name of the exception.  */
   const char *name;
 
   /* The address of the symbol corresponding to that exception.  */
   CORE_ADDR addr;
-} ada_exc_info;
 
-DEF_VEC_O(ada_exc_info);
+  bool operator< (const ada_exc_info &);
+  bool operator== (const ada_exc_info &);
+};
 
-extern VEC(ada_exc_info) *ada_exceptions_list (const char *regexp);
+extern std::vector<ada_exc_info> ada_exceptions_list (const char *regexp);
 
 /* Tasking-related: ada-tasks.c */
 

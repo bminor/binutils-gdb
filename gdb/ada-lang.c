@@ -62,6 +62,7 @@
 #include "cli/cli-utils.h"
 #include "common/function-view.h"
 #include "common/byte-vector.h"
+#include <algorithm>
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -13115,29 +13116,29 @@ ada_is_non_standard_exception_sym (struct symbol *sym)
   return 1;
 }
 
-/* A helper function for qsort, comparing two struct ada_exc_info
+/* A helper function for std::sort, comparing two struct ada_exc_info
    objects.
 
    The comparison is determined first by exception name, and then
    by exception address.  */
 
-static int
-compare_ada_exception_info (const void *a, const void *b)
+bool
+ada_exc_info::operator< (const ada_exc_info &other)
 {
-  const struct ada_exc_info *exc_a = (struct ada_exc_info *) a;
-  const struct ada_exc_info *exc_b = (struct ada_exc_info *) b;
   int result;
 
-  result = strcmp (exc_a->name, exc_b->name);
-  if (result != 0)
-    return result;
+  result = strcmp (name, other.name);
+  if (result < 0)
+    return true;
+  if (result == 0 && addr < other.addr)
+    return true;
+  return false;
+}
 
-  if (exc_a->addr < exc_b->addr)
-    return -1;
-  if (exc_a->addr > exc_b->addr)
-    return 1;
-
-  return 0;
+bool
+ada_exc_info::operator== (const ada_exc_info &other)
+{
+  return addr == other.addr && strcmp (name, other.name) == 0;
 }
 
 /* Sort EXCEPTIONS using compare_ada_exception_info as the comparison
@@ -13146,23 +13147,12 @@ compare_ada_exception_info (const void *a, const void *b)
    All duplicates are also removed.  */
 
 static void
-sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
+sort_remove_dups_ada_exceptions_list (std::vector<ada_exc_info> *exceptions,
 				      int skip)
 {
-  struct ada_exc_info *to_sort
-    = VEC_address (ada_exc_info, *exceptions) + skip;
-  int to_sort_len
-    = VEC_length (ada_exc_info, *exceptions) - skip;
-  int i, j;
-
-  qsort (to_sort, to_sort_len, sizeof (struct ada_exc_info),
-	 compare_ada_exception_info);
-
-  for (i = 1, j = 1; i < to_sort_len; i++)
-    if (compare_ada_exception_info (&to_sort[i], &to_sort[j - 1]) != 0)
-      to_sort[j++] = to_sort[i];
-  to_sort_len = j;
-  VEC_truncate(ada_exc_info, *exceptions, skip + to_sort_len);
+  std::sort (exceptions->begin () + skip, exceptions->end ());
+  exceptions->erase (std::unique (exceptions->begin () + skip, exceptions->end ()),
+		     exceptions->end ());
 }
 
 /* Add all exceptions defined by the Ada standard whose name match
@@ -13177,7 +13167,7 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
 
 static void
 ada_add_standard_exceptions (compiled_regex *preg,
-			     VEC(ada_exc_info) **exceptions)
+			     std::vector<ada_exc_info> *exceptions)
 {
   int i;
 
@@ -13194,7 +13184,7 @@ ada_add_standard_exceptions (compiled_regex *preg,
 	      struct ada_exc_info info
 		= {standard_exc[i], BMSYMBOL_VALUE_ADDRESS (msymbol)};
 
-	      VEC_safe_push (ada_exc_info, *exceptions, &info);
+	      exceptions->push_back (info);
 	    }
 	}
     }
@@ -13213,7 +13203,7 @@ ada_add_standard_exceptions (compiled_regex *preg,
 static void
 ada_add_exceptions_from_frame (compiled_regex *preg,
 			       struct frame_info *frame,
-			       VEC(ada_exc_info) **exceptions)
+			       std::vector<ada_exc_info> *exceptions)
 {
   const struct block *block = get_frame_block (frame, 0);
 
@@ -13236,7 +13226,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 		  struct ada_exc_info info = {SYMBOL_PRINT_NAME (sym),
 					      SYMBOL_VALUE_ADDRESS (sym)};
 
-		  VEC_safe_push (ada_exc_info, *exceptions, &info);
+		  exceptions->push_back (info);
 		}
 	    }
 	}
@@ -13276,7 +13266,7 @@ name_matches_regex (const char *name, compiled_regex *preg)
 
 static void
 ada_add_global_exceptions (compiled_regex *preg,
-			   VEC(ada_exc_info) **exceptions)
+			   std::vector<ada_exc_info> *exceptions)
 {
   struct objfile *objfile;
   struct compunit_symtab *s;
@@ -13311,7 +13301,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 		struct ada_exc_info info
 		  = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};
 
-		VEC_safe_push (ada_exc_info, *exceptions, &info);
+		exceptions->push_back (info);
 	      }
 	}
     }
@@ -13323,12 +13313,10 @@ ada_add_global_exceptions (compiled_regex *preg,
    If not NULL, PREG is used to filter out exceptions whose names
    do not match.  Otherwise, all exceptions are listed.  */
 
-static VEC(ada_exc_info) *
+static std::vector<ada_exc_info>
 ada_exceptions_list_1 (compiled_regex *preg)
 {
-  VEC(ada_exc_info) *result = NULL;
-  struct cleanup *old_chain
-    = make_cleanup (VEC_cleanup (ada_exc_info), &result);
+  std::vector<ada_exc_info> result;
   int prev_len;
 
   /* First, list the known standard exceptions.  These exceptions
@@ -13342,21 +13330,20 @@ ada_exceptions_list_1 (compiled_regex *preg)
 
   if (has_stack_frames ())
     {
-      prev_len = VEC_length (ada_exc_info, result);
+      prev_len = result.size ();
       ada_add_exceptions_from_frame (preg, get_selected_frame (NULL),
 				     &result);
-      if (VEC_length (ada_exc_info, result) > prev_len)
+      if (result.size () > prev_len)
 	sort_remove_dups_ada_exceptions_list (&result, prev_len);
     }
 
   /* Add all exceptions whose scope is global.  */
 
-  prev_len = VEC_length (ada_exc_info, result);
+  prev_len = result.size ();
   ada_add_global_exceptions (preg, &result);
-  if (VEC_length (ada_exc_info, result) > prev_len)
+  if (result.size () > prev_len)
     sort_remove_dups_ada_exceptions_list (&result, prev_len);
 
-  discard_cleanups (old_chain);
   return result;
 }
 
@@ -13374,7 +13361,7 @@ ada_exceptions_list_1 (compiled_regex *preg)
        alphabetical order;
      - Exceptions whose scope is global, in alphabetical order.  */
 
-VEC(ada_exc_info) *
+std::vector<ada_exc_info>
 ada_exceptions_list (const char *regexp)
 {
   if (regexp == NULL)
@@ -13389,14 +13376,9 @@ ada_exceptions_list (const char *regexp)
 static void
 info_exceptions_command (char *regexp, int from_tty)
 {
-  VEC(ada_exc_info) *exceptions;
-  struct cleanup *cleanup;
   struct gdbarch *gdbarch = get_current_arch ();
-  int ix;
-  struct ada_exc_info *info;
 
-  exceptions = ada_exceptions_list (regexp);
-  cleanup = make_cleanup (VEC_cleanup (ada_exc_info), &exceptions);
+  std::vector<ada_exc_info> exceptions = ada_exceptions_list (regexp);
 
   if (regexp != NULL)
     printf_filtered
@@ -13404,10 +13386,8 @@ info_exceptions_command (char *regexp, int from_tty)
   else
     printf_filtered (_("All defined Ada exceptions:\n"));
 
-  for (ix = 0; VEC_iterate(ada_exc_info, exceptions, ix, info); ix++)
-    printf_filtered ("%s: %s\n", info->name, paddress (gdbarch, info->addr));
-
-  do_cleanups (cleanup);
+  for (const ada_exc_info &info : exceptions)
+    printf_filtered ("%s: %s\n", info.name, paddress (gdbarch, info.addr));
 }
 
                                 /* Operators */
