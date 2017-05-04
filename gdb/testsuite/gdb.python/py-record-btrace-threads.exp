@@ -69,8 +69,8 @@ proc check_insn_for_thread { self other } {
     gdb_test_no_output "python f1calls = \{x for x in fch if x.symbol and x.symbol.name == \"func1\"\}"
     gdb_test_no_output "python f2calls = \{x for x in fch if x.symbol and x.symbol.name == \"func2\"\}"
 
-    gdb_test "python print not f${self}calls" "False"
-    gdb_test "python print not f${other}calls" "True"
+    gdb_test "python print(not f${self}calls)" "False"
+    gdb_test "python print(not f${other}calls)" "True"
   }
 }
 
