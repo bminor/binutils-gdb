@@ -36,24 +36,24 @@
 #endif
 
 #define BTPY_REQUIRE_VALID_INSN(obj, iter)				\
-    do {								\
-      struct thread_info *tinfo = find_thread_ptid (obj->ptid);		\
-      if (tinfo == NULL || btrace_is_empty (tinfo))			\
-	return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));\
-      if (0 == btrace_find_insn_by_number (&iter, &tinfo->btrace,	\
-					   obj->number))		\
-	return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));\
-    } while (0)
+  do {									\
+    struct thread_info *tinfo = find_thread_ptid (obj->ptid);		\
+    if (tinfo == NULL || btrace_is_empty (tinfo))			\
+      return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));	\
+    if (0 == btrace_find_insn_by_number (&iter, &tinfo->btrace,		\
+					 obj->number))			\
+      return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));	\
+  } while (0)
 
 #define BTPY_REQUIRE_VALID_CALL(obj, iter)				\
-    do {								\
-      struct thread_info *tinfo = find_thread_ptid (obj->ptid);		\
-      if (tinfo == NULL || btrace_is_empty (tinfo))			\
-	return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));\
-      if (0 == btrace_find_call_by_number (&iter, &tinfo->btrace,	\
-					   obj->number))		\
-	return PyErr_Format (gdbpy_gdb_error, _("No such call segment."));\
-    } while (0)
+  do {									\
+    struct thread_info *tinfo = find_thread_ptid (obj->ptid);		\
+    if (tinfo == NULL || btrace_is_empty (tinfo))			\
+      return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));	\
+    if (0 == btrace_find_call_by_number (&iter, &tinfo->btrace,		\
+					 obj->number))			\
+      return PyErr_Format (gdbpy_gdb_error, _("No such call segment."));\
+  } while (0)
 
 /* This can either be a btrace instruction or a function call segment,
    depending on the chosen type.  */
@@ -842,26 +842,26 @@ recpy_bt_instruction_history (PyObject *self, void *closure)
 PyObject *
 recpy_bt_function_call_history (PyObject *self, void *closure)
 {
-    struct thread_info * const tinfo = find_thread_ptid (inferior_ptid);
-    struct btrace_call_iterator iterator;
-    unsigned long first = 0;
-    unsigned long last = 0;
+  struct thread_info * const tinfo = find_thread_ptid (inferior_ptid);
+  struct btrace_call_iterator iterator;
+  unsigned long first = 0;
+  unsigned long last = 0;
 
-    if (tinfo == NULL)
-      Py_RETURN_NONE;
+  if (tinfo == NULL)
+    Py_RETURN_NONE;
 
-    btrace_fetch (tinfo);
+  btrace_fetch (tinfo);
 
-    if (btrace_is_empty (tinfo))
-      Py_RETURN_NONE;
+  if (btrace_is_empty (tinfo))
+    Py_RETURN_NONE;
 
-    btrace_call_begin (&iterator, &tinfo->btrace);
-    first = btrace_call_number (&iterator);
+  btrace_call_begin (&iterator, &tinfo->btrace);
+  first = btrace_call_number (&iterator);
 
-    btrace_call_end (&iterator, &tinfo->btrace);
-    last = btrace_call_number (&iterator);
+  btrace_call_end (&iterator, &tinfo->btrace);
+  last = btrace_call_number (&iterator);
 
-    return btpy_list_new (inferior_ptid, first, last, 1, &btpy_call_type);
+  return btpy_list_new (inferior_ptid, first, last, 1, &btpy_call_type);
 }
 
 /* Implementation of BtraceRecord.goto (self, BtraceInstruction) -> None.  */

@@ -1,3 +1,9 @@
+2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN,
+	BTPY_REQUIRE_VALID_CALL, recpy_bt_function_call_history): Fix
+	indentation.
+
 2017-04-28  Yao Qi  <yao.qi@linaro.org>
 
 	* mips-linux-nat.c (mips_linux_new_thread): Use ptid method
