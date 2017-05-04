@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.12
+*** Changes in GDB 8.0
 
 * GDB now supports access to the PKU register on GNU/Linux. The register is
   added by the Memory Protection Keys for Userspace feature which will be
