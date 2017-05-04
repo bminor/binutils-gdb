@@ -1,5 +1,18 @@
 2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-instruction.o.
+	(SUBDIR_PYTHON_SRCS): Add py-instruction.c.
+	* python/py-instruction.c, python/py-instruction.h: New file.
+	* python/py-record.c: Add py-instruction.h include.
+	(gdbpy_initialize_record): Make gdb.Instruction a super class of
+	gdb.RecordInstruction.
+	* python/python-internal.h: Add gdbpy_initialize_instruction
+	declaration.
+	* python/python.c (do_start_initialization): Add
+	gdbpy_initialize_instruction.
+
+2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_CALL, btpy_call_type):
 	Remove.
 	(btrace_func_from_recpy_func): New function.

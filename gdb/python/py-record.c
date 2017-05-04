@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "py-instruction.h"
 #include "py-record.h"
 #include "py-record-btrace.h"
 #include "py-record-full.h"
@@ -561,6 +562,7 @@ gdbpy_initialize_record (void)
   recpy_insn_type.tp_getset = recpy_insn_getset;
   recpy_insn_type.tp_richcompare = recpy_element_richcompare;
   recpy_insn_type.tp_hash = recpy_element_hash;
+  recpy_insn_type.tp_base = &py_insn_type;
 
   recpy_func_type.tp_new = PyType_GenericNew;
   recpy_func_type.tp_flags = Py_TPFLAGS_DEFAULT;
