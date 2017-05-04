@@ -1,5 +1,10 @@
 2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* gdb.python/py-record-btrace.exp: Remove test for
+	gdb.BtraceInstruction.error.
+
+2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* gdb.python/py-record-btrace.exp: Remove Record.ptid test.
 
 2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>

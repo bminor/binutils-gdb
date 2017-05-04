@@ -1,3 +1,9 @@
+2017-05-04  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Add documentation for
+	gdb.RecordGap and remove documentation of special cases for
+	gdb.BtraceInstruction.
+
 2017-05-04  Tim Wiederhake <tim.wiederhake@intel.com>
 
 	* python.texi (Recording in Python): Remove Record.ptid defvar.

@@ -126,12 +126,30 @@ btpy_new (ptid_t ptid, Py_ssize_t number, PyTypeObject* type)
   return (PyObject *) obj;
 }
 
-/* Create a new gdb.BtraceInstruction object.  */
+/* Looks at the recorded item with the number NUMBER and create a
+   gdb.BtraceInstruction or gdb.RecordGap object for it accordingly.  */
 
 static PyObject *
-btpy_insn_new (ptid_t ptid, Py_ssize_t number)
+btpy_insn_or_gap_new (const thread_info *tinfo, Py_ssize_t number)
 {
-  return btpy_new (ptid, number, &btpy_insn_type);
+  btrace_insn_iterator iter;
+  int err_code;
+
+  btrace_find_insn_by_number (&iter, &tinfo->btrace, number);
+  err_code = btrace_insn_get_error (&iter);
+
+  if (err_code != 0)
+    {
+      const btrace_config *config;
+      const char *err_string;
+
+      config = btrace_conf (&tinfo->btrace);
+      err_string = btrace_decode_error (config->format, err_code);
+
+      return recpy_gap_new (err_code, err_string, number);
+    }
+
+  return btpy_new (tinfo->ptid, number, &btpy_insn_type);
 }
 
 /* Create a new gdb.BtraceFunctionCall object.  */
@@ -185,26 +203,6 @@ btpy_hash (PyObject *self)
   return obj->number;
 }
 
-/* Implementation of BtraceInstruction.error [int].  Returns the
-   error code for gaps.  */
-
-static PyObject *
-btpy_insn_error (PyObject *self, void *closure)
-{
-  const btpy_object * const obj = (btpy_object *) self;
-  struct btrace_insn_iterator iter;
-  int error;
-
-  BTPY_REQUIRE_VALID_INSN (obj, iter);
-
-  error = btrace_insn_get_error (&iter);
-
-  if (error == 0)
-    Py_RETURN_NONE;
-
-  return PyInt_FromLong (error);
-}
-
 /* Implementation of BtraceInstruction.sal [gdb.Symtab_and_line].
    Return the SAL associated with this instruction.  */
 
@@ -220,7 +218,7 @@ btpy_insn_sal (PyObject *self, void *closure)
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
-    Py_RETURN_NONE;
+    return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
 
   TRY
     {
@@ -249,7 +247,7 @@ btpy_insn_pc (PyObject *self, void *closure)
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
-    Py_RETURN_NONE;
+    return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
 
   return gdb_py_long_from_ulongest (insn->pc);
 }
@@ -268,7 +266,7 @@ btpy_insn_size (PyObject *self, void *closure)
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
-    Py_RETURN_NONE;
+    return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
 
   return PyInt_FromLong (insn->size);
 }
@@ -287,7 +285,7 @@ btpy_insn_is_speculative (PyObject *self, void *closure)
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
-    Py_RETURN_NONE;
+    return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
 
   if (insn->flags & BTRACE_INSN_FLAG_SPECULATIVE)
     Py_RETURN_TRUE;
@@ -311,7 +309,7 @@ btpy_insn_data (PyObject *self, void *closure)
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
-    Py_RETURN_NONE;
+    return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
 
   TRY
     {
@@ -354,14 +352,7 @@ btpy_insn_decode (PyObject *self, void *closure)
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
-    {
-      int error_code = btrace_insn_get_error (&iter);
-      const struct btrace_config *config;
-
-      config = btrace_conf (&find_thread_ptid (obj->ptid)->btrace);
-      return PyBytes_FromString (btrace_decode_error (config->format,
-						      error_code));
-    }
+    return PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
 
   TRY
     {
@@ -765,8 +756,8 @@ recpy_bt_replay_position (PyObject *self, void *closure)
   if (tinfo->btrace.replay == NULL)
     Py_RETURN_NONE;
 
-  return btpy_insn_new (record->ptid,
-			btrace_insn_number (tinfo->btrace.replay));
+  return btpy_insn_or_gap_new (tinfo,
+			       btrace_insn_number (tinfo->btrace.replay));
 }
 
 /* Implementation of
@@ -788,7 +779,7 @@ recpy_bt_begin (PyObject *self, void *closure)
     Py_RETURN_NONE;
 
   btrace_insn_begin (&iterator, &tinfo->btrace);
-  return btpy_insn_new (record->ptid, btrace_insn_number (&iterator));
+  return btpy_insn_or_gap_new (tinfo, btrace_insn_number (&iterator));
 }
 
 /* Implementation of
@@ -810,7 +801,7 @@ recpy_bt_end (PyObject *self, void *closure)
     Py_RETURN_NONE;
 
   btrace_insn_end (&iterator, &tinfo->btrace);
-  return btpy_insn_new (record->ptid, btrace_insn_number (&iterator));
+  return btpy_insn_or_gap_new (tinfo, btrace_insn_number (&iterator));
 }
 
 /* Implementation of
@@ -914,7 +905,6 @@ recpy_bt_goto (PyObject *self, PyObject *args)
 struct gdb_PyGetSetDef btpy_insn_getset[] =
 {
   { "number", btpy_number, NULL, "instruction number", NULL},
-  { "error", btpy_insn_error, NULL, "error number for gaps", NULL},
   { "sal", btpy_insn_sal, NULL, "associated symbol and line", NULL},
   { "pc", btpy_insn_pc, NULL, "instruction address", NULL},
   { "data", btpy_insn_data, NULL, "raw instruction data", NULL},
