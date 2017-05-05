@@ -1875,20 +1875,19 @@ mi_cmd_remove_inferior (const char *command, char **argv, int argc)
    Return <0 for error; >=0 for ok.
 
    args->action will tell mi_execute_command what action
-   to perfrom after the given command has executed (display/suppress
+   to perform after the given command has executed (display/suppress
    prompt, display error).  */
 
 static void
 captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 {
   struct mi_interp *mi = (struct mi_interp *) command_interp ();
-  struct cleanup *cleanup;
 
   if (do_timings)
     current_command_ts = context->cmd_start;
 
-  current_token = xstrdup (context->token);
-  cleanup = make_cleanup (free_current_contents, &current_token);
+  scoped_restore save_token = make_scoped_restore (&current_token,
+						   context->token);
 
   running_result_record_printed = 0;
   mi_proceeded = 0;
@@ -1964,8 +1963,6 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	break;
       }
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Print a gdb exception to the MI output stream.  */

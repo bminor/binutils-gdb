@@ -1,5 +1,9 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (captured_mi_execute_command): Use scope_restore.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions): Update.
 	* ada-lang.h (struct ada_exc_info): Remove typedef.  Declare
 	operator< and operator==.
