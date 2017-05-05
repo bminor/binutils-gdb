@@ -1,3 +1,8 @@
+2017-05-05  Pedro Alves  <palves@redhat.com>
+
+	* warning.m4 (build_warnings): Add -Wno-error=maybe-uninitialized.
+	* configure: Regenerate.
+
 2017-05-04  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add progspace-and-thread.c.
