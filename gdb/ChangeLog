@@ -1,3 +1,7 @@
+2017-05-05  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_clear): Free insn vector.
+
 2017-05-05  Pedro Alves  <palves@redhat.com>
 
 	* warning.m4 (build_warnings): Add -Wno-error=maybe-uninitialized.
