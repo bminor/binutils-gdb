@@ -1563,10 +1563,10 @@ oper:	OPERATOR NEW
 					&type_print_raw_options);
 
 			  /* This also needs canonicalization.  */
-			  const char *name = buf.c_str ();
-			  std::string canon = cp_canonicalize_string (name);
+			  std::string canon
+			    = cp_canonicalize_string (buf.c_str ());
 			  if (canon.empty ())
-			    canon = name;
+			    canon = std::move (buf.string ());
 
 			  /* We need a space between "operator" and the
 			     canonicalized type name. */

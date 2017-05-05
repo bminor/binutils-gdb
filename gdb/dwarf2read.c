@@ -8606,6 +8606,22 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
    or DW_AT_MIPS_linkage_name.  Returns NULL if the attribute is not
    defined for the given DIE.  */
 
+static struct attribute *
+dw2_linkage_name_attr (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
+  if (attr == NULL)
+    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+  return attr;
+}
+
+/* Return the DIE's linkage name as a string, either DW_AT_linkage_name
+   or DW_AT_MIPS_linkage_name.  Returns NULL if the attribute is not
+   defined for the given DIE.  */
+
 static const char *
 dw2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -13607,8 +13623,8 @@ new_fn_field (struct die_info *name_die, struct dwarf2_cu *name_cu,
 		{
 		  complaint (&symfile_complaints,
 			     _("cannot determine context for virtual member "
-			       "function \"%s\" (offset %d)"), fieldname,
-			     to_underlying (type_die->sect_off));
+			       "function \"%s\" (offset %d)"),
+			     fieldname, to_underlying (type_die->sect_off));
 		}
 	      else
 		{
@@ -13757,7 +13773,7 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 /* Returns non-zero if NAME is the name of a vtable member in CU's
    language, zero otherwise.  */
 static int
-dw2_is_vtable_name (const char *name, struct dwarf2_cu *cu)
+is_vtable_name (const char *name, struct dwarf2_cu *cu)
 {
   static const char vptr[] = "_vptr";
   static const char vtable[] = "vtable";
@@ -14107,7 +14123,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		    {
 		      const char *fieldname = TYPE_FIELD_NAME (t, i);
 
-                      if (dw2_is_vtable_name (fieldname, cu))
+                      if (is_vtable_name (fieldname, cu))
 			{
 			  set_type_vptr_fieldno (type, i);
 			  break;
@@ -20527,10 +20543,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  char *demangled = NULL;
 
-	  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-	  if (attr == NULL)
-	    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
-
+	  attr = dw2_linkage_name_attr (die, cu);
 	  if (attr == NULL || DW_STRING (attr) == NULL)
 	    return NULL;
 
