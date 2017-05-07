@@ -2097,6 +2097,12 @@ public:
 
   void visit (const tdesc_reg *reg) override
   {
+    if (reg->target_regnum > next_regnum)
+      {
+	printf_unfiltered ("  regnum = %ld;\n", reg->target_regnum);
+	next_regnum = reg->target_regnum;
+      }
+
     printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", regnum++, %d, ",
 		       reg->name, reg->save_restore);
     if (reg->group)
@@ -2104,8 +2110,13 @@ public:
     else
       printf_unfiltered ("NULL, ");
     printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type);
+
+    next_regnum++;
   }
 
+private:
+  /* The register number to use for the next register we see.  */
+  int next_regnum = 0;
 };
 
 static void

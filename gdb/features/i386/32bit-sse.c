@@ -63,6 +63,7 @@ create_feature_i386_32bit_sse (struct target_desc *result, long regnum)
   tdesc_add_flag (type, 12, "PM");
   tdesc_add_flag (type, 15, "FZ");
 
+  regnum = 32;
   tdesc_create_reg (feature, "xmm0", regnum++, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "xmm1", regnum++, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "xmm2", regnum++, 1, NULL, 128, "vec128");
