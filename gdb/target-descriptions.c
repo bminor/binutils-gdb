@@ -2101,6 +2101,48 @@ public:
 
   void visit (const tdesc_reg *reg) override
   {
+    /* Most "reg" in XML target descriptions don't have "regnum"
+       attribute, so the register number is allocated sequentially.
+       In case that reg has "regnum" attribute, register number
+       should be set by that explicitly.  */
+
+    if (reg->target_regnum < m_next_regnum)
+      {
+	/* The integrity check, it can catch some errors on register
+	   number collision, like this,
+
+	  <reg name="x0" bitsize="32"/>
+	  <reg name="x1" bitsize="32"/>
+	  <reg name="x2" bitsize="32"/>
+	  <reg name="x3" bitsize="32"/>
+	  <reg name="ps" bitsize="32" regnum="3"/>
+
+	  but it also has false negatives.  The target description
+	  below is correct,
+
+	  <reg name="x1" bitsize="32" regnum="1"/>
+	  <reg name="x3" bitsize="32" regnum="3"/>
+	  <reg name="x2" bitsize="32" regnum="2"/>
+	  <reg name="x4" bitsize="32" regnum="4"/>
+
+	  but it is not a good practice, so still error on this,
+	  and also print the message so that it can be saved in the
+	  generated c file.  */
+
+	printf_unfiltered ("ERROR: \"regnum\" attribute %ld ",
+			   reg->target_regnum);
+	printf_unfiltered ("is not the largest number (%d).\n",
+			   m_next_regnum);
+	error (_("\"regnum\" attribute %ld is not the largest number (%d)."),
+	       reg->target_regnum, m_next_regnum);
+      }
+
+    if (reg->target_regnum > m_next_regnum)
+      {
+	printf_unfiltered ("  regnum = %ld;\n", reg->target_regnum);
+	m_next_regnum = reg->target_regnum;
+      }
+
     printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", regnum++, %d, ",
 		       reg->name, reg->save_restore);
     if (reg->group)
@@ -2108,8 +2150,13 @@ public:
     else
       printf_unfiltered ("NULL, ");
     printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type);
+
+    m_next_regnum++;
   }
 
+private:
+  /* The register number to use for the next register we see.  */
+  int m_next_regnum = 0;
 };
 
 static void
