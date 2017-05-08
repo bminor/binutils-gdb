@@ -6501,7 +6501,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
       { ".plt", NULL, NULL, plt_unknown, 0, 0, 0, 0 },
       { ".plt.got", NULL, NULL, plt_non_lazy, 0, 0, 0, 0 },
       { ".plt.bnd", NULL, NULL, plt_bnd, 0, 0, 0, 0 },
-      { NULL, }
+      { NULL, NULL, NULL, plt_non_lazy, 0, 0, 0, 0 }
     };
 
   *ret = NULL;
