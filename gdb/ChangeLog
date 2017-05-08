@@ -1,5 +1,11 @@
 2017-05-08  Alan Hayward  <alan.hayward@arm.com>
 
+	* mips-linux-tdep.c (mips_supply_gregset): Use raw_supply_zeroed.
+	(mips_supply_fpregset): Likewise.
+	(mips64_supply_gregset): Likewise.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
 	* mn10300-linux-tdep.c (am33_supply_gregset_method): Use 
 	regcache->raw_supply_zeroed.
 
