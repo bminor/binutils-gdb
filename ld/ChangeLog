@@ -1,3 +1,10 @@
+2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): Check e_type field
+	of import library and executable produced.
+	* testsuite/ld-arm/cmse-implib.type: Expectations for e_type field.
+
 2017-04-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/21404
