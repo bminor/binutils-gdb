@@ -1,3 +1,8 @@
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mn10300-linux-tdep.c (am33_supply_gregset_method): Use 
+	regcache->raw_supply_zeroed.
+
 2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
  	* configure.nat: Rearrange 'case' statements to match
