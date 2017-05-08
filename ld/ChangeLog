@@ -1,3 +1,17 @@
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Add some -z now tests.
+	* testsuite/ld-i386/plt-pic2.dd: New file.
+	* testsuite/ld-i386/plt2.dd: Likewise.
+	* testsuite/ld-i386/plt2.rd: Likewise.
+	* testsuite/ld-i386/plt2.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-local-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-i386-now.d: Likewise.
+	* testsuite/ld-i386/pr20830.d: Update the .plt.got section
+	with func@plt.
+
 2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp

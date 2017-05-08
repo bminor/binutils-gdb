@@ -1160,6 +1160,27 @@ if { !([istarget "i?86-*-linux*"]
     return
 }
 
+run_ld_link_tests [list \
+    [list \
+	"basic PLT generation (non-PIC, -z now)" \
+	"-z now -melf_i386 tmpdir/libpltlib.so" \
+	"" \
+	"--32" \
+	{plt2.s} \
+	{{readelf -SW plt2.rd} {objdump -dwr plt2.dd}} \
+	"plt2" \
+    ] \
+    [list \
+	"basic PLT generation (PIC, -z now)" \
+	"-z now -shared -melf_i386 tmpdir/libpltlib.so" \
+	"" \
+	"--32" \
+	{plt-pic.s} \
+	{{objdump -dwr plt-pic2.dd}} \
+	"plt-pic2.so" \
+    ] \
+]
+
 # Linux only tests
 run_dump_test "pltgot-1"
 run_dump_test "pltgot-2"

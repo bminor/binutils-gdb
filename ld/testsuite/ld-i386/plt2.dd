@@ -1,0 +1,35 @@
+#source: plt2.s
+#as: --32
+#ld: -z now -melf_i386
+#objdump: -dwr
+#target: i?86-*-*
+
+.*: +file format .*
+
+
+Disassembly of section .plt:
+
+0+80481c0 <.plt>:
+ +[a-f0-9]+:	ff 35 b4 92 04 08    	pushl  0x80492b4
+ +[a-f0-9]+:	ff 25 b8 92 04 08    	jmp    \*0x80492b8
+ +[a-f0-9]+:	00 00                	add    %al,\(%eax\)
+	...
+
+0+80481d0 <fn1@plt>:
+ +[a-f0-9]+:	ff 25 bc 92 04 08    	jmp    \*0x80492bc
+ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
+ +[a-f0-9]+:	e9 e0 ff ff ff       	jmp    80481c0 <.plt>
+
+Disassembly of section .plt.got:
+
+0+80481e0 <fn2@plt>:
+ +[a-f0-9]+:	ff 25 ac 92 04 08    	jmp    \*0x80492ac
+ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
+
+Disassembly of section .text:
+
+0+80481e8 <_start>:
+ +[a-f0-9]+:	e8 e3 ff ff ff       	call   80481d0 <fn1@plt>
+ +[a-f0-9]+:	e8 ee ff ff ff       	call   80481e0 <fn2@plt>
+ +[a-f0-9]+:	81 7c 24 04 d0 81 04 08 	cmpl   \$0x80481d0,0x4\(%esp\)
+#pass
