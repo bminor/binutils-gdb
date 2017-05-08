@@ -1,5 +1,10 @@
 2017-05-08  Alan Hayward  <alan.hayward@arm.com>
 
+	* mips-tdep.c (mips_o32_return_value): Remove unused buffer.
+	(print_gp_register_row): Use get_frame_register_value.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
 	* mips-linux-tdep.c (mips_supply_gregset): Use raw_supply_zeroed.
 	(mips_supply_fpregset): Likewise.
 	(mips64_supply_gregset): Likewise.
