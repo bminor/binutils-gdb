@@ -1,5 +1,11 @@
 2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Add missing
+	initializer to silence GCC 4.2.
+	* lf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (PLT_ENTRY_SIZE): Renamed to ...
 	(LAZY_PLT_ENTRY_SIZE): This.
 	(NON_LAZY_PLT_ENTRY_SIZE): New.
