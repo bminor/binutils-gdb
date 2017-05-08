@@ -1,0 +1,791 @@
+From 6ff20007af9962d66cc3fefbe2db9beb509285d7 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Mon, 8 May 2017 13:11:23 -0700
+Subject: [PATCH] x86: Generate PLT relocations for -z now
+
+This patch partially reverses:
+
+commit 25070364b0ce33eed46aa5d78ebebbec6accec7e
+Author: H.J. Lu <hjl.tools@gmail.com>
+Date:   Sat May 16 07:00:21 2015 -0700
+
+    Don't generate PLT relocations for now binding
+
+to support LD_AUDIT and LD_PROFILE with -z now.  If there is an existing
+GOT relocation, it is still used to avoid PLT relocation against the same
+function symbol.
+
+bfd/
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Partially revert
+	commit 25070364b0ce33eed46aa5d78ebebbec6accec7e.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewse.
+
+ld/
+
+	* testsuite/ld-i386/plt-pic2.dd: Updated.
+	* testsuite/ld-i386/plt2.dd: Likewise.
+	* testsuite/ld-i386/plt2.rd: Likewise.
+	* testsuite/ld-i386/pr17689now.rd: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-x86-64-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-x86-64-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-branch-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/plt2.dd: Likewise.
+	* testsuite/ld-x86-64/plt2.rd: Likewise.
+	* testsuite/ld-x86-64/pr17689now.rd: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+---
+ bfd/elf32-i386.c                            | 16 +--------
+ bfd/elf64-x86-64.c                          | 16 +--------
+ ld/testsuite/ld-i386/plt-pic2.dd            | 20 +++++------
+ ld/testsuite/ld-i386/plt2.dd                | 17 +++++-----
+ ld/testsuite/ld-i386/plt2.rd                |  2 +-
+ ld/testsuite/ld-i386/pr17689now.rd          |  3 +-
+ ld/testsuite/ld-ifunc/ifunc-16-i386-now.d   |  6 +---
+ ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d |  6 +---
+ ld/testsuite/ld-ifunc/pr17154-i386-now.d    | 36 ++++++++++----------
+ ld/testsuite/ld-ifunc/pr17154-x86-64-now.d  | 46 ++++++++++++-------------
+ ld/testsuite/ld-x86-64/bnd-branch-1-now.d   | 42 ++++++++++++-----------
+ ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d    | 48 ++++++++++++++------------
+ ld/testsuite/ld-x86-64/bnd-plt-1-now.d      | 52 ++++++++++++++++++-----------
+ ld/testsuite/ld-x86-64/plt2.dd              | 19 +++++------
+ ld/testsuite/ld-x86-64/plt2.rd              |  2 +-
+ ld/testsuite/ld-x86-64/pr17689now.rd        |  3 +-
+ ld/testsuite/ld-x86-64/pr21038b-now.d       | 23 ++++++-------
+ ld/testsuite/ld-x86-64/pr21038c-now.d       | 32 ++++++++++++------
+ 18 files changed, 188 insertions(+), 201 deletions(-)
+
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index 0707b5a..e94f362 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -2657,26 +2657,12 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	   && (h->plt.refcount > eh->func_pointer_refcount
+ 	       || eh->plt_got.refcount > 0))
+     {
+-      bfd_boolean use_plt_got;
++      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
+ 
+       /* Clear the reference count of function pointer relocations
+ 	 if PLT is used.  */
+       eh->func_pointer_refcount = 0;
+ 
+-      if (htab->plt_got != NULL
+-	  && (info->flags & DF_BIND_NOW)
+-	  && !h->pointer_equality_needed)
+-	{
+-	  /* Don't use the regular PLT for DF_BIND_NOW. */
+-	  h->plt.offset = (bfd_vma) -1;
+-
+-	  /* Use the GOT PLT.  */
+-	  h->got.refcount = 1;
+-	  eh->plt_got.refcount = 1;
+-	}
+-
+-      use_plt_got = eh->plt_got.refcount > 0;
+-
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 6d69997..a825d50 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -3057,26 +3057,12 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 	   && (h->plt.refcount > eh->func_pointer_refcount
+ 	       || eh->plt_got.refcount > 0))
+     {
+-      bfd_boolean use_plt_got;
++      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
+ 
+       /* Clear the reference count of function pointer relocations
+ 	 if PLT is used.  */
+       eh->func_pointer_refcount = 0;
+ 
+-      if (htab->plt_got != NULL
+-	  && (info->flags & DF_BIND_NOW)
+-	  && !h->pointer_equality_needed)
+-	{
+-	  /* Don't use the regular PLT for DF_BIND_NOW. */
+-	  h->plt.offset = (bfd_vma) -1;
+-
+-	  /* Use the GOT PLT.  */
+-	  h->got.refcount = 1;
+-	  eh->plt_got.refcount = 1;
+-	}
+-
+-      use_plt_got = eh->plt_got.refcount > 0;
+-
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+diff --git a/ld/testsuite/ld-i386/plt-pic2.dd b/ld/testsuite/ld-i386/plt-pic2.dd
+index aa311fe..4047db5 100644
+--- a/ld/testsuite/ld-i386/plt-pic2.dd
++++ b/ld/testsuite/ld-i386/plt-pic2.dd
+@@ -15,19 +15,19 @@ Disassembly of section .plt:
+  +[a-f0-9]+:	00 00                	add    %al,\(%eax\)
+ 	...
+ 
+-Disassembly of section .plt.got:
+-
+ 0+190 <fn1@plt>:
+- +[a-f0-9]+:	ff a3 f8 ff ff ff    	jmp    \*-0x8\(%ebx\)
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++ +[a-f0-9]+:	e9 e0 ff ff ff       	jmp    180 <.plt>
+ 
+-0+198 <fn2@plt>:
+- +[a-f0-9]+:	ff a3 fc ff ff ff    	jmp    \*-0x4\(%ebx\)
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+1a0 <fn2@plt>:
++ +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d0 ff ff ff       	jmp    180 <.plt>
+ 
+ Disassembly of section .text:
+ 
+-0+1a0 <foo>:
+- +[a-f0-9]+:	e8 eb ff ff ff       	call   190 <fn1@plt>
+- +[a-f0-9]+:	e9 ee ff ff ff       	jmp    198 <fn2@plt>
++0+1b0 <foo>:
++ +[a-f0-9]+:	e8 db ff ff ff       	call   190 <fn1@plt>
++ +[a-f0-9]+:	e9 e6 ff ff ff       	jmp    1a0 <fn2@plt>
+ #pass
+diff --git a/ld/testsuite/ld-i386/plt2.dd b/ld/testsuite/ld-i386/plt2.dd
+index 1a5ea6f..9f8e11d 100644
+--- a/ld/testsuite/ld-i386/plt2.dd
++++ b/ld/testsuite/ld-i386/plt2.dd
+@@ -10,26 +10,25 @@
+ Disassembly of section .plt:
+ 
+ 0+80481c0 <.plt>:
+- +[a-f0-9]+:	ff 35 b4 92 04 08    	pushl  0x80492b4
+- +[a-f0-9]+:	ff 25 b8 92 04 08    	jmp    \*0x80492b8
++ +[a-f0-9]+:	ff 35 a0 92 04 08    	pushl  0x80492a0
++ +[a-f0-9]+:	ff 25 a4 92 04 08    	jmp    \*0x80492a4
+  +[a-f0-9]+:	00 00                	add    %al,\(%eax\)
+ 	...
+ 
+ 0+80481d0 <fn1@plt>:
+- +[a-f0-9]+:	ff 25 bc 92 04 08    	jmp    \*0x80492bc
++ +[a-f0-9]+:	ff 25 a8 92 04 08    	jmp    \*0x80492a8
+  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
+  +[a-f0-9]+:	e9 e0 ff ff ff       	jmp    80481c0 <.plt>
+ 
+-Disassembly of section .plt.got:
+-
+ 0+80481e0 <fn2@plt>:
+  +[a-f0-9]+:	ff 25 ac 92 04 08    	jmp    \*0x80492ac
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d0 ff ff ff       	jmp    80481c0 <.plt>
+ 
+ Disassembly of section .text:
+ 
+-0+80481e8 <_start>:
+- +[a-f0-9]+:	e8 e3 ff ff ff       	call   80481d0 <fn1@plt>
+- +[a-f0-9]+:	e8 ee ff ff ff       	call   80481e0 <fn2@plt>
++0+80481f0 <_start>:
++ +[a-f0-9]+:	e8 db ff ff ff       	call   80481d0 <fn1@plt>
++ +[a-f0-9]+:	e8 e6 ff ff ff       	call   80481e0 <fn2@plt>
+  +[a-f0-9]+:	81 7c 24 04 d0 81 04 08 	cmpl   \$0x80481d0,0x4\(%esp\)
+ #pass
+diff --git a/ld/testsuite/ld-i386/plt2.rd b/ld/testsuite/ld-i386/plt2.rd
+index 11952b4..8233a9a 100644
+--- a/ld/testsuite/ld-i386/plt2.rd
++++ b/ld/testsuite/ld-i386/plt2.rd
+@@ -5,5 +5,5 @@
+ #target: i?86-*-*
+ 
+ #...
+- +\[ *[0-9]+\] \.plt +PROGBITS +[0-9a-f]+ +[0-9a-f]+ +0+20 +.* +AX +0 +0 +16
++ +\[ *[0-9]+\] \.plt +PROGBITS +[0-9a-f]+ +[0-9a-f]+ +0+30 +.* +AX +0 +0 +16
+ #pass
+diff --git a/ld/testsuite/ld-i386/pr17689now.rd b/ld/testsuite/ld-i386/pr17689now.rd
+index 9741df8..594c424 100644
+--- a/ld/testsuite/ld-i386/pr17689now.rd
++++ b/ld/testsuite/ld-i386/pr17689now.rd
+@@ -1,4 +1,3 @@
+-#failif
+ #...
+ [0-9a-f ]+R_386_JUMP_SLOT +0+.*
+-#...
++#pass
+diff --git a/ld/testsuite/ld-ifunc/ifunc-16-i386-now.d b/ld/testsuite/ld-ifunc/ifunc-16-i386-now.d
+index 088b1f3..b72f077 100644
+--- a/ld/testsuite/ld-ifunc/ifunc-16-i386-now.d
++++ b/ld/testsuite/ld-ifunc/ifunc-16-i386-now.d
+@@ -3,12 +3,8 @@
+ #as: --32
+ #readelf: -r --wide
+ #target: x86_64-*-* i?86-*-*
+-#notarget: x86_64-*-nacl* i?86-*-nacl*
+-
+-Relocation section '.rel.dyn' at .*
+-[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
+-[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_GLOB_DAT[ ]+0+[ ]+ifunc
+ 
+ Relocation section '.rel.plt' at .*
+ [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_JUMP_SLOT[ ]+0+[ ]+ifunc
+ [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_386_IRELATIVE[ ]*
+diff --git a/ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d b/ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d
+index acc5093..db6c0e2 100644
+--- a/ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d
++++ b/ld/testsuite/ld-ifunc/ifunc-16-x86-64-now.d
+@@ -3,12 +3,8 @@
+ #ld: -z now -shared -melf_x86_64
+ #readelf: -r --wide
+ #target: x86_64-*-*
+-#notarget: x86_64-*-nacl*
+-
+-Relocation section '.rela.dyn' at .*
+-[ ]+Offset[ ]+Info[ ]+Type[ ]+.*
+-[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_GLOB_DAT[ ]+0+[ ]+ifunc \+ 0
+ 
+ Relocation section '.rela.plt' at .*
+ [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
++[0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_JUMP_SLOT[ ]+0+[ ]+ifunc \+ 0
+ [0-9a-f]+[ ]+[0-9a-f]+[ ]+R_X86_64_IRELATIVE[ ]+[0-9a-f]*
+diff --git a/ld/testsuite/ld-ifunc/pr17154-i386-now.d b/ld/testsuite/ld-ifunc/pr17154-i386-now.d
+index 006af67..cb70b27 100644
+--- a/ld/testsuite/ld-ifunc/pr17154-i386-now.d
++++ b/ld/testsuite/ld-ifunc/pr17154-i386-now.d
+@@ -18,35 +18,35 @@ Disassembly of section .plt:
+ 
+ 0+1e0 <\*ABS\*@plt>:
+  +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
+- +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	68 18 00 00 00       	push   \$0x18
+  +[a-f0-9]+:	e9 e0 ff ff ff       	jmp    1d0 <.plt>
+ 
+-0+1f0 <\*ABS\*@plt>:
++0+1f0 <func1@plt>:
+  +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
+  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
+  +[a-f0-9]+:	e9 d0 ff ff ff       	jmp    1d0 <.plt>
+ 
+-Disassembly of section .plt.got:
+-
+-0+200 <func1@plt>:
+- +[a-f0-9]+:	ff a3 f8 ff ff ff    	jmp    \*-0x8\(%ebx\)
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+200 <func2@plt>:
++ +[a-f0-9]+:	ff a3 14 00 00 00    	jmp    \*0x14\(%ebx\)
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 c0 ff ff ff       	jmp    1d0 <.plt>
+ 
+-0+208 <func2@plt>:
+- +[a-f0-9]+:	ff a3 fc ff ff ff    	jmp    \*-0x4\(%ebx\)
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+210 <\*ABS\*@plt>:
++ +[a-f0-9]+:	ff a3 18 00 00 00    	jmp    \*0x18\(%ebx\)
++ +[a-f0-9]+:	68 10 00 00 00       	push   \$0x10
++ +[a-f0-9]+:	e9 b0 ff ff ff       	jmp    1d0 <.plt>
+ 
+ Disassembly of section .text:
+ 
+-0+210 <resolve1>:
+- +[a-f0-9]+:	e8 eb ff ff ff       	call   200 <func1@plt>
++0+220 <resolve1>:
++ +[a-f0-9]+:	e8 cb ff ff ff       	call   1f0 <func1@plt>
+ 
+-0+215 <g1>:
+- +[a-f0-9]+:	e9 d6 ff ff ff       	jmp    1f0 <\*ABS\*@plt>
++0+225 <g1>:
++ +[a-f0-9]+:	e9 e6 ff ff ff       	jmp    210 <\*ABS\*@plt>
+ 
+-0+21a <resolve2>:
+- +[a-f0-9]+:	e8 e9 ff ff ff       	call   208 <func2@plt>
++0+22a <resolve2>:
++ +[a-f0-9]+:	e8 d1 ff ff ff       	call   200 <func2@plt>
+ 
+-0+21f <g2>:
+- +[a-f0-9]+:	e9 bc ff ff ff       	jmp    1e0 <\*ABS\*@plt>
++0+22f <g2>:
++ +[a-f0-9]+:	e9 ac ff ff ff       	jmp    1e0 <\*ABS\*@plt>
+ #pass
+diff --git a/ld/testsuite/ld-ifunc/pr17154-x86-64-now.d b/ld/testsuite/ld-ifunc/pr17154-x86-64-now.d
+index 8c19571..f099575 100644
+--- a/ld/testsuite/ld-ifunc/pr17154-x86-64-now.d
++++ b/ld/testsuite/ld-ifunc/pr17154-x86-64-now.d
+@@ -11,41 +11,41 @@
+ Disassembly of section .plt:
+ 
+ 0+2b0 <.plt>:
+- +[a-f0-9]+:	ff 35 aa 01 20 00    	pushq  0x2001aa\(%rip\)        # 200460 <_GLOBAL_OFFSET_TABLE_\+0x8>
+- +[a-f0-9]+:	ff 25 ac 01 20 00    	jmpq   \*0x2001ac\(%rip\)        # 200468 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	ff 35 7a 01 20 00    	pushq  0x20017a\(%rip\)        # 200430 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 7c 01 20 00    	jmpq   \*0x20017c\(%rip\)        # 200438 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
+ 
+-0+2c0 <\*ABS\*\+0x2fa@plt>:
+- +[a-f0-9]+:	ff 25 aa 01 20 00    	jmpq   \*0x2001aa\(%rip\)        # 200470 <_GLOBAL_OFFSET_TABLE_\+0x18>
+- +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++0+2c0 <\*ABS\*\+0x30a@plt>:
++ +[a-f0-9]+:	ff 25 7a 01 20 00    	jmpq   \*0x20017a\(%rip\)        # 200440 <_GLOBAL_OFFSET_TABLE_\+0x18>
++ +[a-f0-9]+:	68 03 00 00 00       	pushq  \$0x3
+  +[a-f0-9]+:	e9 e0 ff ff ff       	jmpq   2b0 <.plt>
+ 
+-0+2d0 <\*ABS\*\+0x2f0@plt>:
+- +[a-f0-9]+:	ff 25 a2 01 20 00    	jmpq   \*0x2001a2\(%rip\)        # 200478 <_GLOBAL_OFFSET_TABLE_\+0x20>
++0+2d0 <func1@plt>:
++ +[a-f0-9]+:	ff 25 72 01 20 00    	jmpq   \*0x200172\(%rip\)        # 200448 <func1>
+  +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
+  +[a-f0-9]+:	e9 d0 ff ff ff       	jmpq   2b0 <.plt>
+ 
+-Disassembly of section .plt.got:
+-
+-0+2e0 <func1@plt>:
+- +[a-f0-9]+:	ff 25 62 01 20 00    	jmpq   \*0x200162\(%rip\)        # 200448 <func1>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+2e0 <func2@plt>:
++ +[a-f0-9]+:	ff 25 6a 01 20 00    	jmpq   \*0x20016a\(%rip\)        # 200450 <func2>
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 c0 ff ff ff       	jmpq   2b0 <.plt>
+ 
+-0+2e8 <func2@plt>:
+- +[a-f0-9]+:	ff 25 62 01 20 00    	jmpq   \*0x200162\(%rip\)        # 200450 <func2>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+2f0 <\*ABS\*\+0x300@plt>:
++ +[a-f0-9]+:	ff 25 62 01 20 00    	jmpq   \*0x200162\(%rip\)        # 200458 <_GLOBAL_OFFSET_TABLE_\+0x30>
++ +[a-f0-9]+:	68 02 00 00 00       	pushq  \$0x2
++ +[a-f0-9]+:	e9 b0 ff ff ff       	jmpq   2b0 <.plt>
+ 
+ Disassembly of section .text:
+ 
+-0+2f0 <resolve1>:
+- +[a-f0-9]+:	e8 eb ff ff ff       	callq  2e0 <func1@plt>
++0+300 <resolve1>:
++ +[a-f0-9]+:	e8 cb ff ff ff       	callq  2d0 <func1@plt>
+ 
+-0+2f5 <g1>:
+- +[a-f0-9]+:	e9 d6 ff ff ff       	jmpq   2d0 <\*ABS\*\+0x2f0@plt>
++0+305 <g1>:
++ +[a-f0-9]+:	e9 e6 ff ff ff       	jmpq   2f0 <\*ABS\*\+0x300@plt>
+ 
+-0+2fa <resolve2>:
+- +[a-f0-9]+:	e8 e9 ff ff ff       	callq  2e8 <func2@plt>
++0+30a <resolve2>:
++ +[a-f0-9]+:	e8 d1 ff ff ff       	callq  2e0 <func2@plt>
+ 
+-0+2ff <g2>:
+- +[a-f0-9]+:	e9 bc ff ff ff       	jmpq   2c0 <\*ABS\*\+0x2fa@plt>
++0+30f <g2>:
++ +[a-f0-9]+:	e9 ac ff ff ff       	jmpq   2c0 <\*ABS\*\+0x30a@plt>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-branch-1-now.d b/ld/testsuite/ld-x86-64/bnd-branch-1-now.d
+index b4cd71f..50ddf74 100644
+--- a/ld/testsuite/ld-x86-64/bnd-branch-1-now.d
++++ b/ld/testsuite/ld-x86-64/bnd-branch-1-now.d
+@@ -13,31 +13,33 @@ Disassembly of section .plt:
+  +[a-f0-9]+:	ff 25 84 01 20 00    	jmpq   \*0x200184\(%rip\)        # 200420 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
+ 
+-Disassembly of section .plt.got:
+-
+ 0+2a0 <foo2@plt>:
+- +[a-f0-9]+:	ff 25 4a 01 20 00    	jmpq   \*0x20014a\(%rip\)        # 2003f0 <foo2>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	ff 25 82 01 20 00    	jmpq   \*0x200182\(%rip\)        # 200428 <foo2>
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	e9 e0 ff ff ff       	jmpq   290 <.plt>
+ 
+-0+2a8 <foo3@plt>:
+- +[a-f0-9]+:	ff 25 4a 01 20 00    	jmpq   \*0x20014a\(%rip\)        # 2003f8 <foo3>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+2b0 <foo3@plt>:
++ +[a-f0-9]+:	ff 25 7a 01 20 00    	jmpq   \*0x20017a\(%rip\)        # 200430 <foo3>
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d0 ff ff ff       	jmpq   290 <.plt>
+ 
+-0+2b0 <foo1@plt>:
+- +[a-f0-9]+:	ff 25 4a 01 20 00    	jmpq   \*0x20014a\(%rip\)        # 200400 <foo1>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+2c0 <foo1@plt>:
++ +[a-f0-9]+:	ff 25 72 01 20 00    	jmpq   \*0x200172\(%rip\)        # 200438 <foo1>
++ +[a-f0-9]+:	68 02 00 00 00       	pushq  \$0x2
++ +[a-f0-9]+:	e9 c0 ff ff ff       	jmpq   290 <.plt>
+ 
+-0+2b8 <foo4@plt>:
+- +[a-f0-9]+:	ff 25 4a 01 20 00    	jmpq   \*0x20014a\(%rip\)        # 200408 <foo4>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++0+2d0 <foo4@plt>:
++ +[a-f0-9]+:	ff 25 6a 01 20 00    	jmpq   \*0x20016a\(%rip\)        # 200440 <foo4>
++ +[a-f0-9]+:	68 03 00 00 00       	pushq  \$0x3
++ +[a-f0-9]+:	e9 b0 ff ff ff       	jmpq   290 <.plt>
+ 
+ Disassembly of section .text:
+ 
+-0+2c0 <_start>:
+- +[a-f0-9]+:	f2 e9 ea ff ff ff    	bnd jmpq 2b0 <foo1@plt>
+- +[a-f0-9]+:	e8 d5 ff ff ff       	callq  2a0 <foo2@plt>
+- +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2a8 <foo3@plt>
+- +[a-f0-9]+:	e8 e3 ff ff ff       	callq  2b8 <foo4@plt>
+- +[a-f0-9]+:	f2 e8 cd ff ff ff    	bnd callq 2a8 <foo3@plt>
+- +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2b8 <foo4@plt>
++0+2e0 <_start>:
++ +[a-f0-9]+:	f2 e9 da ff ff ff    	bnd jmpq 2c0 <foo1@plt>
++ +[a-f0-9]+:	e8 b5 ff ff ff       	callq  2a0 <foo2@plt>
++ +[a-f0-9]+:	e9 c0 ff ff ff       	jmpq   2b0 <foo3@plt>
++ +[a-f0-9]+:	e8 db ff ff ff       	callq  2d0 <foo4@plt>
++ +[a-f0-9]+:	f2 e8 b5 ff ff ff    	bnd callq 2b0 <foo3@plt>
++ +[a-f0-9]+:	e9 d0 ff ff ff       	jmpq   2d0 <foo4@plt>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d b/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d
+index a9dd968..e36a928 100644
+--- a/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d
++++ b/ld/testsuite/ld-x86-64/bnd-ifunc-2-now.d
+@@ -9,47 +9,51 @@
+ Disassembly of section .plt:
+ 
+ 0+2b0 <.plt>:
+- +[a-f0-9]+:	ff 35 ba 01 20 00    	pushq  0x2001ba\(%rip\)        # 200470 <_GLOBAL_OFFSET_TABLE_\+0x8>
+- +[a-f0-9]+:	f2 ff 25 bb 01 20 00 	bnd jmpq \*0x2001bb\(%rip\)        # 200478 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	ff 35 9a 01 20 00    	pushq  0x20019a\(%rip\)        # 200450 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 9b 01 20 00 	bnd jmpq \*0x20019b\(%rip\)        # 200458 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
+- +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	68 03 00 00 00       	pushq  \$0x3
+  +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmpq 2b0 <.plt>
+  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
+  +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
+  +[a-f0-9]+:	f2 e9 d5 ff ff ff    	bnd jmpq 2b0 <.plt>
+  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 c5 ff ff ff    	bnd jmpq 2b0 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++ +[a-f0-9]+:	68 02 00 00 00       	pushq  \$0x2
++ +[a-f0-9]+:	f2 e9 b5 ff ff ff    	bnd jmpq 2b0 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
+ 
+-Disassembly of section .plt.got:
++Disassembly of section .plt.bnd:
+ 
+-0+2e0 <func1@plt>:
+- +[a-f0-9]+:	f2 ff 25 71 01 20 00 	bnd jmpq \*0x200171\(%rip\)        # 200458 <func1>
++0+300 <\*ABS\*\+0x32c@plt>:
++ +[a-f0-9]+:	f2 ff 25 59 01 20 00 	bnd jmpq \*0x200159\(%rip\)        # 200460 <_GLOBAL_OFFSET_TABLE_\+0x18>
+  +[a-f0-9]+:	90                   	nop
+ 
+-0+2e8 <func2@plt>:
+- +[a-f0-9]+:	f2 ff 25 71 01 20 00 	bnd jmpq \*0x200171\(%rip\)        # 200460 <func2>
++0+308 <func1@plt>:
++ +[a-f0-9]+:	f2 ff 25 59 01 20 00 	bnd jmpq \*0x200159\(%rip\)        # 200468 <func1>
+  +[a-f0-9]+:	90                   	nop
+ 
+-Disassembly of section .plt.bnd:
+-
+-0+2f0 <\*ABS\*\+0x30c@plt>:
+- +[a-f0-9]+:	f2 ff 25 89 01 20 00 	bnd jmpq \*0x200189\(%rip\)        # 200480 <_GLOBAL_OFFSET_TABLE_\+0x18>
++0+310 <func2@plt>:
++ +[a-f0-9]+:	f2 ff 25 59 01 20 00 	bnd jmpq \*0x200159\(%rip\)        # 200470 <func2>
+  +[a-f0-9]+:	90                   	nop
+ 
+-0+2f8 <\*ABS\*\+0x300@plt>:
+- +[a-f0-9]+:	f2 ff 25 89 01 20 00 	bnd jmpq \*0x200189\(%rip\)        # 200488 <_GLOBAL_OFFSET_TABLE_\+0x20>
++0+318 <\*ABS\*\+0x320@plt>:
++ +[a-f0-9]+:	f2 ff 25 59 01 20 00 	bnd jmpq \*0x200159\(%rip\)        # 200478 <_GLOBAL_OFFSET_TABLE_\+0x30>
+  +[a-f0-9]+:	90                   	nop
+ 
+ Disassembly of section .text:
+ 
+-0+300 <resolve1>:
+- +[a-f0-9]+:	f2 e8 da ff ff ff    	bnd callq 2e0 <func1@plt>
++0+320 <resolve1>:
++ +[a-f0-9]+:	f2 e8 e2 ff ff ff    	bnd callq 308 <func1@plt>
+ 
+-0+306 <g1>:
+- +[a-f0-9]+:	f2 e9 ec ff ff ff    	bnd jmpq 2f8 <\*ABS\*\+0x300@plt>
++0+326 <g1>:
++ +[a-f0-9]+:	f2 e9 ec ff ff ff    	bnd jmpq 318 <\*ABS\*\+0x320@plt>
+ 
+-0+30c <resolve2>:
+- +[a-f0-9]+:	f2 e8 d6 ff ff ff    	bnd callq 2e8 <func2@plt>
++0+32c <resolve2>:
++ +[a-f0-9]+:	f2 e8 de ff ff ff    	bnd callq 310 <func2@plt>
+ 
+-0+312 <g2>:
+- +[a-f0-9]+:	f2 e9 d8 ff ff ff    	bnd jmpq 2f0 <\*ABS\*\+0x30c@plt>
++0+332 <g2>:
++ +[a-f0-9]+:	f2 e9 c8 ff ff ff    	bnd jmpq 300 <\*ABS\*\+0x32c@plt>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/bnd-plt-1-now.d b/ld/testsuite/ld-x86-64/bnd-plt-1-now.d
+index f2932c7..65462cd 100644
+--- a/ld/testsuite/ld-x86-64/bnd-plt-1-now.d
++++ b/ld/testsuite/ld-x86-64/bnd-plt-1-now.d
+@@ -9,35 +9,47 @@
+ Disassembly of section .plt:
+ 
+ 0+290 <.plt>:
+- +[a-f0-9]+:	ff 35 82 01 20 00    	pushq  0x200182\(%rip\)        # 200418 <_GLOBAL_OFFSET_TABLE_\+0x8>
+- +[a-f0-9]+:	f2 ff 25 83 01 20 00 	bnd jmpq \*0x200183\(%rip\)        # 200420 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	ff 35 a2 01 20 00    	pushq  0x2001a2\(%rip\)        # 200438 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 a3 01 20 00 	bnd jmpq \*0x2001a3\(%rip\)        # 200440 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
+-
+-Disassembly of section .plt.got:
+-
+-0+2a0 <foo2@plt>:
+- +[a-f0-9]+:	f2 ff 25 49 01 20 00 	bnd jmpq \*0x200149\(%rip\)        # 2003f0 <foo2>
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 d5 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++ +[a-f0-9]+:	68 02 00 00 00       	pushq  \$0x2
++ +[a-f0-9]+:	f2 e9 c5 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++ +[a-f0-9]+:	68 03 00 00 00       	pushq  \$0x3
++ +[a-f0-9]+:	f2 e9 b5 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++Disassembly of section .plt.bnd:
++
++0+2e0 <foo2@plt>:
++ +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200448 <foo2>
+  +[a-f0-9]+:	90                   	nop
+ 
+-0+2a8 <foo3@plt>:
+- +[a-f0-9]+:	f2 ff 25 49 01 20 00 	bnd jmpq \*0x200149\(%rip\)        # 2003f8 <foo3>
++0+2e8 <foo3@plt>:
++ +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200450 <foo3>
+  +[a-f0-9]+:	90                   	nop
+ 
+-0+2b0 <foo1@plt>:
+- +[a-f0-9]+:	f2 ff 25 49 01 20 00 	bnd jmpq \*0x200149\(%rip\)        # 200400 <foo1>
++0+2f0 <foo1@plt>:
++ +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200458 <foo1>
+  +[a-f0-9]+:	90                   	nop
+ 
+-0+2b8 <foo4@plt>:
+- +[a-f0-9]+:	f2 ff 25 49 01 20 00 	bnd jmpq \*0x200149\(%rip\)        # 200408 <foo4>
++0+2f8 <foo4@plt>:
++ +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200460 <foo4>
+  +[a-f0-9]+:	90                   	nop
+ 
+ Disassembly of section .text:
+ 
+-0+2c0 <_start>:
+- +[a-f0-9]+:	f2 e9 ea ff ff ff    	bnd jmpq 2b0 <foo1@plt>
+- +[a-f0-9]+:	e8 d5 ff ff ff       	callq  2a0 <foo2@plt>
+- +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2a8 <foo3@plt>
+- +[a-f0-9]+:	e8 e3 ff ff ff       	callq  2b8 <foo4@plt>
+- +[a-f0-9]+:	f2 e8 cd ff ff ff    	bnd callq 2a8 <foo3@plt>
+- +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2b8 <foo4@plt>
++0+300 <_start>:
++ +[a-f0-9]+:	f2 e9 ea ff ff ff    	bnd jmpq 2f0 <foo1@plt>
++ +[a-f0-9]+:	e8 d5 ff ff ff       	callq  2e0 <foo2@plt>
++ +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2e8 <foo3@plt>
++ +[a-f0-9]+:	e8 e3 ff ff ff       	callq  2f8 <foo4@plt>
++ +[a-f0-9]+:	f2 e8 cd ff ff ff    	bnd callq 2e8 <foo3@plt>
++ +[a-f0-9]+:	e9 d8 ff ff ff       	jmpq   2f8 <foo4@plt>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/plt2.dd b/ld/testsuite/ld-x86-64/plt2.dd
+index a89e5ba..0321428 100644
+--- a/ld/testsuite/ld-x86-64/plt2.dd
++++ b/ld/testsuite/ld-x86-64/plt2.dd
+@@ -10,25 +10,24 @@
+ Disassembly of section .plt:
+ 
+ 0+400290 <.plt>:
+- +[a-f0-9]+:	ff 35 aa 01 20 00    	pushq  0x2001aa\(%rip\)        # 600440 <_GLOBAL_OFFSET_TABLE_\+0x8>
+- +[a-f0-9]+:	ff 25 ac 01 20 00    	jmpq   \*0x2001ac\(%rip\)        # 600448 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	ff 35 7a 01 20 00    	pushq  0x20017a\(%rip\)        # 600410 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 7c 01 20 00    	jmpq   \*0x20017c\(%rip\)        # 600418 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
+ 
+ 0+4002a0 <fn1@plt>:
+- +[a-f0-9]+:	ff 25 aa 01 20 00    	jmpq   \*0x2001aa\(%rip\)        # 600450 <fn1>
++ +[a-f0-9]+:	ff 25 7a 01 20 00    	jmpq   \*0x20017a\(%rip\)        # 600420 <fn1>
+  +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
+  +[a-f0-9]+:	e9 e0 ff ff ff       	jmpq   400290 <.plt>
+ 
+-Disassembly of section .plt.got:
+-
+ 0+4002b0 <fn2@plt>:
+- +[a-f0-9]+:	ff 25 7a 01 20 00    	jmpq   \*0x20017a\(%rip\)        # 600430 <fn2>
+- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	ff 25 72 01 20 00    	jmpq   \*0x200172\(%rip\)        # 600428 <fn2>
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d0 ff ff ff       	jmpq   400290 <.plt>
+ 
+ Disassembly of section .text:
+ 
+-0+4002b8 <_start>:
+- +[a-f0-9]+:	e8 e3 ff ff ff       	callq  4002a0 <fn1@plt>
+- +[a-f0-9]+:	e8 ee ff ff ff       	callq  4002b0 <fn2@plt>
++0+4002c0 <_start>:
++ +[a-f0-9]+:	e8 db ff ff ff       	callq  4002a0 <fn1@plt>
++ +[a-f0-9]+:	e8 e6 ff ff ff       	callq  4002b0 <fn2@plt>
+  +[a-f0-9]+:	81 7c 24 08 a0 02 40 00 	cmpl   \$0x4002a0,0x8\(%rsp\)
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/plt2.rd b/ld/testsuite/ld-x86-64/plt2.rd
+index fa93f2a..6b6c8a6 100644
+--- a/ld/testsuite/ld-x86-64/plt2.rd
++++ b/ld/testsuite/ld-x86-64/plt2.rd
+@@ -5,5 +5,5 @@
+ #target: i?86-*-*
+ 
+ #...
+- +\[ *[0-9]+\] \.plt +PROGBITS +[0-9a-f]+ +[0-9a-f]+ +0+20 +.* +AX +0 +0 +16
++ +\[ *[0-9]+\] \.plt +PROGBITS +[0-9a-f]+ +[0-9a-f]+ +0+30 +.* +AX +0 +0 +16
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/pr17689now.rd b/ld/testsuite/ld-x86-64/pr17689now.rd
+index 8fd9371..c7f7065 100644
+--- a/ld/testsuite/ld-x86-64/pr17689now.rd
++++ b/ld/testsuite/ld-x86-64/pr17689now.rd
+@@ -1,4 +1,3 @@
+-#failif
+ #...
+ [0-9a-f ]+R_X86_64_JUMP_SLOT +0+ +.*
+-#...
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr21038b-now.d b/ld/testsuite/ld-x86-64/pr21038b-now.d
+index 562c7f1..2bafb8d 100644
+--- a/ld/testsuite/ld-x86-64/pr21038b-now.d
++++ b/ld/testsuite/ld-x86-64/pr21038b-now.d
+@@ -21,7 +21,7 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
+-0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000238..000000000000023d
++0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000248..000000000000024d
+   DW_CFA_nop
+   DW_CFA_nop
+   DW_CFA_nop
+@@ -30,7 +30,7 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
+-0+30 0000000000000024 00000034 FDE cie=00000000 pc=0000000000000220..0000000000000230
++0+30 0000000000000024 00000034 FDE cie=00000000 pc=0000000000000220..0000000000000240
+   DW_CFA_def_cfa_offset: 16
+   DW_CFA_advance_loc: 6 to 0000000000000226
+   DW_CFA_def_cfa_offset: 24
+@@ -41,11 +41,7 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
+-0+58 0000000000000014 0000005c FDE cie=00000000 pc=0000000000000230..0000000000000238
+-  DW_CFA_nop
+-  DW_CFA_nop
+-  DW_CFA_nop
+-  DW_CFA_nop
++0+58 0000000000000010 0000005c FDE cie=00000000 pc=0000000000000240..0000000000000248
+   DW_CFA_nop
+   DW_CFA_nop
+   DW_CFA_nop
+@@ -57,15 +53,18 @@ Disassembly of section .plt:
+  +[a-f0-9]+:	ff 35 c2 0d 20 00    	pushq  0x200dc2\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x8>
+  +[a-f0-9]+:	f2 ff 25 c3 0d 20 00 	bnd jmpq \*0x200dc3\(%rip\)        # 200ff0 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmpq 220 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
+ 
+-Disassembly of section .plt.got:
++Disassembly of section .plt.bnd:
+ 
+-0+230 <func@plt>:
+- +[a-f0-9]+:	f2 ff 25 c1 0d 20 00 	bnd jmpq \*0x200dc1\(%rip\)        # 200ff8 <func>
++0+240 <func@plt>:
++ +[a-f0-9]+:	f2 ff 25 b1 0d 20 00 	bnd jmpq \*0x200db1\(%rip\)        # 200ff8 <func>
+  +[a-f0-9]+:	90                   	nop
+ 
+ Disassembly of section .text:
+ 
+-0+238 <foo>:
+- +[a-f0-9]+:	e8 f3 ff ff ff       	callq  230 <func@plt>
++0+248 <foo>:
++ +[a-f0-9]+:	e8 f3 ff ff ff       	callq  240 <func@plt>
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/pr21038c-now.d b/ld/testsuite/ld-x86-64/pr21038c-now.d
+index ca24335..bdce4e0 100644
+--- a/ld/testsuite/ld-x86-64/pr21038c-now.d
++++ b/ld/testsuite/ld-x86-64/pr21038c-now.d
+@@ -21,7 +21,7 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
+-0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000280..0000000000000291
++0+18 0000000000000014 0000001c FDE cie=00000000 pc=0000000000000290..00000000000002a1
+   DW_CFA_nop
+   DW_CFA_nop
+   DW_CFA_nop
+@@ -30,7 +30,7 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
+-0+30 0000000000000024 00000034 FDE cie=00000000 pc=0000000000000260..0000000000000270
++0+30 0000000000000024 00000034 FDE cie=00000000 pc=0000000000000260..0000000000000280
+   DW_CFA_def_cfa_offset: 16
+   DW_CFA_advance_loc: 6 to 0000000000000266
+   DW_CFA_def_cfa_offset: 24
+@@ -41,7 +41,7 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
+-0+58 0000000000000014 0000005c FDE cie=00000000 pc=0000000000000270..0000000000000280
++0+58 0000000000000014 0000005c FDE cie=00000000 pc=0000000000000280..0000000000000288
+   DW_CFA_nop
+   DW_CFA_nop
+   DW_CFA_nop
+@@ -50,6 +50,11 @@ Contents of the .eh_frame section:
+   DW_CFA_nop
+   DW_CFA_nop
+ 
++0+70 0000000000000010 00000074 FDE cie=00000000 pc=0000000000000288..0000000000000290
++  DW_CFA_nop
++  DW_CFA_nop
++  DW_CFA_nop
++
+ 
+ Disassembly of section .plt:
+ 
+@@ -57,21 +62,26 @@ Disassembly of section .plt:
+  +[a-f0-9]+:	ff 35 7a 0d 20 00    	pushq  0x200d7a\(%rip\)        # 200fe0 <_GLOBAL_OFFSET_TABLE_\+0x8>
+  +[a-f0-9]+:	f2 ff 25 7b 0d 20 00 	bnd jmpq \*0x200d7b\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x10>
+  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmpq 260 <.plt>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
+ 
+ Disassembly of section .plt.got:
+ 
+-0+270 <func1@plt>:
+- +[a-f0-9]+:	f2 ff 25 79 0d 20 00 	bnd jmpq \*0x200d79\(%rip\)        # 200ff0 <func1>
++0+280 <func1@plt>:
++ +[a-f0-9]+:	f2 ff 25 71 0d 20 00 	bnd jmpq \*0x200d71\(%rip\)        # 200ff8 <func1>
+  +[a-f0-9]+:	90                   	nop
+ 
+-0+278 <func2@plt>:
+- +[a-f0-9]+:	f2 ff 25 79 0d 20 00 	bnd jmpq \*0x200d79\(%rip\)        # 200ff8 <func2>
++Disassembly of section .plt.bnd:
++
++0+288 <func2@plt>:
++ +[a-f0-9]+:	f2 ff 25 61 0d 20 00 	bnd jmpq \*0x200d61\(%rip\)        # 200ff0 <func2>
+  +[a-f0-9]+:	90                   	nop
+ 
+ Disassembly of section .text:
+ 
+-0+280 <foo>:
+- +[a-f0-9]+:	e8 eb ff ff ff       	callq  270 <func1@plt>
+- +[a-f0-9]+:	e8 ee ff ff ff       	callq  278 <func2@plt>
+- +[a-f0-9]+:	48 8b 05 5f 0d 20 00 	mov    0x200d5f\(%rip\),%rax        # 200ff0 <func1>
++0+290 <foo>:
++ +[a-f0-9]+:	e8 eb ff ff ff       	callq  280 <func1@plt>
++ +[a-f0-9]+:	e8 ee ff ff ff       	callq  288 <func2@plt>
++ +[a-f0-9]+:	48 8b 05 57 0d 20 00 	mov    0x200d57\(%rip\),%rax        # 200ff8 <func1>
+ #pass
+-- 
+2.9.3
+
