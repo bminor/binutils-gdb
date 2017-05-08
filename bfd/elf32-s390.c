@@ -2774,7 +2774,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      && s390_is_ifunc_symbol_p (h)
 	      && h->def_regular)
 	    {
-	      if (!bfd_link_pic (info) || !h->non_got_ref)
+	      if (!bfd_link_pic (info))
 		{
 		  /* For a non-shared object STT_GNU_IFUNC symbol must
 		     go through PLT.  */

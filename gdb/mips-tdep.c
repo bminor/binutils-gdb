@@ -5759,7 +5759,6 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      gdb_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = mips_regnum (gdbarch)->fp0;
@@ -6474,7 +6473,8 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   /* Do values for GP (int) regs.  */
-  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
+  const gdb_byte *raw_buffer;
+  struct value *value;
   int ncols = (mips_abi_regsize (gdbarch) == 8 ? 4 : 8);    /* display cols
 							       per row.  */
   int col, byte;
@@ -6533,9 +6533,12 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	break;			/* End row: large register.  */
 
       /* OK: get the data in raw format.  */
-      if (!deprecated_frame_register_read (frame, regnum, raw_buffer))
+      value = get_frame_register_value (frame, regnum);
+      if (value_optimized_out (value)
+	|| !value_entirely_available (value))
 	error (_("can't read register %d (%s)"),
 	       regnum, gdbarch_register_name (gdbarch, regnum));
+      raw_buffer = value_contents_all (value);
       /* pad small registers */
       for (byte = 0;
 	   byte < (mips_abi_regsize (gdbarch)

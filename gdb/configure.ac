@@ -2199,29 +2199,22 @@ if test "${host}" != "${target}"; then
 fi
 AC_SUBST(target_subdir)
 
-frags=
+# Import nat definitions.
+nat_extra_makefile_frag=/dev/null
 if test "${gdb_native}" = "yes"; then
-  host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
-  if test ! -f ${host_makefile_frag}; then
-    AC_MSG_ERROR("*** Gdb does not support native target ${host}")
-  fi
-  frags="$frags $host_makefile_frag"
-else
-  host_makefile_frag=/dev/null
+  . ${srcdir}/configure.nat
+  nativefile=$NAT_FILE
 fi
 
-AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST(frags)
-
-changequote(,)dnl
-if test "${gdb_native}" = "yes"; then
-# We pick this up from the host configuration file (.mh) because we
-# do not have a native configuration Makefile fragment.
-nativefile=`sed -n '
-s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${host_makefile_frag}`
-fi
-changequote([,])
+AC_SUBST(NAT_FILE)
+AC_SUBST(NATDEPFILES)
+AC_SUBST(NAT_CDEPS)
+AC_SUBST(LOADLIBES)
+AC_SUBST(MH_CFLAGS)
+AC_SUBST(XM_CLIBS)
+AC_SUBST(NAT_GENERATED_FILES)
+AC_SUBST(HAVE_NATIVE_GCORE_HOST)
+AC_SUBST_FILE(nat_extra_makefile_frag)
 
 if test x"${gdb_osabi}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,
@@ -2310,8 +2303,8 @@ else
   fi
 fi
 
-# If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
-# to an empty version.
+# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
+# empty version.
 
 files=
 links=

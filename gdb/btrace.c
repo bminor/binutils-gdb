@@ -1893,6 +1893,7 @@ btrace_clear (struct thread_info *tp)
       trash = it;
       it = it->flow.next;
 
+      VEC_free (btrace_insn_s, trash->insn);
       xfree (trash);
     }
 

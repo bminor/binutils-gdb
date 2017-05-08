@@ -11277,10 +11277,11 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
   if (!bfd_set_format (implib_bfd, bfd_object))
     return FALSE;
 
+  /* Use flag from executable but make it a relocatable object.  */
   flags = bfd_get_file_flags (abfd);
   flags &= ~HAS_RELOC;
   if (!bfd_set_start_address (implib_bfd, 0)
-      || !bfd_set_file_flags (implib_bfd, flags))
+      || !bfd_set_file_flags (implib_bfd, flags & ~EXEC_P))
     return FALSE;
 
   /* Copy architecture of output file to import library file.  */

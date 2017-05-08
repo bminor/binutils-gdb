@@ -1,3 +1,107 @@
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-tdep.c (mips_o32_return_value): Remove unused buffer.
+	(print_gp_register_row): Use get_frame_register_value.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-linux-tdep.c (mips_supply_gregset): Use raw_supply_zeroed.
+	(mips_supply_fpregset): Likewise.
+	(mips64_supply_gregset): Likewise.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mn10300-linux-tdep.c (am33_supply_gregset_method): Use 
+	regcache->raw_supply_zeroed.
+
+2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+ 	* configure.nat: Rearrange 'case' statements to match
+	host before cpu.
+
+2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in: Remove "@host_makefile_frag@".  Add variables
+	NAT_FILE, NATDEPFILES, NAT_CDEPS, LOADLIBES, MH_CFLAGS, XM_CLIBS,
+	NAT_GENERATED_FILES, HAVE_NATIVE_GCORE_HOST.  Add
+	"@nat_extra_makefile_frag@".
+	(Makefile): Remove dependency on "@frags@".
+	($(GNULIB_BUILDDIR)/Makefile): Likewise.
+	(data-directory/Makefile): Likewise.
+	* config/aarch64/linux.mh: Deleted; moved contents to
+	"gdb/configure.nat".
+	* config/alpha/alpha-linux.mh: Likewise.
+	* config/alpha/nbsd.mh: Likewise.
+	* config/arm/linux.mh: Likewise.
+	* config/arm/nbsdelf.mh: Likewise.
+	* config/i386/cygwin.mh: Likewise.
+	* config/i386/cygwin64.mh: Likewise.
+	* config/i386/darwin.mh: Likewise.
+	* config/i386/fbsd.mh: Likewise.
+	* config/i386/fbsd64.mh: Likewise.
+	* config/i386/go32.mh: Likewise.
+	* config/i386/i386gnu.mh: Likewise.
+	* config/i386/i386sol2.mh: Likewise.
+	* config/i386/linux.mh: Likewise.
+	* config/i386/linux64.mh: Likewise.
+	* config/i386/mingw.mh: Likewise.
+	* config/i386/mingw64.mh: Likewise.
+	* config/i386/nbsd64.mh: Likewise.
+	* config/i386/nbsdelf.mh: Likewise.
+	* config/i386/nto.mh: Likewise.
+	* config/i386/obsd.mh: Likewise.
+	* config/i386/obsd64.mh: Likewise.
+	* config/i386/sol2-64.mh: Likewise.
+	* config/ia64/linux.mh: Likewise.
+	* config/m32r/linux.mh: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/m68k/nbsdelf.mh: Likewise.
+	* config/m68k/obsd.mh: Likewise.
+	* config/m88k/obsd.mh: Likewise.
+	* config/mips/fbsd.mh: Likewise.
+	* config/mips/linux.mh: Likewise.
+	* config/mips/nbsd.mh: Likewise.
+	* config/mips/obsd64.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/pa/nbsd.mh: Likewise.
+	* config/pa/obsd.mh: Likewise.
+	* config/powerpc/aix.mh: Likewise.
+	* config/powerpc/fbsd.mh: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/powerpc/nbsd.mh: Likewise.
+	* config/powerpc/obsd.mh: Likewise.
+	* config/powerpc/ppc64-linux.mh: Likewise.
+	* config/powerpc/spu-linux.mh: Likewise.
+	* config/s390/linux.mh: Likewise.
+	* config/sh/nbsd.mh: Likewise.
+	* config/sparc/fbsd.mh: Likewise.
+	* config/sparc/linux.mh: Likewise.
+	* config/sparc/linux64.mh: Likewise.
+	* config/sparc/nbsd64.mh: Likewise.
+	* config/sparc/nbsdelf.mh: Likewise.
+	* config/sparc/obsd64.mh: Likewise.
+	* config/sparc/sol2.mh: Likewise.
+	* config/tilegx/linux.mh: Likewise.
+	* config/vax/nbsdelf.mh: Likewise.
+	* config/vax/obsd.mh: Likewise.
+	* config/xtensa/linux.mh: Likewise.
+	* config/i386/i386gnu.mn: New file, with excerpts from
+	"config/i386/i386gnu.mh".
+	* configure: Regenerate.
+	* configure.ac: Rewrite code to use "gdb/configure.nat" instead of
+	*.mh files under "gdb/config".
+	* configure.nat: New file, with contents from the
+	"gdb/config/*/*.mh" files.
+
+2017-05-05  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_clear): Free insn vector.
+
+2017-05-05  Pedro Alves  <palves@redhat.com>
+
+	* warning.m4 (build_warnings): Add -Wno-error=maybe-uninitialized.
+	* configure: Regenerate.
+
 2017-05-04  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add progspace-and-thread.c.

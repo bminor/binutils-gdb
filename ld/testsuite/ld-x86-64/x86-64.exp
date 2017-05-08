@@ -1245,6 +1245,24 @@ if { [isnative] && [which $CC] != 0 } {
 		{{objdump {-drw} plt-main-bnd.dd}} \
 		"plt-main-pie-bnd" \
 	    ] \
+	    [list \
+		"Build plt-main with -z bndplt -z now" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now" \
+		"" \
+		{ plt-main5.c } \
+		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
+		"plt-main-bnd-now" \
+	    ] \
+	    [list \
+		"Build plt-main with PIE and -z bndplt -z now" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now -pie" \
+		"-fPIC" \
+		{ plt-main5.c } \
+		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
+		"plt-main-pie-bnd-now" \
+	    ] \
 	]
 
 	run_ld_link_exec_tests [list \
@@ -1270,6 +1288,27 @@ if { [isnative] && [which $CC] != 0 } {
 		"-fPIC" \
 	    ] \
 	    [list \
+		"Run plt-main with -z bndplt -z now" \
+		"-Wl,--no-as-needed,-z,bndplt,-z,now tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-bnd-now" \
+		"plt-main.out" \
+	    ] \
+	    [list \
+		"Run plt-main with PIE and -z bndplt -z now" \
+		"-Wl,--no-as-needed,-z,bndplt,-z,now -pie tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-pie-bnd-now" \
+		"plt-main.out" \
+		"-fPIC" \
+	    ] \
+	    [list \
 		"Run pr20800" \
 		"-Wl,-z,now -pie" \
 		"" \
@@ -1291,6 +1330,18 @@ if { ![istarget "x86_64-*-linux*"]} {
     return
 }
 
+run_ld_link_tests [list \
+    [list \
+	"basic PLT generation (-z now)" \
+	"-z now -melf_x86_64 tmpdir/libpltlib.so" \
+	"" \
+	"--64" \
+	{plt2.s} \
+	{{readelf -SW plt2.rd} {objdump -dwr plt2.dd}} \
+	"plt2" \
+    ] \
+]
+
 # Linux only tests
 run_dump_test "pr17618"
 run_dump_test "pltgot-1"
@@ -1300,3 +1351,8 @@ run_dump_test "pr20830b"
 run_dump_test "pr21038a"
 run_dump_test "pr21038b"
 run_dump_test "pr21038c"
+run_dump_test "pr20830a-now"
+run_dump_test "pr20830b-now"
+run_dump_test "pr21038a-now"
+run_dump_test "pr21038b-now"
+run_dump_test "pr21038c-now"

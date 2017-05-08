@@ -1,3 +1,136 @@
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (PLT_ENTRY_SIZE): Renamed to ...
+	(LAZY_PLT_ENTRY_SIZE): This.
+	(NON_LAZY_PLT_ENTRY_SIZE): New.
+	(elf_x86_64_plt0_entry): Renamed to ...
+	(elf_x86_64_lazy_plt0_entry): This.
+	(elf_x86_64_plt_entry): Renamed to ...
+	(elf_x86_64_lazy_plt_entry): This.
+	(elf_x86_64_bnd_plt0_entry): Renamed to ...
+	(elf_x86_64_lazy_bnd_plt0_entry): This.
+	(elf_x86_64_legacy_plt_entry): Removed.
+	(elf_x86_64_bnd_plt_entry): Renamed to ...
+	(elf_x86_64_lazy_bnd_plt_entry): This.
+	(elf_x86_64_legacy_plt2_entry): Renamed to ...
+	(elf_x86_64_non_lazy_plt_entry): This.
+	(elf_x86_64_bnd_plt2_entry): Renamed to ...
+	(elf_x86_64_non_lazy_bnd_plt_entry): This.
+	(elf_x86_64_eh_frame_plt): Renamed to ...
+	(elf_x86_64_eh_frame_lazy_plt): This.
+	(elf_x86_64_eh_frame_bnd_plt): Renamed to ...
+	(elf_x86_64_eh_frame_lazy_bnd_plt): This.
+	(elf_x86_64_eh_frame_plt_got): Renamed to ...
+	(elf_x86_64_eh_frame_non_lazy_plt): This.
+	(elf_x86_64_lazy_plt_layout): New.
+	(elf_x86_64_non_lazy_plt_layout): Likewise.
+	(elf_x86_64_plt_layout): Likewise.
+	(elf_x86_64_backend_data): Remove PLT layout information.  Add
+	os for target system.
+	(GET_PLT_ENTRY_SIZE): Removed.
+	(elf_x86_64_lazy_plt): New.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_non_lazy_bnd_plt): Likewise.
+	(elf_x86-64_arch_bed): Updated.
+	(elf_x86_64_link_hash_table): Add plt, lazy_plt and non_lazy_plt.
+	(elf_x86_64_create_dynamic_sections): Removed.
+	(elf_x86_64_check_relocs): Don't check elf.dynobj.  Don't call
+	_bfd_elf_create_ifunc_sections nor _bfd_elf_create_got_section.
+	(elf_x86-64_adjust_dynamic_symbol): Updated.
+	(elf_x86_64_allocate_dynrelocs): Updated.  Pass 0 as PLT header
+	size to _bfd_elf_allocate_ifunc_dyn_relocs and don't allocate
+	size for PLT0 if there is no PLT0.  Get plt_entry_size from
+	non_lazy_plt for non-lazy PLT entries.
+	(elf_x86_64_size_dynamic_sections): Updated.  Get plt_entry_size
+	from non_lazy_plt for non-lazy PLT entries.
+	(elf_x86-64_relocate_section): Updated.  Properly get PLT index
+	if there is no PLT0.
+	(elf_x86_64_finish_dynamic_symbol): Updated.  Fill the first slot
+	in the PLT entry with generic PLT layout.  Fill the non-lazy PLT
+	entries with non-lazy PLT layout.  Don't fill the second and third
+	slots in the PLT entry if there is no PLT0.
+	(elf_x86_64_finish_dynamic_sections): Updated.  Don't fill PLT0
+	if there is no PLT0.  Set sh_entsize on the .plt.got section.
+	(compare_relocs): New.
+	(elf_x86_64_plt_type): Likewise.
+	(elf_x86_64_plt): Likewise.
+	(elf_x86_64_nacl_plt): New. Forward declaration.
+	(elf_x86_64_get_plt_sym_val): Removed.
+	(elf_x86_64_get_synthetic_symtab): Rewrite to check PLT sections
+	against all dynamic relocations.
+	(elf_x86_64_link_setup_gnu_properties): New function.
+	(elf_backend_create_dynamic_sections): Updated.
+	(elf_backend_setup_gnu_properties): New.
+	(elf_x86_64_nacl_plt): New.
+	(elf_x86_64_nacl_arch_bed): Updated.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (PLT_ENTRY_SIZE): Renamed to ...
+	(LAZY_PLT_ENTRY_SIZE): This.
+	(NON_LAZY_PLT_ENTRY_SIZE): New.
+	(elf_i386_plt0_entry): Renamed to ...
+	(elf_i386_lazy_plt0_entry): This.
+	(elf_i386_plt_entry): Renamed to ...
+	(elf_i386_lazy_plt_entry): This.
+	(elf_i386_pic_plt0_entry): Renamed to ...
+	(elf_i386_pic_lazy_plt0_entry): This.
+	(elf_i386_pic_plt_entry): Renamed to ...
+	(elf_i386_pic_lazy_plt_entry): This.
+	(elf_i386_got_plt_entry): Renamed to ...
+	(elf_i386_non_lazy_plt_entry): This.
+	(elf_i386_pic_got_plt_entry): Renamed to ...
+	(elf_i386_pic_non_lazy_plt_entry): This.
+	(elf_i386_eh_frame_plt): Renamed to ...
+	(elf_i386_eh_frame_lazy_plt): This.
+	(elf_i386_eh_frame_plt_got): Renamed to ...
+	(elf_i386_eh_frame_non_lazy_plt): This.
+	(elf_i386_plt_layout): Renamed to ...
+	(elf_i386_lazy_plt_layout): This.  Remove eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_i386_non_lazy_plt_layout): New.
+	(elf_i386_plt_layout): Likewise.
+	(elf_i386_non_lazy_plt): Likewise.
+	(GET_PLT_ENTRY_SIZE): Removed.
+	(elf_i386_plt): Renamed to ...
+	(elf_i386_lazy_plt): This.
+	(elf_i386_backend_data): Remove plt.  Rename is_vxworks to os.
+	(elf_i386_arch_bed): Updated.
+	(elf_i386_link_hash_table): Add plt, lazy_plt and non_lazy_plt.
+	(elf_i386_create_dynamic_sections): Removed.
+	(elf_i386_check_relocs): Don't check elf.dynobj.  Don't call
+	_bfd_elf_create_ifunc_sections nor _bfd_elf_create_got_section.
+	(elf_i386_adjust_dynamic_symbol): Updated.
+	(elf_i386_allocate_dynrelocs): Updated.  Pass 0 as PLT header
+	size to _bfd_elf_allocate_ifunc_dyn_relocs and don't allocate
+	size for PLT0 if there is no PLT0.
+	(elf_i386_size_dynamic_sections): Updated.  Check whether GOT
+	output section is discarded only if GOT isn't empty.
+	(elf_i386_relocate_section): Updated.  Properly get PLT index
+	if there is no PLT0.
+	(elf_i386_finish_dynamic_symbol): Updated.  Don't fill the
+	second and third slots in the PLT entry if there is no PLT0.
+	(elf_i386_finish_dynamic_sections): Updated.  Don't fill PLT0
+	if there is no PLT0.  Set sh_entsize on the .plt.got section.
+	(elf_i386_nacl_plt): Forward declaration.
+	(elf_i386_get_plt_sym_val): Removed.
+	(elf_i386_get_synthetic_symtab): Rewrite to check PLT sections
+	against all dynamic relocations.
+	(elf_i386_link_setup_gnu_properties): New function.
+	(elf_backend_create_dynamic_sections): Updated.
+	(elf_backend_setup_gnu_properties): New.
+	(elf_i386_nacl_plt): Updated.
+	(elf_i386_nacl_arch_bed): Likewise.
+	(elf_i386_vxworks_arch_bed): Likewise.
+
+2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elflink.c (elf_output_implib): Remove executable flag from import
+	library bfd.
+	* elf32-arm.c (elf32_arm_filter_implib_symbols): Assert that the import
+	library is a relocatable object file.
+
 2017-05-01  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/21404

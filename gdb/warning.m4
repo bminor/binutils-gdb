@@ -40,7 +40,7 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts \
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
--Wno-sign-compare -Wno-narrowing"
+-Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized"
 
 # Enable -Wno-format by default when using gcc on mingw since many
 # GCC versions complain about %I64.
