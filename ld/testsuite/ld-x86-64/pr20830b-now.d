@@ -1,7 +1,7 @@
-#name: PR ld/20830 (.plt.got)
+#name: PR ld/20830 (.plt.got, -z now)
 #source: pr20830.s
 #as: --x32
-#ld: -melf32_x86_64 -shared -z relro --ld-generated-unwind-info
+#ld: -z now -melf32_x86_64 -shared -z relro --ld-generated-unwind-info
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -42,8 +42,8 @@ Contents of the .eh_frame section:
 Disassembly of section .plt:
 
 0+170 <.plt>:
- +[a-f0-9]+:	ff 35 92 0e 20 00    	pushq  0x200e92\(%rip\)        # 201008 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	ff 25 94 0e 20 00    	jmpq   \*0x200e94\(%rip\)        # 201010 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 72 0e 20 00    	pushq  0x200e72\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	ff 25 74 0e 20 00    	jmpq   \*0x200e74\(%rip\)        # 200ff0 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
 
 Disassembly of section .plt.got:

@@ -544,23 +544,29 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 
 #define GOT_ENTRY_SIZE 8
 
-/* The size in bytes of an entry in the procedure linkage table.  */
+/* The size in bytes of an entry in the lazy procedure linkage table.  */
 
-#define PLT_ENTRY_SIZE 16
+#define LAZY_PLT_ENTRY_SIZE 16
 
-/* The first entry in a procedure linkage table looks like this.  See the
-   SVR4 ABI i386 supplement and the x86-64 ABI to see how this works.  */
+/* The size in bytes of an entry in the non-lazy procedure linkage
+   table.  */
 
-static const bfd_byte elf_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
+#define NON_LAZY_PLT_ENTRY_SIZE 8
+
+/* The first entry in a lazy procedure linkage table looks like this.
+   See the SVR4 ABI i386 supplement and the x86-64 ABI to see how this
+   works.  */
+
+static const bfd_byte elf_x86_64_lazy_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
 {
   0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip)  */
   0xff, 0x25, 16, 0, 0, 0,	/* jmpq *GOT+16(%rip) */
   0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
 };
 
-/* Subsequent entries in a procedure linkage table look like this.  */
+/* Subsequent entries in a lazy procedure linkage table look like this.  */
 
-static const bfd_byte elf_x86_64_plt_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_x86_64_lazy_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 {
   0xff, 0x25,	/* jmpq *name@GOTPC(%rip) */
   0, 0, 0, 0,	/* replaced with offset to this symbol in .got.	 */
@@ -570,59 +576,48 @@ static const bfd_byte elf_x86_64_plt_entry[PLT_ENTRY_SIZE] =
   0, 0, 0, 0	/* replaced with offset to start of .plt0.  */
 };
 
-/* The first entry in a procedure linkage table with BND relocations
+/* The first entry in a lazy procedure linkage table with BND prefix
    like this.  */
 
-static const bfd_byte elf_x86_64_bnd_plt0_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_x86_64_lazy_bnd_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
 {
   0xff, 0x35, 8, 0, 0, 0,         /* pushq GOT+8(%rip)        */
   0xf2, 0xff, 0x25, 16, 0, 0, 0,  /* bnd jmpq *GOT+16(%rip)   */
   0x0f, 0x1f, 0                   /* nopl (%rax)              */
 };
 
-/* Subsequent entries for legacy branches in a procedure linkage table
-   with BND relocations look like this.  */
+/* Subsequent entries for branches with BND prefx in a lazy procedure
+   linkage table look like this.  */
 
-static const bfd_byte elf_x86_64_legacy_plt_entry[PLT_ENTRY_SIZE] =
-{
-  0x68, 0, 0, 0, 0,             /* pushq immediate            */
-  0xe9, 0, 0, 0, 0,             /* jmpq relative              */
-  0x66, 0x0f, 0x1f, 0x44, 0, 0  /* nopw (%rax,%rax,1)         */
-};
-
-/* Subsequent entries for branches with BND prefx in a procedure linkage
-   table with BND relocations look like this.  */
-
-static const bfd_byte elf_x86_64_bnd_plt_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_x86_64_lazy_bnd_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 {
   0x68, 0, 0, 0, 0,             /* pushq immediate            */
   0xf2, 0xe9, 0, 0, 0, 0,       /* bnd jmpq relative          */
   0x0f, 0x1f, 0x44, 0, 0        /* nopl 0(%rax,%rax,1)        */
 };
 
-/* Entries for legacy branches in the second procedure linkage table
-   look like this.  */
+/* Entries in the non-lazey procedure linkage table look like this.  */
 
-static const bfd_byte elf_x86_64_legacy_plt2_entry[8] =
+static const bfd_byte elf_x86_64_non_lazy_plt_entry[NON_LAZY_PLT_ENTRY_SIZE] =
 {
-  0xff, 0x25,                    /* jmpq *name@GOTPC(%rip)      */
-  0, 0, 0, 0,  /* replaced with offset to this symbol in .got.  */
-  0x66, 0x90                     /* xchg %ax,%ax                */
+  0xff, 0x25,        /* jmpq *name@GOTPC(%rip)                        */
+  0, 0, 0, 0,        /* replaced with offset to this symbol in .got.  */
+  0x66, 0x90         /* xchg %ax,%ax                                  */
 };
 
-/* Entries for branches with BND prefix in the second procedure linkage
-   table look like this.  */
+/* Entries for branches with BND prefix in the non-lazey procedure
+   linkage table look like this.  */
 
-static const bfd_byte elf_x86_64_bnd_plt2_entry[8] =
+static const bfd_byte elf_x86_64_non_lazy_bnd_plt_entry[NON_LAZY_PLT_ENTRY_SIZE] =
 {
-  0xf2, 0xff, 0x25,              /* bnd jmpq *name@GOTPC(%rip)  */
-  0, 0, 0, 0,  /* replaced with offset to this symbol in .got.  */
-  0x90                           /* nop                         */
+  0xf2, 0xff, 0x25,  /* bnd jmpq *name@GOTPC(%rip)                    */
+  0, 0, 0, 0,        /* replaced with offset to this symbol in .got.  */
+  0x90               /* nop                                           */
 };
 
-/* .eh_frame covering the .plt section.  */
+/* .eh_frame covering the lazy .plt section.  */
 
-static const bfd_byte elf_x86_64_eh_frame_plt[] =
+static const bfd_byte elf_x86_64_eh_frame_lazy_plt[] =
 {
 #define PLT_CIE_LENGTH		20
 #define PLT_FDE_LENGTH		36
@@ -659,9 +654,9 @@ static const bfd_byte elf_x86_64_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
-/* .eh_frame covering the BND .plt section.  */
+/* .eh_frame covering the lazy BND .plt section.  */
 
-static const bfd_byte elf_x86_64_eh_frame_bnd_plt[] =
+static const bfd_byte elf_x86_64_eh_frame_lazy_bnd_plt[] =
 {
   PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
   0, 0, 0, 0,			/* CIE ID */
@@ -694,9 +689,9 @@ static const bfd_byte elf_x86_64_eh_frame_bnd_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
-/* .eh_frame covering the .plt.got section.  */
+/* .eh_frame covering the non-lazy .plt section.  */
 
-static const bfd_byte elf_x86_64_eh_frame_plt_got[] =
+static const bfd_byte elf_x86_64_eh_frame_non_lazy_plt[] =
 {
 #define PLT_GOT_FDE_LENGTH		20
   PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
@@ -714,16 +709,14 @@ static const bfd_byte elf_x86_64_eh_frame_plt_got[] =
 
   PLT_GOT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
   PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
-  0, 0, 0, 0,			/* the start of .plt.got goes here */
-  0, 0, 0, 0,			/* .plt.got size goes here */
+  0, 0, 0, 0,			/* the start of non-lazy .plt goes here */
+  0, 0, 0, 0,			/* non-lazy .plt size goes here */
   0,				/* Augmentation size */
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop,
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
-/* Architecture-specific backend data for x86-64.  */
-
-struct elf_x86_64_backend_data
+struct elf_x86_64_lazy_plt_layout
 {
   /* Templates for the initial PLT entry and for subsequent entries.  */
   const bfd_byte *plt0_entry;
@@ -752,13 +745,58 @@ struct elf_x86_64_backend_data
   /* Offset into plt_entry where the initial value of the GOT entry points.  */
   unsigned int plt_lazy_offset;
 
+  /* .eh_frame covering the lazy .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
+struct elf_x86_64_non_lazy_plt_layout
+{
+  /* Template for the lazy PLT entries.  */
+  const bfd_byte *plt_entry;
+  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+
+  /* Length of the PC-relative instruction containing plt_got_offset.  */
+  unsigned int plt_got_insn_size;
+
+  /* .eh_frame covering the non-lazy .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
+struct elf_x86_64_plt_layout
+{
+  /* Template for the PLT entries.  */
+  const bfd_byte *plt_entry;
+  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+
+  /* 1 has PLT0.  */
+   unsigned int has_plt0;
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+
+  /* Length of the PC-relative instruction containing plt_got_offset.  */
+  unsigned int plt_got_insn_size;
+
   /* .eh_frame covering the .plt section.  */
   const bfd_byte *eh_frame_plt;
   unsigned int eh_frame_plt_size;
+};
 
-  /* .eh_frame covering the .plt.got section.  */
-  const bfd_byte *eh_frame_plt_got;
-  unsigned int eh_frame_plt_got_size;
+/* Architecture-specific backend data for x86-64.  */
+
+struct elf_x86_64_backend_data
+{
+  /* Target system.  */
+  enum
+    {
+      is_normal,
+      is_nacl
+    } os;
 };
 
 #define get_elf_x86_64_arch_data(bed) \
@@ -767,15 +805,12 @@ struct elf_x86_64_backend_data
 #define get_elf_x86_64_backend_data(abfd) \
   get_elf_x86_64_arch_data (get_elf_backend_data (abfd))
 
-#define GET_PLT_ENTRY_SIZE(abfd) \
-  get_elf_x86_64_backend_data (abfd)->plt_entry_size
-
 /* These are the standard parameters.  */
-static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
+static const struct elf_x86_64_lazy_plt_layout elf_x86_64_lazy_plt =
   {
-    elf_x86_64_plt0_entry,              /* plt0_entry */
-    elf_x86_64_plt_entry,               /* plt_entry */
-    sizeof (elf_x86_64_plt_entry),      /* plt_entry_size */
+    elf_x86_64_lazy_plt0_entry,         /* plt0_entry */
+    elf_x86_64_lazy_plt_entry,          /* plt_entry */
+    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
     2,                                  /* plt0_got1_offset */
     8,                                  /* plt0_got2_offset */
     12,                                 /* plt0_got2_insn_end */
@@ -783,19 +818,27 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
     7,                                  /* plt_reloc_offset */
     12,                                 /* plt_plt_offset */
     6,                                  /* plt_got_insn_size */
-    PLT_ENTRY_SIZE,                     /* plt_plt_insn_end */
+    LAZY_PLT_ENTRY_SIZE,                /* plt_plt_insn_end */
     6,                                  /* plt_lazy_offset */
-    elf_x86_64_eh_frame_plt,            /* eh_frame_plt */
-    sizeof (elf_x86_64_eh_frame_plt),   /* eh_frame_plt_size */
-    elf_x86_64_eh_frame_plt_got,        /* eh_frame_plt_got */
-    sizeof (elf_x86_64_eh_frame_plt_got), /* eh_frame_plt_got_size */
+    elf_x86_64_eh_frame_lazy_plt,       /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_lazy_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
+static const struct elf_x86_64_non_lazy_plt_layout elf_x86_64_non_lazy_plt =
   {
-    elf_x86_64_bnd_plt0_entry,          /* plt0_entry */
-    elf_x86_64_bnd_plt_entry,           /* plt_entry */
-    sizeof (elf_x86_64_bnd_plt_entry),  /* plt_entry_size */
+    elf_x86_64_non_lazy_plt_entry,      /* plt_entry */
+    NON_LAZY_PLT_ENTRY_SIZE,            /* plt_entry_size */
+    2,                                  /* plt_got_offset */
+    6,                                  /* plt_got_insn_size */
+    elf_x86_64_eh_frame_non_lazy_plt,   /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
+  };
+
+static const struct elf_x86_64_lazy_plt_layout elf_x86_64_lazy_bnd_plt =
+  {
+    elf_x86_64_lazy_bnd_plt0_entry,     /* plt0_entry */
+    elf_x86_64_lazy_bnd_plt_entry,      /* plt_entry */
+    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
     2,                                  /* plt0_got1_offset */
     1+8,                                /* plt0_got2_offset */
     1+12,                               /* plt0_got2_insn_end */
@@ -805,10 +848,23 @@ static const struct elf_x86_64_backend_data elf_x86_64_bnd_arch_bed =
     1+6,                                /* plt_got_insn_size */
     11,                                 /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
-    elf_x86_64_eh_frame_bnd_plt,        /* eh_frame_plt */
-    sizeof (elf_x86_64_eh_frame_bnd_plt), /* eh_frame_plt_size */
-    elf_x86_64_eh_frame_plt_got,        /* eh_frame_plt_got */
-    sizeof (elf_x86_64_eh_frame_plt_got), /* eh_frame_plt_got_size */
+    elf_x86_64_eh_frame_lazy_bnd_plt,   /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_lazy_bnd_plt) /* eh_frame_plt_size */
+  };
+
+static const struct elf_x86_64_non_lazy_plt_layout elf_x86_64_non_lazy_bnd_plt =
+  {
+    elf_x86_64_non_lazy_bnd_plt_entry,  /* plt_entry */
+    NON_LAZY_PLT_ENTRY_SIZE,            /* plt_entry_size */
+    1+2,                                /* plt_got_offset */
+    1+6,                                /* plt_got_insn_size */
+    elf_x86_64_eh_frame_non_lazy_plt,   /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
+  };
+
+static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
+  {
+    is_normal                            /* os */
   };
 
 #define	elf_backend_arch_data	&elf_x86_64_arch_bed
@@ -937,6 +993,15 @@ struct elf_x86_64_link_hash_table
   asection *plt_bnd_eh_frame;
   asection *plt_got;
   asection *plt_got_eh_frame;
+
+  /* Parameters describing PLT generation, lazy or non-lazy.  */
+  struct elf_x86_64_plt_layout plt;
+
+  /* Parameters describing lazy PLT generation.  */
+  const struct elf_x86_64_lazy_plt_layout *lazy_plt;
+
+  /* Parameters describing non-lazy PLT generation.  */
+  const struct elf_x86_64_non_lazy_plt_layout *non_lazy_plt;
 
   union
   {
@@ -1167,149 +1232,6 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
   ret->elf.root.hash_table_free = elf_x86_64_link_hash_table_free;
 
   return &ret->elf.root;
-}
-
-/* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
-   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
-   hash table.  */
-
-static bfd_boolean
-elf_x86_64_create_dynamic_sections (bfd *dynobj,
-				    struct bfd_link_info *info)
-{
-  struct elf_x86_64_link_hash_table *htab;
-
-  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
-    return FALSE;
-
-  htab = elf_x86_64_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  /* Set the contents of the .interp section to the interpreter.  */
-  if (bfd_link_executable (info) && !info->nointerp)
-    {
-      asection *s = bfd_get_linker_section (dynobj, ".interp");
-      if (s == NULL)
-	abort ();
-      s->size = htab->dynamic_interpreter_size;
-      s->contents = (unsigned char *) htab->dynamic_interpreter;
-      htab->interp = s;
-    }
-
-  if (htab->elf.splt != NULL)
-    {
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (dynobj);
-      flagword pltflags = (bed->dynamic_sec_flags
-			   | SEC_ALLOC
-			   | SEC_CODE
-			   | SEC_LOAD
-			   | SEC_READONLY);
-
-      if (htab->plt_got == NULL
-	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed)
-	{
-	  /* Create the GOT procedure linkage table.  */
-	  unsigned int plt_got_align;
-
-	  BFD_ASSERT (sizeof (elf_x86_64_legacy_plt2_entry) == 8
-		      && (sizeof (elf_x86_64_bnd_plt2_entry)
-			  == sizeof (elf_x86_64_legacy_plt2_entry)));
-	  plt_got_align = 3;
-
-	  htab->plt_got
-	    = bfd_make_section_anyway_with_flags (dynobj,
-						  ".plt.got",
-						  pltflags);
-	  if (htab->plt_got == NULL
-	      || !bfd_set_section_alignment (dynobj,
-					     htab->plt_got,
-					     plt_got_align))
-	    return FALSE;
-	}
-
-      /* MPX PLT is supported only if elf_x86_64_arch_bed is used in
-	 64-bit mode.  */
-      if (ABI_64_P (dynobj)
-	  && info->bndplt
-	  && get_elf_x86_64_backend_data (dynobj) == &elf_x86_64_arch_bed
-	  && htab->plt_bnd == NULL)
-	{
-	  /* Create the second PLT for Intel MPX support.  */
-	  BFD_ASSERT (sizeof (elf_x86_64_bnd_plt2_entry) == 8
-		      && (sizeof (elf_x86_64_bnd_plt2_entry)
-			  == sizeof (elf_x86_64_legacy_plt2_entry)));
-
-	  htab->plt_bnd
-	    = bfd_make_section_anyway_with_flags (dynobj,
-						  ".plt.bnd",
-						  pltflags);
-	  if (htab->plt_bnd == NULL
-	      || !bfd_set_section_alignment (dynobj, htab->plt_bnd, 3))
-	    return FALSE;
-	}
-
-      if (!info->no_ld_generated_unwind_info)
-	{
-	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			    | SEC_LINKER_CREATED);
-
-	  if (htab->plt_eh_frame == NULL)
-	    {
-	      htab->plt_eh_frame
-		= bfd_make_section_anyway_with_flags (dynobj,
-						      ".eh_frame",
-						      flags);
-	      if (htab->plt_eh_frame == NULL
-		  || !bfd_set_section_alignment (dynobj,
-						 htab->plt_eh_frame,
-						 ABI_64_P (dynobj) ? 3 : 2))
-		return FALSE;
-	    }
-
-	  if (htab->plt_got_eh_frame == NULL
-	      && htab->plt_got != NULL)
-	    {
-	      htab->plt_got_eh_frame
-		= bfd_make_section_anyway_with_flags (htab->elf.dynobj,
-						      ".eh_frame",
-						      flags);
-	      if (htab->plt_got_eh_frame == NULL
-		  || !bfd_set_section_alignment (dynobj,
-						 htab->plt_got_eh_frame,
-						 ABI_64_P (dynobj) ? 3 : 2))
-		return FALSE;
-	    }
-
-	  if (htab->plt_bnd_eh_frame == NULL
-	      && htab->plt_bnd != NULL)
-	    {
-	      htab->plt_bnd_eh_frame
-		= bfd_make_section_anyway_with_flags (dynobj,
-						      ".eh_frame",
-						      flags);
-	      if (htab->plt_bnd_eh_frame == NULL
-		  || !bfd_set_section_alignment (dynobj,
-						 htab->plt_bnd_eh_frame,
-						 3))
-		return FALSE;
-	    }
-	}
-    }
-
-  /* Align .got section to its entry size.  */
-  if (htab->elf.sgot != NULL
-      && !bfd_set_section_alignment (dynobj, htab->elf.sgot, 3))
-    return FALSE;
-
-  /* Align .got.plt section to its entry size.  */
-  if (htab->elf.sgotplt != NULL
-      && !bfd_set_section_alignment (dynobj, htab->elf.sgotplt, 3))
-    return FALSE;
-
-  return TRUE;
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -2413,33 +2335,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (h != NULL)
 	{
-	  switch (r_type)
-	    {
-	    default:
-	      break;
-
-	    case R_X86_64_PC32_BND:
-	    case R_X86_64_PLT32_BND:
-	    case R_X86_64_PC32:
-	    case R_X86_64_PLT32:
-	    case R_X86_64_32:
-	    case R_X86_64_64:
-	    case R_X86_64_32S:
-	    case R_X86_64_PC64:
-	    case R_X86_64_GOTPCREL:
-	    case R_X86_64_GOTPCRELX:
-	    case R_X86_64_REX_GOTPCRELX:
-	    case R_X86_64_GOTPCREL64:
-	      if (htab->elf.dynobj == NULL)
-		htab->elf.dynobj = abfd;
-	      /* Create the ifunc sections for static executables.  */
-	      if (h->type == STT_GNU_IFUNC
-		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj,
-						      info))
-		goto error_return;
-	      break;
-	    }
-
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
 	  h->root.non_ir_ref = 1;
@@ -2576,14 +2471,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	create_got:
 	  if (eh != NULL)
 	    eh->has_got_reloc = 1;
-	  if (htab->elf.sgot == NULL)
-	    {
-	      if (htab->elf.dynobj == NULL)
-		htab->elf.dynobj = abfd;
-	      if (!_bfd_elf_create_got_section (htab->elf.dynobj,
-						info))
-		goto error_return;
-	    }
 	  break;
 
 	case R_X86_64_PLT32:
@@ -2748,9 +2635,6 @@ do_size:
 		 this reloc.  */
 	      if (sreloc == NULL)
 		{
-		  if (htab->elf.dynobj == NULL)
-		    htab->elf.dynobj = abfd;
-
 		  sreloc = _bfd_elf_make_dynamic_reloc_section
 		    (sec, htab->elf.dynobj, ABI_64_P (abfd) ? 3 : 2,
 		     abfd, /*rela?*/ TRUE);
@@ -3110,7 +2994,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   if (htab == NULL)
     return FALSE;
   bed = get_elf_backend_data (info->output_bfd);
-  plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
+  plt_entry_size = htab->plt.plt_entry_size;
 
   resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
 						      eh->has_got_reloc,
@@ -3148,7 +3032,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 					      &eh->dyn_relocs,
 					      &htab->readonly_dynrelocs_against_ifunc,
 					      plt_entry_size,
-					      plt_entry_size,
+					      (htab->plt.has_plt0
+					       * plt_entry_size),
 					      GOT_ENTRY_SIZE, TRUE))
 	{
 	  asection *s = htab->plt_bnd;
@@ -3158,7 +3043,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	      eh->plt_bnd.offset = s->size;
 
 	      /* Make room for this entry in the .plt.bnd section.  */
-	      s->size += sizeof (elf_x86_64_legacy_plt2_entry);
+	      s->size += htab->non_lazy_plt->plt_entry_size;
 	    }
 
 	  return TRUE;
@@ -3214,7 +3099,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	     first entry.  The .plt section is used by prelink to undo
 	     prelinking for dynamic relocations.  */
 	  if (s->size == 0)
-	    s->size = plt_entry_size;
+	    s->size = htab->plt.has_plt0 * plt_entry_size;
 
 	  if (use_plt_got)
 	    eh->plt_got.offset = got_s->size;
@@ -3259,12 +3144,12 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
 	  /* Make room for this entry.  */
 	  if (use_plt_got)
-	    got_s->size += sizeof (elf_x86_64_legacy_plt2_entry);
+	    got_s->size += htab->non_lazy_plt->plt_entry_size;
 	  else
 	    {
 	      s->size += plt_entry_size;
 	      if (bnd_s)
-		bnd_s->size += sizeof (elf_x86_64_legacy_plt2_entry);
+		bnd_s->size += htab->non_lazy_plt->plt_entry_size;
 
 	      /* We also need to make an entry in the .got.plt section,
 		 which will be placed in the .got section by the linker
@@ -3685,7 +3570,6 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   bfd_boolean relocs;
   bfd *ibfd;
   const struct elf_backend_data *bed;
-  const struct elf_x86_64_backend_data *arch_data;
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
@@ -3852,9 +3736,9 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  /* Reserve room for the initial entry.
 	     FIXME: we could probably do away with it in this case.  */
 	  if (htab->elf.splt->size == 0)
-	    htab->elf.splt->size = GET_PLT_ENTRY_SIZE (output_bfd);
+	    htab->elf.splt->size = htab->plt.plt_entry_size;
 	  htab->tlsdesc_plt = htab->elf.splt->size;
-	  htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
+	  htab->elf.splt->size += htab->plt.plt_entry_size;
 	}
     }
 
@@ -3877,23 +3761,20 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	htab->elf.sgotplt->size = 0;
     }
 
-  arch_data = (htab->plt_bnd != NULL
-	       ? &elf_x86_64_bnd_arch_bed
-	       : get_elf_x86_64_arch_data (bed));
-
   if (_bfd_elf_eh_frame_present (info))
     {
       if (htab->plt_eh_frame != NULL
 	  && htab->elf.splt != NULL
 	  && htab->elf.splt->size != 0
 	  && !bfd_is_abs_section (htab->elf.splt->output_section))
-	htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
+	htab->plt_eh_frame->size = htab->plt.eh_frame_plt_size;
 
       if (htab->plt_got_eh_frame != NULL
 	  && htab->plt_got != NULL
 	  && htab->plt_got->size != 0
 	  && !bfd_is_abs_section (htab->plt_got->output_section))
-	htab->plt_got_eh_frame->size = arch_data->eh_frame_plt_got_size;
+	htab->plt_got_eh_frame->size
+	  = htab->non_lazy_plt->eh_frame_plt_size;
 
       /* Unwind info for .plt.bnd and .plt.got sections are
 	 identical.  */
@@ -3901,7 +3782,8 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  && htab->plt_bnd != NULL
 	  && htab->plt_bnd->size != 0
 	  && !bfd_is_abs_section (htab->plt_bnd->output_section))
-	htab->plt_bnd_eh_frame->size = arch_data->eh_frame_plt_got_size;
+	htab->plt_bnd_eh_frame->size
+	  = htab->non_lazy_plt->eh_frame_plt_size;
     }
 
   /* We now have determined the sizes of the various dynamic sections.
@@ -3977,7 +3859,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
       && htab->plt_eh_frame->contents != NULL)
     {
       memcpy (htab->plt_eh_frame->contents,
-	      arch_data->eh_frame_plt, htab->plt_eh_frame->size);
+	      htab->plt.eh_frame_plt, htab->plt_eh_frame->size);
       bfd_put_32 (dynobj, htab->elf.splt->size,
 		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
     }
@@ -3986,7 +3868,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
       && htab->plt_got_eh_frame->contents != NULL)
     {
       memcpy (htab->plt_got_eh_frame->contents,
-	      arch_data->eh_frame_plt_got,
+	      htab->non_lazy_plt->eh_frame_plt,
 	      htab->plt_got_eh_frame->size);
       bfd_put_32 (dynobj, htab->plt_got->size,
 		  (htab->plt_got_eh_frame->contents
@@ -3997,7 +3879,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
       && htab->plt_bnd_eh_frame->contents != NULL)
     {
       memcpy (htab->plt_bnd_eh_frame->contents,
-	      arch_data->eh_frame_plt_got,
+	      htab->non_lazy_plt->eh_frame_plt,
 	      htab->plt_bnd_eh_frame->size);
       bfd_put_32 (dynobj, htab->plt_bnd->size,
 		  (htab->plt_bnd_eh_frame->contents
@@ -4214,7 +4096,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *wrel;
   Elf_Internal_Rela *relend;
-  const unsigned int plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
+  unsigned int plt_entry_size;
 
   BFD_ASSERT (is_x86_64_elf (input_bfd));
 
@@ -4225,6 +4107,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
     return FALSE;
+  plt_entry_size = htab->plt.plt_entry_size;
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -4408,7 +4291,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 		  if (htab->elf.splt != NULL)
 		    {
-		      plt_index = h->plt.offset / plt_entry_size - 1;
+		      plt_index = (h->plt.offset / plt_entry_size
+				   - htab->plt.has_plt0);
 		      off = (plt_index + 3) * GOT_ENTRY_SIZE;
 		      base_got = htab->elf.sgotplt;
 		    }
@@ -4633,7 +4517,8 @@ do_ifunc_pointer:
 		     state, or even just remember the offset, as
 		     finish_dynamic_symbol would use that as offset into
 		     .got.  */
-		  bfd_vma plt_index = h->plt.offset / plt_entry_size - 1;
+		  bfd_vma plt_index = (h->plt.offset / plt_entry_size
+				       - htab->plt.has_plt0);
 		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
 		  base_got = htab->elf.sgotplt;
 		}
@@ -5776,7 +5661,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 				  Elf_Internal_Sym *sym)
 {
   struct elf_x86_64_link_hash_table *htab;
-  const struct elf_x86_64_backend_data *abed;
   bfd_boolean use_plt_bnd;
   struct elf_x86_64_link_hash_entry *eh;
   bfd_boolean local_undefweak;
@@ -5788,9 +5672,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
   /* Use MPX backend data in case of BND relocation.  Use .plt_bnd
      section only if there is .plt section.  */
   use_plt_bnd = htab->elf.splt != NULL && htab->plt_bnd != NULL;
-  abed = (use_plt_bnd
-	  ? &elf_x86_64_bnd_arch_bed
-	  : get_elf_x86_64_backend_data (output_bfd));
 
   eh = (struct elf_x86_64_link_hash_entry *) h;
   if (eh->no_finish_dynamic_symbol)
@@ -5806,8 +5687,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
   if (h->plt.offset != (bfd_vma) -1)
     {
       bfd_vma plt_index;
-      bfd_vma got_offset, plt_offset, plt_plt_offset, plt_got_offset;
-      bfd_vma plt_plt_insn_end, plt_got_insn_size;
+      bfd_vma got_offset, plt_offset;
       Elf_Internal_Rela rela;
       bfd_byte *loc;
       asection *plt, *gotplt, *relplt, *resolved_plt;
@@ -5854,60 +5734,30 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 
       if (plt == htab->elf.splt)
 	{
-	  got_offset = h->plt.offset / abed->plt_entry_size - 1;
+	  got_offset = (h->plt.offset / htab->plt.plt_entry_size
+			- htab->plt.has_plt0);
 	  got_offset = (got_offset + 3) * GOT_ENTRY_SIZE;
 	}
       else
 	{
-	  got_offset = h->plt.offset / abed->plt_entry_size;
+	  got_offset = h->plt.offset / htab->plt.plt_entry_size;
 	  got_offset = got_offset * GOT_ENTRY_SIZE;
 	}
 
-      plt_plt_insn_end = abed->plt_plt_insn_end;
-      plt_plt_offset = abed->plt_plt_offset;
-      plt_got_insn_size = abed->plt_got_insn_size;
-      plt_got_offset = abed->plt_got_offset;
+      /* Fill in the entry in the procedure linkage table.  */
+      memcpy (plt->contents + h->plt.offset, htab->plt.plt_entry,
+	      htab->plt.plt_entry_size);
       if (use_plt_bnd)
 	{
-	  /* Use the second PLT with BND relocations.  */
-	  const bfd_byte *plt_entry, *plt2_entry;
-
-	  if (info->bndplt)
-	    {
-	      plt_entry = elf_x86_64_bnd_plt_entry;
-	      plt2_entry = elf_x86_64_bnd_plt2_entry;
-	    }
-	  else
-	    {
-	      plt_entry = elf_x86_64_legacy_plt_entry;
-	      plt2_entry = elf_x86_64_legacy_plt2_entry;
-
-	      /* Subtract 1 since there is no BND prefix.  */
-	      plt_plt_insn_end -= 1;
-	      plt_plt_offset -= 1;
-	      plt_got_insn_size -= 1;
-	      plt_got_offset -= 1;
-	    }
-
-	  BFD_ASSERT (sizeof (elf_x86_64_bnd_plt_entry)
-		      == sizeof (elf_x86_64_legacy_plt_entry));
-
-	  /* Fill in the entry in the procedure linkage table.  */
-	  memcpy (plt->contents + h->plt.offset,
-		  plt_entry, sizeof (elf_x86_64_legacy_plt_entry));
-	  /* Fill in the entry in the second PLT.  */
 	  memcpy (htab->plt_bnd->contents + eh->plt_bnd.offset,
-		  plt2_entry, sizeof (elf_x86_64_legacy_plt2_entry));
+		  htab->non_lazy_plt->plt_entry,
+		  htab->non_lazy_plt->plt_entry_size);
 
 	  resolved_plt = htab->plt_bnd;
 	  plt_offset = eh->plt_bnd.offset;
 	}
       else
 	{
-	  /* Fill in the entry in the procedure linkage table.  */
-	  memcpy (plt->contents + h->plt.offset, abed->plt_entry,
-		  abed->plt_entry_size);
-
 	  resolved_plt = plt;
 	  plt_offset = h->plt.offset;
 	}
@@ -5922,7 +5772,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 			      - resolved_plt->output_section->vma
 			      - resolved_plt->output_offset
 			      - plt_offset
-			      - plt_got_insn_size);
+			      - htab->plt.plt_got_insn_size);
 
       /* Check PC-relative offset overflow in PLT entry.  */
       if ((plt_got_pcrel_offset + 0x80000000) > 0xffffffff)
@@ -5931,7 +5781,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 				output_bfd, h->root.root.string);
 
       bfd_put_32 (output_bfd, plt_got_pcrel_offset,
-		  resolved_plt->contents + plt_offset + plt_got_offset);
+		  (resolved_plt->contents + plt_offset
+		   + htab->plt.plt_got_offset));
 
       /* Fill in the entry in the global offset table, initially this
 	 points to the second part of the PLT entry.  Leave the entry
@@ -5939,11 +5790,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	 against undefined weak symbol in PIE.  */
       if (!local_undefweak)
 	{
-	  bfd_put_64 (output_bfd, (plt->output_section->vma
-				   + plt->output_offset
-				   + h->plt.offset
-				   + abed->plt_lazy_offset),
-		      gotplt->contents + got_offset);
+	  if (htab->plt.has_plt0)
+	    bfd_put_64 (output_bfd, (plt->output_section->vma
+				     + plt->output_offset
+				     + h->plt.offset
+				     + htab->lazy_plt->plt_lazy_offset),
+			gotplt->contents + got_offset);
 
 	  /* Fill in the entry in the .rela.plt section.  */
 	  rela.r_offset = (gotplt->output_section->vma
@@ -5971,15 +5823,17 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	      plt_index = htab->next_jump_slot_index++;
 	    }
 
-	  /* Don't fill PLT entry for static executables.  */
-	  if (plt == htab->elf.splt)
+	  /* Don't fill the second and third slots in PLT entry for
+	     static executables nor without PLT0.  */
+	  if (plt == htab->elf.splt && htab->plt.has_plt0)
 	    {
-	      bfd_vma plt0_offset = h->plt.offset + plt_plt_insn_end;
+	      bfd_vma plt0_offset
+		= h->plt.offset + htab->lazy_plt->plt_plt_insn_end;
 
 	      /* Put relocation index.  */
 	      bfd_put_32 (output_bfd, plt_index,
 			  (plt->contents + h->plt.offset
-			   + abed->plt_reloc_offset));
+			   + htab->lazy_plt->plt_reloc_offset));
 
 	      /* Put offset for jmp .PLT0 and check for overflow.  We don't
 		 check relocation index for overflow since branch displacement
@@ -5989,7 +5843,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
 					output_bfd, h->root.root.string);
 	      bfd_put_32 (output_bfd, - plt0_offset,
-			  plt->contents + h->plt.offset + plt_plt_offset);
+			  (plt->contents + h->plt.offset
+			   + htab->lazy_plt->plt_plt_offset));
 	    }
 
 	  bed = get_elf_backend_data (output_bfd);
@@ -5999,11 +5854,10 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
     }
   else if (eh->plt_got.offset != (bfd_vma) -1)
     {
-      bfd_vma got_offset, plt_offset, plt_got_offset, plt_got_insn_size;
+      bfd_vma got_offset, plt_offset;
       asection *plt, *got;
       bfd_boolean got_after_plt;
       int32_t got_pcrel_offset;
-      const bfd_byte *got_plt_entry;
 
       /* Set the entry in the GOT procedure linkage table.  */
       plt = htab->plt_got;
@@ -6016,25 +5870,13 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  || got == NULL)
 	abort ();
 
-      /* Use the second PLT entry template for the GOT PLT since they
+      /* Use the non-lazy PLT entry template for the GOT PLT since they
 	 are the identical.  */
-      plt_got_insn_size = elf_x86_64_bnd_arch_bed.plt_got_insn_size;
-      plt_got_offset = elf_x86_64_bnd_arch_bed.plt_got_offset;
-      if (info->bndplt)
-	got_plt_entry = elf_x86_64_bnd_plt2_entry;
-      else
-	{
-	  got_plt_entry = elf_x86_64_legacy_plt2_entry;
-
-	  /* Subtract 1 since there is no BND prefix.  */
-	  plt_got_insn_size -= 1;
-	  plt_got_offset -= 1;
-	}
-
       /* Fill in the entry in the GOT procedure linkage table.  */
       plt_offset = eh->plt_got.offset;
       memcpy (plt->contents + plt_offset,
-	      got_plt_entry, sizeof (elf_x86_64_legacy_plt2_entry));
+	      htab->non_lazy_plt->plt_entry,
+	      htab->non_lazy_plt->plt_entry_size);
 
       /* Put offset the PC-relative instruction referring to the GOT
 	 entry, subtracting the size of that instruction.  */
@@ -6044,7 +5886,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 			  - plt->output_section->vma
 			  - plt->output_offset
 			  - plt_offset
-			  - plt_got_insn_size);
+			  - htab->non_lazy_plt->plt_got_insn_size);
 
       /* Check PC-relative offset overflow in GOT PLT entry.  */
       got_after_plt = got->output_section->vma > plt->output_section->vma;
@@ -6055,7 +5897,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 				output_bfd, h->root.root.string);
 
       bfd_put_32 (output_bfd, got_pcrel_offset,
-		  plt->contents + plt_offset + plt_got_offset);
+		  (plt->contents + plt_offset
+		   + htab->non_lazy_plt->plt_got_offset));
     }
 
   if (!local_undefweak
@@ -6290,17 +6133,10 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
   struct elf_x86_64_link_hash_table *htab;
   bfd *dynobj;
   asection *sdyn;
-  const struct elf_x86_64_backend_data *abed;
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  /* Use MPX backend data in case of BND relocation.  Use .plt_bnd
-     section only if there is .plt section.  */
-  abed = (htab->elf.splt != NULL && htab->plt_bnd != NULL
-	  ? &elf_x86_64_bnd_arch_bed
-	  : get_elf_x86_64_backend_data (output_bfd));
 
   dynobj = htab->elf.dynobj;
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
@@ -6360,78 +6196,95 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	  (*bed->s->swap_dyn_out) (output_bfd, &dyn, dyncon);
 	}
 
-      /* Fill in the special first entry in the procedure linkage table.  */
       if (htab->elf.splt && htab->elf.splt->size > 0)
 	{
-	  /* Fill in the first entry in the procedure linkage table.  */
-	  memcpy (htab->elf.splt->contents,
-		  abed->plt0_entry, abed->plt_entry_size);
-	  /* Add offset for pushq GOT+8(%rip), since the instruction
-	     uses 6 bytes subtract this value.  */
-	  bfd_put_32 (output_bfd,
-		      (htab->elf.sgotplt->output_section->vma
-		       + htab->elf.sgotplt->output_offset
-		       + 8
-		       - htab->elf.splt->output_section->vma
-		       - htab->elf.splt->output_offset
-		       - 6),
-		      htab->elf.splt->contents + abed->plt0_got1_offset);
-	  /* Add offset for the PC-relative instruction accessing GOT+16,
-	     subtracting the offset to the end of that instruction.  */
-	  bfd_put_32 (output_bfd,
-		      (htab->elf.sgotplt->output_section->vma
-		       + htab->elf.sgotplt->output_offset
-		       + 16
-		       - htab->elf.splt->output_section->vma
-		       - htab->elf.splt->output_offset
-		       - abed->plt0_got2_insn_end),
-		      htab->elf.splt->contents + abed->plt0_got2_offset);
-
 	  elf_section_data (htab->elf.splt->output_section)
-	    ->this_hdr.sh_entsize = abed->plt_entry_size;
+	    ->this_hdr.sh_entsize = htab->plt.plt_entry_size;
 
-	  if (htab->tlsdesc_plt)
+	  if (htab->plt.has_plt0)
 	    {
-	      bfd_put_64 (output_bfd, (bfd_vma) 0,
-			  htab->elf.sgot->contents + htab->tlsdesc_got);
-
-	      memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
-		      abed->plt0_entry, abed->plt_entry_size);
-
-	      /* Add offset for pushq GOT+8(%rip), since the
-		 instruction uses 6 bytes subtract this value.  */
+	      /* Fill in the special first entry in the procedure linkage
+		 table.  */
+	      memcpy (htab->elf.splt->contents,
+		      htab->lazy_plt->plt0_entry,
+		      htab->lazy_plt->plt_entry_size);
+	      /* Add offset for pushq GOT+8(%rip), since the instruction
+		 uses 6 bytes subtract this value.  */
 	      bfd_put_32 (output_bfd,
 			  (htab->elf.sgotplt->output_section->vma
 			   + htab->elf.sgotplt->output_offset
 			   + 8
 			   - htab->elf.splt->output_section->vma
 			   - htab->elf.splt->output_offset
-			   - htab->tlsdesc_plt
 			   - 6),
-			  htab->elf.splt->contents
-			  + htab->tlsdesc_plt + abed->plt0_got1_offset);
-	  /* Add offset for the PC-relative instruction accessing GOT+TDG,
-	     where TGD stands for htab->tlsdesc_got, subtracting the offset
-	     to the end of that instruction.  */
+			  (htab->elf.splt->contents
+			   + htab->lazy_plt->plt0_got1_offset));
+	      /* Add offset for the PC-relative instruction accessing
+		 GOT+16, subtracting the offset to the end of that
+		 instruction.  */
 	      bfd_put_32 (output_bfd,
-			  (htab->elf.sgot->output_section->vma
-			   + htab->elf.sgot->output_offset
-			   + htab->tlsdesc_got
+			  (htab->elf.sgotplt->output_section->vma
+			   + htab->elf.sgotplt->output_offset
+			   + 16
 			   - htab->elf.splt->output_section->vma
 			   - htab->elf.splt->output_offset
-			   - htab->tlsdesc_plt
-			   - abed->plt0_got2_insn_end),
-			  htab->elf.splt->contents
-			  + htab->tlsdesc_plt + abed->plt0_got2_offset);
+			   - htab->lazy_plt->plt0_got2_insn_end),
+			  (htab->elf.splt->contents
+			   + htab->lazy_plt->plt0_got2_offset));
+
+	      if (htab->tlsdesc_plt)
+		{
+		  bfd_put_64 (output_bfd, (bfd_vma) 0,
+			      htab->elf.sgot->contents + htab->tlsdesc_got);
+
+		  memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
+			  htab->lazy_plt->plt0_entry,
+			  htab->lazy_plt->plt_entry_size);
+
+		  /* Add offset for pushq GOT+8(%rip), since the
+		     instruction uses 6 bytes subtract this value.  */
+		  bfd_put_32 (output_bfd,
+			      (htab->elf.sgotplt->output_section->vma
+			       + htab->elf.sgotplt->output_offset
+			       + 8
+			       - htab->elf.splt->output_section->vma
+			       - htab->elf.splt->output_offset
+			       - htab->tlsdesc_plt
+			       - 6),
+			      (htab->elf.splt->contents
+			       + htab->tlsdesc_plt
+			       + htab->lazy_plt->plt0_got1_offset));
+		  /* Add offset for the PC-relative instruction accessing
+		     GOT+TDG, where TDG stands for htab->tlsdesc_got,
+		     subtracting the offset to the end of that
+		     instruction.  */
+		  bfd_put_32 (output_bfd,
+			      (htab->elf.sgot->output_section->vma
+			       + htab->elf.sgot->output_offset
+			       + htab->tlsdesc_got
+			       - htab->elf.splt->output_section->vma
+			       - htab->elf.splt->output_offset
+			       - htab->tlsdesc_plt
+			       - htab->lazy_plt->plt0_got2_insn_end),
+			      (htab->elf.splt->contents
+			       + htab->tlsdesc_plt
+			       + htab->lazy_plt->plt0_got2_offset));
+		}
 	    }
 	}
     }
 
-  if (htab->plt_bnd != NULL)
-    elf_section_data (htab->plt_bnd->output_section)
-      ->this_hdr.sh_entsize = sizeof (elf_x86_64_bnd_plt2_entry);
+  if (htab->plt_got != NULL && htab->plt_got->size > 0)
+    elf_section_data (htab->plt_got->output_section)
+      ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
 
-  if (htab->elf.sgotplt)
+  if (htab->plt_bnd != NULL && htab->plt_bnd->size > 0)
+    elf_section_data (htab->plt_bnd->output_section)
+      ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
+
+  /* GOT is always created in setup_gnu_properties.  But it may not be
+     needed.  */
+  if (htab->elf.sgotplt && htab->elf.sgotplt->size > 0)
     {
       if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
 	{
@@ -6440,24 +6293,22 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	  return FALSE;
 	}
 
-      /* Fill in the first three entries in the global offset table.  */
-      if (htab->elf.sgotplt->size > 0)
-	{
-	  /* Set the first entry in the global offset table to the address of
-	     the dynamic section.  */
-	  if (sdyn == NULL)
-	    bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents);
-	  else
-	    bfd_put_64 (output_bfd,
-			sdyn->output_section->vma + sdyn->output_offset,
-			htab->elf.sgotplt->contents);
-	  /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
-	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
-	  bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + GOT_ENTRY_SIZE*2);
-	}
+      /* Set the first entry in the global offset table to the address of
+	 the dynamic section.  */
+      if (sdyn == NULL)
+	bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents);
+      else
+	bfd_put_64 (output_bfd,
+		    sdyn->output_section->vma + sdyn->output_offset,
+		    htab->elf.sgotplt->contents);
+      /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
+      bfd_put_64 (output_bfd, (bfd_vma) 0,
+		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
+      bfd_put_64 (output_bfd, (bfd_vma) 0,
+		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE*2);
 
-      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize =
-	GOT_ENTRY_SIZE;
+      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize
+	= GOT_ENTRY_SIZE;
     }
 
   /* Adjust .eh_frame for .plt section.  */
@@ -6581,126 +6432,363 @@ elf_x86_64_output_arch_local_syms
   return TRUE;
 }
 
-/* Return an array of PLT entry symbol values.  */
+/* Sort relocs into address order.  */
 
-static bfd_vma *
-elf_x86_64_get_plt_sym_val (bfd *abfd, asymbol **dynsyms, asection *plt,
-			    asection *relplt)
+static int
+compare_relocs (const void *ap, const void *bp)
 {
-  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
-  arelent *p;
-  long count, i;
-  bfd_vma *plt_sym_val;
-  bfd_vma plt_offset;
-  bfd_byte *plt_contents;
-  const struct elf_x86_64_backend_data *bed;
-  Elf_Internal_Shdr *hdr;
-  asection *plt_bnd;
+  const arelent *a = * (const arelent **) ap;
+  const arelent *b = * (const arelent **) bp;
 
-  /* Get the .plt section contents.  PLT passed down may point to the
-     .plt.bnd section.  Make sure that PLT always points to the .plt
-     section.  */
-  plt_bnd = bfd_get_section_by_name (abfd, ".plt.bnd");
-  if (plt_bnd)
-    {
-      if (plt != plt_bnd)
-	abort ();
-      plt = bfd_get_section_by_name (abfd, ".plt");
-      if (plt == NULL)
-	abort ();
-      bed = &elf_x86_64_bnd_arch_bed;
-    }
+  if (a->address > b->address)
+    return 1;
+  else if (a->address < b->address)
+    return -1;
   else
-    bed = get_elf_x86_64_backend_data (abfd);
-
-  plt_contents = (bfd_byte *) bfd_malloc (plt->size);
-  if (plt_contents == NULL)
-    return NULL;
-  if (!bfd_get_section_contents (abfd, (asection *) plt,
-				 plt_contents, 0, plt->size))
-    {
-bad_return:
-      free (plt_contents);
-      return NULL;
-    }
-
-  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
-    goto bad_return;
-
-  hdr = &elf_section_data (relplt)->this_hdr;
-  count = relplt->size / hdr->sh_entsize;
-
-  plt_sym_val = (bfd_vma *) bfd_malloc (sizeof (bfd_vma) * count);
-  if (plt_sym_val == NULL)
-    goto bad_return;
-
-  for (i = 0; i < count; i++)
-    plt_sym_val[i] = -1;
-
-  plt_offset = bed->plt_entry_size;
-  p = relplt->relocation;
-  for (i = 0; i < count; i++, p++)
-    {
-      long reloc_index;
-
-      /* Skip unknown relocation.  */
-      if (p->howto == NULL)
-	continue;
-
-      if (p->howto->type != R_X86_64_JUMP_SLOT
-	  && p->howto->type != R_X86_64_IRELATIVE)
-	continue;
-
-      reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
-				     + bed->plt_reloc_offset));
-      if (reloc_index < count)
-	{
-	  if (plt_bnd)
-	    {
-	      /* This is the index in .plt section.  */
-	      long plt_index = plt_offset / bed->plt_entry_size;
-	      /* Store VMA + the offset in .plt.bnd section.  */
-	      plt_sym_val[reloc_index] =
-		(plt_bnd->vma
-		 + (plt_index - 1) * sizeof (elf_x86_64_legacy_plt2_entry));
-	    }
-	  else
-	    plt_sym_val[reloc_index] = plt->vma + plt_offset;
-	}
-      plt_offset += bed->plt_entry_size;
-
-      /* PR binutils/18437: Skip extra relocations in the .rela.plt
-	 section.  */
-      if (plt_offset >= plt->size)
-	break;
-    }
-
-  free (plt_contents);
-
-  return plt_sym_val;
+    return 0;
 }
 
-/* Similar to _bfd_elf_get_synthetic_symtab, with .plt.bnd section
-   support.  */
+enum elf_x86_64_plt_type
+{
+  plt_non_lazy = 0,
+  plt_lazy = 1 << 0,
+  plt_bnd = 1 << 1,
+  plt_unknown = -1
+};
+
+struct elf_x86_64_plt
+{
+  const char *name;
+  asection *sec;
+  bfd_byte *contents;
+  enum elf_x86_64_plt_type type;
+  unsigned int plt_got_offset;
+  unsigned int plt_got_insn_size;
+  unsigned int plt_entry_size;
+  long count;
+};
+
+/* Forward declaration.  */
+static const struct elf_x86_64_lazy_plt_layout elf_x86_64_nacl_plt;
+
+/* Similar to _bfd_elf_get_synthetic_symtab.  Support PLTs with all
+   dynamic relocations.   */
 
 static long
 elf_x86_64_get_synthetic_symtab (bfd *abfd,
-				 long symcount,
-				 asymbol **syms,
+				 long symcount ATTRIBUTE_UNUSED,
+				 asymbol **syms ATTRIBUTE_UNUSED,
 				 long dynsymcount,
 				 asymbol **dynsyms,
 				 asymbol **ret)
 {
-  /* Pass the .plt.bnd section to _bfd_elf_ifunc_get_synthetic_symtab
-     as PLT if it exists.  */
-  asection *plt = bfd_get_section_by_name (abfd, ".plt.bnd");
-  if (plt == NULL)
-    plt = bfd_get_section_by_name (abfd, ".plt");
-  return _bfd_elf_ifunc_get_synthetic_symtab (abfd, symcount, syms,
-					      dynsymcount, dynsyms, ret,
-					      plt,
-					      elf_x86_64_get_plt_sym_val);
+  long size, count, i, n;
+  int j;
+  unsigned int plt_got_offset, plt_entry_size, plt_got_insn_size;
+  asymbol *s;
+  bfd_byte *plt_contents;
+  long dynrelcount, relsize;
+  arelent **dynrelbuf;
+  const struct elf_x86_64_lazy_plt_layout *lazy_plt;
+  const struct elf_x86_64_non_lazy_plt_layout *non_lazy_plt;
+  const struct elf_x86_64_lazy_plt_layout *lazy_bnd_plt;
+  const struct elf_x86_64_non_lazy_plt_layout *non_lazy_bnd_plt;
+  asection *plt;
+  char *names;
+  enum elf_x86_64_plt_type plt_type;
+  struct elf_x86_64_plt plts[] =
+    {
+      { ".plt", NULL, NULL, plt_unknown, 0, 0, 0, 0 },
+      { ".plt.got", NULL, NULL, plt_non_lazy, 0, 0, 0, 0 },
+      { ".plt.bnd", NULL, NULL, plt_bnd, 0, 0, 0, 0 },
+      { NULL, }
+    };
+
+  *ret = NULL;
+
+  if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0)
+    return 0;
+
+  if (dynsymcount <= 0)
+    return 0;
+
+  relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
+  if (relsize <= 0)
+    return -1;
+
+  dynrelbuf = (arelent **) bfd_malloc (relsize);
+  if (dynrelbuf == NULL)
+    return -1;
+
+  dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
+						dynsyms);
+
+  /* Sort the relocs by address.  */
+  qsort (dynrelbuf, dynrelcount, sizeof (arelent *), compare_relocs);
+
+  if (get_elf_x86_64_backend_data (abfd)->os == is_normal)
+    {
+      lazy_plt = &elf_x86_64_lazy_plt;
+      non_lazy_plt = &elf_x86_64_non_lazy_plt;
+      lazy_bnd_plt = &elf_x86_64_lazy_bnd_plt;
+      non_lazy_bnd_plt = &elf_x86_64_non_lazy_bnd_plt;
+    }
+  else
+    {
+      lazy_plt = &elf_x86_64_nacl_plt;
+      non_lazy_plt = NULL;
+      lazy_bnd_plt = NULL;
+      non_lazy_bnd_plt = NULL;
+    }
+
+  count = 0;
+  for (j = 0; plts[j].name != NULL; j++)
+    {
+      plt = bfd_get_section_by_name (abfd, plts[j].name);
+      if (plt == NULL)
+	continue;
+
+      /* Get the PLT section contents.  */
+      plt_contents = (bfd_byte *) bfd_malloc (plt->size);
+      if (plt_contents == NULL)
+	break;
+      if (!bfd_get_section_contents (abfd, (asection *) plt,
+				     plt_contents, 0, plt->size))
+	{
+	  free (plt_contents);
+	  break;
+	}
+
+      /* Check what kind of PLT it is.  */
+      plt_type = plt_unknown;
+      if (plts[j].type == plt_unknown)
+	{
+	  /* Match lazy PLT first.  Need to check the first two
+	     instructions.   */
+	  if ((memcmp (plt_contents, lazy_plt->plt0_entry,
+		       lazy_plt->plt0_got1_offset) == 0)
+	      && (memcmp (plt_contents + 6, lazy_plt->plt0_entry + 6,
+			  2) == 0))
+	    plt_type = plt_lazy;
+	  else if (lazy_bnd_plt != NULL
+		   && (memcmp (plt_contents, lazy_bnd_plt->plt0_entry,
+			       lazy_bnd_plt->plt0_got1_offset) == 0)
+		   && (memcmp (plt_contents + 6,
+			       lazy_bnd_plt->plt0_entry + 6, 3) == 0))
+	    {
+	      plt_type = plt_lazy | plt_bnd;
+	      lazy_plt = lazy_bnd_plt;
+	    }
+	}
+
+      if (non_lazy_plt != NULL
+	  && (plt_type == plt_unknown || plt_type == plt_non_lazy))
+	{
+	  /* Match non-lazy PLT.  */
+	  if (memcmp (plt_contents, non_lazy_plt->plt_entry,
+		      non_lazy_plt->plt_got_offset) == 0)
+	    plt_type = plt_non_lazy;
+	}
+
+      if (non_lazy_bnd_plt != NULL
+	  && (plt_type == plt_unknown || plt_type == plt_bnd))
+	{
+	  /* Match BND PLT.  */
+	  if (memcmp (plt_contents, non_lazy_bnd_plt->plt_entry,
+		      non_lazy_bnd_plt->plt_got_offset) == 0)
+	    {
+	      plt_type = plt_bnd;
+	      non_lazy_plt = non_lazy_bnd_plt;
+	    }
+	}
+
+      if (plt_type == plt_unknown)
+	continue;
+
+      plts[j].sec = plt;
+      plts[j].type = plt_type;
+
+      if ((plt_type & plt_lazy))
+	{
+	  plts[j].plt_got_offset = lazy_plt->plt_got_offset;
+	  plts[j].plt_got_insn_size = lazy_plt->plt_got_insn_size;
+	  plts[j].plt_entry_size = lazy_plt->plt_entry_size;
+	  /* Skip PLT0 in lazy PLT.  */
+	  i = 1;
+	}
+      else
+	{
+	  plts[j].plt_got_offset = non_lazy_plt->plt_got_offset;
+	  plts[j].plt_got_insn_size = non_lazy_plt->plt_got_insn_size;
+	  plts[j].plt_entry_size = non_lazy_plt->plt_entry_size;
+	  i = 0;
+	}
+
+      /* Skip lazy PLT with BND.  */
+      if (plt_type == (plt_lazy |plt_bnd))
+	plts[j].count = 0;
+      else
+	{
+	  n = plt->size / plts[j].plt_entry_size;
+	  plts[j].count = n;
+	  count += n - i;
+	}
+
+      plts[j].contents = plt_contents;
+    }
+
+  size = count * sizeof (asymbol);
+  s = *ret = (asymbol *) bfd_zmalloc (size);
+  if (s == NULL)
+    {
+bad_return:
+      for (j = 0; plts[j].name != NULL; j++)
+	if (plts[j].contents != NULL)
+	  free (plts[j].contents);
+      free (dynrelbuf);
+      return -1;
+    }
+
+  /* Check for each PLT section.  */
+  size = 0;
+  n = 0;
+  for (j = 0; plts[j].name != NULL; j++)
+    if ((plt_contents = plts[j].contents) != NULL)
+      {
+	long k;
+	bfd_vma offset;
+
+	plt_got_offset = plts[j].plt_got_offset;
+	plt_got_insn_size = plts[j].plt_got_insn_size;
+	plt_entry_size = plts[j].plt_entry_size;
+
+	plt = plts[j].sec;
+
+	if ((plts[j].type & plt_lazy))
+	  {
+	    /* Skip PLT0 in lazy PLT.  */
+	    k = 1;
+	    offset = plt_entry_size;
+	  }
+	else
+	  {
+	    k = 0;
+	    offset = 0;
+	  }
+
+	/* Check each PLT entry against dynamic relocations.  */
+	for (; k < plts[j].count; k++)
+	  {
+	    int off;
+	    bfd_vma got_vma;
+	    long min, max, mid;
+	    arelent *p;
+
+	    /* Get the PC-relative offset, a signed 32-bit integer.  */
+	    off = H_GET_32 (abfd, (plt_contents + offset
+				   + plt_got_offset));
+	    got_vma = plt->vma + offset + off + plt_got_insn_size;
+
+	    /* Binary search.  */
+	    p = dynrelbuf[0];
+	    min = 0;
+	    max = dynrelcount;
+	    while ((min + 1) < max)
+	      {
+		arelent *r;
+
+		mid = (min + max) / 2;
+		r = dynrelbuf[mid];
+		if (got_vma > r->address)
+		  min = mid;
+		else if (got_vma < r->address)
+		  max = mid;
+		else
+		  {
+		    p = r;
+		    break;
+		  }
+	      }
+
+	    /* Skip unknown relocation.  PR 17512: file: bc9d6cf5.  */
+	    if (got_vma == p->address
+		&& p->howto != NULL
+		&& (p->howto->type == R_X86_64_JUMP_SLOT
+		    || p->howto->type == R_X86_64_GLOB_DAT
+		    || p->howto->type == R_X86_64_IRELATIVE))
+	      {
+		*s = **p->sym_ptr_ptr;
+		/* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL
+		   set.  Since we are defining a symbol, ensure one
+		   of them is set.  */
+		if ((s->flags & BSF_LOCAL) == 0)
+		  s->flags |= BSF_GLOBAL;
+		s->flags |= BSF_SYNTHETIC;
+		/* This is no longer a section symbol.  */
+		s->flags &= ~BSF_SECTION_SYM;
+		s->section = plt;
+		s->the_bfd = plt->owner;
+		s->value = offset;
+		/* Store relocation for later use.  */
+		s->udata.p = p;
+		/* Add @plt to function name later.  */
+		size += strlen (s->name) + sizeof ("@plt");
+		if (p->addend != 0)
+		  size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
+		n++;
+		s++;
+	      }
+	    offset += plt_entry_size;
+	  }
+      }
+
+  /* PLT entries with R_X86_64_TLSDESC relocations are skipped.  */
+  if (n == 0)
+    goto bad_return;
+
+  count = n;
+
+  /* Allocate space for @plt suffixes.  */
+  names = (char *) bfd_malloc (size);
+  if (s == NULL)
+    goto bad_return;
+
+  s = *ret;
+  for (i = 0; i < count; i++)
+    {
+      /* Add @plt to function name.  */
+      arelent *p = (arelent *) s->udata.p;
+      /* Clear it now.  */
+      s->udata.p = NULL;
+      size = strlen (s->name);
+      memcpy (names, s->name, size);
+      s->name = names;
+      names += size;
+      if (p->addend != 0)
+	{
+	  char buf[30], *a;
+
+	  memcpy (names, "+0x", sizeof ("+0x") - 1);
+	  names += sizeof ("+0x") - 1;
+	  bfd_sprintf_vma (abfd, buf, p->addend);
+	  for (a = buf; *a == '0'; ++a)
+	    ;
+	  size = strlen (a);
+	  memcpy (names, a, size);
+	  names += size;
+	}
+      memcpy (names, "@plt", sizeof ("@plt"));
+      names += sizeof ("@plt");
+      s++;
+    }
+
+  for (j = 0; plts[j].name != NULL; j++)
+    if (plts[j].contents != NULL)
+      free (plts[j].contents);
+
+  free (dynrelbuf);
+
+  return count;
 }
 
 /* Handle an x86-64 specific section when reading an object file.  This
@@ -6968,6 +7056,278 @@ elf_x86_64_merge_gnu_properties (bfd *abfd ATTRIBUTE_UNUSED,
   return updated;
 }
 
+/* Set up x86-64 GNU properties.  Return the first relocatable ELF input
+   with GNU properties if found.  Otherwise, return NULL.  */
+
+static bfd *
+elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
+{
+  bfd_boolean normal_target;
+  bfd_boolean lazy_plt;
+  asection *sec, *pltsec;
+  bfd *dynobj;
+  unsigned int plt_alignment;
+  struct elf_x86_64_link_hash_table *htab;
+  bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
+
+  if (bfd_link_relocatable (info))
+    return pbfd;
+
+  htab = elf_x86_64_hash_table (info);
+  if (htab == NULL)
+    return pbfd;
+
+  dynobj = htab->elf.dynobj;
+
+  /* Set htab->elf.dynobj here so that there is no need to check and
+     set it in check_relocs.  */
+  if (dynobj == NULL)
+    {
+      bfd *abfd;
+
+      /* Find a normal input file to hold linker created
+	 sections.  */
+      for (abfd = info->input_bfds;
+	   abfd != NULL;
+	   abfd = abfd->link.next)
+	if ((abfd->flags
+	     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+	  {
+	    htab->elf.dynobj = abfd;
+	    dynobj = abfd;
+	    break;
+	  }
+    }
+
+  /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
+     still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
+     canonical function address.  */
+  htab->plt.has_plt0 = 1;
+
+  if (get_elf_x86_64_backend_data (info->output_bfd)->os
+      == is_normal)
+    {
+      if (info->bndplt)
+	{
+	  htab->lazy_plt = &elf_x86_64_lazy_bnd_plt;
+	  htab->non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
+	}
+      else
+	{
+	  htab->lazy_plt = &elf_x86_64_lazy_plt;
+	  htab->non_lazy_plt = &elf_x86_64_non_lazy_plt;
+	}
+      normal_target = TRUE;
+    }
+  else
+    {
+      htab->lazy_plt = &elf_x86_64_nacl_plt;
+      htab->non_lazy_plt = NULL;
+      normal_target = FALSE;
+    }
+
+  pltsec = htab->elf.splt;
+
+  /* If the non-lazy PLT is available, use it for all PLT entries if
+     there are no PLT0 or no .plt section.  */
+  if (htab->non_lazy_plt != NULL
+      && (!htab->plt.has_plt0 || pltsec == NULL))
+    {
+      lazy_plt = FALSE;
+      htab->plt.plt_entry
+	= htab->non_lazy_plt->plt_entry;
+      htab->plt.plt_entry_size
+	= htab->non_lazy_plt->plt_entry_size;
+      htab->plt.plt_got_offset
+	= htab->non_lazy_plt->plt_got_offset;
+      htab->plt.plt_got_insn_size
+	= htab->non_lazy_plt->plt_got_insn_size;
+      htab->plt.eh_frame_plt_size
+	= htab->non_lazy_plt->eh_frame_plt_size;
+      htab->plt.eh_frame_plt
+	= htab->non_lazy_plt->eh_frame_plt;
+    }
+  else
+    {
+      lazy_plt = TRUE;
+      htab->plt.plt_entry
+	= htab->lazy_plt->plt_entry;
+      htab->plt.plt_entry_size
+	= htab->lazy_plt->plt_entry_size;
+      htab->plt.plt_got_offset
+	= htab->lazy_plt->plt_got_offset;
+      htab->plt.plt_got_insn_size
+	= htab->lazy_plt->plt_got_insn_size;
+      htab->plt.eh_frame_plt_size
+	= htab->lazy_plt->eh_frame_plt_size;
+      htab->plt.eh_frame_plt
+	= htab->lazy_plt->eh_frame_plt;
+    }
+
+  /* Return if there are no normal input files.  */
+  if (dynobj == NULL)
+    return pbfd;
+
+  /* Since create_dynamic_sections isn't always called, but GOT
+     relocations need GOT relocations, create them here so that we
+     don't need to do it in check_relocs.  */
+  if (htab->elf.sgot == NULL
+      && !_bfd_elf_create_got_section (dynobj, info))
+    info->callbacks->einfo (_("%F: failed to create GOT sections\n"));
+
+  /* Align .got and .got.plt sections to their entry size.  Do it here
+     instead of in create_dynamic_sections so that they are always
+     properly aligned even if create_dynamic_sections isn't called.  */
+  sec = htab->elf.sgot;
+  if (!bfd_set_section_alignment (dynobj, sec, 3))
+    {
+error_alignment:
+      info->callbacks->einfo (_("%F%A: failed to align section\n"),
+			      sec);
+    }
+
+  sec = htab->elf.sgotplt;
+  if (!bfd_set_section_alignment (dynobj, sec, 3))
+    goto error_alignment;
+
+  /* Create the ifunc sections here so that check_relocs can be
+     simplified.  */
+  if (!_bfd_elf_create_ifunc_sections (dynobj, info))
+    info->callbacks->einfo (_("%F: failed to create ifunc sections\n"));
+
+  plt_alignment = bfd_log2 (htab->plt.plt_entry_size);
+
+  if (pltsec != NULL)
+    {
+      /* Whe creating executable, set the contents of the .interp
+	 section to the interpreter.  */
+      if (bfd_link_executable (info) && !info->nointerp)
+	{
+	  asection *s = bfd_get_linker_section (dynobj, ".interp");
+	  if (s == NULL)
+	    abort ();
+	  s->size = htab->dynamic_interpreter_size;
+	  s->contents = (unsigned char *) htab->dynamic_interpreter;
+	  htab->interp = s;
+	}
+
+      /* Don't change PLT section alignment for NaCl since it uses
+	 64-byte PLT entry and sets PLT section alignment to 32
+	 bytes.  Don't create additional PLT sections for NaCl.  */
+      if (normal_target)
+	{
+	  const struct elf_backend_data *bed
+	    = get_elf_backend_data (dynobj);
+	  flagword pltflags = (bed->dynamic_sec_flags
+			       | SEC_ALLOC
+			       | SEC_CODE
+			       | SEC_LOAD
+			       | SEC_READONLY);
+	  unsigned int non_lazy_plt_alignment
+	    = bfd_log2 (htab->non_lazy_plt->plt_entry_size);
+
+	  sec = pltsec;
+	  if (!bfd_set_section_alignment (sec->owner, sec,
+					  plt_alignment))
+	    goto error_alignment;
+
+	  /* Create the GOT procedure linkage table.  */
+	  sec = bfd_make_section_anyway_with_flags (dynobj,
+						    ".plt.got",
+						    pltflags);
+	  if (sec == NULL)
+	    info->callbacks->einfo (_("%F: failed to create GOT PLT section\n"));
+
+	  if (!bfd_set_section_alignment (dynobj, sec,
+					  non_lazy_plt_alignment))
+	    goto error_alignment;
+
+	  htab->plt_got = sec;
+
+	  /* MPX PLT is supported only for non-NaCl target in 64-bit
+	     mode and is needed only for lazy binding.  */
+	  if (lazy_plt
+	      && info->bndplt
+	      && ABI_64_P (htab->elf.dynobj))
+	    {
+	      /* Create the second PLT for Intel MPX support.  */
+	      sec = bfd_make_section_anyway_with_flags (dynobj,
+							".plt.bnd",
+							pltflags);
+	      if (sec == NULL)
+		info->callbacks->einfo (_("%F: failed to create BND PLT section\n"));
+
+	      if (!bfd_set_section_alignment (dynobj, sec,
+					      non_lazy_plt_alignment))
+		goto error_alignment;
+
+	      htab->plt_bnd = sec;
+	    }
+	}
+
+      if (!info->no_ld_generated_unwind_info)
+	{
+	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+			    | SEC_LINKER_CREATED);
+
+	  sec = bfd_make_section_anyway_with_flags (dynobj,
+						    ".eh_frame",
+						    flags);
+	  if (sec == NULL)
+	    info->callbacks->einfo (_("%F: failed to create PLT .eh_frame section\n"));
+
+	  if (!bfd_set_section_alignment (dynobj, sec,
+					  ABI_64_P (dynobj) ? 3 : 2))
+	    goto error_alignment;
+
+	  htab->plt_eh_frame = sec;
+
+	  if (htab->plt_got != NULL)
+	    {
+	      sec = bfd_make_section_anyway_with_flags (dynobj,
+							".eh_frame",
+							flags);
+	      if (sec == NULL)
+		info->callbacks->einfo (_("%F: failed to create GOT PLT .eh_frame section\n"));
+
+	      if (!bfd_set_section_alignment (dynobj, sec,
+					      ABI_64_P (dynobj) ? 3 : 2))
+		goto error_alignment;
+
+	      htab->plt_got_eh_frame = sec;
+	    }
+
+	  if (htab->plt_bnd != NULL)
+	    {
+	      sec = bfd_make_section_anyway_with_flags (dynobj,
+							".eh_frame",
+							flags);
+	      if (sec == NULL)
+		info->callbacks->einfo (_("%F: failed to create BND PLT .eh_frame section\n"));
+
+	      if (!bfd_set_section_alignment (dynobj, sec, 3))
+		goto error_alignment;
+
+	      htab->plt_bnd_eh_frame = sec;
+	    }
+	}
+    }
+
+  if (normal_target)
+    {
+      /* The .iplt section is used for IFUNC symbols in static
+	 executables.  */
+      sec = htab->elf.iplt;
+      if (sec != NULL
+	  && !bfd_set_section_alignment (sec->owner, sec,
+					 plt_alignment))
+	goto error_alignment;
+    }
+
+  return pbfd;
+}
+
 static const struct bfd_elf_special_section
 elf_x86_64_special_sections[]=
 {
@@ -7014,7 +7374,7 @@ elf_x86_64_special_sections[]=
 #define elf_backend_relocs_compatible	    elf_x86_64_relocs_compatible
 #define elf_backend_check_relocs	    elf_x86_64_check_relocs
 #define elf_backend_copy_indirect_symbol    elf_x86_64_copy_indirect_symbol
-#define elf_backend_create_dynamic_sections elf_x86_64_create_dynamic_sections
+#define elf_backend_create_dynamic_sections _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol
 #define elf_backend_output_arch_local_syms  elf_x86_64_output_arch_local_syms
@@ -7064,6 +7424,8 @@ elf_x86_64_special_sections[]=
   elf_x86_64_parse_gnu_properties
 #define elf_backend_merge_gnu_properties \
  elf_x86_64_merge_gnu_properties
+#define elf_backend_setup_gnu_properties \
+ elf_x86_64_link_setup_gnu_properties
 
 #include "elf64-target.h"
 
@@ -7265,7 +7627,7 @@ static const bfd_byte elf_x86_64_nacl_eh_frame_plt[] =
     DW_CFA_nop, DW_CFA_nop
   };
 
-static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
+static const struct elf_x86_64_lazy_plt_layout elf_x86_64_nacl_plt =
   {
     elf_x86_64_nacl_plt0_entry,              /* plt0_entry */
     elf_x86_64_nacl_plt_entry,               /* plt_entry */
@@ -7280,9 +7642,12 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
     42,                                      /* plt_plt_insn_end */
     32,                                      /* plt_lazy_offset */
     elf_x86_64_nacl_eh_frame_plt,            /* eh_frame_plt */
-    sizeof (elf_x86_64_nacl_eh_frame_plt),   /* eh_frame_plt_size */
-    NULL,                                    /* eh_frame_plt_got */
-    0,                                       /* eh_frame_plt_got_size */
+    sizeof (elf_x86_64_nacl_eh_frame_plt)    /* eh_frame_plt_size */
+  };
+
+static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
+  {
+    is_nacl                                  /* os */
   };
 
 #undef	elf_backend_arch_data

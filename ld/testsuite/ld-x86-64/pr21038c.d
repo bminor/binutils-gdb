@@ -67,7 +67,7 @@ Disassembly of section .plt:
 
 Disassembly of section .plt.got:
 
-0+280 <.plt.got>:
+0+280 <func1@plt>:
  +[a-f0-9]+:	f2 ff 25 71 0d 20 00 	bnd jmpq \*0x200d71\(%rip\)        # 200ff8 <func1>
  +[a-f0-9]+:	90                   	nop
 
@@ -80,7 +80,7 @@ Disassembly of section .plt.bnd:
 Disassembly of section .text:
 
 0+290 <foo>:
- +[a-f0-9]+:	e8 eb ff ff ff       	callq  280 <.plt.got>
+ +[a-f0-9]+:	e8 eb ff ff ff       	callq  280 <func1@plt>
  +[a-f0-9]+:	e8 ee ff ff ff       	callq  288 <func2@plt>
  +[a-f0-9]+:	48 8b 05 57 0d 20 00 	mov    0x200d57\(%rip\),%rax        # 200ff8 <func1>
 #pass
