@@ -1699,6 +1699,77 @@ maintenance_print_remote_registers (char *args, int from_tty)
   regcache_print (args, regcache_dump_remote);
 }
 
+#if GDB_SELF_TEST
+#include "selftest.h"
+
+namespace selftests {
+
+/* Return the number of elements in current_regcache.  */
+
+static size_t
+current_regcache_size ()
+{
+  size_t i = 0;
+  for (auto list = current_regcache; list; list = list->next)
+    i++;
+
+  return i;
+}
+
+static void
+current_regcache_test (void)
+{
+  /* It is empty at the start.  */
+  SELF_CHECK (current_regcache_size () == 0);
+
+  ptid_t ptid1 (1), ptid2 (2), ptid3 (3);
+
+  /* Get regcache from ptid1, a new regcache is added to
+     current_regcache.  */
+  regcache *regcache = get_thread_arch_aspace_regcache (ptid1,
+							target_gdbarch (),
+							NULL);
+
+  SELF_CHECK (regcache != NULL);
+  SELF_CHECK (regcache->ptid () == ptid1);
+  SELF_CHECK (current_regcache_size () == 1);
+
+  /* Get regcache from ptid2, a new regcache is added to
+     current_regcache.  */
+  regcache = get_thread_arch_aspace_regcache (ptid2,
+					      target_gdbarch (),
+					      NULL);
+  SELF_CHECK (regcache != NULL);
+  SELF_CHECK (regcache->ptid () == ptid2);
+  SELF_CHECK (current_regcache_size () == 2);
+
+  /* Get regcache from ptid3, a new regcache is added to
+     current_regcache.  */
+  regcache = get_thread_arch_aspace_regcache (ptid3,
+					      target_gdbarch (),
+					      NULL);
+  SELF_CHECK (regcache != NULL);
+  SELF_CHECK (regcache->ptid () == ptid3);
+  SELF_CHECK (current_regcache_size () == 3);
+
+  /* Get regcache from ptid2 again, nothing is added to
+     current_regcache.  */
+  regcache = get_thread_arch_aspace_regcache (ptid2,
+					      target_gdbarch (),
+					      NULL);
+  SELF_CHECK (regcache != NULL);
+  SELF_CHECK (regcache->ptid () == ptid2);
+  SELF_CHECK (current_regcache_size () == 3);
+
+  /* Mark ptid2 is changed, so regcache of ptid2 should be removed from
+     current_regcache.  */
+  registers_changed_ptid (ptid2);
+  SELF_CHECK (current_regcache_size () == 2);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 
 void
@@ -1738,5 +1809,7 @@ Print the internal register configuration including each register's\n\
 remote register number and buffer offset in the g/G packets.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
-
+#if GDB_SELF_TEST
+  register_self_test (selftests::current_regcache_test);
+#endif
 }
