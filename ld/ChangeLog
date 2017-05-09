@@ -1,3 +1,7 @@
+2017-05-09  Benjamin Peterson  <bp@benjamin.pe>
+
+	* ld.texinfo (orphan sections): Grammar fix.
+
 2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-ifunc/ifunc-16-x86-64-now.d: New file.

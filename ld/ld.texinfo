@@ -1038,7 +1038,7 @@ specifically mentioned in a linker script.  @xref{Orphan Sections}.
 @item place
 Orphan sections are placed into a suitable output section following
 the strategy described in @ref{Orphan Sections}.  The option
-@samp{--unique} also effects how sections are placed.
+@samp{--unique} also affects how sections are placed.
 
 @item discard
 All orphan sections are discarded, by placing them in the
