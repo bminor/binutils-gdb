@@ -28,6 +28,7 @@
 #include "remote.h"
 #include "valprint.h"
 #include "regset.h"
+#include <forward_list>
 
 /*
  * DATA STRUCTURE
@@ -472,33 +473,20 @@ regcache::invalidate (int regnum)
    user).  Therefore all registers must be written back to the
    target when appropriate.  */
 
-struct regcache_list
-{
-  struct regcache *regcache;
-  struct regcache_list *next;
-};
-
-static struct regcache_list *current_regcache;
+static std::forward_list<regcache *> current_regcache;
 
 struct regcache *
 get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 				 struct address_space *aspace)
 {
-  struct regcache_list *list;
-  struct regcache *new_regcache;
+  for (const auto &regcache : current_regcache)
+    if (ptid_equal (regcache->ptid (), ptid) && regcache->arch () == gdbarch)
+      return regcache;
 
-  for (list = current_regcache; list; list = list->next)
-    if (ptid_equal (list->regcache->ptid (), ptid)
-	&& get_regcache_arch (list->regcache) == gdbarch)
-      return list->regcache;
+  regcache *new_regcache = new regcache (gdbarch, aspace, false);
 
-  new_regcache = new regcache (gdbarch, aspace, false);
+  current_regcache.push_front (new_regcache);
   new_regcache->set_ptid (ptid);
-
-  list = XNEW (struct regcache_list);
-  list->regcache = new_regcache;
-  list->next = current_regcache;
-  current_regcache = list;
 
   return new_regcache;
 }
@@ -563,11 +551,11 @@ regcache_observer_target_changed (struct target_ops *target)
 static void
 regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
-  struct regcache_list *list;
-
-  for (list = current_regcache; list; list = list->next)
-    if (ptid_equal (list->regcache->ptid (), old_ptid))
-      list->regcache->set_ptid (new_ptid);
+  for (auto &regcache : current_regcache)
+    {
+      if (ptid_equal (regcache->ptid (), old_ptid))
+	regcache->set_ptid (new_ptid);
+    }
 }
 
 /* Low level examining and depositing of registers.
@@ -584,25 +572,18 @@ regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 void
 registers_changed_ptid (ptid_t ptid)
 {
-  struct regcache_list *list, **list_link;
-
-  list = current_regcache;
-  list_link = &current_regcache;
-  while (list)
+  for (auto oit = current_regcache.before_begin (),
+	 it = std::next (oit);
+       it != current_regcache.end ();
+       )
     {
-      if (ptid_match (list->regcache->ptid (), ptid))
+      if (ptid_match ((*it)->ptid (), ptid))
 	{
-	  struct regcache_list *dead = list;
-
-	  *list_link = list->next;
-	  regcache_xfree (list->regcache);
-	  list = *list_link;
-	  xfree (dead);
-	  continue;
+	  delete *it;
+	  it = current_regcache.erase_after (oit);
 	}
-
-      list_link = &list->next;
-      list = *list_link;
+      else
+	oit = it++;
     }
 
   if (ptid_match (current_thread_ptid, ptid))
@@ -1709,11 +1690,7 @@ namespace selftests {
 static size_t
 current_regcache_size ()
 {
-  size_t i = 0;
-  for (auto list = current_regcache; list; list = list->next)
-    i++;
-
-  return i;
+  return std::distance (current_regcache.begin (), current_regcache.end ());
 }
 
 static void

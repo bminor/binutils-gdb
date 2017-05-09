@@ -1,5 +1,15 @@
 2017-05-09  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c: Include <forward_list>.
+	(struct regcache_list): Remove.
+	(current_regcache): Update.
+	(get_thread_arch_aspace_regcache): Update for std::forward_list.
+	(regcache_thread_ptid_changed): Likewise.
+	(registers_changed_ptid): Likewise.
+	(current_regcache_size): Likewise.
+
+2017-05-09  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c [GDB_SELF_TEST]: Include selftest.h.
 	(current_regcache_size): New function.
 	(current_regcache_test): New function.
