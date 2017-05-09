@@ -1,3 +1,8 @@
+2017-05-09  Awson  <kyrab@mail.ru>
+
+	PR ld/21471
+	* pe-dll.c (pe_detail_list): Add entry for pe-bigobj-x86-64.
+
 2017-05-09  Benjamin Peterson  <bp@benjamin.pe>
 
 	* ld.texinfo (orphan sections): Grammar fix.
