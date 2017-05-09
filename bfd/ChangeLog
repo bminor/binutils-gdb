@@ -1,3 +1,10 @@
+2017-05-09  Andrew Goedhart  <Andrewgoedhart@simplepowersolutions.co.za>
+
+	PR ld/21458
+	* elf32-arm.c (elf32_arm_final_link_relocate): Set the bottom bit
+	of the value when resolving a R_ARM_THM_ALU_PREL_11_0 relocation
+	and the destination is a Thumb symbol.
+
 2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_get_synthetic_symtab): Add missing
