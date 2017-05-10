@@ -1,3 +1,80 @@
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/attr-arc600.d: New file.
+	* testsuite/gas/arc/attr-arc600_mul32x16.d: Likewise.
+	* testsuite/gas/arc/attr-arc600_norm.d: Likewise.
+	* testsuite/gas/arc/attr-arc601.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_mul32x16.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_mul64.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_norm.d: Likewise.
+	* testsuite/gas/arc/attr-arc700.d: Likewise.
+	* testsuite/gas/arc/attr-arcem.d: Likewise.
+	* testsuite/gas/arc/attr-archs.d: Likewise.
+	* testsuite/gas/arc/attr-autodetect-1.d: Likewise.
+	* testsuite/gas/arc/attr-autodetect-1.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-a601.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-a601.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-a700.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-a700.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-em.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-em.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-hs.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-hs.s: Likewise.
+	* testsuite/gas/arc/attr-em.d: Likewise.
+	* testsuite/gas/arc/attr-em4.d: Likewise.
+	* testsuite/gas/arc/attr-em4_dmips.d: Likewise.
+	* testsuite/gas/arc/attr-em4_fpuda.d: Likewise.
+	* testsuite/gas/arc/attr-em4_fpus.d: Likewise.
+	* testsuite/gas/arc/attr-hs.d: Likewise.
+	* testsuite/gas/arc/attr-hs34.d: Likewise.
+	* testsuite/gas/arc/attr-hs38.d: Likewise.
+	* testsuite/gas/arc/attr-hs38_linux.d: Likewise.
+	* testsuite/gas/arc/attr-mul64.d: Likewise.
+	* testsuite/gas/arc/attr-name.d: Likewise.
+	* testsuite/gas/arc/attr-name.s: Likewise.
+	* testsuite/gas/arc/attr-nps400.d: Likewise.
+	* testsuite/gas/arc/attr-override-mcpu.d: Likewise.
+	* testsuite/gas/arc/attr-override-mcpu.s
+	* testsuite/gas/arc/attr-quarkse_em.d: Likewise.
+	* testsuite/gas/arc/blank.s: Likewise.
+	* testsuite/gas/elf/section2.e-arc: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-1.d: Update test.
+	* testsuite/gas/arc/cpu-pseudop-2.d: Likewise.
+	* testsuite/gas/arc/nps400-0.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Set target_machine for ARC.
+	* config/tc-arc.c (opcode/arc-attrs.h): Include.
+	(ARC_GET_FLAG, ARC_SET_FLAG, streq): Define.
+	(arc_attribute): Declare new function.
+	(md_pseudo_table): Add arc_attribute.
+	(cpu_types): Rename default cpu features.
+	(selected_cpu): Set the default OSABI flag.
+	(mpy_option): New variable.
+	(pic_option): Likewise.
+	(sda_option): Likewise.
+	(tls_option): Likewise.
+	(feature_type, feature_list): Remove.
+	(arc_initial_eflag): Likewise.
+	(attributes_set_explicitly): New variable.
+	(arc_check_feature): Check also for the conflicting features.
+	(arc_select_cpu): Refactor assignment of selected_cpu.eflags.
+	(arc_option): Remove setting of private flags and architecture.
+	(check_cpu_feature): Refactor feature names.
+	(autodetect_attributes): New function.
+	(assemble_tokens): Use above function.
+	(md_parse_option): Refactor feature names.
+	(arc_attribute): New function.
+	(arc_set_attribute_int): Likewise.
+	(arc_set_attribute_string): Likewise.
+	(arc_stralloc): Likewise.
+	(arc_set_public_attributes): Likewise.
+	(arc_md_end): Likewise.
+	(arc_copy_symbol_attributes): Likewise.
+	(rc_convert_symbolic_attribute): Likewise.
+	* config/tc-arc.h (md_end): Define.
+	(CONVERT_SYMBOLIC_ATTRIBUTE): Likewise.
+	(TC_COPY_SYMBOL_ATTRIBUTES): Likewise.
+	* doc/c-arc.texi: Document ARC object attributes.
+
 2017-05-03  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add `pic', `sym32' and

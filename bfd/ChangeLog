@@ -1,3 +1,26 @@
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf32-arc.c (FEATURE_LIST_NAME): Define.
+	(CONFLICT_LIST): Likewise.
+	(opcode/arc-attrs.h): Include.
+	(arc_elf_print_private_bfd_data): Print OSABI v4 flag.
+	(arc_extract_features): New file.
+	(arc_stralloc): Likewise.
+	(arc_elf_merge_attributes): Likewise.
+	(arc_elf_merge_private_bfd_data): Use object attributes.
+	(bfd_arc_get_mach_from_attributes): New function.
+	(arc_elf_object_p): Use object attributes.
+	(arc_elf_final_write_processing): Likewise.
+	(elf32_arc_obj_attrs_arg_type): New function.
+	(elf32_arc_obj_attrs_handle_unknown): Likewise.
+	(elf32_arc_section_from_shdr): Likewise.
+	(elf_backend_obj_attrs_vendor): Define.
+	(elf_backend_obj_attrs_section): Likewise.
+	(elf_backend_obj_attrs_arg_type): Likewise.
+	(elf_backend_obj_attrs_section_type): Likewise.
+	(elf_backend_obj_attrs_handle_unknown): Likewise.
+	(elf_backend_section_from_shdr): Likewise.
+
 2017-05-09  Andrew Goedhart  <Andrewgoedhart@simplepowersolutions.co.za>
 
 	PR ld/21458

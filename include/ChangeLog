@@ -1,3 +1,19 @@
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf/arc.h (SHT_ARC_ATTRIBUTES): Define.
+	(Tag_ARC_*): Define.
+	(E_ARC_OSABI_V4): Define.
+	(E_ARC_OSABI_CURRENT): Reassign it.
+	(TAG_CPU_*): Define.
+	* opcode/arc-attrs.h: New file.
+	* opcode/arc.h (insn_subclass_t): Assign enum values.
+	(insn_subclass_t): Update enum with QUARKSE1, QUARKSE2, and LL64.
+	(ARC_EA, ARC_CD, ARC_LLOCK, ARC_ATOMIC, ARC_MPY, ARC_MULT)
+	(ARC_NPS400, ARC_DPFP, ARC_SPFP, ARC_FPU, ARC_FPUDA, ARC_SWAP)
+	(ARC_NORM, ARC_BSCAN, ARC_UIX, ARC_TSTAMP, ARC_VBFDW)
+	(ARC_BARREL, ARC_DSPA, ARC_SHIFT, ARC_INTR, ARC_DIV, ARC_XMAC)
+	(ARC_CRC): Delete.
+
 2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21382
