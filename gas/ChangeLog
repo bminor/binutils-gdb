@@ -1,5 +1,38 @@
 2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/isa-override-2.d: New test.
+	* testsuite/gas/mips/mips1@isa-override-2.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-2.d: New test.
+	* testsuite/gas/mips/r3900@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips2@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r2@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r3@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r5@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r6@isa-override-2.d: New test.
+	* testsuite/gas/mips/octeon3@isa-override-2.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-2.l: Remove list test.
+	* testsuite/gas/mips/mips1@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/r3000@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/r3900@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/mips2@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/mips32@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r2@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r3@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r5@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r6@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/octeon3@isa-override-2.s: Remove test
+	source.
+	* gas/testsuite/gas/mips/mips.exp: Fold corresponding list tests
+	into the new tests.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16e-sub.d: Correct test name.
 	* testsuite/gas/mips/mips16-32@mips16e-sub.d: Likewise.
 	* testsuite/gas/mips/mips16-64@mips16e-sub.d: Likewise.
