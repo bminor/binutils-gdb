@@ -2342,6 +2342,9 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 #define _bfd_ecoff_bfd_define_common_symbol bfd_generic_define_common_symbol
 #define _bfd_ecoff_bfd_link_check_relocs    _bfd_generic_link_check_relocs
 
+/* Installing internal relocations in a section is also generic.  */
+#define _bfd_ecoff_set_reloc _bfd_generic_set_reloc
+
 const bfd_target alpha_ecoff_le_vec =
 {
   "ecoff-littlealpha",		/* name */

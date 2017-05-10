@@ -8258,3 +8258,29 @@ error_return:
   free (reloc_vector);
   return NULL;
 }
+
+/*
+INTERNAL_FUNCTION
+	_bfd_generic_set_reloc
+
+SYNOPSIS
+	void _bfd_generic_set_reloc
+	  (bfd *abfd,
+	   sec_ptr section,
+	   arelent **relptr,
+	   unsigned int count);
+
+DESCRIPTION
+	Installs a new set of internal relocations in SECTION.
+*/
+
+
+void _bfd_generic_set_reloc
+  (bfd *abfd ATTRIBUTE_UNUSED,
+   sec_ptr section,
+   arelent **relptr,
+   unsigned int count)
+{
+  section->orelocation = relptr;
+  section->reloc_count = count;
+}

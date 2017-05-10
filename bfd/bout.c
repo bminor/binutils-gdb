@@ -1392,6 +1392,7 @@ b_out_bfd_get_relocated_section_contents (bfd *output_bfd,
 #define b_out_bfd_define_common_symbol         bfd_generic_define_common_symbol
 #define aout_32_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
 #define b_out_bfd_link_check_relocs            _bfd_generic_link_check_relocs
+#define b_out_set_reloc			       _bfd_generic_set_reloc
 
 extern const bfd_target bout_le_vec;
 

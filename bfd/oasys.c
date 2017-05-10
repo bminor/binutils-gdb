@@ -1194,6 +1194,7 @@ oasys_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define oasys_bfd_final_link                       _bfd_generic_final_link
 #define oasys_bfd_link_split_section               _bfd_generic_link_split_section
 #define oasys_bfd_link_check_relocs                _bfd_generic_link_check_relocs
+#define oasys_set_reloc				   _bfd_generic_set_reloc
 
 const bfd_target oasys_vec =
 {

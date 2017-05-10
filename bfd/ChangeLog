@@ -1,3 +1,36 @@
+2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* targets.c (BFD_JUMP_TABLE_RELOCS): Add NAME##_set_reloc.
+	(struct bfd_target): New field _bfd_set_reloc.
+	* bfd.c (bfd_set_reloc): Call backend _set_bfd.
+	* reloc.c (_bfd_generic_set_reloc): New function.
+	* coffcode.h (coff_set_reloc): Define to _bfd_generic_set_reloc.
+	* nlm-target.h (nlm_set_reloc): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_set_reloc): Likewise.
+	* aout-tic30.c (MY_set_reloc): Likewise.
+	* aout-target.h (MY_set_reloc): Likewise.
+	* elfxx-target.h (bfd_elfNN_set_reloc): Likewise.
+	* coff-alpha.c (_bfd_ecoff_set_reloc): Likewise.
+	* mach-o-target.c (bfd_mach_o_set_reloc): Likewise.
+	* vms-alpha.c (alpha_vms_set_reloc): Likewise.
+	* aout-adobe.c (aout_32_set_reloc): Likewise.
+	* bout.c (b_out_set_reloc): Likewise.
+	* coff-mips.c (_bfd_ecoff_set_reloc): Likewise.
+	* i386os9k.c (aout_32_set_reloc): Likewise.
+	* ieee.c (ieee_set_reloc): Likewise.
+	* oasys.c (oasys_set_reloc): Likewise.
+	* som.c (som_set_reloc): Likewise.
+	* versados.c (versados_set_reloc): Likewise.
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Add
+	_bfd_generic_set_reloc.
+	(rs6000_xcoff64_aix_vec): LIkewise.
+	* libbfd.c (_bfd_norelocs_set_reloc): New function.
+	* libbfd-in.h: Prototype for _bfd_norelocs_set_reloc.
+	* i386msdos.c (msdos_set_reloc): Define to
+	_bfd_norelocs_set_reloc.
+	* elfcode.h (elf_set_reloc): Define.
+	* bfd-in2.h: Regenerated.
+
 2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21481

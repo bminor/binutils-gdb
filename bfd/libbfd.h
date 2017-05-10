@@ -449,6 +449,8 @@ extern bfd_boolean _bfd_vms_lib_ia64_mkarchive (bfd *abfd);
 extern long _bfd_norelocs_get_reloc_upper_bound (bfd *, asection *);
 extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
 					      arelent **, asymbol **);
+extern void _bfd_norelocs_set_reloc (bfd *, asection *,
+                                     arelent **, unsigned int);
 #define _bfd_norelocs_bfd_reloc_type_lookup \
   ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
 #define _bfd_norelocs_bfd_reloc_name_lookup \
@@ -3205,6 +3207,12 @@ bfd_byte *bfd_generic_get_relocated_section_contents
     bfd_byte *data,
     bfd_boolean relocatable,
     asymbol **symbols);
+
+void _bfd_generic_set_reloc
+   (bfd *abfd,
+    sec_ptr section,
+    arelent **relptr,
+    unsigned int count);
 
 /* Extracted from archures.c.  */
 extern const bfd_arch_info_type bfd_default_arch_struct;

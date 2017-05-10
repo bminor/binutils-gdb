@@ -46,6 +46,9 @@
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif
+#ifndef bfd_elfNN_set_reloc
+#define bfd_elfNN_set_reloc		_bfd_generic_set_reloc
+#endif
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif

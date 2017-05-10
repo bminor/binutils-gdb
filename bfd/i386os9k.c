@@ -165,6 +165,8 @@ os9k_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define aout_32_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window
 
+#define aout_32_set_reloc _bfd_generic_set_reloc
+
 #define os9k_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define os9k_bfd_relax_section bfd_generic_relax_section

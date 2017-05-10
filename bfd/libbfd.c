@@ -119,6 +119,15 @@ _bfd_norelocs_canonicalize_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   return 0;
 }
 
+void
+_bfd_norelocs_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+                         asection *sec ATTRIBUTE_UNUSED,
+                         arelent **relptr ATTRIBUTE_UNUSED,
+                         unsigned int count ATTRIBUTE_UNUSED)
+{
+  /* Do nothing.  */
+}
+
 bfd_boolean
 _bfd_nocore_core_file_matches_executable_p
   (bfd *ignore_core_bfd ATTRIBUTE_UNUSED,
