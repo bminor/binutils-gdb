@@ -1,5 +1,13 @@
 2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emulparams/i386lynx.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Set
+	to yes.
+	* emulparams/i386moss.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nw.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Likewise.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/21481
 	* testsuite/ld-x86-64/pr21481a.c: New file.
 	* testsuite/ld-x86-64/pr21481b.S: Likewise.
