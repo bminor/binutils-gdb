@@ -1,3 +1,7 @@
+2017-05-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* MAINTAINERS (SH): Remove myself as SH maintainer.
+
 2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (merge_gnu_build_notes): Cast relcount to unsigned
