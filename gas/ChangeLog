@@ -1,3 +1,26 @@
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/r3900@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/r3900@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips1@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/r3000@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/r3900@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips1@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/r3000@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/r3900@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@sd-forward.d: Remove test.
+
 2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/attr-arc600.d: New file.
