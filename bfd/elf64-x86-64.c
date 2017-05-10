@@ -5974,6 +5974,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  else
 	    {
 	      asection *plt;
+	      bfd_vma plt_offset;
 
 	      if (!h->pointer_equality_needed)
 		abort ();
@@ -5981,10 +5982,19 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	      /* For non-shared object, we can't use .got.plt, which
 		 contains the real function addres if we need pointer
 		 equality.  We load the GOT entry with the PLT entry.  */
-	      plt = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
+	      if (htab->plt_bnd != NULL)
+		{
+		  plt = htab->plt_bnd;
+		  plt_offset = eh->plt_bnd.offset;
+		}
+	      else
+		{
+		  plt = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
+		  plt_offset =  h->plt.offset;
+		}
 	      bfd_put_64 (output_bfd, (plt->output_section->vma
 				       + plt->output_offset
-				       + h->plt.offset),
+				       + plt_offset),
 			  htab->elf.sgot->contents + h->got.offset);
 	      return TRUE;
 	    }

@@ -1,3 +1,9 @@
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Use .plt.bnd
+	for IFUNC function address.
+
 2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* elf32-arc.c (FEATURE_LIST_NAME): Define.

@@ -1316,6 +1316,24 @@ if { [isnative] && [which $CC] != 0 } {
 		"pr20800" \
 		"pass.out" \
 	    ] \
+	    [list \
+		"Run pr21481a" \
+		"$NOPIE_LDFLAGS -Wl,-z,bndplt" \
+		"" \
+		{ pr21481a.c pr21481b.S } \
+		"pr21481a" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr21481b" \
+		"$NOPIE_LDFLAGS -Wl,-z,bndplt,-z,now" \
+		"" \
+		{ pr21481a.c pr21481b.S } \
+		"pr21481b" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
 	]
     }
 

@@ -1,3 +1,10 @@
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* testsuite/ld-x86-64/pr21481a.c: New file.
+	* testsuite/ld-x86-64/pr21481b.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/21481 tests.
+
 2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/attr-merge-0.d: New file.
