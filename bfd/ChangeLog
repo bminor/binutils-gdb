@@ -1,5 +1,11 @@
 2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* elf64-sparc.c (elf64_sparc_set_reloc): New function.
+	(bfd_elf64_set_reloc): Define.
+	(elf64_sparc_write_relocs): Use `canon_reloc_count'.
+
+2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* targets.c (BFD_JUMP_TABLE_RELOCS): Add NAME##_set_reloc.
 	(struct bfd_target): New field _bfd_set_reloc.
 	* bfd.c (bfd_set_reloc): Call backend _set_bfd.
