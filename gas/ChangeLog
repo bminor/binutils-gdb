@@ -1,5 +1,9 @@
 2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16-macro.l: Remove list test.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/r3900@ecoff@ld.d: Remove test.
 	* testsuite/gas/mips/mips2@ecoff@ld.d: Remove test.
 	* testsuite/gas/mips/mips32@ecoff@ld.d: Remove test.
