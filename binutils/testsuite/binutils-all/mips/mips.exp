@@ -19,6 +19,14 @@ if ![istarget mips*-*-*] {
     return
 }
 
+if [is_remote host] {
+    set tempfile [remote_download host tmpdir/bintest.o]
+    set copyfile copy
+} else {
+    set tempfile tmpdir/bintest.o
+    set copyfile tmpdir/copy
+}
+
 if [is_elf_format] {
     run_dump_test "mips-ase-1"
     run_dump_test "mips-ase-2"
