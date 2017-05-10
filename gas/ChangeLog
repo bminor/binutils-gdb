@@ -1,5 +1,15 @@
 2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e-sub.d: Correct test name.
+	* testsuite/gas/mips/mips16-32@mips16e-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16e-sub.d: Likewise.
+	* testsuite/gas/mips/mips16e-64-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-32@mips16e-64-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16e-64-sub.d: Likewise.
+	* testsuite/gas/mips/mips16e-32@mips16e-64-sub.d: Likewise.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16-macro.l: Remove list test.
 
 2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
