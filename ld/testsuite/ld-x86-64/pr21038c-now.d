@@ -1,4 +1,4 @@
-#name: PR ld/21038 (.plt.got and .plt.bnd, -z now)
+#name: PR ld/21038 (.plt.got and .plt.sec, -z now)
 #source: pr21038c.s
 #as: --64
 #ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info
@@ -72,7 +72,7 @@ Disassembly of section .plt.got:
  +[a-f0-9]+:	f2 ff 25 71 0d 20 00 	bnd jmpq \*0x200d71\(%rip\)        # 200ff8 <func1>
  +[a-f0-9]+:	90                   	nop
 
-Disassembly of section .plt.bnd:
+Disassembly of section .plt.sec:
 
 0+288 <func2@plt>:
  +[a-f0-9]+:	f2 ff 25 61 0d 20 00 	bnd jmpq \*0x200d61\(%rip\)        # 200ff0 <func2>

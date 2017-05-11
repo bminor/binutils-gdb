@@ -1,5 +1,24 @@
 2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emulparams/elf_x86_64.sh (TINY_READONLY_SECTION): Replace
+	.plt.bnd with .plt.sec.
+	* testsuite/ld-x86-64/bnd-ifunc-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/mpx3.dd: Likewise.
+	* testsuite/ld-x86-64/mpx3n.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4n.dd: Likewise.
+	* testsuite/ld-x86-64/plt-main-bnd-now.rd: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c.d: Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/plt-pic2.dd: Updated.
 	* testsuite/ld-i386/plt2.dd: Likewise.
 	* testsuite/ld-i386/plt2.rd: Likewise.

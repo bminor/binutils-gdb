@@ -25,7 +25,7 @@ Disassembly of section .plt:
  +[a-f0-9]+:	f2 e9 b5 ff ff ff    	bnd jmpq 290 <.plt>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
 
-Disassembly of section .plt.bnd:
+Disassembly of section .plt.sec:
 
 0+2e0 <foo2@plt>:
  +[a-f0-9]+:	f2 ff 25 61 01 20 00 	bnd jmpq \*0x200161\(%rip\)        # 200448 <foo2>

@@ -25,7 +25,7 @@ Disassembly of section .plt:
  +[a-f0-9]+:	f2 e9 b5 ff ff ff    	bnd jmpq 2b0 <.plt>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
 
-Disassembly of section .plt.bnd:
+Disassembly of section .plt.sec:
 
 0+300 <\*ABS\*\+0x32c@plt>:
  +[a-f0-9]+:	f2 ff 25 59 01 20 00 	bnd jmpq \*0x200159\(%rip\)        # 200460 <_GLOBAL_OFFSET_TABLE_\+0x18>
