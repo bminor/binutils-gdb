@@ -1403,6 +1403,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips32-sync"
     run_dump_test_arches "mips32r2-sync" \
 					[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "mips32r2-sync-1" \
+					[mips_arch_list_matching mips32r2]
     run_dump_test_arches "alnv_ps-swap" [mips_arch_list_matching fpisa5 \
 						!mips32r6]
     run_dump_test_arches "cache" [lsort -dictionary -unique [concat \

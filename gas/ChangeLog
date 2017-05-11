@@ -1,3 +1,9 @@
+2017-05-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips32r2-sync-1.d: New test.
+	* testsuite/gas/mips/micromips@mips32r2-sync-1.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/isa-override-2.d: New test.

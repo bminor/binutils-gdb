@@ -1,3 +1,11 @@
+2017-05-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Mark "synciobdma", "syncs",
+	"syncw", "syncws", "sync_acquire", "sync_mb", "sync_release",
+	"sync_rmb" and "sync_wmb" as aliases.
+	* micromips-opc.c (micromips_opcodes): Mark "sync_acquire",
+	"sync_mb", "sync_release", "sync_rmb" and "sync_wmb" as aliases.
+
 2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* arc-dis.c (parse_option): Update quarkse_em option..
