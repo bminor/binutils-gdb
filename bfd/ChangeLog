@@ -1,3 +1,9 @@
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Partially revert
+	commit 25070364b0ce33eed46aa5d78ebebbec6accec7e.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewse.
+
 2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf64-sparc.c (elf64_sparc_set_reloc): New function.

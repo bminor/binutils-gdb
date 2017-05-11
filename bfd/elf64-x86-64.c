@@ -3057,25 +3057,11 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	   && (h->plt.refcount > eh->func_pointer_refcount
 	       || eh->plt_got.refcount > 0))
     {
-      bfd_boolean use_plt_got;
+      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
 
       /* Clear the reference count of function pointer relocations
 	 if PLT is used.  */
       eh->func_pointer_refcount = 0;
-
-      if (htab->plt_got != NULL
-	  && (info->flags & DF_BIND_NOW)
-	  && !h->pointer_equality_needed)
-	{
-	  /* Don't use the regular PLT for DF_BIND_NOW. */
-	  h->plt.offset = (bfd_vma) -1;
-
-	  /* Use the GOT PLT.  */
-	  h->got.refcount = 1;
-	  eh->plt_got.refcount = 1;
-	}
-
-      use_plt_got = eh->plt_got.refcount > 0;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
