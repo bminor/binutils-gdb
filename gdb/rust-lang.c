@@ -1951,14 +1951,15 @@ rust_dump_subexp_body (struct expression *exp, struct ui_file *stream,
       {
 	int field_number;
 
-	field_number = longest_to_int (exp->elts[elt].longconst);
+	field_number = longest_to_int (exp->elts[elt + 1].longconst);
 
 	fprintf_filtered (stream, "Field number: %d", field_number);
-	elt = dump_subexp (exp, stream, elt + 2);
+	elt = dump_subexp (exp, stream, elt + 3);
       }
       break;
 
     case OP_RUST_ARRAY:
+      ++elt;
       break;
 
     default:

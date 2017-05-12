@@ -1,5 +1,10 @@
 2017-05-12  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_dump_subexp_body) <STRUCTOP_ANONYMOUS,
+	OP_RUST_ARRAY>: Fix.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_print_subexp): Replace "return" with "break".
 
 2017-05-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
