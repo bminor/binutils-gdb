@@ -1,4 +1,14 @@
 2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_percent_op): Add "%gprel".
+	(mips16_percent_op): Add "%gp_rel".
+	* testsuite/gas/mips/elf-rel8.s:: Add `%gprel' forms.
+	* testsuite/gas/mips/elf-rel8-mips16.s: Add `%gp_rel' forms.
+	* testsuite/gas/mips/elf-rel8.d: Adjust accordingly.
+	* testsuite/gas/mips/elf-rel8-mips16.d: Likewise.
+
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/mips16.d: Adjust BREAK disassembly.
 	* testsuite/gas/mips/mips16-64@mips16.d: Likewise.

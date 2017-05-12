@@ -14094,6 +14094,7 @@ static const struct percent_op_match mips_percent_op[] =
   {"%got_lo", BFD_RELOC_MIPS_GOT_LO16},
   {"%got", BFD_RELOC_MIPS_GOT16},
   {"%gp_rel", BFD_RELOC_GPREL16},
+  {"%gprel", BFD_RELOC_GPREL16},
   {"%half", BFD_RELOC_16},
   {"%highest", BFD_RELOC_MIPS_HIGHEST},
   {"%higher", BFD_RELOC_MIPS_HIGHER},
@@ -14113,6 +14114,7 @@ static const struct percent_op_match mips_percent_op[] =
 static const struct percent_op_match mips16_percent_op[] =
 {
   {"%lo", BFD_RELOC_MIPS16_LO16},
+  {"%gp_rel", BFD_RELOC_MIPS16_GPREL},
   {"%gprel", BFD_RELOC_MIPS16_GPREL},
   {"%got", BFD_RELOC_MIPS16_GOT16},
   {"%call16", BFD_RELOC_MIPS16_CALL16},
