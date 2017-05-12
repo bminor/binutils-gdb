@@ -1917,7 +1917,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
-	  if (len < 4)
+	  if (len < 4 && !is_fixed_point_type (arg_type))
 	    {
 	      /* Promote to 32 bit integer.  */
 	      if (arg_type->is_unsigned ())
