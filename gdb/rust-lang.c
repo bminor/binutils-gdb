@@ -2021,7 +2021,7 @@ rust_print_subexp (struct expression *exp, int *pos, struct ui_file *stream,
 	print_subexp (exp, pos, stream, PREC_SUFFIX);
 	fprintf_filtered (stream, ".%d", tem);
       }
-      return;
+      break;
 
     case OP_RUST_ARRAY:
       ++*pos;
