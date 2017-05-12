@@ -1769,10 +1769,11 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
 
   // Convert regular input section with index SHNDX to a relaxed section.
   void
-  convert_input_section_to_relaxed_section(unsigned /* shndx */)
+  convert_input_section_to_relaxed_section(unsigned shndx)
   {
     // The stubs have relocations and we need to process them after writing
     // out the stubs.  So relocation now must follow section write.
+    this->set_section_offset(shndx, -1ULL);
     this->set_relocs_must_follow_section_writes();
   }
 
@@ -7960,12 +7961,36 @@ Target_aarch64<size, big_endian>::relocate_section(
     section_size_type view_size,
     const Reloc_symbol_changes* reloc_symbol_changes)
 {
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef Target_aarch64<size, big_endian> Aarch64;
   typedef typename Target_aarch64<size, big_endian>::Relocate AArch64_relocate;
   typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
       Classify_reloc;
 
   gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  // See if we are relocating a relaxed input section.  If so, the view
+  // covers the whole output section and we need to adjust accordingly.
+  if (needs_special_offset_handling)
+    {
+      const Output_relaxed_input_section* poris =
+	output_section->find_relaxed_input_section(relinfo->object,
+						   relinfo->data_shndx);
+      if (poris != NULL)
+	{
+	  Address section_address = poris->address();
+	  section_size_type section_size = poris->data_size();
+
+	  gold_assert((section_address >= address)
+		      && ((section_address + section_size)
+			  <= (address + view_size)));
+
+	  off_t offset = section_address - address;
+	  view += offset;
+	  address += offset;
+	  view_size = section_size;
+	}
+    }
 
   gold::relocate_section<size, big_endian, Aarch64, AArch64_relocate,
 			 gold::Default_comdat_behavior, Classify_reloc>(
