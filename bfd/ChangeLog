@@ -1,3 +1,10 @@
+2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_parse_gnu_properties): Merge
+	GNU_PROPERTY_X86_ISA_1_USED and GNU_PROPERTY_X86_ISA_1_NEEDED
+	properties.
+	* elf64-x86-64.c (elf_x86_64_parse_gnu_properties): Likewise.
+
 2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Rename plt_bnd

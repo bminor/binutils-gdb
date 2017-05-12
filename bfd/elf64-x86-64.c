@@ -7003,7 +7003,8 @@ elf_x86_64_parse_gnu_properties (bfd *abfd, unsigned int type,
 	  return property_corrupt;
 	}
       prop = _bfd_elf_get_property (abfd, type, datasz);
-      prop->u.number = bfd_h_get_32 (abfd, ptr);
+      /* Combine properties of the same type.  */
+      prop->u.number |= bfd_h_get_32 (abfd, ptr);
       prop->pr_kind = property_number;
       break;
 

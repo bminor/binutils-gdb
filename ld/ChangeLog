@@ -1,3 +1,12 @@
+2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-3.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-3.d: New file.
+	* testsuite/ld-i386/property-x86-3.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.s: Likewise.
+
 2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf_x86_64.sh (TINY_READONLY_SECTION): Replace

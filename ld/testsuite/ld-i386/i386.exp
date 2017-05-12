@@ -417,6 +417,7 @@ run_dump_test "pr20253-4b"
 run_dump_test "pr20253-4c"
 run_dump_test "pr20253-5"
 run_dump_test "pr20515"
+run_dump_test "property-x86-3"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
