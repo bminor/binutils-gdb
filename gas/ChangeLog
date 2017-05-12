@@ -1,3 +1,14 @@
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16.d: Adjust BREAK disassembly.
+	* testsuite/gas/mips/mips16-64@mips16.d: Likewise.
+	* testsuite/gas/mips/mips16-64.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16-64.d: Likewise.
+	* testsuite/gas/mips/mips16-macro.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16-macro.d: Likewise.
+	* testsuite/gas/mips/mips16-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-32@mips16-sub.d: Likewise.
+
 2017-05-11  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/mips32r2-sync-1.d: New test.

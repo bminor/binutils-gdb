@@ -56,7 +56,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     case '2': HINT (3, 8);
     case '3': HINT (5, 16);
     case '4': HINT (3, 21);
-    case '6': UINT (6, 5);
+    case '6': HINT (6, 5);
 
     case 'L': SPECIAL (6, 5, ENTRY_EXIT_LIST);
     case 'M': SPECIAL (7, 0, SAVE_RESTORE_LIST);
@@ -230,6 +230,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"bne",	    "x,y,p",	0, (int) M_BNE,		INSN_MACRO,		0,		I1,	0,	0 },
 {"bne",     "x,I,p",	0, (int) M_BNE_I,	INSN_MACRO,		0,		I1,	0,	0 },
 {"bnez",    "x,p",	0x2800, 0xf800,		RD_1,			CBR,		I1,	0,	0 },
+{"break",   "",		0xe805, 0xffff,		TRAP,			SH,		I1,	0,	0 },
 {"break",   "6",	0xe805, 0xf81f,		TRAP,			SH,		I1,	0,	0 },
 {"bteqz",   "p",	0x6000, 0xff00,		RD_T,			CBR,		I1,	0,	0 },
 {"btnez",   "p",	0x6100, 0xff00,		RD_T,			CBR,		I1,	0,	0 },
@@ -358,6 +359,7 @@ const struct mips_opcode mips16_opcodes[] =
   /* MIPS16e additions; see above for compact jumps.  */
 {"restore", "M",	0x6400, 0xff80,		WR_31|NODS,		MOD_SP,		I32,	0,	0 },
 {"save",    "m",	0x6480, 0xff80,		NODS,			RD_31|MOD_SP,	I32,	0,	0 },
+{"sdbbp",   "",		0xe801, 0xffff,		TRAP,			SH,		I32,	0,	0 },
 {"sdbbp",   "6",	0xe801, 0xf81f,		TRAP,			SH,		I32,	0,	0 },
 {"seb",	    "x",	0xe891, 0xf8ff,		MOD_1,			SH,		I32,	0,	0 },
 {"seh",	    "x",	0xe8b1, 0xf8ff,		MOD_1,			SH,		I32,	0,	0 },
