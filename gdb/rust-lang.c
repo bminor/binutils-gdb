@@ -1762,7 +1762,7 @@ tuple structs, and tuple-like enum variants"));
 
     case STRUCTOP_STRUCT:
       {
-        struct value* lhs;
+        struct value *lhs;
         struct type *type;
         int tem, pc;
 
@@ -1771,16 +1771,14 @@ tuple structs, and tuple-like enum variants"));
         (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
         lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
+	const char *field_name = &exp->elts[pc + 2].string;
         type = value_type (lhs);
         if (TYPE_CODE (type) == TYPE_CODE_UNION
             && !rust_union_is_untagged (type))
 	  {
 	    int i, start;
 	    struct disr_info disr;
-	    struct type* variant_type;
-	    char* field_name;
-
-	    field_name = &exp->elts[pc + 2].string;
+	    struct type *variant_type;
 
 	    disr = rust_get_disr_info (type, value_contents (lhs),
 				       value_embedded_offset (lhs),
@@ -1817,9 +1815,10 @@ which has only anonymous fields"),
 	  }
 	else
 	  {
-	    /* Field access in structs and untagged unions works like C.  */
-	    *pos = pc;
-	    result = evaluate_subexp_standard (expect_type, exp, pos, noside);
+	    result = value_struct_elt (&lhs, NULL, field_name, NULL,
+				       "structure");
+	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	      result = value_zero (value_type (result), VALUE_LVAL (result));
 	  }
       }
       break;

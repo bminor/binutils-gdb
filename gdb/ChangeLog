@@ -1,5 +1,11 @@
 2017-05-12  Tom Tromey  <tom@tromey.com>
 
+	PR rust/21483:
+	* rust-lang.c (rust_evaluate_subexp) <STRUCTOP_STRUCT>: Don't
+	recurse, just call value_struct_elt directly.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_dump_subexp_body) <STRUCTOP_ANONYMOUS,
 	OP_RUST_ARRAY>: Fix.
 
