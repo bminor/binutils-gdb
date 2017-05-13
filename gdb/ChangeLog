@@ -1,3 +1,8 @@
+2017-05-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui.c (tui_enable): Cast "unknown" to 'char *' to avoid a
+	C++ compiler warning.
+
 2017-05-17  Yao Qi  <yao.qi@linaro.org>
 
 	* cli/cli-decode.c (add_alias_cmd): New function.
