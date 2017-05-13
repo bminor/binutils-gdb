@@ -1,3 +1,11 @@
+2017-05-13  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/21444
+	* gold.cc (Target_sparc::Relocate::relocate_tls): Local
+	variables are final for position-independent executables. This
+	has to be consistent with Target_sparc::Scan::local otherwise
+	they will disagree as to whether local-exec is used.
+
 2017-05-12  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	PR gold/21430
