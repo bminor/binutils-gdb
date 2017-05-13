@@ -1,3 +1,8 @@
+2017-05-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui.c (tui_enable): Cast "unknown" to 'char *' to avoid a
+	C++ compiler warning.
+
 2017-05-12  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21483:
