@@ -1,3 +1,27 @@
+2017-05-19  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21484:
+	* rust-lang.c (exp_descriptor_rust): New function.
+	(rust_language_defn): Use it.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn)
+	<la_watch_location_expression>: New member.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Update.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* d-lang.c (d_language_defn): Update.
+	* c-lang.h (c_watch_location_expression): Declare.
+	* c-lang.c (c_watch_location_expression): New function.
+	(c_language_defn, cplus_language_defn, asm_language_defn)
+	(minimal_language_defn): Use it.
+	* breakpoint.c (watch_command_1): Call
+	la_watch_location_expression.
+	* ada-lang.c (ada_language_defn): Update.
+
 2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR tui/21482
