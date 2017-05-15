@@ -1,3 +1,8 @@
+2017-05-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (procfs_create_inferior): Change prototype to match
+	definition.
+
 2017-05-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui.c (tui_enable): Cast "unknown" to 'char *' to avoid a
