@@ -1,4 +1,41 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips.exp (run_dump_test_arch): Add
+	`mips16e2@' prefix.
+	(run_list_test_arch): Likewise.
+	(mips16e2-32, mips16e2-64): New architectures.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-t.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-e.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-t.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-e.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16e-64.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16e-64-sub.d: New test.
+	* testsuite/gas/mips/mips16e2@relax-swap3.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-asmacro.d: Remove `source'
+	tag.  Add `-I$srcdir/$subdir' to `as' flags.
+	* testsuite/gas/mips/mips16-64@mips16-asmacro.d: Likewise.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-sub.s: Add `.set nomips16e2'.
+	* testsuite/gas/mips/mips16e-sub.s: Likewise.
+	* testsuite/gas/mips/mips16e-64-sub.s: Likewise.
+	* testsuite/gas/mips/mips16-asmacro.s: Remove `.set mips32'.
+	* testsuite/gas/mips/mips16-32@mips16-asmacro.s: New test
+	source.
+	* testsuite/gas/mips/mips16-64@mips16-asmacro.s: New test
+	source.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 	    Andrew Bennett  <andrew.bennett@imgtec.com>
 

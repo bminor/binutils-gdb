@@ -324,6 +324,9 @@ proc run_dump_test_arch { name opts arch } {
 
     set proparch [lindex [mips_arch_properties $arch 0] 0]
     set prefixes [list ${proparch}@ ]
+    if { [ string match "mips16e2*" $proparch ] } {
+	lappend prefixes mips16e2@
+    }
     if { [ string match "mips16e*" $proparch ] } {
 	lappend prefixes mips16e@
     }
@@ -380,6 +383,9 @@ proc run_list_test_arch { name opts arch } {
     set testname "MIPS $name ([concat $opts [mips_arch_displayname $arch]])"
     set proparch [lindex [mips_arch_properties $arch 0] 0]
     set prefixes [list ${proparch}@ ]
+    if { [ string match "mips16e2*" $proparch ] } {
+	lappend prefixes mips16e2@
+    }
     if { [ string match "mips16e*" $proparch ] } {
 	lappend prefixes mips16e@
     }
@@ -488,8 +494,14 @@ mips_arch_create mips16-64 64	mips16-32	{} \
 			{ -march=mips3 -mips16 } { -mmips:4000 }
 mips_arch_create mips16e-32 32	mips16-32	{} \
 			{ -march=mips32 -mips16 } { -mmips:isa32 }
+mips_arch_create mips16e2-32 32	mips16e-32	{} \
+			{ -march=mips32r2 -mips16 -mmips16e2 } \
+			{ -mmips:isa32r2 }
 mips_arch_create mips16e-64 64	mips16-64 { mips16e-32 } \
 			{ -march=mips64 -mips16 } { -mmips:isa64 }
+mips_arch_create mips16e2-64 64	mips16e-64 { mips16e2-32 } \
+			{ -march=mips64r2 -mips16 -mmips16e2 } \
+			{ -mmips:isa64r2 }
 mips_arch_create micromips 64	mips64r2 {} \
 			{ -march=mips64r2 -mmicromips } {}
 mips_arch_create r3000 	32	mips1	{} \
