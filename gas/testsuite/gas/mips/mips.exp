@@ -1466,6 +1466,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "lui"		[mips_arch_list_matching mips1]
     run_dump_test_arches "lui-1"	[mips_arch_list_matching mips1]
     run_dump_test_arches "lui-2"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "addiu-error"	[mips_arch_list_all]
+    run_dump_test_arches "break-error"	[mips_arch_list_all]
 
     run_dump_test "r5900"
     run_dump_test "r5900-full"

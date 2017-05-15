@@ -1,5 +1,27 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (match_const_int): Call `match_out_of_range'
+	rather than `match_not_constant' for unrelocated operands
+	retrieved as an `O_big' expression.
+	(match_int_operand): Call `match_out_of_range' for relocatable
+	operands retrieved as an `O_big' expression.
+	(match_mips16_insn): Call `match_out_of_range' for relaxable
+	operands retrieved as an `O_big' expression.
+	* testsuite/gas/mips/addiu-error.d: New test.
+	* testsuite/gas/mips/mips16@addiu-error.d: New test.
+	* testsuite/gas/mips/micromips@addiu-error.d: New test.
+	* testsuite/gas/mips/break-error.d: New test.
+	* testsuite/gas/mips/lui-1.l: Adjust error message.
+	* testsuite/gas/mips/addiu-error.l: New stderr output.
+	* testsuite/gas/mips/mips16@addiu-error.l: New stderr output.
+	* testsuite/gas/mips/micromips@addiu-error.l: New stderr output.
+	* testsuite/gas/mips/break-error.l: New stderr output.
+	* testsuite/gas/mips/addiu-error.s: New test source.
+	* testsuite/gas/mips/break-error.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (match_mips16_insn): Remove the explicit
 	OT_INTEGER check before the `match_expression' call.
 	* testsuite/gas/mips/mips16-insn-e.l: Adjust messages.

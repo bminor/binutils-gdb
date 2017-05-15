@@ -4856,7 +4856,10 @@ match_const_int (struct mips_arg_info *arg, offsetT *value)
     *value = ex.X_add_number;
   else
     {
-      match_not_constant (arg);
+      if (r[0] == BFD_RELOC_UNUSED && ex.X_op == O_big)
+	match_out_of_range (arg);
+      else
+	match_not_constant (arg);
       return FALSE;
     }
   return TRUE;
@@ -5061,6 +5064,12 @@ match_int_operand (struct mips_arg_info *arg,
       /* The operand can be relocated.  */
       if (!match_expression (arg, &offset_expr, offset_reloc))
 	return FALSE;
+
+      if (offset_expr.X_op == O_big)
+	{
+	  match_out_of_range (arg);
+	  return FALSE;
+	}
 
       if (offset_reloc[0] != BFD_RELOC_UNUSED)
 	/* Relocation operators were used.  Accept the argument and
@@ -8258,6 +8267,12 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 		  && (ext_operand->size != 16 || c == '8'))
 		{
 		  match_not_constant (&arg);
+		  return FALSE;
+		}
+
+	      if (offset_expr.X_op == O_big)
+		{
+		  match_out_of_range (&arg);
 		  return FALSE;
 		}
 
