@@ -1641,7 +1641,7 @@ print_insn_args (struct disassemble_info *info,
 	      && s[2] == 'H'
 	      && opcode->name[strlen (opcode->name) - 1] == '0')
 	    {
-	      /* Coprocessor register 0 with sel field (MT ASE).  */
+	      /* Coprocessor register 0 with sel field.  */
 	      const struct mips_cp0sel_name *n;
 	      unsigned int reg, sel;
 
