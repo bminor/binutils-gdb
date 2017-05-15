@@ -13586,10 +13586,11 @@ display_arc_attribute (unsigned char * p,
 	{
 	default:
 	  if (val > 0 && val < 16)
-	    {
 	      printf ("Core%d\n", val);
-	      break;
-	    }
+	  else
+	      printf ("Unknown\n");
+	  break;
+
 	case 0:
 	  printf (_("Absent\n"));
 	  break;

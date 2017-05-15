@@ -1,3 +1,7 @@
+2017-05-15  Jeff Law  <law@redhat.com>
+
+	* readelf.c (display_arc_attribute): Avoid implicit fallthru.
+
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/binutils-all/mips/mips16-undecoded.d: Add `-mips3'
