@@ -5102,7 +5102,10 @@ match_int_operand (struct mips_arg_info *arg,
 	{
 	  max_val = ((1 << operand_base->size) - 1) << operand->shift;
 	  if (!arg->lax_match && sval <= max_val)
-	    return FALSE;
+	    {
+	      match_out_of_range (arg);
+	      return FALSE;
+	    }
 	}
     }
   else

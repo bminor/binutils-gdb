@@ -1,6 +1,12 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (match_int_operand): Call
+	`match_out_of_range' before returning failure for 0x8000-0xffff
+	values conditionally allowed.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_int_operand): Call
 	`match_not_constant' before returning failure for a non-constant
 	16-bit immediate conditionally allowed.
 
