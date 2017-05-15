@@ -774,7 +774,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	     even potentially-referenced, perhaps in a future final link if
 	     this is a partial one, perhaps dynamically at load-time if the
 	     symbol is externally visible.  */
-	  if (blhe->non_ir_ref)
+	  if (blhe->non_ir_ref_regular)
 	    res = LDPR_PREVAILING_DEF;
 	  else if (is_visible_from_outside (&syms[n], blhe))
 	    res = def_ironly_exp;
@@ -1266,7 +1266,7 @@ plugin_call_cleanup (void)
 /* To determine which symbols should be resolved LDPR_PREVAILING_DEF
    and which LDPR_PREVAILING_DEF_IRONLY, we notice all the symbols as
    the linker adds them to the linker hash table.  Mark those
-   referenced from a non-IR file with non_ir_ref or
+   referenced from a non-IR file with non_ir_ref_regular or
    non_ir_ref_dynamic as appropriate.  We have to notice_all symbols,
    because we won't necessarily know until later which ones will be
    contributed by IR files.  */
@@ -1304,7 +1304,7 @@ plugin_notice (struct bfd_link_info *info,
 	      || inh->type == bfd_link_hash_new)
 	    {
 	      if ((abfd->flags & DYNAMIC) == 0)
-		inh->non_ir_ref = TRUE;
+		inh->non_ir_ref_regular = TRUE;
 	      else
 		inh->non_ir_ref_dynamic = TRUE;
 	    }
@@ -1362,7 +1362,7 @@ plugin_notice (struct bfd_link_info *info,
       if (ref)
 	{
 	  if ((abfd->flags & DYNAMIC) == 0)
-	    h->non_ir_ref = TRUE;
+	    h->non_ir_ref_regular = TRUE;
 	  else
 	    h->non_ir_ref_dynamic = TRUE;
 	}
