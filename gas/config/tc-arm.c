@@ -8351,6 +8351,12 @@ do_adr (void)
   inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
   inst.reloc.pc_rel = 1;
   inst.reloc.exp.X_add_number -= 8;
+
+  if (inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_number += 1;  
 }
 
 /* This is a pseudo-op of the form "adrl rd, label" to be converted
@@ -8369,6 +8375,12 @@ do_adrl (void)
   inst.reloc.pc_rel	       = 1;
   inst.size		       = INSN_SIZE * 2;
   inst.reloc.exp.X_add_number -= 8;
+
+  if (inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_number += 1;  
 }
 
 static void
@@ -10734,9 +10746,14 @@ do_t_adr (void)
       inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
       inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
       inst.reloc.pc_rel = 1;
-
       inst.instruction |= Rd << 4;
     }
+
+  if (inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_number += 1;
 }
 
 /* Arithmetic instructions for which there is just one 16-bit

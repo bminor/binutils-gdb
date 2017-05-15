@@ -1,3 +1,13 @@
+2017-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/21458
+	* config/tc-arm.c (do_adr): If the ADR involves a thumb function
+	symbol, ensure that the T bit will be set.
+	(do_adrl): Likewise.
+	(do_t_adr): Likewise.
+	* testsuite/gas/arm/pr21458.s: New test.
+	* testsuite/gas/arm/pr21458.d: New test driver.
+
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/mips16-pcrel-1.d: Remove `-mips3' from `as'
