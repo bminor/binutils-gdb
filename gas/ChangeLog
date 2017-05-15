@@ -1,4 +1,52 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add `e2' flag.
+	(RELAX_MIPS16_E2): New macro.
+	(RELAX_MIPS16_PIC, RELAX_MIPS16_SYM32, RELAX_MIPS16_NOMACRO)
+	(RELAX_MIPS16_USER_SMALL, RELAX_MIPS16_USER_EXT)
+	(RELAX_MIPS16_DSLOT, RELAX_MIPS16_JAL_DSLOT)
+	(RELAX_MIPS16_EXTENDED, RELAX_MIPS16_MARK_EXTENDED)
+	(RELAX_MIPS16_CLEAR_EXTENDED, RELAX_MIPS16_ALWAYS_EXTENDED)
+	(RELAX_MIPS16_MARK_ALWAYS_EXTENDED)
+	(RELAX_MIPS16_CLEAR_ALWAYS_EXTENDED, RELAX_MIPS16_MACRO)
+	(RELAX_MIPS16_MARK_MACRO, RELAX_MIPS16_CLEAR_MACRO): Shift bits.
+	(mips16_immed_extend): New prototype.
+	(options): Add OPTION_MIPS16E2 and OPTION_NO_MIPS16E2 enum
+	values.
+	(md_longopts): Add "mmips16e2" and "mno-mips16e2" options.
+	(mips_ases): Add "mips16e2" entry.
+	(mips_set_ase): Handle MIPS16e2 ASE.
+	(insn_insert_operand): Explicitly handle immediates with MIPS16
+	instructions that require 32-bit encoding.
+	(is_opcode_valid_16): Pass enabled ASE bitmask on to
+	`opcode_is_member'.
+	(validate_mips_insn): Explicitly handle immediates with MIPS16
+	instructions that require 32-bit encoding.
+	(operand_reg_mask) <OP_REG28>: Add handler.
+	(match_reg28_operand): New function.
+	(match_operand) <OP_REG28>: Add handler.
+	(append_insn): Pass ASE_MIPS16E2 setting to RELAX_MIPS16_ENCODE.
+	(match_mips16_insn): Handle MIPS16 instructions that require
+	32-bit encoding and `V' and `u' operand codes.
+	(mips16_ip): Allow any characters except from `.' in opcodes.
+	(mips16_immed_extend): Handle 9-bit immediates.  Do not shuffle
+	immediates whose width is not one of these listed.
+	(md_estimate_size_before_relax): Handle MIPS16e2 relaxation.
+	(mips_relax_frag): Likewise.
+	(md_convert_frag): Likewise.
+	(mips_convert_ase_flags): Handle MIPS16e2 ASE.
+
+	* doc/as.texinfo (Target MIPS options): Add `-mmips16e2' and
+	`-mno-mips16e2' options.
+	(-mmips16e2, -mno-mips16e2): New options.
+	* doc/c-mips.texi (MIPS Options): Add `-mmips16e2' and
+	`-mno-mips16e2' options.
+	(MIPS ASE Instruction Generation Overrides): Add `.set mips16e2'
+	and `.set nomips16e2'.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (match_int_operand): Call
 	`match_out_of_range' before returning failure for 0x8000-0xffff

@@ -420,6 +420,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mnan=@var{encoding}}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
    [@b{-mips16}] [@b{-no-mips16}]
+   [@b{-mmips16e2}] [@b{-mno-mips16e2}]
    [@b{-mmicromips}] [@b{-mno-micromips}]
    [@b{-msmartmips}] [@b{-mno-smartmips}]
    [@b{-mips3d}] [@b{-no-mips3d}]
@@ -1454,6 +1455,12 @@ registers when supported by the ISA.  @samp{-mfpxx} implies
 Generate code for the MIPS 16 processor.  This is equivalent to putting
 @code{.module mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
+
+@item -mmips16e2
+@itemx -mno-mips16e2
+Enable the use of MIPS16e2 instructions in MIPS16 mode.  This is equivalent
+to putting @code{.module mips16e2} at the start of the assembly file.
+@samp{-mno-mips16e2} turns off this option.
 
 @item -mmicromips
 @itemx -mno-micromips

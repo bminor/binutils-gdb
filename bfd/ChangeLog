@@ -1,3 +1,7 @@
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (print_mips_ases): Handle MIPS16e2 ASE.
+
 2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_parse_gnu_properties): Merge

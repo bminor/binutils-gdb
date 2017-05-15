@@ -1,3 +1,13 @@
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (AFL_ASE_MIPS16E2): New macro.
+	(AFL_ASE_MASK): Adjust accordingly.
+	* opcode/mips.h: Document new operand codes defined.
+	(mips_operand_type): Add OP_REG28 enum value.
+	(INSN2_SHORT_ONLY): Update description.
+	(ASE_MIPS16E2, ASE_MIPS16E2_MT): New macros.
+
 2017-05-14  John David Anglin  <danglin@gcc.gnu.org>
 
 	* opcode/hppa.h: Fix match and mask for 64-bit bb opcode.

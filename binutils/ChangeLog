@@ -1,3 +1,8 @@
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (print_mips_ases): Handle MIPS16e2 ASE.
+	* NEWS: Mention MIPS16e2 ASE support.
+
 2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/binutils-all/mips/mips16-extend-insn.d: Adjust BREAK

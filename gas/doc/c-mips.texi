@@ -151,6 +151,12 @@ Generate code for the MIPS 16 processor.  This is equivalent to putting
 @code{.module mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
+@item -mmips16e2
+@itemx -mno-mips16e2
+Enable the use of MIPS16e2 instructions in MIPS16 mode.  This is equivalent
+to putting @code{.module mips16e2} at the start of the assembly file.
+@samp{-mno-mips16e2} turns off this option.
+
 @item -mmicromips
 @itemx -mno-micromips
 Generate code for the microMIPS processor.  This is equivalent to putting
@@ -1093,6 +1099,16 @@ instructions from being accepted.
 The directive @code{.set xpa} makes the assembler accept instructions
 from the XPA Extension from that point on in the assembly.  The 
 @code{.set noxpa} directive prevents XPA instructions from being accepted.
+
+@cindex MIPS16e2 instruction generation override
+@kindex @code{.set mips16e2}
+@kindex @code{.set nomips16e2}
+The directive @code{.set mips16e2} makes the assembler accept instructions
+from the MIPS16e2 Application Specific Extension from that point on in the
+assembly, whenever in MIPS16 mode.  The @code{.set nomips16e2} prevents
+MIPS16e2 instructions from being accepted, in MIPS16 mode.  Neither
+directive affects the state of MIPS16 mode being active itself which has
+separate controls.
 
 Traditional MIPS assemblers do not support these directives.
 
