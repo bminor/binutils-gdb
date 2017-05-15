@@ -1452,21 +1452,21 @@ registers when supported by the ISA.  @samp{-mfpxx} implies
 @item -mips16
 @itemx -no-mips16
 Generate code for the MIPS 16 processor.  This is equivalent to putting
-@code{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
+@code{.module mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
 @item -mmicromips
 @itemx -mno-micromips
 Generate code for the microMIPS processor.  This is equivalent to putting
-@code{.set micromips} at the start of the assembly file.  @samp{-mno-micromips}
-turns off this option.  This is equivalent to putting @code{.set nomicromips}
-at the start of the assembly file.
+@code{.module micromips} at the start of the assembly file.
+@samp{-mno-micromips} turns off this option.  This is equivalent to putting
+@code{.module nomicromips} at the start of the assembly file.
 
 @item -msmartmips
 @itemx -mno-smartmips
-Enables the SmartMIPS extension to the MIPS32 instruction set. This is
-equivalent to putting @code{.set smartmips} at the start of the assembly file.
-@samp{-mno-smartmips} turns off this option.
+Enables the SmartMIPS extension to the MIPS32 instruction set.  This is
+equivalent to putting @code{.module smartmips} at the start of the assembly
+file.  @samp{-mno-smartmips} turns off this option.
 
 @item -mips3d
 @itemx -no-mips3d

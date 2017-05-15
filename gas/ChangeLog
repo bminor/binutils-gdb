@@ -1,3 +1,17 @@
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* doc/as.texinfo (-mips16, -no-mips16): Refer to `.module
+	mips16' rather than `.set mips16'.
+	(-mmicromips, -mno-micromips): Refer to `.module micromips' and
+	`.module nomicromips' rather than `.set micromips' and `.set
+	nomicromips'.
+	(-msmartmips, -mno-smartmips): Refer to `.module smartmips'
+	rather than `.set smartmips'.
+	* doc/c-mips.texi (MIPS Options): Refer to `.module mips16',
+	`.module micromips', `.module nomicromips' and `.module
+	smartmips' rather than `.set mips16', `.set micromips', `.set
+	nomicromips' and `.set smartmips' respectively.
+
 2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
