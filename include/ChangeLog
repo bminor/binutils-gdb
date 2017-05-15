@@ -1,3 +1,7 @@
+2020-04-23  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* elf/common.h (NT_ARC_V2): New macro definitions.
+
 2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
 
 	PR ld/25861
