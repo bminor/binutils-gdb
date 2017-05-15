@@ -415,5 +415,15 @@ SECTIONS
   {
     *(.zdebug_types${RELOCATING+ .zdebug.gnu.linkonce.wt.*})
   }
+
+  /* For Go and Rust.  */
+  .debug_gdb_scripts ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_gdb_scripts)
+  }
+  .zdebug_gdb_scripts ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.zdebug_gdb_scripts)
+  }
 }
 EOF

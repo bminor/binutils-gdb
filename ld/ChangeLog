@@ -1,3 +1,9 @@
+2017-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21459
+	* scripttempl/pe.sc: Add .debug_gdb_scripts section.
+	* scripttempl/pep.sc: Likewise.
+
 2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run property-x86-3.
