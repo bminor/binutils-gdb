@@ -629,7 +629,7 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
 
   if (bfd_link_relocatable (&link_info))
     return TRUE;
-  if (blhe->dynamic_ref_after_ir_def
+  if (blhe->non_ir_ref_dynamic
       || link_info.export_dynamic
       || bfd_link_dll (&link_info))
     {
@@ -1266,9 +1266,10 @@ plugin_call_cleanup (void)
 /* To determine which symbols should be resolved LDPR_PREVAILING_DEF
    and which LDPR_PREVAILING_DEF_IRONLY, we notice all the symbols as
    the linker adds them to the linker hash table.  Mark those
-   referenced from a non-IR file with non_ir_ref.  We have to
-   notice_all symbols, because we won't necessarily know until later
-   which ones will be contributed by IR files.  */
+   referenced from a non-IR file with non_ir_ref or
+   non_ir_ref_dynamic as appropriate.  We have to notice_all symbols,
+   because we won't necessarily know until later which ones will be
+   contributed by IR files.  */
 static bfd_boolean
 plugin_notice (struct bfd_link_info *info,
 	       struct bfd_link_hash_entry *h,
@@ -1283,6 +1284,7 @@ plugin_notice (struct bfd_link_info *info,
   if (h != NULL)
     {
       bfd *sym_bfd;
+      bfd_boolean ref = FALSE;
 
       if (h->type == bfd_link_hash_warning)
 	h = h->u.i.link;
@@ -1298,13 +1300,17 @@ plugin_notice (struct bfd_link_info *info,
 	{
 	  /* ??? Some of this is questionable.  See comments in
 	     _bfd_generic_link_add_one_symbol for case IND.  */
-	  if (h->type != bfd_link_hash_new)
+	  if (h->type != bfd_link_hash_new
+	      || inh->type == bfd_link_hash_new)
 	    {
-	      h->non_ir_ref = TRUE;
-	      inh->non_ir_ref = TRUE;
+	      if ((abfd->flags & DYNAMIC) == 0)
+		inh->non_ir_ref = TRUE;
+	      else
+		inh->non_ir_ref_dynamic = TRUE;
 	    }
-	  else if (inh->type == bfd_link_hash_new)
-	    inh->non_ir_ref = TRUE;
+
+	  if (h->type != bfd_link_hash_new)
+	    ref = TRUE;
 	}
 
       /* Nothing to do here for warning symbols.  */
@@ -1318,34 +1324,18 @@ plugin_notice (struct bfd_link_info *info,
       /* If this is a ref, set non_ir_ref.  */
       else if (bfd_is_und_section (section))
 	{
-	   if (h->type == bfd_link_hash_defweak
-	       || h->type == bfd_link_hash_defined)
-	     {
-	       /* Check if the symbol is referenced in a dynamic object
-		  after it has been defined in an IR object.  */
-	       if ((abfd->flags & DYNAMIC) != 0
-		   && is_ir_dummy_bfd (h->u.def.section->owner))
-		 h->dynamic_ref_after_ir_def = TRUE;
-	     }
 	  /* Replace the undefined dummy bfd with the real one.  */
-	   else if ((h->type == bfd_link_hash_undefined
-		     || h->type == bfd_link_hash_undefweak)
-		    && (h->u.undef.abfd == NULL
-			|| (h->u.undef.abfd->flags & BFD_PLUGIN) != 0))
+	   if ((h->type == bfd_link_hash_undefined
+		|| h->type == bfd_link_hash_undefweak)
+	       && (h->u.undef.abfd == NULL
+		   || (h->u.undef.abfd->flags & BFD_PLUGIN) != 0))
 	     h->u.undef.abfd = abfd;
-	  h->non_ir_ref = TRUE;
+	  ref = TRUE;
 	}
 
       /* Otherwise, it must be a new def.  */
       else
 	{
-	  /* A common symbol should be merged with other commons or
-	     defs with the same name.  In particular, a common ought
-	     to be overridden by a def in a -flto object.  In that
-	     sense a common is also a ref.  */
-	  if (bfd_is_com_section (section))
-	    h->non_ir_ref = TRUE;
-
 	  /* Ensure any symbol defined in an IR dummy BFD takes on a
 	     new value from a real BFD.  Weak symbols are not normally
 	     overridden by a new weak definition, and strong symbols
@@ -1360,6 +1350,21 @@ plugin_notice (struct bfd_link_info *info,
 	      h->type = bfd_link_hash_undefweak;
 	      h->u.undef.abfd = sym_bfd;
 	    }
+
+	  /* A common symbol should be merged with other commons or
+	     defs with the same name.  In particular, a common ought
+	     to be overridden by a def in a -flto object.  In that
+	     sense a common is also a ref.  */
+	  if (bfd_is_com_section (section))
+	    ref = TRUE;
+	}
+
+      if (ref)
+	{
+	  if ((abfd->flags & DYNAMIC) == 0)
+	    h->non_ir_ref = TRUE;
+	  else
+	    h->non_ir_ref_dynamic = TRUE;
 	}
     }
 

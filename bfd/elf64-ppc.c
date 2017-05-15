@@ -5119,6 +5119,7 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
       /* Propagate reference flags from entry symbol to function
 	 descriptor symbol.  */
       fdh->elf.root.non_ir_ref |= eh->elf.root.non_ir_ref;
+      fdh->elf.root.non_ir_ref_dynamic |= eh->elf.root.non_ir_ref_dynamic;
       fdh->elf.ref_regular |= eh->elf.ref_regular;
       fdh->elf.ref_regular_nonweak |= eh->elf.ref_regular_nonweak;
 

@@ -1,3 +1,9 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (is_visible_from_outside): Use non_ir_ref_dynamic.
+	(plugin_notice): Set non_ir_ref for references from regular
+	objects, non_ir_ref_dynamic for references from dynamic objects.
+
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips16e2-pcrel-0.d: New test.

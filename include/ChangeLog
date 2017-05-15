@@ -1,3 +1,8 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_hash_entry): Update non_ir_ref
+	comment.  Rename dynamic_ref_after_ir_def to non_ir_ref_dynamic.
+
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 

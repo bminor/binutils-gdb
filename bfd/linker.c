@@ -1735,7 +1735,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	     otherwise add a warning.  */
 	  if ((!info->lto_plugin_active
 	       && (h->u.undef.next != NULL || info->hash->undefs_tail == h))
-	      || h->non_ir_ref)
+	      || h->non_ir_ref
+	      || h->non_ir_ref_dynamic)
 	    {
 	      (*info->callbacks->warning) (info, string, h->root.string,
 					   hash_entry_bfd (h), NULL, 0);

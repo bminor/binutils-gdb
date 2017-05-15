@@ -1,3 +1,12 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (add_symbol_adjust): Transfer non_ir_ref_dynamic.
+	* elflink.c (elf_link_add_object_symbols): Update to use
+	non_ir_ref_dynamic.
+	(elf_link_input_bfd): Test non_ir_ref_dynamic in addition to
+	non_ir_ref.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (print_mips_ases): Handle MIPS16e2 ASE.
