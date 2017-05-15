@@ -1,5 +1,9 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (match_const_int): Update description.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* doc/as.texinfo (-mips16, -no-mips16): Refer to `.module
 	mips16' rather than `.set mips16'.
 	(-mmicromips, -mno-micromips): Refer to `.module micromips' and

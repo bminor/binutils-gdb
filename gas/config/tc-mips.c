@@ -4841,8 +4841,7 @@ match_expression (struct mips_arg_info *arg, expressionS *value,
 
 /* Try to get a constant expression from the next tokens in ARG.  Consume
    the tokens and return return true on success, storing the constant value
-   in *VALUE.  Use FALLBACK as the value if the match succeeded with an
-   error.  */
+   in *VALUE.  */
 
 static bfd_boolean
 match_const_int (struct mips_arg_info *arg, offsetT *value)
