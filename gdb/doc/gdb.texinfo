@@ -35827,6 +35827,19 @@ for an error
 for success
 @end table
 
+@item vMustReplyEmpty
+@cindex @samp{vMustReplyEmpty} packet
+The correct reply to an unknown @samp{v} packet is to return the empty
+string, however, some older versions of @command{gdbserver} would
+incorrectly return @samp{OK} for unknown @samp{v} packets.
+
+The @samp{vMustReplyEmpty} is used as a feature test to check how
+@command{gdbserver} handles unknown packets, it is important that this
+packet be handled in the same way as other unknown @samp{v} packets.
+If this packet is handled differently to other unknown @samp{v}
+packets then it is possile that @value{GDBN} may run into problems in
+other areas, specifically around use of @samp{vFile:setfs:}.
+
 @item vRun;@var{filename}@r{[};@var{argument}@r{]}@dots{}
 @cindex @samp{vRun} packet
 Run the program @var{filename}, passing it each @var{argument} on its
