@@ -1,5 +1,40 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e2.d: New test.
+	* testsuite/gas/mips/mips16e2-mt.d: New test.
+	* testsuite/gas/mips/mips16e2-sub.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16e2-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-mt-sub.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16e2-mt-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-hilo.d: New test.
+	* testsuite/gas/mips/mips16e2-hilo-n32.d: New test.
+	* testsuite/gas/mips/mips16e2-reloc-error.d: New test.
+	* testsuite/gas/mips/mips16e2-imm-error.d: New test.
+	* testsuite/gas/mips/elf_ase_mips16e2.d: New test.
+	* testsuite/gas/mips/elf_ase_mips16e2-2.d: New test.
+	* testsuite/gas/mips/elf-rel9-mips16e2.d: New test.
+	* testsuite/gas/mips/mips16e2-lui.d: New test.
+	* testsuite/gas/mips/mips16e2@mips32r2-sync.d: New test.
+	* testsuite/gas/mips/mips16e2@mips32r2-sync-1.d: New test.
+	* testsuite/gas/mips/mips16e2@lui-2.d: New test.
+	* testsuite/gas/mips/mips16e2-reloc-error.l: New stderr output.
+	* testsuite/gas/mips/mips16e2-imm-error.l: New stderr output.
+	* testsuite/gas/mips/mips16e2@lui-2.l: New stderr output.
+	* testsuite/gas/mips/mips16e2.s: New test source.
+	* testsuite/gas/mips/mips16e2-mt.s: New test source.
+	* testsuite/gas/mips/mips16e2-sub.s: New test source.
+	* testsuite/gas/mips/mips16e2-mt-sub.s: New test source.
+	* testsuite/gas/mips/mips16e2-hilo.s: New test source.
+	* testsuite/gas/mips/mips16e2-reloc-error.s: New test source.
+	* testsuite/gas/mips/mips16e2-imm-error.s: New test source.
+	* testsuite/gas/mips/elf-rel9-mips16e2.s: New test source.
+	* testsuite/gas/mips/mips16e2-lui.s: New test source.
+	* testsuite/gas/mips/mips.exp: Expand `mips32r2-sync',
+	`mips32r2-sync-1', `lui-1' and `lui-2' tests across MIPS16e2
+	architectures.  Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips.exp (run_dump_test_arch): Add
 	`mips16e2@' prefix.
 	(run_list_test_arch): Likewise.

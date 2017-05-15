@@ -1,5 +1,15 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/binutils-all/mips/mips16-undecoded.d: Add `-mips3'
+	to `as' flags.
+	* testsuite/binutils-all/mips/mips16e2-undecoded.d: New test.
+	* testsuite/binutils-all/mips/mips16e2-extend-insn.d: New test.
+	* testsuite/binutils-all/mips/mips16-undecoded.s: Remove
+	`.module mips3'.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* readelf.c (print_mips_ases): Handle MIPS16e2 ASE.
 	* NEWS: Mention MIPS16e2 ASE support.
 
