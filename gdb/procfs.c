@@ -122,8 +122,8 @@ static void procfs_pass_signals (struct target_ops *self,
 				 int, unsigned char *);
 static void procfs_kill_inferior (struct target_ops *ops);
 static void procfs_mourn_inferior (struct target_ops *ops);
-static void procfs_create_inferior (struct target_ops *, char *,
-				    char *, char **, int);
+static void procfs_create_inferior (struct target_ops *, const char *,
+				    const std::string &, char **, int);
 static ptid_t procfs_wait (struct target_ops *,
 			   ptid_t, struct target_waitstatus *, int);
 static enum target_xfer_status procfs_xfer_memory (gdb_byte *,

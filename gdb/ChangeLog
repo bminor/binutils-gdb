@@ -1,3 +1,8 @@
+2017-05-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (procfs_create_inferior): Change prototype to match
+	definition.
+
 2017-05-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 7.99.91.DATE-git.
