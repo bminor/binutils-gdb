@@ -1,3 +1,9 @@
+2017-05-15  Eric Christopher <echristo@gmail.com>
+
+        * layout.cc (Layout::segment_precedes): Add a case for testing
+        pointer equality when determining which segment precedes
+        another.
+
 2017-05-13  James Clarke  <jrtc27@jrtc27.com>
 
 	PR gold/21444
