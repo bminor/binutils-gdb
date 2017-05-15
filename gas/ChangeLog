@@ -1,5 +1,12 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/lui-1.d: New test.
+	* testsuite/gas/mips/lui-2.d: New test.
+	* gas/testsuite/gas/mips/mips.exp: Fold corresponding list tests
+	into the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (match_const_int): Update description.
 
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
