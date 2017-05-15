@@ -8249,10 +8249,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 		  continue;
 		}
 
-	      /* We need the OT_INTEGER check because some MIPS16
-		 immediate variants are listed before the register ones.  */
-	      if (arg.token->type != OT_INTEGER
-		  || !match_expression (&arg, &offset_expr, offset_reloc))
+	      if (!match_expression (&arg, &offset_expr, offset_reloc))
 		return FALSE;
 
 	      /* '8' is used for SLTI(U) and has traditionally not

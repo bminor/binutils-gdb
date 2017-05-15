@@ -1,5 +1,18 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (match_mips16_insn): Remove the explicit
+	OT_INTEGER check before the `match_expression' call.
+	* testsuite/gas/mips/mips16-insn-e.l: Adjust messages.
+	* testsuite/gas/mips/mips16-32@mips16-insn-e.l: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16-insn-e.l: Likewise.
+	* testsuite/gas/mips/mips16e-32@mips16-insn-e.l: Likewise.
+	* testsuite/gas/mips/mips16-reg-error.d: New test.
+	* testsuite/gas/mips/mips16-reg-error.l: New stderr output.
+	* testsuite/gas/mips/mips16-reg-error.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (match_mips16_insn): Call
 	`match_not_constant' for a disallowed relocation operation.
 	* testsuite/gas/mips/mips16-reloc-error.d: New test.
