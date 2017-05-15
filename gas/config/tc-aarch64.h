@@ -109,10 +109,9 @@ void aarch64_copy_symbol_attributes (symbolS *, symbolS *);
    pcrel, but it is easier to be safe than sorry.  */
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)			\
-  (!(FIX)->fx_pcrel					\
+  (GENERIC_FORCE_RELOCATION_LOCAL (FIX)			\
    || (FIX)->fx_r_type == BFD_RELOC_64			\
-   || (FIX)->fx_r_type == BFD_RELOC_32			\
-   || TC_FORCE_RELOCATION (FIX))
+   || (FIX)->fx_r_type == BFD_RELOC_32)
 
 #define TC_CONS_FIX_NEW(f,w,s,e,r) cons_fix_new_aarch64 ((f), (w), (s), (e))
 

@@ -1,3 +1,35 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* write.c (GENERIC_FORCE_RELOCATION_LOCAL): Define.
+	(TC_FORCE_RELOCATION_LOCAL): Use it.
+	(GENERIC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Use it.
+	* config/tc-arm.h (TC_FORCE_RELOCATION_LOCAL,
+	TC_FORCE_RELOCATION_SUB_SAME): Use GENERIC defines.
+	* config/tc-aarch64.h: Similarly.
+	* config/tc-avr.h: Similarly.
+	* config/tc-cris.h: Similarly.
+	* config/tc-i386.h: Similarly.
+	* config/tc-i960.h: Similarly.
+	* config/tc-ia64.h: Similarly.
+	* config/tc-microblaze.h: Similarly.
+	* config/tc-mips.h: Similarly.
+	* config/tc-msp430.h: Similarly.
+	* config/tc-nds32.h: Similarly.
+	* config/tc-pru.h: Similarly.
+	* config/tc-riscv.h: Similarly.
+	* config/tc-rl78.h: Similarly.
+	* config/tc-s390.h: Similarly.
+	* config/tc-sh.h: Similarly.
+	* config/tc-sh64.h: Similarly.
+	* config/tc-sparc.h: Similarly.
+	* config/tc-xtensa.h: Similarly.
+	* config/tc-mn10300.h: Similarly.
+	(GENERIC_FORCE_RELOCATION_LOCAL): Define.
+	* config/tc-msp430.c (msp430_force_relocation_local): Modify to
+	be addition to rather than replacement of standard
+	TC_FORCE_RELOCATION_LOCAL.
+
 2017-05-15  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/21458

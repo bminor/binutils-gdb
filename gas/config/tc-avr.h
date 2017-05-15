@@ -123,7 +123,8 @@ extern void avr_cons_fix_new (fragS *,int, int, expressionS *,
    even when the value can be resolved locally. Do that if linkrelax is turned on */
 #define TC_FORCE_RELOCATION(fix)	avr_force_relocation (fix)
 #define TC_FORCE_RELOCATION_SUB_SAME(fix, seg) \
-  (! SEG_NORMAL (seg) || avr_force_relocation (fix))
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (fix, seg)	\
+   || avr_force_relocation (fix))
 extern int avr_force_relocation (struct fix *);
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
