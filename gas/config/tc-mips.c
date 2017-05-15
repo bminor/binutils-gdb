@@ -8259,7 +8259,10 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 		 been allowed to take relocation operators.  */
 	      if (offset_reloc[0] != BFD_RELOC_UNUSED
 		  && (ext_operand->size != 16 || c == '8'))
-		return FALSE;
+		{
+		  match_not_constant (&arg);
+		  return FALSE;
+		}
 
 	      relax_char = c;
 	      continue;

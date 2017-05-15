@@ -1,5 +1,14 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (match_mips16_insn): Call
+	`match_not_constant' for a disallowed relocation operation.
+	* testsuite/gas/mips/mips16-reloc-error.d: New test.
+	* testsuite/gas/mips/mips16-reloc-error.l: New stderr output.
+	* testsuite/gas/mips/mips16-reloc-error.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/lui-1.d: New test.
 	* testsuite/gas/mips/lui-2.d: New test.
 	* gas/testsuite/gas/mips/mips.exp: Fold corresponding list tests

@@ -967,6 +967,8 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "mips16-hilo-n32"
     }
     run_dump_test "mips16-hilo-match"
+    run_dump_test "mips16-reloc-error"
+
     run_dump_test "delay"
     run_dump_test "nodelay"
     run_dump_test "mips4010"
