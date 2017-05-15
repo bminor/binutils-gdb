@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 PC-relative operations 0 (n64, sym32)
-#as: -64 -msym32 -mips3
+#as: -64 -msym32
 #source: mips16-pcrel-0.s
 
 .*: +file format .*mips.*

@@ -22,10 +22,21 @@ foo:
 	ld	$2, . - 5 + 0x7fff
 	dla	$2, . - 1 - 0x8000
 	ld	$2, . - 5 - 0x8000
-	dla	$2, . - 1 + 0x8000
-	ld	$2, . - 5 + 0x8000
-	dla	$2, . - 1 - 0x8001
-	ld	$2, . - 5 - 0x8001
+
+	# Pad these to retain alignment between MIPS16 and MIPS16e2 code.
+0:	dla	$2, . - 1 + 0x8000
+1:	.insn
+	.fill	(12 - (1b - 0b)) / 2, 2, 0x6500
+0:	ld	$2, . - 5 + 0x8000
+1:	.insn
+	.fill	(12 - (1b - 0b)) / 2, 2, 0x6500
+0:	dla	$2, . - 1 - 0x8001
+1:	.insn
+	.fill	(12 - (1b - 0b)) / 2, 2, 0x6500
+0:	ld	$2, . - 5 - 0x8001
+1:	.insn
+	.fill	(12 - (1b - 0b)) / 2, 2, 0x6500
+
 	nop
 	.set	nomips16
 	.end	foo

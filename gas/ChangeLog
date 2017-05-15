@@ -1,5 +1,129 @@
 2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16-pcrel-1.d: Remove `-mips3' from `as'
+	flags.
+	* testsuite/gas/mips/mips16-pcrel-pic-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n32-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n32-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-5.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-5.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-7.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-pic-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n32-8.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n32-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-sym32-8.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-sym32-9.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-8.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-2.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-3.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-7.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n32-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n32-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-sym32-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-sym32-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n32-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n32-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-sym32-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-sym32-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-0.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-1.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-2.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n32-0.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n32-1.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n64-sym32-0.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n64-sym32-1.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-delay-0.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-delay-1.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-6.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-7.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-2.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-3.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-6.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-7.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-8.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-9.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n32-8.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n32-9.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n64-sym32-8.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n64-sym32-9.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-1.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-2.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-3.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-4.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-5.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-6.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-7.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-4.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-6.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n32-4.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n32-6.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n64-sym32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n64-sym32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n64-sym32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n64-sym32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16-pcrel-1.l: Adjust line numbers.
+	* testsuite/gas/mips/mips16-pcrel-1.s: Adjust for alignment
+	preservation between MIPS16 and MIPS16e2 code.
+	* testsuite/gas/mips/mips.exp: Run MIPS16 relaxation tests over
+	all MIPS16 architectures.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16e2.d: New test.
 	* testsuite/gas/mips/mips16e2-mt.d: New test.
 	* testsuite/gas/mips/mips16e2-sub.d: New test.

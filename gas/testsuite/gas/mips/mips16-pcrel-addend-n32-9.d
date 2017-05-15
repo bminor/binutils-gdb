@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 PC-relative relocation with addend 9 (n32)
-#as: -n32 -mips3
+#as: -n32
 #source: mips16-pcrel-addend-9.s
 
 .*: +file format .*mips.*
