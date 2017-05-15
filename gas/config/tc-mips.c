@@ -5082,7 +5082,10 @@ match_int_operand (struct mips_arg_info *arg,
 	  /* Accept non-constant operands if no later alternative matches,
 	     leaving it for the caller to process.  */
 	  if (!arg->lax_match)
-	    return FALSE;
+	    {
+	      match_not_constant (arg);
+	      return FALSE;
+	    }
 	  offset_reloc[0] = BFD_RELOC_LO16;
 	  return TRUE;
 	}
