@@ -1,5 +1,62 @@
 2017-05-16  Alan Modra  <amodra@gmail.com>
 
+	* elf-m10300.c: Rename occurrences of non_ir_ref.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-moxie.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-or1k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* linker.c: Likewise.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (add_symbol_adjust): Transfer non_ir_ref_dynamic.
 	* elflink.c (elf_link_add_object_symbols): Update to use
 	non_ir_ref_dynamic.

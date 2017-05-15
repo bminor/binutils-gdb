@@ -1,5 +1,9 @@
 2017-05-16  Alan Modra  <amodra@gmail.com>
 
+	* plugin.c: Rename occurrences of non_ir_ref.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
 	* plugin.c (is_visible_from_outside): Use non_ir_ref_dynamic.
 	(plugin_notice): Set non_ir_ref for references from regular
 	objects, non_ir_ref_dynamic for references from dynamic objects.

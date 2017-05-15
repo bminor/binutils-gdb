@@ -1971,7 +1971,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 
 	  if (h->type == STT_GNU_IFUNC)
 	    elf_tdata (info->output_bfd)->has_gnu_symbols

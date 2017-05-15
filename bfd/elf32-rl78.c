@@ -1328,7 +1328,7 @@ rl78_elf_check_relocs
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))

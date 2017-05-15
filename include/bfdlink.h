@@ -102,7 +102,7 @@ struct bfd_link_hash_entry
 
   /* Symbol is referenced in a normal regular object file,
      as distinct from a LTO IR object file.  */
-  unsigned int non_ir_ref : 1;
+  unsigned int non_ir_ref_regular : 1;
 
   /* Symbol is referenced in a normal dynamic object file,
      as distinct from a LTO IR object file.  */

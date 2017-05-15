@@ -10472,7 +10472,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		     linker may attach linker created dynamic sections
 		     to the plugin bfd.  Symbols defined in linker
 		     created sections are not plugin symbols.  */
-		  if ((h->root.non_ir_ref
+		  if ((h->root.non_ir_ref_regular
 		       || h->root.non_ir_ref_dynamic)
 		      && (h->root.type == bfd_link_hash_defined
 			  || h->root.type == bfd_link_hash_defweak)
