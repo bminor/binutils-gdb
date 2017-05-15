@@ -1,6 +1,14 @@
 2017-09-27  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2017-05-16  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (add_symbol_adjust): Transfer non_ir_ref_dynamic.
+	* elflink.c (elf_link_add_object_symbols): Update to use
+	non_ir_ref_dynamic.
+	(elf_link_input_bfd): Test non_ir_ref_dynamic in addition to
+	non_ir_ref.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
 	2017-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 	PR ld/21382
 	* elflink.c (elf_link_add_object_symbols): Preserve
