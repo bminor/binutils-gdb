@@ -28,6 +28,7 @@
 #include "safe-ctype.h"
 
 #include "opcode/arc.h"
+#include "opcode/arc-attrs.h"
 #include "elf/arc.h"
 #include "../opcodes/arc-ext.h"
 
@@ -54,6 +55,10 @@
 #ifndef TARGET_WITH_CPU
 #define TARGET_WITH_CPU "arc700"
 #endif /* TARGET_WITH_CPU */
+
+#define ARC_GET_FLAG(s)   	(*symbol_get_tc (s))
+#define ARC_SET_FLAG(s,v) 	(*symbol_get_tc (s) |= (v))
+#define streq(a, b)	      (strcmp (a, b) == 0)
 
 /* Enum used to enumerate the relaxable ins operands.  */
 enum rlx_operand_type
@@ -147,6 +152,7 @@ static void arc_option (int);
 static void arc_extra_reloc (int);
 static void arc_extinsn (int);
 static void arc_extcorereg (int);
+static void arc_attribute (int);
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -158,6 +164,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "lcommon", arc_lcomm, 0 },
   { "cpu",     arc_option, 0 },
 
+  { "arc_attribute",   arc_attribute, 0 },
   { "extinstruction",  arc_extinsn, 0 },
   { "extcoreregister", arc_extcorereg, EXT_CORE_REGISTER },
   { "extauxregister",  arc_extcorereg, EXT_AUX_REGISTER },
@@ -451,21 +458,21 @@ static const struct cpu_type
   cpu_types[] =
 {
   ARC_CPU_TYPE_A7xx (arc700, 0x00),
-  ARC_CPU_TYPE_A7xx (nps400, ARC_NPS400),
+  ARC_CPU_TYPE_A7xx (nps400, NPS400),
 
   ARC_CPU_TYPE_AV2EM (arcem,	  0x00),
   ARC_CPU_TYPE_AV2EM (em,	  0x00),
-  ARC_CPU_TYPE_AV2EM (em4,	  ARC_CD),
-  ARC_CPU_TYPE_AV2EM (em4_dmips,  ARC_CD),
-  ARC_CPU_TYPE_AV2EM (em4_fpus,	  ARC_CD),
-  ARC_CPU_TYPE_AV2EM (em4_fpuda,  ARC_CD | ARC_FPUDA),
-  ARC_CPU_TYPE_AV2EM (quarkse_em, ARC_CD | ARC_SPFP | ARC_DPFP),
+  ARC_CPU_TYPE_AV2EM (em4,	  CD),
+  ARC_CPU_TYPE_AV2EM (em4_dmips,  CD),
+  ARC_CPU_TYPE_AV2EM (em4_fpus,	  CD),
+  ARC_CPU_TYPE_AV2EM (em4_fpuda,  CD | DPA),
+  ARC_CPU_TYPE_AV2EM (quarkse_em, CD | SPX | DPX),
 
-  ARC_CPU_TYPE_AV2HS (archs,	  ARC_CD),
-  ARC_CPU_TYPE_AV2HS (hs,	  ARC_CD),
-  ARC_CPU_TYPE_AV2HS (hs34,	  ARC_CD),
-  ARC_CPU_TYPE_AV2HS (hs38,	  ARC_CD),
-  ARC_CPU_TYPE_AV2HS (hs38_linux, ARC_CD),
+  ARC_CPU_TYPE_AV2HS (archs,	  CD),
+  ARC_CPU_TYPE_AV2HS (hs,	  CD),
+  ARC_CPU_TYPE_AV2HS (hs34,	  CD),
+  ARC_CPU_TYPE_AV2HS (hs38,	  CD),
+  ARC_CPU_TYPE_AV2HS (hs38_linux, CD),
 
   ARC_CPU_TYPE_A6xx (arc600, 0x00),
   ARC_CPU_TYPE_A6xx (arc600_norm,     0x00),
@@ -479,23 +486,19 @@ static const struct cpu_type
 };
 
 /* Information about the cpu/variant we're assembling for.  */
-static struct cpu_type selected_cpu = { 0, 0, 0, 0, 0 };
+static struct cpu_type selected_cpu = { 0, 0, 0, E_ARC_OSABI_CURRENT, 0 };
 
-/* A table with options.  */
-static const struct feature_type
-{
-  unsigned feature;
-  unsigned cpus;
-  const char *name;
-}
-  feature_list[] =
-{
-  { ARC_CD, ARC_OPCODE_ARCV2, "code-density" },
-  { ARC_NPS400, ARC_OPCODE_ARC700, "nps400" },
-  { ARC_SPFP, ARC_OPCODE_ARCFPX, "single-precision FPX" },
-  { ARC_DPFP, ARC_OPCODE_ARCFPX, "double-precision FPX" },
-  { ARC_FPUDA, ARC_OPCODE_ARCv2EM, "double assist FP" }
-};
+/* MPY option.  */
+static unsigned mpy_option = 0;
+
+/* Use PIC. */
+static unsigned pic_option = 0;
+
+/* Use small data.  */
+static unsigned sda_option = 0;
+
+/* Use TLS.  */
+static unsigned tls_option = 0;
 
 /* Command line given features.  */
 static unsigned cl_features = 0;
@@ -695,14 +698,14 @@ const struct arc_relaxable_ins arc_relaxable_insns[] =
 
 const unsigned arc_num_relaxable_ins = ARRAY_SIZE (arc_relaxable_insns);
 
-/* Flags to set in the elf header.  */
-static const flagword arc_initial_eflag = 0x00;
-
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 symbolS * GOT_symbol = 0;
 
 /* Set to TRUE when we assemble instructions.  */
 static bfd_boolean assembling_insn = FALSE;
+
+/* List with attributes set explicitly.  */
+static bfd_boolean attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
 
 /* Functions implementation.  */
 
@@ -832,15 +835,16 @@ arc_check_feature (void)
   if (!selected_cpu.features
       || !selected_cpu.name)
     return;
-  for (i = 0; (i < ARRAY_SIZE (feature_list)); i++)
-    {
-      if ((selected_cpu.features & feature_list[i].feature)
-	  && !(selected_cpu.flags & feature_list[i].cpus))
-	{
-	  as_bad (_("invalid %s option for %s cpu"), feature_list[i].name,
-		  selected_cpu.name);
-	}
-    }
+
+  for (i = 0; i < ARRAY_SIZE (feature_list); i++)
+    if ((selected_cpu.features & feature_list[i].feature)
+	&& !(selected_cpu.flags & feature_list[i].cpus))
+      as_bad (_("invalid %s option for %s cpu"), feature_list[i].name,
+	      selected_cpu.name);
+
+  for (i = 0; i < ARRAY_SIZE (conflict_list); i++)
+    if ((selected_cpu.features & conflict_list[i]) == conflict_list[i])
+      as_bad(_("conflicting ISA extension attributes."));
 }
 
 /* Select an appropriate entry from CPU_TYPES based on ARG and initialise
@@ -850,7 +854,6 @@ arc_check_feature (void)
 static void
 arc_select_cpu (const char *arg, enum mach_selection_type sel)
 {
-  int cpu_flags = 0;
   int i;
 
   /* We should only set a default if we've not made a selection from some
@@ -888,7 +891,8 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
 	  selected_cpu.name = cpu_types[i].name;
 	  selected_cpu.features = cpu_types[i].features | cl_features;
 	  selected_cpu.mach = cpu_types[i].mach;
-	  cpu_flags = cpu_types[i].eflags;
+	  selected_cpu.eflags = ((selected_cpu.eflags & ~EF_ARC_MACH_MSK)
+				 | cpu_types[i].eflags);
           break;
         }
     }
@@ -898,8 +902,7 @@ arc_select_cpu (const char *arg, enum mach_selection_type sel)
 
   /* Check if set features are compatible with the chosen CPU.  */
   arc_check_feature ();
-  gas_assert (cpu_flags != 0);
-  selected_cpu.eflags = (arc_initial_eflag & ~EF_ARC_MACH_MSK) | cpu_flags;
+
   mach_selection_mode = sel;
 }
 
@@ -1025,12 +1028,6 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
     cpu_name = "nps400";
 
   arc_select_cpu (cpu_name, MACH_SELECTION_FROM_CPU_DIRECTIVE);
-
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, selected_cpu.mach))
-    as_fatal (_("could not set architecture and machine"));
-
-  /* Set elf header flags.  */
-  bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   restore_line_pointer (c);
   demand_empty_rest_of_line ();
@@ -1626,19 +1623,19 @@ allocate_tok (expressionS *tok, int ntok, int cidx)
 static bfd_boolean
 check_cpu_feature (insn_subclass_t sc)
 {
-  if (is_code_density_p (sc) && !(selected_cpu.features & ARC_CD))
+  if (is_code_density_p (sc) && !(selected_cpu.features & CD))
     return FALSE;
 
-  if (is_spfp_p (sc) && !(selected_cpu.features & ARC_SPFP))
+  if (is_spfp_p (sc) && !(selected_cpu.features & SPX))
     return FALSE;
 
-  if (is_dpfp_p (sc) && !(selected_cpu.features & ARC_DPFP))
+  if (is_dpfp_p (sc) && !(selected_cpu.features & DPX))
     return FALSE;
 
-  if (is_fpuda_p (sc) && !(selected_cpu.features & ARC_FPUDA))
+  if (is_fpuda_p (sc) && !(selected_cpu.features & DPA))
     return FALSE;
 
-  if (is_nps400_p (sc) && !(selected_cpu.features & ARC_NPS400))
+  if (is_nps400_p (sc) && !(selected_cpu.features & NPS400))
     return FALSE;
 
   return TRUE;
@@ -2345,7 +2342,56 @@ find_special_case (const char *opname,
   return entry;
 }
 
-/* Given an opcode name, pre-tokenized set of arguments and the
+/* Autodetect cpu attribute list.  */
+
+static void
+autodetect_attributes (const struct arc_opcode *opcode,
+			 const expressionS *tok,
+			 int ntok)
+{
+  unsigned i;
+  struct mpy_type
+  {
+    unsigned feature;
+    unsigned encoding;
+  } mpy_list[] = {{ MPY1E, 1 }, { MPY6E, 6 }, { MPY7E, 7 }, { MPY8E, 8 },
+		 { MPY9E, 9 }};
+
+  for (i = 0; i < ARRAY_SIZE (feature_list); i++)
+    if (opcode->subclass == feature_list[i].feature)
+      selected_cpu.features |= feature_list[i].feature;
+
+  for (i = 0; i < ARRAY_SIZE (mpy_list); i++)
+    if (opcode->subclass == mpy_list[i].feature)
+      mpy_option = mpy_list[i].encoding;
+
+  for (i = 0; i < (unsigned) ntok; i++)
+    {
+      switch (tok[i].X_md)
+	{
+	case O_gotoff:
+	case O_gotpc:
+	case O_plt:
+	  pic_option = 2;
+	  break;
+	case O_sda:
+	  sda_option = 2;
+	  break;
+	case O_tlsgd:
+	case O_tlsie:
+	case O_tpoff9:
+	case O_tpoff:
+	case O_dtpoff9:
+	case O_dtpoff:
+	  tls_option = 1;
+	  break;
+	default:
+	  break;
+	}
+    }
+}
+
+/* Given an opcode name, pre-tockenized set of argumenst and the
    opcode flags, take it all the way through emission.  */
 
 static void
@@ -2380,6 +2426,7 @@ assemble_tokens (const char *opname,
 	{
 	  struct arc_insn insn;
 
+	  autodetect_attributes (opcode,  tok, ntok);
 	  assemble_insn (opcode, tok, ntok, pflags, nflgs, &insn);
 	  emit_insn (&insn);
 	  return;
@@ -3384,8 +3431,8 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_CD:
-      selected_cpu.features |= ARC_CD;
-      cl_features |= ARC_CD;
+      selected_cpu.features |= CD;
+      cl_features |= CD;
       arc_check_feature ();
       break;
 
@@ -3394,26 +3441,26 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_NPS400:
-      selected_cpu.features |= ARC_NPS400;
-      cl_features |= ARC_NPS400;
+      selected_cpu.features |= NPS400;
+      cl_features |= NPS400;
       arc_check_feature ();
       break;
 
     case OPTION_SPFP:
-      selected_cpu.features |= ARC_SPFP;
-      cl_features |= ARC_SPFP;
+      selected_cpu.features |= SPX;
+      cl_features |= SPX;
       arc_check_feature ();
       break;
 
     case OPTION_DPFP:
-      selected_cpu.features |= ARC_DPFP;
-      cl_features |= ARC_DPFP;
+      selected_cpu.features |= DPX;
+      cl_features |= DPX;
       arc_check_feature ();
       break;
 
     case OPTION_FPUDA:
-      selected_cpu.features |= ARC_FPUDA;
-      cl_features |= ARC_FPUDA;
+      selected_cpu.features |= DPA;
+      cl_features |= DPA;
       arc_check_feature ();
       break;
 
@@ -4826,6 +4873,202 @@ arc_extcorereg (int opertype)
       break;
     }
   create_extcore_section (&ereg, opertype);
+}
+
+/* Parse a .arc_attribute directive.  */
+
+static void
+arc_attribute (int ignored ATTRIBUTE_UNUSED)
+{
+  int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
+
+  if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
+    attributes_set_explicitly[tag] = TRUE;
+}
+
+/* Set an attribute if it has not already been set by the user.  */
+
+static void
+arc_set_attribute_int (int tag, int value)
+{
+  if (tag < 1
+      || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
+      || !attributes_set_explicitly[tag])
+    bfd_elf_add_proc_attr_int (stdoutput, tag, value);
+}
+
+static void
+arc_set_attribute_string (int tag, const char *value)
+{
+  if (tag < 1
+      || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
+      || !attributes_set_explicitly[tag])
+    bfd_elf_add_proc_attr_string (stdoutput, tag, value);
+}
+
+/* Allocate and concatenate two strings.  s1 can be NULL but not
+   s2.  s1 pointer is freed at end of this procedure.  */
+
+static char *
+arc_stralloc (char * s1, const char * s2)
+{
+  char * p;
+  int len = 0;
+
+  if (s1)
+    len = strlen (s1) + 1;
+
+  /* Only s1 can be null.  */
+  gas_assert (s2);
+  len += strlen (s2) + 1;
+
+  p = (char *) xmalloc (len);
+  if (p == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  if (s1)
+    {
+      strcpy (p, s1);
+      strcat (p, ",");
+      strcat (p, s2);
+      free (s1);
+    }
+  else
+    strcpy (p, s2);
+
+  return p;
+}
+
+/* Set the public ARC object attributes.  */
+
+static void
+arc_set_public_attributes (void)
+{
+  int base = 0;
+  char *s = NULL;
+  unsigned int i;
+
+  /* Tag_ARC_CPU_name.  */
+  arc_set_attribute_string (Tag_ARC_CPU_name, selected_cpu.name);
+
+  /* Tag_ARC_CPU_base.  */
+  switch (selected_cpu.eflags & EF_ARC_MACH_MSK)
+    {
+    case E_ARC_MACH_ARC600:
+    case E_ARC_MACH_ARC601:
+      base = TAG_CPU_ARC6xx;
+      break;
+    case E_ARC_MACH_ARC700:
+      base = TAG_CPU_ARC7xx;
+      break;
+    case EF_ARC_CPU_ARCV2EM:
+      base = TAG_CPU_ARCEM;
+      break;
+    case EF_ARC_CPU_ARCV2HS:
+      base = TAG_CPU_ARCHS;
+      break;
+    default:
+      base = 0;
+      break;
+    }
+  if (attributes_set_explicitly[Tag_ARC_CPU_base]
+      && (base != bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+					    Tag_ARC_CPU_base)))
+    as_warn (_("Overwrite explicitly set Tag_ARC_CPU_base"));
+  bfd_elf_add_proc_attr_int (stdoutput, Tag_ARC_CPU_base, base);
+
+  /* Tag_ARC_ABI_osver.  */
+  if (attributes_set_explicitly[Tag_ARC_ABI_osver])
+    {
+      int val = bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+					  Tag_ARC_ABI_osver);
+
+      selected_cpu.eflags = ((selected_cpu.eflags & ~EF_ARC_OSABI_MSK)
+			     | (val & 0x0f << 8));
+    }
+  else
+    {
+      arc_set_attribute_int (Tag_ARC_ABI_osver, E_ARC_OSABI_CURRENT >> 8);
+    }
+
+  /* Tag_ARC_ISA_config.  */
+  arc_check_feature();
+
+  for (i = 0; i < ARRAY_SIZE (feature_list); i++)
+    if (selected_cpu.features & feature_list[i].feature)
+      s = arc_stralloc (s, feature_list[i].attr);
+
+  if (s)
+    arc_set_attribute_string (Tag_ARC_ISA_config, s);
+
+  /* Tag_ARC_ISA_mpy_option.  */
+  arc_set_attribute_int (Tag_ARC_ISA_mpy_option, mpy_option);
+
+  /* Tag_ARC_ABI_pic.  */
+  arc_set_attribute_int (Tag_ARC_ABI_pic, pic_option);
+
+  /* Tag_ARC_ABI_sda.  */
+  arc_set_attribute_int (Tag_ARC_ABI_sda, sda_option);
+
+  /* Tag_ARC_ABI_tls.  */
+  arc_set_attribute_int (Tag_ARC_ABI_tls, tls_option);
+}
+
+/* Add the default contents for the .ARC.attributes section.  */
+
+void
+arc_md_end (void)
+{
+  arc_set_public_attributes ();
+
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, selected_cpu.mach))
+    as_fatal (_("could not set architecture and machine"));
+
+  bfd_set_private_flags (stdoutput, selected_cpu.eflags);
+}
+
+void arc_copy_symbol_attributes (symbolS *dest, symbolS *src)
+{
+  ARC_GET_FLAG (dest) = ARC_GET_FLAG (src);
+}
+
+int arc_convert_symbolic_attribute (const char *name)
+{
+  static const struct
+  {
+    const char * name;
+    const int    tag;
+  }
+  attribute_table[] =
+    {
+#define T(tag) {#tag, tag}
+  T (Tag_ARC_PCS_config),
+  T (Tag_ARC_CPU_base),
+  T (Tag_ARC_CPU_variation),
+  T (Tag_ARC_CPU_name),
+  T (Tag_ARC_ABI_rf16),
+  T (Tag_ARC_ABI_osver),
+  T (Tag_ARC_ABI_sda),
+  T (Tag_ARC_ABI_pic),
+  T (Tag_ARC_ABI_tls),
+  T (Tag_ARC_ABI_enumsize),
+  T (Tag_ARC_ABI_exceptions),
+  T (Tag_ARC_ABI_double_size),
+  T (Tag_ARC_ISA_config),
+  T (Tag_ARC_ISA_apex),
+  T (Tag_ARC_ISA_mpy_option)
+#undef T
+    };
+  unsigned int i;
+
+  if (name == NULL)
+    return -1;
+
+  for (i = 0; i < ARRAY_SIZE (attribute_table); i++)
+    if (streq (name, attribute_table[i].name))
+      return attribute_table[i].tag;
+
+  return -1;
 }
 
 /* Local variables:

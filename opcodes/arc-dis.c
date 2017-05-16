@@ -748,7 +748,8 @@ parse_option (const char *option)
     {
       add_to_decodelist (FLOAT, DPX);
       add_to_decodelist (FLOAT, SPX);
-      add_to_decodelist (FLOAT, QUARKSE);
+      add_to_decodelist (FLOAT, QUARKSE1);
+      add_to_decodelist (FLOAT, QUARKSE2);
     }
 
   else if (CONST_STRNEQ (option, "fpuda"))

@@ -658,7 +658,8 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   /* This entry, mips16, is here only for ISA/processor selection; do
      not print its name.  */
-  { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS64, 0,
+  { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS64,
+    ASE_MIPS16E2 | ASE_MIPS16E2_MT,
     mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
     mips_hwr_names_numeric },
 };
@@ -795,6 +796,11 @@ mips_convert_abiflags_ases (unsigned long afl_ases)
     opcode_ases |= ASE_XPA;
   if (afl_ases & AFL_ASE_DSPR3)
     opcode_ases |= ASE_DSPR3;
+  if (afl_ases & AFL_ASE_MIPS16E2)
+    opcode_ases |= ASE_MIPS16E2;
+  if ((afl_ases & (AFL_ASE_MIPS16E2 | AFL_ASE_MT))
+      == (AFL_ASE_MIPS16E2 | AFL_ASE_MT))
+    opcode_ases |= ASE_MIPS16E2_MT;
   return opcode_ases;
 }
 
@@ -1462,6 +1468,10 @@ print_insn_arg (struct disassemble_info *info,
       infprintf (is, "$pc");
       break;
 
+    case OP_REG28:
+      print_reg (info, opcode, OP_REG_GP, 28);
+      break;
+
     case OP_VU0_SUFFIX:
     case OP_VU0_MATCH_SUFFIX:
       print_vu0_channel (info, operand, uval);
@@ -1575,6 +1585,7 @@ validate_insn_args (const struct mips_opcode *opcode,
 		case OP_REPEAT_PREV_REG:
 		case OP_REPEAT_DEST_REG:
 		case OP_PC:
+		case OP_REG28:
 		case OP_VU0_SUFFIX:
 		case OP_VU0_MATCH_SUFFIX:
 		case OP_IMM_INDEX:
@@ -1641,7 +1652,7 @@ print_insn_args (struct disassemble_info *info,
 	      && s[2] == 'H'
 	      && opcode->name[strlen (opcode->name) - 1] == '0')
 	    {
-	      /* Coprocessor register 0 with sel field (MT ASE).  */
+	      /* Coprocessor register 0 with sel field.  */
 	      const struct mips_cp0sel_name *n;
 	      unsigned int reg, sel;
 
@@ -1933,7 +1944,9 @@ print_mips16_insn_arg (struct disassemble_info *info,
       if (use_extend)
 	{
 	  ext_operand = decode_mips16_operand (type, TRUE);
-	  if (ext_operand != operand)
+	  if (ext_operand != operand
+	      || (operand->type == OP_INT && operand->lsb == 0
+		  && mips_opcode_32bit_p (opcode)))
 	    {
 	      ext_size = ext_operand->size;
 	      operand = ext_operand;
@@ -1941,7 +1954,7 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	}
       if (operand->size == 26)
 	uval = ((extend & 0x1f) << 21) | ((extend & 0x3e0) << 11) | insn;
-      else if (ext_size == 16)
+      else if (ext_size == 16 || ext_size == 9)
 	uval = ((extend & 0x1f) << 11) | (extend & 0x7e0) | (insn & 0x1f);
       else if (ext_size == 15)
 	uval = ((extend & 0xf) << 11) | (extend & 0x7f0) | (insn & 0xf);
@@ -1949,6 +1962,8 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	uval = ((extend >> 6) & 0x1f) | (extend & 0x20);
       else
 	uval = mips_extract_operand (operand, (extend << 16) | insn);
+      if (ext_size == 9)
+	uval &= (1U << ext_size) - 1;
 
       baseaddr = memaddr + 2;
       if (operand->type == OP_PCREL)
@@ -2034,6 +2049,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   struct mips_print_arg_state state;
   void *is = info->stream;
   bfd_boolean have_second;
+  bfd_boolean extend_only;
   unsigned int second;
   unsigned int first;
   unsigned int full;
@@ -2076,6 +2092,8 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
       (*info->memory_error_func) (status, memaddr, info);
       return -1;
     }
+
+  extend_only = FALSE;
 
   if (info->endian == BFD_ENDIAN_BIG)
     first = bfd_getb16 (buffer);
@@ -2128,9 +2146,17 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	}
       else if ((first & 0xf800) == 0xf000
 	       && have_second
-	       && !(op->pinfo2 & INSN2_SHORT_ONLY)
+	       && !extend_only
 	       && (second & op->mask) == op->match)
-	match = MATCH_FULL;
+	{
+	  if (op->pinfo2 & INSN2_SHORT_ONLY)
+	    {
+	      match = MATCH_NONE;
+	      extend_only = TRUE;
+	    }
+	  else
+	    match = MATCH_FULL;
+	}
       else
 	match = MATCH_NONE;
 
@@ -2161,19 +2187,49 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 		  ++s;
 		  continue;
 		}
-	      switch (match)
+	      if (s[0] == 'N'
+		  && s[1] == ','
+		  && s[2] == 'O'
+		  && op->name[strlen (op->name) - 1] == '0')
 		{
-		  case MATCH_FULL:
-		    print_mips16_insn_arg (info, &state, op, *s, memaddr + 2,
-					   second, TRUE, first, s[1] == '(');
-		    break;
-		  case MATCH_SHORT:
-		    print_mips16_insn_arg (info, &state, op, *s, memaddr,
-					   first, FALSE, 0, s[1] == '(');
-		    break;
-		  case MATCH_NONE:	/* Stop the compiler complaining.  */
-		    break;
+		  /* Coprocessor register 0 with sel field.  */
+		  const struct mips_cp0sel_name *n;
+		  const struct mips_operand *operand;
+		  unsigned int reg, sel;
+
+		  operand = decode_mips16_operand (*s, TRUE);
+		  reg = mips_extract_operand (operand, (first << 16) | second);
+		  s += 2;
+		  operand = decode_mips16_operand (*s, TRUE);
+		  sel = mips_extract_operand (operand, (first << 16) | second);
+
+		  /* CP0 register including 'sel' code for mftc0, to be
+		     printed textually if known.  If not known, print both
+		     CP0 register name and sel numerically since CP0 register
+		     with sel 0 may have a name unrelated to register being
+		     printed.  */
+		  n = lookup_mips_cp0sel_name (mips_cp0sel_names,
+					       mips_cp0sel_names_len,
+					       reg, sel);
+		  if (n != NULL)
+		    infprintf (is, "%s", n->name);
+		  else
+		    infprintf (is, "$%d,%d", reg, sel);
 		}
+	      else
+		switch (match)
+		  {
+		    case MATCH_FULL:
+		      print_mips16_insn_arg (info, &state, op, *s, memaddr + 2,
+					     second, TRUE, first, s[1] == '(');
+		      break;
+		    case MATCH_SHORT:
+		      print_mips16_insn_arg (info, &state, op, *s, memaddr,
+					     first, FALSE, 0, s[1] == '(');
+		      break;
+		    case MATCH_NONE:	/* Stop the compiler complaining.  */
+		      break;
+		  }
 	    }
 
 	  /* Figure out branch instruction type and delay slot information.  */

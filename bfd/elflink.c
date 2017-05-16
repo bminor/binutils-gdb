@@ -4939,7 +4939,7 @@ error_free_dyn:
 	  struct elf_link_hash_entry *h;
 	  bfd_size_type size;
 	  unsigned int alignment_power;
-	  unsigned int dynamic_ref_after_ir_def;
+	  unsigned int non_ir_ref_dynamic;
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
@@ -4961,10 +4961,10 @@ error_free_dyn:
 		  size = 0;
 		  alignment_power = 0;
 		}
-	      /* Preserve dynamic_ref_after_ir_def so that this symbol
+	      /* Preserve non_ir_ref_dynamic so that this symbol
 		 will be exported when the dynamic lib becomes needed
 		 in the second pass.  */
-	      dynamic_ref_after_ir_def = h->root.dynamic_ref_after_ir_def;
+	      non_ir_ref_dynamic = h->root.non_ir_ref_dynamic;
 	      memcpy (p, old_ent, htab->root.table.entsize);
 	      old_ent = (char *) old_ent + htab->root.table.entsize;
 	      h = (struct elf_link_hash_entry *) p;
@@ -4981,7 +4981,7 @@ error_free_dyn:
 		  if (alignment_power > h->root.u.c.p->alignment_power)
 		    h->root.u.c.p->alignment_power = alignment_power;
 		}
-	      h->root.dynamic_ref_after_ir_def = dynamic_ref_after_ir_def;
+	      h->root.non_ir_ref_dynamic = non_ir_ref_dynamic;
 	    }
 	}
 
@@ -10472,7 +10472,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		     linker may attach linker created dynamic sections
 		     to the plugin bfd.  Symbols defined in linker
 		     created sections are not plugin symbols.  */
-		  if (h->root.non_ir_ref
+		  if ((h->root.non_ir_ref_regular
+		       || h->root.non_ir_ref_dynamic)
 		      && (h->root.type == bfd_link_hash_defined
 			  || h->root.type == bfd_link_hash_defweak)
 		      && (h->root.u.def.section->flags

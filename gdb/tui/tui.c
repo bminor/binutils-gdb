@@ -427,7 +427,7 @@ tui_enable (void)
       /* The MinGW port of ncurses requires $TERM to be unset in order
 	 to activate the Windows console driver.  */
       if (s == NULL)
-	s = newterm ("unknown", stdout, stdin);
+	s = newterm ((char *) "unknown", stdout, stdin);
 #endif
       if (s == NULL)
 	{

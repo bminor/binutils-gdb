@@ -1,3 +1,57 @@
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* mips-dis.c (mips_arch_choices): Add ASE_MIPS16E2 and
+	ASE_MIPS16E2_MT flags to the unnamed MIPS16 entry.
+	(mips_convert_abiflags_ases): Handle the AFL_ASE_MIPS16E2 flag.
+	(print_insn_arg) <OP_REG28>: Add handler.
+	(validate_insn_args) <OP_REG28>: Handle.
+	(print_mips16_insn_arg): Handle MIPS16 instructions that require
+	32-bit encoding and 9-bit immediates.
+	(print_insn_mips16): Handle MIPS16 instructions that require
+	32-bit encoding and MFC0/MTC0 operand decoding.
+	* mips16-opc.c (decode_mips16_operand) <'>', '9', 'G', 'N', 'O'>
+	<'Q', 'T', 'b', 'c', 'd', 'r', 'u'>: Add handlers.
+	(RD_C0, WR_C0, E2, E2MT): New macros.
+	(mips16_opcodes): Add entries for MIPS16e2 instructions:
+	GP-relative "addiu" and its "addu" spelling, "andi", "cache",
+	"di", "ehb", "ei", "ext", "ins", GP-relative "lb", "lbu", "lh",
+	"lhu", and "lw" instructions, "ll", "lui", "lwl", "lwr", "mfc0",
+	"movn", "movtn", "movtz", "movz", "mtc0", "ori", "pause",
+	"pref", "rdhwr", "sc", GP-relative "sb", "sh" and "sw"
+	instructions, "swl", "swr", "sync" and its "sync_acquire",
+	"sync_mb", "sync_release", "sync_rmb" and "sync_wmb" aliases,
+	"xori", "dmt", "dvpe", "emt" and "evpe".  Add split
+	regular/extended entries for original MIPS16 ISA revision
+	instructions whose extended forms are subdecoded in the MIPS16e2
+	ISA revision: "li", "sll" and "srl".
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (print_insn_args) <default>: Remove an MT ASE
+	reference in CP0 move operand decoding.
+
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips16-opc.c (decode_mips16_operand) <'6'>: Switch the operand
+	type to hexadecimal.
+	(mips16_opcodes): Add operandless "break" and "sdbbp" entries.
+
+2017-05-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Mark "synciobdma", "syncs",
+	"syncw", "syncws", "sync_acquire", "sync_mb", "sync_release",
+	"sync_rmb" and "sync_wmb" as aliases.
+	* micromips-opc.c (micromips_opcodes): Mark "sync_acquire",
+	"sync_mb", "sync_release", "sync_rmb" and "sync_wmb" as aliases.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-dis.c (parse_option): Update quarkse_em option..
+	* arc-ext-tbl.h (dsp_fp_flt2i, dsp_fp_i2flt): Change subclass to
+	QUARKSE1.
+	(dsp_fp_div, dsp_fp_cmp): Change subclass to QUARKSE2.
+
 2017-05-03  Kito Cheng  <kito.cheng@gmail.com>
 
 	* riscv-dis.c (print_insn_args): Handle 'Co' operands.

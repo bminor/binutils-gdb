@@ -329,6 +329,7 @@ run_dump_test "pr19807-2e"
 run_dump_test "pr19969"
 run_dump_test "pr20093-1"
 run_dump_test "pr20093-2"
+run_dump_test "property-x86-3"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
@@ -1315,6 +1316,24 @@ if { [isnative] && [which $CC] != 0 } {
 		{ pr20800a.S pr20800b.S } \
 		"pr20800" \
 		"pass.out" \
+	    ] \
+	    [list \
+		"Run pr21481a" \
+		"$NOPIE_LDFLAGS -Wl,-z,bndplt" \
+		"" \
+		{ pr21481a.c pr21481b.S } \
+		"pr21481a" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	    [list \
+		"Run pr21481b" \
+		"$NOPIE_LDFLAGS -Wl,-z,bndplt,-z,now" \
+		"" \
+		{ pr21481a.c pr21481b.S } \
+		"pr21481b" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
 	    ] \
 	]
     }

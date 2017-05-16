@@ -7075,6 +7075,8 @@ long bfd_canonicalize_reloc
 void bfd_set_reloc
    (bfd *abfd, asection *sec, arelent **rel, unsigned int count);
 
+#define bfd_set_reloc(abfd, asect, location, count) \
+     BFD_SEND (abfd, _bfd_set_reloc, (abfd, asect, location, count))
 bfd_boolean bfd_set_file_flags (bfd *abfd, flagword flags);
 
 int bfd_get_arch_size (bfd *abfd);
@@ -7542,12 +7544,15 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_RELOCS(NAME) \
   NAME##_get_reloc_upper_bound, \
   NAME##_canonicalize_reloc, \
+  NAME##_set_reloc, \
   NAME##_bfd_reloc_type_lookup, \
   NAME##_bfd_reloc_name_lookup
 
   long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
   long        (*_bfd_canonicalize_reloc)
     (bfd *, sec_ptr, arelent **, struct bfd_symbol **);
+  void        (*_bfd_set_reloc)
+    (bfd *, sec_ptr, arelent **, unsigned int);
   /* See documentation on reloc types.  */
   reloc_howto_type *
               (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);

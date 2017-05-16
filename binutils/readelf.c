@@ -2508,6 +2508,9 @@ decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
     case E_ARC_OSABI_V3:
       strcat (buf, ", v3 no-legacy-syscalls ABI");
       break;
+    case E_ARC_OSABI_V4:
+      strcat (buf, ", v4 ABI");
+      break;
     default:
       strcat (buf, ", unrecognised ARC OSABI flag");
       break;
@@ -3898,6 +3901,18 @@ get_segment_type (unsigned long p_type)
 }
 
 static const char *
+get_arc_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_ARC_ATTRIBUTES:      return "ARC_ATTRIBUTES";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_mips_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
@@ -4106,6 +4121,11 @@ get_section_type_name (unsigned int sh_type)
 	{
 	  switch (elf_header.e_machine)
 	    {
+	    case EM_ARC:
+	    case EM_ARC_COMPACT:
+	    case EM_ARC_COMPACT2:
+	      result = get_arc_section_type_name (sh_type);
+	      break;
 	    case EM_MIPS:
 	    case EM_MIPS_RS3_LE:
 	      result = get_mips_section_type_name (sh_type);
@@ -13491,6 +13511,181 @@ display_tag_value (signed int tag,
   return p;
 }
 
+/* ARC ABI attributes section.  */
+
+static unsigned char *
+display_arc_attribute (unsigned char * p,
+		       const unsigned char * const end)
+{
+  unsigned int tag;
+  unsigned int len;
+  unsigned int val;
+
+  tag = read_uleb128 (p, &len, end);
+  p += len;
+
+  switch (tag)
+    {
+    case Tag_ARC_PCS_config:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_PCS_config: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("Absent/Non standard\n"));
+	  break;
+	case 1:
+	  printf (_("Bare metal/mwdt\n"));
+	  break;
+	case 2:
+	  printf (_("Bare metal/newlib\n"));
+	  break;
+	case 3:
+	  printf (_("Linux/uclibc\n"));
+	  break;
+	case 4:
+	  printf (_("Linux/glibc\n"));
+	  break;
+	default:
+	  printf (_("Unknown\n"));
+	  break;
+	}
+      break;
+
+    case Tag_ARC_CPU_base:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_CPU_base: ");
+      switch (val)
+	{
+	default:
+	case TAG_CPU_NONE:
+	  printf (_("Absent\n"));
+	  break;
+	case TAG_CPU_ARC6xx:
+	  printf ("ARC6xx\n");
+	  break;
+	case TAG_CPU_ARC7xx:
+	  printf ("ARC7xx\n");
+	  break;
+	case TAG_CPU_ARCEM:
+	  printf ("ARCEM\n");
+	  break;
+	case TAG_CPU_ARCHS:
+	  printf ("ARCHS\n");
+	  break;
+	}
+      break;
+
+    case Tag_ARC_CPU_variation:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_CPU_variation: ");
+      switch (val)
+	{
+	default:
+	  if (val > 0 && val < 16)
+	      printf ("Core%d\n", val);
+	  else
+	      printf ("Unknown\n");
+	  break;
+
+	case 0:
+	  printf (_("Absent\n"));
+	  break;
+	}
+      break;
+
+    case Tag_ARC_CPU_name:
+      printf ("  Tag_ARC_CPU_name: ");
+      p = display_tag_value (-1, p, end);
+      break;
+
+    case Tag_ARC_ABI_rf16:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ABI_rf16: %s\n", val ? _("yes") : _("no"));
+      break;
+
+    case Tag_ARC_ABI_osver:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ABI_osver: v%d\n", val);
+      break;
+
+    case Tag_ARC_ABI_pic:
+    case Tag_ARC_ABI_sda:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf (tag == Tag_ARC_ABI_sda ? "  Tag_ARC_ABI_sda: "
+	      : "  Tag_ARC_ABI_pic: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("Absent\n"));
+	  break;
+	case 1:
+	  printf ("MWDT\n");
+	  break;
+	case 2:
+	  printf ("GNU\n");
+	  break;
+	default:
+	  printf (_("Unknown\n"));
+	  break;
+	}
+      break;
+
+    case Tag_ARC_ABI_tls:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ABI_tls: %s\n", val ? "r25": "none");
+      break;
+
+    case Tag_ARC_ABI_enumsize:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ABI_enumsize: %s\n", val ? _("default") :
+	      _("smallest"));
+      break;
+
+    case Tag_ARC_ABI_exceptions:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ABI_exceptions: %s\n", val ? _("OPTFP")
+	      : _("default"));
+      break;
+
+    case Tag_ARC_ABI_double_size:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ABI_double_size: %d\n", val);
+      break;
+
+    case Tag_ARC_ISA_config:
+      printf ("  Tag_ARC_ISA_config: ");
+      p = display_tag_value (-1, p, end);
+      break;
+
+    case Tag_ARC_ISA_apex:
+      printf ("  Tag_ARC_ISA_apex: ");
+      p = display_tag_value (-1, p, end);
+      break;
+
+    case Tag_ARC_ISA_mpy_option:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ISA_mpy_option: %d\n", val);
+      break;
+
+    default:
+      return display_tag_value (tag & 1, p, end);
+    }
+
+  return p;
+}
+
 /* ARM EABI attributes section.  */
 typedef struct
 {
@@ -14849,6 +15044,8 @@ print_mips_ases (unsigned int mask)
     fputs ("\n\tMICROMIPS ASE", stdout);
   if (mask & AFL_ASE_XPA)
     fputs ("\n\tXPA ASE", stdout);
+  if (mask & AFL_ASE_MIPS16E2)
+    fputs ("\n\tMIPS16e2 ASE", stdout);
   if (mask == 0)
     fprintf (stdout, "\n\t%s", _("None"));
   else if ((mask & ~AFL_ASE_MASK) != 0)
@@ -17573,6 +17770,12 @@ process_arch_specific (FILE * file)
 
   switch (elf_header.e_machine)
     {
+    case EM_ARC:
+    case EM_ARC_COMPACT:
+    case EM_ARC_COMPACT2:
+      return process_attributes (file, "ARC", SHT_ARC_ATTRIBUTES,
+				 display_arc_attribute,
+				 display_generic_attribute);
     case EM_ARM:
       return process_attributes (file, "aeabi", SHT_ARM_ATTRIBUTES,
 				 display_arm_attribute,

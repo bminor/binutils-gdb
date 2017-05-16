@@ -905,6 +905,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #ifndef MY_canonicalize_reloc
 #define MY_canonicalize_reloc NAME (aout, canonicalize_reloc)
 #endif
+#ifndef MY_set_reloc
+#define MY_set_reloc _bfd_generic_set_reloc
+#endif
 #ifndef MY_make_empty_symbol
 #define MY_make_empty_symbol NAME (aout, make_empty_symbol)
 #endif

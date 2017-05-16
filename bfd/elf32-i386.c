@@ -1971,7 +1971,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 
 	  if (h->type == STT_GNU_IFUNC)
 	    elf_tdata (info->output_bfd)->has_gnu_symbols
@@ -2657,25 +2657,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	   && (h->plt.refcount > eh->func_pointer_refcount
 	       || eh->plt_got.refcount > 0))
     {
-      bfd_boolean use_plt_got;
+      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
 
       /* Clear the reference count of function pointer relocations
 	 if PLT is used.  */
       eh->func_pointer_refcount = 0;
-
-      if (htab->plt_got != NULL
-	  && (info->flags & DF_BIND_NOW)
-	  && !h->pointer_equality_needed)
-	{
-	  /* Don't use the regular PLT for DF_BIND_NOW. */
-	  h->plt.offset = (bfd_vma) -1;
-
-	  /* Use the GOT PLT.  */
-	  h->got.refcount = 1;
-	  eh->plt_got.refcount = 1;
-	}
-
-      use_plt_got = eh->plt_got.refcount > 0;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -6376,7 +6362,8 @@ elf_i386_parse_gnu_properties (bfd *abfd, unsigned int type,
 	  return property_corrupt;
 	}
       prop = _bfd_elf_get_property (abfd, type, datasz);
-      prop->u.number = bfd_h_get_32 (abfd, ptr);
+      /* Combine properties of the same type.  */
+      prop->u.number |= bfd_h_get_32 (abfd, ptr);
       prop->pr_kind = property_number;
       break;
 

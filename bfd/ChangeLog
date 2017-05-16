@@ -1,3 +1,179 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* elf-m10300.c: Rename occurrences of non_ir_ref.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-moxie.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-or1k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* linker.c: Likewise.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (add_symbol_adjust): Transfer non_ir_ref_dynamic.
+	* elflink.c (elf_link_add_object_symbols): Update to use
+	non_ir_ref_dynamic.
+	(elf_link_input_bfd): Test non_ir_ref_dynamic in addition to
+	non_ir_ref.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (print_mips_ases): Handle MIPS16e2 ASE.
+
+2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_parse_gnu_properties): Merge
+	GNU_PROPERTY_X86_ISA_1_USED and GNU_PROPERTY_X86_ISA_1_NEEDED
+	properties.
+	* elf64-x86-64.c (elf_x86_64_parse_gnu_properties): Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Rename plt_bnd
+	to plt_second.
+	(elf_x86_64_link_hash_table): Rename plt_bnd/plt_bnd_eh_frame
+	to plt_second/plt_second_eh_frame.
+	(elf_x86_64_link_hash_newfunc): Updated.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Likewise.
+	(elf_x86_64_plt_type): Rename plt_bnd to plt_second.
+	(elf_x86_64_get_synthetic_symtab): Updated.  Also scan the
+	.plt.sec section.
+	(elf_backend_setup_gnu_properties): Updated.  Create the
+	.plt.sec section instead of the .plt.sec section.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Partially revert
+	commit 25070364b0ce33eed46aa5d78ebebbec6accec7e.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewse.
+
+2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf64-sparc.c (elf64_sparc_set_reloc): New function.
+	(bfd_elf64_set_reloc): Define.
+	(elf64_sparc_write_relocs): Use `canon_reloc_count'.
+
+2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* targets.c (BFD_JUMP_TABLE_RELOCS): Add NAME##_set_reloc.
+	(struct bfd_target): New field _bfd_set_reloc.
+	* bfd.c (bfd_set_reloc): Call backend _set_bfd.
+	* reloc.c (_bfd_generic_set_reloc): New function.
+	* coffcode.h (coff_set_reloc): Define to _bfd_generic_set_reloc.
+	* nlm-target.h (nlm_set_reloc): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_set_reloc): Likewise.
+	* aout-tic30.c (MY_set_reloc): Likewise.
+	* aout-target.h (MY_set_reloc): Likewise.
+	* elfxx-target.h (bfd_elfNN_set_reloc): Likewise.
+	* coff-alpha.c (_bfd_ecoff_set_reloc): Likewise.
+	* mach-o-target.c (bfd_mach_o_set_reloc): Likewise.
+	* vms-alpha.c (alpha_vms_set_reloc): Likewise.
+	* aout-adobe.c (aout_32_set_reloc): Likewise.
+	* bout.c (b_out_set_reloc): Likewise.
+	* coff-mips.c (_bfd_ecoff_set_reloc): Likewise.
+	* i386os9k.c (aout_32_set_reloc): Likewise.
+	* ieee.c (ieee_set_reloc): Likewise.
+	* oasys.c (oasys_set_reloc): Likewise.
+	* som.c (som_set_reloc): Likewise.
+	* versados.c (versados_set_reloc): Likewise.
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Add
+	_bfd_generic_set_reloc.
+	(rs6000_xcoff64_aix_vec): LIkewise.
+	* libbfd.c (_bfd_norelocs_set_reloc): New function.
+	* libbfd-in.h: Prototype for _bfd_norelocs_set_reloc.
+	* i386msdos.c (msdos_set_reloc): Define to
+	_bfd_norelocs_set_reloc.
+	* elfcode.h (elf_set_reloc): Define.
+	* bfd-in2.h: Regenerated.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Use .plt.bnd
+	for IFUNC function address.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf32-arc.c (FEATURE_LIST_NAME): Define.
+	(CONFLICT_LIST): Likewise.
+	(opcode/arc-attrs.h): Include.
+	(arc_elf_print_private_bfd_data): Print OSABI v4 flag.
+	(arc_extract_features): New file.
+	(arc_stralloc): Likewise.
+	(arc_elf_merge_attributes): Likewise.
+	(arc_elf_merge_private_bfd_data): Use object attributes.
+	(bfd_arc_get_mach_from_attributes): New function.
+	(arc_elf_object_p): Use object attributes.
+	(arc_elf_final_write_processing): Likewise.
+	(elf32_arc_obj_attrs_arg_type): New function.
+	(elf32_arc_obj_attrs_handle_unknown): Likewise.
+	(elf32_arc_section_from_shdr): Likewise.
+	(elf_backend_obj_attrs_vendor): Define.
+	(elf_backend_obj_attrs_section): Likewise.
+	(elf_backend_obj_attrs_arg_type): Likewise.
+	(elf_backend_obj_attrs_section_type): Likewise.
+	(elf_backend_obj_attrs_handle_unknown): Likewise.
+	(elf_backend_section_from_shdr): Likewise.
+
+2017-05-09  Andrew Goedhart  <Andrewgoedhart@simplepowersolutions.co.za>
+
+	PR ld/21458
+	* elf32-arm.c (elf32_arm_final_link_relocate): Set the bottom bit
+	of the value when resolving a R_ARM_THM_ALU_PREL_11_0 relocation
+	and the destination is a Thumb symbol.
+
 2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_get_synthetic_symtab): Add missing

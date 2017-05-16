@@ -5118,7 +5118,8 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 
       /* Propagate reference flags from entry symbol to function
 	 descriptor symbol.  */
-      fdh->elf.root.non_ir_ref |= eh->elf.root.non_ir_ref;
+      fdh->elf.root.non_ir_ref_regular |= eh->elf.root.non_ir_ref_regular;
+      fdh->elf.root.non_ir_ref_dynamic |= eh->elf.root.non_ir_ref_dynamic;
       fdh->elf.ref_regular |= eh->elf.ref_regular;
       fdh->elf.ref_regular_nonweak |= eh->elf.ref_regular_nonweak;
 
@@ -5422,9 +5423,9 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 	  if (eh->is_func && eh->oh != NULL)
-	    eh->oh->elf.root.non_ir_ref = 1;
+	    eh->oh->elf.root.non_ir_ref_regular = 1;
 
 	  if (h == htab->elf.hgot)
 	    sec->has_toc_reloc = 1;

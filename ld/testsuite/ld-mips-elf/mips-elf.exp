@@ -156,13 +156,23 @@ if $has_newabi {
 
 run_dump_test "mips16-pcrel-0" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-pcrel-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16e2-pcrel-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16e2-pcrel-1" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-pcrel-addend-2" [list [list ld $abi_ldflags(o32)]]
 run_dump_test "mips16-pcrel-addend-6" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16e2-pcrel-addend-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "mips16e2-pcrel-addend-6" [list [list ld $abi_ldflags(o32)]]
 if $has_newabi {
     run_dump_test "mips16-pcrel-n32-0" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "mips16-pcrel-n32-1" [list [list ld $abi_ldflags(n32)]]
     run_dump_test "mips16-pcrel-n64-sym32-0" [list [list ld $abi_ldflags(n64)]]
     run_dump_test "mips16-pcrel-n64-sym32-1" [list [list ld $abi_ldflags(n64)]]
+    run_dump_test "mips16e2-pcrel-n32-0" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "mips16e2-pcrel-n32-1" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "mips16e2-pcrel-n64-sym32-0" \
+					[list [list ld $abi_ldflags(n64)]]
+    run_dump_test "mips16e2-pcrel-n64-sym32-1" \
+					[list [list ld $abi_ldflags(n64)]]
 }
 
 run_dump_test "mips16-branch-2" [list [list ld $abi_ldflags(o32)]]

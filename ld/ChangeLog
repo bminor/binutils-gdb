@@ -1,3 +1,127 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c: Rename occurrences of non_ir_ref.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (is_visible_from_outside): Use non_ir_ref_dynamic.
+	(plugin_notice): Set non_ir_ref for references from regular
+	objects, non_ir_ref_dynamic for references from dynamic objects.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16e2-pcrel-0.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-1.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-addend-2.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-addend-6.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n32-1.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n64-sym32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n64-sym32-1.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21459
+	* scripttempl/pe.sc: Add .debug_gdb_scripts section.
+	* scripttempl/pep.sc: Likewise.
+
+2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-3.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-3.d: New file.
+	* testsuite/ld-i386/property-x86-3.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.s: Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_x86_64.sh (TINY_READONLY_SECTION): Replace
+	.plt.bnd with .plt.sec.
+	* testsuite/ld-x86-64/bnd-ifunc-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/mpx3.dd: Likewise.
+	* testsuite/ld-x86-64/mpx3n.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4n.dd: Likewise.
+	* testsuite/ld-x86-64/plt-main-bnd-now.rd: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c.d: Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/plt-pic2.dd: Updated.
+	* testsuite/ld-i386/plt2.dd: Likewise.
+	* testsuite/ld-i386/plt2.rd: Likewise.
+	* testsuite/ld-i386/pr17689now.rd: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-x86-64-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-x86-64-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-branch-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/plt2.dd: Likewise.
+	* testsuite/ld-x86-64/plt2.rd: Likewise.
+	* testsuite/ld-x86-64/pr17689now.rd: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/i386lynx.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Set
+	to yes.
+	* emulparams/i386moss.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nw.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Likewise.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* testsuite/ld-x86-64/pr21481a.c: New file.
+	* testsuite/ld-x86-64/pr21481b.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/21481 tests.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/attr-merge-0.d: New file.
+	* testsuite/ld-arc/attr-merge-0.s: Likewise.
+	* testsuite/ld-arc/attr-merge-0e.s: Likewise.
+	* testsuite/ld-arc/attr-merge-1.d: Likewise.
+	* testsuite/ld-arc/attr-merge-1.s: Likewise.
+	* testsuite/ld-arc/attr-merge-1e.s: Likewise.
+	* testsuite/ld-arc/attr-merge-2.d: Likewise.
+	* testsuite/ld-arc/attr-merge-2.s: Likewise.
+	* testsuite/ld-arc/attr-merge-3.d: Likewise.
+	* testsuite/ld-arc/attr-merge-3.s: Likewise.
+	* testsuite/ld-arc/attr-merge-3e.s: Likewise.
+	* testsuite/ld-arc/attr-merge-4.s: Likewise.
+	* testsuite/ld-arc/attr-merge-5.d: Likewise.
+	* testsuite/ld-arc/attr-merge-5a.s: Likewise.
+	* testsuite/ld-arc/attr-merge-5b.s: Likewise.
+	* testsuite/ld-arc/attr-merge-conflict-isa.d: Likewise.
+	* testsuite/ld-arc/attr-merge-err-isa.d: Likewise.
+	* testsuite/ld-arc/attr-merge-incompatible-cpu.d: Likewise.
+	* testsuite/ld-arc/got-01.d: Update test.
+	* testsuite/ld-arc/attr-merge-err-quarkse.d: New file.
+	* testsuite/ld-arc/attr-quarkse.s: Likewise.
+	* testsuite/ld-arc/attr-quarkse2.s: Likewise.
+
+2017-05-09  Awson  <kyrab@mail.ru>
+
+	PR ld/21471
+	* pe-dll.c (pe_detail_list): Add entry for pe-bigobj-x86-64.
+
+2017-05-09  Benjamin Peterson  <bp@benjamin.pe>
+
+	* ld.texinfo (orphan sections): Grammar fix.
+
 2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-ifunc/ifunc-16-x86-64-now.d: New file.

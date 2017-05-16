@@ -8393,7 +8393,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      /* PR15323, ref flags aren't set for references in the
 		 same object.  */
-	      h->root.non_ir_ref = 1;
+	      h->root.non_ir_ref_regular = 1;
 	    }
 	}
 
@@ -15648,6 +15648,8 @@ print_mips_ases (FILE *file, unsigned int mask)
     fputs ("\n\tMICROMIPS ASE", file);
   if (mask & AFL_ASE_XPA)
     fputs ("\n\tXPA ASE", file);
+  if (mask & AFL_ASE_MIPS16E2)
+    fputs ("\n\tMIPS16e2 ASE", file);
   if (mask == 0)
     fprintf (file, "\n\t%s", _("None"));
   else if ((mask & ~AFL_ASE_MASK) != 0)

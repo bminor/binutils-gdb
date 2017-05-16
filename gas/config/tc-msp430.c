@@ -3950,7 +3950,7 @@ md_pcrel_from_section (fixS * fixp, segT sec)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
-/* Replaces standard TC_FORCE_RELOCATION_LOCAL.
+/* Addition to the standard TC_FORCE_RELOCATION_LOCAL.
    Now it handles the situation when relocations
    have to be passed to linker.  */
 int
@@ -3964,8 +3964,7 @@ msp430_force_relocation_local (fixS *fixp)
         && !msp430_enable_relax)
     return 1;
 
-  return (!fixp->fx_pcrel
-	  || generic_force_reloc (fixp));
+  return 0;
 }
 
 

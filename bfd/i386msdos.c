@@ -176,6 +176,7 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
 
 #define msdos_canonicalize_reloc _bfd_norelocs_canonicalize_reloc
+#define msdos_set_reloc _bfd_norelocs_set_reloc
 #define msdos_get_reloc_upper_bound _bfd_norelocs_get_reloc_upper_bound
 #define msdos_32_bfd_link_split_section  _bfd_generic_link_split_section
 

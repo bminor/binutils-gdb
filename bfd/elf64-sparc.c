@@ -278,6 +278,18 @@ elf64_sparc_canonicalize_dynamic_reloc (bfd *abfd, arelent **storage,
   return ret;
 }
 
+/* Install a new set of internal relocs.  */
+
+static void
+elf64_sparc_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+                       asection *asect,
+                       arelent **location,
+                       unsigned int count)
+{
+  asect->orelocation = location;
+  canon_reloc_count (asect) = count;
+}
+
 /* Write out the relocs.  */
 
 static void
@@ -302,14 +314,14 @@ elf64_sparc_write_relocs (bfd *abfd, asection *sec, void * data)
      reloc_count field to zero to inhibit writing them here.  Also,
      sometimes the SEC_RELOC flag gets set even when there aren't any
      relocs.  */
-  if (sec->reloc_count == 0)
+  if (canon_reloc_count (sec) == 0)
     return;
 
   /* We can combine two relocs that refer to the same address
      into R_SPARC_OLO10 if first one is R_SPARC_LO10 and the
      latter is R_SPARC_13 with no associated symbol.  */
   count = 0;
-  for (idx = 0; idx < sec->reloc_count; idx++)
+  for (idx = 0; idx < canon_reloc_count (sec); idx++)
     {
       bfd_vma addr;
 
@@ -317,7 +329,7 @@ elf64_sparc_write_relocs (bfd *abfd, asection *sec, void * data)
 
       addr = sec->orelocation[idx]->address;
       if (sec->orelocation[idx]->howto->type == R_SPARC_LO10
-	  && idx < sec->reloc_count - 1)
+	  && idx < canon_reloc_count (sec) - 1)
 	{
 	  arelent *r = sec->orelocation[idx + 1];
 
@@ -354,7 +366,7 @@ elf64_sparc_write_relocs (bfd *abfd, asection *sec, void * data)
   outbound_relocas = (Elf64_External_Rela *) rela_hdr->contents;
   src_rela = outbound_relocas;
 
-  for (idx = 0; idx < sec->reloc_count; idx++)
+  for (idx = 0; idx < canon_reloc_count (sec); idx++)
     {
       Elf_Internal_Rela dst_rela;
       arelent *ptr;
@@ -388,7 +400,7 @@ elf64_sparc_write_relocs (bfd *abfd, asection *sec, void * data)
 	}
 
       if (ptr->howto->type == R_SPARC_LO10
-	  && idx < sec->reloc_count - 1)
+	  && idx < canon_reloc_count (sec) - 1)
 	{
 	  arelent *r = sec->orelocation[idx + 1];
 
@@ -854,6 +866,8 @@ const struct elf_size_info elf64_sparc_size_info =
   elf64_sparc_canonicalize_reloc
 #define bfd_elf64_canonicalize_dynamic_reloc \
   elf64_sparc_canonicalize_dynamic_reloc
+#define bfd_elf64_set_reloc \
+  elf64_sparc_set_reloc
 #define elf_backend_add_symbol_hook \
   elf64_sparc_add_symbol_hook
 #define elf_backend_get_symbol_type \

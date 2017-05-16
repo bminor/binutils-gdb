@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 PC-relative operations 1
-#as: -32 -mips3
+#as: -32
 
 .*: +file format .*mips.*
 

@@ -1,3 +1,45 @@
+2017-05-15  Jeff Law  <law@redhat.com>
+
+	* readelf.c (display_arc_attribute): Avoid implicit fallthru.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-undecoded.d: Add `-mips3'
+	to `as' flags.
+	* testsuite/binutils-all/mips/mips16e2-undecoded.d: New test.
+	* testsuite/binutils-all/mips/mips16e2-extend-insn.d: New test.
+	* testsuite/binutils-all/mips/mips16-undecoded.s: Remove
+	`.module mips3'.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (print_mips_ases): Handle MIPS16e2 ASE.
+	* NEWS: Mention MIPS16e2 ASE support.
+
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-extend-insn.d: Adjust BREAK
+	and SDBBP disassembly.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips.exp: Define `tempfile' and
+	`copyfile' variables.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* readelf.c (decode_ARC_machine_flags): Recognize OSABI v4.
+	(get_arc_section_type_name): New function.
+	(get_section_type_name): Use the above function.
+	(display_arc_attribute): New function.
+	(process_arc_specific): Likewise.
+	(process_arch_specific): Handle ARC specific information.
+
+2017-05-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* MAINTAINERS (SH): Remove myself as SH maintainer.
+
 2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (merge_gnu_build_notes): Cast relcount to unsigned

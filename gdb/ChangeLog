@@ -1,3 +1,45 @@
+2017-05-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (procfs_create_inferior): Change prototype to match
+	definition.
+
+2017-05-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui.c (tui_enable): Cast "unknown" to 'char *' to avoid a
+	C++ compiler warning.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21483:
+	* rust-lang.c (rust_evaluate_subexp) <STRUCTOP_STRUCT>: Don't
+	recurse, just call value_struct_elt directly.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_dump_subexp_body) <STRUCTOP_ANONYMOUS,
+	OP_RUST_ARRAY>: Fix.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_print_subexp): Replace "return" with "break".
+
+2017-05-09  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c: Include <forward_list>.
+	(struct regcache_list): Remove.
+	(current_regcache): Update.
+	(get_thread_arch_aspace_regcache): Update for std::forward_list.
+	(regcache_thread_ptid_changed): Likewise.
+	(registers_changed_ptid): Likewise.
+	(current_regcache_size): Likewise.
+
+2017-05-09  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c [GDB_SELF_TEST]: Include selftest.h.
+	(current_regcache_size): New function.
+	(current_regcache_test): New function.
+	(_initialize_regcache) [GDB_SELF_TEST]: Register the unit test.
+
 2017-05-08  Alan Hayward  <alan.hayward@arm.com>
 
 	* mips-tdep.c (mips_o32_return_value): Remove unused buffer.

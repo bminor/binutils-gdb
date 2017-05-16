@@ -18,35 +18,35 @@ Disassembly of section .plt:
 
 0+1e0 <\*ABS\*@plt>:
  +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
- +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
+ +[a-f0-9]+:	68 18 00 00 00       	push   \$0x18
  +[a-f0-9]+:	e9 e0 ff ff ff       	jmp    1d0 <.plt>
 
-0+1f0 <\*ABS\*@plt>:
+0+1f0 <func1@plt>:
  +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
  +[a-f0-9]+:	e9 d0 ff ff ff       	jmp    1d0 <.plt>
 
-Disassembly of section .plt.got:
+0+200 <func2@plt>:
+ +[a-f0-9]+:	ff a3 14 00 00 00    	jmp    \*0x14\(%ebx\)
+ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
+ +[a-f0-9]+:	e9 c0 ff ff ff       	jmp    1d0 <.plt>
 
-0+200 <func1@plt>:
- +[a-f0-9]+:	ff a3 f8 ff ff ff    	jmp    \*-0x8\(%ebx\)
- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
-
-0+208 <func2@plt>:
- +[a-f0-9]+:	ff a3 fc ff ff ff    	jmp    \*-0x4\(%ebx\)
- +[a-f0-9]+:	66 90                	xchg   %ax,%ax
+0+210 <\*ABS\*@plt>:
+ +[a-f0-9]+:	ff a3 18 00 00 00    	jmp    \*0x18\(%ebx\)
+ +[a-f0-9]+:	68 10 00 00 00       	push   \$0x10
+ +[a-f0-9]+:	e9 b0 ff ff ff       	jmp    1d0 <.plt>
 
 Disassembly of section .text:
 
-0+210 <resolve1>:
- +[a-f0-9]+:	e8 eb ff ff ff       	call   200 <func1@plt>
+0+220 <resolve1>:
+ +[a-f0-9]+:	e8 cb ff ff ff       	call   1f0 <func1@plt>
 
-0+215 <g1>:
- +[a-f0-9]+:	e9 d6 ff ff ff       	jmp    1f0 <\*ABS\*@plt>
+0+225 <g1>:
+ +[a-f0-9]+:	e9 e6 ff ff ff       	jmp    210 <\*ABS\*@plt>
 
-0+21a <resolve2>:
- +[a-f0-9]+:	e8 e9 ff ff ff       	call   208 <func2@plt>
+0+22a <resolve2>:
+ +[a-f0-9]+:	e8 d1 ff ff ff       	call   200 <func2@plt>
 
-0+21f <g2>:
- +[a-f0-9]+:	e9 bc ff ff ff       	jmp    1e0 <\*ABS\*@plt>
+0+22f <g2>:
+ +[a-f0-9]+:	e9 ac ff ff ff       	jmp    1e0 <\*ABS\*@plt>
 #pass

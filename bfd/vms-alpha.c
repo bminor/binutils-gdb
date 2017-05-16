@@ -5118,6 +5118,11 @@ alpha_vms_canonicalize_reloc (bfd *abfd, asection *section, arelent **relptr,
   *relptr = (arelent *) NULL;
   return section->reloc_count;
 }
+
+/* Install a new set of internal relocs.  */
+
+#define alpha_vms_set_reloc _bfd_generic_set_reloc
+
 
 /* This is just copied from ecoff-alpha, needs to be fixed probably.  */
 

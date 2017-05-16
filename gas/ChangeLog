@@ -1,3 +1,544 @@
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* write.c (GENERIC_FORCE_RELOCATION_LOCAL): Define.
+	(TC_FORCE_RELOCATION_LOCAL): Use it.
+	(GENERIC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Use it.
+	* config/tc-arm.h (TC_FORCE_RELOCATION_LOCAL,
+	TC_FORCE_RELOCATION_SUB_SAME): Use GENERIC defines.
+	* config/tc-aarch64.h: Similarly.
+	* config/tc-avr.h: Similarly.
+	* config/tc-cris.h: Similarly.
+	* config/tc-i386.h: Similarly.
+	* config/tc-i960.h: Similarly.
+	* config/tc-ia64.h: Similarly.
+	* config/tc-microblaze.h: Similarly.
+	* config/tc-mips.h: Similarly.
+	* config/tc-msp430.h: Similarly.
+	* config/tc-nds32.h: Similarly.
+	* config/tc-pru.h: Similarly.
+	* config/tc-riscv.h: Similarly.
+	* config/tc-rl78.h: Similarly.
+	* config/tc-s390.h: Similarly.
+	* config/tc-sh.h: Similarly.
+	* config/tc-sh64.h: Similarly.
+	* config/tc-sparc.h: Similarly.
+	* config/tc-xtensa.h: Similarly.
+	* config/tc-mn10300.h: Similarly.
+	(GENERIC_FORCE_RELOCATION_LOCAL): Define.
+	* config/tc-msp430.c (msp430_force_relocation_local): Modify to
+	be addition to rather than replacement of standard
+	TC_FORCE_RELOCATION_LOCAL.
+
+2017-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/21458
+	* config/tc-arm.c (do_adr): If the ADR involves a thumb function
+	symbol, ensure that the T bit will be set.
+	(do_adrl): Likewise.
+	(do_t_adr): Likewise.
+	* testsuite/gas/arm/pr21458.s: New test.
+	* testsuite/gas/arm/pr21458.d: New test driver.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16-pcrel-1.d: Remove `-mips3' from `as'
+	flags.
+	* testsuite/gas/mips/mips16-pcrel-pic-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n32-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n32-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-5.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-reloc-7.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-5.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-7.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-pic-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n32-8.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n32-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-sym32-8.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-sym32-9.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-8.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-addend-n64-9.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-2.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-3.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-7.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n32-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n32-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-4.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-6.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-sym32-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-n64-sym32-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n32-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n32-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-sym32-4.d:
+	Likewise.
+	* testsuite/gas/mips/mips16-pcrel-absolute-pic-n64-sym32-6.d:
+	Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-0.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-1.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-2.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n32-0.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n32-1.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n64-sym32-0.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n64-sym32-1.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-delay-0.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-delay-1.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-2.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-3.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-6.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-reloc-7.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-2.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-3.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-6.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-7.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-8.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-9.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n32-8.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n32-9.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n64-sym32-8.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-addend-n64-sym32-9.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-1.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-2.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-3.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-4.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-5.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-6.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-7.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-4.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-6.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n32-4.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n32-6.d: New
+	test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n64-sym32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-n64-sym32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n64-sym32-4.d:
+	New test.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-absolute-pic-n64-sym32-6.d:
+	New test.
+	* testsuite/gas/mips/mips16-pcrel-1.l: Adjust line numbers.
+	* testsuite/gas/mips/mips16-pcrel-1.s: Adjust for alignment
+	preservation between MIPS16 and MIPS16e2 code.
+	* testsuite/gas/mips/mips.exp: Run MIPS16 relaxation tests over
+	all MIPS16 architectures.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e2.d: New test.
+	* testsuite/gas/mips/mips16e2-mt.d: New test.
+	* testsuite/gas/mips/mips16e2-sub.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16e2-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-mt-sub.d: New test.
+	* testsuite/gas/mips/mips16e2@mips16e2-mt-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-hilo.d: New test.
+	* testsuite/gas/mips/mips16e2-hilo-n32.d: New test.
+	* testsuite/gas/mips/mips16e2-reloc-error.d: New test.
+	* testsuite/gas/mips/mips16e2-imm-error.d: New test.
+	* testsuite/gas/mips/elf_ase_mips16e2.d: New test.
+	* testsuite/gas/mips/elf_ase_mips16e2-2.d: New test.
+	* testsuite/gas/mips/elf-rel9-mips16e2.d: New test.
+	* testsuite/gas/mips/mips16e2-lui.d: New test.
+	* testsuite/gas/mips/mips16e2@mips32r2-sync.d: New test.
+	* testsuite/gas/mips/mips16e2@mips32r2-sync-1.d: New test.
+	* testsuite/gas/mips/mips16e2@lui-2.d: New test.
+	* testsuite/gas/mips/mips16e2-reloc-error.l: New stderr output.
+	* testsuite/gas/mips/mips16e2-imm-error.l: New stderr output.
+	* testsuite/gas/mips/mips16e2@lui-2.l: New stderr output.
+	* testsuite/gas/mips/mips16e2.s: New test source.
+	* testsuite/gas/mips/mips16e2-mt.s: New test source.
+	* testsuite/gas/mips/mips16e2-sub.s: New test source.
+	* testsuite/gas/mips/mips16e2-mt-sub.s: New test source.
+	* testsuite/gas/mips/mips16e2-hilo.s: New test source.
+	* testsuite/gas/mips/mips16e2-reloc-error.s: New test source.
+	* testsuite/gas/mips/mips16e2-imm-error.s: New test source.
+	* testsuite/gas/mips/elf-rel9-mips16e2.s: New test source.
+	* testsuite/gas/mips/mips16e2-lui.s: New test source.
+	* testsuite/gas/mips/mips.exp: Expand `mips32r2-sync',
+	`mips32r2-sync-1', `lui-1' and `lui-2' tests across MIPS16e2
+	architectures.  Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips.exp (run_dump_test_arch): Add
+	`mips16e2@' prefix.
+	(run_list_test_arch): Likewise.
+	(mips16e2-32, mips16e2-64): New architectures.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-t.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-e.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-t.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-e.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16e-64.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-32@mips16e-64-sub.d: New test.
+	* testsuite/gas/mips/mips16e2@relax-swap3.d: New test.
+	* testsuite/gas/mips/mips16-32@mips16-asmacro.d: Remove `source'
+	tag.  Add `-I$srcdir/$subdir' to `as' flags.
+	* testsuite/gas/mips/mips16-64@mips16-asmacro.d: Likewise.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-macro-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-t.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16e2-32@mips16-insn-e.l: New stderr
+	output.
+	* testsuite/gas/mips/mips16-sub.s: Add `.set nomips16e2'.
+	* testsuite/gas/mips/mips16e-sub.s: Likewise.
+	* testsuite/gas/mips/mips16e-64-sub.s: Likewise.
+	* testsuite/gas/mips/mips16-asmacro.s: Remove `.set mips32'.
+	* testsuite/gas/mips/mips16-32@mips16-asmacro.s: New test
+	source.
+	* testsuite/gas/mips/mips16-64@mips16-asmacro.s: New test
+	source.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add `e2' flag.
+	(RELAX_MIPS16_E2): New macro.
+	(RELAX_MIPS16_PIC, RELAX_MIPS16_SYM32, RELAX_MIPS16_NOMACRO)
+	(RELAX_MIPS16_USER_SMALL, RELAX_MIPS16_USER_EXT)
+	(RELAX_MIPS16_DSLOT, RELAX_MIPS16_JAL_DSLOT)
+	(RELAX_MIPS16_EXTENDED, RELAX_MIPS16_MARK_EXTENDED)
+	(RELAX_MIPS16_CLEAR_EXTENDED, RELAX_MIPS16_ALWAYS_EXTENDED)
+	(RELAX_MIPS16_MARK_ALWAYS_EXTENDED)
+	(RELAX_MIPS16_CLEAR_ALWAYS_EXTENDED, RELAX_MIPS16_MACRO)
+	(RELAX_MIPS16_MARK_MACRO, RELAX_MIPS16_CLEAR_MACRO): Shift bits.
+	(mips16_immed_extend): New prototype.
+	(options): Add OPTION_MIPS16E2 and OPTION_NO_MIPS16E2 enum
+	values.
+	(md_longopts): Add "mmips16e2" and "mno-mips16e2" options.
+	(mips_ases): Add "mips16e2" entry.
+	(mips_set_ase): Handle MIPS16e2 ASE.
+	(insn_insert_operand): Explicitly handle immediates with MIPS16
+	instructions that require 32-bit encoding.
+	(is_opcode_valid_16): Pass enabled ASE bitmask on to
+	`opcode_is_member'.
+	(validate_mips_insn): Explicitly handle immediates with MIPS16
+	instructions that require 32-bit encoding.
+	(operand_reg_mask) <OP_REG28>: Add handler.
+	(match_reg28_operand): New function.
+	(match_operand) <OP_REG28>: Add handler.
+	(append_insn): Pass ASE_MIPS16E2 setting to RELAX_MIPS16_ENCODE.
+	(match_mips16_insn): Handle MIPS16 instructions that require
+	32-bit encoding and `V' and `u' operand codes.
+	(mips16_ip): Allow any characters except from `.' in opcodes.
+	(mips16_immed_extend): Handle 9-bit immediates.  Do not shuffle
+	immediates whose width is not one of these listed.
+	(md_estimate_size_before_relax): Handle MIPS16e2 relaxation.
+	(mips_relax_frag): Likewise.
+	(md_convert_frag): Likewise.
+	(mips_convert_ase_flags): Handle MIPS16e2 ASE.
+
+	* doc/as.texinfo (Target MIPS options): Add `-mmips16e2' and
+	`-mno-mips16e2' options.
+	(-mmips16e2, -mno-mips16e2): New options.
+	* doc/c-mips.texi (MIPS Options): Add `-mmips16e2' and
+	`-mno-mips16e2' options.
+	(MIPS ASE Instruction Generation Overrides): Add `.set mips16e2'
+	and `.set nomips16e2'.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_int_operand): Call
+	`match_out_of_range' before returning failure for 0x8000-0xffff
+	values conditionally allowed.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_int_operand): Call
+	`match_not_constant' before returning failure for a non-constant
+	16-bit immediate conditionally allowed.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_const_int): Call `match_out_of_range'
+	rather than `match_not_constant' for unrelocated operands
+	retrieved as an `O_big' expression.
+	(match_int_operand): Call `match_out_of_range' for relocatable
+	operands retrieved as an `O_big' expression.
+	(match_mips16_insn): Call `match_out_of_range' for relaxable
+	operands retrieved as an `O_big' expression.
+	* testsuite/gas/mips/addiu-error.d: New test.
+	* testsuite/gas/mips/mips16@addiu-error.d: New test.
+	* testsuite/gas/mips/micromips@addiu-error.d: New test.
+	* testsuite/gas/mips/break-error.d: New test.
+	* testsuite/gas/mips/lui-1.l: Adjust error message.
+	* testsuite/gas/mips/addiu-error.l: New stderr output.
+	* testsuite/gas/mips/mips16@addiu-error.l: New stderr output.
+	* testsuite/gas/mips/micromips@addiu-error.l: New stderr output.
+	* testsuite/gas/mips/break-error.l: New stderr output.
+	* testsuite/gas/mips/addiu-error.s: New test source.
+	* testsuite/gas/mips/break-error.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_mips16_insn): Remove the explicit
+	OT_INTEGER check before the `match_expression' call.
+	* testsuite/gas/mips/mips16-insn-e.l: Adjust messages.
+	* testsuite/gas/mips/mips16-32@mips16-insn-e.l: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16-insn-e.l: Likewise.
+	* testsuite/gas/mips/mips16e-32@mips16-insn-e.l: Likewise.
+	* testsuite/gas/mips/mips16-reg-error.d: New test.
+	* testsuite/gas/mips/mips16-reg-error.l: New stderr output.
+	* testsuite/gas/mips/mips16-reg-error.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_mips16_insn): Call
+	`match_not_constant' for a disallowed relocation operation.
+	* testsuite/gas/mips/mips16-reloc-error.d: New test.
+	* testsuite/gas/mips/mips16-reloc-error.l: New stderr output.
+	* testsuite/gas/mips/mips16-reloc-error.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/lui-1.d: New test.
+	* testsuite/gas/mips/lui-2.d: New test.
+	* gas/testsuite/gas/mips/mips.exp: Fold corresponding list tests
+	into the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_const_int): Update description.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* doc/as.texinfo (-mips16, -no-mips16): Refer to `.module
+	mips16' rather than `.set mips16'.
+	(-mmicromips, -mno-micromips): Refer to `.module micromips' and
+	`.module nomicromips' rather than `.set micromips' and `.set
+	nomicromips'.
+	(-msmartmips, -mno-smartmips): Refer to `.module smartmips'
+	rather than `.set smartmips'.
+	* doc/c-mips.texi (MIPS Options): Refer to `.module mips16',
+	`.module micromips', `.module nomicromips' and `.module
+	smartmips' rather than `.set mips16', `.set micromips', `.set
+	nomicromips' and `.set smartmips' respectively.
+
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (mips_percent_op): Add "%gprel".
+	(mips16_percent_op): Add "%gp_rel".
+	* testsuite/gas/mips/elf-rel8.s:: Add `%gprel' forms.
+	* testsuite/gas/mips/elf-rel8-mips16.s: Add `%gp_rel' forms.
+	* testsuite/gas/mips/elf-rel8.d: Adjust accordingly.
+	* testsuite/gas/mips/elf-rel8-mips16.d: Likewise.
+
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16.d: Adjust BREAK disassembly.
+	* testsuite/gas/mips/mips16-64@mips16.d: Likewise.
+	* testsuite/gas/mips/mips16-64.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16-64.d: Likewise.
+	* testsuite/gas/mips/mips16-macro.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16-macro.d: Likewise.
+	* testsuite/gas/mips/mips16-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-32@mips16-sub.d: Likewise.
+
+2017-05-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips32r2-sync-1.d: New test.
+	* testsuite/gas/mips/micromips@mips32r2-sync-1.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/isa-override-2.d: New test.
+	* testsuite/gas/mips/mips1@isa-override-2.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-2.d: New test.
+	* testsuite/gas/mips/r3900@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips2@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r2@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r3@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r5@isa-override-2.d: New test.
+	* testsuite/gas/mips/mips32r6@isa-override-2.d: New test.
+	* testsuite/gas/mips/octeon3@isa-override-2.d: New test.
+	* testsuite/gas/mips/r3000@isa-override-2.l: Remove list test.
+	* testsuite/gas/mips/mips1@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/r3000@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/r3900@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/mips2@isa-override-2.s: Remove test source.
+	* testsuite/gas/mips/mips32@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r2@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r3@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r5@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/mips32r6@isa-override-2.s: Remove test
+	source.
+	* testsuite/gas/mips/octeon3@isa-override-2.s: Remove test
+	source.
+	* gas/testsuite/gas/mips/mips.exp: Fold corresponding list tests
+	into the new tests.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e-sub.d: Correct test name.
+	* testsuite/gas/mips/mips16-32@mips16e-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16e-sub.d: Likewise.
+	* testsuite/gas/mips/mips16e-64-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-32@mips16e-64-sub.d: Likewise.
+	* testsuite/gas/mips/mips16-64@mips16e-64-sub.d: Likewise.
+	* testsuite/gas/mips/mips16e-32@mips16e-64-sub.d: Likewise.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16-macro.l: Remove list test.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/r3900@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@ld.d: Remove test.
+	* testsuite/gas/mips/r3900@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@ld-forward.d: Remove test.
+	* testsuite/gas/mips/mips1@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/r3000@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/r3900@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@sd.d: Remove test.
+	* testsuite/gas/mips/mips1@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/r3000@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/r3900@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/mips2@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/mips32@ecoff@sd-forward.d: Remove test.
+	* testsuite/gas/mips/mips32r2@ecoff@sd-forward.d: Remove test.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/attr-arc600.d: New file.
+	* testsuite/gas/arc/attr-arc600_mul32x16.d: Likewise.
+	* testsuite/gas/arc/attr-arc600_norm.d: Likewise.
+	* testsuite/gas/arc/attr-arc601.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_mul32x16.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_mul64.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_norm.d: Likewise.
+	* testsuite/gas/arc/attr-arc700.d: Likewise.
+	* testsuite/gas/arc/attr-arcem.d: Likewise.
+	* testsuite/gas/arc/attr-archs.d: Likewise.
+	* testsuite/gas/arc/attr-autodetect-1.d: Likewise.
+	* testsuite/gas/arc/attr-autodetect-1.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-a601.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-a601.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-a700.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-a700.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-em.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-em.s: Likewise.
+	* testsuite/gas/arc/attr-cpu-hs.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-hs.s: Likewise.
+	* testsuite/gas/arc/attr-em.d: Likewise.
+	* testsuite/gas/arc/attr-em4.d: Likewise.
+	* testsuite/gas/arc/attr-em4_dmips.d: Likewise.
+	* testsuite/gas/arc/attr-em4_fpuda.d: Likewise.
+	* testsuite/gas/arc/attr-em4_fpus.d: Likewise.
+	* testsuite/gas/arc/attr-hs.d: Likewise.
+	* testsuite/gas/arc/attr-hs34.d: Likewise.
+	* testsuite/gas/arc/attr-hs38.d: Likewise.
+	* testsuite/gas/arc/attr-hs38_linux.d: Likewise.
+	* testsuite/gas/arc/attr-mul64.d: Likewise.
+	* testsuite/gas/arc/attr-name.d: Likewise.
+	* testsuite/gas/arc/attr-name.s: Likewise.
+	* testsuite/gas/arc/attr-nps400.d: Likewise.
+	* testsuite/gas/arc/attr-override-mcpu.d: Likewise.
+	* testsuite/gas/arc/attr-override-mcpu.s
+	* testsuite/gas/arc/attr-quarkse_em.d: Likewise.
+	* testsuite/gas/arc/blank.s: Likewise.
+	* testsuite/gas/elf/section2.e-arc: Likewise.
+	* testsuite/gas/arc/cpu-pseudop-1.d: Update test.
+	* testsuite/gas/arc/cpu-pseudop-2.d: Likewise.
+	* testsuite/gas/arc/nps400-0.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Set target_machine for ARC.
+	* config/tc-arc.c (opcode/arc-attrs.h): Include.
+	(ARC_GET_FLAG, ARC_SET_FLAG, streq): Define.
+	(arc_attribute): Declare new function.
+	(md_pseudo_table): Add arc_attribute.
+	(cpu_types): Rename default cpu features.
+	(selected_cpu): Set the default OSABI flag.
+	(mpy_option): New variable.
+	(pic_option): Likewise.
+	(sda_option): Likewise.
+	(tls_option): Likewise.
+	(feature_type, feature_list): Remove.
+	(arc_initial_eflag): Likewise.
+	(attributes_set_explicitly): New variable.
+	(arc_check_feature): Check also for the conflicting features.
+	(arc_select_cpu): Refactor assignment of selected_cpu.eflags.
+	(arc_option): Remove setting of private flags and architecture.
+	(check_cpu_feature): Refactor feature names.
+	(autodetect_attributes): New function.
+	(assemble_tokens): Use above function.
+	(md_parse_option): Refactor feature names.
+	(arc_attribute): New function.
+	(arc_set_attribute_int): Likewise.
+	(arc_set_attribute_string): Likewise.
+	(arc_stralloc): Likewise.
+	(arc_set_public_attributes): Likewise.
+	(arc_md_end): Likewise.
+	(arc_copy_symbol_attributes): Likewise.
+	(rc_convert_symbolic_attribute): Likewise.
+	* config/tc-arc.h (md_end): Define.
+	(CONVERT_SYMBOLIC_ATTRIBUTE): Likewise.
+	(TC_COPY_SYMBOL_ATTRIBUTES): Likewise.
+	* doc/c-arc.texi: Document ARC object attributes.
+
 2017-05-03  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add `pic', `sym32' and

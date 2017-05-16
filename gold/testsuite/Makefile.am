@@ -3818,6 +3818,17 @@ aarch64_relocs.stdout: aarch64_relocs
 
 MOSTLYCLEANFILES += aarch64_relocs
 
+check_SCRIPTS += pr21430.sh
+check_DATA += pr21430.stdout
+pr21430.o: pr21430.s
+	$(TEST_AS) -o $@ $<
+pr21430: pr21430.o ../ld-new
+	../ld-new -o $@ $<
+pr21430.stdout: pr21430
+	$(TEST_NM) -S $< > $@
+
+MOSTLYCLEANFILES += pr21430
+
 endif DEFAULT_TARGET_AARCH64
 
 if DEFAULT_TARGET_S390
