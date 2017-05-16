@@ -1,3 +1,9 @@
+2017-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/21481 tests only
+	if IFUNC is supported by run-time.
+
 2017-05-16  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c: Rename occurrences of non_ir_ref.
