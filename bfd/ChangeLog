@@ -1,3 +1,12 @@
+2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_be_plt_entry,
+	elf_xtensa_le_plt_entry): Add dimension for the ABI to arrays,
+	keep both windowed and call0 ABI PLT definitions.
+	(elf_xtensa_create_plt_entry): Use selected ABI to choose upper
+	elf_xtensa_*_plt_entry endex.
+	(ELF_MAXPAGESIZE): Fix at minimal supported MMU page size.
+
 2017-06-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21578
