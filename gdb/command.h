@@ -141,6 +141,12 @@ extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
 					       enum command_class, int,
 					       struct cmd_list_element **);
 
+extern struct cmd_list_element *add_alias_cmd (const char *,
+					       cmd_list_element *,
+					       enum command_class, int,
+					       struct cmd_list_element **);
+
+
 extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class,
 						cmd_cfunc_ftype *fun,
 						const char *,
