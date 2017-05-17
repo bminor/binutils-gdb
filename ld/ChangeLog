@@ -1,3 +1,10 @@
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-03-13  Alexey Neyman  <stilor@att.net>
+	* emulparams/elf32ppccommon.sh (LIBPATH_SUFFIX): Set from target
+	cpu, not host.
+
 2017-04-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/21404
