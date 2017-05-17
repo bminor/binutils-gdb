@@ -916,7 +916,7 @@ NAT_GENERATED_FILES = @NAT_GENERATED_FILES@
 HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
 
 # Native-target dependent makefile fragment comes in here.
-@nat_extra_makefile_frag@
+@nat_makefile_frag@
 
 # End of native-target dependent variables.
 

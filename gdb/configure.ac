@@ -2200,7 +2200,7 @@ fi
 AC_SUBST(target_subdir)
 
 # Import nat definitions.
-nat_extra_makefile_frag=/dev/null
+nat_makefile_frag=/dev/null
 if test "${gdb_native}" = "yes"; then
   . ${srcdir}/configure.nat
   nativefile=$NAT_FILE
@@ -2214,7 +2214,7 @@ AC_SUBST(MH_CFLAGS)
 AC_SUBST(XM_CLIBS)
 AC_SUBST(NAT_GENERATED_FILES)
 AC_SUBST(HAVE_NATIVE_GCORE_HOST)
-AC_SUBST_FILE(nat_extra_makefile_frag)
+AC_SUBST_FILE(nat_makefile_frag)
 
 if test x"${gdb_osabi}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,
