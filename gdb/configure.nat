@@ -36,16 +36,17 @@
 # HAVE_NATIVE_GCORE_HOST - Whether gcore should be installed on this
 #                          native target.
 #
-# nat_extra_makefile_frag - File containing extra fragments of
-#                           Makefile that will be used by this native
-#                           target.
+# nat_makefile_frag - Name of the (optional) Makefile fragment file
+#                     required to build the native target.  The
+#                     fragment is incorporated into the Makefile that
+#                     configure constructs from Makefile.in.
 #
 # Notes:
 #
 # - To avoid shell expansion of variables, declare them with single
 #   quotes.
 #
-# - nat_extra_makefile_frag should contain the full path of the file.
+# - nat_makefile_frag must contain the full path of the file.
 
 
 # This first case is useful for filling default values for each
@@ -195,7 +196,7 @@ case ${gdb_host} in
 
 		XM_CLIBS='-lshouldbeinlibc'
 
-		nat_extra_makefile_frag="${srcdir}/config/${gdb_host_cpu}/i386gnu.mn"
+		nat_makefile_frag="${srcdir}/config/${gdb_host_cpu}/i386gnu.mn"
 		;;
 	esac
 	;;

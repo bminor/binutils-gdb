@@ -1,3 +1,13 @@
+2017-05-17  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/fileio.exp: Pass nowarnings to gdb_compile.
+
+2017-05-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/set-inferior-tty.exp (test_set_inferior_tty): Add
+	argument command.
+	(top-level): Invoke test_set_inferior_tty.
+
 2017-05-04  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-record-btrace-threads.exp (check_insn_for_thread):

@@ -806,7 +806,7 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL'
-ac_subst_files='nat_extra_makefile_frag'
+ac_subst_files='nat_makefile_frag'
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
@@ -16732,7 +16732,7 @@ fi
 
 
 # Import nat definitions.
-nat_extra_makefile_frag=/dev/null
+nat_makefile_frag=/dev/null
 if test "${gdb_native}" = "yes"; then
   . ${srcdir}/configure.nat
   nativefile=$NAT_FILE

@@ -976,7 +976,6 @@ b286 qsi S_RD "query sampling information" z10 zarch
 b2e0 scctr RRE_RR "set cpu counter" z10 zarch
 b2e1 spctr RRE_RR "set peripheral counter" z10 zarch
 b280 lpp S_RD "load program parameter" z10 zarch
-b928 pckmo RRE_00 "perform cryptographic key management operation" z10 zarch
 
 # The new instructions of the IBM zEnterprise z196
 b9c8 ahhhr RRF_R0RR2 "add high high" z196 zarch
@@ -1116,6 +1115,7 @@ b92a kmf RRE_RR "cipher message with CFB" z196 zarch
 b92b kmo RRE_RR "cipher message with OFB" z196 zarch
 b92c pcc RRE_00 "perform cryptographic computation" z196 zarch
 b92d kmctr RRF_R0RR "cipher message with counter" z196 zarch
+b928 pckmo RRE_00 "perform cryptographic key management operation" z196 zarch
 
 # The new instructions of the IBM zEnterprise EC12
 b2ec etnd RRE_R0 "extract transaction nesting depth" zEC12 zarch htm

@@ -1,3 +1,18 @@
+2017-05-17  Yao Qi  <yao.qi@linaro.org>
+
+	* cli/cli-decode.c (add_alias_cmd): New function.
+	* command.h (add_alias_cmd): Declare.
+	* infcmd.c (_initialize_infcmd): Don't call add_com_alias,
+	instead call add_alias_cmd.
+
+2017-05-17  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (nat_extra_makefile_frag): Rename to ...
+	(nat_makefile_frag): ... this.  All references updated.
+	* configure.ac: Likewise.
+	* configure.nat: Likewise.  Enhance comments.
+	* configure: Regenerate.
+
 2017-05-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* procfs.c (procfs_create_inferior): Change prototype to match

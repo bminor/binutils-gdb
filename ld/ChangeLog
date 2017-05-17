@@ -1,3 +1,12 @@
+2017-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20882
+	* testsuite/ld-gc/gc.exp: Run pr20882.
+	* testsuite/ld-gc/pr20882.d: New file.
+	* testsuite/ld-gc/pr20882a.s: Likewise.
+	* testsuite/ld-gc/pr20882b.s: Likewise.
+	* testsuite/ld-gc/pr20882c.s: Likewise.
+
 2017-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21481

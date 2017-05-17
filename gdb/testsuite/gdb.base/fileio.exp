@@ -31,7 +31,7 @@ if {[is_remote host]} {
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	   executable \
-	   [list debug "additional_flags=-DOUTDIR=\"$outdir/\""]] != "" } {
+	   [list debug nowarnings "additional_flags=-DOUTDIR=\"$outdir/\""]] != "" } {
     untested "failed to compile"
     return -1
 }

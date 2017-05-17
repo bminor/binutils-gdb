@@ -1,3 +1,10 @@
+2017-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20882
+	* elflink.c (elf_gc_mark_debug_section): New function.
+	(_bfd_elf_gc_mark_extra_sections): Mark any debug sections
+	referenced by kept debug sections.
+
 2017-05-16  Alan Modra  <amodra@gmail.com>
 
 	* elf-m10300.c: Rename occurrences of non_ir_ref.

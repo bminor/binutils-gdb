@@ -284,16 +284,10 @@ deprecate_cmd (struct cmd_list_element *cmd, const char *replacement)
 }
 
 struct cmd_list_element *
-add_alias_cmd (const char *name, const char *oldname, enum command_class theclass,
-	       int abbrev_flag, struct cmd_list_element **list)
+add_alias_cmd (const char *name, cmd_list_element *old,
+	       enum command_class theclass, int abbrev_flag,
+	       struct cmd_list_element **list)
 {
-  const char *tmp;
-  struct cmd_list_element *old;
-  struct cmd_list_element *c;
-
-  tmp = oldname;
-  old = lookup_cmd (&tmp, *list, "", 1, 1);
-
   if (old == 0)
     {
       struct cmd_list_element *prehook, *prehookee, *posthook, *posthookee;
@@ -307,7 +301,7 @@ add_alias_cmd (const char *name, const char *oldname, enum command_class theclas
       return 0;
     }
 
-  c = add_cmd (name, theclass, NULL, old->doc, list);
+  struct cmd_list_element *c = add_cmd (name, theclass, NULL, old->doc, list);
 
   /* If OLD->DOC can be freed, we should make another copy.  */
   if (old->doc_allocated)
@@ -329,6 +323,21 @@ add_alias_cmd (const char *name, const char *oldname, enum command_class theclas
   set_cmd_prefix (c, list);
   return c;
 }
+
+struct cmd_list_element *
+add_alias_cmd (const char *name, const char *oldname,
+	       enum command_class theclass, int abbrev_flag,
+	       struct cmd_list_element **list)
+{
+  const char *tmp;
+  struct cmd_list_element *old;
+
+  tmp = oldname;
+  old = lookup_cmd (&tmp, *list, "", 1, 1);
+
+  return add_alias_cmd (name, old, theclass, abbrev_flag, list);
+}
+
 
 /* Like add_cmd but adds an element for a command prefix: a name that
    should be followed by a subcommand to be looked up in another
