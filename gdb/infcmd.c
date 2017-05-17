@@ -3229,7 +3229,10 @@ is restored."),
 				     set_inferior_tty_command,
 				     show_inferior_tty_command,
 				     &setlist, &showlist);
-  add_com_alias ("tty", "set inferior-tty", class_alias, 0);
+  cmd_name = "inferior-tty";
+  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  gdb_assert (c != NULL);
+  add_alias_cmd ("tty", c, class_alias, 0, &cmdlist);
 
   cmd_name = "args";
   add_setshow_string_noescape_cmd (cmd_name, class_run,

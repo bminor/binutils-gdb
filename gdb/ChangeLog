@@ -1,3 +1,10 @@
+2017-05-17  Yao Qi  <yao.qi@linaro.org>
+
+	* cli/cli-decode.c (add_alias_cmd): New function.
+	* command.h (add_alias_cmd): Declare.
+	* infcmd.c (_initialize_infcmd): Don't call add_com_alias,
+	instead call add_alias_cmd.
+
 2017-05-12  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21483:
