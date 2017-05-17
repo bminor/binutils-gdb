@@ -1,3 +1,11 @@
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-01-10  Nick Clifton  <nickc@redhat.com>
+	PR 21034
+	* stabs.c (parse_stab_members): Fix thinko checking for g++
+	version 1 stabs information.
+
 2017-03-02  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
