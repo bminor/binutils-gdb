@@ -1,3 +1,7 @@
+2017-05-18  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.base/float.exp: Expect GDB prompt for targets without FPU.
+
 2017-05-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/set-inferior-tty.exp (test_set_inferior_tty): Add
