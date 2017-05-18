@@ -74,14 +74,14 @@ static const char *strerrno (int err);
 
 #define STRING      "Hello World"
 
-static void stop () {}
+static void stop (void) {}
 
 /* A NULL string.  We pass this to stat below instead of a NULL
    literal to avoid -Wnonnull warnings.  */
 const char *null_str;
 
-int
-test_open ()
+void
+test_open (void)
 {
   int ret;
 
@@ -140,8 +140,8 @@ test_open ()
   stop ();
 }
 
-int
-test_write ()
+void
+test_write (void)
 {
   int fd, ret;
 
@@ -181,8 +181,8 @@ test_write ()
   stop ();
 }
 
-int
-test_read ()
+void
+test_read (void)
 {
   int fd, ret;
   char buf[16];
@@ -213,8 +213,8 @@ test_read ()
   stop ();
 }
 
-int
-test_lseek ()
+void
+test_lseek (void)
 {
   int fd;
   off_t ret = 0;
@@ -255,8 +255,8 @@ test_lseek ()
   stop ();
 }
 
-int
-test_close ()
+void
+test_close (void)
 {
   int fd, ret;
 
@@ -281,8 +281,8 @@ test_close ()
   stop ();
 }
 
-int
-test_stat ()
+void
+test_stat (void)
 {
   int ret;
   struct stat st;
@@ -316,8 +316,8 @@ test_stat ()
   stop ();
 }
 
-int
-test_fstat ()
+void
+test_fstat (void)
 {
   int fd, ret;
   struct stat st;
@@ -347,8 +347,8 @@ test_fstat ()
   stop ();
 }
 
-int
-test_isatty ()
+void
+test_isatty (void)
 {
   int fd;
 
@@ -377,8 +377,8 @@ test_isatty ()
 
 char sys[1512];
 
-int
-test_system ()
+void
+test_system (void)
 {
   /*
    * Requires test framework to switch on "set remote system-call-allowed 1"
@@ -409,8 +409,8 @@ test_system ()
   stop ();
 }
 
-int
-test_rename ()
+void
+test_rename (void)
 {
   int ret;
   struct stat st;
@@ -464,8 +464,8 @@ test_rename ()
 
 char name[1256];
 
-int
-test_unlink ()
+void
+test_unlink (void)
 {
   int ret;
 
@@ -504,8 +504,8 @@ test_unlink ()
   stop ();
 }
 
-int
-test_time ()
+void
+test_time (void)
 {
   time_t ret, t;
 

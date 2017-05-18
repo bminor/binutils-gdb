@@ -1,5 +1,13 @@
 2017-05-18  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/fileio.c (stop, test_open, test_write, test_read)
+	(test_lseek, test_close, test_stat, test_fstat, test_isatty)
+	(test_system, test_rename, test_unlink, test_time): Change
+	prototypes.
+	* gdb.base/fileio.exp (stop_msg): Adjust.
+
+2017-05-18  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/fileio.c (null_str): New global.
 	(test_stat): Use it.
 	* gdb.base/fileio.exp: Remove nowarnings.
