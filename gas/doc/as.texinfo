@@ -5821,6 +5821,20 @@ state machine to @var{value}, which must be an unsigned integer.
 This directive will set the @code{discriminator} register in the @code{.debug_line}
 state machine to @var{value}, which must be an unsigned integer.
 
+@item view @var{value}
+This directive will verify that the @code{view} register in the
+@code{.debug_line} state machine matches @var{value}.  In general, the
+@code{view} register counts how many prior @code{.loc} directives are at the
+same program location, but there are a few exceptions, such as that view
+numbers may be forced reset e.g. at function entry points, or they may not be
+reset even when the location changes.  The assembler will determine the view
+number for that @code{.loc}.  Then, if @var{value} is a label, it will set the
+label to the @var{value}.  Otherwise, @var{value} may be either @code{0}, in
+which case the assembler will error out if the computed view number is not
+zero, or @code{-0}, that will cause the assembler to arrange for the
+@code{view} register to be reset for this @code{.loc} even if for @code{0} it
+would have issued an error.
+
 @end table
 
 @node Loc_mark_labels
