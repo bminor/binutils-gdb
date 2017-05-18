@@ -76,6 +76,10 @@ static const char *strerrno (int err);
 
 static void stop () {}
 
+/* A NULL string.  We pass this to stat below instead of a NULL
+   literal to avoid -Wnonnull warnings.  */
+const char *null_str;
+
 int
 test_open ()
 {
@@ -294,7 +298,7 @@ test_stat ()
   stop ();
   /* NULL pathname */
   errno = 0;
-  ret = stat (NULL, &st);
+  ret = stat (null_str, &st);
   printf ("stat 2: ret = %d, errno = %d %s\n", ret, errno,
   	  strerrno (errno));
   stop ();
