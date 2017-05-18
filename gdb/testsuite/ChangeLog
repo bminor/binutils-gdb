@@ -1,3 +1,7 @@
+2017-05-18  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.base/float.exp: Expect GDB prompt for targets without FPU.
+
 2017-05-18  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/fileio.c (test_write, test_read, test_close)

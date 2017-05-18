@@ -50,7 +50,7 @@ if { [is_aarch64_target] } then {
 	    # if we have NEON.
 	    pass "info float (VFP)"
 	}
-        -re "No floating.point info available for this processor.*" {
+        -re "No floating.point info available for this processor.*$gdb_prompt $" {
             pass "info float (without FPU)"
 	}
     }
@@ -63,7 +63,7 @@ if { [is_aarch64_target] } then {
         -re "fp0.*fp1.*fp7.*$gdb_prompt $" {
             pass "info float (with FPU)"
 	}
-        -re "No floating.point info available for this processor.*" {
+        -re "No floating.point info available for this processor.*$gdb_prompt $" {
             pass "info float (without FPU)"
 	}
     }
@@ -81,7 +81,7 @@ if { [is_aarch64_target] } then {
         -re "fd0.*fd3.*$gdb_prompt $" {
             pass "info float (with FPU)"
 	}
-        -re "No floating.point info available for this processor.*" {
+        -re "No floating.point info available for this processor.*$gdb_prompt $" {
             pass "info float (without FPU)"
 	}
     }
@@ -90,7 +90,7 @@ if { [is_aarch64_target] } then {
         -re "f0.*f1.*f31.*fpscr.*$gdb_prompt $" {
             pass "info float (with FPU)"
 	}
-        -re "No floating.point info available for this processor.*" {
+        -re "No floating.point info available for this processor.*$gdb_prompt $" {
             pass "info float (without FPU)"
 	}
     }
@@ -102,7 +102,7 @@ if { [is_aarch64_target] } then {
 	-re "fpul.*fr0.*fr1.*fr15.*$gdb_prompt $" {
 	      pass "info float (with FPU)"
 	  }
-	-re "No floating.point info available for this processor.*" {
+	-re "No floating.point info available for this processor.*$gdb_prompt $" {
 	      pass "info float (without FPU)"
 	}
     }
