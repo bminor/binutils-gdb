@@ -227,6 +227,10 @@ static struct dwarf2_line_info current = {
    lists.  */
 static symbolS *force_reset_view;
 
+/* This symbol evaluates to an expression that, if nonzero, indicates
+   some view assert check failed.  */
+static symbolS *view_assert_failed;
+
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
@@ -349,15 +353,36 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
 	}
     }
 
-  if (S_IS_DEFINED (e->loc.view) && symbol_constant_p (e->loc.view)
-      && viewx.X_op == O_constant)
+  if (S_IS_DEFINED (e->loc.view) && symbol_constant_p (e->loc.view))
     {
       expressionS *value = symbol_get_value_expression (e->loc.view);
       /* We can't compare the view numbers at this point, because in
 	 VIEWX we've only determined whether we're to reset it so
 	 far.  */
-      if (!value->X_add_number != !viewx.X_add_number)
-	as_bad (_("view number mismatch"));
+      if (viewx.X_op == O_constant)
+	{
+	  if (!value->X_add_number != !viewx.X_add_number)
+	    as_bad (_("view number mismatch"));
+	}
+      /* Record the expression to check it later.  It is the result of
+	 a logical not, thus 0 or 1.  We just add up all such deferred
+	 expressions, and resolve it at the end.  */
+      else if (!value->X_add_number)
+	{
+	  symbolS *deferred = make_expr_symbol (&viewx);
+	  if (view_assert_failed)
+	    {
+	      expressionS chk;
+	      memset (&chk, 0, sizeof (chk));
+	      chk.X_unsigned = 1;
+	      chk.X_op = O_add;
+	      chk.X_add_number = 0;
+	      chk.X_add_symbol = view_assert_failed;
+	      chk.X_op_symbol = deferred;
+	      deferred = make_expr_symbol (&chk);
+	    }
+	  view_assert_failed = deferred;
+	}
     }
 
   if (viewx.X_op != O_constant || viewx.X_add_number)
@@ -2154,5 +2179,40 @@ dwarf2_finish (void)
       out_debug_aranges (aranges_seg, info_seg);
       out_debug_abbrev (abbrev_seg, info_seg, line_seg);
       out_debug_info (info_seg, abbrev_seg, line_seg, ranges_seg);
+    }
+}
+
+/* Perform any deferred checks pertaining to debug information.  */
+
+void
+dwarf2dbg_final_check (void)
+{
+  /* Perform reset-view checks.  Don't evaluate view_assert_failed
+     recursively: it could be very deep.  It's a chain of adds, with
+     each chain element pointing to the next in X_add_symbol, and
+     holding the check value in X_op_symbol.  */
+  while (view_assert_failed)
+    {
+      gas_assert (!symbol_resolved_p (view_assert_failed));
+
+      expressionS *expr = symbol_get_value_expression (view_assert_failed);
+      symbolS *sym = view_assert_failed;
+
+      /* If view_assert_failed looks like a compound check in the
+	 chain, break it up.  */
+      if (expr->X_op == O_add && expr->X_add_number == 0 && expr->X_unsigned)
+	{
+	  view_assert_failed = expr->X_add_symbol;
+	  sym = expr->X_op_symbol;
+	}
+      else
+	view_assert_failed = NULL;
+
+      offsetT failed = resolve_symbol_value (sym);
+      if (!symbol_resolved_p (sym) || failed)
+	{
+	  as_bad (_("view number mismatch"));
+	  break;
+	}
     }
 }

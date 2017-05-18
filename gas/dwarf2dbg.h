@@ -100,6 +100,8 @@ extern int dwarf2dbg_estimate_size_before_relax (fragS *);
 extern int dwarf2dbg_relax_frag (fragS *);
 extern void dwarf2dbg_convert_frag (fragS *);
 
+extern void dwarf2dbg_final_check (void);
+
 /* An enumeration which describes the sizes of offsets (to DWARF sections)
    and the mechanism by which the size is indicated.  */
 enum dwarf2_format {

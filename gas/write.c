@@ -1902,6 +1902,8 @@ write_object_file (void)
   /* Relaxation has completed.  Freeze all syms.  */
   finalize_syms = 1;
 
+  dwarf2dbg_final_check ();
+
 #ifdef md_post_relax_hook
   md_post_relax_hook;
 #endif
