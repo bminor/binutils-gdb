@@ -1,3 +1,17 @@
+2017-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21251
+	* ldfile.c (ldfile_add_library_path): If the path starts with
+	$SYSROOT then use the sysroot as the real prefix.
+	* ldlang.c (lang_add_input_file): Treat $SYSROOT in the same
+	way as =.
+	* ldlex.l: Add $SYSROOT as allow prefix for a filename.
+	* ld.texinfo (-L): Document that $SYSROOT acts like = when
+	prefixing a library search path.
+	(INPUT): Likewise.
+	* testsuite/ld-scripts/sysroot-prefix.exp: Add $SYSROOT prefix
+	tests.
+
 2017-05-18  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/elf32.em: Don't compare boolean values against TRUE or FALSE.

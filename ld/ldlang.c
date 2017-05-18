@@ -1138,11 +1138,14 @@ lang_add_input_file (const char *name,
 		     lang_input_file_enum_type file_type,
 		     const char *target)
 {
-  if (name != NULL && *name == '=')
+  if (name != NULL
+      && (*name == '=' || CONST_STRNEQ (name, "$SYSROOT")))
     {
       lang_input_statement_type *ret;
       char *sysrooted_name
-	= concat (ld_sysroot, name + 1, (const char *) NULL);
+	= concat (ld_sysroot,
+		  name + (*name == '=' ? 1 : strlen ("$SYSROOT")),
+		  (const char *) NULL);
 
       /* We've now forcibly prepended the sysroot, making the input
 	 file independent of the context.  Therefore, temporarily

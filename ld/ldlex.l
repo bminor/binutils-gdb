@@ -380,6 +380,11 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				 yylval.name = xstrdup (yytext);
 				  return NAME;
 				}
+<INPUTLIST>"$SYSROOT"{FILENAMECHAR1}{FILENAMECHAR}*	{
+/* Filename to be prefixed by --sysroot or when non-sysrooted, nothing.  */
+				 yylval.name = xstrdup (yytext);
+				  return NAME;
+				}
 <BOTH,INPUTLIST>"-l"{FILENAMECHAR}+ {
 				  yylval.name = xstrdup (yytext + 2);
 				  return LNAME;
