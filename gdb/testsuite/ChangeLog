@@ -1,3 +1,7 @@
+2017-05-18  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Allow Box to be qualified.
+
 2017-05-18  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* gdb.base/float.exp: Expect GDB prompt for targets without FPU.
