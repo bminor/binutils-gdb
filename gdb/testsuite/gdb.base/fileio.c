@@ -157,7 +157,7 @@ test_write (void)
       close (fd);
     }
   else
-    printf ("write 1: ret = %d, errno = %d\n", ret, errno);
+    printf ("write 1: errno = %d\n", errno);
   stop ();
   /* Write using invalid file descriptor */
   errno = 0;
@@ -177,7 +177,7 @@ test_write (void)
       close (fd);
     }
   else
-    printf ("write 3: ret = %d, errno = %d\n", ret, errno);
+    printf ("write 3: errno = %d\n", errno);
   stop ();
 }
 
@@ -203,7 +203,7 @@ test_read (void)
       close (fd);
     }
   else
-    printf ("read 1: ret = %d, errno = %d\n", ret, errno);
+    printf ("read 1: errno = %d\n", errno);
   stop ();
   /* Read using invalid file descriptor */
   errno = 0;
@@ -271,7 +271,7 @@ test_close (void)
               ret == 0 ? "OK" : "");
     }
   else
-    printf ("close 1: ret = %d, errno = %d\n", ret, errno);
+    printf ("close 1: errno = %d\n", errno);
   stop ();
   /* Close an invalid file descriptor */
   errno = 0;
@@ -337,7 +337,7 @@ test_fstat (void)
       close (fd);
     }
   else
-    printf ("fstat 1: ret = %d, errno = %d\n", ret, errno);
+    printf ("fstat 1: errno = %d\n", errno);
   stop ();
   /* Fstat using invalid file descriptor */
   errno = 0;

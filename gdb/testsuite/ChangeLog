@@ -1,5 +1,10 @@
 2017-05-18  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/fileio.c (test_write, test_read, test_close)
+	(test_fstat): Don't print 'ret' in the fail path.
+
+2017-05-18  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/fileio.c (stop, test_open, test_write, test_read)
 	(test_lseek, test_close, test_stat, test_fstat, test_isatty)
 	(test_system, test_rename, test_unlink, test_time): Change
