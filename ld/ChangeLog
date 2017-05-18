@@ -3,7 +3,8 @@
 	* emultempl/elf32.em: Don't compare boolean values against TRUE or FALSE.
 	* emultempl/pe.em: Likewise.
 	* emultempl/pep.em: Likewise.
-	* emultempl/xtensaelf.em: Likewise.
+	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):
+	Don't compare enum against TRUE.
 
 2017-05-18  Alan Modra  <amodra@gmail.com>
 
