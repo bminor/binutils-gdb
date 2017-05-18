@@ -223,6 +223,10 @@ static struct dwarf2_line_info current = {
   0, NULL
 };
 
+/* This symbol is used to recognize view number forced resets in loc
+   lists.  */
+static symbolS *force_reset_view;
+
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
@@ -320,7 +324,7 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
   /* First, compute !(E->label > P->label), to tell whether or not
      we're to reset the view number.  If we can't resolve it to a
      constant, keep it symbolic.  */
-  if (!p)
+  if (!p || e->loc.view == force_reset_view)
     {
       viewx.X_op = O_constant;
       viewx.X_add_number = 0;
@@ -876,19 +880,31 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  (void) restore_line_pointer (c);
 	  symbolS *sym;
 	  SKIP_WHITESPACE ();
-	  if (ISDIGIT (*input_line_pointer))
+	  if (ISDIGIT (*input_line_pointer)
+	      || *input_line_pointer == '-')
 	    {
+	      bfd_boolean force_reset = *input_line_pointer == '-';
 	      value = get_absolute_expression ();
 	      if (value != 0)
 		{
 		  as_bad (_("numeric view can only be asserted to zero"));
 		  return;
 		}
-	      sym = symbol_temp_new (absolute_section, value, &zero_address_frag);
+	      if (force_reset && force_reset_view)
+		sym = force_reset_view;
+	      else
+		{
+		  sym = symbol_temp_new (absolute_section, value,
+					 &zero_address_frag);
+		  if (force_reset)
+		    force_reset_view = sym;
+		}
 	    }
 	  else
 	    {
 	      char *name = read_symbol_name ();
+	      if (!name)
+		return;
 	      sym = symbol_find_or_make (name);
 	      if (S_IS_DEFINED (sym))
 		{
@@ -1544,7 +1560,19 @@ process_entries (segT seg, struct line_entry *e)
       frag = symbol_get_frag (lab);
       frag_ofs = S_GET_VALUE (lab);
 
-      if (last_frag == NULL)
+      if (last_frag == NULL
+	  || (e->loc.view == force_reset_view
+	      /* If we're to reset the view, but we know we're
+		 advancing PC, we don't have to force with
+		 set_address.  We know we do when we're at the same
+		 address of the same frag, and we know we might when
+		 we're in the beginning of a frag, and we were at the
+		 end of the previous frag.  */
+	      && (frag == last_frag
+		  ? (last_frag_ofs == frag_ofs)
+		  : (frag_ofs > 0
+		     || ((offsetT)last_frag_ofs
+			 >= get_frag_fix (last_frag, seg))))))
 	{
 	  out_set_addr (lab);
 	  out_inc_line_addr (line_delta, 0);
