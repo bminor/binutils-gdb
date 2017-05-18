@@ -1570,8 +1570,8 @@ process_entries (segT seg, struct line_entry *e)
 		 end of the previous frag.  */
 	      && (frag == last_frag
 		  ? (last_frag_ofs == frag_ofs)
-		  : (frag_ofs > 0
-		     || ((offsetT)last_frag_ofs
+		  : (frag_ofs == 0
+		     && ((offsetT)last_frag_ofs
 			 >= get_frag_fix (last_frag, seg))))))
 	{
 	  out_set_addr (lab);
