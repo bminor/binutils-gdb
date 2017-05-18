@@ -324,7 +324,7 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
   /* First, compute !(E->label > P->label), to tell whether or not
      we're to reset the view number.  If we can't resolve it to a
      constant, keep it symbolic.  */
-  if (!p || e->loc.view == force_reset_view)
+  if (!p || (e->loc.view == force_reset_view && force_reset_view))
     {
       viewx.X_op = O_constant;
       viewx.X_add_number = 0;
@@ -1561,7 +1561,7 @@ process_entries (segT seg, struct line_entry *e)
       frag_ofs = S_GET_VALUE (lab);
 
       if (last_frag == NULL
-	  || (e->loc.view == force_reset_view
+	  || (e->loc.view == force_reset_view && force_reset_view
 	      /* If we're to reset the view, but we know we're
 		 advancing PC, we don't have to force with
 		 set_address.  We know we do when we're at the same
