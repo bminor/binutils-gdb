@@ -1,5 +1,12 @@
 2017-05-18  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em: Don't compare boolean values against TRUE or FALSE.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
 	PR ld/20882
 	* testsuite/ld-gc/pr20882.d: Don't pass -gdwarf-sections to gas.
 	Allow for 16-bit address targets and match expected data fully.

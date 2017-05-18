@@ -2353,7 +2353,7 @@ elf_m68k_partition_multi_got_1 (void **_entry, void *_arg)
   if (diff != NULL)
     elf_m68k_clear_got (diff);
 
-  return arg->error_p == FALSE ? 1 : 0;
+  return !arg->error_p;
 }
 
 /* Helper function to build symndx2h mapping.  */

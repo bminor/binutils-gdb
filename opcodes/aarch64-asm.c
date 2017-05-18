@@ -498,9 +498,8 @@ aarch64_ins_limm_1 (const aarch64_operand *self,
 
   if (invert_p)
     imm = ~imm;
-  if (aarch64_logical_immediate_p (imm, esize, &value) == FALSE)
-    /* The constraint check should have guaranteed this wouldn't happen.  */
-    assert (0);
+  /* The constraint check should have guaranteed this wouldn't happen.  */
+  assert (aarch64_logical_immediate_p (imm, esize, &value));
 
   insert_fields (code, value, 0, 3, self->fields[2], self->fields[1],
 		 self->fields[0]);

@@ -2489,7 +2489,7 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 
       ret = riscv_finish_dyn (output_bfd, info, dynobj, sdyn);
 
-      if (ret != TRUE)
+      if (!ret)
 	return ret;
 
       /* Fill in the head and tail entries in the procedure linkage table.  */

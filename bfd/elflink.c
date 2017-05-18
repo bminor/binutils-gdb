@@ -8825,7 +8825,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		else
 		  {
 		    /* Section size is only divisible by rela.  */
-		    if (use_rela_initialised && (use_rela == FALSE))
+		    if (use_rela_initialised && !use_rela)
 		      {
 			_bfd_error_handler (_("%B: Unable to sort relocs - "
 					      "they are in more than one size"),
@@ -8843,7 +8843,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	    else if ((o->size % bed->s->sizeof_rel) == 0)
 	      {
 		/* Section size is only divisible by rel.  */
-		if (use_rela_initialised && (use_rela == TRUE))
+		if (use_rela_initialised && use_rela)
 		  {
 		    _bfd_error_handler (_("%B: Unable to sort relocs - "
 					  "they are in more than one size"),
@@ -8882,7 +8882,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		else
 		  {
 		    /* Section size is only divisible by rela.  */
-		    if (use_rela_initialised && (use_rela == FALSE))
+		    if (use_rela_initialised && !use_rela)
 		      {
 			_bfd_error_handler (_("%B: Unable to sort relocs - "
 					      "they are in more than one size"),
@@ -8900,7 +8900,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	    else if ((o->size % bed->s->sizeof_rel) == 0)
 	      {
 		/* Section size is only divisible by rel.  */
-		if (use_rela_initialised && (use_rela == TRUE))
+		if (use_rela_initialised && use_rela)
 		  {
 		    _bfd_error_handler (_("%B: Unable to sort relocs - "
 					  "they are in more than one size"),
@@ -12964,7 +12964,7 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	  else if (isec->gc_mark)
 	    some_kept = TRUE;
 
-	  if (debug_frag_seen == FALSE
+	  if (!debug_frag_seen
 	      && (isec->flags & SEC_DEBUGGING)
 	      && CONST_STRNEQ (isec->name, ".debug_line."))
 	    debug_frag_seen = TRUE;

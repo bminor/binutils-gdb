@@ -3896,7 +3896,7 @@ tilepro_elf_finish_dynamic_sections (bfd *output_bfd,
 
       ret = tilepro_finish_dyn (output_bfd, info, dynobj, sdyn, splt);
 
-      if (ret != TRUE)
+      if (!ret)
 	return ret;
 
       /* Fill in the first entry in the procedure linkage table.  */

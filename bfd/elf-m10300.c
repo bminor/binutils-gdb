@@ -1520,7 +1520,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	  /* Do not generate relocs when an R_MN10300_32 has been used
 	     with an R_MN10300_SYM_DIFF to compute a difference of two
 	     symbols.  */
-	  && is_sym_diff_reloc == FALSE
+	  && !is_sym_diff_reloc
 	  /* Also, do not generate a reloc when the symbol associated
 	     with the R_MN10300_32 reloc is absolute - there is no
 	     need for a run time computation in this case.  */

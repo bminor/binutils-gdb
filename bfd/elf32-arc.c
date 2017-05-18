@@ -1259,7 +1259,7 @@ arc_do_relocation (bfd_byte * contents,
   struct elf_link_hash_table *htab ATTRIBUTE_UNUSED = elf_hash_table (info);
   bfd_reloc_status_type flag;
 
-  if (reloc_data.should_relocate == FALSE)
+  if (!reloc_data.should_relocate)
     return bfd_reloc_ok;
 
   switch (reloc_data.howto->size)
@@ -1464,9 +1464,9 @@ elf_arc_relocate_section (bfd *		          output_bfd,
       h2 = elf_link_hash_lookup (elf_hash_table (info), "__SDATA_BEGIN__",
 				 FALSE, FALSE, TRUE);
 
-      if (reloc_data.sdata_begin_symbol_vma_set == FALSE
-	    && h2 != NULL && h2->root.type != bfd_link_hash_undefined
-	    && h2->root.u.def.section->output_section != NULL)
+      if (!reloc_data.sdata_begin_symbol_vma_set
+	  && h2 != NULL && h2->root.type != bfd_link_hash_undefined
+	  && h2->root.u.def.section->output_section != NULL)
 	/* TODO: Verify this condition.  */
 	{
 	  reloc_data.sdata_begin_symbol_vma =
@@ -1784,7 +1784,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 
 		bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
-		if (relocate == FALSE)
+		if (!relocate)
 		  continue;
 	      }
 	    break;
@@ -1793,7 +1793,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	}
 
       if (is_reloc_SDA_relative (howto)
-	  && (reloc_data.sdata_begin_symbol_vma_set == FALSE))
+	  && !reloc_data.sdata_begin_symbol_vma_set)
 	{
 	  _bfd_error_handler
 	    ("Error: Linker symbol __SDATA_BEGIN__ not found");
@@ -1907,8 +1907,8 @@ elf_arc_check_relocs (bfd *			 abfd,
       howto = arc_elf_howto (r_type);
 
       if (dynobj == NULL
-	  && (is_reloc_for_GOT (howto) == TRUE
-	      || is_reloc_for_TLS (howto) == TRUE))
+	  && (is_reloc_for_GOT (howto)
+	      || is_reloc_for_TLS (howto)))
 	{
 	  dynobj = elf_hash_table (info)->dynobj = abfd;
 	  if (! _bfd_elf_create_got_section (abfd, info))
@@ -1985,7 +1985,7 @@ elf_arc_check_relocs (bfd *			 abfd,
 	    break;
 	}
 
-      if (is_reloc_for_PLT (howto) == TRUE)
+      if (is_reloc_for_PLT (howto))
 	{
 	  if (h == NULL)
 	    continue;
@@ -1994,8 +1994,8 @@ elf_arc_check_relocs (bfd *			 abfd,
 	}
 
       /* Add info to the symbol got_entry_list.  */
-      if (is_reloc_for_GOT (howto) == TRUE
-	  || is_reloc_for_TLS (howto) == TRUE)
+      if (is_reloc_for_GOT (howto)
+	  || is_reloc_for_TLS (howto))
 	{
 	  arc_fill_got_info_for_reloc (
 		  arc_got_entry_type_for_reloc (howto),

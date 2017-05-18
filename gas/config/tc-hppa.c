@@ -5687,7 +5687,7 @@ pa_ip (char *str)
       /* If this instruction is specific to a particular architecture,
 	 then set a new architecture.  This automatic promotion crud is
 	 for compatibility with HP's old assemblers only.  */
-      if (match == TRUE
+      if (match
 	  && bfd_get_mach (stdoutput) < insn->arch
 	  && !bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
 	{

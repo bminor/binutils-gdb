@@ -992,7 +992,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 	  return PARSE_FAIL;
 	}
 
-      if (in_reg_list == TRUE)
+      if (in_reg_list)
 	{
 	  first_error (_("index not allowed inside register list"));
 	  return PARSE_FAIL;
@@ -3001,7 +3001,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
   switch (mode)
     {
     case SHIFTED_LOGIC_IMM:
-      if (aarch64_extend_operator_p (kind) == TRUE)
+      if (aarch64_extend_operator_p (kind))
 	{
 	  set_syntax_error (_("extending shift is not permitted"));
 	  return FALSE;
@@ -3092,7 +3092,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
     operand->shifter.amount = 1;
   else if (exp.X_op == O_absent)
     {
-      if (aarch64_extend_operator_p (kind) == FALSE || exp_has_prefix)
+      if (!aarch64_extend_operator_p (kind) || exp_has_prefix)
 	{
 	  set_syntax_error (_("missing shift amount"));
 	  return FALSE;
@@ -4413,7 +4413,7 @@ find_best_match (const aarch64_inst *instr,
       const aarch64_opnd_qualifier_t *qualifiers = *qualifiers_list;
 
       /* Most opcodes has much fewer patterns in the list.  */
-      if (empty_qualifier_sequence_p (qualifiers) == TRUE)
+      if (empty_qualifier_sequence_p (qualifiers))
 	{
 	  DEBUG_TRACE_IF (i == 0, "empty list of qualifier sequence");
 	  break;
@@ -4621,7 +4621,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	    {
 	      /* Most opcodes has much fewer patterns in the list.
 		 First NIL qualifier indicates the end in the list.   */
-	      if (empty_qualifier_sequence_p (*qualifiers_list) == TRUE)
+	      if (empty_qualifier_sequence_p (*qualifiers_list))
 		break;
 
 	      if (i != qlf_idx)

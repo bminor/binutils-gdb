@@ -6911,7 +6911,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
                   break;
                 }
             }
-          if (rv == FALSE)
+          if (!rv)
             {
               /* Insert nop after branch to fix short loop. */
               return FALSE;

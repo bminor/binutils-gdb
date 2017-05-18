@@ -1,3 +1,10 @@
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-aarch64.c: Don't compare booleans against TRUE or FALSE.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-score7.c: Likewise.
+
 2017-05-16  Alan Modra  <amodra@gmail.com>
 
 	* write.c (GENERIC_FORCE_RELOCATION_LOCAL): Define.

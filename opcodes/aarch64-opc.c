@@ -1207,7 +1207,7 @@ aarch64_logical_immediate_p (uint64_t value, int esize, aarch64_insn *encoding)
   DEBUG_TRACE ("enter with 0x%" PRIx64 "(%" PRIi64 "), esize: %d", value,
 	       value, esize);
 
-  if (initialized == FALSE)
+  if (!initialized)
     {
       build_immediate_table ();
       initialized = TRUE;
@@ -2113,7 +2113,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    uint64_t uimm = opnd->imm.value;
 	    if (opcode->op == OP_BIC)
 	      uimm = ~uimm;
-	    if (aarch64_logical_immediate_p (uimm, esize, NULL) == FALSE)
+	    if (!aarch64_logical_immediate_p (uimm, esize, NULL))
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("immediate out of range"));
@@ -2521,7 +2521,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       switch (type)
 	{
 	case AARCH64_OPND_Rm_EXT:
-	  if (aarch64_extend_operator_p (opnd->shifter.kind) == FALSE
+	  if (!aarch64_extend_operator_p (opnd->shifter.kind)
 	      && opnd->shifter.kind != AARCH64_MOD_LSL)
 	    {
 	      set_other_error (mismatch_detail, idx,
@@ -2573,7 +2573,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_Rm_SFT:
 	  /* ROR is not available to the shifted register operand in
 	     arithmetic instructions.  */
-	  if (aarch64_shift_operator_p (opnd->shifter.kind) == FALSE)
+	  if (!aarch64_shift_operator_p (opnd->shifter.kind))
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("shift operator expected"));

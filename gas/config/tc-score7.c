@@ -6500,7 +6500,7 @@ s7_relax_frag (asection * sec ATTRIBUTE_UNUSED,
       else
         {
 	  /* Here, try best to do relax regardless fragp->fr_next->fr_type.  */
-          if (word_align_p == FALSE)
+          if (!word_align_p)
             {
               if (insn_size % 4 == 0)
                 {
