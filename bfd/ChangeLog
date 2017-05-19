@@ -1,3 +1,10 @@
+2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (R_RISCV_DELETE): New define.
+	(_bfd_riscv_relax_delete): New function.
+	(perform_relocation): Handle R_RISCV_DELETE.
+	(_bfd_riscv_relax_section): Likewise.
+
 2017-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22263

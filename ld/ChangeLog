@@ -1,3 +1,8 @@
+2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* emultempl/riscvelf.em (riscv_elf_before_allocation): Add a
+	third relaxation pass.
+
 2017-10-17  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (-z): Combine negative options with corresponding

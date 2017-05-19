@@ -32,6 +32,9 @@
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
 
+/* Internal relocations used exclusively by the relaxation pass.  */
+#define R_RISCV_DELETE (R_RISCV_max + 1)
+
 #define ARCH_SIZE NN
 
 #define MINUS_ONE ((bfd_vma)0 - 1)
@@ -1483,6 +1486,9 @@ perform_relocation (const reloc_howto_type *howto,
     case R_RISCV_TLS_DTPREL64:
       break;
 
+    case R_RISCV_DELETE:
+      return bfd_reloc_ok;
+
     default:
       return bfd_reloc_notsupported;
     }
@@ -1805,6 +1811,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_SET16:
 	case R_RISCV_SET32:
 	case R_RISCV_32_PCREL:
+	case R_RISCV_DELETE:
 	  /* These require no special handling beyond perform_relocation.  */
 	  break;
 
@@ -2947,8 +2954,28 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 				   rel->r_addend - nop_bytes);
 }
 
-/* Relax a section.  Pass 0 shortens code sequences unless disabled.
-   Pass 1, which cannot be disabled, handles code alignment directives.  */
+/* Relax PC-relative references to GP-relative references.  */
+
+static bfd_boolean
+_bfd_riscv_relax_delete (bfd *abfd,
+			 asection *sec,
+			 asection *sym_sec ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			 Elf_Internal_Rela *rel,
+			 bfd_vma symval ATTRIBUTE_UNUSED,
+			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
+			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
+			 bfd_boolean *again ATTRIBUTE_UNUSED)
+{
+  if (!riscv_relax_delete_bytes(abfd, sec, rel->r_offset, rel->r_addend))
+    return FALSE;
+  rel->r_info = ELFNN_R_INFO(0, R_RISCV_NONE);
+  return TRUE;
+}
+
+/* Relax a section.  Pass 0 shortens code sequences unless disabled.  Pass 1
+   deletes the bytes that pass 0 made obselete.  Pass 2, which cannot be
+   disabled, handles code alignment directives.  */
 
 static bfd_boolean
 _bfd_riscv_relax_section (bfd *abfd, asection *sec,
@@ -3001,6 +3028,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       int type = ELFNN_R_TYPE (rel->r_info);
       bfd_vma symval;
 
+      relax_func = NULL;
       if (info->relax_pass == 0)
 	{
 	  if (type == R_RISCV_CALL || type == R_RISCV_CALL_PLT)
@@ -3026,7 +3054,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* Skip over the R_RISCV_RELAX.  */
 	  i++;
 	}
-      else if (type == R_RISCV_ALIGN)
+      else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
+        relax_func = _bfd_riscv_relax_delete;
+      else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
 	relax_func = _bfd_riscv_relax_align;
       else
 	continue;
