@@ -252,11 +252,38 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat
 
-cfiles: $(CFILES)
-%.c: %.xml
+FEATURE_XMLFILES = i386/32bit-core.xml \
+	i386/32bit-sse.xml \
+	i386/32bit-linux.xml \
+	i386/32bit-avx.xml \
+	i386/32bit-mpx.xml \
+	i386/32bit-avx512.xml \
+	i386/32bit-pkeys.xml
+
+FEATURE_CFILES = $(patsubst %.xml,%.c,$(FEATURE_XMLFILES))
+
+cfiles: $(CFILES) $(FEATURE_CFILES)
+
+$(CFILES): %.c: %.xml
 	$(GDB) -nx -q -batch \
 	  -ex "set tdesc filename $<" -ex 'maint print c-tdesc' > $@.tmp
 	sh ../../move-if-change $@.tmp $@
+
+$(FEATURE_CFILES): %.c: %.xml.tmp
+	$(GDB) -nx -q -batch \
+	  -ex 'maint print c-tdesc $<' > $@.tmp
+	sh ../../move-if-change $@.tmp $@
+	rm $<
+
+%.xml.tmp: %.xml
+	echo "<?xml version=\"1.0\"?>" > $@
+	echo "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">" >> $@
+	echo "<target>" >> $@
+	echo "  <architecture>" >> $@
+	if test $(findstring i386/32bit-,$@); then echo "i386" >> $@ ; fi;
+	echo "  </architecture>" >> $@
+	echo "  <xi:include href=\"$(notdir $<)\"/>" >> $@
+	echo "</target>" >> $@
 
 # Other dependencies.
 $(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
