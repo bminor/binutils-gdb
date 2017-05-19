@@ -1,3 +1,13 @@
+2017-05-19  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR ld/21472
+	* emulparams/avrxmega3.sh (RODATA_PM_OFFSET): Set to 0x8000.
+	* scripttempl/avr.sc (__RODATA_PM_OFFSET__) [RODATA_PM_OFFSET]:
+	Use RODATA_PM_OFFSET as default if not already defined.
+	(.data) [!RODATA_PM_OFFSET]: Don't include .rodata and friends.
+	(.rodata) [RODATA_PM_OFFSET]: Put at an offset of
+	__RODATA_PM_OFFSET__.
+
 2017-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/21251

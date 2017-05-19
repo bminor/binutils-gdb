@@ -1,3 +1,9 @@
+2017-05-19  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR ld/21472
+	* config/tc-avr.c (mcu_types): Add entries for: attiny416,
+	attiny417, attiny816, attiny817.
+
 2017-05-18  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-aarch64.c: Don't compare booleans against TRUE or FALSE.
