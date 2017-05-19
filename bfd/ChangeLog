@@ -1,3 +1,14 @@
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf64-mips.c (mips_elf64_canonicalize_reloc): Remove prototype
+	and function.
+	(mips_elf64_canonicalize_dynamic_reloc): Likewise.
+	(mips_elf64_slurp_one_reloc_table): Set `reloc_count' to the
+	actual number of internal relocations retrieved.  Adjust
+	function description.
+	(bfd_elf64_canonicalize_reloc): Remove macro.
+	(bfd_elf64_canonicalize_dynamic_reloc): Likewise.
+
 2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* archures.c (bfd_mach_sparc_v9m8): Define.

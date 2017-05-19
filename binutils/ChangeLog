@@ -1,5 +1,16 @@
 2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/binutils-all/mips/mips-note-2.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2-n64.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r-n64.d: New test.
+	* testsuite/binutils-all/mips/mips.exp: Define `has_newabi'.
+	Run the new tests.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/lib/utils-lib.exp (run_dump_test): Handle the `dump'
 	option.
 
