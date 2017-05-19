@@ -1,3 +1,12 @@
+2017-05-19  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
+
+	* sparc-tdep.c (sparc_structure_return_p)
+	(sparc_arg_on_registers_p): New functions.
+	(sparc32_store_arguments): Use them.
+	* sparc64-tdep.c (sparc64_16_byte_align_p)
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields):
+	Handle TYPE_CODE_ARRAY.
+
 2017-05-17  Yao Qi  <yao.qi@linaro.org>
 
 	* cli/cli-decode.c (add_alias_cmd): New function.
