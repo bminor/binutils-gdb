@@ -1,3 +1,12 @@
+2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* tui/tui-windata.c (tui_erase_data_content): Cast last mvwaddstr
+	arg to char *.
+	* tui/tui-wingeneral.c (box_win): Likewise.
+	* tui/tui-winsource.c (tui_erase_source_content): Likewise.
+	(tui_show_source_line): Likewise.
+	(tui_show_exec_info_content): Likewise.
+
 2017-05-19  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
 
 	* sparc-tdep.c (sparc_structure_return_p)
