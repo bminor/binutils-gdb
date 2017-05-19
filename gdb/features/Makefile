@@ -235,7 +235,7 @@ XMLTOC = \
 	tic6x-c64xp-linux.xml \
 	tic6x-c64xp.xml
 
-CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
+TDESC_CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
 GDB = false
 
 all: $(OUTPUTS)
@@ -252,9 +252,38 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat
 
-cfiles: $(CFILES)
-%.c: %.xml
+FEATURE_XMLFILES = i386/32bit-core.xml \
+	i386/32bit-sse.xml \
+	i386/32bit-linux.xml \
+	i386/32bit-avx.xml \
+	i386/32bit-mpx.xml \
+	i386/32bit-avx512.xml \
+	i386/32bit-pkeys.xml
+
+FEATURE_CFILES = $(patsubst %.xml,%.c,$(FEATURE_XMLFILES))
+
+cfiles: $(TDESC_CFILES) $(FEATURE_CFILES)
+
+$(TDESC_CFILES): %.c: %.xml
 	$(GDB) -nx -q -batch -ex 'maint print c-tdesc $<' > $@.tmp
+	sh ../../move-if-change $@.tmp $@
+
+$(FEATURE_CFILES): %.c: %.xml.tmp
+	$(GDB) -nx -q -batch \
+	  -ex 'maint print c-tdesc $<' > $@.tmp
+	sh ../../move-if-change $@.tmp $@
+	rm $<
+
+# %.xml is the XML file for each target description feature, and
+# %.xml.tmp is the XML file target description which only includes
+# one target description feature.
+
+%.xml.tmp: %.xml
+	echo "<?xml version=\"1.0\"?>" > $@.tmp
+	echo "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">" >> $@.tmp
+	echo "<target>" >> $@.tmp
+	echo "  <xi:include href=\"$(notdir $<)\"/>" >> $@.tmp
+	echo "</target>" >> $@.tmp
 	sh ../../move-if-change $@.tmp $@
 
 # Other dependencies.
@@ -325,7 +354,7 @@ $(outdir)/i386/x32-avx-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
 # 'all' doesn't build the C files, so don't delete them in 'clean'
 # either.
 clean-cfiles:
-	rm -f $(CFILES)
+	rm -f $(TDESC_CFILES) $(FEATURE_CFILES)
 
 clean:
 	rm -f $(OUTPUTS)

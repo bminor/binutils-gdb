@@ -34,6 +34,7 @@
 #include "gdb_obstack.h"
 #include "hashtab.h"
 #include "inferior.h"
+#include <algorithm>
 
 /* The interface to visit different elements of target description.  */
 
@@ -43,7 +44,9 @@ public:
   virtual void visit_pre (const target_desc *e) = 0;
   virtual void visit_post (const target_desc *e) = 0;
 
-  virtual void visit (const tdesc_feature *e) = 0;
+  virtual void visit_pre (const tdesc_feature *e) = 0;
+  virtual void visit_post (const tdesc_feature *e) = 0;
+
   virtual void visit (const tdesc_type *e) = 0;
   virtual void visit (const tdesc_reg *e) = 0;
 };
@@ -290,7 +293,7 @@ typedef struct tdesc_feature : tdesc_element
 
   void accept (tdesc_element_visitor &v) const override
   {
-    v.visit (this);
+    v.visit_pre (this);
 
     struct tdesc_type *type;
 
@@ -306,8 +309,9 @@ typedef struct tdesc_feature : tdesc_element
 	 ix++)
       reg->accept (v);
 
-  }
 
+    v.visit_post (this);
+  }
 } *tdesc_feature_p;
 DEF_VEC_P(tdesc_feature_p);
 
@@ -1803,7 +1807,6 @@ public:
     printf_unfiltered ("/* THIS FILE IS GENERATED.  "
 		       "-*- buffer-read-only: t -*- vi"
 		       ":set ro:\n");
-    printf_unfiltered ("  Original: %s */\n\n", filename);
   }
 
   ~print_c_tdesc ()
@@ -1813,6 +1816,9 @@ public:
 
   void visit_pre (const target_desc *e) override
   {
+    printf_unfiltered ("  Original: %s */\n\n",
+		       lbasename (m_filename_after_features.c_str ()));
+
     printf_unfiltered ("#include \"defs.h\"\n");
     printf_unfiltered ("#include \"osabi.h\"\n");
     printf_unfiltered ("#include \"target-descriptions.h\"\n");
@@ -1865,11 +1871,14 @@ public:
     printf_unfiltered ("  struct tdesc_feature *feature;\n");
   }
 
-  void visit (const tdesc_feature *e) override
+  void visit_pre (const tdesc_feature *e) override
   {
     printf_unfiltered ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
 		       e->name);
   }
+
+  void visit_post (const tdesc_feature *e) override
+  {}
 
   void visit_post (const target_desc *e) override
   {
@@ -2029,11 +2038,78 @@ public:
     printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type);
   }
 
+protected:
+  std::string m_filename_after_features;
+
 private:
   char *m_function;
-  std::string m_filename_after_features;
   bool m_printed_field_type = false;
   bool m_printed_type = false;
+};
+
+/* Print target description feature in C.  */
+
+class print_c_feature : public print_c_tdesc
+{
+public:
+  print_c_feature (std::string &file)
+    : print_c_tdesc (file)
+  {
+    /* Trim ".tmp".  */
+    auto const pos = m_filename_after_features.find_last_of ('.');
+
+    m_filename_after_features = m_filename_after_features.substr (0, pos);
+  }
+
+  void visit_pre (const target_desc *e) override
+  {
+    printf_unfiltered ("  Original: %s */\n\n",
+		       lbasename (m_filename_after_features.c_str ()));
+
+    printf_unfiltered ("#include \"target-descriptions.h\"\n");
+    printf_unfiltered ("\n");
+  }
+
+  void visit_post (const target_desc *e) override
+  {}
+
+  void visit_pre (const tdesc_feature *e) override
+  {
+    std::string name (m_filename_after_features);
+
+    auto pos = name.find_first_of ('.');
+
+    name = name.substr (0, pos);
+    std::replace (name.begin (), name.end (), '/', '_');
+    std::replace (name.begin (), name.end (), '-', '_');
+
+    printf_unfiltered ("static int\n");
+    printf_unfiltered ("create_feature_%s ", name.c_str ());
+    printf_unfiltered ("(struct target_desc *result, long regnum)\n");
+
+    printf_unfiltered ("{\n");
+    printf_unfiltered ("  struct tdesc_feature *feature;\n");
+    printf_unfiltered ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
+		       e->name);
+  }
+
+  void visit_post (const tdesc_feature *e) override
+  {
+    printf_unfiltered ("  return regnum;\n");
+    printf_unfiltered ("}\n");
+  }
+
+  void visit (const tdesc_reg *reg) override
+  {
+    printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", regnum++, %d, ",
+		       reg->name, reg->save_restore);
+    if (reg->group)
+      printf_unfiltered ("\"%s\", ", reg->group);
+    else
+      printf_unfiltered ("NULL, ");
+    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type);
+  }
+
 };
 
 static void
@@ -2070,9 +2146,21 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   if (loc != std::string::npos)
     filename_after_features = filename_after_features.substr (loc + 10);
 
-  print_c_tdesc v (filename_after_features);
+  /* Print c files for target features instead of target descriptions,
+     because c files got from target features are more flexible than the
+     counterparts.  */
+  if (startswith (filename_after_features.c_str (), "i386/32bit-"))
+    {
+      print_c_feature v (filename_after_features);
 
-  tdesc->accept (v);
+      tdesc->accept (v);
+    }
+  else
+    {
+      print_c_tdesc v (filename_after_features);
+
+      tdesc->accept (v);
+    }
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
