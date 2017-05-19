@@ -1,5 +1,23 @@
 2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
 
+	* elfnn-riscv.c (riscv_pcgp_hi_reloc): New structure.
+	(riscv_pcgp_lo_reloc): Likewise.
+	(riscv_pcgp_relocs): Likewise.
+	(riscv_init_pcgp_relocs): New function.
+	(riscv_free_pcgp_relocs): Likewise.
+	(riscv_record_pcgp_hi_reloc): Likewise.
+	(riscv_record_pcgp_lo_reloc): Likewise.
+	(riscv_delete_pcgp_hi_reloc): Likewise.
+	(riscv_use_pcgp_hi_reloc): Likewise.
+	(riscv_record_pcgp_lo_reloc): Likewise.
+	(riscv_find_pcgp_lo_reloc): Likewise.
+	(riscv_delete_pcgp_lo_reloc): Likewise.
+	(_bfd_riscv_relax_pc): Likewise.
+	(_bfd_riscv_relax_section): Handle R_RISCV_PCREL_* relocations
+	via the new functions above.
+
+2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
+
 	* elfnn-riscv.c (R_RISCV_DELETE): New define.
 	(_bfd_riscv_relax_delete): New function.
 	(perform_relocation): Handle R_RISCV_DELETE.
