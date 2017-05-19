@@ -330,6 +330,8 @@ run_dump_test "pr19969"
 run_dump_test "pr20093-1"
 run_dump_test "pr20093-2"
 run_dump_test "property-x86-3"
+run_dump_test "property-x86-4a"
+run_dump_test "property-x86-4b"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return

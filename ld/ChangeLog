@@ -1,3 +1,17 @@
+2017-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-4a and
+	property-x86-4b.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-4a.d: New file.
+	* testsuite/ld-i386/property-x86-4a.s: Likewise.
+	* testsuite/ld-i386/property-x86-4b.d: Likewise.
+	* testsuite/ld-i386/property-x86-4b.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.s: Likewise.
+
 2017-05-19  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR ld/21472
