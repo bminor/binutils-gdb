@@ -1,3 +1,9 @@
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/call-relax.d: Support 32-bit targets.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Use -64 to
+	run asi-bump-warn.
+
 2017-05-19  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR ld/21472
