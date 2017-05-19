@@ -12961,7 +12961,9 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	{
 	  if ((isec->flags & SEC_LINKER_CREATED) != 0)
 	    isec->gc_mark = 1;
-	  else if (isec->gc_mark)
+	  else if (isec->gc_mark
+		   && (isec->flags & SEC_ALLOC) != 0
+		   && elf_section_type (isec) != SHT_NOTE)
 	    some_kept = TRUE;
 
 	  if (!debug_frag_seen
@@ -12970,8 +12972,8 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	    debug_frag_seen = TRUE;
 	}
 
-      /* If no section in this file will be kept, then we can
-	 toss out the debug and special sections.  */
+      /* If no non-note alloc section in this file will be kept, then
+	 we can toss out the debug and special sections.  */
       if (!some_kept)
 	continue;
 
