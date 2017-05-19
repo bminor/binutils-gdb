@@ -1,5 +1,12 @@
 2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	PR tui/21482
+	* gdb_curses.h (NOMACROS): Define.
+	(NCURSES_NOMACROS): Define.
+
+2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR tui/21482
 	* tui/tui-windata.c (tui_erase_data_content): Cast last mvwaddstr
 	arg to char *.
 	* tui/tui-wingeneral.c (box_win): Likewise.
