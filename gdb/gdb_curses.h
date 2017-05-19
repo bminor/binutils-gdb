@@ -32,6 +32,13 @@
 #undef KEY_EVENT
 #endif
 
+/* On Solaris and probably other SysVr4 derived systems, we need to define
+   NOMACROS so the native <curses.h> doesn't define clear which interferes
+   with the clear member of class string_file.  ncurses potentially has a
+   similar problem and fix.  */
+#define NOMACROS
+#define NCURSES_NOMACROS
+
 #if defined (HAVE_NCURSES_NCURSES_H)
 #include <ncurses/ncurses.h>
 #elif defined (HAVE_NCURSES_H)
