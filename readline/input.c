@@ -91,6 +91,7 @@ static int rl_gather_tyi PARAMS((void));
 /* 'isatty' in the Windows runtime returns non-zero for every
    character device, including the null device.  Repair that.  */
 #include <io.h>
+#include <conio.h>
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 

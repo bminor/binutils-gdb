@@ -3831,7 +3831,7 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
     {
       if (a->parent != NULL
 	  && a->parent->entry != NULL
-	  && a->parent->entry->is_name == FALSE)
+	  && !a->parent->entry->is_name)
 	_bfd_error_handler (_(".rsrc merge failure: duplicate string resource: %d"),
 			    ((a->parent->entry->name_id.id - 1) << 4) + i);
       return FALSE;
@@ -3939,22 +3939,22 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		     There should only ever be one non-zero lang manifest -
 		     if there are more it is an error.  A non-zero lang
 		     manifest takes precedence over a default manifest.  */
-		  if (entry->is_name == FALSE
+		  if (!entry->is_name
 		      && entry->name_id.id == 1
 		      && dir != NULL
 		      && dir->entry != NULL
-		      && dir->entry->is_name == FALSE
+		      && !dir->entry->is_name
 		      && dir->entry->name_id.id == 0x18)
 		    {
 		      if (next->value.directory->names.num_entries == 0
 			  && next->value.directory->ids.num_entries == 1
-			  && next->value.directory->ids.first_entry->is_name == FALSE
+			  && !next->value.directory->ids.first_entry->is_name
 			  && next->value.directory->ids.first_entry->name_id.id == 0)
 			/* Fall through so that NEXT is dropped.  */
 			;
 		      else if (entry->value.directory->names.num_entries == 0
 			       && entry->value.directory->ids.num_entries == 1
-			       && entry->value.directory->ids.first_entry->is_name == FALSE
+			       && !entry->value.directory->ids.first_entry->is_name
 			       && entry->value.directory->ids.first_entry->name_id.id == 0)
 			{
 			  /* Swap ENTRY and NEXT.  Then fall through so that the old ENTRY is dropped.  */
@@ -3995,22 +3995,22 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 		     message - because there should never be duplicates.
 		     The exception is Type 18/Name 1/Lang 0 which is the
 		     defaul manifest - this can just be dropped.  */
-		  if (entry->is_name == FALSE
+		  if (!entry->is_name
 		      && entry->name_id.id == 0
 		      && dir != NULL
 		      && dir->entry != NULL
-		      && dir->entry->is_name == FALSE
+		      && !dir->entry->is_name
 		      && dir->entry->name_id.id == 1
 		      && dir->entry->parent != NULL
 		      && dir->entry->parent->entry != NULL
-		      && dir->entry->parent->entry->is_name == FALSE
+		      && !dir->entry->parent->entry->is_name
 		      && dir->entry->parent->entry->name_id.id == 0x18 /* RT_MANIFEST */)
 		    ;
 		  else if (dir != NULL
 			   && dir->entry != NULL
 			   && dir->entry->parent != NULL
 			   && dir->entry->parent->entry != NULL
-			   && dir->entry->parent->entry->is_name == FALSE
+			   && !dir->entry->parent->entry->is_name
 			   && dir->entry->parent->entry->name_id.id == 0x6 /* RT_STRING */)
 		    {
 		      /* Strings need special handling.  */

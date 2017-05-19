@@ -1,3 +1,58 @@
+2017-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-4a and
+	property-x86-4b.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-4a.d: New file.
+	* testsuite/ld-i386/property-x86-4a.s: Likewise.
+	* testsuite/ld-i386/property-x86-4b.d: Likewise.
+	* testsuite/ld-i386/property-x86-4b.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.s: Likewise.
+
+2017-05-19  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR ld/21472
+	* emulparams/avrxmega3.sh (RODATA_PM_OFFSET): Set to 0x8000.
+	* scripttempl/avr.sc (__RODATA_PM_OFFSET__) [RODATA_PM_OFFSET]:
+	Use RODATA_PM_OFFSET as default if not already defined.
+	(.data) [!RODATA_PM_OFFSET]: Don't include .rodata and friends.
+	(.rodata) [RODATA_PM_OFFSET]: Put at an offset of
+	__RODATA_PM_OFFSET__.
+
+2017-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21251
+	* ldfile.c (ldfile_add_library_path): If the path starts with
+	$SYSROOT then use the sysroot as the real prefix.
+	* ldlang.c (lang_add_input_file): Treat $SYSROOT in the same
+	way as =.
+	* ldlex.l: Add $SYSROOT as allow prefix for a filename.
+	* ld.texinfo (-L): Document that $SYSROOT acts like = when
+	prefixing a library search path.
+	(INPUT): Likewise.
+	* testsuite/ld-scripts/sysroot-prefix.exp: Add $SYSROOT prefix
+	tests.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em: Don't compare boolean values against TRUE or FALSE.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):
+	Don't compare enum against TRUE.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20882
+	* testsuite/ld-gc/pr20882.d: Don't pass -gdwarf-sections to gas.
+	Allow for 16-bit address targets and match expected data fully.
+	* testsuite/ld-gc/pr20882a.s: Delete .debug_line section.
+	* testsuite/ld-gc/pr20882b.s: Likewise.
+	* testsuite/ld-gc/pr20882c.s: Likewise.
+
 2017-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20882

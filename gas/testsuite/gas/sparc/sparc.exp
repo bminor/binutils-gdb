@@ -96,7 +96,7 @@ if [istarget sparc*-*-*] {
 	run_dump_test "plt64"
 	run_dump_test "gotop64"
         run_list_test "hwcaps-bump" "-64 -bump"
-        run_list_test "asi-bump-warn" "-bump"
+        run_list_test "asi-bump-warn" "-64 -bump"
         run_list_test "asi-arch-error" "-Av9"
     }
 

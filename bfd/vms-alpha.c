@@ -677,7 +677,7 @@ _bfd_vms_slurp_eihs (bfd *abfd, unsigned int offset)
 	  return FALSE;
 	}
 
-      if (_bfd_vms_slurp_object_records (abfd) != TRUE)
+      if (!_bfd_vms_slurp_object_records (abfd))
 	return FALSE;
 
       abfd->flags |= HAS_SYMS;
@@ -2411,7 +2411,7 @@ _bfd_vms_slurp_object_records (bfd * abfd)
         default:
           err = FALSE;
 	}
-      if (err != TRUE)
+      if (!err)
 	{
 	  vms_debug2 ((2, "slurp type %d failed\n", type));
 	  return FALSE;
@@ -2551,14 +2551,14 @@ alpha_vms_object_p (bfd *abfd)
 	goto error_ret;
       vms_debug2 ((2, "file type is image\n"));
 
-      if (_bfd_vms_slurp_eihd (abfd, &eisd_offset, &eihs_offset) != TRUE)
+      if (!_bfd_vms_slurp_eihd (abfd, &eisd_offset, &eihs_offset))
         goto err_wrong_format;
 
-      if (_bfd_vms_slurp_eisd (abfd, eisd_offset) != TRUE)
+      if (!_bfd_vms_slurp_eisd (abfd, eisd_offset))
         goto err_wrong_format;
 
       /* EIHS is optional.  */
-      if (eihs_offset != 0 && _bfd_vms_slurp_eihs (abfd, eihs_offset) != TRUE)
+      if (eihs_offset != 0 && !_bfd_vms_slurp_eihs (abfd, eihs_offset))
         goto err_wrong_format;
     }
   else
@@ -2578,10 +2578,10 @@ alpha_vms_object_p (bfd *abfd)
           vms_debug2 ((2, "file type is module\n"));
 
           type = bfd_getl16 (PRIV (recrd.rec));
-          if (type != EOBJ__C_EMH || _bfd_vms_slurp_ehdr (abfd) != TRUE)
+          if (type != EOBJ__C_EMH || !_bfd_vms_slurp_ehdr (abfd))
             goto err_wrong_format;
 
-          if (_bfd_vms_slurp_object_records (abfd) != TRUE)
+          if (!_bfd_vms_slurp_object_records (abfd))
             goto err_wrong_format;
         }
       else
@@ -3976,13 +3976,13 @@ alpha_vms_write_object_contents (bfd *abfd)
     {
       if (abfd->section_count > 0)			/* we have sections */
         {
-          if (_bfd_vms_write_ehdr (abfd) != TRUE)
+          if (!_bfd_vms_write_ehdr (abfd))
             return FALSE;
-          if (_bfd_vms_write_egsd (abfd) != TRUE)
+          if (!_bfd_vms_write_egsd (abfd))
             return FALSE;
-          if (_bfd_vms_write_etir (abfd, EOBJ__C_ETIR) != TRUE)
+          if (!_bfd_vms_write_etir (abfd, EOBJ__C_ETIR))
             return FALSE;
-          if (_bfd_vms_write_eeom (abfd) != TRUE)
+          if (!_bfd_vms_write_eeom (abfd))
             return FALSE;
         }
     }
@@ -8162,9 +8162,9 @@ alpha_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
         h = NULL;
 
       h_root = (struct bfd_link_hash_entry *) h;
-      if (_bfd_generic_link_add_one_symbol
-          (info, abfd, sym.name, sym.flags, sym.section, sym.value,
-           NULL, FALSE, FALSE, &h_root) == FALSE)
+      if (!_bfd_generic_link_add_one_symbol (info, abfd, sym.name, sym.flags,
+					     sym.section, sym.value, NULL,
+					     FALSE, FALSE, &h_root))
         return FALSE;
       h = (struct alpha_vms_link_hash_entry *) h_root;
 
@@ -9077,9 +9077,9 @@ vms_close_and_cleanup (bfd * abfd)
     {
       /* Last step on VMS is to convert the file to variable record length
 	 format.  */
-      if (bfd_cache_close (abfd) != TRUE)
+      if (!bfd_cache_close (abfd))
 	return FALSE;
-      if (_bfd_vms_convert_to_var_unix_filename (abfd->filename) != TRUE)
+      if (!_bfd_vms_convert_to_var_unix_filename (abfd->filename))
 	return FALSE;
     }
 #endif

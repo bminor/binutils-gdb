@@ -1,3 +1,30 @@
+2017-05-18  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Allow Box to be qualified.
+
+2017-05-18  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.base/float.exp: Expect GDB prompt for targets without FPU.
+
+2017-05-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fileio.c (test_write, test_read, test_close)
+	(test_fstat): Don't print 'ret' in the fail path.
+
+2017-05-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fileio.c (stop, test_open, test_write, test_read)
+	(test_lseek, test_close, test_stat, test_fstat, test_isatty)
+	(test_system, test_rename, test_unlink, test_time): Change
+	prototypes.
+	* gdb.base/fileio.exp (stop_msg): Adjust.
+
+2017-05-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fileio.c (null_str): New global.
+	(test_stat): Use it.
+	* gdb.base/fileio.exp: Remove nowarnings.
+
 2017-05-17  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/fileio.exp: Pass nowarnings to gdb_compile.

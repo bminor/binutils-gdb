@@ -1,3 +1,28 @@
+2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR tui/21482
+	* gdb_curses.h (NOMACROS): Define.
+	(NCURSES_NOMACROS): Define.
+
+2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR tui/21482
+	* tui/tui-windata.c (tui_erase_data_content): Cast last mvwaddstr
+	arg to char *.
+	* tui/tui-wingeneral.c (box_win): Likewise.
+	* tui/tui-winsource.c (tui_erase_source_content): Likewise.
+	(tui_show_source_line): Likewise.
+	(tui_show_exec_info_content): Likewise.
+
+2017-05-19  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
+
+	* sparc-tdep.c (sparc_structure_return_p)
+	(sparc_arg_on_registers_p): New functions.
+	(sparc32_store_arguments): Use them.
+	* sparc64-tdep.c (sparc64_16_byte_align_p)
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields):
+	Handle TYPE_CODE_ARRAY.
+
 2017-05-17  Yao Qi  <yao.qi@linaro.org>
 
 	* cli/cli-decode.c (add_alias_cmd): New function.

@@ -1,3 +1,28 @@
+2017-05-19  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Don't keep
+	debug and special sections when no non-note alloc sections in an
+	object are kept.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* arc-got.h: Don't compare boolean values against TRUE or FALSE.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arc.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* mach-o.c: Likewise.
+	* peXXigen.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* vms-lib.c: Likewise.
+
 2017-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20882

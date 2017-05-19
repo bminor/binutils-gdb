@@ -3295,7 +3295,7 @@ nds32_elf_final_sda_base (bfd *output_bfd, struct bfd_link_info *info,
 	}
     }
 
-  if (add_symbol == TRUE)
+  if (add_symbol)
     {
       if (h)
 	{
@@ -12246,7 +12246,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
 				 irelend, isymbuf))
 	goto error_return;
 
-      if (*again == FALSE)
+      if (!*again)
 	{
 	  if (!nds32_fag_remove_unused_fpbase (abfd, sec, internal_relocs,
 					       irelend))
@@ -12256,7 +12256,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
 
   nds32_elf_pick_relax (FALSE, sec, again, table, link_info);
 
-  if (*again == FALSE)
+  if (!*again)
     {
       if (!nds32_relax_adjust_label (abfd, sec, internal_relocs, contents,
 				     &relax_blank_list, optimize, opt_size))
@@ -12273,7 +12273,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
       relax_blank_list = NULL;
     }
 
-  if (*again == FALSE)
+  if (!*again)
     {
       /* Closing the section, so we don't relax it anymore.  */
       bfd_vma sec_size_align;

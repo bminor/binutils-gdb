@@ -705,9 +705,9 @@ order in which the options appear.  @option{-L} options do not affect
 how @command{ld} searches for a linker script unless @option{-T}
 option is specified.
 
-If @var{searchdir} begins with @code{=}, then the @code{=} will be replaced
-by the @dfn{sysroot prefix}, controlled by the @samp{--sysroot} option, or
-specified when the linker is configured.
+If @var{searchdir} begins with @code{=} or @code{$SYSROOT}, then this
+prefix will be replaced by the @dfn{sysroot prefix}, controlled by the
+@samp{--sysroot} option, or specified when the linker is configured.
 
 @ifset UsesEnvVars
 The default set of paths searched (without being specified with
@@ -3393,8 +3393,9 @@ for in the @dfn{sysroot prefix}.  Otherwise, the linker will try to
 open the file in the current directory.  If it is not found, the
 linker will search through the archive library search path.
 The @dfn{sysroot prefix} can also be forced by specifying @code{=}
-as the first character in the filename path.  See also the
-description of @samp{-L} in @ref{Options,,Command Line Options}.
+as the first character in the filename path, or prefixing the filename
+path with @code{$SYSROOT}.  See also the description of @samp{-L} in
+@ref{Options,,Command Line Options}.
 
 If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the
 name to @code{lib@var{file}.a}, as with the command line argument

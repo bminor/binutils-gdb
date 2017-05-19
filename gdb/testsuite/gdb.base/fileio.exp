@@ -31,7 +31,7 @@ if {[is_remote host]} {
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	   executable \
-	   [list debug nowarnings "additional_flags=-DOUTDIR=\"$outdir/\""]] != "" } {
+	   [list debug "additional_flags=-DOUTDIR=\"$outdir/\""]] != "" } {
     untested "failed to compile"
     return -1
 }
@@ -69,7 +69,7 @@ if ![runto_main] then {
 
 gdb_test "break stop" "Breakpoint .*$srcfile.*" 
 
-set stop_msg ".*Breakpoint .* stop \\(\\) at.*$srcfile:.*static void stop \\(\\) {}.*"
+set stop_msg ".*Breakpoint .* stop \\(\\) at.*$srcfile:.*static void stop \\(void\\) {}.*"
 
 gdb_test continue \
 "Continuing\\..*open 1:.*OK$stop_msg" \

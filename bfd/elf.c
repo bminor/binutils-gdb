@@ -7358,7 +7358,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       for (section = obfd->sections; section != NULL;
 	   section = section->next)
 	{
-	  if (section->segment_mark == FALSE)
+	  if (!section->segment_mark)
 	    goto rewrite;
 	  else
 	    section->segment_mark = FALSE;

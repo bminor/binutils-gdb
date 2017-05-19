@@ -1,3 +1,12 @@
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips.exp: Bail out right away if
+	non-ELF.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* strings.c: Don't compare boolean values against TRUE or FALSE.
+
 2017-05-15  Jeff Law  <law@redhat.com>
 
 	* readelf.c (display_arc_attribute): Avoid implicit fallthru.

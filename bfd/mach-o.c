@@ -1898,7 +1898,7 @@ bfd_mach_o_write_symtab_content (bfd *abfd, bfd_mach_o_symtab_command *sym)
   if (bfd_seek (abfd, sym->stroff, SEEK_SET) != 0)
     goto err;
 
-  if (_bfd_stringtab_emit (abfd, strtab) != TRUE)
+  if (!_bfd_stringtab_emit (abfd, strtab))
     goto err;
 
   /* Pad string table.  */
