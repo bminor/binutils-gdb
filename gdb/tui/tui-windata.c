@@ -117,7 +117,7 @@ tui_erase_data_content (const char *prompt)
       mvwaddstr (TUI_DATA_WIN->generic.handle,
 		 (TUI_DATA_WIN->generic.height / 2),
 		 x_pos,
-		 prompt);
+		 (char *) prompt);
     }
   wrefresh (TUI_DATA_WIN->generic.handle);
 }
