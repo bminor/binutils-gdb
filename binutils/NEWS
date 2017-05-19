@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The SPARC port now supports the SPARC M8 processor, which implements the
+  Oracle SPARC Architecture 2017.
+
 * The MIPS port now supports the MIPS16e2 ASE for assembly and disassembly.
 
 * Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.

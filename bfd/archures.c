@@ -147,9 +147,11 @@ DESCRIPTION
 .#define bfd_mach_sparc_v9v		18 {* with OSA2011 and T4 and IMA and FJMAU add'ns.  *}
 .#define bfd_mach_sparc_v8plusm		19 {* with OSA2015 and M7 add'ns.  *}
 .#define bfd_mach_sparc_v9m		20 {* with OSA2015 and M7 add'ns.  *}
+.#define bfd_mach_sparc_v8plusm8	21 {* with OSA2017 and M8 add'ns.  *}
+.#define bfd_mach_sparc_v9m8		22 {* with OSA2017 and M8 add'ns.  *}
 .{* Nonzero if MACH has the v9 instruction set.  *}
 .#define bfd_mach_sparc_v9_p(mach) \
-.  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9m \
+.  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9m8 \
 .   && (mach) != bfd_mach_sparc_sparclite_le)
 .{* Nonzero if MACH is a 64 bit sparc architecture.  *}
 .#define bfd_mach_sparc_64bit_p(mach) \
@@ -159,7 +161,8 @@ DESCRIPTION
 .   && (mach) != bfd_mach_sparc_v8plusd \
 .   && (mach) != bfd_mach_sparc_v8pluse \
 .   && (mach) != bfd_mach_sparc_v8plusv \
-.   && (mach) != bfd_mach_sparc_v8plusm)
+.   && (mach) != bfd_mach_sparc_v8plusm \
+.   && (mach) != bfd_mach_sparc_v8plusm8)
 .  bfd_arch_spu,       {* PowerPC SPU *}
 .#define bfd_mach_spu		256
 .  bfd_arch_mips,      {* MIPS Rxxxx *}

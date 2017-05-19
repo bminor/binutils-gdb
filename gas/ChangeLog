@@ -1,5 +1,40 @@
 2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* config/tc-sparc.c (sparc_arch_table): Entries for `sparc6',
+	`v9m8' and `v8plusm8'.
+	(sparc_md_end): Handle SPARC_OPCODE_ARCH_M8.
+	(get_hwcap_name): Support the M8 hardware capabilities.
+	(sparc_ip): Handle new operand types.
+	* doc/c-sparc.texi (Sparc-Opts): Document -Av9m8, -Av8plusm8 and
+	-Asparc6, and the corresponding -xarch aliases.
+	* testsuite/gas/sparc/sparc6.s: New file.
+	* testsuite/gas/sparc/sparc6.d: Likewise.
+	* testsuite/gas/sparc/sparc6-diag.s: Likewise.
+	* testsuite/gas/sparc/sparc6-diag.l: Likewise.
+	* testsuite/gas/sparc/fpcmpshl.s: Likewise.
+	* testsuite/gas/sparc/fpcmpshl.d: Likewise.
+	* testsuite/gas/sparc/fpcmpshl-diag.s: Likewise.
+	* testsuite/gas/sparc/fpcmpshl-diag.l: Likewise.
+	* testsuite/gas/sparc/ldm-stm.s: Likewise.
+	* testsuite/gas/sparc/ldm-stm.d: Likewise.
+	* testsuite/gas/sparc/ldm-stm-diag.s: Likewise.
+	* testsuite/gas/sparc/ldm-stm-diag.l: Likewise.
+	* testsuite/gas/sparc/ldmf-stmf.s: Likewise.
+	* testsuite/gas/sparc/ldmf-stmf.d: Likewise.
+	* testsuite/gas/sparc/ldmf-stmf-diag.s: Likewise.
+	* testsuite/gas/sparc/ldmf-stmf-diag.l: Likewise.
+	* testsuite/gas/sparc/on.s: Likewise.
+	* testsuite/gas/sparc/on.d: Likewise.
+	* testsuite/gas/sparc/on-diag.s: Likewise.
+	* testsuite/gas/sparc/on-diag.l: Likewise.
+	* testsuite/gas/sparc/rle.s: Likewise.
+	* testsuite/gas/sparc/rle.d: Likewise.
+	* testsuite/gas/sparc/sparc.exp (gas_64_check): Run new tests.
+	* testsuite/gas/sparc/rdasr.s: Add test for RDENTROPY.
+	* testsuite/gas/sparc/rdasr.d: Likewise.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* testsuite/gas/sparc/call-relax.d: Support 32-bit targets.
 	* testsuite/gas/sparc/sparc.exp (gas_64_check): Use -64 to
 	run asi-bump-warn.

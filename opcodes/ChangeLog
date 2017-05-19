@@ -1,3 +1,40 @@
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-dis.c (MASK_V9): Include SPARC_OPCODE_ARCH_M8.
+	(X_IMM2): Define.
+	(compute_arch_mask): Handle bfd_mach_sparc_v8plusm8 and
+	bfd_mach_sparc_v9m8.
+	(print_insn_sparc): Handle new operand types.
+	* sparc-opc.c (MASK_M8): Define.
+	(v6): Add MASK_M8.
+	(v6notlet): Likewise.
+	(v7): Likewise.
+	(v8): Likewise.
+	(v9): Likewise.
+	(v9a): Likewise.
+	(v9b): Likewise.
+	(v9c): Likewise.
+	(v9d): Likewise.
+	(v9e): Likewise.
+	(v9v): Likewise.
+	(v9m): Likewise.
+	(v9andleon): Likewise.
+	(m8): Define.
+	(HWS_VM8): Define.
+	(HWS2_VM8): Likewise.
+	(sparc_opcode_archs): Add entry for "m8".
+	(sparc_opcodes): Add OSA2017 and M8 instructions
+	dictunpack, fpcmp{ule,ugt,eq,ne,de,ur}{8,16,32}shl,
+	fpx{ll,ra,rl}64x,
+	ldm{sh,uh,sw,uw,x,ux}, ldm{sh,uh,sw,uw,x,ux}a, ldmf{s,d},
+	ldmf{s,d}a, on{add,sub,mul,div}, rdentropy, revbitsb,
+	revbytes{h,w,x}, rle_burst, rle_length, sha3, stm{h,w,x},
+	stm{h,w,x}a, stmf{s,d}, stmf{s,d}a.
+	(asi_table): New M8 ASIs ASI_CORE_COMMIT_COUNT,
+	ASI_CORE_SELECT_COUNT, ASI_ARF_ECC_REG, ASI_ITLB_PROBE, ASI_DSFAR,
+	ASI_DTLB_PROBE_PRIMARY, ASI_DTLB_PROBE_REAL,
+	ASI_CORE_SELECT_COMMIT_NHT.
+
 2017-05-18  Alan Modra  <amodra@gmail.com>
 
 	* aarch64-asm.c: Don't compare boolean values against TRUE or FALSE.

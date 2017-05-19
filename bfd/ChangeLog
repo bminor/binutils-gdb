@@ -1,3 +1,21 @@
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* archures.c (bfd_mach_sparc_v9m8): Define.
+	(bfd_mach_sparc_v8plusm8): Likewise.
+	(bfd_mach_sparc_v9_p): Adjust to M8.
+	(bfd_mach_sparc_64bit_p): Likewise.
+	* aoutx.h (machine_type): Handle bfd_mach_sparc_v9m8 and
+	bfd_mach_sparc_v8plusm8.
+	* bfd-in2.h: Regenerated.
+	* cpu-sparc.c (arch_info_struct): Entries for sparc:v9m8 and
+	sparc:v8plusm8.
+	* elfxx-sparc.c (_bfd_sparc_elf_object_p): Handle
+	bfd_mach_sparc_v8plusm8 and bfd_mach_sparc_v9m8 using the new hw
+	capabilities ONADDSUB, ONMUL, ONDIV, DICTUNP, FPCPSHL, RLE and
+	SHA3.
+	* elf32-sparc.c (elf32_sparc_final_write_processing): Handle
+	bfd_mach_sparc_v8plusm8.
+
 2017-05-19  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_gc_mark_extra_sections): Don't keep
