@@ -893,13 +893,12 @@ rust_print_type (struct type *type, const char *varstring,
 	fputs_filtered ("[", stream);
 	rust_print_type (TYPE_TARGET_TYPE (type), NULL,
 			 stream, show - 1, level, flags);
-	fputs_filtered ("; ", stream);
 
 	if (TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCEXPR
 	    || TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCLIST)
-	  fprintf_filtered (stream, "variable length");
+	  fprintf_filtered (stream, "; variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
-	  fprintf_filtered (stream, "%s", 
+	  fprintf_filtered (stream, "; %s",
 			    plongest (high_bound - low_bound + 1));
 	fputs_filtered ("]", stream);
       }
