@@ -1,3 +1,17 @@
+2017-05-22  Jiong Wang <jiong.wang@arm.com>
+
+	* configure.tgt: Set "arch" to "aarch64" if ${cpu} equals "aarch64".
+	Recognize the new triplet name aarch64*-linux-gnu_ilp32.
+	* configure.ac: Output DEFAULT_ARCH macro for AArch64.
+	* configure: Regenerate.
+	* config/tc-aarch64.h (aarch64_after_parse_args): New declaration.
+	(md_after_parse_args): New define.
+	* config/tc-aarch64.c (aarch64_abi_type): New enumeration
+	AARCH64_ABI_NONE.
+	(DEFAULT_ARCH): New define.
+	(aarch64_abi): Set default value to AARCH64_ABI_NONE.
+	(aarch64_after_parse_args): New function.
+
 2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c (sparc_arch_table): Entries for `sparc6',
