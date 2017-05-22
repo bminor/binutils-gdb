@@ -1,3 +1,19 @@
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (NOTRACK_Fixup): New.
+	(NOTRACK): Likewise.
+	(NOTRACK_PREFIX): Likewise.
+	(last_active_prefix): Likewise.
+	(reg_table): Use NOTRACK on indirect call and jmp.
+	(ckprefix): Set last_active_prefix.
+	(prefix_name): Return "notrack" for NOTRACK_PREFIX.
+	* i386-gen.c (opcode_modifiers): Add NoTrackPrefixOk.
+	* i386-opc.h (NoTrackPrefixOk): New.
+	(i386_opcode_modifier): Add notrackprefixok.
+	* i386-opc.tbl: Add NoTrackPrefixOk to indirect call and jmp.
+	Add notrack.
+	* i386-tbl.h: Regenerated.
+
 2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-dis.c (MASK_V9): Include SPARC_OPCODE_ARCH_M8.

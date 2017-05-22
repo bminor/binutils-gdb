@@ -1,3 +1,26 @@
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (REX_PREFIX): Changed to 7.
+	(NOTRACK_PREFIX): New.
+	(MAX_PREFIXES): Changed to 8.
+	(_i386_insn): Add notrack_prefix.
+	(PREFIX_GROUP): Add PREFIX_DS.
+	(add_prefix): Return PREFIX_DS for DS_PREFIX_OPCODE.
+	(md_assemble): Check if NOTRACK prefix is supported.
+	(parse_insn): Set notrack_prefix and issue an error for
+	other prefixes after NOTRACK prefix.
+	* testsuite/gas/i386/i386.exp: Run tests for NOTRACK prefix.
+	* testsuite/gas/i386/notrack-intel.d: New file.
+	* testsuite/gas/i386/notrack.d: Likewise.
+	* testsuite/gas/i386/notrack.s: Likewise.
+	* testsuite/gas/i386/notrackbad.l: Likewise.
+	* testsuite/gas/i386/notrackbad.s: Likewise.
+	* testsuite/gas/i386/x86-64-notrack-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-notrack.d: Likewise.
+	* testsuite/gas/i386/x86-64-notrack.s: Likewise.
+	* testsuite/gas/i386/x86-64-notrackbad.l: Likewise.
+	* testsuite/gas/i386/x86-64-notrackbad.s: Likewise.
+
 2017-05-22  Jiong Wang <jiong.wang@arm.com>
 
 	* configure.tgt: Set "arch" to "aarch64" if ${cpu} equals "aarch64".

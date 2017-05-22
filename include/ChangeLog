@@ -1,3 +1,7 @@
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* include/opcode/i386.h (NOTRACK_PREFIX_OPCODE): New.
+
 2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf/sparc.h (ELF_SPARC_HWCAP2_SPARC6): Define.
