@@ -305,6 +305,9 @@ enum {
   PPC_NUM_REGS
 };
 
+/* Big enough to hold the size of the largest register in bytes.  */
+#define PPC_MAX_REGISTER_SIZE	64
+
 /* An instruction to match.  */
 
 struct ppc_insn_pattern

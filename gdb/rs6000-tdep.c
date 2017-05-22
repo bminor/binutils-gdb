@@ -2611,7 +2611,7 @@ rs6000_register_to_value (struct frame_info *frame,
 			  int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte from[MAX_REGISTER_SIZE];
+  gdb_byte from[PPC_MAX_REGISTER_SIZE];
   
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
@@ -2633,7 +2633,7 @@ rs6000_value_to_register (struct frame_info *frame,
                           const gdb_byte *from)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte to[MAX_REGISTER_SIZE];
+  gdb_byte to[PPC_MAX_REGISTER_SIZE];
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 

@@ -1,3 +1,21 @@
+2017-05-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* ppc-linux-nat.c (fetch_register): Use PPC_MAX_REGISTER_SIZE.
+	(store_register): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Likewise.
+	(get_decimal_float_return_value): Likewise.
+	(do_ppc_sysv_return_value): Likewise.
+	(ppc64_sysv_abi_push_integer): Likewise.
+	(ppc64_sysv_abi_push_freg): Likewise.
+	(ppc64_sysv_abi_return_value_base): Likewise.
+	(ppc64_sysv_abi_return_value): Likewise.
+	* rs6000-aix-tdep.c (rs6000_push_dummy_call): Likewise.
+	* rs6000-lynx178-tdep.c (rs6000_lynx178_push_dummy_call): Likewise.
+	* rs6000-nat.c: Likewise.
+	* rs6000-tdep.c (rs6000_register_to_value): Likewise.
+	(rs6000_value_to_register): Likewise.
+	* ppc-tdep.h (PPC_MAX_REGISTER_SIZE): Add.
+
 2017-05-21  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21466:
