@@ -781,25 +781,12 @@ generic_val_print_int (struct type *type,
 		       struct value *original_value,
 		       const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+  struct value_print_options opts = *options;
 
-  if (options->format || options->output_format)
-    {
-      struct value_print_options opts = *options;
-
-      opts.format = (options->format ? options->format
-		     : options->output_format);
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, &opts, 0, stream);
-    }
-  else
-    {
-      const gdb_byte *valaddr = value_contents_for_printing (original_value);
-
-      val_print_type_code_int (type, valaddr + embedded_offset * unit_size,
-			       stream);
-    }
+  opts.format = (options->format ? options->format
+		 : options->output_format);
+  val_print_scalar_formatted (type, embedded_offset,
+			      original_value, &opts, 0, stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_CHAR.  */
@@ -1235,43 +1222,6 @@ value_print (struct value *val, struct ui_file *stream,
     }
 
   LA_VALUE_PRINT (val, stream, options);
-}
-
-/* Called by various <lang>_val_print routines to print
-   TYPE_CODE_INT's.  TYPE is the type.  VALADDR is the address of the
-   value.  STREAM is where to print the value.  */
-
-void
-val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
-			 struct ui_file *stream)
-{
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-
-  if (TYPE_LENGTH (type) > sizeof (LONGEST))
-    {
-      LONGEST val;
-
-      if (TYPE_UNSIGNED (type)
-	  && extract_long_unsigned_integer (valaddr, TYPE_LENGTH (type),
-					    byte_order, &val))
-	{
-	  print_longest (stream, 'u', 0, val);
-	}
-      else
-	{
-	  /* Signed, or we couldn't turn an unsigned value into a
-	     LONGEST.  For signed values, one could assume two's
-	     complement (a reasonable assumption, I think) and do
-	     better than this.  */
-	  print_hex_chars (stream, (unsigned char *) valaddr,
-			   TYPE_LENGTH (type), byte_order, false);
-	}
-    }
-  else
-    {
-      print_longest (stream, TYPE_UNSIGNED (type) ? 'u' : 'd', 0,
-		     unpack_long (type, valaddr));
-    }
 }
 
 static void

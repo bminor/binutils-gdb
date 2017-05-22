@@ -121,9 +121,6 @@ extern void val_print_array_elements (struct type *, LONGEST,
 				      const struct value_print_options *,
 				      unsigned int);
 
-extern void val_print_type_code_int (struct type *, const gdb_byte *,
-				     struct ui_file *);
-
 extern void val_print_scalar_formatted (struct type *,
 					LONGEST,
 					struct value *,

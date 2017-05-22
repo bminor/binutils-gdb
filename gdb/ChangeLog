@@ -1,5 +1,17 @@
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
+	* valprint.h (val_print_type_code_int): Remove.
+	* valprint.c (generic_val_print_int): Always call
+	val_print_scalar_formatted.
+	(val_print_type_code_int): Remove.
+	* printcmd.c (print_scalar_formatted): Handle options->format==0.
+	* f-valprint.c (f_val_print): Use val_print_scalar_formatted.
+	* c-valprint.c (c_val_print_int): Use val_print_scalar_formatted.
+	* ada-valprint.c (ada_val_print_num): Use
+	val_print_scalar_formatted.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
 	* printcmd.c (print_scalar_formatted): Unify the two switches.
 	Don't convert scalars to LONGEST.
 
