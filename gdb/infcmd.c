@@ -2310,7 +2310,8 @@ default_print_one_register_info (struct ui_file *file,
       if (print_raw_format)
 	{
 	  fprintf_filtered (file, "\t(raw ");
-	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order);
+	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order,
+			   true);
 	  fprintf_filtered (file, ")");
 	}
     }

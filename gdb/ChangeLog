@@ -1,3 +1,18 @@
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* valprint.h (print_binary_chars, print_hex_chars): Update.
+	* valprint.c (val_print_type_code_int): Update.
+	(print_binary_chars): Add "zero_pad" argument.
+	(emit_octal_digit): New function.
+	(print_octal_chars): Don't zero-pad.
+	(print_decimal_chars): Likewise.
+	(print_hex_chars): Add "zero_pad" argument.
+	* sh64-tdep.c (sh64_do_fp_register): Update.
+	* regcache.c (regcache::dump): Update.
+	* printcmd.c (print_scalar_formatted): Update.
+	* infcmd.c (default_print_one_register_info): Update.
+
 2017-06-12  Pedro Alves  <palves@redhat.com>
 	    Alan Hayward  <alan.hayward@arm.com>
 

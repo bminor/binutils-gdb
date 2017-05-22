@@ -1,3 +1,12 @@
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* gdb.reverse/i386-sse-reverse.exp: Update tests.
+	* gdb.arch/vsx-regs.exp: Update tests.
+	* gdb.arch/s390-vregs.exp (hex128): New proc.
+	Update test.
+	* gdb.arch/altivec-regs.exp: Update tests.
+
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/startup-with-shell.c: New file.

@@ -377,10 +377,13 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	  print_decimal_chars (stream, valaddr, len, byte_order);
 	  return;
 	case 't':
-	  print_binary_chars (stream, valaddr, len, byte_order);
+	  print_binary_chars (stream, valaddr, len, byte_order, size > 0);
 	  return;
 	case 'x':
-	  print_hex_chars (stream, valaddr, len, byte_order);
+	  print_hex_chars (stream, valaddr, len, byte_order, size > 0);
+	  return;
+	case 'z':
+	  print_hex_chars (stream, valaddr, len, byte_order, true);
 	  return;
 	case 'c':
 	  print_char_chars (stream, type, valaddr, len, byte_order);
@@ -439,10 +442,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       break;
 
     case 'o':
-      if (val_long)
-	print_longest (stream, 'o', 1, val_long);
-      else
-	fprintf_filtered (stream, "0");
+      print_longest (stream, 'o', 1, val_long);
       break;
 
     case 'a':
@@ -524,7 +524,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       break;
 
     case 'z':
-      print_hex_chars (stream, valaddr, len, byte_order);
+      print_hex_chars (stream, valaddr, len, byte_order, true);
       break;
 
     default:

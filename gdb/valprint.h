@@ -132,7 +132,7 @@ extern void val_print_scalar_formatted (struct type *,
 					struct ui_file *);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
-				unsigned int, enum bfd_endian);
+				unsigned int, enum bfd_endian, bool);
 
 extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 			       unsigned int, enum bfd_endian);
@@ -141,7 +141,7 @@ extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
 				 unsigned int, enum bfd_endian);
 
 extern void print_hex_chars (struct ui_file *, const gdb_byte *,
-			     unsigned int, enum bfd_endian);
+			     unsigned int, enum bfd_endian, bool);
 
 extern void print_char_chars (struct ui_file *, struct type *,
 			      const gdb_byte *, unsigned int, enum bfd_endian);
