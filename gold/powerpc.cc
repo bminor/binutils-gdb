@@ -81,6 +81,9 @@ struct Stub_table_owner
 inline bool
 is_branch_reloc(unsigned int r_type);
 
+// Counter incremented on every Powerpc_relobj constructed.
+static uint32_t object_id = 0;
+
 template<int size, bool big_endian>
 class Powerpc_relobj : public Sized_relobj_file<size, big_endian>
 {
@@ -92,10 +95,10 @@ public:
   Powerpc_relobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
-      special_(0), relatoc_(0), toc_(0), no_toc_opt_(),
-      has_small_toc_reloc_(false), opd_valid_(false), opd_ent_(),
-      access_from_map_(), has14_(), stub_table_index_(),
-      e_flags_(ehdr.get_e_flags()), st_other_()
+      uniq_(object_id++), special_(0), relatoc_(0), toc_(0),
+      has_small_toc_reloc_(false), opd_valid_(false),
+      e_flags_(ehdr.get_e_flags()), no_toc_opt_(), opd_ent_(),
+      access_from_map_(), has14_(), stub_table_index_(), st_other_()
   {
     this->set_abiversion(0);
   }
@@ -357,6 +360,10 @@ public:
     this->stub_table_index_.clear();
   }
 
+  uint32_t
+  uniq() const
+  { return this->uniq_; }
+
   int
   abiversion() const
   { return this->e_flags_ & elfcpp::EF_PPC64_ABI; }
@@ -396,16 +403,15 @@ private:
   opd_ent_ndx(size_t off) const
   { return off >> 4;}
 
+  // Per object unique identifier
+  uint32_t uniq_;
+
   // For 32-bit the .got2 section shdnx, for 64-bit the .opd section shndx.
   unsigned int special_;
 
   // For 64-bit the .rela.toc and .toc section shdnx.
   unsigned int relatoc_;
   unsigned int toc_;
-
-  // For 64-bit, an array with one entry per 64-bit word in the .toc
-  // section, set if accesses using that word cannot be optimised.
-  std::vector<bool> no_toc_opt_;
 
   // For 64-bit, whether this object uses small model relocs to access
   // the toc.
@@ -417,6 +423,13 @@ private:
   // memory_order_acquire, potentially resulting in fewer entries in
   // access_from_map_.
   bool opd_valid_;
+
+  // Header e_flags
+  elfcpp::Elf_Word e_flags_;
+
+  // For 64-bit, an array with one entry per 64-bit word in the .toc
+  // section, set if accesses using that word cannot be optimised.
+  std::vector<bool> no_toc_opt_;
 
   // The first 8-byte word of an OPD entry gives the address of the
   // entry point of the function.  Relocatable object files have a
@@ -435,9 +448,6 @@ private:
   // The stub table to use for a given input section.
   std::vector<unsigned int> stub_table_index_;
 
-  // Header e_flags
-  elfcpp::Elf_Word e_flags_;
-
   // ELF st_other field for local symbols.
   std::vector<unsigned char> st_other_;
 };
@@ -451,7 +461,7 @@ public:
   Powerpc_dynobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr),
-      opd_shndx_(0), opd_ent_(), e_flags_(ehdr.get_e_flags())
+      opd_shndx_(0), e_flags_(ehdr.get_e_flags()), opd_ent_()
   {
     this->set_abiversion(0);
   }
@@ -548,14 +558,14 @@ private:
   unsigned int opd_shndx_;
   Address opd_address_;
 
+  // Header e_flags
+  elfcpp::Elf_Word e_flags_;
+
   // The first 8-byte word of an OPD entry gives the address of the
   // entry point of the function.  Records the section and offset
   // corresponding to the address.  Note that in dynamic objects,
   // offset is *not* relative to the section.
   std::vector<Opd_ent> opd_ent_;
-
-  // Header e_flags
-  elfcpp::Elf_Word e_flags_;
 };
 
 // Powerpc_copy_relocs class.  Needed to peek at dynamic relocs the
@@ -933,6 +943,23 @@ class Target_powerpc : public Sized_target<size, big_endian>
       {
 	elfcpp::Swap<size, big_endian>::writeval(oview + p->second, p->first);
       }
+  }
+
+  // Wrapper used after relax to define a local symbol in output data,
+  // from the end if value < 0.
+  void
+  define_local(Symbol_table* symtab, const char* name,
+	       Output_data* od, Address value, unsigned int symsize)
+  {
+    Symbol* sym
+      = symtab->define_in_output_data(name, NULL, Symbol_table::PREDEFINED,
+				      od, value, symsize, elfcpp::STT_NOTYPE,
+				      elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN, 0,
+				      static_cast<Signed_address>(value) < 0,
+				      false);
+    // We are creating this symbol late, so need to fix up things
+    // done early in Layout::finalize.
+    sym->set_dynsym_index(-1U);
   }
 
   bool
@@ -2836,7 +2863,8 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
       if ((*t)->owner->is_input_section())
 	stub_table = new Stub_table<size, big_endian>(this,
 						      (*t)->output_section,
-						      (*t)->owner);
+						      (*t)->owner,
+						      this->stub_tables_.size());
       else if ((*t)->owner->is_relaxed_input_section())
 	stub_table = static_cast<Stub_table<size, big_endian>*>(
 			(*t)->owner->relaxed_input_section());
@@ -3232,6 +3260,36 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	}
       this->brlt_section_->finalize_brlt_sizes();
     }
+
+  if (!again
+      && (parameters->options().user_set_emit_stub_syms()
+	  ? parameters->options().emit_stub_syms()
+	  : (size == 64
+	     || parameters->options().output_is_position_independent()
+	     || parameters->options().emit_relocs())))
+    {
+      for (typename Stub_tables::iterator p = this->stub_tables_.begin();
+	   p != this->stub_tables_.end();
+	   ++p)
+	(*p)->define_stub_syms(symtab);
+
+      if (this->glink_ != NULL)
+	{
+	  int stub_size = this->glink_->pltresolve_size;
+	  Address value = -stub_size;
+	  if (size == 64)
+	    {
+	      value = 8;
+	      stub_size -= 8;
+	    }
+	  this->define_local(symtab, "__glink_PLTresolve",
+			     this->glink_, value, stub_size);
+
+	  if (size != 64)
+	    this->define_local(symtab, "__glink", this->glink_, 0, 0);
+	}
+    }
+
   return again;
 }
 
@@ -3857,7 +3915,8 @@ class Stub_table : public Output_relaxed_input_section
 
   Stub_table(Target_powerpc<size, big_endian>* targ,
 	     Output_section* output_section,
-	     const Output_section::Input_section* owner)
+	     const Output_section::Input_section* owner,
+	     uint32_t id)
     : Output_relaxed_input_section(owner->relobj(), owner->shndx(),
 				   owner->relobj()
 				   ->section_addralign(owner->shndx())),
@@ -3865,7 +3924,7 @@ class Stub_table : public Output_relaxed_input_section
       orig_data_size_(owner->current_data_size()),
       plt_size_(0), last_plt_size_(0),
       branch_size_(0), last_branch_size_(0), min_size_threshold_(0),
-      eh_frame_added_(false), need_save_res_(false)
+      eh_frame_added_(false), need_save_res_(false), uniq_(id)
   {
     this->set_output_section(output_section);
 
@@ -3986,8 +4045,12 @@ class Stub_table : public Output_relaxed_input_section
   plt_size() const
   { return this->plt_size_; }
 
-  void set_min_size_threshold(Address min_size)
+  void
+  set_min_size_threshold(Address min_size)
   { this->min_size_threshold_ = min_size; }
+
+  void
+  define_stub_syms(Symbol_table*);
 
   bool
   size_update()
@@ -4058,6 +4121,10 @@ class Stub_table : public Output_relaxed_input_section
   class Plt_stub_ent_hash;
   typedef Unordered_map<Plt_stub_ent, unsigned int,
 			Plt_stub_ent_hash> Plt_stub_entries;
+  class Branch_stub_ent;
+  class Branch_stub_ent_hash;
+  typedef Unordered_map<Branch_stub_ent, unsigned int,
+			Branch_stub_ent_hash> Branch_stub_entries;
 
   // Alignment of stub section.
   unsigned int
@@ -4126,11 +4193,10 @@ class Stub_table : public Output_relaxed_input_section
 
   // Return long branch stub size.
   unsigned int
-  branch_stub_size(Address to)
+  branch_stub_size(typename Branch_stub_entries::const_iterator p)
   {
-    Address loc
-      = this->stub_address() + this->last_plt_size_ + this->branch_size_;
-    if (to - loc + (1 << 25) < 2 << 25)
+    Address loc = this->stub_address() + this->last_plt_size_ + p->second;
+    if (p->first.dest_ - loc + (1 << 25) < 2 << 25)
       return 4;
     if (size == 64 || !parameters->options().output_is_position_independent())
       return 16;
@@ -4196,6 +4262,7 @@ class Stub_table : public Output_relaxed_input_section
     const Sized_relobj_file<size, big_endian>* object_;
     typename elfcpp::Elf_types<size>::Elf_Addr addend_;
     unsigned int locsym_;
+    unsigned int indx_;
   };
 
   class Plt_stub_ent_hash
@@ -4246,8 +4313,6 @@ class Stub_table : public Output_relaxed_input_section
   // Map sym/object/addend to stub offset.
   Plt_stub_entries plt_call_stubs_;
   // Map destination address to stub offset.
-  typedef Unordered_map<Branch_stub_ent, unsigned int,
-			Branch_stub_ent_hash> Branch_stub_entries;
   Branch_stub_entries long_branch_stubs_;
   // size of input section
   section_size_type orig_data_size_;
@@ -4265,6 +4330,8 @@ class Stub_table : public Output_relaxed_input_section
   // Set if this stub group needs a copy of out-of-line register
   // save/restore functions.
   bool need_save_res_;
+  // Per stub table unique identifier.
+  uint32_t uniq_;
 };
 
 // Add a plt call stub, if we do not already have one for this
@@ -4281,6 +4348,7 @@ Stub_table<size, big_endian>::add_plt_call_entry(
 {
   Plt_stub_ent ent(object, gsym, r_type, addend);
   unsigned int off = this->plt_size_;
+  ent.indx_ = this->plt_call_stubs_.size();
   std::pair<typename Plt_stub_entries::iterator, bool> p
     = this->plt_call_stubs_.insert(std::make_pair(ent, off));
   if (p.second)
@@ -4299,6 +4367,7 @@ Stub_table<size, big_endian>::add_plt_call_entry(
 {
   Plt_stub_ent ent(object, locsym_index, r_type, addend);
   unsigned int off = this->plt_size_;
+  ent.indx_ = this->plt_call_stubs_.size();
   std::pair<typename Plt_stub_entries::iterator, bool> p
     = this->plt_call_stubs_.insert(std::make_pair(ent, off));
   if (p.second)
@@ -4368,13 +4437,15 @@ Stub_table<size, big_endian>::add_long_branch_entry(
 {
   Branch_stub_ent ent(object, to, save_res);
   Address off = this->branch_size_;
-  if (this->long_branch_stubs_.insert(std::make_pair(ent, off)).second)
+  std::pair<typename Branch_stub_entries::iterator, bool> p
+    = this->long_branch_stubs_.insert(std::make_pair(ent, off));
+  if (p.second)
     {
       if (save_res)
 	this->need_save_res_ = true;
       else
 	{
-	  unsigned int stub_size = this->branch_stub_size(to);
+	  unsigned int stub_size = this->branch_stub_size(p.first);
 	  this->branch_size_ = off + stub_size;
 	  if (size == 64 && stub_size != 4)
 	    this->targ_->add_branch_lookup_table(to);
@@ -4553,6 +4624,73 @@ Output_data_glink<size, big_endian>::set_final_data_size()
   total += this->ge_size_;
 
   this->set_data_size(total);
+}
+
+// Define symbols on stubs, identifying the stub.
+
+template<int size, bool big_endian>
+void
+Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
+{
+  if (!this->plt_call_stubs_.empty())
+    {
+      // The key for the plt call stub hash table includes addresses,
+      // therefore traversal order depends on those addresses, which
+      // can change between runs if gold is a PIE.  Unfortunately the
+      // output .symtab ordering depends on the order in which symbols
+      // are added to the linker symtab.  We want reproducible output
+      // so must sort the call stub symbols.
+      typedef typename Plt_stub_entries::const_iterator plt_iter;
+      std::vector<plt_iter> sorted;
+      sorted.resize(this->plt_call_stubs_.size());
+
+      for (plt_iter cs = this->plt_call_stubs_.begin();
+	   cs != this->plt_call_stubs_.end();
+	   ++cs)
+	sorted[cs->first.indx_] = cs;
+
+      for (unsigned int i = 0; i < this->plt_call_stubs_.size(); ++i)
+	{
+	  plt_iter cs = sorted[i];
+	  char add[10];
+	  add[0] = 0;
+	  if (cs->first.addend_ != 0)
+	    sprintf(add, "+%x", static_cast<uint32_t>(cs->first.addend_));
+	  char localname[18];
+	  const char *symname;
+	  if (cs->first.sym_ == NULL)
+	    {
+	      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+		<const Powerpc_relobj<size, big_endian>*>(cs->first.object_);
+	      sprintf(localname, "%x:%x", ppcobj->uniq(), cs->first.locsym_);
+	      symname = localname;
+	    }
+	  else
+	    symname = cs->first.sym_->name();
+	  char* name = new char[8 + 10 + strlen(symname) + strlen(add) + 1];
+	  sprintf(name, "%08x.plt_call.%s%s", this->uniq_, symname, add);
+	  Address value = this->stub_address() - this->address() + cs->second;
+	  unsigned int stub_size = this->plt_call_size(cs);
+	  this->targ_->define_local(symtab, name, this, value, stub_size);
+	}
+    }
+
+  typedef typename Branch_stub_entries::const_iterator branch_iter;
+  for (branch_iter bs = this->long_branch_stubs_.begin();
+       bs != this->long_branch_stubs_.end();
+       ++bs)
+    {
+      if (bs->first.save_res_)
+	continue;
+
+      char* name = new char[8 + 13 + 16 + 1];
+      sprintf(name, "%08x.long_branch.%llx", this->uniq_,
+	      static_cast<unsigned long long>(bs->first.dest_));
+      Address value = (this->stub_address() - this->address()
+		       + this->plt_size_ + bs->second);
+      unsigned int stub_size = this->branch_stub_size(bs);
+      this->targ_->define_local(symtab, name, this, value, stub_size);
+    }
 }
 
 // Write out plt and long branch stub code.
