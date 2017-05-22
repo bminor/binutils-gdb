@@ -179,8 +179,11 @@ init_registers_${name} (void)
 
   result->reg_defs = regs_${name};
   result->num_registers = sizeof (regs_${name}) / sizeof (regs_${name}[0]);
+
+#ifndef IN_PROCESS_AGENT
   result->expedite_regs = expedite_regs_${name};
   result->xmltarget = xmltarget_${name};
+#endif
 
   init_target_desc (result);
 

@@ -36,6 +36,7 @@ struct target_desc
   /* The register cache size, in bytes.  */
   int registers_size;
 
+#ifndef IN_PROCESS_AGENT
   /* An array of register names.  These are the "expedite" registers:
      registers whose values are sent along with stop replies.  */
   const char **expedite_regs;
@@ -45,6 +46,7 @@ struct target_desc
      verbatim XML code (prefixed with a '@') or else the name of the
      actual XML file to be used in place of "target.xml".  */
   const char *xmltarget;
+#endif
 };
 
 /* Copy target description SRC to DEST.  */
