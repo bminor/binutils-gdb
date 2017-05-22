@@ -1,6 +1,14 @@
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
 	PR exp/16225:
+	* valprint.h (print_decimal_chars): Update.
+	* valprint.c (maybe_negate_by_bytes): New function.
+	(print_decimal_chars): Add "is_signed" argument.
+	* printcmd.c (print_scalar_formatted): Update.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
 	* valprint.h (print_binary_chars, print_hex_chars): Update.
 	* valprint.c (val_print_type_code_int): Update.
 	(print_binary_chars): Add "zero_pad" argument.

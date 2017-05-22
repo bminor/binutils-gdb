@@ -138,7 +138,7 @@ extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 			       unsigned int, enum bfd_endian);
 
 extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
-				 unsigned int, enum bfd_endian);
+				 unsigned int, bool, enum bfd_endian);
 
 extern void print_hex_chars (struct ui_file *, const gdb_byte *,
 			     unsigned int, enum bfd_endian, bool);

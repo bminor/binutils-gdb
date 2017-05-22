@@ -1763,12 +1763,58 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 }
 
+/* Possibly negate the integer represented by BYTES.  It contains LEN
+   bytes in the specified byte order.  If the integer is negative,
+   copy it into OUT_VEC, negate it, and return true.  Otherwise, do
+   nothing and return false.  */
+
+static bool
+maybe_negate_by_bytes (const gdb_byte *bytes, unsigned len,
+		       enum bfd_endian byte_order,
+		       std::vector<gdb_byte> *out_vec)
+{
+  gdb_byte sign_byte;
+  if (byte_order == BFD_ENDIAN_BIG)
+    sign_byte = bytes[0];
+  else
+    sign_byte = bytes[len - 1];
+  if ((sign_byte & 0x80) == 0)
+    return false;
+
+  out_vec->resize (len);
+
+  /* Compute -x == 1 + ~x.  */
+  if (byte_order == BFD_ENDIAN_LITTLE)
+    {
+      unsigned carry = 1;
+      for (unsigned i = 0; i < len; ++i)
+	{
+	  unsigned tem = (0xff & ~bytes[i]) + carry;
+	  (*out_vec)[i] = tem & 0xff;
+	  carry = tem / 256;
+	}
+    }
+  else
+    {
+      unsigned carry = 1;
+      for (unsigned i = len; i > 0; --i)
+	{
+	  unsigned tem = (0xff & ~bytes[i - 1]) + carry;
+	  (*out_vec)[i - 1] = tem & 0xff;
+	  carry = tem / 256;
+	}
+    }
+
+  return true;
+}
+
 /* VALADDR points to an integer of LEN bytes.
    Print it in decimal on stream or format it in buf.  */
 
 void
 print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		     unsigned len, enum bfd_endian byte_order)
+		     unsigned len, bool is_signed,
+		     enum bfd_endian byte_order)
 {
 #define TEN             10
 #define CARRY_OUT(  x ) ((x) / TEN)	/* extend char to int */
@@ -1783,6 +1829,14 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   int i, j, decimal_digits;
   int dummy;
   int flip;
+
+  std::vector<gdb_byte> negated_bytes;
+  if (is_signed
+      && maybe_negate_by_bytes (valaddr, len, byte_order, &negated_bytes))
+    {
+      fputs_filtered ("-", stream);
+      valaddr = negated_bytes.data ();
+    }
 
   /* Base-ten number is less than twice as many digits
      as the base 16 number, which is 2 digits per byte.  */

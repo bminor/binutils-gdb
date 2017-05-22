@@ -374,7 +374,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	  return;
 	case 'u':
 	case 'd':
-	  print_decimal_chars (stream, valaddr, len, byte_order);
+	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
+			       byte_order);
 	  return;
 	case 't':
 	  print_binary_chars (stream, valaddr, len, byte_order, size > 0);
