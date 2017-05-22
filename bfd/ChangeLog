@@ -1,3 +1,8 @@
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Use
+	dynobj instead of htab->elf.dynobj.
+
 2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf64-mips.c (mips_elf64_canonicalize_reloc): Remove prototype
