@@ -1,3 +1,8 @@
+2017-05-22  Pedro Alves <palves@redhat.com>
+
+	* MAINTAINERS (Host/Native): Add John Baldwin as FreeBSD
+	maintainer.
+
 2017-05-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* ppc-linux-nat.c (fetch_register): Use PPC_MAX_REGISTER_SIZE.
