@@ -244,35 +244,6 @@ initialize_fast_tracepoint_trampoline_buffer (void)
     }
 }
 
-/* Return target_desc to use for IPA, given the tdesc index passed by
-   gdbserver.  */
-
-const struct target_desc *
-get_ipa_tdesc (int idx)
-{
-  switch (idx)
-    {
-    case X86_TDESC_MMX:
-      return tdesc_i386_mmx_linux;
-    case X86_TDESC_SSE:
-      return tdesc_i386_linux;
-    case X86_TDESC_AVX:
-      return tdesc_i386_avx_linux;
-    case X86_TDESC_MPX:
-      return tdesc_i386_mpx_linux;
-    case X86_TDESC_AVX_MPX:
-      return tdesc_i386_avx_mpx_linux;
-    case X86_TDESC_AVX_AVX512:
-      return tdesc_i386_avx_avx512_linux;
-    case X86_TDESC_AVX_MPX_AVX512_PKU:
-      return tdesc_i386_avx_mpx_avx512_pku_linux;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "unknown ipa tdesc index: %d", idx);
-      return tdesc_i386_linux;
-    }
-}
-
 /* Allocate buffer for the jump pads.  On i386, we can reach an arbitrary
    address with a jump instruction, so just allocate normally.  */
 
@@ -291,12 +262,7 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-  init_registers_i386_mmx_linux ();
-  init_registers_i386_linux ();
-  init_registers_i386_avx_linux ();
-  init_registers_i386_mpx_linux ();
-  init_registers_i386_avx_avx512_linux ();
-  init_registers_i386_avx_mpx_avx512_pku_linux ();
+  initialize_low_tdesc ();
 
   initialize_fast_tracepoint_trampoline_buffer ();
 }
