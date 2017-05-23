@@ -1,3 +1,8 @@
+2017-05-23  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* config/tc-arc.c (md_apply_fix): Use as_bad_where.
+	(assemble_insn): Use as_bad.
+
 2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (REX_PREFIX): Changed to 7.
