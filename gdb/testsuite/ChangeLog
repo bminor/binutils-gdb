@@ -1,5 +1,9 @@
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
+	* gdb.arch/altivec-regs.exp: Expect decimal results for uint128.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
 	PR exp/16225:
 	* gdb.reverse/i386-sse-reverse.exp: Update tests.
 	* gdb.arch/vsx-regs.exp: Update tests.

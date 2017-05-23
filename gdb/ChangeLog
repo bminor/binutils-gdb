@@ -1,5 +1,10 @@
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (print_scalar_formatted): Unify the two switches.
+	Don't convert scalars to LONGEST.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
 	PR exp/16225:
 	* valprint.h (print_decimal_chars): Update.
 	* valprint.c (maybe_negate_by_bytes): New function.
